@@ -1,0 +1,68 @@
+[
+  {
+    "channel": "archive-eric",
+    "env_key": "DISCORD_ARCHIVE_ERIC_WEBHOOK",
+    "webhook_url": "[REDACTED]",
+    "status": "OK"
+  },
+  {
+    "channel": "archive-analyst",
+    "env_key": "DISCORD_ARCHIVE_ANALYST_WEBHOOK",
+    "webhook_url": "[REDACTED]",
+    "status": "OK"
+  },
+  {
+    "channel": "archive-risk",
+    "env_key": "DISCORD_ARCHIVE_RISK_WEBHOOK",
+    "webhook_url": "[REDACTED]",
+    "status": "OK"
+  },
+  {
+    "channel": "archive-executions",
+    "env_key": "DISCORD_ARCHIVE_EXECUTIONS_WEBHOOK",
+    "webhook_url": "[REDACTED]",
+    "status": "OK"
+  },
+  {
+    "channel": "archive-portfolio",
+    "env_key": "DISCORD_ARCHIVE_PORTFOLIO_WEBHOOK",
+    "webhook_url": "[REDACTED]",
+    "status": "OK"
+  },
+  {
+    "channel": "archive-broadcaster",
+    "env_key": "DISCORD_ARCHIVE_BROADCASTER_WEBHOOK",
+    "webhook_url": "[REDACTED]",
+    "status": "OK"
+  },
+  {
+    "channel": "archive-sniper",
+    "env_key": "DISCORD_ARCHIVE_SNIPER_WEBHOOK",
+    "webhook_url": "[REDACTED]",
+    "status": "OK"
+  },
+  {
+    "channel": "archive-counter-intel",
+    "env_key": "DISCORD_ARCHIVE_CI_WEBHOOK",
+    "webhook_url": "[REDACTED]",
+    "status": "OK"
+  },
+  {
+    "channel": "archive-auditor",
+    "env_key": "DISCORD_ARCHIVE_AUDITOR_WEBHOOK",
+    "webhook_url": "[REDACTED]",
+    "status": "OK"
+  },
+  {
+    "channel": "archive-macro",
+    "env_key": "DISCORD_ARCHIVE_MACRO_WEBHOOK",
+    "webhook_url": "[REDACTED]",
+    "status": "OK"
+  },
+  {
+    "channel": "archive-psych",
+    "env_key": "DISCORD_ARCHIVE_PSYCH_WEBHOOK",
+    "webhook_url": "[REDACTED]",
+    "status": "OK"
+  }
+]

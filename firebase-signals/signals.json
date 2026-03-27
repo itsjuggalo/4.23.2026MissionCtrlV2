@@ -1,0 +1,14 @@
+[
+  {
+    "coin": "ETH",
+    "action": "buy",
+    "amount_usd": 150,
+    "analysis": "ETH forming ascending triangle, expecting breakout",
+    "target": 3500,
+    "stop_loss": 3100,
+    "timestamp": "2026-03-25T20:35:00Z",
+    "processed_by_tweak": true,
+    "signal_quality": "premium",
+    "source": "Firebase Premium"
+  }
+]

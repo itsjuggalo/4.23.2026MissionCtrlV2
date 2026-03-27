@@ -1,0 +1,26 @@
+{
+  "bot": "tweak",
+  "status": "active",
+  "mode": "paper_trading",
+  "last_update": "2026-03-27T15:08:08.798999",
+  "wallet_balance": 10000.0,
+  "available_balance": 5750.0,
+  "active_positions": 35,
+  "pnl_by_source": {
+    "ai_crypto": {
+      "total_trades": 0,
+      "winning_trades": 0,
+      "losing_trades": 0,
+      "total_pnl": 0.0,
+      "win_rate": 0.0
+    },
+    "firebase": {
+      "total_trades": 0,
+      "winning_trades": 0,
+      "losing_trades": 0,
+      "total_pnl": 0.0,
+      "win_rate": 0.0
+    }
+  },
+  "total_pnl": 0.0
+}

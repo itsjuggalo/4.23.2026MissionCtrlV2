@@ -1,0 +1,24 @@
+package com.google.android.gms.internal.measurement;
+
+import U1.l;
+import U1.o;
+
+/* JADX INFO: loaded from: classes.dex */
+public final class zzpi implements l {
+    private static final zzpi zza = new zzpi();
+    private final l zzb = new o(new zzpk());
+
+    public static boolean zza() {
+        return zza.get().zza();
+    }
+
+    public static boolean zzb() {
+        return zza.get().zzb();
+    }
+
+    @Override // U1.l
+    /* JADX INFO: renamed from: zzc, reason: merged with bridge method [inline-methods] */
+    public final zzpj get() {
+        return (zzpj) this.zzb.get();
+    }
+}

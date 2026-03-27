@@ -1,0 +1,14 @@
+[
+  {
+    "symbol": "BTC/USDT",
+    "action": "buy",
+    "amount_usd": 200,
+    "reason": "Bullish breakout above resistance at $67k",
+    "target": 70000,
+    "stop_loss": 65000,
+    "timestamp": "2026-03-25T20:30:00Z",
+    "processed_by_tweak": true,
+    "confidence": "high",
+    "source": "AI Crypto Telegram"
+  }
+]

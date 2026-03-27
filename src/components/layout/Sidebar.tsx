@@ -1,0 +1,257 @@
+'use client';
+
+import {
+  LayoutDashboard,
+  Radar,
+  ListTodo,
+  Bot,
+  CheckCircle,
+  Calendar,
+  FolderKanban,
+  Brain,
+  FileText,
+  Wallet,
+  Activity,
+  ShieldAlert,
+  Zap,
+  Send,
+  GitBranch,
+  Building2,
+  TrendingUp,
+} from 'lucide-react';
+
+type PageName =
+  | 'Dashboard'
+  | 'Signals'
+  | 'Telegram'
+  | 'Scanner'
+  | 'Tasks'
+  | 'Agents'
+  | 'Approvals'
+  | 'Calendar'
+  | 'Projects'
+  | 'Memory'
+  | 'Memory Graph'
+  | 'Office'
+  | 'Docs'
+  | 'Wallets'
+  | 'Trades'
+  | 'Activity'
+  | 'Risk'
+  | 'Chart';
+
+interface SidebarProps {
+  activePage: PageName;
+  onNavigate: (page: PageName) => void;
+  isCollapsed: boolean;
+  onToggle: () => void;
+  newSignalsCount: number;
+  pendingApprovalsCount: number;
+}
+
+const navItems: { name: PageName; icon: React.ElementType }[] = [
+  { name: 'Dashboard', icon: LayoutDashboard },
+  { name: 'Signals', icon: Zap },
+  { name: 'Telegram', icon: Send },
+  { name: 'Scanner', icon: Radar },
+  { name: 'Tasks', icon: ListTodo },
+  { name: 'Agents', icon: Bot },
+  { name: 'Approvals', icon: CheckCircle },
+  { name: 'Calendar', icon: Calendar },
+  { name: 'Projects', icon: FolderKanban },
+  { name: 'Memory', icon: Brain },
+  { name: 'Memory Graph', icon: GitBranch },
+  { name: 'Office', icon: Building2 },
+  { name: 'Docs', icon: FileText },
+  { name: 'Wallets', icon: Wallet },
+  { name: 'Trades', icon: TrendingUp },
+  { name: 'Activity', icon: Activity },
+  { name: 'Risk', icon: ShieldAlert },
+  { name: 'Chart', icon: TrendingUp },
+];
+
+export function Sidebar({
+  activePage,
+  onNavigate,
+  isCollapsed,
+  onToggle,
+  newSignalsCount,
+  pendingApprovalsCount,
+}: SidebarProps) {
+  const width = isCollapsed ? 56 : 200;
+
+  return (
+    <div
+      style={{
+        width,
+        minWidth: width,
+        height: '100vh',
+        background: '#0f0f17',
+        borderRight: '1px solid #1e1e2a',
+        display: 'flex',
+        flexDirection: 'column',
+        transition: 'width 0.2s ease, min-width 0.2s ease',
+        overflow: 'hidden',
+        position: 'sticky',
+        top: 0,
+        flexShrink: 0,
+      }}
+    >
+      {/* Logo */}
+      <button
+        onClick={onToggle}
+        style={{
+          display: 'flex',
+          alignItems: 'center',
+          gap: 10,
+          padding: isCollapsed ? '16px 10px' : '16px 14px',
+          cursor: 'pointer',
+          background: 'transparent',
+          border: 'none',
+          borderBottom: '1px solid #1e1e2a',
+          width: '100%',
+          textAlign: 'left',
+          flexShrink: 0,
+        }}
+      >
+        <div
+          style={{
+            width: 32,
+            height: 32,
+            borderRadius: 8,
+            background: 'linear-gradient(135deg, #6c5ce7, #a29bfe)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            fontFamily: "'JetBrains Mono', monospace",
+            fontWeight: 700,
+            fontSize: 16,
+            color: '#fff',
+            flexShrink: 0,
+          }}
+        >
+          M
+        </div>
+        {!isCollapsed && (
+          <span
+            style={{
+              fontFamily: "'JetBrains Mono', 'SF Mono', 'Fira Code', monospace",
+              fontSize: 11,
+              fontWeight: 700,
+              color: '#e8e8ed',
+              letterSpacing: '1px',
+              whiteSpace: 'nowrap',
+            }}
+          >
+            MISSION CTRL
+          </span>
+        )}
+      </button>
+
+      {/* Nav items */}
+      <nav style={{ flex: 1, padding: '8px 0', overflowY: 'auto' }}>
+        {navItems.map(({ name, icon: Icon }) => {
+          const isActive = activePage === name;
+          const badge =
+            name === 'Scanner' && newSignalsCount > 0
+              ? newSignalsCount
+              : name === 'Approvals' && pendingApprovalsCount > 0
+              ? pendingApprovalsCount
+              : null;
+
+          return (
+            <button
+              key={name}
+              onClick={() => onNavigate(name)}
+              title={isCollapsed ? name : undefined}
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: 10,
+                width: '100%',
+                padding: isCollapsed ? '9px 0' : '9px 14px',
+                justifyContent: isCollapsed ? 'center' : 'flex-start',
+                background: isActive ? 'rgba(108, 92, 231, 0.08)' : 'transparent',
+                border: 'none',
+                borderRadius: 0,
+                cursor: 'pointer',
+                color: isActive ? '#a29bfe' : '#8b8b9e',
+                position: 'relative',
+                transition: 'background 0.15s, color 0.15s',
+              }}
+            >
+              <Icon size={16} style={{ flexShrink: 0 }} />
+              {!isCollapsed && (
+                <span
+                  style={{
+                    fontSize: 13,
+                    fontFamily: "'Inter', -apple-system, sans-serif",
+                    whiteSpace: 'nowrap',
+                    flex: 1,
+                    textAlign: 'left',
+                  }}
+                >
+                  {name}
+                </span>
+              )}
+              {badge !== null && !isCollapsed && (
+                <span
+                  style={{
+                    background: '#6c5ce7',
+                    color: '#fff',
+                    fontSize: 10,
+                    fontFamily: "'JetBrains Mono', monospace",
+                    fontWeight: 700,
+                    borderRadius: '10px',
+                    padding: '1px 6px',
+                    minWidth: 18,
+                    textAlign: 'center',
+                  }}
+                >
+                  {badge}
+                </span>
+              )}
+              {badge !== null && isCollapsed && (
+                <span
+                  style={{
+                    position: 'absolute',
+                    top: 6,
+                    right: 8,
+                    background: '#6c5ce7',
+                    color: '#fff',
+                    fontSize: 9,
+                    fontFamily: "'JetBrains Mono', monospace",
+                    fontWeight: 700,
+                    borderRadius: '50%',
+                    width: 14,
+                    height: 14,
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                  }}
+                >
+                  {badge}
+                </span>
+              )}
+            </button>
+          );
+        })}
+      </nav>
+
+      {/* Footer */}
+      {!isCollapsed && (
+        <div
+          style={{
+            padding: '12px 14px',
+            borderTop: '1px solid #1e1e2a',
+            fontSize: 11,
+            fontFamily: "'JetBrains Mono', 'SF Mono', 'Fira Code', monospace",
+            color: '#5c5c72',
+          }}
+        >
+          v0.1.0 MVP
+        </div>
+      )}
+    </div>
+  );
+}

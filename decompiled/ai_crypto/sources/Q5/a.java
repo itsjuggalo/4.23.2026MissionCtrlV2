@@ -1,0 +1,7 @@
+package Q5;
+
+import E5.InterfaceC0461f;
+
+/* JADX INFO: loaded from: classes2.dex */
+public interface a extends InterfaceC0461f {
+}

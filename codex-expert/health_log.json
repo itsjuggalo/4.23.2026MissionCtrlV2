@@ -1,0 +1,826 @@
+[
+  {
+    "timestamp": "2026-03-24T23:44:14.742360+00:00",
+    "type": "log_error_detected",
+    "bot": "telegram-listener",
+    "error_key": "rate_limit",
+    "snippet": "lib/python3.10/asyncio/base_events.py\", line 1871, in _run_once\n\u001b[31m1|telegram | \u001b[39m    event_list = self._selector.select(timeout)\n\u001b[31m1|telegram | \u001b[39m  File \"/usr/lib/python3.10/selectors.py\", line 469, in select\n\u001b[31m1|telegram | \u001b[39m    fd_event_list = self._selector.poll(timeout, max_ev)"
+  },
+  {
+    "timestamp": "2026-03-24T23:44:58.010862+00:00",
+    "type": "log_error_detected",
+    "bot": "telegram-listener",
+    "error_key": "rate_limit",
+    "snippet": "lib/python3.10/asyncio/base_events.py\", line 1871, in _run_once\n\u001b[31m1|telegram | \u001b[39m    event_list = self._selector.select(timeout)\n\u001b[31m1|telegram | \u001b[39m  File \"/usr/lib/python3.10/selectors.py\", line 469, in select\n\u001b[31m1|telegram | \u001b[39m    fd_event_list = self._selector.poll(timeout, max_ev)"
+  },
+  {
+    "timestamp": "2026-03-25T00:45:41.290163+00:00",
+    "type": "log_error_detected",
+    "bot": "telegram-listener",
+    "error_key": "rate_limit",
+    "snippet": "lib/python3.10/asyncio/base_events.py\", line 1871, in _run_once\n\u001b[31m1|telegram | \u001b[39m    event_list = self._selector.select(timeout)\n\u001b[31m1|telegram | \u001b[39m  File \"/usr/lib/python3.10/selectors.py\", line 469, in select\n\u001b[31m1|telegram | \u001b[39m    fd_event_list = self._selector.poll(timeout, max_ev)"
+  },
+  {
+    "timestamp": "2026-03-25T01:00:51.383652+00:00",
+    "type": "log_error_detected",
+    "bot": "mission-control",
+    "error_key": "syntax_error",
+    "snippet": ">)\n\u001b[31m0|mission- | \u001b[39m\u2a2f SyntaxError: Unexpected token '<', \"<!DOCTYPE \"... is not valid JSON\n\u001b[31m0|mission- | \u001b[39m    at JSON.parse (<anonymous>)\n\u001b[31m0|mission- | \u001b[39m\u2a2f SyntaxError: Unexpected token '<', \"<!DOCTYPE \"... is not valid JSON\n\u001b[31m0|mission- | \u001b[39m    at JSON.parse (<anonymous>)"
+  },
+  {
+    "timestamp": "2026-03-25T01:46:25.956280+00:00",
+    "type": "log_error_detected",
+    "bot": "telegram-listener",
+    "error_key": "rate_limit",
+    "snippet": ")\n\u001b[31m1|telegram | \u001b[39mArchive webhook 503: upstream connect error or disconnect/reset before headers. reset reason: connect\n\u001b[31m1|telegram | \u001b[39m  [WARN] Discord webhook 503: upstream connect error or disconnect/reset before headers. reset reason: remote connection failure, transport failure re"
+  },
+  {
+    "timestamp": "2026-03-25T02:17:39.300704+00:00",
+    "type": "log_error_detected",
+    "bot": "mission-control",
+    "error_key": "syntax_error",
+    "snippet": ">)\n\u001b[31m0|mission- | \u001b[39m\u2a2f SyntaxError: Unexpected token '<', \"<!DOCTYPE \"... is not valid JSON\n\u001b[31m0|mission- | \u001b[39m    at JSON.parse (<anonymous>)\n\u001b[31m0|mission- | \u001b[39m\u2a2f SyntaxError: Unexpected token '<', \"<!DOCTYPE \"... is not valid JSON\n\u001b[31m0|mission- | \u001b[39m    at JSON.parse (<anonymous>)"
+  },
+  {
+    "timestamp": "2026-03-25T02:17:40.067195+00:00",
+    "type": "log_error_detected",
+    "bot": "telegram-listener",
+    "error_key": "rate_limit",
+    "snippet": ")\n\u001b[31m1|telegram | \u001b[39mArchive webhook 503: upstream connect error or disconnect/reset before headers. reset reason: connect\n\u001b[31m1|telegram | \u001b[39m  [WARN] Discord webhook 503: upstream connect error or disconnect/reset before headers. reset reason: remote connection failure, transport failure re"
+  },
+  {
+    "timestamp": "2026-03-25T03:18:20.898486+00:00",
+    "type": "log_error_detected",
+    "bot": "mission-control",
+    "error_key": "syntax_error",
+    "snippet": ">)\n\u001b[31m0|mission- | \u001b[39m\u2a2f SyntaxError: Unexpected token '<', \"<!DOCTYPE \"... is not valid JSON\n\u001b[31m0|mission- | \u001b[39m    at JSON.parse (<anonymous>)\n\u001b[31m0|mission- | \u001b[39m\u2a2f SyntaxError: Unexpected token '<', \"<!DOCTYPE \"... is not valid JSON\n\u001b[31m0|mission- | \u001b[39m    at JSON.parse (<anonymous>)"
+  },
+  {
+    "timestamp": "2026-03-25T03:18:21.236320+00:00",
+    "type": "log_error_detected",
+    "bot": "telegram-listener",
+    "error_key": "rate_limit",
+    "snippet": "|telegram | \u001b[39m  [WARN] Discord webhook 503: upstream connect error or disconnect/reset before headers. reset reason: remote connection failure, transport failure re\n\u001b[31m1|telegram | \u001b[39m  [WARN] Discord webhook 429: {\"message\": \"You are being rate limited.\", \"retry_after\": 0.3, \"global\": false}"
+  },
+  {
+    "timestamp": "2026-03-25T04:18:59.592375+00:00",
+    "type": "log_error_detected",
+    "bot": "mission-control",
+    "error_key": "syntax_error",
+    "snippet": ">)\n\u001b[31m0|mission- | \u001b[39m\u2a2f SyntaxError: Unexpected token '<', \"<!DOCTYPE \"... is not valid JSON\n\u001b[31m0|mission- | \u001b[39m    at JSON.parse (<anonymous>)\n\u001b[31m0|mission- | \u001b[39m\u2a2f SyntaxError: Unexpected token '<', \"<!DOCTYPE \"... is not valid JSON\n\u001b[31m0|mission- | \u001b[39m    at JSON.parse (<anonymous>)"
+  },
+  {
+    "timestamp": "2026-03-25T04:18:59.951730+00:00",
+    "type": "log_error_detected",
+    "bot": "telegram-listener",
+    "error_key": "rate_limit",
+    "snippet": "|telegram | \u001b[39m  [WARN] Discord webhook 503: upstream connect error or disconnect/reset before headers. reset reason: remote connection failure, transport failure re\n\u001b[31m1|telegram | \u001b[39m  [WARN] Discord webhook 429: {\"message\": \"You are being rate limited.\", \"retry_after\": 0.3, \"global\": false}"
+  },
+  {
+    "timestamp": "2026-03-25T05:19:38.323921+00:00",
+    "type": "log_error_detected",
+    "bot": "mission-control",
+    "error_key": "syntax_error",
+    "snippet": ">)\n\u001b[31m0|mission- | \u001b[39m\u2a2f SyntaxError: Unexpected token '<', \"<!DOCTYPE \"... is not valid JSON\n\u001b[31m0|mission- | \u001b[39m    at JSON.parse (<anonymous>)\n\u001b[31m0|mission- | \u001b[39m\u2a2f SyntaxError: Unexpected token '<', \"<!DOCTYPE \"... is not valid JSON\n\u001b[31m0|mission- | \u001b[39m    at JSON.parse (<anonymous>)"
+  },
+  {
+    "timestamp": "2026-03-25T05:19:38.642666+00:00",
+    "type": "log_error_detected",
+    "bot": "telegram-listener",
+    "error_key": "rate_limit",
+    "snippet": "e connection failure, transport failure re\n\u001b[31m1|telegram | \u001b[39m  [WARN] Discord webhook 429: {\"message\": \"You are being rate limited.\", \"retry_after\": 0.3, \"global\": false}\n\u001b[31m1|telegram | \u001b[39mArchive webhook 429: {\"message\": \"You are being rate limited.\", \"retry_after\": 0.37, \"global\": false}"
+  },
+  {
+    "timestamp": "2026-03-25T06:20:17.109371+00:00",
+    "type": "log_error_detected",
+    "bot": "mission-control",
+    "error_key": "syntax_error",
+    "snippet": ">)\n\u001b[31m0|mission- | \u001b[39m\u2a2f SyntaxError: Unexpected token '<', \"<!DOCTYPE \"... is not valid JSON\n\u001b[31m0|mission- | \u001b[39m    at JSON.parse (<anonymous>)\n\u001b[31m0|mission- | \u001b[39m\u2a2f SyntaxError: Unexpected token '<', \"<!DOCTYPE \"... is not valid JSON\n\u001b[31m0|mission- | \u001b[39m    at JSON.parse (<anonymous>)"
+  },
+  {
+    "timestamp": "2026-03-25T06:20:17.461791+00:00",
+    "type": "log_error_detected",
+    "bot": "telegram-listener",
+    "error_key": "rate_limit",
+    "snippet": "e connection failure, transport failure re\n\u001b[31m1|telegram | \u001b[39m  [WARN] Discord webhook 429: {\"message\": \"You are being rate limited.\", \"retry_after\": 0.3, \"global\": false}\n\u001b[31m1|telegram | \u001b[39mArchive webhook 429: {\"message\": \"You are being rate limited.\", \"retry_after\": 0.37, \"global\": false}"
+  },
+  {
+    "timestamp": "2026-03-25T07:20:53.350846+00:00",
+    "type": "log_error_detected",
+    "bot": "mission-control",
+    "error_key": "syntax_error",
+    "snippet": ">)\n\u001b[31m0|mission- | \u001b[39m\u2a2f SyntaxError: Unexpected token '<', \"<!DOCTYPE \"... is not valid JSON\n\u001b[31m0|mission- | \u001b[39m    at JSON.parse (<anonymous>)\n\u001b[31m0|mission- | \u001b[39m\u2a2f SyntaxError: Unexpected token '<', \"<!DOCTYPE \"... is not valid JSON\n\u001b[31m0|mission- | \u001b[39m    at JSON.parse (<anonymous>)"
+  },
+  {
+    "timestamp": "2026-03-25T07:20:53.752502+00:00",
+    "type": "log_error_detected",
+    "bot": "telegram-listener",
+    "error_key": "rate_limit",
+    "snippet": "e connection failure, transport failure re\n\u001b[31m1|telegram | \u001b[39m  [WARN] Discord webhook 429: {\"message\": \"You are being rate limited.\", \"retry_after\": 0.3, \"global\": false}\n\u001b[31m1|telegram | \u001b[39mArchive webhook 429: {\"message\": \"You are being rate limited.\", \"retry_after\": 0.37, \"global\": false}"
+  },
+  {
+    "timestamp": "2026-03-25T08:21:32.620082+00:00",
+    "type": "log_error_detected",
+    "bot": "mission-control",
+    "error_key": "syntax_error",
+    "snippet": "1m0|mission- | \u001b[39m    at ignore-listed frames {\n\u001b[31m0|mission- | \u001b[39m  code: 'ECONNRESET'\n\u001b[31m0|mission- | \u001b[39m}\n\u001b[31m0|mission- | \u001b[39m\u2a2f uncaughtException:  Error: aborted\n\u001b[31m0|mission- | \u001b[39m    at ignore-listed frames {\n\u001b[31m0|mission- | \u001b[39m  code: 'ECONNRESET'\n\u001b[31m0|mission- | \u001b[39m}"
+  },
+  {
+    "timestamp": "2026-03-25T08:21:32.997783+00:00",
+    "type": "log_error_detected",
+    "bot": "telegram-listener",
+    "error_key": "rate_limit",
+    "snippet": "e connection failure, transport failure re\n\u001b[31m1|telegram | \u001b[39m  [WARN] Discord webhook 429: {\"message\": \"You are being rate limited.\", \"retry_after\": 0.3, \"global\": false}\n\u001b[31m1|telegram | \u001b[39mArchive webhook 429: {\"message\": \"You are being rate limited.\", \"retry_after\": 0.37, \"global\": false}"
+  },
+  {
+    "timestamp": "2026-03-25T09:22:09.823344+00:00",
+    "type": "log_error_detected",
+    "bot": "mission-control",
+    "error_key": "syntax_error",
+    "snippet": "1m0|mission- | \u001b[39m    at ignore-listed frames {\n\u001b[31m0|mission- | \u001b[39m  code: 'ECONNRESET'\n\u001b[31m0|mission- | \u001b[39m}\n\u001b[31m0|mission- | \u001b[39m\u2a2f uncaughtException:  Error: aborted\n\u001b[31m0|mission- | \u001b[39m    at ignore-listed frames {\n\u001b[31m0|mission- | \u001b[39m  code: 'ECONNRESET'\n\u001b[31m0|mission- | \u001b[39m}"
+  },
+  {
+    "timestamp": "2026-03-25T09:22:10.144282+00:00",
+    "type": "log_error_detected",
+    "bot": "telegram-listener",
+    "error_key": "rate_limit",
+    "snippet": "e connection failure, transport failure re\n\u001b[31m1|telegram | \u001b[39m  [WARN] Discord webhook 429: {\"message\": \"You are being rate limited.\", \"retry_after\": 0.3, \"global\": false}\n\u001b[31m1|telegram | \u001b[39mArchive webhook 429: {\"message\": \"You are being rate limited.\", \"retry_after\": 0.37, \"global\": false}"
+  },
+  {
+    "timestamp": "2026-03-25T10:22:50.230259+00:00",
+    "type": "log_error_detected",
+    "bot": "mission-control",
+    "error_key": "syntax_error",
+    "snippet": "1m0|mission- | \u001b[39m    at ignore-listed frames {\n\u001b[31m0|mission- | \u001b[39m  code: 'ECONNRESET'\n\u001b[31m0|mission- | \u001b[39m}\n\u001b[31m0|mission- | \u001b[39m\u2a2f uncaughtException:  Error: aborted\n\u001b[31m0|mission- | \u001b[39m    at ignore-listed frames {\n\u001b[31m0|mission- | \u001b[39m  code: 'ECONNRESET'\n\u001b[31m0|mission- | \u001b[39m}"
+  },
+  {
+    "timestamp": "2026-03-25T10:22:50.532920+00:00",
+    "type": "log_error_detected",
+    "bot": "telegram-listener",
+    "error_key": "rate_limit",
+    "snippet": "e connection failure, transport failure re\n\u001b[31m1|telegram | \u001b[39m  [WARN] Discord webhook 429: {\"message\": \"You are being rate limited.\", \"retry_after\": 0.3, \"global\": false}\n\u001b[31m1|telegram | \u001b[39mArchive webhook 429: {\"message\": \"You are being rate limited.\", \"retry_after\": 0.37, \"global\": false}"
+  },
+  {
+    "timestamp": "2026-03-25T11:23:27.831442+00:00",
+    "type": "log_error_detected",
+    "bot": "mission-control",
+    "error_key": "syntax_error",
+    "snippet": "1m0|mission- | \u001b[39m    at ignore-listed frames {\n\u001b[31m0|mission- | \u001b[39m  code: 'ECONNRESET'\n\u001b[31m0|mission- | \u001b[39m}\n\u001b[31m0|mission- | \u001b[39m\u2a2f uncaughtException:  Error: aborted\n\u001b[31m0|mission- | \u001b[39m    at ignore-listed frames {\n\u001b[31m0|mission- | \u001b[39m  code: 'ECONNRESET'\n\u001b[31m0|mission- | \u001b[39m}"
+  },
+  {
+    "timestamp": "2026-03-25T11:23:28.228579+00:00",
+    "type": "log_error_detected",
+    "bot": "telegram-listener",
+    "error_key": "rate_limit",
+    "snippet": "e connection failure, transport failure re\n\u001b[31m1|telegram | \u001b[39m  [WARN] Discord webhook 429: {\"message\": \"You are being rate limited.\", \"retry_after\": 0.3, \"global\": false}\n\u001b[31m1|telegram | \u001b[39mArchive webhook 429: {\"message\": \"You are being rate limited.\", \"retry_after\": 0.37, \"global\": false}"
+  },
+  {
+    "timestamp": "2026-03-25T12:24:06.048723+00:00",
+    "type": "log_error_detected",
+    "bot": "mission-control",
+    "error_key": "syntax_error",
+    "snippet": "1m0|mission- | \u001b[39m    at ignore-listed frames {\n\u001b[31m0|mission- | \u001b[39m  code: 'ECONNRESET'\n\u001b[31m0|mission- | \u001b[39m}\n\u001b[31m0|mission- | \u001b[39m\u2a2f uncaughtException:  Error: aborted\n\u001b[31m0|mission- | \u001b[39m    at ignore-listed frames {\n\u001b[31m0|mission- | \u001b[39m  code: 'ECONNRESET'\n\u001b[31m0|mission- | \u001b[39m}"
+  },
+  {
+    "timestamp": "2026-03-25T12:24:06.647921+00:00",
+    "type": "log_error_detected",
+    "bot": "telegram-listener",
+    "error_key": "rate_limit",
+    "snippet": "e connection failure, transport failure re\n\u001b[31m1|telegram | \u001b[39m  [WARN] Discord webhook 429: {\"message\": \"You are being rate limited.\", \"retry_after\": 0.3, \"global\": false}\n\u001b[31m1|telegram | \u001b[39mArchive webhook 429: {\"message\": \"You are being rate limited.\", \"retry_after\": 0.37, \"global\": false}"
+  },
+  {
+    "timestamp": "2026-03-25T13:04:35.295634+00:00",
+    "type": "file_integrity",
+    "bot": "crypto-sniper",
+    "file": "/home/ubuntu/mission-control/crypto-sniper/launches.json",
+    "action": "restored from /home/ubuntu/mission-control/crypto-sniper/archive/launches_archive_2026-03.json"
+  },
+  {
+    "timestamp": "2026-03-25T13:24:46.882102+00:00",
+    "type": "log_error_detected",
+    "bot": "mission-control",
+    "error_key": "syntax_error",
+    "snippet": "1m0|mission- | \u001b[39m    at ignore-listed frames {\n\u001b[31m0|mission- | \u001b[39m  code: 'ECONNRESET'\n\u001b[31m0|mission- | \u001b[39m}\n\u001b[31m0|mission- | \u001b[39m\u2a2f uncaughtException:  Error: aborted\n\u001b[31m0|mission- | \u001b[39m    at ignore-listed frames {\n\u001b[31m0|mission- | \u001b[39m  code: 'ECONNRESET'\n\u001b[31m0|mission- | \u001b[39m}"
+  },
+  {
+    "timestamp": "2026-03-25T13:24:47.235566+00:00",
+    "type": "log_error_detected",
+    "bot": "telegram-listener",
+    "error_key": "rate_limit",
+    "snippet": "e connection failure, transport failure re\n\u001b[31m1|telegram | \u001b[39m  [WARN] Discord webhook 429: {\"message\": \"You are being rate limited.\", \"retry_after\": 0.3, \"global\": false}\n\u001b[31m1|telegram | \u001b[39mArchive webhook 429: {\"message\": \"You are being rate limited.\", \"retry_after\": 0.37, \"global\": false}"
+  },
+  {
+    "timestamp": "2026-03-25T14:25:25.807069+00:00",
+    "type": "log_error_detected",
+    "bot": "mission-control",
+    "error_key": "syntax_error",
+    "snippet": "1m0|mission- | \u001b[39m    at ignore-listed frames {\n\u001b[31m0|mission- | \u001b[39m  code: 'ECONNRESET'\n\u001b[31m0|mission- | \u001b[39m}\n\u001b[31m0|mission- | \u001b[39m\u2a2f uncaughtException:  Error: aborted\n\u001b[31m0|mission- | \u001b[39m    at ignore-listed frames {\n\u001b[31m0|mission- | \u001b[39m  code: 'ECONNRESET'\n\u001b[31m0|mission- | \u001b[39m}"
+  },
+  {
+    "timestamp": "2026-03-25T14:25:26.220439+00:00",
+    "type": "log_error_detected",
+    "bot": "telegram-listener",
+    "error_key": "rate_limit",
+    "snippet": "e connection failure, transport failure re\n\u001b[31m1|telegram | \u001b[39m  [WARN] Discord webhook 429: {\"message\": \"You are being rate limited.\", \"retry_after\": 0.3, \"global\": false}\n\u001b[31m1|telegram | \u001b[39mArchive webhook 429: {\"message\": \"You are being rate limited.\", \"retry_after\": 0.37, \"global\": false}"
+  },
+  {
+    "timestamp": "2026-03-25T15:26:08.062860+00:00",
+    "type": "log_error_detected",
+    "bot": "mission-control",
+    "error_key": "syntax_error",
+    "snippet": "1m0|mission- | \u001b[39m    at ignore-listed frames {\n\u001b[31m0|mission- | \u001b[39m  code: 'ECONNRESET'\n\u001b[31m0|mission- | \u001b[39m}\n\u001b[31m0|mission- | \u001b[39m\u2a2f uncaughtException:  Error: aborted\n\u001b[31m0|mission- | \u001b[39m    at ignore-listed frames {\n\u001b[31m0|mission- | \u001b[39m  code: 'ECONNRESET'\n\u001b[31m0|mission- | \u001b[39m}"
+  },
+  {
+    "timestamp": "2026-03-25T15:26:08.368555+00:00",
+    "type": "log_error_detected",
+    "bot": "telegram-listener",
+    "error_key": "rate_limit",
+    "snippet": "e connection failure, transport failure re\n\u001b[31m1|telegram | \u001b[39m  [WARN] Discord webhook 429: {\"message\": \"You are being rate limited.\", \"retry_after\": 0.3, \"global\": false}\n\u001b[31m1|telegram | \u001b[39mArchive webhook 429: {\"message\": \"You are being rate limited.\", \"retry_after\": 0.37, \"global\": false}"
+  },
+  {
+    "timestamp": "2026-03-25T16:26:46.679997+00:00",
+    "type": "log_error_detected",
+    "bot": "mission-control",
+    "error_key": "syntax_error",
+    "snippet": "1m0|mission- | \u001b[39m    at ignore-listed frames {\n\u001b[31m0|mission- | \u001b[39m  code: 'ECONNRESET'\n\u001b[31m0|mission- | \u001b[39m}\n\u001b[31m0|mission- | \u001b[39m\u2a2f uncaughtException:  Error: aborted\n\u001b[31m0|mission- | \u001b[39m    at ignore-listed frames {\n\u001b[31m0|mission- | \u001b[39m  code: 'ECONNRESET'\n\u001b[31m0|mission- | \u001b[39m}"
+  },
+  {
+    "timestamp": "2026-03-25T16:26:47.108919+00:00",
+    "type": "log_error_detected",
+    "bot": "telegram-listener",
+    "error_key": "rate_limit",
+    "snippet": "e connection failure, transport failure re\n\u001b[31m1|telegram | \u001b[39m  [WARN] Discord webhook 429: {\"message\": \"You are being rate limited.\", \"retry_after\": 0.3, \"global\": false}\n\u001b[31m1|telegram | \u001b[39mArchive webhook 429: {\"message\": \"You are being rate limited.\", \"retry_after\": 0.37, \"global\": false}"
+  },
+  {
+    "timestamp": "2026-03-25T17:27:26.380042+00:00",
+    "type": "log_error_detected",
+    "bot": "mission-control",
+    "error_key": "syntax_error",
+    "snippet": "1m0|mission- | \u001b[39m    at ignore-listed frames {\n\u001b[31m0|mission- | \u001b[39m  code: 'ECONNRESET'\n\u001b[31m0|mission- | \u001b[39m}\n\u001b[31m0|mission- | \u001b[39m\u2a2f uncaughtException:  Error: aborted\n\u001b[31m0|mission- | \u001b[39m    at ignore-listed frames {\n\u001b[31m0|mission- | \u001b[39m  code: 'ECONNRESET'\n\u001b[31m0|mission- | \u001b[39m}"
+  },
+  {
+    "timestamp": "2026-03-25T17:27:26.706658+00:00",
+    "type": "log_error_detected",
+    "bot": "telegram-listener",
+    "error_key": "rate_limit",
+    "snippet": "etry_after\": 0.3, \"global\": false}\n\u001b[31m1|telegram | \u001b[39m  [WARN] Discord webhook 429: {\"message\": \"You are being rate limited.\", \"retry_after\": 0.3, \"global\": false}\n\u001b[31m1|telegram | \u001b[39m  [WARN] Discord webhook 429: {\"message\": \"You are being rate limited.\", \"retry_after\": 0.3, \"global\": false}"
+  },
+  {
+    "timestamp": "2026-03-25T18:28:06.087249+00:00",
+    "type": "log_error_detected",
+    "bot": "mission-control",
+    "error_key": "syntax_error",
+    "snippet": "1m0|mission- | \u001b[39m    at ignore-listed frames {\n\u001b[31m0|mission- | \u001b[39m  code: 'ECONNRESET'\n\u001b[31m0|mission- | \u001b[39m}\n\u001b[31m0|mission- | \u001b[39m\u2a2f uncaughtException:  Error: aborted\n\u001b[31m0|mission- | \u001b[39m    at ignore-listed frames {\n\u001b[31m0|mission- | \u001b[39m  code: 'ECONNRESET'\n\u001b[31m0|mission- | \u001b[39m}"
+  },
+  {
+    "timestamp": "2026-03-25T18:28:06.525153+00:00",
+    "type": "log_error_detected",
+    "bot": "telegram-listener",
+    "error_key": "rate_limit",
+    "snippet": "ed.\", \"retry_after\": 0.3, \"global\": false}\n\u001b[31m1|telegram | \u001b[39mArchive webhook 429: {\"message\": \"You are being rate limited.\", \"retry_after\": 0.388, \"global\": false\n\u001b[31m1|telegram | \u001b[39m  [WARN] Discord webhook 429: {\"message\": \"You are being rate limited.\", \"retry_after\": 0.3, \"global\": false}"
+  },
+  {
+    "id": "0d8e2c92-35d9-47bb-9784-b2d34f4cf063",
+    "timestamp": "2026-03-25T19:00:31.990733+00:00",
+    "type": "auto_fix",
+    "bot": "mission-control",
+    "issue": "Process errored",
+    "action": "pm2 restart mission-control",
+    "result": "online"
+  },
+  {
+    "id": "59e9c5be-bfdc-4f21-8432-fd1b3da482fc",
+    "timestamp": "2026-03-25T19:18:46.863466+00:00",
+    "type": "auto_fix",
+    "bot": "mission-control",
+    "issue": "Process errored",
+    "action": "pm2 restart mission-control",
+    "result": "online"
+  },
+  {
+    "timestamp": "2026-03-25T19:18:52.499672+00:00",
+    "type": "auto_fix",
+    "bot": "mission-control",
+    "issue": "Dashboard not responding on port 3000",
+    "action": "pm2 restart mission-control",
+    "result": "restarted"
+  },
+  {
+    "id": "850fa153-7979-47e8-a9f0-bbe43f33f4f6",
+    "timestamp": "2026-03-25T19:20:57.549741+00:00",
+    "type": "auto_fix",
+    "bot": "mission-control",
+    "issue": "Process errored",
+    "action": "pm2 restart mission-control",
+    "result": "online"
+  },
+  {
+    "id": "d4cb82e4-fbcb-41d6-b1a4-d909e3ba3f92",
+    "timestamp": "2026-03-25T19:23:02.680819+00:00",
+    "type": "auto_fix",
+    "bot": "mission-control",
+    "issue": "Process errored",
+    "action": "pm2 restart mission-control",
+    "result": "online"
+  },
+  {
+    "timestamp": "2026-03-25T19:24:06.823088+00:00",
+    "type": "auto_fix",
+    "bot": "mission-control",
+    "issue": "Dashboard not responding on port 3000",
+    "action": "pm2 restart mission-control",
+    "result": "restarted"
+  },
+  {
+    "timestamp": "2026-03-25T19:29:09.061935+00:00",
+    "type": "log_error_detected",
+    "bot": "telegram-listener",
+    "error_key": "rate_limit",
+    "snippet": "ed.\", \"retry_after\": 0.3, \"global\": false}\n\u001b[31m1|telegram | \u001b[39mArchive webhook 429: {\"message\": \"You are being rate limited.\", \"retry_after\": 0.388, \"global\": false\n\u001b[31m1|telegram | \u001b[39m  [WARN] Discord webhook 429: {\"message\": \"You are being rate limited.\", \"retry_after\": 0.3, \"global\": false}"
+  },
+  {
+    "timestamp": "2026-03-25T20:29:51.131480+00:00",
+    "type": "log_error_detected",
+    "bot": "telegram-listener",
+    "error_key": "rate_limit",
+    "snippet": "ed.\", \"retry_after\": 0.3, \"global\": false}\n\u001b[31m1|telegram | \u001b[39mArchive webhook 429: {\"message\": \"You are being rate limited.\", \"retry_after\": 0.388, \"global\": false\n\u001b[31m1|telegram | \u001b[39m  [WARN] Discord webhook 429: {\"message\": \"You are being rate limited.\", \"retry_after\": 0.3, \"global\": false}"
+  },
+  {
+    "timestamp": "2026-03-25T21:30:28.927287+00:00",
+    "type": "log_error_detected",
+    "bot": "telegram-listener",
+    "error_key": "rate_limit",
+    "snippet": "ed.\", \"retry_after\": 0.3, \"global\": false}\n\u001b[31m1|telegram | \u001b[39mArchive webhook 429: {\"message\": \"You are being rate limited.\", \"retry_after\": 0.388, \"global\": false\n\u001b[31m1|telegram | \u001b[39m  [WARN] Discord webhook 429: {\"message\": \"You are being rate limited.\", \"retry_after\": 0.3, \"global\": false}"
+  },
+  {
+    "timestamp": "2026-03-25T22:05:59.173776+00:00",
+    "type": "auto_fix",
+    "bot": "mission-control",
+    "issue": "Dashboard not responding on port 3000",
+    "action": "pm2 restart mission-control",
+    "result": "restarted"
+  },
+  {
+    "timestamp": "2026-03-25T22:31:14.135701+00:00",
+    "type": "log_error_detected",
+    "bot": "telegram-listener",
+    "error_key": "rate_limit",
+    "snippet": "ed.\", \"retry_after\": 0.3, \"global\": false}\n\u001b[31m1|telegram | \u001b[39mArchive webhook 429: {\"message\": \"You are being rate limited.\", \"retry_after\": 0.388, \"global\": false\n\u001b[31m1|telegram | \u001b[39m  [WARN] Discord webhook 429: {\"message\": \"You are being rate limited.\", \"retry_after\": 0.3, \"global\": false}"
+  },
+  {
+    "timestamp": "2026-03-25T22:46:29.805647+00:00",
+    "type": "auto_fix",
+    "bot": "mission-control",
+    "issue": "Dashboard not responding on port 3000",
+    "action": "pm2 restart mission-control",
+    "result": "restarted"
+  },
+  {
+    "timestamp": "2026-03-25T23:31:59.331352+00:00",
+    "type": "log_error_detected",
+    "bot": "telegram-listener",
+    "error_key": "rate_limit",
+    "snippet": "ed.\", \"retry_after\": 0.3, \"global\": false}\n\u001b[31m1|telegram | \u001b[39mArchive webhook 429: {\"message\": \"You are being rate limited.\", \"retry_after\": 0.388, \"global\": false\n\u001b[31m1|telegram | \u001b[39m  [WARN] Discord webhook 429: {\"message\": \"You are being rate limited.\", \"retry_after\": 0.3, \"global\": false}"
+  },
+  {
+    "timestamp": "2026-03-25T23:52:21.909229+00:00",
+    "type": "log_error_detected",
+    "bot": "mission-control",
+    "error_key": "syntax_error",
+    "snippet": ">)\n\u001b[31m16|mission | \u001b[39m\u2a2f SyntaxError: Unexpected token '<', \"<!DOCTYPE \"... is not valid JSON\n\u001b[31m16|mission | \u001b[39m    at JSON.parse (<anonymous>)\n\u001b[31m16|mission | \u001b[39m\u2a2f SyntaxError: Unexpected token '<', \"<!DOCTYPE \"... is not valid JSON\n\u001b[31m16|mission | \u001b[39m    at JSON.parse (<anonymous>)"
+  },
+  {
+    "timestamp": "2026-03-26T00:32:45.857817+00:00",
+    "type": "log_error_detected",
+    "bot": "telegram-listener",
+    "error_key": "rate_limit",
+    "snippet": "ed.\", \"retry_after\": 0.3, \"global\": false}\n\u001b[31m1|telegram | \u001b[39mArchive webhook 429: {\"message\": \"You are being rate limited.\", \"retry_after\": 0.388, \"global\": false\n\u001b[31m1|telegram | \u001b[39m  [WARN] Discord webhook 429: {\"message\": \"You are being rate limited.\", \"retry_after\": 0.3, \"global\": false}"
+  },
+  {
+    "timestamp": "2026-03-26T00:53:01.515092+00:00",
+    "type": "log_error_detected",
+    "bot": "mission-control",
+    "error_key": "syntax_error",
+    "snippet": ">)\n\u001b[31m16|mission | \u001b[39m\u2a2f SyntaxError: Unexpected token '<', \"<!DOCTYPE \"... is not valid JSON\n\u001b[31m16|mission | \u001b[39m    at JSON.parse (<anonymous>)\n\u001b[31m16|mission | \u001b[39m\u2a2f SyntaxError: Unexpected token '<', \"<!DOCTYPE \"... is not valid JSON\n\u001b[31m16|mission | \u001b[39m    at JSON.parse (<anonymous>)"
+  },
+  {
+    "id": "31240f5d-fee2-42ab-a4be-000059fb2674",
+    "timestamp": "2026-03-26T01:09:17.652705+00:00",
+    "type": "auto_fix",
+    "bot": "mission-control",
+    "issue": "Process stopped",
+    "action": "pm2 restart mission-control",
+    "result": "online"
+  },
+  {
+    "timestamp": "2026-03-26T01:33:32.738353+00:00",
+    "type": "log_error_detected",
+    "bot": "telegram-listener",
+    "error_key": "rate_limit",
+    "snippet": "ed.\", \"retry_after\": 0.3, \"global\": false}\n\u001b[31m1|telegram | \u001b[39mArchive webhook 429: {\"message\": \"You are being rate limited.\", \"retry_after\": 0.388, \"global\": false\n\u001b[31m1|telegram | \u001b[39m  [WARN] Discord webhook 429: {\"message\": \"You are being rate limited.\", \"retry_after\": 0.3, \"global\": false}"
+  },
+  {
+    "timestamp": "2026-03-26T01:53:49.407376+00:00",
+    "type": "log_error_detected",
+    "bot": "mission-control",
+    "error_key": "syntax_error",
+    "snippet": "u/mission-control/.next/required-server-files.json'\n\u001b[31m19|mission | \u001b[39m}\n\u001b[31m19|mission | \u001b[39m\u2a2f Error: Failed to load static file for page: /500 ENOENT: no such file or directory, open '/home/ubuntu/mission-control/.next/server/pages/500.html'\n\u001b[31m19|mission | \u001b[39m    at ignore-listed frames"
+  },
+  {
+    "timestamp": "2026-03-26T02:34:15.023040+00:00",
+    "type": "log_error_detected",
+    "bot": "telegram-listener",
+    "error_key": "rate_limit",
+    "snippet": "ed.\", \"retry_after\": 0.3, \"global\": false}\n\u001b[31m1|telegram | \u001b[39mArchive webhook 429: {\"message\": \"You are being rate limited.\", \"retry_after\": 0.388, \"global\": false\n\u001b[31m1|telegram | \u001b[39m  [WARN] Discord webhook 429: {\"message\": \"You are being rate limited.\", \"retry_after\": 0.3, \"global\": false}"
+  },
+  {
+    "timestamp": "2026-03-26T02:54:32.122504+00:00",
+    "type": "log_error_detected",
+    "bot": "mission-control",
+    "error_key": "syntax_error",
+    "snippet": "u/mission-control/.next/required-server-files.json'\n\u001b[31m19|mission | \u001b[39m}\n\u001b[31m19|mission | \u001b[39m\u2a2f Error: Failed to load static file for page: /500 ENOENT: no such file or directory, open '/home/ubuntu/mission-control/.next/server/pages/500.html'\n\u001b[31m19|mission | \u001b[39m    at ignore-listed frames"
+  },
+  {
+    "timestamp": "2026-03-26T03:35:00.405030+00:00",
+    "type": "log_error_detected",
+    "bot": "telegram-listener",
+    "error_key": "rate_limit",
+    "snippet": "ed.\", \"retry_after\": 0.3, \"global\": false}\n\u001b[31m1|telegram | \u001b[39mArchive webhook 429: {\"message\": \"You are being rate limited.\", \"retry_after\": 0.388, \"global\": false\n\u001b[31m1|telegram | \u001b[39m  [WARN] Discord webhook 429: {\"message\": \"You are being rate limited.\", \"retry_after\": 0.3, \"global\": false}"
+  },
+  {
+    "timestamp": "2026-03-26T03:55:16.228256+00:00",
+    "type": "log_error_detected",
+    "bot": "mission-control",
+    "error_key": "syntax_error",
+    "snippet": "Error: Failed to find Server Action \"x\". This request might be from an older or newer deployment.\n\u001b[31m19|mission | \u001b[39m2026-03-26 03:33:05 +00:00: Read more: https://nextjs.org/docs/messages/failed-to-find-server-action\n\u001b[31m19|mission | \u001b[39m2026-03-26 03:33:05 +00:00:     at ignore-listed frames"
+  },
+  {
+    "timestamp": "2026-03-26T04:35:40.774044+00:00",
+    "type": "log_error_detected",
+    "bot": "telegram-listener",
+    "error_key": "rate_limit",
+    "snippet": "ed.\", \"retry_after\": 0.3, \"global\": false}\n\u001b[31m1|telegram | \u001b[39mArchive webhook 429: {\"message\": \"You are being rate limited.\", \"retry_after\": 0.388, \"global\": false\n\u001b[31m1|telegram | \u001b[39m  [WARN] Discord webhook 429: {\"message\": \"You are being rate limited.\", \"retry_after\": 0.3, \"global\": false}"
+  },
+  {
+    "timestamp": "2026-03-26T04:55:57.901339+00:00",
+    "type": "log_error_detected",
+    "bot": "mission-control",
+    "error_key": "syntax_error",
+    "snippet": "Error: Failed to find Server Action \"x\". This request might be from an older or newer deployment.\n\u001b[31m19|mission | \u001b[39m2026-03-26 03:33:05 +00:00: Read more: https://nextjs.org/docs/messages/failed-to-find-server-action\n\u001b[31m19|mission | \u001b[39m2026-03-26 03:33:05 +00:00:     at ignore-listed frames"
+  },
+  {
+    "timestamp": "2026-03-26T05:36:21.955166+00:00",
+    "type": "log_error_detected",
+    "bot": "telegram-listener",
+    "error_key": "rate_limit",
+    "snippet": "ed.\", \"retry_after\": 0.3, \"global\": false}\n\u001b[31m1|telegram | \u001b[39mArchive webhook 429: {\"message\": \"You are being rate limited.\", \"retry_after\": 0.388, \"global\": false\n\u001b[31m1|telegram | \u001b[39m  [WARN] Discord webhook 429: {\"message\": \"You are being rate limited.\", \"retry_after\": 0.3, \"global\": false}"
+  },
+  {
+    "timestamp": "2026-03-26T05:56:39.612468+00:00",
+    "type": "log_error_detected",
+    "bot": "mission-control",
+    "error_key": "syntax_error",
+    "snippet": "Error: Failed to find Server Action \"x\". This request might be from an older or newer deployment.\n\u001b[31m19|mission | \u001b[39m2026-03-26 03:33:05 +00:00: Read more: https://nextjs.org/docs/messages/failed-to-find-server-action\n\u001b[31m19|mission | \u001b[39m2026-03-26 03:33:05 +00:00:     at ignore-listed frames"
+  },
+  {
+    "timestamp": "2026-03-26T06:37:09.734457+00:00",
+    "type": "log_error_detected",
+    "bot": "telegram-listener",
+    "error_key": "rate_limit",
+    "snippet": "ed.\", \"retry_after\": 0.3, \"global\": false}\n\u001b[31m1|telegram | \u001b[39mArchive webhook 429: {\"message\": \"You are being rate limited.\", \"retry_after\": 0.388, \"global\": false\n\u001b[31m1|telegram | \u001b[39m  [WARN] Discord webhook 429: {\"message\": \"You are being rate limited.\", \"retry_after\": 0.3, \"global\": false}"
+  },
+  {
+    "timestamp": "2026-03-26T06:57:26.339411+00:00",
+    "type": "log_error_detected",
+    "bot": "mission-control",
+    "error_key": "syntax_error",
+    "snippet": "Error: Failed to find Server Action \"x\". This request might be from an older or newer deployment.\n\u001b[31m19|mission | \u001b[39m2026-03-26 03:33:05 +00:00: Read more: https://nextjs.org/docs/messages/failed-to-find-server-action\n\u001b[31m19|mission | \u001b[39m2026-03-26 03:33:05 +00:00:     at ignore-listed frames"
+  },
+  {
+    "timestamp": "2026-03-26T07:37:53.936641+00:00",
+    "type": "log_error_detected",
+    "bot": "telegram-listener",
+    "error_key": "rate_limit",
+    "snippet": "ed.\", \"retry_after\": 0.3, \"global\": false}\n\u001b[31m1|telegram | \u001b[39mArchive webhook 429: {\"message\": \"You are being rate limited.\", \"retry_after\": 0.388, \"global\": false\n\u001b[31m1|telegram | \u001b[39m  [WARN] Discord webhook 429: {\"message\": \"You are being rate limited.\", \"retry_after\": 0.3, \"global\": false}"
+  },
+  {
+    "timestamp": "2026-03-26T07:58:11.587164+00:00",
+    "type": "log_error_detected",
+    "bot": "mission-control",
+    "error_key": "syntax_error",
+    "snippet": "Error: Failed to find Server Action \"x\". This request might be from an older or newer deployment.\n\u001b[31m19|mission | \u001b[39m2026-03-26 03:33:05 +00:00: Read more: https://nextjs.org/docs/messages/failed-to-find-server-action\n\u001b[31m19|mission | \u001b[39m2026-03-26 03:33:05 +00:00:     at ignore-listed frames"
+  },
+  {
+    "timestamp": "2026-03-26T08:38:38.748457+00:00",
+    "type": "log_error_detected",
+    "bot": "telegram-listener",
+    "error_key": "rate_limit",
+    "snippet": "ed.\", \"retry_after\": 0.3, \"global\": false}\n\u001b[31m1|telegram | \u001b[39mArchive webhook 429: {\"message\": \"You are being rate limited.\", \"retry_after\": 0.388, \"global\": false\n\u001b[31m1|telegram | \u001b[39m  [WARN] Discord webhook 429: {\"message\": \"You are being rate limited.\", \"retry_after\": 0.3, \"global\": false}"
+  },
+  {
+    "timestamp": "2026-03-26T08:58:56.588974+00:00",
+    "type": "log_error_detected",
+    "bot": "mission-control",
+    "error_key": "syntax_error",
+    "snippet": "Error: Failed to find Server Action \"x\". This request might be from an older or newer deployment.\n\u001b[31m19|mission | \u001b[39m2026-03-26 03:33:05 +00:00: Read more: https://nextjs.org/docs/messages/failed-to-find-server-action\n\u001b[31m19|mission | \u001b[39m2026-03-26 03:33:05 +00:00:     at ignore-listed frames"
+  },
+  {
+    "timestamp": "2026-03-26T09:39:22.364110+00:00",
+    "type": "log_error_detected",
+    "bot": "telegram-listener",
+    "error_key": "rate_limit",
+    "snippet": "ed.\", \"retry_after\": 0.3, \"global\": false}\n\u001b[31m1|telegram | \u001b[39mArchive webhook 429: {\"message\": \"You are being rate limited.\", \"retry_after\": 0.388, \"global\": false\n\u001b[31m1|telegram | \u001b[39m  [WARN] Discord webhook 429: {\"message\": \"You are being rate limited.\", \"retry_after\": 0.3, \"global\": false}"
+  },
+  {
+    "timestamp": "2026-03-26T09:59:37.528111+00:00",
+    "type": "log_error_detected",
+    "bot": "mission-control",
+    "error_key": "syntax_error",
+    "snippet": "Error: Failed to find Server Action \"x\". This request might be from an older or newer deployment.\n\u001b[31m19|mission | \u001b[39m2026-03-26 03:33:05 +00:00: Read more: https://nextjs.org/docs/messages/failed-to-find-server-action\n\u001b[31m19|mission | \u001b[39m2026-03-26 03:33:05 +00:00:     at ignore-listed frames"
+  },
+  {
+    "timestamp": "2026-03-26T10:40:04.412599+00:00",
+    "type": "log_error_detected",
+    "bot": "telegram-listener",
+    "error_key": "rate_limit",
+    "snippet": "ed.\", \"retry_after\": 0.3, \"global\": false}\n\u001b[31m1|telegram | \u001b[39mArchive webhook 429: {\"message\": \"You are being rate limited.\", \"retry_after\": 0.388, \"global\": false\n\u001b[31m1|telegram | \u001b[39m  [WARN] Discord webhook 429: {\"message\": \"You are being rate limited.\", \"retry_after\": 0.3, \"global\": false}"
+  },
+  {
+    "timestamp": "2026-03-26T10:40:06.552830+00:00",
+    "type": "log_error_detected",
+    "bot": "btc-bias-scorer",
+    "error_key": "rate_limit",
+    "snippet": "ed: 429 Client Error: Too Many Requests for url: https://api.coingecko.com/api/v3/global\n\u001b[31m13|btc-bia | \u001b[39m  [WARN] GET https://min-api.cryptocompare.com/data/v2/histoday failed: 502 Server Error: Bad Gateway for url: https://min-api.cryptocompare.com/data/v2/histoday?fsym=BTC&tsym=USD&limit=30"
+  },
+  {
+    "timestamp": "2026-03-26T11:00:26.014802+00:00",
+    "type": "log_error_detected",
+    "bot": "mission-control",
+    "error_key": "syntax_error",
+    "snippet": "Error: Failed to find Server Action \"x\". This request might be from an older or newer deployment.\n\u001b[31m19|mission | \u001b[39m2026-03-26 03:33:05 +00:00: Read more: https://nextjs.org/docs/messages/failed-to-find-server-action\n\u001b[31m19|mission | \u001b[39m2026-03-26 03:33:05 +00:00:     at ignore-listed frames"
+  },
+  {
+    "timestamp": "2026-03-26T11:40:54.554207+00:00",
+    "type": "log_error_detected",
+    "bot": "telegram-listener",
+    "error_key": "rate_limit",
+    "snippet": "ed.\", \"retry_after\": 0.3, \"global\": false}\n\u001b[31m1|telegram | \u001b[39mArchive webhook 429: {\"message\": \"You are being rate limited.\", \"retry_after\": 0.388, \"global\": false\n\u001b[31m1|telegram | \u001b[39m  [WARN] Discord webhook 429: {\"message\": \"You are being rate limited.\", \"retry_after\": 0.3, \"global\": false}"
+  },
+  {
+    "timestamp": "2026-03-26T12:01:13.886157+00:00",
+    "type": "log_error_detected",
+    "bot": "mission-control",
+    "error_key": "syntax_error",
+    "snippet": "Error: Failed to find Server Action \"x\". This request might be from an older or newer deployment.\n\u001b[31m19|mission | \u001b[39m2026-03-26 03:33:05 +00:00: Read more: https://nextjs.org/docs/messages/failed-to-find-server-action\n\u001b[31m19|mission | \u001b[39m2026-03-26 03:33:05 +00:00:     at ignore-listed frames"
+  },
+  {
+    "timestamp": "2026-03-26T12:41:38.582088+00:00",
+    "type": "log_error_detected",
+    "bot": "telegram-listener",
+    "error_key": "rate_limit",
+    "snippet": "ed.\", \"retry_after\": 0.3, \"global\": false}\n\u001b[31m1|telegram | \u001b[39mArchive webhook 429: {\"message\": \"You are being rate limited.\", \"retry_after\": 0.388, \"global\": false\n\u001b[31m1|telegram | \u001b[39m  [WARN] Discord webhook 429: {\"message\": \"You are being rate limited.\", \"retry_after\": 0.3, \"global\": false}"
+  },
+  {
+    "timestamp": "2026-03-26T13:01:54.718872+00:00",
+    "type": "log_error_detected",
+    "bot": "mission-control",
+    "error_key": "syntax_error",
+    "snippet": "Error: Failed to find Server Action \"x\". This request might be from an older or newer deployment.\n\u001b[31m19|mission | \u001b[39m2026-03-26 03:33:05 +00:00: Read more: https://nextjs.org/docs/messages/failed-to-find-server-action\n\u001b[31m19|mission | \u001b[39m2026-03-26 03:33:05 +00:00:     at ignore-listed frames"
+  },
+  {
+    "timestamp": "2026-03-26T13:42:20.219873+00:00",
+    "type": "log_error_detected",
+    "bot": "telegram-listener",
+    "error_key": "rate_limit",
+    "snippet": "ed.\", \"retry_after\": 0.3, \"global\": false}\n\u001b[31m1|telegram | \u001b[39mArchive webhook 429: {\"message\": \"You are being rate limited.\", \"retry_after\": 0.388, \"global\": false\n\u001b[31m1|telegram | \u001b[39m  [WARN] Discord webhook 429: {\"message\": \"You are being rate limited.\", \"retry_after\": 0.3, \"global\": false}"
+  },
+  {
+    "timestamp": "2026-03-26T14:43:04.343632+00:00",
+    "type": "log_error_detected",
+    "bot": "telegram-listener",
+    "error_key": "rate_limit",
+    "snippet": "try_after\": 0.388, \"global\": false\n\u001b[31m1|telegram | \u001b[39m  [WARN] Discord webhook 429: {\"message\": \"You are being rate limited.\", \"retry_after\": 0.3, \"global\": false}\n\u001b[31m1|telegram | \u001b[39m  [WARN] Discord webhook 429: {\"message\": \"You are being rate limited.\", \"retry_after\": 0.3, \"global\": false}"
+  },
+  {
+    "timestamp": "2026-03-26T15:43:54.877073+00:00",
+    "type": "log_error_detected",
+    "bot": "telegram-listener",
+    "error_key": "rate_limit",
+    "snippet": "try_after\": 0.388, \"global\": false\n\u001b[31m1|telegram | \u001b[39m  [WARN] Discord webhook 429: {\"message\": \"You are being rate limited.\", \"retry_after\": 0.3, \"global\": false}\n\u001b[31m1|telegram | \u001b[39m  [WARN] Discord webhook 429: {\"message\": \"You are being rate limited.\", \"retry_after\": 0.3, \"global\": false}"
+  },
+  {
+    "timestamp": "2026-03-26T16:44:37.243848+00:00",
+    "type": "log_error_detected",
+    "bot": "telegram-listener",
+    "error_key": "rate_limit",
+    "snippet": "try_after\": 0.388, \"global\": false\n\u001b[31m1|telegram | \u001b[39m  [WARN] Discord webhook 429: {\"message\": \"You are being rate limited.\", \"retry_after\": 0.3, \"global\": false}\n\u001b[31m1|telegram | \u001b[39m  [WARN] Discord webhook 429: {\"message\": \"You are being rate limited.\", \"retry_after\": 0.3, \"global\": false}"
+  },
+  {
+    "timestamp": "2026-03-26T17:45:22.868078+00:00",
+    "type": "log_error_detected",
+    "bot": "telegram-listener",
+    "error_key": "rate_limit",
+    "snippet": "try_after\": 0.388, \"global\": false\n\u001b[31m1|telegram | \u001b[39m  [WARN] Discord webhook 429: {\"message\": \"You are being rate limited.\", \"retry_after\": 0.3, \"global\": false}\n\u001b[31m1|telegram | \u001b[39m  [WARN] Discord webhook 429: {\"message\": \"You are being rate limited.\", \"retry_after\": 0.3, \"global\": false}"
+  },
+  {
+    "timestamp": "2026-03-26T18:46:07.519923+00:00",
+    "type": "log_error_detected",
+    "bot": "telegram-listener",
+    "error_key": "rate_limit",
+    "snippet": "rate limited.\", \"retry_after\": 0.3, \"global\": false}\n\u001b[31m1|telegram | \u001b[39mArchive webhook 429: {\"message\": \"You are being rate limited.\", \"retry_after\": 0.3, \"global\": false}\n\u001b[31m1|telegram | \u001b[39mArchive webhook 429: {\"message\": \"You are being rate limited.\", \"retry_after\": 0.3, \"global\": false}"
+  },
+  {
+    "timestamp": "2026-03-26T19:46:54.669104+00:00",
+    "type": "log_error_detected",
+    "bot": "telegram-listener",
+    "error_key": "rate_limit",
+    "snippet": "rate limited.\", \"retry_after\": 0.3, \"global\": false}\n\u001b[31m1|telegram | \u001b[39mArchive webhook 429: {\"message\": \"You are being rate limited.\", \"retry_after\": 0.3, \"global\": false}\n\u001b[31m1|telegram | \u001b[39mArchive webhook 429: {\"message\": \"You are being rate limited.\", \"retry_after\": 0.3, \"global\": false}"
+  },
+  {
+    "timestamp": "2026-03-26T20:47:45.088829+00:00",
+    "type": "log_error_detected",
+    "bot": "telegram-listener",
+    "error_key": "rate_limit",
+    "snippet": "\", \"retry_after\": 0.374, \"global\": false}\n\u001b[31m1|telegram | \u001b[39m  [WARN] Discord webhook 429: {\"message\": \"You are being rate limited.\", \"retry_after\": 0.376, \"global\": false}\n\u001b[31m1|telegram | \u001b[39mArchive webhook 429: {\"message\": \"You are being rate limited.\", \"retry_after\": 0.3, \"global\": false}"
+  },
+  {
+    "timestamp": "2026-03-26T21:48:25.756144+00:00",
+    "type": "log_error_detected",
+    "bot": "telegram-listener",
+    "error_key": "rate_limit",
+    "snippet": "\", \"retry_after\": 0.374, \"global\": false}\n\u001b[31m1|telegram | \u001b[39m  [WARN] Discord webhook 429: {\"message\": \"You are being rate limited.\", \"retry_after\": 0.376, \"global\": false}\n\u001b[31m1|telegram | \u001b[39mArchive webhook 429: {\"message\": \"You are being rate limited.\", \"retry_after\": 0.3, \"global\": false}"
+  },
+  {
+    "timestamp": "2026-03-26T22:49:09.733022+00:00",
+    "type": "log_error_detected",
+    "bot": "telegram-listener",
+    "error_key": "rate_limit",
+    "snippet": "\", \"retry_after\": 0.374, \"global\": false}\n\u001b[31m1|telegram | \u001b[39m  [WARN] Discord webhook 429: {\"message\": \"You are being rate limited.\", \"retry_after\": 0.376, \"global\": false}\n\u001b[31m1|telegram | \u001b[39mArchive webhook 429: {\"message\": \"You are being rate limited.\", \"retry_after\": 0.3, \"global\": false}"
+  },
+  {
+    "timestamp": "2026-03-26T23:50:01.256178+00:00",
+    "type": "log_error_detected",
+    "bot": "telegram-listener",
+    "error_key": "rate_limit",
+    "snippet": "te limited.\", \"retry_after\": 0.376, \"global\": false}\n\u001b[31m1|telegram | \u001b[39mArchive webhook 429: {\"message\": \"You are being rate limited.\", \"retry_after\": 0.3, \"global\": false}\n\u001b[31m1|telegram | \u001b[39mArchive webhook 503: upstream connect error or disconnect/reset before headers. reset reason: remote"
+  },
+  {
+    "timestamp": "2026-03-27T00:46:01.311029+00:00",
+    "type": "auto_fix",
+    "bot": "mission-control",
+    "issue": "Dashboard not responding on port 3000",
+    "action": "pm2 restart mission-control",
+    "result": "restarted"
+  },
+  {
+    "id": "8a288373-b11b-4ad3-bdb8-aafd17bec599",
+    "timestamp": "2026-03-27T00:47:16.221902+00:00",
+    "type": "auto_fix",
+    "bot": "mission-control",
+    "issue": "Process errored",
+    "action": "pm2 restart mission-control",
+    "result": "online"
+  },
+  {
+    "timestamp": "2026-03-27T00:51:18.540140+00:00",
+    "type": "log_error_detected",
+    "bot": "telegram-listener",
+    "error_key": "rate_limit",
+    "snippet": "lib/python3.10/asyncio/base_events.py\", line 1871, in _run_once\n\u001b[31m1|telegram | \u001b[39m    event_list = self._selector.select(timeout)\n\u001b[31m1|telegram | \u001b[39m  File \"/usr/lib/python3.10/selectors.py\", line 469, in select\n\u001b[31m1|telegram | \u001b[39m    fd_event_list = self._selector.poll(timeout, max_ev)"
+  },
+  {
+    "timestamp": "2026-03-27T00:51:20.897371+00:00",
+    "type": "log_error_detected",
+    "bot": "mission-control",
+    "error_key": "file_not_found",
+    "snippet": "7 00:47:51 +00:00: }\n\u001b[31m19|mission | \u001b[39m2026-03-27 00:47:51 +00:00: \u2a2f Error: Failed to load static file for page: /500 ENOENT: no such file or directory, open '/home/ubuntu/mission-control/.next/server/pages/500.html'\n\u001b[31m19|mission | \u001b[39m2026-03-27 00:47:51 +00:00:     at ignore-listed frames"
+  },
+  {
+    "id": "1b7c6df1-da39-4320-a2b6-2b21aed1bbe2",
+    "timestamp": "2026-03-27T01:17:53.167367+00:00",
+    "type": "auto_fix",
+    "bot": "mission-control",
+    "issue": "Process stopped",
+    "action": "pm2 restart mission-control",
+    "result": "still launching"
+  },
+  {
+    "timestamp": "2026-03-27T01:52:18.201728+00:00",
+    "type": "log_error_detected",
+    "bot": "telegram-listener",
+    "error_key": "rate_limit",
+    "snippet": "lib/python3.10/asyncio/base_events.py\", line 1871, in _run_once\n\u001b[31m1|telegram | \u001b[39m    event_list = self._selector.select(timeout)\n\u001b[31m1|telegram | \u001b[39m  File \"/usr/lib/python3.10/selectors.py\", line 469, in select\n\u001b[31m1|telegram | \u001b[39m    fd_event_list = self._selector.poll(timeout, max_ev)"
+  },
+  {
+    "timestamp": "2026-03-27T02:53:11.530472+00:00",
+    "type": "log_error_detected",
+    "bot": "telegram-listener",
+    "error_key": "rate_limit",
+    "snippet": "lib/python3.10/asyncio/base_events.py\", line 1871, in _run_once\n\u001b[31m1|telegram | \u001b[39m    event_list = self._selector.select(timeout)\n\u001b[31m1|telegram | \u001b[39m  File \"/usr/lib/python3.10/selectors.py\", line 469, in select\n\u001b[31m1|telegram | \u001b[39m    fd_event_list = self._selector.poll(timeout, max_ev)"
+  },
+  {
+    "timestamp": "2026-03-27T03:45:10.855244+00:00",
+    "type": "log_error_detected",
+    "bot": "btc-bias-scorer",
+    "error_key": "rate_limit",
+    "snippet": "ed: 429 Client Error: Too Many Requests for url: https://api.coingecko.com/api/v3/global\n\u001b[31m13|btc-bia | \u001b[39m  [WARN] GET https://min-api.cryptocompare.com/data/v2/histoday failed: 502 Server Error: Bad Gateway for url: https://min-api.cryptocompare.com/data/v2/histoday?fsym=BTC&tsym=USD&limit=30"
+  },
+  {
+    "timestamp": "2026-03-27T03:50:16.860408+00:00",
+    "type": "log_error_detected",
+    "bot": "mission-control",
+    "error_key": "rate_limit",
+    "snippet": "xi8u.g._.js:1:7914)\n\u001b[31m19|mission | \u001b[39m2026-03-27 03:50:11 +00:00:     at async i (.next/server/chunks/[root-of-the-server]__0xi8u.g._.js:1:8955)\n\u001b[31m19|mission | \u001b[39m2026-03-27 03:50:11 +00:00:     at async Module.j [as handler] (.next/server/chunks/[root-of-the-server]__0xi8u.g._.js:1:10062)"
+  },
+  {
+    "timestamp": "2026-03-27T03:53:38.665965+00:00",
+    "type": "log_error_detected",
+    "bot": "btc-bias-scorer",
+    "error_key": "rate_limit",
+    "snippet": "ed: 429 Client Error: Too Many Requests for url: https://api.coingecko.com/api/v3/global\n\u001b[31m13|btc-bia | \u001b[39m  [WARN] GET https://min-api.cryptocompare.com/data/v2/histoday failed: 502 Server Error: Bad Gateway for url: https://min-api.cryptocompare.com/data/v2/histoday?fsym=BTC&tsym=USD&limit=30"
+  },
+  {
+    "timestamp": "2026-03-27T03:53:40.038325+00:00",
+    "type": "log_error_detected",
+    "bot": "mission-control",
+    "error_key": "rate_limit",
+    "snippet": "xi8u.g._.js:1:7914)\n\u001b[31m19|mission | \u001b[39m2026-03-27 03:53:37 +00:00:     at async i (.next/server/chunks/[root-of-the-server]__0xi8u.g._.js:1:8955)\n\u001b[31m19|mission | \u001b[39m2026-03-27 03:53:37 +00:00:     at async Module.j [as handler] (.next/server/chunks/[root-of-the-server]__0xi8u.g._.js:1:10062)"
+  },
+  {
+    "timestamp": "2026-03-27T04:29:14.930139+00:00",
+    "type": "log_error_detected",
+    "bot": "btc-bias-scorer",
+    "error_key": "rate_limit",
+    "snippet": "ed: 429 Client Error: Too Many Requests for url: https://api.coingecko.com/api/v3/global\n\u001b[31m13|btc-bia | \u001b[39m  [WARN] GET https://min-api.cryptocompare.com/data/v2/histoday failed: 502 Server Error: Bad Gateway for url: https://min-api.cryptocompare.com/data/v2/histoday?fsym=BTC&tsym=USD&limit=30"
+  },
+  {
+    "timestamp": "2026-03-27T04:29:16.640319+00:00",
+    "type": "log_error_detected",
+    "bot": "mission-control",
+    "error_key": "rate_limit",
+    "snippet": "xi8u.g._.js:1:7914)\n\u001b[31m19|mission | \u001b[39m2026-03-27 04:29:14 +00:00:     at async i (.next/server/chunks/[root-of-the-server]__0xi8u.g._.js:1:8955)\n\u001b[31m19|mission | \u001b[39m2026-03-27 04:29:14 +00:00:     at async Module.j [as handler] (.next/server/chunks/[root-of-the-server]__0xi8u.g._.js:1:10062)"
+  },
+  {
+    "timestamp": "2026-03-27T04:33:50.449275+00:00",
+    "type": "log_error_detected",
+    "bot": "btc-bias-scorer",
+    "error_key": "rate_limit",
+    "snippet": "ed: 429 Client Error: Too Many Requests for url: https://api.coingecko.com/api/v3/global\n\u001b[31m13|btc-bia | \u001b[39m  [WARN] GET https://min-api.cryptocompare.com/data/v2/histoday failed: 502 Server Error: Bad Gateway for url: https://min-api.cryptocompare.com/data/v2/histoday?fsym=BTC&tsym=USD&limit=30"
+  },
+  {
+    "timestamp": "2026-03-27T04:33:51.864989+00:00",
+    "type": "log_error_detected",
+    "bot": "mission-control",
+    "error_key": "rate_limit",
+    "snippet": "xi8u.g._.js:1:7914)\n\u001b[31m19|mission | \u001b[39m2026-03-27 04:33:03 +00:00:     at async i (.next/server/chunks/[root-of-the-server]__0xi8u.g._.js:1:8955)\n\u001b[31m19|mission | \u001b[39m2026-03-27 04:33:03 +00:00:     at async Module.j [as handler] (.next/server/chunks/[root-of-the-server]__0xi8u.g._.js:1:10062)"
+  },
+  {
+    "timestamp": "2026-03-27T04:44:09.152393+00:00",
+    "type": "log_error_detected",
+    "bot": "btc-bias-scorer",
+    "error_key": "rate_limit",
+    "snippet": "ed: 429 Client Error: Too Many Requests for url: https://api.coingecko.com/api/v3/global\n\u001b[31m13|btc-bia | \u001b[39m  [WARN] GET https://min-api.cryptocompare.com/data/v2/histoday failed: 502 Server Error: Bad Gateway for url: https://min-api.cryptocompare.com/data/v2/histoday?fsym=BTC&tsym=USD&limit=30"
+  },
+  {
+    "timestamp": "2026-03-27T04:44:10.310906+00:00",
+    "type": "log_error_detected",
+    "bot": "mission-control",
+    "error_key": "rate_limit",
+    "snippet": "xi8u.g._.js:1:7914)\n\u001b[31m19|mission | \u001b[39m2026-03-27 04:33:03 +00:00:     at async i (.next/server/chunks/[root-of-the-server]__0xi8u.g._.js:1:8955)\n\u001b[31m19|mission | \u001b[39m2026-03-27 04:33:03 +00:00:     at async Module.j [as handler] (.next/server/chunks/[root-of-the-server]__0xi8u.g._.js:1:10062)"
+  },
+  {
+    "timestamp": "2026-03-27T10:39:02.603844+00:00",
+    "type": "log_error_detected",
+    "bot": "telegram-listener",
+    "error_key": "rate_limit",
+    "snippet": "d.\", \"retry_after\": 0.323, \"global\": false\n\u001b[31m1|telegram | \u001b[39mArchive webhook 429: {\"message\": \"You are being rate limited.\", \"retry_after\": 0.308, \"global\": false\n\u001b[31m1|telegram | \u001b[39m  [WARN] Discord webhook 429: {\"message\": \"You are being rate limited.\", \"retry_after\": 0.3, \"global\": false}"
+  },
+  {
+    "timestamp": "2026-03-27T11:40:02.983751+00:00",
+    "type": "log_error_detected",
+    "bot": "telegram-listener",
+    "error_key": "rate_limit",
+    "snippet": "etry_after\": 0.3, \"global\": false}\n\u001b[31m1|telegram | \u001b[39m  [WARN] Discord webhook 429: {\"message\": \"You are being rate limited.\", \"retry_after\": 0.3, \"global\": false}\n\u001b[31m1|telegram | \u001b[39m  [WARN] Discord webhook 429: {\"message\": \"You are being rate limited.\", \"retry_after\": 0.3, \"global\": false}"
+  },
+  {
+    "timestamp": "2026-03-27T12:40:51.366747+00:00",
+    "type": "log_error_detected",
+    "bot": "telegram-listener",
+    "error_key": "rate_limit",
+    "snippet": "etry_after\": 0.3, \"global\": false}\n\u001b[31m1|telegram | \u001b[39m  [WARN] Discord webhook 429: {\"message\": \"You are being rate limited.\", \"retry_after\": 0.3, \"global\": false}\n\u001b[31m1|telegram | \u001b[39m  [WARN] Discord webhook 429: {\"message\": \"You are being rate limited.\", \"retry_after\": 0.3, \"global\": false}"
+  },
+  {
+    "timestamp": "2026-03-27T13:41:41.316476+00:00",
+    "type": "log_error_detected",
+    "bot": "telegram-listener",
+    "error_key": "rate_limit",
+    "snippet": "etry_after\": 0.3, \"global\": false}\n\u001b[31m1|telegram | \u001b[39m  [WARN] Discord webhook 429: {\"message\": \"You are being rate limited.\", \"retry_after\": 0.3, \"global\": false}\n\u001b[31m1|telegram | \u001b[39m  [WARN] Discord webhook 429: {\"message\": \"You are being rate limited.\", \"retry_after\": 0.3, \"global\": false}"
+  },
+  {
+    "timestamp": "2026-03-27T14:42:35.018385+00:00",
+    "type": "log_error_detected",
+    "bot": "telegram-listener",
+    "error_key": "rate_limit",
+    "snippet": "etry_after\": 0.3, \"global\": false}\n\u001b[31m1|telegram | \u001b[39m  [WARN] Discord webhook 429: {\"message\": \"You are being rate limited.\", \"retry_after\": 0.3, \"global\": false}\n\u001b[31m1|telegram | \u001b[39m  [WARN] Discord webhook 429: {\"message\": \"You are being rate limited.\", \"retry_after\": 0.3, \"global\": false}"
+  }
+]

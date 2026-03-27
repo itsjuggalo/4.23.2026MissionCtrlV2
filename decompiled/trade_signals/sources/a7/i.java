@@ -1,0 +1,10 @@
+package a7;
+
+import s5.InterfaceC2707e;
+
+/* JADX INFO: loaded from: classes2.dex */
+public interface i {
+    Object a(InterfaceC2707e interfaceC2707e);
+
+    Object next();
+}

@@ -1,0 +1,32 @@
+{
+  "date": "2026-03-26",
+  "timestamp": "2026-03-26T22:00:10.577973+00:00",
+  "strategy_health": {
+    "detectability_score": 0.0,
+    "detectability_level": "STEALTH",
+    "front_running_detected": false,
+    "win_rate_trend": "stable",
+    "slippage_trend": "normal"
+  },
+  "optimization_summary": {
+    "data_points_analyzed": 0,
+    "new_recommendations": 0,
+    "pending_upgrades": 0,
+    "applied_this_week": 0
+  },
+  "team_performance": {
+    "overall_win_rate": 0,
+    "profit_factor": 0,
+    "best_performing_bot": "analyst",
+    "weakest_link": "Insufficient trade data to assess",
+    "improvement_areas": [
+      "Build trade journal data \u2014 need 20+ trades for recommendations"
+    ],
+    "system_status": "HEALTHY"
+  },
+  "threats": {
+    "active_threats": 0,
+    "resolved_this_week": 0,
+    "new_blacklist_entries": 0
+  }
+}

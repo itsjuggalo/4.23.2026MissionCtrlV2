@@ -1,0 +1,39 @@
+{
+  "enabled": true,
+  "check_interval_seconds": 30,
+  "max_position_size_usd": 500,
+  "max_positions_per_source": 25,
+
+  "signal_sources": {
+    "ai_crypto": {
+      "enabled": true,
+      "signals_file": "../aicrypto-signals/signals.json",
+      "description": "AI Crypto Telegram signals"
+    },
+    "firebase": {
+      "enabled": true,
+      "signals_file": "../firebase-signals/signals.json",
+      "description": "Firebase premium signals"
+    },
+    "telegram": {
+      "enabled": true,
+      "signals_file": "../telegram-listener/signals.json",
+      "description": "Telegram listener — all channels",
+      "min_score": 70,
+      "allowed_statuses": ["actionable"]
+    }
+  },
+
+  "risk_management": {
+    "max_total_positions": 100,
+    "default_stop_loss_pct": 5.0,
+    "default_take_profit_pct": 10.0,
+    "max_drawdown_pct": 20.0
+  },
+
+  "paper_trading": {
+    "starting_balance_usd": 10000.0,
+    "track_pnl_by_source": true,
+    "use_live_prices": true
+  }
+}

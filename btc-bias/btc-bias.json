@@ -1,0 +1,58 @@
+{
+  "timestamp": "2026-03-27T15:00:00.389668+00:00",
+  "score": -4,
+  "max_score": 13,
+  "bias": "BEARISH",
+  "signals": {
+    "fear_greed": {
+      "value": "Extreme Fear",
+      "index": 13,
+      "score": 2
+    },
+    "funding_rate": {
+      "value": "-0.0062%",
+      "rate": -0.006164,
+      "score": 1
+    },
+    "moving_averages": {
+      "price": 66166.6,
+      "sma20": 70237.26,
+      "sma50": 68931.15,
+      "sma200": 91532.07,
+      "above_count": 0,
+      "score": -3
+    },
+    "structure_4h": {
+      "trend": "downtrend",
+      "highs": [
+        68930.0,
+        68605.2,
+        66742.6
+      ],
+      "lows": [
+        68258.0,
+        66170.5,
+        65682.4
+      ],
+      "score": -2
+    },
+    "btc_dominance": {
+      "value": "55.9%",
+      "dominance": 55.95,
+      "score": 0
+    },
+    "volume_flow": {
+      "vs_average": "-40.3%",
+      "today": 1386221998.0,
+      "avg30d": 2320151067.0,
+      "score": -1
+    },
+    "dxy": {
+      "value": 99.951,
+      "avg5d": 99.506,
+      "trend": "rising",
+      "score": -1
+    }
+  },
+  "next_update": "2026-03-27T19:00:00.389668+00:00"
+}

@@ -1,0 +1,3502 @@
+[
+  {
+    "timestamp": "2026-03-25T21:42:55.113728+00:00",
+    "total_value": 280054.9,
+    "pnl_since_last": 48.5,
+    "positions_count": 3,
+    "exposure_pct": 21.07
+  },
+  {
+    "timestamp": "2026-03-25T21:47:55.470571+00:00",
+    "total_value": 280021.3,
+    "pnl_since_last": -33.6,
+    "positions_count": 3,
+    "exposure_pct": 21.06
+  },
+  {
+    "timestamp": "2026-03-25T21:52:55.482052+00:00",
+    "total_value": 280016.25,
+    "pnl_since_last": -5.05,
+    "positions_count": 3,
+    "exposure_pct": 21.06
+  },
+  {
+    "timestamp": "2026-03-25T21:57:55.431705+00:00",
+    "total_value": 280004.65,
+    "pnl_since_last": -11.6,
+    "positions_count": 3,
+    "exposure_pct": 21.06
+  },
+  {
+    "timestamp": "2026-03-25T22:02:55.744992+00:00",
+    "total_value": 280060.5,
+    "pnl_since_last": 55.85,
+    "positions_count": 3,
+    "exposure_pct": 21.07
+  },
+  {
+    "timestamp": "2026-03-25T22:07:55.540339+00:00",
+    "total_value": 279998.95,
+    "pnl_since_last": -61.55,
+    "positions_count": 3,
+    "exposure_pct": 21.05
+  },
+  {
+    "timestamp": "2026-03-25T22:12:55.727695+00:00",
+    "total_value": 279994.8,
+    "pnl_since_last": -4.15,
+    "positions_count": 3,
+    "exposure_pct": 21.05
+  },
+  {
+    "timestamp": "2026-03-25T22:17:55.844042+00:00",
+    "total_value": 279998.1,
+    "pnl_since_last": 3.3,
+    "positions_count": 3,
+    "exposure_pct": 21.05
+  },
+  {
+    "timestamp": "2026-03-25T22:22:56.408928+00:00",
+    "total_value": 280017.45,
+    "pnl_since_last": 19.35,
+    "positions_count": 3,
+    "exposure_pct": 21.06
+  },
+  {
+    "timestamp": "2026-03-25T22:27:55.987844+00:00",
+    "total_value": 280019.85,
+    "pnl_since_last": 2.4,
+    "positions_count": 3,
+    "exposure_pct": 21.06
+  },
+  {
+    "timestamp": "2026-03-25T22:32:56.021287+00:00",
+    "total_value": 280116.75,
+    "pnl_since_last": 96.9,
+    "positions_count": 3,
+    "exposure_pct": 21.09
+  },
+  {
+    "timestamp": "2026-03-25T22:37:56.073712+00:00",
+    "total_value": 280198.05,
+    "pnl_since_last": 81.3,
+    "positions_count": 3,
+    "exposure_pct": 21.11
+  },
+  {
+    "timestamp": "2026-03-25T22:42:56.176413+00:00",
+    "total_value": 280213.05,
+    "pnl_since_last": 15.0,
+    "positions_count": 3,
+    "exposure_pct": 21.11
+  },
+  {
+    "timestamp": "2026-03-25T22:47:56.259561+00:00",
+    "total_value": 280248.95,
+    "pnl_since_last": 35.9,
+    "positions_count": 3,
+    "exposure_pct": 21.12
+  },
+  {
+    "timestamp": "2026-03-25T22:52:56.433697+00:00",
+    "total_value": 280235.25,
+    "pnl_since_last": -13.7,
+    "positions_count": 3,
+    "exposure_pct": 21.12
+  },
+  {
+    "timestamp": "2026-03-25T22:57:56.961753+00:00",
+    "total_value": 280220.35,
+    "pnl_since_last": -14.9,
+    "positions_count": 3,
+    "exposure_pct": 21.12
+  },
+  {
+    "timestamp": "2026-03-25T23:02:56.574391+00:00",
+    "total_value": 280273.9,
+    "pnl_since_last": 53.55,
+    "positions_count": 3,
+    "exposure_pct": 21.13
+  },
+  {
+    "timestamp": "2026-03-25T23:07:56.722583+00:00",
+    "total_value": 280263.15,
+    "pnl_since_last": -10.75,
+    "positions_count": 3,
+    "exposure_pct": 21.13
+  },
+  {
+    "timestamp": "2026-03-25T23:12:56.610697+00:00",
+    "total_value": 280233.55,
+    "pnl_since_last": -29.6,
+    "positions_count": 3,
+    "exposure_pct": 21.12
+  },
+  {
+    "timestamp": "2026-03-25T23:17:56.804376+00:00",
+    "total_value": 280176.25,
+    "pnl_since_last": -57.3,
+    "positions_count": 3,
+    "exposure_pct": 21.1
+  },
+  {
+    "timestamp": "2026-03-25T23:22:56.870615+00:00",
+    "total_value": 280215.3,
+    "pnl_since_last": 39.05,
+    "positions_count": 3,
+    "exposure_pct": 21.11
+  },
+  {
+    "timestamp": "2026-03-25T23:27:56.935718+00:00",
+    "total_value": 280261.6,
+    "pnl_since_last": 46.3,
+    "positions_count": 3,
+    "exposure_pct": 21.13
+  },
+  {
+    "timestamp": "2026-03-25T23:32:56.992760+00:00",
+    "total_value": 280195.65,
+    "pnl_since_last": -65.95,
+    "positions_count": 3,
+    "exposure_pct": 21.11
+  },
+  {
+    "timestamp": "2026-03-25T23:37:57.053693+00:00",
+    "total_value": 280174.65,
+    "pnl_since_last": -21.0,
+    "positions_count": 3,
+    "exposure_pct": 21.1
+  },
+  {
+    "timestamp": "2026-03-25T23:42:57.140022+00:00",
+    "total_value": 280133.9,
+    "pnl_since_last": -40.75,
+    "positions_count": 3,
+    "exposure_pct": 21.09
+  },
+  {
+    "timestamp": "2026-03-25T23:47:57.712689+00:00",
+    "total_value": 280141.7,
+    "pnl_since_last": 7.8,
+    "positions_count": 3,
+    "exposure_pct": 21.09
+  },
+  {
+    "timestamp": "2026-03-25T23:52:57.362865+00:00",
+    "total_value": 280172.95,
+    "pnl_since_last": 31.25,
+    "positions_count": 3,
+    "exposure_pct": 21.1
+  },
+  {
+    "timestamp": "2026-03-25T23:57:57.431023+00:00",
+    "total_value": 280199.25,
+    "pnl_since_last": 26.3,
+    "positions_count": 3,
+    "exposure_pct": 21.11
+  },
+  {
+    "timestamp": "2026-03-26T00:02:57.429791+00:00",
+    "total_value": 280186.4,
+    "pnl_since_last": -12.85,
+    "positions_count": 3,
+    "exposure_pct": 21.11
+  },
+  {
+    "timestamp": "2026-03-26T00:07:57.609708+00:00",
+    "total_value": 280143.9,
+    "pnl_since_last": -42.5,
+    "positions_count": 3,
+    "exposure_pct": 21.09
+  },
+  {
+    "timestamp": "2026-03-26T00:12:57.623987+00:00",
+    "total_value": 280110.45,
+    "pnl_since_last": -33.45,
+    "positions_count": 3,
+    "exposure_pct": 21.09
+  },
+  {
+    "timestamp": "2026-03-26T00:17:57.727733+00:00",
+    "total_value": 280192.0,
+    "pnl_since_last": 81.55,
+    "positions_count": 3,
+    "exposure_pct": 21.11
+  },
+  {
+    "timestamp": "2026-03-26T00:22:57.716528+00:00",
+    "total_value": 280157.7,
+    "pnl_since_last": -34.3,
+    "positions_count": 3,
+    "exposure_pct": 21.1
+  },
+  {
+    "timestamp": "2026-03-26T00:27:58.095356+00:00",
+    "total_value": 280130.85,
+    "pnl_since_last": -26.85,
+    "positions_count": 3,
+    "exposure_pct": 21.09
+  },
+  {
+    "timestamp": "2026-03-26T00:32:58.039600+00:00",
+    "total_value": 280185.45,
+    "pnl_since_last": 54.6,
+    "positions_count": 3,
+    "exposure_pct": 21.11
+  },
+  {
+    "timestamp": "2026-03-26T00:37:58.012516+00:00",
+    "total_value": 280211.4,
+    "pnl_since_last": 25.95,
+    "positions_count": 3,
+    "exposure_pct": 21.11
+  },
+  {
+    "timestamp": "2026-03-26T00:42:58.156386+00:00",
+    "total_value": 280182.6,
+    "pnl_since_last": -28.8,
+    "positions_count": 3,
+    "exposure_pct": 21.11
+  },
+  {
+    "timestamp": "2026-03-26T00:47:58.466699+00:00",
+    "total_value": 280221.05,
+    "pnl_since_last": 38.45,
+    "positions_count": 3,
+    "exposure_pct": 21.12
+  },
+  {
+    "timestamp": "2026-03-26T00:52:58.267457+00:00",
+    "total_value": 280129.3,
+    "pnl_since_last": -91.75,
+    "positions_count": 3,
+    "exposure_pct": 21.09
+  },
+  {
+    "timestamp": "2026-03-26T00:57:58.456530+00:00",
+    "total_value": 280139.7,
+    "pnl_since_last": 10.4,
+    "positions_count": 3,
+    "exposure_pct": 21.09
+  },
+  {
+    "timestamp": "2026-03-26T01:02:58.546624+00:00",
+    "total_value": 280188.15,
+    "pnl_since_last": 48.45,
+    "positions_count": 3,
+    "exposure_pct": 21.11
+  },
+  {
+    "timestamp": "2026-03-26T01:07:58.523547+00:00",
+    "total_value": 280122.85,
+    "pnl_since_last": -65.3,
+    "positions_count": 3,
+    "exposure_pct": 21.09
+  },
+  {
+    "timestamp": "2026-03-26T01:12:58.664449+00:00",
+    "total_value": 280123.65,
+    "pnl_since_last": 0.8,
+    "positions_count": 3,
+    "exposure_pct": 21.09
+  },
+  {
+    "timestamp": "2026-03-26T01:17:58.644620+00:00",
+    "total_value": 280080.0,
+    "pnl_since_last": -43.65,
+    "positions_count": 3,
+    "exposure_pct": 21.08
+  },
+  {
+    "timestamp": "2026-03-26T01:22:58.790706+00:00",
+    "total_value": 280141.1,
+    "pnl_since_last": 61.1,
+    "positions_count": 3,
+    "exposure_pct": 21.09
+  },
+  {
+    "timestamp": "2026-03-26T01:27:59.030008+00:00",
+    "total_value": 280162.1,
+    "pnl_since_last": 21.0,
+    "positions_count": 3,
+    "exposure_pct": 21.1
+  },
+  {
+    "timestamp": "2026-03-26T01:32:58.943709+00:00",
+    "total_value": 280181.75,
+    "pnl_since_last": 19.65,
+    "positions_count": 3,
+    "exposure_pct": 21.11
+  },
+  {
+    "timestamp": "2026-03-26T01:37:59.057034+00:00",
+    "total_value": 280149.8,
+    "pnl_since_last": -31.95,
+    "positions_count": 3,
+    "exposure_pct": 21.1
+  },
+  {
+    "timestamp": "2026-03-26T01:42:59.327307+00:00",
+    "total_value": 280142.7,
+    "pnl_since_last": -7.1,
+    "positions_count": 3,
+    "exposure_pct": 21.09
+  },
+  {
+    "timestamp": "2026-03-26T01:47:59.167713+00:00",
+    "total_value": 280136.0,
+    "pnl_since_last": -6.7,
+    "positions_count": 3,
+    "exposure_pct": 21.09
+  },
+  {
+    "timestamp": "2026-03-26T01:52:59.460200+00:00",
+    "total_value": 280132.6,
+    "pnl_since_last": -3.4,
+    "positions_count": 3,
+    "exposure_pct": 21.09
+  },
+  {
+    "timestamp": "2026-03-26T01:57:59.202980+00:00",
+    "total_value": 280161.75,
+    "pnl_since_last": 29.15,
+    "positions_count": 3,
+    "exposure_pct": 21.1
+  },
+  {
+    "timestamp": "2026-03-26T02:02:59.271729+00:00",
+    "total_value": 280150.0,
+    "pnl_since_last": -11.75,
+    "positions_count": 3,
+    "exposure_pct": 21.1
+  },
+  {
+    "timestamp": "2026-03-26T02:07:59.354000+00:00",
+    "total_value": 280057.95,
+    "pnl_since_last": -92.05,
+    "positions_count": 3,
+    "exposure_pct": 21.07
+  },
+  {
+    "timestamp": "2026-03-26T02:12:59.337548+00:00",
+    "total_value": 280035.8,
+    "pnl_since_last": -22.15,
+    "positions_count": 3,
+    "exposure_pct": 21.06
+  },
+  {
+    "timestamp": "2026-03-26T02:17:59.437811+00:00",
+    "total_value": 279918.8,
+    "pnl_since_last": -117.0,
+    "positions_count": 3,
+    "exposure_pct": 21.03
+  },
+  {
+    "timestamp": "2026-03-26T02:22:59.508223+00:00",
+    "total_value": 279944.35,
+    "pnl_since_last": 25.55,
+    "positions_count": 3,
+    "exposure_pct": 21.04
+  },
+  {
+    "timestamp": "2026-03-26T02:27:59.769089+00:00",
+    "total_value": 279928.0,
+    "pnl_since_last": -16.35,
+    "positions_count": 3,
+    "exposure_pct": 21.03
+  },
+  {
+    "timestamp": "2026-03-26T02:32:59.671555+00:00",
+    "total_value": 279787.6,
+    "pnl_since_last": -140.4,
+    "positions_count": 3,
+    "exposure_pct": 20.99
+  },
+  {
+    "timestamp": "2026-03-26T02:37:59.640707+00:00",
+    "total_value": 279800.0,
+    "pnl_since_last": 12.4,
+    "positions_count": 3,
+    "exposure_pct": 21.0
+  },
+  {
+    "timestamp": "2026-03-26T02:42:59.691040+00:00",
+    "total_value": 279858.0,
+    "pnl_since_last": 58.0,
+    "positions_count": 3,
+    "exposure_pct": 21.01
+  },
+  {
+    "timestamp": "2026-03-26T02:47:59.876975+00:00",
+    "total_value": 279865.45,
+    "pnl_since_last": 7.45,
+    "positions_count": 3,
+    "exposure_pct": 21.02
+  },
+  {
+    "timestamp": "2026-03-26T02:52:59.955719+00:00",
+    "total_value": 279855.8,
+    "pnl_since_last": -9.65,
+    "positions_count": 3,
+    "exposure_pct": 21.01
+  },
+  {
+    "timestamp": "2026-03-26T02:58:00.132690+00:00",
+    "total_value": 279871.6,
+    "pnl_since_last": 15.8,
+    "positions_count": 3,
+    "exposure_pct": 21.02
+  },
+  {
+    "timestamp": "2026-03-26T03:02:59.995173+00:00",
+    "total_value": 279863.6,
+    "pnl_since_last": -8.0,
+    "positions_count": 3,
+    "exposure_pct": 21.02
+  },
+  {
+    "timestamp": "2026-03-26T03:08:00.046370+00:00",
+    "total_value": 279809.1,
+    "pnl_since_last": -54.5,
+    "positions_count": 3,
+    "exposure_pct": 21.0
+  },
+  {
+    "timestamp": "2026-03-26T03:13:00.199393+00:00",
+    "total_value": 279874.85,
+    "pnl_since_last": 65.75,
+    "positions_count": 3,
+    "exposure_pct": 21.02
+  },
+  {
+    "timestamp": "2026-03-26T03:18:00.177425+00:00",
+    "total_value": 279892.05,
+    "pnl_since_last": 17.2,
+    "positions_count": 3,
+    "exposure_pct": 21.02
+  },
+  {
+    "timestamp": "2026-03-26T03:23:00.188702+00:00",
+    "total_value": 279810.3,
+    "pnl_since_last": -81.75,
+    "positions_count": 3,
+    "exposure_pct": 21.0
+  },
+  {
+    "timestamp": "2026-03-26T03:28:00.287215+00:00",
+    "total_value": 279767.75,
+    "pnl_since_last": -42.55,
+    "positions_count": 3,
+    "exposure_pct": 20.99
+  },
+  {
+    "timestamp": "2026-03-26T03:33:00.550669+00:00",
+    "total_value": 279812.95,
+    "pnl_since_last": 45.2,
+    "positions_count": 3,
+    "exposure_pct": 21.0
+  },
+  {
+    "timestamp": "2026-03-26T03:38:00.475178+00:00",
+    "total_value": 279862.65,
+    "pnl_since_last": 49.7,
+    "positions_count": 3,
+    "exposure_pct": 21.02
+  },
+  {
+    "timestamp": "2026-03-26T03:43:00.653058+00:00",
+    "total_value": 279897.3,
+    "pnl_since_last": 34.65,
+    "positions_count": 3,
+    "exposure_pct": 21.03
+  },
+  {
+    "timestamp": "2026-03-26T03:48:00.642676+00:00",
+    "total_value": 279864.4,
+    "pnl_since_last": -32.9,
+    "positions_count": 3,
+    "exposure_pct": 21.02
+  },
+  {
+    "timestamp": "2026-03-26T03:53:00.668618+00:00",
+    "total_value": 279841.1,
+    "pnl_since_last": -23.3,
+    "positions_count": 3,
+    "exposure_pct": 21.01
+  },
+  {
+    "timestamp": "2026-03-26T03:58:00.791805+00:00",
+    "total_value": 279891.45,
+    "pnl_since_last": 50.35,
+    "positions_count": 3,
+    "exposure_pct": 21.02
+  },
+  {
+    "timestamp": "2026-03-26T04:03:00.803386+00:00",
+    "total_value": 279879.5,
+    "pnl_since_last": -11.95,
+    "positions_count": 3,
+    "exposure_pct": 21.02
+  },
+  {
+    "timestamp": "2026-03-26T04:08:01.053952+00:00",
+    "total_value": 279867.4,
+    "pnl_since_last": -12.1,
+    "positions_count": 3,
+    "exposure_pct": 21.02
+  },
+  {
+    "timestamp": "2026-03-26T04:13:01.206965+00:00",
+    "total_value": 279793.9,
+    "pnl_since_last": -73.5,
+    "positions_count": 3,
+    "exposure_pct": 21.0
+  },
+  {
+    "timestamp": "2026-03-26T04:18:01.204713+00:00",
+    "total_value": 279784.2,
+    "pnl_since_last": -9.7,
+    "positions_count": 3,
+    "exposure_pct": 20.99
+  },
+  {
+    "timestamp": "2026-03-26T04:23:01.091339+00:00",
+    "total_value": 279844.15,
+    "pnl_since_last": 59.95,
+    "positions_count": 3,
+    "exposure_pct": 21.01
+  },
+  {
+    "timestamp": "2026-03-26T04:28:01.260418+00:00",
+    "total_value": 279865.95,
+    "pnl_since_last": 21.8,
+    "positions_count": 3,
+    "exposure_pct": 21.02
+  },
+  {
+    "timestamp": "2026-03-26T04:33:01.309427+00:00",
+    "total_value": 279853.85,
+    "pnl_since_last": -12.1,
+    "positions_count": 3,
+    "exposure_pct": 21.01
+  },
+  {
+    "timestamp": "2026-03-26T04:38:01.334153+00:00",
+    "total_value": 279884.5,
+    "pnl_since_last": 30.65,
+    "positions_count": 3,
+    "exposure_pct": 21.02
+  },
+  {
+    "timestamp": "2026-03-26T04:43:01.388653+00:00",
+    "total_value": 279868.4,
+    "pnl_since_last": -16.1,
+    "positions_count": 3,
+    "exposure_pct": 21.02
+  },
+  {
+    "timestamp": "2026-03-26T04:48:01.506571+00:00",
+    "total_value": 279883.9,
+    "pnl_since_last": 15.5,
+    "positions_count": 3,
+    "exposure_pct": 21.02
+  },
+  {
+    "timestamp": "2026-03-26T04:53:01.573181+00:00",
+    "total_value": 279868.75,
+    "pnl_since_last": -15.15,
+    "positions_count": 3,
+    "exposure_pct": 21.02
+  },
+  {
+    "timestamp": "2026-03-26T04:58:01.606805+00:00",
+    "total_value": 279834.8,
+    "pnl_since_last": -33.95,
+    "positions_count": 3,
+    "exposure_pct": 21.01
+  },
+  {
+    "timestamp": "2026-03-26T05:03:01.677116+00:00",
+    "total_value": 279817.25,
+    "pnl_since_last": -17.55,
+    "positions_count": 3,
+    "exposure_pct": 21.0
+  },
+  {
+    "timestamp": "2026-03-26T05:08:01.727169+00:00",
+    "total_value": 279648.95,
+    "pnl_since_last": -168.3,
+    "positions_count": 3,
+    "exposure_pct": 20.96
+  },
+  {
+    "timestamp": "2026-03-26T05:13:01.793669+00:00",
+    "total_value": 279639.0,
+    "pnl_since_last": -9.95,
+    "positions_count": 3,
+    "exposure_pct": 20.95
+  },
+  {
+    "timestamp": "2026-03-26T05:18:01.769525+00:00",
+    "total_value": 279673.35,
+    "pnl_since_last": 34.35,
+    "positions_count": 3,
+    "exposure_pct": 20.96
+  },
+  {
+    "timestamp": "2026-03-26T05:23:01.851787+00:00",
+    "total_value": 279702.0,
+    "pnl_since_last": 28.65,
+    "positions_count": 3,
+    "exposure_pct": 20.97
+  },
+  {
+    "timestamp": "2026-03-26T05:28:02.012067+00:00",
+    "total_value": 279671.05,
+    "pnl_since_last": -30.95,
+    "positions_count": 3,
+    "exposure_pct": 20.96
+  },
+  {
+    "timestamp": "2026-03-26T05:33:02.145863+00:00",
+    "total_value": 279650.95,
+    "pnl_since_last": -20.1,
+    "positions_count": 3,
+    "exposure_pct": 20.96
+  },
+  {
+    "timestamp": "2026-03-26T05:38:02.172313+00:00",
+    "total_value": 279680.55,
+    "pnl_since_last": 29.6,
+    "positions_count": 3,
+    "exposure_pct": 20.96
+  },
+  {
+    "timestamp": "2026-03-26T05:43:02.196426+00:00",
+    "total_value": 279646.9,
+    "pnl_since_last": -33.65,
+    "positions_count": 3,
+    "exposure_pct": 20.95
+  },
+  {
+    "timestamp": "2026-03-26T05:48:02.274032+00:00",
+    "total_value": 279510.35,
+    "pnl_since_last": -136.55,
+    "positions_count": 3,
+    "exposure_pct": 20.92
+  },
+  {
+    "timestamp": "2026-03-26T05:53:02.342521+00:00",
+    "total_value": 279378.0,
+    "pnl_since_last": -132.35,
+    "positions_count": 3,
+    "exposure_pct": 20.88
+  },
+  {
+    "timestamp": "2026-03-26T05:58:02.501344+00:00",
+    "total_value": 279281.05,
+    "pnl_since_last": -96.95,
+    "positions_count": 3,
+    "exposure_pct": 20.85
+  },
+  {
+    "timestamp": "2026-03-26T06:03:02.734673+00:00",
+    "total_value": 279268.3,
+    "pnl_since_last": -12.75,
+    "positions_count": 3,
+    "exposure_pct": 20.85
+  },
+  {
+    "timestamp": "2026-03-26T06:08:02.581970+00:00",
+    "total_value": 279310.1,
+    "pnl_since_last": 41.8,
+    "positions_count": 3,
+    "exposure_pct": 20.86
+  },
+  {
+    "timestamp": "2026-03-26T06:13:02.782273+00:00",
+    "total_value": 279276.5,
+    "pnl_since_last": -33.6,
+    "positions_count": 3,
+    "exposure_pct": 20.85
+  },
+  {
+    "timestamp": "2026-03-26T06:18:02.869301+00:00",
+    "total_value": 279343.5,
+    "pnl_since_last": 67.0,
+    "positions_count": 3,
+    "exposure_pct": 20.87
+  },
+  {
+    "timestamp": "2026-03-26T06:23:02.888456+00:00",
+    "total_value": 279294.3,
+    "pnl_since_last": -49.2,
+    "positions_count": 3,
+    "exposure_pct": 20.85
+  },
+  {
+    "timestamp": "2026-03-26T06:28:02.878266+00:00",
+    "total_value": 279304.95,
+    "pnl_since_last": 10.65,
+    "positions_count": 3,
+    "exposure_pct": 20.86
+  },
+  {
+    "timestamp": "2026-03-26T06:33:03.002347+00:00",
+    "total_value": 279329.8,
+    "pnl_since_last": 24.85,
+    "positions_count": 3,
+    "exposure_pct": 20.86
+  },
+  {
+    "timestamp": "2026-03-26T06:38:03.145734+00:00",
+    "total_value": 279304.4,
+    "pnl_since_last": -25.4,
+    "positions_count": 3,
+    "exposure_pct": 20.86
+  },
+  {
+    "timestamp": "2026-03-26T06:43:03.190619+00:00",
+    "total_value": 279279.55,
+    "pnl_since_last": -24.85,
+    "positions_count": 3,
+    "exposure_pct": 20.85
+  },
+  {
+    "timestamp": "2026-03-26T06:48:03.334632+00:00",
+    "total_value": 279288.9,
+    "pnl_since_last": 9.35,
+    "positions_count": 3,
+    "exposure_pct": 20.85
+  },
+  {
+    "timestamp": "2026-03-26T06:53:03.400964+00:00",
+    "total_value": 279337.9,
+    "pnl_since_last": 49.0,
+    "positions_count": 3,
+    "exposure_pct": 20.87
+  },
+  {
+    "timestamp": "2026-03-26T06:58:03.518332+00:00",
+    "total_value": 279348.7,
+    "pnl_since_last": 10.8,
+    "positions_count": 3,
+    "exposure_pct": 20.87
+  },
+  {
+    "timestamp": "2026-03-26T07:03:03.510677+00:00",
+    "total_value": 279337.35,
+    "pnl_since_last": -11.35,
+    "positions_count": 3,
+    "exposure_pct": 20.87
+  },
+  {
+    "timestamp": "2026-03-26T07:08:03.613008+00:00",
+    "total_value": 279301.25,
+    "pnl_since_last": -36.1,
+    "positions_count": 3,
+    "exposure_pct": 20.86
+  },
+  {
+    "timestamp": "2026-03-26T07:13:03.671481+00:00",
+    "total_value": 279325.8,
+    "pnl_since_last": 24.55,
+    "positions_count": 3,
+    "exposure_pct": 20.86
+  },
+  {
+    "timestamp": "2026-03-26T07:18:03.709283+00:00",
+    "total_value": 279316.3,
+    "pnl_since_last": -9.5,
+    "positions_count": 3,
+    "exposure_pct": 20.86
+  },
+  {
+    "timestamp": "2026-03-26T07:23:03.839283+00:00",
+    "total_value": 279343.7,
+    "pnl_since_last": 27.4,
+    "positions_count": 3,
+    "exposure_pct": 20.87
+  },
+  {
+    "timestamp": "2026-03-26T07:28:03.873018+00:00",
+    "total_value": 279283.45,
+    "pnl_since_last": -60.25,
+    "positions_count": 3,
+    "exposure_pct": 20.85
+  },
+  {
+    "timestamp": "2026-03-26T07:33:04.013016+00:00",
+    "total_value": 279164.1,
+    "pnl_since_last": -119.35,
+    "positions_count": 3,
+    "exposure_pct": 20.82
+  },
+  {
+    "timestamp": "2026-03-26T07:38:04.120766+00:00",
+    "total_value": 279294.8,
+    "pnl_since_last": 130.7,
+    "positions_count": 3,
+    "exposure_pct": 20.85
+  },
+  {
+    "timestamp": "2026-03-26T07:43:04.056804+00:00",
+    "total_value": 279307.05,
+    "pnl_since_last": 12.25,
+    "positions_count": 3,
+    "exposure_pct": 20.86
+  },
+  {
+    "timestamp": "2026-03-26T07:48:04.513734+00:00",
+    "total_value": 279324.2,
+    "pnl_since_last": 17.15,
+    "positions_count": 3,
+    "exposure_pct": 20.86
+  },
+  {
+    "timestamp": "2026-03-26T07:53:04.239891+00:00",
+    "total_value": 279351.3,
+    "pnl_since_last": 27.1,
+    "positions_count": 3,
+    "exposure_pct": 20.87
+  },
+  {
+    "timestamp": "2026-03-26T07:58:04.328307+00:00",
+    "total_value": 279351.75,
+    "pnl_since_last": 0.45,
+    "positions_count": 3,
+    "exposure_pct": 20.87
+  },
+  {
+    "timestamp": "2026-03-26T08:03:04.452916+00:00",
+    "total_value": 279348.7,
+    "pnl_since_last": -3.05,
+    "positions_count": 3,
+    "exposure_pct": 20.87
+  },
+  {
+    "timestamp": "2026-03-26T08:08:04.475453+00:00",
+    "total_value": 279344.85,
+    "pnl_since_last": -3.85,
+    "positions_count": 3,
+    "exposure_pct": 20.87
+  },
+  {
+    "timestamp": "2026-03-26T08:13:04.646408+00:00",
+    "total_value": 279259.4,
+    "pnl_since_last": -85.45,
+    "positions_count": 3,
+    "exposure_pct": 20.84
+  },
+  {
+    "timestamp": "2026-03-26T08:18:04.630927+00:00",
+    "total_value": 279255.6,
+    "pnl_since_last": -3.8,
+    "positions_count": 3,
+    "exposure_pct": 20.84
+  },
+  {
+    "timestamp": "2026-03-26T08:23:04.875691+00:00",
+    "total_value": 279173.8,
+    "pnl_since_last": -81.8,
+    "positions_count": 3,
+    "exposure_pct": 20.82
+  },
+  {
+    "timestamp": "2026-03-26T08:28:04.693430+00:00",
+    "total_value": 279193.4,
+    "pnl_since_last": 19.6,
+    "positions_count": 3,
+    "exposure_pct": 20.83
+  },
+  {
+    "timestamp": "2026-03-26T08:33:04.871345+00:00",
+    "total_value": 279196.55,
+    "pnl_since_last": 3.15,
+    "positions_count": 3,
+    "exposure_pct": 20.83
+  },
+  {
+    "timestamp": "2026-03-26T08:38:05.023162+00:00",
+    "total_value": 279193.8,
+    "pnl_since_last": -2.75,
+    "positions_count": 3,
+    "exposure_pct": 20.83
+  },
+  {
+    "timestamp": "2026-03-26T08:43:04.907752+00:00",
+    "total_value": 279213.75,
+    "pnl_since_last": 19.95,
+    "positions_count": 3,
+    "exposure_pct": 20.83
+  },
+  {
+    "timestamp": "2026-03-26T08:48:05.021460+00:00",
+    "total_value": 279263.9,
+    "pnl_since_last": 50.15,
+    "positions_count": 3,
+    "exposure_pct": 20.85
+  },
+  {
+    "timestamp": "2026-03-26T08:53:05.181909+00:00",
+    "total_value": 279253.6,
+    "pnl_since_last": -10.3,
+    "positions_count": 3,
+    "exposure_pct": 20.84
+  },
+  {
+    "timestamp": "2026-03-26T08:58:05.324484+00:00",
+    "total_value": 279288.7,
+    "pnl_since_last": 35.1,
+    "positions_count": 3,
+    "exposure_pct": 20.85
+  },
+  {
+    "timestamp": "2026-03-26T09:03:05.277228+00:00",
+    "total_value": 279254.25,
+    "pnl_since_last": -34.45,
+    "positions_count": 3,
+    "exposure_pct": 20.84
+  },
+  {
+    "timestamp": "2026-03-26T09:08:05.415325+00:00",
+    "total_value": 279320.35,
+    "pnl_since_last": 66.1,
+    "positions_count": 3,
+    "exposure_pct": 20.86
+  },
+  {
+    "timestamp": "2026-03-26T09:13:05.369833+00:00",
+    "total_value": 279309.7,
+    "pnl_since_last": -10.65,
+    "positions_count": 3,
+    "exposure_pct": 20.86
+  },
+  {
+    "timestamp": "2026-03-26T09:18:05.538946+00:00",
+    "total_value": 279203.5,
+    "pnl_since_last": -106.2,
+    "positions_count": 3,
+    "exposure_pct": 20.83
+  },
+  {
+    "timestamp": "2026-03-26T09:23:05.858668+00:00",
+    "total_value": 279279.0,
+    "pnl_since_last": 75.5,
+    "positions_count": 3,
+    "exposure_pct": 20.85
+  },
+  {
+    "timestamp": "2026-03-26T09:28:05.696998+00:00",
+    "total_value": 279278.05,
+    "pnl_since_last": -0.95,
+    "positions_count": 3,
+    "exposure_pct": 20.85
+  },
+  {
+    "timestamp": "2026-03-26T09:33:06.067406+00:00",
+    "total_value": 278940.35,
+    "pnl_since_last": -337.7,
+    "positions_count": 3,
+    "exposure_pct": 20.75
+  },
+  {
+    "timestamp": "2026-03-26T09:38:05.851701+00:00",
+    "total_value": 278875.7,
+    "pnl_since_last": -64.65,
+    "positions_count": 3,
+    "exposure_pct": 20.74
+  },
+  {
+    "timestamp": "2026-03-26T09:43:05.971204+00:00",
+    "total_value": 278847.0,
+    "pnl_since_last": -28.7,
+    "positions_count": 3,
+    "exposure_pct": 20.73
+  },
+  {
+    "timestamp": "2026-03-26T09:48:05.976806+00:00",
+    "total_value": 278806.4,
+    "pnl_since_last": -40.6,
+    "positions_count": 3,
+    "exposure_pct": 20.72
+  },
+  {
+    "timestamp": "2026-03-26T09:53:06.073989+00:00",
+    "total_value": 278865.85,
+    "pnl_since_last": 59.45,
+    "positions_count": 3,
+    "exposure_pct": 20.73
+  },
+  {
+    "timestamp": "2026-03-26T09:58:06.147772+00:00",
+    "total_value": 278896.25,
+    "pnl_since_last": 30.4,
+    "positions_count": 3,
+    "exposure_pct": 20.74
+  },
+  {
+    "timestamp": "2026-03-26T10:03:06.200700+00:00",
+    "total_value": 278829.0,
+    "pnl_since_last": -67.25,
+    "positions_count": 3,
+    "exposure_pct": 20.72
+  },
+  {
+    "timestamp": "2026-03-26T10:08:06.535732+00:00",
+    "total_value": 278877.9,
+    "pnl_since_last": 48.9,
+    "positions_count": 3,
+    "exposure_pct": 20.74
+  },
+  {
+    "timestamp": "2026-03-26T10:13:06.460912+00:00",
+    "total_value": 278857.3,
+    "pnl_since_last": -20.6,
+    "positions_count": 3,
+    "exposure_pct": 20.73
+  },
+  {
+    "timestamp": "2026-03-26T10:18:06.808859+00:00",
+    "total_value": 278911.85,
+    "pnl_since_last": 54.55,
+    "positions_count": 3,
+    "exposure_pct": 20.75
+  },
+  {
+    "timestamp": "2026-03-26T10:23:06.685678+00:00",
+    "total_value": 278940.15,
+    "pnl_since_last": 28.3,
+    "positions_count": 3,
+    "exposure_pct": 20.75
+  },
+  {
+    "timestamp": "2026-03-26T10:28:06.895651+00:00",
+    "total_value": 278940.15,
+    "pnl_since_last": 0.0,
+    "positions_count": 3,
+    "exposure_pct": 20.75
+  },
+  {
+    "timestamp": "2026-03-26T10:33:07.096669+00:00",
+    "total_value": 278904.1,
+    "pnl_since_last": -36.05,
+    "positions_count": 3,
+    "exposure_pct": 20.74
+  },
+  {
+    "timestamp": "2026-03-26T10:38:07.028206+00:00",
+    "total_value": 278878.15,
+    "pnl_since_last": -25.95,
+    "positions_count": 3,
+    "exposure_pct": 20.74
+  },
+  {
+    "timestamp": "2026-03-26T10:43:06.793494+00:00",
+    "total_value": 278847.9,
+    "pnl_since_last": -30.25,
+    "positions_count": 3,
+    "exposure_pct": 20.73
+  },
+  {
+    "timestamp": "2026-03-26T10:48:06.902790+00:00",
+    "total_value": 278826.6,
+    "pnl_since_last": -21.3,
+    "positions_count": 3,
+    "exposure_pct": 20.72
+  },
+  {
+    "timestamp": "2026-03-26T10:53:07.028549+00:00",
+    "total_value": 278838.1,
+    "pnl_since_last": 11.5,
+    "positions_count": 3,
+    "exposure_pct": 20.73
+  },
+  {
+    "timestamp": "2026-03-26T10:58:07.061584+00:00",
+    "total_value": 278810.2,
+    "pnl_since_last": -27.9,
+    "positions_count": 3,
+    "exposure_pct": 20.72
+  },
+  {
+    "timestamp": "2026-03-26T11:03:07.171844+00:00",
+    "total_value": 278874.1,
+    "pnl_since_last": 63.9,
+    "positions_count": 3,
+    "exposure_pct": 20.74
+  },
+  {
+    "timestamp": "2026-03-26T11:08:07.343312+00:00",
+    "total_value": 278825.55,
+    "pnl_since_last": -48.55,
+    "positions_count": 3,
+    "exposure_pct": 20.72
+  },
+  {
+    "timestamp": "2026-03-26T11:13:07.374777+00:00",
+    "total_value": 278801.1,
+    "pnl_since_last": -24.45,
+    "positions_count": 3,
+    "exposure_pct": 20.71
+  },
+  {
+    "timestamp": "2026-03-26T11:18:07.759905+00:00",
+    "total_value": 278796.05,
+    "pnl_since_last": -5.05,
+    "positions_count": 3,
+    "exposure_pct": 20.71
+  },
+  {
+    "timestamp": "2026-03-26T11:23:07.498434+00:00",
+    "total_value": 278759.25,
+    "pnl_since_last": -36.8,
+    "positions_count": 3,
+    "exposure_pct": 20.7
+  },
+  {
+    "timestamp": "2026-03-26T11:28:07.734702+00:00",
+    "total_value": 278657.45,
+    "pnl_since_last": -101.8,
+    "positions_count": 3,
+    "exposure_pct": 20.67
+  },
+  {
+    "timestamp": "2026-03-26T11:33:07.686678+00:00",
+    "total_value": 278702.05,
+    "pnl_since_last": 44.6,
+    "positions_count": 3,
+    "exposure_pct": 20.69
+  },
+  {
+    "timestamp": "2026-03-26T11:38:07.832681+00:00",
+    "total_value": 278752.4,
+    "pnl_since_last": 50.35,
+    "positions_count": 3,
+    "exposure_pct": 20.7
+  },
+  {
+    "timestamp": "2026-03-26T11:43:07.928023+00:00",
+    "total_value": 278751.7,
+    "pnl_since_last": -0.7,
+    "positions_count": 3,
+    "exposure_pct": 20.7
+  },
+  {
+    "timestamp": "2026-03-26T11:48:07.976436+00:00",
+    "total_value": 278752.85,
+    "pnl_since_last": 1.15,
+    "positions_count": 3,
+    "exposure_pct": 20.7
+  },
+  {
+    "timestamp": "2026-03-26T11:53:08.166695+00:00",
+    "total_value": 278717.05,
+    "pnl_since_last": -35.8,
+    "positions_count": 3,
+    "exposure_pct": 20.69
+  },
+  {
+    "timestamp": "2026-03-26T11:58:08.071344+00:00",
+    "total_value": 278661.95,
+    "pnl_since_last": -55.1,
+    "positions_count": 3,
+    "exposure_pct": 20.68
+  },
+  {
+    "timestamp": "2026-03-26T12:03:08.168968+00:00",
+    "total_value": 278685.8,
+    "pnl_since_last": 23.85,
+    "positions_count": 3,
+    "exposure_pct": 20.68
+  },
+  {
+    "timestamp": "2026-03-26T12:08:08.261356+00:00",
+    "total_value": 278701.75,
+    "pnl_since_last": 15.95,
+    "positions_count": 3,
+    "exposure_pct": 20.69
+  },
+  {
+    "timestamp": "2026-03-26T12:13:08.419346+00:00",
+    "total_value": 278730.45,
+    "pnl_since_last": 28.7,
+    "positions_count": 3,
+    "exposure_pct": 20.69
+  },
+  {
+    "timestamp": "2026-03-26T12:18:08.372532+00:00",
+    "total_value": 278733.15,
+    "pnl_since_last": 2.7,
+    "positions_count": 3,
+    "exposure_pct": 20.7
+  },
+  {
+    "timestamp": "2026-03-26T12:23:08.577673+00:00",
+    "total_value": 278731.45,
+    "pnl_since_last": -1.7,
+    "positions_count": 3,
+    "exposure_pct": 20.69
+  },
+  {
+    "timestamp": "2026-03-26T12:28:08.593208+00:00",
+    "total_value": 278729.2,
+    "pnl_since_last": -2.25,
+    "positions_count": 3,
+    "exposure_pct": 20.69
+  },
+  {
+    "timestamp": "2026-03-26T12:33:08.831685+00:00",
+    "total_value": 278733.15,
+    "pnl_since_last": 3.95,
+    "positions_count": 3,
+    "exposure_pct": 20.7
+  },
+  {
+    "timestamp": "2026-03-26T12:38:08.897149+00:00",
+    "total_value": 278680.65,
+    "pnl_since_last": -52.5,
+    "positions_count": 3,
+    "exposure_pct": 20.68
+  },
+  {
+    "timestamp": "2026-03-26T12:43:08.755485+00:00",
+    "total_value": 278733.3,
+    "pnl_since_last": 52.65,
+    "positions_count": 3,
+    "exposure_pct": 20.7
+  },
+  {
+    "timestamp": "2026-03-26T12:48:08.909972+00:00",
+    "total_value": 278751.0,
+    "pnl_since_last": 17.7,
+    "positions_count": 3,
+    "exposure_pct": 20.7
+  },
+  {
+    "timestamp": "2026-03-26T12:53:09.149149+00:00",
+    "total_value": 278747.6,
+    "pnl_since_last": -3.4,
+    "positions_count": 3,
+    "exposure_pct": 20.7
+  },
+  {
+    "timestamp": "2026-03-26T12:58:09.218274+00:00",
+    "total_value": 278781.65,
+    "pnl_since_last": 34.05,
+    "positions_count": 3,
+    "exposure_pct": 20.71
+  },
+  {
+    "timestamp": "2026-03-26T13:03:09.090629+00:00",
+    "total_value": 278771.1,
+    "pnl_since_last": -10.55,
+    "positions_count": 3,
+    "exposure_pct": 20.71
+  },
+  {
+    "timestamp": "2026-03-26T13:08:09.204111+00:00",
+    "total_value": 278828.8,
+    "pnl_since_last": 57.7,
+    "positions_count": 3,
+    "exposure_pct": 20.72
+  },
+  {
+    "timestamp": "2026-03-26T13:13:09.317206+00:00",
+    "total_value": 278802.55,
+    "pnl_since_last": -26.25,
+    "positions_count": 3,
+    "exposure_pct": 20.72
+  },
+  {
+    "timestamp": "2026-03-26T13:18:09.535894+00:00",
+    "total_value": 278834.55,
+    "pnl_since_last": 32.0,
+    "positions_count": 3,
+    "exposure_pct": 20.72
+  },
+  {
+    "timestamp": "2026-03-26T13:23:09.465981+00:00",
+    "total_value": 278816.95,
+    "pnl_since_last": -17.6,
+    "positions_count": 3,
+    "exposure_pct": 20.72
+  },
+  {
+    "timestamp": "2026-03-26T13:28:09.540058+00:00",
+    "total_value": 278763.65,
+    "pnl_since_last": -53.3,
+    "positions_count": 3,
+    "exposure_pct": 20.7
+  },
+  {
+    "timestamp": "2026-03-26T13:33:09.870860+00:00",
+    "total_value": 278701.35,
+    "pnl_since_last": -62.3,
+    "positions_count": 3,
+    "exposure_pct": 20.69
+  },
+  {
+    "timestamp": "2026-03-26T13:38:09.748353+00:00",
+    "total_value": 278710.55,
+    "pnl_since_last": 9.2,
+    "positions_count": 3,
+    "exposure_pct": 20.69
+  },
+  {
+    "timestamp": "2026-03-26T13:43:09.737795+00:00",
+    "total_value": 278672.95,
+    "pnl_since_last": -37.6,
+    "positions_count": 3,
+    "exposure_pct": 20.68
+  },
+  {
+    "timestamp": "2026-03-26T13:48:09.812687+00:00",
+    "total_value": 278961.15,
+    "pnl_since_last": 288.2,
+    "positions_count": 3,
+    "exposure_pct": 20.76
+  },
+  {
+    "timestamp": "2026-03-26T13:53:09.997378+00:00",
+    "total_value": 279040.3,
+    "pnl_since_last": 79.15,
+    "positions_count": 3,
+    "exposure_pct": 20.78
+  },
+  {
+    "timestamp": "2026-03-26T13:58:10.037287+00:00",
+    "total_value": 278910.6,
+    "pnl_since_last": -129.7,
+    "positions_count": 3,
+    "exposure_pct": 20.75
+  },
+  {
+    "timestamp": "2026-03-26T14:03:09.996430+00:00",
+    "total_value": 278981.5,
+    "pnl_since_last": 70.9,
+    "positions_count": 3,
+    "exposure_pct": 20.77
+  },
+  {
+    "timestamp": "2026-03-26T14:08:10.054129+00:00",
+    "total_value": 279042.85,
+    "pnl_since_last": 61.35,
+    "positions_count": 3,
+    "exposure_pct": 20.78
+  },
+  {
+    "timestamp": "2026-03-26T14:13:10.140967+00:00",
+    "total_value": 278956.84,
+    "pnl_since_last": -86.01,
+    "positions_count": 3,
+    "exposure_pct": 20.76
+  },
+  {
+    "timestamp": "2026-03-26T14:18:10.192904+00:00",
+    "total_value": 279042.7,
+    "pnl_since_last": 85.86,
+    "positions_count": 3,
+    "exposure_pct": 20.78
+  },
+  {
+    "timestamp": "2026-03-26T14:23:10.284347+00:00",
+    "total_value": 278961.95,
+    "pnl_since_last": -80.75,
+    "positions_count": 3,
+    "exposure_pct": 20.76
+  },
+  {
+    "timestamp": "2026-03-26T14:28:10.439253+00:00",
+    "total_value": 279072.8,
+    "pnl_since_last": 110.85,
+    "positions_count": 3,
+    "exposure_pct": 20.79
+  },
+  {
+    "timestamp": "2026-03-26T14:33:10.471721+00:00",
+    "total_value": 279112.0,
+    "pnl_since_last": 39.2,
+    "positions_count": 3,
+    "exposure_pct": 20.8
+  },
+  {
+    "timestamp": "2026-03-26T14:38:10.640526+00:00",
+    "total_value": 279065.45,
+    "pnl_since_last": -46.55,
+    "positions_count": 3,
+    "exposure_pct": 20.79
+  },
+  {
+    "timestamp": "2026-03-26T14:43:10.687762+00:00",
+    "total_value": 279074.75,
+    "pnl_since_last": 9.3,
+    "positions_count": 3,
+    "exposure_pct": 20.79
+  },
+  {
+    "timestamp": "2026-03-26T14:48:10.636131+00:00",
+    "total_value": 279000.15,
+    "pnl_since_last": -74.6,
+    "positions_count": 3,
+    "exposure_pct": 20.77
+  },
+  {
+    "timestamp": "2026-03-26T14:53:10.729427+00:00",
+    "total_value": 278949.8,
+    "pnl_since_last": -50.35,
+    "positions_count": 3,
+    "exposure_pct": 20.76
+  },
+  {
+    "timestamp": "2026-03-26T14:58:10.805111+00:00",
+    "total_value": 278952.9,
+    "pnl_since_last": 3.1,
+    "positions_count": 3,
+    "exposure_pct": 20.76
+  },
+  {
+    "timestamp": "2026-03-26T15:03:10.893129+00:00",
+    "total_value": 278933.65,
+    "pnl_since_last": -19.25,
+    "positions_count": 3,
+    "exposure_pct": 20.75
+  },
+  {
+    "timestamp": "2026-03-26T15:08:11.106652+00:00",
+    "total_value": 278861.46,
+    "pnl_since_last": -72.19,
+    "positions_count": 3,
+    "exposure_pct": 20.73
+  },
+  {
+    "timestamp": "2026-03-26T15:13:11.202695+00:00",
+    "total_value": 278783.9,
+    "pnl_since_last": -77.56,
+    "positions_count": 3,
+    "exposure_pct": 20.71
+  },
+  {
+    "timestamp": "2026-03-26T15:18:11.181411+00:00",
+    "total_value": 278575.05,
+    "pnl_since_last": -208.85,
+    "positions_count": 3,
+    "exposure_pct": 20.65
+  },
+  {
+    "timestamp": "2026-03-26T15:23:11.377606+00:00",
+    "total_value": 278613.4,
+    "pnl_since_last": 38.35,
+    "positions_count": 3,
+    "exposure_pct": 20.66
+  },
+  {
+    "timestamp": "2026-03-26T15:28:11.326646+00:00",
+    "total_value": 278705.8,
+    "pnl_since_last": 92.4,
+    "positions_count": 3,
+    "exposure_pct": 20.69
+  },
+  {
+    "timestamp": "2026-03-26T15:33:11.440055+00:00",
+    "total_value": 278677.75,
+    "pnl_since_last": -28.05,
+    "positions_count": 3,
+    "exposure_pct": 20.68
+  },
+  {
+    "timestamp": "2026-03-26T15:38:11.491002+00:00",
+    "total_value": 278647.0,
+    "pnl_since_last": -30.75,
+    "positions_count": 3,
+    "exposure_pct": 20.67
+  },
+  {
+    "timestamp": "2026-03-26T15:43:11.652423+00:00",
+    "total_value": 278666.75,
+    "pnl_since_last": 19.75,
+    "positions_count": 3,
+    "exposure_pct": 20.68
+  },
+  {
+    "timestamp": "2026-03-26T15:48:11.607684+00:00",
+    "total_value": 278750.6,
+    "pnl_since_last": 83.85,
+    "positions_count": 3,
+    "exposure_pct": 20.7
+  },
+  {
+    "timestamp": "2026-03-26T15:53:11.772036+00:00",
+    "total_value": 278852.65,
+    "pnl_since_last": 102.05,
+    "positions_count": 3,
+    "exposure_pct": 20.73
+  },
+  {
+    "timestamp": "2026-03-26T15:58:11.856546+00:00",
+    "total_value": 278800.4,
+    "pnl_since_last": -52.25,
+    "positions_count": 3,
+    "exposure_pct": 20.71
+  },
+  {
+    "timestamp": "2026-03-26T16:03:11.886596+00:00",
+    "total_value": 278742.65,
+    "pnl_since_last": -57.75,
+    "positions_count": 3,
+    "exposure_pct": 20.7
+  },
+  {
+    "timestamp": "2026-03-26T16:08:11.992988+00:00",
+    "total_value": 278724.8,
+    "pnl_since_last": -17.85,
+    "positions_count": 3,
+    "exposure_pct": 20.69
+  },
+  {
+    "timestamp": "2026-03-26T16:13:12.092051+00:00",
+    "total_value": 278681.82,
+    "pnl_since_last": -42.98,
+    "positions_count": 3,
+    "exposure_pct": 20.68
+  },
+  {
+    "timestamp": "2026-03-26T16:18:12.205421+00:00",
+    "total_value": 278623.15,
+    "pnl_since_last": -58.67,
+    "positions_count": 3,
+    "exposure_pct": 20.66
+  },
+  {
+    "timestamp": "2026-03-26T16:23:12.306208+00:00",
+    "total_value": 278648.25,
+    "pnl_since_last": 25.1,
+    "positions_count": 3,
+    "exposure_pct": 20.67
+  },
+  {
+    "timestamp": "2026-03-26T16:28:12.359688+00:00",
+    "total_value": 278671.75,
+    "pnl_since_last": 23.5,
+    "positions_count": 3,
+    "exposure_pct": 20.68
+  },
+  {
+    "timestamp": "2026-03-26T16:33:12.469924+00:00",
+    "total_value": 278625.1,
+    "pnl_since_last": -46.65,
+    "positions_count": 3,
+    "exposure_pct": 20.66
+  },
+  {
+    "timestamp": "2026-03-26T16:38:12.580682+00:00",
+    "total_value": 278622.25,
+    "pnl_since_last": -2.85,
+    "positions_count": 3,
+    "exposure_pct": 20.66
+  },
+  {
+    "timestamp": "2026-03-26T16:43:12.668627+00:00",
+    "total_value": 278609.9,
+    "pnl_since_last": -12.35,
+    "positions_count": 3,
+    "exposure_pct": 20.66
+  },
+  {
+    "timestamp": "2026-03-26T16:48:13.095122+00:00",
+    "total_value": 278630.9,
+    "pnl_since_last": 21.0,
+    "positions_count": 3,
+    "exposure_pct": 20.67
+  },
+  {
+    "timestamp": "2026-03-26T16:53:12.660249+00:00",
+    "total_value": 278616.97,
+    "pnl_since_last": -13.93,
+    "positions_count": 3,
+    "exposure_pct": 20.66
+  },
+  {
+    "timestamp": "2026-03-26T16:58:12.663098+00:00",
+    "total_value": 278639.6,
+    "pnl_since_last": 22.63,
+    "positions_count": 3,
+    "exposure_pct": 20.67
+  },
+  {
+    "timestamp": "2026-03-26T17:03:12.679656+00:00",
+    "total_value": 278687.66,
+    "pnl_since_last": 48.06,
+    "positions_count": 3,
+    "exposure_pct": 20.68
+  },
+  {
+    "timestamp": "2026-03-26T17:08:12.799417+00:00",
+    "total_value": 278651.15,
+    "pnl_since_last": -36.51,
+    "positions_count": 3,
+    "exposure_pct": 20.67
+  },
+  {
+    "timestamp": "2026-03-26T17:13:12.895353+00:00",
+    "total_value": 278618.75,
+    "pnl_since_last": -32.4,
+    "positions_count": 3,
+    "exposure_pct": 20.66
+  },
+  {
+    "timestamp": "2026-03-26T17:18:13.076734+00:00",
+    "total_value": 278647.75,
+    "pnl_since_last": 29.0,
+    "positions_count": 3,
+    "exposure_pct": 20.67
+  },
+  {
+    "timestamp": "2026-03-26T17:23:12.978073+00:00",
+    "total_value": 278644.0,
+    "pnl_since_last": -3.75,
+    "positions_count": 3,
+    "exposure_pct": 20.67
+  },
+  {
+    "timestamp": "2026-03-26T17:28:13.521905+00:00",
+    "total_value": 278625.2,
+    "pnl_since_last": -18.8,
+    "positions_count": 3,
+    "exposure_pct": 20.66
+  },
+  {
+    "timestamp": "2026-03-26T17:33:13.071965+00:00",
+    "total_value": 278685.25,
+    "pnl_since_last": 60.05,
+    "positions_count": 3,
+    "exposure_pct": 20.68
+  },
+  {
+    "timestamp": "2026-03-26T17:38:13.159148+00:00",
+    "total_value": 278656.65,
+    "pnl_since_last": -28.6,
+    "positions_count": 3,
+    "exposure_pct": 20.67
+  },
+  {
+    "timestamp": "2026-03-26T17:43:13.264674+00:00",
+    "total_value": 278583.9,
+    "pnl_since_last": -72.75,
+    "positions_count": 3,
+    "exposure_pct": 20.65
+  },
+  {
+    "timestamp": "2026-03-26T17:48:13.352262+00:00",
+    "total_value": 278527.4,
+    "pnl_since_last": -56.5,
+    "positions_count": 3,
+    "exposure_pct": 20.64
+  },
+  {
+    "timestamp": "2026-03-26T17:53:13.519864+00:00",
+    "total_value": 278454.45,
+    "pnl_since_last": -72.95,
+    "positions_count": 3,
+    "exposure_pct": 20.62
+  },
+  {
+    "timestamp": "2026-03-26T17:58:13.477617+00:00",
+    "total_value": 278267.8,
+    "pnl_since_last": -186.65,
+    "positions_count": 3,
+    "exposure_pct": 20.56
+  },
+  {
+    "timestamp": "2026-03-26T18:03:13.670589+00:00",
+    "total_value": 278366.35,
+    "pnl_since_last": 98.55,
+    "positions_count": 3,
+    "exposure_pct": 20.59
+  },
+  {
+    "timestamp": "2026-03-26T18:08:13.661079+00:00",
+    "total_value": 278264.1,
+    "pnl_since_last": -102.25,
+    "positions_count": 3,
+    "exposure_pct": 20.56
+  },
+  {
+    "timestamp": "2026-03-26T18:13:13.741604+00:00",
+    "total_value": 278240.6,
+    "pnl_since_last": -23.5,
+    "positions_count": 3,
+    "exposure_pct": 20.56
+  },
+  {
+    "timestamp": "2026-03-26T18:18:13.811677+00:00",
+    "total_value": 278150.3,
+    "pnl_since_last": -90.3,
+    "positions_count": 3,
+    "exposure_pct": 20.53
+  },
+  {
+    "timestamp": "2026-03-26T18:23:13.853666+00:00",
+    "total_value": 278116.3,
+    "pnl_since_last": -34.0,
+    "positions_count": 3,
+    "exposure_pct": 20.52
+  },
+  {
+    "timestamp": "2026-03-26T18:28:14.069720+00:00",
+    "total_value": 278013.85,
+    "pnl_since_last": -102.45,
+    "positions_count": 3,
+    "exposure_pct": 20.49
+  },
+  {
+    "timestamp": "2026-03-26T18:33:14.064688+00:00",
+    "total_value": 278078.6,
+    "pnl_since_last": 64.75,
+    "positions_count": 3,
+    "exposure_pct": 20.51
+  },
+  {
+    "timestamp": "2026-03-26T18:38:14.161285+00:00",
+    "total_value": 278124.05,
+    "pnl_since_last": 45.45,
+    "positions_count": 3,
+    "exposure_pct": 20.52
+  },
+  {
+    "timestamp": "2026-03-26T18:43:14.184235+00:00",
+    "total_value": 278125.95,
+    "pnl_since_last": 1.9,
+    "positions_count": 3,
+    "exposure_pct": 20.52
+  },
+  {
+    "timestamp": "2026-03-26T18:48:14.398679+00:00",
+    "total_value": 278194.95,
+    "pnl_since_last": 69.0,
+    "positions_count": 3,
+    "exposure_pct": 20.54
+  },
+  {
+    "timestamp": "2026-03-26T18:53:14.454033+00:00",
+    "total_value": 278213.75,
+    "pnl_since_last": 18.8,
+    "positions_count": 3,
+    "exposure_pct": 20.55
+  },
+  {
+    "timestamp": "2026-03-26T18:58:14.579558+00:00",
+    "total_value": 278226.2,
+    "pnl_since_last": 12.45,
+    "positions_count": 3,
+    "exposure_pct": 20.55
+  },
+  {
+    "timestamp": "2026-03-26T19:03:14.513948+00:00",
+    "total_value": 278198.1,
+    "pnl_since_last": -28.1,
+    "positions_count": 3,
+    "exposure_pct": 20.54
+  },
+  {
+    "timestamp": "2026-03-26T19:08:14.664710+00:00",
+    "total_value": 278154.45,
+    "pnl_since_last": -43.65,
+    "positions_count": 3,
+    "exposure_pct": 20.53
+  },
+  {
+    "timestamp": "2026-03-26T19:13:14.812166+00:00",
+    "total_value": 278195.99,
+    "pnl_since_last": 41.54,
+    "positions_count": 3,
+    "exposure_pct": 20.54
+  },
+  {
+    "timestamp": "2026-03-26T19:18:14.860743+00:00",
+    "total_value": 278204.45,
+    "pnl_since_last": 8.46,
+    "positions_count": 3,
+    "exposure_pct": 20.54
+  },
+  {
+    "timestamp": "2026-03-26T19:23:14.981674+00:00",
+    "total_value": 278255.55,
+    "pnl_since_last": 51.1,
+    "positions_count": 3,
+    "exposure_pct": 20.56
+  },
+  {
+    "timestamp": "2026-03-26T19:28:15.093691+00:00",
+    "total_value": 278151.55,
+    "pnl_since_last": -104.0,
+    "positions_count": 3,
+    "exposure_pct": 20.53
+  },
+  {
+    "timestamp": "2026-03-26T19:33:18.075175+00:00",
+    "total_value": 278097.75,
+    "pnl_since_last": -53.8,
+    "positions_count": 3,
+    "exposure_pct": 20.51
+  },
+  {
+    "timestamp": "2026-03-26T19:38:15.105529+00:00",
+    "total_value": 278207.9,
+    "pnl_since_last": 110.15,
+    "positions_count": 3,
+    "exposure_pct": 20.55
+  },
+  {
+    "timestamp": "2026-03-26T19:43:15.285059+00:00",
+    "total_value": 278256.4,
+    "pnl_since_last": 48.5,
+    "positions_count": 3,
+    "exposure_pct": 20.56
+  },
+  {
+    "timestamp": "2026-03-26T19:48:15.239695+00:00",
+    "total_value": 278286.45,
+    "pnl_since_last": 30.05,
+    "positions_count": 3,
+    "exposure_pct": 20.57
+  },
+  {
+    "timestamp": "2026-03-26T19:53:15.462424+00:00",
+    "total_value": 278254.45,
+    "pnl_since_last": -32.0,
+    "positions_count": 3,
+    "exposure_pct": 20.56
+  },
+  {
+    "timestamp": "2026-03-26T19:58:15.454690+00:00",
+    "total_value": 278272.25,
+    "pnl_since_last": 17.8,
+    "positions_count": 3,
+    "exposure_pct": 20.56
+  },
+  {
+    "timestamp": "2026-03-26T20:03:15.519127+00:00",
+    "total_value": 278197.05,
+    "pnl_since_last": -75.2,
+    "positions_count": 3,
+    "exposure_pct": 20.54
+  },
+  {
+    "timestamp": "2026-03-26T20:08:15.861699+00:00",
+    "total_value": 278173.0,
+    "pnl_since_last": -24.05,
+    "positions_count": 3,
+    "exposure_pct": 20.54
+  },
+  {
+    "timestamp": "2026-03-26T20:13:15.609668+00:00",
+    "total_value": 278619.25,
+    "pnl_since_last": 446.25,
+    "positions_count": 3,
+    "exposure_pct": 20.66
+  },
+  {
+    "timestamp": "2026-03-26T20:18:16.028628+00:00",
+    "total_value": 278616.25,
+    "pnl_since_last": -3.0,
+    "positions_count": 3,
+    "exposure_pct": 20.66
+  },
+  {
+    "timestamp": "2026-03-26T20:23:15.750582+00:00",
+    "total_value": 278677.6,
+    "pnl_since_last": 61.35,
+    "positions_count": 3,
+    "exposure_pct": 20.68
+  },
+  {
+    "timestamp": "2026-03-26T20:28:16.125594+00:00",
+    "total_value": 278605.35,
+    "pnl_since_last": -72.25,
+    "positions_count": 3,
+    "exposure_pct": 20.66
+  },
+  {
+    "timestamp": "2026-03-26T20:33:16.130502+00:00",
+    "total_value": 278671.45,
+    "pnl_since_last": 66.1,
+    "positions_count": 3,
+    "exposure_pct": 20.68
+  },
+  {
+    "timestamp": "2026-03-26T20:38:16.033977+00:00",
+    "total_value": 278636.55,
+    "pnl_since_last": -34.9,
+    "positions_count": 3,
+    "exposure_pct": 20.67
+  },
+  {
+    "timestamp": "2026-03-26T20:43:16.114834+00:00",
+    "total_value": 278626.25,
+    "pnl_since_last": -10.3,
+    "positions_count": 3,
+    "exposure_pct": 20.67
+  },
+  {
+    "timestamp": "2026-03-26T20:48:16.083334+00:00",
+    "total_value": 278644.0,
+    "pnl_since_last": 17.75,
+    "positions_count": 3,
+    "exposure_pct": 20.67
+  },
+  {
+    "timestamp": "2026-03-26T20:53:16.226459+00:00",
+    "total_value": 278573.75,
+    "pnl_since_last": -70.25,
+    "positions_count": 3,
+    "exposure_pct": 20.65
+  },
+  {
+    "timestamp": "2026-03-26T20:58:16.342524+00:00",
+    "total_value": 278502.75,
+    "pnl_since_last": -71.0,
+    "positions_count": 3,
+    "exposure_pct": 20.63
+  },
+  {
+    "timestamp": "2026-03-26T21:03:16.365987+00:00",
+    "total_value": 278480.65,
+    "pnl_since_last": -22.1,
+    "positions_count": 3,
+    "exposure_pct": 20.62
+  },
+  {
+    "timestamp": "2026-03-26T21:08:19.708256+00:00",
+    "total_value": 278473.05,
+    "pnl_since_last": -7.6,
+    "positions_count": 3,
+    "exposure_pct": 20.62
+  },
+  {
+    "timestamp": "2026-03-26T21:13:16.801155+00:00",
+    "total_value": 278505.4,
+    "pnl_since_last": 32.35,
+    "positions_count": 3,
+    "exposure_pct": 20.63
+  },
+  {
+    "timestamp": "2026-03-26T21:18:16.593162+00:00",
+    "total_value": 278513.0,
+    "pnl_since_last": 7.6,
+    "positions_count": 3,
+    "exposure_pct": 20.63
+  },
+  {
+    "timestamp": "2026-03-26T21:23:16.791706+00:00",
+    "total_value": 278576.5,
+    "pnl_since_last": 63.5,
+    "positions_count": 3,
+    "exposure_pct": 20.65
+  },
+  {
+    "timestamp": "2026-03-26T21:28:16.758422+00:00",
+    "total_value": 278595.0,
+    "pnl_since_last": 18.5,
+    "positions_count": 3,
+    "exposure_pct": 20.66
+  },
+  {
+    "timestamp": "2026-03-26T21:33:17.006698+00:00",
+    "total_value": 278569.75,
+    "pnl_since_last": -25.25,
+    "positions_count": 3,
+    "exposure_pct": 20.65
+  },
+  {
+    "timestamp": "2026-03-26T21:38:16.832406+00:00",
+    "total_value": 278563.7,
+    "pnl_since_last": -6.05,
+    "positions_count": 3,
+    "exposure_pct": 20.65
+  },
+  {
+    "timestamp": "2026-03-26T21:43:16.920501+00:00",
+    "total_value": 278557.8,
+    "pnl_since_last": -5.9,
+    "positions_count": 3,
+    "exposure_pct": 20.65
+  },
+  {
+    "timestamp": "2026-03-26T21:48:17.051327+00:00",
+    "total_value": 278554.2,
+    "pnl_since_last": -3.6,
+    "positions_count": 3,
+    "exposure_pct": 20.64
+  },
+  {
+    "timestamp": "2026-03-26T21:53:17.169805+00:00",
+    "total_value": 278500.25,
+    "pnl_since_last": -53.95,
+    "positions_count": 3,
+    "exposure_pct": 20.63
+  },
+  {
+    "timestamp": "2026-03-26T21:58:17.397852+00:00",
+    "total_value": 278498.15,
+    "pnl_since_last": -2.1,
+    "positions_count": 3,
+    "exposure_pct": 20.63
+  },
+  {
+    "timestamp": "2026-03-26T22:03:17.224352+00:00",
+    "total_value": 278520.0,
+    "pnl_since_last": 21.85,
+    "positions_count": 3,
+    "exposure_pct": 20.63
+  },
+  {
+    "timestamp": "2026-03-26T22:08:17.286449+00:00",
+    "total_value": 278538.85,
+    "pnl_since_last": 18.85,
+    "positions_count": 3,
+    "exposure_pct": 20.64
+  },
+  {
+    "timestamp": "2026-03-26T22:13:17.481356+00:00",
+    "total_value": 278527.1,
+    "pnl_since_last": -11.75,
+    "positions_count": 3,
+    "exposure_pct": 20.64
+  },
+  {
+    "timestamp": "2026-03-26T22:18:17.473409+00:00",
+    "total_value": 278497.55,
+    "pnl_since_last": -29.55,
+    "positions_count": 3,
+    "exposure_pct": 20.63
+  },
+  {
+    "timestamp": "2026-03-26T22:23:17.561542+00:00",
+    "total_value": 278501.3,
+    "pnl_since_last": 3.75,
+    "positions_count": 3,
+    "exposure_pct": 20.63
+  },
+  {
+    "timestamp": "2026-03-26T22:28:17.622199+00:00",
+    "total_value": 278427.75,
+    "pnl_since_last": -73.55,
+    "positions_count": 3,
+    "exposure_pct": 20.61
+  },
+  {
+    "timestamp": "2026-03-26T22:33:17.733714+00:00",
+    "total_value": 278373.5,
+    "pnl_since_last": -54.25,
+    "positions_count": 3,
+    "exposure_pct": 20.59
+  },
+  {
+    "timestamp": "2026-03-26T22:38:17.837215+00:00",
+    "total_value": 278415.0,
+    "pnl_since_last": 41.5,
+    "positions_count": 3,
+    "exposure_pct": 20.6
+  },
+  {
+    "timestamp": "2026-03-26T22:43:17.774062+00:00",
+    "total_value": 278405.8,
+    "pnl_since_last": -9.2,
+    "positions_count": 3,
+    "exposure_pct": 20.6
+  },
+  {
+    "timestamp": "2026-03-26T22:48:18.042118+00:00",
+    "total_value": 278398.45,
+    "pnl_since_last": -7.35,
+    "positions_count": 3,
+    "exposure_pct": 20.6
+  },
+  {
+    "timestamp": "2026-03-26T22:53:18.055695+00:00",
+    "total_value": 278429.05,
+    "pnl_since_last": 30.6,
+    "positions_count": 3,
+    "exposure_pct": 20.61
+  },
+  {
+    "timestamp": "2026-03-26T22:58:18.074068+00:00",
+    "total_value": 278452.3,
+    "pnl_since_last": 23.25,
+    "positions_count": 3,
+    "exposure_pct": 20.62
+  },
+  {
+    "timestamp": "2026-03-26T23:03:18.097280+00:00",
+    "total_value": 278534.2,
+    "pnl_since_last": 81.9,
+    "positions_count": 3,
+    "exposure_pct": 20.64
+  },
+  {
+    "timestamp": "2026-03-26T23:08:18.665761+00:00",
+    "total_value": 278480.7,
+    "pnl_since_last": -53.5,
+    "positions_count": 3,
+    "exposure_pct": 20.62
+  },
+  {
+    "timestamp": "2026-03-26T23:13:18.357665+00:00",
+    "total_value": 278418.85,
+    "pnl_since_last": -61.85,
+    "positions_count": 3,
+    "exposure_pct": 20.61
+  },
+  {
+    "timestamp": "2026-03-26T23:18:18.431192+00:00",
+    "total_value": 278416.9,
+    "pnl_since_last": -1.95,
+    "positions_count": 3,
+    "exposure_pct": 20.61
+  },
+  {
+    "timestamp": "2026-03-26T23:23:18.644520+00:00",
+    "total_value": 278403.6,
+    "pnl_since_last": -13.3,
+    "positions_count": 3,
+    "exposure_pct": 20.6
+  },
+  {
+    "timestamp": "2026-03-26T23:28:18.530467+00:00",
+    "total_value": 278309.35,
+    "pnl_since_last": -94.25,
+    "positions_count": 3,
+    "exposure_pct": 20.57
+  },
+  {
+    "timestamp": "2026-03-26T23:33:18.720686+00:00",
+    "total_value": 278343.25,
+    "pnl_since_last": 33.9,
+    "positions_count": 3,
+    "exposure_pct": 20.58
+  },
+  {
+    "timestamp": "2026-03-26T23:38:18.744918+00:00",
+    "total_value": 278392.1,
+    "pnl_since_last": 48.85,
+    "positions_count": 3,
+    "exposure_pct": 20.6
+  },
+  {
+    "timestamp": "2026-03-26T23:43:18.922388+00:00",
+    "total_value": 278367.2,
+    "pnl_since_last": -24.9,
+    "positions_count": 3,
+    "exposure_pct": 20.59
+  },
+  {
+    "timestamp": "2026-03-26T23:48:19.131104+00:00",
+    "total_value": 278365.95,
+    "pnl_since_last": -1.25,
+    "positions_count": 3,
+    "exposure_pct": 20.59
+  },
+  {
+    "timestamp": "2026-03-26T23:53:18.944741+00:00",
+    "total_value": 278424.9,
+    "pnl_since_last": 58.95,
+    "positions_count": 3,
+    "exposure_pct": 20.61
+  },
+  {
+    "timestamp": "2026-03-26T23:58:19.013579+00:00",
+    "total_value": 278419.5,
+    "pnl_since_last": -5.4,
+    "positions_count": 3,
+    "exposure_pct": 20.61
+  },
+  {
+    "timestamp": "2026-03-27T00:03:19.152991+00:00",
+    "total_value": 278384.75,
+    "pnl_since_last": -34.75,
+    "positions_count": 3,
+    "exposure_pct": 20.6
+  },
+  {
+    "timestamp": "2026-03-27T00:08:19.477349+00:00",
+    "total_value": 278444.95,
+    "pnl_since_last": 60.2,
+    "positions_count": 3,
+    "exposure_pct": 20.61
+  },
+  {
+    "timestamp": "2026-03-27T00:13:19.223695+00:00",
+    "total_value": 278478.8,
+    "pnl_since_last": 33.85,
+    "positions_count": 3,
+    "exposure_pct": 20.62
+  },
+  {
+    "timestamp": "2026-03-27T00:18:19.490647+00:00",
+    "total_value": 278502.45,
+    "pnl_since_last": 23.65,
+    "positions_count": 3,
+    "exposure_pct": 20.63
+  },
+  {
+    "timestamp": "2026-03-27T00:23:19.333192+00:00",
+    "total_value": 278401.05,
+    "pnl_since_last": -101.4,
+    "positions_count": 3,
+    "exposure_pct": 20.6
+  },
+  {
+    "timestamp": "2026-03-27T00:28:19.377398+00:00",
+    "total_value": 278400.7,
+    "pnl_since_last": -0.35,
+    "positions_count": 3,
+    "exposure_pct": 20.6
+  },
+  {
+    "timestamp": "2026-03-27T00:33:21.595991+00:00",
+    "total_value": 278368.65,
+    "pnl_since_last": -32.05,
+    "positions_count": 3,
+    "exposure_pct": 20.59
+  },
+  {
+    "timestamp": "2026-03-27T00:38:19.464709+00:00",
+    "total_value": 278270.75,
+    "pnl_since_last": -97.9,
+    "positions_count": 3,
+    "exposure_pct": 20.56
+  },
+  {
+    "timestamp": "2026-03-27T00:43:19.538763+00:00",
+    "total_value": 278384.15,
+    "pnl_since_last": 113.4,
+    "positions_count": 3,
+    "exposure_pct": 20.6
+  },
+  {
+    "timestamp": "2026-03-27T00:48:19.685238+00:00",
+    "total_value": 278304.75,
+    "pnl_since_last": -79.4,
+    "positions_count": 3,
+    "exposure_pct": 20.57
+  },
+  {
+    "timestamp": "2026-03-27T00:53:19.716448+00:00",
+    "total_value": 278411.95,
+    "pnl_since_last": 107.2,
+    "positions_count": 3,
+    "exposure_pct": 20.6
+  },
+  {
+    "timestamp": "2026-03-27T00:58:19.841236+00:00",
+    "total_value": 278399.0,
+    "pnl_since_last": -12.95,
+    "positions_count": 3,
+    "exposure_pct": 20.6
+  },
+  {
+    "timestamp": "2026-03-27T01:03:19.827601+00:00",
+    "total_value": 278421.8,
+    "pnl_since_last": 22.8,
+    "positions_count": 3,
+    "exposure_pct": 20.61
+  },
+  {
+    "timestamp": "2026-03-27T01:08:19.994480+00:00",
+    "total_value": 278372.95,
+    "pnl_since_last": -48.85,
+    "positions_count": 3,
+    "exposure_pct": 20.59
+  },
+  {
+    "timestamp": "2026-03-27T01:13:20.054212+00:00",
+    "total_value": 278484.75,
+    "pnl_since_last": 111.8,
+    "positions_count": 3,
+    "exposure_pct": 20.62
+  },
+  {
+    "timestamp": "2026-03-27T01:18:20.190078+00:00",
+    "total_value": 278501.9,
+    "pnl_since_last": 17.15,
+    "positions_count": 3,
+    "exposure_pct": 20.63
+  },
+  {
+    "timestamp": "2026-03-27T01:23:20.090011+00:00",
+    "total_value": 278480.4,
+    "pnl_since_last": -21.5,
+    "positions_count": 3,
+    "exposure_pct": 20.62
+  },
+  {
+    "timestamp": "2026-03-27T01:28:20.306224+00:00",
+    "total_value": 278496.8,
+    "pnl_since_last": 16.4,
+    "positions_count": 3,
+    "exposure_pct": 20.63
+  },
+  {
+    "timestamp": "2026-03-27T01:33:20.293673+00:00",
+    "total_value": 278496.85,
+    "pnl_since_last": 0.05,
+    "positions_count": 3,
+    "exposure_pct": 20.63
+  },
+  {
+    "timestamp": "2026-03-27T01:38:20.308881+00:00",
+    "total_value": 278458.35,
+    "pnl_since_last": -38.5,
+    "positions_count": 3,
+    "exposure_pct": 20.62
+  },
+  {
+    "timestamp": "2026-03-27T01:43:20.326292+00:00",
+    "total_value": 278499.25,
+    "pnl_since_last": 40.9,
+    "positions_count": 3,
+    "exposure_pct": 20.63
+  },
+  {
+    "timestamp": "2026-03-27T01:48:20.798339+00:00",
+    "total_value": 278505.95,
+    "pnl_since_last": 6.7,
+    "positions_count": 3,
+    "exposure_pct": 20.63
+  },
+  {
+    "timestamp": "2026-03-27T01:53:20.660800+00:00",
+    "total_value": 278514.7,
+    "pnl_since_last": 8.75,
+    "positions_count": 3,
+    "exposure_pct": 20.63
+  },
+  {
+    "timestamp": "2026-03-27T01:58:20.591310+00:00",
+    "total_value": 278569.6,
+    "pnl_since_last": 54.9,
+    "positions_count": 3,
+    "exposure_pct": 20.65
+  },
+  {
+    "timestamp": "2026-03-27T02:03:20.736266+00:00",
+    "total_value": 278609.05,
+    "pnl_since_last": 39.45,
+    "positions_count": 3,
+    "exposure_pct": 20.66
+  },
+  {
+    "timestamp": "2026-03-27T02:08:20.775567+00:00",
+    "total_value": 278599.3,
+    "pnl_since_last": -9.75,
+    "positions_count": 3,
+    "exposure_pct": 20.66
+  },
+  {
+    "timestamp": "2026-03-27T02:13:21.079709+00:00",
+    "total_value": 278609.25,
+    "pnl_since_last": 9.95,
+    "positions_count": 3,
+    "exposure_pct": 20.66
+  },
+  {
+    "timestamp": "2026-03-27T02:18:20.981710+00:00",
+    "total_value": 278550.1,
+    "pnl_since_last": -59.15,
+    "positions_count": 3,
+    "exposure_pct": 20.64
+  },
+  {
+    "timestamp": "2026-03-27T02:23:21.028311+00:00",
+    "total_value": 278557.55,
+    "pnl_since_last": 7.45,
+    "positions_count": 3,
+    "exposure_pct": 20.65
+  },
+  {
+    "timestamp": "2026-03-27T02:28:21.110645+00:00",
+    "total_value": 278541.25,
+    "pnl_since_last": -16.3,
+    "positions_count": 3,
+    "exposure_pct": 20.64
+  },
+  {
+    "timestamp": "2026-03-27T02:33:21.179930+00:00",
+    "total_value": 278597.45,
+    "pnl_since_last": 56.2,
+    "positions_count": 3,
+    "exposure_pct": 20.66
+  },
+  {
+    "timestamp": "2026-03-27T02:38:21.258001+00:00",
+    "total_value": 278535.1,
+    "pnl_since_last": -62.35,
+    "positions_count": 3,
+    "exposure_pct": 20.64
+  },
+  {
+    "timestamp": "2026-03-27T02:43:21.235421+00:00",
+    "total_value": 278500.5,
+    "pnl_since_last": -34.6,
+    "positions_count": 3,
+    "exposure_pct": 20.63
+  },
+  {
+    "timestamp": "2026-03-27T02:48:21.367091+00:00",
+    "total_value": 278492.7,
+    "pnl_since_last": -7.8,
+    "positions_count": 3,
+    "exposure_pct": 20.63
+  },
+  {
+    "timestamp": "2026-03-27T02:53:21.438304+00:00",
+    "total_value": 278526.35,
+    "pnl_since_last": 33.65,
+    "positions_count": 3,
+    "exposure_pct": 20.64
+  },
+  {
+    "timestamp": "2026-03-27T02:58:21.479627+00:00",
+    "total_value": 278496.0,
+    "pnl_since_last": -30.35,
+    "positions_count": 3,
+    "exposure_pct": 20.63
+  },
+  {
+    "timestamp": "2026-03-27T03:03:21.986774+00:00",
+    "total_value": 278474.2,
+    "pnl_since_last": -21.8,
+    "positions_count": 3,
+    "exposure_pct": 20.62
+  },
+  {
+    "timestamp": "2026-03-27T03:08:21.802848+00:00",
+    "total_value": 278368.3,
+    "pnl_since_last": -105.9,
+    "positions_count": 3,
+    "exposure_pct": 20.59
+  },
+  {
+    "timestamp": "2026-03-27T03:13:21.760792+00:00",
+    "total_value": 278382.7,
+    "pnl_since_last": 14.4,
+    "positions_count": 3,
+    "exposure_pct": 20.6
+  },
+  {
+    "timestamp": "2026-03-27T03:18:21.741580+00:00",
+    "total_value": 278406.0,
+    "pnl_since_last": 23.3,
+    "positions_count": 3,
+    "exposure_pct": 20.6
+  },
+  {
+    "timestamp": "2026-03-27T03:23:21.840687+00:00",
+    "total_value": 278385.0,
+    "pnl_since_last": -21.0,
+    "positions_count": 3,
+    "exposure_pct": 20.6
+  },
+  {
+    "timestamp": "2026-03-27T03:28:21.924001+00:00",
+    "total_value": 278420.45,
+    "pnl_since_last": 35.45,
+    "positions_count": 3,
+    "exposure_pct": 20.61
+  },
+  {
+    "timestamp": "2026-03-27T03:33:21.999825+00:00",
+    "total_value": 278425.7,
+    "pnl_since_last": 5.25,
+    "positions_count": 3,
+    "exposure_pct": 20.61
+  },
+  {
+    "timestamp": "2026-03-27T03:38:22.006790+00:00",
+    "total_value": 278462.15,
+    "pnl_since_last": 36.45,
+    "positions_count": 3,
+    "exposure_pct": 20.62
+  },
+  {
+    "timestamp": "2026-03-27T03:43:22.144664+00:00",
+    "total_value": 278459.15,
+    "pnl_since_last": -3.0,
+    "positions_count": 3,
+    "exposure_pct": 20.62
+  },
+  {
+    "timestamp": "2026-03-27T03:45:08.887897+00:00",
+    "total_value": 278444.3,
+    "pnl_since_last": -14.85,
+    "positions_count": 3,
+    "exposure_pct": 20.61
+  },
+  {
+    "timestamp": "2026-03-27T03:50:07.740664+00:00",
+    "total_value": 278437.05,
+    "pnl_since_last": -7.25,
+    "positions_count": 3,
+    "exposure_pct": 20.61
+  },
+  {
+    "timestamp": "2026-03-27T03:53:37.015675+00:00",
+    "total_value": 278430.05,
+    "pnl_since_last": -7.0,
+    "positions_count": 3,
+    "exposure_pct": 20.61
+  },
+  {
+    "timestamp": "2026-03-27T03:58:36.037697+00:00",
+    "total_value": 278383.75,
+    "pnl_since_last": -46.3,
+    "positions_count": 3,
+    "exposure_pct": 20.6
+  },
+  {
+    "timestamp": "2026-03-27T04:03:36.126771+00:00",
+    "total_value": 278250.8,
+    "pnl_since_last": -132.95,
+    "positions_count": 3,
+    "exposure_pct": 20.56
+  },
+  {
+    "timestamp": "2026-03-27T04:08:36.285124+00:00",
+    "total_value": 278121.6,
+    "pnl_since_last": -129.2,
+    "positions_count": 3,
+    "exposure_pct": 20.52
+  },
+  {
+    "timestamp": "2026-03-27T04:13:36.322399+00:00",
+    "total_value": 278120.3,
+    "pnl_since_last": -1.3,
+    "positions_count": 3,
+    "exposure_pct": 20.52
+  },
+  {
+    "timestamp": "2026-03-27T04:18:36.416844+00:00",
+    "total_value": 278157.95,
+    "pnl_since_last": 37.65,
+    "positions_count": 3,
+    "exposure_pct": 20.53
+  },
+  {
+    "timestamp": "2026-03-27T04:23:36.706041+00:00",
+    "total_value": 278218.1,
+    "pnl_since_last": 60.15,
+    "positions_count": 3,
+    "exposure_pct": 20.55
+  },
+  {
+    "timestamp": "2026-03-27T04:28:36.529772+00:00",
+    "total_value": 278223.25,
+    "pnl_since_last": 5.15,
+    "positions_count": 3,
+    "exposure_pct": 20.55
+  },
+  {
+    "timestamp": "2026-03-27T04:29:11.520924+00:00",
+    "total_value": 278217.75,
+    "pnl_since_last": -5.5,
+    "positions_count": 3,
+    "exposure_pct": 20.55
+  },
+  {
+    "timestamp": "2026-03-27T04:33:48.962712+00:00",
+    "total_value": 278220.35,
+    "pnl_since_last": 2.6,
+    "positions_count": 3,
+    "exposure_pct": 20.55
+  },
+  {
+    "timestamp": "2026-03-27T04:38:47.802526+00:00",
+    "total_value": 278249.85,
+    "pnl_since_last": 29.5,
+    "positions_count": 3,
+    "exposure_pct": 20.56
+  },
+  {
+    "timestamp": "2026-03-27T04:43:47.755352+00:00",
+    "total_value": 278250.7,
+    "pnl_since_last": 0.85,
+    "positions_count": 3,
+    "exposure_pct": 20.56
+  },
+  {
+    "timestamp": "2026-03-27T04:44:07.453735+00:00",
+    "total_value": 278244.8,
+    "pnl_since_last": -5.9,
+    "positions_count": 3,
+    "exposure_pct": 20.56
+  },
+  {
+    "timestamp": "2026-03-27T04:49:06.215878+00:00",
+    "total_value": 278253.95,
+    "pnl_since_last": 9.15,
+    "positions_count": 3,
+    "exposure_pct": 20.56
+  },
+  {
+    "timestamp": "2026-03-27T04:54:06.205793+00:00",
+    "total_value": 278268.3,
+    "pnl_since_last": 14.35,
+    "positions_count": 3,
+    "exposure_pct": 20.56
+  },
+  {
+    "timestamp": "2026-03-27T04:59:06.362926+00:00",
+    "total_value": 278251.5,
+    "pnl_since_last": -16.8,
+    "positions_count": 3,
+    "exposure_pct": 20.56
+  },
+  {
+    "timestamp": "2026-03-27T05:04:06.494691+00:00",
+    "total_value": 278230.8,
+    "pnl_since_last": -20.7,
+    "positions_count": 3,
+    "exposure_pct": 20.55
+  },
+  {
+    "timestamp": "2026-03-27T05:09:06.600660+00:00",
+    "total_value": 278308.95,
+    "pnl_since_last": 78.15,
+    "positions_count": 3,
+    "exposure_pct": 20.57
+  },
+  {
+    "timestamp": "2026-03-27T05:14:06.819667+00:00",
+    "total_value": 278382.9,
+    "pnl_since_last": 73.95,
+    "positions_count": 3,
+    "exposure_pct": 20.6
+  },
+  {
+    "timestamp": "2026-03-27T05:19:06.834626+00:00",
+    "total_value": 278413.65,
+    "pnl_since_last": 30.75,
+    "positions_count": 3,
+    "exposure_pct": 20.6
+  },
+  {
+    "timestamp": "2026-03-27T05:24:06.780678+00:00",
+    "total_value": 278350.2,
+    "pnl_since_last": -63.45,
+    "positions_count": 3,
+    "exposure_pct": 20.59
+  },
+  {
+    "timestamp": "2026-03-27T05:29:06.853419+00:00",
+    "total_value": 278295.95,
+    "pnl_since_last": -54.25,
+    "positions_count": 3,
+    "exposure_pct": 20.57
+  },
+  {
+    "timestamp": "2026-03-27T05:34:06.917577+00:00",
+    "total_value": 278259.7,
+    "pnl_since_last": -36.25,
+    "positions_count": 3,
+    "exposure_pct": 20.56
+  },
+  {
+    "timestamp": "2026-03-27T05:39:07.018206+00:00",
+    "total_value": 278325.85,
+    "pnl_since_last": 66.15,
+    "positions_count": 3,
+    "exposure_pct": 20.58
+  },
+  {
+    "timestamp": "2026-03-27T05:44:07.219324+00:00",
+    "total_value": 278297.7,
+    "pnl_since_last": -28.15,
+    "positions_count": 3,
+    "exposure_pct": 20.57
+  },
+  {
+    "timestamp": "2026-03-27T05:49:07.466189+00:00",
+    "total_value": 278296.2,
+    "pnl_since_last": -1.5,
+    "positions_count": 3,
+    "exposure_pct": 20.57
+  },
+  {
+    "timestamp": "2026-03-27T05:54:07.418354+00:00",
+    "total_value": 278292.9,
+    "pnl_since_last": -3.3,
+    "positions_count": 3,
+    "exposure_pct": 20.57
+  },
+  {
+    "timestamp": "2026-03-27T05:59:07.283401+00:00",
+    "total_value": 278314.55,
+    "pnl_since_last": 21.65,
+    "positions_count": 3,
+    "exposure_pct": 20.58
+  },
+  {
+    "timestamp": "2026-03-27T06:04:07.272212+00:00",
+    "total_value": 278297.7,
+    "pnl_since_last": -16.85,
+    "positions_count": 3,
+    "exposure_pct": 20.57
+  },
+  {
+    "timestamp": "2026-03-27T06:09:07.485315+00:00",
+    "total_value": 278339.2,
+    "pnl_since_last": 41.5,
+    "positions_count": 3,
+    "exposure_pct": 20.58
+  },
+  {
+    "timestamp": "2026-03-27T06:14:07.467557+00:00",
+    "total_value": 278377.5,
+    "pnl_since_last": 38.3,
+    "positions_count": 3,
+    "exposure_pct": 20.59
+  },
+  {
+    "timestamp": "2026-03-27T06:19:07.535705+00:00",
+    "total_value": 278389.5,
+    "pnl_since_last": 12.0,
+    "positions_count": 3,
+    "exposure_pct": 20.6
+  },
+  {
+    "timestamp": "2026-03-27T06:24:07.615827+00:00",
+    "total_value": 278390.45,
+    "pnl_since_last": 0.95,
+    "positions_count": 3,
+    "exposure_pct": 20.6
+  },
+  {
+    "timestamp": "2026-03-27T06:29:07.752683+00:00",
+    "total_value": 278434.95,
+    "pnl_since_last": 44.5,
+    "positions_count": 3,
+    "exposure_pct": 20.61
+  },
+  {
+    "timestamp": "2026-03-27T06:34:07.791527+00:00",
+    "total_value": 278391.7,
+    "pnl_since_last": -43.25,
+    "positions_count": 3,
+    "exposure_pct": 20.6
+  },
+  {
+    "timestamp": "2026-03-27T06:39:07.886686+00:00",
+    "total_value": 278401.75,
+    "pnl_since_last": 10.05,
+    "positions_count": 3,
+    "exposure_pct": 20.6
+  },
+  {
+    "timestamp": "2026-03-27T06:44:07.974314+00:00",
+    "total_value": 278393.55,
+    "pnl_since_last": -8.2,
+    "positions_count": 3,
+    "exposure_pct": 20.6
+  },
+  {
+    "timestamp": "2026-03-27T06:49:08.215189+00:00",
+    "total_value": 278352.25,
+    "pnl_since_last": -41.3,
+    "positions_count": 3,
+    "exposure_pct": 20.59
+  },
+  {
+    "timestamp": "2026-03-27T06:54:08.150794+00:00",
+    "total_value": 278361.35,
+    "pnl_since_last": 9.1,
+    "positions_count": 3,
+    "exposure_pct": 20.59
+  },
+  {
+    "timestamp": "2026-03-27T06:59:08.230229+00:00",
+    "total_value": 278326.1,
+    "pnl_since_last": -35.25,
+    "positions_count": 3,
+    "exposure_pct": 20.58
+  },
+  {
+    "timestamp": "2026-03-27T07:04:08.527376+00:00",
+    "total_value": 278345.85,
+    "pnl_since_last": 19.75,
+    "positions_count": 3,
+    "exposure_pct": 20.59
+  },
+  {
+    "timestamp": "2026-03-27T07:09:08.610717+00:00",
+    "total_value": 278298.3,
+    "pnl_since_last": -47.55,
+    "positions_count": 3,
+    "exposure_pct": 20.57
+  },
+  {
+    "timestamp": "2026-03-27T07:14:08.899667+00:00",
+    "total_value": 278440.85,
+    "pnl_since_last": 142.55,
+    "positions_count": 3,
+    "exposure_pct": 20.61
+  },
+  {
+    "timestamp": "2026-03-27T07:19:08.983666+00:00",
+    "total_value": 278500.0,
+    "pnl_since_last": 59.15,
+    "positions_count": 3,
+    "exposure_pct": 20.63
+  },
+  {
+    "timestamp": "2026-03-27T07:24:08.806675+00:00",
+    "total_value": 278483.45,
+    "pnl_since_last": -16.55,
+    "positions_count": 3,
+    "exposure_pct": 20.62
+  },
+  {
+    "timestamp": "2026-03-27T07:29:08.787195+00:00",
+    "total_value": 278517.0,
+    "pnl_since_last": 33.55,
+    "positions_count": 3,
+    "exposure_pct": 20.63
+  },
+  {
+    "timestamp": "2026-03-27T07:34:08.894517+00:00",
+    "total_value": 278425.9,
+    "pnl_since_last": -91.1,
+    "positions_count": 3,
+    "exposure_pct": 20.61
+  },
+  {
+    "timestamp": "2026-03-27T07:39:08.934681+00:00",
+    "total_value": 278370.2,
+    "pnl_since_last": -55.7,
+    "positions_count": 3,
+    "exposure_pct": 20.59
+  },
+  {
+    "timestamp": "2026-03-27T07:44:09.020290+00:00",
+    "total_value": 278342.85,
+    "pnl_since_last": -27.35,
+    "positions_count": 3,
+    "exposure_pct": 20.58
+  },
+  {
+    "timestamp": "2026-03-27T07:49:09.165706+00:00",
+    "total_value": 278303.65,
+    "pnl_since_last": -39.2,
+    "positions_count": 3,
+    "exposure_pct": 20.57
+  },
+  {
+    "timestamp": "2026-03-27T07:54:09.133086+00:00",
+    "total_value": 278336.65,
+    "pnl_since_last": 33.0,
+    "positions_count": 3,
+    "exposure_pct": 20.58
+  },
+  {
+    "timestamp": "2026-03-27T07:59:09.165370+00:00",
+    "total_value": 278248.5,
+    "pnl_since_last": -88.15,
+    "positions_count": 3,
+    "exposure_pct": 20.56
+  },
+  {
+    "timestamp": "2026-03-27T08:04:09.332064+00:00",
+    "total_value": 278342.6,
+    "pnl_since_last": 94.1,
+    "positions_count": 3,
+    "exposure_pct": 20.58
+  },
+  {
+    "timestamp": "2026-03-27T08:09:09.513703+00:00",
+    "total_value": 278272.25,
+    "pnl_since_last": -70.35,
+    "positions_count": 3,
+    "exposure_pct": 20.56
+  },
+  {
+    "timestamp": "2026-03-27T08:14:09.505207+00:00",
+    "total_value": 278256.3,
+    "pnl_since_last": -15.95,
+    "positions_count": 3,
+    "exposure_pct": 20.56
+  },
+  {
+    "timestamp": "2026-03-27T08:19:09.487806+00:00",
+    "total_value": 278185.45,
+    "pnl_since_last": -70.85,
+    "positions_count": 3,
+    "exposure_pct": 20.54
+  },
+  {
+    "timestamp": "2026-03-27T08:24:09.571611+00:00",
+    "total_value": 278151.5,
+    "pnl_since_last": -33.95,
+    "positions_count": 3,
+    "exposure_pct": 20.53
+  },
+  {
+    "timestamp": "2026-03-27T08:29:09.661955+00:00",
+    "total_value": 278100.55,
+    "pnl_since_last": -50.95,
+    "positions_count": 3,
+    "exposure_pct": 20.52
+  },
+  {
+    "timestamp": "2026-03-27T08:34:09.695666+00:00",
+    "total_value": 278115.45,
+    "pnl_since_last": 14.9,
+    "positions_count": 3,
+    "exposure_pct": 20.52
+  },
+  {
+    "timestamp": "2026-03-27T08:39:09.758534+00:00",
+    "total_value": 277710.6,
+    "pnl_since_last": -404.85,
+    "positions_count": 3,
+    "exposure_pct": 20.4
+  },
+  {
+    "timestamp": "2026-03-27T08:44:09.858615+00:00",
+    "total_value": 277824.75,
+    "pnl_since_last": 114.15,
+    "positions_count": 3,
+    "exposure_pct": 20.44
+  },
+  {
+    "timestamp": "2026-03-27T08:49:10.433986+00:00",
+    "total_value": 277863.0,
+    "pnl_since_last": 38.25,
+    "positions_count": 3,
+    "exposure_pct": 20.45
+  },
+  {
+    "timestamp": "2026-03-27T08:54:10.064475+00:00",
+    "total_value": 277923.15,
+    "pnl_since_last": 60.15,
+    "positions_count": 3,
+    "exposure_pct": 20.46
+  },
+  {
+    "timestamp": "2026-03-27T08:59:10.089401+00:00",
+    "total_value": 277890.25,
+    "pnl_since_last": -32.9,
+    "positions_count": 3,
+    "exposure_pct": 20.45
+  },
+  {
+    "timestamp": "2026-03-27T09:04:10.155224+00:00",
+    "total_value": 277848.5,
+    "pnl_since_last": -41.75,
+    "positions_count": 3,
+    "exposure_pct": 20.44
+  },
+  {
+    "timestamp": "2026-03-27T09:09:10.258125+00:00",
+    "total_value": 277789.65,
+    "pnl_since_last": -58.85,
+    "positions_count": 3,
+    "exposure_pct": 20.43
+  },
+  {
+    "timestamp": "2026-03-27T09:14:10.291878+00:00",
+    "total_value": 277792.8,
+    "pnl_since_last": 3.15,
+    "positions_count": 3,
+    "exposure_pct": 20.43
+  },
+  {
+    "timestamp": "2026-03-27T09:19:10.239867+00:00",
+    "total_value": 277843.1,
+    "pnl_since_last": 50.3,
+    "positions_count": 3,
+    "exposure_pct": 20.44
+  },
+  {
+    "timestamp": "2026-03-27T09:24:10.529983+00:00",
+    "total_value": 277860.0,
+    "pnl_since_last": 16.9,
+    "positions_count": 3,
+    "exposure_pct": 20.45
+  },
+  {
+    "timestamp": "2026-03-27T09:29:10.686479+00:00",
+    "total_value": 277899.4,
+    "pnl_since_last": 39.4,
+    "positions_count": 3,
+    "exposure_pct": 20.46
+  },
+  {
+    "timestamp": "2026-03-27T09:34:10.629369+00:00",
+    "total_value": 277858.3,
+    "pnl_since_last": -41.1,
+    "positions_count": 3,
+    "exposure_pct": 20.45
+  },
+  {
+    "timestamp": "2026-03-27T09:39:10.663704+00:00",
+    "total_value": 277822.1,
+    "pnl_since_last": -36.2,
+    "positions_count": 3,
+    "exposure_pct": 20.44
+  },
+  {
+    "timestamp": "2026-03-27T09:44:10.860959+00:00",
+    "total_value": 277785.75,
+    "pnl_since_last": -36.35,
+    "positions_count": 3,
+    "exposure_pct": 20.43
+  },
+  {
+    "timestamp": "2026-03-27T09:49:10.818400+00:00",
+    "total_value": 277831.45,
+    "pnl_since_last": 45.7,
+    "positions_count": 3,
+    "exposure_pct": 20.44
+  },
+  {
+    "timestamp": "2026-03-27T09:54:11.244172+00:00",
+    "total_value": 277841.5,
+    "pnl_since_last": 10.05,
+    "positions_count": 3,
+    "exposure_pct": 20.44
+  },
+  {
+    "timestamp": "2026-03-27T09:59:11.000664+00:00",
+    "total_value": 277763.75,
+    "pnl_since_last": -77.75,
+    "positions_count": 3,
+    "exposure_pct": 20.42
+  },
+  {
+    "timestamp": "2026-03-27T10:04:11.005996+00:00",
+    "total_value": 277755.8,
+    "pnl_since_last": -7.95,
+    "positions_count": 3,
+    "exposure_pct": 20.42
+  },
+  {
+    "timestamp": "2026-03-27T10:09:11.149076+00:00",
+    "total_value": 277777.45,
+    "pnl_since_last": 21.65,
+    "positions_count": 3,
+    "exposure_pct": 20.42
+  },
+  {
+    "timestamp": "2026-03-27T10:14:11.202408+00:00",
+    "total_value": 277713.9,
+    "pnl_since_last": -63.55,
+    "positions_count": 3,
+    "exposure_pct": 20.4
+  },
+  {
+    "timestamp": "2026-03-27T10:19:11.334477+00:00",
+    "total_value": 277736.8,
+    "pnl_since_last": 22.9,
+    "positions_count": 3,
+    "exposure_pct": 20.41
+  },
+  {
+    "timestamp": "2026-03-27T10:24:11.412864+00:00",
+    "total_value": 277778.6,
+    "pnl_since_last": 41.8,
+    "positions_count": 3,
+    "exposure_pct": 20.42
+  },
+  {
+    "timestamp": "2026-03-27T10:29:11.508990+00:00",
+    "total_value": 277795.6,
+    "pnl_since_last": 17.0,
+    "positions_count": 3,
+    "exposure_pct": 20.43
+  },
+  {
+    "timestamp": "2026-03-27T10:34:11.620687+00:00",
+    "total_value": 277762.95,
+    "pnl_since_last": -32.65,
+    "positions_count": 3,
+    "exposure_pct": 20.42
+  },
+  {
+    "timestamp": "2026-03-27T10:39:11.852393+00:00",
+    "total_value": 277204.9,
+    "pnl_since_last": -558.05,
+    "positions_count": 3,
+    "exposure_pct": 20.26
+  },
+  {
+    "timestamp": "2026-03-27T10:44:12.308690+00:00",
+    "total_value": 277265.65,
+    "pnl_since_last": 60.75,
+    "positions_count": 3,
+    "exposure_pct": 20.28
+  },
+  {
+    "timestamp": "2026-03-27T10:49:11.919190+00:00",
+    "total_value": 277169.75,
+    "pnl_since_last": -95.9,
+    "positions_count": 3,
+    "exposure_pct": 20.25
+  },
+  {
+    "timestamp": "2026-03-27T10:54:11.920919+00:00",
+    "total_value": 277016.3,
+    "pnl_since_last": -153.45,
+    "positions_count": 3,
+    "exposure_pct": 20.2
+  },
+  {
+    "timestamp": "2026-03-27T10:59:12.007059+00:00",
+    "total_value": 276900.1,
+    "pnl_since_last": -116.2,
+    "positions_count": 3,
+    "exposure_pct": 20.17
+  },
+  {
+    "timestamp": "2026-03-27T11:04:12.245676+00:00",
+    "total_value": 276878.15,
+    "pnl_since_last": -21.95,
+    "positions_count": 3,
+    "exposure_pct": 20.16
+  },
+  {
+    "timestamp": "2026-03-27T11:09:12.133629+00:00",
+    "total_value": 276877.5,
+    "pnl_since_last": -0.65,
+    "positions_count": 3,
+    "exposure_pct": 20.16
+  },
+  {
+    "timestamp": "2026-03-27T11:14:12.295676+00:00",
+    "total_value": 276970.75,
+    "pnl_since_last": 93.25,
+    "positions_count": 3,
+    "exposure_pct": 20.19
+  },
+  {
+    "timestamp": "2026-03-27T11:19:12.266669+00:00",
+    "total_value": 277013.15,
+    "pnl_since_last": 42.4,
+    "positions_count": 3,
+    "exposure_pct": 20.2
+  },
+  {
+    "timestamp": "2026-03-27T11:24:12.486858+00:00",
+    "total_value": 276994.05,
+    "pnl_since_last": -19.1,
+    "positions_count": 3,
+    "exposure_pct": 20.2
+  },
+  {
+    "timestamp": "2026-03-27T11:29:12.314567+00:00",
+    "total_value": 277030.6,
+    "pnl_since_last": 36.55,
+    "positions_count": 3,
+    "exposure_pct": 20.21
+  },
+  {
+    "timestamp": "2026-03-27T11:34:12.414892+00:00",
+    "total_value": 277034.7,
+    "pnl_since_last": 4.1,
+    "positions_count": 3,
+    "exposure_pct": 20.21
+  },
+  {
+    "timestamp": "2026-03-27T11:39:12.476672+00:00",
+    "total_value": 276997.9,
+    "pnl_since_last": -36.8,
+    "positions_count": 3,
+    "exposure_pct": 20.2
+  },
+  {
+    "timestamp": "2026-03-27T11:44:12.455581+00:00",
+    "total_value": 277058.35,
+    "pnl_since_last": 60.45,
+    "positions_count": 3,
+    "exposure_pct": 20.22
+  },
+  {
+    "timestamp": "2026-03-27T11:49:12.794694+00:00",
+    "total_value": 277075.45,
+    "pnl_since_last": 17.1,
+    "positions_count": 3,
+    "exposure_pct": 20.22
+  },
+  {
+    "timestamp": "2026-03-27T11:54:12.767609+00:00",
+    "total_value": 277008.4,
+    "pnl_since_last": -67.05,
+    "positions_count": 3,
+    "exposure_pct": 20.2
+  },
+  {
+    "timestamp": "2026-03-27T11:59:12.888267+00:00",
+    "total_value": 277004.95,
+    "pnl_since_last": -3.45,
+    "positions_count": 3,
+    "exposure_pct": 20.2
+  },
+  {
+    "timestamp": "2026-03-27T12:04:12.860681+00:00",
+    "total_value": 276980.05,
+    "pnl_since_last": -24.9,
+    "positions_count": 3,
+    "exposure_pct": 20.19
+  },
+  {
+    "timestamp": "2026-03-27T12:09:12.875668+00:00",
+    "total_value": 277008.2,
+    "pnl_since_last": 28.15,
+    "positions_count": 3,
+    "exposure_pct": 20.2
+  },
+  {
+    "timestamp": "2026-03-27T12:14:12.978279+00:00",
+    "total_value": 276989.15,
+    "pnl_since_last": -19.05,
+    "positions_count": 3,
+    "exposure_pct": 20.2
+  },
+  {
+    "timestamp": "2026-03-27T12:19:13.087104+00:00",
+    "total_value": 276973.8,
+    "pnl_since_last": -15.35,
+    "positions_count": 3,
+    "exposure_pct": 20.19
+  },
+  {
+    "timestamp": "2026-03-27T12:24:13.233669+00:00",
+    "total_value": 276940.95,
+    "pnl_since_last": -32.85,
+    "positions_count": 3,
+    "exposure_pct": 20.18
+  },
+  {
+    "timestamp": "2026-03-27T12:29:13.250906+00:00",
+    "total_value": 276899.55,
+    "pnl_since_last": -41.4,
+    "positions_count": 3,
+    "exposure_pct": 20.17
+  },
+  {
+    "timestamp": "2026-03-27T12:34:13.457689+00:00",
+    "total_value": 276869.55,
+    "pnl_since_last": -30.0,
+    "positions_count": 3,
+    "exposure_pct": 20.16
+  },
+  {
+    "timestamp": "2026-03-27T12:39:13.445673+00:00",
+    "total_value": 276952.25,
+    "pnl_since_last": 82.7,
+    "positions_count": 3,
+    "exposure_pct": 20.19
+  },
+  {
+    "timestamp": "2026-03-27T12:44:13.449475+00:00",
+    "total_value": 276928.9,
+    "pnl_since_last": -23.35,
+    "positions_count": 3,
+    "exposure_pct": 20.18
+  },
+  {
+    "timestamp": "2026-03-27T12:49:13.686669+00:00",
+    "total_value": 276870.8,
+    "pnl_since_last": -58.1,
+    "positions_count": 3,
+    "exposure_pct": 20.16
+  },
+  {
+    "timestamp": "2026-03-27T12:54:13.566720+00:00",
+    "total_value": 276926.7,
+    "pnl_since_last": 55.9,
+    "positions_count": 3,
+    "exposure_pct": 20.18
+  },
+  {
+    "timestamp": "2026-03-27T12:59:13.647957+00:00",
+    "total_value": 276954.1,
+    "pnl_since_last": 27.4,
+    "positions_count": 3,
+    "exposure_pct": 20.19
+  },
+  {
+    "timestamp": "2026-03-27T13:04:13.751702+00:00",
+    "total_value": 276964.45,
+    "pnl_since_last": 10.35,
+    "positions_count": 3,
+    "exposure_pct": 20.19
+  },
+  {
+    "timestamp": "2026-03-27T13:09:13.720054+00:00",
+    "total_value": 276905.3,
+    "pnl_since_last": -59.15,
+    "positions_count": 3,
+    "exposure_pct": 20.17
+  },
+  {
+    "timestamp": "2026-03-27T13:14:13.800632+00:00",
+    "total_value": 276911.8,
+    "pnl_since_last": 6.5,
+    "positions_count": 3,
+    "exposure_pct": 20.17
+  },
+  {
+    "timestamp": "2026-03-27T13:19:13.828414+00:00",
+    "total_value": 276924.0,
+    "pnl_since_last": 12.2,
+    "positions_count": 3,
+    "exposure_pct": 20.18
+  },
+  {
+    "timestamp": "2026-03-27T13:24:14.013126+00:00",
+    "total_value": 276976.45,
+    "pnl_since_last": 52.45,
+    "positions_count": 3,
+    "exposure_pct": 20.19
+  },
+  {
+    "timestamp": "2026-03-27T13:29:14.283675+00:00",
+    "total_value": 277027.8,
+    "pnl_since_last": 51.35,
+    "positions_count": 3,
+    "exposure_pct": 20.21
+  },
+  {
+    "timestamp": "2026-03-27T13:34:14.306214+00:00",
+    "total_value": 276829.5,
+    "pnl_since_last": -198.3,
+    "positions_count": 3,
+    "exposure_pct": 20.15
+  },
+  {
+    "timestamp": "2026-03-27T13:39:14.225966+00:00",
+    "total_value": 276897.3,
+    "pnl_since_last": 67.8,
+    "positions_count": 3,
+    "exposure_pct": 20.17
+  },
+  {
+    "timestamp": "2026-03-27T13:44:14.257103+00:00",
+    "total_value": 276975.8,
+    "pnl_since_last": 78.5,
+    "positions_count": 3,
+    "exposure_pct": 20.19
+  },
+  {
+    "timestamp": "2026-03-27T13:49:14.339938+00:00",
+    "total_value": 276974.85,
+    "pnl_since_last": -0.95,
+    "positions_count": 3,
+    "exposure_pct": 20.19
+  },
+  {
+    "timestamp": "2026-03-27T13:54:14.518676+00:00",
+    "total_value": 276792.35,
+    "pnl_since_last": -182.5,
+    "positions_count": 3,
+    "exposure_pct": 20.14
+  },
+  {
+    "timestamp": "2026-03-27T13:59:14.468474+00:00",
+    "total_value": 276741.75,
+    "pnl_since_last": -50.6,
+    "positions_count": 3,
+    "exposure_pct": 20.12
+  },
+  {
+    "timestamp": "2026-03-27T14:04:14.552895+00:00",
+    "total_value": 276812.7,
+    "pnl_since_last": 70.95,
+    "positions_count": 3,
+    "exposure_pct": 20.15
+  },
+  {
+    "timestamp": "2026-03-27T14:09:14.576792+00:00",
+    "total_value": 276878.4,
+    "pnl_since_last": 65.7,
+    "positions_count": 3,
+    "exposure_pct": 20.16
+  },
+  {
+    "timestamp": "2026-03-27T14:14:14.880686+00:00",
+    "total_value": 276836.3,
+    "pnl_since_last": -42.1,
+    "positions_count": 3,
+    "exposure_pct": 20.15
+  },
+  {
+    "timestamp": "2026-03-27T14:19:14.753013+00:00",
+    "total_value": 276822.6,
+    "pnl_since_last": -13.7,
+    "positions_count": 3,
+    "exposure_pct": 20.15
+  },
+  {
+    "timestamp": "2026-03-27T14:24:14.756589+00:00",
+    "total_value": 276647.05,
+    "pnl_since_last": -175.55,
+    "positions_count": 3,
+    "exposure_pct": 20.1
+  },
+  {
+    "timestamp": "2026-03-27T14:29:14.814073+00:00",
+    "total_value": 276493.4,
+    "pnl_since_last": -153.65,
+    "positions_count": 3,
+    "exposure_pct": 20.05
+  },
+  {
+    "timestamp": "2026-03-27T14:34:14.894209+00:00",
+    "total_value": 276572.75,
+    "pnl_since_last": 79.35,
+    "positions_count": 3,
+    "exposure_pct": 20.08
+  },
+  {
+    "timestamp": "2026-03-27T14:39:15.063550+00:00",
+    "total_value": 276516.55,
+    "pnl_since_last": -56.2,
+    "positions_count": 3,
+    "exposure_pct": 20.06
+  },
+  {
+    "timestamp": "2026-03-27T14:44:14.981021+00:00",
+    "total_value": 276499.5,
+    "pnl_since_last": -17.05,
+    "positions_count": 3,
+    "exposure_pct": 20.05
+  },
+  {
+    "timestamp": "2026-03-27T14:49:15.133462+00:00",
+    "total_value": 276540.95,
+    "pnl_since_last": 41.45,
+    "positions_count": 3,
+    "exposure_pct": 20.07
+  },
+  {
+    "timestamp": "2026-03-27T14:54:15.262563+00:00",
+    "total_value": 276644.6,
+    "pnl_since_last": 103.65,
+    "positions_count": 3,
+    "exposure_pct": 20.1
+  },
+  {
+    "timestamp": "2026-03-27T14:59:15.452537+00:00",
+    "total_value": 276755.4,
+    "pnl_since_last": 110.8,
+    "positions_count": 3,
+    "exposure_pct": 20.13
+  },
+  {
+    "timestamp": "2026-03-27T15:04:15.262484+00:00",
+    "total_value": 276806.09,
+    "pnl_since_last": 50.69,
+    "positions_count": 3,
+    "exposure_pct": 20.14
+  }
+]

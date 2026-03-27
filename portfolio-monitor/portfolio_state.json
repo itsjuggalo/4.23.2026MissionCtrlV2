@@ -1,0 +1,104 @@
+{
+  "last_updated": "2026-03-27T15:04:15.262484+00:00",
+  "total_value_usd": 276806.09,
+  "total_pnl_today_usd": 50.69,
+  "total_pnl_today_pct": 0.0183,
+  "total_pnl_week_usd": -3200.31,
+  "cash_available": 221048.0,
+  "deployed_capital": 55758.09,
+  "deployed_pct": 20.14,
+  "positions": [
+    {
+      "symbol": "BTC/USDT",
+      "asset_class": "crypto",
+      "direction": "LONG",
+      "size": 0.5,
+      "entry_price": 66800,
+      "stop_loss": null,
+      "targets": [],
+      "opened_at": null,
+      "value_usd": 33129.15,
+      "current_price": 66258.3,
+      "price_stale": false,
+      "unrealized_pnl_usd": -270.85,
+      "unrealized_pnl_pct": -0.8109,
+      "distance_to_stop_pct": null,
+      "distance_to_target_pct": null,
+      "pct_of_portfolio": 11.9684
+    },
+    {
+      "symbol": "ETH/USDT",
+      "asset_class": "crypto",
+      "direction": "LONG",
+      "size": 5,
+      "entry_price": 3480,
+      "stop_loss": null,
+      "targets": [],
+      "opened_at": null,
+      "value_usd": 9964.45,
+      "current_price": 1992.89,
+      "price_stale": false,
+      "unrealized_pnl_usd": -7435.55,
+      "unrealized_pnl_pct": -42.733,
+      "distance_to_stop_pct": null,
+      "distance_to_target_pct": null,
+      "pct_of_portfolio": 3.5998
+    },
+    {
+      "symbol": "AAPL",
+      "asset_class": "stocks",
+      "direction": "LONG",
+      "size": 50,
+      "entry_price": 197.5,
+      "stop_loss": null,
+      "targets": [],
+      "opened_at": null,
+      "value_usd": 12664.49,
+      "current_price": 253.2899,
+      "price_stale": false,
+      "unrealized_pnl_usd": 2789.49,
+      "unrealized_pnl_pct": 28.248,
+      "distance_to_stop_pct": null,
+      "distance_to_target_pct": null,
+      "pct_of_portfolio": 4.5752
+    }
+  ],
+  "allocation": {
+    "crypto": {
+      "value": 43093.6,
+      "pct": 15.57
+    },
+    "stocks": {
+      "value": 12664.49,
+      "pct": 4.58
+    },
+    "other": {
+      "value": 0,
+      "pct": 0.0
+    },
+    "cash": {
+      "value": 221048.0,
+      "pct": 79.86
+    }
+  },
+  "risk_metrics": {
+    "total_exposure_pct": 20.14,
+    "largest_position_pct": 11.97,
+    "largest_position": "BTC/USDT",
+    "positions_at_risk": 1,
+    "positions_near_stop": [],
+    "positions_near_target": []
+  },
+  "alerts": [
+    {
+      "priority": "HIGH",
+      "type": "large_loss",
+      "symbol": "ETH/USDT",
+      "message": "Unrealized loss -42.73%",
+      "details": {
+        "pnl_pct": -42.733,
+        "pnl_usd": -7435.55
+      }
+    }
+  ]
+}

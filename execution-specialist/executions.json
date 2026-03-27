@@ -1,0 +1,97 @@
+[
+  {
+    "id": "ee447d6a-41a9-40a2-a047-66d229f9cdc7",
+    "signal_id": "165b682c-d470-4528-8369-c3da73927777",
+    "analyst_result_id": null,
+    "risk_decision_id": "9092695c-3e27-4db5-bd16-227e15372814",
+    "symbol": "SOL",
+    "direction": "LONG",
+    "timestamp": "2026-03-24T20:02:07.280696+00:00",
+    "status": "expired",
+    "current_price": 93.39,
+    "signal_entry": 91.0,
+    "price_drift_pct": 5.276,
+    "stale": true,
+    "slippage_est": "0.10%",
+    "estimated_fees": 3.28,
+    "execution_plan": {
+      "entries": [
+        {
+          "order": 1,
+          "type": "limit",
+          "price": 88.71,
+          "size": 7.2,
+          "pct": 40,
+          "status": "prepared",
+          "note": "immediate entry at market"
+        },
+        {
+          "order": 2,
+          "type": "limit",
+          "price": 88.2664,
+          "size": 5.4,
+          "pct": 30,
+          "status": "prepared",
+          "note": "0.5% scaled entry"
+        },
+        {
+          "order": 3,
+          "type": "limit",
+          "price": 87.8229,
+          "size": 5.4,
+          "pct": 30,
+          "status": "prepared",
+          "note": "1.0% scaled entry"
+        }
+      ],
+      "stop_loss": {
+        "trigger": 86.5,
+        "limit": 86.327,
+        "type": "stop_limit",
+        "slippage_buffer": "0.2%"
+      },
+      "take_profits": [
+        {
+          "tp": 1,
+          "price": 100.0,
+          "close_pct": 40,
+          "action": "close 40%, move SL to break-even",
+          "status": "pending"
+        },
+        {
+          "tp": 2,
+          "price": 108.0,
+          "close_pct": 30,
+          "action": "close 30%",
+          "status": "pending"
+        },
+        {
+          "tp": 3,
+          "price": 115.0,
+          "close_pct": 30,
+          "action": "close remaining 30%",
+          "status": "pending"
+        }
+      ]
+    },
+    "risk_manager_approval": {
+      "position_size": 18.0,
+      "value_usd": 1638.0,
+      "risk_amount_usd": 4230.0,
+      "risk_pct": 1.8,
+      "rules_snapshot": {
+        "default_risk_per_trade_pct": 1.5
+      }
+    },
+    "analyst_verdict": "?",
+    "analyst_score": "?",
+    "history": [
+      {
+        "time": "2026-03-24T20:02:07.280717+00:00",
+        "event": "prepared",
+        "detail": "Execution plan created. Price: $88.7100. Analyst: ? ?. \u26a0\ufe0f Stale"
+      }
+    ],
+    "archived_at": "2026-03-25T16:01:14.821125+00:00"
+  }
+]
