@@ -289,7 +289,7 @@ function ForceGraph({
 // ============================= MAIN MEMORY PAGE =============================
 
 export function MemoryPage() {
-  const [activeTab, setActiveTab] = useState<'list' | 'graph'>('list');
+  const [activeTab, setActiveTab] = useState<'list' | 'graph'>('graph');
 
   // List state
   const [memories, setMemories] = useState<Memory[]>([]);

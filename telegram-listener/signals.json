@@ -1,96 +1,5 @@
 [
   {
-    "id": "b6cd786f-eab4-4b71-ae99-2343a88defaf",
-    "channel_id": "-1001853036360",
-    "channel_name": "Coin Sonar V2",
-    "timestamp": "2026-04-03T13:23:20.544941+00:00",
-    "raw_text": "$CTSI | #CTSIUSDT | TradingView\nPrice: 0.04774 (+86.1% in 24h)\n\u25141 min change: +1.9% \ud83d\udcc8\n96.2K USDT traded in 1 min\n\u2514Buys: 52.5K USDT [55%] \ud83d\udfe2\n24h Vol: 34.3M USDT (Binance)\nAlerts in this hour: 14 \u2b50\ufe0f\u2b50\ufe0f",
-    "symbol": "CTSI",
-    "direction": null,
-    "entry": 0.04774,
-    "stop_loss": null,
-    "targets": [],
-    "leverage": null,
-    "price_change": null,
-    "score": 35,
-    "status": "rejected",
-    "risk_reward": null,
-    "confirmations": 1,
-    "confirmed_by": [
-      "Coin Sonar V2"
-    ]
-  },
-  {
-    "id": "8bf93166-9f5c-4e28-b202-fbd66d4559d1",
-    "channel_id": "-1001853036360",
-    "channel_name": "Coin Sonar V2",
-    "timestamp": "2026-04-03T13:24:06.975704+00:00",
-    "raw_text": "$SUPER | #SUPERUSDT | TradingView\nPrice: 0.1010 (+1.5% in 24h)\n\u25141 min change: +0.8% \ud83d\udcc8\n41.9K USDT traded in 1 min\n\u2514Buys: 23.9K USDT [57%] \ud83d\udfe2\n24h Vol: 525.8K USDT (Binance)\nAlerts in this hour: 1",
-    "symbol": "SUPER",
-    "direction": null,
-    "entry": 0.101,
-    "stop_loss": null,
-    "targets": [],
-    "leverage": null,
-    "price_change": null,
-    "score": 35,
-    "status": "rejected",
-    "risk_reward": null,
-    "confirmations": 1,
-    "confirmed_by": [
-      "Coin Sonar V2"
-    ]
-  },
-  {
-    "id": "5c8522a1-d294-49d5-b659-2bd0cb3911ee",
-    "channel_id": "websocket",
-    "channel_name": "AICryptoSignals",
-    "timestamp": "2026-04-03T13:24:28.345049+00:00",
-    "raw_text": "PUMPUSDT\nLONG\nEntry: 0.0016590\nPrice change: +5.00%",
-    "symbol": "PUMP",
-    "direction": "LONG",
-    "entry": 0.001659,
-    "stop_loss": null,
-    "targets": [],
-    "leverage": null,
-    "price_change": "+5.00%",
-    "score": 50,
-    "status": "review",
-    "risk_reward": null,
-    "confirmations": 1,
-    "confirmed_by": [
-      "AICryptoSignals"
-    ],
-    "quality_score": 6.0,
-    "quality_flags": [
-      "complete-data",
-      "new-source",
-      "no-stop-loss"
-    ],
-    "tier_emoji": "\u2b50"
-  },
-  {
-    "id": "2d21e3f4-2648-4812-aee4-53f2f02dcefd",
-    "channel_id": "-1001853036360",
-    "channel_name": "Coin Sonar V2",
-    "timestamp": "2026-04-03T13:24:58.504905+00:00",
-    "raw_text": "$FIDA | #FIDAUSDT | TradingView\nPrice: 0.01864 (+15.0% in 24h)\n\u25141 min change: +1.6% \ud83d\udcc8\n46.0K USDT traded in 1 min\n\u2514Sells: 28.4K USDT [62%] \ud83d\udd34\n24h Vol: 24.6M USDT (Binance)\nAlerts in this hour: 4 \u2b50\ufe0f",
-    "symbol": "FIDA",
-    "direction": null,
-    "entry": 0.01864,
-    "stop_loss": null,
-    "targets": [],
-    "leverage": null,
-    "price_change": null,
-    "score": 35,
-    "status": "rejected",
-    "risk_reward": null,
-    "confirmations": 1,
-    "confirmed_by": [
-      "Coin Sonar V2"
-    ]
-  },
-  {
     "id": "3482f383-6292-4279-9750-2c3168546b69",
     "channel_id": "websocket",
     "channel_name": "AICryptoSignals",
@@ -11301,5 +11210,97 @@
       "duplicate-signal"
     ],
     "tier_emoji": "\u274c"
+  },
+  {
+    "id": "f96232da-82b3-452b-8dc0-95bd94cf22c1",
+    "channel_id": "websocket",
+    "channel_name": "AICryptoSignals",
+    "timestamp": "2026-04-03T18:16:07.419415+00:00",
+    "raw_text": "QNTUSDT\nLONG\nEntry: 77.050000\nPrice change: +8.54%",
+    "symbol": "QNT",
+    "direction": "LONG",
+    "entry": 77.05,
+    "stop_loss": null,
+    "targets": [],
+    "leverage": null,
+    "price_change": "+8.54%",
+    "score": 50,
+    "status": "rejected",
+    "risk_reward": null,
+    "confirmations": 1,
+    "confirmed_by": [
+      "AICryptoSignals"
+    ],
+    "quality_score": 1.0,
+    "quality_flags": [
+      "complete-data",
+      "new-source",
+      "no-stop-loss",
+      "duplicate-signal"
+    ],
+    "tier_emoji": "\u274c"
+  },
+  {
+    "id": "10675ddd-b894-4734-978d-4e863253c580",
+    "channel_id": "-1001853036360",
+    "channel_name": "Coin Sonar V2",
+    "timestamp": "2026-04-03T18:16:23.137379+00:00",
+    "raw_text": "$C | #CUSDT | TradingView\nPrice: 0.0852 (+22.1% in 24h)\n\u25141 min change: +1.7% \ud83d\udcc8\n37.2K USDT traded in 1 min\n\u2514Buys: 25.6K USDT [69%] \ud83d\udfe2\n24h Vol: 7.1M USDT (Binance)\nAlerts in this hour: 10 \u2b50\ufe0f\u2b50\ufe0f",
+    "symbol": "CUSDT",
+    "direction": null,
+    "entry": 0.0852,
+    "stop_loss": null,
+    "targets": [],
+    "leverage": null,
+    "price_change": null,
+    "score": 35,
+    "status": "rejected",
+    "risk_reward": null,
+    "confirmations": 1,
+    "confirmed_by": [
+      "Coin Sonar V2"
+    ]
+  },
+  {
+    "id": "9b6325b1-4250-4178-a6e7-54ad9bcbf8fe",
+    "channel_id": "-1001853036360",
+    "channel_name": "Coin Sonar V2",
+    "timestamp": "2026-04-03T18:16:33.329107+00:00",
+    "raw_text": "$ACH | #ACHUSDT | TradingView\nPrice: 0.00615 (+2.0% in 24h)\n\u25141 min change: +0.7% \ud83d\udcc8\n38.3K USDT traded in 1 min\n\u2514Buys: 31.6K USDT [83%] \ud83d\udfe2\n24h Vol: 998.6K USDT (Binance)\nAlerts in this hour: 3 \u2b50\ufe0f",
+    "symbol": "ACH",
+    "direction": null,
+    "entry": 0.00615,
+    "stop_loss": null,
+    "targets": [],
+    "leverage": null,
+    "price_change": null,
+    "score": 35,
+    "status": "rejected",
+    "risk_reward": null,
+    "confirmations": 1,
+    "confirmed_by": [
+      "Coin Sonar V2"
+    ]
+  },
+  {
+    "id": "91d70a58-4899-4502-b03b-2fdb71d61631",
+    "channel_id": "-1001853036360",
+    "channel_name": "Coin Sonar V2",
+    "timestamp": "2026-04-03T18:17:34.800669+00:00",
+    "raw_text": "$ACH | #ACHUSDT | TradingView\nPrice: 0.00620 (+2.0% in 24h)\n\u251431 sec change: +1.0% \ud83d\udcc8\n24.6K USDT traded in 31 sec\n\u2514Sells: 12.8K USDT [52%] \ud83d\udd34\n24h Vol: 998.6K USDT (Binance)\nAlerts in this hour: 4 \u2b50\ufe0f",
+    "symbol": "ACH",
+    "direction": null,
+    "entry": 0.0062,
+    "stop_loss": null,
+    "targets": [],
+    "leverage": null,
+    "price_change": null,
+    "score": 35,
+    "status": "rejected",
+    "risk_reward": null,
+    "confirmations": 1,
+    "confirmed_by": [
+      "Coin Sonar V2"
+    ]
   }
 ]
