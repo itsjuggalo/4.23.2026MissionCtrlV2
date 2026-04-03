@@ -31,14 +31,14 @@ type PageName =
   | 'Calendar'
   | 'Projects'
   | 'Memory'
-  | 'Memory Graph'
   | 'Office'
   | 'Docs'
   | 'Wallets'
   | 'Trades'
   | 'Activity'
   | 'Risk'
-  | 'Chart';
+  | 'Chart'
+  | 'PowerTrader';
 
 interface SidebarProps {
   activePage: PageName;
@@ -60,7 +60,6 @@ const navItems: { name: PageName; icon: React.ElementType }[] = [
   { name: 'Calendar', icon: Calendar },
   { name: 'Projects', icon: FolderKanban },
   { name: 'Memory', icon: Brain },
-  { name: 'Memory Graph', icon: GitBranch },
   { name: 'Office', icon: Building2 },
   { name: 'Docs', icon: FileText },
   { name: 'Wallets', icon: Wallet },
@@ -68,6 +67,7 @@ const navItems: { name: PageName; icon: React.ElementType }[] = [
   { name: 'Activity', icon: Activity },
   { name: 'Risk', icon: ShieldAlert },
   { name: 'Chart', icon: TrendingUp },
+  { name: 'PowerTrader', icon: TrendingUp },
 ];
 
 export function Sidebar({

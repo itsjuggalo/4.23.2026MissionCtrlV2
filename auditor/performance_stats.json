@@ -1,5 +1,5 @@
 {
-  "last_updated": "2026-03-26T23:58:18.712077+00:00",
+  "last_updated": "2026-04-02T23:56:52.916498+00:00",
   "all_time": {
     "total_trades": 0,
     "wins": 0,
@@ -24,7 +24,7 @@
     "losses": 0,
     "pnl_usd": 0,
     "win_rate_pct": 0,
-    "date": "2026-03-26"
+    "date": "2026-04-02"
   },
   "weekly": {
     "trades_closed": 0,
@@ -32,7 +32,7 @@
     "losses": 0,
     "pnl_usd": 0,
     "win_rate_pct": 0,
-    "week_start": "2026-03-23"
+    "week_start": "2026-03-30"
   },
   "monthly": {
     "trades_closed": 0,
@@ -40,7 +40,7 @@
     "losses": 0,
     "pnl_usd": 0,
     "win_rate_pct": 0,
-    "month": "2026-03"
+    "month": "2026-04"
   },
   "by_asset_class": {},
   "by_signal_source": {},

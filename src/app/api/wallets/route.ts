@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import crypto from 'crypto';
+import { execSync } from 'child_process';
 
 interface Asset {
   symbol: string;
@@ -31,6 +31,7 @@ interface WalletResponse {
   exchanges: {
     coinbase: ExchangeData;
     hyperliquid: ExchangeData;
+    robinhood: ExchangeData;
   };
   portfolio: {
     total_assets: number;
@@ -41,6 +42,37 @@ interface WalletResponse {
       percentage: number;
     }>;
   };
+}
+
+// Fetch Robinhood crypto holdings via Python sidecar (Ed25519 signing)
+function getRobinhoodBalance(): { assets: Asset[]; total_usd: number } {
+  const apiKey = process.env.ROBINHOOD_API_KEY || '';
+  if (!apiKey) throw new Error('ROBINHOOD_API_KEY not set');
+
+  const raw = execSync(
+    `ROBINHOOD_API_KEY=${apiKey} python3 /home/ubuntu/mission-control/scripts/robinhood-holdings.py`,
+    { timeout: 15000 }
+  ).toString();
+
+  const data = JSON.parse(raw);
+  if (data.error) throw new Error(data.error);
+
+  const assets: Asset[] = [];
+  let totalValue = 0;
+  const results = data.results || [];
+
+  totalValue = data.total_usd || 0;
+
+  for (const holding of results) {
+    const symbol = holding.asset_code || 'Unknown';
+    const quantity = parseFloat(holding.total_quantity || 0);
+    const valueUsd = parseFloat(holding.value_usd || 0);
+    if (quantity > 0) {
+      assets.push({ symbol, amount: quantity, value_usd: valueUsd });
+    }
+  }
+
+  return { assets, total_usd: totalValue };
 }
 
 // Fetch Hyperliquid balances for a single wallet (public API - no auth needed)
@@ -103,74 +135,31 @@ async function getHyperliquidBalance(address: string): Promise<{ assets: Asset[]
   return { assets, total_usd: totalValue };
 }
 
-// Fetch Coinbase balances using OAuth API
-async function getCoinbaseBalance(): Promise<{ assets: Asset[]; total_usd: number }> {
+// Fetch Coinbase balances via Python sidecar (CDP JWT/ES256 signing)
+function getCoinbaseBalance(): { assets: Asset[]; total_usd: number } {
+  const apiKey = process.env.COINBASE_API_KEY || '';
+  if (!apiKey) throw new Error('COINBASE_API_KEY not set');
+
+  const raw = execSync(
+    'python3 /home/ubuntu/mission-control/scripts/coinbase-holdings.py',
+    { timeout: 15000, env: { ...process.env, COINBASE_API_KEY: apiKey } }
+  ).toString();
+
+  const data = JSON.parse(raw);
+  if (data.error) throw new Error(data.error);
+
   const assets: Asset[] = [];
   let totalValue = 0;
+  const accounts = data.accounts || [];
+  totalValue = data.total_usd || 0;
 
-  const apiKey = process.env.COINBASE_API_KEY;
-  const apiSecret = process.env.COINBASE_API_SECRET;
-
-  if (!apiKey || !apiSecret) {
-    throw new Error('Coinbase API credentials not configured');
-  }
-
-  try {
-    // Build request for Coinbase API v2
-    const method = 'GET';
-    const requestPath = '/v2/accounts';
-    const body = '';
-    const timestamp = Math.floor(Date.now() / 1000).toString();
-    const message = timestamp + method + requestPath + body;
-
-    // Create HMAC SHA256 signature
-    const signature = crypto
-      .createHmac('sha256', apiSecret)
-      .update(message)
-      .digest('hex');
-
-    const response = await fetch(`https://api.coinbase.com${requestPath}`, {
-      method,
-      headers: {
-        'CB-ACCESS-KEY': apiKey,
-        'CB-ACCESS-SIGN': signature,
-        'CB-ACCESS-TIMESTAMP': timestamp,
-        'Content-Type': 'application/json',
-      },
-    });
-
-    if (!response.ok) {
-      const errorData = await response.json().catch(() => ({}));
-      throw new Error(
-        `Coinbase API returned ${response.status}: ${
-          errorData.errors?.[0]?.message || 'Check API key/secret format'
-        }`
-      );
+  for (const account of accounts) {
+    const symbol = account.currency || 'Unknown';
+    const amount = parseFloat(account.available_balance?.value || 0);
+    const valueUsd = parseFloat(account.value_usd || 0);
+    if (amount > 0.000001) {
+      assets.push({ symbol, amount, value_usd: valueUsd });
     }
-
-    const data = await response.json();
-
-    if (data.data && Array.isArray(data.data)) {
-      for (const account of data.data) {
-        const symbol = account.currency?.code || 'Unknown';
-        const amount = parseFloat(account.balance?.amount || 0);
-
-        if (amount > 0) {
-          // For Coinbase, we'd need to fetch prices separately
-          // For now, assume USD or convert via exchange rate
-          const valueUsd = amount;
-
-          assets.push({
-            symbol,
-            amount,
-            value_usd: valueUsd,
-          });
-          totalValue += valueUsd;
-        }
-      }
-    }
-  } catch (error) {
-    throw error;
   }
 
   return { assets, total_usd: totalValue };
@@ -250,6 +239,20 @@ export async function GET(request: NextRequest): Promise<NextResponse<WalletResp
         error instanceof Error ? error.message : 'Failed to fetch Hyperliquid data';
     }
 
+    // Robinhood integration
+    let robinhoodData: ExchangeData = {
+      exchange: 'robinhood',
+      connected: false,
+      total_usd: 0,
+      assets: [],
+    };
+    try {
+      const { assets, total_usd } = getRobinhoodBalance();
+      robinhoodData = { exchange: 'robinhood', connected: true, total_usd, assets };
+    } catch (error) {
+      robinhoodData.error = error instanceof Error ? error.message : 'Failed to fetch Robinhood data';
+    }
+
     // Coinbase integration (optional - continue if it fails)
     let coinbaseData: ExchangeData = {
       exchange: 'coinbase',
@@ -259,7 +262,7 @@ export async function GET(request: NextRequest): Promise<NextResponse<WalletResp
     };
 
     try {
-      const { assets, total_usd } = await getCoinbaseBalance();
+      const { assets, total_usd } = getCoinbaseBalance();
       coinbaseData = {
         exchange: 'coinbase',
         connected: true,
@@ -272,8 +275,8 @@ export async function GET(request: NextRequest): Promise<NextResponse<WalletResp
     }
 
     // Aggregate portfolio
-    const allAssets = [...hyperliquidData.assets, ...coinbaseData.assets];
-    const portfolioTotal = hyperliquidData.total_usd + coinbaseData.total_usd;
+    const allAssets = [...hyperliquidData.assets, ...coinbaseData.assets, ...robinhoodData.assets];
+    const portfolioTotal = hyperliquidData.total_usd + coinbaseData.total_usd + robinhoodData.total_usd;
 
     const portfolioAssets = allAssets.map((asset) => ({
       symbol: asset.symbol,
@@ -289,6 +292,7 @@ export async function GET(request: NextRequest): Promise<NextResponse<WalletResp
       exchanges: {
         coinbase: coinbaseData,
         hyperliquid: hyperliquidData,
+        robinhood: robinhoodData,
       },
       portfolio: {
         total_assets: portfolioAssets.length,
@@ -315,6 +319,13 @@ export async function GET(request: NextRequest): Promise<NextResponse<WalletResp
             total_usd: 0,
             assets: [],
             error: error instanceof Error ? error.message : 'Unknown error',
+          },
+          robinhood: {
+            exchange: 'robinhood',
+            connected: false,
+            total_usd: 0,
+            assets: [],
+            error: 'Server error',
           },
         },
         portfolio: {

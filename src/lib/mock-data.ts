@@ -59,15 +59,14 @@ export const taskBoard: TaskBoard = {
 };
 
 export const activityFeed: ActivityEntry[] = [
-  { time: '14:32:01', agent: 'Eric', action: 'Signal detected', detail: 'BTC/USDT RSI oversold on 4H - strength 94', type: 'signal' },
-  { time: '14:31:45', agent: 'Risk Manager', action: 'Risk check passed', detail: 'BTC long proposal within limits - 1.2% risk', type: 'risk' },
-  { time: '14:30:12', agent: 'Eric', action: 'Signal detected', detail: 'SOL/USDT breakout above $141.50', type: 'signal' },
-  { time: '14:28:33', agent: 'Macro Strategist', action: 'Intelligence update', detail: 'Fed minutes suggest dovish pivot - updated macro model', type: 'intel' },
-  { time: '14:25:00', agent: 'Execution Specialist', action: 'Order executed', detail: 'AAPL limit buy filled at $197.50 - 50 shares', type: 'execution' },
-  { time: '14:22:17', agent: 'The Analyst', action: 'Memory stored', detail: 'Saved insight: BTC historically rallies post-Fed dovish signals', type: 'memory' },
-  { time: '14:20:00', agent: 'Risk Manager', action: 'Alert triggered', detail: 'Portfolio exposure approaching 65% limit', type: 'risk' },
-  { time: '14:15:30', agent: 'Eric', action: 'Scan complete', detail: 'Crypto scanner cycle finished - 3 new signals', type: 'system' },
-  { time: '14:10:00', agent: 'System', action: 'Heartbeat', detail: 'All agents operational - latency 12ms', type: 'system' },
+  { time: '23:45:00', agent: 'BobaCat', action: 'EOD check complete', detail: 'LLY +0.13% from entry — stop intact, CPI tomorrow 8:30 AM EST', type: 'system' },
+  { time: '23:30:00', agent: 'BobaCat', action: 'Discord updated', detail: '8 channels populated: announcements, executions, risk, lessons, trade-reviews, psych, macro-calendar, mission-control', type: 'system' },
+  { time: '19:47:00', agent: 'BobaCat', action: 'EOD summary created', detail: 'LLY intraday high $957 faded on Novo Nordisk cross-trial data — closed $933.68', type: 'system' },
+  { time: '12:00:00', agent: 'BobaCat', action: 'Morning brief delivered', detail: 'Stock of Day: LLY (FDA oral obesity pill). BTC: hold $66K-$68K ahead of CPI', type: 'signal' },
+  { time: '09:35:00', agent: 'Execution Specialist', action: 'Position opened', detail: 'LLY LONG entry $932.48 — 10 shares. Catalyst: FDA Foundayo approval', type: 'execution' },
+  { time: '09:30:00', agent: 'Risk Manager', action: 'Risk check passed', detail: 'LLY position approved — 9.3% account, max loss $484 (0.48%), R/R 1:2.5', type: 'risk' },
+  { time: '08:30:00', agent: 'Macro Strategist', action: 'Alert issued', detail: 'CPI tomorrow April 3 — avoid BTC ±30 min around 8:30 AM EST. Volatility 2-4%', type: 'intel' },
+  { time: '00:00:00', agent: 'System', action: 'Session start', detail: 'April 2, 2026 — all agents operational', type: 'system' },
 ];
 
 export const schedule: ScheduleItem[] = [
@@ -118,20 +117,19 @@ export const wallets: Wallet[] = [
 ];
 
 export const riskData: RiskData = {
-  exposure: 62,
+  exposure: 9.3,
   limit: 75,
-  drawdown: -2.4,
-  sharpe: 1.82,
+  drawdown: 0.01,
+  sharpe: 0,
   maxPosition: 15,
-  openPositions: 13,
+  openPositions: 1,
   alerts: [
-    { level: 'warning', message: 'Portfolio exposure approaching 65% threshold' },
-    { level: 'info', message: 'Volatility index elevated - consider reducing position sizes' },
+    { level: 'warning', message: 'CPI release April 3 @ 8:30 AM EST — binary event. No new positions tonight.' },
+    { level: 'warning', message: 'Novo Nordisk competitive data weakened LLY thesis — monitor closely' },
+    { level: 'info', message: 'LLY stop $885 intact — max loss $484 (0.48% of account)' },
   ],
 };
 
 export const activeTrades: ActiveTrade[] = [
-  { symbol: 'AAPL', side: 'LONG', entry: 197.50, current: 198.45, pnl: '+0.48%' },
-  { symbol: 'BTC/USDT', side: 'LONG', entry: 66800, current: 67842.50, pnl: '+1.56%' },
-  { symbol: 'ETH/USDT', side: 'LONG', entry: 3480, current: 3521.80, pnl: '+1.20%' },
+  { symbol: 'LLY', side: 'LONG', entry: 932.48, current: 933.68, pnl: '+0.13%' },
 ];

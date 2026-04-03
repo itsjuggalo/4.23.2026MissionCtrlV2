@@ -181,8 +181,9 @@ def _fmt_pct(v) -> str:
 
 def build_trade_opened_msg(execution: dict) -> str:
     sym  = execution.get("symbol", "?")
-    dire = execution.get("direction", "?")
-    entry = execution.get("entry_avg") or execution.get("entry")
+    # Support both old and new executor field names
+    dire = execution.get("side", execution.get("direction", "?")).upper()
+    entry = execution.get("entry_price") or execution.get("entry_avg") or execution.get("entry")
     sl    = execution.get("stop_loss")
     tgts  = execution.get("targets") or []
     tgt_str = " / ".join(_fmt_price(t) for t in tgts[:3]) if tgts else "N/A"

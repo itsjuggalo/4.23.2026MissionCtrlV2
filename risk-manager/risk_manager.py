@@ -74,9 +74,38 @@ def load_rules() -> dict:
     return load_json(RULES_FILE, {})
 
 
+ALPACA_KEY    = open(os.path.expanduser("~/.openclaw/secrets/alpaca-key-id")).read().strip()
+ALPACA_SECRET = open(os.path.expanduser("~/.openclaw/secrets/alpaca-secret")).read().strip()
+ALPACA_BASE   = "https://paper-api.alpaca.markets/v2"
+
+def sync_alpaca_state(state: dict) -> dict:
+    """Pull live account + positions from Alpaca and update state."""
+    try:
+        import requests as _req
+        headers = {"APCA-API-KEY-ID": ALPACA_KEY, "APCA-API-SECRET-KEY": ALPACA_SECRET}
+        acct = _req.get(f"{ALPACA_BASE}/account", headers=headers, timeout=8).json()
+        pos  = _req.get(f"{ALPACA_BASE}/positions", headers=headers, timeout=8).json()
+        if isinstance(pos, list):
+            state["portfolio_value"] = round(float(acct.get("portfolio_value", state.get("portfolio_value", 100000))), 2)
+            state["cash"]            = round(float(acct.get("cash", 0)), 2)
+            state["daily_pnl"]       = round(float(acct.get("unrealized_intraday_pl", 0)), 2)
+            state["open_positions"]  = [{
+                "symbol":      p["symbol"],
+                "direction":   "LONG" if float(p["qty"]) > 0 else "SHORT",
+                "entry":       float(p["avg_entry_price"]),
+                "size":        abs(float(p["qty"])),
+                "value":       abs(float(p["market_value"])),
+                "asset_class": "stocks",
+            } for p in pos]
+            log.debug(f"[ALPACA SYNC] portfolio=${state['portfolio_value']:,.2f}  positions={len(state['open_positions'])}")
+    except Exception as e:
+        log.warning(f"[ALPACA SYNC] Failed: {e} — using cached state")
+    return state
+
 def load_state() -> dict:
     return load_json(STATE_FILE, {
-        "portfolio_value": 282000,
+        "portfolio_value": 100000,
+        "cash": 100000,
         "open_positions": [],
         "daily_pnl": 0.0,
         "weekly_pnl": 0.0,
@@ -249,18 +278,28 @@ def run_checks(analysis: dict, state: dict, rules: dict) -> dict:
         warnings.append(f"Cool-down active: {consec_loss} consecutive losses — position size reduced {rules.get('cool_down_reduce_size_pct',50)}%")
 
     # ── Check 3: Single Position Size ─────────────────────────────────────────
+    # NOTE: We check RISK amount (1.5% of portfolio) not position VALUE.
+    # A properly risk-sized trade on a wide-stop stock will have high position
+    # value but that's expected — we cap by dollar risk, not dollar value.
+    # Hard cap: position value must not exceed 25% of portfolio regardless.
     pos_sizing = calc_position(entry, stop, portfolio, rules, cool_down)
     max_single = rules.get("max_single_position_pct", 10)
+    HARD_VALUE_CAP_PCT = 25.0  # never put more than 25% of portfolio in one trade
     if pos_sizing is None:
         checks["position_size"] = {"status":"WARN","note":"Cannot calculate (missing entry/stop)"}
         warnings.append("Position size unknown — entry or stop loss missing from signal")
     else:
-        pct = pos_sizing["pct_of_portfolio"]
-        if pct > max_single:
-            checks["position_size"] = {"status":"VETO","pct_of_portfolio":pct,"limit":max_single}
-            veto.append(f"Position size {pct}% exceeds limit {max_single}%")
+        pct  = pos_sizing["pct_of_portfolio"]
+        risk_pct = round((pos_sizing["risk_amount_usd"] / portfolio) * 100, 2)
+        # Only veto if BOTH risk% > limit AND value > hard cap
+        if pct > HARD_VALUE_CAP_PCT:
+            checks["position_size"] = {"status":"VETO","pct_of_portfolio":pct,"risk_pct":risk_pct,"limit":HARD_VALUE_CAP_PCT}
+            veto.append(f"Position value {pct}% exceeds hard cap {HARD_VALUE_CAP_PCT}%")
+        elif risk_pct > max_single:
+            checks["position_size"] = {"status":"VETO","pct_of_portfolio":pct,"risk_pct":risk_pct,"limit":max_single}
+            veto.append(f"Risk {risk_pct}% of portfolio exceeds limit {max_single}%")
         else:
-            checks["position_size"] = {"status":"PASS","pct_of_portfolio":pct,"limit":max_single}
+            checks["position_size"] = {"status":"PASS","pct_of_portfolio":pct,"risk_pct":risk_pct,"note":"Risk-based sizing OK"}
 
     # ── Check 4: Asset Class Allocation ───────────────────────────────────────
     alloc_limits = rules.get("asset_allocation_limits", {})
@@ -522,6 +561,8 @@ async def run():
             try:
                 rules   = load_rules()
                 state   = load_state()
+                state   = sync_alpaca_state(state)   # ← live Alpaca sync every cycle
+                save_state(state)
                 results = load_analyst_results()
 
                 # IDs already decided on
@@ -542,6 +583,7 @@ async def run():
                     dire = analysis.get("direction", "?")
                     log.info(f"Evaluating {sym} {dire} (analyst score {analysis.get('total_score',0)}/6)")
 
+                    regime_data = get_market_regime(sym)
                     eval_result = run_checks(analysis, state, rules)
 
                     decision_record = {

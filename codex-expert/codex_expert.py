@@ -551,10 +551,10 @@ async def check_apis(session: aiohttp.ClientSession) -> None:
 # ── Check 5: Mission Control dashboard ────────────────────────────────────────
 
 async def check_dashboard(session: aiohttp.ClientSession) -> None:
-    # Check if port 3000 is responding
+    # Check if port 3033 is responding (mission-control runs on 3033)
     try:
         async with session.get(
-            "http://127.0.0.1:3000",
+            "http://127.0.0.1:3033",
             timeout=aiohttp.ClientTimeout(total=8)
         ) as r:
             if r.status in (200, 401):  # 401 = auth required but server is up
@@ -569,14 +569,14 @@ async def check_dashboard(session: aiohttp.ClientSession) -> None:
         "timestamp": datetime.now(timezone.utc).isoformat(),
         "type":      "auto_fix",
         "bot":       "mission-control",
-        "issue":     "Dashboard not responding on port 3000",
+        "issue":     "Dashboard not responding on port 3033",
         "action":    "pm2 restart mission-control",
         "result":    "restarted" if ok else "restart failed",
     })
     if can_alert("dashboard_down"):
         await post_discord(session, embed(
             "🔧 AUTO-FIX APPLIED" if ok else "🚨 CODEX ALERT — Dashboard Down",
-            f"**Issue:** Mission Control not responding on :3000\n"
+            f"**Issue:** Mission Control not responding on :3033\n"
             f"**Action:** pm2 restart mission-control\n"
             f"**Result:** {'Restarted ✅' if ok else 'Restart failed ❌'}",
             0x00d2a0 if ok else 0xff4757

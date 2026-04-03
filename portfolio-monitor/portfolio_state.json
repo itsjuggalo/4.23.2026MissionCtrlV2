@@ -1,104 +1,79 @@
 {
-  "last_updated": "2026-03-27T15:04:15.262484+00:00",
-  "total_value_usd": 276806.09,
-  "total_pnl_today_usd": 50.69,
-  "total_pnl_today_pct": 0.0183,
-  "total_pnl_week_usd": -3200.31,
-  "cash_available": 221048.0,
-  "deployed_capital": 55758.09,
-  "deployed_pct": 20.14,
+  "last_updated": "2026-04-03T16:38:46.860691+00:00",
+  "total_value_usd": 100031.93,
+  "total_pnl_today_usd": 0.0,
+  "total_pnl_today_pct": 0.0,
+  "total_pnl_week_usd": -178566.72,
+  "cash_available": 90020.3,
+  "deployed_capital": 10011.63,
+  "deployed_pct": 10.01,
   "positions": [
     {
-      "symbol": "BTC/USDT",
-      "asset_class": "crypto",
-      "direction": "LONG",
-      "size": 0.5,
-      "entry_price": 66800,
-      "stop_loss": null,
-      "targets": [],
-      "opened_at": null,
-      "value_usd": 33129.15,
-      "current_price": 66258.3,
-      "price_stale": false,
-      "unrealized_pnl_usd": -270.85,
-      "unrealized_pnl_pct": -0.8109,
-      "distance_to_stop_pct": null,
-      "distance_to_target_pct": null,
-      "pct_of_portfolio": 11.9684
-    },
-    {
-      "symbol": "ETH/USDT",
-      "asset_class": "crypto",
-      "direction": "LONG",
-      "size": 5,
-      "entry_price": 3480,
-      "stop_loss": null,
-      "targets": [],
-      "opened_at": null,
-      "value_usd": 9964.45,
-      "current_price": 1992.89,
-      "price_stale": false,
-      "unrealized_pnl_usd": -7435.55,
-      "unrealized_pnl_pct": -42.733,
-      "distance_to_stop_pct": null,
-      "distance_to_target_pct": null,
-      "pct_of_portfolio": 3.5998
-    },
-    {
-      "symbol": "AAPL",
+      "symbol": "LLY",
       "asset_class": "stocks",
       "direction": "LONG",
-      "size": 50,
-      "entry_price": 197.5,
+      "size": 10.0,
+      "entry_price": 932.48,
       "stop_loss": null,
       "targets": [],
       "opened_at": null,
-      "value_usd": 12664.49,
-      "current_price": 253.2899,
+      "value_usd": 9355.8,
+      "_alpaca_pnl_usd": 31.0,
+      "_alpaca_pnl_pct": 0.332,
+      "current_price": 935.58,
       "price_stale": false,
-      "unrealized_pnl_usd": 2789.49,
-      "unrealized_pnl_pct": 28.248,
+      "unrealized_pnl_usd": 31.0,
+      "unrealized_pnl_pct": 0.3324,
       "distance_to_stop_pct": null,
       "distance_to_target_pct": null,
-      "pct_of_portfolio": 4.5752
+      "pct_of_portfolio": 9.3528
+    },
+    {
+      "symbol": "SPY",
+      "asset_class": "stocks",
+      "direction": "LONG",
+      "size": 1.0,
+      "entry_price": 654.9,
+      "stop_loss": null,
+      "targets": [],
+      "opened_at": null,
+      "value_usd": 655.83,
+      "_alpaca_pnl_usd": 0.93,
+      "_alpaca_pnl_pct": 0.14200000000000002,
+      "current_price": 655.83,
+      "price_stale": false,
+      "unrealized_pnl_usd": 0.93,
+      "unrealized_pnl_pct": 0.142,
+      "distance_to_stop_pct": null,
+      "distance_to_target_pct": null,
+      "pct_of_portfolio": 0.6556
     }
   ],
   "allocation": {
     "crypto": {
-      "value": 43093.6,
-      "pct": 15.57
+      "value": 0,
+      "pct": 0.0
     },
     "stocks": {
-      "value": 12664.49,
-      "pct": 4.58
+      "value": 10011.63,
+      "pct": 10.01
     },
     "other": {
       "value": 0,
       "pct": 0.0
     },
     "cash": {
-      "value": 221048.0,
-      "pct": 79.86
+      "value": 90020.3,
+      "pct": 89.99
     }
   },
   "risk_metrics": {
-    "total_exposure_pct": 20.14,
-    "largest_position_pct": 11.97,
-    "largest_position": "BTC/USDT",
-    "positions_at_risk": 1,
+    "total_exposure_pct": 10.01,
+    "largest_position_pct": 9.35,
+    "largest_position": "LLY",
+    "positions_at_risk": 0,
     "positions_near_stop": [],
     "positions_near_target": []
   },
-  "alerts": [
-    {
-      "priority": "HIGH",
-      "type": "large_loss",
-      "symbol": "ETH/USDT",
-      "message": "Unrealized loss -42.73%",
-      "details": {
-        "pnl_pct": -42.733,
-        "pnl_usd": -7435.55
-      }
-    }
-  ]
+  "alerts": []
 }

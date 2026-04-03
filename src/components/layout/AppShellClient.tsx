@@ -21,9 +21,10 @@ import { ActivityPage } from '../pages/ActivityPage';
 import { RiskPage } from '../pages/RiskPage';
 import { SignalsPage } from '../pages/SignalsPage';
 import { TelegramSignalsPage } from '../pages/TelegramSignalsPage';
-import { MemoryGraphPage } from '../pages/MemoryGraphPage';
+
 import { OfficePage } from '../pages/OfficePage';
 import { ChartPage } from '../pages/ChartPage';
+import { PowerTraderPage } from '../pages/PowerTraderPage';
 import { PsychChatWidget } from '../ui/PsychChatWidget';
 
 type PageName =
@@ -37,14 +38,14 @@ type PageName =
   | 'Calendar'
   | 'Projects'
   | 'Memory'
-  | 'Memory Graph'
   | 'Office'
   | 'Docs'
   | 'Wallets'
   | 'Trades'
   | 'Activity'
   | 'Risk'
-  | 'Chart';
+  | 'Chart'
+  | 'PowerTrader';
 
 export function AppShellClient() {
   const searchParams = useSearchParams();
@@ -62,8 +63,8 @@ export function AppShellClient() {
       const pageName = (page.charAt(0).toUpperCase() + page.slice(1).toLowerCase()) as PageName;
       const validPages: PageName[] = [
         'Dashboard', 'Signals', 'Telegram', 'Scanner', 'Tasks', 'Agents', 
-        'Approvals', 'Calendar', 'Projects', 'Memory', 'Memory Graph', 
-        'Office', 'Docs', 'Wallets', 'Trades', 'Activity', 'Risk', 'Chart'
+        'Approvals', 'Calendar', 'Projects', 'Memory', 
+        'Office', 'Docs', 'Wallets', 'Trades', 'Activity', 'Risk', 'Chart', 'PowerTrader'
       ];
       if (validPages.includes(pageName)) {
         setActivePage(pageName);
@@ -99,8 +100,6 @@ export function AppShellClient() {
         return <ProjectsPage />;
       case 'Memory':
         return <MemoryPage />;
-      case 'Memory Graph':
-        return <MemoryGraphPage />;
       case 'Office':
         return <OfficePage />;
       case 'Docs':
@@ -111,6 +110,8 @@ export function AppShellClient() {
         return <TradesPage />;
       case 'Activity':
         return <ActivityPage />;
+      case 'PowerTrader':
+        return <PowerTraderPage />;
       case 'Chart':
         return <ChartPage />;
       case 'Risk':

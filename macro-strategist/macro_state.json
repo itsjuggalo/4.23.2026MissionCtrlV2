@@ -1,126 +1,126 @@
 {
-  "timestamp": "2026-03-27T15:00:01.043844+00:00",
-  "regime": "CRISIS",
-  "total_score": -8,
+  "timestamp": "2026-04-03T16:20:01.061011+00:00",
+  "regime": "RISK-OFF",
+  "total_score": -5,
   "max_score": 12,
-  "position_size_modifier": 0.25,
-  "recommendation": "Minimal exposure. Quarter-size only. Preserve capital \u2014 no new longs. DXY strength is a headwind \u2014 watch for risk-off pressure. VIX at 29.9 \u2014 heightened volatility, size down.",
+  "position_size_modifier": 0.5,
+  "recommendation": "Defensive stance. Half position sizes. Prefer shorts or cash over new longs.",
   "indicators": {
     "btc_bias": {
-      "raw_score": -4,
-      "bias": "BEARISH",
+      "raw_score": -3,
+      "bias": "SLIGHTLY BEARISH",
       "score": -1,
       "source": "btc-bias-scorer",
-      "timestamp": "2026-03-27T14:40:00.396702+00:00"
+      "timestamp": "2026-04-03T16:00:00.617381+00:00"
     },
     "dxy": {
-      "value": 99.951,
-      "trend": "rising above both SMAs",
-      "sma20": 99.397,
-      "sma50": 98.293,
+      "value": 100.179,
+      "trend": "flat",
+      "sma20": 99.698,
+      "sma50": 98.414,
       "vs_sma20": "above",
-      "chg5d": 0.302,
-      "score": -2
+      "chg5d": 0.029,
+      "score": 0
     },
     "vix": {
-      "value": 29.9,
-      "prev": 27.44,
+      "value": 23.87,
+      "prev": 24.54,
       "level": "elevated fear",
       "score": -1
     },
     "sp500": {
-      "price": 6427.44,
-      "ema20": 6650.19,
-      "ema50": 6754.1,
-      "sma200": 6635.13,
+      "price": 6582.69,
+      "ema20": 6602.47,
+      "ema50": 6716.25,
+      "sma200": 6644.6,
       "trend": "below all MAs \u2014 bear",
-      "chg5d": -1.215,
+      "chg5d": 1.629,
       "score": -2
     },
     "us10y": {
-      "value": 4.442,
-      "chg10d_pct": 3.664,
-      "trend": "rising sharply \u2014 tightening",
+      "value": 4.313,
+      "chg10d_pct": 0.747,
+      "trend": "rising",
       "score": -1
     },
     "crypto_mcap": {
-      "mcap": 2362371178960.0,
-      "prev_mcap": 2356612491524.0,
-      "trend": "flat (+0.2%)",
+      "mcap": 2383483816151.0,
+      "prev_mcap": 2383290437181.0,
+      "trend": "flat (+0.0%)",
       "score": 0
     },
     "fed_expectations": {
-      "value": 3.615,
-      "chg10d_pct": 0.333,
+      "value": 3.607,
+      "chg10d_pct": -0.138,
       "two_year_trend": "stable",
       "score": 0
     },
     "sector_rotation": {
-      "leader": "XLE",
-      "type": "risk-off",
-      "growth_avg_5d": -2.246,
-      "defensive_avg_5d": 1.916,
+      "leader": "XLK",
+      "type": "neutral",
+      "growth_avg_5d": 1.806,
+      "defensive_avg_5d": 1.576,
       "perf": {
-        "XLK": -3.127,
-        "XLF": -1.365,
-        "XLE": 5.438,
-        "XLU": 2.799,
-        "XLP": 1.033
+        "XLK": 2.634,
+        "XLF": 0.979,
+        "XLE": -3.69,
+        "XLU": 2.228,
+        "XLP": 0.924
       },
-      "score": -1
+      "score": 0
     }
   },
   "alerts": [],
   "history": [
     {
-      "timestamp": "2026-03-27T14:40:01.092918+00:00",
-      "regime": "CRISIS",
-      "score": -8
-    },
-    {
-      "timestamp": "2026-03-27T14:20:01.212763+00:00",
-      "regime": "CRISIS",
-      "score": -8
-    },
-    {
-      "timestamp": "2026-03-27T14:00:01.644041+00:00",
-      "regime": "CRISIS",
-      "score": -8
-    },
-    {
-      "timestamp": "2026-03-27T13:40:01.103837+00:00",
-      "regime": "CRISIS",
-      "score": -7
-    },
-    {
-      "timestamp": "2026-03-27T13:20:01.045327+00:00",
+      "timestamp": "2026-04-03T16:00:01.557239+00:00",
       "regime": "RISK-OFF",
-      "score": -6
+      "score": -5
     },
     {
-      "timestamp": "2026-03-27T13:00:01.066300+00:00",
+      "timestamp": "2026-04-03T15:40:01.108881+00:00",
       "regime": "RISK-OFF",
-      "score": -6
+      "score": -5
     },
     {
-      "timestamp": "2026-03-27T12:40:01.086352+00:00",
+      "timestamp": "2026-04-03T15:20:01.861240+00:00",
       "regime": "RISK-OFF",
-      "score": -6
+      "score": -5
     },
     {
-      "timestamp": "2026-03-27T12:20:01.534934+00:00",
+      "timestamp": "2026-04-03T15:00:01.202052+00:00",
       "regime": "RISK-OFF",
-      "score": -6
+      "score": -5
     },
     {
-      "timestamp": "2026-03-27T12:00:01.048956+00:00",
-      "regime": "CRISIS",
-      "score": -7
+      "timestamp": "2026-04-03T14:40:01.162769+00:00",
+      "regime": "RISK-OFF",
+      "score": -4
     },
     {
-      "timestamp": "2026-03-27T11:40:01.078894+00:00",
-      "regime": "CRISIS",
-      "score": -7
+      "timestamp": "2026-04-03T14:20:01.077915+00:00",
+      "regime": "RISK-OFF",
+      "score": -4
+    },
+    {
+      "timestamp": "2026-04-03T14:00:03.125914+00:00",
+      "regime": "RISK-OFF",
+      "score": -4
+    },
+    {
+      "timestamp": "2026-04-03T13:40:01.743955+00:00",
+      "regime": "RISK-OFF",
+      "score": -4
+    },
+    {
+      "timestamp": "2026-04-03T13:20:01.153849+00:00",
+      "regime": "RISK-OFF",
+      "score": -4
+    },
+    {
+      "timestamp": "2026-04-03T13:00:01.080629+00:00",
+      "regime": "RISK-OFF",
+      "score": -4
     }
   ]
 }

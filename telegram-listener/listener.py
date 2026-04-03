@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
 Mission Control - Telegram Signal Listener
-Monitors 7 channels and parses trading signals into signals.json
+Monitors 9 channels and parses trading signals into signals.json
 
 v2: adds signal quality scoring, duplicate detection, Discord webhooks,
     and per-channel stats tracking.
@@ -23,6 +23,7 @@ _sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), "..
 from dotenv import load_dotenv
 from shared.archiver import maybe_rotate
 from telethon import TelegramClient, events
+from signal_scorer import SignalScorer
 
 # Load .env from the same directory as this file
 load_dotenv(os.path.join(os.path.dirname(os.path.abspath(__file__)), ".env"))
@@ -51,16 +52,32 @@ WS_SOURCE            = "AICryptoSignals"
 WS_BACKOFF           = [5, 10, 30, 60]  # reconnect delays
 
 CHANNEL_IDS = [
-    -1002139755277,
-    -1001811830204,
-    -1001768716068,
-    -1001314221782,
-    -1002315467756,
-    -1001498307336,
-    -1001853036360,
+    # ── TIER 1: Structured signals (entry/stop/targets) ──────────────────
+    -1001448000337,   # Ai Golden Crypto — structured signals, hitting TPs (45%+ confirmed)
+    -1002048136679,   # xCrypto Signals — entry zone + 5 TPs, real-time TP confirmations
+    -1001853036360,   # Coin Sonar V2 — volume alerts (kept for context)
+    # ── TIER 2: Whale / market data ──────────────────────────────────────
+    -1002139755277,   # 🐳 WHALETRACKER
+    -1001768716068,   # Binance Futures 5m Volume Pump Monitor
+    -1002315467756,   # 🐳 Whale Volume Alert
+    -1001498307336,   # 📈 Binance Futures 5m Pump Monitor (No charts)
+    -1001314221782,   # 🐳 Whale Liquidations
+    # ── REMOVED (noise/scam/no signals) ──────────────────────────────────
+    # -1001811830204  # Ai Crypto Signals (Auto Bot) — 682 signals, 0 actionable
 ]
 
 DUPLICATE_WINDOW_MINUTES = 30
+
+# Initialize smart signal scorer
+_scorer = None
+def get_scorer():
+    global _scorer
+    if _scorer is None:
+        _scorer = SignalScorer(
+            channel_stats_path=CHANNEL_STATS_FILE,
+            signals_history_path=SIGNALS_FILE
+        )
+    return _scorer
 
 
 # ─── Existing parsing helpers (unchanged) ───────────────────────────────────
@@ -307,6 +324,12 @@ def build_actionable_embed(sig: dict) -> dict:
     lev = sig.get("leverage") or "—"
     confirmations = sig.get("confirmations", 1)
     conf_note = f" (+{confirmations-1} confirmation{'s' if confirmations > 2 else ''})" if confirmations > 1 else ""
+    
+    # Quality scoring
+    quality_score = sig.get('quality_score', 0)
+    tier_emoji = sig.get('tier_emoji', '')
+    quality_flags = sig.get('quality_flags', [])
+    flags_str = ', '.join(quality_flags[:3]) if quality_flags else 'N/A'
 
     description = (
         f"**Symbol:** {sig.get('symbol') or '?'}\n"
@@ -316,12 +339,14 @@ def build_actionable_embed(sig: dict) -> dict:
         f"**Targets:** {targets_str or '—'}\n"
         f"**R:R Ratio:** {rr_str}\n"
         f"**Leverage:** {lev}\n"
+        f"**Quality:** {quality_score:.1f}/10 {tier_emoji}\n"
+        f"**Flags:** {flags_str}\n"
         f"**Source:** {sig.get('channel_name', '?')}{conf_note}"
     )
 
     return {
         "embeds": [{
-            "title": f"🟢 ACTIONABLE SIGNAL (Score: {sig.get('score', 0)}/100)",
+            "title": f"{tier_emoji} ACTIONABLE SIGNAL (Quality: {quality_score:.1f}/10)",
             "description": description,
             "color": 0x00d2a0,
             "footer": {"text": f"Mission Control • {sig.get('timestamp', '')[:19].replace('T', ' ')} UTC"},
@@ -337,13 +362,18 @@ def build_rejected_embed(sig: dict, parsed: dict) -> dict:
     if not parsed.get("stop_loss"): missing.append("stop loss")
     if not parsed.get("targets"):   missing.append("targets")
     raw_preview = (sig.get("raw_text") or "")[:100].replace("\n", " ")
+    
+    quality_score = sig.get('quality_score', 0)
+    quality_flags = sig.get('quality_flags', [])
+    flags_str = ', '.join(quality_flags) if quality_flags else 'N/A'
 
     return {
         "embeds": [{
-            "title": f"🔴 REJECTED (Score: {sig.get('score', 0)}/100)",
+            "title": f"❌ REJECTED (Quality: {quality_score:.1f}/10)",
             "description": (
                 f"**Symbol:** {parsed.get('symbol') or '?'}\n"
                 f"**Missing:** {', '.join(missing) or 'none'}\n"
+                f"**Flags:** {flags_str}\n"
                 f"**Source:** {sig.get('channel_name', '?')}\n"
                 f"**Raw:** {raw_preview}…"
             ),
@@ -462,6 +492,27 @@ async def ingest_signal(text: str, channel_name: str, source_type: str = "telegr
     parsed    = parse_signal(text)
     score, rr = score_signal(parsed)
     status    = classify_status(score)
+    
+    # === SMART SIGNAL SCORING ===
+    quality_score = score / 10.0  # Default fallback
+    quality_flags = []
+    tier_emoji = '❓'
+    
+    try:
+        scorer = get_scorer()
+        quality_score, quality_flags = scorer.score_signal(parsed)
+        routing = scorer.get_routing(quality_score)
+        tier_emoji = scorer.get_tier_emoji(quality_score)
+        
+        # Override status with smart routing
+        if routing == 'reject':
+            status = 'rejected'
+        elif routing == 'review':
+            status = 'review'
+        elif routing == 'post':
+            status = 'actionable'
+    except Exception as e:
+        print(f"[SCORER ERROR] {e}", file=sys.stderr)
 
     signals  = load_signals()
     duplicate = find_duplicate(signals, parsed.get("symbol"), parsed.get("direction"))
@@ -484,11 +535,11 @@ async def ingest_signal(text: str, channel_name: str, source_type: str = "telegr
         return
 
     signal = {
-        "id":           str(uuid.uuid4()),
-        "channel_id":   source_type,
-        "channel_name": channel_name,
-        "timestamp":    timestamp,
-        "raw_text":     text,
+        "id":            str(uuid.uuid4()),
+        "channel_id":    source_type,
+        "channel_name":  channel_name,
+        "timestamp":     timestamp,
+        "raw_text":      text,
         **parsed,
         "score":         score,
         "status":        status,
@@ -496,6 +547,9 @@ async def ingest_signal(text: str, channel_name: str, source_type: str = "telegr
         "confirmations": 1,
         "confirmed_by":  [channel_name],
         "price_change":  parsed.get("price_change"),
+        "quality_score": quality_score,
+        "quality_flags": quality_flags,
+        "tier_emoji":    tier_emoji,
     }
 
     signals.append(signal)

@@ -3,7 +3,7 @@ module.exports = {
     {
       name: 'mission-control',
       script: 'npm',
-      args: 'start',
+      args: 'start -- -p 3033',
       cwd: '/home/ubuntu/mission-control',
       
       // CRITICAL: Disable file watching to prevent .next deletion

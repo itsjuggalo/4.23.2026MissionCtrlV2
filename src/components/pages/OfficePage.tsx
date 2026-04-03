@@ -173,9 +173,9 @@ export function OfficePage() {
     try {
       const res = await fetch('/api/agents');
       if (!res.ok) return;
-      const json = await res.json(); const data: AgentPM2[] = json.agents || json || [];
+      const json = await res.json(); const data: AgentPM2[] = Array.isArray(json.agents || json) ? (json.agents || json) : [];
       setAgents(prev => prev.map(agent => {
-        const proc = data.find((p: any) => p.id === agent.pm2Name);
+        const proc = data?.find((p: any) => p.id === agent.pm2Name);
         if (proc) return { ...agent, status: proc.status, lastLog: (proc as any).stats?.lastLog || proc.lastLog || '—', memMb: (proc as any).stats?.memMb || proc.memMb || 0, uptime: (proc as any).stats?.uptime || proc.uptime || '—', isBusy: ((proc as any).stats?.lastLog || '—') !== '—' && proc.status === 'online' };
         if (agent.pm2Name === 'psychtechologist') return { ...agent, status: 'online', lastLog: 'Ready for Commander', memMb: 0, uptime: '∞', isBusy: false };
         return agent;

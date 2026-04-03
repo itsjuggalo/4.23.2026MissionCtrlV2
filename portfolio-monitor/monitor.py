@@ -32,6 +32,58 @@ load_dotenv(os.path.join(os.path.dirname(os.path.abspath(__file__)), ".env"))
 _DIR          = os.path.dirname(os.path.abspath(__file__))
 _ROOT         = os.path.dirname(_DIR)
 
+# ── Alpaca live data ──────────────────────────────────────────────────────────
+_secrets = os.path.expanduser("~/.openclaw/secrets")
+try:
+    ALPACA_KEY    = open(os.path.join(_secrets, "alpaca-key-id")).read().strip()
+    ALPACA_SECRET = open(os.path.join(_secrets, "alpaca-secret")).read().strip()
+    ALPACA_BASE   = "https://paper-api.alpaca.markets/v2"
+    ALPACA_DATA   = "https://data.alpaca.markets/v2"
+    ALPACA_HDR    = {"APCA-API-KEY-ID": ALPACA_KEY, "APCA-API-SECRET-KEY": ALPACA_SECRET}
+    ALPACA_OK     = True
+except Exception:
+    ALPACA_OK = False
+
+def fetch_alpaca_account():
+    """Pull live account value, cash, P&L from Alpaca."""
+    if not ALPACA_OK:
+        return None
+    try:
+        r = requests.get(f"{ALPACA_BASE}/account", headers=ALPACA_HDR, timeout=8)
+        return r.json()
+    except Exception as e:
+        log.warning(f"Alpaca account fetch failed: {e}")
+        return None
+
+def fetch_alpaca_positions():
+    """Pull real open positions with live P&L from Alpaca."""
+    if not ALPACA_OK:
+        return None
+    try:
+        r = requests.get(f"{ALPACA_BASE}/positions", headers=ALPACA_HDR, timeout=8)
+        pos = r.json()
+        if not isinstance(pos, list):
+            return None
+        return pos
+    except Exception as e:
+        log.warning(f"Alpaca positions fetch failed: {e}")
+        return None
+
+def fetch_alpaca_price(symbol: str) -> float | None:
+    """Get latest stock price from Alpaca data API."""
+    if not ALPACA_OK:
+        return None
+    try:
+        r = requests.get(f"{ALPACA_DATA}/stocks/{symbol}/quotes/latest",
+                         headers=ALPACA_HDR, timeout=8)
+        q = r.json().get("quote", {})
+        ask, bid = float(q.get("ap", 0)), float(q.get("bp", 0))
+        if ask > 0 and bid > 0:
+            return round((ask + bid) / 2, 4)
+    except Exception:
+        pass
+    return None
+
 RISK_STATE    = os.path.join(_ROOT, "risk-manager",   "risk_state.json")
 MACRO_STATE   = os.path.join(_ROOT, "macro-strategist","macro_state.json")
 PORT_STATE    = os.path.join(_DIR,  "portfolio_state.json")
@@ -595,37 +647,70 @@ async def run():
                 risk_state  = load_json(RISK_STATE, {})
                 prev_state  = load_json(PORT_STATE, None)
 
-                raw_positions = risk_state.get("open_positions", [])
-                portfolio_val = float(risk_state.get("portfolio_value", 282000))
-                cash_avail    = portfolio_val - sum(
-                    float(p.get("value", 0)) for p in raw_positions)
-                cash_avail    = max(0, cash_avail)
+                # ── Alpaca live data (primary source) ─────────────────────────
+                alpaca_account   = fetch_alpaca_account()
+                alpaca_positions = fetch_alpaca_positions()
 
-                # ── Fetch prices ──────────────────────────────────────────────
+                if alpaca_account:
+                    portfolio_val = float(alpaca_account.get("portfolio_value", 0))
+                    cash_avail    = float(alpaca_account.get("cash", 0))
+                    daily_pnl     = float(alpaca_account.get("unrealized_intraday_pl", 0))
+                    log.info(f"  Alpaca: portfolio=${portfolio_val:,.2f} cash=${cash_avail:,.2f} day_pnl=${daily_pnl:+.2f}")
+                else:
+                    portfolio_val = float(risk_state.get("portfolio_value", 100000))
+                    cash_avail    = portfolio_val - sum(float(p.get("value",0)) for p in risk_state.get("open_positions",[]))
+                    daily_pnl     = float(risk_state.get("daily_pnl", 0))
+                    log.warning("  Alpaca unavailable — using cached risk_state")
+
+                # Build raw_positions from Alpaca (real) or risk_state (fallback)
+                if alpaca_positions is not None:
+                    raw_positions = [{
+                        "symbol":      p["symbol"],
+                        "direction":   "LONG" if float(p["qty"]) > 0 else "SHORT",
+                        "size":        abs(float(p["qty"])),
+                        "entry":       float(p["avg_entry_price"]),
+                        "entry_price": float(p["avg_entry_price"]),
+                        "value":       abs(float(p["market_value"])),
+                        "current_price_live": float(p["current_price"]),
+                        "unrealized_pnl_usd": float(p["unrealized_pl"]),
+                        "unrealized_pnl_pct": float(p["unrealized_plpc"]) * 100,
+                        "asset_class": "stocks",
+                        "stop_loss":   None,
+                        "targets":     [],
+                    } for p in alpaca_positions]
+                    log.info(f"  Alpaca positions: {len(raw_positions)} open")
+                else:
+                    raw_positions = risk_state.get("open_positions", [])
+
+                # ── Fetch prices (Alpaca first, yfinance fallback) ────────────
+                all_prices: dict[str, float | None] = {}
+
                 crypto_syms = [p["symbol"] for p in raw_positions
                                if classify_asset(p.get("symbol","")) == "crypto"]
                 stock_syms  = [p["symbol"] for p in raw_positions
                                if classify_asset(p.get("symbol","")) == "stocks"]
 
-                crypto_prices: dict[str, float | None] = {}
                 if crypto_syms:
                     log.info(f"  Fetching crypto prices: {crypto_syms}")
-                    crypto_prices = fetch_crypto_prices(crypto_syms)
+                    all_prices.update(fetch_crypto_prices(crypto_syms))
 
-                stock_prices: dict[str, float | None] = {}
                 for sym in stock_syms:
-                    log.info(f"  Fetching stock price: {sym}")
-                    stock_prices[sym] = fetch_stock_price(sym)
-                    time.sleep(YF_DELAY)
-
-                all_prices = {**crypto_prices, **stock_prices}
+                    # Try Alpaca data API first (faster, no rate limits)
+                    price = fetch_alpaca_price(sym)
+                    if not price:
+                        log.info(f"  Alpaca price miss for {sym}, trying yfinance")
+                        price = fetch_stock_price(sym)
+                        time.sleep(YF_DELAY)
+                    else:
+                        log.info(f"  {sym}: ${price} (Alpaca live)")
+                    all_prices[sym] = price
 
                 # ── Enrich positions ──────────────────────────────────────────
                 enriched = []
                 for raw in raw_positions:
                     sym   = raw.get("symbol","")
-                    price = all_prices.get(sym)
-                    # Normalise raw position into expected fields
+                    # Use Alpaca live price if available in the position record
+                    price = raw.get("current_price_live") or all_prices.get(sym)
                     norm = {
                         "symbol":        sym,
                         "asset_class":   raw.get("asset_class", classify_asset(sym)),
@@ -636,6 +721,9 @@ async def run():
                         "targets":       raw.get("targets", []),
                         "opened_at":     raw.get("opened_at"),
                         "value_usd":     raw.get("value", 0),
+                        # Carry through live P&L if Alpaca provided it
+                        "_alpaca_pnl_usd": raw.get("unrealized_pnl_usd"),
+                        "_alpaca_pnl_pct": raw.get("unrealized_pnl_pct"),
                     }
                     enriched.append(enrich_position(norm, price))
 

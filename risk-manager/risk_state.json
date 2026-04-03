@@ -1,33 +1,26 @@
 {
-  "portfolio_value": 282000,
+  "portfolio_value": 100031.93,
+  "cash": 90020.3,
   "open_positions": [
     {
-      "symbol": "BTC/USDT",
+      "symbol": "LLY",
       "direction": "LONG",
-      "entry": 66800,
-      "size": 0.5,
-      "value": 33421,
-      "asset_class": "crypto"
+      "entry": 932.48,
+      "size": 10.0,
+      "value": 9355.8,
+      "asset_class": "stocks"
     },
     {
-      "symbol": "ETH/USDT",
+      "symbol": "SPY",
       "direction": "LONG",
-      "entry": 3480,
-      "size": 5,
-      "value": 17609,
-      "asset_class": "crypto"
-    },
-    {
-      "symbol": "AAPL",
-      "direction": "LONG",
-      "entry": 197.5,
-      "size": 50,
-      "value": 9922,
+      "entry": 654.9,
+      "size": 1.0,
+      "value": 655.83,
       "asset_class": "stocks"
     }
   ],
-  "daily_pnl": -2.4,
-  "weekly_pnl": 1.8,
+  "daily_pnl": 0.0,
+  "weekly_pnl": 0,
   "consecutive_losses": 0,
   "decisions": [
     {
@@ -1392,7 +1385,1324 @@
       "entry": 0.2335,
       "stop_loss": null,
       "targets": []
+    },
+    {
+      "id": "388103f7-c82a-43f4-b671-9ba03bcbe62e",
+      "signal_id": "927d1ff9-eb3c-4468-b07e-f252c6417b2e",
+      "analyst_result_id": "5b2cdaf1-f1c8-4fb7-bb44-ec87a9bdc0fc",
+      "symbol": "SUI",
+      "direction": "BUY",
+      "timestamp": "2026-04-03T02:45:25.034708+00:00",
+      "decision": "VETOED",
+      "veto_reasons": [
+        "R:R ratio unavailable \u2014 conservative VETO"
+      ],
+      "warnings": [
+        "Position size unknown \u2014 entry or stop loss missing from signal",
+        "Correlation warning: BTC/USDT, ETH/USDT also open (crypto exposure 23.1%)"
+      ],
+      "checks": {
+        "drawdown": {
+          "status": "PASS",
+          "daily_pnl": -2.4,
+          "weekly_pnl": 1.8,
+          "daily_limit": -5,
+          "weekly_limit": -10
+        },
+        "open_positions": {
+          "status": "PASS",
+          "current": 3,
+          "limit": 15
+        },
+        "portfolio_exposure": {
+          "status": "PASS",
+          "current_pct": 21.61,
+          "would_be_pct": 31.61,
+          "limit": 75
+        },
+        "consecutive_losses": {
+          "status": "PASS",
+          "streak": 0,
+          "threshold": 3
+        },
+        "position_size": {
+          "status": "WARN",
+          "note": "Cannot calculate (missing entry/stop)"
+        },
+        "asset_allocation": {
+          "status": "PASS",
+          "asset_class": "crypto",
+          "current_pct": 18.1,
+          "would_be_pct": 23.1,
+          "limit": 60
+        },
+        "correlation": {
+          "status": "WARN",
+          "correlated_positions": [
+            "BTC/USDT",
+            "ETH/USDT"
+          ],
+          "exposure_pct": 18.1,
+          "would_be_pct": 23.1,
+          "limit": 30
+        },
+        "risk_reward": {
+          "status": "VETO",
+          "note": "R:R not calculable \u2014 missing entry/stop/target"
+        },
+        "leverage": {
+          "status": "PASS",
+          "requested": null,
+          "max": 20
+        }
+      },
+      "recommended_position": null,
+      "cool_down_active": false,
+      "rules_snapshot": {
+        "default_risk_per_trade_pct": 1.5
+      },
+      "volatility_regime": "LOW",
+      "supertrend_win_rate": 52.38,
+      "entry": 0.8908,
+      "stop_loss": null,
+      "targets": []
+    },
+    {
+      "id": "74f70dc7-f706-4bfd-ab5a-54c430e37780",
+      "signal_id": "e3413ba7-f36b-48c3-b7b2-54a72f78eda8",
+      "analyst_result_id": "d17c8891-c465-4f03-bd18-2f983965226d",
+      "symbol": "DOGE",
+      "direction": "BUY",
+      "timestamp": "2026-04-03T02:45:26.243968+00:00",
+      "decision": "VETOED",
+      "veto_reasons": [
+        "R:R ratio unavailable \u2014 conservative VETO"
+      ],
+      "warnings": [
+        "Position size unknown \u2014 entry or stop loss missing from signal",
+        "Correlation warning: BTC/USDT, ETH/USDT also open (crypto exposure 23.1%)"
+      ],
+      "checks": {
+        "drawdown": {
+          "status": "PASS",
+          "daily_pnl": -2.4,
+          "weekly_pnl": 1.8,
+          "daily_limit": -5,
+          "weekly_limit": -10
+        },
+        "open_positions": {
+          "status": "PASS",
+          "current": 3,
+          "limit": 15
+        },
+        "portfolio_exposure": {
+          "status": "PASS",
+          "current_pct": 21.61,
+          "would_be_pct": 31.61,
+          "limit": 75
+        },
+        "consecutive_losses": {
+          "status": "PASS",
+          "streak": 0,
+          "threshold": 3
+        },
+        "position_size": {
+          "status": "WARN",
+          "note": "Cannot calculate (missing entry/stop)"
+        },
+        "asset_allocation": {
+          "status": "PASS",
+          "asset_class": "crypto",
+          "current_pct": 18.1,
+          "would_be_pct": 23.1,
+          "limit": 60
+        },
+        "correlation": {
+          "status": "WARN",
+          "correlated_positions": [
+            "BTC/USDT",
+            "ETH/USDT"
+          ],
+          "exposure_pct": 18.1,
+          "would_be_pct": 23.1,
+          "limit": 30
+        },
+        "risk_reward": {
+          "status": "VETO",
+          "note": "R:R not calculable \u2014 missing entry/stop/target"
+        },
+        "leverage": {
+          "status": "PASS",
+          "requested": null,
+          "max": 20
+        }
+      },
+      "recommended_position": null,
+      "cool_down_active": false,
+      "rules_snapshot": {
+        "default_risk_per_trade_pct": 1.5
+      },
+      "volatility_regime": "HIGH",
+      "supertrend_win_rate": 41.38,
+      "entry": 0.09371,
+      "stop_loss": null,
+      "targets": []
+    },
+    {
+      "id": "ead80b25-64c1-41ef-b60f-49a614bfab0a",
+      "signal_id": "1dcea00d-446a-4b0a-aa38-dd8f03442d05",
+      "analyst_result_id": "f91007e7-af08-489c-ba75-6a638cbf6a29",
+      "symbol": "TRX",
+      "direction": "BUY",
+      "timestamp": "2026-04-03T02:45:27.516252+00:00",
+      "decision": "VETOED",
+      "veto_reasons": [
+        "R:R ratio unavailable \u2014 conservative VETO"
+      ],
+      "warnings": [
+        "Position size unknown \u2014 entry or stop loss missing from signal"
+      ],
+      "checks": {
+        "drawdown": {
+          "status": "PASS",
+          "daily_pnl": -2.4,
+          "weekly_pnl": 1.8,
+          "daily_limit": -5,
+          "weekly_limit": -10
+        },
+        "open_positions": {
+          "status": "PASS",
+          "current": 3,
+          "limit": 15
+        },
+        "portfolio_exposure": {
+          "status": "PASS",
+          "current_pct": 21.61,
+          "would_be_pct": 31.61,
+          "limit": 75
+        },
+        "consecutive_losses": {
+          "status": "PASS",
+          "streak": 0,
+          "threshold": 3
+        },
+        "position_size": {
+          "status": "WARN",
+          "note": "Cannot calculate (missing entry/stop)"
+        },
+        "asset_allocation": {
+          "status": "PASS",
+          "asset_class": "stocks",
+          "current_pct": 3.52,
+          "would_be_pct": 8.52,
+          "limit": 50
+        },
+        "correlation": {
+          "status": "PASS",
+          "correlated_positions": [
+            "AAPL"
+          ],
+          "exposure_pct": 3.52,
+          "would_be_pct": 8.52,
+          "limit": 30
+        },
+        "risk_reward": {
+          "status": "VETO",
+          "note": "R:R not calculable \u2014 missing entry/stop/target"
+        },
+        "leverage": {
+          "status": "PASS",
+          "requested": null,
+          "max": 20
+        }
+      },
+      "recommended_position": null,
+      "cool_down_active": false,
+      "rules_snapshot": {
+        "default_risk_per_trade_pct": 1.5
+      },
+      "volatility_regime": "LOW",
+      "supertrend_win_rate": 36.0,
+      "entry": 0.3206,
+      "stop_loss": null,
+      "targets": []
+    },
+    {
+      "id": "408c2942-6cc5-47be-9db3-97d80d868a7f",
+      "signal_id": "6e4d50ea-be31-40bc-bc11-8a0c2c645e40",
+      "analyst_result_id": "47870dad-13f8-458f-983e-25938f90f1a4",
+      "symbol": "DOGE",
+      "direction": "BUY",
+      "timestamp": "2026-04-03T02:45:28.761999+00:00",
+      "decision": "VETOED",
+      "veto_reasons": [
+        "R:R ratio unavailable \u2014 conservative VETO"
+      ],
+      "warnings": [
+        "Position size unknown \u2014 entry or stop loss missing from signal",
+        "Correlation warning: BTC/USDT, ETH/USDT also open (crypto exposure 23.1%)"
+      ],
+      "checks": {
+        "drawdown": {
+          "status": "PASS",
+          "daily_pnl": -2.4,
+          "weekly_pnl": 1.8,
+          "daily_limit": -5,
+          "weekly_limit": -10
+        },
+        "open_positions": {
+          "status": "PASS",
+          "current": 3,
+          "limit": 15
+        },
+        "portfolio_exposure": {
+          "status": "PASS",
+          "current_pct": 21.61,
+          "would_be_pct": 31.61,
+          "limit": 75
+        },
+        "consecutive_losses": {
+          "status": "PASS",
+          "streak": 0,
+          "threshold": 3
+        },
+        "position_size": {
+          "status": "WARN",
+          "note": "Cannot calculate (missing entry/stop)"
+        },
+        "asset_allocation": {
+          "status": "PASS",
+          "asset_class": "crypto",
+          "current_pct": 18.1,
+          "would_be_pct": 23.1,
+          "limit": 60
+        },
+        "correlation": {
+          "status": "WARN",
+          "correlated_positions": [
+            "BTC/USDT",
+            "ETH/USDT"
+          ],
+          "exposure_pct": 18.1,
+          "would_be_pct": 23.1,
+          "limit": 30
+        },
+        "risk_reward": {
+          "status": "VETO",
+          "note": "R:R not calculable \u2014 missing entry/stop/target"
+        },
+        "leverage": {
+          "status": "PASS",
+          "requested": null,
+          "max": 20
+        }
+      },
+      "recommended_position": null,
+      "cool_down_active": false,
+      "rules_snapshot": {
+        "default_risk_per_trade_pct": 1.5
+      },
+      "volatility_regime": "HIGH",
+      "supertrend_win_rate": 41.38,
+      "entry": 0.09325,
+      "stop_loss": null,
+      "targets": []
+    },
+    {
+      "id": "0c7a78c0-96a9-4034-b3f2-6490bad6b5ad",
+      "signal_id": "cb5a0ca4-208d-4a3e-a523-3eb04c95f334",
+      "analyst_result_id": "ffdf8308-b52b-4f6c-bf04-14c1f49a0a8a",
+      "symbol": "NVO",
+      "direction": "PUT",
+      "timestamp": "2026-04-03T02:45:29.996299+00:00",
+      "decision": "VETOED",
+      "veto_reasons": [
+        "R:R ratio unavailable \u2014 conservative VETO"
+      ],
+      "warnings": [
+        "Position size unknown \u2014 entry or stop loss missing from signal"
+      ],
+      "checks": {
+        "drawdown": {
+          "status": "PASS",
+          "daily_pnl": -2.4,
+          "weekly_pnl": 1.8,
+          "daily_limit": -5,
+          "weekly_limit": -10
+        },
+        "open_positions": {
+          "status": "PASS",
+          "current": 3,
+          "limit": 15
+        },
+        "portfolio_exposure": {
+          "status": "PASS",
+          "current_pct": 21.61,
+          "would_be_pct": 31.61,
+          "limit": 75
+        },
+        "consecutive_losses": {
+          "status": "PASS",
+          "streak": 0,
+          "threshold": 3
+        },
+        "position_size": {
+          "status": "WARN",
+          "note": "Cannot calculate (missing entry/stop)"
+        },
+        "asset_allocation": {
+          "status": "PASS",
+          "asset_class": "stocks",
+          "current_pct": 3.52,
+          "would_be_pct": 8.52,
+          "limit": 50
+        },
+        "correlation": {
+          "status": "PASS",
+          "correlated_positions": [
+            "AAPL"
+          ],
+          "exposure_pct": 3.52,
+          "would_be_pct": 8.52,
+          "limit": 30
+        },
+        "risk_reward": {
+          "status": "VETO",
+          "note": "R:R not calculable \u2014 missing entry/stop/target"
+        },
+        "leverage": {
+          "status": "PASS",
+          "requested": null,
+          "max": 20
+        }
+      },
+      "recommended_position": null,
+      "cool_down_active": false,
+      "rules_snapshot": {
+        "default_risk_per_trade_pct": 1.5
+      },
+      "volatility_regime": "LOW",
+      "supertrend_win_rate": 31.43,
+      "entry": 0.79,
+      "stop_loss": 0.79,
+      "targets": [
+        0.91,
+        1.03,
+        1.19
+      ]
+    },
+    {
+      "id": "2a7c7fa9-bc19-49d7-a4c1-5f5c0274d441",
+      "signal_id": "08f80e64-1ee3-4a0b-a3c2-f8f7b4c51d8c",
+      "analyst_result_id": "d9688bb4-a4c6-4469-b665-930ba0b9fcc5",
+      "symbol": "BAC",
+      "direction": "PUT",
+      "timestamp": "2026-04-03T02:45:31.195660+00:00",
+      "decision": "VETOED",
+      "veto_reasons": [
+        "R:R ratio unavailable \u2014 conservative VETO"
+      ],
+      "warnings": [
+        "Position size unknown \u2014 entry or stop loss missing from signal"
+      ],
+      "checks": {
+        "drawdown": {
+          "status": "PASS",
+          "daily_pnl": -2.4,
+          "weekly_pnl": 1.8,
+          "daily_limit": -5,
+          "weekly_limit": -10
+        },
+        "open_positions": {
+          "status": "PASS",
+          "current": 3,
+          "limit": 15
+        },
+        "portfolio_exposure": {
+          "status": "PASS",
+          "current_pct": 21.61,
+          "would_be_pct": 31.61,
+          "limit": 75
+        },
+        "consecutive_losses": {
+          "status": "PASS",
+          "streak": 0,
+          "threshold": 3
+        },
+        "position_size": {
+          "status": "WARN",
+          "note": "Cannot calculate (missing entry/stop)"
+        },
+        "asset_allocation": {
+          "status": "PASS",
+          "asset_class": "stocks",
+          "current_pct": 3.52,
+          "would_be_pct": 8.52,
+          "limit": 50
+        },
+        "correlation": {
+          "status": "PASS",
+          "correlated_positions": [
+            "AAPL"
+          ],
+          "exposure_pct": 3.52,
+          "would_be_pct": 8.52,
+          "limit": 30
+        },
+        "risk_reward": {
+          "status": "VETO",
+          "note": "R:R not calculable \u2014 missing entry/stop/target"
+        },
+        "leverage": {
+          "status": "PASS",
+          "requested": null,
+          "max": 20
+        }
+      },
+      "recommended_position": null,
+      "cool_down_active": false,
+      "rules_snapshot": {
+        "default_risk_per_trade_pct": 1.5
+      },
+      "volatility_regime": "LOW",
+      "supertrend_win_rate": 57.14,
+      "entry": 1.76,
+      "stop_loss": 1.76,
+      "targets": [
+        2.02,
+        2.29,
+        2.64
+      ]
+    },
+    {
+      "id": "818c8ea0-0031-4b4f-95b7-ef86d61c027e",
+      "signal_id": "029d924f-8551-4660-8aa6-c22a0a69d0c8",
+      "analyst_result_id": "ba8042bc-73d2-4176-a154-538053ed1785",
+      "symbol": "IWM",
+      "direction": "PUT",
+      "timestamp": "2026-04-03T02:45:32.418317+00:00",
+      "decision": "VETOED",
+      "veto_reasons": [
+        "R:R ratio unavailable \u2014 conservative VETO"
+      ],
+      "warnings": [
+        "Position size unknown \u2014 entry or stop loss missing from signal"
+      ],
+      "checks": {
+        "drawdown": {
+          "status": "PASS",
+          "daily_pnl": -2.4,
+          "weekly_pnl": 1.8,
+          "daily_limit": -5,
+          "weekly_limit": -10
+        },
+        "open_positions": {
+          "status": "PASS",
+          "current": 3,
+          "limit": 15
+        },
+        "portfolio_exposure": {
+          "status": "PASS",
+          "current_pct": 21.61,
+          "would_be_pct": 31.61,
+          "limit": 75
+        },
+        "consecutive_losses": {
+          "status": "PASS",
+          "streak": 0,
+          "threshold": 3
+        },
+        "position_size": {
+          "status": "WARN",
+          "note": "Cannot calculate (missing entry/stop)"
+        },
+        "asset_allocation": {
+          "status": "PASS",
+          "asset_class": "stocks",
+          "current_pct": 3.52,
+          "would_be_pct": 8.52,
+          "limit": 50
+        },
+        "correlation": {
+          "status": "PASS",
+          "correlated_positions": [
+            "AAPL"
+          ],
+          "exposure_pct": 3.52,
+          "would_be_pct": 8.52,
+          "limit": 30
+        },
+        "risk_reward": {
+          "status": "VETO",
+          "note": "R:R not calculable \u2014 missing entry/stop/target"
+        },
+        "leverage": {
+          "status": "PASS",
+          "requested": null,
+          "max": 20
+        }
+      },
+      "recommended_position": null,
+      "cool_down_active": false,
+      "rules_snapshot": {
+        "default_risk_per_trade_pct": 1.5
+      },
+      "volatility_regime": "LOW",
+      "supertrend_win_rate": 37.84,
+      "entry": 3.68,
+      "stop_loss": 3.68,
+      "targets": [
+        4.23,
+        4.78,
+        5.52
+      ]
+    },
+    {
+      "id": "25f2d298-fcbd-4669-a7bb-4b0c866d81d2",
+      "signal_id": "185c6516-b08a-4a40-9673-4c68883d4cfa",
+      "analyst_result_id": "d934e668-327f-43c3-8a55-6ba7061e32ee",
+      "symbol": "ALAB",
+      "direction": "PUT",
+      "timestamp": "2026-04-03T02:45:33.655422+00:00",
+      "decision": "VETOED",
+      "veto_reasons": [
+        "R:R 0.43:1 below minimum 1.5:1"
+      ],
+      "warnings": [],
+      "checks": {
+        "drawdown": {
+          "status": "PASS",
+          "daily_pnl": -2.4,
+          "weekly_pnl": 1.8,
+          "daily_limit": -5,
+          "weekly_limit": -10
+        },
+        "open_positions": {
+          "status": "PASS",
+          "current": 3,
+          "limit": 15
+        },
+        "portfolio_exposure": {
+          "status": "PASS",
+          "current_pct": 21.61,
+          "would_be_pct": 31.61,
+          "limit": 75
+        },
+        "consecutive_losses": {
+          "status": "PASS",
+          "streak": 0,
+          "threshold": 3
+        },
+        "position_size": {
+          "status": "PASS",
+          "pct_of_portfolio": 4.29,
+          "limit": 10
+        },
+        "asset_allocation": {
+          "status": "PASS",
+          "asset_class": "stocks",
+          "current_pct": 3.52,
+          "would_be_pct": 7.81,
+          "limit": 50
+        },
+        "correlation": {
+          "status": "PASS",
+          "correlated_positions": [
+            "AAPL"
+          ],
+          "exposure_pct": 3.52,
+          "would_be_pct": 7.81,
+          "limit": 30
+        },
+        "risk_reward": {
+          "status": "VETO",
+          "ratio": 0.43,
+          "minimum": 1.5
+        },
+        "leverage": {
+          "status": "PASS",
+          "requested": null,
+          "max": 20
+        }
+      },
+      "recommended_position": null,
+      "cool_down_active": false,
+      "rules_snapshot": {
+        "default_risk_per_trade_pct": 1.5
+      },
+      "volatility_regime": "LOW",
+      "supertrend_win_rate": 28.21,
+      "entry": 6.2,
+      "stop_loss": 4.03,
+      "targets": [
+        7.13,
+        8.06,
+        9.3
+      ]
+    },
+    {
+      "id": "3c70f27d-0ea9-43a2-8030-3c4be019aa53",
+      "signal_id": "66e3f762-fbfa-485f-a130-2f4ee261b7a7",
+      "analyst_result_id": "71bd8562-3971-4971-9516-93cd26230a1d",
+      "symbol": "TLT",
+      "direction": "BUY",
+      "timestamp": "2026-04-03T02:45:34.920279+00:00",
+      "decision": "VETOED",
+      "veto_reasons": [
+        "Position size 18.75% exceeds limit 10%",
+        "R:R 0.25:1 below minimum 1.5:1"
+      ],
+      "warnings": [],
+      "checks": {
+        "drawdown": {
+          "status": "PASS",
+          "daily_pnl": -2.4,
+          "weekly_pnl": 1.8,
+          "daily_limit": -5,
+          "weekly_limit": -10
+        },
+        "open_positions": {
+          "status": "PASS",
+          "current": 3,
+          "limit": 15
+        },
+        "portfolio_exposure": {
+          "status": "PASS",
+          "current_pct": 21.61,
+          "would_be_pct": 31.61,
+          "limit": 75
+        },
+        "consecutive_losses": {
+          "status": "PASS",
+          "streak": 0,
+          "threshold": 3
+        },
+        "position_size": {
+          "status": "VETO",
+          "pct_of_portfolio": 18.75,
+          "limit": 10
+        },
+        "asset_allocation": {
+          "status": "PASS",
+          "asset_class": "stocks",
+          "current_pct": 3.52,
+          "would_be_pct": 22.27,
+          "limit": 50
+        },
+        "correlation": {
+          "status": "PASS",
+          "correlated_positions": [
+            "AAPL"
+          ],
+          "exposure_pct": 3.52,
+          "would_be_pct": 22.27,
+          "limit": 30
+        },
+        "risk_reward": {
+          "status": "VETO",
+          "ratio": 0.25,
+          "minimum": 1.5
+        },
+        "leverage": {
+          "status": "PASS",
+          "requested": null,
+          "max": 20
+        }
+      },
+      "recommended_position": null,
+      "cool_down_active": false,
+      "rules_snapshot": {
+        "default_risk_per_trade_pct": 1.5
+      },
+      "volatility_regime": "LOW",
+      "supertrend_win_rate": 42.86,
+      "entry": 89.36,
+      "stop_loss": 82.21,
+      "targets": [
+        91.15,
+        93.83,
+        96.51
+      ]
+    },
+    {
+      "id": "c8c49f03-060e-4126-b574-bef87542362b",
+      "signal_id": "b77403f0-0120-4cab-bef2-508d43bc9028",
+      "analyst_result_id": "58e39a73-d6c0-4d1c-8978-bd20347d113a",
+      "symbol": "SEI",
+      "direction": "BUY",
+      "timestamp": "2026-04-03T02:45:36.358177+00:00",
+      "decision": "VETOED",
+      "veto_reasons": [
+        "R:R ratio unavailable \u2014 conservative VETO"
+      ],
+      "warnings": [
+        "Position size unknown \u2014 entry or stop loss missing from signal",
+        "Correlation warning: BTC/USDT, ETH/USDT also open (crypto exposure 23.1%)"
+      ],
+      "checks": {
+        "drawdown": {
+          "status": "PASS",
+          "daily_pnl": -2.4,
+          "weekly_pnl": 1.8,
+          "daily_limit": -5,
+          "weekly_limit": -10
+        },
+        "open_positions": {
+          "status": "PASS",
+          "current": 3,
+          "limit": 15
+        },
+        "portfolio_exposure": {
+          "status": "PASS",
+          "current_pct": 21.61,
+          "would_be_pct": 31.61,
+          "limit": 75
+        },
+        "consecutive_losses": {
+          "status": "PASS",
+          "streak": 0,
+          "threshold": 3
+        },
+        "position_size": {
+          "status": "WARN",
+          "note": "Cannot calculate (missing entry/stop)"
+        },
+        "asset_allocation": {
+          "status": "PASS",
+          "asset_class": "crypto",
+          "current_pct": 18.1,
+          "would_be_pct": 23.1,
+          "limit": 60
+        },
+        "correlation": {
+          "status": "WARN",
+          "correlated_positions": [
+            "BTC/USDT",
+            "ETH/USDT"
+          ],
+          "exposure_pct": 18.1,
+          "would_be_pct": 23.1,
+          "limit": 30
+        },
+        "risk_reward": {
+          "status": "VETO",
+          "note": "R:R not calculable \u2014 missing entry/stop/target"
+        },
+        "leverage": {
+          "status": "PASS",
+          "requested": null,
+          "max": 20
+        }
+      },
+      "recommended_position": null,
+      "cool_down_active": false,
+      "rules_snapshot": {
+        "default_risk_per_trade_pct": 1.5
+      },
+      "volatility_regime": "HIGH",
+      "supertrend_win_rate": 36.36,
+      "entry": 0.0501,
+      "stop_loss": null,
+      "targets": []
+    },
+    {
+      "id": "e66b713e-747a-4e73-aa96-c3b43c397a63",
+      "signal_id": "9f408c9a-12fa-448f-b083-ad08242005c7",
+      "analyst_result_id": "0ea74080-f88d-4df8-a12a-fcc8ed8b316a",
+      "symbol": "SOLBTC",
+      "direction": "BUY",
+      "timestamp": "2026-04-03T02:45:43.875379+00:00",
+      "decision": "VETOED",
+      "veto_reasons": [
+        "R:R ratio unavailable \u2014 conservative VETO"
+      ],
+      "warnings": [
+        "Position size unknown \u2014 entry or stop loss missing from signal",
+        "Correlation warning: BTC/USDT, ETH/USDT also open (crypto exposure 23.1%)"
+      ],
+      "checks": {
+        "drawdown": {
+          "status": "PASS",
+          "daily_pnl": -2.4,
+          "weekly_pnl": 1.8,
+          "daily_limit": -5,
+          "weekly_limit": -10
+        },
+        "open_positions": {
+          "status": "PASS",
+          "current": 3,
+          "limit": 15
+        },
+        "portfolio_exposure": {
+          "status": "PASS",
+          "current_pct": 21.61,
+          "would_be_pct": 31.61,
+          "limit": 75
+        },
+        "consecutive_losses": {
+          "status": "PASS",
+          "streak": 0,
+          "threshold": 3
+        },
+        "position_size": {
+          "status": "WARN",
+          "note": "Cannot calculate (missing entry/stop)"
+        },
+        "asset_allocation": {
+          "status": "PASS",
+          "asset_class": "crypto",
+          "current_pct": 18.1,
+          "would_be_pct": 23.1,
+          "limit": 60
+        },
+        "correlation": {
+          "status": "WARN",
+          "correlated_positions": [
+            "BTC/USDT",
+            "ETH/USDT"
+          ],
+          "exposure_pct": 18.1,
+          "would_be_pct": 23.1,
+          "limit": 30
+        },
+        "risk_reward": {
+          "status": "VETO",
+          "note": "R:R not calculable \u2014 missing entry/stop/target"
+        },
+        "leverage": {
+          "status": "PASS",
+          "requested": null,
+          "max": 20
+        }
+      },
+      "recommended_position": null,
+      "cool_down_active": false,
+      "rules_snapshot": {
+        "default_risk_per_trade_pct": 1.5
+      },
+      "volatility_regime": "UNKNOWN",
+      "supertrend_win_rate": 0,
+      "entry": 0.0012375,
+      "stop_loss": null,
+      "targets": []
+    },
+    {
+      "id": "e1db5f07-057a-4d02-8cf9-d1ccafdae119",
+      "signal_id": "864e6fb3-80aa-4762-bfdf-75bf858e2f92",
+      "analyst_result_id": "5cc56b4c-4403-4b00-bd97-d4aa419d7980",
+      "symbol": "TLT",
+      "direction": "BUY",
+      "timestamp": "2026-04-03T02:45:44.992996+00:00",
+      "decision": "VETOED",
+      "veto_reasons": [
+        "Position size 18.75% exceeds limit 10%",
+        "R:R 0.25:1 below minimum 1.5:1"
+      ],
+      "warnings": [],
+      "checks": {
+        "drawdown": {
+          "status": "PASS",
+          "daily_pnl": -2.4,
+          "weekly_pnl": 1.8,
+          "daily_limit": -5,
+          "weekly_limit": -10
+        },
+        "open_positions": {
+          "status": "PASS",
+          "current": 3,
+          "limit": 15
+        },
+        "portfolio_exposure": {
+          "status": "PASS",
+          "current_pct": 21.61,
+          "would_be_pct": 31.61,
+          "limit": 75
+        },
+        "consecutive_losses": {
+          "status": "PASS",
+          "streak": 0,
+          "threshold": 3
+        },
+        "position_size": {
+          "status": "VETO",
+          "pct_of_portfolio": 18.75,
+          "limit": 10
+        },
+        "asset_allocation": {
+          "status": "PASS",
+          "asset_class": "stocks",
+          "current_pct": 3.52,
+          "would_be_pct": 22.27,
+          "limit": 50
+        },
+        "correlation": {
+          "status": "PASS",
+          "correlated_positions": [
+            "AAPL"
+          ],
+          "exposure_pct": 3.52,
+          "would_be_pct": 22.27,
+          "limit": 30
+        },
+        "risk_reward": {
+          "status": "VETO",
+          "ratio": 0.25,
+          "minimum": 1.5
+        },
+        "leverage": {
+          "status": "PASS",
+          "requested": null,
+          "max": 20
+        }
+      },
+      "recommended_position": null,
+      "cool_down_active": false,
+      "rules_snapshot": {
+        "default_risk_per_trade_pct": 1.5
+      },
+      "volatility_regime": "LOW",
+      "supertrend_win_rate": 42.86,
+      "entry": 89.36,
+      "stop_loss": 82.21,
+      "targets": [
+        91.15,
+        93.83,
+        96.51
+      ]
+    },
+    {
+      "id": "01098e2e-f74d-4a16-afe2-490615c52087",
+      "signal_id": "3926eaa1-b3e1-4424-b090-ba4e42371f82",
+      "analyst_result_id": "803a9131-9763-44b5-93a7-a5332e9221c1",
+      "symbol": "MSFT",
+      "direction": "BUY",
+      "timestamp": "2026-04-03T02:45:46.140772+00:00",
+      "decision": "VETOED",
+      "veto_reasons": [
+        "Position size 18.75% exceeds limit 10%",
+        "R:R 0.25:1 below minimum 1.5:1"
+      ],
+      "warnings": [],
+      "checks": {
+        "drawdown": {
+          "status": "PASS",
+          "daily_pnl": -2.4,
+          "weekly_pnl": 1.8,
+          "daily_limit": -5,
+          "weekly_limit": -10
+        },
+        "open_positions": {
+          "status": "PASS",
+          "current": 3,
+          "limit": 15
+        },
+        "portfolio_exposure": {
+          "status": "PASS",
+          "current_pct": 21.61,
+          "would_be_pct": 31.61,
+          "limit": 75
+        },
+        "consecutive_losses": {
+          "status": "PASS",
+          "streak": 0,
+          "threshold": 3
+        },
+        "position_size": {
+          "status": "VETO",
+          "pct_of_portfolio": 18.75,
+          "limit": 10
+        },
+        "asset_allocation": {
+          "status": "PASS",
+          "asset_class": "stocks",
+          "current_pct": 3.52,
+          "would_be_pct": 22.27,
+          "limit": 50
+        },
+        "correlation": {
+          "status": "PASS",
+          "correlated_positions": [
+            "AAPL"
+          ],
+          "exposure_pct": 3.52,
+          "would_be_pct": 22.27,
+          "limit": 30
+        },
+        "risk_reward": {
+          "status": "VETO",
+          "ratio": 0.25,
+          "minimum": 1.5
+        },
+        "leverage": {
+          "status": "PASS",
+          "requested": null,
+          "max": 20
+        }
+      },
+      "recommended_position": null,
+      "cool_down_active": false,
+      "rules_snapshot": {
+        "default_risk_per_trade_pct": 1.5
+      },
+      "volatility_regime": "LOW",
+      "supertrend_win_rate": 27.27,
+      "entry": 373.93,
+      "stop_loss": 344.02,
+      "targets": [
+        381.41,
+        392.63,
+        403.84
+      ]
+    },
+    {
+      "id": "2da17eb7-6b6d-4ecf-9286-896aebb86f81",
+      "signal_id": "84f5fa40-527f-40df-86f0-b44e69dc5d3e",
+      "analyst_result_id": "c8268055-794d-4768-9ed7-9dffab08420a",
+      "symbol": "AAPL",
+      "direction": "BUY",
+      "timestamp": "2026-04-03T02:45:47.406496+00:00",
+      "decision": "VETOED",
+      "veto_reasons": [
+        "Position size 18.75% exceeds limit 10%",
+        "R:R 0.25:1 below minimum 1.5:1"
+      ],
+      "warnings": [],
+      "checks": {
+        "drawdown": {
+          "status": "PASS",
+          "daily_pnl": -2.4,
+          "weekly_pnl": 1.8,
+          "daily_limit": -5,
+          "weekly_limit": -10
+        },
+        "open_positions": {
+          "status": "PASS",
+          "current": 3,
+          "limit": 15
+        },
+        "portfolio_exposure": {
+          "status": "PASS",
+          "current_pct": 21.61,
+          "would_be_pct": 31.61,
+          "limit": 75
+        },
+        "consecutive_losses": {
+          "status": "PASS",
+          "streak": 0,
+          "threshold": 3
+        },
+        "position_size": {
+          "status": "VETO",
+          "pct_of_portfolio": 18.75,
+          "limit": 10
+        },
+        "asset_allocation": {
+          "status": "PASS",
+          "asset_class": "stocks",
+          "current_pct": 3.52,
+          "would_be_pct": 22.27,
+          "limit": 50
+        },
+        "correlation": {
+          "status": "PASS",
+          "correlated_positions": [
+            "AAPL"
+          ],
+          "exposure_pct": 3.52,
+          "would_be_pct": 22.27,
+          "limit": 30
+        },
+        "risk_reward": {
+          "status": "VETO",
+          "ratio": 0.25,
+          "minimum": 1.5
+        },
+        "leverage": {
+          "status": "PASS",
+          "requested": null,
+          "max": 20
+        }
+      },
+      "recommended_position": null,
+      "cool_down_active": false,
+      "rules_snapshot": {
+        "default_risk_per_trade_pct": 1.5
+      },
+      "volatility_regime": "MEDIUM",
+      "supertrend_win_rate": 41.38,
+      "entry": 252.57,
+      "stop_loss": 232.36,
+      "targets": [
+        257.62,
+        265.2,
+        272.78
+      ]
+    },
+    {
+      "id": "e62f376f-3d67-4a65-b865-1f1984a2c753",
+      "signal_id": "4b2147d7-0e18-4a92-8056-a2880de7c82b",
+      "analyst_result_id": "2dbf4dfa-6deb-437d-bb6e-b3ad7bd4cc7d",
+      "symbol": "NVDL",
+      "direction": "BUY",
+      "timestamp": "2026-04-03T02:45:48.598245+00:00",
+      "decision": "VETOED",
+      "veto_reasons": [
+        "Position size 18.75% exceeds limit 10%",
+        "R:R 0.25:1 below minimum 1.5:1"
+      ],
+      "warnings": [],
+      "checks": {
+        "drawdown": {
+          "status": "PASS",
+          "daily_pnl": -2.4,
+          "weekly_pnl": 1.8,
+          "daily_limit": -5,
+          "weekly_limit": -10
+        },
+        "open_positions": {
+          "status": "PASS",
+          "current": 3,
+          "limit": 15
+        },
+        "portfolio_exposure": {
+          "status": "PASS",
+          "current_pct": 21.61,
+          "would_be_pct": 31.61,
+          "limit": 75
+        },
+        "consecutive_losses": {
+          "status": "PASS",
+          "streak": 0,
+          "threshold": 3
+        },
+        "position_size": {
+          "status": "VETO",
+          "pct_of_portfolio": 18.75,
+          "limit": 10
+        },
+        "asset_allocation": {
+          "status": "PASS",
+          "asset_class": "stocks",
+          "current_pct": 3.52,
+          "would_be_pct": 22.27,
+          "limit": 50
+        },
+        "correlation": {
+          "status": "PASS",
+          "correlated_positions": [
+            "AAPL"
+          ],
+          "exposure_pct": 3.52,
+          "would_be_pct": 22.27,
+          "limit": 30
+        },
+        "risk_reward": {
+          "status": "VETO",
+          "ratio": 0.25,
+          "minimum": 1.5
+        },
+        "leverage": {
+          "status": "PASS",
+          "requested": null,
+          "max": 20
+        }
+      },
+      "recommended_position": null,
+      "cool_down_active": false,
+      "rules_snapshot": {
+        "default_risk_per_trade_pct": 1.5
+      },
+      "volatility_regime": "LOW",
+      "supertrend_win_rate": 35.14,
+      "entry": 89.14,
+      "stop_loss": 82.01,
+      "targets": [
+        90.92,
+        93.6,
+        96.27
+      ]
+    },
+    {
+      "id": "0f11f17e-8b17-44c0-b055-bd7128a16166",
+      "signal_id": "5d7fcab4-0639-4ab4-828d-f5a7652cc666",
+      "analyst_result_id": "877c9aa6-2767-48ec-95a5-2c41bc164b5e",
+      "symbol": "RENDER",
+      "direction": "BUY",
+      "timestamp": "2026-04-03T09:47:11.927396+00:00",
+      "decision": "VETOED",
+      "veto_reasons": [
+        "R:R ratio unavailable \u2014 conservative VETO"
+      ],
+      "warnings": [
+        "Position size unknown \u2014 entry or stop loss missing from signal",
+        "Correlation warning: LLY, SPY also open (stocks exposure 15.01%)"
+      ],
+      "checks": {
+        "drawdown": {
+          "status": "PASS",
+          "daily_pnl": 0.0,
+          "weekly_pnl": 0.0,
+          "daily_limit": -5,
+          "weekly_limit": -10
+        },
+        "open_positions": {
+          "status": "PASS",
+          "current": 2,
+          "limit": 15
+        },
+        "portfolio_exposure": {
+          "status": "PASS",
+          "current_pct": 10.01,
+          "would_be_pct": 20.01,
+          "limit": 75
+        },
+        "consecutive_losses": {
+          "status": "PASS",
+          "streak": 0,
+          "threshold": 3
+        },
+        "position_size": {
+          "status": "WARN",
+          "note": "Cannot calculate (missing entry/stop)"
+        },
+        "asset_allocation": {
+          "status": "PASS",
+          "asset_class": "stocks",
+          "current_pct": 10.01,
+          "would_be_pct": 15.01,
+          "limit": 50
+        },
+        "correlation": {
+          "status": "WARN",
+          "correlated_positions": [
+            "LLY",
+            "SPY"
+          ],
+          "exposure_pct": 10.01,
+          "would_be_pct": 15.01,
+          "limit": 30
+        },
+        "risk_reward": {
+          "status": "VETO",
+          "note": "R:R not calculable \u2014 missing entry/stop/target"
+        },
+        "leverage": {
+          "status": "PASS",
+          "requested": null,
+          "max": 20
+        }
+      },
+      "recommended_position": null,
+      "cool_down_active": false,
+      "rules_snapshot": {
+        "default_risk_per_trade_pct": 1.5
+      },
+      "volatility_regime": "UNKNOWN",
+      "supertrend_win_rate": 0,
+      "entry": 1.895,
+      "stop_loss": null,
+      "targets": []
     }
   ],
-  "last_updated": "2026-03-27T04:45:26.766355+00:00"
+  "last_updated": "2026-04-03T16:38:43.390298+00:00"
 }

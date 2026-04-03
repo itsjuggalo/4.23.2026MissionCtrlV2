@@ -1,5 +1,5 @@
 {
-  "last_analysis": "2026-03-27T14:44:29.715944+00:00",
+  "last_analysis": "2026-04-03T16:34:45.335189+00:00",
   "data_points": 0,
   "parameter_recommendations": {
     "eric": {
@@ -40,7 +40,7 @@
         }
       },
       "status": "pending_review",
-      "data_points": 147
+      "data_points": 200
     },
     "risk_manager": {
       "status": "insufficient_data",
@@ -54,63 +54,77 @@
       "channels_ranked": [
         {
           "channel": "Firebase-Vivid2",
-          "total_signals": 127,
-          "actionable_signals": 127,
-          "hit_rate_pct": 100.0,
+          "total_signals": 192,
+          "actionable_signals": 177,
+          "hit_rate_pct": 92.2,
+          "actual_win_rate": null
+        },
+        {
+          "channel": "Ai Golden Crypto",
+          "total_signals": 50,
+          "actionable_signals": 1,
+          "hit_rate_pct": 2.0,
           "actual_win_rate": null
         },
         {
           "channel": "Coin Sonar V2",
-          "total_signals": 2490,
+          "total_signals": 10696,
           "actionable_signals": 0,
           "hit_rate_pct": 0.0,
           "actual_win_rate": null
         },
         {
           "channel": "\ud83d\udc33 \ud835\udc16\ud835\udc07\ud835\udc00\ud835\udc0b\ud835\udc04\ud835\udc13\ud835\udc11\ud835\udc00\ud835\udc02\ud835\udc0a\ud835\udc04\ud835\udc11 \ud83d\udc40",
-          "total_signals": 1120,
+          "total_signals": 3546,
           "actionable_signals": 0,
           "hit_rate_pct": 0.0,
           "actual_win_rate": null
         },
         {
           "channel": "\ud83d\udc33 Whale Liquidations",
-          "total_signals": 242,
+          "total_signals": 837,
           "actionable_signals": 0,
           "hit_rate_pct": 0.0,
           "actual_win_rate": null
         },
         {
           "channel": "\ud83d\udc33 Whale Volume Alert",
-          "total_signals": 243,
+          "total_signals": 781,
           "actionable_signals": 0,
           "hit_rate_pct": 0.0,
           "actual_win_rate": null
         },
         {
           "channel": "Ai Crypto Signals (Auto Bot)",
-          "total_signals": 214,
+          "total_signals": 740,
           "actionable_signals": 0,
           "hit_rate_pct": 0.0,
           "actual_win_rate": null
         },
         {
           "channel": "\ud83d\udcc8 Binance Futures 5m Pump Monitor (No charts)",
-          "total_signals": 406,
+          "total_signals": 1605,
           "actionable_signals": 0,
           "hit_rate_pct": 0.0,
           "actual_win_rate": null
         },
         {
           "channel": "Binance Futures 5m Volume Pump Monitor \ud83d\ude80",
-          "total_signals": 406,
+          "total_signals": 1605,
           "actionable_signals": 0,
           "hit_rate_pct": 0.0,
           "actual_win_rate": null
         },
         {
           "channel": "AICryptoSignals",
-          "total_signals": 1912,
+          "total_signals": 5629,
+          "actionable_signals": 0,
+          "hit_rate_pct": 0.0,
+          "actual_win_rate": null
+        },
+        {
+          "channel": "xCrypto Signals",
+          "total_signals": 65,
           "actionable_signals": 0,
           "hit_rate_pct": 0.0,
           "actual_win_rate": null

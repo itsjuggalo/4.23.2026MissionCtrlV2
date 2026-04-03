@@ -28,6 +28,7 @@ interface WalletData {
   exchanges: {
     coinbase: ExchangeData;
     hyperliquid: ExchangeData;
+    robinhood: ExchangeData;
   };
   portfolio: {
     total_assets: number;
@@ -98,8 +99,8 @@ export function WalletsPage() {
     return null;
   }
 
-  const { coinbase, hyperliquid } = walletData.exchanges;
-  const hasAnyConnection = coinbase.connected || hyperliquid.connected;
+  const { coinbase, hyperliquid, robinhood } = walletData.exchanges;
+  const hasAnyConnection = coinbase.connected || hyperliquid.connected || robinhood?.connected;
 
   return (
     <div className="p-8">
@@ -128,7 +129,7 @@ export function WalletsPage() {
       </div>
 
       {/* Exchange Status */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
         {/* Coinbase */}
         <div className="bg-slate-800 rounded-lg p-6">
           <div className="flex items-center justify-between mb-4">
@@ -166,6 +167,45 @@ export function WalletsPage() {
             </>
           )}
         </div>
+
+        {/* Robinhood */}
+        {robinhood && (
+          <div className="bg-slate-800 rounded-lg p-6">
+            <div className="flex items-center justify-between mb-4">
+              <div className="flex items-center gap-2">
+                <span className="text-green-500 font-bold text-lg">$</span>
+                <h2 className="text-xl font-semibold">Robinhood</h2>
+              </div>
+              <div className={`px-3 py-1 rounded text-sm ${
+                robinhood.connected ? 'bg-green-900/30 text-green-400' : 'bg-red-900/30 text-red-400'
+              }`}>
+                {robinhood.connected ? '● Connected' : '○ Disconnected'}
+              </div>
+            </div>
+            {robinhood.error ? (
+              <p className="text-red-400 text-sm">{robinhood.error}</p>
+            ) : (
+              <>
+                <p className="text-2xl font-bold text-white mb-4">
+                  ${robinhood.total_usd.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                </p>
+                {robinhood.assets.length > 0 ? (
+                  <div className="space-y-2">
+                    {robinhood.assets.map((asset, idx) => (
+                      <div key={idx} className="flex justify-between text-sm">
+                        <span className="text-gray-400">{asset.symbol}</span>
+                        <span className="text-white">{asset.amount.toFixed(4)}</span>
+                        <span className="text-green-400">${asset.value_usd.toFixed(2)}</span>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <p className="text-gray-500 text-sm">No holdings</p>
+                )}
+              </>
+            )}
+          </div>
+        )}
 
         {/* Hyperliquid */}
         <div className="bg-slate-800 rounded-lg p-6">

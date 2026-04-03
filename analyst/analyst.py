@@ -39,6 +39,130 @@ WATCHLIST_URL = os.getenv("DISCORD_ANALYST_WATCHLIST_WEBHOOK", "")
 
 POLL_INTERVAL = 60   # seconds
 
+# ── SuperTrend signal integration ─────────────────────────────────────────────
+ST_SIGNAL_FILE = os.path.join(os.path.dirname(_DIR), "shared", "btc_supertrend_signal.json")
+_last_st_signal_id = None  # track last processed signal to avoid duplicates
+
+def load_supertrend_signal() -> dict | None:
+    """Load latest BTC SuperTrend signal from enhanced strategy."""
+    try:
+        if os.path.exists(ST_SIGNAL_FILE):
+            with open(ST_SIGNAL_FILE) as f:
+                return json.load(f)
+    except Exception:
+        pass
+    return None
+
+def supertrend_to_signal(st: dict) -> dict | None:
+    """
+    Convert SuperTrend output to an Eric-format signal so the Analyst pipeline
+    can score and route it through Risk Manager → Executor.
+    Only converts BUY/SELL signals, not HOLD.
+    """
+    direction = st.get("signal", "HOLD")
+    if direction == "HOLD":
+        return None
+    confidence = int(st.get("confidence", 0))
+    if confidence < 6:  # require high confidence (out of 10)
+        return None
+
+    price = float(st.get("price", 0))
+    atr   = float(st.get("atr", 0))
+    params = st.get("params", {})
+    mult  = float(params.get("dynamic_multiplier", params.get("multiplier", 3.0)))
+    regime = st.get("volatility_regime", "MEDIUM")
+
+    # Derive stop and targets from SuperTrend level + ATR
+    st_level = float(st.get("supertrend_line", 0))
+    if direction == "BUY":
+        stop   = round(st_level * 0.995, 2)  # just below ST line
+        t1     = round(price * 1.02, 2)
+        t2     = round(price * 1.04, 2)
+        t3     = round(price * 1.06, 2)
+    else:
+        stop   = round(st_level * 1.005, 2)
+        t1     = round(price * 0.98, 2)
+        t2     = round(price * 0.96, 2)
+        t3     = round(price * 0.94, 2)
+
+    return {
+        "id":           f"st_{st.get('timestamp','').replace(':','').replace('-','')[:14]}",
+        "channel_id":   "supertrend",
+        "channel_name": "BTC-SuperTrend-AI",
+        "timestamp":    st.get("timestamp", datetime.now(timezone.utc).isoformat()),
+        "raw_text":     f"BTC {direction} @ ${price:,.2f} | ST={st_level:,.2f} | RSI={st.get('rsi',0):.1f} | regime={regime} | confidence={confidence}/10",
+        "symbol":       "BTC",
+        "direction":    direction,
+        "entry":        price,
+        "stop_loss":    stop,
+        "targets":      [t1, t2, t3],
+        "score":        min(50 + confidence * 5, 100),  # 80-100 for high confidence
+        "status":       "actionable",
+        "confirmed_by": ["SuperTrend-AI", "RSI", "Volume", "MTF"],
+        "quality_flags": [
+            "complete-data",
+            f"vol-regime-{regime.lower()}",
+            f"confidence-{confidence}",
+            "supertrend-signal",
+        ],
+        "_supertrend_meta": st,
+    }
+
+# ── OpenAI news sentiment ─────────────────────────────────────────────────────
+_secrets = os.path.expanduser("~/.openclaw/secrets")
+try:
+    OPENAI_KEY = open(os.path.join(_secrets, "openai.key")).read().strip()
+    OPENAI_OK  = True
+except Exception:
+    OPENAI_KEY = ""
+    OPENAI_OK  = False
+
+def openai_news_sentiment(symbol: str, direction: str) -> tuple[int, str]:
+    """
+    Ask GPT-4o-mini about recent news for this ticker.
+    Returns (score, summary): score +1=bullish -1=bearish 0=neutral
+    Uses token_tracker for cost logging and budget enforcement.
+    """
+    if not OPENAI_OK:
+        return 0, "OpenAI not configured"
+    try:
+        import sys as _sys2
+        _sys2.path.insert(0, '/home/ubuntu/.openclaw/workspace/mission-control/scripts')
+        from token_tracker import openai_call, check_budget
+
+        ok, msg = check_budget()
+        if not ok:
+            log.warning(f"OpenAI budget exceeded, skipping news check: {msg}")
+            return 0, f"Budget limit: {msg}"
+
+        prompt = (
+            f"You are a professional trader. In 2 sentences max, summarize the most important "
+            f"recent news for {symbol} (stock or crypto) that would affect a {direction} trade TODAY. "
+            f"End with exactly one of: [BULLISH] [BEARISH] [NEUTRAL]. "
+            f"If no significant news, say 'No major catalysts found.' [NEUTRAL]"
+        )
+        content = openai_call(
+            prompt=prompt,
+            model="gpt-4o-mini",
+            max_tokens=120,
+            source="analyst",
+            purpose=f"news_sentiment_{symbol}",
+        )
+        if not content:
+            return 0, "News check unavailable"
+
+        if "[BULLISH]" in content:
+            score = 1
+        elif "[BEARISH]" in content:
+            score = -1
+        else:
+            score = 0
+        summary = content.replace("[BULLISH]","").replace("[BEARISH]","").replace("[NEUTRAL]","").strip()
+        return score, summary
+    except Exception as e:
+        log.warning(f"OpenAI news check failed for {symbol}: {e}")
+        return 0, "News check unavailable"
+
 KNOWN_CRYPTO = {
     "BTC","ETH","SOL","BNB","XRP","ADA","DOGE","AVAX","DOT","MATIC",
     "LINK","UNI","ATOM","LTC","BCH","NEAR","APT","ARB","OP","SUI",
@@ -349,16 +473,21 @@ def score_sr(df: pd.DataFrame, entry: float | None, direction: str) -> tuple[int
 def score_rr(entry: float | None, stop: float | None, targets: list) -> tuple[int, str, float | None]:
     if entry is None or stop is None or not targets:
         return 0, "unavailable", None
-    risk   = abs(entry - stop)
+    risk = abs(entry - stop)
     if risk == 0:
         return 0, "zero risk (entry == stop)", None
-    reward = abs(targets[0] - entry)
+    # Use BEST target (last/highest for longs, lowest for shorts) not just T1
+    # This correctly values multi-target signals like Firebase
+    best_target = max(targets, key=lambda t: abs(t - entry))
+    reward = abs(best_target - entry)
     rr     = round(reward / risk, 2)
+    t1_rr  = round(abs(targets[0] - entry) / risk, 2)
+    label  = f"{rr}:1 (T1={t1_rr}:1, best=T{len(targets)})"
     if rr >= 2.0:
-        return 1, f"{rr}:1 ✅", rr
+        return 1, f"{label} ✅", rr
     if rr >= 1.0:
-        return 0, f"{rr}:1 ⚠️", rr
-    return -1, f"{rr}:1 ❌ below 1:1", rr
+        return 0, f"{label} ⚠️", rr
+    return -1, f"{label} ❌ below 1:1", rr
 
 
 # ── Verdict ───────────────────────────────────────────────────────────────────
@@ -450,7 +579,11 @@ def analyze_signal(signal: dict) -> dict | None:
     st_sc = 1 if st_dir == expected_st else (-1 if expected_st != 0 else 0)
     st_label = f"{'✅' if st_sc == 1 else '❌' if st_sc == -1 else '➖'} {st_sig} (ATR={st_atr}, factor={st_factor}, regime={st_regime})"
 
-    total   = rsi_sc + macd_sc + ma_sc + vol_sc + sr_sc + rr_sc + st_sc
+    # ── 8th indicator: OpenAI news sentiment ─────────────────────────────────
+    news_sc, news_summary = openai_news_sentiment(symbol, direction)
+    news_label = f"{'✅' if news_sc == 1 else '❌' if news_sc == -1 else '➖'} {news_summary[:100]}"
+
+    total   = rsi_sc + macd_sc + ma_sc + vol_sc + sr_sc + rr_sc + st_sc + news_sc
     verdict = get_verdict(total)
 
     indicators = {
@@ -495,6 +628,11 @@ def analyze_signal(signal: dict) -> dict | None:
             "signal": rr_sig,
             "score":  rr_sc,
         },
+        "news_sentiment": {
+            "score":   news_sc,
+            "signal":  news_label,
+            "summary": news_summary,
+        },
     }
 
     summary = build_summary(symbol, direction, verdict, total, indicators)
@@ -515,7 +653,7 @@ def analyze_signal(signal: dict) -> dict | None:
         "summary":    summary,
     }
 
-    log.info(f"  → {symbol} {direction} | score={total}/6 | verdict={verdict}")
+    log.info(f"  → {symbol} {direction} | score={total}/8 | verdict={verdict} | news={news_sc:+d} ({news_summary[:40]}...)")
     return result
 
 
@@ -631,6 +769,38 @@ async def run():
     async with aiohttp.ClientSession() as session:
         while True:
             try:
+                global _last_st_signal_id
+
+                # ── Check SuperTrend signal first ─────────────────────────────
+                st_data = load_supertrend_signal()
+                if st_data:
+                    st_sig = supertrend_to_signal(st_data)
+                    if st_sig and st_sig["id"] != _last_st_signal_id:
+                        _last_st_signal_id = st_sig["id"]
+                        log.info(f"[SuperTrend] New signal: BTC {st_sig['direction']} @ ${st_sig['entry']:,.2f} (confidence {st_data.get('confidence')}/10)")
+                        # Add to signals file so Risk Manager sees it too
+                        existing_sigs = load_signals()
+                        if not any(s.get("id") == st_sig["id"] for s in existing_sigs):
+                            existing_sigs.append(st_sig)
+                            if len(existing_sigs) > 500:
+                                existing_sigs = existing_sigs[-500:]
+                            with open(SIGNALS_FILE, "w") as f:
+                                json.dump(existing_sigs, f, indent=2)
+                        # Analyze it immediately
+                        st_result = analyze_signal(st_sig)
+                        if st_result:
+                            results_now = load_results()
+                            results_now.append(st_result)
+                            results_now = await maybe_rotate(
+                                session, "analyst", results_now, RESULTS_FILE,
+                                max_entries=RESULTS_MAX, webhook_url=ARCHIVE_URL
+                            )
+                            save_results(results_now)
+                            payload = build_discord_payload(st_result)
+                            if st_result["verdict"] in ("STRONG", "MODERATE"):
+                                await post_discord(session, SETUPS_URL, payload)
+                            log.info(f"[SuperTrend] Analysis complete: {st_result['verdict']} ({st_result['total_score']}/8)")
+
                 signals = load_signals()
                 results = load_results()
                 analyzed_ids = {r["signal_id"] for r in results}
