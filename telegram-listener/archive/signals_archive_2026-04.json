@@ -224295,5 +224295,118 @@
       "duplicate-signal"
     ],
     "tier_emoji": "\u274c"
+  },
+  {
+    "id": "6403702b-7b71-4762-ac62-fd584c8447e8",
+    "channel_id": "-1001853036360",
+    "channel_name": "Coin Sonar V2",
+    "timestamp": "2026-04-03T12:16:10.407112+00:00",
+    "raw_text": "$KITE | #KITEUSDT | TradingView\nPrice: 0.1408 (+2.0% in 24h)\n\u251455 sec change: +1.0% \ud83d\udcc8\n38.2K USDT traded in 55 sec\n\u2514Buys: 25.4K USDT [66%] \ud83d\udfe2\n24h Vol: 11.2M USDT (Binance)\nAlerts in this hour: 2 \u2b50\ufe0f",
+    "symbol": "KITE",
+    "direction": null,
+    "entry": 0.1408,
+    "stop_loss": null,
+    "targets": [],
+    "leverage": null,
+    "price_change": null,
+    "score": 35,
+    "status": "rejected",
+    "risk_reward": null,
+    "confirmations": 1,
+    "confirmed_by": [
+      "Coin Sonar V2"
+    ]
+  },
+  {
+    "id": "adc1778a-b3ae-4004-a8c8-9b4fe5b059f5",
+    "channel_id": "websocket",
+    "channel_name": "AICryptoSignals",
+    "timestamp": "2026-04-03T12:16:29.405401+00:00",
+    "raw_text": "SANDUSDT\nLONG\nEntry: 0.07704\nPrice change: +5.20%",
+    "symbol": "SAND",
+    "direction": "LONG",
+    "entry": 0.07704,
+    "stop_loss": null,
+    "targets": [],
+    "leverage": null,
+    "price_change": "+5.20%",
+    "score": 50,
+    "status": "review",
+    "risk_reward": null,
+    "confirmations": 1,
+    "confirmed_by": [
+      "AICryptoSignals"
+    ],
+    "quality_score": 6.5,
+    "quality_flags": [
+      "complete-data",
+      "new-source",
+      "no-stop-loss",
+      "valid-symbol"
+    ],
+    "tier_emoji": "\u2b50"
+  },
+  {
+    "id": "46aa6798-eb8a-4821-b728-5fc36bbc7878",
+    "channel_id": "-1002048136679",
+    "channel_name": "xCrypto Signals",
+    "timestamp": "2026-04-03T12:16:33.138836+00:00",
+    "raw_text": "#PENDLE/USDT\n\nTP 2 \u2705\n\nProfit: 22.5662% | Duration: Period: 3 hr 10 min  \u23f0",
+    "symbol": "PENDLE",
+    "direction": null,
+    "entry": null,
+    "stop_loss": null,
+    "targets": [],
+    "leverage": null,
+    "price_change": null,
+    "score": 15,
+    "status": "rejected",
+    "risk_reward": null,
+    "confirmations": 1,
+    "confirmed_by": [
+      "xCrypto Signals"
+    ]
+  },
+  {
+    "id": "1b1ca3f5-608c-4df5-961e-baffe47d3553",
+    "channel_id": "-1001314221782",
+    "channel_name": "\ud83d\udc33 \ud835\udc16\ud835\udc07\ud835\udc00\ud835\udc0b\ud835\udc04\ud835\udc13\ud835\udc11\ud835\udc00\ud835\udc02\ud835\udc0a\ud835\udc04\ud835\udc11 \ud83d\udc40",
+    "timestamp": "2026-04-03T12:17:17.239613+00:00",
+    "raw_text": "\u250c #SPKUSDT \u2733\ufe0f Buying Volume\n\u251c 67.17K \u20ae volume in 52s\n\u250a\u251c Buy [82%]: 55.26K \u20ae\n\u250a\u2514 Sell [-18%]: -11.91K \u20ae\n\u251cPrice: 0.019901\u21920.020144 (1.2%)\n\u251cChange: 24h[0.085%] 4h[0.78%]\n\u250a\u2514 15m[1.18%] 1h[0.99%]\n\u251c24h Volume: 628.31K \u20ae\n\u250a\u251c Buy [50%]: 314.19K \u20ae\n\u250a\u2514 Sell [-50%]: -314.12K \u20ae\n\u251cNet Vol: 15m[39%] 1h[44%] 4h[24%]\n\u2514Alerts: 24h[1] 4h[1]",
+    "symbol": "SPK",
+    "direction": "BUY",
+    "entry": 0.019901,
+    "stop_loss": null,
+    "targets": [],
+    "leverage": null,
+    "price_change": null,
+    "score": 50,
+    "status": "review",
+    "risk_reward": null,
+    "confirmations": 1,
+    "confirmed_by": [
+      "\ud83d\udc33 \ud835\udc16\ud835\udc07\ud835\udc00\ud835\udc0b\ud835\udc04\ud835\udc13\ud835\udc11\ud835\udc00\ud835\udc02\ud835\udc0a\ud835\udc04\ud835\udc11 \ud83d\udc40"
+    ]
+  },
+  {
+    "id": "342bb127-b723-4582-b882-0eaa8c53677b",
+    "channel_id": "-1001498307336",
+    "channel_name": "Binance Futures 5m Volume Pump Monitor \ud83d\ude80",
+    "timestamp": "2026-04-03T12:17:35.430228+00:00",
+    "raw_text": "#PRLUSDT price DOWN on 2.31% \nVolume up on 272.6%\nPrice: 0.152  (+2.2% in 24h)\n24h Volume: 8.85M",
+    "symbol": "PRL",
+    "direction": null,
+    "entry": 0.152,
+    "stop_loss": null,
+    "targets": [],
+    "leverage": null,
+    "price_change": null,
+    "score": 35,
+    "status": "rejected",
+    "risk_reward": null,
+    "confirmations": 1,
+    "confirmed_by": [
+      "Binance Futures 5m Volume Pump Monitor \ud83d\ude80"
+    ]
   }
 ]

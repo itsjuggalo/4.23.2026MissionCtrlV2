@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
+import { SouthParkAgent } from '../ui/SouthParkAgent';
 
 interface AgentPM2 {
   name: string;
