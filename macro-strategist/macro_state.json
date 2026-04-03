@@ -1,5 +1,5 @@
 {
-  "timestamp": "2026-04-03T16:20:01.061011+00:00",
+  "timestamp": "2026-04-03T16:40:01.154375+00:00",
   "regime": "RISK-OFF",
   "total_score": -5,
   "max_score": 12,
@@ -11,7 +11,7 @@
       "bias": "SLIGHTLY BEARISH",
       "score": -1,
       "source": "btc-bias-scorer",
-      "timestamp": "2026-04-03T16:00:00.617381+00:00"
+      "timestamp": "2026-04-03T16:20:00.390800+00:00"
     },
     "dxy": {
       "value": 100.179,
@@ -45,9 +45,9 @@
     },
     "crypto_mcap": {
       "mcap": 2383483816151.0,
-      "prev_mcap": 2383290437181.0,
-      "trend": "flat (+0.0%)",
-      "score": 0
+      "trend": "unknown",
+      "score": 0,
+      "stale": true
     },
     "fed_expectations": {
       "value": 3.607,
@@ -72,6 +72,11 @@
   },
   "alerts": [],
   "history": [
+    {
+      "timestamp": "2026-04-03T16:20:01.061011+00:00",
+      "regime": "RISK-OFF",
+      "score": -5
+    },
     {
       "timestamp": "2026-04-03T16:00:01.557239+00:00",
       "regime": "RISK-OFF",
@@ -114,11 +119,6 @@
     },
     {
       "timestamp": "2026-04-03T13:20:01.153849+00:00",
-      "regime": "RISK-OFF",
-      "score": -4
-    },
-    {
-      "timestamp": "2026-04-03T13:00:01.080629+00:00",
       "regime": "RISK-OFF",
       "score": -4
     }

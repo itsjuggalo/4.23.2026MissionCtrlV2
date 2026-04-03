@@ -1,12 +1,5 @@
 [
   {
-    "timestamp": "2026-04-01T23:06:14.268502+00:00",
-    "total_value": 278678.2,
-    "pnl_since_last": 79.55,
-    "positions_count": 3,
-    "exposure_pct": 20.68
-  },
-  {
     "timestamp": "2026-04-01T23:11:14.826778+00:00",
     "total_value": 278622.1,
     "pnl_since_last": -56.1,
@@ -3494,6 +3487,13 @@
   },
   {
     "timestamp": "2026-04-03T16:38:46.860691+00:00",
+    "total_value": 100031.93,
+    "pnl_since_last": 0.0,
+    "positions_count": 2,
+    "exposure_pct": 10.01
+  },
+  {
+    "timestamp": "2026-04-03T16:43:46.245692+00:00",
     "total_value": 100031.93,
     "pnl_since_last": 0.0,
     "positions_count": 2,

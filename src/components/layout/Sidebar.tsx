@@ -18,6 +18,7 @@ import {
   GitBranch,
   Building2,
   TrendingUp,
+  Cpu,
 } from 'lucide-react';
 
 type PageName =
@@ -31,6 +32,7 @@ type PageName =
   | 'Calendar'
   | 'Projects'
   | 'Memory'
+  | 'Memory Graph'
   | 'Office'
   | 'Docs'
   | 'Wallets'
@@ -60,6 +62,7 @@ const navItems: { name: PageName; icon: React.ElementType }[] = [
   { name: 'Calendar', icon: Calendar },
   { name: 'Projects', icon: FolderKanban },
   { name: 'Memory', icon: Brain },
+  { name: 'Memory Graph', icon: GitBranch },
   { name: 'Office', icon: Building2 },
   { name: 'Docs', icon: FileText },
   { name: 'Wallets', icon: Wallet },
@@ -67,7 +70,7 @@ const navItems: { name: PageName; icon: React.ElementType }[] = [
   { name: 'Activity', icon: Activity },
   { name: 'Risk', icon: ShieldAlert },
   { name: 'Chart', icon: TrendingUp },
-  { name: 'PowerTrader', icon: TrendingUp },
+  { name: 'PowerTrader', icon: Cpu },
 ];
 
 export function Sidebar({
@@ -238,7 +241,7 @@ export function Sidebar({
         })}
       </nav>
 
-      {/* Footer */}
+      {/* Footer — Phase 1 Progress */}
       {!isCollapsed && (
         <div
           style={{
@@ -246,10 +249,14 @@ export function Sidebar({
             borderTop: '1px solid #1e1e2a',
             fontSize: 11,
             fontFamily: "'JetBrains Mono', 'SF Mono', 'Fira Code', monospace",
-            color: '#5c5c72',
           }}
         >
-          v0.1.0 MVP
+          <div style={{ color: '#ffa502', fontWeight: 700, marginBottom: 3 }}>Phase 1 — Prove ROI</div>
+          <div style={{ color: '#e8e8ed', marginBottom: 4 }}>$100K → $110K</div>
+          <div style={{ background: '#1e1e2a', borderRadius: 4, height: 4, overflow: 'hidden' }}>
+            <div style={{ background: '#6c5ce7', width: '3%', height: '100%', borderRadius: 4 }} />
+          </div>
+          <div style={{ color: '#5c5c72', marginTop: 4 }}>3% complete</div>
         </div>
       )}
     </div>

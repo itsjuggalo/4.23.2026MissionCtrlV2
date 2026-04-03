@@ -1,5 +1,63 @@
 [
   {
+    "id": "7360f1eabf5a",
+    "title": "Portfolio: $100,032 | Day +0",
+    "content": "Portfolio value: $100,031.93. Today P&L: $+0.00. Week P&L: $-178,646.27. Deployed: 10.0%, Cash: $90,020.30. Top movers: LLY (+0.3%), SPY (+0.1%).",
+    "source": "portfolio-monitor",
+    "tags": [
+      "portfolio",
+      "pnl",
+      "positions"
+    ],
+    "importance": "medium",
+    "timestamp": "2026-04-03T16:44:24.662663+00:00",
+    "date": "Apr 03"
+  },
+  {
+    "id": "6ebc9a0e9e70",
+    "title": "Tweak: 35 positions | P&L $+11,983,063",
+    "content": "Tweak paper trading: 35 open positions. Wallet: $10,000.00, available: $5,750.00. Total unrealized P&L: $+11,983,062.90.",
+    "source": "tweak",
+    "tags": [
+      "tweak",
+      "positions",
+      "pnl",
+      "paper-trading"
+    ],
+    "importance": "high",
+    "timestamp": "2026-04-03T16:44:24.733353+00:00",
+    "date": "Apr 03"
+  },
+  {
+    "id": "d4e3fb39e525",
+    "title": "Portfolio: $100,032 | Day +0",
+    "content": "Portfolio value: $100,031.93. Today P&L: $+0.00. Week P&L: $-178,566.72. Deployed: 10.0%, Cash: $90,020.30. Top movers: LLY (+0.3%), SPY (+0.1%).",
+    "source": "portfolio-monitor",
+    "tags": [
+      "portfolio",
+      "pnl",
+      "positions"
+    ],
+    "importance": "medium",
+    "timestamp": "2026-04-03T16:39:24.455187+00:00",
+    "date": "Apr 03"
+  },
+  {
+    "id": "c192c3763e0e",
+    "title": "Tweak: 35 positions | P&L $+11,983,064",
+    "content": "Tweak paper trading: 35 open positions. Wallet: $10,000.00, available: $5,750.00. Total unrealized P&L: $+11,983,064.08.",
+    "source": "tweak",
+    "tags": [
+      "tweak",
+      "positions",
+      "pnl",
+      "paper-trading"
+    ],
+    "importance": "high",
+    "timestamp": "2026-04-03T16:39:24.512885+00:00",
+    "date": "Apr 03"
+  },
+  {
     "id": "8aa5e61154ed",
     "title": "Portfolio: $100,032 | Day +0",
     "content": "Portfolio value: $100,031.93. Today P&L: $+0.00. Week P&L: $-178,568.82. Deployed: 10.0%, Cash: $90,020.30. Top movers: LLY (+0.3%), SPY (+0.1%).",
@@ -7174,64 +7232,6 @@
     ],
     "importance": "high",
     "timestamp": "2026-04-02T21:22:07.394972+00:00",
-    "date": "Apr 02"
-  },
-  {
-    "id": "052249c78e2e",
-    "title": "Portfolio: $277,554 | Day +28",
-    "content": "Portfolio value: $277,554.35. Today P&L: $+28.20. Week P&L: $-630.60. Deployed: 20.4%, Cash: $221,048.00. Top movers: ETH/USDT (-40.8%), AAPL (+29.6%), BTC/USDT (+0.0%).",
-    "source": "portfolio-monitor",
-    "tags": [
-      "portfolio",
-      "pnl",
-      "positions"
-    ],
-    "importance": "medium",
-    "timestamp": "2026-04-02T21:17:07.229613+00:00",
-    "date": "Apr 02"
-  },
-  {
-    "id": "b6263237eb95",
-    "title": "Tweak: 35 positions | P&L $+11,979,598",
-    "content": "Tweak paper trading: 35 open positions. Wallet: $10,000.00, available: $5,750.00. Total unrealized P&L: $+11,979,597.90.",
-    "source": "tweak",
-    "tags": [
-      "tweak",
-      "positions",
-      "pnl",
-      "paper-trading"
-    ],
-    "importance": "high",
-    "timestamp": "2026-04-02T21:17:07.251895+00:00",
-    "date": "Apr 02"
-  },
-  {
-    "id": "730c349c02cf",
-    "title": "Portfolio: $277,526 | Day -118",
-    "content": "Portfolio value: $277,526.15. Today P&L: $-118.00. Week P&L: $-685.10. Deployed: 20.4%, Cash: $221,048.00. Top movers: ETH/USDT (-40.9%), AAPL (+29.6%), BTC/USDT (-0.0%).",
-    "source": "portfolio-monitor",
-    "tags": [
-      "portfolio",
-      "pnl",
-      "positions"
-    ],
-    "importance": "medium",
-    "timestamp": "2026-04-02T21:12:07.118017+00:00",
-    "date": "Apr 02"
-  },
-  {
-    "id": "4663c8b8354a",
-    "title": "Tweak: 35 positions | P&L $+11,979,596",
-    "content": "Tweak paper trading: 35 open positions. Wallet: $10,000.00, available: $5,750.00. Total unrealized P&L: $+11,979,596.32.",
-    "source": "tweak",
-    "tags": [
-      "tweak",
-      "positions",
-      "pnl",
-      "paper-trading"
-    ],
-    "importance": "high",
-    "timestamp": "2026-04-02T21:12:07.141595+00:00",
     "date": "Apr 02"
   }
 ]

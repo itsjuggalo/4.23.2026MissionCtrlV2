@@ -21,7 +21,7 @@ import { ActivityPage } from '../pages/ActivityPage';
 import { RiskPage } from '../pages/RiskPage';
 import { SignalsPage } from '../pages/SignalsPage';
 import { TelegramSignalsPage } from '../pages/TelegramSignalsPage';
-
+import { MemoryGraphPage } from '../pages/MemoryGraphPage';
 import { OfficePage } from '../pages/OfficePage';
 import { ChartPage } from '../pages/ChartPage';
 import { PowerTraderPage } from '../pages/PowerTraderPage';
@@ -38,6 +38,7 @@ type PageName =
   | 'Calendar'
   | 'Projects'
   | 'Memory'
+  | 'Memory Graph'
   | 'Office'
   | 'Docs'
   | 'Wallets'
@@ -63,7 +64,7 @@ export function AppShellClient() {
       const pageName = (page.charAt(0).toUpperCase() + page.slice(1).toLowerCase()) as PageName;
       const validPages: PageName[] = [
         'Dashboard', 'Signals', 'Telegram', 'Scanner', 'Tasks', 'Agents', 
-        'Approvals', 'Calendar', 'Projects', 'Memory', 
+        'Approvals', 'Calendar', 'Projects', 'Memory', 'Memory Graph', 
         'Office', 'Docs', 'Wallets', 'Trades', 'Activity', 'Risk', 'Chart', 'PowerTrader'
       ];
       if (validPages.includes(pageName)) {
@@ -100,6 +101,8 @@ export function AppShellClient() {
         return <ProjectsPage />;
       case 'Memory':
         return <MemoryPage />;
+      case 'Memory Graph':
+        return <MemoryGraphPage />;
       case 'Office':
         return <OfficePage />;
       case 'Docs':
@@ -110,10 +113,10 @@ export function AppShellClient() {
         return <TradesPage />;
       case 'Activity':
         return <ActivityPage />;
-      case 'PowerTrader':
-        return <PowerTraderPage />;
       case 'Chart':
         return <ChartPage />;
+      case 'PowerTrader':
+        return <PowerTraderPage />;
       case 'Risk':
         return <RiskPage />;
       default:
