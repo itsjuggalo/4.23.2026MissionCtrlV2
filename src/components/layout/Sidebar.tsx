@@ -21,8 +21,11 @@ import {
   Cpu,
   Target,
   BarChart2,
-  Bell,
   Globe,
+  LineChart,
+  Bell,
+  Settings,
+  Users,
 } from 'lucide-react';
 
 type PageName =
@@ -58,33 +61,42 @@ interface SidebarProps {
   pendingApprovalsCount: number;
 }
 
+// COMMAND section — mission ops
 const commandItems: { name: PageName; icon: React.ElementType }[] = [
   { name: 'Command Center', icon: Target },
   { name: 'Performance', icon: BarChart2 },
   { name: 'Regime', icon: Globe },
+  { name: 'Activity', icon: Bell },
 ];
 
-const navItems: { name: PageName; icon: React.ElementType }[] = [
+// TRADING section
+const tradingItems: { name: PageName; icon: React.ElementType }[] = [
   { name: 'Dashboard', icon: LayoutDashboard },
+  { name: 'Chart', icon: LineChart },
+  { name: 'Scanner', icon: Radar },
+  { name: 'Wallets', icon: Wallet },
+  { name: 'Trades', icon: TrendingUp },
+  { name: 'Risk', icon: ShieldAlert },
+  { name: 'PowerTrader', icon: Cpu },
+];
+
+// SYSTEM section
+const systemItems: { name: PageName; icon: React.ElementType }[] = [
+  { name: 'Office', icon: Users },
+  { name: 'Agents', icon: Bot },
+  { name: 'Memory', icon: Brain },
+  { name: 'Memory Graph', icon: GitBranch },
   { name: 'Signals', icon: Zap },
   { name: 'Telegram', icon: Send },
-  { name: 'Scanner', icon: Radar },
   { name: 'Tasks', icon: ListTodo },
-  { name: 'Agents', icon: Bot },
   { name: 'Approvals', icon: CheckCircle },
   { name: 'Calendar', icon: Calendar },
   { name: 'Projects', icon: FolderKanban },
-  { name: 'Memory', icon: Brain },
-  { name: 'Memory Graph', icon: GitBranch },
-  { name: 'Office', icon: Building2 },
   { name: 'Docs', icon: FileText },
-  { name: 'Wallets', icon: Wallet },
-  { name: 'Trades', icon: TrendingUp },
-  { name: 'Activity', icon: Activity },
-  { name: 'Risk', icon: ShieldAlert },
-  { name: 'Chart', icon: TrendingUp },
-  { name: 'PowerTrader', icon: Cpu },
 ];
+
+// Keep for compatibility
+const navItems = tradingItems;
 
 export function Sidebar({
   activePage,
@@ -192,7 +204,7 @@ export function Sidebar({
         {!isCollapsed && (
           <div style={{ padding: '8px 14px 2px', fontSize: 9, fontFamily: "'JetBrains Mono', monospace", color: '#3d3d52', letterSpacing: '1.5px', fontWeight: 700, marginTop: 4 }}>TRADING</div>
         )}
-        {navItems.map(({ name, icon: Icon }) => {
+        {tradingItems.map(({ name, icon: Icon }) => {
           const isActive = activePage === name;
           const badge =
             name === 'Scanner' && newSignalsCount > 0
@@ -275,6 +287,26 @@ export function Sidebar({
                   {badge}
                 </span>
               )}
+            </button>
+          );
+        })}
+
+        {/* SYSTEM section */}
+        {!isCollapsed && (
+          <div style={{ padding: '8px 14px 2px', fontSize: 9, fontFamily: "'JetBrains Mono', monospace", color: '#3d3d52', letterSpacing: '1.5px', fontWeight: 700, marginTop: 4 }}>SYSTEM</div>
+        )}
+        {systemItems.map(({ name, icon: Icon }) => {
+          const isActive = activePage === name;
+          const badge = name === 'Scanner' && newSignalsCount > 0 ? newSignalsCount : name === 'Approvals' && pendingApprovalsCount > 0 ? pendingApprovalsCount : null;
+          return (
+            <button key={name} onClick={() => onNavigate(name)} title={isCollapsed ? name : undefined}
+              style={{ display: 'flex', alignItems: 'center', gap: 10, width: '100%', padding: isCollapsed ? '9px 0' : '9px 14px',
+                justifyContent: isCollapsed ? 'center' : 'flex-start', background: isActive ? 'rgba(108,92,231,0.08)' : 'transparent',
+                border: 'none', cursor: 'pointer', color: isActive ? '#a29bfe' : '#8b8b9e', transition: 'background 0.15s, color 0.15s', position: 'relative' }}
+            >
+              <Icon size={16} style={{ flexShrink: 0 }} />
+              {!isCollapsed && <span style={{ fontSize: 13, fontFamily: "'Inter', -apple-system, sans-serif", whiteSpace: 'nowrap', flex: 1, textAlign: 'left' }}>{name}</span>}
+              {badge !== null && !isCollapsed && <span style={{ background: '#6c5ce7', color: '#fff', fontSize: 10, fontWeight: 700, borderRadius: '10px', padding: '1px 6px' }}>{badge}</span>}
             </button>
           );
         })}

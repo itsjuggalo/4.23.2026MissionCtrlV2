@@ -1,5 +1,5 @@
 {
-  "timestamp": "2026-04-03T16:40:01.154375+00:00",
+  "timestamp": "2026-04-03T18:00:01.104924+00:00",
   "regime": "RISK-OFF",
   "total_score": -5,
   "max_score": 12,
@@ -11,15 +11,15 @@
       "bias": "SLIGHTLY BEARISH",
       "score": -1,
       "source": "btc-bias-scorer",
-      "timestamp": "2026-04-03T16:20:00.390800+00:00"
+      "timestamp": "2026-04-03T17:40:00.521974+00:00"
     },
     "dxy": {
-      "value": 100.179,
+      "value": 100.185,
       "trend": "flat",
       "sma20": 99.698,
       "sma50": 98.414,
       "vs_sma20": "above",
-      "chg5d": 0.029,
+      "chg5d": 0.035,
       "score": 0
     },
     "vix": {
@@ -44,10 +44,10 @@
       "score": -1
     },
     "crypto_mcap": {
-      "mcap": 2383483816151.0,
-      "trend": "unknown",
-      "score": 0,
-      "stale": true
+      "mcap": 2383052548212.0,
+      "prev_mcap": 2384053640431.0,
+      "trend": "flat (-0.0%)",
+      "score": 0
     },
     "fed_expectations": {
       "value": 3.607,
@@ -72,6 +72,26 @@
   },
   "alerts": [],
   "history": [
+    {
+      "timestamp": "2026-04-03T17:40:02.122892+00:00",
+      "regime": "RISK-OFF",
+      "score": -5
+    },
+    {
+      "timestamp": "2026-04-03T17:20:02.103568+00:00",
+      "regime": "RISK-OFF",
+      "score": -5
+    },
+    {
+      "timestamp": "2026-04-03T17:00:02.374225+00:00",
+      "regime": "RISK-OFF",
+      "score": -5
+    },
+    {
+      "timestamp": "2026-04-03T16:40:01.154375+00:00",
+      "regime": "RISK-OFF",
+      "score": -5
+    },
     {
       "timestamp": "2026-04-03T16:20:01.061011+00:00",
       "regime": "RISK-OFF",
@@ -99,26 +119,6 @@
     },
     {
       "timestamp": "2026-04-03T14:40:01.162769+00:00",
-      "regime": "RISK-OFF",
-      "score": -4
-    },
-    {
-      "timestamp": "2026-04-03T14:20:01.077915+00:00",
-      "regime": "RISK-OFF",
-      "score": -4
-    },
-    {
-      "timestamp": "2026-04-03T14:00:03.125914+00:00",
-      "regime": "RISK-OFF",
-      "score": -4
-    },
-    {
-      "timestamp": "2026-04-03T13:40:01.743955+00:00",
-      "regime": "RISK-OFF",
-      "score": -4
-    },
-    {
-      "timestamp": "2026-04-03T13:20:01.153849+00:00",
       "regime": "RISK-OFF",
       "score": -4
     }

@@ -1,5 +1,569 @@
 [
   {
+    "id": "a2650813d083",
+    "title": "Portfolio: $100,032 | Day +0",
+    "content": "Portfolio value: $100,031.93. Today P&L: $+0.00. Week P&L: $-178,627.92. Deployed: 10.0%, Cash: $90,020.30. Top movers: LLY (+0.3%), SPY (+0.1%).",
+    "source": "portfolio-monitor",
+    "tags": [
+      "portfolio",
+      "pnl",
+      "positions"
+    ],
+    "importance": "medium",
+    "timestamp": "2026-04-03T18:14:27.074360+00:00",
+    "date": "Apr 03"
+  },
+  {
+    "id": "0f57b0e1a11e",
+    "title": "Tweak: 35 positions | P&L $+11,983,060",
+    "content": "Tweak paper trading: 35 open positions. Wallet: $10,000.00, available: $5,750.00. Total unrealized P&L: $+11,983,059.81.",
+    "source": "tweak",
+    "tags": [
+      "tweak",
+      "positions",
+      "pnl",
+      "paper-trading"
+    ],
+    "importance": "high",
+    "timestamp": "2026-04-03T18:14:27.098149+00:00",
+    "date": "Apr 03"
+  },
+  {
+    "id": "62c8e2a498cd",
+    "title": "Portfolio: $100,032 | Day +0",
+    "content": "Portfolio value: $100,031.93. Today P&L: $+0.00. Week P&L: $-178,612.62. Deployed: 10.0%, Cash: $90,020.30. Top movers: LLY (+0.3%), SPY (+0.1%).",
+    "source": "portfolio-monitor",
+    "tags": [
+      "portfolio",
+      "pnl",
+      "positions"
+    ],
+    "importance": "medium",
+    "timestamp": "2026-04-03T18:09:26.938385+00:00",
+    "date": "Apr 03"
+  },
+  {
+    "id": "c0a49d29702e",
+    "title": "Tweak: 35 positions | P&L $+11,983,060",
+    "content": "Tweak paper trading: 35 open positions. Wallet: $10,000.00, available: $5,750.00. Total unrealized P&L: $+11,983,060.09.",
+    "source": "tweak",
+    "tags": [
+      "tweak",
+      "positions",
+      "pnl",
+      "paper-trading"
+    ],
+    "importance": "high",
+    "timestamp": "2026-04-03T18:09:26.960188+00:00",
+    "date": "Apr 03"
+  },
+  {
+    "id": "0e66a959926d",
+    "title": "Portfolio: $100,032 | Day +0",
+    "content": "Portfolio value: $100,031.93. Today P&L: $+0.00. Week P&L: $-178,631.17. Deployed: 10.0%, Cash: $90,020.30. Top movers: LLY (+0.3%), SPY (+0.1%).",
+    "source": "portfolio-monitor",
+    "tags": [
+      "portfolio",
+      "pnl",
+      "positions"
+    ],
+    "importance": "medium",
+    "timestamp": "2026-04-03T18:04:26.829961+00:00",
+    "date": "Apr 03"
+  },
+  {
+    "id": "ead2034625ca",
+    "title": "Tweak: 35 positions | P&L $+11,983,061",
+    "content": "Tweak paper trading: 35 open positions. Wallet: $10,000.00, available: $5,750.00. Total unrealized P&L: $+11,983,060.60.",
+    "source": "tweak",
+    "tags": [
+      "tweak",
+      "positions",
+      "pnl",
+      "paper-trading"
+    ],
+    "importance": "high",
+    "timestamp": "2026-04-03T18:04:26.852598+00:00",
+    "date": "Apr 03"
+  },
+  {
+    "id": "88e6fee91928",
+    "title": "Portfolio: $100,032 | Day +0",
+    "content": "Portfolio value: $100,031.93. Today P&L: $+0.00. Week P&L: $-178,625.92. Deployed: 10.0%, Cash: $90,020.30. Top movers: LLY (+0.3%), SPY (+0.1%).",
+    "source": "portfolio-monitor",
+    "tags": [
+      "portfolio",
+      "pnl",
+      "positions"
+    ],
+    "importance": "medium",
+    "timestamp": "2026-04-03T17:59:26.703479+00:00",
+    "date": "Apr 03"
+  },
+  {
+    "id": "d2c943072426",
+    "title": "Tweak: 35 positions | P&L $+11,983,061",
+    "content": "Tweak paper trading: 35 open positions. Wallet: $10,000.00, available: $5,750.00. Total unrealized P&L: $+11,983,061.08.",
+    "source": "tweak",
+    "tags": [
+      "tweak",
+      "positions",
+      "pnl",
+      "paper-trading"
+    ],
+    "importance": "high",
+    "timestamp": "2026-04-03T17:59:26.727864+00:00",
+    "date": "Apr 03"
+  },
+  {
+    "id": "20dbd8ec473e",
+    "title": "Portfolio: $100,032 | Day +0",
+    "content": "Portfolio value: $100,031.93. Today P&L: $+0.00. Week P&L: $-178,582.37. Deployed: 10.0%, Cash: $90,020.30. Top movers: LLY (+0.3%), SPY (+0.1%).",
+    "source": "portfolio-monitor",
+    "tags": [
+      "portfolio",
+      "pnl",
+      "positions"
+    ],
+    "importance": "medium",
+    "timestamp": "2026-04-03T17:54:26.608450+00:00",
+    "date": "Apr 03"
+  },
+  {
+    "id": "4edf6ca53d26",
+    "title": "Tweak: 35 positions | P&L $+11,983,060",
+    "content": "Tweak paper trading: 35 open positions. Wallet: $10,000.00, available: $5,750.00. Total unrealized P&L: $+11,983,060.47.",
+    "source": "tweak",
+    "tags": [
+      "tweak",
+      "positions",
+      "pnl",
+      "paper-trading"
+    ],
+    "importance": "high",
+    "timestamp": "2026-04-03T17:54:26.630307+00:00",
+    "date": "Apr 03"
+  },
+  {
+    "id": "438a69ed8722",
+    "title": "Portfolio: $100,032 | Day +0",
+    "content": "Portfolio value: $100,031.93. Today P&L: $+0.00. Week P&L: $-178,599.32. Deployed: 10.0%, Cash: $90,020.30. Top movers: LLY (+0.3%), SPY (+0.1%).",
+    "source": "portfolio-monitor",
+    "tags": [
+      "portfolio",
+      "pnl",
+      "positions"
+    ],
+    "importance": "medium",
+    "timestamp": "2026-04-03T17:49:26.482919+00:00",
+    "date": "Apr 03"
+  },
+  {
+    "id": "d51bbb4ed244",
+    "title": "Tweak: 35 positions | P&L $+11,983,060",
+    "content": "Tweak paper trading: 35 open positions. Wallet: $10,000.00, available: $5,750.00. Total unrealized P&L: $+11,983,060.35.",
+    "source": "tweak",
+    "tags": [
+      "tweak",
+      "positions",
+      "pnl",
+      "paper-trading"
+    ],
+    "importance": "high",
+    "timestamp": "2026-04-03T17:49:26.504636+00:00",
+    "date": "Apr 03"
+  },
+  {
+    "id": "db34b6ff54b8",
+    "title": "Portfolio: $100,032 | Day +0",
+    "content": "Portfolio value: $100,031.93. Today P&L: $+0.00. Week P&L: $-178,549.82. Deployed: 10.0%, Cash: $90,020.30. Top movers: LLY (+0.3%), SPY (+0.1%).",
+    "source": "portfolio-monitor",
+    "tags": [
+      "portfolio",
+      "pnl",
+      "positions"
+    ],
+    "importance": "medium",
+    "timestamp": "2026-04-03T17:44:26.376563+00:00",
+    "date": "Apr 03"
+  },
+  {
+    "id": "68d36400dde7",
+    "title": "Tweak: 35 positions | P&L $+11,983,060",
+    "content": "Tweak paper trading: 35 open positions. Wallet: $10,000.00, available: $5,750.00. Total unrealized P&L: $+11,983,060.44.",
+    "source": "tweak",
+    "tags": [
+      "tweak",
+      "positions",
+      "pnl",
+      "paper-trading"
+    ],
+    "importance": "high",
+    "timestamp": "2026-04-03T17:44:26.398573+00:00",
+    "date": "Apr 03"
+  },
+  {
+    "id": "3077217bd2e2",
+    "title": "Telegram: 2 actionable signals",
+    "content": "Telegram listener has 500 total signals: 2 actionable, 2 high confidence (score \u226580). High confidence signals: TRUMP, NO.",
+    "source": "telegram-listener",
+    "tags": [
+      "telegram",
+      "signals",
+      "actionable"
+    ],
+    "importance": "medium",
+    "timestamp": "2026-04-03T17:44:26.402227+00:00",
+    "date": "Apr 03"
+  },
+  {
+    "id": "ea0586f9dc2b",
+    "title": "Portfolio: $100,032 | Day +0",
+    "content": "Portfolio value: $100,031.93. Today P&L: $+0.00. Week P&L: $-178,550.67. Deployed: 10.0%, Cash: $90,020.30. Top movers: LLY (+0.3%), SPY (+0.1%).",
+    "source": "portfolio-monitor",
+    "tags": [
+      "portfolio",
+      "pnl",
+      "positions"
+    ],
+    "importance": "medium",
+    "timestamp": "2026-04-03T17:39:26.274858+00:00",
+    "date": "Apr 03"
+  },
+  {
+    "id": "7ee808302f01",
+    "title": "Counter-Intel: STEALTH | 0 threats",
+    "content": "Strategy detectability: STEALTH. Team win rate: 0%. Best bot: analyst, weakest: Insufficient trade data to assess. Active threats: 0. Improvements: Build trade journal data \u2014 need 20+ trades for recommendations",
+    "source": "counter-intelligence",
+    "tags": [
+      "intelligence",
+      "security",
+      "performance",
+      "stealth"
+    ],
+    "importance": "medium",
+    "timestamp": "2026-04-03T17:39:26.276081+00:00",
+    "date": "Apr 03"
+  },
+  {
+    "id": "301c23307d7d",
+    "title": "Tweak: 35 positions | P&L $+11,983,061",
+    "content": "Tweak paper trading: 35 open positions. Wallet: $10,000.00, available: $5,750.00. Total unrealized P&L: $+11,983,060.84.",
+    "source": "tweak",
+    "tags": [
+      "tweak",
+      "positions",
+      "pnl",
+      "paper-trading"
+    ],
+    "importance": "high",
+    "timestamp": "2026-04-03T17:39:26.317340+00:00",
+    "date": "Apr 03"
+  },
+  {
+    "id": "a14ee91087a1",
+    "title": "Portfolio: $100,032 | Day +0",
+    "content": "Portfolio value: $100,031.93. Today P&L: $+0.00. Week P&L: $-178,552.92. Deployed: 10.0%, Cash: $90,020.30. Top movers: LLY (+0.3%), SPY (+0.1%).",
+    "source": "portfolio-monitor",
+    "tags": [
+      "portfolio",
+      "pnl",
+      "positions"
+    ],
+    "importance": "medium",
+    "timestamp": "2026-04-03T17:34:26.127624+00:00",
+    "date": "Apr 03"
+  },
+  {
+    "id": "004fb6211498",
+    "title": "Tweak: 35 positions | P&L $+11,983,062",
+    "content": "Tweak paper trading: 35 open positions. Wallet: $10,000.00, available: $5,750.00. Total unrealized P&L: $+11,983,061.69.",
+    "source": "tweak",
+    "tags": [
+      "tweak",
+      "positions",
+      "pnl",
+      "paper-trading"
+    ],
+    "importance": "high",
+    "timestamp": "2026-04-03T17:34:26.155922+00:00",
+    "date": "Apr 03"
+  },
+  {
+    "id": "611190d9e415",
+    "title": "Portfolio: $100,032 | Day +0",
+    "content": "Portfolio value: $100,031.93. Today P&L: $+0.00. Week P&L: $-178,553.22. Deployed: 10.0%, Cash: $90,020.30. Top movers: LLY (+0.3%), SPY (+0.1%).",
+    "source": "portfolio-monitor",
+    "tags": [
+      "portfolio",
+      "pnl",
+      "positions"
+    ],
+    "importance": "medium",
+    "timestamp": "2026-04-03T17:29:25.998671+00:00",
+    "date": "Apr 03"
+  },
+  {
+    "id": "b0125aa00cb7",
+    "title": "Sniper: ? launch detected (score 0)",
+    "content": "New launch detected: ?. Score: 0. Status: ?. ",
+    "source": "crypto-sniper",
+    "tags": [
+      "launch",
+      "sniper",
+      "?",
+      "?"
+    ],
+    "importance": "medium",
+    "timestamp": "2026-04-03T17:29:26.017218+00:00",
+    "date": "Apr 03"
+  },
+  {
+    "id": "21a78a671113",
+    "title": "Tweak: 35 positions | P&L $+11,983,060",
+    "content": "Tweak paper trading: 35 open positions. Wallet: $10,000.00, available: $5,750.00. Total unrealized P&L: $+11,983,059.86.",
+    "source": "tweak",
+    "tags": [
+      "tweak",
+      "positions",
+      "pnl",
+      "paper-trading"
+    ],
+    "importance": "high",
+    "timestamp": "2026-04-03T17:29:26.021124+00:00",
+    "date": "Apr 03"
+  },
+  {
+    "id": "ecd3672c02de",
+    "title": "Telegram: 3 actionable signals",
+    "content": "Telegram listener has 500 total signals: 3 actionable, 3 high confidence (score \u226580). High confidence signals: TRUMP, XUSD, NO.",
+    "source": "telegram-listener",
+    "tags": [
+      "telegram",
+      "signals",
+      "actionable"
+    ],
+    "importance": "medium",
+    "timestamp": "2026-04-03T17:29:26.024692+00:00",
+    "date": "Apr 03"
+  },
+  {
+    "id": "efcc20312eab",
+    "title": "Portfolio: $100,032 | Day +0",
+    "content": "Portfolio value: $100,031.93. Today P&L: $+0.00. Week P&L: $-178,568.37. Deployed: 10.0%, Cash: $90,020.30. Top movers: LLY (+0.3%), SPY (+0.1%).",
+    "source": "portfolio-monitor",
+    "tags": [
+      "portfolio",
+      "pnl",
+      "positions"
+    ],
+    "importance": "medium",
+    "timestamp": "2026-04-03T17:24:25.895051+00:00",
+    "date": "Apr 03"
+  },
+  {
+    "id": "10de769ff67f",
+    "title": "Tweak: 35 positions | P&L $+11,983,061",
+    "content": "Tweak paper trading: 35 open positions. Wallet: $10,000.00, available: $5,750.00. Total unrealized P&L: $+11,983,061.21.",
+    "source": "tweak",
+    "tags": [
+      "tweak",
+      "positions",
+      "pnl",
+      "paper-trading"
+    ],
+    "importance": "high",
+    "timestamp": "2026-04-03T17:24:25.917343+00:00",
+    "date": "Apr 03"
+  },
+  {
+    "id": "6ed789d63fbe",
+    "title": "Portfolio: $100,032 | Day +0",
+    "content": "Portfolio value: $100,031.93. Today P&L: $+0.00. Week P&L: $-178,585.52. Deployed: 10.0%, Cash: $90,020.30. Top movers: LLY (+0.3%), SPY (+0.1%).",
+    "source": "portfolio-monitor",
+    "tags": [
+      "portfolio",
+      "pnl",
+      "positions"
+    ],
+    "importance": "medium",
+    "timestamp": "2026-04-03T17:19:25.755453+00:00",
+    "date": "Apr 03"
+  },
+  {
+    "id": "b4d918acf5d8",
+    "title": "Execution: ? SOL @ $0.0000",
+    "content": "Execution: ? SOL @ $0.0000. Status: expired. Slippage: 0.000%.",
+    "source": "execution-specialist",
+    "tags": [
+      "execution",
+      "sol",
+      "?",
+      "expired"
+    ],
+    "importance": "medium",
+    "timestamp": "2026-04-03T17:19:25.795233+00:00",
+    "date": "Apr 03"
+  },
+  {
+    "id": "e90a2b46f44c",
+    "title": "Tweak: 35 positions | P&L $+11,983,058",
+    "content": "Tweak paper trading: 35 open positions. Wallet: $10,000.00, available: $5,750.00. Total unrealized P&L: $+11,983,057.72.",
+    "source": "tweak",
+    "tags": [
+      "tweak",
+      "positions",
+      "pnl",
+      "paper-trading"
+    ],
+    "importance": "high",
+    "timestamp": "2026-04-03T17:19:25.796263+00:00",
+    "date": "Apr 03"
+  },
+  {
+    "id": "51dcf1214348",
+    "title": "Portfolio: $100,032 | Day +0",
+    "content": "Portfolio value: $100,031.93. Today P&L: $+0.00. Week P&L: $-178,570.17. Deployed: 10.0%, Cash: $90,020.30. Top movers: LLY (+0.3%), SPY (+0.1%).",
+    "source": "portfolio-monitor",
+    "tags": [
+      "portfolio",
+      "pnl",
+      "positions"
+    ],
+    "importance": "medium",
+    "timestamp": "2026-04-03T17:14:25.607043+00:00",
+    "date": "Apr 03"
+  },
+  {
+    "id": "3f7b2303fd5a",
+    "title": "Tweak: 35 positions | P&L $+11,983,066",
+    "content": "Tweak paper trading: 35 open positions. Wallet: $10,000.00, available: $5,750.00. Total unrealized P&L: $+11,983,065.63.",
+    "source": "tweak",
+    "tags": [
+      "tweak",
+      "positions",
+      "pnl",
+      "paper-trading"
+    ],
+    "importance": "high",
+    "timestamp": "2026-04-03T17:14:25.630027+00:00",
+    "date": "Apr 03"
+  },
+  {
+    "id": "f9d847eefce9",
+    "title": "Portfolio: $100,032 | Day +0",
+    "content": "Portfolio value: $100,031.93. Today P&L: $+0.00. Week P&L: $-178,520.07. Deployed: 10.0%, Cash: $90,020.30. Top movers: LLY (+0.3%), SPY (+0.1%).",
+    "source": "portfolio-monitor",
+    "tags": [
+      "portfolio",
+      "pnl",
+      "positions"
+    ],
+    "importance": "medium",
+    "timestamp": "2026-04-03T17:09:25.462702+00:00",
+    "date": "Apr 03"
+  },
+  {
+    "id": "0384e1a5a5bb",
+    "title": "Tweak: 35 positions | P&L $+11,983,065",
+    "content": "Tweak paper trading: 35 open positions. Wallet: $10,000.00, available: $5,750.00. Total unrealized P&L: $+11,983,064.52.",
+    "source": "tweak",
+    "tags": [
+      "tweak",
+      "positions",
+      "pnl",
+      "paper-trading"
+    ],
+    "importance": "high",
+    "timestamp": "2026-04-03T17:09:25.493088+00:00",
+    "date": "Apr 03"
+  },
+  {
+    "id": "51beb35af972",
+    "title": "Portfolio: $100,032 | Day +0",
+    "content": "Portfolio value: $100,031.93. Today P&L: $+0.00. Week P&L: $-178,556.02. Deployed: 10.0%, Cash: $90,020.30. Top movers: LLY (+0.3%), SPY (+0.1%).",
+    "source": "portfolio-monitor",
+    "tags": [
+      "portfolio",
+      "pnl",
+      "positions"
+    ],
+    "importance": "medium",
+    "timestamp": "2026-04-03T17:04:25.318596+00:00",
+    "date": "Apr 03"
+  },
+  {
+    "id": "6bb226e28dd3",
+    "title": "Tweak: 35 positions | P&L $+11,983,063",
+    "content": "Tweak paper trading: 35 open positions. Wallet: $10,000.00, available: $5,750.00. Total unrealized P&L: $+11,983,063.45.",
+    "source": "tweak",
+    "tags": [
+      "tweak",
+      "positions",
+      "pnl",
+      "paper-trading"
+    ],
+    "importance": "high",
+    "timestamp": "2026-04-03T17:04:25.342589+00:00",
+    "date": "Apr 03"
+  },
+  {
+    "id": "ade779538831",
+    "title": "Top Telegram Channels",
+    "content": "Most active channels: Coin Sonar V2 (0 signals), \ud83d\udc33 \ud835\udc16\ud835\udc07\ud835\udc00\ud835\udc0b\ud835\udc04\ud835\udc13\ud835\udc11\ud835\udc00\ud835\udc02\ud835\udc0a\ud835\udc04\ud835\udc11 \ud83d\udc40 (0 signals), \ud83d\udc33 Whale Liquidations (0 signals).",
+    "source": "telegram-listener",
+    "tags": [
+      "telegram",
+      "channels"
+    ],
+    "importance": "low",
+    "timestamp": "2026-04-03T17:04:25.346375+00:00",
+    "date": "Apr 03"
+  },
+  {
+    "id": "ff002574deb8",
+    "title": "Portfolio: $100,032 | Day +0",
+    "content": "Portfolio value: $100,031.93. Today P&L: $+0.00. Week P&L: $-178,552.12. Deployed: 10.0%, Cash: $90,020.30. Top movers: LLY (+0.3%), SPY (+0.1%).",
+    "source": "portfolio-monitor",
+    "tags": [
+      "portfolio",
+      "pnl",
+      "positions"
+    ],
+    "importance": "medium",
+    "timestamp": "2026-04-03T16:59:25.253783+00:00",
+    "date": "Apr 03"
+  },
+  {
+    "id": "535c1d56b29c",
+    "title": "Tweak: 35 positions | P&L $+11,983,065",
+    "content": "Tweak paper trading: 35 open positions. Wallet: $10,000.00, available: $5,750.00. Total unrealized P&L: $+11,983,064.97.",
+    "source": "tweak",
+    "tags": [
+      "tweak",
+      "positions",
+      "pnl",
+      "paper-trading"
+    ],
+    "importance": "high",
+    "timestamp": "2026-04-03T16:59:25.277776+00:00",
+    "date": "Apr 03"
+  },
+  {
+    "id": "b50c6341a524",
+    "title": "Broadcast: ...",
+    "content": "Broadcasted to ?: ",
+    "source": "broadcaster",
+    "tags": [
+      "broadcast",
+      "alert",
+      "?"
+    ],
+    "importance": "low",
+    "timestamp": "2026-04-03T16:59:25.282338+00:00",
+    "date": "Apr 03"
+  },
+  {
     "id": "8cc677219868",
     "title": "Portfolio: $100,032 | Day +0",
     "content": "Portfolio value: $100,031.93. Today P&L: $+0.00. Week P&L: $-178,574.62. Deployed: 10.0%, Cash: $90,020.30. Top movers: LLY (+0.3%), SPY (+0.1%).",
@@ -6669,569 +7233,6 @@
     ],
     "importance": "high",
     "timestamp": "2026-04-02T22:47:10.071259+00:00",
-    "date": "Apr 02"
-  },
-  {
-    "id": "d666c8a3e4a8",
-    "title": "Portfolio: $277,634 | Day +18",
-    "content": "Portfolio value: $277,633.95. Today P&L: $+18.30. Week P&L: $-786.45. Deployed: 20.4%, Cash: $221,048.00. Top movers: ETH/USDT (-40.8%), AAPL (+29.6%), BTC/USDT (+0.3%).",
-    "source": "portfolio-monitor",
-    "tags": [
-      "portfolio",
-      "pnl",
-      "positions"
-    ],
-    "importance": "medium",
-    "timestamp": "2026-04-02T22:42:09.803075+00:00",
-    "date": "Apr 02"
-  },
-  {
-    "id": "6638de59c101",
-    "title": "Tweak: 35 positions | P&L $+11,979,600",
-    "content": "Tweak paper trading: 35 open positions. Wallet: $10,000.00, available: $5,750.00. Total unrealized P&L: $+11,979,599.92.",
-    "source": "tweak",
-    "tags": [
-      "tweak",
-      "positions",
-      "pnl",
-      "paper-trading"
-    ],
-    "importance": "high",
-    "timestamp": "2026-04-02T22:42:09.879215+00:00",
-    "date": "Apr 02"
-  },
-  {
-    "id": "8af1fa3bd91c",
-    "title": "Portfolio: $277,616 | Day -10",
-    "content": "Portfolio value: $277,615.65. Today P&L: $-9.50. Week P&L: $-826.70. Deployed: 20.4%, Cash: $221,048.00. Top movers: ETH/USDT (-40.8%), AAPL (+29.6%), BTC/USDT (+0.2%).",
-    "source": "portfolio-monitor",
-    "tags": [
-      "portfolio",
-      "pnl",
-      "positions"
-    ],
-    "importance": "medium",
-    "timestamp": "2026-04-02T22:37:09.650100+00:00",
-    "date": "Apr 02"
-  },
-  {
-    "id": "560eccd91f90",
-    "title": "Tweak: 35 positions | P&L $+11,979,599",
-    "content": "Tweak paper trading: 35 open positions. Wallet: $10,000.00, available: $5,750.00. Total unrealized P&L: $+11,979,599.31.",
-    "source": "tweak",
-    "tags": [
-      "tweak",
-      "positions",
-      "pnl",
-      "paper-trading"
-    ],
-    "importance": "high",
-    "timestamp": "2026-04-02T22:37:09.671405+00:00",
-    "date": "Apr 02"
-  },
-  {
-    "id": "b2e01da4b9ca",
-    "title": "Portfolio: $277,625 | Day +70",
-    "content": "Portfolio value: $277,625.15. Today P&L: $+70.20. Week P&L: $-819.85. Deployed: 20.4%, Cash: $221,048.00. Top movers: ETH/USDT (-40.8%), AAPL (+29.6%), BTC/USDT (+0.3%).",
-    "source": "portfolio-monitor",
-    "tags": [
-      "portfolio",
-      "pnl",
-      "positions"
-    ],
-    "importance": "medium",
-    "timestamp": "2026-04-02T22:32:09.516415+00:00",
-    "date": "Apr 02"
-  },
-  {
-    "id": "1ce382577a69",
-    "title": "Tweak: 35 positions | P&L $+11,979,600",
-    "content": "Tweak paper trading: 35 open positions. Wallet: $10,000.00, available: $5,750.00. Total unrealized P&L: $+11,979,599.85.",
-    "source": "tweak",
-    "tags": [
-      "tweak",
-      "positions",
-      "pnl",
-      "paper-trading"
-    ],
-    "importance": "high",
-    "timestamp": "2026-04-02T22:32:09.544322+00:00",
-    "date": "Apr 02"
-  },
-  {
-    "id": "cf854c803fed",
-    "title": "Portfolio: $277,555 | Day -78",
-    "content": "Portfolio value: $277,554.95. Today P&L: $-77.60. Week P&L: $-837.35. Deployed: 20.4%, Cash: $221,048.00. Top movers: ETH/USDT (-41.0%), AAPL (+29.6%), BTC/USDT (+0.1%).",
-    "source": "portfolio-monitor",
-    "tags": [
-      "portfolio",
-      "pnl",
-      "positions"
-    ],
-    "importance": "medium",
-    "timestamp": "2026-04-02T22:27:09.392902+00:00",
-    "date": "Apr 02"
-  },
-  {
-    "id": "b2a5e9ca398f",
-    "title": "Risk State: 0 consecutive losses",
-    "content": "Risk state: portfolio $282,000. Daily P&L: -2.4%, weekly: +1.8%. Consecutive losses: 0.",
-    "source": "risk-manager",
-    "tags": [
-      "risk",
-      "drawdown",
-      "pnl"
-    ],
-    "importance": "medium",
-    "timestamp": "2026-04-02T22:27:09.393703+00:00",
-    "date": "Apr 02"
-  },
-  {
-    "id": "8863fddca8db",
-    "title": "Tweak: 35 positions | P&L $+11,979,596",
-    "content": "Tweak paper trading: 35 open positions. Wallet: $10,000.00, available: $5,750.00. Total unrealized P&L: $+11,979,596.26.",
-    "source": "tweak",
-    "tags": [
-      "tweak",
-      "positions",
-      "pnl",
-      "paper-trading"
-    ],
-    "importance": "high",
-    "timestamp": "2026-04-02T22:27:09.414065+00:00",
-    "date": "Apr 02"
-  },
-  {
-    "id": "2596c53f054f",
-    "title": "Portfolio: $277,633 | Day +2",
-    "content": "Portfolio value: $277,632.55. Today P&L: $+1.65. Week P&L: $-757.60. Deployed: 20.4%, Cash: $221,048.00. Top movers: ETH/USDT (-40.8%), AAPL (+29.6%), BTC/USDT (+0.2%).",
-    "source": "portfolio-monitor",
-    "tags": [
-      "portfolio",
-      "pnl",
-      "positions"
-    ],
-    "importance": "medium",
-    "timestamp": "2026-04-02T22:22:09.211443+00:00",
-    "date": "Apr 02"
-  },
-  {
-    "id": "251c61a9e5fd",
-    "title": "Risk Veto: OKTA",
-    "content": "Risk manager vetoed OKTA trade. Reason: No reason given",
-    "source": "risk-manager",
-    "tags": [
-      "risk",
-      "veto",
-      "okta"
-    ],
-    "importance": "high",
-    "timestamp": "2026-04-02T22:22:09.213346+00:00",
-    "date": "Apr 02"
-  },
-  {
-    "id": "bd1b9fc7b1be",
-    "title": "Tweak: 35 positions | P&L $+11,979,600",
-    "content": "Tweak paper trading: 35 open positions. Wallet: $10,000.00, available: $5,750.00. Total unrealized P&L: $+11,979,600.03.",
-    "source": "tweak",
-    "tags": [
-      "tweak",
-      "positions",
-      "pnl",
-      "paper-trading"
-    ],
-    "importance": "high",
-    "timestamp": "2026-04-02T22:22:09.253491+00:00",
-    "date": "Apr 02"
-  },
-  {
-    "id": "64236b8db7f1",
-    "title": "Portfolio: $277,631 | Day -5",
-    "content": "Portfolio value: $277,630.90. Today P&L: $-4.75. Week P&L: $-727.25. Deployed: 20.4%, Cash: $221,048.00. Top movers: ETH/USDT (-40.7%), AAPL (+29.6%), BTC/USDT (+0.2%).",
-    "source": "portfolio-monitor",
-    "tags": [
-      "portfolio",
-      "pnl",
-      "positions"
-    ],
-    "importance": "medium",
-    "timestamp": "2026-04-02T22:17:09.062536+00:00",
-    "date": "Apr 02"
-  },
-  {
-    "id": "e5fa22733fd8",
-    "title": "Risk Veto: PUMP",
-    "content": "Risk manager vetoed PUMP trade. Reason: No reason given",
-    "source": "risk-manager",
-    "tags": [
-      "risk",
-      "veto",
-      "pump"
-    ],
-    "importance": "high",
-    "timestamp": "2026-04-02T22:17:09.063335+00:00",
-    "date": "Apr 02"
-  },
-  {
-    "id": "ecdaa2394bda",
-    "title": "Tweak: 35 positions | P&L $+11,979,600",
-    "content": "Tweak paper trading: 35 open positions. Wallet: $10,000.00, available: $5,750.00. Total unrealized P&L: $+11,979,600.32.",
-    "source": "tweak",
-    "tags": [
-      "tweak",
-      "positions",
-      "pnl",
-      "paper-trading"
-    ],
-    "importance": "high",
-    "timestamp": "2026-04-02T22:17:09.085384+00:00",
-    "date": "Apr 02"
-  },
-  {
-    "id": "b8cb186aaf95",
-    "title": "Portfolio: $277,636 | Day -29",
-    "content": "Portfolio value: $277,635.65. Today P&L: $-28.80. Week P&L: $-737.80. Deployed: 20.4%, Cash: $221,048.00. Top movers: ETH/USDT (-40.7%), AAPL (+29.6%), BTC/USDT (+0.2%).",
-    "source": "portfolio-monitor",
-    "tags": [
-      "portfolio",
-      "pnl",
-      "positions"
-    ],
-    "importance": "medium",
-    "timestamp": "2026-04-02T22:12:08.918474+00:00",
-    "date": "Apr 02"
-  },
-  {
-    "id": "7625aece573a",
-    "title": "Risk Veto: FET",
-    "content": "Risk manager vetoed FET trade. Reason: No reason given",
-    "source": "risk-manager",
-    "tags": [
-      "risk",
-      "veto",
-      "fet"
-    ],
-    "importance": "high",
-    "timestamp": "2026-04-02T22:12:08.919304+00:00",
-    "date": "Apr 02"
-  },
-  {
-    "id": "9270b2cf7889",
-    "title": "Tweak: 35 positions | P&L $+11,979,601",
-    "content": "Tweak paper trading: 35 open positions. Wallet: $10,000.00, available: $5,750.00. Total unrealized P&L: $+11,979,600.53.",
-    "source": "tweak",
-    "tags": [
-      "tweak",
-      "positions",
-      "pnl",
-      "paper-trading"
-    ],
-    "importance": "high",
-    "timestamp": "2026-04-02T22:12:08.945983+00:00",
-    "date": "Apr 02"
-  },
-  {
-    "id": "f76d3412f13d",
-    "title": "Portfolio: $277,664 | Day +36",
-    "content": "Portfolio value: $277,664.45. Today P&L: $+36.10. Week P&L: $-705.45. Deployed: 20.4%, Cash: $221,048.00. Top movers: ETH/USDT (-40.7%), AAPL (+29.6%), BTC/USDT (+0.3%).",
-    "source": "portfolio-monitor",
-    "tags": [
-      "portfolio",
-      "pnl",
-      "positions"
-    ],
-    "importance": "medium",
-    "timestamp": "2026-04-02T22:07:08.704867+00:00",
-    "date": "Apr 02"
-  },
-  {
-    "id": "7ee808302f01",
-    "title": "Counter-Intel: STEALTH | 0 threats",
-    "content": "Strategy detectability: STEALTH. Team win rate: 0%. Best bot: analyst, weakest: Insufficient trade data to assess. Active threats: 0. Improvements: Build trade journal data \u2014 need 20+ trades for recommendations",
-    "source": "counter-intelligence",
-    "tags": [
-      "intelligence",
-      "security",
-      "performance",
-      "stealth"
-    ],
-    "importance": "medium",
-    "timestamp": "2026-04-02T22:07:08.707118+00:00",
-    "date": "Apr 02"
-  },
-  {
-    "id": "0846ac425f93",
-    "title": "Tweak: 35 positions | P&L $+11,979,602",
-    "content": "Tweak paper trading: 35 open positions. Wallet: $10,000.00, available: $5,750.00. Total unrealized P&L: $+11,979,601.65.",
-    "source": "tweak",
-    "tags": [
-      "tweak",
-      "positions",
-      "pnl",
-      "paper-trading"
-    ],
-    "importance": "high",
-    "timestamp": "2026-04-02T22:07:08.778403+00:00",
-    "date": "Apr 02"
-  },
-  {
-    "id": "939e05bca409",
-    "title": "Portfolio: $277,628 | Day +10",
-    "content": "Portfolio value: $277,628.35. Today P&L: $+10.25. Week P&L: $-724.10. Deployed: 20.4%, Cash: $221,048.00. Top movers: ETH/USDT (-40.8%), AAPL (+29.6%), BTC/USDT (+0.2%).",
-    "source": "portfolio-monitor",
-    "tags": [
-      "portfolio",
-      "pnl",
-      "positions"
-    ],
-    "importance": "medium",
-    "timestamp": "2026-04-02T22:02:08.512236+00:00",
-    "date": "Apr 02"
-  },
-  {
-    "id": "3cd8089676fb",
-    "title": "Tweak: 35 positions | P&L $+11,979,600",
-    "content": "Tweak paper trading: 35 open positions. Wallet: $10,000.00, available: $5,750.00. Total unrealized P&L: $+11,979,599.97.",
-    "source": "tweak",
-    "tags": [
-      "tweak",
-      "positions",
-      "pnl",
-      "paper-trading"
-    ],
-    "importance": "high",
-    "timestamp": "2026-04-02T22:02:08.559480+00:00",
-    "date": "Apr 02"
-  },
-  {
-    "id": "30a7a45f014d",
-    "title": "Portfolio: $277,618 | Day +68",
-    "content": "Portfolio value: $277,618.10. Today P&L: $+67.65. Week P&L: $-650.55. Deployed: 20.4%, Cash: $221,048.00. Top movers: ETH/USDT (-40.7%), AAPL (+29.6%), BTC/USDT (+0.2%).",
-    "source": "portfolio-monitor",
-    "tags": [
-      "portfolio",
-      "pnl",
-      "positions"
-    ],
-    "importance": "medium",
-    "timestamp": "2026-04-02T21:57:08.365725+00:00",
-    "date": "Apr 02"
-  },
-  {
-    "id": "b0125aa00cb7",
-    "title": "Sniper: ? launch detected (score 0)",
-    "content": "New launch detected: ?. Score: 0. Status: ?. ",
-    "source": "crypto-sniper",
-    "tags": [
-      "launch",
-      "sniper",
-      "?",
-      "?"
-    ],
-    "importance": "medium",
-    "timestamp": "2026-04-02T21:57:08.384205+00:00",
-    "date": "Apr 02"
-  },
-  {
-    "id": "f16193ac42e8",
-    "title": "Tweak: 35 positions | P&L $+11,979,600",
-    "content": "Tweak paper trading: 35 open positions. Wallet: $10,000.00, available: $5,750.00. Total unrealized P&L: $+11,979,599.88.",
-    "source": "tweak",
-    "tags": [
-      "tweak",
-      "positions",
-      "pnl",
-      "paper-trading"
-    ],
-    "importance": "high",
-    "timestamp": "2026-04-02T21:57:08.388257+00:00",
-    "date": "Apr 02"
-  },
-  {
-    "id": "54c4509fe4b2",
-    "title": "Portfolio: $277,550 | Day +18",
-    "content": "Portfolio value: $277,550.45. Today P&L: $+17.55. Week P&L: $-746.25. Deployed: 20.4%, Cash: $221,048.00. Top movers: ETH/USDT (-40.8%), AAPL (+29.6%), BTC/USDT (+0.0%).",
-    "source": "portfolio-monitor",
-    "tags": [
-      "portfolio",
-      "pnl",
-      "positions"
-    ],
-    "importance": "medium",
-    "timestamp": "2026-04-02T21:52:08.252697+00:00",
-    "date": "Apr 02"
-  },
-  {
-    "id": "2fb308fc773e",
-    "title": "Tweak: 35 positions | P&L $+11,979,598",
-    "content": "Tweak paper trading: 35 open positions. Wallet: $10,000.00, available: $5,750.00. Total unrealized P&L: $+11,979,597.56.",
-    "source": "tweak",
-    "tags": [
-      "tweak",
-      "positions",
-      "pnl",
-      "paper-trading"
-    ],
-    "importance": "high",
-    "timestamp": "2026-04-02T21:52:08.277004+00:00",
-    "date": "Apr 02"
-  },
-  {
-    "id": "6526cb6faef0",
-    "title": "Portfolio: $277,533 | Day -15",
-    "content": "Portfolio value: $277,532.90. Today P&L: $-15.10. Week P&L: $-781.15. Deployed: 20.4%, Cash: $221,048.00. Top movers: ETH/USDT (-40.8%), AAPL (+29.6%), BTC/USDT (-0.0%).",
-    "source": "portfolio-monitor",
-    "tags": [
-      "portfolio",
-      "pnl",
-      "positions"
-    ],
-    "importance": "medium",
-    "timestamp": "2026-04-02T21:47:08.109650+00:00",
-    "date": "Apr 02"
-  },
-  {
-    "id": "b4d918acf5d8",
-    "title": "Execution: ? SOL @ $0.0000",
-    "content": "Execution: ? SOL @ $0.0000. Status: expired. Slippage: 0.000%.",
-    "source": "execution-specialist",
-    "tags": [
-      "execution",
-      "sol",
-      "?",
-      "expired"
-    ],
-    "importance": "medium",
-    "timestamp": "2026-04-02T21:47:08.132992+00:00",
-    "date": "Apr 02"
-  },
-  {
-    "id": "e333b2f1c5b8",
-    "title": "Tweak: 35 positions | P&L $+11,979,597",
-    "content": "Tweak paper trading: 35 open positions. Wallet: $10,000.00, available: $5,750.00. Total unrealized P&L: $+11,979,596.65.",
-    "source": "tweak",
-    "tags": [
-      "tweak",
-      "positions",
-      "pnl",
-      "paper-trading"
-    ],
-    "importance": "high",
-    "timestamp": "2026-04-02T21:47:08.134102+00:00",
-    "date": "Apr 02"
-  },
-  {
-    "id": "2fbb69bf005a",
-    "title": "Portfolio: $277,548 | Day -28",
-    "content": "Portfolio value: $277,548.00. Today P&L: $-27.80. Week P&L: $-794.90. Deployed: 20.4%, Cash: $221,048.00. Top movers: ETH/USDT (-40.8%), AAPL (+29.6%), BTC/USDT (+0.0%).",
-    "source": "portfolio-monitor",
-    "tags": [
-      "portfolio",
-      "pnl",
-      "positions"
-    ],
-    "importance": "medium",
-    "timestamp": "2026-04-02T21:42:07.970856+00:00",
-    "date": "Apr 02"
-  },
-  {
-    "id": "7d9b5015c529",
-    "title": "Tweak: 35 positions | P&L $+11,979,598",
-    "content": "Tweak paper trading: 35 open positions. Wallet: $10,000.00, available: $5,750.00. Total unrealized P&L: $+11,979,597.68.",
-    "source": "tweak",
-    "tags": [
-      "tweak",
-      "positions",
-      "pnl",
-      "paper-trading"
-    ],
-    "importance": "high",
-    "timestamp": "2026-04-02T21:42:08.014226+00:00",
-    "date": "Apr 02"
-  },
-  {
-    "id": "46e74309f4c1",
-    "title": "Portfolio: $277,576 | Day +3",
-    "content": "Portfolio value: $277,575.80. Today P&L: $+3.40. Week P&L: $-757.80. Deployed: 20.4%, Cash: $221,048.00. Top movers: ETH/USDT (-40.8%), AAPL (+29.6%), BTC/USDT (+0.1%).",
-    "source": "portfolio-monitor",
-    "tags": [
-      "portfolio",
-      "pnl",
-      "positions"
-    ],
-    "importance": "medium",
-    "timestamp": "2026-04-02T21:37:07.745847+00:00",
-    "date": "Apr 02"
-  },
-  {
-    "id": "d6ff00023114",
-    "title": "Tweak: 35 positions | P&L $+11,979,598",
-    "content": "Tweak paper trading: 35 open positions. Wallet: $10,000.00, available: $5,750.00. Total unrealized P&L: $+11,979,598.28.",
-    "source": "tweak",
-    "tags": [
-      "tweak",
-      "positions",
-      "pnl",
-      "paper-trading"
-    ],
-    "importance": "high",
-    "timestamp": "2026-04-02T21:37:07.815260+00:00",
-    "date": "Apr 02"
-  },
-  {
-    "id": "8104b5a161ab",
-    "title": "Portfolio: $277,572 | Day +11",
-    "content": "Portfolio value: $277,572.40. Today P&L: $+10.80. Week P&L: $-756.70. Deployed: 20.4%, Cash: $221,048.00. Top movers: ETH/USDT (-40.8%), AAPL (+29.6%), BTC/USDT (+0.1%).",
-    "source": "portfolio-monitor",
-    "tags": [
-      "portfolio",
-      "pnl",
-      "positions"
-    ],
-    "importance": "medium",
-    "timestamp": "2026-04-02T21:32:07.585153+00:00",
-    "date": "Apr 02"
-  },
-  {
-    "id": "cbe1873ad336",
-    "title": "Tweak: 35 positions | P&L $+11,979,598",
-    "content": "Tweak paper trading: 35 open positions. Wallet: $10,000.00, available: $5,750.00. Total unrealized P&L: $+11,979,598.12.",
-    "source": "tweak",
-    "tags": [
-      "tweak",
-      "positions",
-      "pnl",
-      "paper-trading"
-    ],
-    "importance": "high",
-    "timestamp": "2026-04-02T21:32:07.611235+00:00",
-    "date": "Apr 02"
-  },
-  {
-    "id": "ade779538831",
-    "title": "Top Telegram Channels",
-    "content": "Most active channels: Coin Sonar V2 (0 signals), \ud83d\udc33 \ud835\udc16\ud835\udc07\ud835\udc00\ud835\udc0b\ud835\udc04\ud835\udc13\ud835\udc11\ud835\udc00\ud835\udc02\ud835\udc0a\ud835\udc04\ud835\udc11 \ud83d\udc40 (0 signals), \ud83d\udc33 Whale Liquidations (0 signals).",
-    "source": "telegram-listener",
-    "tags": [
-      "telegram",
-      "channels"
-    ],
-    "importance": "low",
-    "timestamp": "2026-04-02T21:32:07.614874+00:00",
-    "date": "Apr 02"
-  },
-  {
-    "id": "ab949579cc5b",
-    "title": "Portfolio: $277,562 | Day -66",
-    "content": "Portfolio value: $277,561.60. Today P&L: $-66.00. Week P&L: $-795.15. Deployed: 20.4%, Cash: $221,048.00. Top movers: ETH/USDT (-40.8%), AAPL (+29.6%), BTC/USDT (+0.1%).",
-    "source": "portfolio-monitor",
-    "tags": [
-      "portfolio",
-      "pnl",
-      "positions"
-    ],
-    "importance": "medium",
-    "timestamp": "2026-04-02T21:27:07.469910+00:00",
     "date": "Apr 02"
   }
 ]

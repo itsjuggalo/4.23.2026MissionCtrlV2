@@ -1,21 +1,5 @@
 [
   {
-    "timestamp": "2026-04-01T15:49:07.047891+00:00",
-    "type": "auto_fix",
-    "bot": "mission-control",
-    "issue": "Dashboard not responding on port 3000",
-    "action": "pm2 restart mission-control",
-    "result": "restarted"
-  },
-  {
-    "timestamp": "2026-04-01T15:54:10.960007+00:00",
-    "type": "auto_fix",
-    "bot": "mission-control",
-    "issue": "Dashboard not responding on port 3000",
-    "action": "pm2 restart mission-control",
-    "result": "restarted"
-  },
-  {
     "timestamp": "2026-04-01T15:59:15.159629+00:00",
     "type": "auto_fix",
     "bot": "mission-control",
@@ -3927,5 +3911,19 @@
     "issue": "Dashboard not responding on port 3033",
     "action": "pm2 restart mission-control",
     "result": "restarted"
+  },
+  {
+    "timestamp": "2026-04-03T17:11:46.197305+00:00",
+    "type": "log_error_detected",
+    "bot": "telegram-listener",
+    "error_key": "rate_limit",
+    "snippet": "essage\": \"You are being rate limited.\", \"retry_after\": 0.391, \"global\": false}\n\u001b[31m1|telegram | \u001b[39mArchive webhook failed: \n\u001b[31m1|telegram | \u001b[39m  [WARN] Discord webhook 503: upstream connect error or disconnect/reset before headers. reset reason: remote connection failure, transport failure re"
+  },
+  {
+    "timestamp": "2026-04-03T18:12:38.278721+00:00",
+    "type": "log_error_detected",
+    "bot": "telegram-listener",
+    "error_key": "rate_limit",
+    "snippet": ": \n\u001b[31m1|telegram | \u001b[39m  [WARN] Discord webhook 503: upstream connect error or disconnect/reset before headers. reset reason: remote connection failure, transport failure re\n\u001b[31m1|telegram | \u001b[39mArchive webhook 503: upstream connect error or disconnect/reset before headers. reset reason: remote"
   }
 ]

@@ -56,7 +56,7 @@ type PageName =
 
 export function AppShellClient() {
   const searchParams = useSearchParams();
-  const [activePage, setActivePage] = useState<PageName>('Dashboard');
+  const [activePage, setActivePage] = useState<PageName>('Command Center');
   const [isCollapsed, setIsCollapsed] = useState(false);
   const [approvals, setApprovals] = useState<Approval[]>(initialApprovals);
 

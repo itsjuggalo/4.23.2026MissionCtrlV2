@@ -23,9 +23,9 @@
     },
     "target_price": 70000,
     "stop_loss": 65000,
-    "current_price": 67020.005,
-    "unrealized_pnl": -11.831414773843937,
-    "unrealized_pnl_pct": -5.9157073869219685
+    "current_price": 66831.995,
+    "unrealized_pnl": -12.359280680573896,
+    "unrealized_pnl_pct": -6.179640340286948
   },
   {
     "id": "TWEAK-20260326003022-1",
@@ -51,9 +51,9 @@
     },
     "target_price": 3500,
     "stop_loss": 3100,
-    "current_price": 2055.575,
-    "unrealized_pnl": -7.525471894277218,
-    "unrealized_pnl_pct": -5.016981262851479
+    "current_price": 2050.045,
+    "unrealized_pnl": -7.908763255781717,
+    "unrealized_pnl_pct": -5.272508837187812
   },
   {
     "id": "TWEAK-20260326003122-2",
@@ -79,9 +79,9 @@
     },
     "target_price": 70000,
     "stop_loss": 65000,
-    "current_price": 67034.515,
-    "unrealized_pnl": -11.867266323337498,
-    "unrealized_pnl_pct": -5.933633161668749
+    "current_price": 66831.995,
+    "unrealized_pnl": -12.435639813086748,
+    "unrealized_pnl_pct": -6.217819906543374
   },
   {
     "id": "TWEAK-20260326003123-3",
@@ -107,9 +107,9 @@
     },
     "target_price": 3500,
     "stop_loss": 3100,
-    "current_price": 2055.575,
-    "unrealized_pnl": -7.528763515386748,
-    "unrealized_pnl_pct": -5.019175676924498
+    "current_price": 2050.045,
+    "unrealized_pnl": -7.912046021624601,
+    "unrealized_pnl_pct": -5.2746973477497345
   },
   {
     "id": "TWEAK-20260326003224-4",
@@ -135,9 +135,9 @@
     },
     "target_price": 70000,
     "stop_loss": 65000,
-    "current_price": 67034.515,
-    "unrealized_pnl": -11.90685765593872,
-    "unrealized_pnl_pct": -5.95342882796936
+    "current_price": 66831.995,
+    "unrealized_pnl": -12.475111535116037,
+    "unrealized_pnl_pct": -6.237555767558018
   },
   {
     "id": "TWEAK-20260326003224-5",
@@ -163,9 +163,9 @@
     },
     "target_price": 3500,
     "stop_loss": 3100,
-    "current_price": 2055.575,
-    "unrealized_pnl": -7.580750950350809,
-    "unrealized_pnl_pct": -5.053833966900539
+    "current_price": 2050.045,
+    "unrealized_pnl": -7.96389359766094,
+    "unrealized_pnl_pct": -5.309262398440627
   },
   {
     "id": "TWEAK-20260326003325-6",
@@ -191,9 +191,9 @@
     },
     "target_price": 70000,
     "stop_loss": 65000,
-    "current_price": 67034.515,
-    "unrealized_pnl": -11.978080078535868,
-    "unrealized_pnl_pct": -5.989040039267934
+    "current_price": 66831.995,
+    "unrealized_pnl": -12.546118785498924,
+    "unrealized_pnl_pct": -6.273059392749462
   },
   {
     "id": "TWEAK-20260326003325-7",
@@ -219,9 +219,9 @@
     },
     "target_price": 3500,
     "stop_loss": 3100,
-    "current_price": 2055.575,
-    "unrealized_pnl": -7.635987127336871,
-    "unrealized_pnl_pct": -5.090658084891247
+    "current_price": 2050.045,
+    "unrealized_pnl": -8.018981175807879,
+    "unrealized_pnl_pct": -5.345987450538585
   },
   {
     "id": "TWEAK-20260326003427-8",
@@ -247,9 +247,9 @@
     },
     "target_price": 70000,
     "stop_loss": 65000,
-    "current_price": 67034.515,
-    "unrealized_pnl": -11.999172661366092,
-    "unrealized_pnl_pct": -5.999586330683046
+    "current_price": 66831.995,
+    "unrealized_pnl": -12.567147644889445,
+    "unrealized_pnl_pct": -6.283573822444723
   },
   {
     "id": "TWEAK-20260326003427-9",
@@ -275,9 +275,9 @@
     },
     "target_price": 3500,
     "stop_loss": 3100,
-    "current_price": 2055.575,
-    "unrealized_pnl": -7.667531424403719,
-    "unrealized_pnl_pct": -5.111687616269146
+    "current_price": 2050.045,
+    "unrealized_pnl": -8.050440610992878,
+    "unrealized_pnl_pct": -5.366960407328585
   },
   {
     "id": "TWEAK-20260327052143-10",
