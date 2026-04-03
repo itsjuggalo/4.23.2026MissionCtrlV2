@@ -1,26 +1,5 @@
 [
   {
-    "id": "72515df8-627b-4a35-8ae0-a6a0a9966080",
-    "channel_id": "-1001853036360",
-    "channel_name": "Coin Sonar V2",
-    "timestamp": "2026-04-03T13:22:20.029850+00:00",
-    "raw_text": "$CTSI | #CTSIUSDT | TradingView\nPrice: 0.04672 (+85.3% in 24h)\n\u25141 min change: +1.4% \ud83d\udcc8\n148.4K USDT traded in 1 min\n\u2514Buys: 106.0K USDT [71%] \ud83d\udfe2\n24h Vol: 34.2M USDT (Binance)\nAlerts in this hour: 13 \u2b50\ufe0f\u2b50\ufe0f",
-    "symbol": "CTSI",
-    "direction": null,
-    "entry": 0.04672,
-    "stop_loss": null,
-    "targets": [],
-    "leverage": null,
-    "price_change": null,
-    "score": 35,
-    "status": "rejected",
-    "risk_reward": null,
-    "confirmations": 1,
-    "confirmed_by": [
-      "Coin Sonar V2"
-    ]
-  },
-  {
     "id": "b6cd786f-eab4-4b71-ae99-2343a88defaf",
     "channel_id": "-1001853036360",
     "channel_name": "Coin Sonar V2",
@@ -11291,6 +11270,35 @@
       "no-stop-loss",
       "duplicate-signal",
       "valid-symbol"
+    ],
+    "tier_emoji": "\u274c"
+  },
+  {
+    "id": "d5c2cc0b-b7a2-464d-8eac-ada1d449e797",
+    "channel_id": "websocket",
+    "channel_name": "AICryptoSignals",
+    "timestamp": "2026-04-03T18:15:49.323790+00:00",
+    "raw_text": "RENDERUSDT\nLONG\nEntry: 1.9420000\nPrice change: +9.22%",
+    "symbol": "RENDER",
+    "direction": "LONG",
+    "entry": 1.942,
+    "stop_loss": null,
+    "targets": [],
+    "leverage": null,
+    "price_change": "+9.22%",
+    "score": 50,
+    "status": "rejected",
+    "risk_reward": null,
+    "confirmations": 1,
+    "confirmed_by": [
+      "AICryptoSignals"
+    ],
+    "quality_score": 1.0,
+    "quality_flags": [
+      "complete-data",
+      "new-source",
+      "no-stop-loss",
+      "duplicate-signal"
     ],
     "tier_emoji": "\u274c"
   }

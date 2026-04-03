@@ -227946,5 +227946,26 @@
     "confirmed_by": [
       "\ud83d\udc33 \ud835\udc16\ud835\udc07\ud835\udc00\ud835\udc0b\ud835\udc04\ud835\udc13\ud835\udc11\ud835\udc00\ud835\udc02\ud835\udc0a\ud835\udc04\ud835\udc11 \ud83d\udc40"
     ]
+  },
+  {
+    "id": "72515df8-627b-4a35-8ae0-a6a0a9966080",
+    "channel_id": "-1001853036360",
+    "channel_name": "Coin Sonar V2",
+    "timestamp": "2026-04-03T13:22:20.029850+00:00",
+    "raw_text": "$CTSI | #CTSIUSDT | TradingView\nPrice: 0.04672 (+85.3% in 24h)\n\u25141 min change: +1.4% \ud83d\udcc8\n148.4K USDT traded in 1 min\n\u2514Buys: 106.0K USDT [71%] \ud83d\udfe2\n24h Vol: 34.2M USDT (Binance)\nAlerts in this hour: 13 \u2b50\ufe0f\u2b50\ufe0f",
+    "symbol": "CTSI",
+    "direction": null,
+    "entry": 0.04672,
+    "stop_loss": null,
+    "targets": [],
+    "leverage": null,
+    "price_change": null,
+    "score": 35,
+    "status": "rejected",
+    "risk_reward": null,
+    "confirmations": 1,
+    "confirmed_by": [
+      "Coin Sonar V2"
+    ]
   }
 ]
