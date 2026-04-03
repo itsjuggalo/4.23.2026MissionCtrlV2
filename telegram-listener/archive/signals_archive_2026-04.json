@@ -224057,5 +224057,243 @@
     "confirmed_by": [
       "Coin Sonar V2"
     ]
+  },
+  {
+    "id": "4fa19cb4-cc01-4973-b3fc-8251513590a1",
+    "channel_id": "-1001853036360",
+    "channel_name": "Coin Sonar V2",
+    "timestamp": "2026-04-03T12:13:15.370566+00:00",
+    "raw_text": "$ONG | #ONGUSDT | TradingView\nPrice: 0.10210 (+48.9% in 24h)\n\u25141 min change: +1.1% \ud83d\udcc8\n65.3K USDT traded in 1 min\n\u2514Buys: 43.1K USDT [66%] \ud83d\udfe2\n24h Vol: 11.0M USDT (Binance)\nAlerts in this hour: 15 \u2b50\ufe0f\u2b50\ufe0f",
+    "symbol": "ONG",
+    "direction": null,
+    "entry": 0.1021,
+    "stop_loss": null,
+    "targets": [],
+    "leverage": null,
+    "price_change": null,
+    "score": 35,
+    "status": "rejected",
+    "risk_reward": null,
+    "confirmations": 1,
+    "confirmed_by": [
+      "Coin Sonar V2"
+    ]
+  },
+  {
+    "id": "4fa19cb4-cc01-4973-b3fc-8251513590a1",
+    "channel_id": "-1001853036360",
+    "channel_name": "Coin Sonar V2",
+    "timestamp": "2026-04-03T12:13:15.370566+00:00",
+    "raw_text": "$ONG | #ONGUSDT | TradingView\nPrice: 0.10210 (+48.9% in 24h)\n\u25141 min change: +1.1% \ud83d\udcc8\n65.3K USDT traded in 1 min\n\u2514Buys: 43.1K USDT [66%] \ud83d\udfe2\n24h Vol: 11.0M USDT (Binance)\nAlerts in this hour: 15 \u2b50\ufe0f\u2b50\ufe0f",
+    "symbol": "ONG",
+    "direction": null,
+    "entry": 0.1021,
+    "stop_loss": null,
+    "targets": [],
+    "leverage": null,
+    "price_change": null,
+    "score": 35,
+    "status": "rejected",
+    "risk_reward": null,
+    "confirmations": 1,
+    "confirmed_by": [
+      "Coin Sonar V2"
+    ]
+  },
+  {
+    "id": "335876f1-caa1-4c94-9451-08371d4a7ae3",
+    "channel_id": "websocket",
+    "channel_name": "AICryptoSignals",
+    "timestamp": "2026-04-03T12:15:15.403113+00:00",
+    "raw_text": "ALGOUSDT\nLONG\nEntry: 0.1187\nPrice change: +17.29%",
+    "symbol": "ALGO",
+    "direction": "LONG",
+    "entry": 0.1187,
+    "stop_loss": null,
+    "targets": [],
+    "leverage": null,
+    "price_change": "+17.29%",
+    "score": 50,
+    "status": "rejected",
+    "risk_reward": null,
+    "confirmations": 1,
+    "confirmed_by": [
+      "AICryptoSignals"
+    ],
+    "quality_score": 1.5,
+    "quality_flags": [
+      "complete-data",
+      "new-source",
+      "no-stop-loss",
+      "duplicate-signal",
+      "valid-symbol"
+    ],
+    "tier_emoji": "\u274c"
+  },
+  {
+    "id": "5aabbd24-7dc4-4e15-a7f9-23ee2ed858c8",
+    "channel_id": "-1001853036360",
+    "channel_name": "Coin Sonar V2",
+    "timestamp": "2026-04-03T12:15:17.229100+00:00",
+    "raw_text": "$KITE | #KITEUSDT | TradingView\nPrice: 0.1394 (+2.0% in 24h)\n\u25141 min change: +1.0% \ud83d\udcc8\n36.0K USDT traded in 1 min\n\u2514Buys: 20.5K USDT [57%] \ud83d\udfe2\n24h Vol: 11.2M USDT (Binance)\nAlerts in this hour: 1",
+    "symbol": "KITE",
+    "direction": null,
+    "entry": 0.1394,
+    "stop_loss": null,
+    "targets": [],
+    "leverage": null,
+    "price_change": null,
+    "score": 35,
+    "status": "rejected",
+    "risk_reward": null,
+    "confirmations": 1,
+    "confirmed_by": [
+      "Coin Sonar V2"
+    ]
+  },
+  {
+    "id": "6e3383aa-ecac-467d-9abf-648ebdf1e825",
+    "channel_id": "websocket",
+    "channel_name": "AICryptoSignals",
+    "timestamp": "2026-04-03T12:15:27.061273+00:00",
+    "raw_text": "RENDERUSDT\nLONG\nEntry: 1.9160000\nPrice change: +10.76%",
+    "symbol": "RENDER",
+    "direction": "LONG",
+    "entry": 1.916,
+    "stop_loss": null,
+    "targets": [],
+    "leverage": null,
+    "price_change": "+10.76%",
+    "score": 50,
+    "status": "rejected",
+    "risk_reward": null,
+    "confirmations": 1,
+    "confirmed_by": [
+      "AICryptoSignals"
+    ],
+    "quality_score": 1.0,
+    "quality_flags": [
+      "complete-data",
+      "new-source",
+      "no-stop-loss",
+      "duplicate-signal"
+    ],
+    "tier_emoji": "\u274c"
+  },
+  {
+    "id": "6e3383aa-ecac-467d-9abf-648ebdf1e825",
+    "channel_id": "websocket",
+    "channel_name": "AICryptoSignals",
+    "timestamp": "2026-04-03T12:15:27.061273+00:00",
+    "raw_text": "RENDERUSDT\nLONG\nEntry: 1.9160000\nPrice change: +10.76%",
+    "symbol": "RENDER",
+    "direction": "LONG",
+    "entry": 1.916,
+    "stop_loss": null,
+    "targets": [],
+    "leverage": null,
+    "price_change": "+10.76%",
+    "score": 50,
+    "status": "rejected",
+    "risk_reward": null,
+    "confirmations": 1,
+    "confirmed_by": [
+      "AICryptoSignals"
+    ],
+    "quality_score": 1.0,
+    "quality_flags": [
+      "complete-data",
+      "new-source",
+      "no-stop-loss",
+      "duplicate-signal"
+    ],
+    "tier_emoji": "\u274c"
+  },
+  {
+    "id": "427d2c96-ddae-4cb9-8f76-294b0c6ae5e4",
+    "channel_id": "websocket",
+    "channel_name": "AICryptoSignals",
+    "timestamp": "2026-04-03T12:15:28.851274+00:00",
+    "raw_text": "QNTUSDT\nLONG\nEntry: 76.150000\nPrice change: +8.60%",
+    "symbol": "QNT",
+    "direction": "LONG",
+    "entry": 76.15,
+    "stop_loss": null,
+    "targets": [],
+    "leverage": null,
+    "price_change": "+8.60%",
+    "score": 50,
+    "status": "rejected",
+    "risk_reward": null,
+    "confirmations": 1,
+    "confirmed_by": [
+      "AICryptoSignals"
+    ],
+    "quality_score": 1.0,
+    "quality_flags": [
+      "complete-data",
+      "new-source",
+      "no-stop-loss",
+      "duplicate-signal"
+    ],
+    "tier_emoji": "\u274c"
+  },
+  {
+    "id": "7f6cfa34-5d24-4316-a566-c83c2657bd5f",
+    "channel_id": "websocket",
+    "channel_name": "AICryptoSignals",
+    "timestamp": "2026-04-03T12:15:30.468378+00:00",
+    "raw_text": "XPLUSDT\nLONG\nEntry: 0.1226000\nPrice change: +12.90%",
+    "symbol": "XPL",
+    "direction": "LONG",
+    "entry": 0.1226,
+    "stop_loss": null,
+    "targets": [],
+    "leverage": null,
+    "price_change": "+12.90%",
+    "score": 50,
+    "status": "rejected",
+    "risk_reward": null,
+    "confirmations": 1,
+    "confirmed_by": [
+      "AICryptoSignals"
+    ],
+    "quality_score": 1.0,
+    "quality_flags": [
+      "complete-data",
+      "new-source",
+      "no-stop-loss",
+      "duplicate-signal"
+    ],
+    "tier_emoji": "\u274c"
+  },
+  {
+    "id": "7f6cfa34-5d24-4316-a566-c83c2657bd5f",
+    "channel_id": "websocket",
+    "channel_name": "AICryptoSignals",
+    "timestamp": "2026-04-03T12:15:30.468378+00:00",
+    "raw_text": "XPLUSDT\nLONG\nEntry: 0.1226000\nPrice change: +12.90%",
+    "symbol": "XPL",
+    "direction": "LONG",
+    "entry": 0.1226,
+    "stop_loss": null,
+    "targets": [],
+    "leverage": null,
+    "price_change": "+12.90%",
+    "score": 50,
+    "status": "rejected",
+    "risk_reward": null,
+    "confirmations": 1,
+    "confirmed_by": [
+      "AICryptoSignals"
+    ],
+    "quality_score": 1.0,
+    "quality_flags": [
+      "complete-data",
+      "new-source",
+      "no-stop-loss",
+      "duplicate-signal"
+    ],
+    "tier_emoji": "\u274c"
   }
 ]

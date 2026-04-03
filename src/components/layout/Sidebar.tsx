@@ -19,6 +19,10 @@ import {
   Building2,
   TrendingUp,
   Cpu,
+  Target,
+  BarChart2,
+  Bell,
+  Globe,
 } from 'lucide-react';
 
 type PageName =
@@ -40,7 +44,10 @@ type PageName =
   | 'Activity'
   | 'Risk'
   | 'Chart'
-  | 'PowerTrader';
+  | 'PowerTrader'
+  | 'Command Center'
+  | 'Performance'
+  | 'Regime';
 
 interface SidebarProps {
   activePage: PageName;
@@ -50,6 +57,12 @@ interface SidebarProps {
   newSignalsCount: number;
   pendingApprovalsCount: number;
 }
+
+const commandItems: { name: PageName; icon: React.ElementType }[] = [
+  { name: 'Command Center', icon: Target },
+  { name: 'Performance', icon: BarChart2 },
+  { name: 'Regime', icon: Globe },
+];
 
 const navItems: { name: PageName; icon: React.ElementType }[] = [
   { name: 'Dashboard', icon: LayoutDashboard },
@@ -153,6 +166,32 @@ export function Sidebar({
 
       {/* Nav items */}
       <nav style={{ flex: 1, padding: '8px 0', overflowY: 'auto' }}>
+        {/* COMMAND section */}
+        {!isCollapsed && (
+          <div style={{ padding: '6px 14px 2px', fontSize: 9, fontFamily: "'JetBrains Mono', monospace", color: '#3d3d52', letterSpacing: '1.5px', fontWeight: 700 }}>COMMAND</div>
+        )}
+        {commandItems.map(({ name, icon: Icon }) => {
+          const isActive = activePage === name;
+          return (
+            <button
+              key={name}
+              onClick={() => onNavigate(name)}
+              style={{
+                display: 'flex', alignItems: 'center', gap: 10,
+                padding: isCollapsed ? '9px 10px' : '9px 14px',
+                width: '100%', cursor: 'pointer', background: isActive ? 'rgba(108,92,231,0.12)' : 'transparent',
+                border: 'none', borderLeft: isActive ? '2px solid #6c5ce7' : '2px solid transparent',
+                color: isActive ? '#a29bfe' : '#8b8b9e', transition: 'background 0.15s, color 0.15s',
+              }}
+            >
+              <Icon size={16} style={{ flexShrink: 0 }} />
+              {!isCollapsed && <span style={{ fontSize: 13, fontFamily: "'Inter', -apple-system, sans-serif", whiteSpace: 'nowrap' }}>{name}</span>}
+            </button>
+          );
+        })}
+        {!isCollapsed && (
+          <div style={{ padding: '8px 14px 2px', fontSize: 9, fontFamily: "'JetBrains Mono', monospace", color: '#3d3d52', letterSpacing: '1.5px', fontWeight: 700, marginTop: 4 }}>TRADING</div>
+        )}
         {navItems.map(({ name, icon: Icon }) => {
           const isActive = activePage === name;
           const badge =

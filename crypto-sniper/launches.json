@@ -1,172 +1,5 @@
 [
   {
-    "id": "74bc5c86-2de0-47b5-ab1f-c99b15313b42",
-    "timestamp": "2026-03-25T15:32:28.742168+00:00",
-    "token_name": "CAP",
-    "token_symbol": "CAP",
-    "chain": "bsc",
-    "contract_address": "0xc2acf1bd2124ecc3d9668d00ce5af80108264444",
-    "dex": "four-meme",
-    "pair_address": "0xc2acf1bd2124ecc3d9668d00ce5af80108264444",
-    "launch_time": "2026-03-25T15:31:15Z",
-    "minutes_since_launch": 1.2,
-    "price_usd": 3.84157242485463e-06,
-    "market_cap_usd": 0.0,
-    "liquidity_usd": 3073.52,
-    "volume_24h": 0,
-    "checks": {
-      "liquidity": {
-        "value": 3073.52,
-        "locked": false,
-        "score": 0
-      },
-      "contract": {
-        "verified": null,
-        "honeypot": null,
-        "score": 0,
-        "note": "GT source \u2014 full check pending DS cross-ref"
-      },
-      "holders": {
-        "top10_pct": null,
-        "score": 0
-      },
-      "socials": {
-        "twitter": false,
-        "website": false,
-        "telegram": false,
-        "score": -1
-      },
-      "smart_money": {
-        "detected": false,
-        "wallets": [],
-        "score": 0
-      },
-      "deployer": {
-        "address": null,
-        "blacklisted": false,
-        "score": 0
-      }
-    },
-    "total_score": -1,
-    "verdict": "RISKY",
-    "dexscreener_url": "https://dexscreener.com/bsc/0xc2acf1bd2124ecc3d9668d00ce5af80108264444",
-    "alert_sent": true,
-    "price_history": [
-      {
-        "ts": "2026-03-25T15:39:11.291789+00:00",
-        "price": 3.704e-06,
-        "liq": 0.0
-      },
-      {
-        "ts": "2026-03-25T16:44:55.587068+00:00",
-        "price": 3.704e-06,
-        "liq": 0.0
-      },
-      {
-        "ts": "2026-03-25T17:50:36.318349+00:00",
-        "price": 3.704e-06,
-        "liq": 0.0
-      },
-      {
-        "ts": "2026-03-25T18:56:47.361833+00:00",
-        "price": 3.704e-06,
-        "liq": 0.0
-      },
-      {
-        "ts": "2026-03-25T20:03:02.705160+00:00",
-        "price": 3.704e-06,
-        "liq": 0.0
-      },
-      {
-        "ts": "2026-03-25T21:09:03.173742+00:00",
-        "price": 3.704e-06,
-        "liq": 0.0
-      },
-      {
-        "ts": "2026-03-25T22:14:57.621450+00:00",
-        "price": 3.704e-06,
-        "liq": 0.0
-      },
-      {
-        "ts": "2026-03-25T23:20:38.051389+00:00",
-        "price": 3.704e-06,
-        "liq": 0.0
-      },
-      {
-        "ts": "2026-03-26T00:26:33.086967+00:00",
-        "price": 3.704e-06,
-        "liq": 0.0
-      },
-      {
-        "ts": "2026-03-26T01:32:32.826163+00:00",
-        "price": 3.704e-06,
-        "liq": 0.0
-      },
-      {
-        "ts": "2026-03-26T02:38:03.463812+00:00",
-        "price": 3.704e-06,
-        "liq": 0.0
-      },
-      {
-        "ts": "2026-03-26T03:43:31.741422+00:00",
-        "price": 3.704e-06,
-        "liq": 0.0
-      },
-      {
-        "ts": "2026-03-26T04:49:12.602167+00:00",
-        "price": 3.704e-06,
-        "liq": 0.0
-      },
-      {
-        "ts": "2026-03-26T05:54:36.662252+00:00",
-        "price": 3.704e-06,
-        "liq": 0.0
-      },
-      {
-        "ts": "2026-03-26T07:00:28.080353+00:00",
-        "price": 3.704e-06,
-        "liq": 0.0
-      },
-      {
-        "ts": "2026-03-26T08:05:51.661837+00:00",
-        "price": 3.704e-06,
-        "liq": 0.0
-      },
-      {
-        "ts": "2026-03-26T09:11:12.856496+00:00",
-        "price": 3.704e-06,
-        "liq": 0.0
-      },
-      {
-        "ts": "2026-03-26T10:16:35.898607+00:00",
-        "price": 3.704e-06,
-        "liq": 0.0
-      },
-      {
-        "ts": "2026-03-26T11:22:01.859243+00:00",
-        "price": 3.704e-06,
-        "liq": 0.0
-      },
-      {
-        "ts": "2026-03-26T12:27:34.477175+00:00",
-        "price": 3.704e-06,
-        "liq": 0.0
-      },
-      {
-        "ts": "2026-03-26T13:33:43.036809+00:00",
-        "price": 3.704e-06,
-        "liq": 0.0
-      },
-      {
-        "ts": "2026-03-26T14:40:08.010356+00:00",
-        "price": 3.704e-06,
-        "liq": 0.0
-      }
-    ],
-    "source": "geckoterminal",
-    "peak_multiplier": 1.0
-  },
-  {
     "id": "677a347f-cd35-438f-ba11-f8e8c7fe4eb6",
     "timestamp": "2026-03-25T15:32:29.280487+00:00",
     "token_name": "CAP",
@@ -85233,5 +85066,60 @@
     ],
     "source": "geckoterminal",
     "peak_multiplier": 1.0
+  },
+  {
+    "id": "6e1fc8e8-822d-4c14-bf12-9940bbad60cd",
+    "timestamp": "2026-04-03T16:49:04.738181+00:00",
+    "token_name": "00",
+    "token_symbol": "00",
+    "chain": "solana",
+    "contract_address": "94VkKUz5YDEdUFwpgH7CSnEnAft7qGzGGP8ehYY7eZ45",
+    "dex": "orca",
+    "pair_address": "63iN2grNWoYqD1qSWyQBhNKhvNwDLkKxTxsd82suR89C",
+    "launch_time": "2026-04-03T16:47:23Z",
+    "minutes_since_launch": 1.7,
+    "price_usd": 0.0005218181630298865,
+    "market_cap_usd": 0.0,
+    "liquidity_usd": 2084292.19,
+    "volume_24h": 0,
+    "checks": {
+      "liquidity": {
+        "value": 2084292.19,
+        "locked": false,
+        "score": 2
+      },
+      "contract": {
+        "verified": null,
+        "honeypot": null,
+        "score": 0,
+        "note": "GT source \u2014 full check pending DS cross-ref"
+      },
+      "holders": {
+        "top10_pct": null,
+        "score": 0
+      },
+      "socials": {
+        "twitter": false,
+        "website": false,
+        "telegram": false,
+        "score": -1
+      },
+      "smart_money": {
+        "detected": false,
+        "wallets": [],
+        "score": 0
+      },
+      "deployer": {
+        "address": null,
+        "blacklisted": false,
+        "score": 0
+      }
+    },
+    "total_score": 1,
+    "verdict": "RISKY",
+    "dexscreener_url": "https://dexscreener.com/solana/63iN2grNWoYqD1qSWyQBhNKhvNwDLkKxTxsd82suR89C",
+    "alert_sent": true,
+    "price_history": [],
+    "source": "geckoterminal"
   }
 ]

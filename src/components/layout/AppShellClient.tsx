@@ -25,6 +25,9 @@ import { MemoryGraphPage } from '../pages/MemoryGraphPage';
 import { OfficePage } from '../pages/OfficePage';
 import { ChartPage } from '../pages/ChartPage';
 import { PowerTraderPage } from '../pages/PowerTraderPage';
+import { CommandCenterPage } from '../pages/CommandCenterPage';
+import { PerformancePage } from '../pages/PerformancePage';
+import { RegimePage } from '../pages/RegimePage';
 import { PsychChatWidget } from '../ui/PsychChatWidget';
 
 type PageName =
@@ -46,7 +49,10 @@ type PageName =
   | 'Activity'
   | 'Risk'
   | 'Chart'
-  | 'PowerTrader';
+  | 'PowerTrader'
+  | 'Command Center'
+  | 'Performance'
+  | 'Regime';
 
 export function AppShellClient() {
   const searchParams = useSearchParams();
@@ -65,7 +71,8 @@ export function AppShellClient() {
       const validPages: PageName[] = [
         'Dashboard', 'Signals', 'Telegram', 'Scanner', 'Tasks', 'Agents', 
         'Approvals', 'Calendar', 'Projects', 'Memory', 'Memory Graph', 
-        'Office', 'Docs', 'Wallets', 'Trades', 'Activity', 'Risk', 'Chart', 'PowerTrader'
+        'Office', 'Docs', 'Wallets', 'Trades', 'Activity', 'Risk', 'Chart', 'PowerTrader',
+        'Command Center', 'Performance', 'Regime'
       ];
       if (validPages.includes(pageName)) {
         setActivePage(pageName);
@@ -117,6 +124,12 @@ export function AppShellClient() {
         return <ChartPage />;
       case 'PowerTrader':
         return <PowerTraderPage />;
+      case 'Command Center':
+        return <CommandCenterPage />;
+      case 'Performance':
+        return <PerformancePage />;
+      case 'Regime':
+        return <RegimePage />;
       case 'Risk':
         return <RiskPage />;
       default:
