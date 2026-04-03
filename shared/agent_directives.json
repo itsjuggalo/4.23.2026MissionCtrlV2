@@ -1,5 +1,5 @@
 {
-  "updated_at": "2026-04-03T14:03:30.947096+00:00",
+  "updated_at": "2026-04-03T20:14:57.223561+00:00",
   "source": "supertrend_optimizer",
   "message": "Supertrend params updated. Use these for signal analysis.",
   "symbols": {
@@ -31,13 +31,13 @@
       "profit_factor": 0.93
     },
     "ARB": {
-      "atr_period": 12,
-      "multiplier": 3.0,
-      "train_period": 150,
-      "volatility_regime": "MEDIUM",
-      "current_atr": 0.000964,
-      "win_rate": 80.0,
-      "profit_factor": 4.37
+      "atr_period": 7,
+      "multiplier": 1.5,
+      "train_period": 100,
+      "volatility_regime": "LOW",
+      "current_atr": 0.000583,
+      "win_rate": 64.0,
+      "profit_factor": 1.244
     },
     "AVAX": {
       "atr_period": 7,
@@ -67,22 +67,22 @@
       "profit_factor": 2.167
     },
     "BNB": {
-      "atr_period": 10,
+      "atr_period": 16,
       "multiplier": 1.5,
       "train_period": 100,
       "volatility_regime": "LOW",
-      "current_atr": 3.122972,
-      "win_rate": 34.48,
-      "profit_factor": 1.166
+      "current_atr": 2.382926,
+      "win_rate": 37.04,
+      "profit_factor": 1.151
     },
     "BTC": {
       "atr_period": 7,
       "multiplier": 2.0,
       "train_period": 150,
       "volatility_regime": "LOW",
-      "current_atr": 361.168128,
+      "current_atr": 183.700372,
       "win_rate": 77.78,
-      "profit_factor": 1.676
+      "profit_factor": 0.831
     },
     "DAL": {
       "atr_period": 7,
@@ -103,13 +103,13 @@
       "profit_factor": 0.883
     },
     "ETH": {
-      "atr_period": 7,
-      "multiplier": 2.5,
-      "train_period": 150,
+      "atr_period": 20,
+      "multiplier": 1.5,
+      "train_period": 100,
       "volatility_regime": "LOW",
-      "current_atr": 14.998989,
-      "win_rate": 57.14,
-      "profit_factor": 4.99
+      "current_atr": 11.033104,
+      "win_rate": 52.38,
+      "profit_factor": 1.764
     },
     "FCX": {
       "atr_period": 7,
@@ -157,13 +157,13 @@
       "profit_factor": 1.135
     },
     "NEAR": {
-      "atr_period": 14,
-      "multiplier": 2.5,
-      "train_period": 150,
-      "volatility_regime": "MEDIUM",
-      "current_atr": 0.011643,
-      "win_rate": 71.43,
-      "profit_factor": 13.526
+      "atr_period": 7,
+      "multiplier": 1.5,
+      "train_period": 100,
+      "volatility_regime": "LOW",
+      "current_atr": 0.008068,
+      "win_rate": 44.44,
+      "profit_factor": 1.465
     },
     "NVDA": {
       "atr_period": 20,
@@ -220,13 +220,13 @@
       "profit_factor": 4.975
     },
     "SOL": {
-      "atr_period": 12,
+      "atr_period": 10,
       "multiplier": 1.5,
-      "train_period": 150,
+      "train_period": 100,
       "volatility_regime": "LOW",
-      "current_atr": 0.62969,
-      "win_rate": 47.62,
-      "profit_factor": 1.28
+      "current_atr": 0.499166,
+      "win_rate": 44.44,
+      "profit_factor": 1.029
     },
     "TLT": {
       "atr_period": 20,

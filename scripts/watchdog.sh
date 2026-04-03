@@ -3,7 +3,7 @@
 # Checks port 3033 every 60s, auto-rebuilds + restarts if down
 set -euo pipefail
 
-MC_DIR="/home/ubuntu/mission-control"
+MC_DIR="/home/ubuntu/.openclaw/workspace/mission-control"
 LOG="$MC_DIR/logs/watchdog.log"
 LOCK="/tmp/mc-watchdog.lock"
 

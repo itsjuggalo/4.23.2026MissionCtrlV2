@@ -1,14 +1,14 @@
 {
   "signal": "HOLD",
-  "confidence": 11,
+  "confidence": 4,
   "base_signal": "SELL",
   "is_new_flip": "False",
   "current_trend": -1,
-  "price": 66920.1,
-  "supertrend_line": 67856.27,
-  "rsi": 50.97,
-  "volume": 81.9335,
-  "volume_ma20": 156.9357,
+  "price": 66927.9,
+  "supertrend_line": 67827.88,
+  "rsi": 51.41,
+  "volume": 22.55,
+  "volume_ma20": 150.0306,
   "volume_ok": false,
   "rsi_ok": true,
   "rsi_blocked": null,
@@ -16,7 +16,7 @@
   "mtf_4h_trend": 1,
   "volatility_regime": "LOW",
   "dynamic_multiplier": 3.6,
-  "atr": 323.41,
+  "atr": 250.3,
   "params": {
     "atr_period": 14,
     "multiplier": 4.5,
@@ -26,5 +26,5 @@
     "primary_tf": "1H",
     "mtf_tf": "4H"
   },
-  "timestamp": "2026-04-03T18:24:55.697558+00:00"
+  "timestamp": "2026-04-03T22:35:52.224569+00:00"
 }
