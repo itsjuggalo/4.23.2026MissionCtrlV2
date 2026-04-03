@@ -1,6 +1,6 @@
 {
   "Coin Sonar V2": {
-    "total_signals": 10706,
+    "total_signals": 10707,
     "actionable_signals": 0,
     "hit_rate": 0.0
   },
@@ -40,7 +40,7 @@
     "hit_rate": 92.2
   },
   "AICryptoSignals": {
-    "total_signals": 5631,
+    "total_signals": 5633,
     "actionable_signals": 0,
     "hit_rate": 0.0
   },

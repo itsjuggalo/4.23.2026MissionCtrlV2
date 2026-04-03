@@ -1,68 +1,5 @@
 [
   {
-    "id": "9252906f-739c-43a0-9543-74526ecbdb9a",
-    "channel_id": "-1001853036360",
-    "channel_name": "Coin Sonar V2",
-    "timestamp": "2026-04-03T12:11:44.128007+00:00",
-    "raw_text": "$BIO | #BIOUSDT | TradingView\nPrice: 0.0176 (+8.6% in 24h)\n\u25141 min change: +0.6% \ud83d\udcc8\n35.5K USDT traded in 1 min\n\u2514Buys: 26.1K USDT [74%] \ud83d\udfe2\n24h Vol: 2.0M USDT (Binance)\nAlerts in this hour: 4 \u2b50\ufe0f",
-    "symbol": "BIO",
-    "direction": null,
-    "entry": 0.0176,
-    "stop_loss": null,
-    "targets": [],
-    "leverage": null,
-    "price_change": null,
-    "score": 35,
-    "status": "rejected",
-    "risk_reward": null,
-    "confirmations": 1,
-    "confirmed_by": [
-      "Coin Sonar V2"
-    ]
-  },
-  {
-    "id": "1832d2e0-5692-4cbd-ac74-46e49b99c41c",
-    "channel_id": "-1001853036360",
-    "channel_name": "Coin Sonar V2",
-    "timestamp": "2026-04-03T12:11:58.199421+00:00",
-    "raw_text": "$CFG | #CFGUSDT | TradingView\nPrice: 0.1706 (+15.6% in 24h)\n\u251447 sec change: +1.1% \ud83d\udcc8\n34.6K USDT traded in 47 sec\n\u2514Buys: 23.6K USDT [68%] \ud83d\udfe2\n24h Vol: 3.7M USDT (Binance)\nAlerts in this hour: 7 \u2b50\ufe0f\u2b50\ufe0f",
-    "symbol": "CFG",
-    "direction": null,
-    "entry": 0.1706,
-    "stop_loss": null,
-    "targets": [],
-    "leverage": null,
-    "price_change": null,
-    "score": 35,
-    "status": "rejected",
-    "risk_reward": null,
-    "confirmations": 1,
-    "confirmed_by": [
-      "Coin Sonar V2"
-    ]
-  },
-  {
-    "id": "4157bf60-8fff-4c31-8a00-60647d842603",
-    "channel_id": "-1001853036360",
-    "channel_name": "Coin Sonar V2",
-    "timestamp": "2026-04-03T12:12:28.887471+00:00",
-    "raw_text": "$PLUME | #PLUMEUSDT | TradingView\nPrice: 0.00980 (+3.0% in 24h)\n\u25141 min change: +1.3% \ud83d\udcc8\n25.6K USDT traded in 1 min\n\u2514Buys: 23.9K USDT [94%] \ud83d\udfe2\n24h Vol: 747.1K USDT (Binance)\nAlerts in this hour: 1",
-    "symbol": "PLUME",
-    "direction": null,
-    "entry": 0.0098,
-    "stop_loss": null,
-    "targets": [],
-    "leverage": null,
-    "price_change": null,
-    "score": 35,
-    "status": "rejected",
-    "risk_reward": null,
-    "confirmations": 1,
-    "confirmed_by": [
-      "Coin Sonar V2"
-    ]
-  },
-  {
     "id": "4fa19cb4-cc01-4973-b3fc-8251513590a1",
     "channel_id": "-1001853036360",
     "channel_name": "Coin Sonar V2",
@@ -11401,5 +11338,84 @@
       "valid-symbol"
     ],
     "tier_emoji": "\u274c"
+  },
+  {
+    "id": "cf9c88b0-8c1e-4c15-bfd4-cdc0c0f86782",
+    "channel_id": "websocket",
+    "channel_name": "AICryptoSignals",
+    "timestamp": "2026-04-03T16:45:48.201251+00:00",
+    "raw_text": "RENDERUSDT\nLONG\nEntry: 1.9080000\nPrice change: +6.77%",
+    "symbol": "RENDER",
+    "direction": "LONG",
+    "entry": 1.908,
+    "stop_loss": null,
+    "targets": [],
+    "leverage": null,
+    "price_change": "+6.77%",
+    "score": 50,
+    "status": "rejected",
+    "risk_reward": null,
+    "confirmations": 1,
+    "confirmed_by": [
+      "AICryptoSignals"
+    ],
+    "quality_score": 1.0,
+    "quality_flags": [
+      "complete-data",
+      "new-source",
+      "no-stop-loss",
+      "duplicate-signal"
+    ],
+    "tier_emoji": "\u274c"
+  },
+  {
+    "id": "f6b14779-8490-4340-8619-ad6a581e8687",
+    "channel_id": "websocket",
+    "channel_name": "AICryptoSignals",
+    "timestamp": "2026-04-03T16:45:59.277168+00:00",
+    "raw_text": "QNTUSDT\nLONG\nEntry: 76.340000\nPrice change: +7.08%",
+    "symbol": "QNT",
+    "direction": "LONG",
+    "entry": 76.34,
+    "stop_loss": null,
+    "targets": [],
+    "leverage": null,
+    "price_change": "+7.08%",
+    "score": 50,
+    "status": "rejected",
+    "risk_reward": null,
+    "confirmations": 1,
+    "confirmed_by": [
+      "AICryptoSignals"
+    ],
+    "quality_score": 1.0,
+    "quality_flags": [
+      "complete-data",
+      "new-source",
+      "no-stop-loss",
+      "duplicate-signal"
+    ],
+    "tier_emoji": "\u274c"
+  },
+  {
+    "id": "1848e903-e2c0-418a-861e-ba03ec2d1c6f",
+    "channel_id": "-1001853036360",
+    "channel_name": "Coin Sonar V2",
+    "timestamp": "2026-04-03T16:46:32.683726+00:00",
+    "raw_text": "$C | #CUSDT | TradingView\nPrice: 0.0821 (+12.5% in 24h)\n\u25141 min change: +1.4% \ud83d\udcc8\n62.6K USDT traded in 1 min\n\u2514Buys: 33.9K USDT [54%] \ud83d\udfe2\n24h Vol: 3.7M USDT (Binance)\nAlerts in this hour: 21 \ud83d\udca5",
+    "symbol": "CUSDT",
+    "direction": null,
+    "entry": 0.0821,
+    "stop_loss": null,
+    "targets": [],
+    "leverage": null,
+    "price_change": null,
+    "score": 35,
+    "status": "rejected",
+    "risk_reward": null,
+    "confirmations": 1,
+    "confirmed_by": [
+      "Coin Sonar V2"
+    ]
   }
 ]

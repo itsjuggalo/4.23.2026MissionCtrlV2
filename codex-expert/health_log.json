@@ -1,13 +1,5 @@
 [
   {
-    "timestamp": "2026-04-01T15:44:03.202895+00:00",
-    "type": "auto_fix",
-    "bot": "mission-control",
-    "issue": "Dashboard not responding on port 3000",
-    "action": "pm2 restart mission-control",
-    "result": "restarted"
-  },
-  {
     "timestamp": "2026-04-01T15:49:07.047891+00:00",
     "type": "auto_fix",
     "bot": "mission-control",
@@ -3922,6 +3914,14 @@
   },
   {
     "timestamp": "2026-04-03T16:15:36.402799+00:00",
+    "type": "auto_fix",
+    "bot": "mission-control",
+    "issue": "Dashboard not responding on port 3033",
+    "action": "pm2 restart mission-control",
+    "result": "restarted"
+  },
+  {
+    "timestamp": "2026-04-03T16:46:20.487183+00:00",
     "type": "auto_fix",
     "bot": "mission-control",
     "issue": "Dashboard not responding on port 3033",
