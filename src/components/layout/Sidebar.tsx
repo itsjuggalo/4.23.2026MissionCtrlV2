@@ -48,6 +48,7 @@ type PageName =
   | 'Risk'
   | 'Chart'
   | 'PowerTrader'
+  | 'GoTrader'
   | 'Command Center'
   | 'Performance'
   | 'Regime';
@@ -76,6 +77,7 @@ const tradingItems: { name: PageName; icon: React.ElementType }[] = [
   { name: 'Scanner', icon: Radar },
   { name: 'Wallets', icon: Wallet },
   { name: 'Trades', icon: TrendingUp },
+  { name: 'GoTrader', icon: Bot },
   { name: 'Risk', icon: ShieldAlert },
   { name: 'PowerTrader', icon: Cpu },
 ];
