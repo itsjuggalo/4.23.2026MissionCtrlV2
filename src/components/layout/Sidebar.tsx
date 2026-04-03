@@ -85,7 +85,6 @@ const systemItems: { name: PageName; icon: React.ElementType }[] = [
   { name: 'Office', icon: Users },
   { name: 'Agents', icon: Bot },
   { name: 'Memory', icon: Brain },
-  { name: 'Memory Graph', icon: GitBranch },
   { name: 'Signals', icon: Zap },
   { name: 'Telegram', icon: Send },
   { name: 'Tasks', icon: ListTodo },

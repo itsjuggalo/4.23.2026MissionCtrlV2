@@ -2,6 +2,14 @@
 
 import { useEffect, useState } from 'react';
 
+interface TokenUsage {
+  inputTokens: number;
+  outputTokens: number;
+  totalCost: number;
+  model: string;
+  sessionCount: number;
+}
+
 interface AgentStatus {
   name: string;
   role: string;
@@ -39,6 +47,7 @@ export function CommandCenterPage() {
   const [agents, setAgents] = useState<AgentStatus[]>(MOCK_AGENTS);
   const [pipeline, setPipeline] = useState<PipelineEvent[]>(MOCK_PIPELINE);
   const [lastRefresh, setLastRefresh] = useState(new Date());
+  const [tokens, setTokens] = useState<TokenUsage>({ inputTokens: 0, outputTokens: 0, totalCost: 0, model: 'claude-sonnet-4', sessionCount: 0 });
 
   const portfolioValue = 100031.93;
   const targetValue = 110000;
@@ -46,7 +55,7 @@ export function CommandCenterPage() {
   const progress = Math.max(0, Math.min(100, ((portfolioValue - startValue) / (targetValue - startValue)) * 100));
 
   useEffect(() => {
-    const interval = setInterval(async () => {
+    const fetchData = async () => {
       try {
         const res = await fetch('/api/agents');
         if (res.ok) {
@@ -54,8 +63,18 @@ export function CommandCenterPage() {
           if (data?.agents?.length) setAgents(data.agents);
         }
       } catch { /* use mock */ }
+      // Fetch token usage from OpenClaw stats
+      try {
+        const res = await fetch('/api/openclaw-stats');
+        if (res.ok) {
+          const data = await res.json();
+          if (data?.tokens) setTokens(data.tokens);
+        }
+      } catch { /* use mock */ }
       setLastRefresh(new Date());
-    }, 5000);
+    };
+    fetchData();
+    const interval = setInterval(fetchData, 10000);
     return () => clearInterval(interval);
   }, []);
 
@@ -93,6 +112,22 @@ export function CommandCenterPage() {
           <span style={{ fontSize: 11, color: '#5c5c72', fontFamily: "'JetBrains Mono', monospace" }}>+${(portfolioValue - startValue).toFixed(2)} earned</span>
           <span style={{ fontSize: 11, color: '#6c5ce7', fontFamily: "'JetBrains Mono', monospace" }}>{progress.toFixed(2)}% complete</span>
         </div>
+      </div>
+
+      {/* AI Token Usage */}
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 12, marginBottom: 24 }}>
+        {[
+          { label: 'Input Tokens', value: tokens.inputTokens > 0 ? tokens.inputTokens.toLocaleString() : '—', color: '#6c5ce7', sub: 'today' },
+          { label: 'Output Tokens', value: tokens.outputTokens > 0 ? tokens.outputTokens.toLocaleString() : '—', color: '#0984e3', sub: 'today' },
+          { label: 'Est. Cost', value: tokens.totalCost > 0 ? `$${tokens.totalCost.toFixed(3)}` : '—', color: '#ffa502', sub: 'today' },
+          { label: 'Model', value: tokens.model || 'claude-sonnet-4', color: '#2ed573', sub: 'active' },
+        ].map((stat) => (
+          <div key={stat.label} style={{ background: '#0f0f17', border: `1px solid ${stat.color}25`, borderRadius: 10, padding: '12px 14px' }}>
+            <div style={{ fontSize: 10, color: '#5c5c72', fontFamily: "'JetBrains Mono', monospace", marginBottom: 6 }}>{stat.label}</div>
+            <div style={{ fontSize: 18, fontWeight: 700, color: stat.color, fontFamily: "'JetBrains Mono', monospace" }}>{stat.value}</div>
+            <div style={{ fontSize: 10, color: '#8b8b9e', marginTop: 3 }}>{stat.sub}</div>
+          </div>
+        ))}
       </div>
 
       {/* Agent Cards */}

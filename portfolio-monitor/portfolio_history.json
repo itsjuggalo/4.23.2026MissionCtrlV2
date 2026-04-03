@@ -1,19 +1,5 @@
 [
   {
-    "timestamp": "2026-04-02T00:41:15.771677+00:00",
-    "total_value": 278813.4,
-    "pnl_since_last": 153.55,
-    "positions_count": 3,
-    "exposure_pct": 20.72
-  },
-  {
-    "timestamp": "2026-04-02T00:46:15.939025+00:00",
-    "total_value": 278815.4,
-    "pnl_since_last": 2.0,
-    "positions_count": 3,
-    "exposure_pct": 20.72
-  },
-  {
     "timestamp": "2026-04-02T00:51:16.132670+00:00",
     "total_value": 278818.35,
     "pnl_since_last": 2.95,
@@ -3494,6 +3480,20 @@
   },
   {
     "timestamp": "2026-04-03T18:13:47.955717+00:00",
+    "total_value": 100031.93,
+    "pnl_since_last": 0.0,
+    "positions_count": 2,
+    "exposure_pct": 10.01
+  },
+  {
+    "timestamp": "2026-04-03T18:18:47.614102+00:00",
+    "total_value": 100031.93,
+    "pnl_since_last": 0.0,
+    "positions_count": 2,
+    "exposure_pct": 10.01
+  },
+  {
+    "timestamp": "2026-04-03T18:23:48.093228+00:00",
     "total_value": 100031.93,
     "pnl_since_last": 0.0,
     "positions_count": 2,
