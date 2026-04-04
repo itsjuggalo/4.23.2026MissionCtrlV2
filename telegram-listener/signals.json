@@ -6958,29 +6958,6 @@
     "tier_emoji": "\u2b50"
   },
   {
-    "id": "56d23c61-3d4d-4c89-8462-cb849197acef",
-    "channel_id": "-1001448000337",
-    "channel_name": "Ai Golden Crypto",
-    "timestamp": "2026-04-03T19:30:16.296786+00:00",
-    "raw_text": "#Signal #POL/USDT $POL \nShort \ud83e\ude78 Lev x45 #Crypto \n\nEntry: 0.09258 - Stop Loss: 0.0932 \n\nTargets: 0.09227 - 0.09196 - 0.09165 - 0.09134 - 0.09103",
-    "symbol": "POL",
-    "direction": "SHORT",
-    "entry": 0.09258,
-    "stop_loss": 0.0932,
-    "targets": [
-      0.09227
-    ],
-    "leverage": null,
-    "price_change": null,
-    "score": 85,
-    "status": "actionable",
-    "risk_reward": 0.5,
-    "confirmations": 1,
-    "confirmed_by": [
-      "Ai Golden Crypto"
-    ]
-  },
-  {
     "id": "bf032a63-8fdd-4589-86ab-fdd5112fddfc",
     "channel_id": "-1002315467756",
     "channel_name": "\ud83d\udcc8 Binance Futures 5m Pump Monitor (No charts)",
