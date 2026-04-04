@@ -1,5 +1,6 @@
 'use client';
 
+import { useState, useEffect } from 'react';
 import {
   LayoutDashboard,
   Radar,
@@ -108,6 +109,26 @@ export function Sidebar({
   pendingApprovalsCount,
 }: SidebarProps) {
   const width = isCollapsed ? 56 : 200;
+  const [balance, setBalance] = useState<number>(100000);
+  const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    const fetchBalance = async () => {
+      try {
+        const res = await fetch('/api/portfolio');
+        const data = await res.json();
+        if (data.balance) setBalance(data.balance);
+      } catch (err) {
+        console.error('Portfolio fetch failed:', err);
+      }
+    };
+
+    fetchBalance();
+    const interval = setInterval(fetchBalance, 5000); // Refresh every 5s
+    return () => clearInterval(interval);
+  }, []);
+
+  const percent = Math.min(((balance - 100000) / 10000) * 100, 100);
 
   return (
     <div
@@ -324,11 +345,11 @@ export function Sidebar({
           }}
         >
           <div style={{ color: '#ffa502', fontWeight: 700, marginBottom: 3 }}>Phase 1 — Prove ROI</div>
-          <div style={{ color: '#e8e8ed', marginBottom: 4 }}>$100K → $110K</div>
+          <div style={{ color: '#e8e8ed', marginBottom: 4 }}>${(balance / 1000).toFixed(0)}K → $110K</div>
           <div style={{ background: '#1e1e2a', borderRadius: 4, height: 4, overflow: 'hidden' }}>
-            <div style={{ background: '#6c5ce7', width: '3%', height: '100%', borderRadius: 4 }} />
+            <div style={{ background: '#6c5ce7', width: `${percent}%`, height: '100%', borderRadius: 4 }} />
           </div>
-          <div style={{ color: '#5c5c72', marginTop: 4 }}>3% complete</div>
+          <div style={{ color: '#5c5c72', marginTop: 4 }}>{percent.toFixed(1)}% complete</div>
         </div>
       )}
     </div>
