@@ -334,6 +334,33 @@ export function Sidebar({
         })}
       </nav>
 
+        {/* BETA section — preview routes */}
+        {!isCollapsed && (
+          <div style={{ padding: '8px 14px 2px', fontSize: 9, fontFamily: "'JetBrains Mono', monospace", color: '#3d3d52', letterSpacing: '1.5px', fontWeight: 700, marginTop: 4 }}>BETA</div>
+        )}
+        {[
+          { label: 'Trades',           href: '/preview/trades',       icon: TrendingUp },
+          { label: 'Power Trader',     href: '/preview/powertrader',  icon: Cpu },
+          { label: 'Signals',          href: '/preview/signals',      icon: Zap },
+          { label: 'Telegram Signals', href: '/preview/telegram',     icon: Send },
+        ].map(({ label, href, icon: Icon }) => (
+          <a key={href} href={href} title={isCollapsed ? label : undefined}
+            style={{ display: 'flex', alignItems: 'center', gap: 10, width: '100%', padding: isCollapsed ? '9px 0' : '9px 14px',
+              justifyContent: isCollapsed ? 'center' : 'flex-start', background: 'transparent',
+              textDecoration: 'none', color: '#8b8b9e', transition: 'background 0.15s, color 0.15s' }}
+            onMouseEnter={e => { (e.currentTarget as HTMLAnchorElement).style.color = '#a29bfe'; (e.currentTarget as HTMLAnchorElement).style.background = 'rgba(108,92,231,0.08)'; }}
+            onMouseLeave={e => { (e.currentTarget as HTMLAnchorElement).style.color = '#8b8b9e'; (e.currentTarget as HTMLAnchorElement).style.background = 'transparent'; }}
+          >
+            <Icon size={16} style={{ flexShrink: 0 }} />
+            {!isCollapsed && (
+              <>
+                <span style={{ fontSize: 13, fontFamily: "'Inter', -apple-system, sans-serif", whiteSpace: 'nowrap', flex: 1, textAlign: 'left' }}>{label}</span>
+                <span style={{ fontSize: 9, color: '#6c5ce7', fontWeight: 700, fontFamily: "'JetBrains Mono', monospace", letterSpacing: '0.5px' }}>β</span>
+              </>
+            )}
+          </a>
+        ))}
+
       {/* Footer — Phase 1 Progress */}
       {!isCollapsed && (
         <div
