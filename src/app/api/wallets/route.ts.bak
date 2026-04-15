@@ -44,25 +44,14 @@ interface WalletResponse {
   };
 }
 
-
-// Strip API keys, secrets, tokens from error messages
-function sanitizeError(msg: string): string {
-  return msg
-    .replace(/[A-Za-z0-9_]*(KEY|SECRET|TOKEN|PASS|PRIVATE)[A-Za-z0-9_]*=[^\s&'"]*/gi, '[REDACTED]')
-    .replace(/sk-[a-zA-Z0-9-_]{20,}/g, '[REDACTED]')
-    .replace(/rh-api-[a-zA-Z0-9-]{20,}/g, '[REDACTED]')
-    .replace(/[a-f0-9]{32,}/gi, '[REDACTED]')
-    .replace(/python3 .*\.py/g, '[internal script]');
-}
-
 // Fetch Robinhood crypto holdings via Python sidecar (Ed25519 signing)
 function getRobinhoodBalance(): { assets: Asset[]; total_usd: number } {
   const apiKey = process.env.ROBINHOOD_API_KEY || '';
   if (!apiKey) throw new Error('ROBINHOOD_API_KEY not set');
 
   const raw = execSync(
-    'python3 /home/ubuntu/mission-control-restored/scripts/robinhood-holdings.py',
-    { timeout: 15000, env: { ...process.env, ROBINHOOD_API_KEY: apiKey } }
+    `ROBINHOOD_API_KEY=${apiKey} python3 /home/ubuntu/mission-control/scripts/robinhood-holdings.py`,
+    { timeout: 15000 }
   ).toString();
 
   const data = JSON.parse(raw);
@@ -97,7 +86,7 @@ async function getHyperliquidBalance(address: string): Promise<{ assets: Asset[]
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        type: 'spotClearinghouseState',
+        type: 'spotBalances',
         user: address,
       }),
     });
@@ -108,9 +97,8 @@ async function getHyperliquidBalance(address: string): Promise<{ assets: Asset[]
 
     const data = await response.json();
 
-    const balances = Array.isArray(data) ? data : (data?.balances || []);
-    if (Array.isArray(balances)) {
-      for (const coin of balances) {
+    if (Array.isArray(data)) {
+      for (const coin of data) {
         if (coin.total && parseFloat(coin.total) > 0) {
           const symbol = coin.coin || 'Unknown';
           const amount = parseFloat(coin.total);
@@ -144,31 +132,6 @@ async function getHyperliquidBalance(address: string): Promise<{ assets: Asset[]
     throw error;
   }
 
-  // Also fetch perp positions
-  try {
-    const perpRes = await fetch('https://api.hyperliquid.xyz/info', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ type: 'clearinghouseState', user: address }),
-    });
-    if (perpRes.ok) {
-      const perpData = await perpRes.json();
-      const positions = perpData?.assetPositions || [];
-      for (const pos of positions) {
-        const p = pos?.position;
-        if (p && parseFloat(p.positionValue) > 0) {
-          const symbol = p.coin + '-PERP';
-          const value = parseFloat(p.positionValue);
-          const pnl = parseFloat(p.unrealizedPnl || 0);
-          assets.push({ symbol, amount: parseFloat(p.szi), value_usd: value + pnl });
-          totalValue += value + pnl;
-        }
-      }
-    }
-  } catch (e) {
-    // perp fetch optional
-  }
-
   return { assets, total_usd: totalValue };
 }
 
@@ -178,7 +141,7 @@ function getCoinbaseBalance(): { assets: Asset[]; total_usd: number } {
   if (!apiKey) throw new Error('COINBASE_API_KEY not set');
 
   const raw = execSync(
-    'python3 /home/ubuntu/mission-control-restored/scripts/coinbase-holdings.py',
+    'python3 /home/ubuntu/mission-control/scripts/coinbase-holdings.py',
     { timeout: 15000, env: { ...process.env, COINBASE_API_KEY: apiKey } }
   ).toString();
 
@@ -234,7 +197,7 @@ export async function GET(request: NextRequest): Promise<NextResponse<WalletResp
               address,
               assets: [],
               balance_usd: 0,
-              error: sanitizeError(error instanceof Error ? error.message : 'Failed to fetch'),
+              error: error instanceof Error ? error.message : 'Failed to fetch',
             };
           }
         })
@@ -272,8 +235,8 @@ export async function GET(request: NextRequest): Promise<NextResponse<WalletResp
         };
       }
     } catch (error) {
-      hyperliquidData.error = sanitizeError(
-        error instanceof Error ? error.message : 'Failed to fetch Hyperliquid data');
+      hyperliquidData.error =
+        error instanceof Error ? error.message : 'Failed to fetch Hyperliquid data';
     }
 
     // Robinhood integration
@@ -287,7 +250,7 @@ export async function GET(request: NextRequest): Promise<NextResponse<WalletResp
       const { assets, total_usd } = getRobinhoodBalance();
       robinhoodData = { exchange: 'robinhood', connected: true, total_usd, assets };
     } catch (error) {
-      robinhoodData.error = sanitizeError(error instanceof Error ? error.message : 'Failed to fetch Robinhood data');
+      robinhoodData.error = error instanceof Error ? error.message : 'Failed to fetch Robinhood data';
     }
 
     // Coinbase integration (optional - continue if it fails)
@@ -308,7 +271,7 @@ export async function GET(request: NextRequest): Promise<NextResponse<WalletResp
       };
     } catch (error) {
       // Coinbase is optional - don't fail the entire request
-      coinbaseData.error = sanitizeError(error instanceof Error ? error.message : 'Failed to fetch Coinbase data');
+      coinbaseData.error = error instanceof Error ? error.message : 'Failed to fetch Coinbase data';
     }
 
     // Aggregate portfolio
@@ -355,7 +318,7 @@ export async function GET(request: NextRequest): Promise<NextResponse<WalletResp
             connected: false,
             total_usd: 0,
             assets: [],
-            error: sanitizeError(error instanceof Error ? error.message : 'Unknown error'),
+            error: error instanceof Error ? error.message : 'Unknown error',
           },
           robinhood: {
             exchange: 'robinhood',

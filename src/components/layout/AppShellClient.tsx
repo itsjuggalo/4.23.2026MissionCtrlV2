@@ -139,7 +139,7 @@ export function AppShellClient() {
 
   return (
     <div className="flex h-screen bg-slate-950 text-slate-100">
-      <Sidebar activePage={activePage} onNavigate={setActivePage} isCollapsed={isCollapsed} onToggle={() => setIsCollapsed(!isCollapsed)} newSignalsCount={newSignalsCount} pendingApprovalsCount={pendingApprovalsCount} />
+      <Sidebar activePage={activePage} onNavigate={(page) => { setActivePage(page as any); window.history.replaceState(null, '', '/?page=' + (page as string).toLowerCase().replace(/\s+/g, '-')); }} isCollapsed={isCollapsed} onToggle={() => setIsCollapsed(!isCollapsed)} newSignalsCount={newSignalsCount} pendingApprovalsCount={pendingApprovalsCount} />
       <div className="flex-1 flex flex-col overflow-hidden">
         <Header title={activePage} />
         <main className="flex-1 overflow-auto">

@@ -49,7 +49,7 @@ export function CommandCenterPage() {
   const [lastRefresh, setLastRefresh] = useState(new Date());
   const [tokens, setTokens] = useState<TokenUsage>({ inputTokens: 0, outputTokens: 0, totalCost: 0, model: 'claude-sonnet-4', sessionCount: 0 });
 
-  const portfolioValue = 100031.93;
+  const [portfolioValue, setPortfolioValue] = useState(100000);
   const targetValue = 110000;
   const startValue = 100000;
   const progress = Math.max(0, Math.min(100, ((portfolioValue - startValue) / (targetValue - startValue)) * 100));
@@ -71,6 +71,30 @@ export function CommandCenterPage() {
           if (data?.tokens) setTokens(data.tokens);
         }
       } catch { /* use mock */ }
+      // Fetch live portfolio
+      try {
+        const pRes = await fetch("/api/portfolio");
+        if (pRes.ok) {
+          const pData = await pRes.json();
+          if (pData.balance) setPortfolioValue(pData.balance);
+        }
+      } catch {}
+      // Fetch live signals for pipeline
+      try {
+        const sRes = await fetch("/api/signals/history?ticker=BTCUSD&limit=5");
+        if (sRes.ok) {
+          const sData = await sRes.json();
+          if (Array.isArray(sData) && sData.length > 0) {
+            const livePipe = sData.reverse().map((s: any) => ({
+              time: s.timestamp ? new Date(s.timestamp).toLocaleTimeString([], {hour: "2-digit", minute: "2-digit"}) : "",
+              source: s.action === "BUY" ? "SIGNAL" : "SIGNAL",
+              message: s.ticker + " " + s.action + (s.price ? " @ $" + s.price.toLocaleString() : "") + " — " + (s.signal_type || "signal"),
+              type: (s.action === "BUY" ? "trade" : "alert") as "trade" | "alert",
+            }));
+            setPipeline(livePipe);
+          }
+        }
+      } catch {}
       setLastRefresh(new Date());
     };
     fetchData();

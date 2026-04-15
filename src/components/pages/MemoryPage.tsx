@@ -112,7 +112,7 @@ interface Pos { x: number; y: number; vx: number; vy: number }
 function initPositions(nodes: GraphNode[], w: number, h: number): Map<string, Pos> {
   const m = new Map<string, Pos>();
   nodes.forEach((n, i) => {
-    const angle  = (i / nodes.length) * 2 * Math.PI;
+    const angle  = (i / (nodes.length || 1)) * 2 * Math.PI;
     const radius = Math.min(w, h) * 0.35;
     m.set(n.id, {
       x:  w / 2 + Math.cos(angle) * radius * (0.5 + Math.random() * 0.5),
