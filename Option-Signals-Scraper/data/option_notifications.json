@@ -4089,5 +4089,11 @@
     "message": "Buy To Open at 1.26 with first target above 1.45",
     "symbol": "C",
     "title": "C 140C 5/15: BTO"
+  },
+  "1776368976": {
+    "category": "SCALP",
+    "message": "Buy To Open at 1.86 with first target above 2.14",
+    "symbol": "BABA",
+    "title": "BABA 143C 4/24: BTO"
   }
 }

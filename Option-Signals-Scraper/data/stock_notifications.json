@@ -2761,5 +2761,11 @@
     "message": "Reached Target 198.2 and that's 18.81%! Lock some in and wait for next target. Raise the stops to 192.3",
     "symbol": "COIN",
     "title": "COIN : STC"
+  },
+  "1776368980": {
+    "category": "SCALP",
+    "message": "Buy To Open at 138.51 with first target above 141.28",
+    "symbol": "BABA",
+    "title": "BABA: BTO"
   }
 }
