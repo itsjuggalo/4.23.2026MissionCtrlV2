@@ -6,8 +6,8 @@ interface StatusDotProps {
 
 export function StatusDot({ status }: StatusDotProps) {
   const color =
-    status === 'active' ? '#00d2a0' : status === 'idle' ? '#ffa502' : '#5c5c72';
-  const glow = status === 'active' ? `0 0 6px #00d2a0` : 'none';
+    status === 'active' ? '#66bb6a' : status === 'idle' ? '#ff9800' : '#607d8b';
+  const glow = status === 'active' ? `0 0 6px #66bb6a` : 'none';
 
   return (
     <span

@@ -197,7 +197,7 @@ function ForceGraph({
 
         // Label
         ctx.font      = `${isSelected ? 11 : 10}px Inter, sans-serif`;
-        ctx.fillStyle = isSelected ? '#e8e8ed' : '#8b8b9e';
+        ctx.fillStyle = isSelected ? '#e0e0e0' : '#455a64';
         ctx.textAlign = 'center';
         ctx.fillText(n.name.length > 18 ? n.name.slice(0, 16) + '…' : n.name, p.x, p.y + r + 13);
       }

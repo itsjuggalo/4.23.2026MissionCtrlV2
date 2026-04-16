@@ -13,12 +13,12 @@ interface ActivityEntry {
 
 function typeColor(type: string) {
   switch (type) {
-    case 'signal': return '#6c5ce7';
-    case 'risk': return '#ffa502';
-    case 'intel': return '#3498ff';
-    case 'execution': return '#00d2a0';
+    case 'signal': return '#4fc3f7';
+    case 'risk': return '#ff9800';
+    case 'intel': return '#4fc3f7';
+    case 'execution': return '#66bb6a';
     case 'memory': return '#00cec9';
-    default: return '#5c5c72';
+    default: return '#607d8b';
   }
 }
 
@@ -64,7 +64,7 @@ export function ActivityPage() {
 
   if (loading) {
     return (
-      <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: 200, color: '#5c5c72' }}>
+      <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: 200, color: '#607d8b' }}>
         <div style={{ textAlign: 'center' }}>
           <div style={{ fontSize: 24, marginBottom: 8 }}>⏳</div>
           <div style={{ fontFamily: "'Inter', sans-serif", fontSize: 13 }}>Loading activity...</div>
@@ -81,20 +81,20 @@ export function ActivityPage() {
         alignItems: 'center',
         justifyContent: 'space-between',
         padding: '10px 16px',
-        borderBottom: '1px solid #1e1e2a',
+        borderBottom: '1px solid #1a3a4a',
         background: 'rgba(0,210,160,0.04)',
       }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
           <span style={{
             width: 8, height: 8, borderRadius: '50%',
-            background: '#00d2a0',
+            background: '#66bb6a',
             display: 'inline-block',
             animation: 'pulse 2s infinite',
           }} />
-          <span style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: 11, color: '#00d2a0' }}>
+          <span style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: 11, color: '#66bb6a' }}>
             LIVE
           </span>
-          <span style={{ fontFamily: "'Inter', sans-serif", fontSize: 11, color: '#5c5c72' }}>
+          <span style={{ fontFamily: "'Inter', sans-serif", fontSize: 11, color: '#607d8b' }}>
             • updated {secondsAgo}s ago • {entries.length} events
           </span>
         </div>
@@ -104,7 +104,7 @@ export function ActivityPage() {
             background: 'rgba(108,92,231,0.15)',
             border: '1px solid rgba(108,92,231,0.3)',
             borderRadius: 4,
-            color: '#a29bfe',
+            color: '#81d4fa',
             padding: '4px 12px',
             fontSize: 11,
             fontFamily: "'JetBrains Mono', monospace",
@@ -116,7 +116,7 @@ export function ActivityPage() {
       </div>
 
       {entries.length === 0 ? (
-        <div style={{ padding: 40, textAlign: 'center', color: '#5c5c72', fontFamily: "'Inter', sans-serif", fontSize: 13 }}>
+        <div style={{ padding: 40, textAlign: 'center', color: '#607d8b', fontFamily: "'Inter', sans-serif", fontSize: 13 }}>
           No recent activity found
         </div>
       ) : (
@@ -131,27 +131,27 @@ export function ActivityPage() {
                 gap: 16,
                 padding: '14px 16px',
                 background: isFirst ? 'rgba(108,92,231,0.06)' : 'transparent',
-                borderBottom: '1px solid #1e1e2a',
+                borderBottom: '1px solid #1a3a4a',
               }}
             >
               <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 6, minWidth: 70 }}>
-                <span style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: 11, color: '#5c5c72' }}>
+                <span style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: 11, color: '#607d8b' }}>
                   {entry.time.includes(' ') ? entry.time.split(' ')[1]?.slice(0, 5) || entry.time : entry.time}
                 </span>
                 <span style={{ width: 8, height: 8, borderRadius: '50%', background: dotColor, display: 'inline-block', flexShrink: 0 }} />
               </div>
               <div style={{ flex: 1 }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 4, flexWrap: 'wrap' }}>
-                  <span style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: 12, color: '#a29bfe', fontWeight: 600 }}>
+                  <span style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: 12, color: '#81d4fa', fontWeight: 600 }}>
                     {entry.agent}
                   </span>
-                  <span style={{ fontSize: 13, fontFamily: "'Inter', sans-serif", fontWeight: 500, color: '#e8e8ed' }}>
+                  <span style={{ fontSize: 13, fontFamily: "'Inter', sans-serif", fontWeight: 500, color: '#e0e0e0' }}>
                     {entry.action}
                   </span>
                   <Badge color={dotColor}>{entry.type}</Badge>
                 </div>
                 {entry.detail && (
-                  <div style={{ fontSize: 12, fontFamily: "'Inter', sans-serif", color: '#8b8b9e', lineHeight: 1.5 }}>
+                  <div style={{ fontSize: 12, fontFamily: "'Inter', sans-serif", color: '#455a64', lineHeight: 1.5 }}>
                     {entry.detail}
                   </div>
                 )}

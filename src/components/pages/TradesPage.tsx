@@ -55,11 +55,11 @@ interface TweakStats {
 }
 
 const SOURCE_COLORS: Record<string, string> = {
-  ai_crypto: '#6c5ce7',
-  firebase:  '#f59e0b',
+  ai_crypto: '#4fc3f7',
+  firebase:  '#ff9800',
   telegram:  '#0088cc',
-  grid:      '#10b981',
-  dca:       '#3b82f6',
+  grid:      '#66bb6a',
+  dca:       '#4fc3f7',
 };
 
 const CRYPTO_SYMBOLS = new Set([
@@ -366,7 +366,7 @@ export function TradesPage() {
         positions={cryptoPositions}
         page={cryptoPage}
         setPage={setCryptoPage}
-        color="#3b82f6"
+        color="#4fc3f7"
       />
 
       {/* ── Stock Positions ── */}
@@ -376,7 +376,7 @@ export function TradesPage() {
         positions={stockPositions}
         page={stockPage}
         setPage={setStockPage}
-        color="#10b981"
+        color="#66bb6a"
       />
 
       {/* ── Options Positions ── */}
@@ -386,7 +386,7 @@ export function TradesPage() {
         positions={optionPositions}
         page={optionPage}
         setPage={setOptionPage}
-        color="#f59e0b"
+        color="#ff9800"
         note="Live contract prices require a paid options API. Entry prices shown. P&L tracked on close."
       />
 

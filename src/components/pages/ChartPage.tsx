@@ -30,6 +30,31 @@ interface SupertrendParams {
   optimized_at?: string;
 }
 
+interface Signal {
+  timestamp: string;
+  ticker?: string;
+  symbol?: string;
+  action?: string;
+  side?: string;
+  price?: number;
+  source?: string;
+  strategy?: string;
+}
+
+interface Regime {
+  regime?: string;
+  confidence?: number;
+  updated?: string;
+}
+
+interface ChartSignalsData {
+  regime: Regime;
+  signals: Signal[];
+  optimal_params: Record<string, unknown>;
+  latest_state: Record<string, unknown>;
+  updated_at: string;
+}
+
 function toTVSymbol(raw: string): string {
   const base = raw.split('/')[0].toUpperCase();
   const map: Record<string, string> = {
@@ -50,10 +75,14 @@ function toTVSymbol(raw: string): string {
 }
 
 const SOURCE_COLORS: Record<string, string> = {
-  ai_crypto:'#6c5ce7', firebase:'#f59e0b', telegram:'#0088cc',
-  grid:'#10b981', dca:'#3b82f6',
+  ai_crypto:'#4fc3f7', firebase:'#ff9800', telegram:'#0088cc',
+  grid:'#66bb6a', dca:'#4fc3f7',
 };
 function sourceColor(s: string) { return SOURCE_COLORS[s] || '#6b7280'; }
+
+const REGIME_COLORS: Record<string, string> = {
+  BULL: '#66bb6a', BEAR: '#ef5350', CHOP: '#ff9800',
+};
 
 const INTERVALS = [
   { label:'1m', value:'1' }, { label:'5m', value:'5' },
@@ -69,6 +98,7 @@ export function ChartPage() {
   const [interval,   setInterval_]= useState('60');
   const [loading,    setLoading]  = useState(true);
   const [showSettings, setShowSettings] = useState(false);
+  const [showSignals,  setShowSignals]  = useState(false);
 
   // Supertrend params — agent optimized or manually overridden
   const [allParams,  setAllParams]= useState<Record<string, SupertrendParams>>({});
@@ -81,6 +111,9 @@ export function ChartPage() {
   const [highVol,    setHighVol]  = useState(0.75);
   const [medVol,     setMedVol]   = useState(0.5);
   const [lowVol,     setLowVol]   = useState(0.25);
+
+  // Chart signals data
+  const [chartSignals, setChartSignals] = useState<ChartSignalsData | null>(null);
 
   const fetchPositions = useCallback(async () => {
     try {
@@ -106,13 +139,23 @@ export function ChartPage() {
     } catch { /* params optional */ }
   }, []);
 
+  const fetchChartSignals = useCallback(async () => {
+    try {
+      const res = await fetch('/api/chart-signals', { cache: 'no-store' });
+      const data = await res.json();
+      setChartSignals(data);
+    } catch { /* optional */ }
+  }, []);
+
   useEffect(() => {
     fetchPositions();
     fetchParams();
+    fetchChartSignals();
     const t1 = setInterval(fetchPositions, 10000);
     const t2 = setInterval(fetchParams, 60000);
-    return () => { clearInterval(t1); clearInterval(t2); };
-  }, [fetchPositions, fetchParams]);
+    const t3 = setInterval(fetchChartSignals, 30000);
+    return () => { clearInterval(t1); clearInterval(t2); clearInterval(t3); };
+  }, [fetchPositions, fetchParams, fetchChartSignals]);
 
   // When selected position changes, load its optimized params
   useEffect(() => {
@@ -142,7 +185,7 @@ export function ChartPage() {
       enable_publishing: false, hide_top_toolbar: false,
       save_image: true, calendar: false,
       support_host: 'https://www.tradingview.com',
-      backgroundColor: '#0d0d14', gridColor: '#1e1e2a',
+      backgroundColor: '#0d1117', gridColor: '#1a3a4a',
     });
     containerRef.current.appendChild(script);
   }, [tvSymbol, interval]);
@@ -165,8 +208,16 @@ export function ChartPage() {
     ? new Date(agentParams.optimized_at).toLocaleString('en-US', { month:'short', day:'numeric', hour:'2-digit', minute:'2-digit' })
     : null;
 
+  const regime = chartSignals?.regime;
+  const regimeName = (regime?.regime || '').toUpperCase();
+  const regimeColor = REGIME_COLORS[regimeName] || '#607d8b';
+  const recentSignals = (chartSignals?.signals || []).slice(0, 15);
+  const signalsUpdatedAt = chartSignals?.updated_at
+    ? new Date(chartSignals.updated_at).toLocaleTimeString()
+    : '';
+
   return (
-    <div className="flex h-screen overflow-hidden" style={{ background: '#0d0d14' }}>
+    <div className="flex h-screen overflow-hidden" style={{ background: '#0d1117' }}>
 
       {/* ── Left: position list ── */}
       <div className="w-60 flex-shrink-0 border-r border-gray-800 flex flex-col overflow-hidden">
@@ -223,6 +274,13 @@ export function ChartPage() {
                 {selected.target_price && <span className="ml-2 text-green-400">TP: {fmt.c(selected.target_price)}</span>}
               </span>
             )}
+            {/* Regime badge */}
+            {regimeName && (
+              <span className="text-xs px-2 py-0.5 rounded font-mono"
+                style={{ background: `${regimeColor}22`, color: regimeColor, border: `1px solid ${regimeColor}55` }}>
+                {regimeName}{regime?.confidence ? ` ${(regime.confidence * 100).toFixed(0)}%` : ''}
+              </span>
+            )}
           </div>
           <div className="flex items-center gap-2">
             {/* Interval */}
@@ -230,17 +288,25 @@ export function ChartPage() {
               {INTERVALS.map(iv => (
                 <button key={iv.value} onClick={() => setInterval_(iv.value)}
                   className="px-2.5 py-1 rounded text-xs font-medium transition-colors"
-                  style={{ background: interval===iv.value ? '#6c5ce7':'transparent',
+                  style={{ background: interval===iv.value ? '#4fc3f7':'transparent',
                            color:      interval===iv.value ? '#fff':'#6b7280' }}>
                   {iv.label}
                 </button>
               ))}
             </div>
+            {/* Signals toggle */}
+            <button onClick={() => setShowSignals(s => !s)}
+              className="px-3 py-1.5 rounded-lg text-xs font-medium transition-colors border"
+              style={{ background: showSignals ? '#4fc3f722':'transparent',
+                       borderColor: showSignals ? '#4fc3f7':'#374151',
+                       color: showSignals ? '#4fc3f7':'#9ca3af' }}>
+              📡 Signals {recentSignals.length > 0 && `(${recentSignals.length})`}
+            </button>
             {/* Settings toggle */}
             <button onClick={() => setShowSettings(s => !s)}
               className="px-3 py-1.5 rounded-lg text-xs font-medium transition-colors border"
-              style={{ background: showSettings ? '#6c5ce722':'transparent',
-                       borderColor: showSettings ? '#6c5ce7':'#374151',
+              style={{ background: showSettings ? '#4fc3f722':'transparent',
+                       borderColor: showSettings ? '#4fc3f7':'#374151',
                        color: showSettings ? '#a78bfa':'#9ca3af' }}>
               ⚙ Supertrend
             </button>
@@ -392,6 +458,118 @@ export function ChartPage() {
             </div>
           )}
         </div>
+
+        {/* ── SIGNALS PANEL (below chart, toggleable) ── */}
+        {showSignals && (
+          <div className="flex-shrink-0 border-t border-gray-800 bg-slate-900/80" style={{ height: '280px' }}>
+            <div className="flex h-full">
+
+              {/* Signals feed */}
+              <div className="flex-1 flex flex-col border-r border-gray-800 overflow-hidden">
+                <div className="flex items-center justify-between px-4 py-2 border-b border-gray-800">
+                  <span className="text-xs font-semibold text-cyan-400 uppercase tracking-wide">Recent Signals</span>
+                  <span className="text-xs text-gray-600 font-mono">
+                    {signalsUpdatedAt ? `Updated ${signalsUpdatedAt}` : 'No data'}
+                  </span>
+                </div>
+                <div className="flex-1 overflow-y-auto">
+                  {recentSignals.length === 0 ? (
+                    <div className="p-4 text-xs text-gray-600">
+                      No signals received yet. Waiting for data from <span className="font-mono text-gray-500">signals_history.jsonl</span>
+                    </div>
+                  ) : (
+                    <table className="w-full text-xs">
+                      <thead>
+                        <tr className="text-gray-500 uppercase text-[10px]">
+                          <th className="text-left px-4 py-1.5">Time</th>
+                          <th className="text-left px-2 py-1.5">Ticker</th>
+                          <th className="text-left px-2 py-1.5">Action</th>
+                          <th className="text-right px-2 py-1.5">Price</th>
+                          <th className="text-left px-2 py-1.5">Source</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {recentSignals.map((s, i) => {
+                          const ticker = (s.ticker || s.symbol || '').toUpperCase();
+                          const action = (s.action || s.side || '').toUpperCase();
+                          const isBuy = action === 'BUY' || action === 'LONG';
+                          const src = s.source || s.strategy || '';
+                          const time = s.timestamp
+                            ? new Date(s.timestamp).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', second: '2-digit' })
+                            : '';
+                          return (
+                            <tr key={i} className="border-t border-gray-800/40 hover:bg-slate-800/30">
+                              <td className="px-4 py-1.5 text-gray-500 font-mono">{time}</td>
+                              <td className="px-2 py-1.5 text-white font-semibold">{ticker}</td>
+                              <td className="px-2 py-1.5">
+                                <span className={`px-1.5 py-0.5 rounded font-semibold ${isBuy ? 'bg-green-500/20 text-green-400' : 'bg-red-500/20 text-red-400'}`}>
+                                  {action}
+                                </span>
+                              </td>
+                              <td className="px-2 py-1.5 text-right text-white font-mono">
+                                {s.price ? `$${Number(s.price).toFixed(2)}` : '—'}
+                              </td>
+                              <td className="px-2 py-1.5" style={{ color: sourceColor(src) }}>{src}</td>
+                            </tr>
+                          );
+                        })}
+                      </tbody>
+                    </table>
+                  )}
+                </div>
+              </div>
+
+              {/* Right: regime + optimal params */}
+              <div className="w-80 flex flex-col overflow-y-auto">
+                {/* Regime */}
+                <div className="p-4 border-b border-gray-800">
+                  <div className="text-xs font-semibold text-cyan-400 uppercase tracking-wide mb-2">Market Regime</div>
+                  {regimeName ? (
+                    <>
+                      <div className="flex items-baseline gap-3">
+                        <span className="text-2xl font-bold font-mono" style={{ color: regimeColor }}>{regimeName}</span>
+                        {regime?.confidence !== undefined && (
+                          <span className="text-sm text-gray-400 font-mono">{(regime.confidence * 100).toFixed(1)}% conf</span>
+                        )}
+                      </div>
+                      {regime?.updated && (
+                        <div className="text-xs text-gray-600 mt-2 font-mono">
+                          Updated: {new Date(regime.updated).toLocaleString()}
+                        </div>
+                      )}
+                    </>
+                  ) : (
+                    <div className="text-xs text-gray-600">
+                      No regime data. Check <span className="font-mono">market_regime.json</span>
+                    </div>
+                  )}
+                </div>
+
+                {/* Optimal params */}
+                <div className="p-4 flex-1">
+                  <div className="text-xs font-semibold text-cyan-400 uppercase tracking-wide mb-2">Optimal Parameters</div>
+                  {chartSignals?.optimal_params && Object.keys(chartSignals.optimal_params).length > 0 ? (
+                    <div className="space-y-1 text-xs font-mono">
+                      {Object.entries(chartSignals.optimal_params).map(([key, val]) => (
+                        <div key={key} className="flex justify-between py-1 border-b border-gray-800/40">
+                          <span className="text-gray-400">{key}</span>
+                          <span className="text-white">
+                            {typeof val === 'object' ? JSON.stringify(val).substring(0, 40) : String(val)}
+                          </span>
+                        </div>
+                      ))}
+                    </div>
+                  ) : (
+                    <div className="text-xs text-gray-600">
+                      No optimal params. Check <span className="font-mono">optimal_params.json</span>
+                    </div>
+                  )}
+                </div>
+              </div>
+
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );

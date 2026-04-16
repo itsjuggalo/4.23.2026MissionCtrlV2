@@ -1,5 +1,4 @@
-import { AppShell } from '@/components/layout/AppShell';
-
+import { redirect } from 'next/navigation';
 export default function Home() {
-  return <AppShell />;
+  redirect('/landing');
 }

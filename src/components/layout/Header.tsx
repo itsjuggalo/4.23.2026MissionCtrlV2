@@ -22,8 +22,8 @@ export function Header({ title }: HeaderProps) {
     <div
       style={{
         height: 52,
-        background: '#0f0f17',
-        borderBottom: '1px solid #1e1e2a',
+        background: '#0d1117',
+        borderBottom: '1px solid #1a3a4a',
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'space-between',
@@ -36,7 +36,7 @@ export function Header({ title }: HeaderProps) {
           fontSize: 16,
           fontWeight: 600,
           fontFamily: "'Inter', -apple-system, sans-serif",
-          color: '#e8e8ed',
+          color: '#e0e0e0',
         }}
       >
         {title}
@@ -50,8 +50,8 @@ export function Header({ title }: HeaderProps) {
             width: 8,
             height: 8,
             borderRadius: '50%',
-            background: '#00d2a0',
-            boxShadow: '0 0 6px #00d2a0',
+            background: '#66bb6a',
+            boxShadow: '0 0 6px #66bb6a',
             animation: 'pulse 2s infinite',
           }}
         />
@@ -59,7 +59,7 @@ export function Header({ title }: HeaderProps) {
           style={{
             fontSize: 12,
             fontFamily: "'JetBrains Mono', 'SF Mono', 'Fira Code', monospace",
-            color: '#00d2a0',
+            color: '#66bb6a',
             fontWeight: 600,
             letterSpacing: '1px',
           }}
@@ -70,7 +70,7 @@ export function Header({ title }: HeaderProps) {
           style={{
             fontSize: 13,
             fontFamily: "'JetBrains Mono', 'SF Mono', 'Fira Code', monospace",
-            color: '#8b8b9e',
+            color: '#455a64',
           }}
         >
           {time}
@@ -79,8 +79,8 @@ export function Header({ title }: HeaderProps) {
 
       <style>{`
         @keyframes pulse {
-          0%, 100% { opacity: 1; box-shadow: 0 0 6px #00d2a0; }
-          50% { opacity: 0.5; box-shadow: 0 0 12px #00d2a0; }
+          0%, 100% { opacity: 1; box-shadow: 0 0 6px #66bb6a; }
+          50% { opacity: 0.5; box-shadow: 0 0 12px #66bb6a; }
         }
       `}</style>
     </div>

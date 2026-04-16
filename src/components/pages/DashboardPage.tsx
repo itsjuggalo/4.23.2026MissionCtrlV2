@@ -68,17 +68,17 @@ export function DashboardPage() {
   const btcChange = prices['BTC']?.change24h || 0;
 
   function regimeColor(r: string) {
-    if (r?.includes('STRONG_TREND')) return '#00d2a0';
-    if (r?.includes('WEAK_TREND')) return '#ffa502';
-    if (r?.includes('RANGING')) return '#3498ff';
-    if (r?.includes('VOLATILE')) return '#ff4757';
-    return '#5c5c72';
+    if (r?.includes('STRONG_TREND')) return '#66bb6a';
+    if (r?.includes('WEAK_TREND')) return '#ff9800';
+    if (r?.includes('RANGING')) return '#4fc3f7';
+    if (r?.includes('VOLATILE')) return '#ef5350';
+    return '#607d8b';
   }
 
   function actionColor(a: string) {
-    if (a === 'BUY') return '#00d2a0';
-    if (a === 'SELL') return '#ff4757';
-    return '#5c5c72';
+    if (a === 'BUY') return '#66bb6a';
+    if (a === 'SELL') return '#ef5350';
+    return '#607d8b';
   }
 
   function formatTime(iso: string) {
@@ -98,35 +98,35 @@ export function DashboardPage() {
       {/* Header */}
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
         <div>
-          <h1 style={{ fontSize: 20, fontWeight: 700, color: '#e8e8ed', margin: 0 }}>Command Center</h1>
-          <div style={{ fontSize: 11, color: '#5c5c72', fontFamily: "'JetBrains Mono', monospace", marginTop: 2 }}>
+          <h1 style={{ fontSize: 20, fontWeight: 700, color: '#e0e0e0', margin: 0 }}>Command Center</h1>
+          <div style={{ fontSize: 11, color: '#607d8b', fontFamily: "'JetBrains Mono', monospace", marginTop: 2 }}>
             PHASE 1 — PROVE ROI · Last refresh: {lastRefresh}
           </div>
         </div>
         <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-          <span style={{ width: 8, height: 8, borderRadius: '50%', background: '#00d2a0', animation: 'pulse 2s infinite' }} />
-          <span style={{ fontSize: 12, color: '#00d2a0', fontWeight: 600 }}>LIVE</span>
+          <span style={{ width: 8, height: 8, borderRadius: '50%', background: '#66bb6a', animation: 'pulse 2s infinite' }} />
+          <span style={{ fontSize: 12, color: '#66bb6a', fontWeight: 600 }}>LIVE</span>
         </div>
       </div>
 
       {/* Mission Progress */}
       <Card>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
-          <span style={{ fontSize: 11, color: '#5c5c72', fontFamily: "'JetBrains Mono', monospace", letterSpacing: 1 }}>MISSION PROGRESS</span>
-          <span style={{ fontSize: 12, color: '#ff4757', fontFamily: "'JetBrains Mono', monospace" }}>Phase 1 of 2</span>
+          <span style={{ fontSize: 11, color: '#607d8b', fontFamily: "'JetBrains Mono', monospace", letterSpacing: 1 }}>MISSION PROGRESS</span>
+          <span style={{ fontSize: 12, color: '#ef5350', fontFamily: "'JetBrains Mono', monospace" }}>Phase 1 of 2</span>
         </div>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', marginBottom: 6 }}>
-          <span style={{ fontSize: 28, fontFamily: "'JetBrains Mono', monospace", fontWeight: 700, color: '#e8e8ed' }}>
+          <span style={{ fontSize: 28, fontFamily: "'JetBrains Mono', monospace", fontWeight: 700, color: '#e0e0e0' }}>
             ${equity.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
           </span>
-          <span style={{ fontSize: 13, color: '#5c5c72', fontFamily: "'JetBrains Mono', monospace" }}>→ ${goalCapital.toLocaleString()} goal</span>
+          <span style={{ fontSize: 13, color: '#607d8b', fontFamily: "'JetBrains Mono', monospace" }}>→ ${goalCapital.toLocaleString()} goal</span>
         </div>
-        <ProgressBar value={Math.max(goalPct, 0)} max={100} color="#6c5ce7" height={6} />
+        <ProgressBar value={Math.max(goalPct, 0)} max={100} color="#4fc3f7" height={6} />
         <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: 6 }}>
-          <span style={{ fontSize: 11, color: totalReturn >= 0 ? '#00d2a0' : '#ff4757', fontFamily: "'JetBrains Mono', monospace" }}>
+          <span style={{ fontSize: 11, color: totalReturn >= 0 ? '#66bb6a' : '#ef5350', fontFamily: "'JetBrains Mono', monospace" }}>
             {totalReturn >= 0 ? '+' : ''}${(equity - startCapital).toFixed(2)} earned
           </span>
-          <span style={{ fontSize: 11, color: '#6c5ce7', fontFamily: "'JetBrains Mono', monospace" }}>
+          <span style={{ fontSize: 11, color: '#4fc3f7', fontFamily: "'JetBrains Mono', monospace" }}>
             {goalPct.toFixed(1)}% complete
           </span>
         </div>
@@ -134,10 +134,10 @@ export function DashboardPage() {
 
       {/* Key Metrics */}
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 12 }}>
-        <MetricCard label="BTC Price" value={btcPrice > 0 ? `$${btcPrice.toLocaleString()}` : '—'} subtitle={btcChange !== 0 ? `${btcChange >= 0 ? '+' : ''}${btcChange.toFixed(1)}% 24h` : 'loading'} color={btcChange >= 0 ? '#00d2a0' : '#ff4757'} />
-        <MetricCard label="Day P&L" value={`${dayPL >= 0 ? '+' : ''}$${dayPL.toFixed(0)}`} subtitle={`${totalTradesToday} trades today`} color={dayPL >= 0 ? '#00d2a0' : '#ff4757'} />
-        <MetricCard label="Win Rate" value={`${winRate}%`} subtitle={`${allWins}/${allTrades} trades`} color={winRate >= 50 ? '#00d2a0' : '#ffa502'} />
-        <MetricCard label="Signals" value={String(totalSignalsToday)} subtitle={`${report?.signals?.buys || 0}B / ${report?.signals?.sells || 0}S`} color="#3498ff" />
+        <MetricCard label="BTC Price" value={btcPrice > 0 ? `$${btcPrice.toLocaleString()}` : '—'} subtitle={btcChange !== 0 ? `${btcChange >= 0 ? '+' : ''}${btcChange.toFixed(1)}% 24h` : 'loading'} color={btcChange >= 0 ? '#66bb6a' : '#ef5350'} />
+        <MetricCard label="Day P&L" value={`${dayPL >= 0 ? '+' : ''}$${dayPL.toFixed(0)}`} subtitle={`${totalTradesToday} trades today`} color={dayPL >= 0 ? '#66bb6a' : '#ef5350'} />
+        <MetricCard label="Win Rate" value={`${winRate}%`} subtitle={`${allWins}/${allTrades} trades`} color={winRate >= 50 ? '#66bb6a' : '#ff9800'} />
+        <MetricCard label="Signals" value={String(totalSignalsToday)} subtitle={`${report?.signals?.buys || 0}B / ${report?.signals?.sells || 0}S`} color="#4fc3f7" />
       </div>
 
       {/* Regime + BTC Bias */}
@@ -150,15 +150,15 @@ export function DashboardPage() {
               {regime?.overall_regime?.replace(/_/g, ' ') || 'LOADING'}
             </span>
           </div>
-          <div style={{ fontSize: 12, color: '#8b8b9e', marginTop: 6 }}>Bias: {regime?.direction_bias || '—'}</div>
-          <div style={{ fontSize: 11, color: '#5c5c72', marginTop: 4 }}>{regime?.overall_recommendation || ''}</div>
+          <div style={{ fontSize: 12, color: '#455a64', marginTop: 6 }}>Bias: {regime?.direction_bias || '—'}</div>
+          <div style={{ fontSize: 11, color: '#607d8b', marginTop: 4 }}>{regime?.overall_recommendation || ''}</div>
           {regime?.timeframes && (
             <div style={{ display: 'flex', gap: 8, marginTop: 12 }}>
               {Object.entries(regime.timeframes).map(([tf, data]: [string, any]) => (
-                <div key={tf} style={{ background: '#0f0f17', borderRadius: 6, padding: '6px 10px', border: '1px solid #1e1e2a', flex: 1 }}>
-                  <div style={{ fontSize: 11, fontWeight: 600, color: '#e8e8ed' }}>{tf}</div>
+                <div key={tf} style={{ background: '#0d1117', borderRadius: 6, padding: '6px 10px', border: '1px solid #1a3a4a', flex: 1 }}>
+                  <div style={{ fontSize: 11, fontWeight: 600, color: '#e0e0e0' }}>{tf}</div>
                   <div style={{ fontSize: 10, color: regimeColor(data.regime) }}>{data.regime?.replace(/_/g, ' ')}</div>
-                  <div style={{ fontSize: 9, color: '#5c5c72' }}>ADX {data.adx}</div>
+                  <div style={{ fontSize: 9, color: '#607d8b' }}>ADX {data.adx}</div>
                 </div>
               ))}
             </div>
@@ -177,29 +177,29 @@ export function DashboardPage() {
           {params?.recommended_atr_period ? (
             <div style={{ marginTop: 8 }}>
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 8 }}>
-                <div style={{ background: '#0f0f17', borderRadius: 6, padding: '8px 10px', border: '1px solid #1e1e2a' }}>
-                  <div style={{ fontSize: 10, color: '#5c5c72' }}>ATR Period</div>
-                  <div style={{ fontSize: 18, fontWeight: 700, color: '#6c5ce7', fontFamily: "'JetBrains Mono', monospace" }}>{params.recommended_atr_period}</div>
+                <div style={{ background: '#0d1117', borderRadius: 6, padding: '8px 10px', border: '1px solid #1a3a4a' }}>
+                  <div style={{ fontSize: 10, color: '#607d8b' }}>ATR Period</div>
+                  <div style={{ fontSize: 18, fontWeight: 700, color: '#4fc3f7', fontFamily: "'JetBrains Mono', monospace" }}>{params.recommended_atr_period}</div>
                 </div>
-                <div style={{ background: '#0f0f17', borderRadius: 6, padding: '8px 10px', border: '1px solid #1e1e2a' }}>
-                  <div style={{ fontSize: 10, color: '#5c5c72' }}>Multiplier</div>
-                  <div style={{ fontSize: 18, fontWeight: 700, color: '#6c5ce7', fontFamily: "'JetBrains Mono', monospace" }}>{params.recommended_multiplier}</div>
+                <div style={{ background: '#0d1117', borderRadius: 6, padding: '8px 10px', border: '1px solid #1a3a4a' }}>
+                  <div style={{ fontSize: 10, color: '#607d8b' }}>Multiplier</div>
+                  <div style={{ fontSize: 18, fontWeight: 700, color: '#4fc3f7', fontFamily: "'JetBrains Mono', monospace" }}>{params.recommended_multiplier}</div>
                 </div>
-                <div style={{ background: '#0f0f17', borderRadius: 6, padding: '8px 10px', border: '1px solid #1e1e2a' }}>
-                  <div style={{ fontSize: 10, color: '#5c5c72' }}>Win Rate</div>
-                  <div style={{ fontSize: 14, fontWeight: 600, color: '#00d2a0', fontFamily: "'JetBrains Mono', monospace" }}>{params.expected_win_rate}%</div>
+                <div style={{ background: '#0d1117', borderRadius: 6, padding: '8px 10px', border: '1px solid #1a3a4a' }}>
+                  <div style={{ fontSize: 10, color: '#607d8b' }}>Win Rate</div>
+                  <div style={{ fontSize: 14, fontWeight: 600, color: '#66bb6a', fontFamily: "'JetBrains Mono', monospace" }}>{params.expected_win_rate}%</div>
                 </div>
-                <div style={{ background: '#0f0f17', borderRadius: 6, padding: '8px 10px', border: '1px solid #1e1e2a' }}>
-                  <div style={{ fontSize: 10, color: '#5c5c72' }}>Profit Factor</div>
-                  <div style={{ fontSize: 14, fontWeight: 600, color: '#00d2a0', fontFamily: "'JetBrains Mono', monospace" }}>{params.expected_profit_factor}</div>
+                <div style={{ background: '#0d1117', borderRadius: 6, padding: '8px 10px', border: '1px solid #1a3a4a' }}>
+                  <div style={{ fontSize: 10, color: '#607d8b' }}>Profit Factor</div>
+                  <div style={{ fontSize: 14, fontWeight: 600, color: '#66bb6a', fontFamily: "'JetBrains Mono', monospace" }}>{params.expected_profit_factor}</div>
                 </div>
               </div>
-              <div style={{ fontSize: 10, color: '#5c5c72', marginTop: 8, fontFamily: "'JetBrains Mono', monospace" }}>
+              <div style={{ fontSize: 10, color: '#607d8b', marginTop: 8, fontFamily: "'JetBrains Mono', monospace" }}>
                 Backtested: {params.backtest_return_pct}% return | Updated: {params.updated ? formatTime(params.updated) : '—'}
               </div>
             </div>
           ) : (
-            <div style={{ color: '#5c5c72', fontSize: 12, marginTop: 8 }}>Run optimizer to see params</div>
+            <div style={{ color: '#607d8b', fontSize: 12, marginTop: 8 }}>Run optimizer to see params</div>
           )}
         </Card>
 
@@ -208,26 +208,26 @@ export function DashboardPage() {
           <SectionHeader title="Position Book" />
           <div style={{ marginTop: 8 }}>
             {openPositions.length === 0 ? (
-              <div style={{ color: '#5c5c72', fontSize: 12 }}>No open positions</div>
+              <div style={{ color: '#607d8b', fontSize: 12 }}>No open positions</div>
             ) : (
               openPositions.map(([ticker, data]: [string, any]) => (
-                <div key={ticker} style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '8px 0', borderBottom: '1px solid #1e1e2a' }}>
-                  <span style={{ fontSize: 13, fontWeight: 600, color: '#e8e8ed', minWidth: 70 }}>{ticker}</span>
-                  <Badge color={data.direction === 'LONG' ? '#00d2a0' : '#ff4757'}>{data.direction}</Badge>
+                <div key={ticker} style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '8px 0', borderBottom: '1px solid #1a3a4a' }}>
+                  <span style={{ fontSize: 13, fontWeight: 600, color: '#e0e0e0', minWidth: 70 }}>{ticker}</span>
+                  <Badge color={data.direction === 'LONG' ? '#66bb6a' : '#ef5350'}>{data.direction}</Badge>
                   <span style={{ flex: 1 }} />
                   <div style={{ textAlign: 'right' }}>
-                    <div style={{ fontSize: 12, fontFamily: "'JetBrains Mono', monospace", color: '#e8e8ed' }}>
+                    <div style={{ fontSize: 12, fontFamily: "'JetBrains Mono', monospace", color: '#e0e0e0' }}>
                       ${data.entry_price?.toLocaleString() || '—'}
                     </div>
-                    <div style={{ fontSize: 10, color: '#5c5c72' }}>{data.signal_count} signals</div>
+                    <div style={{ fontSize: 10, color: '#607d8b' }}>{data.signal_count} signals</div>
                   </div>
                 </div>
               ))
             )}
             {/* Portfolio summary */}
-            <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: 10, padding: '8px 0', borderTop: '1px solid #1e1e2a' }}>
-              <span style={{ fontSize: 11, color: '#5c5c72' }}>Cash available</span>
-              <span style={{ fontSize: 12, fontFamily: "'JetBrains Mono', monospace", color: '#00d2a0' }}>${cash.toLocaleString()}</span>
+            <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: 10, padding: '8px 0', borderTop: '1px solid #1a3a4a' }}>
+              <span style={{ fontSize: 11, color: '#607d8b' }}>Cash available</span>
+              <span style={{ fontSize: 12, fontFamily: "'JetBrains Mono', monospace", color: '#66bb6a' }}>${cash.toLocaleString()}</span>
             </div>
           </div>
         </Card>
@@ -238,12 +238,12 @@ export function DashboardPage() {
         <SectionHeader title="Infrastructure" />
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 10, marginTop: 8 }}>
           {Object.entries(report?.infrastructure?.pm2 || {}).map(([name, data]: [string, any]) => (
-            <div key={name} style={{ background: '#111118', border: '1px solid #1e1e2a', borderRadius: 8, padding: '10px 14px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            <div key={name} style={{ background: '#111118', border: '1px solid #1a3a4a', borderRadius: 8, padding: '10px 14px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
               <div>
-                <div style={{ fontSize: 13, fontWeight: 600, color: '#e8e8ed' }}>{name}</div>
-                <div style={{ fontSize: 10, color: '#5c5c72' }}>{data.memory_mb}MB · {data.restarts} restarts</div>
+                <div style={{ fontSize: 13, fontWeight: 600, color: '#e0e0e0' }}>{name}</div>
+                <div style={{ fontSize: 10, color: '#607d8b' }}>{data.memory_mb}MB · {data.restarts} restarts</div>
               </div>
-              <Badge color={data.status === 'online' ? '#00d2a0' : '#ff4757'}>{data.status?.toUpperCase()}</Badge>
+              <Badge color={data.status === 'online' ? '#66bb6a' : '#ef5350'}>{data.status?.toUpperCase()}</Badge>
             </div>
           ))}
         </div>
@@ -254,29 +254,29 @@ export function DashboardPage() {
         <SectionHeader title="Live Pipeline" />
         <div style={{ marginTop: 8, display: 'flex', flexDirection: 'column', gap: 6 }}>
           {signals.length === 0 ? (
-            <div style={{ color: '#5c5c72', fontSize: 12 }}>No signals yet today</div>
+            <div style={{ color: '#607d8b', fontSize: 12 }}>No signals yet today</div>
           ) : (
             signals.slice(0, 8).map((sig, i) => {
-              const agentColors: Record<string, string> = { 'SUPERTREND_FLIP': '#6c5ce7', 'ENTRY': '#00d2a0', 'TP': '#ffa502', 'SL': '#ff4757' };
-              const sigColor = agentColors[sig.signal_type] || '#5c5c72';
+              const agentColors: Record<string, string> = { 'SUPERTREND_FLIP': '#4fc3f7', 'ENTRY': '#66bb6a', 'TP': '#ff9800', 'SL': '#ef5350' };
+              const sigColor = agentColors[sig.signal_type] || '#607d8b';
               return (
                 <div
                   key={i}
                   style={{
                     display: 'flex', alignItems: 'center', gap: 10,
                     padding: '8px 12px', borderLeft: `3px solid ${sigColor}`,
-                    background: '#0f0f17', borderRadius: '0 6px 6px 0',
+                    background: '#0d1117', borderRadius: '0 6px 6px 0',
                   }}
                 >
-                  <span style={{ fontSize: 11, fontFamily: "'JetBrains Mono', monospace", color: '#5c5c72', minWidth: 50 }}>
+                  <span style={{ fontSize: 11, fontFamily: "'JetBrains Mono', monospace", color: '#607d8b', minWidth: 50 }}>
                     {sig.timestamp ? new Date(sig.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : ''}
                   </span>
                   <Badge color={sigColor}>{sig.signal_type || 'SIGNAL'}</Badge>
-                  <span style={{ fontSize: 12, color: '#8b8b9e', flex: 1 }}>
+                  <span style={{ fontSize: 12, color: '#455a64', flex: 1 }}>
                     {sig.ticker} {sig.action} {sig.price ? `@ $${sig.price.toLocaleString()}` : ''}
                     {sig.timeframe && sig.timeframe !== 'UNKNOWN' ? ` · ${sig.timeframe}` : ''}
                   </span>
-                  <span style={{ fontSize: 10, color: '#5c5c72' }}>{formatTime(sig.timestamp)}</span>
+                  <span style={{ fontSize: 10, color: '#607d8b' }}>{formatTime(sig.timestamp)}</span>
                 </div>
               );
             })

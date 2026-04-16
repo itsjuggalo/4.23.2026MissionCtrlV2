@@ -12,7 +12,7 @@ interface SouthParkAgentProps {
 export function SouthParkAgent({ name, role, color, status, activity, size = 80 }: SouthParkAgentProps) {
   const isOnline = status === 'online';
   const isIdle = status === 'idle';
-  const statusColor = isOnline ? '#2ed573' : isIdle ? '#ffa502' : '#636e72';
+  const statusColor = isOnline ? '#2ed573' : isIdle ? '#ff9800' : '#636e72';
 
   const s = size;
   const headSize = s * 0.5;
@@ -103,13 +103,13 @@ export function SouthParkAgent({ name, role, color, status, activity, size = 80 
       </div>
 
       {/* Role */}
-      <div style={{ fontSize: 10, color: '#8b8b9e', textAlign: 'center', maxWidth: 90, lineHeight: 1.3 }}>
+      <div style={{ fontSize: 10, color: '#455a64', textAlign: 'center', maxWidth: 90, lineHeight: 1.3 }}>
         {role}
       </div>
 
       {/* Activity */}
       {activity && (
-        <div style={{ fontSize: 9, color: '#5c5c72', textAlign: 'center', maxWidth: 100, lineHeight: 1.3, fontStyle: 'italic' }}>
+        <div style={{ fontSize: 9, color: '#607d8b', textAlign: 'center', maxWidth: 100, lineHeight: 1.3, fontStyle: 'italic' }}>
           {activity}
         </div>
       )}

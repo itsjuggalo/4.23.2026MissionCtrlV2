@@ -1,61 +1,69 @@
-import { NextRequest, NextResponse } from 'next/server';
-import { readFile, readdir } from 'fs/promises';
+import { NextResponse } from "next/server";
+import fs from "fs";
+import path from "path";
+import os from "os";
 
-export const dynamic = 'force-dynamic';
+const CALENDAR_FILE = path.join(os.homedir(), "mission-control-restored", "data", "calendar_events.json");
 
-const CALENDAR_DIR = '/home/ubuntu/mission-control/daily-reports/calendar';
-
-async function safeRead(path: string) {
-  try {
-    return JSON.parse(await readFile(path, 'utf-8'));
-  } catch {
-    return null;
-  }
+interface CalendarEvent {
+  date: string;
+  category: string;
+  ticker: string;
+  title: string;
+  detail: string;
+  time: string;
+  importance: string;
 }
 
-export async function GET(req: NextRequest) {
-  const { searchParams } = new URL(req.url);
-  const month = searchParams.get('month'); // e.g., 2026-04
+interface CalendarData {
+  last_updated: string;
+  total_events: number;
+  month_summaries: Record<string, Record<string, number>>;
+  events: CalendarEvent[];
+}
 
+export async function GET(request: Request) {
   try {
-    // If month specified, return that month's calendar
-    if (month) {
-      const cal = await safeRead(`${CALENDAR_DIR}/${month}-calendar.json`);
-      return NextResponse.json(cal || { month, days: {} });
+    const { searchParams } = new URL(request.url);
+    const month = searchParams.get("month"); // YYYY-MM
+    const category = searchParams.get("category"); // earnings|economic|crypto|dividend|ipo|split
+
+    let data: CalendarData;
+    try {
+      const raw = fs.readFileSync(CALENDAR_FILE, "utf-8");
+      data = JSON.parse(raw);
+    } catch {
+      data = { last_updated: "", total_events: 0, month_summaries: {}, events: [] };
     }
 
-    // Default: return current month calendar + today's entry
-    const now = new Date();
-    const ym = `${now.getUTCFullYear()}-${String(now.getUTCMonth() + 1).padStart(2, '0')}`;
-    const today = now.toISOString().split('T')[0];
+    let events = data.events;
 
-    const cal = await safeRead(`${CALENDAR_DIR}/${ym}-calendar.json`);
-    const todayEntry = await safeRead(`${CALENDAR_DIR}/${today}.json`);
+    // Filter by month
+    if (month) {
+      events = events.filter((e) => e.date.startsWith(month));
+    }
 
-    // Build events list from calendar days
-    const events: any[] = [];
-    const days = cal?.days || {};
+    // Filter by category
+    if (category && category !== "all") {
+      events = events.filter((e) => e.category === category);
+    }
 
-    for (const [date, data] of Object.entries(days) as [string, any][]) {
-      events.push({
-        date,
-        title: data.highlight || 'No activity',
-        signals: data.signals_received || 0,
-        trades: data.trades_closed || 0,
-        pnl: data.total_pnl_pct || 0,
-        regime: data.regime || 'UNKNOWN',
-        bias: data.bias || 'UNKNOWN',
-        health: `${data.processes_online || 0}/${data.processes_total || 0}`,
-      });
+    // Group events by date
+    const grouped: Record<string, CalendarEvent[]> = {};
+    for (const e of events) {
+      if (!grouped[e.date]) grouped[e.date] = [];
+      grouped[e.date].push(e);
     }
 
     return NextResponse.json({
-      month: ym,
-      today: todayEntry,
+      last_updated: data.last_updated,
+      total_events: events.length,
+      month_summaries: data.month_summaries,
+      grouped,
       events,
-      summary: cal?.summary || {},
     });
-  } catch (e: any) {
-    return NextResponse.json({ month: '', events: [], error: e.message });
+  } catch (err) {
+    console.error("Calendar API error:", err);
+    return NextResponse.json({ error: "Failed to load calendar data" }, { status: 500 });
   }
 }

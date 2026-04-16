@@ -15,16 +15,16 @@ interface Project {
 }
 
 function statusColor(s: string) {
-  if (s === 'online') return '#00d2a0';
-  if (s === 'degraded') return '#ffa502';
-  if (s === 'offline') return '#ff4757';
-  return '#5c5c72';
+  if (s === 'online') return '#66bb6a';
+  if (s === 'degraded') return '#ff9800';
+  if (s === 'offline') return '#ef5350';
+  return '#607d8b';
 }
 
 function healthColor(h: number) {
-  if (h >= 80) return '#00d2a0';
-  if (h >= 50) return '#ffa502';
-  return '#ff4757';
+  if (h >= 80) return '#66bb6a';
+  if (h >= 50) return '#ff9800';
+  return '#ef5350';
 }
 
 function formatTime(iso: string) {
@@ -215,7 +215,7 @@ export function ProjectsPage() {
   }, []);
 
   if (loading) {
-    return <div style={{ color: '#5c5c72', padding: 20, fontSize: 13 }}>Loading projects...</div>;
+    return <div style={{ color: '#607d8b', padding: 20, fontSize: 13 }}>Loading projects...</div>;
   }
 
   return (
@@ -225,7 +225,7 @@ export function ProjectsPage() {
           key={project.id}
           style={{
             background: '#111118',
-            border: '1px solid #1e1e2a',
+            border: '1px solid #1a3a4a',
             borderRadius: 10,
             padding: 16,
             borderLeft: `3px solid ${statusColor(project.status)}`,
@@ -234,7 +234,7 @@ export function ProjectsPage() {
           {/* Header */}
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 10 }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-              <span style={{ fontSize: 15, fontFamily: "'Inter', sans-serif", fontWeight: 700, color: '#e8e8ed' }}>
+              <span style={{ fontSize: 15, fontFamily: "'Inter', sans-serif", fontWeight: 700, color: '#e0e0e0' }}>
                 {project.name}
               </span>
               <Badge color={statusColor(project.status)}>{project.status}</Badge>
@@ -248,22 +248,22 @@ export function ProjectsPage() {
           <ProgressBar value={project.health} max={100} color={healthColor(project.health)} height={4} />
 
           {/* Description */}
-          <div style={{ marginTop: 8, fontSize: 12, color: '#5c5c72', fontFamily: "'Inter', sans-serif" }}>
+          <div style={{ marginTop: 8, fontSize: 12, color: '#607d8b', fontFamily: "'Inter', sans-serif" }}>
             {project.description}
           </div>
 
           {/* Metrics grid */}
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 8, marginTop: 12 }}>
             {project.metrics.map((m, i) => (
-              <div key={i} style={{ background: '#0f0f17', borderRadius: 6, padding: '8px 10px', border: '1px solid #1e1e2a' }}>
-                <div style={{ fontSize: 10, color: '#5c5c72', marginBottom: 2 }}>{m.label}</div>
-                <div style={{ fontSize: 12, fontFamily: "'JetBrains Mono', monospace", color: '#e8e8ed', fontWeight: 500 }}>{m.value}</div>
+              <div key={i} style={{ background: '#0d1117', borderRadius: 6, padding: '8px 10px', border: '1px solid #1a3a4a' }}>
+                <div style={{ fontSize: 10, color: '#607d8b', marginBottom: 2 }}>{m.label}</div>
+                <div style={{ fontSize: 12, fontFamily: "'JetBrains Mono', monospace", color: '#e0e0e0', fontWeight: 500 }}>{m.value}</div>
               </div>
             ))}
           </div>
 
           {/* Footer */}
-          <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: 10, fontSize: 10, fontFamily: "'JetBrains Mono', monospace", color: '#5c5c72' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: 10, fontSize: 10, fontFamily: "'JetBrains Mono', monospace", color: '#607d8b' }}>
             <span>{project.source}</span>
             {project.lastActivity && <span>Last activity: {formatTime(project.lastActivity)}</span>}
           </div>

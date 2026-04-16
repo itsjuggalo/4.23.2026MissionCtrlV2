@@ -109,11 +109,11 @@ function relativeTime(iso: string): string {
 }
 
 function directionStyle(dir: string | null): { bg: string; color: string } {
-  if (!dir) return { bg: '#1e1e2a', color: '#8b8b9e' };
+  if (!dir) return { bg: '#1a3a4a', color: '#455a64' };
   const d = dir.toUpperCase();
   if (['LONG', 'BUY', 'CALL'].includes(d))  return { bg: '#0d2b1a', color: '#00e07a' };
   if (['SHORT', 'SELL', 'PUT'].includes(d)) return { bg: '#2b0d0d', color: '#ff4d4d' };
-  return { bg: '#1e1e2a', color: '#8b8b9e' };
+  return { bg: '#1a3a4a', color: '#455a64' };
 }
 
 function sourceLabel(sig: TelegramSignal): string {
@@ -130,9 +130,9 @@ function sourceLabel(sig: TelegramSignal): string {
 
 function SkeletonCard() {
   return (
-    <div style={{ background: '#0f0f17', border: '1px solid #1e1e2a', borderRadius: 12, padding: 20, animation: 'pulse 1.5s ease-in-out infinite' }}>
+    <div style={{ background: '#0d1117', border: '1px solid #1a3a4a', borderRadius: 12, padding: 20, animation: 'pulse 1.5s ease-in-out infinite' }}>
       {[80, 120, 60, 100].map((w, i) => (
-        <div key={i} style={{ height: 14, width: `${w}%`, background: '#1e1e2a', borderRadius: 4, marginBottom: i < 3 ? 12 : 0 }} />
+        <div key={i} style={{ height: 14, width: `${w}%`, background: '#1a3a4a', borderRadius: 4, marginBottom: i < 3 ? 12 : 0 }} />
       ))}
     </div>
   );
@@ -157,9 +157,9 @@ function TabRow<T extends string>({
           style={{
             padding: '6px 14px', fontSize: 12, borderRadius: 6, cursor: 'pointer',
             fontFamily: "'Inter', sans-serif", border: 'none',
-            background: active === tab ? '#6c5ce7' : '#0f0f17',
-            color: active === tab ? '#fff' : '#8b8b9e',
-            borderBottom: active === tab ? '2px solid #a29bfe' : '2px solid transparent',
+            background: active === tab ? '#4fc3f7' : '#0d1117',
+            color: active === tab ? '#fff' : '#455a64',
+            borderBottom: active === tab ? '2px solid #81d4fa' : '2px solid transparent',
             transition: 'all 0.15s',
           }}
         >
@@ -219,12 +219,12 @@ export function TelegramSignalsPage() {
   const lastStr = lastUpdated ? relativeTime(lastUpdated.toISOString()) : '—';
 
   return (
-    <div style={{ fontFamily: "'Inter', -apple-system, sans-serif", color: '#e8e8ed' }}>
+    <div style={{ fontFamily: "'Inter', -apple-system, sans-serif", color: '#e0e0e0' }}>
 
       {/* Status bar */}
       <div style={{
         display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-        background: '#0f0f17', border: '1px solid #1e1e2a', borderRadius: 10,
+        background: '#0d1117', border: '1px solid #1a3a4a', borderRadius: 10,
         padding: '12px 20px', marginBottom: 16, flexWrap: 'wrap', gap: 10,
       }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
@@ -232,11 +232,11 @@ export function TelegramSignalsPage() {
           <span style={{ fontSize: 13, fontWeight: 600 }}>
             Monitoring 7 Telegram + Firebase + AICryptoSignals
           </span>
-          <span style={{ background: 'rgba(108,92,231,0.15)', color: '#a29bfe', fontSize: 11, fontFamily: "'JetBrains Mono', monospace", padding: '2px 8px', borderRadius: 6 }}>
+          <span style={{ background: 'rgba(108,92,231,0.15)', color: '#81d4fa', fontSize: 11, fontFamily: "'JetBrains Mono', monospace", padding: '2px 8px', borderRadius: 6 }}>
             {filtered.length} / {signals.length}
           </span>
         </div>
-        <span style={{ fontSize: 11, color: '#5c5c72', fontFamily: "'JetBrains Mono', monospace" }}>
+        <span style={{ fontSize: 11, color: '#607d8b', fontFamily: "'JetBrains Mono', monospace" }}>
           Last updated: {lastStr}
         </span>
       </div>
@@ -265,8 +265,8 @@ export function TelegramSignalsPage() {
 
       {/* Empty state */}
       {!loading && filtered.length === 0 && (
-        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '80px 20px', color: '#5c5c72', gap: 14 }}>
-          <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#5c5c72" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '80px 20px', color: '#607d8b', gap: 14 }}>
+          <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#607d8b" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
             <line x1="22" y1="2" x2="11" y2="13" /><polygon points="22 2 15 22 11 13 2 9 22 2" />
           </svg>
           <div style={{ fontSize: 16, fontWeight: 500 }}>No signals match the current filters</div>
@@ -284,30 +284,30 @@ export function TelegramSignalsPage() {
 
             return (
               <div key={sig.id} style={{
-                background: '#0f0f17', border: '1px solid #1e1e2a',
+                background: '#0d1117', border: '1px solid #1a3a4a',
                 borderRadius: 12, padding: 18, display: 'flex', flexDirection: 'column', gap: 12,
               }}>
                 {/* Header */}
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: 6 }}>
                   <div style={{ display: 'flex', alignItems: 'center', gap: 6, flexWrap: 'wrap', minWidth: 0 }}>
                     <span style={{
-                      fontSize: 10, color: '#5c5c72', fontFamily: "'JetBrains Mono', monospace",
-                      background: '#1e1e2a', padding: '1px 6px', borderRadius: 4, flexShrink: 0,
+                      fontSize: 10, color: '#607d8b', fontFamily: "'JetBrains Mono', monospace",
+                      background: '#1a3a4a', padding: '1px 6px', borderRadius: 4, flexShrink: 0,
                     }}>
                       {srcLabel}
                     </span>
-                    <span style={{ fontSize: 11, color: '#8b8b9e', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                    <span style={{ fontSize: 11, color: '#455a64', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                       {sig.channel_name}
                     </span>
                   </div>
-                  <span style={{ fontSize: 11, color: '#5c5c72', fontFamily: "'JetBrains Mono', monospace", flexShrink: 0 }}>
+                  <span style={{ fontSize: 11, color: '#607d8b', fontFamily: "'JetBrains Mono', monospace", flexShrink: 0 }}>
                     {relativeTime(sig.timestamp)}
                   </span>
                 </div>
 
                 {/* Symbol + direction + leverage */}
                 <div style={{ display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap' }}>
-                  <span style={{ fontSize: 22, fontWeight: 700, color: '#a29bfe', fontFamily: "'JetBrains Mono', monospace", letterSpacing: '0.5px' }}>
+                  <span style={{ fontSize: 22, fontWeight: 700, color: '#81d4fa', fontFamily: "'JetBrains Mono', monospace", letterSpacing: '0.5px' }}>
                     {sym}
                   </span>
                   {sig.direction && (
@@ -321,7 +321,7 @@ export function TelegramSignalsPage() {
                     </span>
                   )}
                   {sig.score != null && (
-                    <span style={{ background: 'rgba(108,92,231,0.12)', color: '#a29bfe', fontSize: 10, fontFamily: "'JetBrains Mono', monospace", padding: '2px 7px', borderRadius: 4, marginLeft: 'auto' }}>
+                    <span style={{ background: 'rgba(108,92,231,0.12)', color: '#81d4fa', fontSize: 10, fontFamily: "'JetBrains Mono', monospace", padding: '2px 7px', borderRadius: 4, marginLeft: 'auto' }}>
                       {sig.score}/100
                     </span>
                   )}
@@ -331,15 +331,15 @@ export function TelegramSignalsPage() {
                 <div style={{ display: 'flex', flexDirection: 'column', gap: 5 }}>
                   {sig.entry !== null && (
                     <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 13 }}>
-                      <span style={{ color: '#8b8b9e' }}>Entry</span>
-                      <span style={{ color: '#e8e8ed', fontFamily: "'JetBrains Mono', monospace", fontWeight: 600 }}>
+                      <span style={{ color: '#455a64' }}>Entry</span>
+                      <span style={{ color: '#e0e0e0', fontFamily: "'JetBrains Mono', monospace", fontWeight: 600 }}>
                         ${sig.entry.toLocaleString()}
                       </span>
                     </div>
                   )}
                   {sig.price_change && (
                     <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 13 }}>
-                      <span style={{ color: '#8b8b9e' }}>Price Δ</span>
+                      <span style={{ color: '#455a64' }}>Price Δ</span>
                       <span style={{
                         fontFamily: "'JetBrains Mono', monospace", fontWeight: 600,
                         color: sig.price_change.startsWith('-') ? '#ff6b6b' : '#00e07a',
@@ -350,7 +350,7 @@ export function TelegramSignalsPage() {
                   )}
                   {sig.stop_loss !== null && (
                     <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 13 }}>
-                      <span style={{ color: '#8b8b9e' }}>Stop Loss</span>
+                      <span style={{ color: '#455a64' }}>Stop Loss</span>
                       <span style={{ color: '#ff6b6b', fontFamily: "'JetBrains Mono', monospace", fontWeight: 600 }}>
                         ${sig.stop_loss.toLocaleString()}
                       </span>
@@ -361,7 +361,7 @@ export function TelegramSignalsPage() {
                 {/* Targets */}
                 {sig.targets.length > 0 && (
                   <div>
-                    <div style={{ fontSize: 10, color: '#8b8b9e', marginBottom: 5, textTransform: 'uppercase', letterSpacing: '0.5px' }}>Targets</div>
+                    <div style={{ fontSize: 10, color: '#455a64', marginBottom: 5, textTransform: 'uppercase', letterSpacing: '0.5px' }}>Targets</div>
                     <div style={{ display: 'flex', flexWrap: 'wrap', gap: 5 }}>
                       {sig.targets.map((t, i) => (
                         <span key={i} style={{ background: '#0d2b1a', color: '#00e07a', fontSize: 11, fontFamily: "'JetBrains Mono', monospace", fontWeight: 600, padding: '2px 8px', borderRadius: 5, border: '1px solid rgba(0,224,122,0.15)' }}>
@@ -376,7 +376,7 @@ export function TelegramSignalsPage() {
                 <div>
                   <button
                     onClick={() => toggleExpand(sig.id)}
-                    style={{ background: 'transparent', border: 'none', color: '#5c5c72', fontSize: 11, cursor: 'pointer', padding: '3px 0', fontFamily: "'Inter', sans-serif", display: 'flex', alignItems: 'center', gap: 4 }}
+                    style={{ background: 'transparent', border: 'none', color: '#607d8b', fontSize: 11, cursor: 'pointer', padding: '3px 0', fontFamily: "'Inter', sans-serif", display: 'flex', alignItems: 'center', gap: 4 }}
                   >
                     <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"
                       style={{ transform: isExp ? 'rotate(90deg)' : 'rotate(0)', transition: 'transform 0.15s' }}>
@@ -385,7 +385,7 @@ export function TelegramSignalsPage() {
                     Raw Message
                   </button>
                   {isExp && (
-                    <div style={{ marginTop: 6, background: '#050508', border: '1px solid #1e1e2a', borderRadius: 6, padding: 10, fontSize: 11, fontFamily: "'JetBrains Mono', monospace", color: '#8b8b9e', whiteSpace: 'pre-wrap', wordBreak: 'break-word', lineHeight: 1.6, maxHeight: 180, overflowY: 'auto' }}>
+                    <div style={{ marginTop: 6, background: '#050508', border: '1px solid #1a3a4a', borderRadius: 6, padding: 10, fontSize: 11, fontFamily: "'JetBrains Mono', monospace", color: '#455a64', whiteSpace: 'pre-wrap', wordBreak: 'break-word', lineHeight: 1.6, maxHeight: 180, overflowY: 'auto' }}>
                       {sig.raw_text}
                     </div>
                   )}

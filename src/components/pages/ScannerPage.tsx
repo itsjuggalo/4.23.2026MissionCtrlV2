@@ -12,7 +12,7 @@ type TabFilter = 'All signals' | 'Crypto' | 'Stocks';
 type TFFilter = 'All' | '15m' | '1H' | '4H' | '1D';
 
 function getStatusColor(status: Signal['status']) {
-  return status === 'new' ? '#00d2a0' : status === 'reviewing' ? '#ffa502' : '#5c5c72';
+  return status === 'new' ? '#66bb6a' : status === 'reviewing' ? '#ff9800' : '#607d8b';
 }
 
 function OfflineBanner({ message }: { message: string }) {
@@ -33,7 +33,7 @@ function OfflineBanner({ message }: { message: string }) {
           width: 8,
           height: 8,
           borderRadius: '50%',
-          background: '#ff4757',
+          background: '#ef5350',
           flexShrink: 0,
           marginTop: 4,
         }}
@@ -44,7 +44,7 @@ function OfflineBanner({ message }: { message: string }) {
             fontFamily: "'JetBrains Mono', monospace",
             fontSize: 12,
             fontWeight: 700,
-            color: '#ff4757',
+            color: '#ef5350',
             letterSpacing: '0.5px',
             marginBottom: 4,
           }}
@@ -106,23 +106,23 @@ export function ScannerPage() {
     if (isLoading) {
       return (
         <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-          <span style={{ display: 'inline-block', width: 8, height: 8, borderRadius: '50%', background: '#ffa502', animation: 'scanner-spin 1s linear infinite' }} />
-          <span style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: 11, color: '#ffa502' }}>LOADING</span>
+          <span style={{ display: 'inline-block', width: 8, height: 8, borderRadius: '50%', background: '#ff9800', animation: 'scanner-spin 1s linear infinite' }} />
+          <span style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: 11, color: '#ff9800' }}>LOADING</span>
         </div>
       );
     }
     if (relevantError && !hasSignals) {
       return (
         <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-          <span style={{ width: 8, height: 8, borderRadius: '50%', background: '#ff4757', display: 'inline-block' }} />
-          <span style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: 11, color: '#ff4757' }}>OFFLINE</span>
+          <span style={{ width: 8, height: 8, borderRadius: '50%', background: '#ef5350', display: 'inline-block' }} />
+          <span style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: 11, color: '#ef5350' }}>OFFLINE</span>
         </div>
       );
     }
     return (
       <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-        <span style={{ width: 8, height: 8, borderRadius: '50%', background: '#00d2a0', boxShadow: '0 0 6px #00d2a0', display: 'inline-block', animation: 'scanner-pulse 2s infinite' }} />
-        <span style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: 11, color: '#00d2a0' }}>LIVE DATA</span>
+        <span style={{ width: 8, height: 8, borderRadius: '50%', background: '#66bb6a', boxShadow: '0 0 6px #66bb6a', display: 'inline-block', animation: 'scanner-pulse 2s infinite' }} />
+        <span style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: 11, color: '#66bb6a' }}>LIVE DATA</span>
       </div>
     );
   }
@@ -140,9 +140,9 @@ export function ScannerPage() {
                 padding: '6px 14px',
                 fontSize: 13,
                 fontFamily: "'Inter', sans-serif",
-                border: tab === t ? '1px solid #6c5ce7' : '1px solid #1e1e2a',
+                border: tab === t ? '1px solid #4fc3f7' : '1px solid #1a3a4a',
                 background: tab === t ? 'rgba(108,92,231,0.1)' : 'transparent',
-                color: tab === t ? '#a29bfe' : '#8b8b9e',
+                color: tab === t ? '#81d4fa' : '#455a64',
                 borderRadius: 6,
                 cursor: 'pointer',
                 transition: 'all 0.15s',
@@ -162,8 +162,8 @@ export function ScannerPage() {
               fontSize: 12,
               fontFamily: "'JetBrains Mono', monospace",
               background: '#111118',
-              border: '1px solid #1e1e2a',
-              color: '#e8e8ed',
+              border: '1px solid #1a3a4a',
+              color: '#e0e0e0',
               borderRadius: 6,
               cursor: 'pointer',
             }}
@@ -184,9 +184,9 @@ export function ScannerPage() {
             gap: 12,
             padding: '24px 18px',
             background: '#111118',
-            border: '1px solid #1e1e2a',
+            border: '1px solid #1a3a4a',
             borderRadius: 10,
-            color: '#5c5c72',
+            color: '#607d8b',
             fontFamily: "'JetBrains Mono', monospace",
             fontSize: 12,
           }}
@@ -211,7 +211,7 @@ export function ScannerPage() {
         <div
           style={{
             background: '#111118',
-            border: '1px solid #1e1e2a',
+            border: '1px solid #1a3a4a',
             borderRadius: 10,
             overflow: 'hidden',
           }}
@@ -222,14 +222,14 @@ export function ScannerPage() {
               display: 'grid',
               gridTemplateColumns: '130px 80px 60px 120px 60px 120px 140px 80px 90px',
               padding: '10px 16px',
-              borderBottom: '1px solid #1e1e2a',
+              borderBottom: '1px solid #1a3a4a',
               gap: 8,
             }}
           >
             {['SYMBOL', 'ASSET', 'TF', 'PRICE', 'TREND', 'STRENGTH', 'SOURCE', 'TIME', 'STATUS'].map((h) => (
               <span
                 key={h}
-                style={{ fontSize: 10, fontFamily: "'JetBrains Mono', monospace", color: '#5c5c72', textTransform: 'uppercase', letterSpacing: '0.8px' }}
+                style={{ fontSize: 10, fontFamily: "'JetBrains Mono', monospace", color: '#607d8b', textTransform: 'uppercase', letterSpacing: '0.8px' }}
               >
                 {h}
               </span>
@@ -246,7 +246,7 @@ export function ScannerPage() {
                     display: 'grid',
                     gridTemplateColumns: '130px 80px 60px 120px 60px 120px 140px 80px 90px',
                     padding: '12px 16px',
-                    borderBottom: '1px solid #1e1e2a',
+                    borderBottom: '1px solid #1a3a4a',
                     gap: 8,
                     cursor: 'pointer',
                     background: isExpanded ? 'rgba(108,92,231,0.04)' : 'transparent',
@@ -260,24 +260,24 @@ export function ScannerPage() {
                     (e.currentTarget as HTMLElement).style.background = isExpanded ? 'rgba(108,92,231,0.04)' : 'transparent';
                   }}
                 >
-                  <span style={{ fontFamily: "'JetBrains Mono', monospace", fontWeight: 700, fontSize: 13, color: '#e8e8ed' }}>
+                  <span style={{ fontFamily: "'JetBrains Mono', monospace", fontWeight: 700, fontSize: 13, color: '#e0e0e0' }}>
                     {signal.symbol}
                   </span>
                   <span>
-                    <Badge color={signal.asset === 'Crypto' ? '#00cec9' : '#3498ff'}>{signal.asset}</Badge>
+                    <Badge color={signal.asset === 'Crypto' ? '#00cec9' : '#4fc3f7'}>{signal.asset}</Badge>
                   </span>
-                  <span style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: 12, color: '#8b8b9e' }}>
+                  <span style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: 12, color: '#455a64' }}>
                     {signal.timeframe}
                   </span>
-                  <span style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: 13, color: '#e8e8ed' }}>
+                  <span style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: 13, color: '#e0e0e0' }}>
                     ${signal.price.toLocaleString()}
                   </span>
                   <TrendArrow trend={signal.trend} />
                   <SignalBar strength={signal.strength} />
-                  <span style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: 11, color: '#8b8b9e' }}>
+                  <span style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: 11, color: '#455a64' }}>
                     {signal.source}
                   </span>
-                  <span style={{ fontSize: 11, color: '#5c5c72' }}>{signal.time}</span>
+                  <span style={{ fontSize: 11, color: '#607d8b' }}>{signal.time}</span>
                   <Badge color={getStatusColor(signal.status)}>{signal.status}</Badge>
                 </div>
 
@@ -285,7 +285,7 @@ export function ScannerPage() {
                   <div
                     style={{
                       padding: '14px 16px 16px 16px',
-                      borderBottom: '1px solid #1e1e2a',
+                      borderBottom: '1px solid #1a3a4a',
                       background: 'rgba(108,92,231,0.03)',
                     }}
                   >
@@ -293,7 +293,7 @@ export function ScannerPage() {
                       style={{
                         fontSize: 11,
                         fontFamily: "'JetBrains Mono', monospace",
-                        color: '#5c5c72',
+                        color: '#607d8b',
                         textTransform: 'uppercase',
                         letterSpacing: '0.8px',
                         marginBottom: 6,
@@ -301,14 +301,14 @@ export function ScannerPage() {
                     >
                       Signal Reasoning
                     </div>
-                    <p style={{ fontSize: 13, fontFamily: "'Inter', sans-serif", color: '#8b8b9e', lineHeight: 1.6, marginBottom: 14 }}>
+                    <p style={{ fontSize: 13, fontFamily: "'Inter', sans-serif", color: '#455a64', lineHeight: 1.6, marginBottom: 14 }}>
                       {signal.reasoning}
                     </p>
                     <div style={{ display: 'flex', gap: 10 }}>
-                      <button style={{ padding: '6px 16px', fontSize: 12, fontFamily: "'JetBrains Mono', monospace", background: 'transparent', border: '1px solid #00d2a0', color: '#00d2a0', borderRadius: 6, cursor: 'pointer' }}>
+                      <button style={{ padding: '6px 16px', fontSize: 12, fontFamily: "'JetBrains Mono', monospace", background: 'transparent', border: '1px solid #66bb6a', color: '#66bb6a', borderRadius: 6, cursor: 'pointer' }}>
                         Send to tasks
                       </button>
-                      <button style={{ padding: '6px 16px', fontSize: 12, fontFamily: "'JetBrains Mono', monospace", background: 'transparent', border: '1px solid #2a2a3a', color: '#8b8b9e', borderRadius: 6, cursor: 'pointer' }}>
+                      <button style={{ padding: '6px 16px', fontSize: 12, fontFamily: "'JetBrains Mono', monospace", background: 'transparent', border: '1px solid #2a2a3a', color: '#455a64', borderRadius: 6, cursor: 'pointer' }}>
                         Dismiss
                       </button>
                     </div>
@@ -321,24 +321,24 @@ export function ScannerPage() {
       )}
 
       {/* Active scanners */}
-      <div style={{ border: '1px dashed #1e1e2a', borderRadius: 10, padding: 16 }}>
-        <div style={{ fontSize: 12, fontFamily: "'JetBrains Mono', monospace", color: '#5c5c72', marginBottom: 12, textTransform: 'uppercase', letterSpacing: '0.8px' }}>
+      <div style={{ border: '1px dashed #1a3a4a', borderRadius: 10, padding: 16 }}>
+        <div style={{ fontSize: 12, fontFamily: "'JetBrains Mono', monospace", color: '#607d8b', marginBottom: 12, textTransform: 'uppercase', letterSpacing: '0.8px' }}>
           Active Scanners
         </div>
         <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8, marginBottom: 12 }}>
           {['RSI', 'MACD', 'EMA/SMA', 'Bollinger', 'Volume', 'Breakout', 'Momentum'].map((s) => (
-            <Badge key={s} color="#6c5ce7">{s}</Badge>
+            <Badge key={s} color="#4fc3f7">{s}</Badge>
           ))}
         </div>
-        <div style={{ fontSize: 11, fontFamily: "'Inter', sans-serif", color: '#5c5c72' }}>
+        <div style={{ fontSize: 11, fontFamily: "'Inter', sans-serif", color: '#607d8b' }}>
           Modular architecture — add TradingView webhooks, external APIs, custom quant scanners
         </div>
       </div>
 
       <style>{`
         @keyframes scanner-pulse {
-          0%, 100% { opacity: 1; box-shadow: 0 0 6px #00d2a0; }
-          50% { opacity: 0.6; box-shadow: 0 0 12px #00d2a0; }
+          0%, 100% { opacity: 1; box-shadow: 0 0 6px #66bb6a; }
+          50% { opacity: 0.6; box-shadow: 0 0 12px #66bb6a; }
         }
         @keyframes scanner-spin {
           from { transform: rotate(0deg); }

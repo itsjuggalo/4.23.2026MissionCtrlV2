@@ -111,7 +111,7 @@ export function RiskPage() {
   }, []);
 
   if (loading) {
-    return <div style={{ color: '#5c5c72', padding: 20, fontSize: 13 }}>Loading risk data...</div>;
+    return <div style={{ color: '#607d8b', padding: 20, fontSize: 13 }}>Loading risk data...</div>;
   }
 
   // Calculate metrics
@@ -159,10 +159,10 @@ export function RiskPage() {
   const cashPct = equity > 0 ? Math.round((cash / equity) * 100) : 100;
 
   function alertColor(level: string) {
-    if (level === 'critical') return '#ff4757';
-    if (level === 'warning') return '#ffa502';
-    if (level === 'success') return '#00d2a0';
-    return '#3498ff';
+    if (level === 'critical') return '#ef5350';
+    if (level === 'warning') return '#ff9800';
+    if (level === 'success') return '#66bb6a';
+    return '#4fc3f7';
   }
 
   return (
@@ -173,77 +173,77 @@ export function RiskPage() {
           label="Exposure"
           value={`${exposure}%`}
           subtitle={`Limit: ${exposureLimit}%`}
-          color="#ffa502"
+          color="#ff9800"
         />
         <MetricCard
           label="Drawdown"
           value={`${maxDrawdown.toFixed(2)}%`}
           subtitle="Max: -5%"
-          color={maxDrawdown > 5 ? '#ff4757' : '#00d2a0'}
+          color={maxDrawdown > 5 ? '#ef5350' : '#66bb6a'}
         />
         <MetricCard
           label="Win Rate"
           value={`${winRate}%`}
           subtitle={`${wins}/${totalTrades} trades`}
-          color={winRate >= 50 ? '#00d2a0' : '#ffa502'}
+          color={winRate >= 50 ? '#66bb6a' : '#ff9800'}
         />
         <MetricCard
           label="Open Positions"
           value={String(openPositionCount)}
           subtitle={`Equity: $${(equity / 1000).toFixed(1)}K`}
-          color="#e8e8ed"
+          color="#e0e0e0"
         />
       </div>
 
       {/* Portfolio Overview */}
       <Card>
-        <div style={{ fontSize: 14, fontFamily: "'Inter', sans-serif", fontWeight: 600, color: '#e8e8ed', marginBottom: 16 }}>
+        <div style={{ fontSize: 14, fontFamily: "'Inter', sans-serif", fontWeight: 600, color: '#e0e0e0', marginBottom: 16 }}>
           Portfolio Overview
         </div>
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 12, marginBottom: 16 }}>
-          <div style={{ background: '#0f0f17', borderRadius: 6, padding: '8px 10px', border: '1px solid #1e1e2a' }}>
-            <div style={{ fontSize: 10, color: '#5c5c72', marginBottom: 2 }}>Equity</div>
-            <div style={{ fontSize: 14, fontFamily: "'JetBrains Mono', monospace", color: '#e8e8ed', fontWeight: 600 }}>${equity.toLocaleString(undefined, { maximumFractionDigits: 0 })}</div>
+          <div style={{ background: '#0d1117', borderRadius: 6, padding: '8px 10px', border: '1px solid #1a3a4a' }}>
+            <div style={{ fontSize: 10, color: '#607d8b', marginBottom: 2 }}>Equity</div>
+            <div style={{ fontSize: 14, fontFamily: "'JetBrains Mono', monospace", color: '#e0e0e0', fontWeight: 600 }}>${equity.toLocaleString(undefined, { maximumFractionDigits: 0 })}</div>
           </div>
-          <div style={{ background: '#0f0f17', borderRadius: 6, padding: '8px 10px', border: '1px solid #1e1e2a' }}>
-            <div style={{ fontSize: 10, color: '#5c5c72', marginBottom: 2 }}>Cash</div>
-            <div style={{ fontSize: 14, fontFamily: "'JetBrains Mono', monospace", color: '#00d2a0', fontWeight: 600 }}>${cash.toLocaleString(undefined, { maximumFractionDigits: 0 })}</div>
+          <div style={{ background: '#0d1117', borderRadius: 6, padding: '8px 10px', border: '1px solid #1a3a4a' }}>
+            <div style={{ fontSize: 10, color: '#607d8b', marginBottom: 2 }}>Cash</div>
+            <div style={{ fontSize: 14, fontFamily: "'JetBrains Mono', monospace", color: '#66bb6a', fontWeight: 600 }}>${cash.toLocaleString(undefined, { maximumFractionDigits: 0 })}</div>
           </div>
-          <div style={{ background: '#0f0f17', borderRadius: 6, padding: '8px 10px', border: '1px solid #1e1e2a' }}>
-            <div style={{ fontSize: 10, color: '#5c5c72', marginBottom: 2 }}>Unrealized P&L</div>
-            <div style={{ fontSize: 14, fontFamily: "'JetBrains Mono', monospace", color: unrealizedPL >= 0 ? '#00d2a0' : '#ff4757', fontWeight: 600 }}>{unrealizedPL >= 0 ? '+' : ''}${unrealizedPL.toLocaleString(undefined, { maximumFractionDigits: 0 })}</div>
+          <div style={{ background: '#0d1117', borderRadius: 6, padding: '8px 10px', border: '1px solid #1a3a4a' }}>
+            <div style={{ fontSize: 10, color: '#607d8b', marginBottom: 2 }}>Unrealized P&L</div>
+            <div style={{ fontSize: 14, fontFamily: "'JetBrains Mono', monospace", color: unrealizedPL >= 0 ? '#66bb6a' : '#ef5350', fontWeight: 600 }}>{unrealizedPL >= 0 ? '+' : ''}${unrealizedPL.toLocaleString(undefined, { maximumFractionDigits: 0 })}</div>
           </div>
-          <div style={{ background: '#0f0f17', borderRadius: 6, padding: '8px 10px', border: '1px solid #1e1e2a' }}>
-            <div style={{ fontSize: 10, color: '#5c5c72', marginBottom: 2 }}>Day P&L</div>
-            <div style={{ fontSize: 14, fontFamily: "'JetBrains Mono', monospace", color: dayPL >= 0 ? '#00d2a0' : '#ff4757', fontWeight: 600 }}>{dayPL >= 0 ? '+' : ''}${dayPL.toLocaleString(undefined, { maximumFractionDigits: 0 })}</div>
+          <div style={{ background: '#0d1117', borderRadius: 6, padding: '8px 10px', border: '1px solid #1a3a4a' }}>
+            <div style={{ fontSize: 10, color: '#607d8b', marginBottom: 2 }}>Day P&L</div>
+            <div style={{ fontSize: 14, fontFamily: "'JetBrains Mono', monospace", color: dayPL >= 0 ? '#66bb6a' : '#ef5350', fontWeight: 600 }}>{dayPL >= 0 ? '+' : ''}${dayPL.toLocaleString(undefined, { maximumFractionDigits: 0 })}</div>
           </div>
         </div>
       </Card>
 
       {/* Risk exposure card */}
       <Card>
-        <div style={{ fontSize: 14, fontFamily: "'Inter', sans-serif", fontWeight: 600, color: '#e8e8ed', marginBottom: 16 }}>
+        <div style={{ fontSize: 14, fontFamily: "'Inter', sans-serif", fontWeight: 600, color: '#e0e0e0', marginBottom: 16 }}>
           Risk Exposure
         </div>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', marginBottom: 10 }}>
-          <span style={{ fontSize: 32, fontFamily: "'JetBrains Mono', monospace", fontWeight: 700, color: exposure > exposureLimit ? '#ff4757' : '#ffa502' }}>
+          <span style={{ fontSize: 32, fontFamily: "'JetBrains Mono', monospace", fontWeight: 700, color: exposure > exposureLimit ? '#ef5350' : '#ff9800' }}>
             {exposure}%
           </span>
-          <span style={{ fontSize: 13, fontFamily: "'JetBrains Mono', monospace", color: '#5c5c72' }}>
+          <span style={{ fontSize: 13, fontFamily: "'JetBrains Mono', monospace", color: '#607d8b' }}>
             {exposureLimit}% limit
           </span>
         </div>
-        <ProgressBar value={exposure} max={exposureLimit} color={exposure > exposureLimit ? '#ff4757' : '#ffa502'} height={8} />
+        <ProgressBar value={exposure} max={exposureLimit} color={exposure > exposureLimit ? '#ef5350' : '#ff9800'} height={8} />
 
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 16, marginTop: 20 }}>
           {[
             { label: 'Crypto', pct: cryptoExposure, color: '#00cec9' },
-            { label: 'Equities', pct: equitiesExposure, color: '#3498ff' },
-            { label: 'Cash', pct: cashPct, color: '#00d2a0' },
+            { label: 'Equities', pct: equitiesExposure, color: '#4fc3f7' },
+            { label: 'Cash', pct: cashPct, color: '#66bb6a' },
           ].map((item) => (
             <div key={item.label}>
               <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 6 }}>
-                <span style={{ fontSize: 12, fontFamily: "'Inter', sans-serif", color: '#8b8b9e' }}>{item.label}</span>
+                <span style={{ fontSize: 12, fontFamily: "'Inter', sans-serif", color: '#455a64' }}>{item.label}</span>
                 <span style={{ fontSize: 12, fontFamily: "'JetBrains Mono', monospace", color: item.color }}>{item.pct}%</span>
               </div>
               <ProgressBar value={item.pct} max={100} color={item.color} height={4} />
@@ -255,7 +255,7 @@ export function RiskPage() {
       {/* Trade History */}
       {totalTrades > 0 && (
         <Card>
-          <div style={{ fontSize: 14, fontFamily: "'Inter', sans-serif", fontWeight: 600, color: '#e8e8ed', marginBottom: 12 }}>
+          <div style={{ fontSize: 14, fontFamily: "'Inter', sans-serif", fontWeight: 600, color: '#e0e0e0', marginBottom: 12 }}>
             Recent Trades
           </div>
           {Object.entries(positions).map(([ticker, data]: [string, any]) => (
@@ -265,28 +265,28 @@ export function RiskPage() {
                 style={{
                   display: 'flex', alignItems: 'center', gap: 12,
                   padding: '8px 0',
-                  borderBottom: '1px solid #1e1e2a',
+                  borderBottom: '1px solid #1a3a4a',
                 }}
               >
-                <span style={{ fontSize: 12, fontFamily: "'JetBrains Mono', monospace", color: '#5c5c72', minWidth: 70 }}>
+                <span style={{ fontSize: 12, fontFamily: "'JetBrains Mono', monospace", color: '#607d8b', minWidth: 70 }}>
                   {ticker}
                 </span>
-                <Badge color={trade.direction === 'LONG' ? '#00d2a0' : '#ff4757'}>
+                <Badge color={trade.direction === 'LONG' ? '#66bb6a' : '#ef5350'}>
                   {trade.direction}
                 </Badge>
                 <span style={{ flex: 1 }} />
                 <span style={{
                   fontSize: 13, fontFamily: "'JetBrains Mono', monospace", fontWeight: 600,
-                  color: trade.pnl_pct >= 0 ? '#00d2a0' : '#ff4757',
+                  color: trade.pnl_pct >= 0 ? '#66bb6a' : '#ef5350',
                 }}>
                   {trade.pnl_pct >= 0 ? '+' : ''}{trade.pnl_pct.toFixed(2)}%
                 </span>
                 {trade.exit_type && (
-                  <Badge color={trade.exit_type === 'TAKE_PROFIT' ? '#ffa502' : '#ff4757'}>
+                  <Badge color={trade.exit_type === 'TAKE_PROFIT' ? '#ff9800' : '#ef5350'}>
                     {trade.exit_type}
                   </Badge>
                 )}
-                <span style={{ fontSize: 10, fontFamily: "'JetBrains Mono', monospace", color: '#5c5c72' }}>
+                <span style={{ fontSize: 10, fontFamily: "'JetBrains Mono', monospace", color: '#607d8b' }}>
                   {new Date(trade.closed_at).toLocaleTimeString()}
                 </span>
               </div>
@@ -297,7 +297,7 @@ export function RiskPage() {
 
       {/* Active alerts */}
       <div>
-        <div style={{ fontSize: 14, fontFamily: "'Inter', sans-serif", fontWeight: 600, color: '#e8e8ed', marginBottom: 12 }}>
+        <div style={{ fontSize: 14, fontFamily: "'Inter', sans-serif", fontWeight: 600, color: '#e0e0e0', marginBottom: 12 }}>
           Active Alerts
         </div>
         <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
@@ -306,7 +306,7 @@ export function RiskPage() {
               key={i}
               style={{
                 background: '#111118',
-                border: '1px solid #1e1e2a',
+                border: '1px solid #1a3a4a',
                 borderLeft: `3px solid ${alertColor(alert.level)}`,
                 borderRadius: '0 10px 10px 0',
                 padding: '12px 16px',
@@ -316,7 +316,7 @@ export function RiskPage() {
               }}
             >
               <Badge color={alertColor(alert.level)}>{alert.level}</Badge>
-              <span style={{ fontSize: 13, fontFamily: "'Inter', sans-serif", color: '#8b8b9e' }}>
+              <span style={{ fontSize: 13, fontFamily: "'Inter', sans-serif", color: '#455a64' }}>
                 {alert.message}
               </span>
             </div>

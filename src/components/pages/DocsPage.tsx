@@ -4,12 +4,12 @@ import type { Doc } from '@/lib/types';
 
 function typeColor(type: Doc['type']) {
   return type === 'Strategy'
-    ? '#6c5ce7'
+    ? '#4fc3f7'
     : type === 'Policy'
-    ? '#ffa502'
+    ? '#ff9800'
     : type === 'Technical'
-    ? '#3498ff'
-    : '#00d2a0';
+    ? '#4fc3f7'
+    : '#66bb6a';
 }
 
 export function DocsPage() {
@@ -22,7 +22,7 @@ export function DocsPage() {
             key={i}
             style={{
               background: '#111118',
-              border: '1px solid #1e1e2a',
+              border: '1px solid #1a3a4a',
               borderRadius: 10,
               padding: '14px 16px',
               display: 'flex',
@@ -37,7 +37,7 @@ export function DocsPage() {
             }}
             onMouseLeave={(e) => {
               (e.currentTarget as HTMLElement).style.background = '#111118';
-              (e.currentTarget as HTMLElement).style.borderColor = '#1e1e2a';
+              (e.currentTarget as HTMLElement).style.borderColor = '#1a3a4a';
             }}
           >
             {/* Icon */}
@@ -63,7 +63,7 @@ export function DocsPage() {
                   fontSize: 14,
                   fontFamily: "'Inter', sans-serif",
                   fontWeight: 500,
-                  color: '#e8e8ed',
+                  color: '#e0e0e0',
                   marginBottom: 3,
                 }}
               >
@@ -73,7 +73,7 @@ export function DocsPage() {
                 style={{
                   fontSize: 11,
                   fontFamily: "'JetBrains Mono', monospace",
-                  color: '#5c5c72',
+                  color: '#607d8b',
                 }}
               >
                 {doc.type} · {doc.pages} pages
@@ -85,7 +85,7 @@ export function DocsPage() {
               style={{
                 fontSize: 11,
                 fontFamily: "'JetBrains Mono', monospace",
-                color: '#5c5c72',
+                color: '#607d8b',
                 flexShrink: 0,
               }}
             >

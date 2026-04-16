@@ -6,9 +6,9 @@ interface TrendArrowProps {
 
 export function TrendArrow({ trend }: TrendArrowProps) {
   const config = {
-    bullish: { symbol: '↑', color: '#00d2a0' },
-    bearish: { symbol: '↓', color: '#ff4757' },
-    neutral: { symbol: '→', color: '#ffa502' },
+    bullish: { symbol: '↑', color: '#66bb6a' },
+    bearish: { symbol: '↓', color: '#ef5350' },
+    neutral: { symbol: '→', color: '#ff9800' },
   };
 
   const { symbol, color } = config[trend];

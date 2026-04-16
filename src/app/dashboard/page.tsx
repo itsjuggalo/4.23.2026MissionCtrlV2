@@ -1,4 +1,11 @@
-import { redirect } from 'next/navigation';
-export default function Page() {
-  redirect('/?page=dashboard');
+'use client';
+import { Suspense } from 'react';
+import { AppShellClient } from '../../components/layout/AppShellClient';
+
+export default function DashboardPage() {
+  return (
+    <Suspense fallback={<div style={{ background: '#0d1117', height: '100vh' }} />}>
+      <AppShellClient />
+    </Suspense>
+  );
 }

@@ -57,7 +57,7 @@ function PixelCharacter({ x, y, color, isBusy, status, frame }: {
     <g opacity={isOnline ? 1 : 0.4}>
       <ellipse cx={x} cy={y + 4} rx={8} ry={3} fill="rgba(0,0,0,0.3)" />
       <rect x={x - 6} y={y - 12} width={12} height={14} rx={2} fill={color} />
-      <rect x={x - 5} y={headY} width={10} height={10} rx={3} fill="#e8e8ed" />
+      <rect x={x - 5} y={headY} width={10} height={10} rx={3} fill="#e0e0e0" />
       {isOnline ? (
         <>
           <rect x={x - 3} y={headY + 3} width={2} height={2} rx={0.5} fill="#111118" />
@@ -65,8 +65,8 @@ function PixelCharacter({ x, y, color, isBusy, status, frame }: {
         </>
       ) : (
         <>
-          <text x={x - 3} y={headY + 6} fontSize={4} fill="#ff4757" fontWeight={700}>×</text>
-          <text x={x + 1} y={headY + 6} fontSize={4} fill="#ff4757" fontWeight={700}>×</text>
+          <text x={x - 3} y={headY + 6} fontSize={4} fill="#ef5350" fontWeight={700}>×</text>
+          <text x={x + 1} y={headY + 6} fontSize={4} fill="#ef5350" fontWeight={700}>×</text>
         </>
       )}
       {isBusy && isOnline && [0, 1, 2].map(i => (
@@ -101,7 +101,7 @@ function SpeechBubble({ x, y, text, color }: { x: number; y: number; text: strin
     <g>
       <rect x={x - w / 2} y={y - 22} width={w} height={16} rx={6} fill="#111118" stroke={`${color}40`} strokeWidth={0.5} />
       <polygon points={`${x - 3},${y - 6} ${x + 3},${y - 6} ${x},${y - 2}`} fill="#111118" />
-      <text x={x} y={y - 12} fontSize={5} fontFamily={FONT} fill="#8b8b9e" textAnchor="middle">{display}</text>
+      <text x={x} y={y - 12} fontSize={5} fontFamily={FONT} fill="#455a64" textAnchor="middle">{display}</text>
     </g>
   );
 }
@@ -112,13 +112,13 @@ function ActivityFeed({ agents }: { agents: Agent[] }) {
     .map(a => ({ name: a.name, emoji: a.emoji, color: a.color, action: a.lastLog.length > 55 ? a.lastLog.slice(0, 55) + '…' : a.lastLog }))
     .slice(0, 8);
   return (
-    <div style={{ width: 250, background: '#111118', border: '1px solid #1e1e2a', borderRadius: 10, padding: 14, flexShrink: 0, maxHeight: 560, overflowY: 'auto' }}>
+    <div style={{ width: 250, background: '#111118', border: '1px solid #1a3a4a', borderRadius: 10, padding: 14, flexShrink: 0, maxHeight: 560, overflowY: 'auto' }}>
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 12 }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
           <span style={{ fontSize: 12 }}>⚡</span>
-          <span style={{ fontSize: 12, fontFamily: FONT, fontWeight: 700, color: '#e8e8ed' }}>Live Activity</span>
+          <span style={{ fontSize: 12, fontFamily: FONT, fontWeight: 700, color: '#e0e0e0' }}>Live Activity</span>
         </div>
-        <span style={{ fontSize: 9, fontFamily: FONT, color: '#5c5c72' }}>Last hour</span>
+        <span style={{ fontSize: 9, fontFamily: FONT, color: '#607d8b' }}>Last hour</span>
       </div>
       <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
         {activities.map((a, i) => (
@@ -126,12 +126,12 @@ function ActivityFeed({ agents }: { agents: Agent[] }) {
             <span style={{ fontSize: 14, flexShrink: 0, marginTop: 1 }}>{a.emoji}</span>
             <div>
               <span style={{ fontSize: 11, fontFamily: FONT, fontWeight: 600, color: a.color }}>{a.name}</span>
-              <div style={{ fontSize: 10, color: '#8b8b9e', lineHeight: 1.4, marginTop: 2 }}>{a.action}</div>
-              <div style={{ fontSize: 9, fontFamily: FONT, color: '#5c5c72', marginTop: 2 }}>less than a minute ago</div>
+              <div style={{ fontSize: 10, color: '#455a64', lineHeight: 1.4, marginTop: 2 }}>{a.action}</div>
+              <div style={{ fontSize: 9, fontFamily: FONT, color: '#607d8b', marginTop: 2 }}>less than a minute ago</div>
             </div>
           </div>
         ))}
-        {activities.length === 0 && <div style={{ fontSize: 11, color: '#5c5c72', textAlign: 'center', padding: 20 }}>No recent activity</div>}
+        {activities.length === 0 && <div style={{ fontSize: 11, color: '#607d8b', textAlign: 'center', padding: 20 }}>No recent activity</div>}
       </div>
     </div>
   );
@@ -143,18 +143,18 @@ function AgentBar({ agents, selectedId, onSelect }: { agents: Agent[]; selectedI
       {agents.map(a => (
         <button key={a.id} onClick={() => onSelect(a.id)} style={{
           background: selectedId === a.id ? `${a.color}15` : '#111118',
-          border: `1px solid ${selectedId === a.id ? a.color + '40' : '#1e1e2a'}`,
+          border: `1px solid ${selectedId === a.id ? a.color + '40' : '#1a3a4a'}`,
           borderRadius: 8, padding: '8px 6px', cursor: 'pointer', textAlign: 'left',
         }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
             <span style={{ fontSize: 14 }}>{a.emoji}</span>
-            <span style={{ fontSize: 10, fontFamily: FONT, fontWeight: 600, color: '#e8e8ed' }}>{a.name}</span>
+            <span style={{ fontSize: 10, fontFamily: FONT, fontWeight: 600, color: '#e0e0e0' }}>{a.name}</span>
             <div style={{
               width: 6, height: 6, borderRadius: '50%', marginLeft: 'auto', flexShrink: 0,
-              background: a.status === 'online' ? '#00d2a0' : a.status === 'stopped' ? '#ffa502' : '#ff4757',
+              background: a.status === 'online' ? '#66bb6a' : a.status === 'stopped' ? '#ff9800' : '#ef5350',
             }} />
           </div>
-          <div style={{ fontSize: 9, color: '#5c5c72', marginTop: 3, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+          <div style={{ fontSize: 9, color: '#607d8b', marginTop: 3, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
             {a.status === 'online' ? (a.lastLog !== '—' ? a.lastLog.slice(0, 28) : a.role) : a.status}
           </div>
         </button>
@@ -194,19 +194,19 @@ export function OfficePage() {
       <div style={{ flex: 1, minWidth: 0 }}>
         {/* Header */}
         <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 14 }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 6, background: '#111118', border: '1px solid #1e1e2a', borderRadius: 8, padding: '6px 12px' }}>
-            <div style={{ width: 7, height: 7, borderRadius: '50%', background: '#00d2a0', boxShadow: '0 0 6px #00d2a0' }} />
-            <span style={{ fontSize: 11, fontFamily: FONT, color: '#00d2a0', fontWeight: 600 }}>{onlineCount}/{agents.length} ONLINE</span>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 6, background: '#111118', border: '1px solid #1a3a4a', borderRadius: 8, padding: '6px 12px' }}>
+            <div style={{ width: 7, height: 7, borderRadius: '50%', background: '#66bb6a', boxShadow: '0 0 6px #66bb6a' }} />
+            <span style={{ fontSize: 11, fontFamily: FONT, color: '#66bb6a', fontWeight: 600 }}>{onlineCount}/{agents.length} ONLINE</span>
           </div>
         </div>
 
         {/* Office SVG */}
-        <div style={{ background: '#0a0a0f', border: '1px solid #1e1e2a', borderRadius: 12, overflow: 'hidden', position: 'relative' }}>
+        <div style={{ background: '#0a0a0f', border: '1px solid #1a3a4a', borderRadius: 12, overflow: 'hidden', position: 'relative' }}>
           <svg viewBox="0 0 700 520" style={{ width: '100%', display: 'block' }}>
             {/* Grid */}
             <defs>
               <pattern id="grid" width="40" height="40" patternUnits="userSpaceOnUse">
-                <path d="M 40 0 L 0 0 0 40" fill="none" stroke="#1e1e2a" strokeWidth="0.3" opacity="0.3" />
+                <path d="M 40 0 L 0 0 0 40" fill="none" stroke="#1a3a4a" strokeWidth="0.3" opacity="0.3" />
               </pattern>
             </defs>
             <rect width="700" height="520" fill="url(#grid)" />
@@ -257,17 +257,17 @@ export function OfficePage() {
               <div style={{ width: 48, height: 48, borderRadius: 12, background: `${selectedAgent.color}15`, border: `1px solid ${selectedAgent.color}30`, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 24, flexShrink: 0 }}>{selectedAgent.emoji}</div>
               <div style={{ flex: 1, minWidth: 0 }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                  <span style={{ fontSize: 15, fontWeight: 700, color: '#e8e8ed' }}>{selectedAgent.name}</span>
-                  <span style={{ fontSize: 9, fontFamily: FONT, padding: '2px 8px', borderRadius: 4, background: selectedAgent.status === 'online' ? '#00d2a018' : '#ff475718', color: selectedAgent.status === 'online' ? '#00d2a0' : '#ff4757', fontWeight: 600 }}>{selectedAgent.status?.toUpperCase()}</span>
+                  <span style={{ fontSize: 15, fontWeight: 700, color: '#e0e0e0' }}>{selectedAgent.name}</span>
+                  <span style={{ fontSize: 9, fontFamily: FONT, padding: '2px 8px', borderRadius: 4, background: selectedAgent.status === 'online' ? '#66bb6a18' : '#ef535018', color: selectedAgent.status === 'online' ? '#66bb6a' : '#ef5350', fontWeight: 600 }}>{selectedAgent.status?.toUpperCase()}</span>
                 </div>
                 <div style={{ fontSize: 11, color: selectedAgent.color, fontFamily: FONT, marginTop: 2 }}>{selectedAgent.role}</div>
-                <div style={{ fontSize: 10, color: '#8b8b9e', marginTop: 4, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{selectedAgent.lastLog}</div>
+                <div style={{ fontSize: 10, color: '#455a64', marginTop: 4, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{selectedAgent.lastLog}</div>
               </div>
               <div style={{ display: 'flex', gap: 16, flexShrink: 0 }}>
-                <div style={{ textAlign: 'center' }}><div style={{ fontSize: 8, fontFamily: FONT, color: '#5c5c72' }}>MEM</div><div style={{ fontSize: 13, fontFamily: FONT, fontWeight: 600, color: '#e8e8ed' }}>{selectedAgent.memMb}mb</div></div>
-                <div style={{ textAlign: 'center' }}><div style={{ fontSize: 8, fontFamily: FONT, color: '#5c5c72' }}>UP</div><div style={{ fontSize: 13, fontFamily: FONT, fontWeight: 600, color: '#e8e8ed' }}>{selectedAgent.uptime}</div></div>
+                <div style={{ textAlign: 'center' }}><div style={{ fontSize: 8, fontFamily: FONT, color: '#607d8b' }}>MEM</div><div style={{ fontSize: 13, fontFamily: FONT, fontWeight: 600, color: '#e0e0e0' }}>{selectedAgent.memMb}mb</div></div>
+                <div style={{ textAlign: 'center' }}><div style={{ fontSize: 8, fontFamily: FONT, color: '#607d8b' }}>UP</div><div style={{ fontSize: 13, fontFamily: FONT, fontWeight: 600, color: '#e0e0e0' }}>{selectedAgent.uptime}</div></div>
               </div>
-              <button onClick={() => setSelectedId(null)} style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid #2a2a3a', borderRadius: 6, color: '#5c5c72', cursor: 'pointer', width: 28, height: 28, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 14, flexShrink: 0 }}>✕</button>
+              <button onClick={() => setSelectedId(null)} style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid #2a2a3a', borderRadius: 6, color: '#607d8b', cursor: 'pointer', width: 28, height: 28, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 14, flexShrink: 0 }}>✕</button>
             </div>
           )}
         </div>

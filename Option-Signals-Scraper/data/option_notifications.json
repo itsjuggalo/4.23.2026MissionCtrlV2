@@ -4017,5 +4017,77 @@
     "message": "Reached Target 3.31 and that's 51.83%! Lock some in and wait for next target. Raise the stops to 2.65",
     "symbol": "AAPL",
     "title": "AAPL 280C 05/15 : STC"
+  },
+  "1776272767": {
+    "category": "SWING",
+    "message": "Reached Target 5.50 and that's 66.67%! Lock some in and wait for next target. Raise the stops to 4.40",
+    "symbol": "AAPL",
+    "title": "AAPL 285C 06/18 : STC"
+  },
+  "1776278257": {
+    "category": "SWING",
+    "message": "Buy To Open at 0.56 with first target above 0.64",
+    "symbol": "PCG",
+    "title": "PCG 21C 9/18: BTO"
+  },
+  "1776346205": {
+    "category": "SWING",
+    "message": "Reached Target 12.01 and that's 89.13%! Lock some in and wait for next target. Raise the stops to 9.61",
+    "symbol": "IGV",
+    "title": "IGV 75C 06/18 : STC"
+  },
+  "1776347818": {
+    "category": "SWING",
+    "message": "Buy To Open at 10.05 with first target above 11.56",
+    "symbol": "ORCL",
+    "title": "ORCL 180C 5/15: BTO"
+  },
+  "1776348185": {
+    "category": "SWING",
+    "message": "Reached Target 19.30 and that's 15.22%! Lock some in and wait for next target. Raise the stops to 13.51",
+    "symbol": "AXTI",
+    "title": "AXTI 105C 08/21 : STC"
+  },
+  "1776348386": {
+    "category": "SWING",
+    "message": "Close the trade as it hit trailing stop at 4.30!",
+    "symbol": "AAPL",
+    "title": "AAPL 285C 06/18 : STC"
+  },
+  "1776348485": {
+    "category": "SWING",
+    "message": "Close the trade as it hit trailing stop at 2.64!",
+    "symbol": "AAPL",
+    "title": "AAPL 280C 05/15 : STC"
+  },
+  "1776348605": {
+    "category": "SWING",
+    "message": "Reached Target 0.73 and that's 30.36%! Lock some in and wait for next target. Raise the stops to 0.56",
+    "symbol": "PCG",
+    "title": "PCG 21C 09/18 : STC"
+  },
+  "1776348785": {
+    "category": "SWING",
+    "message": "Reached Target 21.80 and that's 30.15%! Lock some in and wait for next target. Raise the stops to 16.75",
+    "symbol": "AXTI",
+    "title": "AXTI 105C 08/21 : STC"
+  },
+  "1776348993": {
+    "category": "SWING",
+    "message": "Buy To Open at 4.20 with first target above 4.83",
+    "symbol": "SPY",
+    "title": "SPY 685P 4/30: BTO"
+  },
+  "1776352475": {
+    "category": "SWING",
+    "message": "Reached Target 25.20 and that's 50.45%! Lock some in and wait for next target. Raise the stops to 20.16",
+    "symbol": "AXTI",
+    "title": "AXTI 105C 08/21 : STC"
+  },
+  "1776354737": {
+    "category": "SWING",
+    "message": "Buy To Open at 1.26 with first target above 1.45",
+    "symbol": "C",
+    "title": "C 140C 5/15: BTO"
   }
 }

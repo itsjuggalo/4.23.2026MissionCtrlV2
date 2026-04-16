@@ -5,7 +5,7 @@ interface ProgressBarProps {
   height?: number;
 }
 
-export function ProgressBar({ value, max = 100, color = '#6c5ce7', height = 4 }: ProgressBarProps) {
+export function ProgressBar({ value, max = 100, color = '#4fc3f7', height = 4 }: ProgressBarProps) {
   const pct = Math.min(100, (value / max) * 100);
 
   return (

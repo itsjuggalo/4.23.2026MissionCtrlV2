@@ -2725,5 +2725,41 @@
     "message": "Close the trade as it hit trailing stop at 61.21!",
     "symbol": "AXTI",
     "title": "AXTI : STC"
+  },
+  "1776274368": {
+    "category": "SWING",
+    "message": "Reached Target 335.6 and that's 5.03%! Lock some in and wait for next target. Raise the stops to 319.52",
+    "symbol": "GOOGL",
+    "title": "GOOGL : STC"
+  },
+  "1776278260": {
+    "category": "SWING",
+    "message": "Buy To Open at 17.39 with first target above 17.74",
+    "symbol": "PCG",
+    "title": "PCG: BTO"
+  },
+  "1776344449": {
+    "category": "SWING",
+    "message": "Reached Target 84.83 and that's 9.56%! Lock some in and wait for next target. Raise the stops to 82.29",
+    "symbol": "IGV",
+    "title": "IGV : STC"
+  },
+  "1776346304": {
+    "category": "SWING",
+    "message": "Close the trade as it hit trailing stop at 367.0!",
+    "symbol": "TSM",
+    "title": "TSM : STC"
+  },
+  "1776347822": {
+    "category": "SWING",
+    "message": "Buy To Open at 176.77 with first target above 180.31",
+    "symbol": "ORCL",
+    "title": "ORCL: BTO"
+  },
+  "1776355187": {
+    "category": "SWING",
+    "message": "Reached Target 198.2 and that's 18.81%! Lock some in and wait for next target. Raise the stops to 192.3",
+    "symbol": "COIN",
+    "title": "COIN : STC"
   }
 }

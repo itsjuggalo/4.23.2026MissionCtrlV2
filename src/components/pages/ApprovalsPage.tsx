@@ -7,11 +7,11 @@ interface ApprovalsPageProps {
 }
 
 function borderColor(status: Approval['status']) {
-  return status === 'pending' ? '#ffa502' : status === 'approved' ? '#00d2a0' : '#ff4757';
+  return status === 'pending' ? '#ff9800' : status === 'approved' ? '#66bb6a' : '#ef5350';
 }
 
 function statusBadgeColor(status: Approval['status']) {
-  return status === 'pending' ? '#ffa502' : status === 'approved' ? '#00d2a0' : '#ff4757';
+  return status === 'pending' ? '#ff9800' : status === 'approved' ? '#66bb6a' : '#ef5350';
 }
 
 export function ApprovalsPage({ approvals, onUpdate }: ApprovalsPageProps) {
@@ -24,7 +24,7 @@ export function ApprovalsPage({ approvals, onUpdate }: ApprovalsPageProps) {
             key={approval.id}
             style={{
               background: '#111118',
-              border: '1px solid #1e1e2a',
+              border: '1px solid #1a3a4a',
               borderLeft: `3px solid ${border}`,
               borderRadius: '0 10px 10px 0',
               padding: '16px',
@@ -41,12 +41,12 @@ export function ApprovalsPage({ approvals, onUpdate }: ApprovalsPageProps) {
                     fontFamily: "'JetBrains Mono', monospace",
                     fontWeight: 700,
                     fontSize: 18,
-                    color: '#e8e8ed',
+                    color: '#e0e0e0',
                   }}
                 >
                   {approval.symbol}
                 </span>
-                <Badge color={approval.type === 'Long' ? '#00d2a0' : '#ff4757'}>
+                <Badge color={approval.type === 'Long' ? '#66bb6a' : '#ef5350'}>
                   {approval.type}
                 </Badge>
                 <Badge color={statusBadgeColor(approval.status)}>
@@ -61,7 +61,7 @@ export function ApprovalsPage({ approvals, onUpdate }: ApprovalsPageProps) {
                     style={{
                       fontSize: 11,
                       fontFamily: "'JetBrains Mono', monospace",
-                      color: '#5c5c72',
+                      color: '#607d8b',
                     }}
                   >
                     Entry{' '}
@@ -70,7 +70,7 @@ export function ApprovalsPage({ approvals, onUpdate }: ApprovalsPageProps) {
                     style={{
                       fontSize: 13,
                       fontFamily: "'JetBrains Mono', monospace",
-                      color: '#e8e8ed',
+                      color: '#e0e0e0',
                     }}
                   >
                     ${approval.entry.toLocaleString()}
@@ -81,7 +81,7 @@ export function ApprovalsPage({ approvals, onUpdate }: ApprovalsPageProps) {
                     style={{
                       fontSize: 11,
                       fontFamily: "'JetBrains Mono', monospace",
-                      color: '#5c5c72',
+                      color: '#607d8b',
                     }}
                   >
                     Target{' '}
@@ -90,7 +90,7 @@ export function ApprovalsPage({ approvals, onUpdate }: ApprovalsPageProps) {
                     style={{
                       fontSize: 13,
                       fontFamily: "'JetBrains Mono', monospace",
-                      color: '#00d2a0',
+                      color: '#66bb6a',
                     }}
                   >
                     ${approval.target.toLocaleString()}
@@ -101,7 +101,7 @@ export function ApprovalsPage({ approvals, onUpdate }: ApprovalsPageProps) {
                     style={{
                       fontSize: 11,
                       fontFamily: "'JetBrains Mono', monospace",
-                      color: '#5c5c72',
+                      color: '#607d8b',
                     }}
                   >
                     Stop{' '}
@@ -110,7 +110,7 @@ export function ApprovalsPage({ approvals, onUpdate }: ApprovalsPageProps) {
                     style={{
                       fontSize: 13,
                       fontFamily: "'JetBrains Mono', monospace",
-                      color: '#ff4757',
+                      color: '#ef5350',
                     }}
                   >
                     ${approval.stop.toLocaleString()}
@@ -121,7 +121,7 @@ export function ApprovalsPage({ approvals, onUpdate }: ApprovalsPageProps) {
                     style={{
                       fontSize: 11,
                       fontFamily: "'JetBrains Mono', monospace",
-                      color: '#5c5c72',
+                      color: '#607d8b',
                     }}
                   >
                     Risk{' '}
@@ -130,7 +130,7 @@ export function ApprovalsPage({ approvals, onUpdate }: ApprovalsPageProps) {
                     style={{
                       fontSize: 13,
                       fontFamily: "'JetBrains Mono', monospace",
-                      color: '#ffa502',
+                      color: '#ff9800',
                     }}
                   >
                     {approval.risk}
@@ -143,7 +143,7 @@ export function ApprovalsPage({ approvals, onUpdate }: ApprovalsPageProps) {
                 style={{
                   fontSize: 13,
                   fontFamily: "'Inter', sans-serif",
-                  color: '#8b8b9e',
+                  color: '#455a64',
                   lineHeight: 1.6,
                   marginBottom: 10,
                 }}
@@ -157,7 +157,7 @@ export function ApprovalsPage({ approvals, onUpdate }: ApprovalsPageProps) {
                   style={{
                     fontSize: 11,
                     fontFamily: "'JetBrains Mono', monospace",
-                    color: '#5c5c72',
+                    color: '#607d8b',
                   }}
                 >
                   {approval.agent}
@@ -166,7 +166,7 @@ export function ApprovalsPage({ approvals, onUpdate }: ApprovalsPageProps) {
                   style={{
                     fontSize: 11,
                     fontFamily: "'JetBrains Mono', monospace",
-                    color: '#5c5c72',
+                    color: '#607d8b',
                   }}
                 >
                   {approval.time}
@@ -192,8 +192,8 @@ export function ApprovalsPage({ approvals, onUpdate }: ApprovalsPageProps) {
                     fontSize: 12,
                     fontFamily: "'JetBrains Mono', monospace",
                     background: 'rgba(0, 210, 160, 0.1)',
-                    border: '1px solid #00d2a0',
-                    color: '#00d2a0',
+                    border: '1px solid #66bb6a',
+                    color: '#66bb6a',
                     borderRadius: 6,
                     cursor: 'pointer',
                     fontWeight: 600,
@@ -208,8 +208,8 @@ export function ApprovalsPage({ approvals, onUpdate }: ApprovalsPageProps) {
                     fontSize: 12,
                     fontFamily: "'JetBrains Mono', monospace",
                     background: 'rgba(255, 71, 87, 0.1)',
-                    border: '1px solid #ff4757',
-                    color: '#ff4757',
+                    border: '1px solid #ef5350',
+                    color: '#ef5350',
                     borderRadius: 6,
                     cursor: 'pointer',
                     fontWeight: 600,

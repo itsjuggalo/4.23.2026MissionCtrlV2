@@ -8,7 +8,7 @@ import { approvals as initialApprovals, signals } from '@/lib/mock-data';
 
 type PageName = 'Dashboard' | 'Signals' | 'Telegram' | 'Scanner' | 'Tasks' | 'Agents' |
   'Approvals' | 'Calendar' | 'Projects' | 'Memory' | 'Memory Graph' | 'Office' | 'Docs' |
-  'Wallets' | 'Trades' | 'Activity' | 'Risk' | 'Chart' | 'PowerTrader' | 'Command Center' |
+  'Wallets' | 'Trades' | 'Activity' | 'Risk' | 'TV Chart' | 'PowerTrader' | 'Command Center' |
   'Performance' | 'Regime';
 
 export default function PreviewLayout({ children }: { children: React.ReactNode }) {

@@ -6,7 +6,7 @@ interface SignalBarProps {
 
 export function SignalBar({ strength }: SignalBarProps) {
   const color =
-    strength >= 80 ? '#00d2a0' : strength >= 60 ? '#ffa502' : '#5c5c72';
+    strength >= 80 ? '#66bb6a' : strength >= 60 ? '#ff9800' : '#607d8b';
 
   return (
     <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>

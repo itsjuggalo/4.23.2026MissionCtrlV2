@@ -28,6 +28,7 @@ import {
   Settings,
   Users,
 } from 'lucide-react';
+import { TerranLogo } from '../ui/TerranLogo';
 
 type PageName =
   | 'Dashboard'
@@ -47,12 +48,16 @@ type PageName =
   | 'Trades'
   | 'Activity'
   | 'Risk'
-  | 'Chart'
+  | 'TV Chart'
   | 'PowerTrader'
   | 'GoTrader'
   | 'Command Center'
   | 'Performance'
-  | 'Regime';
+  | 'Regime'
+  | 'Congress'
+  | 'LLM Portfolio'
+  | 'Usage'
+  | 'Landing';
 
 interface SidebarProps {
   activePage: PageName;
@@ -65,6 +70,7 @@ interface SidebarProps {
 
 // COMMAND section — mission ops
 const commandItems: { name: PageName; icon: React.ElementType }[] = [
+  { name: 'Landing', icon: Zap },
   { name: 'Command Center', icon: Target },
   { name: 'Performance', icon: BarChart2 },
   { name: 'Regime', icon: Globe },
@@ -74,7 +80,7 @@ const commandItems: { name: PageName; icon: React.ElementType }[] = [
 // TRADING section
 const tradingItems: { name: PageName; icon: React.ElementType }[] = [
   { name: 'Dashboard', icon: LayoutDashboard },
-  { name: 'Chart', icon: LineChart },
+  { name: 'TV Chart', icon: LineChart },
   { name: 'Scanner', icon: Radar },
   { name: 'Wallets', icon: Wallet },
   { name: 'Trades', icon: TrendingUp },
@@ -94,6 +100,9 @@ const systemItems: { name: PageName; icon: React.ElementType }[] = [
   { name: 'Approvals', icon: CheckCircle },
   { name: 'Calendar', icon: Calendar },
   { name: 'Projects', icon: FolderKanban },
+  { name: 'Usage', icon: BarChart2 },
+  { name: 'Congress', icon: Users },
+  { name: 'LLM Portfolio', icon: Cpu },
   { name: 'Docs', icon: FileText },
 ];
 
@@ -136,8 +145,8 @@ export function Sidebar({
         width,
         minWidth: width,
         height: '100vh',
-        background: '#0f0f17',
-        borderRight: '1px solid #1e1e2a',
+        background: '#0d1117',
+        borderRight: '1px solid #1a3a4a',
         display: 'flex',
         flexDirection: 'column',
         transition: 'width 0.2s ease, min-width 0.2s ease',
@@ -158,44 +167,13 @@ export function Sidebar({
           cursor: 'pointer',
           background: 'transparent',
           border: 'none',
-          borderBottom: '1px solid #1e1e2a',
+          borderBottom: '1px solid #1a3a4a',
           width: '100%',
           textAlign: 'left',
           flexShrink: 0,
         }}
       >
-        <div
-          style={{
-            width: 32,
-            height: 32,
-            borderRadius: 8,
-            background: 'linear-gradient(135deg, #6c5ce7, #a29bfe)',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            fontFamily: "'JetBrains Mono', monospace",
-            fontWeight: 700,
-            fontSize: 16,
-            color: '#fff',
-            flexShrink: 0,
-          }}
-        >
-          M
-        </div>
-        {!isCollapsed && (
-          <span
-            style={{
-              fontFamily: "'JetBrains Mono', 'SF Mono', 'Fira Code', monospace",
-              fontSize: 11,
-              fontWeight: 700,
-              color: '#e8e8ed',
-              letterSpacing: '1px',
-              whiteSpace: 'nowrap',
-            }}
-          >
-            MISSION CTRL
-          </span>
-        )}
+        <TerranLogo collapsed={isCollapsed} />
       </button>
 
       {/* Nav items */}
@@ -209,13 +187,13 @@ export function Sidebar({
           return (
             <button
               key={name}
-              onClick={() => onNavigate(name)}
+              onClick={() => name === 'Landing' ? (window.location.href = '/landing') : onNavigate(name)}
               style={{
                 display: 'flex', alignItems: 'center', gap: 10,
                 padding: isCollapsed ? '9px 10px' : '9px 14px',
                 width: '100%', cursor: 'pointer', background: isActive ? 'rgba(108,92,231,0.12)' : 'transparent',
-                border: 'none', borderLeft: isActive ? '2px solid #6c5ce7' : '2px solid transparent',
-                color: isActive ? '#a29bfe' : '#8b8b9e', transition: 'background 0.15s, color 0.15s',
+                border: 'none', borderLeft: isActive ? '2px solid #4fc3f7' : '2px solid transparent',
+                color: isActive ? '#81d4fa' : '#455a64', transition: 'background 0.15s, color 0.15s',
               }}
             >
               <Icon size={16} style={{ flexShrink: 0 }} />
@@ -238,7 +216,7 @@ export function Sidebar({
           return (
             <button
               key={name}
-              onClick={() => onNavigate(name)}
+              onClick={() => name === 'Landing' ? (window.location.href = '/landing') : onNavigate(name)}
               title={isCollapsed ? name : undefined}
               style={{
                 display: 'flex',
@@ -251,7 +229,7 @@ export function Sidebar({
                 border: 'none',
                 borderRadius: 0,
                 cursor: 'pointer',
-                color: isActive ? '#a29bfe' : '#8b8b9e',
+                color: isActive ? '#81d4fa' : '#455a64',
                 position: 'relative',
                 transition: 'background 0.15s, color 0.15s',
               }}
@@ -273,7 +251,7 @@ export function Sidebar({
               {badge !== null && !isCollapsed && (
                 <span
                   style={{
-                    background: '#6c5ce7',
+                    background: '#4fc3f7',
                     color: '#fff',
                     fontSize: 10,
                     fontFamily: "'JetBrains Mono', monospace",
@@ -293,7 +271,7 @@ export function Sidebar({
                     position: 'absolute',
                     top: 6,
                     right: 8,
-                    background: '#6c5ce7',
+                    background: '#4fc3f7',
                     color: '#fff',
                     fontSize: 9,
                     fontFamily: "'JetBrains Mono', monospace",
@@ -321,62 +299,36 @@ export function Sidebar({
           const isActive = activePage === name;
           const badge = name === 'Scanner' && newSignalsCount > 0 ? newSignalsCount : name === 'Approvals' && pendingApprovalsCount > 0 ? pendingApprovalsCount : null;
           return (
-            <button key={name} onClick={() => onNavigate(name)} title={isCollapsed ? name : undefined}
+            <button key={name} onClick={() => name === 'Landing' ? (window.location.href = '/landing') : onNavigate(name)} title={isCollapsed ? name : undefined}
               style={{ display: 'flex', alignItems: 'center', gap: 10, width: '100%', padding: isCollapsed ? '9px 0' : '9px 14px',
                 justifyContent: isCollapsed ? 'center' : 'flex-start', background: isActive ? 'rgba(108,92,231,0.08)' : 'transparent',
-                border: 'none', cursor: 'pointer', color: isActive ? '#a29bfe' : '#8b8b9e', transition: 'background 0.15s, color 0.15s', position: 'relative' }}
+                border: 'none', cursor: 'pointer', color: isActive ? '#81d4fa' : '#455a64', transition: 'background 0.15s, color 0.15s', position: 'relative' }}
             >
               <Icon size={16} style={{ flexShrink: 0 }} />
               {!isCollapsed && <span style={{ fontSize: 13, fontFamily: "'Inter', -apple-system, sans-serif", whiteSpace: 'nowrap', flex: 1, textAlign: 'left' }}>{name}</span>}
-              {badge !== null && !isCollapsed && <span style={{ background: '#6c5ce7', color: '#fff', fontSize: 10, fontWeight: 700, borderRadius: '10px', padding: '1px 6px' }}>{badge}</span>}
+              {badge !== null && !isCollapsed && <span style={{ background: '#4fc3f7', color: '#fff', fontSize: 10, fontWeight: 700, borderRadius: '10px', padding: '1px 6px' }}>{badge}</span>}
             </button>
           );
         })}
       </nav>
 
-        {/* BETA section — preview routes */}
-        {!isCollapsed && (
-          <div style={{ padding: '8px 14px 2px', fontSize: 9, fontFamily: "'JetBrains Mono', monospace", color: '#3d3d52', letterSpacing: '1.5px', fontWeight: 700, marginTop: 4 }}>BETA</div>
-        )}
-        {[
-          { label: 'Trades',           href: '/preview/trades',       icon: TrendingUp },
-          { label: 'Power Trader',     href: '/preview/powertrader',  icon: Cpu },
-          { label: 'Signals',          href: '/preview/signals',      icon: Zap },
-          { label: 'Telegram Signals', href: '/preview/telegram',     icon: Send },
-        ].map(({ label, href, icon: Icon }) => (
-          <a key={href} href={href} title={isCollapsed ? label : undefined}
-            style={{ display: 'flex', alignItems: 'center', gap: 10, width: '100%', padding: isCollapsed ? '9px 0' : '9px 14px',
-              justifyContent: isCollapsed ? 'center' : 'flex-start', background: 'transparent',
-              textDecoration: 'none', color: '#8b8b9e', transition: 'background 0.15s, color 0.15s' }}
-            onMouseEnter={e => { (e.currentTarget as HTMLAnchorElement).style.color = '#a29bfe'; (e.currentTarget as HTMLAnchorElement).style.background = 'rgba(108,92,231,0.08)'; }}
-            onMouseLeave={e => { (e.currentTarget as HTMLAnchorElement).style.color = '#8b8b9e'; (e.currentTarget as HTMLAnchorElement).style.background = 'transparent'; }}
-          >
-            <Icon size={16} style={{ flexShrink: 0 }} />
-            {!isCollapsed && (
-              <>
-                <span style={{ fontSize: 13, fontFamily: "'Inter', -apple-system, sans-serif", whiteSpace: 'nowrap', flex: 1, textAlign: 'left' }}>{label}</span>
-                <span style={{ fontSize: 9, color: '#6c5ce7', fontWeight: 700, fontFamily: "'JetBrains Mono', monospace", letterSpacing: '0.5px' }}>β</span>
-              </>
-            )}
-          </a>
-        ))}
 
       {/* Footer — Phase 1 Progress */}
       {!isCollapsed && (
         <div
           style={{
             padding: '12px 14px',
-            borderTop: '1px solid #1e1e2a',
+            borderTop: '1px solid #1a3a4a',
             fontSize: 11,
             fontFamily: "'JetBrains Mono', 'SF Mono', 'Fira Code', monospace",
           }}
         >
-          <div style={{ color: '#ffa502', fontWeight: 700, marginBottom: 3 }}>Phase 1 — Prove ROI</div>
-          <div style={{ color: '#e8e8ed', marginBottom: 4 }}>${(balance / 1000).toFixed(0)}K → $110K</div>
-          <div style={{ background: '#1e1e2a', borderRadius: 4, height: 4, overflow: 'hidden' }}>
-            <div style={{ background: '#6c5ce7', width: `${percent}%`, height: '100%', borderRadius: 4 }} />
+          <div style={{ color: '#ff9800', fontWeight: 700, marginBottom: 3 }}>Phase 1 — Prove ROI</div>
+          <div style={{ color: '#e0e0e0', marginBottom: 4 }}>${(balance / 1000).toFixed(0)}K → $110K</div>
+          <div style={{ background: '#1a3a4a', borderRadius: 4, height: 4, overflow: 'hidden' }}>
+            <div style={{ background: '#4fc3f7', width: `${percent}%`, height: '100%', borderRadius: 4 }} />
           </div>
-          <div style={{ color: '#5c5c72', marginTop: 4 }}>{percent.toFixed(1)}% complete</div>
+          <div style={{ color: '#607d8b', marginTop: 4 }}>{percent.toFixed(1)}% complete</div>
         </div>
       )}
     </div>

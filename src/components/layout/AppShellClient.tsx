@@ -28,6 +28,9 @@ import { PowerTraderPage } from '../pages/PowerTraderPage';
 import { CommandCenterPage } from '../pages/CommandCenterPage';
 import { PerformancePage } from '../pages/PerformancePage';
 import { RegimePage } from '../pages/RegimePage';
+import UsagePage from '../pages/UsagePage';
+import { CongressPage } from '../pages/CongressPage';
+import { LLMPortfolioPage } from '../pages/LLMPortfolioPage';
 import { PsychChatWidget } from '../ui/PsychChatWidget';
 
 type PageName =
@@ -48,11 +51,15 @@ type PageName =
   | 'Trades'
   | 'Activity'
   | 'Risk'
-  | 'Chart'
+  | 'TV Chart'
   | 'PowerTrader'
   | 'Command Center'
   | 'Performance'
-  | 'Regime';
+  | 'Regime'
+  | 'Congress'
+  | 'LLM Portfolio'
+  | 'Usage'
+  | 'Landing';
 
 export function AppShellClient() {
   const searchParams = useSearchParams();
@@ -71,8 +78,8 @@ export function AppShellClient() {
       const validPages: PageName[] = [
         'Dashboard', 'Signals', 'Telegram', 'Scanner', 'Tasks', 'Agents', 
         'Approvals', 'Calendar', 'Projects', 'Memory', 'Memory Graph', 
-        'Office', 'Docs', 'Wallets', 'Trades', 'Activity', 'Risk', 'Chart', 'PowerTrader',
-        'Command Center', 'Performance', 'Regime'
+        'Office', 'Docs', 'Wallets', 'Trades', 'Activity', 'Risk', 'TV Chart', 'PowerTrader',
+        'Command Center', 'Performance', 'Regime', 'Usage', 'Landing', 'Congress', 'LLM Portfolio'
       ];
       if (validPages.includes(pageName)) {
         setActivePage(pageName);
@@ -120,7 +127,7 @@ export function AppShellClient() {
         return <TradesPage />;
       case 'Activity':
         return <ActivityPage />;
-      case 'Chart':
+      case 'TV Chart':
         return <ChartPage />;
       case 'PowerTrader':
         return <PowerTraderPage />;
@@ -132,6 +139,12 @@ export function AppShellClient() {
         return <RegimePage />;
       case 'Risk':
         return <RiskPage />;
+      case 'Usage':
+        return <UsagePage />;
+      case 'Congress':
+        return <CongressPage />;
+      case 'LLM Portfolio':
+        return <LLMPortfolioPage />;
       default:
         return <DashboardPage />;
     }
