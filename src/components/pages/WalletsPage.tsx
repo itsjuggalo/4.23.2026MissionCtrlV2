@@ -81,7 +81,11 @@ export function WalletsPage() {
               <div key={i} style={{ background: 'linear-gradient(180deg, #0a1929 0%, #0d1420 100%)', border: '1px solid #1a3a4a', borderRadius: '10px', padding: '24px' }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                   <div>
-                    <div style={{ fontSize: '16px', fontWeight: 700, color: '#e0e0e0', fontFamily: 'var(--font-mc-mono)' }}>{w.name || 'Wallet ' + (i+1)}</div>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                      <div style={{ fontSize: '16px', fontWeight: 700, color: '#e0e0e0', fontFamily: 'var(--font-mc-mono)' }}>{w.name || 'Wallet ' + (i+1)}</div>
+                      {w.badge && <span style={{ fontSize: '9px', fontWeight: 700, padding: '2px 8px', borderRadius: '4px', fontFamily: 'var(--font-mc-mono)', letterSpacing: '1px', background: w.badge === 'LIVE' ? '#66bb6a22' : '#ff980022', color: w.badge === 'LIVE' ? '#66bb6a' : '#ff9800', border: '1px solid ' + (w.badge === 'LIVE' ? '#66bb6a44' : '#ff980044') }}>{w.badge}</span>}
+                      {w.status === 'error' && <span style={{ fontSize: '9px', fontWeight: 700, padding: '2px 8px', borderRadius: '4px', fontFamily: 'var(--font-mc-mono)', background: '#ef535022', color: '#ef5350', border: '1px solid #ef535044' }}>ERROR</span>}
+                    </div>
                     <div style={{ fontSize: '11px', color: '#455a64', fontFamily: 'var(--font-mc-mono)', marginTop: '4px' }}>{w.type || 'Account'}</div>
                   </div>
                   <div style={{ fontSize: '28px', fontWeight: 800, color: '#66bb6a', fontFamily: 'var(--font-mc-mono)' }}>${fmt(balance)}</div>
@@ -90,6 +94,11 @@ export function WalletsPage() {
                   <div style={{ display: 'flex', gap: '20px', marginTop: '14px', paddingTop: '14px', borderTop: '1px solid #1a3a4a', fontSize: '11px', fontFamily: 'var(--font-mc-mono)' }}>
                     {cash !== 0 && <div><span style={{ color: '#607d8b' }}>CASH: </span><span style={{ color: cash >= 0 ? '#66bb6a' : '#ef5350', fontWeight: 600 }}>${fmt(cash)}</span></div>}
                     {bp !== 0 && <div><span style={{ color: '#607d8b' }}>BUYING POWER: </span><span style={{ color: '#4fc3f7', fontWeight: 600 }}>${fmt(bp)}</span></div>}
+                  </div>
+                )}
+                {w.notes && (
+                  <div style={{ marginTop: '10px', paddingTop: '10px', borderTop: '1px solid #1a3a4a', fontSize: '11px', color: '#607d8b', fontFamily: 'var(--font-mc-mono)' }}>
+                    {w.notes}
                   </div>
                 )}
               </div>

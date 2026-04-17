@@ -2,9 +2,12 @@ import { NextResponse } from 'next/server';
 import { cookies } from 'next/headers';
 import { readFileSync, existsSync } from 'fs';
 import { join } from 'path';
+import { execSync } from 'child_process';
+import * as jose from 'jose';
+
+const SECRETS = join(process.env.HOME || '/home/ubuntu', '.openclaw/secrets');
 
 export async function GET() {
-  // Check auth cookie — only if WALLET_PASSWORD is configured
   const walletPassword = process.env.WALLET_PASSWORD;
   if (walletPassword) {
     const cookieStore = await cookies();
@@ -17,52 +20,138 @@ export async function GET() {
     }
   }
 
+  const wallets: any[] = [];
+
+  // === 1. ALPACA PAPER ===
   try {
-    // Read wallet data from secrets or config
-    const walletsPath = join(
-      process.env.HOME || '/home/ubuntu',
-      '.openclaw/workspace/wallets.json'
-    );
-
-    if (existsSync(walletsPath)) {
-      const data = JSON.parse(readFileSync(walletsPath, 'utf-8'));
-      return NextResponse.json(data);
+    const key = readFileSync(join(SECRETS, 'alpaca-key-id'), 'utf-8').trim();
+    const secret = readFileSync(join(SECRETS, 'alpaca-secret'), 'utf-8').trim();
+    const res = await fetch('https://paper-api.alpaca.markets/v2/account', {
+      headers: { 'APCA-API-KEY-ID': key, 'APCA-API-SECRET-KEY': secret },
+    });
+    if (res.ok) {
+      const acct = await res.json();
+      wallets.push({
+        name: 'Alpaca Paper Trading',
+        type: 'Brokerage (Paper)',
+        badge: 'PAPER',
+        balance: parseFloat(acct.equity || '0'),
+        cash: parseFloat(acct.cash || '0'),
+        buying_power: parseFloat(acct.buying_power || '0'),
+        status: 'live',
+        notes: 'Phase 1: $100K → $110K goal',
+      });
     }
+  } catch (e) {
+    wallets.push({ name: 'Alpaca Paper Trading', type: 'Brokerage (Paper)', badge: 'PAPER', balance: 0, cash: 0, buying_power: 0, status: 'error', notes: `Error: ${String(e).slice(0, 80)}` });
+  }
 
-    // Fallback: return Alpaca portfolio as wallet
-    const keyPath = join(process.env.HOME || '/home/ubuntu', '.openclaw/secrets/alpaca-key-id');
-    const secretPath = join(process.env.HOME || '/home/ubuntu', '.openclaw/secrets/alpaca-secret');
+  // === 2. COINBASE (JWT auth) ===
+  try {
+    const cbKeyPath = join(SECRETS, 'coinbase-api-key.txt');
+    const cbPemPath = join(SECRETS, 'coinbase-private.pem');
+    if (existsSync(cbKeyPath) && existsSync(cbPemPath)) {
+      const apiKey = readFileSync(cbKeyPath, 'utf-8').trim();
+      const pemRaw = readFileSync(cbPemPath, 'utf-8').trim();
+      const uri = 'GET api.coinbase.com/api/v3/brokerage/accounts';
+      const privateKey = await jose.importPKCS8(pemRaw, 'ES256');
+      const now = Math.floor(Date.now() / 1000);
+      const jwt = await new jose.SignJWT({ sub: apiKey, iss: 'cdp', uri })
+        .setProtectedHeader({ alg: 'ES256', kid: apiKey, nonce: String(now), typ: 'JWT' })
+        .setIssuedAt(now).setExpirationTime(now + 120).setNotBefore(now)
+        .sign(privateKey);
 
-    if (existsSync(keyPath) && existsSync(secretPath)) {
-      const key = readFileSync(keyPath, 'utf-8').trim();
-      const secret = readFileSync(secretPath, 'utf-8').trim();
-
-      const res = await fetch('https://paper-api.alpaca.markets/v2/account', {
-        headers: {
-          'APCA-API-KEY-ID': key,
-          'APCA-API-SECRET-KEY': secret,
-        },
+      const cbRes = await fetch('https://api.coinbase.com/api/v3/brokerage/accounts', {
+        headers: { Authorization: `Bearer ${jwt}` },
       });
 
-      if (res.ok) {
-        const acct = await res.json();
-        return NextResponse.json([
-          {
-            name: 'Alpaca Paper Trading',
-            type: 'Brokerage',
-            balance: parseFloat(acct.equity || '0'),
-            cash: parseFloat(acct.cash || '0'),
-            buying_power: parseFloat(acct.buying_power || '0'),
-          },
-        ]);
+      if (cbRes.ok) {
+        const cbData = await cbRes.json();
+        const accounts = cbData.accounts || [];
+        let usdValue = 0;
+        const holdings: string[] = [];
+
+        for (const acct of accounts) {
+          const bal = parseFloat(acct.available_balance?.value || '0');
+          const hold = parseFloat(acct.hold?.value || '0');
+          const total = bal + hold;
+          if (total > 0.01) {
+            const currency = acct.currency || 'USD';
+            // Get USD price
+            let price = 1;
+            if (currency !== 'USD' && currency !== 'USDC' && currency !== 'USDT') {
+              try {
+                const pRes = await fetch(`https://api.coinbase.com/v2/prices/${currency}-USD/spot`);
+                if (pRes.ok) { const pd = await pRes.json(); price = parseFloat(pd.data?.amount || '0'); }
+              } catch {}
+            }
+            const valUsd = total * price;
+            usdValue += valUsd;
+            holdings.push(`${currency}: $${valUsd.toFixed(2)}`);
+          }
+        }
+
+        wallets.push({
+          name: 'Coinbase',
+          type: 'Exchange (Live)',
+          badge: 'LIVE',
+          balance: usdValue,
+          cash: 0,
+          buying_power: 0,
+          status: 'live',
+          notes: holdings.slice(0, 5).join(' | ') || 'No holdings',
+        });
+      } else {
+        wallets.push({ name: 'Coinbase', type: 'Exchange (Live)', badge: 'LIVE', balance: 0, cash: 0, buying_power: 0, status: 'error', notes: `API ${cbRes.status}` });
       }
     }
-
-    return NextResponse.json([]);
-  } catch (error) {
-    return NextResponse.json(
-      { error: 'Failed to load wallet data' },
-      { status: 500 }
-    );
+  } catch (e) {
+    wallets.push({ name: 'Coinbase', type: 'Exchange (Live)', badge: 'LIVE', balance: 0, cash: 0, buying_power: 0, status: 'error', notes: `Error: ${String(e).slice(0, 80)}` });
   }
+
+  // === 3. ROBINHOOD (call Python script) ===
+  try {
+    const rhKey = process.env.ROBINHOOD_API_KEY || '';
+    if (rhKey) {
+      const result = execSync(
+        `ROBINHOOD_API_KEY="${rhKey}" python3 /home/ubuntu/scripts/robinhood-holdings.py`,
+        { timeout: 15000, encoding: 'utf-8' }
+      );
+      const rhData = JSON.parse(result);
+      if (rhData.error) {
+        wallets.push({ name: 'Robinhood', type: 'Brokerage (Live)', badge: 'LIVE', balance: 0, cash: 0, buying_power: 0, status: 'error', notes: rhData.error.slice(0, 80) });
+      } else {
+        const holdings = (rhData.results || []).map((h: any) =>
+          `${h.asset_code}: ${parseFloat(h.total_quantity).toFixed(6)} ($${h.value_usd})`
+        ).slice(0, 5).join(' | ');
+
+        wallets.push({
+          name: 'Robinhood',
+          type: 'Brokerage (Live)',
+          badge: 'LIVE',
+          balance: rhData.total_usd || 0,
+          cash: 0,
+          buying_power: 0,
+          status: 'live',
+          notes: holdings || 'No holdings',
+        });
+      }
+    }
+  } catch (e) {
+    wallets.push({ name: 'Robinhood', type: 'Brokerage (Live)', badge: 'LIVE', balance: 0, cash: 0, buying_power: 0, status: 'error', notes: `Error: ${String(e).slice(0, 80)}` });
+  }
+
+  // === 4. HYPERLIQUID (not funded yet) ===
+  wallets.push({
+    name: 'Hyperliquid',
+    type: 'DEX (Paper)',
+    badge: 'PAPER',
+    balance: 0,
+    cash: 0,
+    buying_power: 0,
+    status: 'inactive',
+    notes: 'Not yet funded — paper mode only',
+  });
+
+  return NextResponse.json(wallets);
 }
