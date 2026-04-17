@@ -6,6 +6,7 @@ import { execSync } from 'child_process';
 import * as jose from 'jose';
 
 const SECRETS = join(process.env.HOME || '/home/ubuntu', '.openclaw/secrets');
+const HL_STATE = join(process.env.HOME || '/home/ubuntu', 'go-trader/scheduler/state.json');
 
 export async function GET() {
   const walletPassword = process.env.WALLET_PASSWORD;
@@ -43,10 +44,10 @@ export async function GET() {
       });
     }
   } catch (e) {
-    wallets.push({ name: 'Alpaca Paper Trading', type: 'Brokerage (Paper)', badge: 'PAPER', balance: 0, cash: 0, buying_power: 0, status: 'error', notes: `Error: ${String(e).slice(0, 80)}` });
+    wallets.push({ name: 'Alpaca Paper', type: 'Brokerage (Paper)', badge: 'PAPER', balance: 0, cash: 0, buying_power: 0, status: 'error', notes: String(e).slice(0, 80) });
   }
 
-  // === 2. COINBASE (JWT auth) ===
+  // === 2. COINBASE (JWT) ===
   try {
     const cbKeyPath = join(SECRETS, 'coinbase-api-key.txt');
     const cbPemPath = join(SECRETS, 'coinbase-private.pem');
@@ -60,98 +61,127 @@ export async function GET() {
         .setProtectedHeader({ alg: 'ES256', kid: apiKey, nonce: String(now), typ: 'JWT' })
         .setIssuedAt(now).setExpirationTime(now + 120).setNotBefore(now)
         .sign(privateKey);
-
       const cbRes = await fetch('https://api.coinbase.com/api/v3/brokerage/accounts', {
         headers: { Authorization: `Bearer ${jwt}` },
       });
-
       if (cbRes.ok) {
         const cbData = await cbRes.json();
         const accounts = cbData.accounts || [];
         let usdValue = 0;
         const holdings: string[] = [];
-
         for (const acct of accounts) {
-          const bal = parseFloat(acct.available_balance?.value || '0');
-          const hold = parseFloat(acct.hold?.value || '0');
-          const total = bal + hold;
-          if (total > 0.01) {
-            const currency = acct.currency || 'USD';
-            // Get USD price
+          const bal = parseFloat(acct.available_balance?.value || '0') + parseFloat(acct.hold?.value || '0');
+          if (bal > 0.01) {
+            const cur = acct.currency || 'USD';
             let price = 1;
-            if (currency !== 'USD' && currency !== 'USDC' && currency !== 'USDT') {
+            if (!['USD','USDC','USDT'].includes(cur)) {
               try {
-                const pRes = await fetch(`https://api.coinbase.com/v2/prices/${currency}-USD/spot`);
+                const pRes = await fetch(`https://api.coinbase.com/v2/prices/${cur}-USD/spot`);
                 if (pRes.ok) { const pd = await pRes.json(); price = parseFloat(pd.data?.amount || '0'); }
               } catch {}
             }
-            const valUsd = total * price;
+            const valUsd = bal * price;
             usdValue += valUsd;
-            holdings.push(`${currency}: $${valUsd.toFixed(2)}`);
+            if (valUsd > 1) holdings.push(`${cur}: $${valUsd.toFixed(2)}`);
           }
         }
-
-        wallets.push({
-          name: 'Coinbase',
-          type: 'Exchange (Live)',
-          badge: 'LIVE',
-          balance: usdValue,
-          cash: 0,
-          buying_power: 0,
-          status: 'live',
-          notes: holdings.slice(0, 5).join(' | ') || 'No holdings',
-        });
+        wallets.push({ name: 'Coinbase', type: 'Exchange (Live)', badge: 'LIVE', balance: usdValue, cash: 0, buying_power: 0, status: 'live', notes: holdings.slice(0, 5).join(' | ') || 'No holdings' });
       } else {
         wallets.push({ name: 'Coinbase', type: 'Exchange (Live)', badge: 'LIVE', balance: 0, cash: 0, buying_power: 0, status: 'error', notes: `API ${cbRes.status}` });
       }
     }
   } catch (e) {
-    wallets.push({ name: 'Coinbase', type: 'Exchange (Live)', badge: 'LIVE', balance: 0, cash: 0, buying_power: 0, status: 'error', notes: `Error: ${String(e).slice(0, 80)}` });
+    wallets.push({ name: 'Coinbase', type: 'Exchange (Live)', badge: 'LIVE', balance: 0, cash: 0, buying_power: 0, status: 'error', notes: String(e).slice(0, 80) });
   }
 
-  // === 3. ROBINHOOD (call Python script) ===
+  // === 3. ROBINHOOD (Python script) ===
   try {
     const rhKey = process.env.ROBINHOOD_API_KEY || '';
     if (rhKey) {
       const result = execSync(
         `ROBINHOOD_API_KEY="${rhKey}" python3 /home/ubuntu/scripts/robinhood-holdings.py`,
-        { timeout: 15000, encoding: 'utf-8' }
+        { timeout: 20000, encoding: 'utf-8' }
       );
-      const rhData = JSON.parse(result);
+      const rhData = JSON.parse(result.trim());
       if (rhData.error) {
         wallets.push({ name: 'Robinhood', type: 'Brokerage (Live)', badge: 'LIVE', balance: 0, cash: 0, buying_power: 0, status: 'error', notes: rhData.error.slice(0, 80) });
       } else {
         const holdings = (rhData.results || []).map((h: any) =>
           `${h.asset_code}: ${parseFloat(h.total_quantity).toFixed(6)} ($${h.value_usd})`
         ).slice(0, 5).join(' | ');
-
-        wallets.push({
-          name: 'Robinhood',
-          type: 'Brokerage (Live)',
-          badge: 'LIVE',
-          balance: rhData.total_usd || 0,
-          cash: 0,
-          buying_power: 0,
-          status: 'live',
-          notes: holdings || 'No holdings',
-        });
+        wallets.push({ name: 'Robinhood', type: 'Brokerage (Live)', badge: 'LIVE', balance: rhData.total_usd || 0, cash: 0, buying_power: 0, status: 'live', notes: holdings || 'No holdings' });
       }
     }
   } catch (e) {
-    wallets.push({ name: 'Robinhood', type: 'Brokerage (Live)', badge: 'LIVE', balance: 0, cash: 0, buying_power: 0, status: 'error', notes: `Error: ${String(e).slice(0, 80)}` });
+    wallets.push({ name: 'Robinhood', type: 'Brokerage (Live)', badge: 'LIVE', balance: 0, cash: 0, buying_power: 0, status: 'error', notes: String(e).slice(0, 80) });
   }
 
-  // === 4. HYPERLIQUID (not funded yet) ===
-  wallets.push({
-    name: 'Hyperliquid',
-    type: 'DEX (Paper)',
-    badge: 'PAPER',
-    balance: 0,
-    cash: 0,
-    buying_power: 0,
-    status: 'inactive',
-    notes: 'Not yet funded — paper mode only',
-  });
+  // === 4. HYPERLIQUID (go-trader state file) ===
+  try {
+    if (existsSync(HL_STATE)) {
+      const state = JSON.parse(readFileSync(HL_STATE, 'utf-8'));
+      const strategies = state.strategies || {};
+
+      // Get current prices for position valuation
+      let btcPrice = 0, ethPrice = 0, solPrice = 0;
+      try {
+        const priceRes = await fetch('https://api.coingecko.com/api/v3/simple/price?ids=bitcoin,ethereum,solana&vs_currencies=usd', {
+          headers: { 'User-Agent': 'MissionControl/1.0' },
+        });
+        if (priceRes.ok) {
+          const prices = await priceRes.json();
+          btcPrice = prices.bitcoin?.usd || 0;
+          ethPrice = prices.ethereum?.usd || 0;
+          solPrice = prices.solana?.usd || 0;
+        }
+      } catch {}
+
+      const priceMap: Record<string, number> = { BTC: btcPrice, ETH: ethPrice, SOL: solPrice };
+
+      let totalValue = 0;
+      let totalCash = 0;
+      let totalInitial = 0;
+      let activeStrategies = 0;
+      let openPositions = 0;
+      const positionSummary: string[] = [];
+
+      for (const [id, strat] of Object.entries(strategies) as any[]) {
+        const cash = strat.cash || 0;
+        const initial = strat.initial_capital || 500;
+        totalCash += cash;
+        totalInitial += initial;
+
+        let posValue = 0;
+        const positions = strat.positions || {};
+        for (const [sym, pos] of Object.entries(positions) as any[]) {
+          const qty = pos.quantity || 0;
+          const price = priceMap[sym] || 0;
+          posValue += qty * price;
+          if (qty > 0) openPositions++;
+        }
+
+        const stratValue = cash + posValue;
+        totalValue += stratValue;
+        if (Object.keys(positions).length > 0) activeStrategies++;
+      }
+
+      const stratCount = Object.keys(strategies).length;
+      const pnlPct = totalInitial > 0 ? ((totalValue - totalInitial) / totalInitial * 100) : 0;
+
+      wallets.push({
+        name: 'Hyperliquid (go-trader)',
+        type: 'DEX Perps (Live)',
+        badge: 'LIVE',
+        balance: totalValue,
+        cash: totalCash,
+        buying_power: totalCash,
+        status: 'live',
+        notes: `${stratCount} strategies | ${activeStrategies} active | ${openPositions} positions | ${pnlPct >= 0 ? '+' : ''}${pnlPct.toFixed(1)}% P/L`,
+      });
+    }
+  } catch (e) {
+    wallets.push({ name: 'Hyperliquid', type: 'DEX Perps (Live)', badge: 'LIVE', balance: 0, cash: 0, buying_power: 0, status: 'error', notes: String(e).slice(0, 80) });
+  }
 
   return NextResponse.json(wallets);
 }
