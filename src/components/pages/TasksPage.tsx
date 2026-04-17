@@ -102,6 +102,31 @@ const scanKeyframes = `
 // MAIN PAGE
 // ----------------------------------------------------------------------------
 
+
+function formatTaskTime(dateStr: string): string {
+  try {
+    const d = new Date(dateStr);
+    const now = Date.now();
+    const diff = now - d.getTime();
+    const mins = Math.floor(diff / 60000);
+    if (mins < 1) return 'just now';
+    if (mins < 60) return mins + 'm ago';
+    const hrs = Math.floor(mins / 60);
+    if (hrs < 24) return hrs + 'h ago';
+    const days = Math.floor(hrs / 24);
+    if (days < 7) return days + 'd ago';
+    return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+  } catch { return dateStr; }
+}
+
+function fullTimestamp(dateStr: string): string {
+  try {
+    const d = new Date(dateStr);
+    return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' }) + ' ' +
+      d.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
+  } catch { return dateStr; }
+}
+
 export function TasksPage() {
   const [tasks, setTasks] = useState<TaskItem[]>([]);
   const [activity, setActivity] = useState<ActivityEntry[]>([]);

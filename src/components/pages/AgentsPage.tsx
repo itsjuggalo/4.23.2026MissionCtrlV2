@@ -26,6 +26,7 @@ const TIER_INFO = {
 
 export function AgentsPage() {
   const [agents, setAgents] = useState<Agent[]>([]);
+  const [trustData, setTrustData] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedTier, setSelectedTier] = useState<number | null>(null);
 
@@ -43,9 +44,11 @@ export function AgentsPage() {
       if (data.success) {
         setAgents(data.agents);
       }
+      if (trustRes?.agents) setTrustData(trustRes.agents);
       setLoading(false);
     } catch (error) {
       console.error('Error fetching agents:', error);
+      if (trustRes?.agents) setTrustData(trustRes.agents);
       setLoading(false);
     }
   };

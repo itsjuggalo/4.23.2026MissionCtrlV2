@@ -49,6 +49,8 @@ const SOURCE_COLORS = ["#4fc3f7", "#ff9800", "#66bb6a", "#ce93d8", "#ef5350", "#
 
 export default function UsagePage() {
   const [data, setData] = useState<UsageData | null>(null);
+  const [costData, setCostData] = useState<any>(null);
+  const [dbStats, setDbStats] = useState<any>(null);
   const [error, setError] = useState<string | null>(null);
   const [lastUpdate, setLastUpdate] = useState<string>("");
   const [view, setView] = useState<"24h" | "7d">("24h");
@@ -70,16 +72,67 @@ export default function UsagePage() {
   useEffect(() => {
     fetchData();
     const interval = setInterval(fetchData, 60000);
-    return () => clearInterval(interval);
+  
+  useEffect(() => {
+    async function fetchExtras() {
+      try {
+        const [costRes, dbRes] = await Promise.all([
+          fetch('/api/cost-tracking').then(r => r.json()).catch(() => null),
+          fetch('/api/db-status').then(r => r.json()).catch(() => null),
+        ]);
+        if (costRes) setCostData(costRes);
+        if (dbRes) setDbStats(dbRes);
+      } catch {}
+    }
+    fetchExtras();
+    const i = setInterval(fetchExtras, 60000);
+    return () => clearInterval(i);
+  }, []);
+
+  return () => clearInterval(interval);
   }, [fetchData]);
 
   if (error && !data) {
-    return (
+  
+  useEffect(() => {
+    async function fetchExtras() {
+      try {
+        const [costRes, dbRes] = await Promise.all([
+          fetch('/api/cost-tracking').then(r => r.json()).catch(() => null),
+          fetch('/api/db-status').then(r => r.json()).catch(() => null),
+        ]);
+        if (costRes) setCostData(costRes);
+        if (dbRes) setDbStats(dbRes);
+      } catch {}
+    }
+    fetchExtras();
+    const i = setInterval(fetchExtras, 60000);
+    return () => clearInterval(i);
+  }, []);
+
+  return (
       <div style={{ padding: 32, color: "#ef5350", fontFamily: "var(--font-mc-mono, monospace)" }}>
         {error}
       </div>
     );
   }
+
+
+  useEffect(() => {
+    async function fetchExtras() {
+      try {
+        const [costRes, dbRes] = await Promise.all([
+          fetch('/api/cost-tracking').then(r => r.json()).catch(() => null),
+          fetch('/api/db-status').then(r => r.json()).catch(() => null),
+        ]);
+        if (costRes) setCostData(costRes);
+        if (dbRes) setDbStats(dbRes);
+      } catch {}
+    }
+    fetchExtras();
+    const i = setInterval(fetchExtras, 60000);
+    return () => clearInterval(i);
+  }, []);
 
   return (
     <div style={{ padding: "24px 32px", maxWidth: 1400, margin: "0 auto" }}>
@@ -121,7 +174,24 @@ export default function UsagePage() {
       <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 16, marginBottom: 28 }}>
         {Object.entries(PROVIDER_CONFIG).map(([key, cfg]) => {
           const info = data?.balances?.[key] || { budget: 0, spent: 0, remaining: 0, pct_used: 0 };
-          return (
+        
+  useEffect(() => {
+    async function fetchExtras() {
+      try {
+        const [costRes, dbRes] = await Promise.all([
+          fetch('/api/cost-tracking').then(r => r.json()).catch(() => null),
+          fetch('/api/db-status').then(r => r.json()).catch(() => null),
+        ]);
+        if (costRes) setCostData(costRes);
+        if (dbRes) setDbStats(dbRes);
+      } catch {}
+    }
+    fetchExtras();
+    const i = setInterval(fetchExtras, 60000);
+    return () => clearInterval(i);
+  }, []);
+
+  return (
             <div
               key={key}
               style={{
@@ -294,13 +364,47 @@ export default function UsagePage() {
             const chartData = view === "24h" ? data?.hourlyData : data?.dailyData;
             const xKey = view === "24h" ? "hour" : "day";
             if (!chartData || chartData.length === 0) {
-              return (
+            
+  useEffect(() => {
+    async function fetchExtras() {
+      try {
+        const [costRes, dbRes] = await Promise.all([
+          fetch('/api/cost-tracking').then(r => r.json()).catch(() => null),
+          fetch('/api/db-status').then(r => r.json()).catch(() => null),
+        ]);
+        if (costRes) setCostData(costRes);
+        if (dbRes) setDbStats(dbRes);
+      } catch {}
+    }
+    fetchExtras();
+    const i = setInterval(fetchExtras, 60000);
+    return () => clearInterval(i);
+  }, []);
+
+  return (
                 <div style={{ height: 220, display: "flex", alignItems: "center", justifyContent: "center", color: "#455a64", fontSize: 13, fontFamily: "var(--font-mc-mono, monospace)" }}>
                   No usage data yet
                 </div>
               );
             }
-            return (
+          
+  useEffect(() => {
+    async function fetchExtras() {
+      try {
+        const [costRes, dbRes] = await Promise.all([
+          fetch('/api/cost-tracking').then(r => r.json()).catch(() => null),
+          fetch('/api/db-status').then(r => r.json()).catch(() => null),
+        ]);
+        if (costRes) setCostData(costRes);
+        if (dbRes) setDbStats(dbRes);
+      } catch {}
+    }
+    fetchExtras();
+    const i = setInterval(fetchExtras, 60000);
+    return () => clearInterval(i);
+  }, []);
+
+  return (
               <ResponsiveContainer width="100%" height={220}>
                 <LineChart data={chartData} margin={{ left: 10, right: 10 }}>
                   <CartesianGrid strokeDasharray="3 3" stroke="#1a3a4a" />
@@ -366,7 +470,24 @@ export default function UsagePage() {
               <tbody>
                 {data.recent.map((r, i) => {
                   const provCfg = PROVIDER_CONFIG[r.provider];
-                  return (
+                
+  useEffect(() => {
+    async function fetchExtras() {
+      try {
+        const [costRes, dbRes] = await Promise.all([
+          fetch('/api/cost-tracking').then(r => r.json()).catch(() => null),
+          fetch('/api/db-status').then(r => r.json()).catch(() => null),
+        ]);
+        if (costRes) setCostData(costRes);
+        if (dbRes) setDbStats(dbRes);
+      } catch {}
+    }
+    fetchExtras();
+    const i = setInterval(fetchExtras, 60000);
+    return () => clearInterval(i);
+  }, []);
+
+  return (
                     <tr key={i} style={{ borderBottom: "1px solid rgba(26,58,74,0.5)" }}>
                       <td style={{ padding: "8px 12px", color: "#455a64" }}>
                         {new Date(r.timestamp).toLocaleTimeString()}

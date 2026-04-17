@@ -11,18 +11,24 @@ export function PerformancePage() {
   const [signals, setSignals] = useState<any>(null);
   const [params, setParams] = useState<any>(null);
   const [loading, setLoading] = useState(true);
+  const [tradeLog, setTradeLog] = useState<any>(null);
+  const [equityHist, setEquityHist] = useState<any[]>([]);
   const [tick, setTick] = useState(0);
 
   const fetchAll = async () => {
     try {
-      const [pRes, sRes, prRes] = await Promise.all([
+      const [pRes, sRes, prRes, tlRes, ehRes] = await Promise.all([
         fetch('/api/portfolio').then(r => r.json()).catch(() => null),
         fetch('/api/signals/history?ticker=BTCUSD&limit=100').then(r => r.json()).catch(() => null),
         fetch('/api/supertrend-params').then(r => r.json()).catch(() => null),
+        fetch('/api/trade-log?limit=100').then(r => r.json()).catch(() => null),
+        fetch('/api/equity-history?days=90').then(r => r.json()).catch(() => null),
       ]);
       if (pRes) setPortfolio(pRes);
       if (sRes) setSignals(sRes);
       if (prRes) setParams(prRes);
+      if (tlRes) setTradeLog(tlRes);
+      if (ehRes?.history) setEquityHist(ehRes.history);
     } catch (e) { console.error(e); }
     finally { setLoading(false); }
   };
@@ -72,6 +78,20 @@ export function PerformancePage() {
 
   // Win rate gauge percentage (capped)
   const gaugeAngle = Math.min(winRate, 100) * 1.8; // 0-180 degrees
+
+  // Use SQLite trade stats if available (more accurate than signal-based)
+  const dbStats = tradeLog?.stats || {};
+  const dbTrades = tradeLog?.trades || [];
+  const useDb = dbStats.total_trades > 0;
+  const finalWinRate = useDb ? dbStats.win_rate : winRate;
+  const finalPF = useDb ? dbStats.profit_factor : profitFactor;
+  const finalAvgWin = useDb ? dbStats.avg_win : avgWin;
+  const finalAvgLoss = useDb ? dbStats.avg_loss : avgLoss;
+  const finalBest = useDb ? dbStats.best_trade : bestTrade;
+  const finalWorst = useDb ? dbStats.worst_trade : worstTrade;
+  const finalTotalTrades = useDb ? dbStats.total_trades : totalTrades;
+  const finalWins = useDb ? dbStats.wins : wins.length;
+  const finalLosses = useDb ? dbStats.losses : losses.length;
 
   if (loading) return (
     <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '60vh', color: '#4fc3f7', fontFamily: 'var(--font-mc-mono)' }}>
@@ -134,12 +154,12 @@ export function PerformancePage() {
       {/* === METRICS ROW === */}
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(6, 1fr)', gap: '8px', marginBottom: '16px' }}>
         {[
-          { label: 'WIN RATE', value: `${fmt(winRate, 1)}%`, color: winRate > 50 ? '#66bb6a' : winRate > 35 ? '#ff9800' : '#ef5350' },
-          { label: 'PROFIT FACTOR', value: `${fmt(profitFactor)}`, color: profitFactor > 1.5 ? '#66bb6a' : profitFactor > 1 ? '#ff9800' : '#ef5350' },
+          { label: 'WIN RATE', value: `${fmt(finalWinRate, 1)}%`, color: finalWinRate > 50 ? '#66bb6a' : finalWinRate > 35 ? '#ff9800' : '#ef5350' },
+          { label: 'PROFIT FACTOR', value: `${fmt(finalPF)}`, color: finalPF > 1.5 ? '#66bb6a' : finalPF > 1 ? '#ff9800' : '#ef5350' },
           { label: 'MAX DRAWDOWN', value: `${fmt(maxDD, 1)}%`, color: maxDD < 10 ? '#66bb6a' : maxDD < 20 ? '#ff9800' : '#ef5350' },
-          { label: 'AVG WIN', value: `+${fmt(avgWin)}%`, color: '#66bb6a' },
-          { label: 'AVG LOSS', value: `${fmt(avgLoss)}%`, color: '#ef5350' },
-          { label: 'TOTAL TRADES', value: `${totalTrades}`, color: '#4fc3f7' },
+          { label: 'AVG WIN', value: `+${fmt(finalAvgWin)}%`, color: '#66bb6a' },
+          { label: 'AVG LOSS', value: `${fmt(finalAvgLoss)}%`, color: '#ef5350' },
+          { label: 'TOTAL TRADES', value: `${finalTotalTrades}`, color: '#4fc3f7' },
         ].map((m, i) => (
           <div key={i} className="perf-card" style={{ padding: '14px 16px', textAlign: 'center' }}>
             <div className="perf-label" style={{ marginBottom: '8px' }}>{m.label}</div>
@@ -195,11 +215,11 @@ export function PerformancePage() {
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px', marginBottom: '16px' }}>
             <div style={{ background: '#0d1117', borderRadius: '6px', padding: '12px', borderLeft: '3px solid #66bb6a' }}>
               <div style={{ fontSize: '10px', color: '#607d8b', fontFamily: 'var(--font-mc-mono)' }}>BEST TRADE</div>
-              <div style={{ fontSize: '22px', fontWeight: 700, color: '#66bb6a', fontFamily: 'var(--font-mc-mono)' }}>+{fmt(bestTrade)}%</div>
+              <div style={{ fontSize: '22px', fontWeight: 700, color: '#66bb6a', fontFamily: 'var(--font-mc-mono)' }}>+{fmt(finalBest)}%</div>
             </div>
             <div style={{ background: '#0d1117', borderRadius: '6px', padding: '12px', borderLeft: '3px solid #ef5350' }}>
               <div style={{ fontSize: '10px', color: '#607d8b', fontFamily: 'var(--font-mc-mono)' }}>WORST TRADE</div>
-              <div style={{ fontSize: '22px', fontWeight: 700, color: '#ef5350', fontFamily: 'var(--font-mc-mono)' }}>{fmt(worstTrade)}%</div>
+              <div style={{ fontSize: '22px', fontWeight: 700, color: '#ef5350', fontFamily: 'var(--font-mc-mono)' }}>{fmt(finalWorst)}%</div>
             </div>
           </div>
           {/* Win/Loss visual bar */}

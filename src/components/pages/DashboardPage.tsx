@@ -15,19 +15,22 @@ export function DashboardPage() {
   const [params, setParams] = useState<any>(null);
   const [crypto, setCrypto] = useState<any>(null);
   const [loading, setLoading] = useState(true);
+  const [equityHist, setEquityHist] = useState<any[]>([]);
   const [tick, setTick] = useState(0);
 
   const fetchAll = async () => {
     try {
-      const [pRes, sRes, rRes, repRes, prRes, cRes] = await Promise.all([
+      const [pRes, sRes, rRes, repRes, prRes, cRes, ehRes] = await Promise.all([
         fetch('/api/portfolio').then(r => r.json()).catch(() => null),
         fetch('/api/signals/latest').then(r => r.json()).catch(() => null),
         fetch('/api/regime').then(r => r.json()).catch(() => null),
         fetch('/api/daily-report').then(r => r.json()).catch(() => null),
         fetch('/api/supertrend-params').then(r => r.json()).catch(() => null),
         fetch('/api/crypto').then(r => r.json()).catch(() => null),
+        fetch('/api/equity-history?days=30').then(r => r.json()).catch(() => null),
       ]);
-      setPortfolio(pRes); setSignals(sRes); setRegime(rRes);
+      setPortfolio(pRes); setSignals(sRes);
+      if (ehRes?.history) setEquityHist(ehRes.history); setRegime(rRes);
       setReport(repRes); setParams(prRes); setCrypto(cRes);
     } catch (e) { console.error(e); }
     finally { setLoading(false); }
@@ -317,6 +320,32 @@ export function DashboardPage() {
               );
             })}
           </div>
+
+          
+          {/* Equity History */}
+          {equityHist.length > 1 && (
+            <div className="db-card" style={{ padding: '16px' }}>
+              <div className="db-label" style={{ marginBottom: '10px' }}>EQUITY CURVE ({equityHist.length} days)</div>
+              <div style={{ display: 'flex', gap: '2px', alignItems: 'flex-end', height: '60px' }}>
+                {equityHist.slice().reverse().map((s: any, i: number) => {
+                  const min = Math.min(...equityHist.map((h: any) => h.equity));
+                  const max = Math.max(...equityHist.map((h: any) => h.equity));
+                  const range = max - min || 1;
+                  const pct = ((s.equity - min) / range) * 100;
+                  const g = s.daily_pnl_pct >= 0;
+                  return (
+                    <div key={i} style={{
+                      flex: 1, minWidth: '4px', maxWidth: '12px',
+                      height: `${Math.max(pct, 5)}%`,
+                      background: g ? '#66bb6a' : '#ef5350',
+                      borderRadius: '2px 2px 0 0',
+                      opacity: 0.7 + (i / equityHist.length) * 0.3,
+                    }} title={`${s.date}: $${s.equity?.toFixed(0)} (${s.daily_pnl_pct?.toFixed(1)}%)`} />
+                  );
+                })}
+              </div>
+            </div>
+          )}
 
           {/* Quick Stats */}
           <div className="db-card" style={{ padding: '16px' }}>
