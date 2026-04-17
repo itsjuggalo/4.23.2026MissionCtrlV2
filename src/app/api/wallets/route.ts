@@ -6,7 +6,7 @@ import { execSync } from 'child_process';
 import * as jose from 'jose';
 
 const SECRETS = join(process.env.HOME || '/home/ubuntu', '.openclaw/secrets');
-const HL_STATE = join(process.env.HOME || '/home/ubuntu', 'go-trader/scheduler/state.json');
+const HL_STATE = join(process.env.HOME || '/home/ubuntu', 'go-trader/platforms/hyperliquid/state.json');
 
 export async function GET() {
   const walletPassword = process.env.WALLET_PASSWORD;
@@ -50,7 +50,7 @@ export async function GET() {
   // === 2. COINBASE (JWT) ===
   try {
     const cbKeyPath = join(SECRETS, 'coinbase-api-key.txt');
-    const cbPemPath = join(SECRETS, 'coinbase-private.pem');
+    const cbPemPath = join(SECRETS, 'coinbase-private-pkcs8.pem');
     if (existsSync(cbKeyPath) && existsSync(cbPemPath)) {
       const apiKey = readFileSync(cbKeyPath, 'utf-8').trim();
       const pemRaw = readFileSync(cbPemPath, 'utf-8').trim();
