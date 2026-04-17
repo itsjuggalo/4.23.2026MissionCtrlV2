@@ -31,6 +31,7 @@ import { RegimePage } from '../pages/RegimePage';
 import UsagePage from '../pages/UsagePage';
 import { CongressPage } from '../pages/CongressPage';
 import { LLMPortfolioPage } from '../pages/LLMPortfolioPage';
+import { SkillsPage } from "../pages/SkillsPage";
 import { PsychChatWidget } from '../ui/PsychChatWidget';
 
 type PageName =
@@ -59,6 +60,8 @@ type PageName =
   | 'Congress'
   | 'LLM Portfolio'
   | 'Usage'
+  | 'Skills'
+  | 'Skills'
   | 'Landing';
 
 export function AppShellClient() {
@@ -79,7 +82,7 @@ export function AppShellClient() {
         'Dashboard', 'Signals', 'Telegram', 'Scanner', 'Tasks', 'Agents', 
         'Approvals', 'Calendar', 'Projects', 'Memory', 'Memory Graph', 
         'Office', 'Docs', 'Wallets', 'Trades', 'Activity', 'Risk', 'TV Chart', 'PowerTrader',
-        'Command Center', 'Performance', 'Regime', 'Usage', 'Landing', 'Congress', 'LLM Portfolio'
+        'Command Center', 'Performance', 'Regime', 'Usage', 'Landing', 'Congress', 'LLM Portfolio', 'Skills'
       ];
       if (validPages.includes(pageName)) {
         setActivePage(pageName);
@@ -145,6 +148,8 @@ export function AppShellClient() {
         return <CongressPage />;
       case 'LLM Portfolio':
         return <LLMPortfolioPage />;
+      case "Skills":
+        return <SkillsPage />;
       default:
         return <DashboardPage />;
     }

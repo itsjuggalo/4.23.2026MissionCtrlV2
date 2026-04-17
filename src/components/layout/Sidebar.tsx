@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import {
+import { BookOpen,
   LayoutDashboard,
   Radar,
   ListTodo,
@@ -56,6 +56,7 @@ type PageName =
   | 'Regime'
   | 'Congress'
   | 'LLM Portfolio'
+  | 'Skills'
   | 'Usage'
   | 'Landing';
 
@@ -103,6 +104,7 @@ const systemItems: { name: PageName; icon: React.ElementType }[] = [
   { name: 'Usage', icon: BarChart2 },
   { name: 'Congress', icon: Users },
   { name: 'LLM Portfolio', icon: Cpu },
+  { name: 'Skills', icon: BookOpen },
   { name: 'Docs', icon: FileText },
 ];
 
