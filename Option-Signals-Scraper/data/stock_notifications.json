@@ -2767,5 +2767,47 @@
     "message": "Buy To Open at 138.51 with first target above 141.28",
     "symbol": "BABA",
     "title": "BABA: BTO"
+  },
+  "1776430874": {
+    "category": "SCALP",
+    "message": "Reached Target 141.6 and that's 2.23%! Lock some in and wait for next target. Raise the stops to 127.4",
+    "symbol": "BABA",
+    "title": "BABA : STC"
+  },
+  "1776436013": {
+    "category": "SCALP",
+    "message": "Reached Target 396.3 and that's 5.18%! Lock some in and wait for next target. Raise the stops to 376.78",
+    "symbol": "CVNA",
+    "title": "CVNA : STC"
+  },
+  "1776436262": {
+    "category": "SWING",
+    "message": "Reached Target 212.0 and that's 27.08%! Lock some in and wait for next target. Raise the stops to 205.6",
+    "symbol": "COIN",
+    "title": "COIN : STC"
+  },
+  "1776437868": {
+    "category": "SCALP",
+    "message": "Reached Target 429.5 and that's 14.86%! Lock some in and wait for next target. Raise the stops to 416.6",
+    "symbol": "MSFT",
+    "title": "MSFT : STC"
+  },
+  "1776438406": {
+    "category": "SWING",
+    "message": "Reached Target 271.6 and that's 5.00%! Lock some in and wait for next target. Raise the stops to 258.67",
+    "symbol": "AAPL",
+    "title": "AAPL : STC"
+  },
+  "1776439271": {
+    "category": "SWING",
+    "message": "Buy To Open at 19.82 with first target above 20.22",
+    "symbol": "SOFI",
+    "title": "SOFI: BTO"
+  },
+  "1776455264": {
+    "category": "SWING",
+    "message": "Close the trade as it hit trailing stop at 205.5!",
+    "symbol": "COIN",
+    "title": "COIN : STC"
   }
 }

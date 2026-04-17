@@ -36,14 +36,14 @@ logging.getLogger().addHandler(console)
 
 # ─── WEBHOOKS ──────────────────────────────────────────────────────────────────
 WEBHOOKS = {
-    "flow_alerts":      "https://discordapp.com/api/webhooks/1493401894310383826/uUUHIRv3GqVncJCftpCQTAZ-9Erdjk45AH0BMZhQXOfgvqFqNOEZtbPAj3_SnxJMADU3",
-    "flow_live":        "https://discordapp.com/api/webhooks/1493402170119159909/Pqs3pyN8ZyVzYOInm9AW-_ez5LsMZhkoFJK-X-mZAFJMK2bV95qmmochnF5v6e2H1N43",
-    "scalp_signals":    "https://discordapp.com/api/webhooks/1493402271642554409/v4hJfM6w6aW34oqsIWtten7apGe6YmkCgrU1v-ppyOPkxgUGTSxY6JzvVlqWFbzQ5GGI",
-    "swing_signals":    "https://discordapp.com/api/webhooks/1493402334716493916/3Pninv0bIWOO8FXb6CAzDTD5K-n0wy61xuR0luhCwZjqXXokOB4NhKwoC2qyZHLmX0be",
-    "stock_signals":    "https://discordapp.com/api/webhooks/1493402402299052052/LjR3bHljamFb-pcrwPsZumUJSgGw7Za-aXC2PbRyGDunAEVAXI2-5LMm014U9XVcjnfr",
-    "long_term_options": "https://discordapp.com/api/webhooks/1493402455176646831/3xbaAmcPNhFgKvCaBchfFVlrogOBh8iMNe9hTh_MWwNKk3MzlGPeFl3fMPdSuPbuU2o0",
-    "long_term_stocks":  "https://discordapp.com/api/webhooks/1493402513502634186/GiXkTE0VhdbCZER4l8THB9TfaR4pJ6x84Ilnm-JZI-UY9nVxNGK86-B1pgxy4uINHgKj",
-    "closed_trades":    "https://discordapp.com/api/webhooks/1493402563410788442/hQLE4DY3WmKhumUcWNsiHxIdRBQIjXkwV3_n89WaUxWvrhvpar8jMwHvdsBLUnCmcS5D",
+    "flow_alerts":      "https://discord.com/api/webhooks/1493401894310383826/uUUHIRv3GqVncJCftpCQTAZ-9Erdjk45AH0BMZhQXOfgvqFqNOEZtbPAj3_SnxJMADU3",
+    "flow_live":        "https://discord.com/api/webhooks/1493402170119159909/Pqs3pyN8ZyVzYOInm9AW-_ez5LsMZhkoFJK-X-mZAFJMK2bV95qmmochnF5v6e2H1N43",
+    "scalp_signals":    "https://discord.com/api/webhooks/1493402271642554409/v4hJfM6w6aW34oqsIWtten7apGe6YmkCgrU1v-ppyOPkxgUGTSxY6JzvVlqWFbzQ5GGI",
+    "swing_signals":    "https://discord.com/api/webhooks/1493402334716493916/3Pninv0bIWOO8FXb6CAzDTD5K-n0wy61xuR0luhCwZjqXXokOB4NhKwoC2qyZHLmX0be",
+    "stock_signals":    "https://discord.com/api/webhooks/1493402402299052052/LjR3bHljamFb-pcrwPsZumUJSgGw7Za-aXC2PbRyGDunAEVAXI2-5LMm014U9XVcjnfr",
+    "long_term_options": "https://discord.com/api/webhooks/1493402455176646831/3xbaAmcPNhFgKvCaBchfFVlrogOBh8iMNe9hTh_MWwNKk3MzlGPeFl3fMPdSuPbuU2o0",
+    "long_term_stocks":  "https://discord.com/api/webhooks/1493402513502634186/GiXkTE0VhdbCZER4l8THB9TfaR4pJ6x84Ilnm-JZI-UY9nVxNGK86-B1pgxy4uINHgKj",
+    "closed_trades":    "https://discord.com/api/webhooks/1493402563410788442/hQLE4DY3WmKhumUcWNsiHxIdRBQIjXkwV3_n89WaUxWvrhvpar8jMwHvdsBLUnCmcS5D",
 }
 
 # ─── COLORS ────────────────────────────────────────────────────────────────────
@@ -167,6 +167,11 @@ def relay_flow_alerts(state):
                 {"name": "DTE", "value": str(alert.get("DTE", "?")), "inline": True},
                 {"name": "Trades", "value": str(alert.get("trade_count", "?")), "inline": True},
                 {"name": "Last Price", "value": f"${quote.get('Last', '?')}", "inline": True},
+                {"name": "Alert Price", "value": f"${alert.get('AlertPrice', '?')}", "inline": True},
+                {"name": "Day High", "value": f"${quote.get('DayHigh', '?')}", "inline": True},
+                {"name": "High/Low", "value": f"${quote.get('High', '?')} / ${quote.get('Low', '?')}", "inline": True},
+                {"name": "Gain %", "value": f"{((float(quote.get('Last',0))-float(alert.get('AlertPrice',0)))/max(float(alert.get('AlertPrice',1)),0.01)*100):+.1f}%" if alert.get('AlertPrice') and quote.get('Last') else "?", "inline": True},
+                {"name": "Max Gain", "value": f"{((float(quote.get('DayHigh',0))-float(alert.get('AlertPrice',0)))/max(float(alert.get('AlertPrice',1)),0.01)*100):+.1f}%" if alert.get('AlertPrice') and quote.get('DayHigh') else "?", "inline": True},
             ],
             "footer": {"text": f"Option Signals Flow | {format_timestamp(alert.get('Time', 0))}"}
         }

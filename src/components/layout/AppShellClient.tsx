@@ -3,7 +3,7 @@
 import { useSearchParams } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import type { Approval } from '@/lib/types';
-import { approvals as initialApprovals, signals } from '@/lib/mock-data';
+const initialApprovals: any[] = []; const signals: any[] = [];
 import { Sidebar } from './Sidebar';
 import { Header } from './Header';
 import { DashboardPage } from '../pages/DashboardPage';
@@ -14,6 +14,7 @@ import { ApprovalsPage } from '../pages/ApprovalsPage';
 import { CalendarPage } from '../pages/CalendarPage';
 import { ProjectsPage } from '../pages/ProjectsPage';
 import { MemoryPage } from '../pages/MemoryPage';
+import { AlertsPage } from '../pages/AlertsPage';
 import { DocsPage } from '../pages/DocsPage';
 import { WalletsPage } from '../pages/WalletsPage';
 import { TradesPage } from '../pages/TradesPage';
@@ -47,6 +48,7 @@ type PageName =
   | 'Memory'
   | 'Memory Graph'
   | 'Office'
+  | 'Alerts'
   | 'Docs'
   | 'Wallets'
   | 'Trades'
@@ -122,6 +124,8 @@ export function AppShellClient() {
         return <MemoryGraphPage />;
       case 'Office':
         return <OfficePage />;
+      case 'Alerts':
+        return <AlertsPage />;
       case 'Docs':
         return <DocsPage />;
       case 'Wallets':

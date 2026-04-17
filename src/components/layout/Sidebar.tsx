@@ -43,6 +43,7 @@ type PageName =
   | 'Memory'
   | 'Memory Graph'
   | 'Office'
+  | 'Alerts'
   | 'Docs'
   | 'Wallets'
   | 'Trades'

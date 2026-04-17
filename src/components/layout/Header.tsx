@@ -1,14 +1,40 @@
 'use client';
-
 import { useEffect, useState } from 'react';
+
+const SUBTITLES: Record<string, string> = {
+  'Command Center': 'Power Overwhelming',
+  'Performance': 'Operation CWAL',
+  'Regime': 'Black Sheep Wall',
+  'Activity': 'The Gathering',
+  'Dashboard': 'Something For Nothing',
+  'TV Chart': 'War Aint What It Used To Be',
+  'Scanner': 'Breathe Deep',
+  'Wallets': 'Show Me The Money',
+  'Trades': 'Whats Mine Is Mine',
+  'GoTrader': 'There Is No Cow Level',
+  'PowerTrader': 'Medieval Man',
+  'Risk': 'Staying Alive',
+  'Office': 'Food For Thought',
+  'Agents': 'Radio Free Zerg',
+  'Memory': 'Ophelia',
+  'Signals': 'Modify The Phase Variance',
+  'Telegram': 'Noglues',
+  'Approvals': 'Game Over Man',
+  'Calendar': 'En Taro Adun',
+  'Tasks': 'Need A Light?',
+  'Projects': 'Spawn More Overlords',
+  'Usage': 'Not Enough Minerals',
+  'Congress': 'Nuclear Launch Detected',
+  'LLM Portfolio': 'My Life For Aiur',
+  'Skills': 'Spawn More Overlords',
+  'Docs': 'You Must Construct Additional Pylons',
+};
 
 interface HeaderProps {
   title: string;
 }
-
 export function Header({ title }: HeaderProps) {
   const [time, setTime] = useState('');
-
   useEffect(() => {
     const update = () => {
       setTime(new Date().toLocaleTimeString('en-US', { hour12: false }));
@@ -17,7 +43,7 @@ export function Header({ title }: HeaderProps) {
     const id = setInterval(update, 1000);
     return () => clearInterval(id);
   }, []);
-
+  const subtitle = SUBTITLES[title] || '';
   return (
     <div
       style={{
@@ -31,19 +57,32 @@ export function Header({ title }: HeaderProps) {
         flexShrink: 0,
       }}
     >
-      <span
-        style={{
-          fontSize: 16,
-          fontWeight: 600,
-          fontFamily: "'Inter', -apple-system, sans-serif",
-          color: '#e0e0e0',
-        }}
-      >
-        {title}
-      </span>
-
+      <div style={{ display: 'flex', alignItems: 'baseline', gap: 12 }}>
+        <span
+          style={{
+            fontSize: 16,
+            fontWeight: 600,
+            fontFamily: "'Inter', -apple-system, sans-serif",
+            color: '#e0e0e0',
+          }}
+        >
+          {title}
+        </span>
+        {subtitle && (
+          <span
+            style={{
+              fontSize: 12,
+              fontFamily: "'JetBrains Mono', 'SF Mono', monospace",
+              color: '#4fc3f7',
+              fontStyle: 'italic',
+              letterSpacing: '0.5px',
+            }}
+          >
+            {subtitle}
+          </span>
+        )}
+      </div>
       <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-        {/* Pulsing green dot */}
         <span
           style={{
             display: 'inline-block',
@@ -76,7 +115,6 @@ export function Header({ title }: HeaderProps) {
           {time}
         </span>
       </div>
-
       <style>{`
         @keyframes pulse {
           0%, 100% { opacity: 1; box-shadow: 0 0 6px #66bb6a; }

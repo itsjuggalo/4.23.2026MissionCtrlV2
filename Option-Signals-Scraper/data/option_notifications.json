@@ -4095,5 +4095,131 @@
     "message": "Buy To Open at 1.86 with first target above 2.14",
     "symbol": "BABA",
     "title": "BABA 143C 4/24: BTO"
+  },
+  "1776432623": {
+    "category": "SWING",
+    "message": "Close the trade at 2.24!",
+    "symbol": "SPY",
+    "title": "SPY 685P 04/30 : STC"
+  },
+  "1776432773": {
+    "category": "SWING",
+    "message": "Reached Target 11.68 and that's 16.22%! Lock some in and wait for next target. Raise the stops to 8.18",
+    "symbol": "ORCL",
+    "title": "ORCL 180C 05/15 : STC"
+  },
+  "1776432867": {
+    "category": "SWING",
+    "message": "Reached Target 1.55 and that's 23.02%! Lock some in and wait for next target. Raise the stops to 1.08",
+    "symbol": "C",
+    "title": "C 140C 05/15 : STC"
+  },
+  "1776432890": {
+    "category": "SCALP",
+    "message": "Reached Target 2.50 and that's 34.41%! Lock some in and wait for next target. Raise the stops to 1.86",
+    "symbol": "BABA",
+    "title": "BABA 143C 04/24 : STC"
+  },
+  "1776433146": {
+    "category": "SCALP",
+    "message": "Reached Target 2.80 and that's 50.54%! Lock some in and wait for next target. Raise the stops to 2.24",
+    "symbol": "BABA",
+    "title": "BABA 143C 04/24 : STC"
+  },
+  "1776433239": {
+    "category": "SWING",
+    "message": "Reached Target 13.10 and that's 30.35%! Lock some in and wait for next target. Raise the stops to 10.05",
+    "symbol": "ORCL",
+    "title": "ORCL 180C 05/15 : STC"
+  },
+  "1776434329": {
+    "category": "SCALP",
+    "message": "Reached Target 3.40 and that's 82.80%! Lock some in and wait for next target. Raise the stops to 2.72",
+    "symbol": "BABA",
+    "title": "BABA 143C 04/24 : STC"
+  },
+  "1776434569": {
+    "category": "SWING",
+    "message": "Close the trade as it hit trailing stop at 0.55!",
+    "symbol": "PCG",
+    "title": "PCG 21C 09/18 : STC"
+  },
+  "1776435538": {
+    "category": "SCALP",
+    "message": "Buy To Open at 0.35 with first target above 0.40",
+    "symbol": "INTC",
+    "title": "INTC 70C 4/17: BTO"
+  },
+  "1776435875": {
+    "category": "SCALP",
+    "message": "Reached Target 0.40 and that's 14.29%! Lock some in and wait for next target. Raise the stops to 0.28",
+    "symbol": "INTC",
+    "title": "INTC 70C 04/17 : STC"
+  },
+  "1776435939": {
+    "category": "SWING",
+    "message": "Close the trade as it hit trailing stop at 10.00!",
+    "symbol": "ORCL",
+    "title": "ORCL 180C 05/15 : STC"
+  },
+  "1776436408": {
+    "category": "SWING",
+    "message": "Reached Target 1.65 and that's 30.95%! Lock some in and wait for next target. Raise the stops to 1.26",
+    "symbol": "C",
+    "title": "C 140C 05/15 : STC"
+  },
+  "1776436979": {
+    "category": "SCALP",
+    "message": "Reached Target 0.46 and that's 31.43%! Lock some in and wait for next target. Raise the stops to 0.35",
+    "symbol": "INTC",
+    "title": "INTC 70C 04/17 : STC"
+  },
+  "1776437461": {
+    "category": "SCALP",
+    "message": "Close the trade as it hit trailing stop at 0.34!",
+    "symbol": "INTC",
+    "title": "INTC 70C 04/17 : STC"
+  },
+  "1776439262": {
+    "category": "SWING",
+    "message": "Buy To Open at 2.05 with first target above 2.36",
+    "symbol": "SOFI",
+    "title": "SOFI 20C 6/18: BTO"
+  },
+  "1776442969": {
+    "category": "SWING",
+    "message": "Reached Target 30.50 and that's 82.09%! Lock some in and wait for next target. Raise the stops to 24.40",
+    "symbol": "AXTI",
+    "title": "AXTI 105C 08/21 : STC"
+  },
+  "1776443479": {
+    "category": "SCALP",
+    "message": "Buy To Open at 4.40 with first target above 5.06",
+    "symbol": "TSLA",
+    "title": "TSLA 410C 4/20: BTO"
+  },
+  "1776444386": {
+    "category": "SWING",
+    "message": "Reached Target 1.90 and that's 50.79%! Lock some in and wait for next target. Raise the stops to 1.52",
+    "symbol": "C",
+    "title": "C 140C 05/15 : STC"
+  },
+  "1776446285": {
+    "category": "SCALP",
+    "message": "Close the trade at 2.85!",
+    "symbol": "TSLA",
+    "title": "TSLA 410C 04/20 : STC"
+  },
+  "1776446689": {
+    "category": "SCALP",
+    "message": "Close the trade as it hit trailing stop at 2.60!",
+    "symbol": "BABA",
+    "title": "BABA 143C 04/24 : STC"
+  },
+  "1776452166": {
+    "category": "SWING",
+    "message": "Reached Target 17.60 and that's 118.63%! Lock some in and wait for next target. Raise the stops to 14.08",
+    "symbol": "GOOGL",
+    "title": "GOOGL 335C 05/15 : STC"
   }
 }

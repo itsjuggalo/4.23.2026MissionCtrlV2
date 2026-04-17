@@ -4,7 +4,7 @@ import { useState } from 'react';
 import { Sidebar } from '@/components/layout/Sidebar';
 import { Header } from '@/components/layout/Header';
 import type { Approval } from '@/lib/types';
-import { approvals as initialApprovals, signals } from '@/lib/mock-data';
+const initialApprovals: any[] = []; const signals: any[] = [];
 
 type PageName = 'Dashboard' | 'Signals' | 'Telegram' | 'Scanner' | 'Tasks' | 'Agents' |
   'Approvals' | 'Calendar' | 'Projects' | 'Memory' | 'Memory Graph' | 'Office' | 'Docs' |

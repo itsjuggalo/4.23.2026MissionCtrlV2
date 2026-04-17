@@ -1,288 +1,339 @@
 'use client';
 import { useEffect, useState } from 'react';
-import { MetricCard } from '../ui/MetricCard';
-import { Card } from '../ui/Card';
-import { Badge } from '../ui/Badge';
-import { SectionHeader } from '../ui/SectionHeader';
-import { ProgressBar } from '../ui/ProgressBar';
 import { BTCBiasWidget } from '../ui/BTCBiasWidget';
-import { useMarketData } from '@/hooks/useMarketData';
+
+// ============================================================================
+// TERRAN DASHBOARD — Trading Decision Headquarters
+// The ONE page that answers: "What should I do RIGHT NOW?"
+// ============================================================================
 
 export function DashboardPage() {
-  const { prices } = useMarketData();
   const [portfolio, setPortfolio] = useState<any>(null);
-  const [positions, setPositions] = useState<any>({});
+  const [signals, setSignals] = useState<any>(null);
   const [regime, setRegime] = useState<any>(null);
   const [report, setReport] = useState<any>(null);
-  const [signals, setSignals] = useState<any[]>([]);
   const [params, setParams] = useState<any>(null);
-  const [lastRefresh, setLastRefresh] = useState('');
+  const [crypto, setCrypto] = useState<any>(null);
+  const [loading, setLoading] = useState(true);
+  const [tick, setTick] = useState(0);
 
-  useEffect(() => {
-    async function fetchAll() {
-      const [portRes, posRes, regRes, repRes, sigRes, parRes] = await Promise.all([
+  const fetchAll = async () => {
+    try {
+      const [pRes, sRes, rRes, repRes, prRes, cRes] = await Promise.all([
         fetch('/api/portfolio').then(r => r.json()).catch(() => null),
-        fetch('/api/signals/latest').then(r => r.json()).catch(() => ({})),
+        fetch('/api/signals/latest').then(r => r.json()).catch(() => null),
         fetch('/api/regime').then(r => r.json()).catch(() => null),
         fetch('/api/daily-report').then(r => r.json()).catch(() => null),
-        fetch('/api/signals/history?ticker=BTCUSD&limit=10').then(r => r.json()).catch(() => []),
         fetch('/api/supertrend-params').then(r => r.json()).catch(() => null),
+        fetch('/api/crypto').then(r => r.json()).catch(() => null),
       ]);
-      setPortfolio(portRes);
-      setPositions(posRes || {});
-      setRegime(regRes);
-      setReport(repRes);
-      setSignals(Array.isArray(sigRes) ? sigRes.reverse() : []);
-      setParams(parRes);
-      setLastRefresh(new Date().toLocaleTimeString());
-    }
+      setPortfolio(pRes); setSignals(sRes); setRegime(rRes);
+      setReport(repRes); setParams(prRes); setCrypto(cRes);
+    } catch (e) { console.error(e); }
+    finally { setLoading(false); }
+  };
+
+  useEffect(() => {
     fetchAll();
-    const interval = setInterval(fetchAll, 15000);
-    return () => clearInterval(interval);
+    const d = setInterval(fetchAll, 15000);
+    const t = setInterval(() => setTick(x => x + 1), 1000);
+    return () => { clearInterval(d); clearInterval(t); };
   }, []);
 
-  // Portfolio calcs
-  const equity = portfolio?.balance || 0;
-  const cash = portfolio?.cash || 0;
-  const unrealizedPL = portfolio?.pl || 0;
-  const dayPL = portfolio?.day_pl || 0;
-  const startCapital = 100000;
-  const totalReturn = equity > 0 ? ((equity - startCapital) / startCapital * 100) : 0;
-  const goalCapital = 110000;
-  const goalPct = Math.min(((equity - startCapital) / (goalCapital - startCapital)) * 100, 100);
+  const equity = parseFloat(portfolio?.equity || portfolio?.balance || '0');
+  const lastEq = parseFloat(portfolio?.last_equity || '0');
+  const dailyPct = lastEq ? ((equity - lastEq) / lastEq * 100) : 0;
+  const dailyChange = equity - lastEq;
+  const totalReturn = ((equity - 100000) / 100000 * 100);
+  const positions = portfolio?.positions || [];
+  const btcSignal = signals?.BTCUSD || {};
+  const regimeStr = regime?.overall_regime || 'UNKNOWN';
+  const bias = regime?.direction_bias || '';
+  const timeframes = regime?.timeframes || {};
 
-  // Position calcs
-  const openPositions = Object.entries(positions).filter(([, d]: [string, any]) => d.direction);
-  const totalSignalsToday = report?.signals?.total || 0;
-  const totalTradesToday = Object.values(report?.pnl || {}).reduce((s: number, p: any) => s + (p.trades_today || 0), 0) as number;
+  const pnlHistory = signals?.BTCUSD?.pnl_history || [];
+  const wins = pnlHistory.filter((t: any) => t.pnl_pct > 0).length;
+  const winRate = pnlHistory.length > 0 ? (wins / pnlHistory.length * 100) : 0;
 
-  // Win rate from all trade history
-  let allWins = 0, allTrades = 0;
-  Object.values(positions).forEach((p: any) => {
-    (p.pnl_history || []).forEach((t: any) => { allTrades++; if (t.pnl_pct > 0) allWins++; });
-  });
-  const winRate = allTrades > 0 ? Math.round((allWins / allTrades) * 100) : 0;
+  const fmt = (n: number, d = 2) => n.toLocaleString(undefined, { minimumFractionDigits: d, maximumFractionDigits: d });
 
-  // BTC price from market data
-  const btcPrice = prices['BTC']?.price || 0;
-  const btcChange = prices['BTC']?.change24h || 0;
+  if (loading) return (
+    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '60vh', color: '#4fc3f7', fontFamily: 'var(--font-mc-mono)' }}>
+      <div style={{ animation: 'db-blink 1s infinite' }}>LOADING DASHBOARD...</div>
+    </div>
+  );
 
-  function regimeColor(r: string) {
-    if (r?.includes('STRONG_TREND')) return '#66bb6a';
-    if (r?.includes('WEAK_TREND')) return '#ff9800';
-    if (r?.includes('RANGING')) return '#4fc3f7';
-    if (r?.includes('VOLATILE')) return '#ef5350';
-    return '#607d8b';
-  }
-
-  function actionColor(a: string) {
-    if (a === 'BUY') return '#66bb6a';
-    if (a === 'SELL') return '#ef5350';
-    return '#607d8b';
-  }
-
-  function formatTime(iso: string) {
-    try {
-      const d = new Date(iso);
-      const now = new Date();
-      const diff = Math.floor((now.getTime() - d.getTime()) / 1000);
-      if (diff < 60) return `${diff}s ago`;
-      if (diff < 3600) return `${Math.floor(diff / 60)}m ago`;
-      if (diff < 86400) return `${Math.floor(diff / 3600)}h ago`;
-      return d.toLocaleDateString();
-    } catch { return ''; }
-  }
+  // Determine market stance
+  const stanceColor = bias === 'BULLISH' ? '#66bb6a' : bias === 'BEARISH' ? '#ef5350' : '#ff9800';
+  const stanceText = bias === 'BULLISH' ? 'RISK ON — Favor longs' : bias === 'BEARISH' ? 'RISK OFF — Defensive' : 'NEUTRAL — Wait for clarity';
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
-      {/* Header */}
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-        <div>
-          <h1 style={{ fontSize: 20, fontWeight: 700, color: '#e0e0e0', margin: 0 }}>Command Center</h1>
-          <div style={{ fontSize: 11, color: '#607d8b', fontFamily: "'JetBrains Mono', monospace", marginTop: 2 }}>
-            PHASE 1 — PROVE ROI · Last refresh: {lastRefresh}
+    <div style={{ padding: '20px', maxWidth: '1400px', margin: '0 auto' }}>
+      <style>{`
+        @keyframes db-blink { 0%,100% { opacity: 1; } 50% { opacity: 0.3; } }
+        @keyframes db-breathe { 0%,100% { box-shadow: 0 0 8px #4fc3f711; } 50% { box-shadow: 0 0 20px #4fc3f722; } }
+        @keyframes db-slide { from { transform: translateX(-10px); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
+        .db-card { background: linear-gradient(180deg, #0a1929 0%, #0d1420 100%); border: 1px solid #1a3a4a; border-radius: 10px; position: relative; animation: db-breathe 4s ease-in-out infinite; }
+        .db-label { font-size: 10px; color: #607d8b; text-transform: uppercase; letter-spacing: 1.5px; font-family: var(--font-mc-mono); }
+        .db-glow-line { height: 2px; background: linear-gradient(90deg, transparent, #4fc3f7, transparent); border-radius: 1px; }
+      `}</style>
+
+      {/* === STANCE BANNER === */}
+      <div style={{
+        padding: '14px 24px', marginBottom: '16px', borderRadius: '10px',
+        background: `linear-gradient(135deg, ${stanceColor}11, #0a1929)`,
+        border: `1px solid ${stanceColor}33`,
+        display: 'flex', justifyContent: 'space-between', alignItems: 'center',
+      }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
+          <div style={{ width: '12px', height: '12px', borderRadius: '50%', background: stanceColor, boxShadow: `0 0 10px ${stanceColor}` }} />
+          <div>
+            <div style={{ fontSize: '16px', fontWeight: 700, color: stanceColor, fontFamily: 'var(--font-mc-mono)', letterSpacing: '1px' }}>
+              {regimeStr.replace(/_/g, ' ')} — {bias}
+            </div>
+            <div style={{ fontSize: '12px', color: '#607d8b', marginTop: '2px' }}>{stanceText}</div>
           </div>
         </div>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-          <span style={{ width: 8, height: 8, borderRadius: '50%', background: '#66bb6a', animation: 'pulse 2s infinite' }} />
-          <span style={{ fontSize: 12, color: '#66bb6a', fontWeight: 600 }}>LIVE</span>
-        </div>
-      </div>
-
-      {/* Mission Progress */}
-      <Card>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
-          <span style={{ fontSize: 11, color: '#607d8b', fontFamily: "'JetBrains Mono', monospace", letterSpacing: 1 }}>MISSION PROGRESS</span>
-          <span style={{ fontSize: 12, color: '#ef5350', fontFamily: "'JetBrains Mono', monospace" }}>Phase 1 of 2</span>
-        </div>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', marginBottom: 6 }}>
-          <span style={{ fontSize: 28, fontFamily: "'JetBrains Mono', monospace", fontWeight: 700, color: '#e0e0e0' }}>
-            ${equity.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
-          </span>
-          <span style={{ fontSize: 13, color: '#607d8b', fontFamily: "'JetBrains Mono', monospace" }}>→ ${goalCapital.toLocaleString()} goal</span>
-        </div>
-        <ProgressBar value={Math.max(goalPct, 0)} max={100} color="#4fc3f7" height={6} />
-        <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: 6 }}>
-          <span style={{ fontSize: 11, color: totalReturn >= 0 ? '#66bb6a' : '#ef5350', fontFamily: "'JetBrains Mono', monospace" }}>
-            {totalReturn >= 0 ? '+' : ''}${(equity - startCapital).toFixed(2)} earned
-          </span>
-          <span style={{ fontSize: 11, color: '#4fc3f7', fontFamily: "'JetBrains Mono', monospace" }}>
-            {goalPct.toFixed(1)}% complete
-          </span>
-        </div>
-      </Card>
-
-      {/* Key Metrics */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 12 }}>
-        <MetricCard label="BTC Price" value={btcPrice > 0 ? `$${btcPrice.toLocaleString()}` : '—'} subtitle={btcChange !== 0 ? `${btcChange >= 0 ? '+' : ''}${btcChange.toFixed(1)}% 24h` : 'loading'} color={btcChange >= 0 ? '#66bb6a' : '#ef5350'} />
-        <MetricCard label="Day P&L" value={`${dayPL >= 0 ? '+' : ''}$${dayPL.toFixed(0)}`} subtitle={`${totalTradesToday} trades today`} color={dayPL >= 0 ? '#66bb6a' : '#ef5350'} />
-        <MetricCard label="Win Rate" value={`${winRate}%`} subtitle={`${allWins}/${allTrades} trades`} color={winRate >= 50 ? '#66bb6a' : '#ff9800'} />
-        <MetricCard label="Signals" value={String(totalSignalsToday)} subtitle={`${report?.signals?.buys || 0}B / ${report?.signals?.sells || 0}S`} color="#4fc3f7" />
-      </div>
-
-      {/* Regime + BTC Bias */}
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>
-        {/* Market Regime */}
-        <Card>
-          <SectionHeader title="Market Regime" />
-          <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginTop: 8 }}>
-            <span style={{ fontSize: 24, fontWeight: 700, color: regimeColor(regime?.overall_regime), fontFamily: "'JetBrains Mono', monospace" }}>
-              {regime?.overall_regime?.replace(/_/g, ' ') || 'LOADING'}
-            </span>
+        <div style={{ textAlign: 'right' }}>
+          <div style={{ fontSize: '11px', color: '#607d8b', fontFamily: 'var(--font-mc-mono)' }}>SUPERTREND</div>
+          <div style={{ fontSize: '18px', fontWeight: 700, color: btcSignal.direction === 'LONG' ? '#66bb6a' : '#ef5350', fontFamily: 'var(--font-mc-mono)' }}>
+            {btcSignal.direction === 'LONG' ? '▲ LONG' : btcSignal.direction === 'SHORT' ? '▼ SHORT' : '— WAIT'}
           </div>
-          <div style={{ fontSize: 12, color: '#455a64', marginTop: 6 }}>Bias: {regime?.direction_bias || '—'}</div>
-          <div style={{ fontSize: 11, color: '#607d8b', marginTop: 4 }}>{regime?.overall_recommendation || ''}</div>
-          {regime?.timeframes && (
-            <div style={{ display: 'flex', gap: 8, marginTop: 12 }}>
-              {Object.entries(regime.timeframes).map(([tf, data]: [string, any]) => (
-                <div key={tf} style={{ background: '#0d1117', borderRadius: 6, padding: '6px 10px', border: '1px solid #1a3a4a', flex: 1 }}>
-                  <div style={{ fontSize: 11, fontWeight: 600, color: '#e0e0e0' }}>{tf}</div>
-                  <div style={{ fontSize: 10, color: regimeColor(data.regime) }}>{data.regime?.replace(/_/g, ' ')}</div>
-                  <div style={{ fontSize: 9, color: '#607d8b' }}>ADX {data.adx}</div>
-                </div>
-              ))}
-            </div>
-          )}
-        </Card>
-
-        {/* BTC Bias */}
-        <BTCBiasWidget />
+        </div>
       </div>
 
-      {/* Strategy Scoreboard + Position Book */}
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>
-        {/* Strategy Scoreboard */}
-        <Card>
-          <SectionHeader title="Strategy Parameters" />
-          {params?.recommended_atr_period ? (
-            <div style={{ marginTop: 8 }}>
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 8 }}>
-                <div style={{ background: '#0d1117', borderRadius: 6, padding: '8px 10px', border: '1px solid #1a3a4a' }}>
-                  <div style={{ fontSize: 10, color: '#607d8b' }}>ATR Period</div>
-                  <div style={{ fontSize: 18, fontWeight: 700, color: '#4fc3f7', fontFamily: "'JetBrains Mono', monospace" }}>{params.recommended_atr_period}</div>
-                </div>
-                <div style={{ background: '#0d1117', borderRadius: 6, padding: '8px 10px', border: '1px solid #1a3a4a' }}>
-                  <div style={{ fontSize: 10, color: '#607d8b' }}>Multiplier</div>
-                  <div style={{ fontSize: 18, fontWeight: 700, color: '#4fc3f7', fontFamily: "'JetBrains Mono', monospace" }}>{params.recommended_multiplier}</div>
-                </div>
-                <div style={{ background: '#0d1117', borderRadius: 6, padding: '8px 10px', border: '1px solid #1a3a4a' }}>
-                  <div style={{ fontSize: 10, color: '#607d8b' }}>Win Rate</div>
-                  <div style={{ fontSize: 14, fontWeight: 600, color: '#66bb6a', fontFamily: "'JetBrains Mono', monospace" }}>{params.expected_win_rate}%</div>
-                </div>
-                <div style={{ background: '#0d1117', borderRadius: 6, padding: '8px 10px', border: '1px solid #1a3a4a' }}>
-                  <div style={{ fontSize: 10, color: '#607d8b' }}>Profit Factor</div>
-                  <div style={{ fontSize: 14, fontWeight: 600, color: '#66bb6a', fontFamily: "'JetBrains Mono', monospace" }}>{params.expected_profit_factor}</div>
-                </div>
-              </div>
-              <div style={{ fontSize: 10, color: '#607d8b', marginTop: 8, fontFamily: "'JetBrains Mono', monospace" }}>
-                Backtested: {params.backtest_return_pct}% return | Updated: {params.updated ? formatTime(params.updated) : '—'}
+      {/* === MARKET PULSE BAR === */}
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '8px', marginBottom: '16px' }}>
+        {[
+          { sym: 'BTC', price: crypto?.bitcoin?.usd || 0, chg: crypto?.bitcoin?.usd_24h_change || 0 },
+          { sym: 'ETH', price: crypto?.ethereum?.usd || 0, chg: crypto?.ethereum?.usd_24h_change || 0 },
+          { sym: 'SOL', price: crypto?.solana?.usd || 0, chg: crypto?.solana?.usd_24h_change || 0 },
+          { sym: 'PORTFOLIO', price: equity, chg: dailyPct },
+        ].map((c, i) => (
+          <div key={i} style={{
+            background: '#0a1929', border: '1px solid #1a3a4a', borderRadius: '8px',
+            padding: '12px 16px', display: 'flex', justifyContent: 'space-between', alignItems: 'center',
+          }}>
+            <div>
+              <div style={{ fontSize: '11px', color: '#4fc3f7', fontFamily: 'var(--font-mc-mono)', fontWeight: 600 }}>{c.sym}</div>
+              <div style={{ fontSize: '18px', fontWeight: 700, color: '#e0e0e0', fontFamily: 'var(--font-mc-mono)' }}>
+                ${c.price >= 1000 ? fmt(c.price, 0) : fmt(c.price)}
               </div>
             </div>
-          ) : (
-            <div style={{ color: '#607d8b', fontSize: 12, marginTop: 8 }}>Run optimizer to see params</div>
-          )}
-        </Card>
-
-        {/* Position Book */}
-        <Card>
-          <SectionHeader title="Position Book" />
-          <div style={{ marginTop: 8 }}>
-            {openPositions.length === 0 ? (
-              <div style={{ color: '#607d8b', fontSize: 12 }}>No open positions</div>
-            ) : (
-              openPositions.map(([ticker, data]: [string, any]) => (
-                <div key={ticker} style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '8px 0', borderBottom: '1px solid #1a3a4a' }}>
-                  <span style={{ fontSize: 13, fontWeight: 600, color: '#e0e0e0', minWidth: 70 }}>{ticker}</span>
-                  <Badge color={data.direction === 'LONG' ? '#66bb6a' : '#ef5350'}>{data.direction}</Badge>
-                  <span style={{ flex: 1 }} />
-                  <div style={{ textAlign: 'right' }}>
-                    <div style={{ fontSize: 12, fontFamily: "'JetBrains Mono', monospace", color: '#e0e0e0' }}>
-                      ${data.entry_price?.toLocaleString() || '—'}
-                    </div>
-                    <div style={{ fontSize: 10, color: '#607d8b' }}>{data.signal_count} signals</div>
-                  </div>
-                </div>
-              ))
-            )}
-            {/* Portfolio summary */}
-            <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: 10, padding: '8px 0', borderTop: '1px solid #1a3a4a' }}>
-              <span style={{ fontSize: 11, color: '#607d8b' }}>Cash available</span>
-              <span style={{ fontSize: 12, fontFamily: "'JetBrains Mono', monospace", color: '#66bb6a' }}>${cash.toLocaleString()}</span>
+            <div style={{
+              fontSize: '14px', fontWeight: 700, fontFamily: 'var(--font-mc-mono)',
+              color: c.chg >= 0 ? '#66bb6a' : '#ef5350',
+              padding: '4px 10px', borderRadius: '6px',
+              background: c.chg >= 0 ? '#66bb6a11' : '#ef535011',
+            }}>
+              {c.chg >= 0 ? '+' : ''}{fmt(c.chg, 1)}%
             </div>
           </div>
-        </Card>
+        ))}
       </div>
 
-      {/* PM2 Process Status */}
-      <div>
-        <SectionHeader title="Infrastructure" />
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 10, marginTop: 8 }}>
-          {Object.entries(report?.infrastructure?.pm2 || {}).map(([name, data]: [string, any]) => (
-            <div key={name} style={{ background: '#111118', border: '1px solid #1a3a4a', borderRadius: 8, padding: '10px 14px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-              <div>
-                <div style={{ fontSize: 13, fontWeight: 600, color: '#e0e0e0' }}>{name}</div>
-                <div style={{ fontSize: 10, color: '#607d8b' }}>{data.memory_mb}MB · {data.restarts} restarts</div>
+      {/* === MAIN 3-COLUMN === */}
+      <div style={{ display: 'grid', gridTemplateColumns: '340px 1fr 320px', gap: '14px' }}>
+
+        {/* LEFT: Portfolio Deep Dive */}
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+          {/* Equity Card */}
+          <div className="db-card" style={{ padding: '20px' }}>
+            <div className="db-label" style={{ marginBottom: '8px' }}>PORTFOLIO EQUITY</div>
+            <div style={{ fontSize: '34px', fontWeight: 800, color: '#e0e0e0', fontFamily: 'var(--font-mc-mono)', lineHeight: 1 }}>${fmt(equity)}</div>
+            <div style={{ display: 'flex', gap: '16px', marginTop: '10px' }}>
+              <div style={{ fontSize: '13px', color: dailyPct >= 0 ? '#66bb6a' : '#ef5350', fontFamily: 'var(--font-mc-mono)' }}>
+                {dailyPct >= 0 ? '▲' : '▼'} {fmt(Math.abs(dailyPct))}%
               </div>
-              <Badge color={data.status === 'online' ? '#66bb6a' : '#ef5350'}>{data.status?.toUpperCase()}</Badge>
+              <div style={{ fontSize: '13px', color: '#607d8b', fontFamily: 'var(--font-mc-mono)' }}>
+                ${fmt(Math.abs(dailyChange))}
+              </div>
             </div>
-          ))}
-        </div>
-      </div>
+            <div className="db-glow-line" style={{ marginTop: '14px' }} />
+            <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '10px', fontSize: '11px', fontFamily: 'var(--font-mc-mono)' }}>
+              <span style={{ color: '#607d8b' }}>RETURN</span>
+              <span style={{ color: totalReturn >= 0 ? '#66bb6a' : '#ef5350', fontWeight: 600 }}>{totalReturn >= 0 ? '+' : ''}{fmt(totalReturn, 1)}%</span>
+            </div>
+            <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '4px', fontSize: '11px', fontFamily: 'var(--font-mc-mono)' }}>
+              <span style={{ color: '#607d8b' }}>WIN RATE</span>
+              <span style={{ color: winRate > 50 ? '#66bb6a' : '#ff9800', fontWeight: 600 }}>{fmt(winRate, 0)}% ({wins}/{pnlHistory.length})</span>
+            </div>
+          </div>
 
-      {/* Live Signal Pipeline */}
-      <Card>
-        <SectionHeader title="Live Pipeline" />
-        <div style={{ marginTop: 8, display: 'flex', flexDirection: 'column', gap: 6 }}>
-          {signals.length === 0 ? (
-            <div style={{ color: '#607d8b', fontSize: 12 }}>No signals yet today</div>
-          ) : (
-            signals.slice(0, 8).map((sig, i) => {
-              const agentColors: Record<string, string> = { 'SUPERTREND_FLIP': '#4fc3f7', 'ENTRY': '#66bb6a', 'TP': '#ff9800', 'SL': '#ef5350' };
-              const sigColor = agentColors[sig.signal_type] || '#607d8b';
+          {/* Positions */}
+          <div className="db-card" style={{ padding: '16px' }}>
+            <div className="db-label" style={{ marginBottom: '12px' }}>POSITIONS ({positions.length})</div>
+            {positions.length === 0 ? (
+              <div style={{ color: '#455a64', fontSize: '12px', fontFamily: 'var(--font-mc-mono)' }}>No open positions</div>
+            ) : positions.map((p: any, i: number) => {
+              const pnl = parseFloat(p.unrealized_pl || '0');
+              const pnlPct = parseFloat(p.unrealized_plpc || '0') * 100;
+              const g = pnl >= 0;
               return (
-                <div
-                  key={i}
-                  style={{
-                    display: 'flex', alignItems: 'center', gap: 10,
-                    padding: '8px 12px', borderLeft: `3px solid ${sigColor}`,
-                    background: '#0d1117', borderRadius: '0 6px 6px 0',
-                  }}
-                >
-                  <span style={{ fontSize: 11, fontFamily: "'JetBrains Mono', monospace", color: '#607d8b', minWidth: 50 }}>
-                    {sig.timestamp ? new Date(sig.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : ''}
-                  </span>
-                  <Badge color={sigColor}>{sig.signal_type || 'SIGNAL'}</Badge>
-                  <span style={{ fontSize: 12, color: '#455a64', flex: 1 }}>
-                    {sig.ticker} {sig.action} {sig.price ? `@ $${sig.price.toLocaleString()}` : ''}
-                    {sig.timeframe && sig.timeframe !== 'UNKNOWN' ? ` · ${sig.timeframe}` : ''}
-                  </span>
-                  <span style={{ fontSize: 10, color: '#607d8b' }}>{formatTime(sig.timestamp)}</span>
+                <div key={i} style={{
+                  padding: '12px', background: '#0d1117', borderRadius: '8px',
+                  border: `1px solid ${g ? '#66bb6a22' : '#ef535022'}`,
+                  marginBottom: '8px', animation: `db-slide 0.3s ease-out ${i * 0.1}s both`,
+                }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '6px' }}>
+                    <span style={{ fontSize: '16px', fontWeight: 700, color: '#e0e0e0', fontFamily: 'var(--font-mc-mono)' }}>{p.symbol}</span>
+                    <span style={{ fontSize: '16px', fontWeight: 700, color: g ? '#66bb6a' : '#ef5350', fontFamily: 'var(--font-mc-mono)' }}>
+                      {g ? '+' : ''}{fmt(pnlPct, 1)}%
+                    </span>
+                  </div>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '10px', color: '#607d8b', fontFamily: 'var(--font-mc-mono)' }}>
+                    <span>{p.qty} @ ${fmt(parseFloat(p.avg_entry_price || '0'))}</span>
+                    <span>${fmt(parseFloat(p.current_price || '0'))}</span>
+                  </div>
+                  <div style={{ height: '3px', borderRadius: '2px', background: '#0a1929', marginTop: '8px', overflow: 'hidden' }}>
+                    <div style={{ height: '100%', width: `${Math.min(Math.abs(pnlPct) * 3, 100)}%`, background: g ? '#66bb6a' : '#ef5350', borderRadius: '2px' }} />
+                  </div>
+                  <div style={{ fontSize: '10px', color: g ? '#66bb6a' : '#ef5350', marginTop: '4px', fontFamily: 'var(--font-mc-mono)' }}>
+                    P/L: {g ? '+' : ''}${fmt(pnl)}
+                  </div>
+                  {pnlPct > 10 && <div style={{ fontSize: '10px', color: '#ff9800', marginTop: '4px', fontFamily: 'var(--font-mc-mono)' }}>⚠ Consider partial profit</div>}
+                  {pnlPct < -3 && <div style={{ fontSize: '10px', color: '#ef5350', marginTop: '4px', fontFamily: 'var(--font-mc-mono)' }}>⚠ Review stop loss</div>}
                 </div>
               );
-            })
-          )}
+            })}
+          </div>
         </div>
-      </Card>
+
+        {/* CENTER: BTC Analysis */}
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+          {/* BTC Bias Widget */}
+          <BTCBiasWidget />
+
+          {/* Multi-Timeframe Technical */}
+          <div className="db-card" style={{ padding: '18px' }}>
+            <div className="db-label" style={{ marginBottom: '14px' }}>BTC MULTI-TIMEFRAME ANALYSIS</div>
+            {Object.entries(timeframes).length === 0 ? (
+              <div style={{ color: '#455a64', fontSize: '12px', fontFamily: 'var(--font-mc-mono)' }}>Awaiting regime data...</div>
+            ) : Object.entries(timeframes).map(([tf, data]: [string, any]) => {
+              const dirColor = data.direction === 'BULLISH' ? '#66bb6a' : data.direction === 'BEARISH' ? '#ef5350' : '#ff9800';
+              const adxWidth = Math.min((data.adx || 0) / 60 * 100, 100);
+              return (
+                <div key={tf} style={{ marginBottom: '14px', padding: '12px', background: '#0d1117', borderRadius: '6px', borderLeft: `3px solid ${dirColor}` }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
+                    <span style={{ fontSize: '14px', fontWeight: 700, color: '#4fc3f7', fontFamily: 'var(--font-mc-mono)' }}>{tf}</span>
+                    <span style={{ fontSize: '12px', fontWeight: 600, color: dirColor, fontFamily: 'var(--font-mc-mono)', padding: '2px 10px', background: `${dirColor}11`, borderRadius: '4px' }}>
+                      {data.direction || data.regime || 'N/A'}
+                    </span>
+                  </div>
+                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '8px', fontSize: '10px', fontFamily: 'var(--font-mc-mono)' }}>
+                    <div>
+                      <span style={{ color: '#607d8b' }}>ADX</span>
+                      <div style={{ height: '4px', background: '#0a1929', borderRadius: '2px', marginTop: '4px' }}>
+                        <div style={{ height: '100%', width: `${adxWidth}%`, background: data.adx > 25 ? '#66bb6a' : '#ff9800', borderRadius: '2px' }} />
+                      </div>
+                      <span style={{ color: data.adx > 25 ? '#66bb6a' : '#ff9800' }}>{data.adx?.toFixed(1) || 'N/A'}</span>
+                    </div>
+                    <div>
+                      <span style={{ color: '#607d8b' }}>CHOP</span>
+                      <div style={{ marginTop: '4px', color: data.choppiness > 60 ? '#ef5350' : '#66bb6a' }}>{data.choppiness?.toFixed(1) || 'N/A'}</div>
+                    </div>
+                    <div>
+                      <span style={{ color: '#607d8b' }}>EFFICIENCY</span>
+                      <div style={{ marginTop: '4px', color: '#4fc3f7' }}>{data.trend_efficiency?.toFixed(3) || 'N/A'}</div>
+                    </div>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+
+          {/* SuperTrend Signal */}
+          <div className="db-card" style={{ padding: '18px' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+              <div>
+                <div className="db-label" style={{ marginBottom: '6px' }}>SUPERTREND SIGNAL</div>
+                <div style={{ fontSize: '24px', fontWeight: 800, color: btcSignal.direction === 'LONG' ? '#66bb6a' : '#ef5350', fontFamily: 'var(--font-mc-mono)' }}>
+                  {btcSignal.direction || 'N/A'}
+                </div>
+                <div style={{ fontSize: '11px', color: '#607d8b', fontFamily: 'var(--font-mc-mono)', marginTop: '4px' }}>
+                  Entry: ${btcSignal.entry_price ? Number(btcSignal.entry_price).toLocaleString() : 'N/A'} | Signals: {btcSignal.signal_count || 0}
+                </div>
+              </div>
+              {params && (
+                <div style={{ textAlign: 'right' }}>
+                  <div className="db-label" style={{ marginBottom: '4px' }}>OPTIMIZER</div>
+                  <div style={{ fontSize: '13px', color: '#4fc3f7', fontFamily: 'var(--font-mc-mono)' }}>ATR {params.recommended_atr_period} × {params.recommended_multiplier}</div>
+                  <div style={{ fontSize: '11px', color: '#66bb6a', fontFamily: 'var(--font-mc-mono)' }}>+{params.backtest_return_pct}% backtest</div>
+                  <div style={{ fontSize: '11px', color: '#ff9800', fontFamily: 'var(--font-mc-mono)' }}>{params.expected_win_rate}% WR | {params.expected_profit_factor} PF</div>
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+
+        {/* RIGHT: Signals + Daily Report */}
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+          {/* Today's Report */}
+          {report && (
+            <div className="db-card" style={{ padding: '16px' }}>
+              <div className="db-label" style={{ marginBottom: '12px' }}>TODAY'S REPORT</div>
+              {report.summary ? (
+                <div style={{ fontSize: '12px', color: '#b0bec5', lineHeight: '1.6' }}>{report.summary}</div>
+              ) : (
+                <>
+                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '6px', fontSize: '11px', fontFamily: 'var(--font-mc-mono)' }}>
+                    {[
+                      { l: 'SIGNALS', v: report?.signals?.total || 0, c: '#4fc3f7' },
+                      { l: 'TRADES', v: report?.trades || 0, c: '#66bb6a' },
+                      { l: 'P/L', v: report?.pnl ? `${report.pnl >= 0 ? '+' : ''}${fmt(report.pnl)}%` : 'N/A', c: (report?.pnl || 0) >= 0 ? '#66bb6a' : '#ef5350' },
+                      { l: 'ALERTS', v: report?.alerts || 0, c: '#ff9800' },
+                    ].map((s, i) => (
+                      <div key={i} style={{ padding: '8px 10px', background: '#0d1117', borderRadius: '4px', display: 'flex', justifyContent: 'space-between' }}>
+                        <span style={{ color: '#607d8b' }}>{s.l}</span>
+                        <span style={{ color: s.c, fontWeight: 600 }}>{s.v}</span>
+                      </div>
+                    ))}
+                  </div>
+                </>
+              )}
+            </div>
+          )}
+
+          {/* Recent Signal History */}
+          <div className="db-card" style={{ padding: '16px' }}>
+            <div className="db-label" style={{ marginBottom: '12px' }}>RECENT SIGNALS</div>
+            {pnlHistory.length === 0 ? (
+              <div style={{ color: '#455a64', fontSize: '12px', fontFamily: 'var(--font-mc-mono)' }}>No signal history</div>
+            ) : [...pnlHistory].reverse().slice(0, 8).map((t: any, i: number) => {
+              const g = t.pnl_pct > 0;
+              const d = t.closed_at ? new Date(t.closed_at) : null;
+              return (
+                <div key={i} style={{
+                  display: 'flex', justifyContent: 'space-between', alignItems: 'center',
+                  padding: '8px 10px', borderLeft: `2px solid ${g ? '#66bb6a' : '#ef5350'}`,
+                  background: '#0d1117', borderRadius: '3px', marginBottom: '4px',
+                  fontSize: '11px', fontFamily: 'var(--font-mc-mono)',
+                }}>
+                  <span style={{ color: '#455a64', minWidth: '50px' }}>{d ? d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' }) : '?'}</span>
+                  <span style={{ color: t.direction === 'LONG' ? '#66bb6a' : '#ef5350', minWidth: '40px' }}>{t.direction}</span>
+                  <span style={{ color: '#607d8b' }}>${fmt(t.entry, 0)}→${fmt(t.exit, 0)}</span>
+                  <span style={{ color: g ? '#66bb6a' : '#ef5350', fontWeight: 700 }}>{g ? '+' : ''}{fmt(t.pnl_pct)}%</span>
+                </div>
+              );
+            })}
+          </div>
+
+          {/* Quick Stats */}
+          <div className="db-card" style={{ padding: '16px' }}>
+            <div className="db-label" style={{ marginBottom: '10px' }}>ACCOUNT</div>
+            {[
+              { l: 'BUYING POWER', v: `$${fmt(parseFloat(portfolio?.buying_power || '0'))}`, c: '#4fc3f7' },
+              { l: 'CASH', v: `$${fmt(parseFloat(portfolio?.cash || '0'))}`, c: '#607d8b' },
+              { l: 'GOAL ($110K)', v: `${fmt(Math.min(((equity - 100000) / 10000) * 100, 100), 0)}%`, c: '#ff9800' },
+            ].map((s, i) => (
+              <div key={i} style={{ display: 'flex', justifyContent: 'space-between', padding: '6px 10px', background: '#0d1117', borderRadius: '4px', marginBottom: '4px', fontSize: '11px', fontFamily: 'var(--font-mc-mono)' }}>
+                <span style={{ color: '#607d8b' }}>{s.l}</span>
+                <span style={{ color: s.c, fontWeight: 600 }}>{s.v}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
     </div>
   );
 }
