@@ -44,11 +44,9 @@ export function AgentsPage() {
       if (data.success) {
         setAgents(data.agents);
       }
-      if (trustRes?.agents) setTrustData(trustRes.agents);
       setLoading(false);
     } catch (error) {
       console.error('Error fetching agents:', error);
-      if (trustRes?.agents) setTrustData(trustRes.agents);
       setLoading(false);
     }
   };

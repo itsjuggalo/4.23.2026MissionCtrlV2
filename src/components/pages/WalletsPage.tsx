@@ -1,297 +1,102 @@
 'use client';
-
-import { useEffect, useState } from 'react';
-
-interface Asset {
-  symbol: string;
-  amount: number;
-  value_usd: number;
-  percentage: number;
-}
-
-interface ExchangeData {
-  exchange: string;
-  connected: boolean;
-  total_usd: number;
-  assets: Array<{
-    symbol: string;
-    amount: number;
-    value_usd: number;
-  }>;
-  error?: string;
-}
-
-interface WalletData {
-  success: boolean;
-  timestamp: string;
-  total_value_usd: number;
-  exchanges: {
-    coinbase: ExchangeData;
-    hyperliquid: ExchangeData;
-    robinhood: ExchangeData;
-  };
-  portfolio: {
-    total_assets: number;
-    assets: Asset[];
-  };
-}
+import { useState, useEffect } from 'react';
 
 export function WalletsPage() {
-  const [walletData, setWalletData] = useState<WalletData | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  const [authenticated, setAuthenticated] = useState(false);
+  const [checking, setChecking] = useState(true);
+  const [password, setPassword] = useState('');
+  const [error, setError] = useState('');
+  const [loading, setLoading] = useState(false);
+  const [wallets, setWallets] = useState<any[]>([]);
 
   useEffect(() => {
-    fetchWalletData();
-    // Refresh every 30 seconds
-    const interval = setInterval(fetchWalletData, 30000);
-    return () => clearInterval(interval);
+    fetch('/api/wallets')
+      .then(r => { if (r.ok) { setAuthenticated(true); return r.json(); } throw new Error(''); })
+      .then(data => setWallets(Array.isArray(data) ? data : data.wallets || []))
+      .catch(() => {})
+      .finally(() => setChecking(false));
   }, []);
 
-  const fetchWalletData = async () => {
+  const handleLogin = async () => {
+    setLoading(true); setError('');
     try {
-      const response = await fetch('/api/wallets');
-      const data = await response.json();
-      
-      if (data.success) {
-        setWalletData(data);
-        setError(null);
-      } else {
-        setError(data.error || 'Failed to fetch wallet data');
-      }
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Unknown error');
-    } finally {
-      setLoading(false);
-    }
+      const res = await fetch('/api/wallet-auth', {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ password }),
+      });
+      if (res.ok) {
+        setAuthenticated(true);
+        const wRes = await fetch('/api/wallets');
+        const data = await wRes.json();
+        setWallets(Array.isArray(data) ? data : data.wallets || []);
+      } else { setError('Access denied'); }
+    } catch { setError('Connection error'); }
+    finally { setLoading(false); }
   };
 
-  if (loading) {
-    return (
-      <div className="p-8">
-        <h1 className="text-2xl font-bold mb-6">Wallets</h1>
-        <div className="text-center py-12">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500 mx-auto"></div>
-          <p className="mt-4 text-gray-400">Loading wallet data...</p>
-        </div>
-      </div>
-    );
-  }
+  const fmt = (n: number) => n.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 
-  if (error) {
+  if (checking) return (
+    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '60vh', color: '#4fc3f7', fontFamily: 'var(--font-mc-mono)' }}>
+      <div style={{ animation: 'wBlink 1s infinite' }}>VERIFYING ACCESS...</div>
+      <style>{'@keyframes wBlink { 0%,100% { opacity:1; } 50% { opacity:0.3; } }'}</style>
+    </div>
+  );
+
+  if (!authenticated) {
     return (
-      <div className="p-8">
-        <h1 className="text-2xl font-bold mb-6">Wallets</h1>
-        <div className="bg-red-900/20 border border-red-500 rounded-lg p-6">
-          <p className="text-red-400">Error: {error}</p>
-          <button 
-            onClick={fetchWalletData}
-            className="mt-4 px-4 py-2 bg-red-600 hover:bg-red-700 rounded"
-          >
-            Retry
+      <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '60vh' }}>
+        <style>{'@keyframes wGlow { 0%,100% { boxShadow: 0 0 15px #4fc3f711; } 50% { boxShadow: 0 0 30px #4fc3f722; } }'}</style>
+        <div style={{ background: 'linear-gradient(180deg, #0a1929 0%, #0d1420 100%)', border: '1px solid #1a3a4a', borderRadius: '12px', padding: '48px 40px', maxWidth: '420px', width: '100%', textAlign: 'center' }}>
+          <div style={{ fontSize: '48px', marginBottom: '16px' }}>&#x1F512;</div>
+          <h2 style={{ fontSize: '18px', fontWeight: 700, color: '#4fc3f7', fontFamily: 'var(--font-mc-mono)', letterSpacing: '2px', marginBottom: '8px' }}>VAULT ACCESS</h2>
+          <p style={{ fontSize: '12px', color: '#455a64', marginBottom: '28px', fontFamily: 'var(--font-mc-mono)' }}>Enter authorization code to access wallet data</p>
+          <input type="password" value={password} onChange={(e) => setPassword(e.target.value)} onKeyDown={(e) => e.key === 'Enter' && handleLogin()} placeholder="Password"
+            style={{ width: '100%', padding: '14px 18px', background: '#0d1117', border: '1px solid #1a3a4a', borderRadius: '8px', color: '#e0e0e0', fontSize: '16px', fontFamily: 'var(--font-mc-mono)', marginBottom: '14px', outline: 'none', boxSizing: 'border-box', textAlign: 'center', letterSpacing: '4px' }} />
+          {error && <p style={{ color: '#ef5350', fontSize: '12px', marginBottom: '14px', fontFamily: 'var(--font-mc-mono)' }}>{error}</p>}
+          <button onClick={handleLogin} disabled={loading || !password}
+            style={{ width: '100%', padding: '14px', background: loading ? '#1a3a4a' : 'linear-gradient(135deg, #1a3a4a, #0a1929)', color: '#4fc3f7', border: '1px solid #4fc3f744', borderRadius: '8px', fontSize: '14px', fontWeight: 700, fontFamily: 'var(--font-mc-mono)', letterSpacing: '2px', cursor: loading ? 'wait' : 'pointer', opacity: !password ? 0.4 : 1 }}>
+            {loading ? 'AUTHENTICATING...' : 'UNLOCK VAULT'}
           </button>
         </div>
       </div>
     );
   }
 
-  if (!walletData) {
-    return null;
-  }
-
-  const { coinbase, hyperliquid, robinhood } = walletData.exchanges;
-  const hasAnyConnection = coinbase.connected || hyperliquid.connected || robinhood?.connected;
-
   return (
-    <div className="p-8">
-      <div className="flex justify-between items-center mb-6">
-        <h1 className="text-2xl font-bold">Wallets</h1>
-        <button 
-          onClick={fetchWalletData}
-          className="px-4 py-2 bg-blue-600 hover:bg-blue-700 rounded text-sm"
-        >
-          Refresh
-        </button>
+    <div style={{ padding: '24px', maxWidth: '900px', margin: '0 auto' }}>
+      <div style={{ marginBottom: '24px' }}>
+        <h1 style={{ fontSize: '18px', fontWeight: 700, color: '#4fc3f7', fontFamily: 'var(--font-mc-mono)', letterSpacing: '2px', margin: 0 }}>WALLET VAULT</h1>
+        <p style={{ fontSize: '11px', color: '#455a64', fontFamily: 'var(--font-mc-mono)', marginTop: '4px' }}>Authenticated</p>
       </div>
-
-      {/* Total Portfolio Value */}
-      <div className="bg-slate-800 rounded-lg p-6 mb-6">
-        <p className="text-gray-400 text-sm mb-2">Total Portfolio Value</p>
-        <p className="text-4xl font-bold text-green-400">
-          ${walletData.total_value_usd.toLocaleString(undefined, { 
-            minimumFractionDigits: 2, 
-            maximumFractionDigits: 2 
-          })}
-        </p>
-        <p className="text-gray-500 text-sm mt-2">
-          Last updated: {new Date(walletData.timestamp).toLocaleTimeString()}
-        </p>
-      </div>
-
-      {/* Exchange Status */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
-        {/* Coinbase */}
-        <div className="bg-slate-800 rounded-lg p-6">
-          <div className="flex items-center justify-between mb-4">
-            <h2 className="text-xl font-semibold">Coinbase</h2>
-            <div className={`px-3 py-1 rounded text-sm ${
-              coinbase.connected ? 'bg-green-900/30 text-green-400' : 'bg-red-900/30 text-red-400'
-            }`}>
-              {coinbase.connected ? '● Connected' : '○ Disconnected'}
-            </div>
-          </div>
-          
-          {coinbase.error ? (
-            <p className="text-red-400 text-sm">{coinbase.error}</p>
-          ) : (
-            <>
-              <p className="text-2xl font-bold text-white mb-4">
-                ${coinbase.total_usd.toLocaleString(undefined, { 
-                  minimumFractionDigits: 2, 
-                  maximumFractionDigits: 2 
-                })}
-              </p>
-              {coinbase.assets.length > 0 ? (
-                <div className="space-y-2">
-                  {coinbase.assets.map((asset, idx) => (
-                    <div key={idx} className="flex justify-between text-sm">
-                      <span className="text-gray-400">{asset.symbol}</span>
-                      <span className="text-white">{asset.amount.toFixed(4)}</span>
-                      <span className="text-green-400">${asset.value_usd.toFixed(2)}</span>
-                    </div>
-                  ))}
-                </div>
-              ) : (
-                <p className="text-gray-500 text-sm">No assets</p>
-              )}
-            </>
-          )}
-        </div>
-
-        {/* Robinhood */}
-        {robinhood && (
-          <div className="bg-slate-800 rounded-lg p-6">
-            <div className="flex items-center justify-between mb-4">
-              <div className="flex items-center gap-2">
-                <span className="text-green-500 font-bold text-lg">$</span>
-                <h2 className="text-xl font-semibold">Robinhood</h2>
-              </div>
-              <div className={`px-3 py-1 rounded text-sm ${
-                robinhood.connected ? 'bg-green-900/30 text-green-400' : 'bg-red-900/30 text-red-400'
-              }`}>
-                {robinhood.connected ? '● Connected' : '○ Disconnected'}
-              </div>
-            </div>
-            {robinhood.error ? (
-              <p className="text-red-400 text-sm">{robinhood.error}</p>
-            ) : (
-              <>
-                <p className="text-2xl font-bold text-white mb-4">
-                  ${robinhood.total_usd.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
-                </p>
-                {robinhood.assets.length > 0 ? (
-                  <div className="space-y-2">
-                    {robinhood.assets.map((asset, idx) => (
-                      <div key={idx} className="flex justify-between text-sm">
-                        <span className="text-gray-400">{asset.symbol}</span>
-                        <span className="text-white">{asset.amount.toFixed(4)}</span>
-                        <span className="text-green-400">${asset.value_usd.toFixed(2)}</span>
-                      </div>
-                    ))}
+      {wallets.length === 0 ? (
+        <div style={{ background: '#0a1929', border: '1px solid #1a3a4a', borderRadius: '10px', padding: '40px', textAlign: 'center', color: '#455a64', fontFamily: 'var(--font-mc-mono)' }}>No wallet data available</div>
+      ) : (
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+          {wallets.map((w: any, i: number) => {
+            const balance = parseFloat(w.balance || w.equity || '0');
+            const cash = parseFloat(w.cash || '0');
+            const bp = parseFloat(w.buying_power || '0');
+            return (
+              <div key={i} style={{ background: 'linear-gradient(180deg, #0a1929 0%, #0d1420 100%)', border: '1px solid #1a3a4a', borderRadius: '10px', padding: '24px' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                  <div>
+                    <div style={{ fontSize: '16px', fontWeight: 700, color: '#e0e0e0', fontFamily: 'var(--font-mc-mono)' }}>{w.name || 'Wallet ' + (i+1)}</div>
+                    <div style={{ fontSize: '11px', color: '#455a64', fontFamily: 'var(--font-mc-mono)', marginTop: '4px' }}>{w.type || 'Account'}</div>
                   </div>
-                ) : (
-                  <p className="text-gray-500 text-sm">No holdings</p>
+                  <div style={{ fontSize: '28px', fontWeight: 800, color: '#66bb6a', fontFamily: 'var(--font-mc-mono)' }}>${fmt(balance)}</div>
+                </div>
+                {(cash !== 0 || bp !== 0) && (
+                  <div style={{ display: 'flex', gap: '20px', marginTop: '14px', paddingTop: '14px', borderTop: '1px solid #1a3a4a', fontSize: '11px', fontFamily: 'var(--font-mc-mono)' }}>
+                    {cash !== 0 && <div><span style={{ color: '#607d8b' }}>CASH: </span><span style={{ color: cash >= 0 ? '#66bb6a' : '#ef5350', fontWeight: 600 }}>${fmt(cash)}</span></div>}
+                    {bp !== 0 && <div><span style={{ color: '#607d8b' }}>BUYING POWER: </span><span style={{ color: '#4fc3f7', fontWeight: 600 }}>${fmt(bp)}</span></div>}
+                  </div>
                 )}
-              </>
-            )}
-          </div>
-        )}
-
-        {/* Hyperliquid */}
-        <div className="bg-slate-800 rounded-lg p-6">
-          <div className="flex items-center justify-between mb-4">
-            <h2 className="text-xl font-semibold">Hyperliquid</h2>
-            <div className={`px-3 py-1 rounded text-sm ${
-              hyperliquid.connected ? 'bg-green-900/30 text-green-400' : 'bg-red-900/30 text-red-400'
-            }`}>
-              {hyperliquid.connected ? '● Connected' : '○ Disconnected'}
-            </div>
-          </div>
-          
-          {hyperliquid.error ? (
-            <p className="text-red-400 text-sm">{hyperliquid.error}</p>
-          ) : (
-            <>
-              <p className="text-2xl font-bold text-white mb-4">
-                ${hyperliquid.total_usd.toLocaleString(undefined, { 
-                  minimumFractionDigits: 2, 
-                  maximumFractionDigits: 2 
-                })}
-              </p>
-              {hyperliquid.assets.length > 0 ? (
-                <div className="space-y-2">
-                  {hyperliquid.assets.map((asset, idx) => (
-                    <div key={idx} className="flex justify-between text-sm">
-                      <span className="text-gray-400">{asset.symbol}</span>
-                      <span className="text-white">{asset.amount.toFixed(4)}</span>
-                      <span className="text-green-400">${asset.value_usd.toFixed(2)}</span>
-                    </div>
-                  ))}
-                </div>
-              ) : (
-                <p className="text-gray-500 text-sm">No assets</p>
-              )}
-            </>
-          )}
-        </div>
-      </div>
-
-      {/* Portfolio Breakdown */}
-      {walletData.portfolio.assets.length > 0 && (
-        <div className="bg-slate-800 rounded-lg p-6">
-          <h2 className="text-xl font-semibold mb-4">Portfolio Breakdown</h2>
-          <div className="space-y-3">
-            {walletData.portfolio.assets.map((asset, idx) => (
-              <div key={idx} className="flex items-center justify-between">
-                <div className="flex-1">
-                  <div className="flex justify-between mb-1">
-                    <span className="font-medium">{asset.symbol}</span>
-                    <span className="text-gray-400">{asset.percentage.toFixed(1)}%</span>
-                  </div>
-                  <div className="w-full bg-slate-700 rounded-full h-2">
-                    <div 
-                      className="bg-blue-500 h-2 rounded-full transition-all"
-                      style={{ width: `${asset.percentage}%` }}
-                    />
-                  </div>
-                </div>
-                <div className="ml-6 text-right">
-                  <p className="text-white font-medium">${asset.value_usd.toFixed(2)}</p>
-                  <p className="text-gray-400 text-sm">{asset.amount.toFixed(4)}</p>
-                </div>
               </div>
-            ))}
-          </div>
-        </div>
-      )}
-
-      {/* No wallets connected state */}
-      {!hasAnyConnection && (
-        <div className="bg-slate-800 rounded-lg p-12 text-center">
-          <p className="text-xl text-gray-300 mb-4">No Wallets Connected</p>
-          <p className="text-gray-500 mb-6">
-            Configure your API keys in the .env file to connect exchanges
-          </p>
-          <div className="text-left max-w-md mx-auto bg-slate-900 rounded p-4 text-sm font-mono">
-            <p className="text-gray-400"># Add to .env file:</p>
-            <p className="text-green-400 mt-2">COINBASE_API_KEY=your_key</p>
-            <p className="text-green-400">COINBASE_API_SECRET=your_secret</p>
-            <p className="text-green-400 mt-2">HYPERLIQUID_WALLET_ADDRESS=0x...</p>
-          </div>
+            );
+          })}
         </div>
       )}
     </div>
   );
 }
-
-export default WalletsPage;
