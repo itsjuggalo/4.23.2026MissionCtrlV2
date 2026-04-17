@@ -1,4 +1,5 @@
 import { NextResponse } from 'next/server';
+import { logActivity } from '@/lib/db';
 import { readFile } from 'fs/promises';
 import path from 'path';
 import { readdirSync } from 'fs';
@@ -152,6 +153,15 @@ export async function GET() {
     // Sort by time descending, limit to 50
     entries.sort((a, b) => b.sortKey - a.sortKey);
     const limited = entries.slice(0, 50).map(({ sortKey, ...rest }) => rest);
+
+    // Save notable activities to SQLite for persistence
+    try {
+      for (const entry of limited.slice(0, 10)) {
+        if (entry.type !== 'system' || entry.action.includes('alert') || entry.action.includes('trade') || entry.action.includes('signal')) {
+          logActivity(entry.agent, entry.action, entry.detail, entry.type, 'info');
+        }
+      }
+    } catch {}
 
     return NextResponse.json({
       success: true,
