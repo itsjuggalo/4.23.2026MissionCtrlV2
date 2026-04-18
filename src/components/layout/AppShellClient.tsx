@@ -33,6 +33,7 @@ import UsagePage from '../pages/UsagePage';
 import { CongressPage } from '../pages/CongressPage';
 import { LLMPortfolioPage } from '../pages/LLMPortfolioPage';
 import { SkillsPage } from "../pages/SkillsPage";
+import { TelegramPage } from '@/components/pages/TelegramPage';
 import { PsychChatWidget } from '../ui/PsychChatWidget';
 
 type PageName =
@@ -104,6 +105,7 @@ export function AppShellClient() {
         return <DashboardPage />;
       case 'Signals':
         return <SignalsPage />;
+<TelegramPage />;
       case 'Telegram':
         return <TelegramSignalsPage />;
       case 'Scanner':
