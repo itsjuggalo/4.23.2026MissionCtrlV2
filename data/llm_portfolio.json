@@ -1,5 +1,5 @@
 {
-  "last_updated": "2026-04-18T00:00:25.662407",
+  "last_updated": "2026-04-18T04:00:13.366392",
   "leaderboard": [
     {
       "rank": 0,
@@ -47,9 +47,9 @@
       "model": "Gemini 2.5 Pro",
       "color": "#81d4fa",
       "total_trades": 100,
-      "holdings_count": 4,
-      "buy_volume": 28549.49,
-      "sell_volume": 28224.6
+      "holdings_count": 5,
+      "buy_volume": 29549.48,
+      "sell_volume": 27489.95
     },
     {
       "rank": 0,
@@ -5357,15 +5357,16 @@
       "color": "#81d4fa",
       "account_id": "1800473182_19",
       "total_trades": 100,
-      "total_buy_value": 28549.49,
-      "total_sell_value": 28224.6,
+      "total_buy_value": 29549.48,
+      "total_sell_value": 27489.95,
       "current_holdings": {
         "ON": 17.16,
         "TSM": 1.77,
         "NVDA": 15.78,
+        "MU": 0.18,
         "MRVL": 6.25
       },
-      "holdings_count": 4,
+      "holdings_count": 5,
       "recent_trades": [
         {
           "date": "2026-04-17",
@@ -5376,6 +5377,16 @@
           "quantity": 12.16,
           "value": 1000.0,
           "order_id": "0634956949654732800"
+        },
+        {
+          "date": "2026-04-17",
+          "side": "buy",
+          "symbol": "ASML",
+          "company": "ASML Holding",
+          "price": 1467.31,
+          "quantity": 0.68,
+          "value": 999.99,
+          "order_id": "0634881571204497408"
         },
         {
           "date": "2026-04-17",
@@ -5656,16 +5667,6 @@
           "quantity": 2.77,
           "value": 200.0,
           "order_id": "0633869907558334464"
-        },
-        {
-          "date": "2026-04-14",
-          "side": "buy",
-          "symbol": "MU",
-          "company": "Micron Technology",
-          "price": 461.21,
-          "quantity": 0.65,
-          "value": 300.0,
-          "order_id": "0633869907961315328"
         }
       ],
       "all_trades": [
@@ -5678,6 +5679,16 @@
           "quantity": 12.16,
           "value": 1000.0,
           "order_id": "0634956949654732800"
+        },
+        {
+          "date": "2026-04-17",
+          "side": "buy",
+          "symbol": "ASML",
+          "company": "ASML Holding",
+          "price": 1467.31,
+          "quantity": 0.68,
+          "value": 999.99,
+          "order_id": "0634881571204497408"
         },
         {
           "date": "2026-04-17",
@@ -6658,16 +6669,6 @@
           "quantity": 10.0,
           "value": 479.5,
           "order_id": "0629143765131427840"
-        },
-        {
-          "date": "2026-04-01",
-          "side": "sell",
-          "symbol": "MU",
-          "company": "Micron Technology",
-          "price": 367.32,
-          "quantity": 2.0,
-          "value": 734.65,
-          "order_id": "0629143765517205504"
         }
       ]
     },

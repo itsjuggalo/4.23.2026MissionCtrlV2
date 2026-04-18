@@ -34,6 +34,7 @@ import { CongressPage } from '../pages/CongressPage';
 import { LLMPortfolioPage } from '../pages/LLMPortfolioPage';
 import { SkillsPage } from "../pages/SkillsPage";
 import { TelegramPage } from '@/components/pages/TelegramPage';
+import { SessionViewerPage } from '@/components/pages/SessionViewerPage';
 import { PsychChatWidget } from '../ui/PsychChatWidget';
 
 type PageName =
@@ -41,7 +42,7 @@ type PageName =
   | 'Signals'
   | 'Telegram'
   | 'Scanner'
-  | 'Tasks'
+  | 'Tasks', 'Sessions'
   | 'Agents'
   | 'Approvals'
   | 'Calendar'
@@ -82,7 +83,7 @@ export function AppShellClient() {
     if (page) {
       const pageName = (page.charAt(0).toUpperCase() + page.slice(1).toLowerCase()) as PageName;
       const validPages: PageName[] = [
-        'Dashboard', 'Signals', 'Telegram', 'Scanner', 'Tasks', 'Agents', 
+        'Dashboard', 'Signals', 'Telegram', 'Scanner', 'Tasks', 'Sessions', 'Agents', 
         'Approvals', 'Calendar', 'Projects', 'Memory', 'Memory Graph', 
         'Office', 'Docs', 'Wallets', 'Trades', 'Activity', 'Risk', 'TV Chart', 'PowerTrader',
         'Command Center', 'Performance', 'Regime', 'Usage', 'Landing', 'Congress', 'LLM Portfolio', 'Skills'
@@ -110,7 +111,7 @@ export function AppShellClient() {
         return <TelegramPage />;
       case 'Scanner':
         return <ScannerPage />;
-      case 'Tasks':
+      case 'Tasks', 'Sessions':
         return <TasksPage />;
       case 'Agents':
         return <AgentsPage />;
