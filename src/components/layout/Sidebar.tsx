@@ -36,6 +36,8 @@ type PageName =
   | 'Telegram'
   | 'Scanner'
   | 'Tasks'
+  | 'Options'
+  | 'Sessions'
   | 'Agents'
   | 'Approvals'
   | 'Calendar'
@@ -84,6 +86,7 @@ const tradingItems: { name: PageName; icon: React.ElementType }[] = [
   { name: 'Dashboard', icon: LayoutDashboard },
   { name: 'TV Chart', icon: LineChart },
   { name: 'Scanner', icon: Radar },
+  { name: 'Options', icon: BarChart2 },
   { name: 'Wallets', icon: Wallet },
   { name: 'Trades', icon: TrendingUp },
   { name: 'GoTrader', icon: Bot },
@@ -99,6 +102,7 @@ const systemItems: { name: PageName; icon: React.ElementType }[] = [
   { name: 'Signals', icon: Zap },
   { name: 'Telegram', icon: Send },
   { name: 'Tasks', icon: ListTodo },
+  { name: 'Sessions', icon: Activity },
   { name: 'Approvals', icon: CheckCircle },
   { name: 'Calendar', icon: Calendar },
   { name: 'Projects', icon: FolderKanban },
