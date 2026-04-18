@@ -135,7 +135,7 @@ export async function GET() {
         cash: 0,
         buying_power: 0,
         status: 'live',
-        positions: (rhData.crypto || []).filter((c: any) => c.equity > 0.5).map((c: any) => ({
+        positions: (rhData.crypto || []).filter((c: any) => c.equity > 1).map((c: any) => ({
           symbol: c.symbol,
           quantity: c.quantity,
           price: c.price,

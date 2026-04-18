@@ -156,14 +156,16 @@ export function WalletsPage() {
                             <span style={{ fontSize: '11px', color: '#607d8b', fontFamily: 'var(--font-mc-mono)' }}>
                               {fmtQty(p.quantity)} {isStock ? 'shares' : 'coins'}
                             </span>
-                            {p.avg_cost > 0 && isStock && (
-                              <span style={{ fontSize: '11px', color: '#607d8b', fontFamily: 'var(--font-mc-mono)' }}>Avg: {fmtPrice(p.avg_cost)}</span>
+                            {p.avg_cost > 0 && (
+                              <span style={{ fontSize: '11px', color: '#607d8b', fontFamily: 'var(--font-mc-mono)' }}>
+                                {isStock ? `Avg: ${fmtPrice(p.avg_cost)}` : ''}
+                              </span>
                             )}
                           </div>
                           {/* Row 3: Current Price + Return % */}
                           <div style={{ display: 'flex', justifyContent: 'space-between' }}>
                             <span style={{ fontSize: '11px', color: '#607d8b', fontFamily: 'var(--font-mc-mono)' }}>
-                              Now: {fmtPrice(p.price)}
+                              {p.type === 'crypto' ? `${fmtPrice(p.price)}/coin` : `Now: ${fmtPrice(p.price)}`}
                             </span>
                             {returnPct !== null && (
                               <span style={{ fontSize: '12px', fontWeight: 700, color: returnColor, fontFamily: 'var(--font-mc-mono)' }}>
