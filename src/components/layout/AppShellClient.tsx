@@ -109,13 +109,16 @@ export function AppShellClient() {
         return <DashboardPage />;
       case 'Signals':
         return <SignalsPage />;
-<TelegramPage />;
       case 'Telegram':
         return <TelegramPage />;
       case 'Scanner':
         return <ScannerPage />;
-      case 'Tasks', 'Sessions':
+      case 'Options':
+        return <OptionsPage />;
+      case 'Tasks':
         return <TasksPage />;
+      case 'Sessions':
+        return <SessionViewerPage />;
       case 'Agents':
         return <AgentsPage />;
       case 'Approvals':
