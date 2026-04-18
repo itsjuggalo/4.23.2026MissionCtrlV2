@@ -26,7 +26,7 @@ export async function POST(req: Request) {
       secure: false,
       sameSite: 'strict',
       path: '/',
-      maxAge: 86400,
+      maxAge: 900,
     });
     return response;
   } catch {
