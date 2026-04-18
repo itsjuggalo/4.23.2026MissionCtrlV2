@@ -16,6 +16,7 @@ export function CommandCenterPage() {
   const [regime, setRegime] = useState<any>(null);
   const [activity, setActivity] = useState<any[]>([]);
   const live = useLiveStream(true);
+  const [rhPositions, setRhPositions] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [tick, setTick] = useState(0);
 
@@ -42,6 +43,26 @@ export function CommandCenterPage() {
 
   useEffect(() => {
     fetchData();
+    // Fetch RH positions for marquee
+    fetch('/api/wallets').then(r => r.ok ? r.json() : []).then(wallets => {
+      const tickers: any[] = [];
+      for (const w of wallets) {
+        if (w.positions && (w.name || '').includes('Robinhood')) {
+          for (const p of w.positions) {
+            if (p.equity > 1) {
+              const pctChange = p.avg_cost > 0 ? ((p.price - p.avg_cost) / p.avg_cost * 100) : 0;
+              tickers.push({
+                sym: p.symbol,
+                val: `$${p.price < 1 ? p.price.toFixed(4) : p.price.toFixed(2)}`,
+                chg: pctChange,
+                color: pctChange >= 0 ? '#66bb6a' : '#ef5350',
+              });
+            }
+          }
+        }
+      }
+      setRhPositions(tickers);
+    }).catch(() => {});
     const data = setInterval(fetchData, 10000);
     const pulse = setInterval(() => setTick(t => t + 1), 1000);
     return () => { clearInterval(data); clearInterval(pulse); };
@@ -120,11 +141,7 @@ export function CommandCenterPage() {
             { sym: 'PORTFOLIO', val: `$${fmt(equity)}`, chg: dailyPct, color: dailyPct >= 0 ? '#66bb6a' : '#ef5350' },
             { sym: 'BTC SIGNAL', val: btcSignal.direction || 'N/A', chg: 0, color: btcSignal.direction === 'LONG' ? '#66bb6a' : '#ef5350' },
             { sym: 'RETURN', val: `${totalReturn >= 0 ? '+' : ''}${fmt(totalReturn, 1)}%`, chg: totalReturn, color: totalReturn >= 0 ? '#66bb6a' : '#ef5350' },
-            ...(positions.map((p: any) => ({
-              sym: p.symbol, val: `$${fmt(parseFloat(p.current_price || '0'))}`,
-              chg: parseFloat(p.unrealized_plpc || '0') * 100,
-              color: parseFloat(p.unrealized_pl || '0') >= 0 ? '#66bb6a' : '#ef5350',
-            }))),
+            ...(rhPositions || []),
           ]).map((item, i) => (
             <span key={i} style={{ fontSize: '12px', fontFamily: 'var(--font-mc-mono)', color: '#607d8b' }}>
               <span style={{ color: '#4fc3f7', marginRight: '6px' }}>{item.sym}</span>
