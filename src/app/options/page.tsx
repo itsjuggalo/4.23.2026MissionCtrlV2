@@ -1,4 +1,2 @@
-import { redirect } from 'next/navigation';
-export default function Page() {
-  redirect('/?page=options');
-}
+import { OptionsPage } from '@/components/pages/OptionsPage';
+export default function Page() { return <OptionsPage />; }
