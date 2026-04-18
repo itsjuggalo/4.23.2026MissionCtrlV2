@@ -1,151 +1,74 @@
-import { NextResponse } from "next/server";
-import fs from "fs";
-import path from "path";
-import os from "os";
+import { NextResponse } from 'next/server';
+import { execSync } from 'child_process';
+import { readFileSync, existsSync } from 'fs';
+import { join } from 'path';
 
-const DATA_DIR = path.join(os.homedir(), "mission-control-restored", "data");
-const USAGE_FILE = path.join(DATA_DIR, "api_usage.json");
-const BUDGETS_FILE = path.join(DATA_DIR, "api_budgets.json");
-
-interface UsageEntry {
-  timestamp: string;
-  source: string;
-  provider: string;
-  model: string;
-  input_tokens: number;
-  output_tokens: number;
-  cost_usd: number;
-}
-
-interface Budgets {
-  [provider: string]: number;
-}
-
-function readJSON(filePath: string, fallback: unknown): unknown {
-  try {
-    const raw = fs.readFileSync(filePath, "utf-8");
-    return JSON.parse(raw);
-  } catch {
-    return fallback;
-  }
-}
+const DATA_DIR = join(process.env.HOME || '/home/ubuntu', '.mission-control');
+const USAGE_FILE = join(DATA_DIR, 'api_usage.json');
 
 export async function GET() {
+  // Get real PM2 memory/cpu usage
+  let pm2Data: any[] = [];
   try {
-    const entries = readJSON(USAGE_FILE, []) as UsageEntry[];
-    const budgets = readJSON(BUDGETS_FILE, {
-      anthropic: 50,
-      openai: 20,
-      deepseek: 20,
-      xai: 20,
-    }) as Budgets;
+    const raw = execSync('pm2 jlist 2>/dev/null', { encoding: 'utf-8', timeout: 5000 });
+    pm2Data = JSON.parse(raw);
+  } catch {}
 
-    // Total spend per provider
-    const spendByProvider: Record<string, number> = {};
-    const spendBySource: Record<string, number> = {};
-    const tokensByProvider: Record<string, { input: number; output: number }> = {};
+  const totalMemMB = pm2Data.reduce((s, p) => s + (p.monit?.memory || 0), 0) / 1024 / 1024;
+  const totalCpu = pm2Data.reduce((s, p) => s + (p.monit?.cpu || 0), 0);
+  const processCount = pm2Data.length;
+  const uptimeHrs = pm2Data.length > 0 ? Math.round((Date.now() - Math.min(...pm2Data.map(p => p.pm2_env?.pm_uptime || Date.now()))) / 3600000) : 0;
 
-    for (const e of entries) {
-      // By provider
-      spendByProvider[e.provider] = (spendByProvider[e.provider] || 0) + e.cost_usd;
-
-      // By source
-      spendBySource[e.source] = (spendBySource[e.source] || 0) + e.cost_usd;
-
-      // Tokens by provider
-      if (!tokensByProvider[e.provider]) {
-        tokensByProvider[e.provider] = { input: 0, output: 0 };
-      }
-      tokensByProvider[e.provider].input += e.input_tokens;
-      tokensByProvider[e.provider].output += e.output_tokens;
+  // Estimate API costs from log activity
+  let anthropicCalls = 0, openaiCalls = 0, geminiCalls = 0, deepseekCalls = 0, xaiCalls = 0;
+  const logDir = join(process.env.HOME || '/home/ubuntu', '.pm2/logs');
+  
+  try {
+    // Count API calls from skill scheduler logs (today)
+    const schedulerLog = join(logDir, 'skill-scheduler-out.log');
+    if (existsSync(schedulerLog)) {
+      const content = readFileSync(schedulerLog, 'utf-8');
+      const today = new Date().toISOString().split('T')[0];
+      const todayLines = content.split('\n').filter(l => l.includes(today) && l.includes('success'));
+      // Each skill run uses ~1 API call
+      geminiCalls = todayLines.filter(l => l.includes('crypto-')).length;
+      anthropicCalls = todayLines.filter(l => l.includes('portfolio') || l.includes('morning') || l.includes('sentiment')).length;
     }
+  } catch {}
 
-    // Remaining balance per provider
-    const balances: Record<string, { budget: number; spent: number; remaining: number; pct_used: number }> = {};
-    for (const [provider, budget] of Object.entries(budgets)) {
-      const spent = spendByProvider[provider] || 0;
-      balances[provider] = {
-        budget,
-        spent: Math.round(spent * 100) / 100,
-        remaining: Math.round((budget - spent) * 100) / 100,
-        pct_used: budget > 0 ? Math.round((spent / budget) * 10000) / 100 : 0,
-      };
-    }
+  // Estimated costs (rough per-call estimates)
+  const costs = {
+    anthropic: { calls: anthropicCalls, cost: anthropicCalls * 0.015, budget: 50 },
+    gemini: { calls: geminiCalls, cost: geminiCalls * 0.001, budget: 0 },
+    openai: { calls: openaiCalls, cost: openaiCalls * 0.005, budget: 20 },
+    deepseek: { calls: deepseekCalls, cost: deepseekCalls * 0.002, budget: 20 },
+    xai: { calls: xaiCalls, cost: xaiCalls * 0.005, budget: 20 },
+  };
 
-    // Hourly buckets for last 24h
-    const now = Date.now();
-    const hourly: Record<string, Record<string, number>> = {};
-    for (let i = 23; i >= 0; i--) {
-      const hourStart = new Date(now - i * 3600000);
-      const key = hourStart.toISOString().slice(0, 13);
-      hourly[key] = {};
-    }
+  const totalCost = Object.values(costs).reduce((s, c) => s + c.cost, 0);
+  const totalCalls = Object.values(costs).reduce((s, c) => s + c.calls, 0);
 
-    for (const e of entries) {
-      const ts = new Date(e.timestamp).getTime();
-      if (now - ts <= 24 * 3600000) {
-        const key = new Date(e.timestamp).toISOString().slice(0, 13);
-        if (hourly[key]) {
-          hourly[key][e.provider] = (hourly[key][e.provider] || 0) + e.cost_usd;
-        }
-      }
-    }
-
-    const hourlyData = Object.entries(hourly).map(([hour, providers]) => ({
-      hour: hour.slice(5, 13).replace("T", " ") + "h",
-      ...Object.fromEntries(
-        Object.entries(providers).map(([k, v]) => [k, Math.round(v * 10000) / 10000])
-      ),
-    }));
-
-    // Daily buckets for last 7 days
-    const daily: Record<string, Record<string, number>> = {};
-    for (let i = 6; i >= 0; i--) {
-      const dayStart = new Date(now - i * 86400000);
-      const key = dayStart.toISOString().slice(0, 10);
-      daily[key] = {};
-    }
-
-    for (const e of entries) {
-      const ts = new Date(e.timestamp).getTime();
-      if (now - ts <= 7 * 86400000) {
-        const key = new Date(e.timestamp).toISOString().slice(0, 10);
-        if (daily[key]) {
-          daily[key][e.provider] = (daily[key][e.provider] || 0) + e.cost_usd;
-        }
-      }
-    }
-
-    const dailyData = Object.entries(daily).map(([day, providers]) => ({
-      day: day.slice(5),
-      ...Object.fromEntries(
-        Object.entries(providers).map(([k, v]) => [k, Math.round(v * 10000) / 10000])
-      ),
-    }));
-
-    // Source breakdown
-    const sourceData = Object.entries(spendBySource)
-      .map(([source, cost]) => ({ source, cost: Math.round(cost * 10000) / 10000 }))
-      .sort((a, b) => b.cost - a.cost);
-
-    // Recent entries (last 20)
-    const recent = entries.slice(-20).reverse().map((e) => ({
-      ...e,
-      cost_usd: Math.round(e.cost_usd * 10000) / 10000,
-    }));
-
-    return NextResponse.json({
-      balances,
-      spendByProvider,
-      spendBySource: sourceData,
-      tokensByProvider,
-      hourlyData,
-      dailyData,
-      recent,
-      totalEntries: entries.length,
-    });
-  } catch (err) {
-    console.error("Usage API error:", err);
-    return NextResponse.json({ error: "Failed to load usage data" }, { status: 500 });
-  }
+  return NextResponse.json({
+    balances: Object.fromEntries(
+      Object.entries(costs).map(([k, v]) => [k, {
+        budget: v.budget,
+        spent: Math.round(v.cost * 100) / 100,
+        remaining: Math.round((v.budget - v.cost) * 100) / 100,
+        pct_used: v.budget > 0 ? Math.round((v.cost / v.budget) * 10000) / 100 : 0,
+        calls_today: v.calls,
+      }])
+    ),
+    infrastructure: {
+      processes: processCount,
+      memory_mb: Math.round(totalMemMB),
+      cpu_pct: Math.round(totalCpu * 10) / 10,
+      uptime_hrs: uptimeHrs,
+    },
+    totals: {
+      cost_today: Math.round(totalCost * 100) / 100,
+      calls_today: totalCalls,
+    },
+    spendByProvider: Object.fromEntries(Object.entries(costs).filter(([,v]) => v.cost > 0).map(([k, v]) => [k, v.cost])),
+    tokensByProvider: {},
+  });
 }
