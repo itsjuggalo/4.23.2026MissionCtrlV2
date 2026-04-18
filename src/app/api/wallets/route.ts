@@ -114,7 +114,7 @@ export async function GET() {
         cash: rhData.cash || 0,
         buying_power: rhData.cash || 0,
         status: 'live',
-        positions: (rhData.stocks || []).filter((s: any) => s.equity > 0.5).map((s: any) => ({
+        positions: (rhData.stocks || []).map((s: any) => ({
           symbol: s.symbol,
           quantity: s.quantity,
           avg_cost: s.avg_cost,
@@ -135,7 +135,7 @@ export async function GET() {
         cash: 0,
         buying_power: 0,
         status: 'live',
-        positions: (rhData.crypto || []).filter((c: any) => c.equity > 1).map((c: any) => ({
+        positions: (rhData.crypto || []).map((c: any) => ({
           symbol: c.symbol,
           quantity: c.quantity,
           price: c.price,
