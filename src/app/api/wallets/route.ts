@@ -183,5 +183,49 @@ export async function GET() {
     wallets.push({ name: 'Hyperliquid', type: 'DEX Perps (Live)', badge: 'LIVE', balance: 0, cash: 0, buying_power: 0, status: 'error', notes: String(e).slice(0, 80) });
   }
 
+
+  // === 5. HYPERLIQUID PERSONAL WALLET (live API) ===
+  try {
+    const hlAddrPath = join(SECRETS, 'hyperliquid-address.txt');
+    if (existsSync(hlAddrPath)) {
+      const hlAddress = readFileSync(hlAddrPath, 'utf-8').trim();
+      const hlRes = await fetch('https://api.hyperliquid.xyz/info', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ type: 'clearinghouseState', user: hlAddress }),
+      });
+      if (hlRes.ok) {
+        const hlData = await hlRes.json();
+        const marginSummary = hlData.marginSummary || {};
+        const accountValue = parseFloat(marginSummary.accountValue || '0');
+        const totalMargin = parseFloat(marginSummary.totalMarginUsed || '0');
+        const positions = hlData.assetPositions || [];
+        const posNotes = positions
+          .map((p: any) => {
+            const pos = p.position || {};
+            const coin = pos.coin || '?';
+            const size = pos.szi || '0';
+            const upnl = parseFloat(pos.unrealizedPnl || '0');
+            return `${coin}: ${size} (uPnL: $${upnl.toFixed(2)})`;
+          })
+          .slice(0, 5)
+          .join(' | ');
+
+        wallets.push({
+          name: 'Hyperliquid (Personal)',
+          type: 'DEX Perps (Live)',
+          badge: 'LIVE',
+          balance: accountValue,
+          cash: accountValue - totalMargin,
+          buying_power: accountValue - totalMargin,
+          status: 'live',
+          notes: positions.length > 0 ? posNotes : 'No open positions',
+        });
+      }
+    }
+  } catch (e) {
+    wallets.push({ name: 'Hyperliquid (Personal)', type: 'DEX Perps (Live)', badge: 'LIVE', balance: 0, cash: 0, buying_power: 0, status: 'error', notes: String(e).slice(0, 80) });
+  }
+
   return NextResponse.json(wallets);
 }
