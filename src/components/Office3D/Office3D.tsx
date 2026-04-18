@@ -28,6 +28,8 @@ export default function Office3D() {
     boba: { id: 'boba', status: 'idle', model: 'Sonnet 4-6', tokensPerHour: 0, tasksInQueue: 0, uptime: 0 },
     jazzyhazzy: { id: 'jazzyhazzy', status: 'idle', model: 'GPT-4o-mini', tokensPerHour: 0, tasksInQueue: 0, uptime: 0 },
     orion: { id: 'orion', status: 'idle', model: 'Gemini 2.5', tokensPerHour: 0, tasksInQueue: 0, uptime: 0 },
+    groot: { id: 'groot', status: 'idle', model: 'Grok', tokensPerHour: 0, tasksInQueue: 0, uptime: 0 },
+    deepsheet: { id: 'deepsheet', status: 'idle', model: 'DeepSeek', tokensPerHour: 0, tasksInQueue: 0, uptime: 0 },
   });
 
   useEffect(() => {
@@ -44,6 +46,8 @@ export default function Office3D() {
           if (name.includes('boba')) id = 'boba';
           else if (name.includes('jazzy')) id = 'jazzyhazzy';
           else if (name.includes('orion')) id = 'orion';
+          else if (name.includes('grok') || name.includes('groot')) id = 'groot';
+          else if (name.includes('deep')) id = 'deepsheet';
           else continue;
 
           const metrics: Record<string, number> = {};

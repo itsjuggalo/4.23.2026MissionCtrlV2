@@ -32,6 +32,22 @@ export const AGENTS: AgentConfig[] = [
     color: "#ce93d8",
     role: "Scanner · Gemini 2.5 Flash",
   },
+  {
+    id: "groot",
+    name: "Groot",
+    emoji: "🌳",
+    position: [-4, 0, 3],
+    color: "#ff9800",
+    role: "Analyst · Grok",
+  },
+  {
+    id: "deepsheet",
+    name: "DeepSheet",
+    emoji: "🧠",
+    position: [4, 0, 3],
+    color: "#ef5350",
+    role: "Strategist · DeepSeek",
+  },
 ];
 
 export type AgentStatus = "idle" | "working" | "thinking" | "error";
