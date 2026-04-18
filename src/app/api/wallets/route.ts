@@ -94,23 +94,34 @@ export async function GET() {
     wallets.push({ name: 'Coinbase', type: 'Exchange (Live)', badge: 'LIVE', balance: 0, cash: 0, buying_power: 0, status: 'error', notes: String(e).slice(0, 80) });
   }
 
-  // === 3. ROBINHOOD (Python script) ===
+  // === 3. ROBINHOOD (full portfolio — stocks + crypto via robin_stocks) ===
   try {
-    const rhKey = process.env.ROBINHOOD_API_KEY || '';
-    if (rhKey) {
-      const result = execSync(
-        `ROBINHOOD_API_KEY="${rhKey}" python3 /home/ubuntu/scripts/robinhood-holdings.py`,
-        { timeout: 20000, encoding: 'utf-8' }
-      );
-      const rhData = JSON.parse(result.trim());
-      if (rhData.error) {
-        wallets.push({ name: 'Robinhood', type: 'Brokerage (Live)', badge: 'LIVE', balance: 0, cash: 0, buying_power: 0, status: 'error', notes: rhData.error.slice(0, 80) });
-      } else {
-        const holdings = (rhData.results || []).map((h: any) =>
-          `${h.asset_code}: ${parseFloat(h.total_quantity).toFixed(6)} ($${h.value_usd})`
-        ). join(' | ');
-        wallets.push({ name: 'Robinhood', type: 'Brokerage (Live)', badge: 'LIVE', balance: rhData.total_usd || 0, cash: 0, buying_power: 0, status: 'live', notes: holdings || 'No holdings' });
-      }
+    const result = execSync(
+      'python3 /home/ubuntu/scripts/robinhood-full-portfolio.py',
+      { timeout: 30000, encoding: 'utf-8' }
+    );
+    const rhData = JSON.parse(result.trim());
+    if (rhData.error) {
+      wallets.push({ name: 'Robinhood', type: 'Brokerage (Live)', badge: 'LIVE', balance: 0, cash: 0, buying_power: 0, status: 'error', notes: rhData.error.slice(0, 80) });
+    } else {
+      const stockNotes = (rhData.stocks || [])
+        .filter((s: any) => s.equity > 1)
+        .map((s: any) => `${s.symbol}: ${s.quantity.toFixed(2)} ($${s.equity.toFixed(2)})`)
+        .join(' | ');
+      const cryptoNotes = (rhData.crypto || [])
+        .filter((c: any) => c.equity > 1)
+        .map((c: any) => `${c.symbol}: ${c.quantity.toFixed(6)} ($${c.equity.toFixed(2)})`)
+        .join(' | ');
+      wallets.push({
+        name: 'Robinhood',
+        type: 'Brokerage (Live)',
+        badge: 'LIVE',
+        balance: rhData.total_equity || 0,
+        cash: rhData.cash || 0,
+        buying_power: rhData.cash || 0,
+        status: 'live',
+        notes: [stockNotes, cryptoNotes].filter(Boolean).join(' | '),
+      });
     }
   } catch (e) {
     wallets.push({ name: 'Robinhood', type: 'Brokerage (Live)', badge: 'LIVE', balance: 0, cash: 0, buying_power: 0, status: 'error', notes: String(e).slice(0, 80) });
