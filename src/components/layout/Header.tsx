@@ -36,7 +36,8 @@ interface HeaderProps {
   title: string;
 }
 export function Header({
-  const live = useLiveStream(true); title }: HeaderProps) {
+ title }: HeaderProps) {
+  const live = useLiveStream(true);
   const [time, setTime] = useState('');
   useEffect(() => {
     const update = () => {
