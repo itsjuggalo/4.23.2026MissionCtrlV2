@@ -85,7 +85,7 @@ export async function GET() {
             if (valUsd > 1) holdings.push(`${cur}: $${valUsd.toFixed(2)}`);
           }
         }
-        wallets.push({ name: 'Coinbase', type: 'Exchange (Live)', badge: 'LIVE', balance: usdValue, cash: 0, buying_power: 0, status: 'live', notes: holdings.slice(0, 5).join(' | ') || 'No holdings' });
+        wallets.push({ name: 'Coinbase', type: 'Exchange (Live)', badge: 'LIVE', balance: usdValue, cash: 0, buying_power: 0, status: 'live', notes: holdings. join(' | ') || 'No holdings' });
       } else {
         wallets.push({ name: 'Coinbase', type: 'Exchange (Live)', badge: 'LIVE', balance: 0, cash: 0, buying_power: 0, status: 'error', notes: `API ${cbRes.status}` });
       }
@@ -108,7 +108,7 @@ export async function GET() {
       } else {
         const holdings = (rhData.results || []).map((h: any) =>
           `${h.asset_code}: ${parseFloat(h.total_quantity).toFixed(6)} ($${h.value_usd})`
-        ).slice(0, 5).join(' | ');
+        ). join(' | ');
         wallets.push({ name: 'Robinhood', type: 'Brokerage (Live)', badge: 'LIVE', balance: rhData.total_usd || 0, cash: 0, buying_power: 0, status: 'live', notes: holdings || 'No holdings' });
       }
     }
