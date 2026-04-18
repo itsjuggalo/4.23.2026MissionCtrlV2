@@ -2,44 +2,47 @@
 import { useState, useEffect } from 'react';
 
 export function ScannerPage() {
-  const [regime, setRegime] = useState<any>(null);
   const [crypto, setCrypto] = useState<any>(null);
+  const [regime, setRegime] = useState<any>(null);
   const [signals, setSignals] = useState<any>(null);
+  const [telegram, setTelegram] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const [lastUpdate, setLastUpdate] = useState<Date | null>(null);
 
   useEffect(() => {
-    async function fetchData() {
-      const [rRes, cRes, sRes] = await Promise.all([
-        fetch('/api/regime').then(r => r.json()).catch(() => null),
-        fetch('/api/crypto').then(r => r.json()).catch(() => null),
-        fetch('/api/signals/latest').then(r => r.json()).catch(() => null),
+    async function fetchAll() {
+      const [cRes, rRes, sRes, tRes] = await Promise.all([
+        fetch('/api/crypto').then(r => r.json()).catch(() => ({})),
+        fetch('/api/regime').then(r => r.json()).catch(() => ({})),
+        fetch('/api/signals/latest').then(r => r.json()).catch(() => ({})),
+        fetch('/api/telegram-signals?limit=10').then(r => r.json()).catch(() => []),
       ]);
-      setRegime(rRes); setCrypto(cRes); setSignals(sRes);
+      setCrypto(cRes); setRegime(rRes); setSignals(sRes);
+      setTelegram(Array.isArray(tRes) ? tRes : tRes.signals || []);
+      setLastUpdate(new Date());
       setLoading(false);
     }
-    fetchData();
-    const i = setInterval(fetchData, 30000);
+    fetchAll();
+    const i = setInterval(fetchAll, 15000);
     return () => clearInterval(i);
   }, []);
 
   const fmt = (n: number) => n?.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 }) || '0.00';
+  const fmtK = (n: number) => n > 1000 ? `$${(n / 1000).toFixed(1)}K` : `$${fmt(n)}`;
 
-  // Parse regime data
-  const regimeData = regime?.regime || regime?.current_regime || 'Unknown';
-  const regimeColor = regimeData === 'trending_up' ? '#66bb6a' : regimeData === 'trending_down' ? '#ef5350' : regimeData === 'ranging' ? '#ff9800' : '#4fc3f7';
+  const regimeData = regime?.overall_regime || regime?.regime || 'Unknown';
+  const regimeColor = regimeData.includes('UP') || regimeData.includes('BULL') ? '#66bb6a' : regimeData.includes('DOWN') || regimeData.includes('BEAR') ? '#ef5350' : '#ff9800';
 
-  // Parse crypto
-  const btcData = crypto?.BTC || crypto?.btc || {};
-  const ethData = crypto?.ETH || crypto?.eth || {};
-  const solData = crypto?.SOL || crypto?.sol || {};
-  const btcPrice = btcData.price || btcData.usd || 0;
-  const ethPrice = ethData.price || ethData.usd || 0;
-  const solPrice = solData.price || solData.usd || 0;
+  const btc = crypto?.BTC?.price || 0;
+  const eth = crypto?.ETH?.price || 0;
+  const sol = crypto?.SOL?.price || 0;
+  const doge = crypto?.DOGE?.price || 0;
 
-  // Signal state
   const sigState = signals?.BTCUSD || signals?.btcusd || {};
   const lastAction = sigState.last_action || sigState.direction || 'NONE';
-  const signalCount = sigState.signal_count || 0;
+
+  // Recent high-score telegram signals
+  const hotSignals = telegram.filter(s => s.score >= 50).slice(0, 6);
 
   if (loading) return (
     <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '40vh', color: '#4fc3f7', fontFamily: 'var(--font-mc-mono)' }}>
@@ -49,68 +52,99 @@ export function ScannerPage() {
 
   return (
     <div style={{ padding: '24px', maxWidth: '1100px', margin: '0 auto' }}>
-      <style>{`
-        .scan-card { background: linear-gradient(180deg, #0a1929 0%, #0d1420 100%); border: 1px solid #1a3a4a; border-radius: 10px; }
-        @keyframes scanLine { 0% { transform: translateX(-100%); } 100% { transform: translateX(200%); } }
-      `}</style>
+      <style>{`.scan-card { background: linear-gradient(180deg, #0a1929 0%, #0d1420 100%); border: 1px solid #1a3a4a; border-radius: 10px; }`}</style>
 
-      {/* Market Regime Hero */}
-      <div className="scan-card" style={{ padding: '32px', textAlign: 'center', marginBottom: '20px', borderBottom: `3px solid ${regimeColor}` }}>
-        <div style={{ fontSize: '11px', color: '#607d8b', fontFamily: 'var(--font-mc-mono)', letterSpacing: '1.5px', marginBottom: '8px' }}>CURRENT MARKET REGIME</div>
-        <div style={{ fontSize: '36px', fontWeight: 900, color: regimeColor, fontFamily: 'var(--font-mc-mono)', textTransform: 'uppercase', letterSpacing: '3px' }}>
-          {regimeData.replace('_', ' ')}
+      {/* Status bar */}
+      <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '16px', padding: '8px 14px', background: '#66bb6a0d', border: '1px solid #66bb6a33', borderRadius: '6px' }}>
+        <span style={{ width: '8px', height: '8px', borderRadius: '50%', background: '#66bb6a', boxShadow: '0 0 6px #66bb6a88', animation: 'pulse 2s infinite' }} />
+        <span style={{ fontSize: '11px', fontWeight: 700, color: '#66bb6a', fontFamily: 'var(--font-mc-mono)' }}>LIVE SCANNING</span>
+        {lastUpdate && <span style={{ fontSize: '10px', color: '#607d8b', fontFamily: 'var(--font-mc-mono)' }}>Updated {Math.floor((Date.now() - lastUpdate.getTime()) / 1000)}s ago · 15s refresh</span>}
+        <style>{`@keyframes pulse { 0%,100% { opacity:1; } 50% { opacity:0.4; } }`}</style>
+      </div>
+
+      {/* Regime + Signal */}
+      <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr', gap: '12px', marginBottom: '16px' }}>
+        <div className="scan-card" style={{ padding: '24px', textAlign: 'center', borderBottom: `3px solid ${regimeColor}` }}>
+          <div style={{ fontSize: '10px', color: '#607d8b', fontFamily: 'var(--font-mc-mono)', letterSpacing: '1.5px', marginBottom: '6px' }}>MARKET REGIME</div>
+          <div style={{ fontSize: '28px', fontWeight: 900, color: regimeColor, fontFamily: 'var(--font-mc-mono)', letterSpacing: '2px' }}>
+            {regimeData.replace(/_/g, ' ')}
+          </div>
         </div>
-        <div style={{ marginTop: '12px', fontSize: '13px', color: '#607d8b', fontFamily: 'var(--font-mc-mono)' }}>
-          SuperTrend Signal: <span style={{ color: lastAction === 'BUY' ? '#66bb6a' : '#ef5350', fontWeight: 700 }}>{lastAction}</span>
-          <span style={{ margin: '0 12px', color: '#1a3a4a' }}>|</span>
-          {signalCount} signals processed
+        <div className="scan-card" style={{ padding: '24px', textAlign: 'center', borderBottom: `3px solid ${lastAction === 'BUY' ? '#66bb6a' : '#ef5350'}` }}>
+          <div style={{ fontSize: '10px', color: '#607d8b', fontFamily: 'var(--font-mc-mono)', letterSpacing: '1.5px', marginBottom: '6px' }}>SUPERTREND 1H</div>
+          <div style={{ fontSize: '28px', fontWeight: 900, color: lastAction === 'BUY' ? '#66bb6a' : '#ef5350', fontFamily: 'var(--font-mc-mono)' }}>
+            {lastAction}
+          </div>
         </div>
       </div>
 
-      {/* Price Tickers */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '12px', marginBottom: '20px' }}>
+      {/* Live Prices */}
+      <div style={{ fontSize: '12px', fontWeight: 700, color: '#4fc3f7', fontFamily: 'var(--font-mc-mono)', letterSpacing: '1.5px', marginBottom: '10px', paddingBottom: '4px', borderBottom: '2px solid #4fc3f744' }}>
+        LIVE PRICES
+      </div>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '10px', marginBottom: '20px' }}>
         {[
-          { symbol: 'BTC', price: btcPrice, color: '#ff9800' },
-          { symbol: 'ETH', price: ethPrice, color: '#627eea' },
-          { symbol: 'SOL', price: solPrice, color: '#9945ff' },
+          { sym: 'BTC', price: btc, color: '#ff9800' },
+          { sym: 'ETH', price: eth, color: '#627eea' },
+          { sym: 'SOL', price: sol, color: '#9945ff' },
+          { sym: 'DOGE', price: doge, color: '#c2a633' },
         ].map((c, i) => (
-          <div key={i} className="scan-card" style={{ padding: '20px 24px' }}>
+          <div key={i} className="scan-card" style={{ padding: '16px 20px' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-              <div>
-                <div style={{ fontSize: '14px', fontWeight: 700, color: c.color, fontFamily: 'var(--font-mc-mono)' }}>{c.symbol}</div>
-                <div style={{ fontSize: '11px', color: '#607d8b', fontFamily: 'var(--font-mc-mono)', marginTop: '2px' }}>USD</div>
-              </div>
-              <div style={{ fontSize: '24px', fontWeight: 800, color: '#e0e0e0', fontFamily: 'var(--font-mc-mono)' }}>
-                ${c.price > 1000 ? c.price.toLocaleString(undefined, { maximumFractionDigits: 0 }) : fmt(c.price)}
-              </div>
+              <span style={{ fontSize: '14px', fontWeight: 700, color: c.color, fontFamily: 'var(--font-mc-mono)' }}>{c.sym}</span>
+              <span style={{ fontSize: '20px', fontWeight: 800, color: '#e0e0e0', fontFamily: 'var(--font-mc-mono)' }}>
+                {c.price > 1000 ? `$${c.price.toLocaleString(undefined, { maximumFractionDigits: 0 })}` : `$${fmt(c.price)}`}
+              </span>
             </div>
           </div>
         ))}
       </div>
 
-      {/* Scanner Grid */}
-      <div style={{ fontSize: '13px', fontWeight: 700, color: '#4fc3f7', fontFamily: 'var(--font-mc-mono)', letterSpacing: '1.5px', marginBottom: '12px', paddingBottom: '6px', borderBottom: '2px solid #4fc3f744' }}>
+      {/* Hot Signals from Telegram */}
+      {hotSignals.length > 0 && (
+        <>
+          <div style={{ fontSize: '12px', fontWeight: 700, color: '#ef5350', fontFamily: 'var(--font-mc-mono)', letterSpacing: '1.5px', marginBottom: '10px', paddingBottom: '4px', borderBottom: '2px solid #ef535044' }}>
+            HOT SIGNALS (SCORE 50+)
+          </div>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(260px, 1fr))', gap: '8px', marginBottom: '20px' }}>
+            {hotSignals.map((s: any, i: number) => (
+              <div key={i} className="scan-card" style={{ padding: '14px 16px', borderLeft: `3px solid ${s.direction === 'LONG' ? '#66bb6a' : s.direction === 'SHORT' ? '#ef5350' : '#ff9800'}` }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '6px' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                    <span style={{ fontSize: '16px', fontWeight: 700, color: '#4fc3f7', fontFamily: 'var(--font-mc-mono)' }}>{s.symbol || '?'}</span>
+                    {s.direction && <span style={{ fontSize: '10px', fontWeight: 700, padding: '2px 6px', borderRadius: '3px', background: s.direction === 'LONG' ? '#66bb6a22' : '#ef535022', color: s.direction === 'LONG' ? '#66bb6a' : '#ef5350', fontFamily: 'var(--font-mc-mono)' }}>{s.direction}</span>}
+                  </div>
+                  <span style={{ fontSize: '12px', fontWeight: 700, padding: '2px 8px', borderRadius: '4px', background: s.score >= 70 ? '#66bb6a22' : '#ff980022', color: s.score >= 70 ? '#66bb6a' : '#ff9800', fontFamily: 'var(--font-mc-mono)' }}>{s.score}</span>
+                </div>
+                {s.entry && <div style={{ fontSize: '11px', color: '#90a4ae', fontFamily: 'var(--font-mc-mono)' }}>Entry: ${s.entry}</div>}
+                <div style={{ fontSize: '10px', color: '#455a64', fontFamily: 'var(--font-mc-mono)', marginTop: '4px' }}>{s.channel_name?.slice(0, 25) || ''}</div>
+              </div>
+            ))}
+          </div>
+        </>
+      )}
+
+      {/* Active Scanners */}
+      <div style={{ fontSize: '12px', fontWeight: 700, color: '#66bb6a', fontFamily: 'var(--font-mc-mono)', letterSpacing: '1.5px', marginBottom: '10px', paddingBottom: '4px', borderBottom: '2px solid #66bb6a44' }}>
         ACTIVE SCANNERS
       </div>
-
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: '12px' }}>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: '10px' }}>
         {[
-          { name: 'SuperTrend 1H', status: 'Active', desc: 'ATR 7, Mult 5.0 — BTC/USD on Coinbase', source: 'TradingView → Signal Receiver', color: '#66bb6a' },
-          { name: 'Option Flow Monitor', status: 'Active', desc: 'Scraping unusual options activity', source: 'Firebase Vivid2', color: '#66bb6a' },
-          { name: 'Telegram Listener', status: 'Active', desc: '9 channels — crypto signals + whale alerts', source: 'Telethon + WebSocket', color: '#66bb6a' },
-          { name: 'Whale Flow Filter', status: 'Active', desc: 'Filtering high-value options flow from scraper', source: 'Cron every 5 min', color: '#66bb6a' },
-          { name: 'Regime Detector', status: 'Active', desc: 'Multi-timeframe regime classification', source: 'Cron every 4 hours', color: '#66bb6a' },
-          { name: 'Market Aggregator', status: 'Active', desc: 'Hourly market briefing data fetch', source: 'Cron every hour', color: '#66bb6a' },
-          { name: 'go-trader Hyperliquid', status: 'Active', desc: '30 strategies across BTC/ETH/SOL perps', source: 'Cron every 5 min', color: '#66bb6a' },
-          { name: 'SuperTrend 30m', status: 'Planned', desc: 'Second timeframe layer — not yet deployed', source: 'Pending', color: '#ff9800' },
-        ].map((scanner, i) => (
-          <div key={i} className="scan-card" style={{ padding: '18px 20px', borderLeft: `3px solid ${scanner.color}` }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
-              <span style={{ fontSize: '15px', fontWeight: 700, color: '#e0e0e0', fontFamily: 'var(--font-mc-mono)' }}>{scanner.name}</span>
-              <span style={{ fontSize: '10px', fontWeight: 700, padding: '2px 8px', borderRadius: '4px', background: `${scanner.color}22`, color: scanner.color, fontFamily: 'var(--font-mc-mono)' }}>{scanner.status.toUpperCase()}</span>
+          { name: 'SuperTrend 1H', desc: 'ATR 7 · BTC/USD Coinbase', freq: 'Webhook', color: '#66bb6a' },
+          { name: 'Telegram Listener', desc: `${telegram.length > 0 ? telegram.length : '9 ch'} signals`, freq: 'Real-time', color: '#66bb6a' },
+          { name: 'Option Flow', desc: 'Firebase Vivid2 scraper', freq: '5 min', color: '#66bb6a' },
+          { name: 'go-trader HL', desc: '30 strategies BTC/ETH/SOL', freq: '5 min', color: '#66bb6a' },
+          { name: 'Regime Detector', desc: `Current: ${regimeData.replace(/_/g, ' ')}`, freq: '4 hours', color: '#66bb6a' },
+          { name: 'Market Aggregator', desc: 'Hourly briefing for agents', freq: 'Hourly', color: '#66bb6a' },
+          { name: 'Whale Flow', desc: 'High-value options filter', freq: '5 min', color: '#66bb6a' },
+          { name: 'SuperTrend 30m', desc: 'Second timeframe layer', freq: 'Planned', color: '#ff9800' },
+        ].map((s, i) => (
+          <div key={i} className="scan-card" style={{ padding: '14px 18px', borderLeft: `3px solid ${s.color}`, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            <div>
+              <div style={{ fontSize: '14px', fontWeight: 700, color: '#e0e0e0', fontFamily: 'var(--font-mc-mono)' }}>{s.name}</div>
+              <div style={{ fontSize: '11px', color: '#607d8b', fontFamily: 'var(--font-mc-mono)', marginTop: '2px' }}>{s.desc}</div>
             </div>
-            <div style={{ fontSize: '12px', color: '#90a4ae', fontFamily: 'var(--font-mc-mono)', marginBottom: '6px' }}>{scanner.desc}</div>
-            <div style={{ fontSize: '10px', color: '#455a64', fontFamily: 'var(--font-mc-mono)' }}>{scanner.source}</div>
+            <span style={{ fontSize: '10px', fontWeight: 700, padding: '3px 8px', borderRadius: '4px', background: `${s.color}22`, color: s.color, fontFamily: 'var(--font-mc-mono)' }}>{s.freq.toUpperCase()}</span>
           </div>
         ))}
       </div>

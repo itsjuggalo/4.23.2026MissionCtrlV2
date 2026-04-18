@@ -1,19 +1,22 @@
-import type { NextRequest } from 'next/server';
-export async function GET(request: NextRequest) {
-  const { searchParams } = new URL(request.url);
-  const ids = searchParams.get('ids') ?? '';
-  const vs_currencies = searchParams.get('vs_currencies') ?? 'usd';
-  const include_24hr_change = searchParams.get('include_24hr_change') ?? 'true';
-  const url = `https://api.coingecko.com/api/v3/simple/price?ids=${ids}&vs_currencies=${vs_currencies}&include_24hr_change=${include_24hr_change}`;
-  let res: Response;
+import { NextResponse } from 'next/server';
+
+export async function GET() {
   try {
-    res = await fetch(url, { signal: AbortSignal.timeout(8000) });
-  } catch (err) {
-    return Response.json({}, { status: 200 });
+    const [btcRes, ethRes, solRes, dogeRes] = await Promise.all([
+      fetch('https://api.coinbase.com/v2/prices/BTC-USD/spot').then(r => r.json()).catch(() => null),
+      fetch('https://api.coinbase.com/v2/prices/ETH-USD/spot').then(r => r.json()).catch(() => null),
+      fetch('https://api.coinbase.com/v2/prices/SOL-USD/spot').then(r => r.json()).catch(() => null),
+      fetch('https://api.coinbase.com/v2/prices/DOGE-USD/spot').then(r => r.json()).catch(() => null),
+    ]);
+
+    return NextResponse.json({
+      BTC: { price: parseFloat(btcRes?.data?.amount || '0'), symbol: 'BTC' },
+      ETH: { price: parseFloat(ethRes?.data?.amount || '0'), symbol: 'ETH' },
+      SOL: { price: parseFloat(solRes?.data?.amount || '0'), symbol: 'SOL' },
+      DOGE: { price: parseFloat(dogeRes?.data?.amount || '0'), symbol: 'DOGE' },
+      timestamp: new Date().toISOString(),
+    });
+  } catch {
+    return NextResponse.json({});
   }
-  if (res.status !== 200) {
-    return Response.json({}, { status: 200 });
-  }
-  const data = await res.json();
-  return Response.json(data, { status: 200 });
 }
