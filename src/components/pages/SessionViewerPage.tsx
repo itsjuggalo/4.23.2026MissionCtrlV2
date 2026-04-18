@@ -150,7 +150,7 @@ export function SessionViewerPage() {
           filtered.map((log, i) => (
             <div key={i} className="log-line">
               <span style={{ color: '#455a64', minWidth: '75px', flexShrink: 0 }}>
-                {new Date(log.timestamp).toLocaleTimeString('en-US', { hour12: false })}
+                {(() => { const d = new Date(log.timestamp); const now = new Date(); const isToday = d.toDateString() === now.toDateString(); return isToday ? d.toLocaleTimeString('en-US', { hour12: false }) : d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' }) + ' ' + d.toLocaleTimeString('en-US', { hour12: false }); })()}
               </span>
               <span style={{ color: LEVEL_COLORS[log.level] || '#607d8b', minWidth: '40px', fontWeight: 700, flexShrink: 0 }}>
                 {log.level.toUpperCase()}

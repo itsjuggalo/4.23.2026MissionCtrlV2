@@ -1,84 +1,72 @@
 import { NextResponse } from 'next/server';
-import { readFileSync, existsSync } from 'fs';
+import { readFileSync, existsSync, statSync } from 'fs';
 import { join } from 'path';
 
 const PM2_LOGS = join(process.env.HOME || '/home/ubuntu', '.pm2/logs');
 
-interface LogEntry {
-  timestamp: string;
-  source: string;
-  level: 'info' | 'warn' | 'error' | 'debug';
-  message: string;
+const SOURCES = [
+  { out: 'mission-control-out.log', err: 'mission-control-error.log', name: 'Mission Control' },
+  { out: 'signal-receiver-out.log', err: 'signal-receiver-error.log', name: 'Signal Receiver' },
+  { out: 'option-signals-out.log', err: 'option-signals-error.log', name: 'Option Signals' },
+  { out: 'option-signals-relay-out.log', err: 'option-signals-relay-error.log', name: 'Signals Relay' },
+  { out: 'flow-monitor-out.log', err: 'flow-monitor-error.log', name: 'Flow Monitor' },
+  { out: 'telegram-listener-out.log', err: 'telegram-listener-error.log', name: 'Telegram Listener' },
+  { out: 'telegram-discord-relay-out.log', err: 'telegram-discord-relay-error.log', name: 'TG→Discord Relay' },
+  { out: 'brief-forwarder-out.log', err: 'brief-forwarder-error.log', name: 'Brief Forwarder' },
+  { out: 'coupon-claw-out.log', err: 'coupon-claw-error.log', name: 'CouponClaw' },
+  { out: 'skill-scheduler-out.log', err: 'skill-scheduler-error.log', name: 'Skill Scheduler' },
+  { out: 'deepseek-bot-out.log', err: 'deepseek-bot-error.log', name: 'DeepSheet Bot' },
+  { out: 'grok-bot-out.log', err: 'grok-bot-error.log', name: 'Groot Bot' },
+  { out: 'coupon-monitor-out.log', err: 'coupon-monitor-error.log', name: 'Coupon Monitor' },
+];
+
+function parseTimestamp(line: string, fileMtime: Date): string {
+  // Try ISO format: 2026-04-18T19:42:15.917583+00:00
+  const isoMatch = line.match(/(\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2})/);
+  if (isoMatch) return new Date(isoMatch[1] + 'Z').toISOString();
+
+  // Try bracket format: [2026-04-18 15:32:12]
+  const bracketMatch = line.match(/\[(\d{4}-\d{2}-\d{2})\s+(\d{2}:\d{2}:\d{2})\]/);
+  if (bracketMatch) return new Date(bracketMatch[1] + 'T' + bracketMatch[2] + 'Z').toISOString();
+
+  // Try date prefix: 2026-04-18 15:32:12
+  const dateMatch = line.match(/^(\d{4}-\d{2}-\d{2}\s+\d{2}:\d{2}:\d{2})/);
+  if (dateMatch) return new Date(dateMatch[1].replace(' ', 'T') + 'Z').toISOString();
+
+  // Fallback to file modification time
+  return fileMtime.toISOString();
 }
 
-function parseLogLine(line: string, source: string, isError: boolean): LogEntry | null {
-  if (!line.trim()) return null;
-
-  // Try to extract timestamp
-  const tsMatch = line.match(/^(\d{4}-\d{2}-\d{2}[T ]\d{2}:\d{2}:\d{2})/);
-  const timestamp = tsMatch ? tsMatch[1] : new Date().toISOString();
-
-  // Determine level
-  let level: 'info' | 'warn' | 'error' | 'debug' = isError ? 'error' : 'info';
-  const lower = line.toLowerCase();
-  if (lower.includes('[error]') || lower.includes('error:') || lower.includes('traceback')) level = 'error';
-  else if (lower.includes('[warn]') || lower.includes('warning')) level = 'warn';
-  else if (lower.includes('[debug]') || lower.includes('debug:')) level = 'debug';
-
-  // Clean message
-  let message = line;
-  if (tsMatch) message = line.slice(tsMatch[0].length).replace(/^\s*[:\|]\s*/, '').trim();
-  if (!message) return null;
-
-  return { timestamp, source, level, message };
-}
-
-function readLastLines(filepath: string, maxLines: number): string[] {
+function readLogFile(filepath: string, source: string, level: 'info' | 'error', limit: number): any[] {
   try {
     if (!existsSync(filepath)) return [];
+    const stat = statSync(filepath);
     const content = readFileSync(filepath, 'utf-8');
-    const lines = content.split('\n').filter(l => l.trim());
-    return lines.slice(-maxLines);
+    const lines = content.split('\n').filter(l => l.trim().length > 5);
+    const tail = lines.slice(-limit);
+
+    return tail.map(line => ({
+      timestamp: parseTimestamp(line, stat.mtime),
+      source,
+      level,
+      message: line.replace(/^\d{4}-\d{2}-\d{2}[T ]\d{2}:\d{2}:\d{2}[^\s]*\s*/, '').replace(/^\[.*?\]\s*/, '').trim() || line,
+    }));
   } catch { return []; }
 }
 
 export async function GET(req: Request) {
   const url = new URL(req.url);
-  const sourcesParam = url.searchParams.get('sources') || '';
-  const limit = parseInt(url.searchParams.get('limit') || '200');
+  const limit = Math.min(parseInt(url.searchParams.get('limit') || '200'), 500);
+  const perFile = Math.ceil(limit / (SOURCES.length * 2));
 
-  const requestedSources = sourcesParam ? sourcesParam.split(',') : [];
-
-  const allLogs: LogEntry[] = [];
-
-  const processes = [
-    'mission-control', 'signal-receiver', 'option-signals', 'option-signals-relay',
-    'flow-monitor', 'telegram-listener', 'telegram-discord-relay', 'brief-forwarder',
-    'coupon-claw', 'coupon-monitor', 'deepseek-bot', 'grok-bot', 'skill-scheduler',
-  ];
-
-  for (const proc of processes) {
-    if (requestedSources.length > 0 && !requestedSources.includes(proc)) continue;
-
-    // Read both out and error logs
-    const outFile = join(PM2_LOGS, `${proc}-out.log`);
-    const errFile = join(PM2_LOGS, `${proc}-error.log`);
-
-    const outLines = readLastLines(outFile, 50);
-    const errLines = readLastLines(errFile, 30);
-
-    for (const line of outLines) {
-      const entry = parseLogLine(line, proc, false);
-      if (entry) allLogs.push(entry);
-    }
-    for (const line of errLines) {
-      const entry = parseLogLine(line, proc, true);
-      if (entry) allLogs.push(entry);
-    }
+  let logs: any[] = [];
+  for (const src of SOURCES) {
+    logs.push(...readLogFile(join(PM2_LOGS, src.out), src.name, 'info', perFile));
+    logs.push(...readLogFile(join(PM2_LOGS, src.err), src.name, 'error', perFile));
   }
 
-  // Sort by timestamp
-  allLogs.sort((a, b) => new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime());
+  logs.sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime());
+  logs = logs.slice(0, limit);
 
-  return NextResponse.json({ logs: allLogs.slice(-limit) });
+  return NextResponse.json({ logs, sources: SOURCES.map(s => s.name) });
 }
