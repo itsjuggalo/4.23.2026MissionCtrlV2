@@ -98,7 +98,7 @@ export async function GET() {
   try {
     const result = execSync(
       'python3 /home/ubuntu/scripts/robinhood-full-portfolio.py',
-      { timeout: 30000, encoding: 'utf-8' }
+      { timeout: 45000, encoding: 'utf-8' }
     );
     const rhData = JSON.parse(result.trim());
     if (rhData.error) {

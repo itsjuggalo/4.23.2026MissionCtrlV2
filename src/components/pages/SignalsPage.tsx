@@ -63,6 +63,8 @@ function classify(id: string, raw: FirebaseSignal, isBuy: boolean, isOption: boo
   let expCategory: Signal['expCategory'] = null;
   if (expiryDate) {
     const daysOut = (expiryDate.getTime() - Date.now()) / 86400000;
+    // Skip signals expired more than 1 day ago
+    if (daysOut < -1) expCategory = 'expired' as any;
     expCategory = daysOut <= 7 ? 'weekly' : daysOut <= 60 ? 'monthly' : 'leaps';
   }
 
@@ -376,7 +378,7 @@ export function SignalsPage() {
   const weekly  = filteredOptions.filter(s => s.expCategory === 'weekly');
   const monthly = filteredOptions.filter(s => s.expCategory === 'monthly');
   const leaps   = filteredOptions.filter(s => s.expCategory === 'leaps');
-  const noExpiry= filteredOptions.filter(s => !s.expCategory);
+  const noExpiry= filteredOptions.filter(s => !s.expCategory && (s as any).expCategory !== 'expired');
 
   // Sort stocks by expiry (soonest first) or just by id
   const sortedStocks = [...filteredStocks].sort((a, b) =>
