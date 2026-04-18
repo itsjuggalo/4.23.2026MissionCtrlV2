@@ -1,4 +1,6 @@
 'use client';
+import { useLiveStream } from '@/hooks/useLiveStream';
+import { LiveIndicator } from '@/components/ui/LiveIndicator';
 import { useEffect, useState } from 'react';
 
 // ============================================================================
@@ -13,6 +15,7 @@ export function CommandCenterPage() {
   const [signals, setSignals] = useState<any>(null);
   const [regime, setRegime] = useState<any>(null);
   const [activity, setActivity] = useState<any[]>([]);
+  const live = useLiveStream(true);
   const [loading, setLoading] = useState(true);
   const [tick, setTick] = useState(0);
 

@@ -1,4 +1,6 @@
 'use client';
+import { useLiveStream } from '@/hooks/useLiveStream';
+import { LiveIndicator } from '@/components/ui/LiveIndicator';
 import { useEffect, useState } from 'react';
 import { BTCBiasWidget } from '../ui/BTCBiasWidget';
 
@@ -14,6 +16,7 @@ export function DashboardPage() {
   const [report, setReport] = useState<any>(null);
   const [params, setParams] = useState<any>(null);
   const [crypto, setCrypto] = useState<any>(null);
+  const live = useLiveStream(true);
   const [loading, setLoading] = useState(true);
   const [equityHist, setEquityHist] = useState<any[]>([]);
   const [tick, setTick] = useState(0);

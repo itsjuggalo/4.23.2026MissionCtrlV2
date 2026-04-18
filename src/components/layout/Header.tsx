@@ -1,4 +1,6 @@
 'use client';
+import { useLiveStream } from '@/hooks/useLiveStream';
+import { LiveIndicator } from '@/components/ui/LiveIndicator';
 import { useEffect, useState } from 'react';
 
 const SUBTITLES: Record<string, string> = {
@@ -33,7 +35,8 @@ const SUBTITLES: Record<string, string> = {
 interface HeaderProps {
   title: string;
 }
-export function Header({ title }: HeaderProps) {
+export function Header({
+  const live = useLiveStream(true); title }: HeaderProps) {
   const [time, setTime] = useState('');
   useEffect(() => {
     const update = () => {
