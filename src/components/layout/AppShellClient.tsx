@@ -34,6 +34,7 @@ import { CongressPage } from '../pages/CongressPage';
 import { LLMPortfolioPage } from '../pages/LLMPortfolioPage';
 import { SkillsPage } from "../pages/SkillsPage";
 import { TelegramPage } from '@/components/pages/TelegramPage';
+import { OptionsPage } from '@/components/pages/OptionsPage';
 import { SessionViewerPage } from '@/components/pages/SessionViewerPage';
 import { PsychChatWidget } from '../ui/PsychChatWidget';
 
@@ -44,6 +45,7 @@ type PageName =
   | 'Scanner'
   | 'Tasks'
   | 'Sessions'
+  | 'Options'
   | 'Agents'
   | 'Approvals'
   | 'Calendar'
@@ -84,7 +86,7 @@ export function AppShellClient() {
     if (page) {
       const pageName = (page.charAt(0).toUpperCase() + page.slice(1).toLowerCase()) as PageName;
       const validPages: PageName[] = [
-        'Dashboard', 'Signals', 'Telegram', 'Scanner', 'Tasks', 'Sessions', 'Agents', 
+        'Dashboard', 'Signals', 'Telegram', 'Scanner', 'Tasks', 'Sessions', 'Options', 'Agents', 
         'Approvals', 'Calendar', 'Projects', 'Memory', 'Memory Graph', 
         'Office', 'Docs', 'Wallets', 'Trades', 'Activity', 'Risk', 'TV Chart', 'PowerTrader',
         'Command Center', 'Performance', 'Regime', 'Usage', 'Landing', 'Congress', 'LLM Portfolio', 'Skills'
