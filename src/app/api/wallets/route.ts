@@ -94,7 +94,7 @@ export async function GET() {
     wallets.push({ name: 'Coinbase', type: 'Exchange (Live)', badge: 'LIVE', balance: 0, cash: 0, buying_power: 0, status: 'error', notes: String(e).slice(0, 80) });
   }
 
-  // === 3. ROBINHOOD (full portfolio — stocks + crypto via robin_stocks) ===
+  // === 3. ROBINHOOD (split: stocks + crypto) ===
   try {
     const result = execSync(
       'python3 /home/ubuntu/scripts/robinhood-full-portfolio.py',
@@ -104,23 +104,45 @@ export async function GET() {
     if (rhData.error) {
       wallets.push({ name: 'Robinhood', type: 'Brokerage (Live)', badge: 'LIVE', balance: 0, cash: 0, buying_power: 0, status: 'error', notes: rhData.error.slice(0, 80) });
     } else {
-      const stockNotes = (rhData.stocks || [])
-        .filter((s: any) => s.equity > 1)
-        .map((s: any) => `${s.symbol}: ${s.quantity.toFixed(2)} ($${s.equity.toFixed(2)})`)
-        .join(' | ');
-      const cryptoNotes = (rhData.crypto || [])
-        .filter((c: any) => c.equity > 1)
-        .map((c: any) => `${c.symbol}: ${c.quantity.toFixed(6)} ($${c.equity.toFixed(2)})`)
-        .join(' | ');
+      // Stocks card
       wallets.push({
-        name: 'Robinhood',
+        name: 'Robinhood — Stocks',
         type: 'Brokerage (Live)',
         badge: 'LIVE',
-        balance: rhData.total_equity || 0,
+        accent: 'cyan',
+        balance: rhData.stock_total || 0,
         cash: rhData.cash || 0,
         buying_power: rhData.cash || 0,
         status: 'live',
-        notes: [stockNotes, cryptoNotes].filter(Boolean).join(' | '),
+        positions: (rhData.stocks || []).filter((s: any) => s.equity > 0.5).map((s: any) => ({
+          symbol: s.symbol,
+          quantity: s.quantity,
+          avg_cost: s.avg_cost,
+          price: s.price,
+          equity: s.equity,
+          pct_change: s.pct_change,
+          type: 'stock',
+        })),
+        notes: `${(rhData.stocks || []).length} positions`,
+      });
+      // Crypto card
+      wallets.push({
+        name: 'Robinhood — Crypto',
+        type: 'Brokerage (Live)',
+        badge: 'LIVE',
+        accent: 'purple',
+        balance: rhData.crypto_total || 0,
+        cash: 0,
+        buying_power: 0,
+        status: 'live',
+        positions: (rhData.crypto || []).filter((c: any) => c.equity > 0.5).map((c: any) => ({
+          symbol: c.symbol,
+          quantity: c.quantity,
+          price: c.price,
+          equity: c.equity,
+          type: 'crypto',
+        })),
+        notes: `${(rhData.crypto || []).filter((c: any) => c.equity > 0.5).length} assets`,
       });
     }
   } catch (e) {
