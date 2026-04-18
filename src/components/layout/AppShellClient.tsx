@@ -107,7 +107,7 @@ export function AppShellClient() {
         return <SignalsPage />;
 <TelegramPage />;
       case 'Telegram':
-        return <TelegramSignalsPage />;
+        return <TelegramPage />;
       case 'Scanner':
         return <ScannerPage />;
       case 'Tasks':
