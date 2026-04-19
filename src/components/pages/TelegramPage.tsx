@@ -23,8 +23,7 @@ function timeAgo(ts: string): string {
   if (mins < 60) return `${mins}m ago`;
   const hrs = Math.floor(mins / 60);
   if (hrs < 24) return `${hrs}h ago`;
-  const days = Math.floor(hrs / 24);
-  return `${days}d ago`;
+  return `${Math.floor(hrs / 24)}d ago`;
 }
 
 function fullTime(ts: string): string {
@@ -57,10 +56,11 @@ function cleanChannelName(name: string): string {
 export function TelegramPage() {
   const [signals, setSignals] = useState<TelegramSignal[]>([]);
   const [loading, setLoading] = useState(true);
-  const [filter, setFilter] = useState<string>('all');
+  const [channelFilter, setChannelFilter] = useState<string>('all');
   const [search, setSearch] = useState('');
-  const [scoreFilter, setScoreFilter] = useState<number>(0);
+  const [scoreFilter, setScoreFilter] = useState<string>('0');
   const [statusFilter, setStatusFilter] = useState<string>('all');
+  const [dirFilter, setDirFilter] = useState<string>('all');
 
   useEffect(() => {
     async function fetchSignals() {
@@ -68,33 +68,25 @@ export function TelegramPage() {
         const res = await fetch('/api/telegram-signals');
         const data = await res.json();
         const entries = Array.isArray(data) ? data : data.signals || [];
-        // Filter out junk
         const cleaned = entries.filter((s: any) => {
           const text = (s.raw_text || '').toLowerCase();
           const sym = (s.symbol || '').toUpperCase();
-          // Remove promos
           if (['bingx', 'deposit', 'usdt completely free', 'receive up to', 'join now', 'bonus', 'exclusive benefit', 'sign up'].some(w => text.includes(w))) return false;
-          // Remove locked content
           if (text.includes('\u{1f512}') || text.includes('\u{1f510}') || text.includes('🔒') || text.includes('🔐')) return false;
-          // Remove no-symbol entries
           if (!sym || sym === '???' || sym === 'NO' || sym === 'UNKNOWN' || sym.length < 2) return false;
-          // Remove entries with no useful data
           if (!s.entry && !s.direction && s.score < 15) return false;
           return true;
         });
-
-        // Deduplicate: same symbol + same channel within 10 minutes
         const deduped: any[] = [];
         const seen = new Map<string, number>();
         for (const s of cleaned) {
           const key = (s.symbol || '') + '|' + (s.channel_name || '');
           const ts = new Date(s.timestamp).getTime();
           const lastTs = seen.get(key);
-          if (lastTs && Math.abs(ts - lastTs) < 600000) continue; // skip if within 10 min
+          if (lastTs && Math.abs(ts - lastTs) < 600000) continue;
           seen.set(key, ts);
           deduped.push(s);
         }
-
         setSignals(deduped);
       } catch {}
       setLoading(false);
@@ -105,105 +97,77 @@ export function TelegramPage() {
   }, []);
 
   const channels = [...new Set(signals.map(s => s.channel_name || 'Unknown'))].sort();
+  const channelCounts: Record<string, number> = {};
+  signals.forEach(s => { const ch = s.channel_name || 'Unknown'; channelCounts[ch] = (channelCounts[ch] || 0) + 1; });
 
   let filtered = signals;
-  if (filter !== 'all') filtered = filtered.filter(s => s.channel_name === filter);
-  if (search) {
-    const q = search.toLowerCase();
-    filtered = filtered.filter(s => (s.symbol || '').toLowerCase().includes(q) || (s.raw_text || '').toLowerCase().includes(q));
-  }
-  if (scoreFilter > 0) filtered = filtered.filter(s => s.score >= scoreFilter);
+  if (channelFilter !== 'all') filtered = filtered.filter(s => s.channel_name === channelFilter);
+  if (search) { const q = search.toLowerCase(); filtered = filtered.filter(s => (s.symbol || '').toLowerCase().includes(q) || (s.raw_text || '').toLowerCase().includes(q)); }
+  if (scoreFilter !== '0') filtered = filtered.filter(s => s.score >= parseInt(scoreFilter));
   if (statusFilter !== 'all') filtered = filtered.filter(s => s.status === statusFilter);
-
+  if (dirFilter !== 'all') filtered = filtered.filter(s => s.direction === dirFilter);
   filtered.sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime());
 
-  const totalSignals = signals.length;
-  const channelCount = channels.length;
   const recentCount = signals.filter(s => Date.now() - new Date(s.timestamp).getTime() < 86400000).length;
-  const highScoreCount = signals.filter(s => s.score >= 70).length;
-  const acceptedCount = signals.filter(s => s.status === 'accepted').length;
-  const rejectedCount = signals.filter(s => s.status === 'rejected').length;
+  const fmtPrice = (p: number) => p < 0.01 ? `$${p.toFixed(6)}` : p < 1 ? `$${p.toFixed(4)}` : `$${p.toFixed(2)}`;
+
+  const selectStyle: React.CSSProperties = { padding: '7px 12px', background: '#0d1117', border: '1px solid #1a3a4a', borderRadius: '6px', color: '#e0e0e0', fontFamily: 'var(--font-mc-mono)', fontSize: '12px', cursor: 'pointer', outline: 'none' };
 
   if (loading) return (
-    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '40vh', color: '#4fc3f7', fontFamily: 'var(--font-mc-mono)' }}>
+    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '40vh', color: '#4fc3f7', fontFamily: 'var(--font-mc-mono)', fontSize: '16px' }}>
       <div style={{ animation: 'tBlink 1s infinite' }}>SCANNING CHANNELS...</div>
       <style>{'@keyframes tBlink { 0%,100% { opacity:1; } 50% { opacity:0.3; } }'}</style>
     </div>
   );
 
   return (
-    <div style={{ padding: '24px', maxWidth: '1100px', margin: '0 auto' }}>
-      <style>{`
-        .tcard { background: linear-gradient(180deg, #0a1929 0%, #0d1420 100%); border: 1px solid #1a3a4a; border-radius: 8px; transition: border-color 0.2s; }
-        .tcard:hover { border-color: #4fc3f744; }
-        .tbtn { padding: 6px 12px; border-radius: 6px; border: 1px solid #1a3a4a; background: transparent; color: #607d8b; font-family: var(--font-mc-mono); font-size: 11px; cursor: pointer; font-weight: 600; transition: all 0.15s; }
-        .tbtn.active { background: #4fc3f722; border-color: #4fc3f7; color: #4fc3f7; }
-      `}</style>
+    <div style={{ padding: '16px 20px', height: '100%', display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
+      {/* Top Bar */}
+      <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '12px', flexWrap: 'wrap' }}>
+        <span style={{ width: '8px', height: '8px', borderRadius: '50%', background: '#66bb6a', boxShadow: '0 0 6px #66bb6a88' }} />
+        <span style={{ fontSize: '12px', fontWeight: 700, color: '#66bb6a', fontFamily: 'var(--font-mc-mono)' }}>LIVE</span>
+        <span style={{ fontSize: '11px', color: '#607d8b', fontFamily: 'var(--font-mc-mono)' }}>
+          {signals.length} signals · {channels.length} channels · {recentCount} last 24h
+        </span>
+        <div style={{ width: '1px', height: '16px', background: '#1a3a4a' }} />
 
-      {/* Stats */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(6, 1fr)', gap: '10px', marginBottom: '20px' }}>
-        {[
-          { label: 'TOTAL', value: totalSignals, color: '#4fc3f7' },
-          { label: 'CHANNELS', value: channelCount, color: '#ce93d8' },
-          { label: 'LAST 24H', value: recentCount, color: recentCount > 0 ? '#66bb6a' : '#ef5350' },
-          { label: 'SCORE 70+', value: highScoreCount, color: '#ffd54f' },
-          { label: 'ACCEPTED', value: acceptedCount, color: '#66bb6a' },
-          { label: 'REJECTED', value: rejectedCount, color: '#ef5350' },
-        ].map((m, i) => (
-          <div key={i} className="tcard" style={{ padding: '14px', textAlign: 'center' }}>
-            <div style={{ fontSize: '10px', color: '#607d8b', fontFamily: 'var(--font-mc-mono)', letterSpacing: '1px', marginBottom: '4px' }}>{m.label}</div>
-            <div style={{ fontSize: '24px', fontWeight: 800, color: m.color, fontFamily: 'var(--font-mc-mono)' }}>{m.value}</div>
-          </div>
-        ))}
+        <select value={channelFilter} onChange={e => setChannelFilter(e.target.value)} style={selectStyle}>
+          <option value="all">All Channels ({signals.length})</option>
+          {channels.map(ch => <option key={ch} value={ch}>{cleanChannelName(ch)} ({channelCounts[ch] || 0})</option>)}
+        </select>
+
+        <select value={scoreFilter} onChange={e => setScoreFilter(e.target.value)} style={selectStyle}>
+          <option value="0">All Scores</option>
+          <option value="40">Score 40+</option>
+          <option value="70">Score 70+</option>
+          <option value="85">Score 85+</option>
+        </select>
+
+        <select value={statusFilter} onChange={e => setStatusFilter(e.target.value)} style={selectStyle}>
+          <option value="all">All Status</option>
+          <option value="accepted">Accepted</option>
+          <option value="rejected">Rejected</option>
+          <option value="pending">Pending</option>
+        </select>
+
+        <select value={dirFilter} onChange={e => setDirFilter(e.target.value)} style={selectStyle}>
+          <option value="all">All Directions</option>
+          <option value="LONG">Long Only</option>
+          <option value="SHORT">Short Only</option>
+        </select>
+
+        <input value={search} onChange={e => setSearch(e.target.value)} placeholder="Ticker..."
+          style={{ ...selectStyle, width: '100px' }} />
+
+        <span style={{ fontSize: '11px', color: '#455a64', fontFamily: 'var(--font-mc-mono)', marginLeft: 'auto' }}>
+          {filtered.length} of {signals.length}
+        </span>
       </div>
 
-      {/* Channel Filters */}
-      <div style={{ display: 'flex', gap: '8px', alignItems: 'center', flexWrap: 'wrap', marginBottom: '12px' }}>
-        <button className={`tbtn ${filter === 'all' ? 'active' : ''}`} onClick={() => setFilter('all')}>
-          ALL ({totalSignals})
-        </button>
-        {channels.map(ch => {
-          const count = signals.filter(s => s.channel_name === ch).length;
-          const color = getChannelColor(ch);
-          return (
-            <button key={ch} className={`tbtn ${filter === ch ? 'active' : ''}`} onClick={() => setFilter(ch)}
-              style={filter === ch ? { background: `${color}22`, borderColor: color, color: color } : {}}>
-              {cleanChannelName(ch)} ({count})
-            </button>
-          );
-        })}
-      </div>
-
-      {/* Score + Status + Search */}
-      <div style={{ display: 'flex', gap: '8px', alignItems: 'center', flexWrap: 'wrap', marginBottom: '16px' }}>
-        <span style={{ fontSize: '11px', color: '#607d8b', fontFamily: 'var(--font-mc-mono)' }}>Score:</span>
-        {[0, 40, 70].map(s => (
-          <button key={s} className={`tbtn ${scoreFilter === s ? 'active' : ''}`} onClick={() => setScoreFilter(s)}>
-            {s === 0 ? 'All' : `${s}+`}
-          </button>
-        ))}
-        <div style={{ width: '1px', height: '24px', background: '#1a3a4a', margin: '0 4px' }} />
-        <span style={{ fontSize: '11px', color: '#607d8b', fontFamily: 'var(--font-mc-mono)' }}>Status:</span>
-        {['all', 'accepted', 'rejected', 'pending'].map(s => (
-          <button key={s} className={`tbtn ${statusFilter === s ? 'active' : ''}`} onClick={() => setStatusFilter(s)}
-            style={statusFilter === s && s === 'accepted' ? { background: '#66bb6a22', borderColor: '#66bb6a', color: '#66bb6a' } :
-                   statusFilter === s && s === 'rejected' ? { background: '#ef535022', borderColor: '#ef5350', color: '#ef5350' } : {}}>
-            {s.charAt(0).toUpperCase() + s.slice(1)}
-          </button>
-        ))}
-        <input value={search} onChange={e => setSearch(e.target.value)} placeholder="Search..."
-          style={{ marginLeft: 'auto', padding: '6px 14px', background: '#0d1117', border: '1px solid #1a3a4a', borderRadius: '6px', color: '#e0e0e0', fontFamily: 'var(--font-mc-mono)', fontSize: '12px', width: '140px', outline: 'none' }} />
-      </div>
-
-      {/* Showing count */}
-      <div style={{ fontSize: '11px', color: '#455a64', fontFamily: 'var(--font-mc-mono)', marginBottom: '10px' }}>
-        Showing {Math.min(filtered.length, 100)} of {filtered.length} signals
-      </div>
-
-      {/* Signal Feed */}
-      <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+      {/* Signal Feed — scrollable */}
+      <div style={{ flex: 1, overflow: 'auto', display: 'flex', flexDirection: 'column', gap: '4px', minHeight: 0 }}>
         {filtered.length === 0 ? (
-          <div className="tcard" style={{ padding: '40px', textAlign: 'center', color: '#455a64', fontFamily: 'var(--font-mc-mono)', fontSize: '14px' }}>
+          <div style={{ padding: '60px', textAlign: 'center', color: '#455a64', fontFamily: 'var(--font-mc-mono)', fontSize: '14px', background: '#0a1929', borderRadius: '8px', border: '1px solid #1a3a4a' }}>
             No signals match filters
           </div>
         ) : filtered.slice(0, 100).map((s, i) => {
@@ -211,72 +175,38 @@ export function TelegramPage() {
           const scoreColor = s.score >= 70 ? '#66bb6a' : s.score >= 40 ? '#ffd54f' : '#ef5350';
           const dirColor = s.direction === 'LONG' ? '#66bb6a' : s.direction === 'SHORT' ? '#ef5350' : '#607d8b';
           const statusColor = s.status === 'accepted' ? '#66bb6a' : s.status === 'rejected' ? '#ef5350' : '#607d8b';
-
-          const hasStructuredData = !!(s.entry || s.direction || s.stop_loss || (s.targets && s.targets.length > 0));
-          const fmtPrice = (p: number) => p < 0.01 ? `$${p.toFixed(6)}` : p < 1 ? `$${p.toFixed(4)}` : `$${p.toFixed(2)}`;
+          const hasData = !!(s.entry || s.direction || s.stop_loss || (s.targets && s.targets.length > 0));
 
           return (
-            <div key={s.id || i} className="tcard" style={{ padding: '16px 20px', borderLeft: `3px solid ${color}` }}>
-              {/* Header: Symbol + Badges + Score + Time */}
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: hasStructuredData ? '12px' : '8px' }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                  {s.symbol && <span style={{ fontSize: '20px', fontWeight: 800, color: '#4fc3f7', fontFamily: 'var(--font-mc-mono)' }}>{s.symbol}</span>}
-                  {s.direction && <span style={{ fontSize: '11px', fontWeight: 700, padding: '3px 10px', borderRadius: '4px', background: `${dirColor}22`, color: dirColor, fontFamily: 'var(--font-mc-mono)' }}>{s.direction}</span>}
-                  <span style={{ fontSize: '11px', color: color, fontFamily: 'var(--font-mc-mono)', fontWeight: 600 }}>
-                    {cleanChannelName(s.channel_name || 'Unknown')}
-                  </span>
-                </div>
+            <div key={s.id || i} style={{ padding: hasData ? '14px 16px' : '10px 16px', background: '#0a1929', border: '1px solid #1a3a4a', borderRadius: '6px', borderLeft: `3px solid ${color}`, transition: 'border-color 0.2s' }}>
+              {/* Header */}
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: hasData ? '10px' : '0' }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                  <span style={{ fontSize: '12px', fontWeight: 700, padding: '3px 10px', borderRadius: '4px', background: `${scoreColor}22`, color: scoreColor, fontFamily: 'var(--font-mc-mono)' }}>{s.score}</span>
-                  <span style={{ fontSize: '10px', fontWeight: 700, padding: '3px 8px', borderRadius: '4px', background: `${statusColor}22`, color: statusColor, fontFamily: 'var(--font-mc-mono)', textTransform: 'uppercase' }}>{s.status || 'pending'}</span>
+                  {s.symbol && <span style={{ fontSize: '18px', fontWeight: 800, color: '#e0e0e0', fontFamily: 'var(--font-mc-mono)' }}>{s.symbol}</span>}
+                  {s.direction && <span style={{ fontSize: '11px', fontWeight: 700, padding: '2px 8px', borderRadius: '4px', background: `${dirColor}22`, color: dirColor, fontFamily: 'var(--font-mc-mono)' }}>{s.direction}</span>}
+                  <span style={{ fontSize: '11px', color: color, fontFamily: 'var(--font-mc-mono)', fontWeight: 600 }}>{cleanChannelName(s.channel_name || 'Unknown')}</span>
+                </div>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                  <span style={{ fontSize: '12px', fontWeight: 700, padding: '2px 8px', borderRadius: '4px', background: `${scoreColor}22`, color: scoreColor, fontFamily: 'var(--font-mc-mono)' }}>{s.score}</span>
+                  <span style={{ fontSize: '10px', fontWeight: 700, padding: '2px 6px', borderRadius: '3px', background: `${statusColor}22`, color: statusColor, fontFamily: 'var(--font-mc-mono)', textTransform: 'uppercase' }}>{s.status || 'pending'}</span>
                   <span style={{ fontSize: '11px', color: '#455a64', fontFamily: 'var(--font-mc-mono)' }} title={fullTime(s.timestamp)}>{timeAgo(s.timestamp)}</span>
                 </div>
               </div>
 
-              {/* Structured Data Grid — only when parsed data exists */}
-              {hasStructuredData && (
-                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(120px, 1fr))', gap: '8px', marginBottom: '8px' }}>
-                  {s.entry && s.entry > 0 && (
-                    <div style={{ padding: '8px 10px', background: '#0d1117', borderRadius: '6px' }}>
-                      <div style={{ fontSize: '10px', color: '#607d8b', fontFamily: 'var(--font-mc-mono)', marginBottom: '3px' }}>ENTRY</div>
-                      <div style={{ fontSize: '15px', fontWeight: 700, color: '#e0e0e0', fontFamily: 'var(--font-mc-mono)' }}>{fmtPrice(s.entry)}</div>
-                    </div>
-                  )}
-                  {s.stop_loss && (
-                    <div style={{ padding: '8px 10px', background: '#0d1117', borderRadius: '6px' }}>
-                      <div style={{ fontSize: '10px', color: '#607d8b', fontFamily: 'var(--font-mc-mono)', marginBottom: '3px' }}>STOP LOSS</div>
-                      <div style={{ fontSize: '15px', fontWeight: 700, color: '#ef5350', fontFamily: 'var(--font-mc-mono)' }}>${s.stop_loss}</div>
-                    </div>
-                  )}
-                  {s.targets && s.targets.length > 0 && s.targets.map((t: number, ti: number) => (
-                    <div key={ti} style={{ padding: '8px 10px', background: '#0d1117', borderRadius: '6px' }}>
-                      <div style={{ fontSize: '10px', color: '#607d8b', fontFamily: 'var(--font-mc-mono)', marginBottom: '3px' }}>TP {ti + 1}</div>
-                      <div style={{ fontSize: '15px', fontWeight: 700, color: '#66bb6a', fontFamily: 'var(--font-mc-mono)' }}>${t}</div>
-                    </div>
+              {/* Price data */}
+              {hasData && (
+                <div style={{ display: 'flex', gap: '16px', fontSize: '13px', fontFamily: 'var(--font-mc-mono)' }}>
+                  {s.entry && s.entry > 0 && <span><span style={{ color: '#607d8b', fontSize: '10px' }}>ENTRY </span><span style={{ color: '#66bb6a', fontWeight: 700 }}>{fmtPrice(s.entry)}</span></span>}
+                  {s.stop_loss && <span><span style={{ color: '#607d8b', fontSize: '10px' }}>SL </span><span style={{ color: '#ef5350', fontWeight: 700 }}>${s.stop_loss}</span></span>}
+                  {s.targets && s.targets.length > 0 && s.targets.slice(0, 3).map((t, ti) => (
+                    <span key={ti}><span style={{ color: '#607d8b', fontSize: '10px' }}>TP{ti + 1} </span><span style={{ color: '#4fc3f7', fontWeight: 700 }}>{fmtPrice(t)}</span></span>
                   ))}
-                  {s.leverage && (
-                    <div style={{ padding: '8px 10px', background: '#0d1117', borderRadius: '6px' }}>
-                      <div style={{ fontSize: '10px', color: '#607d8b', fontFamily: 'var(--font-mc-mono)', marginBottom: '3px' }}>LEVERAGE</div>
-                      <div style={{ fontSize: '15px', fontWeight: 700, color: '#ff9800', fontFamily: 'var(--font-mc-mono)' }}>{s.leverage}x</div>
-                    </div>
-                  )}
+                  {s.leverage && <span><span style={{ color: '#607d8b', fontSize: '10px' }}>LEV </span><span style={{ color: '#ff9800', fontWeight: 700 }}>{s.leverage}x</span></span>}
                 </div>
               )}
-
-              {/* Raw text — only show if no structured data, or collapsed summary */}
-              {!hasStructuredData ? (
-                <div style={{ fontSize: '12px', color: '#78909c', fontFamily: 'var(--font-mc-mono)', lineHeight: '1.5', whiteSpace: 'pre-wrap', maxHeight: '60px', overflow: 'hidden' }}>
-                  {(s.raw_text || '').slice(0, 200)}
-                </div>
-              ) : null}
             </div>
           );
         })}
-      </div>
-
-      {/* Footer */}
-      <div style={{ marginTop: '20px', padding: '10px 16px', background: '#0a1929', border: '1px solid #1a3a4a', borderRadius: '8px', fontSize: '11px', color: '#455a64', fontFamily: 'var(--font-mc-mono)' }}>
-        Sources: {channelCount} Telegram channels · {totalSignals} signals indexed · Auto-refresh 30s
       </div>
     </div>
   );
