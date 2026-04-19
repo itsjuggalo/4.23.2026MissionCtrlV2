@@ -33,24 +33,49 @@ function fullTime(ts: string): string {
 }
 
 const CHANNEL_COLORS: Record<string, string> = {
-  'Coin Sonar V2': '#4fc3f7',
-  'AICryptoSignals': '#66bb6a',
-  'Ai Golden Crypto': '#ffd54f',
-  'xCrypto Signals': '#ce93d8',
-  'Ai Crypto Signals (Auto Bot)': '#4db6ac',
+  'Coin Sonar V2': '#4fc3f7', 'AICryptoSignals': '#66bb6a', 'Ai Golden Crypto': '#ffd54f',
+  'xCrypto Signals': '#ce93d8', 'Ai Crypto Signals (Auto Bot)': '#4db6ac',
 };
 
 function getChannelColor(name: string): string {
-  for (const [key, color] of Object.entries(CHANNEL_COLORS)) {
-    if (name.includes(key)) return color;
-  }
+  for (const [key, color] of Object.entries(CHANNEL_COLORS)) { if (name.includes(key)) return color; }
   if (name.includes('Whale') || name.includes('WHALE')) return '#ef5350';
   if (name.includes('Pump') || name.includes('Volume')) return '#ff9800';
   return '#78909c';
 }
 
 function cleanChannelName(name: string): string {
-  return name.replace(/[^\w\s()-]/g, '').trim().slice(0, 30);
+  return name.replace(/[^\w\s()-]/g, '').trim().slice(0, 25);
+}
+
+function SignalRow({ s, isSelected, onClick }: { s: TelegramSignal; isSelected: boolean; onClick: () => void }) {
+  const color = getChannelColor(s.channel_name || '');
+  const scoreColor = s.score >= 70 ? '#66bb6a' : s.score >= 40 ? '#ffd54f' : '#ef5350';
+  const dirColor = s.direction === 'LONG' ? '#66bb6a' : s.direction === 'SHORT' ? '#ef5350' : '#607d8b';
+  const fmtPrice = (p: number) => p < 0.01 ? `$${p.toFixed(6)}` : p < 1 ? `$${p.toFixed(4)}` : `$${p.toFixed(2)}`;
+
+  return (
+    <div onClick={onClick} style={{ padding: '10px 12px', background: isSelected ? '#0d2137' : 'transparent', border: `1px solid ${isSelected ? '#4fc3f7' : '#1a3a4a'}`, borderRadius: '6px', cursor: 'pointer', borderLeft: `3px solid ${color}`, marginBottom: '4px', transition: 'all 0.15s' }}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '6px' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+          <span style={{ fontSize: '16px', fontWeight: 800, color: '#e0e0e0', fontFamily: 'var(--font-mc-mono)' }}>{s.symbol}</span>
+          {s.direction && <span style={{ fontSize: '10px', fontWeight: 700, padding: '2px 6px', borderRadius: '3px', background: `${dirColor}22`, color: dirColor, fontFamily: 'var(--font-mc-mono)' }}>{s.direction}</span>}
+          <span style={{ fontSize: '12px', fontWeight: 700, padding: '2px 6px', borderRadius: '3px', background: `${scoreColor}22`, color: scoreColor, fontFamily: 'var(--font-mc-mono)' }}>{s.score}</span>
+        </div>
+        <span style={{ fontSize: '10px', color: '#607d8b', fontFamily: 'var(--font-mc-mono)' }}>{timeAgo(s.timestamp)}</span>
+      </div>
+      <div style={{ display: 'flex', gap: '12px', fontSize: '13px', fontFamily: 'var(--font-mc-mono)' }}>
+        {s.entry && s.entry > 0 && <span><span style={{ color: '#607d8b', fontSize: '10px' }}>IN </span><span style={{ color: '#66bb6a', fontWeight: 700 }}>{fmtPrice(s.entry)}</span></span>}
+        {s.stop_loss && <span><span style={{ color: '#607d8b', fontSize: '10px' }}>SL </span><span style={{ color: '#ef5350', fontWeight: 700 }}>{fmtPrice(s.stop_loss)}</span></span>}
+        {s.targets && s.targets.length > 0 && <span><span style={{ color: '#607d8b', fontSize: '10px' }}>TP </span><span style={{ color: '#4fc3f7', fontWeight: 700 }}>{fmtPrice(s.targets[0])}</span></span>}
+        {s.leverage && <span><span style={{ color: '#607d8b', fontSize: '10px' }}>LEV </span><span style={{ color: '#ff9800', fontWeight: 700 }}>{s.leverage}x</span></span>}
+      </div>
+      <div style={{ display: 'flex', gap: '4px', marginTop: '4px' }}>
+        <span style={{ fontSize: '9px', padding: '1px 4px', borderRadius: '2px', background: `${color}22`, color: color, fontFamily: 'var(--font-mc-mono)' }}>{cleanChannelName(s.channel_name || 'Unknown')}</span>
+        {s.targets && s.targets.length > 1 && <span style={{ fontSize: '9px', padding: '1px 4px', borderRadius: '2px', background: '#1a3a4a', color: '#607d8b', fontFamily: 'var(--font-mc-mono)' }}>{s.targets.length} TPs</span>}
+      </div>
+    </div>
+  );
 }
 
 export function TelegramPage() {
@@ -59,8 +84,7 @@ export function TelegramPage() {
   const [channelFilter, setChannelFilter] = useState<string>('all');
   const [search, setSearch] = useState('');
   const [scoreFilter, setScoreFilter] = useState<string>('0');
-  const [statusFilter, setStatusFilter] = useState<string>('all');
-  const [dirFilter, setDirFilter] = useState<string>('all');
+  const [selected, setSelected] = useState<TelegramSignal | null>(null);
 
   useEffect(() => {
     async function fetchSignals() {
@@ -72,7 +96,7 @@ export function TelegramPage() {
           const text = (s.raw_text || '').toLowerCase();
           const sym = (s.symbol || '').toUpperCase();
           if (['bingx', 'deposit', 'usdt completely free', 'receive up to', 'join now', 'bonus', 'exclusive benefit', 'sign up'].some(w => text.includes(w))) return false;
-          if (text.includes('\u{1f512}') || text.includes('\u{1f510}') || text.includes('🔒') || text.includes('🔐')) return false;
+          if (text.includes('🔒') || text.includes('🔐')) return false;
           if (!sym || sym === '???' || sym === 'NO' || sym === 'UNKNOWN' || sym.length < 2) return false;
           if (!s.entry && !s.direction && s.score < 15) return false;
           return true;
@@ -100,18 +124,25 @@ export function TelegramPage() {
   const channelCounts: Record<string, number> = {};
   signals.forEach(s => { const ch = s.channel_name || 'Unknown'; channelCounts[ch] = (channelCounts[ch] || 0) + 1; });
 
-  let filtered = signals;
-  if (channelFilter !== 'all') filtered = filtered.filter(s => s.channel_name === channelFilter);
-  if (search) { const q = search.toLowerCase(); filtered = filtered.filter(s => (s.symbol || '').toLowerCase().includes(q) || (s.raw_text || '').toLowerCase().includes(q)); }
-  if (scoreFilter !== '0') filtered = filtered.filter(s => s.score >= parseInt(scoreFilter));
-  if (statusFilter !== 'all') filtered = filtered.filter(s => s.status === statusFilter);
-  if (dirFilter !== 'all') filtered = filtered.filter(s => s.direction === dirFilter);
-  filtered.sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime());
+  const applyFilters = (sigs: TelegramSignal[]) => {
+    let f = sigs;
+    if (channelFilter !== 'all') f = f.filter(s => s.channel_name === channelFilter);
+    if (search) { const q = search.toLowerCase(); f = f.filter(s => (s.symbol || '').toLowerCase().includes(q)); }
+    if (scoreFilter !== '0') f = f.filter(s => s.score >= parseInt(scoreFilter));
+    f.sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime());
+    return f;
+  };
+
+  // 3 columns: LONG, SHORT, Accepted/High Score
+  const longs = applyFilters(signals.filter(s => s.direction === 'LONG' && s.status !== 'rejected'));
+  const shorts = applyFilters(signals.filter(s => s.direction === 'SHORT' && s.status !== 'rejected'));
+  const accepted = applyFilters(signals.filter(s => s.status === 'accepted' || s.score >= 70));
 
   const recentCount = signals.filter(s => Date.now() - new Date(s.timestamp).getTime() < 86400000).length;
-  const fmtPrice = (p: number) => p < 0.01 ? `$${p.toFixed(6)}` : p < 1 ? `$${p.toFixed(4)}` : `$${p.toFixed(2)}`;
 
   const selectStyle: React.CSSProperties = { padding: '7px 12px', background: '#0d1117', border: '1px solid #1a3a4a', borderRadius: '6px', color: '#e0e0e0', fontFamily: 'var(--font-mc-mono)', fontSize: '12px', cursor: 'pointer', outline: 'none' };
+  const colHeader: React.CSSProperties = { fontSize: '13px', fontWeight: 700, fontFamily: 'var(--font-mc-mono)', letterSpacing: '1px', padding: '10px 12px', borderBottom: '2px solid', marginBottom: '8px' };
+  const fmtPrice = (p: number) => p < 0.01 ? `$${p.toFixed(6)}` : p < 1 ? `$${p.toFixed(4)}` : `$${p.toFixed(2)}`;
 
   if (loading) return (
     <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '40vh', color: '#4fc3f7', fontFamily: 'var(--font-mc-mono)', fontSize: '16px' }}>
@@ -121,9 +152,9 @@ export function TelegramPage() {
   );
 
   return (
-    <div style={{ padding: '16px 20px', height: '100%', display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
+    <div style={{ padding: '12px 16px', height: '100%', display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
       {/* Top Bar */}
-      <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '12px', flexWrap: 'wrap' }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '10px', flexWrap: 'wrap' }}>
         <span style={{ width: '8px', height: '8px', borderRadius: '50%', background: '#66bb6a', boxShadow: '0 0 6px #66bb6a88' }} />
         <span style={{ fontSize: '12px', fontWeight: 700, color: '#66bb6a', fontFamily: 'var(--font-mc-mono)' }}>LIVE</span>
         <span style={{ fontSize: '11px', color: '#607d8b', fontFamily: 'var(--font-mc-mono)' }}>
@@ -143,70 +174,91 @@ export function TelegramPage() {
           <option value="85">Score 85+</option>
         </select>
 
-        <select value={statusFilter} onChange={e => setStatusFilter(e.target.value)} style={selectStyle}>
-          <option value="all">All Status</option>
-          <option value="accepted">Accepted</option>
-          <option value="rejected">Rejected</option>
-          <option value="pending">Pending</option>
-        </select>
-
-        <select value={dirFilter} onChange={e => setDirFilter(e.target.value)} style={selectStyle}>
-          <option value="all">All Directions</option>
-          <option value="LONG">Long Only</option>
-          <option value="SHORT">Short Only</option>
-        </select>
-
-        <input value={search} onChange={e => setSearch(e.target.value)} placeholder="Ticker..."
-          style={{ ...selectStyle, width: '100px' }} />
-
-        <span style={{ fontSize: '11px', color: '#455a64', fontFamily: 'var(--font-mc-mono)', marginLeft: 'auto' }}>
-          {filtered.length} of {signals.length}
-        </span>
+        <input value={search} onChange={e => setSearch(e.target.value)} placeholder="Ticker..." style={{ ...selectStyle, width: '100px' }} />
       </div>
 
-      {/* Signal Feed — scrollable */}
-      <div style={{ flex: 1, overflow: 'auto', display: 'flex', flexDirection: 'column', gap: '4px', minHeight: 0 }}>
-        {filtered.length === 0 ? (
-          <div style={{ padding: '60px', textAlign: 'center', color: '#455a64', fontFamily: 'var(--font-mc-mono)', fontSize: '14px', background: '#0a1929', borderRadius: '8px', border: '1px solid #1a3a4a' }}>
-            No signals match filters
+      {/* 3-Column Layout + Detail Panel */}
+      <div style={{ display: 'grid', gridTemplateColumns: selected ? '1fr 1fr 1fr 320px' : '1fr 1fr 1fr', gap: '10px', flex: 1, overflow: 'hidden', minHeight: 0 }}>
+
+        {/* Column 1: LONG */}
+        <div style={{ display: 'flex', flexDirection: 'column', overflow: 'hidden', borderRadius: '8px', border: '1px solid #1a3a4a' }}>
+          <div style={{ ...colHeader, color: '#66bb6a', borderColor: '#66bb6a44' }}>
+            LONG <span style={{ fontSize: '11px', color: '#607d8b', fontWeight: 400 }}>({longs.length})</span>
           </div>
-        ) : filtered.slice(0, 100).map((s, i) => {
-          const color = getChannelColor(s.channel_name || '');
-          const scoreColor = s.score >= 70 ? '#66bb6a' : s.score >= 40 ? '#ffd54f' : '#ef5350';
-          const dirColor = s.direction === 'LONG' ? '#66bb6a' : s.direction === 'SHORT' ? '#ef5350' : '#607d8b';
-          const statusColor = s.status === 'accepted' ? '#66bb6a' : s.status === 'rejected' ? '#ef5350' : '#607d8b';
-          const hasData = !!(s.entry || s.direction || s.stop_loss || (s.targets && s.targets.length > 0));
+          <div style={{ overflow: 'auto', padding: '0 8px 8px', flex: 1 }}>
+            {longs.map((s, i) => <SignalRow key={`l-${s.id || i}`} s={s} isSelected={selected?.id === s.id} onClick={() => setSelected(selected?.id === s.id ? null : s)} />)}
+            {longs.length === 0 && <div style={{ padding: '20px', textAlign: 'center', color: '#455a64', fontFamily: 'var(--font-mc-mono)', fontSize: '12px' }}>No long signals</div>}
+          </div>
+        </div>
 
-          return (
-            <div key={s.id || i} style={{ padding: hasData ? '14px 16px' : '10px 16px', background: '#0a1929', border: '1px solid #1a3a4a', borderRadius: '6px', borderLeft: `3px solid ${color}`, transition: 'border-color 0.2s' }}>
-              {/* Header */}
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: hasData ? '10px' : '0' }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                  {s.symbol && <span style={{ fontSize: '18px', fontWeight: 800, color: '#e0e0e0', fontFamily: 'var(--font-mc-mono)' }}>{s.symbol}</span>}
-                  {s.direction && <span style={{ fontSize: '11px', fontWeight: 700, padding: '2px 8px', borderRadius: '4px', background: `${dirColor}22`, color: dirColor, fontFamily: 'var(--font-mc-mono)' }}>{s.direction}</span>}
-                  <span style={{ fontSize: '11px', color: color, fontFamily: 'var(--font-mc-mono)', fontWeight: 600 }}>{cleanChannelName(s.channel_name || 'Unknown')}</span>
-                </div>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                  <span style={{ fontSize: '12px', fontWeight: 700, padding: '2px 8px', borderRadius: '4px', background: `${scoreColor}22`, color: scoreColor, fontFamily: 'var(--font-mc-mono)' }}>{s.score}</span>
-                  <span style={{ fontSize: '10px', fontWeight: 700, padding: '2px 6px', borderRadius: '3px', background: `${statusColor}22`, color: statusColor, fontFamily: 'var(--font-mc-mono)', textTransform: 'uppercase' }}>{s.status || 'pending'}</span>
-                  <span style={{ fontSize: '11px', color: '#455a64', fontFamily: 'var(--font-mc-mono)' }} title={fullTime(s.timestamp)}>{timeAgo(s.timestamp)}</span>
-                </div>
-              </div>
+        {/* Column 2: SHORT */}
+        <div style={{ display: 'flex', flexDirection: 'column', overflow: 'hidden', borderRadius: '8px', border: '1px solid #1a3a4a' }}>
+          <div style={{ ...colHeader, color: '#ef5350', borderColor: '#ef535044' }}>
+            SHORT <span style={{ fontSize: '11px', color: '#607d8b', fontWeight: 400 }}>({shorts.length})</span>
+          </div>
+          <div style={{ overflow: 'auto', padding: '0 8px 8px', flex: 1 }}>
+            {shorts.map((s, i) => <SignalRow key={`s-${s.id || i}`} s={s} isSelected={selected?.id === s.id} onClick={() => setSelected(selected?.id === s.id ? null : s)} />)}
+            {shorts.length === 0 && <div style={{ padding: '20px', textAlign: 'center', color: '#455a64', fontFamily: 'var(--font-mc-mono)', fontSize: '12px' }}>No short signals</div>}
+          </div>
+        </div>
 
-              {/* Price data */}
-              {hasData && (
-                <div style={{ display: 'flex', gap: '16px', fontSize: '13px', fontFamily: 'var(--font-mc-mono)' }}>
-                  {s.entry && s.entry > 0 && <span><span style={{ color: '#607d8b', fontSize: '10px' }}>ENTRY </span><span style={{ color: '#66bb6a', fontWeight: 700 }}>{fmtPrice(s.entry)}</span></span>}
-                  {s.stop_loss && <span><span style={{ color: '#607d8b', fontSize: '10px' }}>SL </span><span style={{ color: '#ef5350', fontWeight: 700 }}>${s.stop_loss}</span></span>}
-                  {s.targets && s.targets.length > 0 && s.targets.slice(0, 3).map((t, ti) => (
-                    <span key={ti}><span style={{ color: '#607d8b', fontSize: '10px' }}>TP{ti + 1} </span><span style={{ color: '#4fc3f7', fontWeight: 700 }}>{fmtPrice(t)}</span></span>
-                  ))}
-                  {s.leverage && <span><span style={{ color: '#607d8b', fontSize: '10px' }}>LEV </span><span style={{ color: '#ff9800', fontWeight: 700 }}>{s.leverage}x</span></span>}
-                </div>
-              )}
+        {/* Column 3: HIGH SCORE / ACCEPTED */}
+        <div style={{ display: 'flex', flexDirection: 'column', overflow: 'hidden', borderRadius: '8px', border: '1px solid #1a3a4a' }}>
+          <div style={{ ...colHeader, color: '#ffd54f', borderColor: '#ffd54f44' }}>
+            TOP PICKS (70+ / ACCEPTED) <span style={{ fontSize: '11px', color: '#607d8b', fontWeight: 400 }}>({accepted.length})</span>
+          </div>
+          <div style={{ overflow: 'auto', padding: '0 8px 8px', flex: 1 }}>
+            {accepted.map((s, i) => <SignalRow key={`a-${s.id || i}`} s={s} isSelected={selected?.id === s.id} onClick={() => setSelected(selected?.id === s.id ? null : s)} />)}
+            {accepted.length === 0 && <div style={{ padding: '20px', textAlign: 'center', color: '#455a64', fontFamily: 'var(--font-mc-mono)', fontSize: '12px' }}>No top picks</div>}
+          </div>
+        </div>
+
+        {/* Detail Panel */}
+        {selected && (
+          <div style={{ background: '#0a1929', border: '1px solid #1a3a4a', borderRadius: '8px', padding: '16px', overflow: 'auto' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px' }}>
+              <span style={{ fontSize: '22px', fontWeight: 800, color: '#e0e0e0', fontFamily: 'var(--font-mc-mono)' }}>{selected.symbol}</span>
+              <button onClick={() => setSelected(null)} style={{ background: 'none', border: '1px solid #1a3a4a', borderRadius: '4px', color: '#607d8b', padding: '2px 8px', cursor: 'pointer', fontFamily: 'var(--font-mc-mono)', fontSize: '11px' }}>✕</button>
             </div>
-          );
-        })}
+
+            <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap', marginBottom: '16px' }}>
+              {selected.direction && <span style={{ fontSize: '11px', padding: '3px 8px', borderRadius: '4px', background: selected.direction === 'LONG' ? '#66bb6a22' : '#ef535022', color: selected.direction === 'LONG' ? '#66bb6a' : '#ef5350', fontFamily: 'var(--font-mc-mono)', fontWeight: 700 }}>{selected.direction}</span>}
+              <span style={{ fontSize: '11px', padding: '3px 8px', borderRadius: '4px', background: `${getChannelColor(selected.channel_name || '')}22`, color: getChannelColor(selected.channel_name || ''), fontFamily: 'var(--font-mc-mono)' }}>{cleanChannelName(selected.channel_name || '')}</span>
+              <span style={{ fontSize: '11px', padding: '3px 8px', borderRadius: '4px', background: (selected.score >= 70 ? '#66bb6a' : selected.score >= 40 ? '#ffd54f' : '#ef5350') + '22', color: selected.score >= 70 ? '#66bb6a' : selected.score >= 40 ? '#ffd54f' : '#ef5350', fontFamily: 'var(--font-mc-mono)', fontWeight: 700 }}>SCORE: {selected.score}</span>
+              <span style={{ fontSize: '11px', padding: '3px 8px', borderRadius: '4px', background: (selected.status === 'accepted' ? '#66bb6a' : selected.status === 'rejected' ? '#ef5350' : '#607d8b') + '22', color: selected.status === 'accepted' ? '#66bb6a' : selected.status === 'rejected' ? '#ef5350' : '#607d8b', fontFamily: 'var(--font-mc-mono)', fontWeight: 700, textTransform: 'uppercase' }}>{selected.status || 'pending'}</span>
+            </div>
+
+            <div style={{ fontSize: '10px', color: '#607d8b', fontFamily: 'var(--font-mc-mono)', letterSpacing: '1.5px', marginBottom: '8px' }}>PRICE LEVELS</div>
+            {[
+              { label: 'ENTRY', value: selected.entry && selected.entry > 0 ? fmtPrice(selected.entry) : null, color: '#66bb6a' },
+              { label: 'STOP LOSS', value: selected.stop_loss ? fmtPrice(selected.stop_loss) : null, color: '#ef5350' },
+              ...(selected.targets || []).map((t, i) => ({ label: `TARGET ${i + 1}`, value: fmtPrice(t), color: '#4fc3f7' })),
+              { label: 'LEVERAGE', value: selected.leverage ? `${selected.leverage}x` : null, color: '#ff9800' },
+            ].filter(t => t.value).map((t, i) => (
+              <div key={i} style={{ display: 'flex', justifyContent: 'space-between', padding: '6px 0', borderBottom: '1px solid #0d1117' }}>
+                <span style={{ fontSize: '11px', color: '#607d8b', fontFamily: 'var(--font-mc-mono)' }}>{t.label}</span>
+                <span style={{ fontSize: '16px', fontWeight: 700, color: t.color, fontFamily: 'var(--font-mc-mono)' }}>{t.value}</span>
+              </div>
+            ))}
+
+            <div style={{ fontSize: '10px', color: '#607d8b', fontFamily: 'var(--font-mc-mono)', letterSpacing: '1.5px', marginTop: '16px', marginBottom: '8px' }}>TIMING</div>
+            <div style={{ display: 'flex', justifyContent: 'space-between', padding: '5px 0', borderBottom: '1px solid #0d1117' }}>
+              <span style={{ fontSize: '11px', color: '#607d8b', fontFamily: 'var(--font-mc-mono)' }}>Received</span>
+              <span style={{ fontSize: '12px', color: '#e0e0e0', fontFamily: 'var(--font-mc-mono)', fontWeight: 600 }}>{fullTime(selected.timestamp)}</span>
+            </div>
+            <div style={{ display: 'flex', justifyContent: 'space-between', padding: '5px 0' }}>
+              <span style={{ fontSize: '11px', color: '#607d8b', fontFamily: 'var(--font-mc-mono)' }}>Age</span>
+              <span style={{ fontSize: '12px', color: '#e0e0e0', fontFamily: 'var(--font-mc-mono)', fontWeight: 600 }}>{timeAgo(selected.timestamp)}</span>
+            </div>
+
+            {selected.raw_text && (
+              <>
+                <div style={{ fontSize: '10px', color: '#607d8b', fontFamily: 'var(--font-mc-mono)', letterSpacing: '1.5px', marginTop: '16px', marginBottom: '8px' }}>RAW MESSAGE</div>
+                <div style={{ fontSize: '11px', color: '#90a4ae', fontFamily: 'var(--font-mc-mono)', padding: '10px', background: '#0d1117', borderRadius: '6px', maxHeight: '200px', overflow: 'auto', whiteSpace: 'pre-wrap', lineHeight: '1.4' }}>{selected.raw_text.slice(0, 500)}</div>
+              </>
+            )}
+          </div>
+        )}
       </div>
     </div>
   );
