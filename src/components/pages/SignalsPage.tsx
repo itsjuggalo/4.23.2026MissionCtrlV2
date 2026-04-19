@@ -1,141 +1,80 @@
 'use client';
 import { useState, useEffect, useCallback } from 'react';
 
-const FIREBASE_URLS = {
-  shortOptions: 'https://stock-signal-72772-default-rtdb.firebaseio.com/Vivid2/ShortTermOptions.json',
-  longOptions:  'https://stock-signal-72772-default-rtdb.firebaseio.com/Vivid2/LongTermOptions.json',
-  shortStocks:  'https://stock-signal-72772-default-rtdb.firebaseio.com/Vivid2/ShortTermStocks.json',
-  longStocks:   'https://stock-signal-72772-default-rtdb.firebaseio.com/Vivid2/LongTermStocks.json',
-};
-
 interface Signal {
-  id: string;
-  symbol: string;
-  isOption: boolean;
-  isCall: boolean;
-  isBuy: boolean;
-  strike: number | null;
-  expiry: Date | null;
-  daysToExpiry: number | null;
-  buyTarget: string;
-  stopLoss: string;
-  sellTarget: string;
-  status: string;
-  lastPrice: number;
-  volume: number;
-  notes: string;
-  category: string;
-  raw: any;
+  id: string; symbol: string; shortName?: string; strike?: string; expiry?: number;
+  buyTarget?: string; sellTarget?: string; sellTarget2?: string; sellTarget3?: string;
+  earlyTarget?: string; stopLoss?: string; reduceLoss?: string; category?: string;
+  isPut?: number; isWeekly?: number; free?: number; risk?: string; status?: string;
+  source: string; type: 'option' | 'stock';
 }
 
-function timeAgo(d: Date): string {
-  const diff = Date.now() - d.getTime();
-  const mins = Math.floor(diff / 60000);
-  if (mins < 60) return `${mins}m`;
-  const hrs = Math.floor(mins / 60);
-  if (hrs < 24) return `${hrs}h`;
-  return `${Math.floor(hrs / 24)}d`;
-}
-
-function parseSignal(id: string, raw: any, isBuy: boolean, isOption: boolean): Signal | null {
-  const expiryUnix = raw.expiry || 0;
-  const expiry = expiryUnix ? new Date(expiryUnix * 1000) : null;
-  const daysToExpiry = expiry ? Math.floor((expiry.getTime() - Date.now()) / 86400000) : null;
-
-  // FILTER: skip expired options (more than 1 day past expiry)
-  if (isOption && daysToExpiry !== null && daysToExpiry < -1) return null;
-
-  return {
-    id,
-    symbol: raw.symbol || id,
-    isOption,
-    isCall: !raw.isPut || raw.isPut === 0,
-    isBuy,
-    strike: raw.strike ? parseFloat(String(raw.strike)) : null,
-    expiry,
-    daysToExpiry,
-    buyTarget: raw.buyTarget ? String(raw.buyTarget) : '',
-    stopLoss: raw.stopLoss ? String(raw.stopLoss) : '',
-    sellTarget: raw.sellTarget ? String(raw.sellTarget) : '',
-    status: raw.status || '',
-    lastPrice: raw.quote?.lastPrice || 0,
-    volume: raw.quote?.totalVolume || 0,
-    notes: raw.notes || '',
-    category: raw.category || '',
-    raw,
-  };
-}
+function daysTo(ts?: number) { return ts ? Math.floor((ts * 1000 - Date.now()) / 86400000) : null; }
+function expStr(ts?: number) { return ts ? new Date(ts * 1000).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }) : ''; }
 
 export function SignalsPage() {
-  const [signals, setSignals] = useState<Signal[]>([]);
+  const [data, setData] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [lastUpdated, setLastUpdated] = useState<Date | null>(null);
-  const [tab, setTab] = useState<'options' | 'stocks'>('options');
+  const [sourceTab, setSourceTab] = useState<'all' | 'name' | 'name2' | 'vivid' | 'closed'>('all');
   const [typeFilter, setTypeFilter] = useState<'all' | 'calls' | 'puts'>('all');
-  const [dirFilter, setDirFilter] = useState<'all' | 'buy' | 'sell'>('all');
   const [search, setSearch] = useState('');
 
-  const fetchSignals = useCallback(async () => {
+  const fetchData = useCallback(async () => {
     try {
-      const results: Signal[] = [];
-      const entries = Object.entries(FIREBASE_URLS);
-      const responses = await Promise.all(entries.map(([, url]) => fetch(url).then(r => r.json()).catch(() => null)));
-
-      responses.forEach((data, idx) => {
-        if (!data || typeof data !== 'object') return;
-        const key = entries[idx][0];
-        const isBuy = key.includes('short') || key.includes('Short');
-        const isOption = key.includes('Option');
-
-        const items = Array.isArray(data) ? data : Object.values(data);
-        items.forEach((item: any, i: number) => {
-          if (!item || typeof item !== 'object') return;
-          const sig = parseSignal(`${key}-${item.symbol || i}`, item, isBuy, isOption);
-          if (sig) results.push(sig);
-        });
-      });
-
-      setSignals(results);
-      setLastUpdated(new Date());
+      const r = await fetch('/api/trade-signals');
+      if (r.ok) { setData(await r.json()); setLastUpdated(new Date()); }
     } catch {}
     setLoading(false);
   }, []);
 
-  useEffect(() => {
-    fetchSignals();
-    const i = setInterval(fetchSignals, 60000);
-    return () => clearInterval(i);
-  }, [fetchSignals]);
+  useEffect(() => { fetchData(); const i = setInterval(fetchData, 30000); return () => clearInterval(i); }, [fetchData]);
 
-  // Filter
-  const options = signals.filter(s => s.isOption);
-  const stocks = signals.filter(s => !s.isOption);
+  if (loading) return <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '40vh', color: '#4fc3f7', fontFamily: 'var(--font-mc-mono)' }}>LOADING SIGNALS...</div>;
 
-  let filtered = tab === 'options' ? options : stocks;
-  if (typeFilter === 'calls') filtered = filtered.filter(s => s.isCall);
-  if (typeFilter === 'puts') filtered = filtered.filter(s => !s.isCall);
-  if (dirFilter === 'buy') filtered = filtered.filter(s => s.isBuy);
-  if (dirFilter === 'sell') filtered = filtered.filter(s => !s.isBuy);
-  if (search) {
-    const q = search.toUpperCase();
-    filtered = filtered.filter(s => s.symbol.includes(q));
-  }
+  const toSignals = (arr: any[], source: string, type: 'option' | 'stock'): Signal[] =>
+    (arr || []).map((s: any) => ({ ...s, source, type })).filter((s: Signal) => {
+      const dte = daysTo(s.expiry);
+      return type === 'stock' || dte === null || dte > -2;
+    });
 
-  // Sort: expiring soonest first for options, alphabetical for stocks
-  if (tab === 'options') {
-    filtered.sort((a, b) => (a.daysToExpiry ?? 999) - (b.daysToExpiry ?? 999));
-  } else {
-    filtered.sort((a, b) => a.symbol.localeCompare(b.symbol));
-  }
+  const nameOpts = toSignals(data?.name?.shortTerm || [], 'Name', 'option').concat(toSignals(data?.name?.longTerm || [], 'Name', 'option'));
+  const nameStocks = toSignals(data?.name?.stocks || [], 'Name', 'stock');
+  const name2Opts = toSignals(data?.name2?.shortTerm || [], 'Name2', 'option').concat(toSignals(data?.name2?.longTerm || [], 'Name2', 'option'));
+  const vividOpts = toSignals(data?.vivid?.shortTerm || [], 'Vivid', 'option');
+  const closed = toSignals(data?.name?.recentClosed || [], 'Closed', 'option');
 
-  // Group options by urgency
-  const expiringSoon = filtered.filter(s => s.daysToExpiry !== null && s.daysToExpiry <= 7 && s.daysToExpiry >= 0);
-  const monthly = filtered.filter(s => s.daysToExpiry !== null && s.daysToExpiry > 7 && s.daysToExpiry <= 60);
-  const leaps = filtered.filter(s => s.daysToExpiry !== null && s.daysToExpiry > 60);
-  const noExpiry = filtered.filter(s => s.daysToExpiry === null);
+  const allActive = [...nameOpts, ...nameStocks, ...name2Opts, ...vividOpts];
 
-  const callCount = options.filter(s => s.isCall).length;
-  const putCount = options.filter(s => !s.isCall).length;
+  let filtered: Signal[] = [];
+  if (sourceTab === 'all') filtered = allActive;
+  else if (sourceTab === 'name') filtered = [...nameOpts, ...nameStocks];
+  else if (sourceTab === 'name2') filtered = name2Opts;
+  else if (sourceTab === 'vivid') filtered = vividOpts;
+  else if (sourceTab === 'closed') filtered = closed;
+
+  if (typeFilter === 'calls') filtered = filtered.filter(s => !s.isPut);
+  if (typeFilter === 'puts') filtered = filtered.filter(s => s.isPut);
+  if (search) { const q = search.toUpperCase(); filtered = filtered.filter(s => s.symbol?.includes(q)); }
+
+  filtered.sort((a, b) => {
+    const da = daysTo(a.expiry); const db = daysTo(b.expiry);
+    if (da !== null && db !== null) return da - db;
+    if (da !== null) return -1; if (db !== null) return 1;
+    return (a.symbol || '').localeCompare(b.symbol || '');
+  });
+
+  const summary = data?.summary || {};
+  const options = allActive.filter(s => s.type === 'option');
+  const callCount = options.filter(s => !s.isPut).length;
+  const putCount = options.filter(s => s.isPut).length;
+
+  const catColor = (c?: string) => {
+    if (!c) return '#607d8b';
+    if (c === 'SWING') return '#4fc3f7'; if (c === 'SCALP') return '#ff9800';
+    if (c === 'LONGTERM') return '#ce93d8'; if (c.includes('ER')) return '#ffeb3b';
+    return '#607d8b';
+  };
 
   return (
     <div style={{ padding: '24px', maxWidth: '1100px', margin: '0 auto' }}>
@@ -147,145 +86,80 @@ export function SignalsPage() {
       `}</style>
 
       {/* Status Bar */}
-      <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '20px', padding: '10px 16px', background: '#66bb6a0d', border: '1px solid #66bb6a33', borderRadius: '8px' }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '16px', padding: '10px 16px', background: '#66bb6a0d', border: '1px solid #66bb6a33', borderRadius: '8px' }}>
         <span style={{ width: '8px', height: '8px', borderRadius: '50%', background: '#66bb6a', boxShadow: '0 0 6px #66bb6a88' }} />
-        <span style={{ fontSize: '12px', fontWeight: 700, color: '#66bb6a', fontFamily: 'var(--font-mc-mono)', letterSpacing: '0.5px' }}>
-          FIREBASE LIVE
-        </span>
-        {lastUpdated && (
-          <span style={{ fontSize: '11px', color: '#607d8b', fontFamily: 'var(--font-mc-mono)' }}>
-            Updated {timeAgo(lastUpdated)} ago · Polling 60s
-          </span>
-        )}
-        <button onClick={fetchSignals} style={{ marginLeft: 'auto', padding: '4px 12px', background: 'transparent', border: '1px solid #1a3a4a', borderRadius: '4px', color: '#607d8b', fontFamily: 'var(--font-mc-mono)', fontSize: '11px', cursor: 'pointer' }}>
-          Refresh
-        </button>
+        <span style={{ fontSize: '12px', fontWeight: 700, color: '#66bb6a', fontFamily: 'var(--font-mc-mono)' }}>FIREBASE LIVE — 4 SOURCES</span>
+        {lastUpdated && <span style={{ fontSize: '11px', color: '#607d8b', fontFamily: 'var(--font-mc-mono)' }}>Updated {Math.floor((Date.now() - lastUpdated.getTime()) / 60000)}m ago</span>}
+        <button onClick={fetchData} style={{ marginLeft: 'auto', padding: '4px 12px', background: 'transparent', border: '1px solid #1a3a4a', borderRadius: '4px', color: '#607d8b', fontFamily: 'var(--font-mc-mono)', fontSize: '11px', cursor: 'pointer' }}>Refresh</button>
       </div>
 
-      {/* Stats */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '12px', marginBottom: '20px' }}>
+      {/* Stats Row */}
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(5, 1fr)', gap: '10px', marginBottom: '16px' }}>
         {[
-          { label: 'OPTIONS', value: options.length, color: '#4fc3f7' },
-          { label: 'CALLS', value: callCount, color: '#66bb6a' },
-          { label: 'PUTS', value: putCount, color: '#ef5350' },
-          { label: 'STOCKS', value: stocks.length, color: '#ff9800' },
+          { label: 'TOTAL ACTIVE', value: summary.totalActive || 0, color: '#4fc3f7' },
+          { label: 'NAME', value: summary.nameActiveCount || 0, color: '#66bb6a' },
+          { label: 'NAME2', value: summary.name2ActiveCount || 0, color: '#ce93d8' },
+          { label: 'VIVID', value: summary.vividActiveCount || 0, color: '#ff9800' },
+          { label: 'CLOSED', value: closed.length, color: '#ef5350' },
         ].map((m, i) => (
-          <div key={i} className="sig-card" style={{ textAlign: 'center', padding: '16px' }}>
-            <div style={{ fontSize: '11px', color: '#607d8b', fontFamily: 'var(--font-mc-mono)', letterSpacing: '1px', marginBottom: '6px' }}>{m.label}</div>
-            <div style={{ fontSize: '28px', fontWeight: 800, color: m.color, fontFamily: 'var(--font-mc-mono)' }}>{m.value}</div>
+          <div key={i} className="sig-card" style={{ textAlign: 'center', padding: '12px 8px', cursor: 'pointer', borderTop: sourceTab === ['all','name','name2','vivid','closed'][i] ? `2px solid ${m.color}` : '2px solid transparent' }}
+            onClick={() => setSourceTab(['all','name','name2','vivid','closed'][i] as any)}>
+            <div style={{ fontSize: '9px', color: '#607d8b', fontFamily: 'var(--font-mc-mono)', letterSpacing: '1px', marginBottom: '4px' }}>{m.label}</div>
+            <div style={{ fontSize: '24px', fontWeight: 800, color: m.color, fontFamily: 'var(--font-mc-mono)' }}>{m.value}</div>
           </div>
         ))}
       </div>
 
-      {/* Tabs + Filters */}
+      {/* Filters */}
       <div style={{ display: 'flex', gap: '8px', alignItems: 'center', flexWrap: 'wrap', marginBottom: '16px' }}>
-        <button className={`sig-btn ${tab === 'options' ? 'active' : ''}`} onClick={() => setTab('options')}>
-          Options ({options.length})
-        </button>
-        <button className={`sig-btn ${tab === 'stocks' ? 'active' : ''}`} onClick={() => setTab('stocks')}>
-          Stocks ({stocks.length})
-        </button>
-        <div style={{ width: '1px', height: '24px', background: '#1a3a4a', margin: '0 4px' }} />
-        {tab === 'options' && (
-          <>
-            <button className={`sig-btn ${typeFilter === 'all' ? 'active' : ''}`} onClick={() => setTypeFilter('all')}>All</button>
-            <button className={`sig-btn ${typeFilter === 'calls' ? 'active' : ''}`} onClick={() => setTypeFilter('calls')} style={typeFilter === 'calls' ? { background: '#66bb6a22', borderColor: '#66bb6a', color: '#66bb6a' } : {}}>Calls</button>
-            <button className={`sig-btn ${typeFilter === 'puts' ? 'active' : ''}`} onClick={() => setTypeFilter('puts')} style={typeFilter === 'puts' ? { background: '#ef535022', borderColor: '#ef5350', color: '#ef5350' } : {}}>Puts</button>
-            <div style={{ width: '1px', height: '24px', background: '#1a3a4a', margin: '0 4px' }} />
-          </>
-        )}
-        <button className={`sig-btn ${dirFilter === 'all' ? 'active' : ''}`} onClick={() => setDirFilter('all')}>All</button>
-        <button className={`sig-btn ${dirFilter === 'buy' ? 'active' : ''}`} onClick={() => setDirFilter('buy')} style={dirFilter === 'buy' ? { background: '#66bb6a22', borderColor: '#66bb6a', color: '#66bb6a' } : {}}>Buy</button>
-        <button className={`sig-btn ${dirFilter === 'sell' ? 'active' : ''}`} onClick={() => setDirFilter('sell')} style={dirFilter === 'sell' ? { background: '#ef535022', borderColor: '#ef5350', color: '#ef5350' } : {}}>Sell</button>
-        <input value={search} onChange={e => setSearch(e.target.value)} placeholder="Search symbol..."
+        {sourceTab !== 'closed' && <>
+          <button className={`sig-btn ${typeFilter === 'all' ? 'active' : ''}`} onClick={() => setTypeFilter('all')}>All</button>
+          <button className={`sig-btn ${typeFilter === 'calls' ? 'active' : ''}`} onClick={() => setTypeFilter('calls')} style={typeFilter === 'calls' ? { background: '#66bb6a22', borderColor: '#66bb6a', color: '#66bb6a' } : {}}>Calls ({callCount})</button>
+          <button className={`sig-btn ${typeFilter === 'puts' ? 'active' : ''}`} onClick={() => setTypeFilter('puts')} style={typeFilter === 'puts' ? { background: '#ef535022', borderColor: '#ef5350', color: '#ef5350' } : {}}>Puts ({putCount})</button>
+        </>}
+        <input value={search} onChange={e => setSearch(e.target.value)} placeholder="Search ticker..."
           style={{ marginLeft: 'auto', padding: '6px 14px', background: '#0d1117', border: '1px solid #1a3a4a', borderRadius: '6px', color: '#e0e0e0', fontFamily: 'var(--font-mc-mono)', fontSize: '12px', width: '140px', outline: 'none' }} />
       </div>
 
-      {loading ? (
-        <div style={{ textAlign: 'center', padding: '40px', color: '#4fc3f7', fontFamily: 'var(--font-mc-mono)' }}>Loading signals...</div>
-      ) : tab === 'options' ? (
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
-          {[
-            { label: 'EXPIRING WITHIN 7 DAYS', items: expiringSoon, color: '#ef5350', icon: '⚡' },
-            { label: 'MONTHLY (8-60 DAYS)', items: monthly, color: '#ff9800', icon: '📅' },
-            { label: 'LEAPS (60+ DAYS)', items: leaps, color: '#4fc3f7', icon: '🏔' },
-            { label: 'NO EXPIRY SET', items: noExpiry, color: '#607d8b', icon: '📌' },
-          ].filter(g => g.items.length > 0).map((group, gi) => (
-            <div key={gi}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '10px', paddingBottom: '6px', borderBottom: `2px solid ${group.color}44` }}>
-                <span style={{ fontSize: '14px' }}>{group.icon}</span>
-                <span style={{ fontSize: '13px', fontWeight: 700, color: group.color, fontFamily: 'var(--font-mc-mono)', letterSpacing: '1px' }}>{group.label}</span>
-                <span style={{ fontSize: '11px', padding: '1px 7px', borderRadius: '10px', background: `${group.color}22`, color: group.color, fontFamily: 'var(--font-mc-mono)' }}>{group.items.length}</span>
-              </div>
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: '8px' }}>
-                {group.items.map((sig, si) => (
-                  <div key={si} className="sig-card" style={{ borderLeft: `3px solid ${sig.isCall ? '#66bb6a' : '#ef5350'}` }}>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                        <span style={{ fontSize: '16px', fontWeight: 700, color: '#4fc3f7', fontFamily: 'var(--font-mc-mono)' }}>{sig.symbol}</span>
-                        <span style={{ fontSize: '10px', fontWeight: 700, padding: '2px 6px', borderRadius: '3px', background: sig.isCall ? '#66bb6a22' : '#ef535022', color: sig.isCall ? '#66bb6a' : '#ef5350', fontFamily: 'var(--font-mc-mono)' }}>
-                          {sig.isCall ? 'CALL' : 'PUT'}
-                        </span>
-                        <span style={{ fontSize: '10px', fontWeight: 700, padding: '2px 6px', borderRadius: '3px', background: sig.isBuy ? '#66bb6a22' : '#ef535022', color: sig.isBuy ? '#66bb6a' : '#ef5350', fontFamily: 'var(--font-mc-mono)' }}>
-                          {sig.isBuy ? 'BUY' : 'SELL'}
-                        </span>
-                      </div>
-                      {sig.daysToExpiry !== null && (
-                        <span style={{ fontSize: '11px', fontWeight: 700, color: sig.daysToExpiry <= 7 ? '#ef5350' : sig.daysToExpiry <= 30 ? '#ff9800' : '#66bb6a', fontFamily: 'var(--font-mc-mono)' }}>
-                          {sig.daysToExpiry}d
-                        </span>
-                      )}
-                    </div>
-                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '4px', fontSize: '11px', fontFamily: 'var(--font-mc-mono)' }}>
-                      {sig.strike && <div><span style={{ color: '#607d8b' }}>Strike: </span><span style={{ color: '#e0e0e0' }}>${sig.strike}</span></div>}
-                      {sig.lastPrice > 0 && <div><span style={{ color: '#607d8b' }}>Price: </span><span style={{ color: '#e0e0e0' }}>${sig.lastPrice.toFixed(2)}</span></div>}
-                      {sig.buyTarget && <div><span style={{ color: '#607d8b' }}>Buy: </span><span style={{ color: '#66bb6a' }}>${sig.buyTarget}</span></div>}
-                      {sig.stopLoss && <div><span style={{ color: '#607d8b' }}>Stop: </span><span style={{ color: '#ef5350' }}>${sig.stopLoss}</span></div>}
-                      {sig.sellTarget && <div><span style={{ color: '#607d8b' }}>Target: </span><span style={{ color: '#66bb6a' }}>${sig.sellTarget}</span></div>}
-                      {sig.volume > 0 && <div><span style={{ color: '#607d8b' }}>Vol: </span><span style={{ color: '#e0e0e0' }}>{sig.volume.toLocaleString()}</span></div>}
-                    </div>
-                    {sig.expiry && (
-                      <div style={{ marginTop: '6px', fontSize: '10px', color: '#455a64', fontFamily: 'var(--font-mc-mono)' }}>
-                        Exp: {sig.expiry.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
-                      </div>
-                    )}
-                  </div>
-                ))}
-              </div>
-            </div>
-          ))}
-          {filtered.length === 0 && (
-            <div style={{ textAlign: 'center', padding: '40px', color: '#455a64', fontFamily: 'var(--font-mc-mono)', fontSize: '14px' }}>No signals match filters</div>
-          )}
-        </div>
-      ) : (
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: '8px' }}>
-          {filtered.map((sig, si) => (
-            <div key={si} className="sig-card" style={{ borderLeft: `3px solid ${sig.isBuy ? '#66bb6a' : '#ef5350'}` }}>
+      {/* Signal Cards */}
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: '10px' }}>
+        {filtered.map((sig, i) => {
+          const dte = daysTo(sig.expiry);
+          const isCall = !sig.isPut;
+          const isClosed = sourceTab === 'closed';
+          const won = sig.status?.toLowerCase().includes('profit') || sig.status?.toLowerCase().includes('booked');
+          return (
+            <div key={i} className="sig-card" style={{ borderLeft: `3px solid ${isClosed ? (won ? '#66bb6a' : '#ef5350') : isCall ? '#66bb6a' : '#ef5350'}` }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
-                <span style={{ fontSize: '16px', fontWeight: 700, color: '#4fc3f7', fontFamily: 'var(--font-mc-mono)' }}>{sig.symbol}</span>
-                <span style={{ fontSize: '10px', fontWeight: 700, padding: '2px 6px', borderRadius: '3px', background: sig.isBuy ? '#66bb6a22' : '#ef535022', color: sig.isBuy ? '#66bb6a' : '#ef5350', fontFamily: 'var(--font-mc-mono)' }}>
-                  {sig.isBuy ? 'BUY' : 'SELL'}
-                </span>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                  <span style={{ fontSize: '16px', fontWeight: 700, color: '#e0e0e0', fontFamily: 'var(--font-mc-mono)' }}>{sig.symbol}</span>
+                  {sig.strike && <span style={{ fontSize: '11px', color: '#90a4ae', fontFamily: 'var(--font-mc-mono)' }}>${sig.strike}</span>}
+                  <span style={{ fontSize: '9px', fontWeight: 700, padding: '2px 5px', borderRadius: '3px', background: isCall ? '#66bb6a22' : '#ef535022', color: isCall ? '#66bb6a' : '#ef5350', fontFamily: 'var(--font-mc-mono)' }}>
+                    {sig.type === 'stock' ? 'STOCK' : isCall ? 'CALL' : 'PUT'}
+                  </span>
+                  <span style={{ fontSize: '9px', padding: '2px 5px', borderRadius: '3px', background: `${catColor(sig.category)}22`, color: catColor(sig.category), fontFamily: 'var(--font-mc-mono)', fontWeight: 700 }}>{sig.category}</span>
+                </div>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                  <span style={{ fontSize: '9px', padding: '2px 5px', borderRadius: '3px', background: '#1a3a4a', color: '#607d8b', fontFamily: 'var(--font-mc-mono)' }}>{sig.source}</span>
+                  {dte !== null && <span style={{ fontSize: '11px', fontWeight: 700, color: dte <= 3 ? '#ef5350' : dte <= 14 ? '#ff9800' : '#66bb6a', fontFamily: 'var(--font-mc-mono)' }}>{dte}d</span>}
+                </div>
               </div>
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '4px', fontSize: '11px', fontFamily: 'var(--font-mc-mono)' }}>
-                {sig.lastPrice > 0 && <div><span style={{ color: '#607d8b' }}>Price: </span><span style={{ color: '#e0e0e0' }}>${sig.lastPrice.toFixed(2)}</span></div>}
-                {sig.buyTarget && <div><span style={{ color: '#607d8b' }}>Buy: </span><span style={{ color: '#66bb6a' }}>${sig.buyTarget}</span></div>}
-                {sig.stopLoss && <div><span style={{ color: '#607d8b' }}>Stop: </span><span style={{ color: '#ef5350' }}>${sig.stopLoss}</span></div>}
-                {sig.sellTarget && <div><span style={{ color: '#607d8b' }}>Target: </span><span style={{ color: '#66bb6a' }}>${sig.sellTarget}</span></div>}
+              {sig.shortName && <div style={{ fontSize: '10px', color: '#455a64', fontFamily: 'var(--font-mc-mono)', marginBottom: '6px' }}>{sig.shortName}</div>}
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '4px', fontSize: '11px', fontFamily: 'var(--font-mc-mono)' }}>
+                {sig.buyTarget && <div><span style={{ color: '#607d8b' }}>Buy </span><span style={{ color: '#66bb6a' }}>${sig.buyTarget}</span></div>}
+                {(sig.sellTarget || sig.earlyTarget) && <div><span style={{ color: '#607d8b' }}>TP </span><span style={{ color: '#4fc3f7' }}>${sig.sellTarget || sig.earlyTarget}</span></div>}
+                {(sig.stopLoss || sig.reduceLoss) && <div><span style={{ color: '#607d8b' }}>SL </span><span style={{ color: '#ef5350' }}>${sig.stopLoss || sig.reduceLoss}</span></div>}
               </div>
-              {sig.notes && <div style={{ marginTop: '6px', fontSize: '10px', color: '#455a64', fontFamily: 'var(--font-mc-mono)' }}>{sig.notes}</div>}
+              {sig.expiry && <div style={{ fontSize: '10px', color: '#455a64', fontFamily: 'var(--font-mc-mono)', marginTop: '6px' }}>Exp {expStr(sig.expiry)}{sig.risk ? ` · Risk: ${sig.risk}` : ''}{sig.free !== undefined ? ` · ${sig.free ? 'FREE' : 'PREMIUM'}` : ''}</div>}
+              {isClosed && sig.status && <div style={{ fontSize: '11px', fontWeight: 700, color: won ? '#66bb6a' : '#ef5350', fontFamily: 'var(--font-mc-mono)', marginTop: '6px' }}>{sig.status}</div>}
             </div>
-          ))}
-          {filtered.length === 0 && (
-            <div style={{ textAlign: 'center', padding: '40px', color: '#455a64', fontFamily: 'var(--font-mc-mono)', fontSize: '14px', gridColumn: '1 / -1' }}>No stock signals match filters</div>
-          )}
-        </div>
-      )}
+          );
+        })}
+      </div>
+      {filtered.length === 0 && <div style={{ textAlign: 'center', padding: '40px', color: '#455a64', fontFamily: 'var(--font-mc-mono)' }}>No signals match filters</div>}
 
-      {/* Footer */}
       <div style={{ marginTop: '20px', padding: '10px 16px', background: '#0a1929', border: '1px solid #1a3a4a', borderRadius: '8px', fontSize: '11px', color: '#455a64', fontFamily: 'var(--font-mc-mono)' }}>
-        Sources: Firebase (Vivid2) · AI Crypto Signals · Polling every 60s · Expired options auto-filtered
+        Sources: Firebase (Name · Name2 · Vivid · FlowGreeks2) · {summary.totalActive || 0} active signals · Polling 30s · Expired options auto-filtered
       </div>
     </div>
   );
