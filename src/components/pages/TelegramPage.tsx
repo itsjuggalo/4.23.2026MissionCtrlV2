@@ -2,18 +2,9 @@
 import { useState, useEffect } from 'react';
 
 interface TelegramSignal {
-  id: string;
-  channel_name: string;
-  timestamp: string;
-  raw_text: string;
-  symbol: string;
-  direction: string | null;
-  entry: number | null;
-  stop_loss: number | null;
-  targets: number[];
-  leverage: number | null;
-  score: number;
-  status: string;
+  id: string; channel_name: string; timestamp: string; raw_text: string; symbol: string;
+  direction: string | null; entry: number | null; stop_loss: number | null;
+  targets: number[]; leverage: number | null; score: number; status: string;
 }
 
 function timeAgo(ts: string): string {
@@ -48,34 +39,19 @@ function cleanChannelName(name: string): string {
   return name.replace(/[^\w\s()-]/g, '').trim().slice(0, 25);
 }
 
-function SignalRow({ s, isSelected, onClick }: { s: TelegramSignal; isSelected: boolean; onClick: () => void }) {
-  const color = getChannelColor(s.channel_name || '');
-  const scoreColor = s.score >= 70 ? '#66bb6a' : s.score >= 40 ? '#ffd54f' : '#ef5350';
-  const dirColor = s.direction === 'LONG' ? '#66bb6a' : s.direction === 'SHORT' ? '#ef5350' : '#607d8b';
-  const fmtPrice = (p: number) => p < 0.01 ? `$${p.toFixed(6)}` : p < 1 ? `$${p.toFixed(4)}` : `$${p.toFixed(2)}`;
-
-  return (
-    <div onClick={onClick} style={{ padding: '10px 12px', background: isSelected ? '#0d2137' : 'transparent', border: `1px solid ${isSelected ? '#4fc3f7' : '#1a3a4a'}`, borderRadius: '6px', cursor: 'pointer', borderLeft: `3px solid ${color}`, marginBottom: '4px', transition: 'all 0.15s' }}>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '6px' }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-          <span style={{ fontSize: '16px', fontWeight: 800, color: '#e0e0e0', fontFamily: 'var(--font-mc-mono)' }}>{s.symbol}</span>
-          {s.direction && <span style={{ fontSize: '10px', fontWeight: 700, padding: '2px 6px', borderRadius: '3px', background: `${dirColor}22`, color: dirColor, fontFamily: 'var(--font-mc-mono)' }}>{s.direction}</span>}
-          <span style={{ fontSize: '12px', fontWeight: 700, padding: '2px 6px', borderRadius: '3px', background: `${scoreColor}22`, color: scoreColor, fontFamily: 'var(--font-mc-mono)' }}>{s.score}</span>
-        </div>
-        <span style={{ fontSize: '10px', color: '#607d8b', fontFamily: 'var(--font-mc-mono)' }}>{timeAgo(s.timestamp)}</span>
-      </div>
-      <div style={{ display: 'flex', gap: '12px', fontSize: '13px', fontFamily: 'var(--font-mc-mono)' }}>
-        {s.entry && s.entry > 0 && <span><span style={{ color: '#607d8b', fontSize: '10px' }}>IN </span><span style={{ color: '#66bb6a', fontWeight: 700 }}>{fmtPrice(s.entry)}</span></span>}
-        {s.stop_loss && <span><span style={{ color: '#607d8b', fontSize: '10px' }}>SL </span><span style={{ color: '#ef5350', fontWeight: 700 }}>{fmtPrice(s.stop_loss)}</span></span>}
-        {s.targets && s.targets.length > 0 && <span><span style={{ color: '#607d8b', fontSize: '10px' }}>TP </span><span style={{ color: '#4fc3f7', fontWeight: 700 }}>{fmtPrice(s.targets[0])}</span></span>}
-        {s.leverage && <span><span style={{ color: '#607d8b', fontSize: '10px' }}>LEV </span><span style={{ color: '#ff9800', fontWeight: 700 }}>{s.leverage}x</span></span>}
-      </div>
-      <div style={{ display: 'flex', gap: '4px', marginTop: '4px' }}>
-        <span style={{ fontSize: '9px', padding: '1px 4px', borderRadius: '2px', background: `${color}22`, color: color, fontFamily: 'var(--font-mc-mono)' }}>{cleanChannelName(s.channel_name || 'Unknown')}</span>
-        {s.targets && s.targets.length > 1 && <span style={{ fontSize: '9px', padding: '1px 4px', borderRadius: '2px', background: '#1a3a4a', color: '#607d8b', fontFamily: 'var(--font-mc-mono)' }}>{s.targets.length} TPs</span>}
-      </div>
-    </div>
-  );
+// Transparent quality assessment — shows WHY a signal is good or bad
+function assessQuality(s: TelegramSignal): { checks: { label: string; pass: boolean; reason: string }[]; grade: string; gradeColor: string } {
+  const checks = [
+    { label: 'Entry', pass: !!(s.entry && s.entry > 0), reason: s.entry ? `$${s.entry < 1 ? s.entry.toFixed(4) : s.entry.toFixed(2)}` : 'No entry price' },
+    { label: 'Stop Loss', pass: !!s.stop_loss, reason: s.stop_loss ? `$${s.stop_loss}` : 'No SL — risky' },
+    { label: 'Targets', pass: !!(s.targets && s.targets.length > 0), reason: s.targets?.length ? `${s.targets.length} target${s.targets.length > 1 ? 's' : ''}` : 'No TP set' },
+    { label: 'Direction', pass: !!s.direction, reason: s.direction || 'Unclear bias' },
+    { label: 'Fresh', pass: Date.now() - new Date(s.timestamp).getTime() < 86400000, reason: timeAgo(s.timestamp) },
+  ];
+  const passed = checks.filter(c => c.pass).length;
+  const grade = passed >= 4 ? 'ACTIONABLE' : passed >= 3 ? 'PARTIAL' : passed >= 2 ? 'WEAK' : 'NOISE';
+  const gradeColor = passed >= 4 ? '#66bb6a' : passed >= 3 ? '#4fc3f7' : passed >= 2 ? '#ff9800' : '#ef5350';
+  return { checks, grade, gradeColor };
 }
 
 export function TelegramPage() {
@@ -83,7 +59,7 @@ export function TelegramPage() {
   const [loading, setLoading] = useState(true);
   const [channelFilter, setChannelFilter] = useState<string>('all');
   const [search, setSearch] = useState('');
-  const [scoreFilter, setScoreFilter] = useState<string>('0');
+  const [qualityFilter, setQualityFilter] = useState<string>('all');
   const [selected, setSelected] = useState<TelegramSignal | null>(null);
 
   useEffect(() => {
@@ -124,25 +100,28 @@ export function TelegramPage() {
   const channelCounts: Record<string, number> = {};
   signals.forEach(s => { const ch = s.channel_name || 'Unknown'; channelCounts[ch] = (channelCounts[ch] || 0) + 1; });
 
-  const applyFilters = (sigs: TelegramSignal[]) => {
-    let f = sigs;
-    if (channelFilter !== 'all') f = f.filter(s => s.channel_name === channelFilter);
-    if (search) { const q = search.toLowerCase(); f = f.filter(s => (s.symbol || '').toLowerCase().includes(q)); }
-    if (scoreFilter !== '0') f = f.filter(s => s.score >= parseInt(scoreFilter));
-    f.sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime());
-    return f;
-  };
+  let filtered = signals;
+  if (channelFilter !== 'all') filtered = filtered.filter(s => s.channel_name === channelFilter);
+  if (search) { const q = search.toLowerCase(); filtered = filtered.filter(s => (s.symbol || '').toLowerCase().includes(q)); }
+  if (qualityFilter !== 'all') {
+    filtered = filtered.filter(s => {
+      const q = assessQuality(s);
+      return q.grade === qualityFilter;
+    });
+  }
+  filtered.sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime());
 
-  // 3 columns: LONG, SHORT, Accepted/High Score
-  const longs = applyFilters(signals.filter(s => s.direction === 'LONG' && s.status !== 'rejected'));
-  const shorts = applyFilters(signals.filter(s => s.direction === 'SHORT' && s.status !== 'rejected'));
-  const accepted = applyFilters(signals.filter(s => s.status === 'accepted' || s.score >= 70));
+  // Group by time for the left column
+  const now = Date.now();
+  const lastHour = filtered.filter(s => now - new Date(s.timestamp).getTime() < 3600000);
+  const today = filtered.filter(s => { const d = now - new Date(s.timestamp).getTime(); return d >= 3600000 && d < 86400000; });
+  const older = filtered.filter(s => now - new Date(s.timestamp).getTime() >= 86400000);
 
-  const recentCount = signals.filter(s => Date.now() - new Date(s.timestamp).getTime() < 86400000).length;
+  const recentCount = signals.filter(s => now - new Date(s.timestamp).getTime() < 86400000).length;
+  const actionableCount = signals.filter(s => assessQuality(s).grade === 'ACTIONABLE').length;
+  const fmtPrice = (p: number) => p < 0.01 ? `$${p.toFixed(6)}` : p < 1 ? `$${p.toFixed(4)}` : `$${p.toFixed(2)}`;
 
   const selectStyle: React.CSSProperties = { padding: '7px 12px', background: '#0d1117', border: '1px solid #1a3a4a', borderRadius: '6px', color: '#e0e0e0', fontFamily: 'var(--font-mc-mono)', fontSize: '12px', cursor: 'pointer', outline: 'none' };
-  const colHeader: React.CSSProperties = { fontSize: '13px', fontWeight: 700, fontFamily: 'var(--font-mc-mono)', letterSpacing: '1px', padding: '10px 12px', borderBottom: '2px solid', marginBottom: '8px' };
-  const fmtPrice = (p: number) => p < 0.01 ? `$${p.toFixed(6)}` : p < 1 ? `$${p.toFixed(4)}` : `$${p.toFixed(2)}`;
 
   if (loading) return (
     <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '40vh', color: '#4fc3f7', fontFamily: 'var(--font-mc-mono)', fontSize: '16px' }}>
@@ -151,6 +130,44 @@ export function TelegramPage() {
     </div>
   );
 
+  const renderSignal = (s: TelegramSignal, i: number) => {
+    const color = getChannelColor(s.channel_name || '');
+    const dirColor = s.direction === 'LONG' ? '#66bb6a' : s.direction === 'SHORT' ? '#ef5350' : '#607d8b';
+    const q = assessQuality(s);
+    const isSelected = selected?.id === s.id;
+
+    return (
+      <div key={`${s.id || i}`} onClick={() => setSelected(isSelected ? null : s)}
+        style={{ padding: '10px 12px', background: isSelected ? '#0d2137' : 'transparent', border: `1px solid ${isSelected ? '#4fc3f7' : '#1a3a4a'}`, borderRadius: '6px', cursor: 'pointer', borderLeft: `3px solid ${dirColor}`, marginBottom: '4px', transition: 'all 0.15s' }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '6px' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+            <span style={{ fontSize: '16px', fontWeight: 800, color: '#e0e0e0', fontFamily: 'var(--font-mc-mono)' }}>{s.symbol}</span>
+            {s.direction && <span style={{ fontSize: '10px', fontWeight: 700, padding: '2px 6px', borderRadius: '3px', background: `${dirColor}22`, color: dirColor, fontFamily: 'var(--font-mc-mono)' }}>{s.direction}</span>}
+            <span style={{ fontSize: '10px', padding: '2px 6px', borderRadius: '3px', background: `${q.gradeColor}22`, color: q.gradeColor, fontFamily: 'var(--font-mc-mono)', fontWeight: 700 }}>{q.grade}</span>
+          </div>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+            <span style={{ fontSize: '9px', padding: '1px 4px', borderRadius: '2px', background: `${color}22`, color: color, fontFamily: 'var(--font-mc-mono)' }}>{cleanChannelName(s.channel_name || '')}</span>
+            <span style={{ fontSize: '10px', color: '#607d8b', fontFamily: 'var(--font-mc-mono)' }}>{timeAgo(s.timestamp)}</span>
+          </div>
+        </div>
+        <div style={{ display: 'flex', gap: '12px', fontSize: '13px', fontFamily: 'var(--font-mc-mono)' }}>
+          {s.entry && s.entry > 0 && <span><span style={{ color: '#607d8b', fontSize: '10px' }}>IN </span><span style={{ color: '#66bb6a', fontWeight: 700 }}>{fmtPrice(s.entry)}</span></span>}
+          {s.stop_loss && <span><span style={{ color: '#607d8b', fontSize: '10px' }}>SL </span><span style={{ color: '#ef5350', fontWeight: 700 }}>{fmtPrice(s.stop_loss)}</span></span>}
+          {s.targets && s.targets.length > 0 && <span><span style={{ color: '#607d8b', fontSize: '10px' }}>TP </span><span style={{ color: '#4fc3f7', fontWeight: 700 }}>{fmtPrice(s.targets[0])}</span></span>}
+          {s.leverage && <span><span style={{ color: '#607d8b', fontSize: '10px' }}>LEV </span><span style={{ color: '#ff9800', fontWeight: 700 }}>{s.leverage}x</span></span>}
+        </div>
+        {/* Quality checkmarks — visible reason for the grade */}
+        <div style={{ display: 'flex', gap: '8px', marginTop: '5px', fontSize: '10px', fontFamily: 'var(--font-mc-mono)' }}>
+          {q.checks.map((c, ci) => (
+            <span key={ci} style={{ color: c.pass ? '#66bb6a88' : '#ef535066' }}>{c.pass ? '✓' : '✗'} {c.label}</span>
+          ))}
+        </div>
+      </div>
+    );
+  };
+
+  const sectionStyle: React.CSSProperties = { fontSize: '12px', fontWeight: 700, fontFamily: 'var(--font-mc-mono)', letterSpacing: '1px', padding: '8px 12px', borderBottom: '2px solid', marginBottom: '6px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' };
+
   return (
     <div style={{ padding: '12px 16px', height: '100%', display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
       {/* Top Bar */}
@@ -158,7 +175,7 @@ export function TelegramPage() {
         <span style={{ width: '8px', height: '8px', borderRadius: '50%', background: '#66bb6a', boxShadow: '0 0 6px #66bb6a88' }} />
         <span style={{ fontSize: '12px', fontWeight: 700, color: '#66bb6a', fontFamily: 'var(--font-mc-mono)' }}>LIVE</span>
         <span style={{ fontSize: '11px', color: '#607d8b', fontFamily: 'var(--font-mc-mono)' }}>
-          {signals.length} signals · {channels.length} channels · {recentCount} last 24h
+          {signals.length} signals · {channels.length} channels · {actionableCount} actionable
         </span>
         <div style={{ width: '1px', height: '16px', background: '#1a3a4a' }} />
 
@@ -167,98 +184,131 @@ export function TelegramPage() {
           {channels.map(ch => <option key={ch} value={ch}>{cleanChannelName(ch)} ({channelCounts[ch] || 0})</option>)}
         </select>
 
-        <select value={scoreFilter} onChange={e => setScoreFilter(e.target.value)} style={selectStyle}>
-          <option value="0">All Scores</option>
-          <option value="40">Score 40+</option>
-          <option value="70">Score 70+</option>
-          <option value="85">Score 85+</option>
+        <select value={qualityFilter} onChange={e => setQualityFilter(e.target.value)} style={selectStyle}>
+          <option value="all">All Quality</option>
+          <option value="ACTIONABLE">Actionable Only</option>
+          <option value="PARTIAL">Partial</option>
+          <option value="WEAK">Weak</option>
+          <option value="NOISE">Noise</option>
         </select>
 
         <input value={search} onChange={e => setSearch(e.target.value)} placeholder="Ticker..." style={{ ...selectStyle, width: '100px' }} />
       </div>
 
-      {/* 3-Column Layout + Detail Panel */}
-      <div style={{ display: 'grid', gridTemplateColumns: selected ? '1fr 1fr 1fr 320px' : '1fr 1fr 1fr', gap: '10px', flex: 1, overflow: 'hidden', minHeight: 0 }}>
+      {/* 2-Panel: Signal Feed + Detail */}
+      <div style={{ display: 'grid', gridTemplateColumns: selected ? '1fr 360px' : '1fr', gap: '12px', flex: 1, overflow: 'hidden', minHeight: 0 }}>
 
-        {/* Column 1: LONG */}
-        <div style={{ display: 'flex', flexDirection: 'column', overflow: 'hidden', borderRadius: '8px', border: '1px solid #1a3a4a' }}>
-          <div style={{ ...colHeader, color: '#66bb6a', borderColor: '#66bb6a44' }}>
-            LONG <span style={{ fontSize: '11px', color: '#607d8b', fontWeight: 400 }}>({longs.length})</span>
-          </div>
-          <div style={{ overflow: 'auto', padding: '0 8px 8px', flex: 1 }}>
-            {longs.map((s, i) => <SignalRow key={`l-${s.id || i}`} s={s} isSelected={selected?.id === s.id} onClick={() => setSelected(selected?.id === s.id ? null : s)} />)}
-            {longs.length === 0 && <div style={{ padding: '20px', textAlign: 'center', color: '#455a64', fontFamily: 'var(--font-mc-mono)', fontSize: '12px' }}>No long signals</div>}
-          </div>
-        </div>
-
-        {/* Column 2: SHORT */}
-        <div style={{ display: 'flex', flexDirection: 'column', overflow: 'hidden', borderRadius: '8px', border: '1px solid #1a3a4a' }}>
-          <div style={{ ...colHeader, color: '#ef5350', borderColor: '#ef535044' }}>
-            SHORT <span style={{ fontSize: '11px', color: '#607d8b', fontWeight: 400 }}>({shorts.length})</span>
-          </div>
-          <div style={{ overflow: 'auto', padding: '0 8px 8px', flex: 1 }}>
-            {shorts.map((s, i) => <SignalRow key={`s-${s.id || i}`} s={s} isSelected={selected?.id === s.id} onClick={() => setSelected(selected?.id === s.id ? null : s)} />)}
-            {shorts.length === 0 && <div style={{ padding: '20px', textAlign: 'center', color: '#455a64', fontFamily: 'var(--font-mc-mono)', fontSize: '12px' }}>No short signals</div>}
-          </div>
-        </div>
-
-        {/* Column 3: HIGH SCORE / ACCEPTED */}
-        <div style={{ display: 'flex', flexDirection: 'column', overflow: 'hidden', borderRadius: '8px', border: '1px solid #1a3a4a' }}>
-          <div style={{ ...colHeader, color: '#ffd54f', borderColor: '#ffd54f44' }}>
-            TOP PICKS (70+ / ACCEPTED) <span style={{ fontSize: '11px', color: '#607d8b', fontWeight: 400 }}>({accepted.length})</span>
-          </div>
-          <div style={{ overflow: 'auto', padding: '0 8px 8px', flex: 1 }}>
-            {accepted.map((s, i) => <SignalRow key={`a-${s.id || i}`} s={s} isSelected={selected?.id === s.id} onClick={() => setSelected(selected?.id === s.id ? null : s)} />)}
-            {accepted.length === 0 && <div style={{ padding: '20px', textAlign: 'center', color: '#455a64', fontFamily: 'var(--font-mc-mono)', fontSize: '12px' }}>No top picks</div>}
-          </div>
-        </div>
-
-        {/* Detail Panel */}
-        {selected && (
-          <div style={{ background: '#0a1929', border: '1px solid #1a3a4a', borderRadius: '8px', padding: '16px', overflow: 'auto' }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px' }}>
-              <span style={{ fontSize: '22px', fontWeight: 800, color: '#e0e0e0', fontFamily: 'var(--font-mc-mono)' }}>{selected.symbol}</span>
-              <button onClick={() => setSelected(null)} style={{ background: 'none', border: '1px solid #1a3a4a', borderRadius: '4px', color: '#607d8b', padding: '2px 8px', cursor: 'pointer', fontFamily: 'var(--font-mc-mono)', fontSize: '11px' }}>✕</button>
-            </div>
-
-            <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap', marginBottom: '16px' }}>
-              {selected.direction && <span style={{ fontSize: '11px', padding: '3px 8px', borderRadius: '4px', background: selected.direction === 'LONG' ? '#66bb6a22' : '#ef535022', color: selected.direction === 'LONG' ? '#66bb6a' : '#ef5350', fontFamily: 'var(--font-mc-mono)', fontWeight: 700 }}>{selected.direction}</span>}
-              <span style={{ fontSize: '11px', padding: '3px 8px', borderRadius: '4px', background: `${getChannelColor(selected.channel_name || '')}22`, color: getChannelColor(selected.channel_name || ''), fontFamily: 'var(--font-mc-mono)' }}>{cleanChannelName(selected.channel_name || '')}</span>
-              <span style={{ fontSize: '11px', padding: '3px 8px', borderRadius: '4px', background: (selected.score >= 70 ? '#66bb6a' : selected.score >= 40 ? '#ffd54f' : '#ef5350') + '22', color: selected.score >= 70 ? '#66bb6a' : selected.score >= 40 ? '#ffd54f' : '#ef5350', fontFamily: 'var(--font-mc-mono)', fontWeight: 700 }}>SCORE: {selected.score}</span>
-              <span style={{ fontSize: '11px', padding: '3px 8px', borderRadius: '4px', background: (selected.status === 'accepted' ? '#66bb6a' : selected.status === 'rejected' ? '#ef5350' : '#607d8b') + '22', color: selected.status === 'accepted' ? '#66bb6a' : selected.status === 'rejected' ? '#ef5350' : '#607d8b', fontFamily: 'var(--font-mc-mono)', fontWeight: 700, textTransform: 'uppercase' }}>{selected.status || 'pending'}</span>
-            </div>
-
-            <div style={{ fontSize: '10px', color: '#607d8b', fontFamily: 'var(--font-mc-mono)', letterSpacing: '1.5px', marginBottom: '8px' }}>PRICE LEVELS</div>
-            {[
-              { label: 'ENTRY', value: selected.entry && selected.entry > 0 ? fmtPrice(selected.entry) : null, color: '#66bb6a' },
-              { label: 'STOP LOSS', value: selected.stop_loss ? fmtPrice(selected.stop_loss) : null, color: '#ef5350' },
-              ...(selected.targets || []).map((t, i) => ({ label: `TARGET ${i + 1}`, value: fmtPrice(t), color: '#4fc3f7' })),
-              { label: 'LEVERAGE', value: selected.leverage ? `${selected.leverage}x` : null, color: '#ff9800' },
-            ].filter(t => t.value).map((t, i) => (
-              <div key={i} style={{ display: 'flex', justifyContent: 'space-between', padding: '6px 0', borderBottom: '1px solid #0d1117' }}>
-                <span style={{ fontSize: '11px', color: '#607d8b', fontFamily: 'var(--font-mc-mono)' }}>{t.label}</span>
-                <span style={{ fontSize: '16px', fontWeight: 700, color: t.color, fontFamily: 'var(--font-mc-mono)' }}>{t.value}</span>
+        {/* LEFT: Time-grouped signal feed */}
+        <div style={{ overflow: 'auto', paddingRight: '4px' }}>
+          {lastHour.length > 0 && (
+            <div>
+              <div style={{ ...sectionStyle, color: '#66bb6a', borderColor: '#66bb6a44' }}>
+                <span>LAST HOUR</span>
+                <span style={{ fontSize: '11px', color: '#607d8b', fontWeight: 400 }}>{lastHour.length}</span>
               </div>
-            ))}
-
-            <div style={{ fontSize: '10px', color: '#607d8b', fontFamily: 'var(--font-mc-mono)', letterSpacing: '1.5px', marginTop: '16px', marginBottom: '8px' }}>TIMING</div>
-            <div style={{ display: 'flex', justifyContent: 'space-between', padding: '5px 0', borderBottom: '1px solid #0d1117' }}>
-              <span style={{ fontSize: '11px', color: '#607d8b', fontFamily: 'var(--font-mc-mono)' }}>Received</span>
-              <span style={{ fontSize: '12px', color: '#e0e0e0', fontFamily: 'var(--font-mc-mono)', fontWeight: 600 }}>{fullTime(selected.timestamp)}</span>
+              {lastHour.map((s, i) => renderSignal(s, i))}
             </div>
-            <div style={{ display: 'flex', justifyContent: 'space-between', padding: '5px 0' }}>
-              <span style={{ fontSize: '11px', color: '#607d8b', fontFamily: 'var(--font-mc-mono)' }}>Age</span>
-              <span style={{ fontSize: '12px', color: '#e0e0e0', fontFamily: 'var(--font-mc-mono)', fontWeight: 600 }}>{timeAgo(selected.timestamp)}</span>
+          )}
+          {today.length > 0 && (
+            <div style={{ marginTop: lastHour.length > 0 ? '12px' : '0' }}>
+              <div style={{ ...sectionStyle, color: '#4fc3f7', borderColor: '#4fc3f744' }}>
+                <span>TODAY</span>
+                <span style={{ fontSize: '11px', color: '#607d8b', fontWeight: 400 }}>{today.length}</span>
+              </div>
+              {today.map((s, i) => renderSignal(s, i + 1000))}
             </div>
+          )}
+          {older.length > 0 && (
+            <div style={{ marginTop: '12px' }}>
+              <div style={{ ...sectionStyle, color: '#607d8b', borderColor: '#607d8b44' }}>
+                <span>OLDER</span>
+                <span style={{ fontSize: '11px', color: '#607d8b', fontWeight: 400 }}>{older.length}</span>
+              </div>
+              {older.slice(0, 50).map((s, i) => renderSignal(s, i + 2000))}
+            </div>
+          )}
+          {filtered.length === 0 && <div style={{ padding: '60px', textAlign: 'center', color: '#455a64', fontFamily: 'var(--font-mc-mono)', fontSize: '14px' }}>No signals match filters</div>}
+        </div>
 
-            {selected.raw_text && (
-              <>
-                <div style={{ fontSize: '10px', color: '#607d8b', fontFamily: 'var(--font-mc-mono)', letterSpacing: '1.5px', marginTop: '16px', marginBottom: '8px' }}>RAW MESSAGE</div>
-                <div style={{ fontSize: '11px', color: '#90a4ae', fontFamily: 'var(--font-mc-mono)', padding: '10px', background: '#0d1117', borderRadius: '6px', maxHeight: '200px', overflow: 'auto', whiteSpace: 'pre-wrap', lineHeight: '1.4' }}>{selected.raw_text.slice(0, 500)}</div>
-              </>
-            )}
-          </div>
-        )}
+        {/* RIGHT: Detail Panel */}
+        {selected && (() => {
+          const q = assessQuality(selected);
+          const dirColor = selected.direction === 'LONG' ? '#66bb6a' : selected.direction === 'SHORT' ? '#ef5350' : '#607d8b';
+          return (
+            <div style={{ background: '#0a1929', border: '1px solid #1a3a4a', borderRadius: '8px', padding: '16px', overflow: 'auto' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px' }}>
+                <span style={{ fontSize: '22px', fontWeight: 800, color: '#e0e0e0', fontFamily: 'var(--font-mc-mono)' }}>{selected.symbol}</span>
+                <button onClick={() => setSelected(null)} style={{ background: 'none', border: '1px solid #1a3a4a', borderRadius: '4px', color: '#607d8b', padding: '2px 8px', cursor: 'pointer', fontFamily: 'var(--font-mc-mono)', fontSize: '11px' }}>✕</button>
+              </div>
+
+              <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap', marginBottom: '16px' }}>
+                {selected.direction && <span style={{ fontSize: '11px', padding: '3px 8px', borderRadius: '4px', background: `${dirColor}22`, color: dirColor, fontFamily: 'var(--font-mc-mono)', fontWeight: 700 }}>{selected.direction}</span>}
+                <span style={{ fontSize: '11px', padding: '3px 8px', borderRadius: '4px', background: `${getChannelColor(selected.channel_name || '')}22`, color: getChannelColor(selected.channel_name || ''), fontFamily: 'var(--font-mc-mono)' }}>{cleanChannelName(selected.channel_name || '')}</span>
+                <span style={{ fontSize: '11px', padding: '3px 8px', borderRadius: '4px', background: `${q.gradeColor}22`, color: q.gradeColor, fontFamily: 'var(--font-mc-mono)', fontWeight: 700 }}>{q.grade}</span>
+              </div>
+
+              {/* Signal Quality Breakdown — transparent scoring */}
+              <div style={{ fontSize: '10px', color: '#607d8b', fontFamily: 'var(--font-mc-mono)', letterSpacing: '1.5px', marginBottom: '8px' }}>SIGNAL QUALITY</div>
+              <div style={{ marginBottom: '16px', padding: '10px', background: '#0d1117', borderRadius: '6px' }}>
+                {q.checks.map((c, i) => (
+                  <div key={i} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '5px 0', borderBottom: i < q.checks.length - 1 ? '1px solid #1a3a4a' : 'none' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                      <span style={{ fontSize: '13px', color: c.pass ? '#66bb6a' : '#ef5350' }}>{c.pass ? '✓' : '✗'}</span>
+                      <span style={{ fontSize: '12px', color: '#90a4ae', fontFamily: 'var(--font-mc-mono)' }}>{c.label}</span>
+                    </div>
+                    <span style={{ fontSize: '12px', color: c.pass ? '#e0e0e0' : '#455a64', fontFamily: 'var(--font-mc-mono)', fontWeight: 600 }}>{c.reason}</span>
+                  </div>
+                ))}
+                <div style={{ marginTop: '8px', paddingTop: '8px', borderTop: '1px solid #1a3a4a', display: 'flex', justifyContent: 'space-between' }}>
+                  <span style={{ fontSize: '12px', color: '#607d8b', fontFamily: 'var(--font-mc-mono)', fontWeight: 700 }}>VERDICT</span>
+                  <span style={{ fontSize: '14px', fontWeight: 700, color: q.gradeColor, fontFamily: 'var(--font-mc-mono)' }}>{q.grade} ({q.checks.filter(c => c.pass).length}/5)</span>
+                </div>
+              </div>
+
+              {/* Price Levels */}
+              <div style={{ fontSize: '10px', color: '#607d8b', fontFamily: 'var(--font-mc-mono)', letterSpacing: '1.5px', marginBottom: '8px' }}>PRICE LEVELS</div>
+              {[
+                { label: 'ENTRY', value: selected.entry && selected.entry > 0 ? fmtPrice(selected.entry) : null, color: '#66bb6a' },
+                { label: 'STOP LOSS', value: selected.stop_loss ? fmtPrice(selected.stop_loss) : null, color: '#ef5350' },
+                ...(selected.targets || []).map((t, i) => ({ label: `TARGET ${i + 1}`, value: fmtPrice(t), color: '#4fc3f7' })),
+                { label: 'LEVERAGE', value: selected.leverage ? `${selected.leverage}x` : null, color: '#ff9800' },
+              ].filter(t => t.value).map((t, i) => (
+                <div key={i} style={{ display: 'flex', justifyContent: 'space-between', padding: '6px 0', borderBottom: '1px solid #0d1117' }}>
+                  <span style={{ fontSize: '11px', color: '#607d8b', fontFamily: 'var(--font-mc-mono)' }}>{t.label}</span>
+                  <span style={{ fontSize: '16px', fontWeight: 700, color: t.color, fontFamily: 'var(--font-mc-mono)' }}>{t.value}</span>
+                </div>
+              ))}
+
+              {/* R:R Ratio if we have entry + SL + TP */}
+              {selected.entry && selected.stop_loss && selected.targets?.length > 0 && (() => {
+                const risk = Math.abs(selected.entry! - selected.stop_loss!);
+                const reward = Math.abs(selected.targets[0] - selected.entry!);
+                const rr = risk > 0 ? (reward / risk).toFixed(1) : '?';
+                return (
+                  <div style={{ marginTop: '12px', padding: '10px', background: '#0d1117', borderRadius: '6px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                    <span style={{ fontSize: '12px', color: '#607d8b', fontFamily: 'var(--font-mc-mono)' }}>RISK:REWARD</span>
+                    <span style={{ fontSize: '18px', fontWeight: 800, color: parseFloat(rr) >= 2 ? '#66bb6a' : parseFloat(rr) >= 1 ? '#ff9800' : '#ef5350', fontFamily: 'var(--font-mc-mono)' }}>1:{rr}</span>
+                  </div>
+                );
+              })()}
+
+              {/* Timing */}
+              <div style={{ fontSize: '10px', color: '#607d8b', fontFamily: 'var(--font-mc-mono)', letterSpacing: '1.5px', marginTop: '16px', marginBottom: '8px' }}>TIMING</div>
+              <div style={{ display: 'flex', justifyContent: 'space-between', padding: '5px 0' }}>
+                <span style={{ fontSize: '11px', color: '#607d8b', fontFamily: 'var(--font-mc-mono)' }}>Received</span>
+                <span style={{ fontSize: '12px', color: '#e0e0e0', fontFamily: 'var(--font-mc-mono)', fontWeight: 600 }}>{fullTime(selected.timestamp)}</span>
+              </div>
+
+              {/* Raw Message */}
+              {selected.raw_text && (
+                <>
+                  <div style={{ fontSize: '10px', color: '#607d8b', fontFamily: 'var(--font-mc-mono)', letterSpacing: '1.5px', marginTop: '16px', marginBottom: '8px' }}>RAW MESSAGE</div>
+                  <div style={{ fontSize: '11px', color: '#90a4ae', fontFamily: 'var(--font-mc-mono)', padding: '10px', background: '#0d1117', borderRadius: '6px', maxHeight: '180px', overflow: 'auto', whiteSpace: 'pre-wrap', lineHeight: '1.4' }}>{selected.raw_text.slice(0, 500)}</div>
+                </>
+              )}
+            </div>
+          );
+        })()}
       </div>
     </div>
   );

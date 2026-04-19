@@ -2,223 +2,223 @@
   {
     "id": "mem-0793",
     "title": "Market Briefing",
-    "content": "# Market Briefing \u2014 April 18, 2026 05:00 AM UTC\n\n## BTC: $77,160.00 (+3.2% 24h)\n- 24h Range: $74,577 \u2014 $78,372 (5.1%)\n- 24h Trend: UP\n- Volume: 68,159,435,603 USD\n- Fear & Greed: 26 (Fear)\n\n## Market Regime: MIXED_TREND\n- Bias: BULLISH\n- Recommendation: SuperTrend on trending TFs, Grid Bot on rangin",
+    "content": "# Market Briefing \u2014 April 19, 2026 05:00 AM UTC\n\n## BTC: $75,681.00 (-2.0% 24h)\n- 24h Range: $75,397 \u2014 $77,296 (2.5%)\n- 24h Trend: DOWN\n- Volume: 45,442,441,844 USD\n- Fear & Greed: 27 (Fear)\n\n## Market Regime: MIXED\n- Bias: BULLISH\n- Recommendation: DayTrader light size \u2014 no clear regime\n- 1H: WEAK_",
     "source": "directives",
     "tags": [
       "directives",
       "md"
     ],
     "importance": "low",
-    "timestamp": "2026-04-18T05:00:03.708455",
-    "date": "2026-04-18"
+    "timestamp": "2026-04-19T05:00:04.345130",
+    "date": "2026-04-19"
   },
   {
     "id": "mem-0792",
     "title": "Market Briefing",
-    "content": "{\n  \"generated\": \"2026-04-18T05:00:02.857923+00:00\",\n  \"generated_human\": \"April 18, 2026 05:00 AM UTC\",\n  \"prices\": {\n    \"bitcoin\": {\n      \"price\": 77160,\n      \"change_24h_pct\": 3.17,\n      \"volume_24h\": 68159435603,\n      \"market_cap\": 1544578785646\n    },\n    \"ethereum\": {\n      \"price\": 2409.",
+    "content": "{\n  \"generated\": \"2026-04-19T05:00:03.401778+00:00\",\n  \"generated_human\": \"April 19, 2026 05:00 AM UTC\",\n  \"prices\": {\n    \"bitcoin\": {\n      \"price\": 75681,\n      \"change_24h_pct\": -1.96,\n      \"volume_24h\": 45442441844,\n      \"market_cap\": 1514978295461\n    },\n    \"ethereum\": {\n      \"price\": 2333",
     "source": "directives",
     "tags": [
       "directives",
       "json"
     ],
     "importance": "low",
-    "timestamp": "2026-04-18T05:00:03.692455",
-    "date": "2026-04-18"
+    "timestamp": "2026-04-19T05:00:04.327130",
+    "date": "2026-04-19"
   },
   {
     "id": "mem-0043",
     "title": "Run Log",
-    "content": "[\n  {\n    \"id\": \"crypto-ta-sol\",\n    \"agent\": \"orion\",\n    \"skill\": \"crypto-technical-analysis\",\n    \"timestamp\": \"2026-04-17T13:55:54.840807+00:00\",\n    \"status\": \"error\",\n    \"elapsed_sec\": 0.9,\n    \"error\": \"Error: TA failed for SOL: No candle data for SOL\\n\"\n  },\n  {\n    \"id\": \"crypto-ta-eth\",\n ",
+    "content": "[\n  {\n    \"id\": \"crypto-ta-sol\",\n    \"agent\": \"orion\",\n    \"skill\": \"crypto-technical-analysis\",\n    \"timestamp\": \"2026-04-18T13:55:30.357795+00:00\",\n    \"status\": \"success\",\n    \"elapsed_sec\": 0.86\n  },\n  {\n    \"id\": \"portfolio-manager\",\n    \"agent\": \"boba\",\n    \"skill\": \"portfolio-manager\",\n    \"t",
     "source": "skill_outputs",
     "tags": [
       "skill_outputs",
       "json"
     ],
     "importance": "low",
-    "timestamp": "2026-04-18T04:59:37.841634",
-    "date": "2026-04-18"
-  },
-  {
-    "id": "mem-0053",
-    "title": "Crypto Ta Sol",
-    "content": "{\n  \"skill_id\": \"crypto-ta-sol\",\n  \"agent\": \"orion\",\n  \"skill\": \"crypto-technical-analysis\",\n  \"timestamp\": \"2026-04-18T04:59:37.836001+00:00\",\n  \"data\": {\n    \"symbol\": \"SOL\",\n    \"price\": 88.42,\n    \"trend\": \"neutral\",\n    \"rsi\": 47.15,\n    \"sma20\": 89.122,\n    \"sma50\": 87.871,\n    \"ema12\": 88.887",
-    "source": "skill_outputs",
-    "tags": [
-      "skill_outputs",
-      "json"
-    ],
-    "importance": "low",
-    "timestamp": "2026-04-18T04:59:37.834634",
-    "date": "2026-04-18"
+    "timestamp": "2026-04-19T04:59:12.752484",
+    "date": "2026-04-19"
   },
   {
     "id": "mem-0054",
     "title": "Crypto Ta Btc",
-    "content": "{\n  \"skill_id\": \"crypto-ta-btc\",\n  \"agent\": \"orion\",\n  \"skill\": \"crypto-technical-analysis\",\n  \"timestamp\": \"2026-04-18T04:59:37.799977+00:00\",\n  \"data\": {\n    \"symbol\": \"BTC\",\n    \"price\": 77164.64,\n    \"trend\": \"bullish\",\n    \"rsi\": 58.5,\n    \"sma20\": 77076.6275,\n    \"sma50\": 75703.7678,\n    \"ema1",
+    "content": "{\n  \"skill_id\": \"crypto-ta-btc\",\n  \"agent\": \"orion\",\n  \"skill\": \"crypto-technical-analysis\",\n  \"timestamp\": \"2026-04-19T04:59:12.731426+00:00\",\n  \"data\": {\n    \"symbol\": \"BTC\",\n    \"price\": 75697.75,\n    \"trend\": \"bearish\",\n    \"rsi\": 39.78,\n    \"sma20\": 75915.6715,\n    \"sma50\": 76357.5672,\n    \"ema",
     "source": "skill_outputs",
     "tags": [
       "skill_outputs",
       "json"
     ],
     "importance": "low",
-    "timestamp": "2026-04-18T04:59:37.798634",
-    "date": "2026-04-18"
+    "timestamp": "2026-04-19T04:59:12.730484",
+    "date": "2026-04-19"
+  },
+  {
+    "id": "mem-0053",
+    "title": "Crypto Ta Sol",
+    "content": "{\n  \"skill_id\": \"crypto-ta-sol\",\n  \"agent\": \"orion\",\n  \"skill\": \"crypto-technical-analysis\",\n  \"timestamp\": \"2026-04-19T04:59:12.726691+00:00\",\n  \"data\": {\n    \"symbol\": \"SOL\",\n    \"price\": 85.61,\n    \"trend\": \"bearish\",\n    \"rsi\": 29.21,\n    \"sma20\": 86.3965,\n    \"sma50\": 87.8336,\n    \"ema12\": 86.0",
+    "source": "skill_outputs",
+    "tags": [
+      "skill_outputs",
+      "json"
+    ],
+    "importance": "low",
+    "timestamp": "2026-04-19T04:59:12.725484",
+    "date": "2026-04-19"
   },
   {
     "id": "mem-0058",
     "title": "Portfolio Watcher",
-    "content": "{\n  \"skill_id\": \"portfolio-watcher\",\n  \"agent\": \"boba\",\n  \"skill\": \"portfolio-watcher\",\n  \"timestamp\": \"2026-04-18T04:56:08.315936+00:00\",\n  \"data\": {\n    \"timestamp\": \"2026-04-18T04:56:08.166520+00:00\",\n    \"watchlist\": [\n      {\n        \"symbol\": \"BTC\",\n        \"price\": 77114.5791919982,\n        \"",
+    "content": "{\n  \"skill_id\": \"portfolio-watcher\",\n  \"agent\": \"boba\",\n  \"skill\": \"portfolio-watcher\",\n  \"timestamp\": \"2026-04-19T04:58:44.690906+00:00\",\n  \"data\": {\n    \"timestamp\": \"2026-04-19T04:58:44.152157+00:00\",\n    \"watchlist\": [\n      {\n        \"symbol\": \"BTC\",\n        \"price\": 75701.8574637965,\n        \"",
     "source": "skill_outputs",
     "tags": [
       "skill_outputs",
       "json"
     ],
     "importance": "low",
-    "timestamp": "2026-04-18T04:56:08.315081",
-    "date": "2026-04-18"
+    "timestamp": "2026-04-19T04:58:44.689677",
+    "date": "2026-04-19"
   },
   {
     "id": "mem-0051",
     "title": "Crypto Screener",
-    "content": "{\n  \"skill_id\": \"crypto-screener\",\n  \"agent\": \"orion\",\n  \"skill\": \"crypto-screener\",\n  \"timestamp\": \"2026-04-18T04:56:07.692059+00:00\",\n  \"data\": {\n    \"timestamp\": \"2026-04-18T04:56:07.619132+00:00\",\n    \"count\": 20,\n    \"sort\": \"market_cap\",\n    \"coins\": [\n      {\n        \"rank\": 1,\n        \"symbo",
+    "content": "{\n  \"skill_id\": \"crypto-screener\",\n  \"agent\": \"orion\",\n  \"skill\": \"crypto-screener\",\n  \"timestamp\": \"2026-04-19T04:58:42.827120+00:00\",\n  \"data\": {\n    \"timestamp\": \"2026-04-19T04:58:42.584524+00:00\",\n    \"count\": 20,\n    \"sort\": \"market_cap\",\n    \"coins\": [\n      {\n        \"rank\": 1,\n        \"symbo",
     "source": "skill_outputs",
     "tags": [
       "skill_outputs",
       "json"
     ],
     "importance": "low",
-    "timestamp": "2026-04-18T04:56:07.693086",
-    "date": "2026-04-18"
+    "timestamp": "2026-04-19T04:58:42.831689",
+    "date": "2026-04-19"
   },
   {
     "id": "mem-0057",
     "title": "Portfolio Manager",
-    "content": "{\n  \"skill_id\": \"portfolio-manager\",\n  \"agent\": \"boba\",\n  \"skill\": \"portfolio-manager\",\n  \"timestamp\": \"2026-04-18T04:55:37.100227+00:00\",\n  \"data\": {\n    \"timestamp\": \"2026-04-18T04:55:37.067924+00:00\",\n    \"account\": {\n      \"equity\": 135218.05,\n      \"cash\": -90569.6,\n      \"buying_power\": 31092.",
+    "content": "{\n  \"skill_id\": \"portfolio-manager\",\n  \"agent\": \"boba\",\n  \"skill\": \"portfolio-manager\",\n  \"timestamp\": \"2026-04-19T04:56:41.178376+00:00\",\n  \"data\": {\n    \"timestamp\": \"2026-04-19T04:56:41.146707+00:00\",\n    \"account\": {\n      \"equity\": 134962.88,\n      \"cash\": -90569.6,\n      \"buying_power\": 31092.",
     "source": "skill_outputs",
     "tags": [
       "skill_outputs",
       "json"
     ],
     "importance": "low",
-    "timestamp": "2026-04-18T04:55:37.100297",
-    "date": "2026-04-18"
+    "timestamp": "2026-04-19T04:56:41.177523",
+    "date": "2026-04-19"
   },
   {
     "id": "mem-0056",
     "title": "Crypto Funding Alert",
-    "content": "{\n  \"skill_id\": \"crypto-funding-alert\",\n  \"agent\": \"orion\",\n  \"skill\": \"crypto-funding-alert\",\n  \"timestamp\": \"2026-04-18T04:51:37.422610+00:00\",\n  \"data\": {\n    \"timestamp\": \"2026-04-18T04:51:37.388185+00:00\",\n    \"threshold\": 0.05,\n    \"total_checked\": 1,\n    \"extreme_long_count\": 0,\n    \"extreme_",
+    "content": "{\n  \"skill_id\": \"crypto-funding-alert\",\n  \"agent\": \"orion\",\n  \"skill\": \"crypto-funding-alert\",\n  \"timestamp\": \"2026-04-19T04:54:11.372100+00:00\",\n  \"data\": {\n    \"timestamp\": \"2026-04-19T04:54:11.334903+00:00\",\n    \"threshold\": 0.05,\n    \"total_checked\": 1,\n    \"extreme_long_count\": 0,\n    \"extreme_",
     "source": "skill_outputs",
     "tags": [
       "skill_outputs",
       "json"
     ],
     "importance": "low",
-    "timestamp": "2026-04-18T04:51:37.421950",
-    "date": "2026-04-18"
+    "timestamp": "2026-04-19T04:54:11.370549",
+    "date": "2026-04-19"
   },
   {
     "id": "mem-0096",
     "title": "Altcoin Alert State",
-    "content": "{\"timestamp\": \"2026-04-18T04:45:26.764119+00:00\", \"prices\": {\"AAVE\": 114.76, \"ALGO\": 0.110884, \"APT\": 0.980936, \"ARB\": 0.130628, \"AVAX\": 9.66, \"BNB\": 643.61, \"BTC\": 77093, \"TAO\": 252.45, \"ADA\": 0.256968, \"LINK\": 9.58, \"ATOM\": 1.83, \"DOGE\": 0.098346, \"ETH\": 2407.37, \"FET\": 0.229429, \"FIL\": 0.978828, ",
+    "content": "{\"timestamp\": \"2026-04-19T04:45:23.638436+00:00\", \"prices\": {\"AAVE\": 93.32, \"ALGO\": 0.105644, \"APT\": 0.927048, \"ARB\": 0.126852, \"AVAX\": 9.27, \"BNB\": 621.46, \"BTC\": 75553, \"TAO\": 241.1, \"ADA\": 0.247067, \"LINK\": 9.2, \"ATOM\": 1.77, \"DOGE\": 0.094393, \"ETH\": 2329.77, \"FET\": 0.214589, \"FIL\": 0.925622, \"FL",
     "source": "memory",
     "tags": [
       "memory",
       "json"
     ],
     "importance": "low",
-    "timestamp": "2026-04-18T04:45:26.764497",
-    "date": "2026-04-18"
+    "timestamp": "2026-04-19T04:45:23.638148",
+    "date": "2026-04-19"
   },
   {
     "id": "mem-0120",
     "title": "Btc Alert State",
-    "content": "{\"last_price\": 77010.7, \"timestamp\": \"2026-04-18T04:45:03.498922+00:00\"}",
+    "content": "{\"last_price\": 75541.0, \"timestamp\": \"2026-04-19T04:45:03.036947+00:00\"}",
     "source": "memory",
     "tags": [
       "memory",
       "json"
     ],
     "importance": "low",
-    "timestamp": "2026-04-18T04:45:03.497657",
-    "date": "2026-04-18"
+    "timestamp": "2026-04-19T04:45:03.036287",
+    "date": "2026-04-19"
   },
   {
     "id": "mem-0052",
     "title": "Crypto Ta Eth",
-    "content": "{\n  \"skill_id\": \"crypto-ta-eth\",\n  \"agent\": \"orion\",\n  \"skill\": \"crypto-technical-analysis\",\n  \"timestamp\": \"2026-04-18T04:38:37.952958+00:00\",\n  \"data\": {\n    \"symbol\": \"ETH\",\n    \"price\": 2407.65,\n    \"trend\": \"neutral\",\n    \"rsi\": 53.18,\n    \"sma20\": 2414.9675,\n    \"sma50\": 2369.1856,\n    \"ema12\"",
+    "content": "{\n  \"skill_id\": \"crypto-ta-eth\",\n  \"agent\": \"orion\",\n  \"skill\": \"crypto-technical-analysis\",\n  \"timestamp\": \"2026-04-19T04:38:10.889848+00:00\",\n  \"data\": {\n    \"symbol\": \"ETH\",\n    \"price\": 2337.5,\n    \"trend\": \"bearish\",\n    \"rsi\": 31.98,\n    \"sma20\": 2354.7085,\n    \"sma50\": 2379.979,\n    \"ema12\": ",
     "source": "skill_outputs",
     "tags": [
       "skill_outputs",
       "json"
     ],
     "importance": "low",
-    "timestamp": "2026-04-18T04:38:37.952285",
-    "date": "2026-04-18"
+    "timestamp": "2026-04-19T04:38:10.889060",
+    "date": "2026-04-19"
   },
   {
     "id": "mem-0049",
     "title": "Morning Note",
-    "content": "{\n  \"skill_id\": \"morning-note\",\n  \"agent\": \"jazzyhazzy\",\n  \"skill\": \"morning-note\",\n  \"timestamp\": \"2026-04-18T04:24:07.903117+00:00\",\n  \"data\": {\n    \"timestamp\": \"2026-04-18T04:24:07.750586+00:00\",\n    \"market_indices\": {\n      \"S&P 500\": {\n        \"price\": 710.14,\n        \"change_pct\": 1.21\n     ",
+    "content": "{\n  \"skill_id\": \"morning-note\",\n  \"agent\": \"jazzyhazzy\",\n  \"skill\": \"morning-note\",\n  \"timestamp\": \"2026-04-19T04:28:40.926048+00:00\",\n  \"data\": {\n    \"timestamp\": \"2026-04-19T04:28:40.766362+00:00\",\n    \"market_indices\": {\n      \"S&P 500\": {\n        \"price\": 710.14,\n        \"change_pct\": 1.21\n     ",
     "source": "skill_outputs",
     "tags": [
       "skill_outputs",
       "json"
     ],
     "importance": "low",
-    "timestamp": "2026-04-18T04:24:07.903332",
-    "date": "2026-04-18"
+    "timestamp": "2026-04-19T04:28:40.925897",
+    "date": "2026-04-19"
   },
   {
     "id": "mem-0055",
     "title": "Crypto Snapshot Btc",
-    "content": "{\n  \"skill_id\": \"crypto-snapshot-btc\",\n  \"agent\": \"orion\",\n  \"skill\": \"crypto-snapshot-diagnosis\",\n  \"timestamp\": \"2026-04-18T04:22:35.564089+00:00\",\n  \"data\": {\n    \"symbol\": \"BTC\",\n    \"health_score\": 85,\n    \"verdict\": \"strong\",\n    \"price\": {\n      \"symbol\": \"BTC\",\n      \"price\": 77039.894523273",
+    "content": "{\n  \"skill_id\": \"crypto-snapshot-btc\",\n  \"agent\": \"orion\",\n  \"skill\": \"crypto-snapshot-diagnosis\",\n  \"timestamp\": \"2026-04-19T04:23:39.966088+00:00\",\n  \"data\": {\n    \"symbol\": \"BTC\",\n    \"health_score\": 75,\n    \"verdict\": \"strong\",\n    \"price\": {\n      \"symbol\": \"BTC\",\n      \"price\": 75761.338810052",
     "source": "skill_outputs",
     "tags": [
       "skill_outputs",
       "json"
     ],
     "importance": "low",
-    "timestamp": "2026-04-18T04:22:35.562973",
-    "date": "2026-04-18"
+    "timestamp": "2026-04-19T04:23:39.964991",
+    "date": "2026-04-19"
   },
   {
     "id": "mem-0059",
     "title": "Sentiment Pulse",
-    "content": "{\n  \"skill_id\": \"sentiment-pulse\",\n  \"agent\": \"shared\",\n  \"skill\": \"market-sentiment-pulse\",\n  \"timestamp\": \"2026-04-18T04:21:36.701313+00:00\",\n  \"data\": {\n    \"timestamp\": \"2026-04-18T04:21:36.552116+00:00\",\n    \"sentiment\": \"fear\",\n    \"fear_greed\": {\n      \"value\": 26,\n      \"label\": \"Fear\",\n    ",
+    "content": "{\n  \"skill_id\": \"sentiment-pulse\",\n  \"agent\": \"shared\",\n  \"skill\": \"market-sentiment-pulse\",\n  \"timestamp\": \"2026-04-19T04:23:10.431080+00:00\",\n  \"data\": {\n    \"timestamp\": \"2026-04-19T04:23:10.285149+00:00\",\n    \"sentiment\": \"fear\",\n    \"fear_greed\": {\n      \"value\": 27,\n      \"label\": \"Fear\",\n    ",
     "source": "skill_outputs",
     "tags": [
       "skill_outputs",
       "json"
     ],
     "importance": "low",
-    "timestamp": "2026-04-18T04:21:36.700382",
-    "date": "2026-04-18"
+    "timestamp": "2026-04-19T04:23:10.430197",
+    "date": "2026-04-19"
   },
   {
     "id": "mem-0047",
     "title": "Sector Rotation",
-    "content": "{\n  \"skill_id\": \"sector-rotation\",\n  \"agent\": \"jazzyhazzy\",\n  \"skill\": \"sector-rotation-detector\",\n  \"timestamp\": \"2026-04-18T04:20:36.230415+00:00\",\n  \"data\": {\n    \"timestamp\": \"2026-04-18T04:20:36.197772+00:00\",\n    \"rotation_signal\": \"risk_on_rotation\",\n    \"leaders\": [\n      {\n        \"etf\": \"X",
+    "content": "{\n  \"skill_id\": \"sector-rotation\",\n  \"agent\": \"jazzyhazzy\",\n  \"skill\": \"sector-rotation-detector\",\n  \"timestamp\": \"2026-04-19T04:21:40.351960+00:00\",\n  \"data\": {\n    \"timestamp\": \"2026-04-19T04:21:40.319242+00:00\",\n    \"rotation_signal\": \"risk_on_rotation\",\n    \"leaders\": [\n      {\n        \"etf\": \"X",
     "source": "skill_outputs",
     "tags": [
       "skill_outputs",
       "json"
     ],
     "importance": "low",
-    "timestamp": "2026-04-18T04:20:36.229803",
-    "date": "2026-04-18"
+    "timestamp": "2026-04-19T04:21:40.350824",
+    "date": "2026-04-19"
   },
   {
     "id": "mem-0048",
     "title": "Catalyst Scanner",
-    "content": "{\n  \"skill_id\": \"catalyst-scanner\",\n  \"agent\": \"jazzyhazzy\",\n  \"skill\": \"catalyst-scanner-v2\",\n  \"timestamp\": \"2026-04-18T04:19:35.321169+00:00\",\n  \"data\": {\n    \"timestamp\": \"2026-04-18T04:19:35.287769+00:00\",\n    \"scan_type\": \"all\",\n    \"total_found\": 0,\n    \"catalysts\": []\n  }\n}",
+    "content": "{\n  \"skill_id\": \"catalyst-scanner\",\n  \"agent\": \"jazzyhazzy\",\n  \"skill\": \"catalyst-scanner-v2\",\n  \"timestamp\": \"2026-04-19T04:20:39.607068+00:00\",\n  \"data\": {\n    \"timestamp\": \"2026-04-19T04:20:39.569632+00:00\",\n    \"scan_type\": \"all\",\n    \"total_found\": 0,\n    \"catalysts\": []\n  }\n}",
     "source": "skill_outputs",
     "tags": [
       "skill_outputs",
       "json"
     ],
     "importance": "low",
-    "timestamp": "2026-04-18T04:19:35.320226",
-    "date": "2026-04-18"
+    "timestamp": "2026-04-19T04:20:39.606247",
+    "date": "2026-04-19"
   },
   {
     "id": "mem-0025",
@@ -230,33 +230,72 @@
       "json"
     ],
     "importance": "low",
-    "timestamp": "2026-04-18T04:00:04.108367",
-    "date": "2026-04-18"
+    "timestamp": "2026-04-19T04:00:04.689871",
+    "date": "2026-04-19"
   },
   {
     "id": "mem-0798",
     "title": "Market Regime Btc",
-    "content": "{\n  \"timestamp\": \"2026-04-18T04:00:03.716178+00:00\",\n  \"symbol\": \"BTC/USD\",\n  \"overall_regime\": \"MIXED_TREND\",\n  \"overall_recommendation\": \"SuperTrend on trending TFs, Grid Bot on ranging TFs\",\n  \"direction_bias\": \"BULLISH\",\n  \"timeframes\": {\n    \"1H\": {\n      \"regime\": \"WEAK_TREND\",\n      \"recommen",
+    "content": "{\n  \"timestamp\": \"2026-04-19T04:00:04.449506+00:00\",\n  \"symbol\": \"BTC/USD\",\n  \"overall_regime\": \"MIXED\",\n  \"overall_recommendation\": \"DayTrader light size \\u2014 no clear regime\",\n  \"direction_bias\": \"BULLISH\",\n  \"timeframes\": {\n    \"1H\": {\n      \"regime\": \"WEAK_TREND\",\n      \"recommended_strategy\":",
     "source": "directives",
     "tags": [
       "directives",
       "json"
     ],
     "importance": "medium",
-    "timestamp": "2026-04-18T04:00:03.734370",
-    "date": "2026-04-18"
+    "timestamp": "2026-04-19T04:00:04.448872",
+    "date": "2026-04-19"
   },
   {
     "id": "mem-0022",
     "title": "Market Data Latest",
-    "content": "{\n  \"fetched_at\": \"2026-04-17T23:55:02.363704-04:00\",\n  \"fetched_at_readable\": \"Friday, April 17, 2026 11:55 PM EST\",\n  \"mode\": \"full\",\n  \"crypto\": {\n    \"prices\": {\n      \"aptos\": {\n        \"usd\": 0.982886,\n        \"usd_market_cap\": 792926775.1494616,\n        \"usd_24h_vol\": 113774571.47048974,\n    ",
+    "content": "{\n  \"fetched_at\": \"2026-04-18T23:55:02.724821-04:00\",\n  \"fetched_at_readable\": \"Saturday, April 18, 2026 11:55 PM EST\",\n  \"mode\": \"full\",\n  \"crypto\": {\n    \"prices\": {\n      \"aptos\": {\n        \"usd\": 0.928407,\n        \"usd_market_cap\": 748832133.3541757,\n        \"usd_24h_vol\": 104917169.29096644,\n  ",
     "source": "root",
     "tags": [
       "root",
       "json"
     ],
     "importance": "low",
-    "timestamp": "2026-04-18T03:55:04.894449",
+    "timestamp": "2026-04-19T03:55:07.232944",
+    "date": "2026-04-19"
+  },
+  {
+    "id": "mem-0784",
+    "title": "Supertrend Config Btc 4H",
+    "content": "{\n  \"updated\": \"2026-04-18T22:00:12.227371+00:00\",\n  \"symbol\": \"BTC/USD\",\n  \"timeframe\": \"4H\",\n  \"recommended_atr_period\": 16,\n  \"recommended_multiplier\": 5.0,\n  \"expected_win_rate\": 40.0,\n  \"expected_profit_factor\": 1.79,\n  \"backtest_return_pct\": 49.35,\n  \"max_drawdown_pct\": 29.65,\n  \"mode\": \"long-",
+    "source": "directives",
+    "tags": [
+      "directives",
+      "json"
+    ],
+    "importance": "high",
+    "timestamp": "2026-04-18T22:00:12.226622",
+    "date": "2026-04-18"
+  },
+  {
+    "id": "mem-0789",
+    "title": "Supertrend Config Btc 1H",
+    "content": "{\n  \"updated\": \"2026-04-18T22:00:09.856550+00:00\",\n  \"symbol\": \"BTC/USD\",\n  \"timeframe\": \"1H\",\n  \"recommended_atr_period\": 7,\n  \"recommended_multiplier\": 5.0,\n  \"expected_win_rate\": 44.9,\n  \"expected_profit_factor\": 1.54,\n  \"backtest_return_pct\": 31.44,\n  \"max_drawdown_pct\": 25.79,\n  \"mode\": \"long+s",
+    "source": "directives",
+    "tags": [
+      "directives",
+      "json"
+    ],
+    "importance": "high",
+    "timestamp": "2026-04-18T22:00:09.855638",
+    "date": "2026-04-18"
+  },
+  {
+    "id": "mem-0050",
+    "title": "Fed Monitor",
+    "content": "{\n  \"skill_id\": \"fed-monitor\",\n  \"agent\": \"jazzyhazzy\",\n  \"skill\": \"fed-speech-monitor\",\n  \"timestamp\": \"2026-04-18T08:17:15.744630+00:00\",\n  \"data\": {\n    \"timestamp\": \"2026-04-18T08:17:15.711973+00:00\",\n    \"new_items\": 1,\n    \"items\": [\n      {\n        \"title\": \" Federal Reserve Board issues enfo",
+    "source": "skill_outputs",
+    "tags": [
+      "skill_outputs",
+      "json"
+    ],
+    "importance": "low",
+    "timestamp": "2026-04-18T08:17:15.743906",
     "date": "2026-04-18"
   },
   {
@@ -270,32 +309,6 @@
     ],
     "importance": "low",
     "timestamp": "2026-04-17T23:45:05.889117",
-    "date": "2026-04-17"
-  },
-  {
-    "id": "mem-0784",
-    "title": "Supertrend Config Btc 4H",
-    "content": "{\n  \"updated\": \"2026-04-17T22:00:13.908959+00:00\",\n  \"symbol\": \"BTC/USD\",\n  \"timeframe\": \"4H\",\n  \"recommended_atr_period\": 16,\n  \"recommended_multiplier\": 5.0,\n  \"expected_win_rate\": 40.0,\n  \"expected_profit_factor\": 1.79,\n  \"backtest_return_pct\": 49.35,\n  \"max_drawdown_pct\": 29.65,\n  \"mode\": \"long-",
-    "source": "directives",
-    "tags": [
-      "directives",
-      "json"
-    ],
-    "importance": "high",
-    "timestamp": "2026-04-17T22:00:13.907837",
-    "date": "2026-04-17"
-  },
-  {
-    "id": "mem-0789",
-    "title": "Supertrend Config Btc 1H",
-    "content": "{\n  \"updated\": \"2026-04-17T22:00:11.461021+00:00\",\n  \"symbol\": \"BTC/USD\",\n  \"timeframe\": \"1H\",\n  \"recommended_atr_period\": 7,\n  \"recommended_multiplier\": 5.0,\n  \"expected_win_rate\": 44.9,\n  \"expected_profit_factor\": 1.54,\n  \"backtest_return_pct\": 31.44,\n  \"max_drawdown_pct\": 25.79,\n  \"mode\": \"long+s",
-    "source": "directives",
-    "tags": [
-      "directives",
-      "json"
-    ],
-    "importance": "high",
-    "timestamp": "2026-04-17T22:00:11.459854",
     "date": "2026-04-17"
   },
   {
@@ -388,19 +401,6 @@
     "importance": "low",
     "timestamp": "2026-04-16T00:30:42.807250",
     "date": "2026-04-16"
-  },
-  {
-    "id": "mem-0050",
-    "title": "Fed Monitor",
-    "content": "{\n  \"skill_id\": \"fed-monitor\",\n  \"agent\": \"jazzyhazzy\",\n  \"skill\": \"fed-speech-monitor\",\n  \"timestamp\": \"2026-04-15T20:17:05.160686+00:00\",\n  \"data\": {\n    \"timestamp\": \"2026-04-15T20:17:05.126583+00:00\",\n    \"new_items\": 0,\n    \"items\": [],\n    \"total_checked\": 20\n  }\n}",
-    "source": "skill_outputs",
-    "tags": [
-      "skill_outputs",
-      "json"
-    ],
-    "importance": "low",
-    "timestamp": "2026-04-15T20:17:05.159997",
-    "date": "2026-04-15"
   },
   {
     "id": "mem-0159",
