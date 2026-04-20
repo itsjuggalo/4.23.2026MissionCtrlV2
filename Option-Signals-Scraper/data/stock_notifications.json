@@ -2809,5 +2809,17 @@
     "message": "Close the trade as it hit trailing stop at 205.5!",
     "symbol": "COIN",
     "title": "COIN : STC"
+  },
+  "1776692207": {
+    "category": "SWING",
+    "message": "Reached Target 273.0 and that's 5.02%! Lock some in and wait for next target. Raise the stops to 259.95",
+    "symbol": "AAPL",
+    "title": "AAPL : STC"
+  },
+  "1776692518": {
+    "category": "SWING",
+    "message": "Buy To Open at 72.61 with first target above 74.06",
+    "symbol": "SLV",
+    "title": "SLV: BTO"
   }
 }

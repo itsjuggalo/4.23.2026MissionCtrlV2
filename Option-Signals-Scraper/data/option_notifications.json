@@ -4221,5 +4221,23 @@
     "message": "Reached Target 17.60 and that's 118.63%! Lock some in and wait for next target. Raise the stops to 14.08",
     "symbol": "GOOGL",
     "title": "GOOGL 335C 05/15 : STC"
+  },
+  "1776691878": {
+    "category": "SWING",
+    "message": "Close the trade as it hit trailing stop at 1.49!",
+    "symbol": "C",
+    "title": "C 140C 05/15 : STC"
+  },
+  "1776692514": {
+    "category": "SWING",
+    "message": "Buy To Open at 2.91 with first target above 3.35",
+    "symbol": "SLV",
+    "title": "SLV 72.5C 5/1: BTO"
+  },
+  "1776693462": {
+    "category": "SWING",
+    "message": "Buy To Open at 2.30 with first target above 2.64",
+    "symbol": "CRWV",
+    "title": "CRWV 100P 5/1: BTO"
   }
 }
