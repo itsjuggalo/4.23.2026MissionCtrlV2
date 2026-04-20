@@ -29,22 +29,22 @@ function SignalCard({ sig, onClick, isSelected }: { sig: Signal; onClick: () => 
     <div onClick={onClick} style={{ padding: '12px', background: isSelected ? '#0d2137' : '#0d1117', border: '1px solid ' + (isSelected ? '#4fc3f7' : '#1a3a4a'), borderRadius: '6px', cursor: 'pointer', borderLeft: '3px solid ' + (isCall ? '#66bb6a' : '#ef5350'), marginBottom: '6px' }}>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-          <span style={{ fontSize: '15px', fontWeight: 800, color: '#e0e0e0', fontFamily: M }}>{sig.symbol}</span>
+          <span style={{ fontSize: 'var(--mc-font-md)', fontWeight: 800, color: '#e0e0e0', fontFamily: M }}>{sig.symbol}</span>
           {sig.strike && <span style={{ fontSize: F, color: '#b0bec5', fontFamily: M, fontWeight: 600 }}>${sig.strike}{isCall ? 'C' : 'P'}</span>}
-          <span style={{ fontSize: '11px', padding: '2px 6px', borderRadius: '3px', background: catColor(sig.category) + '22', color: catColor(sig.category), fontFamily: M, fontWeight: 700 }}>{sig.category}</span>
+          <span style={{ fontSize: 'var(--mc-font-label)', padding: '2px 6px', borderRadius: '3px', background: catColor(sig.category) + '22', color: catColor(sig.category), fontFamily: M, fontWeight: 700 }}>{sig.category}</span>
         </div>
       </div>
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '4px', marginBottom: '6px' }}>
-        {sig.buyTarget && <div><div style={{ fontSize: '11px', color: '#607d8b', fontFamily: M }}>Buy Target</div><div style={{ fontSize: F, color: '#66bb6a', fontWeight: 700, fontFamily: M }}>${sig.buyTarget}</div></div>}
-        {(sig.stopLoss || sig.reduceLoss) && <div><div style={{ fontSize: '11px', color: '#607d8b', fontFamily: M }}>Stop Loss</div><div style={{ fontSize: F, color: '#ef5350', fontWeight: 700, fontFamily: M }}>${sig.stopLoss || sig.reduceLoss}</div></div>}
-        {sig.risk ? <div><div style={{ fontSize: '11px', color: '#607d8b', fontFamily: M }}>Risk</div><div style={{ fontSize: F, color: sig.risk === 'VH' || sig.risk === 'HI' ? '#ef5350' : '#ff9800', fontWeight: 700, fontFamily: M }}>{sig.risk}</div></div> : <div />}
+        {sig.buyTarget && <div><div style={{ fontSize: 'var(--mc-font-label)', color: '#607d8b', fontFamily: M }}>Buy Target</div><div style={{ fontSize: F, color: '#66bb6a', fontWeight: 700, fontFamily: M }}>${sig.buyTarget}</div></div>}
+        {(sig.stopLoss || sig.reduceLoss) && <div><div style={{ fontSize: 'var(--mc-font-label)', color: '#607d8b', fontFamily: M }}>Stop Loss</div><div style={{ fontSize: F, color: '#ef5350', fontWeight: 700, fontFamily: M }}>${sig.stopLoss || sig.reduceLoss}</div></div>}
+        {sig.risk ? <div><div style={{ fontSize: 'var(--mc-font-label)', color: '#607d8b', fontFamily: M }}>Risk</div><div style={{ fontSize: F, color: sig.risk === 'VH' || sig.risk === 'HI' ? '#ef5350' : '#ff9800', fontWeight: 700, fontFamily: M }}>{sig.risk}</div></div> : <div />}
       </div>
       {(sig.sellTarget || sig.earlyTarget) && <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '4px', marginBottom: '6px' }}>
-        <div><div style={{ fontSize: '11px', color: '#607d8b', fontFamily: M }}>Target 1</div><div style={{ fontSize: F, color: '#4fc3f7', fontWeight: 700, fontFamily: M }}>${sig.sellTarget || sig.earlyTarget}</div></div>
-        {sig.sellTarget2 && <div><div style={{ fontSize: '11px', color: '#607d8b', fontFamily: M }}>Target 2</div><div style={{ fontSize: F, color: '#4fc3f7', fontWeight: 700, fontFamily: M }}>${sig.sellTarget2}</div></div>}
-        {sig.sellTarget3 && <div><div style={{ fontSize: '11px', color: '#607d8b', fontFamily: M }}>Target 3</div><div style={{ fontSize: F, color: '#4fc3f7', fontWeight: 700, fontFamily: M }}>${sig.sellTarget3}</div></div>}
+        <div><div style={{ fontSize: 'var(--mc-font-label)', color: '#607d8b', fontFamily: M }}>Target 1</div><div style={{ fontSize: F, color: '#4fc3f7', fontWeight: 700, fontFamily: M }}>${sig.sellTarget || sig.earlyTarget}</div></div>
+        {sig.sellTarget2 && <div><div style={{ fontSize: 'var(--mc-font-label)', color: '#607d8b', fontFamily: M }}>Target 2</div><div style={{ fontSize: F, color: '#4fc3f7', fontWeight: 700, fontFamily: M }}>${sig.sellTarget2}</div></div>}
+        {sig.sellTarget3 && <div><div style={{ fontSize: 'var(--mc-font-label)', color: '#607d8b', fontFamily: M }}>Target 3</div><div style={{ fontSize: F, color: '#4fc3f7', fontWeight: 700, fontFamily: M }}>${sig.sellTarget3}</div></div>}
       </div>}
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderTop: '1px solid #1a3a4a', paddingTop: '6px', fontSize: '11px', fontFamily: M }}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderTop: '1px solid #1a3a4a', paddingTop: '6px', fontSize: 'var(--mc-font-label)', fontFamily: M }}>
         <div style={{ display: 'flex', gap: '6px' }}>
           <span style={{ padding: '2px 6px', borderRadius: '3px', background: '#1a3a4a', color: '#90a4ae' }}>{sig.source}</span>
           {sig.free !== undefined && <span style={{ padding: '2px 6px', borderRadius: '3px', background: sig.free ? '#66bb6a22' : '#ce93d822', color: sig.free ? '#66bb6a' : '#ce93d8', fontWeight: 700 }}>{sig.free ? 'FREE' : 'PRO'}</span>}
@@ -64,14 +64,14 @@ function ClosedRow({ sig }: { sig: Signal }) {
     <div style={{ padding: '8px 12px', border: '1px solid #1a3a4a', borderRadius: '6px', borderLeft: '3px solid ' + (won ? '#66bb6a' : '#ef5350'), marginBottom: '4px' }}>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '4px' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-          <span style={{ fontSize: '14px', fontWeight: 700, color: '#e0e0e0', fontFamily: M }}>{sig.symbol}</span>
-          {sig.strike && <span style={{ fontSize: '11px', color: '#607d8b', fontFamily: M }}>${sig.strike}</span>}
-          <span style={{ fontSize: '9px', padding: '2px 5px', borderRadius: '3px', background: catColor(sig.category) + '22', color: catColor(sig.category), fontFamily: M, fontWeight: 700 }}>{sig.category}</span>
+          <span style={{ fontSize: 'var(--mc-font-sm)', fontWeight: 700, color: '#e0e0e0', fontFamily: M }}>{sig.symbol}</span>
+          {sig.strike && <span style={{ fontSize: 'var(--mc-font-label)', color: '#607d8b', fontFamily: M }}>${sig.strike}</span>}
+          <span style={{ fontSize: 'var(--mc-font-label)', padding: '2px 5px', borderRadius: '3px', background: catColor(sig.category) + '22', color: catColor(sig.category), fontFamily: M, fontWeight: 700 }}>{sig.category}</span>
         </div>
-        <span style={{ fontSize: '10px', color: '#607d8b', fontFamily: M }}>{postedStr(sig.postedAt)}</span>
+        <span style={{ fontSize: 'var(--mc-font-label)', color: '#607d8b', fontFamily: M }}>{postedStr(sig.postedAt)}</span>
       </div>
-      <div style={{ fontSize: '12px', fontWeight: 700, color: won ? '#66bb6a' : '#ef5350', fontFamily: M }}>{won ? '\u2705' : '\u274c'} {sig.status}</div>
-      <div style={{ display: 'flex', gap: '10px', fontSize: '11px', fontFamily: M, marginTop: '4px', color: '#607d8b' }}>
+      <div style={{ fontSize: 'var(--mc-font-badge)', fontWeight: 700, color: won ? '#66bb6a' : '#ef5350', fontFamily: M }}>{won ? '\u2705' : '\u274c'} {sig.status}</div>
+      <div style={{ display: 'flex', gap: '10px', fontSize: 'var(--mc-font-label)', fontFamily: M, marginTop: '4px', color: '#607d8b' }}>
         {sig.buyTarget && <span>In: ${sig.buyTarget}</span>}
         {sig.sellTarget && <span>TP: ${sig.sellTarget}</span>}
       </div>
@@ -82,8 +82,8 @@ function ClosedRow({ sig }: { sig: Signal }) {
 function GridBox({ title, color, count, children }: { title: string; color: string; count: number; children: React.ReactNode }) {
   return (
     <div style={{ display: 'flex', flexDirection: 'column', overflow: 'hidden', background: '#0a192908', borderRadius: '8px', border: '1px solid #1a3a4a', minHeight: 0 }}>
-      <div style={{ fontSize: '12px', fontWeight: 700, fontFamily: M, letterSpacing: '1px', padding: '10px 12px', borderBottom: '2px solid ' + color + '44', color, flexShrink: 0 }}>
-        {title} <span style={{ fontSize: '11px', color: '#607d8b', fontWeight: 400 }}>({count})</span>
+      <div style={{ fontSize: 'var(--mc-font-badge)', fontWeight: 700, fontFamily: M, letterSpacing: '1px', padding: '10px 12px', borderBottom: '2px solid ' + color + '44', color, flexShrink: 0 }}>
+        {title} <span style={{ fontSize: 'var(--mc-font-label)', color: '#607d8b', fontWeight: 400 }}>({count})</span>
       </div>
       <div style={{ overflow: 'auto', padding: '6px 8px', flex: 1 }}>
         {children}
@@ -111,7 +111,7 @@ export function SignalsPage() {
 
   useEffect(() => { fetchData(); const i = setInterval(fetchData, 30000); return () => clearInterval(i); }, [fetchData]);
 
-  if (loading) return <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '40vh', color: '#4fc3f7', fontFamily: M, fontSize: '18px' }}>LOADING SIGNALS...</div>;
+  if (loading) return <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '40vh', color: '#4fc3f7', fontFamily: M, fontSize: 'var(--mc-font-xl)' }}>LOADING SIGNALS...</div>;
 
   const toSignals = (arr: any[], source: string, type: 'option' | 'stock'): Signal[] =>
     (arr || []).map((s: any) => ({ ...s, source, type, postedAt: s.id && /^\d{9,10}$/.test(s.id) ? parseInt(s.id) : undefined }))
@@ -145,16 +145,16 @@ export function SignalsPage() {
 
   const categories = [...new Set(allActive.map(s => s.category).filter(Boolean))].sort();
   const summary = data?.summary || {};
-  const selectStyle: React.CSSProperties = { padding: '6px 10px', background: '#0d1117', border: '1px solid #1a3a4a', borderRadius: '5px', color: '#e0e0e0', fontFamily: M, fontSize: '12px', cursor: 'pointer', outline: 'none' };
-  const noSig = <div style={{ padding: '20px', textAlign: 'center', color: '#455a64', fontFamily: M, fontSize: '12px' }}>No signals</div>;
+  const selectStyle: React.CSSProperties = { padding: '6px 10px', background: '#0d1117', border: '1px solid #1a3a4a', borderRadius: '5px', color: '#e0e0e0', fontFamily: M, fontSize: 'var(--mc-font-badge)', cursor: 'pointer', outline: 'none' };
+  const noSig = <div style={{ padding: '20px', textAlign: 'center', color: '#455a64', fontFamily: M, fontSize: 'var(--mc-font-badge)' }}>No signals</div>;
   const sel = selected;
 
   return (
     <div style={{ padding: '12px 16px', height: '100%', display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
       <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '10px', flexWrap: 'wrap', flexShrink: 0 }}>
         <span style={{ width: '8px', height: '8px', borderRadius: '50%', background: '#66bb6a', boxShadow: '0 0 6px #66bb6a88' }} />
-        <span style={{ fontSize: '12px', fontWeight: 700, color: '#66bb6a', fontFamily: M }}>LIVE</span>
-        <span style={{ fontSize: '11px', color: '#607d8b', fontFamily: M }}>{summary.totalActive || allActive.length} active</span>
+        <span style={{ fontSize: 'var(--mc-font-badge)', fontWeight: 700, color: '#66bb6a', fontFamily: M }}>LIVE</span>
+        <span style={{ fontSize: 'var(--mc-font-label)', color: '#607d8b', fontFamily: M }}>{summary.totalActive || allActive.length} active</span>
         <div style={{ width: '1px', height: '16px', background: '#1a3a4a' }} />
         <select value={sourceFilter} onChange={e => setSourceFilter(e.target.value)} style={selectStyle}>
           <option value="all">All Sources</option>
@@ -196,20 +196,20 @@ export function SignalsPage() {
         </div>
         {sel ? (
           <div style={{ display: 'flex', flexDirection: 'column', overflow: 'hidden', background: '#0a1929', borderRadius: '8px', border: '1px solid #4fc3f7', minHeight: 0 }}>
-            <div style={{ fontSize: '12px', fontWeight: 700, fontFamily: M, letterSpacing: '1px', padding: '10px 12px', borderBottom: '2px solid #4fc3f744', color: '#4fc3f7', display: 'flex', justifyContent: 'space-between', flexShrink: 0 }}>
+            <div style={{ fontSize: 'var(--mc-font-badge)', fontWeight: 700, fontFamily: M, letterSpacing: '1px', padding: '10px 12px', borderBottom: '2px solid #4fc3f744', color: '#4fc3f7', display: 'flex', justifyContent: 'space-between', flexShrink: 0 }}>
               SIGNAL DETAIL
-              <button onClick={() => setSelected(null)} style={{ background: 'none', border: '1px solid #1a3a4a', borderRadius: '4px', color: '#607d8b', padding: '1px 8px', cursor: 'pointer', fontFamily: M, fontSize: '11px' }}>{'\u2715'}</button>
+              <button onClick={() => setSelected(null)} style={{ background: 'none', border: '1px solid #1a3a4a', borderRadius: '4px', color: '#607d8b', padding: '1px 8px', cursor: 'pointer', fontFamily: M, fontSize: 'var(--mc-font-label)' }}>{'\u2715'}</button>
             </div>
             <div style={{ overflow: 'auto', padding: '12px', flex: 1 }}>
-              <div style={{ fontSize: '20px', fontWeight: 800, color: '#e0e0e0', fontFamily: M, marginBottom: '4px' }}>{sel.symbol}</div>
+              <div style={{ fontSize: 'var(--mc-font-xl)', fontWeight: 800, color: '#e0e0e0', fontFamily: M, marginBottom: '4px' }}>{sel.symbol}</div>
               {sel.shortName && <div style={{ fontSize: F, color: '#607d8b', fontFamily: M, marginBottom: '12px' }}>{sel.shortName}</div>}
               <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap', marginBottom: '16px' }}>
-                <span style={{ fontSize: '11px', padding: '3px 8px', borderRadius: '4px', background: !sel.isPut ? '#66bb6a22' : '#ef535022', color: !sel.isPut ? '#66bb6a' : '#ef5350', fontFamily: M, fontWeight: 700 }}>{sel.type === 'stock' ? 'STOCK' : !sel.isPut ? 'CALL' : 'PUT'}</span>
-                <span style={{ fontSize: '11px', padding: '3px 8px', borderRadius: '4px', background: catColor(sel.category) + '22', color: catColor(sel.category), fontFamily: M, fontWeight: 700 }}>{sel.category}</span>
-                <span style={{ fontSize: '11px', padding: '3px 8px', borderRadius: '4px', background: '#1a3a4a', color: '#90a4ae', fontFamily: M }}>{sel.source}</span>
-                {sel.risk && <span style={{ fontSize: '11px', padding: '3px 8px', borderRadius: '4px', background: '#ef535022', color: '#ef5350', fontFamily: M, fontWeight: 700 }}>RISK: {sel.risk}</span>}
+                <span style={{ fontSize: 'var(--mc-font-label)', padding: '3px 8px', borderRadius: '4px', background: !sel.isPut ? '#66bb6a22' : '#ef535022', color: !sel.isPut ? '#66bb6a' : '#ef5350', fontFamily: M, fontWeight: 700 }}>{sel.type === 'stock' ? 'STOCK' : !sel.isPut ? 'CALL' : 'PUT'}</span>
+                <span style={{ fontSize: 'var(--mc-font-label)', padding: '3px 8px', borderRadius: '4px', background: catColor(sel.category) + '22', color: catColor(sel.category), fontFamily: M, fontWeight: 700 }}>{sel.category}</span>
+                <span style={{ fontSize: 'var(--mc-font-label)', padding: '3px 8px', borderRadius: '4px', background: '#1a3a4a', color: '#90a4ae', fontFamily: M }}>{sel.source}</span>
+                {sel.risk && <span style={{ fontSize: 'var(--mc-font-label)', padding: '3px 8px', borderRadius: '4px', background: '#ef535022', color: '#ef5350', fontFamily: M, fontWeight: 700 }}>RISK: {sel.risk}</span>}
               </div>
-              <div style={{ fontSize: '11px', color: '#607d8b', fontFamily: M, letterSpacing: '1.5px', marginBottom: '8px' }}>PRICE TARGETS</div>
+              <div style={{ fontSize: 'var(--mc-font-label)', color: '#607d8b', fontFamily: M, letterSpacing: '1.5px', marginBottom: '8px' }}>PRICE TARGETS</div>
               {[
                 { label: 'ENTRY', value: sel.buyTarget, color: '#66bb6a' },
                 { label: 'TARGET 1', value: sel.sellTarget || sel.earlyTarget, color: '#4fc3f7' },
@@ -218,11 +218,11 @@ export function SignalsPage() {
                 { label: 'STOP LOSS', value: sel.stopLoss || sel.reduceLoss, color: '#ef5350' },
               ].filter(t => t.value).map((t, i) => (
                 <div key={i} style={{ display: 'flex', justifyContent: 'space-between', padding: '6px 0', borderBottom: '1px solid #0d1117' }}>
-                  <span style={{ fontSize: '11px', color: '#607d8b', fontFamily: M }}>{t.label}</span>
-                  <span style={{ fontSize: '15px', fontWeight: 700, color: t.color, fontFamily: M }}>${t.value}</span>
+                  <span style={{ fontSize: 'var(--mc-font-label)', color: '#607d8b', fontFamily: M }}>{t.label}</span>
+                  <span style={{ fontSize: 'var(--mc-font-md)', fontWeight: 700, color: t.color, fontFamily: M }}>${t.value}</span>
                 </div>
               ))}
-              <div style={{ fontSize: '11px', color: '#607d8b', fontFamily: M, letterSpacing: '1.5px', marginTop: '16px', marginBottom: '8px' }}>CONTRACT INFO</div>
+              <div style={{ fontSize: 'var(--mc-font-label)', color: '#607d8b', fontFamily: M, letterSpacing: '1.5px', marginTop: '16px', marginBottom: '8px' }}>CONTRACT INFO</div>
               {[
                 { label: 'Strike', value: sel.strike ? '$' + sel.strike : null },
                 { label: 'Expiry', value: sel.expiry ? dateStr(sel.expiry) + ' (' + daysTo(sel.expiry) + ' days)' : null },
@@ -230,7 +230,7 @@ export function SignalsPage() {
                 { label: 'Access', value: sel.free !== undefined ? (sel.free ? 'FREE' : 'PREMIUM') : null },
               ].filter(d => d.value).map((d, i) => (
                 <div key={i} style={{ display: 'flex', justifyContent: 'space-between', padding: '5px 0', borderBottom: '1px solid #0d1117' }}>
-                  <span style={{ fontSize: '11px', color: '#607d8b', fontFamily: M }}>{d.label}</span>
+                  <span style={{ fontSize: 'var(--mc-font-label)', color: '#607d8b', fontFamily: M }}>{d.label}</span>
                   <span style={{ fontSize: F, color: '#e0e0e0', fontFamily: M, fontWeight: 600 }}>{d.value}</span>
                 </div>
               ))}

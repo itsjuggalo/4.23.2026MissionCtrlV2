@@ -193,11 +193,11 @@ export function DocsPage() {
       {/* Header */}
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '24px', flexWrap: 'wrap', gap: '16px' }}>
         <div>
-          <h1 style={{ fontSize: '22px', fontWeight: 700, color: '#f0f0f0', margin: 0, display: 'flex', alignItems: 'center', gap: '10px' }}>
+          <h1 style={{ fontSize: 'var(--mc-font-2xl)', fontWeight: 700, color: '#f0f0f0', margin: 0, display: 'flex', alignItems: 'center', gap: '10px' }}>
             <BookOpen style={{ width: '22px', height: '22px', color: '#60a5fa' }} />
             Knowledge Library
           </h1>
-          <p style={{ fontSize: '13px', color: '#666', marginTop: '4px' }}>
+          <p style={{ fontSize: 'var(--mc-font-xs)', color: '#666', marginTop: '4px' }}>
             {total} documents across {Object.keys(docs).length} categories
           </p>
         </div>
@@ -206,7 +206,7 @@ export function DocsPage() {
           style={{
             display: 'flex', alignItems: 'center', gap: '6px',
             padding: '8px 14px', background: '#111', border: '1px solid #222',
-            borderRadius: '8px', color: '#888', fontSize: '13px', cursor: 'pointer',
+            borderRadius: '8px', color: '#888', fontSize: 'var(--mc-font-xs)', cursor: 'pointer',
           }}
         >
           <RefreshCw style={{ width: '14px', height: '14px' }} />
@@ -225,7 +225,7 @@ export function DocsPage() {
           style={{
             width: '100%', padding: '12px 40px 12px 42px',
             background: '#0a0a0a', border: '1px solid #1f1f1f', borderRadius: '10px',
-            color: '#f0f0f0', fontSize: '14px', outline: 'none', boxSizing: 'border-box',
+            color: '#f0f0f0', fontSize: 'var(--mc-font-sm)', outline: 'none', boxSizing: 'border-box',
           }}
         />
         {search && (
@@ -270,10 +270,10 @@ export function DocsPage() {
                     : <ChevronDown style={{ width: '14px', height: '14px', color: '#555' }} />
                   }
                   <Folder style={{ width: '15px', height: '15px', color: '#555' }} />
-                  <span style={{ fontSize: '12px', fontWeight: 600, color: '#888', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
+                  <span style={{ fontSize: 'var(--mc-font-badge)', fontWeight: 600, color: '#888', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
                     {category}
                   </span>
-                  <span style={{ fontSize: '11px', color: '#555', marginLeft: '4px' }}>
+                  <span style={{ fontSize: 'var(--mc-font-label)', color: '#555', marginLeft: '4px' }}>
                     ({files.length})
                   </span>
                 </button>
@@ -301,13 +301,13 @@ export function DocsPage() {
                               padding: '14px 16px', cursor: 'pointer',
                             }}
                           >
-                            <span style={{ fontSize: '18px', flexShrink: 0 }}>{getFileIcon(doc.name)}</span>
+                            <span style={{ fontSize: 'var(--mc-font-xl)', flexShrink: 0 }}>{getFileIcon(doc.name)}</span>
 
                             <div style={{ flex: 1, minWidth: 0 }}>
-                              <div style={{ fontSize: '14px', fontWeight: 500, color: '#e8e8e8', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                              <div style={{ fontSize: 'var(--mc-font-sm)', fontWeight: 500, color: '#e8e8e8', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                                 {doc.name}
                               </div>
-                              <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginTop: '3px', fontSize: '12px', color: '#555' }}>
+                              <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginTop: '3px', fontSize: 'var(--mc-font-badge)', color: '#555' }}>
                                 <span style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
                                   <Clock style={{ width: '11px', height: '11px' }} />
                                   {timeAgo(doc.modified)}
@@ -318,7 +318,7 @@ export function DocsPage() {
 
                             <span className={`${badgeStyle}`} style={{
                               display: 'inline-flex', padding: '3px 10px', borderRadius: '6px',
-                              fontSize: '11px', fontWeight: 500, flexShrink: 0, borderWidth: '1px', borderStyle: 'solid',
+                              fontSize: 'var(--mc-font-label)', fontWeight: 500, flexShrink: 0, borderWidth: '1px', borderStyle: 'solid',
                             }}>
                               {category}
                             </span>
@@ -345,7 +345,7 @@ export function DocsPage() {
                             }}>
                               {doc.name.endsWith('.json') ? (
                                 <pre style={{
-                                  fontSize: '13px', lineHeight: '1.7', color: '#c8c8c8',
+                                  fontSize: 'var(--mc-font-xs)', lineHeight: '1.7', color: '#c8c8c8',
                                   fontFamily: '"JetBrains Mono", "Fira Code", "Consolas", monospace',
                                   whiteSpace: 'pre-wrap', wordBreak: 'break-word', margin: 0,
                                 }}>
@@ -356,7 +356,7 @@ export function DocsPage() {
                                 </pre>
                               ) : doc.name.endsWith('.py') || doc.name.endsWith('.sh') ? (
                                 <pre style={{
-                                  fontSize: '13px', lineHeight: '1.7', color: '#c8c8c8',
+                                  fontSize: 'var(--mc-font-xs)', lineHeight: '1.7', color: '#c8c8c8',
                                   fontFamily: '"JetBrains Mono", "Fira Code", "Consolas", monospace',
                                   whiteSpace: 'pre-wrap', wordBreak: 'break-word', margin: 0,
                                 }}>

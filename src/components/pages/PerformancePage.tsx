@@ -115,10 +115,10 @@ export function PerformancePage() {
       {/* === HEADER === */}
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
         <div>
-          <h1 style={{ fontSize: '18px', fontWeight: 700, color: '#4fc3f7', margin: 0, fontFamily: 'var(--font-mc-mono)', letterSpacing: '2px' }}>PERFORMANCE ANALYTICS</h1>
-          <p style={{ fontSize: '11px', color: '#455a64', marginTop: '4px', fontFamily: 'var(--font-mc-mono)' }}>Mission Control Trading Intelligence • Auto-refreshes 30s</p>
+          <h1 style={{ fontSize: 'var(--mc-font-xl)', fontWeight: 700, color: '#4fc3f7', margin: 0, fontFamily: 'var(--font-mc-mono)', letterSpacing: '2px' }}>PERFORMANCE ANALYTICS</h1>
+          <p style={{ fontSize: 'var(--mc-font-label)', color: '#455a64', marginTop: '4px', fontFamily: 'var(--font-mc-mono)' }}>Mission Control Trading Intelligence • Auto-refreshes 30s</p>
         </div>
-        <button onClick={fetchAll} style={{ padding: '6px 14px', background: '#0a1929', border: '1px solid #1a3a4a', borderRadius: '6px', color: '#607d8b', fontSize: '11px', cursor: 'pointer', fontFamily: 'var(--font-mc-mono)' }}>REFRESH</button>
+        <button onClick={fetchAll} style={{ padding: '6px 14px', background: '#0a1929', border: '1px solid #1a3a4a', borderRadius: '6px', color: '#607d8b', fontSize: 'var(--mc-font-label)', cursor: 'pointer', fontFamily: 'var(--font-mc-mono)' }}>REFRESH</button>
       </div>
 
       {/* === PORTFOLIO HERO === */}
@@ -128,13 +128,13 @@ export function PerformancePage() {
             <div className="perf-label" style={{ marginBottom: '8px' }}>PORTFOLIO EQUITY</div>
             <div style={{ fontSize: '42px', fontWeight: 800, color: '#e0e0e0', fontFamily: 'var(--font-mc-mono)', lineHeight: 1 }}>${fmt(equity)}</div>
             <div style={{ display: 'flex', gap: '20px', marginTop: '10px' }}>
-              <span style={{ fontSize: '14px', fontFamily: 'var(--font-mc-mono)', color: dailyPct >= 0 ? '#66bb6a' : '#ef5350' }}>
+              <span style={{ fontSize: 'var(--mc-font-sm)', fontFamily: 'var(--font-mc-mono)', color: dailyPct >= 0 ? '#66bb6a' : '#ef5350' }}>
                 {dailyPct >= 0 ? '▲' : '▼'} {fmt(Math.abs(dailyPct), 2)}% today
               </span>
-              <span style={{ fontSize: '14px', fontFamily: 'var(--font-mc-mono)', color: totalReturn >= 0 ? '#66bb6a' : '#ef5350' }}>
+              <span style={{ fontSize: 'var(--mc-font-sm)', fontFamily: 'var(--font-mc-mono)', color: totalReturn >= 0 ? '#66bb6a' : '#ef5350' }}>
                 {totalReturn >= 0 ? '+' : ''}{fmt(totalReturn, 1)}% total
               </span>
-              <span style={{ fontSize: '14px', fontFamily: 'var(--font-mc-mono)', color: '#607d8b' }}>
+              <span style={{ fontSize: 'var(--mc-font-sm)', fontFamily: 'var(--font-mc-mono)', color: '#607d8b' }}>
                 ${fmt(Math.abs(dailyChange))} {dailyChange >= 0 ? 'gain' : 'loss'}
               </span>
             </div>
@@ -145,7 +145,7 @@ export function PerformancePage() {
               <div className="perf-bar" style={{ height: '10px', marginBottom: '4px' }}>
                 <div className="perf-bar-fill" style={{ width: `${Math.max(goalPct, 0)}%`, background: goalPct >= 100 ? '#66bb6a' : `linear-gradient(90deg, #4fc3f7, ${goalPct > 60 ? '#66bb6a' : '#4fc3f7'})` }} />
               </div>
-              <div style={{ fontSize: '11px', color: '#607d8b', fontFamily: 'var(--font-mc-mono)' }}>{fmt(goalPct, 0)}% complete</div>
+              <div style={{ fontSize: 'var(--mc-font-label)', color: '#607d8b', fontFamily: 'var(--font-mc-mono)' }}>{fmt(goalPct, 0)}% complete</div>
             </div>
           </div>
         </div>
@@ -163,7 +163,7 @@ export function PerformancePage() {
         ].map((m, i) => (
           <div key={i} className="perf-card" style={{ padding: '14px 16px', textAlign: 'center' }}>
             <div className="perf-label" style={{ marginBottom: '8px' }}>{m.label}</div>
-            <div style={{ fontSize: '22px', fontWeight: 700, color: m.color, fontFamily: 'var(--font-mc-mono)' }}>{m.value}</div>
+            <div style={{ fontSize: 'var(--mc-font-2xl)', fontWeight: 700, color: m.color, fontFamily: 'var(--font-mc-mono)' }}>{m.value}</div>
           </div>
         ))}
       </div>
@@ -174,7 +174,7 @@ export function PerformancePage() {
         <div className="perf-card" style={{ padding: '18px' }}>
           <div className="perf-label" style={{ marginBottom: '14px' }}>POSITION PERFORMANCE</div>
           {positions.length === 0 ? (
-            <div style={{ color: '#455a64', fontSize: '12px', fontFamily: 'var(--font-mc-mono)' }}>No open positions</div>
+            <div style={{ color: '#455a64', fontSize: 'var(--mc-font-badge)', fontFamily: 'var(--font-mc-mono)' }}>No open positions</div>
           ) : positions.map((p: any, i: number) => {
             const pnl = parseFloat(p.unrealized_pl || '0');
             const pnlPct = parseFloat(p.unrealized_plpc || '0') * 100;
@@ -185,14 +185,14 @@ export function PerformancePage() {
               <div key={i} style={{ marginBottom: '14px' }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '6px' }}>
                   <div>
-                    <span style={{ fontSize: '15px', fontWeight: 700, color: '#e0e0e0', fontFamily: 'var(--font-mc-mono)' }}>{p.symbol}</span>
-                    <span style={{ fontSize: '11px', color: '#455a64', marginLeft: '8px' }}>{p.qty} @ ${fmt(parseFloat(p.avg_entry_price || '0'))}</span>
+                    <span style={{ fontSize: 'var(--mc-font-md)', fontWeight: 700, color: '#e0e0e0', fontFamily: 'var(--font-mc-mono)' }}>{p.symbol}</span>
+                    <span style={{ fontSize: 'var(--mc-font-label)', color: '#455a64', marginLeft: '8px' }}>{p.qty} @ ${fmt(parseFloat(p.avg_entry_price || '0'))}</span>
                   </div>
                   <div style={{ textAlign: 'right' }}>
-                    <span style={{ fontSize: '16px', fontWeight: 700, color: g ? '#66bb6a' : '#ef5350', fontFamily: 'var(--font-mc-mono)' }}>
+                    <span style={{ fontSize: 'var(--mc-font-lg)', fontWeight: 700, color: g ? '#66bb6a' : '#ef5350', fontFamily: 'var(--font-mc-mono)' }}>
                       {g ? '+' : ''}{fmt(pnlPct, 1)}%
                     </span>
-                    <span style={{ fontSize: '11px', color: '#455a64', marginLeft: '8px' }}>
+                    <span style={{ fontSize: 'var(--mc-font-label)', color: '#455a64', marginLeft: '8px' }}>
                       ${fmt(pnl)}
                     </span>
                   </div>
@@ -200,7 +200,7 @@ export function PerformancePage() {
                 <div className="perf-bar">
                   <div className="perf-bar-fill" style={{ width: `${barWidth}%`, background: g ? 'linear-gradient(90deg, #66bb6a44, #66bb6a)' : 'linear-gradient(90deg, #ef535044, #ef5350)' }} />
                 </div>
-                <div style={{ fontSize: '10px', color: '#455a64', marginTop: '4px', fontFamily: 'var(--font-mc-mono)' }}>
+                <div style={{ fontSize: 'var(--mc-font-label)', color: '#455a64', marginTop: '4px', fontFamily: 'var(--font-mc-mono)' }}>
                   Today: <span style={{ color: dayPnl >= 0 ? '#66bb6a' : '#ef5350' }}>{dayPnl >= 0 ? '+' : ''}${fmt(dayPnl)}</span>
                   &nbsp;&nbsp;|&nbsp;&nbsp;Current: ${fmt(parseFloat(p.current_price || '0'))}
                 </div>
@@ -214,19 +214,19 @@ export function PerformancePage() {
           <div className="perf-label" style={{ marginBottom: '14px' }}>TRADE ANALYTICS</div>
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px', marginBottom: '16px' }}>
             <div style={{ background: '#0d1117', borderRadius: '6px', padding: '12px', borderLeft: '3px solid #66bb6a' }}>
-              <div style={{ fontSize: '10px', color: '#607d8b', fontFamily: 'var(--font-mc-mono)' }}>BEST TRADE</div>
-              <div style={{ fontSize: '22px', fontWeight: 700, color: '#66bb6a', fontFamily: 'var(--font-mc-mono)' }}>+{fmt(finalBest)}%</div>
+              <div style={{ fontSize: 'var(--mc-font-label)', color: '#607d8b', fontFamily: 'var(--font-mc-mono)' }}>BEST TRADE</div>
+              <div style={{ fontSize: 'var(--mc-font-2xl)', fontWeight: 700, color: '#66bb6a', fontFamily: 'var(--font-mc-mono)' }}>+{fmt(finalBest)}%</div>
             </div>
             <div style={{ background: '#0d1117', borderRadius: '6px', padding: '12px', borderLeft: '3px solid #ef5350' }}>
-              <div style={{ fontSize: '10px', color: '#607d8b', fontFamily: 'var(--font-mc-mono)' }}>WORST TRADE</div>
-              <div style={{ fontSize: '22px', fontWeight: 700, color: '#ef5350', fontFamily: 'var(--font-mc-mono)' }}>{fmt(finalWorst)}%</div>
+              <div style={{ fontSize: 'var(--mc-font-label)', color: '#607d8b', fontFamily: 'var(--font-mc-mono)' }}>WORST TRADE</div>
+              <div style={{ fontSize: 'var(--mc-font-2xl)', fontWeight: 700, color: '#ef5350', fontFamily: 'var(--font-mc-mono)' }}>{fmt(finalWorst)}%</div>
             </div>
           </div>
           {/* Win/Loss visual bar */}
           <div style={{ marginBottom: '14px' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '6px' }}>
-              <span style={{ fontSize: '11px', color: '#66bb6a', fontFamily: 'var(--font-mc-mono)' }}>{wins.length} WINS</span>
-              <span style={{ fontSize: '11px', color: '#ef5350', fontFamily: 'var(--font-mc-mono)' }}>{losses.length} LOSSES</span>
+              <span style={{ fontSize: 'var(--mc-font-label)', color: '#66bb6a', fontFamily: 'var(--font-mc-mono)' }}>{wins.length} WINS</span>
+              <span style={{ fontSize: 'var(--mc-font-label)', color: '#ef5350', fontFamily: 'var(--font-mc-mono)' }}>{losses.length} LOSSES</span>
             </div>
             <div style={{ display: 'flex', height: '14px', borderRadius: '7px', overflow: 'hidden', background: '#0d1117' }}>
               <div style={{ width: `${winRate}%`, background: 'linear-gradient(90deg, #66bb6a88, #66bb6a)', transition: 'width 1s' }} />
@@ -234,7 +234,7 @@ export function PerformancePage() {
             </div>
           </div>
           {/* Additional stats */}
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '6px', fontSize: '11px', fontFamily: 'var(--font-mc-mono)' }}>
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '6px', fontSize: 'var(--mc-font-label)', fontFamily: 'var(--font-mc-mono)' }}>
             {[
               { l: 'BUYING POWER', v: `$${fmt(buyingPower)}`, c: '#4fc3f7' },
               { l: 'CASH', v: `$${fmt(cash)}`, c: cash >= 0 ? '#607d8b' : '#ef5350' },
@@ -255,14 +255,14 @@ export function PerformancePage() {
         <div className="perf-card" style={{ padding: '18px', marginBottom: '16px' }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '14px' }}>
             <div className="perf-label">SUPERTREND OPTIMIZER — {params.timeframe || '4H'}</div>
-            <div style={{ fontSize: '12px', fontFamily: 'var(--font-mc-mono)' }}>
+            <div style={{ fontSize: 'var(--mc-font-badge)', fontFamily: 'var(--font-mc-mono)' }}>
               <span style={{ color: '#607d8b' }}>RECOMMENDED: </span>
               <span style={{ color: '#4fc3f7', fontWeight: 600 }}>ATR {params.recommended_atr_period} × {params.recommended_multiplier}</span>
             </div>
           </div>
           {params.top_results && (
             <div style={{ overflowX: 'auto' }}>
-              <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '11px', fontFamily: 'var(--font-mc-mono)' }}>
+              <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 'var(--mc-font-label)', fontFamily: 'var(--font-mc-mono)' }}>
                 <thead>
                   <tr>
                     {['#', 'ATR', 'MULT', 'TRADES', 'WIN%', 'PF', 'RETURN', 'MAX DD', 'SHARPE'].map(h => (
@@ -295,7 +295,7 @@ export function PerformancePage() {
       <div className="perf-card" style={{ padding: '18px' }}>
         <div className="perf-label" style={{ marginBottom: '14px' }}>TRADE HISTORY — LAST {recentTrades.length}</div>
         {recentTrades.length === 0 ? (
-          <div style={{ color: '#455a64', fontSize: '12px', fontFamily: 'var(--font-mc-mono)', textAlign: 'center', padding: '20px' }}>No trade history</div>
+          <div style={{ color: '#455a64', fontSize: 'var(--mc-font-badge)', fontFamily: 'var(--font-mc-mono)', textAlign: 'center', padding: '20px' }}>No trade history</div>
         ) : (
           <div style={{ display: 'flex', flexDirection: 'column', gap: '3px' }}>
             {recentTrades.map((t: any, i: number) => {
@@ -309,7 +309,7 @@ export function PerformancePage() {
                   alignItems: 'center', padding: '8px 12px',
                   background: i % 2 === 0 ? '#0d1117' : '#0a1929',
                   borderLeft: `2px solid ${g ? '#66bb6a' : '#ef5350'}`,
-                  borderRadius: '3px', fontSize: '11px', fontFamily: 'var(--font-mc-mono)',
+                  borderRadius: '3px', fontSize: 'var(--mc-font-label)', fontFamily: 'var(--font-mc-mono)',
                 }}>
                   <span style={{ color: '#455a64' }}>{dateStr.split(' ')[0]}</span>
                   <span style={{ color: t.direction === 'LONG' ? '#66bb6a' : '#ef5350', fontWeight: 600 }}>{t.direction}</span>

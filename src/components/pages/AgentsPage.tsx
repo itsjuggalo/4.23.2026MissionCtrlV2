@@ -133,15 +133,15 @@ export function AgentsPage() {
           { label: 'MEMORY USAGE', value: `${Math.round(totalMemory)}MB`, color: '#ce93d8', sub: 'Total PM2 footprint' },
         ].map((m, i) => (
           <div key={i} className="ag-card" style={{ padding: '16px 20px', textAlign: 'center' }}>
-            <div style={{ fontSize: '10px', color: '#607d8b', fontFamily: 'var(--font-mc-mono)', letterSpacing: '1px', marginBottom: '6px' }}>{m.label}</div>
-            <div style={{ fontSize: '28px', fontWeight: 800, color: m.color, fontFamily: 'var(--font-mc-mono)' }}>{m.value}</div>
-            <div style={{ fontSize: '10px', color: '#455a64', fontFamily: 'var(--font-mc-mono)', marginTop: '4px' }}>{m.sub}</div>
+            <div style={{ fontSize: 'var(--mc-font-label)', color: '#607d8b', fontFamily: 'var(--font-mc-mono)', letterSpacing: '1px', marginBottom: '6px' }}>{m.label}</div>
+            <div style={{ fontSize: 'var(--mc-font-3xl)', fontWeight: 800, color: m.color, fontFamily: 'var(--font-mc-mono)' }}>{m.value}</div>
+            <div style={{ fontSize: 'var(--mc-font-label)', color: '#455a64', fontFamily: 'var(--font-mc-mono)', marginTop: '4px' }}>{m.sub}</div>
           </div>
         ))}
       </div>
 
       {/* AI Agents Section */}
-      <div style={{ fontSize: '13px', fontWeight: 700, color: '#4fc3f7', fontFamily: 'var(--font-mc-mono)', letterSpacing: '1.5px', marginBottom: '12px', paddingBottom: '6px', borderBottom: '2px solid #4fc3f744' }}>
+      <div style={{ fontSize: 'var(--mc-font-xs)', fontWeight: 700, color: '#4fc3f7', fontFamily: 'var(--font-mc-mono)', letterSpacing: '1.5px', marginBottom: '12px', paddingBottom: '6px', borderBottom: '2px solid #4fc3f744' }}>
         AI AGENT FLEET
       </div>
 
@@ -156,22 +156,22 @@ export function AgentsPage() {
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '16px' }}>
                 <div>
                   <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '6px' }}>
-                    <span style={{ fontSize: '22px', fontWeight: 800, color: '#e0e0e0', fontFamily: 'var(--font-mc-mono)' }}>{agent.name}</span>
-                    <span style={{ fontSize: '11px', fontWeight: 600, padding: '3px 10px', borderRadius: '4px', background: '#4fc3f722', color: '#4fc3f7', fontFamily: 'var(--font-mc-mono)' }}>{agent.model}</span>
+                    <span style={{ fontSize: 'var(--mc-font-2xl)', fontWeight: 800, color: '#e0e0e0', fontFamily: 'var(--font-mc-mono)' }}>{agent.name}</span>
+                    <span style={{ fontSize: 'var(--mc-font-label)', fontWeight: 600, padding: '3px 10px', borderRadius: '4px', background: '#4fc3f722', color: '#4fc3f7', fontFamily: 'var(--font-mc-mono)' }}>{agent.model}</span>
                   </div>
-                  <div style={{ fontSize: '14px', color: '#90a4ae', fontFamily: 'var(--font-mc-mono)' }}>{agent.role}</div>
+                  <div style={{ fontSize: 'var(--mc-font-sm)', color: '#90a4ae', fontFamily: 'var(--font-mc-mono)' }}>{agent.role}</div>
                 </div>
                 {/* Trust Grade */}
                 <div style={{ textAlign: 'center', minWidth: '80px' }}>
                   <div style={{ fontSize: '36px', fontWeight: 900, color: gc, fontFamily: 'var(--font-mc-mono)', lineHeight: 1 }}>{trust.grade}</div>
-                  <div style={{ fontSize: '11px', color: '#607d8b', fontFamily: 'var(--font-mc-mono)', marginTop: '4px' }}>{trust.score}/100</div>
+                  <div style={{ fontSize: 'var(--mc-font-label)', color: '#607d8b', fontFamily: 'var(--font-mc-mono)', marginTop: '4px' }}>{trust.score}/100</div>
                 </div>
               </div>
 
               {/* Specialty */}
               <div style={{ marginBottom: '14px', padding: '10px 14px', background: '#0d1117', borderRadius: '8px' }}>
-                <div style={{ fontSize: '10px', color: '#607d8b', fontFamily: 'var(--font-mc-mono)', letterSpacing: '1px', marginBottom: '4px' }}>SPECIALTY</div>
-                <div style={{ fontSize: '13px', color: '#b0bec5', fontFamily: 'var(--font-mc-mono)' }}>{agent.specialty}</div>
+                <div style={{ fontSize: 'var(--mc-font-label)', color: '#607d8b', fontFamily: 'var(--font-mc-mono)', letterSpacing: '1px', marginBottom: '4px' }}>SPECIALTY</div>
+                <div style={{ fontSize: 'var(--mc-font-xs)', color: '#b0bec5', fontFamily: 'var(--font-mc-mono)' }}>{agent.specialty}</div>
               </div>
 
               {/* Metrics Row */}
@@ -181,8 +181,8 @@ export function AgentsPage() {
                     const metricColor = val >= 90 ? '#66bb6a' : val >= 70 ? '#4fc3f7' : val >= 50 ? '#ff9800' : '#ef5350';
                     return (
                       <div key={key} className="ag-metric">
-                        <div style={{ fontSize: '10px', color: '#607d8b', fontFamily: 'var(--font-mc-mono)', letterSpacing: '0.5px', marginBottom: '4px', textTransform: 'uppercase' }}>{key}</div>
-                        <div style={{ fontSize: '20px', fontWeight: 700, color: metricColor, fontFamily: 'var(--font-mc-mono)' }}>{val}</div>
+                        <div style={{ fontSize: 'var(--mc-font-label)', color: '#607d8b', fontFamily: 'var(--font-mc-mono)', letterSpacing: '0.5px', marginBottom: '4px', textTransform: 'uppercase' }}>{key}</div>
+                        <div style={{ fontSize: 'var(--mc-font-xl)', fontWeight: 700, color: metricColor, fontFamily: 'var(--font-mc-mono)' }}>{val}</div>
                         {/* Bar */}
                         <div style={{ marginTop: '4px', height: '3px', background: '#1a3a4a', borderRadius: '2px', overflow: 'hidden' }}>
                           <div style={{ height: '100%', width: `${Math.min(val, 100)}%`, background: metricColor, borderRadius: '2px' }} />
@@ -196,10 +196,10 @@ export function AgentsPage() {
               {/* Known Issues */}
               {agent.knownIssues.length > 0 && (
                 <div>
-                  <div style={{ fontSize: '10px', color: '#ef5350', fontFamily: 'var(--font-mc-mono)', letterSpacing: '1px', marginBottom: '6px' }}>KNOWN ISSUES</div>
+                  <div style={{ fontSize: 'var(--mc-font-label)', color: '#ef5350', fontFamily: 'var(--font-mc-mono)', letterSpacing: '1px', marginBottom: '6px' }}>KNOWN ISSUES</div>
                   <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
                     {agent.knownIssues.map((issue, j) => (
-                      <div key={j} style={{ fontSize: '11px', color: '#90a4ae', fontFamily: 'var(--font-mc-mono)', padding: '6px 10px', background: '#ef535008', borderRadius: '4px', borderLeft: '2px solid #ef535044' }}>
+                      <div key={j} style={{ fontSize: 'var(--mc-font-label)', color: '#90a4ae', fontFamily: 'var(--font-mc-mono)', padding: '6px 10px', background: '#ef535008', borderRadius: '4px', borderLeft: '2px solid #ef535044' }}>
                         {issue}
                       </div>
                     ))}
@@ -212,7 +212,7 @@ export function AgentsPage() {
       </div>
 
       {/* Infrastructure Services */}
-      <div style={{ fontSize: '13px', fontWeight: 700, color: '#66bb6a', fontFamily: 'var(--font-mc-mono)', letterSpacing: '1.5px', marginBottom: '12px', paddingBottom: '6px', borderBottom: '2px solid #66bb6a44' }}>
+      <div style={{ fontSize: 'var(--mc-font-xs)', fontWeight: 700, color: '#66bb6a', fontFamily: 'var(--font-mc-mono)', letterSpacing: '1.5px', marginBottom: '12px', paddingBottom: '6px', borderBottom: '2px solid #66bb6a44' }}>
         INFRASTRUCTURE SERVICES
       </div>
 
@@ -233,13 +233,13 @@ export function AgentsPage() {
                     boxShadow: isOnline ? `0 0 6px ${statusColor}88` : 'none',
                     animation: isOnline ? 'agPulse 3s ease-in-out infinite' : 'none',
                   }} />
-                  <span style={{ fontSize: '14px', fontWeight: 700, color: '#e0e0e0', fontFamily: 'var(--font-mc-mono)' }}>{svc.name}</span>
+                  <span style={{ fontSize: 'var(--mc-font-sm)', fontWeight: 700, color: '#e0e0e0', fontFamily: 'var(--font-mc-mono)' }}>{svc.name}</span>
                 </div>
-                <span style={{ fontSize: '10px', fontWeight: 700, padding: '2px 8px', borderRadius: '4px', background: `${statusColor}22`, color: statusColor, fontFamily: 'var(--font-mc-mono)', textTransform: 'uppercase' }}>
+                <span style={{ fontSize: 'var(--mc-font-label)', fontWeight: 700, padding: '2px 8px', borderRadius: '4px', background: `${statusColor}22`, color: statusColor, fontFamily: 'var(--font-mc-mono)', textTransform: 'uppercase' }}>
                   {svc.status}
                 </span>
               </div>
-              <div style={{ display: 'flex', gap: '16px', fontSize: '11px', fontFamily: 'var(--font-mc-mono)' }}>
+              <div style={{ display: 'flex', gap: '16px', fontSize: 'var(--mc-font-label)', fontFamily: 'var(--font-mc-mono)' }}>
                 <div><span style={{ color: '#607d8b' }}>MEM: </span><span style={{ color: '#e0e0e0' }}>{mem}MB</span></div>
                 <div><span style={{ color: '#607d8b' }}>CPU: </span><span style={{ color: '#e0e0e0' }}>{svc.cpu || 0}%</span></div>
                 <div><span style={{ color: '#607d8b' }}>RST: </span><span style={{ color: restartColor, fontWeight: 600 }}>{restarts}</span></div>

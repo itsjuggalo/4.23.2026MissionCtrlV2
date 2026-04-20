@@ -95,12 +95,12 @@ export function TasksPage() {
       {/* Header + Add Button */}
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
         <div>
-          <h1 style={{ fontSize: '20px', fontWeight: 700, color: '#4fc3f7', fontFamily: 'var(--font-mc-mono)', letterSpacing: '2px', margin: 0 }}>MISSION BOARD</h1>
-          <p style={{ fontSize: '12px', color: '#607d8b', fontFamily: 'var(--font-mc-mono)', margin: '4px 0 0' }}>
+          <h1 style={{ fontSize: 'var(--mc-font-xl)', fontWeight: 700, color: '#4fc3f7', fontFamily: 'var(--font-mc-mono)', letterSpacing: '2px', margin: 0 }}>MISSION BOARD</h1>
+          <p style={{ fontSize: 'var(--mc-font-badge)', color: '#607d8b', fontFamily: 'var(--font-mc-mono)', margin: '4px 0 0' }}>
             {tasks.filter(t => t.status === 'done').length}/{tasks.length} completed
           </p>
         </div>
-        <button onClick={() => setAdding(!adding)} style={{ padding: '8px 18px', background: '#4fc3f722', border: '1px solid #4fc3f744', borderRadius: '6px', color: '#4fc3f7', fontFamily: 'var(--font-mc-mono)', fontSize: '12px', fontWeight: 700, cursor: 'pointer', letterSpacing: '1px' }}>
+        <button onClick={() => setAdding(!adding)} style={{ padding: '8px 18px', background: '#4fc3f722', border: '1px solid #4fc3f744', borderRadius: '6px', color: '#4fc3f7', fontFamily: 'var(--font-mc-mono)', fontSize: 'var(--mc-font-badge)', fontWeight: 700, cursor: 'pointer', letterSpacing: '1px' }}>
           {adding ? 'CANCEL' : '+ NEW TASK'}
         </button>
       </div>
@@ -109,17 +109,17 @@ export function TasksPage() {
       {adding && (
         <div style={{ background: '#0a1929', border: '1px solid #1a3a4a', borderRadius: '10px', padding: '20px', marginBottom: '20px' }}>
           <input value={newTitle} onChange={e => setNewTitle(e.target.value)} placeholder="Task title..."
-            style={{ width: '100%', padding: '10px 14px', background: '#0d1117', border: '1px solid #1a3a4a', borderRadius: '6px', color: '#e0e0e0', fontFamily: 'var(--font-mc-mono)', fontSize: '14px', marginBottom: '10px', outline: 'none', boxSizing: 'border-box' }} />
+            style={{ width: '100%', padding: '10px 14px', background: '#0d1117', border: '1px solid #1a3a4a', borderRadius: '6px', color: '#e0e0e0', fontFamily: 'var(--font-mc-mono)', fontSize: 'var(--mc-font-sm)', marginBottom: '10px', outline: 'none', boxSizing: 'border-box' }} />
           <input value={newDesc} onChange={e => setNewDesc(e.target.value)} placeholder="Description..."
-            style={{ width: '100%', padding: '10px 14px', background: '#0d1117', border: '1px solid #1a3a4a', borderRadius: '6px', color: '#e0e0e0', fontFamily: 'var(--font-mc-mono)', fontSize: '12px', marginBottom: '10px', outline: 'none', boxSizing: 'border-box' }} />
+            style={{ width: '100%', padding: '10px 14px', background: '#0d1117', border: '1px solid #1a3a4a', borderRadius: '6px', color: '#e0e0e0', fontFamily: 'var(--font-mc-mono)', fontSize: 'var(--mc-font-badge)', marginBottom: '10px', outline: 'none', boxSizing: 'border-box' }} />
           <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
             {(['critical', 'high', 'medium', 'low'] as const).map(p => (
               <button key={p} onClick={() => setNewPriority(p)}
-                style={{ padding: '4px 12px', borderRadius: '4px', border: newPriority === p ? `1px solid ${PRIORITY_COLORS[p]}` : '1px solid #1a3a4a', background: newPriority === p ? `${PRIORITY_COLORS[p]}22` : 'transparent', color: newPriority === p ? PRIORITY_COLORS[p] : '#607d8b', fontFamily: 'var(--font-mc-mono)', fontSize: '11px', cursor: 'pointer', fontWeight: 600, textTransform: 'uppercase' }}>
+                style={{ padding: '4px 12px', borderRadius: '4px', border: newPriority === p ? `1px solid ${PRIORITY_COLORS[p]}` : '1px solid #1a3a4a', background: newPriority === p ? `${PRIORITY_COLORS[p]}22` : 'transparent', color: newPriority === p ? PRIORITY_COLORS[p] : '#607d8b', fontFamily: 'var(--font-mc-mono)', fontSize: 'var(--mc-font-label)', cursor: 'pointer', fontWeight: 600, textTransform: 'uppercase' }}>
                 {p}
               </button>
             ))}
-            <button onClick={addTask} style={{ marginLeft: 'auto', padding: '8px 20px', background: '#66bb6a22', border: '1px solid #66bb6a44', borderRadius: '6px', color: '#66bb6a', fontFamily: 'var(--font-mc-mono)', fontSize: '12px', fontWeight: 700, cursor: 'pointer' }}>
+            <button onClick={addTask} style={{ marginLeft: 'auto', padding: '8px 20px', background: '#66bb6a22', border: '1px solid #66bb6a44', borderRadius: '6px', color: '#66bb6a', fontFamily: 'var(--font-mc-mono)', fontSize: 'var(--mc-font-badge)', fontWeight: 700, cursor: 'pointer' }}>
               ADD
             </button>
           </div>
@@ -139,34 +139,34 @@ export function TasksPage() {
               onDragLeave={e => { e.currentTarget.classList.remove('dragover'); }}
               onDrop={e => { e.currentTarget.classList.remove('dragover'); if (dragId) moveTask(dragId, col.key); setDragId(null); }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '12px', paddingBottom: '8px', borderBottom: `2px solid ${col.color}44` }}>
-                <span style={{ fontSize: '12px', fontWeight: 700, color: col.color, fontFamily: 'var(--font-mc-mono)', letterSpacing: '1px' }}>{col.label}</span>
-                <span style={{ fontSize: '11px', fontWeight: 700, padding: '1px 7px', borderRadius: '10px', background: `${col.color}22`, color: col.color, fontFamily: 'var(--font-mc-mono)' }}>{colTasks.length}</span>
+                <span style={{ fontSize: 'var(--mc-font-badge)', fontWeight: 700, color: col.color, fontFamily: 'var(--font-mc-mono)', letterSpacing: '1px' }}>{col.label}</span>
+                <span style={{ fontSize: 'var(--mc-font-label)', fontWeight: 700, padding: '1px 7px', borderRadius: '10px', background: `${col.color}22`, color: col.color, fontFamily: 'var(--font-mc-mono)' }}>{colTasks.length}</span>
               </div>
               {colTasks.map(task => (
                 <div key={task.id} className={`kb-card ${dragId === task.id ? 'dragging' : ''}`}
                   draggable onDragStart={() => setDragId(task.id)} onDragEnd={() => setDragId(null)}
                   style={{ borderLeft: `3px solid ${PRIORITY_COLORS[task.priority]}` }}>
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '6px' }}>
-                    <span style={{ fontSize: '14px', fontWeight: 700, color: '#e0e0e0', fontFamily: 'var(--font-mc-mono)', lineHeight: '1.3' }}>{task.title}</span>
-                    <button onClick={() => deleteTask(task.id)} style={{ background: 'none', border: 'none', color: '#455a64', cursor: 'pointer', fontSize: '14px', padding: '0 0 0 8px', lineHeight: 1 }}>x</button>
+                    <span style={{ fontSize: 'var(--mc-font-sm)', fontWeight: 700, color: '#e0e0e0', fontFamily: 'var(--font-mc-mono)', lineHeight: '1.3' }}>{task.title}</span>
+                    <button onClick={() => deleteTask(task.id)} style={{ background: 'none', border: 'none', color: '#455a64', cursor: 'pointer', fontSize: 'var(--mc-font-sm)', padding: '0 0 0 8px', lineHeight: 1 }}>x</button>
                   </div>
                   {task.description && (
-                    <div style={{ fontSize: '11px', color: '#607d8b', fontFamily: 'var(--font-mc-mono)', lineHeight: '1.4', marginBottom: '8px', maxHeight: '40px', overflow: 'hidden' }}>
+                    <div style={{ fontSize: 'var(--mc-font-label)', color: '#607d8b', fontFamily: 'var(--font-mc-mono)', lineHeight: '1.4', marginBottom: '8px', maxHeight: '40px', overflow: 'hidden' }}>
                       {task.description}
                     </div>
                   )}
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                     <div style={{ display: 'flex', gap: '6px', alignItems: 'center' }}>
-                      <span style={{ fontSize: '9px', fontWeight: 700, padding: '2px 6px', borderRadius: '3px', background: `${PRIORITY_COLORS[task.priority]}22`, color: PRIORITY_COLORS[task.priority], fontFamily: 'var(--font-mc-mono)', textTransform: 'uppercase' }}>{task.priority}</span>
-                      {task.agent && <span style={{ fontSize: '9px', padding: '2px 6px', borderRadius: '3px', background: '#4fc3f722', color: '#4fc3f7', fontFamily: 'var(--font-mc-mono)' }}>{task.agent}</span>}
+                      <span style={{ fontSize: 'var(--mc-font-label)', fontWeight: 700, padding: '2px 6px', borderRadius: '3px', background: `${PRIORITY_COLORS[task.priority]}22`, color: PRIORITY_COLORS[task.priority], fontFamily: 'var(--font-mc-mono)', textTransform: 'uppercase' }}>{task.priority}</span>
+                      {task.agent && <span style={{ fontSize: 'var(--mc-font-label)', padding: '2px 6px', borderRadius: '3px', background: '#4fc3f722', color: '#4fc3f7', fontFamily: 'var(--font-mc-mono)' }}>{task.agent}</span>}
                     </div>
-                    <span style={{ fontSize: '10px', color: '#455a64', fontFamily: 'var(--font-mc-mono)' }}>{timeAgo(task.updated)}</span>
+                    <span style={{ fontSize: 'var(--mc-font-label)', color: '#455a64', fontFamily: 'var(--font-mc-mono)' }}>{timeAgo(task.updated)}</span>
                   </div>
                   {/* Move buttons */}
                   <div style={{ display: 'flex', gap: '4px', marginTop: '8px' }}>
                     {COLUMN_CONFIG.filter(c => c.key !== col.key).map(c => (
                       <button key={c.key} onClick={() => moveTask(task.id, c.key)}
-                        style={{ flex: 1, padding: '3px', borderRadius: '3px', border: `1px solid ${c.color}33`, background: 'transparent', color: c.color, fontFamily: 'var(--font-mc-mono)', fontSize: '9px', cursor: 'pointer', fontWeight: 600 }}>
+                        style={{ flex: 1, padding: '3px', borderRadius: '3px', border: `1px solid ${c.color}33`, background: 'transparent', color: c.color, fontFamily: 'var(--font-mc-mono)', fontSize: 'var(--mc-font-label)', cursor: 'pointer', fontWeight: 600 }}>
                         {c.label.slice(0, 3)}
                       </button>
                     ))}

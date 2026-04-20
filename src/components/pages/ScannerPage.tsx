@@ -57,29 +57,29 @@ export function ScannerPage() {
       {/* Status bar */}
       <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '16px', padding: '8px 14px', background: '#66bb6a0d', border: '1px solid #66bb6a33', borderRadius: '6px' }}>
         <span style={{ width: '8px', height: '8px', borderRadius: '50%', background: '#66bb6a', boxShadow: '0 0 6px #66bb6a88', animation: 'pulse 2s infinite' }} />
-        <span style={{ fontSize: '11px', fontWeight: 700, color: '#66bb6a', fontFamily: 'var(--font-mc-mono)' }}>LIVE SCANNING</span>
-        {lastUpdate && <span style={{ fontSize: '10px', color: '#607d8b', fontFamily: 'var(--font-mc-mono)' }}>Updated {Math.floor((Date.now() - lastUpdate.getTime()) / 1000)}s ago · 15s refresh</span>}
+        <span style={{ fontSize: 'var(--mc-font-label)', fontWeight: 700, color: '#66bb6a', fontFamily: 'var(--font-mc-mono)' }}>LIVE SCANNING</span>
+        {lastUpdate && <span style={{ fontSize: 'var(--mc-font-label)', color: '#607d8b', fontFamily: 'var(--font-mc-mono)' }}>Updated {Math.floor((Date.now() - lastUpdate.getTime()) / 1000)}s ago · 15s refresh</span>}
         <style>{`@keyframes pulse { 0%,100% { opacity:1; } 50% { opacity:0.4; } }`}</style>
       </div>
 
       {/* Regime + Signal */}
       <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr', gap: '12px', marginBottom: '16px' }}>
         <div className="scan-card" style={{ padding: '24px', textAlign: 'center', borderBottom: `3px solid ${regimeColor}` }}>
-          <div style={{ fontSize: '10px', color: '#607d8b', fontFamily: 'var(--font-mc-mono)', letterSpacing: '1.5px', marginBottom: '6px' }}>MARKET REGIME</div>
-          <div style={{ fontSize: '28px', fontWeight: 900, color: regimeColor, fontFamily: 'var(--font-mc-mono)', letterSpacing: '2px' }}>
+          <div style={{ fontSize: 'var(--mc-font-label)', color: '#607d8b', fontFamily: 'var(--font-mc-mono)', letterSpacing: '1.5px', marginBottom: '6px' }}>MARKET REGIME</div>
+          <div style={{ fontSize: 'var(--mc-font-3xl)', fontWeight: 900, color: regimeColor, fontFamily: 'var(--font-mc-mono)', letterSpacing: '2px' }}>
             {regimeData.replace(/_/g, ' ')}
           </div>
         </div>
         <div className="scan-card" style={{ padding: '24px', textAlign: 'center', borderBottom: `3px solid ${lastAction === 'BUY' ? '#66bb6a' : '#ef5350'}` }}>
-          <div style={{ fontSize: '10px', color: '#607d8b', fontFamily: 'var(--font-mc-mono)', letterSpacing: '1.5px', marginBottom: '6px' }}>SUPERTREND 1H</div>
-          <div style={{ fontSize: '28px', fontWeight: 900, color: lastAction === 'BUY' ? '#66bb6a' : '#ef5350', fontFamily: 'var(--font-mc-mono)' }}>
+          <div style={{ fontSize: 'var(--mc-font-label)', color: '#607d8b', fontFamily: 'var(--font-mc-mono)', letterSpacing: '1.5px', marginBottom: '6px' }}>SUPERTREND 1H</div>
+          <div style={{ fontSize: 'var(--mc-font-3xl)', fontWeight: 900, color: lastAction === 'BUY' ? '#66bb6a' : '#ef5350', fontFamily: 'var(--font-mc-mono)' }}>
             {lastAction}
           </div>
         </div>
       </div>
 
       {/* Live Prices */}
-      <div style={{ fontSize: '12px', fontWeight: 700, color: '#4fc3f7', fontFamily: 'var(--font-mc-mono)', letterSpacing: '1.5px', marginBottom: '10px', paddingBottom: '4px', borderBottom: '2px solid #4fc3f744' }}>
+      <div style={{ fontSize: 'var(--mc-font-badge)', fontWeight: 700, color: '#4fc3f7', fontFamily: 'var(--font-mc-mono)', letterSpacing: '1.5px', marginBottom: '10px', paddingBottom: '4px', borderBottom: '2px solid #4fc3f744' }}>
         LIVE PRICES
       </div>
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '10px', marginBottom: '20px' }}>
@@ -91,8 +91,8 @@ export function ScannerPage() {
         ].map((c, i) => (
           <div key={i} className="scan-card" style={{ padding: '16px 20px' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-              <span style={{ fontSize: '14px', fontWeight: 700, color: c.color, fontFamily: 'var(--font-mc-mono)' }}>{c.sym}</span>
-              <span style={{ fontSize: '20px', fontWeight: 800, color: '#e0e0e0', fontFamily: 'var(--font-mc-mono)' }}>
+              <span style={{ fontSize: 'var(--mc-font-sm)', fontWeight: 700, color: c.color, fontFamily: 'var(--font-mc-mono)' }}>{c.sym}</span>
+              <span style={{ fontSize: 'var(--mc-font-xl)', fontWeight: 800, color: '#e0e0e0', fontFamily: 'var(--font-mc-mono)' }}>
                 {c.price > 1000 ? `$${c.price.toLocaleString(undefined, { maximumFractionDigits: 0 })}` : `$${fmt(c.price)}`}
               </span>
             </div>
@@ -103,7 +103,7 @@ export function ScannerPage() {
       {/* Hot Signals from Telegram */}
       {hotSignals.length > 0 && (
         <>
-          <div style={{ fontSize: '12px', fontWeight: 700, color: '#ef5350', fontFamily: 'var(--font-mc-mono)', letterSpacing: '1.5px', marginBottom: '10px', paddingBottom: '4px', borderBottom: '2px solid #ef535044' }}>
+          <div style={{ fontSize: 'var(--mc-font-badge)', fontWeight: 700, color: '#ef5350', fontFamily: 'var(--font-mc-mono)', letterSpacing: '1.5px', marginBottom: '10px', paddingBottom: '4px', borderBottom: '2px solid #ef535044' }}>
             HOT SIGNALS (SCORE 50+)
           </div>
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(260px, 1fr))', gap: '8px', marginBottom: '20px' }}>
@@ -111,13 +111,13 @@ export function ScannerPage() {
               <div key={i} className="scan-card" style={{ padding: '14px 16px', borderLeft: `3px solid ${s.direction === 'LONG' ? '#66bb6a' : s.direction === 'SHORT' ? '#ef5350' : '#ff9800'}` }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '6px' }}>
                   <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                    <span style={{ fontSize: '16px', fontWeight: 700, color: '#4fc3f7', fontFamily: 'var(--font-mc-mono)' }}>{s.symbol || '?'}</span>
-                    {s.direction && <span style={{ fontSize: '10px', fontWeight: 700, padding: '2px 6px', borderRadius: '3px', background: s.direction === 'LONG' ? '#66bb6a22' : '#ef535022', color: s.direction === 'LONG' ? '#66bb6a' : '#ef5350', fontFamily: 'var(--font-mc-mono)' }}>{s.direction}</span>}
+                    <span style={{ fontSize: 'var(--mc-font-lg)', fontWeight: 700, color: '#4fc3f7', fontFamily: 'var(--font-mc-mono)' }}>{s.symbol || '?'}</span>
+                    {s.direction && <span style={{ fontSize: 'var(--mc-font-label)', fontWeight: 700, padding: '2px 6px', borderRadius: '3px', background: s.direction === 'LONG' ? '#66bb6a22' : '#ef535022', color: s.direction === 'LONG' ? '#66bb6a' : '#ef5350', fontFamily: 'var(--font-mc-mono)' }}>{s.direction}</span>}
                   </div>
-                  <span style={{ fontSize: '12px', fontWeight: 700, padding: '2px 8px', borderRadius: '4px', background: s.score >= 70 ? '#66bb6a22' : '#ff980022', color: s.score >= 70 ? '#66bb6a' : '#ff9800', fontFamily: 'var(--font-mc-mono)' }}>{s.score}</span>
+                  <span style={{ fontSize: 'var(--mc-font-badge)', fontWeight: 700, padding: '2px 8px', borderRadius: '4px', background: s.score >= 70 ? '#66bb6a22' : '#ff980022', color: s.score >= 70 ? '#66bb6a' : '#ff9800', fontFamily: 'var(--font-mc-mono)' }}>{s.score}</span>
                 </div>
-                {s.entry && <div style={{ fontSize: '11px', color: '#90a4ae', fontFamily: 'var(--font-mc-mono)' }}>Entry: ${s.entry}</div>}
-                <div style={{ fontSize: '10px', color: '#455a64', fontFamily: 'var(--font-mc-mono)', marginTop: '4px' }}>{s.channel_name?.slice(0, 25) || ''}</div>
+                {s.entry && <div style={{ fontSize: 'var(--mc-font-label)', color: '#90a4ae', fontFamily: 'var(--font-mc-mono)' }}>Entry: ${s.entry}</div>}
+                <div style={{ fontSize: 'var(--mc-font-label)', color: '#455a64', fontFamily: 'var(--font-mc-mono)', marginTop: '4px' }}>{s.channel_name?.slice(0, 25) || ''}</div>
               </div>
             ))}
           </div>
@@ -125,7 +125,7 @@ export function ScannerPage() {
       )}
 
       {/* Active Scanners */}
-      <div style={{ fontSize: '12px', fontWeight: 700, color: '#66bb6a', fontFamily: 'var(--font-mc-mono)', letterSpacing: '1.5px', marginBottom: '10px', paddingBottom: '4px', borderBottom: '2px solid #66bb6a44' }}>
+      <div style={{ fontSize: 'var(--mc-font-badge)', fontWeight: 700, color: '#66bb6a', fontFamily: 'var(--font-mc-mono)', letterSpacing: '1.5px', marginBottom: '10px', paddingBottom: '4px', borderBottom: '2px solid #66bb6a44' }}>
         ACTIVE SCANNERS
       </div>
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: '10px' }}>
@@ -141,10 +141,10 @@ export function ScannerPage() {
         ].map((s, i) => (
           <div key={i} className="scan-card" style={{ padding: '14px 18px', borderLeft: `3px solid ${s.color}`, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
             <div>
-              <div style={{ fontSize: '14px', fontWeight: 700, color: '#e0e0e0', fontFamily: 'var(--font-mc-mono)' }}>{s.name}</div>
-              <div style={{ fontSize: '11px', color: '#607d8b', fontFamily: 'var(--font-mc-mono)', marginTop: '2px' }}>{s.desc}</div>
+              <div style={{ fontSize: 'var(--mc-font-sm)', fontWeight: 700, color: '#e0e0e0', fontFamily: 'var(--font-mc-mono)' }}>{s.name}</div>
+              <div style={{ fontSize: 'var(--mc-font-label)', color: '#607d8b', fontFamily: 'var(--font-mc-mono)', marginTop: '2px' }}>{s.desc}</div>
             </div>
-            <span style={{ fontSize: '10px', fontWeight: 700, padding: '3px 8px', borderRadius: '4px', background: `${s.color}22`, color: s.color, fontFamily: 'var(--font-mc-mono)' }}>{s.freq.toUpperCase()}</span>
+            <span style={{ fontSize: 'var(--mc-font-label)', fontWeight: 700, padding: '3px 8px', borderRadius: '4px', background: `${s.color}22`, color: s.color, fontFamily: 'var(--font-mc-mono)' }}>{s.freq.toUpperCase()}</span>
           </div>
         ))}
       </div>

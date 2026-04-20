@@ -10,6 +10,10 @@ export function CommandCenterPage() {
   const [rhBalance, setRhBalance] = useState(0);
   const [dashData, setDashData] = useState<any>(null);
   const [loading, setLoading] = useState(true);
+  const [unusualFlows, setUnusualFlows] = useState<any[]>([]);
+  const [kronosForecast, setKronosForecast] = useState<any>(null);
+  const [unusualFlows, setUnusualFlows] = useState<any[]>([]);
+  const [kronosForecast, setKronosForecast] = useState<any>(null);
 
   const fetchData = async () => {
     try {
@@ -28,6 +32,17 @@ export function CommandCenterPage() {
 
   useEffect(() => {
     fetchData();
+    fetch('/api/options-flow').then(r => r.ok ? r.json() : { flows: [] }).then(d => {
+      const flows = d.flows || [];
+      const unusual = flows.filter((f: any) => f.Volume > f.OI && f.OI >= 0).sort((a: any, b: any) => b.Time - a.Time);
+      setUnusualFlows(unusual.slice(0, 10));
+    }).catch(() => {});
+    fetch('/api/kronos-forecast').then(r => r.ok ? r.json() : null).then(d => { if (d) setKronosForecast(d); }).catch(() => {});
+    fetch('/api/options-flow').then(r => r.ok ? r.json() : { flows: [] }).then(d => {
+      const flows = d.flows || [];
+      setUnusualFlows(flows.filter((f: any) => f.Volume > f.OI && f.OI >= 0).sort((a: any, b: any) => b.Time - a.Time).slice(0, 10));
+    }).catch(() => {});
+    fetch('/api/kronos-forecast').then(r => r.ok ? r.json() : null).then(d => { if (d) setKronosForecast(d); }).catch(() => {});
     fetch('/api/wallets').then(r => r.ok ? r.json() : []).then(wallets => {
       const tickers: any[] = []; let rhTotal = 0;
       for (const w of wallets) {
@@ -64,7 +79,7 @@ export function CommandCenterPage() {
 
   if (loading) return (
     <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '60vh', color: '#4fc3f7', fontFamily: 'var(--font-mc-mono)' }}>
-      <div style={{ fontSize: '14px', animation: 'blink 1s infinite' }}>INITIALIZING COMMAND CENTER...</div>
+      <div style={{ fontSize: 'var(--mc-font-sm)', animation: 'blink 1s infinite' }}>INITIALIZING COMMAND CENTER...</div>
     </div>
   );
 
@@ -76,7 +91,7 @@ export function CommandCenterPage() {
         @keyframes marquee { 0% { transform: translateX(0); } 100% { transform: translateX(-50%); } }
         .cc { background: #0a1929; border: 1px solid #1a3a4a; border-radius: 8px; overflow: hidden; position: relative; }
         .cc::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 2px; background: linear-gradient(90deg, transparent, #4fc3f7, transparent); }
-        .lbl { font-size: 10px; color: #607d8b; text-transform: uppercase; letter-spacing: 1.5px; font-family: var(--font-mc-mono); margin-bottom: 6px; }
+        .lbl { font-size: var(--mc-font-label); color: #607d8b; text-transform: uppercase; letter-spacing: 1.5px; font-family: var(--font-mc-mono); margin-bottom: 6px; }
         .beat { color: #66bb6a; } .miss { color: #ef5350; } .neu { color: #ff9800; }
         .news-row:hover { background: #0d1929 !important; }
       `}</style>
@@ -85,11 +100,11 @@ export function CommandCenterPage() {
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px', padding: '10px 20px', background: '#0a1929', border: '1px solid #1a3a4a', borderRadius: '8px' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
           <div style={{ width: '10px', height: '10px', borderRadius: '50%', background: '#66bb6a', boxShadow: '0 0 8px #66bb6a', animation: 'pulse 2s infinite' }} />
-          <span style={{ fontSize: '16px', fontWeight: 700, color: '#4fc3f7', fontFamily: 'var(--font-mc-mono)', letterSpacing: '2px' }}>COMMAND CENTER</span>
+          <span style={{ fontSize: 'var(--mc-font-lg)', fontWeight: 700, color: '#4fc3f7', fontFamily: 'var(--font-mc-mono)', letterSpacing: '2px' }}>COMMAND CENTER</span>
         </div>
-        <div style={{ display: 'flex', gap: '16px', fontSize: '11px', fontFamily: 'var(--font-mc-mono)', color: '#607d8b' }}>
+        <div style={{ display: 'flex', gap: '16px', fontSize: 'var(--mc-font-label)', fontFamily: 'var(--font-mc-mono)', color: '#607d8b' }}>
           <span>REGIME: <span style={{ color: bias === 'BULLISH' ? '#66bb6a' : bias === 'BEARISH' ? '#ef5350' : '#ff9800' }}>{regimeStr}</span></span>
-          <span style={{ animation: 'blink 1.4s infinite', color: '#ef5350' }}>\u25cf LIVE</span>
+          <span style={{ animation: 'blink 1.4s infinite', color: '#ef5350', display: 'flex', alignItems: 'center', gap: '4px' }}><span style={{ width: '8px', height: '8px', borderRadius: '50%', background: '#ef5350', display: 'inline-block' }} />LIVE</span>
         </div>
       </div>
 
@@ -107,10 +122,10 @@ export function CommandCenterPage() {
             { sym: 'RETURN', val: (totalReturn >= 0 ? '+' : '') + fmt(totalReturn, 1) + '%', chg: totalReturn, color: totalReturn >= 0 ? '#66bb6a' : '#ef5350' },
             ...(rhPositions || []),
           ]).map((item, i) => (
-            <span key={i} style={{ fontSize: '12px', fontFamily: 'var(--font-mc-mono)', color: '#607d8b' }}>
+            <span key={i} style={{ fontSize: 'var(--mc-font-badge)', fontFamily: 'var(--font-mc-mono)', color: '#607d8b' }}>
               <span style={{ color: '#4fc3f7', marginRight: '6px' }}>{item.sym}</span>
               <span style={{ color: item.color, fontWeight: 600 }}>{item.val}</span>
-              {item.chg ? <span style={{ color: item.color, marginLeft: '4px', fontSize: '10px' }}>({item.chg >= 0 ? '+' : ''}{fmt(item.chg, 1)}%)</span> : null}
+              {item.chg ? <span style={{ color: item.color, marginLeft: '4px', fontSize: 'var(--mc-font-label)' }}>({item.chg >= 0 ? '+' : ''}{fmt(item.chg, 1)}%)</span> : null}
             </span>
           ))}
         </div>
@@ -127,8 +142,8 @@ export function CommandCenterPage() {
         ].map((m, i) => (
           <div key={i} className="cc" style={{ padding: '16px 18px' }}>
             <div className="lbl">{m.l}</div>
-            <div style={{ fontSize: '28px', fontWeight: 700, fontFamily: 'var(--font-mc-mono)', color: m.c }}>{m.v}</div>
-            <div style={{ fontSize: '11px', color: '#455a64', marginTop: '4px' }}>{m.s}</div>
+            <div style={{ fontSize: 'var(--mc-font-3xl)', fontWeight: 700, fontFamily: 'var(--font-mc-mono)', color: m.c }}>{m.v}</div>
+            <div style={{ fontSize: 'var(--mc-font-label)', color: '#455a64', marginTop: '4px' }}>{m.s}</div>
           </div>
         ))}
       </div>
@@ -151,12 +166,12 @@ export function CommandCenterPage() {
               return (
                 <div key={sym} style={{ background: '#0d1117', border: '1px solid #1a3a4a', borderRadius: '8px', padding: '12px' }}>
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
-                    <span style={{ fontSize: '15px', fontWeight: 700, color: '#e0e0e0', fontFamily: 'var(--font-mc-mono)' }}>{sym}</span>
-                    <span style={{ fontSize: '14px', fontWeight: 700, color: green ? '#66bb6a' : '#ef5350', fontFamily: 'var(--font-mc-mono)' }}>
+                    <span style={{ fontSize: 'var(--mc-font-md)', fontWeight: 700, color: '#e0e0e0', fontFamily: 'var(--font-mc-mono)' }}>{sym}</span>
+                    <span style={{ fontSize: 'var(--mc-font-sm)', fontWeight: 700, color: green ? '#66bb6a' : '#ef5350', fontFamily: 'var(--font-mc-mono)' }}>
                       {q ? '$' + (typeof q.price === 'number' ? q.price.toFixed(2) : q.price) : 'N/A'}
                     </span>
                   </div>
-                  {q && <div style={{ fontSize: '11px', color: green ? '#66bb6a' : '#ef5350', marginBottom: '6px', fontFamily: 'var(--font-mc-mono)' }}>{green ? '+' : ''}{typeof chg === 'number' ? chg.toFixed(2) : chg}%</div>}
+                  {q && <div style={{ fontSize: 'var(--mc-font-label)', color: green ? '#66bb6a' : '#ef5350', marginBottom: '6px', fontFamily: 'var(--font-mc-mono)' }}>{green ? '+' : ''}{typeof chg === 'number' ? chg.toFixed(2) : chg}%</div>}
                   {a && (
                     <div style={{ marginBottom: '6px' }}>
                       <div style={{ display: 'flex', height: '6px', borderRadius: '3px', overflow: 'hidden', background: '#1a3a4a' }}>
@@ -164,11 +179,11 @@ export function CommandCenterPage() {
                         <div style={{ width: (100 - a.buyPct - ((a.sell + a.strongSell) / a.total * 100)) + '%', background: '#ff9800' }} />
                         <div style={{ width: ((a.sell + a.strongSell) / a.total * 100) + '%', background: '#ef5350' }} />
                       </div>
-                      <div style={{ fontSize: '9px', color: '#607d8b', marginTop: '3px', fontFamily: 'var(--font-mc-mono)' }}>{a.buyPct}% BUY ({a.total} analysts)</div>
+                      <div style={{ fontSize: 'var(--mc-font-label)', color: '#607d8b', marginTop: '3px', fontFamily: 'var(--font-mc-mono)' }}>{a.buyPct}% BUY ({a.total} analysts)</div>
                     </div>
                   )}
-                  {e && <div style={{ fontSize: '10px', fontFamily: 'var(--font-mc-mono)', color: e.beat ? '#66bb6a' : '#ef5350' }}>{e.beat ? '\u2713 BEAT' : '\u2717 MISS'} {e.surprisePct > 0 ? '+' : ''}{e.surprisePct}% (Q{e.period?.slice(5,7)})</div>}
-                  {ins && <div style={{ fontSize: '10px', fontFamily: 'var(--font-mc-mono)', color: ins.direction === 'BUYING' ? '#66bb6a' : '#ef5350', marginTop: '2px' }}>Insiders: {ins.direction} (MSPR {ins.mspr})</div>}
+                  {e && <div style={{ fontSize: 'var(--mc-font-label)', fontFamily: 'var(--font-mc-mono)', color: e.beat ? '#66bb6a' : '#ef5350' }}>{e.beat ? '\u2713 BEAT' : '\u2717 MISS'} {e.surprisePct > 0 ? '+' : ''}{e.surprisePct}% (Q{e.period?.slice(5,7)})</div>}
+                  {ins && <div style={{ fontSize: 'var(--mc-font-label)', fontFamily: 'var(--font-mc-mono)', color: ins.direction === 'BUYING' ? '#66bb6a' : '#ef5350', marginTop: '2px' }}>Insiders: {ins.direction} (MSPR {ins.mspr})</div>}
                 </div>
               );
             })}
@@ -178,19 +193,142 @@ export function CommandCenterPage() {
         {/* LIVE PIPELINE */}
         <div className="cc" style={{ padding: '16px' }}>
           <div className="lbl" style={{ marginBottom: '12px', display: 'flex', justifyContent: 'space-between' }}>
-            <span><span style={{ animation: 'blink 1.4s infinite', color: '#ef5350' }}>\u25cf</span> LIVE PIPELINE</span>
+            <span><span style={{ display: 'flex', alignItems: 'center', gap: '4px' }}><span style={{ width: '8px', height: '8px', borderRadius: '50%', background: '#ef5350', animation: 'blink 1.4s infinite', display: 'inline-block' }} />LIVE PIPELINE</span></span>
             <span style={{ color: '#455a64' }}>{activity.length} events</span>
           </div>
           <div style={{ display: 'flex', flexDirection: 'column', gap: '3px', maxHeight: '380px', overflowY: 'auto' }}>
             {activity.length === 0 ? (
-              <div style={{ color: '#455a64', fontSize: '12px', fontFamily: 'var(--font-mc-mono)', textAlign: 'center', padding: '40px' }}>Awaiting pipeline data...</div>
+              <div style={{ color: '#455a64', fontSize: 'var(--mc-font-badge)', fontFamily: 'var(--font-mc-mono)', textAlign: 'center', padding: '40px' }}>Awaiting pipeline data...</div>
             ) : activity.map((entry, i) => (
               <div key={i} style={{ display: 'flex', gap: '10px', padding: '8px 12px', background: i === 0 ? '#0d1929' : '#0d1117', borderLeft: '2px solid #1a3a4a', borderRadius: '3px', opacity: 1 - (i * 0.05) }}>
-                <div style={{ minWidth: '65px', color: '#4fc3f7', fontFamily: 'var(--font-mc-mono)', fontWeight: 600, fontSize: '10px' }}>{(entry.agent || 'SYS').toUpperCase()}</div>
-                <div style={{ flex: 1, color: '#b0bec5', fontSize: '11px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{entry.action}</div>
+                <div style={{ minWidth: '65px', color: '#4fc3f7', fontFamily: 'var(--font-mc-mono)', fontWeight: 600, fontSize: 'var(--mc-font-label)' }}>{(entry.agent || 'SYS').toUpperCase()}</div>
+                <div style={{ flex: 1, color: '#b0bec5', fontSize: 'var(--mc-font-label)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{entry.action}</div>
               </div>
             ))}
           </div>
+        </div>
+      </div>
+
+      {/* UNUSUAL FLOW + KRONOS FORECAST */}
+      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px', marginBottom: '12px' }}>
+        <div className="cc" style={{ padding: '16px', maxHeight: '350px', overflowY: 'auto' }}>
+          <div className="lbl" style={{ marginBottom: '10px', display: 'flex', justifyContent: 'space-between' }}>
+            <span style={{ color: '#ffd600' }}>UNUSUAL FLOW (Vol {'>'} OI)</span>
+            <span style={{ color: '#ffd600' }}>{unusualFlows.length}</span>
+          </div>
+          {unusualFlows.length > 0 ? unusualFlows.map((f: any, i: number) => {
+            const isCall = f.OptionType === 'CALL';
+            const isAsk = f.BidAskType === 'A' || f.BidAskType === 'AA';
+            const bullish = (isCall && isAsk) || (!isCall && !isAsk);
+            const sColor = bullish ? '#66bb6a' : '#ef5350';
+            const isSweep = f.BlockType === 'SWEEP';
+            const valColor = f.Value >= 5000000 ? '#e040fb' : f.Value >= 1000000 ? '#ffd600' : f.Value >= 500000 ? '#ff9800' : f.Value >= 250000 ? '#4fc3f7' : '#e0e0e0';
+            const fmtV = (n: number) => n >= 1000000 ? '$' + (n/1000000).toFixed(1) + 'M' : n >= 1000 ? '$' + (n/1000).toFixed(0) + 'K' : '$' + n;
+            const timeAgo = (ts: number) => { const m = Math.floor((Date.now() - ts) / 60000); if (m < 1) return 'now'; if (m < 60) return m + 'm'; const h = Math.floor(m/60); if (h < 24) return h + 'h'; return Math.floor(h/24) + 'd'; };
+            return (
+              <div key={i} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '7px 10px', borderBottom: '1px solid #0d1117', borderLeft: '3px solid #ffd600' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                  <span style={{ width: '8px', height: '8px', borderRadius: '50%', background: sColor, boxShadow: '0 0 4px ' + sColor }} />
+                  <span style={{ fontSize: 'var(--mc-font-label)', color: '#455a64', fontFamily: 'var(--font-mc-mono)' }}>{timeAgo(f.Time)}</span>
+                  <span style={{ fontSize: 'var(--mc-font-sm)', color: sColor, fontWeight: 700, fontFamily: 'var(--font-mc-mono)' }}>{f.Symbol}</span>
+                  <span style={{ fontSize: 'var(--mc-font-label)', color: sColor }}>{f.OptionType?.slice(0,1)} ${f.Strike}</span>
+                </div>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                  <span style={{ fontSize: 'var(--mc-font-sm)', color: valColor, fontWeight: 700, fontFamily: 'var(--font-mc-mono)' }}>{fmtV(f.Value)}</span>
+                  <span style={{ fontSize: 'var(--mc-font-label)', fontWeight: 700, padding: '1px 4px', borderRadius: '3px', background: isSweep ? '#ff980022' : '#4fc3f722', color: isSweep ? '#ff9800' : '#4fc3f7' }}>{isSweep ? 'SWP' : 'BLK'}</span>
+                </div>
+              </div>
+            );
+          }) : <div style={{ color: '#455a64', fontSize: 'var(--mc-font-badge)', fontFamily: 'var(--font-mc-mono)', textAlign: 'center', padding: '30px' }}>No unusual flow detected</div>}
+        </div>
+
+        <div className="cc" style={{ padding: '16px' }}>
+          <div className="lbl" style={{ marginBottom: '10px', display: 'flex', justifyContent: 'space-between' }}>
+            <span style={{ color: '#ce93d8' }}>KRONOS BTC FORECAST</span>
+            <span style={{ color: '#607d8b' }}>{kronosForecast?.generated_at || ''}</span>
+          </div>
+          {kronosForecast ? (
+            <div>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '8px', marginBottom: '12px' }}>
+                <div style={{ background: '#0d1117', borderRadius: '6px', padding: '10px', textAlign: 'center' }}>
+                  <div style={{ fontSize: 'var(--mc-font-label)', color: '#607d8b', fontFamily: 'var(--font-mc-mono)', marginBottom: '4px' }}>NOW</div>
+                  <div style={{ fontSize: 'var(--mc-font-lg)', fontWeight: 700, color: '#4fc3f7', fontFamily: 'var(--font-mc-mono)' }}>${kronosForecast.current_price?.toLocaleString()}</div>
+                </div>
+                <div style={{ background: '#0d1117', borderRadius: '6px', padding: '10px', textAlign: 'center' }}>
+                  <div style={{ fontSize: 'var(--mc-font-label)', color: '#607d8b', fontFamily: 'var(--font-mc-mono)', marginBottom: '4px' }}>24H FORECAST</div>
+                  <div style={{ fontSize: 'var(--mc-font-lg)', fontWeight: 700, color: kronosForecast.summary?.direction === 'BULLISH' ? '#66bb6a' : '#ef5350', fontFamily: 'var(--font-mc-mono)' }}>${kronosForecast.summary?.price_in_24h?.toLocaleString()}</div>
+                </div>
+                <div style={{ background: '#0d1117', borderRadius: '6px', padding: '10px', textAlign: 'center' }}>
+                  <div style={{ fontSize: 'var(--mc-font-label)', color: '#607d8b', fontFamily: 'var(--font-mc-mono)', marginBottom: '4px' }}>DIRECTION</div>
+                  <div style={{ fontSize: 'var(--mc-font-lg)', fontWeight: 700, color: kronosForecast.summary?.direction === 'BULLISH' ? '#66bb6a' : '#ef5350', fontFamily: 'var(--font-mc-mono)' }}>{kronosForecast.summary?.direction}</div>
+                </div>
+              </div>
+              <div style={{ display: 'flex', justifyContent: 'space-between', padding: '8px 12px', background: '#0d1117', borderRadius: '6px' }}>
+                <span style={{ fontSize: 'var(--mc-font-label)', color: '#607d8b', fontFamily: 'var(--font-mc-mono)' }}>Change: <span style={{ color: kronosForecast.summary?.change_pct >= 0 ? '#66bb6a' : '#ef5350', fontWeight: 700 }}>{kronosForecast.summary?.change_pct >= 0 ? '+' : ''}{kronosForecast.summary?.change_pct?.toFixed(2)}%</span></span>
+                <span style={{ fontSize: 'var(--mc-font-label)', color: '#607d8b', fontFamily: 'var(--font-mc-mono)' }}>Range: <span style={{ color: '#ff9800' }}>${kronosForecast.summary?.predicted_low?.toLocaleString()} — ${kronosForecast.summary?.predicted_high?.toLocaleString()}</span></span>
+              </div>
+            </div>
+          ) : <div style={{ color: '#455a64', fontSize: 'var(--mc-font-badge)', fontFamily: 'var(--font-mc-mono)', textAlign: 'center', padding: '30px' }}>Awaiting Kronos forecast...</div>}
+        </div>
+      </div>
+
+      {/* UNUSUAL FLOW + KRONOS FORECAST */}
+      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px', marginBottom: '12px' }}>
+        <div className="cc" style={{ padding: '16px', maxHeight: '350px', overflowY: 'auto' }}>
+          <div className="lbl" style={{ marginBottom: '10px', display: 'flex', justifyContent: 'space-between' }}>
+            <span style={{ color: '#ffd600' }}>UNUSUAL FLOW (Vol &gt; OI)</span>
+            <span style={{ color: '#ffd600' }}>{unusualFlows.length}</span>
+          </div>
+          {unusualFlows.length > 0 ? unusualFlows.map((f: any, i: number) => {
+            const isCall = f.OptionType === 'CALL';
+            const isAsk = f.BidAskType === 'A' || f.BidAskType === 'AA';
+            const bull = (isCall && isAsk) || (!isCall && !isAsk);
+            const sc = bull ? '#66bb6a' : '#ef5350';
+            const vc = f.Value >= 5000000 ? '#e040fb' : f.Value >= 1000000 ? '#ffd600' : f.Value >= 500000 ? '#ff9800' : f.Value >= 250000 ? '#4fc3f7' : '#e0e0e0';
+            const fv = (n: number) => n >= 1000000 ? '$' + (n/1000000).toFixed(1) + 'M' : n >= 1000 ? '$' + (n/1000).toFixed(0) + 'K' : '$' + n;
+            const ta = (ts: number) => { const m = Math.floor((Date.now() - ts) / 60000); return m < 1 ? 'now' : m < 60 ? m + 'm' : m < 1440 ? Math.floor(m/60) + 'h' : Math.floor(m/1440) + 'd'; };
+            return (
+              <div key={i} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '8px 12px', borderBottom: '1px solid #0d1117', borderLeft: '3px solid #ffd600' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                  <span style={{ width: '8px', height: '8px', borderRadius: '50%', background: sc, boxShadow: '0 0 4px ' + sc, display: 'inline-block' }} />
+                  <span style={{ fontSize: 'var(--mc-font-label)', color: '#455a64', fontFamily: 'var(--font-mc-mono)' }}>{ta(f.Time)}</span>
+                  <span style={{ fontSize: 'var(--mc-font-sm)', color: sc, fontWeight: 700, fontFamily: 'var(--font-mc-mono)' }}>{f.Symbol}</span>
+                  <span style={{ fontSize: 'var(--mc-font-xs)', color: sc }}>{f.OptionType?.slice(0,1)} ${f.Strike}</span>
+                </div>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                  <span style={{ fontSize: 'var(--mc-font-sm)', color: vc, fontWeight: 700, fontFamily: 'var(--font-mc-mono)' }}>{fv(f.Value)}</span>
+                  <span style={{ fontSize: 'var(--mc-font-badge)', fontWeight: 700, padding: '1px 5px', borderRadius: '3px', background: f.BlockType === 'SWEEP' ? '#ff980022' : '#4fc3f722', color: f.BlockType === 'SWEEP' ? '#ff9800' : '#4fc3f7' }}>{f.BlockType === 'SWEEP' ? 'SWP' : 'BLK'}</span>
+                </div>
+              </div>
+            );
+          }) : <div style={{ color: '#455a64', fontSize: 'var(--mc-font-badge)', fontFamily: 'var(--font-mc-mono)', textAlign: 'center', padding: '30px' }}>No unusual flow</div>}
+        </div>
+
+        <div className="cc" style={{ padding: '16px' }}>
+          <div className="lbl" style={{ marginBottom: '10px', display: 'flex', justifyContent: 'space-between' }}>
+            <span style={{ color: '#ce93d8' }}>KRONOS BTC FORECAST</span>
+            <span style={{ color: '#607d8b', fontSize: 'var(--mc-font-label)' }}>{kronosForecast?.generated_at || ''}</span>
+          </div>
+          {kronosForecast ? (
+            <div>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '8px', marginBottom: '12px' }}>
+                {[
+                  { l: 'NOW', v: '$' + kronosForecast.current_price?.toLocaleString(), c: '#4fc3f7' },
+                  { l: '24H FORECAST', v: '$' + kronosForecast.summary?.price_in_24h?.toLocaleString(), c: kronosForecast.summary?.direction === 'BULLISH' ? '#66bb6a' : '#ef5350' },
+                  { l: 'DIRECTION', v: kronosForecast.summary?.direction, c: kronosForecast.summary?.direction === 'BULLISH' ? '#66bb6a' : '#ef5350' },
+                ].map((m, i) => (
+                  <div key={i} style={{ background: '#0d1117', borderRadius: '6px', padding: '10px', textAlign: 'center' }}>
+                    <div style={{ fontSize: 'var(--mc-font-label)', color: '#607d8b', fontFamily: 'var(--font-mc-mono)', marginBottom: '4px' }}>{m.l}</div>
+                    <div style={{ fontSize: 'var(--mc-font-lg)', fontWeight: 700, color: m.c, fontFamily: 'var(--font-mc-mono)' }}>{m.v}</div>
+                  </div>
+                ))}
+              </div>
+              <div style={{ display: 'flex', justifyContent: 'space-between', padding: '8px 12px', background: '#0d1117', borderRadius: '6px' }}>
+                <span style={{ fontSize: 'var(--mc-font-xs)', color: '#607d8b', fontFamily: 'var(--font-mc-mono)' }}>Change: <span style={{ color: kronosForecast.summary?.change_pct >= 0 ? '#66bb6a' : '#ef5350', fontWeight: 700 }}>{kronosForecast.summary?.change_pct >= 0 ? '+' : ''}{kronosForecast.summary?.change_pct?.toFixed(2)}%</span></span>
+                <span style={{ fontSize: 'var(--mc-font-xs)', color: '#607d8b', fontFamily: 'var(--font-mc-mono)' }}>Range: <span style={{ color: '#ff9800' }}>${kronosForecast.summary?.predicted_low?.toLocaleString()} — ${kronosForecast.summary?.predicted_high?.toLocaleString()}</span></span>
+              </div>
+            </div>
+          ) : <div style={{ color: '#455a64', fontSize: 'var(--mc-font-badge)', fontFamily: 'var(--font-mc-mono)', textAlign: 'center', padding: '30px' }}>Awaiting Kronos forecast...</div>}
         </div>
       </div>
 
@@ -200,11 +338,11 @@ export function CommandCenterPage() {
           <div className="lbl" style={{ marginBottom: '10px' }}>MARKET NEWS</div>
           {news.length > 0 ? news.slice(0, 12).map((n: any, i: number) => (
             <a key={i} href={n.url} target="_blank" rel="noopener noreferrer" className="news-row" style={{ display: 'flex', gap: '8px', padding: '6px 4px', borderBottom: '1px solid #1a3a4a', textDecoration: 'none', cursor: 'pointer' }}>
-              <span style={{ minWidth: '42px', fontSize: '10px', color: '#607d8b', fontFamily: 'var(--font-mc-mono)' }}>{n.time}</span>
-              <span style={{ flex: 1, fontSize: '11px', color: '#b0bec5', fontFamily: 'var(--font-mc-mono)' }}>{n.headline}</span>
-              <span style={{ fontSize: '9px', color: '#455a64', minWidth: '50px', textAlign: 'right' }}>{n.source}</span>
+              <span style={{ minWidth: '42px', fontSize: 'var(--mc-font-label)', color: '#607d8b', fontFamily: 'var(--font-mc-mono)' }}>{n.time}</span>
+              <span style={{ flex: 1, fontSize: 'var(--mc-font-label)', color: '#b0bec5', fontFamily: 'var(--font-mc-mono)' }}>{n.headline}</span>
+              <span style={{ fontSize: 'var(--mc-font-label)', color: '#455a64', minWidth: '50px', textAlign: 'right' }}>{n.source}</span>
             </a>
-          )) : <div style={{ color: '#455a64', fontSize: '11px' }}>Loading...</div>}
+          )) : <div style={{ color: '#455a64', fontSize: 'var(--mc-font-label)' }}>Loading...</div>}
         </div>
 
         <div className="cc" style={{ padding: '16px', maxHeight: '350px', overflowY: 'auto' }}>
@@ -216,22 +354,22 @@ export function CommandCenterPage() {
             return (
               <div key={i} style={{ display: 'flex', justifyContent: 'space-between', padding: '8px 10px', background: '#0d1117', borderRadius: '6px', border: '1px solid ' + (g ? '#66bb6a22' : '#ef535022'), marginBottom: '6px' }}>
                 <div>
-                  <div style={{ fontSize: '13px', fontWeight: 700, color: '#e0e0e0', fontFamily: 'var(--font-mc-mono)' }}>{p.symbol}</div>
-                  <div style={{ fontSize: '10px', color: '#455a64' }}>{p.qty} @ ${fmt(parseFloat(p.avg_entry_price || '0'))}</div>
+                  <div style={{ fontSize: 'var(--mc-font-xs)', fontWeight: 700, color: '#e0e0e0', fontFamily: 'var(--font-mc-mono)' }}>{p.symbol}</div>
+                  <div style={{ fontSize: 'var(--mc-font-label)', color: '#455a64' }}>{p.qty} @ ${fmt(parseFloat(p.avg_entry_price || '0'))}</div>
                 </div>
                 <div style={{ textAlign: 'right' }}>
-                  <div style={{ fontSize: '15px', fontWeight: 700, color: g ? '#66bb6a' : '#ef5350', fontFamily: 'var(--font-mc-mono)' }}>{g ? '+' : ''}{fmt(pnlPct, 1)}%</div>
-                  <div style={{ fontSize: '10px', color: g ? '#66bb6a' : '#ef5350' }}>{g ? '+' : ''}${fmt(pnl)}</div>
+                  <div style={{ fontSize: 'var(--mc-font-md)', fontWeight: 700, color: g ? '#66bb6a' : '#ef5350', fontFamily: 'var(--font-mc-mono)' }}>{g ? '+' : ''}{fmt(pnlPct, 1)}%</div>
+                  <div style={{ fontSize: 'var(--mc-font-label)', color: g ? '#66bb6a' : '#ef5350' }}>{g ? '+' : ''}${fmt(pnl)}</div>
                 </div>
               </div>
             );
-          }) : <div style={{ color: '#455a64', fontSize: '12px', fontFamily: 'var(--font-mc-mono)', marginBottom: '12px' }}>No open positions</div>}
+          }) : <div style={{ color: '#455a64', fontSize: 'var(--mc-font-badge)', fontFamily: 'var(--font-mc-mono)', marginBottom: '12px' }}>No open positions</div>}
           <div className="lbl" style={{ marginTop: '12px', marginBottom: '8px' }}>INSIDER SENTIMENT</div>
           {SYMS.map(sym => {
             const ins = intel[sym]?.insider;
             if (!ins) return null;
             return (
-              <div key={sym} style={{ display: 'flex', justifyContent: 'space-between', padding: '4px 8px', fontSize: '11px', fontFamily: 'var(--font-mc-mono)' }}>
+              <div key={sym} style={{ display: 'flex', justifyContent: 'space-between', padding: '4px 8px', fontSize: 'var(--mc-font-label)', fontFamily: 'var(--font-mc-mono)' }}>
                 <span style={{ color: '#4fc3f7' }}>{sym}</span>
                 <span style={{ color: ins.direction === 'BUYING' ? '#66bb6a' : '#ef5350' }}>{ins.direction} (MSPR: {ins.mspr})</span>
               </div>

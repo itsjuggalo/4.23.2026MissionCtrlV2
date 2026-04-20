@@ -62,10 +62,10 @@ export function ActivityPage() {
   const typeCounts: Record<string, number> = {};
   activities.forEach(a => { typeCounts[a.type] = (typeCounts[a.type] || 0) + 1; });
 
-  const selectStyle: React.CSSProperties = { padding: '7px 12px', background: '#0d1117', border: '1px solid #1a3a4a', borderRadius: '6px', color: '#e0e0e0', fontFamily: 'var(--font-mc-mono)', fontSize: '12px', cursor: 'pointer', outline: 'none' };
+  const selectStyle: React.CSSProperties = { padding: '7px 12px', background: '#0d1117', border: '1px solid #1a3a4a', borderRadius: '6px', color: '#e0e0e0', fontFamily: 'var(--font-mc-mono)', fontSize: 'var(--mc-font-badge)', cursor: 'pointer', outline: 'none' };
 
   if (loading) return (
-    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '40vh', color: '#4fc3f7', fontFamily: 'var(--font-mc-mono)', fontSize: '16px' }}>
+    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '40vh', color: '#4fc3f7', fontFamily: 'var(--font-mc-mono)', fontSize: 'var(--mc-font-lg)' }}>
       LOADING ACTIVITY...
     </div>
   );
@@ -75,8 +75,8 @@ export function ActivityPage() {
       {/* Top Bar — Status + Dropdown Filters */}
       <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '12px', flexWrap: 'wrap' }}>
         <span style={{ width: '8px', height: '8px', borderRadius: '50%', background: '#66bb6a', boxShadow: '0 0 6px #66bb6a88' }} />
-        <span style={{ fontSize: '12px', fontWeight: 700, color: '#66bb6a', fontFamily: 'var(--font-mc-mono)' }}>LIVE</span>
-        <span style={{ fontSize: '11px', color: '#607d8b', fontFamily: 'var(--font-mc-mono)' }}>{activities.length} events · Polling 15s</span>
+        <span style={{ fontSize: 'var(--mc-font-badge)', fontWeight: 700, color: '#66bb6a', fontFamily: 'var(--font-mc-mono)' }}>LIVE</span>
+        <span style={{ fontSize: 'var(--mc-font-label)', color: '#607d8b', fontFamily: 'var(--font-mc-mono)' }}>{activities.length} events · Polling 15s</span>
 
         <div style={{ width: '1px', height: '16px', background: '#1a3a4a' }} />
 
@@ -96,7 +96,7 @@ export function ActivityPage() {
         <input value={search} onChange={e => setSearch(e.target.value)} placeholder="Search..."
           style={{ ...selectStyle, width: '120px' }} />
 
-        <span style={{ fontSize: '11px', color: '#455a64', fontFamily: 'var(--font-mc-mono)', marginLeft: 'auto' }}>
+        <span style={{ fontSize: 'var(--mc-font-label)', color: '#455a64', fontFamily: 'var(--font-mc-mono)', marginLeft: 'auto' }}>
           {filtered.length} of {activities.length}
         </span>
       </div>
@@ -104,7 +104,7 @@ export function ActivityPage() {
       {/* Activity Feed — scrollable */}
       <div style={{ flex: 1, overflow: 'auto', display: 'flex', flexDirection: 'column', gap: '4px', minHeight: 0 }}>
         {filtered.length === 0 ? (
-          <div style={{ padding: '60px', textAlign: 'center', color: '#455a64', fontFamily: 'var(--font-mc-mono)', fontSize: '14px', background: '#0a1929', borderRadius: '8px', border: '1px solid #1a3a4a' }}>
+          <div style={{ padding: '60px', textAlign: 'center', color: '#455a64', fontFamily: 'var(--font-mc-mono)', fontSize: 'var(--mc-font-sm)', background: '#0a1929', borderRadius: '8px', border: '1px solid #1a3a4a' }}>
             No activity matches filters
           </div>
         ) : filtered.map((a, i) => {
@@ -113,12 +113,12 @@ export function ActivityPage() {
             <div key={i} style={{ padding: '10px 14px', background: '#0a1929', border: '1px solid #1a3a4a', borderRadius: '6px', borderLeft: `3px solid ${cfg.color}`, transition: 'border-color 0.2s' }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flex: 1, minWidth: 0 }}>
-                  <span style={{ fontSize: '14px', flexShrink: 0 }}>{cfg.icon}</span>
-                  <span style={{ fontSize: '13px', fontWeight: 700, color: cfg.color, fontFamily: 'var(--font-mc-mono)', flexShrink: 0 }}>{a.agent}</span>
-                  <span style={{ fontSize: '10px', padding: '1px 6px', borderRadius: '3px', background: `${cfg.color}22`, color: cfg.color, fontFamily: 'var(--font-mc-mono)', flexShrink: 0 }}>{a.type}</span>
-                  <span style={{ fontSize: '12px', color: '#b0bec5', fontFamily: 'var(--font-mc-mono)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{a.action}</span>
+                  <span style={{ fontSize: 'var(--mc-font-sm)', flexShrink: 0 }}>{cfg.icon}</span>
+                  <span style={{ fontSize: 'var(--mc-font-xs)', fontWeight: 700, color: cfg.color, fontFamily: 'var(--font-mc-mono)', flexShrink: 0 }}>{a.agent}</span>
+                  <span style={{ fontSize: 'var(--mc-font-label)', padding: '1px 6px', borderRadius: '3px', background: `${cfg.color}22`, color: cfg.color, fontFamily: 'var(--font-mc-mono)', flexShrink: 0 }}>{a.type}</span>
+                  <span style={{ fontSize: 'var(--mc-font-badge)', color: '#b0bec5', fontFamily: 'var(--font-mc-mono)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{a.action}</span>
                 </div>
-                <span style={{ fontSize: '11px', color: '#455a64', fontFamily: 'var(--font-mc-mono)', flexShrink: 0, marginLeft: '12px' }} title={a.time}>{timeAgo(a.time)}</span>
+                <span style={{ fontSize: 'var(--mc-font-label)', color: '#455a64', fontFamily: 'var(--font-mc-mono)', flexShrink: 0, marginLeft: '12px' }} title={a.time}>{timeAgo(a.time)}</span>
               </div>
             </div>
           );

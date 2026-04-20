@@ -94,15 +94,15 @@ export function DashboardPage() {
         <div style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
           <div style={{ width: '12px', height: '12px', borderRadius: '50%', background: stanceColor, boxShadow: `0 0 10px ${stanceColor}` }} />
           <div>
-            <div style={{ fontSize: '16px', fontWeight: 700, color: stanceColor, fontFamily: 'var(--font-mc-mono)', letterSpacing: '1px' }}>
+            <div style={{ fontSize: 'var(--mc-font-lg)', fontWeight: 700, color: stanceColor, fontFamily: 'var(--font-mc-mono)', letterSpacing: '1px' }}>
               {regimeStr.replace(/_/g, ' ')} — {bias}
             </div>
-            <div style={{ fontSize: '12px', color: '#607d8b', marginTop: '2px' }}>{stanceText}</div>
+            <div style={{ fontSize: 'var(--mc-font-badge)', color: '#607d8b', marginTop: '2px' }}>{stanceText}</div>
           </div>
         </div>
         <div style={{ textAlign: 'right' }}>
-          <div style={{ fontSize: '11px', color: '#607d8b', fontFamily: 'var(--font-mc-mono)' }}>SUPERTREND</div>
-          <div style={{ fontSize: '18px', fontWeight: 700, color: btcSignal.direction === 'LONG' ? '#66bb6a' : '#ef5350', fontFamily: 'var(--font-mc-mono)' }}>
+          <div style={{ fontSize: 'var(--mc-font-label)', color: '#607d8b', fontFamily: 'var(--font-mc-mono)' }}>SUPERTREND</div>
+          <div style={{ fontSize: 'var(--mc-font-xl)', fontWeight: 700, color: btcSignal.direction === 'LONG' ? '#66bb6a' : '#ef5350', fontFamily: 'var(--font-mc-mono)' }}>
             {btcSignal.direction === 'LONG' ? '▲ LONG' : btcSignal.direction === 'SHORT' ? '▼ SHORT' : '— WAIT'}
           </div>
         </div>
@@ -121,13 +121,13 @@ export function DashboardPage() {
             padding: '12px 16px', display: 'flex', justifyContent: 'space-between', alignItems: 'center',
           }}>
             <div>
-              <div style={{ fontSize: '11px', color: '#4fc3f7', fontFamily: 'var(--font-mc-mono)', fontWeight: 600 }}>{c.sym}</div>
-              <div style={{ fontSize: '18px', fontWeight: 700, color: '#e0e0e0', fontFamily: 'var(--font-mc-mono)' }}>
+              <div style={{ fontSize: 'var(--mc-font-label)', color: '#4fc3f7', fontFamily: 'var(--font-mc-mono)', fontWeight: 600 }}>{c.sym}</div>
+              <div style={{ fontSize: 'var(--mc-font-xl)', fontWeight: 700, color: '#e0e0e0', fontFamily: 'var(--font-mc-mono)' }}>
                 ${c.price >= 1000 ? fmt(c.price, 0) : fmt(c.price)}
               </div>
             </div>
             <div style={{
-              fontSize: '14px', fontWeight: 700, fontFamily: 'var(--font-mc-mono)',
+              fontSize: 'var(--mc-font-sm)', fontWeight: 700, fontFamily: 'var(--font-mc-mono)',
               color: c.chg >= 0 ? '#66bb6a' : '#ef5350',
               padding: '4px 10px', borderRadius: '6px',
               background: c.chg >= 0 ? '#66bb6a11' : '#ef535011',
@@ -148,19 +148,19 @@ export function DashboardPage() {
             <div className="db-label" style={{ marginBottom: '8px' }}>PORTFOLIO EQUITY</div>
             <div style={{ fontSize: '34px', fontWeight: 800, color: '#e0e0e0', fontFamily: 'var(--font-mc-mono)', lineHeight: 1 }}>${fmt(equity)}</div>
             <div style={{ display: 'flex', gap: '16px', marginTop: '10px' }}>
-              <div style={{ fontSize: '13px', color: dailyPct >= 0 ? '#66bb6a' : '#ef5350', fontFamily: 'var(--font-mc-mono)' }}>
+              <div style={{ fontSize: 'var(--mc-font-xs)', color: dailyPct >= 0 ? '#66bb6a' : '#ef5350', fontFamily: 'var(--font-mc-mono)' }}>
                 {dailyPct >= 0 ? '▲' : '▼'} {fmt(Math.abs(dailyPct))}%
               </div>
-              <div style={{ fontSize: '13px', color: '#607d8b', fontFamily: 'var(--font-mc-mono)' }}>
+              <div style={{ fontSize: 'var(--mc-font-xs)', color: '#607d8b', fontFamily: 'var(--font-mc-mono)' }}>
                 ${fmt(Math.abs(dailyChange))}
               </div>
             </div>
             <div className="db-glow-line" style={{ marginTop: '14px' }} />
-            <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '10px', fontSize: '11px', fontFamily: 'var(--font-mc-mono)' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '10px', fontSize: 'var(--mc-font-label)', fontFamily: 'var(--font-mc-mono)' }}>
               <span style={{ color: '#607d8b' }}>RETURN</span>
               <span style={{ color: totalReturn >= 0 ? '#66bb6a' : '#ef5350', fontWeight: 600 }}>{totalReturn >= 0 ? '+' : ''}{fmt(totalReturn, 1)}%</span>
             </div>
-            <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '4px', fontSize: '11px', fontFamily: 'var(--font-mc-mono)' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '4px', fontSize: 'var(--mc-font-label)', fontFamily: 'var(--font-mc-mono)' }}>
               <span style={{ color: '#607d8b' }}>WIN RATE</span>
               <span style={{ color: winRate > 50 ? '#66bb6a' : '#ff9800', fontWeight: 600 }}>{fmt(winRate, 0)}% ({wins}/{pnlHistory.length})</span>
             </div>
@@ -170,7 +170,7 @@ export function DashboardPage() {
           <div className="db-card" style={{ padding: '16px' }}>
             <div className="db-label" style={{ marginBottom: '12px' }}>POSITIONS ({positions.length})</div>
             {positions.length === 0 ? (
-              <div style={{ color: '#455a64', fontSize: '12px', fontFamily: 'var(--font-mc-mono)' }}>No open positions</div>
+              <div style={{ color: '#455a64', fontSize: 'var(--mc-font-badge)', fontFamily: 'var(--font-mc-mono)' }}>No open positions</div>
             ) : positions.map((p: any, i: number) => {
               const pnl = parseFloat(p.unrealized_pl || '0');
               const pnlPct = parseFloat(p.unrealized_plpc || '0') * 100;
@@ -182,23 +182,23 @@ export function DashboardPage() {
                   marginBottom: '8px', animation: `db-slide 0.3s ease-out ${i * 0.1}s both`,
                 }}>
                   <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '6px' }}>
-                    <span style={{ fontSize: '16px', fontWeight: 700, color: '#e0e0e0', fontFamily: 'var(--font-mc-mono)' }}>{p.symbol}</span>
-                    <span style={{ fontSize: '16px', fontWeight: 700, color: g ? '#66bb6a' : '#ef5350', fontFamily: 'var(--font-mc-mono)' }}>
+                    <span style={{ fontSize: 'var(--mc-font-lg)', fontWeight: 700, color: '#e0e0e0', fontFamily: 'var(--font-mc-mono)' }}>{p.symbol}</span>
+                    <span style={{ fontSize: 'var(--mc-font-lg)', fontWeight: 700, color: g ? '#66bb6a' : '#ef5350', fontFamily: 'var(--font-mc-mono)' }}>
                       {g ? '+' : ''}{fmt(pnlPct, 1)}%
                     </span>
                   </div>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '10px', color: '#607d8b', fontFamily: 'var(--font-mc-mono)' }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 'var(--mc-font-label)', color: '#607d8b', fontFamily: 'var(--font-mc-mono)' }}>
                     <span>{p.qty} @ ${fmt(parseFloat(p.avg_entry_price || '0'))}</span>
                     <span>${fmt(parseFloat(p.current_price || '0'))}</span>
                   </div>
                   <div style={{ height: '3px', borderRadius: '2px', background: '#0a1929', marginTop: '8px', overflow: 'hidden' }}>
                     <div style={{ height: '100%', width: `${Math.min(Math.abs(pnlPct) * 3, 100)}%`, background: g ? '#66bb6a' : '#ef5350', borderRadius: '2px' }} />
                   </div>
-                  <div style={{ fontSize: '10px', color: g ? '#66bb6a' : '#ef5350', marginTop: '4px', fontFamily: 'var(--font-mc-mono)' }}>
+                  <div style={{ fontSize: 'var(--mc-font-label)', color: g ? '#66bb6a' : '#ef5350', marginTop: '4px', fontFamily: 'var(--font-mc-mono)' }}>
                     P/L: {g ? '+' : ''}${fmt(pnl)}
                   </div>
-                  {pnlPct > 10 && <div style={{ fontSize: '10px', color: '#ff9800', marginTop: '4px', fontFamily: 'var(--font-mc-mono)' }}>⚠ Consider partial profit</div>}
-                  {pnlPct < -3 && <div style={{ fontSize: '10px', color: '#ef5350', marginTop: '4px', fontFamily: 'var(--font-mc-mono)' }}>⚠ Review stop loss</div>}
+                  {pnlPct > 10 && <div style={{ fontSize: 'var(--mc-font-label)', color: '#ff9800', marginTop: '4px', fontFamily: 'var(--font-mc-mono)' }}>⚠ Consider partial profit</div>}
+                  {pnlPct < -3 && <div style={{ fontSize: 'var(--mc-font-label)', color: '#ef5350', marginTop: '4px', fontFamily: 'var(--font-mc-mono)' }}>⚠ Review stop loss</div>}
                 </div>
               );
             })}
@@ -214,19 +214,19 @@ export function DashboardPage() {
           <div className="db-card" style={{ padding: '18px' }}>
             <div className="db-label" style={{ marginBottom: '14px' }}>BTC MULTI-TIMEFRAME ANALYSIS</div>
             {Object.entries(timeframes).length === 0 ? (
-              <div style={{ color: '#455a64', fontSize: '12px', fontFamily: 'var(--font-mc-mono)' }}>Awaiting regime data...</div>
+              <div style={{ color: '#455a64', fontSize: 'var(--mc-font-badge)', fontFamily: 'var(--font-mc-mono)' }}>Awaiting regime data...</div>
             ) : Object.entries(timeframes).map(([tf, data]: [string, any]) => {
               const dirColor = data.direction === 'BULLISH' ? '#66bb6a' : data.direction === 'BEARISH' ? '#ef5350' : '#ff9800';
               const adxWidth = Math.min((data.adx || 0) / 60 * 100, 100);
               return (
                 <div key={tf} style={{ marginBottom: '14px', padding: '12px', background: '#0d1117', borderRadius: '6px', borderLeft: `3px solid ${dirColor}` }}>
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
-                    <span style={{ fontSize: '14px', fontWeight: 700, color: '#4fc3f7', fontFamily: 'var(--font-mc-mono)' }}>{tf}</span>
-                    <span style={{ fontSize: '12px', fontWeight: 600, color: dirColor, fontFamily: 'var(--font-mc-mono)', padding: '2px 10px', background: `${dirColor}11`, borderRadius: '4px' }}>
+                    <span style={{ fontSize: 'var(--mc-font-sm)', fontWeight: 700, color: '#4fc3f7', fontFamily: 'var(--font-mc-mono)' }}>{tf}</span>
+                    <span style={{ fontSize: 'var(--mc-font-badge)', fontWeight: 600, color: dirColor, fontFamily: 'var(--font-mc-mono)', padding: '2px 10px', background: `${dirColor}11`, borderRadius: '4px' }}>
                       {data.direction || data.regime || 'N/A'}
                     </span>
                   </div>
-                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '8px', fontSize: '10px', fontFamily: 'var(--font-mc-mono)' }}>
+                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '8px', fontSize: 'var(--mc-font-label)', fontFamily: 'var(--font-mc-mono)' }}>
                     <div>
                       <span style={{ color: '#607d8b' }}>ADX</span>
                       <div style={{ height: '4px', background: '#0a1929', borderRadius: '2px', marginTop: '4px' }}>
@@ -253,19 +253,19 @@ export function DashboardPage() {
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
               <div>
                 <div className="db-label" style={{ marginBottom: '6px' }}>SUPERTREND SIGNAL</div>
-                <div style={{ fontSize: '24px', fontWeight: 800, color: btcSignal.direction === 'LONG' ? '#66bb6a' : '#ef5350', fontFamily: 'var(--font-mc-mono)' }}>
+                <div style={{ fontSize: 'var(--mc-font-2xl)', fontWeight: 800, color: btcSignal.direction === 'LONG' ? '#66bb6a' : '#ef5350', fontFamily: 'var(--font-mc-mono)' }}>
                   {btcSignal.direction || 'N/A'}
                 </div>
-                <div style={{ fontSize: '11px', color: '#607d8b', fontFamily: 'var(--font-mc-mono)', marginTop: '4px' }}>
+                <div style={{ fontSize: 'var(--mc-font-label)', color: '#607d8b', fontFamily: 'var(--font-mc-mono)', marginTop: '4px' }}>
                   Entry: ${btcSignal.entry_price ? Number(btcSignal.entry_price).toLocaleString() : 'N/A'} | Signals: {btcSignal.signal_count || 0}
                 </div>
               </div>
               {params && (
                 <div style={{ textAlign: 'right' }}>
                   <div className="db-label" style={{ marginBottom: '4px' }}>OPTIMIZER</div>
-                  <div style={{ fontSize: '13px', color: '#4fc3f7', fontFamily: 'var(--font-mc-mono)' }}>ATR {params.recommended_atr_period} × {params.recommended_multiplier}</div>
-                  <div style={{ fontSize: '11px', color: '#66bb6a', fontFamily: 'var(--font-mc-mono)' }}>+{params.backtest_return_pct}% backtest</div>
-                  <div style={{ fontSize: '11px', color: '#ff9800', fontFamily: 'var(--font-mc-mono)' }}>{params.expected_win_rate}% WR | {params.expected_profit_factor} PF</div>
+                  <div style={{ fontSize: 'var(--mc-font-xs)', color: '#4fc3f7', fontFamily: 'var(--font-mc-mono)' }}>ATR {params.recommended_atr_period} × {params.recommended_multiplier}</div>
+                  <div style={{ fontSize: 'var(--mc-font-label)', color: '#66bb6a', fontFamily: 'var(--font-mc-mono)' }}>+{params.backtest_return_pct}% backtest</div>
+                  <div style={{ fontSize: 'var(--mc-font-label)', color: '#ff9800', fontFamily: 'var(--font-mc-mono)' }}>{params.expected_win_rate}% WR | {params.expected_profit_factor} PF</div>
                 </div>
               )}
             </div>
@@ -279,10 +279,10 @@ export function DashboardPage() {
             <div className="db-card" style={{ padding: '16px' }}>
               <div className="db-label" style={{ marginBottom: '12px' }}>TODAY'S REPORT</div>
               {report.summary ? (
-                <div style={{ fontSize: '12px', color: '#b0bec5', lineHeight: '1.6' }}>{report.summary}</div>
+                <div style={{ fontSize: 'var(--mc-font-badge)', color: '#b0bec5', lineHeight: '1.6' }}>{report.summary}</div>
               ) : (
                 <>
-                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '6px', fontSize: '11px', fontFamily: 'var(--font-mc-mono)' }}>
+                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '6px', fontSize: 'var(--mc-font-label)', fontFamily: 'var(--font-mc-mono)' }}>
                     {[
                       { l: 'SIGNALS', v: report?.signals?.total || 0, c: '#4fc3f7' },
                       { l: 'TRADES', v: report?.trades || 0, c: '#66bb6a' },
@@ -304,7 +304,7 @@ export function DashboardPage() {
           <div className="db-card" style={{ padding: '16px' }}>
             <div className="db-label" style={{ marginBottom: '12px' }}>RECENT SIGNALS</div>
             {pnlHistory.length === 0 ? (
-              <div style={{ color: '#455a64', fontSize: '12px', fontFamily: 'var(--font-mc-mono)' }}>No signal history</div>
+              <div style={{ color: '#455a64', fontSize: 'var(--mc-font-badge)', fontFamily: 'var(--font-mc-mono)' }}>No signal history</div>
             ) : [...pnlHistory].reverse().slice(0, 8).map((t: any, i: number) => {
               const g = t.pnl_pct > 0;
               const d = t.closed_at ? new Date(t.closed_at) : null;
@@ -313,7 +313,7 @@ export function DashboardPage() {
                   display: 'flex', justifyContent: 'space-between', alignItems: 'center',
                   padding: '8px 10px', borderLeft: `2px solid ${g ? '#66bb6a' : '#ef5350'}`,
                   background: '#0d1117', borderRadius: '3px', marginBottom: '4px',
-                  fontSize: '11px', fontFamily: 'var(--font-mc-mono)',
+                  fontSize: 'var(--mc-font-label)', fontFamily: 'var(--font-mc-mono)',
                 }}>
                   <span style={{ color: '#455a64', minWidth: '50px' }}>{d ? d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' }) : '?'}</span>
                   <span style={{ color: t.direction === 'LONG' ? '#66bb6a' : '#ef5350', minWidth: '40px' }}>{t.direction}</span>
@@ -358,7 +358,7 @@ export function DashboardPage() {
               { l: 'CASH', v: `$${fmt(parseFloat(portfolio?.cash || '0'))}`, c: '#607d8b' },
               { l: 'GOAL ($110K)', v: `${fmt(Math.min(((equity - 100000) / 10000) * 100, 100), 0)}%`, c: '#ff9800' },
             ].map((s, i) => (
-              <div key={i} style={{ display: 'flex', justifyContent: 'space-between', padding: '6px 10px', background: '#0d1117', borderRadius: '4px', marginBottom: '4px', fontSize: '11px', fontFamily: 'var(--font-mc-mono)' }}>
+              <div key={i} style={{ display: 'flex', justifyContent: 'space-between', padding: '6px 10px', background: '#0d1117', borderRadius: '4px', marginBottom: '4px', fontSize: 'var(--mc-font-label)', fontFamily: 'var(--font-mc-mono)' }}>
                 <span style={{ color: '#607d8b' }}>{s.l}</span>
                 <span style={{ color: s.c, fontWeight: 600 }}>{s.v}</span>
               </div>

@@ -72,7 +72,7 @@ export function RegimePage() {
     const pct = Math.min((value / max) * 100, 100);
     return (
       <div style={{ textAlign: 'center' }}>
-        <div style={{ fontSize: '10px', color: '#607d8b', fontFamily: 'var(--font-mc-mono)', marginBottom: '8px', letterSpacing: '1px' }}>{label}</div>
+        <div style={{ fontSize: 'var(--mc-font-label)', color: '#607d8b', fontFamily: 'var(--font-mc-mono)', marginBottom: '8px', letterSpacing: '1px' }}>{label}</div>
         <div style={{ position: 'relative', width: '100%', height: '8px', background: '#0d1117', borderRadius: '4px', overflow: 'hidden' }}>
           <div style={{
             position: 'absolute', top: 0, left: 0, height: '100%',
@@ -80,7 +80,7 @@ export function RegimePage() {
             borderRadius: '4px', transition: 'width 0.8s ease-out',
           }} />
         </div>
-        <div style={{ fontSize: '18px', fontWeight: 700, color, fontFamily: 'var(--font-mc-mono)', marginTop: '6px' }}>
+        <div style={{ fontSize: 'var(--mc-font-xl)', fontWeight: 700, color, fontFamily: 'var(--font-mc-mono)', marginTop: '6px' }}>
           {fmt(value, 1)}{unit || ''}
         </div>
       </div>
@@ -117,14 +117,14 @@ export function RegimePage() {
         }}>
           {overallRegime.replace(/_/g, ' ')}
         </div>
-        <div style={{ fontSize: '16px', color: getColor(overallBias), marginTop: '8px', fontFamily: 'var(--font-mc-mono)' }}>
+        <div style={{ fontSize: 'var(--mc-font-lg)', color: getColor(overallBias), marginTop: '8px', fontFamily: 'var(--font-mc-mono)' }}>
           BIAS: {overallBias || 'NEUTRAL'} {overallBias === 'BULLISH' ? '▲' : overallBias === 'BEARISH' ? '▼' : '—'}
         </div>
         {recommendation && (
-          <div style={{ fontSize: '13px', color: '#607d8b', marginTop: '8px', fontStyle: 'italic' }}>{recommendation}</div>
+          <div style={{ fontSize: 'var(--mc-font-xs)', color: '#607d8b', marginTop: '8px', fontStyle: 'italic' }}>{recommendation}</div>
         )}
         {price > 0 && (
-          <div style={{ fontSize: '14px', color: '#4fc3f7', marginTop: '10px', fontFamily: 'var(--font-mc-mono)' }}>
+          <div style={{ fontSize: 'var(--mc-font-sm)', color: '#4fc3f7', marginTop: '10px', fontFamily: 'var(--font-mc-mono)' }}>
             BTC: ${price.toLocaleString()} | SuperTrend: {btcSignal.direction || 'N/A'}
           </div>
         )}
@@ -135,16 +135,16 @@ export function RegimePage() {
         <div className="rg-label" style={{ marginBottom: '12px' }}>STRATEGY RECOMMENDATION FOR {overallRegime.replace(/_/g, ' ')}</div>
         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '16px' }}>
           <div>
-            <div style={{ fontSize: '10px', color: '#455a64', fontFamily: 'var(--font-mc-mono)', marginBottom: '6px' }}>APPROACH</div>
-            <div style={{ fontSize: '14px', color: '#e0e0e0', lineHeight: '1.5' }}>{strat.strategy}</div>
+            <div style={{ fontSize: 'var(--mc-font-label)', color: '#455a64', fontFamily: 'var(--font-mc-mono)', marginBottom: '6px' }}>APPROACH</div>
+            <div style={{ fontSize: 'var(--mc-font-sm)', color: '#e0e0e0', lineHeight: '1.5' }}>{strat.strategy}</div>
           </div>
           <div>
-            <div style={{ fontSize: '10px', color: '#455a64', fontFamily: 'var(--font-mc-mono)', marginBottom: '6px' }}>POSITION SIZING</div>
-            <div style={{ fontSize: '14px', color: '#4fc3f7' }}>{strat.sizing}</div>
+            <div style={{ fontSize: 'var(--mc-font-label)', color: '#455a64', fontFamily: 'var(--font-mc-mono)', marginBottom: '6px' }}>POSITION SIZING</div>
+            <div style={{ fontSize: 'var(--mc-font-sm)', color: '#4fc3f7' }}>{strat.sizing}</div>
           </div>
           <div>
-            <div style={{ fontSize: '10px', color: '#455a64', fontFamily: 'var(--font-mc-mono)', marginBottom: '6px' }}>TRADING STYLE</div>
-            <div style={{ fontSize: '14px', color: getColor(overallRegime) }}>{strat.style}</div>
+            <div style={{ fontSize: 'var(--mc-font-label)', color: '#455a64', fontFamily: 'var(--font-mc-mono)', marginBottom: '6px' }}>TRADING STYLE</div>
+            <div style={{ fontSize: 'var(--mc-font-sm)', color: getColor(overallRegime) }}>{strat.style}</div>
           </div>
         </div>
       </div>
@@ -154,7 +154,7 @@ export function RegimePage() {
       <div style={{ display: 'grid', gridTemplateColumns: `repeat(${Object.keys(timeframes).length || 3}, 1fr)`, gap: '12px', marginBottom: '16px' }}>
         {Object.entries(timeframes).length === 0 ? (
           <div className="rg-card" style={{ padding: '30px', textAlign: 'center', color: '#455a64', gridColumn: '1 / -1' }}>
-            <div style={{ fontFamily: 'var(--font-mc-mono)', fontSize: '12px' }}>Awaiting regime data from market_regime.json...</div>
+            <div style={{ fontFamily: 'var(--font-mc-mono)', fontSize: 'var(--mc-font-badge)' }}>Awaiting regime data from market_regime.json...</div>
           </div>
         ) : Object.entries(timeframes).map(([tf, data]: [string, any]) => {
           const dirColor = getColor(data.direction || '');
@@ -170,9 +170,9 @@ export function RegimePage() {
             <div key={tf} className="rg-card" style={{ padding: '20px', borderTop: `3px solid ${dirColor}` }}>
               {/* TF Header */}
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
-                <div style={{ fontSize: '22px', fontWeight: 800, color: '#4fc3f7', fontFamily: 'var(--font-mc-mono)' }}>{tf}</div>
+                <div style={{ fontSize: 'var(--mc-font-2xl)', fontWeight: 800, color: '#4fc3f7', fontFamily: 'var(--font-mc-mono)' }}>{tf}</div>
                 <div style={{
-                  fontSize: '11px', fontWeight: 600, color: dirColor, fontFamily: 'var(--font-mc-mono)',
+                  fontSize: 'var(--mc-font-label)', fontWeight: 600, color: dirColor, fontFamily: 'var(--font-mc-mono)',
                   padding: '4px 12px', borderRadius: '6px', background: `${dirColor}15`, border: `1px solid ${dirColor}33`,
                 }}>
                   {data.direction || 'N/A'}
@@ -181,10 +181,10 @@ export function RegimePage() {
 
               {/* Regime label */}
               <div style={{ textAlign: 'center', marginBottom: '16px' }}>
-                <div style={{ fontSize: '14px', fontWeight: 700, color: regColor, fontFamily: 'var(--font-mc-mono)' }}>
+                <div style={{ fontSize: 'var(--mc-font-sm)', fontWeight: 700, color: regColor, fontFamily: 'var(--font-mc-mono)' }}>
                   {(data.regime || 'UNKNOWN').replace(/_/g, ' ')}
                 </div>
-                <div style={{ fontSize: '10px', color: '#455a64', marginTop: '2px' }}>{data.recommended_strategy || ''}</div>
+                <div style={{ fontSize: 'var(--mc-font-label)', color: '#455a64', marginTop: '2px' }}>{data.recommended_strategy || ''}</div>
               </div>
 
               {/* Gauges */}
@@ -197,23 +197,23 @@ export function RegimePage() {
 
               {/* DI Comparison */}
               <div style={{ marginTop: '16px', padding: '12px', background: '#0d1117', borderRadius: '6px' }}>
-                <div style={{ fontSize: '10px', color: '#607d8b', fontFamily: 'var(--font-mc-mono)', marginBottom: '8px', letterSpacing: '1px' }}>DIRECTIONAL MOVEMENT</div>
+                <div style={{ fontSize: 'var(--mc-font-label)', color: '#607d8b', fontFamily: 'var(--font-mc-mono)', marginBottom: '8px', letterSpacing: '1px' }}>DIRECTIONAL MOVEMENT</div>
                 <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '6px' }}>
-                  <span style={{ fontSize: '11px', color: '#66bb6a', fontFamily: 'var(--font-mc-mono)' }}>+DI: {fmt(plusDI, 1)}</span>
-                  <span style={{ fontSize: '11px', color: '#ef5350', fontFamily: 'var(--font-mc-mono)' }}>-DI: {fmt(minusDI, 1)}</span>
+                  <span style={{ fontSize: 'var(--mc-font-label)', color: '#66bb6a', fontFamily: 'var(--font-mc-mono)' }}>+DI: {fmt(plusDI, 1)}</span>
+                  <span style={{ fontSize: 'var(--mc-font-label)', color: '#ef5350', fontFamily: 'var(--font-mc-mono)' }}>-DI: {fmt(minusDI, 1)}</span>
                 </div>
                 <div style={{ display: 'flex', height: '10px', borderRadius: '5px', overflow: 'hidden', background: '#0a1929' }}>
                   <div style={{ width: `${(plusDI / (plusDI + minusDI || 1)) * 100}%`, background: '#66bb6a', transition: 'width 0.5s' }} />
                   <div style={{ width: `${(minusDI / (plusDI + minusDI || 1)) * 100}%`, background: '#ef5350', transition: 'width 0.5s' }} />
                 </div>
-                <div style={{ fontSize: '11px', color: plusDI > minusDI ? '#66bb6a' : '#ef5350', fontFamily: 'var(--font-mc-mono)', marginTop: '6px', textAlign: 'center' }}>
+                <div style={{ fontSize: 'var(--mc-font-label)', color: plusDI > minusDI ? '#66bb6a' : '#ef5350', fontFamily: 'var(--font-mc-mono)', marginTop: '6px', textAlign: 'center' }}>
                   {plusDI > minusDI ? '▲ BULLS LEADING' : '▼ BEARS LEADING'} ({fmt(Math.abs(plusDI - minusDI), 1)} spread)
                 </div>
               </div>
 
               {/* Price */}
               {data.current_price && (
-                <div style={{ marginTop: '12px', textAlign: 'center', fontSize: '12px', color: '#4fc3f7', fontFamily: 'var(--font-mc-mono)' }}>
+                <div style={{ marginTop: '12px', textAlign: 'center', fontSize: 'var(--mc-font-badge)', color: '#4fc3f7', fontFamily: 'var(--font-mc-mono)' }}>
                   ${data.current_price.toLocaleString()}
                 </div>
               )}
@@ -225,7 +225,7 @@ export function RegimePage() {
       {/* === REGIME LEGEND === */}
       <div className="rg-card" style={{ padding: '18px' }}>
         <div className="rg-label" style={{ marginBottom: '12px' }}>REGIME DEFINITIONS</div>
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '8px', fontSize: '11px' }}>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '8px', fontSize: 'var(--mc-font-label)' }}>
           {[
             { regime: 'STRONG TREND', desc: 'ADX >30, clear direction. Ride the trend.', color: '#66bb6a' },
             { regime: 'WEAK TREND', desc: 'ADX 15-30, direction unclear. Be selective.', color: '#ff9800' },

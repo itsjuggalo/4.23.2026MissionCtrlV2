@@ -70,7 +70,7 @@ export function RiskPage() {
       <div style={{ display: 'grid', gridTemplateColumns: '280px 1fr', gap: '16px', marginBottom: '20px' }}>
         {/* Gauge */}
         <div style={{ background: '#0a1929', border: '1px solid #1a3a4a', borderRadius: '12px', padding: '28px 24px', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
-          <div style={{ fontSize: '10px', color: '#607d8b', fontFamily: 'var(--font-mc-mono)', letterSpacing: '2px', marginBottom: '8px' }}>PORTFOLIO RISK</div>
+          <div style={{ fontSize: 'var(--mc-font-label)', color: '#607d8b', fontFamily: 'var(--font-mc-mono)', letterSpacing: '2px', marginBottom: '8px' }}>PORTFOLIO RISK</div>
           <div style={{ width: '140px', height: '70px', position: 'relative', overflow: 'hidden', marginBottom: '8px' }}>
             <svg viewBox="0 0 140 70" style={{ width: '100%' }}>
               <path d="M 10 65 A 60 60 0 0 1 130 65" fill="none" stroke="#1a3a4a" strokeWidth="12" strokeLinecap="round" />
@@ -79,7 +79,7 @@ export function RiskPage() {
             </svg>
           </div>
           <div style={{ fontSize: '32px', fontWeight: 900, color: riskColor, fontFamily: 'var(--font-mc-mono)', letterSpacing: '3px' }}>{riskLevel}</div>
-          <div style={{ fontSize: '11px', color: '#607d8b', fontFamily: 'var(--font-mc-mono)', marginTop: '4px' }}>Max DD: {fmt(maxDrawdown, 1)}%</div>
+          <div style={{ fontSize: 'var(--mc-font-label)', color: '#607d8b', fontFamily: 'var(--font-mc-mono)', marginTop: '4px' }}>Max DD: {fmt(maxDrawdown, 1)}%</div>
         </div>
 
         {/* Key Metrics — 2x3 grid */}
@@ -93,9 +93,9 @@ export function RiskPage() {
             { label: 'WIN RATE', value: `${fmt(winRate, 0)}%`, sub: `${total} trades`, color: winRate > 55 ? '#66bb6a' : winRate > 45 ? '#ff9800' : '#ef5350' },
           ].map((m, i) => (
             <div key={i} style={{ background: '#0d1117', border: '1px solid #1a3a4a', borderRadius: '8px', padding: '14px 16px', borderTop: `2px solid ${m.color}` }}>
-              <div style={{ fontSize: '9px', color: '#607d8b', fontFamily: 'var(--font-mc-mono)', letterSpacing: '1.5px', marginBottom: '6px' }}>{m.label}</div>
-              <div style={{ fontSize: '20px', fontWeight: 800, color: m.color, fontFamily: 'var(--font-mc-mono)' }}>{m.value}</div>
-              <div style={{ fontSize: '10px', color: '#455a64', fontFamily: 'var(--font-mc-mono)', marginTop: '2px' }}>{m.sub}</div>
+              <div style={{ fontSize: 'var(--mc-font-label)', color: '#607d8b', fontFamily: 'var(--font-mc-mono)', letterSpacing: '1.5px', marginBottom: '6px' }}>{m.label}</div>
+              <div style={{ fontSize: 'var(--mc-font-xl)', fontWeight: 800, color: m.color, fontFamily: 'var(--font-mc-mono)' }}>{m.value}</div>
+              <div style={{ fontSize: 'var(--mc-font-label)', color: '#455a64', fontFamily: 'var(--font-mc-mono)', marginTop: '2px' }}>{m.sub}</div>
             </div>
           ))}
         </div>
@@ -105,7 +105,7 @@ export function RiskPage() {
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px', marginBottom: '20px' }}>
         {/* Portfolio Allocation */}
         <div style={{ background: '#0a1929', border: '1px solid #1a3a4a', borderRadius: '10px', padding: '20px' }}>
-          <div style={{ fontSize: '11px', fontWeight: 700, color: '#4fc3f7', fontFamily: 'var(--font-mc-mono)', letterSpacing: '1.5px', marginBottom: '14px' }}>EXPOSURE BREAKDOWN</div>
+          <div style={{ fontSize: 'var(--mc-font-label)', fontWeight: 700, color: '#4fc3f7', fontFamily: 'var(--font-mc-mono)', letterSpacing: '1.5px', marginBottom: '14px' }}>EXPOSURE BREAKDOWN</div>
           {[
             { label: 'Alpaca Paper', pct: 82, color: '#4fc3f7' },
             { label: 'Hyperliquid', pct: 10, color: '#ce93d8' },
@@ -113,7 +113,7 @@ export function RiskPage() {
             { label: 'Coinbase', pct: 2, color: '#ff9800' },
           ].map((a, i) => (
             <div key={i} style={{ marginBottom: '10px' }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '11px', fontFamily: 'var(--font-mc-mono)', color: '#90a4ae', marginBottom: '4px' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 'var(--mc-font-label)', fontFamily: 'var(--font-mc-mono)', color: '#90a4ae', marginBottom: '4px' }}>
                 <span>{a.label}</span><span style={{ color: a.color }}>{a.pct}%</span>
               </div>
               <div style={{ background: '#0d1117', borderRadius: '3px', height: '6px', overflow: 'hidden' }}>
@@ -125,7 +125,7 @@ export function RiskPage() {
 
         {/* Performance Bars */}
         <div style={{ background: '#0a1929', border: '1px solid #1a3a4a', borderRadius: '10px', padding: '20px' }}>
-          <div style={{ fontSize: '11px', fontWeight: 700, color: '#4fc3f7', fontFamily: 'var(--font-mc-mono)', letterSpacing: '1.5px', marginBottom: '14px' }}>PERFORMANCE METRICS</div>
+          <div style={{ fontSize: 'var(--mc-font-label)', fontWeight: 700, color: '#4fc3f7', fontFamily: 'var(--font-mc-mono)', letterSpacing: '1.5px', marginBottom: '14px' }}>PERFORMANCE METRICS</div>
           {[
             { label: 'Win Rate', val: winRate, max: 100, color: '#66bb6a', suffix: '%' },
             { label: 'Avg Win / Avg Loss', val: avgLoss > 0 ? (avgWin / avgLoss) : 0, max: 5, color: '#4fc3f7', suffix: 'x' },
@@ -133,7 +133,7 @@ export function RiskPage() {
             { label: 'Sharpe Ratio', val: Math.max(sharpe, 0), max: 3, color: '#ce93d8', suffix: '' },
           ].map((m, i) => (
             <div key={i} style={{ marginBottom: '10px' }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '11px', fontFamily: 'var(--font-mc-mono)', color: '#90a4ae', marginBottom: '4px' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 'var(--mc-font-label)', fontFamily: 'var(--font-mc-mono)', color: '#90a4ae', marginBottom: '4px' }}>
                 <span>{m.label}</span><span style={{ color: m.color }}>{fmt(m.val, 1)}{m.suffix}</span>
               </div>
               <div style={{ background: '#0d1117', borderRadius: '3px', height: '6px', overflow: 'hidden' }}>
@@ -146,7 +146,7 @@ export function RiskPage() {
 
       {/* === BOTTOM: Risk Rules as timeline/checklist === */}
       <div style={{ background: '#0a1929', border: '1px solid #1a3a4a', borderRadius: '10px', padding: '20px' }}>
-        <div style={{ fontSize: '11px', fontWeight: 700, color: '#ef5350', fontFamily: 'var(--font-mc-mono)', letterSpacing: '1.5px', marginBottom: '14px' }}>RISK RULES</div>
+        <div style={{ fontSize: 'var(--mc-font-label)', fontWeight: 700, color: '#ef5350', fontFamily: 'var(--font-mc-mono)', letterSpacing: '1.5px', marginBottom: '14px' }}>RISK RULES</div>
         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px 24px' }}>
           {[
             { rule: 'Max position size: 5% of portfolio', ok: true },
@@ -157,8 +157,8 @@ export function RiskPage() {
             { rule: 'Phase 1: reach $110K before increasing risk', ok: eq >= 110000 },
           ].map((r, i) => (
             <div key={i} style={{ display: 'flex', alignItems: 'center', gap: '10px', padding: '8px 0', borderBottom: '1px solid #0d1117' }}>
-              <span style={{ fontSize: '16px', flexShrink: 0 }}>{r.ok ? '✅' : '⚠️'}</span>
-              <span style={{ fontSize: '12px', color: r.ok ? '#90a4ae' : '#ff9800', fontFamily: 'var(--font-mc-mono)' }}>{r.rule}</span>
+              <span style={{ fontSize: 'var(--mc-font-lg)', flexShrink: 0 }}>{r.ok ? '✅' : '⚠️'}</span>
+              <span style={{ fontSize: 'var(--mc-font-badge)', color: r.ok ? '#90a4ae' : '#ff9800', fontFamily: 'var(--font-mc-mono)' }}>{r.rule}</span>
             </div>
           ))}
         </div>

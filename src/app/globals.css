@@ -21,6 +21,21 @@
 
   --font-mc-sans: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
   --font-mc-mono: 'JetBrains Mono', 'SF Mono', 'Fira Code', monospace;
+
+  /* Global font sizes — change these to resize ALL pages at once */
+  --mc-font-xs: 13px;
+  --mc-font-sm: 14px;
+  --mc-font-md: 15px;
+  --mc-font-lg: 16px;
+  --mc-font-xl: 18px;
+  --mc-font-2xl: 22px;
+  --mc-font-3xl: 26px;
+  --mc-font-hero: 30px;
+  --mc-font-badge: 12px;
+  --mc-font-label: 11px;
+  --mc-row-pad: 10px 14px;
+  --mc-dot-size: 10px;
+  --mc-block-height: 340px;
 }
 
 @layer base {

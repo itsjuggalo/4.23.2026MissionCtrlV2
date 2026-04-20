@@ -165,14 +165,14 @@ export function AlertsPage() {
     <div style={{ padding: '24px', maxWidth: '1100px', margin: '0 auto' }}>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
         <div>
-          <h1 style={{ fontSize: '22px', fontWeight: 700, color: '#f0f0f0', margin: 0 }}>🚨 Alerts</h1>
-          <p style={{ fontSize: '12px', color: '#555', marginTop: '4px' }}>
+          <h1 style={{ fontSize: 'var(--mc-font-2xl)', fontWeight: 700, color: '#f0f0f0', margin: 0 }}>🚨 Alerts</h1>
+          <p style={{ fontSize: 'var(--mc-font-badge)', color: '#555', marginTop: '4px' }}>
             {alerts.length} active • {critCount} critical • {warnCount} warnings • Updated {timeAgo(lastUpdate.toISOString())}
           </p>
         </div>
         <button onClick={fetchAlerts} style={{
           padding: '8px 14px', background: '#111', border: '1px solid #222',
-          borderRadius: '8px', color: '#888', fontSize: '12px', cursor: 'pointer',
+          borderRadius: '8px', color: '#888', fontSize: 'var(--mc-font-badge)', cursor: 'pointer',
         }}>Refresh</button>
       </div>
 
@@ -185,7 +185,7 @@ export function AlertsPage() {
           { key: 'info', label: '🔵 Info', count: infoCount, color: '#60a5fa' },
         ].map(f => (
           <button key={f.key} onClick={() => setFilter(f.key)} style={{
-            padding: '8px 16px', borderRadius: '8px', fontSize: '12px', fontWeight: 500,
+            padding: '8px 16px', borderRadius: '8px', fontSize: 'var(--mc-font-badge)', fontWeight: 500,
             border: `1px solid ${filter === f.key ? f.color + '44' : '#1a1a1a'}`,
             background: filter === f.key ? f.color + '15' : '#111',
             color: filter === f.key ? f.color : '#666',
@@ -202,7 +202,7 @@ export function AlertsPage() {
       ) : filtered.length === 0 ? (
         <div style={{ textAlign: 'center', padding: '60px', color: '#555' }}>
           <div style={{ fontSize: '48px', marginBottom: '12px' }}>✅</div>
-          <div style={{ fontSize: '16px', color: '#666' }}>All clear — no alerts at this severity level</div>
+          <div style={{ fontSize: 'var(--mc-font-lg)', color: '#666' }}>All clear — no alerts at this severity level</div>
         </div>
       ) : (
         <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
@@ -214,25 +214,25 @@ export function AlertsPage() {
                 padding: '14px 18px', background: sev.bg, border: `1px solid ${sev.border}`,
                 borderRadius: '10px', borderLeft: `4px solid ${sev.color}`,
               }}>
-                <span style={{ fontSize: '20px', flexShrink: 0 }}>{sev.icon}</span>
+                <span style={{ fontSize: 'var(--mc-font-xl)', flexShrink: 0 }}>{sev.icon}</span>
                 <div style={{ flex: 1, minWidth: 0 }}>
                   <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '4px' }}>
-                    <span style={{ fontSize: '14px', fontWeight: 600, color: sev.color }}>{alert.title}</span>
+                    <span style={{ fontSize: 'var(--mc-font-sm)', fontWeight: 600, color: sev.color }}>{alert.title}</span>
                     <span style={{
-                      fontSize: '10px', padding: '2px 8px', borderRadius: '10px',
+                      fontSize: 'var(--mc-font-label)', padding: '2px 8px', borderRadius: '10px',
                       background: '#ffffff08', color: '#888', border: '1px solid #ffffff10',
                     }}>{alert.category}</span>
                   </div>
-                  <div style={{ fontSize: '13px', color: '#aaa', lineHeight: '1.5' }}>{alert.detail}</div>
+                  <div style={{ fontSize: 'var(--mc-font-xs)', color: '#aaa', lineHeight: '1.5' }}>{alert.detail}</div>
                 </div>
                 <div style={{ flexShrink: 0, textAlign: 'right' }}>
                   {alert.value && (
-                    <div style={{ fontSize: '16px', fontWeight: 700, color: sev.color, marginBottom: '4px' }}>
+                    <div style={{ fontSize: 'var(--mc-font-lg)', fontWeight: 700, color: sev.color, marginBottom: '4px' }}>
                       {alert.value}
                     </div>
                   )}
-                  <div style={{ fontSize: '11px', color: '#555' }}>{timeAgo(alert.time)}</div>
-                  <div style={{ fontSize: '10px', color: '#444' }}>{fmtTime(alert.time)}</div>
+                  <div style={{ fontSize: 'var(--mc-font-label)', color: '#555' }}>{timeAgo(alert.time)}</div>
+                  <div style={{ fontSize: 'var(--mc-font-label)', color: '#444' }}>{fmtTime(alert.time)}</div>
                 </div>
               </div>
             );

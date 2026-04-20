@@ -98,8 +98,8 @@ export function SessionViewerPage() {
       {/* Header */}
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px' }}>
         <div>
-          <h1 style={{ fontSize: '18px', fontWeight: 700, color: '#4fc3f7', fontFamily: 'var(--font-mc-mono)', letterSpacing: '2px', margin: 0 }}>SESSION VIEWER</h1>
-          <p style={{ fontSize: '11px', color: '#607d8b', fontFamily: 'var(--font-mc-mono)', margin: '4px 0 0' }}>
+          <h1 style={{ fontSize: 'var(--mc-font-xl)', fontWeight: 700, color: '#4fc3f7', fontFamily: 'var(--font-mc-mono)', letterSpacing: '2px', margin: 0 }}>SESSION VIEWER</h1>
+          <p style={{ fontSize: 'var(--mc-font-label)', color: '#607d8b', fontFamily: 'var(--font-mc-mono)', margin: '4px 0 0' }}>
             {filtered.length} log entries · {selectedSources.size} sources active
           </p>
         </div>
@@ -137,7 +137,7 @@ export function SessionViewerPage() {
           </button>
         ))}
         <input value={search} onChange={e => setSearch(e.target.value)} placeholder="Search logs..."
-          style={{ marginLeft: 'auto', padding: '4px 12px', background: '#0d1117', border: '1px solid #1a3a4a', borderRadius: '4px', color: '#e0e0e0', fontFamily: 'var(--font-mc-mono)', fontSize: '11px', width: '200px', outline: 'none' }} />
+          style={{ marginLeft: 'auto', padding: '4px 12px', background: '#0d1117', border: '1px solid #1a3a4a', borderRadius: '4px', color: '#e0e0e0', fontFamily: 'var(--font-mc-mono)', fontSize: 'var(--mc-font-label)', width: '200px', outline: 'none' }} />
       </div>
 
       {/* Log Stream */}

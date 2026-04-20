@@ -79,16 +79,16 @@ function SignalCard({ sig, onClick, isSelected }: { sig: TelegramSignal; onClick
     <div onClick={onClick} style={{ padding: '10px 12px', background: isSelected ? '#0d2137' : '#0d1117', border: '1px solid ' + (isSelected ? '#4fc3f7' : '#1a3a4a'), borderRadius: '6px', cursor: 'pointer', borderLeft: '3px solid ' + dirColor, marginBottom: '5px' }}>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '6px' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-          <span style={{ fontSize: '14px', fontWeight: 800, color: '#e0e0e0', fontFamily: M }}>{sig.symbol}</span>
+          <span style={{ fontSize: 'var(--mc-font-sm)', fontWeight: 800, color: '#e0e0e0', fontFamily: M }}>{sig.symbol}</span>
           {sig.direction && <span style={{ fontSize: LBL, fontWeight: 700, padding: '2px 6px', borderRadius: '3px', background: dirColor + '22', color: dirColor, fontFamily: M }}>{sig.direction}</span>}
           <span style={{ fontSize: LBL, padding: '2px 6px', borderRadius: '3px', background: q.gradeColor + '22', color: q.gradeColor, fontFamily: M, fontWeight: 700 }}>{q.grade}</span>
         </div>
         <span style={{ fontSize: LBL, color: '#607d8b', fontFamily: M }}>{timeAgo(sig.timestamp)}</span>
       </div>
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '4px', marginBottom: '4px' }}>
-        {sig.entry && sig.entry > 0 ? <div><div style={{ fontSize: '10px', color: '#607d8b', fontFamily: M }}>Entry</div><div style={{ fontSize: F, color: '#66bb6a', fontWeight: 700, fontFamily: M }}>{fmtPrice(sig.entry)}</div></div> : <div />}
-        {sig.stop_loss ? <div><div style={{ fontSize: '10px', color: '#607d8b', fontFamily: M }}>Stop Loss</div><div style={{ fontSize: F, color: '#ef5350', fontWeight: 700, fontFamily: M }}>{fmtPrice(sig.stop_loss)}</div></div> : <div />}
-        {sig.targets && sig.targets.length > 0 ? <div><div style={{ fontSize: '10px', color: '#607d8b', fontFamily: M }}>Target 1</div><div style={{ fontSize: F, color: '#4fc3f7', fontWeight: 700, fontFamily: M }}>{fmtPrice(sig.targets[0])}</div></div> : <div />}
+        {sig.entry && sig.entry > 0 ? <div><div style={{ fontSize: 'var(--mc-font-label)', color: '#607d8b', fontFamily: M }}>Entry</div><div style={{ fontSize: F, color: '#66bb6a', fontWeight: 700, fontFamily: M }}>{fmtPrice(sig.entry)}</div></div> : <div />}
+        {sig.stop_loss ? <div><div style={{ fontSize: 'var(--mc-font-label)', color: '#607d8b', fontFamily: M }}>Stop Loss</div><div style={{ fontSize: F, color: '#ef5350', fontWeight: 700, fontFamily: M }}>{fmtPrice(sig.stop_loss)}</div></div> : <div />}
+        {sig.targets && sig.targets.length > 0 ? <div><div style={{ fontSize: 'var(--mc-font-label)', color: '#607d8b', fontFamily: M }}>Target 1</div><div style={{ fontSize: F, color: '#4fc3f7', fontWeight: 700, fontFamily: M }}>{fmtPrice(sig.targets[0])}</div></div> : <div />}
       </div>
       {sig.leverage && <div style={{ fontSize: LBL, color: '#ff9800', fontFamily: M, fontWeight: 700 }}>Leverage: {sig.leverage}x</div>}
     </div>
@@ -98,7 +98,7 @@ function SignalCard({ sig, onClick, isSelected }: { sig: TelegramSignal; onClick
 function GridBox({ title, color, count, children }: { title: string; color: string; count: number; children: React.ReactNode }) {
   return (
     <div style={{ display: 'flex', flexDirection: 'column', overflow: 'hidden', background: '#0a192908', borderRadius: '8px', border: '1px solid #1a3a4a', minHeight: 0 }}>
-      <div style={{ fontSize: '12px', fontWeight: 700, fontFamily: M, letterSpacing: '1px', padding: '10px 12px', borderBottom: '2px solid ' + color + '44', color: color, flexShrink: 0 }}>
+      <div style={{ fontSize: 'var(--mc-font-badge)', fontWeight: 700, fontFamily: M, letterSpacing: '1px', padding: '10px 12px', borderBottom: '2px solid ' + color + '44', color: color, flexShrink: 0 }}>
         {title} <span style={{ fontSize: LBL, color: '#607d8b', fontWeight: 400 }}>({count})</span>
       </div>
       <div style={{ overflow: 'auto', padding: '6px 8px', flex: 1 }}>{children}</div>
@@ -148,7 +148,7 @@ export function TelegramPage() {
   }, []);
 
   if (loading) return (
-    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '40vh', color: '#4fc3f7', fontFamily: M, fontSize: '16px' }}>
+    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '40vh', color: '#4fc3f7', fontFamily: M, fontSize: 'var(--mc-font-lg)' }}>
       <div style={{ animation: 'tBlink 1s infinite' }}>SCANNING CHANNELS...</div>
       <style>{'@keyframes tBlink { 0%,100% { opacity:1; } 50% { opacity:0.3; } }'}</style>
     </div>
@@ -170,8 +170,8 @@ export function TelegramPage() {
   const whaleLiqs = byGroup('WHALE LIQS');
   const xCrypto = byGroup('xCRYPTO');
 
-  const selectStyle: React.CSSProperties = { padding: '7px 12px', background: '#0d1117', border: '1px solid #1a3a4a', borderRadius: '6px', color: '#e0e0e0', fontFamily: M, fontSize: '12px', cursor: 'pointer', outline: 'none' };
-  const noSig = <div style={{ padding: '20px', textAlign: 'center', color: '#455a64', fontFamily: M, fontSize: '12px' }}>No signals</div>;
+  const selectStyle: React.CSSProperties = { padding: '7px 12px', background: '#0d1117', border: '1px solid #1a3a4a', borderRadius: '6px', color: '#e0e0e0', fontFamily: M, fontSize: 'var(--mc-font-badge)', cursor: 'pointer', outline: 'none' };
+  const noSig = <div style={{ padding: '20px', textAlign: 'center', color: '#455a64', fontFamily: M, fontSize: 'var(--mc-font-badge)' }}>No signals</div>;
   const sel = selected;
   const isSel = (s: TelegramSignal) => sel?.id === s.id;
   const toggle = (s: TelegramSignal) => setSelected(isSel(s) ? null : s);
@@ -181,7 +181,7 @@ export function TelegramPage() {
       {/* Top Bar */}
       <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '10px', flexWrap: 'wrap', flexShrink: 0 }}>
         <span style={{ width: '8px', height: '8px', borderRadius: '50%', background: '#66bb6a', boxShadow: '0 0 6px #66bb6a88' }} />
-        <span style={{ fontSize: '12px', fontWeight: 700, color: '#66bb6a', fontFamily: M }}>LIVE</span>
+        <span style={{ fontSize: 'var(--mc-font-badge)', fontWeight: 700, color: '#66bb6a', fontFamily: M }}>LIVE</span>
         <span style={{ fontSize: LBL, color: '#607d8b', fontFamily: M }}>
           {signals.length} signals {' \u00b7 '} {channels.length} channels {' \u00b7 '} {actionableCount} actionable
         </span>
@@ -226,36 +226,36 @@ export function TelegramPage() {
           const dirColor = sel.direction === 'LONG' || sel.direction === 'BUY' ? '#66bb6a' : sel.direction === 'SHORT' ? '#ef5350' : '#607d8b';
           return (
             <div style={{ display: 'flex', flexDirection: 'column', overflow: 'hidden', background: '#0a1929', borderRadius: '8px', border: '1px solid #4fc3f7', minHeight: 0 }}>
-              <div style={{ fontSize: '12px', fontWeight: 700, fontFamily: M, letterSpacing: '1px', padding: '10px 12px', borderBottom: '2px solid #4fc3f744', color: '#4fc3f7', display: 'flex', justifyContent: 'space-between', flexShrink: 0 }}>
+              <div style={{ fontSize: 'var(--mc-font-badge)', fontWeight: 700, fontFamily: M, letterSpacing: '1px', padding: '10px 12px', borderBottom: '2px solid #4fc3f744', color: '#4fc3f7', display: 'flex', justifyContent: 'space-between', flexShrink: 0 }}>
                 SIGNAL DETAIL
                 <button onClick={() => setSelected(null)} style={{ background: 'none', border: '1px solid #1a3a4a', borderRadius: '4px', color: '#607d8b', padding: '1px 8px', cursor: 'pointer', fontFamily: M, fontSize: LBL }}>\u2715</button>
               </div>
               <div style={{ overflow: 'auto', padding: '12px', flex: 1 }}>
-                <div style={{ fontSize: '20px', fontWeight: 800, color: '#e0e0e0', fontFamily: M, marginBottom: '8px' }}>{sel.symbol}</div>
+                <div style={{ fontSize: 'var(--mc-font-xl)', fontWeight: 800, color: '#e0e0e0', fontFamily: M, marginBottom: '8px' }}>{sel.symbol}</div>
                 <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap', marginBottom: '16px' }}>
                   {sel.direction && <span style={{ fontSize: LBL, padding: '3px 8px', borderRadius: '4px', background: dirColor + '22', color: dirColor, fontFamily: M, fontWeight: 700 }}>{sel.direction}</span>}
                   <span style={{ fontSize: LBL, padding: '3px 8px', borderRadius: '4px', background: getChannelColor(sel.channel_name || '') + '22', color: getChannelColor(sel.channel_name || ''), fontFamily: M }}>{cleanChannelName(sel.channel_name || '')}</span>
                   <span style={{ fontSize: LBL, padding: '3px 8px', borderRadius: '4px', background: q.gradeColor + '22', color: q.gradeColor, fontFamily: M, fontWeight: 700 }}>{q.grade}</span>
                 </div>
 
-                <div style={{ fontSize: '10px', color: '#607d8b', fontFamily: M, letterSpacing: '1.5px', marginBottom: '8px' }}>SIGNAL QUALITY</div>
+                <div style={{ fontSize: 'var(--mc-font-label)', color: '#607d8b', fontFamily: M, letterSpacing: '1.5px', marginBottom: '8px' }}>SIGNAL QUALITY</div>
                 <div style={{ marginBottom: '16px', padding: '10px', background: '#0d1117', borderRadius: '6px' }}>
                   {q.checks.map((c: any, i: number) => (
                     <div key={i} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '5px 0', borderBottom: i < q.checks.length - 1 ? '1px solid #1a3a4a' : 'none' }}>
                       <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
                         <span style={{ fontSize: F, color: c.pass ? '#66bb6a' : '#ef5350' }}>{c.pass ? '\u2713' : '\u2717'}</span>
-                        <span style={{ fontSize: '12px', color: '#90a4ae', fontFamily: M }}>{c.label}</span>
+                        <span style={{ fontSize: 'var(--mc-font-badge)', color: '#90a4ae', fontFamily: M }}>{c.label}</span>
                       </div>
-                      <span style={{ fontSize: '12px', color: c.pass ? '#e0e0e0' : '#455a64', fontFamily: M, fontWeight: 600 }}>{c.reason}</span>
+                      <span style={{ fontSize: 'var(--mc-font-badge)', color: c.pass ? '#e0e0e0' : '#455a64', fontFamily: M, fontWeight: 600 }}>{c.reason}</span>
                     </div>
                   ))}
                   <div style={{ marginTop: '8px', paddingTop: '8px', borderTop: '1px solid #1a3a4a', display: 'flex', justifyContent: 'space-between' }}>
-                    <span style={{ fontSize: '12px', color: '#607d8b', fontFamily: M, fontWeight: 700 }}>VERDICT</span>
-                    <span style={{ fontSize: '14px', fontWeight: 700, color: q.gradeColor, fontFamily: M }}>{q.grade} ({q.checks.filter((c: any) => c.pass).length}/5)</span>
+                    <span style={{ fontSize: 'var(--mc-font-badge)', color: '#607d8b', fontFamily: M, fontWeight: 700 }}>VERDICT</span>
+                    <span style={{ fontSize: 'var(--mc-font-sm)', fontWeight: 700, color: q.gradeColor, fontFamily: M }}>{q.grade} ({q.checks.filter((c: any) => c.pass).length}/5)</span>
                   </div>
                 </div>
 
-                <div style={{ fontSize: '10px', color: '#607d8b', fontFamily: M, letterSpacing: '1.5px', marginBottom: '8px' }}>PRICE LEVELS</div>
+                <div style={{ fontSize: 'var(--mc-font-label)', color: '#607d8b', fontFamily: M, letterSpacing: '1.5px', marginBottom: '8px' }}>PRICE LEVELS</div>
                 {[
                   { label: 'ENTRY', value: sel.entry && sel.entry > 0 ? fmtPrice(sel.entry) : null, color: '#66bb6a' },
                   { label: 'STOP LOSS', value: sel.stop_loss ? fmtPrice(sel.stop_loss) : null, color: '#ef5350' },
@@ -264,7 +264,7 @@ export function TelegramPage() {
                 ].filter(t => t.value).map((t, i) => (
                   <div key={i} style={{ display: 'flex', justifyContent: 'space-between', padding: '6px 0', borderBottom: '1px solid #0d1117' }}>
                     <span style={{ fontSize: LBL, color: '#607d8b', fontFamily: M }}>{t.label}</span>
-                    <span style={{ fontSize: '15px', fontWeight: 700, color: t.color, fontFamily: M }}>{t.value}</span>
+                    <span style={{ fontSize: 'var(--mc-font-md)', fontWeight: 700, color: t.color, fontFamily: M }}>{t.value}</span>
                   </div>
                 ))}
 
@@ -274,21 +274,21 @@ export function TelegramPage() {
                   const rr = risk > 0 ? (reward / risk).toFixed(1) : '?';
                   return (
                     <div style={{ marginTop: '12px', padding: '10px', background: '#0d1117', borderRadius: '6px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                      <span style={{ fontSize: '12px', color: '#607d8b', fontFamily: M }}>RISK:REWARD</span>
-                      <span style={{ fontSize: '18px', fontWeight: 800, color: parseFloat(rr) >= 2 ? '#66bb6a' : parseFloat(rr) >= 1 ? '#ff9800' : '#ef5350', fontFamily: M }}>1:{rr}</span>
+                      <span style={{ fontSize: 'var(--mc-font-badge)', color: '#607d8b', fontFamily: M }}>RISK:REWARD</span>
+                      <span style={{ fontSize: 'var(--mc-font-xl)', fontWeight: 800, color: parseFloat(rr) >= 2 ? '#66bb6a' : parseFloat(rr) >= 1 ? '#ff9800' : '#ef5350', fontFamily: M }}>1:{rr}</span>
                     </div>
                   );
                 })()}
 
-                <div style={{ fontSize: '10px', color: '#607d8b', fontFamily: M, letterSpacing: '1.5px', marginTop: '16px', marginBottom: '8px' }}>TIMING</div>
+                <div style={{ fontSize: 'var(--mc-font-label)', color: '#607d8b', fontFamily: M, letterSpacing: '1.5px', marginTop: '16px', marginBottom: '8px' }}>TIMING</div>
                 <div style={{ display: 'flex', justifyContent: 'space-between', padding: '5px 0' }}>
                   <span style={{ fontSize: LBL, color: '#607d8b', fontFamily: M }}>Received</span>
-                  <span style={{ fontSize: '12px', color: '#e0e0e0', fontFamily: M, fontWeight: 600 }}>{fullTime(sel.timestamp)}</span>
+                  <span style={{ fontSize: 'var(--mc-font-badge)', color: '#e0e0e0', fontFamily: M, fontWeight: 600 }}>{fullTime(sel.timestamp)}</span>
                 </div>
 
                 {sel.raw_text && (
                   <>
-                    <div style={{ fontSize: '10px', color: '#607d8b', fontFamily: M, letterSpacing: '1.5px', marginTop: '16px', marginBottom: '8px' }}>RAW MESSAGE</div>
+                    <div style={{ fontSize: 'var(--mc-font-label)', color: '#607d8b', fontFamily: M, letterSpacing: '1.5px', marginTop: '16px', marginBottom: '8px' }}>RAW MESSAGE</div>
                     <div style={{ fontSize: LBL, color: '#90a4ae', fontFamily: M, padding: '10px', background: '#0d1117', borderRadius: '6px', maxHeight: '180px', overflow: 'auto', whiteSpace: 'pre-wrap', lineHeight: '1.4' }}>{sel.raw_text.slice(0, 500)}</div>
                   </>
                 )}
