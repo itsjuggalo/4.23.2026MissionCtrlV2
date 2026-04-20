@@ -17,7 +17,12 @@ def get_secret(name):
     p = SECRETS / name
     return p.read_text().strip() if p.exists() else None
 
-WEBHOOK = get_secret("discord_tv_signals_webhook")
+WEBHOOKS = {
+    "Name": get_secret("discord-webhook-signals-name.txt"),
+    "Name2": get_secret("discord-webhook-signals-name2.txt"),
+    "Vivid": get_secret("discord-webhook-signals-vivid.txt"),
+}
+WEBHOOK = get_secret("discord_tv_signals_webhook")  # fallback
 
 def load_state():
     if STATE_FILE.exists():
@@ -54,12 +59,13 @@ def format_signal(sig, source):
         f"Risk: {risk} | {free}"
     )
 
-def post_to_discord(message):
-    if not WEBHOOK:
-        print(f"[signal-relay] No webhook configured")
+def post_to_discord(message, source=None):
+    wh = WEBHOOKS.get(source, WEBHOOK) if source else WEBHOOK
+    if not wh:
+        print(f"[signal-relay] No webhook for source {source}")
         return
     try:
-        requests.post(WEBHOOK, json={
+        requests.post(wh, json={
             "username": "Signal Relay",
             "content": message
         }, timeout=10)
@@ -85,8 +91,8 @@ def poll():
                 full_id = f"{source}:{sig_id}"
                 if full_id not in seen:
                     seen.add(full_id)
-                    msg = format_signal(sig, f"{source}/{path}")
-                    post_to_discord(msg)
+                    embed = build_embed(sig, f"{source}/{path}")
+                    post_to_discord(embed, source=source)
                     new_count += 1
                     time.sleep(1)
 

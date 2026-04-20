@@ -44,7 +44,55 @@ WEBHOOKS = {
     "long_term_options": "https://discord.com/api/webhooks/1493402455176646831/3xbaAmcPNhFgKvCaBchfFVlrogOBh8iMNe9hTh_MWwNKk3MzlGPeFl3fMPdSuPbuU2o0",
     "long_term_stocks":  "https://discord.com/api/webhooks/1493402513502634186/GiXkTE0VhdbCZER4l8THB9TfaR4pJ6x84Ilnm-JZI-UY9nVxNGK86-B1pgxy4uINHgKj",
     "closed_trades":    "https://discord.com/api/webhooks/1493402563410788442/hQLE4DY3WmKhumUcWNsiHxIdRBQIjXkwV3_n89WaUxWvrhvpar8jMwHvdsBLUnCmcS5D",
+    "flow_alerts_fg":   "https://discordapp.com/api/webhooks/1495490266604376194/bYKgqn64LjN7SGW27iX6rFFgsyv2u0BvN6MCpCYPd9N1LrluQ5MwL8Vyn8cTBf8ls612",
+    "flow_weekly":      "https://discordapp.com/api/webhooks/1495498687978275058/jZmluiXHtGrtVZJr1upleLlIRPK0-ykoS9IPCfgr-djBdcpnAHMDdIzF09dJ7W9aS_pQ",
+    "flow_repeaters":   "https://discordapp.com/api/webhooks/1495498970967969885/moFqKah8nmLDNnbFYKuH1X9USbE7KfPoyXEccWdw4XR2pf_hYRl04DnBzFOXHwZmc3un",
+    "flow_unusual":     "https://discordapp.com/api/webhooks/1495499097615106110/iSSylcNPZtzIWi_3f4GAgva4XEb4JavZU99CK_Dhda04PtLaycYzlPvDk55-YjY3ILLc",
+    "flow_huge":        "https://discordapp.com/api/webhooks/1495499184512434308/fqh1umawF2mXZs2679-qENjqCNNcKtlzSqMoUyX3P8CH4kb6B6hFPS3qJrH6q19Tyfmc",
+    "flow_etf":         "https://discordapp.com/api/webhooks/1495499274828517498/-NhSohclpP8hBxlekP_BNSnLF7ZeDb-Zdb39QhyyXUp43xhxppN8PeQwz1CSn0It_xNY",
 }
+
+FINNHUB_KEY = "d70ov6hr01ql6rg044qgd70ov6hr01ql6rg044r0"
+def get_flow_channel(alert_type):
+    """Route flow alerts to the correct Discord channel by AlertType."""
+    at = (alert_type or "").lower()
+    if at.endswith("_etf"):
+        return "flow_etf"
+    elif at == "weekly_flow":
+        return "flow_weekly"
+    elif at == "repeat_flow":
+        return "flow_repeaters"
+    elif at == "unusual_high_flow":
+        return "flow_unusual"
+    elif at == "high_flow":
+        return "flow_huge"
+    else:
+        return "flow_alerts"  # fallback
+
+
+def finnhub_option_quote(symbol, strike, opt_type, expiry_ts):
+    """Fetch option chain from Finnhub to get last price and high."""
+    try:
+        expiry_str = datetime.fromtimestamp(expiry_ts, tz=timezone.utc).strftime("%Y-%m-%d")
+        r = requests.get(f"https://finnhub.io/api/v1/stock/option-chain",
+            params={"symbol": symbol, "expiration": expiry_str, "token": FINNHUB_KEY}, timeout=10)
+        if r.status_code != 200:
+            return None
+        data = r.json()
+        chain = data.get("data", [])
+        for item in chain:
+            if abs(float(item.get("strike", 0)) - float(strike)) < 0.01:
+                if item.get("contractType", "").upper() == opt_type.upper():
+                    return {
+                        "last": item.get("lastPrice", 0),
+                        "high": item.get("highPrice", 0),
+                        "low": item.get("lowPrice", 0),
+                        "volume": item.get("volume", 0),
+                        "oi": item.get("openInterest", 0),
+                    }
+    except Exception as e:
+        logging.debug(f"Finnhub option quote error: {e}")
+    return None
 
 # ─── COLORS ────────────────────────────────────────────────────────────────────
 GREEN  = 0x00FF00
@@ -155,28 +203,55 @@ def relay_flow_alerts(state):
         sweeps = alert.get("SWEEPS", 0)
         blocks = alert.get("BLOCKS", 0)
 
+        flow_val = alert.get("totalFlowValue", 0)
+        alert_price = float(alert.get("AlertPrice", 0) or 0)
+        last_price = quote.get("Last")
+        day_high = quote.get("DayHigh")
+        dte = alert.get("DTE", "?")
+        trades = alert.get("trade_count", "?")
+
+        # Calculate gains
+        gain_pct = "?"
+        max_gain_pct = "?"
+        if last_price and alert_price > 0:
+            try:
+                gain_pct = f"{((float(last_price) - alert_price) / alert_price * 100):+.2f}%"
+            except: pass
+        if day_high and alert_price > 0:
+            try:
+                max_gain_pct = f"{((float(day_high) - alert_price) / alert_price * 100):+.2f}%"
+            except: pass
+
+        fields = [
+            {"name": "Flow Premium", "value": f"**{format_value(flow_val)}**", "inline": True},
+            {"name": "Size / OI", "value": f"{alert.get('Volume', '?')} / {alert.get('OI', '?')}", "inline": True},
+            {"name": "\u200b", "value": "\u200b", "inline": True},
+            {"name": "Sweeps / Blocks", "value": f"{sweeps} / {blocks}", "inline": True},
+            {"name": "Alerted Price", "value": f"${alert_price}", "inline": True},
+            {"name": "DTE", "value": str(dte), "inline": True},
+        ]
+        if last_price and str(last_price) != "?":
+            fields.append({"name": "Last Price", "value": f"${last_price}", "inline": True})
+            fields.append({"name": "Gain %", "value": str(gain_pct), "inline": True})
+            fields.append({"name": "Max Gain %", "value": str(max_gain_pct), "inline": True})
+        if day_high and str(day_high) != "?":
+            fields.append({"name": "Highest After", "value": f"${day_high}", "inline": True})
+        if alert.get("Spot") and float(alert.get("Spot", 0)) > 0:
+            fields.append({"name": "Spot", "value": f"${alert['Spot']}", "inline": True})
+        if trades and str(trades) != "?":
+            fields.append({"name": "Trades", "value": str(trades), "inline": True})
+
         embed = {
             "title": f"{'🟢' if bullish else '🔴'} {sym} ${strike}{opt_type[0]} {expiry}",
             "color": GREEN if bullish else RED,
-            "fields": [
-                {"name": "Alert Type", "value": alert.get("AlertType", "?"), "inline": True},
-                {"name": "Flow Value", "value": format_value(alert.get("totalFlowValue", 0)), "inline": True},
-                {"name": "Volume / OI", "value": f"{alert.get('Volume', '?')} / {alert.get('OI', '?')}", "inline": True},
-                {"name": "Sweeps / Blocks", "value": f"{sweeps} / {blocks}", "inline": True},
-                {"name": "Spot", "value": f"${alert.get('Spot', '?')}", "inline": True},
-                {"name": "DTE", "value": str(alert.get("DTE", "?")), "inline": True},
-                {"name": "Trades", "value": str(alert.get("trade_count", "?")), "inline": True},
-                {"name": "Last Price", "value": f"${quote.get('Last', '?')}", "inline": True},
-                {"name": "Alert Price", "value": f"${alert.get('AlertPrice', '?')}", "inline": True},
-                {"name": "Day High", "value": f"${quote.get('DayHigh', '?')}", "inline": True},
-                {"name": "High/Low", "value": f"${quote.get('High', '?')} / ${quote.get('Low', '?')}", "inline": True},
-                {"name": "Gain %", "value": f"{((float(quote.get('Last',0))-float(alert.get('AlertPrice',0)))/max(float(alert.get('AlertPrice',1)),0.01)*100):+.1f}%" if alert.get('AlertPrice') and quote.get('Last') else "?", "inline": True},
-                {"name": "Max Gain", "value": f"{((float(quote.get('DayHigh',0))-float(alert.get('AlertPrice',0)))/max(float(alert.get('AlertPrice',1)),0.01)*100):+.1f}%" if alert.get('AlertPrice') and quote.get('DayHigh') else "?", "inline": True},
-            ],
+            "fields": fields,
             "footer": {"text": f"Option Signals Flow | {format_timestamp(alert.get('Time', 0))}"}
         }
 
-        if post_embed("flow_alerts", embed):
+        channel = get_flow_channel(alert.get("AlertType", ""))
+        posted = post_embed(channel, embed)
+        post_embed("flow_alerts", embed)  # also post to original firehose
+        if posted:
             new_sent.append(key)
             time.sleep(1)  # rate limit buffer
 
@@ -530,22 +605,58 @@ def relay_flow2_alerts(state):
         bullish = alert.get("isBullish", False)
         sweeps = alert.get("SWEEPS", 0)
         blocks = alert.get("BLOCKS", 0)
+        flow_val = alert.get("totalFlowValue", 0)
+        vol = alert.get("Volume", "?")
+        oi = alert.get("OI", "?")
+        alert_price = float(alert.get("AlertPrice", 0) or 0)
+        spot = alert.get("Spot", 0)
+        dte = alert.get("DTE", "?")
+        trade_count = alert.get("trade_count", alert.get("NumOfAlerts", "?"))
+
+        # Enrich with Finnhub option quote
+        quote = finnhub_option_quote(sym, strike, opt_type, alert.get("Expiry", 0)) if alert.get("Expiry") else None
+        last_price = quote["last"] if quote and quote.get("last") else None
+        day_high = quote["high"] if quote and quote.get("high") else None
+        day_low = quote["low"] if quote and quote.get("low") else None
+
+        # Calculate gains
+        gain_pct = "?"
+        max_gain_pct = "?"
+        if last_price and alert_price > 0:
+            gain_pct = f"{((last_price - alert_price) / alert_price * 100):+.2f}%"
+        if day_high and alert_price > 0:
+            max_gain_pct = f"{((day_high - alert_price) / alert_price * 100):+.2f}%"
+
+        fields = [
+            {"name": "Flow Premium", "value": f"**{format_value(flow_val)}**", "inline": True},
+            {"name": "Size/OI", "value": f"{vol} / {oi}", "inline": True},
+            {"name": "\u200b", "value": "\u200b", "inline": True},
+            {"name": "Sweeps / Blocks", "value": f"{sweeps} / {blocks}", "inline": True},
+            {"name": "Alerted Price", "value": f"${alert_price}", "inline": True},
+            {"name": "DTE", "value": str(dte), "inline": True},
+        ]
+
+        if last_price is not None:
+            fields.extend([
+                {"name": "Last Price", "value": f"${last_price}", "inline": True},
+                {"name": "Gain %", "value": str(gain_pct), "inline": True},
+                {"name": "Max Gain %", "value": str(max_gain_pct), "inline": True},
+            ])
+            if day_high is not None:
+                fields.append({"name": "Highest After", "value": f"${day_high}", "inline": True})
+
         embed = {
             "title": f"{'🟢' if bullish else '🔴'} {sym} ${strike}{opt_type[0]} {expiry}",
             "color": GREEN if bullish else RED,
-            "fields": [
-                {"name": "Alert Type", "value": alert.get("AlertType", "?"), "inline": True},
-                {"name": "Flow Value", "value": format_value(alert.get("totalFlowValue", 0)), "inline": True},
-                {"name": "Volume / OI", "value": f"{alert.get('Volume', '?')} / {alert.get('OI', '?')}", "inline": True},
-                {"name": "Sweeps / Blocks", "value": f"{sweeps} / {blocks}", "inline": True},
-                {"name": "Spot", "value": f"${alert.get('Spot', '?')}", "inline": True},
-                {"name": "DTE", "value": str(alert.get("DTE", "?")), "inline": True},
-            ],
+            "fields": fields,
             "footer": {"text": f"FlowGreeks2 | {format_timestamp(alert.get('Time', 0))}"}
         }
-        if post_embed("flow_alerts", embed):
+        channel = get_flow_channel(alert.get("AlertType", ""))
+        posted = post_embed(channel, embed)
+        post_embed("flow_alerts_fg", embed)  # also post to original fg firehose
+        if posted:
             new_sent.append(key)
-            time.sleep(1)
+            time.sleep(1.5)  # extra delay for finnhub rate limit
     state["flow2_alerts"] = list(sent | set(new_sent))
     return state
 

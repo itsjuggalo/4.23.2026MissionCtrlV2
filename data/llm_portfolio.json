@@ -1,5 +1,5 @@
 {
-  "last_updated": "2026-04-19T04:00:18.875206",
+  "last_updated": "2026-04-20T00:00:30.729164",
   "leaderboard": [
     {
       "rank": 0,
@@ -26,10 +26,10 @@
       "name": "QWEN",
       "model": "Qwen3 Max",
       "color": "#ff9800",
-      "total_trades": 0,
-      "holdings_count": 0,
-      "buy_volume": 0,
-      "sell_volume": 0
+      "total_trades": 100,
+      "holdings_count": 5,
+      "buy_volume": 86652.81,
+      "sell_volume": 89377.81
     },
     {
       "rank": 0,
@@ -2707,13 +2707,1321 @@
       "model": "Qwen3 Max",
       "color": "#ff9800",
       "account_id": "1800473182_17",
-      "total_trades": 0,
-      "total_buy_value": 0,
-      "total_sell_value": 0,
-      "current_holdings": {},
-      "holdings_count": 0,
-      "recent_trades": [],
-      "all_trades": []
+      "total_trades": 100,
+      "total_buy_value": 86652.81,
+      "total_sell_value": 89377.81,
+      "current_holdings": {
+        "RMSG": 762.54,
+        "CAR": 4.1,
+        "AVGO": 3.77,
+        "NVDA": 10.08,
+        "INTC": 31.78
+      },
+      "holdings_count": 5,
+      "recent_trades": [
+        {
+          "date": "2026-04-17",
+          "side": "buy",
+          "symbol": "RMSG",
+          "company": "Real Messenger",
+          "price": 2.62,
+          "quantity": 762.54,
+          "value": 2000.0,
+          "order_id": "0634956948815216640"
+        },
+        {
+          "date": "2026-04-17",
+          "side": "buy",
+          "symbol": "CAR",
+          "company": "Avis Budget Group",
+          "price": 487.61,
+          "quantity": 4.1,
+          "value": 2000.0,
+          "order_id": "0634956948584988672"
+        },
+        {
+          "date": "2026-04-17",
+          "side": "buy",
+          "symbol": "MGRT",
+          "company": "Mega Fortune",
+          "price": 113.0,
+          "quantity": 17.7,
+          "value": 2000.0,
+          "order_id": "0634926779665481728"
+        },
+        {
+          "date": "2026-04-17",
+          "side": "buy",
+          "symbol": "XNDU",
+          "company": "Xanadu Quantum",
+          "price": 30.95,
+          "quantity": 48.47,
+          "value": 1500.0,
+          "order_id": "0634926779471757312"
+        },
+        {
+          "date": "2026-04-17",
+          "side": "sell",
+          "symbol": "MGRT",
+          "company": "Mega Fortune",
+          "price": 110.52,
+          "quantity": 17.7,
+          "value": 1956.11,
+          "order_id": "0634956926434869248"
+        },
+        {
+          "date": "2026-04-17",
+          "side": "sell",
+          "symbol": "XNDU",
+          "company": "Xanadu Quantum",
+          "price": 28.4,
+          "quantity": 48.47,
+          "value": 1376.41,
+          "order_id": "0634942003096584192"
+        },
+        {
+          "date": "2026-04-17",
+          "side": "sell",
+          "symbol": "AKTX",
+          "company": "Akari Therapeutics",
+          "price": 5.76,
+          "quantity": 520.83,
+          "value": 3002.6,
+          "order_id": "0634926772618723328"
+        },
+        {
+          "date": "2026-04-17",
+          "side": "sell",
+          "symbol": "ALTO",
+          "company": "Alto Ingredients",
+          "price": 4.93,
+          "quantity": 650.81,
+          "value": 3211.73,
+          "order_id": "0634911779994730496"
+        },
+        {
+          "date": "2026-04-17",
+          "side": "sell",
+          "symbol": "BNAI",
+          "company": "Brand Engagement",
+          "price": 34.76,
+          "quantity": 17.23,
+          "value": 598.98,
+          "order_id": "0634896626084216832"
+        },
+        {
+          "date": "2026-04-16",
+          "side": "buy",
+          "symbol": "AVGO",
+          "company": "Broadcom",
+          "price": 397.91,
+          "quantity": 3.77,
+          "value": 1500.0,
+          "order_id": "0634564593646567424"
+        },
+        {
+          "date": "2026-04-16",
+          "side": "buy",
+          "symbol": "NVDA",
+          "company": "Nvidia",
+          "price": 198.42,
+          "quantity": 10.08,
+          "value": 2000.0,
+          "order_id": "0634564593301848064"
+        },
+        {
+          "date": "2026-04-13",
+          "side": "sell",
+          "symbol": "FUBO",
+          "company": "FuboTV",
+          "price": 11.42,
+          "quantity": 168.42,
+          "value": 1923.37,
+          "order_id": "0633432245395652608"
+        },
+        {
+          "date": "2026-04-10",
+          "side": "buy",
+          "symbol": "INTC",
+          "company": "Intel",
+          "price": 62.92,
+          "quantity": 31.78,
+          "value": 2000.0,
+          "order_id": "0632420349523460096"
+        },
+        {
+          "date": "2026-04-10",
+          "side": "buy",
+          "symbol": "AKTX",
+          "company": "Akari Therapeutics",
+          "price": 3.84,
+          "quantity": 520.83,
+          "value": 2000.0,
+          "order_id": "0632390225352196096"
+        },
+        {
+          "date": "2026-04-10",
+          "side": "buy",
+          "symbol": "AGL",
+          "company": "agilon health",
+          "price": 20.3,
+          "quantity": 98.51,
+          "value": 2000.0,
+          "order_id": "0632390224752869376"
+        },
+        {
+          "date": "2026-04-10",
+          "side": "buy",
+          "symbol": "FUBO",
+          "company": "FuboTV",
+          "price": 11.88,
+          "quantity": 168.42,
+          "value": 2000.0,
+          "order_id": "0632390225016651776"
+        },
+        {
+          "date": "2026-04-10",
+          "side": "sell",
+          "symbol": "AGL",
+          "company": "agilon health",
+          "price": 18.9,
+          "quantity": 98.51,
+          "value": 1861.39,
+          "order_id": "0632420343999889408"
+        },
+        {
+          "date": "2026-04-06",
+          "side": "sell",
+          "symbol": "VOR",
+          "company": "Vor Biopharma",
+          "price": 16.8,
+          "quantity": 112.96,
+          "value": 1897.31,
+          "order_id": "0630925464530583552"
+        },
+        {
+          "date": "2026-04-01",
+          "side": "sell",
+          "symbol": "ATXG",
+          "company": "Addentax Group",
+          "price": 5.19,
+          "quantity": 451.47,
+          "value": 2343.12,
+          "order_id": "0629083480253136896"
+        },
+        {
+          "date": "2026-04-01",
+          "side": "sell",
+          "symbol": "MKDW",
+          "company": "MKDWELL Tech",
+          "price": 6.15,
+          "quantity": 0.0,
+          "value": 0.0,
+          "order_id": "0629068504016945152"
+        },
+        {
+          "date": "2026-03-31",
+          "side": "buy",
+          "symbol": "VOR",
+          "company": "Vor Biopharma",
+          "price": 17.7,
+          "quantity": 112.96,
+          "value": 2000.0,
+          "order_id": "0628796560834953216"
+        },
+        {
+          "date": "2026-03-31",
+          "side": "sell",
+          "symbol": "MKDW",
+          "company": "MKDWELL Tech",
+          "price": 6.37,
+          "quantity": 476.19,
+          "value": 3030.95,
+          "order_id": "0628796539859337216"
+        },
+        {
+          "date": "2026-03-30",
+          "side": "buy",
+          "symbol": "ATXG",
+          "company": "Addentax Group",
+          "price": 4.43,
+          "quantity": 451.47,
+          "value": 2000.0,
+          "order_id": "0628403946831020032"
+        },
+        {
+          "date": "2026-03-30",
+          "side": "buy",
+          "symbol": "BVC",
+          "company": "BitVentures",
+          "price": 11.79,
+          "quantity": 169.64,
+          "value": 2000.0,
+          "order_id": "0628388942190739456"
+        },
+        {
+          "date": "2026-03-30",
+          "side": "buy",
+          "symbol": "MKDW",
+          "company": "MKDWELL Tech",
+          "price": 6.3,
+          "quantity": 476.19,
+          "value": 3000.0,
+          "order_id": "0628388942522089472"
+        },
+        {
+          "date": "2026-03-30",
+          "side": "sell",
+          "symbol": "BVC",
+          "company": "BitVentures",
+          "price": 11.28,
+          "quantity": 169.64,
+          "value": 1913.49,
+          "order_id": "0628403925314174976"
+        },
+        {
+          "date": "2026-03-30",
+          "side": "sell",
+          "symbol": "AGX",
+          "company": "Argan",
+          "price": 522.4,
+          "quantity": 3.62,
+          "value": 1893.02,
+          "order_id": "0628388936947924992"
+        },
+        {
+          "date": "2026-03-27",
+          "side": "buy",
+          "symbol": "AGX",
+          "company": "Argan",
+          "price": 551.93,
+          "quantity": 3.62,
+          "value": 2000.0,
+          "order_id": "0627316904683438080"
+        },
+        {
+          "date": "2026-03-27",
+          "side": "buy",
+          "symbol": "ARTL",
+          "company": "Artelo Biosciences",
+          "price": 17.49,
+          "quantity": 114.35,
+          "value": 2000.0,
+          "order_id": "0627316905124397056"
+        },
+        {
+          "date": "2026-03-27",
+          "side": "buy",
+          "symbol": "PLYX",
+          "company": "Polaryx Therapeutics",
+          "price": 8.74,
+          "quantity": 228.7,
+          "value": 2000.0,
+          "order_id": "0627316904860188672"
+        }
+      ],
+      "all_trades": [
+        {
+          "date": "2026-04-17",
+          "side": "buy",
+          "symbol": "RMSG",
+          "company": "Real Messenger",
+          "price": 2.62,
+          "quantity": 762.54,
+          "value": 2000.0,
+          "order_id": "0634956948815216640"
+        },
+        {
+          "date": "2026-04-17",
+          "side": "buy",
+          "symbol": "CAR",
+          "company": "Avis Budget Group",
+          "price": 487.61,
+          "quantity": 4.1,
+          "value": 2000.0,
+          "order_id": "0634956948584988672"
+        },
+        {
+          "date": "2026-04-17",
+          "side": "buy",
+          "symbol": "MGRT",
+          "company": "Mega Fortune",
+          "price": 113.0,
+          "quantity": 17.7,
+          "value": 2000.0,
+          "order_id": "0634926779665481728"
+        },
+        {
+          "date": "2026-04-17",
+          "side": "buy",
+          "symbol": "XNDU",
+          "company": "Xanadu Quantum",
+          "price": 30.95,
+          "quantity": 48.47,
+          "value": 1500.0,
+          "order_id": "0634926779471757312"
+        },
+        {
+          "date": "2026-04-17",
+          "side": "sell",
+          "symbol": "MGRT",
+          "company": "Mega Fortune",
+          "price": 110.52,
+          "quantity": 17.7,
+          "value": 1956.11,
+          "order_id": "0634956926434869248"
+        },
+        {
+          "date": "2026-04-17",
+          "side": "sell",
+          "symbol": "XNDU",
+          "company": "Xanadu Quantum",
+          "price": 28.4,
+          "quantity": 48.47,
+          "value": 1376.41,
+          "order_id": "0634942003096584192"
+        },
+        {
+          "date": "2026-04-17",
+          "side": "sell",
+          "symbol": "AKTX",
+          "company": "Akari Therapeutics",
+          "price": 5.76,
+          "quantity": 520.83,
+          "value": 3002.6,
+          "order_id": "0634926772618723328"
+        },
+        {
+          "date": "2026-04-17",
+          "side": "sell",
+          "symbol": "ALTO",
+          "company": "Alto Ingredients",
+          "price": 4.93,
+          "quantity": 650.81,
+          "value": 3211.73,
+          "order_id": "0634911779994730496"
+        },
+        {
+          "date": "2026-04-17",
+          "side": "sell",
+          "symbol": "BNAI",
+          "company": "Brand Engagement",
+          "price": 34.76,
+          "quantity": 17.23,
+          "value": 598.98,
+          "order_id": "0634896626084216832"
+        },
+        {
+          "date": "2026-04-16",
+          "side": "buy",
+          "symbol": "AVGO",
+          "company": "Broadcom",
+          "price": 397.91,
+          "quantity": 3.77,
+          "value": 1500.0,
+          "order_id": "0634564593646567424"
+        },
+        {
+          "date": "2026-04-16",
+          "side": "buy",
+          "symbol": "NVDA",
+          "company": "Nvidia",
+          "price": 198.42,
+          "quantity": 10.08,
+          "value": 2000.0,
+          "order_id": "0634564593301848064"
+        },
+        {
+          "date": "2026-04-13",
+          "side": "sell",
+          "symbol": "FUBO",
+          "company": "FuboTV",
+          "price": 11.42,
+          "quantity": 168.42,
+          "value": 1923.37,
+          "order_id": "0633432245395652608"
+        },
+        {
+          "date": "2026-04-10",
+          "side": "buy",
+          "symbol": "INTC",
+          "company": "Intel",
+          "price": 62.92,
+          "quantity": 31.78,
+          "value": 2000.0,
+          "order_id": "0632420349523460096"
+        },
+        {
+          "date": "2026-04-10",
+          "side": "buy",
+          "symbol": "AKTX",
+          "company": "Akari Therapeutics",
+          "price": 3.84,
+          "quantity": 520.83,
+          "value": 2000.0,
+          "order_id": "0632390225352196096"
+        },
+        {
+          "date": "2026-04-10",
+          "side": "buy",
+          "symbol": "AGL",
+          "company": "agilon health",
+          "price": 20.3,
+          "quantity": 98.51,
+          "value": 2000.0,
+          "order_id": "0632390224752869376"
+        },
+        {
+          "date": "2026-04-10",
+          "side": "buy",
+          "symbol": "FUBO",
+          "company": "FuboTV",
+          "price": 11.88,
+          "quantity": 168.42,
+          "value": 2000.0,
+          "order_id": "0632390225016651776"
+        },
+        {
+          "date": "2026-04-10",
+          "side": "sell",
+          "symbol": "AGL",
+          "company": "agilon health",
+          "price": 18.9,
+          "quantity": 98.51,
+          "value": 1861.39,
+          "order_id": "0632420343999889408"
+        },
+        {
+          "date": "2026-04-06",
+          "side": "sell",
+          "symbol": "VOR",
+          "company": "Vor Biopharma",
+          "price": 16.8,
+          "quantity": 112.96,
+          "value": 1897.31,
+          "order_id": "0630925464530583552"
+        },
+        {
+          "date": "2026-04-01",
+          "side": "sell",
+          "symbol": "ATXG",
+          "company": "Addentax Group",
+          "price": 5.19,
+          "quantity": 451.47,
+          "value": 2343.12,
+          "order_id": "0629083480253136896"
+        },
+        {
+          "date": "2026-04-01",
+          "side": "sell",
+          "symbol": "MKDW",
+          "company": "MKDWELL Tech",
+          "price": 6.15,
+          "quantity": 0.0,
+          "value": 0.0,
+          "order_id": "0629068504016945152"
+        },
+        {
+          "date": "2026-03-31",
+          "side": "buy",
+          "symbol": "VOR",
+          "company": "Vor Biopharma",
+          "price": 17.7,
+          "quantity": 112.96,
+          "value": 2000.0,
+          "order_id": "0628796560834953216"
+        },
+        {
+          "date": "2026-03-31",
+          "side": "sell",
+          "symbol": "MKDW",
+          "company": "MKDWELL Tech",
+          "price": 6.37,
+          "quantity": 476.19,
+          "value": 3030.95,
+          "order_id": "0628796539859337216"
+        },
+        {
+          "date": "2026-03-30",
+          "side": "buy",
+          "symbol": "ATXG",
+          "company": "Addentax Group",
+          "price": 4.43,
+          "quantity": 451.47,
+          "value": 2000.0,
+          "order_id": "0628403946831020032"
+        },
+        {
+          "date": "2026-03-30",
+          "side": "buy",
+          "symbol": "BVC",
+          "company": "BitVentures",
+          "price": 11.79,
+          "quantity": 169.64,
+          "value": 2000.0,
+          "order_id": "0628388942190739456"
+        },
+        {
+          "date": "2026-03-30",
+          "side": "buy",
+          "symbol": "MKDW",
+          "company": "MKDWELL Tech",
+          "price": 6.3,
+          "quantity": 476.19,
+          "value": 3000.0,
+          "order_id": "0628388942522089472"
+        },
+        {
+          "date": "2026-03-30",
+          "side": "sell",
+          "symbol": "BVC",
+          "company": "BitVentures",
+          "price": 11.28,
+          "quantity": 169.64,
+          "value": 1913.49,
+          "order_id": "0628403925314174976"
+        },
+        {
+          "date": "2026-03-30",
+          "side": "sell",
+          "symbol": "AGX",
+          "company": "Argan",
+          "price": 522.4,
+          "quantity": 3.62,
+          "value": 1893.02,
+          "order_id": "0628388936947924992"
+        },
+        {
+          "date": "2026-03-27",
+          "side": "buy",
+          "symbol": "AGX",
+          "company": "Argan",
+          "price": 551.93,
+          "quantity": 3.62,
+          "value": 2000.0,
+          "order_id": "0627316904683438080"
+        },
+        {
+          "date": "2026-03-27",
+          "side": "buy",
+          "symbol": "ARTL",
+          "company": "Artelo Biosciences",
+          "price": 17.49,
+          "quantity": 114.35,
+          "value": 2000.0,
+          "order_id": "0627316905124397056"
+        },
+        {
+          "date": "2026-03-27",
+          "side": "buy",
+          "symbol": "PLYX",
+          "company": "Polaryx Therapeutics",
+          "price": 8.74,
+          "quantity": 228.7,
+          "value": 2000.0,
+          "order_id": "0627316904860188672"
+        },
+        {
+          "date": "2026-03-27",
+          "side": "sell",
+          "symbol": "PLYX",
+          "company": "Polaryx Therapeutics",
+          "price": 7.5,
+          "quantity": 228.7,
+          "value": 1715.27,
+          "order_id": "0627347055404744704"
+        },
+        {
+          "date": "2026-03-27",
+          "side": "sell",
+          "symbol": "ARTL",
+          "company": "Artelo Biosciences",
+          "price": 13.65,
+          "quantity": 114.35,
+          "value": 1561.46,
+          "order_id": "0627331969441595392"
+        },
+        {
+          "date": "2026-03-26",
+          "side": "sell",
+          "symbol": "SNDK",
+          "company": "Sandisk",
+          "price": 614.65,
+          "quantity": 4.72,
+          "value": 2899.29,
+          "order_id": "0626954485524135936"
+        },
+        {
+          "date": "2026-03-26",
+          "side": "sell",
+          "symbol": "MU",
+          "company": "Micron Technology",
+          "price": 359.72,
+          "quantity": 7.18,
+          "value": 2582.58,
+          "order_id": "0626954485495365632"
+        },
+        {
+          "date": "2026-03-18",
+          "side": "sell",
+          "symbol": "TME",
+          "company": "Tencent Music",
+          "price": 10.42,
+          "quantity": 132.01,
+          "value": 1375.55,
+          "order_id": "0624055100784115712"
+        },
+        {
+          "date": "2026-03-16",
+          "side": "buy",
+          "symbol": "TME",
+          "company": "Tencent Music",
+          "price": 15.15,
+          "quantity": 132.01,
+          "value": 2000.0,
+          "order_id": "0623315334803390464"
+        },
+        {
+          "date": "2026-03-16",
+          "side": "sell",
+          "symbol": "CRWD",
+          "company": "CrowdStrike Holdings",
+          "price": 428.44,
+          "quantity": 4.58,
+          "value": 1960.95,
+          "order_id": "0623315328138706944"
+        },
+        {
+          "date": "2026-03-12",
+          "side": "sell",
+          "symbol": "BNAI",
+          "company": "Brand Engagement",
+          "price": 37.91,
+          "quantity": 5.0,
+          "value": 189.56,
+          "order_id": "0621850680822497280"
+        },
+        {
+          "date": "2026-03-11",
+          "side": "buy",
+          "symbol": "MU",
+          "company": "Micron Technology",
+          "price": 417.86,
+          "quantity": 7.18,
+          "value": 3000.0,
+          "order_id": "0621488381335076864"
+        },
+        {
+          "date": "2026-03-11",
+          "side": "buy",
+          "symbol": "SNDK",
+          "company": "Sandisk",
+          "price": 636.0,
+          "quantity": 4.72,
+          "value": 3000.0,
+          "order_id": "0621488381553246208"
+        },
+        {
+          "date": "2026-03-11",
+          "side": "sell",
+          "symbol": "BNAI",
+          "company": "Brand Engagement",
+          "price": 37.08,
+          "quantity": 10.0,
+          "value": 370.75,
+          "order_id": "0621518595549167616"
+        },
+        {
+          "date": "2026-03-11",
+          "side": "sell",
+          "symbol": "BNAI",
+          "company": "Brand Engagement",
+          "price": 38.63,
+          "quantity": 10.0,
+          "value": 386.3,
+          "order_id": "0621488370920685568"
+        },
+        {
+          "date": "2026-03-11",
+          "side": "sell",
+          "symbol": "BNAI",
+          "company": "Brand Engagement",
+          "price": 34.99,
+          "quantity": 20.0,
+          "value": 699.9,
+          "order_id": "0621458549020786688"
+        },
+        {
+          "date": "2026-03-10",
+          "side": "sell",
+          "symbol": "BNAI",
+          "company": "Brand Engagement",
+          "price": 37.48,
+          "quantity": 20.0,
+          "value": 749.6,
+          "order_id": "0621156161609138176"
+        },
+        {
+          "date": "2026-03-10",
+          "side": "sell",
+          "symbol": "BNAI",
+          "company": "Brand Engagement",
+          "price": 38.66,
+          "quantity": 20.0,
+          "value": 773.2,
+          "order_id": "0621126038566666240"
+        },
+        {
+          "date": "2026-03-10",
+          "side": "sell",
+          "symbol": "BNAI",
+          "company": "Brand Engagement",
+          "price": 36.33,
+          "quantity": 20.0,
+          "value": 726.6,
+          "order_id": "0621110984165228544"
+        },
+        {
+          "date": "2026-03-09",
+          "side": "buy",
+          "symbol": "CRWD",
+          "company": "CrowdStrike Holdings",
+          "price": 436.97,
+          "quantity": 4.58,
+          "value": 2000.0,
+          "order_id": "0620763716065001472"
+        },
+        {
+          "date": "2026-03-09",
+          "side": "sell",
+          "symbol": "BNAI",
+          "company": "Brand Engagement",
+          "price": 42.51,
+          "quantity": 30.0,
+          "value": 1275.3,
+          "order_id": "0620793726910595072"
+        },
+        {
+          "date": "2026-03-09",
+          "side": "sell",
+          "symbol": "BNAI",
+          "company": "Brand Engagement",
+          "price": 43.13,
+          "quantity": 20.0,
+          "value": 862.6,
+          "order_id": "0620778574407892992"
+        },
+        {
+          "date": "2026-03-09",
+          "side": "sell",
+          "symbol": "BNAI",
+          "company": "Brand Engagement",
+          "price": 44.52,
+          "quantity": 30.0,
+          "value": 1335.75,
+          "order_id": "0620763695865200640"
+        },
+        {
+          "date": "2026-03-09",
+          "side": "sell",
+          "symbol": "BNAI",
+          "company": "Brand Engagement",
+          "price": 45.05,
+          "quantity": 50.0,
+          "value": 2252.41,
+          "order_id": "0620748702671241216"
+        },
+        {
+          "date": "2026-03-05",
+          "side": "buy",
+          "symbol": "ALTO",
+          "company": "Alto Ingredients",
+          "price": 3.97,
+          "quantity": 650.81,
+          "value": 2583.7,
+          "order_id": "0619374618931363840"
+        },
+        {
+          "date": "2026-02-26",
+          "side": "buy",
+          "symbol": "CELH",
+          "company": "Celsius Holdings",
+          "price": 56.32,
+          "quantity": 35.51,
+          "value": 2000.0,
+          "order_id": "0616762162896142336"
+        },
+        {
+          "date": "2026-02-26",
+          "side": "sell",
+          "symbol": "CELH",
+          "company": "Celsius Holdings",
+          "price": 54.43,
+          "quantity": 35.51,
+          "value": 1932.98,
+          "order_id": "0616792509057662976"
+        },
+        {
+          "date": "2026-02-24",
+          "side": "sell",
+          "symbol": "LITE",
+          "company": "Lumentum Holdings",
+          "price": 694.22,
+          "quantity": 2.97,
+          "value": 2063.9,
+          "order_id": "0616097601406861312"
+        },
+        {
+          "date": "2026-02-23",
+          "side": "buy",
+          "symbol": "LITE",
+          "company": "Lumentum Holdings",
+          "price": 672.73,
+          "quantity": 2.97,
+          "value": 2000.0,
+          "order_id": "0615705276095594496"
+        },
+        {
+          "date": "2026-02-17",
+          "side": "sell",
+          "symbol": "IPGP",
+          "company": "IPG Photonics",
+          "price": 132.58,
+          "quantity": 9.32,
+          "value": 1235.76,
+          "order_id": "0613530906422083584"
+        },
+        {
+          "date": "2026-02-17",
+          "side": "sell",
+          "symbol": "CGNX",
+          "company": "Cognex",
+          "price": 57.04,
+          "quantity": 23.69,
+          "value": 1351.13,
+          "order_id": "0613530906514554880"
+        },
+        {
+          "date": "2026-02-12",
+          "side": "buy",
+          "symbol": "CGNX",
+          "company": "Cognex",
+          "price": 57.53,
+          "quantity": 23.69,
+          "value": 1362.74,
+          "order_id": "0611749304759025664"
+        },
+        {
+          "date": "2026-02-12",
+          "side": "buy",
+          "symbol": "IPGP",
+          "company": "IPG Photonics",
+          "price": 146.19,
+          "quantity": 9.32,
+          "value": 1362.6,
+          "order_id": "0611749304584077312"
+        },
+        {
+          "date": "2026-02-11",
+          "side": "sell",
+          "symbol": "AAOI",
+          "company": "Applied Optoelectronics",
+          "price": 46.27,
+          "quantity": 58.91,
+          "value": 2725.44,
+          "order_id": "0611341297730846720"
+        },
+        {
+          "date": "2026-02-06",
+          "side": "buy",
+          "symbol": "AAOI",
+          "company": "Applied Optoelectronics",
+          "price": 43.78,
+          "quantity": 58.91,
+          "value": 2579.25,
+          "order_id": "0609560305978441728"
+        },
+        {
+          "date": "2026-02-05",
+          "side": "buy",
+          "symbol": "ESLA",
+          "company": "Estrella",
+          "price": 1.41,
+          "quantity": 2034.76,
+          "value": 2865.8,
+          "order_id": "0609198273416331264"
+        },
+        {
+          "date": "2026-02-05",
+          "side": "sell",
+          "symbol": "ESLA",
+          "company": "Estrella",
+          "price": 1.27,
+          "quantity": 2034.76,
+          "value": 2579.0,
+          "order_id": "0609243402374348800"
+        },
+        {
+          "date": "2026-02-04",
+          "side": "sell",
+          "symbol": "TER",
+          "company": "Teradyne",
+          "price": 272.22,
+          "quantity": 10.53,
+          "value": 2865.31,
+          "order_id": "0608880732181561344"
+        },
+        {
+          "date": "2026-02-03",
+          "side": "buy",
+          "symbol": "TER",
+          "company": "Teradyne",
+          "price": 275.52,
+          "quantity": 10.53,
+          "value": 2900.0,
+          "order_id": "0608443494188843008"
+        },
+        {
+          "date": "2026-01-30",
+          "side": "sell",
+          "symbol": "KLAC",
+          "company": "KLA",
+          "price": 1473.99,
+          "quantity": 1.24,
+          "value": 1833.32,
+          "order_id": "0607008369936629760"
+        },
+        {
+          "date": "2026-01-28",
+          "side": "sell",
+          "symbol": "SATL",
+          "company": "Satellogic",
+          "price": 5.46,
+          "quantity": 178.75,
+          "value": 976.87,
+          "order_id": "0606328877081952256"
+        },
+        {
+          "date": "2026-01-27",
+          "side": "buy",
+          "symbol": "SATL",
+          "company": "Satellogic",
+          "price": 5.6,
+          "quantity": 178.75,
+          "value": 1000.5,
+          "order_id": "0605981550580334592"
+        },
+        {
+          "date": "2026-01-27",
+          "side": "buy",
+          "symbol": "KLAC",
+          "company": "KLA",
+          "price": 1607.99,
+          "quantity": 1.24,
+          "value": 1999.99,
+          "order_id": "0605981550479671296"
+        },
+        {
+          "date": "2026-01-27",
+          "side": "sell",
+          "symbol": "SONM",
+          "company": "Sonim Technologies",
+          "price": 6.37,
+          "quantity": 139.97,
+          "value": 891.39,
+          "order_id": "0605921335361142784"
+        },
+        {
+          "date": "2026-01-27",
+          "side": "sell",
+          "symbol": "GAUZ",
+          "company": "Gauzy",
+          "price": 1.15,
+          "quantity": 0.0,
+          "value": 0.0,
+          "order_id": "0605921335466000384"
+        },
+        {
+          "date": "2026-01-27",
+          "side": "sell",
+          "symbol": "GAUZ",
+          "company": "Gauzy",
+          "price": 1.28,
+          "quantity": 1445.32,
+          "value": 1851.51,
+          "order_id": "0605906202353926144"
+        },
+        {
+          "date": "2026-01-26",
+          "side": "buy",
+          "symbol": "GAUZ",
+          "company": "Gauzy",
+          "price": 1.39,
+          "quantity": 717.94,
+          "value": 1000.54,
+          "order_id": "0605573180966699008"
+        },
+        {
+          "date": "2026-01-26",
+          "side": "buy",
+          "symbol": "SONM",
+          "company": "Sonim Technologies",
+          "price": 7.15,
+          "quantity": 139.97,
+          "value": 1001.02,
+          "order_id": "0605558260980908032"
+        },
+        {
+          "date": "2026-01-26",
+          "side": "buy",
+          "symbol": "GAUZ",
+          "company": "Gauzy",
+          "price": 1.37,
+          "quantity": 727.38,
+          "value": 1000.0,
+          "order_id": "0605558260586643456"
+        },
+        {
+          "date": "2026-01-26",
+          "side": "sell",
+          "symbol": "IOT",
+          "company": "Samsara",
+          "price": 32.27,
+          "quantity": 46.69,
+          "value": 1506.32,
+          "order_id": "0605558242723102720"
+        },
+        {
+          "date": "2026-01-26",
+          "side": "sell",
+          "symbol": "MU",
+          "company": "Micron Technology",
+          "price": 388.94,
+          "quantity": 3.74,
+          "value": 1456.05,
+          "order_id": "0605543196558491648"
+        },
+        {
+          "date": "2026-01-23",
+          "side": "buy",
+          "symbol": "IOT",
+          "company": "Samsara",
+          "price": 32.13,
+          "quantity": 46.69,
+          "value": 1500.03,
+          "order_id": "0604516270305837056"
+        },
+        {
+          "date": "2026-01-23",
+          "side": "buy",
+          "symbol": "MU",
+          "company": "Micron Technology",
+          "price": 400.68,
+          "quantity": 3.74,
+          "value": 1500.0,
+          "order_id": "0604516270406631424"
+        },
+        {
+          "date": "2026-01-23",
+          "side": "sell",
+          "symbol": "MDB",
+          "company": "MongoDB",
+          "price": 399.24,
+          "quantity": 2.53,
+          "value": 1008.77,
+          "order_id": "0604516249564807168"
+        },
+        {
+          "date": "2026-01-22",
+          "side": "buy",
+          "symbol": "MDB",
+          "company": "MongoDB",
+          "price": 395.77,
+          "quantity": 2.53,
+          "value": 1000.0,
+          "order_id": "0604124002801680384"
+        },
+        {
+          "date": "2026-01-22",
+          "side": "sell",
+          "symbol": "LVLU",
+          "company": "Lulu s Fashion",
+          "price": 24.02,
+          "quantity": 74.47,
+          "value": 1788.59,
+          "order_id": "0604123809121173504"
+        },
+        {
+          "date": "2026-01-21",
+          "side": "buy",
+          "symbol": "LVLU",
+          "company": "Lulu s Fashion",
+          "price": 26.86,
+          "quantity": 74.47,
+          "value": 2000.0,
+          "order_id": "0603761311146639360"
+        },
+        {
+          "date": "2026-01-21",
+          "side": "buy",
+          "symbol": "BNAI",
+          "company": "Brand Engagement",
+          "price": 7.94,
+          "quantity": 252.23,
+          "value": 2002.18,
+          "order_id": "0603761311423463424"
+        },
+        {
+          "date": "2026-01-21",
+          "side": "sell",
+          "symbol": "SKYT",
+          "company": "SkyWater Technology",
+          "price": 31.89,
+          "quantity": 60.12,
+          "value": 1917.34,
+          "order_id": "0603761295459942400"
+        },
+        {
+          "date": "2026-01-16",
+          "side": "sell",
+          "symbol": "ROLR",
+          "company": "High Roller",
+          "price": 18.63,
+          "quantity": 81.93,
+          "value": 1526.06,
+          "order_id": "0601994748039954432"
+        },
+        {
+          "date": "2026-01-15",
+          "side": "buy",
+          "symbol": "SKYT",
+          "company": "SkyWater Technology",
+          "price": 33.27,
+          "quantity": 60.12,
+          "value": 2000.28,
+          "order_id": "0601556883367690240"
+        },
+        {
+          "date": "2026-01-15",
+          "side": "buy",
+          "symbol": "CALX",
+          "company": "Calix",
+          "price": 61.09,
+          "quantity": 32.74,
+          "value": 2000.0,
+          "order_id": "0601556882839175168"
+        },
+        {
+          "date": "2026-01-15",
+          "side": "buy",
+          "symbol": "ROLR",
+          "company": "High Roller",
+          "price": 24.41,
+          "quantity": 81.93,
+          "value": 2000.0,
+          "order_id": "0601556883057278976"
+        },
+        {
+          "date": "2026-01-15",
+          "side": "sell",
+          "symbol": "CALX",
+          "company": "Calix",
+          "price": 60.16,
+          "quantity": 32.74,
+          "value": 1969.42,
+          "order_id": "0601587019064410112"
+        },
+        {
+          "date": "2026-01-15",
+          "side": "sell",
+          "symbol": "LLY",
+          "company": "Eli Lilly",
+          "price": 1021.34,
+          "quantity": 2.91,
+          "value": 2975.99,
+          "order_id": "0601556879752167424"
+        },
+        {
+          "date": "2026-01-13",
+          "side": "buy",
+          "symbol": "KOPN",
+          "company": "Kopin",
+          "price": 3.05,
+          "quantity": 656.54,
+          "value": 2000.0,
+          "order_id": "0600847152151953408"
+        },
+        {
+          "date": "2026-01-13",
+          "side": "sell",
+          "symbol": "KOPN",
+          "company": "Kopin",
+          "price": 3.02,
+          "quantity": 656.54,
+          "value": 1982.74,
+          "order_id": "0600892384600031232"
+        },
+        {
+          "date": "2026-01-12",
+          "side": "sell",
+          "symbol": "SKYT",
+          "company": "SkyWater Technology",
+          "price": 28.53,
+          "quantity": 44.68,
+          "value": 1274.67,
+          "order_id": "0600469727362580480"
+        },
+        {
+          "date": "2026-01-05",
+          "side": "sell",
+          "symbol": "GDS",
+          "company": "GDS Holdings",
+          "price": 37.64,
+          "quantity": 51.7,
+          "value": 1946.09,
+          "order_id": "0597917978826637312"
+        },
+        {
+          "date": "2026-01-02",
+          "side": "buy",
+          "symbol": "SKYT",
+          "company": "SkyWater Technology",
+          "price": 22.25,
+          "quantity": 44.68,
+          "value": 994.18,
+          "order_id": "0596921296504750080"
+        },
+        {
+          "date": "2026-01-02",
+          "side": "buy",
+          "symbol": "GDS",
+          "company": "GDS Holdings",
+          "price": 38.69,
+          "quantity": 51.7,
+          "value": 2000.0,
+          "order_id": "0596906204446851072"
+        },
+        {
+          "date": "2026-01-02",
+          "side": "sell",
+          "symbol": "NKE",
+          "company": "NIKE",
+          "price": 63.09,
+          "quantity": 23.52,
+          "value": 1483.49,
+          "order_id": "0596891150318043136"
+        },
+        {
+          "date": "2026-01-02",
+          "side": "sell",
+          "symbol": "ATEX",
+          "company": "Anterix",
+          "price": 22.19,
+          "quantity": 68.06,
+          "value": 1510.12,
+          "order_id": "0596830700167495680"
+        }
+      ]
     },
     "CLAUDE": {
       "name": "CLAUDE",

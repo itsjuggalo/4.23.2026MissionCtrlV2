@@ -13,6 +13,8 @@ import requests
 from pathlib import Path
 from datetime import datetime
 
+MEMORY_DIR = Path.home() / ".openclaw" / "workspace" / "memory"
+
 SECRETS_DIR = Path.home() / ".openclaw" / "secrets"
 DATA_DIR = Path.home() / "mission-control-restored" / "data"
 DATA_DIR.mkdir(parents=True, exist_ok=True)
@@ -118,6 +120,26 @@ def send_to_discord(webhook_url, route, message_text, timestamp):
         return False
 
 
+# File name mapping for saving briefs to disk
+SAVE_FILE_MAP = {
+    "morning": "morning-brief",
+    "midday": "midday",
+    "eod": "eod-summary",
+    "afterhours": "nightly",
+}
+
+def save_brief_to_disk(route_name, text):
+    """Save JazzyHazzy's actual brief text to memory dir for later cron jobs to read."""
+    file_suffix = SAVE_FILE_MAP.get(route_name)
+    if not file_suffix:
+        return
+    MEMORY_DIR.mkdir(parents=True, exist_ok=True)
+    date_str = datetime.now().strftime("%Y-%m-%d")
+    filepath = MEMORY_DIR / f"{date_str}-{file_suffix}.md"
+    filepath.write_text(text)
+    print(f"  [relay] Saved brief to {filepath} ({len(text)} bytes)")
+
+
 def poll_telegram():
     """Long-poll Telegram for new messages."""
     if not BOT_TOKEN:
@@ -176,6 +198,7 @@ def poll_telegram():
                 if route:
                     webhook = WEBHOOKS.get(route["name"])
                     send_to_discord(webhook, route, text, ts)
+                    save_brief_to_disk(route["name"], text)
                 else:
                     print(f"  [relay] No keyword match — not forwarded")
 
