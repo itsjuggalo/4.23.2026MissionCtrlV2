@@ -111,7 +111,7 @@ function FlowColHeaders() {
   return (
     <div style={{ display: 'grid', gridTemplateColumns: '10px 32px 50px 76px 52px 64px 28px 72px 68px', gap: '6px', padding: '4px 14px', background: '#0a1422', borderBottom: '1px solid #1a3a4a', alignItems: 'center' }}>
       {['', 'TIME', 'TICKER', 'CONTRACT', 'EXP', 'VOL/OI', 'SIDE', 'PREMIUM', 'TYPE'].map((h, i) => (
-        <span key={i} style={{ fontSize: '9px', color: '#455a64', letterSpacing: '0.8px', fontFamily: 'var(--font-mc-mono)', fontWeight: 700, textAlign: i >= 7 ? 'right' : 'left' }}>{h}</span>
+        <span key={i} style={{ fontSize: 'var(--mc-font-label)', color: '#455a64', letterSpacing: '0.8px', fontFamily: 'var(--font-mc-mono)', fontWeight: 700, textAlign: i >= 7 ? 'right' : 'left' }}>{h}</span>
       ))}
     </div>
   );
@@ -151,8 +151,8 @@ function FlowRow({ f, onClick, livePrice }: { f: FlowEntry; onClick: () => void;
       <span style={{ fontSize: 'var(--mc-font-sm)', color: valColor, fontWeight: 700, fontFamily: 'var(--font-mc-mono)', textAlign: 'right' }}>{fv(f.Value)}</span>
       <div style={{ display: 'flex', gap: '3px', justifyContent: 'flex-end', alignItems: 'center' }}>
         {highConviction && <span style={{ fontSize: 'var(--mc-font-badge)' }}>🔥</span>}
-        {unusual && <span style={{ fontSize: '9px', fontWeight: 700, padding: '1px 4px', borderRadius: '3px', background: '#ffd60022', color: '#ffd600', border: '1px solid #ffd60033', fontFamily: 'var(--font-mc-mono)' }}>U</span>}
-        <span style={{ fontSize: '9px', fontWeight: 700, padding: '2px 5px', borderRadius: '3px', background: f.BlockType === 'SWEEP' ? '#ff980022' : '#4fc3f722', color: f.BlockType === 'SWEEP' ? '#ff9800' : '#4fc3f7', fontFamily: 'var(--font-mc-mono)' }}>{f.BlockType === 'SWEEP' ? 'SWP' : 'BLK'}</span>
+        {unusual && <span style={{ fontSize: 'var(--mc-font-label)', fontWeight: 700, padding: '1px 4px', borderRadius: '3px', background: '#ffd60022', color: '#ffd600', border: '1px solid #ffd60033', fontFamily: 'var(--font-mc-mono)' }}>U</span>}
+        <span style={{ fontSize: 'var(--mc-font-label)', fontWeight: 700, padding: '2px 5px', borderRadius: '3px', background: f.BlockType === 'SWEEP' ? '#ff980022' : '#4fc3f722', color: f.BlockType === 'SWEEP' ? '#ff9800' : '#4fc3f7', fontFamily: 'var(--font-mc-mono)' }}>{f.BlockType === 'SWEEP' ? 'SWP' : 'BLK'}</span>
       </div>
     </div>
   );
@@ -179,7 +179,7 @@ function AlertRow({ a, onClick, livePrice }: { a: AlertEntry; onClick: () => voi
       <span style={{ fontSize: 'var(--mc-font-label)', color: '#ce93d8', fontFamily: 'var(--font-mc-mono)' }}>{(a.NumOfAlerts || 0) > 1 ? '×' + a.NumOfAlerts : ''}</span>
       <span style={{ fontSize: 'var(--mc-font-sm)', color: sColor, fontWeight: 700, fontFamily: 'var(--font-mc-mono)', textAlign: 'right' }}>{a.isBullish ? 'BULL' : 'BEAR'}</span>
       <div style={{ display: 'flex', gap: '3px', justifyContent: 'flex-end', alignItems: 'center' }}>
-        {(a.SWEEPS || 0) > 0 && <span style={{ fontSize: '9px', fontWeight: 700, padding: '2px 5px', borderRadius: '3px', background: '#ff980022', color: '#ff9800', fontFamily: 'var(--font-mc-mono)' }}>{a.SWEEPS}SWP</span>}
+        {(a.SWEEPS || 0) > 0 && <span style={{ fontSize: 'var(--mc-font-label)', fontWeight: 700, padding: '2px 5px', borderRadius: '3px', background: '#ff980022', color: '#ff9800', fontFamily: 'var(--font-mc-mono)' }}>{a.SWEEPS}SWP</span>}
       </div>
     </div>
   );
@@ -328,7 +328,7 @@ function SentimentPopup({ f, onClose }: { f: FlowEntry; onClose: () => void }) {
         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px', marginBottom: '14px' }}>
           {cells.map((c, i) => (
             <div key={i} style={{ background: '#0a1929', borderRadius: '6px', padding: '10px 12px' }}>
-              <div style={{ fontSize: '9px', color: '#607d8b', letterSpacing: '0.5px', marginBottom: '4px' }}>{c.l}</div>
+              <div style={{ fontSize: 'var(--mc-font-label)', color: '#607d8b', letterSpacing: '0.5px', marginBottom: '4px' }}>{c.l}</div>
               <div style={{ fontSize: 'var(--mc-font-sm)', fontWeight: 600, color: c.c }}>{c.v}</div>
             </div>
           ))}
