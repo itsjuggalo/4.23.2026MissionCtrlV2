@@ -37,6 +37,7 @@ type PageName =
   | 'Scanner'
   | 'Tasks'
   | 'Options'
+  | 'OptionsWatcher'
   | 'Sessions'
   | 'Agents'
   | 'Approvals'
@@ -87,6 +88,7 @@ const tradingItems: { name: PageName; icon: React.ElementType }[] = [
   { name: 'TV Chart', icon: LineChart },
   { name: 'Scanner', icon: Radar },
   { name: 'Options', icon: BarChart2 },
+  { name: 'OptionsWatcher', icon: BarChart2 },
   { name: 'Wallets', icon: Wallet },
   { name: 'Trades', icon: TrendingUp },
   { name: 'GoTrader', icon: Bot },

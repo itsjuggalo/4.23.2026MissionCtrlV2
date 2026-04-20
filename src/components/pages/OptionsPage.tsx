@@ -110,6 +110,7 @@ function spotVsCurrent(spot: number, current: number | undefined): { text: strin
 function FlowRow({ f, onClick, livePrice }: { f: FlowEntry; onClick: () => void; livePrice?: { price: number; change: number; changePct: number } }) {
   const isSweep = f.BlockType === 'SWEEP';
   const unusual = flagUnusual(f);
+  const highConviction = unusual && f.BlockType === 'SWEEP' && isAsk(f.BidAskType) && f.Value >= 100000;
   const unusualHuge = flagUnusualHuge(f);
   const huge = flagHuge(f);
   const valColor = premiumColor(f.Value, unusual);
@@ -136,6 +137,17 @@ function FlowRow({ f, onClick, livePrice }: { f: FlowEntry; onClick: () => void;
         <span style={{ fontSize: 'var(--mc-font-xl)', color: sColor, fontFamily: 'var(--font-mc-mono)' }}>${f.Strike}</span>
         <span style={{ fontSize: 'var(--mc-font-xl)', color: '#607d8b', fontFamily: 'var(--font-mc-mono)' }}>{f.ExpiryStr?.slice(5)}</span>
       </div>
+
+      {/* SENTIMENT GUIDE */}
+      <div style={{ display: 'flex', gap: '16px', padding: '6px 14px', marginBottom: '6px', background: '#0a1929', border: '1px solid #1a3a4a', borderRadius: '4px', fontSize: 'var(--mc-font-label)', fontFamily: 'var(--font-mc-mono)', flexWrap: 'wrap', alignItems: 'center' }}>
+        <span style={{ color: '#607d8b', fontWeight: 700 }}>SENTIMENT:</span>
+        <span><span style={{ color: '#66bb6a' }}>■</span> CALL on ASK = BULLISH</span>
+        <span><span style={{ color: '#ef5350' }}>■</span> CALL on BID = BEARISH</span>
+        <span><span style={{ color: '#ef5350' }}>■</span> PUT on ASK = BEARISH</span>
+        <span><span style={{ color: '#66bb6a' }}>■</span> PUT on BID = BULLISH</span>
+        <span style={{ color: '#455a64' }}>|</span>
+        <span style={{ color: '#ffd600' }}>🔥 = Unusual Sweep on ASK (high conviction buy)</span>
+      </div>
       <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
         {/* Spot @ alert */}
         <span style={{ fontSize: 'var(--mc-font-xl)', color: '#607d8b', fontFamily: 'var(--font-mc-mono)' }}>{fmtPrice(f.Spot)}</span>
@@ -156,6 +168,7 @@ function FlowRow({ f, onClick, livePrice }: { f: FlowEntry; onClick: () => void;
 
 function AlertRow({ a, onClick, livePrice }: { a: AlertEntry; onClick: () => void; livePrice?: { price: number; change: number; changePct: number } }) {
   const sColor = a.isBullish ? '#66bb6a' : '#ef5350';
+  const highConviction = a.SWEEPS > 0 && a.isBullish && a.Value >= 100000;
   const priceMove = livePrice ? spotVsCurrent(a.Spot, livePrice.price) : null;
   return (
     <div onClick={onClick} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '10px 14px', borderBottom: '1px solid #0d1117', cursor: 'pointer' }}
