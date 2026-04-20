@@ -107,16 +107,6 @@ function spotVsCurrent(spot: number, current: number | undefined): { text: strin
   };
 }
 
-function FlowColHeaders() {
-  return (
-    <div style={{ display: 'grid', gridTemplateColumns: '10px 32px 50px 76px 52px 64px 28px 72px 68px', gap: '6px', padding: '4px 14px', background: '#0a1422', borderBottom: '1px solid #1a3a4a', alignItems: 'center' }}>
-      {['', 'TIME', 'TICKER', 'CONTRACT', 'EXP', 'VOL/OI', 'SIDE', 'PREMIUM', 'TYPE'].map((h, i) => (
-        <span key={i} style={{ fontSize: '9px', color: '#455a64', letterSpacing: '0.8px', fontFamily: 'var(--font-mc-mono)', fontWeight: 700, textAlign: i >= 7 ? 'right' : 'left' }}>{h}</span>
-      ))}
-    </div>
-  );
-}
-
 function FlowRow({ f, onClick, livePrice }: { f: FlowEntry; onClick: () => void; livePrice?: { price: number; change: number; changePct: number } }) {
   const isSweep = f.BlockType === 'SWEEP';
   const unusual = flagUnusual(f);
@@ -128,64 +118,79 @@ function FlowRow({ f, onClick, livePrice }: { f: FlowEntry; onClick: () => void;
   const sentiment = getSentiment(f);
   const sColor = sentColor(sentiment);
   const postfix = pricePostfix(f.BidAskType);
-  const fv = (n: number) => n >= 1000000 ? '$' + (n/1000000).toFixed(1) + 'M' : n >= 1000 ? '$' + (n/1000).toFixed(0) + 'K' : '$' + n;
-  const expStr = f.ExpiryStr?.slice(5) || '';
+  const priceMove = livePrice ? spotVsCurrent(f.Spot, livePrice.price) : null;
 
   return (
     <div onClick={onClick} style={{
-      display: 'grid', gridTemplateColumns: '10px 32px 50px 76px 52px 64px 28px 72px 68px',
-      gap: '6px', padding: '8px 14px', borderBottom: '1px solid #0d1117', cursor: 'pointer',
-      alignItems: 'center',
-      background: unusualHuge ? '#e040fb08' : huge ? '#ffd60008' : highConviction ? '#66bb6a06' : 'transparent',
+      display: 'flex', justifyContent: 'space-between', alignItems: 'center',
+      padding: '10px 14px', borderBottom: '1px solid #0d1117', cursor: 'pointer',
+      background: unusualHuge ? '#e040fb08' : huge ? '#ffd60008' : 'transparent',
       borderLeft: unusualHuge ? '3px solid #e040fb' : unusual ? '3px solid #ffd600' : '3px solid transparent',
     }}
-      onMouseEnter={e => (e.currentTarget.style.background = '#1a3a4a18')}
+      onMouseEnter={e => (e.currentTarget.style.background = '#1a3a4a33')}
       onMouseLeave={e => (e.currentTarget.style.background = unusualHuge ? '#e040fb08' : huge ? '#ffd60008' : 'transparent')}>
-      <span style={{ width: '8px', height: '8px', borderRadius: '50%', background: sColor, boxShadow: '0 0 4px ' + sColor, display: 'inline-block' }} />
-      <span style={{ fontSize: 'var(--mc-font-label)', color: '#455a64', fontFamily: 'var(--font-mc-mono)' }}>{timeAgo(f.Time)}</span>
-      <span style={{ fontSize: 'var(--mc-font-sm)', color: sColor, fontWeight: 700, fontFamily: 'var(--font-mc-mono)' }}>{f.Symbol}</span>
-      <span style={{ fontSize: 'var(--mc-font-xs)', color: sColor, fontFamily: 'var(--font-mc-mono)' }}>{f.OptionType?.slice(0, 1)} ${f.Strike}</span>
-      <span style={{ fontSize: 'var(--mc-font-label)', color: '#607d8b', fontFamily: 'var(--font-mc-mono)' }}>{expStr}</span>
-      <span style={{ fontSize: 'var(--mc-font-label)', color: unusual ? '#ffd600' : '#607d8b', fontFamily: 'var(--font-mc-mono)' }}>{f.Volume || 0}/{f.OI || 0}</span>
-      <span style={{ fontSize: 'var(--mc-font-label)', color: '#90a4ae', fontFamily: 'var(--font-mc-mono)' }}>{postfix}</span>
-      <span style={{ fontSize: 'var(--mc-font-sm)', color: valColor, fontWeight: 700, fontFamily: 'var(--font-mc-mono)', textAlign: 'right' }}>{fv(f.Value)}</span>
-      <div style={{ display: 'flex', gap: '3px', justifyContent: 'flex-end', alignItems: 'center' }}>
-        {highConviction && <span style={{ fontSize: 'var(--mc-font-badge)' }}>🔥</span>}
-        {unusual && <span style={{ fontSize: '9px', fontWeight: 700, padding: '1px 4px', borderRadius: '3px', background: '#ffd60022', color: '#ffd600', border: '1px solid #ffd60033', fontFamily: 'var(--font-mc-mono)' }}>U</span>}
-        <span style={{ fontSize: '9px', fontWeight: 700, padding: '2px 5px', borderRadius: '3px', background: f.BlockType === 'SWEEP' ? '#ff980022' : '#4fc3f722', color: f.BlockType === 'SWEEP' ? '#ff9800' : '#4fc3f7', fontFamily: 'var(--font-mc-mono)' }}>{f.BlockType === 'SWEEP' ? 'SWP' : 'BLK'}</span>
+      <div style={{ display: 'flex', alignItems: 'center', gap: '5px', minWidth: 0 }}>
+        <span style={{ width: '10px', height: '10px', borderRadius: '50%', background: sColor, flexShrink: 0, boxShadow: `0 0 4px ${sColor}88` }} />
+        <span style={{ fontSize: 'var(--mc-font-xl)', color: '#455a64', fontFamily: 'var(--font-mc-mono)', width: '26px', flexShrink: 0 }}>{timeAgo(f.Time)}</span>
+        <span style={{ fontSize: 'var(--mc-font-xl)', color: sColor, fontWeight: 700, fontFamily: 'var(--font-mc-mono)', width: '42px', flexShrink: 0 }}>{f.Symbol}</span>
+        <span style={{ fontSize: 'var(--mc-font-xl)', color: sColor, fontWeight: 600, width: '12px', flexShrink: 0 }}>{f.OptionType?.slice(0, 1)}</span>
+        <span style={{ fontSize: 'var(--mc-font-xl)', color: sColor, fontFamily: 'var(--font-mc-mono)' }}>${f.Strike}</span>
+        <span style={{ fontSize: 'var(--mc-font-xl)', color: '#607d8b', fontFamily: 'var(--font-mc-mono)' }}>{f.ExpiryStr?.slice(5)}</span>
+      </div>
+
+      {/* SENTIMENT GUIDE */}
+      <div style={{ display: 'flex', gap: '16px', padding: '6px 14px', marginBottom: '6px', background: '#0a1929', border: '1px solid #1a3a4a', borderRadius: '4px', fontSize: 'var(--mc-font-label)', fontFamily: 'var(--font-mc-mono)', flexWrap: 'wrap', alignItems: 'center' }}>
+        <span style={{ color: '#607d8b', fontWeight: 700 }}>SENTIMENT:</span>
+        <span><span style={{ color: '#66bb6a' }}>■</span> CALL on ASK = BULLISH</span>
+        <span><span style={{ color: '#ef5350' }}>■</span> CALL on BID = BEARISH</span>
+        <span><span style={{ color: '#ef5350' }}>■</span> PUT on ASK = BEARISH</span>
+        <span><span style={{ color: '#66bb6a' }}>■</span> PUT on BID = BULLISH</span>
+        <span style={{ color: '#455a64' }}>|</span>
+        <span style={{ color: '#ffd600' }}>🔥 = Unusual Sweep on ASK (high conviction buy)</span>
+      </div>
+      <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+        {/* Spot @ alert */}
+        <span style={{ fontSize: 'var(--mc-font-xl)', color: '#607d8b', fontFamily: 'var(--font-mc-mono)' }}>{fmtPrice(f.Spot)}</span>
+        {/* Move since alert */}
+        {priceMove && <span style={{ fontSize: 'var(--mc-font-sm)', color: priceMove.color, fontFamily: 'var(--font-mc-mono)', fontWeight: 600 }}>{priceMove.text}</span>}
+        {/* Contract price + postfix */}
+        <span style={{ fontSize: 'var(--mc-font-xl)', color: '#90a4ae', fontFamily: 'var(--font-mc-mono)' }}>{postfix}</span>
+        {/* Premium */}
+        <span style={{ fontSize: 'var(--mc-font-xl)', color: valColor, fontWeight: f.Value >= 250000 ? 700 : 400, fontFamily: 'var(--font-mc-mono)', minWidth: '40px', textAlign: 'right', textShadow: f.Value >= 5000000 ? '0 0 8px #e040fb66' : f.Value >= 1000000 ? '0 0 6px #ffd60044' : 'none' }}>{fmtVal(f.Value)}</span>
+        {/* Volume */}
+        <span style={{ fontSize: 'var(--mc-font-xl)', color: volColor, fontFamily: 'var(--font-mc-mono)', minWidth: '28px', textAlign: 'right' }}>{f.Volume >= 1000 ? `${(f.Volume/1000).toFixed(1)}K` : f.Volume}</span>
+        {unusual && <span style={{ fontSize: 'var(--mc-font-xs)', fontWeight: 700, padding: '0px 3px', borderRadius: '2px', background: '#ffd60022', color: '#ffd600', border: '1px solid #ffd60044' }}>U</span>}
+        <span style={{ fontSize: 'var(--mc-font-sm)', fontWeight: 700, padding: '1px 3px', borderRadius: '3px', background: isSweep ? '#ff980022' : '#4fc3f722', color: isSweep ? '#ff9800' : '#4fc3f7' }}>{isSweep ? 'SWP' : 'BLK'}</span>
       </div>
     </div>
   );
 }
-
-
 
 function AlertRow({ a, onClick, livePrice }: { a: AlertEntry; onClick: () => void; livePrice?: { price: number; change: number; changePct: number } }) {
   const sColor = a.isBullish ? '#66bb6a' : '#ef5350';
-  const fv = (n: number) => n >= 1000000 ? '$' + (n/1000000).toFixed(1) + 'M' : n >= 1000 ? '$' + (n/1000).toFixed(0) + 'K' : '$' + n;
+  const highConviction = a.SWEEPS > 0 && a.isBullish && a.Value >= 100000;
+  const priceMove = livePrice ? spotVsCurrent(a.Spot, livePrice.price) : null;
   return (
-    <div onClick={onClick} style={{
-      display: 'grid', gridTemplateColumns: '10px 32px 50px 76px 52px 64px 28px 72px 68px',
-      gap: '6px', padding: '8px 14px', borderBottom: '1px solid #0d1117', cursor: 'pointer', alignItems: 'center',
-    }}
-      onMouseEnter={e => (e.currentTarget.style.background = '#1a3a4a18')}
+    <div onClick={onClick} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '10px 14px', borderBottom: '1px solid #0d1117', cursor: 'pointer' }}
+      onMouseEnter={e => (e.currentTarget.style.background = '#1a3a4a33')}
       onMouseLeave={e => (e.currentTarget.style.background = 'transparent')}>
-      <span style={{ width: '8px', height: '8px', borderRadius: '50%', background: sColor, boxShadow: '0 0 4px ' + sColor, display: 'inline-block' }} />
-      <span style={{ fontSize: 'var(--mc-font-label)', color: '#455a64', fontFamily: 'var(--font-mc-mono)' }}>{timeAgo(a.Time || Date.now())}</span>
-      <span style={{ fontSize: 'var(--mc-font-sm)', color: sColor, fontWeight: 700, fontFamily: 'var(--font-mc-mono)' }}>{a.Symbol}</span>
-      <span style={{ fontSize: 'var(--mc-font-xs)', color: sColor, fontFamily: 'var(--font-mc-mono)' }}>{a.OptionType?.slice(0, 1)} ${a.Strike}</span>
-      <span style={{ fontSize: 'var(--mc-font-label)', color: a.DTE <= 2 ? '#ff9800' : '#607d8b', fontFamily: 'var(--font-mc-mono)' }}>{a.DTE}d</span>
-      <span style={{ fontSize: 'var(--mc-font-label)', color: '#607d8b', fontFamily: 'var(--font-mc-mono)' }}>{a.Volume || 0}/{a.OI || 0}</span>
-      <span style={{ fontSize: 'var(--mc-font-label)', color: '#ce93d8', fontFamily: 'var(--font-mc-mono)' }}>{(a.NumOfAlerts || 0) > 1 ? '×' + a.NumOfAlerts : ''}</span>
-      <span style={{ fontSize: 'var(--mc-font-sm)', color: sColor, fontWeight: 700, fontFamily: 'var(--font-mc-mono)', textAlign: 'right' }}>{a.isBullish ? 'BULL' : 'BEAR'}</span>
-      <div style={{ display: 'flex', gap: '3px', justifyContent: 'flex-end', alignItems: 'center' }}>
-        {(a.SWEEPS || 0) > 0 && <span style={{ fontSize: '9px', fontWeight: 700, padding: '2px 5px', borderRadius: '3px', background: '#ff980022', color: '#ff9800', fontFamily: 'var(--font-mc-mono)' }}>{a.SWEEPS}SWP</span>}
+      <div style={{ display: 'flex', alignItems: 'center', gap: '5px', minWidth: 0 }}>
+        <span style={{ width: '10px', height: '10px', borderRadius: '50%', background: sColor, flexShrink: 0, boxShadow: `0 0 4px ${sColor}88` }} />
+        <span style={{ fontSize: 'var(--mc-font-xl)', color: '#455a64', fontFamily: 'var(--font-mc-mono)', width: '26px', flexShrink: 0 }}>{timeAgo(a.Time)}</span>
+        <span style={{ fontSize: 'var(--mc-font-xl)', color: sColor, fontWeight: 700, fontFamily: 'var(--font-mc-mono)', width: '42px', flexShrink: 0 }}>{a.Symbol}</span>
+        <span style={{ fontSize: 'var(--mc-font-xl)', color: sColor, fontWeight: 600 }}>{a.OptionType?.slice(0, 1)} ${a.Strike}</span>
+      </div>
+      <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+        <span style={{ fontSize: 'var(--mc-font-xl)', color: '#607d8b', fontFamily: 'var(--font-mc-mono)' }}>{fmtPrice(a.Spot)}</span>
+        {priceMove && <span style={{ fontSize: 'var(--mc-font-sm)', color: priceMove.color, fontFamily: 'var(--font-mc-mono)', fontWeight: 600 }}>{priceMove.text}</span>}
+        {(a.NumOfAlerts || 0) > 1 && <span style={{ fontSize: 'var(--mc-font-xl)', color: '#ce93d8', fontFamily: 'var(--font-mc-mono)' }}>×{a.NumOfAlerts}</span>}
+        <span style={{ fontSize: 'var(--mc-font-xl)', color: a.DTE <= 2 ? '#ff9800' : '#90a4ae', fontFamily: 'var(--font-mc-mono)' }}>{a.DTE}d</span>
+        <span style={{ fontSize: 'var(--mc-font-xl)', color: volumeColor(a.Volume), fontFamily: 'var(--font-mc-mono)' }}>{a.Volume >= 1000 ? `${(a.Volume/1000).toFixed(1)}K` : a.Volume}</span>
+        <span style={{ fontSize: 'var(--mc-font-sm)', fontWeight: 700, padding: '1px 5px', borderRadius: '3px', background: `${sColor}22`, color: sColor }}>{a.isBullish ? 'BULL' : 'BEAR'}</span>
       </div>
     </div>
   );
 }
-
-
 
 function Block({ title, count, color, children }: { title: string; count: number; color: string; children: React.ReactNode }) {
   return (
@@ -194,7 +199,6 @@ function Block({ title, count, color, children }: { title: string; count: number
         <span style={{ fontSize: 'var(--mc-font-xl)', fontWeight: 700, color, fontFamily: 'var(--font-mc-mono)', letterSpacing: '0.5px' }}>{title}</span>
         <span style={{ fontSize: 'var(--mc-font-xl)', fontWeight: 700, padding: '1px 8px', borderRadius: '10px', background: `${color}18`, color, fontFamily: 'var(--font-mc-mono)' }}>{count}</span>
       </div>
-          <FlowColHeaders />
       <div style={{ overflow: 'auto', maxHeight: '340px', flex: 1 }}>{children}</div>
     </div>
   );
@@ -295,87 +299,12 @@ function DetailPanel({ item, onClose, livePrice }: { item: SelectedItem; onClose
   );
 }
 
-
-function SentimentPopup({ f, onClose }: { f: FlowEntry; onClose: () => void }) {
-  const sentiment = getSentiment(f);
-  const sc = sentColor(sentiment);
-  const unusual = flagUnusual(f);
-  const huge = flagHuge(f);
-  const highConviction = unusual && f.BlockType === 'SWEEP' && isAsk(f.BidAskType) && f.Value >= 100000;
-  const pc = premiumColor(f.Value, unusual);
-  const fv = (n: number) => n >= 1000000 ? '$' + (n/1000000).toFixed(1) + 'M' : n >= 1000 ? '$' + (n/1000).toFixed(0) + 'K' : '$' + n;
-  const postfix = pricePostfix(f.BidAskType);
-  const volOiRatio = f.OI > 0 ? (f.Volume / f.OI).toFixed(2) + 'x' : 'N/A';
-
-  const cells = [
-    { l: 'SENTIMENT', v: sentiment, c: sc },
-    { l: 'DIRECTION', v: f.OptionType + ' on ' + (isAsk(f.BidAskType) ? 'ASK' : 'BID'), c: sc },
-    { l: 'PREMIUM', v: fv(f.Value), c: pc },
-    { l: 'SPOT @ ALERT', v: '$' + f.Spot?.toFixed(2), c: '#ff9800' },
-    { l: 'VOLUME / OI', v: f.Volume + ' / ' + f.OI, c: unusual ? '#ffd600' : '#607d8b' },
-    { l: 'VOL/OI RATIO', v: volOiRatio, c: unusual ? '#ffd600' : '#607d8b' },
-    { l: 'PRICE SIDE', v: postfix + ' (' + (isAsk(f.BidAskType) ? 'ASK' : 'BID') + ')', c: '#e0e0e0' },
-    { l: 'FLOW TYPE', v: f.BlockType, c: f.BlockType === 'SWEEP' ? '#ff9800' : '#4fc3f7' },
-  ];
-
-  return (
-    <div onClick={onClose} style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(0,0,0,0.6)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 9999 }}>
-      <div onClick={e => e.stopPropagation()} style={{ background: '#0d1929', border: '1px solid #4fc3f7', borderRadius: '12px', padding: '20px 24px', width: '440px', maxHeight: '90vh', overflowY: 'auto', fontFamily: 'var(--font-mc-mono)' }}>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px', paddingBottom: '12px', borderBottom: '1px solid #1a3a4a' }}>
-          <span style={{ fontSize: 'var(--mc-font-lg)', fontWeight: 700, color: sc }}>{f.Symbol} {f.OptionType?.slice(0,1)} ${f.Strike} <span style={{ fontSize: 'var(--mc-font-label)', color: '#607d8b' }}>{f.ExpiryStr}</span></span>
-          <button onClick={onClose} style={{ fontSize: 'var(--mc-font-xl)', color: '#607d8b', cursor: 'pointer', background: 'none', border: 'none' }}>x</button>
-        </div>
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px', marginBottom: '14px' }}>
-          {cells.map((c, i) => (
-            <div key={i} style={{ background: '#0a1929', borderRadius: '6px', padding: '10px 12px' }}>
-              <div style={{ fontSize: '9px', color: '#607d8b', letterSpacing: '0.5px', marginBottom: '4px' }}>{c.l}</div>
-              <div style={{ fontSize: 'var(--mc-font-sm)', fontWeight: 600, color: c.c }}>{c.v}</div>
-            </div>
-          ))}
-        </div>
-        <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap', marginBottom: '14px' }}>
-          {unusual && <span style={{ fontSize: 'var(--mc-font-label)', padding: '3px 8px', borderRadius: '3px', background: '#ffd60022', color: '#ffd600', fontWeight: 700 }}>UNUSUAL</span>}
-          <span style={{ fontSize: 'var(--mc-font-label)', padding: '3px 8px', borderRadius: '3px', background: f.BlockType === 'SWEEP' ? '#ff980022' : '#4fc3f722', color: f.BlockType === 'SWEEP' ? '#ff9800' : '#4fc3f7', fontWeight: 700 }}>{f.BlockType}</span>
-          <span style={{ fontSize: 'var(--mc-font-label)', padding: '3px 8px', borderRadius: '3px', background: sc + '22', color: sc, fontWeight: 700 }}>{sentiment}</span>
-          {highConviction && <span style={{ fontSize: 'var(--mc-font-label)', padding: '3px 8px', borderRadius: '3px', background: '#e040fb22', color: '#e040fb', fontWeight: 700 }}>HIGH CONVICTION 🔥</span>}
-        </div>
-        {highConviction && (
-          <div style={{ padding: '12px', background: '#0a1929', borderRadius: '6px', marginBottom: '14px', borderLeft: '3px solid #ffd600' }}>
-            <div style={{ fontSize: 'var(--mc-font-label)', color: '#607d8b', letterSpacing: '1px', marginBottom: '6px' }}>WHY THIS IS FLAGGED</div>
-            <div style={{ fontSize: 'var(--mc-font-label)', color: '#b0bec5', lineHeight: '1.6' }}>
-              Unusual volume (Vol {f.Volume} &gt; OI {f.OI}) = <span style={{ color: '#ffd600' }}>new positions</span>.
-              {f.BlockType} across exchanges = <span style={{ color: '#ff9800' }}>urgency</span>.
-              Bought at <span style={{ color: '#66bb6a' }}>ASK</span> = bullish conviction.
-              Premium <span style={{ color: pc }}>{fv(f.Value)}</span> = institutional.
-            </div>
-          </div>
-        )}
-        <div style={{ paddingTop: '12px', borderTop: '1px solid #1a3a4a' }}>
-          <div style={{ fontSize: 'var(--mc-font-label)', color: '#607d8b', letterSpacing: '1px', marginBottom: '6px' }}>SENTIMENT REFERENCE</div>
-          {[
-            { e: 'CALL on ASK', s: 'BULLISH', c: '#66bb6a' },
-            { e: 'CALL on BID', s: 'BEARISH', c: '#ef5350' },
-            { e: 'PUT on ASK', s: 'BEARISH', c: '#ef5350' },
-            { e: 'PUT on BID', s: 'BULLISH', c: '#66bb6a' },
-          ].map((r, i) => (
-            <div key={i} style={{ display: 'flex', justifyContent: 'space-between', padding: '4px 0', fontSize: 'var(--mc-font-label)' }}>
-              <span style={{ color: '#90a4ae' }}>{r.e}</span>
-              <span style={{ color: r.c, fontWeight: 700 }}>= {r.s}</span>
-            </div>
-          ))}
-        </div>
-      </div>
-    </div>
-  );
-}
-
 export function OptionsPage() {
   const [flows, setFlows] = useState<FlowEntry[]>([]);
   const [alerts, setAlerts] = useState<AlertEntry[]>([]);
   const [livePrices, setLivePrices] = useState<LivePrices>({});
   const [loading, setLoading] = useState(true);
   const [selected, setSelected] = useState<SelectedItem>(null);
-  const [popup, setPopup] = useState<FlowEntry | null>(null);
   const [lastUpdate, setLastUpdate] = useState<Date | null>(null);
   const priceCache = useRef<{ ts: number; data: LivePrices }>({ ts: 0, data: {} });
 
@@ -469,16 +398,6 @@ export function OptionsPage() {
           <span style={{ fontSize: 'var(--mc-font-xl)', color: '#ef5350', fontFamily: 'var(--font-mc-mono)' }}>● Bear</span>
           <span style={{ fontSize: 'var(--mc-font-xl)', color: '#ffd600', fontFamily: 'var(--font-mc-mono)' }}>● Unusual</span>
         </div>
-      {/* SENTIMENT GUIDE */}
-      <div style={{ display: 'flex', gap: '16px', padding: '6px 14px', marginBottom: '6px', background: '#0a1929', border: '1px solid #1a3a4a', borderRadius: '4px', fontSize: 'var(--mc-font-label)', fontFamily: 'var(--font-mc-mono)', flexWrap: 'wrap', alignItems: 'center' }}>
-        <span style={{ color: '#607d8b', fontWeight: 700 }}>SENTIMENT:</span>
-        <span><span style={{ color: '#66bb6a' }}>■</span> CALL on ASK = BULLISH</span>
-        <span><span style={{ color: '#ef5350' }}>■</span> CALL on BID = BEARISH</span>
-        <span><span style={{ color: '#ef5350' }}>■</span> PUT on ASK = BEARISH</span>
-        <span><span style={{ color: '#66bb6a' }}>■</span> PUT on BID = BULLISH</span>
-        <span style={{ color: '#455a64' }}>|</span>
-        <span style={{ color: '#ffd600' }}>🔥 = High Conviction (Unusual + Sweep + ASK + $100K+)</span>
-      </div>
 
         {/* TOP 3x2 */}
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '10px', marginBottom: '16px' }}>
@@ -531,7 +450,6 @@ export function OptionsPage() {
         </div>
       </div>
 
-      {popup && <SentimentPopup f={popup} onClose={() => setPopup(null)} />}
       {selected && <DetailPanel item={selected} onClose={() => setSelected(null)} livePrice={selectedLive} />}
     </div>
   );
