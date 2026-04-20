@@ -151,8 +151,8 @@ function FlowRow({ f, onClick, livePrice }: { f: FlowEntry; onClick: () => void;
       <span style={{ fontSize: 'var(--mc-font-sm)', color: valColor, fontWeight: 700, fontFamily: 'var(--font-mc-mono)', textAlign: 'right' }}>{fv(f.Value)}</span>
       <div style={{ display: 'flex', gap: '3px', justifyContent: 'flex-end', alignItems: 'center' }}>
         {highConviction && <span style={{ fontSize: 'var(--mc-font-badge)' }}>🔥</span>}
-        {unusual && <span style={{ fontSize: 'var(--mc-font-label)', fontWeight: 700, padding: '1px 4px', borderRadius: '3px', background: '#ffd60022', color: '#ffd600', border: '1px solid #ffd60033', fontFamily: 'var(--font-mc-mono)' }}>U</span>}
-        <span style={{ fontSize: 'var(--mc-font-label)', fontWeight: 700, padding: '2px 5px', borderRadius: '3px', background: f.BlockType === 'SWEEP' ? '#ff980022' : '#4fc3f722', color: f.BlockType === 'SWEEP' ? '#ff9800' : '#4fc3f7', fontFamily: 'var(--font-mc-mono)' }}>{f.BlockType === 'SWEEP' ? 'SWP' : 'BLK'}</span>
+        {unusual && <span style={{ display: 'inline-flex', alignItems: 'center', padding: '1px 6px', borderRadius: '3px', background: '#ffd60022', border: '1px solid #ffd60055', fontSize: 'var(--mc-font-label)', fontFamily: 'var(--font-mc-mono)', color: '#ffd600', fontWeight: 700, lineHeight: 1.2, whiteSpace: 'nowrap' }}>U</span>}
+        <span style={{ display: 'inline-flex', alignItems: 'center', padding: '1px 6px', borderRadius: '3px', background: f.BlockType === 'SWEEP' ? '#ff980022' : '#4fc3f722', border: f.BlockType === 'SWEEP' ? '1px solid #ff980055' : '1px solid #4fc3f755', fontSize: 'var(--mc-font-label)', fontFamily: 'var(--font-mc-mono)', color: f.BlockType === 'SWEEP' ? '#ff9800' : '#4fc3f7', fontWeight: 700, lineHeight: 1.2, whiteSpace: 'nowrap' }}>{f.BlockType === 'SWEEP' ? 'SWP' : 'BLK'}</span>
       </div>
     </div>
   );
