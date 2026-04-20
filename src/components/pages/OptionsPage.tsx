@@ -109,7 +109,7 @@ function spotVsCurrent(spot: number, current: number | undefined): { text: strin
 
 function FlowColHeaders() {
   return (
-    <div style={{ display: 'grid', gridTemplateColumns: '10px 32px 50px 76px 52px 64px 28px 72px 68px', gap: '6px', padding: '4px 14px', background: '#0a1422', borderBottom: '1px solid #1a3a4a', alignItems: 'center' }}>
+    <div style={{ display: 'grid', gridTemplateColumns: '12px 36px 56px 80px 56px 1fr 32px 80px 76px', gap: '6px', padding: '4px 14px', background: '#0a1422', borderBottom: '1px solid #1a3a4a', alignItems: 'center' }}>
       {['', 'TIME', 'TICKER', 'CONTRACT', 'EXP', 'VOL/OI', 'SIDE', 'PREMIUM', 'TYPE'].map((h, i) => (
         <span key={i} style={{ fontSize: 'var(--mc-font-label)', color: '#455a64', letterSpacing: '0.8px', fontFamily: 'var(--font-mc-mono)', fontWeight: 700, textAlign: i >= 7 ? 'right' : 'left' }}>{h}</span>
       ))}
@@ -133,7 +133,7 @@ function FlowRow({ f, onClick, livePrice }: { f: FlowEntry; onClick: () => void;
 
   return (
     <div onClick={onClick} style={{
-      display: 'grid', gridTemplateColumns: '10px 32px 50px 76px 52px 64px 28px 72px 68px',
+      display: 'grid', gridTemplateColumns: '12px 36px 56px 80px 56px 1fr 32px 80px 76px',
       gap: '6px', padding: '8px 14px', borderBottom: '1px solid #0d1117', cursor: 'pointer',
       alignItems: 'center',
       background: unusualHuge ? '#e040fb08' : huge ? '#ffd60008' : highConviction ? '#66bb6a06' : 'transparent',
@@ -165,7 +165,7 @@ function AlertRow({ a, onClick, livePrice }: { a: AlertEntry; onClick: () => voi
   const fv = (n: number) => n >= 1000000 ? '$' + (n/1000000).toFixed(1) + 'M' : n >= 1000 ? '$' + (n/1000).toFixed(0) + 'K' : '$' + n;
   return (
     <div onClick={onClick} style={{
-      display: 'grid', gridTemplateColumns: '10px 32px 50px 76px 52px 64px 28px 72px 68px',
+      display: 'grid', gridTemplateColumns: '12px 36px 56px 80px 56px 1fr 32px 80px 76px',
       gap: '6px', padding: '8px 14px', borderBottom: '1px solid #0d1117', cursor: 'pointer', alignItems: 'center',
     }}
       onMouseEnter={e => (e.currentTarget.style.background = '#1a3a4a18')}
