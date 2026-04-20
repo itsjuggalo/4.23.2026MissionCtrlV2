@@ -4239,5 +4239,11 @@
     "message": "Buy To Open at 2.30 with first target above 2.64",
     "symbol": "CRWV",
     "title": "CRWV 100P 5/1: BTO"
+  },
+  "1776694834": {
+    "category": "SWING",
+    "message": "Buy To Open at 8.15 with first target above 9.37",
+    "symbol": "GLD",
+    "title": "GLD 443C 5/1: BTO"
   }
 }

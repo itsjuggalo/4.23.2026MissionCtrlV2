@@ -12,8 +12,6 @@ export function CommandCenterPage() {
   const [loading, setLoading] = useState(true);
   const [unusualFlows, setUnusualFlows] = useState<any[]>([]);
   const [kronosForecast, setKronosForecast] = useState<any>(null);
-  const [unusualFlows, setUnusualFlows] = useState<any[]>([]);
-  const [kronosForecast, setKronosForecast] = useState<any>(null);
 
   const fetchData = async () => {
     try {

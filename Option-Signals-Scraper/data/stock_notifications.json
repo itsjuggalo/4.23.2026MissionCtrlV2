@@ -2821,5 +2821,11 @@
     "message": "Buy To Open at 72.61 with first target above 74.06",
     "symbol": "SLV",
     "title": "SLV: BTO"
+  },
+  "1776694837": {
+    "category": "SWING",
+    "message": "Buy To Open at 442.53 with first target above 451.38",
+    "symbol": "GLD",
+    "title": "GLD: BTO"
   }
 }
