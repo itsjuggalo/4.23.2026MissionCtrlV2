@@ -46,12 +46,12 @@ const fmtPrice = (n: number) => {
 function premiumColor(value: number, unusual: boolean): string {
   const v = unusual ? value * 2 : value;
   if (v >= 5000000) return '#e040fb';
-  if (v >= 1000000) return '#ffd600';
-  if (v >= 500000) return '#ff9800';
-  if (v >= 250000) return '#4fc3f7';
-  if (v >= 100000) return '#e0e0e0';
-  if (v >= 50000) return '#90a4ae';
-  return '#607d8b';
+  if (v >= 1000000) return '#ff9800';
+  if (v >= 500000) return '#ffd600';
+  if (v >= 250000) return '#66bb6a';
+  if (v >= 100000) return '#00bcd4';
+  if (v >= 50000) return '#448aff';
+  return '#7c4dff';
 }
 
 function premiumLabel(value: number): string {
@@ -66,12 +66,12 @@ function premiumLabel(value: number): string {
 
 function volumeColor(vol: number): string {
   if (vol >= 10000) return '#e040fb';
-  if (vol >= 5000) return '#ffd600';
-  if (vol >= 2000) return '#ff9800';
-  if (vol >= 500) return '#4fc3f7';
-  if (vol >= 100) return '#e0e0e0';
-  if (vol >= 50) return '#90a4ae';
-  return '#607d8b';
+  if (vol >= 5000) return '#ff9800';
+  if (vol >= 2000) return '#ffd600';
+  if (vol >= 500) return '#66bb6a';
+  if (vol >= 100) return '#00bcd4';
+  if (vol >= 50) return '#448aff';
+  return '#7c4dff';
 }
 
 function pricePostfix(ba: string): string {
@@ -145,8 +145,8 @@ function FlowRow({ f, onClick, livePrice }: { f: FlowEntry; onClick: () => void;
       <span style={{ fontSize: 'var(--mc-font-label)', color: '#455a64', fontFamily: 'var(--font-mc-mono)' }}>{timeAgo(f.Time)}</span>
       <span style={{ fontSize: 'var(--mc-font-sm)', color: sColor, fontWeight: 700, fontFamily: 'var(--font-mc-mono)' }}>{f.Symbol}</span>
       <span style={{ fontSize: 'var(--mc-font-xs)', color: sColor, fontFamily: 'var(--font-mc-mono)' }}>{f.OptionType?.slice(0, 1)} ${f.Strike}</span>
-      <span style={{ fontSize: 'var(--mc-font-label)', color: '#607d8b', fontFamily: 'var(--font-mc-mono)' }}>{expStr}</span>
-      <span style={{ fontSize: 'var(--mc-font-label)', color: unusual ? '#ffd600' : '#607d8b', fontFamily: 'var(--font-mc-mono)' }}>{f.Volume || 0}/{f.OI || 0}</span>
+      <span style={{ fontSize: 'var(--mc-font-label)', color: '#ffffff', fontFamily: 'var(--font-mc-mono)' }}>{expStr}</span>
+      <span style={{ fontSize: 'var(--mc-font-label)', color: unusual ? '#ffd600' : '#ffffff', fontFamily: 'var(--font-mc-mono)' }}>{f.Volume || 0}/{f.OI || 0}</span>
       <span style={{ fontSize: 'var(--mc-font-label)', color: '#90a4ae', fontFamily: 'var(--font-mc-mono)' }}>{postfix}</span>
       <span style={{ fontSize: 'var(--mc-font-sm)', color: valColor, fontWeight: 700, fontFamily: 'var(--font-mc-mono)', textAlign: 'right' }}>{fv(f.Value)}</span>
       <div style={{ display: 'flex', gap: '3px', justifyContent: 'flex-end', alignItems: 'center' }}>
@@ -174,12 +174,13 @@ function AlertRow({ a, onClick, livePrice }: { a: AlertEntry; onClick: () => voi
       <span style={{ fontSize: 'var(--mc-font-label)', color: '#455a64', fontFamily: 'var(--font-mc-mono)' }}>{timeAgo(a.Time || Date.now())}</span>
       <span style={{ fontSize: 'var(--mc-font-sm)', color: sColor, fontWeight: 700, fontFamily: 'var(--font-mc-mono)' }}>{a.Symbol}</span>
       <span style={{ fontSize: 'var(--mc-font-xs)', color: sColor, fontFamily: 'var(--font-mc-mono)' }}>{a.OptionType?.slice(0, 1)} ${a.Strike}</span>
-      <span style={{ fontSize: 'var(--mc-font-label)', color: a.DTE <= 2 ? '#ff9800' : '#607d8b', fontFamily: 'var(--font-mc-mono)' }}>{a.DTE}d</span>
-      <span style={{ fontSize: 'var(--mc-font-label)', color: '#607d8b', fontFamily: 'var(--font-mc-mono)' }}>{a.Volume || 0}/{a.OI || 0}</span>
+      <span style={{ fontSize: 'var(--mc-font-label)', color: a.DTE <= 2 ? '#ff9800' : '#ffffff', fontFamily: 'var(--font-mc-mono)' }}>{a.DTE}d</span>
+      <span style={{ fontSize: 'var(--mc-font-label)', color: '#ffffff', fontFamily: 'var(--font-mc-mono)' }}>{a.Volume || 0}/{a.OI || 0}</span>
       <span style={{ fontSize: 'var(--mc-font-label)', color: '#ce93d8', fontFamily: 'var(--font-mc-mono)' }}>{(a.NumOfAlerts || 0) > 1 ? '×' + a.NumOfAlerts : ''}</span>
-      <span style={{ fontSize: 'var(--mc-font-sm)', color: sColor, fontWeight: 700, fontFamily: 'var(--font-mc-mono)', textAlign: 'right' }}>{a.isBullish ? 'BULL' : 'BEAR'}</span>
+      <span style={{ fontSize: 'var(--mc-font-sm)', color: sColor, fontWeight: 700, fontFamily: 'var(--font-mc-mono)', textAlign: 'right' }}>{a.AlertPrice ? '$' + a.AlertPrice.toFixed(2) : (a.isBullish ? 'BULL' : 'BEAR')}</span>
       <div style={{ display: 'flex', gap: '3px', justifyContent: 'flex-end', alignItems: 'center' }}>
-        {(a.SWEEPS || 0) > 0 && <span style={{ fontSize: 'var(--mc-font-label)', fontWeight: 700, padding: '2px 5px', borderRadius: '3px', background: '#ff980022', color: '#ff9800', fontFamily: 'var(--font-mc-mono)' }}>{a.SWEEPS}SWP</span>}
+        {(a.SWEEPS || 0) > 0 && <><span style={{ fontSize: 'var(--mc-font-label)', fontWeight: 700, padding: '2px 5px', borderRadius: '3px', background: '#ff980022', color: '#ff9800', fontFamily: 'var(--font-mc-mono)' }}>{a.SWEEPS}</span><span style={{ fontSize: 'var(--mc-font-label)', fontWeight: 700, padding: '2px 5px', borderRadius: '3px', background: '#ff980033', color: '#ff9800', fontFamily: 'var(--font-mc-mono)' }}>SWP</span></>}
+        {(a.BLOCKS || 0) > 0 && <><span style={{ fontSize: 'var(--mc-font-label)', fontWeight: 700, padding: '2px 5px', borderRadius: '3px', background: '#4fc3f722', color: '#4fc3f7', fontFamily: 'var(--font-mc-mono)' }}>{a.BLOCKS}</span><span style={{ fontSize: 'var(--mc-font-label)', fontWeight: 700, padding: '2px 5px', borderRadius: '3px', background: '#4fc3f733', color: '#4fc3f7', fontFamily: 'var(--font-mc-mono)' }}>BLK</span></>}
       </div>
     </div>
   );
@@ -187,9 +188,9 @@ function AlertRow({ a, onClick, livePrice }: { a: AlertEntry; onClick: () => voi
 
 
 
-function Block({ title, count, color, children }: { title: string; count: number; color: string; children: React.ReactNode }) {
+function Block({ title, count, color, children, golden }: { title: string; count: number; color: string; children: React.ReactNode; golden?: boolean }) {
   return (
-    <div style={{ background: '#0a1929', border: '1px solid #1a3a4a', borderRadius: '8px', overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
+    <div style={{ background: '#0a1929', border: golden ? '1px solid #ffd60055' : '1px solid #1a3a4a', borderRadius: '8px', overflow: 'hidden', boxShadow: golden ? '0 0 12px #ffd60015' : 'none', display: 'flex', flexDirection: 'column' }}>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '10px 14px', background: '#0d1117', borderBottom: '1px solid #1a3a4a' }}>
         <span style={{ fontSize: 'var(--mc-font-xl)', fontWeight: 700, color, fontFamily: 'var(--font-mc-mono)', letterSpacing: '0.5px' }}>{title}</span>
         <span style={{ fontSize: 'var(--mc-font-xl)', fontWeight: 700, padding: '1px 8px', borderRadius: '10px', background: `${color}18`, color, fontFamily: 'var(--font-mc-mono)' }}>{count}</span>
@@ -458,13 +459,14 @@ export function OptionsPage() {
         {/* Legends */}
         <div style={{ display: 'flex', gap: '6px', marginBottom: '6px', flexWrap: 'wrap' }}>
           <span style={{ fontSize: 'var(--mc-font-xl)', color: '#607d8b', fontFamily: 'var(--font-mc-mono)', padding: '2px 0' }}>$$:</span>
-          {[{ l: '<$50K', c: '#607d8b' }, { l: '$50-100K', c: '#90a4ae' }, { l: '$100-250K', c: '#e0e0e0' }, { l: '$250-500K', c: '#4fc3f7' }, { l: '$500K-1M', c: '#ff9800' }, { l: '$1-5M', c: '#ffd600' }, { l: '$5M+', c: '#e040fb' }].map((x, i) => (
+          {[{ l: '<$50K', c: '#7c4dff' }, { l: '$50-100K', c: '#448aff' }, { l: '$100-250K', c: '#00bcd4' }, { l: '$250-500K', c: '#66bb6a' }, { l: '$500K-1M', c: '#ffd600' }, { l: '$1-5M', c: '#ff9800' }, { l: '$5M+', c: '#e040fb' }].map((x, i) => (
             <span key={i} style={{ fontSize: 'var(--mc-font-xl)', color: x.c, fontFamily: 'var(--font-mc-mono)', fontWeight: 600, padding: '2px 5px', background: `${x.c}10`, borderRadius: '3px', border: `1px solid ${x.c}25` }}>{x.l}</span>
           ))}
         </div>
         <div style={{ display: 'flex', gap: '10px', marginBottom: '12px', flexWrap: 'wrap', alignItems: 'center' }}>
           <span style={{ fontSize: 'var(--mc-font-xl)', color: '#90a4ae', fontFamily: 'var(--font-mc-mono)' }}>=A at ask · &gt;A above ask · =B at bid · &gt;B above bid</span>
           <span style={{ fontSize: 'var(--mc-font-xl)', color: '#1a3a4a' }}>|</span>
+          <span style={{ fontSize: 'var(--mc-font-xl)', fontWeight: 700, padding: '1px 6px', borderRadius: '3px', background: '#ffd60022', color: '#ffd600', border: '1px solid #ffd60033', fontFamily: 'var(--font-mc-mono)' }}>U = Unusual</span>
           <span style={{ fontSize: 'var(--mc-font-xl)', color: '#66bb6a', fontFamily: 'var(--font-mc-mono)' }}>● Bull</span>
           <span style={{ fontSize: 'var(--mc-font-xl)', color: '#ef5350', fontFamily: 'var(--font-mc-mono)' }}>● Bear</span>
           <span style={{ fontSize: 'var(--mc-font-xl)', color: '#ffd600', fontFamily: 'var(--font-mc-mono)' }}>● Unusual</span>
@@ -510,22 +512,22 @@ export function OptionsPage() {
 
         {/* BOTTOM 3x2 */}
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '10px' }}>
-          <Block title="UNUSUAL FLOW" count={unusualFlow.length} color="#ffd600">
+          <Block golden title="UNUSUAL FLOW" count={unusualFlow.length} color="#ffd600">
             {unusualFlow.length === 0 ? noItems : unusualFlow.slice(0, 50).map((f, i) => <FlowRow key={i} f={f} livePrice={livePrices[f.Symbol]} onClick={() => setSelected({ type: 'flow', data: f })} />)}
           </Block>
-          <Block title="HUGE FLOW ($1M+)" count={hugeFlow.length} color="#ff9800">
+          <Block golden title="HUGE FLOW ($1M+)" count={hugeFlow.length} color="#ff9800">
             {hugeFlow.length === 0 ? noItems : hugeFlow.slice(0, 50).map((f, i) => <FlowRow key={i} f={f} livePrice={livePrices[f.Symbol]} onClick={() => setSelected({ type: 'flow', data: f })} />)}
           </Block>
-          <Block title="WEEKLY FLOW" count={weeklyFlow.length} color="#4fc3f7">
+          <Block golden title="WEEKLY FLOW" count={weeklyFlow.length} color="#4fc3f7">
             {weeklyFlow.length === 0 ? noItems : weeklyFlow.slice(0, 50).map((f, i) => <FlowRow key={i} f={f} livePrice={livePrices[f.Symbol]} onClick={() => setSelected({ type: 'flow', data: f })} />)}
           </Block>
-          <Block title="REPEATING FLOW" count={repeatingAlerts.length} color="#ce93d8">
+          <Block golden title="REPEATING FLOW" count={repeatingAlerts.length} color="#ce93d8">
             {repeatingAlerts.length === 0 ? noItems : repeatingAlerts.slice(0, 50).map((a, i) => <AlertRow key={i} a={a} livePrice={livePrices[a.Symbol]} onClick={() => setSelected({ type: 'alert', data: a })} />)}
           </Block>
-          <Block title="ETF FLOW" count={etfFlow.length} color="#66bb6a">
+          <Block golden title="ETF FLOW" count={etfFlow.length} color="#66bb6a">
             {etfFlow.length === 0 ? noItems : etfFlow.slice(0, 50).map((f, i) => <FlowRow key={i} f={f} livePrice={livePrices[f.Symbol]} onClick={() => setSelected({ type: 'flow', data: f })} />)}
           </Block>
-          <Block title="UNUSUAL HUGE ($500K+)" count={unusualHugeFlow.length} color="#e040fb">
+          <Block golden title="UNUSUAL HUGE ($500K+)" count={unusualHugeFlow.length} color="#e040fb">
             {unusualHugeFlow.length === 0 ? noItems : unusualHugeFlow.slice(0, 50).map((f, i) => <FlowRow key={i} f={f} livePrice={livePrices[f.Symbol]} onClick={() => setSelected({ type: 'flow', data: f })} />)}
           </Block>
         </div>
