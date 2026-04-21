@@ -19,7 +19,7 @@ function postedStr(ts?: number) {
 }
 
 const M = 'var(--font-mc-mono)';
-const F = '13px';
+const F = 'var(--mc-font-label)';
 const catColor = (c?: string) => c === 'SWING' ? '#4fc3f7' : c === 'SCALP' ? '#ff9800' : c === 'LONGTERM' ? '#ce93d8' : c?.includes('ER') ? '#ffeb3b' : '#607d8b';
 
 function SignalCard({ sig, onClick, isSelected }: { sig: Signal; onClick: () => void; isSelected: boolean }) {
@@ -31,7 +31,7 @@ function SignalCard({ sig, onClick, isSelected }: { sig: Signal; onClick: () => 
         <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
           <span style={{ fontSize: 'var(--mc-font-md)', fontWeight: 800, color: '#e0e0e0', fontFamily: M }}>{sig.symbol}</span>
           {sig.strike && <span style={{ fontSize: F, color: '#b0bec5', fontFamily: M, fontWeight: 600 }}>${sig.strike}{isCall ? 'C' : 'P'}</span>}
-          <span style={{ fontSize: 'var(--mc-font-label)', padding: '2px 6px', borderRadius: '3px', background: catColor(sig.category) + '22', color: catColor(sig.category), fontFamily: M, fontWeight: 700 }}>{sig.category}</span>
+          <span style={{ display: 'inline-flex', alignItems: 'center', padding: '1px 6px', borderRadius: '3px', background: catColor(sig.category) + '22', border: '1px solid ' + catColor(sig.category) + '55', fontSize: 'var(--mc-font-label)', fontFamily: M, color: catColor(sig.category), fontWeight: 700, lineHeight: 1.2, whiteSpace: 'nowrap' }}>{sig.category}</span>
         </div>
       </div>
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '4px', marginBottom: '6px' }}>
@@ -46,8 +46,8 @@ function SignalCard({ sig, onClick, isSelected }: { sig: Signal; onClick: () => 
       </div>}
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderTop: '1px solid #1a3a4a', paddingTop: '6px', fontSize: 'var(--mc-font-label)', fontFamily: M }}>
         <div style={{ display: 'flex', gap: '6px' }}>
-          <span style={{ padding: '2px 6px', borderRadius: '3px', background: '#1a3a4a', color: '#90a4ae' }}>{sig.source}</span>
-          {sig.free !== undefined && <span style={{ padding: '2px 6px', borderRadius: '3px', background: sig.free ? '#66bb6a22' : '#ce93d822', color: sig.free ? '#66bb6a' : '#ce93d8', fontWeight: 700 }}>{sig.free ? 'FREE' : 'PRO'}</span>}
+          <span style={{ display: 'inline-flex', alignItems: 'center', padding: '1px 6px', borderRadius: '3px', background: '#1a3a4a', border: '1px solid #2a4a5a', color: '#90a4ae', fontWeight: 600, lineHeight: 1.2, whiteSpace: 'nowrap' }}>{sig.source}</span>
+          {sig.free !== undefined && <span style={{ display: 'inline-flex', alignItems: 'center', padding: '1px 6px', borderRadius: '3px', background: sig.free ? '#66bb6a22' : '#ce93d822', border: sig.free ? '1px solid #66bb6a55' : '1px solid #ce93d855', color: sig.free ? '#66bb6a' : '#ce93d8', fontWeight: 700, lineHeight: 1.2, whiteSpace: 'nowrap' }}>{sig.free ? 'FREE' : 'PRO'}</span>}
         </div>
         <div style={{ display: 'flex', gap: '8px', color: '#607d8b' }}>
           {sig.postedAt && <span>Posted {postedStr(sig.postedAt)}</span>}
@@ -66,7 +66,7 @@ function ClosedRow({ sig }: { sig: Signal }) {
         <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
           <span style={{ fontSize: 'var(--mc-font-sm)', fontWeight: 700, color: '#e0e0e0', fontFamily: M }}>{sig.symbol}</span>
           {sig.strike && <span style={{ fontSize: 'var(--mc-font-label)', color: '#607d8b', fontFamily: M }}>${sig.strike}</span>}
-          <span style={{ fontSize: 'var(--mc-font-label)', padding: '2px 5px', borderRadius: '3px', background: catColor(sig.category) + '22', color: catColor(sig.category), fontFamily: M, fontWeight: 700 }}>{sig.category}</span>
+          <span style={{ display: 'inline-flex', alignItems: 'center', padding: '1px 6px', borderRadius: '3px', background: catColor(sig.category) + '22', border: '1px solid ' + catColor(sig.category) + '55', fontSize: 'var(--mc-font-label)', fontFamily: M, color: catColor(sig.category), fontWeight: 700, lineHeight: 1.2, whiteSpace: 'nowrap' }}>{sig.category}</span>
         </div>
         <span style={{ fontSize: 'var(--mc-font-label)', color: '#607d8b', fontFamily: M }}>{postedStr(sig.postedAt)}</span>
       </div>
@@ -204,10 +204,10 @@ export function SignalsPage() {
               <div style={{ fontSize: 'var(--mc-font-xl)', fontWeight: 800, color: '#e0e0e0', fontFamily: M, marginBottom: '4px' }}>{sel.symbol}</div>
               {sel.shortName && <div style={{ fontSize: F, color: '#607d8b', fontFamily: M, marginBottom: '12px' }}>{sel.shortName}</div>}
               <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap', marginBottom: '16px' }}>
-                <span style={{ fontSize: 'var(--mc-font-label)', padding: '3px 8px', borderRadius: '4px', background: !sel.isPut ? '#66bb6a22' : '#ef535022', color: !sel.isPut ? '#66bb6a' : '#ef5350', fontFamily: M, fontWeight: 700 }}>{sel.type === 'stock' ? 'STOCK' : !sel.isPut ? 'CALL' : 'PUT'}</span>
-                <span style={{ fontSize: 'var(--mc-font-label)', padding: '3px 8px', borderRadius: '4px', background: catColor(sel.category) + '22', color: catColor(sel.category), fontFamily: M, fontWeight: 700 }}>{sel.category}</span>
-                <span style={{ fontSize: 'var(--mc-font-label)', padding: '3px 8px', borderRadius: '4px', background: '#1a3a4a', color: '#90a4ae', fontFamily: M }}>{sel.source}</span>
-                {sel.risk && <span style={{ fontSize: 'var(--mc-font-label)', padding: '3px 8px', borderRadius: '4px', background: '#ef535022', color: '#ef5350', fontFamily: M, fontWeight: 700 }}>RISK: {sel.risk}</span>}
+                <span style={{ display: 'inline-flex', alignItems: 'center', padding: '2px 8px', borderRadius: '4px', background: !sel.isPut ? '#66bb6a22' : '#ef535022', border: !sel.isPut ? '1px solid #66bb6a55' : '1px solid #ef535055', fontSize: 'var(--mc-font-label)', fontFamily: M, color: !sel.isPut ? '#66bb6a' : '#ef5350', fontWeight: 700, lineHeight: 1.2, whiteSpace: 'nowrap' }}>{sel.type === 'stock' ? 'STOCK' : !sel.isPut ? 'CALL' : 'PUT'}</span>
+                <span style={{ display: 'inline-flex', alignItems: 'center', padding: '2px 8px', borderRadius: '4px', background: catColor(sel.category) + '22', border: '1px solid ' + catColor(sel.category) + '55', fontSize: 'var(--mc-font-label)', fontFamily: M, color: catColor(sel.category), fontWeight: 700, lineHeight: 1.2, whiteSpace: 'nowrap' }}>{sel.category}</span>
+                <span style={{ display: 'inline-flex', alignItems: 'center', padding: '2px 8px', borderRadius: '4px', background: '#1a3a4a', border: '1px solid #2a4a5a', fontSize: 'var(--mc-font-label)', fontFamily: M, color: '#90a4ae', fontWeight: 600, lineHeight: 1.2, whiteSpace: 'nowrap' }}>{sel.source}</span>
+                {sel.risk && <span style={{ display: 'inline-flex', alignItems: 'center', padding: '2px 8px', borderRadius: '4px', background: '#ef535022', border: '1px solid #ef535055', fontSize: 'var(--mc-font-label)', fontFamily: M, color: '#ef5350', fontWeight: 700, lineHeight: 1.2, whiteSpace: 'nowrap' }}>RISK: {sel.risk}</span>}
               </div>
               <div style={{ fontSize: 'var(--mc-font-label)', color: '#607d8b', fontFamily: M, letterSpacing: '1.5px', marginBottom: '8px' }}>PRICE TARGETS</div>
               {[

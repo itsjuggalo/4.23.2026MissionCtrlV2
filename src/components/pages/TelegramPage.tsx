@@ -9,8 +9,8 @@ interface TelegramSignal {
 }
 
 const M = 'var(--font-mc-mono)';
-const F = '13px';
-const LBL = '11px';
+const F = 'var(--mc-font-label)';
+const LBL = 'var(--mc-font-label)';
 
 function timeAgo(ts: string): string {
   const diff = Date.now() - new Date(ts).getTime();
@@ -76,16 +76,16 @@ function SignalCard({ sig, onClick, isSelected }: { sig: TelegramSignal; onClick
   const dirColor = sig.direction === 'LONG' || sig.direction === 'BUY' ? '#66bb6a' : sig.direction === 'SHORT' ? '#ef5350' : '#607d8b';
   const q = assessQuality(sig);
   return (
-    <div onClick={onClick} style={{ padding: '10px 12px', background: isSelected ? '#0d2137' : '#0d1117', border: '1px solid ' + (isSelected ? '#4fc3f7' : '#1a3a4a'), borderRadius: '6px', cursor: 'pointer', borderLeft: '3px solid ' + dirColor, marginBottom: '5px' }}>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '6px' }}>
+    <div onClick={onClick} style={{ padding: '6px 10px', background: isSelected ? '#0d2137' : '#0d1117', border: '1px solid ' + (isSelected ? '#4fc3f7' : '#1a3a4a'), borderRadius: '6px', cursor: 'pointer', borderLeft: '3px solid ' + dirColor, marginBottom: '3px' }}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '3px' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
           <span style={{ fontSize: 'var(--mc-font-sm)', fontWeight: 800, color: '#e0e0e0', fontFamily: M }}>{sig.symbol}</span>
-          {sig.direction && <span style={{ fontSize: LBL, fontWeight: 700, padding: '2px 6px', borderRadius: '3px', background: dirColor + '22', color: dirColor, fontFamily: M }}>{sig.direction}</span>}
-          <span style={{ fontSize: LBL, padding: '2px 6px', borderRadius: '3px', background: q.gradeColor + '22', color: q.gradeColor, fontFamily: M, fontWeight: 700 }}>{q.grade}</span>
+          {sig.direction && <span style={{ display: 'inline-flex', alignItems: 'center', padding: '1px 6px', borderRadius: '3px', background: dirColor + '22', border: '1px solid ' + dirColor + '55', fontSize: LBL, fontFamily: M, color: dirColor, fontWeight: 700, lineHeight: 1.2, whiteSpace: 'nowrap' }}>{sig.direction}</span>}
+          <span style={{ display: 'inline-flex', alignItems: 'center', padding: '1px 6px', borderRadius: '3px', background: q.gradeColor + '22', border: '1px solid ' + q.gradeColor + '55', fontSize: LBL, fontFamily: M, color: q.gradeColor, fontWeight: 700, lineHeight: 1.2, whiteSpace: 'nowrap' }}>{q.grade}</span>
         </div>
         <span style={{ fontSize: LBL, color: '#607d8b', fontFamily: M }}>{timeAgo(sig.timestamp)}</span>
       </div>
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '4px', marginBottom: '4px' }}>
+      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '4px', marginBottom: '2px' }}>
         {sig.entry && sig.entry > 0 ? <div><div style={{ fontSize: 'var(--mc-font-label)', color: '#607d8b', fontFamily: M }}>Entry</div><div style={{ fontSize: F, color: '#66bb6a', fontWeight: 700, fontFamily: M }}>{fmtPrice(sig.entry)}</div></div> : <div />}
         {sig.stop_loss ? <div><div style={{ fontSize: 'var(--mc-font-label)', color: '#607d8b', fontFamily: M }}>Stop Loss</div><div style={{ fontSize: F, color: '#ef5350', fontWeight: 700, fontFamily: M }}>{fmtPrice(sig.stop_loss)}</div></div> : <div />}
         {sig.targets && sig.targets.length > 0 ? <div><div style={{ fontSize: 'var(--mc-font-label)', color: '#607d8b', fontFamily: M }}>Target 1</div><div style={{ fontSize: F, color: '#4fc3f7', fontWeight: 700, fontFamily: M }}>{fmtPrice(sig.targets[0])}</div></div> : <div />}
@@ -233,9 +233,9 @@ export function TelegramPage() {
               <div style={{ overflow: 'auto', padding: '12px', flex: 1 }}>
                 <div style={{ fontSize: 'var(--mc-font-xl)', fontWeight: 800, color: '#e0e0e0', fontFamily: M, marginBottom: '8px' }}>{sel.symbol}</div>
                 <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap', marginBottom: '16px' }}>
-                  {sel.direction && <span style={{ fontSize: LBL, padding: '3px 8px', borderRadius: '4px', background: dirColor + '22', color: dirColor, fontFamily: M, fontWeight: 700 }}>{sel.direction}</span>}
-                  <span style={{ fontSize: LBL, padding: '3px 8px', borderRadius: '4px', background: getChannelColor(sel.channel_name || '') + '22', color: getChannelColor(sel.channel_name || ''), fontFamily: M }}>{cleanChannelName(sel.channel_name || '')}</span>
-                  <span style={{ fontSize: LBL, padding: '3px 8px', borderRadius: '4px', background: q.gradeColor + '22', color: q.gradeColor, fontFamily: M, fontWeight: 700 }}>{q.grade}</span>
+                  {sel.direction && <span style={{ display: 'inline-flex', alignItems: 'center', padding: '2px 8px', borderRadius: '4px', background: dirColor + '22', border: '1px solid ' + dirColor + '55', fontSize: LBL, fontFamily: M, color: dirColor, fontWeight: 700, lineHeight: 1.2, whiteSpace: 'nowrap' }}>{sel.direction}</span>}
+                  <span style={{ display: 'inline-flex', alignItems: 'center', padding: '2px 8px', borderRadius: '4px', background: getChannelColor(sel.channel_name || '') + '22', border: '1px solid ' + getChannelColor(sel.channel_name || '') + '55', fontSize: LBL, fontFamily: M, color: getChannelColor(sel.channel_name || ''), fontWeight: 600, lineHeight: 1.2, whiteSpace: 'nowrap' }}>{cleanChannelName(sel.channel_name || '')}</span>
+                  <span style={{ display: 'inline-flex', alignItems: 'center', padding: '2px 8px', borderRadius: '4px', background: q.gradeColor + '22', border: '1px solid ' + q.gradeColor + '55', fontSize: LBL, fontFamily: M, color: q.gradeColor, fontWeight: 700, lineHeight: 1.2, whiteSpace: 'nowrap' }}>{q.grade}</span>
                 </div>
 
                 <div style={{ fontSize: 'var(--mc-font-label)', color: '#607d8b', fontFamily: M, letterSpacing: '1.5px', marginBottom: '8px' }}>SIGNAL QUALITY</div>

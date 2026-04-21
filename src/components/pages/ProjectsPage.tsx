@@ -219,7 +219,7 @@ export function ProjectsPage() {
   }
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
       {projects.map((project) => (
         <div
           key={project.id}
@@ -227,12 +227,12 @@ export function ProjectsPage() {
             background: '#111118',
             border: '1px solid #1a3a4a',
             borderRadius: 10,
-            padding: 16,
+            padding: 12,
             borderLeft: `3px solid ${statusColor(project.status)}`,
           }}
         >
           {/* Header */}
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 10 }}>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 6 }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
               <span style={{ fontSize: 15, fontFamily: "'Inter', sans-serif", fontWeight: 700, color: '#e0e0e0' }}>
                 {project.name}
@@ -253,9 +253,9 @@ export function ProjectsPage() {
           </div>
 
           {/* Metrics grid */}
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 8, marginTop: 12 }}>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 8, marginTop: 8 }}>
             {project.metrics.map((m, i) => (
-              <div key={i} style={{ background: '#0d1117', borderRadius: 6, padding: '8px 10px', border: '1px solid #1a3a4a' }}>
+              <div key={i} style={{ background: '#0d1117', borderRadius: 6, padding: '6px 8px', border: '1px solid #1a3a4a' }}>
                 <div style={{ fontSize: 10, color: '#607d8b', marginBottom: 2 }}>{m.label}</div>
                 <div style={{ fontSize: 12, fontFamily: "'JetBrains Mono', monospace", color: '#e0e0e0', fontWeight: 500 }}>{m.value}</div>
               </div>
@@ -263,7 +263,7 @@ export function ProjectsPage() {
           </div>
 
           {/* Footer */}
-          <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: 10, fontSize: 10, fontFamily: "'JetBrains Mono', monospace", color: '#607d8b' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: 6, fontSize: 10, fontFamily: "'JetBrains Mono', monospace", color: '#607d8b' }}>
             <span>{project.source}</span>
             {project.lastActivity && <span>Last activity: {formatTime(project.lastActivity)}</span>}
           </div>
