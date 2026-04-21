@@ -57,12 +57,13 @@ CHANNEL_IDS = [
     -1002048136679,   # xCrypto Signals — entry zone + 5 TPs, real-time TP confirmations
     -1001853036360,   # Coin Sonar V2 — volume alerts (kept for context)
     # ── TIER 2: Whale / market data ──────────────────────────────────────
-    -1002139755277,   # Ai Crypto Signals (Auto Bot) — Cornix auto-bot trade outcome feed
+    -1002139755277,   # 🐳 WHALETRACKER
     -1001768716068,   # Binance Futures 5m Volume Pump Monitor
     -1002315467756,   # 🐳 Whale Volume Alert
     -1001498307336,   # 📈 Binance Futures 5m Pump Monitor (No charts)
     -1001314221782,   # 🐳 Whale Liquidations
     # ── REMOVED (noise/scam/no signals) ──────────────────────────────────
+    # -1001811830204  # Ai Crypto Signals (Auto Bot) — 682 signals, 0 actionable
 ]
 
 DUPLICATE_WINDOW_MINUTES = 30
