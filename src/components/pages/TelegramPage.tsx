@@ -63,6 +63,7 @@ function assessQuality(s: TelegramSignal): { checks: { label: string; pass: bool
 function getChannelGroup(name: string): string {
   if (name.includes('Coin Sonar')) return 'COIN SONAR';
   if (name.includes('AICrypto') || name.includes('Ai Golden') || name.includes('Ai Crypto Signals')) return 'AI SIGNALS';
+  if (name.includes('Bitcoin Crypto Signals') || name.includes('Sober Trading')) return 'STRUCTURED SIGNALS';
   if (name.includes('WHALE') && !name.includes('Liquidation')) return 'WHALE TRACKER';
   if (name.includes('Binance') || name.includes('Pump') || name.includes('Volume')) return 'BINANCE PUMP';
   if (name.includes('Whale Liquidation') || name.includes('Liquidation')) return 'WHALE LIQS';
@@ -165,6 +166,7 @@ export function TelegramPage() {
   const byGroup = (group: string) => filtered.filter(s => getChannelGroup(s.channel_name || '') === group);
   const coinSonar = byGroup('COIN SONAR');
   const aiSignals = byGroup('AI SIGNALS');
+  const structuredSignals = byGroup('STRUCTURED SIGNALS');
   const whaleTracker = byGroup('WHALE TRACKER');
   const binancePump = byGroup('BINANCE PUMP');
   const whaleLiqs = byGroup('WHALE LIQS');
@@ -206,8 +208,8 @@ export function TelegramPage() {
           <GridBox title="AI SIGNALS" color="#66bb6a" count={aiSignals.length}>
             {aiSignals.length > 0 ? aiSignals.map((s, i) => <SignalCard key={s.id + i} sig={s} isSelected={isSel(s)} onClick={() => toggle(s)} />) : noSig}
           </GridBox>
-          <GridBox title="WHALE TRACKER" color="#ef5350" count={whaleTracker.length}>
-            {whaleTracker.length > 0 ? whaleTracker.map((s, i) => <SignalCard key={s.id + i} sig={s} isSelected={isSel(s)} onClick={() => toggle(s)} />) : noSig}
+          <GridBox title="BITCOIN CRYPTO + SOBER TRADING" color="#66bb6a" count={structuredSignals.length}>
+            {structuredSignals.length > 0 ? structuredSignals.map((s, i) => <SignalCard key={s.id + i} sig={s} isSelected={isSel(s)} onClick={() => toggle(s)} />) : noSig}
           </GridBox>
           <GridBox title="BINANCE PUMP" color="#ff9800" count={binancePump.length}>
             {binancePump.length > 0 ? binancePump.map((s, i) => <SignalCard key={s.id + i} sig={s} isSelected={isSel(s)} onClick={() => toggle(s)} />) : noSig}
