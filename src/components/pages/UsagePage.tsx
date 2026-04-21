@@ -91,9 +91,6 @@ export default function UsagePage() {
     return () => clearInterval(i);
   }, []);
 
-  return () => clearInterval(interval);
-  }, [fetchData]);
-
   if (error && !data) {
   
   useEffect(() => {
