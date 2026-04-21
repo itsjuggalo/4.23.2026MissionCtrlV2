@@ -111,7 +111,7 @@ function spotVsCurrent(spot: number, current: number | undefined): { text: strin
 
 function FlowColHeaders() {
   return (
-    <div style={{ display: 'grid', gridTemplateColumns: '12px 36px 60px 92px 52px minmax(60px, 1fr) 32px 92px 108px', gap: '6px', padding: '4px 14px', background: '#0a1422', borderBottom: '1px solid #1a3a4a', alignItems: 'center' }}>
+    <div style={{ display: 'grid', gridTemplateColumns: '12px 36px 60px 92px 52px 120px 32px 92px 108px', gap: '6px', padding: '4px 14px', background: '#0a1422', borderBottom: '1px solid #1a3a4a', alignItems: 'center', maxWidth: '700px', margin: '0 auto', width: '100%', boxSizing: 'border-box' }}>
       {['', 'TIME', 'TICKER', 'CONTRACT', 'EXP', 'VOL/OI', 'SIDE', 'PREMIUM', 'TYPE'].map((h, i) => (
         <span key={i} style={{ fontSize: 'var(--mc-font-label)', color: '#455a64', letterSpacing: '0.8px', fontFamily: 'var(--font-mc-mono)', fontWeight: 700, textAlign: i >= 7 ? 'right' : 'left' }}>{h}</span>
       ))}
@@ -135,11 +135,12 @@ function FlowRow({ f, onClick, livePrice }: { f: FlowEntry; onClick: () => void;
 
   return (
     <div onClick={onClick} style={{
-      display: 'grid', gridTemplateColumns: '12px 36px 60px 92px 52px minmax(60px, 1fr) 32px 92px 108px',
+      display: 'grid', gridTemplateColumns: '12px 36px 60px 92px 52px 120px 32px 92px 108px',
       gap: '6px', padding: '8px 14px', borderBottom: '1px solid #0d1117', cursor: 'pointer',
       alignItems: 'center',
       background: unusualHuge ? '#e040fb08' : huge ? '#ffd60008' : highConviction ? '#66bb6a06' : 'transparent',
       borderLeft: unusualHuge ? '3px solid #e040fb' : unusual ? '3px solid #ffd600' : '3px solid transparent',
+      maxWidth: '700px', margin: '0 auto', width: '100%', boxSizing: 'border-box',
     }}
       onMouseEnter={e => (e.currentTarget.style.background = '#1a3a4a18')}
       onMouseLeave={e => (e.currentTarget.style.background = unusualHuge ? '#e040fb08' : huge ? '#ffd60008' : 'transparent')}>
@@ -154,7 +155,7 @@ function FlowRow({ f, onClick, livePrice }: { f: FlowEntry; onClick: () => void;
       <div style={{ display: 'flex', gap: '3px', justifyContent: 'flex-end', alignItems: 'center' }}>
         {highConviction && <span style={{ fontSize: 'var(--mc-font-badge)' }}>🔥</span>}
         {unusual && <span style={{ display: 'inline-flex', alignItems: 'center', padding: '1px 6px', borderRadius: '3px', background: '#ffd60022', border: '1px solid #ffd60055', fontSize: 'var(--mc-font-label)', fontFamily: 'var(--font-mc-mono)', color: '#ffd600', fontWeight: 700, lineHeight: 1.2, whiteSpace: 'nowrap' }}>U</span>}
-        <span style={{ display: 'inline-flex', alignItems: 'center', padding: '1px 6px', borderRadius: '3px', background: f.BlockType === 'SWEEP' ? '#ff980022' : '#4fc3f722', border: f.BlockType === 'SWEEP' ? '1px solid #ff980055' : '1px solid #4fc3f755', fontSize: 'var(--mc-font-label)', fontFamily: 'var(--font-mc-mono)', color: f.BlockType === 'SWEEP' ? '#ff9800' : '#4fc3f7', fontWeight: 700, lineHeight: 1.2, whiteSpace: 'nowrap' }}>{f.BlockType === 'SWEEP' ? 'SWP' : 'BLK'}</span>
+        <span style={{ display: 'inline-flex', alignItems: 'baseline', gap: '3px', padding: '1px 6px', borderRadius: '3px', background: f.BlockType === 'SWEEP' ? '#ff980022' : '#4fc3f722', border: f.BlockType === 'SWEEP' ? '1px solid #ff980055' : '1px solid #4fc3f755', fontFamily: 'var(--font-mc-mono)', fontWeight: 700, color: f.BlockType === 'SWEEP' ? '#ff9800' : '#4fc3f7', lineHeight: 1.2, whiteSpace: 'nowrap' }}><span style={{ fontSize: 'var(--mc-font-badge)', opacity: 0.75 }}>{f.BlockType === 'SWEEP' ? 'SWP' : 'BLK'}</span></span>
       </div>
     </div>
   );
@@ -167,8 +168,9 @@ function AlertRow({ a, onClick, livePrice }: { a: AlertEntry; onClick: () => voi
   const fv = (n: number) => n >= 1000000 ? '$' + (n/1000000).toFixed(1) + 'M' : n >= 1000 ? '$' + (n/1000).toFixed(0) + 'K' : '$' + n;
   return (
     <div onClick={onClick} style={{
-      display: 'grid', gridTemplateColumns: '12px 36px 60px 92px 52px minmax(60px, 1fr) 32px 92px 108px',
+      display: 'grid', gridTemplateColumns: '12px 36px 60px 92px 52px 120px 32px 92px 108px',
       gap: '6px', padding: '8px 14px', borderBottom: '1px solid #0d1117', cursor: 'pointer', alignItems: 'center',
+      maxWidth: '700px', margin: '0 auto', width: '100%', boxSizing: 'border-box',
     }}
       onMouseEnter={e => (e.currentTarget.style.background = '#1a3a4a18')}
       onMouseLeave={e => (e.currentTarget.style.background = 'transparent')}>
