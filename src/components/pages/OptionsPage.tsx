@@ -1,4 +1,6 @@
 'use client';
+import GridLayout from 'react-grid-layout';
+import 'react-grid-layout/css/styles.css';
 import { useState, useEffect, useRef } from 'react';
 
 interface FlowEntry {
@@ -188,12 +190,15 @@ function AlertRow({ a, onClick, livePrice }: { a: AlertEntry; onClick: () => voi
 
 
 
-function Block({ title, count, color, children, golden }: { title: string; count: number; color: string; children: React.ReactNode; golden?: boolean }) {
+function Block({ title, count, color, children, golden, editMode }: { title: string; count: number; color: string; children: React.ReactNode; golden?: boolean; editMode?: boolean }) {
   return (
-    <div style={{ background: '#0a1929', border: golden ? '1px solid #ffd60055' : '1px solid #1a3a4a', borderRadius: '8px', overflow: 'hidden', boxShadow: golden ? '0 0 12px #ffd60015' : 'none', display: 'flex', flexDirection: 'column' }}>
+    <div style={{ background: '#0a1929', border: editMode ? '1px dashed #4fc3f7aa' : (golden ? '1px solid #ffd60055' : '1px solid #1a3a4a'), borderRadius: '8px', overflow: 'hidden', boxShadow: golden ? '0 0 12px #ffd60015' : 'none', display: 'flex', flexDirection: 'column', height: '100%', width: '100%' }}>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '10px 14px', background: '#0d1117', borderBottom: '1px solid #1a3a4a' }}>
         <span style={{ fontSize: 'var(--mc-font-xl)', fontWeight: 700, color, fontFamily: 'var(--font-mc-mono)', letterSpacing: '0.5px' }}>{title}</span>
-        <span style={{ fontSize: 'var(--mc-font-xl)', fontWeight: 700, padding: '1px 8px', borderRadius: '10px', background: `${color}18`, color, fontFamily: 'var(--font-mc-mono)' }}>{count}</span>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+          <span style={{ fontSize: 'var(--mc-font-xl)', fontWeight: 700, padding: '1px 8px', borderRadius: '10px', background: `${color}18`, color, fontFamily: 'var(--font-mc-mono)' }}>{count}</span>
+          <span className="mc-drag-handle" style={{ cursor: editMode ? 'grab' : 'default', color: editMode ? '#4fc3f7' : '#455a64', fontSize: '14px', fontFamily: 'var(--font-mc-mono)', padding: '0 4px', userSelect: 'none', opacity: editMode ? 1 : 0.4 }} title={editMode ? 'Drag to reposition' : 'Enable EDIT LAYOUT to move'}>⋮⋮</span>
+        </div>
       </div>
           <FlowColHeaders />
       <div style={{ overflow: 'auto', maxHeight: '340px', flex: 1 }}>{children}</div>
@@ -370,7 +375,57 @@ function SentimentPopup({ f, onClose }: { f: FlowEntry; onClose: () => void }) {
   );
 }
 
+const DEFAULT_LAYOUT = [
+  { i: 'calls',         x: 0, y: 0,  w: 4, h: 8 },
+  { i: 'puts',          x: 4, y: 0,  w: 4, h: 8 },
+  { i: 'sweeps',        x: 8, y: 0,  w: 4, h: 8 },
+  { i: 'blocks',        x: 0, y: 8,  w: 4, h: 8 },
+  { i: 'alerts',        x: 4, y: 8,  w: 4, h: 8 },
+  { i: 'liveflows',     x: 8, y: 8,  w: 4, h: 8 },
+  { i: 'unusualflow',   x: 0, y: 16, w: 4, h: 8 },
+  { i: 'hugeflow',      x: 4, y: 16, w: 4, h: 8 },
+  { i: 'weeklyflow',    x: 8, y: 16, w: 4, h: 8 },
+  { i: 'repeatingflow', x: 0, y: 24, w: 4, h: 8 },
+  { i: 'etfflow',       x: 4, y: 24, w: 4, h: 8 },
+  { i: 'unusualhuge',   x: 8, y: 24, w: 4, h: 8 },
+];
+
+const LAYOUT_STORAGE_KEY = 'mc-options-layout-v1';
+
 export function OptionsPage() {
+  const [layout, setLayout] = useState<any[]>(DEFAULT_LAYOUT);
+  const [editMode, setEditMode] = useState(false);
+  const [layoutDirty, setLayoutDirty] = useState(false);
+
+  useEffect(() => {
+    try {
+      const saved = localStorage.getItem(LAYOUT_STORAGE_KEY);
+      if (saved) setLayout(JSON.parse(saved));
+    } catch {}
+  }, []);
+
+  const handleLayoutChange = (newLayout: any[]) => {
+    if (editMode) {
+      setLayout(newLayout);
+      setLayoutDirty(true);
+    }
+  };
+
+  const handleSaveLayout = () => {
+    try {
+      localStorage.setItem(LAYOUT_STORAGE_KEY, JSON.stringify(layout));
+      setEditMode(false);
+      setLayoutDirty(false);
+    } catch (e) { console.error('Save layout failed', e); }
+  };
+
+  const handleResetLayout = () => {
+    if (!confirm('Reset block layout to default?')) return;
+    setLayout(DEFAULT_LAYOUT);
+    try { localStorage.removeItem(LAYOUT_STORAGE_KEY); } catch {}
+    setLayoutDirty(false);
+  };
+
   const [flows, setFlows] = useState<FlowEntry[]>([]);
   const [alerts, setAlerts] = useState<AlertEntry[]>([]);
   const [livePrices, setLivePrices] = useState<LivePrices>({});
@@ -482,55 +537,64 @@ export function OptionsPage() {
         <span style={{ color: '#ffd600' }}>🔥 = High Conviction (Unusual + Sweep + ASK + $100K+)</span>
       </div>
 
-        {/* TOP 3x2 */}
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '10px', marginBottom: '16px' }}>
-          <Block title="CALLS" count={calls.length} color="#66bb6a">
+        <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '8px', marginBottom: '10px' }}>
+          {editMode && <button onClick={handleSaveLayout} style={{ padding: '6px 14px', background: layoutDirty ? '#66bb6a22' : '#0d1117', border: '1px solid ' + (layoutDirty ? '#66bb6a' : '#1a3a4a'), borderRadius: '6px', color: layoutDirty ? '#66bb6a' : '#607d8b', fontFamily: 'var(--font-mc-mono)', fontSize: 'var(--mc-font-badge)', fontWeight: 700, cursor: 'pointer' }}>💾 SAVE</button>}
+          {editMode && <button onClick={handleResetLayout} style={{ padding: '6px 14px', background: '#0d1117', border: '1px solid #ef5350', borderRadius: '6px', color: '#ef5350', fontFamily: 'var(--font-mc-mono)', fontSize: 'var(--mc-font-badge)', fontWeight: 700, cursor: 'pointer' }}>↻ RESET</button>}
+          <button onClick={() => setEditMode(m => !m)} style={{ padding: '6px 14px', background: editMode ? '#4fc3f722' : '#0d1117', border: '1px solid ' + (editMode ? '#4fc3f7' : '#1a3a4a'), borderRadius: '6px', color: editMode ? '#4fc3f7' : '#90a4ae', fontFamily: 'var(--font-mc-mono)', fontSize: 'var(--mc-font-badge)', fontWeight: 700, cursor: 'pointer' }}>{editMode ? '✓ DONE' : '✎ EDIT LAYOUT'}</button>
+        </div>
+
+        <GridLayout
+          className="mc-options-grid"
+          layout={layout}
+          cols={12}
+          rowHeight={50}
+          width={1400}
+          margin={[10, 10]}
+          containerPadding={[0, 0]}
+          draggableHandle=".mc-drag-handle"
+          isDraggable={editMode}
+          isResizable={editMode}
+          onLayoutChange={handleLayoutChange}
+          compactType={null}
+          preventCollision={true}
+        >
+          <div key="calls"><Block editMode={editMode} title="CALLS" count={calls.length} color="#66bb6a">
             {calls.length === 0 ? noItems : calls.slice(0, 50).map((f, i) => <FlowRow key={i} f={f} livePrice={livePrices[f.Symbol]} onClick={() => setSelected({ type: 'flow', data: f })} />)}
-          </Block>
-          <Block title="PUTS" count={puts.length} color="#ef5350">
+          </Block></div>
+          <div key="puts"><Block editMode={editMode} title="PUTS" count={puts.length} color="#ef5350">
             {puts.length === 0 ? noItems : puts.slice(0, 50).map((f, i) => <FlowRow key={i} f={f} livePrice={livePrices[f.Symbol]} onClick={() => setSelected({ type: 'flow', data: f })} />)}
-          </Block>
-          <Block title="SWEEPS" count={sweeps.length} color="#ff9800">
+          </Block></div>
+          <div key="sweeps"><Block editMode={editMode} title="SWEEPS" count={sweeps.length} color="#ff9800">
             {sweeps.length === 0 ? noItems : sweeps.slice(0, 50).map((f, i) => <FlowRow key={i} f={f} livePrice={livePrices[f.Symbol]} onClick={() => setSelected({ type: 'flow', data: f })} />)}
-          </Block>
-          <Block title="BLOCKS" count={blocks.length} color="#4fc3f7">
+          </Block></div>
+          <div key="blocks"><Block editMode={editMode} title="BLOCKS" count={blocks.length} color="#4fc3f7">
             {blocks.length === 0 ? noItems : blocks.slice(0, 50).map((f, i) => <FlowRow key={i} f={f} livePrice={livePrices[f.Symbol]} onClick={() => setSelected({ type: 'flow', data: f })} />)}
-          </Block>
-          <Block title="ALERTS" count={alerts.length} color="#ce93d8">
+          </Block></div>
+          <div key="alerts"><Block editMode={editMode} title="ALERTS" count={alerts.length} color="#ce93d8">
             {alerts.length === 0 ? noItems : alerts.slice(0, 50).map((a, i) => <AlertRow key={i} a={a} livePrice={livePrices[a.Symbol]} onClick={() => setSelected({ type: 'alert', data: a })} />)}
-          </Block>
-          <Block title="LIVE FLOWS" count={flows.length} color="#4fc3f7">
+          </Block></div>
+          <div key="liveflows"><Block editMode={editMode} title="LIVE FLOWS" count={flows.length} color="#4fc3f7">
             {flows.length === 0 ? noItems : flows.slice(0, 50).map((f, i) => <FlowRow key={i} f={f} livePrice={livePrices[f.Symbol]} onClick={() => setSelected({ type: 'flow', data: f })} />)}
-          </Block>
-        </div>
-
-        {/* GOLDEN TICKETS */}
-        <div style={{ textAlign: 'center', margin: '8px 0 16px 0', position: 'relative' }}>
-          <div style={{ position: 'absolute', top: '50%', left: 0, right: 0, height: '1px', background: 'linear-gradient(90deg, transparent, #ffd60044, #ffd600, #ffd60044, transparent)' }} />
-          <span style={{ position: 'relative', padding: '0 24px', background: '#060e1a', fontSize: 'var(--mc-font-hero)', fontWeight: 800, fontFamily: 'var(--font-mc-mono)', letterSpacing: '3px', color: '#ffd600', textShadow: '0 0 20px #ffd60066, 0 0 40px #ffd60033' }}>GOLDEN TICKETS</span>
-        </div>
-
-        {/* BOTTOM 3x2 */}
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '10px' }}>
-          <Block golden title="UNUSUAL FLOW" count={unusualFlow.length} color="#ffd600">
+          </Block></div>
+          <div key="unusualflow"><Block golden editMode={editMode} title="UNUSUAL FLOW" count={unusualFlow.length} color="#ffd600">
             {unusualFlow.length === 0 ? noItems : unusualFlow.slice(0, 50).map((f, i) => <FlowRow key={i} f={f} livePrice={livePrices[f.Symbol]} onClick={() => setSelected({ type: 'flow', data: f })} />)}
-          </Block>
-          <Block golden title="HUGE FLOW ($1M+)" count={hugeFlow.length} color="#ff9800">
+          </Block></div>
+          <div key="hugeflow"><Block golden editMode={editMode} title="HUGE FLOW ($1M+)" count={hugeFlow.length} color="#ff9800">
             {hugeFlow.length === 0 ? noItems : hugeFlow.slice(0, 50).map((f, i) => <FlowRow key={i} f={f} livePrice={livePrices[f.Symbol]} onClick={() => setSelected({ type: 'flow', data: f })} />)}
-          </Block>
-          <Block golden title="WEEKLY FLOW" count={weeklyFlow.length} color="#4fc3f7">
+          </Block></div>
+          <div key="weeklyflow"><Block golden editMode={editMode} title="WEEKLY FLOW" count={weeklyFlow.length} color="#4fc3f7">
             {weeklyFlow.length === 0 ? noItems : weeklyFlow.slice(0, 50).map((f, i) => <FlowRow key={i} f={f} livePrice={livePrices[f.Symbol]} onClick={() => setSelected({ type: 'flow', data: f })} />)}
-          </Block>
-          <Block golden title="REPEATING FLOW" count={repeatingAlerts.length} color="#ce93d8">
+          </Block></div>
+          <div key="repeatingflow"><Block golden editMode={editMode} title="REPEATING FLOW" count={repeatingAlerts.length} color="#ce93d8">
             {repeatingAlerts.length === 0 ? noItems : repeatingAlerts.slice(0, 50).map((a, i) => <AlertRow key={i} a={a} livePrice={livePrices[a.Symbol]} onClick={() => setSelected({ type: 'alert', data: a })} />)}
-          </Block>
-          <Block golden title="ETF FLOW" count={etfFlow.length} color="#66bb6a">
+          </Block></div>
+          <div key="etfflow"><Block golden editMode={editMode} title="ETF FLOW" count={etfFlow.length} color="#66bb6a">
             {etfFlow.length === 0 ? noItems : etfFlow.slice(0, 50).map((f, i) => <FlowRow key={i} f={f} livePrice={livePrices[f.Symbol]} onClick={() => setSelected({ type: 'flow', data: f })} />)}
-          </Block>
-          <Block golden title="UNUSUAL HUGE ($500K+)" count={unusualHugeFlow.length} color="#e040fb">
+          </Block></div>
+          <div key="unusualhuge"><Block golden editMode={editMode} title="UNUSUAL HUGE ($500K+)" count={unusualHugeFlow.length} color="#e040fb">
             {unusualHugeFlow.length === 0 ? noItems : unusualHugeFlow.slice(0, 50).map((f, i) => <FlowRow key={i} f={f} livePrice={livePrices[f.Symbol]} onClick={() => setSelected({ type: 'flow', data: f })} />)}
-          </Block>
-        </div>
+          </Block></div>
+        </GridLayout>
       </div>
 
       {popup && <SentimentPopup f={popup} onClose={() => setPopup(null)} />}
