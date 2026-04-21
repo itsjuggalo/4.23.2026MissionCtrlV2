@@ -9,6 +9,168 @@ import { BTCBiasWidget } from '../ui/BTCBiasWidget';
 // The ONE page that answers: "What should I do RIGHT NOW?"
 // ============================================================================
 
+// Parse whale liquidation raw_text. Format:
+//   ┌🟢 #BTC Liquidated $125.6K in Short - at $76173.4
+//   └☠️ 24h Liquidation for $BTC: $33.35M
+function parseWhaleLiq(s: any) {
+  const txt = s.raw_text || '';
+  // amount + direction + spot price
+  const m1 = txt.match(/Liquidated\s+\$([0-9,.]+)\s*([MKk]?)\s+in\s+(Long|Short|long|short)\s+-\s+at\s+\$([0-9,.]+)/);
+  // 24h aggregate
+  const m2 = txt.match(/24h\s+Liquidation\s+for\s+\$?[A-Z]+:\s+\$([0-9,.]+)\s*([MKk]?)/);
+  const toNum = (v: string, mult: string) => {
+    const n = parseFloat((v || '0').replace(/,/g, ''));
+    if (mult === 'M') return n * 1_000_000;
+    if (mult === 'K' || mult === 'k') return n * 1_000;
+    return n;
+  };
+  return {
+    symbol: s.symbol || '?',
+    amount: m1 ? toNum(m1[1], m1[2]) : 0,
+    direction: m1 ? m1[3].toUpperCase() : (s.direction || 'SHORT'),
+    spot: m1 ? parseFloat(m1[4].replace(/,/g, '')) : 0,
+    total24h: m2 ? toNum(m2[1], m2[2]) : 0,
+    timestamp: s.timestamp,
+    id: s.id,
+  };
+}
+
+function timeAgoShort(ts: string): string {
+  const diff = Date.now() - new Date(ts).getTime();
+  const mins = Math.floor(diff / 60000);
+  if (mins < 1) return 'now';
+  if (mins < 60) return mins + 'm';
+  const hrs = Math.floor(mins / 60);
+  if (hrs < 24) return hrs + 'h';
+  return Math.floor(hrs / 24) + 'd';
+}
+
+function fmtDollarShort(n: number): string {
+  if (n >= 1_000_000) return '$' + (n / 1_000_000).toFixed(2) + 'M';
+  if (n >= 1_000) return '$' + (n / 1_000).toFixed(1) + 'K';
+  return '$' + n.toFixed(0);
+}
+
+function WhaleLiquidationsWidget() {
+  const [liqs, setLiqs] = useState<any[]>([]);
+
+  useEffect(() => {
+    const fetch_ = async () => {
+      try {
+        const r = await fetch('/api/telegram-signals');
+        const d = await r.json();
+        const sigs = Array.isArray(d) ? d : (d.signals || []);
+        const wl = sigs
+          .filter((s: any) => (s.channel_name || '').includes('Liquidat'))
+          .map(parseWhaleLiq)
+          .filter((x: any) => x.amount > 0);
+        setLiqs(wl);
+      } catch {}
+    };
+    fetch_();
+    const t = setInterval(fetch_, 30000);
+    return () => clearInterval(t);
+  }, []);
+
+  if (liqs.length === 0) {
+    return (
+      <div className="db-card" style={{ padding: '16px' }}>
+        <div className="db-label" style={{ marginBottom: '10px' }}>WHALE LIQUIDATIONS</div>
+        <div style={{ color: '#455a64', fontSize: 'var(--mc-font-badge)', fontFamily: 'var(--font-mc-mono)' }}>No liquidations in window</div>
+      </div>
+    );
+  }
+
+  // Pressure: longs wrecked vs shorts wrecked
+  const longsCount = liqs.filter((l: any) => l.direction === 'LONG').length;
+  const shortsCount = liqs.filter((l: any) => l.direction === 'SHORT').length;
+  const total = longsCount + shortsCount;
+  const longsPct = total > 0 ? Math.round((longsCount / total) * 100) : 0;
+  const shortsPct = 100 - longsPct;
+
+  // Per-symbol 24h totals (grab latest seen value per symbol)
+  const bySymbol: Record<string, { total24h: number; count: number; lastSeen: number }> = {};
+  for (const l of liqs) {
+    if (!bySymbol[l.symbol] || new Date(l.timestamp).getTime() > bySymbol[l.symbol].lastSeen) {
+      bySymbol[l.symbol] = {
+        total24h: l.total24h || bySymbol[l.symbol]?.total24h || 0,
+        count: (bySymbol[l.symbol]?.count || 0) + 1,
+        lastSeen: new Date(l.timestamp).getTime(),
+      };
+    } else {
+      bySymbol[l.symbol].count += 1;
+    }
+  }
+  const symbolRows = Object.entries(bySymbol)
+    .sort((a, b) => b[1].total24h - a[1].total24h)
+    .slice(0, 5);
+  const maxTotal = Math.max(...symbolRows.map(([, v]) => v.total24h), 1);
+  const aggregateTotal = symbolRows.reduce((s, [, v]) => s + v.total24h, 0);
+
+  // Latest 5 events
+  const latest5 = [...liqs]
+    .sort((a: any, b: any) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime())
+    .slice(0, 5);
+
+  return (
+    <div className="db-card" style={{ padding: '16px' }}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', marginBottom: '10px' }}>
+        <div className="db-label">WHALE LIQUIDATIONS</div>
+        <div style={{ fontSize: 'var(--mc-font-label)', color: '#ff9800', fontFamily: 'var(--font-mc-mono)', fontWeight: 700 }}>
+          24h: {fmtDollarShort(aggregateTotal)}
+        </div>
+      </div>
+
+      {/* Pressure bar */}
+      <div style={{ marginBottom: '12px' }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 'var(--mc-font-label)', fontFamily: 'var(--font-mc-mono)', marginBottom: '4px' }}>
+          <span style={{ color: '#66bb6a' }}>LONGS WRECKED {longsPct}%</span>
+          <span style={{ color: '#ef5350' }}>{shortsPct}% SHORTS WRECKED</span>
+        </div>
+        <div style={{ height: '6px', background: '#0d1117', borderRadius: '3px', overflow: 'hidden', display: 'flex' }}>
+          <div style={{ width: longsPct + '%', background: '#66bb6a', transition: 'width 0.5s' }} />
+          <div style={{ width: shortsPct + '%', background: '#ef5350', transition: 'width 0.5s' }} />
+        </div>
+      </div>
+
+      {/* Per-asset heat bars */}
+      <div style={{ marginBottom: '12px' }}>
+        {symbolRows.map(([sym, v]: [string, any]) => {
+          const barPct = (v.total24h / maxTotal) * 100;
+          return (
+            <div key={sym} style={{ display: 'grid', gridTemplateColumns: '42px 1fr 78px 50px', gap: '8px', alignItems: 'center', padding: '3px 0', fontSize: 'var(--mc-font-label)', fontFamily: 'var(--font-mc-mono)' }}>
+              <span style={{ color: '#4fc3f7', fontWeight: 700 }}>{sym}</span>
+              <div style={{ height: '8px', background: '#0d1117', borderRadius: '2px', overflow: 'hidden' }}>
+                <div style={{ height: '100%', width: barPct + '%', background: 'linear-gradient(90deg, #ff9800, #ef5350)', borderRadius: '2px', transition: 'width 0.5s' }} />
+              </div>
+              <span style={{ color: '#e0e0e0', textAlign: 'right', fontWeight: 600 }}>{fmtDollarShort(v.total24h)}</span>
+              <span style={{ color: '#607d8b', textAlign: 'right' }}>{v.count} liq{v.count !== 1 ? 's' : ''}</span>
+            </div>
+          );
+        })}
+      </div>
+
+      {/* Latest-5 ticker */}
+      <div style={{ borderTop: '1px solid #1a3a4a', paddingTop: '8px' }}>
+        <div className="db-label" style={{ marginBottom: '6px' }}>LATEST</div>
+        {latest5.map((l: any) => {
+          const dirColor = l.direction === 'LONG' ? '#66bb6a' : '#ef5350';
+          return (
+            <div key={l.id} style={{ display: 'grid', gridTemplateColumns: '32px 42px 52px 1fr 80px', gap: '6px', alignItems: 'center', padding: '3px 0', fontSize: 'var(--mc-font-label)', fontFamily: 'var(--font-mc-mono)' }}>
+              <span style={{ color: '#607d8b' }}>{timeAgoShort(l.timestamp)}</span>
+              <span style={{ color: '#4fc3f7', fontWeight: 700 }}>{l.symbol}</span>
+              <span style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', padding: '0 6px', borderRadius: '3px', background: dirColor + '22', border: '1px solid ' + dirColor + '55', color: dirColor, fontWeight: 700, fontSize: '9px' }}>{l.direction}</span>
+              <span style={{ color: '#ff9800', fontWeight: 600 }}>-{fmtDollarShort(l.amount)}</span>
+              <span style={{ color: '#90a4ae', textAlign: 'right' }}>@ ${l.spot >= 1000 ? l.spot.toLocaleString(undefined, { maximumFractionDigits: 0 }) : l.spot.toFixed(2)}</span>
+            </div>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
+
 export function DashboardPage() {
   const [portfolio, setPortfolio] = useState<any>(null);
   const [signals, setSignals] = useState<any>(null);
@@ -325,6 +487,8 @@ export function DashboardPage() {
           </div>
 
           
+          <WhaleLiquidationsWidget />
+
           {/* Equity History */}
           {equityHist.length > 1 && (
             <div className="db-card" style={{ padding: '16px' }}>
