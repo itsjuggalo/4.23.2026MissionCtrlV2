@@ -376,18 +376,18 @@ function SentimentPopup({ f, onClose }: { f: FlowEntry; onClose: () => void }) {
 }
 
 const DEFAULT_LAYOUT = [
-  { i: 'calls',         x: 0, y: 0,  w: 4, h: 8 },
-  { i: 'puts',          x: 4, y: 0,  w: 4, h: 8 },
-  { i: 'sweeps',        x: 8, y: 0,  w: 4, h: 8 },
-  { i: 'blocks',        x: 0, y: 8,  w: 4, h: 8 },
-  { i: 'alerts',        x: 4, y: 8,  w: 4, h: 8 },
-  { i: 'liveflows',     x: 8, y: 8,  w: 4, h: 8 },
-  { i: 'unusualflow',   x: 0, y: 16, w: 4, h: 8 },
-  { i: 'hugeflow',      x: 4, y: 16, w: 4, h: 8 },
-  { i: 'weeklyflow',    x: 8, y: 16, w: 4, h: 8 },
-  { i: 'repeatingflow', x: 0, y: 24, w: 4, h: 8 },
-  { i: 'etfflow',       x: 4, y: 24, w: 4, h: 8 },
-  { i: 'unusualhuge',   x: 8, y: 24, w: 4, h: 8 },
+  { i: 'calls',         x: 0,  y: 0,  w: 8, h: 8 },
+  { i: 'puts',          x: 8,  y: 0,  w: 8, h: 8 },
+  { i: 'sweeps',        x: 16, y: 0,  w: 8, h: 8 },
+  { i: 'blocks',        x: 0,  y: 8,  w: 8, h: 8 },
+  { i: 'alerts',        x: 8,  y: 8,  w: 8, h: 8 },
+  { i: 'liveflows',     x: 16, y: 8,  w: 8, h: 8 },
+  { i: 'unusualflow',   x: 0,  y: 16, w: 8, h: 8 },
+  { i: 'hugeflow',      x: 8,  y: 16, w: 8, h: 8 },
+  { i: 'weeklyflow',    x: 16, y: 16, w: 8, h: 8 },
+  { i: 'repeatingflow', x: 0,  y: 24, w: 8, h: 8 },
+  { i: 'etfflow',       x: 8,  y: 24, w: 8, h: 8 },
+  { i: 'unusualhuge',   x: 16, y: 24, w: 8, h: 8 },
 ];
 
 const LAYOUT_STORAGE_KEY = 'mc-options-layout-v1';
@@ -396,12 +396,24 @@ export function OptionsPage() {
   const [layout, setLayout] = useState<any[]>(DEFAULT_LAYOUT);
   const [editMode, setEditMode] = useState(false);
   const [layoutDirty, setLayoutDirty] = useState(false);
+  const [gridWidth, setGridWidth] = useState(1400);
 
   useEffect(() => {
     try {
       const saved = localStorage.getItem(LAYOUT_STORAGE_KEY);
       if (saved) setLayout(JSON.parse(saved));
     } catch {}
+  }, []);
+
+  useEffect(() => {
+    const updateWidth = () => {
+      if (typeof window !== 'undefined') {
+        setGridWidth(Math.max(900, window.innerWidth - 40));
+      }
+    };
+    updateWidth();
+    window.addEventListener('resize', updateWidth);
+    return () => window.removeEventListener('resize', updateWidth);
   }, []);
 
   const handleLayoutChange = (newLayout: any[]) => {
@@ -546,9 +558,9 @@ export function OptionsPage() {
         <GridLayout
           className="mc-options-grid"
           layout={layout}
-          cols={12}
+          cols={24}
           rowHeight={50}
-          width={1400}
+          width={gridWidth}
           margin={[10, 10]}
           containerPadding={[0, 0]}
           draggableHandle=".mc-drag-handle"
