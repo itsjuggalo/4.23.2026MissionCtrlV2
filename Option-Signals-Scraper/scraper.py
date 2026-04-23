@@ -117,6 +117,12 @@ def fetch_endpoint(name, path):
             with open(filepath, "w") as f:
                 json.dump(data, f, indent=2)
 
+            # Update per-alert price history for the two Alerts/today feeds
+            if name == "flow_alerts_today":
+                update_alert_history(data, "FlowGreeks")
+            elif name == "flow2_alerts_today":
+                update_alert_history(data, "FlowGreeks2")
+
             # Update stats
             fetch_stats[name]["ok"] += 1
             fetch_stats[name]["last_count"] = count
@@ -148,6 +154,81 @@ def fetch_endpoint(name, path):
         fetch_stats[name]["fail"] += 1
         fetch_stats[name]["last_status"] = f"error: {str(e)[:80]}"
         return False
+
+
+# ─── ALERT HISTORY TRACKING ───────────────────────────────────────────────────
+HISTORY_FILE = os.path.join(DATA_DIR, "flow_alerts_history.json")
+
+def load_history():
+    if not os.path.exists(HISTORY_FILE):
+        return {}
+    try:
+        with open(HISTORY_FILE) as f:
+            return json.load(f)
+    except Exception as e:
+        logging.warning(f"history load failed: {e}")
+        return {}
+
+def save_history(hist):
+    try:
+        with open(HISTORY_FILE, "w") as f:
+            json.dump(hist, f, indent=2)
+    except Exception as e:
+        logging.warning(f"history save failed: {e}")
+
+def update_alert_history(raw_data, source_root):
+    """Walk Alerts/today, update running price stats per OptionSymbol."""
+    if not isinstance(raw_data, dict):
+        return
+    hist = load_history()
+    now_ms = int(datetime.now(timezone.utc).timestamp() * 1000)
+    new_count = 0
+    updated_count = 0
+    for _, v in raw_data.items():
+        if not isinstance(v, dict):
+            continue
+        a = v.get("alert", v)
+        if not isinstance(a, dict):
+            continue
+        opt_sym = a.get("OptionSymbol")
+        price = a.get("AlertPrice")
+        if not opt_sym or price is None:
+            continue
+        try:
+            price = float(price)
+        except (TypeError, ValueError):
+            continue
+        if price <= 0:
+            continue
+        entry = hist.get(opt_sym)
+        if entry is None:
+            hist[opt_sym] = {
+                "first_price": price,
+                "last_price": price,
+                "max_price": price,
+                "min_price": price,
+                "first_seen": now_ms,
+                "last_seen": now_ms,
+                "num_updates": 1,
+                "source": source_root,
+            }
+            new_count += 1
+        else:
+            entry["last_price"] = price
+            if price > entry.get("max_price", price):
+                entry["max_price"] = price
+            if price < entry.get("min_price", price):
+                entry["min_price"] = price
+            entry["last_seen"] = now_ms
+            entry["num_updates"] = entry.get("num_updates", 0) + 1
+            updated_count += 1
+    cutoff = now_ms - (7 * 24 * 60 * 60 * 1000)
+    before = len(hist)
+    hist = {k: v for k, v in hist.items() if v.get("last_seen", 0) > cutoff}
+    pruned = before - len(hist)
+    save_history(hist)
+    if new_count or updated_count or pruned:
+        logging.info(f"  history[{source_root}]: +{new_count} new, ~{updated_count} updated, -{pruned} pruned, {len(hist)} total")
 
 # ─── STATUS FILE ──────────────────────────────────────────────────────────────
 def save_status():

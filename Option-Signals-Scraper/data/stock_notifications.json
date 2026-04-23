@@ -2827,5 +2827,113 @@
     "message": "Buy To Open at 442.53 with first target above 451.38",
     "symbol": "GLD",
     "title": "GLD: BTO"
+  },
+  "1776778605": {
+    "category": "SCALP",
+    "message": "Reached Target 407.5 and that's 8.15%! Lock some in and wait for next target. Raise the stops to 395.3",
+    "symbol": "CVNA",
+    "title": "CVNA : STC"
+  },
+  "1776779265": {
+    "category": "SWING",
+    "message": "Reached Target 87.39 and that's 12.86%! Lock some in and wait for next target. Raise the stops to 84.77",
+    "symbol": "IGV",
+    "title": "IGV : STC"
+  },
+  "1776780659": {
+    "category": "SWING",
+    "message": "Buy To Open at 648.71 with first target above 661.68",
+    "symbol": "CAR",
+    "title": "CAR: BTO"
+  },
+  "1776780830": {
+    "category": "SWING",
+    "message": "Reached Target 680.9 and that's 4.96%! Lock some in and wait for next target. Raise the stops to 596.8",
+    "symbol": "CAR",
+    "title": "CAR : STC"
+  },
+  "1776781065": {
+    "category": "SWING",
+    "message": "Reached Target 732.2 and that's 12.87%! Lock some in and wait for next target. Raise the stops to 710.2",
+    "symbol": "CAR",
+    "title": "CAR : STC"
+  },
+  "1776781606": {
+    "category": "SWING",
+    "message": "Close the trade as it hit trailing stop at 707.0!",
+    "symbol": "CAR",
+    "title": "CAR : STC"
+  },
+  "1776862847": {
+    "category": "SWING",
+    "message": "Reached Target 186.6 and that's 5.56%! Lock some in and wait for next target. Raise the stops to 176.77",
+    "symbol": "ORCL",
+    "title": "ORCL : STC"
+  },
+  "1776866202": {
+    "category": "SWING",
+    "message": "Buy To Open at 151.63 with first target above 154.66",
+    "symbol": "MRVL",
+    "title": "MRVL: BTO"
+  },
+  "1776866867": {
+    "category": "SWING",
+    "message": "Reached Target 154.7 and that's 2.02%! Lock some in and wait for next target. Raise the stops to 139.5",
+    "symbol": "MRVL",
+    "title": "MRVL : STC"
+  },
+  "1776868281": {
+    "category": "SWING",
+    "message": "Buy To Open at 55.98 with first target above 57.10",
+    "symbol": "BWA",
+    "title": "BWA: BTO"
+  },
+  "1776951063": {
+    "category": "SWING",
+    "message": "Reached Target 159.6 and that's 5.26%! Lock some in and wait for next target. Raise the stops to 151.63",
+    "symbol": "MRVL",
+    "title": "MRVL : STC"
+  },
+  "1776951172": {
+    "category": "SWING",
+    "message": "Close the trade as it hit trailing stop at 84.69!",
+    "symbol": "IGV",
+    "title": "IGV : STC"
+  },
+  "1776951407": {
+    "category": "SWING",
+    "message": "Reached Target 163.9 and that's 8.09%! Lock some in and wait for next target. Raise the stops to 159.0",
+    "symbol": "MRVL",
+    "title": "MRVL : STC"
+  },
+  "1776952551": {
+    "category": "SWING",
+    "message": "Close the trade as it hit trailing stop at 176.4!",
+    "symbol": "ORCL",
+    "title": "ORCL : STC"
+  },
+  "1776953566": {
+    "category": "SCALP",
+    "message": "Close the trade as it hit trailing stop at 415.9!",
+    "symbol": "MSFT",
+    "title": "MSFT : STC"
+  },
+  "1776956145": {
+    "category": "SWING",
+    "message": "Reached Target 257.5 and that's 22.77%! Lock some in and wait for next target. Raise the stops to 249.8",
+    "symbol": "AMZN",
+    "title": "AMZN : STC"
+  },
+  "1776964664": {
+    "category": "SWING",
+    "message": "Close the trade as it hit stop at 18.21!",
+    "symbol": "SOFI",
+    "title": "SOFI : STC"
+  },
+  "1776966284": {
+    "category": "SCALP",
+    "message": "Close the trade as it hit trailing stop at 395.1!",
+    "symbol": "CVNA",
+    "title": "CVNA : STC"
   }
 }

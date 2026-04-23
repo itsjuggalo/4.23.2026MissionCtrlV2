@@ -1,9 +1,11 @@
+// ═══════════════════════════════════════════════════════════════
+// Options Page — MOBILE VERSION
+// Preserved exact layout with ~720px centered column, single-stack cards.
+// Use this as the blueprint when we build the mobile version of Mission Control.
+// ═══════════════════════════════════════════════════════════════
 'use client';
 
 import React, { useEffect, useMemo, useState } from 'react';
-import { StockDetailDrawer } from '@/components/drawers/StockDetailDrawer';
-import { TickerLogo } from '@/components/ui/TickerLogo';
-import { FilterModal, FilterState, DEFAULT_FILTERS, loadFilters, matchesFilters, isFiltersDefault } from '@/components/modals/FilterModal';
 
 // ──────────────────────────────────────────────────────────
 // Types
@@ -74,7 +76,6 @@ interface FlowEntry {
   BidAskType: string;
   BlockType: 'SWEEP' | 'BLOCK' | string;
   Time: number;
-  logoUrl?: string | null;
 }
 
 interface AlertEntry {
@@ -93,7 +94,6 @@ interface AlertEntry {
   DTE: number;
   isBullish: boolean;
   Updated: number;
-  logoUrl?: string | null;
   _history?: {
     firstPrice: number;
     lastPrice: number;
@@ -108,7 +108,7 @@ interface AlertEntry {
 
 interface FlowResponse {
   alerts: AlertEntry[];
-  flows: FlowEntry[];
+  flow: FlowEntry[];
 }
 
 type PrimaryTab = 'scalps' | 'swings' | 'leaps' | 'flowAlerts' | 'optionFlow';
@@ -132,12 +132,8 @@ const fmtCount = (n: number): string => {
 };
 
 const ago = (ts: number): string => {
-  if (!ts || typeof ts !== 'number' || !isFinite(ts)) return '—';
-  // ts is in ms (Firebase timestamps); auto-upconvert seconds just in case
-  const tsMs = ts < 1e11 ? ts * 1000 : ts;
-  const diffMs = Date.now() - tsMs;
-  if (diffMs < 0) return 'now';
-  const secs = Math.floor(diffMs / 1000);
+  if (!ts) return '';
+  const secs = Math.floor(Date.now() / 1000) - ts;
   if (secs < 60) return `${secs}s`;
   const mins = Math.floor(secs / 60);
   if (mins < 60) return `${mins}m`;
@@ -163,46 +159,16 @@ const categorizeAlert = (a: AlertEntry): AlertCategory | null => {
 };
 
 const isAlertQualifying = (a: AlertEntry): boolean => {
-  // Golden Ticket criteria — tight thresholds so only top-tier alerts qualify
   const t = (a.AlertType || '').toLowerCase();
-  const prem = a.totalFlowValue || 0;
-  const count = (a.SWEEPS || 0) + (a.BLOCKS || 0);
-  // Mega flow: $3M+ premium
-  if (prem >= 3_000_000) return true;
-  // Heavy unusual activity: explicitly unusual AND $1M+
-  if (t.includes('unusual') && prem >= 1_000_000) return true;
-  // Heavy sweep/block activity: 5+ events AND $1M+ premium
-  if (count >= 5 && prem >= 1_000_000) return true;
+  if (t.includes('unusual')) return true;
+  if (a.totalFlowValue >= 1_000_000) return true;
+  if ((a.SWEEPS + a.BLOCKS) >= 3 && a.totalFlowValue >= 500_000) return true;
   return false;
 };
 
 // ──────────────────────────────────────────────────────────
 // Fire badge SVG
 // ──────────────────────────────────────────────────────────
-const FilterIconButton: React.FC<{ active: boolean; onClick: () => void }> = ({ active, onClick }) => (
-  <button
-    onClick={onClick}
-    title="Filters"
-    style={{
-      position: 'relative', display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
-      width: '32px', height: '32px', borderRadius: '4px',
-      background: active ? '#66bb6a22' : 'transparent',
-      border: `1px solid ${active ? '#66bb6a55' : '#1a3a4a'}`,
-      cursor: 'pointer', padding: 0, color: active ? '#66bb6a' : '#90a4ae',
-    }}
-  >
-    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-      <polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3" />
-    </svg>
-    {active && (
-      <span style={{
-        position: 'absolute', top: '-3px', right: '-3px', width: '8px', height: '8px',
-        borderRadius: '50%', background: '#66bb6a', border: '1.5px solid #0a1929',
-      }} />
-    )}
-  </button>
-);
-
 const FireBadge: React.FC = () => (
   <span style={{
     display: 'inline-flex', alignItems: 'center', gap: '3px',
@@ -217,6 +183,35 @@ const FireBadge: React.FC = () => (
     </svg>
   </span>
 );
+
+// ──────────────────────────────────────────────────────────
+// Logo with clearbit + fallback to 2-letter monogram
+// ──────────────────────────────────────────────────────────
+const TickerLogo: React.FC<{ symbol: string; logoUrl: string | null; size?: number }> = ({ symbol, logoUrl, size = 36 }) => {
+  const [errored, setErrored] = useState(false);
+  if (!logoUrl || errored) {
+    return (
+      <div style={{
+        width: size, height: size, borderRadius: '50%',
+        background: '#1a2332', display: 'flex', alignItems: 'center', justifyContent: 'center',
+        color: '#90a4ae', fontSize: size / 3, fontWeight: 600, flexShrink: 0,
+      }}>
+        {(symbol || '?').slice(0, 3).toUpperCase()}
+      </div>
+    );
+  }
+  return (
+    <img
+      src={logoUrl}
+      onError={() => setErrored(true)}
+      alt={symbol}
+      style={{
+        width: size, height: size, borderRadius: '50%',
+        background: '#fff', objectFit: 'contain', flexShrink: 0,
+      }}
+    />
+  );
+};
 
 // ──────────────────────────────────────────────────────────
 // Signal Card (Scalps/Swings/Leaps)
@@ -245,7 +240,7 @@ const SignalCard: React.FC<{ sig: AnalystSignal; isPast?: boolean }> = ({ sig, i
 
   return (
     <div style={{
-      padding: '18px 22px', borderRadius: '10px', marginBottom: '12px',
+      padding: '12px 14px', borderRadius: '8px', marginBottom: '10px',
       background: isPast ? '#0a0f15' : '#07101a',
       border: '1px solid #1a2332', position: 'relative', overflow: 'hidden',
       opacity: isPast ? 0.88 : 1,
@@ -260,13 +255,13 @@ const SignalCard: React.FC<{ sig: AnalystSignal; isPast?: boolean }> = ({ sig, i
 
       {/* Top: logo + ticker + time */}
       <div style={{ display: 'flex', gap: '12px', marginRight: '65px', alignItems: 'flex-start' }}>
-        <TickerLogo symbol={sig.symbol} size="lg" logoUrl={sig.logoUrl} />
+        <TickerLogo symbol={sig.symbol} logoUrl={sig.logoUrl} />
         <div style={{ flex: 1, minWidth: 0 }}>
           <div style={{
             color: sig.isPut ? '#ef5350' : '#66bb6a',
-            fontSize: '24px', fontWeight: 700,
+            fontSize: '15px', fontWeight: 500,
           }}>{sig.contractLabel}</div>
-          <div style={{ color: '#607d8b', fontSize: '15px', marginTop: '4px' }}>
+          <div style={{ color: '#607d8b', fontSize: '11px', marginTop: '1px' }}>
             {sig.shortName || sig.symbol}
             {sig.category && ` · ${sig.category}`}
           </div>
@@ -298,26 +293,26 @@ const SignalCard: React.FC<{ sig: AnalystSignal; isPast?: boolean }> = ({ sig, i
         borderTop: '1px solid #1a2332',
       }}>
         <div>
-          <div style={{ color: '#607d8b', fontSize: '13px', textTransform: 'uppercase', letterSpacing: '0.4px', marginBottom: '6px' }}>
+          <div style={{ color: '#607d8b', fontSize: '9px', textTransform: 'uppercase', letterSpacing: '0.4px', marginBottom: '2px' }}>
             Buy Target
           </div>
-          <div style={{ color: '#ffffff', fontSize: '21px', fontWeight: 700 }}>
+          <div style={{ color: '#ffffff', fontSize: '13px', fontWeight: 500 }}>
             {sig.buyTarget != null ? `$${sig.buyTarget.toFixed(2)}` : '—'}
           </div>
         </div>
         <div>
-          <div style={{ color: '#607d8b', fontSize: '13px', textTransform: 'uppercase', letterSpacing: '0.4px', marginBottom: '6px' }}>
+          <div style={{ color: '#607d8b', fontSize: '9px', textTransform: 'uppercase', letterSpacing: '0.4px', marginBottom: '2px' }}>
             Stop Loss
           </div>
-          <div style={{ color: '#ef5350', fontSize: '21px', fontWeight: 700 }}>
+          <div style={{ color: '#ef5350', fontSize: '13px', fontWeight: 500 }}>
             {sig.stopLoss != null ? `$${sig.stopLoss.toFixed(2)}` : '—'}
           </div>
         </div>
         <div>
-          <div style={{ color: '#607d8b', fontSize: '13px', textTransform: 'uppercase', letterSpacing: '0.4px', marginBottom: '6px' }}>
+          <div style={{ color: '#607d8b', fontSize: '9px', textTransform: 'uppercase', letterSpacing: '0.4px', marginBottom: '2px' }}>
             Early Target
           </div>
-          <div style={{ color: '#66bb6a', fontSize: '21px', fontWeight: 700 }}>
+          <div style={{ color: '#66bb6a', fontSize: '13px', fontWeight: 500 }}>
             {sig.earlyTarget != null ? `$${sig.earlyTarget.toFixed(2)}` : '—'}
           </div>
         </div>
@@ -334,13 +329,13 @@ const SignalCard: React.FC<{ sig: AnalystSignal; isPast?: boolean }> = ({ sig, i
           { label: 'Sell 3', val: sig.sellTarget3 },
         ].map((t, i) => (
           <div key={i} style={{
-            padding: '10px 12px', borderRadius: '6px',
+            padding: '5px 8px', borderRadius: '4px',
             background: t.val != null ? '#0a1422' : '#07101a',
             border: `1px solid ${t.val != null ? '#1a2332' : '#0a1422'}`,
             textAlign: 'center',
           }}>
-            <div style={{ color: '#607d8b', fontSize: '13px', textTransform: 'uppercase', letterSpacing: '0.4px' }}>{t.label}</div>
-            <div style={{ color: t.val != null ? '#ffffff' : '#394352', fontSize: '19px', fontWeight: 700, marginTop: '4px' }}>
+            <div style={{ color: '#607d8b', fontSize: '9px', textTransform: 'uppercase' }}>{t.label}</div>
+            <div style={{ color: t.val != null ? '#ffffff' : '#394352', fontSize: '12px', fontWeight: 500, marginTop: '1px' }}>
               {t.val != null ? `$${t.val.toFixed(2)}` : '—'}
             </div>
           </div>
@@ -364,7 +359,7 @@ const SignalCard: React.FC<{ sig: AnalystSignal; isPast?: boolean }> = ({ sig, i
 // ──────────────────────────────────────────────────────────
 // Alert Card (Flow Alerts tab)
 // ──────────────────────────────────────────────────────────
-const AlertCard: React.FC<{ a: AlertEntry; onSymbolClick?: (s: string) => void }> = ({ a, onSymbolClick }) => {
+const AlertCard: React.FC<{ a: AlertEntry }> = ({ a }) => {
   const qualifying = isAlertQualifying(a);
   const bull = a.isBullish;
   const strike = String(a.Strike).replace(/\.0+$/, '');
@@ -375,24 +370,23 @@ const AlertCard: React.FC<{ a: AlertEntry; onSymbolClick?: (s: string) => void }
 
   return (
     <div style={{
-      padding: '16px 20px', borderRadius: '10px', marginBottom: '10px',
+      padding: '12px 14px', borderRadius: '8px', marginBottom: '8px',
       background: qualifying ? '#ffd60014' : '#05080c',
       border: `1px solid ${qualifying ? '#ffd600' : '#1a2332'}`,
       boxShadow: qualifying ? '0 0 8px #ffd60022' : undefined,
     }}>
       <div style={{ display: 'flex', alignItems: 'baseline', gap: '12px' }}>
         <span style={{ color: '#607d8b', fontSize: '11px', minWidth: '42px' }}>{ago(a.Updated)}</span>
-        <TickerLogo symbol={a.Symbol} size="md" logoUrl={a.logoUrl} />
         <div style={{ flex: 1, minWidth: 0 }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '7px', marginBottom: '3px' }}>
-            <span onClick={(e) => { e.stopPropagation(); onSymbolClick?.(a.Symbol); }} style={{ color: bull ? '#66bb6a' : '#ef5350', fontWeight: 700, fontSize: '22px', cursor: onSymbolClick ? 'pointer' : 'default' }}>
+            <span style={{ color: bull ? '#66bb6a' : '#ef5350', fontWeight: 500, fontSize: '14px' }}>
               {contractName}
             </span>
             {qualifying && <FireBadge />}
           </div>
           <div style={{ display: 'flex', alignItems: 'baseline', gap: '6px' }}>
             <span style={{ color: '#607d8b', fontSize: '11px' }}>Flow Premium =</span>
-            <span style={{ fontWeight: 700, fontSize: '24px', color: premColor(a.totalFlowValue) }}>
+            <span style={{ fontWeight: 500, fontSize: '15px', color: premColor(a.totalFlowValue) }}>
               {fmtMoney(a.totalFlowValue)}
             </span>
           </div>
@@ -440,58 +434,35 @@ const AlertCard: React.FC<{ a: AlertEntry; onSymbolClick?: (s: string) => void }
 // ──────────────────────────────────────────────────────────
 // Flow Tape Row (Option Flow tab - dense, like app screenshot 4)
 // ──────────────────────────────────────────────────────────
-const FlowTapeRow: React.FC<{ f: FlowEntry; onSymbolClick?: (s: string) => void }> = ({ f, onSymbolClick }) => {
-  // Sentiment per Help Center: CALL+ASK=bull, CALL+BID=bear, PUT+ASK=bear, PUT+BID=bull
-  // Case-insensitive on BOTH OptionType and BidAskType (API returns CALL/PUT uppercase)
-  const optType = (f.OptionType || '').toUpperCase();
-  const bidAsk = (f.BidAskType || '').toUpperCase();
-  const isAskSide = bidAsk.includes('A');
-  const isBidSide = bidAsk.includes('B');
-  const isCall = optType === 'CALL';
-  const isPut = optType === 'PUT';
-  const isBullish =
-    (isCall && isAskSide) || (isPut && isBidSide);
-  const isBearish =
-    (isCall && isBidSide) || (isPut && isAskSide);
-  const color = isBullish ? '#66bb6a' : isBearish ? '#ef5350' : '#90a4ae';
-
-  // GOLDEN row border: Flow Premium >= $1M (Mission Ctrl addition)
-  const isBigMoney = f.Value >= 1_000_000;
-
-  // YELLOW pill border: Volume > OI (Help Center unusual-flow rule)
-  const isUnusual = f.Volume > f.OI;
-
+const FlowTapeRow: React.FC<{ f: FlowEntry }> = ({ f }) => {
+  const isBull = f.BidAskType?.toUpperCase().includes('A') && f.OptionType === 'Call';
+  const isBear = f.BidAskType?.toUpperCase().includes('A') && f.OptionType === 'Put';
+  const color = isBull ? '#66bb6a' : isBear ? '#ef5350' : '#ffd600';
+  const highlight = f.Value >= 1_000_000;
   const time = new Date(f.Time * 1000).toLocaleTimeString('en-US', { hour12: false });
-
-  // Pill color matches sentiment (green for bull, red for bear, grey for unknown)
-  const pillFg = color;
-  const pillBg = isBullish ? '#66bb6a18' : isBearish ? '#ef535018' : '#90a4ae18';
-  // Yellow border overrides sentiment color when unusual
-  const pillBorder = isUnusual ? '#ffd600' : color;
+  const pillBg = f.BlockType === 'SWEEP' ? '#ff980022' : '#4fc3f722';
+  const pillBorder = f.BlockType === 'SWEEP' ? '#ff9800' : '#4fc3f7';
 
   return (
     <div style={{
       display: 'grid',
-      gridTemplateColumns: '1.2fr 1fr 1.4fr 0.8fr 0.5fr 1.4fr 0.7fr 1fr',
-      gap: '12px', padding: '8px 16px', fontSize: '15px', alignItems: 'center',
+      gridTemplateColumns: '62px 52px 62px 48px 34px 78px 48px 60px',
+      gap: '8px', padding: '5px 12px', fontSize: '11px', alignItems: 'center',
       borderBottom: '1px solid #0a1220',
-      background: isBigMoney ? '#ffd60015' : 'transparent',
-      borderLeft: isBigMoney ? '3px solid #ffd600' : '3px solid transparent',
+      background: highlight ? '#ffd60010' : 'transparent',
+      borderLeft: highlight ? '2px solid #ffd600' : '2px solid transparent',
       color,
     }}>
       <span>{time}</span>
-      <span onClick={(e) => { e.stopPropagation(); onSymbolClick?.(f.Symbol); }} style={{ fontWeight: 500, cursor: onSymbolClick ? 'pointer' : 'default', textDecoration: onSymbolClick ? 'underline' : 'none', textDecorationColor: '#ffffff22', display: 'flex', alignItems: 'center', gap: '6px' }}><TickerLogo symbol={f.Symbol} size="sm" logoUrl={f.logoUrl} />{f.Symbol}</span>
+      <span style={{ fontWeight: 500 }}>{f.Symbol}</span>
       <span>{f.ExpiryStr?.slice(2) || ''}</span>
       <span>{f.Strike}</span>
-      <span>{isCall ? 'CAL' : 'PUT'}</span>
+      <span>{f.OptionType === 'Call' ? 'CAL' : 'PUT'}</span>
       <span>{f.Price?.toFixed(2)}{f.BidAskType}</span>
       <span style={{
-        padding: '3px 10px', borderRadius: '4px', fontSize: '11px', fontWeight: 600,
-        background: pillBg,
-        border: `${isUnusual ? '2px' : '1px'} solid ${pillBorder}`,
-        color: pillFg,
+        padding: '1px 6px', borderRadius: '3px', fontSize: '9px',
+        background: pillBg, border: `1px solid ${pillBorder}`, color: pillBorder,
         textAlign: 'center',
-        boxShadow: isUnusual ? '0 0 4px #ffd60066' : 'none',
       }}>{f.BlockType === 'SWEEP' ? 'SWP' : 'BLK'}</span>
       <span style={{ textAlign: 'right' }}>{fmtMoney(f.Value)}</span>
     </div>
@@ -544,22 +515,14 @@ const SubTabButton: React.FC<{
 // ──────────────────────────────────────────────────────────
 // Main component
 // ──────────────────────────────────────────────────────────
-export function OptionsPage() {
+export function OptionsPageMobile() {
   const [activeTab, setActiveTab] = useState<PrimaryTab>('swings');
-  const [filterModalOpen, setFilterModalOpen] = useState(false);
-  const [alertFilters, setAlertFilters] = useState<FilterState>(DEFAULT_FILTERS);
-  const [flowFilters, setFlowFilters] = useState<FilterState>(DEFAULT_FILTERS);
-  useEffect(() => {
-    setAlertFilters(loadFilters('mc:filters:alerts'));
-    setFlowFilters(loadFilters('mc:filters:flow'));
-  }, []);
   const [sourceFilter, setSourceFilter] = useState<SourceFilter>('all');
   const [alertCat, setAlertCat] = useState<AlertCategory>('all');
 
   const [analystData, setAnalystData] = useState<AnalystResponse | null>(null);
   const [flowData, setFlowData] = useState<FlowResponse | null>(null);
   const [loading, setLoading] = useState(true);
-  const [drawerTicker, setDrawerTicker] = useState<string | null>(null);
 
   // Data fetching — analyst signals
   useEffect(() => {
@@ -607,12 +570,12 @@ export function OptionsPage() {
     };
   }, [analystData, activeTab, sourceFilter]);
 
-  // Derived: filter alerts by category + filter modal state
+  // Derived: filter alerts by category
   const filteredAlerts = useMemo(() => {
     if (!flowData?.alerts) return [];
-    if (alertCat === 'all') return flowData.alerts.filter(a => matchesFilters(a, alertFilters));
-    return flowData.alerts.filter(a => categorizeAlert(a) === alertCat && matchesFilters(a, alertFilters));
-  }, [flowData, alertCat, alertFilters]);
+    if (alertCat === 'all') return flowData.alerts;
+    return flowData.alerts.filter(a => categorizeAlert(a) === alertCat);
+  }, [flowData, alertCat]);
 
   const alertCatCounts = useMemo(() => {
     const counts: Record<AlertCategory, number> = { all: 0, unusual: 0, huge: 0, weekly: 0, repeaters: 0, etf: 0 };
@@ -647,14 +610,14 @@ export function OptionsPage() {
       ];
     }
     // Option Flow tab
-    const total = (flowData?.flows || []).reduce((sum, f) => sum + (f.Value || 0), 0);
-    const sweeps = (flowData?.flows || []).filter(f => f.BlockType === 'SWEEP').length;
-    const blocks = (flowData?.flows || []).filter(f => f.BlockType === 'BLOCK').length;
+    const total = (flowData?.flow || []).reduce((sum, f) => sum + (f.Value || 0), 0);
+    const sweeps = (flowData?.flow || []).filter(f => f.BlockType === 'SWEEP').length;
+    const blocks = (flowData?.flow || []).filter(f => f.BlockType === 'BLOCK').length;
     return [
       { label: 'Total Flow', value: fmtMoney(total) },
       { label: 'Sweeps', value: String(sweeps), color: '#ff9800' },
       { label: 'Blocks', value: String(blocks), color: '#4fc3f7' },
-      { label: 'Rows', value: String((flowData?.flows || []).length) },
+      { label: 'Rows', value: String((flowData?.flow || []).length) },
     ];
   };
 
@@ -664,7 +627,7 @@ export function OptionsPage() {
     swings: analystData?.stats?.swingsOpen ?? 0,
     leaps: analystData?.stats?.leapsOpen ?? 0,
     flowAlerts: flowData?.alerts?.length ?? 0,
-    optionFlow: flowData?.flows?.length ?? 0,
+    optionFlow: flowData?.flow?.length ?? 0,
   };
 
   return (
@@ -673,7 +636,7 @@ export function OptionsPage() {
       fontSize: '13px', color: '#e4e4e4', background: '#000',
       minHeight: '100vh',
     }}>
-      <div style={{ width: '100%', margin: '0', padding: '0 16px' }}>
+      <div style={{ maxWidth: '720px', margin: '0 auto' }}>
 
         {/* Header */}
         <div style={{ padding: '14px 18px 10px', borderBottom: '1px solid #0d1117', textAlign: 'center' }}>
@@ -698,8 +661,8 @@ export function OptionsPage() {
         {(activeTab === 'scalps' || activeTab === 'swings' || activeTab === 'leaps') && (
           <div style={{ display: 'flex', gap: '4px', padding: '10px 14px', borderBottom: '1px solid #0d1117' }}>
             <SubTabButton label="All" count={(analystData?.stats?.sourceOpenCounts?.name || 0) + (analystData?.stats?.sourceOpenCounts?.vivid || 0)} active={sourceFilter === 'all'} onClick={() => setSourceFilter('all')} />
-            <SubTabButton label="FLoWz1" count={analystData?.stats?.sourceOpenCounts?.name} active={sourceFilter === 'name'} onClick={() => setSourceFilter('name')} />
-            <SubTabButton label="FLoWz2" count={analystData?.stats?.sourceOpenCounts?.vivid} active={sourceFilter === 'vivid'} onClick={() => setSourceFilter('vivid')} />
+            <SubTabButton label="Name" count={analystData?.stats?.sourceOpenCounts?.name} active={sourceFilter === 'name'} onClick={() => setSourceFilter('name')} />
+            <SubTabButton label="Vivid" count={analystData?.stats?.sourceOpenCounts?.vivid} active={sourceFilter === 'vivid'} onClick={() => setSourceFilter('vivid')} />
           </div>
         )}
 
@@ -747,9 +710,7 @@ export function OptionsPage() {
                   <div style={{ color: '#607d8b', fontSize: '10px', letterSpacing: '0.6px', textTransform: 'uppercase', marginBottom: '8px' }}>
                     Open · {filteredSignals.open.length}
                   </div>
-                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px', alignItems: 'start' }}>
-                    {filteredSignals.open.map(sig => <SignalCard key={sig.id} sig={sig} />)}
-                  </div>
+                  {filteredSignals.open.map(sig => <SignalCard key={sig.id} sig={sig} />)}
                 </>
               )}
               {filteredSignals.closed.length > 0 && (
@@ -759,9 +720,7 @@ export function OptionsPage() {
                     textTransform: 'uppercase', marginTop: '18px', marginBottom: '8px',
                     paddingTop: '14px', borderTop: '2px solid #1a2332',
                   }}>Past Performance · {filteredSignals.closed.length} recent</div>
-                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px', alignItems: 'start' }}>
-                    {filteredSignals.closed.slice(0, 30).map(sig => <SignalCard key={sig.id} sig={sig} isPast />)}
-                  </div>
+                  {filteredSignals.closed.slice(0, 30).map(sig => <SignalCard key={sig.id} sig={sig} isPast />)}
                 </>
               )}
             </>
@@ -769,35 +728,24 @@ export function OptionsPage() {
 
           {/* Flow Alerts tab */}
           {activeTab === 'flowAlerts' && flowData && (
-          <>
-            <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: '10px' }}>
-              <FilterIconButton active={!isFiltersDefault(alertFilters)} onClick={() => setFilterModalOpen(true)} />
-            </div>
             <>
               {filteredAlerts.length === 0 && (
                 <div style={{ color: '#607d8b', textAlign: 'center', padding: '30px 0', fontSize: '13px' }}>
                   No alerts in this category.
                 </div>
               )}
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px', alignItems: 'start' }}>
-                {filteredAlerts.map((a, i) => <AlertCard key={a.OptionSymbol + '_' + i} a={a} onSymbolClick={setDrawerTicker} />)}
-              </div>
+              {filteredAlerts.map((a, i) => <AlertCard key={a.OptionSymbol + '_' + i} a={a} />)}
             </>
-          </>
           )}
 
           {/* Option Flow tab */}
-        {activeTab === 'optionFlow' && flowData && (
-          <>
-            <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: '10px' }}>
-              <FilterIconButton active={!isFiltersDefault(flowFilters)} onClick={() => setFilterModalOpen(true)} />
-            </div>
+          {activeTab === 'optionFlow' && flowData && (
             <div style={{ background: '#05080c', borderRadius: '6px', border: '1px solid #1a2332' }}>
               <div style={{
                 display: 'grid',
-                gridTemplateColumns: '1.2fr 1fr 1.4fr 0.8fr 0.5fr 1.4fr 0.7fr 1fr',
-                gap: '12px', padding: '10px 16px',
-                color: '#607d8b', fontSize: '12px', fontWeight: 600,
+                gridTemplateColumns: '62px 52px 62px 48px 34px 78px 48px 60px',
+                gap: '8px', padding: '6px 12px',
+                color: '#607d8b', fontSize: '9px', fontWeight: 500,
                 textTransform: 'uppercase', letterSpacing: '0.4px',
                 borderBottom: '1px solid #1a2332',
               }}>
@@ -810,24 +758,12 @@ export function OptionsPage() {
                 <span>Type</span>
                 <span style={{ textAlign: 'right' }}>Value</span>
               </div>
-              {(flowData.flows || []).filter(f => matchesFilters(f, flowFilters)).slice(0, 300).map((f, i) => <FlowTapeRow key={f.OptionSymbol + '_' + i} f={f} onSymbolClick={setDrawerTicker} />)}
+              {(flowData.flow || []).slice(0, 300).map((f, i) => <FlowTapeRow key={f.OptionSymbol + '_' + i} f={f} />)}
             </div>
-          </>
           )}
         </div>
 
       </div>
-      <StockDetailDrawer ticker={drawerTicker} onClose={() => setDrawerTicker(null)} />
-      <FilterModal
-        open={filterModalOpen}
-        onClose={() => setFilterModalOpen(false)}
-        storageKey={activeTab === 'flowAlerts' ? 'mc:filters:alerts' : 'mc:filters:flow'}
-        initial={activeTab === 'flowAlerts' ? alertFilters : flowFilters}
-        onApply={(f) => {
-          if (activeTab === 'flowAlerts') setAlertFilters(f);
-          else setFlowFilters(f);
-        }}
-      />
     </div>
   );
 }

@@ -4245,5 +4245,197 @@
     "message": "Buy To Open at 8.15 with first target above 9.37",
     "symbol": "GLD",
     "title": "GLD 443C 5/1: BTO"
+  },
+  "1776778229": {
+    "category": "SWING",
+    "message": "Close the trade at 1.38!",
+    "symbol": "CRWV",
+    "title": "CRWV 100P 05/01 : STC"
+  },
+  "1776778339": {
+    "category": "SWING",
+    "message": "Close the trade as it hit trailing stop at 13.30!",
+    "symbol": "GOOGL",
+    "title": "GOOGL 335C 05/15 : STC"
+  },
+  "1776778566": {
+    "category": "SWING",
+    "message": "Close the trade at 1.88!",
+    "symbol": "SLV",
+    "title": "SLV 72.5C 05/01 : STC"
+  },
+  "1776779810": {
+    "category": "SWING",
+    "message": "Buy To Open at 1.85 with first target above 2.13",
+    "symbol": "SILJ",
+    "title": "SILJ 30P 6/18: BTO"
+  },
+  "1776780246": {
+    "category": "SWING",
+    "message": "Reached Target 14.50 and that's 128.35%! Lock some in and wait for next target. Raise the stops to 11.60",
+    "symbol": "IGV",
+    "title": "IGV 75C 06/18 : STC"
+  },
+  "1776781470": {
+    "category": "SWING",
+    "message": "Close the trade at 5.20!",
+    "symbol": "GLD",
+    "title": "GLD 443C 05/01 : STC"
+  },
+  "1776783512": {
+    "category": "SWING",
+    "message": "Reached Target 2.20 and that's 18.92%! Lock some in and wait for next target. Raise the stops to 1.54",
+    "symbol": "SILJ",
+    "title": "SILJ 30P 06/18 : STC"
+  },
+  "1776783749": {
+    "category": "SWING",
+    "message": "Close the trade as it hit trailing stop at 24.20!",
+    "symbol": "AXTI",
+    "title": "AXTI 105C 08/21 : STC"
+  },
+  "1776783876": {
+    "category": "SWING",
+    "message": "Buy To Open at 1.63 with first target above 1.87",
+    "symbol": "XLE",
+    "title": "XLE 55.5C 5/15: BTO"
+  },
+  "1776792065": {
+    "category": "SWING",
+    "message": "Reached Target 2.45 and that's 32.43%! Lock some in and wait for next target. Raise the stops to 1.85",
+    "symbol": "SILJ",
+    "title": "SILJ 30P 06/18 : STC"
+  },
+  "1776792788": {
+    "category": "SWING",
+    "message": "Reached Target 1.87 and that's 14.72%! Lock some in and wait for next target. Raise the stops to 1.31",
+    "symbol": "XLE",
+    "title": "XLE 55.5C 05/15 : STC"
+  },
+  "1776864628": {
+    "category": "SWING",
+    "message": "Reached Target 2.25 and that's 38.04%! Lock some in and wait for next target. Raise the stops to 1.63",
+    "symbol": "XLE",
+    "title": "XLE 55.5C 05/15 : STC"
+  },
+  "1776866196": {
+    "category": "SWING",
+    "message": "Buy To Open at 17.00 with first target above 19.55",
+    "symbol": "MRVL",
+    "title": "MRVL 175C 8/21: BTO"
+  },
+  "1776867537": {
+    "category": "SWING",
+    "message": "Take full profits at 2.15. Gain: 16.22%",
+    "symbol": "SILJ",
+    "title": "SILJ 30P 6/18: STC"
+  },
+  "1776868277": {
+    "category": "SWING",
+    "message": "Buy To Open at 2.15 with first target above 2.47",
+    "symbol": "BWA",
+    "title": "BWA 70C 10/16: BTO"
+  },
+  "1776878366": {
+    "category": "SWING",
+    "message": "Reached Target 19.60 and that's 15.29%! Lock some in and wait for next target. Raise the stops to 13.72",
+    "symbol": "MRVL",
+    "title": "MRVL 175C 08/21 : STC"
+  },
+  "1776951033": {
+    "category": "SWING",
+    "message": "Reached Target 2.45 and that's 50.31%! Lock some in and wait for next target. Raise the stops to 1.96",
+    "symbol": "XLE",
+    "title": "XLE 55.5C 05/15 : STC"
+  },
+  "1776951135": {
+    "category": "SWING",
+    "message": "Reached Target 22.10 and that's 30.00%! Lock some in and wait for next target. Raise the stops to 17.00",
+    "symbol": "MRVL",
+    "title": "MRVL 175C 08/21 : STC"
+  },
+  "1776951817": {
+    "category": "SWING",
+    "message": "Buy To Open at 9.05 with first target above 10.41",
+    "symbol": "TSLA",
+    "title": "TSLA 400C 5/15: BTO"
+  },
+  "1776952265": {
+    "category": "SWING",
+    "message": "Close the trade as it hit trailing stop at 11.51!",
+    "symbol": "IGV",
+    "title": "IGV 75C 06/18 : STC"
+  },
+  "1776952266": {
+    "category": "SWING",
+    "message": "Close the trade as it hit trailing stop at 11.51!",
+    "symbol": "IGV",
+    "title": "IGV 75C 06/18 : STC"
+  },
+  "1776952806": {
+    "category": "SWING",
+    "message": "Close the trade at 1.30!",
+    "symbol": "SOFI",
+    "title": "SOFI 20C 06/18 : STC"
+  },
+  "1776954066": {
+    "category": "SWING",
+    "message": "Close the trade at 5.85!",
+    "symbol": "TSLA",
+    "title": "TSLA 400C 05/15 : STC"
+  },
+  "1776955156": {
+    "category": "SWING",
+    "message": "Buy To Open at 6.47 with first target above 7.44",
+    "symbol": "SPY",
+    "title": "SPY 710P 5/1: BTO"
+  },
+  "1776956550": {
+    "category": "SWING",
+    "message": "Close the trade as it hit trailing stop at 0.89!",
+    "symbol": "PFE",
+    "title": "PFE 30C 01/15 : STC"
+  },
+  "1776961946": {
+    "category": "SWING",
+    "message": "Reached Target 25.80 and that's 51.76%! Lock some in and wait for next target. Raise the stops to 20.64",
+    "symbol": "MRVL",
+    "title": "MRVL 175C 08/21 : STC"
+  },
+  "1776964070": {
+    "category": "SWING",
+    "message": "Reached Target 7.48 and that's 15.61%! Lock some in and wait for next target. Raise the stops to 5.24",
+    "symbol": "SPY",
+    "title": "SPY 710P 05/01 : STC"
+  },
+  "1776964565": {
+    "category": "SWING",
+    "message": "Reached Target 8.50 and that's 31.38%! Lock some in and wait for next target. Raise the stops to 6.47",
+    "symbol": "SPY",
+    "title": "SPY 710P 05/01 : STC"
+  },
+  "1776965674": {
+    "category": "SCALP",
+    "message": "Buy To Open at 2.83 with first target above 3.25",
+    "symbol": "MRVL",
+    "title": "MRVL 180C 5/1: BTO"
+  },
+  "1776966027": {
+    "category": "SWING",
+    "message": "Reached Target 9.71 and that's 50.08%! Lock some in and wait for next target. Raise the stops to 7.77",
+    "symbol": "SPY",
+    "title": "SPY 710P 05/01 : STC"
+  },
+  "1776966425": {
+    "category": "SWING",
+    "message": "Reached Target 11.95 and that's 84.70%! Lock some in and wait for next target. Raise the stops to 9.56",
+    "symbol": "SPY",
+    "title": "SPY 710P 05/01 : STC"
+  },
+  "1776966830": {
+    "category": "SWING",
+    "message": "Close the trade as it hit trailing stop at 8.80!",
+    "symbol": "SPY",
+    "title": "SPY 710P 05/01 : STC"
   }
 }
