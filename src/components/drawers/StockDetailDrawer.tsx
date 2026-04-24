@@ -178,17 +178,6 @@ export const StockDetailDrawer: React.FC<{ ticker: string | null; onClose: () =>
               ))}
             </div>
 
-            {/* Technical Analysis */}
-            <SectionTitle>Technical Analysis</SectionTitle>
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', columnGap: '20px', rowGap: '10px', marginBottom: '20px' }}>
-              <StatPair label="Rating" value={data.rating} color={
-                data.rating === 'BUY' ? '#66bb6a' : data.rating === 'SELL' ? '#ef5350' : '#ffd600'
-              }/>
-              <StatPair label="Target Price" value={fmtPrice(data.targetPrice)} />
-              <StatPair label="Support" value={fmtPrice(data.support)} />
-              <StatPair label="Stop Loss" value={fmtPrice(data.stopLoss)} color="#ef5350" />
-              <StatPair label="Resistance" value={fmtPrice(data.resistance)} />
-            </div>
 
             {/* Stats */}
             
@@ -384,6 +373,10 @@ const PriceChart: React.FC<{ candles: Candles | null; bullish: boolean; mode?: '
     return (
       <svg viewBox={`0 0 ${W} ${H}`} preserveAspectRatio="none" style={{ width: '100%', height: '220px', overflow: 'visible' }}>
         <defs>
+          <filter id="maGlow" x="-20%" y="-20%" width="140%" height="140%">
+            <feGaussianBlur stdDeviation="2.2" result="blur" />
+            <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+          </filter>
           <linearGradient id="supportGrad" x1="0" y1="0" x2="0" y2="1">
             <stop offset="0%" stopColor="#66bb6a" stopOpacity="0.14" />
             <stop offset="100%" stopColor="#66bb6a" stopOpacity="0" />
@@ -397,7 +390,7 @@ const PriceChart: React.FC<{ candles: Candles | null; bullish: boolean; mode?: '
           </clipPath>
         </defs>
         {[0.2, 0.4, 0.6, 0.8].map((pct, i) => (
-          <line key={i} x1={PAD} x2={CHART_W - PAD} y1={7 + pct * (H - 14)} y2={7 + pct * (H - 14)} stroke="#1a2332" strokeWidth="0.4" strokeDasharray="1 5" opacity="0.5" />
+          <line key={i} x1={PAD} x2={CHART_W - PAD} y1={7 + pct * (H - 14)} y2={7 + pct * (H - 14)} stroke="#2a3442" strokeWidth="0.6" strokeDasharray="2 4" opacity="0.7" />
         ))}
         <rect x={PAD} y={scaleY(resistance)} width={CHART_W - PAD*2} height={10} fill="url(#resistanceGrad)" />
         <rect x={PAD} y={scaleY(support) - 10} width={CHART_W - PAD*2} height={10} fill="url(#supportGrad)" />
@@ -422,14 +415,12 @@ const PriceChart: React.FC<{ candles: Candles | null; bullish: boolean; mode?: '
           })}
           {ma50arr && (
             <>
-              <path d={maToPath(ma50arr)} fill="none" stroke="#4fc3f7" strokeWidth="3" opacity="0.25" />
-              <path d={maToPath(ma50arr)} fill="none" stroke="#4fc3f7" strokeWidth="1.5" opacity="1" />
+              <path d={maToPath(ma50arr)} fill="none" stroke="#4fc3f7" strokeWidth="2" opacity="1" filter="url(#maGlow)" />
             </>
           )}
           {ma200arr && (
             <>
-              <path d={maToPath(ma200arr)} fill="none" stroke="#ce93d8" strokeWidth="3" opacity="0.25" />
-              <path d={maToPath(ma200arr)} fill="none" stroke="#ce93d8" strokeWidth="1.5" opacity="1" />
+              <path d={maToPath(ma200arr)} fill="none" stroke="#ce93d8" strokeWidth="2" opacity="1" filter="url(#maGlow)" />
             </>
           )}
         </g>
