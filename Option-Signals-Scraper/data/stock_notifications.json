@@ -2971,5 +2971,11 @@
     "message": "Reached Target 68.47 and that's 2.00%! Lock some in and wait for next target. Raise the stops to 61.76",
     "symbol": "BKR",
     "title": "BKR : STC"
+  },
+  "1777053486": {
+    "category": "SWING",
+    "message": "Buy To Open at 172.69 with first target above 176.14",
+    "symbol": "UHS",
+    "title": "UHS: BTO"
   }
 }
