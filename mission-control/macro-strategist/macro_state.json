@@ -1,0 +1,125 @@
+{
+  "timestamp": "2026-04-09T16:37:24.752885+00:00",
+  "regime": "RISK-ON",
+  "total_score": 5,
+  "max_score": 12,
+  "position_size_modifier": 1.0,
+  "recommendation": "Normal positioning. Favor long setups in crypto and growth sectors. DXY weakness supports risk assets.",
+  "indicators": {
+    "btc_bias": {
+      "score": 0,
+      "bias": "UNKNOWN",
+      "source": "btc-bias-scorer",
+      "error": true
+    },
+    "dxy": {
+      "value": 98.693,
+      "trend": "falling",
+      "sma20": 99.694,
+      "sma50": 98.54,
+      "vs_sma20": "below",
+      "chg5d": -0.96,
+      "score": 1
+    },
+    "vix": {
+      "value": 19.95,
+      "prev": 21.04,
+      "level": "normal",
+      "score": 0
+    },
+    "sp500": {
+      "price": 6819.46,
+      "ema20": 6640.45,
+      "ema50": 6715.57,
+      "sma200": 6658.97,
+      "trend": "above all MAs \u2014 strong bull",
+      "chg5d": 3.713,
+      "score": 2
+    },
+    "us10y": {
+      "value": 4.269,
+      "chg10d_pct": -1.363,
+      "trend": "falling",
+      "score": 1
+    },
+    "crypto_mcap": {
+      "mcap": 2526287896814.0,
+      "prev_mcap": 2526287896814.0,
+      "trend": "flat (+0.0%)",
+      "score": 0
+    },
+    "fed_expectations": {
+      "value": 3.585,
+      "chg10d_pct": -0.967,
+      "two_year_trend": "stable",
+      "score": 0
+    },
+    "sector_rotation": {
+      "leader": "XLK",
+      "type": "risk-on",
+      "growth_avg_5d": 4.394,
+      "defensive_avg_5d": 2.678,
+      "perf": {
+        "XLK": 4.803,
+        "XLF": 3.985,
+        "XLE": -2.773,
+        "XLU": 3.036,
+        "XLP": 2.32
+      },
+      "score": 1
+    }
+  },
+  "alerts": [],
+  "history": [
+    {
+      "timestamp": "2026-04-09T16:37:05.654939+00:00",
+      "regime": "RISK-ON",
+      "score": 5
+    },
+    {
+      "timestamp": "2026-04-09T16:36:50.016899+00:00",
+      "regime": "RISK-ON",
+      "score": 5
+    },
+    {
+      "timestamp": "2026-04-09T16:36:31.438552+00:00",
+      "regime": "RISK-ON",
+      "score": 5
+    },
+    {
+      "timestamp": "2026-04-09T16:36:14.674983+00:00",
+      "regime": "RISK-ON",
+      "score": 5
+    },
+    {
+      "timestamp": "2026-04-09T16:35:58.437236+00:00",
+      "regime": "RISK-ON",
+      "score": 5
+    },
+    {
+      "timestamp": "2026-04-09T16:35:41.910363+00:00",
+      "regime": "RISK-ON",
+      "score": 5
+    },
+    {
+      "timestamp": "2026-04-09T16:35:24.620817+00:00",
+      "regime": "RISK-ON",
+      "score": 5
+    },
+    {
+      "timestamp": "2026-04-09T16:35:02.966362+00:00",
+      "regime": "RISK-ON",
+      "score": 5
+    },
+    {
+      "timestamp": "2026-04-09T16:34:47.444369+00:00",
+      "regime": "RISK-ON",
+      "score": 5
+    },
+    {
+      "timestamp": "2026-04-09T16:34:32.568595+00:00",
+      "regime": "RISK-ON",
+      "score": 5
+    }
+  ]
+}

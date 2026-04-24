@@ -1,0 +1,12 @@
+{
+    "name": "Best Buy",
+    "test_product_url": "https://www.bestbuy.com/site/insignia-8-ft-4k-ultra-hd-hdmi-cable-black/6501071.p",
+    "add_to_cart_selector": "button.add-to-cart-button",
+    "cart_url": "https://www.bestbuy.com/cart",
+    "coupon_input_selector": "input#coupon-input",
+    "apply_button_selector": "button.apply-coupon-btn",
+    "success_indicators": ["applied", "coupon applied", "discount", "savings"],
+    "failure_indicators": ["invalid", "expired", "not eligible", "not recognized"],
+    "targeted_indicators": ["my best buy members", "first purchase", "totaltech members"],
+    "notes": "Best Buy rarely has public coupon codes — mostly member-specific."
+}

@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 60 60">
+  <defs>
+    <linearGradient id="g" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#81d4fa"/>
+      <stop offset="50%" stop-color="#4fc3f7"/>
+      <stop offset="100%" stop-color="#0288d1"/>
+    </linearGradient>
+  </defs>
+  <polygon points="8,4 52,4 58,30 52,56 8,56 2,30" fill="#0a1929" stroke="url(#g)" stroke-width="2"/>
+  <polyline points="11,9 7,13 7,17" fill="none" stroke="#4fc3f7" stroke-width="1.5" opacity="0.8"/>
+  <polyline points="49,9 53,13 53,17" fill="none" stroke="#4fc3f7" stroke-width="1.5" opacity="0.8"/>
+  <polyline points="11,51 7,47 7,43" fill="none" stroke="#4fc3f7" stroke-width="1.5" opacity="0.8"/>
+  <polyline points="49,51 53,47 53,43" fill="none" stroke="#4fc3f7" stroke-width="1.5" opacity="0.8"/>
+  <text x="30" y="40" text-anchor="middle" font-family="'Arial Black', sans-serif" font-size="22" font-weight="900" fill="url(#g)" letter-spacing="-1">MC</text>
+</svg>

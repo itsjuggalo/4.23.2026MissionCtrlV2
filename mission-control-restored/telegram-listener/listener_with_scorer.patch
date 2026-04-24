@@ -1,0 +1,71 @@
+--- listener.py	2026-03-31 04:00:00.000000000 +0000
++++ listener_new.py	2026-03-31 04:45:00.000000000 +0000
+@@ -19,6 +19,7 @@
+ from dotenv import load_dotenv
+ from shared.archiver import maybe_rotate
+ from telethon import TelegramClient, events
++from signal_scorer import SignalScorer
+ 
+ # Load .env from the same directory as this file
+ load_dotenv(os.path.join(os.path.dirname(os.path.abspath(__file__)), ".env"))
+@@ -42,6 +43,10 @@
+     -1001853036360,
+ ]
+ 
++# Initialize signal scorer
++scorer = SignalScorer(
++    channel_stats_path=CHANNEL_STATS_FILE,
++    signals_history_path=SIGNALS_FILE
++)
+ 
+ DUPLICATE_WINDOW_MINUTES = 30
+ 
+@@ -453,6 +458,20 @@
+ async def ingest_signal(text: str, channel_name: str, source_type: str = "telegram") -> None:
+     """
+     Parse, score, dedup-check, save, and Discord-post a signal from any source.
++    NOW ENHANCED WITH SMART SCORING!
+     """
+     if not text or not text.strip():
+         return
+@@ -461,8 +480,24 @@
+     parsed    = parse_signal(text)
+     score, rr = score_signal(parsed)
+     status    = classify_status(score)
++    
++    # === NEW: Smart signal scoring ===
++    try:
++        quality_score, quality_flags = scorer.score_signal(parsed)
++        routing = scorer.get_routing(quality_score)
++        tier_emoji = scorer.get_tier_emoji(quality_score)
++        
++        # Override status with quality routing
++        if routing == 'reject':
++            status = 'rejected'
++        elif routing == 'review':
++            status = 'review'
++        elif routing == 'post':
++            status = 'actionable'
++        
++        parsed['quality_score'] = quality_score
++        parsed['quality_flags'] = quality_flags
++        parsed['tier_emoji'] = tier_emoji
++    except Exception as e:
++        print(f"[SCORER ERROR] {e}", file=sys.stderr)
++        # Fall back to old scoring if scorer fails
++        quality_score = score / 10.0  # Convert 0-100 to 0-10
++        quality_flags = []
++        tier_emoji = '❓'
+ 
+     signals  = load_signals()
+     duplicate = find_duplicate(signals, parsed.get("symbol"), parsed.get("direction"))
+@@ -497,6 +532,9 @@
+         "risk_reward":   rr,
+         "confirmations": 1,
+         "confirmed_by":  [channel_name],
++        "quality_score": quality_score,
++        "quality_flags": quality_flags,
++        "tier_emoji":    tier_emoji,
+         "price_change":  parsed.get("price_change"),
+     }
+ 

@@ -1,0 +1,23 @@
+package com.google.android.gms.internal.auth;
+
+import a3.d;
+import android.util.Log;
+
+/* JADX INFO: loaded from: classes.dex */
+final class zzcx extends zzdc {
+    public zzcx(zzcz zzczVar, String str, Double d4, boolean z6) {
+        super(zzczVar, str, d4, true, null);
+    }
+
+    @Override // com.google.android.gms.internal.auth.zzdc
+    public final /* synthetic */ Object zza(Object obj) {
+        try {
+            return Double.valueOf(Double.parseDouble((String) obj));
+        } catch (NumberFormatException unused) {
+            StringBuilder sbP = d.p("Invalid double value for ", this.zzc, ": ");
+            sbP.append((String) obj);
+            Log.e("PhenotypeFlag", sbP.toString());
+            return null;
+        }
+    }
+}

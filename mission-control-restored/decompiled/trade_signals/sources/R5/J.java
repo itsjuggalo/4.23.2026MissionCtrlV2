@@ -1,0 +1,6 @@
+package R5;
+
+/* JADX INFO: loaded from: classes2.dex */
+public interface J {
+    q6.f getName();
+}

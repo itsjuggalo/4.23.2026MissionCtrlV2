@@ -1,0 +1,19 @@
+package O5;
+
+import kotlin.jvm.functions.Function0;
+
+/* JADX INFO: loaded from: classes2.dex */
+public class k implements Function0 {
+
+    /* JADX INFO: renamed from: a, reason: collision with root package name */
+    public final l f6056a;
+
+    public k(l lVar) {
+        this.f6056a = lVar;
+    }
+
+    @Override // kotlin.jvm.functions.Function0
+    public Object invoke() {
+        return l.i(this.f6056a);
+    }
+}

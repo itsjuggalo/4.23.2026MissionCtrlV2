@@ -1,0 +1,1150 @@
+
+[2026-04-14T22:00:01Z] Daily SuperTrend Optimization Starting
+
+============================================================
+SuperTrend Grid Optimizer
+============================================================
+Symbol:     BTC/USD
+Timeframe:  1H
+Candles:    5000
+Mode:       all
+Fee:        0.1%
+Grid size:  9 × 8 = 72 combos
+============================================================
+
+[data_fetcher] Loaded 5001 candles from cache
+Data range: 2025-09-18T11:00:00+00:00 → 2026-04-14T19:00:00+00:00
+Total candles: 5001
+
+Running backtests...
+
+  [10/72] ATR=8 Mult=2.0
+  [20/72] ATR=9 Mult=3.0
+  [30/72] ATR=10 Mult=4.0
+  [40/72] ATR=11 Mult=5.0
+  [50/72] ATR=14 Mult=2.0
+  [60/72] ATR=16 Mult=3.0
+  [70/72] ATR=20 Mult=4.0
+
+  [72/72] Complete!
+
+============================================================
+TOP 10 PARAMETER COMBINATIONS
+============================================================
+Rank  ATR   Mult   Mode         Return%    WinRate   PF     MaxDD%   Trades  Sharpe 
+--------------------------------------------------------------------------------
+1     7     5.0    long+short   31.44      44.9      1.54   25.79    49      0.136  
+2     8     5.0    long+short   30.58      44.9      1.53   25.9     49      0.134  
+3     7     4.5    long+short   18.43      40.7      1.3    28.65    59      0.086  
+4     10    4.5    long+short   15.41      42.1      1.27   27.64    57      0.077  
+5     8     4.5    long+short   11.39      40.7      1.21   30.24    59      0.062  
+6     7     4.0    long+short   9.41       40.8      1.16   28.43    71      0.051  
+7     9     4.5    long+short   9.32       39.7      1.19   29.88    58      0.055  
+8     10    4.0    long+short   9.19       40.8      1.16   34.41    71      0.05   
+9     12    4.5    long+short   9.14       41.7      1.19   27.68    60      0.054  
+10    9     5.0    long+short   8.24       40.0      1.19   25.9     50      0.055  
+
+============================================================
+WORST 5 (avoid these)
+============================================================
+  ATR=10 Mult=3.0 Mode=long+short Return=-38.44% DD=46.0%
+  ATR=7 Mult=2.5 Mode=long+short Return=-38.45% DD=51.51%
+  ATR=12 Mult=3.0 Mode=long+short Return=-40.94% DD=45.65%
+  ATR=11 Mult=3.0 Mode=long+short Return=-40.99% DD=45.62%
+  ATR=8 Mult=3.0 Mode=long+short Return=-43.75% DD=50.78%
+
+Full results saved: /home/ubuntu/mission-control/supertrend-engine/results/optimization_BTC_1H_1776204005.json
+Agent config saved: /home/ubuntu/.openclaw/workspace/directives/supertrend_config_BTC_1H.json
+Signal receiver config: /home/ubuntu/mission-control/signal-receiver/data/optimal_params.json
+
+============================================================
+SuperTrend Grid Optimizer
+============================================================
+Symbol:     BTC/USD
+Timeframe:  4H
+Candles:    5000
+Mode:       all
+Fee:        0.1%
+Grid size:  9 × 8 = 72 combos
+============================================================
+
+[data_fetcher] Loaded 5001 candles from cache
+Data range: 2024-01-02T08:00:00+00:00 → 2026-04-14T16:00:00+00:00
+Total candles: 5001
+
+Running backtests...
+
+  [10/72] ATR=8 Mult=2.0
+  [20/72] ATR=9 Mult=3.0
+  [30/72] ATR=10 Mult=4.0
+  [40/72] ATR=11 Mult=5.0
+  [50/72] ATR=14 Mult=2.0
+  [60/72] ATR=16 Mult=3.0
+  [70/72] ATR=20 Mult=4.0
+
+  [72/72] Complete!
+
+============================================================
+TOP 10 PARAMETER COMBINATIONS
+============================================================
+Rank  ATR   Mult   Mode         Return%    WinRate   PF     MaxDD%   Trades  Sharpe 
+--------------------------------------------------------------------------------
+1     16    5.0    long-only    49.35      40.0      1.79   29.65    25      0.185  
+2     14    2.5    long-only    48.91      50.0      1.42   31.32    74      0.12   
+3     14    2.0    long-only    48.12      37.5      1.34   37.78    104     0.091  
+4     20    2.5    long-only    47.71      50.0      1.41   36.53    76      0.117  
+5     8     4.5    long-only    47.21      38.7      1.71   26.72    31      0.161  
+6     16    2.5    long-only    46.51      50.0      1.4    35.56    74      0.116  
+7     16    3.0    long-only    46.33      50.8      1.51   28.58    59      0.119  
+8     20    5.0    long-only    43.92      38.5      1.67   26.3     26      0.168  
+9     20    3.0    long-only    41.48      49.2      1.47   32.51    59      0.106  
+10    10    4.5    long-only    39.49      35.5      1.63   26.01    31      0.144  
+
+============================================================
+WORST 5 (avoid these)
+============================================================
+  ATR=10 Mult=4.0 Mode=long+short Return=-60.29% DD=73.53%
+  ATR=9 Mult=1.5 Mode=long+short Return=-60.48% DD=72.18%
+  ATR=9 Mult=4.0 Mode=long+short Return=-64.38% DD=74.24%
+  ATR=8 Mult=1.5 Mode=long+short Return=-65.88% DD=75.86%
+  ATR=7 Mult=1.5 Mode=long+short Return=-67.53% DD=75.56%
+
+Full results saved: /home/ubuntu/mission-control/supertrend-engine/results/optimization_BTC_4H_1776204008.json
+Agent config saved: /home/ubuntu/.openclaw/workspace/directives/supertrend_config_BTC_4H.json
+Signal receiver config: /home/ubuntu/mission-control/signal-receiver/data/optimal_params.json
+[2026-04-14T22:00:08Z] Daily Optimization Complete
+
+[2026-04-15T22:00:01Z] Daily SuperTrend Optimization Starting
+
+============================================================
+SuperTrend Grid Optimizer
+============================================================
+Symbol:     BTC/USD
+Timeframe:  1H
+Candles:    5000
+Mode:       all
+Fee:        0.1%
+Grid size:  9 × 8 = 72 combos
+============================================================
+
+[data_fetcher] Loaded 5001 candles from cache
+Data range: 2025-09-18T11:00:00+00:00 → 2026-04-14T19:00:00+00:00
+Total candles: 5001
+
+Running backtests...
+
+  [10/72] ATR=8 Mult=2.0
+  [20/72] ATR=9 Mult=3.0
+  [30/72] ATR=10 Mult=4.0
+  [40/72] ATR=11 Mult=5.0
+  [50/72] ATR=14 Mult=2.0
+  [60/72] ATR=16 Mult=3.0
+  [70/72] ATR=20 Mult=4.0
+
+  [72/72] Complete!
+
+============================================================
+TOP 10 PARAMETER COMBINATIONS
+============================================================
+Rank  ATR   Mult   Mode         Return%    WinRate   PF     MaxDD%   Trades  Sharpe 
+--------------------------------------------------------------------------------
+1     7     5.0    long+short   31.44      44.9      1.54   25.79    49      0.136  
+2     8     5.0    long+short   30.58      44.9      1.53   25.9     49      0.134  
+3     7     4.5    long+short   18.43      40.7      1.3    28.65    59      0.086  
+4     10    4.5    long+short   15.41      42.1      1.27   27.64    57      0.077  
+5     8     4.5    long+short   11.39      40.7      1.21   30.24    59      0.062  
+6     7     4.0    long+short   9.41       40.8      1.16   28.43    71      0.051  
+7     9     4.5    long+short   9.32       39.7      1.19   29.88    58      0.055  
+8     10    4.0    long+short   9.19       40.8      1.16   34.41    71      0.05   
+9     12    4.5    long+short   9.14       41.7      1.19   27.68    60      0.054  
+10    9     5.0    long+short   8.24       40.0      1.19   25.9     50      0.055  
+
+============================================================
+WORST 5 (avoid these)
+============================================================
+  ATR=10 Mult=3.0 Mode=long+short Return=-38.44% DD=46.0%
+  ATR=7 Mult=2.5 Mode=long+short Return=-38.45% DD=51.51%
+  ATR=12 Mult=3.0 Mode=long+short Return=-40.94% DD=45.65%
+  ATR=11 Mult=3.0 Mode=long+short Return=-40.99% DD=45.62%
+  ATR=8 Mult=3.0 Mode=long+short Return=-43.75% DD=50.78%
+
+Full results saved: /home/ubuntu/mission-control/supertrend-engine/results/optimization_BTC_1H_1776290406.json
+Agent config saved: /home/ubuntu/.openclaw/workspace/directives/supertrend_config_BTC_1H.json
+Signal receiver config: /home/ubuntu/mission-control/signal-receiver/data/optimal_params.json
+
+============================================================
+SuperTrend Grid Optimizer
+============================================================
+Symbol:     BTC/USD
+Timeframe:  4H
+Candles:    5000
+Mode:       all
+Fee:        0.1%
+Grid size:  9 × 8 = 72 combos
+============================================================
+
+[data_fetcher] Loaded 5001 candles from cache
+Data range: 2024-01-02T08:00:00+00:00 → 2026-04-14T16:00:00+00:00
+Total candles: 5001
+
+Running backtests...
+
+  [10/72] ATR=8 Mult=2.0
+  [20/72] ATR=9 Mult=3.0
+  [30/72] ATR=10 Mult=4.0
+  [40/72] ATR=11 Mult=5.0
+  [50/72] ATR=14 Mult=2.0
+  [60/72] ATR=16 Mult=3.0
+  [70/72] ATR=20 Mult=4.0
+
+  [72/72] Complete!
+
+============================================================
+TOP 10 PARAMETER COMBINATIONS
+============================================================
+Rank  ATR   Mult   Mode         Return%    WinRate   PF     MaxDD%   Trades  Sharpe 
+--------------------------------------------------------------------------------
+1     16    5.0    long-only    49.35      40.0      1.79   29.65    25      0.185  
+2     14    2.5    long-only    48.91      50.0      1.42   31.32    74      0.12   
+3     14    2.0    long-only    48.12      37.5      1.34   37.78    104     0.091  
+4     20    2.5    long-only    47.71      50.0      1.41   36.53    76      0.117  
+5     8     4.5    long-only    47.21      38.7      1.71   26.72    31      0.161  
+6     16    2.5    long-only    46.51      50.0      1.4    35.56    74      0.116  
+7     16    3.0    long-only    46.33      50.8      1.51   28.58    59      0.119  
+8     20    5.0    long-only    43.92      38.5      1.67   26.3     26      0.168  
+9     20    3.0    long-only    41.48      49.2      1.47   32.51    59      0.106  
+10    10    4.5    long-only    39.49      35.5      1.63   26.01    31      0.144  
+
+============================================================
+WORST 5 (avoid these)
+============================================================
+  ATR=10 Mult=4.0 Mode=long+short Return=-60.29% DD=73.53%
+  ATR=9 Mult=1.5 Mode=long+short Return=-60.48% DD=72.18%
+  ATR=9 Mult=4.0 Mode=long+short Return=-64.38% DD=74.24%
+  ATR=8 Mult=1.5 Mode=long+short Return=-65.88% DD=75.86%
+  ATR=7 Mult=1.5 Mode=long+short Return=-67.53% DD=75.56%
+
+Full results saved: /home/ubuntu/mission-control/supertrend-engine/results/optimization_BTC_4H_1776290408.json
+Agent config saved: /home/ubuntu/.openclaw/workspace/directives/supertrend_config_BTC_4H.json
+Signal receiver config: /home/ubuntu/mission-control/signal-receiver/data/optimal_params.json
+[2026-04-15T22:00:08Z] Daily Optimization Complete
+
+[2026-04-16T22:00:01Z] Daily SuperTrend Optimization Starting
+
+============================================================
+SuperTrend Grid Optimizer
+============================================================
+Symbol:     BTC/USD
+Timeframe:  1H
+Candles:    5000
+Mode:       all
+Fee:        0.1%
+Grid size:  9 × 8 = 72 combos
+============================================================
+
+[data_fetcher] Loaded 5001 candles from cache
+Data range: 2025-09-18T11:00:00+00:00 → 2026-04-14T19:00:00+00:00
+Total candles: 5001
+
+Running backtests...
+
+  [10/72] ATR=8 Mult=2.0
+  [20/72] ATR=9 Mult=3.0
+  [30/72] ATR=10 Mult=4.0
+  [40/72] ATR=11 Mult=5.0
+  [50/72] ATR=14 Mult=2.0
+  [60/72] ATR=16 Mult=3.0
+  [70/72] ATR=20 Mult=4.0
+
+  [72/72] Complete!
+
+============================================================
+TOP 10 PARAMETER COMBINATIONS
+============================================================
+Rank  ATR   Mult   Mode         Return%    WinRate   PF     MaxDD%   Trades  Sharpe 
+--------------------------------------------------------------------------------
+1     7     5.0    long+short   31.44      44.9      1.54   25.79    49      0.136  
+2     8     5.0    long+short   30.58      44.9      1.53   25.9     49      0.134  
+3     7     4.5    long+short   18.43      40.7      1.3    28.65    59      0.086  
+4     10    4.5    long+short   15.41      42.1      1.27   27.64    57      0.077  
+5     8     4.5    long+short   11.39      40.7      1.21   30.24    59      0.062  
+6     7     4.0    long+short   9.41       40.8      1.16   28.43    71      0.051  
+7     9     4.5    long+short   9.32       39.7      1.19   29.88    58      0.055  
+8     10    4.0    long+short   9.19       40.8      1.16   34.41    71      0.05   
+9     12    4.5    long+short   9.14       41.7      1.19   27.68    60      0.054  
+10    9     5.0    long+short   8.24       40.0      1.19   25.9     50      0.055  
+
+============================================================
+WORST 5 (avoid these)
+============================================================
+  ATR=10 Mult=3.0 Mode=long+short Return=-38.44% DD=46.0%
+  ATR=7 Mult=2.5 Mode=long+short Return=-38.45% DD=51.51%
+  ATR=12 Mult=3.0 Mode=long+short Return=-40.94% DD=45.65%
+  ATR=11 Mult=3.0 Mode=long+short Return=-40.99% DD=45.62%
+  ATR=8 Mult=3.0 Mode=long+short Return=-43.75% DD=50.78%
+
+Full results saved: /home/ubuntu/mission-control/supertrend-engine/results/optimization_BTC_1H_1776376806.json
+Agent config saved: /home/ubuntu/.openclaw/workspace/directives/supertrend_config_BTC_1H.json
+Signal receiver config: /home/ubuntu/mission-control/signal-receiver/data/optimal_params.json
+
+============================================================
+SuperTrend Grid Optimizer
+============================================================
+Symbol:     BTC/USD
+Timeframe:  4H
+Candles:    5000
+Mode:       all
+Fee:        0.1%
+Grid size:  9 × 8 = 72 combos
+============================================================
+
+[data_fetcher] Loaded 5001 candles from cache
+Data range: 2024-01-02T08:00:00+00:00 → 2026-04-14T16:00:00+00:00
+Total candles: 5001
+
+Running backtests...
+
+  [10/72] ATR=8 Mult=2.0
+  [20/72] ATR=9 Mult=3.0
+  [30/72] ATR=10 Mult=4.0
+  [40/72] ATR=11 Mult=5.0
+  [50/72] ATR=14 Mult=2.0
+  [60/72] ATR=16 Mult=3.0
+  [70/72] ATR=20 Mult=4.0
+
+  [72/72] Complete!
+
+============================================================
+TOP 10 PARAMETER COMBINATIONS
+============================================================
+Rank  ATR   Mult   Mode         Return%    WinRate   PF     MaxDD%   Trades  Sharpe 
+--------------------------------------------------------------------------------
+1     16    5.0    long-only    49.35      40.0      1.79   29.65    25      0.185  
+2     14    2.5    long-only    48.91      50.0      1.42   31.32    74      0.12   
+3     14    2.0    long-only    48.12      37.5      1.34   37.78    104     0.091  
+4     20    2.5    long-only    47.71      50.0      1.41   36.53    76      0.117  
+5     8     4.5    long-only    47.21      38.7      1.71   26.72    31      0.161  
+6     16    2.5    long-only    46.51      50.0      1.4    35.56    74      0.116  
+7     16    3.0    long-only    46.33      50.8      1.51   28.58    59      0.119  
+8     20    5.0    long-only    43.92      38.5      1.67   26.3     26      0.168  
+9     20    3.0    long-only    41.48      49.2      1.47   32.51    59      0.106  
+10    10    4.5    long-only    39.49      35.5      1.63   26.01    31      0.144  
+
+============================================================
+WORST 5 (avoid these)
+============================================================
+  ATR=10 Mult=4.0 Mode=long+short Return=-60.29% DD=73.53%
+  ATR=9 Mult=1.5 Mode=long+short Return=-60.48% DD=72.18%
+  ATR=9 Mult=4.0 Mode=long+short Return=-64.38% DD=74.24%
+  ATR=8 Mult=1.5 Mode=long+short Return=-65.88% DD=75.86%
+  ATR=7 Mult=1.5 Mode=long+short Return=-67.53% DD=75.56%
+
+Full results saved: /home/ubuntu/mission-control/supertrend-engine/results/optimization_BTC_4H_1776376809.json
+Agent config saved: /home/ubuntu/.openclaw/workspace/directives/supertrend_config_BTC_4H.json
+Signal receiver config: /home/ubuntu/mission-control/signal-receiver/data/optimal_params.json
+[2026-04-16T22:00:09Z] Daily Optimization Complete
+
+[2026-04-17T22:00:01Z] Daily SuperTrend Optimization Starting
+
+============================================================
+SuperTrend Grid Optimizer
+============================================================
+Symbol:     BTC/USD
+Timeframe:  1H
+Candles:    5000
+Mode:       all
+Fee:        0.1%
+Grid size:  9 × 8 = 72 combos
+============================================================
+
+[data_fetcher] Loaded 5001 candles from cache
+Data range: 2025-09-18T11:00:00+00:00 → 2026-04-14T19:00:00+00:00
+Total candles: 5001
+
+Running backtests...
+
+  [10/72] ATR=8 Mult=2.0
+  [20/72] ATR=9 Mult=3.0
+  [30/72] ATR=10 Mult=4.0
+  [40/72] ATR=11 Mult=5.0
+  [50/72] ATR=14 Mult=2.0
+  [60/72] ATR=16 Mult=3.0
+  [70/72] ATR=20 Mult=4.0
+
+  [72/72] Complete!
+
+============================================================
+TOP 10 PARAMETER COMBINATIONS
+============================================================
+Rank  ATR   Mult   Mode         Return%    WinRate   PF     MaxDD%   Trades  Sharpe 
+--------------------------------------------------------------------------------
+1     7     5.0    long+short   31.44      44.9      1.54   25.79    49      0.136  
+2     8     5.0    long+short   30.58      44.9      1.53   25.9     49      0.134  
+3     7     4.5    long+short   18.43      40.7      1.3    28.65    59      0.086  
+4     10    4.5    long+short   15.41      42.1      1.27   27.64    57      0.077  
+5     8     4.5    long+short   11.39      40.7      1.21   30.24    59      0.062  
+6     7     4.0    long+short   9.41       40.8      1.16   28.43    71      0.051  
+7     9     4.5    long+short   9.32       39.7      1.19   29.88    58      0.055  
+8     10    4.0    long+short   9.19       40.8      1.16   34.41    71      0.05   
+9     12    4.5    long+short   9.14       41.7      1.19   27.68    60      0.054  
+10    9     5.0    long+short   8.24       40.0      1.19   25.9     50      0.055  
+
+============================================================
+WORST 5 (avoid these)
+============================================================
+  ATR=10 Mult=3.0 Mode=long+short Return=-38.44% DD=46.0%
+  ATR=7 Mult=2.5 Mode=long+short Return=-38.45% DD=51.51%
+  ATR=12 Mult=3.0 Mode=long+short Return=-40.94% DD=45.65%
+  ATR=11 Mult=3.0 Mode=long+short Return=-40.99% DD=45.62%
+  ATR=8 Mult=3.0 Mode=long+short Return=-43.75% DD=50.78%
+
+Full results saved: /home/ubuntu/mission-control/supertrend-engine/results/optimization_BTC_1H_1776463211.json
+Agent config saved: /home/ubuntu/.openclaw/workspace/directives/supertrend_config_BTC_1H.json
+Signal receiver config: /home/ubuntu/mission-control/signal-receiver/data/optimal_params.json
+
+============================================================
+SuperTrend Grid Optimizer
+============================================================
+Symbol:     BTC/USD
+Timeframe:  4H
+Candles:    5000
+Mode:       all
+Fee:        0.1%
+Grid size:  9 × 8 = 72 combos
+============================================================
+
+[data_fetcher] Loaded 5001 candles from cache
+Data range: 2024-01-02T08:00:00+00:00 → 2026-04-14T16:00:00+00:00
+Total candles: 5001
+
+Running backtests...
+
+  [10/72] ATR=8 Mult=2.0
+  [20/72] ATR=9 Mult=3.0
+  [30/72] ATR=10 Mult=4.0
+  [40/72] ATR=11 Mult=5.0
+  [50/72] ATR=14 Mult=2.0
+  [60/72] ATR=16 Mult=3.0
+  [70/72] ATR=20 Mult=4.0
+
+  [72/72] Complete!
+
+============================================================
+TOP 10 PARAMETER COMBINATIONS
+============================================================
+Rank  ATR   Mult   Mode         Return%    WinRate   PF     MaxDD%   Trades  Sharpe 
+--------------------------------------------------------------------------------
+1     16    5.0    long-only    49.35      40.0      1.79   29.65    25      0.185  
+2     14    2.5    long-only    48.91      50.0      1.42   31.32    74      0.12   
+3     14    2.0    long-only    48.12      37.5      1.34   37.78    104     0.091  
+4     20    2.5    long-only    47.71      50.0      1.41   36.53    76      0.117  
+5     8     4.5    long-only    47.21      38.7      1.71   26.72    31      0.161  
+6     16    2.5    long-only    46.51      50.0      1.4    35.56    74      0.116  
+7     16    3.0    long-only    46.33      50.8      1.51   28.58    59      0.119  
+8     20    5.0    long-only    43.92      38.5      1.67   26.3     26      0.168  
+9     20    3.0    long-only    41.48      49.2      1.47   32.51    59      0.106  
+10    10    4.5    long-only    39.49      35.5      1.63   26.01    31      0.144  
+
+============================================================
+WORST 5 (avoid these)
+============================================================
+  ATR=10 Mult=4.0 Mode=long+short Return=-60.29% DD=73.53%
+  ATR=9 Mult=1.5 Mode=long+short Return=-60.48% DD=72.18%
+  ATR=9 Mult=4.0 Mode=long+short Return=-64.38% DD=74.24%
+  ATR=8 Mult=1.5 Mode=long+short Return=-65.88% DD=75.86%
+  ATR=7 Mult=1.5 Mode=long+short Return=-67.53% DD=75.56%
+
+Full results saved: /home/ubuntu/mission-control/supertrend-engine/results/optimization_BTC_4H_1776463213.json
+Agent config saved: /home/ubuntu/.openclaw/workspace/directives/supertrend_config_BTC_4H.json
+Signal receiver config: /home/ubuntu/mission-control/signal-receiver/data/optimal_params.json
+[2026-04-17T22:00:13Z] Daily Optimization Complete
+
+[2026-04-18T22:00:01Z] Daily SuperTrend Optimization Starting
+
+============================================================
+SuperTrend Grid Optimizer
+============================================================
+Symbol:     BTC/USD
+Timeframe:  1H
+Candles:    5000
+Mode:       all
+Fee:        0.1%
+Grid size:  9 × 8 = 72 combos
+============================================================
+
+[data_fetcher] Loaded 5001 candles from cache
+Data range: 2025-09-18T11:00:00+00:00 → 2026-04-14T19:00:00+00:00
+Total candles: 5001
+
+Running backtests...
+
+  [10/72] ATR=8 Mult=2.0
+  [20/72] ATR=9 Mult=3.0
+  [30/72] ATR=10 Mult=4.0
+  [40/72] ATR=11 Mult=5.0
+  [50/72] ATR=14 Mult=2.0
+  [60/72] ATR=16 Mult=3.0
+  [70/72] ATR=20 Mult=4.0
+
+  [72/72] Complete!
+
+============================================================
+TOP 10 PARAMETER COMBINATIONS
+============================================================
+Rank  ATR   Mult   Mode         Return%    WinRate   PF     MaxDD%   Trades  Sharpe 
+--------------------------------------------------------------------------------
+1     7     5.0    long+short   31.44      44.9      1.54   25.79    49      0.136  
+2     8     5.0    long+short   30.58      44.9      1.53   25.9     49      0.134  
+3     7     4.5    long+short   18.43      40.7      1.3    28.65    59      0.086  
+4     10    4.5    long+short   15.41      42.1      1.27   27.64    57      0.077  
+5     8     4.5    long+short   11.39      40.7      1.21   30.24    59      0.062  
+6     7     4.0    long+short   9.41       40.8      1.16   28.43    71      0.051  
+7     9     4.5    long+short   9.32       39.7      1.19   29.88    58      0.055  
+8     10    4.0    long+short   9.19       40.8      1.16   34.41    71      0.05   
+9     12    4.5    long+short   9.14       41.7      1.19   27.68    60      0.054  
+10    9     5.0    long+short   8.24       40.0      1.19   25.9     50      0.055  
+
+============================================================
+WORST 5 (avoid these)
+============================================================
+  ATR=10 Mult=3.0 Mode=long+short Return=-38.44% DD=46.0%
+  ATR=7 Mult=2.5 Mode=long+short Return=-38.45% DD=51.51%
+  ATR=12 Mult=3.0 Mode=long+short Return=-40.94% DD=45.65%
+  ATR=11 Mult=3.0 Mode=long+short Return=-40.99% DD=45.62%
+  ATR=8 Mult=3.0 Mode=long+short Return=-43.75% DD=50.78%
+
+Full results saved: /home/ubuntu/mission-control/supertrend-engine/results/optimization_BTC_1H_1776549609.json
+Agent config saved: /home/ubuntu/.openclaw/workspace/directives/supertrend_config_BTC_1H.json
+Signal receiver config: /home/ubuntu/mission-control/signal-receiver/data/optimal_params.json
+
+============================================================
+SuperTrend Grid Optimizer
+============================================================
+Symbol:     BTC/USD
+Timeframe:  4H
+Candles:    5000
+Mode:       all
+Fee:        0.1%
+Grid size:  9 × 8 = 72 combos
+============================================================
+
+[data_fetcher] Loaded 5001 candles from cache
+Data range: 2024-01-02T08:00:00+00:00 → 2026-04-14T16:00:00+00:00
+Total candles: 5001
+
+Running backtests...
+
+  [10/72] ATR=8 Mult=2.0
+  [20/72] ATR=9 Mult=3.0
+  [30/72] ATR=10 Mult=4.0
+  [40/72] ATR=11 Mult=5.0
+  [50/72] ATR=14 Mult=2.0
+  [60/72] ATR=16 Mult=3.0
+  [70/72] ATR=20 Mult=4.0
+
+  [72/72] Complete!
+
+============================================================
+TOP 10 PARAMETER COMBINATIONS
+============================================================
+Rank  ATR   Mult   Mode         Return%    WinRate   PF     MaxDD%   Trades  Sharpe 
+--------------------------------------------------------------------------------
+1     16    5.0    long-only    49.35      40.0      1.79   29.65    25      0.185  
+2     14    2.5    long-only    48.91      50.0      1.42   31.32    74      0.12   
+3     14    2.0    long-only    48.12      37.5      1.34   37.78    104     0.091  
+4     20    2.5    long-only    47.71      50.0      1.41   36.53    76      0.117  
+5     8     4.5    long-only    47.21      38.7      1.71   26.72    31      0.161  
+6     16    2.5    long-only    46.51      50.0      1.4    35.56    74      0.116  
+7     16    3.0    long-only    46.33      50.8      1.51   28.58    59      0.119  
+8     20    5.0    long-only    43.92      38.5      1.67   26.3     26      0.168  
+9     20    3.0    long-only    41.48      49.2      1.47   32.51    59      0.106  
+10    10    4.5    long-only    39.49      35.5      1.63   26.01    31      0.144  
+
+============================================================
+WORST 5 (avoid these)
+============================================================
+  ATR=10 Mult=4.0 Mode=long+short Return=-60.29% DD=73.53%
+  ATR=9 Mult=1.5 Mode=long+short Return=-60.48% DD=72.18%
+  ATR=9 Mult=4.0 Mode=long+short Return=-64.38% DD=74.24%
+  ATR=8 Mult=1.5 Mode=long+short Return=-65.88% DD=75.86%
+  ATR=7 Mult=1.5 Mode=long+short Return=-67.53% DD=75.56%
+
+Full results saved: /home/ubuntu/mission-control/supertrend-engine/results/optimization_BTC_4H_1776549612.json
+Agent config saved: /home/ubuntu/.openclaw/workspace/directives/supertrend_config_BTC_4H.json
+Signal receiver config: /home/ubuntu/mission-control/signal-receiver/data/optimal_params.json
+[2026-04-18T22:00:12Z] Daily Optimization Complete
+
+[2026-04-19T22:00:02Z] Daily SuperTrend Optimization Starting
+
+============================================================
+SuperTrend Grid Optimizer
+============================================================
+Symbol:     BTC/USD
+Timeframe:  1H
+Candles:    5000
+Mode:       all
+Fee:        0.1%
+Grid size:  9 × 8 = 72 combos
+============================================================
+
+[data_fetcher] Loaded 5001 candles from cache
+Data range: 2025-09-18T11:00:00+00:00 → 2026-04-14T19:00:00+00:00
+Total candles: 5001
+
+Running backtests...
+
+  [10/72] ATR=8 Mult=2.0
+  [20/72] ATR=9 Mult=3.0
+  [30/72] ATR=10 Mult=4.0
+  [40/72] ATR=11 Mult=5.0
+  [50/72] ATR=14 Mult=2.0
+  [60/72] ATR=16 Mult=3.0
+  [70/72] ATR=20 Mult=4.0
+
+  [72/72] Complete!
+
+============================================================
+TOP 10 PARAMETER COMBINATIONS
+============================================================
+Rank  ATR   Mult   Mode         Return%    WinRate   PF     MaxDD%   Trades  Sharpe 
+--------------------------------------------------------------------------------
+1     7     5.0    long+short   31.44      44.9      1.54   25.79    49      0.136  
+2     8     5.0    long+short   30.58      44.9      1.53   25.9     49      0.134  
+3     7     4.5    long+short   18.43      40.7      1.3    28.65    59      0.086  
+4     10    4.5    long+short   15.41      42.1      1.27   27.64    57      0.077  
+5     8     4.5    long+short   11.39      40.7      1.21   30.24    59      0.062  
+6     7     4.0    long+short   9.41       40.8      1.16   28.43    71      0.051  
+7     9     4.5    long+short   9.32       39.7      1.19   29.88    58      0.055  
+8     10    4.0    long+short   9.19       40.8      1.16   34.41    71      0.05   
+9     12    4.5    long+short   9.14       41.7      1.19   27.68    60      0.054  
+10    9     5.0    long+short   8.24       40.0      1.19   25.9     50      0.055  
+
+============================================================
+WORST 5 (avoid these)
+============================================================
+  ATR=10 Mult=3.0 Mode=long+short Return=-38.44% DD=46.0%
+  ATR=7 Mult=2.5 Mode=long+short Return=-38.45% DD=51.51%
+  ATR=12 Mult=3.0 Mode=long+short Return=-40.94% DD=45.65%
+  ATR=11 Mult=3.0 Mode=long+short Return=-40.99% DD=45.62%
+  ATR=8 Mult=3.0 Mode=long+short Return=-43.75% DD=50.78%
+
+Full results saved: /home/ubuntu/mission-control/supertrend-engine/results/optimization_BTC_1H_1776636011.json
+Agent config saved: /home/ubuntu/.openclaw/workspace/directives/supertrend_config_BTC_1H.json
+Signal receiver config: /home/ubuntu/mission-control/signal-receiver/data/optimal_params.json
+
+============================================================
+SuperTrend Grid Optimizer
+============================================================
+Symbol:     BTC/USD
+Timeframe:  4H
+Candles:    5000
+Mode:       all
+Fee:        0.1%
+Grid size:  9 × 8 = 72 combos
+============================================================
+
+[data_fetcher] Loaded 5001 candles from cache
+Data range: 2024-01-02T08:00:00+00:00 → 2026-04-14T16:00:00+00:00
+Total candles: 5001
+
+Running backtests...
+
+  [10/72] ATR=8 Mult=2.0
+  [20/72] ATR=9 Mult=3.0
+  [30/72] ATR=10 Mult=4.0
+  [40/72] ATR=11 Mult=5.0
+  [50/72] ATR=14 Mult=2.0
+  [60/72] ATR=16 Mult=3.0
+  [70/72] ATR=20 Mult=4.0
+
+  [72/72] Complete!
+
+============================================================
+TOP 10 PARAMETER COMBINATIONS
+============================================================
+Rank  ATR   Mult   Mode         Return%    WinRate   PF     MaxDD%   Trades  Sharpe 
+--------------------------------------------------------------------------------
+1     16    5.0    long-only    49.35      40.0      1.79   29.65    25      0.185  
+2     14    2.5    long-only    48.91      50.0      1.42   31.32    74      0.12   
+3     14    2.0    long-only    48.12      37.5      1.34   37.78    104     0.091  
+4     20    2.5    long-only    47.71      50.0      1.41   36.53    76      0.117  
+5     8     4.5    long-only    47.21      38.7      1.71   26.72    31      0.161  
+6     16    2.5    long-only    46.51      50.0      1.4    35.56    74      0.116  
+7     16    3.0    long-only    46.33      50.8      1.51   28.58    59      0.119  
+8     20    5.0    long-only    43.92      38.5      1.67   26.3     26      0.168  
+9     20    3.0    long-only    41.48      49.2      1.47   32.51    59      0.106  
+10    10    4.5    long-only    39.49      35.5      1.63   26.01    31      0.144  
+
+============================================================
+WORST 5 (avoid these)
+============================================================
+  ATR=10 Mult=4.0 Mode=long+short Return=-60.29% DD=73.53%
+  ATR=9 Mult=1.5 Mode=long+short Return=-60.48% DD=72.18%
+  ATR=9 Mult=4.0 Mode=long+short Return=-64.38% DD=74.24%
+  ATR=8 Mult=1.5 Mode=long+short Return=-65.88% DD=75.86%
+  ATR=7 Mult=1.5 Mode=long+short Return=-67.53% DD=75.56%
+
+Full results saved: /home/ubuntu/mission-control/supertrend-engine/results/optimization_BTC_4H_1776636013.json
+Agent config saved: /home/ubuntu/.openclaw/workspace/directives/supertrend_config_BTC_4H.json
+Signal receiver config: /home/ubuntu/mission-control/signal-receiver/data/optimal_params.json
+[2026-04-19T22:00:14Z] Daily Optimization Complete
+
+[2026-04-20T22:00:01Z] Daily SuperTrend Optimization Starting
+
+============================================================
+SuperTrend Grid Optimizer
+============================================================
+Symbol:     BTC/USD
+Timeframe:  1H
+Candles:    5000
+Mode:       all
+Fee:        0.1%
+Grid size:  9 × 8 = 72 combos
+============================================================
+
+[data_fetcher] Loaded 5001 candles from cache
+Data range: 2025-09-18T11:00:00+00:00 → 2026-04-14T19:00:00+00:00
+Total candles: 5001
+
+Running backtests...
+
+  [10/72] ATR=8 Mult=2.0
+  [20/72] ATR=9 Mult=3.0
+  [30/72] ATR=10 Mult=4.0
+  [40/72] ATR=11 Mult=5.0
+  [50/72] ATR=14 Mult=2.0
+  [60/72] ATR=16 Mult=3.0
+  [70/72] ATR=20 Mult=4.0
+
+  [72/72] Complete!
+
+============================================================
+TOP 10 PARAMETER COMBINATIONS
+============================================================
+Rank  ATR   Mult   Mode         Return%    WinRate   PF     MaxDD%   Trades  Sharpe 
+--------------------------------------------------------------------------------
+1     7     5.0    long+short   31.44      44.9      1.54   25.79    49      0.136  
+2     8     5.0    long+short   30.58      44.9      1.53   25.9     49      0.134  
+3     7     4.5    long+short   18.43      40.7      1.3    28.65    59      0.086  
+4     10    4.5    long+short   15.41      42.1      1.27   27.64    57      0.077  
+5     8     4.5    long+short   11.39      40.7      1.21   30.24    59      0.062  
+6     7     4.0    long+short   9.41       40.8      1.16   28.43    71      0.051  
+7     9     4.5    long+short   9.32       39.7      1.19   29.88    58      0.055  
+8     10    4.0    long+short   9.19       40.8      1.16   34.41    71      0.05   
+9     12    4.5    long+short   9.14       41.7      1.19   27.68    60      0.054  
+10    9     5.0    long+short   8.24       40.0      1.19   25.9     50      0.055  
+
+============================================================
+WORST 5 (avoid these)
+============================================================
+  ATR=10 Mult=3.0 Mode=long+short Return=-38.44% DD=46.0%
+  ATR=7 Mult=2.5 Mode=long+short Return=-38.45% DD=51.51%
+  ATR=12 Mult=3.0 Mode=long+short Return=-40.94% DD=45.65%
+  ATR=11 Mult=3.0 Mode=long+short Return=-40.99% DD=45.62%
+  ATR=8 Mult=3.0 Mode=long+short Return=-43.75% DD=50.78%
+
+Full results saved: /home/ubuntu/mission-control/supertrend-engine/results/optimization_BTC_1H_1776722409.json
+Agent config saved: /home/ubuntu/.openclaw/workspace/directives/supertrend_config_BTC_1H.json
+Signal receiver config: /home/ubuntu/mission-control/signal-receiver/data/optimal_params.json
+
+============================================================
+SuperTrend Grid Optimizer
+============================================================
+Symbol:     BTC/USD
+Timeframe:  4H
+Candles:    5000
+Mode:       all
+Fee:        0.1%
+Grid size:  9 × 8 = 72 combos
+============================================================
+
+[data_fetcher] Loaded 5001 candles from cache
+Data range: 2024-01-02T08:00:00+00:00 → 2026-04-14T16:00:00+00:00
+Total candles: 5001
+
+Running backtests...
+
+  [10/72] ATR=8 Mult=2.0
+  [20/72] ATR=9 Mult=3.0
+  [30/72] ATR=10 Mult=4.0
+  [40/72] ATR=11 Mult=5.0
+  [50/72] ATR=14 Mult=2.0
+  [60/72] ATR=16 Mult=3.0
+  [70/72] ATR=20 Mult=4.0
+
+  [72/72] Complete!
+
+============================================================
+TOP 10 PARAMETER COMBINATIONS
+============================================================
+Rank  ATR   Mult   Mode         Return%    WinRate   PF     MaxDD%   Trades  Sharpe 
+--------------------------------------------------------------------------------
+1     16    5.0    long-only    49.35      40.0      1.79   29.65    25      0.185  
+2     14    2.5    long-only    48.91      50.0      1.42   31.32    74      0.12   
+3     14    2.0    long-only    48.12      37.5      1.34   37.78    104     0.091  
+4     20    2.5    long-only    47.71      50.0      1.41   36.53    76      0.117  
+5     8     4.5    long-only    47.21      38.7      1.71   26.72    31      0.161  
+6     16    2.5    long-only    46.51      50.0      1.4    35.56    74      0.116  
+7     16    3.0    long-only    46.33      50.8      1.51   28.58    59      0.119  
+8     20    5.0    long-only    43.92      38.5      1.67   26.3     26      0.168  
+9     20    3.0    long-only    41.48      49.2      1.47   32.51    59      0.106  
+10    10    4.5    long-only    39.49      35.5      1.63   26.01    31      0.144  
+
+============================================================
+WORST 5 (avoid these)
+============================================================
+  ATR=10 Mult=4.0 Mode=long+short Return=-60.29% DD=73.53%
+  ATR=9 Mult=1.5 Mode=long+short Return=-60.48% DD=72.18%
+  ATR=9 Mult=4.0 Mode=long+short Return=-64.38% DD=74.24%
+  ATR=8 Mult=1.5 Mode=long+short Return=-65.88% DD=75.86%
+  ATR=7 Mult=1.5 Mode=long+short Return=-67.53% DD=75.56%
+
+Full results saved: /home/ubuntu/mission-control/supertrend-engine/results/optimization_BTC_4H_1776722412.json
+Agent config saved: /home/ubuntu/.openclaw/workspace/directives/supertrend_config_BTC_4H.json
+Signal receiver config: /home/ubuntu/mission-control/signal-receiver/data/optimal_params.json
+[2026-04-20T22:00:12Z] Daily Optimization Complete
+
+[2026-04-21T22:00:01Z] Daily SuperTrend Optimization Starting
+
+============================================================
+SuperTrend Grid Optimizer
+============================================================
+Symbol:     BTC/USD
+Timeframe:  1H
+Candles:    5000
+Mode:       all
+Fee:        0.1%
+Grid size:  9 × 8 = 72 combos
+============================================================
+
+[data_fetcher] Loaded 5001 candles from cache
+Data range: 2025-09-18T11:00:00+00:00 → 2026-04-14T19:00:00+00:00
+Total candles: 5001
+
+Running backtests...
+
+  [10/72] ATR=8 Mult=2.0
+  [20/72] ATR=9 Mult=3.0
+  [30/72] ATR=10 Mult=4.0
+  [40/72] ATR=11 Mult=5.0
+  [50/72] ATR=14 Mult=2.0
+  [60/72] ATR=16 Mult=3.0
+  [70/72] ATR=20 Mult=4.0
+
+  [72/72] Complete!
+
+============================================================
+TOP 10 PARAMETER COMBINATIONS
+============================================================
+Rank  ATR   Mult   Mode         Return%    WinRate   PF     MaxDD%   Trades  Sharpe 
+--------------------------------------------------------------------------------
+1     7     5.0    long+short   31.44      44.9      1.54   25.79    49      0.136  
+2     8     5.0    long+short   30.58      44.9      1.53   25.9     49      0.134  
+3     7     4.5    long+short   18.43      40.7      1.3    28.65    59      0.086  
+4     10    4.5    long+short   15.41      42.1      1.27   27.64    57      0.077  
+5     8     4.5    long+short   11.39      40.7      1.21   30.24    59      0.062  
+6     7     4.0    long+short   9.41       40.8      1.16   28.43    71      0.051  
+7     9     4.5    long+short   9.32       39.7      1.19   29.88    58      0.055  
+8     10    4.0    long+short   9.19       40.8      1.16   34.41    71      0.05   
+9     12    4.5    long+short   9.14       41.7      1.19   27.68    60      0.054  
+10    9     5.0    long+short   8.24       40.0      1.19   25.9     50      0.055  
+
+============================================================
+WORST 5 (avoid these)
+============================================================
+  ATR=10 Mult=3.0 Mode=long+short Return=-38.44% DD=46.0%
+  ATR=7 Mult=2.5 Mode=long+short Return=-38.45% DD=51.51%
+  ATR=12 Mult=3.0 Mode=long+short Return=-40.94% DD=45.65%
+  ATR=11 Mult=3.0 Mode=long+short Return=-40.99% DD=45.62%
+  ATR=8 Mult=3.0 Mode=long+short Return=-43.75% DD=50.78%
+
+Full results saved: /home/ubuntu/mission-control/supertrend-engine/results/optimization_BTC_1H_1776808812.json
+Agent config saved: /home/ubuntu/.openclaw/workspace/directives/supertrend_config_BTC_1H.json
+Signal receiver config: /home/ubuntu/mission-control/signal-receiver/data/optimal_params.json
+
+============================================================
+SuperTrend Grid Optimizer
+============================================================
+Symbol:     BTC/USD
+Timeframe:  4H
+Candles:    5000
+Mode:       all
+Fee:        0.1%
+Grid size:  9 × 8 = 72 combos
+============================================================
+
+[data_fetcher] Loaded 5001 candles from cache
+Data range: 2024-01-02T08:00:00+00:00 → 2026-04-14T16:00:00+00:00
+Total candles: 5001
+
+Running backtests...
+
+  [10/72] ATR=8 Mult=2.0
+  [20/72] ATR=9 Mult=3.0
+  [30/72] ATR=10 Mult=4.0
+  [40/72] ATR=11 Mult=5.0
+  [50/72] ATR=14 Mult=2.0
+  [60/72] ATR=16 Mult=3.0
+  [70/72] ATR=20 Mult=4.0
+
+  [72/72] Complete!
+
+============================================================
+TOP 10 PARAMETER COMBINATIONS
+============================================================
+Rank  ATR   Mult   Mode         Return%    WinRate   PF     MaxDD%   Trades  Sharpe 
+--------------------------------------------------------------------------------
+1     16    5.0    long-only    49.35      40.0      1.79   29.65    25      0.185  
+2     14    2.5    long-only    48.91      50.0      1.42   31.32    74      0.12   
+3     14    2.0    long-only    48.12      37.5      1.34   37.78    104     0.091  
+4     20    2.5    long-only    47.71      50.0      1.41   36.53    76      0.117  
+5     8     4.5    long-only    47.21      38.7      1.71   26.72    31      0.161  
+6     16    2.5    long-only    46.51      50.0      1.4    35.56    74      0.116  
+7     16    3.0    long-only    46.33      50.8      1.51   28.58    59      0.119  
+8     20    5.0    long-only    43.92      38.5      1.67   26.3     26      0.168  
+9     20    3.0    long-only    41.48      49.2      1.47   32.51    59      0.106  
+10    10    4.5    long-only    39.49      35.5      1.63   26.01    31      0.144  
+
+============================================================
+WORST 5 (avoid these)
+============================================================
+  ATR=10 Mult=4.0 Mode=long+short Return=-60.29% DD=73.53%
+  ATR=9 Mult=1.5 Mode=long+short Return=-60.48% DD=72.18%
+  ATR=9 Mult=4.0 Mode=long+short Return=-64.38% DD=74.24%
+  ATR=8 Mult=1.5 Mode=long+short Return=-65.88% DD=75.86%
+  ATR=7 Mult=1.5 Mode=long+short Return=-67.53% DD=75.56%
+
+Full results saved: /home/ubuntu/mission-control/supertrend-engine/results/optimization_BTC_4H_1776808815.json
+Agent config saved: /home/ubuntu/.openclaw/workspace/directives/supertrend_config_BTC_4H.json
+Signal receiver config: /home/ubuntu/mission-control/signal-receiver/data/optimal_params.json
+[2026-04-21T22:00:15Z] Daily Optimization Complete
+
+[2026-04-22T22:00:01Z] Daily SuperTrend Optimization Starting
+
+============================================================
+SuperTrend Grid Optimizer
+============================================================
+Symbol:     BTC/USD
+Timeframe:  1H
+Candles:    5000
+Mode:       all
+Fee:        0.1%
+Grid size:  9 × 8 = 72 combos
+============================================================
+
+[data_fetcher] Loaded 5001 candles from cache
+Data range: 2025-09-18T11:00:00+00:00 → 2026-04-14T19:00:00+00:00
+Total candles: 5001
+
+Running backtests...
+
+  [10/72] ATR=8 Mult=2.0
+  [20/72] ATR=9 Mult=3.0
+  [30/72] ATR=10 Mult=4.0
+  [40/72] ATR=11 Mult=5.0
+  [50/72] ATR=14 Mult=2.0
+  [60/72] ATR=16 Mult=3.0
+  [70/72] ATR=20 Mult=4.0
+
+  [72/72] Complete!
+
+============================================================
+TOP 10 PARAMETER COMBINATIONS
+============================================================
+Rank  ATR   Mult   Mode         Return%    WinRate   PF     MaxDD%   Trades  Sharpe 
+--------------------------------------------------------------------------------
+1     7     5.0    long+short   31.44      44.9      1.54   25.79    49      0.136  
+2     8     5.0    long+short   30.58      44.9      1.53   25.9     49      0.134  
+3     7     4.5    long+short   18.43      40.7      1.3    28.65    59      0.086  
+4     10    4.5    long+short   15.41      42.1      1.27   27.64    57      0.077  
+5     8     4.5    long+short   11.39      40.7      1.21   30.24    59      0.062  
+6     7     4.0    long+short   9.41       40.8      1.16   28.43    71      0.051  
+7     9     4.5    long+short   9.32       39.7      1.19   29.88    58      0.055  
+8     10    4.0    long+short   9.19       40.8      1.16   34.41    71      0.05   
+9     12    4.5    long+short   9.14       41.7      1.19   27.68    60      0.054  
+10    9     5.0    long+short   8.24       40.0      1.19   25.9     50      0.055  
+
+============================================================
+WORST 5 (avoid these)
+============================================================
+  ATR=10 Mult=3.0 Mode=long+short Return=-38.44% DD=46.0%
+  ATR=7 Mult=2.5 Mode=long+short Return=-38.45% DD=51.51%
+  ATR=12 Mult=3.0 Mode=long+short Return=-40.94% DD=45.65%
+  ATR=11 Mult=3.0 Mode=long+short Return=-40.99% DD=45.62%
+  ATR=8 Mult=3.0 Mode=long+short Return=-43.75% DD=50.78%
+
+Full results saved: /home/ubuntu/mission-control/supertrend-engine/results/optimization_BTC_1H_1776895211.json
+Agent config saved: /home/ubuntu/.openclaw/workspace/directives/supertrend_config_BTC_1H.json
+Signal receiver config: /home/ubuntu/mission-control/signal-receiver/data/optimal_params.json
+
+============================================================
+SuperTrend Grid Optimizer
+============================================================
+Symbol:     BTC/USD
+Timeframe:  4H
+Candles:    5000
+Mode:       all
+Fee:        0.1%
+Grid size:  9 × 8 = 72 combos
+============================================================
+
+[data_fetcher] Loaded 5001 candles from cache
+Data range: 2024-01-02T08:00:00+00:00 → 2026-04-14T16:00:00+00:00
+Total candles: 5001
+
+Running backtests...
+
+  [10/72] ATR=8 Mult=2.0
+  [20/72] ATR=9 Mult=3.0
+  [30/72] ATR=10 Mult=4.0
+  [40/72] ATR=11 Mult=5.0
+  [50/72] ATR=14 Mult=2.0
+  [60/72] ATR=16 Mult=3.0
+  [70/72] ATR=20 Mult=4.0
+
+  [72/72] Complete!
+
+============================================================
+TOP 10 PARAMETER COMBINATIONS
+============================================================
+Rank  ATR   Mult   Mode         Return%    WinRate   PF     MaxDD%   Trades  Sharpe 
+--------------------------------------------------------------------------------
+1     16    5.0    long-only    49.35      40.0      1.79   29.65    25      0.185  
+2     14    2.5    long-only    48.91      50.0      1.42   31.32    74      0.12   
+3     14    2.0    long-only    48.12      37.5      1.34   37.78    104     0.091  
+4     20    2.5    long-only    47.71      50.0      1.41   36.53    76      0.117  
+5     8     4.5    long-only    47.21      38.7      1.71   26.72    31      0.161  
+6     16    2.5    long-only    46.51      50.0      1.4    35.56    74      0.116  
+7     16    3.0    long-only    46.33      50.8      1.51   28.58    59      0.119  
+8     20    5.0    long-only    43.92      38.5      1.67   26.3     26      0.168  
+9     20    3.0    long-only    41.48      49.2      1.47   32.51    59      0.106  
+10    10    4.5    long-only    39.49      35.5      1.63   26.01    31      0.144  
+
+============================================================
+WORST 5 (avoid these)
+============================================================
+  ATR=10 Mult=4.0 Mode=long+short Return=-60.29% DD=73.53%
+  ATR=9 Mult=1.5 Mode=long+short Return=-60.48% DD=72.18%
+  ATR=9 Mult=4.0 Mode=long+short Return=-64.38% DD=74.24%
+  ATR=8 Mult=1.5 Mode=long+short Return=-65.88% DD=75.86%
+  ATR=7 Mult=1.5 Mode=long+short Return=-67.53% DD=75.56%
+
+Full results saved: /home/ubuntu/mission-control/supertrend-engine/results/optimization_BTC_4H_1776895214.json
+Agent config saved: /home/ubuntu/.openclaw/workspace/directives/supertrend_config_BTC_4H.json
+Signal receiver config: /home/ubuntu/mission-control/signal-receiver/data/optimal_params.json
+[2026-04-22T22:00:14Z] Daily Optimization Complete
+
+[2026-04-23T22:00:01Z] Daily SuperTrend Optimization Starting
+
+============================================================
+SuperTrend Grid Optimizer
+============================================================
+Symbol:     BTC/USD
+Timeframe:  1H
+Candles:    5000
+Mode:       all
+Fee:        0.1%
+Grid size:  9 × 8 = 72 combos
+============================================================
+
+[data_fetcher] Loaded 5001 candles from cache
+Data range: 2025-09-18T11:00:00+00:00 → 2026-04-14T19:00:00+00:00
+Total candles: 5001
+
+Running backtests...
+
+  [10/72] ATR=8 Mult=2.0
+  [20/72] ATR=9 Mult=3.0
+  [30/72] ATR=10 Mult=4.0
+  [40/72] ATR=11 Mult=5.0
+  [50/72] ATR=14 Mult=2.0
+  [60/72] ATR=16 Mult=3.0
+  [70/72] ATR=20 Mult=4.0
+
+  [72/72] Complete!
+
+============================================================
+TOP 10 PARAMETER COMBINATIONS
+============================================================
+Rank  ATR   Mult   Mode         Return%    WinRate   PF     MaxDD%   Trades  Sharpe 
+--------------------------------------------------------------------------------
+1     7     5.0    long+short   31.44      44.9      1.54   25.79    49      0.136  
+2     8     5.0    long+short   30.58      44.9      1.53   25.9     49      0.134  
+3     7     4.5    long+short   18.43      40.7      1.3    28.65    59      0.086  
+4     10    4.5    long+short   15.41      42.1      1.27   27.64    57      0.077  
+5     8     4.5    long+short   11.39      40.7      1.21   30.24    59      0.062  
+6     7     4.0    long+short   9.41       40.8      1.16   28.43    71      0.051  
+7     9     4.5    long+short   9.32       39.7      1.19   29.88    58      0.055  
+8     10    4.0    long+short   9.19       40.8      1.16   34.41    71      0.05   
+9     12    4.5    long+short   9.14       41.7      1.19   27.68    60      0.054  
+10    9     5.0    long+short   8.24       40.0      1.19   25.9     50      0.055  
+
+============================================================
+WORST 5 (avoid these)
+============================================================
+  ATR=10 Mult=3.0 Mode=long+short Return=-38.44% DD=46.0%
+  ATR=7 Mult=2.5 Mode=long+short Return=-38.45% DD=51.51%
+  ATR=12 Mult=3.0 Mode=long+short Return=-40.94% DD=45.65%
+  ATR=11 Mult=3.0 Mode=long+short Return=-40.99% DD=45.62%
+  ATR=8 Mult=3.0 Mode=long+short Return=-43.75% DD=50.78%
+
+Full results saved: /home/ubuntu/mission-control/supertrend-engine/results/optimization_BTC_1H_1776981612.json
+Agent config saved: /home/ubuntu/.openclaw/workspace/directives/supertrend_config_BTC_1H.json
+Signal receiver config: /home/ubuntu/mission-control/signal-receiver/data/optimal_params.json
+
+============================================================
+SuperTrend Grid Optimizer
+============================================================
+Symbol:     BTC/USD
+Timeframe:  4H
+Candles:    5000
+Mode:       all
+Fee:        0.1%
+Grid size:  9 × 8 = 72 combos
+============================================================
+
+[data_fetcher] Loaded 5001 candles from cache
+Data range: 2024-01-02T08:00:00+00:00 → 2026-04-14T16:00:00+00:00
+Total candles: 5001
+
+Running backtests...
+
+  [10/72] ATR=8 Mult=2.0
+  [20/72] ATR=9 Mult=3.0
+  [30/72] ATR=10 Mult=4.0
+  [40/72] ATR=11 Mult=5.0
+  [50/72] ATR=14 Mult=2.0
+  [60/72] ATR=16 Mult=3.0
+  [70/72] ATR=20 Mult=4.0
+
+  [72/72] Complete!
+
+============================================================
+TOP 10 PARAMETER COMBINATIONS
+============================================================
+Rank  ATR   Mult   Mode         Return%    WinRate   PF     MaxDD%   Trades  Sharpe 
+--------------------------------------------------------------------------------
+1     16    5.0    long-only    49.35      40.0      1.79   29.65    25      0.185  
+2     14    2.5    long-only    48.91      50.0      1.42   31.32    74      0.12   
+3     14    2.0    long-only    48.12      37.5      1.34   37.78    104     0.091  
+4     20    2.5    long-only    47.71      50.0      1.41   36.53    76      0.117  
+5     8     4.5    long-only    47.21      38.7      1.71   26.72    31      0.161  
+6     16    2.5    long-only    46.51      50.0      1.4    35.56    74      0.116  
+7     16    3.0    long-only    46.33      50.8      1.51   28.58    59      0.119  
+8     20    5.0    long-only    43.92      38.5      1.67   26.3     26      0.168  
+9     20    3.0    long-only    41.48      49.2      1.47   32.51    59      0.106  
+10    10    4.5    long-only    39.49      35.5      1.63   26.01    31      0.144  
+
+============================================================
+WORST 5 (avoid these)
+============================================================
+  ATR=10 Mult=4.0 Mode=long+short Return=-60.29% DD=73.53%
+  ATR=9 Mult=1.5 Mode=long+short Return=-60.48% DD=72.18%
+  ATR=9 Mult=4.0 Mode=long+short Return=-64.38% DD=74.24%
+  ATR=8 Mult=1.5 Mode=long+short Return=-65.88% DD=75.86%
+  ATR=7 Mult=1.5 Mode=long+short Return=-67.53% DD=75.56%
+
+Full results saved: /home/ubuntu/mission-control/supertrend-engine/results/optimization_BTC_4H_1776981615.json
+Agent config saved: /home/ubuntu/.openclaw/workspace/directives/supertrend_config_BTC_4H.json
+Signal receiver config: /home/ubuntu/mission-control/signal-receiver/data/optimal_params.json
+[2026-04-23T22:00:15Z] Daily Optimization Complete

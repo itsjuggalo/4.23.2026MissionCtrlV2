@@ -1,0 +1,12 @@
+{
+    "name": "Template",
+    "test_product_url": "",
+    "add_to_cart_selector": "",
+    "cart_url": "",
+    "coupon_input_selector": "",
+    "apply_button_selector": "",
+    "success_indicators": ["applied", "discount", "promo code accepted", "coupon applied", "savings"],
+    "failure_indicators": ["invalid", "expired", "not eligible", "already used", "does not exist", "not valid"],
+    "targeted_indicators": ["first order", "new customer", "one per account", "new users", "first purchase"],
+    "notes": ""
+}

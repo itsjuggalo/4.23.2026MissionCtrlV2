@@ -1,0 +1,21 @@
+export const mockDashboardStats = {
+  systemStatus: 'operational' as const,
+  activeAgents: 3,
+  idleAgents: 1,
+  pausedAgents: 1,
+  activeSimTrades: 2,
+  pendingDecisions: 2,
+  totalPortfolioValue: 85000,
+  dailyPnL: -320,
+  dailyPnLPct: -0.38,
+  weeklyPnL: 1240,
+  weeklyPnLPct: 1.48,
+  openRiskExposure: 11.6,
+  riskStatus: 'warning' as const,
+  marketSummary: {
+    btc: { price: 67420.50, change24h: 2.34 },
+    eth: { price: 3421.80, change24h: 1.87 },
+    sol: { price: 178.90, change24h: 3.12 },
+    sp500: { price: 5204.10, change24h: 0.21 },
+  },
+};

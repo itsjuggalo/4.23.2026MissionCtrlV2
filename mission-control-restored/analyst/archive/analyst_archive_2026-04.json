@@ -1,0 +1,1635 @@
+[
+  {
+    "id": "93bc2161-a691-496b-9a5b-99863d5d6e7b",
+    "signal_id": "30625fd6-7bb9-4321-bcbe-38cb4209ffd8",
+    "symbol": "ALAB",
+    "direction": "PUT",
+    "timestamp": "2026-03-24T23:06:40.585038+00:00",
+    "entry": 6.2,
+    "stop_loss": 4.03,
+    "targets": [
+      7.13,
+      8.06,
+      9.3
+    ],
+    "source_score": 85,
+    "indicators": {
+      "rsi": {
+        "value": 60.53,
+        "signal": "neutral (60.53)",
+        "score": 0
+      },
+      "macd": {
+        "macd_line": -0.239478,
+        "signal_line": -0.401554,
+        "histogram": 0.162076,
+        "signal": "bullish crossover",
+        "score": -1
+      },
+      "moving_averages": {
+        "price": 121.74,
+        "ema20": 122.1888,
+        "ema50": 122.4553,
+        "sma200": null,
+        "structure": "Price bearish \u2014 above 0/2 MAs",
+        "score": 1
+      },
+      "volume": {
+        "current": 423996.0,
+        "average": 469124.1,
+        "ratio": 0.9,
+        "signal": "0.9x average \u2014 normal",
+        "score": 0
+      },
+      "support_resistance": {
+        "nearest_level": 107.080002,
+        "signal": "Not near key level (nearest: 107.0800, 1627.1% away)",
+        "score": 0
+      },
+      "risk_reward": {
+        "ratio": 0.43,
+        "signal": "0.43:1 \u274c below 1:1",
+        "score": -1
+      }
+    },
+    "total_score": -1,
+    "verdict": "REJECT",
+    "summary": "ALAB PUT setup is technicals CONTRADICT the signal. Avoid. RSI: neutral (60.53). MACD: bullish crossover. MAs: Price bearish \u2014 above 0/2 MAs. Volume: 0.9x average \u2014 normal. S/R: Not near key level (nearest: 107.0800, 1627.1% away). R:R: 0.43:1 \u274c below 1:1."
+  },
+  {
+    "id": "5c9908c7-c5a3-48ab-8311-3cbb0ab1ec94",
+    "signal_id": "1fa7a709-3124-4575-ac48-ccd405ea91bd",
+    "symbol": "EL",
+    "direction": "CALL",
+    "timestamp": "2026-03-24T23:06:43.170428+00:00",
+    "entry": 5.55,
+    "stop_loss": 3.61,
+    "targets": [
+      6.38,
+      7.22,
+      8.33
+    ],
+    "source_score": 85,
+    "indicators": {
+      "rsi": {
+        "value": 26.19,
+        "signal": "oversold (26.19)",
+        "score": 1
+      },
+      "macd": {
+        "macd_line": -4.413432,
+        "signal_line": -2.953401,
+        "histogram": -1.460031,
+        "signal": "bearish crossover",
+        "score": -1
+      },
+      "moving_averages": {
+        "price": 71.47,
+        "ema20": 79.0594,
+        "ema50": 83.9165,
+        "sma200": null,
+        "structure": "Price bearish \u2014 above 0/2 MAs",
+        "score": -1
+      },
+      "volume": {
+        "current": 2704697.0,
+        "average": 1408378.65,
+        "ratio": 1.92,
+        "signal": "1.92x average \u2014 strong conviction",
+        "score": 1
+      },
+      "support_resistance": {
+        "nearest_level": 84.110001,
+        "signal": "Not near key level (nearest: 84.1100, 1415.5% away)",
+        "score": 0
+      },
+      "risk_reward": {
+        "ratio": 0.43,
+        "signal": "0.43:1 \u274c below 1:1",
+        "score": -1
+      }
+    },
+    "total_score": -1,
+    "verdict": "REJECT",
+    "summary": "EL CALL setup is technicals CONTRADICT the signal. Avoid. RSI: oversold (26.19). MACD: bearish crossover. MAs: Price bearish \u2014 above 0/2 MAs. Volume: 1.92x average \u2014 strong conviction. S/R: Not near key level (nearest: 84.1100, 1415.5% away). R:R: 0.43:1 \u274c below 1:1."
+  },
+  {
+    "id": "03b2a0ec-0120-4065-ac32-779d84c9ccdf",
+    "signal_id": "4a7b783a-cf9d-4bfd-a116-74247f9b73a6",
+    "symbol": "AMZN",
+    "direction": "CALL",
+    "timestamp": "2026-03-24T23:06:45.523613+00:00",
+    "entry": 6.8,
+    "stop_loss": 4.42,
+    "targets": [
+      7.82,
+      8.84,
+      10.2
+    ],
+    "source_score": 85,
+    "indicators": {
+      "rsi": {
+        "value": 56.67,
+        "signal": "neutral (56.67)",
+        "score": 0
+      },
+      "macd": {
+        "macd_line": -0.454292,
+        "signal_line": -0.302785,
+        "histogram": -0.151507,
+        "signal": "bearish crossover",
+        "score": -1
+      },
+      "moving_averages": {
+        "price": 207.28,
+        "ema20": 208.4623,
+        "ema50": 209.4143,
+        "sma200": null,
+        "structure": "Price bearish \u2014 above 0/2 MAs",
+        "score": -1
+      },
+      "volume": {
+        "current": 3820503.0,
+        "average": 4602562.0,
+        "ratio": 0.83,
+        "signal": "0.83x average \u2014 normal",
+        "score": 0
+      },
+      "support_resistance": {
+        "nearest_level": 196.0,
+        "signal": "Not near key level (nearest: 196.0000, 2782.4% away)",
+        "score": 0
+      },
+      "risk_reward": {
+        "ratio": 0.43,
+        "signal": "0.43:1 \u274c below 1:1",
+        "score": -1
+      }
+    },
+    "total_score": -3,
+    "verdict": "REJECT",
+    "summary": "AMZN CALL setup is technicals CONTRADICT the signal. Avoid. RSI: neutral (56.67). MACD: bearish crossover. MAs: Price bearish \u2014 above 0/2 MAs. Volume: 0.83x average \u2014 normal. S/R: Not near key level (nearest: 196.0000, 2782.4% away). R:R: 0.43:1 \u274c below 1:1."
+  },
+  {
+    "id": "4646c36a-39e8-4822-a438-134538bda8f6",
+    "signal_id": "101a814e-6440-4533-b7f5-6657b678a161",
+    "symbol": "MSFT",
+    "direction": "BUY",
+    "timestamp": "2026-03-24T23:06:47.877545+00:00",
+    "entry": 401.17,
+    "stop_loss": 369.1,
+    "targets": [
+      409.19,
+      421.23,
+      433.26
+    ],
+    "source_score": 85,
+    "indicators": {
+      "rsi": {
+        "value": 31.55,
+        "signal": "neutral (31.55)",
+        "score": 0
+      },
+      "macd": {
+        "macd_line": -4.570062,
+        "signal_line": -4.152932,
+        "histogram": -0.417131,
+        "signal": "bearish crossover",
+        "score": -1
+      },
+      "moving_averages": {
+        "price": 372.75,
+        "ema20": 379.4381,
+        "ema50": 386.8164,
+        "sma200": null,
+        "structure": "Price bearish \u2014 above 0/2 MAs",
+        "score": -1
+      },
+      "volume": {
+        "current": 3489541.0,
+        "average": 3772957.35,
+        "ratio": 0.92,
+        "signal": "0.92x average \u2014 normal",
+        "score": 0
+      },
+      "support_resistance": {
+        "nearest_level": 404.429993,
+        "signal": "Entry near resistance at 404.4300 (0.8%)",
+        "score": 0
+      },
+      "risk_reward": {
+        "ratio": 0.25,
+        "signal": "0.25:1 \u274c below 1:1",
+        "score": -1
+      }
+    },
+    "total_score": -3,
+    "verdict": "REJECT",
+    "summary": "MSFT BUY setup is technicals CONTRADICT the signal. Avoid. RSI: neutral (31.55). MACD: bearish crossover. MAs: Price bearish \u2014 above 0/2 MAs. Volume: 0.92x average \u2014 normal. S/R: Entry near resistance at 404.4300 (0.8%). R:R: 0.25:1 \u274c below 1:1."
+  },
+  {
+    "id": "7ba4d6b7-e809-4b3f-85e8-ef65db2d862d",
+    "signal_id": "97e21251-17a9-456a-84b8-2594fcb375bc",
+    "symbol": "TLT",
+    "direction": "BUY",
+    "timestamp": "2026-03-24T23:06:50.541717+00:00",
+    "entry": 89.36,
+    "stop_loss": 82.21,
+    "targets": [
+      91.15,
+      93.83,
+      96.51
+    ],
+    "source_score": 85,
+    "indicators": {
+      "rsi": {
+        "value": 52.25,
+        "signal": "neutral (52.25)",
+        "score": 0
+      },
+      "macd": {
+        "macd_line": -0.230471,
+        "signal_line": -0.245863,
+        "histogram": 0.015392,
+        "signal": "bullish crossover",
+        "score": 1
+      },
+      "moving_averages": {
+        "price": 86.015,
+        "ema20": 86.2582,
+        "ema50": 86.707,
+        "sma200": null,
+        "structure": "Price bearish \u2014 above 0/2 MAs",
+        "score": -1
+      },
+      "volume": {
+        "current": 4609643.0,
+        "average": 8322889.9,
+        "ratio": 0.55,
+        "signal": "0.55x average \u2014 low volume",
+        "score": -1
+      },
+      "support_resistance": {
+        "nearest_level": 89.32,
+        "signal": "Entry near support at 89.3200 (0.0%)",
+        "score": 1
+      },
+      "risk_reward": {
+        "ratio": 0.25,
+        "signal": "0.25:1 \u274c below 1:1",
+        "score": -1
+      }
+    },
+    "total_score": -1,
+    "verdict": "REJECT",
+    "summary": "TLT BUY setup is technicals CONTRADICT the signal. Avoid. RSI: neutral (52.25). MACD: bullish crossover. MAs: Price bearish \u2014 above 0/2 MAs. Volume: 0.55x average \u2014 low volume. S/R: Entry near support at 89.3200 (0.0%). R:R: 0.25:1 \u274c below 1:1."
+  },
+  {
+    "id": "c599bc6a-7a67-4495-80a5-b61c5f86ee17",
+    "signal_id": "5553e627-094f-4f3e-90b1-628b1f667049",
+    "symbol": "INTC",
+    "direction": "BUY",
+    "timestamp": "2026-03-24T23:06:52.928457+00:00",
+    "entry": 46.96,
+    "stop_loss": 43.2,
+    "targets": [
+      47.9,
+      49.31,
+      50.72
+    ],
+    "source_score": 85,
+    "indicators": {
+      "rsi": {
+        "value": 51.02,
+        "signal": "neutral (51.02)",
+        "score": 0
+      },
+      "macd": {
+        "macd_line": -0.336713,
+        "signal_line": -0.366599,
+        "histogram": 0.029887,
+        "signal": "bullish crossover",
+        "score": 1
+      },
+      "moving_averages": {
+        "price": 44.07,
+        "ema20": 44.2379,
+        "ema50": 44.8041,
+        "sma200": null,
+        "structure": "Price bearish \u2014 above 0/2 MAs",
+        "score": -1
+      },
+      "volume": {
+        "current": 4607545.0,
+        "average": 9348681.0,
+        "ratio": 0.49,
+        "signal": "0.49x average \u2014 low volume",
+        "score": -1
+      },
+      "support_resistance": {
+        "nearest_level": 46.970001,
+        "signal": "Entry near resistance at 46.9700 (0.0%)",
+        "score": 0
+      },
+      "risk_reward": {
+        "ratio": 0.25,
+        "signal": "0.25:1 \u274c below 1:1",
+        "score": -1
+      }
+    },
+    "total_score": -2,
+    "verdict": "REJECT",
+    "summary": "INTC BUY setup is technicals CONTRADICT the signal. Avoid. RSI: neutral (51.02). MACD: bullish crossover. MAs: Price bearish \u2014 above 0/2 MAs. Volume: 0.49x average \u2014 low volume. S/R: Entry near resistance at 46.9700 (0.0%). R:R: 0.25:1 \u274c below 1:1."
+  },
+  {
+    "id": "80efaf88-ad8d-468e-8b7d-8047f5de25e6",
+    "signal_id": "d55eff89-91c4-4f08-8566-ce0ce42f0bba",
+    "symbol": "PLTR",
+    "direction": "BUY",
+    "timestamp": "2026-03-24T23:06:55.364746+00:00",
+    "entry": 155.19,
+    "stop_loss": 142.8,
+    "targets": [
+      158.29,
+      162.95,
+      167.61
+    ],
+    "source_score": 85,
+    "indicators": {
+      "rsi": {
+        "value": 56.9,
+        "signal": "neutral (56.9)",
+        "score": 0
+      },
+      "macd": {
+        "macd_line": 0.300045,
+        "signal_line": 0.581422,
+        "histogram": -0.281376,
+        "signal": "bearish crossover",
+        "score": -1
+      },
+      "moving_averages": {
+        "price": 154.78,
+        "ema20": 155.2575,
+        "ema50": 154.5311,
+        "sma200": null,
+        "structure": "Price mixed \u2014 above 1/2 MAs",
+        "score": 0
+      },
+      "volume": {
+        "current": 3812428.0,
+        "average": 6452563.3,
+        "ratio": 0.59,
+        "signal": "0.59x average \u2014 low volume",
+        "score": -1
+      },
+      "support_resistance": {
+        "nearest_level": 156.75,
+        "signal": "Entry near resistance at 156.7500 (1.0%)",
+        "score": 0
+      },
+      "risk_reward": {
+        "ratio": 0.25,
+        "signal": "0.25:1 \u274c below 1:1",
+        "score": -1
+      }
+    },
+    "total_score": -3,
+    "verdict": "REJECT",
+    "summary": "PLTR BUY setup is technicals CONTRADICT the signal. Avoid. RSI: neutral (56.9). MACD: bearish crossover. MAs: Price mixed \u2014 above 1/2 MAs. Volume: 0.59x average \u2014 low volume. S/R: Entry near resistance at 156.7500 (1.0%). R:R: 0.25:1 \u274c below 1:1."
+  },
+  {
+    "id": "ee331c44-f559-4174-b265-6233ceab6cb4",
+    "signal_id": "db328525-2001-4673-b99e-08c70ff502a2",
+    "symbol": "AMZN",
+    "direction": "BUY",
+    "timestamp": "2026-03-24T23:06:57.727837+00:00",
+    "entry": 209.74,
+    "stop_loss": 193.0,
+    "targets": [
+      213.93,
+      220.23,
+      226.52
+    ],
+    "source_score": 85,
+    "indicators": {
+      "rsi": {
+        "value": 56.67,
+        "signal": "neutral (56.67)",
+        "score": 0
+      },
+      "macd": {
+        "macd_line": -0.454292,
+        "signal_line": -0.302785,
+        "histogram": -0.151507,
+        "signal": "bearish crossover",
+        "score": -1
+      },
+      "moving_averages": {
+        "price": 207.28,
+        "ema20": 208.4623,
+        "ema50": 209.4143,
+        "sma200": null,
+        "structure": "Price bearish \u2014 above 0/2 MAs",
+        "score": -1
+      },
+      "volume": {
+        "current": 3820503.0,
+        "average": 4602562.0,
+        "ratio": 0.83,
+        "signal": "0.83x average \u2014 normal",
+        "score": 0
+      },
+      "support_resistance": {
+        "nearest_level": 211.169998,
+        "signal": "Entry near resistance at 211.1700 (0.7%)",
+        "score": 0
+      },
+      "risk_reward": {
+        "ratio": 0.25,
+        "signal": "0.25:1 \u274c below 1:1",
+        "score": -1
+      }
+    },
+    "total_score": -3,
+    "verdict": "REJECT",
+    "summary": "AMZN BUY setup is technicals CONTRADICT the signal. Avoid. RSI: neutral (56.67). MACD: bearish crossover. MAs: Price bearish \u2014 above 0/2 MAs. Volume: 0.83x average \u2014 normal. S/R: Entry near resistance at 211.1700 (0.7%). R:R: 0.25:1 \u274c below 1:1."
+  },
+  {
+    "id": "4a39b397-3a96-4853-b984-99b5475d7f0e",
+    "signal_id": "d994537a-c4eb-46ed-8b66-a14fe2493002",
+    "symbol": "GOOG",
+    "direction": "BUY",
+    "timestamp": "2026-03-24T23:07:00.380115+00:00",
+    "entry": 304.42,
+    "stop_loss": 280.1,
+    "targets": [
+      310.51,
+      319.64,
+      328.77
+    ],
+    "source_score": 85,
+    "indicators": {
+      "rsi": {
+        "value": 27.23,
+        "signal": "oversold (27.23)",
+        "score": 1
+      },
+      "macd": {
+        "macd_line": -3.555798,
+        "signal_line": -2.746887,
+        "histogram": -0.808911,
+        "signal": "bearish crossover",
+        "score": -1
+      },
+      "moving_averages": {
+        "price": 288.99,
+        "ema20": 295.8242,
+        "ema50": 299.811,
+        "sma200": null,
+        "structure": "Price bearish \u2014 above 0/2 MAs",
+        "score": -1
+      },
+      "volume": {
+        "current": 3380734.0,
+        "average": 2633636.35,
+        "ratio": 1.28,
+        "signal": "1.28x average \u2014 normal",
+        "score": 0
+      },
+      "support_resistance": {
+        "nearest_level": 306.703951,
+        "signal": "Entry near resistance at 306.7040 (0.8%)",
+        "score": 0
+      },
+      "risk_reward": {
+        "ratio": 0.25,
+        "signal": "0.25:1 \u274c below 1:1",
+        "score": -1
+      }
+    },
+    "total_score": -2,
+    "verdict": "REJECT",
+    "summary": "GOOG BUY setup is technicals CONTRADICT the signal. Avoid. RSI: oversold (27.23). MACD: bearish crossover. MAs: Price bearish \u2014 above 0/2 MAs. Volume: 1.28x average \u2014 normal. S/R: Entry near resistance at 306.7040 (0.8%). R:R: 0.25:1 \u274c below 1:1."
+  },
+  {
+    "id": "2ce2589d-4372-47c2-b6da-0df73de6d2b4",
+    "signal_id": "95a3ef5f-7533-49b7-8388-c6f0ded101a7",
+    "symbol": "APT",
+    "direction": "LONG",
+    "timestamp": "2026-03-24T23:08:06.841848+00:00",
+    "entry": 1.0918,
+    "stop_loss": null,
+    "targets": [],
+    "source_score": 80,
+    "indicators": {
+      "rsi": {
+        "value": 58.91,
+        "signal": "neutral (58.91)",
+        "score": 0
+      },
+      "macd": {
+        "macd_line": 0.016981,
+        "signal_line": 0.015383,
+        "histogram": 0.001598,
+        "signal": "bullish crossover",
+        "score": 1
+      },
+      "moving_averages": {
+        "price": 1.0943,
+        "ema20": 1.058,
+        "ema50": 1.0277,
+        "sma200": null,
+        "structure": "Price bullish \u2014 above 2/2 MAs",
+        "score": 1
+      },
+      "volume": {
+        "current": 15742.922,
+        "average": 247463.47677999997,
+        "ratio": 0.06,
+        "signal": "0.06x average \u2014 low volume",
+        "score": -1
+      },
+      "support_resistance": {
+        "nearest_level": 1.0868,
+        "signal": "Entry near support at 1.0868 (0.5%)",
+        "score": 1
+      },
+      "risk_reward": {
+        "ratio": null,
+        "signal": "unavailable",
+        "score": 0
+      }
+    },
+    "total_score": 2,
+    "verdict": "MODERATE",
+    "summary": "APT LONG setup is decent setup. Proceed with caution. RSI: neutral (58.91). MACD: bullish crossover. MAs: Price bullish \u2014 above 2/2 MAs. Volume: 0.06x average \u2014 low volume. S/R: Entry near support at 1.0868 (0.5%). R:R: unavailable."
+  },
+  {
+    "id": "d0d8d742-ca35-483a-8be4-24fa701087b3",
+    "signal_id": "9f6c1664-bc35-4d2e-b780-b62e742e97b6",
+    "symbol": "CRV",
+    "direction": "LONG",
+    "timestamp": "2026-03-24T23:08:09.963369+00:00",
+    "entry": 0.225,
+    "stop_loss": null,
+    "targets": [],
+    "source_score": 80,
+    "indicators": {
+      "rsi": {
+        "value": 48.94,
+        "signal": "neutral (48.94)",
+        "score": 0
+      },
+      "macd": {
+        "macd_line": 0.000884,
+        "signal_line": 0.000761,
+        "histogram": 0.000123,
+        "signal": "bullish crossover",
+        "score": 1
+      },
+      "moving_averages": {
+        "price": 0.2254,
+        "ema20": 0.2231,
+        "ema50": 0.2226,
+        "sma200": null,
+        "structure": "Price bullish \u2014 above 2/2 MAs",
+        "score": 1
+      },
+      "volume": {
+        "current": 9.0,
+        "average": 134559.66457880003,
+        "ratio": 0.0,
+        "signal": "0.0x average \u2014 low volume",
+        "score": -1
+      },
+      "support_resistance": {
+        "nearest_level": 0.2295,
+        "signal": "Not near key level (nearest: 0.2295, 2.0% away)",
+        "score": 0
+      },
+      "risk_reward": {
+        "ratio": null,
+        "signal": "unavailable",
+        "score": 0
+      }
+    },
+    "total_score": 1,
+    "verdict": "WEAK",
+    "summary": "CRV LONG setup is technically weak. Technicals don't fully support this. RSI: neutral (48.94). MACD: bullish crossover. MAs: Price bullish \u2014 above 2/2 MAs. Volume: 0.0x average \u2014 low volume. S/R: Not near key level (nearest: 0.2295, 2.0% away). R:R: unavailable."
+  },
+  {
+    "id": "bbe050c2-78f9-4122-b921-021b92f34423",
+    "signal_id": "beba66b4-1200-4b00-b02f-fa0b8d694cba",
+    "symbol": "FET",
+    "direction": "LONG",
+    "timestamp": "2026-03-24T23:08:12.849622+00:00",
+    "entry": 0.2418,
+    "stop_loss": null,
+    "targets": [],
+    "source_score": 80,
+    "indicators": {
+      "rsi": {
+        "value": 60.39,
+        "signal": "neutral (60.39)",
+        "score": 0
+      },
+      "macd": {
+        "macd_line": 0.004971,
+        "signal_line": 0.004119,
+        "histogram": 0.000852,
+        "signal": "bullish crossover",
+        "score": 1
+      },
+      "moving_averages": {
+        "price": 0.243,
+        "ema20": 0.235,
+        "ema50": 0.228,
+        "sma200": null,
+        "structure": "Price bullish \u2014 above 2/2 MAs",
+        "score": 1
+      },
+      "volume": {
+        "current": 35479.669,
+        "average": 451314.40839999996,
+        "ratio": 0.08,
+        "signal": "0.08x average \u2014 low volume",
+        "score": -1
+      },
+      "support_resistance": {
+        "nearest_level": 0.2425,
+        "signal": "Entry near resistance at 0.2425 (0.3%)",
+        "score": 0
+      },
+      "risk_reward": {
+        "ratio": null,
+        "signal": "unavailable",
+        "score": 0
+      }
+    },
+    "total_score": 1,
+    "verdict": "WEAK",
+    "summary": "FET LONG setup is technically weak. Technicals don't fully support this. RSI: neutral (60.39). MACD: bullish crossover. MAs: Price bullish \u2014 above 2/2 MAs. Volume: 0.08x average \u2014 low volume. S/R: Entry near resistance at 0.2425 (0.3%). R:R: unavailable."
+  },
+  {
+    "id": "e3a470bc-9c9f-44c1-97de-2b75d79b7b1d",
+    "signal_id": "f73aa227-ec0f-448a-9aaa-d9d7926d72fd",
+    "symbol": "FLOW",
+    "direction": "SHORT",
+    "timestamp": "2026-03-24T23:08:15.120111+00:00",
+    "entry": 0.03191,
+    "stop_loss": null,
+    "targets": [],
+    "source_score": 80,
+    "indicators": {
+      "rsi": {
+        "value": 53.67,
+        "signal": "neutral (53.67)",
+        "score": 0
+      },
+      "macd": {
+        "macd_line": -0.021344,
+        "signal_line": -0.052773,
+        "histogram": 0.031428,
+        "signal": "bullish crossover",
+        "score": -1
+      },
+      "moving_averages": {
+        "price": 35.2796,
+        "ema20": 35.2569,
+        "ema50": 35.4238,
+        "sma200": null,
+        "structure": "Price mixed \u2014 above 1/2 MAs",
+        "score": 0
+      },
+      "volume": {
+        "current": 330.0,
+        "average": 816.45,
+        "ratio": 0.4,
+        "signal": "0.4x average \u2014 low volume",
+        "score": -1
+      },
+      "support_resistance": {
+        "nearest_level": 34.700001,
+        "signal": "Not near key level (nearest: 34.7000, 108643.3% away)",
+        "score": 0
+      },
+      "risk_reward": {
+        "ratio": null,
+        "signal": "unavailable",
+        "score": 0
+      }
+    },
+    "total_score": -2,
+    "verdict": "REJECT",
+    "summary": "FLOW SHORT setup is technicals CONTRADICT the signal. Avoid. RSI: neutral (53.67). MACD: bullish crossover. MAs: Price mixed \u2014 above 1/2 MAs. Volume: 0.4x average \u2014 low volume. S/R: Not near key level (nearest: 34.7000, 108643.3% away). R:R: unavailable."
+  },
+  {
+    "id": "5c3467ef-56d3-4e6b-b2b3-1d28b3f44514",
+    "signal_id": "714e5780-f34b-4e2b-8f43-fabdbf799328",
+    "symbol": "TAO",
+    "direction": "LONG",
+    "timestamp": "2026-03-24T23:08:18.653939+00:00",
+    "entry": 335.36,
+    "stop_loss": null,
+    "targets": [],
+    "source_score": 80,
+    "indicators": {
+      "rsi": {
+        "value": 76.39,
+        "signal": "overbought (76.39)",
+        "score": -1
+      },
+      "macd": {
+        "macd_line": 10.370757,
+        "signal_line": 9.07392,
+        "histogram": 1.296837,
+        "signal": "bullish crossover",
+        "score": 1
+      },
+      "moving_averages": {
+        "price": 334.8,
+        "ema20": 317.5335,
+        "ema50": 301.7759,
+        "sma200": null,
+        "structure": "Price bullish \u2014 above 2/2 MAs",
+        "score": 1
+      },
+      "volume": {
+        "current": 310552.0,
+        "average": 4049531.05,
+        "ratio": 0.08,
+        "signal": "0.08x average \u2014 low volume",
+        "score": -1
+      },
+      "support_resistance": {
+        "nearest_level": 310.3,
+        "signal": "Not near key level (nearest: 310.3000, 7.5% away)",
+        "score": 0
+      },
+      "risk_reward": {
+        "ratio": null,
+        "signal": "unavailable",
+        "score": 0
+      }
+    },
+    "total_score": 0,
+    "verdict": "WEAK",
+    "summary": "TAO LONG setup is technically weak. Technicals don't fully support this. RSI: overbought (76.39). MACD: bullish crossover. MAs: Price bullish \u2014 above 2/2 MAs. Volume: 0.08x average \u2014 low volume. S/R: Not near key level (nearest: 310.3000, 7.5% away). R:R: unavailable."
+  },
+  {
+    "id": "d0a0af58-d2ba-4b91-add2-411ad3710ece",
+    "signal_id": "35267c6f-1eb0-40bf-bf85-7783e7217f3c",
+    "symbol": "CRWV",
+    "direction": "BUY",
+    "timestamp": "2026-03-24T23:08:21.172235+00:00",
+    "entry": 82.62,
+    "stop_loss": 76.01,
+    "targets": [
+      84.27,
+      86.75,
+      89.23
+    ],
+    "source_score": 95,
+    "indicators": {
+      "rsi": {
+        "value": 55.17,
+        "signal": "neutral (55.17)",
+        "score": 0
+      },
+      "macd": {
+        "macd_line": 0.322779,
+        "signal_line": 0.087401,
+        "histogram": 0.235378,
+        "signal": "bullish crossover",
+        "score": 1
+      },
+      "moving_averages": {
+        "price": 83.01,
+        "ema20": 82.0051,
+        "ema50": 81.5946,
+        "sma200": null,
+        "structure": "Price bullish \u2014 above 2/2 MAs",
+        "score": 1
+      },
+      "volume": {
+        "current": 1712450.0,
+        "average": 2755638.25,
+        "ratio": 0.62,
+        "signal": "0.62x average \u2014 low volume",
+        "score": -1
+      },
+      "support_resistance": {
+        "nearest_level": 84.5,
+        "signal": "Not near key level (nearest: 84.5000, 2.3% away)",
+        "score": 0
+      },
+      "risk_reward": {
+        "ratio": 0.25,
+        "signal": "0.25:1 \u274c below 1:1",
+        "score": -1
+      }
+    },
+    "total_score": 0,
+    "verdict": "WEAK",
+    "summary": "CRWV BUY setup is technically weak. Technicals don't fully support this. RSI: neutral (55.17). MACD: bullish crossover. MAs: Price bullish \u2014 above 2/2 MAs. Volume: 0.62x average \u2014 low volume. S/R: Not near key level (nearest: 84.5000, 2.3% away). R:R: 0.25:1 \u274c below 1:1."
+  },
+  {
+    "id": "03d341f6-cd2a-4af5-9ae3-4dd46816b072",
+    "signal_id": "a6d99d43-4a11-42f8-8479-3d6c94e22b5e",
+    "symbol": "OKTA",
+    "direction": "BUY",
+    "timestamp": "2026-03-24T23:08:23.543813+00:00",
+    "entry": 81.69,
+    "stop_loss": 75.15,
+    "targets": [
+      83.32,
+      85.77,
+      88.23
+    ],
+    "source_score": 85,
+    "indicators": {
+      "rsi": {
+        "value": 43.13,
+        "signal": "neutral (43.13)",
+        "score": 0
+      },
+      "macd": {
+        "macd_line": -0.711801,
+        "signal_line": -0.284794,
+        "histogram": -0.427007,
+        "signal": "bearish crossover",
+        "score": -1
+      },
+      "moving_averages": {
+        "price": 76.79,
+        "ema20": 78.5446,
+        "ema50": 78.866,
+        "sma200": null,
+        "structure": "Price bearish \u2014 above 0/2 MAs",
+        "score": -1
+      },
+      "volume": {
+        "current": 559532.0,
+        "average": 322791.65,
+        "ratio": 1.73,
+        "signal": "1.73x average \u2014 strong conviction",
+        "score": 1
+      },
+      "support_resistance": {
+        "nearest_level": 81.559998,
+        "signal": "Entry near support at 81.5600 (0.2%)",
+        "score": 1
+      },
+      "risk_reward": {
+        "ratio": 0.25,
+        "signal": "0.25:1 \u274c below 1:1",
+        "score": -1
+      }
+    },
+    "total_score": -1,
+    "verdict": "REJECT",
+    "summary": "OKTA BUY setup is technicals CONTRADICT the signal. Avoid. RSI: neutral (43.13). MACD: bearish crossover. MAs: Price bearish \u2014 above 0/2 MAs. Volume: 1.73x average \u2014 strong conviction. S/R: Entry near support at 81.5600 (0.2%). R:R: 0.25:1 \u274c below 1:1."
+  },
+  {
+    "id": "cf324a7b-b434-4791-ac5d-ee8704a28cef",
+    "signal_id": "5361a1b1-10c0-437b-a44d-16a4dd6bed15",
+    "symbol": "AG",
+    "direction": "BUY",
+    "timestamp": "2026-03-24T23:08:25.908193+00:00",
+    "entry": 18.57,
+    "stop_loss": 19.58,
+    "targets": [
+      18.94,
+      19.5,
+      20.8
+    ],
+    "source_score": 85,
+    "indicators": {
+      "rsi": {
+        "value": 70.95,
+        "signal": "overbought (70.95)",
+        "score": -1
+      },
+      "macd": {
+        "macd_line": 0.019539,
+        "signal_line": -0.197518,
+        "histogram": 0.217058,
+        "signal": "bullish crossover",
+        "score": 1
+      },
+      "moving_averages": {
+        "price": 20.09,
+        "ema20": 19.5875,
+        "ema50": 20.4859,
+        "sma200": null,
+        "structure": "Price mixed \u2014 above 1/2 MAs",
+        "score": 0
+      },
+      "volume": {
+        "current": 2343872.0,
+        "average": 3174865.25,
+        "ratio": 0.74,
+        "signal": "0.74x average \u2014 low volume",
+        "score": -1
+      },
+      "support_resistance": {
+        "nearest_level": 19.00511,
+        "signal": "Not near key level (nearest: 19.0051, 2.3% away)",
+        "score": 0
+      },
+      "risk_reward": {
+        "ratio": 0.37,
+        "signal": "0.37:1 \u274c below 1:1",
+        "score": -1
+      }
+    },
+    "total_score": -2,
+    "verdict": "REJECT",
+    "summary": "AG BUY setup is technicals CONTRADICT the signal. Avoid. RSI: overbought (70.95). MACD: bullish crossover. MAs: Price mixed \u2014 above 1/2 MAs. Volume: 0.74x average \u2014 low volume. S/R: Not near key level (nearest: 19.0051, 2.3% away). R:R: 0.37:1 \u274c below 1:1."
+  },
+  {
+    "id": "8b1f4e2f-68c1-4856-a152-5f60ff2562c2",
+    "signal_id": "25102e5e-c145-44af-a005-a3958de753fa",
+    "symbol": "AMD",
+    "direction": "BUY",
+    "timestamp": "2026-03-24T23:08:28.415708+00:00",
+    "entry": 206.82,
+    "stop_loss": 190.27,
+    "targets": [
+      210.96,
+      217.16,
+      223.37
+    ],
+    "source_score": 85,
+    "indicators": {
+      "rsi": {
+        "value": 56.97,
+        "signal": "neutral (56.97)",
+        "score": 0
+      },
+      "macd": {
+        "macd_line": 1.075741,
+        "signal_line": 1.015265,
+        "histogram": 0.060476,
+        "signal": "bullish crossover",
+        "score": 1
+      },
+      "moving_averages": {
+        "price": 205.385,
+        "ema20": 203.1808,
+        "ema50": 201.5699,
+        "sma200": null,
+        "structure": "Price bullish \u2014 above 2/2 MAs",
+        "score": 1
+      },
+      "volume": {
+        "current": 3068567.0,
+        "average": 3533081.7,
+        "ratio": 0.87,
+        "signal": "0.87x average \u2014 normal",
+        "score": 0
+      },
+      "support_resistance": {
+        "nearest_level": 209.210007,
+        "signal": "Entry near resistance at 209.2100 (1.2%)",
+        "score": 0
+      },
+      "risk_reward": {
+        "ratio": 0.25,
+        "signal": "0.25:1 \u274c below 1:1",
+        "score": -1
+      }
+    },
+    "total_score": 1,
+    "verdict": "WEAK",
+    "summary": "AMD BUY setup is technically weak. Technicals don't fully support this. RSI: neutral (56.97). MACD: bullish crossover. MAs: Price bullish \u2014 above 2/2 MAs. Volume: 0.87x average \u2014 normal. S/R: Entry near resistance at 209.2100 (1.2%). R:R: 0.25:1 \u274c below 1:1."
+  },
+  {
+    "id": "9758ad7a-554d-4a30-a747-3e15d5228319",
+    "signal_id": "2c033aff-13c4-4846-99ac-d5d129d180a0",
+    "symbol": "GOOGL",
+    "direction": "BUY",
+    "timestamp": "2026-03-24T23:08:30.859871+00:00",
+    "entry": 305.48,
+    "stop_loss": 281.04,
+    "targets": [
+      311.59,
+      320.75,
+      329.92
+    ],
+    "source_score": 85,
+    "indicators": {
+      "rsi": {
+        "value": 27.02,
+        "signal": "oversold (27.02)",
+        "score": 1
+      },
+      "macd": {
+        "macd_line": -3.421588,
+        "signal_line": -2.444795,
+        "histogram": -0.976793,
+        "signal": "bearish crossover",
+        "score": -1
+      },
+      "moving_averages": {
+        "price": 290.41,
+        "ema20": 298.0159,
+        "ema50": 301.5528,
+        "sma200": null,
+        "structure": "Price bearish \u2014 above 0/2 MAs",
+        "score": -1
+      },
+      "volume": {
+        "current": 5828358.0,
+        "average": 3761339.65,
+        "ratio": 1.55,
+        "signal": "1.55x average \u2014 strong conviction",
+        "score": 1
+      },
+      "support_resistance": {
+        "nearest_level": 306.244399,
+        "signal": "Entry near resistance at 306.2444 (0.3%)",
+        "score": 0
+      },
+      "risk_reward": {
+        "ratio": 0.25,
+        "signal": "0.25:1 \u274c below 1:1",
+        "score": -1
+      }
+    },
+    "total_score": -1,
+    "verdict": "REJECT",
+    "summary": "GOOGL BUY setup is technicals CONTRADICT the signal. Avoid. RSI: oversold (27.02). MACD: bearish crossover. MAs: Price bearish \u2014 above 0/2 MAs. Volume: 1.55x average \u2014 strong conviction. S/R: Entry near resistance at 306.2444 (0.3%). R:R: 0.25:1 \u274c below 1:1."
+  },
+  {
+    "id": "a5afc864-13bb-49cb-a60f-3d6b06ab98e8",
+    "signal_id": "96394012-6e94-4435-adf3-af29b073f7f6",
+    "symbol": "TQQQ",
+    "direction": "BUY",
+    "timestamp": "2026-03-24T23:08:33.183411+00:00",
+    "entry": 44.19,
+    "stop_loss": 40.65,
+    "targets": [
+      45.07,
+      46.4,
+      47.73
+    ],
+    "source_score": 85,
+    "indicators": {
+      "rsi": {
+        "value": 52.96,
+        "signal": "neutral (52.96)",
+        "score": 0
+      },
+      "macd": {
+        "macd_line": -0.505225,
+        "signal_line": -0.53243,
+        "histogram": 0.027205,
+        "signal": "bullish crossover",
+        "score": 1
+      },
+      "moving_averages": {
+        "price": 43.625,
+        "ema20": 44.3666,
+        "ema50": 45.4499,
+        "sma200": null,
+        "structure": "Price bearish \u2014 above 0/2 MAs",
+        "score": -1
+      },
+      "volume": {
+        "current": 7131920.0,
+        "average": 16064396.9,
+        "ratio": 0.44,
+        "signal": "0.44x average \u2014 low volume",
+        "score": -1
+      },
+      "support_resistance": {
+        "nearest_level": 45.5,
+        "signal": "Not near key level (nearest: 45.5000, 3.0% away)",
+        "score": 0
+      },
+      "risk_reward": {
+        "ratio": 0.25,
+        "signal": "0.25:1 \u274c below 1:1",
+        "score": -1
+      }
+    },
+    "total_score": -2,
+    "verdict": "REJECT",
+    "summary": "TQQQ BUY setup is technicals CONTRADICT the signal. Avoid. RSI: neutral (52.96). MACD: bullish crossover. MAs: Price bearish \u2014 above 0/2 MAs. Volume: 0.44x average \u2014 low volume. S/R: Not near key level (nearest: 45.5000, 3.0% away). R:R: 0.25:1 \u274c below 1:1."
+  },
+  {
+    "id": "94c623b3-792c-4798-952f-4ce2cd5952d8",
+    "signal_id": "ca3865f9-cfc5-4f5f-bd9f-ce980eb0eedd",
+    "symbol": "FCX",
+    "direction": "BUY",
+    "timestamp": "2026-03-24T23:08:35.708083+00:00",
+    "entry": 39.24,
+    "stop_loss": 36.1,
+    "targets": [
+      40.02,
+      41.2,
+      42.38
+    ],
+    "source_score": 85,
+    "indicators": {
+      "rsi": {
+        "value": 78.81,
+        "signal": "overbought (78.81)",
+        "score": -1
+      },
+      "macd": {
+        "macd_line": 0.480652,
+        "signal_line": 0.115436,
+        "histogram": 0.365216,
+        "signal": "bullish crossover",
+        "score": 1
+      },
+      "moving_averages": {
+        "price": 56.52,
+        "ema20": 55.1959,
+        "ema50": 55.7392,
+        "sma200": null,
+        "structure": "Price bullish \u2014 above 2/2 MAs",
+        "score": 1
+      },
+      "volume": {
+        "current": 2286530.0,
+        "average": 2452236.55,
+        "ratio": 0.93,
+        "signal": "0.93x average \u2014 normal",
+        "score": 0
+      },
+      "support_resistance": {
+        "nearest_level": 50.790001,
+        "signal": "Not near key level (nearest: 50.7900, 29.4% away)",
+        "score": 0
+      },
+      "risk_reward": {
+        "ratio": 0.25,
+        "signal": "0.25:1 \u274c below 1:1",
+        "score": -1
+      }
+    },
+    "total_score": 0,
+    "verdict": "WEAK",
+    "summary": "FCX BUY setup is technically weak. Technicals don't fully support this. RSI: overbought (78.81). MACD: bullish crossover. MAs: Price bullish \u2014 above 2/2 MAs. Volume: 0.93x average \u2014 normal. S/R: Not near key level (nearest: 50.7900, 29.4% away). R:R: 0.25:1 \u274c below 1:1."
+  },
+  {
+    "id": "4705a383-7bc7-4747-b117-1bd23857cad8",
+    "signal_id": "c5e1a281-979d-4816-8ec6-91785cf4ac91",
+    "symbol": "EL",
+    "direction": "BUY",
+    "timestamp": "2026-03-24T23:08:38.310422+00:00",
+    "entry": 70.17,
+    "stop_loss": 64.56,
+    "targets": [
+      71.57,
+      73.68,
+      75.78
+    ],
+    "source_score": 85,
+    "indicators": {
+      "rsi": {
+        "value": 26.19,
+        "signal": "oversold (26.19)",
+        "score": 1
+      },
+      "macd": {
+        "macd_line": -4.413432,
+        "signal_line": -2.953401,
+        "histogram": -1.460031,
+        "signal": "bearish crossover",
+        "score": -1
+      },
+      "moving_averages": {
+        "price": 71.47,
+        "ema20": 79.0594,
+        "ema50": 83.9165,
+        "sma200": null,
+        "structure": "Price bearish \u2014 above 0/2 MAs",
+        "score": -1
+      },
+      "volume": {
+        "current": 2704697.0,
+        "average": 1408378.65,
+        "ratio": 1.92,
+        "signal": "1.92x average \u2014 strong conviction",
+        "score": 1
+      },
+      "support_resistance": {
+        "nearest_level": 84.110001,
+        "signal": "Not near key level (nearest: 84.1100, 19.9% away)",
+        "score": 0
+      },
+      "risk_reward": {
+        "ratio": 0.25,
+        "signal": "0.25:1 \u274c below 1:1",
+        "score": -1
+      }
+    },
+    "total_score": -1,
+    "verdict": "REJECT",
+    "summary": "EL BUY setup is technicals CONTRADICT the signal. Avoid. RSI: oversold (26.19). MACD: bearish crossover. MAs: Price bearish \u2014 above 0/2 MAs. Volume: 1.92x average \u2014 strong conviction. S/R: Not near key level (nearest: 84.1100, 19.9% away). R:R: 0.25:1 \u274c below 1:1."
+  },
+  {
+    "id": "b58724f0-654d-47fa-97f1-a535ebbb4754",
+    "signal_id": "195c4477-8f39-4d5f-8090-d34b5db0bfb5",
+    "symbol": "NVDL",
+    "direction": "BUY",
+    "timestamp": "2026-03-24T23:08:40.599986+00:00",
+    "entry": 89.14,
+    "stop_loss": 82.01,
+    "targets": [
+      90.92,
+      93.6,
+      96.27
+    ],
+    "source_score": 85,
+    "indicators": {
+      "rsi": {
+        "value": 57.47,
+        "signal": "neutral (57.47)",
+        "score": 0
+      },
+      "macd": {
+        "macd_line": -0.893813,
+        "signal_line": -1.101742,
+        "histogram": 0.207929,
+        "signal": "bullish crossover",
+        "score": 1
+      },
+      "moving_averages": {
+        "price": 73.91,
+        "ema20": 74.5621,
+        "ema50": 76.5078,
+        "sma200": null,
+        "structure": "Price bearish \u2014 above 0/2 MAs",
+        "score": -1
+      },
+      "volume": {
+        "current": 372596.0,
+        "average": 1179847.7,
+        "ratio": 0.32,
+        "signal": "0.32x average \u2014 low volume",
+        "score": -1
+      },
+      "support_resistance": {
+        "nearest_level": 89.010002,
+        "signal": "Entry near support at 89.0100 (0.1%)",
+        "score": 1
+      },
+      "risk_reward": {
+        "ratio": 0.25,
+        "signal": "0.25:1 \u274c below 1:1",
+        "score": -1
+      }
+    },
+    "total_score": -1,
+    "verdict": "REJECT",
+    "summary": "NVDL BUY setup is technicals CONTRADICT the signal. Avoid. RSI: neutral (57.47). MACD: bullish crossover. MAs: Price bearish \u2014 above 0/2 MAs. Volume: 0.32x average \u2014 low volume. S/R: Entry near support at 89.0100 (0.1%). R:R: 0.25:1 \u274c below 1:1."
+  },
+  {
+    "id": "0e494592-40e9-4b93-a4c7-74c44ebaa173",
+    "signal_id": "5cce5e06-5eca-4c6b-a991-0531faa6d122",
+    "symbol": "AG",
+    "direction": "CALL",
+    "timestamp": "2026-03-25T02:18:40.021007+00:00",
+    "entry": 3.35,
+    "stop_loss": 3.35,
+    "targets": [
+      3.8,
+      4.36,
+      5.02
+    ],
+    "source_score": 85,
+    "indicators": {
+      "rsi": {
+        "value": 70.95,
+        "signal": "overbought (70.95)",
+        "score": -1
+      },
+      "macd": {
+        "macd_line": 0.019539,
+        "signal_line": -0.197518,
+        "histogram": 0.217058,
+        "signal": "bullish crossover",
+        "score": 1
+      },
+      "moving_averages": {
+        "price": 20.09,
+        "ema20": 19.5875,
+        "ema50": 20.4859,
+        "sma200": null,
+        "structure": "Price mixed \u2014 above 1/2 MAs",
+        "score": 0
+      },
+      "volume": {
+        "current": 2343872.0,
+        "average": 3174865.25,
+        "ratio": 0.74,
+        "signal": "0.74x average \u2014 low volume",
+        "score": -1
+      },
+      "support_resistance": {
+        "nearest_level": 17.879999,
+        "signal": "Not near key level (nearest: 17.8800, 433.7% away)",
+        "score": 0
+      },
+      "risk_reward": {
+        "ratio": null,
+        "signal": "zero risk (entry == stop)",
+        "score": 0
+      }
+    },
+    "total_score": -1,
+    "verdict": "REJECT",
+    "summary": "AG CALL setup is technicals CONTRADICT the signal. Avoid. RSI: overbought (70.95). MACD: bullish crossover. MAs: Price mixed \u2014 above 1/2 MAs. Volume: 0.74x average \u2014 low volume. S/R: Not near key level (nearest: 17.8800, 433.7% away). R:R: zero risk (entry == stop)."
+  },
+  {
+    "id": "9dd54a4a-0911-4d91-aee9-e1fadb2a4ddb",
+    "signal_id": "e7008f45-b97e-479d-bc51-764ca9be155a",
+    "symbol": "GOOGL",
+    "direction": "CALL",
+    "timestamp": "2026-03-25T02:18:42.356676+00:00",
+    "entry": 6.95,
+    "stop_loss": 4.0,
+    "targets": [
+      7.6,
+      10.66,
+      12.3
+    ],
+    "source_score": 85,
+    "indicators": {
+      "rsi": {
+        "value": 27.02,
+        "signal": "oversold (27.02)",
+        "score": 1
+      },
+      "macd": {
+        "macd_line": -3.421588,
+        "signal_line": -2.444795,
+        "histogram": -0.976793,
+        "signal": "bearish crossover",
+        "score": -1
+      },
+      "moving_averages": {
+        "price": 290.41,
+        "ema20": 298.0159,
+        "ema50": 301.5528,
+        "sma200": null,
+        "structure": "Price bearish \u2014 above 0/2 MAs",
+        "score": -1
+      },
+      "volume": {
+        "current": 5828358.0,
+        "average": 3761339.65,
+        "ratio": 1.55,
+        "signal": "1.55x average \u2014 strong conviction",
+        "score": 1
+      },
+      "support_resistance": {
+        "nearest_level": 294.079987,
+        "signal": "Not near key level (nearest: 294.0800, 4131.4% away)",
+        "score": 0
+      },
+      "risk_reward": {
+        "ratio": 0.22,
+        "signal": "0.22:1 \u274c below 1:1",
+        "score": -1
+      }
+    },
+    "total_score": -1,
+    "verdict": "REJECT",
+    "summary": "GOOGL CALL setup is technicals CONTRADICT the signal. Avoid. RSI: oversold (27.02). MACD: bearish crossover. MAs: Price bearish \u2014 above 0/2 MAs. Volume: 1.55x average \u2014 strong conviction. S/R: Not near key level (nearest: 294.0800, 4131.4% away). R:R: 0.22:1 \u274c below 1:1."
+  },
+  {
+    "id": "92063f87-7652-49f6-8a91-8a4b6c2648fe",
+    "signal_id": "e7c35e9f-59c3-4d56-8b48-7c8b17e1df72",
+    "symbol": "GLD",
+    "direction": "PUT",
+    "timestamp": "2026-03-25T02:18:44.721817+00:00",
+    "entry": 10.7,
+    "stop_loss": 6.95,
+    "targets": [
+      12.31,
+      13.91,
+      16.05
+    ],
+    "source_score": 85,
+    "indicators": {
+      "rsi": {
+        "value": 33.17,
+        "signal": "neutral (33.17)",
+        "score": 0
+      },
+      "macd": {
+        "macd_line": -7.784233,
+        "signal_line": -9.086313,
+        "histogram": 1.302079,
+        "signal": "bullish crossover",
+        "score": -1
+      },
+      "moving_averages": {
+        "price": 404.1799,
+        "ema20": 410.7423,
+        "ema50": 427.1786,
+        "sma200": null,
+        "structure": "Price bearish \u2014 above 0/2 MAs",
+        "score": 1
+      },
+      "volume": {
+        "current": 1128321.0,
+        "average": 3635867.35,
+        "ratio": 0.31,
+        "signal": "0.31x average \u2014 low volume",
+        "score": -1
+      },
+      "support_resistance": {
+        "nearest_level": 417.040009,
+        "signal": "Not near key level (nearest: 417.0400, 3797.6% away)",
+        "score": 0
+      },
+      "risk_reward": {
+        "ratio": 0.43,
+        "signal": "0.43:1 \u274c below 1:1",
+        "score": -1
+      }
+    },
+    "total_score": -2,
+    "verdict": "REJECT",
+    "summary": "GLD PUT setup is technicals CONTRADICT the signal. Avoid. RSI: neutral (33.17). MACD: bullish crossover. MAs: Price bearish \u2014 above 0/2 MAs. Volume: 0.31x average \u2014 low volume. S/R: Not near key level (nearest: 417.0400, 3797.6% away). R:R: 0.43:1 \u274c below 1:1."
+  },
+  {
+    "id": "990b76a6-04af-48a9-9856-e699a437735d",
+    "signal_id": "d39a46bd-186d-4253-9140-ad399159d10c",
+    "symbol": "CRWV",
+    "direction": "CALL",
+    "timestamp": "2026-03-25T02:18:47.054323+00:00",
+    "entry": 4.2,
+    "stop_loss": 4.2,
+    "targets": [
+      4.83,
+      5.46,
+      6.3
+    ],
+    "source_score": 85,
+    "indicators": {
+      "rsi": {
+        "value": 55.17,
+        "signal": "neutral (55.17)",
+        "score": 0
+      },
+      "macd": {
+        "macd_line": 0.322779,
+        "signal_line": 0.087401,
+        "histogram": 0.235378,
+        "signal": "bullish crossover",
+        "score": 1
+      },
+      "moving_averages": {
+        "price": 83.01,
+        "ema20": 82.0051,
+        "ema50": 81.5946,
+        "sma200": null,
+        "structure": "Price bullish \u2014 above 2/2 MAs",
+        "score": 1
+      },
+      "volume": {
+        "current": 1712450.0,
+        "average": 2755638.25,
+        "ratio": 0.62,
+        "signal": "0.62x average \u2014 low volume",
+        "score": -1
+      },
+      "support_resistance": {
+        "nearest_level": 70.370003,
+        "signal": "Not near key level (nearest: 70.3700, 1575.5% away)",
+        "score": 0
+      },
+      "risk_reward": {
+        "ratio": null,
+        "signal": "zero risk (entry == stop)",
+        "score": 0
+      }
+    },
+    "total_score": 1,
+    "verdict": "WEAK",
+    "summary": "CRWV CALL setup is technically weak. Technicals don't fully support this. RSI: neutral (55.17). MACD: bullish crossover. MAs: Price bullish \u2014 above 2/2 MAs. Volume: 0.62x average \u2014 low volume. S/R: Not near key level (nearest: 70.3700, 1575.5% away). R:R: zero risk (entry == stop)."
+  },
+  {
+    "id": "fdce3c5f-b18a-4ba7-a737-25c4ba82e482",
+    "signal_id": "eba2bb90-093d-4ba0-b56e-dc82a4835d54",
+    "symbol": "MSFT",
+    "direction": "CALL",
+    "timestamp": "2026-03-25T02:18:49.354233+00:00",
+    "entry": 4.15,
+    "stop_loss": 2.7,
+    "targets": [
+      4.77,
+      5.39,
+      6.23
+    ],
+    "source_score": 85,
+    "indicators": {
+      "rsi": {
+        "value": 31.55,
+        "signal": "neutral (31.55)",
+        "score": 0
+      },
+      "macd": {
+        "macd_line": -4.570062,
+        "signal_line": -4.152932,
+        "histogram": -0.417131,
+        "signal": "bearish crossover",
+        "score": -1
+      },
+      "moving_averages": {
+        "price": 372.75,
+        "ema20": 379.4381,
+        "ema50": 386.8164,
+        "sma200": null,
+        "structure": "Price bearish \u2014 above 0/2 MAs",
+        "score": -1
+      },
+      "volume": {
+        "current": 3489541.0,
+        "average": 3771442.9,
+        "ratio": 0.93,
+        "signal": "0.93x average \u2014 normal",
+        "score": 0
+      },
+      "support_resistance": {
+        "nearest_level": 381.709991,
+        "signal": "Not near key level (nearest: 381.7100, 9097.8% away)",
+        "score": 0
+      },
+      "risk_reward": {
+        "ratio": 0.43,
+        "signal": "0.43:1 \u274c below 1:1",
+        "score": -1
+      }
+    },
+    "total_score": -3,
+    "verdict": "REJECT",
+    "summary": "MSFT CALL setup is technicals CONTRADICT the signal. Avoid. RSI: neutral (31.55). MACD: bearish crossover. MAs: Price bearish \u2014 above 0/2 MAs. Volume: 0.93x average \u2014 normal. S/R: Not near key level (nearest: 381.7100, 9097.8% away). R:R: 0.43:1 \u274c below 1:1."
+  },
+  {
+    "id": "18046dc8-69f4-4033-80c2-ac6a0918b312",
+    "signal_id": "62c626de-c0eb-4a78-bf4b-63ae4e6fde60",
+    "symbol": "QQQ",
+    "direction": "CALL",
+    "timestamp": "2026-03-25T02:18:51.649007+00:00",
+    "entry": 8.43,
+    "stop_loss": 5.48,
+    "targets": [
+      9.69,
+      10.96,
+      12.65
+    ],
+    "source_score": 85,
+    "indicators": {
+      "rsi": {
+        "value": 52.39,
+        "signal": "neutral (52.39)",
+        "score": 0
+      },
+      "macd": {
+        "macd_line": -2.209146,
+        "signal_line": -2.302255,
+        "histogram": 0.093109,
+        "signal": "bullish crossover",
+        "score": 1
+      },
+      "moving_averages": {
+        "price": 583.93,
+        "ema20": 587.1938,
+        "ema50": 591.7529,
+        "sma200": null,
+        "structure": "Price bearish \u2014 above 0/2 MAs",
+        "score": -1
+      },
+      "volume": {
+        "current": 4664778.0,
+        "average": 9958945.8,
+        "ratio": 0.47,
+        "signal": "0.47x average \u2014 low volume",
+        "score": -1
+      },
+      "support_resistance": {
+        "nearest_level": 578.539978,
+        "signal": "Not near key level (nearest: 578.5400, 6762.9% away)",
+        "score": 0
+      },
+      "risk_reward": {
+        "ratio": 0.43,
+        "signal": "0.43:1 \u274c below 1:1",
+        "score": -1
+      }
+    },
+    "total_score": -2,
+    "verdict": "REJECT",
+    "summary": "QQQ CALL setup is technicals CONTRADICT the signal. Avoid. RSI: neutral (52.39). MACD: bullish crossover. MAs: Price bearish \u2014 above 0/2 MAs. Volume: 0.47x average \u2014 low volume. S/R: Not near key level (nearest: 578.5400, 6762.9% away). R:R: 0.43:1 \u274c below 1:1."
+  }
+]

@@ -1,0 +1,260 @@
+
+[2026-04-14T23:55:01Z] Running Daily Report
+
+============================================================
+Mission Control Daily Report — 2026-04-14
+============================================================
+
+SIGNALS: 51 total (45 buys, 6 sells, 0 TP, 0 SL)
+POSITION BTCUSD: LONG | Trades: 50 | PnL: -0.7817%
+REGIME: MIXED_TREND | Bias: BULLISH
+OPTIMAL: ATR 16 / Mult 5.0
+
+PM2 PROCESSES:
+
+CRON JOBS:
+  [RAN] optimizer
+  [NOT RUN] regime_detector
+
+DISK: 26G/45G (57% used)
+
+Report saved: /home/ubuntu/mission-control/daily-reports/reports/2026-04-14.json
+Calendar saved: /home/ubuntu/mission-control/daily-reports/calendar/2026-04-14.json
+Dashboard: /home/ubuntu/mission-control/signal-receiver/data/daily_report.json
+Monthly calendar: /home/ubuntu/mission-control/daily-reports/calendar/2026-04-calendar.json
+Posted to Discord
+[2026-04-14T23:55:01Z] Done
+
+[2026-04-15T23:55:01Z] Running Daily Report
+
+============================================================
+Mission Control Daily Report — 2026-04-15
+============================================================
+
+SIGNALS: 90 total (83 buys, 7 sells, 0 TP, 0 SL)
+POSITION BTCUSD: LONG | Trades: 90 | PnL: 0.7193%
+REGIME: MIXED | Bias: BULLISH
+OPTIMAL: ATR 16 / Mult 5.0
+
+PM2 PROCESSES:
+
+CRON JOBS:
+  [RAN] optimizer
+  [RAN] regime_detector
+
+DISK: 26G/45G (57% used)
+
+Report saved: /home/ubuntu/mission-control/daily-reports/reports/2026-04-15.json
+Calendar saved: /home/ubuntu/mission-control/daily-reports/calendar/2026-04-15.json
+Dashboard: /home/ubuntu/mission-control/signal-receiver/data/daily_report.json
+Monthly calendar: /home/ubuntu/mission-control/daily-reports/calendar/2026-04-calendar.json
+Posted to Discord
+[2026-04-15T23:55:01Z] Done
+
+[2026-04-16T23:55:01Z] Running Daily Report
+
+============================================================
+Mission Control Daily Report — 2026-04-16
+============================================================
+
+SIGNALS: 37 total (33 buys, 4 sells, 0 TP, 0 SL)
+POSITION BTCUSD: LONG | Trades: 37 | PnL: 0.2732%
+REGIME: MIXED | Bias: BULLISH
+OPTIMAL: ATR 16 / Mult 5.0
+
+PM2 PROCESSES:
+
+CRON JOBS:
+  [RAN] optimizer
+  [RAN] regime_detector
+
+DISK: 26G/45G (57% used)
+
+Report saved: /home/ubuntu/mission-control/daily-reports/reports/2026-04-16.json
+Calendar saved: /home/ubuntu/mission-control/daily-reports/calendar/2026-04-16.json
+Dashboard: /home/ubuntu/mission-control/signal-receiver/data/daily_report.json
+Monthly calendar: /home/ubuntu/mission-control/daily-reports/calendar/2026-04-calendar.json
+Posted to Discord
+[2026-04-16T23:55:01Z] Done
+
+[2026-04-17T23:55:01Z] Running Daily Report
+
+============================================================
+Mission Control Daily Report — 2026-04-17
+============================================================
+
+SIGNALS: 2 total (2 buys, 0 sells, 0 TP, 0 SL)
+POSITION BTCUSD: LONG | Trades: 0 | PnL: 0%
+REGIME: MIXED_TREND | Bias: BULLISH
+OPTIMAL: ATR 16 / Mult 5.0
+
+PM2 PROCESSES:
+
+CRON JOBS:
+  [RAN] optimizer
+  [RAN] regime_detector
+
+DISK: 33G/45G (72% used)
+
+Report saved: /home/ubuntu/mission-control/daily-reports/reports/2026-04-17.json
+Calendar saved: /home/ubuntu/mission-control/daily-reports/calendar/2026-04-17.json
+Dashboard: /home/ubuntu/mission-control/signal-receiver/data/daily_report.json
+Monthly calendar: /home/ubuntu/mission-control/daily-reports/calendar/2026-04-calendar.json
+Posted to Discord
+[2026-04-17T23:55:01Z] Done
+
+[2026-04-18T23:55:01Z] Running Daily Report
+
+============================================================
+Mission Control Daily Report — 2026-04-18
+============================================================
+
+SIGNALS: 4 total (3 buys, 1 sells, 0 TP, 0 SL)
+POSITION BTCUSD: LONG | Trades: 0 | PnL: 0%
+REGIME: MIXED | Bias: BULLISH
+OPTIMAL: ATR 16 / Mult 5.0
+
+PM2 PROCESSES:
+
+CRON JOBS:
+  [RAN] optimizer
+  [RAN] regime_detector
+
+DISK: 33G/45G (73% used)
+
+Report saved: /home/ubuntu/mission-control/daily-reports/reports/2026-04-18.json
+Calendar saved: /home/ubuntu/mission-control/daily-reports/calendar/2026-04-18.json
+Dashboard: /home/ubuntu/mission-control/signal-receiver/data/daily_report.json
+Monthly calendar: /home/ubuntu/mission-control/daily-reports/calendar/2026-04-calendar.json
+Posted to Discord
+[2026-04-18T23:55:01Z] Done
+
+[2026-04-19T23:55:01Z] Running Daily Report
+
+============================================================
+Mission Control Daily Report — 2026-04-19
+============================================================
+
+SIGNALS: 3 total (1 buys, 2 sells, 0 TP, 0 SL)
+POSITION BTCUSD: LONG | Trades: 1 | PnL: -0.6757%
+REGIME: MIXED | Bias: MIXED
+OPTIMAL: ATR 16 / Mult 5.0
+
+PM2 PROCESSES:
+
+CRON JOBS:
+  [RAN] optimizer
+  [RAN] regime_detector
+
+DISK: 32G/45G (70% used)
+
+Report saved: /home/ubuntu/mission-control/daily-reports/reports/2026-04-19.json
+Calendar saved: /home/ubuntu/mission-control/daily-reports/calendar/2026-04-19.json
+Dashboard: /home/ubuntu/mission-control/signal-receiver/data/daily_report.json
+Monthly calendar: /home/ubuntu/mission-control/daily-reports/calendar/2026-04-calendar.json
+Posted to Discord
+[2026-04-19T23:55:01Z] Done
+
+[2026-04-20T23:55:01Z] Running Daily Report
+
+============================================================
+Mission Control Daily Report — 2026-04-20
+============================================================
+
+SIGNALS: 4 total (2 buys, 2 sells, 0 TP, 0 SL)
+POSITION BTCUSD: SHORT | Trades: 2 | PnL: -1.8949%
+REGIME: MIXED | Bias: BULLISH
+OPTIMAL: ATR 16 / Mult 5.0
+
+PM2 PROCESSES:
+
+CRON JOBS:
+  [RAN] optimizer
+  [RAN] regime_detector
+
+DISK: 33G/45G (73% used)
+
+Report saved: /home/ubuntu/mission-control/daily-reports/reports/2026-04-20.json
+Calendar saved: /home/ubuntu/mission-control/daily-reports/calendar/2026-04-20.json
+Dashboard: /home/ubuntu/mission-control/signal-receiver/data/daily_report.json
+Monthly calendar: /home/ubuntu/mission-control/daily-reports/calendar/2026-04-calendar.json
+Posted to Discord
+[2026-04-20T23:55:01Z] Done
+
+[2026-04-21T23:55:01Z] Running Daily Report
+
+============================================================
+Mission Control Daily Report — 2026-04-21
+============================================================
+
+SIGNALS: 1 total (0 buys, 1 sells, 0 TP, 0 SL)
+POSITION BTCUSD: SHORT | Trades: 1 | PnL: 1.8988%
+REGIME: MIXED | Bias: BULLISH
+OPTIMAL: ATR 16 / Mult 5.0
+
+PM2 PROCESSES:
+
+CRON JOBS:
+  [RAN] optimizer
+  [RAN] regime_detector
+
+DISK: 33G/45G (73% used)
+
+Report saved: /home/ubuntu/mission-control/daily-reports/reports/2026-04-21.json
+Calendar saved: /home/ubuntu/mission-control/daily-reports/calendar/2026-04-21.json
+Dashboard: /home/ubuntu/mission-control/signal-receiver/data/daily_report.json
+Monthly calendar: /home/ubuntu/mission-control/daily-reports/calendar/2026-04-calendar.json
+Posted to Discord
+[2026-04-21T23:55:01Z] Done
+
+[2026-04-22T23:55:01Z] Running Daily Report
+
+============================================================
+Mission Control Daily Report — 2026-04-22
+============================================================
+
+SIGNALS: 0 total (0 buys, 0 sells, 0 TP, 0 SL)
+POSITION BTCUSD: SHORT | Trades: 0 | PnL: 0%
+REGIME: MIXED | Bias: BULLISH
+OPTIMAL: ATR 16 / Mult 5.0
+
+PM2 PROCESSES:
+
+CRON JOBS:
+  [RAN] optimizer
+  [RAN] regime_detector
+
+DISK: 37G/45G (81% used)
+
+Report saved: /home/ubuntu/mission-control/daily-reports/reports/2026-04-22.json
+Calendar saved: /home/ubuntu/mission-control/daily-reports/calendar/2026-04-22.json
+Dashboard: /home/ubuntu/mission-control/signal-receiver/data/daily_report.json
+Monthly calendar: /home/ubuntu/mission-control/daily-reports/calendar/2026-04-calendar.json
+Posted to Discord
+[2026-04-22T23:55:01Z] Done
+
+[2026-04-23T23:55:01Z] Running Daily Report
+
+============================================================
+Mission Control Daily Report — 2026-04-23
+============================================================
+
+SIGNALS: 0 total (0 buys, 0 sells, 0 TP, 0 SL)
+POSITION BTCUSD: SHORT | Trades: 0 | PnL: 0%
+REGIME: MIXED | Bias: BULLISH
+OPTIMAL: ATR 16 / Mult 5.0
+
+PM2 PROCESSES:
+
+CRON JOBS:
+  [RAN] optimizer
+  [RAN] regime_detector
+
+DISK: 33G/45G (73% used)
+
+Report saved: /home/ubuntu/mission-control/daily-reports/reports/2026-04-23.json
+Calendar saved: /home/ubuntu/mission-control/daily-reports/calendar/2026-04-23.json
+Dashboard: /home/ubuntu/mission-control/signal-receiver/data/daily_report.json
+Monthly calendar: /home/ubuntu/mission-control/daily-reports/calendar/2026-04-calendar.json
+Posted to Discord
+[2026-04-23T23:55:01Z] Done

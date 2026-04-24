@@ -1,0 +1,78 @@
+# Environment variables (NEVER COMMIT THESE)
+.env
+.env.local
+.env.production
+.env.development
+
+# But keep the template
+!.env.template
+
+# Node modules
+node_modules/
+npm-debug.log
+yarn-error.log
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+env/
+venv/
+*.egg-info/
+
+# Mission Control data files (these contain sensitive trading data)
+shared/*.json
+*/pending_orders.json
+*/executions.json
+*/signals.json
+*/analyses.json
+*/portfolio_state.json
+*/token_usage.json
+
+# Keep example/template files
+!shared/*.example.json
+
+# Logs
+logs/
+*.log
+pm2-logs/
+
+# OS files
+.DS_Store
+Thumbs.db
+*.swp
+*.swo
+
+# IDE
+.vscode/
+.idea/
+*.sublime-project
+*.sublime-workspace
+
+# Temporary files
+tmp/
+temp/
+*.tmp
+
+# Backup files
+*.bak
+*.backup
+*~
+
+# SSL certificates (if any local copies)
+*.pem
+*.key
+*.crt
+*.csr
+
+# Database files (if using local SQLite)
+*.db
+*.sqlite
+*.sqlite3
+
+# Archives
+*.zip
+*.tar.gz
+*.rar

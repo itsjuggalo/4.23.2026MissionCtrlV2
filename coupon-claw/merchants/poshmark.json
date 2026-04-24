@@ -1,0 +1,12 @@
+{
+    "name": "Poshmark",
+    "test_product_url": "https://poshmark.com/",
+    "add_to_cart_selector": "",
+    "cart_url": "https://poshmark.com/bundles",
+    "coupon_input_selector": "input[name='promoCode']",
+    "apply_button_selector": "button.apply-promo",
+    "success_indicators": ["applied", "promo applied", "discount", "credit applied"],
+    "failure_indicators": ["invalid", "expired", "not valid", "not eligible"],
+    "targeted_indicators": ["new user", "first order", "referral"],
+    "notes": "Poshmark codes are usually referral-based or new-user only."
+}

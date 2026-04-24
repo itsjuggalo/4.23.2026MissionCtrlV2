@@ -1,0 +1,15 @@
+package U2;
+
+import java.io.Closeable;
+
+/* JADX INFO: loaded from: classes3.dex */
+public final class e implements Closeable {
+
+    /* JADX INFO: renamed from: a, reason: collision with root package name */
+    public static final e f5273a = new e();
+
+    @Override // java.io.Closeable, java.lang.AutoCloseable
+    public void close() {
+        c.g();
+    }
+}

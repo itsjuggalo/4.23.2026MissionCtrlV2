@@ -1,0 +1,283 @@
+'use client';
+import { useState, useEffect } from 'react';
+
+export function WalletsPage() {
+  const [authenticated, setAuthenticated] = useState(false);
+  const [checking, setChecking] = useState(true);
+  const [password, setPassword] = useState('');
+  const [error, setError] = useState('');
+  const [loading, setLoading] = useState(false);
+  const [wallets, setWallets] = useState<any[]>([]);
+  const [collapsed, setCollapsed] = useState<Record<string, boolean>>({});
+  const [expanded, setExpanded] = useState<Record<string, boolean>>({});
+
+  const toggleCollapse = (name: string) => setCollapsed(prev => ({ ...prev, [name]: !prev[name] }));
+  const toggleExpanded = (name: string) => setExpanded(prev => ({ ...prev, [name]: !prev[name] }));
+
+  useEffect(() => {
+    fetch('/api/wallets')
+      .then(r => { if (r.ok) { setAuthenticated(true); return r.json(); } throw new Error(''); })
+      .then(data => setWallets(Array.isArray(data) ? data : data.wallets || []))
+      .catch(() => {})
+      .finally(() => setChecking(false));
+  }, []);
+
+  const handleLogin = async () => {
+    setLoading(true); setError('');
+    try {
+      const res = await fetch('/api/wallet-auth', {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ password }),
+      });
+      if (res.ok) {
+        setAuthenticated(true);
+        const wRes = await fetch('/api/wallets');
+        const data = await wRes.json();
+        setWallets(Array.isArray(data) ? data : data.wallets || []);
+      } else { setError('Access denied'); }
+    } catch { setError('Connection error'); }
+    finally { setLoading(false); }
+  };
+
+  const fmt = (n: number) => n.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  const fmtQty = (n: number) => n < 1 ? n.toFixed(6) : n < 100 ? n.toFixed(2) : n.toLocaleString(undefined, { maximumFractionDigits: 2 });
+  const fmtPrice = (n: number) => n > 0 && n < 0.01 ? n.toFixed(6) : n > 0 && n < 1 ? n.toFixed(4) : fmt(n);
+
+  if (checking) return (
+    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '60vh', color: '#4fc3f7', fontFamily: 'var(--font-mc-mono)' }}>
+      <div style={{ animation: 'wBlink 1s infinite' }}>VERIFYING ACCESS...</div>
+      <style>{'@keyframes wBlink { 0%,100% { opacity:1; } 50% { opacity:0.3; } }'}</style>
+    </div>
+  );
+
+  if (!authenticated) {
+    return (
+      <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '60vh' }}>
+        <div style={{ background: 'linear-gradient(180deg, #0a1929 0%, #0d1420 100%)', border: '1px solid #1a3a4a', borderRadius: '12px', padding: '48px 40px', maxWidth: '420px', width: '100%', textAlign: 'center' }}>
+          <div style={{ fontSize: '48px', marginBottom: '16px' }}>&#x1F512;</div>
+          <h2 style={{ fontSize: 'var(--mc-font-xl)', fontWeight: 700, color: '#4fc3f7', fontFamily: 'var(--font-mc-mono)', letterSpacing: '2px', marginBottom: '8px' }}>VAULT ACCESS</h2>
+          <p style={{ fontSize: 'var(--mc-font-badge)', color: '#455a64', marginBottom: '28px', fontFamily: 'var(--font-mc-mono)' }}>Enter authorization code to access wallet data</p>
+          <input type="password" value={password} onChange={(e) => setPassword(e.target.value)} onKeyDown={(e) => e.key === 'Enter' && handleLogin()} placeholder="Password"
+            style={{ width: '100%', padding: '14px 18px', background: '#0d1117', border: '1px solid #1a3a4a', borderRadius: '8px', color: '#e0e0e0', fontSize: 'var(--mc-font-lg)', fontFamily: 'var(--font-mc-mono)', marginBottom: '14px', outline: 'none', boxSizing: 'border-box', textAlign: 'center', letterSpacing: '4px' }} />
+          {error && <p style={{ color: '#ef5350', fontSize: 'var(--mc-font-badge)', marginBottom: '14px', fontFamily: 'var(--font-mc-mono)' }}>{error}</p>}
+          <button onClick={handleLogin} disabled={loading || !password}
+            style={{ width: '100%', padding: '14px', background: loading ? '#1a3a4a' : 'linear-gradient(135deg, #1a3a4a, #0a1929)', color: '#4fc3f7', border: '1px solid #4fc3f744', borderRadius: '8px', fontSize: 'var(--mc-font-sm)', fontWeight: 700, fontFamily: 'var(--font-mc-mono)', letterSpacing: '2px', cursor: loading ? 'wait' : 'pointer', opacity: !password ? 0.4 : 1 }}>
+            {loading ? 'AUTHENTICATING...' : 'UNLOCK VAULT'}
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  const totalBalance = wallets.reduce((s, w) => s + (w.balance || 0), 0);
+
+  const accentColors: Record<string, string> = {
+    cyan: '#4fc3f7', purple: '#ce93d8', green: '#66bb6a', amber: '#ff9800',
+  };
+
+  return (
+    <div style={{ padding: '24px', maxWidth: '1000px', margin: '0 auto' }}>
+
+      {/* Total */}
+      <div style={{ background: 'linear-gradient(180deg, #0a1929 0%, #0d1420 100%)', border: '1px solid #1a3a4a', borderRadius: '10px', padding: '28px 32px', marginBottom: '20px', textAlign: 'center' }}>
+        <div style={{ fontSize: 'var(--mc-font-badge)', color: '#607d8b', fontFamily: 'var(--font-mc-mono)', letterSpacing: '1.5px', marginBottom: '8px' }}>TOTAL PORTFOLIO VALUE</div>
+        <div style={{ fontSize: '42px', fontWeight: 800, color: '#66bb6a', fontFamily: 'var(--font-mc-mono)' }}>${fmt(totalBalance)}</div>
+        <div style={{ fontSize: 'var(--mc-font-sm)', color: '#607d8b', fontFamily: 'var(--font-mc-mono)', marginTop: '8px' }}>{wallets.length} accounts connected</div>
+      </div>
+
+      {/* Wallets */}
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+        {wallets.map((w: any, i: number) => {
+          const balance = w.balance || 0;
+          const cash = w.cash || 0;
+          const bp = w.buying_power || 0;
+          const pctOfTotal = totalBalance > 0 ? (balance / totalBalance * 100) : 0;
+          const isError = w.status === 'error';
+          const positions = w.positions || [];
+          const borderColor = isError ? '#ef5350' : accentColors[w.accent] || (w.badge === 'LIVE' ? '#66bb6a' : '#ff9800');
+          const isStrategy = (w.notes || '').includes('strategies');
+          const hasPositions = positions.length > 0;
+          const isCollapsed = !!collapsed[w.name];
+          const isExpanded = !!expanded[w.name];
+
+          // Parse notes-based holdings for wallets without positions array
+          const noteHoldings = !hasPositions && w.notes ? (w.notes || '').split(' | ').filter((n: string) =>
+            n && !n.startsWith('Phase') && !n.includes('strategies') && !n.includes('positions') && !n.includes('assets')
+          ) : [];
+
+          const hasAnyContent = hasPositions || noteHoldings.length > 0 || isStrategy || (cash !== 0 || bp !== 0);
+          const shownPositions = isExpanded ? positions : positions.slice(0, 8);
+
+          return (
+            <div key={i} style={{ background: 'linear-gradient(180deg, #0a1929 0%, #0d1420 100%)', border: '1px solid #1a3a4a', borderLeft: `4px solid ${borderColor}`, borderRadius: '10px', padding: '24px 28px' }}>
+
+              {/* Header */}
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: hasAnyContent && !isCollapsed ? '16px' : '0' }}>
+                <div style={{ display: 'flex', alignItems: 'flex-start', gap: '10px' }}>
+                  {hasAnyContent && (
+                    <span onClick={() => toggleCollapse(w.name)} style={{ cursor: 'pointer', fontSize: '16px', color: '#607d8b', userSelect: 'none', lineHeight: '1.4', marginTop: '2px' }}>
+                      {isCollapsed ? '\u25B8' : '\u25BE'}
+                    </span>
+                  )}
+                  <div>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '6px' }}>
+                      <span style={{ fontSize: 'var(--mc-font-xl)', fontWeight: 700, color: '#e0e0e0', fontFamily: 'var(--font-mc-mono)' }}>{w.name}</span>
+                      {w.badge && <span style={{ fontSize: 'var(--mc-font-label)', fontWeight: 700, padding: '3px 10px', borderRadius: '4px', fontFamily: 'var(--font-mc-mono)', letterSpacing: '1px', background: w.badge === 'LIVE' ? '#66bb6a22' : '#ff980022', color: w.badge === 'LIVE' ? '#66bb6a' : '#ff9800', border: `1px solid ${w.badge === 'LIVE' ? '#66bb6a44' : '#ff980044'}` }}>{w.badge}</span>}
+                      {isError && <span style={{ fontSize: 'var(--mc-font-label)', fontWeight: 700, padding: '3px 10px', borderRadius: '4px', fontFamily: 'var(--font-mc-mono)', background: '#ef535022', color: '#ef5350', border: '1px solid #ef535044' }}>ERROR</span>}
+                    </div>
+                    <div style={{ fontSize: 'var(--mc-font-xs)', color: '#607d8b', fontFamily: 'var(--font-mc-mono)' }}>
+                      {w.type}{hasPositions ? ` \u00B7 ${positions.length} positions` : ''}
+                    </div>
+                  </div>
+                </div>
+                <div style={{ textAlign: 'right' }}>
+                  <div style={{ fontSize: '32px', fontWeight: 800, color: balance > 0 ? '#66bb6a' : '#ef5350', fontFamily: 'var(--font-mc-mono)' }}>${fmt(balance)}</div>
+                  <div style={{ fontSize: 'var(--mc-font-badge)', color: '#607d8b', fontFamily: 'var(--font-mc-mono)', marginTop: '4px' }}>{pctOfTotal.toFixed(1)}% of portfolio</div>
+                </div>
+              </div>
+
+              {/* Collapsible content */}
+              {!isCollapsed && (
+                <>
+                  {/* Cash Row */}
+                  {(cash !== 0 || bp !== 0) && (
+                    <div style={{ display: 'flex', gap: '24px', marginBottom: '16px', padding: '12px 16px', background: '#0d1117', borderRadius: '8px' }}>
+                      {cash !== 0 && <div>
+                        <div style={{ fontSize: 'var(--mc-font-label)', color: '#607d8b', fontFamily: 'var(--font-mc-mono)', marginBottom: '4px' }}>CASH</div>
+                        <div style={{ fontSize: 'var(--mc-font-xl)', fontWeight: 600, color: cash >= 0 ? '#e0e0e0' : '#ef5350', fontFamily: 'var(--font-mc-mono)' }}>${fmt(cash)}</div>
+                      </div>}
+                      {bp !== 0 && bp !== cash && <div>
+                        <div style={{ fontSize: 'var(--mc-font-label)', color: '#607d8b', fontFamily: 'var(--font-mc-mono)', marginBottom: '4px' }}>BUYING POWER</div>
+                        <div style={{ fontSize: 'var(--mc-font-xl)', fontWeight: 600, color: '#4fc3f7', fontFamily: 'var(--font-mc-mono)' }}>${fmt(bp)}</div>
+                      </div>}
+                    </div>
+                  )}
+
+                  {/* Positions Grid (structured data) */}
+                  {hasPositions && (
+                    <div>
+                      <div style={{ fontSize: 'var(--mc-font-label)', color: '#607d8b', fontFamily: 'var(--font-mc-mono)', marginBottom: '10px', letterSpacing: '1px' }}>HOLDINGS</div>
+                      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(240px, 1fr))', gap: '8px' }}>
+                        {shownPositions.map((p: any, j: number) => {
+                          const isStock = p.type === 'stock';
+                          const price = Number(p.price || 0);
+                          const avgCost = Number(p.avg_cost || 0);
+                          const equity = Number(p.equity || 0);
+                          const qty = Number(p.quantity || 0);
+                          const pctRet = p.pct_change != null ? p.pct_change : (avgCost > 0 ? ((price - avgCost) / avgCost) * 100 : null);
+                          const dollarPL = avgCost > 0 && qty ? (price - avgCost) * qty : null;
+                          const symbolColor = w.accent === 'purple' ? '#ce93d8' : '#4fc3f7';
+                          const pctColor = pctRet != null ? (pctRet >= 0 ? '#66bb6a' : '#ef5350') : '#607d8b';
+                          const bgTint = pctRet != null ? (pctRet >= 0 ? 'rgba(102,187,106,0.06)' : 'rgba(239,83,80,0.06)') : '#0d1117';
+                          const borderTint = pctRet != null ? (pctRet >= 0 ? 'rgba(102,187,106,0.30)' : 'rgba(239,83,80,0.28)') : '#1a3a4a';
+                          return (
+                            <div key={j} style={{
+                              padding: '10px 12px',
+                              background: 'linear-gradient(180deg, #0d1117 0%, ' + bgTint + ' 100%)',
+                              borderRadius: '6px',
+                              border: '1px solid ' + borderTint,
+                              display: 'flex', flexDirection: 'column', gap: '5px',
+                            }}>
+                              {/* Row 1: Symbol + Type badge */}
+                              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline' }}>
+                                <span style={{ fontSize: 'var(--mc-font-md)', fontWeight: 800, color: symbolColor, fontFamily: 'var(--font-mc-mono)', letterSpacing: '0.5px' }}>{p.symbol}</span>
+                                <span style={{ fontSize: '9px', fontWeight: 700, color: '#607d8b', fontFamily: 'var(--font-mc-mono)', letterSpacing: '1.2px' }}>{isStock ? 'STOCK' : 'CRYPTO'}</span>
+                              </div>
+                              {/* Row 2: Equity + pct pill */}
+                              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline' }}>
+                                <span style={{ fontSize: 'var(--mc-font-lg)', fontWeight: 800, color: '#e0e0e0', fontFamily: 'var(--font-mc-mono)' }}>${fmt(equity)}</span>
+                                {pctRet != null && (
+                                  <span style={{ fontSize: 'var(--mc-font-badge)', fontWeight: 700, color: pctColor, background: pctColor + '22', padding: '2px 7px', borderRadius: '3px', fontFamily: 'var(--font-mc-mono)' }}>
+                                    {pctRet >= 0 ? '+' : ''}{pctRet.toFixed(1)}%
+                                  </span>
+                                )}
+                              </div>
+                              {/* Row 3: qty + avg -> current */}
+                              <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 'var(--mc-font-label)', color: '#90a4ae', fontFamily: 'var(--font-mc-mono)', borderTop: '1px solid #1a2332', paddingTop: '5px', gap: '8px' }}>
+                                <span>{fmtQty(qty)} {isStock ? 'sh' : 'coins'}</span>
+                                {avgCost > 0 ? (
+                                  <span style={{ textAlign: 'right' }}>{'avg $' + fmtPrice(avgCost) + ' \u2192 $' + fmtPrice(price)}</span>
+                                ) : price > 0 ? (
+                                  <span>{'@ $' + fmtPrice(price)}</span>
+                                ) : (
+                                  <span>{"\u2014"}</span>
+                                )}
+                              </div>
+                              {/* Row 4: dollar P/L */}
+                              {dollarPL != null && Math.abs(dollarPL) > 0.01 && (
+                                <div style={{ fontSize: '10px', color: pctColor, textAlign: 'right', marginTop: '-2px', fontWeight: 600, fontFamily: 'var(--font-mc-mono)' }}>
+                                  {dollarPL >= 0 ? '+' : '-'}${fmt(Math.abs(dollarPL))} {dollarPL >= 0 ? 'gain' : 'loss'}
+                                </div>
+                              )}
+                            </div>
+                          );
+                        })}
+                      </div>
+                      {positions.length > 8 && (
+                        <button onClick={() => toggleExpanded(w.name)} style={{
+                          marginTop: '10px', width: '100%',
+                          fontSize: 'var(--mc-font-label)', color: '#4fc3f7', padding: '7px',
+                          background: 'transparent', border: '1px dashed #1a3a4a', borderRadius: '4px',
+                          cursor: 'pointer', fontFamily: 'var(--font-mc-mono)', letterSpacing: '0.5px',
+                          display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px',
+                        }}>
+                          <span style={{ fontSize: '12px' }}>{isExpanded ? '\u25B4' : '\u25BE'}</span>
+                          {isExpanded ? 'Show Top 8' : 'Show All (' + positions.length + ')'}
+                        </button>
+                      )}
+                    </div>
+                  )}
+
+                  {/* Note-based holdings (for wallets without positions array) */}
+                  {!hasPositions && noteHoldings.length > 0 && (
+                    <div>
+                      <div style={{ fontSize: 'var(--mc-font-label)', color: '#607d8b', fontFamily: 'var(--font-mc-mono)', marginBottom: '10px', letterSpacing: '1px' }}>HOLDINGS</div>
+                      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))', gap: '6px' }}>
+                        {noteHoldings.map((h: string, j: number) => {
+                          const parts = h.trim().split(':');
+                          const symbol = parts[0]?.trim() || '?';
+                          const rest = parts.slice(1).join(':').trim();
+                          const dollarMatch = rest.match(/\(\$?([\d,.-]+)\)/);
+                          const upnlMatch = rest.match(/uPnL:\s*\$?([\d,.-]+)/);
+                          const value = dollarMatch ? parseFloat(dollarMatch[1].replace(',', '')) : 0;
+                          const upnl = upnlMatch ? parseFloat(upnlMatch[1].replace(',', '')) : null;
+                          return (
+                            <div key={j} style={{ padding: '12px 14px', background: '#0d1117', borderRadius: '6px', border: '1px solid #1a3a4a', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                              <div>
+                                <div style={{ fontSize: 'var(--mc-font-md)', fontWeight: 700, color: '#4fc3f7', fontFamily: 'var(--font-mc-mono)' }}>{symbol}</div>
+                                <div style={{ fontSize: 'var(--mc-font-label)', color: '#607d8b', fontFamily: 'var(--font-mc-mono)', marginTop: '2px' }}>{rest.split('(')[0]?.trim()}</div>
+                              </div>
+                              <div style={{ textAlign: 'right' }}>
+                                {value > 0 && <div style={{ fontSize: 'var(--mc-font-md)', fontWeight: 700, color: '#e0e0e0', fontFamily: 'var(--font-mc-mono)' }}>${fmt(value)}</div>}
+                                {upnl !== null && <div style={{ fontSize: 'var(--mc-font-badge)', fontWeight: 600, color: upnl >= 0 ? '#66bb6a' : '#ef5350', fontFamily: 'var(--font-mc-mono)' }}>{upnl >= 0 ? '+' : ''}${upnl.toFixed(2)}</div>}
+                              </div>
+                            </div>
+                          );
+                        })}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Strategy note */}
+                  {isStrategy && (
+                    <div style={{ padding: '12px 16px', background: '#0d1117', borderRadius: '8px' }}>
+                      <div style={{ fontSize: 'var(--mc-font-label)', color: '#607d8b', fontFamily: 'var(--font-mc-mono)', marginBottom: '8px' }}>STRATEGY OVERVIEW</div>
+                      <div style={{ fontSize: 'var(--mc-font-md)', color: '#e0e0e0', fontFamily: 'var(--font-mc-mono)' }}>{w.notes}</div>
+                    </div>
+                  )}
+
+                  {/* Simple note for wallets with no positions and no parsed holdings */}
+                  {!hasPositions && noteHoldings.length === 0 && !isStrategy && w.notes && (
+                    <div style={{ padding: '12px 16px', background: '#0d1117', borderRadius: '8px', color: '#607d8b', fontSize: 'var(--mc-font-xs)', fontFamily: 'var(--font-mc-mono)' }}>
+                      {w.notes}
+                    </div>
+                  )}
+                </>
+              )}
+            </div>
+          );
+        })}
+      </div>
+    </div>
+  );
+}

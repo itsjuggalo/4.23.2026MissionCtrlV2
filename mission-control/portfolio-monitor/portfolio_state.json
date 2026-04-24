@@ -1,0 +1,79 @@
+{
+  "last_updated": "2026-04-09T16:37:24.292156+00:00",
+  "total_value_usd": 114643.5,
+  "total_pnl_today_usd": -98.27,
+  "total_pnl_today_pct": -0.0856,
+  "total_pnl_week_usd": 10659.52,
+  "cash_available": -76839.11,
+  "deployed_capital": 191482.61,
+  "deployed_pct": 167.02,
+  "positions": [
+    {
+      "symbol": "LLY",
+      "asset_class": "stocks",
+      "direction": "LONG",
+      "size": 10.0,
+      "entry_price": 932.48,
+      "stop_loss": null,
+      "targets": [],
+      "opened_at": null,
+      "value_usd": 9588.2,
+      "_alpaca_pnl_usd": 263.4,
+      "_alpaca_pnl_pct": 2.825,
+      "current_price": 958.82,
+      "price_stale": false,
+      "unrealized_pnl_usd": 263.4,
+      "unrealized_pnl_pct": 2.8247,
+      "distance_to_stop_pct": null,
+      "distance_to_target_pct": null,
+      "pct_of_portfolio": 8.3635
+    },
+    {
+      "symbol": "MU",
+      "asset_class": "stocks",
+      "direction": "LONG",
+      "size": 446.0,
+      "entry_price": 375.64,
+      "stop_loss": null,
+      "targets": [],
+      "opened_at": null,
+      "value_usd": 181894.41,
+      "_alpaca_pnl_usd": 14358.97,
+      "_alpaca_pnl_pct": 8.571,
+      "current_price": 407.835,
+      "price_stale": false,
+      "unrealized_pnl_usd": 14358.97,
+      "unrealized_pnl_pct": 8.5707,
+      "distance_to_stop_pct": null,
+      "distance_to_target_pct": null,
+      "pct_of_portfolio": 158.6609
+    }
+  ],
+  "allocation": {
+    "crypto": {
+      "value": 0,
+      "pct": 0.0
+    },
+    "stocks": {
+      "value": 191482.61,
+      "pct": 167.02
+    },
+    "other": {
+      "value": 0,
+      "pct": 0.0
+    },
+    "cash": {
+      "value": -76839.11,
+      "pct": -67.02
+    }
+  },
+  "risk_metrics": {
+    "total_exposure_pct": 167.02,
+    "largest_position_pct": 158.66,
+    "largest_position": "MU",
+    "positions_at_risk": 0,
+    "positions_near_stop": [],
+    "positions_near_target": []
+  },
+  "alerts": []
+}

@@ -1,0 +1,12 @@
+{
+  "date": "2026-04-15",
+  "signals_received": 90,
+  "trades_closed": 90,
+  "total_pnl_pct": 0.7193,
+  "regime": "MIXED",
+  "bias": "BULLISH",
+  "processes_online": 0,
+  "processes_total": 0,
+  "crons_ran": 2,
+  "highlight": "+0.72% PnL | 90 signals | Mixed"
+}

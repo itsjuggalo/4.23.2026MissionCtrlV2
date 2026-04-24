@@ -1,0 +1,20 @@
+{
+  "max_portfolio_exposure_pct": 75,
+  "max_single_position_pct": 10,
+  "max_daily_drawdown_pct": 5,
+  "max_weekly_drawdown_pct": 10,
+  "max_correlated_exposure_pct": 30,
+  "max_open_positions": 15,
+  "min_risk_reward_ratio": 1.5,
+  "max_leverage": 20,
+  "position_sizing_method": "risk_based",
+  "default_risk_per_trade_pct": 1.5,
+  "cool_down_after_consecutive_losses": 3,
+  "cool_down_reduce_size_pct": 50,
+  "asset_allocation_limits": {
+    "crypto": 60,
+    "stocks": 50,
+    "futures": 30,
+    "options": 20
+  }
+}

@@ -1,0 +1,29 @@
+package com.google.firebase.auth;
+
+import A1.b;
+import android.os.Parcel;
+import android.os.Parcelable;
+
+/* JADX INFO: loaded from: classes.dex */
+public final class zzar implements Parcelable.Creator<PlayGamesAuthCredential> {
+    @Override // android.os.Parcelable.Creator
+    public final /* synthetic */ PlayGamesAuthCredential createFromParcel(Parcel parcel) {
+        int iM = b.M(parcel);
+        String strQ = null;
+        while (parcel.dataPosition() < iM) {
+            int iD = b.D(parcel);
+            if (b.w(iD) != 1) {
+                b.L(parcel, iD);
+            } else {
+                strQ = b.q(parcel, iD);
+            }
+        }
+        b.v(parcel, iM);
+        return new PlayGamesAuthCredential(strQ);
+    }
+
+    @Override // android.os.Parcelable.Creator
+    public final /* synthetic */ PlayGamesAuthCredential[] newArray(int i4) {
+        return new PlayGamesAuthCredential[i4];
+    }
+}

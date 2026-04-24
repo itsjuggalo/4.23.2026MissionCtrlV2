@@ -1,0 +1,12 @@
+{
+    "name": "Walmart",
+    "test_product_url": "https://www.walmart.com/ip/Great-Value-Purified-Drinking-Water-16-9-fl-oz-Bottles-40-Count/992524928",
+    "add_to_cart_selector": "button[data-testid='add-to-cart-btn']",
+    "cart_url": "https://www.walmart.com/cart",
+    "coupon_input_selector": "input[data-testid='promo-input']",
+    "apply_button_selector": "button[data-testid='promo-apply-btn']",
+    "success_indicators": ["applied", "promo applied", "savings", "discount"],
+    "failure_indicators": ["invalid", "expired", "not eligible", "doesn't apply"],
+    "targeted_indicators": ["walmart+ members", "first order", "new customers"],
+    "notes": "Walmart+ codes won't work without membership."
+}
