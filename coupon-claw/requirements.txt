@@ -1,6 +1,0 @@
-playwright
-discord.py
-requests
-python-dotenv
-beautifulsoup4
-aiosqlite

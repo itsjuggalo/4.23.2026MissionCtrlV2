@@ -1008,3 +1008,77 @@ Saved: /home/ubuntu/.openclaw/workspace/directives/market_regime_BTC.json
 Saved: /home/ubuntu/mission-control/signal-receiver/data/market_regime.json
 Posted to Discord
 [2026-04-24T00:00:03Z] Done
+
+[2026-04-24T04:00:01Z] Running Regime Detection
+
+============================================================
+Market Regime Detector — BTC/USD
+============================================================
+
+Overall: MIXED
+Bias:    BULLISH
+Action:  DayTrader light size — no clear regime
+
+  1H: TRANSITIONAL     ADX=19.3   Chop=54.0   BBW=1.56    Dir=BULLISH  → DayTrader (light size)
+  4H: TRANSITIONAL     ADX=17.2   Chop=53.9   BBW=5.77    Dir=BULLISH  → DayTrader (light size)
+
+Saved: /home/ubuntu/.openclaw/workspace/directives/market_regime_BTC.json
+Saved: /home/ubuntu/mission-control/signal-receiver/data/market_regime.json
+Posted to Discord
+[2026-04-24T04:00:01Z] Done
+
+[2026-04-24T08:00:02Z] Running Regime Detection
+
+============================================================
+Market Regime Detector — BTC/USD
+============================================================
+
+Overall: MIXED
+Bias:    MIXED
+Action:  DayTrader light size — no clear regime
+
+  1H: RANGING          ADX=19.5   Chop=59.6   BBW=1.46    Dir=BEARISH  → Grid Bot
+  4H: RANGING          ADX=16.5   Chop=61.0   BBW=5.39    Dir=BULLISH  → Grid Bot
+  1D: WEAK_TREND       ADX=22.9   Chop=50.4   BBW=15.04   Dir=BULLISH  → SuperTrend (cautious)
+
+Saved: /home/ubuntu/.openclaw/workspace/directives/market_regime_BTC.json
+Saved: /home/ubuntu/mission-control/signal-receiver/data/market_regime.json
+Posted to Discord
+[2026-04-24T08:00:02Z] Done
+
+[2026-04-24T12:00:01Z] Running Regime Detection
+
+============================================================
+Market Regime Detector — BTC/USD
+============================================================
+
+Overall: MIXED
+Bias:    MIXED
+Action:  DayTrader light size — no clear regime
+
+  1H: RANGING          ADX=17.2   Chop=62.7   BBW=1.4     Dir=BEARISH  → Grid Bot
+  1D: WEAK_TREND       ADX=22.9   Chop=50.5   BBW=15.25   Dir=BULLISH  → SuperTrend (cautious)
+
+Saved: /home/ubuntu/.openclaw/workspace/directives/market_regime_BTC.json
+Saved: /home/ubuntu/mission-control/signal-receiver/data/market_regime.json
+Posted to Discord
+[2026-04-24T12:00:01Z] Done
+
+[2026-04-24T16:00:02Z] Running Regime Detection
+
+============================================================
+Market Regime Detector — BTC/USD
+============================================================
+
+Overall: MIXED
+Bias:    MIXED
+Action:  DayTrader light size — no clear regime
+
+  1H: RANGING          ADX=13.9   Chop=64.6   BBW=1.33    Dir=BEARISH  → Grid Bot
+  4H: RANGING          ADX=16.7   Chop=61.1   BBW=4.97    Dir=BULLISH  → Grid Bot
+  1D: WEAK_TREND       ADX=22.9   Chop=50.5   BBW=15.18   Dir=BULLISH  → SuperTrend (cautious)
+
+Saved: /home/ubuntu/.openclaw/workspace/directives/market_regime_BTC.json
+Saved: /home/ubuntu/mission-control/signal-receiver/data/market_regime.json
+Posted to Discord
+[2026-04-24T16:00:02Z] Done

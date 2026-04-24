@@ -1,33 +1,45 @@
 {
-  "timestamp": "2026-04-24T00:00:08.693231+00:00",
+  "timestamp": "2026-04-24T16:00:09.890048+00:00",
   "symbol": "BTC/USD",
   "overall_regime": "MIXED",
   "overall_recommendation": "DayTrader light size \u2014 no clear regime",
-  "direction_bias": "BULLISH",
+  "direction_bias": "MIXED",
   "timeframes": {
     "1H": {
-      "regime": "WEAK_TREND",
-      "recommended_strategy": "SuperTrend (cautious)",
+      "regime": "RANGING",
+      "recommended_strategy": "Grid Bot",
+      "direction": "BEARISH",
+      "adx": 13.9,
+      "plus_di": 20.9,
+      "minus_di": 19.1,
+      "bbw": 1.33,
+      "choppiness": 64.6,
+      "trend_efficiency": 0.12,
+      "current_price": 78073.15
+    },
+    "4H": {
+      "regime": "RANGING",
+      "recommended_strategy": "Grid Bot",
       "direction": "BULLISH",
-      "adx": 21.2,
-      "plus_di": 18.7,
-      "minus_di": 23.5,
-      "bbw": 1.39,
-      "choppiness": 51.0,
-      "trend_efficiency": 0.179,
-      "current_price": 78312.88
+      "adx": 16.7,
+      "plus_di": 21.3,
+      "minus_di": 15.4,
+      "bbw": 4.97,
+      "choppiness": 61.1,
+      "trend_efficiency": 0.133,
+      "current_price": 78073.15
     },
     "1D": {
       "regime": "WEAK_TREND",
       "recommended_strategy": "SuperTrend (cautious)",
       "direction": "BULLISH",
       "adx": 22.9,
-      "plus_di": 27.4,
-      "minus_di": 12.9,
-      "bbw": 15.27,
-      "choppiness": 49.2,
-      "trend_efficiency": 0.178,
-      "current_price": 78312.24
+      "plus_di": 26.4,
+      "minus_di": 12.5,
+      "bbw": 15.18,
+      "choppiness": 50.5,
+      "trend_efficiency": 0.173,
+      "current_price": 78075.18
     }
   }
 }

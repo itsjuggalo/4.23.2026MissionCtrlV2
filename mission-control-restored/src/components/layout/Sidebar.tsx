@@ -50,6 +50,7 @@ type PageName =
   | 'Docs'
   | 'Wallets'
   | 'Trades'
+  | 'Journal'
   | 'Activity'
   | 'Risk'
   | 'TV Chart'
@@ -91,6 +92,7 @@ const tradingItems: { name: PageName; icon: React.ElementType }[] = [
   { name: 'OptionsWatcher', icon: BarChart2 },
   { name: 'Wallets', icon: Wallet },
   { name: 'Trades', icon: TrendingUp },
+  { name: 'Journal', icon: BookOpen },
   { name: 'GoTrader', icon: Bot },
   { name: 'Risk', icon: ShieldAlert },
   { name: 'PowerTrader', icon: Cpu },

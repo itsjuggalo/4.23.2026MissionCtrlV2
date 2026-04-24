@@ -4437,5 +4437,47 @@
     "message": "Close the trade as it hit trailing stop at 8.80!",
     "symbol": "SPY",
     "title": "SPY 710P 05/01 : STC"
+  },
+  "1777037405": {
+    "category": "SCALP",
+    "message": "Reached Target 3.50 and that's 23.67%! Lock some in and wait for next target. Raise the stops to 2.45",
+    "symbol": "MRVL",
+    "title": "MRVL 180C 05/01 : STC"
+  },
+  "1777037466": {
+    "category": "SCALP",
+    "message": "Reached Target 3.70 and that's 30.74%! Lock some in and wait for next target. Raise the stops to 2.83",
+    "symbol": "MRVL",
+    "title": "MRVL 180C 05/01 : STC"
+  },
+  "1777037846": {
+    "category": "SCALP",
+    "message": "Close the trade as it hit trailing stop at 2.78!",
+    "symbol": "MRVL",
+    "title": "MRVL 180C 05/01 : STC"
+  },
+  "1777039297": {
+    "category": "SWING",
+    "message": "Buy To Open at 2.80 with first target above 3.22",
+    "symbol": "BKR",
+    "title": "BKR 70C 6/18: BTO"
+  },
+  "1777040147": {
+    "category": "SCALP",
+    "message": "Buy To Open at 5.50 with first target above 6.32",
+    "symbol": "MRVL",
+    "title": "MRVL 180C 5/15: BTO"
+  },
+  "1777045685": {
+    "category": "SWING",
+    "message": "Close the trade as it hit trailing stop at 1.90!",
+    "symbol": "XLE",
+    "title": "XLE 55.5C 05/15 : STC"
+  },
+  "1777049786": {
+    "category": "SWING",
+    "message": "Reached Target 3.30 and that's 17.86%! Lock some in and wait for next target. Raise the stops to 2.31",
+    "symbol": "BKR",
+    "title": "BKR 70C 06/18 : STC"
   }
 }

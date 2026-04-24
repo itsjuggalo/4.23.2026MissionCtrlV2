@@ -2935,5 +2935,41 @@
     "message": "Close the trade as it hit trailing stop at 395.1!",
     "symbol": "CVNA",
     "title": "CVNA : STC"
+  },
+  "1777035646": {
+    "category": "SWING",
+    "message": "Reached Target 170.8 and that's 12.64%! Lock some in and wait for next target. Raise the stops to 165.7",
+    "symbol": "MRVL",
+    "title": "MRVL : STC"
+  },
+  "1777038224": {
+    "category": "SWING",
+    "message": "Close the trade as it hit trailing stop at 165.3!",
+    "symbol": "MRVL",
+    "title": "MRVL : STC"
+  },
+  "1777039301": {
+    "category": "SWING",
+    "message": "Buy To Open at 67.13 with first target above 68.47",
+    "symbol": "BKR",
+    "title": "BKR: BTO"
+  },
+  "1777040151": {
+    "category": "SCALP",
+    "message": "Buy To Open at 162.38 with first target above 165.63",
+    "symbol": "MRVL",
+    "title": "MRVL: BTO"
+  },
+  "1777046744": {
+    "category": "SWING",
+    "message": "Reached Target 345.1 and that's 8.01%! Lock some in and wait for next target. Raise the stops to 334.7",
+    "symbol": "GOOGL",
+    "title": "GOOGL : STC"
+  },
+  "1777049745": {
+    "category": "SWING",
+    "message": "Reached Target 68.47 and that's 2.00%! Lock some in and wait for next target. Raise the stops to 61.76",
+    "symbol": "BKR",
+    "title": "BKR : STC"
   }
 }

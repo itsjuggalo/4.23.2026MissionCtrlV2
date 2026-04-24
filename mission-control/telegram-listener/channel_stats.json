@@ -1,52 +1,52 @@
 {
   "Firebase-Vivid2": {
-    "total_signals": 181,
-    "actionable_signals": 149,
-    "hit_rate": 82.3
+    "total_signals": 185,
+    "actionable_signals": 153,
+    "hit_rate": 82.7
   },
   "AICryptoSignals": {
-    "total_signals": 7238,
+    "total_signals": 7387,
     "actionable_signals": 0,
     "hit_rate": 0.0
   },
   "Coin Sonar V2": {
-    "total_signals": 16224,
+    "total_signals": 17376,
     "actionable_signals": 0,
     "hit_rate": 0.0
   },
   "\ud83d\udc33 \ud835\udc16\ud835\udc07\ud835\udc00\ud835\udc0b\ud835\udc04\ud835\udc13\ud835\udc11\ud835\udc00\ud835\udc02\ud835\udc0a\ud835\udc04\ud835\udc11 \ud83d\udc40": {
-    "total_signals": 4272,
+    "total_signals": 4545,
     "actionable_signals": 0,
     "hit_rate": 0.0
   },
   "\ud83d\udcc8 Binance Futures 5m Pump Monitor (No charts)": {
-    "total_signals": 1998,
+    "total_signals": 2114,
     "actionable_signals": 0,
     "hit_rate": 0.0
   },
   "Binance Futures 5m Volume Pump Monitor \ud83d\ude80": {
-    "total_signals": 1997,
+    "total_signals": 2113,
     "actionable_signals": 0,
     "hit_rate": 0.0
   },
   "xCrypto Signals": {
-    "total_signals": 892,
+    "total_signals": 956,
     "actionable_signals": 0,
     "hit_rate": 0.0
   },
   "\ud83d\udc33 Whale Liquidations": {
-    "total_signals": 1033,
+    "total_signals": 1034,
     "actionable_signals": 0,
     "hit_rate": 0.0
   },
   "Ai Crypto Signals (Auto Bot)": {
-    "total_signals": 915,
+    "total_signals": 981,
     "actionable_signals": 0,
     "hit_rate": 0.0
   },
   "Ai Golden Crypto": {
-    "total_signals": 656,
-    "actionable_signals": 38,
-    "hit_rate": 5.8
+    "total_signals": 696,
+    "actionable_signals": 40,
+    "hit_rate": 5.7
   }
 }

@@ -13,6 +13,7 @@ const SUBTITLES: Record<string, string> = {
   'Scanner': 'Breathe Deep',
   'Wallets': 'Show Me The Money',
   'Trades': 'Whats Mine Is Mine',
+  'Journal': 'Something For Nothing',
   'GoTrader': 'There Is No Cow Level',
   'PowerTrader': 'Medieval Man',
   'Risk': 'Staying Alive',
@@ -41,7 +42,7 @@ export function Header({
   const [time, setTime] = useState('');
   useEffect(() => {
     const update = () => {
-      setTime(new Date().toLocaleTimeString('en-US', { hour12: false }));
+      setTime(new Date().toLocaleTimeString("en-US", { hour12: false, timeZone: "America/New_York", timeZoneName: "short" }));
     };
     update();
     const id = setInterval(update, 1000);
