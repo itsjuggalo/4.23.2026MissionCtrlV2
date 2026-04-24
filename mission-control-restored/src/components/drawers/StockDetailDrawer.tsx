@@ -104,7 +104,7 @@ export const StockDetailDrawer: React.FC<{ ticker: string | null; onClose: () =>
       }}/>
       <div style={{
         position: 'fixed', top: 0, right: 0, bottom: 0,
-        width: '440px', background: '#000', borderLeft: '1px solid #1a2332',
+        width: '560px', background: '#000', borderLeft: '1px solid #1a2332',
         boxShadow: '-8px 0 32px rgba(0,0,0,0.6)', zIndex: 1000, overflowY: 'auto',
         fontFamily: 'ui-monospace, "SF Mono", Menlo, monospace',
         color: '#e4e4e4', fontSize: '13px',
@@ -341,10 +341,10 @@ const PriceChart: React.FC<{ candles: Candles | null; bullish: boolean; mode?: '
     const min = Math.min(...allVals);
     const max = Math.max(...allVals);
     const range = max - min || 1;
-    const W = 600, H = 220, PAD = 4;
-    const CHART_W = 488;
+    const W = 720, H = 340, PAD = 4, AXIS_H = 18;
+    const CHART_W = 600;
     const cw = (CHART_W - PAD*2) / ohlc.length;
-    const scaleY = (v: number) => H - ((v - min) / range) * (H - 14) - 7;
+    const scaleY = (v: number) => (H - AXIS_H) - ((v - min) / range) * ((H - AXIS_H) - 14) - 7;
     const maToPath = (arr: (number | null)[] | null): string => {
       if (!arr) return '';
       const step = (CHART_W - PAD*2) / arr.length;
@@ -371,10 +371,10 @@ const PriceChart: React.FC<{ candles: Candles | null; bullish: boolean; mode?: '
       if (pills[i].y - pills[i-1].y < MIN_GAP) pills[i].y = pills[i-1].y + MIN_GAP;
     }
     return (
-      <svg viewBox={`0 0 ${W} ${H}`} preserveAspectRatio="none" style={{ width: '100%', height: '220px', overflow: 'visible' }}>
+      <svg viewBox={`0 0 ${W} ${H}`} preserveAspectRatio="none" style={{ width: '100%', height: '340px', overflow: 'visible' }}>
         <defs>
           <filter id="maGlow" x="-20%" y="-20%" width="140%" height="140%">
-            <feGaussianBlur stdDeviation="2.2" result="blur" />
+            <feGaussianBlur stdDeviation="3.5" result="blur" />
             <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
           </filter>
           <linearGradient id="supportGrad" x1="0" y1="0" x2="0" y2="1">
@@ -386,11 +386,11 @@ const PriceChart: React.FC<{ candles: Candles | null; bullish: boolean; mode?: '
             <stop offset="100%" stopColor="#ff9800" stopOpacity="0.14" />
           </linearGradient>
           <clipPath id="chartClip">
-            <rect x="0" y="0" width={CHART_W} height={H} />
+            <rect x="0" y="0" width={CHART_W} height={H - AXIS_H} />
           </clipPath>
         </defs>
         {[0.2, 0.4, 0.6, 0.8].map((pct, i) => (
-          <line key={i} x1={PAD} x2={CHART_W - PAD} y1={7 + pct * (H - 14)} y2={7 + pct * (H - 14)} stroke="#2a3442" strokeWidth="0.6" strokeDasharray="2 4" opacity="0.7" />
+          <line key={i} x1={PAD} x2={CHART_W - PAD} y1={7 + pct * ((H - AXIS_H) - 14)} y2={7 + pct * ((H - AXIS_H) - 14)} stroke="#2a3442" strokeWidth="0.6" strokeDasharray="2 4" opacity="0.7" />
         ))}
         <rect x={PAD} y={scaleY(resistance)} width={CHART_W - PAD*2} height={10} fill="url(#resistanceGrad)" />
         <rect x={PAD} y={scaleY(support) - 10} width={CHART_W - PAD*2} height={10} fill="url(#supportGrad)" />
@@ -405,7 +405,7 @@ const PriceChart: React.FC<{ candles: Candles | null; bullish: boolean; mode?: '
             const bodyTop = scaleY(Math.max(c.o, c.c));
             const bodyBot = scaleY(Math.min(c.o, c.c));
             const bodyH = Math.max(2, bodyBot - bodyTop);
-            const bodyW = Math.min(cw * 0.7, 9);
+            const bodyW = Math.max(2, Math.min(cw * 0.7, 9));
             return (
               <g key={i}>
                 <line x1={x} x2={x} y1={scaleY(c.h)} y2={scaleY(c.l)} stroke={color} strokeWidth="1" />
@@ -424,7 +424,53 @@ const PriceChart: React.FC<{ candles: Candles | null; bullish: boolean; mode?: '
             </>
           )}
         </g>
-        <line x1={CHART_W} x2={CHART_W} y1="0" y2={H} stroke="#1a2332" strokeWidth="0.5" opacity="0.5" />
+        {/* Y-axis price ticks */}
+        {[0.1, 0.3, 0.5, 0.7, 0.9].map((pct, i) => {
+          const price = max - pct * range;
+          const y = 7 + pct * ((H - AXIS_H) - 14);
+          return (
+            <text key={`yt${i}`} x={PAD + 3} y={y - 2} textAnchor="start" fontSize="9" fill="#e0e0e0" fontFamily="var(--font-mc-mono)" opacity="1" fontWeight="600">
+              {price >= 1000 ? price.toFixed(0) : price.toFixed(2)}
+            </text>
+          );
+        })}
+        {/* X-axis date labels — auto-detect timestamp field + span-based format */}
+        {(() => {
+          const tickCount = 6;
+          const extractTs = (c: any): number | null => {
+            if (!c) return null;
+            const cand = c.t ?? c.time ?? c.date ?? c.timestamp ?? c.T ?? c.Time ?? c.Date ?? c.x ?? c.unix;
+            if (cand == null) return null;
+            if (typeof cand === 'number') return cand < 1e12 ? cand * 1000 : cand;
+            const parsed = new Date(cand).getTime();
+            return isNaN(parsed) ? null : parsed;
+          };
+          const firstTs = extractTs(ohlc[0]);
+          const lastTs = extractTs(ohlc[ohlc.length - 1]);
+          const spanMs = (firstTs && lastTs) ? (lastTs - firstTs) : 0;
+          const DAY = 86400000;
+          const fmt = (d: Date): string => {
+            if (spanMs > 0 && spanMs < 2 * DAY) {
+              const h = d.getHours(); const m = d.getMinutes();
+              return `${h}:${m.toString().padStart(2,'0')}`;
+            }
+            if (spanMs < 400 * DAY) return `${d.getMonth()+1}/${d.getDate()}`;
+            return `${d.getMonth()+1}/${String(d.getFullYear()).slice(2)}`;
+          };
+          return Array.from({length: tickCount}).map((_, idx) => {
+            const dataIdx = Math.floor((ohlc.length - 1) * idx / (tickCount - 1));
+            const c: any = ohlc[dataIdx];
+            const x = PAD + dataIdx * cw + cw / 2;
+            const ts = extractTs(c);
+            const label = ts != null ? fmt(new Date(ts)) : `#${dataIdx}`;
+            return (
+              <text key={`xt${idx}`} x={x} y={H - 5} textAnchor="middle" fontSize="9" fill="#e0e0e0" fontFamily="var(--font-mc-mono)" opacity="1" fontWeight="600">
+                {label}
+              </text>
+            );
+          });
+        })()}
+        <line x1={CHART_W} x2={CHART_W} y1="0" y2={H - AXIS_H} stroke="#1a2332" strokeWidth="0.5" opacity="0.5" />
         {pills.map((pl, i) => (
           <g key={i} transform={`translate(${CHART_W + 3}, ${pl.y - 6.5})`}>
             <rect width={pl.w} height="13" rx="2" fill={pl.color} opacity="0.95" />
