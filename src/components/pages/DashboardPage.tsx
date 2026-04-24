@@ -2,6 +2,7 @@
 import { useLiveStream } from '@/hooks/useLiveStream';
 import { LiveIndicator } from '@/components/ui/LiveIndicator';
 import { useEffect, useState } from 'react';
+import { CopilotSection } from './CopilotSection';
 import { BTCBiasWidget } from '../ui/BTCBiasWidget';
 
 // ============================================================================
@@ -530,6 +531,7 @@ export function DashboardPage() {
           </div>
         </div>
       </div>
+      <CopilotSection />
     </div>
   );
 }
