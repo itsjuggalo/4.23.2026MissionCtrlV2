@@ -18,7 +18,7 @@ STATE_DIR = Path.home() / ".openclaw/state/watchdogs"
 STATE_DIR.mkdir(parents=True, exist_ok=True)
 LAST_OK_FILE = STATE_DIR / "gateway_last_ok.txt"
 LAST_REPORT_FILE = STATE_DIR / "gateway_last_daily_report.txt"
-WEBHOOK_FILE = Path.home() / ".openclaw/secrets/discord_bobatrades_webhook"
+WEBHOOK_FILE = Path.home() / ".openclaw/secrets/discord_dns_renewal_webhook"
 
 def post_discord(content: str, mention_everyone: bool = False):
     if not WEBHOOK_FILE.exists():
@@ -63,7 +63,7 @@ def check_oracle_metadata() -> tuple[bool, dict | str]:
 
 def check_pm2_mission_control() -> tuple[bool, str]:
     try:
-        out = subprocess.check_output(["pm2", "jlist"], timeout=10, stderr=subprocess.DEVNULL)
+        out = subprocess.check_output(["/home/ubuntu/.npm-global/bin/pm2", "jlist"], timeout=10, stderr=subprocess.DEVNULL)
         procs = json.loads(out)
         for p in procs:
             if p.get("name") == "mission-control":
@@ -113,8 +113,8 @@ def main():
             pass
 
     msg = f"🚨 **Oracle/OpenClaw health check FAILED** (last OK {since} ago)\n" + "\n".join(lines)
-    mention = not pm2_ok or not oracle_ok  # ping on serious issues only, not flaky outbound
-    post_discord(msg, mention_everyone=mention)
+    mention = False  # keep the channel quiet; failures are visible enough on their own
+    post_discord(msg)
 
 if __name__ == "__main__":
     main()
