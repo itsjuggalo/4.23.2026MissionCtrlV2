@@ -9119,3 +9119,43 @@ Markdown saved: /home/ubuntu/.openclaw/workspace/directives/market_briefing.md
 - Total Market Cap: $2,676,368,228,164
 - BTC Dominance: 58.1%
 - 24h Change: -0.4%
+
+============================================================
+Market Data Aggregator — 2026-04-24 18:00 UTC
+============================================================
+
+Fetching BTC price...
+Fetching BTC OHLCV 24h...
+Fetching Fear & Greed...
+Fetching global crypto market...
+Fetching FRED macro data...
+Loading internal data...
+
+JSON saved: /home/ubuntu/.openclaw/workspace/directives/market_briefing.json
+Markdown saved: /home/ubuntu/.openclaw/workspace/directives/market_briefing.md
+
+# Market Briefing — April 24, 2026 06:00 PM UTC
+
+## BTC: $77,717.00 (-0.1% 24h)
+- 24h Range: $77,436 — $78,605 (1.5%)
+- 24h Trend: DOWN
+- Volume: 35,256,543,866 USD
+- Fear & Greed: 39 (Fear)
+
+## Market Regime: MIXED
+- Bias: MIXED
+- Recommendation: DayTrader light size — no clear regime
+- 1H: RANGING (ADX 13.9, Chop 64.6)
+- 4H: RANGING (ADX 16.7, Chop 61.1)
+- 1D: WEAK_TREND (ADX 22.9, Chop 50.5)
+
+## Optimal SuperTrend: ATR 16 / Mult 5.0
+- Win Rate: 40.0% | PF: 1.79 | Return: 49.35%
+
+## Positions
+- BTCUSD: SHORT @ $75,031.09
+
+## Global Crypto
+- Total Market Cap: $2,677,499,263,220
+- BTC Dominance: 58.1%
+- 24h Change: +0.1%
