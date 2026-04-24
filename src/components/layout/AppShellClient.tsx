@@ -18,6 +18,7 @@ import { AlertsPage } from '../pages/AlertsPage';
 import { DocsPage } from '../pages/DocsPage';
 import { WalletsPage } from '../pages/WalletsPage';
 import { TradesPage } from '../pages/TradesPage';
+import TradeJournalPage from '../pages/TradeJournalPage';
 import { ActivityPage } from '../pages/ActivityPage';
 import { RiskPage } from '../pages/RiskPage';
 import { SignalsPage } from '../pages/SignalsPage';
@@ -59,6 +60,7 @@ type PageName =
   | 'Docs'
   | 'Wallets'
   | 'Trades'
+  | 'Journal'
   | 'Activity'
   | 'Risk'
   | 'TV Chart'
@@ -90,7 +92,7 @@ export function AppShellClient() {
       const validPages: PageName[] = [
         'Dashboard', 'Signals', 'Telegram', 'Scanner', 'Tasks', 'Sessions', 'Options', 'OptionsWatcher', 'Agents', 
         'Approvals', 'Calendar', 'Projects', 'Memory', 'Memory Graph', 
-        'Office', 'Docs', 'Wallets', 'Trades', 'Activity', 'Risk', 'TV Chart', 'PowerTrader',
+        'Office', 'Docs', 'Wallets', 'Trades', 'Journal', 'Activity', 'Risk', 'TV Chart', 'PowerTrader',
         'Command Center', 'Performance', 'Regime', 'Usage', 'Landing', 'Congress', 'LLM Portfolio', 'Skills'
       ];
       if (validPages.includes(pageName)) {
@@ -145,6 +147,8 @@ export function AppShellClient() {
         return <WalletsPage />;
       case 'Trades':
         return <TradesPage />;
+      case 'Journal':
+        return <TradeJournalPage />;
       case 'Activity':
         return <ActivityPage />;
       case 'TV Chart':

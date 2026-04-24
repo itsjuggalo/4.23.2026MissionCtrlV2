@@ -13,6 +13,7 @@ const SUBTITLES: Record<string, string> = {
   'Scanner': 'Breathe Deep',
   'Wallets': 'Show Me The Money',
   'Trades': 'Whats Mine Is Mine',
+  'Journal': 'Something For Nothing',
   'GoTrader': 'There Is No Cow Level',
   'PowerTrader': 'Medieval Man',
   'Risk': 'Staying Alive',
