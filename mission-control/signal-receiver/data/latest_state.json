@@ -1,18 +1,11 @@
 {
   "BTCUSD": {
-    "direction": "SHORT",
-    "entry_price": 75031.09,
-    "last_signal_time": "2026-04-21T20:00:19.324778+00:00",
-    "last_action": "SELL",
-    "signal_count": 191,
+    "direction": "LONG",
+    "entry_price": 60000.0,
+    "last_signal_time": "2026-04-24T20:21:49.989250+00:00",
+    "last_action": "BUY",
+    "signal_count": 192,
     "pnl_history": [
-      {
-        "closed_at": "2026-04-15T11:50:05.833297+00:00",
-        "direction": "LONG",
-        "entry": 74168.01,
-        "exit": 74170.88,
-        "pnl_pct": 0.0039
-      },
       {
         "closed_at": "2026-04-15T12:01:49.716518+00:00",
         "direction": "LONG",
@@ -705,6 +698,13 @@
         "entry": 76483.37,
         "exit": 75031.09,
         "pnl_pct": 1.8988
+      },
+      {
+        "closed_at": "2026-04-24T20:21:49.989250+00:00",
+        "direction": "SHORT",
+        "entry": 75031.09,
+        "exit": 60000.0,
+        "pnl_pct": 20.0331
       }
     ]
   }
