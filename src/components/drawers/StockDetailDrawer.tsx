@@ -163,7 +163,7 @@ export const StockDetailDrawer: React.FC<{ ticker: string | null; onClose: () =>
             </div>
 
             {/* Price chart */}
-            <PriceChart candles={candles} bullish={(data.regularChangePct ?? 0) >= 0} mode={chartMode} />
+            <PriceChart candles={candles} bullish={(data.regularChangePct ?? 0) >= 0} mode={chartMode} tf={tf} />
 
             {/* Timeframe selector */}
             <div style={{ display: 'flex', gap: '4px', marginBottom: '18px', justifyContent: 'space-between' }}>
@@ -299,17 +299,17 @@ const StatPair: React.FC<{ label: string; value: string; color?: string }> = ({ 
   </div>
 );
 
-const PriceChart: React.FC<{ candles: Candles | null; bullish: boolean; mode?: 'candle' | 'line' }> = ({ candles, bullish, mode = 'line' }) => {
+const PriceChart: React.FC<{ candles: Candles | null; bullish: boolean; mode?: 'candle' | 'line'; tf?: string }> = ({ candles, bullish, mode = 'line', tf = '1M' }) => {
   // CANDLE_MODE_INJECT
   if (mode === 'candle' && candles && candles.points.length > 3) {
     const pts = candles.points;
     const groupSize = Math.max(1, Math.floor(pts.length / 50));
-    const ohlc: {o:number;h:number;l:number;c:number}[] = [];
+    const ohlc: {o:number;h:number;l:number;c:number;t:number}[] = [];
     for (let i = 0; i < pts.length; i += groupSize) {
       const chunk = pts.slice(i, i + groupSize);
       if (chunk.length === 0) continue;
       const cl = chunk.map(pt => pt.c);
-      ohlc.push({ o: cl[0], c: cl[cl.length - 1], h: Math.max(...cl), l: Math.min(...cl) });
+      ohlc.push({ o: cl[0], c: cl[cl.length - 1], h: Math.max(...cl), l: Math.min(...cl), t: chunk[0].t });
     }
     const allCloses = pts.map(pt => pt.c);
     const recent = allCloses.slice(-60);
@@ -434,35 +434,30 @@ const PriceChart: React.FC<{ candles: Candles | null; bullish: boolean; mode?: '
             </text>
           );
         })}
-        {/* X-axis date labels — auto-detect timestamp field + span-based format */}
+        {/* X-axis date labels — tf-aware format */}
         {(() => {
           const tickCount = 6;
-          const extractTs = (c: any): number | null => {
-            if (!c) return null;
-            const cand = c.t ?? c.time ?? c.date ?? c.timestamp ?? c.T ?? c.Time ?? c.Date ?? c.x ?? c.unix;
-            if (cand == null) return null;
-            if (typeof cand === 'number') return cand < 1e12 ? cand * 1000 : cand;
-            const parsed = new Date(cand).getTime();
-            return isNaN(parsed) ? null : parsed;
+          const toMs = (t: any): number | null => {
+            if (t == null) return null;
+            if (typeof t === 'number') return t < 1e12 ? t * 1000 : t;
+            const v = new Date(t).getTime(); return isNaN(v) ? null : v;
           };
-          const firstTs = extractTs(ohlc[0]);
-          const lastTs = extractTs(ohlc[ohlc.length - 1]);
-          const spanMs = (firstTs && lastTs) ? (lastTs - firstTs) : 0;
-          const DAY = 86400000;
-          const fmt = (d: Date): string => {
-            if (spanMs > 0 && spanMs < 2 * DAY) {
-              const h = d.getHours(); const m = d.getMinutes();
-              return `${h}:${m.toString().padStart(2,'0')}`;
-            }
-            if (spanMs < 400 * DAY) return `${d.getMonth()+1}/${d.getDate()}`;
-            return `${d.getMonth()+1}/${String(d.getFullYear()).slice(2)}`;
+          const fmtForTf = (d: Date): string => {
+            const mo = d.getMonth()+1, da = d.getDate(), yr = String(d.getFullYear()).slice(2);
+            const h = d.getHours(), mn = d.getMinutes();
+            const hh12 = ((h + 11) % 12) + 1;
+            const ampm = h < 12 ? 'a' : 'p';
+            if (tf === '1D') return `${hh12}:${mn.toString().padStart(2,'0')}${ampm}`;
+            if (tf === '5D') return `${mo}/${da} ${hh12}${ampm}`;
+            if (tf === '1M' || tf === '3M' || tf === '6M' || tf === 'YTD') return `${mo}/${da}`;
+            return `${mo}/${yr}`;
           };
           return Array.from({length: tickCount}).map((_, idx) => {
             const dataIdx = Math.floor((ohlc.length - 1) * idx / (tickCount - 1));
             const c: any = ohlc[dataIdx];
             const x = PAD + dataIdx * cw + cw / 2;
-            const ts = extractTs(c);
-            const label = ts != null ? fmt(new Date(ts)) : `#${dataIdx}`;
+            const ms = toMs(c?.t);
+            const label = ms != null ? fmtForTf(new Date(ms)) : '';
             return (
               <text key={`xt${idx}`} x={x} y={H - 5} textAnchor="middle" fontSize="9" fill="#e0e0e0" fontFamily="var(--font-mc-mono)" opacity="1" fontWeight="600">
                 {label}
