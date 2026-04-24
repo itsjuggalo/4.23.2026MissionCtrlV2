@@ -537,12 +537,40 @@ def convert_spx_to_spy(pick):
         return pick, f"SPX→SPY conversion error: {e}"
 
 
-def execute_pick_on_alpaca(pick):
-    """Place option order on Alpaca paper account."""
+def _post_bobatrades(msg: str):
+    """Fire-and-forget Discord webhook to BobaTrades. Never raises."""
     try:
         import requests
+        from pathlib import Path
+        hook = Path("/home/ubuntu/.openclaw/secrets/discord_bobatrades_webhook")
+        if not hook.exists():
+            return
+        url = hook.read_text().strip()
+        if not url:
+            return
+        requests.post(url, json={"content": msg}, timeout=5)
+    except Exception:
+        pass
+
+
+def execute_pick_on_alpaca(pick):
+    """
+    Layer 2 — Place option buy + protection stop-limit on Alpaca paper.
+
+    1. Submit buy market order
+    2. Poll up to 10 sec for fill
+    3. On fill, submit sell stop-limit at -stop_loss_pct from fill
+       (trigger = fill * (1 - sl/100), limit = trigger * 0.9)
+    4. Return both order IDs + protection status
+    5. Notify BobaTrades Discord on success/failure
+    """
+    import requests
+    import time as _time
+
+    try:
         key = read_secret("alpaca-key-id") or read_secret("alpaca_key.txt")
         sec = read_secret("alpaca-secret") or read_secret("alpaca_secret.txt")
+        headers = {"APCA-API-KEY-ID": key, "APCA-API-SECRET-KEY": sec, "Content-Type": "application/json"}
 
         # Build OCC option symbol: NVDA240517C00145000
         ticker = pick["ticker"]
@@ -551,23 +579,103 @@ def execute_pick_on_alpaca(pick):
         right = "C" if pick["option_type"].upper().startswith("C") else "P"
         strike_int = int(float(pick["strike"]) * 1000)
         occ_symbol = f"{ticker}{exp_clean}{right}{strike_int:08d}"
+        qty = int(pick["contracts"])
 
-        order = {
+        # 1. Submit market buy
+        buy_order = {
             "symbol": occ_symbol,
-            "qty": str(pick["contracts"]),
+            "qty": str(qty),
             "side": "buy",
             "type": "market",
             "time_in_force": "day",
         }
-        r = requests.post(
+        buy_r = requests.post(
             "https://paper-api.alpaca.markets/v2/orders",
-            headers={"APCA-API-KEY-ID": key, "APCA-API-SECRET-KEY": sec},
-            json=order, timeout=15,
+            headers=headers, json=buy_order, timeout=15,
         )
-        if r.status_code in (200, 201):
-            return {"ok": True, "symbol": occ_symbol, "order_id": r.json().get("id")}
-        return {"ok": False, "error": f"HTTP {r.status_code}: {r.text[:300]}", "symbol": occ_symbol}
+        if buy_r.status_code not in (200, 201):
+            err = f"BUY HTTP {buy_r.status_code}: {buy_r.text[:300]}"
+            _post_bobatrades(f"❌ Boba buy REJECTED {occ_symbol} x{qty}\n{err}")
+            return {"ok": False, "error": err, "symbol": occ_symbol}
+
+        buy_data = buy_r.json()
+        buy_id = buy_data.get("id")
+
+        # 2. Poll for fill (up to 10 sec)
+        fill_price = None
+        for _ in range(20):  # 20 * 500ms = 10s
+            _time.sleep(0.5)
+            poll_r = requests.get(
+                f"https://paper-api.alpaca.markets/v2/orders/{buy_id}",
+                headers=headers, timeout=5,
+            )
+            if poll_r.status_code == 200:
+                pd = poll_r.json()
+                if pd.get("status") == "filled":
+                    fill_price = float(pd.get("filled_avg_price") or 0)
+                    break
+
+        if not fill_price:
+            _post_bobatrades(
+                f"⏱️ Boba bought {occ_symbol} x{qty} — NOT filled in 10s\n"
+                f"Daemon will trail on next cycle. Order: {buy_id[:8]}"
+            )
+            return {
+                "ok": True, "symbol": occ_symbol, "order_id": buy_id,
+                "fill_price": None, "protection_order_id": None,
+                "protection_status": "SKIPPED (buy did not fill in 10s — daemon will trail)",
+            }
+
+        # 3. Submit protection stop-limit
+        stop_loss_pct = float(pick.get("stop_loss_pct", 30))
+        stop_trigger = round(max(fill_price * (1 - stop_loss_pct / 100), 0.01), 2)
+        stop_limit = round(max(stop_trigger * 0.90, 0.01), 2)
+
+        protection_order = {
+            "symbol": occ_symbol,
+            "qty": str(qty),
+            "side": "sell",
+            "type": "stop_limit",
+            "time_in_force": "gtc",
+            "stop_price": str(stop_trigger),
+            "limit_price": str(stop_limit),
+        }
+        prot_r = requests.post(
+            "https://paper-api.alpaca.markets/v2/orders",
+            headers=headers, json=protection_order, timeout=10,
+        )
+
+        if prot_r.status_code in (200, 201):
+            prot_id = prot_r.json().get("id")
+            cost = fill_price * qty * 100
+            _post_bobatrades(
+                f"✅ Boba BOUGHT {occ_symbol} x{qty} @ ${fill_price:.2f} (${cost:,.0f})\n"
+                f"🛡️ SL armed: trigger ${stop_trigger:.2f} / limit ${stop_limit:.2f} (-{stop_loss_pct:.0f}%)"
+            )
+            return {
+                "ok": True, "symbol": occ_symbol, "order_id": buy_id,
+                "fill_price": fill_price,
+                "protection_order_id": prot_id,
+                "protection_status": f"ARMED stop-limit @ ${stop_trigger:.2f}/${stop_limit:.2f} (-{stop_loss_pct:.0f}%)",
+            }
+        else:
+            _post_bobatrades(
+                f"⚠️ Boba bought {occ_symbol} x{qty} @ ${fill_price:.2f} "
+                f"BUT protection FAILED (HTTP {prot_r.status_code})\n"
+                f"Daemon will trail. {prot_r.text[:150]}"
+            )
+            return {
+                "ok": True, "symbol": occ_symbol, "order_id": buy_id,
+                "fill_price": fill_price,
+                "protection_order_id": None,
+                "protection_status": f"FAILED to arm: HTTP {prot_r.status_code} — daemon will trail",
+            }
+
     except Exception as e:
+        try:
+            _post_bobatrades(f"❌ Boba execute EXCEPTION: {e}")
+        except Exception:
+            pass
         return {"ok": False, "error": str(e)}
 
 
