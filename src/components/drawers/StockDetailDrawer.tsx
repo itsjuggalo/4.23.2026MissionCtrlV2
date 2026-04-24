@@ -429,27 +429,42 @@ const PriceChart: React.FC<{ candles: Candles | null; bullish: boolean; mode?: '
           const price = max - pct * range;
           const y = 7 + pct * ((H - AXIS_H) - 14);
           return (
-            <text key={`yt${i}`} x={PAD + 3} y={y - 2} textAnchor="start" fontSize="8" fill="#607d8b" fontFamily="var(--font-mc-mono)" opacity="0.65">
+            <text key={`yt${i}`} x={PAD + 3} y={y - 2} textAnchor="start" fontSize="9" fill="#e0e0e0" fontFamily="var(--font-mc-mono)" opacity="1" fontWeight="600">
               {price >= 1000 ? price.toFixed(0) : price.toFixed(2)}
             </text>
           );
         })}
-        {/* X-axis date labels */}
+        {/* X-axis date labels — auto-detect timestamp field + span-based format */}
         {(() => {
           const tickCount = 6;
+          const extractTs = (c: any): number | null => {
+            if (!c) return null;
+            const cand = c.t ?? c.time ?? c.date ?? c.timestamp ?? c.T ?? c.Time ?? c.Date ?? c.x ?? c.unix;
+            if (cand == null) return null;
+            if (typeof cand === 'number') return cand < 1e12 ? cand * 1000 : cand;
+            const parsed = new Date(cand).getTime();
+            return isNaN(parsed) ? null : parsed;
+          };
+          const firstTs = extractTs(ohlc[0]);
+          const lastTs = extractTs(ohlc[ohlc.length - 1]);
+          const spanMs = (firstTs && lastTs) ? (lastTs - firstTs) : 0;
+          const DAY = 86400000;
+          const fmt = (d: Date): string => {
+            if (spanMs > 0 && spanMs < 2 * DAY) {
+              const h = d.getHours(); const m = d.getMinutes();
+              return `${h}:${m.toString().padStart(2,'0')}`;
+            }
+            if (spanMs < 400 * DAY) return `${d.getMonth()+1}/${d.getDate()}`;
+            return `${d.getMonth()+1}/${String(d.getFullYear()).slice(2)}`;
+          };
           return Array.from({length: tickCount}).map((_, idx) => {
             const dataIdx = Math.floor((ohlc.length - 1) * idx / (tickCount - 1));
             const c: any = ohlc[dataIdx];
             const x = PAD + dataIdx * cw + cw / 2;
-            const ts = c?.t ?? c?.time ?? c?.date ?? c?.timestamp ?? null;
-            let label = '';
-            if (ts != null) {
-              const raw = typeof ts === 'number' ? (ts < 1e12 ? ts * 1000 : ts) : ts;
-              const d = new Date(raw);
-              if (!isNaN(d.getTime())) label = `${d.getMonth()+1}/${d.getDate()}`;
-            }
+            const ts = extractTs(c);
+            const label = ts != null ? fmt(new Date(ts)) : `#${dataIdx}`;
             return (
-              <text key={`xt${idx}`} x={x} y={H - 5} textAnchor="middle" fontSize="8.5" fill="#607d8b" fontFamily="var(--font-mc-mono)" opacity="0.85">
+              <text key={`xt${idx}`} x={x} y={H - 5} textAnchor="middle" fontSize="9" fill="#e0e0e0" fontFamily="var(--font-mc-mono)" opacity="1" fontWeight="600">
                 {label}
               </text>
             );
