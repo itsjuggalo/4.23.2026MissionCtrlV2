@@ -1,6 +1,7 @@
 'use client';
 import { useState, useRef, useEffect } from 'react';
 import Link from 'next/link';
+import LandingBanner from '@/components/starcraft/LandingBanner';
 
 type ModeKey = 'auto' | 'fast' | 'expert' | 'copilot' | 'support';
 
@@ -206,6 +207,11 @@ export default function WelcomePage() {
         <div style={{ display: 'inline-flex', alignItems: 'center', gap: 6, padding: '5px 14px', background: 'linear-gradient(90deg, rgba(79,195,247,0.2), rgba(129,212,250,0.2))', border: '1px solid rgba(79,195,247,0.4)', borderRadius: 100, fontSize: 13, fontWeight: 600, color: '#81d4fa', marginBottom: 18, backdropFilter: 'blur(10px)' }}>
           <span style={{ color: '#4fc3f7', display: 'inline-flex' }}><SparkleIcon /></span>
           <span>Copilot</span>
+        </div>
+
+        {/* StarCraft landing banner */}
+        <div style={{ width: '100%', maxWidth: 900, marginBottom: 28 }}>
+          <LandingBanner height={180} />
         </div>
 
         {/* Title */}
