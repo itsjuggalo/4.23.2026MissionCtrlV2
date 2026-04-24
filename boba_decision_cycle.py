@@ -648,15 +648,44 @@ def execute_pick_on_alpaca(pick):
         if prot_r.status_code in (200, 201):
             prot_id = prot_r.json().get("id")
             cost = fill_price * qty * 100
+
+            # 4. Submit TP limit leg (Layer 2 bracket — profit side)
+            profit_target_pct = float(pick.get("profit_target_pct", 50))
+            tp_price = round(max(fill_price * (1 + profit_target_pct / 100), 0.01), 2)
+
+            tp_order = {
+                "symbol": occ_symbol,
+                "qty": str(qty),
+                "side": "sell",
+                "type": "limit",
+                "time_in_force": "gtc",
+                "limit_price": str(tp_price),
+            }
+            tp_r = requests.post(
+                "https://paper-api.alpaca.markets/v2/orders",
+                headers=headers, json=tp_order, timeout=10,
+            )
+            tp_id = None
+            tp_status = "NOT ARMED"
+            if tp_r.status_code in (200, 201):
+                tp_id = tp_r.json().get("id")
+                tp_status = f"ARMED limit @ ${tp_price:.2f} (+{profit_target_pct:.0f}%)"
+
             _post_bobatrades(
                 f"✅ Boba BOUGHT {occ_symbol} x{qty} @ ${fill_price:.2f} (${cost:,.0f})\n"
-                f"🛡️ SL armed: trigger ${stop_trigger:.2f} / limit ${stop_limit:.2f} (-{stop_loss_pct:.0f}%)"
+                f"🛡️ SL armed: trigger ${stop_trigger:.2f} / limit ${stop_limit:.2f} (-{stop_loss_pct:.0f}%)\n"
+                f"🎯 TP armed: limit ${tp_price:.2f} (+{profit_target_pct:.0f}%)" if tp_id else
+                f"✅ Boba BOUGHT {occ_symbol} x{qty} @ ${fill_price:.2f} (${cost:,.0f})\n"
+                f"🛡️ SL armed: trigger ${stop_trigger:.2f} / limit ${stop_limit:.2f} (-{stop_loss_pct:.0f}%)\n"
+                f"⚠️ TP FAILED: HTTP {tp_r.status_code}"
             )
             return {
                 "ok": True, "symbol": occ_symbol, "order_id": buy_id,
                 "fill_price": fill_price,
                 "protection_order_id": prot_id,
+                "tp_order_id": tp_id,
                 "protection_status": f"ARMED stop-limit @ ${stop_trigger:.2f}/${stop_limit:.2f} (-{stop_loss_pct:.0f}%)",
+                "tp_status": tp_status,
             }
         else:
             _post_bobatrades(
