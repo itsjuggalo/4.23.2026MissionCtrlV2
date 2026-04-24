@@ -4467,5 +4467,17 @@
     "message": "Buy To Open at 5.50 with first target above 6.32",
     "symbol": "MRVL",
     "title": "MRVL 180C 5/15: BTO"
+  },
+  "1777045685": {
+    "category": "SWING",
+    "message": "Close the trade as it hit trailing stop at 1.90!",
+    "symbol": "XLE",
+    "title": "XLE 55.5C 05/15 : STC"
+  },
+  "1777049786": {
+    "category": "SWING",
+    "message": "Reached Target 3.30 and that's 17.86%! Lock some in and wait for next target. Raise the stops to 2.31",
+    "symbol": "BKR",
+    "title": "BKR 70C 06/18 : STC"
   }
 }

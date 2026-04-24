@@ -2959,5 +2959,17 @@
     "message": "Buy To Open at 162.38 with first target above 165.63",
     "symbol": "MRVL",
     "title": "MRVL: BTO"
+  },
+  "1777046744": {
+    "category": "SWING",
+    "message": "Reached Target 345.1 and that's 8.01%! Lock some in and wait for next target. Raise the stops to 334.7",
+    "symbol": "GOOGL",
+    "title": "GOOGL : STC"
+  },
+  "1777049745": {
+    "category": "SWING",
+    "message": "Reached Target 68.47 and that's 2.00%! Lock some in and wait for next target. Raise the stops to 61.76",
+    "symbol": "BKR",
+    "title": "BKR : STC"
   }
 }
