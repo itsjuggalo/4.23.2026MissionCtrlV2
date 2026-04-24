@@ -1,5 +1,5 @@
 {
-  "last_updated": "2026-04-24T00:00:29.269181",
+  "last_updated": "2026-04-24T12:00:34.495142",
   "leaderboard": [
     {
       "rank": 0,
@@ -57,9 +57,9 @@
       "model": "GPT-5",
       "color": "#ef5350",
       "total_trades": 100,
-      "holdings_count": 6,
-      "buy_volume": 63249.94,
-      "sell_volume": 63600.09
+      "holdings_count": 7,
+      "buy_volume": 64249.92,
+      "sell_volume": 63097.63
     }
   ],
   "models": {
@@ -6676,9 +6676,10 @@
       "color": "#ef5350",
       "account_id": "1800473182_20",
       "total_trades": 100,
-      "total_buy_value": 63249.94,
-      "total_sell_value": 63600.09,
+      "total_buy_value": 64249.92,
+      "total_sell_value": 63097.63,
       "current_holdings": {
+        "CAT": 2.39,
         "AMD": 2.85,
         "MU": 2.24,
         "AMZN": 11.89,
@@ -6686,8 +6687,28 @@
         "GS": 0.55,
         "BLK": 0.49
       },
-      "holdings_count": 6,
+      "holdings_count": 7,
       "recent_trades": [
+        {
+          "date": "2026-04-23",
+          "side": "buy",
+          "symbol": "CAT",
+          "company": "Caterpillar",
+          "price": 835.09,
+          "quantity": 1.2,
+          "value": 999.99,
+          "order_id": "0637131255746625536"
+        },
+        {
+          "date": "2026-04-23",
+          "side": "buy",
+          "symbol": "CAT",
+          "company": "Caterpillar",
+          "price": 839.48,
+          "quantity": 1.19,
+          "value": 999.99,
+          "order_id": "0637116320979320832"
+        },
         {
           "date": "2026-04-23",
           "side": "buy",
@@ -6967,29 +6988,29 @@
           "quantity": 4.0,
           "value": 1115.0,
           "order_id": "0634911780464492544"
-        },
-        {
-          "date": "2026-04-17",
-          "side": "sell",
-          "symbol": "MU",
-          "company": "Micron Technology",
-          "price": 459.77,
-          "quantity": 2.5,
-          "value": 1149.42,
-          "order_id": "0634896626579144704"
-        },
-        {
-          "date": "2026-04-17",
-          "side": "sell",
-          "symbol": "GE",
-          "company": "GE Aerospace",
-          "price": 310.03,
-          "quantity": 3.2,
-          "value": 992.53,
-          "order_id": "0634896626230689792"
         }
       ],
       "all_trades": [
+        {
+          "date": "2026-04-23",
+          "side": "buy",
+          "symbol": "CAT",
+          "company": "Caterpillar",
+          "price": 835.09,
+          "quantity": 1.2,
+          "value": 999.99,
+          "order_id": "0637131255746625536"
+        },
+        {
+          "date": "2026-04-23",
+          "side": "buy",
+          "symbol": "CAT",
+          "company": "Caterpillar",
+          "price": 839.48,
+          "quantity": 1.19,
+          "value": 999.99,
+          "order_id": "0637116320979320832"
+        },
         {
           "date": "2026-04-23",
           "side": "buy",
@@ -7962,16 +7983,6 @@
         },
         {
           "date": "2026-03-31",
-          "side": "buy",
-          "symbol": "MRVL",
-          "company": "Marvell Technology",
-          "price": 94.91,
-          "quantity": 10.54,
-          "value": 1000.0,
-          "order_id": "0628736277823225856"
-        },
-        {
-          "date": "2026-03-31",
           "side": "sell",
           "symbol": "UPS",
           "company": "United Parcel",
@@ -7979,16 +7990,6 @@
           "quantity": 11.63,
           "value": 1130.93,
           "order_id": "0628766280665497600"
-        },
-        {
-          "date": "2026-03-31",
-          "side": "sell",
-          "symbol": "AES",
-          "company": "The Aes",
-          "price": 14.09,
-          "quantity": 35.67,
-          "value": 502.46,
-          "order_id": "0628751172413423616"
         }
       ]
     }
