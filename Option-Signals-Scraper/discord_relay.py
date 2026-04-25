@@ -600,13 +600,19 @@ def relay_flow2_phone_mirror(state):
     new_sent = []
 
     # AlertType → notification header mapping
-    HEADERS = {
-        "rapid_flow":   "Rapid Flow Detected!",
-        "repeat_flow":  "Repeated Flow Alert!",
-        "weekly_flow":  "Weekly Flow Alert!",
-        "unusual_flow": "Unusual Flow Detected!",
-        "etf_flow":     "ETF: Repeated Flow Alert!",
-    }
+    # Match AlertType values from live FlowGreeks2 data, paired with isBullish + UnderlyingType
+    def _header(alert_type, is_bullish, underlying):
+        direction = "Bullish" if is_bullish else "Bearish"
+        is_etf = (underlying or "").upper() == "ETF"
+        prefix = "ETF: " if is_etf else ""
+        if alert_type == "weekly_flow" or alert_type == "weekly_flow_etf":
+            kind = "Rapid"
+        elif alert_type == "repeat_flow" or alert_type == "repeat_flow_etf":
+            kind = "Repeated"
+        else:
+            kind = "Unusual"
+        return f"{prefix}{kind} {direction} Flow Alert!"
+
 
     def fmt_premium(val):
         try:
@@ -637,7 +643,7 @@ def relay_flow2_phone_mirror(state):
         if sent_key in sent:
             continue
 
-        header = HEADERS.get(alert_type, "Flow Alert!")
+        header = _header(alert_type, alert.get("isBullish", False), alert.get("UnderlyingType", ""))
         premium_str = fmt_premium(flow_value)
 
         msg = (
@@ -808,6 +814,7 @@ def run():
             state = relay_long_term_stocks(state)
             state = relay_closed_trades(state)
             state = relay_flow2_alerts(state)
+            state = relay_flow2_phone_mirror(state)
             state = relay_flow2_live(state)
             save_state(state)
 
