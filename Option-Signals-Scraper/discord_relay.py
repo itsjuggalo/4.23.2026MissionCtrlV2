@@ -51,6 +51,7 @@ WEBHOOKS = {
     "flow_unusual":     "https://discordapp.com/api/webhooks/1495499097615106110/iSSylcNPZtzIWi_3f4GAgva4XEb4JavZU99CK_Dhda04PtLaycYzlPvDk55-YjY3ILLc",
     "flow_huge":        "https://discordapp.com/api/webhooks/1495499184512434308/fqh1umawF2mXZs2679-qENjqCNNcKtlzSqMoUyX3P8CH4kb6B6hFPS3qJrH6q19Tyfmc",
     "flow_messages":   "https://discordapp.com/api/webhooks/1497628988938649684/3IrKREiuukaqLb73fW-ugSVazebeER92tCi2Ys9RE8LEEetwXnTnSvFXssbH0ufPjiAv",
+    "flow_trade_results": "https://discordapp.com/api/webhooks/1497661681126609008/tlS_qnTSq4Uef8AUVpllp2vwC3sJ7u0BHt2_WcoJz5y75dnh3cgHpkhOn59zGlkWmyPk",
     "flow_etf":         "https://discordapp.com/api/webhooks/1495499274828517498/-NhSohclpP8hBxlekP_BNSnLF7ZeDb-Zdb39QhyyXUp43xhxppN8PeQwz1CSn0It_xNY",
 }
 
@@ -614,6 +615,24 @@ def _post_to_flow_messages(content, log_tag):
         return False
 
 
+
+def _post_to_trade_results(content, log_tag):
+    url = WEBHOOKS.get("flow_trade_results")
+    if not url: return False
+    try:
+        r = requests.post(url, json={"content": content[:1900]}, timeout=10)
+        if r.status_code in (200, 204): return True
+        if r.status_code == 429:
+            retry = r.json().get("retry_after", 5)
+            logging.warning(f"[{log_tag}] rate limited, sleeping {retry}s")
+            time.sleep(retry)
+            return False
+        logging.warning(f"[{log_tag}] HTTP {r.status_code}: {r.text[:150]}")
+        return False
+    except Exception as e:
+        logging.warning(f"[{log_tag}] post error: {e}")
+        return False
+
 def _fmt_money(v):
     try: v = float(v)
     except: return str(v)
@@ -671,7 +690,7 @@ def relay_winners_mirror(state):
             if buy and sell: lines.append(f"Buy {buy} → Sell {sell}")
             if category: lines.append(f"[{category}]")
             msg = "\n".join(lines)
-            if _post_to_flow_messages(msg, "winners"):
+            if _post_to_trade_results(msg, "winners"):
                 new_sent.append(sent_key)
                 logging.info(f"[winners] posted {symbol} pct={pct} tier={tier}")
                 time.sleep(1.2)
@@ -753,7 +772,7 @@ def relay_management_mirror(state):
             if message: lines.append(message)
             if category: lines.append(f"[{category}]")
             msg = "\n".join(lines)
-            if _post_to_flow_messages(msg, "mgmt"):
+            if _post_to_trade_results(msg, "mgmt"):
                 new_sent.append(sent_key)
                 logging.info(f"[mgmt] posted {title or entry_id}")
                 time.sleep(1.2)
