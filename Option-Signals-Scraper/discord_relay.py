@@ -1195,7 +1195,7 @@ def relay_synthetic_analysis(state):
     # Hourly cadence — only post if last post was over 55 min ago
     last_post = state.get("synthetic_analysis_last_post", 0)
     now = int(time.time())
-    if now - last_post < 55 * 60:
+    if now - last_post < 30 * 60:
         return state
 
     d = read_data("flow_live_last100")
