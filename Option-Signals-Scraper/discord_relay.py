@@ -1268,8 +1268,7 @@ def relay_synthetic_analysis(state):
         line = "{}`{:<5} {:<7} {:<7} {:>3.0f}%{} {:<7}`{}".format(
             tier, sym, fmt_prem(s["bull_prem"]), fmt_prem(s["bear_prem"]), bull_pct, arrow, fmt_prem(s["total_prem"]), dot)
         rows_main.append(line)
-    main_table = "
-".join(rows_main)
+    main_table = "\n".join(rows_main)
 
     unusual = []
     for sym, s in top:
@@ -1279,8 +1278,7 @@ def relay_synthetic_analysis(state):
             unusual.append("🟢 **{}** — {:.0f}% bull on {}".format(sym, bp, fmt_prem(s["total_prem"])))
         elif bp <= 10:
             unusual.append("🔴 **{}** — {:.0f}% bear on {}".format(sym, 100-bp, fmt_prem(s["total_prem"])))
-    unusual_text = "
-".join(unusual[:10]) if unusual else "_No extreme flow detected this cycle_"
+    unusual_text = "\n".join(unusual[:10]) if unusual else "_No extreme flow detected this cycle_"
 
     sweep_top = sorted(ticker_sweep.items(), key=lambda x: x[1]["total_prem"], reverse=True)[:10]
     if sweep_top:
@@ -1292,8 +1290,7 @@ def relay_synthetic_analysis(state):
             line = "{}`{:<5} {:<7} {:<7} {:>3.0f}%`{}".format(
                 tier, sym, fmt_prem(s["bull_prem"]), fmt_prem(s["bear_prem"]), bp, dot)
             rows_sweep.append(line)
-        sweep_table = "
-".join(rows_sweep)
+        sweep_table = "\n".join(rows_sweep)
     else:
         sweep_table = "_No sweep data this cycle_"
 
