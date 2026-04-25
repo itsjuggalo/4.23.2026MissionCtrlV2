@@ -48,6 +48,13 @@ DECISIONS_LOG = Path("/home/ubuntu/.openclaw/workspace/skill_outputs/boba_decisi
 DECISIONS_LOG.parent.mkdir(parents=True, exist_ok=True)
 SIDECAR = Path("/home/ubuntu/mission-control/signal-receiver/data/scored_signals_recent.json")
 FIREBASE_FEED = Path("/home/ubuntu/.openclaw/workspace/directives/firebase_trade_signals.json")
+
+# Tradier live options quotes (bid/ask/IV/greeks) for informed contract selection
+sys.path.insert(0, "/home/ubuntu/scripts/lib")
+try:
+    from tradier_client import fetch_option_quote as _tradier_quote
+except Exception:
+    _tradier_quote = None
 KRONOS_CMD = "/home/ubuntu/mission-control/agent-team/kronos/kronos_on_demand.py"
 
 MAX_PICKS_PER_CYCLE = 3
@@ -256,6 +263,36 @@ def get_alpaca_positions():
     return []
 
 
+def fetch_live_option_quote(ticker, strike, option_type, expiry):
+    """
+    Build OCC symbol + fetch live Tradier bid/ask/IV/greeks.
+    Returns dict {bid, ask, mid, iv, delta, theta} or None.
+    """
+    if _tradier_quote is None:
+        return None
+    try:
+        # Build OCC: TICKER + YYMMDD + C/P + STRIKE*1000 zero-padded to 8
+        exp_clean = str(expiry).replace("-", "")[2:]  # YYMMDD
+        right = "C" if str(option_type).upper().startswith("C") else "P"
+        strike_int = int(float(strike) * 1000)
+        occ = f"{str(ticker).upper()}{exp_clean}{right}{strike_int:08d}"
+        q = _tradier_quote(occ)
+        if not q:
+            return None
+        bid = q.get("bid", 0) or 0
+        ask = q.get("ask", 0) or 0
+        mid = round((bid + ask) / 2, 2) if (bid and ask) else 0
+        return {
+            "bid": bid, "ask": ask, "mid": mid,
+            "iv": q.get("iv", 0) or 0,
+            "delta": q.get("delta", 0) or 0,
+            "theta": q.get("theta", 0) or 0,
+            "spread_pct": round(((ask - bid) / mid * 100), 1) if mid else 0,
+        }
+    except Exception:
+        return None
+
+
 def format_firebase_signals_for_prompt(signals, max_show=20):
     """Format last N Firebase trade signals (Name/Name2/Vivid) into prompt-ready text."""
     if not signals:
@@ -309,6 +346,19 @@ def build_boba_prompt(account, positions, shortlist_with_kronos):
         shortlist_text += f"Tier: {s.get('tier','')} | Flow: {s.get('flow_value_raw')} | Vol/OI: {s.get('vol_oi_ratio')}x\n"
         shortlist_text += f"Sweeps/Blocks: {s.get('sweeps')}/{s.get('blocks')} | Spot: ${s.get('spot')}\n"
         shortlist_text += f"Score: {s.get('score')}/100 ({s.get('grade')})\n"
+
+        # Live Tradier quote (if available) — gives LLM real bid/ask/IV/greeks
+        _lq = fetch_live_option_quote(s.get("ticker"), s.get("strike"),
+                                       s.get("option_type"), s.get("expiry"))
+        if _lq and _lq.get("mid"):
+            shortlist_text += (
+                f"LIVE QUOTE: bid ${_lq['bid']:.2f} / ask ${_lq['ask']:.2f} / mid ${_lq['mid']:.2f}"
+                f" | spread {_lq['spread_pct']}%\n"
+                f"GREEKS: IV {_lq['iv']:.2f} | Δ {_lq['delta']:+.2f} | Θ {_lq['theta']:+.3f}/day\n"
+            )
+        else:
+            shortlist_text += f"LIVE QUOTE: (Tradier unavailable — use score/spot for sizing)\n"
+
         shortlist_text += f"Whale reasoning:\n"
         for r in s.get("reasons", []):
             shortlist_text += f"  • {r}\n"

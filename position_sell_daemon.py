@@ -98,8 +98,40 @@ def fetch_alpaca_positions() -> list:
         return []
 
 
+def cancel_open_sells_for_symbol(symbol: str) -> int:
+    """
+    Cancel any open sell orders (OCO bracket legs, stop_limits, limits) for this symbol.
+    Needed because Boba's Layer 2 arms OCO brackets that would reject our Layer 1 sell
+    with "insufficient balance" since shares are reserved. Returns count cancelled.
+    """
+    import requests
+    try:
+        r = requests.get(f"{ALPACA_BASE}/v2/orders?status=open&limit=100",
+                         headers=alpaca_headers(), timeout=10)
+        if r.status_code != 200:
+            return 0
+        cancelled = 0
+        for o in r.json():
+            if o.get("symbol") == symbol and o.get("side") == "sell":
+                del_r = requests.delete(f"{ALPACA_BASE}/v2/orders/{o.get('id')}",
+                                        headers=alpaca_headers(), timeout=5)
+                if del_r.status_code in (200, 204):
+                    cancelled += 1
+        # Alpaca needs ~1-2 sec to release reserved shares after cancel
+        if cancelled > 0:
+            import time as _t
+            _t.sleep(2)
+        return cancelled
+    except Exception:
+        return 0
+
+
 def submit_sell_limit(symbol: str, qty: float, limit_price: float) -> dict:
-    """Submit a sell LIMIT order. Returns {ok, order_id, error}."""
+    """Submit a sell LIMIT order. Returns {ok, order_id, error}.
+    First cancels any open OCO/bracket legs for this symbol to release reserved shares."""
+    cancelled = cancel_open_sells_for_symbol(symbol)
+    if cancelled > 0:
+        print(f"  [daemon] cancelled {cancelled} open sell order(s) on {symbol} before new sell")
     import requests
     body = {
         "symbol": symbol,
