@@ -1,0 +1,57 @@
+{
+  "1774622906": {
+    "buyTarget": "252.27",
+    "category": "LONGTERM",
+    "discordMessageId": "1487100997330276403",
+    "discordThreadId": "1487100997330276403",
+    "earlyTarget": "259.84",
+    "exit1": "259.9",
+    "exit1Time": 1775483972,
+    "exit2": "267.6",
+    "exit2Time": 1776344435,
+    "free": 1,
+    "isWeekly": 1,
+    "quote": {
+      "closePrice": 273.43,
+      "highPrice": 273.06,
+      "lastPrice": 271.07,
+      "lowPrice": 269.67,
+      "openPrice": 272.76,
+      "quoteTimeInLong": 1777060774,
+      "tradeTimeInLong": 1777060774
+    },
+    "reduceLoss": "227.04",
+    "sellTarget": "259.84",
+    "sellTarget2": "267.41",
+    "sellTarget3": "277.50",
+    "shortName": "Apple Inc.",
+    "status": "Booked profits @267.6 and riding runners",
+    "stopLoss": "252.27",
+    "symbol": "AAPL"
+  },
+  "1777057410": {
+    "buyTarget": "16.50",
+    "category": "LONGTERM",
+    "discordMessageId": "1497312047090761800",
+    "discordThreadId": "1497312047090761800",
+    "earlyTarget": "17.00",
+    "free": 0,
+    "isWeekly": 1,
+    "quote": {
+      "closePrice": 16.95,
+      "highPrice": 17.07,
+      "lastPrice": 16.525,
+      "lowPrice": 16.26,
+      "openPrice": 16.95,
+      "quoteTimeInLong": 1777060774,
+      "tradeTimeInLong": 1777060774
+    },
+    "reduceLoss": "14.85",
+    "sellTarget": "17.00",
+    "sellTarget2": "17.49",
+    "sellTarget3": "18.15",
+    "shortName": "Rivian Automotive, Inc.",
+    "stopLoss": "14.85",
+    "symbol": "RIVN"
+  }
+}

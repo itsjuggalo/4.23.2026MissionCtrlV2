@@ -55,6 +55,16 @@ TIER_1 = [  # Every 5 min — live trading data
     ("short_term_stocks",       "/Vivid2/ShortTermStocks.json",             5),
     ("option_notifications",    "/Vivid2/OptionNotifications.json",         5),
     ("stock_notifications",     "/Vivid2/StockNotifications.json",          5),
+    # Trade Signals (Name/) — 4 active feeds
+    ("ts_short_term_options",   "/Name/ShortTermOptions.json",              5),
+    ("ts_short_term_stocks",    "/Name/ShortTermStocks.json",               5),
+    ("ts_option_notifications", "/Name/OptionNotifications.json",           5),
+    ("ts_stock_notifications",  "/Name/StockNotifications.json",            5),
+    # Stock Signals (Name2/) — 4 active feeds
+    ("ss_short_term_options",   "/Name2/ShortTermOptions.json",             5),
+    ("ss_short_term_stocks",    "/Name2/ShortTermStocks.json",              5),
+    ("ss_option_notifications", "/Name2/OptionNotifications.json",          5),
+    ("ss_stock_notifications",  "/Name2/StockNotifications.json",           5),
 ]
 
 TIER_2 = [  # Every 30 min — slower changing
@@ -64,6 +74,11 @@ TIER_2 = [  # Every 30 min — slower changing
     ("flow_bullbears_today",    "/FlowGreeks/BullBears/today.json",        30),
     ("flow2_liveflows_today",   "/FlowGreeks2/LiveFlows/today.json",       30),
     ("flow2_bullbears",         "/FlowGreeks2/BullBears.json",             30),
+    # Trade Signals + Stock Signals long-term (lower volume, 30 min)
+    ("ts_long_term_options",    "/Name/LongTermOptions.json",              30),
+    ("ts_long_term_stocks",     "/Name/LongTermStocks.json",               30),
+    ("ss_long_term_options",    "/Name2/LongTermOptions.json",             30),
+    ("ss_long_term_stocks",     "/Name2/LongTermStocks.json",              30),
 ]
 
 TIER_3 = [  # Every 6 hours — historical
@@ -72,6 +87,12 @@ TIER_3 = [  # Every 6 hours — historical
     ("closed_options_older",    "/Vivid2/ClosedOptionssOlder.json",       360),
     ("closed_stocks_older",     "/Vivid2/ClosedStocksOlder.json",         360),
     ("closed_options_2022",     "/Vivid2/ClosedOptions2022AndOld.json",   360),
+    # Trade Signals closed trades
+    ("ts_closed_options",       "/Name/ClosedOptions.json",               360),
+    ("ts_closed_stocks",        "/Name/ClosedStocks.json",                360),
+    # Stock Signals closed trades
+    ("ss_closed_options",       "/Name2/ClosedOptions.json",              360),
+    ("ss_closed_stocks",        "/Name2/ClosedStocks.json",               360),
 ]
 
 TIER_4 = [  # Once daily — deep archive

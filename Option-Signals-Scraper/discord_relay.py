@@ -50,6 +50,15 @@ WEBHOOKS = {
     "flow_repeaters":   "https://discordapp.com/api/webhooks/1495498970967969885/moFqKah8nmLDNnbFYKuH1X9USbE7KfPoyXEccWdw4XR2pf_hYRl04DnBzFOXHwZmc3un",
     "flow_unusual":     "https://discordapp.com/api/webhooks/1495499097615106110/iSSylcNPZtzIWi_3f4GAgva4XEb4JavZU99CK_Dhda04PtLaycYzlPvDk55-YjY3ILLc",
     "flow_huge":        "https://discordapp.com/api/webhooks/1495499184512434308/fqh1umawF2mXZs2679-qENjqCNNcKtlzSqMoUyX3P8CH4kb6B6hFPS3qJrH6q19Tyfmc",
+    "ts_picks":           "https://discordapp.com/api/webhooks/1497686981012881505/86vXVi4Tq5AJaFsRXU0oVYkWF8CBFZL1UwB--AHk2o9oLqCDwJjAJsM_4rg0gTaGc4oC",
+    "ts_closed":          "https://discordapp.com/api/webhooks/1497687033450205308/kRBByqvIOzDLCi57KN2NHSe2xn8XOoeM75ZZF6KhC-XAcnCHQvAThwc_nnQq52_19VdH",
+    "ts_mgmt":            "https://discordapp.com/api/webhooks/1497687088663892030/xo2dk5-jD_k56yf4FFabnDjoOeeJ4lhPU_XWmV4d0VkSaym4V0lFFMfvFLU1HmNvKYq9",
+    "ss_picks":           "https://discordapp.com/api/webhooks/1497686205217898687/DxkPdFVOMBnSR2gDRbt_jthQ814kimPvyO1stDdlsF5WhlzFg0q0W7V4geuvOUhcQ-hR",
+    "ss_closed":          "https://discordapp.com/api/webhooks/1497686368179196055/G2mJXX0oNZcTsJVgqzcDtNw1dvJw8EhyLDiVD5LS5yUkdxUwN6QqvPt1HirQYedf3Jf6",
+    "ss_mgmt":            "https://discordapp.com/api/webhooks/1497686609154281554/GTbFYTzAOTxAjYY0ddsnbiRot70jBqIDsbl_DxxBFujux96iIGhvLubIZ3ObMLEAlDNe",
+    "os_closed_stocks":   "https://discordapp.com/api/webhooks/1497687226870665264/BkNppKtAPqNEIpOECh33GGx2fyyiW32g_1Zxz99Q7rjbC3wq7Os4rp8k_HYhBIwSfJcA",
+    "fg1_sentiment":      "https://discordapp.com/api/webhooks/1497687328557371543/3dHICJGUg3txpH5fPGHRL67A7G0rfOykyuaEYAppYUnhhh_2iuZD4WE-NlR4RubsDkA2",
+    "fg2_sentiment":      "https://discordapp.com/api/webhooks/1497687543531962418/1nYerfY_4TuNAO4lrjgCcVNxq66RhbJIMhmQfJATIZhL0y39nhn8m-drL7TKBJ_Ihuiy",
     "flow_messages":   "https://discordapp.com/api/webhooks/1497628988938649684/3IrKREiuukaqLb73fW-ugSVazebeER92tCi2Ys9RE8LEEetwXnTnSvFXssbH0ufPjiAv",
     "flow_trade_results": "https://discordapp.com/api/webhooks/1497661681126609008/tlS_qnTSq4Uef8AUVpllp2vwC3sJ7u0BHt2_WcoJz5y75dnh3cgHpkhOn59zGlkWmyPk",
     "flow_etf":         "https://discordapp.com/api/webhooks/1495499274828517498/-NhSohclpP8hBxlekP_BNSnLF7ZeDb-Zdb39QhyyXUp43xhxppN8PeQwz1CSn0It_xNY",
@@ -597,6 +606,25 @@ def relay_closed_trades(state):
 # AUTO MIRRORS TO #flow-messages — additive
 # ═══════════════════════════════════════════════════════════════════════════════
 
+
+def _post_to(webhook_key, content, log_tag):
+    """Generic post to any webhook key with rate-limit handling."""
+    url = WEBHOOKS.get(webhook_key)
+    if not url: return False
+    try:
+        r = requests.post(url, json={"content": content[:1900]}, timeout=10)
+        if r.status_code in (200, 204): return True
+        if r.status_code == 429:
+            retry = r.json().get("retry_after", 5)
+            logging.warning(f"[{log_tag}] rate limited, sleeping {retry}s")
+            time.sleep(retry)
+            return False
+        logging.warning(f"[{log_tag}] HTTP {r.status_code}: {r.text[:150]}")
+        return False
+    except Exception as e:
+        logging.warning(f"[{log_tag}] post error: {e}")
+        return False
+
 def _post_to_flow_messages(content, log_tag):
     url = WEBHOOKS.get("flow_messages")
     if not url: return False
@@ -816,6 +844,282 @@ def relay_fg1_mirror(state):
             time.sleep(1.2)
     if new_sent:
         state["fg1_mirror_sent"] = list(sent | set(new_sent))[-5000:]
+    return state
+
+
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# TRADE SIGNALS + STOCK SIGNALS + OS-CLOSED-STOCKS + FG1/FG2 SENTIMENT MIRRORS
+# ═══════════════════════════════════════════════════════════════════════════════
+
+def _format_pick(entry, label):
+    sym = entry.get("symbol", "?")
+    strike = entry.get("strike", "")
+    buy = entry.get("buyTarget", "")
+    sell = entry.get("sellTarget", "")
+    sell2 = entry.get("sellTarget2", "")
+    stop = entry.get("stopLoss", "")
+    risk = entry.get("risk", "")
+    cat = entry.get("category", "")
+    expiry = entry.get("expiry", "")
+    short_name = entry.get("shortName", "")
+    is_put = entry.get("isPut", 0)
+
+    expiry_str = ""
+    try:
+        if expiry and str(expiry).isdigit() and int(expiry) > 1000000000:
+            from datetime import datetime
+            exp_dt = datetime.fromtimestamp(int(expiry))
+            expiry_str = f" {exp_dt.month}/{exp_dt.day}/{str(exp_dt.year)[2:]}"
+    except: pass
+
+    side = "P" if is_put else "C"
+    if "OPTION" in label.upper() and strike:
+        title = f"{sym} {strike}{side}{expiry_str}"
+    else:
+        title = sym
+
+    lines = [f"📊 {title} — {label}"]
+    if short_name: lines.append(short_name)
+    row = []
+    if buy: row.append(f"Buy {buy}")
+    if sell: row.append(f"T1 {sell}")
+    if sell2: row.append(f"T2 {sell2}")
+    if stop: row.append(f"SL {stop}")
+    if row: lines.append(" | ".join(row))
+    tags = []
+    if cat: tags.append(cat)
+    if risk: tags.append(f"Risk:{risk}")
+    if tags: lines.append("[" + ", ".join(tags) + "]")
+    return "\n".join(lines)
+
+
+def _format_closed(entry, kind):
+    sym = entry.get("symbol", "?")
+    strike = entry.get("strike", "")
+    status = entry.get("status", "")
+    buy = entry.get("buyTarget", "")
+    sell = entry.get("sellTarget", "")
+    cat = entry.get("category", "")
+    expiry = entry.get("expiry", "")
+    is_put = entry.get("isPut", 0)
+    expiry_str = ""
+    try:
+        if expiry and str(expiry).isdigit() and int(expiry) > 1000000000:
+            from datetime import datetime
+            exp_dt = datetime.fromtimestamp(int(expiry))
+            expiry_str = f" {exp_dt.month}/{exp_dt.day}/{str(exp_dt.year)[2:]}"
+    except: pass
+    side = "P" if is_put else "C"
+    if kind == "OPTION" and strike:
+        title = f"{sym} {strike}{side}{expiry_str}"
+    else:
+        title = sym
+    lines = [f"📕 {title} — Closed"]
+    if status: lines.append(status)
+    if buy and sell: lines.append(f"Buy {buy} → Sell {sell}")
+    if cat: lines.append(f"[{cat}]")
+    return "\n".join(lines)
+
+
+def _format_mgmt(entry):
+    title = entry.get("title", "")
+    msg = entry.get("message", "")
+    cat = entry.get("category", "")
+    sym = entry.get("symbol", "?")
+    emoji = "📋"
+    if "stopped" in msg.lower(): emoji = "🛑"
+    elif ("target" in msg.lower() and ("reach" in msg.lower() or "lock" in msg.lower())): emoji = "🎯"
+    elif "stc" in title.lower() or "sell" in title.lower(): emoji = "💰"
+    lines = [f"{emoji} {title}" if title else f"{emoji} {sym}"]
+    if msg: lines.append(msg)
+    if cat: lines.append(f"[{cat}]")
+    return "\n".join(lines)
+
+
+# --- Trade Signals (Name/) ---
+def relay_ts_picks(state):
+    sent = set(state.get("ts_picks_sent", []))
+    new = []
+    for fname, label in [("ts_short_term_options", "TS ST OPTION"),
+                          ("ts_long_term_options", "TS LT OPTION"),
+                          ("ts_short_term_stocks", "TS ST STOCK"),
+                          ("ts_long_term_stocks", "TS LT STOCK")]:
+        d = read_data(fname)
+        if not d or not isinstance(d, dict): continue
+        for k, e in d.items():
+            if not isinstance(e, dict): continue
+            sk = f"tsp|{fname}|{k}"
+            if sk in sent: continue
+            if _post_to("ts_picks", _format_pick(e, label), "ts_picks"):
+                new.append(sk)
+                logging.info(f"[ts_picks] posted {e.get('symbol','?')}")
+                time.sleep(1.2)
+    if new: state["ts_picks_sent"] = list(sent | set(new))[-5000:]
+    return state
+
+
+def relay_ts_closed(state):
+    sent = set(state.get("ts_closed_sent", []))
+    new = []
+    for fname, kind in [("ts_closed_options", "OPTION"), ("ts_closed_stocks", "STOCK")]:
+        d = read_data(fname)
+        if not d or not isinstance(d, dict): continue
+        for k, e in d.items():
+            if not isinstance(e, dict): continue
+            sk = f"tsc|{fname}|{k}"
+            if sk in sent: continue
+            if _post_to("ts_closed", _format_closed(e, kind), "ts_closed"):
+                new.append(sk)
+                logging.info(f"[ts_closed] posted {e.get('symbol','?')}")
+                time.sleep(1.2)
+    if new: state["ts_closed_sent"] = list(sent | set(new))[-5000:]
+    return state
+
+
+def relay_ts_mgmt(state):
+    sent = set(state.get("ts_mgmt_sent", []))
+    new = []
+    for fname in ["ts_option_notifications", "ts_stock_notifications"]:
+        d = read_data(fname)
+        if not d or not isinstance(d, dict): continue
+        for k, e in d.items():
+            if not isinstance(e, dict): continue
+            sk = f"tsm|{fname}|{k}"
+            if sk in sent: continue
+            if not (e.get("title") or e.get("message")): continue
+            if _post_to("ts_mgmt", _format_mgmt(e), "ts_mgmt"):
+                new.append(sk)
+                logging.info(f"[ts_mgmt] posted {e.get('title','?')[:30]}")
+                time.sleep(1.2)
+    if new: state["ts_mgmt_sent"] = list(sent | set(new))[-5000:]
+    return state
+
+
+# --- Stock Signals (Name2/) ---
+def relay_ss_picks(state):
+    sent = set(state.get("ss_picks_sent", []))
+    new = []
+    for fname, label in [("ss_short_term_options", "SS ST OPTION"),
+                          ("ss_long_term_options", "SS LT OPTION"),
+                          ("ss_short_term_stocks", "SS ST STOCK"),
+                          ("ss_long_term_stocks", "SS LT STOCK")]:
+        d = read_data(fname)
+        if not d or not isinstance(d, dict): continue
+        for k, e in d.items():
+            if not isinstance(e, dict): continue
+            sk = f"ssp|{fname}|{k}"
+            if sk in sent: continue
+            if _post_to("ss_picks", _format_pick(e, label), "ss_picks"):
+                new.append(sk)
+                logging.info(f"[ss_picks] posted {e.get('symbol','?')}")
+                time.sleep(1.2)
+    if new: state["ss_picks_sent"] = list(sent | set(new))[-5000:]
+    return state
+
+
+def relay_ss_closed(state):
+    sent = set(state.get("ss_closed_sent", []))
+    new = []
+    for fname, kind in [("ss_closed_options", "OPTION"), ("ss_closed_stocks", "STOCK")]:
+        d = read_data(fname)
+        if not d or not isinstance(d, dict): continue
+        for k, e in d.items():
+            if not isinstance(e, dict): continue
+            sk = f"ssc|{fname}|{k}"
+            if sk in sent: continue
+            if _post_to("ss_closed", _format_closed(e, kind), "ss_closed"):
+                new.append(sk)
+                logging.info(f"[ss_closed] posted {e.get('symbol','?')}")
+                time.sleep(1.2)
+    if new: state["ss_closed_sent"] = list(sent | set(new))[-5000:]
+    return state
+
+
+def relay_ss_mgmt(state):
+    sent = set(state.get("ss_mgmt_sent", []))
+    new = []
+    for fname in ["ss_option_notifications", "ss_stock_notifications"]:
+        d = read_data(fname)
+        if not d or not isinstance(d, dict): continue
+        for k, e in d.items():
+            if not isinstance(e, dict): continue
+            sk = f"ssm|{fname}|{k}"
+            if sk in sent: continue
+            if not (e.get("title") or e.get("message")): continue
+            if _post_to("ss_mgmt", _format_mgmt(e), "ss_mgmt"):
+                new.append(sk)
+                logging.info(f"[ss_mgmt] posted {e.get('title','?')[:30]}")
+                time.sleep(1.2)
+    if new: state["ss_mgmt_sent"] = list(sent | set(new))[-5000:]
+    return state
+
+
+# --- OS Closed Stocks (Vivid2/ClosedStocks — currently scraped, never routed) ---
+def relay_os_closed_stocks(state):
+    sent = set(state.get("os_closed_stocks_sent", []))
+    new = []
+    d = read_data("closed_stocks")
+    if not d or not isinstance(d, dict): return state
+    for k, e in d.items():
+        if not isinstance(e, dict): continue
+        sk = f"osc|{k}"
+        if sk in sent: continue
+        if _post_to("os_closed_stocks", _format_closed(e, "STOCK"), "os_closed_stocks"):
+            new.append(sk)
+            logging.info(f"[os_closed_stocks] posted {e.get('symbol','?')}")
+            time.sleep(1.2)
+    if new: state["os_closed_stocks_sent"] = list(sent | set(new))[-5000:]
+    return state
+
+
+# --- FG1 + FG2 Sentiment (BullBears) ---
+def _format_sentiment(ticker, entry):
+    if not isinstance(entry, dict): return None
+    bull = entry.get("bullish", entry.get("Bullish", entry.get("bull", 0)))
+    bear = entry.get("bearish", entry.get("Bearish", entry.get("bear", 0)))
+    try:
+        bull_n = float(bull) if bull else 0
+        bear_n = float(bear) if bear else 0
+    except: bull_n = bear_n = 0
+    if bull_n == 0 and bear_n == 0: return None
+    total = bull_n + bear_n
+    bull_pct = (bull_n / total * 100) if total else 0
+    arrow = "🟢" if bull_pct > 60 else ("🔴" if bull_pct < 40 else "⚪")
+    return f"{arrow} {ticker}: {bull_pct:.0f}% bull / {100-bull_pct:.0f}% bear (vol {int(total)})"
+
+
+def relay_fg1_sentiment(state):
+    sent = set(state.get("fg1_sent_sent", []))
+    new = []
+    d = read_data("flow_bullbears_today")
+    if not d or not isinstance(d, dict): return state
+    for ticker, entry in d.items():
+        sk = f"fg1s|{ticker}|{json.dumps(entry, sort_keys=True)[:60] if isinstance(entry, dict) else entry}"
+        if sk in sent: continue
+        msg = _format_sentiment(ticker, entry)
+        if not msg: continue
+        if _post_to("fg1_sentiment", msg, "fg1_sentiment"):
+            new.append(sk)
+            time.sleep(1.2)
+    if new: state["fg1_sent_sent"] = list(sent | set(new))[-3000:]
+    return state
+
+
+def relay_fg2_sentiment(state):
+    sent = set(state.get("fg2_sent_sent", []))
+    new = []
+    d = read_data("flow2_bullbears")
+    if not d or not isinstance(d, dict): return state
+    for ticker, entry in d.items():
+        sk = f"fg2s|{ticker}|{json.dumps(entry, sort_keys=True)[:60] if isinstance(entry, dict) else entry}"
+        if sk in sent: continue
+        msg = _format_sentiment(ticker, entry)
+        if not msg: continue
+        if _post_to("fg2_sentiment", msg, "fg2_sentiment"):
+            new.append(sk)
+            time.sleep(1.2)
+    if new: state["fg2_sent_sent"] = list(sent | set(new))[-3000:]
     return state
 
 

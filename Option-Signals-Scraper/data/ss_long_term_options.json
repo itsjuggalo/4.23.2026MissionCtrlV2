@@ -1,0 +1,79 @@
+{
+  "1752598156": {
+    "buyTarget": "37.40",
+    "category": "LONGTERM",
+    "earlyTarget": "43.01",
+    "exit1": "43.05",
+    "exit2": "69.50",
+    "expiry": "1799971200",
+    "free": 1,
+    "isWeekly": 1,
+    "quote": {
+      "askPrice": "65.1",
+      "askSize": "809",
+      "bidPrice": "61.55",
+      "bidSize": "1114",
+      "closePrice": "61.3",
+      "highPrice": "63.01",
+      "lastPrice": "63.01",
+      "lowPrice": "63.01",
+      "openInterest": "1813",
+      "openPrice": "63.01",
+      "quoteTimeInLong": 1775591937125,
+      "totalVolume": "20",
+      "tradeTimeInLong": 1775585636000
+    },
+    "reasoning": {
+      "\ud83d\udc0b Unusual Flows": "Newly opened option sweeps were detected with Sweep Volume > Open Interest.",
+      "\ud83d\udcc8 Bullish Sweeps": "Bullish sweeps indicate some hedge fund managers expect the stock to go up in short term.",
+      "\ud83d\udcca Technical Analysis": "Technical Analysis indicates that the analyst has verified chart pattern, support and resistance levels, moving averages, RSI and VWAP for this entry."
+    },
+    "reduceLoss": "24.31",
+    "risk": "HI",
+    "sellTarget": "43.01",
+    "sellTarget2": "46.75",
+    "sellTarget3": 83.4,
+    "status": "Booked profits @69.50 and riding runners",
+    "stopLoss": 55.6,
+    "strike": "55",
+    "symbol": "C"
+  },
+  "1777057406": {
+    "buyTarget": "2.25",
+    "category": "LONGTERM",
+    "discordMessageId": "1497312028258209944",
+    "discordThreadId": "1497312028258209944",
+    "earlyTarget": "2.59",
+    "expiry": "1832043600",
+    "free": 0,
+    "isWeekly": 1,
+    "quote": {
+      "askPrice": "2.35",
+      "askSize": "20",
+      "bidPrice": "2.26",
+      "bidSize": "3",
+      "closePrice": "2.4",
+      "highPrice": "2.45",
+      "lastPrice": "2.29",
+      "lowPrice": "2.06",
+      "openInterest": "2878",
+      "openPrice": "2.07",
+      "quoteTimeInLong": 1777060794973,
+      "totalVolume": "34599",
+      "tradeTimeInLong": 1777060776000
+    },
+    "reasoning": {
+      "\ud83d\udc0b Unusual Flows": "Newly opened option sweeps were detected with Sweep Volume > Open Interest.",
+      "\ud83d\udcc8 Bullish Sweeps": "Bullish sweeps indicate some hedge fund managers expect the stock to go up in short term.",
+      "\ud83d\udcca Technical Analysis": "Technical Analysis indicates that the analyst has verified chart pattern, support and resistance levels, moving averages, RSI and VWAP for this entry."
+    },
+    "reduceLoss": "1.46",
+    "sellTarget": "2.59",
+    "sellTarget2": "2.81",
+    "sellTarget3": "3.15",
+    "shortName": "Rivian Automotive, Inc.",
+    "stopLoss": "1.46",
+    "strike": "40",
+    "symbol": "RIVN"
+  }
+}
