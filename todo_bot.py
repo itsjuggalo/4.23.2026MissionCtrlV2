@@ -98,15 +98,26 @@ def categorize_with_grok(text):
         return {"category": "other", "energy": "medium", "estimate_min": 60, "reason": "(parse failed)"}
 
 
+ICONS = {"dev": "🔧", "dashboard": "📊", "bot": "🤖", "trading": "📈", "pine": "📜", "personal": "🏠", "other": "▫️"}
+ENERGY_E = {"quick": "⚡", "medium": "◐", "deep": "🧠"}
+ENERGY_RANK = {"quick": 0, "medium": 1, "deep": 2}
+
+def age_str(t):
+    if not t.get("created_at"):
+        return "?"
+    age_min = (datetime.now(timezone.utc) - datetime.fromisoformat(t["created_at"].replace("Z", "+00:00"))).total_seconds() / 60
+    if age_min < 60: return f"{int(age_min)}m"
+    if age_min < 1440: return f"{int(age_min/60)}h"
+    return f"{int(age_min/1440)}d"
+
 def fmt_todo(t, idx_num=None):
-    icons = {"dev": "🔧", "dashboard": "📊", "bot": "🤖", "trading": "📈", "pine": "📜", "personal": "🏠", "other": "•"}
-    energy_e = {"quick": "⚡", "medium": "◐", "deep": "🧠"}
-    icon = icons.get(t.get("category", "other"), "•")
-    en = energy_e.get(t.get("energy", "medium"), "◐")
+    icon = ICONS.get(t.get("category", "other"), "▫️")
+    en = ENERGY_E.get(t.get("energy", "medium"), "◐")
     num = idx_num or t.get("id", "?")
-    age_min = (datetime.now(timezone.utc) - datetime.fromisoformat(t.get("created_at", "").replace("Z", "+00:00"))).total_seconds() / 60 if t.get("created_at") else 0
-    age = f"{int(age_min)}m" if age_min < 60 else (f"{int(age_min/60)}h" if age_min < 1440 else f"{int(age_min/1440)}d")
-    return f"`#{num}` {icon}{en} {t.get('text','')[:120]}  _·{age}·_"
+    text = t.get("text","")
+    if len(text) > 75:
+        text = text[:72] + "..."
+    return f"`#{num:>2}` {icon}{en} {text}"
 
 
 # Discord setup
@@ -270,7 +281,7 @@ async def on_message(message):
         await message.channel.send(f"❌ #{target_id} not found or already done")
         return
 
-    # !list [filter]
+    # !list [filter] — prettier grouped view, sorted by energy then ID
     if content.startswith("!list"):
         parts = content.split()
         filt = parts[1].lower() if len(parts) > 1 else None
@@ -280,19 +291,68 @@ async def on_message(message):
         elif filt in CATEGORIES:
             items = [t for t in items if t.get("category") == filt]
         if not items:
-            await message.channel.send(f"No active todos{f' in {filt}' if filt else ''}.")
+            await message.channel.send(f"📭 No active todos{f' in `{filt}`' if filt else ''}.")
             return
-        # Group by category
         by_cat = {}
         for t in items:
             by_cat.setdefault(t.get("category","other"), []).append(t)
-        chunks = []
-        for cat in sorted(by_cat.keys()):
-            chunks.append(f"\n**{cat.upper()}** ({len(by_cat[cat])})")
-            for t in sorted(by_cat[cat], key=lambda x: -x.get("id",0))[:15]:
+        # Header
+        header = f"📋  **TODO LIST**  ·  {len(items)} active"
+        if filt: header += f"  ·  filter: `{filt}`"
+        chunks = [header, "─" * 40]
+        # Order categories by item count desc
+        for cat in sorted(by_cat.keys(), key=lambda c: -len(by_cat[c])):
+            cat_icon = ICONS.get(cat, "▫️")
+            chunks.append(f"\n{cat_icon} **{cat.upper()}**  ·  {len(by_cat[cat])}")
+            # Within category: sort by energy (quick first), then id desc
+            sorted_items = sorted(by_cat[cat], key=lambda x: (ENERGY_RANK.get(x.get("energy","medium"), 1), -x.get("id", 0)))
+            for t in sorted_items[:20]:
                 chunks.append(fmt_todo(t))
+        chunks.append("\n" + "─" * 40)
+        chunks.append("_⚡ quick · ◐ medium · 🧠 deep_   `!triage` for top picks · `!board` for kanban view")
         out = "\n".join(chunks)
         for c in [out[i:i+1900] for i in range(0, len(out), 1900)]:
+            await message.channel.send(c)
+        return
+
+    # !board — kanban-style view (Quick Wins / Steady / Deep Work)
+    if content.startswith("!board"):
+        if not active:
+            await message.channel.send("📭 No active todos.")
+            return
+        quick = sorted([t for t in active if t.get("energy") == "quick"], key=lambda x: -x.get("id", 0))
+        mid = sorted([t for t in active if t.get("energy") == "medium"], key=lambda x: -x.get("id", 0))
+        deep = sorted([t for t in active if t.get("energy") == "deep"], key=lambda x: -x.get("id", 0))
+        total = len(active)
+        # Visual progress bar across columns
+        bar_total = 30
+        q_blocks = round(bar_total * len(quick) / total) if total else 0
+        m_blocks = round(bar_total * len(mid) / total) if total else 0
+        d_blocks = bar_total - q_blocks - m_blocks
+        bar = "🟩" * q_blocks + "🟨" * m_blocks + "🟥" * d_blocks
+
+        out = ["🗂️  **KANBAN BOARD**  ·  " + str(total) + " active"]
+        out.append(bar)
+        out.append(f"⚡ Quick: {len(quick)}  ·  ◐ Medium: {len(mid)}  ·  🧠 Deep: {len(deep)}")
+        out.append("─" * 40)
+
+        if quick:
+            out.append(f"\n⚡ **QUICK WINS**  ·  *<15 min, low effort*")
+            for t in quick[:8]:
+                out.append(fmt_todo(t))
+        if mid:
+            out.append(f"\n◐ **STEADY**  ·  *~1 hour, moderate*")
+            for t in mid[:8]:
+                out.append(fmt_todo(t))
+        if deep:
+            out.append(f"\n🧠 **DEEP WORK**  ·  *2hr+, focus required*")
+            for t in deep[:10]:
+                out.append(fmt_todo(t))
+        out.append("\n" + "─" * 40)
+        out.append("_Tip: tackle ⚡ when tired, 🧠 when fresh._")
+
+        full = "\n".join(out)
+        for c in [full[i:i+1900] for i in range(0, len(full), 1900)]:
             await message.channel.send(c)
         return
 
