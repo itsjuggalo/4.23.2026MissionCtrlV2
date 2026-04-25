@@ -46,11 +46,10 @@ def save_todos(todos):
 
 
 def next_id(todos):
-    used = {t.get("id", 0) for t in todos}
-    n = 1
-    while n in used:
-        n += 1
-    return n
+    """Strictly sequential — never reuse IDs even after completion."""
+    if not todos:
+        return 1
+    return max(t.get("id", 0) for t in todos) + 1
 
 
 def call_grok(prompt, structured=False):
