@@ -271,8 +271,22 @@ def fetch_live_option_quote(ticker, strike, option_type, expiry):
     if _tradier_quote is None:
         return None
     try:
-        # Build OCC: TICKER + YYMMDD + C/P + STRIKE*1000 zero-padded to 8
-        exp_clean = str(expiry).replace("-", "")[2:]  # YYMMDD
+        # Build OCC symbol — handle multiple expiry formats:
+        #   YYYY-MM-DD (Boba internal)
+        #   MM/DD/YY   (whale flow sidecar format)
+        #   MM/DD      (Firebase format, year inferred)
+        exp_str = str(expiry).strip()
+        from datetime import datetime as _dt
+        exp_dt = None
+        for fmt in ("%Y-%m-%d", "%m/%d/%y", "%m/%d/%Y", "%Y%m%d"):
+            try:
+                exp_dt = _dt.strptime(exp_str, fmt)
+                break
+            except ValueError:
+                continue
+        if exp_dt is None:
+            return None
+        exp_clean = exp_dt.strftime("%y%m%d")  # YYMMDD
         right = "C" if str(option_type).upper().startswith("C") else "P"
         strike_int = int(float(strike) * 1000)
         occ = f"{str(ticker).upper()}{exp_clean}{right}{strike_int:08d}"
