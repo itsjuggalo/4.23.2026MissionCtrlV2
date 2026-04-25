@@ -49,6 +49,7 @@ WEBHOOKS = {
     "flow_repeaters":   "https://discordapp.com/api/webhooks/1495498970967969885/moFqKah8nmLDNnbFYKuH1X9USbE7KfPoyXEccWdw4XR2pf_hYRl04DnBzFOXHwZmc3un",
     "flow_unusual":     "https://discordapp.com/api/webhooks/1495499097615106110/iSSylcNPZtzIWi_3f4GAgva4XEb4JavZU99CK_Dhda04PtLaycYzlPvDk55-YjY3ILLc",
     "flow_huge":        "https://discordapp.com/api/webhooks/1495499184512434308/fqh1umawF2mXZs2679-qENjqCNNcKtlzSqMoUyX3P8CH4kb6B6hFPS3qJrH6q19Tyfmc",
+    "flow_messages":   "https://discordapp.com/api/webhooks/1497628988938649684/3IrKREiuukaqLb73fW-ugSVazebeER92tCi2Ys9RE8LEEetwXnTnSvFXssbH0ufPjiAv",
     "flow_etf":         "https://discordapp.com/api/webhooks/1495499274828517498/-NhSohclpP8hBxlekP_BNSnLF7ZeDb-Zdb39QhyyXUp43xhxppN8PeQwz1CSn0It_xNY",
 }
 
@@ -588,6 +589,87 @@ def relay_closed_trades(state):
 
 
 # ─── RELAY: FLOWGREEKS2 ALERTS ────────────────────────────────────────────────
+
+def relay_flow2_phone_mirror(state):
+    """Mirror FlowGreeks2 alerts to #flow-messages in phone-notification format.
+    Reads same data as relay_flow2_alerts but separate sent-tracking and posts as plain text."""
+    data = read_data("flow2_alerts_today")
+    if not data or not isinstance(data, dict):
+        return state
+    sent = set(state.get("flow2_phone_sent", []))
+    new_sent = []
+
+    # AlertType → notification header mapping
+    HEADERS = {
+        "rapid_flow":   "Rapid Flow Detected!",
+        "repeat_flow":  "Repeated Flow Alert!",
+        "weekly_flow":  "Weekly Flow Alert!",
+        "unusual_flow": "Unusual Flow Detected!",
+        "etf_flow":     "ETF: Repeated Flow Alert!",
+    }
+
+    def fmt_premium(val):
+        try:
+            v = float(val)
+        except Exception:
+            return "0"
+        if v >= 1_000_000:
+            return f"{v/1_000_000:.1f}M"
+        if v >= 1_000:
+            return f"{v/1_000:.0f}K"
+        return f"{v:.0f}"
+
+    for option_symbol, entry in data.items():
+        if not isinstance(entry, dict):
+            continue
+        alert = entry.get("alert", {})
+        if not alert:
+            continue
+        # Only mirror what the phone would have notified
+        if alert.get("NotifyAlert", 0) != 1:
+            continue
+        # Dedupe: ticker + alertType + flow_count keeps re-fires of the same alert level out
+        symbol = alert.get("Symbol", "")
+        alert_type = alert.get("AlertType", "")
+        flow_count = alert.get("totalFlowCount", 0)
+        flow_value = alert.get("totalFlowValue", 0)
+        sent_key = f"{option_symbol}|{alert_type}|{flow_count}"
+        if sent_key in sent:
+            continue
+
+        header = HEADERS.get(alert_type, "Flow Alert!")
+        premium_str = fmt_premium(flow_value)
+
+        msg = (
+            f"🚨 ${symbol} Flow Alert! 🚨\n"
+            f"{header}\n"
+            f"Flow count: {flow_count}, Premium: {premium_str} !!"
+        )
+
+        try:
+            url = WEBHOOKS.get("flow_messages")
+            if not url:
+                continue
+            r = requests.post(url, json={"content": msg}, timeout=10)
+            if r.status_code in (200, 204):
+                new_sent.append(sent_key)
+                logging.info(f"[flow_messages] posted {symbol} {alert_type} count={flow_count} premium={premium_str}")
+            elif r.status_code == 429:
+                retry = r.json().get("retry_after", 5)
+                logging.warning(f"[flow_messages] rate limited, sleeping {retry}s")
+                time.sleep(retry)
+            else:
+                logging.warning(f"[flow_messages] HTTP {r.status_code}: {r.text[:200]}")
+        except Exception as e:
+            logging.warning(f"[flow_messages] post error: {e}")
+
+    if new_sent:
+        all_sent = list(sent | set(new_sent))
+        # Cap tracked IDs to last 5000 to avoid unbounded growth
+        state["flow2_phone_sent"] = all_sent[-5000:]
+    return state
+
+
 def relay_flow2_alerts(state):
     data = read_data("flow2_alerts_today")
     if not data or not isinstance(data, dict):
