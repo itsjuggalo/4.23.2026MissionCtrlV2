@@ -724,7 +724,7 @@ def relay_winners_mirror(state):
                 logging.info(f"[winners] posted {symbol} pct={pct} tier={tier}")
             _posted_count += 1
             if _posted_count >= _max_per_cycle:
-                if new: state["winners_mirror_sent"] = list(set(state.get("winners_mirror_sent", []) + new))[-5000:]
+                if new_sent: state["winners_mirror_sent"] = list(set(state.get("winners_mirror_sent", []) + new_sent))[-5000:]
                 return state
                 time.sleep(1.2)
     if new_sent:
