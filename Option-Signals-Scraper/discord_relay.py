@@ -1162,6 +1162,11 @@ def relay_fg2_sentiment(state):
     new = []
     d = read_data("flow2_bullbears")
     if not d or not isinstance(d, dict): return state
+    # Schema is {"today": {ticker: {...}}} — drill down if needed
+    if "today" in d and isinstance(d.get("today"), dict):
+        d = d["today"]
+    elif "today" in d:
+        return state  # today exists but is not a dict (empty string), nothing to post
     for ticker, entry in d.items():
         sk = f"fg2s|{ticker}|{json.dumps(entry, sort_keys=True)[:60] if isinstance(entry, dict) else entry}"
         if sk in sent: continue
