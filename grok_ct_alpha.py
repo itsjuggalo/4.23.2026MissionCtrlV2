@@ -19,7 +19,7 @@ OUTPUT_FILE.parent.mkdir(parents=True, exist_ok=True)
 
 DEDUPE_HOURS = 6
 API_URL = "https://api.x.ai/v1/responses"
-MODEL = "grok-4-latest"
+MODEL = "grok-4-fast-non-reasoning"
 WEBHOOK_NAME = "discord_webhook_x_updates"
 
 
