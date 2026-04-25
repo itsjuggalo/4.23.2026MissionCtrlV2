@@ -256,6 +256,41 @@ def get_alpaca_positions():
     return []
 
 
+def format_firebase_signals_for_prompt(signals, max_show=20):
+    """Format last N Firebase trade signals (Name/Name2/Vivid) into prompt-ready text."""
+    if not signals:
+        return "  (no recent provider trade signals)"
+    # Most recent first, cap at max_show
+    recent = sorted(signals, key=lambda x: x.get("captured_at", ""), reverse=True)[:max_show]
+    lines = []
+    for s in recent:
+        side = "PUT" if s.get("is_put") else "CALL"
+        cat = s.get("category", "?")
+        ticker = s.get("ticker", "?")
+        strike = s.get("strike", "?")
+        buy = s.get("buy_target", "?")
+        sell = s.get("sell_target", "?")
+        sl = s.get("stop_loss", "?")
+        source = s.get("source", "?")
+        risk = s.get("risk") or "?"
+        is_free = s.get("is_free", False)
+        free_tag = "FREE" if is_free else "PREMIUM"
+        # Convert expiry timestamp to MM/DD if available
+        exp_str = "?"
+        ts = s.get("expiry_ts")
+        if ts:
+            try:
+                from datetime import datetime as _dt
+                exp_str = _dt.fromtimestamp(int(ts)).strftime("%m/%d")
+            except Exception:
+                pass
+        lines.append(
+            f"  - [{source}] {cat}: {ticker} ${strike} {side} exp {exp_str} | "
+            f"Entry ${buy} → Target ${sell} | SL ${sl} | Risk: {risk} | {free_tag}"
+        )
+    return "\n".join(lines)
+
+
 def build_boba_prompt(account, positions, shortlist_with_kronos):
     equity = float(account.get("equity", 0))
     buying_power = float(account.get("buying_power", 0))
@@ -300,6 +335,8 @@ def build_boba_prompt(account, positions, shortlist_with_kronos):
             elif agree is False:
                 shortlist_text += f"  → Kronos CONFLICTS with option thesis ❌\n"
 
+    firebase_signals_text = format_firebase_signals_for_prompt(load_firebase_signals(), max_show=20)
+
     prompt = f"""You are Boba — the decision-making agent in Mission Control's multi-agent trading system.
 
 # Mission
@@ -314,6 +351,10 @@ Open positions:
 
 # Candidates to review (already filtered to $1M+ whale tier + today's signals)
 {shortlist_text}
+
+# Trade signals from providers (Name / Name2 / Vivid — last 20)
+These are curated buy/sell calls from human-run provider services. Use them as INDEPENDENT confirmation: if a provider has called the same direction as a whale flow above, that's stronger alignment. Disagreement is also informative. Do NOT take a pick just because a provider called it — use these alongside whale flow + Kronos.
+{firebase_signals_text}
 
 # Your task
 Pick UP TO 3 options to buy on Alpaca paper. You can pick 0, 1, 2, or 3. Only pick if the setup is genuinely good — if nothing is compelling, say so and skip.
