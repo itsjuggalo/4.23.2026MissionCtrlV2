@@ -14,6 +14,7 @@ Deploy:
 import json
 import time
 import os
+import re
 import logging
 import requests
 from datetime import datetime, timezone
@@ -646,8 +647,17 @@ def relay_flow2_phone_mirror(state):
         header = _header(alert_type, alert.get("isBullish", False), alert.get("UnderlyingType", ""))
         premium_str = fmt_premium(flow_value)
 
+        # Parse OptionSymbol "SPY260424P00710000" → "SPY 710P 4/24/26"
+        _m = re.match(r"^([A-Z]+)(\d{2})(\d{2})(\d{2})([CP])(\d{8})$", option_symbol)
+        if _m:
+            _ticker, _yr, _mo, _day, _opt, _strike_raw = _m.groups()
+            _strike_dollars = int(_strike_raw) // 1000
+            title_line = f"{_ticker} {_strike_dollars}{_opt} {int(_mo)}/{int(_day)}/{_yr}"
+        else:
+            title_line = symbol
+
         msg = (
-            f"🚨 ${symbol} Flow Alert! 🚨\n"
+            f"{title_line}\n"
             f"{header}\n"
             f"Flow count: {flow_count}, Premium: {premium_str} !!"
         )
