@@ -1183,11 +1183,11 @@ def relay_fg2_sentiment(state):
 
 
 def relay_synthetic_analysis(state):
-    """Compute synthetic bull/bear sentiment per ticker from FG1 LiveFlows.
+    """Synthetic bull/bear sentiment per ticker from FG1 LiveFlows.
     Posts as Discord embed with trend arrows, ratio bars, sweep callouts.
-    Bullish: (CALL @ ASK) or (PUT @ BID).  Bearish: (CALL @ BID) or (PUT @ ASK).
     """
     import datetime as _dt
+    import requests as _req
     last_post = state.get("synthetic_analysis_last_post", 0)
     now = int(time.time())
     if now - last_post < 30 * 60:
@@ -1199,7 +1199,6 @@ def relay_synthetic_analysis(state):
         if not d or not isinstance(d, dict):
             return state
 
-    # Aggregate ALL trades per ticker + SWEEP-only per ticker
     ticker_all = {}
     ticker_sweep = {}
     for entry_id, entry in d.items():
@@ -1214,7 +1213,6 @@ def relay_synthetic_analysis(state):
         is_bullish = (opt_type == "CALL" and bid_ask == "A") or (opt_type == "PUT" and bid_ask == "B")
         is_bearish = (opt_type == "CALL" and bid_ask == "B") or (opt_type == "PUT" and bid_ask == "A")
         if not (is_bullish or is_bearish): continue
-
         for bucket in [ticker_all] + ([ticker_sweep] if block_type == "SWEEP" else []):
             s = bucket.setdefault(sym, {"bull_count":0, "bear_count":0, "bull_prem":0.0, "bear_prem":0.0, "total_prem":0.0})
             if is_bullish:
@@ -1225,10 +1223,8 @@ def relay_synthetic_analysis(state):
 
     if not ticker_all: return state
 
-    # Load previous snapshot for trend arrows
     prev_snap = state.get("synthetic_analysis_prev", {})
 
-    # Helpers
     def fmt_prem(v):
         if v >= 1_000_000: return f"${v/1_000_000:.1f}M"
         if v >= 1_000: return f"${v/1_000:.0f}K"
@@ -1237,100 +1233,86 @@ def relay_synthetic_analysis(state):
     def tier_emoji(total):
         if total >= 1_000_000: return "🔥"
         if total >= 500_000: return "⚡"
-        if total >= 100_000: return "•"
-        return " "
+        return "•"
 
     def trend_arrow(sym, current_pct):
         prev_pct = prev_snap.get(sym)
-        if prev_pct is None: return "•"
+        if prev_pct is None: return " "
         delta = current_pct - prev_pct
         if delta > 10: return "↑"
         if delta < -10: return "↓"
         return "→"
-
-    def ratio_bar(bull_pct):
-        # 10-segment bar
-        filled = int(round(bull_pct / 10))
-        if bull_pct >= 60: bull_char = "🟢"
-        elif bull_pct >= 40: bull_char = "🟡"
-        else: bull_char = "🔴"
-        return bull_char * filled + "⬜" * (10 - filled)
 
     def dot_emoji(bull_pct):
         if bull_pct >= 60: return "🟢"
         if bull_pct <= 40: return "🔴"
         return "🟡"
 
-    # Sort top 20 by total premium
     top = sorted(ticker_all.items(), key=lambda x: x[1]["total_prem"], reverse=True)[:20]
-
-    # Compute aggregate sentiment for embed sidebar color
     total_bull = sum(s["bull_prem"] for _, s in top)
     total_bear = sum(s["bear_prem"] for _, s in top)
     grand_total = total_bull + total_bear
     overall_pct = (total_bull / grand_total * 100) if grand_total > 0 else 50
-    if overall_pct >= 60: color = 0x2ecc71  # green
-    elif overall_pct <= 40: color = 0xe74c3c  # red
-    else: color = 0xf1c40f  # yellow
+    if overall_pct >= 60: color = 0x2ecc71
+    elif overall_pct <= 40: color = 0xe74c3c
+    else: color = 0xf1c40f
 
-    # Save snapshot for next run's trend arrows
     new_snap = {sym: ((s["bull_prem"]/s["total_prem"]*100) if s["total_prem"]>0 else 50) for sym, s in top}
 
-    # Build top-20 main table
-    lines_main = [f"`{'TKR':<5} {'BULL$':<7} {'BEAR$':<7} {'B/B%':<5} {'TOT':<7}`"]
+    rows_main = []
     for sym, s in top:
         bull_pct = (s["bull_prem"] / s["total_prem"] * 100) if s["total_prem"] > 0 else 0
         arrow = trend_arrow(sym, bull_pct)
         tier = tier_emoji(s["total_prem"])
         dot = dot_emoji(bull_pct)
-        lines_main.append(f"{tier}`{sym:<5} {fmt_prem(s['bull_prem']):<7} {fmt_prem(s['bear_prem']):<7} {bull_pct:>3.0f}%{arrow} {fmt_prem(s['total_prem']):<7}`{dot}")
+        line = "{}`{:<5} {:<7} {:<7} {:>3.0f}%{} {:<7}`{}".format(
+            tier, sym, fmt_prem(s["bull_prem"]), fmt_prem(s["bear_prem"]), bull_pct, arrow, fmt_prem(s["total_prem"]), dot)
+        rows_main.append(line)
     main_table = "
-".join(lines_main)
+".join(rows_main)
 
-    # Unusual flow callouts: >$500K AND >90% one direction
     unusual = []
     for sym, s in top:
         if s["total_prem"] < 500_000: continue
         bp = (s["bull_prem"] / s["total_prem"] * 100) if s["total_prem"] > 0 else 0
         if bp >= 90:
-            unusual.append(f"🟢 **{sym}** — {bp:.0f}% bull on {fmt_prem(s['total_prem'])}")
+            unusual.append("🟢 **{}** — {:.0f}% bull on {}".format(sym, bp, fmt_prem(s["total_prem"])))
         elif bp <= 10:
-            unusual.append(f"🔴 **{sym}** — {100-bp:.0f}% bear on {fmt_prem(s['total_prem'])}")
+            unusual.append("🔴 **{}** — {:.0f}% bear on {}".format(sym, 100-bp, fmt_prem(s["total_prem"])))
     unusual_text = "
 ".join(unusual[:10]) if unusual else "_No extreme flow detected this cycle_"
 
-    # Sweep-only top 10
     sweep_top = sorted(ticker_sweep.items(), key=lambda x: x[1]["total_prem"], reverse=True)[:10]
     if sweep_top:
-        lines_sweep = [f"`{'TKR':<5} {'BULL$':<7} {'BEAR$':<7} {'B/B%':<5}`"]
+        rows_sweep = []
         for sym, s in sweep_top:
             bp = (s["bull_prem"] / s["total_prem"] * 100) if s["total_prem"] > 0 else 0
             tier = tier_emoji(s["total_prem"])
             dot = dot_emoji(bp)
-            lines_sweep.append(f"{tier}`{sym:<5} {fmt_prem(s['bull_prem']):<7} {fmt_prem(s['bear_prem']):<7} {bp:>3.0f}%`{dot}")
+            line = "{}`{:<5} {:<7} {:<7} {:>3.0f}%`{}".format(
+                tier, sym, fmt_prem(s["bull_prem"]), fmt_prem(s["bear_prem"]), bp, dot)
+            rows_sweep.append(line)
         sweep_table = "
-".join(lines_sweep)
+".join(rows_sweep)
     else:
         sweep_table = "_No sweep data this cycle_"
 
-    # Build embed
     ts_str = _dt.datetime.now().strftime("%-I:%M %p ET")
     ts_iso = _dt.datetime.utcnow().isoformat() + "Z"
     embed = {
-        "title": f"📊 Synthetic Sentiment Rollup",
-        "description": f"**Overall: {overall_pct:.0f}% Bullish** {dot_emoji(overall_pct)}  •  Net flow: {fmt_prem(total_bull)} bull / {fmt_prem(total_bear)} bear",
+        "title": "📊 Synthetic Sentiment Rollup",
+        "description": "**Overall: {:.0f}% Bullish** {}  •  Net flow: {} bull / {} bear".format(
+            overall_pct, dot_emoji(overall_pct), fmt_prem(total_bull), fmt_prem(total_bear)),
         "color": color,
         "fields": [
-            {"name": f"Top 20 by Premium  •  🔥$1M+ ⚡$500K+ •$100K+", "value": main_table[:1024], "inline": False},
+            {"name": "Top 20 by Premium  •  🔥$1M+ ⚡$500K+ •under", "value": main_table[:1024], "inline": False},
             {"name": "🚨 Unusual Flow (>$500K & >90% directional)", "value": unusual_text[:1024], "inline": False},
-            {"name": "⚔️ SWEEP-Only Top 10 (most aggressive)", "value": sweep_table[:1024], "inline": False},
+            {"name": "⚔️ SWEEP-Only Top 10 (most aggressive money)", "value": sweep_table[:1024], "inline": False},
         ],
-        "footer": {"text": f"Computed from FG1 LiveFlows • {ts_str} • Updates every 30 min"},
+        "footer": {"text": "Computed from FG1 LiveFlows • {} • Updates every 30 min".format(ts_str)},
         "timestamp": ts_iso,
     }
 
-    # Post via webhook with embed
-    import requests as _req
     try:
         url = WEBHOOKS.get("synthetic_analysis")
         if not url: return state
@@ -1338,11 +1320,11 @@ def relay_synthetic_analysis(state):
         if r.status_code in (200, 204):
             state["synthetic_analysis_last_post"] = now
             state["synthetic_analysis_prev"] = new_snap
-            logging.info(f"[synthetic_analysis] posted embed rollup, {len(top)} tickers, overall {overall_pct:.0f}% bull")
+            logging.info("[synthetic_analysis] posted embed rollup, {} tickers, overall {:.0f}% bull".format(len(top), overall_pct))
         else:
-            logging.error(f"[synthetic_analysis] webhook returned {r.status_code}: {r.text[:200]}")
+            logging.error("[synthetic_analysis] webhook returned {}: {}".format(r.status_code, r.text[:200]))
     except Exception as e:
-        logging.error(f"[synthetic_analysis] post failed: {e}")
+        logging.error("[synthetic_analysis] post failed: {}".format(e))
     return state
 
 def relay_flow2_phone_mirror(state):
