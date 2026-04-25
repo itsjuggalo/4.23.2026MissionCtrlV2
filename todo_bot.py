@@ -163,30 +163,91 @@ async def on_message(message):
         )
         return
 
-    # + <text> — quick add (also accept "add ...")
+    # + <text> — single OR multi-line bulk add (every line starting with + becomes a todo)
     if content.startswith("+ ") or content.lower().startswith("add "):
-        text = content[2:] if content.startswith("+ ") else content[4:]
-        text = text.strip()
-        if not text:
+        # Extract all "+ ..." or "add ..." lines from the message
+        items = []
+        for raw_line in content.splitlines():
+            line = raw_line.strip()
+            if line.startswith("+ "):
+                items.append(line[2:].strip())
+            elif line.lower().startswith("add "):
+                items.append(line[4:].strip())
+        items = [t for t in items if t]
+
+        if not items:
             return
+
+        # Single item: full Grok categorization
+        if len(items) == 1:
+            text = items[0]
+            async with message.channel.typing():
+                cat = categorize_with_grok(text)
+            new_t = {
+                "id": next_id(todos), "text": text,
+                "category": cat["category"], "energy": cat["energy"],
+                "estimate_min": cat["estimate_min"], "actual_min": None,
+                "created_at": datetime.now(timezone.utc).isoformat(),
+                "completed_at": None, "source": "discord-quick-add",
+                "ai_reason": cat.get("reason", ""),
+            }
+            todos.append(new_t)
+            save_todos(todos)
+            await message.channel.send(f"✓ Added {fmt_todo(new_t)}\n_{cat.get('reason','')}_")
+            audit("add", f"#{new_t['id']} {text[:80]}")
+            return
+
+        # Bulk: batch-categorize via single Grok call
+        await message.channel.send(f"📦 Bulk-adding {len(items)} todos, categorizing with Grok...")
+        bulk_prompt = (
+            "Categorize each todo. Respond with STRICT JSON array, one object per item, in same order:\n"
+            f"Categories: {', '.join(CATEGORIES)}\n"
+            f"Energy: quick (<15min), medium (~1hr), deep (>2hr focused)\n\n"
+            "Items:\n" + "\n".join(f"{i+1}. {t}" for i, t in enumerate(items)) + "\n\n"
+            'Format: [{"category":"<one>","energy":"<one>","estimate_min":<int>}, ...]\n'
+            "Return ONLY the JSON array, no preamble."
+        )
         async with message.channel.typing():
-            cat = categorize_with_grok(text)
-        new = {
-            "id": next_id(todos),
-            "text": text,
-            "category": cat["category"],
-            "energy": cat["energy"],
-            "estimate_min": cat["estimate_min"],
-            "actual_min": None,
-            "created_at": datetime.now(timezone.utc).isoformat(),
-            "completed_at": None,
-            "source": "discord-quick-add",
-            "ai_reason": cat.get("reason", ""),
-        }
-        todos.append(new)
+            raw = call_grok(bulk_prompt, structured=True)
+        cats = []
+        try:
+            cats = json.loads(raw) if raw else []
+            if not isinstance(cats, list):
+                cats = []
+        except Exception:
+            cats = []
+        # Pad with defaults if Grok returned wrong count
+        while len(cats) < len(items):
+            cats.append({"category": "other", "energy": "medium", "estimate_min": 60})
+
+        added_ids = []
+        for i, text in enumerate(items):
+            c = cats[i] if i < len(cats) else {}
+            cat_v = c.get("category") if c.get("category") in CATEGORIES else "other"
+            en_v = c.get("energy") if c.get("energy") in ENERGY else "medium"
+            est_v = int(c.get("estimate_min", 60)) if str(c.get("estimate_min", "")).replace("-","").isdigit() else 60
+            new_t = {
+                "id": next_id(todos), "text": text,
+                "category": cat_v, "energy": en_v,
+                "estimate_min": est_v, "actual_min": None,
+                "created_at": datetime.now(timezone.utc).isoformat(),
+                "completed_at": None, "source": "discord-bulk-add",
+                "ai_reason": "bulk import",
+            }
+            todos.append(new_t)
+            added_ids.append(new_t["id"])
         save_todos(todos)
-        await message.channel.send(f"✓ Added {fmt_todo(new)}\n_{cat.get('reason','')}_")
-        audit("add", f"#{new['id']} {text[:80]}")
+
+        # Summary by category
+        by_cat = {}
+        for tid in added_ids:
+            t = next((x for x in todos if x.get("id") == tid), None)
+            if t:
+                by_cat.setdefault(t["category"], 0)
+                by_cat[t["category"]] += 1
+        cat_summary = " · ".join(f"{c}:{n}" for c, n in sorted(by_cat.items()))
+        await message.channel.send(f"✅ Added {len(added_ids)} todos (#{added_ids[0]}-#{added_ids[-1]})\n{cat_summary}\nUse `!list` to view.")
+        audit("bulk-add", f"count={len(added_ids)} ids={added_ids[0]}-{added_ids[-1]}")
         return
 
     # !done <id> or - <id>
