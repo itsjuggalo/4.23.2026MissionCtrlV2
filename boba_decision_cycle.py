@@ -47,6 +47,7 @@ KILLSWITCH = STATE_DIR / "boba_killswitch"
 DECISIONS_LOG = Path("/home/ubuntu/.openclaw/workspace/skill_outputs/boba_decisions_validated.json")
 DECISIONS_LOG.parent.mkdir(parents=True, exist_ok=True)
 SIDECAR = Path("/home/ubuntu/mission-control/signal-receiver/data/scored_signals_recent.json")
+FIREBASE_FEED = Path("/home/ubuntu/.openclaw/workspace/directives/firebase_trade_signals.json")
 KRONOS_CMD = "/home/ubuntu/mission-control/agent-team/kronos/kronos_on_demand.py"
 
 MAX_PICKS_PER_CYCLE = 3
@@ -78,6 +79,16 @@ def load_seen():
 
 def save_seen(seen):
     SEEN_FILE.write_text(json.dumps(list(seen)))
+
+
+def load_firebase_signals():
+    """Load Firebase Name/Name2/Vivid trade signals (last 50)."""
+    if not FIREBASE_FEED.exists():
+        return []
+    try:
+        return json.loads(FIREBASE_FEED.read_text())
+    except Exception:
+        return []
 
 
 def load_sidecar():
