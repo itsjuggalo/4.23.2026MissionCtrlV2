@@ -58,6 +58,7 @@ WEBHOOKS = {
     "ss_mgmt":            "https://discordapp.com/api/webhooks/1497686609154281554/GTbFYTzAOTxAjYY0ddsnbiRot70jBqIDsbl_DxxBFujux96iIGhvLubIZ3ObMLEAlDNe",
     "os_closed_stocks":   "https://discordapp.com/api/webhooks/1497687226870665264/BkNppKtAPqNEIpOECh33GGx2fyyiW32g_1Zxz99Q7rjbC3wq7Os4rp8k_HYhBIwSfJcA",
     "fg1_sentiment":      "https://discordapp.com/api/webhooks/1497687328557371543/3dHICJGUg3txpH5fPGHRL67A7G0rfOykyuaEYAppYUnhhh_2iuZD4WE-NlR4RubsDkA2",
+    "synthetic_analysis":  "https://discordapp.com/api/webhooks/1497723109296443574/09Vir6qTI2xdBFoUcggH9WemQi_RKnMM4AoaFVklQItTaqek2UV9piaylUMC1grNUbgA",
     "fg2_sentiment":      "https://discordapp.com/api/webhooks/1497687543531962418/1nYerfY_4TuNAO4lrjgCcVNxq66RhbJIMhmQfJATIZhL0y39nhn8m-drL7TKBJ_Ihuiy",
     "flow_messages":   "https://discordapp.com/api/webhooks/1497628988938649684/3IrKREiuukaqLb73fW-ugSVazebeER92tCi2Ys9RE8LEEetwXnTnSvFXssbH0ufPjiAv",
     "flow_trade_results": "https://discordapp.com/api/webhooks/1497661681126609008/tlS_qnTSq4Uef8AUVpllp2vwC3sJ7u0BHt2_WcoJz5y75dnh3cgHpkhOn59zGlkWmyPk",
@@ -1176,6 +1177,84 @@ def relay_fg2_sentiment(state):
             new.append(sk)
             time.sleep(1.2)
     if new: state["fg2_sent_sent"] = list(sent | set(new))[-3000:]
+    return state
+
+
+
+
+def relay_synthetic_analysis(state):
+    """Compute synthetic bull/bear sentiment per ticker from FG1 LiveFlows.
+    Bullish trades: (CALL @ ASK) or (PUT @ BID) — buyers paying up to be long calls or short puts
+    Bearish trades: (CALL @ BID) or (PUT @ ASK) — sellers letting them go cheap or buying puts
+    Posts hourly rollup of top 20 tickers by total premium volume.
+    """
+    import datetime as _dt
+    _max_per_cycle = 1  # only post once per cycle
+    _posted_count = 0
+
+    # Hourly cadence — only post if last post was over 55 min ago
+    last_post = state.get("synthetic_analysis_last_post", 0)
+    now = int(time.time())
+    if now - last_post < 55 * 60:
+        return state
+
+    d = read_data("flow_live_last100")
+    if not d or not isinstance(d, dict):
+        # Try LiveFlows today as fallback
+        d = read_data("flow_liveflows_today")
+        if not d or not isinstance(d, dict):
+            return state
+
+    # Aggregate per ticker
+    ticker_stats = {}
+    for entry_id, entry in d.items():
+        if not isinstance(entry, dict): continue
+        sym = entry.get("Symbol", "")
+        if not sym: continue
+        opt_type = entry.get("OptionType", "")
+        bid_ask = entry.get("BidAskType", "")
+        value = float(entry.get("Value", 0) or 0)
+        if value <= 0: continue
+
+        # Determine direction
+        is_bullish = (opt_type == "CALL" and bid_ask == "A") or (opt_type == "PUT" and bid_ask == "B")
+        is_bearish = (opt_type == "CALL" and bid_ask == "B") or (opt_type == "PUT" and bid_ask == "A")
+        if not (is_bullish or is_bearish): continue
+
+        s = ticker_stats.setdefault(sym, {"bull_count": 0, "bear_count": 0, "bull_prem": 0.0, "bear_prem": 0.0, "total_prem": 0.0})
+        if is_bullish:
+            s["bull_count"] += 1
+            s["bull_prem"] += value
+        else:
+            s["bear_count"] += 1
+            s["bear_prem"] += value
+        s["total_prem"] += value
+
+    if not ticker_stats:
+        return state
+
+    # Sort by total premium, take top 20
+    top = sorted(ticker_stats.items(), key=lambda x: x[1]["total_prem"], reverse=True)[:20]
+
+    # Build the message
+    def fmt_prem(v):
+        if v >= 1_000_000: return f"${v/1_000_000:.1f}M"
+        if v >= 1_000: return f"${v/1_000:.0f}K"
+        return f"${v:.0f}"
+
+    ts_str = _dt.datetime.now().strftime("%H:%M ET")
+    lines = [f"📊 **Synthetic Sentiment Rollup** — {ts_str}", f"Top 20 tickers by total options premium:", "```"]
+    lines.append(f"{'TKR':<6} {'BULL$':<9} {'BEAR$':<9} {'B/B%':<8} {'TOT$':<9}")
+    for sym, s in top:
+        bull_pct = (s["bull_prem"] / s["total_prem"] * 100) if s["total_prem"] > 0 else 0
+        emoji = "🟢" if bull_pct >= 60 else "🔴" if bull_pct <= 40 else "🟡"
+        lines.append(f"{sym:<6} {fmt_prem(s['bull_prem']):<9} {fmt_prem(s['bear_prem']):<9} {emoji}{bull_pct:>5.0f}%  {fmt_prem(s['total_prem']):<9}")
+    lines.append("```")
+    msg = "\n".join(lines)
+
+    if _post_to("synthetic_analysis", msg, "synthetic_analysis"):
+        state["synthetic_analysis_last_post"] = now
+        logging.info(f"[synthetic_analysis] posted hourly rollup, {len(top)} tickers")
     return state
 
 
