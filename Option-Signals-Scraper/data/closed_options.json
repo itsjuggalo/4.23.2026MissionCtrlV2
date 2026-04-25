@@ -6007,5 +6007,26 @@
     "stopLoss": "2.83",
     "strike": "180",
     "symbol": "MRVL"
+  },
+  "1777039297": {
+    "buyTarget": "2.80",
+    "category": "SWING",
+    "discordMessageId": "1497236073980362923",
+    "discordThreadId": "1497236073980362923",
+    "earlyTarget": "3.22",
+    "exit1": "3.30",
+    "exit2": "3.70",
+    "exitTime": 1777056027,
+    "expiry": "1781758800",
+    "free": 1,
+    "isWeekly": 1,
+    "reduceLoss": "1.82",
+    "sellTarget": "3.30",
+    "sellTarget2": "3.70",
+    "shortName": "Baker Hughes Company",
+    "status": "Locked some at 3.70 for 32.14%!",
+    "stopLoss": "2.80",
+    "strike": "70",
+    "symbol": "BKR"
   }
 }
