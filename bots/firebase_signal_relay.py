@@ -13,6 +13,11 @@ DATA.mkdir(parents=True, exist_ok=True)
 STATE_FILE = DATA / "signal_relay_state.json"
 BASE = "https://stock-signal-72772-default-rtdb.firebaseio.com"
 
+# Boba feed — written so boba_decision_cycle.py can include these in its prompt
+BOBA_FEED = Path.home() / ".openclaw" / "workspace" / "directives" / "firebase_trade_signals.json"
+BOBA_FEED.parent.mkdir(parents=True, exist_ok=True)
+BOBA_FEED_MAX = 50  # keep last N trade signals
+
 def get_secret(name):
     p = SECRETS / name
     return p.read_text().strip() if p.exists() else None
@@ -73,8 +78,34 @@ def post_to_discord(message, source=None):
     except Exception as e:
         print(f"[signal-relay] Discord error: {e}")
 
+def save_for_boba(new_signals):
+    """Append new signals to the Boba feed JSON, capping at BOBA_FEED_MAX."""
+    if not new_signals:
+        return
+    existing = []
+    if BOBA_FEED.exists():
+        try:
+            existing = json.loads(BOBA_FEED.read_text())
+            if not isinstance(existing, list):
+                existing = []
+        except Exception:
+            existing = []
+    combined = existing + new_signals
+    # Most recent first, dedupe by id, cap
+    seen_ids = set()
+    deduped = []
+    for s in reversed(combined):
+        if s.get("id") not in seen_ids:
+            seen_ids.add(s.get("id"))
+            deduped.append(s)
+    deduped = list(reversed(deduped))[-BOBA_FEED_MAX:]
+    BOBA_FEED.write_text(json.dumps(deduped, indent=2))
+    print(f"[signal-relay] Wrote {len(deduped)} signals to Boba feed")
+
+
 def poll():
     state = load_state()
+    new_signals_buffer = []
     seen = set(state.get("seen_ids", []))
     new_count = 0
 
@@ -91,14 +122,31 @@ def poll():
                 full_id = f"{source}:{sig_id}"
                 if full_id not in seen:
                     seen.add(full_id)
-                    embed = build_embed(sig, f"{source}/{path}")
-                    post_to_discord(embed, source=source)
+                    msg = format_signal(sig, f"{source}/{path}")
+                    post_to_discord(msg, source=source)
+                    new_signals_buffer.append({
+                        "id": full_id,
+                        "source": source,
+                        "path": path,
+                        "ticker": sig.get("symbol", "???"),
+                        "strike": sig.get("strike"),
+                        "is_put": sig.get("isPut", False),
+                        "category": sig.get("category", "UNKNOWN"),
+                        "buy_target": sig.get("buyTarget"),
+                        "sell_target": sig.get("sellTarget"),
+                        "stop_loss": sig.get("stopLoss") or sig.get("reduceLoss"),
+                        "expiry_ts": sig.get("expiry"),
+                        "risk": sig.get("risk"),
+                        "is_free": sig.get("free", False),
+                        "captured_at": datetime.now().isoformat(),
+                    })
                     new_count += 1
                     time.sleep(1)
 
     # Keep only last 500 IDs
     state["seen_ids"] = list(seen)[-500:]
     save_state(state)
+    save_for_boba(new_signals_buffer)
     return new_count
 
 if __name__ == "__main__":
