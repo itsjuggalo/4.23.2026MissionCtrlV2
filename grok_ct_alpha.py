@@ -1,10 +1,9 @@
 #!/usr/bin/env python3
 """
-Grok CT Alpha Scraper — polls Grok every 15min for crypto/CT alpha and posts to Discord X-updates.
-Run via cron, single-shot, no daemon.
+Grok CT Alpha Scraper — uses xAI Responses API with built-in x_search tool.
+Polls every 15min via cron, dedupes 6h, posts urgency-tagged items to Discord X-updates.
 """
 import json
-import os
 import sys
 import time
 import hashlib
@@ -19,7 +18,7 @@ STATE_FILE.parent.mkdir(parents=True, exist_ok=True)
 OUTPUT_FILE.parent.mkdir(parents=True, exist_ok=True)
 
 DEDUPE_HOURS = 6
-API_URL = "https://api.x.ai/v1/chat/completions"
+API_URL = "https://api.x.ai/v1/responses"
 MODEL = "grok-4-latest"
 WEBHOOK_NAME = "discord_webhook_x_updates"
 
@@ -56,23 +55,19 @@ def call_grok():
         print("[grok-ct] FATAL: no xai_api_key in secrets")
         sys.exit(1)
 
-    system = (
-        "You are a crypto market intelligence analyst with live access to X (Twitter). "
-        "Your job is to surface ACTIONABLE alpha from Crypto Twitter in the last 60 minutes."
-    )
-    user = (
-        "Search X right now for the last 60 minutes of crypto/CT activity. "
-        "Surface only items with real signal value:\n"
+    prompt = (
+        "Search X for the last 60 minutes of crypto/CT activity. "
+        "Surface only ACTIONABLE alpha — items a trader can act on:\n"
         "- Whale on-chain moves >$10M\n"
-        "- KOL position calls from credible accounts (>50k followers)\n"
+        "- KOL position calls from credible accounts (>50k followers, track record)\n"
         "- Breaking news affecting BTC/ETH/SOL/major alts\n"
         "- Sudden sentiment shifts or coordinated narratives\n"
         "- Exchange listing/delisting announcements\n"
         "- Regulatory news\n\n"
-        "Skip generic price chatter, low-credibility accounts, repetitive memes, NFT hype.\n\n"
-        "Respond with STRICT JSON only, no preamble:\n"
+        "Skip: generic price chatter, low-credibility accounts, repetitive memes, NFT hype.\n\n"
+        "Respond with STRICT JSON only, no preamble or markdown:\n"
         '{\n'
-        '  "summary": "1-line overall vibe",\n'
+        '  "summary": "1-line overall vibe of the last hour",\n'
         '  "items": [\n'
         '    {\n'
         '      "urgency": "high|med|low",\n'
@@ -89,33 +84,11 @@ def call_grok():
 
     body = {
         "model": MODEL,
-        "messages": [
-            {"role": "system", "content": system},
-            {"role": "user", "content": user},
-        ],
-        "max_tokens": 2000,
-        "temperature": 0.3,
-        "tools": [
-            {
-                "type": "function",
-                "function": {
-                    "name": "x_search",
-                    "description": "Search X (Twitter) for posts. Use this to find recent CT alpha, whale activity, breaking crypto news.",
-                    "parameters": {
-                        "type": "object",
-                        "properties": {
-                            "query": {"type": "string", "description": "Search query for X posts"},
-                            "max_results": {"type": "integer", "description": "Max posts to return", "default": 25},
-                        },
-                        "required": ["query"],
-                    },
-                },
-            }
-        ],
-        "tool_choice": "auto",
+        "input": prompt,
+        "tools": [{"type": "x_search"}],
     }
 
-    content = ""
+    text = ""
     try:
         r = requests.post(
             API_URL,
@@ -124,25 +97,38 @@ def call_grok():
                 "Content-Type": "application/json",
             },
             json=body,
-            timeout=120,
+            timeout=180,
         )
         if r.status_code != 200:
             print(f"[grok-ct] API error {r.status_code}: {r.text[:300]}")
             return None
         data = r.json()
-        content = data["choices"][0]["message"]["content"]
+        # Extract output_text from the response shape
+        for block in data.get("output", []):
+            if block.get("type") == "message" or block.get("content"):
+                for c in block.get("content", []):
+                    if c.get("type") == "output_text":
+                        text = c.get("text", "")
+                        break
+                if text:
+                    break
+        if not text:
+            print(f"[grok-ct] no output_text found in response")
+            print(json.dumps(data, indent=2)[:1500])
+            return None
         usage = data.get("usage", {})
-        print(f"[grok-ct] tokens: in={usage.get('prompt_tokens',0)} out={usage.get('completion_tokens',0)}")
-        content = content.strip()
-        if content.startswith("```"):
-            content = content.split("```")[1]
-            if content.startswith("json"):
-                content = content[4:]
-            content = content.rsplit("```", 1)[0].strip()
-        return json.loads(content)
+        print(f"[grok-ct] tokens used: {usage}")
+        # Strip markdown if present
+        text = text.strip()
+        if text.startswith("```"):
+            text = text.split("```")[1]
+            if text.startswith("json"):
+                text = text[4:]
+            text = text.rsplit("```", 1)[0].strip()
+        return json.loads(text)
     except json.JSONDecodeError as e:
         print(f"[grok-ct] JSON parse failed: {e}")
-        print(f"  Raw: {content[:500]}")
+        print(f"  Raw text (first 500): {text[:500]}")
         return None
     except Exception as e:
         print(f"[grok-ct] Error: {e}")
@@ -191,7 +177,8 @@ def main():
         sys.exit(1)
 
     items = result.get("items", [])
-    print(f"[grok-ct] {len(items)} items returned, summary: {result.get('summary','')[:100]}")
+    print(f"[grok-ct] {len(items)} items returned")
+    print(f"  Summary: {result.get('summary','')[:200]}")
 
     output = {
         "generated_at": datetime.now(timezone.utc).isoformat(),
