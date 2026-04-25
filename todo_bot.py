@@ -117,7 +117,7 @@ intents.messages = True
 intents.guilds = True
 client = discord.Client(intents=intents)
 
-CHANNEL_NAMES = {"todo"}  # only respond in #todo
+CHANNEL_NAMES = {"todo", "todo-list", "todos"}  # only respond in #todo
 
 
 @client.event

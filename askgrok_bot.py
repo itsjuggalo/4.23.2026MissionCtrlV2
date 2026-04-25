@@ -76,6 +76,10 @@ async def on_message(message):
         return
     if message.author.id != AUTH_USER_ID:
         return
+    # Skip channels owned by other bots
+    SKIP_CHANNELS = {"todo-list", "todo", "todos"}
+    if message.channel.name in SKIP_CHANNELS:
+        return
     content = message.content.strip()
     if not content:
         return
