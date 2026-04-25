@@ -591,6 +591,215 @@ def relay_closed_trades(state):
 
 # ─── RELAY: FLOWGREEKS2 ALERTS ────────────────────────────────────────────────
 
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# AUTO MIRRORS TO #flow-messages — additive
+# ═══════════════════════════════════════════════════════════════════════════════
+
+def _post_to_flow_messages(content, log_tag):
+    url = WEBHOOKS.get("flow_messages")
+    if not url: return False
+    try:
+        r = requests.post(url, json={"content": content[:1900]}, timeout=10)
+        if r.status_code in (200, 204): return True
+        if r.status_code == 429:
+            retry = r.json().get("retry_after", 5)
+            logging.warning(f"[{log_tag}] rate limited, sleeping {retry}s")
+            time.sleep(retry)
+            return False
+        logging.warning(f"[{log_tag}] HTTP {r.status_code}: {r.text[:150]}")
+        return False
+    except Exception as e:
+        logging.warning(f"[{log_tag}] post error: {e}")
+        return False
+
+
+def _fmt_money(v):
+    try: v = float(v)
+    except: return str(v)
+    if v >= 1_000_000: return f"{v/1_000_000:.1f}M"
+    if v >= 1_000: return f"{v/1_000:.0f}K"
+    return f"{v:.2f}"
+
+
+def _extract_pct_from_status(status):
+    if not status: return None
+    m = re.search(r"(-?\d+(?:\.\d+)?)\s*%", status)
+    return float(m.group(1)) if m else None
+
+
+def relay_winners_mirror(state):
+    sent = set(state.get("winners_mirror_sent", []))
+    new_sent = []
+    for fname, kind in [("closed_options", "OPTION"), ("closed_stocks", "STOCK"),
+                         ("notif_options_older", "OPTION"), ("notif_stocks_older", "STOCK")]:
+        data = read_data(fname)
+        if not data or not isinstance(data, dict): continue
+        for entry_id, entry in data.items():
+            if not isinstance(entry, dict): continue
+            sent_key = f"win|{fname}|{entry_id}"
+            if sent_key in sent: continue
+            status = entry.get("status", "") or entry.get("message", "")
+            if not status: continue
+            pct = _extract_pct_from_status(status)
+            symbol = entry.get("symbol", "?")
+            buy = entry.get("buyTarget", "")
+            sell = entry.get("sellTarget", "")
+            strike = entry.get("strike", "")
+            expiry = entry.get("expiry", "")
+            category = entry.get("category", "")
+            if pct is None and "profits" not in status.lower() and "delivered" not in status.lower() and "winner" not in status.lower():
+                continue
+            if pct is not None and pct <= 0: continue
+            if pct is None: emoji, tier = "🏆", "Winner"
+            elif pct >= 500: emoji, tier = "🚀", "Magic"
+            elif pct >= 100: emoji, tier = "💫", "Mega-Win"
+            elif pct >= 50: emoji, tier = "💎", "Diamond Hands"
+            elif pct >= 25: emoji, tier = "🏆", "Bull Run"
+            else: emoji, tier = "🎯", "Win"
+            expiry_str = ""
+            try:
+                if expiry and str(expiry).isdigit() and int(expiry) > 1000000000:
+                    from datetime import datetime
+                    exp_dt = datetime.fromtimestamp(int(expiry))
+                    expiry_str = f" {exp_dt.month}/{exp_dt.day}/{str(exp_dt.year)[2:]}"
+            except: pass
+            title = f"{symbol} {strike}{expiry_str}" if (kind == "OPTION" and strike) else symbol
+            pct_str = f" +{pct:.1f}%" if pct is not None else ""
+            lines = [f"{emoji} {title} {tier} Alert!{pct_str}"]
+            if status: lines.append(status)
+            if buy and sell: lines.append(f"Buy {buy} → Sell {sell}")
+            if category: lines.append(f"[{category}]")
+            msg = "\n".join(lines)
+            if _post_to_flow_messages(msg, "winners"):
+                new_sent.append(sent_key)
+                logging.info(f"[winners] posted {symbol} pct={pct} tier={tier}")
+                time.sleep(1.2)
+    if new_sent:
+        state["winners_mirror_sent"] = list(sent | set(new_sent))[-5000:]
+    return state
+
+
+def relay_picks_mirror(state):
+    sent = set(state.get("picks_mirror_sent", []))
+    new_sent = []
+    for fname, label in [("short_term_options", "ST OPTION"), ("long_term_options", "LT OPTION"),
+                          ("short_term_stocks", "ST STOCK"), ("long_term_stocks", "LT STOCK")]:
+        data = read_data(fname)
+        if not data or not isinstance(data, dict): continue
+        for entry_id, entry in data.items():
+            if not isinstance(entry, dict): continue
+            sent_key = f"pick|{fname}|{entry_id}"
+            if sent_key in sent: continue
+            symbol = entry.get("symbol", "?")
+            strike = entry.get("strike", "")
+            buy = entry.get("buyTarget", "")
+            sell = entry.get("sellTarget", "")
+            sell2 = entry.get("sellTarget2", "")
+            stop = entry.get("stopLoss", "")
+            risk = entry.get("risk", "")
+            category = entry.get("category", "")
+            expiry = entry.get("expiry", "")
+            short_name = entry.get("shortName", "")
+            expiry_str = ""
+            try:
+                if expiry and str(expiry).isdigit() and int(expiry) > 1000000000:
+                    from datetime import datetime
+                    exp_dt = datetime.fromtimestamp(int(expiry))
+                    expiry_str = f" {exp_dt.month}/{exp_dt.day}/{str(exp_dt.year)[2:]}"
+            except: pass
+            title = f"{symbol} {strike}{expiry_str}" if ("OPTION" in label and strike) else symbol
+            lines = [f"📊 {title} — {label} Pick"]
+            if short_name: lines.append(short_name)
+            row = []
+            if buy: row.append(f"Buy {buy}")
+            if sell: row.append(f"T1 {sell}")
+            if sell2: row.append(f"T2 {sell2}")
+            if stop: row.append(f"SL {stop}")
+            if row: lines.append(" | ".join(row))
+            tags = []
+            if category: tags.append(category)
+            if risk: tags.append(f"Risk:{risk}")
+            if tags: lines.append("[" + ", ".join(tags) + "]")
+            msg = "\n".join(lines)
+            if _post_to_flow_messages(msg, "picks"):
+                new_sent.append(sent_key)
+                logging.info(f"[picks] posted {symbol} {label}")
+                time.sleep(1.2)
+    if new_sent:
+        state["picks_mirror_sent"] = list(sent | set(new_sent))[-5000:]
+    return state
+
+
+def relay_management_mirror(state):
+    sent = set(state.get("management_mirror_sent", []))
+    new_sent = []
+    for fname in ["option_notifications", "stock_notifications"]:
+        data = read_data(fname)
+        if not data or not isinstance(data, dict): continue
+        for entry_id, entry in data.items():
+            if not isinstance(entry, dict): continue
+            sent_key = f"mgmt|{fname}|{entry_id}"
+            if sent_key in sent: continue
+            title = entry.get("title", "")
+            message = entry.get("message", "")
+            category = entry.get("category", "")
+            if not title and not message: continue
+            emoji = "📋"
+            if "stopped" in message.lower(): emoji = "🛑"
+            elif "target" in message.lower() and ("reach" in message.lower() or "lock" in message.lower()): emoji = "🎯"
+            elif "stc" in title.lower() or "sell" in title.lower(): emoji = "💰"
+            lines = [f"{emoji} {title}" if title else f"{emoji} {entry.get('symbol','?')}"]
+            if message: lines.append(message)
+            if category: lines.append(f"[{category}]")
+            msg = "\n".join(lines)
+            if _post_to_flow_messages(msg, "mgmt"):
+                new_sent.append(sent_key)
+                logging.info(f"[mgmt] posted {title or entry_id}")
+                time.sleep(1.2)
+    if new_sent:
+        state["management_mirror_sent"] = list(sent | set(new_sent))[-5000:]
+    return state
+
+
+def relay_fg1_mirror(state):
+    data = read_data("flow_alerts_today")
+    if not data or not isinstance(data, dict): return state
+    sent = set(state.get("fg1_mirror_sent", []))
+    new_sent = []
+    def _hdr(at, bull, ut):
+        direction = "Bullish" if bull else "Bearish"
+        is_etf = (ut or "").upper() == "ETF"
+        prefix = "ETF: " if is_etf else ""
+        if at in ("weekly_flow", "weekly_flow_etf"): kind = "Rapid"
+        elif at in ("repeat_flow", "repeat_flow_etf"): kind = "Repeated"
+        else: kind = "Unusual"
+        return f"{prefix}{kind} {direction} Flow Alert!"
+    for option_symbol, entry in data.items():
+        if not isinstance(entry, dict): continue
+        a = entry.get("alert", {})
+        if not a or a.get("NotifyAlert", 0) != 1: continue
+        sym = a.get("Symbol", "")
+        at = a.get("AlertType", "")
+        fc = a.get("totalFlowCount", 0)
+        sent_key = f"fg1|{option_symbol}|{at}|{fc}"
+        if sent_key in sent: continue
+        m = re.match(r"^([A-Z]+)(\d{2})(\d{2})(\d{2})([CP])(\d{8})$", option_symbol)
+        if m:
+            t, yr, mo, day, opt, sk = m.groups()
+            title = f"{t} {int(sk)//1000}{opt} {int(mo)}/{int(day)}/{yr}"
+        else:
+            title = sym
+        msg = f"{title}\n{_hdr(at, a.get('isBullish'), a.get('UnderlyingType'))}\nFlow count: {fc}, Premium: {_fmt_money(a.get('totalFlowValue', 0))} !!"
+        if _post_to_flow_messages(msg, "fg1"):
+            new_sent.append(sent_key)
+            logging.info(f"[fg1] posted {sym} {at}")
+            time.sleep(1.2)
+    if new_sent:
+        state["fg1_mirror_sent"] = list(sent | set(new_sent))[-5000:]
+    return state
+
+
 def relay_flow2_phone_mirror(state):
     """Mirror FlowGreeks2 alerts to #flow-messages in phone-notification format.
     Reads same data as relay_flow2_alerts but separate sent-tracking and posts as plain text."""
