@@ -1357,6 +1357,17 @@ def run():
             state = relay_closed_trades(state)
             state = relay_flow2_alerts(state)
             state = relay_flow2_phone_mirror(state)
+            # === MIRROR_BLOCK_INSERTED ===
+            state = relay_winners_mirror(state)
+            state = relay_ts_picks(state)
+            state = relay_ts_closed(state)
+            state = relay_ts_mgmt(state)
+            state = relay_ss_picks(state)
+            state = relay_ss_closed(state)
+            state = relay_ss_mgmt(state)
+            state = relay_os_closed_stocks(state)
+            state = relay_fg1_sentiment(state)
+            state = relay_fg2_sentiment(state)
             state = relay_flow2_live(state)
             save_state(state)
 
