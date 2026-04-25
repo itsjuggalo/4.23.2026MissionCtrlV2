@@ -676,10 +676,11 @@ def _extract_pct_from_status(status):
 
 
 def relay_winners_mirror(state):
+    _max_per_cycle = 200
+    _posted_count = 0
     sent = set(state.get("winners_mirror_sent", []))
     new_sent = []
-    for fname, kind in [("closed_options", "OPTION"), ("closed_stocks", "STOCK"),
-                         ("notif_options_older", "OPTION"), ("notif_stocks_older", "STOCK")]:
+    for fname, kind in [("closed_options", "OPTION"), ("closed_stocks", "STOCK")]:
         data = read_data(fname)
         if not data or not isinstance(data, dict): continue
         for entry_id, entry in data.items():
@@ -721,6 +722,10 @@ def relay_winners_mirror(state):
             if _post_to_trade_results(msg, "winners"):
                 new_sent.append(sent_key)
                 logging.info(f"[winners] posted {symbol} pct={pct} tier={tier}")
+            _posted_count += 1
+            if _posted_count >= _max_per_cycle:
+                if new: state["winners_mirror_sent"] = list(set(state.get("winners_mirror_sent", []) + new))[-5000:]
+                return state
                 time.sleep(1.2)
     if new_sent:
         state["winners_mirror_sent"] = list(sent | set(new_sent))[-5000:]
@@ -939,6 +944,8 @@ def _format_mgmt(entry):
 
 # --- Trade Signals (Name/) ---
 def relay_ts_picks(state):
+    _max_per_cycle = 200
+    _posted_count = 0
     sent = set(state.get("ts_picks_sent", []))
     new = []
     for fname, label in [("ts_short_term_options", "TS ST OPTION"),
@@ -954,12 +961,18 @@ def relay_ts_picks(state):
             if _post_to("ts_picks", _format_pick(e, label), "ts_picks"):
                 new.append(sk)
                 logging.info(f"[ts_picks] posted {e.get('symbol','?')}")
+            _posted_count += 1
+            if _posted_count >= _max_per_cycle:
+                if new: state["ts_picks_sent"] = list(set(state.get("ts_picks_sent", []) + new))[-5000:]
+                return state
                 time.sleep(1.2)
     if new: state["ts_picks_sent"] = list(sent | set(new))[-5000:]
     return state
 
 
 def relay_ts_closed(state):
+    _max_per_cycle = 200
+    _posted_count = 0
     sent = set(state.get("ts_closed_sent", []))
     new = []
     for fname, kind in [("ts_closed_options", "OPTION"), ("ts_closed_stocks", "STOCK")]:
@@ -972,12 +985,18 @@ def relay_ts_closed(state):
             if _post_to("ts_closed", _format_closed(e, kind), "ts_closed"):
                 new.append(sk)
                 logging.info(f"[ts_closed] posted {e.get('symbol','?')}")
+            _posted_count += 1
+            if _posted_count >= _max_per_cycle:
+                if new: state["ts_closed_sent"] = list(set(state.get("ts_closed_sent", []) + new))[-5000:]
+                return state
                 time.sleep(1.2)
     if new: state["ts_closed_sent"] = list(sent | set(new))[-5000:]
     return state
 
 
 def relay_ts_mgmt(state):
+    _max_per_cycle = 200
+    _posted_count = 0
     sent = set(state.get("ts_mgmt_sent", []))
     new = []
     for fname in ["ts_option_notifications", "ts_stock_notifications"]:
@@ -991,6 +1010,10 @@ def relay_ts_mgmt(state):
             if _post_to("ts_mgmt", _format_mgmt(e), "ts_mgmt"):
                 new.append(sk)
                 logging.info(f"[ts_mgmt] posted {e.get('title','?')[:30]}")
+            _posted_count += 1
+            if _posted_count >= _max_per_cycle:
+                if new: state["ts_mgmt_sent"] = list(set(state.get("ts_mgmt_sent", []) + new))[-5000:]
+                return state
                 time.sleep(1.2)
     if new: state["ts_mgmt_sent"] = list(sent | set(new))[-5000:]
     return state
@@ -998,6 +1021,8 @@ def relay_ts_mgmt(state):
 
 # --- Stock Signals (Name2/) ---
 def relay_ss_picks(state):
+    _max_per_cycle = 200
+    _posted_count = 0
     sent = set(state.get("ss_picks_sent", []))
     new = []
     for fname, label in [("ss_short_term_options", "SS ST OPTION"),
@@ -1013,12 +1038,18 @@ def relay_ss_picks(state):
             if _post_to("ss_picks", _format_pick(e, label), "ss_picks"):
                 new.append(sk)
                 logging.info(f"[ss_picks] posted {e.get('symbol','?')}")
+            _posted_count += 1
+            if _posted_count >= _max_per_cycle:
+                if new: state["ss_picks_sent"] = list(set(state.get("ss_picks_sent", []) + new))[-5000:]
+                return state
                 time.sleep(1.2)
     if new: state["ss_picks_sent"] = list(sent | set(new))[-5000:]
     return state
 
 
 def relay_ss_closed(state):
+    _max_per_cycle = 200
+    _posted_count = 0
     sent = set(state.get("ss_closed_sent", []))
     new = []
     for fname, kind in [("ss_closed_options", "OPTION"), ("ss_closed_stocks", "STOCK")]:
@@ -1031,12 +1062,18 @@ def relay_ss_closed(state):
             if _post_to("ss_closed", _format_closed(e, kind), "ss_closed"):
                 new.append(sk)
                 logging.info(f"[ss_closed] posted {e.get('symbol','?')}")
+            _posted_count += 1
+            if _posted_count >= _max_per_cycle:
+                if new: state["ss_closed_sent"] = list(set(state.get("ss_closed_sent", []) + new))[-5000:]
+                return state
                 time.sleep(1.2)
     if new: state["ss_closed_sent"] = list(sent | set(new))[-5000:]
     return state
 
 
 def relay_ss_mgmt(state):
+    _max_per_cycle = 200
+    _posted_count = 0
     sent = set(state.get("ss_mgmt_sent", []))
     new = []
     for fname in ["ss_option_notifications", "ss_stock_notifications"]:
@@ -1050,6 +1087,10 @@ def relay_ss_mgmt(state):
             if _post_to("ss_mgmt", _format_mgmt(e), "ss_mgmt"):
                 new.append(sk)
                 logging.info(f"[ss_mgmt] posted {e.get('title','?')[:30]}")
+            _posted_count += 1
+            if _posted_count >= _max_per_cycle:
+                if new: state["ss_mgmt_sent"] = list(set(state.get("ss_mgmt_sent", []) + new))[-5000:]
+                return state
                 time.sleep(1.2)
     if new: state["ss_mgmt_sent"] = list(sent | set(new))[-5000:]
     return state
@@ -1057,6 +1098,8 @@ def relay_ss_mgmt(state):
 
 # --- OS Closed Stocks (Vivid2/ClosedStocks — currently scraped, never routed) ---
 def relay_os_closed_stocks(state):
+    _max_per_cycle = 200
+    _posted_count = 0
     sent = set(state.get("os_closed_stocks_sent", []))
     new = []
     d = read_data("closed_stocks")
@@ -1068,6 +1111,10 @@ def relay_os_closed_stocks(state):
         if _post_to("os_closed_stocks", _format_closed(e, "STOCK"), "os_closed_stocks"):
             new.append(sk)
             logging.info(f"[os_closed_stocks] posted {e.get('symbol','?')}")
+            _posted_count += 1
+            if _posted_count >= _max_per_cycle:
+                if new: state["os_closed_stocks_sent"] = list(set(state.get("os_closed_stocks_sent", []) + new))[-5000:]
+                return state
             time.sleep(1.2)
     if new: state["os_closed_stocks_sent"] = list(sent | set(new))[-5000:]
     return state
@@ -1090,6 +1137,8 @@ def _format_sentiment(ticker, entry):
 
 
 def relay_fg1_sentiment(state):
+    _max_per_cycle = 200
+    _posted_count = 0
     sent = set(state.get("fg1_sent_sent", []))
     new = []
     d = read_data("flow_bullbears_today")
@@ -1107,6 +1156,8 @@ def relay_fg1_sentiment(state):
 
 
 def relay_fg2_sentiment(state):
+    _max_per_cycle = 200
+    _posted_count = 0
     sent = set(state.get("fg2_sent_sent", []))
     new = []
     d = read_data("flow2_bullbears")
