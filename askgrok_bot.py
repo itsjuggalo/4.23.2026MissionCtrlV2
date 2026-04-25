@@ -200,26 +200,60 @@ async def on_message(message):
                 return
 
             sigs = _json.loads(sidecar_path.read_text())
-            cutoff = _dt.now(_tz.utc) - _td(minutes=minutes)
-            fresh = []
+            # Same-day NY 4AM-8PM ET filter (overrides minutes window for tiering)
+            from datetime import timezone as _tz2
+            try:
+                from zoneinfo import ZoneInfo
+                ET = ZoneInfo("America/New_York")
+            except Exception:
+                ET = _tz2.utc
+            now_et = _dt.now(ET)
+            day_start_et = now_et.replace(hour=4, minute=0, second=0, microsecond=0)
+            day_end_et = now_et.replace(hour=20, minute=0, second=0, microsecond=0)
+            same_day = []
             for s in sigs:
                 ts_str = s.get("timestamp", "")
                 if not ts_str:
                     continue
                 try:
-                    ts = _dt.fromisoformat(ts_str.replace("Z", "+00:00"))
+                    ts_utc = _dt.fromisoformat(ts_str.replace("Z", "+00:00"))
+                    ts_et = ts_utc.astimezone(ET)
                 except Exception:
                     continue
-                if ts >= cutoff and float(s.get("flow_value", 0)) >= 1_000_000:
-                    fresh.append(s)
+                if day_start_et <= ts_et <= day_end_et:
+                    same_day.append(s)
 
-            if not fresh:
-                await message.channel.send(f"No $1M+ flow signals in last {minutes}min.")
+            # Apply UNUSUAL FLOW PRIORITY RULE — classify into tiers
+            def _is_ask_sweep(s):
+                ba = (s.get("bid_ask_type") or s.get("BidAskType") or "").upper()
+                bt = (s.get("block_type") or s.get("BlockType") or "").upper()
+                return bt == "SWEEP" and ba in ("A", "AA")
+            def _vol_gt_oi(s):
+                try:
+                    return float(s.get("volume", s.get("Volume", 0))) > float(s.get("oi", s.get("OI", 0)))
+                except Exception:
+                    return False
+            def _val(s):
+                try:
+                    return float(s.get("flow_value", s.get("Value", 0)))
+                except Exception:
+                    return 0
+
+            tier1 = [s for s in same_day if _is_ask_sweep(s) and _val(s) >= 1_000_000]
+            tier2 = [s for s in same_day if _vol_gt_oi(s) and _is_ask_sweep(s) and _val(s) >= 500_000 and s not in tier1]
+            tier3 = [s for s in same_day if _vol_gt_oi(s) and s not in tier1 and s not in tier2]
+            other_high = sorted([s for s in same_day if _val(s) >= 1_000_000 and s not in tier1 and s not in tier2 and s not in tier3], key=lambda x: -_val(x))[:5]
+
+            if not (tier1 or tier2 or tier3 or other_high):
+                await message.channel.send(f"No tier1/2/3 unusual flow today (NY 4AM-8PM ET window).")
                 return
 
-            # Top 8 by score for ranking
-            fresh.sort(key=lambda x: -x.get("score", 0))
-            top = fresh[:8]
+            # Sort each tier by flow value desc
+            tier1.sort(key=lambda x: -_val(x))
+            tier2.sort(key=lambda x: -_val(x))
+            tier3.sort(key=lambda x: -_val(x))
+            top = tier1[:5] + tier2[:5] + tier3[:5] + other_high
+            top = top[:12]  # cap at 12 for prompt size
 
             # Fetch live Tradier quotes for each
             from boba_decision_cycle import fetch_live_option_quote, check_fresh_kronos_file
@@ -234,8 +268,15 @@ async def on_message(message):
 
             # Build context for Grok
             ctx_parts = []
+            # Re-enrich to include tier labels
+            tier_map = {}
+            for s in tier1: tier_map[id(s)] = "🔥 TIER 1 (Huge Flow $1M+)"
+            for s in tier2: tier_map[id(s)] = "⭐ TIER 2 (Unusual Huge $500K+)"
+            for s in tier3: tier_map[id(s)] = "🟡 TIER 3 (Unusual Vol>OI)"
             for i, e in enumerate(enriched, 1):
                 s = e["sig"]
+                tlabel = tier_map.get(id(s), "  (other high-premium)")
+                ctx_parts.append(tlabel)
                 q = e["quote"] or {}
                 k = e["kronos"]
                 line = (

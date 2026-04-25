@@ -342,6 +342,24 @@ def format_firebase_signals_for_prompt(signals, max_show=20):
     return "\n".join(lines)
 
 
+
+# === UNUSUAL FLOW PRIORITY RULE (memory #12) ===
+# Boba MUST evaluate Tier 1 (Huge Flow $1M+ SWEEP+ASK) and Tier 2 (Unusual Huge $500K+ Vol>OI SWEEP+ASK)
+# candidates BEFORE selecting top 3 each cycle. Same-day NY 4AM-8PM ET only.
+# Tier 1: BlockType=SWEEP AND BidAskType in (A,AA) AND Value>=1M
+# Tier 2: Volume>OI AND BlockType=SWEEP AND BidAskType in (A,AA) AND Value>=500K
+# Tier 3: Volume>OI (yellow)
+UNUSUAL_FLOW_RULE_TEXT = """
+MANDATORY UNUSUAL FLOW PRIORITY RULE:
+You MUST enumerate every TIER 1 and TIER 2 candidate explicitly before picking your top 3.
+TIER 1 = Huge Flow $1M+ (SWEEP on ASK side, premium >= $1M)
+TIER 2 = Unusual Huge $500K+ (SWEEP on ASK side, Volume > OI, premium >= $500K)
+TIER 3 = Unusual Flow (Volume > OI, COLOR=yellow)
+Tier 1 + Tier 2 candidates DOMINATE top 3 selection unless overwhelming reason to skip.
+Window: same-day NY 4AM-8PM ET only — no carryover from prior days.
+"""
+
+# Rule injected at top of every Boba prompt
 def build_boba_prompt(account, positions, shortlist_with_kronos):
     equity = float(account.get("equity", 0))
     buying_power = float(account.get("buying_power", 0))
