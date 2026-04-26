@@ -99,8 +99,8 @@ def fetch_eth_large_transfers(prices):
     try:
         # Get latest block number
         r = requests.get(
-            "https://api.etherscan.io/api",
-            params={"module": "proxy", "action": "eth_blockNumber"},
+            "https://api.etherscan.io/v2/api",
+            params={"chainid": 1, "module": "proxy", "action": "eth_blockNumber"},
             timeout=10,
         )
         if r.status_code != 200: return []
@@ -109,8 +109,9 @@ def fetch_eth_large_transfers(prices):
 
         # Fetch the latest block with full tx info
         r2 = requests.get(
-            "https://api.etherscan.io/api",
+            "https://api.etherscan.io/v2/api",
             params={
+                "chainid": 1,
                 "module": "proxy",
                 "action": "eth_getBlockByNumber",
                 "tag": block_hex,
@@ -206,8 +207,9 @@ def fetch_erc20_large_transfers():
         try:
             # Etherscan public token tx list — recent transfers (latest 100)
             r = requests.get(
-                "https://api.etherscan.io/api",
+                "https://api.etherscan.io/v2/api",
                 params={
+                    "chainid": 1,
                     "module": "account",
                     "action": "tokentx",
                     "contractaddress": contract,
@@ -242,47 +244,10 @@ def fetch_erc20_large_transfers():
 
 # ─── Solana via Solscan public API ──────────────────────────────
 def fetch_sol_large_transfers(prices):
-    sol_price = prices.get("SOL", 200)
-    if sol_price <= 0: return []
-    alerts = []
-    try:
-        # Solscan public account top txs by amount (no auth needed for basics)
-        # Use solana.fm or solscan public endpoints
-        r = requests.get(
-            "https://api.solscan.io/transaction/last",
-            params={"limit": 50},
-            headers={"User-Agent": "Mozilla/5.0"},
-            timeout=10,
-        )
-        if r.status_code != 200:
-            logging.info(f"solscan returned {r.status_code} — skipping SOL")
-            return []
-        data = r.json()
-        if not isinstance(data, list): return []
-        for tx in data:
-            lamports = tx.get("lamport", 0)
-            if not lamports: continue
-            value_sol = lamports / 1e9
-            value_usd = value_sol * sol_price
-            if value_usd >= THRESHOLD_USD:
-                alerts.append({
-                    "chain": "SOL",
-                    "asset": "SOL",
-                    "amount": value_sol,
-                    "amount_usd": value_usd,
-                    "from": tx.get("src", "?"),
-                    "to": tx.get("dst", "?"),
-                    "tx_hash": tx.get("txHash", "?"),
-                    "block": tx.get("slot", 0),
-                })
-            if len(alerts) >= 3: break
-    except Exception as e:
-        logging.info(f"solscan fail (non-fatal): {e}")
-    return alerts
+    """SOL coverage disabled — Solscan public API deprecated DNS.
+    TODO: swap to Helius/QuickNode free RPC for SOL whale tracking."""
+    return []
 
-
-# ─── Discord posting ────────────────────────────────────────────
-EMOJI = {"BTC": "🟧", "ETH": "🔷", "SOL": "🟣", "USDT": "🟢", "USDC": "🔵"}
 
 def post_alert(alert):
     asset = alert["asset"]
