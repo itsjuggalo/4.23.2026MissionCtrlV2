@@ -7,12 +7,20 @@ Block 4 will add /trade with arm/disarm safety.
 
 Locked to OWNER_ID. Slash commands sync to GUILD_ID for instant availability.
 """
-import asyncio, json, os, sys, time, logging
-from datetime import datetime, timezone
+import asyncio, json, os, sys, time, logging, re
+from datetime import datetime, timezone, timedelta
 from pathlib import Path
+from collections import defaultdict
 import discord
 from discord import app_commands
 from discord.ext import commands
+import requests
+
+sys.path.insert(0, '/home/ubuntu/scripts/lib')
+try:
+    import tradier_client as tc
+except ImportError:
+    tc = None
 
 SECRETS = Path.home() / ".openclaw" / "secrets"
 TOKEN = (SECRETS / "discord_boba_token").read_text().strip()
@@ -26,6 +34,213 @@ CHAN = {
     "trade_live":    int((SECRETS / "discord_trade_live_channel").read_text().strip()),
     "backtest":      int((SECRETS / "discord_backtest_channel").read_text().strip()),
 }
+
+
+RELAY_DATA = Path.home() / "mission-control-restored" / "Option-Signals-Scraper" / "data"
+ANTHROPIC_KEY = (SECRETS / "anthropic_api_key").read_text().strip()
+GROK_KEY_FILE = SECRETS / "xai_api_key"
+GROK_KEY = GROK_KEY_FILE.read_text().strip() if GROK_KEY_FILE.exists() else None
+ANTHROPIC_MODEL = "claude-sonnet-4-6"
+
+
+def _fmt_prem(v):
+    if v >= 1_000_000: return f"${v/1_000_000:.2f}M"
+    if v >= 1_000: return f"${v/1_000:.0f}K"
+    return f"${v:.0f}"
+
+
+def _read_data(name):
+    f = RELAY_DATA / f"{name}.json"
+    if not f.exists(): return None
+    try: return json.loads(f.read_text())
+    except: return None
+
+
+def _ticker_quote(symbol):
+    """Tradier real-time quote."""
+    try:
+        key = (SECRETS / "tradier-sandbox-key").read_text().strip()
+        r = requests.get(
+            "https://sandbox.tradier.com/v1/markets/quotes",
+            headers={"Authorization": f"Bearer {key}", "Accept": "application/json"},
+            params={"symbols": symbol}, timeout=8,
+        )
+        if r.status_code != 200: return None
+        q = (r.json().get("quotes", {}) or {}).get("quote")
+        if not q: return None
+        if isinstance(q, list): q = q[0]
+        last = float(q.get("last", 0) or 0)
+        prev = float(q.get("prevclose", 0) or 0)
+        chg_pct = ((last - prev) / prev * 100) if prev > 0 else 0
+        return {
+            "last": last, "prev": prev, "chg_pct": chg_pct,
+            "open": float(q.get("open", 0) or 0),
+            "high": float(q.get("high", 0) or 0),
+            "low": float(q.get("low", 0) or 0),
+            "volume": int(q.get("volume", 0) or 0),
+        }
+    except Exception as e:
+        logging.error(f"quote {symbol}: {e}")
+        return None
+
+
+def _ticker_flow_today(symbol):
+    """Today's options flow stats for a single ticker."""
+    d = _read_data("flow_liveflows_today") or {}
+    if not isinstance(d, dict): return None
+    bull, bear, total, n, sweeps = 0.0, 0.0, 0.0, 0, 0
+    for entry in d.values():
+        if not isinstance(entry, dict): continue
+        if entry.get("Symbol") != symbol: continue
+        opt = entry.get("OptionType", "")
+        ba = entry.get("BidAskType", "")
+        val = float(entry.get("Value", 0) or 0)
+        if val <= 0: continue
+        is_bull = (opt == "CALL" and ba == "A") or (opt == "PUT" and ba == "B")
+        is_bear = (opt == "CALL" and ba == "B") or (opt == "PUT" and ba == "A")
+        if is_bull: bull += val
+        elif is_bear: bear += val
+        else: continue
+        total += val
+        n += 1
+        if entry.get("BlockType") == "SWEEP": sweeps += 1
+    if n == 0: return None
+    bull_pct = (bull / total * 100) if total > 0 else 50
+    return {"n": n, "total": total, "bull": bull, "bear": bear,
+            "bull_pct": bull_pct, "sweeps": sweeps}
+
+
+def _ticker_win_rate(symbol):
+    """Historical W/L for symbol across all closed files."""
+    files = ["closed_options", "closed_stocks", "ts_closed_options",
+             "ts_closed_stocks", "ss_closed_options", "ss_closed_stocks"]
+    wins = losses = 0
+    last_pnls = []
+    for fname in files:
+        d = _read_data(fname) or {}
+        entries = list(d.values()) if isinstance(d, dict) else (d if isinstance(d, list) else [])
+        for e in entries:
+            if not isinstance(e, dict): continue
+            if e.get("symbol") != symbol: continue
+            status = (e.get("status") or "").lower()
+            if any(p in status for p in ("profit", "locked", "booked")):
+                wins += 1
+            elif any(p in status for p in ("stop", "loss")):
+                losses += 1
+    n = wins + losses
+    if n == 0: return None
+    return {"n": n, "wins": wins, "losses": losses,
+            "win_rate": wins / n * 100}
+
+
+def _grok_news(symbol, limit=4):
+    """Get recent news via Grok x_search if key available."""
+    if not GROK_KEY:
+        return None
+    try:
+        r = requests.post(
+            "https://api.x.ai/v1/responses",
+            headers={"Authorization": f"Bearer {GROK_KEY}", "Content-Type": "application/json"},
+            json={
+                "model": "grok-4-fast-non-reasoning",
+                "input": f"Top {limit} most recent news headlines about ${symbol} stock from last 24 hours. Just headlines, one per line, no commentary.",
+                "tools": [{"type": "x_search"}],
+                "max_output_tokens": 400,
+            },
+            timeout=20,
+        )
+        if r.status_code != 200: return None
+        data = r.json()
+        # Extract output text
+        for item in data.get("output", []):
+            if item.get("type") == "message":
+                for c in item.get("content", []):
+                    if c.get("type") == "output_text":
+                        return c.get("text", "").strip()
+        return None
+    except Exception as e:
+        logging.error(f"grok news {symbol}: {e}")
+        return None
+
+
+def _ask_anthropic(question, context_blob=""):
+    """Send question to Claude with current MC context. Returns text response."""
+    system = (
+        "You are Boba, the AI orchestrator for Mike's Mission Control trading system. "
+        "Mike runs an algorithmic trading operation with multi-agent intelligence "
+        "(you, Orion for technicals, JazzyHazzy for news/sentiment, Grok for X data). "
+        "Be direct, specific, and trade-focused. Cite numbers when you have them. "
+        "Mike trades stocks, crypto, options on Alpaca + Hyperliquid + Robinhood. "
+        "Default account: PA3R6MOPBWF7 ($500K paper, Level 3, OCO supported). "
+        "When making trade calls, give clear setup: entry / stop / TP. "
+        "When uncertain, say so. Never invent numbers."
+    )
+    if context_blob:
+        system += f"\n\nCurrent Mission Control context:\n{context_blob}"
+    try:
+        r = requests.post(
+            "https://api.anthropic.com/v1/messages",
+            headers={
+                "x-api-key": ANTHROPIC_KEY,
+                "anthropic-version": "2023-06-01",
+                "content-type": "application/json",
+            },
+            json={
+                "model": ANTHROPIC_MODEL,
+                "max_tokens": 1024,
+                "system": system,
+                "messages": [{"role": "user", "content": question}],
+            },
+            timeout=45,
+        )
+        if r.status_code != 200:
+            logging.error(f"anthropic {r.status_code}: {r.text[:300]}")
+            return f"[Boba] API error {r.status_code}"
+        return r.json().get("content", [{}])[0].get("text", "").strip()
+    except Exception as e:
+        logging.error(f"anthropic {e}")
+        return f"[Boba] error: {e}"
+
+
+def _build_context_blob():
+    """Snapshot of current MC state for !boba prompt context."""
+    parts = []
+    flow = _read_data("flow_liveflows_today") or {}
+    if isinstance(flow, dict) and flow:
+        bull, bear = 0, 0
+        for e in flow.values():
+            if not isinstance(e, dict): continue
+            v = float(e.get("Value", 0) or 0)
+            if v <= 0: continue
+            opt = e.get("OptionType", "")
+            ba = e.get("BidAskType", "")
+            if (opt == "CALL" and ba == "A") or (opt == "PUT" and ba == "B"):
+                bull += v
+            elif (opt == "CALL" and ba == "B") or (opt == "PUT" and ba == "A"):
+                bear += v
+        total = bull + bear
+        bull_pct = (bull / total * 100) if total > 0 else 50
+        parts.append(f"Today's overall options flow: {bull_pct:.0f}% bull "
+                     f"({_fmt_prem(bull)} / {_fmt_prem(bear)} bear), "
+                     f"{len(flow)} fills tracked.")
+
+    return "\n".join(parts) if parts else "No live state snapshot available."
+
+
+def _chunk_message(text, limit=1900):
+    """Split long messages into Discord-friendly chunks."""
+    if len(text) <= limit:
+        return [text]
+    chunks = []
+    while text:
+        if len(text) <= limit:
+            chunks.append(text); break
+        cut = text.rfind("\n", 0, limit)
+        if cut < 0: cut = limit
+        chunks.append(text[:cut])
+        text = text[cut:].lstrip("\n")
+    return chunks
+
 
 LOG_DIR = Path.home() / ".openclaw" / "workspace" / "logs"
 LOG_DIR.mkdir(parents=True, exist_ok=True)
@@ -70,11 +285,70 @@ async def scan(interaction: discord.Interaction, ticker: str):
         await interaction.response.send_message("⛔ unauthorized", ephemeral=True)
         return
     ticker = ticker.upper().strip()
-    await interaction.response.send_message(
-        f"🔍 /scan {ticker} — handler not yet implemented (Block 2 ships next)",
-        ephemeral=True,
-    )
+    await interaction.response.defer(thinking=True)
     logging.info(f"/scan {ticker} by {interaction.user.id}")
+
+    # Run all data fetches in thread pool (don't block event loop)
+    loop = asyncio.get_event_loop()
+    quote = await loop.run_in_executor(None, _ticker_quote, ticker)
+    flow = await loop.run_in_executor(None, _ticker_flow_today, ticker)
+    wr = await loop.run_in_executor(None, _ticker_win_rate, ticker)
+    news = await loop.run_in_executor(None, _grok_news, ticker, 4)
+
+    embed = discord.Embed(
+        title=f"🔍 Scan: {ticker}",
+        color=0x3498db,
+        timestamp=datetime.now(timezone.utc),
+    )
+
+    # Quote
+    if quote and quote["last"] > 0:
+        sign = "+" if quote["chg_pct"] >= 0 else ""
+        emoji = "🟢" if quote["chg_pct"] >= 0 else "🔴"
+        embed.add_field(
+            name="📈 Quote",
+            value=(f"{emoji} **${quote['last']:.2f}** ({sign}{quote['chg_pct']:.2f}%)\n"
+                   f"O ${quote['open']:.2f} • H ${quote['high']:.2f} • "
+                   f"L ${quote['low']:.2f} • Vol {quote['volume']:,}"),
+            inline=False,
+        )
+    else:
+        embed.add_field(name="📈 Quote", value="_Tradier returned no data_", inline=False)
+
+    # Today's flow
+    if flow:
+        embed.add_field(
+            name="🌊 Today's Options Flow",
+            value=(f"Total: **{_fmt_prem(flow['total'])}** across {flow['n']} fills\n"
+                   f"Direction: **{flow['bull_pct']:.0f}% bull** "
+                   f"({_fmt_prem(flow['bull'])} / {_fmt_prem(flow['bear'])} bear)\n"
+                   f"Sweeps: {flow['sweeps']}"),
+            inline=False,
+        )
+    else:
+        embed.add_field(name="🌊 Today's Options Flow", value="_No flow data for this ticker today_", inline=False)
+
+    # Historical win rate
+    if wr:
+        embed.add_field(
+            name="🎯 Historical Performance",
+            value=(f"**{wr['win_rate']:.0f}% win rate** "
+                   f"({wr['wins']}W / {wr['losses']}L over {wr['n']} closed trades)"),
+            inline=False,
+        )
+    else:
+        embed.add_field(name="🎯 Historical Performance", value="_No closed trade history for this ticker_", inline=False)
+
+    # News
+    if news:
+        embed.add_field(
+            name="📰 Recent News (via Grok)",
+            value=news[:1024],
+            inline=False,
+        )
+
+    embed.set_footer(text=f"Boba scan • {datetime.now().strftime('%-I:%M %p ET')}")
+    await interaction.followup.send(embed=embed)
 
 
 # ─── /backtest ───────────────────────────────────────────────────────
@@ -158,8 +432,19 @@ async def boba_qa(ctx, *, question: str = None):
     if not question:
         await ctx.reply("ask me something: `!boba should I buy AMD?`")
         return
-    await ctx.reply(f"🍵 received: _{question}_\n\nQ&A handler ships in Block 2 (Anthropic claude-sonnet-4-6).")
+
     logging.info(f"!boba: {question[:80]}")
+    async with ctx.typing():
+        loop = asyncio.get_event_loop()
+        context_blob = await loop.run_in_executor(None, _build_context_blob)
+        answer = await loop.run_in_executor(None, _ask_anthropic, question, context_blob)
+
+    chunks = _chunk_message(answer)
+    for i, chunk in enumerate(chunks):
+        if i == 0:
+            await ctx.reply(chunk)
+        else:
+            await ctx.send(chunk)
 
 
 # ─── lifecycle ───────────────────────────────────────────────────────
