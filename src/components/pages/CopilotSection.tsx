@@ -15,7 +15,7 @@ function fmtTimeAgo(iso: string) {
 function RightNowBlock() {
   const [data, setData] = useState<any>(null);
   useEffect(() => {
-    const fetch2 = () => fetch('/api/live-signals').then(r => r.json()).then(setData).catch(() => {});
+    const fetch2 = () => fetch('/api/live-signals', { cache: 'no-store' }).then(r => r.json()).then(setData).catch(() => {});
     fetch2();
     const t = setInterval(fetch2, 30000);
     return () => clearInterval(t);
@@ -59,7 +59,7 @@ function KronosBlock() {
     setResult(null);
     if (!t) return;
     try {
-      const r = await fetch(`/api/kronos-forecast?ticker=${encodeURIComponent(t)}`);
+      const r = await fetch(`/api/kronos-forecast?ticker=${encodeURIComponent(t)}`, { cache: 'no-store' });
       if (r.ok) setResult(await r.json());
       else setError((await r.json()).error || 'not found');
     } catch (e: any) { setError(e.message); }
@@ -110,7 +110,7 @@ function KronosBlock() {
 function PassedOnBlock() {
   const [data, setData] = useState<any>(null);
   useEffect(() => {
-    const f = () => fetch('/api/live-signals').then(r => r.json()).then(setData).catch(() => {});
+    const f = () => fetch('/api/live-signals', { cache: 'no-store' }).then(r => r.json()).then(setData).catch(() => {});
     f();
     const t = setInterval(f, 120000);
     return () => clearInterval(t);
@@ -194,15 +194,21 @@ function WhyTakeBlock() {
   const check = async () => {
     if (!ticker) return;
     setChecked(false);
-    const j = await fetch('/api/boba-journal').then(r => r.json()).catch(() => null);
+    const j = await fetch('/api/boba-journal', { cache: 'no-store' }).then(r => r.json()).catch(() => null);
     const entries = j?.entries || [];
+    // Walk entries newest-first. Each entry IS a single executed decision (entry.symbol/.executed/.reasoning)
+    // PLUS each entry carries the cycle's passed_on[] array — search both.
     for (const e of entries) {
-      const picks = e.raw?.raw_response?.picks || [];
-      const passed = e.raw?.raw_response?.passed_on || [];
-      const tookIt = picks.find((p: any) => p.ticker === ticker);
-      const passedIt = passed.find((p: any) => p.ticker === ticker);
-      if (tookIt || passedIt) {
-        setHit({ took: !!tookIt, reason: tookIt?.reasoning || passedIt?.reason || '', when: e.raw?.cycle_time });
+      // Took it? entry.symbol matches and was executed
+      if (e.symbol === ticker && e.executed) {
+        setHit({ took: true, reason: e.reasoning || '', when: e.timestamp, full_symbol: e.full_symbol });
+        setChecked(true);
+        return;
+      }
+      // Passed on it? Look in entry.passed_on[]
+      const passed = (e.passed_on || []).find((p: any) => p.ticker === ticker);
+      if (passed) {
+        setHit({ took: false, reason: passed.reason || '', when: e.timestamp });
         setChecked(true);
         return;
       }
