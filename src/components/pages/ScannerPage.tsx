@@ -6,19 +6,24 @@ export function ScannerPage() {
   const [regime, setRegime] = useState<any>(null);
   const [signals, setSignals] = useState<any>(null);
   const [telegram, setTelegram] = useState<any[]>([]);
+  const [squeeze, setSqueeze] = useState<any>({ candidates: [] });
+  const [liq, setLiq] = useState<any>({ bias: 'NO_DATA', top_coins: [], largest: [] });
   const [loading, setLoading] = useState(true);
   const [lastUpdate, setLastUpdate] = useState<Date | null>(null);
 
   useEffect(() => {
     async function fetchAll() {
-      const [cRes, rRes, sRes, tRes] = await Promise.all([
+      const [cRes, rRes, sRes, tRes, qRes, lRes] = await Promise.all([
         fetch('/api/crypto').then(r => r.json()).catch(() => ({})),
         fetch('/api/regime').then(r => r.json()).catch(() => ({})),
         fetch('/api/signals/latest').then(r => r.json()).catch(() => ({})),
         fetch('/api/telegram-signals?limit=10').then(r => r.json()).catch(() => []),
+        fetch('/api/squeeze-alerts', { cache: 'no-store' }).then(r => r.json()).catch(() => ({ candidates: [] })),
+        fetch('/api/liquidations', { cache: 'no-store' }).then(r => r.json()).catch(() => ({ bias: 'NO_DATA', top_coins: [], largest: [] })),
       ]);
       setCrypto(cRes); setRegime(rRes); setSignals(sRes);
       setTelegram(Array.isArray(tRes) ? tRes : tRes.signals || []);
+      setSqueeze(qRes); setLiq(lRes);
       setLastUpdate(new Date());
       setLoading(false);
     }
@@ -120,6 +125,75 @@ export function ScannerPage() {
                 <div style={{ fontSize: 'var(--mc-font-label)', color: '#455a64', fontFamily: 'var(--font-mc-mono)', marginTop: '4px' }}>{s.channel_name?.slice(0, 25) || ''}</div>
               </div>
             ))}
+          </div>
+        </>
+      )}
+
+      {/* Squeeze Candidates */}
+      {squeeze?.candidates?.length > 0 && (
+        <>
+          <div style={{ fontSize: 'var(--mc-font-badge)', fontWeight: 700, color: '#ff9800', fontFamily: 'var(--font-mc-mono)', letterSpacing: '1.5px', marginBottom: '10px', paddingBottom: '4px', borderBottom: '2px solid #ff980044' }}>
+            SQUEEZE CANDIDATES (SCORE 50+)
+          </div>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(220px, 1fr))', gap: '8px', marginBottom: '20px' }}>
+            {squeeze.candidates.slice(0, 12).map((c: any, i: number) => {
+              const tone = c.score >= 70 ? '#ef5350' : c.score >= 60 ? '#ff9800' : '#fdd835';
+              return (
+                <div key={i} className="scan-card" style={{ padding: '12px 14px', borderLeft: `3px solid ${tone}` }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '6px' }}>
+                    <span style={{ fontSize: 'var(--mc-font-lg)', fontWeight: 700, color: '#4fc3f7', fontFamily: 'var(--font-mc-mono)' }}>{c.ticker}</span>
+                    <span style={{ fontSize: 'var(--mc-font-badge)', fontWeight: 700, padding: '2px 8px', borderRadius: '4px', background: `${tone}22`, color: tone, fontFamily: 'var(--font-mc-mono)' }}>{c.score}</span>
+                  </div>
+                  <div style={{ fontSize: 'var(--mc-font-label)', color: '#90a4ae', fontFamily: 'var(--font-mc-mono)' }}>
+                    SI {c.si_pct != null ? `${c.si_pct.toFixed(1)}%` : '—'} · DTC {c.dtc != null ? c.dtc.toFixed(1) : '—'}{c.sweep ? ' · 🐋' : ''}
+                  </div>
+                  {c.price != null && c.price > 0 && (
+                    <div style={{ fontSize: 'var(--mc-font-label)', color: '#607d8b', fontFamily: 'var(--font-mc-mono)', marginTop: '2px' }}>
+                      ${c.price.toFixed(2)}{c.near_high_pct != null && c.near_high_pct < 5 ? ` · ${c.near_high_pct.toFixed(1)}% from 52w-hi` : ''}
+                    </div>
+                  )}
+                </div>
+              );
+            })}
+          </div>
+        </>
+      )}
+
+      {/* Liquidation Bias */}
+      {liq?.total > 0 && (
+        <>
+          <div style={{ fontSize: 'var(--mc-font-badge)', fontWeight: 700, color: '#9c27b0', fontFamily: 'var(--font-mc-mono)', letterSpacing: '1.5px', marginBottom: '10px', paddingBottom: '4px', borderBottom: '2px solid #9c27b044' }}>
+            CRYPTO LIQUIDATIONS · LAST 4H
+          </div>
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px', marginBottom: '20px' }}>
+            <div className="scan-card" style={{ padding: '18px 20px', borderBottom: `3px solid ${liq.bias === 'LONGS_WRECKED' ? '#ef5350' : liq.bias === 'SHORTS_WRECKED' ? '#66bb6a' : '#607d8b'}` }}>
+              <div style={{ fontSize: 'var(--mc-font-label)', color: '#607d8b', fontFamily: 'var(--font-mc-mono)', letterSpacing: '1.5px', marginBottom: '6px' }}>BIAS</div>
+              <div style={{ fontSize: 'var(--mc-font-2xl)', fontWeight: 900, color: liq.bias === 'LONGS_WRECKED' ? '#ef5350' : liq.bias === 'SHORTS_WRECKED' ? '#66bb6a' : '#607d8b', fontFamily: 'var(--font-mc-mono)' }}>
+                {liq.bias.replace('_', ' ')}
+              </div>
+              <div style={{ fontSize: 'var(--mc-font-label)', color: '#90a4ae', fontFamily: 'var(--font-mc-mono)', marginTop: '6px' }}>
+                Total: ${(liq.total / 1_000_000).toFixed(2)}M · {liq.events_total} events
+              </div>
+              <div style={{ fontSize: 'var(--mc-font-label)', color: '#ef5350', fontFamily: 'var(--font-mc-mono)', marginTop: '4px' }}>
+                🔴 Longs liq: ${(liq.long_liq / 1_000_000).toFixed(2)}M
+              </div>
+              <div style={{ fontSize: 'var(--mc-font-label)', color: '#66bb6a', fontFamily: 'var(--font-mc-mono)' }}>
+                🟢 Shorts liq: ${(liq.short_liq / 1_000_000).toFixed(2)}M
+              </div>
+            </div>
+            <div className="scan-card" style={{ padding: '14px 18px' }}>
+              <div style={{ fontSize: 'var(--mc-font-label)', color: '#607d8b', fontFamily: 'var(--font-mc-mono)', letterSpacing: '1.5px', marginBottom: '8px' }}>TOP COINS</div>
+              {liq.top_coins.slice(0, 6).map((c: any, i: number) => {
+                const longShare = c.total > 0 ? (c.long / c.total) * 100 : 50;
+                const tone = longShare > 65 ? '#ef5350' : longShare < 35 ? '#66bb6a' : '#607d8b';
+                return (
+                  <div key={i} style={{ display: 'flex', justifyContent: 'space-between', fontSize: 'var(--mc-font-label)', fontFamily: 'var(--font-mc-mono)', marginBottom: '3px' }}>
+                    <span style={{ color: '#e0e0e0', fontWeight: 700 }}>{c.sym}</span>
+                    <span style={{ color: tone }}>${c.total >= 1_000_000 ? `${(c.total/1_000_000).toFixed(2)}M` : `${(c.total/1000).toFixed(0)}K`}</span>
+                  </div>
+                );
+              })}
+            </div>
           </div>
         </>
       )}
