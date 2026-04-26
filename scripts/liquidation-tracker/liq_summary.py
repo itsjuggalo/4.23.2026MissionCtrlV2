@@ -63,18 +63,25 @@ def main():
     short_liq = sum(e["value"] for e in events if e["side"] == "BUY")
     total = long_liq + short_liq
     
-    # Per-coin
+    # Per-coin (filter unicode/junk symbols, only USDT/USDC perps, min $1k per event)
+    MIN_EVT = 1000
     by_coin = defaultdict(lambda: {"long": 0, "short": 0})
     for e in events:
-        sym = e["symbol"].replace("USDT", "").replace("USDC", "").replace("USD", "")
+        sym_raw = e["symbol"]
+        # skip non-ASCII (e.g. Chinese meme pairs) and non-USD-quoted
+        if not sym_raw.isascii(): continue
+        if not (sym_raw.endswith("USDT") or sym_raw.endswith("USDC") or sym_raw.endswith("USD")): continue
+        if e["value"] < MIN_EVT: continue
+        sym = sym_raw.replace("USDT", "").replace("USDC", "").replace("USD", "")
         if e["side"] == "SELL":
             by_coin[sym]["long"] += e["value"]
         else:
             by_coin[sym]["short"] += e["value"]
     top_coins = sorted(by_coin.items(), key=lambda x: x[1]["long"]+x[1]["short"], reverse=True)[:8]
     
-    # Largest single events
-    largest = sorted(events, key=lambda e: e["value"], reverse=True)[:5]
+    # Largest single events (skip junk pairs)
+    clean_events = [e for e in events if e["symbol"].isascii() and (e["symbol"].endswith("USDT") or e["symbol"].endswith("USDC"))]
+    largest = sorted(clean_events, key=lambda e: e["value"], reverse=True)[:5]
     
     # Bias
     if total > 0:
