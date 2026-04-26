@@ -23,7 +23,7 @@ SECRETS = Path.home() / ".openclaw" / "secrets"
 TOKEN = (SECRETS / "discord_verify_token").read_text().strip()
 GUILD_ID = int((SECRETS / "discord_guild_id").read_text().strip())
 VERIFY_CHANNEL_ID = int((SECRETS / "discord_verify_channel").read_text().strip())
-VERIFIED_ROLE_ID = 1497766452663554161  # "Verify" role granted on ✅
+VERIFIED_ROLE_ID = 1486033851594838118  # "Verify" role granted on ✅
 CHECK_EMOJI = "✅"
 
 STATE_FILE = Path.home() / ".openclaw" / "workspace" / "captcha_pending.json"
