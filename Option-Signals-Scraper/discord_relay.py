@@ -1185,12 +1185,25 @@ def relay_fg2_sentiment(state):
 def relay_synthetic_analysis(state):
     """Synthetic bull/bear sentiment per ticker from FG1 LiveFlows.
     Posts as Discord embed with trend arrows, ratio bars, sweep callouts.
+    Config from synth_config.json: cadence_minutes, topn, min_premium, watch, mute.
     """
     import datetime as _dt
     import requests as _req
+    _cfg_path = os.path.join(BASE_DIR, "synth_config.json")
+    _cfg = {"cadence_minutes": 30, "topn": 20, "min_premium": 0, "watch": [], "mute": []}
+    try:
+        with open(_cfg_path) as _cf:
+            _cfg.update(json.load(_cf))
+    except Exception:
+        pass
+    cadence_min = int(_cfg.get("cadence_minutes", 30))
+    topn = int(_cfg.get("topn", 20))
+    min_prem_floor = float(_cfg.get("min_premium", 0))
+    watchlist = set(s.upper() for s in _cfg.get("watch", []))
+    mutelist = set(s.upper() for s in _cfg.get("mute", []))
     last_post = state.get("synthetic_analysis_last_post", 0)
     now = int(time.time())
-    if now - last_post < 30 * 60:
+    if now - last_post < cadence_min * 60:
         return state
 
     d = read_data("flow_live_last100")
@@ -1248,7 +1261,13 @@ def relay_synthetic_analysis(state):
         if bull_pct <= 40: return "🔴"
         return "🟡"
 
-    top = sorted(ticker_all.items(), key=lambda x: x[1]["total_prem"], reverse=True)[:20]
+    _filtered = {sym: s for sym, s in ticker_all.items() if sym not in mutelist and s["total_prem"] >= min_prem_floor}
+    _sorted = sorted(_filtered.items(), key=lambda x: x[1]["total_prem"], reverse=True)
+    top = _sorted[:topn]
+    _top_syms = set(sym for sym, _ in top)
+    for _wsym in watchlist:
+        if _wsym not in _top_syms and _wsym in _filtered:
+            top.append((_wsym, _filtered[_wsym]))
     total_bull = sum(s["bull_prem"] for _, s in top)
     total_bear = sum(s["bear_prem"] for _, s in top)
     grand_total = total_bull + total_bear
@@ -1318,6 +1337,20 @@ def relay_synthetic_analysis(state):
             state["synthetic_analysis_last_post"] = now
             state["synthetic_analysis_prev"] = new_snap
             logging.info("[synthetic_analysis] posted embed rollup, {} tickers, overall {:.0f}% bull".format(len(top), overall_pct))
+            try:
+                _hist_path = os.path.join(BASE_DIR, "synth_history.json")
+                _hist = []
+                if os.path.exists(_hist_path):
+                    with open(_hist_path) as _hf:
+                        _hist = json.load(_hf)
+                _hist.append({"ts": now, "pct": overall_pct, "bull": fmt_prem(total_bull), "bear": fmt_prem(total_bear), "n": len(top)})
+                _hist = _hist[-500:]
+                _tmp = _hist_path + ".tmp"
+                with open(_tmp, "w") as _hf:
+                    json.dump(_hist, _hf)
+                os.replace(_tmp, _hist_path)
+            except Exception as _he:
+                logging.error("[synthetic_analysis] history write failed: {}".format(_he))
         else:
             logging.error("[synthetic_analysis] webhook returned {}: {}".format(r.status_code, r.text[:200]))
     except Exception as e:
