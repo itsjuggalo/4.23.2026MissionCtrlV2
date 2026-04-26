@@ -203,7 +203,7 @@ def main():
             "score": sc,
             "si_pct": float(yf_data.get("si_pct_float", 0) or 0),
             "dtc": float(yf_data.get("dtc", 0) or 0),
-            "sweep": bool(sweep),
+            "sweep": tkr in sweeps,
             "price": float(yf_data.get("price", 0) or 0),
             "from_hi_pct": float(yf_data.get("from_hi_pct", 0) or 0),
         }
