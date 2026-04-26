@@ -145,9 +145,9 @@ function PreTradeBlock() {
     if (!ticker) return;
     setLoading(true);
     const [ls, kn, jr] = await Promise.all([
-      fetch('/api/live-signals').then(r => r.json()).catch(() => null),
-      fetch(`/api/kronos-forecast?ticker=${ticker}`).then(r => r.ok ? r.json() : null).catch(() => null),
-      fetch('/api/boba-journal').then(r => r.ok ? r.json() : null).catch(() => null),
+      fetch('/api/live-signals', { cache: 'no-store' }).then(r => r.json()).catch(() => null),
+      fetch(`/api/kronos-forecast?ticker=${ticker}`, { cache: 'no-store' }).then(r => r.ok ? r.json() : null).catch(() => null),
+      fetch('/api/boba-journal', { cache: 'no-store' }).then(r => r.ok ? r.json() : null).catch(() => null),
     ]);
     const matchingFlows = (ls?.recentSignals || []).filter((s: any) => s.ticker === ticker).slice(0, 3);
     setData({ flows: matchingFlows, kronos: kn, journal: jr });
@@ -235,7 +235,7 @@ function WhyTakeBlock() {
       {hit && (
         <div style={{ fontSize: 11, color: '#e8e8ed', lineHeight: 1.5 }}>
           <div style={{ fontSize: 11, fontWeight: 700, color: hit.took ? '#00d2a0' : '#ffa502', marginBottom: 6 }}>
-            {hit.took ? '✓ TOOK IT' : '⏸ PASSED'} · {fmtTimeAgo(hit.when)}
+            {hit.took ? `✓ TOOK ${hit.full_symbol || ''}` : '⏸ PASSED'} · {fmtTimeAgo(hit.when)}
           </div>
           <div style={{ fontSize: 11, color: '#8b8b9e', maxHeight: 140, overflowY: 'auto' }}>{hit.reason}</div>
         </div>
