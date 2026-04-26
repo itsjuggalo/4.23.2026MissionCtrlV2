@@ -241,6 +241,125 @@ def _chunk_message(text, limit=1900):
         text = text[cut:].lstrip("\n")
     return chunks
 
+# ─── Alpaca trade execution ─────────────────────────────────────────
+ALPACA_PAPER_BASE = "https://paper-api.alpaca.markets"
+ALPACA_LIVE_BASE = "https://api.alpaca.markets"
+
+# State file for !arm/!disarm
+ARM_STATE_FILE = Path.home() / ".openclaw" / "workspace" / "boba_arm_state.json"
+ARM_STATE_FILE.parent.mkdir(parents=True, exist_ok=True)
+ARM_DURATION_SECS = 15 * 60  # 15 minutes
+
+
+def _alpaca_keys(live=False):
+    """Returns (key, secret, base_url) tuple. None if live keys unavailable."""
+    paper_key = (SECRETS / "alpaca-key-id").read_text().strip()
+    paper_secret = (SECRETS / "alpaca-secret").read_text().strip()
+    if not live:
+        return paper_key, paper_secret, ALPACA_PAPER_BASE
+    # Live keys
+    live_key_path = SECRETS / "alpaca-live-key-id"
+    live_secret_path = SECRETS / "alpaca-live-secret"
+    if live_key_path.exists() and live_secret_path.exists():
+        return live_key_path.read_text().strip(), live_secret_path.read_text().strip(), ALPACA_LIVE_BASE
+    return None, None, None
+
+
+def _alpaca_headers(key, secret):
+    return {
+        "APCA-API-KEY-ID": key,
+        "APCA-API-SECRET-KEY": secret,
+        "Content-Type": "application/json",
+    }
+
+
+def _is_armed():
+    if not ARM_STATE_FILE.exists():
+        return False
+    try:
+        s = json.loads(ARM_STATE_FILE.read_text())
+        armed_until = s.get("armed_until", 0)
+        return time.time() < armed_until
+    except Exception:
+        return False
+
+
+def _arm(seconds=ARM_DURATION_SECS):
+    state = {"armed_until": int(time.time()) + seconds, "armed_at": int(time.time())}
+    ARM_STATE_FILE.write_text(json.dumps(state))
+
+
+def _disarm():
+    ARM_STATE_FILE.write_text(json.dumps({"armed_until": 0}))
+
+
+def _arm_remaining_secs():
+    if not ARM_STATE_FILE.exists():
+        return 0
+    try:
+        s = json.loads(ARM_STATE_FILE.read_text())
+        return max(0, int(s.get("armed_until", 0) - time.time()))
+    except Exception:
+        return 0
+
+
+def _build_occ_symbol(ticker, expiry_mmdd, strike, side):
+    """Build OCC option symbol from MM/DD expiry + strike + side (call/put).
+    Assumes current year for now. e.g. NVDA + 5/15 + 200 + call → NVDA260515C00200000"""
+    try:
+        mm, dd = expiry_mmdd.split("/")
+        year_short = datetime.now().strftime("%y")
+        # Handle year rollover: if expiry month < current month, assume next year
+        cur_month = int(datetime.now().strftime("%m"))
+        if int(mm) < cur_month:
+            year_short = str(int(year_short) + 1).zfill(2)
+        side_char = "C" if side.lower() == "call" else "P"
+        strike_str = f"{int(round(float(strike) * 1000)):08d}"
+        return f"{ticker.upper()}{year_short}{int(mm):02d}{int(dd):02d}{side_char}{strike_str}"
+    except Exception as e:
+        logging.error(f"build_occ {ticker} {expiry_mmdd} {strike} {side}: {e}")
+        return None
+
+
+def _submit_alpaca_order(symbol, side, qty, take_profit_price, stop_loss_price,
+                         asset_type="stock", live=False):
+    """Submit OCO bracket order. Returns (success, response_dict_or_error)."""
+    key, secret, base = _alpaca_keys(live=live)
+    if key is None:
+        return False, {"error": "Live Alpaca keys not configured"}
+
+    payload = {
+        "symbol": symbol,
+        "qty": str(qty),
+        "side": side.lower(),
+        "type": "market",
+        "time_in_force": "day",
+        "order_class": "bracket",
+        "take_profit": {"limit_price": str(round(take_profit_price, 2))},
+        "stop_loss": {"stop_price": str(round(stop_loss_price, 2))},
+    }
+    try:
+        r = requests.post(
+            f"{base}/v2/orders",
+            headers=_alpaca_headers(key, secret),
+            json=payload,
+            timeout=15,
+        )
+        if r.status_code in (200, 201):
+            return True, r.json()
+        return False, {"error": f"HTTP {r.status_code}", "body": r.text[:500]}
+    except Exception as e:
+        return False, {"error": str(e)}
+
+
+def _last_price(symbol, asset_type="stock"):
+    """Best-effort last price for stop/TP defaults."""
+    if asset_type == "stock":
+        q = _ticker_quote(symbol)
+        return q["last"] if q and q["last"] > 0 else None
+    return None
+
+
 
 LOG_DIR = Path.home() / ".openclaw" / "workspace" / "logs"
 LOG_DIR.mkdir(parents=True, exist_ok=True)
@@ -370,14 +489,16 @@ async def backtest(interaction: discord.Interaction, strategy: str, symbol: str,
 
 
 # ─── /trade ──────────────────────────────────────────────────────────
-@bot.tree.command(name="trade", description="Place a trade (paper by default)")
+@bot.tree.command(name="trade", description="Place a trade (paper auto, live needs !arm + 👍)")
 @app_commands.describe(
     ticker="Stock ticker (e.g. NVDA)",
-    side="Order side: buy or sell",
-    qty="Quantity",
+    side="buy or sell",
+    qty="Quantity (shares or contracts)",
     asset_type="stock, call, or put",
-    strike="Strike price (for options only)",
-    expiry="Expiry MM/DD (for options only, e.g. 5/15)",
+    take_profit="TP price (optional - defaults to +4%)",
+    stop_loss="SL price (optional - defaults to -2%)",
+    strike="Strike price (options only)",
+    expiry="Expiry MM/DD (options only, e.g. 5/15)",
 )
 async def trade(
     interaction: discord.Interaction,
@@ -385,18 +506,153 @@ async def trade(
     side: str,
     qty: int,
     asset_type: str = "stock",
+    take_profit: float = None,
+    stop_loss: float = None,
     strike: float = None,
     expiry: str = None,
 ):
     if not is_owner(interaction):
         await interaction.response.send_message("⛔ unauthorized", ephemeral=True)
         return
-    await interaction.response.send_message(
-        f"💼 /trade {side} {qty} {ticker} {asset_type} — handler not yet implemented (Block 4 ships later)\n"
-        f"_Will default to PAPER mode (R2 sandbox). Use !arm to enable LIVE._",
-        ephemeral=True,
+
+    ticker = ticker.upper().strip()
+    side = side.lower().strip()
+    asset_type = asset_type.lower().strip()
+
+    if side not in ("buy", "sell"):
+        await interaction.response.send_message("❌ side must be `buy` or `sell`", ephemeral=True)
+        return
+    if asset_type not in ("stock", "call", "put"):
+        await interaction.response.send_message("❌ asset_type must be `stock`, `call`, or `put`", ephemeral=True)
+        return
+    if asset_type in ("call", "put") and (strike is None or expiry is None):
+        await interaction.response.send_message("❌ options require both `strike` and `expiry`", ephemeral=True)
+        return
+
+    # Determine mode (paper/live)
+    armed = _is_armed()
+    mode = "LIVE" if armed else "PAPER"
+
+    # Build symbol
+    if asset_type == "stock":
+        symbol = ticker
+    else:
+        symbol = _build_occ_symbol(ticker, expiry, strike, asset_type)
+        if not symbol:
+            await interaction.response.send_message(f"❌ could not build OCC symbol from {ticker} {expiry} {strike} {asset_type}", ephemeral=True)
+            return
+
+    # Get last price for defaults
+    if asset_type == "stock":
+        ref_price_data = await asyncio.get_event_loop().run_in_executor(None, _ticker_quote, ticker)
+        ref_price = ref_price_data["last"] if ref_price_data and ref_price_data["last"] > 0 else None
+    else:
+        # For options, use Tradier client to get last price
+        ref_price = None
+        if tc:
+            try:
+                opt = await asyncio.get_event_loop().run_in_executor(None, tc.fetch_option_quote, symbol)
+                if opt:
+                    ref_price = (opt["bid"] + opt["ask"]) / 2 if (opt["bid"] > 0 and opt["ask"] > 0) else opt["last"]
+            except Exception as e:
+                logging.error(f"option quote {symbol}: {e}")
+
+    if ref_price is None or ref_price <= 0:
+        await interaction.response.send_message(
+            f"❌ Could not fetch reference price for {symbol}. Provide explicit `take_profit` and `stop_loss`.",
+            ephemeral=True,
+        )
+        return
+
+    # Compute TP/SL defaults if not provided
+    if side == "buy":
+        tp = take_profit if take_profit else round(ref_price * 1.04, 2)
+        sl = stop_loss if stop_loss else round(ref_price * 0.98, 2)
+    else:  # sell/short
+        tp = take_profit if take_profit else round(ref_price * 0.96, 2)
+        sl = stop_loss if stop_loss else round(ref_price * 1.02, 2)
+
+    # Build summary embed
+    color = 0xe74c3c if mode == "LIVE" else 0x3498db
+    embed = discord.Embed(
+        title=f"💼 {mode} Trade: {side.upper()} {qty} {symbol}",
+        color=color,
+        timestamp=datetime.now(timezone.utc),
     )
-    logging.info(f"/trade {side} {qty} {ticker} by {interaction.user.id}")
+    embed.add_field(name="Ref Price", value=f"${ref_price:.2f}", inline=True)
+    embed.add_field(name="Take Profit", value=f"${tp:.2f}", inline=True)
+    embed.add_field(name="Stop Loss", value=f"${sl:.2f}", inline=True)
+    embed.add_field(name="Mode", value=mode, inline=True)
+    embed.add_field(name="Asset", value=asset_type.upper(), inline=True)
+    embed.add_field(name="Time in Force", value="DAY", inline=True)
+
+    # PAPER: auto-execute
+    if mode == "PAPER":
+        await interaction.response.defer(thinking=True)
+        success, result = await asyncio.get_event_loop().run_in_executor(
+            None, _submit_alpaca_order, symbol, side, qty, tp, sl, asset_type, False,
+        )
+        if success:
+            embed.add_field(name="Order ID", value=result.get("id", "?")[:18], inline=False)
+            embed.add_field(name="Status", value=f"✅ Submitted: {result.get('status', 'pending')}", inline=False)
+            logging.info(f"PAPER /trade {side} {qty} {symbol} → {result.get('id')}")
+        else:
+            embed.color = 0xe74c3c
+            embed.add_field(name="❌ Error", value=str(result.get("error", "unknown"))[:1024], inline=False)
+            if "body" in result:
+                embed.add_field(name="Details", value=str(result["body"])[:1024], inline=False)
+            logging.error(f"PAPER /trade FAILED: {result}")
+
+        # Send to #trade-paper channel
+        paper_chan = bot.get_channel(CHAN["trade_paper"])
+        if paper_chan:
+            await paper_chan.send(embed=embed)
+        await interaction.followup.send("✅ Paper trade submitted (see #trade-paper)", ephemeral=True)
+        return
+
+    # LIVE: require 👍 confirmation reaction within 60s
+    embed.add_field(name="⚠️ CONFIRMATION REQUIRED", value="React 👍 within 60s to execute", inline=False)
+    await interaction.response.send_message(embed=embed)
+    msg = await interaction.original_response()
+    await msg.add_reaction("👍")
+
+    def check(reaction, user):
+        return (user.id == OWNER_ID
+                and str(reaction.emoji) == "👍"
+                and reaction.message.id == msg.id)
+
+    try:
+        await bot.wait_for("reaction_add", timeout=60.0, check=check)
+    except asyncio.TimeoutError:
+        await msg.edit(embed=discord.Embed(
+            title="⏱ LIVE trade CANCELLED (no confirmation)",
+            color=0x95a5a6,
+        ))
+        return
+
+    # Confirmed - execute live
+    success, result = await asyncio.get_event_loop().run_in_executor(
+        None, _submit_alpaca_order, symbol, side, qty, tp, sl, asset_type, True,
+    )
+    confirm_embed = discord.Embed(
+        title=f"💼 LIVE Trade: {side.upper()} {qty} {symbol}",
+        color=0x27ae60 if success else 0xe74c3c,
+        timestamp=datetime.now(timezone.utc),
+    )
+    if success:
+        confirm_embed.add_field(name="Order ID", value=result.get("id", "?")[:18], inline=False)
+        confirm_embed.add_field(name="Status", value=f"✅ Submitted: {result.get('status', 'pending')}", inline=False)
+        logging.info(f"LIVE /trade {side} {qty} {symbol} → {result.get('id')}")
+    else:
+        confirm_embed.add_field(name="❌ Error", value=str(result.get("error", "unknown"))[:1024], inline=False)
+        if "body" in result:
+            confirm_embed.add_field(name="Details", value=str(result["body"])[:1024], inline=False)
+        logging.error(f"LIVE /trade FAILED: {result}")
+
+    live_chan = bot.get_channel(CHAN["trade_live"])
+    if live_chan:
+        await live_chan.send(embed=confirm_embed)
+    await msg.edit(embed=confirm_embed)
 
 
 # ─── /boba_help ──────────────────────────────────────────────────────
@@ -405,21 +661,28 @@ async def boba_help(interaction: discord.Interaction):
     if not is_owner(interaction):
         await interaction.response.send_message("⛔ unauthorized", ephemeral=True)
         return
+    armed = _is_armed()
+    rem = _arm_remaining_secs()
+    arm_line = f"🔫 **LIVE armed** ({rem//60}m {rem%60}s left)" if armed else "🔒 PAPER mode (R2 sandbox)"
     msg = (
-        "🤖 **Boba's Command Reference**\n"
+        f"🤖 **Boba's Command Reference**  •  {arm_line}\n"
         "\n"
         "**Slash commands:**\n"
-        "• `/scan TICKER` — full context on a ticker (Block 2)\n"
-        "• `/backtest STRATEGY SYMBOL TIMEFRAME` — backtest a strategy (Block 3)\n"
-        "• `/trade TICKER SIDE QTY` — place a paper trade (Block 4)\n"
+        "• `/scan TICKER` — full context (price, flow, win rate, news)\n"
+        "• `/trade ticker side qty asset_type [tp] [sl] [strike] [expiry]` — submit order\n"
+        "    paper auto-executes • live needs 🔫!arm + 👍 confirmation\n"
+        "• `/backtest` — DEFERRED (Block 3 not yet shipped)\n"
         "• `/boba_help` — this menu\n"
         "\n"
         "**Text commands:**\n"
-        "• `!boba <question>` — ask Boba anything (Block 2)\n"
-        "• `!arm` — switch /trade to LIVE mode for 15 min (Block 4)\n"
-        "• `!disarm` — back to PAPER mode (Block 4)\n"
+        "• `!boba <question>` — Q&A via Anthropic claude-sonnet-4-6\n"
+        "• `!arm` — switch /trade to LIVE mode for 15 min\n"
+        "• `!disarm` — back to PAPER\n"
+        "• `!armstatus` — check current mode\n"
         "\n"
-        "_Currently: scaffold deployed (Block 1). Handlers stubbed; full impl rolls out across Blocks 2-4._"
+        "**Examples:**\n"
+        "• `/trade ticker:NVDA side:buy qty:10 asset_type:stock`\n"
+        "• `/trade ticker:NVDA side:buy qty:5 asset_type:call strike:200 expiry:5/15`\n"
     )
     await interaction.response.send_message(msg, ephemeral=True)
 
@@ -445,6 +708,49 @@ async def boba_qa(ctx, *, question: str = None):
             await ctx.reply(chunk)
         else:
             await ctx.send(chunk)
+
+@bot.command(name="arm")
+async def arm_cmd(ctx):
+    if ctx.author.id != OWNER_ID:
+        return
+    # Check live keys exist
+    key, secret, base = _alpaca_keys(live=True)
+    if key is None:
+        await ctx.reply("⚠️ Cannot arm — no LIVE Alpaca keys on server.\n"
+                        "Add `~/.openclaw/secrets/alpaca-live-key-id` and "
+                        "`~/.openclaw/secrets/alpaca-live-secret` to enable.")
+        return
+    _arm()
+    remaining_min = ARM_DURATION_SECS // 60
+    await ctx.reply(f"🔫 **LIVE MODE ARMED** for {remaining_min} min.\n"
+                    f"`/trade` will route to LIVE Alpaca account. "
+                    f"All live trades require 👍 confirmation. Auto-disarm at "
+                    f"<t:{int(time.time()) + ARM_DURATION_SECS}:t>.")
+    logging.info(f"!arm by {ctx.author.id}")
+
+
+@bot.command(name="disarm")
+async def disarm_cmd(ctx):
+    if ctx.author.id != OWNER_ID:
+        return
+    if not _is_armed():
+        await ctx.reply("ℹ️ Not currently armed (already in PAPER mode).")
+        return
+    _disarm()
+    await ctx.reply("🔒 **DISARMED** — back to PAPER mode (R2 sandbox).")
+    logging.info(f"!disarm by {ctx.author.id}")
+
+
+@bot.command(name="armstatus")
+async def armstatus_cmd(ctx):
+    if ctx.author.id != OWNER_ID:
+        return
+    if _is_armed():
+        rem = _arm_remaining_secs()
+        await ctx.reply(f"🔫 ARMED — LIVE mode active. Auto-disarm in {rem//60}m {rem%60}s.")
+    else:
+        await ctx.reply("🔒 PAPER mode (R2 sandbox).")
+
 
 
 # ─── lifecycle ───────────────────────────────────────────────────────
