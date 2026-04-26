@@ -477,15 +477,92 @@ async def scan(interaction: discord.Interaction, ticker: str):
     symbol="Symbol (e.g. BTCUSD, SPY)",
     timeframe="Timeframe (e.g. 1h, 4h, 1d)",
 )
-async def backtest(interaction: discord.Interaction, strategy: str, symbol: str, timeframe: str = "1h"):
+async def backtest(interaction: discord.Interaction, strategy: str, symbol: str, timeframe: str = "1H", months: int = 6):
     if not is_owner(interaction):
         await interaction.response.send_message("⛔ unauthorized", ephemeral=True)
         return
-    await interaction.response.send_message(
-        f"📊 /backtest {strategy} {symbol} {timeframe} — handler not yet implemented (Block 3 ships later)",
-        ephemeral=True,
+
+    # Defer because subprocess can take 5-15s
+    await interaction.response.defer(thinking=True)
+    logging.info(f"/backtest {strategy} {symbol} {timeframe} {months}mo by {interaction.user.id}")
+
+    # Validate strategy
+    if strategy.lower() not in ("supertrend", "st"):
+        await interaction.followup.send(
+            f"⚠️ Strategy `{strategy}` not in registry. Available: `supertrend`",
+            ephemeral=True,
+        )
+        return
+
+    # Run subprocess (asyncio so we don't block the event loop)
+    import subprocess
+    runner = "/home/ubuntu/scripts/backtest-runner/run.py"
+    cmd = ["python3", runner, symbol.upper(), timeframe, str(months), "supertrend"]
+
+    try:
+        proc = await asyncio.create_subprocess_exec(
+            *cmd,
+            stdout=asyncio.subprocess.PIPE,
+            stderr=asyncio.subprocess.PIPE,
+        )
+        stdout_b, stderr_b = await asyncio.wait_for(proc.communicate(), timeout=60)
+        stdout = stdout_b.decode("utf-8", errors="replace")
+        stderr = stderr_b.decode("utf-8", errors="replace")
+    except asyncio.TimeoutError:
+        await interaction.followup.send("⏱️ Backtest timed out after 60s.", ephemeral=True)
+        return
+    except Exception as e:
+        await interaction.followup.send(f"❌ Subprocess error: `{e}`", ephemeral=True)
+        return
+
+    # Parse JSON output
+    try:
+        result = json.loads(stdout.strip())
+    except Exception as e:
+        # First 1500 chars of stdout for debug
+        msg = f"❌ Backtest output not valid JSON: `{e}`\n```\n{stdout[:1500]}\n```"
+        await interaction.followup.send(msg, ephemeral=True)
+        return
+
+    # Error case
+    if "error" in result:
+        await interaction.followup.send(
+            f"❌ Backtest error: `{result['error']}`",
+            ephemeral=True,
+        )
+        return
+
+    # Build embed
+    gate_pass = result.get("gate_pass", False)
+    color = 0x00FF00 if gate_pass else 0xFF4444
+    gate_emoji = "✅" if gate_pass else "❌"
+    bh_str = f"{result['buy_hold_pct']:+.2f}%"
+    ret_str = f"{result['strategy_return_pct']:+.2f}%"
+
+    embed = discord.Embed(
+        title=f"📊 Backtest — {result['symbol']} {result['timeframe']} ({result['months']}mo)",
+        description=f"Strategy: `{result['strategy']}` · {result['candles_used']} candles\nFirst→Last: ${result['first_close']:,.2f} → ${result['last_close']:,.2f}",
+        color=color,
+        timestamp=datetime.now(timezone.utc),
     )
-    logging.info(f"/backtest {strategy} {symbol} {timeframe} by {interaction.user.id}")
+    embed.add_field(name="Strategy Return", value=f"**{ret_str}**", inline=True)
+    embed.add_field(name="Buy & Hold", value=bh_str, inline=True)
+    embed.add_field(name="Beats B&H", value="✅ Yes" if result["beats_buy_hold"] else "❌ No", inline=True)
+    embed.add_field(name="Win Rate", value=f"{result['win_rate_pct']:.1f}%", inline=True)
+    embed.add_field(name="Max DD", value=f"{result['max_drawdown_pct']:.2f}%", inline=True)
+    embed.add_field(name="Trades", value=str(result["total_trades"]), inline=True)
+    embed.add_field(name="Profit Factor", value=f"{result['profit_factor']:.3f}", inline=True)
+    embed.add_field(name="Gate (DD<25 · WR>40 · Beats BH)",
+                    value=f"{gate_emoji} {'PASS' if gate_pass else 'FAIL'}", inline=True)
+    embed.set_footer(text="Mission Control · /backtest")
+
+    # Send to #backtest channel + ephemeral confirmation
+    bt_channel = bot.get_channel(CHAN["backtest"])
+    if bt_channel:
+        await bt_channel.send(embed=embed)
+        await interaction.followup.send(f"📊 Posted to <#{CHAN['backtest']}>", ephemeral=True)
+    else:
+        await interaction.followup.send(embed=embed)
 
 
 # ─── /trade ──────────────────────────────────────────────────────────
@@ -671,7 +748,7 @@ async def boba_help(interaction: discord.Interaction):
         "• `/scan TICKER` — full context (price, flow, win rate, news)\n"
         "• `/trade ticker side qty asset_type [tp] [sl] [strike] [expiry]` — submit order\n"
         "    paper auto-executes • live needs 🔫!arm + 👍 confirmation\n"
-        "• `/backtest` — DEFERRED (Block 3 not yet shipped)\n"
+        "• `/backtest <strategy> <symbol> <timeframe> [months]` — Run SuperTrend backtest, posts to #backtest\n"
         "• `/boba_help` — this menu\n"
         "\n"
         "**Text commands:**\n"
