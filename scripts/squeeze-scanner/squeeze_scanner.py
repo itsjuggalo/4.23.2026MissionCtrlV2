@@ -197,7 +197,7 @@ def main():
         log.info(f"  {tkr}: score={sc} SI={yf_data['si_pct_float']:.1f}% DTC={yf_data['dtc']:.1f} sweep={tkr in sweeps}")
         if sc >= SCORE_THRESHOLD:
             if post(yf_data, sc, reasons, iv):
-                state[tkr] = {"last_post": now.isoformat(), "score": sc}
+                state[tkr] = {"last_post": now.isoformat(), "score": sc, "si_pct": yf_data.get("si_pct_float", 0), "dtc": yf_data.get("dtc", 0), "sweep": bool(sweep), "price": yf_data.get("price", 0), "near_high_pct": yf_data.get("near_high_pct", 0)}
                 posted += 1
                 log.info(f"  {tkr}: ✓ POSTED score {sc}")
             time.sleep(1)
