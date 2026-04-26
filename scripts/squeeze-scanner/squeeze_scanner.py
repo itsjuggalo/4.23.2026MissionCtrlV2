@@ -48,7 +48,8 @@ def dynamic_universe():
         r = requests.get("http://localhost:3033/api/live-signals", timeout=10)
         if r.status_code == 200:
             sigs = r.json().get("recentSignals", [])
-            return [s["ticker"] for s in sigs if s.get("option_type") == "CALL" and s.get("ticker")]
+            INDEX_SKIP = {"SPX", "SPXW", "NDX", "RUT", "VIX", "XSP"}
+            return [s["ticker"] for s in sigs if s.get("option_type") == "CALL" and s.get("ticker") and s["ticker"] not in INDEX_SKIP]
     except Exception as e:
         log.warning(f"dynamic_universe: {e}")
     return []
@@ -102,7 +103,7 @@ def fetch_yf(ticker):
     except Exception as e:
         log.warning(f"yf {ticker}: {e}"); return None
 
-def tradier_iv(ticker):
+def tradier_iv(ticker, spot):
     """Pull ATM call IV from nearest expiry 7-30 DTE."""
     try:
         exps = get_expirations(ticker) or []
@@ -115,10 +116,13 @@ def tradier_iv(ticker):
             if 7 <= dte <= 35:
                 target = e; break
         if not target: target = exps[0]
-        s = fetch_atm_straddle(ticker, target)
-        if s and s.get("call"):
-            return {"iv": s["call"].get("iv", 0), "exp": target,
-                    "implied_move_pct": s.get("implied_move_pct", 0)}
+        # Need spot price — call yfinance fast-info or use the yf_data we already have
+        # But tradier_iv is called from main loop; we'll get spot from the data we already fetched.
+        # Pass spot via new param — refactor below.
+        s = fetch_atm_straddle(ticker, spot, target)
+        if s and s.get("call_iv") is not None:
+            return {"iv": float(s.get("call_iv") or 0), "exp": target,
+                    "implied_move_pct": float(s.get("implied_move_pct") or 0)}
     except Exception as e:
         log.warning(f"tradier {ticker}: {e}")
     return None
@@ -188,7 +192,7 @@ def main():
             log.info(f"  {tkr}: yf data missing, skip"); continue
         if yf_data["si_pct_float"] < 5 and yf_data["dtc"] < 2:
             continue  # not a squeeze candidate
-        iv = tradier_iv(tkr) if yf_data["si_pct_float"] > 15 else None
+        iv = tradier_iv(tkr, yf_data["price"]) if yf_data["si_pct_float"] > 15 else None
         sc, reasons = score(yf_data, tkr in sweeps, iv)
         log.info(f"  {tkr}: score={sc} SI={yf_data['si_pct_float']:.1f}% DTC={yf_data['dtc']:.1f} sweep={tkr in sweeps}")
         if sc >= SCORE_THRESHOLD:
