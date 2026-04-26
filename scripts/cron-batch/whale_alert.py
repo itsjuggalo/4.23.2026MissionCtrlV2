@@ -19,6 +19,10 @@ import requests
 SECRETS = Path.home() / ".openclaw" / "secrets"
 WEBHOOK = (SECRETS / "discord_whale_flow_webhook").read_text().strip()
 
+# Etherscan API key (free tier, 5 req/sec, 100k/day)
+_etherscan_key_path = SECRETS / "etherscan_api_key"
+ETHERSCAN_KEY = _etherscan_key_path.read_text().strip() if _etherscan_key_path.exists() else None
+
 STATE_DIR = Path.home() / ".openclaw" / "workspace" / "state"
 STATE_DIR.mkdir(parents=True, exist_ok=True)
 STATE_FILE = STATE_DIR / "whale_alert_state.json"
@@ -100,7 +104,7 @@ def fetch_eth_large_transfers(prices):
         # Get latest block number
         r = requests.get(
             "https://api.etherscan.io/v2/api",
-            params={"chainid": 1, "module": "proxy", "action": "eth_blockNumber"},
+            params={"chainid": 1, "module": "proxy", "action": "eth_blockNumber", "apikey": ETHERSCAN_KEY or ""},
             timeout=10,
         )
         if r.status_code != 200: return []
@@ -116,6 +120,7 @@ def fetch_eth_large_transfers(prices):
                 "action": "eth_getBlockByNumber",
                 "tag": block_hex,
                 "boolean": "true",
+                "apikey": ETHERSCAN_KEY or "",
             },
             timeout=10,
         )
@@ -216,6 +221,7 @@ def fetch_erc20_large_transfers():
                     "page": 1,
                     "offset": 100,
                     "sort": "desc",
+                    "apikey": ETHERSCAN_KEY or "",
                 },
                 timeout=10,
             )
