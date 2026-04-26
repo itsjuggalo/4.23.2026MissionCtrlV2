@@ -150,7 +150,11 @@ function PreTradeBlock() {
       fetch('/api/boba-journal', { cache: 'no-store' }).then(r => r.ok ? r.json() : null).catch(() => null),
     ]);
     const matchingFlows = (ls?.recentSignals || []).filter((s: any) => s.ticker === ticker).slice(0, 3);
-    setData({ flows: matchingFlows, kronos: kn, journal: jr });
+    const journalEntries = jr?.entries || [];
+    const tookIt = journalEntries.find((e: any) => e.symbol === ticker && e.executed);
+    const passedFromCycle = journalEntries.flatMap((e: any) => (e.passed_on || []).filter((p: any) => p.ticker === ticker).map((p: any) => ({ ...p, when: e.timestamp })))[0];
+    const decision = tookIt ? { took: true, reason: tookIt.reasoning, when: tookIt.timestamp, full_symbol: tookIt.full_symbol } : passedFromCycle ? { took: false, reason: passedFromCycle.reason, when: passedFromCycle.when } : null;
+    setData({ flows: matchingFlows, kronos: kn, journal: jr, decision });
     setLoading(false);
   };
 
@@ -179,6 +183,15 @@ function PreTradeBlock() {
           {data.kronos ? (
             <div>{String(data.kronos.forecast_24h_direction || '').toUpperCase()} → ${data.kronos.forecast_24h_target?.toFixed(2) ?? '—'}</div>
           ) : <div style={{ color: '#607d8b' }}>No cached forecast</div>}
+          {data.decision && (
+            <>
+              <div style={{ color: '#607d8b', fontSize: 10, marginTop: 8, marginBottom: 4 }}>BOBA HISTORY</div>
+              <div style={{ fontSize: 11, color: data.decision.took ? '#00d2a0' : '#ffa502', fontWeight: 700, marginBottom: 2 }}>
+                {data.decision.took ? `✓ TOOK ${data.decision.full_symbol || ''}` : '⏸ PASSED'} · {fmtTimeAgo(data.decision.when)}
+              </div>
+              <div style={{ fontSize: 10, color: '#8b8b9e', maxHeight: 60, overflowY: 'auto' }}>{data.decision.reason}</div>
+            </>
+          )}
         </div>
       )}
     </div>
