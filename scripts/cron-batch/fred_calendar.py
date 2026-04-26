@@ -73,13 +73,52 @@ def main():
         return
 
     releases = r.json().get("release_dates", [])
-    # Filter to high-impact releases
-    keywords = ["cpi", "consumer price", "employment", "nonfarm", "payroll", "jobless", "unemployment",
-                "fomc", "federal funds", "gdp", "pce", "personal consumption", "retail sales"]
+    # Tiered impact filter — HIGH = market-moving, MED = relevant
+    HIGH_IMPACT = [
+        "consumer price index", "cpi",
+        "producer price index", "ppi",
+        "employment situation", "nonfarm payroll", "payems", "nonfarm employees",
+        "unemployment rate",
+        "advance gdp", "gross domestic product", "gdp first", "gdp second", "gdp third",
+        "fomc", "federal open market committee", "federal funds",
+        "personal income and outlays", "pce price index", "personal consumption",
+        "retail sales", "advance monthly retail",
+        "ism manufacturing", "ism services", "ism non-manufacturing",
+        "jolts", "job openings",
+        "initial jobless claims", "continuing jobless claims",
+        "treasury auction",
+    ]
+    MED_IMPACT = [
+        "housing starts", "building permits", "new residential construction",
+        "existing home sales", "new home sales",
+        "durable goods", "manufacturers shipments",
+        "consumer confidence", "consumer sentiment", "michigan",
+        "industrial production", "capacity utilization",
+        "international trade", "trade balance", "current account",
+        "factory orders", "wholesale trade", "business inventories",
+        "philadelphia fed", "empire state", "richmond fed", "kansas city fed", "dallas fed",
+        "leading economic", "lei",
+        "construction spending", "case-shiller",
+        "challenger job cuts", "adp employment",
+        "import price", "export price",
+    ]
     relevant = []
+    keywords = HIGH_IMPACT + MED_IMPACT  # combined for filter
     for rel in releases:
         name = (rel.get("release_name") or "").lower()
-        if any(kw in name for kw in keywords):
+        # Tag with impact tier
+        impact = None
+        for kw in HIGH_IMPACT:
+            if kw in name:
+                impact = "HIGH"
+                break
+        if not impact:
+            for kw in MED_IMPACT:
+                if kw in name:
+                    impact = "MED"
+                    break
+        if impact:
+            rel["_impact"] = impact
             relevant.append(rel)
 
     if not relevant:
