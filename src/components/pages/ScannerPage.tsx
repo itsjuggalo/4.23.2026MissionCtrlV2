@@ -149,7 +149,7 @@ export function ScannerPage() {
                   </div>
                   {c.price != null && c.price > 0 && (
                     <div style={{ fontSize: 'var(--mc-font-label)', color: '#607d8b', fontFamily: 'var(--font-mc-mono)', marginTop: '2px' }}>
-                      ${c.price.toFixed(2)}{c.near_high_pct != null && c.near_high_pct < 5 ? ` · ${c.near_high_pct.toFixed(1)}% from 52w-hi` : ''}
+                      ${c.price.toFixed(2)}{c.from_hi_pct != null && c.from_hi_pct > -5 ? ` · ${c.from_hi_pct.toFixed(1)}% vs 52w-hi` : ''}
                     </div>
                   )}
                 </div>

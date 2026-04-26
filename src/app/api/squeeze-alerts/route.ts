@@ -18,7 +18,8 @@ export async function GET() {
       dtc: v.dtc ?? null,
       sweep: v.sweep ?? false,
       price: v.price ?? null,
-      near_high_pct: v.near_high_pct ?? null,
+      from_hi_pct: v.from_hi_pct ?? null,
+      scanned_at: v.scanned_at ?? null,
       last_post: v.last_post ?? null,
     })).sort((a, b) => b.score - a.score);
     return NextResponse.json({ candidates, last_scan: candidates[0]?.last_post ?? null }, {

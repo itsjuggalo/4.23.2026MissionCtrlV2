@@ -195,9 +195,21 @@ def main():
         iv = tradier_iv(tkr, yf_data["price"]) if yf_data["si_pct_float"] > 15 else None
         sc, reasons = score(yf_data, tkr in sweeps, iv)
         log.info(f"  {tkr}: score={sc} SI={yf_data['si_pct_float']:.1f}% DTC={yf_data['dtc']:.1f} sweep={tkr in sweeps}")
+        # Always write enriched state for dashboard (regardless of post cooldown)
+        prior_post = state.get(tkr, {}).get("last_post")
+        state[tkr] = {
+            "last_post": prior_post,  # preserve last actual post time
+            "scanned_at": now.isoformat(),
+            "score": sc,
+            "si_pct": float(yf_data.get("si_pct_float", 0) or 0),
+            "dtc": float(yf_data.get("dtc", 0) or 0),
+            "sweep": bool(sweep),
+            "price": float(yf_data.get("price", 0) or 0),
+            "from_hi_pct": float(yf_data.get("from_hi_pct", 0) or 0),
+        }
         if sc >= SCORE_THRESHOLD:
             if post(yf_data, sc, reasons, iv):
-                state[tkr] = {"last_post": now.isoformat(), "score": sc, "si_pct": yf_data.get("si_pct_float", 0), "dtc": yf_data.get("dtc", 0), "sweep": bool(sweep), "price": yf_data.get("price", 0), "near_high_pct": yf_data.get("near_high_pct", 0)}
+                state[tkr]["last_post"] = now.isoformat()
                 posted += 1
                 log.info(f"  {tkr}: ✓ POSTED score {sc}")
             time.sleep(1)
