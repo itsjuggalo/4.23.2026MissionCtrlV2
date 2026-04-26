@@ -1,1 +1,15 @@
-{"cadence_minutes": 30, "topn": 20, "min_premium": 0, "watch": [], "mute": []}
+{
+  "cadence_minutes": 30,
+  "topn": 20,
+  "min_premium": 0,
+  "watch": [],
+  "mute": [],
+  "crypto_cadence_minutes": 15,
+  "crypto_symbols": [
+    "BTC",
+    "ETH",
+    "SOL",
+    "BNB",
+    "XRP"
+  ]
+}

@@ -122,6 +122,23 @@ async def dispatch(msg, cmd, args):
         await handle_history(msg); return
     if cmd == "stats":
         await handle_stats(msg); return
+    if cmd == "crefresh":
+        await handle_crefresh(msg); return
+    if cmd == "ccadence":
+        if not args:
+            await msg.channel.send(f"crypto cadence is {cfg.get('crypto_cadence_minutes', 15)} min. usage: !ccadence 15"); return
+        n = int(args[0])
+        if n < 1 or n > 1440:
+            await msg.channel.send("ccadence must be 1-1440"); return
+        cfg["crypto_cadence_minutes"] = n; save_config(cfg)
+        await msg.channel.send(f"crypto cadence set to {n} min"); return
+    if cmd == "ccoins":
+        if not args:
+            cur = cfg.get("crypto_symbols", [])
+            await msg.channel.send(f"crypto symbols: {cur}. usage: !ccoins BTC ETH SOL"); return
+        syms = [a.upper().strip() for a in args]
+        cfg["crypto_symbols"] = syms; save_config(cfg)
+        await msg.channel.send(f"crypto symbols set to: {syms}"); return
     await msg.channel.send(f"unknown command `{cmd}`. try !help")
 
 async def handle_refresh(msg):
@@ -182,13 +199,43 @@ async def handle_stats(msg):
     line = f"{len(todays)} posts today. avg {avg:.0f}% bull. range {lo:.0f}-{hi:.0f}%. latest {latest.get('pct',0):.0f}%"
     await msg.channel.send(f"```{line}```")
 
+
+async def handle_crefresh(msg):
+    await msg.channel.send("force-firing crypto rollup...")
+    sys.path.insert(0, BASE_DIR)
+    for m in list(sys.modules.keys()):
+        if m == "discord_relay" or m.startswith("discord_relay."):
+            del sys.modules[m]
+    import discord_relay as dr
+    try:
+        with open(STATE_PATH) as f: state = json.load(f)
+    except: state = {}
+    state.pop("crypto_sentiment_last_post", None)
+    result = dr.relay_crypto_sentiment(state)
+    if result and "crypto_sentiment_last_post" in result:
+        try:
+            with open(STATE_PATH) as f: cur = json.load(f)
+        except: cur = {}
+        cur["crypto_sentiment_last_post"] = result["crypto_sentiment_last_post"]
+        if "crypto_sentiment_prev" in result:
+            cur["crypto_sentiment_prev"] = result["crypto_sentiment_prev"]
+        tmp = STATE_PATH + ".tmp"
+        with open(tmp, "w") as f: json.dump(cur, f)
+        os.replace(tmp, STATE_PATH)
+        await msg.channel.send("crypto rollup posted to #crypto-sentiment")
+    else:
+        await msg.channel.send("relay returned without posting (check relay.log)")
+
 HELP = """```
 synth-control-bot commands:
-  !refresh           force-post rollup now
+  !refresh           force-post stock rollup now
+  !crefresh          force-post crypto rollup now
   !config            show current settings
-  !cadence <min>     change post frequency (1-1440)
+  !cadence <min>     stock cadence (1-1440)
+  !ccadence <min>    crypto cadence (1-1440)
   !topn <n>          change Top N tickers (1-50)
   !minprem <amt>     min premium floor (150K | 1M | 0)
+  !ccoins <syms>     crypto symbols (e.g. BTC ETH SOL)
   !watch <TKR>       pin a ticker
   !unwatch <TKR>     remove pin
   !mute <TKR>        exclude ticker

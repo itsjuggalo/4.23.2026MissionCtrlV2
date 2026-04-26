@@ -59,6 +59,7 @@ WEBHOOKS = {
     "os_closed_stocks":   "https://discordapp.com/api/webhooks/1497687226870665264/BkNppKtAPqNEIpOECh33GGx2fyyiW32g_1Zxz99Q7rjbC3wq7Os4rp8k_HYhBIwSfJcA",
     "fg1_sentiment":      "https://discordapp.com/api/webhooks/1497687328557371543/3dHICJGUg3txpH5fPGHRL67A7G0rfOykyuaEYAppYUnhhh_2iuZD4WE-NlR4RubsDkA2",
     "synthetic_analysis":  "https://discordapp.com/api/webhooks/1497723109296443574/09Vir6qTI2xdBFoUcggH9WemQi_RKnMM4AoaFVklQItTaqek2UV9piaylUMC1grNUbgA",
+    "crypto_sentiment":   "https://discordapp.com/api/webhooks/1497756224312049854/2cDv8VUZsFt8eBDTCbfig3gFmEJsbJAh8DtSiFvwg92SDhEsFsBnvYFTkpXU6DgbLC-X",
     "fg2_sentiment":      "https://discordapp.com/api/webhooks/1497687543531962418/1nYerfY_4TuNAO4lrjgCcVNxq66RhbJIMhmQfJATIZhL0y39nhn8m-drL7TKBJ_Ihuiy",
     "flow_messages":   "https://discordapp.com/api/webhooks/1497628988938649684/3IrKREiuukaqLb73fW-ugSVazebeER92tCi2Ys9RE8LEEetwXnTnSvFXssbH0ufPjiAv",
     "flow_trade_results": "https://discordapp.com/api/webhooks/1497661681126609008/tlS_qnTSq4Uef8AUVpllp2vwC3sJ7u0BHt2_WcoJz5y75dnh3cgHpkhOn59zGlkWmyPk",
@@ -1623,3 +1624,158 @@ if __name__ == "__main__":
     except Exception as e:
         logging.critical(f"Relay crashed: {e}", exc_info=True)
         raise
+
+
+def relay_crypto_sentiment(state):
+    """Crypto sentiment rollup for top 5 by mcap (BTC, ETH, SOL, BNB, XRP).
+    Sources: CoinGecko (price/24h change), Binance public funding rate,
+    CoinGlass-style liquidation proxy via funding+price action.
+    Posts every cadence_minutes from synth_config.json (crypto_cadence_minutes).
+    """
+    import datetime as _dt
+    import requests as _req
+    _cfg_path = os.path.join(BASE_DIR, "synth_config.json")
+    _cfg = {"crypto_cadence_minutes": 15, "crypto_symbols": ["BTC","ETH","SOL","BNB","XRP"]}
+    try:
+        with open(_cfg_path) as _cf:
+            _cfg.update(json.load(_cf))
+    except Exception:
+        pass
+    cadence_min = int(_cfg.get("crypto_cadence_minutes", 15))
+    symbols = _cfg.get("crypto_symbols", ["BTC","ETH","SOL","BNB","XRP"])
+
+    last_post = state.get("crypto_sentiment_last_post", 0)
+    now = int(time.time())
+    if now - last_post < cadence_min * 60:
+        return state
+
+    # CoinGecko ID map
+    cg_ids = {"BTC":"bitcoin","ETH":"ethereum","SOL":"solana","BNB":"binancecoin","XRP":"ripple"}
+    # Binance perp symbols
+    binance_syms = {"BTC":"BTCUSDT","ETH":"ETHUSDT","SOL":"SOLUSDT","BNB":"BNBUSDT","XRP":"XRPUSDT"}
+
+    # 1. CoinGecko prices + 24h change
+    cg_data = {}
+    try:
+        ids = ",".join(cg_ids[s] for s in symbols if s in cg_ids)
+        r = _req.get("https://api.coingecko.com/api/v3/simple/price",
+                     params={"ids": ids, "vs_currencies":"usd",
+                             "include_24hr_change":"true","include_24hr_vol":"true"},
+                     timeout=10)
+        if r.status_code == 200:
+            cg_data = r.json()
+    except Exception as e:
+        logging.error("[crypto_sentiment] coingecko failed: {}".format(e))
+
+    # 2. Binance funding rates (public, no key)
+    fund_data = {}
+    for sym in symbols:
+        bsym = binance_syms.get(sym)
+        if not bsym: continue
+        try:
+            r = _req.get("https://fapi.binance.com/fapi/v1/premiumIndex",
+                         params={"symbol": bsym}, timeout=8)
+            if r.status_code == 200:
+                d = r.json()
+                fund_data[sym] = float(d.get("lastFundingRate", 0)) * 100  # to %
+        except Exception:
+            pass
+
+    if not cg_data:
+        logging.error("[crypto_sentiment] no coingecko data, skipping")
+        return state
+
+    prev_snap = state.get("crypto_sentiment_prev", {})
+
+    def fmt_price(p):
+        if p >= 1000: return "${:,.0f}".format(p)
+        if p >= 1: return "${:.2f}".format(p)
+        return "${:.4f}".format(p)
+
+    def fmt_pct(p):
+        sign = "+" if p >= 0 else ""
+        return "{}{:.2f}%".format(sign, p)
+
+    def dot_emoji(score):
+        if score >= 60: return "🟢"
+        if score <= 40: return "🔴"
+        return "🟡"
+
+    def trend_arrow(sym, current_score):
+        prev_score = prev_snap.get(sym)
+        if prev_score is None: return " "
+        delta = current_score - prev_score
+        if delta > 5: return "↑"
+        if delta < -5: return "↓"
+        return "→"
+
+    rows = []
+    new_snap = {}
+    overall_score = 0
+    valid_count = 0
+
+    for sym in symbols:
+        cg_id = cg_ids.get(sym)
+        if not cg_id or cg_id not in cg_data: continue
+        d = cg_data[cg_id]
+        price = d.get("usd", 0)
+        chg = d.get("usd_24h_change", 0) or 0
+        funding = fund_data.get(sym, 0)
+
+        # Synthetic score 0-100:
+        # 50 baseline. +/- price change (capped). +/- funding rate (positive funding = longs paying = bullish bias).
+        score = 50.0
+        score += max(-25, min(25, chg * 2.5))    # +/- 25 from price change
+        score += max(-15, min(15, funding * 30))  # +/- 15 from funding
+        score = max(0, min(100, score))
+
+        new_snap[sym] = score
+        overall_score += score
+        valid_count += 1
+
+        arrow = trend_arrow(sym, score)
+        dot = dot_emoji(score)
+        fund_str = "{:+.3f}%".format(funding) if sym in fund_data else "  n/a"
+        line = "`{:<4} {:>10} {:>8} {:>7} {:>3.0f}%{}`{}".format(
+            sym, fmt_price(price), fmt_pct(chg), fund_str, score, arrow, dot)
+        rows.append(line)
+
+    if not rows:
+        logging.error("[crypto_sentiment] no rows produced")
+        return state
+
+    overall_pct = overall_score / valid_count if valid_count else 50
+    if overall_pct >= 60: color = 0x2ecc71
+    elif overall_pct <= 40: color = 0xe74c3c
+    else: color = 0xf1c40f
+
+    main_table = "`SYM      PRICE   24H%    FUND%  SCORE`\n" + "\n".join(rows)
+
+    ts_str = _dt.datetime.now().strftime("%-I:%M %p ET")
+    ts_iso = _dt.datetime.utcnow().isoformat() + "Z"
+    embed = {
+        "title": "₿ Crypto Sentiment Rollup",
+        "description": "**Overall: {:.0f}% Bullish** {}  •  Top {} by mcap".format(
+            overall_pct, dot_emoji(overall_pct), valid_count),
+        "color": color,
+        "fields": [
+            {"name": "Score = price action + funding rate bias", "value": main_table[:1024], "inline": False},
+        ],
+        "footer": {"text": "CoinGecko + Binance Futures • {} • Updates every {} min".format(ts_str, cadence_min)},
+        "timestamp": ts_iso,
+    }
+
+    try:
+        url = WEBHOOKS.get("crypto_sentiment")
+        if not url: return state
+        r = _req.post(url, json={"embeds": [embed]}, timeout=10)
+        if r.status_code in (200, 204):
+            state["crypto_sentiment_last_post"] = now
+            state["crypto_sentiment_prev"] = new_snap
+            logging.info("[crypto_sentiment] posted, {} symbols, overall {:.0f}".format(valid_count, overall_pct))
+        else:
+            logging.error("[crypto_sentiment] webhook returned {}: {}".format(r.status_code, r.text[:200]))
+    except Exception as e:
+        logging.error("[crypto_sentiment] post failed: {}".format(e))
+    return state
+
