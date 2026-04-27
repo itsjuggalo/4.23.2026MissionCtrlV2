@@ -179,6 +179,22 @@ export function DashboardPage() {
   const [report, setReport] = useState<any>(null);
   const [params, setParams] = useState<any>(null);
   const [crypto, setCrypto] = useState<any>(null);
+  const [topFlowsCount, setTopFlowsCount] = useState<number>(0);
+  useEffect(() => {
+    const fetchFlows = () => {
+      fetch('/api/options-flow')
+        .then(r => r.ok ? r.json() : { flows: [] })
+        .then(d => {
+          const flows = d?.flows || [];
+          const count = flows.filter((f: any) => (f.Value || 0) >= 1000000).length;
+          setTopFlowsCount(count);
+        })
+        .catch(() => {});
+    };
+    fetchFlows();
+    const iv = setInterval(fetchFlows, 30000);
+    return () => clearInterval(iv);
+  }, []);
   const live = useLiveStream(true);
   const [loading, setLoading] = useState(true);
   const [equityHist, setEquityHist] = useState<any[]>([]);
@@ -277,7 +293,7 @@ export function DashboardPage() {
           { sym: 'BTC', price: crypto?.bitcoin?.usd || 0, chg: crypto?.bitcoin?.usd_24h_change || 0 },
           { sym: 'ETH', price: crypto?.ethereum?.usd || 0, chg: crypto?.ethereum?.usd_24h_change || 0 },
           { sym: 'SOL', price: crypto?.solana?.usd || 0, chg: crypto?.solana?.usd_24h_change || 0 },
-          { sym: 'PORTFOLIO', price: equity, chg: dailyPct },
+          { sym: '$1M+ FLOWS', price: topFlowsCount, chg: 0, isCount: true },
         ].map((c, i) => (
           <div key={i} style={{
             background: '#0a1929', border: '1px solid #1a3a4a', borderRadius: '8px',
@@ -449,7 +465,7 @@ export function DashboardPage() {
                     {[
                       { l: 'SIGNALS', v: report?.signals?.total || 0, c: '#4fc3f7' },
                       { l: 'TRADES', v: report?.trades || 0, c: '#66bb6a' },
-                      (() => { const pn = typeof report?.pnl === 'object' ? (report.pnl?.total ?? report.pnl?.value ?? report.pnl?.amount ?? report.pnl?.daily ?? 0) : (typeof report?.pnl === 'number' ? report.pnl : 0); return { l: 'P/L', v: pn !== 0 ? `${pn >= 0 ? '+' : ''}${fmt(pn)}%` : 'N/A', c: pn >= 0 ? '#66bb6a' : '#ef5350' }; })(),
+                      (() => { const pn = typeof report?.pnl === 'object' ? (report.pnl?.BTCUSD?.total_pnl_pct ?? report.pnl?.total ?? report.pnl?.value ?? report.pnl?.amount ?? report.pnl?.daily ?? 0) : (typeof report?.pnl === 'number' ? report.pnl : 0); return { l: 'P/L', v: pn !== 0 ? `${pn >= 0 ? '+' : ''}${fmt(pn)}%` : 'N/A', c: pn >= 0 ? '#66bb6a' : '#ef5350' }; })(),
                       { l: 'ALERTS', v: report?.alerts || 0, c: '#ff9800' },
                     ].map((s, i) => (
                       <div key={i} style={{ padding: '8px 10px', background: '#0d1117', borderRadius: '4px', display: 'flex', justifyContent: 'space-between' }}>
