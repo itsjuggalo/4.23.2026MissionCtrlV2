@@ -42,7 +42,7 @@ export function Header({
   const [time, setTime] = useState('');
   useEffect(() => {
     const update = () => {
-      setTime(new Date().toLocaleTimeString("en-US", { hour12: false, timeZone: "America/New_York", timeZoneName: "short" }));
+      setTime(new Date().toLocaleTimeString("en-US", { hour12: true, timeZone: "America/New_York", timeZoneName: "short" }));
     };
     update();
     const id = setInterval(update, 1000);
