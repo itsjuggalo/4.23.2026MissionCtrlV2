@@ -38,6 +38,14 @@ def log_trade_to_db(symbol, direction, price, qty, source="supertrend"):
 EST = timezone(timedelta(hours=-4))
 NOW = datetime.now(EST)
 SECRETS_DIR = "/home/ubuntu/.openclaw/secrets"
+
+# === Firebase signal execution config ===
+from pathlib import Path as _Path
+FIREBASE_SIGNALS_FILE = _Path("/home/ubuntu/.openclaw/workspace/directives/firebase_trade_signals.json")
+FIREBASE_SEEN_FILE = _Path("/home/ubuntu/.openclaw/workspace/state/auto_trader_firebase_seen.json")
+FIREBASE_MAX_AGE_HOURS = 24
+FIREBASE_STOCK_QTY = 2
+FIREBASE_OPTION_CONTRACTS = 2
 SIGNAL_DIR = "/home/ubuntu/mission-control/signal-receiver/data"
 TRADE_LOG = "/home/ubuntu/.openclaw/workspace/memory/trade_log.jsonl"
 STATE_FILE = "/home/ubuntu/scripts/auto_trader_state.json"
@@ -243,6 +251,199 @@ def place_limit_order(symbol, qty, limit_price):
 
     result, status = alpaca_post("/v2/orders", order)
     return result, status
+
+
+
+
+# ============ FIREBASE SIGNAL EXECUTOR ============
+def load_firebase_seen():
+    """Load set of Firebase signal IDs we have already executed."""
+    try:
+        if FIREBASE_SEEN_FILE.exists():
+            return set(json.loads(FIREBASE_SEEN_FILE.read_text()))
+    except Exception:
+        pass
+    return set()
+
+
+def save_firebase_seen(seen_set):
+    """Persist seen signal IDs to disk."""
+    try:
+        FIREBASE_SEEN_FILE.parent.mkdir(parents=True, exist_ok=True)
+        FIREBASE_SEEN_FILE.write_text(json.dumps(sorted(list(seen_set))))
+    except Exception as e:
+        print(f"[firebase] save_seen failed: {e}")
+
+
+def build_alpaca_option_symbol(ticker, strike, is_put, expiry_ts):
+    """Build OCC option symbol like AAPL260619P00200000 from Firebase fields."""
+    try:
+        exp_dt = datetime.fromtimestamp(int(expiry_ts), tz=timezone.utc)
+        yymmdd = exp_dt.strftime("%y%m%d")
+        cp = "P" if is_put else "C"
+        strike_int = int(round(float(strike) * 1000))
+        strike_str = f"{strike_int:08d}"
+        return f"{ticker}{yymmdd}{cp}{strike_str}"
+    except Exception as e:
+        print(f"[firebase] symbol build failed for {ticker}: {e}")
+        return None
+
+
+def execute_firebase_stock(sig):
+    """Place bracket order: limit entry, TP at sell_target, SL at stop_loss."""
+    ticker = sig.get("ticker")
+    try:
+        buy = float(sig.get("buy_target"))
+        sell = float(sig.get("sell_target"))
+        sl = float(sig.get("stop_loss"))
+    except Exception:
+        return False, "missing or non-numeric targets"
+
+    body = {
+        "symbol": ticker,
+        "qty": str(FIREBASE_STOCK_QTY),
+        "side": "buy",
+        "type": "limit",
+        "limit_price": f"{buy:.2f}",
+        "time_in_force": "day",
+        "order_class": "bracket",
+        "take_profit": {"limit_price": f"{sell:.2f}"},
+        "stop_loss": {"stop_price": f"{sl:.2f}"},
+    }
+    result = alpaca_post("/v2/orders", body)
+    if isinstance(result, tuple):
+        result = result[0]
+    ok = (isinstance(result, dict) and "id" in result)
+    if ok:
+        oid = result.get("id", "?")
+        msg = (
+            f"FIREBASE STOCK BUY {FIREBASE_STOCK_QTY}x {ticker} "
+            f"@ limit ${buy:.2f} | TP ${sell:.2f} / SL ${sl:.2f}\n"
+            f"Source: {sig.get('source','?')} | Order: {oid}"
+        )
+        send_telegram(msg)
+        send_discord(msg)
+        print(f"[firebase] {msg}")
+        return True, oid
+    else:
+        err = result if isinstance(result, str) else json.dumps(result)[:200]
+        print(f"[firebase] STOCK order failed for {ticker}: {err}")
+        return False, err
+
+
+def execute_firebase_option(sig):
+    """Market buy 2 contracts + separate stop_limit SELL at stop_loss (R1 L2 — no OCO)."""
+    ticker = sig.get("ticker")
+    try:
+        sl = float(sig.get("stop_loss"))
+    except Exception:
+        return False, "missing stop_loss"
+
+    occ_symbol = build_alpaca_option_symbol(
+        ticker, sig.get("strike"), sig.get("is_put"), sig.get("expiry_ts")
+    )
+    if not occ_symbol:
+        return False, "symbol build failed"
+
+    # Step 1: market buy
+    buy_body = {
+        "symbol": occ_symbol,
+        "qty": str(FIREBASE_OPTION_CONTRACTS),
+        "side": "buy",
+        "type": "market",
+        "time_in_force": "day",
+    }
+    buy_result = alpaca_post("/v2/orders", buy_body)
+    if isinstance(buy_result, tuple):
+        buy_result = buy_result[0]
+    if not (isinstance(buy_result, dict) and "id" in buy_result):
+        err = buy_result if isinstance(buy_result, str) else json.dumps(buy_result)[:200]
+        print(f"[firebase] OPTION buy failed for {occ_symbol}: {err}")
+        return False, err
+
+    buy_oid = buy_result.get("id", "?")
+
+    # Step 2: stop_limit sell at SL (R1 only allows stop_limit on options)
+    sl_limit = round(sl * 0.95, 2)  # 5% slippage tolerance below stop trigger
+    sell_body = {
+        "symbol": occ_symbol,
+        "qty": str(FIREBASE_OPTION_CONTRACTS),
+        "side": "sell",
+        "type": "stop_limit",
+        "stop_price": f"{sl:.2f}",
+        "limit_price": f"{sl_limit:.2f}",
+        "time_in_force": "gtc",
+    }
+    sell_result = alpaca_post("/v2/orders", sell_body)
+    if isinstance(sell_result, tuple):
+        sell_result = sell_result[0]
+    sl_ok = (isinstance(sell_result, dict) and "id" in sell_result)
+    sl_oid = sell_result.get("id", "?") if sl_ok else "FAILED"
+
+    msg = (
+        f"FIREBASE OPTION BUY {FIREBASE_OPTION_CONTRACTS}x {occ_symbol} (market)\n"
+        f"Stop_limit SELL @ ${sl:.2f} trigger / ${sl_limit:.2f} limit | {'placed' if sl_ok else 'SL FAILED'}\n"
+        f"Source: {sig.get('source','?')} | Buy: {buy_oid} | SL: {sl_oid}\n"
+        f"NO AUTO TP (R1 L2 stop_limit only) - manage TP manually"
+    )
+    send_telegram(msg)
+    send_discord(msg)
+    print(f"[firebase] {msg}")
+    return True, buy_oid
+
+
+def process_firebase_signals():
+    """Pull fresh Firebase signals, dedupe, execute on R1."""
+    if not FIREBASE_SIGNALS_FILE.exists():
+        print("[firebase] no signals file")
+        return
+
+    try:
+        sigs = json.loads(FIREBASE_SIGNALS_FILE.read_text())
+    except Exception as e:
+        print(f"[firebase] failed to load: {e}")
+        return
+
+    seen = load_firebase_seen()
+    now_utc = datetime.now(timezone.utc)
+
+    fresh_unseen = []
+    for s in sigs:
+        sig_id = s.get("id")
+        if not sig_id or sig_id in seen:
+            continue
+        captured = s.get("captured_at", "")
+        try:
+            cap_dt = datetime.fromisoformat(captured.replace("Z","+00:00"))
+            if cap_dt.tzinfo is None:
+                cap_dt = cap_dt.replace(tzinfo=timezone.utc)
+            age_hours = (now_utc - cap_dt).total_seconds() / 3600
+        except Exception:
+            continue
+        if age_hours <= FIREBASE_MAX_AGE_HOURS:
+            fresh_unseen.append(s)
+
+    if not fresh_unseen:
+        print(f"[firebase] no fresh unseen signals (total={len(sigs)}, seen={len(seen)})")
+        return
+
+    print(f"[firebase] {len(fresh_unseen)} fresh signal(s) to execute")
+    for s in fresh_unseen:
+        sig_id = s.get("id")
+        ticker = s.get("ticker", "?")
+        is_option = (s.get("strike") is not None) and (s.get("is_put") is not None)
+
+        if is_option:
+            ok, info = execute_firebase_option(s)
+        else:
+            ok, info = execute_firebase_stock(s)
+
+        if ok:
+            seen.add(sig_id)
+        else:
+            print(f"[firebase] skipping {ticker} ({sig_id}): {info}")
+
+    save_firebase_seen(seen)
 
 
 def main():
@@ -504,6 +705,13 @@ def main():
 
     state["last_signal_id"] = signal_id
     save_state(state)
+
+
+    # === Firebase signal execution (R1) ===
+    try:
+        process_firebase_signals()
+    except Exception as e:
+        print(f"[firebase] process error: {e}")
 
 
 if __name__ == "__main__":
