@@ -4005,5 +4005,29 @@
     "message": "Reached SellTarget2 @61.82 with gain: 6.07%. Take profits and ride for next target with stops @58.28",
     "symbol": "TQQQ",
     "title": "TQQQ : SELL"
+  },
+  "1777296303": {
+    "category": "ER PLAY",
+    "message": "Reached SellTarget1 @179.0 with gain: 3.27%. Take profits and ride for next target with stops @156.0",
+    "symbol": "UHS",
+    "title": "UHS : SELL"
+  },
+  "1777302593": {
+    "category": "SWING",
+    "message": "Buy below 55.38, Sell above 57.04\nSwing, Moderate risk",
+    "symbol": "BWA",
+    "title": "BWA: BUY"
+  },
+  "1777304319": {
+    "category": "SWING",
+    "message": "Buy below 155.29, Sell above 159.95\nSwing, Hi risk",
+    "symbol": "MRVL",
+    "title": "MRVL: BUY"
+  },
+  "1777320903": {
+    "category": "ER PLAY",
+    "message": "Reached SellTarget2 @186.2 with gain: 7.43%. Take profits and ride for next target with stops @173.33",
+    "symbol": "UHS",
+    "title": "UHS : SELL"
   }
 }

@@ -4497,5 +4497,65 @@
     "message": "Buy To Open at 0.45 with first target above 0.52",
     "symbol": "KWEB",
     "title": "KWEB 27P 5/29: BTO"
+  },
+  "1777296605": {
+    "category": "SWING",
+    "message": "Reached Target 6.20 and that's 21.57%! Lock some in and wait for next target. Raise the stops to 4.34",
+    "symbol": "UHS",
+    "title": "UHS 180C 05/15 : STC"
+  },
+  "1777296725": {
+    "category": "SWING",
+    "message": "Reached Target 0.54 and that's 20.00%! Lock some in and wait for next target. Raise the stops to 0.38",
+    "symbol": "KWEB",
+    "title": "KWEB 27P 05/29 : STC"
+  },
+  "1777296746": {
+    "category": "SWING",
+    "message": "Reached Target 6.90 and that's 35.29%! Lock some in and wait for next target. Raise the stops to 5.10",
+    "symbol": "UHS",
+    "title": "UHS 180C 05/15 : STC"
+  },
+  "1777297010": {
+    "category": "SCALP",
+    "message": "Close the trade at 3.51!",
+    "symbol": "MRVL",
+    "title": "MRVL 180C 05/15 : STC"
+  },
+  "1777297130": {
+    "category": "SWING",
+    "message": "Close the trade as it hit trailing stop at 20.09!",
+    "symbol": "MRVL",
+    "title": "MRVL 175C 08/21 : STC"
+  },
+  "1777298765": {
+    "category": "SWING",
+    "message": "Reached Target 7.70 and that's 50.98%! Lock some in and wait for next target. Raise the stops to 6.16",
+    "symbol": "UHS",
+    "title": "UHS 180C 05/15 : STC"
+  },
+  "1777299603": {
+    "category": "SWING",
+    "message": "Buy To Open at 8.20 with first target above 9.43",
+    "symbol": "GOOGL",
+    "title": "GOOGL 360C 5/15: BTO"
+  },
+  "1777300730": {
+    "category": "SWING",
+    "message": "Reached Target 9.45 and that's 15.24%! Lock some in and wait for next target. Raise the stops to 6.61",
+    "symbol": "GOOGL",
+    "title": "GOOGL 360C 05/15 : STC"
+  },
+  "1777302419": {
+    "category": "SWING",
+    "message": "Buy To Open at 1.64 with first target above 1.89",
+    "symbol": "CMCSA",
+    "title": "CMCSA 27.5C 7/17: BTO"
+  },
+  "1777308404": {
+    "category": "SWING",
+    "message": "Buy To Open at 6.55 with first target above 7.53",
+    "symbol": "SFM",
+    "title": "SFM 75P 5/15: BTO"
   }
 }

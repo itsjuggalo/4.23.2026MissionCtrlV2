@@ -25586,5 +25586,23 @@
     "message": "Buy below 16.50, Sell above 17.00\nLongTerm, Moderate risk",
     "symbol": "RIVN",
     "title": "RIVN: BUY"
+  },
+  "1777297052": {
+    "category": "LONGTERM",
+    "message": "Reached SellTarget1 @17.00 with gain: 3.03%. Take profits and ride for next target with stops @14.85",
+    "symbol": "RIVN",
+    "title": "RIVN : SELL"
+  },
+  "1777297345": {
+    "category": "SCALP",
+    "message": "Take trailing stop at 168.1 to exit trade!",
+    "symbol": "GLW",
+    "title": "GLW : SELL"
+  },
+  "1777321525": {
+    "category": "SWING",
+    "message": "Reached SellTarget2 @195.5 with gain: 9.36%. Take profits and ride for next target with stops @178.8",
+    "symbol": "DHR",
+    "title": "DHR : SELL"
   }
 }

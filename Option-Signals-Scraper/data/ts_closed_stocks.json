@@ -5501,5 +5501,24 @@
     "status": "Booked profits @48.00 and riding runners",
     "stopLoss": "42.33",
     "symbol": "DVN"
+  },
+  "1777040074": {
+    "buyTarget": "173.33",
+    "category": "ER PLAY",
+    "discordMessageId": "1497239333839700148",
+    "discordThreadId": "1497239333839700148",
+    "earlyTarget": "178.53",
+    "exit1": "179.0",
+    "exit1Time": 1777296303,
+    "exitTime": 1777296303,
+    "free": 1,
+    "isWeekly": 1,
+    "reduceLoss": "156.00",
+    "risk": "VH",
+    "sellTarget": "179.0",
+    "sellTargetTime": 1777296303,
+    "status": "Booked profits @179.0 and riding runners",
+    "stopLoss": "156.0",
+    "symbol": "UHS"
   }
 }

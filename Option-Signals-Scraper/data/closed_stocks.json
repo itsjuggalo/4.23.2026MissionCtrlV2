@@ -3268,19 +3268,19 @@
     "earlyTarget": "213.93",
     "exit1": "214.7",
     "exit1Time": 1773754487,
-    "exit2": "257.5",
-    "exit2Time": 1776956145,
-    "exitTime": 1776956145,
+    "exit2": "266.7",
+    "exit2Time": 1777295161,
+    "exitTime": 1777295161,
     "free": 1,
     "isWeekly": 1,
     "reduceLoss": "192.96",
     "sellTarget": "214.7",
-    "sellTarget2": "257.5",
-    "sellTarget2Time": 1776956145,
+    "sellTarget2": "266.7",
+    "sellTarget2Time": 1777295161,
     "sellTargetTime": 1773754487,
     "shortName": "Amazon.com, Inc.",
-    "status": "Locked some at 257.5 for 22.77%!",
-    "stopLoss": "249.8",
+    "status": "Locked some at 266.7 for 27.16%!",
+    "stopLoss": "258.7",
     "symbol": "AMZN"
   },
   "1773678011": {
@@ -4004,5 +4004,21 @@
     "status": "Locked some at 68.47 for 2.00%!",
     "stopLoss": "61.76",
     "symbol": "BKR"
+  },
+  "1777053486": {
+    "buyTarget": "172.69",
+    "category": "SWING",
+    "earlyTarget": "176.14",
+    "exit1": "179.0",
+    "exit1Time": 1777296344,
+    "exitTime": 1777296344,
+    "free": 1,
+    "isWeekly": 1,
+    "reduceLoss": "158.87",
+    "sellTarget": "179.0",
+    "sellTargetTime": 1777296344,
+    "status": "Locked some at 179.0 for 3.65%!",
+    "stopLoss": "158.9",
+    "symbol": "UHS"
   }
 }

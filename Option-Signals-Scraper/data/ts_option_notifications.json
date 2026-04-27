@@ -5654,5 +5654,65 @@
     "message": "Reached SellTarget2 @6.33 with gain: 25.35%. Take profits and ride for next target @7.07 with stops @5.05",
     "symbol": "QXO",
     "title": "QXO 25P 01/15 : SELL"
+  },
+  "1777296610": {
+    "category": "SCALP",
+    "message": "Take trailing stop at 5.70 to exit trade!",
+    "symbol": "GLD",
+    "title": "GLD 430C 05/01 : SELL"
+  },
+  "1777296730": {
+    "category": "ER PLAY",
+    "message": "Reached SellTarget2 @6.90 with gain: 30.19%. Take profits and ride for next target @7.42 with stops @5.30",
+    "symbol": "UHS",
+    "title": "UHS 180C 05/15 : SELL"
+  },
+  "1777297329": {
+    "category": "SWING",
+    "message": "Take trailing stop at 19.20 to exit trade! Gain: 11.95%.",
+    "symbol": "MRVL",
+    "title": "MRVL 175C 08/21 : SELL"
+  },
+  "1777298769": {
+    "category": "ER PLAY",
+    "message": "Reached final SellTarget @7.70 with gain: 45.28%. Take profits or ride for new target @9.24 with stops @6.16",
+    "symbol": "UHS",
+    "title": "UHS 180C 05/15 : SELL"
+  },
+  "1777299599": {
+    "category": "SWING",
+    "message": "Buy below 8.20, Sell above 9.43\nSwing, Moderate risk",
+    "symbol": "GOOGL",
+    "title": "GOOGL 360C 5/15: BUY"
+  },
+  "1777300726": {
+    "category": "SWING",
+    "message": "Reached SellTarget1 @9.45 with gain: 15.24%. Take profits and ride for next target with stops @6.61",
+    "symbol": "GOOGL",
+    "title": "GOOGL 360C 05/15 : SELL"
+  },
+  "1777304316": {
+    "category": "SWING",
+    "message": "Buy below 8.40, Sell above 9.66\nSwing, Hi risk",
+    "symbol": "MRVL",
+    "title": "MRVL 160C 5/15: BUY"
+  },
+  "1777308396": {
+    "category": "SWING",
+    "message": "Buy below 6.50, Sell above 7.47\nSwing, Moderate risk",
+    "symbol": "SFM",
+    "title": "SFM 75P 5/15: BUY"
+  },
+  "1777311969": {
+    "category": "SWING",
+    "message": "Reached SellTarget2 @10.25 with gain: 25.00%. Take profits and ride for next target @11.48 with stops @8.20",
+    "symbol": "GOOGL",
+    "title": "GOOGL 360C 05/15 : SELL"
+  },
+  "1777313446": {
+    "category": "SWING",
+    "message": "Reached SellTarget1 @9.60 with gain: 14.29%. Take profits and ride for next target with stops @6.72",
+    "symbol": "MRVL",
+    "title": "MRVL 160C 05/15 : SELL"
   }
 }

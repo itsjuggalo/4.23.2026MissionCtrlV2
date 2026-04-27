@@ -6403,5 +6403,96 @@
     "message": "Buy below 0.44, Sell above 0.51\nSwing, Moderate risk",
     "symbol": "KWEB",
     "title": "KWEB 27P 5/29: BUY"
+  },
+  "1777296738": {
+    "category": "SWING",
+    "message": "Reached SellTarget1 @0.54 with gain: 22.73%. Take profits and ride for next target with stops @0.38",
+    "symbol": "KWEB",
+    "title": "KWEB 27P 05/29 : SELL"
+  },
+  "1777296978": {
+    "category": "SWING",
+    "message": "Take trailing stop at 15.00 to exit trade! Gain: 12.36%.",
+    "symbol": "MRVL",
+    "title": "MRVL 180C 07/17 : SELL"
+  },
+  "1777296999": {
+    "category": "SWING",
+    "message": "Stopped out at 3.39",
+    "symbol": "MRVL",
+    "title": "MRVL 180C 05/15 : SELL"
+  },
+  "1777297938": {
+    "category": "SWING",
+    "message": "Reached final SellTarget @2.85 with gain: 74.85%. Take profits or ride for new target @3.42 with stops @2.28",
+    "symbol": "XLE",
+    "title": "XLE 55.5C 05/15 : SELL"
+  },
+  "1777297998": {
+    "category": "SWING",
+    "message": "Reached SellTarget1 @3.40 with gain: 15.25%. Take profits and ride for next target with stops @2.38",
+    "symbol": "DHR",
+    "title": "DHR 195C 06/18 : SELL"
+  },
+  "1777298380": {
+    "category": "SWING",
+    "message": "Take trailing stop at 2.50 to exit trade!",
+    "symbol": "SHEL",
+    "title": "SHEL 88C 05/15 : SELL"
+  },
+  "1777301678": {
+    "category": "SWING",
+    "message": "Buy below 1.61, Sell above 1.85\nSwing, Moderate risk",
+    "symbol": "CMCSA",
+    "title": "CMCSA 27.5C 7/17: BUY"
+  },
+  "1777302480": {
+    "category": "SWING",
+    "message": "Buy below 2.80, Sell above 3.22\nSwing, Moderate risk",
+    "symbol": "IWM",
+    "title": "IWM 220P 9/18: BUY"
+  },
+  "1777304981": {
+    "category": "SCALP",
+    "message": "Buy below 0.94, Sell above 1.08\nScalp, VH risk",
+    "symbol": "META",
+    "title": "META 680C 4/27: BUY"
+  },
+  "1777307150": {
+    "category": "SWING",
+    "message": "Take trailing stop at 2.24 to exit trade! Gain: 37.42%.",
+    "symbol": "XLE",
+    "title": "XLE 55.5C 05/15 : SELL"
+  },
+  "1777308267": {
+    "category": "SCALP",
+    "free": 1,
+    "message": "Reached SellTarget1 @1.08. Take profits and ride the runners. Gain: 14.89%",
+    "symbol": "META",
+    "title": "META 680C 4/27: SELL"
+  },
+  "1777308837": {
+    "category": "SCALP",
+    "message": "Reached SellTarget2 @1.19 with gain: 26.60%. Take profits and ride for next target @1.32 with stops @0.94",
+    "symbol": "META",
+    "title": "META 680C 04/27 : SELL"
+  },
+  "1777308858": {
+    "category": "SCALP",
+    "message": "Reached final SellTarget @1.36 with gain: 44.68%. Take profits or ride for new target @1.63 with stops @1.09",
+    "symbol": "META",
+    "title": "META 680C 04/27 : SELL"
+  },
+  "1777309059": {
+    "category": "SCALP",
+    "message": "Take trailing stop at 1.04 to exit trade! Gain: 10.64%.",
+    "symbol": "META",
+    "title": "META 680C 04/27 : SELL"
+  },
+  "1777317111": {
+    "category": "SCALP",
+    "message": "Buy below 9.20, Sell above 10.58\nScalp, VH risk",
+    "symbol": "SMH",
+    "title": "SMH 520C 5/8: BUY"
   }
 }

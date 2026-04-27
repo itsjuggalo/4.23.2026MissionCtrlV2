@@ -2977,5 +2977,23 @@
     "message": "Buy To Open at 172.69 with first target above 176.14",
     "symbol": "UHS",
     "title": "UHS: BTO"
+  },
+  "1777295161": {
+    "category": "SWING",
+    "message": "Reached Target 266.7 and that's 27.16%! Lock some in and wait for next target. Raise the stops to 258.7",
+    "symbol": "AMZN",
+    "title": "AMZN : STC"
+  },
+  "1777296344": {
+    "category": "SWING",
+    "message": "Reached Target 179.0 and that's 3.65%! Lock some in and wait for next target. Raise the stops to 158.9",
+    "symbol": "UHS",
+    "title": "UHS : STC"
+  },
+  "1777302430": {
+    "category": "SWING",
+    "message": "Buy To Open at 27.75 with first target above 28.31",
+    "symbol": "CMCSA",
+    "title": "CMCSA: BTO"
   }
 }
