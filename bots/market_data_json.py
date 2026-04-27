@@ -4,7 +4,7 @@ import json, requests
 from datetime import datetime, timedelta
 from pathlib import Path
 
-FKEY = "d70ov6hr01ql6rg044qgd70ov6hr01ql6rg044r0"
+FKEY = "d7n38hpr01qppri3d580d7n38hpr01qppri3d58g"
 EODHD = "demo"
 OUT = Path.home() / ".openclaw" / "workspace" / "directives"
 OUT.mkdir(parents=True, exist_ok=True)
@@ -37,7 +37,7 @@ data = {"updated": datetime.utcnow().isoformat(), "news": [], "quotes": {}, "int
 
 # News with URLs
 news_raw = fget("news", {"category": "general"})
-if news_raw:
+if isinstance(news_raw, list):
     for n in news_raw[:15]:
         data["news"].append({
             "time": datetime.fromtimestamp(n.get("datetime", 0)).strftime("%H:%M"),

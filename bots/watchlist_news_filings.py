@@ -5,7 +5,7 @@ import requests
 from datetime import datetime, timedelta
 from pathlib import Path
 
-FKEY = "d70ov6hr01ql6rg044qgd70ov6hr01ql6rg044r0"
+FKEY = "d7n38hpr01qppri3d580d7n38hpr01qppri3d58g"
 DIRECTIVES = Path.home() / ".openclaw" / "workspace" / "directives"
 DIRECTIVES.mkdir(parents=True, exist_ok=True)
 WATCHLIST = ["AAPL", "NVDA", "TSLA", "MU", "LLY"]
