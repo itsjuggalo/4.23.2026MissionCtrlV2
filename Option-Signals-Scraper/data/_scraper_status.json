@@ -1,6 +1,6 @@
 {
   "scraper": "option-signals-firebase",
-  "updated_at": "2026-04-27T03:44:51.563475+00:00",
+  "updated_at": "2026-04-27T03:47:14.243152+00:00",
   "endpoints": {
     "flow_live_last100": {
       "tier": "tier1",
@@ -85,9 +85,9 @@
     "ts_short_term_stocks": {
       "tier": "tier1",
       "interval_min": 5,
-      "last_fetch": "2026-04-27T03:41:41.588072+00:00",
+      "last_fetch": "2026-04-27T03:46:51.684899+00:00",
       "firebase_path": "/Name/ShortTermStocks.json",
-      "ok": 365,
+      "ok": 366,
       "fail": 1,
       "last_count": 10,
       "last_status": "ok"
@@ -155,9 +155,9 @@
     "long_term_options": {
       "tier": "tier2",
       "interval_min": 30,
-      "last_fetch": "2026-04-27T03:16:27.377131+00:00",
+      "last_fetch": "2026-04-27T03:46:51.684899+00:00",
       "firebase_path": "/Vivid2/LongTermOptions.json",
-      "ok": 63,
+      "ok": 64,
       "fail": 0,
       "last_count": 3,
       "last_status": "ok"
@@ -165,9 +165,9 @@
     "long_term_stocks": {
       "tier": "tier2",
       "interval_min": 30,
-      "last_fetch": "2026-04-27T03:16:27.377131+00:00",
+      "last_fetch": "2026-04-27T03:46:51.684899+00:00",
       "firebase_path": "/Vivid2/LongTermStocks.json",
-      "ok": 63,
+      "ok": 64,
       "fail": 0,
       "last_count": 4,
       "last_status": "ok"
@@ -175,9 +175,9 @@
     "flow_liveflows_today": {
       "tier": "tier2",
       "interval_min": 30,
-      "last_fetch": "2026-04-27T03:16:27.377131+00:00",
+      "last_fetch": "2026-04-27T03:46:51.684899+00:00",
       "firebase_path": "/FlowGreeks/LiveFlows/today.json",
-      "ok": 63,
+      "ok": 64,
       "fail": 0,
       "last_count": 25025,
       "last_status": "ok"
@@ -185,9 +185,9 @@
     "flow_bullbears_today": {
       "tier": "tier2",
       "interval_min": 30,
-      "last_fetch": "2026-04-27T03:16:27.377131+00:00",
+      "last_fetch": "2026-04-27T03:46:51.684899+00:00",
       "firebase_path": "/FlowGreeks/BullBears/today.json",
-      "ok": 63,
+      "ok": 64,
       "fail": 0,
       "last_count": 0,
       "last_status": "ok"
@@ -195,9 +195,9 @@
     "flow2_liveflows_today": {
       "tier": "tier2",
       "interval_min": 30,
-      "last_fetch": "2026-04-27T03:16:27.377131+00:00",
+      "last_fetch": "2026-04-27T03:46:51.684899+00:00",
       "firebase_path": "/FlowGreeks2/LiveFlows/today.json",
-      "ok": 63,
+      "ok": 64,
       "fail": 0,
       "last_count": 66860,
       "last_status": "ok"
@@ -205,9 +205,9 @@
     "flow2_bullbears": {
       "tier": "tier2",
       "interval_min": 30,
-      "last_fetch": "2026-04-27T03:16:27.377131+00:00",
+      "last_fetch": "2026-04-27T03:46:51.684899+00:00",
       "firebase_path": "/FlowGreeks2/BullBears.json",
-      "ok": 63,
+      "ok": 64,
       "fail": 0,
       "last_count": 1,
       "last_status": "ok"
@@ -215,9 +215,9 @@
     "ts_long_term_options": {
       "tier": "tier2",
       "interval_min": 30,
-      "last_fetch": "2026-04-27T03:16:27.377131+00:00",
+      "last_fetch": "2026-04-27T03:46:51.684899+00:00",
       "firebase_path": "/Name/LongTermOptions.json",
-      "ok": 63,
+      "ok": 64,
       "fail": 0,
       "last_count": 3,
       "last_status": "ok"
@@ -225,9 +225,9 @@
     "ts_long_term_stocks": {
       "tier": "tier2",
       "interval_min": 30,
-      "last_fetch": "2026-04-27T03:16:27.377131+00:00",
+      "last_fetch": "2026-04-27T03:46:51.684899+00:00",
       "firebase_path": "/Name/LongTermStocks.json",
-      "ok": 63,
+      "ok": 64,
       "fail": 0,
       "last_count": 4,
       "last_status": "ok"
@@ -235,9 +235,9 @@
     "ss_long_term_options": {
       "tier": "tier2",
       "interval_min": 30,
-      "last_fetch": "2026-04-27T03:16:27.377131+00:00",
+      "last_fetch": "2026-04-27T03:46:51.684899+00:00",
       "firebase_path": "/Name2/LongTermOptions.json",
-      "ok": 63,
+      "ok": 64,
       "fail": 0,
       "last_count": 2,
       "last_status": "ok"
@@ -245,9 +245,9 @@
     "ss_long_term_stocks": {
       "tier": "tier2",
       "interval_min": 30,
-      "last_fetch": "2026-04-27T03:16:27.377131+00:00",
+      "last_fetch": "2026-04-27T03:46:51.684899+00:00",
       "firebase_path": "/Name2/LongTermStocks.json",
-      "ok": 63,
+      "ok": 64,
       "fail": 0,
       "last_count": 2,
       "last_status": "ok"
@@ -394,8 +394,8 @@
     }
   },
   "summary": {
-    "total_fetches": 6184,
-    "successful": 6183,
+    "total_fetches": 6195,
+    "successful": 6194,
     "failed": 1,
     "success_rate": "100.0%"
   }

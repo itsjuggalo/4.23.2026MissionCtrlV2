@@ -318,7 +318,7 @@ export function DashboardPage() {
       </div>
 
       {/* === MAIN 3-COLUMN === */}
-      <div style={{ display: 'grid', gridTemplateColumns: '340px 1fr 320px', gap: '14px' }}>
+      <div style={{ display: 'grid', gridTemplateColumns: '700px 1fr 320px', gap: '14px' }}>
 
         {/* LEFT: Portfolio Deep Dive */}
         <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
@@ -345,59 +345,69 @@ export function DashboardPage() {
             </div>
           </div>
 
-          {/* Positions */}
-          <div className="db-card" style={{ padding: '16px' }}>
-            <div className="db-label" style={{ marginBottom: '12px' }}>POSITIONS ({positions.length})</div>
-            {positions.length === 0 ? (
-              <div style={{ color: '#455a64', fontSize: 'var(--mc-font-badge)', fontFamily: 'var(--font-mc-mono)' }}>No open positions</div>
-            ) : (() => {
-              const r1Positions = positions.filter((p: any) => p.account === 'R1');
-              const r2Positions = positions.filter((p: any) => p.account === 'R2' || !p.account);
-              const renderSection = (label: string, color: string, list: any[]) => list.length === 0 ? null : (
-                <div key={label} style={{ marginBottom: '14px' }}>
-                  <div style={{ fontSize: 'var(--mc-font-label)', color, fontWeight: 700, fontFamily: 'var(--font-mc-mono)', marginBottom: '8px', letterSpacing: '0.5px' }}>
-                    {label} ({list.length})
+          {/* Positions — Round 1 + Round 2 side by side */}
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '14px' }}>
+
+            {/* Round 1 Positions (R1 — PA3Y7UTNIQFZ) */}
+            <div className="db-card" style={{ padding: '16px' }}>
+              <div className="db-label" style={{ marginBottom: '12px', color: '#ff9800' }}>Round 1 Positions ({positions.filter((p: any) => p.account === 'R1').length})</div>
+              {positions.filter((p: any) => p.account === 'R1').length === 0 ? (
+                <div style={{ color: '#455a64', fontSize: 'var(--mc-font-badge)', fontFamily: 'var(--font-mc-mono)' }}>No open positions</div>
+              ) : positions.filter((p: any) => p.account === 'R1').map((p: any, i: number) => {
+                const pnl = parseFloat(p.unrealized_pl || '0');
+                const pnlPct = parseFloat(p.unrealized_plpc || '0') * 100;
+                const g = pnl >= 0;
+                return (
+                  <div key={i} style={{
+                    padding: '12px', background: '#0d1117', borderRadius: '8px',
+                    border: `1px solid ${g ? '#66bb6a22' : '#ef535022'}`,
+                    marginBottom: '8px', animation: `db-slide 0.3s ease-out ${i * 0.1}s both`,
+                  }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '6px' }}>
+                      <span style={{ fontSize: 'var(--mc-font-lg)', fontWeight: 700, color: '#e0e0e0', fontFamily: 'var(--font-mc-mono)' }}>{p.symbol}</span>
+                      <span style={{ fontSize: 'var(--mc-font-lg)', fontWeight: 700, color: g ? '#66bb6a' : '#ef5350', fontFamily: 'var(--font-mc-mono)' }}>
+                        {g ? '+' : ''}{fmt(pnlPct, 1)}%
+                      </span>
+                    </div>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 'var(--mc-font-label)', color: '#607d8b', fontFamily: 'var(--font-mc-mono)' }}>
+                      <span>{p.qty} @ ${fmt(parseFloat(p.avg_entry_price || '0'))}</span>
+                      <span style={{ color: g ? '#66bb6a' : '#ef5350' }}>{g ? '+' : ''}${fmt(pnl)}</span>
+                    </div>
                   </div>
-                  {list.map((p: any, i: number) => {
-              const pnl = parseFloat(p.unrealized_pl || '0');
-              const pnlPct = parseFloat(p.unrealized_plpc || '0') * 100;
-              const g = pnl >= 0;
-              return (
-                <div key={i} style={{
-                  padding: '12px', background: '#0d1117', borderRadius: '8px',
-                  border: `1px solid ${g ? '#66bb6a22' : '#ef535022'}`,
-                  marginBottom: '8px', animation: `db-slide 0.3s ease-out ${i * 0.1}s both`,
-                }}>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '6px' }}>
-                    <span style={{ fontSize: 'var(--mc-font-lg)', fontWeight: 700, color: '#e0e0e0', fontFamily: 'var(--font-mc-mono)' }}>{p.symbol}</span>
-                    <span style={{ fontSize: 'var(--mc-font-lg)', fontWeight: 700, color: g ? '#66bb6a' : '#ef5350', fontFamily: 'var(--font-mc-mono)' }}>
-                      {g ? '+' : ''}{fmt(pnlPct, 1)}%
-                    </span>
+                );
+              })}
+            </div>
+
+            {/* Round 2 (R2 — PA3R6MOPBWF7) */}
+            <div className="db-card" style={{ padding: '16px' }}>
+              <div className="db-label" style={{ marginBottom: '12px', color: '#4fc3f7' }}>Round 2 ({positions.filter((p: any) => p.account === 'R2' || !p.account).length})</div>
+              {positions.filter((p: any) => p.account === 'R2' || !p.account).length === 0 ? (
+                <div style={{ color: '#455a64', fontSize: 'var(--mc-font-badge)', fontFamily: 'var(--font-mc-mono)' }}>No open positions</div>
+              ) : positions.filter((p: any) => p.account === 'R2' || !p.account).map((p: any, i: number) => {
+                const pnl = parseFloat(p.unrealized_pl || '0');
+                const pnlPct = parseFloat(p.unrealized_plpc || '0') * 100;
+                const g = pnl >= 0;
+                return (
+                  <div key={i} style={{
+                    padding: '12px', background: '#0d1117', borderRadius: '8px',
+                    border: `1px solid ${g ? '#66bb6a22' : '#ef535022'}`,
+                    marginBottom: '8px', animation: `db-slide 0.3s ease-out ${i * 0.1}s both`,
+                  }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '6px' }}>
+                      <span style={{ fontSize: 'var(--mc-font-lg)', fontWeight: 700, color: '#e0e0e0', fontFamily: 'var(--font-mc-mono)' }}>{p.symbol}</span>
+                      <span style={{ fontSize: 'var(--mc-font-lg)', fontWeight: 700, color: g ? '#66bb6a' : '#ef5350', fontFamily: 'var(--font-mc-mono)' }}>
+                        {g ? '+' : ''}{fmt(pnlPct, 1)}%
+                      </span>
+                    </div>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 'var(--mc-font-label)', color: '#607d8b', fontFamily: 'var(--font-mc-mono)' }}>
+                      <span>{p.qty} @ ${fmt(parseFloat(p.avg_entry_price || '0'))}</span>
+                      <span style={{ color: g ? '#66bb6a' : '#ef5350' }}>{g ? '+' : ''}${fmt(pnl)}</span>
+                    </div>
                   </div>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 'var(--mc-font-label)', color: '#607d8b', fontFamily: 'var(--font-mc-mono)' }}>
-                    <span>{p.qty} @ ${fmt(parseFloat(p.avg_entry_price || '0'))}</span>
-                    <span>${fmt(parseFloat(p.current_price || '0'))}</span>
-                  </div>
-                  <div style={{ height: '3px', borderRadius: '2px', background: '#0a1929', marginTop: '8px', overflow: 'hidden' }}>
-                    <div style={{ height: '100%', width: `${Math.min(Math.abs(pnlPct) * 3, 100)}%`, background: g ? '#66bb6a' : '#ef5350', borderRadius: '2px' }} />
-                  </div>
-                  <div style={{ fontSize: 'var(--mc-font-label)', color: g ? '#66bb6a' : '#ef5350', marginTop: '4px', fontFamily: 'var(--font-mc-mono)' }}>
-                    P/L: {g ? '+' : ''}${fmt(pnl)}
-                  </div>
-                  {pnlPct > 10 && <div style={{ fontSize: 'var(--mc-font-label)', color: '#ff9800', marginTop: '4px', fontFamily: 'var(--font-mc-mono)' }}>⚠ Consider partial profit</div>}
-                  {pnlPct < -3 && <div style={{ fontSize: 'var(--mc-font-label)', color: '#ef5350', marginTop: '4px', fontFamily: 'var(--font-mc-mono)' }}>⚠ Review stop loss</div>}
-                </div>
-              );
-                  })}
-                </div>
-              );
-              return (
-                <>
-                  {renderSection('R1 — On Hold (PA3Y7UTNIQFZ)', '#ff9800', r1Positions)}
-                  {renderSection('R2 — Active (PA3R6MOPBWF7)', '#4fc3f7', r2Positions)}
-                </>
-              );
-            })()}
+                );
+              })}
+            </div>
+
           </div>
         </div>
 
