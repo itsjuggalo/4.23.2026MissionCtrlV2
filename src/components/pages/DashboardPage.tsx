@@ -350,7 +350,15 @@ export function DashboardPage() {
             <div className="db-label" style={{ marginBottom: '12px' }}>POSITIONS ({positions.length})</div>
             {positions.length === 0 ? (
               <div style={{ color: '#455a64', fontSize: 'var(--mc-font-badge)', fontFamily: 'var(--font-mc-mono)' }}>No open positions</div>
-            ) : positions.map((p: any, i: number) => {
+            ) : (() => {
+              const r1Positions = positions.filter((p: any) => p.account === 'R1');
+              const r2Positions = positions.filter((p: any) => p.account === 'R2' || !p.account);
+              const renderSection = (label: string, color: string, list: any[]) => list.length === 0 ? null : (
+                <div key={label} style={{ marginBottom: '14px' }}>
+                  <div style={{ fontSize: 'var(--mc-font-label)', color, fontWeight: 700, fontFamily: 'var(--font-mc-mono)', marginBottom: '8px', letterSpacing: '0.5px' }}>
+                    {label} ({list.length})
+                  </div>
+                  {list.map((p: any, i: number) => {
               const pnl = parseFloat(p.unrealized_pl || '0');
               const pnlPct = parseFloat(p.unrealized_plpc || '0') * 100;
               const g = pnl >= 0;
@@ -380,7 +388,16 @@ export function DashboardPage() {
                   {pnlPct < -3 && <div style={{ fontSize: 'var(--mc-font-label)', color: '#ef5350', marginTop: '4px', fontFamily: 'var(--font-mc-mono)' }}>⚠ Review stop loss</div>}
                 </div>
               );
-            })}
+                  })}
+                </div>
+              );
+              return (
+                <>
+                  {renderSection('R1 — On Hold (PA3Y7UTNIQFZ)', '#ff9800', r1Positions)}
+                  {renderSection('R2 — Active (PA3R6MOPBWF7)', '#4fc3f7', r2Positions)}
+                </>
+              );
+            })()}
           </div>
         </div>
 
