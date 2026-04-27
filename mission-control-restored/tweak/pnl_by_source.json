@@ -1,0 +1,16 @@
+{
+  "ai_crypto": {
+    "total_trades": 0,
+    "winning_trades": 0,
+    "losing_trades": 0,
+    "total_pnl": 0.0,
+    "win_rate": 0.0
+  },
+  "firebase": {
+    "total_trades": 0,
+    "winning_trades": 0,
+    "losing_trades": 0,
+    "total_pnl": 0.0,
+    "win_rate": 0.0
+  }
+}

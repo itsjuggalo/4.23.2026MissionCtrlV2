@@ -1,0 +1,583 @@
+{
+  "updated_at": "2026-04-11T10:49:57.796855+00:00",
+  "source": "supertrend_optimizer",
+  "message": "Supertrend params updated. Use these for signal analysis.",
+  "symbols": {
+    "AG": {
+      "atr_period": 7,
+      "multiplier": 1.5,
+      "train_period": 100,
+      "volatility_regime": "LOW",
+      "current_atr": 0.269195,
+      "win_rate": 36.36,
+      "profit_factor": 0.89
+    },
+    "ALAB": {
+      "atr_period": 12,
+      "multiplier": 1.5,
+      "train_period": 100,
+      "volatility_regime": "LOW",
+      "current_atr": 1.910357,
+      "win_rate": 30.77,
+      "profit_factor": 1.01
+    },
+    "AMZN": {
+      "atr_period": 9,
+      "multiplier": 3.0,
+      "train_period": 100,
+      "volatility_regime": "LOW",
+      "current_atr": 1.201904,
+      "win_rate": 54.55,
+      "profit_factor": 0.45
+    },
+    "ARB": {
+      "atr_period": 14,
+      "multiplier": 3.5,
+      "train_period": 150,
+      "volatility_regime": "HIGH",
+      "current_atr": 0.002212,
+      "win_rate": 80.0,
+      "profit_factor": 20.442
+    },
+    "AVAX": {
+      "atr_period": 7,
+      "multiplier": 3.5,
+      "train_period": 150,
+      "volatility_regime": "HIGH",
+      "current_atr": 0.190414,
+      "win_rate": 100.0,
+      "profit_factor": 59.754
+    },
+    "BAC": {
+      "atr_period": 12,
+      "multiplier": 2.5,
+      "train_period": 150,
+      "volatility_regime": "LOW",
+      "current_atr": 0.305994,
+      "win_rate": 11.11,
+      "profit_factor": 2.536
+    },
+    "BCH": {
+      "atr_period": 12,
+      "multiplier": 1.5,
+      "train_period": 150,
+      "volatility_regime": "MEDIUM",
+      "current_atr": 2.120328,
+      "win_rate": 23.53,
+      "profit_factor": 2.734
+    },
+    "BNB": {
+      "atr_period": 16,
+      "multiplier": 3.5,
+      "train_period": 100,
+      "volatility_regime": "LOW",
+      "current_atr": 2.034363,
+      "win_rate": 60.0,
+      "profit_factor": 8.038
+    },
+    "BTC": {
+      "atr_period": 7,
+      "multiplier": 2.0,
+      "train_period": 100,
+      "volatility_regime": "LOW",
+      "current_atr": 205.903745,
+      "win_rate": 44.44,
+      "profit_factor": 5.524
+    },
+    "DAL": {
+      "atr_period": 7,
+      "multiplier": 1.5,
+      "train_period": 100,
+      "volatility_regime": "LOW",
+      "current_atr": 0.67428,
+      "win_rate": 39.13,
+      "profit_factor": 0.948
+    },
+    "EL": {
+      "atr_period": 7,
+      "multiplier": 2.5,
+      "train_period": 100,
+      "volatility_regime": "LOW",
+      "current_atr": 0.733958,
+      "win_rate": 51.85,
+      "profit_factor": 1.154
+    },
+    "ETH": {
+      "atr_period": 12,
+      "multiplier": 4.0,
+      "train_period": 150,
+      "volatility_regime": "LOW",
+      "current_atr": 10.605281,
+      "win_rate": 100.0,
+      "profit_factor": 165.28
+    },
+    "FCX": {
+      "atr_period": 14,
+      "multiplier": 1.5,
+      "train_period": 150,
+      "volatility_regime": "LOW",
+      "current_atr": 0.617697,
+      "win_rate": 37.04,
+      "profit_factor": 1.377
+    },
+    "FET": {
+      "atr_period": 16,
+      "multiplier": 2.0,
+      "train_period": 100,
+      "volatility_regime": "LOW",
+      "current_atr": 0.841678,
+      "win_rate": 23.08,
+      "profit_factor": 4.535
+    },
+    "FIG": {
+      "atr_period": 10,
+      "multiplier": 1.5,
+      "train_period": 100,
+      "volatility_regime": "LOW",
+      "current_atr": 0.352056,
+      "win_rate": 48.72,
+      "profit_factor": 0.797
+    },
+    "INTC": {
+      "atr_period": 10,
+      "multiplier": 2.0,
+      "train_period": 100,
+      "volatility_regime": "MEDIUM",
+      "current_atr": 0.79891,
+      "win_rate": 61.9,
+      "profit_factor": 0.6
+    },
+    "MSFT": {
+      "atr_period": 9,
+      "multiplier": 1.5,
+      "train_period": 100,
+      "volatility_regime": "LOW",
+      "current_atr": 1.909305,
+      "win_rate": 24.24,
+      "profit_factor": 1.192
+    },
+    "NEAR": {
+      "atr_period": 7,
+      "multiplier": 3.0,
+      "train_period": 150,
+      "volatility_regime": "LOW",
+      "current_atr": 0.008235,
+      "win_rate": 100.0,
+      "profit_factor": 201.371
+    },
+    "NVDA": {
+      "atr_period": 20,
+      "multiplier": 2.5,
+      "train_period": 100,
+      "volatility_regime": "LOW",
+      "current_atr": 1.509978,
+      "win_rate": 47.06,
+      "profit_factor": 0.857
+    },
+    "NVDL": {
+      "atr_period": 9,
+      "multiplier": 1.5,
+      "train_period": 100,
+      "volatility_regime": "LOW",
+      "current_atr": 0.816809,
+      "win_rate": 35.14,
+      "profit_factor": 1.074
+    },
+    "NVO": {
+      "atr_period": 12,
+      "multiplier": 1.5,
+      "train_period": 100,
+      "volatility_regime": "LOW",
+      "current_atr": 0.28702,
+      "win_rate": 31.43,
+      "profit_factor": 0.458
+    },
+    "OKTA": {
+      "atr_period": 10,
+      "multiplier": 1.5,
+      "train_period": 100,
+      "volatility_regime": "LOW",
+      "current_atr": 0.784983,
+      "win_rate": 47.37,
+      "profit_factor": 1.129
+    },
+    "PLTR": {
+      "atr_period": 14,
+      "multiplier": 3.5,
+      "train_period": 100,
+      "volatility_regime": "LOW",
+      "current_atr": 1.804,
+      "win_rate": 28.57,
+      "profit_factor": 5.05
+    },
+    "PUMP": {
+      "atr_period": 16,
+      "multiplier": 3.0,
+      "train_period": 100,
+      "volatility_regime": "LOW",
+      "current_atr": 0.20871,
+      "win_rate": 60.0,
+      "profit_factor": 4.975
+    },
+    "SOL": {
+      "atr_period": 12,
+      "multiplier": 4.0,
+      "train_period": 100,
+      "volatility_regime": "LOW",
+      "current_atr": 0.498821,
+      "win_rate": 42.86,
+      "profit_factor": 5.449
+    },
+    "TLT": {
+      "atr_period": 20,
+      "multiplier": 1.5,
+      "train_period": 100,
+      "volatility_regime": "LOW",
+      "current_atr": 0.220811,
+      "win_rate": 42.86,
+      "profit_factor": 0.702
+    },
+    "TQQQ": {
+      "atr_period": 14,
+      "multiplier": 1.5,
+      "train_period": 100,
+      "volatility_regime": "MEDIUM",
+      "current_atr": 0.826592,
+      "win_rate": 35.9,
+      "profit_factor": 0.984
+    },
+    "XPL": {
+      "atr_period": 7,
+      "multiplier": 2.0,
+      "train_period": 100,
+      "volatility_regime": "LOW",
+      "current_atr": 0.019952,
+      "win_rate": 18.18,
+      "profit_factor": 5.188
+    },
+    "INJ": {
+      "atr_period": 14,
+      "multiplier": 3.0,
+      "train_period": 100,
+      "volatility_regime": "MEDIUM",
+      "current_atr": 0.025585,
+      "win_rate": 53.85,
+      "profit_factor": 0.825
+    },
+    "ROBO": {
+      "atr_period": 10,
+      "multiplier": 1.5,
+      "train_period": 100,
+      "volatility_regime": "LOW",
+      "current_atr": 0.488726,
+      "win_rate": 41.03,
+      "profit_factor": 0.654
+    },
+    "AAPL": {
+      "atr_period": 12,
+      "multiplier": 1.5,
+      "train_period": 100,
+      "volatility_regime": "MEDIUM",
+      "current_atr": 1.79883,
+      "win_rate": 34.48,
+      "profit_factor": 0.767
+    },
+    "ICP": {
+      "atr_period": 7,
+      "multiplier": 3.0,
+      "train_period": 150,
+      "volatility_regime": "HIGH",
+      "current_atr": 0.024666,
+      "win_rate": 60.0,
+      "profit_factor": Infinity
+    },
+    "QQQ": {
+      "atr_period": 12,
+      "multiplier": 1.5,
+      "train_period": 150,
+      "volatility_regime": "MEDIUM",
+      "current_atr": 3.896409,
+      "win_rate": 34.29,
+      "profit_factor": 1.211
+    },
+    "DOGE": {
+      "atr_period": 16,
+      "multiplier": 1.5,
+      "train_period": 100,
+      "volatility_regime": "HIGH",
+      "current_atr": 0.000863,
+      "win_rate": 41.38,
+      "profit_factor": 1.419
+    },
+    "SUI": {
+      "atr_period": 12,
+      "multiplier": 1.5,
+      "train_period": 150,
+      "volatility_regime": "LOW",
+      "current_atr": 0.006209,
+      "win_rate": 52.38,
+      "profit_factor": 1.4
+    },
+    "ZEC": {
+      "atr_period": 9,
+      "multiplier": 1.5,
+      "train_period": 100,
+      "volatility_regime": "HIGH",
+      "current_atr": 3.782078,
+      "win_rate": 48.15,
+      "profit_factor": 1.123
+    },
+    "ADA": {
+      "atr_period": 20,
+      "multiplier": 1.5,
+      "train_period": 100,
+      "volatility_regime": "LOW",
+      "current_atr": 0.001638,
+      "win_rate": 44.44,
+      "profit_factor": 0.828
+    },
+    "TRX": {
+      "atr_period": 7,
+      "multiplier": 1.5,
+      "train_period": 100,
+      "volatility_regime": "LOW",
+      "current_atr": 0.035513,
+      "win_rate": 36.0,
+      "profit_factor": 0.788
+    },
+    "PEPE": {
+      "atr_period": 10,
+      "multiplier": 1.5,
+      "train_period": 100,
+      "volatility_regime": "HIGH",
+      "current_atr": 0.0,
+      "win_rate": 40.0,
+      "profit_factor": 1.729
+    },
+    "DASH": {
+      "atr_period": 20,
+      "multiplier": 1.5,
+      "train_period": 100,
+      "volatility_regime": "MEDIUM",
+      "current_atr": 2.359663,
+      "win_rate": 36.36,
+      "profit_factor": 0.91
+    },
+    "IWM": {
+      "atr_period": 14,
+      "multiplier": 1.5,
+      "train_period": 100,
+      "volatility_regime": "HIGH",
+      "current_atr": 2.529291,
+      "win_rate": 37.14,
+      "profit_factor": 0.994
+    },
+    "SLV": {
+      "atr_period": 10,
+      "multiplier": 1.5,
+      "train_period": 100,
+      "volatility_regime": "LOW",
+      "current_atr": 0.497927,
+      "win_rate": 22.22,
+      "profit_factor": 1.291
+    },
+    "APT": {
+      "atr_period": 7,
+      "multiplier": 1.5,
+      "train_period": 100,
+      "volatility_regime": "MEDIUM",
+      "current_atr": 0.010163,
+      "win_rate": 22.58,
+      "profit_factor": 3.682
+    },
+    "HOOD": {
+      "atr_period": 7,
+      "multiplier": 2.5,
+      "train_period": 100,
+      "volatility_regime": "LOW",
+      "current_atr": 1.22667,
+      "win_rate": 25.93,
+      "profit_factor": 0.592
+    },
+    "NCLH": {
+      "atr_period": 9,
+      "multiplier": 1.5,
+      "train_period": 150,
+      "volatility_regime": "LOW",
+      "current_atr": 0.256536,
+      "win_rate": 38.71,
+      "profit_factor": 0.444
+    },
+    "SKY": {
+      "atr_period": 7,
+      "multiplier": 1.5,
+      "train_period": 100,
+      "volatility_regime": "LOW",
+      "current_atr": 0.764582,
+      "win_rate": 40.54,
+      "profit_factor": 0.691
+    },
+    "TSM": {
+      "atr_period": 14,
+      "multiplier": 1.5,
+      "train_period": 100,
+      "volatility_regime": "LOW",
+      "current_atr": 2.964609,
+      "win_rate": 42.42,
+      "profit_factor": 0.622
+    },
+    "HBAR": {
+      "atr_period": 20,
+      "multiplier": 1.5,
+      "train_period": 100,
+      "volatility_regime": "HIGH",
+      "current_atr": 0.000906,
+      "win_rate": 48.65,
+      "profit_factor": 0.643
+    },
+    "RAY": {
+      "atr_period": 20,
+      "multiplier": 4.0,
+      "train_period": 150,
+      "volatility_regime": "HIGH",
+      "current_atr": 0.139712,
+      "win_rate": 80.0,
+      "profit_factor": 0.76
+    },
+    "SEI": {
+      "atr_period": 7,
+      "multiplier": 2.0,
+      "train_period": 100,
+      "volatility_regime": "HIGH",
+      "current_atr": 0.000935,
+      "win_rate": 36.36,
+      "profit_factor": 0.553
+    },
+    "SOLV": {
+      "atr_period": 9,
+      "multiplier": 4.0,
+      "train_period": 100,
+      "volatility_regime": "LOW",
+      "current_atr": 0.547046,
+      "win_rate": 30.77,
+      "profit_factor": 0.308
+    },
+    "BTTC": {
+      "atr_period": 14,
+      "multiplier": 1.5,
+      "train_period": 150,
+      "volatility_regime": "MEDIUM",
+      "current_atr": 0.038171,
+      "win_rate": 22.86,
+      "profit_factor": 1.592
+    },
+    "AMD": {
+      "atr_period": 20,
+      "multiplier": 4.0,
+      "train_period": 100,
+      "volatility_regime": "MEDIUM",
+      "current_atr": 3.12901,
+      "win_rate": 66.67,
+      "profit_factor": 0.556
+    },
+    "WULF": {
+      "atr_period": 14,
+      "multiplier": 1.5,
+      "train_period": 100,
+      "volatility_regime": "LOW",
+      "current_atr": 0.327483,
+      "win_rate": 51.72,
+      "profit_factor": 0.578
+    },
+    "RENDER": {
+      "atr_period": 7,
+      "multiplier": 4.0,
+      "train_period": 150,
+      "volatility_regime": "HIGH",
+      "current_atr": 0.032953,
+      "win_rate": 100.0,
+      "profit_factor": 221.586
+    },
+    "SNX": {
+      "atr_period": 16,
+      "multiplier": 3.5,
+      "train_period": 150,
+      "volatility_regime": "MEDIUM",
+      "current_atr": 0.003129,
+      "win_rate": 28.57,
+      "profit_factor": 3.706
+    },
+    "MU": {
+      "atr_period": 9,
+      "multiplier": 2.0,
+      "train_period": 100,
+      "volatility_regime": "LOW",
+      "current_atr": 5.271344,
+      "win_rate": 38.71,
+      "profit_factor": 1.125
+    },
+    "NFLX": {
+      "atr_period": 10,
+      "multiplier": 1.5,
+      "train_period": 100,
+      "volatility_regime": "LOW",
+      "current_atr": 0.798484,
+      "win_rate": 32.0,
+      "profit_factor": 4.959
+    },
+    "SQQQ": {
+      "atr_period": 20,
+      "multiplier": 4.0,
+      "train_period": 100,
+      "volatility_regime": "MEDIUM",
+      "current_atr": 1.523264,
+      "win_rate": 77.78,
+      "profit_factor": 11.759
+    },
+    "XLE": {
+      "atr_period": 7,
+      "multiplier": 2.5,
+      "train_period": 100,
+      "volatility_regime": "LOW",
+      "current_atr": 0.549315,
+      "win_rate": 53.85,
+      "profit_factor": 1.521
+    },
+    "FIL": {
+      "atr_period": 7,
+      "multiplier": 2.0,
+      "train_period": 150,
+      "volatility_regime": "LOW",
+      "current_atr": 0.005593,
+      "win_rate": 33.33,
+      "profit_factor": 3.018
+    },
+    "TRU": {
+      "atr_period": 9,
+      "multiplier": 3.0,
+      "train_period": 100,
+      "volatility_regime": "LOW",
+      "current_atr": 0.778105,
+      "win_rate": 7.69,
+      "profit_factor": 0.332
+    },
+    "NBIS": {
+      "atr_period": 20,
+      "multiplier": 3.0,
+      "train_period": 100,
+      "volatility_regime": "HIGH",
+      "current_atr": 3.552784,
+      "win_rate": 36.36,
+      "profit_factor": 2.674
+    },
+    "UNI": {
+      "atr_period": 16,
+      "multiplier": 3.0,
+      "train_period": 150,
+      "volatility_regime": "LOW",
+      "current_atr": 0.018623,
+      "win_rate": 100.0,
+      "profit_factor": 39.397
+    }
+  }
+}

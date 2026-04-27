@@ -1,0 +1,12 @@
+{
+  "date": "2026-04-16",
+  "signals_received": 37,
+  "trades_closed": 37,
+  "total_pnl_pct": 0.2732,
+  "regime": "MIXED",
+  "bias": "BULLISH",
+  "processes_online": 0,
+  "processes_total": 0,
+  "crons_ran": 2,
+  "highlight": "+0.27% PnL | 37 signals | Mixed"
+}

@@ -1,0 +1,12 @@
+package com.google.android.gms.internal.measurement;
+
+/* JADX INFO: loaded from: classes.dex */
+public final class zziz extends zzma implements zznm {
+    private zziz() {
+        throw null;
+    }
+
+    public /* synthetic */ zziz(byte[] bArr) {
+        super(zzja.zzf);
+    }
+}

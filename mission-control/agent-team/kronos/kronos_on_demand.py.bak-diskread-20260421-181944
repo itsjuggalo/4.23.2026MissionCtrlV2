@@ -1,0 +1,188 @@
+"""
+Kronos On-Demand Forecaster
+
+Called by: Boba, Orion, or any agent that needs a price forecast for a specific ticker/option.
+Produces:
+  1. JSON file at ~/.openclaw/workspace/directives/kronos_forecasts/<ticker>_<timestamp>.json (agent-readable)
+  2. Discord post to kronos channel (human-visible)
+
+Inputs:
+  --ticker TICKER         (required, e.g. NVDA, BTCUSDT)
+  --option-context "145C 05/17/26"   (optional — for options-specific forecast framing)
+  --candles 400           (default 400, how many bars to pull)
+  --timeframe 1h          (default 1h for stocks, 1h for crypto)
+
+Outputs JSON schema:
+{
+  "ticker": "NVDA",
+  "generated_at": "...",
+  "timeframe": "1h",
+  "candles_analyzed": 400,
+  "current_price": 142.35,
+  "forecast_24h_direction": "bullish" | "bearish" | "neutral",
+  "forecast_24h_target": 145.80,
+  "forecast_24h_confidence": "high" | "medium" | "low",
+  "key_levels": {"support": [...], "resistance": [...]},
+  "option_context": "145C 05/17/26",  (if provided)
+  "option_in_forecast_direction": true,  (does forecast support this option's thesis?)
+  "notes": "..."
+}
+"""
+import argparse
+import json
+import os
+import subprocess
+import sys
+from datetime import datetime, timezone
+from pathlib import Path
+
+KRONOS_DIR = Path("/home/ubuntu/Kronos")
+FORECAST_DIR = Path("/home/ubuntu/.openclaw/workspace/directives/kronos_forecasts")
+FORECAST_DIR.mkdir(parents=True, exist_ok=True)
+SECRETS = Path("/home/ubuntu/.openclaw/secrets")
+
+
+def get_kronos_webhook():
+    for name in ["discord-webhook-kronos.txt", "discord_kronos_webhook", "kronos_webhook"]:
+        p = SECRETS / name
+        if p.exists():
+            v = p.read_text().strip()
+            if v.startswith("http"):
+                return v
+    return ""
+
+
+def run_kronos_forecast(ticker: str, candles: int = 400, timeframe: str = "1h") -> dict:
+    """
+    Invoke existing Kronos forecaster. The repo at /home/ubuntu/Kronos has its own
+    forecast script. This wraps it.
+    """
+    script = Path("/home/ubuntu/scripts/kronos_forecast_v2.py")
+    if not script.exists():
+        return {"error": "kronos_forecast.py not found at /home/ubuntu/scripts"}
+    try:
+        proc = subprocess.run(
+            ["python3", str(script), "--ticker", ticker, "--candles", str(candles)],
+            capture_output=True, timeout=120, text=True, cwd=str(KRONOS_DIR) if KRONOS_DIR.exists() else None,
+        )
+        if proc.returncode != 0:
+            return {"error": f"kronos exit {proc.returncode}", "stderr": proc.stderr[-500:]}
+        # Attempt to parse JSON output
+        try:
+            return json.loads(proc.stdout)
+        except Exception:
+            # Fallback: return raw text with a placeholder forecast
+            return {
+                "ticker": ticker,
+                "raw_output": proc.stdout[-2000:],
+                "forecast_24h_direction": "neutral",
+                "forecast_24h_confidence": "low",
+                "notes": "Kronos ran but output wasn't JSON — see raw_output",
+            }
+    except subprocess.TimeoutExpired:
+        return {"error": "kronos timed out after 120s"}
+    except Exception as e:
+        return {"error": f"exception: {e}"}
+
+
+def post_to_kronos_discord(forecast: dict, ticker: str, option_context: str = ""):
+    webhook = get_kronos_webhook()
+    if not webhook:
+        return False
+    try:
+        import requests
+        direction = forecast.get("forecast_24h_direction", "?")
+        conf = forecast.get("forecast_24h_confidence", "?")
+        target = forecast.get("forecast_24h_target", "?")
+        current = forecast.get("current_price", "?")
+        notes = forecast.get("notes", "")
+
+        color = {"bullish": 0x00FF00, "bearish": 0xFF4757, "neutral": 0x808080}.get(direction, 0x808080)
+        arrow = {"bullish": "📈", "bearish": "📉", "neutral": "➡️"}.get(direction, "❓")
+
+        title = f"{arrow} Kronos Forecast: {ticker}"
+        if option_context:
+            title += f" ({option_context})"
+
+        desc_lines = [
+            f"**Current:** ${current}",
+            f"**24h target:** ${target}",
+            f"**Direction:** {direction.upper()}",
+            f"**Confidence:** {conf}",
+        ]
+        if forecast.get("option_in_forecast_direction") is not None:
+            match = "✅ agrees with option" if forecast["option_in_forecast_direction"] else "❌ conflicts with option"
+            desc_lines.append(f"**Option check:** {match}")
+        if notes:
+            desc_lines.append(f"\n{notes[:300]}")
+
+        payload = {
+            "username": "Kronos",
+            "embeds": [{
+                "title": title,
+                "description": "\n".join(desc_lines),
+                "color": color,
+                "footer": {"text": f"On-demand forecast | {datetime.now(timezone.utc).strftime('%H:%M UTC')}"},
+            }]
+        }
+        r = requests.post(webhook, json=payload, timeout=8)
+        return r.status_code in (200, 204)
+    except Exception as e:
+        print(f"Discord post failed: {e}", file=sys.stderr)
+        return False
+
+
+def annotate_option_agreement(forecast: dict, option_context: str) -> dict:
+    """If option_context is 'CALL' or 'PUT', check if forecast direction matches."""
+    if not option_context:
+        return forecast
+    is_call = "C" in option_context.upper().split()[0] or "CALL" in option_context.upper()
+    is_put = "P" in option_context.upper().split()[0] or "PUT" in option_context.upper()
+    direction = forecast.get("forecast_24h_direction", "neutral")
+    if is_call:
+        forecast["option_in_forecast_direction"] = (direction == "bullish")
+    elif is_put:
+        forecast["option_in_forecast_direction"] = (direction == "bearish")
+    else:
+        forecast["option_in_forecast_direction"] = None
+    return forecast
+
+
+def main():
+    p = argparse.ArgumentParser()
+    p.add_argument("--ticker", required=True)
+    p.add_argument("--option-context", default="", help="e.g. '145C 05/17/26'")
+    p.add_argument("--candles", type=int, default=400)
+    p.add_argument("--timeframe", default="1h")
+    p.add_argument("--no-discord", action="store_true", help="Skip Discord post")
+    args = p.parse_args()
+
+    forecast = run_kronos_forecast(args.ticker, args.candles, args.timeframe)
+    forecast["ticker"] = args.ticker
+    forecast["generated_at"] = datetime.now(timezone.utc).isoformat()
+    forecast["timeframe"] = args.timeframe
+    forecast["candles_analyzed"] = args.candles
+    if args.option_context:
+        forecast["option_context"] = args.option_context
+        forecast = annotate_option_agreement(forecast, args.option_context)
+
+    # Write agent-readable JSON
+    ts = datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%S")
+    out = FORECAST_DIR / f"{args.ticker}_{ts}.json"
+    out.write_text(json.dumps(forecast, indent=2))
+
+    # Also write a "latest_<ticker>.json" symlink for easy agent lookup
+    latest = FORECAST_DIR / f"latest_{args.ticker}.json"
+    latest.write_text(json.dumps(forecast, indent=2))
+
+    # Post to Discord unless disabled
+    if not args.no_discord:
+        posted = post_to_kronos_discord(forecast, args.ticker, args.option_context)
+        forecast["discord_posted"] = posted
+
+    print(json.dumps(forecast, indent=2))
+    return 0 if "error" not in forecast else 1
+
+
+if __name__ == "__main__":
+    sys.exit(main())

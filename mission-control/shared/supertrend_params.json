@@ -1,0 +1,5328 @@
+{
+  "ENA": {
+    "symbol": "ENA",
+    "error": "insufficient_data",
+    "atr_period": 10,
+    "multiplier": 3.0
+  },
+  "KAS": {
+    "symbol": "KAS",
+    "error": "insufficient_data",
+    "atr_period": 10,
+    "multiplier": 3.0
+  },
+  "PENDLE": {
+    "symbol": "PENDLE",
+    "error": "insufficient_data",
+    "atr_period": 10,
+    "multiplier": 3.0
+  },
+  "SUIBTC": {
+    "symbol": "SUIBTC",
+    "error": "insufficient_data",
+    "atr_period": 10,
+    "multiplier": 3.0
+  },
+  "TON": {
+    "symbol": "TON",
+    "error": "insufficient_data",
+    "atr_period": 10,
+    "multiplier": 3.0
+  },
+  "WLFI": {
+    "symbol": "WLFI",
+    "error": "insufficient_data",
+    "atr_period": 10,
+    "multiplier": 3.0
+  },
+  "XUSD": {
+    "symbol": "XUSD",
+    "error": "insufficient_data",
+    "atr_period": 10,
+    "multiplier": 3.0
+  },
+  "AG": {
+    "symbol": "AG",
+    "atr_period": 7,
+    "multiplier": 1.5,
+    "train_period": 100,
+    "highvol": 0.75,
+    "midvol": 0.5,
+    "lowvol": 0.25,
+    "stats": {
+      "score": 38.17,
+      "win_rate": 36.36,
+      "profit_factor": 0.89,
+      "trades": 33,
+      "net_return_pct": -110.4065,
+      "alignment": 100.0,
+      "combined_score": 65.99
+    },
+    "volatility": {
+      "high_centroid": 0.691152,
+      "medium_centroid": 0.517132,
+      "low_centroid": 0.394784,
+      "current_cluster": 2,
+      "cluster_name": "LOW",
+      "assigned_centroid": 0.394784,
+      "current_atr": 0.269195,
+      "sizes": [
+        14,
+        43,
+        43
+      ],
+      "iterations": 8
+    },
+    "top_3": [
+      {
+        "atr_period": 7,
+        "multiplier": 1.5,
+        "train_period": 100,
+        "backtest": {
+          "score": 38.17,
+          "win_rate": 36.36,
+          "profit_factor": 0.89,
+          "trades": 33,
+          "net_return_pct": -110.4065
+        },
+        "alignment": 100.0,
+        "combined": 65.99
+      },
+      {
+        "atr_period": 9,
+        "multiplier": 1.5,
+        "train_period": 100,
+        "backtest": {
+          "score": 38.11,
+          "win_rate": 36.36,
+          "profit_factor": 0.883,
+          "trades": 33,
+          "net_return_pct": -112.2644
+        },
+        "alignment": 100.0,
+        "combined": 65.96
+      },
+      {
+        "atr_period": 10,
+        "multiplier": 1.5,
+        "train_period": 100,
+        "backtest": {
+          "score": 38.11,
+          "win_rate": 36.36,
+          "profit_factor": 0.883,
+          "trades": 33,
+          "net_return_pct": -112.2644
+        },
+        "alignment": 100.0,
+        "combined": 65.96
+      }
+    ],
+    "candles_used": 300,
+    "optimized_at": "2026-04-07T03:11:07.067117+00:00"
+  },
+  "ALAB": {
+    "symbol": "ALAB",
+    "atr_period": 12,
+    "multiplier": 1.5,
+    "train_period": 100,
+    "highvol": 0.75,
+    "midvol": 0.5,
+    "lowvol": 0.25,
+    "stats": {
+      "score": 39.88,
+      "win_rate": 30.77,
+      "profit_factor": 1.01,
+      "trades": 39,
+      "net_return_pct": -105.3601,
+      "alignment": 100.0,
+      "combined_score": 66.93
+    },
+    "volatility": {
+      "high_centroid": 3.140159,
+      "medium_centroid": 2.648784,
+      "low_centroid": 2.161361,
+      "current_cluster": 2,
+      "cluster_name": "LOW",
+      "assigned_centroid": 2.161361,
+      "current_atr": 1.910357,
+      "sizes": [
+        27,
+        44,
+        29
+      ],
+      "iterations": 4
+    },
+    "top_3": [
+      {
+        "atr_period": 12,
+        "multiplier": 1.5,
+        "train_period": 100,
+        "backtest": {
+          "score": 39.88,
+          "win_rate": 30.77,
+          "profit_factor": 1.01,
+          "trades": 39,
+          "net_return_pct": -105.3601
+        },
+        "alignment": 100.0,
+        "combined": 66.93
+      },
+      {
+        "atr_period": 14,
+        "multiplier": 1.5,
+        "train_period": 100,
+        "backtest": {
+          "score": 36.18,
+          "win_rate": 34.29,
+          "profit_factor": 0.621,
+          "trades": 35,
+          "net_return_pct": -126.8117
+        },
+        "alignment": 100.0,
+        "combined": 64.9
+      },
+      {
+        "atr_period": 16,
+        "multiplier": 1.5,
+        "train_period": 100,
+        "backtest": {
+          "score": 35.94,
+          "win_rate": 34.29,
+          "profit_factor": 0.591,
+          "trades": 35,
+          "net_return_pct": -132.9835
+        },
+        "alignment": 100.0,
+        "combined": 64.77
+      }
+    ],
+    "candles_used": 300,
+    "optimized_at": "2026-04-07T03:11:58.236323+00:00"
+  },
+  "AMZN": {
+    "symbol": "AMZN",
+    "atr_period": 9,
+    "multiplier": 3.0,
+    "train_period": 100,
+    "highvol": 0.75,
+    "midvol": 0.5,
+    "lowvol": 0.25,
+    "stats": {
+      "score": 30.92,
+      "win_rate": 54.55,
+      "profit_factor": 0.45,
+      "trades": 11,
+      "net_return_pct": -42.3232,
+      "alignment": 50.0,
+      "combined_score": 39.51
+    },
+    "volatility": {
+      "high_centroid": 2.430993,
+      "medium_centroid": 1.93572,
+      "low_centroid": 1.522292,
+      "current_cluster": 2,
+      "cluster_name": "LOW",
+      "assigned_centroid": 1.522292,
+      "current_atr": 1.201904,
+      "sizes": [
+        17,
+        38,
+        45
+      ],
+      "iterations": 2
+    },
+    "top_3": [
+      {
+        "atr_period": 9,
+        "multiplier": 3.0,
+        "train_period": 100,
+        "backtest": {
+          "score": 30.92,
+          "win_rate": 54.55,
+          "profit_factor": 0.45,
+          "trades": 11,
+          "net_return_pct": -42.3232
+        },
+        "alignment": 50.0,
+        "combined": 39.51
+      },
+      {
+        "atr_period": 7,
+        "multiplier": 3.0,
+        "train_period": 100,
+        "backtest": {
+          "score": 29.94,
+          "win_rate": 46.15,
+          "profit_factor": 0.622,
+          "trades": 13,
+          "net_return_pct": -42.1767
+        },
+        "alignment": 50.0,
+        "combined": 38.97
+      },
+      {
+        "atr_period": 7,
+        "multiplier": 3.5,
+        "train_period": 100,
+        "backtest": {
+          "score": 27.22,
+          "win_rate": 45.45,
+          "profit_factor": 0.442,
+          "trades": 11,
+          "net_return_pct": -65.3022
+        },
+        "alignment": 50.0,
+        "combined": 37.47
+      }
+    ],
+    "candles_used": 300,
+    "optimized_at": "2026-04-07T03:13:27.475768+00:00"
+  },
+  "ARB": {
+    "symbol": "ARB",
+    "atr_period": 14,
+    "multiplier": 3.5,
+    "train_period": 150,
+    "highvol": 0.75,
+    "midvol": 0.5,
+    "lowvol": 0.25,
+    "stats": {
+      "score": 74.5,
+      "win_rate": 80.0,
+      "profit_factor": 20.442,
+      "trades": 5,
+      "net_return_pct": 239.4531,
+      "alignment": 0.0,
+      "combined_score": 40.98
+    },
+    "volatility": {
+      "high_centroid": 0.002222,
+      "medium_centroid": 0.001539,
+      "low_centroid": 0.000896,
+      "current_cluster": 0,
+      "cluster_name": "HIGH",
+      "assigned_centroid": 0.002222,
+      "current_atr": 0.002212,
+      "sizes": [
+        25,
+        45,
+        80
+      ],
+      "iterations": 4
+    },
+    "top_3": [
+      {
+        "atr_period": 14,
+        "multiplier": 3.5,
+        "train_period": 150,
+        "backtest": {
+          "score": 74.5,
+          "win_rate": 80.0,
+          "profit_factor": 20.442,
+          "trades": 5,
+          "net_return_pct": 239.4531
+        },
+        "alignment": 0.0,
+        "combined": 40.98
+      },
+      {
+        "atr_period": 16,
+        "multiplier": 3.5,
+        "train_period": 150,
+        "backtest": {
+          "score": 74.5,
+          "win_rate": 80.0,
+          "profit_factor": 20.442,
+          "trades": 5,
+          "net_return_pct": 239.4531
+        },
+        "alignment": 0.0,
+        "combined": 40.98
+      },
+      {
+        "atr_period": 20,
+        "multiplier": 3.5,
+        "train_period": 150,
+        "backtest": {
+          "score": 74.5,
+          "win_rate": 80.0,
+          "profit_factor": 20.442,
+          "trades": 5,
+          "net_return_pct": 239.4531
+        },
+        "alignment": 0.0,
+        "combined": 40.98
+      }
+    ],
+    "candles_used": 300,
+    "optimized_at": "2026-04-11T10:45:48.053673+00:00"
+  },
+  "AVAX": {
+    "symbol": "AVAX",
+    "atr_period": 7,
+    "multiplier": 3.5,
+    "train_period": 150,
+    "highvol": 0.75,
+    "midvol": 0.5,
+    "lowvol": 0.25,
+    "stats": {
+      "score": 82.5,
+      "win_rate": 100.0,
+      "profit_factor": 59.754,
+      "trades": 5,
+      "net_return_pct": 59.7541,
+      "alignment": 0.0,
+      "combined_score": 45.38
+    },
+    "volatility": {
+      "high_centroid": 0.144591,
+      "medium_centroid": 0.087318,
+      "low_centroid": 0.055188,
+      "current_cluster": 0,
+      "cluster_name": "HIGH",
+      "assigned_centroid": 0.144591,
+      "current_atr": 0.190414,
+      "sizes": [
+        16,
+        69,
+        65
+      ],
+      "iterations": 9
+    },
+    "top_3": [
+      {
+        "atr_period": 7,
+        "multiplier": 3.5,
+        "train_period": 150,
+        "backtest": {
+          "score": 82.5,
+          "win_rate": 100.0,
+          "profit_factor": 59.754,
+          "trades": 5,
+          "net_return_pct": 59.7541
+        },
+        "alignment": 0.0,
+        "combined": 45.38
+      },
+      {
+        "atr_period": 9,
+        "multiplier": 3.5,
+        "train_period": 150,
+        "backtest": {
+          "score": 82.5,
+          "win_rate": 100.0,
+          "profit_factor": 59.754,
+          "trades": 5,
+          "net_return_pct": 59.7541
+        },
+        "alignment": 0.0,
+        "combined": 45.38
+      },
+      {
+        "atr_period": 10,
+        "multiplier": 3.5,
+        "train_period": 150,
+        "backtest": {
+          "score": 82.5,
+          "win_rate": 100.0,
+          "profit_factor": 59.754,
+          "trades": 5,
+          "net_return_pct": 59.7541
+        },
+        "alignment": 0.0,
+        "combined": 45.38
+      }
+    ],
+    "candles_used": 300,
+    "optimized_at": "2026-04-06T02:51:00.348058+00:00"
+  },
+  "BAC": {
+    "symbol": "BAC",
+    "atr_period": 12,
+    "multiplier": 2.5,
+    "train_period": 150,
+    "highvol": 0.75,
+    "midvol": 0.5,
+    "lowvol": 0.25,
+    "stats": {
+      "score": 29.23,
+      "win_rate": 11.11,
+      "profit_factor": 2.536,
+      "trades": 9,
+      "net_return_pct": -42.4503,
+      "alignment": 100.0,
+      "combined_score": 61.08
+    },
+    "volatility": {
+      "high_centroid": 0.5595,
+      "medium_centroid": 0.447584,
+      "low_centroid": 0.352175,
+      "current_cluster": 2,
+      "cluster_name": "LOW",
+      "assigned_centroid": 0.352175,
+      "current_atr": 0.305994,
+      "sizes": [
+        24,
+        55,
+        71
+      ],
+      "iterations": 5
+    },
+    "top_3": [
+      {
+        "atr_period": 12,
+        "multiplier": 2.5,
+        "train_period": 150,
+        "backtest": {
+          "score": 29.23,
+          "win_rate": 11.11,
+          "profit_factor": 2.536,
+          "trades": 9,
+          "net_return_pct": -42.4503
+        },
+        "alignment": 100.0,
+        "combined": 61.08
+      },
+      {
+        "atr_period": 14,
+        "multiplier": 4.0,
+        "train_period": 100,
+        "backtest": {
+          "score": 27.82,
+          "win_rate": 55.56,
+          "profit_factor": 0.137,
+          "trades": 9,
+          "net_return_pct": -91.8581
+        },
+        "alignment": 100.0,
+        "combined": 60.3
+      },
+      {
+        "atr_period": 16,
+        "multiplier": 4.0,
+        "train_period": 100,
+        "backtest": {
+          "score": 27.82,
+          "win_rate": 55.56,
+          "profit_factor": 0.137,
+          "trades": 9,
+          "net_return_pct": -91.8581
+        },
+        "alignment": 100.0,
+        "combined": 60.3
+      }
+    ],
+    "candles_used": 300,
+    "optimized_at": "2026-04-07T21:33:10.127409+00:00"
+  },
+  "BCH": {
+    "symbol": "BCH",
+    "atr_period": 12,
+    "multiplier": 1.5,
+    "train_period": 150,
+    "highvol": 0.75,
+    "midvol": 0.5,
+    "lowvol": 0.25,
+    "stats": {
+      "score": 39.78,
+      "win_rate": 23.53,
+      "profit_factor": 2.734,
+      "trades": 17,
+      "net_return_pct": -5.7272,
+      "alignment": 0.0,
+      "combined_score": 21.88
+    },
+    "volatility": {
+      "high_centroid": 3.068196,
+      "medium_centroid": 2.18188,
+      "low_centroid": 1.29086,
+      "current_cluster": 1,
+      "cluster_name": "MEDIUM",
+      "assigned_centroid": 2.18188,
+      "current_atr": 2.120328,
+      "sizes": [
+        56,
+        63,
+        31
+      ],
+      "iterations": 7
+    },
+    "top_3": [
+      {
+        "atr_period": 12,
+        "multiplier": 1.5,
+        "train_period": 150,
+        "backtest": {
+          "score": 39.78,
+          "win_rate": 23.53,
+          "profit_factor": 2.734,
+          "trades": 17,
+          "net_return_pct": -5.7272
+        },
+        "alignment": 0.0,
+        "combined": 21.88
+      },
+      {
+        "atr_period": 14,
+        "multiplier": 1.5,
+        "train_period": 150,
+        "backtest": {
+          "score": 39.78,
+          "win_rate": 23.53,
+          "profit_factor": 2.734,
+          "trades": 17,
+          "net_return_pct": -5.7272
+        },
+        "alignment": 0.0,
+        "combined": 21.88
+      },
+      {
+        "atr_period": 16,
+        "multiplier": 1.5,
+        "train_period": 150,
+        "backtest": {
+          "score": 39.78,
+          "win_rate": 23.53,
+          "profit_factor": 2.734,
+          "trades": 17,
+          "net_return_pct": -5.7272
+        },
+        "alignment": 0.0,
+        "combined": 21.88
+      }
+    ],
+    "candles_used": 300,
+    "optimized_at": "2026-04-08T09:46:09.118150+00:00"
+  },
+  "BNB": {
+    "symbol": "BNB",
+    "atr_period": 16,
+    "multiplier": 3.5,
+    "train_period": 100,
+    "highvol": 0.75,
+    "midvol": 0.5,
+    "lowvol": 0.25,
+    "stats": {
+      "score": 66.5,
+      "win_rate": 60.0,
+      "profit_factor": 8.038,
+      "trades": 5,
+      "net_return_pct": 74.603,
+      "alignment": 50.0,
+      "combined_score": 59.08
+    },
+    "volatility": {
+      "high_centroid": 4.2669,
+      "medium_centroid": 3.328109,
+      "low_centroid": 2.631735,
+      "current_cluster": 2,
+      "cluster_name": "LOW",
+      "assigned_centroid": 2.631735,
+      "current_atr": 2.034363,
+      "sizes": [
+        25,
+        38,
+        37
+      ],
+      "iterations": 6
+    },
+    "top_3": [
+      {
+        "atr_period": 16,
+        "multiplier": 3.5,
+        "train_period": 100,
+        "backtest": {
+          "score": 66.5,
+          "win_rate": 60.0,
+          "profit_factor": 8.038,
+          "trades": 5,
+          "net_return_pct": 74.603
+        },
+        "alignment": 50.0,
+        "combined": 59.08
+      },
+      {
+        "atr_period": 10,
+        "multiplier": 2.5,
+        "train_period": 100,
+        "backtest": {
+          "score": 64.96,
+          "win_rate": 46.15,
+          "profit_factor": 6.823,
+          "trades": 13,
+          "net_return_pct": 31.3864
+        },
+        "alignment": 50.0,
+        "combined": 58.23
+      },
+      {
+        "atr_period": 9,
+        "multiplier": 2.5,
+        "train_period": 100,
+        "backtest": {
+          "score": 61.88,
+          "win_rate": 38.46,
+          "profit_factor": 6.136,
+          "trades": 13,
+          "net_return_pct": 27.4312
+        },
+        "alignment": 50.0,
+        "combined": 56.53
+      }
+    ],
+    "candles_used": 300,
+    "optimized_at": "2026-04-11T10:46:12.520902+00:00"
+  },
+  "BTC": {
+    "symbol": "BTC",
+    "atr_period": 7,
+    "multiplier": 2.0,
+    "train_period": 100,
+    "highvol": 0.75,
+    "midvol": 0.5,
+    "lowvol": 0.25,
+    "stats": {
+      "score": 62.28,
+      "win_rate": 44.44,
+      "profit_factor": 5.524,
+      "trades": 9,
+      "net_return_pct": 63.9501,
+      "alignment": 0.0,
+      "combined_score": 34.25
+    },
+    "volatility": {
+      "high_centroid": 914.03611,
+      "medium_centroid": 623.371675,
+      "low_centroid": 386.817108,
+      "current_cluster": 2,
+      "cluster_name": "LOW",
+      "assigned_centroid": 386.817108,
+      "current_atr": 205.903745,
+      "sizes": [
+        4,
+        31,
+        65
+      ],
+      "iterations": 2
+    },
+    "top_3": [
+      {
+        "atr_period": 7,
+        "multiplier": 2.0,
+        "train_period": 100,
+        "backtest": {
+          "score": 62.28,
+          "win_rate": 44.44,
+          "profit_factor": 5.524,
+          "trades": 9,
+          "net_return_pct": 63.9501
+        },
+        "alignment": 0.0,
+        "combined": 34.25
+      },
+      {
+        "atr_period": 9,
+        "multiplier": 2.5,
+        "train_period": 100,
+        "backtest": {
+          "score": 62.28,
+          "win_rate": 44.44,
+          "profit_factor": 5.524,
+          "trades": 9,
+          "net_return_pct": 63.9501
+        },
+        "alignment": 0.0,
+        "combined": 34.25
+      },
+      {
+        "atr_period": 10,
+        "multiplier": 2.0,
+        "train_period": 100,
+        "backtest": {
+          "score": 62.28,
+          "win_rate": 44.44,
+          "profit_factor": 5.524,
+          "trades": 9,
+          "net_return_pct": 63.9501
+        },
+        "alignment": 0.0,
+        "combined": 34.25
+      }
+    ],
+    "candles_used": 300,
+    "optimized_at": "2026-04-11T10:46:56.777694+00:00"
+  },
+  "DAL": {
+    "symbol": "DAL",
+    "atr_period": 7,
+    "multiplier": 1.5,
+    "train_period": 100,
+    "highvol": 0.75,
+    "midvol": 0.5,
+    "lowvol": 0.25,
+    "stats": {
+      "score": 34.74,
+      "win_rate": 39.13,
+      "profit_factor": 0.948,
+      "trades": 23,
+      "net_return_pct": -43.0369,
+      "alignment": 0.0,
+      "combined_score": 19.11
+    },
+    "volatility": {
+      "high_centroid": 1.42141,
+      "medium_centroid": 0.977122,
+      "low_centroid": 0.702785,
+      "current_cluster": 2,
+      "cluster_name": "LOW",
+      "assigned_centroid": 0.702785,
+      "current_atr": 0.67428,
+      "sizes": [
+        21,
+        33,
+        46
+      ],
+      "iterations": 6
+    },
+    "top_3": [
+      {
+        "atr_period": 7,
+        "multiplier": 1.5,
+        "train_period": 100,
+        "backtest": {
+          "score": 34.74,
+          "win_rate": 39.13,
+          "profit_factor": 0.948,
+          "trades": 23,
+          "net_return_pct": -43.0369
+        },
+        "alignment": 0.0,
+        "combined": 19.11
+      },
+      {
+        "atr_period": 9,
+        "multiplier": 1.5,
+        "train_period": 100,
+        "backtest": {
+          "score": 32.31,
+          "win_rate": 34.78,
+          "profit_factor": 0.862,
+          "trades": 23,
+          "net_return_pct": -68.4997
+        },
+        "alignment": 0.0,
+        "combined": 17.77
+      },
+      {
+        "atr_period": 9,
+        "multiplier": 2.0,
+        "train_period": 100,
+        "backtest": {
+          "score": 32.31,
+          "win_rate": 34.78,
+          "profit_factor": 0.862,
+          "trades": 23,
+          "net_return_pct": -68.4997
+        },
+        "alignment": 0.0,
+        "combined": 17.77
+      }
+    ],
+    "candles_used": 300,
+    "optimized_at": "2026-03-27T07:15:59.913784+00:00"
+  },
+  "EL": {
+    "symbol": "EL",
+    "atr_period": 7,
+    "multiplier": 2.5,
+    "train_period": 100,
+    "highvol": 0.75,
+    "midvol": 0.5,
+    "lowvol": 0.25,
+    "stats": {
+      "score": 43.47,
+      "win_rate": 51.85,
+      "profit_factor": 1.154,
+      "trades": 27,
+      "net_return_pct": 28.9066,
+      "alignment": 50.0,
+      "combined_score": 46.41
+    },
+    "volatility": {
+      "high_centroid": 4.557324,
+      "medium_centroid": 2.138812,
+      "low_centroid": 1.104003,
+      "current_cluster": 2,
+      "cluster_name": "LOW",
+      "assigned_centroid": 1.104003,
+      "current_atr": 0.733958,
+      "sizes": [
+        4,
+        15,
+        81
+      ],
+      "iterations": 6
+    },
+    "top_3": [
+      {
+        "atr_period": 7,
+        "multiplier": 2.5,
+        "train_period": 100,
+        "backtest": {
+          "score": 43.47,
+          "win_rate": 51.85,
+          "profit_factor": 1.154,
+          "trades": 27,
+          "net_return_pct": 28.9066
+        },
+        "alignment": 50.0,
+        "combined": 46.41
+      },
+      {
+        "atr_period": 12,
+        "multiplier": 1.5,
+        "train_period": 100,
+        "backtest": {
+          "score": 47.09,
+          "win_rate": 51.22,
+          "profit_factor": 0.825,
+          "trades": 41,
+          "net_return_pct": -16.1845
+        },
+        "alignment": 0.0,
+        "combined": 25.9
+      },
+      {
+        "atr_period": 10,
+        "multiplier": 1.5,
+        "train_period": 100,
+        "backtest": {
+          "score": 46.46,
+          "win_rate": 46.34,
+          "profit_factor": 0.991,
+          "trades": 41,
+          "net_return_pct": -17.635
+        },
+        "alignment": 0.0,
+        "combined": 25.55
+      }
+    ],
+    "candles_used": 300,
+    "optimized_at": "2026-04-07T03:19:33.148785+00:00"
+  },
+  "ETH": {
+    "symbol": "ETH",
+    "atr_period": 12,
+    "multiplier": 4.0,
+    "train_period": 150,
+    "highvol": 0.75,
+    "midvol": 0.5,
+    "lowvol": 0.25,
+    "stats": {
+      "score": 82.5,
+      "win_rate": 100.0,
+      "profit_factor": 165.28,
+      "trades": 5,
+      "net_return_pct": 165.2797,
+      "alignment": 0.0,
+      "combined_score": 45.38
+    },
+    "volatility": {
+      "high_centroid": 25.617161,
+      "medium_centroid": 18.630147,
+      "low_centroid": 12.446429,
+      "current_cluster": 2,
+      "cluster_name": "LOW",
+      "assigned_centroid": 12.446429,
+      "current_atr": 10.605281,
+      "sizes": [
+        26,
+        81,
+        43
+      ],
+      "iterations": 15
+    },
+    "top_3": [
+      {
+        "atr_period": 12,
+        "multiplier": 4.0,
+        "train_period": 150,
+        "backtest": {
+          "score": 82.5,
+          "win_rate": 100.0,
+          "profit_factor": 165.28,
+          "trades": 5,
+          "net_return_pct": 165.2797
+        },
+        "alignment": 0.0,
+        "combined": 45.38
+      },
+      {
+        "atr_period": 16,
+        "multiplier": 4.0,
+        "train_period": 150,
+        "backtest": {
+          "score": 82.5,
+          "win_rate": 100.0,
+          "profit_factor": 177.936,
+          "trades": 5,
+          "net_return_pct": 177.9362
+        },
+        "alignment": 0.0,
+        "combined": 45.38
+      },
+      {
+        "atr_period": 10,
+        "multiplier": 4.0,
+        "train_period": 150,
+        "backtest": {
+          "score": 74.5,
+          "win_rate": 80.0,
+          "profit_factor": 16.112,
+          "trades": 5,
+          "net_return_pct": 154.913
+        },
+        "alignment": 0.0,
+        "combined": 40.98
+      }
+    ],
+    "candles_used": 300,
+    "optimized_at": "2026-04-11T10:47:37.697097+00:00"
+  },
+  "FCX": {
+    "symbol": "FCX",
+    "atr_period": 14,
+    "multiplier": 1.5,
+    "train_period": 150,
+    "highvol": 0.75,
+    "midvol": 0.5,
+    "lowvol": 0.25,
+    "stats": {
+      "score": 39.33,
+      "win_rate": 37.04,
+      "profit_factor": 1.377,
+      "trades": 27,
+      "net_return_pct": -23.357,
+      "alignment": 100.0,
+      "combined_score": 66.63
+    },
+    "volatility": {
+      "high_centroid": 1.178747,
+      "medium_centroid": 0.965365,
+      "low_centroid": 0.753528,
+      "current_cluster": 2,
+      "cluster_name": "LOW",
+      "assigned_centroid": 0.753528,
+      "current_atr": 0.617697,
+      "sizes": [
+        30,
+        60,
+        60
+      ],
+      "iterations": 2
+    },
+    "top_3": [
+      {
+        "atr_period": 14,
+        "multiplier": 1.5,
+        "train_period": 150,
+        "backtest": {
+          "score": 39.33,
+          "win_rate": 37.04,
+          "profit_factor": 1.377,
+          "trades": 27,
+          "net_return_pct": -23.357
+        },
+        "alignment": 100.0,
+        "combined": 66.63
+      },
+      {
+        "atr_period": 10,
+        "multiplier": 1.5,
+        "train_period": 150,
+        "backtest": {
+          "score": 39.2,
+          "win_rate": 40.0,
+          "profit_factor": 1.337,
+          "trades": 25,
+          "net_return_pct": -14.0076
+        },
+        "alignment": 100.0,
+        "combined": 66.56
+      },
+      {
+        "atr_period": 7,
+        "multiplier": 1.5,
+        "train_period": 150,
+        "backtest": {
+          "score": 39.11,
+          "win_rate": 40.0,
+          "profit_factor": 1.326,
+          "trades": 25,
+          "net_return_pct": -15.0566
+        },
+        "alignment": 100.0,
+        "combined": 66.51
+      }
+    ],
+    "candles_used": 300,
+    "optimized_at": "2026-04-07T03:21:44.113388+00:00"
+  },
+  "FET": {
+    "symbol": "FET",
+    "atr_period": 16,
+    "multiplier": 2.0,
+    "train_period": 100,
+    "highvol": 0.75,
+    "midvol": 0.5,
+    "lowvol": 0.25,
+    "stats": {
+      "score": 52.01,
+      "win_rate": 23.08,
+      "profit_factor": 4.535,
+      "trades": 13,
+      "net_return_pct": 44.3079,
+      "alignment": 50.0,
+      "combined_score": 51.11
+    },
+    "volatility": {
+      "high_centroid": 1.116596,
+      "medium_centroid": 0.976052,
+      "low_centroid": 0.843504,
+      "current_cluster": 2,
+      "cluster_name": "LOW",
+      "assigned_centroid": 0.843504,
+      "current_atr": 0.841678,
+      "sizes": [
+        23,
+        36,
+        41
+      ],
+      "iterations": 2
+    },
+    "top_3": [
+      {
+        "atr_period": 16,
+        "multiplier": 2.0,
+        "train_period": 100,
+        "backtest": {
+          "score": 52.01,
+          "win_rate": 23.08,
+          "profit_factor": 4.535,
+          "trades": 13,
+          "net_return_pct": 44.3079
+        },
+        "alignment": 50.0,
+        "combined": 51.11
+      },
+      {
+        "atr_period": 20,
+        "multiplier": 2.0,
+        "train_period": 100,
+        "backtest": {
+          "score": 52.01,
+          "win_rate": 23.08,
+          "profit_factor": 4.535,
+          "trades": 13,
+          "net_return_pct": 44.3079
+        },
+        "alignment": 50.0,
+        "combined": 51.11
+      },
+      {
+        "atr_period": 9,
+        "multiplier": 4.0,
+        "train_period": 100,
+        "backtest": {
+          "score": 48.26,
+          "win_rate": 40.0,
+          "profit_factor": 3.72,
+          "trades": 5,
+          "net_return_pct": 179.2712
+        },
+        "alignment": 50.0,
+        "combined": 49.04
+      }
+    ],
+    "candles_used": 300,
+    "optimized_at": "2026-03-27T07:18:01.251703+00:00"
+  },
+  "FIG": {
+    "symbol": "FIG",
+    "atr_period": 10,
+    "multiplier": 1.5,
+    "train_period": 100,
+    "highvol": 0.75,
+    "midvol": 0.5,
+    "lowvol": 0.25,
+    "stats": {
+      "score": 45.37,
+      "win_rate": 48.72,
+      "profit_factor": 0.797,
+      "trades": 39,
+      "net_return_pct": -33.0855,
+      "alignment": 50.0,
+      "combined_score": 47.45
+    },
+    "volatility": {
+      "high_centroid": 0.698174,
+      "medium_centroid": 0.551929,
+      "low_centroid": 0.429631,
+      "current_cluster": 2,
+      "cluster_name": "LOW",
+      "assigned_centroid": 0.429631,
+      "current_atr": 0.352056,
+      "sizes": [
+        15,
+        33,
+        52
+      ],
+      "iterations": 4
+    },
+    "top_3": [
+      {
+        "atr_period": 10,
+        "multiplier": 1.5,
+        "train_period": 100,
+        "backtest": {
+          "score": 45.37,
+          "win_rate": 48.72,
+          "profit_factor": 0.797,
+          "trades": 39,
+          "net_return_pct": -33.0855
+        },
+        "alignment": 50.0,
+        "combined": 47.45
+      },
+      {
+        "atr_period": 12,
+        "multiplier": 1.5,
+        "train_period": 100,
+        "backtest": {
+          "score": 44.75,
+          "win_rate": 46.15,
+          "profit_factor": 0.849,
+          "trades": 39,
+          "net_return_pct": -37.8803
+        },
+        "alignment": 50.0,
+        "combined": 47.11
+      },
+      {
+        "atr_period": 9,
+        "multiplier": 1.5,
+        "train_period": 100,
+        "backtest": {
+          "score": 44.5,
+          "win_rate": 48.65,
+          "profit_factor": 0.818,
+          "trades": 37,
+          "net_return_pct": -31.6568
+        },
+        "alignment": 50.0,
+        "combined": 46.98
+      }
+    ],
+    "candles_used": 300,
+    "optimized_at": "2026-04-03T20:08:47.124175+00:00"
+  },
+  "INTC": {
+    "symbol": "INTC",
+    "atr_period": 10,
+    "multiplier": 2.0,
+    "train_period": 100,
+    "highvol": 0.75,
+    "midvol": 0.5,
+    "lowvol": 0.25,
+    "stats": {
+      "score": 40.06,
+      "win_rate": 61.9,
+      "profit_factor": 0.6,
+      "trades": 21,
+      "net_return_pct": -2.6358,
+      "alignment": 50.0,
+      "combined_score": 44.53
+    },
+    "volatility": {
+      "high_centroid": 1.21437,
+      "medium_centroid": 0.899545,
+      "low_centroid": 0.647157,
+      "current_cluster": 1,
+      "cluster_name": "MEDIUM",
+      "assigned_centroid": 0.899545,
+      "current_atr": 0.79891,
+      "sizes": [
+        8,
+        37,
+        55
+      ],
+      "iterations": 4
+    },
+    "top_3": [
+      {
+        "atr_period": 10,
+        "multiplier": 2.0,
+        "train_period": 100,
+        "backtest": {
+          "score": 40.06,
+          "win_rate": 61.9,
+          "profit_factor": 0.6,
+          "trades": 21,
+          "net_return_pct": -2.6358
+        },
+        "alignment": 50.0,
+        "combined": 44.53
+      },
+      {
+        "atr_period": 12,
+        "multiplier": 2.0,
+        "train_period": 100,
+        "backtest": {
+          "score": 40.06,
+          "win_rate": 61.9,
+          "profit_factor": 0.6,
+          "trades": 21,
+          "net_return_pct": -2.6358
+        },
+        "alignment": 50.0,
+        "combined": 44.53
+      },
+      {
+        "atr_period": 9,
+        "multiplier": 2.0,
+        "train_period": 100,
+        "backtest": {
+          "score": 39.96,
+          "win_rate": 61.9,
+          "profit_factor": 0.588,
+          "trades": 21,
+          "net_return_pct": -4.807
+        },
+        "alignment": 50.0,
+        "combined": 44.48
+      }
+    ],
+    "candles_used": 300,
+    "optimized_at": "2026-04-03T20:09:10.337939+00:00"
+  },
+  "MSFT": {
+    "symbol": "MSFT",
+    "atr_period": 9,
+    "multiplier": 1.5,
+    "train_period": 100,
+    "highvol": 0.75,
+    "midvol": 0.5,
+    "lowvol": 0.25,
+    "stats": {
+      "score": 35.73,
+      "win_rate": 24.24,
+      "profit_factor": 1.192,
+      "trades": 33,
+      "net_return_pct": -36.6233,
+      "alignment": 0.0,
+      "combined_score": 19.65
+    },
+    "volatility": {
+      "high_centroid": 3.620216,
+      "medium_centroid": 2.870895,
+      "low_centroid": 2.240048,
+      "current_cluster": 2,
+      "cluster_name": "LOW",
+      "assigned_centroid": 2.240048,
+      "current_atr": 1.909305,
+      "sizes": [
+        16,
+        37,
+        47
+      ],
+      "iterations": 4
+    },
+    "top_3": [
+      {
+        "atr_period": 9,
+        "multiplier": 1.5,
+        "train_period": 100,
+        "backtest": {
+          "score": 35.73,
+          "win_rate": 24.24,
+          "profit_factor": 1.192,
+          "trades": 33,
+          "net_return_pct": -36.6233
+        },
+        "alignment": 0.0,
+        "combined": 19.65
+      },
+      {
+        "atr_period": 7,
+        "multiplier": 1.5,
+        "train_period": 100,
+        "backtest": {
+          "score": 35.56,
+          "win_rate": 21.21,
+          "profit_factor": 1.322,
+          "trades": 33,
+          "net_return_pct": -40.4567
+        },
+        "alignment": 0.0,
+        "combined": 19.56
+      },
+      {
+        "atr_period": 14,
+        "multiplier": 1.5,
+        "train_period": 100,
+        "backtest": {
+          "score": 35.2,
+          "win_rate": 24.24,
+          "profit_factor": 1.125,
+          "trades": 33,
+          "net_return_pct": -37.7521
+        },
+        "alignment": 0.0,
+        "combined": 19.36
+      }
+    ],
+    "candles_used": 300,
+    "optimized_at": "2026-04-07T03:22:50.726998+00:00"
+  },
+  "NEAR": {
+    "symbol": "NEAR",
+    "atr_period": 7,
+    "multiplier": 3.0,
+    "train_period": 150,
+    "highvol": 0.75,
+    "midvol": 0.5,
+    "lowvol": 0.25,
+    "stats": {
+      "score": 82.5,
+      "win_rate": 100.0,
+      "profit_factor": 201.371,
+      "trades": 5,
+      "net_return_pct": 201.371,
+      "alignment": 0.0,
+      "combined_score": 45.38
+    },
+    "volatility": {
+      "high_centroid": 0.023778,
+      "medium_centroid": 0.016619,
+      "low_centroid": 0.010979,
+      "current_cluster": 2,
+      "cluster_name": "LOW",
+      "assigned_centroid": 0.010979,
+      "current_atr": 0.008235,
+      "sizes": [
+        12,
+        53,
+        85
+      ],
+      "iterations": 5
+    },
+    "top_3": [
+      {
+        "atr_period": 7,
+        "multiplier": 3.0,
+        "train_period": 150,
+        "backtest": {
+          "score": 82.5,
+          "win_rate": 100.0,
+          "profit_factor": 201.371,
+          "trades": 5,
+          "net_return_pct": 201.371
+        },
+        "alignment": 0.0,
+        "combined": 45.38
+      },
+      {
+        "atr_period": 7,
+        "multiplier": 2.5,
+        "train_period": 150,
+        "backtest": {
+          "score": 77.79,
+          "win_rate": 85.71,
+          "profit_factor": 10.904,
+          "trades": 7,
+          "net_return_pct": 138.6073
+        },
+        "alignment": 0.0,
+        "combined": 42.78
+      },
+      {
+        "atr_period": 9,
+        "multiplier": 2.5,
+        "train_period": 150,
+        "backtest": {
+          "score": 77.79,
+          "win_rate": 85.71,
+          "profit_factor": 22.029,
+          "trades": 7,
+          "net_return_pct": 140.8937
+        },
+        "alignment": 0.0,
+        "combined": 42.78
+      }
+    ],
+    "candles_used": 300,
+    "optimized_at": "2026-04-11T10:48:28.382666+00:00"
+  },
+  "NVDA": {
+    "symbol": "NVDA",
+    "atr_period": 20,
+    "multiplier": 2.5,
+    "train_period": 100,
+    "highvol": 0.75,
+    "midvol": 0.5,
+    "lowvol": 0.25,
+    "stats": {
+      "score": 34.18,
+      "win_rate": 47.06,
+      "profit_factor": 0.857,
+      "trades": 17,
+      "net_return_pct": -15.7476,
+      "alignment": 100.0,
+      "combined_score": 63.8
+    },
+    "volatility": {
+      "high_centroid": 2.108727,
+      "medium_centroid": 1.795337,
+      "low_centroid": 1.595649,
+      "current_cluster": 2,
+      "cluster_name": "LOW",
+      "assigned_centroid": 1.595649,
+      "current_atr": 1.509978,
+      "sizes": [
+        18,
+        40,
+        42
+      ],
+      "iterations": 7
+    },
+    "top_3": [
+      {
+        "atr_period": 20,
+        "multiplier": 2.5,
+        "train_period": 100,
+        "backtest": {
+          "score": 34.18,
+          "win_rate": 47.06,
+          "profit_factor": 0.857,
+          "trades": 17,
+          "net_return_pct": -15.7476
+        },
+        "alignment": 100.0,
+        "combined": 63.8
+      },
+      {
+        "atr_period": 14,
+        "multiplier": 2.5,
+        "train_period": 100,
+        "backtest": {
+          "score": 33.6,
+          "win_rate": 42.11,
+          "profit_factor": 0.907,
+          "trades": 19,
+          "net_return_pct": -23.1881
+        },
+        "alignment": 100.0,
+        "combined": 63.48
+      },
+      {
+        "atr_period": 16,
+        "multiplier": 2.5,
+        "train_period": 100,
+        "backtest": {
+          "score": 33.49,
+          "win_rate": 42.11,
+          "profit_factor": 0.894,
+          "trades": 19,
+          "net_return_pct": -23.987
+        },
+        "alignment": 100.0,
+        "combined": 63.42
+      }
+    ],
+    "candles_used": 300,
+    "optimized_at": "2026-03-27T07:20:30.636989+00:00"
+  },
+  "NVDL": {
+    "symbol": "NVDL",
+    "atr_period": 9,
+    "multiplier": 1.5,
+    "train_period": 100,
+    "highvol": 0.75,
+    "midvol": 0.5,
+    "lowvol": 0.25,
+    "stats": {
+      "score": 41.14,
+      "win_rate": 35.14,
+      "profit_factor": 1.074,
+      "trades": 37,
+      "net_return_pct": -63.992,
+      "alignment": 0.0,
+      "combined_score": 22.63
+    },
+    "volatility": {
+      "high_centroid": 2.030188,
+      "medium_centroid": 1.543488,
+      "low_centroid": 1.196374,
+      "current_cluster": 2,
+      "cluster_name": "LOW",
+      "assigned_centroid": 1.196374,
+      "current_atr": 0.816809,
+      "sizes": [
+        10,
+        36,
+        54
+      ],
+      "iterations": 4
+    },
+    "top_3": [
+      {
+        "atr_period": 9,
+        "multiplier": 1.5,
+        "train_period": 100,
+        "backtest": {
+          "score": 41.14,
+          "win_rate": 35.14,
+          "profit_factor": 1.074,
+          "trades": 37,
+          "net_return_pct": -63.992
+        },
+        "alignment": 0.0,
+        "combined": 22.63
+      },
+      {
+        "atr_period": 10,
+        "multiplier": 1.5,
+        "train_period": 100,
+        "backtest": {
+          "score": 41.14,
+          "win_rate": 35.14,
+          "profit_factor": 1.074,
+          "trades": 37,
+          "net_return_pct": -63.992
+        },
+        "alignment": 0.0,
+        "combined": 22.63
+      },
+      {
+        "atr_period": 12,
+        "multiplier": 1.5,
+        "train_period": 100,
+        "backtest": {
+          "score": 41.14,
+          "win_rate": 35.14,
+          "profit_factor": 1.074,
+          "trades": 37,
+          "net_return_pct": -63.992
+        },
+        "alignment": 0.0,
+        "combined": 22.63
+      }
+    ],
+    "candles_used": 300,
+    "optimized_at": "2026-04-07T03:24:40.487929+00:00"
+  },
+  "NVO": {
+    "symbol": "NVO",
+    "atr_period": 12,
+    "multiplier": 1.5,
+    "train_period": 100,
+    "highvol": 0.75,
+    "midvol": 0.5,
+    "lowvol": 0.25,
+    "stats": {
+      "score": 33.74,
+      "win_rate": 31.43,
+      "profit_factor": 0.458,
+      "trades": 35,
+      "net_return_pct": -103.0288,
+      "alignment": 100.0,
+      "combined_score": 63.56
+    },
+    "volatility": {
+      "high_centroid": 0.415561,
+      "medium_centroid": 0.354668,
+      "low_centroid": 0.295898,
+      "current_cluster": 2,
+      "cluster_name": "LOW",
+      "assigned_centroid": 0.295898,
+      "current_atr": 0.28702,
+      "sizes": [
+        23,
+        40,
+        37
+      ],
+      "iterations": 4
+    },
+    "top_3": [
+      {
+        "atr_period": 12,
+        "multiplier": 1.5,
+        "train_period": 100,
+        "backtest": {
+          "score": 33.74,
+          "win_rate": 31.43,
+          "profit_factor": 0.458,
+          "trades": 35,
+          "net_return_pct": -103.0288
+        },
+        "alignment": 100.0,
+        "combined": 63.56
+      },
+      {
+        "atr_period": 14,
+        "multiplier": 1.5,
+        "train_period": 100,
+        "backtest": {
+          "score": 33.74,
+          "win_rate": 31.43,
+          "profit_factor": 0.458,
+          "trades": 35,
+          "net_return_pct": -103.0288
+        },
+        "alignment": 100.0,
+        "combined": 63.56
+      },
+      {
+        "atr_period": 16,
+        "multiplier": 1.5,
+        "train_period": 100,
+        "backtest": {
+          "score": 33.74,
+          "win_rate": 31.43,
+          "profit_factor": 0.458,
+          "trades": 35,
+          "net_return_pct": -103.0288
+        },
+        "alignment": 100.0,
+        "combined": 63.56
+      }
+    ],
+    "candles_used": 300,
+    "optimized_at": "2026-03-31T09:03:28.156924+00:00"
+  },
+  "OKTA": {
+    "symbol": "OKTA",
+    "atr_period": 10,
+    "multiplier": 1.5,
+    "train_period": 100,
+    "highvol": 0.75,
+    "midvol": 0.5,
+    "lowvol": 0.25,
+    "stats": {
+      "score": 37.48,
+      "win_rate": 47.37,
+      "profit_factor": 1.129,
+      "trades": 19,
+      "net_return_pct": 1.5624,
+      "alignment": 50.0,
+      "combined_score": 43.11
+    },
+    "volatility": {
+      "high_centroid": 1.725613,
+      "medium_centroid": 1.352729,
+      "low_centroid": 0.9935,
+      "current_cluster": 2,
+      "cluster_name": "LOW",
+      "assigned_centroid": 0.9935,
+      "current_atr": 0.784983,
+      "sizes": [
+        8,
+        47,
+        45
+      ],
+      "iterations": 5
+    },
+    "top_3": [
+      {
+        "atr_period": 10,
+        "multiplier": 1.5,
+        "train_period": 100,
+        "backtest": {
+          "score": 37.48,
+          "win_rate": 47.37,
+          "profit_factor": 1.129,
+          "trades": 19,
+          "net_return_pct": 1.5624
+        },
+        "alignment": 50.0,
+        "combined": 43.11
+      },
+      {
+        "atr_period": 14,
+        "multiplier": 2.0,
+        "train_period": 100,
+        "backtest": {
+          "score": 36.97,
+          "win_rate": 53.85,
+          "profit_factor": 1.117,
+          "trades": 13,
+          "net_return_pct": 30.0859
+        },
+        "alignment": 50.0,
+        "combined": 42.83
+      },
+      {
+        "atr_period": 16,
+        "multiplier": 3.5,
+        "train_period": 100,
+        "backtest": {
+          "score": 36.64,
+          "win_rate": 66.67,
+          "profit_factor": 0.684,
+          "trades": 9,
+          "net_return_pct": 32.3591
+        },
+        "alignment": 50.0,
+        "combined": 42.65
+      }
+    ],
+    "candles_used": 300,
+    "optimized_at": "2026-04-03T20:11:45.665254+00:00"
+  },
+  "PLTR": {
+    "symbol": "PLTR",
+    "atr_period": 14,
+    "multiplier": 3.5,
+    "train_period": 100,
+    "highvol": 0.75,
+    "midvol": 0.5,
+    "lowvol": 0.25,
+    "stats": {
+      "score": 54.93,
+      "win_rate": 28.57,
+      "profit_factor": 5.05,
+      "trades": 7,
+      "net_return_pct": 113.8209,
+      "alignment": 50.0,
+      "combined_score": 52.71
+    },
+    "volatility": {
+      "high_centroid": 2.932166,
+      "medium_centroid": 2.281013,
+      "low_centroid": 1.73438,
+      "current_cluster": 2,
+      "cluster_name": "LOW",
+      "assigned_centroid": 1.73438,
+      "current_atr": 1.804,
+      "sizes": [
+        15,
+        44,
+        41
+      ],
+      "iterations": 5
+    },
+    "top_3": [
+      {
+        "atr_period": 14,
+        "multiplier": 3.5,
+        "train_period": 100,
+        "backtest": {
+          "score": 54.93,
+          "win_rate": 28.57,
+          "profit_factor": 5.05,
+          "trades": 7,
+          "net_return_pct": 113.8209
+        },
+        "alignment": 50.0,
+        "combined": 52.71
+      },
+      {
+        "atr_period": 16,
+        "multiplier": 3.5,
+        "train_period": 100,
+        "backtest": {
+          "score": 52.98,
+          "win_rate": 28.57,
+          "profit_factor": 4.757,
+          "trades": 7,
+          "net_return_pct": 107.8383
+        },
+        "alignment": 50.0,
+        "combined": 51.64
+      },
+      {
+        "atr_period": 7,
+        "multiplier": 3.5,
+        "train_period": 100,
+        "backtest": {
+          "score": 46.74,
+          "win_rate": 40.0,
+          "profit_factor": 3.53,
+          "trades": 5,
+          "net_return_pct": 190.8157
+        },
+        "alignment": 50.0,
+        "combined": 48.21
+      }
+    ],
+    "candles_used": 300,
+    "optimized_at": "2026-04-03T20:12:36.926156+00:00"
+  },
+  "PUMP": {
+    "symbol": "PUMP",
+    "atr_period": 16,
+    "multiplier": 3.0,
+    "train_period": 100,
+    "highvol": 0.75,
+    "midvol": 0.5,
+    "lowvol": 0.25,
+    "stats": {
+      "score": 66.3,
+      "win_rate": 60.0,
+      "profit_factor": 4.975,
+      "trades": 5,
+      "net_return_pct": 491.7567,
+      "alignment": 0.0,
+      "combined_score": 36.47
+    },
+    "volatility": {
+      "high_centroid": 0.342409,
+      "medium_centroid": 0.288205,
+      "low_centroid": 0.243604,
+      "current_cluster": 2,
+      "cluster_name": "LOW",
+      "assigned_centroid": 0.243604,
+      "current_atr": 0.20871,
+      "sizes": [
+        20,
+        33,
+        47
+      ],
+      "iterations": 4
+    },
+    "top_3": [
+      {
+        "atr_period": 16,
+        "multiplier": 3.0,
+        "train_period": 100,
+        "backtest": {
+          "score": 66.3,
+          "win_rate": 60.0,
+          "profit_factor": 4.975,
+          "trades": 5,
+          "net_return_pct": 491.7567
+        },
+        "alignment": 0.0,
+        "combined": 36.47
+      },
+      {
+        "atr_period": 7,
+        "multiplier": 2.5,
+        "train_period": 150,
+        "backtest": {
+          "score": 58.5,
+          "win_rate": 40.0,
+          "profit_factor": 5.282,
+          "trades": 5,
+          "net_return_pct": 253.3923
+        },
+        "alignment": 0.0,
+        "combined": 32.18
+      },
+      {
+        "atr_period": 9,
+        "multiplier": 2.5,
+        "train_period": 150,
+        "backtest": {
+          "score": 58.5,
+          "win_rate": 40.0,
+          "profit_factor": 8.221,
+          "trades": 5,
+          "net_return_pct": 317.7635
+        },
+        "alignment": 0.0,
+        "combined": 32.18
+      }
+    ],
+    "candles_used": 300,
+    "optimized_at": "2026-03-30T02:27:06.872795+00:00"
+  },
+  "SOL": {
+    "symbol": "SOL",
+    "atr_period": 12,
+    "multiplier": 4.0,
+    "train_period": 100,
+    "highvol": 0.75,
+    "midvol": 0.5,
+    "lowvol": 0.25,
+    "stats": {
+      "score": 60.64,
+      "win_rate": 42.86,
+      "profit_factor": 5.449,
+      "trades": 7,
+      "net_return_pct": 43.9862,
+      "alignment": 0.0,
+      "combined_score": 33.35
+    },
+    "volatility": {
+      "high_centroid": 1.270055,
+      "medium_centroid": 0.856079,
+      "low_centroid": 0.574745,
+      "current_cluster": 2,
+      "cluster_name": "LOW",
+      "assigned_centroid": 0.574745,
+      "current_atr": 0.498821,
+      "sizes": [
+        5,
+        41,
+        54
+      ],
+      "iterations": 5
+    },
+    "top_3": [
+      {
+        "atr_period": 12,
+        "multiplier": 4.0,
+        "train_period": 100,
+        "backtest": {
+          "score": 60.64,
+          "win_rate": 42.86,
+          "profit_factor": 5.449,
+          "trades": 7,
+          "net_return_pct": 43.9862
+        },
+        "alignment": 0.0,
+        "combined": 33.35
+      },
+      {
+        "atr_period": 14,
+        "multiplier": 4.0,
+        "train_period": 150,
+        "backtest": {
+          "score": 58.5,
+          "win_rate": 40.0,
+          "profit_factor": 7.505,
+          "trades": 5,
+          "net_return_pct": 57.5061
+        },
+        "alignment": 0.0,
+        "combined": 32.18
+      },
+      {
+        "atr_period": 16,
+        "multiplier": 4.0,
+        "train_period": 150,
+        "backtest": {
+          "score": 58.5,
+          "win_rate": 40.0,
+          "profit_factor": 7.505,
+          "trades": 5,
+          "net_return_pct": 57.5061
+        },
+        "alignment": 0.0,
+        "combined": 32.18
+      }
+    ],
+    "candles_used": 300,
+    "optimized_at": "2026-04-11T10:49:18.076335+00:00"
+  },
+  "TLT": {
+    "symbol": "TLT",
+    "atr_period": 20,
+    "multiplier": 1.5,
+    "train_period": 100,
+    "highvol": 0.75,
+    "midvol": 0.5,
+    "lowvol": 0.25,
+    "stats": {
+      "score": 40.26,
+      "win_rate": 42.86,
+      "profit_factor": 0.702,
+      "trades": 35,
+      "net_return_pct": -10.3053,
+      "alignment": 0.0,
+      "combined_score": 22.14
+    },
+    "volatility": {
+      "high_centroid": 0.351788,
+      "medium_centroid": 0.282135,
+      "low_centroid": 0.217143,
+      "current_cluster": 2,
+      "cluster_name": "LOW",
+      "assigned_centroid": 0.217143,
+      "current_atr": 0.220811,
+      "sizes": [
+        27,
+        42,
+        31
+      ],
+      "iterations": 4
+    },
+    "top_3": [
+      {
+        "atr_period": 20,
+        "multiplier": 1.5,
+        "train_period": 100,
+        "backtest": {
+          "score": 40.26,
+          "win_rate": 42.86,
+          "profit_factor": 0.702,
+          "trades": 35,
+          "net_return_pct": -10.3053
+        },
+        "alignment": 0.0,
+        "combined": 22.14
+      },
+      {
+        "atr_period": 7,
+        "multiplier": 1.5,
+        "train_period": 100,
+        "backtest": {
+          "score": 39.89,
+          "win_rate": 40.54,
+          "profit_factor": 0.647,
+          "trades": 37,
+          "net_return_pct": -12.5363
+        },
+        "alignment": 0.0,
+        "combined": 21.94
+      },
+      {
+        "atr_period": 12,
+        "multiplier": 2.0,
+        "train_period": 100,
+        "backtest": {
+          "score": 39.71,
+          "win_rate": 60.0,
+          "profit_factor": 0.401,
+          "trades": 25,
+          "net_return_pct": -8.399
+        },
+        "alignment": 0.0,
+        "combined": 21.84
+      }
+    ],
+    "candles_used": 300,
+    "optimized_at": "2026-04-07T03:25:35.246394+00:00"
+  },
+  "TQQQ": {
+    "symbol": "TQQQ",
+    "atr_period": 14,
+    "multiplier": 1.5,
+    "train_period": 100,
+    "highvol": 0.75,
+    "midvol": 0.5,
+    "lowvol": 0.25,
+    "stats": {
+      "score": 41.73,
+      "win_rate": 35.9,
+      "profit_factor": 0.984,
+      "trades": 39,
+      "net_return_pct": -66.6557,
+      "alignment": 50.0,
+      "combined_score": 45.45
+    },
+    "volatility": {
+      "high_centroid": 0.948908,
+      "medium_centroid": 0.770876,
+      "low_centroid": 0.593812,
+      "current_cluster": 1,
+      "cluster_name": "MEDIUM",
+      "assigned_centroid": 0.770876,
+      "current_atr": 0.826592,
+      "sizes": [
+        33,
+        54,
+        13
+      ],
+      "iterations": 6
+    },
+    "top_3": [
+      {
+        "atr_period": 14,
+        "multiplier": 1.5,
+        "train_period": 100,
+        "backtest": {
+          "score": 41.73,
+          "win_rate": 35.9,
+          "profit_factor": 0.984,
+          "trades": 39,
+          "net_return_pct": -66.6557
+        },
+        "alignment": 50.0,
+        "combined": 45.45
+      },
+      {
+        "atr_period": 16,
+        "multiplier": 1.5,
+        "train_period": 100,
+        "backtest": {
+          "score": 41.7,
+          "win_rate": 34.88,
+          "profit_factor": 0.968,
+          "trades": 43,
+          "net_return_pct": -67.8496
+        },
+        "alignment": 50.0,
+        "combined": 45.44
+      },
+      {
+        "atr_period": 12,
+        "multiplier": 1.5,
+        "train_period": 100,
+        "backtest": {
+          "score": 41.17,
+          "win_rate": 35.9,
+          "profit_factor": 0.914,
+          "trades": 39,
+          "net_return_pct": -72.9952
+        },
+        "alignment": 50.0,
+        "combined": 45.14
+      }
+    ],
+    "candles_used": 300,
+    "optimized_at": "2026-04-03T20:14:54.194485+00:00"
+  },
+  "XPL": {
+    "symbol": "XPL",
+    "atr_period": 7,
+    "multiplier": 2.0,
+    "train_period": 100,
+    "highvol": 0.75,
+    "midvol": 0.5,
+    "lowvol": 0.25,
+    "stats": {
+      "score": 52.77,
+      "win_rate": 18.18,
+      "profit_factor": 5.188,
+      "trades": 11,
+      "net_return_pct": 23.8215,
+      "alignment": 0.0,
+      "combined_score": 29.02
+    },
+    "volatility": {
+      "high_centroid": 0.038083,
+      "medium_centroid": 0.025364,
+      "low_centroid": 0.016181,
+      "current_cluster": 2,
+      "cluster_name": "LOW",
+      "assigned_centroid": 0.016181,
+      "current_atr": 0.019952,
+      "sizes": [
+        11,
+        48,
+        41
+      ],
+      "iterations": 3
+    },
+    "top_3": [
+      {
+        "atr_period": 7,
+        "multiplier": 2.0,
+        "train_period": 100,
+        "backtest": {
+          "score": 52.77,
+          "win_rate": 18.18,
+          "profit_factor": 5.188,
+          "trades": 11,
+          "net_return_pct": 23.8215
+        },
+        "alignment": 0.0,
+        "combined": 29.02
+      },
+      {
+        "atr_period": 9,
+        "multiplier": 2.0,
+        "train_period": 100,
+        "backtest": {
+          "score": 52.77,
+          "win_rate": 18.18,
+          "profit_factor": 5.188,
+          "trades": 11,
+          "net_return_pct": 23.8215
+        },
+        "alignment": 0.0,
+        "combined": 29.02
+      },
+      {
+        "atr_period": 10,
+        "multiplier": 2.0,
+        "train_period": 100,
+        "backtest": {
+          "score": 52.77,
+          "win_rate": 18.18,
+          "profit_factor": 5.188,
+          "trades": 11,
+          "net_return_pct": 23.8215
+        },
+        "alignment": 0.0,
+        "combined": 29.02
+      }
+    ],
+    "candles_used": 300,
+    "optimized_at": "2026-04-02T22:03:50.917678+00:00"
+  },
+  "INJ": {
+    "symbol": "INJ",
+    "atr_period": 14,
+    "multiplier": 3.0,
+    "train_period": 100,
+    "highvol": 0.75,
+    "midvol": 0.5,
+    "lowvol": 0.25,
+    "stats": {
+      "score": 34.64,
+      "win_rate": 53.85,
+      "profit_factor": 0.825,
+      "trades": 13,
+      "net_return_pct": -3.1557,
+      "alignment": 100.0,
+      "combined_score": 64.05
+    },
+    "volatility": {
+      "high_centroid": 0.041427,
+      "medium_centroid": 0.026443,
+      "low_centroid": 0.020753,
+      "current_cluster": 1,
+      "cluster_name": "MEDIUM",
+      "assigned_centroid": 0.026443,
+      "current_atr": 0.025585,
+      "sizes": [
+        17,
+        37,
+        46
+      ],
+      "iterations": 6
+    },
+    "top_3": [
+      {
+        "atr_period": 14,
+        "multiplier": 3.0,
+        "train_period": 100,
+        "backtest": {
+          "score": 34.64,
+          "win_rate": 53.85,
+          "profit_factor": 0.825,
+          "trades": 13,
+          "net_return_pct": -3.1557
+        },
+        "alignment": 100.0,
+        "combined": 64.05
+      },
+      {
+        "atr_period": 12,
+        "multiplier": 3.0,
+        "train_period": 100,
+        "backtest": {
+          "score": 34.26,
+          "win_rate": 53.85,
+          "profit_factor": 0.777,
+          "trades": 13,
+          "net_return_pct": -8.1301
+        },
+        "alignment": 100.0,
+        "combined": 63.84
+      },
+      {
+        "atr_period": 16,
+        "multiplier": 3.0,
+        "train_period": 100,
+        "backtest": {
+          "score": 34.26,
+          "win_rate": 53.85,
+          "profit_factor": 0.777,
+          "trades": 13,
+          "net_return_pct": -8.1301
+        },
+        "alignment": 100.0,
+        "combined": 63.84
+      }
+    ],
+    "candles_used": 300,
+    "optimized_at": "2026-03-27T13:27:39.725167+00:00"
+  },
+  "ROBO": {
+    "symbol": "ROBO",
+    "atr_period": 10,
+    "multiplier": 1.5,
+    "train_period": 100,
+    "highvol": 0.75,
+    "midvol": 0.5,
+    "lowvol": 0.25,
+    "stats": {
+      "score": 41.14,
+      "win_rate": 41.03,
+      "profit_factor": 0.654,
+      "trades": 39,
+      "net_return_pct": -35.986,
+      "alignment": 100.0,
+      "combined_score": 67.63
+    },
+    "volatility": {
+      "high_centroid": 0.892581,
+      "medium_centroid": 0.663586,
+      "low_centroid": 0.472519,
+      "current_cluster": 2,
+      "cluster_name": "LOW",
+      "assigned_centroid": 0.472519,
+      "current_atr": 0.488726,
+      "sizes": [
+        25,
+        46,
+        29
+      ],
+      "iterations": 7
+    },
+    "top_3": [
+      {
+        "atr_period": 10,
+        "multiplier": 1.5,
+        "train_period": 100,
+        "backtest": {
+          "score": 41.14,
+          "win_rate": 41.03,
+          "profit_factor": 0.654,
+          "trades": 39,
+          "net_return_pct": -35.986
+        },
+        "alignment": 100.0,
+        "combined": 67.63
+      },
+      {
+        "atr_period": 7,
+        "multiplier": 1.5,
+        "train_period": 100,
+        "backtest": {
+          "score": 40.91,
+          "win_rate": 37.5,
+          "profit_factor": 0.739,
+          "trades": 40,
+          "net_return_pct": -38.3885
+        },
+        "alignment": 100.0,
+        "combined": 67.5
+      },
+      {
+        "atr_period": 9,
+        "multiplier": 1.5,
+        "train_period": 100,
+        "backtest": {
+          "score": 40.91,
+          "win_rate": 37.5,
+          "profit_factor": 0.739,
+          "trades": 40,
+          "net_return_pct": -38.3885
+        },
+        "alignment": 100.0,
+        "combined": 67.5
+      }
+    ],
+    "candles_used": 300,
+    "optimized_at": "2026-03-27T13:29:40.197806+00:00"
+  },
+  "TRXBTC": {
+    "symbol": "TRXBTC",
+    "error": "insufficient_data",
+    "atr_period": 10,
+    "multiplier": 3.0
+  },
+  "AAPL": {
+    "symbol": "AAPL",
+    "atr_period": 12,
+    "multiplier": 1.5,
+    "train_period": 100,
+    "highvol": 0.75,
+    "midvol": 0.5,
+    "lowvol": 0.25,
+    "stats": {
+      "score": 34.43,
+      "win_rate": 34.48,
+      "profit_factor": 0.767,
+      "trades": 29,
+      "net_return_pct": -33.0039,
+      "alignment": 0.0,
+      "combined_score": 18.94
+    },
+    "volatility": {
+      "high_centroid": 2.142166,
+      "medium_centroid": 1.856951,
+      "low_centroid": 1.529505,
+      "current_cluster": 1,
+      "cluster_name": "MEDIUM",
+      "assigned_centroid": 1.856951,
+      "current_atr": 1.79883,
+      "sizes": [
+        27,
+        34,
+        39
+      ],
+      "iterations": 4
+    },
+    "top_3": [
+      {
+        "atr_period": 12,
+        "multiplier": 1.5,
+        "train_period": 100,
+        "backtest": {
+          "score": 34.43,
+          "win_rate": 34.48,
+          "profit_factor": 0.767,
+          "trades": 29,
+          "net_return_pct": -33.0039
+        },
+        "alignment": 0.0,
+        "combined": 18.94
+      },
+      {
+        "atr_period": 7,
+        "multiplier": 1.5,
+        "train_period": 150,
+        "backtest": {
+          "score": 33.75,
+          "win_rate": 42.11,
+          "profit_factor": 0.927,
+          "trades": 19,
+          "net_return_pct": -15.8027
+        },
+        "alignment": 0.0,
+        "combined": 18.56
+      },
+      {
+        "atr_period": 9,
+        "multiplier": 1.5,
+        "train_period": 150,
+        "backtest": {
+          "score": 33.75,
+          "win_rate": 42.11,
+          "profit_factor": 0.927,
+          "trades": 19,
+          "net_return_pct": -15.8027
+        },
+        "alignment": 0.0,
+        "combined": 18.56
+      }
+    ],
+    "candles_used": 300,
+    "optimized_at": "2026-04-07T03:10:01.694221+00:00"
+  },
+  "BFUSD": {
+    "symbol": "BFUSD",
+    "error": "insufficient_data",
+    "atr_period": 10,
+    "multiplier": 3.0
+  },
+  "ICP": {
+    "symbol": "ICP",
+    "atr_period": 7,
+    "multiplier": 3.0,
+    "train_period": 150,
+    "highvol": 0.75,
+    "midvol": 0.5,
+    "lowvol": 0.25,
+    "stats": {
+      "score": 66.5,
+      "win_rate": 60.0,
+      "profit_factor": Infinity,
+      "trades": 5,
+      "net_return_pct": 51.0398,
+      "alignment": 0.0,
+      "combined_score": 36.58
+    },
+    "volatility": {
+      "high_centroid": 0.02475,
+      "medium_centroid": 0.019669,
+      "low_centroid": 0.013955,
+      "current_cluster": 0,
+      "cluster_name": "HIGH",
+      "assigned_centroid": 0.02475,
+      "current_atr": 0.024666,
+      "sizes": [
+        31,
+        59,
+        60
+      ],
+      "iterations": 1
+    },
+    "top_3": [
+      {
+        "atr_period": 7,
+        "multiplier": 3.0,
+        "train_period": 150,
+        "backtest": {
+          "score": 66.5,
+          "win_rate": 60.0,
+          "profit_factor": Infinity,
+          "trades": 5,
+          "net_return_pct": 51.0398
+        },
+        "alignment": 0.0,
+        "combined": 36.58
+      },
+      {
+        "atr_period": 10,
+        "multiplier": 3.0,
+        "train_period": 150,
+        "backtest": {
+          "score": 66.5,
+          "win_rate": 60.0,
+          "profit_factor": Infinity,
+          "trades": 5,
+          "net_return_pct": 51.0398
+        },
+        "alignment": 0.0,
+        "combined": 36.58
+      },
+      {
+        "atr_period": 12,
+        "multiplier": 3.0,
+        "train_period": 150,
+        "backtest": {
+          "score": 66.5,
+          "win_rate": 60.0,
+          "profit_factor": Infinity,
+          "trades": 5,
+          "net_return_pct": 51.0398
+        },
+        "alignment": 0.0,
+        "combined": 36.58
+      }
+    ],
+    "candles_used": 300,
+    "optimized_at": "2026-04-03T06:46:16.099429+00:00"
+  },
+  "QQQ": {
+    "symbol": "QQQ",
+    "atr_period": 12,
+    "multiplier": 1.5,
+    "train_period": 150,
+    "highvol": 0.75,
+    "midvol": 0.5,
+    "lowvol": 0.25,
+    "stats": {
+      "score": 40.9,
+      "win_rate": 34.29,
+      "profit_factor": 1.211,
+      "trades": 35,
+      "net_return_pct": -15.5909,
+      "alignment": 100.0,
+      "combined_score": 67.5
+    },
+    "volatility": {
+      "high_centroid": 4.523397,
+      "medium_centroid": 3.629772,
+      "low_centroid": 2.791554,
+      "current_cluster": 1,
+      "cluster_name": "MEDIUM",
+      "assigned_centroid": 3.629772,
+      "current_atr": 3.896409,
+      "sizes": [
+        33,
+        88,
+        29
+      ],
+      "iterations": 2
+    },
+    "top_3": [
+      {
+        "atr_period": 12,
+        "multiplier": 1.5,
+        "train_period": 150,
+        "backtest": {
+          "score": 40.9,
+          "win_rate": 34.29,
+          "profit_factor": 1.211,
+          "trades": 35,
+          "net_return_pct": -15.5909
+        },
+        "alignment": 100.0,
+        "combined": 67.5
+      },
+      {
+        "atr_period": 14,
+        "multiplier": 1.5,
+        "train_period": 150,
+        "backtest": {
+          "score": 40.9,
+          "win_rate": 34.29,
+          "profit_factor": 1.211,
+          "trades": 35,
+          "net_return_pct": -15.5909
+        },
+        "alignment": 100.0,
+        "combined": 67.5
+      },
+      {
+        "atr_period": 20,
+        "multiplier": 1.5,
+        "train_period": 150,
+        "backtest": {
+          "score": 40.9,
+          "win_rate": 34.29,
+          "profit_factor": 1.211,
+          "trades": 35,
+          "net_return_pct": -15.5909
+        },
+        "alignment": 100.0,
+        "combined": 67.5
+      }
+    ],
+    "candles_used": 300,
+    "optimized_at": "2026-04-07T21:37:24.860595+00:00"
+  },
+  "RLUSD": {
+    "symbol": "RLUSD",
+    "error": "insufficient_data",
+    "atr_period": 10,
+    "multiplier": 3.0
+  },
+  "SHIB": {
+    "symbol": "SHIB",
+    "error": "insufficient_data",
+    "atr_period": 10,
+    "multiplier": 3.0
+  },
+  "USDC": {
+    "symbol": "USDC",
+    "error": "insufficient_data",
+    "atr_period": 10,
+    "multiplier": 3.0
+  },
+  "WBTC": {
+    "symbol": "WBTC",
+    "error": "insufficient_data",
+    "atr_period": 10,
+    "multiplier": 3.0
+  },
+  "USDE": {
+    "symbol": "USDE",
+    "error": "insufficient_data",
+    "atr_period": 10,
+    "multiplier": 3.0
+  },
+  "DOGE": {
+    "symbol": "DOGE",
+    "atr_period": 16,
+    "multiplier": 1.5,
+    "train_period": 100,
+    "highvol": 0.75,
+    "midvol": 0.5,
+    "lowvol": 0.25,
+    "stats": {
+      "score": 42.4,
+      "win_rate": 41.38,
+      "profit_factor": 1.419,
+      "trades": 29,
+      "net_return_pct": 0.0716,
+      "alignment": 50.0,
+      "combined_score": 45.82
+    },
+    "volatility": {
+      "high_centroid": 0.000943,
+      "medium_centroid": 0.000782,
+      "low_centroid": 0.000601,
+      "current_cluster": 0,
+      "cluster_name": "HIGH",
+      "assigned_centroid": 0.000943,
+      "current_atr": 0.000863,
+      "sizes": [
+        17,
+        42,
+        41
+      ],
+      "iterations": 3
+    },
+    "top_3": [
+      {
+        "atr_period": 16,
+        "multiplier": 1.5,
+        "train_period": 100,
+        "backtest": {
+          "score": 42.4,
+          "win_rate": 41.38,
+          "profit_factor": 1.419,
+          "trades": 29,
+          "net_return_pct": 0.0716
+        },
+        "alignment": 50.0,
+        "combined": 45.82
+      },
+      {
+        "atr_period": 20,
+        "multiplier": 1.5,
+        "train_period": 100,
+        "backtest": {
+          "score": 42.4,
+          "win_rate": 41.38,
+          "profit_factor": 1.419,
+          "trades": 29,
+          "net_return_pct": 0.0794
+        },
+        "alignment": 50.0,
+        "combined": 45.82
+      },
+      {
+        "atr_period": 7,
+        "multiplier": 2.0,
+        "train_period": 100,
+        "backtest": {
+          "score": 36.59,
+          "win_rate": 42.86,
+          "profit_factor": 1.118,
+          "trades": 21,
+          "net_return_pct": -9.4417
+        },
+        "alignment": 50.0,
+        "combined": 42.62
+      }
+    ],
+    "candles_used": 300,
+    "optimized_at": "2026-03-30T08:30:03.833240+00:00"
+  },
+  "PENGU": {
+    "symbol": "PENGU",
+    "error": "insufficient_data",
+    "atr_period": 10,
+    "multiplier": 3.0
+  },
+  "SUI": {
+    "symbol": "SUI",
+    "atr_period": 12,
+    "multiplier": 1.5,
+    "train_period": 150,
+    "highvol": 0.75,
+    "midvol": 0.5,
+    "lowvol": 0.25,
+    "stats": {
+      "score": 42.65,
+      "win_rate": 52.38,
+      "profit_factor": 1.4,
+      "trades": 21,
+      "net_return_pct": 20.773,
+      "alignment": 0.0,
+      "combined_score": 23.46
+    },
+    "volatility": {
+      "high_centroid": 0.016593,
+      "medium_centroid": 0.009699,
+      "low_centroid": 0.007392,
+      "current_cluster": 2,
+      "cluster_name": "LOW",
+      "assigned_centroid": 0.007392,
+      "current_atr": 0.006209,
+      "sizes": [
+        10,
+        67,
+        73
+      ],
+      "iterations": 8
+    },
+    "top_3": [
+      {
+        "atr_period": 12,
+        "multiplier": 1.5,
+        "train_period": 150,
+        "backtest": {
+          "score": 42.65,
+          "win_rate": 52.38,
+          "profit_factor": 1.4,
+          "trades": 21,
+          "net_return_pct": 20.773
+        },
+        "alignment": 0.0,
+        "combined": 23.46
+      },
+      {
+        "atr_period": 7,
+        "multiplier": 1.5,
+        "train_period": 100,
+        "backtest": {
+          "score": 40.21,
+          "win_rate": 51.72,
+          "profit_factor": 0.627,
+          "trades": 29,
+          "net_return_pct": -17.9066
+        },
+        "alignment": 0.0,
+        "combined": 22.12
+      },
+      {
+        "atr_period": 14,
+        "multiplier": 1.5,
+        "train_period": 150,
+        "backtest": {
+          "score": 40.17,
+          "win_rate": 43.48,
+          "profit_factor": 1.409,
+          "trades": 23,
+          "net_return_pct": 3.7928
+        },
+        "alignment": 0.0,
+        "combined": 22.09
+      }
+    ],
+    "candles_used": 300,
+    "optimized_at": "2026-03-28T19:58:39.603358+00:00"
+  },
+  "ZEC": {
+    "symbol": "ZEC",
+    "atr_period": 9,
+    "multiplier": 1.5,
+    "train_period": 100,
+    "highvol": 0.75,
+    "midvol": 0.5,
+    "lowvol": 0.25,
+    "stats": {
+      "score": 41.74,
+      "win_rate": 48.15,
+      "profit_factor": 1.123,
+      "trades": 27,
+      "net_return_pct": 2.8028,
+      "alignment": 0.0,
+      "combined_score": 22.96
+    },
+    "volatility": {
+      "high_centroid": 3.791799,
+      "medium_centroid": 2.986461,
+      "low_centroid": 2.150852,
+      "current_cluster": 0,
+      "cluster_name": "HIGH",
+      "assigned_centroid": 3.791799,
+      "current_atr": 3.782078,
+      "sizes": [
+        34,
+        27,
+        39
+      ],
+      "iterations": 3
+    },
+    "top_3": [
+      {
+        "atr_period": 9,
+        "multiplier": 1.5,
+        "train_period": 100,
+        "backtest": {
+          "score": 41.74,
+          "win_rate": 48.15,
+          "profit_factor": 1.123,
+          "trades": 27,
+          "net_return_pct": 2.8028
+        },
+        "alignment": 0.0,
+        "combined": 22.96
+      },
+      {
+        "atr_period": 10,
+        "multiplier": 1.5,
+        "train_period": 100,
+        "backtest": {
+          "score": 41.58,
+          "win_rate": 48.15,
+          "profit_factor": 1.102,
+          "trades": 27,
+          "net_return_pct": 1.5052
+        },
+        "alignment": 0.0,
+        "combined": 22.87
+      },
+      {
+        "atr_period": 7,
+        "multiplier": 1.5,
+        "train_period": 100,
+        "backtest": {
+          "score": 41.25,
+          "win_rate": 44.83,
+          "profit_factor": 1.102,
+          "trades": 29,
+          "net_return_pct": -7.0092
+        },
+        "alignment": 0.0,
+        "combined": 22.69
+      }
+    ],
+    "candles_used": 300,
+    "optimized_at": "2026-03-31T09:06:33.096581+00:00"
+  },
+  "ADA": {
+    "symbol": "ADA",
+    "atr_period": 20,
+    "multiplier": 1.5,
+    "train_period": 100,
+    "highvol": 0.75,
+    "midvol": 0.5,
+    "lowvol": 0.25,
+    "stats": {
+      "score": 37.9,
+      "win_rate": 44.44,
+      "profit_factor": 0.828,
+      "trades": 27,
+      "net_return_pct": -20.6204,
+      "alignment": 50.0,
+      "combined_score": 43.34
+    },
+    "volatility": {
+      "high_centroid": 0.002637,
+      "medium_centroid": 0.002251,
+      "low_centroid": 0.001862,
+      "current_cluster": 2,
+      "cluster_name": "LOW",
+      "assigned_centroid": 0.001862,
+      "current_atr": 0.001638,
+      "sizes": [
+        21,
+        44,
+        35
+      ],
+      "iterations": 3
+    },
+    "top_3": [
+      {
+        "atr_period": 20,
+        "multiplier": 1.5,
+        "train_period": 100,
+        "backtest": {
+          "score": 37.9,
+          "win_rate": 44.44,
+          "profit_factor": 0.828,
+          "trades": 27,
+          "net_return_pct": -20.6204
+        },
+        "alignment": 50.0,
+        "combined": 43.34
+      },
+      {
+        "atr_period": 16,
+        "multiplier": 1.5,
+        "train_period": 100,
+        "backtest": {
+          "score": 36.96,
+          "win_rate": 37.04,
+          "profit_factor": 1.08,
+          "trades": 27,
+          "net_return_pct": -23.8716
+        },
+        "alignment": 50.0,
+        "combined": 42.83
+      },
+      {
+        "atr_period": 7,
+        "multiplier": 1.5,
+        "train_period": 150,
+        "backtest": {
+          "score": 35.88,
+          "win_rate": 38.1,
+          "profit_factor": 1.268,
+          "trades": 21,
+          "net_return_pct": -11.4511
+        },
+        "alignment": 50.0,
+        "combined": 42.23
+      }
+    ],
+    "candles_used": 300,
+    "optimized_at": "2026-03-29T08:05:27.693855+00:00"
+  },
+  "SIGN": {
+    "symbol": "SIGN",
+    "error": "insufficient_data",
+    "atr_period": 10,
+    "multiplier": 3.0
+  },
+  "EUR": {
+    "symbol": "EUR",
+    "error": "insufficient_data",
+    "atr_period": 10,
+    "multiplier": 3.0
+  },
+  "TRX": {
+    "symbol": "TRX",
+    "atr_period": 7,
+    "multiplier": 1.5,
+    "train_period": 100,
+    "highvol": 0.75,
+    "midvol": 0.5,
+    "lowvol": 0.25,
+    "stats": {
+      "score": 33.2,
+      "win_rate": 36.0,
+      "profit_factor": 0.788,
+      "trades": 25,
+      "net_return_pct": -134.8612,
+      "alignment": 50.0,
+      "combined_score": 40.76
+    },
+    "volatility": {
+      "high_centroid": 0.069021,
+      "medium_centroid": 0.051309,
+      "low_centroid": 0.037673,
+      "current_cluster": 2,
+      "cluster_name": "LOW",
+      "assigned_centroid": 0.037673,
+      "current_atr": 0.035513,
+      "sizes": [
+        9,
+        32,
+        59
+      ],
+      "iterations": 3
+    },
+    "top_3": [
+      {
+        "atr_period": 7,
+        "multiplier": 1.5,
+        "train_period": 100,
+        "backtest": {
+          "score": 33.2,
+          "win_rate": 36.0,
+          "profit_factor": 0.788,
+          "trades": 25,
+          "net_return_pct": -134.8612
+        },
+        "alignment": 50.0,
+        "combined": 40.76
+      },
+      {
+        "atr_period": 12,
+        "multiplier": 1.5,
+        "train_period": 100,
+        "backtest": {
+          "score": 32.86,
+          "win_rate": 36.0,
+          "profit_factor": 0.745,
+          "trades": 25,
+          "net_return_pct": -144.9606
+        },
+        "alignment": 50.0,
+        "combined": 40.57
+      },
+      {
+        "atr_period": 14,
+        "multiplier": 1.5,
+        "train_period": 100,
+        "backtest": {
+          "score": 32.86,
+          "win_rate": 36.0,
+          "profit_factor": 0.745,
+          "trades": 25,
+          "net_return_pct": -144.9606
+        },
+        "alignment": 50.0,
+        "combined": 40.57
+      }
+    ],
+    "candles_used": 300,
+    "optimized_at": "2026-03-30T14:41:43.264825+00:00"
+  },
+  "BNBBTC": {
+    "symbol": "BNBBTC",
+    "error": "insufficient_data",
+    "atr_period": 10,
+    "multiplier": 3.0
+  },
+  "ETHBTC": {
+    "symbol": "ETHBTC",
+    "error": "insufficient_data",
+    "atr_period": 10,
+    "multiplier": 3.0
+  },
+  "PEPE": {
+    "symbol": "PEPE",
+    "atr_period": 10,
+    "multiplier": 1.5,
+    "train_period": 100,
+    "highvol": 0.75,
+    "midvol": 0.5,
+    "lowvol": 0.25,
+    "stats": {
+      "score": 42.34,
+      "win_rate": 40.0,
+      "profit_factor": 1.729,
+      "trades": 25,
+      "net_return_pct": 7.2208,
+      "alignment": 50.0,
+      "combined_score": 45.79
+    },
+    "volatility": {
+      "high_centroid": 0.0,
+      "medium_centroid": 0.0,
+      "low_centroid": 0.0,
+      "current_cluster": 0,
+      "cluster_name": "HIGH",
+      "assigned_centroid": 0.0,
+      "current_atr": 0.0,
+      "sizes": [
+        6,
+        35,
+        59
+      ],
+      "iterations": 2
+    },
+    "top_3": [
+      {
+        "atr_period": 10,
+        "multiplier": 1.5,
+        "train_period": 100,
+        "backtest": {
+          "score": 42.34,
+          "win_rate": 40.0,
+          "profit_factor": 1.729,
+          "trades": 25,
+          "net_return_pct": 7.2208
+        },
+        "alignment": 50.0,
+        "combined": 45.79
+      },
+      {
+        "atr_period": 12,
+        "multiplier": 3.0,
+        "train_period": 150,
+        "backtest": {
+          "score": 82.5,
+          "win_rate": 100.0,
+          "profit_factor": 78.078,
+          "trades": 5,
+          "net_return_pct": 78.0784
+        },
+        "alignment": 0.0,
+        "combined": 45.38
+      },
+      {
+        "atr_period": 12,
+        "multiplier": 3.5,
+        "train_period": 150,
+        "backtest": {
+          "score": 82.5,
+          "win_rate": 100.0,
+          "profit_factor": 58.841,
+          "trades": 5,
+          "net_return_pct": 58.8409
+        },
+        "alignment": 0.0,
+        "combined": 45.38
+      }
+    ],
+    "candles_used": 300,
+    "optimized_at": "2026-04-06T02:54:53.574462+00:00"
+  },
+  "ETC": {
+    "symbol": "ETC",
+    "error": "insufficient_data",
+    "atr_period": 10,
+    "multiplier": 3.0
+  },
+  "FDUSD": {
+    "symbol": "FDUSD",
+    "error": "insufficient_data",
+    "atr_period": 10,
+    "multiplier": 3.0
+  },
+  "ASTER": {
+    "symbol": "ASTER",
+    "error": "insufficient_data",
+    "atr_period": 10,
+    "multiplier": 3.0
+  },
+  "DASH": {
+    "symbol": "DASH",
+    "atr_period": 20,
+    "multiplier": 1.5,
+    "train_period": 100,
+    "highvol": 0.75,
+    "midvol": 0.5,
+    "lowvol": 0.25,
+    "stats": {
+      "score": 38.32,
+      "win_rate": 36.36,
+      "profit_factor": 0.91,
+      "trades": 33,
+      "net_return_pct": -66.4176,
+      "alignment": 0.0,
+      "combined_score": 21.08
+    },
+    "volatility": {
+      "high_centroid": 2.612338,
+      "medium_centroid": 2.325179,
+      "low_centroid": 1.959729,
+      "current_cluster": 1,
+      "cluster_name": "MEDIUM",
+      "assigned_centroid": 2.325179,
+      "current_atr": 2.359663,
+      "sizes": [
+        36,
+        47,
+        17
+      ],
+      "iterations": 2
+    },
+    "top_3": [
+      {
+        "atr_period": 20,
+        "multiplier": 1.5,
+        "train_period": 100,
+        "backtest": {
+          "score": 38.32,
+          "win_rate": 36.36,
+          "profit_factor": 0.91,
+          "trades": 33,
+          "net_return_pct": -66.4176
+        },
+        "alignment": 0.0,
+        "combined": 21.08
+      },
+      {
+        "atr_period": 16,
+        "multiplier": 1.5,
+        "train_period": 100,
+        "backtest": {
+          "score": 37.17,
+          "win_rate": 34.29,
+          "profit_factor": 0.744,
+          "trades": 35,
+          "net_return_pct": -81.9282
+        },
+        "alignment": 0.0,
+        "combined": 20.44
+      },
+      {
+        "atr_period": 14,
+        "multiplier": 1.5,
+        "train_period": 100,
+        "backtest": {
+          "score": 36.2,
+          "win_rate": 36.36,
+          "profit_factor": 0.645,
+          "trades": 33,
+          "net_return_pct": -83.7811
+        },
+        "alignment": 0.0,
+        "combined": 19.91
+      }
+    ],
+    "candles_used": 300,
+    "optimized_at": "2026-03-31T15:08:18.783794+00:00"
+  },
+  "IWM": {
+    "symbol": "IWM",
+    "atr_period": 14,
+    "multiplier": 1.5,
+    "train_period": 100,
+    "highvol": 0.75,
+    "midvol": 0.5,
+    "lowvol": 0.25,
+    "stats": {
+      "score": 40.31,
+      "win_rate": 37.14,
+      "profit_factor": 0.994,
+      "trades": 35,
+      "net_return_pct": -24.6712,
+      "alignment": 100.0,
+      "combined_score": 67.17
+    },
+    "volatility": {
+      "high_centroid": 2.537871,
+      "medium_centroid": 2.091918,
+      "low_centroid": 1.712084,
+      "current_cluster": 0,
+      "cluster_name": "HIGH",
+      "assigned_centroid": 2.537871,
+      "current_atr": 2.529291,
+      "sizes": [
+        21,
+        34,
+        45
+      ],
+      "iterations": 2
+    },
+    "top_3": [
+      {
+        "atr_period": 14,
+        "multiplier": 1.5,
+        "train_period": 100,
+        "backtest": {
+          "score": 40.31,
+          "win_rate": 37.14,
+          "profit_factor": 0.994,
+          "trades": 35,
+          "net_return_pct": -24.6712
+        },
+        "alignment": 100.0,
+        "combined": 67.17
+      },
+      {
+        "atr_period": 9,
+        "multiplier": 1.5,
+        "train_period": 100,
+        "backtest": {
+          "score": 39.62,
+          "win_rate": 39.39,
+          "profit_factor": 0.921,
+          "trades": 33,
+          "net_return_pct": -24.039
+        },
+        "alignment": 100.0,
+        "combined": 66.79
+      },
+      {
+        "atr_period": 10,
+        "multiplier": 1.5,
+        "train_period": 100,
+        "backtest": {
+          "score": 39.62,
+          "win_rate": 39.39,
+          "profit_factor": 0.921,
+          "trades": 33,
+          "net_return_pct": -24.039
+        },
+        "alignment": 100.0,
+        "combined": 66.79
+      }
+    ],
+    "candles_used": 300,
+    "optimized_at": "2026-04-08T15:52:19.737836+00:00"
+  },
+  "SLV": {
+    "symbol": "SLV",
+    "atr_period": 10,
+    "multiplier": 1.5,
+    "train_period": 100,
+    "highvol": 0.75,
+    "midvol": 0.5,
+    "lowvol": 0.25,
+    "stats": {
+      "score": 32.71,
+      "win_rate": 22.22,
+      "profit_factor": 1.291,
+      "trades": 27,
+      "net_return_pct": -116.3417,
+      "alignment": 100.0,
+      "combined_score": 62.99
+    },
+    "volatility": {
+      "high_centroid": 1.369737,
+      "medium_centroid": 1.055211,
+      "low_centroid": 0.764607,
+      "current_cluster": 2,
+      "cluster_name": "LOW",
+      "assigned_centroid": 0.764607,
+      "current_atr": 0.497927,
+      "sizes": [
+        30,
+        33,
+        37
+      ],
+      "iterations": 3
+    },
+    "top_3": [
+      {
+        "atr_period": 10,
+        "multiplier": 1.5,
+        "train_period": 100,
+        "backtest": {
+          "score": 32.71,
+          "win_rate": 22.22,
+          "profit_factor": 1.291,
+          "trades": 27,
+          "net_return_pct": -116.3417
+        },
+        "alignment": 100.0,
+        "combined": 62.99
+      },
+      {
+        "atr_period": 12,
+        "multiplier": 1.5,
+        "train_period": 100,
+        "backtest": {
+          "score": 32.71,
+          "win_rate": 22.22,
+          "profit_factor": 1.291,
+          "trades": 27,
+          "net_return_pct": -116.3417
+        },
+        "alignment": 100.0,
+        "combined": 62.99
+      },
+      {
+        "atr_period": 14,
+        "multiplier": 1.5,
+        "train_period": 100,
+        "backtest": {
+          "score": 32.71,
+          "win_rate": 22.22,
+          "profit_factor": 1.291,
+          "trades": 27,
+          "net_return_pct": -116.3417
+        },
+        "alignment": 100.0,
+        "combined": 62.99
+      }
+    ],
+    "candles_used": 300,
+    "optimized_at": "2026-04-11T10:48:54.736839+00:00"
+  },
+  "AAVE": {
+    "symbol": "AAVE",
+    "error": "insufficient_data",
+    "atr_period": 10,
+    "multiplier": 3.0
+  },
+  "APT": {
+    "symbol": "APT",
+    "atr_period": 7,
+    "multiplier": 1.5,
+    "train_period": 100,
+    "highvol": 0.75,
+    "midvol": 0.5,
+    "lowvol": 0.25,
+    "stats": {
+      "score": 53.99,
+      "win_rate": 22.58,
+      "profit_factor": 3.682,
+      "trades": 31,
+      "net_return_pct": 5.1328,
+      "alignment": 100.0,
+      "combined_score": 74.69
+    },
+    "volatility": {
+      "high_centroid": 0.012508,
+      "medium_centroid": 0.009742,
+      "low_centroid": 0.006949,
+      "current_cluster": 1,
+      "cluster_name": "MEDIUM",
+      "assigned_centroid": 0.009742,
+      "current_atr": 0.010163,
+      "sizes": [
+        24,
+        41,
+        35
+      ],
+      "iterations": 3
+    },
+    "top_3": [
+      {
+        "atr_period": 7,
+        "multiplier": 1.5,
+        "train_period": 100,
+        "backtest": {
+          "score": 53.99,
+          "win_rate": 22.58,
+          "profit_factor": 3.682,
+          "trades": 31,
+          "net_return_pct": 5.1328
+        },
+        "alignment": 100.0,
+        "combined": 74.69
+      },
+      {
+        "atr_period": 16,
+        "multiplier": 3.0,
+        "train_period": 100,
+        "backtest": {
+          "score": 39.9,
+          "win_rate": 46.15,
+          "profit_factor": 1.867,
+          "trades": 13,
+          "net_return_pct": 56.5493
+        },
+        "alignment": 100.0,
+        "combined": 66.94
+      },
+      {
+        "atr_period": 7,
+        "multiplier": 3.5,
+        "train_period": 100,
+        "backtest": {
+          "score": 39.64,
+          "win_rate": 38.46,
+          "profit_factor": 2.219,
+          "trades": 13,
+          "net_return_pct": 37.7799
+        },
+        "alignment": 100.0,
+        "combined": 66.8
+      }
+    ],
+    "candles_used": 300,
+    "optimized_at": "2026-03-31T02:49:38.673690+00:00"
+  },
+  "HOOD": {
+    "symbol": "HOOD",
+    "atr_period": 7,
+    "multiplier": 2.5,
+    "train_period": 100,
+    "highvol": 0.75,
+    "midvol": 0.5,
+    "lowvol": 0.25,
+    "stats": {
+      "score": 28.61,
+      "win_rate": 25.93,
+      "profit_factor": 0.592,
+      "trades": 27,
+      "net_return_pct": -132.6429,
+      "alignment": 50.0,
+      "combined_score": 38.24
+    },
+    "volatility": {
+      "high_centroid": 2.125782,
+      "medium_centroid": 1.421423,
+      "low_centroid": 1.058804,
+      "current_cluster": 2,
+      "cluster_name": "LOW",
+      "assigned_centroid": 1.058804,
+      "current_atr": 1.22667,
+      "sizes": [
+        3,
+        49,
+        48
+      ],
+      "iterations": 7
+    },
+    "top_3": [
+      {
+        "atr_period": 7,
+        "multiplier": 2.5,
+        "train_period": 100,
+        "backtest": {
+          "score": 28.61,
+          "win_rate": 25.93,
+          "profit_factor": 0.592,
+          "trades": 27,
+          "net_return_pct": -132.6429
+        },
+        "alignment": 50.0,
+        "combined": 38.24
+      },
+      {
+        "atr_period": 9,
+        "multiplier": 2.5,
+        "train_period": 100,
+        "backtest": {
+          "score": 28.0,
+          "win_rate": 28.0,
+          "profit_factor": 0.538,
+          "trades": 25,
+          "net_return_pct": -141.5061
+        },
+        "alignment": 50.0,
+        "combined": 37.9
+      },
+      {
+        "atr_period": 10,
+        "multiplier": 2.5,
+        "train_period": 100,
+        "backtest": {
+          "score": 27.27,
+          "win_rate": 28.0,
+          "profit_factor": 0.446,
+          "trades": 25,
+          "net_return_pct": -144.7398
+        },
+        "alignment": 50.0,
+        "combined": 37.5
+      }
+    ],
+    "candles_used": 300,
+    "optimized_at": "2026-03-31T09:00:44.605350+00:00"
+  },
+  "NCLH": {
+    "symbol": "NCLH",
+    "atr_period": 9,
+    "multiplier": 1.5,
+    "train_period": 150,
+    "highvol": 0.75,
+    "midvol": 0.5,
+    "lowvol": 0.25,
+    "stats": {
+      "score": 34.54,
+      "win_rate": 38.71,
+      "profit_factor": 0.444,
+      "trades": 31,
+      "net_return_pct": -118.278,
+      "alignment": 100.0,
+      "combined_score": 64.0
+    },
+    "volatility": {
+      "high_centroid": 0.789088,
+      "medium_centroid": 0.498197,
+      "low_centroid": 0.323616,
+      "current_cluster": 2,
+      "cluster_name": "LOW",
+      "assigned_centroid": 0.323616,
+      "current_atr": 0.256536,
+      "sizes": [
+        9,
+        43,
+        98
+      ],
+      "iterations": 4
+    },
+    "top_3": [
+      {
+        "atr_period": 9,
+        "multiplier": 1.5,
+        "train_period": 150,
+        "backtest": {
+          "score": 34.54,
+          "win_rate": 38.71,
+          "profit_factor": 0.444,
+          "trades": 31,
+          "net_return_pct": -118.278
+        },
+        "alignment": 100.0,
+        "combined": 64.0
+      },
+      {
+        "atr_period": 10,
+        "multiplier": 1.5,
+        "train_period": 150,
+        "backtest": {
+          "score": 34.54,
+          "win_rate": 38.71,
+          "profit_factor": 0.444,
+          "trades": 31,
+          "net_return_pct": -118.278
+        },
+        "alignment": 100.0,
+        "combined": 64.0
+      },
+      {
+        "atr_period": 12,
+        "multiplier": 1.5,
+        "train_period": 150,
+        "backtest": {
+          "score": 34.54,
+          "win_rate": 38.71,
+          "profit_factor": 0.444,
+          "trades": 31,
+          "net_return_pct": -118.278
+        },
+        "alignment": 100.0,
+        "combined": 64.0
+      }
+    ],
+    "candles_used": 300,
+    "optimized_at": "2026-03-31T09:02:08.186338+00:00"
+  },
+  "SKY": {
+    "symbol": "SKY",
+    "atr_period": 7,
+    "multiplier": 1.5,
+    "train_period": 100,
+    "highvol": 0.75,
+    "midvol": 0.5,
+    "lowvol": 0.25,
+    "stats": {
+      "score": 40.24,
+      "win_rate": 40.54,
+      "profit_factor": 0.691,
+      "trades": 37,
+      "net_return_pct": -47.0199,
+      "alignment": 100.0,
+      "combined_score": 67.13
+    },
+    "volatility": {
+      "high_centroid": 1.338166,
+      "medium_centroid": 1.031391,
+      "low_centroid": 0.784875,
+      "current_cluster": 2,
+      "cluster_name": "LOW",
+      "assigned_centroid": 0.784875,
+      "current_atr": 0.764582,
+      "sizes": [
+        11,
+        31,
+        58
+      ],
+      "iterations": 6
+    },
+    "top_3": [
+      {
+        "atr_period": 7,
+        "multiplier": 1.5,
+        "train_period": 100,
+        "backtest": {
+          "score": 40.24,
+          "win_rate": 40.54,
+          "profit_factor": 0.691,
+          "trades": 37,
+          "net_return_pct": -47.0199
+        },
+        "alignment": 100.0,
+        "combined": 67.13
+      },
+      {
+        "atr_period": 20,
+        "multiplier": 1.5,
+        "train_period": 100,
+        "backtest": {
+          "score": 39.85,
+          "win_rate": 42.86,
+          "profit_factor": 0.65,
+          "trades": 35,
+          "net_return_pct": -46.4866
+        },
+        "alignment": 100.0,
+        "combined": 66.92
+      },
+      {
+        "atr_period": 14,
+        "multiplier": 1.5,
+        "train_period": 100,
+        "backtest": {
+          "score": 39.18,
+          "win_rate": 37.84,
+          "profit_factor": 0.693,
+          "trades": 37,
+          "net_return_pct": -53.1098
+        },
+        "alignment": 100.0,
+        "combined": 66.55
+      }
+    ],
+    "candles_used": 300,
+    "optimized_at": "2026-04-06T02:56:11.956725+00:00"
+  },
+  "TAO": {
+    "symbol": "TAO",
+    "error": "insufficient_data",
+    "atr_period": 10,
+    "multiplier": 3.0
+  },
+  "TWT": {
+    "symbol": "TWT",
+    "error": "insufficient_data",
+    "atr_period": 10,
+    "multiplier": 3.0
+  },
+  "ZECBTC": {
+    "symbol": "ZECBTC",
+    "error": "insufficient_data",
+    "atr_period": 10,
+    "multiplier": 3.0
+  },
+  "TSM": {
+    "symbol": "TSM",
+    "atr_period": 14,
+    "multiplier": 1.5,
+    "train_period": 100,
+    "highvol": 0.75,
+    "midvol": 0.5,
+    "lowvol": 0.25,
+    "stats": {
+      "score": 38.45,
+      "win_rate": 42.42,
+      "profit_factor": 0.622,
+      "trades": 33,
+      "net_return_pct": -53.8314,
+      "alignment": 0.0,
+      "combined_score": 21.15
+    },
+    "volatility": {
+      "high_centroid": 4.620881,
+      "medium_centroid": 3.829082,
+      "low_centroid": 2.969143,
+      "current_cluster": 2,
+      "cluster_name": "LOW",
+      "assigned_centroid": 2.969143,
+      "current_atr": 2.964609,
+      "sizes": [
+        30,
+        46,
+        24
+      ],
+      "iterations": 7
+    },
+    "top_3": [
+      {
+        "atr_period": 14,
+        "multiplier": 1.5,
+        "train_period": 100,
+        "backtest": {
+          "score": 38.45,
+          "win_rate": 42.42,
+          "profit_factor": 0.622,
+          "trades": 33,
+          "net_return_pct": -53.8314
+        },
+        "alignment": 0.0,
+        "combined": 21.15
+      },
+      {
+        "atr_period": 9,
+        "multiplier": 1.5,
+        "train_period": 100,
+        "backtest": {
+          "score": 38.09,
+          "win_rate": 42.42,
+          "profit_factor": 0.578,
+          "trades": 33,
+          "net_return_pct": -55.1998
+        },
+        "alignment": 0.0,
+        "combined": 20.95
+      },
+      {
+        "atr_period": 7,
+        "multiplier": 1.5,
+        "train_period": 100,
+        "backtest": {
+          "score": 37.31,
+          "win_rate": 39.39,
+          "profit_factor": 0.632,
+          "trades": 33,
+          "net_return_pct": -61.1435
+        },
+        "alignment": 0.0,
+        "combined": 20.52
+      }
+    ],
+    "candles_used": 300,
+    "optimized_at": "2026-04-07T03:25:58.203687+00:00"
+  },
+  "HBAR": {
+    "symbol": "HBAR",
+    "atr_period": 20,
+    "multiplier": 1.5,
+    "train_period": 100,
+    "highvol": 0.75,
+    "midvol": 0.5,
+    "lowvol": 0.25,
+    "stats": {
+      "score": 43.11,
+      "win_rate": 48.65,
+      "profit_factor": 0.643,
+      "trades": 37,
+      "net_return_pct": -18.6843,
+      "alignment": 80.0,
+      "combined_score": 59.71
+    },
+    "volatility": {
+      "high_centroid": 0.000966,
+      "medium_centroid": 0.000687,
+      "low_centroid": 0.000491,
+      "current_cluster": 0,
+      "cluster_name": "HIGH",
+      "assigned_centroid": 0.000966,
+      "current_atr": 0.000906,
+      "sizes": [
+        7,
+        48,
+        45
+      ],
+      "iterations": 3
+    },
+    "top_3": [
+      {
+        "atr_period": 20,
+        "multiplier": 1.5,
+        "train_period": 100,
+        "backtest": {
+          "score": 43.11,
+          "win_rate": 48.65,
+          "profit_factor": 0.643,
+          "trades": 37,
+          "net_return_pct": -18.6843
+        },
+        "alignment": 80.0,
+        "combined": 59.71
+      },
+      {
+        "atr_period": 10,
+        "multiplier": 1.5,
+        "train_period": 100,
+        "backtest": {
+          "score": 43.02,
+          "win_rate": 51.43,
+          "profit_factor": 0.618,
+          "trades": 35,
+          "net_return_pct": -16.0466
+        },
+        "alignment": 80.0,
+        "combined": 59.66
+      },
+      {
+        "atr_period": 7,
+        "multiplier": 1.5,
+        "train_period": 100,
+        "backtest": {
+          "score": 42.82,
+          "win_rate": 51.43,
+          "profit_factor": 0.593,
+          "trades": 35,
+          "net_return_pct": -16.6931
+        },
+        "alignment": 80.0,
+        "combined": 59.55
+      }
+    ],
+    "candles_used": 300,
+    "optimized_at": "2026-03-31T21:15:41.593877+00:00"
+  },
+  "RAY": {
+    "symbol": "RAY",
+    "atr_period": 20,
+    "multiplier": 4.0,
+    "train_period": 150,
+    "highvol": 0.75,
+    "midvol": 0.5,
+    "lowvol": 0.25,
+    "stats": {
+      "score": 40.58,
+      "win_rate": 80.0,
+      "profit_factor": 0.76,
+      "trades": 5,
+      "net_return_pct": 204.043,
+      "alignment": 50.0,
+      "combined_score": 44.82
+    },
+    "volatility": {
+      "high_centroid": 0.140519,
+      "medium_centroid": 0.110392,
+      "low_centroid": 0.087218,
+      "current_cluster": 0,
+      "cluster_name": "HIGH",
+      "assigned_centroid": 0.140519,
+      "current_atr": 0.139712,
+      "sizes": [
+        37,
+        55,
+        58
+      ],
+      "iterations": 8
+    },
+    "top_3": [
+      {
+        "atr_period": 20,
+        "multiplier": 4.0,
+        "train_period": 150,
+        "backtest": {
+          "score": 40.58,
+          "win_rate": 80.0,
+          "profit_factor": 0.76,
+          "trades": 5,
+          "net_return_pct": 204.043
+        },
+        "alignment": 50.0,
+        "combined": 44.82
+      },
+      {
+        "atr_period": 20,
+        "multiplier": 4.0,
+        "train_period": 100,
+        "backtest": {
+          "score": 38.28,
+          "win_rate": 71.43,
+          "profit_factor": 0.776,
+          "trades": 7,
+          "net_return_pct": 97.8584
+        },
+        "alignment": 50.0,
+        "combined": 43.55
+      },
+      {
+        "atr_period": 10,
+        "multiplier": 1.5,
+        "train_period": 100,
+        "backtest": {
+          "score": 37.03,
+          "win_rate": 30.77,
+          "profit_factor": 0.653,
+          "trades": 39,
+          "net_return_pct": -170.4588
+        },
+        "alignment": 50.0,
+        "combined": 42.87
+      }
+    ],
+    "candles_used": 300,
+    "optimized_at": "2026-04-01T03:23:43.873757+00:00"
+  },
+  "SEI": {
+    "symbol": "SEI",
+    "atr_period": 7,
+    "multiplier": 2.0,
+    "train_period": 100,
+    "highvol": 0.75,
+    "midvol": 0.5,
+    "lowvol": 0.25,
+    "stats": {
+      "score": 35.47,
+      "win_rate": 36.36,
+      "profit_factor": 0.553,
+      "trades": 33,
+      "net_return_pct": -48.597,
+      "alignment": 50.0,
+      "combined_score": 42.01
+    },
+    "volatility": {
+      "high_centroid": 0.000825,
+      "medium_centroid": 0.000596,
+      "low_centroid": 0.000389,
+      "current_cluster": 0,
+      "cluster_name": "HIGH",
+      "assigned_centroid": 0.000825,
+      "current_atr": 0.000935,
+      "sizes": [
+        18,
+        40,
+        42
+      ],
+      "iterations": 4
+    },
+    "top_3": [
+      {
+        "atr_period": 7,
+        "multiplier": 2.0,
+        "train_period": 100,
+        "backtest": {
+          "score": 35.47,
+          "win_rate": 36.36,
+          "profit_factor": 0.553,
+          "trades": 33,
+          "net_return_pct": -48.597
+        },
+        "alignment": 50.0,
+        "combined": 42.01
+      },
+      {
+        "atr_period": 9,
+        "multiplier": 2.0,
+        "train_period": 100,
+        "backtest": {
+          "score": 35.47,
+          "win_rate": 36.36,
+          "profit_factor": 0.553,
+          "trades": 33,
+          "net_return_pct": -48.597
+        },
+        "alignment": 50.0,
+        "combined": 42.01
+      },
+      {
+        "atr_period": 7,
+        "multiplier": 2.0,
+        "train_period": 150,
+        "backtest": {
+          "score": 31.9,
+          "win_rate": 34.48,
+          "profit_factor": 0.451,
+          "trades": 29,
+          "net_return_pct": -63.5666
+        },
+        "alignment": 50.0,
+        "combined": 40.04
+      }
+    ],
+    "candles_used": 300,
+    "optimized_at": "2026-04-01T03:24:15.761166+00:00"
+  },
+  "UUSDT": {
+    "symbol": "UUSDT",
+    "error": "insufficient_data",
+    "atr_period": 10,
+    "multiplier": 3.0
+  },
+  "SOLV": {
+    "symbol": "SOLV",
+    "atr_period": 9,
+    "multiplier": 4.0,
+    "train_period": 100,
+    "highvol": 0.75,
+    "midvol": 0.5,
+    "lowvol": 0.25,
+    "stats": {
+      "score": 21.27,
+      "win_rate": 30.77,
+      "profit_factor": 0.308,
+      "trades": 13,
+      "net_return_pct": -124.4201,
+      "alignment": 100.0,
+      "combined_score": 56.7
+    },
+    "volatility": {
+      "high_centroid": 0.874132,
+      "medium_centroid": 0.683235,
+      "low_centroid": 0.560694,
+      "current_cluster": 2,
+      "cluster_name": "LOW",
+      "assigned_centroid": 0.560694,
+      "current_atr": 0.547046,
+      "sizes": [
+        26,
+        32,
+        42
+      ],
+      "iterations": 6
+    },
+    "top_3": [
+      {
+        "atr_period": 9,
+        "multiplier": 4.0,
+        "train_period": 100,
+        "backtest": {
+          "score": 21.27,
+          "win_rate": 30.77,
+          "profit_factor": 0.308,
+          "trades": 13,
+          "net_return_pct": -124.4201
+        },
+        "alignment": 100.0,
+        "combined": 56.7
+      },
+      {
+        "atr_period": 7,
+        "multiplier": 4.0,
+        "train_period": 100,
+        "backtest": {
+          "score": 21.09,
+          "win_rate": 30.77,
+          "profit_factor": 0.285,
+          "trades": 13,
+          "net_return_pct": -135.9492
+        },
+        "alignment": 100.0,
+        "combined": 56.6
+      },
+      {
+        "atr_period": 20,
+        "multiplier": 3.0,
+        "train_period": 100,
+        "backtest": {
+          "score": 20.38,
+          "win_rate": 26.67,
+          "profit_factor": 0.277,
+          "trades": 15,
+          "net_return_pct": -154.7
+        },
+        "alignment": 100.0,
+        "combined": 56.21
+      }
+    ],
+    "candles_used": 300,
+    "optimized_at": "2026-04-01T15:34:59.552665+00:00"
+  },
+  "SOLBTC": {
+    "symbol": "SOLBTC",
+    "error": "insufficient_data",
+    "atr_period": 10,
+    "multiplier": 3.0
+  },
+  "BTTC": {
+    "symbol": "BTTC",
+    "atr_period": 14,
+    "multiplier": 1.5,
+    "train_period": 150,
+    "highvol": 0.75,
+    "midvol": 0.5,
+    "lowvol": 0.25,
+    "stats": {
+      "score": 39.38,
+      "win_rate": 22.86,
+      "profit_factor": 1.592,
+      "trades": 35,
+      "net_return_pct": -76.8972,
+      "alignment": 100.0,
+      "combined_score": 66.66
+    },
+    "volatility": {
+      "high_centroid": 0.106351,
+      "medium_centroid": 0.047604,
+      "low_centroid": 0.023363,
+      "current_cluster": 1,
+      "cluster_name": "MEDIUM",
+      "assigned_centroid": 0.047604,
+      "current_atr": 0.038171,
+      "sizes": [
+        13,
+        24,
+        113
+      ],
+      "iterations": 7
+    },
+    "top_3": [
+      {
+        "atr_period": 14,
+        "multiplier": 1.5,
+        "train_period": 150,
+        "backtest": {
+          "score": 39.38,
+          "win_rate": 22.86,
+          "profit_factor": 1.592,
+          "trades": 35,
+          "net_return_pct": -76.8972
+        },
+        "alignment": 100.0,
+        "combined": 66.66
+      },
+      {
+        "atr_period": 12,
+        "multiplier": 1.5,
+        "train_period": 150,
+        "backtest": {
+          "score": 39.31,
+          "win_rate": 25.71,
+          "profit_factor": 1.441,
+          "trades": 35,
+          "net_return_pct": -69.0644
+        },
+        "alignment": 100.0,
+        "combined": 66.62
+      },
+      {
+        "atr_period": 7,
+        "multiplier": 1.5,
+        "train_period": 100,
+        "backtest": {
+          "score": 38.91,
+          "win_rate": 23.4,
+          "profit_factor": 1.193,
+          "trades": 47,
+          "net_return_pct": -101.7551
+        },
+        "alignment": 100.0,
+        "combined": 66.4
+      }
+    ],
+    "candles_used": 300,
+    "optimized_at": "2026-04-02T03:43:04.661551+00:00"
+  },
+  "AMD": {
+    "symbol": "AMD",
+    "atr_period": 20,
+    "multiplier": 4.0,
+    "train_period": 100,
+    "highvol": 0.75,
+    "midvol": 0.5,
+    "lowvol": 0.25,
+    "stats": {
+      "score": 35.61,
+      "win_rate": 66.67,
+      "profit_factor": 0.556,
+      "trades": 9,
+      "net_return_pct": 12.9987,
+      "alignment": 100.0,
+      "combined_score": 64.59
+    },
+    "volatility": {
+      "high_centroid": 3.582567,
+      "medium_centroid": 3.067081,
+      "low_centroid": 2.259328,
+      "current_cluster": 1,
+      "cluster_name": "MEDIUM",
+      "assigned_centroid": 3.067081,
+      "current_atr": 3.12901,
+      "sizes": [
+        28,
+        40,
+        32
+      ],
+      "iterations": 7
+    },
+    "top_3": [
+      {
+        "atr_period": 20,
+        "multiplier": 4.0,
+        "train_period": 100,
+        "backtest": {
+          "score": 35.61,
+          "win_rate": 66.67,
+          "profit_factor": 0.556,
+          "trades": 9,
+          "net_return_pct": 12.9987
+        },
+        "alignment": 100.0,
+        "combined": 64.59
+      },
+      {
+        "atr_period": 12,
+        "multiplier": 1.5,
+        "train_period": 100,
+        "backtest": {
+          "score": 44.48,
+          "win_rate": 48.39,
+          "profit_factor": 1.204,
+          "trades": 31,
+          "net_return_pct": 8.9448
+        },
+        "alignment": 0.0,
+        "combined": 24.46
+      },
+      {
+        "atr_period": 14,
+        "multiplier": 1.5,
+        "train_period": 100,
+        "backtest": {
+          "score": 44.48,
+          "win_rate": 48.39,
+          "profit_factor": 1.204,
+          "trades": 31,
+          "net_return_pct": 8.9448
+        },
+        "alignment": 0.0,
+        "combined": 24.46
+      }
+    ],
+    "candles_used": 300,
+    "optimized_at": "2026-04-05T20:41:04.890996+00:00"
+  },
+  "WULF": {
+    "symbol": "WULF",
+    "atr_period": 14,
+    "multiplier": 1.5,
+    "train_period": 100,
+    "highvol": 0.75,
+    "midvol": 0.5,
+    "lowvol": 0.25,
+    "stats": {
+      "score": 39.82,
+      "win_rate": 51.72,
+      "profit_factor": 0.578,
+      "trades": 29,
+      "net_return_pct": -74.359,
+      "alignment": 0.0,
+      "combined_score": 21.9
+    },
+    "volatility": {
+      "high_centroid": 0.556404,
+      "medium_centroid": 0.46763,
+      "low_centroid": 0.393616,
+      "current_cluster": 2,
+      "cluster_name": "LOW",
+      "assigned_centroid": 0.393616,
+      "current_atr": 0.327483,
+      "sizes": [
+        24,
+        39,
+        37
+      ],
+      "iterations": 3
+    },
+    "top_3": [
+      {
+        "atr_period": 14,
+        "multiplier": 1.5,
+        "train_period": 100,
+        "backtest": {
+          "score": 39.82,
+          "win_rate": 51.72,
+          "profit_factor": 0.578,
+          "trades": 29,
+          "net_return_pct": -74.359
+        },
+        "alignment": 0.0,
+        "combined": 21.9
+      },
+      {
+        "atr_period": 16,
+        "multiplier": 1.5,
+        "train_period": 100,
+        "backtest": {
+          "score": 39.71,
+          "win_rate": 48.39,
+          "profit_factor": 0.607,
+          "trades": 31,
+          "net_return_pct": -90.4686
+        },
+        "alignment": 0.0,
+        "combined": 21.84
+      },
+      {
+        "atr_period": 10,
+        "multiplier": 1.5,
+        "train_period": 100,
+        "backtest": {
+          "score": 39.64,
+          "win_rate": 48.39,
+          "profit_factor": 0.598,
+          "trades": 31,
+          "net_return_pct": -87.5698
+        },
+        "alignment": 0.0,
+        "combined": 21.8
+      }
+    ],
+    "candles_used": 300,
+    "optimized_at": "2026-04-07T03:26:22.786410+00:00"
+  },
+  "RENDER": {
+    "symbol": "RENDER",
+    "atr_period": 7,
+    "multiplier": 4.0,
+    "train_period": 150,
+    "highvol": 0.75,
+    "midvol": 0.5,
+    "lowvol": 0.25,
+    "stats": {
+      "score": 82.5,
+      "win_rate": 100.0,
+      "profit_factor": 221.586,
+      "trades": 5,
+      "net_return_pct": 221.5859,
+      "alignment": 0.0,
+      "combined_score": 45.38
+    },
+    "volatility": {
+      "high_centroid": 0.03534,
+      "medium_centroid": 0.026829,
+      "low_centroid": 0.019297,
+      "current_cluster": 0,
+      "cluster_name": "HIGH",
+      "assigned_centroid": 0.03534,
+      "current_atr": 0.032953,
+      "sizes": [
+        34,
+        60,
+        56
+      ],
+      "iterations": 7
+    },
+    "top_3": [
+      {
+        "atr_period": 7,
+        "multiplier": 4.0,
+        "train_period": 150,
+        "backtest": {
+          "score": 82.5,
+          "win_rate": 100.0,
+          "profit_factor": 221.586,
+          "trades": 5,
+          "net_return_pct": 221.5859
+        },
+        "alignment": 0.0,
+        "combined": 45.38
+      },
+      {
+        "atr_period": 12,
+        "multiplier": 3.5,
+        "train_period": 150,
+        "backtest": {
+          "score": 82.5,
+          "win_rate": 100.0,
+          "profit_factor": 221.586,
+          "trades": 5,
+          "net_return_pct": 221.5859
+        },
+        "alignment": 0.0,
+        "combined": 45.38
+      },
+      {
+        "atr_period": 14,
+        "multiplier": 3.5,
+        "train_period": 150,
+        "backtest": {
+          "score": 82.5,
+          "win_rate": 100.0,
+          "profit_factor": 221.586,
+          "trades": 5,
+          "net_return_pct": 221.5859
+        },
+        "alignment": 0.0,
+        "combined": 45.38
+      }
+    ],
+    "candles_used": 300,
+    "optimized_at": "2026-04-06T02:55:39.656642+00:00"
+  },
+  "PAXG": {
+    "symbol": "PAXG",
+    "error": "insufficient_data",
+    "atr_period": 10,
+    "multiplier": 3.0
+  },
+  "TRUMP": {
+    "symbol": "TRUMP",
+    "error": "insufficient_data",
+    "atr_period": 10,
+    "multiplier": 3.0
+  },
+  "NO": {
+    "symbol": "NO",
+    "error": "insufficient_data",
+    "atr_period": 10,
+    "multiplier": 3.0
+  },
+  "POL": {
+    "symbol": "POL",
+    "error": "insufficient_data",
+    "atr_period": 10,
+    "multiplier": 3.0
+  },
+  "DOTBTC": {
+    "symbol": "DOTBTC",
+    "error": "insufficient_data",
+    "atr_period": 10,
+    "multiplier": 3.0
+  },
+  "SNX": {
+    "symbol": "SNX",
+    "atr_period": 16,
+    "multiplier": 3.5,
+    "train_period": 150,
+    "highvol": 0.75,
+    "midvol": 0.5,
+    "lowvol": 0.25,
+    "stats": {
+      "score": 44.58,
+      "win_rate": 28.57,
+      "profit_factor": 3.706,
+      "trades": 7,
+      "net_return_pct": 30.1266,
+      "alignment": 100.0,
+      "combined_score": 69.52
+    },
+    "volatility": {
+      "high_centroid": 0.004763,
+      "medium_centroid": 0.003034,
+      "low_centroid": 0.001764,
+      "current_cluster": 1,
+      "cluster_name": "MEDIUM",
+      "assigned_centroid": 0.003034,
+      "current_atr": 0.003129,
+      "sizes": [
+        25,
+        85,
+        40
+      ],
+      "iterations": 10
+    },
+    "top_3": [
+      {
+        "atr_period": 16,
+        "multiplier": 3.5,
+        "train_period": 150,
+        "backtest": {
+          "score": 44.58,
+          "win_rate": 28.57,
+          "profit_factor": 3.706,
+          "trades": 7,
+          "net_return_pct": 30.1266
+        },
+        "alignment": 100.0,
+        "combined": 69.52
+      },
+      {
+        "atr_period": 7,
+        "multiplier": 1.5,
+        "train_period": 100,
+        "backtest": {
+          "score": 44.39,
+          "win_rate": 41.38,
+          "profit_factor": 1.667,
+          "trades": 29,
+          "net_return_pct": 8.4046
+        },
+        "alignment": 100.0,
+        "combined": 69.41
+      },
+      {
+        "atr_period": 9,
+        "multiplier": 1.5,
+        "train_period": 100,
+        "backtest": {
+          "score": 42.6,
+          "win_rate": 37.93,
+          "profit_factor": 1.616,
+          "trades": 29,
+          "net_return_pct": -0.6566
+        },
+        "alignment": 100.0,
+        "combined": 68.43
+      }
+    ],
+    "candles_used": 300,
+    "optimized_at": "2026-04-07T15:30:35.136631+00:00"
+  },
+  "ONDO": {
+    "symbol": "ONDO",
+    "error": "insufficient_data",
+    "atr_period": 10,
+    "multiplier": 3.0
+  },
+  "QNT": {
+    "symbol": "QNT",
+    "error": "insufficient_data",
+    "atr_period": 10,
+    "multiplier": 3.0
+  },
+  "MU": {
+    "symbol": "MU",
+    "atr_period": 9,
+    "multiplier": 2.0,
+    "train_period": 100,
+    "highvol": 0.75,
+    "midvol": 0.5,
+    "lowvol": 0.25,
+    "stats": {
+      "score": 39.98,
+      "win_rate": 38.71,
+      "profit_factor": 1.125,
+      "trades": 31,
+      "net_return_pct": -55.0979,
+      "alignment": 50.0,
+      "combined_score": 44.49
+    },
+    "volatility": {
+      "high_centroid": 11.825302,
+      "medium_centroid": 8.998118,
+      "low_centroid": 6.736593,
+      "current_cluster": 2,
+      "cluster_name": "LOW",
+      "assigned_centroid": 6.736593,
+      "current_atr": 5.271344,
+      "sizes": [
+        13,
+        40,
+        47
+      ],
+      "iterations": 3
+    },
+    "top_3": [
+      {
+        "atr_period": 9,
+        "multiplier": 2.0,
+        "train_period": 100,
+        "backtest": {
+          "score": 39.98,
+          "win_rate": 38.71,
+          "profit_factor": 1.125,
+          "trades": 31,
+          "net_return_pct": -55.0979
+        },
+        "alignment": 50.0,
+        "combined": 44.49
+      },
+      {
+        "atr_period": 7,
+        "multiplier": 2.0,
+        "train_period": 100,
+        "backtest": {
+          "score": 39.97,
+          "win_rate": 38.71,
+          "profit_factor": 1.124,
+          "trades": 31,
+          "net_return_pct": -55.2879
+        },
+        "alignment": 50.0,
+        "combined": 44.48
+      },
+      {
+        "atr_period": 10,
+        "multiplier": 2.0,
+        "train_period": 100,
+        "backtest": {
+          "score": 39.07,
+          "win_rate": 35.48,
+          "profit_factor": 1.172,
+          "trades": 31,
+          "net_return_pct": -71.8582
+        },
+        "alignment": 50.0,
+        "combined": 43.99
+      }
+    ],
+    "candles_used": 300,
+    "optimized_at": "2026-04-07T03:23:22.616554+00:00"
+  },
+  "NFLX": {
+    "symbol": "NFLX",
+    "atr_period": 10,
+    "multiplier": 1.5,
+    "train_period": 100,
+    "highvol": 0.75,
+    "midvol": 0.5,
+    "lowvol": 0.25,
+    "stats": {
+      "score": 64.97,
+      "win_rate": 32.0,
+      "profit_factor": 4.959,
+      "trades": 25,
+      "net_return_pct": 75.1507,
+      "alignment": 0.0,
+      "combined_score": 35.73
+    },
+    "volatility": {
+      "high_centroid": 1.232629,
+      "medium_centroid": 0.941639,
+      "low_centroid": 0.714722,
+      "current_cluster": 2,
+      "cluster_name": "LOW",
+      "assigned_centroid": 0.714722,
+      "current_atr": 0.798484,
+      "sizes": [
+        15,
+        37,
+        48
+      ],
+      "iterations": 3
+    },
+    "top_3": [
+      {
+        "atr_period": 10,
+        "multiplier": 1.5,
+        "train_period": 100,
+        "backtest": {
+          "score": 64.97,
+          "win_rate": 32.0,
+          "profit_factor": 4.959,
+          "trades": 25,
+          "net_return_pct": 75.1507
+        },
+        "alignment": 0.0,
+        "combined": 35.73
+      },
+      {
+        "atr_period": 7,
+        "multiplier": 1.5,
+        "train_period": 100,
+        "backtest": {
+          "score": 63.7,
+          "win_rate": 28.0,
+          "profit_factor": 5.4,
+          "trades": 25,
+          "net_return_pct": 67.1886
+        },
+        "alignment": 0.0,
+        "combined": 35.04
+      },
+      {
+        "atr_period": 9,
+        "multiplier": 1.5,
+        "train_period": 100,
+        "backtest": {
+          "score": 63.7,
+          "win_rate": 28.0,
+          "profit_factor": 5.007,
+          "trades": 25,
+          "net_return_pct": 62.4047
+        },
+        "alignment": 0.0,
+        "combined": 35.04
+      }
+    ],
+    "candles_used": 300,
+    "optimized_at": "2026-04-07T03:24:16.043971+00:00"
+  },
+  "ZRO": {
+    "symbol": "ZRO",
+    "error": "insufficient_data",
+    "atr_period": 10,
+    "multiplier": 3.0
+  },
+  "GRT": {
+    "symbol": "GRT",
+    "error": "insufficient_data",
+    "atr_period": 10,
+    "multiplier": 3.0
+  },
+  "ROSE": {
+    "symbol": "ROSE",
+    "error": "insufficient_data",
+    "atr_period": 10,
+    "multiplier": 3.0
+  },
+  "EURI": {
+    "symbol": "EURI",
+    "error": "insufficient_data",
+    "atr_period": 10,
+    "multiplier": 3.0
+  },
+  "SQQQ": {
+    "symbol": "SQQQ",
+    "atr_period": 20,
+    "multiplier": 4.0,
+    "train_period": 100,
+    "highvol": 0.75,
+    "midvol": 0.5,
+    "lowvol": 0.25,
+    "stats": {
+      "score": 75.61,
+      "win_rate": 77.78,
+      "profit_factor": 11.759,
+      "trades": 9,
+      "net_return_pct": 218.8381,
+      "alignment": 0.0,
+      "combined_score": 41.59
+    },
+    "volatility": {
+      "high_centroid": 1.860065,
+      "medium_centroid": 1.51095,
+      "low_centroid": 1.118035,
+      "current_cluster": 1,
+      "cluster_name": "MEDIUM",
+      "assigned_centroid": 1.51095,
+      "current_atr": 1.523264,
+      "sizes": [
+        23,
+        53,
+        24
+      ],
+      "iterations": 3
+    },
+    "top_3": [
+      {
+        "atr_period": 20,
+        "multiplier": 4.0,
+        "train_period": 100,
+        "backtest": {
+          "score": 75.61,
+          "win_rate": 77.78,
+          "profit_factor": 11.759,
+          "trades": 9,
+          "net_return_pct": 218.8381
+        },
+        "alignment": 0.0,
+        "combined": 41.59
+      },
+      {
+        "atr_period": 14,
+        "multiplier": 4.0,
+        "train_period": 100,
+        "backtest": {
+          "score": 74.59,
+          "win_rate": 72.73,
+          "profit_factor": 6.585,
+          "trades": 11,
+          "net_return_pct": 166.2542
+        },
+        "alignment": 0.0,
+        "combined": 41.02
+      },
+      {
+        "atr_period": 16,
+        "multiplier": 4.0,
+        "train_period": 100,
+        "backtest": {
+          "score": 74.59,
+          "win_rate": 72.73,
+          "profit_factor": 6.585,
+          "trades": 11,
+          "net_return_pct": 166.2542
+        },
+        "alignment": 0.0,
+        "combined": 41.02
+      }
+    ],
+    "candles_used": 300,
+    "optimized_at": "2026-04-07T21:38:20.165070+00:00"
+  },
+  "WLD": {
+    "symbol": "WLD",
+    "error": "insufficient_data",
+    "atr_period": 10,
+    "multiplier": 3.0
+  },
+  "XRPBTC": {
+    "symbol": "XRPBTC",
+    "error": "insufficient_data",
+    "atr_period": 10,
+    "multiplier": 3.0
+  },
+  "XLE": {
+    "symbol": "XLE",
+    "atr_period": 7,
+    "multiplier": 2.5,
+    "train_period": 100,
+    "highvol": 0.75,
+    "midvol": 0.5,
+    "lowvol": 0.25,
+    "stats": {
+      "score": 40.21,
+      "win_rate": 53.85,
+      "profit_factor": 1.521,
+      "trades": 13,
+      "net_return_pct": 47.7695,
+      "alignment": 50.0,
+      "combined_score": 44.62
+    },
+    "volatility": {
+      "high_centroid": 1.007003,
+      "medium_centroid": 0.710234,
+      "low_centroid": 0.415021,
+      "current_cluster": 2,
+      "cluster_name": "LOW",
+      "assigned_centroid": 0.415021,
+      "current_atr": 0.549315,
+      "sizes": [
+        9,
+        17,
+        74
+      ],
+      "iterations": 3
+    },
+    "top_3": [
+      {
+        "atr_period": 7,
+        "multiplier": 2.5,
+        "train_period": 100,
+        "backtest": {
+          "score": 40.21,
+          "win_rate": 53.85,
+          "profit_factor": 1.521,
+          "trades": 13,
+          "net_return_pct": 47.7695
+        },
+        "alignment": 50.0,
+        "combined": 44.62
+      },
+      {
+        "atr_period": 9,
+        "multiplier": 2.5,
+        "train_period": 100,
+        "backtest": {
+          "score": 40.21,
+          "win_rate": 53.85,
+          "profit_factor": 1.521,
+          "trades": 13,
+          "net_return_pct": 47.7695
+        },
+        "alignment": 50.0,
+        "combined": 44.62
+      },
+      {
+        "atr_period": 10,
+        "multiplier": 2.5,
+        "train_period": 100,
+        "backtest": {
+          "score": 40.21,
+          "win_rate": 53.85,
+          "profit_factor": 1.521,
+          "trades": 13,
+          "net_return_pct": 47.7695
+        },
+        "alignment": 50.0,
+        "combined": 44.62
+      }
+    ],
+    "candles_used": 300,
+    "optimized_at": "2026-04-08T21:57:23.921128+00:00"
+  },
+  "FIL": {
+    "symbol": "FIL",
+    "atr_period": 7,
+    "multiplier": 2.0,
+    "train_period": 150,
+    "highvol": 0.75,
+    "midvol": 0.5,
+    "lowvol": 0.25,
+    "stats": {
+      "score": 44.98,
+      "win_rate": 33.33,
+      "profit_factor": 3.018,
+      "trades": 15,
+      "net_return_pct": 31.4008,
+      "alignment": 100.0,
+      "combined_score": 69.74
+    },
+    "volatility": {
+      "high_centroid": 0.014863,
+      "medium_centroid": 0.009884,
+      "low_centroid": 0.006112,
+      "current_cluster": 2,
+      "cluster_name": "LOW",
+      "assigned_centroid": 0.006112,
+      "current_atr": 0.005593,
+      "sizes": [
+        11,
+        65,
+        74
+      ],
+      "iterations": 6
+    },
+    "top_3": [
+      {
+        "atr_period": 7,
+        "multiplier": 2.0,
+        "train_period": 150,
+        "backtest": {
+          "score": 44.98,
+          "win_rate": 33.33,
+          "profit_factor": 3.018,
+          "trades": 15,
+          "net_return_pct": 31.4008
+        },
+        "alignment": 100.0,
+        "combined": 69.74
+      },
+      {
+        "atr_period": 9,
+        "multiplier": 2.0,
+        "train_period": 150,
+        "backtest": {
+          "score": 43.43,
+          "win_rate": 40.0,
+          "profit_factor": 2.491,
+          "trades": 15,
+          "net_return_pct": 38.487
+        },
+        "alignment": 100.0,
+        "combined": 68.89
+      },
+      {
+        "atr_period": 7,
+        "multiplier": 2.0,
+        "train_period": 100,
+        "backtest": {
+          "score": 43.15,
+          "win_rate": 47.06,
+          "profit_factor": 1.978,
+          "trades": 17,
+          "net_return_pct": 42.0402
+        },
+        "alignment": 100.0,
+        "combined": 68.73
+      }
+    ],
+    "candles_used": 300,
+    "optimized_at": "2026-04-09T04:02:33.438638+00:00"
+  },
+  "TRU": {
+    "symbol": "TRU",
+    "atr_period": 9,
+    "multiplier": 3.0,
+    "train_period": 100,
+    "highvol": 0.75,
+    "midvol": 0.5,
+    "lowvol": 0.25,
+    "stats": {
+      "score": 12.23,
+      "win_rate": 7.69,
+      "profit_factor": 0.332,
+      "trades": 13,
+      "net_return_pct": -181.4589,
+      "alignment": 100.0,
+      "combined_score": 51.73
+    },
+    "volatility": {
+      "high_centroid": 1.603108,
+      "medium_centroid": 1.143336,
+      "low_centroid": 0.797755,
+      "current_cluster": 2,
+      "cluster_name": "LOW",
+      "assigned_centroid": 0.797755,
+      "current_atr": 0.778105,
+      "sizes": [
+        9,
+        40,
+        51
+      ],
+      "iterations": 4
+    },
+    "top_3": [
+      {
+        "atr_period": 9,
+        "multiplier": 3.0,
+        "train_period": 100,
+        "backtest": {
+          "score": 12.23,
+          "win_rate": 7.69,
+          "profit_factor": 0.332,
+          "trades": 13,
+          "net_return_pct": -181.4589
+        },
+        "alignment": 100.0,
+        "combined": 51.73
+      },
+      {
+        "atr_period": 7,
+        "multiplier": 1.5,
+        "train_period": 100,
+        "backtest": {
+          "score": 33.23,
+          "win_rate": 32.0,
+          "profit_factor": 0.991,
+          "trades": 25,
+          "net_return_pct": -64.8647
+        },
+        "alignment": 0.0,
+        "combined": 18.28
+      },
+      {
+        "atr_period": 16,
+        "multiplier": 1.5,
+        "train_period": 100,
+        "backtest": {
+          "score": 33.11,
+          "win_rate": 31.03,
+          "profit_factor": 0.775,
+          "trades": 29,
+          "net_return_pct": -74.8243
+        },
+        "alignment": 0.0,
+        "combined": 18.21
+      }
+    ],
+    "candles_used": 300,
+    "optimized_at": "2026-04-09T04:04:36.289976+00:00"
+  },
+  "GALA": {
+    "symbol": "GALA",
+    "error": "insufficient_data",
+    "atr_period": 10,
+    "multiplier": 3.0
+  },
+  "NBIS": {
+    "symbol": "NBIS",
+    "atr_period": 20,
+    "multiplier": 3.0,
+    "train_period": 100,
+    "highvol": 0.75,
+    "midvol": 0.5,
+    "lowvol": 0.25,
+    "stats": {
+      "score": 41.44,
+      "win_rate": 36.36,
+      "profit_factor": 2.674,
+      "trades": 11,
+      "net_return_pct": 106.7039,
+      "alignment": 100.0,
+      "combined_score": 67.79
+    },
+    "volatility": {
+      "high_centroid": 3.840349,
+      "medium_centroid": 3.031845,
+      "low_centroid": 2.557916,
+      "current_cluster": 0,
+      "cluster_name": "HIGH",
+      "assigned_centroid": 3.840349,
+      "current_atr": 3.552784,
+      "sizes": [
+        7,
+        47,
+        46
+      ],
+      "iterations": 2
+    },
+    "top_3": [
+      {
+        "atr_period": 20,
+        "multiplier": 3.0,
+        "train_period": 100,
+        "backtest": {
+          "score": 41.44,
+          "win_rate": 36.36,
+          "profit_factor": 2.674,
+          "trades": 11,
+          "net_return_pct": 106.7039
+        },
+        "alignment": 100.0,
+        "combined": 67.79
+      },
+      {
+        "atr_period": 7,
+        "multiplier": 3.5,
+        "train_period": 100,
+        "backtest": {
+          "score": 41.3,
+          "win_rate": 44.44,
+          "profit_factor": 2.377,
+          "trades": 9,
+          "net_return_pct": 178.9852
+        },
+        "alignment": 100.0,
+        "combined": 67.72
+      },
+      {
+        "atr_period": 7,
+        "multiplier": 4.0,
+        "train_period": 100,
+        "backtest": {
+          "score": 41.3,
+          "win_rate": 44.44,
+          "profit_factor": 2.377,
+          "trades": 9,
+          "net_return_pct": 178.9852
+        },
+        "alignment": 100.0,
+        "combined": 67.72
+      }
+    ],
+    "candles_used": 300,
+    "optimized_at": "2026-04-11T10:48:06.747129+00:00"
+  },
+  "PARTI": {
+    "symbol": "PARTI",
+    "error": "insufficient_data",
+    "atr_period": 10,
+    "multiplier": 3.0
+  },
+  "UNI": {
+    "symbol": "UNI",
+    "atr_period": 16,
+    "multiplier": 3.0,
+    "train_period": 150,
+    "highvol": 0.75,
+    "midvol": 0.5,
+    "lowvol": 0.25,
+    "stats": {
+      "score": 82.5,
+      "win_rate": 100.0,
+      "profit_factor": 39.397,
+      "trades": 5,
+      "net_return_pct": 39.3975,
+      "alignment": 33.3,
+      "combined_score": 60.36
+    },
+    "volatility": {
+      "high_centroid": 0.045883,
+      "medium_centroid": 0.031051,
+      "low_centroid": 0.024131,
+      "current_cluster": 2,
+      "cluster_name": "LOW",
+      "assigned_centroid": 0.024131,
+      "current_atr": 0.018623,
+      "sizes": [
+        8,
+        60,
+        82
+      ],
+      "iterations": 6
+    },
+    "top_3": [
+      {
+        "atr_period": 16,
+        "multiplier": 3.0,
+        "train_period": 150,
+        "backtest": {
+          "score": 82.5,
+          "win_rate": 100.0,
+          "profit_factor": 39.397,
+          "trades": 5,
+          "net_return_pct": 39.3975
+        },
+        "alignment": 33.3,
+        "combined": 60.36
+      },
+      {
+        "atr_period": 16,
+        "multiplier": 3.5,
+        "train_period": 150,
+        "backtest": {
+          "score": 82.5,
+          "win_rate": 100.0,
+          "profit_factor": 36.165,
+          "trades": 5,
+          "net_return_pct": 36.1651
+        },
+        "alignment": 33.3,
+        "combined": 60.36
+      },
+      {
+        "atr_period": 16,
+        "multiplier": 4.0,
+        "train_period": 150,
+        "backtest": {
+          "score": 82.5,
+          "win_rate": 100.0,
+          "profit_factor": 29.085,
+          "trades": 5,
+          "net_return_pct": 29.0849
+        },
+        "alignment": 33.3,
+        "combined": 60.36
+      }
+    ],
+    "candles_used": 300,
+    "optimized_at": "2026-04-11T10:49:45.654974+00:00"
+  },
+  "XAG": {
+    "symbol": "XAG",
+    "error": "insufficient_data",
+    "atr_period": 10,
+    "multiplier": 3.0
+  },
+  "XLM": {
+    "symbol": "XLM",
+    "error": "insufficient_data",
+    "atr_period": 10,
+    "multiplier": 3.0
+  }
+}

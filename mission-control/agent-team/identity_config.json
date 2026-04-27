@@ -1,0 +1,49 @@
+{
+  "agents": {
+    "boba": {
+      "emoji": "🫘",
+      "display_name": "Boba",
+      "model": "claude-sonnet-4-20250514",
+      "role": "final_decision_maker",
+      "cost_tier": "premium",
+      "posts_per_day_target": 3
+    },
+    "orion": {
+      "emoji": "🌟",
+      "display_name": "Orion",
+      "model": "gemini-flash",
+      "role": "scanner_technician",
+      "cost_tier": "cheap",
+      "posts_per_day_target": 12
+    },
+    "jazzyhazzy": {
+      "emoji": "🎶",
+      "display_name": "JazzyHazzy",
+      "model": "gpt-4o-mini",
+      "role": "news_catalyst_research",
+      "cost_tier": "cheap",
+      "posts_per_day_target": 8
+    },
+    "deepseek": {
+      "emoji": "🔷",
+      "display_name": "DeepSeek",
+      "model": "deepseek-chat",
+      "role": "thesis_validator",
+      "cost_tier": "very_cheap",
+      "posts_per_day_target": 5
+    },
+    "grok": {
+      "emoji": "⚡",
+      "display_name": "Grok",
+      "model": "grok-beta",
+      "role": "realtime_social_news",
+      "cost_tier": "mid",
+      "posts_per_day_target": 3
+    }
+  },
+  "cadence_limits": {
+    "same_agent_same_type_cooldown_sec": 900,
+    "position_alert_threshold_pct": 10,
+    "daily_team_post_soft_cap": 40
+  }
+}

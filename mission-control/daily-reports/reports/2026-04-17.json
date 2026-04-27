@@ -1,0 +1,89 @@
+{
+  "date": "2026-04-17",
+  "generated_at": "2026-04-17T23:55:01.929969+00:00",
+  "signals": {
+    "total": 2,
+    "buys": 2,
+    "sells": 0,
+    "take_profits": 0,
+    "stop_losses": 0
+  },
+  "pnl": {
+    "BTCUSD": {
+      "trades_today": 0,
+      "total_pnl_pct": 0,
+      "current_direction": "LONG",
+      "current_entry": null
+    }
+  },
+  "regime": {
+    "overall": "MIXED_TREND",
+    "bias": "BULLISH",
+    "recommendation": "SuperTrend on trending TFs, Grid Bot on ranging TFs",
+    "timeframes": {
+      "1H": {
+        "regime": "STRONG_TREND",
+        "recommended_strategy": "SuperTrend Combined",
+        "direction": "BULLISH",
+        "adx": 33.7,
+        "plus_di": 33.6,
+        "minus_di": 14.3,
+        "bbw": 6.59,
+        "choppiness": 39.1,
+        "trend_efficiency": 0.193,
+        "current_price": 77510.91
+      },
+      "4H": {
+        "regime": "WEAK_TREND",
+        "recommended_strategy": "SuperTrend (cautious)",
+        "direction": "BULLISH",
+        "adx": 37.3,
+        "plus_di": 32.4,
+        "minus_di": 10.3,
+        "bbw": 6.1,
+        "choppiness": 41.8,
+        "trend_efficiency": 0.238,
+        "current_price": 77515.29
+      },
+      "1D": {
+        "regime": "TRANSITIONAL",
+        "recommended_strategy": "DayTrader (light size)",
+        "direction": "BULLISH",
+        "adx": 18.1,
+        "plus_di": 29.0,
+        "minus_di": 14.3,
+        "bbw": 18.76,
+        "choppiness": 42.0,
+        "trend_efficiency": 0.179,
+        "current_price": 77514.88
+      }
+    }
+  },
+  "optimal_params": {
+    "atr_period": 16,
+    "multiplier": 5.0,
+    "win_rate": 40.0,
+    "profit_factor": 1.79
+  },
+  "infrastructure": {
+    "pm2": {
+      "error": "[Errno 2] No such file or directory: 'pm2'"
+    },
+    "crons": {
+      "optimizer": {
+        "ran_today": true,
+        "last_entry": "[2026-04-17T22:00:13Z] Daily Optimization Complete"
+      },
+      "regime_detector": {
+        "ran_today": true,
+        "last_entry": "[2026-04-17T20:00:02Z] Done"
+      }
+    },
+    "disk": {
+      "total": "45G",
+      "used": "33G",
+      "available": "13G",
+      "percent": "72%"
+    }
+  }
+}

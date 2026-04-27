@@ -1,0 +1,22 @@
+package com.google.android.gms.internal.play_billing;
+
+import android.os.Bundle;
+import android.os.Parcel;
+
+/* JADX INFO: loaded from: classes.dex */
+public abstract class zzaj extends zzar implements zzak {
+    public zzaj() {
+        super("com.android.vending.billing.IInAppBillingIsExternalPaymentAvailableCallback");
+    }
+
+    @Override // com.google.android.gms.internal.play_billing.zzar
+    public final boolean zzb(int i4, Parcel parcel, Parcel parcel2, int i5) {
+        if (i4 != 1) {
+            return false;
+        }
+        Bundle bundle = (Bundle) zzas.zza(parcel, Bundle.CREATOR);
+        zzas.zzb(parcel);
+        zza(bundle);
+        return true;
+    }
+}

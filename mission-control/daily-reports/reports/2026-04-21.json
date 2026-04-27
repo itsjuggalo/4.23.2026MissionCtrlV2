@@ -1,0 +1,94 @@
+{
+  "date": "2026-04-21",
+  "generated_at": "2026-04-21T23:55:01.325726+00:00",
+  "signals": {
+    "total": 1,
+    "buys": 0,
+    "sells": 1,
+    "take_profits": 0,
+    "stop_losses": 0
+  },
+  "pnl": {
+    "BTCUSD": {
+      "trades_today": 1,
+      "total_pnl_pct": 1.8988,
+      "wins": 1,
+      "losses": 0,
+      "win_rate": 100.0,
+      "best_trade": 1.8988,
+      "worst_trade": 1.8988,
+      "current_direction": "SHORT",
+      "current_entry": 75031.09
+    }
+  },
+  "regime": {
+    "overall": "MIXED",
+    "bias": "BULLISH",
+    "recommendation": "DayTrader light size \u2014 no clear regime",
+    "timeframes": {
+      "1H": {
+        "regime": "WEAK_TREND",
+        "recommended_strategy": "SuperTrend (cautious)",
+        "direction": "BULLISH",
+        "adx": 20.1,
+        "plus_di": 19.3,
+        "minus_di": 25.7,
+        "bbw": 2.29,
+        "choppiness": 51.5,
+        "trend_efficiency": 0.001,
+        "current_price": 75005.56
+      },
+      "4H": {
+        "regime": "RANGING",
+        "recommended_strategy": "Grid Bot",
+        "direction": "BULLISH",
+        "adx": 16.0,
+        "plus_di": 20.5,
+        "minus_di": 21.5,
+        "bbw": 3.23,
+        "choppiness": 55.6,
+        "trend_efficiency": 0.073,
+        "current_price": 75009.28
+      },
+      "1D": {
+        "regime": "RANGING",
+        "recommended_strategy": "Grid Bot",
+        "direction": "BULLISH",
+        "adx": 19.6,
+        "plus_di": 23.9,
+        "minus_di": 14.9,
+        "bbw": 17.08,
+        "choppiness": 56.1,
+        "trend_efficiency": 0.103,
+        "current_price": 75003.81
+      }
+    }
+  },
+  "optimal_params": {
+    "atr_period": 16,
+    "multiplier": 5.0,
+    "win_rate": 40.0,
+    "profit_factor": 1.79
+  },
+  "infrastructure": {
+    "pm2": {
+      "error": "[Errno 2] No such file or directory: 'pm2'"
+    },
+    "crons": {
+      "optimizer": {
+        "ran_today": true,
+        "last_entry": "[2026-04-21T22:00:15Z] Daily Optimization Complete"
+      },
+      "regime_detector": {
+        "ran_today": true,
+        "last_entry": "[2026-04-21T20:00:01Z] Done"
+      }
+    },
+    "disk": {
+      "total": "45G",
+      "used": "33G",
+      "available": "13G",
+      "percent": "73%"
+    }
+  }
+}

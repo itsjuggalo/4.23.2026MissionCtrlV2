@@ -1,0 +1,3456 @@
+[
+  {
+    "id": "0a9d385b-7d0a-431a-89bd-5a8e1ff54109",
+    "type": "macro_update",
+    "source_id": "macro_2026-03-24T20:00:01.095790+00:00",
+    "timestamp": "2026-03-24T21:14:48.707697+00:00",
+    "telegram_sent": false,
+    "discord_sent": true,
+    "message_preview": "\ud83c\udf0d MACRO UPDATE",
+    "data": {
+      "timestamp": "2026-03-24T20:00:01.095790+00:00",
+      "regime": "RISK-OFF",
+      "total_score": -3,
+      "max_score": 12,
+      "position_size_modifier": 0.5,
+      "recommendation": "Defensive stance. Half position sizes. Prefer shorts or cash over new longs. DXY weakness supports risk assets. VIX at 26.72 \u2014 heightened volatility, size down.",
+      "indicators": {
+        "btc_bias": {
+          "raw_score": -4,
+          "bias": "BEARISH",
+          "score": -1,
+          "source": "btc-bias-scorer",
+          "timestamp": "2026-03-24T17:48:08.741278+00:00"
+        },
+        "dxy": {
+          "value": 99.393,
+          "trend": "falling",
+          "sma20": 99.078,
+          "sma50": 98.245,
+          "vs_sma20": "above",
+          "chg5d": -0.188,
+          "score": 1
+        },
+        "vix": {
+          "value": 26.72,
+          "prev": 26.15,
+          "level": "elevated fear",
+          "score": -1
+        },
+        "sp500": {
+          "price": 6557.19,
+          "ema20": 6705.18,
+          "ema50": 6786.97,
+          "sma200": 6627.87,
+          "trend": "below all MAs \u2014 bear",
+          "chg5d": -2.366,
+          "score": -2
+        },
+        "us10y": {
+          "value": 4.392,
+          "chg10d_pct": 6.19,
+          "trend": "rising sharply \u2014 tightening",
+          "score": -1
+        },
+        "crypto_mcap": {
+          "mcap": 2460271108913.0,
+          "prev_mcap": 2464114363813.0,
+          "trend": "flat (-0.2%)",
+          "score": 0
+        },
+        "fed_expectations": {
+          "value": 3.62,
+          "chg10d_pct": 0.695,
+          "two_year_trend": "stable",
+          "score": 0
+        },
+        "sector_rotation": {
+          "leader": "XLE",
+          "type": "risk-on",
+          "growth_avg_5d": -1.502,
+          "defensive_avg_5d": -4.268,
+          "perf": {
+            "XLK": -2.429,
+            "XLF": -0.575,
+            "XLE": 3.948,
+            "XLU": -4.297,
+            "XLP": -4.238
+          },
+          "score": 1
+        }
+      },
+      "alerts": [],
+      "history": [
+        {
+          "timestamp": "2026-03-24T19:39:25.100649+00:00",
+          "regime": "RISK-OFF",
+          "score": -3
+        },
+        {
+          "timestamp": "2026-03-24T19:39:05.420320+00:00",
+          "regime": "RISK-OFF",
+          "score": -3
+        }
+      ]
+    }
+  },
+  {
+    "id": "dd17b3f9-6823-4a37-b040-95ff901eb82b",
+    "type": "macro_regime_change",
+    "source_id": "macro_2026-03-24T23:02:15.968346+00:00",
+    "timestamp": "2026-03-24T23:02:39.820311+00:00",
+    "telegram_sent": true,
+    "discord_sent": true,
+    "message_preview": "\ud83c\udf0d MACRO UPDATE",
+    "data": {
+      "timestamp": "2026-03-24T23:02:15.968346+00:00",
+      "regime": "NEUTRAL",
+      "total_score": -1,
+      "max_score": 12,
+      "position_size_modifier": 0.75,
+      "recommendation": "Reduce position sizes by 25%. Be selective \u2014 only highest-conviction setups. DXY weakness supports risk assets. VIX at 26.95 \u2014 heightened volatility, size down.",
+      "indicators": {
+        "btc_bias": {
+          "raw_score": 1,
+          "bias": "SLIGHTLY BULLISH",
+          "score": 0,
+          "source": "btc-bias-scorer",
+          "timestamp": "2026-03-24T20:00:00.410808+00:00"
+        },
+        "dxy": {
+          "value": 99.183,
+          "trend": "falling",
+          "sma20": 99.067,
+          "sma50": 98.241,
+          "vs_sma20": "above",
+          "chg5d": -0.399,
+          "score": 1
+        },
+        "vix": {
+          "value": 26.95,
+          "prev": 26.15,
+          "level": "elevated fear",
+          "score": -1
+        },
+        "sp500": {
+          "price": 6556.37,
+          "ema20": 6705.1,
+          "ema50": 6786.93,
+          "sma200": 6627.87,
+          "trend": "below all MAs \u2014 bear",
+          "chg5d": -2.378,
+          "score": -2
+        },
+        "us10y": {
+          "value": 4.392,
+          "chg10d_pct": 6.19,
+          "trend": "rising sharply \u2014 tightening",
+          "score": -1
+        },
+        "crypto_mcap": {
+          "mcap": 2491018912896.0,
+          "prev_mcap": 2460271108913.0,
+          "trend": "rising (+1.2%)",
+          "score": 1
+        },
+        "fed_expectations": {
+          "value": 3.62,
+          "chg10d_pct": 0.695,
+          "two_year_trend": "stable",
+          "score": 0
+        },
+        "sector_rotation": {
+          "leader": "XLE",
+          "type": "risk-on",
+          "growth_avg_5d": -1.497,
+          "defensive_avg_5d": -4.283,
+          "perf": {
+            "XLK": -2.429,
+            "XLF": -0.565,
+            "XLE": 3.982,
+            "XLU": -4.328,
+            "XLP": -4.238
+          },
+          "score": 1
+        }
+      },
+      "alerts": [
+        "Regime change: RISK-OFF \u2192 NEUTRAL"
+      ],
+      "history": [
+        {
+          "timestamp": "2026-03-24T20:00:01.095790+00:00",
+          "regime": "RISK-OFF",
+          "score": -3
+        },
+        {
+          "timestamp": "2026-03-24T19:39:25.100649+00:00",
+          "regime": "RISK-OFF",
+          "score": -3
+        },
+        {
+          "timestamp": "2026-03-24T19:39:05.420320+00:00",
+          "regime": "RISK-OFF",
+          "score": -3
+        }
+      ]
+    }
+  },
+  {
+    "id": "ee30fae1-4fa0-4c15-9def-4efb001207ea",
+    "type": "daily_summary",
+    "source_id": "daily_2026-03-25",
+    "timestamp": "2026-03-25T00:00:12.999577+00:00",
+    "telegram_sent": true,
+    "discord_sent": true,
+    "message_preview": "\ud83d\udcca DAILY SUMMARY \u2014 March 25, 2026"
+  },
+  {
+    "id": "94a26478-969b-4f82-ba48-a97ac5aee55a",
+    "type": "daily_summary",
+    "source_id": "daily_2026-03-26",
+    "timestamp": "2026-03-26T00:00:01.565871+00:00",
+    "telegram_sent": true,
+    "discord_sent": true,
+    "message_preview": "\ud83d\udcca DAILY SUMMARY \u2014 March 26, 2026"
+  },
+  {
+    "id": "031e7fad-bf06-4371-b27f-f58964ffa91d",
+    "type": "macro_regime_change",
+    "source_id": "macro_2026-03-26T04:20:01.019142+00:00",
+    "timestamp": "2026-03-26T04:20:14.007662+00:00",
+    "telegram_sent": true,
+    "discord_sent": true,
+    "message_preview": "\ud83c\udf0d MACRO UPDATE",
+    "data": {
+      "timestamp": "2026-03-26T04:20:01.019142+00:00",
+      "regime": "RISK-OFF",
+      "total_score": -5,
+      "max_score": 12,
+      "position_size_modifier": 0.5,
+      "recommendation": "Defensive stance. Half position sizes. Prefer shorts or cash over new longs. DXY strength is a headwind \u2014 watch for risk-off pressure. VIX at 25.33 \u2014 heightened volatility, size down.",
+      "indicators": {
+        "btc_bias": {
+          "raw_score": 0,
+          "bias": "NEUTRAL",
+          "score": 0,
+          "source": "btc-bias-scorer",
+          "timestamp": "2026-03-26T04:00:00.392190+00:00"
+        },
+        "dxy": {
+          "value": 99.596,
+          "trend": "rising above both SMAs",
+          "sma20": 99.265,
+          "sma50": 98.27,
+          "vs_sma20": "above",
+          "chg5d": 0.369,
+          "score": -2
+        },
+        "vix": {
+          "value": 25.33,
+          "prev": 26.95,
+          "level": "elevated fear",
+          "score": -1
+        },
+        "sp500": {
+          "price": 6591.9,
+          "ema20": 6694.32,
+          "ema50": 6779.29,
+          "sma200": 6630.83,
+          "trend": "below all MAs \u2014 bear",
+          "chg5d": -0.495,
+          "score": -2
+        },
+        "us10y": {
+          "value": 4.328,
+          "chg10d_pct": 2.852,
+          "trend": "rising",
+          "score": -1
+        },
+        "crypto_mcap": {
+          "mcap": 2505866013531.0,
+          "trend": "unknown",
+          "score": 0,
+          "stale": true
+        },
+        "fed_expectations": {
+          "value": 3.62,
+          "chg10d_pct": 0.556,
+          "two_year_trend": "stable",
+          "score": 0
+        },
+        "sector_rotation": {
+          "leader": "XLE",
+          "type": "risk-on",
+          "growth_avg_5d": -0.057,
+          "defensive_avg_5d": -2.267,
+          "perf": {
+            "XLK": -0.87,
+            "XLF": 0.756,
+            "XLE": 3.663,
+            "XLU": -3.167,
+            "XLP": -1.367
+          },
+          "score": 1
+        }
+      },
+      "alerts": [
+        "Regime change: NEUTRAL \u2192 RISK-OFF",
+        "DXY direction change: 'falling' \u2192 'rising above both SMAs'"
+      ],
+      "history": [
+        {
+          "timestamp": "2026-03-26T04:00:01.022061+00:00",
+          "regime": "NEUTRAL",
+          "score": -2
+        },
+        {
+          "timestamp": "2026-03-26T03:40:01.279867+00:00",
+          "regime": "NEUTRAL",
+          "score": -2
+        },
+        {
+          "timestamp": "2026-03-26T03:20:01.112966+00:00",
+          "regime": "NEUTRAL",
+          "score": -2
+        },
+        {
+          "timestamp": "2026-03-26T03:00:01.254015+00:00",
+          "regime": "NEUTRAL",
+          "score": -2
+        },
+        {
+          "timestamp": "2026-03-26T02:40:01.018605+00:00",
+          "regime": "NEUTRAL",
+          "score": -2
+        },
+        {
+          "timestamp": "2026-03-26T02:20:01.092148+00:00",
+          "regime": "NEUTRAL",
+          "score": -2
+        },
+        {
+          "timestamp": "2026-03-26T02:00:01.161037+00:00",
+          "regime": "NEUTRAL",
+          "score": -2
+        },
+        {
+          "timestamp": "2026-03-26T01:40:02.010210+00:00",
+          "regime": "NEUTRAL",
+          "score": -2
+        },
+        {
+          "timestamp": "2026-03-26T01:20:01.134445+00:00",
+          "regime": "NEUTRAL",
+          "score": -2
+        },
+        {
+          "timestamp": "2026-03-26T01:00:01.265878+00:00",
+          "regime": "NEUTRAL",
+          "score": -2
+        }
+      ]
+    }
+  },
+  {
+    "id": "076e8d2e-3462-46ca-b417-0f9d9a3f4e7f",
+    "type": "macro_regime_change",
+    "source_id": "macro_2026-03-26T18:00:01.027258+00:00",
+    "timestamp": "2026-03-26T18:00:21.331233+00:00",
+    "telegram_sent": true,
+    "discord_sent": true,
+    "message_preview": "\ud83c\udf0d MACRO UPDATE",
+    "data": {
+      "timestamp": "2026-03-26T18:00:01.027258+00:00",
+      "regime": "CRISIS",
+      "total_score": -7,
+      "max_score": 12,
+      "position_size_modifier": 0.25,
+      "recommendation": "Minimal exposure. Quarter-size only. Preserve capital \u2014 no new longs. DXY strength is a headwind \u2014 watch for risk-off pressure. VIX at 27.94 \u2014 heightened volatility, size down.",
+      "indicators": {
+        "btc_bias": {
+          "raw_score": -1,
+          "bias": "NEUTRAL",
+          "score": 0,
+          "source": "btc-bias-scorer",
+          "timestamp": "2026-03-26T17:40:00.401521+00:00"
+        },
+        "dxy": {
+          "value": 99.93,
+          "trend": "rising above both SMAs",
+          "sma20": 99.281,
+          "sma50": 98.277,
+          "vs_sma20": "above",
+          "chg5d": 0.705,
+          "score": -2
+        },
+        "vix": {
+          "value": 27.94,
+          "prev": 25.33,
+          "level": "elevated fear",
+          "score": -1
+        },
+        "sp500": {
+          "price": 6491.43,
+          "ema20": 6674.99,
+          "ema50": 6768.0,
+          "sma200": 6633.26,
+          "trend": "below all MAs \u2014 bear",
+          "chg5d": -1.742,
+          "score": -2
+        },
+        "us10y": {
+          "value": 4.414,
+          "chg10d_pct": 3.3,
+          "trend": "rising sharply \u2014 tightening",
+          "score": -1
+        },
+        "crypto_mcap": {
+          "mcap": 2435040515718.0,
+          "prev_mcap": 2445633694284.0,
+          "trend": "flat (-0.4%)",
+          "score": 0
+        },
+        "fed_expectations": {
+          "value": 3.615,
+          "chg10d_pct": 0.277,
+          "two_year_trend": "stable",
+          "score": 0
+        },
+        "sector_rotation": {
+          "leader": "XLE",
+          "type": "risk-off",
+          "growth_avg_5d": -1.986,
+          "defensive_avg_5d": -1.551,
+          "perf": {
+            "XLK": -3.951,
+            "XLF": -0.02,
+            "XLE": 3.866,
+            "XLU": -2.578,
+            "XLP": -0.525
+          },
+          "score": -1
+        }
+      },
+      "alerts": [
+        "Regime change: RISK-OFF \u2192 CRISIS"
+      ],
+      "history": [
+        {
+          "timestamp": "2026-03-26T17:40:01.092880+00:00",
+          "regime": "RISK-OFF",
+          "score": -6
+        },
+        {
+          "timestamp": "2026-03-26T17:20:01.190145+00:00",
+          "regime": "RISK-OFF",
+          "score": -6
+        },
+        {
+          "timestamp": "2026-03-26T17:00:01.090141+00:00",
+          "regime": "RISK-OFF",
+          "score": -6
+        },
+        {
+          "timestamp": "2026-03-26T16:40:01.088861+00:00",
+          "regime": "RISK-OFF",
+          "score": -6
+        },
+        {
+          "timestamp": "2026-03-26T16:20:01.084857+00:00",
+          "regime": "RISK-OFF",
+          "score": -6
+        },
+        {
+          "timestamp": "2026-03-26T16:00:01.063178+00:00",
+          "regime": "RISK-OFF",
+          "score": -6
+        },
+        {
+          "timestamp": "2026-03-26T15:40:01.105918+00:00",
+          "regime": "RISK-OFF",
+          "score": -6
+        },
+        {
+          "timestamp": "2026-03-26T15:20:01.125582+00:00",
+          "regime": "RISK-OFF",
+          "score": -6
+        },
+        {
+          "timestamp": "2026-03-26T15:00:01.106219+00:00",
+          "regime": "RISK-OFF",
+          "score": -6
+        },
+        {
+          "timestamp": "2026-03-26T14:40:01.354859+00:00",
+          "regime": "RISK-OFF",
+          "score": -5
+        }
+      ]
+    }
+  },
+  {
+    "id": "7b6ef4b3-8817-4a40-9248-73562a01aa85",
+    "type": "macro_regime_change",
+    "source_id": "macro_2026-03-26T20:40:01.021609+00:00",
+    "timestamp": "2026-03-26T20:40:28.960104+00:00",
+    "telegram_sent": true,
+    "discord_sent": true,
+    "message_preview": "\ud83c\udf0d MACRO UPDATE",
+    "data": {
+      "timestamp": "2026-03-26T20:40:01.021609+00:00",
+      "regime": "RISK-OFF",
+      "total_score": -6,
+      "max_score": 12,
+      "position_size_modifier": 0.5,
+      "recommendation": "Defensive stance. Half position sizes. Prefer shorts or cash over new longs. DXY strength is a headwind \u2014 watch for risk-off pressure. VIX at 27.44 \u2014 heightened volatility, size down.",
+      "indicators": {
+        "btc_bias": {
+          "raw_score": -1,
+          "bias": "NEUTRAL",
+          "score": 0,
+          "source": "btc-bias-scorer",
+          "timestamp": "2026-03-26T20:20:00.394443+00:00"
+        },
+        "dxy": {
+          "value": 99.887,
+          "trend": "rising above both SMAs",
+          "sma20": 99.279,
+          "sma50": 98.276,
+          "vs_sma20": "above",
+          "chg5d": 0.662,
+          "score": -2
+        },
+        "vix": {
+          "value": 27.44,
+          "prev": 25.33,
+          "level": "elevated fear",
+          "score": -1
+        },
+        "sp500": {
+          "price": 6477.16,
+          "ema20": 6673.64,
+          "ema50": 6767.44,
+          "sma200": 6633.18,
+          "trend": "below all MAs \u2014 bear",
+          "chg5d": -1.958,
+          "score": -2
+        },
+        "us10y": {
+          "value": 4.416,
+          "chg10d_pct": 3.347,
+          "trend": "rising sharply \u2014 tightening",
+          "score": -1
+        },
+        "crypto_mcap": {
+          "mcap": 2449996088282.0,
+          "trend": "unknown",
+          "score": 0,
+          "stale": true
+        },
+        "fed_expectations": {
+          "value": 3.62,
+          "chg10d_pct": 0.416,
+          "two_year_trend": "stable",
+          "score": 0
+        },
+        "sector_rotation": {
+          "leader": "XLE",
+          "type": "neutral",
+          "growth_avg_5d": -2.081,
+          "defensive_avg_5d": -1.806,
+          "perf": {
+            "XLK": -4.284,
+            "XLF": 0.122,
+            "XLE": 3.639,
+            "XLU": -2.6,
+            "XLP": -1.013
+          },
+          "score": 0
+        }
+      },
+      "alerts": [
+        "Regime change: CRISIS \u2192 RISK-OFF"
+      ],
+      "history": [
+        {
+          "timestamp": "2026-03-26T20:20:01.055926+00:00",
+          "regime": "CRISIS",
+          "score": -7
+        },
+        {
+          "timestamp": "2026-03-26T20:00:01.098865+00:00",
+          "regime": "CRISIS",
+          "score": -7
+        },
+        {
+          "timestamp": "2026-03-26T19:40:01.897227+00:00",
+          "regime": "CRISIS",
+          "score": -7
+        },
+        {
+          "timestamp": "2026-03-26T19:20:01.123888+00:00",
+          "regime": "CRISIS",
+          "score": -7
+        },
+        {
+          "timestamp": "2026-03-26T19:00:01.624076+00:00",
+          "regime": "CRISIS",
+          "score": -7
+        },
+        {
+          "timestamp": "2026-03-26T18:40:01.162643+00:00",
+          "regime": "CRISIS",
+          "score": -7
+        },
+        {
+          "timestamp": "2026-03-26T18:20:01.027498+00:00",
+          "regime": "CRISIS",
+          "score": -7
+        },
+        {
+          "timestamp": "2026-03-26T18:00:01.027258+00:00",
+          "regime": "CRISIS",
+          "score": -7
+        },
+        {
+          "timestamp": "2026-03-26T17:40:01.092880+00:00",
+          "regime": "RISK-OFF",
+          "score": -6
+        },
+        {
+          "timestamp": "2026-03-26T17:20:01.190145+00:00",
+          "regime": "RISK-OFF",
+          "score": -6
+        }
+      ]
+    }
+  },
+  {
+    "id": "c25ccf97-5aa6-419b-a9cd-84a228cb4022",
+    "type": "macro_regime_change",
+    "source_id": "macro_2026-03-26T23:00:01.028906+00:00",
+    "timestamp": "2026-03-26T23:00:35.553689+00:00",
+    "telegram_sent": true,
+    "discord_sent": true,
+    "message_preview": "\ud83c\udf0d MACRO UPDATE",
+    "data": {
+      "timestamp": "2026-03-26T23:00:01.028906+00:00",
+      "regime": "CRISIS",
+      "total_score": -7,
+      "max_score": 12,
+      "position_size_modifier": 0.25,
+      "recommendation": "Minimal exposure. Quarter-size only. Preserve capital \u2014 no new longs. DXY strength is a headwind \u2014 watch for risk-off pressure. VIX at 27.44 \u2014 heightened volatility, size down.",
+      "indicators": {
+        "btc_bias": {
+          "raw_score": -3,
+          "bias": "SLIGHTLY BEARISH",
+          "score": -1,
+          "source": "btc-bias-scorer",
+          "timestamp": "2026-03-26T22:40:00.393980+00:00"
+        },
+        "dxy": {
+          "value": 99.865,
+          "trend": "rising above both SMAs",
+          "sma20": 99.278,
+          "sma50": 98.276,
+          "vs_sma20": "above",
+          "chg5d": 0.64,
+          "score": -2
+        },
+        "vix": {
+          "value": 27.44,
+          "prev": 25.33,
+          "level": "elevated fear",
+          "score": -1
+        },
+        "sp500": {
+          "price": 6477.16,
+          "ema20": 6673.64,
+          "ema50": 6767.44,
+          "sma200": 6633.18,
+          "trend": "below all MAs \u2014 bear",
+          "chg5d": -1.958,
+          "score": -2
+        },
+        "us10y": {
+          "value": 4.416,
+          "chg10d_pct": 3.347,
+          "trend": "rising sharply \u2014 tightening",
+          "score": -1
+        },
+        "crypto_mcap": {
+          "mcap": 2438891608342.0,
+          "prev_mcap": 2437767395210.0,
+          "trend": "flat (+0.0%)",
+          "score": 0
+        },
+        "fed_expectations": {
+          "value": 3.62,
+          "chg10d_pct": 0.416,
+          "two_year_trend": "stable",
+          "score": 0
+        },
+        "sector_rotation": {
+          "leader": "XLE",
+          "type": "neutral",
+          "growth_avg_5d": -2.081,
+          "defensive_avg_5d": -1.806,
+          "perf": {
+            "XLK": -4.284,
+            "XLF": 0.122,
+            "XLE": 3.639,
+            "XLU": -2.6,
+            "XLP": -1.013
+          },
+          "score": 0
+        }
+      },
+      "alerts": [
+        "Regime change: RISK-OFF \u2192 CRISIS"
+      ],
+      "history": [
+        {
+          "timestamp": "2026-03-26T22:40:01.069650+00:00",
+          "regime": "RISK-OFF",
+          "score": -6
+        },
+        {
+          "timestamp": "2026-03-26T22:20:01.752898+00:00",
+          "regime": "RISK-OFF",
+          "score": -6
+        },
+        {
+          "timestamp": "2026-03-26T22:00:01.037806+00:00",
+          "regime": "RISK-OFF",
+          "score": -6
+        },
+        {
+          "timestamp": "2026-03-26T21:40:01.031148+00:00",
+          "regime": "RISK-OFF",
+          "score": -6
+        },
+        {
+          "timestamp": "2026-03-26T21:20:01.036140+00:00",
+          "regime": "RISK-OFF",
+          "score": -6
+        },
+        {
+          "timestamp": "2026-03-26T21:00:01.120880+00:00",
+          "regime": "RISK-OFF",
+          "score": -6
+        },
+        {
+          "timestamp": "2026-03-26T20:40:01.021609+00:00",
+          "regime": "RISK-OFF",
+          "score": -6
+        },
+        {
+          "timestamp": "2026-03-26T20:20:01.055926+00:00",
+          "regime": "CRISIS",
+          "score": -7
+        },
+        {
+          "timestamp": "2026-03-26T20:00:01.098865+00:00",
+          "regime": "CRISIS",
+          "score": -7
+        },
+        {
+          "timestamp": "2026-03-26T19:40:01.897227+00:00",
+          "regime": "CRISIS",
+          "score": -7
+        }
+      ]
+    }
+  },
+  {
+    "id": "0156db0f-30a6-4b5e-8b9b-61f323130ea6",
+    "type": "daily_summary",
+    "source_id": "daily_2026-03-27",
+    "timestamp": "2026-03-27T00:00:08.928275+00:00",
+    "telegram_sent": true,
+    "discord_sent": true,
+    "message_preview": "\ud83d\udcca DAILY SUMMARY \u2014 March 27, 2026"
+  },
+  {
+    "id": "8f44d003-8304-4474-968c-e4ade68b92a0",
+    "type": "macro_regime_change",
+    "source_id": "macro_2026-03-27T02:20:01.118629+00:00",
+    "timestamp": "2026-03-27T02:20:16.131599+00:00",
+    "telegram_sent": true,
+    "discord_sent": true,
+    "message_preview": "\ud83c\udf0d MACRO UPDATE",
+    "data": {
+      "timestamp": "2026-03-27T02:20:01.118629+00:00",
+      "regime": "RISK-OFF",
+      "total_score": -6,
+      "max_score": 12,
+      "position_size_modifier": 0.5,
+      "recommendation": "Defensive stance. Half position sizes. Prefer shorts or cash over new longs. DXY strength is a headwind \u2014 watch for risk-off pressure. VIX at 27.44 \u2014 heightened volatility, size down.",
+      "indicators": {
+        "btc_bias": {
+          "raw_score": -2,
+          "bias": "SLIGHTLY BEARISH",
+          "score": 0,
+          "source": "btc-bias-scorer",
+          "timestamp": "2026-03-27T02:00:00.399434+00:00"
+        },
+        "dxy": {
+          "value": 99.838,
+          "trend": "rising above both SMAs",
+          "sma20": 99.277,
+          "sma50": 98.275,
+          "vs_sma20": "above",
+          "chg5d": 0.613,
+          "score": -2
+        },
+        "vix": {
+          "value": 27.44,
+          "prev": 25.33,
+          "level": "elevated fear",
+          "score": -1
+        },
+        "sp500": {
+          "price": 6477.16,
+          "ema20": 6673.64,
+          "ema50": 6767.44,
+          "sma200": 6633.18,
+          "trend": "below all MAs \u2014 bear",
+          "chg5d": -1.958,
+          "score": -2
+        },
+        "us10y": {
+          "value": 4.416,
+          "chg10d_pct": 3.347,
+          "trend": "rising sharply \u2014 tightening",
+          "score": -1
+        },
+        "crypto_mcap": {
+          "mcap": 2445622629588.0,
+          "prev_mcap": 2445355719404.0,
+          "trend": "flat (+0.0%)",
+          "score": 0
+        },
+        "fed_expectations": {
+          "value": 3.62,
+          "chg10d_pct": 0.416,
+          "two_year_trend": "stable",
+          "score": 0
+        },
+        "sector_rotation": {
+          "leader": "XLE",
+          "type": "neutral",
+          "growth_avg_5d": -2.081,
+          "defensive_avg_5d": -1.806,
+          "perf": {
+            "XLK": -4.284,
+            "XLF": 0.122,
+            "XLE": 3.639,
+            "XLU": -2.6,
+            "XLP": -1.013
+          },
+          "score": 0
+        }
+      },
+      "alerts": [
+        "Regime change: CRISIS \u2192 RISK-OFF"
+      ],
+      "history": [
+        {
+          "timestamp": "2026-03-27T02:00:01.547844+00:00",
+          "regime": "CRISIS",
+          "score": -7
+        },
+        {
+          "timestamp": "2026-03-27T01:40:02.748421+00:00",
+          "regime": "CRISIS",
+          "score": -7
+        },
+        {
+          "timestamp": "2026-03-27T01:20:01.165184+00:00",
+          "regime": "CRISIS",
+          "score": -7
+        },
+        {
+          "timestamp": "2026-03-27T01:00:01.026885+00:00",
+          "regime": "CRISIS",
+          "score": -7
+        },
+        {
+          "timestamp": "2026-03-27T00:40:01.024823+00:00",
+          "regime": "CRISIS",
+          "score": -7
+        },
+        {
+          "timestamp": "2026-03-27T00:20:01.075845+00:00",
+          "regime": "CRISIS",
+          "score": -7
+        },
+        {
+          "timestamp": "2026-03-27T00:00:01.859105+00:00",
+          "regime": "CRISIS",
+          "score": -7
+        },
+        {
+          "timestamp": "2026-03-26T23:40:01.048132+00:00",
+          "regime": "CRISIS",
+          "score": -7
+        },
+        {
+          "timestamp": "2026-03-26T23:20:01.089815+00:00",
+          "regime": "CRISIS",
+          "score": -7
+        },
+        {
+          "timestamp": "2026-03-26T23:00:01.028906+00:00",
+          "regime": "CRISIS",
+          "score": -7
+        }
+      ]
+    }
+  },
+  {
+    "id": "6852bc29-f35a-43e4-a545-0b40d52c4590",
+    "type": "macro_regime_change",
+    "source_id": "macro_2026-03-27T02:40:01.025626+00:00",
+    "timestamp": "2026-03-27T02:40:17.723545+00:00",
+    "telegram_sent": true,
+    "discord_sent": true,
+    "message_preview": "\ud83c\udf0d MACRO UPDATE",
+    "data": {
+      "timestamp": "2026-03-27T02:40:01.025626+00:00",
+      "regime": "CRISIS",
+      "total_score": -7,
+      "max_score": 12,
+      "position_size_modifier": 0.25,
+      "recommendation": "Minimal exposure. Quarter-size only. Preserve capital \u2014 no new longs. DXY strength is a headwind \u2014 watch for risk-off pressure. VIX at 27.44 \u2014 heightened volatility, size down.",
+      "indicators": {
+        "btc_bias": {
+          "raw_score": -4,
+          "bias": "BEARISH",
+          "score": -1,
+          "source": "btc-bias-scorer",
+          "timestamp": "2026-03-27T02:20:00.405975+00:00"
+        },
+        "dxy": {
+          "value": 99.845,
+          "trend": "rising above both SMAs",
+          "sma20": 99.277,
+          "sma50": 98.275,
+          "vs_sma20": "above",
+          "chg5d": 0.62,
+          "score": -2
+        },
+        "vix": {
+          "value": 27.44,
+          "prev": 25.33,
+          "level": "elevated fear",
+          "score": -1
+        },
+        "sp500": {
+          "price": 6477.16,
+          "ema20": 6673.64,
+          "ema50": 6767.44,
+          "sma200": 6633.18,
+          "trend": "below all MAs \u2014 bear",
+          "chg5d": -1.958,
+          "score": -2
+        },
+        "us10y": {
+          "value": 4.416,
+          "chg10d_pct": 3.347,
+          "trend": "rising sharply \u2014 tightening",
+          "score": -1
+        },
+        "crypto_mcap": {
+          "mcap": 2444246019401.0,
+          "prev_mcap": 2445622629588.0,
+          "trend": "flat (-0.1%)",
+          "score": 0
+        },
+        "fed_expectations": {
+          "value": 3.62,
+          "chg10d_pct": 0.416,
+          "two_year_trend": "stable",
+          "score": 0
+        },
+        "sector_rotation": {
+          "leader": "XLE",
+          "type": "neutral",
+          "growth_avg_5d": -2.081,
+          "defensive_avg_5d": -1.806,
+          "perf": {
+            "XLK": -4.284,
+            "XLF": 0.122,
+            "XLE": 3.639,
+            "XLU": -2.6,
+            "XLP": -1.013
+          },
+          "score": 0
+        }
+      },
+      "alerts": [
+        "Regime change: RISK-OFF \u2192 CRISIS"
+      ],
+      "history": [
+        {
+          "timestamp": "2026-03-27T02:20:01.118629+00:00",
+          "regime": "RISK-OFF",
+          "score": -6
+        },
+        {
+          "timestamp": "2026-03-27T02:00:01.547844+00:00",
+          "regime": "CRISIS",
+          "score": -7
+        },
+        {
+          "timestamp": "2026-03-27T01:40:02.748421+00:00",
+          "regime": "CRISIS",
+          "score": -7
+        },
+        {
+          "timestamp": "2026-03-27T01:20:01.165184+00:00",
+          "regime": "CRISIS",
+          "score": -7
+        },
+        {
+          "timestamp": "2026-03-27T01:00:01.026885+00:00",
+          "regime": "CRISIS",
+          "score": -7
+        },
+        {
+          "timestamp": "2026-03-27T00:40:01.024823+00:00",
+          "regime": "CRISIS",
+          "score": -7
+        },
+        {
+          "timestamp": "2026-03-27T00:20:01.075845+00:00",
+          "regime": "CRISIS",
+          "score": -7
+        },
+        {
+          "timestamp": "2026-03-27T00:00:01.859105+00:00",
+          "regime": "CRISIS",
+          "score": -7
+        },
+        {
+          "timestamp": "2026-03-26T23:40:01.048132+00:00",
+          "regime": "CRISIS",
+          "score": -7
+        },
+        {
+          "timestamp": "2026-03-26T23:20:01.089815+00:00",
+          "regime": "CRISIS",
+          "score": -7
+        }
+      ]
+    }
+  },
+  {
+    "id": "5cd59430-f174-41a8-8ae7-74513550da0b",
+    "type": "macro_regime_change",
+    "source_id": "macro_2026-03-27T04:00:01.055809+00:00",
+    "timestamp": "2026-03-27T04:00:28.677186+00:00",
+    "telegram_sent": true,
+    "discord_sent": true,
+    "message_preview": "\ud83c\udf0d MACRO UPDATE",
+    "data": {
+      "timestamp": "2026-03-27T04:00:01.055809+00:00",
+      "regime": "RISK-OFF",
+      "total_score": -6,
+      "max_score": 12,
+      "position_size_modifier": 0.5,
+      "recommendation": "Defensive stance. Half position sizes. Prefer shorts or cash over new longs. DXY strength is a headwind \u2014 watch for risk-off pressure. VIX at 27.44 \u2014 heightened volatility, size down.",
+      "indicators": {
+        "btc_bias": {
+          "raw_score": -3,
+          "bias": "SLIGHTLY BEARISH",
+          "score": -1,
+          "source": "btc-bias-scorer",
+          "timestamp": "2026-03-27T03:53:29.797375+00:00"
+        },
+        "dxy": {
+          "value": 99.9,
+          "trend": "rising",
+          "sma20": 99.28,
+          "sma50": null,
+          "vs_sma20": "above",
+          "chg5d": 0.675,
+          "score": -1
+        },
+        "vix": {
+          "value": 27.44,
+          "prev": 25.33,
+          "level": "elevated fear",
+          "score": -1
+        },
+        "sp500": {
+          "price": 6477.16,
+          "ema20": 6673.64,
+          "ema50": 6767.44,
+          "sma200": 6633.18,
+          "trend": "below all MAs \u2014 bear",
+          "chg5d": -1.958,
+          "score": -2
+        },
+        "us10y": {
+          "value": 4.416,
+          "chg10d_pct": 3.347,
+          "trend": "rising sharply \u2014 tightening",
+          "score": -1
+        },
+        "crypto_mcap": {
+          "mcap": 2436321348919.0,
+          "prev_mcap": 2440205340687.0,
+          "trend": "flat (-0.2%)",
+          "score": 0
+        },
+        "fed_expectations": {
+          "value": 3.62,
+          "chg10d_pct": 0.416,
+          "two_year_trend": "stable",
+          "score": 0
+        },
+        "sector_rotation": {
+          "leader": "XLE",
+          "type": "neutral",
+          "growth_avg_5d": -2.081,
+          "defensive_avg_5d": -1.806,
+          "perf": {
+            "XLK": -4.284,
+            "XLF": 0.122,
+            "XLE": 3.639,
+            "XLU": -2.6,
+            "XLP": -1.013
+          },
+          "score": 0
+        }
+      },
+      "alerts": [
+        "Regime change: CRISIS \u2192 RISK-OFF",
+        "DXY direction change: 'rising above both SMAs' \u2192 'rising'"
+      ],
+      "history": [
+        {
+          "timestamp": "2026-03-27T03:53:34.719869+00:00",
+          "regime": "CRISIS",
+          "score": -7
+        },
+        {
+          "timestamp": "2026-03-27T03:45:06.592111+00:00",
+          "regime": "CRISIS",
+          "score": -7
+        },
+        {
+          "timestamp": "2026-03-27T03:40:01.154613+00:00",
+          "regime": "CRISIS",
+          "score": -7
+        },
+        {
+          "timestamp": "2026-03-27T03:20:01.008792+00:00",
+          "regime": "CRISIS",
+          "score": -7
+        },
+        {
+          "timestamp": "2026-03-27T03:00:01.719615+00:00",
+          "regime": "CRISIS",
+          "score": -7
+        },
+        {
+          "timestamp": "2026-03-27T02:40:01.025626+00:00",
+          "regime": "CRISIS",
+          "score": -7
+        },
+        {
+          "timestamp": "2026-03-27T02:20:01.118629+00:00",
+          "regime": "RISK-OFF",
+          "score": -6
+        },
+        {
+          "timestamp": "2026-03-27T02:00:01.547844+00:00",
+          "regime": "CRISIS",
+          "score": -7
+        },
+        {
+          "timestamp": "2026-03-27T01:40:02.748421+00:00",
+          "regime": "CRISIS",
+          "score": -7
+        },
+        {
+          "timestamp": "2026-03-27T01:20:01.165184+00:00",
+          "regime": "CRISIS",
+          "score": -7
+        }
+      ]
+    }
+  },
+  {
+    "id": "5453057b-e8e1-44ec-a89a-0a2d4077662d",
+    "type": "macro_regime_change",
+    "source_id": "macro_2026-03-27T04:20:01.022025+00:00",
+    "timestamp": "2026-03-27T04:20:30.159171+00:00",
+    "telegram_sent": true,
+    "discord_sent": true,
+    "message_preview": "\ud83c\udf0d MACRO UPDATE",
+    "data": {
+      "timestamp": "2026-03-27T04:20:01.022025+00:00",
+      "regime": "CRISIS",
+      "total_score": -7,
+      "max_score": 12,
+      "position_size_modifier": 0.25,
+      "recommendation": "Minimal exposure. Quarter-size only. Preserve capital \u2014 no new longs. DXY strength is a headwind \u2014 watch for risk-off pressure. VIX at 27.44 \u2014 heightened volatility, size down.",
+      "indicators": {
+        "btc_bias": {
+          "raw_score": -3,
+          "bias": "SLIGHTLY BEARISH",
+          "score": -1,
+          "source": "btc-bias-scorer",
+          "timestamp": "2026-03-27T04:00:00.386401+00:00"
+        },
+        "dxy": {
+          "value": 99.851,
+          "trend": "rising above both SMAs",
+          "sma20": 99.392,
+          "sma50": 98.291,
+          "vs_sma20": "above",
+          "chg5d": 0.202,
+          "score": -2
+        },
+        "vix": {
+          "value": 27.44,
+          "prev": 25.33,
+          "level": "elevated fear",
+          "score": -1
+        },
+        "sp500": {
+          "price": 6477.16,
+          "ema20": 6673.64,
+          "ema50": 6767.44,
+          "sma200": 6633.18,
+          "trend": "below all MAs \u2014 bear",
+          "chg5d": -1.958,
+          "score": -2
+        },
+        "us10y": {
+          "value": 4.416,
+          "chg10d_pct": 3.347,
+          "trend": "rising sharply \u2014 tightening",
+          "score": -1
+        },
+        "crypto_mcap": {
+          "mcap": 2426830091789.0,
+          "prev_mcap": 2436321348919.0,
+          "trend": "flat (-0.4%)",
+          "score": 0
+        },
+        "fed_expectations": {
+          "value": 3.62,
+          "chg10d_pct": 0.416,
+          "two_year_trend": "stable",
+          "score": 0
+        },
+        "sector_rotation": {
+          "leader": "XLE",
+          "type": "neutral",
+          "growth_avg_5d": -2.081,
+          "defensive_avg_5d": -1.806,
+          "perf": {
+            "XLK": -4.284,
+            "XLF": 0.122,
+            "XLE": 3.639,
+            "XLU": -2.6,
+            "XLP": -1.013
+          },
+          "score": 0
+        }
+      },
+      "alerts": [
+        "Regime change: RISK-OFF \u2192 CRISIS",
+        "DXY direction change: 'rising' \u2192 'rising above both SMAs'"
+      ],
+      "history": [
+        {
+          "timestamp": "2026-03-27T04:00:01.055809+00:00",
+          "regime": "RISK-OFF",
+          "score": -6
+        },
+        {
+          "timestamp": "2026-03-27T03:53:34.719869+00:00",
+          "regime": "CRISIS",
+          "score": -7
+        },
+        {
+          "timestamp": "2026-03-27T03:45:06.592111+00:00",
+          "regime": "CRISIS",
+          "score": -7
+        },
+        {
+          "timestamp": "2026-03-27T03:40:01.154613+00:00",
+          "regime": "CRISIS",
+          "score": -7
+        },
+        {
+          "timestamp": "2026-03-27T03:20:01.008792+00:00",
+          "regime": "CRISIS",
+          "score": -7
+        },
+        {
+          "timestamp": "2026-03-27T03:00:01.719615+00:00",
+          "regime": "CRISIS",
+          "score": -7
+        },
+        {
+          "timestamp": "2026-03-27T02:40:01.025626+00:00",
+          "regime": "CRISIS",
+          "score": -7
+        },
+        {
+          "timestamp": "2026-03-27T02:20:01.118629+00:00",
+          "regime": "RISK-OFF",
+          "score": -6
+        },
+        {
+          "timestamp": "2026-03-27T02:00:01.547844+00:00",
+          "regime": "CRISIS",
+          "score": -7
+        },
+        {
+          "timestamp": "2026-03-27T01:40:02.748421+00:00",
+          "regime": "CRISIS",
+          "score": -7
+        }
+      ]
+    }
+  },
+  {
+    "id": "568383c8-8658-4cb9-835e-39c9b3771931",
+    "type": "macro_regime_change",
+    "source_id": "macro_2026-03-27T12:20:01.534934+00:00",
+    "timestamp": "2026-03-27T12:20:19.013094+00:00",
+    "telegram_sent": true,
+    "discord_sent": true,
+    "message_preview": "\ud83c\udf0d MACRO UPDATE",
+    "data": {
+      "timestamp": "2026-03-27T12:20:01.534934+00:00",
+      "regime": "RISK-OFF",
+      "total_score": -6,
+      "max_score": 12,
+      "position_size_modifier": 0.5,
+      "recommendation": "Defensive stance. Half position sizes. Prefer shorts or cash over new longs. DXY strength is a headwind \u2014 watch for risk-off pressure. VIX at 29.57 \u2014 heightened volatility, size down.",
+      "indicators": {
+        "btc_bias": {
+          "raw_score": -2,
+          "bias": "SLIGHTLY BEARISH",
+          "score": 0,
+          "source": "btc-bias-scorer",
+          "timestamp": "2026-03-27T12:00:00.397724+00:00"
+        },
+        "dxy": {
+          "value": 100.136,
+          "trend": "rising above both SMAs",
+          "sma20": 99.406,
+          "sma50": 98.297,
+          "vs_sma20": "above",
+          "chg5d": 0.488,
+          "score": -2
+        },
+        "vix": {
+          "value": 29.57,
+          "prev": 27.44,
+          "level": "elevated fear",
+          "score": -1
+        },
+        "sp500": {
+          "price": 6477.16,
+          "ema20": 6673.64,
+          "ema50": 6767.44,
+          "sma200": 6633.18,
+          "trend": "below all MAs \u2014 bear",
+          "chg5d": -1.958,
+          "score": -2
+        },
+        "us10y": {
+          "value": 4.416,
+          "chg10d_pct": 3.347,
+          "trend": "rising sharply \u2014 tightening",
+          "score": -1
+        },
+        "crypto_mcap": {
+          "mcap": 2373413874163.0,
+          "prev_mcap": 2374955757539.0,
+          "trend": "flat (-0.1%)",
+          "score": 0
+        },
+        "fed_expectations": {
+          "value": 3.62,
+          "chg10d_pct": 0.416,
+          "two_year_trend": "stable",
+          "score": 0
+        },
+        "sector_rotation": {
+          "leader": "XLE",
+          "type": "neutral",
+          "growth_avg_5d": -2.081,
+          "defensive_avg_5d": -1.806,
+          "perf": {
+            "XLK": -4.284,
+            "XLF": 0.122,
+            "XLE": 3.639,
+            "XLU": -2.6,
+            "XLP": -1.013
+          },
+          "score": 0
+        }
+      },
+      "alerts": [
+        "Regime change: CRISIS \u2192 RISK-OFF"
+      ],
+      "history": [
+        {
+          "timestamp": "2026-03-27T12:00:01.048956+00:00",
+          "regime": "CRISIS",
+          "score": -7
+        },
+        {
+          "timestamp": "2026-03-27T11:40:01.078894+00:00",
+          "regime": "CRISIS",
+          "score": -7
+        },
+        {
+          "timestamp": "2026-03-27T11:20:01.042838+00:00",
+          "regime": "CRISIS",
+          "score": -7
+        },
+        {
+          "timestamp": "2026-03-27T11:00:01.111998+00:00",
+          "regime": "CRISIS",
+          "score": -8
+        },
+        {
+          "timestamp": "2026-03-27T10:40:01.085853+00:00",
+          "regime": "CRISIS",
+          "score": -7
+        },
+        {
+          "timestamp": "2026-03-27T10:20:01.040367+00:00",
+          "regime": "CRISIS",
+          "score": -7
+        },
+        {
+          "timestamp": "2026-03-27T10:00:02.075851+00:00",
+          "regime": "CRISIS",
+          "score": -7
+        },
+        {
+          "timestamp": "2026-03-27T09:40:03.555242+00:00",
+          "regime": "CRISIS",
+          "score": -7
+        },
+        {
+          "timestamp": "2026-03-27T09:20:01.644293+00:00",
+          "regime": "CRISIS",
+          "score": -7
+        },
+        {
+          "timestamp": "2026-03-27T09:00:01.992778+00:00",
+          "regime": "CRISIS",
+          "score": -7
+        }
+      ]
+    }
+  },
+  {
+    "id": "6be88f4e-a203-4b7a-8b13-a1be36482ea6",
+    "type": "macro_regime_change",
+    "source_id": "macro_2026-03-27T13:40:01.103837+00:00",
+    "timestamp": "2026-03-27T13:40:23.437877+00:00",
+    "telegram_sent": true,
+    "discord_sent": true,
+    "message_preview": "\ud83c\udf0d MACRO UPDATE",
+    "data": {
+      "timestamp": "2026-03-27T13:40:01.103837+00:00",
+      "regime": "CRISIS",
+      "total_score": -7,
+      "max_score": 12,
+      "position_size_modifier": 0.25,
+      "recommendation": "Minimal exposure. Quarter-size only. Preserve capital \u2014 no new longs. DXY strength is a headwind \u2014 watch for risk-off pressure. VIX at 29.7 \u2014 heightened volatility, size down.",
+      "indicators": {
+        "btc_bias": {
+          "raw_score": -2,
+          "bias": "SLIGHTLY BEARISH",
+          "score": 0,
+          "source": "btc-bias-scorer",
+          "timestamp": "2026-03-27T13:20:00.391355+00:00"
+        },
+        "dxy": {
+          "value": 100.006,
+          "trend": "rising above both SMAs",
+          "sma20": 99.4,
+          "sma50": 98.294,
+          "vs_sma20": "above",
+          "chg5d": 0.357,
+          "score": -2
+        },
+        "vix": {
+          "value": 29.7,
+          "prev": 27.44,
+          "level": "elevated fear",
+          "score": -1
+        },
+        "sp500": {
+          "price": 6434.66,
+          "ema20": 6650.88,
+          "ema50": 6754.39,
+          "sma200": 6635.16,
+          "trend": "below all MAs \u2014 bear",
+          "chg5d": -1.104,
+          "score": -2
+        },
+        "us10y": {
+          "value": 4.472,
+          "chg10d_pct": 4.364,
+          "trend": "rising sharply \u2014 tightening",
+          "score": -1
+        },
+        "crypto_mcap": {
+          "mcap": 2364449808366.0,
+          "prev_mcap": 2371834115264.0,
+          "trend": "flat (-0.3%)",
+          "score": 0
+        },
+        "fed_expectations": {
+          "value": 3.618,
+          "chg10d_pct": 0.416,
+          "two_year_trend": "stable",
+          "score": 0
+        },
+        "sector_rotation": {
+          "leader": "XLE",
+          "type": "risk-off",
+          "growth_avg_5d": -2.056,
+          "defensive_avg_5d": 1.151,
+          "perf": {
+            "XLK": -2.646,
+            "XLF": -1.467,
+            "XLE": 4.476,
+            "XLU": 2.105,
+            "XLP": 0.197
+          },
+          "score": -1
+        }
+      },
+      "alerts": [
+        "Regime change: RISK-OFF \u2192 CRISIS"
+      ],
+      "history": [
+        {
+          "timestamp": "2026-03-27T13:20:01.045327+00:00",
+          "regime": "RISK-OFF",
+          "score": -6
+        },
+        {
+          "timestamp": "2026-03-27T13:00:01.066300+00:00",
+          "regime": "RISK-OFF",
+          "score": -6
+        },
+        {
+          "timestamp": "2026-03-27T12:40:01.086352+00:00",
+          "regime": "RISK-OFF",
+          "score": -6
+        },
+        {
+          "timestamp": "2026-03-27T12:20:01.534934+00:00",
+          "regime": "RISK-OFF",
+          "score": -6
+        },
+        {
+          "timestamp": "2026-03-27T12:00:01.048956+00:00",
+          "regime": "CRISIS",
+          "score": -7
+        },
+        {
+          "timestamp": "2026-03-27T11:40:01.078894+00:00",
+          "regime": "CRISIS",
+          "score": -7
+        },
+        {
+          "timestamp": "2026-03-27T11:20:01.042838+00:00",
+          "regime": "CRISIS",
+          "score": -7
+        },
+        {
+          "timestamp": "2026-03-27T11:00:01.111998+00:00",
+          "regime": "CRISIS",
+          "score": -8
+        },
+        {
+          "timestamp": "2026-03-27T10:40:01.085853+00:00",
+          "regime": "CRISIS",
+          "score": -7
+        },
+        {
+          "timestamp": "2026-03-27T10:20:01.040367+00:00",
+          "regime": "CRISIS",
+          "score": -7
+        }
+      ]
+    }
+  },
+  {
+    "id": "3835d545-3d3e-4c75-a150-dc09cec6a43b",
+    "type": "daily_summary",
+    "source_id": "daily_2026-03-28",
+    "timestamp": "2026-03-28T00:00:23.526328+00:00",
+    "telegram_sent": true,
+    "discord_sent": true,
+    "message_preview": "\ud83d\udcca DAILY SUMMARY \u2014 March 28, 2026"
+  },
+  {
+    "id": "02a77ee2-90f2-4f2a-b122-1293b0382158",
+    "type": "daily_summary",
+    "source_id": "daily_2026-03-29",
+    "timestamp": "2026-03-29T00:00:03.302166+00:00",
+    "telegram_sent": true,
+    "discord_sent": true,
+    "message_preview": "\ud83d\udcca DAILY SUMMARY \u2014 March 29, 2026"
+  },
+  {
+    "id": "d6ffb02a-5c2e-4577-83c3-38b76b046f04",
+    "type": "daily_summary",
+    "source_id": "daily_2026-03-30",
+    "timestamp": "2026-03-30T00:00:13.315496+00:00",
+    "telegram_sent": true,
+    "discord_sent": true,
+    "message_preview": "\ud83d\udcca DAILY SUMMARY \u2014 March 30, 2026"
+  },
+  {
+    "id": "c90a6998-1af4-4023-85ec-89b2dcd0f037",
+    "type": "macro_regime_change",
+    "source_id": "macro_2026-03-30T14:40:02.972612+00:00",
+    "timestamp": "2026-03-30T14:40:26.512201+00:00",
+    "telegram_sent": true,
+    "discord_sent": true,
+    "message_preview": "\ud83c\udf0d MACRO UPDATE",
+    "data": {
+      "timestamp": "2026-03-30T14:40:02.972612+00:00",
+      "regime": "RISK-OFF",
+      "total_score": -6,
+      "max_score": 12,
+      "position_size_modifier": 0.5,
+      "recommendation": "Defensive stance. Half position sizes. Prefer shorts or cash over new longs. DXY strength is a headwind \u2014 watch for risk-off pressure. VIX at 29.95 \u2014 heightened volatility, size down.",
+      "indicators": {
+        "btc_bias": {
+          "raw_score": -2,
+          "bias": "SLIGHTLY BEARISH",
+          "score": 0,
+          "source": "btc-bias-scorer",
+          "timestamp": "2026-03-30T14:20:00.447871+00:00"
+        },
+        "dxy": {
+          "value": 100.544,
+          "trend": "rising",
+          "sma20": 99.515,
+          "sma50": null,
+          "vs_sma20": "above",
+          "chg5d": 1.611,
+          "score": -1
+        },
+        "vix": {
+          "value": 29.95,
+          "prev": 31.05,
+          "level": "elevated fear",
+          "score": -1
+        },
+        "sp500": {
+          "price": 6383.1,
+          "ema20": 6619.7,
+          "ema50": 6737.35,
+          "sma200": 6636.64,
+          "trend": "below all MAs \u2014 bear",
+          "chg5d": -3.007,
+          "score": -2
+        },
+        "us10y": {
+          "value": 4.346,
+          "chg10d_pct": 2.986,
+          "trend": "rising",
+          "score": -1
+        },
+        "crypto_mcap": {
+          "mcap": 2401808288840.0,
+          "prev_mcap": 2410780589825.0,
+          "trend": "flat (-0.4%)",
+          "score": 0
+        },
+        "fed_expectations": {
+          "value": 3.582,
+          "chg10d_pct": -0.638,
+          "two_year_trend": "stable",
+          "score": 0
+        },
+        "sector_rotation": {
+          "leader": "XLE",
+          "type": "risk-off",
+          "growth_avg_5d": -3.815,
+          "defensive_avg_5d": 2.158,
+          "perf": {
+            "XLK": -5.823,
+            "XLF": -1.806,
+            "XLE": 5.568,
+            "XLU": 3.004,
+            "XLP": 1.312
+          },
+          "score": -1
+        }
+      },
+      "alerts": [
+        "Regime change: CRISIS \u2192 RISK-OFF",
+        "DXY surging \u2014 5d change +1.61%",
+        "US10Y direction change: 'rising sharply \u2014 tightening' \u2192 'rising'"
+      ],
+      "history": [
+        {
+          "timestamp": "2026-03-30T14:20:01.312141+00:00",
+          "regime": "CRISIS",
+          "score": -7
+        },
+        {
+          "timestamp": "2026-03-30T14:00:01.399214+00:00",
+          "regime": "CRISIS",
+          "score": -7
+        },
+        {
+          "timestamp": "2026-03-30T13:40:01.107950+00:00",
+          "regime": "CRISIS",
+          "score": -7
+        },
+        {
+          "timestamp": "2026-03-30T13:20:01.014956+00:00",
+          "regime": "CRISIS",
+          "score": -7
+        },
+        {
+          "timestamp": "2026-03-30T13:00:01.651691+00:00",
+          "regime": "CRISIS",
+          "score": -7
+        },
+        {
+          "timestamp": "2026-03-30T12:40:01.094285+00:00",
+          "regime": "CRISIS",
+          "score": -8
+        },
+        {
+          "timestamp": "2026-03-30T12:20:01.371862+00:00",
+          "regime": "CRISIS",
+          "score": -8
+        },
+        {
+          "timestamp": "2026-03-30T12:00:01.055800+00:00",
+          "regime": "CRISIS",
+          "score": -7
+        },
+        {
+          "timestamp": "2026-03-30T11:40:01.116828+00:00",
+          "regime": "CRISIS",
+          "score": -7
+        },
+        {
+          "timestamp": "2026-03-30T11:20:01.778887+00:00",
+          "regime": "CRISIS",
+          "score": -7
+        }
+      ]
+    }
+  },
+  {
+    "id": "4071570f-28f4-4770-8b63-40901248afe1",
+    "type": "macro_regime_change",
+    "source_id": "macro_2026-03-30T15:00:01.154777+00:00",
+    "timestamp": "2026-03-30T15:00:28.055289+00:00",
+    "telegram_sent": true,
+    "discord_sent": true,
+    "message_preview": "\ud83c\udf0d MACRO UPDATE",
+    "data": {
+      "timestamp": "2026-03-30T15:00:01.154777+00:00",
+      "regime": "CRISIS",
+      "total_score": -7,
+      "max_score": 12,
+      "position_size_modifier": 0.25,
+      "recommendation": "Minimal exposure. Quarter-size only. Preserve capital \u2014 no new longs. DXY strength is a headwind \u2014 watch for risk-off pressure. VIX at 30.21 \u2014 heightened volatility, size down.",
+      "indicators": {
+        "btc_bias": {
+          "raw_score": -2,
+          "bias": "SLIGHTLY BEARISH",
+          "score": 0,
+          "source": "btc-bias-scorer",
+          "timestamp": "2026-03-30T14:40:00.844975+00:00"
+        },
+        "dxy": {
+          "value": 100.484,
+          "trend": "rising",
+          "sma20": 99.512,
+          "sma50": null,
+          "vs_sma20": "above",
+          "chg5d": 1.55,
+          "score": -1
+        },
+        "vix": {
+          "value": 30.21,
+          "prev": 31.05,
+          "level": "panic \u2014 risk-off",
+          "score": -2
+        },
+        "sp500": {
+          "price": 6400.12,
+          "ema20": 6621.32,
+          "ema50": 6738.02,
+          "sma200": 6636.72,
+          "trend": "below all MAs \u2014 bear",
+          "chg5d": -2.749,
+          "score": -2
+        },
+        "us10y": {
+          "value": 4.346,
+          "chg10d_pct": 2.986,
+          "trend": "rising",
+          "score": -1
+        },
+        "crypto_mcap": {
+          "mcap": 2399463265706.0,
+          "prev_mcap": 2401808288840.0,
+          "trend": "flat (-0.1%)",
+          "score": 0
+        },
+        "fed_expectations": {
+          "value": 3.582,
+          "chg10d_pct": -0.638,
+          "two_year_trend": "stable",
+          "score": 0
+        },
+        "sector_rotation": {
+          "leader": "XLE",
+          "type": "risk-off",
+          "growth_avg_5d": -3.508,
+          "defensive_avg_5d": 2.425,
+          "perf": {
+            "XLK": -5.604,
+            "XLF": -1.411,
+            "XLE": 5.869,
+            "XLU": 3.372,
+            "XLP": 1.478
+          },
+          "score": -1
+        }
+      },
+      "alerts": [
+        "Regime change: RISK-OFF \u2192 CRISIS",
+        "DXY surging \u2014 5d change +1.55%"
+      ],
+      "history": [
+        {
+          "timestamp": "2026-03-30T14:40:02.972612+00:00",
+          "regime": "RISK-OFF",
+          "score": -6
+        },
+        {
+          "timestamp": "2026-03-30T14:20:01.312141+00:00",
+          "regime": "CRISIS",
+          "score": -7
+        },
+        {
+          "timestamp": "2026-03-30T14:00:01.399214+00:00",
+          "regime": "CRISIS",
+          "score": -7
+        },
+        {
+          "timestamp": "2026-03-30T13:40:01.107950+00:00",
+          "regime": "CRISIS",
+          "score": -7
+        },
+        {
+          "timestamp": "2026-03-30T13:20:01.014956+00:00",
+          "regime": "CRISIS",
+          "score": -7
+        },
+        {
+          "timestamp": "2026-03-30T13:00:01.651691+00:00",
+          "regime": "CRISIS",
+          "score": -7
+        },
+        {
+          "timestamp": "2026-03-30T12:40:01.094285+00:00",
+          "regime": "CRISIS",
+          "score": -8
+        },
+        {
+          "timestamp": "2026-03-30T12:20:01.371862+00:00",
+          "regime": "CRISIS",
+          "score": -8
+        },
+        {
+          "timestamp": "2026-03-30T12:00:01.055800+00:00",
+          "regime": "CRISIS",
+          "score": -7
+        },
+        {
+          "timestamp": "2026-03-30T11:40:01.116828+00:00",
+          "regime": "CRISIS",
+          "score": -7
+        }
+      ]
+    }
+  },
+  {
+    "id": "124a6f30-c035-4480-8aef-8648a3e62d04",
+    "type": "daily_summary",
+    "source_id": "daily_2026-03-31",
+    "timestamp": "2026-03-31T00:00:24.307137+00:00",
+    "telegram_sent": true,
+    "discord_sent": true,
+    "message_preview": "\ud83d\udcca DAILY SUMMARY \u2014 March 31, 2026"
+  },
+  {
+    "id": "417730e5-190a-4835-be2a-ca229e2bc3e1",
+    "type": "daily_summary",
+    "source_id": "daily_2026-04-01",
+    "timestamp": "2026-04-01T00:00:03.883533+00:00",
+    "telegram_sent": true,
+    "discord_sent": true,
+    "message_preview": "\ud83d\udcca DAILY SUMMARY \u2014 April 1, 2026"
+  },
+  {
+    "id": "6cbd3fd4-ae6c-46a4-84f3-f0355334c60b",
+    "type": "macro_regime_change",
+    "source_id": "macro_2026-04-01T04:00:01.110530+00:00",
+    "timestamp": "2026-04-01T04:00:16.429195+00:00",
+    "telegram_sent": true,
+    "discord_sent": true,
+    "message_preview": "\ud83c\udf0d MACRO UPDATE",
+    "data": {
+      "timestamp": "2026-04-01T04:00:01.110530+00:00",
+      "regime": "RISK-OFF",
+      "total_score": -6,
+      "max_score": 12,
+      "position_size_modifier": 0.5,
+      "recommendation": "Defensive stance. Half position sizes. Prefer shorts or cash over new longs. DXY strength is a headwind \u2014 watch for risk-off pressure. VIX at 25.25 \u2014 heightened volatility, size down.",
+      "indicators": {
+        "btc_bias": {
+          "raw_score": -1,
+          "bias": "NEUTRAL",
+          "score": 0,
+          "source": "btc-bias-scorer",
+          "timestamp": "2026-04-01T03:40:00.392304+00:00"
+        },
+        "dxy": {
+          "value": 99.96,
+          "trend": "rising",
+          "sma20": 99.559,
+          "sma50": null,
+          "vs_sma20": "above",
+          "chg5d": 0.533,
+          "score": -1
+        },
+        "vix": {
+          "value": 25.25,
+          "prev": 30.61,
+          "level": "elevated fear",
+          "score": -1
+        },
+        "sp500": {
+          "price": 6528.52,
+          "ema20": 6607.63,
+          "ema50": 6727.68,
+          "sma200": 6638.86,
+          "trend": "below all MAs \u2014 bear",
+          "chg5d": -0.425,
+          "score": -2
+        },
+        "us10y": {
+          "value": 4.311,
+          "chg10d_pct": 2.594,
+          "trend": "rising",
+          "score": -1
+        },
+        "crypto_mcap": {
+          "mcap": 2423506138883.0,
+          "prev_mcap": 2417492653150.0,
+          "trend": "flat (+0.2%)",
+          "score": 0
+        },
+        "fed_expectations": {
+          "value": 3.6,
+          "chg10d_pct": -0.139,
+          "two_year_trend": "stable",
+          "score": 0
+        },
+        "sector_rotation": {
+          "leader": "XLU",
+          "type": "risk-off",
+          "growth_avg_5d": -1.102,
+          "defensive_avg_5d": 1.423,
+          "perf": {
+            "XLK": -2.387,
+            "XLF": 0.183,
+            "XLE": 0.69,
+            "XLU": 1.774,
+            "XLP": 1.073
+          },
+          "score": -1
+        }
+      },
+      "alerts": [
+        "Regime change: CRISIS \u2192 RISK-OFF",
+        "DXY direction change: 'rising above both SMAs' \u2192 'rising'"
+      ],
+      "history": [
+        {
+          "timestamp": "2026-04-01T03:40:01.052810+00:00",
+          "regime": "CRISIS",
+          "score": -7
+        },
+        {
+          "timestamp": "2026-04-01T03:20:02.020817+00:00",
+          "regime": "CRISIS",
+          "score": -7
+        },
+        {
+          "timestamp": "2026-04-01T03:00:01.067869+00:00",
+          "regime": "CRISIS",
+          "score": -7
+        },
+        {
+          "timestamp": "2026-04-01T02:40:01.036164+00:00",
+          "regime": "CRISIS",
+          "score": -7
+        },
+        {
+          "timestamp": "2026-04-01T02:20:01.361358+00:00",
+          "regime": "CRISIS",
+          "score": -7
+        },
+        {
+          "timestamp": "2026-04-01T02:00:01.075821+00:00",
+          "regime": "CRISIS",
+          "score": -7
+        },
+        {
+          "timestamp": "2026-04-01T01:40:01.080835+00:00",
+          "regime": "CRISIS",
+          "score": -7
+        },
+        {
+          "timestamp": "2026-04-01T01:20:02.931145+00:00",
+          "regime": "CRISIS",
+          "score": -7
+        },
+        {
+          "timestamp": "2026-04-01T01:00:01.072655+00:00",
+          "regime": "CRISIS",
+          "score": -7
+        },
+        {
+          "timestamp": "2026-04-01T00:40:01.305148+00:00",
+          "regime": "CRISIS",
+          "score": -7
+        }
+      ]
+    }
+  },
+  {
+    "id": "bb1db161-794e-43a6-9e4a-a960f012a3ba",
+    "type": "macro_regime_change",
+    "source_id": "macro_2026-04-01T04:20:01.073754+00:00",
+    "timestamp": "2026-04-01T04:20:17.922633+00:00",
+    "telegram_sent": true,
+    "discord_sent": true,
+    "message_preview": "\ud83c\udf0d MACRO UPDATE",
+    "data": {
+      "timestamp": "2026-04-01T04:20:01.073754+00:00",
+      "regime": "CRISIS",
+      "total_score": -7,
+      "max_score": 12,
+      "position_size_modifier": 0.25,
+      "recommendation": "Minimal exposure. Quarter-size only. Preserve capital \u2014 no new longs. DXY strength is a headwind \u2014 watch for risk-off pressure. VIX at 25.25 \u2014 heightened volatility, size down.",
+      "indicators": {
+        "btc_bias": {
+          "raw_score": -2,
+          "bias": "SLIGHTLY BEARISH",
+          "score": 0,
+          "source": "btc-bias-scorer",
+          "timestamp": "2026-04-01T04:00:00.392690+00:00"
+        },
+        "dxy": {
+          "value": 99.824,
+          "trend": "rising above both SMAs",
+          "sma20": 99.612,
+          "sma50": 98.356,
+          "vs_sma20": "above",
+          "chg5d": 0.225,
+          "score": -2
+        },
+        "vix": {
+          "value": 25.25,
+          "prev": 30.61,
+          "level": "elevated fear",
+          "score": -1
+        },
+        "sp500": {
+          "price": 6528.52,
+          "ema20": 6607.63,
+          "ema50": 6727.68,
+          "sma200": 6638.86,
+          "trend": "below all MAs \u2014 bear",
+          "chg5d": -0.425,
+          "score": -2
+        },
+        "us10y": {
+          "value": 4.311,
+          "chg10d_pct": 2.594,
+          "trend": "rising",
+          "score": -1
+        },
+        "crypto_mcap": {
+          "mcap": 2420876275795.0,
+          "prev_mcap": 2423506138883.0,
+          "trend": "flat (-0.1%)",
+          "score": 0
+        },
+        "fed_expectations": {
+          "value": 3.6,
+          "chg10d_pct": -0.139,
+          "two_year_trend": "stable",
+          "score": 0
+        },
+        "sector_rotation": {
+          "leader": "XLU",
+          "type": "risk-off",
+          "growth_avg_5d": -1.102,
+          "defensive_avg_5d": 1.423,
+          "perf": {
+            "XLK": -2.387,
+            "XLF": 0.183,
+            "XLE": 0.69,
+            "XLU": 1.774,
+            "XLP": 1.073
+          },
+          "score": -1
+        }
+      },
+      "alerts": [
+        "Regime change: RISK-OFF \u2192 CRISIS",
+        "DXY direction change: 'rising' \u2192 'rising above both SMAs'"
+      ],
+      "history": [
+        {
+          "timestamp": "2026-04-01T04:00:01.110530+00:00",
+          "regime": "RISK-OFF",
+          "score": -6
+        },
+        {
+          "timestamp": "2026-04-01T03:40:01.052810+00:00",
+          "regime": "CRISIS",
+          "score": -7
+        },
+        {
+          "timestamp": "2026-04-01T03:20:02.020817+00:00",
+          "regime": "CRISIS",
+          "score": -7
+        },
+        {
+          "timestamp": "2026-04-01T03:00:01.067869+00:00",
+          "regime": "CRISIS",
+          "score": -7
+        },
+        {
+          "timestamp": "2026-04-01T02:40:01.036164+00:00",
+          "regime": "CRISIS",
+          "score": -7
+        },
+        {
+          "timestamp": "2026-04-01T02:20:01.361358+00:00",
+          "regime": "CRISIS",
+          "score": -7
+        },
+        {
+          "timestamp": "2026-04-01T02:00:01.075821+00:00",
+          "regime": "CRISIS",
+          "score": -7
+        },
+        {
+          "timestamp": "2026-04-01T01:40:01.080835+00:00",
+          "regime": "CRISIS",
+          "score": -7
+        },
+        {
+          "timestamp": "2026-04-01T01:20:02.931145+00:00",
+          "regime": "CRISIS",
+          "score": -7
+        },
+        {
+          "timestamp": "2026-04-01T01:00:01.072655+00:00",
+          "regime": "CRISIS",
+          "score": -7
+        }
+      ]
+    }
+  },
+  {
+    "id": "6c0f91f0-2e6e-4187-8b8f-0e7c9ef3883b",
+    "type": "macro_regime_change",
+    "source_id": "macro_2026-04-01T06:00:01.092110+00:00",
+    "timestamp": "2026-04-01T06:00:23.302601+00:00",
+    "telegram_sent": true,
+    "discord_sent": true,
+    "message_preview": "\ud83c\udf0d MACRO UPDATE",
+    "data": {
+      "timestamp": "2026-04-01T06:00:01.092110+00:00",
+      "regime": "RISK-OFF",
+      "total_score": -5,
+      "max_score": 12,
+      "position_size_modifier": 0.5,
+      "recommendation": "Defensive stance. Half position sizes. Prefer shorts or cash over new longs. VIX at 25.25 \u2014 heightened volatility, size down.",
+      "indicators": {
+        "btc_bias": {
+          "raw_score": -1,
+          "bias": "NEUTRAL",
+          "score": 0,
+          "source": "btc-bias-scorer",
+          "timestamp": "2026-04-01T05:40:00.395199+00:00"
+        },
+        "dxy": {
+          "value": 99.695,
+          "trend": "flat",
+          "sma20": 99.605,
+          "sma50": 98.353,
+          "vs_sma20": "above",
+          "chg5d": 0.095,
+          "score": 0
+        },
+        "vix": {
+          "value": 25.25,
+          "prev": 30.61,
+          "level": "elevated fear",
+          "score": -1
+        },
+        "sp500": {
+          "price": 6528.52,
+          "ema20": 6607.63,
+          "ema50": 6727.68,
+          "sma200": 6638.86,
+          "trend": "below all MAs \u2014 bear",
+          "chg5d": -0.425,
+          "score": -2
+        },
+        "us10y": {
+          "value": 4.311,
+          "chg10d_pct": 2.594,
+          "trend": "rising",
+          "score": -1
+        },
+        "crypto_mcap": {
+          "mcap": 2434484819566.0,
+          "prev_mcap": 2436869597940.0,
+          "trend": "flat (-0.1%)",
+          "score": 0
+        },
+        "fed_expectations": {
+          "value": 3.6,
+          "chg10d_pct": -0.139,
+          "two_year_trend": "stable",
+          "score": 0
+        },
+        "sector_rotation": {
+          "leader": "XLU",
+          "type": "risk-off",
+          "growth_avg_5d": -1.102,
+          "defensive_avg_5d": 1.423,
+          "perf": {
+            "XLK": -2.387,
+            "XLF": 0.183,
+            "XLE": 0.69,
+            "XLU": 1.774,
+            "XLP": 1.073
+          },
+          "score": -1
+        }
+      },
+      "alerts": [
+        "Regime change: CRISIS \u2192 RISK-OFF",
+        "DXY direction change: 'rising above both SMAs' \u2192 'flat'"
+      ],
+      "history": [
+        {
+          "timestamp": "2026-04-01T05:40:01.063929+00:00",
+          "regime": "CRISIS",
+          "score": -7
+        },
+        {
+          "timestamp": "2026-04-01T05:20:01.037073+00:00",
+          "regime": "CRISIS",
+          "score": -7
+        },
+        {
+          "timestamp": "2026-04-01T05:00:01.027076+00:00",
+          "regime": "CRISIS",
+          "score": -7
+        },
+        {
+          "timestamp": "2026-04-01T04:40:01.843622+00:00",
+          "regime": "CRISIS",
+          "score": -7
+        },
+        {
+          "timestamp": "2026-04-01T04:20:01.073754+00:00",
+          "regime": "CRISIS",
+          "score": -7
+        },
+        {
+          "timestamp": "2026-04-01T04:00:01.110530+00:00",
+          "regime": "RISK-OFF",
+          "score": -6
+        },
+        {
+          "timestamp": "2026-04-01T03:40:01.052810+00:00",
+          "regime": "CRISIS",
+          "score": -7
+        },
+        {
+          "timestamp": "2026-04-01T03:20:02.020817+00:00",
+          "regime": "CRISIS",
+          "score": -7
+        },
+        {
+          "timestamp": "2026-04-01T03:00:01.067869+00:00",
+          "regime": "CRISIS",
+          "score": -7
+        },
+        {
+          "timestamp": "2026-04-01T02:40:01.036164+00:00",
+          "regime": "CRISIS",
+          "score": -7
+        }
+      ]
+    }
+  },
+  {
+    "id": "8f671ace-654b-432c-81de-b796b12a6eb2",
+    "type": "macro_regime_change",
+    "source_id": "macro_2026-04-01T06:20:01.031354+00:00",
+    "timestamp": "2026-04-01T06:20:24.859290+00:00",
+    "telegram_sent": true,
+    "discord_sent": true,
+    "message_preview": "\ud83c\udf0d MACRO UPDATE",
+    "data": {
+      "timestamp": "2026-04-01T06:20:01.031354+00:00",
+      "regime": "CRISIS",
+      "total_score": -7,
+      "max_score": 12,
+      "position_size_modifier": 0.25,
+      "recommendation": "Minimal exposure. Quarter-size only. Preserve capital \u2014 no new longs. DXY strength is a headwind \u2014 watch for risk-off pressure. VIX at 25.25 \u2014 heightened volatility, size down.",
+      "indicators": {
+        "btc_bias": {
+          "raw_score": -1,
+          "bias": "NEUTRAL",
+          "score": 0,
+          "source": "btc-bias-scorer",
+          "timestamp": "2026-04-01T06:00:00.396438+00:00"
+        },
+        "dxy": {
+          "value": 99.759,
+          "trend": "rising above both SMAs",
+          "sma20": 99.608,
+          "sma50": 98.354,
+          "vs_sma20": "above",
+          "chg5d": 0.16,
+          "score": -2
+        },
+        "vix": {
+          "value": 25.25,
+          "prev": 30.61,
+          "level": "elevated fear",
+          "score": -1
+        },
+        "sp500": {
+          "price": 6528.52,
+          "ema20": 6607.63,
+          "ema50": 6727.68,
+          "sma200": 6638.86,
+          "trend": "below all MAs \u2014 bear",
+          "chg5d": -0.425,
+          "score": -2
+        },
+        "us10y": {
+          "value": 4.311,
+          "chg10d_pct": 2.594,
+          "trend": "rising",
+          "score": -1
+        },
+        "crypto_mcap": {
+          "mcap": 2440631155654.0,
+          "prev_mcap": 2434484819566.0,
+          "trend": "flat (+0.3%)",
+          "score": 0
+        },
+        "fed_expectations": {
+          "value": 3.6,
+          "chg10d_pct": -0.139,
+          "two_year_trend": "stable",
+          "score": 0
+        },
+        "sector_rotation": {
+          "leader": "XLU",
+          "type": "risk-off",
+          "growth_avg_5d": -1.102,
+          "defensive_avg_5d": 1.423,
+          "perf": {
+            "XLK": -2.387,
+            "XLF": 0.183,
+            "XLE": 0.69,
+            "XLU": 1.774,
+            "XLP": 1.073
+          },
+          "score": -1
+        }
+      },
+      "alerts": [
+        "Regime change: RISK-OFF \u2192 CRISIS",
+        "DXY direction change: 'flat' \u2192 'rising above both SMAs'"
+      ],
+      "history": [
+        {
+          "timestamp": "2026-04-01T06:00:01.092110+00:00",
+          "regime": "RISK-OFF",
+          "score": -5
+        },
+        {
+          "timestamp": "2026-04-01T05:40:01.063929+00:00",
+          "regime": "CRISIS",
+          "score": -7
+        },
+        {
+          "timestamp": "2026-04-01T05:20:01.037073+00:00",
+          "regime": "CRISIS",
+          "score": -7
+        },
+        {
+          "timestamp": "2026-04-01T05:00:01.027076+00:00",
+          "regime": "CRISIS",
+          "score": -7
+        },
+        {
+          "timestamp": "2026-04-01T04:40:01.843622+00:00",
+          "regime": "CRISIS",
+          "score": -7
+        },
+        {
+          "timestamp": "2026-04-01T04:20:01.073754+00:00",
+          "regime": "CRISIS",
+          "score": -7
+        },
+        {
+          "timestamp": "2026-04-01T04:00:01.110530+00:00",
+          "regime": "RISK-OFF",
+          "score": -6
+        },
+        {
+          "timestamp": "2026-04-01T03:40:01.052810+00:00",
+          "regime": "CRISIS",
+          "score": -7
+        },
+        {
+          "timestamp": "2026-04-01T03:20:02.020817+00:00",
+          "regime": "CRISIS",
+          "score": -7
+        },
+        {
+          "timestamp": "2026-04-01T03:00:01.067869+00:00",
+          "regime": "CRISIS",
+          "score": -7
+        }
+      ]
+    }
+  },
+  {
+    "id": "0b5f19c1-ac54-446d-b5b3-10b069455cf5",
+    "type": "macro_regime_change",
+    "source_id": "macro_2026-04-01T06:40:02.380286+00:00",
+    "timestamp": "2026-04-01T06:40:26.306373+00:00",
+    "telegram_sent": true,
+    "discord_sent": true,
+    "message_preview": "\ud83c\udf0d MACRO UPDATE",
+    "data": {
+      "timestamp": "2026-04-01T06:40:02.380286+00:00",
+      "regime": "RISK-OFF",
+      "total_score": -5,
+      "max_score": 12,
+      "position_size_modifier": 0.5,
+      "recommendation": "Defensive stance. Half position sizes. Prefer shorts or cash over new longs. VIX at 25.25 \u2014 heightened volatility, size down.",
+      "indicators": {
+        "btc_bias": {
+          "raw_score": -1,
+          "bias": "NEUTRAL",
+          "score": 0,
+          "source": "btc-bias-scorer",
+          "timestamp": "2026-04-01T06:20:00.399886+00:00"
+        },
+        "dxy": {
+          "value": 99.578,
+          "trend": "flat",
+          "sma20": 99.599,
+          "sma50": 98.351,
+          "vs_sma20": "below",
+          "chg5d": -0.022,
+          "score": 0
+        },
+        "vix": {
+          "value": 25.25,
+          "prev": 30.61,
+          "level": "elevated fear",
+          "score": -1
+        },
+        "sp500": {
+          "price": 6528.52,
+          "ema20": 6607.63,
+          "ema50": 6727.68,
+          "sma200": 6638.86,
+          "trend": "below all MAs \u2014 bear",
+          "chg5d": -0.425,
+          "score": -2
+        },
+        "us10y": {
+          "value": 4.311,
+          "chg10d_pct": 2.594,
+          "trend": "rising",
+          "score": -1
+        },
+        "crypto_mcap": {
+          "mcap": 2446310972814.0,
+          "prev_mcap": 2440631155654.0,
+          "trend": "flat (+0.2%)",
+          "score": 0
+        },
+        "fed_expectations": {
+          "value": 3.6,
+          "chg10d_pct": -0.139,
+          "two_year_trend": "stable",
+          "score": 0
+        },
+        "sector_rotation": {
+          "leader": "XLU",
+          "type": "risk-off",
+          "growth_avg_5d": -1.102,
+          "defensive_avg_5d": 1.423,
+          "perf": {
+            "XLK": -2.387,
+            "XLF": 0.183,
+            "XLE": 0.69,
+            "XLU": 1.774,
+            "XLP": 1.073
+          },
+          "score": -1
+        }
+      },
+      "alerts": [
+        "Regime change: CRISIS \u2192 RISK-OFF",
+        "DXY direction change: 'rising above both SMAs' \u2192 'flat'"
+      ],
+      "history": [
+        {
+          "timestamp": "2026-04-01T06:20:01.031354+00:00",
+          "regime": "CRISIS",
+          "score": -7
+        },
+        {
+          "timestamp": "2026-04-01T06:00:01.092110+00:00",
+          "regime": "RISK-OFF",
+          "score": -5
+        },
+        {
+          "timestamp": "2026-04-01T05:40:01.063929+00:00",
+          "regime": "CRISIS",
+          "score": -7
+        },
+        {
+          "timestamp": "2026-04-01T05:20:01.037073+00:00",
+          "regime": "CRISIS",
+          "score": -7
+        },
+        {
+          "timestamp": "2026-04-01T05:00:01.027076+00:00",
+          "regime": "CRISIS",
+          "score": -7
+        },
+        {
+          "timestamp": "2026-04-01T04:40:01.843622+00:00",
+          "regime": "CRISIS",
+          "score": -7
+        },
+        {
+          "timestamp": "2026-04-01T04:20:01.073754+00:00",
+          "regime": "CRISIS",
+          "score": -7
+        },
+        {
+          "timestamp": "2026-04-01T04:00:01.110530+00:00",
+          "regime": "RISK-OFF",
+          "score": -6
+        },
+        {
+          "timestamp": "2026-04-01T03:40:01.052810+00:00",
+          "regime": "CRISIS",
+          "score": -7
+        },
+        {
+          "timestamp": "2026-04-01T03:20:02.020817+00:00",
+          "regime": "CRISIS",
+          "score": -7
+        }
+      ]
+    }
+  },
+  {
+    "id": "e5980c83-da3f-446d-bd47-824638dd5562",
+    "type": "macro_regime_change",
+    "source_id": "macro_2026-04-01T17:20:01.103874+00:00",
+    "timestamp": "2026-04-01T17:20:28.154333+00:00",
+    "telegram_sent": true,
+    "discord_sent": true,
+    "message_preview": "\ud83c\udf0d MACRO UPDATE",
+    "data": {
+      "timestamp": "2026-04-01T17:20:01.103874+00:00",
+      "regime": "NEUTRAL",
+      "total_score": -2,
+      "max_score": 12,
+      "position_size_modifier": 0.75,
+      "recommendation": "Reduce position sizes by 25%. Be selective \u2014 only highest-conviction setups. DXY weakness supports risk assets.",
+      "indicators": {
+        "btc_bias": {
+          "raw_score": 1,
+          "bias": "SLIGHTLY BULLISH",
+          "score": 0,
+          "source": "btc-bias-scorer",
+          "timestamp": "2026-04-01T17:00:00.421493+00:00"
+        },
+        "dxy": {
+          "value": 99.369,
+          "trend": "falling",
+          "sma20": 99.589,
+          "sma50": 98.347,
+          "vs_sma20": "below",
+          "chg5d": -0.232,
+          "score": 1
+        },
+        "vix": {
+          "value": 23.6,
+          "prev": 25.25,
+          "level": "elevated fear",
+          "score": -1
+        },
+        "sp500": {
+          "price": 6608.16,
+          "ema20": 6607.68,
+          "ema50": 6722.99,
+          "sma200": 6642.01,
+          "trend": "mixed \u2014 transitioning",
+          "chg5d": 0.247,
+          "score": 0
+        },
+        "us10y": {
+          "value": 4.303,
+          "chg10d_pct": 1.033,
+          "trend": "rising",
+          "score": -1
+        },
+        "crypto_mcap": {
+          "mcap": 2447421421815.0,
+          "prev_mcap": 2447982648495.0,
+          "trend": "flat (-0.0%)",
+          "score": 0
+        },
+        "fed_expectations": {
+          "value": 3.605,
+          "chg10d_pct": -0.139,
+          "two_year_trend": "stable",
+          "score": 0
+        },
+        "sector_rotation": {
+          "leader": "XLU",
+          "type": "risk-off",
+          "growth_avg_5d": 0.023,
+          "defensive_avg_5d": 0.97,
+          "perf": {
+            "XLK": -0.673,
+            "XLF": 0.719,
+            "XLE": -3.451,
+            "XLU": 1.945,
+            "XLP": -0.006
+          },
+          "score": -1
+        }
+      },
+      "alerts": [
+        "Regime change: RISK-OFF \u2192 NEUTRAL"
+      ],
+      "history": [
+        {
+          "timestamp": "2026-04-01T17:00:01.065838+00:00",
+          "regime": "RISK-OFF",
+          "score": -4
+        },
+        {
+          "timestamp": "2026-04-01T16:40:01.296412+00:00",
+          "regime": "RISK-OFF",
+          "score": -4
+        },
+        {
+          "timestamp": "2026-04-01T16:20:01.041848+00:00",
+          "regime": "RISK-OFF",
+          "score": -4
+        },
+        {
+          "timestamp": "2026-04-01T16:00:01.017805+00:00",
+          "regime": "RISK-OFF",
+          "score": -4
+        },
+        {
+          "timestamp": "2026-04-01T15:40:01.242770+00:00",
+          "regime": "RISK-OFF",
+          "score": -4
+        },
+        {
+          "timestamp": "2026-04-01T15:20:01.109903+00:00",
+          "regime": "RISK-OFF",
+          "score": -4
+        },
+        {
+          "timestamp": "2026-04-01T15:00:01.084854+00:00",
+          "regime": "RISK-OFF",
+          "score": -4
+        },
+        {
+          "timestamp": "2026-04-01T14:40:01.503320+00:00",
+          "regime": "RISK-OFF",
+          "score": -4
+        },
+        {
+          "timestamp": "2026-04-01T14:20:01.016250+00:00",
+          "regime": "RISK-OFF",
+          "score": -4
+        },
+        {
+          "timestamp": "2026-04-01T14:00:01.792501+00:00",
+          "regime": "RISK-OFF",
+          "score": -4
+        }
+      ]
+    }
+  },
+  {
+    "id": "cafa3f36-904e-4d18-99bb-bae2c861644a",
+    "type": "macro_regime_change",
+    "source_id": "macro_2026-04-01T17:40:01.891094+00:00",
+    "timestamp": "2026-04-01T17:40:29.736971+00:00",
+    "telegram_sent": true,
+    "discord_sent": true,
+    "message_preview": "\ud83c\udf0d MACRO UPDATE",
+    "data": {
+      "timestamp": "2026-04-01T17:40:01.891094+00:00",
+      "regime": "RISK-OFF",
+      "total_score": -4,
+      "max_score": 12,
+      "position_size_modifier": 0.5,
+      "recommendation": "Defensive stance. Half position sizes. Prefer shorts or cash over new longs. DXY weakness supports risk assets.",
+      "indicators": {
+        "btc_bias": {
+          "raw_score": 1,
+          "bias": "SLIGHTLY BULLISH",
+          "score": 0,
+          "source": "btc-bias-scorer",
+          "timestamp": "2026-04-01T17:20:00.393664+00:00"
+        },
+        "dxy": {
+          "value": 99.416,
+          "trend": "falling",
+          "sma20": 99.591,
+          "sma50": 98.348,
+          "vs_sma20": "below",
+          "chg5d": -0.185,
+          "score": 1
+        },
+        "vix": {
+          "value": 23.54,
+          "prev": 25.25,
+          "level": "elevated fear",
+          "score": -1
+        },
+        "sp500": {
+          "price": 6605.42,
+          "ema20": 6607.42,
+          "ema50": 6722.88,
+          "sma200": 6642.0,
+          "trend": "below all MAs \u2014 bear",
+          "chg5d": 0.205,
+          "score": -2
+        },
+        "us10y": {
+          "value": 4.309,
+          "chg10d_pct": 1.174,
+          "trend": "rising",
+          "score": -1
+        },
+        "crypto_mcap": {
+          "mcap": 2435402990639.0,
+          "prev_mcap": 2447421421815.0,
+          "trend": "flat (-0.5%)",
+          "score": 0
+        },
+        "fed_expectations": {
+          "value": 3.605,
+          "chg10d_pct": -0.139,
+          "two_year_trend": "stable",
+          "score": 0
+        },
+        "sector_rotation": {
+          "leader": "XLU",
+          "type": "risk-off",
+          "growth_avg_5d": -0.041,
+          "defensive_avg_5d": 0.942,
+          "perf": {
+            "XLK": -0.771,
+            "XLF": 0.689,
+            "XLE": -3.409,
+            "XLU": 1.89,
+            "XLP": -0.006
+          },
+          "score": -1
+        }
+      },
+      "alerts": [
+        "Regime change: NEUTRAL \u2192 RISK-OFF"
+      ],
+      "history": [
+        {
+          "timestamp": "2026-04-01T17:20:01.103874+00:00",
+          "regime": "NEUTRAL",
+          "score": -2
+        },
+        {
+          "timestamp": "2026-04-01T17:00:01.065838+00:00",
+          "regime": "RISK-OFF",
+          "score": -4
+        },
+        {
+          "timestamp": "2026-04-01T16:40:01.296412+00:00",
+          "regime": "RISK-OFF",
+          "score": -4
+        },
+        {
+          "timestamp": "2026-04-01T16:20:01.041848+00:00",
+          "regime": "RISK-OFF",
+          "score": -4
+        },
+        {
+          "timestamp": "2026-04-01T16:00:01.017805+00:00",
+          "regime": "RISK-OFF",
+          "score": -4
+        },
+        {
+          "timestamp": "2026-04-01T15:40:01.242770+00:00",
+          "regime": "RISK-OFF",
+          "score": -4
+        },
+        {
+          "timestamp": "2026-04-01T15:20:01.109903+00:00",
+          "regime": "RISK-OFF",
+          "score": -4
+        },
+        {
+          "timestamp": "2026-04-01T15:00:01.084854+00:00",
+          "regime": "RISK-OFF",
+          "score": -4
+        },
+        {
+          "timestamp": "2026-04-01T14:40:01.503320+00:00",
+          "regime": "RISK-OFF",
+          "score": -4
+        },
+        {
+          "timestamp": "2026-04-01T14:20:01.016250+00:00",
+          "regime": "RISK-OFF",
+          "score": -4
+        }
+      ]
+    }
+  },
+  {
+    "id": "f8033f4e-cd30-4cb7-a01c-b775fa270c5b",
+    "type": "daily_summary",
+    "source_id": "daily_2026-04-02",
+    "timestamp": "2026-04-02T00:00:19.142641+00:00",
+    "telegram_sent": true,
+    "discord_sent": true,
+    "message_preview": "\ud83d\udcca DAILY SUMMARY \u2014 April 2, 2026"
+  },
+  {
+    "id": "6209a159-0348-40c4-8d4b-a7705ba267c0",
+    "type": "macro_regime_change",
+    "source_id": "macro_2026-04-02T01:40:01.081849+00:00",
+    "timestamp": "2026-04-02T01:40:24.828114+00:00",
+    "telegram_sent": true,
+    "discord_sent": true,
+    "message_preview": "\ud83c\udf0d MACRO UPDATE",
+    "data": {
+      "timestamp": "2026-04-02T01:40:01.081849+00:00",
+      "regime": "CRISIS",
+      "total_score": -7,
+      "max_score": 12,
+      "position_size_modifier": 0.25,
+      "recommendation": "Minimal exposure. Quarter-size only. Preserve capital \u2014 no new longs. DXY strength is a headwind \u2014 watch for risk-off pressure.",
+      "indicators": {
+        "btc_bias": {
+          "raw_score": -1,
+          "bias": "NEUTRAL",
+          "score": 0,
+          "source": "btc-bias-scorer",
+          "timestamp": "2026-04-02T01:20:00.398159+00:00"
+        },
+        "dxy": {
+          "value": 99.777,
+          "trend": "rising above both SMAs",
+          "sma20": 99.609,
+          "sma50": 98.355,
+          "vs_sma20": "above",
+          "chg5d": 0.178,
+          "score": -2
+        },
+        "vix": {
+          "value": 24.54,
+          "prev": 25.25,
+          "level": "elevated fear",
+          "score": -1
+        },
+        "sp500": {
+          "price": 6575.32,
+          "ema20": 6604.55,
+          "ema50": 6721.7,
+          "sma200": 6641.85,
+          "trend": "below all MAs \u2014 bear",
+          "chg5d": -0.252,
+          "score": -2
+        },
+        "us10y": {
+          "value": 4.319,
+          "chg10d_pct": 1.409,
+          "trend": "rising",
+          "score": -1
+        },
+        "crypto_mcap": {
+          "mcap": 2402648520264.0,
+          "prev_mcap": 2420167352305.0,
+          "trend": "flat (-0.7%)",
+          "score": 0
+        },
+        "fed_expectations": {
+          "value": 3.605,
+          "chg10d_pct": -0.139,
+          "two_year_trend": "stable",
+          "score": 0
+        },
+        "sector_rotation": {
+          "leader": "XLU",
+          "type": "risk-off",
+          "growth_avg_5d": -0.575,
+          "defensive_avg_5d": 0.92,
+          "perf": {
+            "XLK": -1.353,
+            "XLF": 0.203,
+            "XLE": -2.642,
+            "XLU": 1.901,
+            "XLP": -0.061
+          },
+          "score": -1
+        }
+      },
+      "alerts": [
+        "Regime change: RISK-OFF \u2192 CRISIS",
+        "DXY direction change: 'flat' \u2192 'rising above both SMAs'"
+      ],
+      "history": [
+        {
+          "timestamp": "2026-04-02T01:20:01.048837+00:00",
+          "regime": "RISK-OFF",
+          "score": -5
+        },
+        {
+          "timestamp": "2026-04-02T01:00:01.135100+00:00",
+          "regime": "RISK-OFF",
+          "score": -5
+        },
+        {
+          "timestamp": "2026-04-02T00:40:01.032975+00:00",
+          "regime": "RISK-OFF",
+          "score": -5
+        },
+        {
+          "timestamp": "2026-04-02T00:20:02.489923+00:00",
+          "regime": "RISK-OFF",
+          "score": -5
+        },
+        {
+          "timestamp": "2026-04-02T00:00:01.425059+00:00",
+          "regime": "RISK-OFF",
+          "score": -5
+        },
+        {
+          "timestamp": "2026-04-01T23:40:01.108666+00:00",
+          "regime": "RISK-OFF",
+          "score": -5
+        },
+        {
+          "timestamp": "2026-04-01T23:20:01.062205+00:00",
+          "regime": "RISK-OFF",
+          "score": -5
+        },
+        {
+          "timestamp": "2026-04-01T23:00:01.305294+00:00",
+          "regime": "RISK-OFF",
+          "score": -5
+        },
+        {
+          "timestamp": "2026-04-01T22:40:01.017984+00:00",
+          "regime": "RISK-OFF",
+          "score": -5
+        },
+        {
+          "timestamp": "2026-04-01T22:20:01.025400+00:00",
+          "regime": "RISK-OFF",
+          "score": -5
+        }
+      ]
+    }
+  },
+  {
+    "id": "2b3d0f6b-634b-4583-94e0-6414389ffbb0",
+    "type": "macro_regime_change",
+    "source_id": "macro_2026-04-02T04:00:01.036029+00:00",
+    "timestamp": "2026-04-02T04:00:32.244171+00:00",
+    "telegram_sent": true,
+    "discord_sent": true,
+    "message_preview": "\ud83c\udf0d MACRO UPDATE",
+    "data": {
+      "timestamp": "2026-04-02T04:00:01.036029+00:00",
+      "regime": "RISK-OFF",
+      "total_score": -5,
+      "max_score": 12,
+      "position_size_modifier": 0.5,
+      "recommendation": "Defensive stance. Half position sizes. Prefer shorts or cash over new longs.",
+      "indicators": {
+        "btc_bias": {
+          "raw_score": -1,
+          "bias": "NEUTRAL",
+          "score": 0,
+          "source": "btc-bias-scorer",
+          "timestamp": "2026-04-02T03:40:00.388624+00:00"
+        },
+        "dxy": {
+          "value": 99.65,
+          "trend": "flat",
+          "sma20": 99.603,
+          "sma50": null,
+          "vs_sma20": "above",
+          "chg5d": 0.05,
+          "score": 0
+        },
+        "vix": {
+          "value": 24.54,
+          "prev": 25.25,
+          "level": "elevated fear",
+          "score": -1
+        },
+        "sp500": {
+          "price": 6575.32,
+          "ema20": 6604.55,
+          "ema50": 6721.7,
+          "sma200": 6641.85,
+          "trend": "below all MAs \u2014 bear",
+          "chg5d": -0.252,
+          "score": -2
+        },
+        "us10y": {
+          "value": 4.319,
+          "chg10d_pct": 1.409,
+          "trend": "rising",
+          "score": -1
+        },
+        "crypto_mcap": {
+          "mcap": 2372600520104.0,
+          "prev_mcap": 2384197214058.0,
+          "trend": "flat (-0.5%)",
+          "score": 0
+        },
+        "fed_expectations": {
+          "value": 3.605,
+          "chg10d_pct": -0.139,
+          "two_year_trend": "stable",
+          "score": 0
+        },
+        "sector_rotation": {
+          "leader": "XLU",
+          "type": "risk-off",
+          "growth_avg_5d": -0.575,
+          "defensive_avg_5d": 0.92,
+          "perf": {
+            "XLK": -1.353,
+            "XLF": 0.203,
+            "XLE": -2.642,
+            "XLU": 1.901,
+            "XLP": -0.061
+          },
+          "score": -1
+        }
+      },
+      "alerts": [
+        "Regime change: CRISIS \u2192 RISK-OFF",
+        "DXY direction change: 'rising above both SMAs' \u2192 'flat'"
+      ],
+      "history": [
+        {
+          "timestamp": "2026-04-02T03:40:01.139659+00:00",
+          "regime": "CRISIS",
+          "score": -7
+        },
+        {
+          "timestamp": "2026-04-02T03:20:01.106323+00:00",
+          "regime": "CRISIS",
+          "score": -7
+        },
+        {
+          "timestamp": "2026-04-02T03:00:01.101077+00:00",
+          "regime": "CRISIS",
+          "score": -7
+        },
+        {
+          "timestamp": "2026-04-02T02:40:01.400463+00:00",
+          "regime": "CRISIS",
+          "score": -7
+        },
+        {
+          "timestamp": "2026-04-02T02:20:01.123843+00:00",
+          "regime": "CRISIS",
+          "score": -7
+        },
+        {
+          "timestamp": "2026-04-02T02:00:01.029854+00:00",
+          "regime": "CRISIS",
+          "score": -7
+        },
+        {
+          "timestamp": "2026-04-02T01:40:01.081849+00:00",
+          "regime": "CRISIS",
+          "score": -7
+        },
+        {
+          "timestamp": "2026-04-02T01:20:01.048837+00:00",
+          "regime": "RISK-OFF",
+          "score": -5
+        },
+        {
+          "timestamp": "2026-04-02T01:00:01.135100+00:00",
+          "regime": "RISK-OFF",
+          "score": -5
+        },
+        {
+          "timestamp": "2026-04-02T00:40:01.032975+00:00",
+          "regime": "RISK-OFF",
+          "score": -5
+        }
+      ]
+    }
+  },
+  {
+    "id": "11bc6603-a424-4f66-8fff-345337bebd81",
+    "type": "macro_regime_change",
+    "source_id": "macro_2026-04-02T04:20:01.100804+00:00",
+    "timestamp": "2026-04-02T04:20:33.771457+00:00",
+    "telegram_sent": true,
+    "discord_sent": true,
+    "message_preview": "\ud83c\udf0d MACRO UPDATE",
+    "data": {
+      "timestamp": "2026-04-02T04:20:01.100804+00:00",
+      "regime": "CRISIS",
+      "total_score": -7,
+      "max_score": 12,
+      "position_size_modifier": 0.25,
+      "recommendation": "Minimal exposure. Quarter-size only. Preserve capital \u2014 no new longs. DXY strength is a headwind \u2014 watch for risk-off pressure.",
+      "indicators": {
+        "btc_bias": {
+          "raw_score": -1,
+          "bias": "NEUTRAL",
+          "score": 0,
+          "source": "btc-bias-scorer",
+          "timestamp": "2026-04-02T04:00:00.389061+00:00"
+        },
+        "dxy": {
+          "value": 100.006,
+          "trend": "rising above both SMAs",
+          "sma20": 99.637,
+          "sma50": 98.377,
+          "vs_sma20": "above",
+          "chg5d": 0.106,
+          "score": -2
+        },
+        "vix": {
+          "value": 24.54,
+          "prev": 25.25,
+          "level": "elevated fear",
+          "score": -1
+        },
+        "sp500": {
+          "price": 6575.32,
+          "ema20": 6604.55,
+          "ema50": 6721.7,
+          "sma200": 6641.85,
+          "trend": "below all MAs \u2014 bear",
+          "chg5d": -0.252,
+          "score": -2
+        },
+        "us10y": {
+          "value": 4.319,
+          "chg10d_pct": 1.409,
+          "trend": "rising",
+          "score": -1
+        },
+        "crypto_mcap": {
+          "mcap": 2373696312156.0,
+          "prev_mcap": 2372600520104.0,
+          "trend": "flat (+0.0%)",
+          "score": 0
+        },
+        "fed_expectations": {
+          "value": 3.605,
+          "chg10d_pct": -0.139,
+          "two_year_trend": "stable",
+          "score": 0
+        },
+        "sector_rotation": {
+          "leader": "XLU",
+          "type": "risk-off",
+          "growth_avg_5d": -0.575,
+          "defensive_avg_5d": 0.92,
+          "perf": {
+            "XLK": -1.353,
+            "XLF": 0.203,
+            "XLE": -2.642,
+            "XLU": 1.901,
+            "XLP": -0.061
+          },
+          "score": -1
+        }
+      },
+      "alerts": [
+        "Regime change: RISK-OFF \u2192 CRISIS",
+        "DXY direction change: 'flat' \u2192 'rising above both SMAs'"
+      ],
+      "history": [
+        {
+          "timestamp": "2026-04-02T04:00:01.036029+00:00",
+          "regime": "RISK-OFF",
+          "score": -5
+        },
+        {
+          "timestamp": "2026-04-02T03:40:01.139659+00:00",
+          "regime": "CRISIS",
+          "score": -7
+        },
+        {
+          "timestamp": "2026-04-02T03:20:01.106323+00:00",
+          "regime": "CRISIS",
+          "score": -7
+        },
+        {
+          "timestamp": "2026-04-02T03:00:01.101077+00:00",
+          "regime": "CRISIS",
+          "score": -7
+        },
+        {
+          "timestamp": "2026-04-02T02:40:01.400463+00:00",
+          "regime": "CRISIS",
+          "score": -7
+        },
+        {
+          "timestamp": "2026-04-02T02:20:01.123843+00:00",
+          "regime": "CRISIS",
+          "score": -7
+        },
+        {
+          "timestamp": "2026-04-02T02:00:01.029854+00:00",
+          "regime": "CRISIS",
+          "score": -7
+        },
+        {
+          "timestamp": "2026-04-02T01:40:01.081849+00:00",
+          "regime": "CRISIS",
+          "score": -7
+        },
+        {
+          "timestamp": "2026-04-02T01:20:01.048837+00:00",
+          "regime": "RISK-OFF",
+          "score": -5
+        },
+        {
+          "timestamp": "2026-04-02T01:00:01.135100+00:00",
+          "regime": "RISK-OFF",
+          "score": -5
+        }
+      ]
+    }
+  },
+  {
+    "id": "4e453d50-9e3b-44d4-ac9d-7e5c4b1c5319",
+    "type": "macro_regime_change",
+    "source_id": "macro_2026-04-02T15:00:01.513178+00:00",
+    "timestamp": "2026-04-02T15:00:35.129077+00:00",
+    "telegram_sent": true,
+    "discord_sent": true,
+    "message_preview": "\ud83c\udf0d MACRO UPDATE",
+    "data": {
+      "timestamp": "2026-04-02T15:00:01.513178+00:00",
+      "regime": "RISK-OFF",
+      "total_score": -3,
+      "max_score": 12,
+      "position_size_modifier": 0.5,
+      "recommendation": "Defensive stance. Half position sizes. Prefer shorts or cash over new longs.",
+      "indicators": {
+        "btc_bias": {
+          "raw_score": -1,
+          "bias": "NEUTRAL",
+          "score": 0,
+          "source": "btc-bias-scorer",
+          "timestamp": "2026-04-02T14:40:00.400481+00:00"
+        },
+        "dxy": {
+          "value": 99.951,
+          "trend": "flat",
+          "sma20": 99.635,
+          "sma50": 98.376,
+          "vs_sma20": "above",
+          "chg5d": 0.051,
+          "score": 0
+        },
+        "vix": {
+          "value": 24.68,
+          "prev": 24.54,
+          "level": "elevated fear",
+          "score": -1
+        },
+        "sp500": {
+          "price": 6577.82,
+          "ema20": 6602.0,
+          "ema50": 6716.06,
+          "sma200": 6644.57,
+          "trend": "below all MAs \u2014 bear",
+          "chg5d": 1.554,
+          "score": -2
+        },
+        "us10y": {
+          "value": 4.293,
+          "chg10d_pct": 0.28,
+          "trend": "stable",
+          "score": 0
+        },
+        "crypto_mcap": {
+          "mcap": 2382159132324.0,
+          "prev_mcap": 2380112542500.0,
+          "trend": "flat (+0.1%)",
+          "score": 0
+        },
+        "fed_expectations": {
+          "value": 3.607,
+          "chg10d_pct": -0.138,
+          "two_year_trend": "stable",
+          "score": 0
+        },
+        "sector_rotation": {
+          "leader": "XLU",
+          "type": "neutral",
+          "growth_avg_5d": 1.539,
+          "defensive_avg_5d": 1.569,
+          "perf": {
+            "XLK": 2.151,
+            "XLF": 0.928,
+            "XLE": -3.438,
+            "XLU": 2.46,
+            "XLP": 0.678
+          },
+          "score": 0
+        }
+      },
+      "alerts": [
+        "Regime change: CRISIS \u2192 RISK-OFF",
+        "DXY direction change: 'rising above both SMAs' \u2192 'flat'",
+        "US10Y direction change: 'rising' \u2192 'stable'"
+      ],
+      "history": [
+        {
+          "timestamp": "2026-04-02T14:40:01.106835+00:00",
+          "regime": "CRISIS",
+          "score": -7
+        },
+        {
+          "timestamp": "2026-04-02T14:20:01.035562+00:00",
+          "regime": "CRISIS",
+          "score": -8
+        },
+        {
+          "timestamp": "2026-04-02T14:00:01.614907+00:00",
+          "regime": "CRISIS",
+          "score": -8
+        },
+        {
+          "timestamp": "2026-04-02T13:40:01.116067+00:00",
+          "regime": "CRISIS",
+          "score": -8
+        },
+        {
+          "timestamp": "2026-04-02T13:20:01.077841+00:00",
+          "regime": "CRISIS",
+          "score": -8
+        },
+        {
+          "timestamp": "2026-04-02T13:00:01.135400+00:00",
+          "regime": "CRISIS",
+          "score": -8
+        },
+        {
+          "timestamp": "2026-04-02T12:40:01.038315+00:00",
+          "regime": "CRISIS",
+          "score": -8
+        },
+        {
+          "timestamp": "2026-04-02T12:20:01.196439+00:00",
+          "regime": "CRISIS",
+          "score": -7
+        },
+        {
+          "timestamp": "2026-04-02T12:00:01.535363+00:00",
+          "regime": "CRISIS",
+          "score": -8
+        },
+        {
+          "timestamp": "2026-04-02T11:40:02.221855+00:00",
+          "regime": "CRISIS",
+          "score": -8
+        }
+      ]
+    }
+  },
+  {
+    "id": "7d121d92-2daf-4ad2-ae07-cca0a311a7e9",
+    "type": "daily_summary",
+    "source_id": "daily_2026-04-03",
+    "timestamp": "2026-04-03T00:00:02.523422+00:00",
+    "telegram_sent": true,
+    "discord_sent": true,
+    "message_preview": "\ud83d\udcca DAILY SUMMARY \u2014 April 3, 2026"
+  }
+]

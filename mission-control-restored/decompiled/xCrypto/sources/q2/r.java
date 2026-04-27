@@ -1,0 +1,49 @@
+package q2;
+
+/* JADX WARN: Failed to restore enum class, 'enum' modifier and super class removed */
+/* JADX WARN: Unknown enum class pattern. Please report as an issue! */
+/* JADX INFO: loaded from: classes.dex */
+public abstract class r {
+
+    /* JADX INFO: renamed from: a, reason: collision with root package name */
+    public static final r f14274a;
+
+    /* JADX INFO: renamed from: b, reason: collision with root package name */
+    public static final r f14275b;
+
+    /* JADX INFO: renamed from: c, reason: collision with root package name */
+    public static final /* synthetic */ r[] f14276c;
+
+    public enum a extends r {
+        public a(String str, int i4) {
+            super(str, i4, null);
+        }
+    }
+
+    static {
+        a aVar = new a("DEFAULT", 0);
+        f14274a = aVar;
+        r rVar = new r("STRING", 1) { // from class: q2.r.b
+            {
+                a aVar2 = null;
+            }
+        };
+        f14275b = rVar;
+        f14276c = new r[]{aVar, rVar};
+    }
+
+    public r(String str, int i4) {
+    }
+
+    public static r valueOf(String str) {
+        return (r) Enum.valueOf(r.class, str);
+    }
+
+    public static r[] values() {
+        return (r[]) f14276c.clone();
+    }
+
+    public /* synthetic */ r(String str, int i4, a aVar) {
+        this(str, i4);
+    }
+}

@@ -1,0 +1,82 @@
+{
+  "date": "2026-04-14",
+  "generated_at": "2026-04-14T23:55:01.587787+00:00",
+  "signals": {
+    "total": 51,
+    "buys": 45,
+    "sells": 6,
+    "take_profits": 0,
+    "stop_losses": 0
+  },
+  "pnl": {
+    "BTCUSD": {
+      "trades_today": 50,
+      "total_pnl_pct": -0.7817,
+      "wins": 16,
+      "losses": 34,
+      "win_rate": 32.0,
+      "best_trade": 0.2109,
+      "worst_trade": -0.2145,
+      "current_direction": "LONG",
+      "current_entry": 74166.54
+    }
+  },
+  "regime": {
+    "overall": "MIXED_TREND",
+    "bias": "BULLISH",
+    "recommendation": "SuperTrend on trending TFs, Grid Bot on ranging TFs",
+    "timeframes": {
+      "1H": {
+        "regime": "WEAK_TREND",
+        "recommended_strategy": "SuperTrend (cautious)",
+        "direction": "BULLISH",
+        "adx": 45.0,
+        "plus_di": 26.6,
+        "minus_di": 15.9,
+        "bbw": 1.94,
+        "choppiness": 50.7,
+        "trend_efficiency": 0.243,
+        "current_price": 74407.62
+      },
+      "4H": {
+        "regime": "STRONG_TREND",
+        "recommended_strategy": "SuperTrend Combined",
+        "direction": "BULLISH",
+        "adx": 39.8,
+        "plus_di": 33.0,
+        "minus_di": 11.1,
+        "bbw": 8.69,
+        "choppiness": 35.2,
+        "trend_efficiency": 0.208,
+        "current_price": 74400.14
+      }
+    }
+  },
+  "optimal_params": {
+    "atr_period": 16,
+    "multiplier": 5.0,
+    "win_rate": 40.0,
+    "profit_factor": 1.79
+  },
+  "infrastructure": {
+    "pm2": {
+      "error": "[Errno 2] No such file or directory: 'pm2'"
+    },
+    "crons": {
+      "optimizer": {
+        "ran_today": true,
+        "last_entry": "[2026-04-14T22:00:08Z] Daily Optimization Complete"
+      },
+      "regime_detector": {
+        "ran_today": false,
+        "last_run": "never"
+      }
+    },
+    "disk": {
+      "total": "45G",
+      "used": "26G",
+      "available": "20G",
+      "percent": "57%"
+    }
+  }
+}

@@ -1,0 +1,61 @@
+# Mission Control — HTTPS reverse proxy with basic auth
+# HTTP — webhook routes + redirect everything else to HTTPS
+server {
+    listen 80;
+    server_name 132.145.205.15 _;
+
+    # TradingView webhook (must be HTTP port 80)
+    location /webhook/ {
+        proxy_pass http://127.0.0.1:8420;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+    }
+
+    location /signals/ {
+        proxy_pass http://127.0.0.1:8420;
+        proxy_set_header Host $host;
+    }
+
+    location /health {
+        proxy_pass http://127.0.0.1:8420;
+    }
+
+    # Everything else → HTTPS
+    location / {
+        return 301 https://$host$request_uri;
+    }
+}
+# HTTPS — proxy to Next.js on :3000 with basic auth
+server {
+    listen 443 ssl;
+    server_name 132.145.205.15 _;
+    ssl_certificate     /etc/nginx/ssl/mission-control.crt;
+    ssl_certificate_key /etc/nginx/ssl/mission-control.key;
+    ssl_protocols       TLSv1.2 TLSv1.3;
+    ssl_ciphers         HIGH:!aNULL:!MD5;
+    ssl_session_cache   shared:SSL:10m;
+    ssl_session_timeout 10m;
+    add_header X-Frame-Options "SAMEORIGIN" always;
+    add_header X-Content-Type-Options "nosniff" always;
+    add_header X-XSS-Protection "1; mode=block" always;
+    add_header Referrer-Policy "strict-origin-when-cross-origin" always;
+    location / {
+        proxy_pass         http://127.0.0.1:3000;
+        proxy_http_version 1.1;
+        proxy_set_header   Upgrade $http_upgrade;
+        proxy_set_header   Connection 'upgrade';
+        proxy_set_header   Host $host;
+        proxy_set_header   X-Real-IP $remote_addr;
+        proxy_set_header   X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header   X-Forwarded-Proto $scheme;
+        proxy_set_header   Authorization $http_authorization;
+        proxy_pass_header  Authorization;
+        proxy_cache_bypass $http_upgrade;
+        proxy_read_timeout 60s;
+    }
+
+    # Block sensitive paths
+    location ~ /\.(env|git) { deny all; return 404; }
+    location ~ /secrets { deny all; return 404; }
+    location ~ /node_modules { deny all; return 404; }
+}

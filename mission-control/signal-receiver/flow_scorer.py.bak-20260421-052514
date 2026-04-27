@@ -1,0 +1,502 @@
+#!/usr/bin/env python3
+"""
+Flow Greeks Signal Scorer — Parses and ranks options flow signals
+Zero LLM calls. Pure rule-based scoring.
+
+Reads from Discord channel, scores each signal, posts top picks with reasoning.
+"""
+
+import json
+import os
+import re
+import sys
+import urllib.request
+from datetime import datetime, timezone
+
+sys.path.insert(0, os.path.expanduser("~/.openclaw/workspace/skills/shared"))
+
+try:
+    from mc_utils import get_secret
+except ImportError:
+    def get_secret(name):
+        path = os.path.expanduser(f"~/.openclaw/secrets/{name}")
+        with open(path, "r") as f:
+            return f.read().strip()
+
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+LOG_FILE = os.path.join(BASE_DIR, "logs", "scored_signals.jsonl")
+os.makedirs(os.path.join(BASE_DIR, "logs"), exist_ok=True)
+
+
+def parse_flow_signal(text: str) -> dict:
+    """
+    Parse a Flow Greeks signal message.
+
+    Format:
+    🔴 APH $155.0P 06/18/26
+    Alert Type          Flow Value    Volume / OI
+    unusual_high_flow   $593.7K       362 / 21
+    Sweeps / Blocks     Spot          DTE
+    1 / 0               $148.0        65
+    Trades              Last Price
+    16                  $16.4
+    Option Signals Flow | 04/14 03:15 PM
+    """
+    signal = {
+        "raw": text,
+        "ticker": None,
+        "strike": None,
+        "option_type": None,  # CALL or PUT
+        "expiry": None,
+        "alert_type": None,
+        "flow_value": None,
+        "flow_value_raw": None,
+        "volume": None,
+        "oi": None,
+        "vol_oi_ratio": None,
+        "sweeps": None,
+        "blocks": None,
+        "spot": None,
+        "dte": None,
+        "trades": None,
+        "last_price": None,
+        "timestamp": None,
+    }
+
+    lines = [l.strip() for l in text.strip().split("\n") if l.strip()]
+
+    # Line 1: Ticker, strike, type, expiry
+    # e.g. "🔴 APH $155.0P 06/18/26" or "🟢 MU $425.0C 04/17/26"
+    header_match = re.search(r'([A-Z]{1,5})\s+\$(\d+\.?\d*)(C|P)\s+(\d{2,4}[-/]\d{2}[-/]\d{2,4})', text)
+    if header_match:
+        signal["ticker"] = header_match.group(1)
+        signal["strike"] = float(header_match.group(2))
+        signal["option_type"] = "CALL" if header_match.group(3) == "C" else "PUT"
+        signal["expiry"] = header_match.group(4)
+
+    # Alert type
+    for alert_type in ["unusual_high_flow", "weekly_flow", "daily_flow", "sweep", "block", "golden_sweep"]:
+        if alert_type in text.lower():
+            signal["alert_type"] = alert_type
+            break
+
+    # Flow value: $593.7K or $1.2M
+    flow_match = re.search(r'\$(\d+\.?\d*)(K|M|B)', text)
+    if flow_match:
+        val = float(flow_match.group(1))
+        mult = flow_match.group(2)
+        if mult == "K":
+            signal["flow_value"] = val * 1000
+        elif mult == "M":
+            signal["flow_value"] = val * 1000000
+        elif mult == "B":
+            signal["flow_value"] = val * 1000000000
+        signal["flow_value_raw"] = f"${flow_match.group(1)}{mult}"
+
+    # Volume / OI
+    vol_oi_match = re.search(r'(\d+)\s*/\s*(\d+)', text)
+    if vol_oi_match:
+        signal["volume"] = int(vol_oi_match.group(1))
+        signal["oi"] = int(vol_oi_match.group(2))
+        if signal["oi"] > 0:
+            signal["vol_oi_ratio"] = round(signal["volume"] / signal["oi"], 2)
+
+    # Sweeps / Blocks
+    sweep_match = re.findall(r'(\d+)\s*/\s*(\d+)', text)
+    if len(sweep_match) >= 2:
+        # First match is Vol/OI, second is Sweeps/Blocks
+        signal["volume"] = int(sweep_match[0][0])
+        signal["oi"] = int(sweep_match[0][1])
+        signal["sweeps"] = int(sweep_match[1][0])
+        signal["blocks"] = int(sweep_match[1][1])
+        if signal["oi"] > 0:
+            signal["vol_oi_ratio"] = round(signal["volume"] / signal["oi"], 2)
+
+    # Spot price
+    spot_match = re.findall(r'\$(\d+\.?\d*)', text)
+    # Skip strike price (first $), flow value, find spot by context
+    for match in re.finditer(r'Spot[^\$]*\$(\d+\.?\d*)', text, re.IGNORECASE):
+        signal["spot"] = float(match.group(1))
+
+    # If no Spot label, try to find it from all dollar amounts
+    if signal["spot"] is None and len(spot_match) >= 3:
+        # spot_match[0] = strike, spot_match[1] = flow value, spot_match[2] = spot or last price
+        for val in spot_match:
+            v = float(val)
+            # Spot is usually near the strike price
+            if signal["strike"] and abs(v - signal["strike"]) / signal["strike"] < 0.3:
+                signal["spot"] = v
+                break
+
+    # DTE
+    dte_match = re.search(r'DTE\s*\n?\s*(\d+)', text, re.IGNORECASE)
+    if not dte_match:
+        dte_match = re.search(r'(\d+)\s*$', text, re.MULTILINE)
+    if dte_match:
+        signal["dte"] = int(dte_match.group(1))
+
+    # Trades count
+    trades_match = re.search(r'Trades\s*\n?\s*(\d+)', text, re.IGNORECASE)
+    if trades_match:
+        signal["trades"] = int(trades_match.group(1))
+
+    # Last price
+    last_match = re.search(r'Last Price\s*\n?\s*\$?(\d+\.?\d*)', text, re.IGNORECASE)
+    if last_match:
+        signal["last_price"] = float(last_match.group(1))
+
+    # Timestamp
+    ts_match = re.search(r'(\d{2}/\d{2})\s+(\d{1,2}:\d{2}\s*[AP]M)', text)
+    if ts_match:
+        signal["timestamp"] = f"{ts_match.group(1)} {ts_match.group(2)}"
+
+    # Handle embed format: "Volume 45" on its own line
+    if signal["volume"] is None:
+        vol_match = re.search(r'Volume\s+(\d+)', text)
+        if vol_match:
+            signal["volume"] = int(vol_match.group(1))
+
+    # Handle embed format: "OI 0" on its own line
+    if signal["oi"] is None:
+        oi_match = re.search(r'OI\s+(\d+)', text)
+        if oi_match:
+            signal["oi"] = int(oi_match.group(1))
+
+    # Recalculate vol/oi ratio
+    if signal["volume"] and signal["oi"] and signal["oi"] > 0:
+        signal["vol_oi_ratio"] = round(signal["volume"] / signal["oi"], 2)
+    elif signal["volume"] and (signal["oi"] == 0 or signal["oi"] is None):
+        signal["vol_oi_ratio"] = signal["volume"]  # All new activity
+
+    # Handle embed format: "Spot $6967.38" on its own line
+    if signal["spot"] is None:
+        spot_line = re.search(r'Spot\s+\$(\d+\.?\d*)', text)
+        if spot_line:
+            signal["spot"] = float(spot_line.group(1))
+
+    # Calculate DTE from expiry if not found
+    if signal["expiry"] and (signal["dte"] is None or signal["dte"] == signal.get("volume")):
+        try:
+            from datetime import datetime
+            exp_str = signal["expiry"]
+            for fmt in ["%Y-%m-%d", "%m/%d/%y", "%m/%d/%Y"]:
+                try:
+                    exp_date = datetime.strptime(exp_str, fmt)
+                    signal["dte"] = max(0, (exp_date - datetime.now()).days)
+                    break
+                except ValueError:
+                    continue
+        except Exception:
+            pass
+
+    # Detect sweeps/blocks from embed text
+    if signal["sweeps"] is None:
+        if "SWEEP" in text.upper():
+            signal["sweeps"] = 1
+            signal["alert_type"] = signal["alert_type"] or "sweep"
+        else:
+            signal["sweeps"] = 0
+
+    if signal["blocks"] is None:
+        if "BLOCK" in text.upper():
+            signal["blocks"] = 1
+            signal["alert_type"] = signal["alert_type"] or "block"
+        else:
+            signal["blocks"] = 0
+
+    # Trades from embed: look for "Trades" label or total count
+    if signal["trades"] is None:
+        trades_match = re.search(r'Trades\s+(\d+)', text)
+        if trades_match:
+            signal["trades"] = int(trades_match.group(1))
+
+    return signal
+
+
+def score_signal(signal: dict) -> dict:
+    """
+    Score a parsed signal 0-100 with reasoning.
+
+    Scoring factors:
+    - Flow value (bigger = more institutional money)
+    - Volume/OI ratio (higher = more unusual activity)
+    - Sweeps (aggressive market orders)
+    - Alert type (unusual_high_flow > weekly_flow > daily_flow)
+    - DTE (3-30 sweet spot, too short = risky, too long = less conviction)
+    - Trades count (more trades = sustained interest)
+    """
+    score = 0
+    reasons = []
+
+    # Flow value (0-25 points)
+    fv = signal.get("flow_value", 0) or 0
+    if fv >= 5000000:
+        score += 25
+        reasons.append(f"Massive flow {signal.get('flow_value_raw', '')} (whale)")
+    elif fv >= 1000000:
+        score += 20
+        reasons.append(f"Large flow {signal.get('flow_value_raw', '')} (institutional)")
+    elif fv >= 500000:
+        score += 15
+        reasons.append(f"Notable flow {signal.get('flow_value_raw', '')}")
+    elif fv >= 100000:
+        score += 8
+        reasons.append(f"Moderate flow {signal.get('flow_value_raw', '')}")
+    else:
+        score += 3
+
+    # Volume / OI ratio (0-25 points)
+    ratio = signal.get("vol_oi_ratio", 0) or 0
+    if ratio >= 10:
+        score += 25
+        reasons.append(f"Extreme Vol/OI ratio {ratio}x (very unusual)")
+    elif ratio >= 5:
+        score += 20
+        reasons.append(f"High Vol/OI ratio {ratio}x (unusual activity)")
+    elif ratio >= 2:
+        score += 12
+        reasons.append(f"Elevated Vol/OI ratio {ratio}x")
+    elif ratio >= 1:
+        score += 6
+    else:
+        score += 2
+
+    # Sweeps (0-20 points)
+    sweeps = signal.get("sweeps", 0) or 0
+    blocks = signal.get("blocks", 0) or 0
+    if sweeps >= 5:
+        score += 20
+        reasons.append(f"{sweeps} sweeps — aggressive buying across exchanges")
+    elif sweeps >= 3:
+        score += 15
+        reasons.append(f"{sweeps} sweeps — notable urgency")
+    elif sweeps >= 1:
+        score += 8
+        reasons.append(f"{sweeps} sweep(s)")
+    if blocks >= 3:
+        score += 5
+        reasons.append(f"{blocks} block trades — large single orders")
+    elif blocks >= 1:
+        score += 3
+
+    # Alert type (0-15 points)
+    alert_type = signal.get("alert_type", "") or ""
+    if alert_type == "golden_sweep":
+        score += 15
+        reasons.append("GOLDEN SWEEP — highest conviction signal")
+    elif alert_type == "unusual_high_flow":
+        score += 12
+        reasons.append("Unusual high flow — abnormal activity detected")
+    elif alert_type == "weekly_flow":
+        score += 8
+        reasons.append("Weekly flow — sustained weekly interest")
+    elif alert_type in ("sweep", "block"):
+        score += 6
+    elif alert_type == "daily_flow":
+        score += 4
+
+    # DTE sweet spot (0-10 points)
+    dte = signal.get("dte", 0) or 0
+    if 7 <= dte <= 30:
+        score += 10
+        reasons.append(f"{dte} DTE — sweet spot for momentum plays")
+    elif 3 <= dte <= 7:
+        score += 7
+        reasons.append(f"{dte} DTE — short-dated, high gamma")
+    elif 30 < dte <= 60:
+        score += 5
+        reasons.append(f"{dte} DTE — medium-term")
+    elif dte > 60:
+        score += 3
+        reasons.append(f"{dte} DTE — longer dated LEAP")
+    elif dte > 0:
+        score += 2
+        reasons.append(f"{dte} DTE — very short, high risk")
+
+    # Trades count (0-5 points)
+    trades = signal.get("trades", 0) or 0
+    if trades >= 30:
+        score += 5
+        reasons.append(f"{trades} trades — heavy sustained interest")
+    elif trades >= 15:
+        score += 3
+        reasons.append(f"{trades} trades — active interest")
+    elif trades >= 5:
+        score += 2
+
+    # Cap at 100
+    score = min(score, 100)
+
+    # Grade
+    if score >= 80:
+        grade = "A+"
+    elif score >= 70:
+        grade = "A"
+    elif score >= 60:
+        grade = "B+"
+    elif score >= 50:
+        grade = "B"
+    elif score >= 40:
+        grade = "C"
+    else:
+        grade = "D"
+
+    return {
+        "score": score,
+        "grade": grade,
+        "reasons": reasons,
+        "recommendation": _get_recommendation(signal, score),
+    }
+
+
+def _get_recommendation(signal, score):
+    """Generate actionable recommendation."""
+    ticker = signal.get("ticker", "?")
+    opt_type = signal.get("option_type", "?")
+    strike = signal.get("strike", 0)
+    expiry = signal.get("expiry", "?")
+    spot = signal.get("spot")
+    dte = signal.get("dte", 0)
+
+    direction = "BULLISH" if opt_type == "CALL" else "BEARISH" if opt_type == "PUT" else "UNKNOWN"
+
+    if score >= 70:
+        action = "STRONG SIGNAL"
+    elif score >= 50:
+        action = "WORTH WATCHING"
+    else:
+        action = "LOW PRIORITY"
+
+    opt_char = opt_type[0] if opt_type and len(opt_type) > 0 else "?"
+    rec = f"{action}: {ticker} {direction} — ${strike}{opt_char} exp {expiry}"
+    if spot:
+        if opt_type == "CALL":
+            otm = ((strike - spot) / spot * 100) if spot > 0 else 0
+            rec += f" | Spot ${spot} ({otm:+.1f}% OTM)"
+        else:
+            itm = ((spot - strike) / spot * 100) if spot > 0 else 0
+            rec += f" | Spot ${spot} ({itm:+.1f}% OTM)"
+
+    return rec
+
+
+def process_and_score(text: str) -> dict:
+    """Parse and score a signal, return full result."""
+    signal = parse_flow_signal(text)
+    scoring = score_signal(signal)
+
+    result = {
+        "parsed": signal,
+        "scoring": scoring,
+        "processed_at": datetime.now(timezone.utc).isoformat(),
+    }
+
+    # Log it
+    with open(LOG_FILE, "a") as f:
+        log_entry = {
+            "timestamp": result["processed_at"],
+            "ticker": signal.get("ticker"),
+            "option_type": signal.get("option_type"),
+            "strike": signal.get("strike"),
+            "score": scoring["score"],
+            "grade": scoring["grade"],
+            "recommendation": scoring["recommendation"],
+        }
+        f.write(json.dumps(log_entry) + "\n")
+
+    return result
+
+
+def post_top_pick(result: dict):
+    """Post a scored signal to Discord if it scores high enough."""
+    scoring = result["scoring"]
+    signal = result["parsed"]
+
+    if scoring["score"] < 50:
+        return  # Don't post low scores
+
+    try:
+        webhook = get_secret("discord_flow_picks_webhook")
+    except Exception:
+        return
+
+    grade_colors = {
+        "A+": 0x00FF00,
+        "A": 0x00D2A0,
+        "B+": 0x3498FF,
+        "B": 0xFFA502,
+        "C": 0xFF6348,
+        "D": 0xFF4757,
+    }
+
+    color = grade_colors.get(scoring["grade"], 0x808080)
+    opt_emoji = "📗" if signal.get("option_type") == "CALL" else "📕"
+
+    fields = [
+        {"name": "Score", "value": f"{scoring['score']}/100 ({scoring['grade']})", "inline": True},
+        {"name": "Flow", "value": signal.get("flow_value_raw", "—"), "inline": True},
+        {"name": "Vol/OI", "value": f"{signal.get('volume', '?')}/{signal.get('oi', '?')} ({signal.get('vol_oi_ratio', '?')}x)", "inline": True},
+        {"name": "Sweeps/Blocks", "value": f"{signal.get('sweeps', 0)}/{signal.get('blocks', 0)}", "inline": True},
+        {"name": "DTE", "value": str(signal.get("dte", "?")), "inline": True},
+        {"name": "Spot", "value": f"${signal.get('spot', '?')}", "inline": True},
+    ]
+
+    reasons_text = "\n".join(f"• {r}" for r in scoring["reasons"][:5])
+
+    embed = {
+        "title": f"{opt_emoji} {signal['ticker']} ${signal['strike']}{signal['option_type'][0]} {signal['expiry']}",
+        "description": f"**{scoring['recommendation']}**\n\n{reasons_text}",
+        "color": color,
+        "fields": fields,
+        "footer": {"text": f"Flow Greeks Scorer | {signal.get('alert_type', '')}"},
+    }
+
+    payload = json.dumps({"username": "Flow Scorer", "embeds": [embed]}).encode("utf-8")
+    req = urllib.request.Request(
+        webhook, data=payload,
+        headers={"Content-Type": "application/json", "User-Agent": "SignalReceiver/1.0"},
+        method="POST"
+    )
+    try:
+        urllib.request.urlopen(req)
+        print(f"[flow-scorer] Posted: {signal['ticker']} {scoring['grade']} ({scoring['score']})")
+    except Exception as e:
+        print(f"[flow-scorer] Discord error: {e}")
+
+
+if __name__ == "__main__":
+    # Test with the two signals from screenshot
+    test1 = """🔴 APH $155.0P 06/18/26
+Alert Type          Flow Value    Volume / OI
+unusual_high_flow   $593.7K       362 / 21
+Sweeps / Blocks     Spot          DTE
+1 / 0               $148.0        65
+Trades              Last Price
+16                  $16.4
+Option Signals Flow | 04/14 03:15 PM"""
+
+    test2 = """🟢 MU $425.0C 04/17/26
+Alert Type          Flow Value    Volume / OI
+weekly_flow         $931.9K       543 / 4529
+Sweeps / Blocks     Spot          DTE
+6 / 5               $432.95       3
+Trades              Last Price
+34                  $17.99
+Option Signals Flow | 04/14 03:13 PM"""
+
+    for i, test in enumerate([test1, test2], 1):
+        print(f"\n{'='*60}")
+        print(f"SIGNAL #{i}")
+        print(f"{'='*60}")
+        result = process_and_score(test)
+        s = result["parsed"]
+        sc = result["scoring"]
+        print(f"Ticker: {s['ticker']} ${s['strike']}{s['option_type'][0]} exp {s['expiry']}")
+        print(f"Type: {s['alert_type']} | Flow: {s.get('flow_value_raw', '?')}")
+        print(f"Vol/OI: {s['volume']}/{s['oi']} ({s['vol_oi_ratio']}x) | Sweeps: {s['sweeps']} | Blocks: {s['blocks']}")
+        print(f"Spot: ${s['spot']} | DTE: {s['dte']} | Trades: {s['trades']}")
+        print(f"\nSCORE: {sc['score']}/100 ({sc['grade']})")
+        print(f"RECOMMENDATION: {sc['recommendation']}")
+        print("REASONS:")
+        for r in sc["reasons"]:
+            print(f"  • {r}")

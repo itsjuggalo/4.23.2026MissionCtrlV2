@@ -1,0 +1,77 @@
+{
+  "date": "2026-04-22",
+  "generated_at": "2026-04-22T23:55:01.514878+00:00",
+  "signals": {
+    "total": 0,
+    "buys": 0,
+    "sells": 0,
+    "take_profits": 0,
+    "stop_losses": 0
+  },
+  "pnl": {
+    "BTCUSD": {
+      "trades_today": 0,
+      "total_pnl_pct": 0,
+      "current_direction": "SHORT",
+      "current_entry": 75031.09
+    }
+  },
+  "regime": {
+    "overall": "MIXED",
+    "bias": "BULLISH",
+    "recommendation": "DayTrader light size \u2014 no clear regime",
+    "timeframes": {
+      "1H": {
+        "regime": "WEAK_TREND",
+        "recommended_strategy": "SuperTrend (cautious)",
+        "direction": "BULLISH",
+        "adx": 43.3,
+        "plus_di": 29.4,
+        "minus_di": 9.9,
+        "bbw": 3.58,
+        "choppiness": 47.1,
+        "trend_efficiency": 0.234,
+        "current_price": 78885.36
+      },
+      "1D": {
+        "regime": "WEAK_TREND",
+        "recommended_strategy": "SuperTrend (cautious)",
+        "direction": "BULLISH",
+        "adx": 20.8,
+        "plus_di": 28.8,
+        "minus_di": 13.6,
+        "bbw": 17.52,
+        "choppiness": 52.3,
+        "trend_efficiency": 0.099,
+        "current_price": 78911.3
+      }
+    }
+  },
+  "optimal_params": {
+    "atr_period": 16,
+    "multiplier": 5.0,
+    "win_rate": 40.0,
+    "profit_factor": 1.79
+  },
+  "infrastructure": {
+    "pm2": {
+      "error": "[Errno 2] No such file or directory: 'pm2'"
+    },
+    "crons": {
+      "optimizer": {
+        "ran_today": true,
+        "last_entry": "[2026-04-22T22:00:14Z] Daily Optimization Complete"
+      },
+      "regime_detector": {
+        "ran_today": true,
+        "last_entry": "[2026-04-22T20:00:02Z] Done"
+      }
+    },
+    "disk": {
+      "total": "45G",
+      "used": "37G",
+      "available": "8.9G",
+      "percent": "81%"
+    }
+  }
+}

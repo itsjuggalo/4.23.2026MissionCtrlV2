@@ -1,0 +1,19 @@
+server {
+    listen 80;
+    server_name 132.145.205.15;
+
+    location /webhook/ {
+        proxy_pass http://127.0.0.1:8420;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+    }
+
+    location /signals/ {
+        proxy_pass http://127.0.0.1:8420;
+        proxy_set_header Host $host;
+    }
+
+    location /health {
+        proxy_pass http://127.0.0.1:8420;
+    }
+}

@@ -1,0 +1,16 @@
+package com.google.gson;
+
+/* JADX INFO: loaded from: classes.dex */
+public final class p extends m {
+    public p(String str) {
+        super(str);
+    }
+
+    public p(String str, Throwable th) {
+        super(str, th);
+    }
+
+    public p(Throwable th) {
+        super(th);
+    }
+}

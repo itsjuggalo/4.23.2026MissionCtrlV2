@@ -1,0 +1,149 @@
+{
+  "last_analysis": "2026-04-09T15:33:38.168156+00:00",
+  "data_points": 0,
+  "parameter_recommendations": {
+    "eric": {
+      "status": "insufficient_data",
+      "data_points": 0
+    },
+    "analyst": {
+      "indicator_accuracy": {
+        "rsi": {
+          "correct_pct": null,
+          "weight_recommendation": 1.0,
+          "samples": 0
+        },
+        "macd": {
+          "correct_pct": null,
+          "weight_recommendation": 1.0,
+          "samples": 0
+        },
+        "moving_averages": {
+          "correct_pct": null,
+          "weight_recommendation": 1.0,
+          "samples": 0
+        },
+        "volume": {
+          "correct_pct": null,
+          "weight_recommendation": 1.0,
+          "samples": 0
+        },
+        "support_resistance": {
+          "correct_pct": null,
+          "weight_recommendation": 1.0,
+          "samples": 0
+        },
+        "risk_reward": {
+          "correct_pct": null,
+          "weight_recommendation": 1.0,
+          "samples": 0
+        }
+      },
+      "status": "pending_review",
+      "data_points": 200
+    },
+    "risk_manager": {
+      "status": "insufficient_data",
+      "data_points": 0
+    },
+    "execution": {
+      "status": "insufficient_data",
+      "data_points": 0
+    },
+    "channels": {
+      "channels_ranked": [
+        {
+          "channel": "Firebase-Vivid2",
+          "total_signals": 66,
+          "actionable_signals": 60,
+          "hit_rate_pct": 90.9,
+          "actual_win_rate": null
+        },
+        {
+          "channel": "Ai Golden Crypto",
+          "total_signals": 238,
+          "actionable_signals": 11,
+          "hit_rate_pct": 4.6,
+          "actual_win_rate": null
+        },
+        {
+          "channel": "AICryptoSignals",
+          "total_signals": 4015,
+          "actionable_signals": 0,
+          "hit_rate_pct": 0.0,
+          "actual_win_rate": null
+        },
+        {
+          "channel": "Coin Sonar V2",
+          "total_signals": 5980,
+          "actionable_signals": 0,
+          "hit_rate_pct": 0.0,
+          "actual_win_rate": null
+        },
+        {
+          "channel": "\ud83d\udc33 \ud835\udc16\ud835\udc07\ud835\udc00\ud835\udc0b\ud835\udc04\ud835\udc13\ud835\udc11\ud835\udc00\ud835\udc02\ud835\udc0a\ud835\udc04\ud835\udc11 \ud83d\udc40",
+          "total_signals": 1699,
+          "actionable_signals": 0,
+          "hit_rate_pct": 0.0,
+          "actual_win_rate": null
+        },
+        {
+          "channel": "\ud83d\udcc8 Binance Futures 5m Pump Monitor (No charts)",
+          "total_signals": 784,
+          "actionable_signals": 0,
+          "hit_rate_pct": 0.0,
+          "actual_win_rate": null
+        },
+        {
+          "channel": "Binance Futures 5m Volume Pump Monitor \ud83d\ude80",
+          "total_signals": 784,
+          "actionable_signals": 0,
+          "hit_rate_pct": 0.0,
+          "actual_win_rate": null
+        },
+        {
+          "channel": "xCrypto Signals",
+          "total_signals": 412,
+          "actionable_signals": 0,
+          "hit_rate_pct": 0.0,
+          "actual_win_rate": null
+        },
+        {
+          "channel": "\ud83d\udc33 Whale Liquidations",
+          "total_signals": 347,
+          "actionable_signals": 0,
+          "hit_rate_pct": 0.0,
+          "actual_win_rate": null
+        },
+        {
+          "channel": "Ai Crypto Signals (Auto Bot)",
+          "total_signals": 341,
+          "actionable_signals": 0,
+          "hit_rate_pct": 0.0,
+          "actual_win_rate": null
+        }
+      ],
+      "status": "ready"
+    },
+    "macro": {
+      "status": "insufficient_data"
+    }
+  },
+  "system_efficiency": {
+    "signal_to_execution_avg_minutes": 4.2,
+    "false_positive_rate": 100.0,
+    "trades_per_day_avg": 0,
+    "overall_win_rate": 0,
+    "overall_edge_confidence": "low"
+  },
+  "detectability": {
+    "score": 0.0,
+    "level": "STEALTH",
+    "scores": {
+      "timing": 0.0,
+      "sizing": 0.0,
+      "sequencing": 0.0,
+      "entry_method": 0.0
+    }
+  }
+}

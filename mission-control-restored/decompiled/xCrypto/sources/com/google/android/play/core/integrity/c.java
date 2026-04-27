@@ -1,0 +1,40 @@
+package com.google.android.play.core.integrity;
+
+import com.google.android.play.core.integrity.StandardIntegrityManager;
+
+/* JADX INFO: loaded from: classes.dex */
+final class c extends StandardIntegrityManager.PrepareIntegrityTokenRequest.Builder {
+
+    /* JADX INFO: renamed from: a, reason: collision with root package name */
+    private long f10169a;
+
+    /* JADX INFO: renamed from: b, reason: collision with root package name */
+    private byte f10170b;
+
+    public final StandardIntegrityManager.PrepareIntegrityTokenRequest.Builder a(int i4) {
+        this.f10170b = (byte) (this.f10170b | 2);
+        return this;
+    }
+
+    @Override // com.google.android.play.core.integrity.StandardIntegrityManager.PrepareIntegrityTokenRequest.Builder
+    public final StandardIntegrityManager.PrepareIntegrityTokenRequest build() {
+        if (this.f10170b == 3) {
+            return new e(this.f10169a, 0, null);
+        }
+        StringBuilder sb = new StringBuilder();
+        if ((this.f10170b & 1) == 0) {
+            sb.append(" cloudProjectNumber");
+        }
+        if ((this.f10170b & 2) == 0) {
+            sb.append(" webViewRequestMode");
+        }
+        throw new IllegalStateException("Missing required properties:".concat(sb.toString()));
+    }
+
+    @Override // com.google.android.play.core.integrity.StandardIntegrityManager.PrepareIntegrityTokenRequest.Builder
+    public final StandardIntegrityManager.PrepareIntegrityTokenRequest.Builder setCloudProjectNumber(long j4) {
+        this.f10169a = j4;
+        this.f10170b = (byte) (this.f10170b | 1);
+        return this;
+    }
+}

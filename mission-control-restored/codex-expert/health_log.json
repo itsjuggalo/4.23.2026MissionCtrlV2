@@ -1,0 +1,3928 @@
+[
+  {
+    "timestamp": "2026-04-01T17:40:57.762150+00:00",
+    "type": "auto_fix",
+    "bot": "mission-control",
+    "issue": "Dashboard not responding on port 3000",
+    "action": "pm2 restart mission-control",
+    "result": "restarted"
+  },
+  {
+    "timestamp": "2026-04-01T17:46:03.152421+00:00",
+    "type": "auto_fix",
+    "bot": "mission-control",
+    "issue": "Dashboard not responding on port 3000",
+    "action": "pm2 restart mission-control",
+    "result": "restarted"
+  },
+  {
+    "timestamp": "2026-04-01T17:51:09.691777+00:00",
+    "type": "auto_fix",
+    "bot": "mission-control",
+    "issue": "Dashboard not responding on port 3000",
+    "action": "pm2 restart mission-control",
+    "result": "restarted"
+  },
+  {
+    "timestamp": "2026-04-01T17:56:13.562607+00:00",
+    "type": "auto_fix",
+    "bot": "mission-control",
+    "issue": "Dashboard not responding on port 3000",
+    "action": "pm2 restart mission-control",
+    "result": "restarted"
+  },
+  {
+    "timestamp": "2026-04-01T18:01:19.721377+00:00",
+    "type": "auto_fix",
+    "bot": "mission-control",
+    "issue": "Dashboard not responding on port 3000",
+    "action": "pm2 restart mission-control",
+    "result": "restarted"
+  },
+  {
+    "timestamp": "2026-04-01T18:06:23.927839+00:00",
+    "type": "auto_fix",
+    "bot": "mission-control",
+    "issue": "Dashboard not responding on port 3000",
+    "action": "pm2 restart mission-control",
+    "result": "restarted"
+  },
+  {
+    "timestamp": "2026-04-01T18:11:28.329879+00:00",
+    "type": "auto_fix",
+    "bot": "mission-control",
+    "issue": "Dashboard not responding on port 3000",
+    "action": "pm2 restart mission-control",
+    "result": "restarted"
+  },
+  {
+    "timestamp": "2026-04-01T18:16:34.177573+00:00",
+    "type": "auto_fix",
+    "bot": "mission-control",
+    "issue": "Dashboard not responding on port 3000",
+    "action": "pm2 restart mission-control",
+    "result": "restarted"
+  },
+  {
+    "timestamp": "2026-04-01T18:21:39.225844+00:00",
+    "type": "auto_fix",
+    "bot": "mission-control",
+    "issue": "Dashboard not responding on port 3000",
+    "action": "pm2 restart mission-control",
+    "result": "restarted"
+  },
+  {
+    "timestamp": "2026-04-01T18:26:40.325208+00:00",
+    "type": "log_error_detected",
+    "bot": "telegram-listener",
+    "error_key": "rate_limit",
+    "snippet": "egram | \u001b[39mArchive webhook 429: {\"message\": \"You are being rate limited.\", \"retry_after\": 0.378, \"global\": false\n\u001b[31m1|telegram | \u001b[39m  [WARN] Discord webhook 429: {\"message\": \"You are being rate limited.\", \"retry_after\": 0.3, \"global\": false}\n\u001b[31m1|telegram | \u001b[39m  [WARN] Discord post failed:"
+  },
+  {
+    "timestamp": "2026-04-01T18:26:43.377742+00:00",
+    "type": "auto_fix",
+    "bot": "mission-control",
+    "issue": "Dashboard not responding on port 3000",
+    "action": "pm2 restart mission-control",
+    "result": "restarted"
+  },
+  {
+    "timestamp": "2026-04-01T18:31:49.698066+00:00",
+    "type": "auto_fix",
+    "bot": "mission-control",
+    "issue": "Dashboard not responding on port 3000",
+    "action": "pm2 restart mission-control",
+    "result": "restarted"
+  },
+  {
+    "timestamp": "2026-04-01T18:36:53.640011+00:00",
+    "type": "auto_fix",
+    "bot": "mission-control",
+    "issue": "Dashboard not responding on port 3000",
+    "action": "pm2 restart mission-control",
+    "result": "restarted"
+  },
+  {
+    "timestamp": "2026-04-01T18:41:57.860660+00:00",
+    "type": "auto_fix",
+    "bot": "mission-control",
+    "issue": "Dashboard not responding on port 3000",
+    "action": "pm2 restart mission-control",
+    "result": "restarted"
+  },
+  {
+    "timestamp": "2026-04-01T18:47:01.887678+00:00",
+    "type": "auto_fix",
+    "bot": "mission-control",
+    "issue": "Dashboard not responding on port 3000",
+    "action": "pm2 restart mission-control",
+    "result": "restarted"
+  },
+  {
+    "timestamp": "2026-04-01T18:52:07.117274+00:00",
+    "type": "auto_fix",
+    "bot": "mission-control",
+    "issue": "Dashboard not responding on port 3000",
+    "action": "pm2 restart mission-control",
+    "result": "restarted"
+  },
+  {
+    "timestamp": "2026-04-01T18:57:10.985081+00:00",
+    "type": "auto_fix",
+    "bot": "mission-control",
+    "issue": "Dashboard not responding on port 3000",
+    "action": "pm2 restart mission-control",
+    "result": "restarted"
+  },
+  {
+    "timestamp": "2026-04-01T19:02:15.821888+00:00",
+    "type": "auto_fix",
+    "bot": "mission-control",
+    "issue": "Dashboard not responding on port 3000",
+    "action": "pm2 restart mission-control",
+    "result": "restarted"
+  },
+  {
+    "timestamp": "2026-04-01T19:07:19.614563+00:00",
+    "type": "auto_fix",
+    "bot": "mission-control",
+    "issue": "Dashboard not responding on port 3000",
+    "action": "pm2 restart mission-control",
+    "result": "restarted"
+  },
+  {
+    "timestamp": "2026-04-01T19:12:23.870750+00:00",
+    "type": "auto_fix",
+    "bot": "mission-control",
+    "issue": "Dashboard not responding on port 3000",
+    "action": "pm2 restart mission-control",
+    "result": "restarted"
+  },
+  {
+    "timestamp": "2026-04-01T19:17:27.976957+00:00",
+    "type": "auto_fix",
+    "bot": "mission-control",
+    "issue": "Dashboard not responding on port 3000",
+    "action": "pm2 restart mission-control",
+    "result": "restarted"
+  },
+  {
+    "timestamp": "2026-04-01T19:22:32.425668+00:00",
+    "type": "auto_fix",
+    "bot": "mission-control",
+    "issue": "Dashboard not responding on port 3000",
+    "action": "pm2 restart mission-control",
+    "result": "restarted"
+  },
+  {
+    "timestamp": "2026-04-01T19:27:33.460642+00:00",
+    "type": "log_error_detected",
+    "bot": "telegram-listener",
+    "error_key": "rate_limit",
+    "snippet": "egram | \u001b[39mArchive webhook 429: {\"message\": \"You are being rate limited.\", \"retry_after\": 0.378, \"global\": false\n\u001b[31m1|telegram | \u001b[39m  [WARN] Discord webhook 429: {\"message\": \"You are being rate limited.\", \"retry_after\": 0.3, \"global\": false}\n\u001b[31m1|telegram | \u001b[39m  [WARN] Discord post failed:"
+  },
+  {
+    "timestamp": "2026-04-01T19:27:36.374978+00:00",
+    "type": "auto_fix",
+    "bot": "mission-control",
+    "issue": "Dashboard not responding on port 3000",
+    "action": "pm2 restart mission-control",
+    "result": "restarted"
+  },
+  {
+    "timestamp": "2026-04-01T19:32:41.925239+00:00",
+    "type": "auto_fix",
+    "bot": "mission-control",
+    "issue": "Dashboard not responding on port 3000",
+    "action": "pm2 restart mission-control",
+    "result": "restarted"
+  },
+  {
+    "timestamp": "2026-04-01T19:37:45.669840+00:00",
+    "type": "auto_fix",
+    "bot": "mission-control",
+    "issue": "Dashboard not responding on port 3000",
+    "action": "pm2 restart mission-control",
+    "result": "restarted"
+  },
+  {
+    "timestamp": "2026-04-01T19:42:50.694876+00:00",
+    "type": "auto_fix",
+    "bot": "mission-control",
+    "issue": "Dashboard not responding on port 3000",
+    "action": "pm2 restart mission-control",
+    "result": "restarted"
+  },
+  {
+    "timestamp": "2026-04-01T19:47:54.852792+00:00",
+    "type": "auto_fix",
+    "bot": "mission-control",
+    "issue": "Dashboard not responding on port 3000",
+    "action": "pm2 restart mission-control",
+    "result": "restarted"
+  },
+  {
+    "timestamp": "2026-04-01T19:52:58.826777+00:00",
+    "type": "auto_fix",
+    "bot": "mission-control",
+    "issue": "Dashboard not responding on port 3000",
+    "action": "pm2 restart mission-control",
+    "result": "restarted"
+  },
+  {
+    "timestamp": "2026-04-01T19:58:02.553331+00:00",
+    "type": "auto_fix",
+    "bot": "mission-control",
+    "issue": "Dashboard not responding on port 3000",
+    "action": "pm2 restart mission-control",
+    "result": "restarted"
+  },
+  {
+    "timestamp": "2026-04-01T20:03:06.801900+00:00",
+    "type": "auto_fix",
+    "bot": "mission-control",
+    "issue": "Dashboard not responding on port 3000",
+    "action": "pm2 restart mission-control",
+    "result": "restarted"
+  },
+  {
+    "timestamp": "2026-04-01T20:08:10.984351+00:00",
+    "type": "auto_fix",
+    "bot": "mission-control",
+    "issue": "Dashboard not responding on port 3000",
+    "action": "pm2 restart mission-control",
+    "result": "restarted"
+  },
+  {
+    "timestamp": "2026-04-01T20:13:15.029889+00:00",
+    "type": "auto_fix",
+    "bot": "mission-control",
+    "issue": "Dashboard not responding on port 3000",
+    "action": "pm2 restart mission-control",
+    "result": "restarted"
+  },
+  {
+    "timestamp": "2026-04-01T20:18:19.160670+00:00",
+    "type": "auto_fix",
+    "bot": "mission-control",
+    "issue": "Dashboard not responding on port 3000",
+    "action": "pm2 restart mission-control",
+    "result": "restarted"
+  },
+  {
+    "timestamp": "2026-04-01T20:23:25.289659+00:00",
+    "type": "auto_fix",
+    "bot": "mission-control",
+    "issue": "Dashboard not responding on port 3000",
+    "action": "pm2 restart mission-control",
+    "result": "restarted"
+  },
+  {
+    "timestamp": "2026-04-01T20:28:26.269094+00:00",
+    "type": "log_error_detected",
+    "bot": "telegram-listener",
+    "error_key": "rate_limit",
+    "snippet": "egram | \u001b[39mArchive webhook 429: {\"message\": \"You are being rate limited.\", \"retry_after\": 0.378, \"global\": false\n\u001b[31m1|telegram | \u001b[39m  [WARN] Discord webhook 429: {\"message\": \"You are being rate limited.\", \"retry_after\": 0.3, \"global\": false}\n\u001b[31m1|telegram | \u001b[39m  [WARN] Discord post failed:"
+  },
+  {
+    "timestamp": "2026-04-01T20:28:29.473811+00:00",
+    "type": "auto_fix",
+    "bot": "mission-control",
+    "issue": "Dashboard not responding on port 3000",
+    "action": "pm2 restart mission-control",
+    "result": "restarted"
+  },
+  {
+    "timestamp": "2026-04-01T20:33:33.801772+00:00",
+    "type": "auto_fix",
+    "bot": "mission-control",
+    "issue": "Dashboard not responding on port 3000",
+    "action": "pm2 restart mission-control",
+    "result": "restarted"
+  },
+  {
+    "timestamp": "2026-04-01T20:38:39.559655+00:00",
+    "type": "auto_fix",
+    "bot": "mission-control",
+    "issue": "Dashboard not responding on port 3000",
+    "action": "pm2 restart mission-control",
+    "result": "restarted"
+  },
+  {
+    "timestamp": "2026-04-01T20:43:43.734753+00:00",
+    "type": "auto_fix",
+    "bot": "mission-control",
+    "issue": "Dashboard not responding on port 3000",
+    "action": "pm2 restart mission-control",
+    "result": "restarted"
+  },
+  {
+    "timestamp": "2026-04-01T20:48:47.813684+00:00",
+    "type": "auto_fix",
+    "bot": "mission-control",
+    "issue": "Dashboard not responding on port 3000",
+    "action": "pm2 restart mission-control",
+    "result": "restarted"
+  },
+  {
+    "timestamp": "2026-04-01T20:53:52.486791+00:00",
+    "type": "auto_fix",
+    "bot": "mission-control",
+    "issue": "Dashboard not responding on port 3000",
+    "action": "pm2 restart mission-control",
+    "result": "restarted"
+  },
+  {
+    "timestamp": "2026-04-01T20:58:57.263762+00:00",
+    "type": "auto_fix",
+    "bot": "mission-control",
+    "issue": "Dashboard not responding on port 3000",
+    "action": "pm2 restart mission-control",
+    "result": "restarted"
+  },
+  {
+    "timestamp": "2026-04-01T21:04:01.470502+00:00",
+    "type": "auto_fix",
+    "bot": "mission-control",
+    "issue": "Dashboard not responding on port 3000",
+    "action": "pm2 restart mission-control",
+    "result": "restarted"
+  },
+  {
+    "timestamp": "2026-04-01T21:09:05.477785+00:00",
+    "type": "auto_fix",
+    "bot": "mission-control",
+    "issue": "Dashboard not responding on port 3000",
+    "action": "pm2 restart mission-control",
+    "result": "restarted"
+  },
+  {
+    "timestamp": "2026-04-01T21:14:11.841429+00:00",
+    "type": "auto_fix",
+    "bot": "mission-control",
+    "issue": "Dashboard not responding on port 3000",
+    "action": "pm2 restart mission-control",
+    "result": "restarted"
+  },
+  {
+    "timestamp": "2026-04-01T21:19:19.052416+00:00",
+    "type": "auto_fix",
+    "bot": "mission-control",
+    "issue": "Dashboard not responding on port 3000",
+    "action": "pm2 restart mission-control",
+    "result": "restarted"
+  },
+  {
+    "timestamp": "2026-04-01T21:24:23.018668+00:00",
+    "type": "auto_fix",
+    "bot": "mission-control",
+    "issue": "Dashboard not responding on port 3000",
+    "action": "pm2 restart mission-control",
+    "result": "restarted"
+  },
+  {
+    "timestamp": "2026-04-01T21:29:23.947720+00:00",
+    "type": "log_error_detected",
+    "bot": "telegram-listener",
+    "error_key": "rate_limit",
+    "snippet": "egram | \u001b[39mArchive webhook 429: {\"message\": \"You are being rate limited.\", \"retry_after\": 0.378, \"global\": false\n\u001b[31m1|telegram | \u001b[39m  [WARN] Discord webhook 429: {\"message\": \"You are being rate limited.\", \"retry_after\": 0.3, \"global\": false}\n\u001b[31m1|telegram | \u001b[39m  [WARN] Discord post failed:"
+  },
+  {
+    "timestamp": "2026-04-01T21:29:26.870912+00:00",
+    "type": "auto_fix",
+    "bot": "mission-control",
+    "issue": "Dashboard not responding on port 3000",
+    "action": "pm2 restart mission-control",
+    "result": "restarted"
+  },
+  {
+    "timestamp": "2026-04-01T21:34:33.345106+00:00",
+    "type": "auto_fix",
+    "bot": "mission-control",
+    "issue": "Dashboard not responding on port 3000",
+    "action": "pm2 restart mission-control",
+    "result": "restarted"
+  },
+  {
+    "timestamp": "2026-04-01T21:39:42.563394+00:00",
+    "type": "auto_fix",
+    "bot": "mission-control",
+    "issue": "Dashboard not responding on port 3000",
+    "action": "pm2 restart mission-control",
+    "result": "restarted"
+  },
+  {
+    "timestamp": "2026-04-01T21:44:48.446657+00:00",
+    "type": "auto_fix",
+    "bot": "mission-control",
+    "issue": "Dashboard not responding on port 3000",
+    "action": "pm2 restart mission-control",
+    "result": "restarted"
+  },
+  {
+    "timestamp": "2026-04-01T21:49:54.213774+00:00",
+    "type": "auto_fix",
+    "bot": "mission-control",
+    "issue": "Dashboard not responding on port 3000",
+    "action": "pm2 restart mission-control",
+    "result": "restarted"
+  },
+  {
+    "timestamp": "2026-04-01T21:54:58.475729+00:00",
+    "type": "auto_fix",
+    "bot": "mission-control",
+    "issue": "Dashboard not responding on port 3000",
+    "action": "pm2 restart mission-control",
+    "result": "restarted"
+  },
+  {
+    "timestamp": "2026-04-01T22:00:04.130077+00:00",
+    "type": "auto_fix",
+    "bot": "mission-control",
+    "issue": "Dashboard not responding on port 3000",
+    "action": "pm2 restart mission-control",
+    "result": "restarted"
+  },
+  {
+    "timestamp": "2026-04-01T22:05:11.514756+00:00",
+    "type": "auto_fix",
+    "bot": "mission-control",
+    "issue": "Dashboard not responding on port 3000",
+    "action": "pm2 restart mission-control",
+    "result": "restarted"
+  },
+  {
+    "timestamp": "2026-04-01T22:10:16.253805+00:00",
+    "type": "auto_fix",
+    "bot": "mission-control",
+    "issue": "Dashboard not responding on port 3000",
+    "action": "pm2 restart mission-control",
+    "result": "restarted"
+  },
+  {
+    "timestamp": "2026-04-01T22:15:21.286786+00:00",
+    "type": "auto_fix",
+    "bot": "mission-control",
+    "issue": "Dashboard not responding on port 3000",
+    "action": "pm2 restart mission-control",
+    "result": "restarted"
+  },
+  {
+    "timestamp": "2026-04-01T22:20:25.466479+00:00",
+    "type": "auto_fix",
+    "bot": "mission-control",
+    "issue": "Dashboard not responding on port 3000",
+    "action": "pm2 restart mission-control",
+    "result": "restarted"
+  },
+  {
+    "timestamp": "2026-04-01T22:25:30.580654+00:00",
+    "type": "auto_fix",
+    "bot": "mission-control",
+    "issue": "Dashboard not responding on port 3000",
+    "action": "pm2 restart mission-control",
+    "result": "restarted"
+  },
+  {
+    "timestamp": "2026-04-01T22:30:31.754303+00:00",
+    "type": "log_error_detected",
+    "bot": "telegram-listener",
+    "error_key": "rate_limit",
+    "snippet": "egram | \u001b[39mArchive webhook 429: {\"message\": \"You are being rate limited.\", \"retry_after\": 0.378, \"global\": false\n\u001b[31m1|telegram | \u001b[39m  [WARN] Discord webhook 429: {\"message\": \"You are being rate limited.\", \"retry_after\": 0.3, \"global\": false}\n\u001b[31m1|telegram | \u001b[39m  [WARN] Discord post failed:"
+  },
+  {
+    "timestamp": "2026-04-01T22:30:36.652842+00:00",
+    "type": "auto_fix",
+    "bot": "mission-control",
+    "issue": "Dashboard not responding on port 3000",
+    "action": "pm2 restart mission-control",
+    "result": "restarted"
+  },
+  {
+    "timestamp": "2026-04-01T22:35:40.862769+00:00",
+    "type": "auto_fix",
+    "bot": "mission-control",
+    "issue": "Dashboard not responding on port 3000",
+    "action": "pm2 restart mission-control",
+    "result": "restarted"
+  },
+  {
+    "timestamp": "2026-04-01T22:40:46.239782+00:00",
+    "type": "auto_fix",
+    "bot": "mission-control",
+    "issue": "Dashboard not responding on port 3000",
+    "action": "pm2 restart mission-control",
+    "result": "restarted"
+  },
+  {
+    "timestamp": "2026-04-01T22:45:50.711116+00:00",
+    "type": "auto_fix",
+    "bot": "mission-control",
+    "issue": "Dashboard not responding on port 3000",
+    "action": "pm2 restart mission-control",
+    "result": "restarted"
+  },
+  {
+    "timestamp": "2026-04-01T22:50:55.718851+00:00",
+    "type": "auto_fix",
+    "bot": "mission-control",
+    "issue": "Dashboard not responding on port 3000",
+    "action": "pm2 restart mission-control",
+    "result": "restarted"
+  },
+  {
+    "timestamp": "2026-04-01T22:55:59.569438+00:00",
+    "type": "auto_fix",
+    "bot": "mission-control",
+    "issue": "Dashboard not responding on port 3000",
+    "action": "pm2 restart mission-control",
+    "result": "restarted"
+  },
+  {
+    "timestamp": "2026-04-01T23:01:04.773763+00:00",
+    "type": "auto_fix",
+    "bot": "mission-control",
+    "issue": "Dashboard not responding on port 3000",
+    "action": "pm2 restart mission-control",
+    "result": "restarted"
+  },
+  {
+    "timestamp": "2026-04-01T23:06:09.126459+00:00",
+    "type": "auto_fix",
+    "bot": "mission-control",
+    "issue": "Dashboard not responding on port 3000",
+    "action": "pm2 restart mission-control",
+    "result": "restarted"
+  },
+  {
+    "timestamp": "2026-04-01T23:11:13.074541+00:00",
+    "type": "auto_fix",
+    "bot": "mission-control",
+    "issue": "Dashboard not responding on port 3000",
+    "action": "pm2 restart mission-control",
+    "result": "restarted"
+  },
+  {
+    "timestamp": "2026-04-01T23:16:17.123197+00:00",
+    "type": "auto_fix",
+    "bot": "mission-control",
+    "issue": "Dashboard not responding on port 3000",
+    "action": "pm2 restart mission-control",
+    "result": "restarted"
+  },
+  {
+    "timestamp": "2026-04-01T23:21:21.190870+00:00",
+    "type": "auto_fix",
+    "bot": "mission-control",
+    "issue": "Dashboard not responding on port 3000",
+    "action": "pm2 restart mission-control",
+    "result": "restarted"
+  },
+  {
+    "timestamp": "2026-04-01T23:26:27.421808+00:00",
+    "type": "auto_fix",
+    "bot": "mission-control",
+    "issue": "Dashboard not responding on port 3000",
+    "action": "pm2 restart mission-control",
+    "result": "restarted"
+  },
+  {
+    "timestamp": "2026-04-01T23:31:28.542184+00:00",
+    "type": "log_error_detected",
+    "bot": "telegram-listener",
+    "error_key": "rate_limit",
+    "snippet": "egram | \u001b[39mArchive webhook 429: {\"message\": \"You are being rate limited.\", \"retry_after\": 0.378, \"global\": false\n\u001b[31m1|telegram | \u001b[39m  [WARN] Discord webhook 429: {\"message\": \"You are being rate limited.\", \"retry_after\": 0.3, \"global\": false}\n\u001b[31m1|telegram | \u001b[39m  [WARN] Discord post failed:"
+  },
+  {
+    "timestamp": "2026-04-01T23:31:33.265536+00:00",
+    "type": "auto_fix",
+    "bot": "mission-control",
+    "issue": "Dashboard not responding on port 3000",
+    "action": "pm2 restart mission-control",
+    "result": "restarted"
+  },
+  {
+    "timestamp": "2026-04-01T23:36:38.014073+00:00",
+    "type": "auto_fix",
+    "bot": "mission-control",
+    "issue": "Dashboard not responding on port 3000",
+    "action": "pm2 restart mission-control",
+    "result": "restarted"
+  },
+  {
+    "timestamp": "2026-04-01T23:41:42.109062+00:00",
+    "type": "auto_fix",
+    "bot": "mission-control",
+    "issue": "Dashboard not responding on port 3000",
+    "action": "pm2 restart mission-control",
+    "result": "restarted"
+  },
+  {
+    "timestamp": "2026-04-01T23:46:46.413979+00:00",
+    "type": "auto_fix",
+    "bot": "mission-control",
+    "issue": "Dashboard not responding on port 3000",
+    "action": "pm2 restart mission-control",
+    "result": "restarted"
+  },
+  {
+    "timestamp": "2026-04-01T23:51:52.027462+00:00",
+    "type": "auto_fix",
+    "bot": "mission-control",
+    "issue": "Dashboard not responding on port 3000",
+    "action": "pm2 restart mission-control",
+    "result": "restarted"
+  },
+  {
+    "timestamp": "2026-04-01T23:56:55.842756+00:00",
+    "type": "auto_fix",
+    "bot": "mission-control",
+    "issue": "Dashboard not responding on port 3000",
+    "action": "pm2 restart mission-control",
+    "result": "restarted"
+  },
+  {
+    "timestamp": "2026-04-02T00:01:59.687667+00:00",
+    "type": "auto_fix",
+    "bot": "mission-control",
+    "issue": "Dashboard not responding on port 3000",
+    "action": "pm2 restart mission-control",
+    "result": "restarted"
+  },
+  {
+    "timestamp": "2026-04-02T00:07:04.171795+00:00",
+    "type": "auto_fix",
+    "bot": "mission-control",
+    "issue": "Dashboard not responding on port 3000",
+    "action": "pm2 restart mission-control",
+    "result": "restarted"
+  },
+  {
+    "timestamp": "2026-04-02T00:12:08.225812+00:00",
+    "type": "auto_fix",
+    "bot": "mission-control",
+    "issue": "Dashboard not responding on port 3000",
+    "action": "pm2 restart mission-control",
+    "result": "restarted"
+  },
+  {
+    "timestamp": "2026-04-02T00:17:12.696799+00:00",
+    "type": "auto_fix",
+    "bot": "mission-control",
+    "issue": "Dashboard not responding on port 3000",
+    "action": "pm2 restart mission-control",
+    "result": "restarted"
+  },
+  {
+    "timestamp": "2026-04-02T00:22:18.484650+00:00",
+    "type": "auto_fix",
+    "bot": "mission-control",
+    "issue": "Dashboard not responding on port 3000",
+    "action": "pm2 restart mission-control",
+    "result": "restarted"
+  },
+  {
+    "timestamp": "2026-04-02T00:27:23.581783+00:00",
+    "type": "auto_fix",
+    "bot": "mission-control",
+    "issue": "Dashboard not responding on port 3000",
+    "action": "pm2 restart mission-control",
+    "result": "restarted"
+  },
+  {
+    "timestamp": "2026-04-02T00:32:24.630735+00:00",
+    "type": "log_error_detected",
+    "bot": "telegram-listener",
+    "error_key": "rate_limit",
+    "snippet": " 503: upstream connect error or disconnect/reset before headers. reset reason: remote connection failure, transport failure re\n\u001b[31m1|telegram | \u001b[39m  [WARN] Discord webhook 503: upstream connect error or disconnect/reset before headers. reset reason: remote connection failure, transport failure re"
+  },
+  {
+    "timestamp": "2026-04-02T00:32:27.572424+00:00",
+    "type": "auto_fix",
+    "bot": "mission-control",
+    "issue": "Dashboard not responding on port 3000",
+    "action": "pm2 restart mission-control",
+    "result": "restarted"
+  },
+  {
+    "timestamp": "2026-04-02T00:37:31.878027+00:00",
+    "type": "auto_fix",
+    "bot": "mission-control",
+    "issue": "Dashboard not responding on port 3000",
+    "action": "pm2 restart mission-control",
+    "result": "restarted"
+  },
+  {
+    "timestamp": "2026-04-02T00:42:35.673769+00:00",
+    "type": "auto_fix",
+    "bot": "mission-control",
+    "issue": "Dashboard not responding on port 3000",
+    "action": "pm2 restart mission-control",
+    "result": "restarted"
+  },
+  {
+    "timestamp": "2026-04-02T00:47:39.996536+00:00",
+    "type": "auto_fix",
+    "bot": "mission-control",
+    "issue": "Dashboard not responding on port 3000",
+    "action": "pm2 restart mission-control",
+    "result": "restarted"
+  },
+  {
+    "timestamp": "2026-04-02T00:52:44.008807+00:00",
+    "type": "auto_fix",
+    "bot": "mission-control",
+    "issue": "Dashboard not responding on port 3000",
+    "action": "pm2 restart mission-control",
+    "result": "restarted"
+  },
+  {
+    "timestamp": "2026-04-02T00:57:48.501459+00:00",
+    "type": "auto_fix",
+    "bot": "mission-control",
+    "issue": "Dashboard not responding on port 3000",
+    "action": "pm2 restart mission-control",
+    "result": "restarted"
+  },
+  {
+    "timestamp": "2026-04-02T01:02:54.052648+00:00",
+    "type": "auto_fix",
+    "bot": "mission-control",
+    "issue": "Dashboard not responding on port 3000",
+    "action": "pm2 restart mission-control",
+    "result": "restarted"
+  },
+  {
+    "timestamp": "2026-04-02T01:07:58.313652+00:00",
+    "type": "auto_fix",
+    "bot": "mission-control",
+    "issue": "Dashboard not responding on port 3000",
+    "action": "pm2 restart mission-control",
+    "result": "restarted"
+  },
+  {
+    "timestamp": "2026-04-02T01:13:03.461645+00:00",
+    "type": "auto_fix",
+    "bot": "mission-control",
+    "issue": "Dashboard not responding on port 3000",
+    "action": "pm2 restart mission-control",
+    "result": "restarted"
+  },
+  {
+    "timestamp": "2026-04-02T01:18:09.987861+00:00",
+    "type": "auto_fix",
+    "bot": "mission-control",
+    "issue": "Dashboard not responding on port 3000",
+    "action": "pm2 restart mission-control",
+    "result": "restarted"
+  },
+  {
+    "timestamp": "2026-04-02T01:23:14.672769+00:00",
+    "type": "auto_fix",
+    "bot": "mission-control",
+    "issue": "Dashboard not responding on port 3000",
+    "action": "pm2 restart mission-control",
+    "result": "restarted"
+  },
+  {
+    "timestamp": "2026-04-02T01:28:18.712657+00:00",
+    "type": "auto_fix",
+    "bot": "mission-control",
+    "issue": "Dashboard not responding on port 3000",
+    "action": "pm2 restart mission-control",
+    "result": "restarted"
+  },
+  {
+    "timestamp": "2026-04-02T01:33:19.700243+00:00",
+    "type": "log_error_detected",
+    "bot": "telegram-listener",
+    "error_key": "rate_limit",
+    "snippet": "on: remote connection failure, transport failure re\n\u001b[31m1|telegram | \u001b[39mArchive webhook 429: {\"message\": \"You are being rate limited.\", \"retry_after\": 0.388, \"global\": false\n\u001b[31m1|telegram | \u001b[39mArchive webhook 429: {\"message\": \"You are being rate limited.\", \"retry_after\": 0.3, \"global\": false}"
+  },
+  {
+    "timestamp": "2026-04-02T01:33:22.840671+00:00",
+    "type": "auto_fix",
+    "bot": "mission-control",
+    "issue": "Dashboard not responding on port 3000",
+    "action": "pm2 restart mission-control",
+    "result": "restarted"
+  },
+  {
+    "timestamp": "2026-04-02T01:38:27.281911+00:00",
+    "type": "auto_fix",
+    "bot": "mission-control",
+    "issue": "Dashboard not responding on port 3000",
+    "action": "pm2 restart mission-control",
+    "result": "restarted"
+  },
+  {
+    "timestamp": "2026-04-02T01:43:31.361800+00:00",
+    "type": "auto_fix",
+    "bot": "mission-control",
+    "issue": "Dashboard not responding on port 3000",
+    "action": "pm2 restart mission-control",
+    "result": "restarted"
+  },
+  {
+    "timestamp": "2026-04-02T01:48:36.369681+00:00",
+    "type": "auto_fix",
+    "bot": "mission-control",
+    "issue": "Dashboard not responding on port 3000",
+    "action": "pm2 restart mission-control",
+    "result": "restarted"
+  },
+  {
+    "timestamp": "2026-04-02T01:53:40.886195+00:00",
+    "type": "auto_fix",
+    "bot": "mission-control",
+    "issue": "Dashboard not responding on port 3000",
+    "action": "pm2 restart mission-control",
+    "result": "restarted"
+  },
+  {
+    "timestamp": "2026-04-02T01:58:45.122654+00:00",
+    "type": "auto_fix",
+    "bot": "mission-control",
+    "issue": "Dashboard not responding on port 3000",
+    "action": "pm2 restart mission-control",
+    "result": "restarted"
+  },
+  {
+    "timestamp": "2026-04-02T02:03:49.254661+00:00",
+    "type": "auto_fix",
+    "bot": "mission-control",
+    "issue": "Dashboard not responding on port 3000",
+    "action": "pm2 restart mission-control",
+    "result": "restarted"
+  },
+  {
+    "timestamp": "2026-04-02T02:08:54.089013+00:00",
+    "type": "auto_fix",
+    "bot": "mission-control",
+    "issue": "Dashboard not responding on port 3000",
+    "action": "pm2 restart mission-control",
+    "result": "restarted"
+  },
+  {
+    "timestamp": "2026-04-02T02:13:57.897459+00:00",
+    "type": "auto_fix",
+    "bot": "mission-control",
+    "issue": "Dashboard not responding on port 3000",
+    "action": "pm2 restart mission-control",
+    "result": "restarted"
+  },
+  {
+    "timestamp": "2026-04-02T02:19:03.892550+00:00",
+    "type": "auto_fix",
+    "bot": "mission-control",
+    "issue": "Dashboard not responding on port 3000",
+    "action": "pm2 restart mission-control",
+    "result": "restarted"
+  },
+  {
+    "timestamp": "2026-04-02T02:24:07.897425+00:00",
+    "type": "auto_fix",
+    "bot": "mission-control",
+    "issue": "Dashboard not responding on port 3000",
+    "action": "pm2 restart mission-control",
+    "result": "restarted"
+  },
+  {
+    "timestamp": "2026-04-02T02:29:11.894797+00:00",
+    "type": "auto_fix",
+    "bot": "mission-control",
+    "issue": "Dashboard not responding on port 3000",
+    "action": "pm2 restart mission-control",
+    "result": "restarted"
+  },
+  {
+    "timestamp": "2026-04-02T02:34:13.021526+00:00",
+    "type": "log_error_detected",
+    "bot": "telegram-listener",
+    "error_key": "rate_limit",
+    "snippet": "e re\n\u001b[31m1|telegram | \u001b[39mArchive webhook 429: {\"message\": \"You are being rate limited.\", \"retry_after\": 0.388, \"global\": false\n\u001b[31m1|telegram | \u001b[39mArchive webhook 429: {\"message\": \"You are being rate limited.\", \"retry_after\": 0.3, \"global\": false}\n\u001b[31m1|telegram | \u001b[39mArchive webhook failed:"
+  },
+  {
+    "timestamp": "2026-04-02T02:34:16.734398+00:00",
+    "type": "auto_fix",
+    "bot": "mission-control",
+    "issue": "Dashboard not responding on port 3000",
+    "action": "pm2 restart mission-control",
+    "result": "restarted"
+  },
+  {
+    "timestamp": "2026-04-02T02:39:22.629873+00:00",
+    "type": "auto_fix",
+    "bot": "mission-control",
+    "issue": "Dashboard not responding on port 3000",
+    "action": "pm2 restart mission-control",
+    "result": "restarted"
+  },
+  {
+    "timestamp": "2026-04-02T02:44:27.168650+00:00",
+    "type": "auto_fix",
+    "bot": "mission-control",
+    "issue": "Dashboard not responding on port 3000",
+    "action": "pm2 restart mission-control",
+    "result": "restarted"
+  },
+  {
+    "timestamp": "2026-04-02T02:49:33.392778+00:00",
+    "type": "auto_fix",
+    "bot": "mission-control",
+    "issue": "Dashboard not responding on port 3000",
+    "action": "pm2 restart mission-control",
+    "result": "restarted"
+  },
+  {
+    "timestamp": "2026-04-02T02:54:37.518960+00:00",
+    "type": "auto_fix",
+    "bot": "mission-control",
+    "issue": "Dashboard not responding on port 3000",
+    "action": "pm2 restart mission-control",
+    "result": "restarted"
+  },
+  {
+    "timestamp": "2026-04-02T02:59:44.290814+00:00",
+    "type": "auto_fix",
+    "bot": "mission-control",
+    "issue": "Dashboard not responding on port 3000",
+    "action": "pm2 restart mission-control",
+    "result": "restarted"
+  },
+  {
+    "timestamp": "2026-04-02T03:04:50.696257+00:00",
+    "type": "auto_fix",
+    "bot": "mission-control",
+    "issue": "Dashboard not responding on port 3000",
+    "action": "pm2 restart mission-control",
+    "result": "restarted"
+  },
+  {
+    "timestamp": "2026-04-02T03:09:56.508773+00:00",
+    "type": "auto_fix",
+    "bot": "mission-control",
+    "issue": "Dashboard not responding on port 3000",
+    "action": "pm2 restart mission-control",
+    "result": "restarted"
+  },
+  {
+    "timestamp": "2026-04-02T03:15:00.450867+00:00",
+    "type": "auto_fix",
+    "bot": "mission-control",
+    "issue": "Dashboard not responding on port 3000",
+    "action": "pm2 restart mission-control",
+    "result": "restarted"
+  },
+  {
+    "timestamp": "2026-04-02T03:20:03.992409+00:00",
+    "type": "log_error_detected",
+    "bot": "btc-bias-scorer",
+    "error_key": "rate_limit",
+    "snippet": " File \"/usr/lib/python3.10/types.py\", line 46, in <module>\n\u001b[31m13|btc-bia | \u001b[39m    WrapperDescriptorType = type(object.__init__)\n\u001b[31m13|btc-bia | \u001b[39m  [WARN] GET https://api.coingecko.com/api/v3/global failed: 429 Client Error: Too Many Requests for url: https://api.coingecko.com/api/v3/global"
+  },
+  {
+    "timestamp": "2026-04-02T03:20:05.681671+00:00",
+    "type": "auto_fix",
+    "bot": "mission-control",
+    "issue": "Dashboard not responding on port 3000",
+    "action": "pm2 restart mission-control",
+    "result": "restarted"
+  },
+  {
+    "timestamp": "2026-04-02T03:25:10.338813+00:00",
+    "type": "auto_fix",
+    "bot": "mission-control",
+    "issue": "Dashboard not responding on port 3000",
+    "action": "pm2 restart mission-control",
+    "result": "restarted"
+  },
+  {
+    "timestamp": "2026-04-02T03:30:14.827823+00:00",
+    "type": "auto_fix",
+    "bot": "mission-control",
+    "issue": "Dashboard not responding on port 3000",
+    "action": "pm2 restart mission-control",
+    "result": "restarted"
+  },
+  {
+    "timestamp": "2026-04-02T03:35:15.894472+00:00",
+    "type": "log_error_detected",
+    "bot": "telegram-listener",
+    "error_key": "rate_limit",
+    "snippet": "e re\n\u001b[31m1|telegram | \u001b[39mArchive webhook 429: {\"message\": \"You are being rate limited.\", \"retry_after\": 0.388, \"global\": false\n\u001b[31m1|telegram | \u001b[39mArchive webhook 429: {\"message\": \"You are being rate limited.\", \"retry_after\": 0.3, \"global\": false}\n\u001b[31m1|telegram | \u001b[39mArchive webhook failed:"
+  },
+  {
+    "timestamp": "2026-04-02T03:35:19.216206+00:00",
+    "type": "auto_fix",
+    "bot": "mission-control",
+    "issue": "Dashboard not responding on port 3000",
+    "action": "pm2 restart mission-control",
+    "result": "restarted"
+  },
+  {
+    "timestamp": "2026-04-02T03:40:24.079562+00:00",
+    "type": "auto_fix",
+    "bot": "mission-control",
+    "issue": "Dashboard not responding on port 3000",
+    "action": "pm2 restart mission-control",
+    "result": "restarted"
+  },
+  {
+    "timestamp": "2026-04-02T03:45:35.587177+00:00",
+    "type": "auto_fix",
+    "bot": "mission-control",
+    "issue": "Dashboard not responding on port 3000",
+    "action": "pm2 restart mission-control",
+    "result": "restarted"
+  },
+  {
+    "timestamp": "2026-04-02T03:50:39.892668+00:00",
+    "type": "auto_fix",
+    "bot": "mission-control",
+    "issue": "Dashboard not responding on port 3000",
+    "action": "pm2 restart mission-control",
+    "result": "restarted"
+  },
+  {
+    "timestamp": "2026-04-02T03:55:43.958657+00:00",
+    "type": "auto_fix",
+    "bot": "mission-control",
+    "issue": "Dashboard not responding on port 3000",
+    "action": "pm2 restart mission-control",
+    "result": "restarted"
+  },
+  {
+    "timestamp": "2026-04-02T04:00:48.106232+00:00",
+    "type": "auto_fix",
+    "bot": "mission-control",
+    "issue": "Dashboard not responding on port 3000",
+    "action": "pm2 restart mission-control",
+    "result": "restarted"
+  },
+  {
+    "timestamp": "2026-04-02T04:05:53.590983+00:00",
+    "type": "auto_fix",
+    "bot": "mission-control",
+    "issue": "Dashboard not responding on port 3000",
+    "action": "pm2 restart mission-control",
+    "result": "restarted"
+  },
+  {
+    "timestamp": "2026-04-02T04:10:58.406740+00:00",
+    "type": "auto_fix",
+    "bot": "mission-control",
+    "issue": "Dashboard not responding on port 3000",
+    "action": "pm2 restart mission-control",
+    "result": "restarted"
+  },
+  {
+    "timestamp": "2026-04-02T04:16:04.430917+00:00",
+    "type": "auto_fix",
+    "bot": "mission-control",
+    "issue": "Dashboard not responding on port 3000",
+    "action": "pm2 restart mission-control",
+    "result": "restarted"
+  },
+  {
+    "timestamp": "2026-04-02T04:21:08.462787+00:00",
+    "type": "auto_fix",
+    "bot": "mission-control",
+    "issue": "Dashboard not responding on port 3000",
+    "action": "pm2 restart mission-control",
+    "result": "restarted"
+  },
+  {
+    "timestamp": "2026-04-02T04:26:13.260715+00:00",
+    "type": "auto_fix",
+    "bot": "mission-control",
+    "issue": "Dashboard not responding on port 3000",
+    "action": "pm2 restart mission-control",
+    "result": "restarted"
+  },
+  {
+    "timestamp": "2026-04-02T04:31:17.058652+00:00",
+    "type": "auto_fix",
+    "bot": "mission-control",
+    "issue": "Dashboard not responding on port 3000",
+    "action": "pm2 restart mission-control",
+    "result": "restarted"
+  },
+  {
+    "timestamp": "2026-04-02T04:36:18.163179+00:00",
+    "type": "log_error_detected",
+    "bot": "telegram-listener",
+    "error_key": "rate_limit",
+    "snippet": "e re\n\u001b[31m1|telegram | \u001b[39mArchive webhook 429: {\"message\": \"You are being rate limited.\", \"retry_after\": 0.388, \"global\": false\n\u001b[31m1|telegram | \u001b[39mArchive webhook 429: {\"message\": \"You are being rate limited.\", \"retry_after\": 0.3, \"global\": false}\n\u001b[31m1|telegram | \u001b[39mArchive webhook failed:"
+  },
+  {
+    "timestamp": "2026-04-02T04:36:21.587799+00:00",
+    "type": "auto_fix",
+    "bot": "mission-control",
+    "issue": "Dashboard not responding on port 3000",
+    "action": "pm2 restart mission-control",
+    "result": "restarted"
+  },
+  {
+    "timestamp": "2026-04-02T04:41:25.977353+00:00",
+    "type": "auto_fix",
+    "bot": "mission-control",
+    "issue": "Dashboard not responding on port 3000",
+    "action": "pm2 restart mission-control",
+    "result": "restarted"
+  },
+  {
+    "timestamp": "2026-04-02T04:46:30.789128+00:00",
+    "type": "auto_fix",
+    "bot": "mission-control",
+    "issue": "Dashboard not responding on port 3000",
+    "action": "pm2 restart mission-control",
+    "result": "restarted"
+  },
+  {
+    "timestamp": "2026-04-02T04:51:34.952132+00:00",
+    "type": "auto_fix",
+    "bot": "mission-control",
+    "issue": "Dashboard not responding on port 3000",
+    "action": "pm2 restart mission-control",
+    "result": "restarted"
+  },
+  {
+    "timestamp": "2026-04-02T04:56:39.165786+00:00",
+    "type": "auto_fix",
+    "bot": "mission-control",
+    "issue": "Dashboard not responding on port 3000",
+    "action": "pm2 restart mission-control",
+    "result": "restarted"
+  },
+  {
+    "timestamp": "2026-04-02T05:01:43.950108+00:00",
+    "type": "auto_fix",
+    "bot": "mission-control",
+    "issue": "Dashboard not responding on port 3000",
+    "action": "pm2 restart mission-control",
+    "result": "restarted"
+  },
+  {
+    "timestamp": "2026-04-02T05:06:47.970026+00:00",
+    "type": "auto_fix",
+    "bot": "mission-control",
+    "issue": "Dashboard not responding on port 3000",
+    "action": "pm2 restart mission-control",
+    "result": "restarted"
+  },
+  {
+    "timestamp": "2026-04-02T05:11:56.776708+00:00",
+    "type": "auto_fix",
+    "bot": "mission-control",
+    "issue": "Dashboard not responding on port 3000",
+    "action": "pm2 restart mission-control",
+    "result": "restarted"
+  },
+  {
+    "timestamp": "2026-04-02T05:17:00.753678+00:00",
+    "type": "auto_fix",
+    "bot": "mission-control",
+    "issue": "Dashboard not responding on port 3000",
+    "action": "pm2 restart mission-control",
+    "result": "restarted"
+  },
+  {
+    "timestamp": "2026-04-02T05:22:05.213804+00:00",
+    "type": "auto_fix",
+    "bot": "mission-control",
+    "issue": "Dashboard not responding on port 3000",
+    "action": "pm2 restart mission-control",
+    "result": "restarted"
+  },
+  {
+    "timestamp": "2026-04-02T05:27:11.519572+00:00",
+    "type": "auto_fix",
+    "bot": "mission-control",
+    "issue": "Dashboard not responding on port 3000",
+    "action": "pm2 restart mission-control",
+    "result": "restarted"
+  },
+  {
+    "timestamp": "2026-04-02T05:32:20.536796+00:00",
+    "type": "auto_fix",
+    "bot": "mission-control",
+    "issue": "Dashboard not responding on port 3000",
+    "action": "pm2 restart mission-control",
+    "result": "restarted"
+  },
+  {
+    "timestamp": "2026-04-02T05:37:21.539687+00:00",
+    "type": "log_error_detected",
+    "bot": "telegram-listener",
+    "error_key": "rate_limit",
+    "snippet": "e re\n\u001b[31m1|telegram | \u001b[39mArchive webhook 429: {\"message\": \"You are being rate limited.\", \"retry_after\": 0.388, \"global\": false\n\u001b[31m1|telegram | \u001b[39mArchive webhook 429: {\"message\": \"You are being rate limited.\", \"retry_after\": 0.3, \"global\": false}\n\u001b[31m1|telegram | \u001b[39mArchive webhook failed:"
+  },
+  {
+    "timestamp": "2026-04-02T05:37:24.552789+00:00",
+    "type": "auto_fix",
+    "bot": "mission-control",
+    "issue": "Dashboard not responding on port 3000",
+    "action": "pm2 restart mission-control",
+    "result": "restarted"
+  },
+  {
+    "timestamp": "2026-04-02T05:42:28.722647+00:00",
+    "type": "auto_fix",
+    "bot": "mission-control",
+    "issue": "Dashboard not responding on port 3000",
+    "action": "pm2 restart mission-control",
+    "result": "restarted"
+  },
+  {
+    "timestamp": "2026-04-02T05:47:32.503022+00:00",
+    "type": "auto_fix",
+    "bot": "mission-control",
+    "issue": "Dashboard not responding on port 3000",
+    "action": "pm2 restart mission-control",
+    "result": "restarted"
+  },
+  {
+    "timestamp": "2026-04-02T05:52:36.925772+00:00",
+    "type": "auto_fix",
+    "bot": "mission-control",
+    "issue": "Dashboard not responding on port 3000",
+    "action": "pm2 restart mission-control",
+    "result": "restarted"
+  },
+  {
+    "timestamp": "2026-04-02T05:57:44.838194+00:00",
+    "type": "auto_fix",
+    "bot": "mission-control",
+    "issue": "Dashboard not responding on port 3000",
+    "action": "pm2 restart mission-control",
+    "result": "restarted"
+  },
+  {
+    "timestamp": "2026-04-02T06:02:48.678817+00:00",
+    "type": "auto_fix",
+    "bot": "mission-control",
+    "issue": "Dashboard not responding on port 3000",
+    "action": "pm2 restart mission-control",
+    "result": "restarted"
+  },
+  {
+    "timestamp": "2026-04-02T06:07:52.619969+00:00",
+    "type": "auto_fix",
+    "bot": "mission-control",
+    "issue": "Dashboard not responding on port 3000",
+    "action": "pm2 restart mission-control",
+    "result": "restarted"
+  },
+  {
+    "timestamp": "2026-04-02T06:12:58.170758+00:00",
+    "type": "auto_fix",
+    "bot": "mission-control",
+    "issue": "Dashboard not responding on port 3000",
+    "action": "pm2 restart mission-control",
+    "result": "restarted"
+  },
+  {
+    "timestamp": "2026-04-02T06:18:03.254783+00:00",
+    "type": "auto_fix",
+    "bot": "mission-control",
+    "issue": "Dashboard not responding on port 3000",
+    "action": "pm2 restart mission-control",
+    "result": "restarted"
+  },
+  {
+    "timestamp": "2026-04-02T06:23:07.432656+00:00",
+    "type": "auto_fix",
+    "bot": "mission-control",
+    "issue": "Dashboard not responding on port 3000",
+    "action": "pm2 restart mission-control",
+    "result": "restarted"
+  },
+  {
+    "timestamp": "2026-04-02T06:28:11.667637+00:00",
+    "type": "auto_fix",
+    "bot": "mission-control",
+    "issue": "Dashboard not responding on port 3000",
+    "action": "pm2 restart mission-control",
+    "result": "restarted"
+  },
+  {
+    "timestamp": "2026-04-02T06:33:16.125135+00:00",
+    "type": "auto_fix",
+    "bot": "mission-control",
+    "issue": "Dashboard not responding on port 3000",
+    "action": "pm2 restart mission-control",
+    "result": "restarted"
+  },
+  {
+    "timestamp": "2026-04-02T06:38:17.246758+00:00",
+    "type": "log_error_detected",
+    "bot": "telegram-listener",
+    "error_key": "rate_limit",
+    "snippet": "1|telegram | \u001b[39mArchive webhook failed: \n\u001b[31m1|telegram | \u001b[39mArchive webhook 429: {\"message\": \"You are being rate limited.\", \"retry_after\": 0.394, \"global\": false\n\u001b[31m1|telegram | \u001b[39m  [WARN] Discord webhook 429: {\"message\": \"You are being rate limited.\", \"retry_after\": 0.3, \"global\": false}"
+  },
+  {
+    "timestamp": "2026-04-02T06:38:21.857777+00:00",
+    "type": "auto_fix",
+    "bot": "mission-control",
+    "issue": "Dashboard not responding on port 3000",
+    "action": "pm2 restart mission-control",
+    "result": "restarted"
+  },
+  {
+    "timestamp": "2026-04-02T06:43:26.082751+00:00",
+    "type": "auto_fix",
+    "bot": "mission-control",
+    "issue": "Dashboard not responding on port 3000",
+    "action": "pm2 restart mission-control",
+    "result": "restarted"
+  },
+  {
+    "timestamp": "2026-04-02T06:48:31.629949+00:00",
+    "type": "auto_fix",
+    "bot": "mission-control",
+    "issue": "Dashboard not responding on port 3000",
+    "action": "pm2 restart mission-control",
+    "result": "restarted"
+  },
+  {
+    "timestamp": "2026-04-02T06:53:37.320495+00:00",
+    "type": "auto_fix",
+    "bot": "mission-control",
+    "issue": "Dashboard not responding on port 3000",
+    "action": "pm2 restart mission-control",
+    "result": "restarted"
+  },
+  {
+    "timestamp": "2026-04-02T06:58:41.682625+00:00",
+    "type": "auto_fix",
+    "bot": "mission-control",
+    "issue": "Dashboard not responding on port 3000",
+    "action": "pm2 restart mission-control",
+    "result": "restarted"
+  },
+  {
+    "timestamp": "2026-04-02T07:03:45.523686+00:00",
+    "type": "auto_fix",
+    "bot": "mission-control",
+    "issue": "Dashboard not responding on port 3000",
+    "action": "pm2 restart mission-control",
+    "result": "restarted"
+  },
+  {
+    "timestamp": "2026-04-02T07:08:49.953977+00:00",
+    "type": "auto_fix",
+    "bot": "mission-control",
+    "issue": "Dashboard not responding on port 3000",
+    "action": "pm2 restart mission-control",
+    "result": "restarted"
+  },
+  {
+    "timestamp": "2026-04-02T07:13:54.404774+00:00",
+    "type": "auto_fix",
+    "bot": "mission-control",
+    "issue": "Dashboard not responding on port 3000",
+    "action": "pm2 restart mission-control",
+    "result": "restarted"
+  },
+  {
+    "timestamp": "2026-04-02T07:18:58.189089+00:00",
+    "type": "auto_fix",
+    "bot": "mission-control",
+    "issue": "Dashboard not responding on port 3000",
+    "action": "pm2 restart mission-control",
+    "result": "restarted"
+  },
+  {
+    "timestamp": "2026-04-02T07:24:06.128470+00:00",
+    "type": "auto_fix",
+    "bot": "mission-control",
+    "issue": "Dashboard not responding on port 3000",
+    "action": "pm2 restart mission-control",
+    "result": "restarted"
+  },
+  {
+    "timestamp": "2026-04-02T07:29:10.477838+00:00",
+    "type": "auto_fix",
+    "bot": "mission-control",
+    "issue": "Dashboard not responding on port 3000",
+    "action": "pm2 restart mission-control",
+    "result": "restarted"
+  },
+  {
+    "timestamp": "2026-04-02T07:34:14.479491+00:00",
+    "type": "auto_fix",
+    "bot": "mission-control",
+    "issue": "Dashboard not responding on port 3000",
+    "action": "pm2 restart mission-control",
+    "result": "restarted"
+  },
+  {
+    "timestamp": "2026-04-02T07:39:15.806227+00:00",
+    "type": "log_error_detected",
+    "bot": "telegram-listener",
+    "error_key": "rate_limit",
+    "snippet": "1|telegram | \u001b[39mArchive webhook failed: \n\u001b[31m1|telegram | \u001b[39mArchive webhook 429: {\"message\": \"You are being rate limited.\", \"retry_after\": 0.394, \"global\": false\n\u001b[31m1|telegram | \u001b[39m  [WARN] Discord webhook 429: {\"message\": \"You are being rate limited.\", \"retry_after\": 0.3, \"global\": false}"
+  },
+  {
+    "timestamp": "2026-04-02T07:39:20.688962+00:00",
+    "type": "auto_fix",
+    "bot": "mission-control",
+    "issue": "Dashboard not responding on port 3000",
+    "action": "pm2 restart mission-control",
+    "result": "restarted"
+  },
+  {
+    "timestamp": "2026-04-02T07:44:27.375928+00:00",
+    "type": "auto_fix",
+    "bot": "mission-control",
+    "issue": "Dashboard not responding on port 3000",
+    "action": "pm2 restart mission-control",
+    "result": "restarted"
+  },
+  {
+    "timestamp": "2026-04-02T07:49:31.544897+00:00",
+    "type": "auto_fix",
+    "bot": "mission-control",
+    "issue": "Dashboard not responding on port 3000",
+    "action": "pm2 restart mission-control",
+    "result": "restarted"
+  },
+  {
+    "timestamp": "2026-04-02T07:54:36.670842+00:00",
+    "type": "auto_fix",
+    "bot": "mission-control",
+    "issue": "Dashboard not responding on port 3000",
+    "action": "pm2 restart mission-control",
+    "result": "restarted"
+  },
+  {
+    "timestamp": "2026-04-02T07:59:40.752145+00:00",
+    "type": "auto_fix",
+    "bot": "mission-control",
+    "issue": "Dashboard not responding on port 3000",
+    "action": "pm2 restart mission-control",
+    "result": "restarted"
+  },
+  {
+    "timestamp": "2026-04-02T08:04:44.609688+00:00",
+    "type": "auto_fix",
+    "bot": "mission-control",
+    "issue": "Dashboard not responding on port 3000",
+    "action": "pm2 restart mission-control",
+    "result": "restarted"
+  },
+  {
+    "timestamp": "2026-04-02T08:09:48.403667+00:00",
+    "type": "auto_fix",
+    "bot": "mission-control",
+    "issue": "Dashboard not responding on port 3000",
+    "action": "pm2 restart mission-control",
+    "result": "restarted"
+  },
+  {
+    "timestamp": "2026-04-02T08:14:53.128739+00:00",
+    "type": "auto_fix",
+    "bot": "mission-control",
+    "issue": "Dashboard not responding on port 3000",
+    "action": "pm2 restart mission-control",
+    "result": "restarted"
+  },
+  {
+    "timestamp": "2026-04-02T08:19:56.818768+00:00",
+    "type": "auto_fix",
+    "bot": "mission-control",
+    "issue": "Dashboard not responding on port 3000",
+    "action": "pm2 restart mission-control",
+    "result": "restarted"
+  },
+  {
+    "timestamp": "2026-04-02T08:25:00.866631+00:00",
+    "type": "auto_fix",
+    "bot": "mission-control",
+    "issue": "Dashboard not responding on port 3000",
+    "action": "pm2 restart mission-control",
+    "result": "restarted"
+  },
+  {
+    "timestamp": "2026-04-02T08:30:05.080797+00:00",
+    "type": "auto_fix",
+    "bot": "mission-control",
+    "issue": "Dashboard not responding on port 3000",
+    "action": "pm2 restart mission-control",
+    "result": "restarted"
+  },
+  {
+    "timestamp": "2026-04-02T08:35:11.000265+00:00",
+    "type": "auto_fix",
+    "bot": "mission-control",
+    "issue": "Dashboard not responding on port 3000",
+    "action": "pm2 restart mission-control",
+    "result": "restarted"
+  },
+  {
+    "timestamp": "2026-04-02T08:40:12.293829+00:00",
+    "type": "log_error_detected",
+    "bot": "telegram-listener",
+    "error_key": "rate_limit",
+    "snippet": "te limited.\", \"retry_after\": 0.3, \"global\": false}\n\u001b[31m1|telegram | \u001b[39mArchive webhook 429: {\"message\": \"You are being rate limited.\", \"retry_after\": 0.379, \"global\": false\n\u001b[31m1|telegram | \u001b[39mArchive webhook 429: {\"message\": \"You are being rate limited.\", \"retry_after\": 0.38, \"global\": false}"
+  },
+  {
+    "timestamp": "2026-04-02T08:40:16.332781+00:00",
+    "type": "auto_fix",
+    "bot": "mission-control",
+    "issue": "Dashboard not responding on port 3000",
+    "action": "pm2 restart mission-control",
+    "result": "restarted"
+  },
+  {
+    "timestamp": "2026-04-02T08:45:22.549668+00:00",
+    "type": "auto_fix",
+    "bot": "mission-control",
+    "issue": "Dashboard not responding on port 3000",
+    "action": "pm2 restart mission-control",
+    "result": "restarted"
+  },
+  {
+    "timestamp": "2026-04-02T08:50:26.362769+00:00",
+    "type": "auto_fix",
+    "bot": "mission-control",
+    "issue": "Dashboard not responding on port 3000",
+    "action": "pm2 restart mission-control",
+    "result": "restarted"
+  },
+  {
+    "timestamp": "2026-04-02T08:55:33.026608+00:00",
+    "type": "auto_fix",
+    "bot": "mission-control",
+    "issue": "Dashboard not responding on port 3000",
+    "action": "pm2 restart mission-control",
+    "result": "restarted"
+  },
+  {
+    "timestamp": "2026-04-02T09:00:37.177000+00:00",
+    "type": "auto_fix",
+    "bot": "mission-control",
+    "issue": "Dashboard not responding on port 3000",
+    "action": "pm2 restart mission-control",
+    "result": "restarted"
+  },
+  {
+    "timestamp": "2026-04-02T09:05:41.628767+00:00",
+    "type": "auto_fix",
+    "bot": "mission-control",
+    "issue": "Dashboard not responding on port 3000",
+    "action": "pm2 restart mission-control",
+    "result": "restarted"
+  },
+  {
+    "timestamp": "2026-04-02T09:10:45.866804+00:00",
+    "type": "auto_fix",
+    "bot": "mission-control",
+    "issue": "Dashboard not responding on port 3000",
+    "action": "pm2 restart mission-control",
+    "result": "restarted"
+  },
+  {
+    "timestamp": "2026-04-02T09:15:52.198650+00:00",
+    "type": "auto_fix",
+    "bot": "mission-control",
+    "issue": "Dashboard not responding on port 3000",
+    "action": "pm2 restart mission-control",
+    "result": "restarted"
+  },
+  {
+    "timestamp": "2026-04-02T09:20:55.996628+00:00",
+    "type": "auto_fix",
+    "bot": "mission-control",
+    "issue": "Dashboard not responding on port 3000",
+    "action": "pm2 restart mission-control",
+    "result": "restarted"
+  },
+  {
+    "timestamp": "2026-04-02T09:25:59.994650+00:00",
+    "type": "auto_fix",
+    "bot": "mission-control",
+    "issue": "Dashboard not responding on port 3000",
+    "action": "pm2 restart mission-control",
+    "result": "restarted"
+  },
+  {
+    "timestamp": "2026-04-02T09:31:05.450799+00:00",
+    "type": "auto_fix",
+    "bot": "mission-control",
+    "issue": "Dashboard not responding on port 3000",
+    "action": "pm2 restart mission-control",
+    "result": "restarted"
+  },
+  {
+    "timestamp": "2026-04-02T09:36:09.388764+00:00",
+    "type": "auto_fix",
+    "bot": "mission-control",
+    "issue": "Dashboard not responding on port 3000",
+    "action": "pm2 restart mission-control",
+    "result": "restarted"
+  },
+  {
+    "timestamp": "2026-04-02T09:41:10.455647+00:00",
+    "type": "log_error_detected",
+    "bot": "telegram-listener",
+    "error_key": "rate_limit",
+    "snippet": "try_after\": 0.395, \"global\": false\n\u001b[31m1|telegram | \u001b[39m  [WARN] Discord webhook 429: {\"message\": \"You are being rate limited.\", \"retry_after\": 0.3, \"global\": false}\n\u001b[31m1|telegram | \u001b[39m  [WARN] Discord webhook 429: {\"message\": \"You are being rate limited.\", \"retry_after\": 0.3, \"global\": false}"
+  },
+  {
+    "timestamp": "2026-04-02T09:41:13.372143+00:00",
+    "type": "auto_fix",
+    "bot": "mission-control",
+    "issue": "Dashboard not responding on port 3000",
+    "action": "pm2 restart mission-control",
+    "result": "restarted"
+  },
+  {
+    "timestamp": "2026-04-02T09:46:18.149919+00:00",
+    "type": "auto_fix",
+    "bot": "mission-control",
+    "issue": "Dashboard not responding on port 3000",
+    "action": "pm2 restart mission-control",
+    "result": "restarted"
+  },
+  {
+    "timestamp": "2026-04-02T09:51:25.655961+00:00",
+    "type": "auto_fix",
+    "bot": "mission-control",
+    "issue": "Dashboard not responding on port 3000",
+    "action": "pm2 restart mission-control",
+    "result": "restarted"
+  },
+  {
+    "timestamp": "2026-04-02T09:56:29.838928+00:00",
+    "type": "auto_fix",
+    "bot": "mission-control",
+    "issue": "Dashboard not responding on port 3000",
+    "action": "pm2 restart mission-control",
+    "result": "restarted"
+  },
+  {
+    "timestamp": "2026-04-02T10:01:36.327686+00:00",
+    "type": "auto_fix",
+    "bot": "mission-control",
+    "issue": "Dashboard not responding on port 3000",
+    "action": "pm2 restart mission-control",
+    "result": "restarted"
+  },
+  {
+    "timestamp": "2026-04-02T10:06:40.272782+00:00",
+    "type": "auto_fix",
+    "bot": "mission-control",
+    "issue": "Dashboard not responding on port 3000",
+    "action": "pm2 restart mission-control",
+    "result": "restarted"
+  },
+  {
+    "timestamp": "2026-04-02T10:11:46.429267+00:00",
+    "type": "auto_fix",
+    "bot": "mission-control",
+    "issue": "Dashboard not responding on port 3000",
+    "action": "pm2 restart mission-control",
+    "result": "restarted"
+  },
+  {
+    "timestamp": "2026-04-02T10:16:51.753813+00:00",
+    "type": "auto_fix",
+    "bot": "mission-control",
+    "issue": "Dashboard not responding on port 3000",
+    "action": "pm2 restart mission-control",
+    "result": "restarted"
+  },
+  {
+    "timestamp": "2026-04-02T10:21:58.217808+00:00",
+    "type": "auto_fix",
+    "bot": "mission-control",
+    "issue": "Dashboard not responding on port 3000",
+    "action": "pm2 restart mission-control",
+    "result": "restarted"
+  },
+  {
+    "timestamp": "2026-04-02T10:27:04.234594+00:00",
+    "type": "auto_fix",
+    "bot": "mission-control",
+    "issue": "Dashboard not responding on port 3000",
+    "action": "pm2 restart mission-control",
+    "result": "restarted"
+  },
+  {
+    "timestamp": "2026-04-02T10:32:08.504698+00:00",
+    "type": "auto_fix",
+    "bot": "mission-control",
+    "issue": "Dashboard not responding on port 3000",
+    "action": "pm2 restart mission-control",
+    "result": "restarted"
+  },
+  {
+    "timestamp": "2026-04-02T10:37:13.535797+00:00",
+    "type": "auto_fix",
+    "bot": "mission-control",
+    "issue": "Dashboard not responding on port 3000",
+    "action": "pm2 restart mission-control",
+    "result": "restarted"
+  },
+  {
+    "timestamp": "2026-04-02T10:42:14.718373+00:00",
+    "type": "log_error_detected",
+    "bot": "telegram-listener",
+    "error_key": "rate_limit",
+    "snippet": "ed.\", \"retry_after\": 0.3, \"global\": false}\n\u001b[31m1|telegram | \u001b[39m  [WARN] Discord webhook 429: {\"message\": \"You are being rate limited.\", \"retry_after\": 0.3, \"global\": false}\n\u001b[31m1|telegram | \u001b[39mArchive webhook 429: {\"message\": \"You are being rate limited.\", \"retry_after\": 0.393, \"global\": false"
+  },
+  {
+    "timestamp": "2026-04-02T10:42:18.048749+00:00",
+    "type": "auto_fix",
+    "bot": "mission-control",
+    "issue": "Dashboard not responding on port 3000",
+    "action": "pm2 restart mission-control",
+    "result": "restarted"
+  },
+  {
+    "timestamp": "2026-04-02T10:47:22.370351+00:00",
+    "type": "auto_fix",
+    "bot": "mission-control",
+    "issue": "Dashboard not responding on port 3000",
+    "action": "pm2 restart mission-control",
+    "result": "restarted"
+  },
+  {
+    "timestamp": "2026-04-02T10:52:27.553100+00:00",
+    "type": "auto_fix",
+    "bot": "mission-control",
+    "issue": "Dashboard not responding on port 3000",
+    "action": "pm2 restart mission-control",
+    "result": "restarted"
+  },
+  {
+    "timestamp": "2026-04-02T10:57:33.256809+00:00",
+    "type": "auto_fix",
+    "bot": "mission-control",
+    "issue": "Dashboard not responding on port 3000",
+    "action": "pm2 restart mission-control",
+    "result": "restarted"
+  },
+  {
+    "timestamp": "2026-04-02T11:02:37.979793+00:00",
+    "type": "auto_fix",
+    "bot": "mission-control",
+    "issue": "Dashboard not responding on port 3000",
+    "action": "pm2 restart mission-control",
+    "result": "restarted"
+  },
+  {
+    "timestamp": "2026-04-02T11:07:42.073670+00:00",
+    "type": "auto_fix",
+    "bot": "mission-control",
+    "issue": "Dashboard not responding on port 3000",
+    "action": "pm2 restart mission-control",
+    "result": "restarted"
+  },
+  {
+    "timestamp": "2026-04-02T11:12:46.015671+00:00",
+    "type": "auto_fix",
+    "bot": "mission-control",
+    "issue": "Dashboard not responding on port 3000",
+    "action": "pm2 restart mission-control",
+    "result": "restarted"
+  },
+  {
+    "timestamp": "2026-04-02T11:17:51.337647+00:00",
+    "type": "auto_fix",
+    "bot": "mission-control",
+    "issue": "Dashboard not responding on port 3000",
+    "action": "pm2 restart mission-control",
+    "result": "restarted"
+  },
+  {
+    "timestamp": "2026-04-02T11:22:55.160181+00:00",
+    "type": "auto_fix",
+    "bot": "mission-control",
+    "issue": "Dashboard not responding on port 3000",
+    "action": "pm2 restart mission-control",
+    "result": "restarted"
+  },
+  {
+    "timestamp": "2026-04-02T11:27:59.900256+00:00",
+    "type": "auto_fix",
+    "bot": "mission-control",
+    "issue": "Dashboard not responding on port 3000",
+    "action": "pm2 restart mission-control",
+    "result": "restarted"
+  },
+  {
+    "timestamp": "2026-04-02T11:33:04.071098+00:00",
+    "type": "auto_fix",
+    "bot": "mission-control",
+    "issue": "Dashboard not responding on port 3000",
+    "action": "pm2 restart mission-control",
+    "result": "restarted"
+  },
+  {
+    "timestamp": "2026-04-02T11:38:10.586773+00:00",
+    "type": "auto_fix",
+    "bot": "mission-control",
+    "issue": "Dashboard not responding on port 3000",
+    "action": "pm2 restart mission-control",
+    "result": "restarted"
+  },
+  {
+    "timestamp": "2026-04-02T11:43:11.651413+00:00",
+    "type": "log_error_detected",
+    "bot": "telegram-listener",
+    "error_key": "rate_limit",
+    "snippet": "ed.\", \"retry_after\": 0.3, \"global\": false}\n\u001b[31m1|telegram | \u001b[39m  [WARN] Discord webhook 429: {\"message\": \"You are being rate limited.\", \"retry_after\": 0.3, \"global\": false}\n\u001b[31m1|telegram | \u001b[39mArchive webhook 429: {\"message\": \"You are being rate limited.\", \"retry_after\": 0.393, \"global\": false"
+  },
+  {
+    "timestamp": "2026-04-02T11:43:15.088391+00:00",
+    "type": "auto_fix",
+    "bot": "mission-control",
+    "issue": "Dashboard not responding on port 3000",
+    "action": "pm2 restart mission-control",
+    "result": "restarted"
+  },
+  {
+    "timestamp": "2026-04-02T11:48:19.560796+00:00",
+    "type": "auto_fix",
+    "bot": "mission-control",
+    "issue": "Dashboard not responding on port 3000",
+    "action": "pm2 restart mission-control",
+    "result": "restarted"
+  },
+  {
+    "timestamp": "2026-04-02T11:53:24.759974+00:00",
+    "type": "auto_fix",
+    "bot": "mission-control",
+    "issue": "Dashboard not responding on port 3000",
+    "action": "pm2 restart mission-control",
+    "result": "restarted"
+  },
+  {
+    "timestamp": "2026-04-02T11:58:29.682794+00:00",
+    "type": "auto_fix",
+    "bot": "mission-control",
+    "issue": "Dashboard not responding on port 3000",
+    "action": "pm2 restart mission-control",
+    "result": "restarted"
+  },
+  {
+    "timestamp": "2026-04-02T12:03:34.339071+00:00",
+    "type": "auto_fix",
+    "bot": "mission-control",
+    "issue": "Dashboard not responding on port 3000",
+    "action": "pm2 restart mission-control",
+    "result": "restarted"
+  },
+  {
+    "timestamp": "2026-04-02T12:08:40.710770+00:00",
+    "type": "auto_fix",
+    "bot": "mission-control",
+    "issue": "Dashboard not responding on port 3000",
+    "action": "pm2 restart mission-control",
+    "result": "restarted"
+  },
+  {
+    "timestamp": "2026-04-02T12:13:46.059844+00:00",
+    "type": "auto_fix",
+    "bot": "mission-control",
+    "issue": "Dashboard not responding on port 3000",
+    "action": "pm2 restart mission-control",
+    "result": "restarted"
+  },
+  {
+    "timestamp": "2026-04-02T12:18:51.841792+00:00",
+    "type": "auto_fix",
+    "bot": "mission-control",
+    "issue": "Dashboard not responding on port 3000",
+    "action": "pm2 restart mission-control",
+    "result": "restarted"
+  },
+  {
+    "timestamp": "2026-04-02T12:23:56.920934+00:00",
+    "type": "auto_fix",
+    "bot": "mission-control",
+    "issue": "Dashboard not responding on port 3000",
+    "action": "pm2 restart mission-control",
+    "result": "restarted"
+  },
+  {
+    "timestamp": "2026-04-02T12:29:02.355918+00:00",
+    "type": "auto_fix",
+    "bot": "mission-control",
+    "issue": "Dashboard not responding on port 3000",
+    "action": "pm2 restart mission-control",
+    "result": "restarted"
+  },
+  {
+    "timestamp": "2026-04-02T12:34:06.545804+00:00",
+    "type": "auto_fix",
+    "bot": "mission-control",
+    "issue": "Dashboard not responding on port 3000",
+    "action": "pm2 restart mission-control",
+    "result": "restarted"
+  },
+  {
+    "timestamp": "2026-04-02T12:39:10.460904+00:00",
+    "type": "auto_fix",
+    "bot": "mission-control",
+    "issue": "Dashboard not responding on port 3000",
+    "action": "pm2 restart mission-control",
+    "result": "restarted"
+  },
+  {
+    "timestamp": "2026-04-02T12:44:11.727764+00:00",
+    "type": "log_error_detected",
+    "bot": "telegram-listener",
+    "error_key": "rate_limit",
+    "snippet": "ed.\", \"retry_after\": 0.3, \"global\": false}\n\u001b[31m1|telegram | \u001b[39m  [WARN] Discord webhook 429: {\"message\": \"You are being rate limited.\", \"retry_after\": 0.3, \"global\": false}\n\u001b[31m1|telegram | \u001b[39mArchive webhook 429: {\"message\": \"You are being rate limited.\", \"retry_after\": 0.393, \"global\": false"
+  },
+  {
+    "timestamp": "2026-04-02T12:44:15.732787+00:00",
+    "type": "auto_fix",
+    "bot": "mission-control",
+    "issue": "Dashboard not responding on port 3000",
+    "action": "pm2 restart mission-control",
+    "result": "restarted"
+  },
+  {
+    "timestamp": "2026-04-02T12:49:20.205848+00:00",
+    "type": "auto_fix",
+    "bot": "mission-control",
+    "issue": "Dashboard not responding on port 3000",
+    "action": "pm2 restart mission-control",
+    "result": "restarted"
+  },
+  {
+    "timestamp": "2026-04-02T12:54:27.786895+00:00",
+    "type": "auto_fix",
+    "bot": "mission-control",
+    "issue": "Dashboard not responding on port 3000",
+    "action": "pm2 restart mission-control",
+    "result": "restarted"
+  },
+  {
+    "timestamp": "2026-04-02T12:59:38.018094+00:00",
+    "type": "auto_fix",
+    "bot": "mission-control",
+    "issue": "Dashboard not responding on port 3000",
+    "action": "pm2 restart mission-control",
+    "result": "restarted"
+  },
+  {
+    "timestamp": "2026-04-02T13:04:42.178470+00:00",
+    "type": "auto_fix",
+    "bot": "mission-control",
+    "issue": "Dashboard not responding on port 3000",
+    "action": "pm2 restart mission-control",
+    "result": "restarted"
+  },
+  {
+    "timestamp": "2026-04-02T13:09:47.125954+00:00",
+    "type": "auto_fix",
+    "bot": "mission-control",
+    "issue": "Dashboard not responding on port 3000",
+    "action": "pm2 restart mission-control",
+    "result": "restarted"
+  },
+  {
+    "timestamp": "2026-04-02T13:14:52.238104+00:00",
+    "type": "auto_fix",
+    "bot": "mission-control",
+    "issue": "Dashboard not responding on port 3000",
+    "action": "pm2 restart mission-control",
+    "result": "restarted"
+  },
+  {
+    "timestamp": "2026-04-02T13:19:56.607605+00:00",
+    "type": "auto_fix",
+    "bot": "mission-control",
+    "issue": "Dashboard not responding on port 3000",
+    "action": "pm2 restart mission-control",
+    "result": "restarted"
+  },
+  {
+    "timestamp": "2026-04-02T13:25:01.862060+00:00",
+    "type": "auto_fix",
+    "bot": "mission-control",
+    "issue": "Dashboard not responding on port 3000",
+    "action": "pm2 restart mission-control",
+    "result": "restarted"
+  },
+  {
+    "timestamp": "2026-04-02T13:30:07.602902+00:00",
+    "type": "auto_fix",
+    "bot": "mission-control",
+    "issue": "Dashboard not responding on port 3000",
+    "action": "pm2 restart mission-control",
+    "result": "restarted"
+  },
+  {
+    "timestamp": "2026-04-02T13:35:12.870825+00:00",
+    "type": "auto_fix",
+    "bot": "mission-control",
+    "issue": "Dashboard not responding on port 3000",
+    "action": "pm2 restart mission-control",
+    "result": "restarted"
+  },
+  {
+    "timestamp": "2026-04-02T13:40:20.512994+00:00",
+    "type": "auto_fix",
+    "bot": "mission-control",
+    "issue": "Dashboard not responding on port 3000",
+    "action": "pm2 restart mission-control",
+    "result": "restarted"
+  },
+  {
+    "timestamp": "2026-04-02T13:45:21.562200+00:00",
+    "type": "log_error_detected",
+    "bot": "telegram-listener",
+    "error_key": "rate_limit",
+    "snippet": "ed.\", \"retry_after\": 0.3, \"global\": false}\n\u001b[31m1|telegram | \u001b[39m  [WARN] Discord webhook 429: {\"message\": \"You are being rate limited.\", \"retry_after\": 0.3, \"global\": false}\n\u001b[31m1|telegram | \u001b[39mArchive webhook 429: {\"message\": \"You are being rate limited.\", \"retry_after\": 0.393, \"global\": false"
+  },
+  {
+    "timestamp": "2026-04-02T13:45:25.000005+00:00",
+    "type": "auto_fix",
+    "bot": "mission-control",
+    "issue": "Dashboard not responding on port 3000",
+    "action": "pm2 restart mission-control",
+    "result": "restarted"
+  },
+  {
+    "timestamp": "2026-04-02T13:50:32.960036+00:00",
+    "type": "auto_fix",
+    "bot": "mission-control",
+    "issue": "Dashboard not responding on port 3000",
+    "action": "pm2 restart mission-control",
+    "result": "restarted"
+  },
+  {
+    "timestamp": "2026-04-02T13:55:37.516069+00:00",
+    "type": "auto_fix",
+    "bot": "mission-control",
+    "issue": "Dashboard not responding on port 3000",
+    "action": "pm2 restart mission-control",
+    "result": "restarted"
+  },
+  {
+    "timestamp": "2026-04-02T14:00:43.014847+00:00",
+    "type": "auto_fix",
+    "bot": "mission-control",
+    "issue": "Dashboard not responding on port 3000",
+    "action": "pm2 restart mission-control",
+    "result": "restarted"
+  },
+  {
+    "timestamp": "2026-04-02T14:05:47.364941+00:00",
+    "type": "auto_fix",
+    "bot": "mission-control",
+    "issue": "Dashboard not responding on port 3000",
+    "action": "pm2 restart mission-control",
+    "result": "restarted"
+  },
+  {
+    "timestamp": "2026-04-02T14:10:52.193845+00:00",
+    "type": "auto_fix",
+    "bot": "mission-control",
+    "issue": "Dashboard not responding on port 3000",
+    "action": "pm2 restart mission-control",
+    "result": "restarted"
+  },
+  {
+    "timestamp": "2026-04-02T14:15:56.780589+00:00",
+    "type": "auto_fix",
+    "bot": "mission-control",
+    "issue": "Dashboard not responding on port 3000",
+    "action": "pm2 restart mission-control",
+    "result": "restarted"
+  },
+  {
+    "timestamp": "2026-04-02T14:21:01.885796+00:00",
+    "type": "auto_fix",
+    "bot": "mission-control",
+    "issue": "Dashboard not responding on port 3000",
+    "action": "pm2 restart mission-control",
+    "result": "restarted"
+  },
+  {
+    "timestamp": "2026-04-02T14:26:07.046869+00:00",
+    "type": "auto_fix",
+    "bot": "mission-control",
+    "issue": "Dashboard not responding on port 3000",
+    "action": "pm2 restart mission-control",
+    "result": "restarted"
+  },
+  {
+    "timestamp": "2026-04-02T14:31:11.378814+00:00",
+    "type": "auto_fix",
+    "bot": "mission-control",
+    "issue": "Dashboard not responding on port 3000",
+    "action": "pm2 restart mission-control",
+    "result": "restarted"
+  },
+  {
+    "timestamp": "2026-04-02T14:36:17.763820+00:00",
+    "type": "auto_fix",
+    "bot": "mission-control",
+    "issue": "Dashboard not responding on port 3000",
+    "action": "pm2 restart mission-control",
+    "result": "restarted"
+  },
+  {
+    "timestamp": "2026-04-02T14:41:22.450771+00:00",
+    "type": "auto_fix",
+    "bot": "mission-control",
+    "issue": "Dashboard not responding on port 3000",
+    "action": "pm2 restart mission-control",
+    "result": "restarted"
+  },
+  {
+    "timestamp": "2026-04-02T14:46:23.619044+00:00",
+    "type": "log_error_detected",
+    "bot": "telegram-listener",
+    "error_key": "rate_limit",
+    "snippet": "ed.\", \"retry_after\": 0.3, \"global\": false}\n\u001b[31m1|telegram | \u001b[39m  [WARN] Discord webhook 429: {\"message\": \"You are being rate limited.\", \"retry_after\": 0.3, \"global\": false}\n\u001b[31m1|telegram | \u001b[39mArchive webhook 429: {\"message\": \"You are being rate limited.\", \"retry_after\": 0.371, \"global\": false"
+  },
+  {
+    "timestamp": "2026-04-02T14:46:27.172428+00:00",
+    "type": "auto_fix",
+    "bot": "mission-control",
+    "issue": "Dashboard not responding on port 3000",
+    "action": "pm2 restart mission-control",
+    "result": "restarted"
+  },
+  {
+    "timestamp": "2026-04-02T14:51:31.563815+00:00",
+    "type": "auto_fix",
+    "bot": "mission-control",
+    "issue": "Dashboard not responding on port 3000",
+    "action": "pm2 restart mission-control",
+    "result": "restarted"
+  },
+  {
+    "timestamp": "2026-04-02T14:56:36.487101+00:00",
+    "type": "auto_fix",
+    "bot": "mission-control",
+    "issue": "Dashboard not responding on port 3000",
+    "action": "pm2 restart mission-control",
+    "result": "restarted"
+  },
+  {
+    "timestamp": "2026-04-02T15:01:41.067900+00:00",
+    "type": "auto_fix",
+    "bot": "mission-control",
+    "issue": "Dashboard not responding on port 3000",
+    "action": "pm2 restart mission-control",
+    "result": "restarted"
+  },
+  {
+    "timestamp": "2026-04-02T15:06:45.154323+00:00",
+    "type": "auto_fix",
+    "bot": "mission-control",
+    "issue": "Dashboard not responding on port 3000",
+    "action": "pm2 restart mission-control",
+    "result": "restarted"
+  },
+  {
+    "timestamp": "2026-04-02T15:11:50.510753+00:00",
+    "type": "auto_fix",
+    "bot": "mission-control",
+    "issue": "Dashboard not responding on port 3000",
+    "action": "pm2 restart mission-control",
+    "result": "restarted"
+  },
+  {
+    "timestamp": "2026-04-02T15:16:54.757384+00:00",
+    "type": "auto_fix",
+    "bot": "mission-control",
+    "issue": "Dashboard not responding on port 3000",
+    "action": "pm2 restart mission-control",
+    "result": "restarted"
+  },
+  {
+    "timestamp": "2026-04-02T15:17:03.069757+00:00",
+    "type": "api_down",
+    "service": "Firebase"
+  },
+  {
+    "timestamp": "2026-04-02T15:22:07.072333+00:00",
+    "type": "auto_fix",
+    "bot": "mission-control",
+    "issue": "Dashboard not responding on port 3000",
+    "action": "pm2 restart mission-control",
+    "result": "restarted"
+  },
+  {
+    "timestamp": "2026-04-02T15:27:10.901619+00:00",
+    "type": "auto_fix",
+    "bot": "mission-control",
+    "issue": "Dashboard not responding on port 3000",
+    "action": "pm2 restart mission-control",
+    "result": "restarted"
+  },
+  {
+    "timestamp": "2026-04-02T15:32:24.968220+00:00",
+    "type": "auto_fix",
+    "bot": "mission-control",
+    "issue": "Dashboard not responding on port 3000",
+    "action": "pm2 restart mission-control",
+    "result": "restarted"
+  },
+  {
+    "timestamp": "2026-04-02T15:37:29.072632+00:00",
+    "type": "auto_fix",
+    "bot": "mission-control",
+    "issue": "Dashboard not responding on port 3000",
+    "action": "pm2 restart mission-control",
+    "result": "restarted"
+  },
+  {
+    "timestamp": "2026-04-02T15:42:36.189799+00:00",
+    "type": "auto_fix",
+    "bot": "mission-control",
+    "issue": "Dashboard not responding on port 3000",
+    "action": "pm2 restart mission-control",
+    "result": "restarted"
+  },
+  {
+    "timestamp": "2026-04-02T15:47:37.308734+00:00",
+    "type": "log_error_detected",
+    "bot": "telegram-listener",
+    "error_key": "rate_limit",
+    "snippet": "[39m  [WARN] Discord webhook 429: {\"message\": \"You are being rate limited.\", \"retry_after\": 0.3, \"global\": false}\n\u001b[31m1|telegram | \u001b[39m[Firebase] Poll error: \n\u001b[31m1|telegram | \u001b[39m[Firebase] Poll error: \n\u001b[31m1|telegram | \u001b[39m[Firebase] Poll error: \n\u001b[31m1|telegram | \u001b[39m[Firebase] Poll error:"
+  },
+  {
+    "timestamp": "2026-04-02T15:47:40.509979+00:00",
+    "type": "auto_fix",
+    "bot": "mission-control",
+    "issue": "Dashboard not responding on port 3000",
+    "action": "pm2 restart mission-control",
+    "result": "restarted"
+  },
+  {
+    "timestamp": "2026-04-02T15:52:49.569775+00:00",
+    "type": "auto_fix",
+    "bot": "mission-control",
+    "issue": "Dashboard not responding on port 3000",
+    "action": "pm2 restart mission-control",
+    "result": "restarted"
+  },
+  {
+    "timestamp": "2026-04-02T15:57:58.921851+00:00",
+    "type": "auto_fix",
+    "bot": "mission-control",
+    "issue": "Dashboard not responding on port 3000",
+    "action": "pm2 restart mission-control",
+    "result": "restarted"
+  },
+  {
+    "timestamp": "2026-04-02T16:03:05.019792+00:00",
+    "type": "auto_fix",
+    "bot": "mission-control",
+    "issue": "Dashboard not responding on port 3000",
+    "action": "pm2 restart mission-control",
+    "result": "restarted"
+  },
+  {
+    "timestamp": "2026-04-02T16:08:09.328949+00:00",
+    "type": "auto_fix",
+    "bot": "mission-control",
+    "issue": "Dashboard not responding on port 3000",
+    "action": "pm2 restart mission-control",
+    "result": "restarted"
+  },
+  {
+    "timestamp": "2026-04-02T16:13:13.636235+00:00",
+    "type": "auto_fix",
+    "bot": "mission-control",
+    "issue": "Dashboard not responding on port 3000",
+    "action": "pm2 restart mission-control",
+    "result": "restarted"
+  },
+  {
+    "timestamp": "2026-04-02T16:18:18.860460+00:00",
+    "type": "auto_fix",
+    "bot": "mission-control",
+    "issue": "Dashboard not responding on port 3000",
+    "action": "pm2 restart mission-control",
+    "result": "restarted"
+  },
+  {
+    "timestamp": "2026-04-02T16:23:23.411673+00:00",
+    "type": "auto_fix",
+    "bot": "mission-control",
+    "issue": "Dashboard not responding on port 3000",
+    "action": "pm2 restart mission-control",
+    "result": "restarted"
+  },
+  {
+    "timestamp": "2026-04-02T16:28:27.629960+00:00",
+    "type": "auto_fix",
+    "bot": "mission-control",
+    "issue": "Dashboard not responding on port 3000",
+    "action": "pm2 restart mission-control",
+    "result": "restarted"
+  },
+  {
+    "timestamp": "2026-04-02T16:33:31.798685+00:00",
+    "type": "auto_fix",
+    "bot": "mission-control",
+    "issue": "Dashboard not responding on port 3000",
+    "action": "pm2 restart mission-control",
+    "result": "restarted"
+  },
+  {
+    "timestamp": "2026-04-02T16:38:36.512665+00:00",
+    "type": "auto_fix",
+    "bot": "mission-control",
+    "issue": "Dashboard not responding on port 3000",
+    "action": "pm2 restart mission-control",
+    "result": "restarted"
+  },
+  {
+    "timestamp": "2026-04-02T16:43:42.853827+00:00",
+    "type": "auto_fix",
+    "bot": "mission-control",
+    "issue": "Dashboard not responding on port 3000",
+    "action": "pm2 restart mission-control",
+    "result": "restarted"
+  },
+  {
+    "timestamp": "2026-04-02T16:48:44.058743+00:00",
+    "type": "log_error_detected",
+    "bot": "telegram-listener",
+    "error_key": "rate_limit",
+    "snippet": "ebase] Poll error: \n\u001b[31m1|telegram | \u001b[39m[Firebase] Poll error: \n\u001b[31m1|telegram | \u001b[39m[Firebase] Poll error: \n\u001b[31m1|telegram | \u001b[39m[Firebase] Poll error: \n\u001b[31m1|telegram | \u001b[39m[Firebase] Poll error: \n\u001b[31m1|telegram | \u001b[39m[Firebase] Poll error: \n\u001b[31m1|telegram | \u001b[39m[Firebase] Poll error:"
+  },
+  {
+    "timestamp": "2026-04-02T16:48:46.993454+00:00",
+    "type": "auto_fix",
+    "bot": "mission-control",
+    "issue": "Dashboard not responding on port 3000",
+    "action": "pm2 restart mission-control",
+    "result": "restarted"
+  },
+  {
+    "timestamp": "2026-04-02T16:53:53.113797+00:00",
+    "type": "auto_fix",
+    "bot": "mission-control",
+    "issue": "Dashboard not responding on port 3000",
+    "action": "pm2 restart mission-control",
+    "result": "restarted"
+  },
+  {
+    "timestamp": "2026-04-02T16:58:57.862218+00:00",
+    "type": "auto_fix",
+    "bot": "mission-control",
+    "issue": "Dashboard not responding on port 3000",
+    "action": "pm2 restart mission-control",
+    "result": "restarted"
+  },
+  {
+    "timestamp": "2026-04-02T17:04:02.483804+00:00",
+    "type": "auto_fix",
+    "bot": "mission-control",
+    "issue": "Dashboard not responding on port 3000",
+    "action": "pm2 restart mission-control",
+    "result": "restarted"
+  },
+  {
+    "timestamp": "2026-04-02T17:09:07.146953+00:00",
+    "type": "auto_fix",
+    "bot": "mission-control",
+    "issue": "Dashboard not responding on port 3000",
+    "action": "pm2 restart mission-control",
+    "result": "restarted"
+  },
+  {
+    "timestamp": "2026-04-02T17:14:11.131997+00:00",
+    "type": "auto_fix",
+    "bot": "mission-control",
+    "issue": "Dashboard not responding on port 3000",
+    "action": "pm2 restart mission-control",
+    "result": "restarted"
+  },
+  {
+    "timestamp": "2026-04-02T17:19:15.199660+00:00",
+    "type": "auto_fix",
+    "bot": "mission-control",
+    "issue": "Dashboard not responding on port 3000",
+    "action": "pm2 restart mission-control",
+    "result": "restarted"
+  },
+  {
+    "timestamp": "2026-04-02T17:24:21.111311+00:00",
+    "type": "auto_fix",
+    "bot": "mission-control",
+    "issue": "Dashboard not responding on port 3000",
+    "action": "pm2 restart mission-control",
+    "result": "restarted"
+  },
+  {
+    "timestamp": "2026-04-02T17:29:25.000799+00:00",
+    "type": "auto_fix",
+    "bot": "mission-control",
+    "issue": "Dashboard not responding on port 3000",
+    "action": "pm2 restart mission-control",
+    "result": "restarted"
+  },
+  {
+    "timestamp": "2026-04-02T17:34:29.936775+00:00",
+    "type": "auto_fix",
+    "bot": "mission-control",
+    "issue": "Dashboard not responding on port 3000",
+    "action": "pm2 restart mission-control",
+    "result": "restarted"
+  },
+  {
+    "timestamp": "2026-04-02T17:39:36.524345+00:00",
+    "type": "auto_fix",
+    "bot": "mission-control",
+    "issue": "Dashboard not responding on port 3000",
+    "action": "pm2 restart mission-control",
+    "result": "restarted"
+  },
+  {
+    "timestamp": "2026-04-02T17:44:43.061050+00:00",
+    "type": "auto_fix",
+    "bot": "mission-control",
+    "issue": "Dashboard not responding on port 3000",
+    "action": "pm2 restart mission-control",
+    "result": "restarted"
+  },
+  {
+    "timestamp": "2026-04-02T17:49:44.154039+00:00",
+    "type": "log_error_detected",
+    "bot": "telegram-listener",
+    "error_key": "rate_limit",
+    "snippet": "ebase] Poll error: \n\u001b[31m1|telegram | \u001b[39m[Firebase] Poll error: \n\u001b[31m1|telegram | \u001b[39m[Firebase] Poll error: \n\u001b[31m1|telegram | \u001b[39m[Firebase] Poll error: \n\u001b[31m1|telegram | \u001b[39m[Firebase] Poll error: \n\u001b[31m1|telegram | \u001b[39m[Firebase] Poll error: \n\u001b[31m1|telegram | \u001b[39m[Firebase] Poll error:"
+  },
+  {
+    "timestamp": "2026-04-02T17:49:47.551801+00:00",
+    "type": "auto_fix",
+    "bot": "mission-control",
+    "issue": "Dashboard not responding on port 3000",
+    "action": "pm2 restart mission-control",
+    "result": "restarted"
+  },
+  {
+    "timestamp": "2026-04-02T17:54:52.201200+00:00",
+    "type": "auto_fix",
+    "bot": "mission-control",
+    "issue": "Dashboard not responding on port 3000",
+    "action": "pm2 restart mission-control",
+    "result": "restarted"
+  },
+  {
+    "timestamp": "2026-04-02T17:59:56.227654+00:00",
+    "type": "auto_fix",
+    "bot": "mission-control",
+    "issue": "Dashboard not responding on port 3000",
+    "action": "pm2 restart mission-control",
+    "result": "restarted"
+  },
+  {
+    "timestamp": "2026-04-02T18:05:00.692778+00:00",
+    "type": "auto_fix",
+    "bot": "mission-control",
+    "issue": "Dashboard not responding on port 3000",
+    "action": "pm2 restart mission-control",
+    "result": "restarted"
+  },
+  {
+    "timestamp": "2026-04-02T18:10:04.920780+00:00",
+    "type": "auto_fix",
+    "bot": "mission-control",
+    "issue": "Dashboard not responding on port 3000",
+    "action": "pm2 restart mission-control",
+    "result": "restarted"
+  },
+  {
+    "timestamp": "2026-04-02T18:15:08.801573+00:00",
+    "type": "auto_fix",
+    "bot": "mission-control",
+    "issue": "Dashboard not responding on port 3000",
+    "action": "pm2 restart mission-control",
+    "result": "restarted"
+  },
+  {
+    "timestamp": "2026-04-02T18:20:14.561797+00:00",
+    "type": "auto_fix",
+    "bot": "mission-control",
+    "issue": "Dashboard not responding on port 3000",
+    "action": "pm2 restart mission-control",
+    "result": "restarted"
+  },
+  {
+    "timestamp": "2026-04-02T18:25:19.413565+00:00",
+    "type": "auto_fix",
+    "bot": "mission-control",
+    "issue": "Dashboard not responding on port 3000",
+    "action": "pm2 restart mission-control",
+    "result": "restarted"
+  },
+  {
+    "timestamp": "2026-04-02T18:30:24.477789+00:00",
+    "type": "auto_fix",
+    "bot": "mission-control",
+    "issue": "Dashboard not responding on port 3000",
+    "action": "pm2 restart mission-control",
+    "result": "restarted"
+  },
+  {
+    "timestamp": "2026-04-02T18:35:33.358719+00:00",
+    "type": "auto_fix",
+    "bot": "mission-control",
+    "issue": "Dashboard not responding on port 3000",
+    "action": "pm2 restart mission-control",
+    "result": "restarted"
+  },
+  {
+    "timestamp": "2026-04-02T18:40:39.790076+00:00",
+    "type": "auto_fix",
+    "bot": "mission-control",
+    "issue": "Dashboard not responding on port 3000",
+    "action": "pm2 restart mission-control",
+    "result": "restarted"
+  },
+  {
+    "timestamp": "2026-04-02T18:45:45.132633+00:00",
+    "type": "auto_fix",
+    "bot": "mission-control",
+    "issue": "Dashboard not responding on port 3000",
+    "action": "pm2 restart mission-control",
+    "result": "restarted"
+  },
+  {
+    "timestamp": "2026-04-02T18:50:46.208000+00:00",
+    "type": "log_error_detected",
+    "bot": "telegram-listener",
+    "error_key": "rate_limit",
+    "snippet": "ebase] Poll error: \n\u001b[31m1|telegram | \u001b[39m[Firebase] Poll error: \n\u001b[31m1|telegram | \u001b[39m[Firebase] Poll error: \n\u001b[31m1|telegram | \u001b[39m[Firebase] Poll error: \n\u001b[31m1|telegram | \u001b[39m[Firebase] Poll error: \n\u001b[31m1|telegram | \u001b[39m[Firebase] Poll error: \n\u001b[31m1|telegram | \u001b[39m[Firebase] Poll error:"
+  },
+  {
+    "timestamp": "2026-04-02T18:50:51.888274+00:00",
+    "type": "auto_fix",
+    "bot": "mission-control",
+    "issue": "Dashboard not responding on port 3000",
+    "action": "pm2 restart mission-control",
+    "result": "restarted"
+  },
+  {
+    "timestamp": "2026-04-02T18:55:56.053778+00:00",
+    "type": "auto_fix",
+    "bot": "mission-control",
+    "issue": "Dashboard not responding on port 3000",
+    "action": "pm2 restart mission-control",
+    "result": "restarted"
+  },
+  {
+    "timestamp": "2026-04-02T19:01:00.093809+00:00",
+    "type": "auto_fix",
+    "bot": "mission-control",
+    "issue": "Dashboard not responding on port 3000",
+    "action": "pm2 restart mission-control",
+    "result": "restarted"
+  },
+  {
+    "timestamp": "2026-04-02T19:06:04.601653+00:00",
+    "type": "auto_fix",
+    "bot": "mission-control",
+    "issue": "Dashboard not responding on port 3000",
+    "action": "pm2 restart mission-control",
+    "result": "restarted"
+  },
+  {
+    "timestamp": "2026-04-02T19:11:12.182114+00:00",
+    "type": "auto_fix",
+    "bot": "mission-control",
+    "issue": "Dashboard not responding on port 3000",
+    "action": "pm2 restart mission-control",
+    "result": "restarted"
+  },
+  {
+    "timestamp": "2026-04-02T19:16:16.305657+00:00",
+    "type": "auto_fix",
+    "bot": "mission-control",
+    "issue": "Dashboard not responding on port 3000",
+    "action": "pm2 restart mission-control",
+    "result": "restarted"
+  },
+  {
+    "timestamp": "2026-04-02T19:21:20.095924+00:00",
+    "type": "auto_fix",
+    "bot": "mission-control",
+    "issue": "Dashboard not responding on port 3000",
+    "action": "pm2 restart mission-control",
+    "result": "restarted"
+  },
+  {
+    "timestamp": "2026-04-02T19:26:24.278697+00:00",
+    "type": "auto_fix",
+    "bot": "mission-control",
+    "issue": "Dashboard not responding on port 3000",
+    "action": "pm2 restart mission-control",
+    "result": "restarted"
+  },
+  {
+    "timestamp": "2026-04-02T19:31:31.098213+00:00",
+    "type": "auto_fix",
+    "bot": "mission-control",
+    "issue": "Dashboard not responding on port 3000",
+    "action": "pm2 restart mission-control",
+    "result": "restarted"
+  },
+  {
+    "timestamp": "2026-04-02T19:36:41.804637+00:00",
+    "type": "auto_fix",
+    "bot": "mission-control",
+    "issue": "Dashboard not responding on port 3000",
+    "action": "pm2 restart mission-control",
+    "result": "restarted"
+  },
+  {
+    "timestamp": "2026-04-02T19:41:46.264624+00:00",
+    "type": "auto_fix",
+    "bot": "mission-control",
+    "issue": "Dashboard not responding on port 3000",
+    "action": "pm2 restart mission-control",
+    "result": "restarted"
+  },
+  {
+    "timestamp": "2026-04-02T19:46:50.533795+00:00",
+    "type": "auto_fix",
+    "bot": "mission-control",
+    "issue": "Dashboard not responding on port 3000",
+    "action": "pm2 restart mission-control",
+    "result": "restarted"
+  },
+  {
+    "timestamp": "2026-04-02T19:51:51.913295+00:00",
+    "type": "log_error_detected",
+    "bot": "telegram-listener",
+    "error_key": "rate_limit",
+    "snippet": "ebase] Poll error: \n\u001b[31m1|telegram | \u001b[39m[Firebase] Poll error: \n\u001b[31m1|telegram | \u001b[39m[Firebase] Poll error: \n\u001b[31m1|telegram | \u001b[39m[Firebase] Poll error: \n\u001b[31m1|telegram | \u001b[39m[Firebase] Poll error: \n\u001b[31m1|telegram | \u001b[39m[Firebase] Poll error: \n\u001b[31m1|telegram | \u001b[39m[Firebase] Poll error:"
+  },
+  {
+    "timestamp": "2026-04-02T19:51:55.828742+00:00",
+    "type": "auto_fix",
+    "bot": "mission-control",
+    "issue": "Dashboard not responding on port 3000",
+    "action": "pm2 restart mission-control",
+    "result": "restarted"
+  },
+  {
+    "timestamp": "2026-04-02T19:57:00.522103+00:00",
+    "type": "auto_fix",
+    "bot": "mission-control",
+    "issue": "Dashboard not responding on port 3000",
+    "action": "pm2 restart mission-control",
+    "result": "restarted"
+  },
+  {
+    "timestamp": "2026-04-02T20:02:04.327799+00:00",
+    "type": "auto_fix",
+    "bot": "mission-control",
+    "issue": "Dashboard not responding on port 3000",
+    "action": "pm2 restart mission-control",
+    "result": "restarted"
+  },
+  {
+    "timestamp": "2026-04-02T20:07:10.674739+00:00",
+    "type": "auto_fix",
+    "bot": "mission-control",
+    "issue": "Dashboard not responding on port 3000",
+    "action": "pm2 restart mission-control",
+    "result": "restarted"
+  },
+  {
+    "timestamp": "2026-04-02T20:07:19.106186+00:00",
+    "type": "api_down",
+    "service": "Yahoo"
+  },
+  {
+    "timestamp": "2026-04-02T20:12:23.944874+00:00",
+    "type": "auto_fix",
+    "bot": "mission-control",
+    "issue": "Dashboard not responding on port 3000",
+    "action": "pm2 restart mission-control",
+    "result": "restarted"
+  },
+  {
+    "timestamp": "2026-04-02T20:17:28.074646+00:00",
+    "type": "auto_fix",
+    "bot": "mission-control",
+    "issue": "Dashboard not responding on port 3000",
+    "action": "pm2 restart mission-control",
+    "result": "restarted"
+  },
+  {
+    "timestamp": "2026-04-02T20:22:34.054881+00:00",
+    "type": "auto_fix",
+    "bot": "mission-control",
+    "issue": "Dashboard not responding on port 3000",
+    "action": "pm2 restart mission-control",
+    "result": "restarted"
+  },
+  {
+    "timestamp": "2026-04-02T20:27:38.501675+00:00",
+    "type": "auto_fix",
+    "bot": "mission-control",
+    "issue": "Dashboard not responding on port 3000",
+    "action": "pm2 restart mission-control",
+    "result": "restarted"
+  },
+  {
+    "timestamp": "2026-04-02T20:32:42.789821+00:00",
+    "type": "auto_fix",
+    "bot": "mission-control",
+    "issue": "Dashboard not responding on port 3000",
+    "action": "pm2 restart mission-control",
+    "result": "restarted"
+  },
+  {
+    "timestamp": "2026-04-02T20:37:47.504672+00:00",
+    "type": "auto_fix",
+    "bot": "mission-control",
+    "issue": "Dashboard not responding on port 3000",
+    "action": "pm2 restart mission-control",
+    "result": "restarted"
+  },
+  {
+    "timestamp": "2026-04-02T20:42:53.401373+00:00",
+    "type": "auto_fix",
+    "bot": "mission-control",
+    "issue": "Dashboard not responding on port 3000",
+    "action": "pm2 restart mission-control",
+    "result": "restarted"
+  },
+  {
+    "timestamp": "2026-04-02T20:47:57.294851+00:00",
+    "type": "auto_fix",
+    "bot": "mission-control",
+    "issue": "Dashboard not responding on port 3000",
+    "action": "pm2 restart mission-control",
+    "result": "restarted"
+  },
+  {
+    "timestamp": "2026-04-02T20:52:58.459004+00:00",
+    "type": "log_error_detected",
+    "bot": "telegram-listener",
+    "error_key": "rate_limit",
+    "snippet": "ebase] Poll error: \n\u001b[31m1|telegram | \u001b[39m[Firebase] Poll error: \n\u001b[31m1|telegram | \u001b[39m[Firebase] Poll error: \n\u001b[31m1|telegram | \u001b[39m[Firebase] Poll error: \n\u001b[31m1|telegram | \u001b[39m[Firebase] Poll error: \n\u001b[31m1|telegram | \u001b[39m[Firebase] Poll error: \n\u001b[31m1|telegram | \u001b[39m[Firebase] Poll error:"
+  },
+  {
+    "timestamp": "2026-04-02T20:53:02.615098+00:00",
+    "type": "auto_fix",
+    "bot": "mission-control",
+    "issue": "Dashboard not responding on port 3000",
+    "action": "pm2 restart mission-control",
+    "result": "restarted"
+  },
+  {
+    "timestamp": "2026-04-02T20:58:11.772775+00:00",
+    "type": "auto_fix",
+    "bot": "mission-control",
+    "issue": "Dashboard not responding on port 3000",
+    "action": "pm2 restart mission-control",
+    "result": "restarted"
+  },
+  {
+    "timestamp": "2026-04-02T21:03:16.480230+00:00",
+    "type": "auto_fix",
+    "bot": "mission-control",
+    "issue": "Dashboard not responding on port 3000",
+    "action": "pm2 restart mission-control",
+    "result": "restarted"
+  },
+  {
+    "timestamp": "2026-04-02T21:08:21.416503+00:00",
+    "type": "auto_fix",
+    "bot": "mission-control",
+    "issue": "Dashboard not responding on port 3000",
+    "action": "pm2 restart mission-control",
+    "result": "restarted"
+  },
+  {
+    "timestamp": "2026-04-02T21:13:25.716793+00:00",
+    "type": "auto_fix",
+    "bot": "mission-control",
+    "issue": "Dashboard not responding on port 3000",
+    "action": "pm2 restart mission-control",
+    "result": "restarted"
+  },
+  {
+    "timestamp": "2026-04-02T21:18:29.734546+00:00",
+    "type": "auto_fix",
+    "bot": "mission-control",
+    "issue": "Dashboard not responding on port 3000",
+    "action": "pm2 restart mission-control",
+    "result": "restarted"
+  },
+  {
+    "timestamp": "2026-04-02T21:23:34.078665+00:00",
+    "type": "auto_fix",
+    "bot": "mission-control",
+    "issue": "Dashboard not responding on port 3000",
+    "action": "pm2 restart mission-control",
+    "result": "restarted"
+  },
+  {
+    "timestamp": "2026-04-02T21:28:38.899757+00:00",
+    "type": "auto_fix",
+    "bot": "mission-control",
+    "issue": "Dashboard not responding on port 3000",
+    "action": "pm2 restart mission-control",
+    "result": "restarted"
+  },
+  {
+    "timestamp": "2026-04-02T21:33:43.170141+00:00",
+    "type": "auto_fix",
+    "bot": "mission-control",
+    "issue": "Dashboard not responding on port 3000",
+    "action": "pm2 restart mission-control",
+    "result": "restarted"
+  },
+  {
+    "timestamp": "2026-04-02T21:38:47.949664+00:00",
+    "type": "auto_fix",
+    "bot": "mission-control",
+    "issue": "Dashboard not responding on port 3000",
+    "action": "pm2 restart mission-control",
+    "result": "restarted"
+  },
+  {
+    "timestamp": "2026-04-02T21:43:52.368893+00:00",
+    "type": "auto_fix",
+    "bot": "mission-control",
+    "issue": "Dashboard not responding on port 3000",
+    "action": "pm2 restart mission-control",
+    "result": "restarted"
+  },
+  {
+    "timestamp": "2026-04-02T21:48:57.050114+00:00",
+    "type": "auto_fix",
+    "bot": "mission-control",
+    "issue": "Dashboard not responding on port 3000",
+    "action": "pm2 restart mission-control",
+    "result": "restarted"
+  },
+  {
+    "timestamp": "2026-04-02T21:53:58.385534+00:00",
+    "type": "log_error_detected",
+    "bot": "telegram-listener",
+    "error_key": "rate_limit",
+    "snippet": "ebase] Poll error: \n\u001b[31m1|telegram | \u001b[39m[Firebase] Poll error: \n\u001b[31m1|telegram | \u001b[39m[Firebase] Poll error: \n\u001b[31m1|telegram | \u001b[39m[Firebase] Poll error: \n\u001b[31m1|telegram | \u001b[39m[Firebase] Poll error: \n\u001b[31m1|telegram | \u001b[39m[Firebase] Poll error: \n\u001b[31m1|telegram | \u001b[39m[Firebase] Poll error:"
+  },
+  {
+    "timestamp": "2026-04-02T21:54:01.812121+00:00",
+    "type": "auto_fix",
+    "bot": "mission-control",
+    "issue": "Dashboard not responding on port 3000",
+    "action": "pm2 restart mission-control",
+    "result": "restarted"
+  },
+  {
+    "timestamp": "2026-04-02T21:59:06.786550+00:00",
+    "type": "auto_fix",
+    "bot": "mission-control",
+    "issue": "Dashboard not responding on port 3000",
+    "action": "pm2 restart mission-control",
+    "result": "restarted"
+  },
+  {
+    "timestamp": "2026-04-02T22:04:11.364638+00:00",
+    "type": "auto_fix",
+    "bot": "mission-control",
+    "issue": "Dashboard not responding on port 3000",
+    "action": "pm2 restart mission-control",
+    "result": "restarted"
+  },
+  {
+    "timestamp": "2026-04-02T22:09:17.342649+00:00",
+    "type": "auto_fix",
+    "bot": "mission-control",
+    "issue": "Dashboard not responding on port 3000",
+    "action": "pm2 restart mission-control",
+    "result": "restarted"
+  },
+  {
+    "timestamp": "2026-04-02T22:14:21.604790+00:00",
+    "type": "auto_fix",
+    "bot": "mission-control",
+    "issue": "Dashboard not responding on port 3000",
+    "action": "pm2 restart mission-control",
+    "result": "restarted"
+  },
+  {
+    "timestamp": "2026-04-02T22:19:25.482770+00:00",
+    "type": "auto_fix",
+    "bot": "mission-control",
+    "issue": "Dashboard not responding on port 3000",
+    "action": "pm2 restart mission-control",
+    "result": "restarted"
+  },
+  {
+    "timestamp": "2026-04-02T22:24:29.707462+00:00",
+    "type": "auto_fix",
+    "bot": "mission-control",
+    "issue": "Dashboard not responding on port 3000",
+    "action": "pm2 restart mission-control",
+    "result": "restarted"
+  },
+  {
+    "timestamp": "2026-04-02T22:29:36.733806+00:00",
+    "type": "auto_fix",
+    "bot": "mission-control",
+    "issue": "Dashboard not responding on port 3000",
+    "action": "pm2 restart mission-control",
+    "result": "restarted"
+  },
+  {
+    "timestamp": "2026-04-02T22:34:40.474661+00:00",
+    "type": "auto_fix",
+    "bot": "mission-control",
+    "issue": "Dashboard not responding on port 3000",
+    "action": "pm2 restart mission-control",
+    "result": "restarted"
+  },
+  {
+    "timestamp": "2026-04-02T22:39:44.756029+00:00",
+    "type": "auto_fix",
+    "bot": "mission-control",
+    "issue": "Dashboard not responding on port 3000",
+    "action": "pm2 restart mission-control",
+    "result": "restarted"
+  },
+  {
+    "timestamp": "2026-04-02T22:44:49.454793+00:00",
+    "type": "auto_fix",
+    "bot": "mission-control",
+    "issue": "Dashboard not responding on port 3000",
+    "action": "pm2 restart mission-control",
+    "result": "restarted"
+  },
+  {
+    "timestamp": "2026-04-02T22:49:53.353804+00:00",
+    "type": "auto_fix",
+    "bot": "mission-control",
+    "issue": "Dashboard not responding on port 3000",
+    "action": "pm2 restart mission-control",
+    "result": "restarted"
+  },
+  {
+    "timestamp": "2026-04-02T22:54:54.610582+00:00",
+    "type": "log_error_detected",
+    "bot": "telegram-listener",
+    "error_key": "rate_limit",
+    "snippet": "gram | \u001b[39m[Firebase] Poll error: \n\u001b[31m1|telegram | \u001b[39m[Firebase] Poll error: \n\u001b[31m1|telegram | \u001b[39m[Firebase] Poll error: \n\u001b[31m1|telegram | \u001b[39m[Firebase] Poll error: \n\u001b[31m1|telegram | \u001b[39mArchive webhook 503: upstream connect error or disconnect/reset before headers. reset reason: remote"
+  },
+  {
+    "timestamp": "2026-04-02T22:54:57.556037+00:00",
+    "type": "auto_fix",
+    "bot": "mission-control",
+    "issue": "Dashboard not responding on port 3000",
+    "action": "pm2 restart mission-control",
+    "result": "restarted"
+  },
+  {
+    "timestamp": "2026-04-02T23:00:04.983467+00:00",
+    "type": "auto_fix",
+    "bot": "mission-control",
+    "issue": "Dashboard not responding on port 3000",
+    "action": "pm2 restart mission-control",
+    "result": "restarted"
+  },
+  {
+    "timestamp": "2026-04-02T23:05:10.516973+00:00",
+    "type": "auto_fix",
+    "bot": "mission-control",
+    "issue": "Dashboard not responding on port 3000",
+    "action": "pm2 restart mission-control",
+    "result": "restarted"
+  },
+  {
+    "timestamp": "2026-04-02T23:10:16.788404+00:00",
+    "type": "auto_fix",
+    "bot": "mission-control",
+    "issue": "Dashboard not responding on port 3000",
+    "action": "pm2 restart mission-control",
+    "result": "restarted"
+  },
+  {
+    "timestamp": "2026-04-02T23:15:21.036970+00:00",
+    "type": "auto_fix",
+    "bot": "mission-control",
+    "issue": "Dashboard not responding on port 3000",
+    "action": "pm2 restart mission-control",
+    "result": "restarted"
+  },
+  {
+    "timestamp": "2026-04-02T23:20:25.278064+00:00",
+    "type": "auto_fix",
+    "bot": "mission-control",
+    "issue": "Dashboard not responding on port 3000",
+    "action": "pm2 restart mission-control",
+    "result": "restarted"
+  },
+  {
+    "timestamp": "2026-04-02T23:25:31.367044+00:00",
+    "type": "auto_fix",
+    "bot": "mission-control",
+    "issue": "Dashboard not responding on port 3000",
+    "action": "pm2 restart mission-control",
+    "result": "restarted"
+  },
+  {
+    "timestamp": "2026-04-02T23:30:35.629011+00:00",
+    "type": "auto_fix",
+    "bot": "mission-control",
+    "issue": "Dashboard not responding on port 3000",
+    "action": "pm2 restart mission-control",
+    "result": "restarted"
+  },
+  {
+    "timestamp": "2026-04-02T23:35:39.491781+00:00",
+    "type": "auto_fix",
+    "bot": "mission-control",
+    "issue": "Dashboard not responding on port 3000",
+    "action": "pm2 restart mission-control",
+    "result": "restarted"
+  },
+  {
+    "timestamp": "2026-04-02T23:40:43.766673+00:00",
+    "type": "auto_fix",
+    "bot": "mission-control",
+    "issue": "Dashboard not responding on port 3000",
+    "action": "pm2 restart mission-control",
+    "result": "restarted"
+  },
+  {
+    "timestamp": "2026-04-02T23:45:49.613384+00:00",
+    "type": "auto_fix",
+    "bot": "mission-control",
+    "issue": "Dashboard not responding on port 3000",
+    "action": "pm2 restart mission-control",
+    "result": "restarted"
+  },
+  {
+    "timestamp": "2026-04-02T23:50:55.750781+00:00",
+    "type": "auto_fix",
+    "bot": "mission-control",
+    "issue": "Dashboard not responding on port 3000",
+    "action": "pm2 restart mission-control",
+    "result": "restarted"
+  },
+  {
+    "timestamp": "2026-04-02T23:55:57.058601+00:00",
+    "type": "log_error_detected",
+    "bot": "telegram-listener",
+    "error_key": "rate_limit",
+    "snippet": "gram | \u001b[39m[Firebase] Poll error: \n\u001b[31m1|telegram | \u001b[39m[Firebase] Poll error: \n\u001b[31m1|telegram | \u001b[39m[Firebase] Poll error: \n\u001b[31m1|telegram | \u001b[39m[Firebase] Poll error: \n\u001b[31m1|telegram | \u001b[39mArchive webhook 503: upstream connect error or disconnect/reset before headers. reset reason: remote"
+  },
+  {
+    "timestamp": "2026-04-02T23:56:00.317179+00:00",
+    "type": "auto_fix",
+    "bot": "mission-control",
+    "issue": "Dashboard not responding on port 3000",
+    "action": "pm2 restart mission-control",
+    "result": "restarted"
+  },
+  {
+    "timestamp": "2026-04-03T00:01:04.632072+00:00",
+    "type": "auto_fix",
+    "bot": "mission-control",
+    "issue": "Dashboard not responding on port 3000",
+    "action": "pm2 restart mission-control",
+    "result": "restarted"
+  },
+  {
+    "timestamp": "2026-04-03T00:06:15.756166+00:00",
+    "type": "auto_fix",
+    "bot": "mission-control",
+    "issue": "Dashboard not responding on port 3000",
+    "action": "pm2 restart mission-control",
+    "result": "restarted"
+  },
+  {
+    "timestamp": "2026-04-03T00:11:25.071653+00:00",
+    "type": "auto_fix",
+    "bot": "mission-control",
+    "issue": "Dashboard not responding on port 3000",
+    "action": "pm2 restart mission-control",
+    "result": "restarted"
+  },
+  {
+    "timestamp": "2026-04-03T00:16:29.177687+00:00",
+    "type": "auto_fix",
+    "bot": "mission-control",
+    "issue": "Dashboard not responding on port 3000",
+    "action": "pm2 restart mission-control",
+    "result": "restarted"
+  },
+  {
+    "timestamp": "2026-04-03T00:21:33.425888+00:00",
+    "type": "auto_fix",
+    "bot": "mission-control",
+    "issue": "Dashboard not responding on port 3000",
+    "action": "pm2 restart mission-control",
+    "result": "restarted"
+  },
+  {
+    "timestamp": "2026-04-03T00:26:37.086075+00:00",
+    "type": "log_error_detected",
+    "bot": "mission-control",
+    "error_key": "file_not_found",
+    "snippet": "xt/dist/server/lib/start-server.js:249:36) {\n\u001b[31m23|mission | \u001b[39m  errno: -2,\n\u001b[31m23|mission | \u001b[39m  code: 'ENOENT',\n\u001b[31m23|mission | \u001b[39m  syscall: 'open',\n\u001b[31m23|mission | \u001b[39m  path: '/home/ubuntu/.openclaw/workspace/mission-control/.next/prerender-manifest.json'\n\u001b[31m23|mission | \u001b[39m}"
+  },
+  {
+    "timestamp": "2026-04-03T00:26:37.903629+00:00",
+    "type": "auto_fix",
+    "bot": "mission-control",
+    "issue": "Dashboard not responding on port 3000",
+    "action": "pm2 restart mission-control",
+    "result": "restarted"
+  },
+  {
+    "timestamp": "2026-04-03T00:31:42.812968+00:00",
+    "type": "auto_fix",
+    "bot": "mission-control",
+    "issue": "Dashboard not responding on port 3000",
+    "action": "pm2 restart mission-control",
+    "result": "restarted"
+  },
+  {
+    "timestamp": "2026-04-03T00:34:11.445590+00:00",
+    "type": "log_error_detected",
+    "bot": "btc-bias-scorer",
+    "error_key": "rate_limit",
+    "snippet": " File \"/usr/lib/python3.10/types.py\", line 46, in <module>\n\u001b[31m13|btc-bia | \u001b[39m    WrapperDescriptorType = type(object.__init__)\n\u001b[31m13|btc-bia | \u001b[39m  [WARN] GET https://api.coingecko.com/api/v3/global failed: 429 Client Error: Too Many Requests for url: https://api.coingecko.com/api/v3/global"
+  },
+  {
+    "timestamp": "2026-04-03T00:34:16.098262+00:00",
+    "type": "log_error_detected",
+    "bot": "mission-control",
+    "error_key": "file_not_found",
+    "snippet": "xt/dist/server/lib/start-server.js:249:36) {\n\u001b[31m23|mission | \u001b[39m  errno: -2,\n\u001b[31m23|mission | \u001b[39m  code: 'ENOENT',\n\u001b[31m23|mission | \u001b[39m  syscall: 'open',\n\u001b[31m23|mission | \u001b[39m  path: '/home/ubuntu/.openclaw/workspace/mission-control/.next/prerender-manifest.json'\n\u001b[31m23|mission | \u001b[39m}"
+  },
+  {
+    "timestamp": "2026-04-03T00:34:17.314653+00:00",
+    "type": "auto_fix",
+    "bot": "mission-control",
+    "issue": "Dashboard not responding on port 3000",
+    "action": "pm2 restart mission-control",
+    "result": "restarted"
+  },
+  {
+    "timestamp": "2026-04-03T00:39:25.635053+00:00",
+    "type": "log_error_detected",
+    "bot": "supertrend-optimizer",
+    "error_key": "rate_limit",
+    "snippet": "actor=1.5 train=100 score=45.8 wr=52% pf=0.90\n\u001b[31m21|supertr | \u001b[39m2026-04-03 00:39:11 [SUPERTREND]     Volatility: LOW (ATR=0.0070, centroid=0.0100)\n\u001b[31m21|supertr | \u001b[39m2026-04-03 00:39:14 [SUPERTREND]   Optimizing NVDL...\n\u001b[31m21|supertr | \u001b[39m2026-04-03 00:39:14 [SUPERTREND]     300 candles"
+  },
+  {
+    "timestamp": "2026-04-03T00:39:27.186678+00:00",
+    "type": "auto_fix",
+    "bot": "mission-control",
+    "issue": "Dashboard not responding on port 3000",
+    "action": "pm2 restart mission-control",
+    "result": "restarted"
+  },
+  {
+    "timestamp": "2026-04-03T00:44:33.478135+00:00",
+    "type": "auto_fix",
+    "bot": "mission-control",
+    "issue": "Dashboard not responding on port 3000",
+    "action": "pm2 restart mission-control",
+    "result": "restarted"
+  },
+  {
+    "timestamp": "2026-04-03T00:49:37.434657+00:00",
+    "type": "auto_fix",
+    "bot": "mission-control",
+    "issue": "Dashboard not responding on port 3000",
+    "action": "pm2 restart mission-control",
+    "result": "restarted"
+  },
+  {
+    "timestamp": "2026-04-03T00:54:43.623032+00:00",
+    "type": "auto_fix",
+    "bot": "mission-control",
+    "issue": "Dashboard not responding on port 3000",
+    "action": "pm2 restart mission-control",
+    "result": "restarted"
+  },
+  {
+    "timestamp": "2026-04-03T00:59:49.279856+00:00",
+    "type": "auto_fix",
+    "bot": "mission-control",
+    "issue": "Dashboard not responding on port 3000",
+    "action": "pm2 restart mission-control",
+    "result": "restarted"
+  },
+  {
+    "timestamp": "2026-04-03T01:04:54.051242+00:00",
+    "type": "auto_fix",
+    "bot": "mission-control",
+    "issue": "Dashboard not responding on port 3000",
+    "action": "pm2 restart mission-control",
+    "result": "restarted"
+  },
+  {
+    "timestamp": "2026-04-03T01:10:00.629211+00:00",
+    "type": "auto_fix",
+    "bot": "mission-control",
+    "issue": "Dashboard not responding on port 3000",
+    "action": "pm2 restart mission-control",
+    "result": "restarted"
+  },
+  {
+    "timestamp": "2026-04-03T01:15:05.165081+00:00",
+    "type": "auto_fix",
+    "bot": "mission-control",
+    "issue": "Dashboard not responding on port 3000",
+    "action": "pm2 restart mission-control",
+    "result": "restarted"
+  },
+  {
+    "timestamp": "2026-04-03T01:20:13.939539+00:00",
+    "type": "auto_fix",
+    "bot": "mission-control",
+    "issue": "Dashboard not responding on port 3000",
+    "action": "pm2 restart mission-control",
+    "result": "restarted"
+  },
+  {
+    "timestamp": "2026-04-03T01:25:23.250432+00:00",
+    "type": "auto_fix",
+    "bot": "mission-control",
+    "issue": "Dashboard not responding on port 3000",
+    "action": "pm2 restart mission-control",
+    "result": "restarted"
+  },
+  {
+    "timestamp": "2026-04-03T01:30:27.237823+00:00",
+    "type": "auto_fix",
+    "bot": "mission-control",
+    "issue": "Dashboard not responding on port 3000",
+    "action": "pm2 restart mission-control",
+    "result": "restarted"
+  },
+  {
+    "timestamp": "2026-04-03T01:35:39.557721+00:00",
+    "type": "log_error_detected",
+    "bot": "mission-control",
+    "error_key": "file_not_found",
+    "snippet": "xt/dist/server/lib/start-server.js:249:36) {\n\u001b[31m23|mission | \u001b[39m  errno: -2,\n\u001b[31m23|mission | \u001b[39m  code: 'ENOENT',\n\u001b[31m23|mission | \u001b[39m  syscall: 'open',\n\u001b[31m23|mission | \u001b[39m  path: '/home/ubuntu/.openclaw/workspace/mission-control/.next/prerender-manifest.json'\n\u001b[31m23|mission | \u001b[39m}"
+  },
+  {
+    "timestamp": "2026-04-03T01:35:40.504662+00:00",
+    "type": "auto_fix",
+    "bot": "mission-control",
+    "issue": "Dashboard not responding on port 3000",
+    "action": "pm2 restart mission-control",
+    "result": "restarted"
+  },
+  {
+    "timestamp": "2026-04-03T01:40:45.072571+00:00",
+    "type": "auto_fix",
+    "bot": "mission-control",
+    "issue": "Dashboard not responding on port 3000",
+    "action": "pm2 restart mission-control",
+    "result": "restarted"
+  },
+  {
+    "timestamp": "2026-04-03T01:45:48.911302+00:00",
+    "type": "auto_fix",
+    "bot": "mission-control",
+    "issue": "Dashboard not responding on port 3000",
+    "action": "pm2 restart mission-control",
+    "result": "restarted"
+  },
+  {
+    "timestamp": "2026-04-03T01:50:53.773056+00:00",
+    "type": "auto_fix",
+    "bot": "mission-control",
+    "issue": "Dashboard not responding on port 3000",
+    "action": "pm2 restart mission-control",
+    "result": "restarted"
+  },
+  {
+    "timestamp": "2026-04-03T01:56:07.607041+00:00",
+    "type": "auto_fix",
+    "bot": "mission-control",
+    "issue": "Dashboard not responding on port 3000",
+    "action": "pm2 restart mission-control",
+    "result": "restarted"
+  },
+  {
+    "timestamp": "2026-04-03T02:01:13.768616+00:00",
+    "type": "auto_fix",
+    "bot": "mission-control",
+    "issue": "Dashboard not responding on port 3000",
+    "action": "pm2 restart mission-control",
+    "result": "restarted"
+  },
+  {
+    "timestamp": "2026-04-03T02:06:21.755980+00:00",
+    "type": "auto_fix",
+    "bot": "mission-control",
+    "issue": "Dashboard not responding on port 3000",
+    "action": "pm2 restart mission-control",
+    "result": "restarted"
+  },
+  {
+    "timestamp": "2026-04-03T02:11:26.121949+00:00",
+    "type": "auto_fix",
+    "bot": "mission-control",
+    "issue": "Dashboard not responding on port 3000",
+    "action": "pm2 restart mission-control",
+    "result": "restarted"
+  },
+  {
+    "timestamp": "2026-04-03T02:16:29.967668+00:00",
+    "type": "auto_fix",
+    "bot": "mission-control",
+    "issue": "Dashboard not responding on port 3000",
+    "action": "pm2 restart mission-control",
+    "result": "restarted"
+  },
+  {
+    "timestamp": "2026-04-03T02:21:39.139300+00:00",
+    "type": "auto_fix",
+    "bot": "mission-control",
+    "issue": "Dashboard not responding on port 3000",
+    "action": "pm2 restart mission-control",
+    "result": "restarted"
+  },
+  {
+    "timestamp": "2026-04-03T02:26:44.930310+00:00",
+    "type": "auto_fix",
+    "bot": "mission-control",
+    "issue": "Dashboard not responding on port 3000",
+    "action": "pm2 restart mission-control",
+    "result": "restarted"
+  },
+  {
+    "timestamp": "2026-04-03T02:31:51.736672+00:00",
+    "type": "auto_fix",
+    "bot": "mission-control",
+    "issue": "Dashboard not responding on port 3000",
+    "action": "pm2 restart mission-control",
+    "result": "restarted"
+  },
+  {
+    "timestamp": "2026-04-03T02:36:55.958450+00:00",
+    "type": "log_error_detected",
+    "bot": "mission-control",
+    "error_key": "file_not_found",
+    "snippet": "xt/dist/server/lib/start-server.js:249:36) {\n\u001b[31m23|mission | \u001b[39m  errno: -2,\n\u001b[31m23|mission | \u001b[39m  code: 'ENOENT',\n\u001b[31m23|mission | \u001b[39m  syscall: 'open',\n\u001b[31m23|mission | \u001b[39m  path: '/home/ubuntu/.openclaw/workspace/mission-control/.next/prerender-manifest.json'\n\u001b[31m23|mission | \u001b[39m}"
+  },
+  {
+    "timestamp": "2026-04-03T02:36:56.631939+00:00",
+    "type": "auto_fix",
+    "bot": "mission-control",
+    "issue": "Dashboard not responding on port 3000",
+    "action": "pm2 restart mission-control",
+    "result": "restarted"
+  },
+  {
+    "timestamp": "2026-04-03T02:42:01.037824+00:00",
+    "type": "auto_fix",
+    "bot": "mission-control",
+    "issue": "Dashboard not responding on port 3000",
+    "action": "pm2 restart mission-control",
+    "result": "restarted"
+  },
+  {
+    "timestamp": "2026-04-03T02:47:05.668283+00:00",
+    "type": "auto_fix",
+    "bot": "mission-control",
+    "issue": "Dashboard not responding on port 3000",
+    "action": "pm2 restart mission-control",
+    "result": "restarted"
+  },
+  {
+    "timestamp": "2026-04-03T02:52:11.121273+00:00",
+    "type": "auto_fix",
+    "bot": "mission-control",
+    "issue": "Dashboard not responding on port 3000",
+    "action": "pm2 restart mission-control",
+    "result": "restarted"
+  },
+  {
+    "timestamp": "2026-04-03T02:57:15.423993+00:00",
+    "type": "auto_fix",
+    "bot": "mission-control",
+    "issue": "Dashboard not responding on port 3000",
+    "action": "pm2 restart mission-control",
+    "result": "restarted"
+  },
+  {
+    "timestamp": "2026-04-03T03:02:23.849665+00:00",
+    "type": "auto_fix",
+    "bot": "mission-control",
+    "issue": "Dashboard not responding on port 3000",
+    "action": "pm2 restart mission-control",
+    "result": "restarted"
+  },
+  {
+    "timestamp": "2026-04-03T03:07:30.399036+00:00",
+    "type": "auto_fix",
+    "bot": "mission-control",
+    "issue": "Dashboard not responding on port 3000",
+    "action": "pm2 restart mission-control",
+    "result": "restarted"
+  },
+  {
+    "timestamp": "2026-04-03T03:12:42.340015+00:00",
+    "type": "auto_fix",
+    "bot": "mission-control",
+    "issue": "Dashboard not responding on port 3000",
+    "action": "pm2 restart mission-control",
+    "result": "restarted"
+  },
+  {
+    "timestamp": "2026-04-03T03:18:04.975312+00:00",
+    "type": "auto_fix",
+    "bot": "mission-control",
+    "issue": "Dashboard not responding on port 3000",
+    "action": "pm2 restart mission-control",
+    "result": "restarted"
+  },
+  {
+    "timestamp": "2026-04-03T03:23:09.941790+00:00",
+    "type": "auto_fix",
+    "bot": "mission-control",
+    "issue": "Dashboard not responding on port 3000",
+    "action": "pm2 restart mission-control",
+    "result": "restarted"
+  },
+  {
+    "timestamp": "2026-04-03T03:28:18.314802+00:00",
+    "type": "auto_fix",
+    "bot": "mission-control",
+    "issue": "Dashboard not responding on port 3000",
+    "action": "pm2 restart mission-control",
+    "result": "restarted"
+  },
+  {
+    "timestamp": "2026-04-03T03:33:22.316862+00:00",
+    "type": "auto_fix",
+    "bot": "mission-control",
+    "issue": "Dashboard not responding on port 3000",
+    "action": "pm2 restart mission-control",
+    "result": "restarted"
+  },
+  {
+    "timestamp": "2026-04-03T03:38:27.858027+00:00",
+    "type": "log_error_detected",
+    "bot": "mission-control",
+    "error_key": "file_not_found",
+    "snippet": "xt/dist/server/lib/start-server.js:249:36) {\n\u001b[31m23|mission | \u001b[39m  errno: -2,\n\u001b[31m23|mission | \u001b[39m  code: 'ENOENT',\n\u001b[31m23|mission | \u001b[39m  syscall: 'open',\n\u001b[31m23|mission | \u001b[39m  path: '/home/ubuntu/.openclaw/workspace/mission-control/.next/prerender-manifest.json'\n\u001b[31m23|mission | \u001b[39m}"
+  },
+  {
+    "timestamp": "2026-04-03T03:38:28.689660+00:00",
+    "type": "auto_fix",
+    "bot": "mission-control",
+    "issue": "Dashboard not responding on port 3000",
+    "action": "pm2 restart mission-control",
+    "result": "restarted"
+  },
+  {
+    "timestamp": "2026-04-03T03:43:33.360714+00:00",
+    "type": "auto_fix",
+    "bot": "mission-control",
+    "issue": "Dashboard not responding on port 3000",
+    "action": "pm2 restart mission-control",
+    "result": "restarted"
+  },
+  {
+    "timestamp": "2026-04-03T03:48:37.587584+00:00",
+    "type": "auto_fix",
+    "bot": "mission-control",
+    "issue": "Dashboard not responding on port 3000",
+    "action": "pm2 restart mission-control",
+    "result": "restarted"
+  },
+  {
+    "timestamp": "2026-04-03T03:53:44.009484+00:00",
+    "type": "auto_fix",
+    "bot": "mission-control",
+    "issue": "Dashboard not responding on port 3000",
+    "action": "pm2 restart mission-control",
+    "result": "restarted"
+  },
+  {
+    "timestamp": "2026-04-03T03:57:44.461605+00:00",
+    "type": "log_error_detected",
+    "bot": "mission-control",
+    "error_key": "file_not_found",
+    "snippet": "xt/dist/server/lib/start-server.js:249:36) {\n\u001b[31m23|mission | \u001b[39m  errno: -2,\n\u001b[31m23|mission | \u001b[39m  code: 'ENOENT',\n\u001b[31m23|mission | \u001b[39m  syscall: 'open',\n\u001b[31m23|mission | \u001b[39m  path: '/home/ubuntu/.openclaw/workspace/mission-control/.next/prerender-manifest.json'\n\u001b[31m23|mission | \u001b[39m}"
+  },
+  {
+    "timestamp": "2026-04-03T04:58:41.054954+00:00",
+    "type": "log_error_detected",
+    "bot": "telegram-listener",
+    "error_key": "rate_limit",
+    "snippet": ")\n\u001b[31m1|telegram | \u001b[39m  File \"/usr/lib/python3.10/selectors.py\", line 469, in select\n\u001b[31m1|telegram | \u001b[39m    fd_event_list = self._selector.poll(timeout, max_ev)\n\u001b[31m1|telegram | \u001b[39m  [WARN] Discord webhook 429: {\"message\": \"You are being rate limited.\", \"retry_after\": 0.3, \"global\": false}"
+  },
+  {
+    "timestamp": "2026-04-03T04:58:43.607094+00:00",
+    "type": "log_error_detected",
+    "bot": "mission-control",
+    "error_key": "file_not_found",
+    "snippet": "xt/dist/server/lib/start-server.js:249:36) {\n\u001b[31m23|mission | \u001b[39m  errno: -2,\n\u001b[31m23|mission | \u001b[39m  code: 'ENOENT',\n\u001b[31m23|mission | \u001b[39m  syscall: 'open',\n\u001b[31m23|mission | \u001b[39m  path: '/home/ubuntu/.openclaw/workspace/mission-control/.next/prerender-manifest.json'\n\u001b[31m23|mission | \u001b[39m}"
+  },
+  {
+    "timestamp": "2026-04-03T05:59:38.508251+00:00",
+    "type": "log_error_detected",
+    "bot": "telegram-listener",
+    "error_key": "rate_limit",
+    "snippet": "te limited.\", \"retry_after\": 0.3, \"global\": false}\n\u001b[31m1|telegram | \u001b[39mArchive webhook 429: {\"message\": \"You are being rate limited.\", \"retry_after\": 0.39, \"global\": false}\n\u001b[31m1|telegram | \u001b[39mArchive webhook 429: {\"message\": \"You are being rate limited.\", \"retry_after\": 0.391, \"global\": false"
+  },
+  {
+    "timestamp": "2026-04-03T05:59:42.782708+00:00",
+    "type": "log_error_detected",
+    "bot": "mission-control",
+    "error_key": "file_not_found",
+    "snippet": "xt/dist/server/lib/start-server.js:249:36) {\n\u001b[31m23|mission | \u001b[39m  errno: -2,\n\u001b[31m23|mission | \u001b[39m  code: 'ENOENT',\n\u001b[31m23|mission | \u001b[39m  syscall: 'open',\n\u001b[31m23|mission | \u001b[39m  path: '/home/ubuntu/.openclaw/workspace/mission-control/.next/prerender-manifest.json'\n\u001b[31m23|mission | \u001b[39m}"
+  },
+  {
+    "timestamp": "2026-04-03T07:00:38.173275+00:00",
+    "type": "log_error_detected",
+    "bot": "telegram-listener",
+    "error_key": "rate_limit",
+    "snippet": "te limited.\", \"retry_after\": 0.3, \"global\": false}\n\u001b[31m1|telegram | \u001b[39mArchive webhook 429: {\"message\": \"You are being rate limited.\", \"retry_after\": 0.39, \"global\": false}\n\u001b[31m1|telegram | \u001b[39mArchive webhook 429: {\"message\": \"You are being rate limited.\", \"retry_after\": 0.391, \"global\": false"
+  },
+  {
+    "timestamp": "2026-04-03T07:00:40.921258+00:00",
+    "type": "log_error_detected",
+    "bot": "mission-control",
+    "error_key": "file_not_found",
+    "snippet": "xt/dist/server/lib/start-server.js:249:36) {\n\u001b[31m23|mission | \u001b[39m  errno: -2,\n\u001b[31m23|mission | \u001b[39m  code: 'ENOENT',\n\u001b[31m23|mission | \u001b[39m  syscall: 'open',\n\u001b[31m23|mission | \u001b[39m  path: '/home/ubuntu/.openclaw/workspace/mission-control/.next/prerender-manifest.json'\n\u001b[31m23|mission | \u001b[39m}"
+  },
+  {
+    "timestamp": "2026-04-03T08:01:33.911743+00:00",
+    "type": "log_error_detected",
+    "bot": "telegram-listener",
+    "error_key": "rate_limit",
+    "snippet": "te limited.\", \"retry_after\": 0.3, \"global\": false}\n\u001b[31m1|telegram | \u001b[39mArchive webhook 429: {\"message\": \"You are being rate limited.\", \"retry_after\": 0.39, \"global\": false}\n\u001b[31m1|telegram | \u001b[39mArchive webhook 429: {\"message\": \"You are being rate limited.\", \"retry_after\": 0.391, \"global\": false"
+  },
+  {
+    "timestamp": "2026-04-03T08:01:36.572166+00:00",
+    "type": "log_error_detected",
+    "bot": "mission-control",
+    "error_key": "file_not_found",
+    "snippet": "xt/dist/server/lib/start-server.js:249:36) {\n\u001b[31m23|mission | \u001b[39m  errno: -2,\n\u001b[31m23|mission | \u001b[39m  code: 'ENOENT',\n\u001b[31m23|mission | \u001b[39m  syscall: 'open',\n\u001b[31m23|mission | \u001b[39m  path: '/home/ubuntu/.openclaw/workspace/mission-control/.next/prerender-manifest.json'\n\u001b[31m23|mission | \u001b[39m}"
+  },
+  {
+    "timestamp": "2026-04-03T09:02:30.043500+00:00",
+    "type": "log_error_detected",
+    "bot": "telegram-listener",
+    "error_key": "rate_limit",
+    "snippet": "etry_after\": 0.3, \"global\": false}\n\u001b[31m1|telegram | \u001b[39m  [WARN] Discord webhook 429: {\"message\": \"You are being rate limited.\", \"retry_after\": 0.3, \"global\": false}\n\u001b[31m1|telegram | \u001b[39m  [WARN] Discord webhook 429: {\"message\": \"You are being rate limited.\", \"retry_after\": 0.3, \"global\": false}"
+  },
+  {
+    "timestamp": "2026-04-03T09:02:32.596392+00:00",
+    "type": "log_error_detected",
+    "bot": "mission-control",
+    "error_key": "file_not_found",
+    "snippet": "xt/dist/server/lib/start-server.js:249:36) {\n\u001b[31m23|mission | \u001b[39m  errno: -2,\n\u001b[31m23|mission | \u001b[39m  code: 'ENOENT',\n\u001b[31m23|mission | \u001b[39m  syscall: 'open',\n\u001b[31m23|mission | \u001b[39m  path: '/home/ubuntu/.openclaw/workspace/mission-control/.next/prerender-manifest.json'\n\u001b[31m23|mission | \u001b[39m}"
+  },
+  {
+    "timestamp": "2026-04-03T10:03:26.772703+00:00",
+    "type": "log_error_detected",
+    "bot": "telegram-listener",
+    "error_key": "rate_limit",
+    "snippet": "etry_after\": 0.3, \"global\": false}\n\u001b[31m1|telegram | \u001b[39m  [WARN] Discord webhook 429: {\"message\": \"You are being rate limited.\", \"retry_after\": 0.3, \"global\": false}\n\u001b[31m1|telegram | \u001b[39m  [WARN] Discord webhook 429: {\"message\": \"You are being rate limited.\", \"retry_after\": 0.3, \"global\": false}"
+  },
+  {
+    "timestamp": "2026-04-03T10:03:29.307038+00:00",
+    "type": "log_error_detected",
+    "bot": "mission-control",
+    "error_key": "file_not_found",
+    "snippet": "/app-page.runtime.prod.js:12:141547)\n\u001b[31m23|mission | \u001b[39m    at /home/ubuntu/.openclaw/workspace/mission-control/node_modules/next/dist/compiled/next-server/app-page.runtime.prod.js:12:138889\n\u001b[31m23|mission | \u001b[39m    at process.processTicksAndRejections (node:internal/process/task_queues:104:5)"
+  },
+  {
+    "timestamp": "2026-04-03T11:04:20.839795+00:00",
+    "type": "log_error_detected",
+    "bot": "telegram-listener",
+    "error_key": "rate_limit",
+    "snippet": "etry_after\": 0.3, \"global\": false}\n\u001b[31m1|telegram | \u001b[39m  [WARN] Discord webhook 429: {\"message\": \"You are being rate limited.\", \"retry_after\": 0.3, \"global\": false}\n\u001b[31m1|telegram | \u001b[39m  [WARN] Discord webhook 429: {\"message\": \"You are being rate limited.\", \"retry_after\": 0.3, \"global\": false}"
+  },
+  {
+    "timestamp": "2026-04-03T11:04:23.561936+00:00",
+    "type": "log_error_detected",
+    "bot": "mission-control",
+    "error_key": "file_not_found",
+    "snippet": "/app-page.runtime.prod.js:12:141547)\n\u001b[31m23|mission | \u001b[39m    at /home/ubuntu/.openclaw/workspace/mission-control/node_modules/next/dist/compiled/next-server/app-page.runtime.prod.js:12:138889\n\u001b[31m23|mission | \u001b[39m    at process.processTicksAndRejections (node:internal/process/task_queues:104:5)"
+  },
+  {
+    "timestamp": "2026-04-03T12:05:18.319221+00:00",
+    "type": "log_error_detected",
+    "bot": "telegram-listener",
+    "error_key": "rate_limit",
+    "snippet": "etry_after\": 0.3, \"global\": false}\n\u001b[31m1|telegram | \u001b[39m  [WARN] Discord webhook 429: {\"message\": \"You are being rate limited.\", \"retry_after\": 0.3, \"global\": false}\n\u001b[31m1|telegram | \u001b[39m  [WARN] Discord webhook 429: {\"message\": \"You are being rate limited.\", \"retry_after\": 0.3, \"global\": false}"
+  },
+  {
+    "timestamp": "2026-04-03T12:05:20.873263+00:00",
+    "type": "log_error_detected",
+    "bot": "mission-control",
+    "error_key": "file_not_found",
+    "snippet": "/app-page.runtime.prod.js:12:141547)\n\u001b[31m23|mission | \u001b[39m    at /home/ubuntu/.openclaw/workspace/mission-control/node_modules/next/dist/compiled/next-server/app-page.runtime.prod.js:12:138889\n\u001b[31m23|mission | \u001b[39m    at process.processTicksAndRejections (node:internal/process/task_queues:104:5)"
+  },
+  {
+    "timestamp": "2026-04-03T13:06:16.692622+00:00",
+    "type": "log_error_detected",
+    "bot": "telegram-listener",
+    "error_key": "rate_limit",
+    "snippet": "fter\": 0.394, \"global\": false}\n\u001b[31m1|telegram | \u001b[39m  [WARN] Discord webhook 429: {\"message\": \"You are being rate limited.\", \"retry_after\": 0.393, \"global\": false}\n\u001b[31m1|telegram | \u001b[39m  [WARN] Discord webhook 429: {\"message\": \"You are being rate limited.\", \"retry_after\": 0.391, \"global\": false}"
+  },
+  {
+    "timestamp": "2026-04-03T13:06:19.846136+00:00",
+    "type": "log_error_detected",
+    "bot": "mission-control",
+    "error_key": "file_not_found",
+    "snippet": "/app-page.runtime.prod.js:12:141547)\n\u001b[31m23|mission | \u001b[39m    at /home/ubuntu/.openclaw/workspace/mission-control/node_modules/next/dist/compiled/next-server/app-page.runtime.prod.js:12:138889\n\u001b[31m23|mission | \u001b[39m    at process.processTicksAndRejections (node:internal/process/task_queues:104:5)"
+  },
+  {
+    "timestamp": "2026-04-03T14:07:20.909616+00:00",
+    "type": "log_error_detected",
+    "bot": "telegram-listener",
+    "error_key": "rate_limit",
+    "snippet": "| \u001b[39m  [WARN] Discord webhook 429: {\"message\": \"You are being rate limited.\", \"retry_after\": 0.393, \"global\": false}\n\u001b[31m1|telegram | \u001b[39m  [WARN] Discord webhook 429: {\"message\": \"You are being rate limited.\", \"retry_after\": 0.391, \"global\": false}\n\u001b[31m1|telegram | \u001b[39mArchive webhook failed:"
+  },
+  {
+    "timestamp": "2026-04-03T14:07:25.665178+00:00",
+    "type": "log_error_detected",
+    "bot": "mission-control",
+    "error_key": "file_not_found",
+    "snippet": "/app-page.runtime.prod.js:12:141547)\n\u001b[31m23|mission | \u001b[39m    at /home/ubuntu/.openclaw/workspace/mission-control/node_modules/next/dist/compiled/next-server/app-page.runtime.prod.js:12:138889\n\u001b[31m23|mission | \u001b[39m    at process.processTicksAndRejections (node:internal/process/task_queues:104:5)"
+  },
+  {
+    "timestamp": "2026-04-03T15:08:23.080079+00:00",
+    "type": "log_error_detected",
+    "bot": "telegram-listener",
+    "error_key": "rate_limit",
+    "snippet": "| \u001b[39m  [WARN] Discord webhook 429: {\"message\": \"You are being rate limited.\", \"retry_after\": 0.393, \"global\": false}\n\u001b[31m1|telegram | \u001b[39m  [WARN] Discord webhook 429: {\"message\": \"You are being rate limited.\", \"retry_after\": 0.391, \"global\": false}\n\u001b[31m1|telegram | \u001b[39mArchive webhook failed:"
+  },
+  {
+    "id": "47766bbf-7da6-410f-b0dc-6180123fad62",
+    "timestamp": "2026-04-03T15:53:15.360892+00:00",
+    "type": "auto_fix",
+    "bot": "mission-control",
+    "issue": "Process stopped",
+    "action": "pm2 restart mission-control",
+    "result": "online"
+  },
+  {
+    "timestamp": "2026-04-03T15:54:29.134001+00:00",
+    "type": "auto_fix",
+    "bot": "mission-control",
+    "issue": "Dashboard not responding on port 3033",
+    "action": "pm2 restart mission-control",
+    "result": "restarted"
+  },
+  {
+    "timestamp": "2026-04-03T15:59:45.006433+00:00",
+    "type": "auto_fix",
+    "bot": "mission-control",
+    "issue": "Dashboard not responding on port 3033",
+    "action": "pm2 restart mission-control",
+    "result": "restarted"
+  },
+  {
+    "timestamp": "2026-04-03T16:05:02.861441+00:00",
+    "type": "auto_fix",
+    "bot": "mission-control",
+    "issue": "Dashboard not responding on port 3033",
+    "action": "pm2 restart mission-control",
+    "result": "restarted"
+  },
+  {
+    "timestamp": "2026-04-03T16:10:05.029208+00:00",
+    "type": "log_error_detected",
+    "bot": "telegram-listener",
+    "error_key": "rate_limit",
+    "snippet": "| \u001b[39m  [WARN] Discord webhook 429: {\"message\": \"You are being rate limited.\", \"retry_after\": 0.393, \"global\": false}\n\u001b[31m1|telegram | \u001b[39m  [WARN] Discord webhook 429: {\"message\": \"You are being rate limited.\", \"retry_after\": 0.391, \"global\": false}\n\u001b[31m1|telegram | \u001b[39mArchive webhook failed:"
+  },
+  {
+    "timestamp": "2026-04-03T16:10:20.349648+00:00",
+    "type": "auto_fix",
+    "bot": "mission-control",
+    "issue": "Dashboard not responding on port 3033",
+    "action": "pm2 restart mission-control",
+    "result": "restarted"
+  },
+  {
+    "timestamp": "2026-04-03T16:15:36.402799+00:00",
+    "type": "auto_fix",
+    "bot": "mission-control",
+    "issue": "Dashboard not responding on port 3033",
+    "action": "pm2 restart mission-control",
+    "result": "restarted"
+  },
+  {
+    "timestamp": "2026-04-03T16:46:20.487183+00:00",
+    "type": "auto_fix",
+    "bot": "mission-control",
+    "issue": "Dashboard not responding on port 3033",
+    "action": "pm2 restart mission-control",
+    "result": "restarted"
+  },
+  {
+    "timestamp": "2026-04-03T17:11:46.197305+00:00",
+    "type": "log_error_detected",
+    "bot": "telegram-listener",
+    "error_key": "rate_limit",
+    "snippet": "essage\": \"You are being rate limited.\", \"retry_after\": 0.391, \"global\": false}\n\u001b[31m1|telegram | \u001b[39mArchive webhook failed: \n\u001b[31m1|telegram | \u001b[39m  [WARN] Discord webhook 503: upstream connect error or disconnect/reset before headers. reset reason: remote connection failure, transport failure re"
+  },
+  {
+    "timestamp": "2026-04-03T18:12:38.278721+00:00",
+    "type": "log_error_detected",
+    "bot": "telegram-listener",
+    "error_key": "rate_limit",
+    "snippet": ": \n\u001b[31m1|telegram | \u001b[39m  [WARN] Discord webhook 503: upstream connect error or disconnect/reset before headers. reset reason: remote connection failure, transport failure re\n\u001b[31m1|telegram | \u001b[39mArchive webhook 503: upstream connect error or disconnect/reset before headers. reset reason: remote"
+  },
+  {
+    "timestamp": "2026-04-03T18:17:49.001998+00:00",
+    "type": "log_error_detected",
+    "bot": "mission-control",
+    "error_key": "file_not_found",
+    "snippet": "sion | \u001b[39m2026-04-03 18:15:30 +00:00:   code: 'ENOENT',\n\u001b[31m26|mission | \u001b[39m2026-04-03 18:15:30 +00:00:   syscall: 'open',\n\u001b[31m26|mission | \u001b[39m2026-04-03 18:15:30 +00:00:   path: '/home/ubuntu/mission-control/.next/prerender-manifest.json'\n\u001b[31m26|mission | \u001b[39m2026-04-03 18:15:30 +00:00: }"
+  },
+  {
+    "timestamp": "2026-04-03T18:58:28.887448+00:00",
+    "type": "log_error_detected",
+    "bot": "supertrend-optimizer",
+    "error_key": "rate_limit",
+    "snippet": "or=2.0 train=100 score=44.5 wr=62% pf=0.60\n\u001b[31m21|supertr | \u001b[39m2026-04-03 18:58:21 [SUPERTREND]     Volatility: MEDIUM (ATR=0.7989, centroid=0.8995)\n\u001b[31m21|supertr | \u001b[39m2026-04-03 18:58:24 [SUPERTREND]   Optimizing MSFT...\n\u001b[31m21|supertr | \u001b[39m2026-04-03 18:58:24 [SUPERTREND]     300 candles"
+  },
+  {
+    "timestamp": "2026-04-03T19:13:53.283445+00:00",
+    "type": "log_error_detected",
+    "bot": "telegram-listener",
+    "error_key": "rate_limit",
+    "snippet": ": \n\u001b[31m1|telegram | \u001b[39m  [WARN] Discord webhook 503: upstream connect error or disconnect/reset before headers. reset reason: remote connection failure, transport failure re\n\u001b[31m1|telegram | \u001b[39mArchive webhook 503: upstream connect error or disconnect/reset before headers. reset reason: remote"
+  },
+  {
+    "timestamp": "2026-04-03T20:16:06.120578+00:00",
+    "type": "log_error_detected",
+    "bot": "telegram-listener",
+    "error_key": "rate_limit",
+    "snippet": "ok 503: upstream connect error or disconnect/reset before headers. reset reason: remote connection failure, transport failure re\n\u001b[31m1|telegram | \u001b[39mArchive webhook 503: upstream connect error or disconnect/reset before headers. reset reason: remote \n\u001b[31m1|telegram | \u001b[39mArchive webhook failed:"
+  },
+  {
+    "timestamp": "2026-04-03T20:16:34.508682+00:00",
+    "type": "auto_fix",
+    "bot": "mission-control",
+    "issue": "Dashboard not responding on port 3033",
+    "action": "pm2 restart mission-control",
+    "result": "restarted"
+  },
+  {
+    "timestamp": "2026-04-03T21:12:51.930820+00:00",
+    "type": "auto_fix",
+    "bot": "mission-control",
+    "issue": "Dashboard not responding on port 3033",
+    "action": "pm2 restart mission-control",
+    "result": "restart failed"
+  },
+  {
+    "timestamp": "2026-04-03T21:17:53.837221+00:00",
+    "type": "log_error_detected",
+    "bot": "telegram-listener",
+    "error_key": "rate_limit",
+    "snippet": "ok 503: upstream connect error or disconnect/reset before headers. reset reason: remote connection failure, transport failure re\n\u001b[31m1|telegram | \u001b[39mArchive webhook 503: upstream connect error or disconnect/reset before headers. reset reason: remote \n\u001b[31m1|telegram | \u001b[39mArchive webhook failed:"
+  },
+  {
+    "timestamp": "2026-04-03T21:17:58.802039+00:00",
+    "type": "auto_fix",
+    "bot": "mission-control",
+    "issue": "Dashboard not responding on port 3033",
+    "action": "pm2 restart mission-control",
+    "result": "restart failed"
+  },
+  {
+    "timestamp": "2026-04-03T21:23:09.546928+00:00",
+    "type": "auto_fix",
+    "bot": "mission-control",
+    "issue": "Dashboard not responding on port 3033",
+    "action": "pm2 restart mission-control",
+    "result": "restart failed"
+  },
+  {
+    "timestamp": "2026-04-03T21:28:51.209831+00:00",
+    "type": "auto_fix",
+    "bot": "mission-control",
+    "issue": "Dashboard not responding on port 3033",
+    "action": "pm2 restart mission-control",
+    "result": "restart failed"
+  },
+  {
+    "timestamp": "2026-04-03T21:33:56.971856+00:00",
+    "type": "auto_fix",
+    "bot": "mission-control",
+    "issue": "Dashboard not responding on port 3033",
+    "action": "pm2 restart mission-control",
+    "result": "restart failed"
+  },
+  {
+    "timestamp": "2026-04-03T21:39:00.928953+00:00",
+    "type": "auto_fix",
+    "bot": "mission-control",
+    "issue": "Dashboard not responding on port 3033",
+    "action": "pm2 restart mission-control",
+    "result": "restart failed"
+  },
+  {
+    "timestamp": "2026-04-03T21:44:13.613662+00:00",
+    "type": "auto_fix",
+    "bot": "mission-control",
+    "issue": "Dashboard not responding on port 3033",
+    "action": "pm2 restart mission-control",
+    "result": "restart failed"
+  },
+  {
+    "timestamp": "2026-04-03T21:49:18.441144+00:00",
+    "type": "auto_fix",
+    "bot": "mission-control",
+    "issue": "Dashboard not responding on port 3033",
+    "action": "pm2 restart mission-control",
+    "result": "restart failed"
+  },
+  {
+    "timestamp": "2026-04-03T21:54:27.590704+00:00",
+    "type": "auto_fix",
+    "bot": "mission-control",
+    "issue": "Dashboard not responding on port 3033",
+    "action": "pm2 restart mission-control",
+    "result": "restart failed"
+  },
+  {
+    "timestamp": "2026-04-03T21:59:33.472914+00:00",
+    "type": "auto_fix",
+    "bot": "mission-control",
+    "issue": "Dashboard not responding on port 3033",
+    "action": "pm2 restart mission-control",
+    "result": "restart failed"
+  },
+  {
+    "timestamp": "2026-04-03T22:04:39.424248+00:00",
+    "type": "auto_fix",
+    "bot": "mission-control",
+    "issue": "Dashboard not responding on port 3033",
+    "action": "pm2 restart mission-control",
+    "result": "restart failed"
+  },
+  {
+    "timestamp": "2026-04-03T22:09:50.936210+00:00",
+    "type": "auto_fix",
+    "bot": "mission-control",
+    "issue": "Dashboard not responding on port 3033",
+    "action": "pm2 restart mission-control",
+    "result": "restart failed"
+  },
+  {
+    "timestamp": "2026-04-03T22:15:02.275133+00:00",
+    "type": "auto_fix",
+    "bot": "mission-control",
+    "issue": "Dashboard not responding on port 3033",
+    "action": "pm2 restart mission-control",
+    "result": "restart failed"
+  },
+  {
+    "timestamp": "2026-04-03T22:20:07.342210+00:00",
+    "type": "log_error_detected",
+    "bot": "telegram-listener",
+    "error_key": "rate_limit",
+    "snippet": "ok 503: upstream connect error or disconnect/reset before headers. reset reason: remote connection failure, transport failure re\n\u001b[31m1|telegram | \u001b[39mArchive webhook 503: upstream connect error or disconnect/reset before headers. reset reason: remote \n\u001b[31m1|telegram | \u001b[39mArchive webhook failed:"
+  },
+  {
+    "timestamp": "2026-04-03T22:20:21.480822+00:00",
+    "type": "auto_fix",
+    "bot": "mission-control",
+    "issue": "Dashboard not responding on port 3033",
+    "action": "pm2 restart mission-control",
+    "result": "restart failed"
+  },
+  {
+    "timestamp": "2026-04-03T22:25:27.369472+00:00",
+    "type": "auto_fix",
+    "bot": "mission-control",
+    "issue": "Dashboard not responding on port 3033",
+    "action": "pm2 restart mission-control",
+    "result": "restart failed"
+  },
+  {
+    "timestamp": "2026-04-03T22:30:57.546678+00:00",
+    "type": "auto_fix",
+    "bot": "mission-control",
+    "issue": "Dashboard not responding on port 3033",
+    "action": "pm2 restart mission-control",
+    "result": "restart failed"
+  }
+]

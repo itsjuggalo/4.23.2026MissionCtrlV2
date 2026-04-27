@@ -1,0 +1,114 @@
+"""Weekly Kronos Accuracy Report — posts Fridays after close."""
+import csv, json
+from collections import defaultdict
+from datetime import datetime, timezone, timedelta
+from pathlib import Path
+import urllib.request
+
+CSV_FILE = Path("/home/ubuntu/mission-control/kronos-tracker/kronos_predictions.csv")
+SECRETS = Path("/home/ubuntu/.openclaw/secrets")
+MEMORY_DIR = Path("/home/ubuntu/.openclaw/workspace/memory")
+MEMORY_DIR.mkdir(parents=True, exist_ok=True)
+
+
+def get_webhook():
+    for n in ["discord-webhook-kronos.txt","discord_kronos_webhook"]:
+        p = SECRETS / n
+        if p.exists():
+            v = p.read_text().strip()
+            if v.startswith("http"): return v
+    return ""
+
+
+def post(embed):
+    w = get_webhook()
+    if not w: return False
+    try:
+        data = json.dumps({"username":"Kronos Tracker","embeds":[embed]}).encode()
+        req = urllib.request.Request(w, data=data,
+            headers={"Content-Type":"application/json","User-Agent":"MissionControl-KronosTracker/1.0"}, method="POST")
+        urllib.request.urlopen(req, timeout=10)
+        return True
+    except Exception as e:
+        print(f"Post failed: {e}"); return False
+
+
+def main():
+    if not CSV_FILE.exists(): print("No tracker CSV"); return
+    with open(CSV_FILE) as f:
+        rows = list(csv.DictReader(f))
+    cutoff = datetime.now(timezone.utc) - timedelta(days=7)
+    ev = []
+    for r in rows:
+        if r.get("evaluation_status") != "done": continue
+        try:
+            t = datetime.fromisoformat(r["evaluated_at"].replace("Z","+00:00"))
+            if t >= cutoff: ev.append(r)
+        except: continue
+    if not ev: print("No evals this week"); return
+    ok = [r for r in ev if str(r.get("direction_correct")).lower()=="true"]
+    acc = len(ok)/len(ev)*100
+    ts = defaultdict(lambda: {"t":0,"c":0,"err":[]})
+    for r in ev:
+        t = r["ticker"]
+        ts[t]["t"] += 1
+        if str(r.get("direction_correct")).lower()=="true": ts[t]["c"] += 1
+        try: ts[t]["err"].append(float(r.get("target_error_pct",0)))
+        except: pass
+    ranked = []
+    for t, s in ts.items():
+        if s["t"] >= 2:
+            ae = sum(s["err"])/len(s["err"]) if s["err"] else 0
+            ranked.append((t, s["c"]/s["t"]*100, s["c"], s["t"], ae))
+    ranked.sort(key=lambda x: -x[1])
+    conf_stats = {}
+    for c in ("high","medium","low"):
+        s = [r for r in ev if r.get("forecast_24h_confidence")==c]
+        if s:
+            cc = sum(1 for r in s if str(r.get("direction_correct")).lower()=="true")
+            conf_stats[c] = (cc, len(s), cc/len(s)*100)
+    with_err = []
+    for r in ev:
+        try: with_err.append((r, float(r.get("target_error_pct",0))))
+        except: pass
+    with_err.sort(key=lambda x: x[1])
+    md = [f"# Kronos Weekly Report — {datetime.now().strftime('%Y-%m-%d')}", "",
+          f"## Overall", f"- Evaluated: {len(ev)}",
+          f"- Accuracy: {len(ok)}/{len(ev)} = {acc:.1f}%", "", "## By Confidence"]
+    for c in ("high","medium","low"):
+        if c in conf_stats:
+            cc, tot, a = conf_stats[c]
+            md.append(f"- {c}: {cc}/{tot} = {a:.1f}%")
+    md.extend(["", "## Per-Ticker","| Ticker | Correct | Total | Acc | AvgErr |","|--------|---------|-------|-----|--------|"])
+    for t, a, c, tot, err in ranked:
+        md.append(f"| {t} | {c} | {tot} | {a:.0f}% | {err:.2f}% |")
+    md.extend(["","## Biggest Hits"])
+    for r, err in with_err[:3]:
+        md.append(f"- **{r['ticker']}** {r['generated_at'][:10]}: pred {r['forecast_24h_target']}, actual {r['actual_price_24h']} (err {err:.2f}%)")
+    md.extend(["","## Biggest Misses"])
+    for r, err in with_err[-3:][::-1]:
+        md.append(f"- **{r['ticker']}** {r['generated_at'][:10]}: pred {r['forecast_24h_target']}, actual {r['actual_price_24h']} (err {err:.2f}%)")
+    md_file = MEMORY_DIR / f"kronos-weekly-{datetime.now().strftime('%Y-%m-%d')}.md"
+    md_file.write_text("\n".join(md))
+    print(f"Saved {md_file}")
+    dl = [f"**Week:** {len(ok)}/{len(ev)} = **{acc:.1f}%**"]
+    if conf_stats:
+        dl.append("\n**By confidence:**")
+        for c in ("high","medium","low"):
+            if c in conf_stats:
+                cc, tot, a = conf_stats[c]
+                dl.append(f"  {c}: {cc}/{tot} = {a:.0f}%")
+    if ranked:
+        dl.append("\n**Top tickers:**")
+        for t, a, c, tot, err in ranked[:5]:
+            dl.append(f"  {t}: {c}/{tot} = {a:.0f}%")
+    color = 0x00FF00 if acc>=60 else 0xFFA502 if acc>=50 else 0xFF4757
+    embed = {
+        "title": f"📈 Kronos Weekly — {datetime.now().strftime('%b %d')}",
+        "description": "\n".join(dl), "color": color,
+        "footer": {"text": f"Full report in memory/kronos-weekly-{datetime.now().strftime('%Y-%m-%d')}.md"},
+    }
+    if post(embed): print("Posted weekly")
+
+
+if __name__ == "__main__": main()

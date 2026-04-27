@@ -1,0 +1,45 @@
+{
+  "timestamp": "2026-04-24T20:00:08.734384+00:00",
+  "symbol": "BTC/USD",
+  "overall_regime": "MIXED",
+  "overall_recommendation": "DayTrader light size \u2014 no clear regime",
+  "direction_bias": "MIXED",
+  "timeframes": {
+    "1H": {
+      "regime": "RANGING",
+      "recommended_strategy": "Grid Bot",
+      "direction": "BEARISH",
+      "adx": 11.2,
+      "plus_di": 16.6,
+      "minus_di": 18.0,
+      "bbw": 1.29,
+      "choppiness": 61.4,
+      "trend_efficiency": 0.123,
+      "current_price": 77666.84
+    },
+    "4H": {
+      "regime": "RANGING",
+      "recommended_strategy": "Grid Bot",
+      "direction": "BULLISH",
+      "adx": 16.0,
+      "plus_di": 20.2,
+      "minus_di": 16.2,
+      "bbw": 4.42,
+      "choppiness": 59.2,
+      "trend_efficiency": 0.091,
+      "current_price": 77651.82
+    },
+    "1D": {
+      "regime": "WEAK_TREND",
+      "recommended_strategy": "SuperTrend (cautious)",
+      "direction": "BULLISH",
+      "adx": 22.9,
+      "plus_di": 26.4,
+      "minus_di": 12.4,
+      "bbw": 15.03,
+      "choppiness": 50.5,
+      "trend_efficiency": 0.164,
+      "current_price": 77659.98
+    }
+  }
+}
