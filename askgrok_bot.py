@@ -84,6 +84,35 @@ async def on_message(message):
     if not content:
         return
 
+    # Mention/prefix guard: only respond when explicitly summoned
+    # - DM (no guild) → always respond
+    # - @mention of the bot → respond
+    # - !ag / !askgrok prefix → respond
+    # - Reply to one of our own messages → respond
+    # - Otherwise stay silent
+    is_dm = message.guild is None
+    is_mentioned = client.user in message.mentions
+    is_prefixed = content.lower().startswith(("!ag ", "!askgrok ", "!ag\n", "!askgrok\n")) or content.lower() in ("!ag", "!askgrok")
+    is_reply_to_us = (
+        message.reference is not None
+        and isinstance(message.reference.resolved, discord.Message)
+        and message.reference.resolved.author.id == client.user.id
+    )
+    if not (is_dm or is_mentioned or is_prefixed or is_reply_to_us):
+        return
+
+    # Strip the trigger so Grok sees only the actual question
+    if is_mentioned:
+        content = content.replace(f"<@{client.user.id}>", "").replace(f"<@!{client.user.id}>", "").strip()
+    if is_prefixed:
+        for pfx in ("!askgrok", "!ag"):
+            if content.lower().startswith(pfx):
+                content = content[len(pfx):].strip()
+                break
+    if not content:
+        await message.channel.send("Yes? (mention me with a question, or use `!ag <question>`)")
+        return
+
     if content.upper() == "CONFIRM" and message.author.id in pending_confirms:
         action_fn, expires_at = pending_confirms[message.author.id]
         if time.time() > expires_at:
@@ -302,8 +331,10 @@ async def on_message(message):
 
             # Ask Grok to rank
             question = (
-                "From the candidates above, pick the TOP 3 with the BEST risk-adjusted % return potential. "
-                "For each pick show the math:\n"
+                "MANDATORY UNUSUAL FLOW PRIORITY RULE: candidates are pre-classified.\n"
+                "STEP 1 — explicitly enumerate every 🔥 TIER 1 (Huge Flow $1M+ ASK sweep) and ⭐ TIER 2 (Unusual Huge $500K+ Vol>OI ASK sweep) candidate by ticker+strike, give a 1-line take on each. Do NOT skip any.\n"
+                "STEP 2 — only AFTER step 1, pick the TOP 3 with BEST risk-adjusted % return. Tier 1 + Tier 2 should DOMINATE the top 3 unless overwhelming reasons.\n"
+                "STEP 3 — for each top 3 pick show the math:\n"
                 "1. THESIS - 1 sentence directional view\n"
                 "2. ENTRY - mid price as cost basis\n"
                 "3. BREAKEVEN at expiry (strike +/- premium)\n"
@@ -445,6 +476,65 @@ async def on_message(message):
         except Exception as e:
             await message.channel.send(f"❌ Digest error: {e}")
             audit("digest_failed", str(e))
+        return
+
+    # !purge N [#channel] — bulk delete last N messages (Discord 14-day limit)
+    if content.startswith("!purge"):
+        parts = content.split()
+        if len(parts) < 2 or not parts[1].isdigit():
+            await message.channel.send("Usage: `!purge 50` (current channel) or `!purge 50 #other-channel`")
+            return
+        n = min(int(parts[1]), 1000)
+        # Target = mentioned channel if any, else current
+        target = message.channel_mentions[0] if message.channel_mentions else message.channel
+        # Permission check
+        me = message.guild.me if message.guild else None
+        if me and not target.permissions_for(me).manage_messages:
+            await message.channel.send(f"❌ I don't have Manage Messages permission in `#{target.name}`. Add it in channel settings.")
+            return
+
+        async def do_purge(_msg):
+            await _msg.channel.send(f"🧹 Purging up to {n} messages from `#{target.name}`...")
+            try:
+                # Discord bulk_delete only works on messages <14 days old
+                from datetime import timedelta as _td_pg
+                cutoff = datetime.now(timezone.utc) - _td_pg(days=14)
+                deleted_count = 0
+                old_count = 0
+                # Pull and split into bulk-deletable vs single-delete
+                msgs = [m async for m in target.history(limit=n)]
+                bulk_ok = [m for m in msgs if m.created_at > cutoff]
+                old = [m for m in msgs if m.created_at <= cutoff]
+                # Bulk delete in batches of 100
+                for i in range(0, len(bulk_ok), 100):
+                    batch = bulk_ok[i:i+100]
+                    if len(batch) == 1:
+                        await batch[0].delete()
+                    else:
+                        await target.delete_messages(batch)
+                    deleted_count += len(batch)
+                # Old messages must be deleted one at a time
+                for m in old:
+                    try:
+                        await m.delete()
+                        old_count += 1
+                        await asyncio.sleep(0.5)  # rate limit safety
+                    except Exception:
+                        pass
+                summary = f"✅ Purged {deleted_count} recent + {old_count} old messages from `#{target.name}`"
+                # Send summary in current channel (may be different from target)
+                await message.channel.send(summary)
+                audit("purge", f"channel={target.name} recent={deleted_count} old={old_count}")
+            except Exception as e:
+                await message.channel.send(f"❌ Purge failed: {e}")
+                audit("purge_failed", str(e))
+
+        pending_confirms[message.author.id] = (do_purge, time.time() + 60)
+        warn = f"⚠️ Purge **last {n} messages** from `#{target.name}`?"
+        if target.id != message.channel.id:
+            warn += f"\n_(target is different from current channel)_"
+        warn += "\n_Note: Discord only allows bulk-delete on messages under 14 days old. Older messages will be deleted one at a time (slower)._\nReply **CONFIRM** within 60s, or **CANCEL** to abort."
+        await message.channel.send(warn)
         return
 
     if content.startswith("!help"):

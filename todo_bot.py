@@ -22,6 +22,7 @@ GROK_URL = "https://api.x.ai/v1/responses"
 GROK_MODEL = "grok-4-fast-non-reasoning"
 
 CATEGORIES = ["dev", "dashboard", "bot", "trading", "pine", "personal", "other"]
+pending_purges = {}
 ENERGY = ["quick", "medium", "deep"]
 
 
@@ -154,6 +155,75 @@ async def on_message(message):
 
     todos = load_todos()
     active = [t for t in todos if not t.get("completed_at")]
+
+    # !purge N — bulk delete last N messages from current channel (CONFIRM gated)
+    if content.startswith("!purge"):
+        parts = content.split()
+        if len(parts) < 2 or not parts[1].isdigit():
+            await message.channel.send("Usage: `!purge 50` (deletes last 50 messages from this channel)")
+            return
+        n = min(int(parts[1]), 1000)
+        target = message.channel
+        me = message.guild.me if message.guild else None
+        if me and not target.permissions_for(me).manage_messages:
+            await message.channel.send(f"❌ I don't have Manage Messages permission in `#{target.name}`. Add it in channel settings → Permissions → ToDoList → Manage Messages ✓")
+            return
+
+        async def do_purge(_msg):
+            await _msg.channel.send(f"🧹 Purging up to {n} messages from `#{target.name}`...")
+            try:
+                cutoff = datetime.now(timezone.utc) - timedelta(days=14)
+                deleted_count = 0
+                old_count = 0
+                msgs = [m async for m in target.history(limit=n)]
+                bulk_ok = [m for m in msgs if m.created_at > cutoff]
+                old = [m for m in msgs if m.created_at <= cutoff]
+                for i in range(0, len(bulk_ok), 100):
+                    batch = bulk_ok[i:i+100]
+                    if len(batch) == 1:
+                        await batch[0].delete()
+                    else:
+                        await target.delete_messages(batch)
+                    deleted_count += len(batch)
+                for m in old:
+                    try:
+                        await m.delete()
+                        old_count += 1
+                        await asyncio.sleep(0.5)
+                    except Exception:
+                        pass
+                await message.channel.send(f"✅ Purged {deleted_count} recent + {old_count} old messages")
+                audit("purge", f"channel={target.name} recent={deleted_count} old={old_count}")
+            except Exception as e:
+                await message.channel.send(f"❌ Purge failed: {e}")
+                audit("purge_failed", str(e))
+
+        pending_purges[message.author.id] = (do_purge, time.time() + 60)
+        await message.channel.send(
+            f"⚠️ Purge **last {n} messages** from `#{target.name}`?\n"
+            f"_Note: Discord only allows fast bulk-delete on messages under 14 days old. Older ones go one-at-a-time (slow)._\n"
+            f"Reply **CONFIRM** within 60s, or **CANCEL** to abort."
+        )
+        return
+
+    # CONFIRM/CANCEL handlers for purge
+    if content.upper() == "CONFIRM" and message.author.id in pending_purges:
+        action_fn, expires_at = pending_purges[message.author.id]
+        if time.time() > expires_at:
+            await message.channel.send("⏰ Confirmation expired (60s window). Try again.")
+            del pending_purges[message.author.id]
+            return
+        del pending_purges[message.author.id]
+        try:
+            await action_fn(message)
+        except Exception as e:
+            await message.channel.send(f"❌ Action failed: {e}")
+        return
+
+    if content.upper() == "CANCEL" and message.author.id in pending_purges:
+        del pending_purges[message.author.id]
+        await message.channel.send("🛑 Cancelled.")
+        return
 
     # !help
     if content in ("!help", "!commands"):

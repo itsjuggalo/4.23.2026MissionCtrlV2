@@ -123,3 +123,106 @@ if __name__ == "__main__":
     sym = sys.argv[1] if len(sys.argv) > 1 else "MSFT260515P00410000"
     q = fetch_option_quote(sym)
     print(json.dumps(q, indent=2) if q else f"No quote for {sym}")
+
+
+def get_expirations(symbol: str):
+    """Fetch list of available option expirations for a symbol. Returns list of YYYY-MM-DD strings."""
+    import requests
+    cache_key = f"exp_{symbol.upper()}"
+    cached = _cache_get(cache_key)
+    if cached is not None:
+        return cached
+    try:
+        r = requests.get(
+            f"{BASE}/markets/options/expirations",
+            headers=_headers(),
+            params={"symbol": symbol.upper()},
+            timeout=10,
+        )
+        if r.status_code != 200:
+            return []
+        data = r.json()
+        exps = (data.get("expirations") or {}).get("date", [])
+        if isinstance(exps, str):
+            exps = [exps]
+        _cache_set(cache_key, exps)
+        return exps
+    except Exception:
+        return []
+
+
+def get_chain(symbol: str, expiration: str, with_greeks: bool = True):
+    """Fetch full option chain for a symbol+expiration. Returns list of option dicts."""
+    import requests
+    cache_key = f"chain_{symbol.upper()}_{expiration}"
+    cached = _cache_get(cache_key)
+    if cached is not None:
+        return cached
+    try:
+        r = requests.get(
+            f"{BASE}/markets/options/chains",
+            headers=_headers(),
+            params={"symbol": symbol.upper(), "expiration": expiration, "greeks": "true" if with_greeks else "false"},
+            timeout=15,
+        )
+        if r.status_code != 200:
+            return []
+        chain = (r.json().get("options") or {}).get("option", []) or []
+        _cache_set(cache_key, chain)
+        return chain
+    except Exception:
+        return []
+
+
+def fetch_atm_straddle(symbol: str, spot: float, expiration: str = None):
+    """
+    Find ATM call+put for given expiration (or nearest if not provided).
+    Returns dict with: expiration, call_strike, call_premium, put_strike, put_premium,
+    straddle_premium, implied_move_pct, implied_move_dollars, call_iv, put_iv.
+    Uses mid (bid+ask)/2 for premium when both > 0, else last.
+    """
+    if expiration is None:
+        exps = get_expirations(symbol)
+        if not exps:
+            return None
+        expiration = exps[0]  # nearest
+
+    chain = get_chain(symbol, expiration)
+    if not chain:
+        return None
+
+    calls = [o for o in chain if o.get("option_type") == "call"]
+    puts = [o for o in chain if o.get("option_type") == "put"]
+    if not calls or not puts:
+        return None
+
+    # Pick strike closest to spot
+    atm_call = min(calls, key=lambda o: abs(float(o.get("strike", 0)) - spot))
+    atm_put = min(puts, key=lambda o: abs(float(o.get("strike", 0)) - spot))
+
+    def premium(o):
+        bid = float(o.get("bid", 0) or 0)
+        ask = float(o.get("ask", 0) or 0)
+        if bid > 0 and ask > 0:
+            return (bid + ask) / 2
+        return float(o.get("last", 0) or 0)
+
+    call_prem = premium(atm_call)
+    put_prem = premium(atm_put)
+    straddle = call_prem + put_prem
+    if spot <= 0 or straddle <= 0:
+        return None
+
+    return {
+        "expiration": expiration,
+        "spot": spot,
+        "call_strike": float(atm_call.get("strike", 0)),
+        "call_premium": round(call_prem, 2),
+        "call_iv": float((atm_call.get("greeks") or {}).get("mid_iv", 0) or 0),
+        "put_strike": float(atm_put.get("strike", 0)),
+        "put_premium": round(put_prem, 2),
+        "put_iv": float((atm_put.get("greeks") or {}).get("mid_iv", 0) or 0),
+        "straddle_premium": round(straddle, 2),
+        "implied_move_dollars": round(straddle, 2),
+        "implied_move_pct": round((straddle / spot) * 100, 2),
+    }

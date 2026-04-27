@@ -1,0 +1,58 @@
+# Squeeze scanner seed watchlist — Apr 26 2026 research
+# Format: TICKER per line, # comments OK
+
+# ═══ Active mega-squeeze (already extended, watch for resume/crash) ═══
+CAR
+
+# ═══ Highest static SI (>40% of float, FINRA early 2026) ═══
+GRPN
+HTZ
+BETR
+
+# ═══ Yahoo "most shorted" current top ═══
+GEV
+MAAS
+FRMI
+EMAT
+NN
+CALX
+
+# ═══ Meme/retail veterans ═══
+GME
+AMC
+BB
+KOSS
+MARA
+RIOT
+MSTR
+
+# ═══ Recent IPO + heavy short ═══
+HIMS
+RDDT
+SMCI
+
+# ═══ Biotech FDA catalysts Q2-Q4 2026 ═══
+DNLI
+VNDA
+NUVL
+MNMD
+OCGN
+NRXP
+XFOR
+ESPR
+CADL
+DRTS
+IDYA
+SABS
+DFTX
+APGE
+CYTK
+
+# ═══ Discretionary high-SI watch ═══
+CVNA
+WOLF
+BYND
+UPST
+PLUG
+FUBO
+OPEN

@@ -461,7 +461,9 @@ Additional decisions per pick:
 Hard limits:
 - Max 3 picks total
 - Max ${MAX_TOTAL_RISK_USD:,} total notional risk across all picks
-- Do NOT pick contracts where Kronos CONFLICTS with option thesis (unless you have a strong reason, and you must state it explicitly)
+- HARD GATE: Kronos CONFLICTS = AUTOMATIC VETO. Do NOT pick the contract. The ONLY override is if the flow score is ≥ 90 AND you must state the exact score number in your reasoning AND state why the flow override is justified
+- HARD GATE: Kronos UNAVAILABLE (timeout/error) = AUTOMATIC VETO. Do NOT pick the contract unless flow score is ≥ 85 AND you state the exact score in your reasoning
+- For every pick, you MUST set the `kronos_verdict` field in the JSON output to one of: AGREES | CONFLICTS | NEUTRAL | UNAVAILABLE — this is REQUIRED, not optional
 
 # Response format (STRICT JSON, no prose outside the JSON)
 {{
@@ -474,13 +476,14 @@ Hard limits:
       "expiry": "2026-05-17",
       "contracts": 5,
       "reasoning": "THESIS: NVDA bullish over 26 days (whale + Kronos agrees). CONTRACT: $145C 05/17 beats $150C (lower delta, same expiry) and $145C 06/21 (extra theta cost, earnings already priced). BREAKEVEN: $145 + $4.50 = $149.50 at expiry. EXPECTED RETURN: Kronos +5% → NVDA=153 → $145C worth ~$8.50 intrinsic = +89%. MAX LOSS: $4.50 × 5 × 100 = $2,250 if NVDA closes ≤ $145. RISK: Earnings in 8 days — IV likely elevated, potential IV crush post-earnings. CONVICTION: 26 DTE, theta manageable, earnings catalyst drives upside.",
+      "kronos_verdict": "AGREES",
       "profit_target_pct": 50,
       "stop_loss_pct": 30,
       "confidence": "high"
     }}
   ],
   "passed_on": [
-    {{"ticker": "TSLA", "reason": "Kronos conflicts — forecast bearish but 250C is bullish thesis"}}
+    {{"ticker": "TSLA", "reason": "Kronos conflicts — forecast bearish but 250C is bullish thesis", "kronos_verdict": "CONFLICTS"}}
   ]
 }}
 
