@@ -856,26 +856,26 @@ def execute_pick_on_alpaca(pick):
                 "protection_status": "SKIPPED (buy did not fill in 10s — daemon will trail)",
             }
 
-        # 3. Submit OCO bracket — SL + TP as single broker-managed pair
+        # 3. Submit stop_limit SL — Alpaca rejects OCO on options (complex orders not supported).
+        # TP is handled by daemon trailing SL up + Boba position_actions TRIM/EXIT.
         stop_loss_pct = float(pick.get("stop_loss_pct", 30))
         profit_target_pct = float(pick.get("profit_target_pct", 50))
         stop_trigger = round(max(fill_price * (1 - stop_loss_pct / 100), 0.01), 2)
         stop_limit = round(max(stop_trigger * 0.90, 0.01), 2)
         tp_price = round(max(fill_price * (1 + profit_target_pct / 100), 0.01), 2)
 
-        oco_order = {
+        sl_order = {
             "symbol": occ_symbol,
             "qty": str(qty),
             "side": "sell",
-            "type": "limit",
+            "type": "stop_limit",
             "time_in_force": "gtc",
-            "order_class": "oco",
-            "take_profit": {"limit_price": str(tp_price)},
-            "stop_loss": {"stop_price": str(stop_trigger), "limit_price": str(stop_limit)},
+            "stop_price": str(stop_trigger),
+            "limit_price": str(stop_limit),
         }
         prot_r = requests.post(
             "https://paper-api.alpaca.markets/v2/orders",
-            headers=headers, json=oco_order, timeout=10,
+            headers=headers, json=sl_order, timeout=10,
         )
 
         if prot_r.status_code in (200, 201):
