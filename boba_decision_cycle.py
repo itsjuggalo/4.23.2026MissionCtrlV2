@@ -529,6 +529,11 @@ Additional decisions per pick:
 Hard limits:
 - Max NEW picks this cycle: {remaining_budget} (out of daily cap {MAX_NEW_PICKS_PER_DAY})
 - Max ${MAX_TOTAL_RISK_USD:,} total notional risk across all picks
+- TP/SL TUNING by signal tier (set profit_target_pct + stop_loss_pct per pick accordingly):
+  - T1 huge flow ($1M+ SWEEP A/AA): profit_target_pct=60, stop_loss_pct=20 (high conviction, tight risk)
+  - T2 unusual ($500K+ Vol>OI SWEEP A/AA): profit_target_pct=50, stop_loss_pct=30 (standard, current default)
+  - T3 unusual ($100-500K Vol>OI): profit_target_pct=40, stop_loss_pct=40 (lower conviction, wider stop)
+  - You may override with explicit reasoning (e.g. earnings within 5 days = tighten SL by 10%, deep ITM = widen TP)
 - HARD GATE: Kronos CONFLICTS = AUTOMATIC VETO. Do NOT pick the contract. The ONLY override is if the flow score is ≥ 90 AND you must state the exact score number in your reasoning AND state why the flow override is justified
 - HARD GATE: Kronos UNAVAILABLE (timeout/error) = AUTOMATIC VETO. Do NOT pick the contract unless flow score is ≥ 85 AND you state the exact score in your reasoning
 - For every pick, you MUST set the `kronos_verdict` field in the JSON output to one of: AGREES | CONFLICTS | NEUTRAL | UNAVAILABLE — this is REQUIRED, not optional
@@ -936,6 +941,124 @@ def execute_pick_on_alpaca(pick):
         return {"ok": False, "error": str(e)}
 
 
+
+def execute_position_action(action_dict, positions):
+    """
+    Layer 2 — Execute Boba's position management action.
+    Actions: HOLD (no-op), TRIM_25, TRIM_50, TIGHTEN_STOP, EXIT.
+    Cancels existing OCO/bracket legs first to release reserved shares,
+    sleeps 2s, then submits the new order(s). Reuses pattern from daemon.
+    """
+    import requests
+    import time as _time
+
+    sym = action_dict.get("symbol", "")
+    act = (action_dict.get("action", "HOLD") or "HOLD").upper()
+    reason = (action_dict.get("reason", "") or "")[:200]
+
+    if act == "HOLD":
+        return {"ok": True, "action": act, "symbol": sym, "details": "no-op (HOLD)"}
+
+    pos = next((p for p in positions if p.get("symbol") == sym), None)
+    if not pos:
+        return {"ok": False, "action": act, "symbol": sym, "error": f"position not found: {sym}"}
+
+    qty = int(float(pos.get("qty", 0)))
+    avg_entry = float(pos.get("avg_entry_price", 0))
+    cur_price = float(pos.get("current_price", 0) or 0)
+    if qty <= 0:
+        return {"ok": False, "action": act, "symbol": sym, "error": "qty <= 0"}
+
+    try:
+        key = read_secret("alpaca-key-id") or read_secret("alpaca_key.txt")
+        sec = read_secret("alpaca-secret") or read_secret("alpaca_secret.txt")
+        headers = {"APCA-API-KEY-ID": key, "APCA-API-SECRET-KEY": sec, "Content-Type": "application/json"}
+        BASE = "https://paper-api.alpaca.markets/v2"
+
+        # 1. Cancel any open sell orders for this symbol (releases share reservation)
+        r = requests.get(f"{BASE}/orders?status=open&limit=100", headers=headers, timeout=10)
+        cancelled = 0
+        if r.status_code == 200:
+            for o in r.json():
+                if o.get("symbol") == sym and o.get("side") == "sell":
+                    dr = requests.delete(f"{BASE}/orders/{o.get('id')}", headers=headers, timeout=5)
+                    if dr.status_code in (200, 204):
+                        cancelled += 1
+        if cancelled > 0:
+            _time.sleep(2)
+
+        # 2. Determine limit price for sells (use current price as proxy for bid)
+        is_option = len(sym) >= 15 and sym[-9:-8] in ("0", "1", "2", "3", "4", "5", "6", "7", "8", "9")
+        limit_p = cur_price if cur_price > 0.01 else max(avg_entry * 0.95, 0.01)
+
+        # 3. Branch by action
+        if act in ("TRIM_25", "TRIM_50"):
+            pct = 0.25 if act == "TRIM_25" else 0.50
+            close_qty = max(1, int(qty * pct))
+            remaining = qty - close_qty
+
+            sell_body = {
+                "symbol": sym, "qty": str(close_qty), "side": "sell",
+                "type": "limit", "time_in_force": "day",
+                "limit_price": f"{limit_p:.2f}",
+            }
+            sr = requests.post(f"{BASE}/orders", headers=headers, json=sell_body, timeout=15)
+            ok = sr.status_code in (200, 201)
+            details = f"sell limit {close_qty}/{qty} @ ${limit_p:.2f}"
+
+            # Reissue OCO on remaining qty so it stays protected
+            if ok and remaining > 0 and is_option:
+                _time.sleep(1)
+                tp_pct, sl_pct = 50.0, 30.0
+                stop_t = round(max(avg_entry * (1 - sl_pct/100), 0.01), 2)
+                stop_l = round(max(stop_t * 0.90, 0.01), 2)
+                tp_p = round(max(avg_entry * (1 + tp_pct/100), 0.01), 2)
+                oco = {
+                    "symbol": sym, "qty": str(remaining), "side": "sell",
+                    "type": "limit", "time_in_force": "gtc", "order_class": "oco",
+                    "take_profit": {"limit_price": str(tp_p)},
+                    "stop_loss": {"stop_price": str(stop_t), "limit_price": str(stop_l)},
+                }
+                requests.post(f"{BASE}/orders", headers=headers, json=oco, timeout=15)
+                details += f" + reissued OCO on {remaining}"
+            return {"ok": ok, "action": act, "symbol": sym, "details": details}
+
+        elif act == "EXIT":
+            sell_body = {
+                "symbol": sym, "qty": str(qty), "side": "sell",
+                "type": "limit", "time_in_force": "day",
+                "limit_price": f"{limit_p:.2f}",
+            }
+            sr = requests.post(f"{BASE}/orders", headers=headers, json=sell_body, timeout=15)
+            ok = sr.status_code in (200, 201)
+            err = None if ok else f"HTTP {sr.status_code}: {sr.text[:200]}"
+            return {"ok": ok, "action": act, "symbol": sym, "details": f"sell limit {qty} @ ${limit_p:.2f}", "error": err}
+
+        elif act == "TIGHTEN_STOP":
+            if not is_option:
+                return {"ok": False, "action": act, "symbol": sym, "error": "TIGHTEN_STOP only supported on options"}
+            tp_pct, sl_pct = 50.0, 15.0
+            stop_t = round(max(avg_entry * (1 - sl_pct/100), 0.01), 2)
+            stop_l = round(max(stop_t * 0.90, 0.01), 2)
+            tp_p = round(max(avg_entry * (1 + tp_pct/100), 0.01), 2)
+            oco = {
+                "symbol": sym, "qty": str(qty), "side": "sell",
+                "type": "limit", "time_in_force": "gtc", "order_class": "oco",
+                "take_profit": {"limit_price": str(tp_p)},
+                "stop_loss": {"stop_price": str(stop_t), "limit_price": str(stop_l)},
+            }
+            sr = requests.post(f"{BASE}/orders", headers=headers, json=oco, timeout=15)
+            ok = sr.status_code in (200, 201)
+            err = None if ok else f"HTTP {sr.status_code}: {sr.text[:200]}"
+            return {"ok": ok, "action": act, "symbol": sym, "details": f"OCO tightened SL ${stop_t:.2f} (-{sl_pct:.0f}%)", "error": err}
+
+        else:
+            return {"ok": False, "action": act, "symbol": sym, "error": f"unknown action: {act}"}
+
+    except Exception as e:
+        return {"ok": False, "action": act, "symbol": sym, "error": str(e)[:200]}
+
+
 def log_decision(cycle_result, picks_executed):
     entry = {
         "cycle_time": datetime.now(timezone.utc).isoformat(),
@@ -1142,13 +1265,41 @@ def main():
     position_actions = cycle_result.get("position_actions", [])
     if position_actions:
         print(f"[position_mgmt] {len(position_actions)} position actions from Boba", flush=True)
+        executed_actions = []
         for action in position_actions:
             sym = action.get("symbol", "?")
-            act = action.get("action", "HOLD")
-            reason = action.get("reason", "")[:200]
+            act = (action.get("action", "HOLD") or "HOLD").upper()
+            reason = (action.get("reason", "") or "")[:200]
             print(f"  {sym}: {act} — {reason}", flush=True)
-            # TODO: Wire executor for TRIM/TIGHTEN/EXIT actions in next patch
-            # For now we LOG only — Mike will wire the actions after reviewing the first cycle output
+
+            if act == "HOLD":
+                continue
+
+            result = execute_position_action(action, positions)
+            executed_actions.append(result)
+
+            if result.get("ok"):
+                details = result.get("details", "")
+                print(f"    ✓ {details}", flush=True)
+                try:
+                    _post_bobatrades(
+                        f"⚙️ Boba position action: {sym} {act}\n"
+                        f"{details}\n"
+                        f"Reason: {reason}"
+                    )
+                except Exception:
+                    pass
+            else:
+                err = result.get("error", "unknown")
+                print(f"    ✗ {err}", flush=True)
+                try:
+                    _post_bobatrades(
+                        f"❌ Boba position action FAILED: {sym} {act}\n"
+                        f"Error: {err}\n"
+                        f"Reason: {reason}"
+                    )
+                except Exception:
+                    pass
         try:
             post_to_telegram(
                 agent="boba",
