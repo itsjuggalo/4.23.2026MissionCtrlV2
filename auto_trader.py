@@ -12,6 +12,9 @@ import os
 import sys
 import requests
 from datetime import datetime, timezone, timedelta
+# R1 safety guard - skip if buying power below threshold (paper-margin artifact)
+MIN_BUYING_POWER = 1000.0
+
 
 
 # === SQLite Trade Logging ===
