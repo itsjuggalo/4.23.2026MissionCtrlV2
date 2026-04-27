@@ -58,8 +58,11 @@ except Exception:
 KRONOS_CMD = "/home/ubuntu/mission-control/agent-team/kronos/kronos_on_demand.py"
 
 MAX_PICKS_PER_CYCLE = 3
+MAX_NEW_PICKS_PER_DAY = 3   # Hard cap on NEW picks per trading day across all cycles
 MAX_TOTAL_RISK_USD = 3000
 SHORTLIST_SIZE = 5
+DAILY_PICKS_FILE = Path("/home/ubuntu/.openclaw/workspace/state/boba_daily_picks.json")
+MIN_FLOW_VALUE = 500_000   # Hard floor: T1+T2 only ($500K+) — anything below is rejected
 
 
 def read_secret(name):
@@ -112,6 +115,46 @@ def signal_id(sig):
     return f"{sig.get('ticker','?')}|{sig.get('strike','?')}|{sig.get('option_type','?')}|{sig.get('expiry','?')}|{sig.get('timestamp','?')[:19]}"
 
 
+
+
+def load_daily_picks_state():
+    """Load the daily NEW picks counter. Resets at midnight ET."""
+    from datetime import datetime, timezone, timedelta
+    et_now = datetime.now(timezone(timedelta(hours=-4)))   # EDT — adjust to -5 in winter
+    today_et = et_now.strftime("%Y-%m-%d")
+    try:
+        if DAILY_PICKS_FILE.exists():
+            data = json.loads(DAILY_PICKS_FILE.read_text())
+            if data.get("date") == today_et:
+                return data
+    except Exception:
+        pass
+    return {"date": today_et, "new_picks_count": 0, "picks_today": []}
+
+
+def save_daily_picks_state(state):
+    """Persist daily counter to disk."""
+    try:
+        DAILY_PICKS_FILE.parent.mkdir(parents=True, exist_ok=True)
+        DAILY_PICKS_FILE.write_text(json.dumps(state, indent=2))
+    except Exception as e:
+        print(f"[daily_picks] save failed: {e}", flush=True)
+
+
+def remaining_picks_today():
+    """How many NEW picks Boba still has in the daily budget."""
+    state = load_daily_picks_state()
+    return max(0, MAX_NEW_PICKS_PER_DAY - state.get("new_picks_count", 0))
+
+
+def increment_daily_picks(pick_summary):
+    """Record a NEW pick was made today, reduce remaining budget."""
+    state = load_daily_picks_state()
+    state["new_picks_count"] = state.get("new_picks_count", 0) + 1
+    state.setdefault("picks_today", []).append(pick_summary)
+    save_daily_picks_state(state)
+
+
 def get_todays_whale_signals(seen_ids):
     sigs = load_sidecar()
     today = datetime.now(timezone.utc).strftime("%Y-%m-%d")
@@ -127,9 +170,14 @@ def get_todays_whale_signals(seen_ids):
 
 
 def build_shortlist(fresh_signals):
-    """Top N by score, ensuring ticker variety."""
+    """Top N by score, ensuring ticker variety. Hard floor: $500K+ flow value (T1+T2)."""
+    # Hard floor — drop anything below MIN_FLOW_VALUE before sorting
+    filtered = [(sid, s) for sid, s in fresh_signals
+                if float(s.get("flow_value", 0) or 0) >= MIN_FLOW_VALUE]
+    if len(filtered) < len(fresh_signals):
+        print(f"[build_shortlist] dropped {len(fresh_signals) - len(filtered)} sigs below ${MIN_FLOW_VALUE:,}", flush=True)
     # Sort by score desc
-    sorted_sigs = sorted(fresh_signals, key=lambda x: -x[1].get("score", 0))
+    sorted_sigs = sorted(filtered, key=lambda x: -x[1].get("score", 0))
     seen_tickers = set()
     out = []
     for sid, s in sorted_sigs:
@@ -1012,9 +1060,16 @@ def main():
                f"Boba response received",
                metadata={"picks": len(cycle_result.get("picks", [])), "passed": len(cycle_result.get("passed_on", [])), "usage": usage})
 
-    # 7. Execute picks
+    # 7. Execute picks — gated by daily NEW picks budget
+    remaining_budget = remaining_picks_today()
+    print(f"[daily_budget] {remaining_budget} NEW picks remaining today (cap {MAX_NEW_PICKS_PER_DAY})", flush=True)
+    cycle_picks = cycle_result.get("picks", [])
+    # Cap at min(per-cycle limit, remaining daily budget)
+    effective_cap = min(MAX_PICKS_PER_CYCLE, remaining_budget)
+    if effective_cap < len(cycle_picks):
+        print(f"[daily_budget] LLM returned {len(cycle_picks)} picks, executing first {effective_cap}", flush=True)
     picks_executed = []
-    for pick in cycle_result.get("picks", [])[:MAX_PICKS_PER_CYCLE]:
+    for pick in cycle_picks[:effective_cap]:
         # Auto-convert SPX picks to SPY equivalents (Alpaca can't trade SPX)
         converted_pick, conversion_note = convert_spx_to_spy(pick)
         if conversion_note:
@@ -1036,6 +1091,17 @@ def main():
         exec_result = execute_pick_on_alpaca(converted_pick)
         converted_pick["execution"] = exec_result
         picks_executed.append(converted_pick)
+
+        # Increment daily NEW picks counter on successful execution
+        if exec_result.get("ok"):
+            increment_daily_picks({
+                "ticker": converted_pick.get("ticker"),
+                "strike": converted_pick.get("strike"),
+                "option_type": converted_pick.get("option_type"),
+                "expiry": converted_pick.get("expiry"),
+                "contracts": converted_pick.get("contracts"),
+                "executed_at": __import__("datetime").datetime.now().isoformat(),
+            })
 
         # Telegram announcement per pick
         emoji = "✅" if exec_result.get("ok") else "⚠"
