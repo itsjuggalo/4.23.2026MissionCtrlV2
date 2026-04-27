@@ -213,7 +213,7 @@ export function DashboardPage() {
   const lastEq = parseFloat(portfolio?.last_equity || '0');
   const dailyPct = lastEq ? ((equity - lastEq) / lastEq * 100) : 0;
   const dailyChange = equity - lastEq;
-  const totalReturn = ((equity - 100000) / 100000 * 100);
+  const totalReturn = ((equity - 500000) / 500000 * 100);
   const positions = portfolio?.positions || [];
   const btcSignal = signals?.BTCUSD || {};
   const regimeStr = regime?.overall_regime || 'UNKNOWN';
@@ -449,7 +449,7 @@ export function DashboardPage() {
                     {[
                       { l: 'SIGNALS', v: report?.signals?.total || 0, c: '#4fc3f7' },
                       { l: 'TRADES', v: report?.trades || 0, c: '#66bb6a' },
-                      { l: 'P/L', v: report?.pnl ? `${report.pnl >= 0 ? '+' : ''}${fmt(report.pnl)}%` : 'N/A', c: (report?.pnl || 0) >= 0 ? '#66bb6a' : '#ef5350' },
+                      (() => { const pn = typeof report?.pnl === 'object' ? (report.pnl?.total ?? report.pnl?.value ?? report.pnl?.amount ?? report.pnl?.daily ?? 0) : (typeof report?.pnl === 'number' ? report.pnl : 0); return { l: 'P/L', v: pn !== 0 ? `${pn >= 0 ? '+' : ''}${fmt(pn)}%` : 'N/A', c: pn >= 0 ? '#66bb6a' : '#ef5350' }; })(),
                       { l: 'ALERTS', v: report?.alerts || 0, c: '#ff9800' },
                     ].map((s, i) => (
                       <div key={i} style={{ padding: '8px 10px', background: '#0d1117', borderRadius: '4px', display: 'flex', justifyContent: 'space-between' }}>
@@ -521,7 +521,7 @@ export function DashboardPage() {
             {[
               { l: 'BUYING POWER', v: `$${fmt(parseFloat(portfolio?.buying_power || '0'))}`, c: '#4fc3f7' },
               { l: 'CASH', v: `$${fmt(parseFloat(portfolio?.cash || '0'))}`, c: '#607d8b' },
-              { l: 'GOAL ($110K)', v: `${fmt(Math.min(((equity - 100000) / 10000) * 100, 100), 0)}%`, c: '#ff9800' },
+              { l: 'GOAL ($1M)', v: `${fmt(Math.min(Math.max(((equity - 500000) / 500000) * 100, 0), 100), 0)}%`, c: '#ff9800' },
             ].map((s, i) => (
               <div key={i} style={{ display: 'flex', justifyContent: 'space-between', padding: '6px 10px', background: '#0d1117', borderRadius: '4px', marginBottom: '4px', fontSize: 'var(--mc-font-label)', fontFamily: 'var(--font-mc-mono)' }}>
                 <span style={{ color: '#607d8b' }}>{s.l}</span>

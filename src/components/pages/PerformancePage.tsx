@@ -44,7 +44,7 @@ export function PerformancePage() {
   const lastEq = parseFloat(portfolio?.last_equity || '0');
   const cash = parseFloat(portfolio?.cash || '0');
   const buyingPower = parseFloat(portfolio?.buying_power || '0');
-  const startCap = 100000;
+  const startCap = 500000;
   const totalReturn = ((equity - startCap) / startCap) * 100;
   const dailyChange = equity - lastEq;
   const dailyPct = lastEq ? (dailyChange / lastEq) * 100 : 0;

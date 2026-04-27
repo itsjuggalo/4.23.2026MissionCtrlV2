@@ -25,7 +25,7 @@ export function RiskPage() {
   }, []);
 
   const eq = portfolio?.equity || 0;
-  const start = 100000;
+  const start = 500000;
   const pnl = eq - start;
   const pnlPct = start > 0 ? (pnl / start * 100) : 0;
   const dayPl = portfolio?.day_pl || 0;

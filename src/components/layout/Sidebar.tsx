@@ -129,7 +129,7 @@ export function Sidebar({
   pendingApprovalsCount,
 }: SidebarProps) {
   const width = isCollapsed ? 56 : 200;
-  const [balance, setBalance] = useState<number>(100000);
+  const [balance, setBalance] = useState<number>(500000);
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
@@ -148,7 +148,29 @@ export function Sidebar({
     return () => clearInterval(interval);
   }, []);
 
-  const percent = Math.min(((balance - 100000) / 10000) * 100, 100);
+  // Best Options of the Day — top call + top put by Value from unusual flows
+  const [bestCall, setBestCall] = useState<any>(null);
+  const [bestPut, setBestPut] = useState<any>(null);
+  useEffect(() => {
+    const fetchFlows = async () => {
+      try {
+        const res = await fetch('/api/options-flow');
+        const d = await res.json();
+        const flows = d?.flows || [];
+        const calls = flows.filter((f: any) => String(f.OptionType || '').toLowerCase() === 'call').sort((a: any, b: any) => (b.Value || 0) - (a.Value || 0));
+        const puts  = flows.filter((f: any) => String(f.OptionType || '').toLowerCase() === 'put').sort((a: any, b: any) => (b.Value || 0) - (a.Value || 0));
+        setBestCall(calls[0] || null);
+        setBestPut(puts[0] || null);
+      } catch (err) {
+        console.error('Options flow fetch failed:', err);
+      }
+    };
+    fetchFlows();
+    const iv = setInterval(fetchFlows, 30000);
+    return () => clearInterval(iv);
+  }, []);
+
+  const percent = Math.min(((balance - 500000) / 500000) * 100, 100);
 
   return (
     <div
@@ -324,7 +346,7 @@ export function Sidebar({
       </nav>
 
 
-      {/* Footer — Phase 1 Progress */}
+      {/* Footer — Best Options of the Day */}
       {!isCollapsed && (
         <div
           style={{
@@ -334,12 +356,25 @@ export function Sidebar({
             fontFamily: "'JetBrains Mono', 'SF Mono', 'Fira Code', monospace",
           }}
         >
-          <div style={{ color: '#ff9800', fontWeight: 700, marginBottom: 3 }}>Phase 1 — Prove ROI</div>
-          <div style={{ color: '#e0e0e0', marginBottom: 4 }}>${(balance / 1000).toFixed(0)}K → $110K</div>
-          <div style={{ background: '#1a3a4a', borderRadius: 4, height: 4, overflow: 'hidden' }}>
-            <div style={{ background: '#4fc3f7', width: `${percent}%`, height: '100%', borderRadius: 4 }} />
-          </div>
-          <div style={{ color: '#607d8b', marginTop: 4 }}>{percent.toFixed(1)}% complete</div>
+          <div style={{ color: '#ffd600', fontWeight: 700, marginBottom: 6 }}>BEST OPTIONS OF THE DAY!</div>
+          {bestCall ? (
+            <div style={{ marginBottom: 6 }}>
+              <div style={{ color: '#66bb6a', fontWeight: 700, fontSize: 10 }}>CALL</div>
+              <div style={{ color: '#e0e0e0', fontSize: 10 }}>{bestCall.Symbol || bestCall.symbol || '?'} ${bestCall.Strike || bestCall.strike || '?'} {bestCall.Expiry || bestCall.expiry || ''}</div>
+              <div style={{ color: '#4fc3f7', fontSize: 10 }}>${((bestCall.Value || 0) / 1000).toFixed(0)}K · Vol {bestCall.Volume || bestCall.volume || '?'}</div>
+            </div>
+          ) : (
+            <div style={{ color: '#607d8b', fontSize: 10, marginBottom: 6 }}>CALL: scanning...</div>
+          )}
+          {bestPut ? (
+            <div>
+              <div style={{ color: '#ef5350', fontWeight: 700, fontSize: 10 }}>PUT</div>
+              <div style={{ color: '#e0e0e0', fontSize: 10 }}>{bestPut.Symbol || bestPut.symbol || '?'} ${bestPut.Strike || bestPut.strike || '?'} {bestPut.Expiry || bestPut.expiry || ''}</div>
+              <div style={{ color: '#4fc3f7', fontSize: 10 }}>${((bestPut.Value || 0) / 1000).toFixed(0)}K · Vol {bestPut.Volume || bestPut.volume || '?'}</div>
+            </div>
+          ) : (
+            <div style={{ color: '#607d8b', fontSize: 10 }}>PUT: scanning...</div>
+          )}
         </div>
       )}
     </div>

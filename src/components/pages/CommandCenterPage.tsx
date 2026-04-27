@@ -64,7 +64,7 @@ export function CommandCenterPage() {
   const equity = parseFloat(portfolio?.equity || portfolio?.balance || '0');
   const lastEq = parseFloat(portfolio?.last_equity || '0');
   const dailyPct = lastEq ? ((equity - lastEq) / lastEq * 100) : 0;
-  const totalReturn = ((equity - 100000) / 100000 * 100);
+  const totalReturn = ((equity - 500000) / 500000 * 100);
   const positions = portfolio?.positions || [];
   const btcSignal = signals?.BTCUSD || {};
   const regimeStr = regime?.overall_regime || regime?.regime || 'UNKNOWN';
