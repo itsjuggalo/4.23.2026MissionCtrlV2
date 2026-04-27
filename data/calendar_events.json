@@ -1,6 +1,6 @@
 {
-  "last_updated": "2026-04-26T18:00:06.803159",
-  "total_events": 183,
+  "last_updated": "2026-04-27T00:00:17.432613",
+  "total_events": 167,
   "scraper_version": "3.0",
   "sources": [
     "ainvest",
@@ -31,10 +31,10 @@
     },
     "2026-04": {
       "earnings": 72,
-      "economic": 12,
+      "economic": 18,
       "crypto": 4,
       "dividend": 0,
-      "ipo": 0
+      "ipo": 6
     },
     "2026-05": {
       "earnings": 0,
@@ -44,10 +44,10 @@
       "ipo": 0
     },
     "2026-06": {
-      "earnings": 0,
+      "earnings": 1,
       "economic": 10,
       "crypto": 2,
-      "dividend": 29,
+      "dividend": 0,
       "ipo": 0
     },
     "2026-07": {
@@ -712,6 +712,78 @@
       "revenue_forecast": null,
       "revenue_surprise": null,
       "beat_miss": null
+    },
+    {
+      "date": "2026-04-13",
+      "category": "economic",
+      "ticker": "",
+      "title": "IMF Meetings",
+      "detail": "",
+      "time": "",
+      "importance": "low",
+      "actual": null,
+      "forecast": null,
+      "previous": null
+    },
+    {
+      "date": "2026-04-13",
+      "category": "economic",
+      "ticker": "",
+      "title": "OPEC Monthly Report",
+      "detail": "",
+      "time": "",
+      "importance": "low",
+      "actual": null,
+      "forecast": null,
+      "previous": null
+    },
+    {
+      "date": "2026-04-13",
+      "category": "economic",
+      "ticker": "",
+      "title": "Existing Home Sales (MoM)",
+      "detail": "Prev: 2.7 | Act: -3.6",
+      "time": "",
+      "importance": "medium",
+      "actual": -3.6,
+      "forecast": null,
+      "previous": 2.7
+    },
+    {
+      "date": "2026-04-13",
+      "category": "economic",
+      "ticker": "",
+      "title": "Existing Home Sales",
+      "detail": "Prev: 4130000.0 | Est: 4070000.0 | Act: 3980000.0",
+      "time": "",
+      "importance": "low",
+      "actual": 3980000.0,
+      "forecast": 4070000.0,
+      "previous": 4130000.0
+    },
+    {
+      "date": "2026-04-13",
+      "category": "economic",
+      "ticker": "",
+      "title": "6-Month Bill Auction",
+      "detail": "Prev: 3.615 | Act: 3.61",
+      "time": "",
+      "importance": "medium",
+      "actual": 3.61,
+      "forecast": null,
+      "previous": 3.615
+    },
+    {
+      "date": "2026-04-13",
+      "category": "economic",
+      "ticker": "",
+      "title": "3-Month Bill Auction",
+      "detail": "Prev: 3.635 | Act: 3.62",
+      "time": "",
+      "importance": "low",
+      "actual": 3.62,
+      "forecast": null,
+      "previous": 3.635
     },
     {
       "date": "2026-04-14",
@@ -1454,6 +1526,60 @@
       "importance": "high"
     },
     {
+      "date": "2026-04-22",
+      "category": "ipo",
+      "ticker": "NHP",
+      "title": "NHP",
+      "detail": "Price: TBD",
+      "time": "",
+      "importance": "medium"
+    },
+    {
+      "date": "2026-04-22",
+      "category": "ipo",
+      "ticker": "DETX",
+      "title": "DETX",
+      "detail": "Price: TBD",
+      "time": "",
+      "importance": "medium"
+    },
+    {
+      "date": "2026-04-22",
+      "category": "ipo",
+      "ticker": "YSWY",
+      "title": "YSWY",
+      "detail": "Price: TBD",
+      "time": "",
+      "importance": "medium"
+    },
+    {
+      "date": "2026-04-23",
+      "category": "ipo",
+      "ticker": "LABT",
+      "title": "LABT",
+      "detail": "Price: TBD",
+      "time": "",
+      "importance": "medium"
+    },
+    {
+      "date": "2026-04-23",
+      "category": "ipo",
+      "ticker": "ELMT",
+      "title": "ELMT",
+      "detail": "Price: TBD",
+      "time": "",
+      "importance": "medium"
+    },
+    {
+      "date": "2026-04-24",
+      "category": "ipo",
+      "ticker": "XE",
+      "title": "XE",
+      "detail": "Price: TBD",
+      "time": "",
+      "importance": "medium"
+    },
+    {
       "date": "2026-04-28",
       "category": "economic",
       "ticker": "",
@@ -1671,133 +1797,12 @@
     },
     {
       "date": "2026-06-04",
-      "category": "dividend",
-      "ticker": "QCOM",
-      "title": "QCOM Ex-Dividend",
-      "detail": "$0.92/share | Pay: 2026-06-25",
-      "time": "",
-      "importance": "low",
-      "amount": 0.92,
-      "pay_date": "2026-06-25"
-    },
-    {
-      "date": "2026-06-04",
-      "category": "dividend",
-      "ticker": "SLM",
-      "title": "SLM Ex-Dividend",
-      "detail": "$0.13/share | Pay: 2026-06-15",
-      "time": "",
-      "importance": "low",
-      "amount": 0.13,
-      "pay_date": "2026-06-15"
-    },
-    {
-      "date": "2026-06-04",
-      "category": "dividend",
-      "ticker": "LBRT",
-      "title": "LBRT Ex-Dividend",
-      "detail": "$0.09/share | Pay: 2026-06-18",
-      "time": "",
-      "importance": "low",
-      "amount": 0.09,
-      "pay_date": "2026-06-18"
-    },
-    {
-      "date": "2026-06-04",
-      "category": "dividend",
-      "ticker": "SSTK",
-      "title": "SSTK Ex-Dividend",
-      "detail": "$0.36/share | Pay: 2026-06-18",
-      "time": "",
-      "importance": "low",
-      "amount": 0.36,
-      "pay_date": "2026-06-18"
-    },
-    {
-      "date": "2026-06-04",
-      "category": "dividend",
-      "ticker": "SAR",
-      "title": "SAR Ex-Dividend",
-      "detail": "$0.25/share | Pay: 2026-06-23",
-      "time": "",
-      "importance": "low",
-      "amount": 0.25,
-      "pay_date": "2026-06-23"
-    },
-    {
-      "date": "2026-06-04",
-      "category": "dividend",
-      "ticker": "FF",
-      "title": "FF Ex-Dividend",
-      "detail": "$0.01/share | Pay: 2026-06-18",
-      "time": "",
-      "importance": "low",
-      "amount": 0.01,
-      "pay_date": "2026-06-18"
-    },
-    {
-      "date": "2026-06-04",
       "category": "economic",
       "ticker": "",
       "title": "Initial Jobless Claims",
       "detail": "Weekly unemployment claims (8:30 AM ET)",
       "time": "08:30",
       "importance": "low"
-    },
-    {
-      "date": "2026-06-05",
-      "category": "dividend",
-      "ticker": "TT",
-      "title": "TT Ex-Dividend",
-      "detail": "$1.05/share | Pay: 2026-06-30",
-      "time": "",
-      "importance": "low",
-      "amount": 1.05,
-      "pay_date": "2026-06-30"
-    },
-    {
-      "date": "2026-06-05",
-      "category": "dividend",
-      "ticker": "NTRS",
-      "title": "NTRS Ex-Dividend",
-      "detail": "$0.80/share | Pay: 2026-07-01",
-      "time": "",
-      "importance": "low",
-      "amount": 0.8,
-      "pay_date": "2026-07-01"
-    },
-    {
-      "date": "2026-06-05",
-      "category": "dividend",
-      "ticker": "UNF",
-      "title": "UNF Ex-Dividend",
-      "detail": "$0.36/share | Pay: 2026-06-26",
-      "time": "",
-      "importance": "low",
-      "amount": 0.365,
-      "pay_date": "2026-06-26"
-    },
-    {
-      "date": "2026-06-05",
-      "category": "dividend",
-      "ticker": "WPP",
-      "title": "WPP Ex-Dividend",
-      "detail": "$0.51/share | Pay: 2026-07-06",
-      "time": "",
-      "importance": "low",
-      "amount": 0.507862,
-      "pay_date": "2026-07-06"
-    },
-    {
-      "date": "2026-06-05",
-      "category": "dividend",
-      "ticker": "MBWM",
-      "title": "MBWM Ex-Dividend",
-      "detail": "$0.39/share | Pay: 2026-06-17",
-      "time": "",
-      "importance": "low",
-      "amount": 0.39,
-      "pay_date": "2026-06-17"
     },
     {
       "date": "2026-06-05",
@@ -1809,204 +1814,6 @@
       "importance": "high"
     },
     {
-      "date": "2026-06-08",
-      "category": "dividend",
-      "ticker": "MAIN",
-      "title": "MAIN Ex-Dividend",
-      "detail": "$0.26/share | Pay: 2026-06-15",
-      "time": "",
-      "importance": "low",
-      "amount": 0.26,
-      "pay_date": "2026-06-15"
-    },
-    {
-      "date": "2026-06-09",
-      "category": "dividend",
-      "ticker": "PEG",
-      "title": "PEG Ex-Dividend",
-      "detail": "$0.67/share | Pay: 2026-06-30",
-      "time": "",
-      "importance": "low",
-      "amount": 0.67,
-      "pay_date": "2026-06-30"
-    },
-    {
-      "date": "2026-06-09",
-      "category": "dividend",
-      "ticker": "RCI",
-      "title": "RCI Ex-Dividend",
-      "detail": "$0.37/share | Pay: 2026-07-06",
-      "time": "",
-      "importance": "low",
-      "amount": 0.365685,
-      "pay_date": "2026-07-06"
-    },
-    {
-      "date": "2026-06-09",
-      "category": "dividend",
-      "ticker": "UTF",
-      "title": "UTF Ex-Dividend",
-      "detail": "$0.17/share | Pay: 2026-06-30",
-      "time": "",
-      "importance": "low",
-      "amount": 0.165,
-      "pay_date": "2026-06-30"
-    },
-    {
-      "date": "2026-06-09",
-      "category": "dividend",
-      "ticker": "RQI",
-      "title": "RQI Ex-Dividend",
-      "detail": "$0.09/share | Pay: 2026-06-30",
-      "time": "",
-      "importance": "low",
-      "amount": 0.09,
-      "pay_date": "2026-06-30"
-    },
-    {
-      "date": "2026-06-09",
-      "category": "dividend",
-      "ticker": "PTA",
-      "title": "PTA Ex-Dividend",
-      "detail": "$0.13/share | Pay: 2026-06-30",
-      "time": "",
-      "importance": "low",
-      "amount": 0.134,
-      "pay_date": "2026-06-30"
-    },
-    {
-      "date": "2026-06-09",
-      "category": "dividend",
-      "ticker": "RNP",
-      "title": "RNP Ex-Dividend",
-      "detail": "$0.14/share | Pay: 2026-06-30",
-      "time": "",
-      "importance": "low",
-      "amount": 0.136,
-      "pay_date": "2026-06-30"
-    },
-    {
-      "date": "2026-06-09",
-      "category": "dividend",
-      "ticker": "LDP",
-      "title": "LDP Ex-Dividend",
-      "detail": "$0.13/share | Pay: 2026-06-30",
-      "time": "",
-      "importance": "low",
-      "amount": 0.131,
-      "pay_date": "2026-06-30"
-    },
-    {
-      "date": "2026-06-09",
-      "category": "dividend",
-      "ticker": "FOF",
-      "title": "FOF Ex-Dividend",
-      "detail": "$0.09/share | Pay: 2026-06-30",
-      "time": "",
-      "importance": "low",
-      "amount": 0.087,
-      "pay_date": "2026-06-30"
-    },
-    {
-      "date": "2026-06-09",
-      "category": "dividend",
-      "ticker": "RFI",
-      "title": "RFI Ex-Dividend",
-      "detail": "$0.08/share | Pay: 2026-06-30",
-      "time": "",
-      "importance": "low",
-      "amount": 0.08,
-      "pay_date": "2026-06-30"
-    },
-    {
-      "date": "2026-06-09",
-      "category": "dividend",
-      "ticker": "RLTY",
-      "title": "RLTY Ex-Dividend",
-      "detail": "$0.11/share | Pay: 2026-06-30",
-      "time": "",
-      "importance": "low",
-      "amount": 0.11,
-      "pay_date": "2026-06-30"
-    },
-    {
-      "date": "2026-06-09",
-      "category": "dividend",
-      "ticker": "PSF",
-      "title": "PSF Ex-Dividend",
-      "detail": "$0.13/share | Pay: 2026-06-30",
-      "time": "",
-      "importance": "low",
-      "amount": 0.126,
-      "pay_date": "2026-06-30"
-    },
-    {
-      "date": "2026-06-10",
-      "category": "dividend",
-      "ticker": "ELV",
-      "title": "ELV Ex-Dividend",
-      "detail": "$1.72/share | Pay: 2026-06-25",
-      "time": "",
-      "importance": "low",
-      "amount": 1.72,
-      "pay_date": "2026-06-25"
-    },
-    {
-      "date": "2026-06-10",
-      "category": "dividend",
-      "ticker": "TRV",
-      "title": "TRV Ex-Dividend",
-      "detail": "$1.25/share | Pay: 2026-06-30",
-      "time": "",
-      "importance": "low",
-      "amount": 1.25,
-      "pay_date": "2026-06-30"
-    },
-    {
-      "date": "2026-06-10",
-      "category": "dividend",
-      "ticker": "NJR",
-      "title": "NJR Ex-Dividend",
-      "detail": "$0.47/share | Pay: 2026-07-01",
-      "time": "",
-      "importance": "low",
-      "amount": 0.475,
-      "pay_date": "2026-07-01"
-    },
-    {
-      "date": "2026-06-10",
-      "category": "dividend",
-      "ticker": "ECC",
-      "title": "ECC Ex-Dividend",
-      "detail": "$0.06/share | Pay: 2026-06-30",
-      "time": "",
-      "importance": "low",
-      "amount": 0.06,
-      "pay_date": "2026-06-30"
-    },
-    {
-      "date": "2026-06-10",
-      "category": "dividend",
-      "ticker": "EIC",
-      "title": "EIC Ex-Dividend",
-      "detail": "$0.11/share | Pay: 2026-06-30",
-      "time": "",
-      "importance": "low",
-      "amount": 0.11,
-      "pay_date": "2026-06-30"
-    },
-    {
-      "date": "2026-06-10",
-      "category": "dividend",
-      "ticker": "UBCP",
-      "title": "UBCP Ex-Dividend",
-      "detail": "$0.20/share | Pay: 2026-06-19",
-      "time": "",
-      "importance": "low",
-      "amount": 0.195,
-      "pay_date": "2026-06-19"
-    },
-    {
       "date": "2026-06-10",
       "category": "economic",
       "ticker": "",
@@ -2014,6 +1821,22 @@
       "detail": "Consumer Price Index (May)",
       "time": "",
       "importance": "high"
+    },
+    {
+      "date": "2026-06-11",
+      "category": "earnings",
+      "ticker": "ADBE",
+      "title": "ADBE Q2 2026 Earnings",
+      "detail": "EPS Est: 5.68",
+      "time": "",
+      "importance": "medium",
+      "eps_forecast": 5.68,
+      "eps_actual": null,
+      "eps_surprise": null,
+      "revenue_actual": null,
+      "revenue_forecast": 6430000000.0,
+      "revenue_surprise": null,
+      "beat_miss": null
     },
     {
       "date": "2026-06-11",

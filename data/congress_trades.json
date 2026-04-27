@@ -1,8 +1,34 @@
 {
-  "last_updated": "2026-04-26T18:00:42.941119",
-  "total_trades": 30,
+  "last_updated": "2026-04-27T00:01:35.998400",
+  "total_trades": 50,
   "tickers_scanned": 50,
   "politicians": [
+    {
+      "name": "Gil Cisneros",
+      "party": "Democrat",
+      "state": "CA",
+      "trades": 12,
+      "buys": 6,
+      "sells": 6,
+      "tickers": [
+        "COIN",
+        "LMT",
+        "NVDA"
+      ]
+    },
+    {
+      "name": "Ro Khanna",
+      "party": "Democrat",
+      "state": "CA",
+      "trades": 12,
+      "buys": 7,
+      "sells": 5,
+      "tickers": [
+        "AAPL",
+        "COIN",
+        "NVDA"
+      ]
+    },
     {
       "name": "John Karl Fetterman",
       "party": "Democrat",
@@ -12,29 +38,6 @@
       "sells": 3,
       "tickers": [
         "MSFT"
-      ]
-    },
-    {
-      "name": "Ro Khanna",
-      "party": "Democrat",
-      "state": "CA",
-      "trades": 7,
-      "buys": 3,
-      "sells": 4,
-      "tickers": [
-        "AAPL",
-        "NVDA"
-      ]
-    },
-    {
-      "name": "Gil Cisneros",
-      "party": "Democrat",
-      "state": "CA",
-      "trades": 3,
-      "buys": 2,
-      "sells": 1,
-      "tickers": [
-        "NVDA"
       ]
     },
     {
@@ -57,6 +60,17 @@
       "sells": 1,
       "tickers": [
         "AAPL"
+      ]
+    },
+    {
+      "name": "Val Hoyle",
+      "party": "Democrat",
+      "state": "OR",
+      "trades": 2,
+      "buys": 0,
+      "sells": 2,
+      "tickers": [
+        "LMT"
       ]
     },
     {
@@ -124,6 +138,50 @@
       "tickers": [
         "AAPL"
       ]
+    },
+    {
+      "name": "Tim Moore",
+      "party": "Republican",
+      "state": "NC",
+      "trades": 1,
+      "buys": 0,
+      "sells": 1,
+      "tickers": [
+        "COIN"
+      ]
+    },
+    {
+      "name": "Jefferson Shreve",
+      "party": "Republican",
+      "state": "IN",
+      "trades": 1,
+      "buys": 0,
+      "sells": 1,
+      "tickers": [
+        "LMT"
+      ]
+    },
+    {
+      "name": "Robert P. Bresnahan",
+      "party": "Republican",
+      "state": "PA",
+      "trades": 1,
+      "buys": 1,
+      "sells": 0,
+      "tickers": [
+        "LMT"
+      ]
+    },
+    {
+      "name": "Jared Moskowitz",
+      "party": "Democrat",
+      "state": "FL",
+      "trades": 1,
+      "buys": 1,
+      "sells": 0,
+      "tickers": [
+        "LMT"
+      ]
     }
   ],
   "suspicious": [
@@ -138,6 +196,19 @@
       "trade_date": "2026-03-25",
       "party": "Democrat",
       "ticker": "NVDA",
+      "suspicious": "Short-Term Event Window"
+    },
+    {
+      "id": "H002477647202603230050",
+      "size": "$1K-$15K",
+      "reporting_gap": "15 Days",
+      "name": "Ro Khanna",
+      "trade_type": "sell",
+      "filing_date": "2026-04-07",
+      "state": "CA",
+      "trade_date": "2026-03-23",
+      "party": "Democrat",
+      "ticker": "COIN",
       "suspicious": "Short-Term Event Window"
     },
     {
@@ -310,6 +381,19 @@
       "suspicious": "Short-Term Event Window"
     },
     {
+      "id": "H002477647202602240082",
+      "size": "$1K-$15K",
+      "reporting_gap": "13 Days",
+      "name": "Ro Khanna",
+      "trade_type": "buy",
+      "filing_date": "2026-03-09",
+      "state": "CA",
+      "trade_date": "2026-02-24",
+      "party": "Democrat",
+      "ticker": "COIN",
+      "suspicious": "Short-Term Event Window"
+    },
+    {
       "id": "H003087523202602260023",
       "size": "$1K-$15K",
       "reporting_gap": "8 Days",
@@ -333,6 +417,19 @@
       "trade_date": "2026-02-12",
       "party": "Democrat",
       "ticker": "AAPL",
+      "suspicious": "Short-Term Event Window"
+    },
+    {
+      "id": "H003087728202602180001",
+      "size": "$1K-$15K",
+      "reporting_gap": "2 Days",
+      "name": "Tim Moore",
+      "trade_type": "sell",
+      "filing_date": "2026-02-20",
+      "state": "NC",
+      "trade_date": "2026-02-18",
+      "party": "Republican",
+      "ticker": "COIN",
       "suspicious": "Short-Term Event Window"
     },
     {
@@ -414,6 +511,19 @@
       "party": "Democrat",
       "ticker": "AAPL",
       "suspicious": null
+    },
+    {
+      "id": "H002477647202603230050",
+      "size": "$1K-$15K",
+      "reporting_gap": "15 Days",
+      "name": "Ro Khanna",
+      "trade_type": "sell",
+      "filing_date": "2026-04-07",
+      "state": "CA",
+      "trade_date": "2026-03-23",
+      "party": "Democrat",
+      "ticker": "COIN",
+      "suspicious": "Short-Term Event Window"
     },
     {
       "id": "H002474695202602250001",
@@ -689,6 +799,71 @@
       "suspicious": null
     },
     {
+      "id": "H002477647202602240082",
+      "size": "$1K-$15K",
+      "reporting_gap": "13 Days",
+      "name": "Ro Khanna",
+      "trade_type": "buy",
+      "filing_date": "2026-03-09",
+      "state": "CA",
+      "trade_date": "2026-02-24",
+      "party": "Democrat",
+      "ticker": "COIN",
+      "suspicious": "Short-Term Event Window"
+    },
+    {
+      "id": "H002477647202602170038",
+      "size": "$1K-$15K",
+      "reporting_gap": "20 Days",
+      "name": "Ro Khanna",
+      "trade_type": "buy",
+      "filing_date": "2026-03-09",
+      "state": "CA",
+      "trade_date": "2026-02-17",
+      "party": "Democrat",
+      "ticker": "COIN",
+      "suspicious": null
+    },
+    {
+      "id": "H002471749202602120001",
+      "size": "$1K-$15K",
+      "reporting_gap": "25 Days",
+      "name": "Gil Cisneros",
+      "trade_type": "sell",
+      "filing_date": "2026-03-09",
+      "state": "CA",
+      "trade_date": "2026-02-12",
+      "party": "Democrat",
+      "ticker": "COIN",
+      "suspicious": null
+    },
+    {
+      "id": "H002477647202602060004",
+      "size": "$1K-$15K",
+      "reporting_gap": "31 Days",
+      "name": "Ro Khanna",
+      "trade_type": "buy",
+      "filing_date": "2026-03-09",
+      "state": "CA",
+      "trade_date": "2026-02-06",
+      "party": "Democrat",
+      "ticker": "COIN",
+      "suspicious": null
+    },
+    {
+      "id": "H002477647202602050120",
+      "size": "$1K-$15K",
+      "reporting_gap": "32 Days",
+      "name": "Ro Khanna",
+      "trade_type": "buy",
+      "filing_date": "2026-03-09",
+      "state": "CA",
+      "trade_date": "2026-02-05",
+      "party": "Democrat",
+      "ticker": "COIN",
+      "suspicious": null
+    },
+    {
       "id": "H003087523202602260023",
       "size": "$1K-$15K",
       "reporting_gap": "8 Days",
@@ -715,6 +890,19 @@
       "suspicious": "Short-Term Event Window"
     },
     {
+      "id": "H003087728202602180001",
+      "size": "$1K-$15K",
+      "reporting_gap": "2 Days",
+      "name": "Tim Moore",
+      "trade_type": "sell",
+      "filing_date": "2026-02-20",
+      "state": "NC",
+      "trade_date": "2026-02-18",
+      "party": "Republican",
+      "ticker": "COIN",
+      "suspicious": "Short-Term Event Window"
+    },
+    {
       "id": "H002471749202601300008",
       "size": "$1K-$15K",
       "reporting_gap": "14 Days",
@@ -725,6 +913,19 @@
       "trade_date": "2026-01-30",
       "party": "Democrat",
       "ticker": "NVDA",
+      "suspicious": "Short-Term Event Window"
+    },
+    {
+      "id": "H002471749202601300023",
+      "size": "$1K-$15K",
+      "reporting_gap": "14 Days",
+      "name": "Gil Cisneros",
+      "trade_type": "buy",
+      "filing_date": "2026-02-13",
+      "state": "CA",
+      "trade_date": "2026-01-30",
+      "party": "Democrat",
+      "ticker": "COIN",
       "suspicious": "Short-Term Event Window"
     },
     {
@@ -739,6 +940,162 @@
       "party": "Republican",
       "ticker": "AAPL",
       "suspicious": null
+    },
+    {
+      "id": "H002471749202512190023",
+      "size": "$1K-$15K",
+      "reporting_gap": "24 Days",
+      "name": "Gil Cisneros",
+      "trade_type": "sell",
+      "filing_date": "2026-01-12",
+      "state": "CA",
+      "trade_date": "2025-12-19",
+      "party": "Democrat",
+      "ticker": "LMT",
+      "suspicious": null
+    },
+    {
+      "id": "H002471749202512240013",
+      "size": "$1K-$15K",
+      "reporting_gap": "19 Days",
+      "name": "Gil Cisneros",
+      "trade_type": "sell",
+      "filing_date": "2026-01-12",
+      "state": "CA",
+      "trade_date": "2025-12-24",
+      "party": "Democrat",
+      "ticker": "COIN",
+      "suspicious": null
+    },
+    {
+      "id": "H002471749202512190002",
+      "size": "$1K-$15K",
+      "reporting_gap": "24 Days",
+      "name": "Gil Cisneros",
+      "trade_type": "sell",
+      "filing_date": "2026-01-12",
+      "state": "CA",
+      "trade_date": "2025-12-19",
+      "party": "Democrat",
+      "ticker": "COIN",
+      "suspicious": null
+    },
+    {
+      "id": "H002471749202511180035",
+      "size": "$1K-$15K",
+      "reporting_gap": "27 Days",
+      "name": "Gil Cisneros",
+      "trade_type": "buy",
+      "filing_date": "2025-12-15",
+      "state": "CA",
+      "trade_date": "2025-11-18",
+      "party": "Democrat",
+      "ticker": "LMT",
+      "suspicious": null
+    },
+    {
+      "id": "H002471890202509230265",
+      "size": "$1K-$15K",
+      "reporting_gap": "17 Days",
+      "name": "Val Hoyle",
+      "trade_type": "sell",
+      "filing_date": "2025-10-10",
+      "state": "OR",
+      "trade_date": "2025-09-23",
+      "party": "Democrat",
+      "ticker": "LMT",
+      "suspicious": null
+    },
+    {
+      "id": "H002471890202509230017",
+      "size": "$1K-$15K",
+      "reporting_gap": "17 Days",
+      "name": "Val Hoyle",
+      "trade_type": "sell",
+      "filing_date": "2025-10-10",
+      "state": "OR",
+      "trade_date": "2025-09-23",
+      "party": "Democrat",
+      "ticker": "LMT",
+      "suspicious": null
+    },
+    {
+      "id": "H002471749202508050007",
+      "size": "$1K-$15K",
+      "reporting_gap": "38 Days",
+      "name": "Gil Cisneros",
+      "trade_type": "buy",
+      "filing_date": "2025-09-12",
+      "state": "CA",
+      "trade_date": "2025-08-05",
+      "party": "Democrat",
+      "ticker": "LMT",
+      "suspicious": null
+    },
+    {
+      "id": "H003088719202505120094",
+      "size": "$15K-$50K",
+      "reporting_gap": "41 Days",
+      "name": "Jefferson Shreve",
+      "trade_type": "sell",
+      "filing_date": "2025-06-22",
+      "state": "IN",
+      "trade_date": "2025-05-12",
+      "party": "Republican",
+      "ticker": "LMT",
+      "suspicious": null
+    },
+    {
+      "id": "H003087775202505150038",
+      "size": "$1K-$15K",
+      "reporting_gap": "25 Days",
+      "name": "Robert P. Bresnahan",
+      "trade_type": "buy",
+      "filing_date": "2025-06-09",
+      "state": "PA",
+      "trade_date": "2025-05-15",
+      "party": "Republican",
+      "ticker": "LMT",
+      "suspicious": null
+    },
+    {
+      "id": "H002471749202505300004",
+      "size": "$1K-$15K",
+      "reporting_gap": "7 Days",
+      "name": "Gil Cisneros",
+      "trade_type": "sell",
+      "filing_date": "2025-06-06",
+      "state": "CA",
+      "trade_date": "2025-05-30",
+      "party": "Democrat",
+      "ticker": "LMT",
+      "suspicious": "Short-Term Event Window"
+    },
+    {
+      "id": "H002474712202504070014",
+      "size": "$1K-$15K",
+      "reporting_gap": "32 Days",
+      "name": "Jared Moskowitz",
+      "trade_type": "buy",
+      "filing_date": "2025-05-09",
+      "state": "FL",
+      "trade_date": "2025-04-07",
+      "party": "Democrat",
+      "ticker": "LMT",
+      "suspicious": null
+    },
+    {
+      "id": "H002471749202504290019",
+      "size": "$1K-$15K",
+      "reporting_gap": "7 Days",
+      "name": "Gil Cisneros",
+      "trade_type": "buy",
+      "filing_date": "2025-05-06",
+      "state": "CA",
+      "trade_date": "2025-04-29",
+      "party": "Democrat",
+      "ticker": "LMT",
+      "suspicious": "Short-Term Event Window"
     }
   ]
 }
