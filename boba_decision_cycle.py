@@ -537,8 +537,8 @@ Hard limits:
 {{
   "cycle_summary": "1-2 sentence overview of the current setup today",
   "position_actions": [
-    {"symbol": "SOXX260501P00460000", "action": "HOLD", "reason": "Down -1.5%, thesis intact, 4 days to expiry but spot still above strike"},
-    {"symbol": "TSLA260515P00360000", "action": "EXIT", "reason": "Kronos now bullish TSLA, original bear thesis invalidated"}
+    {{"symbol": "SOXX260501P00460000", "action": "HOLD", "reason": "Down -1.5%, thesis intact, 4 days to expiry but spot still above strike"}},
+    {{"symbol": "TSLA260515P00360000", "action": "EXIT", "reason": "Kronos now bullish TSLA, original bear thesis invalidated"}}
   ],
   "picks": [
     {{
