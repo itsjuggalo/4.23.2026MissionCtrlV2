@@ -59,8 +59,8 @@ def load_secret(name):
     return None
 
 
-ALPACA_KEY = load_secret("alpaca-key-id")
-ALPACA_SECRET = load_secret("alpaca-secret")
+ALPACA_KEY = load_secret("alpaca-r1-key-id")
+ALPACA_SECRET = load_secret("alpaca-r1-secret")
 ALPACA_BASE = "https://paper-api.alpaca.markets"
 TG_TOKEN = load_secret("telegram-bot-token")
 TG_CHAT = load_secret("telegram-chat-id")
