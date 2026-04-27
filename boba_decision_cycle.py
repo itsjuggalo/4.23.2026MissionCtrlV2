@@ -408,7 +408,7 @@ Window: same-day NY 4AM-8PM ET only — no carryover from prior days.
 """
 
 # Rule injected at top of every Boba prompt
-def build_boba_prompt(account, positions, shortlist_with_kronos):
+def build_boba_prompt(account, positions, shortlist_with_kronos, remaining_budget=3):
     equity = float(account.get("equity", 0))
     buying_power = float(account.get("buying_power", 0))
     cash = float(account.get("cash", 0))
@@ -470,7 +470,7 @@ def build_boba_prompt(account, positions, shortlist_with_kronos):
     prompt = f"""You are Boba — the decision-making agent in Mission Control's multi-agent trading system.
 
 # Mission
-Make positive-expected-value options trades using whale-tier ($1M+) options flow signals, validated by Kronos price forecasts. Target average R:R ≥ 1.5. You are NOT aiming for 80%+ win rate — you're aiming for edge × sizing × discipline.
+Make positive-expected-value options trades using whale-tier T1+T2 options flow signals (T1: $1M+ SWEEP/A,AA, T2: $500K+ Vol>OI SWEEP/A,AA), validated by Kronos price forecasts. Target average R:R ≥ 1.5. You are NOT aiming for 80%+ win rate — you're aiming for edge × sizing × discipline.
 
 # Account state
 Equity: ${equity:,.2f}
@@ -479,15 +479,35 @@ Cash: ${cash:,.2f}
 Open positions:
 {pos_summary}
 
-# Candidates to review (already filtered to $1M+ whale tier + today's signals)
+# Candidates to review (already filtered to T1+T2 whale tier $500K+ + today's signals)
 {shortlist_text}
 
 # Trade signals from providers (Name / Name2 / Vivid — last 20)
 These are curated buy/sell calls from human-run provider services. Use them as INDEPENDENT confirmation: if a provider has called the same direction as a whale flow above, that's stronger alignment. Disagreement is also informative. Do NOT take a pick just because a provider called it — use these alongside whale flow + Kronos.
 {firebase_signals_text}
 
-# Your task
-Pick UP TO 3 options to buy on Alpaca paper. You can pick 0, 1, 2, or 3. Only pick if the setup is genuinely good — if nothing is compelling, say so and skip.
+# Your task — TWO parts every cycle
+
+## TASK 1: POSITION MANAGEMENT (review every open position)
+For EVERY open position listed above, output a recommended action in `position_actions`. This does NOT count against your daily new-picks budget.
+Available actions per position:
+- HOLD — keep the position as-is, no change
+- TRIM_25 / TRIM_50 — close 25% or 50% of contracts to lock in partial profit (only if P&L > +30%)
+- TIGHTEN_STOP — move stop loss closer to entry (e.g. from -30% to -15%) to protect gains
+- EXIT — fully close the position (use when thesis broken, max loss approaching, or better setup elsewhere)
+You MUST emit one action per open position. If positions list is empty, position_actions = [].
+
+## TASK 2: NEW PICKS (up to remaining daily budget)
+You have {remaining_budget} NEW pick(s) remaining in today's daily budget (cap is {MAX_NEW_PICKS_PER_DAY}/day across ALL cycles).
+Pick 0 to {remaining_budget} NEW options to buy on Alpaca paper. Only pick if the setup is genuinely good — if nothing is compelling, say so and pick zero.
+
+### Same-ticker re-flow rule
+If a candidate ticker is one you ALREADY hold:
+- ADD action (default): open a new contract alongside existing position. Counts as 1 NEW pick.
+- REPLACE action: close existing + open new contract. Counts as 1 NEW pick (the close goes in position_actions as EXIT, the new buy goes in picks).
+- Specify by setting `same_ticker_action` field to "ADD" or "REPLACE" on the pick.
+
+If your daily budget is 0, you cannot make new picks this cycle — only do TASK 1 (position management).
 
 For each pick, you MUST show due diligence. In the reasoning field, include these items concisely:
 
@@ -507,7 +527,7 @@ Additional decisions per pick:
 - Max loss % (default -30%)
 
 Hard limits:
-- Max 3 picks total
+- Max NEW picks this cycle: {remaining_budget} (out of daily cap {MAX_NEW_PICKS_PER_DAY})
 - Max ${MAX_TOTAL_RISK_USD:,} total notional risk across all picks
 - HARD GATE: Kronos CONFLICTS = AUTOMATIC VETO. Do NOT pick the contract. The ONLY override is if the flow score is ≥ 90 AND you must state the exact score number in your reasoning AND state why the flow override is justified
 - HARD GATE: Kronos UNAVAILABLE (timeout/error) = AUTOMATIC VETO. Do NOT pick the contract unless flow score is ≥ 85 AND you state the exact score in your reasoning
@@ -516,6 +536,10 @@ Hard limits:
 # Response format (STRICT JSON, no prose outside the JSON)
 {{
   "cycle_summary": "1-2 sentence overview of the current setup today",
+  "position_actions": [
+    {"symbol": "SOXX260501P00460000", "action": "HOLD", "reason": "Down -1.5%, thesis intact, 4 days to expiry but spot still above strike"},
+    {"symbol": "TSLA260515P00360000", "action": "EXIT", "reason": "Kronos now bullish TSLA, original bear thesis invalidated"}
+  ],
   "picks": [
     {{
       "ticker": "NVDA",
@@ -1034,7 +1058,7 @@ def main():
     positions = get_alpaca_positions()
 
     # 5. Build prompt
-    prompt = build_boba_prompt(account, positions, shortlist_with_kronos)
+    prompt = build_boba_prompt(account, positions, shortlist_with_kronos, remaining_budget=remaining_picks_today())
     if args.dry_run:
         print("=== DRY RUN — prompt that would be sent to Boba ===")
         print(prompt)
@@ -1113,6 +1137,30 @@ def main():
         if not exec_result.get("ok"):
             body += f"\n⚠ Alpaca: {exec_result.get('error', 'unknown')[:100]}"
         post_to_telegram(agent="boba", message_type="Pick", body=body, bypass_cooldown=True)
+
+    # Process position_actions (HOLD/TRIM/TIGHTEN/EXIT) — does NOT count against daily budget
+    position_actions = cycle_result.get("position_actions", [])
+    if position_actions:
+        print(f"[position_mgmt] {len(position_actions)} position actions from Boba", flush=True)
+        for action in position_actions:
+            sym = action.get("symbol", "?")
+            act = action.get("action", "HOLD")
+            reason = action.get("reason", "")[:200]
+            print(f"  {sym}: {act} — {reason}", flush=True)
+            # TODO: Wire executor for TRIM/TIGHTEN/EXIT actions in next patch
+            # For now we LOG only — Mike will wire the actions after reviewing the first cycle output
+        try:
+            post_to_telegram(
+                agent="boba",
+                message_type="PosMgmt",
+                body="Position actions:\n" + "\n".join(
+                    f"• {a.get('symbol','?')}: {a.get('action','HOLD')} ({a.get('reason','')[:80]})"
+                    for a in position_actions
+                ),
+                bypass_cooldown=True
+            )
+        except Exception:
+            pass
 
     # Cycle summary post
     summary = cycle_result.get("cycle_summary", "(no summary)")
