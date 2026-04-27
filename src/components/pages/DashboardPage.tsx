@@ -373,6 +373,11 @@ export function DashboardPage() {
                       <span>{p.qty} @ ${fmt(parseFloat(p.avg_entry_price || '0'))}</span>
                       <span style={{ color: g ? '#66bb6a' : '#ef5350' }}>{g ? '+' : ''}${fmt(pnl)}</span>
                     </div>
+                    <div style={{ height: '3px', borderRadius: '2px', background: '#0a1929', marginTop: '8px', overflow: 'hidden' }}>
+                      <div style={{ height: '100%', width: `${Math.min(Math.abs(pnlPct) * 3, 100)}%`, background: g ? '#66bb6a' : '#ef5350', borderRadius: '2px' }} />
+                    </div>
+                    {pnlPct > 10 && <div style={{ fontSize: 'var(--mc-font-label)', color: '#ff9800', marginTop: '4px', fontFamily: 'var(--font-mc-mono)' }}>⚠ Consider partial profit</div>}
+                    {pnlPct < -3 && <div style={{ fontSize: 'var(--mc-font-label)', color: '#ef5350', marginTop: '4px', fontFamily: 'var(--font-mc-mono)' }}>⚠ Review stop loss</div>}
                   </div>
                 );
               })}
@@ -403,6 +408,11 @@ export function DashboardPage() {
                       <span>{p.qty} @ ${fmt(parseFloat(p.avg_entry_price || '0'))}</span>
                       <span style={{ color: g ? '#66bb6a' : '#ef5350' }}>{g ? '+' : ''}${fmt(pnl)}</span>
                     </div>
+                    <div style={{ height: '3px', borderRadius: '2px', background: '#0a1929', marginTop: '8px', overflow: 'hidden' }}>
+                      <div style={{ height: '100%', width: `${Math.min(Math.abs(pnlPct) * 3, 100)}%`, background: g ? '#66bb6a' : '#ef5350', borderRadius: '2px' }} />
+                    </div>
+                    {pnlPct > 10 && <div style={{ fontSize: 'var(--mc-font-label)', color: '#ff9800', marginTop: '4px', fontFamily: 'var(--font-mc-mono)' }}>⚠ Consider partial profit</div>}
+                    {pnlPct < -3 && <div style={{ fontSize: 'var(--mc-font-label)', color: '#ef5350', marginTop: '4px', fontFamily: 'var(--font-mc-mono)' }}>⚠ Review stop loss</div>}
                   </div>
                 );
               })}
