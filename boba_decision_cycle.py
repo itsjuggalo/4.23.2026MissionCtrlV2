@@ -674,7 +674,7 @@ def convert_spx_to_spy(pick):
         strike_str = f"{int(round(final_spy_strike * 1000)):08d}"
         candidate_symbol = f"SPY{yymmdd}{opt_letter}{strike_str}"
         v_check = _requests.get(
-            f"https://paper-api.alpaca.markets/v2/assets/{candidate_symbol}",
+            f"https://paper-api.alpaca.markets/v2/options/contracts/{candidate_symbol}",
             headers=H, timeout=10
         )
         if v_check.status_code != 200:
