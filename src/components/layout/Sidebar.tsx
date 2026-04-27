@@ -157,8 +157,20 @@ export function Sidebar({
         const res = await fetch('/api/options-flow');
         const d = await res.json();
         const flows = d?.flows || [];
-        const calls = flows.filter((f: any) => String(f.OptionType || '').toLowerCase() === 'call').sort((a: any, b: any) => (b.Value || 0) - (a.Value || 0));
-        const puts  = flows.filter((f: any) => String(f.OptionType || '').toLowerCase() === 'put').sort((a: any, b: any) => (b.Value || 0) - (a.Value || 0));
+        // Aggregate by Symbol+Strike+Expiry+OptionType so multiple sweeps on same contract roll up
+        const agg: Record<string, any> = {};
+        for (const f of flows) {
+          const key = `${f.Symbol}|${f.Strike}|${f.Expiry}|${f.OptionType}`;
+          if (!agg[key]) {
+            agg[key] = { Symbol: f.Symbol, Strike: f.Strike, Expiry: f.Expiry, ExpiryStr: f.ExpiryStr, OptionType: f.OptionType, Value: 0, Volume: 0, count: 0 };
+          }
+          agg[key].Value += Number(f.Value || 0);
+          agg[key].Volume += Number(f.Volume || 0);
+          agg[key].count += 1;
+        }
+        const rolled = Object.values(agg);
+        const calls = rolled.filter((f: any) => String(f.OptionType || '').toLowerCase() === 'call').sort((a: any, b: any) => b.Value - a.Value);
+        const puts  = rolled.filter((f: any) => String(f.OptionType || '').toLowerCase() === 'put').sort((a: any, b: any) => b.Value - a.Value);
         setBestCall(calls[0] || null);
         setBestPut(puts[0] || null);
       } catch (err) {
@@ -169,6 +181,31 @@ export function Sidebar({
     const iv = setInterval(fetchFlows, 30000);
     return () => clearInterval(iv);
   }, []);
+
+  // Helpers for Best Options display
+  const fmtExpiry = (o: any): string => {
+    if (!o) return '';
+    if (o.ExpiryStr) return String(o.ExpiryStr).slice(5).replace('-', '/'); // "2026-08-20" -> "08/20"
+    if (o.Expiry) {
+      const ts = Number(o.Expiry);
+      if (!ts) return '';
+      const d = new Date(ts > 1e12 ? ts : ts * 1000);
+      return `${String(d.getMonth() + 1).padStart(2, '0')}/${String(d.getDate()).padStart(2, '0')}`;
+    }
+    return '';
+  };
+  const fmtValue = (v: number): string => {
+    if (!v) return '$0';
+    if (v >= 1e6) return `$${(v / 1e6).toFixed(2)}M`;
+    if (v >= 1e3) return `$${Math.round(v / 1e3)}K`;
+    return `$${Math.round(v)}`;
+  };
+  const fmtVol = (v: number): string => {
+    if (!v) return '0';
+    if (v >= 1e6) return `${(v / 1e6).toFixed(1)}M`;
+    if (v >= 1e3) return `${(v / 1e3).toFixed(1)}K`;
+    return String(v);
+  };
 
   const percent = Math.min(((balance - 500000) / 500000) * 100, 100);
 
@@ -356,21 +393,27 @@ export function Sidebar({
             fontFamily: "'JetBrains Mono', 'SF Mono', 'Fira Code', monospace",
           }}
         >
-          <div style={{ color: '#ffd600', fontWeight: 700, marginBottom: 6 }}>BEST OPTIONS OF THE DAY!</div>
+          <div style={{ color: '#ffd600', fontWeight: 700, marginBottom: 8, fontSize: 11, letterSpacing: '0.5px' }}>BEST OPTIONS OF THE DAY</div>
           {bestCall ? (
-            <div style={{ marginBottom: 6 }}>
-              <div style={{ color: '#66bb6a', fontWeight: 700, fontSize: 10 }}>CALL</div>
-              <div style={{ color: '#e0e0e0', fontSize: 10 }}>{bestCall.Symbol || bestCall.symbol || '?'} ${bestCall.Strike || bestCall.strike || '?'} {bestCall.Expiry || bestCall.expiry || ''}</div>
-              <div style={{ color: '#4fc3f7', fontSize: 10 }}>${((bestCall.Value || 0) / 1000).toFixed(0)}K · Vol {bestCall.Volume || bestCall.volume || '?'}</div>
+            <div style={{ marginBottom: 8 }}>
+              <div style={{ display: 'flex', alignItems: 'baseline', gap: 6, marginBottom: 2 }}>
+                <span style={{ color: '#66bb6a', fontWeight: 700, fontSize: 10, letterSpacing: '0.5px' }}>CALL</span>
+                <span style={{ color: '#e0e0e0', fontSize: 11, fontWeight: 600 }}>{bestCall.Symbol || '?'} ${bestCall.Strike || '?'}C</span>
+                <span style={{ color: '#90a4ae', fontSize: 10 }}>{fmtExpiry(bestCall)}</span>
+              </div>
+              <div style={{ color: '#4fc3f7', fontSize: 10 }}>{fmtValue(bestCall.Value || 0)} · {fmtVol(bestCall.Volume || 0)} vol</div>
             </div>
           ) : (
-            <div style={{ color: '#607d8b', fontSize: 10, marginBottom: 6 }}>CALL: scanning...</div>
+            <div style={{ color: '#607d8b', fontSize: 10, marginBottom: 8 }}>CALL: scanning...</div>
           )}
           {bestPut ? (
             <div>
-              <div style={{ color: '#ef5350', fontWeight: 700, fontSize: 10 }}>PUT</div>
-              <div style={{ color: '#e0e0e0', fontSize: 10 }}>{bestPut.Symbol || bestPut.symbol || '?'} ${bestPut.Strike || bestPut.strike || '?'} {bestPut.Expiry || bestPut.expiry || ''}</div>
-              <div style={{ color: '#4fc3f7', fontSize: 10 }}>${((bestPut.Value || 0) / 1000).toFixed(0)}K · Vol {bestPut.Volume || bestPut.volume || '?'}</div>
+              <div style={{ display: 'flex', alignItems: 'baseline', gap: 6, marginBottom: 2 }}>
+                <span style={{ color: '#ef5350', fontWeight: 700, fontSize: 10, letterSpacing: '0.5px' }}>PUT</span>
+                <span style={{ color: '#e0e0e0', fontSize: 11, fontWeight: 600 }}>{bestPut.Symbol || '?'} ${bestPut.Strike || '?'}P</span>
+                <span style={{ color: '#90a4ae', fontSize: 10 }}>{fmtExpiry(bestPut)}</span>
+              </div>
+              <div style={{ color: '#4fc3f7', fontSize: 10 }}>{fmtValue(bestPut.Value || 0)} · {fmtVol(bestPut.Volume || 0)} vol</div>
             </div>
           ) : (
             <div style={{ color: '#607d8b', fontSize: 10 }}>PUT: scanning...</div>
