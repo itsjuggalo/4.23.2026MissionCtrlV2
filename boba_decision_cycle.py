@@ -576,6 +576,9 @@ def convert_spx_to_spy(pick):
         except Exception:
             spx_price = spy_mid * 10.0  # Fallback: assume 10x
         ratio = spx_price / spy_mid  # Typically ~10.03
+        if not (9.0 <= ratio <= 11.5):
+            print(f"[convert] computed ratio {ratio:.2f} outside sane range, falling back to 10.03", flush=True)
+            ratio = 10.03
 
         # Scale strike and round to nearest $5 (SPY strike increment)
         raw_spy_strike = float(pick["strike"]) / ratio
@@ -663,10 +666,23 @@ def convert_spx_to_spy(pick):
             f"(ratio {ratio:.2f}x, Alpaca can't trade SPX)]"
         )
 
+        # Validate the symbol Alpaca will use is actually tradeable
+        from datetime import datetime as _dt
+        exp_dt_obj = _dt.strptime(final_spy_expiry, "%Y-%m-%d")
+        yymmdd = exp_dt_obj.strftime("%y%m%d")
+        opt_letter = "P" if option_type.startswith("P") else "C"
+        strike_str = f"{int(round(final_spy_strike * 1000)):08d}"
+        candidate_symbol = f"SPY{yymmdd}{opt_letter}{strike_str}"
+        v_check = _requests.get(
+            f"https://paper-api.alpaca.markets/v2/assets/{candidate_symbol}",
+            headers=H, timeout=10
+        )
+        if v_check.status_code != 200:
+            return pick, f"SPX→SPY conversion failed: validated symbol {candidate_symbol} not tradeable on Alpaca ({v_check.status_code})"
         note = (
             f"Converted SPX ${pick['strike']:.0f} {pick['expiry'][:10]} "
             f"→ SPY ${final_spy_strike:.0f} {final_spy_expiry} "
-            f"(ratio {ratio:.2f}x)"
+            f"(ratio {ratio:.2f}x, validated {candidate_symbol})"
         )
         return converted, note
 
@@ -1008,6 +1024,15 @@ def main():
                                  body=f"🔄 {conversion_note}", bypass_cooldown=True)
             except Exception:
                 pass
+        if str(converted_pick.get("ticker", "")).upper() == "SPX":
+            print(f"[convert] SKIPPING — pick is still SPX after conversion attempt", flush=True)
+            try:
+                post_to_telegram(agent="boba", message_type="Note",
+                                 body=f"⏭ Skipped SPX pick (no tradeable SPY equivalent): {conversion_note or 'unknown'}",
+                                 bypass_cooldown=True)
+            except Exception:
+                pass
+            continue
         exec_result = execute_pick_on_alpaca(converted_pick)
         converted_pick["execution"] = exec_result
         picks_executed.append(converted_pick)
