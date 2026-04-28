@@ -119,7 +119,16 @@ def signal_id(sig):
 
 def load_daily_picks_state():
     """Load the daily NEW picks counter. Resets at midnight ET."""
-    from datetime import datetime, timezone, timedelta
+    from datetime import datetime, timezone
+import sys as _sys
+_sys.path.insert(0, "/home/ubuntu/scripts")
+try:
+    from lib.flow_channel_reader import get_recent_flow_context, format_for_prompt as format_flow_for_prompt
+    from lib.agent_debate import post_to_debate
+    _MULTIAGENT_LIB_OK = True
+except Exception as _e:
+    _MULTIAGENT_LIB_OK = False
+    print(f"[multiagent] lib import failed: {_e}", flush=True), timedelta
     et_now = datetime.now(timezone(timedelta(hours=-4)))   # EDT — adjust to -5 in winter
     today_et = et_now.strftime("%Y-%m-%d")
     try:
@@ -420,7 +429,10 @@ def load_grok_brief(max_age_min=60):
         if age_min > max_age_min: return ""
         text = d.get("brief_text", "").strip()
         if not text: return ""
-        return f"\n# Grok Market Brief (xAI grok-4-fast + x_search, {age_min}min old)\n{text}\n"
+        return f"\n# Flow Channel Activity (last 30 min, T0/T1/T2 priority)
+{flow_channel_text}
+
+# Grok Market Brief (xAI grok-4-fast + x_search, {age_min}min old)\n{text}\n"
     except Exception as e:
         log_to_ops("boba_cycle", "WARN", f"Grok brief load failed: {e}")
         return ""
@@ -551,6 +563,14 @@ def build_boba_prompt(account, positions, shortlist_with_kronos, remaining_budge
     firebase_signals_text = format_firebase_signals_for_prompt(load_firebase_signals(), max_show=20)
     market_briefing_text = load_market_briefing()
     grok_brief_text = load_grok_brief()
+    if _MULTIAGENT_LIB_OK:
+        try:
+            _flow_ctx = get_recent_flow_context(agent_token_file="discord_boba_token", lookback_min=30)
+            flow_channel_text = format_flow_for_prompt(_flow_ctx, max_show=8)
+        except Exception as _e:
+            flow_channel_text = f"(flow channel reader error: {_e})"
+    else:
+        flow_channel_text = "(multi-agent lib unavailable)"
     orion_skills_text = load_orion_skills()
     multi_agent_context = market_briefing_text + grok_brief_text + orion_skills_text
 
@@ -1197,7 +1217,22 @@ def execute_position_action(action_dict, positions):
         return {"ok": False, "action": act, "symbol": sym, "error": str(e)[:200]}
 
 
-def log_decision(cycle_result, picks_executed):
+def log_decision(cycle_result, picks_executed)
+    
+    # Multi-agent: post Boba's cycle summary to #agent-debate
+    if _MULTIAGENT_LIB_OK:
+        try:
+            _summary = cycle_result.get("cycle_summary", "")[:1500]
+            _picks = cycle_result.get("picks", [])
+            if _picks:
+                _pick_lines = [f"• {p.get('ticker','?')} ${p.get('strike','?')}{p.get('option_type','?')} {p.get('expiry','?')}" for p in _picks[:3]]
+                _summary += "\n\n**Picks this cycle:**\n" + "\n".join(_pick_lines)
+            _passed = cycle_result.get("passed_on", [])
+            if _passed:
+                _summary += f"\n\n_Passed on {len(_passed)}: {', '.join(p.get('ticker','?') for p in _passed[:5])}_"
+            post_to_debate("boba", _summary, related_symbol=(_picks[0].get("ticker") if _picks else None))
+        except Exception as _e:
+            print(f"[multiagent] debate post failed: {_e}", flush=True):
     # SCHEMA v2 (2026-04-28): enrich picks with protocol + entry_criteria defaults
     # protocol: "flow" (current flow-driven picks) | "swing" (future Protocol B) | "manual"
     # entry_criteria: gates that fired for this pick (e.g. ["T1_huge_flow","sweep_AA","repeater_5x"])

@@ -14,6 +14,13 @@ import json
 import sys
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
+import sys as _sys_orion
+_sys_orion.path.insert(0, "/home/ubuntu/scripts")
+try:
+    from lib.agent_debate import post_to_debate as _post_orion_debate
+    _ORION_DEBATE_OK = True
+except Exception:
+    _ORION_DEBATE_OK = False
 
 sys.path.insert(0, "/home/ubuntu/mission-control/agent-team")
 sys.path.insert(0, "/home/ubuntu/mission-control/flow-monitor/reasoning")
@@ -160,3 +167,16 @@ def main():
 
 if __name__ == "__main__":
     sys.exit(main())
+    # Multi-agent: post Orion's brief summary to #agent-debate
+    if _ORION_DEBATE_OK:
+        try:
+            _orion_summary = "**Orion Premarket Brief**\n\n"
+            if 'top_events' in dir() and top_events:
+                for e in top_events[:5]:
+                    _orion_summary += f"• {e.get('symbol','?')} score {e.get('score','?')}: {e.get('reasoning','')[:100]}\n"
+            else:
+                _orion_summary += "No high-conviction events surfaced this morning."
+            _post_orion_debate("orion", _orion_summary)
+            print("[orion] posted brief to #agent-debate")
+        except Exception as _e:
+            print(f"[orion] debate post failed: {_e}")

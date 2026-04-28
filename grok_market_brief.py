@@ -9,6 +9,13 @@ Cost: ~$0.01-0.03 per call × 48/day ≈ $0.48-1.44/day at most.
 import json, requests, sys
 from pathlib import Path
 from datetime import datetime, timezone
+import sys as _sys_grok
+_sys_grok.path.insert(0, "/home/ubuntu/scripts")
+try:
+    from lib.agent_debate import post_to_debate as _post_grok_debate
+    _GROK_DEBATE_OK = True
+except Exception:
+    _GROK_DEBATE_OK = False
 
 SECRETS = Path.home() / ".openclaw" / "secrets"
 OUT = Path.home() / ".openclaw" / "workspace" / "directives" / "grok_brief.json"
@@ -63,3 +70,17 @@ def main():
 
 if __name__ == "__main__":
     main()
+
+# Multi-agent: post Grok's macro brief snippet to #agent-debate
+if _GROK_DEBATE_OK:
+    try:
+        # Re-read what we just wrote
+        import json as _json
+        out_file = Path("/home/ubuntu/.openclaw/workspace/directives/grok_brief.json")
+        if out_file.exists():
+            d = _json.loads(out_file.read_text())
+            brief = d.get("brief","")[:1500]
+            _post_grok_debate("grok", f"**Grok 30m Macro Brief**\n\n{brief}")
+            print("[grok] posted brief to #agent-debate")
+    except Exception as _e:
+        print(f"[grok] debate post failed: {_e}")
