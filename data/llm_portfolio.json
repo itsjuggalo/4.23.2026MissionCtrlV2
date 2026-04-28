@@ -1,5 +1,5 @@
 {
-  "last_updated": "2026-04-27T20:00:39.358148",
+  "last_updated": "2026-04-28T12:00:51.072153",
   "leaderboard": [
     {
       "rank": 0,
@@ -17,8 +17,8 @@
       "model": "DeepSeek Chat 3.1",
       "color": "#66bb6a",
       "total_trades": 100,
-      "holdings_count": 5,
-      "buy_volume": 29979.99,
+      "holdings_count": 6,
+      "buy_volume": 30459.98,
       "sell_volume": 31633.29
     },
     {
@@ -1384,17 +1384,28 @@
       "color": "#66bb6a",
       "account_id": "1800473182_16",
       "total_trades": 100,
-      "total_buy_value": 29979.99,
+      "total_buy_value": 30459.98,
       "total_sell_value": 31633.29,
       "current_holdings": {
+        "META": 2.07,
         "NVDA": 6.49,
         "SMH": 1.06,
         "XLE": 2.81,
         "GOOGL": 1.49,
         "AVGO": 2.43
       },
-      "holdings_count": 5,
+      "holdings_count": 6,
       "recent_trades": [
+        {
+          "date": "2026-04-27",
+          "side": "buy",
+          "symbol": "META",
+          "company": "Meta",
+          "price": 675.8,
+          "quantity": 2.07,
+          "value": 1399.99,
+          "order_id": "0638520510766743552"
+        },
         {
           "date": "2026-04-27",
           "side": "sell",
@@ -1684,19 +1695,19 @@
           "quantity": 1.0,
           "value": 372.31,
           "order_id": "0633417499753709568"
-        },
-        {
-          "date": "2026-04-13",
-          "side": "sell",
-          "symbol": "AMZN",
-          "company": "Amazon.com",
-          "price": 237.91,
-          "quantity": 1.0,
-          "value": 237.91,
-          "order_id": "0633417499602714624"
         }
       ],
       "all_trades": [
+        {
+          "date": "2026-04-27",
+          "side": "buy",
+          "symbol": "META",
+          "company": "Meta",
+          "price": 675.8,
+          "quantity": 2.07,
+          "value": 1399.99,
+          "order_id": "0638520510766743552"
+        },
         {
           "date": "2026-04-27",
           "side": "sell",
@@ -2676,16 +2687,6 @@
           "quantity": 1.0,
           "value": 387.91,
           "order_id": "0620763695827451904"
-        },
-        {
-          "date": "2026-03-06",
-          "side": "buy",
-          "symbol": "TLT",
-          "company": "iShares 20+ Year Treasury Bond ETF",
-          "price": 88.21,
-          "quantity": 10.43,
-          "value": 920.0,
-          "order_id": "0619661454534049792"
         },
         {
           "date": "2026-03-06",

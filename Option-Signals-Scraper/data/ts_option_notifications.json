@@ -5714,5 +5714,29 @@
     "message": "Reached SellTarget1 @9.60 with gain: 14.29%. Take profits and ride for next target with stops @6.72",
     "symbol": "MRVL",
     "title": "MRVL 160C 05/15 : SELL"
+  },
+  "1777383023": {
+    "category": "SWING",
+    "message": "Take trailing stop at 5.36 to exit trade!",
+    "symbol": "MRVL",
+    "title": "MRVL 160C 05/15 : SELL"
+  },
+  "1777383049": {
+    "category": "ER PLAY",
+    "message": "Take trailing stop at 6.10 to exit trade! Gain: 15.09%.",
+    "symbol": "UHS",
+    "title": "UHS 180C 05/15 : SELL"
+  },
+  "1777383085": {
+    "category": "SWING",
+    "message": "Take trailing stop at 8.00 to exit trade!",
+    "symbol": "GOOGL",
+    "title": "GOOGL 360C 05/15 : SELL"
+  },
+  "1777385372": {
+    "category": "SWING",
+    "message": "Buy below 21.10, Sell above 24.26\nSwing, Moderate risk",
+    "symbol": "CLS",
+    "title": "CLS 450C 7/17: BUY"
   }
 }

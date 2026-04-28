@@ -25604,5 +25604,35 @@
     "message": "Reached SellTarget2 @195.5 with gain: 9.36%. Take profits and ride for next target with stops @178.8",
     "symbol": "DHR",
     "title": "DHR : SELL"
+  },
+  "1777383040": {
+    "category": "SWING",
+    "message": "Take trailing stop at 388.1 to exit trade! Gain: 5.02%.",
+    "symbol": "TSM",
+    "title": "TSM : SELL"
+  },
+  "1777384256": {
+    "category": "SWING",
+    "message": "Buy below 10.86, Sell above 11.19\nSwing, Moderate risk",
+    "symbol": "NOK",
+    "title": "NOK: BUY"
+  },
+  "1777384885": {
+    "category": "SWING",
+    "message": "Take trailing stop at 178.8 to exit trade! Gain: 0.02%.",
+    "symbol": "DHR",
+    "title": "DHR : SELL"
+  },
+  "1777385622": {
+    "category": "SWING",
+    "message": "Buy below 440.78, Sell above 454.00\nSwing, Moderate risk",
+    "symbol": "SPOT",
+    "title": "SPOT: BUY"
+  },
+  "1777385641": {
+    "category": "SCALP",
+    "message": "Buy below 366.96, Sell above 377.97\nScalp, VH risk",
+    "symbol": "CLS",
+    "title": "CLS: BUY"
   }
 }

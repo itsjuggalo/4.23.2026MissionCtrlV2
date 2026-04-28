@@ -4029,5 +4029,23 @@
     "message": "Reached SellTarget2 @186.2 with gain: 7.43%. Take profits and ride for next target with stops @173.33",
     "symbol": "UHS",
     "title": "UHS : SELL"
+  },
+  "1777383312": {
+    "category": "ER PLAY",
+    "message": "Take trailing stop at 172.9 to exit trade!",
+    "symbol": "UHS",
+    "title": "UHS : SELL"
+  },
+  "1777383867": {
+    "category": "SWING",
+    "message": "Buy below 389.30, Sell above 400.98\nSwing, Moderate risk",
+    "symbol": "CLS",
+    "title": "CLS: BUY"
+  },
+  "1777384149": {
+    "category": "SWING",
+    "message": "Take trailing stop at 72.52 to exit trade!",
+    "symbol": "SYY",
+    "title": "SYY : SELL"
   }
 }

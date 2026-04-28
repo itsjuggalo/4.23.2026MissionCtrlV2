@@ -6494,5 +6494,17 @@
     "message": "Buy below 9.20, Sell above 10.58\nScalp, VH risk",
     "symbol": "SMH",
     "title": "SMH 520C 5/8: BUY"
+  },
+  "1777383027": {
+    "category": "SCALP",
+    "message": "Stopped out at 4.40",
+    "symbol": "SMH",
+    "title": "SMH 520C 05/08 : SELL"
+  },
+  "1777384137": {
+    "category": "SWING",
+    "message": "Take trailing stop at 2.90 to exit trade!",
+    "symbol": "DHR",
+    "title": "DHR 195C 06/18 : SELL"
   }
 }

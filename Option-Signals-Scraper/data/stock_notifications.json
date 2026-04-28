@@ -2995,5 +2995,29 @@
     "message": "Buy To Open at 27.75 with first target above 28.31",
     "symbol": "CMCSA",
     "title": "CMCSA: BTO"
+  },
+  "1777381284": {
+    "category": "SWING",
+    "message": "Reached Target 185.0 and that's 7.13%! Lock some in and wait for next target. Raise the stops to 172.69",
+    "symbol": "UHS",
+    "title": "UHS : STC"
+  },
+  "1777382266": {
+    "category": "SWING",
+    "message": "Reached Target 187.0 and that's 8.29%! Lock some in and wait for next target. Raise the stops to 181.4",
+    "symbol": "UHS",
+    "title": "UHS : STC"
+  },
+  "1777383055": {
+    "category": "SCALP",
+    "message": "Close the trade as it hit stop at 147.3!",
+    "symbol": "MRVL",
+    "title": "MRVL : STC"
+  },
+  "1777383226": {
+    "category": "SWING",
+    "message": "Reached Target 28.31 and that's 2.02%! Lock some in and wait for next target. Raise the stops to 25.53",
+    "symbol": "CMCSA",
+    "title": "CMCSA : STC"
   }
 }

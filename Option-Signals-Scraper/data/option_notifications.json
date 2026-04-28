@@ -4557,5 +4557,23 @@
     "message": "Buy To Open at 6.55 with first target above 7.53",
     "symbol": "SFM",
     "title": "SFM 75P 5/15: BTO"
+  },
+  "1777383007": {
+    "category": "SWING",
+    "message": "Reached Target 1.94 and that's 18.29%! Lock some in and wait for next target. Raise the stops to 1.36",
+    "symbol": "CMCSA",
+    "title": "CMCSA 27.5C 07/17 : STC"
+  },
+  "1777383065": {
+    "category": "SWING",
+    "message": "Close the trade as it hit trailing stop at 6.10!",
+    "symbol": "UHS",
+    "title": "UHS 180C 05/15 : STC"
+  },
+  "1777383147": {
+    "category": "SWING",
+    "message": "Reached Target 0.58 and that's 28.89%! Lock some in and wait for next target. Raise the stops to 0.45",
+    "symbol": "KWEB",
+    "title": "KWEB 27P 05/29 : STC"
   }
 }
