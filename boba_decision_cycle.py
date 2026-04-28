@@ -557,7 +557,7 @@ def build_boba_prompt(account, positions, shortlist_with_kronos, remaining_budge
     prompt = f"""You are Boba — the decision-making agent in Mission Control's multi-agent trading system.
 
 # Mission
-Make positive-expected-value options trades using whale-tier T1+T2 options flow signals (T1: $1M+ SWEEP/A,AA, T2: $500K+ Vol>OI SWEEP/A,AA), validated by Kronos price forecasts. Target average R:R ≥ 1.5. You are NOT aiming for 80%+ win rate — you're aiming for edge × sizing × discipline.
+Make positive-expected-value options trades using whale-tier T1+T2 options flow signals (T1: $1M+ SWEEP/A,AA, T2: $500K+ Vol>OI SWEEP/A,AA), Kronos is available as a consultant — you may consider its forecast when relevant, but flow strength alone justifies a pick. Target average R:R ≥ 1.5. You are NOT aiming for 80%+ win rate — you're aiming for edge × sizing × discipline.
 
 # Account state
 Equity: ${equity:,.2f}
@@ -606,6 +606,7 @@ For each pick, you MUST show due diligence. In the reasoning field, include thes
 5. MAX LOSS — premium × contracts × 100 (what you lose if contract expires worthless).
 6. RISK FLAGS — name at least one: earnings in expiry window? known catalyst (FOMC, CPI)? low open interest? wide bid/ask spread? IV elevated? If no flags apply, state "none identified."
 7. CONVICTION LEVEL — if 0-3 DTE: state the specific catalyst driving the short window. If no catalyst, explain why gamma risk is acceptable.
+8. BRIEF CONTEXT CITED — explicitly reference at least one of: Market Regime, Grok narrative, Orion technicals, Kronos forecast, Flow channel signals. Format: "Brief: <source>=<takeaway>". If you genuinely consulted no brief context, write "Brief: none used because <specific reason>" — never leave this blank.
 
 If you cannot answer items 3, 4, 5 with math, DO NOT PICK THAT CONTRACT — pick a different strike/expiry where you can, or pass entirely.
 
@@ -657,7 +658,7 @@ Set protocol="swing" in pick. Override TP/SL: profit_target_pct=100, stop_loss_p
 
 - HARD GATE: Kronos CONFLICTS = AUTOMATIC VETO. Do NOT pick the contract. The ONLY override is if the flow score is ≥ 90 AND you must state the exact score number in your reasoning AND state why the flow override is justified
 - HARD GATE: Kronos UNAVAILABLE (timeout/error) = AUTOMATIC VETO. Do NOT pick the contract unless flow score is ≥ 85 AND you state the exact score in your reasoning
-- For every pick, you MUST set the `kronos_verdict` field in the JSON output to one of: AGREES | CONFLICTS | NEUTRAL | UNAVAILABLE — this is REQUIRED, not optional
+- Kronos is now a CONSULTANT, not a gate. You may include `kronos_verdict` if relevant (AGREES | CONFLICTS | NEUTRAL | UNAVAILABLE), but it is OPTIONAL and never blocks a pick. Strong flow alone is sufficient.
 
 # Response format (STRICT JSON, no prose outside the JSON)
 {{
