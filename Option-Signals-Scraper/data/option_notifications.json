@@ -4575,5 +4575,11 @@
     "message": "Reached Target 0.58 and that's 28.89%! Lock some in and wait for next target. Raise the stops to 0.45",
     "symbol": "KWEB",
     "title": "KWEB 27P 05/29 : STC"
+  },
+  "1777386699": {
+    "category": "SWING",
+    "message": "Buy To Open at 19.80 with first target above 22.77",
+    "symbol": "CLS",
+    "title": "CLS 450C 7/17: BTO"
   }
 }

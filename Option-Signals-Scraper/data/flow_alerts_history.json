@@ -735,8 +735,8 @@
     "max_price": 12.0,
     "min_price": 3.65,
     "first_seen": 1776875297993,
-    "last_seen": 1777386174231,
-    "num_updates": 2267,
+    "last_seen": 1777387422871,
+    "num_updates": 2271,
     "source": "FlowGreeks"
   },
   "NVDA260515P00200000": {
@@ -2295,8 +2295,8 @@
     "max_price": 5.5,
     "min_price": 1.8,
     "first_seen": 1776880809595,
-    "last_seen": 1777386174929,
-    "num_updates": 1876,
+    "last_seen": 1777387423523,
+    "num_updates": 1880,
     "source": "FlowGreeks"
   },
   "MSFT260618C00500000": {
@@ -3415,8 +3415,8 @@
     "max_price": 11.8,
     "min_price": 5.5,
     "first_seen": 1776953328573,
-    "last_seen": 1777386174929,
-    "num_updates": 283,
+    "last_seen": 1777387423523,
+    "num_updates": 287,
     "source": "FlowGreeks"
   },
   "FIG260918P00025000": {
@@ -4085,8 +4085,8 @@
     "max_price": 4.0,
     "min_price": 1.83,
     "first_seen": 1776957301167,
-    "last_seen": 1777386174929,
-    "num_updates": 728,
+    "last_seen": 1777387423523,
+    "num_updates": 732,
     "source": "FlowGreeks2"
   },
   "COIN260618C00250000": {
@@ -4255,8 +4255,8 @@
     "max_price": 7.25,
     "min_price": 5.65,
     "first_seen": 1776958526056,
-    "last_seen": 1777386174929,
-    "num_updates": 522,
+    "last_seen": 1777387423523,
+    "num_updates": 526,
     "source": "FlowGreeks"
   },
   "QQQ260424C00655000": {
@@ -4605,8 +4605,8 @@
     "max_price": 10.0,
     "min_price": 7.1,
     "first_seen": 1776962207771,
-    "last_seen": 1777386174929,
-    "num_updates": 1513,
+    "last_seen": 1777387423523,
+    "num_updates": 1517,
     "source": "FlowGreeks2"
   },
   "CVNA260618C00350000": {
@@ -4695,8 +4695,8 @@
     "max_price": 10.4,
     "min_price": 7.0,
     "first_seen": 1776963121625,
-    "last_seen": 1777386174231,
-    "num_updates": 485,
+    "last_seen": 1777387422871,
+    "num_updates": 489,
     "source": "FlowGreeks"
   },
   "NBIS260501C00175000": {
@@ -5291,12 +5291,12 @@
   },
   "SPY260501P00710000": {
     "first_price": 9.19,
-    "last_price": 9.19,
+    "last_price": 5.02,
     "max_price": 9.19,
-    "min_price": 8.24,
+    "min_price": 5.02,
     "first_seen": 1776965572212,
-    "last_seen": 1777036892096,
-    "num_updates": 460,
+    "last_seen": 1777387423523,
+    "num_updates": 462,
     "source": "FlowGreeks2"
   },
   "SPY260515P00707000": {
@@ -5701,12 +5701,12 @@
   },
   "QQQ260501P00655000": {
     "first_price": 13.0,
-    "last_price": 13.0,
+    "last_price": 7.14,
     "max_price": 13.0,
-    "min_price": 13.0,
+    "min_price": 7.14,
     "first_seen": 1776967097221,
-    "last_seen": 1777036892096,
-    "num_updates": 229,
+    "last_seen": 1777387423523,
+    "num_updates": 230,
     "source": "FlowGreeks2"
   },
   "SMH260515P00460000": {
@@ -7445,8 +7445,8 @@
     "max_price": 15.75,
     "min_price": 13.5,
     "first_seen": 1777043618857,
-    "last_seen": 1777386174231,
-    "num_updates": 2081,
+    "last_seen": 1777387422871,
+    "num_updates": 2085,
     "source": "FlowGreeks2"
   },
   "NVDA260618C00220000": {
@@ -7735,8 +7735,8 @@
     "max_price": 6.25,
     "min_price": 5.0,
     "first_seen": 1777045148409,
-    "last_seen": 1777386174929,
-    "num_updates": 2162,
+    "last_seen": 1777387423523,
+    "num_updates": 2166,
     "source": "FlowGreeks2"
   },
   "NVDA260618C00190000": {
@@ -7985,8 +7985,8 @@
     "max_price": 5.14,
     "min_price": 2.12,
     "first_seen": 1777046062605,
-    "last_seen": 1777386174929,
-    "num_updates": 817,
+    "last_seen": 1777387423523,
+    "num_updates": 821,
     "source": "FlowGreeks2"
   },
   "QQQ260515C00663000": {
@@ -8145,8 +8145,8 @@
     "max_price": 3.2,
     "min_price": 2.31,
     "first_seen": 1777047592420,
-    "last_seen": 1777386174929,
-    "num_updates": 2058,
+    "last_seen": 1777387423523,
+    "num_updates": 2062,
     "source": "FlowGreeks2"
   },
   "AAOI260424C00150000": {
@@ -8865,8 +8865,8 @@
     "max_price": 4.8,
     "min_price": 2.89,
     "first_seen": 1777057406713,
-    "last_seen": 1777386174929,
-    "num_updates": 1266,
+    "last_seen": 1777387423523,
+    "num_updates": 1270,
     "source": "FlowGreeks"
   },
   "SNDK260918C01400000": {
@@ -9285,8 +9285,8 @@
     "max_price": 1.75,
     "min_price": 1.2,
     "first_seen": 1777061080731,
-    "last_seen": 1777386174231,
-    "num_updates": 1233,
+    "last_seen": 1777387422871,
+    "num_updates": 1237,
     "source": "FlowGreeks2"
   },
   "SPY260428C00713000": {
@@ -9371,12 +9371,12 @@
   },
   "AAPL260501C00270000": {
     "first_price": 6.4,
-    "last_price": 6.4,
+    "last_price": 5.95,
     "max_price": 6.4,
-    "min_price": 6.4,
+    "min_price": 5.95,
     "first_seen": 1777089868804,
-    "last_seen": 1777296217888,
-    "num_updates": 665,
+    "last_seen": 1777387423523,
+    "num_updates": 666,
     "source": "FlowGreeks2"
   },
   "AAPL260501C00280000": {
@@ -9415,8 +9415,8 @@
     "max_price": 23.5,
     "min_price": 6.65,
     "first_seen": 1777089868804,
-    "last_seen": 1777386174929,
-    "num_updates": 1204,
+    "last_seen": 1777387423523,
+    "num_updates": 1208,
     "source": "FlowGreeks2"
   },
   "AMD260618C00300000": {
@@ -11425,8 +11425,8 @@
     "max_price": 28.7,
     "min_price": 9.82,
     "first_seen": 1777089868804,
-    "last_seen": 1777386174929,
-    "num_updates": 671,
+    "last_seen": 1777387423523,
+    "num_updates": 675,
     "source": "FlowGreeks2"
   },
   "SPX260501C07150000": {
@@ -11931,12 +11931,12 @@
   },
   "MU260501P00500000": {
     "first_price": 14.95,
-    "last_price": 14.95,
-    "max_price": 14.95,
+    "last_price": 19.25,
+    "max_price": 19.66,
     "min_price": 14.95,
     "first_seen": 1777298085026,
-    "last_seen": 1777382428596,
-    "num_updates": 541,
+    "last_seen": 1777387423523,
+    "num_updates": 544,
     "source": "FlowGreeks2"
   },
   "MU260501P00520000": {
@@ -12055,8 +12055,8 @@
     "max_price": 4.68,
     "min_price": 1.99,
     "first_seen": 1777298705915,
-    "last_seen": 1777386174929,
-    "num_updates": 543,
+    "last_seen": 1777387423523,
+    "num_updates": 547,
     "source": "FlowGreeks2"
   },
   "IWM270319P00265000": {
@@ -12375,8 +12375,8 @@
     "max_price": 0.98,
     "min_price": 0.76,
     "first_seen": 1777308396720,
-    "last_seen": 1777386174929,
-    "num_updates": 484,
+    "last_seen": 1777387423523,
+    "num_updates": 488,
     "source": "FlowGreeks"
   },
   "TSLA260429C00375000": {
@@ -12545,8 +12545,8 @@
     "max_price": 5.51,
     "min_price": 4.44,
     "first_seen": 1777310895950,
-    "last_seen": 1777386174231,
-    "num_updates": 464,
+    "last_seen": 1777387422871,
+    "num_updates": 468,
     "source": "FlowGreeks"
   },
   "GOOGL260515C00375000": {
@@ -12625,8 +12625,8 @@
     "max_price": 4.7,
     "min_price": 3.5,
     "first_seen": 1777313077453,
-    "last_seen": 1777386174929,
-    "num_updates": 454,
+    "last_seen": 1777387423523,
+    "num_updates": 462,
     "source": "FlowGreeks"
   },
   "MSFT260427C00425000": {
@@ -12645,8 +12645,8 @@
     "max_price": 5.0,
     "min_price": 2.49,
     "first_seen": 1777313387561,
-    "last_seen": 1777386174929,
-    "num_updates": 453,
+    "last_seen": 1777387423523,
+    "num_updates": 457,
     "source": "FlowGreeks"
   },
   "NVDA260504C00215000": {
@@ -12795,8 +12795,8 @@
     "max_price": 7.43,
     "min_price": 6.55,
     "first_seen": 1777317441733,
-    "last_seen": 1777386174231,
-    "num_updates": 421,
+    "last_seen": 1777387422871,
+    "num_updates": 425,
     "source": "FlowGreeks"
   },
   "MU260717C00590000": {
@@ -13075,8 +13075,8 @@
     "max_price": 15.5,
     "min_price": 15.5,
     "first_seen": 1777383367954,
-    "last_seen": 1777386174231,
-    "num_updates": 10,
+    "last_seen": 1777387422871,
+    "num_updates": 14,
     "source": "FlowGreeks"
   },
   "AMZN260501C00272500": {
@@ -13085,8 +13085,8 @@
     "max_price": 4.15,
     "min_price": 4.15,
     "first_seen": 1777383677941,
-    "last_seen": 1777386174231,
-    "num_updates": 9,
+    "last_seen": 1777387422871,
+    "num_updates": 13,
     "source": "FlowGreeks"
   },
   "CRWV260501C00106000": {
@@ -13095,8 +13095,8 @@
     "max_price": 5.2,
     "min_price": 5.2,
     "first_seen": 1777383677941,
-    "last_seen": 1777386174231,
-    "num_updates": 9,
+    "last_seen": 1777387422871,
+    "num_updates": 13,
     "source": "FlowGreeks"
   },
   "GOOGL260504P00340000": {
@@ -13105,8 +13105,8 @@
     "max_price": 6.1,
     "min_price": 6.1,
     "first_seen": 1777383677941,
-    "last_seen": 1777386174231,
-    "num_updates": 9,
+    "last_seen": 1777387422871,
+    "num_updates": 13,
     "source": "FlowGreeks"
   },
   "SPX260428C07140000": {
@@ -13115,8 +13115,8 @@
     "max_price": 17.0,
     "min_price": 17.0,
     "first_seen": 1777383678588,
-    "last_seen": 1777386174929,
-    "num_updates": 9,
+    "last_seen": 1777387423523,
+    "num_updates": 13,
     "source": "FlowGreeks2"
   },
   "SPX260428C07145000": {
@@ -13125,8 +13125,8 @@
     "max_price": 14.88,
     "min_price": 14.87,
     "first_seen": 1777383678588,
-    "last_seen": 1777386174929,
-    "num_updates": 9,
+    "last_seen": 1777387423523,
+    "num_updates": 13,
     "source": "FlowGreeks2"
   },
   "INTC260918P00075000": {
@@ -13135,8 +13135,8 @@
     "max_price": 9.5,
     "min_price": 9.5,
     "first_seen": 1777383988037,
-    "last_seen": 1777386174231,
-    "num_updates": 8,
+    "last_seen": 1777387422871,
+    "num_updates": 12,
     "source": "FlowGreeks"
   },
   "NVDA270319C00200000": {
@@ -13145,8 +13145,8 @@
     "max_price": 43.76,
     "min_price": 43.76,
     "first_seen": 1777383988037,
-    "last_seen": 1777386174231,
-    "num_updates": 8,
+    "last_seen": 1777387422871,
+    "num_updates": 12,
     "source": "FlowGreeks"
   },
   "QQQ260428C00658000": {
@@ -13155,8 +13155,8 @@
     "max_price": 2.72,
     "min_price": 2.68,
     "first_seen": 1777383988037,
-    "last_seen": 1777386174929,
-    "num_updates": 16,
+    "last_seen": 1777387423523,
+    "num_updates": 24,
     "source": "FlowGreeks"
   },
   "QQQ260505C00680000": {
@@ -13165,8 +13165,8 @@
     "max_price": 1.15,
     "min_price": 1.13,
     "first_seen": 1777383988037,
-    "last_seen": 1777386174929,
-    "num_updates": 16,
+    "last_seen": 1777387423523,
+    "num_updates": 24,
     "source": "FlowGreeks"
   },
   "SPY260428C00712000": {
@@ -13175,8 +13175,8 @@
     "max_price": 1.96,
     "min_price": 1.96,
     "first_seen": 1777383988037,
-    "last_seen": 1777386174231,
-    "num_updates": 8,
+    "last_seen": 1777387422871,
+    "num_updates": 12,
     "source": "FlowGreeks"
   },
   "WULF261218C00020000": {
@@ -13185,8 +13185,8 @@
     "max_price": 6.7,
     "min_price": 6.7,
     "first_seen": 1777383988037,
-    "last_seen": 1777386174231,
-    "num_updates": 8,
+    "last_seen": 1777387422871,
+    "num_updates": 12,
     "source": "FlowGreeks"
   },
   "CLS260717C00450000": {
@@ -13195,8 +13195,8 @@
     "max_price": 28.0,
     "min_price": 28.0,
     "first_seen": 1777383988750,
-    "last_seen": 1777386174929,
-    "num_updates": 8,
+    "last_seen": 1777387423523,
+    "num_updates": 12,
     "source": "FlowGreeks2"
   },
   "QQQ260428C00657000": {
@@ -13205,8 +13205,8 @@
     "max_price": 2.99,
     "min_price": 2.99,
     "first_seen": 1777383988750,
-    "last_seen": 1777386174929,
-    "num_updates": 8,
+    "last_seen": 1777387423523,
+    "num_updates": 12,
     "source": "FlowGreeks2"
   },
   "QQQ260428C00660000": {
@@ -13215,8 +13215,8 @@
     "max_price": 1.6,
     "min_price": 1.55,
     "first_seen": 1777383988750,
-    "last_seen": 1777386174929,
-    "num_updates": 8,
+    "last_seen": 1777387423523,
+    "num_updates": 12,
     "source": "FlowGreeks2"
   },
   "SPX260428C07150000": {
@@ -13225,8 +13225,8 @@
     "max_price": 14.51,
     "min_price": 13.57,
     "first_seen": 1777383988750,
-    "last_seen": 1777386174929,
-    "num_updates": 8,
+    "last_seen": 1777387423523,
+    "num_updates": 12,
     "source": "FlowGreeks2"
   },
   "SPX260428C07155000": {
@@ -13235,8 +13235,8 @@
     "max_price": 12.86,
     "min_price": 12.86,
     "first_seen": 1777383988750,
-    "last_seen": 1777386174929,
-    "num_updates": 8,
+    "last_seen": 1777387423523,
+    "num_updates": 12,
     "source": "FlowGreeks2"
   },
   "NOK260501C00010500": {
@@ -13245,8 +13245,8 @@
     "max_price": 0.5,
     "min_price": 0.5,
     "first_seen": 1777384298290,
-    "last_seen": 1777386174231,
-    "num_updates": 7,
+    "last_seen": 1777387422871,
+    "num_updates": 11,
     "source": "FlowGreeks"
   },
   "OKLO260508P00073000": {
@@ -13255,8 +13255,8 @@
     "max_price": 6.4,
     "min_price": 6.4,
     "first_seen": 1777384298290,
-    "last_seen": 1777386174231,
-    "num_updates": 7,
+    "last_seen": 1777387422871,
+    "num_updates": 11,
     "source": "FlowGreeks"
   },
   "SNDK270115C01550000": {
@@ -13265,8 +13265,8 @@
     "max_price": 222.0,
     "min_price": 222.0,
     "first_seen": 1777384298290,
-    "last_seen": 1777386174231,
-    "num_updates": 7,
+    "last_seen": 1777387422871,
+    "num_updates": 11,
     "source": "FlowGreeks"
   },
   "STX260717C00540000": {
@@ -13275,8 +13275,8 @@
     "max_price": 104.03,
     "min_price": 104.03,
     "first_seen": 1777384298290,
-    "last_seen": 1777386174231,
-    "num_updates": 7,
+    "last_seen": 1777387422871,
+    "num_updates": 11,
     "source": "FlowGreeks"
   },
   "GFS260618P00055000": {
@@ -13285,8 +13285,8 @@
     "max_price": 4.7,
     "min_price": 4.7,
     "first_seen": 1777384608507,
-    "last_seen": 1777386174231,
-    "num_updates": 6,
+    "last_seen": 1777387422871,
+    "num_updates": 10,
     "source": "FlowGreeks"
   },
   "MU280121P00970000": {
@@ -13295,8 +13295,8 @@
     "max_price": 518.4,
     "min_price": 518.4,
     "first_seen": 1777384608507,
-    "last_seen": 1777386174231,
-    "num_updates": 6,
+    "last_seen": 1777387422871,
+    "num_updates": 10,
     "source": "FlowGreeks"
   },
   "MU280616P01010000": {
@@ -13305,18 +13305,18 @@
     "max_price": 564.4,
     "min_price": 564.4,
     "first_seen": 1777384608507,
-    "last_seen": 1777386174231,
-    "num_updates": 6,
+    "last_seen": 1777387422871,
+    "num_updates": 10,
     "source": "FlowGreeks"
   },
   "QQQ260428P00657000": {
     "first_price": 1.7,
-    "last_price": 1.46,
+    "last_price": 1.7,
     "max_price": 1.7,
     "min_price": 1.46,
     "first_seen": 1777384609156,
-    "last_seen": 1777386174929,
-    "num_updates": 6,
+    "last_seen": 1777387423523,
+    "num_updates": 10,
     "source": "FlowGreeks2"
   },
   "QQQ260428P00659000": {
@@ -13325,8 +13325,8 @@
     "max_price": 2.47,
     "min_price": 2.47,
     "first_seen": 1777384609156,
-    "last_seen": 1777386174929,
-    "num_updates": 6,
+    "last_seen": 1777387423523,
+    "num_updates": 10,
     "source": "FlowGreeks2"
   },
   "SPX260428P07135000": {
@@ -13335,8 +13335,8 @@
     "max_price": 14.84,
     "min_price": 14.16,
     "first_seen": 1777384609156,
-    "last_seen": 1777386174929,
-    "num_updates": 6,
+    "last_seen": 1777387423523,
+    "num_updates": 10,
     "source": "FlowGreeks2"
   },
   "SPX260428P07140000": {
@@ -13345,8 +13345,8 @@
     "max_price": 16.47,
     "min_price": 16.47,
     "first_seen": 1777384609156,
-    "last_seen": 1777386174929,
-    "num_updates": 6,
+    "last_seen": 1777387423523,
+    "num_updates": 10,
     "source": "FlowGreeks2"
   },
   "SPX260428P07145000": {
@@ -13355,18 +13355,18 @@
     "max_price": 17.14,
     "min_price": 17.14,
     "first_seen": 1777384609156,
-    "last_seen": 1777386174929,
-    "num_updates": 6,
+    "last_seen": 1777387423523,
+    "num_updates": 10,
     "source": "FlowGreeks2"
   },
   "SPY260428P00710000": {
     "first_price": 1.08,
     "last_price": 1.08,
     "max_price": 1.08,
-    "min_price": 1.08,
+    "min_price": 0.73,
     "first_seen": 1777384609156,
-    "last_seen": 1777386174929,
-    "num_updates": 6,
+    "last_seen": 1777387423523,
+    "num_updates": 13,
     "source": "FlowGreeks2"
   },
   "SPY260428P00712000": {
@@ -13375,8 +13375,8 @@
     "max_price": 1.98,
     "min_price": 1.91,
     "first_seen": 1777384609156,
-    "last_seen": 1777386174929,
-    "num_updates": 6,
+    "last_seen": 1777387423523,
+    "num_updates": 10,
     "source": "FlowGreeks2"
   },
   "MU280121P00540000": {
@@ -13385,8 +13385,8 @@
     "max_price": 186.2,
     "min_price": 186.2,
     "first_seen": 1777384919362,
-    "last_seen": 1777386174231,
-    "num_updates": 5,
+    "last_seen": 1777387422871,
+    "num_updates": 9,
     "source": "FlowGreeks"
   },
   "TSEM260918C00210000": {
@@ -13395,18 +13395,18 @@
     "max_price": 34.67,
     "min_price": 34.67,
     "first_seen": 1777384919362,
-    "last_seen": 1777386174231,
-    "num_updates": 5,
+    "last_seen": 1777387422871,
+    "num_updates": 9,
     "source": "FlowGreeks"
   },
   "QQQ260428C00655000": {
     "first_price": 3.83,
-    "last_price": 3.83,
-    "max_price": 3.83,
+    "last_price": 4.03,
+    "max_price": 4.03,
     "min_price": 3.83,
     "first_seen": 1777384920173,
-    "last_seen": 1777386174929,
-    "num_updates": 5,
+    "last_seen": 1777387423523,
+    "num_updates": 9,
     "source": "FlowGreeks2"
   },
   "QQQ260428P00658000": {
@@ -13415,8 +13415,8 @@
     "max_price": 1.64,
     "min_price": 1.64,
     "first_seen": 1777384920173,
-    "last_seen": 1777386174929,
-    "num_updates": 5,
+    "last_seen": 1777387423523,
+    "num_updates": 9,
     "source": "FlowGreeks2"
   },
   "SMH260515P00500000": {
@@ -13425,8 +13425,8 @@
     "max_price": 24.0,
     "min_price": 24.0,
     "first_seen": 1777384920173,
-    "last_seen": 1777386174929,
-    "num_updates": 5,
+    "last_seen": 1777387423523,
+    "num_updates": 9,
     "source": "FlowGreeks2"
   },
   "SPY260428P00713000": {
@@ -13435,8 +13435,8 @@
     "max_price": 2.26,
     "min_price": 2.26,
     "first_seen": 1777384920173,
-    "last_seen": 1777386174929,
-    "num_updates": 5,
+    "last_seen": 1777387423523,
+    "num_updates": 9,
     "source": "FlowGreeks2"
   },
   "SPY260429P00711000": {
@@ -13445,8 +13445,8 @@
     "max_price": 3.1,
     "min_price": 3.1,
     "first_seen": 1777384920173,
-    "last_seen": 1777386174929,
-    "num_updates": 5,
+    "last_seen": 1777387423523,
+    "num_updates": 9,
     "source": "FlowGreeks2"
   },
   "SPY260529P00665000": {
@@ -13455,8 +13455,8 @@
     "max_price": 3.07,
     "min_price": 3.07,
     "first_seen": 1777384920173,
-    "last_seen": 1777386174929,
-    "num_updates": 5,
+    "last_seen": 1777387423523,
+    "num_updates": 9,
     "source": "FlowGreeks2"
   },
   "UNH270115C00300000": {
@@ -13465,8 +13465,8 @@
     "max_price": 78.25,
     "min_price": 78.25,
     "first_seen": 1777384920173,
-    "last_seen": 1777386174929,
-    "num_updates": 5,
+    "last_seen": 1777387423523,
+    "num_updates": 9,
     "source": "FlowGreeks2"
   },
   "QQQ260508C00659000": {
@@ -13475,8 +13475,8 @@
     "max_price": 10.53,
     "min_price": 10.42,
     "first_seen": 1777385237976,
-    "last_seen": 1777386174929,
-    "num_updates": 7,
+    "last_seen": 1777387423523,
+    "num_updates": 15,
     "source": "FlowGreeks"
   },
   "RBLX260618P00057500": {
@@ -13485,8 +13485,8 @@
     "max_price": 7.19,
     "min_price": 7.19,
     "first_seen": 1777385237976,
-    "last_seen": 1777386174231,
-    "num_updates": 4,
+    "last_seen": 1777387422871,
+    "num_updates": 8,
     "source": "FlowGreeks"
   },
   "MSFT260501C00430000": {
@@ -13495,8 +13495,8 @@
     "max_price": 12.85,
     "min_price": 12.85,
     "first_seen": 1777385238644,
-    "last_seen": 1777386174929,
-    "num_updates": 4,
+    "last_seen": 1777387423523,
+    "num_updates": 8,
     "source": "FlowGreeks2"
   },
   "NIO260618C00005000": {
@@ -13505,8 +13505,8 @@
     "max_price": 1.55,
     "min_price": 1.55,
     "first_seen": 1777385238644,
-    "last_seen": 1777386174929,
-    "num_updates": 4,
+    "last_seen": 1777387423523,
+    "num_updates": 8,
     "source": "FlowGreeks2"
   },
   "TSLA260501C00385000": {
@@ -13515,8 +13515,8 @@
     "max_price": 6.11,
     "min_price": 5.6,
     "first_seen": 1777385238644,
-    "last_seen": 1777386174929,
-    "num_updates": 4,
+    "last_seen": 1777387423523,
+    "num_updates": 8,
     "source": "FlowGreeks2"
   },
   "NVDA260515C00212500": {
@@ -13525,8 +13525,8 @@
     "max_price": 8.25,
     "min_price": 8.25,
     "first_seen": 1777385554967,
-    "last_seen": 1777386174929,
-    "num_updates": 3,
+    "last_seen": 1777387423523,
+    "num_updates": 7,
     "source": "FlowGreeks2"
   },
   "TSLA260429C00385000": {
@@ -13535,8 +13535,8 @@
     "max_price": 3.92,
     "min_price": 3.92,
     "first_seen": 1777385554967,
-    "last_seen": 1777386174929,
-    "num_updates": 3,
+    "last_seen": 1777387423523,
+    "num_updates": 7,
     "source": "FlowGreeks2"
   },
   "SNDK260501P01020000": {
@@ -13545,18 +13545,18 @@
     "max_price": 75.0,
     "min_price": 75.0,
     "first_seen": 1777385864259,
-    "last_seen": 1777386174231,
-    "num_updates": 2,
+    "last_seen": 1777387422871,
+    "num_updates": 6,
     "source": "FlowGreeks"
   },
   "SPY260428P00711000": {
     "first_price": 1.17,
-    "last_price": 1.17,
-    "max_price": 1.17,
+    "last_price": 1.94,
+    "max_price": 1.94,
     "min_price": 1.17,
     "first_seen": 1777385864259,
-    "last_seen": 1777386174231,
-    "num_updates": 2,
+    "last_seen": 1777387423523,
+    "num_updates": 7,
     "source": "FlowGreeks"
   },
   "TSLA260501C00357500": {
@@ -13565,8 +13565,8 @@
     "max_price": 24.5,
     "min_price": 24.5,
     "first_seen": 1777385864902,
-    "last_seen": 1777386174929,
-    "num_updates": 2,
+    "last_seen": 1777387423523,
+    "num_updates": 6,
     "source": "FlowGreeks2"
   },
   "TSLA260501C00382500": {
@@ -13575,8 +13575,8 @@
     "max_price": 6.9,
     "min_price": 6.63,
     "first_seen": 1777385864902,
-    "last_seen": 1777386174929,
-    "num_updates": 3,
+    "last_seen": 1777387423523,
+    "num_updates": 11,
     "source": "FlowGreeks2"
   },
   "TSLA260529C00400000": {
@@ -13585,8 +13585,218 @@
     "max_price": 11.65,
     "min_price": 11.65,
     "first_seen": 1777386174231,
-    "last_seen": 1777386174231,
+    "last_seen": 1777387422871,
+    "num_updates": 5,
+    "source": "FlowGreeks"
+  },
+  "MSFT260508C00430000": {
+    "first_price": 14.93,
+    "last_price": 14.93,
+    "max_price": 14.93,
+    "min_price": 14.93,
+    "first_seen": 1777386484601,
+    "last_seen": 1777387422871,
+    "num_updates": 4,
+    "source": "FlowGreeks"
+  },
+  "LITE260501C00815000": {
+    "first_price": 28.6,
+    "last_price": 28.6,
+    "max_price": 28.6,
+    "min_price": 28.6,
+    "first_seen": 1777386795436,
+    "last_seen": 1777387422871,
+    "num_updates": 3,
+    "source": "FlowGreeks"
+  },
+  "QQQ260506P00648000": {
+    "first_price": 5.36,
+    "last_price": 5.36,
+    "max_price": 5.36,
+    "min_price": 5.36,
+    "first_seen": 1777386796086,
+    "last_seen": 1777387423523,
+    "num_updates": 3,
+    "source": "FlowGreeks2"
+  },
+  "WMT260515P00126000": {
+    "first_price": 2.32,
+    "last_price": 2.32,
+    "max_price": 2.32,
+    "min_price": 2.32,
+    "first_seen": 1777387112729,
+    "last_seen": 1777387422871,
+    "num_updates": 2,
+    "source": "FlowGreeks"
+  },
+  "QQQ260428P00662000": {
+    "first_price": 5.99,
+    "last_price": 5.99,
+    "max_price": 5.99,
+    "min_price": 5.99,
+    "first_seen": 1777387113446,
+    "last_seen": 1777387423523,
+    "num_updates": 2,
+    "source": "FlowGreeks2"
+  },
+  "QQQ260429P00658000": {
+    "first_price": 5.5,
+    "last_price": 5.5,
+    "max_price": 5.5,
+    "min_price": 5.5,
+    "first_seen": 1777387113446,
+    "last_seen": 1777387423523,
+    "num_updates": 2,
+    "source": "FlowGreeks2"
+  },
+  "SPX260428P07100000": {
+    "first_price": 4.76,
+    "last_price": 4.76,
+    "max_price": 4.76,
+    "min_price": 4.76,
+    "first_seen": 1777387113446,
+    "last_seen": 1777387423523,
+    "num_updates": 2,
+    "source": "FlowGreeks2"
+  },
+  "SPX260428P07120000": {
+    "first_price": 9.17,
+    "last_price": 9.17,
+    "max_price": 9.17,
+    "min_price": 9.17,
+    "first_seen": 1777387113446,
+    "last_seen": 1777387423523,
+    "num_updates": 2,
+    "source": "FlowGreeks2"
+  },
+  "GOOGL260501P00342500": {
+    "first_price": 6.15,
+    "last_price": 6.15,
+    "max_price": 6.15,
+    "min_price": 6.15,
+    "first_seen": 1777387422871,
+    "last_seen": 1777387422871,
     "num_updates": 1,
     "source": "FlowGreeks"
+  },
+  "TSLA260429P00375000": {
+    "first_price": 5.0,
+    "last_price": 5.0,
+    "max_price": 5.0,
+    "min_price": 5.0,
+    "first_seen": 1777387422871,
+    "last_seen": 1777387423523,
+    "num_updates": 2,
+    "source": "FlowGreeks"
+  },
+  "TSLA260429P00377500": {
+    "first_price": 6.28,
+    "last_price": 6.28,
+    "max_price": 6.28,
+    "min_price": 6.28,
+    "first_seen": 1777387422871,
+    "last_seen": 1777387422871,
+    "num_updates": 1,
+    "source": "FlowGreeks"
+  },
+  "AMD260501P00325000": {
+    "first_price": 12.6,
+    "last_price": 12.6,
+    "max_price": 12.6,
+    "min_price": 12.6,
+    "first_seen": 1777387423523,
+    "last_seen": 1777387423523,
+    "num_updates": 1,
+    "source": "FlowGreeks2"
+  },
+  "MU260501P00505000": {
+    "first_price": 24.75,
+    "last_price": 24.75,
+    "max_price": 24.75,
+    "min_price": 24.75,
+    "first_seen": 1777387423523,
+    "last_seen": 1777387423523,
+    "num_updates": 1,
+    "source": "FlowGreeks2"
+  },
+  "QQQ260428P00654000": {
+    "first_price": 1.33,
+    "last_price": 1.33,
+    "max_price": 1.33,
+    "min_price": 1.33,
+    "first_seen": 1777387423523,
+    "last_seen": 1777387423523,
+    "num_updates": 1,
+    "source": "FlowGreeks2"
+  },
+  "QQQ260428P00655000": {
+    "first_price": 1.75,
+    "last_price": 1.75,
+    "max_price": 1.75,
+    "min_price": 1.75,
+    "first_seen": 1777387423523,
+    "last_seen": 1777387423523,
+    "num_updates": 1,
+    "source": "FlowGreeks2"
+  },
+  "QQQ260428P00656000": {
+    "first_price": 1.99,
+    "last_price": 1.99,
+    "max_price": 1.99,
+    "min_price": 1.99,
+    "first_seen": 1777387423523,
+    "last_seen": 1777387423523,
+    "num_updates": 1,
+    "source": "FlowGreeks2"
+  },
+  "QQQ260515P00655000": {
+    "first_price": 12.12,
+    "last_price": 12.12,
+    "max_price": 12.12,
+    "min_price": 12.12,
+    "first_seen": 1777387423523,
+    "last_seen": 1777387423523,
+    "num_updates": 1,
+    "source": "FlowGreeks2"
+  },
+  "SPX260428P07115000": {
+    "first_price": 10.96,
+    "last_price": 10.96,
+    "max_price": 10.96,
+    "min_price": 10.96,
+    "first_seen": 1777387423523,
+    "last_seen": 1777387423523,
+    "num_updates": 1,
+    "source": "FlowGreeks2"
+  },
+  "SPY260428P00709000": {
+    "first_price": 1.04,
+    "last_price": 1.04,
+    "max_price": 1.04,
+    "min_price": 1.04,
+    "first_seen": 1777387423523,
+    "last_seen": 1777387423523,
+    "num_updates": 1,
+    "source": "FlowGreeks2"
+  },
+  "TSLA260429P00370000": {
+    "first_price": 2.8,
+    "last_price": 2.8,
+    "max_price": 2.8,
+    "min_price": 2.8,
+    "first_seen": 1777387423523,
+    "last_seen": 1777387423523,
+    "num_updates": 1,
+    "source": "FlowGreeks2"
+  },
+  "TSLA260429P00380000": {
+    "first_price": 7.5,
+    "last_price": 7.5,
+    "max_price": 7.5,
+    "min_price": 7.5,
+    "first_seen": 1777387423523,
+    "last_seen": 1777387423523,
+    "num_updates": 1,
+    "source": "FlowGreeks2"
   }
 }

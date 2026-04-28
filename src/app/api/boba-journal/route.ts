@@ -28,6 +28,9 @@ interface BobaPick {
   stop_loss_pct?: number;
   confidence?: string;
   execution?: { ok: boolean; symbol?: string; order_id?: string; error?: string };
+  // SCHEMA v2 (2026-04-28): two-protocol journaling
+  protocol?: 'flow' | 'swing' | 'manual';
+  entry_criteria?: string[];
 }
 
 interface BobaCycle {
@@ -60,6 +63,9 @@ interface JournalEntry {
   executed: boolean;
   order_id?: string;
   error?: string;
+  // SCHEMA v2 (2026-04-28): two-protocol journaling
+  protocol?: 'flow' | 'swing' | 'manual';
+  entry_criteria?: string[];
 }
 
 async function loadBobaDecisions(): Promise<BobaCycle[]> {
@@ -107,6 +113,9 @@ function flattenBobaDecisions(cycles: BobaCycle[]): JournalEntry[] {
         executed: !!pick.execution?.ok,
         order_id: pick.execution?.order_id,
         error: pick.execution?.error,
+        // SCHEMA v2: protocol + entry_criteria pass-through
+        protocol: pick.protocol || 'flow',
+        entry_criteria: pick.entry_criteria || [],
       });
     }
   }

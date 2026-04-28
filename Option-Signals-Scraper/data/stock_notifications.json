@@ -3019,5 +3019,11 @@
     "message": "Reached Target 28.31 and that's 2.02%! Lock some in and wait for next target. Raise the stops to 25.53",
     "symbol": "CMCSA",
     "title": "CMCSA : STC"
+  },
+  "1777386703": {
+    "category": "SWING",
+    "message": "Buy To Open at 365.01 with first target above 372.31",
+    "symbol": "CLS",
+    "title": "CLS: BTO"
   }
 }
