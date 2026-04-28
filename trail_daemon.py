@@ -40,9 +40,32 @@ def _read(name):
     p = SECRETS / name
     return p.read_text().strip() if p.exists() else ""
 
+# DAEMON ACCOUNT LOCK: this daemon is hardcoded to R2 (PA3R6MOPBWF7, Boba's account).
+# Do not change to alpaca-r1-* — those are R1 (managed by position_sell_daemon).
+EXPECTED_ACCOUNT = "PA3R6MOPBWF7"  # R2
+
 KEY = _read("alpaca-key-id") or _read("alpaca_key.txt")
 SEC = _read("alpaca-secret") or _read("alpaca_secret.txt")
 DISCORD_WH = _read("discord_bobatrades_webhook")
+
+
+def assert_correct_account():
+    """Crash if this daemon is pointed at the wrong Alpaca account."""
+    try:
+        r = requests.get(f"{ALPACA_BASE}/account", headers=HEADERS, timeout=10)
+        if r.status_code != 200:
+            log("fatal", f"Cannot reach Alpaca: HTTP {r.status_code}")
+            raise SystemExit(1)
+        actual = r.json().get("account_number", "")
+        if actual != EXPECTED_ACCOUNT:
+            log("fatal_account_mismatch", f"Expected R2 ({EXPECTED_ACCOUNT}) but got {actual}. Refusing to run on wrong account.")
+            raise SystemExit(2)
+        equity = float(r.json().get("equity", 0))
+        log("startup_account_check", f"✓ Confirmed R2 account {actual} (equity ${equity:,.0f}) — managing R2 swing positions only")
+    except SystemExit: raise
+    except Exception as e:
+        log("fatal_account_check", str(e))
+        raise SystemExit(3)
 
 HEADERS = {"APCA-API-KEY-ID": KEY, "APCA-API-SECRET-KEY": SEC, "Content-Type": "application/json"}
 
@@ -292,6 +315,7 @@ def run_once():
 
 
 def main():
+    assert_correct_account()
     log("startup", f"trail daemon online, polling every {POLL_INTERVAL_SEC}s")
     while True:
         try:

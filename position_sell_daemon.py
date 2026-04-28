@@ -80,10 +80,36 @@ def read_secret(name: str) -> str:
     return ""
 
 
+
+def assert_correct_account():
+    """Crash if this daemon is pointed at the wrong Alpaca account."""
+    import requests
+    try:
+        r = requests.get(f"{ALPACA_BASE}/v2/account", headers=alpaca_headers(), timeout=10)
+        if r.status_code != 200:
+            print(f"[FATAL] Cannot reach Alpaca: HTTP {r.status_code}", flush=True)
+            raise SystemExit(1)
+        actual = r.json().get("account_number", "")
+        if actual != EXPECTED_ACCOUNT:
+            print(f"[FATAL] Account mismatch! Expected R1 ({EXPECTED_ACCOUNT}) but got {actual}.", flush=True)
+            print(f"[FATAL] This daemon manages R1 only. Refusing to run on the wrong account.", flush=True)
+            raise SystemExit(2)
+        equity = float(r.json().get("equity", 0))
+        print(f"[startup] ✓ Confirmed R1 account {actual} (equity ${equity:,.0f}) — managing R1 positions only", flush=True)
+    except SystemExit: raise
+    except Exception as e:
+        print(f"[FATAL] Account check exception: {e}", flush=True)
+        raise SystemExit(3)
+
+
+# DAEMON ACCOUNT LOCK: this daemon is hardcoded to R1 (PA3Y7UTNIQFZ).
+# Do not change to alpaca-key-id/alpaca-secret — those are R2 (Boba's account, managed by trail_daemon).
+EXPECTED_ACCOUNT = "PA3Y7UTNIQFZ"  # R1
+
 def alpaca_headers() -> dict:
     return {
-        "APCA-API-KEY-ID": read_secret("alpaca-key-id"),
-        "APCA-API-SECRET-KEY": read_secret("alpaca-secret"),
+        "APCA-API-KEY-ID": read_secret("alpaca-r1-key-id"),
+        "APCA-API-SECRET-KEY": read_secret("alpaca-r1-secret"),
         "Content-Type": "application/json",
     }
 
@@ -371,4 +397,5 @@ def main():
 
 
 if __name__ == "__main__":
+    assert_correct_account()
     sys.exit(main())
