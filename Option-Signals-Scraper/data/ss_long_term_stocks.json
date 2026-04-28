@@ -14,11 +14,11 @@
     "quote": {
       "closePrice": 267.62,
       "highPrice": 273.22,
-      "lastPrice": 271.5,
+      "lastPrice": 269.8715,
       "lowPrice": 268.66,
       "openPrice": 272.335,
-      "quoteTimeInLong": 1777386749,
-      "tradeTimeInLong": 1777386749
+      "quoteTimeInLong": 1777392211,
+      "tradeTimeInLong": 1777392211
     },
     "reduceLoss": "227.04",
     "sellTarget": "259.84",
@@ -42,11 +42,11 @@
     "quote": {
       "closePrice": 16.72,
       "highPrice": 16.535,
-      "lastPrice": 16.19,
-      "lowPrice": 16.18,
+      "lastPrice": 16.0499,
+      "lowPrice": 15.96,
       "openPrice": 16.49,
-      "quoteTimeInLong": 1777386750,
-      "tradeTimeInLong": 1777386750
+      "quoteTimeInLong": 1777392207,
+      "tradeTimeInLong": 1777392207
     },
     "reduceLoss": "14.85",
     "sellTarget": "17.00",

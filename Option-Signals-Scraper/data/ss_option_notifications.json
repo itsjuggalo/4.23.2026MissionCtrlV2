@@ -6506,5 +6506,17 @@
     "message": "Take trailing stop at 2.90 to exit trade!",
     "symbol": "DHR",
     "title": "DHR 195C 06/18 : SELL"
+  },
+  "1777387548": {
+    "category": "SCALP",
+    "message": "Buy below 4.50, Sell above 5.18\nScalp, VH risk",
+    "symbol": "SPY",
+    "title": "SPY 710P 4/30: BUY"
+  },
+  "1777392247": {
+    "category": "SCALP",
+    "message": "Take stop at 4.25.",
+    "symbol": "SPY",
+    "title": "SPY 710P 4/30: SELL"
   }
 }

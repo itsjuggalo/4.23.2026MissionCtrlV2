@@ -5738,5 +5738,17 @@
     "message": "Buy below 21.10, Sell above 24.26\nSwing, Moderate risk",
     "symbol": "CLS",
     "title": "CLS 450C 7/17: BUY"
+  },
+  "1777387843": {
+    "category": "SCALP",
+    "message": "Buy below 4.51, Sell above 5.19\nScalp, VH risk",
+    "symbol": "QQQ",
+    "title": "QQQ 650P 4/30: BUY"
+  },
+  "1777392282": {
+    "category": "SCALP",
+    "message": "Take stop at 4.05.",
+    "symbol": "QQQ",
+    "title": "QQQ 650P 4/30: SELL"
   }
 }

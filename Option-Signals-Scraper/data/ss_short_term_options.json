@@ -13,18 +13,18 @@
     "isWeekly": 1,
     "quote": {
       "askPrice": "0.6",
-      "askSize": "189",
-      "bidPrice": "0.54",
-      "bidSize": "295",
+      "askSize": "772",
+      "bidPrice": "0.55",
+      "bidSize": "353",
       "closePrice": "0.52",
       "highPrice": "0.6",
-      "lastPrice": "0.55",
+      "lastPrice": "0.59",
       "lowPrice": "0.49",
       "openInterest": "15275",
       "openPrice": "0.55",
-      "quoteTimeInLong": 1777387398372,
-      "totalVolume": "101",
-      "tradeTimeInLong": 1777385700000
+      "quoteTimeInLong": 1777393038367,
+      "totalVolume": "105",
+      "tradeTimeInLong": 1777392024000
     },
     "reasoning": {
       "\ud83d\udc0b Unusual Flows": "Newly opened option sweeps were detected with Sweep Volume > Open Interest.",
@@ -53,18 +53,18 @@
     "isWeekly": 1,
     "quote": {
       "askPrice": "1.68",
-      "askSize": "7",
+      "askSize": "162",
       "bidPrice": "1.63",
-      "bidSize": "841",
+      "bidSize": "611",
       "closePrice": "1.42",
       "highPrice": "1.95",
-      "lastPrice": "1.65",
+      "lastPrice": "1.69",
       "lowPrice": "1.52",
       "openInterest": "4414",
       "openPrice": "1.8",
-      "quoteTimeInLong": 1777387398377,
-      "totalVolume": "835",
-      "tradeTimeInLong": 1777387363000
+      "quoteTimeInLong": 1777393038373,
+      "totalVolume": "857",
+      "tradeTimeInLong": 1777391576000
     },
     "reasoning": {
       "\ud83d\udc0b Unusual Flows": "Newly opened option sweeps were detected with Sweep Volume > Open Interest.",
@@ -92,19 +92,19 @@
     "isPut": 1,
     "isWeekly": 1,
     "quote": {
-      "askPrice": "2.97",
-      "askSize": "226",
-      "bidPrice": "2.92",
-      "bidSize": "98",
+      "askPrice": "2.95",
+      "askSize": "279",
+      "bidPrice": "2.9",
+      "bidSize": "366",
       "closePrice": "2.74",
       "highPrice": "3.01",
-      "lastPrice": "3.01",
+      "lastPrice": "2.91",
       "lowPrice": "2.8",
       "openInterest": "38024",
       "openPrice": "2.85",
-      "quoteTimeInLong": 1777387398382,
-      "totalVolume": "32",
-      "tradeTimeInLong": 1777387205000
+      "quoteTimeInLong": 1777393038379,
+      "totalVolume": "37",
+      "tradeTimeInLong": 1777392555000
     },
     "reasoning": {
       "\ud83d\udc0b Unusual Flows": "Newly opened option sweeps were detected with Sweep Volume > Open Interest.",

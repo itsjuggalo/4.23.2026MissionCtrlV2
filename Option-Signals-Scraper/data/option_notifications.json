@@ -4581,5 +4581,17 @@
     "message": "Buy To Open at 19.80 with first target above 22.77",
     "symbol": "CLS",
     "title": "CLS 450C 7/17: BTO"
+  },
+  "1777387802": {
+    "category": "SCALP",
+    "message": "Buy To Open at 4.26 with first target above 4.90",
+    "symbol": "QQQ",
+    "title": "QQQ 650P 4/30: BTO"
+  },
+  "1777392271": {
+    "category": "SCALP",
+    "message": "Take stop at 4.1.",
+    "symbol": "QQQ",
+    "title": "QQQ 650P 4/30: STC"
   }
 }
