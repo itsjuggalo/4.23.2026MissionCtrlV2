@@ -312,6 +312,20 @@ def run_once():
 
     if swing_count == 0:
         log("idle", {"positions": len(positions), "swing": 0})
+    else:
+        # Summary of tracked positions (no ratchet fired this cycle)
+        summary = {}
+        for sym, rec in hwm.items():
+            entry = rec.get("entry", 0)
+            hwm_px = rec.get("hwm", 0)
+            curr = rec.get("last_seen_price", 0)
+            if entry > 0:
+                summary[sym] = {
+                    "gain_from_entry_pct": round(((curr-entry)/entry)*100, 1),
+                    "hwm_gain_pct": round(((hwm_px-entry)/entry)*100, 1),
+                    "tier": rec.get("last_trail_pct", 0),
+                }
+        log("tracking", {"positions": len(positions), "swing": swing_count, "details": summary})
 
 
 def main():
