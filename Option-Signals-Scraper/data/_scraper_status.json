@@ -1,6 +1,6 @@
 {
   "scraper": "option-signals-firebase",
-  "updated_at": "2026-04-28T16:17:28.955906+00:00",
+  "updated_at": "2026-04-28T16:19:29.783208+00:00",
   "endpoints": {
     "flow_live_last100": {
       "tier": "tier1",
@@ -85,9 +85,9 @@
     "ts_short_term_stocks": {
       "tier": "tier1",
       "interval_min": 5,
-      "last_fetch": "2026-04-28T16:14:18.797166+00:00",
+      "last_fetch": "2026-04-28T16:19:29.080148+00:00",
       "firebase_path": "/Name/ShortTermStocks.json",
-      "ok": 786,
+      "ok": 787,
       "fail": 1,
       "last_count": 11,
       "last_status": "ok"
@@ -394,8 +394,8 @@
     }
   },
   "summary": {
-    "total_fetches": 13288,
-    "successful": 13287,
+    "total_fetches": 13289,
+    "successful": 13288,
     "failed": 1,
     "success_rate": "100.0%"
   }

@@ -14,21 +14,37 @@ export function PerformancePage() {
   const [tradeLog, setTradeLog] = useState<any>(null);
   const [equityHist, setEquityHist] = useState<any[]>([]);
   const [tick, setTick] = useState(0);
+  const [bobaJournal, setBobaJournal] = useState<any[]>([]);
+  const [protocolFilter, setProtocolFilter] = useState<'all' | 'flow' | 'swing' | 'manual' | 'auto-btc'>(
+    () => {
+      if (typeof window === 'undefined') return 'all';
+      return (localStorage.getItem('perf_protocol_filter') as any) || 'all';
+    }
+  );
+
+  // Persist filter selection
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('perf_protocol_filter', protocolFilter);
+    }
+  }, [protocolFilter]);
 
   const fetchAll = async () => {
     try {
-      const [pRes, sRes, prRes, tlRes, ehRes] = await Promise.all([
+      const [pRes, sRes, prRes, tlRes, ehRes, bjRes] = await Promise.all([
         fetch('/api/portfolio').then(r => r.json()).catch(() => null),
         fetch('/api/signals/history?ticker=BTCUSD&limit=100').then(r => r.json()).catch(() => null),
         fetch('/api/supertrend-params').then(r => r.json()).catch(() => null),
         fetch('/api/trade-log?limit=100').then(r => r.json()).catch(() => null),
         fetch('/api/equity-history?days=90').then(r => r.json()).catch(() => null),
+        fetch('/api/boba-journal?limit=200').then(r => r.json()).catch(() => null),
       ]);
       if (pRes) setPortfolio(pRes);
       if (sRes) setSignals(sRes);
       if (prRes) setParams(prRes);
       if (tlRes) setTradeLog(tlRes);
       if (ehRes?.history) setEquityHist(ehRes.history);
+      if (bjRes?.entries) setBobaJournal(bjRes.entries);
     } catch (e) { console.error(e); }
     finally { setLoading(false); }
   };
@@ -51,11 +67,38 @@ export function PerformancePage() {
   const positions = portfolio?.positions || [];
   const goalPct = Math.min(((equity - startCap) / (110000 - startCap)) * 100, 100);
 
-  // Trade metrics
-  const pnlHistory = signals?.BTCUSD?.pnl_history || signals?.pnl_history || [];
+  // Trade metrics — protocol-aware
+  // Build unified trade list: BTC auto-trader signals + Boba journal picks
+  const btcTrades = (signals?.BTCUSD?.pnl_history || signals?.pnl_history || []).map((t: any) => ({
+    ...t,
+    protocol: 'auto-btc',
+  }));
+  const journalTrades = (bobaJournal || []).flatMap((entry: any) =>
+    (entry.picks || []).filter((p: any) => p.pnl_pct !== undefined && p.pnl_pct !== null).map((p: any) => ({
+      pnl_pct: p.pnl_pct,
+      symbol: p.symbol || `${p.ticker}${p.strike}${p.option_type?.[0] || ''}`,
+      protocol: p.protocol || 'manual',
+      timestamp: entry.timestamp,
+      entry_criteria: p.entry_criteria || [],
+    }))
+  );
+  const allTrades = [...btcTrades, ...journalTrades];
+  const filteredTrades = protocolFilter === 'all'
+    ? allTrades
+    : allTrades.filter((t: any) => t.protocol === protocolFilter);
+
+  const pnlHistory = filteredTrades;
   const totalTrades = pnlHistory.length;
   const wins = pnlHistory.filter((t: any) => t.pnl_pct > 0);
   const losses = pnlHistory.filter((t: any) => t.pnl_pct <= 0);
+  // Counts per protocol for the dropdown labels
+  const protoCounts = {
+    all: allTrades.length,
+    flow: allTrades.filter(t => t.protocol === 'flow').length,
+    swing: allTrades.filter(t => t.protocol === 'swing').length,
+    manual: allTrades.filter(t => t.protocol === 'manual').length,
+    'auto-btc': allTrades.filter(t => t.protocol === 'auto-btc').length,
+  };
   const winRate = totalTrades > 0 ? (wins.length / totalTrades) * 100 : 0;
   const avgWin = wins.length > 0 ? wins.reduce((s: number, t: any) => s + t.pnl_pct, 0) / wins.length : 0;
   const avgLoss = losses.length > 0 ? losses.reduce((s: number, t: any) => s + t.pnl_pct, 0) / losses.length : 0;
@@ -95,6 +138,39 @@ export function PerformancePage() {
 
   if (loading) return (
     <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '60vh', color: '#4fc3f7', fontFamily: 'var(--font-mc-mono)' }}>
+      <div style={{
+        padding: '8px 16px',
+        borderBottom: '1px solid #1a2332',
+        background: '#05080c',
+        display: 'flex',
+        alignItems: 'center',
+        gap: 12,
+      }}>
+        <span style={{ color: '#607d8b', fontSize: 11, textTransform: 'uppercase', letterSpacing: 1 }}>Filter by Protocol:</span>
+        <select
+          value={protocolFilter}
+          onChange={(e) => setProtocolFilter(e.target.value as any)}
+          style={{
+            background: '#0a1320',
+            color: '#66ccff',
+            border: '1px solid #1a3a4a',
+            padding: '4px 8px',
+            fontSize: 12,
+            fontFamily: 'inherit',
+            cursor: 'pointer',
+          }}
+        >
+          <option value="all">All ({protoCounts.all})</option>
+          <option value="flow">FLOW ({protoCounts.flow})</option>
+          <option value="swing">SWING ({protoCounts.swing})</option>
+          <option value="manual">Manual ({protoCounts.manual})</option>
+          <option value="auto-btc">Auto BTC ({protoCounts['auto-btc']})</option>
+        </select>
+        <span style={{ color: '#4caf50', fontSize: 11 }}>
+          Showing {totalTrades} trades · {winRate.toFixed(1)}% WR
+        </span>
+      </div>
+
       <div style={{ animation: 'perf-blink 1s infinite' }}>LOADING PERFORMANCE DATA...</div>
     </div>
   );
