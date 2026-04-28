@@ -408,6 +408,89 @@ Window: same-day NY 4AM-8PM ET only — no carryover from prior days.
 """
 
 # Rule injected at top of every Boba prompt
+def load_grok_brief(max_age_min=60):
+    """Read Grok market brief if recent. Returns formatted text or empty string."""
+    try:
+        f = Path("/home/ubuntu/.openclaw/workspace/directives/grok_brief.json")
+        if not f.exists(): return ""
+        d = json.loads(f.read_text())
+        from datetime import datetime as _dt, timezone as _tz
+        gen = _dt.fromisoformat(d["generated_at"].replace("Z","+00:00"))
+        age_min = int((_dt.now(_tz.utc) - gen).total_seconds() / 60)
+        if age_min > max_age_min: return ""
+        text = d.get("brief_text", "").strip()
+        if not text: return ""
+        return f"\n# Grok Market Brief (xAI grok-4-fast + x_search, {age_min}min old)\n{text}\n"
+    except Exception as e:
+        log_to_ops("boba_cycle", "WARN", f"Grok brief load failed: {e}")
+        return ""
+
+
+def load_orion_skills():
+    """Read Orion's structured skill outputs and summarize for Boba."""
+    try:
+        from datetime import datetime as _dt, timezone as _tz
+        d = Path("/home/ubuntu/.openclaw/workspace/skill_outputs/orion")
+        if not d.exists(): return ""
+        out = "\n# Orion Skill Outputs (Gemini, structured)\n"
+        skills_loaded = 0
+        for f in sorted(d.glob("*.json"), key=lambda p: p.stat().st_mtime, reverse=True)[:8]:
+            try:
+                rec = json.loads(f.read_text())
+                ts = rec.get("timestamp", "")
+                if ts:
+                    gen = _dt.fromisoformat(ts.replace("Z","+00:00"))
+                    age_min = int((_dt.now(_tz.utc) - gen).total_seconds() / 60)
+                    if age_min > 120: continue  # skip stale
+                else:
+                    age_min = "?"
+                skill = rec.get("skill", f.stem)
+                data = rec.get("data", {})
+                # Compact summary depending on skill
+                if "crypto-ta" in skill:
+                    s = data.get("summary") or data.get("trend") or json.dumps(data)[:200]
+                    out += f"  - {skill} ({age_min}m old): {s[:200]}\n"
+                elif "screener" in skill:
+                    coins = data.get("coins", [])[:5]
+                    if coins:
+                        out += f"  - {skill} top movers: " + ", ".join([f"{c.get('symbol')} {c.get('change_24h',0):+.1f}%" for c in coins]) + "\n"
+                elif "funding" in skill:
+                    long_count = data.get("extreme_long_count", 0)
+                    short_count = data.get("extreme_short_count", 0)
+                    out += f"  - {skill}: {long_count} extreme-long / {short_count} extreme-short funding rates\n"
+                elif "vol-holdings" in skill or "option-vol" in skill:
+                    out += f"  - {skill}: {json.dumps(data)[:250]}\n"
+                else:
+                    out += f"  - {skill}: {json.dumps(data)[:200]}\n"
+                skills_loaded += 1
+            except Exception:
+                continue
+        return out if skills_loaded else ""
+    except Exception as e:
+        log_to_ops("boba_cycle", "WARN", f"Orion skills load failed: {e}")
+        return ""
+
+
+def load_market_briefing():
+    """Read hourly market briefing (regime, F&G, BTC). Compact summary."""
+    try:
+        f = Path("/home/ubuntu/.openclaw/workspace/directives/market_briefing.json")
+        if not f.exists(): return ""
+        d = json.loads(f.read_text())
+        btc = d.get("btc_24h", {})
+        fg = d.get("fear_greed", {})
+        regime = d.get("internal", {}).get("regime", {})
+        return (
+            f"\n# Market Regime (hourly snapshot)\n"
+            f"  - BTC 24h: ${btc.get('current',0):,.0f} ({btc.get('change_24h_pct',0):+.1f}%) trend {btc.get('trend_24h','?')}\n"
+            f"  - Fear/Greed: {fg.get('value','?')} ({fg.get('label','?')})\n"
+            f"  - Regime: {regime.get('overall','?')} | Bias: {regime.get('bias','?')}\n"
+        )
+    except Exception as e:
+        log_to_ops("boba_cycle", "WARN", f"Market briefing load failed: {e}")
+        return ""
+
+
 def build_boba_prompt(account, positions, shortlist_with_kronos, remaining_budget=3):
     equity = float(account.get("equity", 0))
     buying_power = float(account.get("buying_power", 0))
@@ -466,6 +549,10 @@ def build_boba_prompt(account, positions, shortlist_with_kronos, remaining_budge
                 shortlist_text += f"  → Kronos CONFLICTS with option thesis ❌\n"
 
     firebase_signals_text = format_firebase_signals_for_prompt(load_firebase_signals(), max_show=20)
+    market_briefing_text = load_market_briefing()
+    grok_brief_text = load_grok_brief()
+    orion_skills_text = load_orion_skills()
+    multi_agent_context = market_briefing_text + grok_brief_text + orion_skills_text
 
     prompt = f"""You are Boba — the decision-making agent in Mission Control's multi-agent trading system.
 
@@ -478,6 +565,7 @@ Buying power: ${buying_power:,.2f}
 Cash: ${cash:,.2f}
 Open positions:
 {pos_summary}
+{multi_agent_context}
 
 # Candidates to review (already filtered to T1+T2 whale tier $500K+ + today's signals)
 {shortlist_text}
