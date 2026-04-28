@@ -529,11 +529,44 @@ Additional decisions per pick:
 Hard limits:
 - Max NEW picks this cycle: {remaining_budget} (out of daily cap {MAX_NEW_PICKS_PER_DAY})
 - Max ${MAX_TOTAL_RISK_USD:,} total notional risk across all picks
-- TP/SL TUNING by signal tier (set profit_target_pct + stop_loss_pct per pick accordingly):
-  - T1 huge flow ($1M+ SWEEP A/AA): profit_target_pct=60, stop_loss_pct=20 (high conviction, tight risk)
-  - T2 unusual ($500K+ Vol>OI SWEEP A/AA): profit_target_pct=50, stop_loss_pct=30 (standard, current default)
-  - T3 unusual ($100-500K Vol>OI): profit_target_pct=40, stop_loss_pct=40 (lower conviction, wider stop)
-  - You may override with explicit reasoning (e.g. earnings within 5 days = tighten SL by 10%, deep ITM = widen TP)
+- PREMIUM TIER LADDER (rank picks highest tier first — if T0 hits exist, ignore lower tiers):
+  - T0 MEGA FLOW ($10M+ premium): profit_target_pct=80, stop_loss_pct=15 (highest conviction, tightest risk)
+  - T1 HUGE FLOW ($5M+ premium): profit_target_pct=60, stop_loss_pct=20 (high conviction)
+  - T2 BIG FLOW ($1M+ premium): profit_target_pct=50, stop_loss_pct=25 (standard)
+  - T3 STANDARD ($500K+ SWEEP + A/AA + Vol>OI): profit_target_pct=40, stop_loss_pct=30 (lower)
+  - T4 UNUSUAL (Vol>OI yellow): profit_target_pct=30, stop_loss_pct=35 (last resort)
+- WITHIN-TIER RANKING (co-primary tiebreakers): repeater_count (same contract appearing 3+ times today) AND DTE (shorter wins). Then sweep>block>split, then A/AA bid-ask, then Vol/OI ratio.
+
+# DUAL PROTOCOL — Boba picks under whichever protocol fits each candidate
+
+## Protocol A — FLOW (current method, fast cycle)
+Use when: T0/T1/T2 unusual flow priority hits today. Short-dated bets riding institutional positioning.
+Gates (all must pass):
+- Premium tier T0/T1/T2/T3 (rank highest first)
+- Same-day NY 4AM-8PM ET activity
+- SWEEP, BLOCK, or repeater (3+ hits today on same contract)
+- BidAskType A or AA preferred
+- Kronos AGREES or NEUTRAL (CONFLICTS = veto)
+Set protocol="flow" in pick. Use T0-T4 TP/SL from ladder above.
+
+## Protocol B — SWING (MU-pattern method, longer hold for trend trades)
+Use when: candidate has institutional positioning AND room to ride a multi-week trend. The MU $460C 6/18 added 04/02 at $18.58 → $97.70 = 5.26x. That setup is the template.
+Gates (ALL must pass — if any fail, reject as swing or fall back to Protocol A):
+- DTE >= 60 at entry (theta runway)
+- Delta 0.40-0.55 at entry (ATM, not OTM lottery)
+- Underlying price within 5% of strike (cheap premium relative to strike)
+- OI >= 1000 before today (institutional pre-positioning, not just today's spike)
+- IV percentile < 60 at entry (room for IV expansion)
+- Earnings 30-60 days out from entry (catalyst runway, exit before print)
+- Kronos AGREES or NEUTRAL on multi-week direction
+Set protocol="swing" in pick. Override TP/SL: profit_target_pct=100, stop_loss_pct=25 (uncapped runner with cut loser — let winners breathe). When position hits +50%, you'll later get TIGHTEN_STOP signals from the trail daemon.
+
+## How to choose between A and B for the same candidate
+- If candidate passes Protocol B gates AND tier is T0/T1, prefer SWING (longer hold = bigger multiple).
+- If candidate fails any Protocol B gate, evaluate as FLOW only.
+- Never log the same pick under both protocols. Pick one and commit.
+- entry_criteria field MUST list which gates fired (e.g. ["T1_5M+","sweep","repeater_5x","kronos_agrees"] for flow, or ["dte_77","delta_0.48","iv_pct_42","oi_7859","earnings_45d","kronos_agrees"] for swing).
+
 - HARD GATE: Kronos CONFLICTS = AUTOMATIC VETO. Do NOT pick the contract. The ONLY override is if the flow score is ≥ 90 AND you must state the exact score number in your reasoning AND state why the flow override is justified
 - HARD GATE: Kronos UNAVAILABLE (timeout/error) = AUTOMATIC VETO. Do NOT pick the contract unless flow score is ≥ 85 AND you state the exact score in your reasoning
 - For every pick, you MUST set the `kronos_verdict` field in the JSON output to one of: AGREES | CONFLICTS | NEUTRAL | UNAVAILABLE — this is REQUIRED, not optional
@@ -555,8 +588,24 @@ Hard limits:
       "reasoning": "THESIS: NVDA bullish over 26 days (whale + Kronos agrees). CONTRACT: $145C 05/17 beats $150C (lower delta, same expiry) and $145C 06/21 (extra theta cost, earnings already priced). BREAKEVEN: $145 + $4.50 = $149.50 at expiry. EXPECTED RETURN: Kronos +5% → NVDA=153 → $145C worth ~$8.50 intrinsic = +89%. MAX LOSS: $4.50 × 5 × 100 = $2,250 if NVDA closes ≤ $145. RISK: Earnings in 8 days — IV likely elevated, potential IV crush post-earnings. CONVICTION: 26 DTE, theta manageable, earnings catalyst drives upside.",
       "kronos_verdict": "AGREES",
       "profit_target_pct": 50,
-      "stop_loss_pct": 30,
-      "confidence": "high"
+      "stop_loss_pct": 25,
+      "confidence": "high",
+      "protocol": "flow",
+      "entry_criteria": ["T2_1M+", "sweep", "AA", "repeater_3x", "kronos_agrees"]
+    }},
+    {{
+      "ticker": "MU",
+      "strike": 460.0,
+      "option_type": "CALL",
+      "expiry": "2026-06-18",
+      "contracts": 1,
+      "reasoning": "THESIS: MU bullish multi-week, semis sector strength, pre-earnings IV runway. CONTRACT: $460C 06/18 (77 DTE, ATM delta 0.48) beats $440C (extra premium) and $460C 05/16 (theta starts biting at 30 DTE). BREAKEVEN: $460 + $18.58 = $478.58. EXPECTED RETURN: Kronos +6% over 30d → MU=550 → $460C worth ~$95 = +411%. MAX LOSS: $18.58 × 1 × 100 = $1,858. RISK: IV may compress post-earnings (45d out). CONVICTION: 77 DTE theta-safe, ATM delta lets us ride trend, OI 7,859 confirms institutional pre-positioning.",
+      "kronos_verdict": "AGREES",
+      "profit_target_pct": 100,
+      "stop_loss_pct": 25,
+      "confidence": "high",
+      "protocol": "swing",
+      "entry_criteria": ["dte_77", "delta_0.48", "iv_pct_42", "oi_7859", "earnings_45d", "kronos_agrees"]
     }}
   ],
   "passed_on": [
