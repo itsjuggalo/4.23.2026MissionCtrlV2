@@ -1060,6 +1060,14 @@ def execute_position_action(action_dict, positions):
 
 
 def log_decision(cycle_result, picks_executed):
+    # SCHEMA v2 (2026-04-28): enrich picks with protocol + entry_criteria defaults
+    # protocol: "flow" (current flow-driven picks) | "swing" (future Protocol B) | "manual"
+    # entry_criteria: gates that fired for this pick (e.g. ["T1_huge_flow","sweep_AA","repeater_5x"])
+    for _pick in picks_executed:
+        if "protocol" not in _pick:
+            _pick["protocol"] = "flow"
+        if "entry_criteria" not in _pick:
+            _pick["entry_criteria"] = []
     entry = {
         "cycle_time": datetime.now(timezone.utc).isoformat(),
         "cycle_summary": cycle_result.get("cycle_summary", ""),
