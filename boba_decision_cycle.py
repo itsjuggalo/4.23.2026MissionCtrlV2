@@ -1211,6 +1211,7 @@ def log_decision(cycle_result, picks_executed):
         "picks_proposed": len(cycle_result.get("picks", [])),
         "picks_executed": picks_executed,
         "passed_on": cycle_result.get("passed_on", []),
+        "position_actions": cycle_result.get("position_actions", []),
         "raw_response": cycle_result,
     }
     existing = []
