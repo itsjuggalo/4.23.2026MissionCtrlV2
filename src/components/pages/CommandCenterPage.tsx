@@ -614,27 +614,48 @@ export function CommandCenterPage() {
           </div>
         </div>
 
-        {/* LIVE PIPELINE */}
+        {/* FLOW ALERTS - mirrors Options page Flow Alerts tab */}
         <div className="cc" style={{ padding: '16px' }}>
           <div className="lbl" style={{ marginBottom: '12px', display: 'flex', justifyContent: 'space-between' }}>
-            <span><span style={{ display: 'flex', alignItems: 'center', gap: '4px' }}><span style={{ width: '8px', height: '8px', borderRadius: '50%', background: '#ef5350', animation: 'blink 1.4s infinite', display: 'inline-block' }} />LIVE PIPELINE</span></span>
-            <span style={{ color: '#455a64' }}>{pipelineFeed.length} events</span>
+            <span><span style={{ display: 'flex', alignItems: 'center', gap: '4px' }}><span style={{ width: '8px', height: '8px', borderRadius: '50%', background: '#ef5350', animation: 'blink 1.4s infinite', display: 'inline-block' }} />FLOW ALERTS</span></span>
+            <span style={{ color: '#455a64' }}>{(((unusualFlows as any)?._allAlerts || []) as any[]).length} alerts</span>
           </div>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '4px', maxHeight: '380px', overflowY: 'auto' }}>
-            {pipelineFeed.length === 0 ? (
-              <div style={{ color: '#455a64', fontSize: 'var(--mc-font-badge)', fontFamily: 'var(--font-mc-mono)', textAlign: 'center', padding: '40px' }}>Awaiting events...</div>
-            ) : pipelineFeed.map((ev: any, i: number) => {
-              const ago = Math.floor((Date.now() - ev.ts) / 1000);
-              const agoStr = ago < 60 ? ago + 's' : ago < 3600 ? Math.floor(ago/60) + 'm' : Math.floor(ago/3600) + 'h';
-              return (
-                <div key={i} style={{ display: 'flex', gap: '8px', padding: '6px 10px', background: '#0d1117', borderLeft: '3px solid ' + ev.color, borderRadius: '3px', alignItems: 'center' }}>
-                  <div style={{ minWidth: '52px', color: ev.color, fontWeight: 700, fontSize: 'var(--mc-font-label)', fontFamily: 'var(--font-mc-mono)' }}>{ev.source}</div>
-                  <div style={{ minWidth: '55px', color: '#90a4ae', fontWeight: 600, fontSize: 'var(--mc-font-label)', fontFamily: 'var(--font-mc-mono)' }}>{ev.label}</div>
-                  <div style={{ flex: 1, color: '#b0bec5', fontSize: 'var(--mc-font-label)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{ev.message}</div>
-                  <div style={{ color: '#455a64', fontSize: '10px', minWidth: '32px', textAlign: 'right', fontFamily: 'var(--font-mc-mono)' }}>{agoStr}</div>
-                </div>
-              );
-            })}
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '2px', maxHeight: '380px', overflowY: 'auto' }}>
+            {(() => {
+              const allAlerts = (((unusualFlows as any)?._allAlerts || []) as any[]);
+              if (allAlerts.length === 0) {
+                return <div style={{ color: '#455a64', fontSize: 'var(--mc-font-badge)', fontFamily: 'var(--font-mc-mono)', textAlign: 'center', padding: '40px' }}>No flow alerts</div>;
+              }
+              const cat = (a: any): string | null => {
+                const t = (a.AlertType || '').toLowerCase();
+                if (t.includes('etf')) return 'etf';
+                if (t.includes('weekly')) return 'weekly';
+                if (t.includes('repeat')) return 'repeat';
+                if (t.includes('unusual')) return 'unusual';
+                if (t.includes('high_flow') || t.includes('huge')) return 'huge';
+                return null;
+              };
+              const catColor = (c: string | null) => c === 'huge' ? '#e040fb' : c === 'unusual' ? '#ffd600' : c === 'repeat' ? '#4fc3f7' : c === 'weekly' ? '#ff9800' : c === 'etf' ? '#66bb6a' : '#607d8b';
+              const sorted = allAlerts.slice().sort((a: any, b: any) => (b.Updated || 0) - (a.Updated || 0)).slice(0, 30);
+              return sorted.map((a: any, i: number) => {
+                const c = cat(a);
+                const v = a.totalFlowValue || 0;
+                const fmtV = (n: number) => n >= 1000000 ? '$' + (n/1000000).toFixed(2) + 'M' : '$' + (n/1000).toFixed(0) + 'K';
+                const expStr = a.Expiry ? new Date(a.Expiry).toLocaleDateString('en-US', { month: 'numeric', day: 'numeric' }) : '';
+                const ago = (() => { const m = Math.floor((Date.now() - (a.Updated||0)) / 60000); return m < 1 ? 'now' : m < 60 ? m+'m' : m < 1440 ? Math.floor(m/60)+'h' : Math.floor(m/1440)+'d'; })();
+                return (
+                  <div key={i} style={{ display: 'grid', gridTemplateColumns: '34px 36px 56px 56px 46px 1fr 70px', gap: '6px', alignItems: 'center', padding: '4px 8px', borderLeft: '2px solid ' + catColor(c), background: '#0d1117', fontSize: 'var(--mc-font-label)', fontFamily: 'var(--font-mc-mono)' }}>
+                    <span style={{ color: '#607d8b' }}>{ago}</span>
+                    <span style={{ color: catColor(c), fontWeight: 700, fontSize: '9px', textTransform: 'uppercase' }}>{c || '?'}</span>
+                    <span style={{ color: '#e0e0e0', fontWeight: 700 }}>{a.Symbol}</span>
+                    <span style={{ color: a.OptionType === 'CALL' ? '#66bb6a' : '#ef5350' }}>{a.OptionType === 'CALL' ? 'C' : 'P'} ${a.Strike}</span>
+                    <span style={{ color: '#90a4ae' }}>{expStr}</span>
+                    <span style={{ color: a.isBullish ? '#66bb6a' : '#ef5350', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{a.isBullish ? '▲' : '▼'} {(a.SWEEPS||0)>0?(a.SWEEPS+'sw '):''}{(a.BLOCKS||0)>0?(a.BLOCKS+'bk'):''}</span>
+                    <span style={{ color: catColor(c), fontWeight: 700, textAlign: 'right' }}>{fmtV(v)}</span>
+                  </div>
+                );
+              });
+            })()}
           </div>
         </div>
       </div>
