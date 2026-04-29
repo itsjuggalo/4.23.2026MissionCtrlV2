@@ -742,6 +742,25 @@ export function CommandCenterPage() {
             <span style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
               <span style={{ color: '#4fc3f7', fontWeight: 700 }}>{kronosForecast?.symbol || kronosSymbol}</span>
               <button onClick={() => setShowKronosInput(v => !v)} style={{ background: showKronosInput ? '#ef5350' : '#1a3a4a', color: '#e0e0e0', border: 'none', borderRadius: '3px', width: '20px', height: '20px', cursor: 'pointer', fontSize: '12px', fontWeight: 700, lineHeight: '14px', fontFamily: 'var(--font-mc-mono)' }}>{showKronosInput ? '×' : '✎'}</button>
+              <button onClick={() => setShowKronosHistory(v => !v)} title="History" style={{ background: '#1a3a4a', color: '#e0e0e0', border: 'none', borderRadius: '3px', padding: '2px 6px', cursor: 'pointer', fontSize: '10px', fontWeight: 700, fontFamily: 'var(--font-mc-mono)' }}>HIST</button>
+              <button onClick={async () => {
+                setKronosLoading(true); setKronosError('');
+                try {
+                  const r = await fetch('/api/kronos-generate', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ ticker: kronosSymbol }) });
+                  const j = await r.json();
+                  if (j.status === 'generating') {
+                    setKronosError('Generating ' + kronosSymbol + '... checking every 20s (~3 min)');
+                    let attempts = 0;
+                    const poll = setInterval(() => {
+                      attempts++;
+                      fetch('/api/kronos-forecast?symbol=' + encodeURIComponent(kronosSymbol)).then(r => r.ok ? r.json() : null).then(d => {
+                        if (d && !d.error) { setKronosForecast(d); setKronosError(''); setKronosLoading(false); clearInterval(poll); }
+                      });
+                      if (attempts > 20) { setKronosError('Timeout waiting for forecast.'); setKronosLoading(false); clearInterval(poll); }
+                    }, 20000);
+                  } else { setKronosError(j.error || 'generation failed'); setKronosLoading(false); }
+                } catch (e) { setKronosError(String(e)); setKronosLoading(false); }
+              }} title="Generate fresh forecast" style={{ background: '#66bb6a', color: '#0d1117', border: 'none', borderRadius: '3px', padding: '2px 6px', cursor: 'pointer', fontSize: '10px', fontWeight: 700, fontFamily: 'var(--font-mc-mono)' }}>GEN</button>
               {showKronosInput && (
                 <input type="text" placeholder="SYMBOL" value={kronosInput} onChange={e => setKronosInput(e.target.value.toUpperCase())} onKeyDown={e => { if (e.key === 'Enter') { const s = kronosInput.trim().toUpperCase(); if (s) setKronosSymbol(s); setKronosInput(''); setShowKronosInput(false); } else if (e.key === 'Escape') { setKronosInput(''); setShowKronosInput(false); } }} autoFocus style={{ width: '90px', background: '#0d1117', color: '#e0e0e0', border: '1px solid #1a3a4a', borderRadius: '3px', padding: '3px 6px', fontSize: 'var(--mc-font-label)', fontFamily: 'var(--font-mc-mono)', outline: 'none' }} />
               )}
