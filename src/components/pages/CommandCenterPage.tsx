@@ -30,6 +30,11 @@ export function CommandCenterPage() {
   const newsTickerRef = useRef<HTMLDivElement>(null);
   const tvContainerRef = useRef<HTMLDivElement>(null);
   const tvLoadedRef = useRef(false);
+  const [watchlist, setWatchlist] = useState<string[]>(['AAPL', 'NVDA', 'TSLA', 'MU', 'LLY']);
+  const [showAddInput, setShowAddInput] = useState(false);
+  const [newSymInput, setNewSymInput] = useState('');
+  const [draggedIdx, setDraggedIdx] = useState<number | null>(null);
+  const [equityHistory, setEquityHistory] = useState<any[]>([]);
 
   const fetchData = async () => {
     try {
@@ -97,6 +102,29 @@ export function CommandCenterPage() {
     return () => window.removeEventListener('keydown', onKey);
   }, [dashData]);
 
+  // Load watchlist from localStorage on mount
+  useEffect(() => {
+    try {
+      const saved = localStorage.getItem('cc-watchlist');
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        if (Array.isArray(parsed) && parsed.length > 0) setWatchlist(parsed);
+      }
+    } catch {}
+  }, []);
+
+  // Persist watchlist changes to localStorage
+  useEffect(() => {
+    try { localStorage.setItem('cc-watchlist', JSON.stringify(watchlist)); } catch {}
+  }, [watchlist]);
+
+  // Fetch equity history for sparkline
+  useEffect(() => {
+    fetch('/api/equity-history').then(r => r.ok ? r.json() : null).then(d => {
+      if (d?.history) setEquityHistory(d.history);
+    }).catch(() => {});
+  }, []);
+
   // TradingView widget loader for BTC SuperTrend chart
   useEffect(() => {
     if (tvLoadedRef.current) return;
@@ -153,7 +181,6 @@ export function CommandCenterPage() {
   const quotes = dashData?.quotes || {};
   const intel = dashData?.intel || {};
   const news = dashData?.news || [];
-  const SYMS = ['AAPL', 'NVDA', 'TSLA', 'MU', 'LLY'];
 
   // Multi-timeframe regime data for SuperTrend MTF Quorum tile
   const tfData = regime?.timeframes || {};
@@ -257,8 +284,29 @@ export function CommandCenterPage() {
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr 1.4fr 1.4fr', gap: '10px', marginBottom: '12px', alignItems: 'stretch' }}>
         <div className="cc" style={{ padding: '16px 18px' }}>
           <div className="lbl">ALPACA EQUITY</div>
-          <div style={{ fontSize: 'var(--mc-font-3xl)', fontWeight: 700, fontFamily: 'var(--font-mc-mono)', color: '#4fc3f7' }}>${fmt(equity)}</div>
-          <div style={{ fontSize: 'var(--mc-font-label)', color: '#455a64', marginTop: '4px' }}>{(dailyPct >= 0 ? '+' : '') + fmt(dailyPct) + '% today'}</div>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', gap: '10px' }}>
+            <div style={{ minWidth: 0, flex: 1 }}>
+              <div style={{ fontSize: 'var(--mc-font-3xl)', fontWeight: 700, fontFamily: 'var(--font-mc-mono)', color: '#4fc3f7' }}>${fmt(equity)}</div>
+              <div style={{ fontSize: 'var(--mc-font-label)', color: '#455a64', marginTop: '4px' }}>{(dailyPct >= 0 ? '+' : '') + fmt(dailyPct) + '% today'}</div>
+            </div>
+            {(() => {
+              const data = (equityHistory || []).map((h: any) => Number(h.equity)).filter(v => !isNaN(v));
+              if (data.length < 2) return null;
+              const w = 90, h = 32;
+              const min = Math.min(...data);
+              const max = Math.max(...data);
+              const range = max - min || 1;
+              const pts = data.map((v, i) => `${(i / (data.length - 1)) * w},${h - ((v - min) / range) * h}`).join(' ');
+              const up = data[data.length - 1] >= data[0];
+              const color = up ? '#66bb6a' : '#ef5350';
+              return (
+                <svg width={w} height={h} style={{ display: 'block', flexShrink: 0 }}>
+                  <polyline points={pts} fill="none" stroke={color} strokeWidth="1.5" strokeLinejoin="round" strokeLinecap="round" />
+                  <circle cx={w} cy={h - ((data[data.length - 1] - min) / range) * h} r="2" fill={color} />
+                </svg>
+              );
+            })()}
+          </div>
         </div>
 
         <div className="cc" style={{ padding: '16px 18px' }}>
@@ -373,9 +421,45 @@ export function CommandCenterPage() {
 
         {/* WATCHLIST QUOTE CARDS */}
         <div className="cc" style={{ padding: '16px' }}>
-          <div className="lbl" style={{ marginBottom: '12px' }}>WATCHLIST</div>
+          <div className="lbl" style={{ marginBottom: '12px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            <span>WATCHLIST <span style={{ color: '#455a64', fontWeight: 400, marginLeft: '6px' }}>{watchlist.length}</span></span>
+            <button
+              onClick={() => setShowAddInput(v => !v)}
+              style={{ background: showAddInput ? '#ef5350' : '#4fc3f7', color: '#0d1117', border: 'none', borderRadius: '4px', width: '24px', height: '24px', cursor: 'pointer', fontSize: '16px', fontWeight: 700, lineHeight: '20px', fontFamily: 'var(--font-mc-mono)' }}
+              title={showAddInput ? 'Cancel' : 'Add symbol'}
+            >{showAddInput ? '×' : '+'}</button>
+          </div>
+          {showAddInput && (
+            <div style={{ display: 'flex', gap: '6px', marginBottom: '10px' }}>
+              <input
+                type="text"
+                placeholder="SYMBOL"
+                value={newSymInput}
+                onChange={e => setNewSymInput(e.target.value.toUpperCase())}
+                onKeyDown={e => {
+                  if (e.key === 'Enter') {
+                    const s = newSymInput.trim().toUpperCase();
+                    if (s && !watchlist.includes(s)) setWatchlist([...watchlist, s]);
+                    setNewSymInput(''); setShowAddInput(false);
+                  } else if (e.key === 'Escape') {
+                    setNewSymInput(''); setShowAddInput(false);
+                  }
+                }}
+                autoFocus
+                style={{ flex: 1, background: '#0d1117', color: '#e0e0e0', border: '1px solid #1a3a4a', borderRadius: '4px', padding: '6px 10px', fontSize: 'var(--mc-font-label)', fontFamily: 'var(--font-mc-mono)', outline: 'none' }}
+              />
+              <button
+                onClick={() => {
+                  const s = newSymInput.trim().toUpperCase();
+                  if (s && !watchlist.includes(s)) setWatchlist([...watchlist, s]);
+                  setNewSymInput(''); setShowAddInput(false);
+                }}
+                style={{ background: '#66bb6a', color: '#0d1117', border: 'none', borderRadius: '4px', padding: '0 12px', cursor: 'pointer', fontSize: 'var(--mc-font-label)', fontWeight: 700, fontFamily: 'var(--font-mc-mono)' }}
+              >ADD</button>
+            </div>
+          )}
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px' }}>
-            {SYMS.map(sym => {
+            {watchlist.map((sym, idx) => {
               const q = quotes[sym];
               const inf = intel[sym];
               const a = inf?.analyst;
@@ -384,7 +468,30 @@ export function CommandCenterPage() {
               const chg = q?.change_p || 0;
               const green = chg >= 0;
               return (
-                <div key={sym} style={{ background: '#0d1117', border: '1px solid #1a3a4a', borderRadius: '8px', padding: '12px' }}>
+                <div
+                  key={sym}
+                  draggable
+                  onDragStart={() => setDraggedIdx(idx)}
+                  onDragOver={e => e.preventDefault()}
+                  onDrop={() => {
+                    if (draggedIdx === null || draggedIdx === idx) { setDraggedIdx(null); return; }
+                    const next = [...watchlist];
+                    const [moved] = next.splice(draggedIdx, 1);
+                    next.splice(idx, 0, moved);
+                    setWatchlist(next);
+                    setDraggedIdx(null);
+                  }}
+                  onDragEnd={() => setDraggedIdx(null)}
+                  style={{ background: '#0d1117', border: '1px solid ' + (draggedIdx === idx ? '#4fc3f7' : '#1a3a4a'), borderRadius: '8px', padding: '12px', position: 'relative', cursor: 'grab', opacity: draggedIdx === idx ? 0.5 : 1 }}
+                >
+                  <button
+                    onClick={() => setWatchlist(watchlist.filter((_, i) => i !== idx))}
+                    onMouseDown={e => e.stopPropagation()}
+                    style={{ position: 'absolute', top: '4px', right: '4px', background: 'transparent', border: 'none', color: '#455a64', cursor: 'pointer', fontSize: '14px', padding: '2px 6px', borderRadius: '3px', lineHeight: 1, fontFamily: 'var(--font-mc-mono)' }}
+                    onMouseEnter={e => { (e.currentTarget as HTMLElement).style.color = '#ef5350'; }}
+                    onMouseLeave={e => { (e.currentTarget as HTMLElement).style.color = '#455a64'; }}
+                    title={'Remove ' + sym}
+                  >×</button>
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
                     <span style={{ fontSize: 'var(--mc-font-md)', fontWeight: 700, color: '#e0e0e0', fontFamily: 'var(--font-mc-mono)' }}>{sym}</span>
                     <span style={{ fontSize: 'var(--mc-font-sm)', fontWeight: 700, color: green ? '#66bb6a' : '#ef5350', fontFamily: 'var(--font-mc-mono)' }}>
