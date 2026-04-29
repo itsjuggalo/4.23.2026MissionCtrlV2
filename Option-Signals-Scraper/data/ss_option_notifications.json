@@ -6536,5 +6536,47 @@
     "message": "Take profits at revised SellTarget 4.5.",
     "symbol": "AAPL",
     "title": "AAPL 272.5C 5/1: SELL"
+  },
+  "1777469458": {
+    "category": "SWING",
+    "message": "Stopped out at 1.52",
+    "symbol": "SLV",
+    "title": "SLV 66C 05/08 : SELL"
+  },
+  "1777469577": {
+    "category": "SWING",
+    "message": "Take trailing stop at 0.39 to exit trade!",
+    "symbol": "KWEB",
+    "title": "KWEB 27P 05/29 : SELL"
+  },
+  "1777472084": {
+    "category": "SWING",
+    "message": "Take trailing stop at 1.28 to exit trade!",
+    "symbol": "CMCSA",
+    "title": "CMCSA 27.5C 07/17 : SELL"
+  },
+  "1777472124": {
+    "category": "SWING",
+    "message": "Buy below 21.40, Sell above 24.61\nSwing, Moderate risk",
+    "symbol": "AMD",
+    "title": "AMD 320C 5/15: BUY"
+  },
+  "1777472942": {
+    "category": "SWING",
+    "message": "Reached SellTarget1 @24.70 with gain: 15.42%. Take profits and ride for next target with stops @17.29",
+    "symbol": "AMD",
+    "title": "AMD 320C 05/15 : SELL"
+  },
+  "1777473498": {
+    "category": "SWING",
+    "message": "Reached SellTarget2 @27.00 with gain: 26.17%. Take profits and ride for next target @29.96 with stops @21.40",
+    "symbol": "AMD",
+    "title": "AMD 320C 05/15 : SELL"
+  },
+  "1777475765": {
+    "category": "SWING",
+    "message": "Buy below 13.10, Sell above 15.07\nSwing, Moderate risk",
+    "symbol": "AMZN",
+    "title": "AMZN 265C 6/5: BUY"
   }
 }

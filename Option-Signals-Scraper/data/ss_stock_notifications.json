@@ -25647,5 +25647,42 @@
     "message": "Reached SellTarget1 @11.10. Take profits and ride the runners. Gain: 2.21%",
     "symbol": "NOK",
     "title": "NOK: SELL"
+  },
+  "1777471989": {
+    "category": "LONGTERM",
+    "message": "Buy below 15.97, Sell above 16.45\nLongTerm, Moderate risk",
+    "symbol": "SOFI",
+    "title": "SOFI: BUY"
+  },
+  "1777472130": {
+    "category": "SWING",
+    "message": "Buy below 322.80, Sell above 332.48\nSwing, Moderate risk",
+    "symbol": "AMD",
+    "title": "AMD: BUY"
+  },
+  "1777474525": {
+    "category": "SWING",
+    "message": "Reached SellTarget1 @332.6 with gain: 3.04%. Take profits and ride for next target with stops @290.5",
+    "symbol": "AMD",
+    "title": "AMD : SELL"
+  },
+  "1777474953": {
+    "category": "SWING",
+    "free": 1,
+    "message": "Book more profits at 12.05 and ride the runners. Gain: 10.96%",
+    "symbol": "NOK",
+    "title": "NOK: SELL"
+  },
+  "1777474959": {
+    "category": "SWING",
+    "message": "Reached SellTarget1 @446.1 with gain: 1.21%. Take profits and ride for next target with stops @396.7",
+    "symbol": "SPOT",
+    "title": "SPOT : SELL"
+  },
+  "1777475785": {
+    "category": "SCALP",
+    "message": "Buy below 263.27, Sell above 271.17\nScalp, VH risk",
+    "symbol": "AMZN",
+    "title": "AMZN: BUY"
   }
 }

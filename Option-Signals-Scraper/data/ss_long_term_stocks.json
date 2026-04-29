@@ -12,13 +12,13 @@
     "free": 1,
     "isWeekly": 1,
     "quote": {
-      "closePrice": 267.62,
-      "highPrice": 273.22,
-      "lastPrice": 270.79,
-      "lowPrice": 268.66,
-      "openPrice": 272.335,
-      "quoteTimeInLong": 1777406371,
-      "tradeTimeInLong": 1777406371
+      "closePrice": 270.71,
+      "highPrice": 270.3118,
+      "lastPrice": 268.9499,
+      "lowPrice": 267.04,
+      "openPrice": 267.55,
+      "quoteTimeInLong": 1777475678,
+      "tradeTimeInLong": 1777475678
     },
     "reduceLoss": "227.04",
     "sellTarget": "259.84",
@@ -40,13 +40,13 @@
     "free": 0,
     "isWeekly": 1,
     "quote": {
-      "closePrice": 16.72,
-      "highPrice": 16.535,
-      "lastPrice": 16.135,
-      "lowPrice": 15.96,
-      "openPrice": 16.49,
-      "quoteTimeInLong": 1777406370,
-      "tradeTimeInLong": 1777406370
+      "closePrice": 16.145,
+      "highPrice": 16.14,
+      "lastPrice": 15.9469,
+      "lowPrice": 15.91,
+      "openPrice": 16,
+      "quoteTimeInLong": 1777475677,
+      "tradeTimeInLong": 1777475677
     },
     "reduceLoss": "14.85",
     "sellTarget": "17.00",
@@ -56,5 +56,27 @@
     "status": "Booked profits @17.00 and riding runners",
     "stopLoss": "14.85",
     "symbol": "RIVN"
+  },
+  "1777471989": {
+    "buyTarget": "15.97",
+    "category": "LONGTERM",
+    "earlyTarget": "16.45",
+    "free": 0,
+    "isWeekly": 1,
+    "quote": {
+      "closePrice": 18.36,
+      "highPrice": 16.59,
+      "lastPrice": 15.97,
+      "lowPrice": 15.77,
+      "openPrice": 16.55,
+      "quoteTimeInLong": 1777475677,
+      "tradeTimeInLong": 1777475677
+    },
+    "reduceLoss": "14.37",
+    "sellTarget": "16.45",
+    "sellTarget2": "16.93",
+    "sellTarget3": "17.57",
+    "stopLoss": "14.37",
+    "symbol": "SOFI"
   }
 }

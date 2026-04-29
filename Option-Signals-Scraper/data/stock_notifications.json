@@ -3043,5 +3043,35 @@
     "message": "Reached Target 156.0 and that's 2.00%! Lock some in and wait for next target. Raise the stops to 140.7",
     "symbol": "MRVL",
     "title": "MRVL : STC"
+  },
+  "1777468664": {
+    "category": "SWING",
+    "message": "Reached Target 372.4 and that's 2.02%! Lock some in and wait for next target. Raise the stops to 335.8",
+    "symbol": "CLS",
+    "title": "CLS : STC"
+  },
+  "1777472240": {
+    "category": "SWING",
+    "message": "Buy To Open at 324.15 with first target above 330.63",
+    "symbol": "AMD",
+    "title": "AMD: BTO"
+  },
+  "1777473404": {
+    "category": "SWING",
+    "message": "Reached Target 355.6 and that's 11.29%! Lock some in and wait for next target. Raise the stops to 344.9",
+    "symbol": "GOOGL",
+    "title": "GOOGL : STC"
+  },
+  "1777473405": {
+    "category": "SWING",
+    "message": "Reached Target 330.8 and that's 2.05%! Lock some in and wait for next target. Raise the stops to 298.2",
+    "symbol": "AMD",
+    "title": "AMD : STC"
+  },
+  "1777474365": {
+    "category": "SWING",
+    "message": "Buy To Open at 265.38 with first target above 270.69",
+    "symbol": "AMZN",
+    "title": "AMZN: BTO"
   }
 }

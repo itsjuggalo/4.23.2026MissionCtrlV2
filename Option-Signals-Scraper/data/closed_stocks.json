@@ -4069,6 +4069,23 @@
     "stopLoss": "25.53",
     "symbol": "CMCSA"
   },
+  "1777386703": {
+    "buyTarget": "365.01",
+    "category": "SWING",
+    "earlyTarget": "372.31",
+    "exit1": "372.4",
+    "exit1Time": 1777468664,
+    "exitTime": 1777468664,
+    "free": 1,
+    "isWeekly": 1,
+    "reduceLoss": "335.81",
+    "sellTarget": "372.4",
+    "sellTargetTime": 1777468664,
+    "shortName": "Celestica, Inc.",
+    "status": "Locked some at 372.4 for 2.02%!",
+    "stopLoss": "335.8",
+    "symbol": "CLS"
+  },
   "1777398076": {
     "buyTarget": "152.94",
     "category": "SWING",
@@ -4081,7 +4098,7 @@
     "free": 1,
     "isWeekly": 1,
     "reduceLoss": "140.70",
-    "sellTarget": "153.4",
+    "sellTarget": "156",
     "sellTargetTime": 1777404584,
     "shortName": "Marvell Technology, Inc.",
     "status": "Locked some at 156.0 for 2.00%!",

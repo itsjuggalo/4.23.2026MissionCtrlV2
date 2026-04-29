@@ -5780,5 +5780,29 @@
     "message": "Reached SellTarget2 @1.63 with gain: 25.38%. Take profits and ride for next target @1.82 with stops @1.30",
     "symbol": "NFLX",
     "title": "NFLX 93C 05/08 : SELL"
+  },
+  "1777469410": {
+    "category": "SWING",
+    "message": "Take trailing stop at 1.17 to exit trade!",
+    "symbol": "NFLX",
+    "title": "NFLX 93C 05/08 : SELL"
+  },
+  "1777472009": {
+    "category": "LONGTERM",
+    "message": "Buy below 2.34, Sell above 2.69\nLongTerm, Hi risk",
+    "symbol": "SOFI",
+    "title": "SOFI 20C 1/15/27: BUY"
+  },
+  "1777474182": {
+    "category": "ER PLAY",
+    "message": "Buy below 14.20, Sell above 16.33\nER play, VH risk",
+    "symbol": "AMZN",
+    "title": "AMZN 265C 6/5: BUY"
+  },
+  "1777475327": {
+    "category": "SWING",
+    "message": "Reached SellTarget1 @7.47 with gain: 14.92%. Take profits and ride for next target with stops @5.23",
+    "symbol": "SFM",
+    "title": "SFM 75P 05/15 : SELL"
   }
 }

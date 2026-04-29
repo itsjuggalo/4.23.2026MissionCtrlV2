@@ -8,13 +8,13 @@
     "free": 1,
     "isWeekly": 1,
     "quote": {
-      "closePrice": 14.81,
-      "highPrice": 15.05,
-      "lastPrice": 14.84,
-      "lowPrice": 14.67,
-      "openPrice": 14.87,
-      "quoteTimeInLong": 1777406351,
-      "tradeTimeInLong": 1777406351
+      "closePrice": 14.82,
+      "highPrice": 15.08,
+      "lastPrice": 15.0799,
+      "lowPrice": 14.7,
+      "openPrice": 14.81,
+      "quoteTimeInLong": 1777475654,
+      "tradeTimeInLong": 1777475654
     },
     "reduceLoss": "13.90",
     "sellTarget": "14.90",
@@ -37,13 +37,13 @@
     "free": 1,
     "isWeekly": 1,
     "quote": {
-      "closePrice": 216.61,
-      "highPrice": 214.73,
-      "lastPrice": 213.32,
-      "lowPrice": 208.2,
-      "openPrice": 209.505,
-      "quoteTimeInLong": 1777406351,
-      "tradeTimeInLong": 1777406351
+      "closePrice": 213.07,
+      "highPrice": 212.715,
+      "lastPrice": 210.5005,
+      "lowPrice": 209.77,
+      "openPrice": 212.715,
+      "quoteTimeInLong": 1777475659,
+      "tradeTimeInLong": 1777475659
     },
     "reduceLoss": "157.74",
     "sellTarget": "180.53",
@@ -65,13 +65,13 @@
     "free": 0,
     "isWeekly": 1,
     "quote": {
-      "closePrice": 132.52,
-      "highPrice": 130.92,
-      "lastPrice": 130.85,
-      "lowPrice": 128.95,
-      "openPrice": 129.5,
-      "quoteTimeInLong": 1777406351,
-      "tradeTimeInLong": 1777406351
+      "closePrice": 130.85,
+      "highPrice": 132.03,
+      "lastPrice": 130.5,
+      "lowPrice": 129.98,
+      "openPrice": 131.95,
+      "quoteTimeInLong": 1777475652,
+      "tradeTimeInLong": 1777475652
     },
     "reduceLoss": "124.68",
     "sellTarget": "142.69",
@@ -89,13 +89,13 @@
     "free": 0,
     "isWeekly": 1,
     "quote": {
-      "closePrice": 91.355,
-      "highPrice": 92.34,
-      "lastPrice": 92.32,
-      "lowPrice": 90.02,
-      "openPrice": 91.4,
-      "quoteTimeInLong": 1777406351,
-      "tradeTimeInLong": 1777406351
+      "closePrice": 92.295,
+      "highPrice": 92.855,
+      "lastPrice": 92.475,
+      "lowPrice": 90.86,
+      "openPrice": 91.225,
+      "quoteTimeInLong": 1777475659,
+      "tradeTimeInLong": 1777475659
     },
     "reduceLoss": "84.20",
     "risk": "HI",
@@ -105,5 +105,29 @@
     "shortName": "Netflix, Inc.",
     "stopLoss": "84.20",
     "symbol": "NFLX"
+  },
+  "1777472012": {
+    "buyTarget": "15.99",
+    "category": "LONGTERM",
+    "earlyTarget": "16.47",
+    "free": 0,
+    "isWeekly": 1,
+    "quote": {
+      "closePrice": 18.36,
+      "highPrice": 16.59,
+      "lastPrice": 15.995,
+      "lowPrice": 15.77,
+      "openPrice": 16.55,
+      "quoteTimeInLong": 1777475659,
+      "tradeTimeInLong": 1777475659
+    },
+    "reduceLoss": "14.39",
+    "risk": "HI",
+    "sellTarget": "16.47",
+    "sellTarget2": "16.95",
+    "sellTarget3": "17.59",
+    "shortName": "SoFi Technologies, Inc.",
+    "stopLoss": "14.39",
+    "symbol": "SOFI"
   }
 }

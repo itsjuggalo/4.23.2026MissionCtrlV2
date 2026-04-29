@@ -6369,9 +6369,7 @@
     "discordMessageId": "1497323699572047964",
     "discordThreadId": "1497323699572047964",
     "earlyTarget": "0.51",
-    "exit1": "0.54",
-    "exit2": "0.55",
-    "exitTime": 1777383027,
+    "exitTime": 1777469577,
     "expiry": "1780030800",
     "free": 1,
     "isPut": 1,
@@ -6384,8 +6382,9 @@
     "reduceLoss": "0.29",
     "sellTarget": "0.54",
     "sellTarget2": "0.55",
+    "sellTarget3": "0.39",
     "shortName": "KraneShares CSI China Internet ",
-    "status": "Booked profits @0.55 and riding runners",
+    "status": "Booked full profits.",
     "stopLoss": "0.44",
     "strike": "27",
     "symbol": "KWEB"
@@ -6486,6 +6485,29 @@
     "stopLoss": "2.92",
     "strike": "710",
     "symbol": "SPY"
+  },
+  "1777397236": {
+    "buyTarget": "2.46",
+    "category": "SWING",
+    "discordMessageId": "1498737377772834897",
+    "discordThreadId": "1498737377772834897",
+    "earlyTarget": "2.83",
+    "exitTime": 1777469458,
+    "expiry": "1778216400",
+    "free": 0,
+    "isWeekly": 1,
+    "reasoning": {
+      "\ud83d\udc0b Unusual Flows": "Newly opened option sweeps were detected with Sweep Volume > Open Interest.",
+      "\ud83d\udcc8 Bullish Sweeps": "Bullish sweeps indicate some hedge fund managers expect the stock to go up in short term.",
+      "\ud83d\udcca Technical Analysis": "Technical Analysis indicates that the analyst has verified chart pattern, support and resistance levels, moving averages, RSI and VWAP for this entry."
+    },
+    "reduceLoss": "1.60",
+    "sellTarget": "1.52",
+    "shortName": "iShares Silver Trust",
+    "status": "Stopped out.",
+    "stopLoss": "1.60",
+    "strike": "66",
+    "symbol": "SLV"
   },
   "1777400025": {
     "buyTarget": "4.50",

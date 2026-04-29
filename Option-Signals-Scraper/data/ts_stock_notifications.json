@@ -4047,5 +4047,35 @@
     "message": "Take trailing stop at 72.52 to exit trade!",
     "symbol": "SYY",
     "title": "SYY : SELL"
+  },
+  "1777467606": {
+    "category": "SWING",
+    "message": "Reached SellTarget2 @50.25 with gain: 6.85%. Take profits and ride for next target with stops @47.03",
+    "symbol": "DVN",
+    "title": "DVN : SELL"
+  },
+  "1777472012": {
+    "category": "LONGTERM",
+    "message": "Buy below 15.99, Sell above 16.47\nLongTerm, Hi risk",
+    "symbol": "SOFI",
+    "title": "SOFI: BUY"
+  },
+  "1777472356": {
+    "category": "SWING",
+    "message": "Buy below 324.17, Sell above 333.90\nSwing, Moderate risk",
+    "symbol": "AMD",
+    "title": "AMD: BUY"
+  },
+  "1777474188": {
+    "category": "ER PLAY",
+    "message": "Buy below 265.45, Sell above 273.41\nER play, VH risk",
+    "symbol": "AMZN",
+    "title": "AMZN: BUY"
+  },
+  "1777474877": {
+    "category": "SWING",
+    "message": "Reached SellTarget1 @333.9 with gain: 3.00%. Take profits and ride for next target with stops @291.8",
+    "symbol": "AMD",
+    "title": "AMD : SELL"
   }
 }
