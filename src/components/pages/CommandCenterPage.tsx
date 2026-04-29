@@ -644,29 +644,6 @@ export function CommandCenterPage() {
               </div>
             );
           }) : <div style={{ color: '#455a64', fontSize: 'var(--mc-font-badge)', fontFamily: 'var(--font-mc-mono)', textAlign: 'center', padding: '30px' }}>No huge-flow alerts today</div>}
-          {/* DEAD - old map below, kept as no-op */}
-          {false && unusualFlows.filter((f: any) => f.Value >= 1000000).map((f: any, i: number) => {
-            const isCall = f.OptionType === 'CALL';
-            const isAsk = f.BidAskType === 'A' || f.BidAskType === 'AA';
-            const bull = (isCall && isAsk) || (!isCall && !isAsk);
-            const sc = bull ? '#66bb6a' : '#ef5350';
-            const fv = (n: number) => n >= 1000000 ? '$' + (n/1000000).toFixed(1) + 'M' : '$' + (n/1000).toFixed(0) + 'K';
-            const ta = (ts: number) => { const m = Math.floor((Date.now() - ts) / 60000); return m < 1 ? 'now' : m < 60 ? m + 'm' : m < 1440 ? Math.floor(m/60) + 'h' : Math.floor(m/1440) + 'd'; };
-            return (
-              <div key={i} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '8px 12px', borderBottom: '1px solid #0d1117', borderLeft: '3px solid #e040fb', background: '#e040fb08' }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                  <span style={{ width: '8px', height: '8px', borderRadius: '50%', background: sc, boxShadow: '0 0 4px ' + sc, display: 'inline-block' }} />
-                  <span style={{ fontSize: 'var(--mc-font-label)', color: '#455a64', fontFamily: 'var(--font-mc-mono)' }}>{ta(f.Time)}</span>
-                  <span style={{ fontSize: 'var(--mc-font-sm)', color: sc, fontWeight: 700, fontFamily: 'var(--font-mc-mono)' }}>{f.Symbol}</span>
-                  <span style={{ fontSize: 'var(--mc-font-xs)', color: sc }}>{f.OptionType?.slice(0,1)} ${f.Strike}</span>
-                </div>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                  <span style={{ fontSize: 'var(--mc-font-sm)', color: '#e040fb', fontWeight: 700, fontFamily: 'var(--font-mc-mono)' }}>{fv(f.Value)}</span>
-                  <span style={{ fontSize: 'var(--mc-font-badge)', fontWeight: 700, padding: '1px 5px', borderRadius: '3px', background: f.BlockType === 'SWEEP' ? '#ff980022' : '#4fc3f722', color: f.BlockType === 'SWEEP' ? '#ff9800' : '#4fc3f7' }}>{f.BlockType === 'SWEEP' ? 'SWP' : 'BLK'}</span>
-                </div>
-              </div>
-            );
-          }) : <div style={{ color: '#455a64', fontSize: 'var(--mc-font-badge)', fontFamily: 'var(--font-mc-mono)', textAlign: 'center', padding: '30px' }}>No $1M+ flows today</div>}
         </div>
 
         <div className="cc" style={{ padding: '16px' }}>
