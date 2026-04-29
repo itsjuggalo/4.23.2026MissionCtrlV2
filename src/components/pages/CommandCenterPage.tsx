@@ -133,9 +133,10 @@ export function CommandCenterPage() {
   // Fetch extended insider+congress data for each watchlist + position symbol
   useEffect(() => {
     const fetchExtendedIntel = async () => {
+      const portfolioPositions = (portfolio?.positions || []) as any[];
       const allSyms = new Set<string>();
       watchlist.forEach(s => allSyms.add(s));
-      positions.forEach((p: any) => allSyms.add(tickerOnly(p.symbol)));
+      portfolioPositions.forEach((p: any) => { const t = tickerOnly(p.symbol); if (t) allSyms.add(t); });
       const result: Record<string, any> = {};
       await Promise.all(Array.from(allSyms).filter(s => s && s.length > 0 && s.length <= 5).map(async (sym) => {
         try {
@@ -148,7 +149,7 @@ export function CommandCenterPage() {
     fetchExtendedIntel();
     const iv = setInterval(fetchExtendedIntel, 5 * 60 * 1000);
     return () => clearInterval(iv);
-  }, [watchlist, positions]);
+  }, [watchlist, portfolio]);
 
   // Arrow-key navigation for Market News ticker (when focused)
   useEffect(() => {
