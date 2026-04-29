@@ -1205,7 +1205,7 @@ def execute_position_action(action_dict, positions):
         return {"ok": False, "action": act, "symbol": sym, "error": str(e)[:200]}
 
 
-def log_decision(cycle_result, picks_executed):
+def log_decision(cycle_result, picks_executed)
     
     # Multi-agent: post Boba's cycle summary to #agent-debate
     if _MULTIAGENT_LIB_OK:
