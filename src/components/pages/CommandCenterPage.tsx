@@ -930,7 +930,7 @@ export function CommandCenterPage() {
             );
           }) : <div style={{ color: '#455a64', fontSize: 'var(--mc-font-badge)', fontFamily: 'var(--font-mc-mono)', marginBottom: '12px' }}>No open positions</div>}
           <div className="lbl" style={{ marginTop: '14px', marginBottom: '8px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-            <span>INSIDER + CONGRESS (90d)</span>
+            <span>INSIDER ACTIVITY (90d)</span>
             <span style={{ color: '#607d8b', fontSize: '9px', fontWeight: 400 }}>insider • Ⓒ congress</span>
           </div>
           {watchlist.map(sym => {

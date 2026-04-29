@@ -10,11 +10,11 @@
     "quote": {
       "closePrice": 14.82,
       "highPrice": 15.09,
-      "lastPrice": 14.83,
+      "lastPrice": 14.95,
       "lowPrice": 14.7,
       "openPrice": 14.81,
-      "quoteTimeInLong": 1777491492,
-      "tradeTimeInLong": 1777491492
+      "quoteTimeInLong": 1777492752,
+      "tradeTimeInLong": 1777492752
     },
     "reduceLoss": "13.90",
     "sellTarget": "14.90",
@@ -39,11 +39,11 @@
     "quote": {
       "closePrice": 213.07,
       "highPrice": 212.715,
-      "lastPrice": 209.225,
+      "lastPrice": 209.035,
       "lowPrice": 207.5758,
       "openPrice": 212.715,
-      "quoteTimeInLong": 1777491494,
-      "tradeTimeInLong": 1777491494
+      "quoteTimeInLong": 1777492752,
+      "tradeTimeInLong": 1777492752
     },
     "reduceLoss": "157.74",
     "sellTarget": "180.53",
@@ -67,11 +67,11 @@
     "quote": {
       "closePrice": 130.85,
       "highPrice": 132.03,
-      "lastPrice": 130.62,
+      "lastPrice": 130.43,
       "lowPrice": 129.98,
       "openPrice": 131.95,
-      "quoteTimeInLong": 1777491488,
-      "tradeTimeInLong": 1777491488
+      "quoteTimeInLong": 1777492751,
+      "tradeTimeInLong": 1777492751
     },
     "reduceLoss": "124.68",
     "sellTarget": "142.69",
@@ -91,11 +91,11 @@
     "quote": {
       "closePrice": 92.295,
       "highPrice": 92.855,
-      "lastPrice": 92.13,
+      "lastPrice": 92.095,
       "lowPrice": 90.86,
       "openPrice": 91.225,
-      "quoteTimeInLong": 1777491494,
-      "tradeTimeInLong": 1777491494
+      "quoteTimeInLong": 1777492752,
+      "tradeTimeInLong": 1777492752
     },
     "reduceLoss": "84.20",
     "risk": "HI",
@@ -115,11 +115,11 @@
     "quote": {
       "closePrice": 18.36,
       "highPrice": 16.59,
-      "lastPrice": 15.555,
-      "lowPrice": 15.54,
+      "lastPrice": 15.545,
+      "lowPrice": 15.5,
       "openPrice": 16.55,
-      "quoteTimeInLong": 1777491494,
-      "tradeTimeInLong": 1777491494
+      "quoteTimeInLong": 1777492751,
+      "tradeTimeInLong": 1777492751
     },
     "reduceLoss": "14.39",
     "risk": "HI",

@@ -4083,5 +4083,11 @@
     "message": "Buy below 31.69, Sell above 32.64\nSwing, Moderate risk",
     "symbol": "KMI",
     "title": "KMI: BUY"
+  },
+  "1777492988": {
+    "category": "SWING",
+    "message": "Reached SellTarget1 @445.0 with gain: 4.79%. Take profits and ride for next target with stops @382.2",
+    "symbol": "MSFT",
+    "title": "MSFT : SELL"
   }
 }

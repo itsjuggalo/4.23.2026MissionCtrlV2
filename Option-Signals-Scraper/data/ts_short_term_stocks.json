@@ -66,8 +66,8 @@
     "discordThreadId": "1485669397753368647",
     "earlyTarget": "312.72",
     "exit1": "312.72",
-    "exit2": "355.0",
-    "exit2Time": 1777473253,
+    "exit2": "366.3",
+    "exit2Time": 1777493046,
     "free": 1,
     "isWeekly": 1,
     "quote": {
@@ -82,10 +82,10 @@
     "reduceLoss": "273.25",
     "sellTarget": "312.72",
     "sellTarget2": "321.83",
-    "sellTarget3": "365.6",
+    "sellTarget3": "377.3",
     "shortName": "Alphabet Inc.",
-    "status": "Booked profits @355.0 and riding runners",
-    "stopLoss": "344.4",
+    "status": "Booked profits @366.3 and riding runners",
+    "stopLoss": "355.3",
     "symbol": "GOOGL"
   },
   "1775499427": {
@@ -177,6 +177,8 @@
     "discordMessageId": "1496171226719191225",
     "discordThreadId": "1496171226719191225",
     "earlyTarget": "437.41",
+    "exit1": "445.0",
+    "exit1Time": 1777492988,
     "free": 0,
     "isWeekly": 1,
     "quote": {
@@ -193,7 +195,8 @@
     "sellTarget2": "450.15",
     "sellTarget3": "467.14",
     "shortName": "Microsoft Corporation",
-    "stopLoss": "382.20",
+    "status": "Booked profits @445.0 and riding runners",
+    "stopLoss": "382.2",
     "symbol": "MSFT"
   },
   "1776885512": {

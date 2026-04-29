@@ -5,7 +5,8 @@
     "earlyTarget": "407.16",
     "exit1": "409.0",
     "exit1Time": 1770648026,
-    "exit2": "415.75",
+    "exit2": "438.4",
+    "exit2Time": 1777493011,
     "free": 1,
     "isWeekly": 1,
     "quote": {
@@ -21,10 +22,10 @@
     "risk": "HI",
     "sellTarget": "407.16",
     "sellTarget2": "415.75",
-    "sellTarget3": "434.83",
+    "sellTarget3": "451.6",
     "shortName": "Microsoft Corporation",
-    "status": "Booked profits at 415.75 and riding runners",
-    "stopLoss": "355.8",
+    "status": "Booked profits @438.4 and riding runners",
+    "stopLoss": "425.2",
     "symbol": "MSFT"
   },
   "1773410743": {
@@ -245,7 +246,9 @@
     "buyTarget": "366.96",
     "category": "SCALP",
     "earlyTarget": "377.97",
-    "free": 0,
+    "exit1": "384.0",
+    "exit1Time": 1777493011,
+    "free": 1,
     "isWeekly": 1,
     "quote": {
       "closePrice": 361.54,
@@ -262,7 +265,8 @@
     "sellTarget2": "388.98",
     "sellTarget3": "403.66",
     "shortName": "Celestica, Inc.",
-    "stopLoss": "330.26",
+    "status": "Booked profits @384.0 and riding runners",
+    "stopLoss": "330.3",
     "symbol": "CLS"
   },
   "1777397472": {

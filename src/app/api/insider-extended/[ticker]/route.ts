@@ -154,52 +154,9 @@ async function fetchSecForm4(ticker: string): Promise<any> {
   }
 }
 
-async function loadQuiverKey(): Promise<string> {
-  try {
-    const k = await fs.readFile(path.join(os.homedir(), '.openclaw/secrets/quiver_api_key'), 'utf-8');
-    return k.trim();
-  } catch {
-    return '';
-  }
-}
-
-async function fetchQuiverCongress(ticker: string): Promise<any> {
-  const cached = await readCache(`quiver_${ticker}`);
-  if (cached) return cached;
-  const token = await loadQuiverKey();
-  if (!token) return { count: 0, trades: [], source: 'quiver_no_key' };
-  try {
-    const res = await fetch(`https://api.quiverquant.com/beta/live/congresstrading/${ticker.toUpperCase()}`, {
-      headers: { 'Authorization': `Bearer ${token}`, 'Accept': 'application/json' },
-    });
-    if (!res.ok) return { count: 0, trades: [], source: `quiver_http_${res.status}` };
-    const j = await res.json();
-    const arr = Array.isArray(j) ? j : (j.data || []);
-    const ninetyDaysAgo = Date.now() - 90 * 86400000;
-    const filtered = arr.filter((t: any) => {
-      const d = new Date(t.TransactionDate || t.transactionDate || t.Date || t.date || 0).getTime();
-      return d > ninetyDaysAgo;
-    });
-    const trades = filtered.map((t: any) => ({
-      name: t.Representative || t.Senator || t.Name || t.name || 'Unknown',
-      party: t.Party || t.party || '',
-      chamber: t.House ? 'House' : t.Senate ? 'Senate' : (t.Chamber || ''),
-      date: t.TransactionDate || t.Date || '',
-      reported: t.ReportDate || t.reportDate || '',
-      type: String(t.Transaction || t.type || '').toLowerCase().includes('purchase') ? 'BUY' : 'SELL',
-      amount: t.Range || t.Amount || t.amount || '',
-    })).sort((a: any, b: any) => new Date(b.date).getTime() - new Date(a.date).getTime()).slice(0, 10);
-    const result = { count: trades.length, trades, source: 'quiver' };
-    await writeCache(`quiver_${ticker}`, result);
-    return result;
-  } catch (e) {
-    return { count: 0, trades: [], source: 'quiver_err', error: String(e) };
-  }
-}
-
 export async function GET(_req: Request, { params }: { params: Promise<{ ticker: string }> }) {
   const { ticker } = await params;
   const tk = ticker.toUpperCase();
-  const [insider, congress] = await Promise.all([fetchSecForm4(tk), fetchQuiverCongress(tk)]);
-  return NextResponse.json({ ticker: tk, insider, congress });
+  const insider = await fetchSecForm4(tk);
+  return NextResponse.json({ ticker: tk, insider });
 }

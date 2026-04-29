@@ -25684,5 +25684,11 @@
     "message": "Buy below 263.27, Sell above 271.17\nScalp, VH risk",
     "symbol": "AMZN",
     "title": "AMZN: BUY"
+  },
+  "1777493011": {
+    "category": "SCALP",
+    "message": "Reached SellTarget1 @384.0 with gain: 4.64%. Take profits and ride for next target with stops @330.3",
+    "symbol": "CLS",
+    "title": "CLS : SELL"
   }
 }
