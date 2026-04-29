@@ -128,7 +128,12 @@ try:
     _MULTIAGENT_LIB_OK = True
 except Exception as _e:
     _MULTIAGENT_LIB_OK = False
-    print(f"[multiagent] lib import failed: {_e}", flush=True), timedelta
+    print(f"[multiagent] lib import failed: {_e}", flush=True)
+
+
+def load_daily_picks_state():
+    """Read today's daily pick counter (resets at NY 4AM ET)."""
+    from datetime import timedelta
     et_now = datetime.now(timezone(timedelta(hours=-4)))   # EDT — adjust to -5 in winter
     today_et = et_now.strftime("%Y-%m-%d")
     try:
