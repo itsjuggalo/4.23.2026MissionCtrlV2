@@ -4,6 +4,18 @@ import { useEffect, useState, useRef } from 'react';
 
 
 // Parse OCC option symbol → "TICKER M/D/YY $STRIKEC/P". Returns symbol unchanged if not OCC.
+function tickerOnly(sym: string): string {
+  if (!sym) return '';
+  const s = String(sym).trim().toUpperCase();
+  // OCC option symbol: AAPL250117C00200000 -> match leading letters
+  // Or display: "IWM 9/18/26 $220P" -> first whitespace-separated word
+  // Or crypto: BTC/USDT -> first slash-separated piece
+  const occMatch = s.match(/^([A-Z]+)\d{6}[CP]/);
+  if (occMatch) return occMatch[1];
+  const firstWord = s.split(/[\s/]/)[0];
+  return firstWord.replace(/[^A-Z]/g, '');
+}
+
 function parseOCC(sym: string): string {
   if (!sym) return '';
   const m = /^([A-Z]+)(\d{2})(\d{2})(\d{2})([CP])(\d{8})$/.exec(sym);
@@ -48,6 +60,7 @@ export function CommandCenterPage() {
   const [showKronosHistory, setShowKronosHistory] = useState(false);
   const [selectedItem, setSelectedItem] = useState<{ type: string; data: any } | null>(null);
   const [drawerTicker, setDrawerTicker] = useState<string | null>(null);
+  const [extendedIntel, setExtendedIntel] = useState<Record<string, any>>({});
 
   const fetchData = async () => {
     try {
@@ -116,6 +129,26 @@ export function CommandCenterPage() {
     const iv = setInterval(fetchData, 10000);
     return () => clearInterval(iv);
   }, []);
+
+  // Fetch extended insider+congress data for each watchlist + position symbol
+  useEffect(() => {
+    const fetchExtendedIntel = async () => {
+      const allSyms = new Set<string>();
+      watchlist.forEach(s => allSyms.add(s));
+      positions.forEach((p: any) => allSyms.add(tickerOnly(p.symbol)));
+      const result: Record<string, any> = {};
+      await Promise.all(Array.from(allSyms).filter(s => s && s.length > 0 && s.length <= 5).map(async (sym) => {
+        try {
+          const r = await fetch(`/api/insider-extended/${sym}`);
+          if (r.ok) result[sym] = await r.json();
+        } catch {}
+      }));
+      setExtendedIntel(result);
+    };
+    fetchExtendedIntel();
+    const iv = setInterval(fetchExtendedIntel, 5 * 60 * 1000);
+    return () => clearInterval(iv);
+  }, [watchlist, positions]);
 
   // Arrow-key navigation for Market News ticker (when focused)
   useEffect(() => {
@@ -883,7 +916,7 @@ export function CommandCenterPage() {
             const pnlPct = parseFloat(p.unrealized_plpc || '0') * 100;
             const g = pnl >= 0;
             return (
-              <div key={i} onClick={() => setDrawerTicker(parseOCC(p.symbol))} style={{ cursor: 'pointer', display: 'flex', justifyContent: 'space-between', padding: '8px 10px', background: '#0d1117', borderRadius: '6px', border: '1px solid ' + (g ? '#66bb6a22' : '#ef535022'), marginBottom: '6px' }}>
+              <div key={i} onClick={() => setDrawerTicker(tickerOnly(p.symbol))} style={{ cursor: 'pointer', display: 'flex', justifyContent: 'space-between', padding: '8px 10px', background: '#0d1117', borderRadius: '6px', border: '1px solid ' + (g ? '#66bb6a22' : '#ef535022'), marginBottom: '6px' }}>
                 <div>
                   <div style={{ fontSize: 'var(--mc-font-xs)', fontWeight: 700, color: '#e0e0e0', fontFamily: 'var(--font-mc-mono)' }}>{parseOCC(p.symbol)}{p.account ? ' ' + p.account : ''}</div>
                   <div style={{ fontSize: 'var(--mc-font-label)', color: '#455a64' }}>{p.qty} @ ${fmt(parseFloat(p.avg_entry_price || '0'))}</div>
@@ -895,14 +928,33 @@ export function CommandCenterPage() {
               </div>
             );
           }) : <div style={{ color: '#455a64', fontSize: 'var(--mc-font-badge)', fontFamily: 'var(--font-mc-mono)', marginBottom: '12px' }}>No open positions</div>}
-          <div className="lbl" style={{ marginTop: '12px', marginBottom: '8px' }}>INSIDER SENTIMENT</div>
+          <div className="lbl" style={{ marginTop: '14px', marginBottom: '8px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            <span>INSIDER + CONGRESS (90d)</span>
+            <span style={{ color: '#607d8b', fontSize: '9px', fontWeight: 400 }}>insider • Ⓒ congress</span>
+          </div>
           {watchlist.map(sym => {
+            const ext = extendedIntel[sym];
             const ins = intel[sym]?.insider;
-            if (!ins) return null;
+            if (!ext && !ins) return null;
+            const net90d = ext?.insider?.net90d || 0;
+            const txCount = ext?.insider?.transactions?.length || 0;
+            const lastTx = ext?.insider?.transactions?.[0];
+            const congressCount = ext?.congress?.count || 0;
+            const lastCongress = ext?.congress?.trades?.[0];
+            const fmtBig = (n: number) => { const a = Math.abs(n); return a >= 1e6 ? '$' + (n/1e6).toFixed(1) + 'M' : a >= 1e3 ? '$' + (n/1e3).toFixed(0) + 'K' : '$' + n.toFixed(0); };
             return (
-              <div key={sym} style={{ display: 'flex', justifyContent: 'space-between', padding: '4px 8px', fontSize: 'var(--mc-font-label)', fontFamily: 'var(--font-mc-mono)' }}>
-                <span style={{ color: '#4fc3f7' }}>{sym}</span>
-                <span style={{ color: ins.direction === 'BUYING' ? '#66bb6a' : '#ef5350' }}>{ins.direction} (MSPR: {ins.mspr})</span>
+              <div key={sym} onClick={() => setDrawerTicker(sym)} style={{ cursor: 'pointer', display: 'grid', gridTemplateColumns: '60px 1fr 1fr', gap: '8px', alignItems: 'center', padding: '8px 10px', background: '#0d1117', borderRadius: '6px', marginBottom: '5px', borderLeft: '2px solid ' + (net90d >= 0 ? '#66bb6a' : '#ef5350') }}>
+                <span style={{ color: '#4fc3f7', fontWeight: 700, fontSize: 'var(--mc-font-sm)', fontFamily: 'var(--font-mc-mono)' }}>{sym}</span>
+                <div>
+                  <div style={{ fontSize: '9px', color: '#607d8b', textTransform: 'uppercase', letterSpacing: '0.4px' }}>INSIDER {txCount > 0 ? '• ' + txCount + ' tx' : ''}</div>
+                  <div style={{ fontSize: 'var(--mc-font-label)', color: net90d >= 0 ? '#66bb6a' : '#ef5350', fontWeight: 700, fontFamily: 'var(--font-mc-mono)' }}>{net90d !== 0 ? (net90d >= 0 ? '+' : '−') + fmtBig(Math.abs(net90d)) : (ins ? ins.direction : '—')}</div>
+                  {lastTx && <div style={{ fontSize: '9px', color: '#90a4ae', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }} title={lastTx.name + ' ' + lastTx.type + ' ' + (lastTx.share || 0) + ' sh @ $' + (lastTx.price || 0)}>{lastTx.name?.split(' ').slice(-1)[0]} {lastTx.type === 'BUY' ? '▲' : '▼'}</div>}
+                </div>
+                <div>
+                  <div style={{ fontSize: '9px', color: '#607d8b', textTransform: 'uppercase', letterSpacing: '0.4px' }}>CONGRESS {congressCount > 0 ? '• ' + congressCount : ''}</div>
+                  <div style={{ fontSize: 'var(--mc-font-label)', color: congressCount > 0 ? '#ce93d8' : '#455a64', fontWeight: 700, fontFamily: 'var(--font-mc-mono)' }}>{congressCount === 0 ? 'no trades' : lastCongress?.type === 'BUY' ? '▲ ' + (lastCongress?.party || '') : '▼ ' + (lastCongress?.party || '')}</div>
+                  {lastCongress && <div style={{ fontSize: '9px', color: '#90a4ae', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }} title={lastCongress.name + ' ' + lastCongress.chamber + ' ' + lastCongress.amount}>{lastCongress.name?.split(' ').slice(-1)[0]} ({lastCongress.chamber?.[0]})</div>}
+                </div>
               </div>
             );
           })}
