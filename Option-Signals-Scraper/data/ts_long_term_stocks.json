@@ -9,12 +9,12 @@
     "isWeekly": 1,
     "quote": {
       "closePrice": 14.82,
-      "highPrice": 15.08,
-      "lastPrice": 15.0799,
+      "highPrice": 15.09,
+      "lastPrice": 15,
       "lowPrice": 14.7,
       "openPrice": 14.81,
-      "quoteTimeInLong": 1777475654,
-      "tradeTimeInLong": 1777475654
+      "quoteTimeInLong": 1777477438,
+      "tradeTimeInLong": 1777477438
     },
     "reduceLoss": "13.90",
     "sellTarget": "14.90",
@@ -39,11 +39,11 @@
     "quote": {
       "closePrice": 213.07,
       "highPrice": 212.715,
-      "lastPrice": 210.5005,
+      "lastPrice": 211.035,
       "lowPrice": 209.77,
       "openPrice": 212.715,
-      "quoteTimeInLong": 1777475659,
-      "tradeTimeInLong": 1777475659
+      "quoteTimeInLong": 1777477459,
+      "tradeTimeInLong": 1777477459
     },
     "reduceLoss": "157.74",
     "sellTarget": "180.53",
@@ -67,11 +67,11 @@
     "quote": {
       "closePrice": 130.85,
       "highPrice": 132.03,
-      "lastPrice": 130.5,
+      "lastPrice": 130.97,
       "lowPrice": 129.98,
       "openPrice": 131.95,
-      "quoteTimeInLong": 1777475652,
-      "tradeTimeInLong": 1777475652
+      "quoteTimeInLong": 1777477458,
+      "tradeTimeInLong": 1777477458
     },
     "reduceLoss": "124.68",
     "sellTarget": "142.69",
@@ -91,11 +91,11 @@
     "quote": {
       "closePrice": 92.295,
       "highPrice": 92.855,
-      "lastPrice": 92.475,
+      "lastPrice": 92.175,
       "lowPrice": 90.86,
       "openPrice": 91.225,
-      "quoteTimeInLong": 1777475659,
-      "tradeTimeInLong": 1777475659
+      "quoteTimeInLong": 1777477456,
+      "tradeTimeInLong": 1777477456
     },
     "reduceLoss": "84.20",
     "risk": "HI",
@@ -115,11 +115,11 @@
     "quote": {
       "closePrice": 18.36,
       "highPrice": 16.59,
-      "lastPrice": 15.995,
+      "lastPrice": 15.915,
       "lowPrice": 15.77,
       "openPrice": 16.55,
-      "quoteTimeInLong": 1777475659,
-      "tradeTimeInLong": 1777475659
+      "quoteTimeInLong": 1777477459,
+      "tradeTimeInLong": 1777477459
     },
     "reduceLoss": "14.39",
     "risk": "HI",
