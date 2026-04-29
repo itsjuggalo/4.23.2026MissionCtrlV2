@@ -49,18 +49,18 @@
     "isWeekly": 1,
     "quote": {
       "askPrice": "2.2",
-      "askSize": "1",
-      "bidPrice": "2.05",
-      "bidSize": "813",
+      "askSize": "2",
+      "bidPrice": "2.06",
+      "bidSize": "284",
       "closePrice": "2.2",
       "highPrice": "2.26",
       "lastPrice": "2.13",
       "lowPrice": "2.07",
       "openInterest": "38798",
       "openPrice": "2.19",
-      "quoteTimeInLong": 1777489677363,
-      "totalVolume": "886",
-      "tradeTimeInLong": 1777489551000
+      "quoteTimeInLong": 1777491477841,
+      "totalVolume": "889",
+      "tradeTimeInLong": 1777490985000
     },
     "reasoning": {
       "\ud83d\udc0b Unusual Flows": "Newly opened option sweeps were detected with Sweep Volume > Open Interest.",
