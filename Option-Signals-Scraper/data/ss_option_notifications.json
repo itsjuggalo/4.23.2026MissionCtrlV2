@@ -6578,5 +6578,11 @@
     "message": "Buy below 13.10, Sell above 15.07\nSwing, Moderate risk",
     "symbol": "AMZN",
     "title": "AMZN 265C 6/5: BUY"
+  },
+  "1777485716": {
+    "category": "SWING",
+    "message": "Reached final SellTarget @30.05 with gain: 40.42%. Take profits or ride for new target @36.06 with stops @24.04",
+    "symbol": "AMD",
+    "title": "AMD 320C 05/15 : SELL"
   }
 }

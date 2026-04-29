@@ -5816,5 +5816,11 @@
     "message": "Take profits at revised SellTarget 3.17.",
     "symbol": "SPY",
     "title": "SPY 708P 4/30: SELL"
+  },
+  "1777485669": {
+    "category": "SWING",
+    "message": "Take trailing stop at 5.20 to exit trade!",
+    "symbol": "SFM",
+    "title": "SFM 75P 05/15 : SELL"
   }
 }
