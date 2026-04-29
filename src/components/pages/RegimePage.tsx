@@ -75,46 +75,140 @@ export function RegimePage() {
     const pct = Math.min((value / max) * 100, 100);
     return (
       <div style={{ textAlign: 'center' }}>
-      {/* MACRO REGIME HERO STRIP */}
+      {/* ============ MACRO REGIME PRO PANEL ============ */}
       {macro && (
-        <div className="cc" style={{ padding: '16px', marginBottom: '12px' }}>
-          <div className="lbl" style={{ marginBottom: '12px', letterSpacing: '2px' }}>MARKET RISK STANCE</div>
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(160px, 1fr))', gap: '12px' }}>
-            {/* TILE 1: COMPOSITE STANCE */}
-            <div style={{ background: '#0d1117', padding: '14px', borderRadius: '6px', borderLeft: '3px solid ' + (macro.stance?.color || '#607d8b') }}>
-              <div style={{ fontSize: 'var(--mc-font-label)', color: '#607d8b', fontFamily: 'var(--font-mc-mono)', marginBottom: '6px', letterSpacing: '1px' }}>OVERALL</div>
-              <div style={{ fontSize: 'var(--mc-font-xl)', fontWeight: 700, color: macro.stance?.color || '#607d8b', fontFamily: 'var(--font-mc-mono)' }}>{macro.stance?.label || '—'}</div>
-              <div style={{ fontSize: 'var(--mc-font-badge)', color: '#455a64', fontFamily: 'var(--font-mc-mono)', marginTop: '4px' }}>score {macro.stance?.score >= 0 ? '+' : ''}{macro.stance?.score?.toFixed(2) || '—'}</div>
-            </div>
-            {/* TILE 2: VIX */}
-            <div style={{ background: '#0d1117', padding: '14px', borderRadius: '6px', borderLeft: '3px solid ' + (macro.vix?.level >= 25 ? '#ef5350' : macro.vix?.level >= 20 ? '#ff9800' : macro.vix?.level < 15 ? '#66bb6a' : '#4fc3f7') }}>
-              <div style={{ fontSize: 'var(--mc-font-label)', color: '#607d8b', fontFamily: 'var(--font-mc-mono)', marginBottom: '6px', letterSpacing: '1px' }}>VIX (vol)</div>
-              <div style={{ fontSize: 'var(--mc-font-xl)', fontWeight: 700, color: '#e0e0e0', fontFamily: 'var(--font-mc-mono)' }}>{macro.vix?.level?.toFixed(2) || '—'}</div>
-              <div style={{ fontSize: 'var(--mc-font-badge)', color: (macro.vix?.pct || 0) >= 0 ? '#ef5350' : '#66bb6a', fontFamily: 'var(--font-mc-mono)', marginTop: '4px' }}>{(macro.vix?.pct || 0) >= 0 ? '+' : ''}{macro.vix?.pct?.toFixed(2) || '0'}%</div>
-            </div>
-            {/* TILE 3: FEAR & GREED */}
-            <div style={{ background: '#0d1117', padding: '14px', borderRadius: '6px', borderLeft: '3px solid ' + (macro.fearGreed?.value >= 75 ? '#66bb6a' : macro.fearGreed?.value >= 55 ? '#9ccc65' : macro.fearGreed?.value >= 45 ? '#607d8b' : macro.fearGreed?.value >= 25 ? '#ff9800' : '#ef5350') }}>
-              <div style={{ fontSize: 'var(--mc-font-label)', color: '#607d8b', fontFamily: 'var(--font-mc-mono)', marginBottom: '6px', letterSpacing: '1px' }}>FEAR & GREED</div>
-              <div style={{ fontSize: 'var(--mc-font-xl)', fontWeight: 700, color: '#e0e0e0', fontFamily: 'var(--font-mc-mono)' }}>{macro.fearGreed?.value ?? '—'}</div>
-              <div style={{ fontSize: 'var(--mc-font-badge)', color: '#90a4ae', fontFamily: 'var(--font-mc-mono)', marginTop: '4px' }}>{macro.fearGreed?.label || '—'}</div>
-            </div>
-            {/* TILE 4: YIELD CURVE */}
-            <div style={{ background: '#0d1117', padding: '14px', borderRadius: '6px', borderLeft: '3px solid ' + ((macro.yields?.spread ?? 0) < 0 ? '#ef5350' : (macro.yields?.spread ?? 0) < 0.5 ? '#ff9800' : '#66bb6a') }}>
-              <div style={{ fontSize: 'var(--mc-font-label)', color: '#607d8b', fontFamily: 'var(--font-mc-mono)', marginBottom: '6px', letterSpacing: '1px' }}>YIELD CURVE</div>
-              <div style={{ fontSize: 'var(--mc-font-xl)', fontWeight: 700, color: '#e0e0e0', fontFamily: 'var(--font-mc-mono)' }}>{macro.yields?.spread != null ? (macro.yields.spread >= 0 ? '+' : '') + macro.yields.spread.toFixed(2) + 'pp' : '—'}</div>
-              <div style={{ fontSize: 'var(--mc-font-badge)', color: '#455a64', fontFamily: 'var(--font-mc-mono)', marginTop: '4px' }}>10Y {macro.yields?.tenY?.toFixed(2) || '—'}% / 3M {macro.yields?.twoY?.toFixed(2) || '—'}%</div>
-            </div>
+        <>
+          {/* VERDICT — plain English headline */}
+          <div className="cc" style={{ padding: '16px', marginBottom: '12px', borderLeft: '4px solid ' + (macro.stance?.color || '#607d8b') }}>
+            <div className="lbl" style={{ marginBottom: '8px', letterSpacing: '2px', color: '#90a4ae' }}>TODAY'S READ</div>
+            <div style={{ fontSize: 'var(--mc-font-md)', color: '#e0e0e0', lineHeight: 1.6, fontFamily: 'var(--font-mc-sans)' }} dangerouslySetInnerHTML={{ __html: (macro.verdict || '').replace(/\*\*(.+?)\*\*/g, '<strong style="color:' + (macro.stance?.color || '#e0e0e0') + '">$1</strong>') }} />
           </div>
-          {/* FG TIMELINE */}
-          {macro.fearGreed && (
-            <div style={{ marginTop: '12px', display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(120px, 1fr))', gap: '8px', fontSize: 'var(--mc-font-badge)', fontFamily: 'var(--font-mc-mono)', color: '#90a4ae' }}>
-              <div>Prev close: <span style={{ color: '#e0e0e0' }}>{macro.fearGreed.previousClose}</span></div>
-              <div>1W ago: <span style={{ color: '#e0e0e0' }}>{macro.fearGreed.oneWeekAgo}</span></div>
-              <div>1M ago: <span style={{ color: '#e0e0e0' }}>{macro.fearGreed.oneMonthAgo}</span></div>
-              <div>1Y ago: <span style={{ color: '#e0e0e0' }}>{macro.fearGreed.oneYearAgo}</span></div>
+
+          {/* 4-TILE STANCE STRIP */}
+          <div className="cc" style={{ padding: '16px', marginBottom: '12px' }}>
+            <div className="lbl" style={{ marginBottom: '12px', letterSpacing: '2px' }}>MARKET RISK STANCE</div>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(160px, 1fr))', gap: '12px' }}>
+              <div style={{ background: '#0d1117', padding: '14px', borderRadius: '6px', borderLeft: '3px solid ' + (macro.stance?.color || '#607d8b') }}>
+                <div style={{ fontSize: 'var(--mc-font-label)', color: '#607d8b', fontFamily: 'var(--font-mc-mono)', marginBottom: '6px', letterSpacing: '1px' }}>OVERALL</div>
+                <div style={{ fontSize: 'var(--mc-font-xl)', fontWeight: 700, color: macro.stance?.color || '#607d8b', fontFamily: 'var(--font-mc-mono)' }}>{macro.stance?.label || '—'}</div>
+                <div style={{ fontSize: 'var(--mc-font-badge)', color: '#455a64', fontFamily: 'var(--font-mc-mono)', marginTop: '4px' }}>score {macro.stance?.score >= 0 ? '+' : ''}{macro.stance?.score?.toFixed(2) || '—'}</div>
+              </div>
+              <div style={{ background: '#0d1117', padding: '14px', borderRadius: '6px', borderLeft: '3px solid ' + (macro.vix?.level >= 25 ? '#ef5350' : macro.vix?.level >= 20 ? '#ff9800' : macro.vix?.level < 15 ? '#66bb6a' : '#4fc3f7') }}>
+                <div style={{ fontSize: 'var(--mc-font-label)', color: '#607d8b', fontFamily: 'var(--font-mc-mono)', marginBottom: '6px', letterSpacing: '1px' }}>VIX (vol)</div>
+                <div style={{ fontSize: 'var(--mc-font-xl)', fontWeight: 700, color: '#e0e0e0', fontFamily: 'var(--font-mc-mono)' }}>{macro.vix?.level?.toFixed(2) || '—'}</div>
+                <div style={{ fontSize: 'var(--mc-font-badge)', color: (macro.vix?.pct || 0) >= 0 ? '#ef5350' : '#66bb6a', fontFamily: 'var(--font-mc-mono)', marginTop: '4px' }}>{(macro.vix?.pct || 0) >= 0 ? '+' : ''}{macro.vix?.pct?.toFixed(2) || '0'}%</div>
+              </div>
+              <div style={{ background: '#0d1117', padding: '14px', borderRadius: '6px', borderLeft: '3px solid ' + (macro.fearGreed?.value >= 75 ? '#66bb6a' : macro.fearGreed?.value >= 55 ? '#9ccc65' : macro.fearGreed?.value >= 45 ? '#607d8b' : macro.fearGreed?.value >= 25 ? '#ff9800' : '#ef5350') }}>
+                <div style={{ fontSize: 'var(--mc-font-label)', color: '#607d8b', fontFamily: 'var(--font-mc-mono)', marginBottom: '6px', letterSpacing: '1px' }}>FEAR & GREED</div>
+                <div style={{ fontSize: 'var(--mc-font-xl)', fontWeight: 700, color: '#e0e0e0', fontFamily: 'var(--font-mc-mono)' }}>{macro.fearGreed?.value ?? '—'}</div>
+                <div style={{ fontSize: 'var(--mc-font-badge)', color: '#90a4ae', fontFamily: 'var(--font-mc-mono)', marginTop: '4px' }}>{macro.fearGreed?.label || '—'}</div>
+              </div>
+              <div style={{ background: '#0d1117', padding: '14px', borderRadius: '6px', borderLeft: '3px solid ' + ((macro.yields?.spread ?? 0) < 0 ? '#ef5350' : (macro.yields?.spread ?? 0) < 0.5 ? '#ff9800' : '#66bb6a') }}>
+                <div style={{ fontSize: 'var(--mc-font-label)', color: '#607d8b', fontFamily: 'var(--font-mc-mono)', marginBottom: '6px', letterSpacing: '1px' }}>YIELD CURVE</div>
+                <div style={{ fontSize: 'var(--mc-font-xl)', fontWeight: 700, color: '#e0e0e0', fontFamily: 'var(--font-mc-mono)' }}>{macro.yields?.spread != null ? (macro.yields.spread >= 0 ? '+' : '') + macro.yields.spread.toFixed(2) + 'pp' : '—'}</div>
+                <div style={{ fontSize: 'var(--mc-font-badge)', color: '#455a64', fontFamily: 'var(--font-mc-mono)', marginTop: '4px' }}>10Y {macro.yields?.tenY?.toFixed(2) || '—'}% / 3M {macro.yields?.twoY?.toFixed(2) || '—'}%</div>
+              </div>
+            </div>
+            {macro.fearGreed && (
+              <div style={{ marginTop: '12px', display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(120px, 1fr))', gap: '8px', fontSize: 'var(--mc-font-badge)', fontFamily: 'var(--font-mc-mono)', color: '#90a4ae' }}>
+                <div>Prev close: <span style={{ color: '#e0e0e0' }}>{macro.fearGreed.previousClose}</span></div>
+                <div>1W ago: <span style={{ color: '#e0e0e0' }}>{macro.fearGreed.oneWeekAgo}</span></div>
+                <div>1M ago: <span style={{ color: '#e0e0e0' }}>{macro.fearGreed.oneMonthAgo}</span></div>
+                <div>1Y ago: <span style={{ color: '#e0e0e0' }}>{macro.fearGreed.oneYearAgo}</span></div>
+              </div>
+            )}
+          </div>
+
+          {/* 30-DAY REGIME TRANSITION TIMELINE */}
+          {macro.history && macro.history.length > 0 && (
+            <div className="cc" style={{ padding: '16px', marginBottom: '12px' }}>
+              <div className="lbl" style={{ marginBottom: '12px', letterSpacing: '2px' }}>REGIME TRANSITIONS — LAST {macro.history.length} DAYS</div>
+              <div style={{ display: 'flex', gap: '2px', height: '32px', borderRadius: '4px', overflow: 'hidden' }}>
+                {macro.history.map((h: any, i: number) => (
+                  <div key={i} title={`${h.date} — ${h.stance} (score ${h.score >= 0 ? '+' : ''}${h.score?.toFixed?.(2) || h.score})`} style={{ flex: 1, background: h.color || '#607d8b', cursor: 'help' }} />
+                ))}
+              </div>
+              <div style={{ marginTop: '6px', display: 'flex', justifyContent: 'space-between', fontSize: 'var(--mc-font-badge)', color: '#607d8b', fontFamily: 'var(--font-mc-mono)' }}>
+                <span>{macro.history[0]?.date || ''}</span>
+                <span>← hover for daily detail →</span>
+                <span>{macro.history[macro.history.length - 1]?.date || ''} (today)</span>
+              </div>
             </div>
           )}
-        </div>
+
+          {/* EDGE TODAY / AVOID TODAY */}
+          {macro.playbook && (
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px', marginBottom: '12px' }}>
+              <div className="cc" style={{ padding: '16px', borderTop: '3px solid #66bb6a' }}>
+                <div className="lbl" style={{ marginBottom: '12px', letterSpacing: '2px', color: '#66bb6a' }}>✓ EDGE TODAY</div>
+                {(macro.playbook.edges || []).map((e: string, i: number) => (
+                  <div key={i} style={{ padding: '8px 10px', marginBottom: '6px', background: '#0d1117', borderRadius: '4px', borderLeft: '2px solid #66bb6a', fontSize: 'var(--mc-font-sm)', color: '#e0e0e0', lineHeight: 1.5 }}>{e}</div>
+                ))}
+              </div>
+              <div className="cc" style={{ padding: '16px', borderTop: '3px solid #ef5350' }}>
+                <div className="lbl" style={{ marginBottom: '12px', letterSpacing: '2px', color: '#ef5350' }}>✗ AVOID TODAY</div>
+                {(macro.playbook.avoids || []).map((a: string, i: number) => (
+                  <div key={i} style={{ padding: '8px 10px', marginBottom: '6px', background: '#0d1117', borderRadius: '4px', borderLeft: '2px solid #ef5350', fontSize: 'var(--mc-font-sm)', color: '#e0e0e0', lineHeight: 1.5 }}>{a}</div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* PLAYBOOK NOTES */}
+          {macro.playbook?.notes && macro.playbook.notes.length > 0 && (
+            <div className="cc" style={{ padding: '16px', marginBottom: '12px', background: '#1a1f2e' }}>
+              <div className="lbl" style={{ marginBottom: '8px', letterSpacing: '2px', color: '#ffd600' }}>⚠ NOTES</div>
+              {macro.playbook.notes.map((n: string, i: number) => (
+                <div key={i} style={{ padding: '6px 0', fontSize: 'var(--mc-font-sm)', color: '#ffd600', lineHeight: 1.5 }}>{n}</div>
+              ))}
+            </div>
+          )}
+
+          {/* POSITION SIZING */}
+          {macro.sizing && (
+            <div className="cc" style={{ padding: '16px', marginBottom: '12px' }}>
+              <div className="lbl" style={{ marginBottom: '12px', letterSpacing: '2px' }}>POSITION SIZING (computed from regime + VIX)</div>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))', gap: '12px', marginBottom: '12px' }}>
+                <div style={{ background: '#0d1117', padding: '12px', borderRadius: '6px' }}>
+                  <div style={{ fontSize: 'var(--mc-font-label)', color: '#607d8b', fontFamily: 'var(--font-mc-mono)', marginBottom: '6px' }}>R PER TRADE</div>
+                  <div style={{ fontSize: 'var(--mc-font-xl)', fontWeight: 700, color: '#ffd600', fontFamily: 'var(--font-mc-mono)' }}>{macro.sizing.rPerTrade?.toFixed(2)}%</div>
+                  <div style={{ fontSize: 'var(--mc-font-badge)', color: '#455a64', fontFamily: 'var(--font-mc-mono)', marginTop: '4px' }}>vs {macro.sizing.rBaseline?.toFixed(2)}% baseline</div>
+                </div>
+                <div style={{ background: '#0d1117', padding: '12px', borderRadius: '6px' }}>
+                  <div style={{ fontSize: 'var(--mc-font-label)', color: '#607d8b', fontFamily: 'var(--font-mc-mono)', marginBottom: '6px' }}>MAX CONCURRENT</div>
+                  <div style={{ fontSize: 'var(--mc-font-xl)', fontWeight: 700, color: '#e0e0e0', fontFamily: 'var(--font-mc-mono)' }}>{macro.sizing.maxConcurrent}</div>
+                  <div style={{ fontSize: 'var(--mc-font-badge)', color: '#455a64', fontFamily: 'var(--font-mc-mono)', marginTop: '4px' }}>positions</div>
+                </div>
+                <div style={{ background: '#0d1117', padding: '12px', borderRadius: '6px' }}>
+                  <div style={{ fontSize: 'var(--mc-font-label)', color: '#607d8b', fontFamily: 'var(--font-mc-mono)', marginBottom: '6px' }}>OPTIONS EXPOSURE</div>
+                  <div style={{ fontSize: 'var(--mc-font-xl)', fontWeight: 700, color: '#e0e0e0', fontFamily: 'var(--font-mc-mono)' }}>{macro.sizing.optionsPct}%</div>
+                  <div style={{ fontSize: 'var(--mc-font-badge)', color: '#455a64', fontFamily: 'var(--font-mc-mono)', marginTop: '4px' }}>of book</div>
+                </div>
+              </div>
+              <div style={{ fontSize: 'var(--mc-font-sm)', color: '#90a4ae', fontFamily: 'var(--font-mc-mono)', padding: '8px 10px', background: '#0d1117', borderRadius: '4px' }}>
+                <span style={{ color: '#607d8b' }}>WHY:</span> {macro.sizing.reasoning}
+              </div>
+            </div>
+          )}
+
+          {/* SECTOR ROTATION */}
+          {macro.sectors && macro.sectors.length > 0 && (
+            <div className="cc" style={{ padding: '16px', marginBottom: '12px' }}>
+              <div className="lbl" style={{ marginBottom: '12px', letterSpacing: '2px' }}>SECTOR ROTATION (sorted by 5d return)</div>
+              <div style={{ display: 'grid', gridTemplateColumns: '60px 1fr 100px 100px', gap: '8px', alignItems: 'center', padding: '6px 10px', background: '#0d1117', borderRadius: '4px', fontSize: 'var(--mc-font-label)', color: '#607d8b', fontFamily: 'var(--font-mc-mono)', marginBottom: '6px', letterSpacing: '1px' }}>
+                <div>SYM</div><div>SECTOR</div><div style={{ textAlign: 'right' }}>5D %</div><div style={{ textAlign: 'right' }}>20D %</div>
+              </div>
+              {macro.sectors.map((s: any, i: number) => (
+                <div key={i} style={{ display: 'grid', gridTemplateColumns: '60px 1fr 100px 100px', gap: '8px', alignItems: 'center', padding: '8px 10px', borderBottom: '1px solid #0d1117', fontSize: 'var(--mc-font-sm)', fontFamily: 'var(--font-mc-mono)' }}>
+                  <div style={{ fontWeight: 700, color: '#ffd600' }}>{s.symbol}</div>
+                  <div style={{ color: '#e0e0e0' }}>{s.name}</div>
+                  <div style={{ textAlign: 'right', fontWeight: 700, color: s.return5d >= 0 ? '#66bb6a' : '#ef5350' }}>{s.return5d >= 0 ? '+' : ''}{s.return5d?.toFixed(2)}%</div>
+                  <div style={{ textAlign: 'right', color: s.return20d >= 0 ? '#66bb6a' : '#ef5350' }}>{s.return20d >= 0 ? '+' : ''}{s.return20d?.toFixed(2)}%</div>
+                </div>
+              ))}
+            </div>
+          )}
+        </>
       )}
 
         <div style={{ fontSize: 'var(--mc-font-label)', color: '#607d8b', fontFamily: 'var(--font-mc-mono)', marginBottom: '8px', letterSpacing: '1px' }}>{label}</div>
