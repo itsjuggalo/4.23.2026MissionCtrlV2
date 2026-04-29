@@ -163,8 +163,24 @@ export async function GET() {
     const raw = fs.readFileSync(MERGED_PATH, 'utf-8');
     const parsed = JSON.parse(raw);
 
-    const openSignals: EnrichedSignal[] = (parsed.open || []).map(enrich);
-    const closedSignals: EnrichedSignal[] = (parsed.closed || []).map(enrich);
+    // Auto-close stale signals: anything with expiry in the past or no exitTime+old buy date
+    const nowSec = Date.now() / 1000;
+    const STALE_THRESHOLD_SEC = 60 * 86400;  // 60 days old with no exit = treat as closed
+    const rawOpen: RawSignal[] = parsed.open || [];
+    const rawClosed: RawSignal[] = parsed.closed || [];
+    const movedToClosed: RawSignal[] = [];
+    const stillOpen: RawSignal[] = [];
+    for (const sig of rawOpen) {
+      const expired = sig.expiry && sig.expiry < nowSec;
+      const ancient = sig.ts && (nowSec - sig.ts) > STALE_THRESHOLD_SEC;
+      if (expired || ancient) {
+        movedToClosed.push({ ...sig, isClosed: true, status: sig.status || 'Expired (auto-closed)' });
+      } else {
+        stillOpen.push(sig);
+      }
+    }
+    const openSignals: EnrichedSignal[] = stillOpen.map(enrich);
+    const closedSignals: EnrichedSignal[] = [...movedToClosed, ...rawClosed].map(enrich);
 
     const stats = computeStats(openSignals, closedSignals);
 

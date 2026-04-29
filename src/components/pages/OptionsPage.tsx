@@ -61,6 +61,30 @@ interface AnalystResponse {
   };
 }
 
+
+interface NotificationItem {
+  key: string;
+  ts: number;
+  source: string;
+  sourceGroup: 'name' | 'vivid';
+  category: string;
+  message: string;
+  symbol: string;
+  title: string;
+  action: 'BUY' | 'SELL' | 'INFO';
+}
+
+interface NotificationsResponse {
+  generated_at: string;
+  total: number;
+  byTab: {
+    scalps: NotificationItem[];
+    swings: NotificationItem[];
+    leaps:  NotificationItem[];
+  };
+  all: NotificationItem[];
+}
+
 interface FlowEntry {
   Symbol: string;
   OptionSymbol: string;
@@ -700,17 +724,18 @@ export function OptionsPage() {
             <SubTabButton label="All" count={(analystData?.stats?.sourceOpenCounts?.name || 0) + (analystData?.stats?.sourceOpenCounts?.vivid || 0)} active={sourceFilter === 'all'} onClick={() => setSourceFilter('all')} />
             <SubTabButton label="FLoWz1" count={analystData?.stats?.sourceOpenCounts?.name} active={sourceFilter === 'name'} onClick={() => setSourceFilter('name')} />
             <SubTabButton label="FLoWz2" count={analystData?.stats?.sourceOpenCounts?.vivid} active={sourceFilter === 'vivid'} onClick={() => setSourceFilter('vivid')} />
+            <SubTabButton label="Notifications" count={notificationsForActiveTab.length} active={sourceFilter === 'notifications'} onClick={() => setSourceFilter('notifications')} />
           </div>
         )}
 
         {activeTab === 'flowAlerts' && (
           <div style={{ display: 'flex', gap: '4px', padding: '10px 14px', borderBottom: '1px solid #0d1117', overflowX: 'auto' }}>
             <SubTabButton label="All" count={alertCatCounts.all} active={alertCat === 'all'} onClick={() => setAlertCat('all')} />
-            <SubTabButton label="Unusual" count={alertCatCounts.unusual} active={alertCat === 'unusual'} onClick={() => setAlertCat('unusual')} />
-            <SubTabButton label="Huge" count={alertCatCounts.huge} active={alertCat === 'huge'} onClick={() => setAlertCat('huge')} />
-            <SubTabButton label="Weekly" count={alertCatCounts.weekly} active={alertCat === 'weekly'} onClick={() => setAlertCat('weekly')} />
+            <SubTabButton label="Weekly Alerts" count={alertCatCounts.weekly} active={alertCat === 'weekly'} onClick={() => setAlertCat('weekly')} />
             <SubTabButton label="Repeaters" count={alertCatCounts.repeaters} active={alertCat === 'repeaters'} onClick={() => setAlertCat('repeaters')} />
-            <SubTabButton label="ETF" count={alertCatCounts.etf} active={alertCat === 'etf'} onClick={() => setAlertCat('etf')} />
+            <SubTabButton label="Unusual Flow" count={alertCatCounts.unusual} active={alertCat === 'unusual'} onClick={() => setAlertCat('unusual')} />
+            <SubTabButton label="Huge Flow" count={alertCatCounts.huge} active={alertCat === 'huge'} onClick={() => setAlertCat('huge')} />
+            <SubTabButton label="ETF Flow" count={alertCatCounts.etf} active={alertCat === 'etf'} onClick={() => setAlertCat('etf')} />
           </div>
         )}
 
@@ -742,26 +767,32 @@ export function OptionsPage() {
                   No Signals at the moment.
                 </div>
               )}
-              {filteredSignals.open.length > 0 && (
+              {sourceFilter === 'notifications' ? (
+                <NotificationsList items={notificationsForActiveTab} />
+              ) : (
                 <>
-                  <div style={{ color: '#607d8b', fontSize: '10px', letterSpacing: '0.6px', textTransform: 'uppercase', marginBottom: '8px' }}>
-                    Open · {filteredSignals.open.length}
-                  </div>
-                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px', alignItems: 'start' }}>
-                    {filteredSignals.open.map(sig => <SignalCard key={sig.id} sig={sig} />)}
-                  </div>
-                </>
-              )}
-              {filteredSignals.closed.length > 0 && (
-                <>
-                  <div style={{
-                    color: '#607d8b', fontSize: '10px', letterSpacing: '0.6px',
-                    textTransform: 'uppercase', marginTop: '18px', marginBottom: '8px',
-                    paddingTop: '14px', borderTop: '2px solid #1a2332',
-                  }}>Past Performance · {filteredSignals.closed.length} recent</div>
-                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px', alignItems: 'start' }}>
-                    {filteredSignals.closed.slice(0, 30).map(sig => <SignalCard key={sig.id} sig={sig} isPast />)}
-                  </div>
+                  {filteredSignals.open.length > 0 && (
+                    <>
+                      <div style={{ color: '#607d8b', fontSize: '10px', letterSpacing: '0.6px', textTransform: 'uppercase', marginBottom: '8px' }}>
+                        Open · {filteredSignals.open.length}
+                      </div>
+                      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px', alignItems: 'start' }}>
+                        {filteredSignals.open.map(sig => <SignalCard key={sig.id} sig={sig} />)}
+                      </div>
+                    </>
+                  )}
+                  {filteredSignals.closed.length > 0 && (
+                    <>
+                      <div style={{
+                        color: '#607d8b', fontSize: '10px', letterSpacing: '0.6px',
+                        textTransform: 'uppercase', marginTop: '18px', marginBottom: '8px',
+                        paddingTop: '14px', borderTop: '2px solid #1a2332',
+                      }}>Past Performance · {filteredSignals.closed.length} recent</div>
+                      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px', alignItems: 'start' }}>
+                        {filteredSignals.closed.slice(0, 30).map(sig => <SignalCard key={sig.id} sig={sig} isPast />)}
+                      </div>
+                    </>
+                  )}
                 </>
               )}
             </>
@@ -828,6 +859,63 @@ export function OptionsPage() {
           else setFlowFilters(f);
         }}
       />
+    </div>
+  );
+}
+
+
+// ──────────────────────────────────────────────────────────
+// Notifications List
+// ──────────────────────────────────────────────────────────
+
+function NotificationsList({ items }: { items: NotificationItem[] }) {
+  if (!items || items.length === 0) {
+    return (
+      <div style={{ padding: '40px 20px', textAlign: 'center', color: '#5c5c72', fontFamily: 'var(--font-mc-mono)' }}>
+        No notifications yet.
+      </div>
+    );
+  }
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', padding: '8px 0' }}>
+      {items.map(n => {
+        const dt = new Date(n.ts * 1000);
+        const dateStr = dt.toLocaleDateString('en-US', { month: '2-digit', day: '2-digit', year: '2-digit' });
+        const timeStr = dt.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: true, timeZone: 'America/New_York' });
+        const actionColor = n.action === 'BUY' ? '#00d2a0' : n.action === 'SELL' ? '#ff4757' : '#8b8b9e';
+        return (
+          <div key={`${n.ts}-${n.title}`} style={{
+            background: '#111118',
+            border: '1px solid #1e1e2a',
+            borderRadius: '6px',
+            padding: '12px 16px',
+            display: 'grid',
+            gridTemplateColumns: 'auto 1fr auto',
+            gap: '12px',
+            alignItems: 'start',
+          }}>
+            <div style={{ width: '6px', borderRadius: '3px', background: actionColor, alignSelf: 'stretch' }} />
+            <div>
+              <div style={{ display: 'flex', gap: '8px', alignItems: 'center', marginBottom: '4px' }}>
+                <span style={{ color: '#e8e8ed', fontWeight: 600, fontSize: '14px', fontFamily: 'var(--font-mc-mono)' }}>{n.title}</span>
+                <span style={{
+                  fontSize: '10px', padding: '2px 6px', borderRadius: '3px',
+                  background: actionColor + '20', color: actionColor,
+                  fontFamily: 'var(--font-mc-mono)', fontWeight: 600, letterSpacing: '0.5px',
+                }}>{n.action}</span>
+                <span style={{ fontSize: '10px', color: '#5c5c72', fontFamily: 'var(--font-mc-mono)' }}>{n.source}</span>
+              </div>
+              <div style={{ color: '#a8a8b8', fontSize: '13px', whiteSpace: 'pre-wrap', lineHeight: 1.4 }}>
+                {n.message}
+              </div>
+            </div>
+            <div style={{ textAlign: 'right', fontSize: '11px', color: '#5c5c72', fontFamily: 'var(--font-mc-mono)' }}>
+              <div>{dateStr}</div>
+              <div>{timeStr}</div>
+            </div>
+          </div>
+        );
+      })}
     </div>
   );
 }
