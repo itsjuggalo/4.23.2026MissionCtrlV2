@@ -1206,21 +1206,6 @@ def execute_position_action(action_dict, positions):
 
 
 def log_decision(cycle_result, picks_executed):
-    
-    # Multi-agent: post Boba's cycle summary to #agent-debate
-    if _MULTIAGENT_LIB_OK:
-        try:
-            _summary = cycle_result.get("cycle_summary", "")[:1500]
-            _picks = cycle_result.get("picks", [])
-            if _picks:
-                _pick_lines = [f"• {pk.get('ticker','?')} ${pk.get('strike','?')}{pk.get('option_type','?')} {pk.get('expiry','?')}" for pk in _picks[:3]]
-                _summary += "\n\n**Picks this cycle:**\n" + "\n".join(_pick_lines)
-            _passed = cycle_result.get("passed_on", [])
-            if _passed:
-                _summary += f"\n\n_Passed on {len(_passed)}: {', '.join(pk.get('ticker','?') for pk in _passed[:5])}_"
-            post_to_debate("boba", _summary, related_symbol=(_picks[0].get("ticker") if _picks else None))
-        except Exception as _e:
-            print(f"[multiagent] debate post failed: {_e}", flush=True):
     # SCHEMA v2 (2026-04-28): enrich picks with protocol + entry_criteria defaults
     # protocol: "flow" (current flow-driven picks) | "swing" (future Protocol B) | "manual"
     # entry_criteria: gates that fired for this pick (e.g. ["T1_huge_flow","sweep_AA","repeater_5x"])
@@ -1500,6 +1485,21 @@ def main():
 
     # 9. Log decision
     log_decision(cycle_result, picks_executed)
+
+    # Multi-agent: post Boba's cycle summary to #agent-debate
+    if _MULTIAGENT_LIB_OK:
+        try:
+            _summary = cycle_result.get("cycle_summary", "")[:1500]
+            _picks = cycle_result.get("picks", [])
+            if _picks:
+                _pick_lines = [f"• {pk.get('ticker','?')} ${pk.get('strike','?')}{pk.get('option_type','?')} {pk.get('expiry','?')}" for pk in _picks[:3]]
+                _summary += "\n\n**Picks this cycle:**\n" + "\n".join(_pick_lines)
+            _passed = cycle_result.get("passed_on", [])
+            if _passed:
+                _summary += f"\n\n_Passed on {len(_passed)}: {', '.join(pk.get('ticker','?') for pk in _passed[:5])}_"
+            post_to_debate("boba", _summary, related_symbol=(_picks[0].get("ticker") if _picks else None))
+        except Exception as _e:
+            print(f"[multiagent] debate post failed: {_e}", flush=True)
 
     log_to_ops("boba_cycle", "INFO", f"Cycle complete — {n_picks} picks, {n_passed} passed")
     print(f"Cycle done: {n_picks} picks executed, {n_passed} passed on")
