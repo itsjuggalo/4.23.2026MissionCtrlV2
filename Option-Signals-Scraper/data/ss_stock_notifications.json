@@ -25634,5 +25634,18 @@
     "message": "Buy below 366.96, Sell above 377.97\nScalp, VH risk",
     "symbol": "CLS",
     "title": "CLS: BUY"
+  },
+  "1777397472": {
+    "category": "SWING",
+    "message": "Buy below 66.46, Sell above 68.45\nSwing, Moderate risk",
+    "symbol": "SLV",
+    "title": "SLV: BUY"
+  },
+  "1777398682": {
+    "category": "SWING",
+    "free": 1,
+    "message": "Reached SellTarget1 @11.10. Take profits and ride the runners. Gain: 2.21%",
+    "symbol": "NOK",
+    "title": "NOK: SELL"
   }
 }

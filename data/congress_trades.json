@@ -1,19 +1,20 @@
 {
-  "last_updated": "2026-04-28T12:01:53.918502",
-  "total_trades": 60,
+  "last_updated": "2026-04-29T00:01:33.170448",
+  "total_trades": 50,
   "tickers_scanned": 50,
   "politicians": [
     {
       "name": "Ro Khanna",
       "party": "Democrat",
       "state": "CA",
-      "trades": 14,
-      "buys": 7,
-      "sells": 7,
+      "trades": 11,
+      "buys": 6,
+      "sells": 5,
       "tickers": [
         "AAPL",
-        "KO",
-        "NVDA"
+        "CEG",
+        "NVDA",
+        "VST"
       ]
     },
     {
@@ -28,51 +29,50 @@
       ]
     },
     {
+      "name": "Lisa C. McClain",
+      "party": "Republican",
+      "state": "MI",
+      "trades": 7,
+      "buys": 3,
+      "sells": 4,
+      "tickers": [
+        "CEG",
+        "VST"
+      ]
+    },
+    {
+      "name": "Jefferson Shreve",
+      "party": "Republican",
+      "state": "IN",
+      "trades": 4,
+      "buys": 2,
+      "sells": 2,
+      "tickers": [
+        "CEG",
+        "VST"
+      ]
+    },
+    {
       "name": "Gil Cisneros",
       "party": "Democrat",
       "state": "CA",
-      "trades": 9,
-      "buys": 4,
-      "sells": 5,
+      "trades": 3,
+      "buys": 2,
+      "sells": 1,
       "tickers": [
-        "CVX",
-        "NVDA",
-        "XOM"
-      ]
-    },
-    {
-      "name": "David J. Taylor",
-      "party": "Republican",
-      "state": "OH",
-      "trades": 5,
-      "buys": 1,
-      "sells": 4,
-      "tickers": [
-        "AAPL",
-        "CVX"
-      ]
-    },
-    {
-      "name": "Michael T. McCaul",
-      "party": "Republican",
-      "state": "TX",
-      "trades": 4,
-      "buys": 0,
-      "sells": 4,
-      "tickers": [
-        "CVX",
         "NVDA"
       ]
     },
     {
-      "name": "Lisa C. McClain",
-      "party": "Republican",
-      "state": "MI",
+      "name": "Julie Johnson",
+      "party": "Democrat",
+      "state": "TX",
       "trades": 3,
       "buys": 1,
       "sells": 2,
       "tickers": [
-        "XOM"
+        "CEG",
+        "VST"
       ]
     },
     {
@@ -87,14 +87,26 @@
       ]
     },
     {
-      "name": "Josh S. Gottheimer",
-      "party": "Democrat",
-      "state": "NJ",
+      "name": "Julia Letlow",
+      "party": "Republican",
+      "state": "LA",
       "trades": 2,
       "buys": 2,
       "sells": 0,
       "tickers": [
-        "XOM"
+        "AAPL",
+        "VST"
+      ]
+    },
+    {
+      "name": "David J. Taylor",
+      "party": "Republican",
+      "state": "OH",
+      "trades": 2,
+      "buys": 1,
+      "sells": 1,
+      "tickers": [
+        "AAPL"
       ]
     },
     {
@@ -131,14 +143,14 @@
       ]
     },
     {
-      "name": "Julia Letlow",
+      "name": "Michael T. McCaul",
       "party": "Republican",
-      "state": "LA",
+      "state": "TX",
       "trades": 1,
-      "buys": 1,
-      "sells": 0,
+      "buys": 0,
+      "sells": 1,
       "tickers": [
-        "AAPL"
+        "NVDA"
       ]
     },
     {
@@ -153,99 +165,18 @@
       ]
     },
     {
-      "name": "John Boozman",
-      "party": "Republican",
-      "state": "AR",
+      "name": "Nancy Pelosi",
+      "party": "Democrat",
+      "state": "CA",
       "trades": 1,
       "buys": 1,
       "sells": 0,
       "tickers": [
-        "XOM"
-      ]
-    },
-    {
-      "name": "Markwayne Mullin",
-      "party": "Republican",
-      "state": "OK",
-      "trades": 1,
-      "buys": 1,
-      "sells": 0,
-      "tickers": [
-        "KO"
-      ]
-    },
-    {
-      "name": "Lloyd Alton Doggett",
-      "party": "Democrat",
-      "state": "TX",
-      "trades": 1,
-      "buys": 1,
-      "sells": 0,
-      "tickers": [
-        "KO"
-      ]
-    },
-    {
-      "name": "Sheldon Whitehouse",
-      "party": "Democrat",
-      "state": "RI",
-      "trades": 1,
-      "buys": 1,
-      "sells": 0,
-      "tickers": [
-        "KO"
-      ]
-    },
-    {
-      "name": "Val Hoyle",
-      "party": "Democrat",
-      "state": "OR",
-      "trades": 1,
-      "buys": 0,
-      "sells": 1,
-      "tickers": [
-        "XOM"
-      ]
-    },
-    {
-      "name": "Julie Johnson",
-      "party": "Democrat",
-      "state": "TX",
-      "trades": 1,
-      "buys": 0,
-      "sells": 1,
-      "tickers": [
-        "XOM"
+        "VST"
       ]
     }
   ],
   "suspicious": [
-    {
-      "id": "H002474652202603130004",
-      "size": "$500K-$1M",
-      "reporting_gap": "26 Days",
-      "name": "Michael T. McCaul",
-      "trade_type": "sell",
-      "filing_date": "2026-04-08",
-      "state": "TX",
-      "trade_date": "2026-03-13",
-      "party": "Republican",
-      "ticker": "CVX",
-      "suspicious": "Large Position"
-    },
-    {
-      "id": "H002474652202603040002",
-      "size": "$100K-$250K",
-      "reporting_gap": "35 Days",
-      "name": "Michael T. McCaul",
-      "trade_type": "sell",
-      "filing_date": "2026-04-08",
-      "state": "TX",
-      "trade_date": "2026-03-04",
-      "party": "Republican",
-      "ticker": "CVX",
-      "suspicious": "Large Position"
-    },
     {
       "id": "H002471749202603250003",
       "size": "$1K-$15K",
@@ -257,32 +188,6 @@
       "trade_date": "2026-03-25",
       "party": "Democrat",
       "ticker": "NVDA",
-      "suspicious": "Short-Term Event Window"
-    },
-    {
-      "id": "H002477647202603300073",
-      "size": "$15K-$50K",
-      "reporting_gap": "8 Days",
-      "name": "Ro Khanna",
-      "trade_type": "buy",
-      "filing_date": "2026-04-07",
-      "state": "CA",
-      "trade_date": "2026-03-30",
-      "party": "Democrat",
-      "ticker": "KO",
-      "suspicious": "Short-Term Event Window"
-    },
-    {
-      "id": "H002477647202603230106",
-      "size": "$15K-$50K",
-      "reporting_gap": "15 Days",
-      "name": "Ro Khanna",
-      "trade_type": "buy",
-      "filing_date": "2026-04-07",
-      "state": "CA",
-      "trade_date": "2026-03-23",
-      "party": "Democrat",
-      "ticker": "KO",
       "suspicious": "Short-Term Event Window"
     },
     {
@@ -429,32 +334,6 @@
       "suspicious": "Short-Term Event Window"
     },
     {
-      "id": "H003087523202603120001",
-      "size": "$1K-$15K",
-      "reporting_gap": "8 Days",
-      "name": "David J. Taylor",
-      "trade_type": "sell",
-      "filing_date": "2026-03-20",
-      "state": "OH",
-      "trade_date": "2026-03-12",
-      "party": "Republican",
-      "ticker": "CVX",
-      "suspicious": "Short-Term Event Window"
-    },
-    {
-      "id": "H003087523202603110001",
-      "size": "$1K-$15K",
-      "reporting_gap": "9 Days",
-      "name": "David J. Taylor",
-      "trade_type": "sell",
-      "filing_date": "2026-03-20",
-      "state": "OH",
-      "trade_date": "2026-03-11",
-      "party": "Republican",
-      "ticker": "CVX",
-      "suspicious": "Short-Term Event Window"
-    },
-    {
       "id": "H002474652202602260003",
       "size": "$1K-$15K",
       "reporting_gap": "12 Days",
@@ -479,48 +358,87 @@
       "party": "Democrat",
       "ticker": "NVDA",
       "suspicious": "Short-Term Event Window"
+    },
+    {
+      "id": "H003087523202602260023",
+      "size": "$1K-$15K",
+      "reporting_gap": "8 Days",
+      "name": "David J. Taylor",
+      "trade_type": "sell",
+      "filing_date": "2026-03-06",
+      "state": "OH",
+      "trade_date": "2026-02-26",
+      "party": "Republican",
+      "ticker": "AAPL",
+      "suspicious": "Short-Term Event Window"
+    },
+    {
+      "id": "H003087783202602120001",
+      "size": "$1K-$15K",
+      "reporting_gap": "12 Days",
+      "name": "Cleo Fields",
+      "trade_type": "buy",
+      "filing_date": "2026-02-24",
+      "state": "LA",
+      "trade_date": "2026-02-12",
+      "party": "Democrat",
+      "ticker": "AAPL",
+      "suspicious": "Short-Term Event Window"
+    },
+    {
+      "id": "H002471749202601300008",
+      "size": "$1K-$15K",
+      "reporting_gap": "14 Days",
+      "name": "Gil Cisneros",
+      "trade_type": "buy",
+      "filing_date": "2026-02-13",
+      "state": "CA",
+      "trade_date": "2026-01-30",
+      "party": "Democrat",
+      "ticker": "NVDA",
+      "suspicious": "Short-Term Event Window"
+    },
+    {
+      "id": "H002476490202601160006",
+      "size": "$100K-$250K",
+      "reporting_gap": "7 Days",
+      "name": "Nancy Pelosi",
+      "trade_type": "buy",
+      "filing_date": "2026-01-23",
+      "state": "CA",
+      "trade_date": "2026-01-16",
+      "party": "Democrat",
+      "ticker": "VST",
+      "suspicious": "Short-Term Event Window"
+    },
+    {
+      "id": "H002477647202506270009",
+      "size": "$1K-$15K",
+      "reporting_gap": "13 Days",
+      "name": "Ro Khanna",
+      "trade_type": "buy",
+      "filing_date": "2025-07-10",
+      "state": "CA",
+      "trade_date": "2025-06-27",
+      "party": "Democrat",
+      "ticker": "CEG",
+      "suspicious": "Short-Term Event Window"
+    },
+    {
+      "id": "H003088719202503310033",
+      "size": "$15K-$50K",
+      "reporting_gap": "11 Days",
+      "name": "Jefferson Shreve",
+      "trade_type": "sell",
+      "filing_date": "2025-04-11",
+      "state": "IN",
+      "trade_date": "2025-03-31",
+      "party": "Republican",
+      "ticker": "CEG",
+      "suspicious": "Short-Term Event Window"
     }
   ],
   "trades": [
-    {
-      "id": "H002474652202603230005",
-      "size": "$15K-$50K",
-      "reporting_gap": "16 Days",
-      "name": "Michael T. McCaul",
-      "trade_type": "sell",
-      "filing_date": "2026-04-08",
-      "state": "TX",
-      "trade_date": "2026-03-23",
-      "party": "Republican",
-      "ticker": "CVX",
-      "suspicious": null
-    },
-    {
-      "id": "H002474652202603130004",
-      "size": "$500K-$1M",
-      "reporting_gap": "26 Days",
-      "name": "Michael T. McCaul",
-      "trade_type": "sell",
-      "filing_date": "2026-04-08",
-      "state": "TX",
-      "trade_date": "2026-03-13",
-      "party": "Republican",
-      "ticker": "CVX",
-      "suspicious": "Large Position"
-    },
-    {
-      "id": "H002474652202603040002",
-      "size": "$100K-$250K",
-      "reporting_gap": "35 Days",
-      "name": "Michael T. McCaul",
-      "trade_type": "sell",
-      "filing_date": "2026-04-08",
-      "state": "TX",
-      "trade_date": "2026-03-04",
-      "party": "Republican",
-      "ticker": "CVX",
-      "suspicious": "Large Position"
-    },
     {
       "id": "H002471749202603250003",
       "size": "$1K-$15K",
@@ -587,42 +505,16 @@
       "suspicious": null
     },
     {
-      "id": "H002477647202603300073",
-      "size": "$15K-$50K",
-      "reporting_gap": "8 Days",
+      "id": "H002477647202603190004",
+      "size": "$1K-$15K",
+      "reporting_gap": "19 Days",
       "name": "Ro Khanna",
       "trade_type": "buy",
       "filing_date": "2026-04-07",
       "state": "CA",
-      "trade_date": "2026-03-30",
+      "trade_date": "2026-03-19",
       "party": "Democrat",
-      "ticker": "KO",
-      "suspicious": "Short-Term Event Window"
-    },
-    {
-      "id": "H002477647202603230106",
-      "size": "$15K-$50K",
-      "reporting_gap": "15 Days",
-      "name": "Ro Khanna",
-      "trade_type": "buy",
-      "filing_date": "2026-04-07",
-      "state": "CA",
-      "trade_date": "2026-03-23",
-      "party": "Democrat",
-      "ticker": "KO",
-      "suspicious": "Short-Term Event Window"
-    },
-    {
-      "id": "H002477647202603100033",
-      "size": "$15K-$50K",
-      "reporting_gap": "28 Days",
-      "name": "Ro Khanna",
-      "trade_type": "buy",
-      "filing_date": "2026-04-07",
-      "state": "CA",
-      "trade_date": "2026-03-10",
-      "party": "Democrat",
-      "ticker": "KO",
+      "ticker": "CEG",
       "suspicious": null
     },
     {
@@ -782,32 +674,6 @@
       "suspicious": "Short-Term Event Window"
     },
     {
-      "id": "H003087523202603120001",
-      "size": "$1K-$15K",
-      "reporting_gap": "8 Days",
-      "name": "David J. Taylor",
-      "trade_type": "sell",
-      "filing_date": "2026-03-20",
-      "state": "OH",
-      "trade_date": "2026-03-12",
-      "party": "Republican",
-      "ticker": "CVX",
-      "suspicious": "Short-Term Event Window"
-    },
-    {
-      "id": "H003087523202603110001",
-      "size": "$1K-$15K",
-      "reporting_gap": "9 Days",
-      "name": "David J. Taylor",
-      "trade_type": "sell",
-      "filing_date": "2026-03-20",
-      "state": "OH",
-      "trade_date": "2026-03-11",
-      "party": "Republican",
-      "ticker": "CVX",
-      "suspicious": "Short-Term Event Window"
-    },
-    {
       "id": "H002476569202602180002",
       "size": "$15K-$50K",
       "reporting_gap": "27 Days",
@@ -834,32 +700,6 @@
       "suspicious": null
     },
     {
-      "id": "H002472330202602040002",
-      "size": "$1K-$15K",
-      "reporting_gap": "40 Days",
-      "name": "Josh S. Gottheimer",
-      "trade_type": "buy",
-      "filing_date": "2026-03-16",
-      "state": "NJ",
-      "trade_date": "2026-02-04",
-      "party": "Democrat",
-      "ticker": "XOM",
-      "suspicious": null
-    },
-    {
-      "id": "H002472330202602020001",
-      "size": "$1K-$15K",
-      "reporting_gap": "42 Days",
-      "name": "Josh S. Gottheimer",
-      "trade_type": "buy",
-      "filing_date": "2026-03-16",
-      "state": "NJ",
-      "trade_date": "2026-02-02",
-      "party": "Democrat",
-      "ticker": "XOM",
-      "suspicious": null
-    },
-    {
       "id": "H002477606202602120001",
       "size": "$1K-$15K",
       "reporting_gap": "30 Days",
@@ -883,6 +723,19 @@
       "trade_date": "2026-02-02",
       "party": "Republican",
       "ticker": "AAPL",
+      "suspicious": null
+    },
+    {
+      "id": "H002474645202602170003",
+      "size": "$1K-$15K",
+      "reporting_gap": "23 Days",
+      "name": "Julia Letlow",
+      "trade_type": "buy",
+      "filing_date": "2026-03-12",
+      "state": "LA",
+      "trade_date": "2026-02-17",
+      "party": "Republican",
+      "ticker": "VST",
       "suspicious": null
     },
     {
@@ -951,81 +804,29 @@
       "suspicious": null
     },
     {
-      "id": "H002471749202602100015",
-      "size": "$50K-$100K",
-      "reporting_gap": "27 Days",
-      "name": "Gil Cisneros",
-      "trade_type": "buy",
-      "filing_date": "2026-03-09",
-      "state": "CA",
-      "trade_date": "2026-02-10",
-      "party": "Democrat",
-      "ticker": "XOM",
-      "suspicious": null
-    },
-    {
-      "id": "H002471749202602100004",
-      "size": "$15K-$50K",
-      "reporting_gap": "27 Days",
-      "name": "Gil Cisneros",
-      "trade_type": "buy",
-      "filing_date": "2026-03-09",
-      "state": "CA",
-      "trade_date": "2026-02-10",
-      "party": "Democrat",
-      "ticker": "CVX",
-      "suspicious": null
-    },
-    {
-      "id": "H002477647202602240141",
-      "size": "$50K-$100K",
-      "reporting_gap": "13 Days",
+      "id": "H002477647202602050034",
+      "size": "$1K-$15K",
+      "reporting_gap": "32 Days",
       "name": "Ro Khanna",
       "trade_type": "sell",
       "filing_date": "2026-03-09",
       "state": "CA",
-      "trade_date": "2026-02-24",
+      "trade_date": "2026-02-05",
       "party": "Democrat",
-      "ticker": "KO",
-      "suspicious": "Short-Term Event Window"
-    },
-    {
-      "id": "H002477647202602170106",
-      "size": "$1K-$15K",
-      "reporting_gap": "20 Days",
-      "name": "Ro Khanna",
-      "trade_type": "sell",
-      "filing_date": "2026-03-09",
-      "state": "CA",
-      "trade_date": "2026-02-17",
-      "party": "Democrat",
-      "ticker": "KO",
+      "ticker": "VST",
       "suspicious": null
     },
     {
-      "id": "H002477647202602130014",
+      "id": "H002477647202602050119",
       "size": "$1K-$15K",
-      "reporting_gap": "24 Days",
-      "name": "Ro Khanna",
-      "trade_type": "sell",
-      "filing_date": "2026-03-09",
-      "state": "CA",
-      "trade_date": "2026-02-13",
-      "party": "Democrat",
-      "ticker": "KO",
-      "suspicious": null
-    },
-    {
-      "id": "H002477647202602060002",
-      "size": "$1K-$15K",
-      "reporting_gap": "31 Days",
+      "reporting_gap": "32 Days",
       "name": "Ro Khanna",
       "trade_type": "buy",
       "filing_date": "2026-03-09",
       "state": "CA",
-      "trade_date": "2026-02-06",
+      "trade_date": "2026-02-05",
       "party": "Democrat",
-      "ticker": "KO",
+      "ticker": "CEG",
       "suspicious": null
     },
     {
@@ -1042,19 +843,6 @@
       "suspicious": "Short-Term Event Window"
     },
     {
-      "id": "H003087523202602260026",
-      "size": "$1K-$15K",
-      "reporting_gap": "8 Days",
-      "name": "David J. Taylor",
-      "trade_type": "sell",
-      "filing_date": "2026-03-06",
-      "state": "OH",
-      "trade_date": "2026-02-26",
-      "party": "Republican",
-      "ticker": "CVX",
-      "suspicious": "Short-Term Event Window"
-    },
-    {
       "id": "H003087783202602120001",
       "size": "$1K-$15K",
       "reporting_gap": "12 Days",
@@ -1066,19 +854,6 @@
       "party": "Democrat",
       "ticker": "AAPL",
       "suspicious": "Short-Term Event Window"
-    },
-    {
-      "id": "H002471709202601080003",
-      "size": "$1K-$15K",
-      "reporting_gap": "38 Days",
-      "name": "John Boozman",
-      "trade_type": "buy",
-      "filing_date": "2026-02-15",
-      "state": "AR",
-      "trade_date": "2026-01-08",
-      "party": "Republican",
-      "ticker": "XOM",
-      "suspicious": null
     },
     {
       "id": "H002471749202601300008",
@@ -1094,58 +869,6 @@
       "suspicious": "Short-Term Event Window"
     },
     {
-      "id": "H002471749202601090014",
-      "size": "$50K-$100K",
-      "reporting_gap": "35 Days",
-      "name": "Gil Cisneros",
-      "trade_type": "sell",
-      "filing_date": "2026-02-13",
-      "state": "CA",
-      "trade_date": "2026-01-09",
-      "party": "Democrat",
-      "ticker": "XOM",
-      "suspicious": null
-    },
-    {
-      "id": "H002471749202601090002",
-      "size": "$15K-$50K",
-      "reporting_gap": "35 Days",
-      "name": "Gil Cisneros",
-      "trade_type": "sell",
-      "filing_date": "2026-02-13",
-      "state": "CA",
-      "trade_date": "2026-01-09",
-      "party": "Democrat",
-      "ticker": "CVX",
-      "suspicious": null
-    },
-    {
-      "id": "H002471749202601090056",
-      "size": "$1K-$15K",
-      "reporting_gap": "35 Days",
-      "name": "Gil Cisneros",
-      "trade_type": "sell",
-      "filing_date": "2026-02-13",
-      "state": "CA",
-      "trade_date": "2026-01-09",
-      "party": "Democrat",
-      "ticker": "CVX",
-      "suspicious": null
-    },
-    {
-      "id": "H002471749202601090059",
-      "size": "$15K-$50K",
-      "reporting_gap": "35 Days",
-      "name": "Gil Cisneros",
-      "trade_type": "sell",
-      "filing_date": "2026-02-13",
-      "state": "CA",
-      "trade_date": "2026-01-09",
-      "party": "Democrat",
-      "ticker": "CVX",
-      "suspicious": null
-    },
-    {
       "id": "H003087523202601160013",
       "size": "$1K-$15K",
       "reporting_gap": "17 Days",
@@ -1159,46 +882,20 @@
       "suspicious": null
     },
     {
-      "id": "H002474716202512290013",
-      "size": "$15K-$50K",
-      "reporting_gap": "18 Days",
-      "name": "Markwayne Mullin",
+      "id": "H002476490202601160006",
+      "size": "$100K-$250K",
+      "reporting_gap": "7 Days",
+      "name": "Nancy Pelosi",
       "trade_type": "buy",
-      "filing_date": "2026-01-16",
-      "state": "OK",
-      "trade_date": "2025-12-29",
-      "party": "Republican",
-      "ticker": "KO",
-      "suspicious": null
-    },
-    {
-      "id": "H002471793202512150001",
-      "size": "$1K-$15K",
-      "reporting_gap": "18 Days",
-      "name": "Lloyd Alton Doggett",
-      "trade_type": "buy",
-      "filing_date": "2026-01-02",
-      "state": "TX",
-      "trade_date": "2025-12-15",
+      "filing_date": "2026-01-23",
+      "state": "CA",
+      "trade_date": "2026-01-16",
       "party": "Democrat",
-      "ticker": "KO",
-      "suspicious": null
-    },
-    {
-      "id": "H002482591202511210002",
-      "size": "$1K-$15K",
-      "reporting_gap": "10 Days",
-      "name": "Sheldon Whitehouse",
-      "trade_type": "buy",
-      "filing_date": "2025-12-01",
-      "state": "RI",
-      "trade_date": "2025-11-21",
-      "party": "Democrat",
-      "ticker": "KO",
+      "ticker": "VST",
       "suspicious": "Short-Term Event Window"
     },
     {
-      "id": "H002477656202510310129",
+      "id": "H002477656202510310078",
       "size": "$1K-$15K",
       "reporting_gap": "21 Days",
       "name": "Lisa C. McClain",
@@ -1207,11 +904,24 @@
       "state": "MI",
       "trade_date": "2025-10-31",
       "party": "Republican",
-      "ticker": "XOM",
+      "ticker": "VST",
       "suspicious": null
     },
     {
-      "id": "H002477656202510300078",
+      "id": "H002477656202510300236",
+      "size": "$1K-$15K",
+      "reporting_gap": "22 Days",
+      "name": "Lisa C. McClain",
+      "trade_type": "sell",
+      "filing_date": "2025-11-21",
+      "state": "MI",
+      "trade_date": "2025-10-30",
+      "party": "Republican",
+      "ticker": "VST",
+      "suspicious": null
+    },
+    {
+      "id": "H002477656202510300237",
       "size": "$1K-$15K",
       "reporting_gap": "22 Days",
       "name": "Lisa C. McClain",
@@ -1220,11 +930,24 @@
       "state": "MI",
       "trade_date": "2025-10-30",
       "party": "Republican",
-      "ticker": "XOM",
+      "ticker": "VST",
       "suspicious": null
     },
     {
-      "id": "H002477656202510300079",
+      "id": "H002477656202510310025",
+      "size": "$1K-$15K",
+      "reporting_gap": "21 Days",
+      "name": "Lisa C. McClain",
+      "trade_type": "sell",
+      "filing_date": "2025-11-21",
+      "state": "MI",
+      "trade_date": "2025-10-31",
+      "party": "Republican",
+      "ticker": "CEG",
+      "suspicious": null
+    },
+    {
+      "id": "H002477656202510300050",
       "size": "$1K-$15K",
       "reporting_gap": "22 Days",
       "name": "Lisa C. McClain",
@@ -1233,33 +956,137 @@
       "state": "MI",
       "trade_date": "2025-10-30",
       "party": "Republican",
-      "ticker": "XOM",
+      "ticker": "CEG",
       "suspicious": null
     },
     {
-      "id": "H002471890202509230025",
+      "id": "H002477656202510300049",
       "size": "$1K-$15K",
-      "reporting_gap": "17 Days",
-      "name": "Val Hoyle",
-      "trade_type": "sell",
-      "filing_date": "2025-10-10",
-      "state": "OR",
-      "trade_date": "2025-09-23",
+      "reporting_gap": "22 Days",
+      "name": "Lisa C. McClain",
+      "trade_type": "buy",
+      "filing_date": "2025-11-21",
+      "state": "MI",
+      "trade_date": "2025-10-30",
+      "party": "Republican",
+      "ticker": "CEG",
+      "suspicious": null
+    },
+    {
+      "id": "H002477656202506170007",
+      "size": "$1K-$15K",
+      "reporting_gap": "57 Days",
+      "name": "Lisa C. McClain",
+      "trade_type": "buy",
+      "filing_date": "2025-08-13",
+      "state": "MI",
+      "trade_date": "2025-06-17",
+      "party": "Republican",
+      "ticker": "VST",
+      "suspicious": null
+    },
+    {
+      "id": "H002477647202506270009",
+      "size": "$1K-$15K",
+      "reporting_gap": "13 Days",
+      "name": "Ro Khanna",
+      "trade_type": "buy",
+      "filing_date": "2025-07-10",
+      "state": "CA",
+      "trade_date": "2025-06-27",
       "party": "Democrat",
-      "ticker": "XOM",
+      "ticker": "CEG",
+      "suspicious": "Short-Term Event Window"
+    },
+    {
+      "id": "H003088719202505120011",
+      "size": "$15K-$50K",
+      "reporting_gap": "41 Days",
+      "name": "Jefferson Shreve",
+      "trade_type": "sell",
+      "filing_date": "2025-06-22",
+      "state": "IN",
+      "trade_date": "2025-05-12",
+      "party": "Republican",
+      "ticker": "CEG",
       "suspicious": null
     },
     {
-      "id": "H003087748202509160001",
+      "id": "H003088719202505080008",
+      "size": "$15K-$50K",
+      "reporting_gap": "45 Days",
+      "name": "Jefferson Shreve",
+      "trade_type": "buy",
+      "filing_date": "2025-06-22",
+      "state": "IN",
+      "trade_date": "2025-05-08",
+      "party": "Republican",
+      "ticker": "CEG",
+      "suspicious": null
+    },
+    {
+      "id": "H003087748202504010037",
       "size": "$1K-$15K",
-      "reporting_gap": "21 Days",
+      "reporting_gap": "43 Days",
       "name": "Julie Johnson",
       "trade_type": "sell",
-      "filing_date": "2025-10-07",
+      "filing_date": "2025-05-14",
       "state": "TX",
-      "trade_date": "2025-09-16",
+      "trade_date": "2025-04-01",
       "party": "Democrat",
-      "ticker": "XOM",
+      "ticker": "VST",
+      "suspicious": null
+    },
+    {
+      "id": "H003087748202504010049",
+      "size": "$1K-$15K",
+      "reporting_gap": "43 Days",
+      "name": "Julie Johnson",
+      "trade_type": "sell",
+      "filing_date": "2025-05-14",
+      "state": "TX",
+      "trade_date": "2025-04-01",
+      "party": "Democrat",
+      "ticker": "CEG",
+      "suspicious": null
+    },
+    {
+      "id": "H003088719202503050005",
+      "size": "$15K-$50K",
+      "reporting_gap": "37 Days",
+      "name": "Jefferson Shreve",
+      "trade_type": "buy",
+      "filing_date": "2025-04-11",
+      "state": "IN",
+      "trade_date": "2025-03-05",
+      "party": "Republican",
+      "ticker": "VST",
+      "suspicious": null
+    },
+    {
+      "id": "H003088719202503310033",
+      "size": "$15K-$50K",
+      "reporting_gap": "11 Days",
+      "name": "Jefferson Shreve",
+      "trade_type": "sell",
+      "filing_date": "2025-04-11",
+      "state": "IN",
+      "trade_date": "2025-03-31",
+      "party": "Republican",
+      "ticker": "CEG",
+      "suspicious": "Short-Term Event Window"
+    },
+    {
+      "id": "H003087748202502120001",
+      "size": "$1K-$15K",
+      "reporting_gap": "28 Days",
+      "name": "Julie Johnson",
+      "trade_type": "buy",
+      "filing_date": "2025-03-12",
+      "state": "TX",
+      "trade_date": "2025-02-12",
+      "party": "Democrat",
+      "ticker": "VST",
       "suspicious": null
     }
   ]

@@ -1,9 +1,0 @@
-package com.google.gson;
-
-/* JADX INFO: loaded from: classes.dex */
-public enum r {
-    ALLOW,
-    INDECISIVE,
-    BLOCK_INACCESSIBLE,
-    BLOCK_ALL
-}

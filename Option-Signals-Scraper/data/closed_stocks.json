@@ -4068,5 +4068,24 @@
     "status": "Locked some at 28.31 for 2.02%!",
     "stopLoss": "25.53",
     "symbol": "CMCSA"
+  },
+  "1777398076": {
+    "buyTarget": "152.94",
+    "category": "SWING",
+    "discordMessageId": "1498740903005782200",
+    "discordThreadId": "1498740903005782200",
+    "earlyTarget": "156.00",
+    "exit1": "156.0",
+    "exit1Time": 1777404584,
+    "exitTime": 1777404584,
+    "free": 1,
+    "isWeekly": 1,
+    "reduceLoss": "140.70",
+    "sellTarget": "153.4",
+    "sellTargetTime": 1777404584,
+    "shortName": "Marvell Technology, Inc.",
+    "status": "Locked some at 156.0 for 2.00%!",
+    "stopLoss": "140.7",
+    "symbol": "MRVL"
   }
 }

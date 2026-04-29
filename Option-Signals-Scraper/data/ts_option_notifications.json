@@ -5750,5 +5750,35 @@
     "message": "Take stop at 4.05.",
     "symbol": "QQQ",
     "title": "QQQ 650P 4/30: SELL"
+  },
+  "1777395977": {
+    "category": "SWING",
+    "message": "Reached final SellTarget @7.16 with gain: 41.78%. Take profits or ride for new target @8.59 with stops @5.73",
+    "symbol": "QXO",
+    "title": "QXO 25P 01/15 : SELL"
+  },
+  "1777397583": {
+    "category": "SWING",
+    "message": "Buy below 17.45, Sell above 20.07\nSwing, Hi risk",
+    "symbol": "MRVL",
+    "title": "MRVL 175C 8/21: BUY"
+  },
+  "1777400855": {
+    "category": "SWING",
+    "message": "Buy below 1.30, Sell above 1.49\nSwing, Moderate risk",
+    "symbol": "NFLX",
+    "title": "NFLX 93C 5/8: BUY"
+  },
+  "1777402347": {
+    "category": "SWING",
+    "message": "Reached SellTarget1 @1.50 with gain: 15.38%. Take profits and ride for next target with stops @1.05",
+    "symbol": "NFLX",
+    "title": "NFLX 93C 05/08 : SELL"
+  },
+  "1777403686": {
+    "category": "SWING",
+    "message": "Reached SellTarget2 @1.63 with gain: 25.38%. Take profits and ride for next target @1.82 with stops @1.30",
+    "symbol": "NFLX",
+    "title": "NFLX 93C 05/08 : SELL"
   }
 }

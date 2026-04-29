@@ -1,6 +1,0 @@
-requests
-yfinance
-pandas
-numpy
-python-dotenv
-aiohttp

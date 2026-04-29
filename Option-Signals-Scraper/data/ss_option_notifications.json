@@ -6518,5 +6518,23 @@
     "message": "Take stop at 4.25.",
     "symbol": "SPY",
     "title": "SPY 710P 4/30: SELL"
+  },
+  "1777397236": {
+    "category": "SWING",
+    "message": "Buy below 2.46, Sell above 2.83\nSwing, Moderate risk",
+    "symbol": "SLV",
+    "title": "SLV 66C 5/8: BUY"
+  },
+  "1777400025": {
+    "category": "SCALP",
+    "message": "Buy below 4.50, Sell above 5.18\nScalp, VH risk",
+    "symbol": "AAPL",
+    "title": "AAPL 272.5C 5/1: BUY"
+  },
+  "1777403874": {
+    "category": "SCALP",
+    "message": "Take profits at revised SellTarget 4.5.",
+    "symbol": "AAPL",
+    "title": "AAPL 272.5C 5/1: SELL"
   }
 }

@@ -1,5 +1,5 @@
 {
-  "last_updated": "2026-04-28T16:00:44.492158",
+  "last_updated": "2026-04-29T00:00:42.925143",
   "leaderboard": [
     {
       "rank": 0,
@@ -7,9 +7,9 @@
       "model": "AIME",
       "color": "#4fc3f7",
       "total_trades": 100,
-      "holdings_count": 1,
+      "holdings_count": 0,
       "buy_volume": 386099.67,
-      "sell_volume": 386137.63
+      "sell_volume": 386630.39
     },
     {
       "rank": 0,
@@ -48,8 +48,8 @@
       "color": "#81d4fa",
       "total_trades": 100,
       "holdings_count": 4,
-      "buy_volume": 21154.78,
-      "sell_volume": 21118.34
+      "buy_volume": 20754.78,
+      "sell_volume": 20730.86
     },
     {
       "rank": 0,
@@ -70,11 +70,9 @@
       "account_id": "1800473182_15",
       "total_trades": 100,
       "total_buy_value": 386099.67,
-      "total_sell_value": 386137.63,
-      "current_holdings": {
-        "WLDN": 128.0
-      },
-      "holdings_count": 1,
+      "total_sell_value": 386630.39,
+      "current_holdings": {},
+      "holdings_count": 0,
       "recent_trades": [
         {
           "date": "2026-04-28",
@@ -155,6 +153,16 @@
           "quantity": 812.0,
           "value": 8996.96,
           "order_id": "0638863159164403712"
+        },
+        {
+          "date": "2026-04-28",
+          "side": "sell",
+          "symbol": "WLDN",
+          "company": "Willdan Group",
+          "price": 72.12,
+          "quantity": 128.0,
+          "value": 9231.68,
+          "order_id": "0638947738680295424"
         },
         {
           "date": "2026-04-28",
@@ -365,16 +373,6 @@
           "quantity": 472.0,
           "value": 8996.32,
           "order_id": "0638557149015048192"
-        },
-        {
-          "date": "2026-04-27",
-          "side": "buy",
-          "symbol": "ET",
-          "company": "Energy Transfer",
-          "price": 19.08,
-          "quantity": 471.0,
-          "value": 8986.68,
-          "order_id": "0638555895891197952"
         }
       ],
       "all_trades": [
@@ -457,6 +455,16 @@
           "quantity": 812.0,
           "value": 8996.96,
           "order_id": "0638863159164403712"
+        },
+        {
+          "date": "2026-04-28",
+          "side": "sell",
+          "symbol": "WLDN",
+          "company": "Willdan Group",
+          "price": 72.12,
+          "quantity": 128.0,
+          "value": 9231.68,
+          "order_id": "0638947738680295424"
         },
         {
           "date": "2026-04-28",
@@ -1367,16 +1375,6 @@
           "quantity": 812.0,
           "value": 9005.08,
           "order_id": "0638533997010583552"
-        },
-        {
-          "date": "2026-04-27",
-          "side": "sell",
-          "symbol": "AGNC",
-          "company": "AGNC Investment",
-          "price": 11.09,
-          "quantity": 788.0,
-          "value": 8738.92,
-          "order_id": "0638533491961462784"
         }
       ]
     },
@@ -5354,16 +5352,36 @@
       "color": "#81d4fa",
       "account_id": "1800473182_19",
       "total_trades": 100,
-      "total_buy_value": 21154.78,
-      "total_sell_value": 21118.34,
+      "total_buy_value": 20754.78,
+      "total_sell_value": 20730.86,
       "current_holdings": {
         "MU": 2.63,
-        "ADI": 0.81,
+        "ON": 0.29,
         "MRVL": 12.09,
         "NVDA": 5.11
       },
       "holdings_count": 4,
       "recent_trades": [
+        {
+          "date": "2026-04-28",
+          "side": "buy",
+          "symbol": "KOPN",
+          "company": "Kopin",
+          "price": 4.42,
+          "quantity": 67.8,
+          "value": 300.0,
+          "order_id": "0638898150543556608"
+        },
+        {
+          "date": "2026-04-28",
+          "side": "buy",
+          "symbol": "KNSA",
+          "company": "Kiniksa",
+          "price": 52.28,
+          "quantity": 5.74,
+          "value": 300.0,
+          "order_id": "0638898150766379008"
+        },
         {
           "date": "2026-04-28",
           "side": "buy",
@@ -5373,6 +5391,36 @@
           "quantity": 2.02,
           "value": 1000.0,
           "order_id": "0638883465409069056"
+        },
+        {
+          "date": "2026-04-28",
+          "side": "sell",
+          "symbol": "KNSA",
+          "company": "Kiniksa",
+          "price": 53.48,
+          "quantity": 5.74,
+          "value": 306.86,
+          "order_id": "0638928243097698304"
+        },
+        {
+          "date": "2026-04-28",
+          "side": "sell",
+          "symbol": "KOPN",
+          "company": "Kopin",
+          "price": 4.18,
+          "quantity": 67.8,
+          "value": 283.31,
+          "order_id": "0638913109269118976"
+        },
+        {
+          "date": "2026-04-28",
+          "side": "sell",
+          "symbol": "ADI",
+          "company": "Analog Devices",
+          "price": 384.46,
+          "quantity": 0.81,
+          "value": 311.37,
+          "order_id": "0638898148115447808"
         },
         {
           "date": "2026-04-28",
@@ -5613,59 +5661,29 @@
           "quantity": 2.36,
           "value": 900.0,
           "order_id": "0636738643692748800"
-        },
-        {
-          "date": "2026-04-22",
-          "side": "buy",
-          "symbol": "MU",
-          "company": "Micron Technology",
-          "price": 473.1,
-          "quantity": 2.11,
-          "value": 1000.0,
-          "order_id": "0636694991855550464"
-        },
-        {
-          "date": "2026-04-22",
-          "side": "sell",
-          "symbol": "TSM",
-          "company": "TSMC",
-          "price": 385.47,
-          "quantity": 0.5,
-          "value": 192.74,
-          "order_id": "0636768872595423232"
-        },
-        {
-          "date": "2026-04-22",
-          "side": "sell",
-          "symbol": "TSM",
-          "company": "TSMC",
-          "price": 383.16,
-          "quantity": 1.0,
-          "value": 383.16,
-          "order_id": "0636753771426349056"
-        },
-        {
-          "date": "2026-04-22",
-          "side": "sell",
-          "symbol": "ON",
-          "company": "On Semiconductor",
-          "price": 88.38,
-          "quantity": 2.0,
-          "value": 176.76,
-          "order_id": "0636738632619884544"
-        },
-        {
-          "date": "2026-04-22",
-          "side": "sell",
-          "symbol": "ON",
-          "company": "On Semiconductor",
-          "price": 88.02,
-          "quantity": 3.0,
-          "value": 264.06,
-          "order_id": "0636723545229099008"
         }
       ],
       "all_trades": [
+        {
+          "date": "2026-04-28",
+          "side": "buy",
+          "symbol": "KOPN",
+          "company": "Kopin",
+          "price": 4.42,
+          "quantity": 67.8,
+          "value": 300.0,
+          "order_id": "0638898150543556608"
+        },
+        {
+          "date": "2026-04-28",
+          "side": "buy",
+          "symbol": "KNSA",
+          "company": "Kiniksa",
+          "price": 52.28,
+          "quantity": 5.74,
+          "value": 300.0,
+          "order_id": "0638898150766379008"
+        },
         {
           "date": "2026-04-28",
           "side": "buy",
@@ -5675,6 +5693,36 @@
           "quantity": 2.02,
           "value": 1000.0,
           "order_id": "0638883465409069056"
+        },
+        {
+          "date": "2026-04-28",
+          "side": "sell",
+          "symbol": "KNSA",
+          "company": "Kiniksa",
+          "price": 53.48,
+          "quantity": 5.74,
+          "value": 306.86,
+          "order_id": "0638928243097698304"
+        },
+        {
+          "date": "2026-04-28",
+          "side": "sell",
+          "symbol": "KOPN",
+          "company": "Kopin",
+          "price": 4.18,
+          "quantity": 67.8,
+          "value": 283.31,
+          "order_id": "0638913109269118976"
+        },
+        {
+          "date": "2026-04-28",
+          "side": "sell",
+          "symbol": "ADI",
+          "company": "Analog Devices",
+          "price": 384.46,
+          "quantity": 0.81,
+          "value": 311.37,
+          "order_id": "0638898148115447808"
         },
         {
           "date": "2026-04-28",
@@ -6615,56 +6663,6 @@
           "quantity": 0.68,
           "value": 251.94,
           "order_id": "0633432245563555840"
-        },
-        {
-          "date": "2026-04-13",
-          "side": "sell",
-          "symbol": "TSM",
-          "company": "TSMC",
-          "price": 369.31,
-          "quantity": 2.0,
-          "value": 738.62,
-          "order_id": "0633417500096987136"
-        },
-        {
-          "date": "2026-04-10",
-          "side": "buy",
-          "symbol": "TSM",
-          "company": "TSMC",
-          "price": 372.74,
-          "quantity": 2.68,
-          "value": 1000.0,
-          "order_id": "0632405276532867072"
-        },
-        {
-          "date": "2026-04-10",
-          "side": "sell",
-          "symbol": "ON",
-          "company": "On Semiconductor",
-          "price": 68.92,
-          "quantity": 2.0,
-          "value": 137.84,
-          "order_id": "0632405273680740352"
-        },
-        {
-          "date": "2026-04-10",
-          "side": "sell",
-          "symbol": "ON",
-          "company": "On Semiconductor",
-          "price": 68.82,
-          "quantity": 4.0,
-          "value": 275.28,
-          "order_id": "0632390224526704640"
-        },
-        {
-          "date": "2026-04-10",
-          "side": "sell",
-          "symbol": "ON",
-          "company": "On Semiconductor",
-          "price": 68.64,
-          "quantity": 2.0,
-          "value": 137.28,
-          "order_id": "0632375171030450176"
         }
       ]
     },

@@ -13,18 +13,18 @@
     "isWeekly": 1,
     "quote": {
       "askPrice": "0.6",
-      "askSize": "772",
-      "bidPrice": "0.55",
-      "bidSize": "353",
+      "askSize": "525",
+      "bidPrice": "0.53",
+      "bidSize": "84",
       "closePrice": "0.52",
       "highPrice": "0.6",
-      "lastPrice": "0.59",
+      "lastPrice": "0.55",
       "lowPrice": "0.49",
       "openInterest": "15275",
       "openPrice": "0.55",
-      "quoteTimeInLong": 1777393038367,
-      "totalVolume": "105",
-      "tradeTimeInLong": 1777392024000
+      "quoteTimeInLong": 1777406396949,
+      "totalVolume": "115",
+      "tradeTimeInLong": 1777405285000
     },
     "reasoning": {
       "\ud83d\udc0b Unusual Flows": "Newly opened option sweeps were detected with Sweep Volume > Open Interest.",
@@ -52,19 +52,19 @@
     "free": 1,
     "isWeekly": 1,
     "quote": {
-      "askPrice": "1.68",
-      "askSize": "162",
-      "bidPrice": "1.63",
-      "bidSize": "611",
+      "askPrice": "1.55",
+      "askSize": "300",
+      "bidPrice": "1.51",
+      "bidSize": "1",
       "closePrice": "1.42",
       "highPrice": "1.95",
-      "lastPrice": "1.69",
-      "lowPrice": "1.52",
+      "lastPrice": "1.48",
+      "lowPrice": "1.48",
       "openInterest": "4414",
       "openPrice": "1.8",
-      "quoteTimeInLong": 1777393038373,
-      "totalVolume": "857",
-      "tradeTimeInLong": 1777391576000
+      "quoteTimeInLong": 1777406396958,
+      "totalVolume": "1093",
+      "tradeTimeInLong": 1777405075000
     },
     "reasoning": {
       "\ud83d\udc0b Unusual Flows": "Newly opened option sweeps were detected with Sweep Volume > Open Interest.",
@@ -92,19 +92,19 @@
     "isPut": 1,
     "isWeekly": 1,
     "quote": {
-      "askPrice": "2.95",
-      "askSize": "279",
-      "bidPrice": "2.9",
-      "bidSize": "366",
+      "askPrice": "2.78",
+      "askSize": "281",
+      "bidPrice": "2.74",
+      "bidSize": "65",
       "closePrice": "2.74",
       "highPrice": "3.01",
-      "lastPrice": "2.91",
-      "lowPrice": "2.8",
+      "lastPrice": "2.76",
+      "lowPrice": "2.76",
       "openInterest": "38024",
       "openPrice": "2.85",
-      "quoteTimeInLong": 1777393038379,
-      "totalVolume": "37",
-      "tradeTimeInLong": 1777392555000
+      "quoteTimeInLong": 1777406396963,
+      "totalVolume": "48",
+      "tradeTimeInLong": 1777406359000
     },
     "reasoning": {
       "\ud83d\udc0b Unusual Flows": "Newly opened option sweeps were detected with Sweep Volume > Open Interest.",
@@ -119,5 +119,43 @@
     "stopLoss": "1.82",
     "strike": "220",
     "symbol": "IWM"
+  },
+  "1777397236": {
+    "buyTarget": "2.46",
+    "category": "SWING",
+    "discordMessageId": "1498737377772834897",
+    "discordThreadId": "1498737377772834897",
+    "earlyTarget": "2.83",
+    "expiry": "1778216400",
+    "free": 0,
+    "isWeekly": 1,
+    "quote": {
+      "askPrice": "2.31",
+      "askSize": "403",
+      "bidPrice": "2.23",
+      "bidSize": "957",
+      "closePrice": "3.7",
+      "highPrice": "2.54",
+      "lastPrice": "2.26",
+      "lowPrice": "2",
+      "openInterest": "203",
+      "openPrice": "2.23",
+      "quoteTimeInLong": 1777406396968,
+      "totalVolume": "21913",
+      "tradeTimeInLong": 1777406338000
+    },
+    "reasoning": {
+      "\ud83d\udc0b Unusual Flows": "Newly opened option sweeps were detected with Sweep Volume > Open Interest.",
+      "\ud83d\udcc8 Bullish Sweeps": "Bullish sweeps indicate some hedge fund managers expect the stock to go up in short term.",
+      "\ud83d\udcca Technical Analysis": "Technical Analysis indicates that the analyst has verified chart pattern, support and resistance levels, moving averages, RSI and VWAP for this entry."
+    },
+    "reduceLoss": "1.60",
+    "sellTarget": "2.83",
+    "sellTarget2": "3.08",
+    "sellTarget3": "3.44",
+    "shortName": "iShares Silver Trust",
+    "stopLoss": "1.60",
+    "strike": "66",
+    "symbol": "SLV"
   }
 }

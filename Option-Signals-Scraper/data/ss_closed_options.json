@@ -6462,5 +6462,53 @@
     "stopLoss": "5.98",
     "strike": "520",
     "symbol": "SMH"
+  },
+  "1777387548": {
+    "buyTarget": "4.50",
+    "category": "SCALP",
+    "discordMessageId": "1498696744966557786",
+    "discordThreadId": "1498696744966557786",
+    "earlyTarget": "5.18",
+    "exitTime": 1777392247,
+    "expiry": "1777507200",
+    "free": 0,
+    "isPut": 1,
+    "isWeekly": 1,
+    "reasoning": {
+      "\ud83d\udcc8 Price Action": "Price Action entry is based on the stock movement in the 1-min time frame and should be strictly used for quick scalping.",
+      "\ud83d\udcca Technical Analysis": "Technical Analysis indicates that the analyst has verified chart pattern, support and resistance levels, moving averages, RSI and VWAP for this entry."
+    },
+    "reduceLoss": "2.92",
+    "risk": "VH",
+    "sellTarget": "4.25",
+    "shortName": "State Street SPDR S&P 500 ETF T",
+    "status": "Stopped out.",
+    "stopLoss": "2.92",
+    "strike": "710",
+    "symbol": "SPY"
+  },
+  "1777400025": {
+    "buyTarget": "4.50",
+    "category": "SCALP",
+    "discordMessageId": "1498749078786539631",
+    "discordThreadId": "1498749078786539631",
+    "earlyTarget": "5.18",
+    "exitTime": 1777403874,
+    "expiry": "1777593600",
+    "free": 0,
+    "isWeekly": 1,
+    "reasoning": {
+      "\ud83d\udcc8 Bullish Sweeps": "Bullish sweeps indicate some hedge fund managers expect the stock to go up in short term.",
+      "\ud83d\udcc8 Price Action": "Price Action entry is based on the stock movement in the 1-min time frame and should be strictly used for quick scalping.",
+      "\ud83d\udcca Technical Analysis": "Technical Analysis indicates that the analyst has verified chart pattern, support and resistance levels, moving averages, RSI and VWAP for this entry."
+    },
+    "reduceLoss": "2.92",
+    "risk": "VH",
+    "sellTarget": "4.5",
+    "shortName": "Apple Inc.",
+    "status": "Booked full profit.",
+    "stopLoss": "2.92",
+    "strike": "272.5",
+    "symbol": "AAPL"
   }
 }

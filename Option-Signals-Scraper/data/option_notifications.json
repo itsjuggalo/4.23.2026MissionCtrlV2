@@ -4593,5 +4593,23 @@
     "message": "Take stop at 4.1.",
     "symbol": "QQQ",
     "title": "QQQ 650P 4/30: STC"
+  },
+  "1777397463": {
+    "category": "SWING",
+    "message": "Buy To Open at 2.48 with first target above 2.85",
+    "symbol": "SLV",
+    "title": "SLV 66C 5/8: BTO"
+  },
+  "1777398061": {
+    "category": "SWING",
+    "message": "Buy To Open at 18.00 with first target above 20.70",
+    "symbol": "MRVL",
+    "title": "MRVL 175C 8/21: BTO"
+  },
+  "1777402027": {
+    "category": "SWING",
+    "message": "Close the trade as it hit trailing stop at 2.70!",
+    "symbol": "BKR",
+    "title": "BKR 70C 06/18 : STC"
   }
 }

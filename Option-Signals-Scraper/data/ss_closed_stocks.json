@@ -60425,5 +60425,29 @@
     "status": "Booked profits @17.00 and riding runners",
     "stopLoss": "14.85",
     "symbol": "RIVN"
+  },
+  "1777384256": {
+    "buyTarget": "10.86",
+    "category": "SWING",
+    "discordMessageId": "1498682936466210826",
+    "discordThreadId": "1498682936466210826",
+    "earlyTarget": "11.19",
+    "exitTime": 1777398682,
+    "free": 1,
+    "isWeekly": 1,
+    "quote": {
+      "closePrice": 10.7132,
+      "highPrice": 11.11,
+      "lastPrice": 11.085,
+      "lowPrice": 10.461,
+      "openPrice": 10.62,
+      "quoteTimeInLong": 1777398623,
+      "tradeTimeInLong": 1777398623
+    },
+    "reduceLoss": "9.77",
+    "sellTarget": "11.10",
+    "status": "Booked profits at 11.10 and riding runners",
+    "stopLoss": "9.77",
+    "symbol": "NOK"
   }
 }

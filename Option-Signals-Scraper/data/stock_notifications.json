@@ -3025,5 +3025,23 @@
     "message": "Buy To Open at 365.01 with first target above 372.31",
     "symbol": "CLS",
     "title": "CLS: BTO"
+  },
+  "1777397467": {
+    "category": "SWING",
+    "message": "Buy To Open at 66.44 with first target above 67.77",
+    "symbol": "SLV",
+    "title": "SLV: BTO"
+  },
+  "1777398076": {
+    "category": "SWING",
+    "message": "Buy To Open at 152.94 with first target above 156.00",
+    "symbol": "MRVL",
+    "title": "MRVL: BTO"
+  },
+  "1777404584": {
+    "category": "SWING",
+    "message": "Reached Target 156.0 and that's 2.00%! Lock some in and wait for next target. Raise the stops to 140.7",
+    "symbol": "MRVL",
+    "title": "MRVL : STC"
   }
 }
