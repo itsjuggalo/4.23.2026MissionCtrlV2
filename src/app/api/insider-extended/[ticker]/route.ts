@@ -119,10 +119,15 @@ async function fetchSecForm4(ticker: string): Promise<any> {
         const shares = parseFloat((sharesMatch?.[1] || '0').replace(/,/g, ''));
         const price = parseFloat((priceMatch?.[1] || '0').replace(/,/g, ''));
         const value = shares * price;
-        const isBuy = code === 'P' || code === 'A' || code === 'M';
-        const isSell = code === 'S' || code === 'D' || code === 'F';
-        if (isBuy && value > 0) net90d += value;
-        else if (isSell && value > 0) net90d -= value;
+        // Code P = open-market PURCHASE (cash buy = bullish signal)
+        // Code S = open-market SALE (cash sell = bearish signal)
+        // Codes A/M/F/D = awards, exercises, vested grants - compensation, not signal
+        const isOpenBuy = code === 'P';
+        const isOpenSell = code === 'S';
+        const isGrant = code === 'A' || code === 'M' || code === 'F' || code === 'D';
+        if (isOpenBuy && value > 0) net90d += value;
+        else if (isOpenSell && value > 0) net90d -= value;
+        const txTypeLabel = isOpenBuy ? 'BUY' : isOpenSell ? 'SELL' : isGrant ? 'GRANT' : 'OTHER';
         const role = titleMatch?.[1] || (isDirector ? 'Director' : is10pct ? '10% Owner' : '');
         transactions.push({
           name: nameMatch?.[1] || 'Unknown',
@@ -132,7 +137,7 @@ async function fetchSecForm4(ticker: string): Promise<any> {
           shares,
           price,
           value,
-          type: isBuy ? 'BUY' : isSell ? 'SELL' : 'OTHER',
+          type: txTypeLabel,
         });
       } catch {}
     }
