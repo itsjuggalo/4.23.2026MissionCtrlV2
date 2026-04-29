@@ -737,7 +737,7 @@ export function CommandCenterPage() {
             const fmtV = (n: number) => n >= 1000000 ? '$' + (n/1000000).toFixed(1) + 'M' : n >= 1000 ? '$' + (n/1000).toFixed(0) + 'K' : '$' + n;
             const timeAgo = (ts: number) => { const m = Math.floor((Date.now() - ts) / 60000); if (m < 1) return 'now'; if (m < 60) return m + 'm'; const h = Math.floor(m/60); if (h < 24) return h + 'h'; return Math.floor(h/24) + 'd'; };
             return (
-              <div key={i} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '7px 10px', borderBottom: '1px solid #0d1117', borderLeft: '3px solid #ffd600' }}>
+              <div key={i} onClick={() => setSelectedItem({ type: 'huge', data: { ...f, totalFlowValue: f.Value, SWEEPS: f.BlockType === 'SWEEP' ? 1 : 0, BLOCKS: f.BlockType === 'BLOCK' || f.BlockType === 'BLOCKS' ? 1 : 0, AlertType: f.BlockType || 'unusual_flow', AlertPrice: f.Spot || null, isBullish: ((f.OptionType === 'CALL') === (f.BidAskType === 'A' || f.BidAskType === 'AA')) } })} style={{ cursor: 'pointer', display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '7px 10px', borderBottom: '1px solid #0d1117', borderLeft: '3px solid #ffd600' }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                   <span style={{ width: '8px', height: '8px', borderRadius: '50%', background: sColor, boxShadow: '0 0 4px ' + sColor }} />
                   <span style={{ fontSize: 'var(--mc-font-label)', color: '#455a64', fontFamily: 'var(--font-mc-mono)' }}>{timeAgo(f.Time)}</span>
