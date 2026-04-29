@@ -659,8 +659,9 @@ export function OptionsPage() {
   // Derived: filter alerts by category + filter modal state
   const filteredAlerts = useMemo(() => {
     if (!flowData?.alerts) return [];
-    if (alertCat === 'all') return flowData.alerts.filter(a => matchesFilters(a, alertFilters));
-    return flowData.alerts.filter(a => categorizeAlert(a) === alertCat && matchesFilters(a, alertFilters));
+    const byUpdatedDesc = (a: AlertEntry, b: AlertEntry) => (b.Updated || 0) - (a.Updated || 0);
+    if (alertCat === 'all') return flowData.alerts.filter(a => matchesFilters(a, alertFilters)).sort(byUpdatedDesc);
+    return flowData.alerts.filter(a => categorizeAlert(a) === alertCat && matchesFilters(a, alertFilters)).sort(byUpdatedDesc);
   }, [flowData, alertCat, alertFilters]);
 
   const alertCatCounts = useMemo(() => {
@@ -670,7 +671,7 @@ export function OptionsPage() {
       const c = categorizeAlert(a);
       if (c) counts[c]++;
     });
-    return [...counts].sort((a, b) => (b.Updated || 0) - (a.Updated || 0));
+    return counts;
   }, [flowData]);
 
   const summaryStrip = () => {
