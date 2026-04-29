@@ -118,20 +118,6 @@ def signal_id(sig):
 
 
 def load_daily_picks_state():
-    """Load the daily NEW picks counter. Resets at midnight ET."""
-    from datetime import datetime, timezone
-import sys as _sys
-_sys.path.insert(0, "/home/ubuntu/scripts")
-try:
-    from lib.flow_channel_reader import get_recent_flow_context, format_for_prompt as format_flow_for_prompt
-    from lib.agent_debate import post_to_debate
-    _MULTIAGENT_LIB_OK = True
-except Exception as _e:
-    _MULTIAGENT_LIB_OK = False
-    print(f"[multiagent] lib import failed: {_e}", flush=True)
-
-
-def load_daily_picks_state():
     """Read today's daily pick counter (resets at NY 4AM ET)."""
     from datetime import timedelta
     et_now = datetime.now(timezone(timedelta(hours=-4)))   # EDT — adjust to -5 in winter
