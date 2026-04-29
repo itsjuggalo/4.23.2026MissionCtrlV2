@@ -641,9 +641,10 @@ export function OptionsPage() {
     if (!tabData) return { open: [], closed: [] };
     const filterFn = (s: AnalystSignal) =>
       sourceFilter === 'all' ? true : s.sourceGroup === sourceFilter;
+    const byTsDesc = (a: AnalystSignal, b: AnalystSignal) => (b.ts || 0) - (a.ts || 0);
     return {
-      open: (tabData.open || []).filter(filterFn),
-      closed: (tabData.closed || []).filter(filterFn),
+      open: (tabData.open || []).filter(filterFn).sort(byTsDesc),
+      closed: (tabData.closed || []).filter(filterFn).sort(byTsDesc),
     };
   }, [analystData, activeTab, sourceFilter]);
 
@@ -669,7 +670,7 @@ export function OptionsPage() {
       const c = categorizeAlert(a);
       if (c) counts[c]++;
     });
-    return counts;
+    return [...counts].sort((a, b) => (b.Updated || 0) - (a.Updated || 0));
   }, [flowData]);
 
   const summaryStrip = () => {
@@ -865,7 +866,7 @@ export function OptionsPage() {
                 <span>Type</span>
                 <span style={{ textAlign: 'right' }}>Value</span>
               </div>
-              {(flowData.flows || []).filter(f => matchesFilters(f, flowFilters)).slice(0, 300).map((f, i) => <FlowTapeRow key={f.OptionSymbol + '_' + i} f={f} onSymbolClick={setDrawerTicker} />)}
+              {[...(flowData.flows || [])].sort((a, b) => (b.Time || 0) - (a.Time || 0)).filter(f => matchesFilters(f, flowFilters)).slice(0, 300).map((f, i) => <FlowTapeRow key={f.OptionSymbol + '_' + i} f={f} onSymbolClick={setDrawerTicker} />)}
             </div>
           </>
           )}
