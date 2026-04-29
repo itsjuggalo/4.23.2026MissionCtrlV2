@@ -10,19 +10,22 @@ export function RegimePage() {
   const [regime, setRegime] = useState<any>(null);
   const [signals, setSignals] = useState<any>(null);
   const [params, setParams] = useState<any>(null);
+  const [macro, setMacro] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [tick, setTick] = useState(0);
 
   const fetchAll = async () => {
     try {
-      const [rRes, sRes, pRes] = await Promise.all([
+      const [rRes, sRes, pRes, mRes] = await Promise.all([
         fetch('/api/regime').then(r => r.json()).catch(() => null),
         fetch('/api/signals/latest').then(r => r.json()).catch(() => null),
         fetch('/api/supertrend-params').then(r => r.json()).catch(() => null),
+        fetch('/api/macro-regime').then(r => r.json()).catch(() => null),
       ]);
       if (rRes) setRegime(rRes);
       if (sRes) setSignals(sRes);
       if (pRes) setParams(pRes);
+      if (mRes) setMacro(mRes);
     } catch (e) { console.error(e); }
     finally { setLoading(false); }
   };
@@ -72,6 +75,48 @@ export function RegimePage() {
     const pct = Math.min((value / max) * 100, 100);
     return (
       <div style={{ textAlign: 'center' }}>
+      {/* MACRO REGIME HERO STRIP */}
+      {macro && (
+        <div className="cc" style={{ padding: '16px', marginBottom: '12px' }}>
+          <div className="lbl" style={{ marginBottom: '12px', letterSpacing: '2px' }}>MARKET RISK STANCE</div>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(160px, 1fr))', gap: '12px' }}>
+            {/* TILE 1: COMPOSITE STANCE */}
+            <div style={{ background: '#0d1117', padding: '14px', borderRadius: '6px', borderLeft: '3px solid ' + (macro.stance?.color || '#607d8b') }}>
+              <div style={{ fontSize: 'var(--mc-font-label)', color: '#607d8b', fontFamily: 'var(--font-mc-mono)', marginBottom: '6px', letterSpacing: '1px' }}>OVERALL</div>
+              <div style={{ fontSize: 'var(--mc-font-xl)', fontWeight: 700, color: macro.stance?.color || '#607d8b', fontFamily: 'var(--font-mc-mono)' }}>{macro.stance?.label || '—'}</div>
+              <div style={{ fontSize: 'var(--mc-font-badge)', color: '#455a64', fontFamily: 'var(--font-mc-mono)', marginTop: '4px' }}>score {macro.stance?.score >= 0 ? '+' : ''}{macro.stance?.score?.toFixed(2) || '—'}</div>
+            </div>
+            {/* TILE 2: VIX */}
+            <div style={{ background: '#0d1117', padding: '14px', borderRadius: '6px', borderLeft: '3px solid ' + (macro.vix?.level >= 25 ? '#ef5350' : macro.vix?.level >= 20 ? '#ff9800' : macro.vix?.level < 15 ? '#66bb6a' : '#4fc3f7') }}>
+              <div style={{ fontSize: 'var(--mc-font-label)', color: '#607d8b', fontFamily: 'var(--font-mc-mono)', marginBottom: '6px', letterSpacing: '1px' }}>VIX (vol)</div>
+              <div style={{ fontSize: 'var(--mc-font-xl)', fontWeight: 700, color: '#e0e0e0', fontFamily: 'var(--font-mc-mono)' }}>{macro.vix?.level?.toFixed(2) || '—'}</div>
+              <div style={{ fontSize: 'var(--mc-font-badge)', color: (macro.vix?.pct || 0) >= 0 ? '#ef5350' : '#66bb6a', fontFamily: 'var(--font-mc-mono)', marginTop: '4px' }}>{(macro.vix?.pct || 0) >= 0 ? '+' : ''}{macro.vix?.pct?.toFixed(2) || '0'}%</div>
+            </div>
+            {/* TILE 3: FEAR & GREED */}
+            <div style={{ background: '#0d1117', padding: '14px', borderRadius: '6px', borderLeft: '3px solid ' + (macro.fearGreed?.value >= 75 ? '#66bb6a' : macro.fearGreed?.value >= 55 ? '#9ccc65' : macro.fearGreed?.value >= 45 ? '#607d8b' : macro.fearGreed?.value >= 25 ? '#ff9800' : '#ef5350') }}>
+              <div style={{ fontSize: 'var(--mc-font-label)', color: '#607d8b', fontFamily: 'var(--font-mc-mono)', marginBottom: '6px', letterSpacing: '1px' }}>FEAR & GREED</div>
+              <div style={{ fontSize: 'var(--mc-font-xl)', fontWeight: 700, color: '#e0e0e0', fontFamily: 'var(--font-mc-mono)' }}>{macro.fearGreed?.value ?? '—'}</div>
+              <div style={{ fontSize: 'var(--mc-font-badge)', color: '#90a4ae', fontFamily: 'var(--font-mc-mono)', marginTop: '4px' }}>{macro.fearGreed?.label || '—'}</div>
+            </div>
+            {/* TILE 4: YIELD CURVE */}
+            <div style={{ background: '#0d1117', padding: '14px', borderRadius: '6px', borderLeft: '3px solid ' + ((macro.yields?.spread ?? 0) < 0 ? '#ef5350' : (macro.yields?.spread ?? 0) < 0.5 ? '#ff9800' : '#66bb6a') }}>
+              <div style={{ fontSize: 'var(--mc-font-label)', color: '#607d8b', fontFamily: 'var(--font-mc-mono)', marginBottom: '6px', letterSpacing: '1px' }}>YIELD CURVE</div>
+              <div style={{ fontSize: 'var(--mc-font-xl)', fontWeight: 700, color: '#e0e0e0', fontFamily: 'var(--font-mc-mono)' }}>{macro.yields?.spread != null ? (macro.yields.spread >= 0 ? '+' : '') + macro.yields.spread.toFixed(2) + 'pp' : '—'}</div>
+              <div style={{ fontSize: 'var(--mc-font-badge)', color: '#455a64', fontFamily: 'var(--font-mc-mono)', marginTop: '4px' }}>10Y {macro.yields?.tenY?.toFixed(2) || '—'}% / 3M {macro.yields?.twoY?.toFixed(2) || '—'}%</div>
+            </div>
+          </div>
+          {/* FG TIMELINE */}
+          {macro.fearGreed && (
+            <div style={{ marginTop: '12px', display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(120px, 1fr))', gap: '8px', fontSize: 'var(--mc-font-badge)', fontFamily: 'var(--font-mc-mono)', color: '#90a4ae' }}>
+              <div>Prev close: <span style={{ color: '#e0e0e0' }}>{macro.fearGreed.previousClose}</span></div>
+              <div>1W ago: <span style={{ color: '#e0e0e0' }}>{macro.fearGreed.oneWeekAgo}</span></div>
+              <div>1M ago: <span style={{ color: '#e0e0e0' }}>{macro.fearGreed.oneMonthAgo}</span></div>
+              <div>1Y ago: <span style={{ color: '#e0e0e0' }}>{macro.fearGreed.oneYearAgo}</span></div>
+            </div>
+          )}
+        </div>
+      )}
+
         <div style={{ fontSize: 'var(--mc-font-label)', color: '#607d8b', fontFamily: 'var(--font-mc-mono)', marginBottom: '8px', letterSpacing: '1px' }}>{label}</div>
         <div style={{ position: 'relative', width: '100%', height: '8px', background: '#0d1117', borderRadius: '4px', overflow: 'hidden' }}>
           <div style={{
