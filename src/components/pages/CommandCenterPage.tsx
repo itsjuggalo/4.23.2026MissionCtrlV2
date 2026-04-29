@@ -1,5 +1,5 @@
 'use client';
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 
 
 // Parse OCC option symbol → "TICKER M/D/YY $STRIKEC/P". Returns symbol unchanged if not OCC.
@@ -24,6 +24,10 @@ export function CommandCenterPage() {
   const [loading, setLoading] = useState(true);
   const [unusualFlows, setUnusualFlows] = useState<any[]>([]);
   const [kronosForecast, setKronosForecast] = useState<any>(null);
+  const [pipelineFeed, setPipelineFeed] = useState<any[]>([]);
+  const [positionsExpanded, setPositionsExpanded] = useState(false);
+  const [newsIdx, setNewsIdx] = useState(0);
+  const newsTickerRef = useRef<HTMLDivElement>(null);
 
   const fetchData = async () => {
     try {
@@ -38,6 +42,7 @@ export function CommandCenterPage() {
       setActivity(acts.slice(0, 10));
     } catch (e) { console.error(e); }
     finally { setLoading(false); }
+    fetch('/api/pipeline-feed').then(r => r.ok ? r.json() : null).then(d => { if (d?.events) setPipelineFeed(d.events); }).catch(() => {});
   };
 
   useEffect(() => {
@@ -69,9 +74,26 @@ export function CommandCenterPage() {
       setRhPositions(tickers); setRhBalance(rhTotal);
     }).catch(() => {});
     fetch('/api/directives?file=dashboard_data.json').then(r => r.ok ? r.json() : null).then(d => { if (d) setDashData(d); }).catch(() => {});
+    fetch('/api/pipeline-feed').then(r => r.ok ? r.json() : null).then(d => { if (d?.events) setPipelineFeed(d.events); }).catch(() => {});
     const iv = setInterval(fetchData, 10000);
     return () => clearInterval(iv);
   }, []);
+
+  // Arrow-key navigation for Market News ticker (when focused)
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      const ticker = newsTickerRef.current;
+      if (!ticker) return;
+      const focused = document.activeElement === ticker || ticker.contains(document.activeElement);
+      if (!focused) return;
+      const newsLen = (dashData?.news?.length || 0);
+      if (newsLen === 0) return;
+      if (e.key === 'ArrowRight') { e.preventDefault(); setNewsIdx(i => Math.min(i + 1, newsLen - 1)); }
+      else if (e.key === 'ArrowLeft') { e.preventDefault(); setNewsIdx(i => Math.max(i - 1, 0)); }
+    };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, [dashData]);
 
   const equity = parseFloat(portfolio?.equity || portfolio?.balance || '0');
   const lastEq = parseFloat(portfolio?.last_equity || '0');
@@ -86,6 +108,33 @@ export function CommandCenterPage() {
   const intel = dashData?.intel || {};
   const news = dashData?.news || [];
   const SYMS = ['AAPL', 'NVDA', 'TSLA', 'MU', 'LLY'];
+
+  // Multi-timeframe regime data for SuperTrend MTF Quorum tile
+  const tfData = regime?.timeframes || {};
+  const mtfRows = (['1H', '4H', '1D'] as const).map(k => {
+    const t = tfData[k] || {};
+    return { tf: k, direction: t.direction || 'UNKNOWN', adx: t.adx || 0, choppiness: t.choppiness || 50 };
+  });
+  const dirCount = mtfRows.reduce((acc: any, r) => { acc[r.direction] = (acc[r.direction] || 0) + 1; return acc; }, {});
+  const consensusDir = (dirCount.BULLISH || 0) > (dirCount.BEARISH || 0) ? 'BULL' : (dirCount.BEARISH || 0) > (dirCount.BULLISH || 0) ? 'BEAR' : 'MIXED';
+  const consensusCount = Math.max(dirCount.BULLISH || 0, dirCount.BEARISH || 0);
+  const consensusVerdict = consensusCount === 3 ? 'Strong ' + consensusDir : consensusCount === 2 ? 'Light ' + consensusDir + ' — wait' : 'Mixed — sit out';
+
+  // Tradeability score (0-100)
+  const adxAvg = mtfRows.reduce((s, r) => s + r.adx, 0) / 3;
+  const choppyAvg = mtfRows.reduce((s, r) => s + r.choppiness, 0) / 3;
+  const dirsArr = mtfRows.map(r => r.direction);
+  const allBull = dirsArr.every(d => d === 'BULLISH');
+  const allBear = dirsArr.every(d => d === 'BEARISH');
+  const aligned = allBull || allBear;
+  const partial = new Set(dirsArr).size === 2;
+  const alignmentBonus = aligned ? 1 : (partial ? 0.5 : 0.25);
+  const tradeability = Math.round(Math.min(adxAvg / 50, 1) * 40 + Math.max(0, (1 - choppyAvg / 100)) * 30 + alignmentBonus * 30);
+  const tradeabilityColor = tradeability >= 60 ? '#66bb6a' : tradeability >= 30 ? '#ff9800' : '#ef5350';
+  const tradeabilityLabel = tradeability >= 60 ? 'TRADEABLE' : tradeability >= 30 ? 'CAUTION' : 'CHOPPY';
+  const volLabel = choppyAvg >= 60 ? 'HIGH' : choppyAvg >= 40 ? 'MED' : 'LOW';
+  const dirArrow = (d: string) => d === 'BULLISH' ? '▲' : d === 'BEARISH' ? '▼' : '-';
+  const dirColor = (d: string) => d === 'BULLISH' ? '#66bb6a' : d === 'BEARISH' ? '#ef5350' : '#ff9800';
 
   if (loading) return (
     <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '60vh', color: '#4fc3f7', fontFamily: 'var(--font-mc-mono)' }}>
@@ -141,27 +190,128 @@ export function CommandCenterPage() {
         </div>
       </div>
 
-      {/* METRIC CARDS */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(5, 1fr)', gap: '10px', marginBottom: '12px' }}>
-        {[
-          { l: 'ALPACA EQUITY', v: '$' + fmt(equity), s: (dailyPct >= 0 ? '+' : '') + fmt(dailyPct) + '% today', c: '#4fc3f7' },
-          { l: 'TOTAL RETURN', v: (totalReturn >= 0 ? '+' : '') + fmt(totalReturn, 1) + '%', s: 'From $100K', c: totalReturn >= 0 ? '#66bb6a' : '#ef5350' },
-          { l: 'POSITIONS', v: '' + positions.length, s: positions.map((p: any) => parseOCC(p.symbol)).slice(0, 4).join(' \u00b7 ') + (positions.length > 4 ? ' \u00b7 +' + (positions.length - 4) + ' more' : '') || 'None', c: '#4fc3f7' },
-          { l: 'SUPERTREND BTC', v: btcSignal.direction || 'N/A', s: (() => {
-            const tf = regime?.timeframes || {};
-            const dirs = ['1H','4H','1D'].map(k => (tf[k]?.direction || '?').slice(0,1)).join('/');
-            const px = btcSignal.entry_price ? '$' + Number(btcSignal.entry_price).toLocaleString() : '';
-            return px ? `${px} \u00b7 ${dirs}` : dirs;
-          })(), c: btcSignal.direction === 'LONG' ? '#66bb6a' : '#ef5350' },
-          { l: 'REGIME (BTC)', v: regimeStr.replace(/_/g, ' '), s: regime?.overall_recommendation || ('Bias: ' + bias), c: bias === 'BULLISH' ? '#66bb6a' : bias === 'BEARISH' ? '#ef5350' : '#ff9800' },
-        ].map((m, i) => (
-          <div key={i} className="cc" style={{ padding: '16px 18px' }}>
-            <div className="lbl">{m.l}</div>
-            <div style={{ fontSize: 'var(--mc-font-3xl)', fontWeight: 700, fontFamily: 'var(--font-mc-mono)', color: m.c }}>{m.v}</div>
-            <div style={{ fontSize: 'var(--mc-font-label)', color: '#455a64', marginTop: '4px' }}>{m.s}</div>
+      {/* MARKET NEWS - full-width keyboard-navigable ticker */}
+      <div className="cc" tabIndex={0} ref={newsTickerRef} style={{ padding: '12px 18px', marginBottom: '12px', cursor: 'pointer', outline: 'none' }} onClick={() => newsTickerRef.current?.focus()}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
+          <div className="lbl">MARKET NEWS</div>
+          <div style={{ fontSize: 'var(--mc-font-label)', color: '#455a64', fontFamily: 'var(--font-mc-mono)' }}>
+            {'\u2190'} / {'\u2192'} arrow keys \u00b7 {newsIdx + 1} of {news.length || 0}
           </div>
-        ))}
+        </div>
+        {news.length > 0 && news[newsIdx] ? (
+          <a href={news[newsIdx]?.url} target="_blank" rel="noopener noreferrer" style={{ display: 'flex', gap: '12px', alignItems: 'center', textDecoration: 'none', color: '#e0e0e0' }}>
+            <span style={{ minWidth: '50px', color: '#4fc3f7', fontFamily: 'var(--font-mc-mono)', fontWeight: 600, fontSize: 'var(--mc-font-label)' }}>{news[newsIdx]?.time || ''}</span>
+            <span style={{ flex: 1, fontSize: 'var(--mc-font-md)', fontWeight: 500, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{news[newsIdx]?.headline || ''}</span>
+            <span style={{ minWidth: '70px', textAlign: 'right', color: '#607d8b', fontSize: 'var(--mc-font-label)', fontFamily: 'var(--font-mc-mono)' }}>{news[newsIdx]?.source || ''}</span>
+          </a>
+        ) : <div style={{ color: '#455a64', fontSize: 'var(--mc-font-label)', textAlign: 'center', padding: '8px' }}>No news available</div>}
       </div>
+
+      {/* METRIC CARDS - 5 tiles with redesigned SuperTrend MTF + Regime Tradeability */}
+      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr 1.4fr 1.4fr', gap: '10px', marginBottom: '12px', alignItems: 'stretch' }}>
+        <div className="cc" style={{ padding: '16px 18px' }}>
+          <div className="lbl">ALPACA EQUITY</div>
+          <div style={{ fontSize: 'var(--mc-font-3xl)', fontWeight: 700, fontFamily: 'var(--font-mc-mono)', color: '#4fc3f7' }}>${fmt(equity)}</div>
+          <div style={{ fontSize: 'var(--mc-font-label)', color: '#455a64', marginTop: '4px' }}>{(dailyPct >= 0 ? '+' : '') + fmt(dailyPct) + '% today'}</div>
+        </div>
+
+        <div className="cc" style={{ padding: '16px 18px' }}>
+          <div className="lbl">TOTAL RETURN</div>
+          <div style={{ fontSize: 'var(--mc-font-3xl)', fontWeight: 700, fontFamily: 'var(--font-mc-mono)', color: totalReturn >= 0 ? '#66bb6a' : '#ef5350' }}>{(totalReturn >= 0 ? '+' : '') + fmt(totalReturn, 1)}%</div>
+          <div style={{ fontSize: 'var(--mc-font-label)', color: '#455a64', marginTop: '4px' }}>From $100K</div>
+        </div>
+
+        <div className="cc" style={{ padding: '16px 18px', cursor: 'pointer' }} onClick={() => setPositionsExpanded(v => !v)}>
+          <div className="lbl" style={{ display: 'flex', justifyContent: 'space-between' }}>
+            <span>POSITIONS</span>
+            <span style={{ color: '#4fc3f7' }}>{positionsExpanded ? '\u25BC' : '\u25B6'}</span>
+          </div>
+          <div style={{ fontSize: 'var(--mc-font-3xl)', fontWeight: 700, fontFamily: 'var(--font-mc-mono)', color: '#4fc3f7' }}>{positions.length}</div>
+          <div style={{ fontSize: 'var(--mc-font-label)', color: '#455a64', marginTop: '4px' }}>
+            {positions.slice(0, 3).map((pp: any, i: number) => (
+              <div key={i}>{parseOCC(pp.symbol)}{pp.account ? ' ' + pp.account : ''}</div>
+            ))}
+            {positions.length > 3 && <div style={{ color: '#4fc3f7', marginTop: '2px' }}>+ {positions.length - 3} more (click)</div>}
+          </div>
+        </div>
+
+        {/* SUPERTREND BTC - MTF Quorum */}
+        <div className="cc" style={{ padding: '12px 14px' }}>
+          <div className="lbl" style={{ marginBottom: '6px', display: 'flex', justifyContent: 'space-between' }}>
+            <span>SUPERTREND BTC</span>
+            <span style={{ color: '#607d8b', fontWeight: 400 }}>{btcSignal.entry_price ? '$' + Number(btcSignal.entry_price).toLocaleString() : ''}</span>
+          </div>
+          {mtfRows.map((r, i) => (
+            <div key={i} style={{ display: 'grid', gridTemplateColumns: '24px 64px 1fr 60px', gap: '6px', alignItems: 'center', padding: '3px 0', fontSize: 'var(--mc-font-label)', fontFamily: 'var(--font-mc-mono)' }}>
+              <span style={{ color: '#607d8b', fontWeight: 600 }}>{r.tf}</span>
+              <span style={{ color: dirColor(r.direction), fontWeight: 700 }}>{dirArrow(r.direction)} {r.direction === 'BULLISH' ? 'BUY' : r.direction === 'BEARISH' ? 'SELL' : '\u2014'}</span>
+              <span style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                <span style={{ width: '50px', height: '5px', background: '#1a3a4a', borderRadius: '3px', overflow: 'hidden', display: 'inline-block' }}>
+                  <span style={{ display: 'block', width: Math.min(r.adx / 50 * 100, 100) + '%', height: '100%', background: dirColor(r.direction) }} />
+                </span>
+                <span style={{ color: '#90a4ae', fontSize: '10px' }}>ADX{r.adx.toFixed(0)}</span>
+              </span>
+              <span style={{ color: r.choppiness >= 60 ? '#ef5350' : r.choppiness >= 40 ? '#ff9800' : '#66bb6a', textAlign: 'right', fontSize: '10px' }}>Chop{r.choppiness.toFixed(0)}</span>
+            </div>
+          ))}
+          <div style={{ marginTop: '6px', paddingTop: '6px', borderTop: '1px solid #1a3a4a', fontSize: 'var(--mc-font-label)', fontFamily: 'var(--font-mc-mono)', textAlign: 'center', color: dirColor(consensusDir === 'BULL' ? 'BULLISH' : consensusDir === 'BEAR' ? 'BEARISH' : 'MIXED'), fontWeight: 600 }}>
+            {consensusCount}/3 {consensusDir} \u00b7 {consensusVerdict}
+          </div>
+        </div>
+
+        {/* REGIME (BTC) - Tradeability */}
+        <div className="cc" style={{ padding: '12px 14px' }}>
+          <div className="lbl" style={{ marginBottom: '6px' }}>REGIME (BTC)</div>
+          <div style={{ display: 'flex', alignItems: 'baseline', gap: '8px', marginBottom: '6px', flexWrap: 'wrap' }}>
+            <span style={{ fontSize: '11px', color: '#607d8b', fontFamily: 'var(--font-mc-mono)' }}>TRADEABILITY</span>
+            <span style={{ fontSize: 'var(--mc-font-xl)', fontWeight: 700, color: tradeabilityColor, fontFamily: 'var(--font-mc-mono)' }}>{tradeability}/100</span>
+            <span style={{ fontSize: '10px', fontWeight: 600, color: tradeabilityColor, fontFamily: 'var(--font-mc-mono)' }}>{tradeabilityLabel}</span>
+          </div>
+          <div style={{ width: '100%', height: '6px', background: '#1a3a4a', borderRadius: '3px', overflow: 'hidden', marginBottom: '6px' }}>
+            <div style={{ width: tradeability + '%', height: '100%', background: tradeabilityColor }} />
+          </div>
+          <div style={{ display: 'grid', gridTemplateColumns: '36px 1fr 56px', gap: '6px', alignItems: 'center', fontSize: '10px', fontFamily: 'var(--font-mc-mono)', padding: '2px 0' }}>
+            <span style={{ color: '#607d8b' }}>Trend</span>
+            <span style={{ width: '100%', height: '5px', background: '#1a3a4a', borderRadius: '2px', overflow: 'hidden' }}><span style={{ display: 'block', width: Math.min(adxAvg / 50 * 100, 100) + '%', height: '100%', background: '#4fc3f7' }} /></span>
+            <span style={{ color: '#90a4ae', textAlign: 'right' }}>ADX {adxAvg.toFixed(0)}</span>
+          </div>
+          <div style={{ display: 'grid', gridTemplateColumns: '36px 1fr 56px', gap: '6px', alignItems: 'center', fontSize: '10px', fontFamily: 'var(--font-mc-mono)', padding: '2px 0' }}>
+            <span style={{ color: '#607d8b' }}>Vol</span>
+            <span style={{ width: '100%', height: '5px', background: '#1a3a4a', borderRadius: '2px', overflow: 'hidden' }}><span style={{ display: 'block', width: Math.min(choppyAvg, 100) + '%', height: '100%', background: choppyAvg >= 60 ? '#ef5350' : choppyAvg >= 40 ? '#ff9800' : '#66bb6a' }} /></span>
+            <span style={{ color: '#90a4ae', textAlign: 'right' }}>{volLabel}</span>
+          </div>
+          <div style={{ display: 'grid', gridTemplateColumns: '36px 1fr 56px', gap: '6px', alignItems: 'center', fontSize: '10px', fontFamily: 'var(--font-mc-mono)', padding: '2px 0' }}>
+            <span style={{ color: '#607d8b' }}>Bias</span>
+            <span style={{ display: 'flex', gap: '4px' }}>
+              {mtfRows.map((r, i) => <span key={i} style={{ color: dirColor(r.direction), fontSize: '10px', fontWeight: 600 }}>{r.tf}{dirArrow(r.direction)}</span>)}
+            </span>
+            <span style={{ color: '#90a4ae', textAlign: 'right' }}>{aligned ? 'ALIGN' : partial ? 'PART' : 'MIX'}</span>
+          </div>
+          <div style={{ marginTop: '6px', paddingTop: '6px', borderTop: '1px solid #1a3a4a', fontSize: 'var(--mc-font-label)', color: tradeabilityColor, fontFamily: 'var(--font-mc-mono)', fontWeight: 600 }}>
+            \u2192 {regime?.overall_recommendation || 'No data'}
+          </div>
+        </div>
+      </div>
+
+      {/* All positions inline (when expanded) */}
+      {positionsExpanded && (
+        <div className="cc" style={{ padding: '16px', marginBottom: '12px' }}>
+          <div className="lbl" style={{ marginBottom: '10px' }}>ALL POSITIONS ({positions.length})</div>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '6px' }}>
+            {positions.map((pp: any, i: number) => {
+              const pnl = parseFloat(pp.unrealized_pl || '0');
+              const pnlPct = parseFloat(pp.unrealized_plpc || '0') * 100;
+              const g = pnl >= 0;
+              return (
+                <div key={i} style={{ display: 'flex', justifyContent: 'space-between', padding: '8px 10px', background: '#0d1117', borderRadius: '6px', border: '1px solid ' + (g ? '#66bb6a22' : '#ef535022'), fontSize: 'var(--mc-font-label)', fontFamily: 'var(--font-mc-mono)' }}>
+                  <span style={{ color: '#e0e0e0' }}>{parseOCC(pp.symbol)}{pp.account ? ' ' + pp.account : ''}</span>
+                  <span style={{ color: g ? '#66bb6a' : '#ef5350', fontWeight: 600 }}>{g ? '+' : ''}${pnl.toFixed(0)} ({g ? '+' : ''}{pnlPct.toFixed(1)}%)</span>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      )}
 
       {/* WATCHLIST CARDS + PIPELINE */}
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px', marginBottom: '12px' }}>
@@ -209,17 +359,23 @@ export function CommandCenterPage() {
         <div className="cc" style={{ padding: '16px' }}>
           <div className="lbl" style={{ marginBottom: '12px', display: 'flex', justifyContent: 'space-between' }}>
             <span><span style={{ display: 'flex', alignItems: 'center', gap: '4px' }}><span style={{ width: '8px', height: '8px', borderRadius: '50%', background: '#ef5350', animation: 'blink 1.4s infinite', display: 'inline-block' }} />LIVE PIPELINE</span></span>
-            <span style={{ color: '#455a64' }}>{activity.length} events</span>
+            <span style={{ color: '#455a64' }}>{pipelineFeed.length} events</span>
           </div>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '3px', maxHeight: '380px', overflowY: 'auto' }}>
-            {activity.length === 0 ? (
-              <div style={{ color: '#455a64', fontSize: 'var(--mc-font-badge)', fontFamily: 'var(--font-mc-mono)', textAlign: 'center', padding: '40px' }}>Awaiting pipeline data...</div>
-            ) : activity.map((entry, i) => (
-              <div key={i} style={{ display: 'flex', gap: '10px', padding: '8px 12px', background: i === 0 ? '#0d1929' : '#0d1117', borderLeft: '2px solid #1a3a4a', borderRadius: '3px', opacity: 1 - (i * 0.05) }}>
-                <div style={{ minWidth: '65px', color: '#4fc3f7', fontFamily: 'var(--font-mc-mono)', fontWeight: 600, fontSize: 'var(--mc-font-label)' }}>{(entry.agent || 'SYS').toUpperCase()}</div>
-                <div style={{ flex: 1, color: '#b0bec5', fontSize: 'var(--mc-font-label)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{entry.action}</div>
-              </div>
-            ))}
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '4px', maxHeight: '380px', overflowY: 'auto' }}>
+            {pipelineFeed.length === 0 ? (
+              <div style={{ color: '#455a64', fontSize: 'var(--mc-font-badge)', fontFamily: 'var(--font-mc-mono)', textAlign: 'center', padding: '40px' }}>Awaiting events...</div>
+            ) : pipelineFeed.map((ev: any, i: number) => {
+              const ago = Math.floor((Date.now() - ev.ts) / 1000);
+              const agoStr = ago < 60 ? ago + 's' : ago < 3600 ? Math.floor(ago/60) + 'm' : Math.floor(ago/3600) + 'h';
+              return (
+                <div key={i} style={{ display: 'flex', gap: '8px', padding: '6px 10px', background: '#0d1117', borderLeft: '3px solid ' + ev.color, borderRadius: '3px', alignItems: 'center' }}>
+                  <div style={{ minWidth: '52px', color: ev.color, fontWeight: 700, fontSize: 'var(--mc-font-label)', fontFamily: 'var(--font-mc-mono)' }}>{ev.source}</div>
+                  <div style={{ minWidth: '55px', color: '#90a4ae', fontWeight: 600, fontSize: 'var(--mc-font-label)', fontFamily: 'var(--font-mc-mono)' }}>{ev.label}</div>
+                  <div style={{ flex: 1, color: '#b0bec5', fontSize: 'var(--mc-font-label)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{ev.message}</div>
+                  <div style={{ color: '#455a64', fontSize: '10px', minWidth: '32px', textAlign: 'right', fontFamily: 'var(--font-mc-mono)' }}>{agoStr}</div>
+                </div>
+              );
+            })}
           </div>
         </div>
       </div>
