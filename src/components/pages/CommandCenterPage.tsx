@@ -54,15 +54,20 @@ export function CommandCenterPage() {
 
   useEffect(() => {
     fetchData();
-    fetch('/api/options-flow').then(r => r.ok ? r.json() : { flows: [] }).then(d => {
+    fetch('/api/options-flow').then(r => r.ok ? r.json() : { flows: [], alerts: [] }).then(d => {
       const flows = d.flows || [];
-      const unusual = flows.filter((f: any) => f.Volume > f.OI && f.OI >= 0).sort((a: any, b: any) => b.Time - a.Time);
-      setUnusualFlows(unusual.slice(0, 10));
+      const alerts = d.alerts || [];
+      const unusual: any = flows.filter((f: any) => f.Volume > f.OI && f.OI >= 0).sort((a: any, b: any) => b.Time - a.Time).slice(0, 10);
+      unusual._allAlerts = alerts;
+      setUnusualFlows(unusual);
     }).catch(() => {});
     fetch('/api/kronos-forecast').then(r => r.ok ? r.json() : null).then(d => { if (d) setKronosForecast(d); }).catch(() => {});
-    fetch('/api/options-flow').then(r => r.ok ? r.json() : { flows: [] }).then(d => {
+    fetch('/api/options-flow').then(r => r.ok ? r.json() : { flows: [], alerts: [] }).then(d => {
       const flows = d.flows || [];
-      setUnusualFlows(flows.filter((f: any) => f.Volume > f.OI && f.OI >= 0).sort((a: any, b: any) => b.Time - a.Time).slice(0, 10));
+      const alerts = d.alerts || [];
+      const unusual: any = flows.filter((f: any) => f.Volume > f.OI && f.OI >= 0).sort((a: any, b: any) => b.Time - a.Time).slice(0, 10);
+      unusual._allAlerts = alerts;
+      setUnusualFlows(unusual);
     }).catch(() => {});
     fetch('/api/kronos-forecast').then(r => r.ok ? r.json() : null).then(d => { if (d) setKronosForecast(d); }).catch(() => {});
     fetch('/api/wallets').then(r => r.ok ? r.json() : []).then(wallets => {
@@ -178,6 +183,16 @@ export function CommandCenterPage() {
   const regimeStr = regime?.overall_regime || regime?.regime || 'UNKNOWN';
   const bias = regime?.direction_bias || regime?.bias || '';
   const fmt = (n: number, d = 2) => n.toLocaleString(undefined, { minimumFractionDigits: d, maximumFractionDigits: d });
+
+  // Huge Flow alerts (matches Options page categorizeAlert 'huge' logic, sorted by totalFlowValue DESC)
+  const hugeAlerts = (() => {
+    const flowsArr = (unusualFlows as any)?._allAlerts || [];
+    return flowsArr.filter((a: any) => {
+      const t = (a.AlertType || '').toLowerCase();
+      if (t.includes('etf') || t.includes('weekly') || t.includes('repeat') || t.includes('unusual')) return false;
+      return t.includes('high_flow') || t.includes('huge');
+    }).sort((a: any, b: any) => (b.totalFlowValue || 0) - (a.totalFlowValue || 0));
+  })();
   const quotes = dashData?.quotes || {};
   const intel = dashData?.intel || {};
   const news = dashData?.news || [];
@@ -610,9 +625,27 @@ export function CommandCenterPage() {
         <div className="cc" style={{ padding: '16px', maxHeight: '350px', overflowY: 'auto' }}>
           <div className="lbl" style={{ marginBottom: '10px', display: 'flex', justifyContent: 'space-between' }}>
             <span style={{ color: '#e040fb' }}>HUGE FLOW ($1M+)</span>
-            <span style={{ color: '#e040fb' }}>{unusualFlows.filter((f: any) => f.Value >= 1000000).length}</span>
+            <span style={{ color: '#e040fb' }}>{hugeAlerts.length}</span>
           </div>
-          {unusualFlows.filter((f: any) => f.Value >= 1000000).length > 0 ? unusualFlows.filter((f: any) => f.Value >= 1000000).map((f: any, i: number) => {
+          {hugeAlerts.length > 0 ? hugeAlerts.slice(0, 12).map((a: any, i: number) => {
+            const v = a.totalFlowValue || 0;
+            const valColor = v >= 5000000 ? '#e040fb' : v >= 2000000 ? '#ffd600' : '#ff9800';
+            const fmtV = (n: number) => n >= 1000000 ? '$' + (n/1000000).toFixed(2) + 'M' : '$' + (n/1000).toFixed(0) + 'K';
+            const expStr = a.Expiry ? new Date(a.Expiry).toLocaleDateString('en-US', { month: 'numeric', day: 'numeric' }) : '';
+            const dirColor = a.isBullish ? '#66bb6a' : '#ef5350';
+            return (
+              <div key={i} style={{ display: 'grid', gridTemplateColumns: '8px 60px 50px 60px 1fr 70px', gap: '6px', alignItems: 'center', padding: '5px 8px', borderBottom: '1px solid #1a3a4a', fontSize: 'var(--mc-font-label)', fontFamily: 'var(--font-mc-mono)' }}>
+                <span style={{ color: dirColor, fontWeight: 700 }}>{a.isBullish ? '▲' : '▼'}</span>
+                <span style={{ color: '#e0e0e0', fontWeight: 700 }}>{a.Symbol}</span>
+                <span style={{ color: a.OptionType === 'CALL' ? '#66bb6a' : '#ef5350' }}>{a.OptionType === 'CALL' ? 'C' : 'P'} ${a.Strike}</span>
+                <span style={{ color: '#90a4ae' }}>{expStr}</span>
+                <span style={{ color: '#607d8b', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{(a.SWEEPS||0)>0?(a.SWEEPS+'sw '):''}{(a.BLOCKS||0)>0?(a.BLOCKS+'bk '):''}{(a.DTE!=null)?(a.DTE+'d'):''}</span>
+                <span style={{ color: valColor, fontWeight: 700, textAlign: 'right' }}>{fmtV(v)}</span>
+              </div>
+            );
+          }) : <div style={{ color: '#455a64', fontSize: 'var(--mc-font-badge)', fontFamily: 'var(--font-mc-mono)', textAlign: 'center', padding: '30px' }}>No huge-flow alerts today</div>}
+          {/* DEAD - old map below, kept as no-op */}
+          {false && unusualFlows.filter((f: any) => f.Value >= 1000000).map((f: any, i: number) => {
             const isCall = f.OptionType === 'CALL';
             const isAsk = f.BidAskType === 'A' || f.BidAskType === 'AA';
             const bull = (isCall && isAsk) || (!isCall && !isAsk);
@@ -642,7 +675,7 @@ export function CommandCenterPage() {
             {[
               { l: 'TOTAL FLOWS', v: unusualFlows.length.toString(), c: '#4fc3f7' },
               { l: 'UNUSUAL', v: unusualFlows.filter((f: any) => f.Volume > f.OI).length.toString(), c: '#ffd600' },
-              { l: '$1M+ FLOWS', v: unusualFlows.filter((f: any) => f.Value >= 1000000).length.toString(), c: '#e040fb' },
+              { l: '$1M+ ALERTS', v: hugeAlerts.length.toString(), c: '#e040fb' },
               { l: '$500K+ FLOWS', v: unusualFlows.filter((f: any) => f.Value >= 500000).length.toString(), c: '#ff9800' },
             ].map((m, i) => (
               <div key={i} style={{ background: '#0d1117', borderRadius: '6px', padding: '12px', textAlign: 'center' }}>
@@ -687,7 +720,7 @@ export function CommandCenterPage() {
             );
           }) : <div style={{ color: '#455a64', fontSize: 'var(--mc-font-badge)', fontFamily: 'var(--font-mc-mono)', marginBottom: '12px' }}>No open positions</div>}
           <div className="lbl" style={{ marginTop: '12px', marginBottom: '8px' }}>INSIDER SENTIMENT</div>
-          {SYMS.map(sym => {
+          {watchlist.map(sym => {
             const ins = intel[sym]?.insider;
             if (!ins) return null;
             return (
