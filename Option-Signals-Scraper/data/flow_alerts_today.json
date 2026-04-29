@@ -11,25 +11,25 @@
       "OI": 3055,
       "OptionSymbol": "AMD260501C00330000",
       "OptionType": "CALL",
-      "SWEEPS": 9,
-      "Spot": 328.3525,
+      "SWEEPS": 10,
+      "Spot": 328.4207692307692,
       "Strike": 330.0,
       "Symbol": "AMD",
       "Time": 1777473908000,
       "UnderlyingType": "STOCK",
-      "Updated": 1777475852000,
-      "Volume": 1408,
+      "Updated": 1777475970000,
+      "Volume": 1572,
       "isBullish": true,
       "last_alert_flow_count": 9,
       "option_activity_type": "AUTO",
-      "totalFlowCount": 12,
-      "totalFlowValue": 1180720,
-      "trade_count": 80
+      "totalFlowCount": 13,
+      "totalFlowValue": 1328300,
+      "trade_count": 95
     },
     "quote": {
       "DayHigh": 11.4,
       "High": 11.4,
-      "Last": 9,
+      "Last": 9.49,
       "Low": 8.6,
       "free": 0
     }
@@ -64,7 +64,7 @@
     "quote": {
       "DayHigh": 6.7,
       "High": 6.7,
-      "Last": 5,
+      "Last": 5.21,
       "Low": 4.75,
       "free": 0
     }
@@ -99,7 +99,7 @@
     "quote": {
       "DayHigh": 29,
       "High": 29,
-      "Last": 26.1,
+      "Last": 26.55,
       "Low": 21.05,
       "free": 1
     }
@@ -134,7 +134,7 @@
     "quote": {
       "DayHigh": 25.99,
       "High": 25.99,
-      "Last": 23.8,
+      "Last": 24.28,
       "Low": 20.7,
       "free": 1
     }
@@ -204,7 +204,7 @@
     "quote": {
       "DayHigh": 11.58,
       "High": 11.58,
-      "Last": 10.15,
+      "Last": 10.17,
       "Low": 10,
       "free": 0
     }
@@ -239,7 +239,7 @@
     "quote": {
       "DayHigh": 10.31,
       "High": 9.25,
-      "Last": 8.9,
+      "Last": 8.95,
       "Low": 8.9,
       "free": 0
     }
@@ -309,7 +309,7 @@
     "quote": {
       "DayHigh": 5.9,
       "High": 5.9,
-      "Last": 5.14,
+      "Last": 5.2,
       "Low": 4.63,
       "free": 1
     }
@@ -344,7 +344,7 @@
     "quote": {
       "DayHigh": 20,
       "High": 20,
-      "Last": 18.5,
+      "Last": 18.54,
       "Low": 17,
       "free": 0
     }
@@ -379,8 +379,8 @@
     "quote": {
       "DayHigh": 14.45,
       "High": 14.45,
-      "Last": 13.25,
-      "Low": 13.25,
+      "Last": 13.15,
+      "Low": 13.1,
       "free": 0
     }
   },
@@ -414,7 +414,7 @@
     "quote": {
       "DayHigh": 11.15,
       "High": 11.15,
-      "Last": 10.25,
+      "Last": 10.34,
       "Low": 10.24,
       "free": 0
     }
@@ -449,7 +449,7 @@
     "quote": {
       "DayHigh": 9.3,
       "High": 9.3,
-      "Last": 8.55,
+      "Last": 8.62,
       "Low": 6.87,
       "free": 1
     }
@@ -550,6 +550,13 @@
       "totalFlowCount": 1,
       "totalFlowValue": 1059173,
       "trade_count": 52
+    },
+    "quote": {
+      "DayHigh": 3.25,
+      "High": 3.25,
+      "Last": 3.25,
+      "Low": 3.25,
+      "free": 0
     }
   },
   "CNC280121C00070000": {
@@ -827,7 +834,7 @@
     "quote": {
       "DayHigh": 2.28,
       "High": 2.28,
-      "Last": 2.03,
+      "Last": 1.97,
       "Low": 1.95,
       "free": 0
     }
@@ -862,8 +869,8 @@
     "quote": {
       "DayHigh": 13.05,
       "High": 13.05,
-      "Last": 10.66,
-      "Low": 10.66,
+      "Last": 10.75,
+      "Low": 10.65,
       "free": 0
     }
   },
@@ -897,7 +904,7 @@
     "quote": {
       "DayHigh": 4.64,
       "High": 4.64,
-      "Last": 3.45,
+      "Last": 3.35,
       "Low": 3.2,
       "free": 1
     }
@@ -1002,8 +1009,8 @@
     "quote": {
       "DayHigh": 76.5,
       "High": 76.5,
-      "Last": 76.05,
-      "Low": 74.35,
+      "Last": 73.66,
+      "Low": 73.66,
       "free": 0
     }
   },
@@ -1037,7 +1044,7 @@
     "quote": {
       "DayHigh": 4.4,
       "High": 4.4,
-      "Last": 3.45,
+      "Last": 4,
       "Low": 3.42,
       "free": 0
     }
@@ -1072,9 +1079,44 @@
     "quote": {
       "DayHigh": 8.65,
       "High": 8.65,
-      "Last": 7.55,
+      "Last": 8.25,
       "Low": 5.3,
       "free": 1
+    }
+  },
+  "INTC260515C00095000": {
+    "alert": {
+      "AlertPrice": 5.5,
+      "AlertType": "repeat_flow",
+      "BLOCKS": 5,
+      "DTE": 16,
+      "Expiry": 1778817600,
+      "NotifyAlert": 1,
+      "NumOfAlerts": 1,
+      "OI": 16704,
+      "OptionSymbol": "INTC260515C00095000",
+      "OptionType": "CALL",
+      "SWEEPS": 6,
+      "Spot": 88.35000000000001,
+      "Strike": 95.0,
+      "Symbol": "INTC",
+      "Time": 1777475862000,
+      "UnderlyingType": "STOCK",
+      "Updated": 1777475862000,
+      "Volume": 2681,
+      "isBullish": true,
+      "last_alert_flow_count": 11,
+      "option_activity_type": "AUTO",
+      "totalFlowCount": 11,
+      "totalFlowValue": 832356,
+      "trade_count": 51
+    },
+    "quote": {
+      "DayHigh": 6.2,
+      "High": 5.85,
+      "Last": 5.85,
+      "Low": 5.5,
+      "free": 0
     }
   },
   "INTC260618C00050000": {
@@ -1107,7 +1149,7 @@
     "quote": {
       "DayHigh": 43.76,
       "High": 43.76,
-      "Last": 43,
+      "Last": 43.43,
       "Low": 41.5,
       "free": 0
     }
@@ -1124,25 +1166,25 @@
       "OI": 10110,
       "OptionSymbol": "INTC260618C00100000",
       "OptionType": "CALL",
-      "SWEEPS": 8,
-      "Spot": 89.60615384615386,
+      "SWEEPS": 9,
+      "Spot": 89.86642857142859,
       "Strike": 100.0,
       "Symbol": "INTC",
       "Time": 1777474527000,
       "UnderlyingType": "STOCK",
-      "Updated": 1777475851000,
-      "Volume": 2732,
+      "Updated": 1777476128000,
+      "Volume": 2882,
       "isBullish": true,
       "last_alert_flow_count": 10,
       "option_activity_type": "AUTO",
-      "totalFlowCount": 13,
-      "totalFlowValue": 1549764,
-      "trade_count": 65
+      "totalFlowCount": 14,
+      "totalFlowValue": 1669764,
+      "trade_count": 71
     },
     "quote": {
       "DayHigh": 8.2,
       "High": 8.2,
-      "Last": 7.4,
+      "Last": 7.8,
       "Low": 7.4,
       "free": 0
     }
@@ -1177,7 +1219,7 @@
     "quote": {
       "DayHigh": 10.65,
       "High": 10.65,
-      "Last": 9.98,
+      "Last": 10.3,
       "Low": 7.6,
       "free": 1
     }
@@ -1212,8 +1254,8 @@
     "quote": {
       "DayHigh": 18,
       "High": 16.8,
-      "Last": 16.2,
-      "Low": 16.1,
+      "Last": 16.04,
+      "Low": 16.04,
       "free": 0
     }
   },
@@ -1282,7 +1324,7 @@
     "quote": {
       "DayHigh": 0.67,
       "High": 0.67,
-      "Last": 0.57,
+      "Last": 0.5,
       "Low": 0.34,
       "free": 1
     }
@@ -1466,33 +1508,33 @@
     "alert": {
       "AlertPrice": 13.2,
       "AlertType": "repeat_flow",
-      "BLOCKS": 5,
+      "BLOCKS": 7,
       "DTE": 50,
       "Expiry": 1781755200,
       "NotifyAlert": 0,
-      "NumOfAlerts": 5,
+      "NumOfAlerts": 7,
       "OI": 63401,
       "OptionSymbol": "MSFT260618C00450000",
       "OptionType": "CALL",
-      "SWEEPS": 32,
-      "Spot": 424.0094594594595,
+      "SWEEPS": 43,
+      "Spot": 424.1326,
       "Strike": 450.0,
       "Symbol": "MSFT",
       "Time": 1777469478000,
       "UnderlyingType": "STOCK",
-      "Updated": 1777475762000,
-      "Volume": 9771,
+      "Updated": 1777476070000,
+      "Volume": 11962,
       "isBullish": true,
-      "last_alert_flow_count": 32,
+      "last_alert_flow_count": 45,
       "option_activity_type": "AUTO",
-      "totalFlowCount": 37,
-      "totalFlowValue": 12978245,
-      "trade_count": 279
+      "totalFlowCount": 50,
+      "totalFlowValue": 15872365,
+      "trade_count": 360
     },
     "quote": {
       "DayHigh": 15,
       "High": 15,
-      "Last": 13.18,
+      "Last": 13.25,
       "Low": 13.08,
       "free": 0
     }
@@ -1527,7 +1569,7 @@
     "quote": {
       "DayHigh": 11.84,
       "High": 8.97,
-      "Last": 8.2,
+      "Last": 8.35,
       "Low": 8.2,
       "free": 0
     }
@@ -1562,7 +1604,7 @@
     "quote": {
       "DayHigh": 22.3,
       "High": 19.59,
-      "Last": 16.54,
+      "Last": 16.7,
       "Low": 14.91,
       "free": 0
     }
@@ -1597,7 +1639,7 @@
     "quote": {
       "DayHigh": 21.4,
       "High": 21.4,
-      "Last": 20.4,
+      "Last": 20.8,
       "Low": 17.34,
       "free": 0
     }
@@ -1632,7 +1674,7 @@
     "quote": {
       "DayHigh": 28.5,
       "High": 26.4,
-      "Last": 23.58,
+      "Last": 23.8,
       "Low": 23.45,
       "free": 0
     }
@@ -1667,7 +1709,7 @@
     "quote": {
       "DayHigh": 34.22,
       "High": 34.22,
-      "Last": 34.05,
+      "Last": 34.12,
       "Low": 32.05,
       "free": 0
     }
@@ -1702,7 +1744,7 @@
     "quote": {
       "DayHigh": 12.07,
       "High": 11.52,
-      "Last": 11.52,
+      "Last": 11.35,
       "Low": 11,
       "free": 0
     }
@@ -1749,30 +1791,30 @@
       "BLOCKS": 1,
       "DTE": 0,
       "Expiry": 1777435200,
-      "NotifyAlert": 0,
-      "NumOfAlerts": 1,
+      "NotifyAlert": 1,
+      "NumOfAlerts": 2,
       "OI": 17655,
       "OptionSymbol": "NVDA260429C00210000",
       "OptionType": "CALL",
-      "SWEEPS": 23,
-      "Spot": 210.94000000000003,
+      "SWEEPS": 24,
+      "Spot": 210.93240000000003,
       "Strike": 210.0,
       "Symbol": "NVDA",
       "Time": 1777473435000,
       "UnderlyingType": "STOCK",
-      "Updated": 1777475785000,
-      "Volume": 9714,
-      "isBullish": false,
-      "last_alert_flow_count": 19,
+      "Updated": 1777475906000,
+      "Volume": 9969,
+      "isBullish": true,
+      "last_alert_flow_count": 25,
       "option_activity_type": "AUTO",
-      "totalFlowCount": 24,
-      "totalFlowValue": 2283608,
-      "trade_count": 462
+      "totalFlowCount": 25,
+      "totalFlowValue": 2335878,
+      "trade_count": 464
     },
     "quote": {
       "DayHigh": 3.7,
       "High": 2.67,
-      "Last": 1.97,
+      "Last": 2.21,
       "Low": 1.93,
       "free": 0
     }
@@ -1807,7 +1849,7 @@
     "quote": {
       "DayHigh": 2.14,
       "High": 1.41,
-      "Last": 0.94,
+      "Last": 1.07,
       "Low": 0.9,
       "free": 0
     }
@@ -1842,7 +1884,7 @@
     "quote": {
       "DayHigh": 4.6,
       "High": 4.4,
-      "Last": 3.97,
+      "Last": 4.1,
       "Low": 3.8,
       "free": 0
     }
@@ -2052,7 +2094,7 @@
     "quote": {
       "DayHigh": 3.01,
       "High": 3.01,
-      "Last": 2.14,
+      "Last": 2.16,
       "Low": 2.1,
       "free": 1
     }
@@ -2087,7 +2129,7 @@
     "quote": {
       "DayHigh": 1.67,
       "High": 1.4,
-      "Last": 1.12,
+      "Last": 1.15,
       "Low": 1.12,
       "free": 0
     }
@@ -2122,7 +2164,7 @@
     "quote": {
       "DayHigh": 5.27,
       "High": 5.27,
-      "Last": 4.08,
+      "Last": 4.45,
       "Low": 3.32,
       "free": 1
     }
@@ -2134,30 +2176,30 @@
       "BLOCKS": 0,
       "DTE": 0,
       "Expiry": 1777435200,
-      "NotifyAlert": 1,
+      "NotifyAlert": 0,
       "NumOfAlerts": 1,
       "OI": 2374,
       "OptionSymbol": "QQQ260429C00659000",
       "OptionType": "CALL",
-      "SWEEPS": 6,
-      "Spot": 659.0,
+      "SWEEPS": 8,
+      "Spot": 659.1825,
       "Strike": 659.0,
       "Symbol": "QQQ",
       "Time": 1777473131000,
       "UnderlyingType": "ETF",
-      "Updated": 1777473131000,
-      "Volume": 1227,
-      "isBullish": true,
+      "Updated": 1777475925000,
+      "Volume": 2227,
+      "isBullish": false,
       "last_alert_flow_count": 6,
       "option_activity_type": "AUTO",
-      "totalFlowCount": 6,
-      "totalFlowValue": 403964,
-      "trade_count": 58
+      "totalFlowCount": 8,
+      "totalFlowValue": 769756,
+      "trade_count": 144
     },
     "quote": {
       "DayHigh": 4.6,
       "High": 4.6,
-      "Last": 3.51,
+      "Last": 3.87,
       "Low": 3.35,
       "free": 0
     }
@@ -2192,7 +2234,7 @@
     "quote": {
       "DayHigh": 4,
       "High": 3.78,
-      "Last": 3,
+      "Last": 3.33,
       "Low": 2.83,
       "free": 0
     }
@@ -2227,8 +2269,8 @@
     "quote": {
       "DayHigh": 1.95,
       "High": 1.16,
-      "Last": 1.16,
-      "Low": 1.16,
+      "Last": 1.03,
+      "Low": 1.03,
       "free": 0
     }
   },
@@ -2262,8 +2304,8 @@
     "quote": {
       "DayHigh": 5.77,
       "High": 4.19,
-      "Last": 4.09,
-      "Low": 4.09,
+      "Last": 3.7,
+      "Low": 3.7,
       "free": 0
     }
   },
@@ -2297,7 +2339,7 @@
     "quote": {
       "DayHigh": 7.07,
       "High": 7.07,
-      "Last": 6.28,
+      "Last": 6.6,
       "Low": 5.46,
       "free": 0
     }
@@ -2332,8 +2374,8 @@
     "quote": {
       "DayHigh": 7.94,
       "High": 6.73,
-      "Last": 6.62,
-      "Low": 6.47,
+      "Last": 6.31,
+      "Low": 6.31,
       "free": 0
     }
   },
@@ -2367,7 +2409,7 @@
     "quote": {
       "DayHigh": 8.06,
       "High": 8.06,
-      "Last": 7.44,
+      "Last": 7.72,
       "Low": 6.79,
       "free": 0
     }
@@ -2402,7 +2444,7 @@
     "quote": {
       "DayHigh": 5.53,
       "High": 5.25,
-      "Last": 5.22,
+      "Last": 5.1,
       "Low": 4.9,
       "free": 0
     }
@@ -2437,7 +2479,7 @@
     "quote": {
       "DayHigh": 133,
       "High": 130.4,
-      "Last": 123.9,
+      "Last": 128.5,
       "Low": 115,
       "free": 0
     }
@@ -2484,30 +2526,30 @@
       "BLOCKS": 0,
       "DTE": 0,
       "Expiry": 1777435200,
-      "NotifyAlert": 1,
+      "NotifyAlert": 0,
       "NumOfAlerts": 4,
       "OI": 7609,
       "OptionSymbol": "SPY260429C00710000",
       "OptionType": "CALL",
-      "SWEEPS": 26,
-      "Spot": 710.7396153846154,
+      "SWEEPS": 30,
+      "Spot": 710.7379999999999,
       "Strike": 710.0,
       "Symbol": "SPY",
       "Time": 1777470040000,
       "UnderlyingType": "ETF",
-      "Updated": 1777475772000,
-      "Volume": 9193,
+      "Updated": 1777476058000,
+      "Volume": 10105,
       "isBullish": false,
       "last_alert_flow_count": 26,
       "option_activity_type": "AUTO",
-      "totalFlowCount": 26,
-      "totalFlowValue": 2440135,
-      "trade_count": 321
+      "totalFlowCount": 30,
+      "totalFlowValue": 2676928,
+      "trade_count": 363
     },
     "quote": {
       "DayHigh": 3.57,
       "High": 3.57,
-      "Last": 2.48,
+      "Last": 2.64,
       "Low": 2.24,
       "free": 1
     }
@@ -2524,25 +2566,25 @@
       "OI": 6808,
       "OptionSymbol": "SPY260429C00711000",
       "OptionType": "CALL",
-      "SWEEPS": 40,
-      "Spot": 710.8315,
+      "SWEEPS": 41,
+      "Spot": 710.8287804878049,
       "Strike": 711.0,
       "Symbol": "SPY",
       "Time": 1777470937000,
       "UnderlyingType": "ETF",
-      "Updated": 1777475824000,
-      "Volume": 17454,
+      "Updated": 1777475863000,
+      "Volume": 17698,
       "isBullish": false,
       "last_alert_flow_count": 37,
       "option_activity_type": "AUTO",
-      "totalFlowCount": 40,
-      "totalFlowValue": 3843806,
-      "trade_count": 916
+      "totalFlowCount": 41,
+      "totalFlowValue": 3893822,
+      "trade_count": 928
     },
     "quote": {
       "DayHigh": 2.91,
       "High": 2.91,
-      "Last": 1.94,
+      "Last": 2.09,
       "Low": 1.89,
       "free": 1
     }
@@ -2559,26 +2601,26 @@
       "OI": 6330,
       "OptionSymbol": "SPY260429P00711000",
       "OptionType": "PUT",
-      "SWEEPS": 54,
-      "Spot": 711.1147272727272,
+      "SWEEPS": 56,
+      "Spot": 711.0977192982456,
       "Strike": 711.0,
       "Symbol": "SPY",
       "Time": 1777475562000,
       "UnderlyingType": "ETF",
-      "Updated": 1777475739000,
-      "Volume": 21043,
+      "Updated": 1777476065000,
+      "Volume": 21691,
       "isBullish": false,
       "last_alert_flow_count": 53,
       "option_activity_type": "AUTO",
-      "totalFlowCount": 55,
-      "totalFlowValue": 4575794,
-      "trade_count": 940
+      "totalFlowCount": 57,
+      "totalFlowValue": 4728469,
+      "trade_count": 954
     },
     "quote": {
       "DayHigh": 3.04,
       "High": 2.54,
-      "Last": 2.45,
-      "Low": 2.45,
+      "Last": 2.22,
+      "Low": 2.22,
       "free": 0
     }
   },
@@ -2612,7 +2654,7 @@
     "quote": {
       "DayHigh": 5.82,
       "High": 5.29,
-      "Last": 5.08,
+      "Last": 4.77,
       "Low": 3.91,
       "free": 0
     }
@@ -2647,7 +2689,7 @@
     "quote": {
       "DayHigh": 4.57,
       "High": 4.03,
-      "Last": 3.67,
+      "Last": 3.81,
       "Low": 3.61,
       "free": 0
     }
@@ -2925,9 +2967,9 @@
       "trade_count": 2
     },
     "quote": {
-      "DayHigh": 26,
-      "High": 26,
-      "Last": 26,
+      "DayHigh": 26.23,
+      "High": 26.23,
+      "Last": 26.22,
       "Low": 25.64,
       "free": 0
     }
@@ -2962,8 +3004,8 @@
     "quote": {
       "DayHigh": 2.5,
       "High": 2.08,
-      "Last": 1.5,
-      "Low": 1.5,
+      "Last": 0.94,
+      "Low": 0.94,
       "free": 0
     }
   },
@@ -2979,25 +3021,25 @@
       "OI": 4720,
       "OptionSymbol": "TSLA260429P00375000",
       "OptionType": "PUT",
-      "SWEEPS": 7,
-      "Spot": 374.0288888888889,
+      "SWEEPS": 8,
+      "Spot": 373.923,
       "Strike": 375.0,
       "Symbol": "TSLA",
       "Time": 1777471398000,
       "UnderlyingType": "STOCK",
-      "Updated": 1777475291000,
-      "Volume": 2322,
+      "Updated": 1777475918000,
+      "Volume": 2522,
       "isBullish": false,
       "last_alert_flow_count": 8,
       "option_activity_type": "AUTO",
-      "totalFlowCount": 9,
-      "totalFlowValue": 755946,
-      "trade_count": 68
+      "totalFlowCount": 10,
+      "totalFlowValue": 825946,
+      "trade_count": 73
     },
     "quote": {
       "DayHigh": 5.45,
       "High": 5.45,
-      "Last": 4.18,
+      "Last": 3.09,
       "Low": 3.05,
       "free": 0
     }
@@ -3032,7 +3074,7 @@
     "quote": {
       "DayHigh": 7.02,
       "High": 6.4,
-      "Last": 4.58,
+      "Last": 5.2,
       "Low": 4,
       "free": 0
     }
@@ -3067,7 +3109,7 @@
     "quote": {
       "DayHigh": 8.35,
       "High": 8.35,
-      "Last": 7.34,
+      "Last": 6.43,
       "Low": 6.34,
       "free": 0
     }

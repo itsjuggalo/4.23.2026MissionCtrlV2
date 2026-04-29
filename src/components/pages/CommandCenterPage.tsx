@@ -35,6 +35,7 @@ export function CommandCenterPage() {
   const [newSymInput, setNewSymInput] = useState('');
   const [draggedIdx, setDraggedIdx] = useState<number | null>(null);
   const [equityHistory, setEquityHistory] = useState<any[]>([]);
+  const [equityIntraday, setEquityIntraday] = useState<any[]>([]);
 
   const fetchData = async () => {
     try {
@@ -123,20 +124,35 @@ export function CommandCenterPage() {
     try { localStorage.setItem('cc-watchlist', JSON.stringify(watchlist)); } catch {}
   }, [watchlist]);
 
-  // Fetch equity history for sparkline
+  // Fetch equity history for sparkline + intraday bars
   useEffect(() => {
     fetch('/api/equity-history').then(r => r.ok ? r.json() : null).then(d => {
       if (d?.history) setEquityHistory(d.history);
     }).catch(() => {});
+    const fetchIntraday = () => {
+      fetch('/api/equity-intraday').then(r => r.ok ? r.json() : null).then(d => {
+        if (d?.bars) setEquityIntraday(d.bars);
+      }).catch(() => {});
+    };
+    fetchIntraday();
+    const iv = setInterval(fetchIntraday, 60000); // refresh every 60s
+    return () => clearInterval(iv);
   }, []);
 
-  // TradingView widget loader for BTC SuperTrend chart
+  // TradingView widget loader for BTC SuperTrend chart (poll-based, robust to mount timing)
   useEffect(() => {
     if (tvLoadedRef.current) return;
-    const initWidget = () => {
-      if (!tvContainerRef.current) return;
+    let attempts = 0;
+    let cancelled = false;
+    const tryInit = () => {
+      if (cancelled || tvLoadedRef.current) return;
+      const containerEl = document.getElementById('tv_btc_supertrend');
       const TV = (window as any).TradingView;
-      if (!TV || !TV.widget) return;
+      if (!containerEl || !TV || !TV.widget) {
+        attempts++;
+        if (attempts < 40) setTimeout(tryInit, 250); // up to 10s
+        return;
+      }
       try {
         new TV.widget({
           width: '100%',
@@ -158,20 +174,18 @@ export function CommandCenterPage() {
         tvLoadedRef.current = true;
       } catch (e) { console.error('TV widget init failed', e); }
     };
-    if ((window as any).TradingView && (window as any).TradingView.widget) {
-      initWidget();
-    } else {
+    const ensureScript = () => {
+      if ((window as any).TradingView?.widget) { tryInit(); return; }
       const existing = document.querySelector('script[src="https://s3.tradingview.com/tv.js"]') as HTMLScriptElement | null;
-      if (existing) {
-        existing.addEventListener('load', initWidget);
-      } else {
-        const script = document.createElement('script');
-        script.src = 'https://s3.tradingview.com/tv.js';
-        script.async = true;
-        script.onload = initWidget;
-        document.head.appendChild(script);
-      }
-    }
+      if (existing) { existing.addEventListener('load', tryInit); return; }
+      const script = document.createElement('script');
+      script.src = 'https://s3.tradingview.com/tv.js';
+      script.async = true;
+      script.onload = tryInit;
+      document.head.appendChild(script);
+    };
+    ensureScript();
+    return () => { cancelled = true; };
   }, []);
 
   const equity = parseFloat(portfolio?.equity || portfolio?.balance || '0');
@@ -305,19 +319,27 @@ export function CommandCenterPage() {
               <div style={{ fontSize: 'var(--mc-font-label)', color: '#455a64', marginTop: '4px' }}>{(dailyPct >= 0 ? '+' : '') + fmt(dailyPct) + '% today'}</div>
             </div>
             {(() => {
-              const data = (equityHistory || []).map((h: any) => Number(h.equity)).filter(v => !isNaN(v));
-              if (data.length < 2) return null;
-              const w = 90, h = 32;
-              const min = Math.min(...data);
-              const max = Math.max(...data);
-              const range = max - min || 1;
-              const pts = data.map((v, i) => `${(i / (data.length - 1)) * w},${h - ((v - min) / range) * h}`).join(' ');
-              const up = data[data.length - 1] >= data[0];
-              const color = up ? '#66bb6a' : '#ef5350';
+              const bars = equityIntraday || [];
+              if (bars.length < 2) return null;
+              // Visual: vertical bars from premarket open through afterhours
+              const w = 130, h = 36, gap = 1;
+              const eqs = bars.map((b: any) => Number(b.eq)).filter((v: number) => !isNaN(v));
+              if (eqs.length < 2) return null;
+              const baseEq = eqs[0]; // first bar = market open of the day
+              const maxAbsDelta = Math.max(...eqs.map((v: number) => Math.abs(v - baseEq))) || 1;
+              const barW = Math.max(1, (w - (eqs.length - 1) * gap) / eqs.length);
+              const midY = h / 2;
               return (
                 <svg width={w} height={h} style={{ display: 'block', flexShrink: 0 }}>
-                  <polyline points={pts} fill="none" stroke={color} strokeWidth="1.5" strokeLinejoin="round" strokeLinecap="round" />
-                  <circle cx={w} cy={h - ((data[data.length - 1] - min) / range) * h} r="2" fill={color} />
+                  <line x1={0} y1={midY} x2={w} y2={midY} stroke="#1a3a4a" strokeDasharray="2,2" strokeWidth="0.5" />
+                  {eqs.map((v: number, i: number) => {
+                    const delta = v - baseEq;
+                    const barH = Math.max(1, Math.abs(delta) / maxAbsDelta * (h / 2 - 1));
+                    const x = i * (barW + gap);
+                    const y = delta >= 0 ? midY - barH : midY;
+                    const c = delta >= 0 ? '#66bb6a' : '#ef5350';
+                    return <rect key={i} x={x} y={y} width={barW} height={barH} fill={c} />;
+                  })}
                 </svg>
               );
             })()}
