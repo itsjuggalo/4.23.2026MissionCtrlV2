@@ -10,11 +10,11 @@
     "quote": {
       "closePrice": 14.82,
       "highPrice": 15.09,
-      "lastPrice": 15.005,
+      "lastPrice": 14.99,
       "lowPrice": 14.7,
       "openPrice": 14.81,
-      "quoteTimeInLong": 1777482909,
-      "tradeTimeInLong": 1777482909
+      "quoteTimeInLong": 1777484764,
+      "tradeTimeInLong": 1777484764
     },
     "reduceLoss": "13.90",
     "sellTarget": "14.90",
@@ -39,11 +39,11 @@
     "quote": {
       "closePrice": 213.07,
       "highPrice": 212.715,
-      "lastPrice": 209.48,
+      "lastPrice": 209.41,
       "lowPrice": 208.56,
       "openPrice": 212.715,
-      "quoteTimeInLong": 1777482910,
-      "tradeTimeInLong": 1777482910
+      "quoteTimeInLong": 1777484771,
+      "tradeTimeInLong": 1777484771
     },
     "reduceLoss": "157.74",
     "sellTarget": "180.53",
@@ -67,11 +67,11 @@
     "quote": {
       "closePrice": 130.85,
       "highPrice": 132.03,
-      "lastPrice": 130.32,
+      "lastPrice": 130.725,
       "lowPrice": 129.98,
       "openPrice": 131.95,
-      "quoteTimeInLong": 1777482887,
-      "tradeTimeInLong": 1777482887
+      "quoteTimeInLong": 1777484722,
+      "tradeTimeInLong": 1777484722
     },
     "reduceLoss": "124.68",
     "sellTarget": "142.69",
@@ -91,11 +91,11 @@
     "quote": {
       "closePrice": 92.295,
       "highPrice": 92.855,
-      "lastPrice": 92.2885,
+      "lastPrice": 92.365,
       "lowPrice": 90.86,
       "openPrice": 91.225,
-      "quoteTimeInLong": 1777482911,
-      "tradeTimeInLong": 1777482911
+      "quoteTimeInLong": 1777484769,
+      "tradeTimeInLong": 1777484769
     },
     "reduceLoss": "84.20",
     "risk": "HI",
@@ -115,11 +115,11 @@
     "quote": {
       "closePrice": 18.36,
       "highPrice": 16.59,
-      "lastPrice": 15.875,
+      "lastPrice": 15.9635,
       "lowPrice": 15.7,
       "openPrice": 16.55,
-      "quoteTimeInLong": 1777482909,
-      "tradeTimeInLong": 1777482909
+      "quoteTimeInLong": 1777484771,
+      "tradeTimeInLong": 1777484771
     },
     "reduceLoss": "14.39",
     "risk": "HI",
