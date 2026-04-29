@@ -66,7 +66,7 @@
     "discordThreadId": "1485669397753368647",
     "earlyTarget": "312.72",
     "exit1": "312.72",
-    "exit2": "366.3",
+    "exit2": "369",
     "exit2Time": 1777493046,
     "free": 1,
     "isWeekly": 1,
@@ -84,7 +84,7 @@
     "sellTarget2": "321.83",
     "sellTarget3": "377.3",
     "shortName": "Alphabet Inc.",
-    "status": "Booked profits @366.3 and riding runners",
+    "status": "Booked profits at 369 and riding runners",
     "stopLoss": "355.3",
     "symbol": "GOOGL"
   },
@@ -311,7 +311,7 @@
     "earlyTarget": "333.90",
     "exit1": "333.9",
     "exit1Time": 1777474877,
-    "free": 1,
+    "free": 0,
     "isWeekly": 1,
     "quote": {
       "closePrice": 323.21,

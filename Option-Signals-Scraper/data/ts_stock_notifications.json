@@ -4089,5 +4089,19 @@
     "message": "Reached SellTarget1 @445.0 with gain: 4.79%. Take profits and ride for next target with stops @382.2",
     "symbol": "MSFT",
     "title": "MSFT : SELL"
+  },
+  "1777495077": {
+    "category": "SWING",
+    "free": 1,
+    "message": "Book more profits at 369 and ride the runners. Gain: 21.54%",
+    "symbol": "GOOGL",
+    "title": "GOOGL: SELL"
+  },
+  "1777495109": {
+    "category": "LONGTERM",
+    "free": 1,
+    "message": "Take full profits at 14.97. Gain: 3.89%",
+    "symbol": "VTRS",
+    "title": "VTRS: SELL"
   }
 }

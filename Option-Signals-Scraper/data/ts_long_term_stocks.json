@@ -1,30 +1,4 @@
 {
-  "1772480291": {
-    "buyTarget": "14.41",
-    "category": "LONGTERM",
-    "earlyTarget": "15.91",
-    "exit1": "14.90",
-    "exit1Time": 1776693440,
-    "free": 1,
-    "isWeekly": 1,
-    "quote": {
-      "closePrice": 14.82,
-      "highPrice": 15.09,
-      "lastPrice": 14.95,
-      "lowPrice": 14.7,
-      "openPrice": 14.81,
-      "quoteTimeInLong": 1777492752,
-      "tradeTimeInLong": 1777492752
-    },
-    "reduceLoss": "13.90",
-    "sellTarget": "14.90",
-    "sellTarget2": "16.38",
-    "sellTarget3": "16.99",
-    "shortName": "Viatris Inc.",
-    "status": "Booked profits @14.90 and riding runners",
-    "stopLoss": "13.90",
-    "symbol": "VTRS"
-  },
   "1774534699": {
     "buyTarget": "175.27",
     "category": "LONGTERM",

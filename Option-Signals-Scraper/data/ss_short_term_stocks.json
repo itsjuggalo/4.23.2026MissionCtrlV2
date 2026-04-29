@@ -248,6 +248,8 @@
     "earlyTarget": "377.97",
     "exit1": "384.0",
     "exit1Time": 1777493011,
+    "exit2": "389.9",
+    "exit2Time": 1777495105,
     "free": 1,
     "isWeekly": 1,
     "quote": {
@@ -265,8 +267,8 @@
     "sellTarget2": "388.98",
     "sellTarget3": "403.66",
     "shortName": "Celestica, Inc.",
-    "status": "Booked profits @384.0 and riding runners",
-    "stopLoss": "330.3",
+    "status": "Booked profits @389.9 and riding runners",
+    "stopLoss": "366.96",
     "symbol": "CLS"
   },
   "1777397472": {
