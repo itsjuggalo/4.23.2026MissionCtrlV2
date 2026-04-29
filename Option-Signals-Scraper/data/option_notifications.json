@@ -4671,5 +4671,11 @@
     "message": "Take profits at revised SellTarget 3.19.",
     "symbol": "SPY",
     "title": "SPY 708P 4/30: STC"
+  },
+  "1777487786": {
+    "category": "SWING",
+    "message": "Reached Target 16.20 and that's 51.40%! Lock some in and wait for next target. Raise the stops to 12.96",
+    "symbol": "AMD",
+    "title": "AMD 350C 05/15 : STC"
   }
 }

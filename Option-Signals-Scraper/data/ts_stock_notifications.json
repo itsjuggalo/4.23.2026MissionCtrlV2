@@ -4077,5 +4077,11 @@
     "message": "Reached SellTarget1 @333.9 with gain: 3.00%. Take profits and ride for next target with stops @291.8",
     "symbol": "AMD",
     "title": "AMD : SELL"
+  },
+  "1777490756": {
+    "category": "SWING",
+    "message": "Buy below 31.69, Sell above 32.64\nSwing, Moderate risk",
+    "symbol": "KMI",
+    "title": "KMI: BUY"
   }
 }

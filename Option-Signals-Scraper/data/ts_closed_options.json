@@ -4670,6 +4670,26 @@
     "strike": "160",
     "symbol": "MRVL"
   },
+  "1777308396": {
+    "buyTarget": "6.50",
+    "category": "SWING",
+    "discordMessageId": "1498364756845924544",
+    "discordThreadId": "1498364756845924544",
+    "earlyTarget": "7.47",
+    "exitTime": 1777485669,
+    "expiry": "1778821200",
+    "free": 1,
+    "isPut": 1,
+    "isWeekly": 1,
+    "reduceLoss": "4.22",
+    "sellTarget": "7.47",
+    "sellTarget2": "5.20",
+    "shortName": "Sprouts Farmers Market, Inc.",
+    "status": "Booked full profits.",
+    "stopLoss": "5.23",
+    "strike": "75",
+    "symbol": "SFM"
+  },
   "1777387843": {
     "buyTarget": "4.51",
     "category": "SCALP",
@@ -4706,5 +4726,23 @@
     "stopLoss": "1.30",
     "strike": "93",
     "symbol": "NFLX"
+  },
+  "1777481284": {
+    "buyTarget": "3.17",
+    "category": "SCALP",
+    "earlyTarget": "3.65",
+    "exitTime": 1777482383,
+    "expiry": "1777507200",
+    "free": 0,
+    "isPut": 1,
+    "isWeekly": 1,
+    "reduceLoss": "2.06",
+    "risk": "VH",
+    "sellTarget": "3.17",
+    "shortName": "State Street SPDR S&P 500 ETF T",
+    "status": "Booked full profit.",
+    "stopLoss": "2.06",
+    "strike": "708",
+    "symbol": "SPY"
   }
 }

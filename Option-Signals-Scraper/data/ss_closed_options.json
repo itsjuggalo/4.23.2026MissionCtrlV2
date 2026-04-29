@@ -6395,8 +6395,7 @@
     "discordMessageId": "1498336580014706799",
     "discordThreadId": "1498336580014706799",
     "earlyTarget": "1.85",
-    "exit1": "1.89",
-    "exitTime": 1777383027,
+    "exitTime": 1777472084,
     "expiry": "1784264400",
     "free": 1,
     "isWeekly": 1,
@@ -6407,8 +6406,9 @@
     },
     "reduceLoss": "1.05",
     "sellTarget": "1.89",
+    "sellTarget2": "1.28",
     "shortName": "Comcast Corporation",
-    "status": "Booked profits @1.89 and riding runners",
+    "status": "Booked full profits.",
     "stopLoss": "1.32",
     "strike": "27.5",
     "symbol": "CMCSA"
@@ -6532,5 +6532,31 @@
     "stopLoss": "2.92",
     "strike": "272.5",
     "symbol": "AAPL"
+  },
+  "1777472124": {
+    "buyTarget": "21.40",
+    "category": "SWING",
+    "discordMessageId": "1499051483143077978",
+    "discordThreadId": "1499051483143077978",
+    "earlyTarget": "24.61",
+    "exit1": "24.70",
+    "exit2": "30.05",
+    "exitTime": 1777485716,
+    "expiry": "1778803200",
+    "free": 1,
+    "isWeekly": 1,
+    "reasoning": {
+      "\ud83d\udc0b Unusual Flows": "Newly opened option sweeps were detected with Sweep Volume > Open Interest.",
+      "\ud83d\udcc8 Bullish Sweeps": "Bullish sweeps indicate some hedge fund managers expect the stock to go up in short term.",
+      "\ud83d\udcca Technical Analysis": "Technical Analysis indicates that the analyst has verified chart pattern, support and resistance levels, moving averages, RSI and VWAP for this entry."
+    },
+    "reduceLoss": "13.91",
+    "sellTarget": "24.70",
+    "sellTarget2": "30.05",
+    "shortName": "Advanced Micro Devices, Inc.",
+    "status": "Booked profits @30.05 and riding runners",
+    "stopLoss": "24.04",
+    "strike": "320",
+    "symbol": "AMD"
   }
 }

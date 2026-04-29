@@ -83,33 +83,46 @@ async function fetchSecForm4(ticker: string): Promise<any> {
     for (const f of form4Filings.slice(0, 8)) {
       try {
         const accClean = f.accNum.replace(/-/g, '');
-        const idxUrl = `https://www.sec.gov/Archives/edgar/data/${parseInt(cik, 10)}/${accClean}/${f.accNum}-index.json`;
-        const idx = await fetch(idxUrl, { headers: { 'User-Agent': SEC_UA } });
-        if (!idx.ok) continue;
-        const idxJ = await idx.json();
-        const items = idxJ?.directory?.item || [];
-        const xml = items.find((x: any) => x.name?.endsWith('.xml') && !x.name.includes('primary_doc'));
-        const xmlName = xml?.name || items.find((x: any) => x.name?.endsWith('.xml'))?.name;
-        if (!xmlName) continue;
-        const xmlUrl = `https://www.sec.gov/Archives/edgar/data/${parseInt(cik, 10)}/${accClean}/${xmlName}`;
-        const xmlRes = await fetch(xmlUrl, { headers: { 'User-Agent': SEC_UA } });
-        if (!xmlRes.ok) continue;
-        const xmlText = await xmlRes.text();
+        // Real Form 4 always lives at /form4.xml (not primary_doc.xml)
+        // First try direct, fall back to looking up via index.json
+        const dataDir = `https://www.sec.gov/Archives/edgar/data/${parseInt(cik, 10)}/${accClean}`;
+        let xmlText = '';
+        const directRes = await fetch(`${dataDir}/form4.xml`, { headers: { 'User-Agent': SEC_UA } });
+        if (directRes.ok) {
+          xmlText = await directRes.text();
+        } else {
+          // fallback: look up via index
+          const idxRes = await fetch(`${dataDir}/index.json`, { headers: { 'User-Agent': SEC_UA } });
+          if (!idxRes.ok) continue;
+          const idxJ = await idxRes.json();
+          const items = idxJ?.directory?.item || [];
+          const xmlItem = items.find((x: any) => x.name?.endsWith('.xml'));
+          if (!xmlItem?.name) continue;
+          const fallbackRes = await fetch(`${dataDir}/${xmlItem.name}`, { headers: { 'User-Agent': SEC_UA } });
+          if (!fallbackRes.ok) continue;
+          xmlText = await fallbackRes.text();
+        }
+        if (!xmlText) continue;
+        // Parse Form 4 fields. Each Form 4 has 1+ transactions; we extract the FIRST nonDerivativeTransaction
+        // (most filings have just one). Multi-transaction filings get net contribution from primary tx.
         const nameMatch = xmlText.match(/<rptOwnerName>([^<]+)<\/rptOwnerName>/);
         const titleMatch = xmlText.match(/<officerTitle>([^<]+)<\/officerTitle>/);
-        const isDirector = /<isDirector>[\s1true]+<\/isDirector>/i.test(xmlText);
-        const is10pct = /<isTenPercentOwner>[\s1true]+<\/isTenPercentOwner>/i.test(xmlText);
-        const codeMatch = xmlText.match(/<transactionCode>([^<]+)<\/transactionCode>/);
-        const sharesMatch = xmlText.match(/<transactionShares>[\s\S]*?<value>([\d.]+)<\/value>/);
-        const priceMatch = xmlText.match(/<transactionPricePerShare>[\s\S]*?<value>([\d.]+)<\/value>/);
+        const isDirector = /<isDirector>\s*(?:true|1)\s*<\/isDirector>/i.test(xmlText);
+        const is10pct = /<isTenPercentOwner>\s*(?:true|1)\s*<\/isTenPercentOwner>/i.test(xmlText);
+        // Extract first nonDerivative transaction block, then parse its fields
+        const txBlockMatch = xmlText.match(/<nonDerivativeTransaction>([\s\S]*?)<\/nonDerivativeTransaction>/);
+        const txBlock = txBlockMatch?.[1] || xmlText; // fall back to whole doc if no nonDerivative
+        const codeMatch = txBlock.match(/<transactionCode>([^<]+)<\/transactionCode>/);
+        const sharesMatch = txBlock.match(/<transactionShares>\s*<value>([\d.,]+)<\/value>/);
+        const priceMatch = txBlock.match(/<transactionPricePerShare>\s*<value>([\d.,]*)<\/value>/);
         const code = codeMatch?.[1]?.trim() || '?';
-        const shares = parseFloat(sharesMatch?.[1] || '0');
-        const price = parseFloat(priceMatch?.[1] || '0');
+        const shares = parseFloat((sharesMatch?.[1] || '0').replace(/,/g, ''));
+        const price = parseFloat((priceMatch?.[1] || '0').replace(/,/g, ''));
         const value = shares * price;
         const isBuy = code === 'P' || code === 'A' || code === 'M';
         const isSell = code === 'S' || code === 'D' || code === 'F';
-        if (isBuy) net90d += value;
-        else if (isSell) net90d -= value;
+        if (isBuy && value > 0) net90d += value;
+        else if (isSell && value > 0) net90d -= value;
         const role = titleMatch?.[1] || (isDirector ? 'Director' : is10pct ? '10% Owner' : '');
         transactions.push({
           name: nameMatch?.[1] || 'Unknown',

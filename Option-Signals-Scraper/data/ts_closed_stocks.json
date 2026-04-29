@@ -5522,5 +5522,24 @@
     "status": "Closed with profits.",
     "stopLoss": "173.33",
     "symbol": "UHS"
+  },
+  "1777472356": {
+    "buyTarget": "324.17",
+    "category": "SWING",
+    "discordMessageId": "1499052454313066626",
+    "discordThreadId": "1499052454313066626",
+    "earlyTarget": "333.90",
+    "exit1": "333.9",
+    "exit1Time": 1777474877,
+    "exitTime": 1777474877,
+    "free": 1,
+    "isWeekly": 1,
+    "reduceLoss": "291.75",
+    "sellTarget": "333.9",
+    "sellTargetTime": 1777474877,
+    "shortName": "Advanced Micro Devices, Inc.",
+    "status": "Booked profits @333.9 and riding runners",
+    "stopLoss": "291.8",
+    "symbol": "AMD"
   }
 }

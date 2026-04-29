@@ -5822,5 +5822,11 @@
     "message": "Take trailing stop at 5.20 to exit trade!",
     "symbol": "SFM",
     "title": "SFM 75P 05/15 : SELL"
+  },
+  "1777490752": {
+    "category": "SWING",
+    "message": "Buy below 0.72, Sell above 0.83\nSwing, Moderate risk",
+    "symbol": "KMI",
+    "title": "KMI 35C 9/18: BUY"
   }
 }
