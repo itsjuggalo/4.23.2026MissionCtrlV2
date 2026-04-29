@@ -1,74 +1,33 @@
-import { NextResponse } from 'next/server';
-import { readFileSync, existsSync, readdirSync, statSync } from 'fs';
-import { join } from 'path';
+import { NextRequest, NextResponse } from 'next/server';
+import { readFile, readdir } from 'fs/promises';
+import path from 'path';
 
-const FORECAST_DIR = '/home/ubuntu/.openclaw/workspace/directives/kronos_forecasts';
-const LEGACY_FILE = '/home/ubuntu/.openclaw/workspace/directives/kronos_forecast.json';
+export const dynamic = 'force-dynamic';
 
-export async function GET(req: Request) {
-  const url = new URL(req.url);
-  const ticker = url.searchParams.get('ticker')?.toUpperCase();
+const FORECASTS_DIR = '/home/ubuntu/.openclaw/workspace/directives/kronos_forecasts';
+const FALLBACK = '/home/ubuntu/.openclaw/workspace/directives/kronos_forecast.json';
 
-  // Legacy behavior — no ticker = global forecast file
-  if (!ticker) {
-    if (!existsSync(LEGACY_FILE)) {
-      return NextResponse.json({ error: 'No forecast available' }, { status: 404 });
+export async function GET(req: NextRequest) {
+  const symbol = req.nextUrl.searchParams.get('symbol') || '';
+  const tryFiles: string[] = [];
+  if (symbol) {
+    const sym = symbol.toUpperCase();
+    tryFiles.push(path.join(FORECASTS_DIR, `${sym}.json`));
+    tryFiles.push(path.join(FORECASTS_DIR, `${sym}_forecast.json`));
+    // Try without USDT/USD suffix variations
+    const stripped = sym.replace(/USDT?$/, '');
+    if (stripped !== sym) {
+      tryFiles.push(path.join(FORECASTS_DIR, `${stripped}.json`));
+      tryFiles.push(path.join(FORECASTS_DIR, `${stripped}USD.json`));
+      tryFiles.push(path.join(FORECASTS_DIR, `${stripped}USDT.json`));
     }
+  }
+  tryFiles.push(FALLBACK);
+  for (const f of tryFiles) {
     try {
-      return NextResponse.json(JSON.parse(readFileSync(LEGACY_FILE, 'utf-8')));
-    } catch {
-      return NextResponse.json({ error: 'Failed to read forecast' }, { status: 500 });
-    }
+      const txt = await readFile(f, 'utf-8');
+      return NextResponse.json(JSON.parse(txt));
+    } catch {}
   }
-
-  // Per-ticker: find latest <TICKER>_<timestamp>.json
-  if (!existsSync(FORECAST_DIR)) {
-    return NextResponse.json({ error: 'No forecasts directory' }, { status: 404 });
-  }
-
-  try {
-    const files = readdirSync(FORECAST_DIR)
-      .filter(f => f.toUpperCase().startsWith(`${ticker}_`) && f.endsWith('.json'))
-      .map(f => ({ f, m: statSync(join(FORECAST_DIR, f)).mtimeMs }))
-      .sort((a, b) => b.m - a.m);
-
-    if (files.length === 0) {
-      return NextResponse.json({ error: `No forecast for ${ticker}`, ticker }, { status: 404 });
-    }
-
-    const latest = files[0];
-    const content = JSON.parse(readFileSync(join(FORECAST_DIR, latest.f), 'utf-8'));
-    return NextResponse.json({
-      ...content,
-      _filename: latest.f,
-      _file_mtime: new Date(latest.m).toISOString(),
-    });
-  } catch (e: any) {
-    return NextResponse.json({ error: e.message || 'Failed to read' }, { status: 500 });
-  }
-}
-
-// POST triggers on-demand Kronos run
-export async function POST(req: Request) {
-  const { exec } = await import('child_process');
-  const body = await req.json().catch(() => ({}));
-  const ticker = (body.ticker || '').toString().toUpperCase().trim();
-
-  if (!ticker || !/^[A-Z0-9]{1,10}$/.test(ticker)) {
-    return NextResponse.json({ error: 'Invalid ticker' }, { status: 400 });
-  }
-
-  return new Promise((resolve) => {
-    exec(
-      `python3 /home/ubuntu/mission-control/agent-team/kronos/kronos_on_demand.py --ticker ${ticker}`,
-      { timeout: 120000 },
-      (err, stdout, stderr) => {
-        if (err) {
-          resolve(NextResponse.json({ error: stderr || err.message, stdout }, { status: 500 }));
-        } else {
-          resolve(NextResponse.json({ ok: true, ticker, output: stdout.slice(-500) }));
-        }
-      }
-    );
-  });
+  return NextResponse.json({ error: 'No forecast found', symbol }, { status: 404 });
 }

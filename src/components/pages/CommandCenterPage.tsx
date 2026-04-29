@@ -20,6 +20,7 @@ export function CommandCenterPage() {
   const [activity, setActivity] = useState<any[]>([]);
   const [rhPositions, setRhPositions] = useState<any[]>([]);
   const [rhBalance, setRhBalance] = useState(0);
+  const [allWallets, setAllWallets] = useState<any[]>([]);
   const [dashData, setDashData] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [unusualFlows, setUnusualFlows] = useState<any[]>([]);
@@ -36,6 +37,10 @@ export function CommandCenterPage() {
   const [draggedIdx, setDraggedIdx] = useState<number | null>(null);
   const [equityHistory, setEquityHistory] = useState<any[]>([]);
   const [equityIntraday, setEquityIntraday] = useState<any[]>([]);
+  const [liveQuotes, setLiveQuotes] = useState<Record<string, any>>({});
+  const [kronosSymbol, setKronosSymbol] = useState<string>('BTCUSDT');
+  const [showKronosInput, setShowKronosInput] = useState(false);
+  const [kronosInput, setKronosInput] = useState('');
 
   const fetchData = async () => {
     try {
@@ -62,7 +67,7 @@ export function CommandCenterPage() {
       unusual._allAlerts = alerts;
       setUnusualFlows(unusual);
     }).catch(() => {});
-    fetch('/api/kronos-forecast').then(r => r.ok ? r.json() : null).then(d => { if (d) setKronosForecast(d); }).catch(() => {});
+    fetch('/api/kronos-forecast?symbol=' + encodeURIComponent(kronosSymbol)).then(r => r.ok ? r.json() : null).then(d => { if (d) setKronosForecast(d); }).catch(() => {});
     fetch('/api/options-flow').then(r => r.ok ? r.json() : { flows: [], alerts: [] }).then(d => {
       const flows = d.flows || [];
       const alerts = d.alerts || [];
@@ -70,7 +75,7 @@ export function CommandCenterPage() {
       unusual._allAlerts = alerts;
       setUnusualFlows(unusual);
     }).catch(() => {});
-    fetch('/api/kronos-forecast').then(r => r.ok ? r.json() : null).then(d => { if (d) setKronosForecast(d); }).catch(() => {});
+    fetch('/api/kronos-forecast?symbol=' + encodeURIComponent(kronosSymbol)).then(r => r.ok ? r.json() : null).then(d => { if (d) setKronosForecast(d); }).catch(() => {});
     fetch('/api/wallets').then(r => r.ok ? r.json() : []).then(wallets => {
       const tickers: any[] = []; let rhTotal = 0;
       for (const w of wallets) {
@@ -85,6 +90,8 @@ export function CommandCenterPage() {
         }
       }
       setRhPositions(tickers); setRhBalance(rhTotal);
+      // Save all wallet summary for marquee
+      setAllWallets((wallets || []).map((w: any) => ({ name: w.name || 'Unknown', balance: w.balance || 0 })));
     }).catch(() => {});
     fetch('/api/directives?file=dashboard_data.json').then(r => r.ok ? r.json() : null).then(d => { if (d) setDashData(d); }).catch(() => {});
     fetch('/api/pipeline-feed').then(r => r.ok ? r.json() : null).then(d => { if (d?.events) setPipelineFeed(d.events); }).catch(() => {});
@@ -119,6 +126,19 @@ export function CommandCenterPage() {
     } catch {}
   }, []);
 
+  // Fetch live quotes for any watchlist symbols missing from dashboard_data
+  useEffect(() => {
+    if (!watchlist || watchlist.length === 0) return;
+    const fetchLive = () => {
+      fetch('/api/live-quotes?symbols=' + encodeURIComponent(watchlist.join(','))).then(r => r.ok ? r.json() : null).then(d => {
+        if (d?.prices) setLiveQuotes(d.prices);
+      }).catch(() => {});
+    };
+    fetchLive();
+    const iv = setInterval(fetchLive, 30000);
+    return () => clearInterval(iv);
+  }, [watchlist]);
+
   // Persist watchlist changes to localStorage
   useEffect(() => {
     try { localStorage.setItem('cc-watchlist', JSON.stringify(watchlist)); } catch {}
@@ -138,6 +158,20 @@ export function CommandCenterPage() {
     const iv = setInterval(fetchIntraday, 60000); // refresh every 60s
     return () => clearInterval(iv);
   }, []);
+
+  // Refetch Kronos when symbol changes
+  useEffect(() => {
+    fetch('/api/kronos-forecast?symbol=' + encodeURIComponent(kronosSymbol)).then(r => r.ok ? r.json() : null).then(d => { if (d) setKronosForecast(d); }).catch(() => {});
+  }, [kronosSymbol]);
+
+  // Persist Kronos symbol
+  useEffect(() => {
+    try {
+      const s = localStorage.getItem('cc-kronos-symbol');
+      if (s) setKronosSymbol(s);
+    } catch {}
+  }, []);
+  useEffect(() => { try { localStorage.setItem('cc-kronos-symbol', kronosSymbol); } catch {} }, [kronosSymbol]);
 
   // TradingView widget loader for BTC SuperTrend chart (poll-based, robust to mount timing)
   useEffect(() => {
@@ -279,8 +313,8 @@ export function CommandCenterPage() {
         <div style={{ display: 'flex', gap: '40px', animation: 'marquee 25s linear infinite', whiteSpace: 'nowrap' }}>
           {[...Array(2)].flatMap(() => [
             { sym: 'ALPACA', val: '$' + fmt(equity), chg: dailyPct, color: dailyPct >= 0 ? '#66bb6a' : '#ef5350' },
-            { sym: 'ROBINHOOD', val: rhBalance > 0 ? '$' + fmt(rhBalance) : 'N/A', chg: 0, color: '#4fc3f7' },
             { sym: 'RETURN', val: (totalReturn >= 0 ? '+' : '') + fmt(totalReturn, 1) + '%', chg: totalReturn, color: totalReturn >= 0 ? '#66bb6a' : '#ef5350' },
+            ...((allWallets || []).map((w: any) => ({ sym: (w.name || '').toUpperCase().slice(0, 12), val: w.balance > 0 ? '$' + fmt(w.balance) : 'N/A', chg: 0, color: w.balance > 0 ? '#4fc3f7' : '#607d8b' }))),
             ...(rhPositions || []),
           ]).map((item, i) => (
             <span key={i} style={{ fontSize: 'var(--mc-font-badge)', fontFamily: 'var(--font-mc-mono)', color: '#607d8b' }}>
@@ -297,7 +331,7 @@ export function CommandCenterPage() {
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
           <div className="lbl">MARKET NEWS</div>
           <div style={{ fontSize: 'var(--mc-font-label)', color: '#455a64', fontFamily: 'var(--font-mc-mono)' }}>
-            {'\u2190'} / {'\u2192'} arrow keys \u00b7 {newsIdx + 1} of {news.length || 0}
+            {'←'} / {'→'} arrow keys · {newsIdx + 1} of {news.length || 0}
           </div>
         </div>
         {news.length > 0 && news[newsIdx] ? (
@@ -322,7 +356,7 @@ export function CommandCenterPage() {
               const bars = equityIntraday || [];
               if (bars.length < 2) return null;
               // Visual: vertical bars from premarket open through afterhours
-              const w = 130, h = 36, gap = 1;
+              const w = 220, h = 60, gap = 1;
               const eqs = bars.map((b: any) => Number(b.eq)).filter((v: number) => !isNaN(v));
               if (eqs.length < 2) return null;
               const baseEq = eqs[0]; // first bar = market open of the day
@@ -347,9 +381,34 @@ export function CommandCenterPage() {
         </div>
 
         <div className="cc" style={{ padding: '16px 18px' }}>
-          <div className="lbl">TOTAL RETURN</div>
-          <div style={{ fontSize: 'var(--mc-font-3xl)', fontWeight: 700, fontFamily: 'var(--font-mc-mono)', color: totalReturn >= 0 ? '#66bb6a' : '#ef5350' }}>{(totalReturn >= 0 ? '+' : '') + fmt(totalReturn, 1)}%</div>
-          <div style={{ fontSize: 'var(--mc-font-label)', color: '#455a64', marginTop: '4px' }}>From $100K</div>
+          <div className="lbl">P&amp;L SNAPSHOT</div>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', gap: '10px' }}>
+            <div style={{ minWidth: 0, flex: 1 }}>
+              <div style={{ fontSize: 'var(--mc-font-3xl)', fontWeight: 700, fontFamily: 'var(--font-mc-mono)', color: totalReturn >= 0 ? '#66bb6a' : '#ef5350' }}>{(totalReturn >= 0 ? '+' : '') + fmt(totalReturn, 1)}%</div>
+              <div style={{ fontSize: 'var(--mc-font-label)', color: '#455a64', marginTop: '2px', fontFamily: 'var(--font-mc-mono)' }}>${fmt(equity - 100000, 0)} total</div>
+              {(() => {
+                const hist = (equityHistory || []).slice().reverse();
+                if (hist.length < 2) return null;
+                const week = hist[0]?.equity ? ((equity - hist[Math.min(6, hist.length-1)].equity) / hist[Math.min(6, hist.length-1)].equity * 100) : 0;
+                return <div style={{ fontSize: 'var(--mc-font-label)', color: week >= 0 ? '#66bb6a' : '#ef5350', marginTop: '2px', fontFamily: 'var(--font-mc-mono)' }}>{week >= 0 ? '+' : ''}{fmt(week, 1)}% 7d</div>;
+              })()}
+            </div>
+            {(() => {
+              const data = (equityHistory || []).slice().reverse().map((h: any) => Number(h.equity)).filter((v: number) => !isNaN(v));
+              if (data.length < 2) return null;
+              const w = 90, h = 50;
+              const min = Math.min(...data); const max = Math.max(...data); const range = max - min || 1;
+              const pts = data.map((v: number, i: number) => `${(i / (data.length - 1)) * w},${h - ((v - min) / range) * h}`).join(' ');
+              const up = data[data.length - 1] >= data[0];
+              const color = up ? '#66bb6a' : '#ef5350';
+              return (
+                <svg width={w} height={h} style={{ display: 'block', flexShrink: 0 }}>
+                  <polyline points={pts} fill="none" stroke={color} strokeWidth="1.5" strokeLinejoin="round" strokeLinecap="round" />
+                  <circle cx={w} cy={h - ((data[data.length - 1] - min) / range) * h} r="2" fill={color} />
+                </svg>
+              );
+            })()}
+          </div>
         </div>
 
         <div className="cc" style={{ padding: '16px 18px', cursor: 'pointer' }} onClick={() => setPositionsExpanded(v => !v)}>
@@ -386,7 +445,7 @@ export function CommandCenterPage() {
             </div>
           ))}
           <div style={{ marginTop: '6px', paddingTop: '6px', borderTop: '1px solid #1a3a4a', fontSize: 'var(--mc-font-label)', fontFamily: 'var(--font-mc-mono)', textAlign: 'center', color: dirColor(consensusDir === 'BULL' ? 'BULLISH' : consensusDir === 'BEAR' ? 'BEARISH' : 'MIXED'), fontWeight: 600 }}>
-            {consensusCount}/3 {consensusDir} \u00b7 {consensusVerdict}
+            {consensusCount}/3 {consensusDir} · {consensusVerdict}
           </div>
         </div>
 
@@ -419,7 +478,7 @@ export function CommandCenterPage() {
             <span style={{ color: '#90a4ae', textAlign: 'right' }}>{aligned ? 'ALIGN' : partial ? 'PART' : 'MIX'}</span>
           </div>
           <div style={{ marginTop: '6px', paddingTop: '6px', borderTop: '1px solid #1a3a4a', fontSize: 'var(--mc-font-label)', color: tradeabilityColor, fontFamily: 'var(--font-mc-mono)', fontWeight: 600 }}>
-            \u2192 {regime?.overall_recommendation || 'No data'}
+            → {regime?.overall_recommendation || 'No data'}
           </div>
         </div>
       </div>
@@ -497,7 +556,8 @@ export function CommandCenterPage() {
           )}
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px' }}>
             {watchlist.map((sym, idx) => {
-              const q = quotes[sym];
+              const lq = liveQuotes[sym];
+              const q = quotes[sym] || (lq ? { price: lq.price, change_p: lq.changePct } : null);
               const inf = intel[sym];
               const a = inf?.analyst;
               const e = inf?.earnings;
@@ -615,7 +675,14 @@ export function CommandCenterPage() {
         <div className="cc" style={{ padding: '16px' }}>
           <div className="lbl" style={{ marginBottom: '10px', display: 'flex', justifyContent: 'space-between' }}>
             <span style={{ color: '#ce93d8' }}>KRONOS BTC FORECAST</span>
-            <span style={{ color: '#607d8b' }}>{kronosForecast?.generated_at || ''}</span>
+            <span style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+              <span style={{ color: '#4fc3f7', fontWeight: 700 }}>{kronosForecast?.symbol || kronosSymbol}</span>
+              <button onClick={() => setShowKronosInput(v => !v)} style={{ background: showKronosInput ? '#ef5350' : '#1a3a4a', color: '#e0e0e0', border: 'none', borderRadius: '3px', width: '20px', height: '20px', cursor: 'pointer', fontSize: '12px', fontWeight: 700, lineHeight: '14px', fontFamily: 'var(--font-mc-mono)' }}>{showKronosInput ? '×' : '✎'}</button>
+              {showKronosInput && (
+                <input type="text" placeholder="SYMBOL" value={kronosInput} onChange={e => setKronosInput(e.target.value.toUpperCase())} onKeyDown={e => { if (e.key === 'Enter') { const s = kronosInput.trim().toUpperCase(); if (s) setKronosSymbol(s); setKronosInput(''); setShowKronosInput(false); } else if (e.key === 'Escape') { setKronosInput(''); setShowKronosInput(false); } }} autoFocus style={{ width: '90px', background: '#0d1117', color: '#e0e0e0', border: '1px solid #1a3a4a', borderRadius: '3px', padding: '3px 6px', fontSize: 'var(--mc-font-label)', fontFamily: 'var(--font-mc-mono)', outline: 'none' }} />
+              )}
+              <span style={{ color: '#607d8b' }}>{kronosForecast?.generated_at ? new Date(kronosForecast.generated_at).toLocaleTimeString() : ''}</span>
+            </span>
           </div>
           {kronosForecast ? (
             <div>
