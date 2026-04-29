@@ -311,7 +311,7 @@
     "earlyTarget": "333.90",
     "exit1": "333.9",
     "exit1Time": 1777474877,
-    "free": 0,
+    "free": 1,
     "isWeekly": 1,
     "quote": {
       "closePrice": 323.21,
