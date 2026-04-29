@@ -5804,5 +5804,11 @@
     "message": "Reached SellTarget1 @7.47 with gain: 14.92%. Take profits and ride for next target with stops @5.23",
     "symbol": "SFM",
     "title": "SFM 75P 05/15 : SELL"
+  },
+  "1777481284": {
+    "category": "SCALP",
+    "message": "Buy below 3.17, Sell above 3.65\nScalp, VH risk",
+    "symbol": "SPY",
+    "title": "SPY 708P 4/30: BUY"
   }
 }

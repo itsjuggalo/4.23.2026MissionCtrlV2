@@ -4659,5 +4659,11 @@
     "message": "Reached Target 14.00 and that's 30.84%! Lock some in and wait for next target. Raise the stops to 10.70",
     "symbol": "AMD",
     "title": "AMD 350C 05/15 : STC"
+  },
+  "1777481292": {
+    "category": "SCALP",
+    "message": "Buy To Open at 3.19 with first target above 3.67",
+    "symbol": "SPY",
+    "title": "SPY 708P 4/30: BTO"
   }
 }
