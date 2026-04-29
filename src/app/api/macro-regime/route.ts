@@ -96,9 +96,9 @@ export async function GET() {
     fetchYahooQuote('^IRX'),  // 13-week T-bill (proxy short-term)
   ]);
 
-  // Yahoo returns ^TNX as e.g. 42.5 = 4.25%. Same for ^IRX.
-  const tenY = tnxQ ? tnxQ.price / 10 : null;
-  const twoY = irxQ ? irxQ.price / 10 : null;
+  // Yahoo returns ^TNX directly as percent (e.g. 4.42 = 4.42%). Same for ^IRX.
+  const tenY = tnxQ ? Math.round(tnxQ.price * 100) / 100 : null;
+  const twoY = irxQ ? Math.round(irxQ.price * 100) / 100 : null;
   const yieldSpread = tenY != null && twoY != null ? Math.round((tenY - twoY) * 100) / 100 : null;
 
   const stance = computeRiskStance({
