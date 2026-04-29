@@ -5810,5 +5810,11 @@
     "message": "Buy below 3.17, Sell above 3.65\nScalp, VH risk",
     "symbol": "SPY",
     "title": "SPY 708P 4/30: BUY"
+  },
+  "1777482383": {
+    "category": "SCALP",
+    "message": "Take profits at revised SellTarget 3.17.",
+    "symbol": "SPY",
+    "title": "SPY 708P 4/30: SELL"
   }
 }

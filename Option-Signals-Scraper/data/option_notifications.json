@@ -4665,5 +4665,11 @@
     "message": "Buy To Open at 3.19 with first target above 3.67",
     "symbol": "SPY",
     "title": "SPY 708P 4/30: BTO"
+  },
+  "1777482370": {
+    "category": "SCALP",
+    "message": "Take profits at revised SellTarget 3.19.",
+    "symbol": "SPY",
+    "title": "SPY 708P 4/30: STC"
   }
 }

@@ -1,4 +1,5 @@
 'use client';
+import { StockDetailDrawer } from '@/components/drawers/StockDetailDrawer';
 import { useEffect, useState, useRef } from 'react';
 
 
@@ -46,6 +47,7 @@ export function CommandCenterPage() {
   const [kronosError, setKronosError] = useState<string>('');
   const [showKronosHistory, setShowKronosHistory] = useState(false);
   const [selectedItem, setSelectedItem] = useState<{ type: string; data: any } | null>(null);
+  const [drawerTicker, setDrawerTicker] = useState<string | null>(null);
 
   const fetchData = async () => {
     try {
@@ -612,6 +614,7 @@ export function CommandCenterPage() {
                 <div
                   key={sym}
                   draggable
+                  onClick={() => setDrawerTicker(sym)}
                   onDragStart={() => setDraggedIdx(idx)}
                   onDragOver={e => e.preventDefault()}
                   onDrop={() => {
@@ -959,6 +962,7 @@ export function CommandCenterPage() {
                   <div style={{ fontSize: 'var(--mc-font-label)', color: '#607d8b' }}>ALERT TYPE</div>
                   <div style={{ fontSize: 'var(--mc-font-md)', fontWeight: 700, color: '#4fc3f7' }}>{a.AlertType || '—'}</div>
                 </div>
+                <button onClick={() => { setDrawerTicker(a.Symbol); setSelectedItem(null); }} style={{ background: 'linear-gradient(90deg, #4fc3f7 0%, #66bb6a 100%)', color: '#0d1117', border: 'none', borderRadius: '6px', padding: '12px', cursor: 'pointer', fontSize: 'var(--mc-font-md)', fontWeight: 700, fontFamily: 'var(--font-mc-mono)', letterSpacing: '1px' }}>OPEN FULL CHART + TA →</button>
                 {a.OptionSymbol && (
                   <div style={{ background: '#0d1117', padding: '10px', borderRadius: '6px' }}>
                     <div style={{ fontSize: 'var(--mc-font-label)', color: '#607d8b' }}>OCC SYMBOL</div>
@@ -1001,6 +1005,8 @@ export function CommandCenterPage() {
           })()}
         </div>
       )}
+      <StockDetailDrawer ticker={drawerTicker} onClose={() => setDrawerTicker(null)} />
+
 
       </div>
     </div>
