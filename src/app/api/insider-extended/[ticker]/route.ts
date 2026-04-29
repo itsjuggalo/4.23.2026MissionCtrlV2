@@ -154,9 +154,78 @@ async function fetchSecForm4(ticker: string): Promise<any> {
   }
 }
 
+
+// ============ CONGRESS DATA via Quiver /beta/live/congresstrading (FREE, no auth) ============
+// Returns the full firehose (~1000 recent trades, ~430KB). We cache it server-side
+// for 30 min and filter by ticker per request - one bulk download serves all symbols.
+let CONGRESS_BULK_CACHE: { ts: number; data: any[] } | null = null;
+async function loadCongressBulk(): Promise<any[]> {
+  if (CONGRESS_BULK_CACHE && Date.now() - CONGRESS_BULK_CACHE.ts < CACHE_TTL_MS) {
+    return CONGRESS_BULK_CACHE.data;
+  }
+  // Try disk cache
+  const diskCached = await readCache('quiver_bulk');
+  if (diskCached) {
+    CONGRESS_BULK_CACHE = { ts: Date.now(), data: diskCached };
+    return diskCached;
+  }
+  try {
+    const res = await fetch('https://api.quiverquant.com/beta/live/congresstrading', {
+      headers: { 'Accept': 'application/json', 'User-Agent': 'Mozilla/5.0' },
+    });
+    if (!res.ok) return [];
+    const arr = await res.json();
+    if (!Array.isArray(arr)) return [];
+    CONGRESS_BULK_CACHE = { ts: Date.now(), data: arr };
+    await writeCache('quiver_bulk', arr);
+    return arr;
+  } catch {
+    return [];
+  }
+}
+
+async function fetchCongressForTicker(ticker: string): Promise<any> {
+  const all = await loadCongressBulk();
+  const tk = ticker.toUpperCase();
+  const ninetyDaysAgo = Date.now() - 90 * 86400000;
+  const filtered = all.filter((t: any) => {
+    if ((t.Ticker || '').toUpperCase() !== tk) return false;
+    const d = new Date(t.TransactionDate || 0).getTime();
+    return d > ninetyDaysAgo;
+  });
+  const trades = filtered.map((t: any) => ({
+    name: t.Representative || 'Unknown',
+    party: t.Party || '',
+    chamber: t.House === 'Senate' ? 'Senate' : 'House',
+    date: t.TransactionDate || '',
+    reported: t.ReportDate || '',
+    type: String(t.Transaction || '').toLowerCase().includes('purchase') ? 'BUY' :
+          String(t.Transaction || '').toLowerCase().includes('sale') ? 'SELL' : 'OTHER',
+    amount: t.Range || '',
+    excessReturn: t.ExcessReturn != null ? Number(t.ExcessReturn) : null,
+  })).sort((a: any, b: any) => new Date(b.date).getTime() - new Date(a.date).getTime());
+  // Quick aggregate: net direction (buy count - sell count)
+  let buyCount = 0, sellCount = 0;
+  for (const t of trades) {
+    if (t.type === 'BUY') buyCount++;
+    else if (t.type === 'SELL') sellCount++;
+  }
+  return {
+    count: trades.length,
+    buyCount,
+    sellCount,
+    netDirection: buyCount - sellCount,
+    trades: trades.slice(0, 10),
+    source: 'quiver_bulk_free',
+  };
+}
+
 export async function GET(_req: Request, { params }: { params: Promise<{ ticker: string }> }) {
   const { ticker } = await params;
   const tk = ticker.toUpperCase();
-  const insider = await fetchSecForm4(tk);
-  return NextResponse.json({ ticker: tk, insider });
+  const [insider, congress] = await Promise.all([
+    fetchSecForm4(tk),
+    fetchCongressForTicker(tk),
+  ]);
+  return NextResponse.json({ ticker: tk, insider, congress });
 }
