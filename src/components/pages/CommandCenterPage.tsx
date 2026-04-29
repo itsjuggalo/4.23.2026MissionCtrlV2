@@ -28,6 +28,8 @@ export function CommandCenterPage() {
   const [positionsExpanded, setPositionsExpanded] = useState(false);
   const [newsIdx, setNewsIdx] = useState(0);
   const newsTickerRef = useRef<HTMLDivElement>(null);
+  const tvContainerRef = useRef<HTMLDivElement>(null);
+  const tvLoadedRef = useRef(false);
 
   const fetchData = async () => {
     try {
@@ -94,6 +96,50 @@ export function CommandCenterPage() {
     window.addEventListener('keydown', onKey);
     return () => window.removeEventListener('keydown', onKey);
   }, [dashData]);
+
+  // TradingView widget loader for BTC SuperTrend chart
+  useEffect(() => {
+    if (tvLoadedRef.current) return;
+    const initWidget = () => {
+      if (!tvContainerRef.current) return;
+      const TV = (window as any).TradingView;
+      if (!TV || !TV.widget) return;
+      try {
+        new TV.widget({
+          width: '100%',
+          height: 280,
+          symbol: 'BITSTAMP:BTCUSD',
+          interval: '60',
+          timezone: 'America/New_York',
+          theme: 'dark',
+          style: '1',
+          locale: 'en',
+          toolbar_bg: '#0d1117',
+          enable_publishing: false,
+          hide_top_toolbar: false,
+          hide_legend: false,
+          allow_symbol_change: true,
+          studies: ['STD;Supertrend'],
+          container_id: 'tv_btc_supertrend',
+        });
+        tvLoadedRef.current = true;
+      } catch (e) { console.error('TV widget init failed', e); }
+    };
+    if ((window as any).TradingView && (window as any).TradingView.widget) {
+      initWidget();
+    } else {
+      const existing = document.querySelector('script[src="https://s3.tradingview.com/tv.js"]') as HTMLScriptElement | null;
+      if (existing) {
+        existing.addEventListener('load', initWidget);
+      } else {
+        const script = document.createElement('script');
+        script.src = 'https://s3.tradingview.com/tv.js';
+        script.async = true;
+        script.onload = initWidget;
+        document.head.appendChild(script);
+      }
+    }
+  }, []);
 
   const equity = parseFloat(portfolio?.equity || portfolio?.balance || '0');
   const lastEq = parseFloat(portfolio?.last_equity || '0');
@@ -312,6 +358,15 @@ export function CommandCenterPage() {
           </div>
         </div>
       )}
+
+      {/* TRADINGVIEW SUPERTREND MINI CHART (BTCUSD 1H) */}
+      <div className="cc" style={{ padding: '12px 14px', marginBottom: '12px' }}>
+        <div className="lbl" style={{ marginBottom: '8px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+          <span>BTC/USD · 1H · SUPERTREND LIVE</span>
+          <span style={{ color: '#607d8b', fontSize: 'var(--mc-font-label)', fontFamily: 'var(--font-mc-mono)' }}>via TradingView</span>
+        </div>
+        <div id="tv_btc_supertrend" ref={tvContainerRef} style={{ height: '280px', width: '100%' }} />
+      </div>
 
       {/* WATCHLIST CARDS + PIPELINE */}
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px', marginBottom: '12px' }}>
