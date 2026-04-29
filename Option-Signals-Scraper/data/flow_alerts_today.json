@@ -29,7 +29,7 @@
     "quote": {
       "DayHigh": 14.4,
       "High": 11.35,
-      "Last": 10.05,
+      "Last": 10.25,
       "Low": 10.05,
       "free": 0
     }
@@ -38,7 +38,7 @@
     "alert": {
       "AlertPrice": 9.97,
       "AlertType": "weekly_flow",
-      "BLOCKS": 3,
+      "BLOCKS": 4,
       "DTE": 2,
       "Expiry": 1777608000,
       "NotifyAlert": 0,
@@ -47,24 +47,24 @@
       "OptionSymbol": "AMD260501C00330000",
       "OptionType": "CALL",
       "SWEEPS": 14,
-      "Spot": 328.3794117647059,
+      "Spot": 328.315,
       "Strike": 330.0,
       "Symbol": "AMD",
       "Time": 1777473908000,
       "UnderlyingType": "STOCK",
-      "Updated": 1777478520000,
-      "Volume": 1925,
+      "Updated": 1777479931000,
+      "Volume": 2425,
       "isBullish": true,
       "last_alert_flow_count": 15,
       "option_activity_type": "AUTO",
-      "totalFlowCount": 17,
-      "totalFlowValue": 1630610,
-      "trade_count": 109
+      "totalFlowCount": 18,
+      "totalFlowValue": 2030610,
+      "trade_count": 110
     },
     "quote": {
       "DayHigh": 11.4,
       "High": 11.4,
-      "Last": 7.55,
+      "Last": 7.79,
       "Low": 7.55,
       "free": 0
     }
@@ -99,7 +99,7 @@
     "quote": {
       "DayHigh": 6.7,
       "High": 6.7,
-      "Last": 4.05,
+      "Last": 4.2,
       "Low": 4.05,
       "free": 0
     }
@@ -134,7 +134,7 @@
     "quote": {
       "DayHigh": 29,
       "High": 29,
-      "Last": 25.6,
+      "Last": 25,
       "Low": 21.05,
       "free": 1
     }
@@ -169,7 +169,7 @@
     "quote": {
       "DayHigh": 25.99,
       "High": 25.99,
-      "Last": 23,
+      "Last": 22.75,
       "Low": 20.7,
       "free": 1
     }
@@ -239,8 +239,8 @@
     "quote": {
       "DayHigh": 13,
       "High": 11.8,
-      "Last": 10.84,
-      "Low": 10.84,
+      "Last": 10.75,
+      "Low": 10.74,
       "free": 0
     }
   },
@@ -275,7 +275,7 @@
       "DayHigh": 11.58,
       "High": 11.58,
       "Last": 9.5,
-      "Low": 9.5,
+      "Low": 9.46,
       "free": 0
     }
   },
@@ -291,26 +291,26 @@
       "OI": 7751,
       "OptionSymbol": "AMZN260501C00265000",
       "OptionType": "CALL",
-      "SWEEPS": 8,
-      "Spot": 264.0422222222222,
+      "SWEEPS": 9,
+      "Spot": 263.85,
       "Strike": 265.0,
       "Symbol": "AMZN",
       "Time": 1777475492000,
       "UnderlyingType": "STOCK",
-      "Updated": 1777477871001,
-      "Volume": 1728,
+      "Updated": 1777479831000,
+      "Volume": 1803,
       "isBullish": true,
       "last_alert_flow_count": 7,
       "option_activity_type": "AUTO",
-      "totalFlowCount": 9,
-      "totalFlowValue": 1616362,
-      "trade_count": 86
+      "totalFlowCount": 10,
+      "totalFlowValue": 1678947,
+      "trade_count": 88
     },
     "quote": {
       "DayHigh": 10.31,
       "High": 9.75,
-      "Last": 8.32,
-      "Low": 8.32,
+      "Last": 8.35,
+      "Low": 8.3,
       "free": 0
     }
   },
@@ -345,7 +345,7 @@
       "DayHigh": 7.95,
       "High": 7.1,
       "Last": 6.25,
-      "Low": 6.25,
+      "Low": 6.2,
       "free": 0
     }
   },
@@ -379,7 +379,7 @@
     "quote": {
       "DayHigh": 5.83,
       "High": 4.5,
-      "Last": 4.5,
+      "Last": 4.46,
       "Low": 3.95,
       "free": 0
     }
@@ -414,8 +414,8 @@
     "quote": {
       "DayHigh": 14.65,
       "High": 13.81,
-      "Last": 12.5,
-      "Low": 12.5,
+      "Last": 12.35,
+      "Low": 12.35,
       "free": 0
     }
   },
@@ -449,8 +449,8 @@
     "quote": {
       "DayHigh": 9.56,
       "High": 9.56,
-      "Last": 7.9,
-      "Low": 7.9,
+      "Last": 7.82,
+      "Low": 7.82,
       "free": 0
     }
   },
@@ -484,7 +484,7 @@
     "quote": {
       "DayHigh": 5.9,
       "High": 5.9,
-      "Last": 4.75,
+      "Last": 4.69,
       "Low": 4.63,
       "free": 1
     }
@@ -589,8 +589,8 @@
     "quote": {
       "DayHigh": 14.45,
       "High": 14.45,
-      "Last": 12.55,
-      "Low": 12.55,
+      "Last": 12.48,
+      "Low": 12.48,
       "free": 0
     }
   },
@@ -659,7 +659,7 @@
     "quote": {
       "DayHigh": 9.3,
       "High": 9.3,
-      "Last": 8.25,
+      "Last": 8.14,
       "Low": 6.87,
       "free": 1
     }
@@ -1044,7 +1044,7 @@
     "quote": {
       "DayHigh": 19.75,
       "High": 19.75,
-      "Last": 17.5,
+      "Last": 17.95,
       "Low": 17.5,
       "free": 0
     }
@@ -1114,8 +1114,8 @@
     "quote": {
       "DayHigh": 13.05,
       "High": 13.05,
-      "Last": 9.73,
-      "Low": 9.73,
+      "Last": 9.6,
+      "Low": 9.6,
       "free": 0
     }
   },
@@ -1149,7 +1149,7 @@
     "quote": {
       "DayHigh": 4.64,
       "High": 4.64,
-      "Last": 3,
+      "Last": 3.05,
       "Low": 3,
       "free": 1
     }
@@ -1259,6 +1259,41 @@
       "free": 0
     }
   },
+  "GPRE260515C00017000": {
+    "alert": {
+      "AlertPrice": 1.35,
+      "AlertType": "unusual_high_flow",
+      "BLOCKS": 0,
+      "DTE": 16,
+      "Expiry": 1778817600,
+      "NotifyAlert": 1,
+      "NumOfAlerts": 0,
+      "OI": 231,
+      "OptionSymbol": "GPRE260515C00017000",
+      "OptionType": "CALL",
+      "SWEEPS": 1,
+      "Spot": 16.94,
+      "Strike": 17.0,
+      "Symbol": "GPRE",
+      "Time": 1777479764000,
+      "UnderlyingType": "STOCK",
+      "Updated": 1777479764000,
+      "Volume": 5000,
+      "isBullish": true,
+      "last_alert_flow_count": -1,
+      "option_activity_type": "ISOI",
+      "totalFlowCount": 1,
+      "totalFlowValue": 674962,
+      "trade_count": 59
+    },
+    "quote": {
+      "DayHigh": 1.35,
+      "High": 1.35,
+      "Last": 1.35,
+      "Low": 1.35,
+      "free": 0
+    }
+  },
   "HOOD270115P00110000": {
     "alert": {
       "AlertPrice": 43.35,
@@ -1324,7 +1359,7 @@
     "quote": {
       "DayHigh": 4.75,
       "High": 4.75,
-      "Last": 3.68,
+      "Last": 3.6,
       "Low": 3.42,
       "free": 0
     }
@@ -1359,7 +1394,7 @@
     "quote": {
       "DayHigh": 4.13,
       "High": 3.6,
-      "Last": 3.25,
+      "Last": 3.2,
       "Low": 3.2,
       "free": 0
     }
@@ -1394,8 +1429,8 @@
     "quote": {
       "DayHigh": 3.2,
       "High": 2.74,
-      "Last": 2.4,
-      "Low": 2.4,
+      "Last": 2.39,
+      "Low": 2.39,
       "free": 0
     }
   },
@@ -1429,7 +1464,7 @@
     "quote": {
       "DayHigh": 9,
       "High": 9,
-      "Last": 7.9,
+      "Last": 7.87,
       "Low": 5.3,
       "free": 1
     }
@@ -1464,7 +1499,7 @@
     "quote": {
       "DayHigh": 6.5,
       "High": 6.5,
-      "Last": 5.65,
+      "Last": 5.6,
       "Low": 5.5,
       "free": 0
     }
@@ -1499,8 +1534,8 @@
     "quote": {
       "DayHigh": 4.7,
       "High": 4.7,
-      "Last": 3.95,
-      "Low": 3.95,
+      "Last": 3.9,
+      "Low": 3.9,
       "free": 0
     }
   },
@@ -1546,25 +1581,25 @@
       "BLOCKS": 5,
       "DTE": 50,
       "Expiry": 1781755200,
-      "NotifyAlert": 1,
+      "NotifyAlert": 0,
       "NumOfAlerts": 2,
       "OI": 10110,
       "OptionSymbol": "INTC260618C00100000",
       "OptionType": "CALL",
-      "SWEEPS": 11,
-      "Spot": 90.349375,
+      "SWEEPS": 12,
+      "Spot": 90.47588235294117,
       "Strike": 100.0,
       "Symbol": "INTC",
       "Time": 1777474527000,
       "UnderlyingType": "STOCK",
-      "Updated": 1777477426000,
-      "Volume": 3675,
+      "Updated": 1777479767000,
+      "Volume": 3762,
       "isBullish": true,
       "last_alert_flow_count": 16,
       "option_activity_type": "AUTO",
-      "totalFlowCount": 16,
-      "totalFlowValue": 2340809,
-      "trade_count": 117
+      "totalFlowCount": 17,
+      "totalFlowValue": 2408235,
+      "trade_count": 133
     },
     "quote": {
       "DayHigh": 8.6,
@@ -1604,7 +1639,7 @@
     "quote": {
       "DayHigh": 11.1,
       "High": 11.1,
-      "Last": 10.4,
+      "Last": 10.25,
       "Low": 7.6,
       "free": 1
     }
@@ -1639,7 +1674,7 @@
     "quote": {
       "DayHigh": 18,
       "High": 16.8,
-      "Last": 16.45,
+      "Last": 16.55,
       "Low": 15.94,
       "free": 0
     }
@@ -1709,9 +1744,37 @@
     "quote": {
       "DayHigh": 1.06,
       "High": 1.06,
-      "Last": 0.81,
+      "Last": 0.77,
       "Low": 0.34,
       "free": 1
+    }
+  },
+  "IWM260515P00270000": {
+    "alert": {
+      "AlertPrice": 4.78,
+      "AlertType": "repeat_flow_etf",
+      "BLOCKS": 0,
+      "DTE": 16,
+      "Expiry": 1778817600,
+      "NotifyAlert": 0,
+      "NumOfAlerts": 1,
+      "OI": 84789,
+      "OptionSymbol": "IWM260515P00270000",
+      "OptionType": "PUT",
+      "SWEEPS": 7,
+      "Spot": 271.5514285714286,
+      "Strike": 270.0,
+      "Symbol": "IWM",
+      "Time": 1777479864000,
+      "UnderlyingType": "ETF",
+      "Updated": 1777479906000,
+      "Volume": 6479,
+      "isBullish": false,
+      "last_alert_flow_count": 6,
+      "option_activity_type": "AUTO",
+      "totalFlowCount": 7,
+      "totalFlowValue": 3100717,
+      "trade_count": 289
     }
   },
   "IWM260618P00262000": {
@@ -1742,9 +1805,9 @@
       "trade_count": 56
     },
     "quote": {
-      "DayHigh": 5.62,
-      "High": 5.62,
-      "Last": 5.62,
+      "DayHigh": 5.64,
+      "High": 5.64,
+      "Last": 5.6,
       "Low": 5.56,
       "free": 0
     }
@@ -1919,8 +1982,8 @@
     "quote": {
       "DayHigh": 16.5,
       "High": 16.5,
-      "Last": 14.22,
-      "Low": 14.22,
+      "Last": 14.15,
+      "Low": 14.15,
       "free": 0
     }
   },
@@ -1954,9 +2017,37 @@
     "quote": {
       "DayHigh": 15,
       "High": 15,
-      "Last": 12.65,
-      "Low": 12.65,
+      "Last": 12.5,
+      "Low": 12.5,
       "free": 0
+    }
+  },
+  "MSFT260618P00515000": {
+    "alert": {
+      "AlertPrice": 94.0,
+      "AlertType": "unusual_high_flow",
+      "BLOCKS": 0,
+      "DTE": 50,
+      "Expiry": 1781755200,
+      "NotifyAlert": 1,
+      "NumOfAlerts": 0,
+      "OI": 195,
+      "OptionSymbol": "MSFT260618P00515000",
+      "OptionType": "PUT",
+      "SWEEPS": 1,
+      "Spot": 422.62,
+      "Strike": 515.0,
+      "Symbol": "MSFT",
+      "Time": 1777479842000,
+      "UnderlyingType": "STOCK",
+      "Updated": 1777479842000,
+      "Volume": 250,
+      "isBullish": true,
+      "last_alert_flow_count": -1,
+      "option_activity_type": "AUTO",
+      "totalFlowCount": 1,
+      "totalFlowValue": 2350000,
+      "trade_count": 2
     }
   },
   "MSTR260515C00162500": {
@@ -2024,7 +2115,7 @@
     "quote": {
       "DayHigh": 13.2,
       "High": 9.28,
-      "Last": 8.85,
+      "Last": 8.7,
       "Low": 8.5,
       "free": 0
     }
@@ -2059,8 +2150,8 @@
     "quote": {
       "DayHigh": 22.3,
       "High": 19.59,
-      "Last": 14.68,
-      "Low": 14.68,
+      "Last": 14.75,
+      "Low": 14.25,
       "free": 0
     }
   },
@@ -2092,9 +2183,9 @@
       "trade_count": 52
     },
     "quote": {
-      "DayHigh": 21.88,
-      "High": 21.88,
-      "Last": 21.88,
+      "DayHigh": 22.54,
+      "High": 22.54,
+      "Last": 22.5,
       "Low": 17.34,
       "free": 0
     }
@@ -2129,7 +2220,7 @@
     "quote": {
       "DayHigh": 28.5,
       "High": 26.4,
-      "Last": 22.22,
+      "Last": 22.6,
       "Low": 22.22,
       "free": 0
     }
@@ -2269,7 +2360,7 @@
     "quote": {
       "DayHigh": 3.7,
       "High": 2.67,
-      "Last": 1.26,
+      "Last": 1.48,
       "Low": 1.26,
       "free": 0
     }
@@ -2304,7 +2395,7 @@
     "quote": {
       "DayHigh": 2.14,
       "High": 1.41,
-      "Last": 0.43,
+      "Last": 0.52,
       "Low": 0.43,
       "free": 0
     }
@@ -2339,7 +2430,7 @@
     "quote": {
       "DayHigh": 4.6,
       "High": 4.4,
-      "Last": 3.8,
+      "Last": 3.88,
       "Low": 3.8,
       "free": 0
     }
@@ -2514,8 +2605,8 @@
     "quote": {
       "DayHigh": 8.35,
       "High": 8.35,
-      "Last": 7.6,
-      "Low": 7.6,
+      "Last": 7.2,
+      "Low": 7.2,
       "free": 0
     }
   },
@@ -2549,7 +2640,7 @@
     "quote": {
       "DayHigh": 3.01,
       "High": 3.01,
-      "Last": 2.07,
+      "Last": 2,
       "Low": 1.81,
       "free": 1
     }
@@ -2584,7 +2675,7 @@
     "quote": {
       "DayHigh": 8.29,
       "High": 7.85,
-      "Last": 7.7,
+      "Last": 7.65,
       "Low": 7.41,
       "free": 0
     }
@@ -2654,7 +2745,7 @@
     "quote": {
       "DayHigh": 5.27,
       "High": 5.27,
-      "Last": 3.48,
+      "Last": 3.65,
       "Low": 3.32,
       "free": 1
     }
@@ -2666,30 +2757,30 @@
       "BLOCKS": 1,
       "DTE": 0,
       "Expiry": 1777435200,
-      "NotifyAlert": 0,
-      "NumOfAlerts": 2,
+      "NotifyAlert": 1,
+      "NumOfAlerts": 3,
       "OI": 2374,
       "OptionSymbol": "QQQ260429C00659000",
       "OptionType": "CALL",
-      "SWEEPS": 15,
-      "Spot": 659.615,
+      "SWEEPS": 17,
+      "Spot": 659.5144444444445,
       "Strike": 659.0,
       "Symbol": "QQQ",
       "Time": 1777473131000,
       "UnderlyingType": "ETF",
-      "Updated": 1777479041000,
-      "Volume": 5108,
+      "Updated": 1777479945000,
+      "Volume": 5541,
       "isBullish": false,
-      "last_alert_flow_count": 12,
+      "last_alert_flow_count": 18,
       "option_activity_type": "AUTO",
-      "totalFlowCount": 16,
-      "totalFlowValue": 1860252,
-      "trade_count": 204
+      "totalFlowCount": 18,
+      "totalFlowValue": 1990921,
+      "trade_count": 233
     },
     "quote": {
       "DayHigh": 4.6,
       "High": 4.6,
-      "Last": 2.95,
+      "Last": 3.1,
       "Low": 2.95,
       "free": 0
     }
@@ -2724,7 +2815,7 @@
     "quote": {
       "DayHigh": 4,
       "High": 3.78,
-      "Last": 2.47,
+      "Last": 2.62,
       "Low": 2.47,
       "free": 0
     }
@@ -2759,7 +2850,7 @@
     "quote": {
       "DayHigh": 1.95,
       "High": 1.3,
-      "Last": 1.26,
+      "Last": 1.18,
       "Low": 0.9,
       "free": 0
     }
@@ -2794,7 +2885,7 @@
     "quote": {
       "DayHigh": 5.13,
       "High": 3.9,
-      "Last": 3.87,
+      "Last": 3.69,
       "Low": 3.27,
       "free": 0
     }
@@ -2829,7 +2920,7 @@
     "quote": {
       "DayHigh": 5.77,
       "High": 4.49,
-      "Last": 4.47,
+      "Last": 4.32,
       "Low": 3.38,
       "free": 0
     }
@@ -2864,7 +2955,7 @@
     "quote": {
       "DayHigh": 7.07,
       "High": 7.07,
-      "Last": 5.88,
+      "Last": 5.94,
       "Low": 5.46,
       "free": 0
     }
@@ -2899,7 +2990,7 @@
     "quote": {
       "DayHigh": 7.94,
       "High": 7,
-      "Last": 7,
+      "Last": 6.77,
       "Low": 5.91,
       "free": 0
     }
@@ -2934,7 +3025,7 @@
     "quote": {
       "DayHigh": 8.06,
       "High": 8.06,
-      "Last": 7.61,
+      "Last": 7.37,
       "Low": 6.79,
       "free": 0
     }
@@ -3038,8 +3129,8 @@
     },
     "quote": {
       "DayHigh": 33.84,
-      "High": 33,
-      "Last": 33,
+      "High": 33.7,
+      "Last": 33.7,
       "Low": 31.65,
       "free": 0
     }
@@ -3144,7 +3235,7 @@
     "quote": {
       "DayHigh": 3.57,
       "High": 3.57,
-      "Last": 2.12,
+      "Last": 2.24,
       "Low": 2.02,
       "free": 1
     }
@@ -3179,7 +3270,7 @@
     "quote": {
       "DayHigh": 2.91,
       "High": 2.91,
-      "Last": 1.63,
+      "Last": 1.73,
       "Low": 1.56,
       "free": 1
     }
@@ -3214,7 +3305,7 @@
     "quote": {
       "DayHigh": 1.79,
       "High": 1.59,
-      "Last": 1.42,
+      "Last": 1.32,
       "Low": 1.21,
       "free": 0
     }
@@ -3249,7 +3340,7 @@
     "quote": {
       "DayHigh": 3.24,
       "High": 3.24,
-      "Last": 2.71,
+      "Last": 2.58,
       "Low": 2.13,
       "free": 1
     }
@@ -3284,7 +3375,7 @@
     "quote": {
       "DayHigh": 6.14,
       "High": 6.14,
-      "Last": 5.53,
+      "Last": 5.35,
       "Low": 3.91,
       "free": 0
     }
@@ -3319,7 +3410,7 @@
     "quote": {
       "DayHigh": 4.57,
       "High": 4.03,
-      "Last": 3.36,
+      "Last": 3.5,
       "Low": 3.24,
       "free": 0
     }
@@ -3354,7 +3445,7 @@
     "quote": {
       "DayHigh": 5.6,
       "High": 5.6,
-      "Last": 5.4,
+      "Last": 5.35,
       "Low": 5.16,
       "free": 0
     }
@@ -3423,8 +3514,8 @@
     },
     "quote": {
       "DayHigh": 9.85,
-      "High": 9.73,
-      "Last": 9.73,
+      "High": 9.78,
+      "Last": 9.76,
       "Low": 9.71,
       "free": 0
     }
@@ -3739,7 +3830,7 @@
     "quote": {
       "DayHigh": 2.5,
       "High": 2.12,
-      "Last": 1.57,
+      "Last": 1.37,
       "Low": 0.78,
       "free": 0
     }
@@ -3774,7 +3865,7 @@
     "quote": {
       "DayHigh": 5.65,
       "High": 5.65,
-      "Last": 4.65,
+      "Last": 4.45,
       "Low": 2.7,
       "free": 0
     }
@@ -3809,7 +3900,7 @@
     "quote": {
       "DayHigh": 7.02,
       "High": 6.4,
-      "Last": 3.9,
+      "Last": 3.95,
       "Low": 3.77,
       "free": 0
     }
@@ -3844,7 +3935,7 @@
     "quote": {
       "DayHigh": 5.63,
       "High": 5.63,
-      "Last": 4.98,
+      "Last": 4.85,
       "Low": 4.4,
       "free": 0
     }
@@ -3879,7 +3970,7 @@
     "quote": {
       "DayHigh": 6.97,
       "High": 6.23,
-      "Last": 6.23,
+      "Last": 6.1,
       "Low": 5.7,
       "free": 0
     }
@@ -3914,7 +4005,7 @@
     "quote": {
       "DayHigh": 8.5,
       "High": 8.5,
-      "Last": 7.81,
+      "Last": 7.59,
       "Low": 6.1,
       "free": 0
     }
@@ -4019,7 +4110,7 @@
     "quote": {
       "DayHigh": 9.17,
       "High": 8.73,
-      "Last": 8.72,
+      "Last": 8.65,
       "Low": 8.6,
       "free": 0
     }

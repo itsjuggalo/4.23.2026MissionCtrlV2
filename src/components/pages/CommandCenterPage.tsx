@@ -41,6 +41,10 @@ export function CommandCenterPage() {
   const [kronosSymbol, setKronosSymbol] = useState<string>('BTCUSDT');
   const [showKronosInput, setShowKronosInput] = useState(false);
   const [kronosInput, setKronosInput] = useState('');
+  const [kronosHistory, setKronosHistory] = useState<string[]>([]);
+  const [kronosLoading, setKronosLoading] = useState(false);
+  const [kronosError, setKronosError] = useState<string>('');
+  const [showKronosHistory, setShowKronosHistory] = useState(false);
 
   const fetchData = async () => {
     try {
@@ -56,6 +60,15 @@ export function CommandCenterPage() {
     } catch (e) { console.error(e); }
     finally { setLoading(false); }
     fetch('/api/pipeline-feed').then(r => r.ok ? r.json() : null).then(d => { if (d?.events) setPipelineFeed(d.events); }).catch(() => {});
+    // Options flow refresh (was only in mount, now in 10s loop)
+    fetch('/api/options-flow').then(r => r.ok ? r.json() : { flows: [], alerts: [] }).then(d => {
+      const flows = d.flows || [];
+      const alerts = d.alerts || [];
+      const unusual: any = flows.filter((f: any) => f.Volume > f.OI && f.OI >= 0).sort((a: any, b: any) => b.Time - a.Time).slice(0, 10);
+      unusual._allAlerts = alerts;
+      unusual._allFlows = flows;
+      setUnusualFlows(unusual);
+    }).catch(() => {});
   };
 
   useEffect(() => {
@@ -65,6 +78,7 @@ export function CommandCenterPage() {
       const alerts = d.alerts || [];
       const unusual: any = flows.filter((f: any) => f.Volume > f.OI && f.OI >= 0).sort((a: any, b: any) => b.Time - a.Time).slice(0, 10);
       unusual._allAlerts = alerts;
+      unusual._allFlows = flows;
       setUnusualFlows(unusual);
     }).catch(() => {});
     fetch('/api/kronos-forecast?symbol=' + encodeURIComponent(kronosSymbol)).then(r => r.ok ? r.json() : null).then(d => { if (d) setKronosForecast(d); }).catch(() => {});
@@ -73,6 +87,7 @@ export function CommandCenterPage() {
       const alerts = d.alerts || [];
       const unusual: any = flows.filter((f: any) => f.Volume > f.OI && f.OI >= 0).sort((a: any, b: any) => b.Time - a.Time).slice(0, 10);
       unusual._allAlerts = alerts;
+      unusual._allFlows = flows;
       setUnusualFlows(unusual);
     }).catch(() => {});
     fetch('/api/kronos-forecast?symbol=' + encodeURIComponent(kronosSymbol)).then(r => r.ok ? r.json() : null).then(d => { if (d) setKronosForecast(d); }).catch(() => {});
@@ -159,10 +174,38 @@ export function CommandCenterPage() {
     return () => clearInterval(iv);
   }, []);
 
-  // Refetch Kronos when symbol changes
+  // Refetch Kronos when symbol changes — handles 404 + updates history
   useEffect(() => {
-    fetch('/api/kronos-forecast?symbol=' + encodeURIComponent(kronosSymbol)).then(r => r.ok ? r.json() : null).then(d => { if (d) setKronosForecast(d); }).catch(() => {});
+    setKronosError(''); setKronosLoading(true);
+    fetch('/api/kronos-forecast?symbol=' + encodeURIComponent(kronosSymbol))
+      .then(async r => {
+        if (r.ok) { return r.json(); }
+        const j = await r.json().catch(() => ({}));
+        if (j.missing) {
+          setKronosError('No forecast for ' + kronosSymbol + '. Click GENERATE to create one (~3 min).');
+        } else {
+          setKronosError(j.error || 'Failed to load forecast');
+        }
+        return null;
+      })
+      .then(d => { if (d) { setKronosForecast(d); setKronosError(''); } })
+      .catch(() => setKronosError('Network error'))
+      .finally(() => setKronosLoading(false));
+    // Update history (de-dupe, prepend, cap 10)
+    setKronosHistory(prev => {
+      const next = [kronosSymbol, ...prev.filter(s => s !== kronosSymbol)].slice(0, 10);
+      try { localStorage.setItem('cc-kronos-history', JSON.stringify(next)); } catch {}
+      return next;
+    });
   }, [kronosSymbol]);
+
+  // Load Kronos history from localStorage
+  useEffect(() => {
+    try {
+      const h = localStorage.getItem('cc-kronos-history');
+      if (h) setKronosHistory(JSON.parse(h));
+    } catch {}
+  }, []);
 
   // Persist Kronos symbol
   useEffect(() => {
@@ -695,7 +738,7 @@ export function CommandCenterPage() {
 
         <div className="cc" style={{ padding: '16px' }}>
           <div className="lbl" style={{ marginBottom: '10px', display: 'flex', justifyContent: 'space-between' }}>
-            <span style={{ color: '#ce93d8' }}>KRONOS BTC FORECAST</span>
+            <span style={{ color: '#ce93d8' }}>KRONOS {kronosForecast?.symbol || kronosSymbol} FORECAST</span>
             <span style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
               <span style={{ color: '#4fc3f7', fontWeight: 700 }}>{kronosForecast?.symbol || kronosSymbol}</span>
               <button onClick={() => setShowKronosInput(v => !v)} style={{ background: showKronosInput ? '#ef5350' : '#1a3a4a', color: '#e0e0e0', border: 'none', borderRadius: '3px', width: '20px', height: '20px', cursor: 'pointer', fontSize: '12px', fontWeight: 700, lineHeight: '14px', fontFamily: 'var(--font-mc-mono)' }}>{showKronosInput ? '×' : '✎'}</button>
@@ -705,6 +748,16 @@ export function CommandCenterPage() {
               <span style={{ color: '#607d8b' }}>{kronosForecast?.generated_at ? new Date(kronosForecast.generated_at).toLocaleTimeString() : ''}</span>
             </span>
           </div>
+          {showKronosHistory && kronosHistory.length > 0 && (
+            <div className="kronos-history-dropdown" style={{ display: 'flex', flexWrap: 'wrap', gap: '6px', padding: '8px', background: '#0d1117', borderRadius: '4px', marginBottom: '8px', border: '1px solid #1a3a4a' }}>
+              <span style={{ fontSize: 'var(--mc-font-label)', color: '#607d8b', fontFamily: 'var(--font-mc-mono)', marginRight: '4px' }}>RECENT:</span>
+              {kronosHistory.map((s: string) => (
+                <button key={s} onClick={() => { setKronosSymbol(s); setShowKronosHistory(false); }} style={{ background: s === kronosSymbol ? '#4fc3f7' : '#1a3a4a', color: s === kronosSymbol ? '#0d1117' : '#e0e0e0', border: 'none', borderRadius: '3px', padding: '3px 8px', cursor: 'pointer', fontSize: 'var(--mc-font-label)', fontWeight: 700, fontFamily: 'var(--font-mc-mono)' }}>{s}</button>
+              ))}
+            </div>
+          )}
+          {kronosError && <div style={{ color: '#ff9800', fontSize: 'var(--mc-font-label)', fontFamily: 'var(--font-mc-mono)', marginBottom: '8px', padding: '6px 8px', background: '#ff980015', borderLeft: '2px solid #ff9800', borderRadius: '3px' }}>{kronosError}</div>}
+          {kronosLoading && !kronosError && <div style={{ color: '#4fc3f7', fontSize: 'var(--mc-font-label)', fontFamily: 'var(--font-mc-mono)', marginBottom: '8px' }}>Loading {kronosSymbol}...</div>}
           {kronosForecast ? (
             <div>
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '8px', marginBottom: '12px' }}>
@@ -760,10 +813,10 @@ export function CommandCenterPage() {
           <div className="lbl" style={{ marginBottom: '10px' }}>FLOW SUMMARY</div>
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px' }}>
             {[
-              { l: 'TOTAL FLOWS', v: unusualFlows.length.toString(), c: '#4fc3f7' },
-              { l: 'UNUSUAL', v: unusualFlows.filter((f: any) => f.Volume > f.OI).length.toString(), c: '#ffd600' },
+              { l: 'TOTAL FLOWS', v: (((unusualFlows as any)?._allFlows?.length) || unusualFlows.length || 0).toString(), c: '#4fc3f7' },
+              { l: 'UNUSUAL', v: ((((unusualFlows as any)?._allAlerts || []) as any[]).filter((a: any) => (a.AlertType || '').toLowerCase().includes('unusual')).length).toString(), c: '#ffd600' },
               { l: '$1M+ ALERTS', v: hugeAlerts.length.toString(), c: '#e040fb' },
-              { l: '$500K+ FLOWS', v: unusualFlows.filter((f: any) => f.Value >= 500000).length.toString(), c: '#ff9800' },
+              { l: '$500K+ ALERTS', v: ((((unusualFlows as any)?._allAlerts || []) as any[]).filter((a: any) => (a.totalFlowValue || 0) >= 500000).length).toString(), c: '#ff9800' },
             ].map((m, i) => (
               <div key={i} style={{ background: '#0d1117', borderRadius: '6px', padding: '12px', textAlign: 'center' }}>
                 <div style={{ fontSize: 'var(--mc-font-label)', color: '#607d8b', fontFamily: 'var(--font-mc-mono)', marginBottom: '4px' }}>{m.l}</div>
