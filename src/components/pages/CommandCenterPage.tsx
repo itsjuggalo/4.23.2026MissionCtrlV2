@@ -1,6 +1,18 @@
 'use client';
 import { useEffect, useState } from 'react';
 
+
+// Parse OCC option symbol → "TICKER M/D/YY $STRIKEC/P". Returns symbol unchanged if not OCC.
+function parseOCC(sym: string): string {
+  if (!sym) return '';
+  const m = /^([A-Z]+)(\d{2})(\d{2})(\d{2})([CP])(\d{8})$/.exec(sym);
+  if (!m) return sym;
+  const [, tk, yy, mm, dd, cp, strikeRaw] = m;
+  const strike = parseInt(strikeRaw, 10) / 1000;
+  const strikeStr = strike % 1 === 0 ? String(strike) : strike.toFixed(2).replace(/\.?0+$/, '');
+  return `${tk} ${parseInt(mm,10)}/${parseInt(dd,10)}/${yy} $${strikeStr}${cp}`;
+}
+
 export function CommandCenterPage() {
   const [portfolio, setPortfolio] = useState<any>(null);
   const [signals, setSignals] = useState<any>(null);
@@ -22,7 +34,7 @@ export function CommandCenterPage() {
         fetch('/api/activity').then(r => r.json()).catch(() => []),
       ]);
       setPortfolio(pRes); setSignals(sigRes); setRegime(rRes);
-      const acts = Array.isArray(actRes) ? actRes : actRes?.entries || [];
+      const acts = Array.isArray(actRes) ? actRes : (actRes?.activities || actRes?.entries || []);
       setActivity(acts.slice(0, 10));
     } catch (e) { console.error(e); }
     finally { setLoading(false); }
@@ -134,9 +146,14 @@ export function CommandCenterPage() {
         {[
           { l: 'ALPACA EQUITY', v: '$' + fmt(equity), s: (dailyPct >= 0 ? '+' : '') + fmt(dailyPct) + '% today', c: '#4fc3f7' },
           { l: 'TOTAL RETURN', v: (totalReturn >= 0 ? '+' : '') + fmt(totalReturn, 1) + '%', s: 'From $100K', c: totalReturn >= 0 ? '#66bb6a' : '#ef5350' },
-          { l: 'POSITIONS', v: '' + positions.length, s: positions.map((p: any) => p.symbol).join(' \u00b7 ') || 'None', c: '#4fc3f7' },
-          { l: 'SUPERTREND', v: btcSignal.direction || 'N/A', s: btcSignal.entry_price ? '$' + Number(btcSignal.entry_price).toLocaleString() : '', c: btcSignal.direction === 'LONG' ? '#66bb6a' : '#ef5350' },
-          { l: 'REGIME', v: regimeStr.replace(/_/g, ' '), s: 'Bias: ' + bias, c: bias === 'BULLISH' ? '#66bb6a' : bias === 'BEARISH' ? '#ef5350' : '#ff9800' },
+          { l: 'POSITIONS', v: '' + positions.length, s: positions.map((p: any) => parseOCC(p.symbol)).slice(0, 4).join(' \u00b7 ') + (positions.length > 4 ? ' \u00b7 +' + (positions.length - 4) + ' more' : '') || 'None', c: '#4fc3f7' },
+          { l: 'SUPERTREND BTC', v: btcSignal.direction || 'N/A', s: (() => {
+            const tf = regime?.timeframes || {};
+            const dirs = ['1H','4H','1D'].map(k => (tf[k]?.direction || '?').slice(0,1)).join('/');
+            const px = btcSignal.entry_price ? '$' + Number(btcSignal.entry_price).toLocaleString() : '';
+            return px ? `${px} \u00b7 ${dirs}` : dirs;
+          })(), c: btcSignal.direction === 'LONG' ? '#66bb6a' : '#ef5350' },
+          { l: 'REGIME (BTC)', v: regimeStr.replace(/_/g, ' '), s: regime?.overall_recommendation || ('Bias: ' + bias), c: bias === 'BULLISH' ? '#66bb6a' : bias === 'BEARISH' ? '#ef5350' : '#ff9800' },
         ].map((m, i) => (
           <div key={i} className="cc" style={{ padding: '16px 18px' }}>
             <div className="lbl">{m.l}</div>
@@ -341,7 +358,7 @@ export function CommandCenterPage() {
             return (
               <div key={i} style={{ display: 'flex', justifyContent: 'space-between', padding: '8px 10px', background: '#0d1117', borderRadius: '6px', border: '1px solid ' + (g ? '#66bb6a22' : '#ef535022'), marginBottom: '6px' }}>
                 <div>
-                  <div style={{ fontSize: 'var(--mc-font-xs)', fontWeight: 700, color: '#e0e0e0', fontFamily: 'var(--font-mc-mono)' }}>{p.symbol}</div>
+                  <div style={{ fontSize: 'var(--mc-font-xs)', fontWeight: 700, color: '#e0e0e0', fontFamily: 'var(--font-mc-mono)' }}>{parseOCC(p.symbol)}{p.account ? ' ' + p.account : ''}</div>
                   <div style={{ fontSize: 'var(--mc-font-label)', color: '#455a64' }}>{p.qty} @ ${fmt(parseFloat(p.avg_entry_price || '0'))}</div>
                 </div>
                 <div style={{ textAlign: 'right' }}>
