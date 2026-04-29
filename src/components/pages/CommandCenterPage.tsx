@@ -45,6 +45,7 @@ export function CommandCenterPage() {
   const [kronosLoading, setKronosLoading] = useState(false);
   const [kronosError, setKronosError] = useState<string>('');
   const [showKronosHistory, setShowKronosHistory] = useState(false);
+  const [selectedItem, setSelectedItem] = useState<{ type: string; data: any } | null>(null);
 
   const fetchData = async () => {
     try {
@@ -687,7 +688,7 @@ export function CommandCenterPage() {
                 const expStr = a.Expiry ? new Date(a.Expiry).toLocaleDateString('en-US', { month: 'numeric', day: 'numeric' }) : '';
                 const ago = (() => { const m = Math.floor((Date.now() - (a.Updated||0)) / 60000); return m < 1 ? 'now' : m < 60 ? m+'m' : m < 1440 ? Math.floor(m/60)+'h' : Math.floor(m/1440)+'d'; })();
                 return (
-                  <div key={i} style={{ display: 'grid', gridTemplateColumns: '34px 36px 56px 56px 46px 1fr 70px', gap: '6px', alignItems: 'center', padding: '4px 8px', borderLeft: '2px solid ' + catColor(c), background: '#0d1117', fontSize: 'var(--mc-font-label)', fontFamily: 'var(--font-mc-mono)' }}>
+                  <div key={i} onClick={() => setSelectedItem({ type: 'alert', data: a })} style={{ cursor: 'pointer', display: 'grid', gridTemplateColumns: '34px 36px 56px 56px 46px 1fr 70px', gap: '6px', alignItems: 'center', padding: '4px 8px', borderLeft: '2px solid ' + catColor(c), background: '#0d1117', fontSize: 'var(--mc-font-label)', fontFamily: 'var(--font-mc-mono)' }}>
                     <span style={{ color: '#607d8b' }}>{ago}</span>
                     <span style={{ color: catColor(c), fontWeight: 700, fontSize: '9px', textTransform: 'uppercase' }}>{c || '?'}</span>
                     <span style={{ color: '#e0e0e0', fontWeight: 700 }}>{a.Symbol}</span>
@@ -816,7 +817,7 @@ export function CommandCenterPage() {
             const expStr = a.Expiry ? new Date(a.Expiry).toLocaleDateString('en-US', { month: 'numeric', day: 'numeric' }) : '';
             const dirColor = a.isBullish ? '#66bb6a' : '#ef5350';
             return (
-              <div key={i} style={{ display: 'grid', gridTemplateColumns: '8px 60px 50px 60px 1fr 70px', gap: '6px', alignItems: 'center', padding: '5px 8px', borderBottom: '1px solid #1a3a4a', fontSize: 'var(--mc-font-label)', fontFamily: 'var(--font-mc-mono)' }}>
+              <div key={i} onClick={() => setSelectedItem({ type: 'huge', data: a })} style={{ cursor: 'pointer', display: 'grid', gridTemplateColumns: '8px 60px 50px 60px 1fr 70px', gap: '6px', alignItems: 'center', padding: '5px 8px', borderBottom: '1px solid #1a3a4a', fontSize: 'var(--mc-font-label)', fontFamily: 'var(--font-mc-mono)' }}>
                 <span style={{ color: dirColor, fontWeight: 700 }}>{a.isBullish ? '▲' : '▼'}</span>
                 <span style={{ color: '#e0e0e0', fontWeight: 700 }}>{a.Symbol}</span>
                 <span style={{ color: a.OptionType === 'CALL' ? '#66bb6a' : '#ef5350' }}>{a.OptionType === 'CALL' ? 'C' : 'P'} ${a.Strike}</span>
@@ -890,6 +891,117 @@ export function CommandCenterPage() {
             );
           })}
         </div>
+      {/* DETAIL SIDEBAR - mirrors Options page pattern */}
+      {selectedItem && (
+        <div style={{
+          position: 'fixed', top: 0, right: 0, height: '100vh', width: '420px',
+          background: '#0a1929', borderLeft: '2px solid #4fc3f7',
+          boxShadow: '-8px 0 24px rgba(0, 0, 0, 0.4)',
+          zIndex: 9999, overflowY: 'auto', padding: '20px',
+          fontFamily: 'var(--font-mc-mono)', color: '#e0e0e0',
+        }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px', paddingBottom: '12px', borderBottom: '1px solid #1a3a4a' }}>
+            <span style={{ fontSize: 'var(--mc-font-lg)', fontWeight: 700, color: '#4fc3f7', letterSpacing: '1px' }}>
+              {selectedItem.type === 'alert' ? 'FLOW ALERT' : selectedItem.type === 'huge' ? 'HUGE FLOW' : selectedItem.type === 'position' ? 'POSITION' : 'DETAIL'}
+            </span>
+            <button onClick={() => setSelectedItem(null)} style={{ background: '#1a3a4a', color: '#e0e0e0', border: 'none', borderRadius: '4px', width: '28px', height: '28px', cursor: 'pointer', fontSize: '16px', fontWeight: 700, fontFamily: 'var(--font-mc-mono)' }}>×</button>
+          </div>
+          {(selectedItem.type === 'alert' || selectedItem.type === 'huge') && (() => {
+            const a = selectedItem.data;
+            const v = a.totalFlowValue || 0;
+            const fmtV = (n: number) => n >= 1000000 ? '$' + (n/1000000).toFixed(2) + 'M' : '$' + (n/1000).toFixed(0) + 'K';
+            const expStr = a.Expiry ? new Date(a.Expiry).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : '—';
+            return (
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px' }}>
+                  <div style={{ background: '#0d1117', padding: '12px', borderRadius: '6px', borderLeft: '3px solid ' + (a.isBullish ? '#66bb6a' : '#ef5350') }}>
+                    <div style={{ fontSize: 'var(--mc-font-label)', color: '#607d8b', marginBottom: '4px' }}>SYMBOL</div>
+                    <div style={{ fontSize: 'var(--mc-font-2xl)', fontWeight: 700, color: '#e0e0e0' }}>{a.Symbol}</div>
+                  </div>
+                  <div style={{ background: '#0d1117', padding: '12px', borderRadius: '6px' }}>
+                    <div style={{ fontSize: 'var(--mc-font-label)', color: '#607d8b', marginBottom: '4px' }}>SIDE</div>
+                    <div style={{ fontSize: 'var(--mc-font-2xl)', fontWeight: 700, color: a.OptionType === 'CALL' ? '#66bb6a' : '#ef5350' }}>{a.OptionType} ${a.Strike}</div>
+                  </div>
+                </div>
+                <div style={{ background: '#0d1117', padding: '12px', borderRadius: '6px' }}>
+                  <div style={{ fontSize: 'var(--mc-font-label)', color: '#607d8b', marginBottom: '4px' }}>TOTAL FLOW VALUE</div>
+                  <div style={{ fontSize: 'var(--mc-font-3xl)', fontWeight: 700, color: v >= 1000000 ? '#e040fb' : v >= 500000 ? '#ff9800' : '#4fc3f7' }}>{fmtV(v)}</div>
+                </div>
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '8px' }}>
+                  <div style={{ background: '#0d1117', padding: '10px', borderRadius: '6px', textAlign: 'center' }}>
+                    <div style={{ fontSize: 'var(--mc-font-label)', color: '#607d8b' }}>VOLUME</div>
+                    <div style={{ fontSize: 'var(--mc-font-lg)', fontWeight: 700, color: '#e0e0e0' }}>{a.Volume?.toLocaleString() || '—'}</div>
+                  </div>
+                  <div style={{ background: '#0d1117', padding: '10px', borderRadius: '6px', textAlign: 'center' }}>
+                    <div style={{ fontSize: 'var(--mc-font-label)', color: '#607d8b' }}>OI</div>
+                    <div style={{ fontSize: 'var(--mc-font-lg)', fontWeight: 700, color: '#e0e0e0' }}>{a.OI?.toLocaleString() || '—'}</div>
+                  </div>
+                  <div style={{ background: '#0d1117', padding: '10px', borderRadius: '6px', textAlign: 'center' }}>
+                    <div style={{ fontSize: 'var(--mc-font-label)', color: '#607d8b' }}>VOL/OI</div>
+                    <div style={{ fontSize: 'var(--mc-font-lg)', fontWeight: 700, color: '#ffd600' }}>{a.OI > 0 ? (a.Volume / a.OI).toFixed(1) + 'x' : '—'}</div>
+                  </div>
+                </div>
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px' }}>
+                  <div style={{ background: '#0d1117', padding: '10px', borderRadius: '6px' }}>
+                    <div style={{ fontSize: 'var(--mc-font-label)', color: '#607d8b' }}>SWEEPS / BLOCKS</div>
+                    <div style={{ fontSize: 'var(--mc-font-lg)', fontWeight: 700, color: '#ff9800' }}>{(a.SWEEPS || 0)}sw / {(a.BLOCKS || 0)}bk</div>
+                  </div>
+                  <div style={{ background: '#0d1117', padding: '10px', borderRadius: '6px' }}>
+                    <div style={{ fontSize: 'var(--mc-font-label)', color: '#607d8b' }}>EXPIRY ({a.DTE != null ? a.DTE + 'd' : '?'})</div>
+                    <div style={{ fontSize: 'var(--mc-font-md)', fontWeight: 700, color: '#90a4ae' }}>{expStr}</div>
+                  </div>
+                </div>
+                <div style={{ background: '#0d1117', padding: '10px', borderRadius: '6px' }}>
+                  <div style={{ fontSize: 'var(--mc-font-label)', color: '#607d8b' }}>SPOT / ALERT PRICE</div>
+                  <div style={{ fontSize: 'var(--mc-font-md)', fontWeight: 700, color: '#e0e0e0' }}>${a.Spot?.toFixed(2) || '—'} / ${a.AlertPrice?.toFixed(2) || '—'}</div>
+                </div>
+                <div style={{ background: '#0d1117', padding: '10px', borderRadius: '6px' }}>
+                  <div style={{ fontSize: 'var(--mc-font-label)', color: '#607d8b' }}>ALERT TYPE</div>
+                  <div style={{ fontSize: 'var(--mc-font-md)', fontWeight: 700, color: '#4fc3f7' }}>{a.AlertType || '—'}</div>
+                </div>
+                {a.OptionSymbol && (
+                  <div style={{ background: '#0d1117', padding: '10px', borderRadius: '6px' }}>
+                    <div style={{ fontSize: 'var(--mc-font-label)', color: '#607d8b' }}>OCC SYMBOL</div>
+                    <div style={{ fontSize: 'var(--mc-font-label)', color: '#e0e0e0', wordBreak: 'break-all' }}>{a.OptionSymbol}</div>
+                  </div>
+                )}
+              </div>
+            );
+          })()}
+          {selectedItem.type === 'position' && (() => {
+            const p = selectedItem.data;
+            const pnl = parseFloat(p.unrealized_pl || '0');
+            const pnlPct = parseFloat(p.unrealized_plpc || '0') * 100;
+            return (
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                <div style={{ background: '#0d1117', padding: '12px', borderRadius: '6px' }}>
+                  <div style={{ fontSize: 'var(--mc-font-label)', color: '#607d8b' }}>SYMBOL</div>
+                  <div style={{ fontSize: 'var(--mc-font-2xl)', fontWeight: 700, color: '#4fc3f7' }}>{p.symbol}</div>
+                </div>
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px' }}>
+                  <div style={{ background: '#0d1117', padding: '10px', borderRadius: '6px' }}>
+                    <div style={{ fontSize: 'var(--mc-font-label)', color: '#607d8b' }}>QTY</div>
+                    <div style={{ fontSize: 'var(--mc-font-lg)', fontWeight: 700, color: '#e0e0e0' }}>{p.qty}</div>
+                  </div>
+                  <div style={{ background: '#0d1117', padding: '10px', borderRadius: '6px' }}>
+                    <div style={{ fontSize: 'var(--mc-font-label)', color: '#607d8b' }}>AVG ENTRY</div>
+                    <div style={{ fontSize: 'var(--mc-font-lg)', fontWeight: 700, color: '#e0e0e0' }}>${parseFloat(p.avg_entry_price || '0').toFixed(2)}</div>
+                  </div>
+                </div>
+                <div style={{ background: '#0d1117', padding: '12px', borderRadius: '6px' }}>
+                  <div style={{ fontSize: 'var(--mc-font-label)', color: '#607d8b' }}>UNREALIZED P&L</div>
+                  <div style={{ fontSize: 'var(--mc-font-2xl)', fontWeight: 700, color: pnl >= 0 ? '#66bb6a' : '#ef5350' }}>{pnl >= 0 ? '+' : ''}${Math.abs(pnl).toFixed(2)} ({pnl >= 0 ? '+' : ''}{pnlPct.toFixed(2)}%)</div>
+                </div>
+                <div style={{ background: '#0d1117', padding: '10px', borderRadius: '6px' }}>
+                  <div style={{ fontSize: 'var(--mc-font-label)', color: '#607d8b' }}>ACCOUNT</div>
+                  <div style={{ fontSize: 'var(--mc-font-md)', fontWeight: 700, color: '#ffd600' }}>{p.account || '—'}</div>
+                </div>
+              </div>
+            );
+          })()}
+        </div>
+      )}
+
       </div>
     </div>
   );
