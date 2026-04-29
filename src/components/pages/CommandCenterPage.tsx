@@ -684,24 +684,37 @@ export function CommandCenterPage() {
               };
               const catColor = (c: string | null) => c === 'huge' ? '#e040fb' : c === 'unusual' ? '#ffd600' : c === 'repeat' ? '#4fc3f7' : c === 'weekly' ? '#ff9800' : c === 'etf' ? '#66bb6a' : '#607d8b';
               const sorted = allAlerts.slice().sort((a: any, b: any) => (b.Updated || 0) - (a.Updated || 0)).slice(0, 30);
-              return sorted.map((a: any, i: number) => {
+              return [
+                <div key="legend" style={{ display: 'flex', flexWrap: 'wrap', gap: '10px', padding: '4px 8px 8px', borderBottom: '1px solid #1a3a4a', marginBottom: '4px', fontSize: '10px', fontFamily: 'var(--font-mc-mono)', color: '#607d8b' }}>
+                  <span><span style={{ color: '#66bb6a', fontWeight: 700 }}>▲</span> bullish</span>
+                  <span><span style={{ color: '#ef5350', fontWeight: 700 }}>▼</span> bearish</span>
+                  <span><span style={{ color: '#ff9800' }}>⚡</span> sweep (urgency)</span>
+                  <span><span style={{ color: '#ce93d8' }}>▦</span> block (institutional)</span>
+                  <span><span style={{ color: '#66bb6a' }}>C</span> call</span>
+                  <span><span style={{ color: '#ef5350' }}>P</span> put</span>
+                </div>,
+                ...sorted.map((a: any, i: number) => {
                 const c = cat(a);
                 const v = a.totalFlowValue || 0;
                 const fmtV = (n: number) => n >= 1000000 ? '$' + (n/1000000).toFixed(2) + 'M' : '$' + (n/1000).toFixed(0) + 'K';
                 const expStr = a.Expiry ? new Date(a.Expiry).toLocaleDateString('en-US', { month: 'numeric', day: 'numeric' }) : '';
                 const ago = (() => { const m = Math.floor((Date.now() - (a.Updated||0)) / 60000); return m < 1 ? 'now' : m < 60 ? m+'m' : m < 1440 ? Math.floor(m/60)+'h' : Math.floor(m/1440)+'d'; })();
                 return (
-                  <div key={i} onClick={() => setSelectedItem({ type: 'alert', data: a })} style={{ cursor: 'pointer', display: 'grid', gridTemplateColumns: '34px 36px 56px 56px 46px 1fr 70px', gap: '6px', alignItems: 'center', padding: '4px 8px', borderLeft: '2px solid ' + catColor(c), background: '#0d1117', fontSize: 'var(--mc-font-label)', fontFamily: 'var(--font-mc-mono)' }}>
+                  <div key={i} onClick={() => setSelectedItem({ type: 'alert', data: a })} style={{ cursor: 'pointer', display: 'grid', gridTemplateColumns: '34px 42px 50px 82px 44px 1fr 90px', gap: '6px', alignItems: 'center', padding: '5px 8px', borderLeft: '2px solid ' + catColor(c), background: '#0d1117', fontSize: 'var(--mc-font-label)', fontFamily: 'var(--font-mc-mono)' }}>
                     <span style={{ color: '#607d8b' }}>{ago}</span>
                     <span style={{ color: catColor(c), fontWeight: 700, fontSize: '9px', textTransform: 'uppercase' }}>{c || '?'}</span>
                     <span style={{ color: '#e0e0e0', fontWeight: 700 }}>{a.Symbol}</span>
-                    <span style={{ color: a.OptionType === 'CALL' ? '#66bb6a' : '#ef5350' }}>{a.OptionType === 'CALL' ? 'C' : 'P'} ${a.Strike}</span>
+                    <span style={{ color: a.OptionType === 'CALL' ? '#66bb6a' : '#ef5350', fontWeight: 600, whiteSpace: 'nowrap' }} title={a.OptionType === 'CALL' ? 'CALL option' : 'PUT option'}>{a.OptionType === 'CALL' ? 'C' : 'P'} ${a.Strike}</span>
                     <span style={{ color: '#90a4ae' }}>{expStr}</span>
-                    <span style={{ color: a.isBullish ? '#66bb6a' : '#ef5350', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{a.isBullish ? '▲' : '▼'} {(a.SWEEPS||0)>0?(a.SWEEPS+'sw '):''}{(a.BLOCKS||0)>0?(a.BLOCKS+'bk'):''}</span>
-                    <span style={{ color: catColor(c), fontWeight: 700, textAlign: 'right' }}>{fmtV(v)}</span>
+                    <span style={{ display: 'flex', alignItems: 'center', gap: '8px', overflow: 'hidden', whiteSpace: 'nowrap' }}>
+                      <span style={{ color: a.isBullish ? '#66bb6a' : '#ef5350', fontWeight: 700 }} title={a.isBullish ? 'Bullish flow (buyers in control)' : 'Bearish flow (sellers in control)'}>{a.isBullish ? '▲' : '▼'}</span>
+                      {(a.SWEEPS || 0) > 0 && <span title={(a.SWEEPS) + ' sweeps - aggressive multi-exchange fills (urgency)'} style={{ color: '#ff9800', fontWeight: 600 }}>⚡{a.SWEEPS}</span>}
+                      {(a.BLOCKS || 0) > 0 && <span title={(a.BLOCKS) + ' blocks - large single negotiated trades (institutional)'} style={{ color: '#ce93d8', fontWeight: 600 }}>▦{a.BLOCKS}</span>}
+                    </span>
+                    <span style={{ color: catColor(c), fontWeight: 800, fontSize: 'var(--mc-font-md)', textAlign: 'right' }}>{fmtV(v)}</span>
                   </div>
                 );
-              });
+              })];
             })()}
           </div>
         </div>
@@ -870,7 +883,7 @@ export function CommandCenterPage() {
             const pnlPct = parseFloat(p.unrealized_plpc || '0') * 100;
             const g = pnl >= 0;
             return (
-              <div key={i} style={{ display: 'flex', justifyContent: 'space-between', padding: '8px 10px', background: '#0d1117', borderRadius: '6px', border: '1px solid ' + (g ? '#66bb6a22' : '#ef535022'), marginBottom: '6px' }}>
+              <div key={i} onClick={() => setDrawerTicker(parseOCC(p.symbol))} style={{ cursor: 'pointer', display: 'flex', justifyContent: 'space-between', padding: '8px 10px', background: '#0d1117', borderRadius: '6px', border: '1px solid ' + (g ? '#66bb6a22' : '#ef535022'), marginBottom: '6px' }}>
                 <div>
                   <div style={{ fontSize: 'var(--mc-font-xs)', fontWeight: 700, color: '#e0e0e0', fontFamily: 'var(--font-mc-mono)' }}>{parseOCC(p.symbol)}{p.account ? ' ' + p.account : ''}</div>
                   <div style={{ fontSize: 'var(--mc-font-label)', color: '#455a64' }}>{p.qty} @ ${fmt(parseFloat(p.avg_entry_price || '0'))}</div>
