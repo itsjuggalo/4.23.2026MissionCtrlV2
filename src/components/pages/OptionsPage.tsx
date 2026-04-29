@@ -582,6 +582,7 @@ export function OptionsPage() {
 
   const [analystData, setAnalystData] = useState<AnalystResponse | null>(null);
   const [flowData, setFlowData] = useState<FlowResponse | null>(null);
+  const [notificationsData, setNotificationsData] = useState<NotificationsResponse | null>(null);
   const [loading, setLoading] = useState(true);
   const [drawerTicker, setDrawerTicker] = useState<string | null>(null);
 
@@ -619,6 +620,21 @@ export function OptionsPage() {
   }, []);
 
   // Derived: filter signals by source group
+  // Data fetching — notifications (live from Firebase via /api/notifications)
+  useEffect(() => {
+    let cancelled = false;
+    const pull = async () => {
+      try {
+        const r = await fetch('/api/notifications');
+        const d = await r.json();
+        if (!cancelled) setNotificationsData(d);
+      } catch {}
+    };
+    pull();
+    const id = setInterval(pull, 15000);
+    return () => { cancelled = true; clearInterval(id); };
+  }, []);
+
   const filteredSignals = useMemo(() => {
     if (!analystData) return { open: [], closed: [] };
     const tabData = analystData.byTab[activeTab as 'scalps' | 'swings' | 'leaps'];
@@ -630,6 +646,14 @@ export function OptionsPage() {
       closed: (tabData.closed || []).filter(filterFn),
     };
   }, [analystData, activeTab, sourceFilter]);
+
+  const notificationsForActiveTab = useMemo<NotificationItem[]>(() => {
+    if (!notificationsData?.byTab) return [];
+    if (activeTab === 'scalps') return notificationsData.byTab.scalps || [];
+    if (activeTab === 'swings') return notificationsData.byTab.swings || [];
+    if (activeTab === 'leaps')  return notificationsData.byTab.leaps  || [];
+    return [];
+  }, [notificationsData, activeTab]);
 
   // Derived: filter alerts by category + filter modal state
   const filteredAlerts = useMemo(() => {
