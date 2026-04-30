@@ -4774,5 +4774,11 @@
     "message": "Reached Target 3.10 and that's 51.96%! Lock some in and wait for next target. Raise the stops to 2.48",
     "symbol": "NVDA",
     "title": "NVDA 200P 05/04 : STC"
+  },
+  "1777568613": {
+    "category": "SCALP",
+    "message": "Close the trade as it hit trailing stop at 2.47!",
+    "symbol": "NVDA",
+    "title": "NVDA 200P 05/04 : STC"
   }
 }
