@@ -6122,6 +6122,23 @@
     "strike": "27.5",
     "symbol": "CMCSA"
   },
+  "1777386699": {
+    "buyTarget": "19.80",
+    "category": "SWING",
+    "earlyTarget": "22.77",
+    "exit1": "22.77",
+    "exitTime": 1777492686,
+    "expiry": "1784268000",
+    "free": 1,
+    "isWeekly": 1,
+    "reduceLoss": "12.87",
+    "sellTarget": "22.77",
+    "shortName": "Celestica, Inc.",
+    "status": "Locked some at 22.77 for 15.00%!",
+    "stopLoss": "15.94",
+    "strike": "450",
+    "symbol": "CLS"
+  },
   "1777387802": {
     "buyTarget": "4.26",
     "category": "SCALP",

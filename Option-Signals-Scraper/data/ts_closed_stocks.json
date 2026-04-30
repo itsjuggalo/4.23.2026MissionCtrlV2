@@ -4272,14 +4272,15 @@
     "earlyTarget": "15.91",
     "exit1": "14.90",
     "exit1Time": 1776693440,
-    "exitTime": 1776693440,
+    "exitTime": 1777495109,
     "free": 1,
     "isWeekly": 1,
     "reduceLoss": "13.90",
     "sellTarget": "14.90",
+    "sellTarget2": "14.97",
     "sellTargetTime": 1776693440,
     "shortName": "Viatris Inc.",
-    "status": "Booked profits @14.90 and riding runners",
+    "status": "Booked full profits.",
     "stopLoss": "13.90",
     "symbol": "VTRS"
   },
@@ -4788,7 +4789,7 @@
     "discordMessageId": "1485669397753368647",
     "discordThreadId": "1485669397753368647",
     "earlyTarget": "312.72",
-    "exitTime": 1775601678,
+    "exitTime": 1777495077,
     "free": 1,
     "isWeekly": 1,
     "quote": {
@@ -4802,8 +4803,9 @@
     },
     "reduceLoss": "273.25",
     "sellTarget": "312.72",
+    "sellTarget2": "369",
     "shortName": "Alphabet Inc.",
-    "status": "Booked profits at 312.72 and riding runners",
+    "status": "Booked profits at 369 and riding runners",
     "stopLoss": "250",
     "symbol": "GOOGL"
   },
@@ -5442,6 +5444,25 @@
     "stopLoss": "58.28",
     "symbol": "TQQQ"
   },
+  "1776785417": {
+    "buyTarget": "424.67",
+    "category": "SWING",
+    "discordMessageId": "1496171226719191225",
+    "discordThreadId": "1496171226719191225",
+    "earlyTarget": "437.41",
+    "exit1": "445.0",
+    "exit1Time": 1777492988,
+    "exitTime": 1777492988,
+    "free": 1,
+    "isWeekly": 1,
+    "reduceLoss": "382.20",
+    "sellTarget": "445.0",
+    "sellTargetTime": 1777492988,
+    "shortName": "Microsoft Corporation",
+    "status": "Booked profits @445.0 and riding runners",
+    "stopLoss": "382.2",
+    "symbol": "MSFT"
+  },
   "1776791879": {
     "buyTarget": "617.00",
     "category": "SCALP",
@@ -5541,5 +5562,29 @@
     "status": "Booked profits @333.9 and riding runners",
     "stopLoss": "291.8",
     "symbol": "AMD"
+  },
+  "1777474188": {
+    "buyTarget": "265.45",
+    "category": "ER PLAY",
+    "earlyTarget": "273.41",
+    "exitTime": 1777499183,
+    "free": 0,
+    "isWeekly": 1,
+    "quote": {
+      "closePrice": 259.7,
+      "highPrice": 265.91,
+      "lastPrice": 263.04,
+      "lowPrice": 257.7,
+      "openPrice": 257.99,
+      "quoteTimeInLong": 1777492801,
+      "tradeTimeInLong": 1777492801
+    },
+    "reduceLoss": "238.91",
+    "risk": "VH",
+    "sellTarget": "270.5",
+    "shortName": "Amazon.com, Inc.",
+    "status": "Booked profits at 270.5 and riding runners",
+    "stopLoss": "238.91",
+    "symbol": "AMZN"
   }
 }

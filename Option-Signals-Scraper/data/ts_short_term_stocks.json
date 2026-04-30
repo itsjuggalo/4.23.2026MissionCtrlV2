@@ -258,7 +258,8 @@
     "buyTarget": "155.29",
     "category": "SWING",
     "earlyTarget": "159.95",
-    "free": 0,
+    "exit1": "161",
+    "free": 1,
     "isWeekly": 1,
     "quote": {
       "closePrice": 153.25,
@@ -271,10 +272,11 @@
     },
     "reduceLoss": "139.76",
     "risk": "HI",
-    "sellTarget": "159.95",
+    "sellTarget": "161",
     "sellTarget2": "164.61",
     "sellTarget3": "170.82",
     "shortName": "Marvell Technology, Inc.",
+    "status": "Booked profits at 161 and riding runners",
     "stopLoss": "139.76",
     "symbol": "MRVL"
   },
@@ -335,6 +337,7 @@
     "buyTarget": "265.45",
     "category": "ER PLAY",
     "earlyTarget": "273.41",
+    "exit1": "270.5",
     "free": 0,
     "isWeekly": 1,
     "quote": {
@@ -348,10 +351,11 @@
     },
     "reduceLoss": "238.91",
     "risk": "VH",
-    "sellTarget": "273.41",
+    "sellTarget": "270.5",
     "sellTarget2": "281.38",
     "sellTarget3": "292.00",
     "shortName": "Amazon.com, Inc.",
+    "status": "Booked profits at 270.5 and riding runners",
     "stopLoss": "238.91",
     "symbol": "AMZN"
   },

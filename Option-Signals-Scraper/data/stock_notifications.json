@@ -3080,5 +3080,26 @@
     "message": "Book more profits at 377 and ride the runners. Gain: 17.99%",
     "symbol": "GOOGL",
     "title": "GOOGL: STC"
+  },
+  "1777499253": {
+    "category": "SWING",
+    "free": 1,
+    "message": "Reached SellTarget1 @270.69. Take profits and ride the runners. Gain: 2.00%",
+    "symbol": "AMZN",
+    "title": "AMZN: STC"
+  },
+  "1777501411": {
+    "category": "SWING",
+    "free": 1,
+    "message": "Reached SellTarget2 @161. Take profits and ride the runners. Gain: 5.27%",
+    "symbol": "MRVL",
+    "title": "MRVL: STC"
+  },
+  "1777501446": {
+    "category": "SWING",
+    "free": 1,
+    "message": "Reached SellTarget2 @395. Take profits and ride the runners. Gain: 8.22%",
+    "symbol": "CLS",
+    "title": "CLS: STC"
   }
 }

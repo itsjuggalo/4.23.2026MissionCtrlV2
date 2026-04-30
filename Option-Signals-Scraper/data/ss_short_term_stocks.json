@@ -330,7 +330,8 @@
     "discordMessageId": "1499066839580413962",
     "discordThreadId": "1499066839580413962",
     "earlyTarget": "271.17",
-    "free": 0,
+    "exit1": "270.5",
+    "free": 1,
     "isWeekly": 1,
     "quote": {
       "closePrice": 259.7,
@@ -343,9 +344,10 @@
     },
     "reduceLoss": "236.94",
     "risk": "VH",
-    "sellTarget": "271.17",
+    "sellTarget": "270.5",
     "sellTarget2": "279.07",
     "sellTarget3": "289.60",
+    "status": "Booked profits at 270.5 and riding runners",
     "stopLoss": "236.94",
     "symbol": "AMZN"
   }

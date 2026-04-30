@@ -367,6 +367,7 @@
     "earlyTarget": "372.31",
     "exit1": "372.4",
     "exit1Time": 1777468664,
+    "exit2": "395",
     "free": 1,
     "isWeekly": 1,
     "quote": {
@@ -380,10 +381,10 @@
     },
     "reduceLoss": "335.81",
     "sellTarget": "372.31",
-    "sellTarget2": "383.26",
-    "sellTarget3": "394.21",
+    "sellTarget2": "395",
+    "sellTarget3": "405",
     "shortName": "Celestica, Inc.",
-    "status": "Locked some at 372.4 for 2.02%!",
+    "status": "Booked profits at 395 and riding runners",
     "stopLoss": "335.8",
     "symbol": "CLS"
   },
@@ -419,9 +420,10 @@
     "discordMessageId": "1498740903005782200",
     "discordThreadId": "1498740903005782200",
     "earlyTarget": "156.00",
-    "exit1": "156.0",
+    "exit1": "156",
     "exit1Time": 1777404584,
-    "free": 0,
+    "exit2": "161",
+    "free": 1,
     "isWeekly": 1,
     "quote": {
       "closePrice": 153.25,
@@ -434,10 +436,10 @@
     },
     "reduceLoss": "140.70",
     "sellTarget": "156.00",
-    "sellTarget2": "160.59",
+    "sellTarget2": "161",
     "sellTarget3": "165.18",
     "shortName": "Marvell Technology, Inc.",
-    "status": "Locked some at 156.0 for 2.00%!",
+    "status": "Booked profits at 161 and riding runners",
     "stopLoss": "140.7",
     "symbol": "MRVL"
   },
@@ -473,7 +475,8 @@
     "buyTarget": "265.38",
     "category": "SWING",
     "earlyTarget": "270.69",
-    "free": 0,
+    "exit1": "270.69",
+    "free": 1,
     "isWeekly": 1,
     "quote": {
       "closePrice": 259.7,
@@ -488,7 +491,7 @@
     "sellTarget": "270.69",
     "sellTarget2": "278.65",
     "sellTarget3": "286.61",
-    "status": "Waiting for first target!",
+    "status": "Booked profits at 270.69 and riding runners",
     "stopLoss": "244.15",
     "symbol": "AMZN"
   }

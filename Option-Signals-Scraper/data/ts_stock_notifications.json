@@ -4103,5 +4103,18 @@
     "message": "Take full profits at 14.97. Gain: 3.89%",
     "symbol": "VTRS",
     "title": "VTRS: SELL"
+  },
+  "1777499183": {
+    "category": "ER PLAY",
+    "message": "Reached SellTarget1 @270.5. Take profits and ride the runners. Gain: 1.90%",
+    "symbol": "AMZN",
+    "title": "AMZN: SELL"
+  },
+  "1777501272": {
+    "category": "SWING",
+    "free": 1,
+    "message": "Reached SellTarget1 @161. Take profits and ride the runners. Gain: 3.68%",
+    "symbol": "MRVL",
+    "title": "MRVL: SELL"
   }
 }

@@ -25696,5 +25696,12 @@
     "message": "Reached SellTarget2 @389.9 with gain: 6.25%. Take profits and ride for next target with stops @366.96",
     "symbol": "CLS",
     "title": "CLS : SELL"
+  },
+  "1777499229": {
+    "category": "SCALP",
+    "free": 1,
+    "message": "Reached SellTarget1 @270.5. Take profits and ride the runners. Gain: 2.75%",
+    "symbol": "AMZN",
+    "title": "AMZN: SELL"
   }
 }
