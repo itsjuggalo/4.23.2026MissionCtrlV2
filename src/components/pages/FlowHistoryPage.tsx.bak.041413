@@ -192,7 +192,7 @@ export function FlowHistoryPage() {
   const totalPremium = data ? data.contracts.reduce((sum, c) => sum + c.premium, 0) : 0;
 
   return (
-    <div style={{ padding: "20px 24px 40px", maxWidth: 1600, margin: "0 auto", fontFamily: "var(--font-mc-mono, monospace)" }}>
+    <div style={{ padding: "24px 32px", maxWidth: 1500, margin: "0 auto", fontFamily: "var(--font-mc-mono, monospace)" }}>
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-end", marginBottom: 20, flexWrap: "wrap", gap: 16 }}>
         <div>
           <h1 style={{ fontSize: 22, fontWeight: 600, color: "#e0e0e0", margin: 0 }}>Flow History</h1>
@@ -281,10 +281,10 @@ export function FlowHistoryPage() {
       )}
 
       <div style={{ background: "#0d1f2a", border: "1px solid #1a3a4a", borderRadius: 8, overflow: "hidden" }}>
-        <div style={{ overflowX: "auto", maxHeight: "calc(100vh - 380px)", overflowY: "auto" }}>
-          <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 12, tableLayout: "auto" }}>
-            <thead style={{ position: "sticky", top: 0, zIndex: 10 }}>
-              <tr style={{ background: "#13293b", color: "#b0bec5", fontSize: 10, letterSpacing: "0.5px", boxShadow: "0 1px 0 #1a3a4a" }}>
+        <div style={{ overflowX: "auto" }}>
+          <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 12 }}>
+            <thead>
+              <tr style={{ background: "rgba(26,58,74,0.6)", color: "#90a4ae", fontSize: 10, letterSpacing: "0.5px" }}>
                 <Th label="TIER" />
                 <Th label="DIR" />
                 <Th label="TICKER" sortable onClick={() => handleSort("ticker")} active={sortKey === "ticker"} desc={sortDesc} />
@@ -323,24 +323,24 @@ export function FlowHistoryPage() {
                     <td style={{ padding: "8px 10px" }}>
                       <span style={{ color: c.is_bullish ? "#66bb6a" : "#ef5350", fontWeight: 700, fontSize: 10 }}>{c.is_bullish ? "BULL" : "BEAR"}</span>
                     </td>
-                    <td style={{ padding: "7px 10px", color: "#e0e0e0", fontWeight: 700, fontSize: 13 }}>{c.ticker}</td>
-                    <td style={{ padding: "7px 10px", color: "#cfd8dc", textAlign: "right", fontWeight: 500 }}>${c.strike}</td>
-                    <td style={{ padding: "7px 10px", color: c.option_type === "CALL" ? "#66bb6a" : "#ef5350", fontWeight: 600 }}>{c.option_type}</td>
-                    <td style={{ padding: "7px 10px", color: "#90a4ae" }}>{c.expiry}</td>
-                    <td style={{ padding: "7px 10px", color: "#90a4ae", textAlign: "right" }}>{c.dte}d</td>
-                    <td style={{ padding: "7px 10px", color: "#ffd600", fontWeight: 600, textAlign: "right" }}>{fmtMoney(c.premium)}</td>
-                    <td style={{ padding: "7px 10px", color: "#b0bec5", textAlign: "right", fontWeight: 500 }}>{fmtNum(c.volume)}</td>
-                    <td style={{ padding: "7px 10px", color: "#90a4ae", textAlign: "right" }}>{fmtNum(c.oi)}</td>
-                    <td style={{ padding: "7px 10px", color: c.sweeps > 0 ? "#4fc3f7" : "#607d8b", textAlign: "right" }}>{c.sweeps}</td>
-                    <td style={{ padding: "7px 10px", color: c.blocks > 0 ? "#ab47bc" : "#607d8b", textAlign: "right" }}>{c.blocks}</td>
-                    <td style={{ padding: "7px 10px", color: "#90a4ae", textAlign: "right" }}>${c.alert_price?.toFixed(2) ?? "—"}</td>
-                    <td style={{ padding: "7px 10px", textAlign: "right", whiteSpace: "nowrap" }}>
+                    <td style={{ padding: "8px 10px", color: "#e0e0e0", fontWeight: 600 }}>{c.ticker}</td>
+                    <td style={{ padding: "8px 10px", color: "#e0e0e0", textAlign: "right" }}>${c.strike}</td>
+                    <td style={{ padding: "8px 10px", color: c.option_type === "CALL" ? "#66bb6a" : "#ef5350", fontWeight: 600 }}>{c.option_type}</td>
+                    <td style={{ padding: "8px 10px", color: "#90a4ae" }}>{c.expiry}</td>
+                    <td style={{ padding: "8px 10px", color: "#90a4ae", textAlign: "right" }}>{c.dte}d</td>
+                    <td style={{ padding: "8px 10px", color: "#ffd600", fontWeight: 600, textAlign: "right" }}>{fmtMoney(c.premium)}</td>
+                    <td style={{ padding: "8px 10px", color: "#e0e0e0", textAlign: "right" }}>{fmtNum(c.volume)}</td>
+                    <td style={{ padding: "8px 10px", color: "#90a4ae", textAlign: "right" }}>{fmtNum(c.oi)}</td>
+                    <td style={{ padding: "8px 10px", color: c.sweeps > 0 ? "#4fc3f7" : "#607d8b", textAlign: "right" }}>{c.sweeps}</td>
+                    <td style={{ padding: "8px 10px", color: c.blocks > 0 ? "#ab47bc" : "#607d8b", textAlign: "right" }}>{c.blocks}</td>
+                    <td style={{ padding: "8px 10px", color: "#90a4ae", textAlign: "right" }}>${c.alert_price?.toFixed(2) ?? "—"}</td>
+                    <td style={{ padding: "8px 10px", textAlign: "right", whiteSpace: "nowrap" }}>
                       <div style={{ color: ageColor(c.first_seen_ms || 0, nowMs), fontWeight: 600 }}>
                         {timeAgo(c.first_seen_ms || 0, nowMs)}
                       </div>
                       <div style={{ color: "#607d8b", fontSize: 10 }}>{fmtTimeET(c.first_seen_ms || 0)}</div>
                     </td>
-                    <td style={{ padding: "7px 10px", textAlign: "right", whiteSpace: "nowrap" }}>
+                    <td style={{ padding: "8px 10px", textAlign: "right", whiteSpace: "nowrap" }}>
                       <div style={{ color: ageColor(c.last_updated_ms || 0, nowMs), fontWeight: 600 }}>
                         {timeAgo(c.last_updated_ms || 0, nowMs)}
                       </div>
@@ -385,19 +385,7 @@ function FilterSelect({ label, value, options, onChange }: { label: string; valu
 function Th({ label, align, sortable, onClick, active, desc }: { label: string; align?: "right"; sortable?: boolean; onClick?: () => void; active?: boolean; desc?: boolean }) {
   return (
     <th onClick={onClick}
-      style={{
-        padding: "11px 10px",
-        textAlign: align || "left",
-        fontWeight: 700,
-        cursor: sortable ? "pointer" : "default",
-        color: active ? "#4fc3f7" : "#b0bec5",
-        userSelect: "none",
-        whiteSpace: "nowrap",
-        background: "#13293b",
-        borderBottom: "1px solid #1a3a4a",
-        position: "sticky",
-        top: 0,
-      }}>
+      style={{ padding: "10px", textAlign: align || "left", fontWeight: 600, cursor: sortable ? "pointer" : "default", color: active ? "#4fc3f7" : "#90a4ae", userSelect: "none", whiteSpace: "nowrap" }}>
       {label}{sortable && active ? (desc ? " ↓" : " ↑") : ""}
     </th>
   );

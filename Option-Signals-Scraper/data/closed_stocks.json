@@ -4075,14 +4075,15 @@
     "earlyTarget": "372.31",
     "exit1": "372.4",
     "exit1Time": 1777468664,
-    "exitTime": 1777468664,
+    "exitTime": 1777501446,
     "free": 1,
     "isWeekly": 1,
     "reduceLoss": "335.81",
     "sellTarget": "372.4",
+    "sellTarget2": "395",
     "sellTargetTime": 1777468664,
     "shortName": "Celestica, Inc.",
-    "status": "Locked some at 372.4 for 2.02%!",
+    "status": "Booked profits at 395 and riding runners",
     "stopLoss": "335.8",
     "symbol": "CLS"
   },
@@ -4094,14 +4095,15 @@
     "earlyTarget": "156.00",
     "exit1": "156.0",
     "exit1Time": 1777404584,
-    "exitTime": 1777404584,
+    "exitTime": 1777501411,
     "free": 1,
     "isWeekly": 1,
     "reduceLoss": "140.70",
     "sellTarget": "156",
+    "sellTarget2": "161",
     "sellTargetTime": 1777404584,
     "shortName": "Marvell Technology, Inc.",
-    "status": "Locked some at 156.0 for 2.00%!",
+    "status": "Booked profits at 161 and riding runners",
     "stopLoss": "140.7",
     "symbol": "MRVL"
   },
@@ -4123,5 +4125,27 @@
     "status": "Locked some at 330.8 for 2.05%!",
     "stopLoss": "298.2",
     "symbol": "AMD"
+  },
+  "1777474365": {
+    "buyTarget": "265.38",
+    "category": "SWING",
+    "earlyTarget": "270.69",
+    "exitTime": 1777499253,
+    "free": 1,
+    "isWeekly": 1,
+    "quote": {
+      "closePrice": 259.7,
+      "highPrice": 265.91,
+      "lastPrice": 262.96,
+      "lowPrice": 257.7,
+      "openPrice": 258.215,
+      "quoteTimeInLong": 1777492782,
+      "tradeTimeInLong": 1777492782
+    },
+    "reduceLoss": "244.15",
+    "sellTarget": "270.69",
+    "status": "Booked profits at 270.69 and riding runners",
+    "stopLoss": "244.15",
+    "symbol": "AMZN"
   }
 }

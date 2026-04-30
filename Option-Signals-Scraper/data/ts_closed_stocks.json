@@ -5544,6 +5544,30 @@
     "stopLoss": "173.33",
     "symbol": "UHS"
   },
+  "1777304319": {
+    "buyTarget": "155.29",
+    "category": "SWING",
+    "earlyTarget": "159.95",
+    "exitTime": 1777501272,
+    "free": 1,
+    "isWeekly": 1,
+    "quote": {
+      "closePrice": 153.25,
+      "highPrice": 157.21,
+      "lastPrice": 156.57,
+      "lowPrice": 151.3136,
+      "openPrice": 153.765,
+      "quoteTimeInLong": 1777492801,
+      "tradeTimeInLong": 1777492801
+    },
+    "reduceLoss": "139.76",
+    "risk": "HI",
+    "sellTarget": "161",
+    "shortName": "Marvell Technology, Inc.",
+    "status": "Booked profits at 161 and riding runners",
+    "stopLoss": "139.76",
+    "symbol": "MRVL"
+  },
   "1777472356": {
     "buyTarget": "324.17",
     "category": "SWING",

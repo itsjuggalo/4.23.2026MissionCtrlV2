@@ -60504,5 +60504,30 @@
     "status": "Booked profits @332.6 and riding runners",
     "stopLoss": "290.5",
     "symbol": "AMD"
+  },
+  "1777475785": {
+    "buyTarget": "263.27",
+    "category": "SCALP",
+    "discordMessageId": "1499066839580413962",
+    "discordThreadId": "1499066839580413962",
+    "earlyTarget": "271.17",
+    "exitTime": 1777499229,
+    "free": 1,
+    "isWeekly": 1,
+    "quote": {
+      "closePrice": 259.7,
+      "highPrice": 265.91,
+      "lastPrice": 263.04,
+      "lowPrice": 257.7,
+      "openPrice": 257.99,
+      "quoteTimeInLong": 1777492801,
+      "tradeTimeInLong": 1777492801
+    },
+    "reduceLoss": "236.94",
+    "risk": "VH",
+    "sellTarget": "270.5",
+    "status": "Booked profits at 270.5 and riding runners",
+    "stopLoss": "236.94",
+    "symbol": "AMZN"
   }
 }
