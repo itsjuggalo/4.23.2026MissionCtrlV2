@@ -21,9 +21,6 @@ interface Contract {
   alert_count: number;
   first_seen?: string;
   last_seen?: string;
-  first_seen_ms?: number;
-  last_updated_ms?: number;
-  alert_type?: string;
 }
 
 interface ApiResp {
@@ -55,42 +52,13 @@ function fmtNum(n: number): string {
   if (n >= 1e3) return `${(n / 1e3).toFixed(1)}K`;
   return String(n);
 }
-
-function timeAgo(ms: number, nowMs: number): string {
-  if (!ms) return "—";
-  const diffSec = Math.floor((nowMs - ms) / 1000);
-  if (diffSec < 0) return "future";
-  if (diffSec < 60) return `${diffSec}s ago`;
-  const diffMin = Math.floor(diffSec / 60);
-  if (diffMin < 60) return `${diffMin}m ago`;
-  const diffHr = diffMin / 60;
-  if (diffHr < 24) return `${diffHr.toFixed(1)}h ago`;
-  return `${Math.floor(diffHr / 24)}d ago`;
-}
-
-function fmtTimeET(ms: number): string {
-  if (!ms) return "—";
-  return new Intl.DateTimeFormat("en-US", {
-    timeZone: "America/New_York",
-    hour: "numeric", minute: "2-digit", hour12: true,
-  }).format(new Date(ms));
-}
-
-function ageColor(ms: number, nowMs: number): string {
-  if (!ms) return "#607d8b";
-  const diffMin = (nowMs - ms) / 60000;
-  if (diffMin < 15) return "#66bb6a";   // green: fresh < 15m
-  if (diffMin < 60) return "#ffd600";   // yellow: < 1h
-  if (diffMin < 240) return "#ffa726";  // orange: < 4h
-  return "#90a4ae";                     // gray: stale
-}
 function todayET(): string {
   return new Intl.DateTimeFormat("en-CA", {
     timeZone: "America/New_York", year: "numeric", month: "2-digit", day: "2-digit",
   }).format(new Date());
 }
 
-type SortKey = "premium" | "volume" | "ticker" | "dte" | "sweeps" | "first_fired" | "last_updated";
+type SortKey = "premium" | "volume" | "ticker" | "dte" | "sweeps";
 type TierFilter = "all" | "T1_HUGE" | "T2_UNUSUAL_HUGE" | "T3_UNUSUAL";
 type DirFilter = "all" | "bullish" | "bearish";
 
@@ -102,8 +70,6 @@ export function FlowHistoryPage() {
   const [tickerFilter, setTickerFilter] = useState<string>("");
   const [sortKey, setSortKey] = useState<SortKey>("premium");
   const [sortDesc, setSortDesc] = useState<boolean>(true);
-  const [hideStale, setHideStale] = useState<boolean>(false);
-  const [nowMs, setNowMs] = useState<number>(Date.now());
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [availableDates, setAvailableDates] = useState<string[]>([]);
@@ -139,12 +105,6 @@ export function FlowHistoryPage() {
     const i = setInterval(fetchData, 60000);
     return () => clearInterval(i);
   }, [fetchData]);
-
-  // Tick "ago" labels every 30s without refetching the snapshot
-  useEffect(() => {
-    const t = setInterval(() => setNowMs(Date.now()), 30000);
-    return () => clearInterval(t);
-  }, []);
 
   const filtered = useMemo(() => {
     if (!data) return [];
@@ -257,11 +217,6 @@ export function FlowHistoryPage() {
         <input type="text" placeholder="Filter ticker..." value={tickerFilter}
           onChange={(e) => setTickerFilter(e.target.value.toUpperCase())}
           style={{ background: "#0d1f2a", border: "1px solid #1e3a4a", color: "#e0e0e0", padding: "5px 10px", borderRadius: 4, fontSize: 12, fontFamily: "inherit", width: 140 }} />
-        <label style={{ display: "flex", alignItems: "center", gap: 6, color: "#90a4ae", fontSize: 11, cursor: "pointer", userSelect: "none" }}>
-          <input type="checkbox" checked={hideStale} onChange={(e) => setHideStale(e.target.checked)}
-            style={{ accentColor: "#4fc3f7", cursor: "pointer" }} />
-          Hide stale (&gt;4h)
-        </label>
         <span style={{ color: "#607d8b", fontSize: 11, marginLeft: "auto" }}>
           Showing {filtered.length} of {data?.total_contracts ?? 0}
         </span>
@@ -298,25 +253,13 @@ export function FlowHistoryPage() {
                 <Th label="SW" sortable onClick={() => handleSort("sweeps")} active={sortKey === "sweeps"} desc={sortDesc} align="right" />
                 <Th label="BL" align="right" />
                 <Th label="ALERT" align="right" />
-                <Th label="FIRST FIRED" sortable onClick={() => handleSort("first_fired")} active={sortKey === "first_fired"} desc={sortDesc} align="right" />
-                <Th label="LAST UPDATE" sortable onClick={() => handleSort("last_updated")} active={sortKey === "last_updated"} desc={sortDesc} align="right" />
               </tr>
             </thead>
             <tbody>
               {filtered.map((c) => {
                 const tier = TIER_COLORS[c.tier] || TIER_COLORS.NORMAL;
                 return (
-                  <tr key={c.option_symbol} style={{
-                    borderTop: "1px solid #1a3a4a",
-                    opacity: (() => {
-                      const ms = c.last_updated_ms || c.first_seen_ms || 0;
-                      if (!ms) return 0.6;
-                      const diffMin = (nowMs - ms) / 60000;
-                      if (diffMin > 240) return 0.55;  // >4h: dimmed
-                      if (diffMin > 60) return 0.85;   // >1h: slight dim
-                      return 1;
-                    })(),
-                  }}>
+                  <tr key={c.option_symbol} style={{ borderTop: "1px solid #1a3a4a" }}>
                     <td style={{ padding: "8px 10px" }}>
                       <span style={{ display: "inline-block", padding: "2px 6px", background: tier.bg, border: `1px solid ${tier.border}`, color: tier.text, borderRadius: 3, fontSize: 9, fontWeight: 700, letterSpacing: "0.3px" }}>{tier.label}</span>
                     </td>
@@ -334,18 +277,6 @@ export function FlowHistoryPage() {
                     <td style={{ padding: "8px 10px", color: c.sweeps > 0 ? "#4fc3f7" : "#607d8b", textAlign: "right" }}>{c.sweeps}</td>
                     <td style={{ padding: "8px 10px", color: c.blocks > 0 ? "#ab47bc" : "#607d8b", textAlign: "right" }}>{c.blocks}</td>
                     <td style={{ padding: "8px 10px", color: "#90a4ae", textAlign: "right" }}>${c.alert_price?.toFixed(2) ?? "—"}</td>
-                    <td style={{ padding: "8px 10px", textAlign: "right", whiteSpace: "nowrap" }}>
-                      <div style={{ color: ageColor(c.first_seen_ms || 0, nowMs), fontWeight: 600 }}>
-                        {timeAgo(c.first_seen_ms || 0, nowMs)}
-                      </div>
-                      <div style={{ color: "#607d8b", fontSize: 10 }}>{fmtTimeET(c.first_seen_ms || 0)}</div>
-                    </td>
-                    <td style={{ padding: "8px 10px", textAlign: "right", whiteSpace: "nowrap" }}>
-                      <div style={{ color: ageColor(c.last_updated_ms || 0, nowMs), fontWeight: 600 }}>
-                        {timeAgo(c.last_updated_ms || 0, nowMs)}
-                      </div>
-                      <div style={{ color: "#607d8b", fontSize: 10 }}>{fmtTimeET(c.last_updated_ms || 0)}</div>
-                    </td>
                   </tr>
                 );
               })}
