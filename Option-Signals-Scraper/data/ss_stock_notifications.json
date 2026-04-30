@@ -25727,5 +25727,11 @@
     "message": "Take trailing stop at 390.0 to exit trade! Gain: 6.28%.",
     "symbol": "CLS",
     "title": "CLS : SELL"
+  },
+  "1777571639": {
+    "category": "SWING",
+    "message": "Buy below 402.21, Sell above 414.28\nSwing, Moderate risk",
+    "symbol": "MSFT",
+    "title": "MSFT: BUY"
   }
 }

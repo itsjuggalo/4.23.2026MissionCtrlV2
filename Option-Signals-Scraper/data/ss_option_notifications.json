@@ -6632,5 +6632,11 @@
     "message": "Stopped out at 0.88",
     "symbol": "SPY",
     "title": "SPY 710P 05/01 : SELL"
+  },
+  "1777571634": {
+    "category": "SWING",
+    "message": "Buy below 3.70, Sell above 4.26\nSwing, Moderate risk",
+    "symbol": "MSFT",
+    "title": "MSFT 450C 6/18: BUY"
   }
 }
