@@ -40,7 +40,6 @@ function getFromPm2Logs(limit: number): Activity[] {
         let message = line;
         if (tsMatch) message = line.slice(tsMatch[0].length).replace(/^\s*[:\|]\s*/, '').trim();
         if (!message || message.length < 5) continue;
-        if (/Telegram API error: 409|Conflict: terminated by other getUpdates/i.test(message)) continue;
 
         activities.push({
           time: timestamp.includes('T') ? timestamp : timestamp.replace(' ', 'T') + 'Z',
