@@ -4683,5 +4683,65 @@
     "message": "Reached Target 22.77 and that's 15.00%! Lock some in and wait for next target. Raise the stops to 15.94",
     "symbol": "CLS",
     "title": "CLS 450C 07/17 : STC"
+  },
+  "1777555805": {
+    "category": "SWING",
+    "message": "Close the trade at 2.79!",
+    "symbol": "SFM",
+    "title": "SFM 75P 05/15 : STC"
+  },
+  "1777555871": {
+    "category": "SWING",
+    "message": "Reached Target 31.65 and that's 59.85%! Lock some in and wait for next target. Raise the stops to 25.32",
+    "symbol": "CLS",
+    "title": "CLS 450C 07/17 : STC"
+  },
+  "1777556345": {
+    "category": "SWING",
+    "message": "Close the trade at 8.85!",
+    "symbol": "AMZN",
+    "title": "AMZN 265C 06/05 : STC"
+  },
+  "1777557845": {
+    "category": "SWING",
+    "message": "Reached Target 19.53 and that's 82.52%! Lock some in and wait for next target. Raise the stops to 15.62",
+    "symbol": "AMD",
+    "title": "AMD 350C 05/15 : STC"
+  },
+  "1777558459": {
+    "category": "SCALP",
+    "message": "Buy To Open at 3.86 with first target above 4.44",
+    "symbol": "QQQ",
+    "title": "QQQ 660P 5/1: BTO"
+  },
+  "1777558565": {
+    "category": "SCALP",
+    "message": "Reached Target 4.60 and that's 19.17%! Lock some in and wait for next target. Raise the stops to 3.22",
+    "symbol": "QQQ",
+    "title": "QQQ 660P 05/01 : STC"
+  },
+  "1777558669": {
+    "category": "SCALP",
+    "message": "Reached Target 5.28 and that's 36.79%! Lock some in and wait for next target. Raise the stops to 3.86",
+    "symbol": "QQQ",
+    "title": "QQQ 660P 05/01 : STC"
+  },
+  "1777559486": {
+    "category": "SCALP",
+    "message": "Close the trade as it hit trailing stop at 3.81!",
+    "symbol": "QQQ",
+    "title": "QQQ 660P 05/01 : STC"
+  },
+  "1777560115": {
+    "category": "SWING",
+    "message": "Reached Target 2.50 and that's 16.28%! Lock some in and wait for next target. Raise the stops to 1.75",
+    "symbol": "BWA",
+    "title": "BWA 70C 10/16 : STC"
+  },
+  "1777562110": {
+    "category": "SCALP",
+    "message": "Buy To Open at 2.04 with first target above 2.35",
+    "symbol": "NVDA",
+    "title": "NVDA 200P 5/4: BTO"
   }
 }

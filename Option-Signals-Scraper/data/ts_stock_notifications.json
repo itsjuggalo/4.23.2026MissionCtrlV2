@@ -4116,5 +4116,29 @@
     "message": "Reached SellTarget1 @161. Take profits and ride the runners. Gain: 3.68%",
     "symbol": "MRVL",
     "title": "MRVL: SELL"
+  },
+  "1777554038": {
+    "category": "SWING",
+    "message": "Reached final SellTarget @272.3 with gain: 30.19%. Take profits or ride for new target @280.5 with stops @264.1",
+    "symbol": "AMZN",
+    "title": "AMZN : SELL"
+  },
+  "1777554039": {
+    "category": "SWING",
+    "message": "Reached SellTarget2 @343.8 with gain: 6.06%. Take profits and ride for next target with stops @324.17",
+    "symbol": "AMD",
+    "title": "AMD : SELL"
+  },
+  "1777556178": {
+    "category": "SWING",
+    "message": "Reached SellTarget1 @405.0 with gain: 4.03%. Take profits and ride for next target with stops @350.4",
+    "symbol": "CLS",
+    "title": "CLS : SELL"
+  },
+  "1777559884": {
+    "category": "SWING",
+    "message": "Reached SellTarget1 @32.70 with gain: 3.19%. Take profits and ride for next target with stops @28.52",
+    "symbol": "KMI",
+    "title": "KMI : SELL"
   }
 }

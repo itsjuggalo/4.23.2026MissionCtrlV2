@@ -187,20 +187,14 @@ export function Sidebar({
   // Helpers for Best Options display
   const fmtExpiry = (o: any): string => {
     if (!o) return '';
-    // Build a Date and format as MM/DD/YY
-    let d: Date | null = null;
-    if (o.ExpiryStr) {
-      // "2026-08-20" — append T00:00:00 to avoid TZ weirdness
-      d = new Date(String(o.ExpiryStr) + 'T00:00:00');
-    } else if (o.Expiry) {
+    if (o.ExpiryStr) return String(o.ExpiryStr).slice(5).replace('-', '/'); // "2026-08-20" -> "08/20"
+    if (o.Expiry) {
       const ts = Number(o.Expiry);
-      if (ts) d = new Date(ts > 1e12 ? ts : ts * 1000);
+      if (!ts) return '';
+      const d = new Date(ts > 1e12 ? ts : ts * 1000);
+      return `${String(d.getMonth() + 1).padStart(2, '0')}/${String(d.getDate()).padStart(2, '0')}`;
     }
-    if (!d || isNaN(d.getTime())) return '';
-    const mm = String(d.getMonth() + 1).padStart(2, '0');
-    const dd = String(d.getDate()).padStart(2, '0');
-    const yy = String(d.getFullYear()).slice(-2);
-    return `${mm}/${dd}/${yy}`;
+    return '';
   };
   const fmtValue = (v: number): string => {
     if (!v) return '$0';

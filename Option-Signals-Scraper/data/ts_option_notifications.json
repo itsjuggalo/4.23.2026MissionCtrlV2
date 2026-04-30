@@ -5828,5 +5828,59 @@
     "message": "Buy below 0.72, Sell above 0.83\nSwing, Moderate risk",
     "symbol": "KMI",
     "title": "KMI 35C 9/18: BUY"
+  },
+  "1777555869": {
+    "category": "SWING",
+    "message": "Reached final SellTarget @31.65 with gain: 50.00%. Take profits or ride for new target @37.98 with stops @25.32",
+    "symbol": "CLS",
+    "title": "CLS 450C 07/17 : SELL"
+  },
+  "1777556296": {
+    "category": "SWING",
+    "message": "Reached SellTarget1 @0.83 with gain: 15.28%. Take profits and ride for next target with stops @0.58",
+    "symbol": "KMI",
+    "title": "KMI 35C 09/18 : SELL"
+  },
+  "1777556350": {
+    "category": "ER PLAY",
+    "message": "Stopped out at 8.75",
+    "symbol": "AMZN",
+    "title": "AMZN 265C 06/05 : SELL"
+  },
+  "1777556605": {
+    "category": "SWING",
+    "message": "Reached SellTarget2 @0.90 with gain: 25.00%. Take profits and ride for next target @1.01 with stops @0.72",
+    "symbol": "KMI",
+    "title": "KMI 35C 09/18 : SELL"
+  },
+  "1777559005": {
+    "category": "SCALP",
+    "message": "Buy below 1.99, Sell above 2.29\nScalp, VH risk",
+    "symbol": "SPY",
+    "title": "SPY 710P 5/1: BUY"
+  },
+  "1777559206": {
+    "category": "SCALP",
+    "message": "Reached SellTarget1 @2.30 with gain: 15.58%. Take profits and ride for next target with stops @1.61",
+    "symbol": "SPY",
+    "title": "SPY 710P 05/01 : SELL"
+  },
+  "1777559335": {
+    "category": "SWING",
+    "message": "Reached final SellTarget @1.05 with gain: 45.83%. Take profits or ride for new target @1.26 with stops @0.84",
+    "symbol": "KMI",
+    "title": "KMI 35C 09/18 : SELL"
+  },
+  "1777560445": {
+    "category": "SCALP",
+    "message": "Take trailing stop at 1.59 to exit trade!",
+    "symbol": "SPY",
+    "title": "SPY 710P 05/01 : SELL"
+  },
+  "1777561330": {
+    "category": "SWING",
+    "message": "Reached SellTarget2 @22.70 with gain: 30.09%. Take profits and ride for next target @24.43 with stops @17.45",
+    "symbol": "MRVL",
+    "title": "MRVL 175C 08/21 : SELL"
   }
 }

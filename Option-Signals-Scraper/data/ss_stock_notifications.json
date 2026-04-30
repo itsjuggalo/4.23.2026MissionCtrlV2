@@ -25703,5 +25703,29 @@
     "message": "Reached SellTarget1 @270.5. Take profits and ride the runners. Gain: 2.75%",
     "symbol": "AMZN",
     "title": "AMZN: SELL"
+  },
+  "1777554061": {
+    "category": "SWING",
+    "message": "Reached SellTarget2 @343.6 with gain: 6.44%. Take profits and ride for next target with stops @322.80",
+    "symbol": "AMD",
+    "title": "AMD : SELL"
+  },
+  "1777555901": {
+    "category": "SWING",
+    "message": "Take trailing stop at 412.0 to exit trade! Gain: 4.22%.",
+    "symbol": "MSFT",
+    "title": "MSFT : SELL"
+  },
+  "1777556006": {
+    "category": "SCALP",
+    "message": "Reached final SellTarget @405.0 with gain: 10.37%. Take profits or ride for new target @417.1 with stops @392.9",
+    "symbol": "CLS",
+    "title": "CLS : SELL"
+  },
+  "1777556185": {
+    "category": "SCALP",
+    "message": "Take trailing stop at 390.0 to exit trade! Gain: 6.28%.",
+    "symbol": "CLS",
+    "title": "CLS : SELL"
   }
 }

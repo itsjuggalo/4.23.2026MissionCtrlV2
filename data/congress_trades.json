@@ -1,22 +1,8 @@
 {
-  "last_updated": "2026-04-30T00:01:42.009232",
-  "total_trades": 60,
+  "last_updated": "2026-04-30T12:01:32.958202",
+  "total_trades": 50,
   "tickers_scanned": 50,
   "politicians": [
-    {
-      "name": "Ro Khanna",
-      "party": "Democrat",
-      "state": "CA",
-      "trades": 14,
-      "buys": 5,
-      "sells": 9,
-      "tickers": [
-        "AAPL",
-        "CAT",
-        "NVDA",
-        "VZ"
-      ]
-    },
     {
       "name": "John Karl Fetterman",
       "party": "Democrat",
@@ -36,44 +22,45 @@
       "buys": 6,
       "sells": 2,
       "tickers": [
-        "BA",
-        "CAT",
+        "NET",
         "NVDA"
       ]
     },
     {
-      "name": "Tim Moore",
-      "party": "Republican",
-      "state": "NC",
-      "trades": 4,
-      "buys": 1,
-      "sells": 3,
-      "tickers": [
-        "VZ"
-      ]
-    },
-    {
-      "name": "Julia Letlow",
-      "party": "Republican",
-      "state": "LA",
-      "trades": 3,
-      "buys": 2,
-      "sells": 1,
+      "name": "Ro Khanna",
+      "party": "Democrat",
+      "state": "CA",
+      "trades": 8,
+      "buys": 3,
+      "sells": 5,
       "tickers": [
         "AAPL",
-        "BA"
+        "NET",
+        "NVDA"
       ]
     },
     {
-      "name": "Julie Johnson",
-      "party": "Democrat",
-      "state": "TX",
-      "trades": 3,
-      "buys": 0,
-      "sells": 3,
+      "name": "Robert P. Bresnahan",
+      "party": "Republican",
+      "state": "PA",
+      "trades": 6,
+      "buys": 5,
+      "sells": 1,
       "tickers": [
-        "BA",
-        "VZ"
+        "NET",
+        "SNOW"
+      ]
+    },
+    {
+      "name": "Josh S. Gottheimer",
+      "party": "Democrat",
+      "state": "NJ",
+      "trades": 4,
+      "buys": 2,
+      "sells": 2,
+      "tickers": [
+        "NET",
+        "SNOW"
       ]
     },
     {
@@ -99,25 +86,26 @@
       ]
     },
     {
-      "name": "David Rouzer",
+      "name": "Marjorie Taylor Greene",
       "party": "Republican",
-      "state": "NC",
+      "state": "GA",
       "trades": 2,
-      "buys": 0,
-      "sells": 2,
+      "buys": 2,
+      "sells": 0,
       "tickers": [
-        "BA"
+        "SNOW"
       ]
     },
     {
-      "name": "Val Hoyle",
-      "party": "Democrat",
-      "state": "OR",
+      "name": "Jefferson Shreve",
+      "party": "Republican",
+      "state": "IN",
       "trades": 2,
       "buys": 0,
       "sells": 2,
       "tickers": [
-        "BA"
+        "NET",
+        "SNOW"
       ]
     },
     {
@@ -154,6 +142,17 @@
       ]
     },
     {
+      "name": "Julia Letlow",
+      "party": "Republican",
+      "state": "LA",
+      "trades": 1,
+      "buys": 1,
+      "sells": 0,
+      "tickers": [
+        "AAPL"
+      ]
+    },
+    {
       "name": "Michael T. McCaul",
       "party": "Republican",
       "state": "TX",
@@ -165,28 +164,6 @@
       ]
     },
     {
-      "name": "Pete Sessions",
-      "party": "Republican",
-      "state": "TX",
-      "trades": 1,
-      "buys": 0,
-      "sells": 1,
-      "tickers": [
-        "VZ"
-      ]
-    },
-    {
-      "name": "Sheldon Whitehouse",
-      "party": "Democrat",
-      "state": "RI",
-      "trades": 1,
-      "buys": 0,
-      "sells": 1,
-      "tickers": [
-        "VZ"
-      ]
-    },
-    {
       "name": "Cleo Fields",
       "party": "Democrat",
       "state": "LA",
@@ -195,39 +172,6 @@
       "sells": 0,
       "tickers": [
         "AAPL"
-      ]
-    },
-    {
-      "name": "John Boozman",
-      "party": "Republican",
-      "state": "AR",
-      "trades": 1,
-      "buys": 1,
-      "sells": 0,
-      "tickers": [
-        "CAT"
-      ]
-    },
-    {
-      "name": "Markwayne Mullin",
-      "party": "Republican",
-      "state": "OK",
-      "trades": 1,
-      "buys": 1,
-      "sells": 0,
-      "tickers": [
-        "CAT"
-      ]
-    },
-    {
-      "name": "Gary C. Peters",
-      "party": "Democrat",
-      "state": "MI",
-      "trades": 1,
-      "buys": 1,
-      "sells": 0,
-      "tickers": [
-        "VZ"
       ]
     }
   ],
@@ -415,19 +359,6 @@
       "suspicious": "Short-Term Event Window"
     },
     {
-      "id": "H002476543202603090001",
-      "size": "$1K-$15K",
-      "reporting_gap": "0 Days",
-      "name": "Pete Sessions",
-      "trade_type": "sell",
-      "filing_date": "2026-03-09",
-      "state": "TX",
-      "trade_date": "2026-03-09",
-      "party": "Republican",
-      "ticker": "VZ",
-      "suspicious": "Short-Term Event Window"
-    },
-    {
       "id": "H003087523202602260023",
       "size": "$1K-$15K",
       "reporting_gap": "8 Days",
@@ -438,19 +369,6 @@
       "trade_date": "2026-02-26",
       "party": "Republican",
       "ticker": "AAPL",
-      "suspicious": "Short-Term Event Window"
-    },
-    {
-      "id": "H002482591202602230003",
-      "size": "$1K-$15K",
-      "reporting_gap": "11 Days",
-      "name": "Sheldon Whitehouse",
-      "trade_type": "sell",
-      "filing_date": "2026-03-06",
-      "state": "RI",
-      "trade_date": "2026-02-23",
-      "party": "Democrat",
-      "ticker": "VZ",
       "suspicious": "Short-Term Event Window"
     },
     {
@@ -480,16 +398,42 @@
       "suspicious": "Short-Term Event Window"
     },
     {
-      "id": "H003087728202512100001",
-      "size": "$15K-$50K",
-      "reporting_gap": "9 Days",
-      "name": "Tim Moore",
+      "id": "H002471749202601300022",
+      "size": "$1K-$15K",
+      "reporting_gap": "14 Days",
+      "name": "Gil Cisneros",
       "trade_type": "buy",
-      "filing_date": "2025-12-19",
-      "state": "NC",
-      "trade_date": "2025-12-10",
+      "filing_date": "2026-02-13",
+      "state": "CA",
+      "trade_date": "2026-01-30",
+      "party": "Democrat",
+      "ticker": "NET",
+      "suspicious": "Short-Term Event Window"
+    },
+    {
+      "id": "H002471856202506170002",
+      "size": "$1K-$15K",
+      "reporting_gap": "6 Days",
+      "name": "Marjorie Taylor Greene",
+      "trade_type": "buy",
+      "filing_date": "2025-06-23",
+      "state": "GA",
+      "trade_date": "2025-06-17",
       "party": "Republican",
-      "ticker": "VZ",
+      "ticker": "SNOW",
+      "suspicious": "Short-Term Event Window"
+    },
+    {
+      "id": "H002471856202506060004",
+      "size": "$1K-$15K",
+      "reporting_gap": "12 Days",
+      "name": "Marjorie Taylor Greene",
+      "trade_type": "buy",
+      "filing_date": "2025-06-18",
+      "state": "GA",
+      "trade_date": "2025-06-06",
+      "party": "Republican",
+      "ticker": "SNOW",
       "suspicious": "Short-Term Event Window"
     }
   ],
@@ -742,6 +686,19 @@
       "suspicious": null
     },
     {
+      "id": "H002472330202602040001",
+      "size": "$1K-$15K",
+      "reporting_gap": "40 Days",
+      "name": "Josh S. Gottheimer",
+      "trade_type": "sell",
+      "filing_date": "2026-03-16",
+      "state": "NJ",
+      "trade_date": "2026-02-04",
+      "party": "Democrat",
+      "ticker": "NET",
+      "suspicious": null
+    },
+    {
       "id": "H002477606202602120001",
       "size": "$1K-$15K",
       "reporting_gap": "30 Days",
@@ -765,19 +722,6 @@
       "trade_date": "2026-02-02",
       "party": "Republican",
       "ticker": "AAPL",
-      "suspicious": null
-    },
-    {
-      "id": "H002474645202602020008",
-      "size": "$1K-$15K",
-      "reporting_gap": "38 Days",
-      "name": "Julia Letlow",
-      "trade_type": "buy",
-      "filing_date": "2026-03-12",
-      "state": "LA",
-      "trade_date": "2026-02-02",
-      "party": "Republican",
-      "ticker": "BA",
       "suspicious": null
     },
     {
@@ -846,19 +790,6 @@
       "suspicious": null
     },
     {
-      "id": "H002476543202603090001",
-      "size": "$1K-$15K",
-      "reporting_gap": "0 Days",
-      "name": "Pete Sessions",
-      "trade_type": "sell",
-      "filing_date": "2026-03-09",
-      "state": "TX",
-      "trade_date": "2026-03-09",
-      "party": "Republican",
-      "ticker": "VZ",
-      "suspicious": "Short-Term Event Window"
-    },
-    {
       "id": "H003087523202602260023",
       "size": "$1K-$15K",
       "reporting_gap": "8 Days",
@@ -869,19 +800,6 @@
       "trade_date": "2026-02-26",
       "party": "Republican",
       "ticker": "AAPL",
-      "suspicious": "Short-Term Event Window"
-    },
-    {
-      "id": "H002482591202602230003",
-      "size": "$1K-$15K",
-      "reporting_gap": "11 Days",
-      "name": "Sheldon Whitehouse",
-      "trade_type": "sell",
-      "filing_date": "2026-03-06",
-      "state": "RI",
-      "trade_date": "2026-02-23",
-      "party": "Democrat",
-      "ticker": "VZ",
       "suspicious": "Short-Term Event Window"
     },
     {
@@ -898,32 +816,6 @@
       "suspicious": "Short-Term Event Window"
     },
     {
-      "id": "H003087728202601300002",
-      "size": "$15K-$50K",
-      "reporting_gap": "21 Days",
-      "name": "Tim Moore",
-      "trade_type": "sell",
-      "filing_date": "2026-02-20",
-      "state": "NC",
-      "trade_date": "2026-01-30",
-      "party": "Republican",
-      "ticker": "VZ",
-      "suspicious": null
-    },
-    {
-      "id": "H002471709202601290004",
-      "size": "$1K-$15K",
-      "reporting_gap": "17 Days",
-      "name": "John Boozman",
-      "trade_type": "buy",
-      "filing_date": "2026-02-15",
-      "state": "AR",
-      "trade_date": "2026-01-29",
-      "party": "Republican",
-      "ticker": "CAT",
-      "suspicious": null
-    },
-    {
       "id": "H002471749202601300008",
       "size": "$1K-$15K",
       "reporting_gap": "14 Days",
@@ -934,6 +826,19 @@
       "trade_date": "2026-01-30",
       "party": "Democrat",
       "ticker": "NVDA",
+      "suspicious": "Short-Term Event Window"
+    },
+    {
+      "id": "H002471749202601300022",
+      "size": "$1K-$15K",
+      "reporting_gap": "14 Days",
+      "name": "Gil Cisneros",
+      "trade_type": "buy",
+      "filing_date": "2026-02-13",
+      "state": "CA",
+      "trade_date": "2026-01-30",
+      "party": "Democrat",
+      "ticker": "NET",
       "suspicious": "Short-Term Event Window"
     },
     {
@@ -950,137 +855,20 @@
       "suspicious": null
     },
     {
-      "id": "H002474716202512290001",
-      "size": "$15K-$50K",
-      "reporting_gap": "18 Days",
-      "name": "Markwayne Mullin",
-      "trade_type": "buy",
-      "filing_date": "2026-01-16",
-      "state": "OK",
-      "trade_date": "2025-12-29",
-      "party": "Republican",
-      "ticker": "CAT",
-      "suspicious": null
-    },
-    {
-      "id": "H003087748202512180045",
+      "id": "H002471749202512240002",
       "size": "$1K-$15K",
-      "reporting_gap": "28 Days",
-      "name": "Julie Johnson",
-      "trade_type": "sell",
-      "filing_date": "2026-01-15",
-      "state": "TX",
-      "trade_date": "2025-12-18",
-      "party": "Democrat",
-      "ticker": "VZ",
-      "suspicious": null
-    },
-    {
-      "id": "H003087748202512030001",
-      "size": "$1K-$15K",
-      "reporting_gap": "43 Days",
-      "name": "Julie Johnson",
-      "trade_type": "sell",
-      "filing_date": "2026-01-15",
-      "state": "TX",
-      "trade_date": "2025-12-03",
-      "party": "Democrat",
-      "ticker": "BA",
-      "suspicious": null
-    },
-    {
-      "id": "H002474645202507250004",
-      "size": "$1K-$15K",
-      "reporting_gap": "172 Days",
-      "name": "Julia Letlow",
-      "trade_type": "sell",
-      "filing_date": "2026-01-13",
-      "state": "LA",
-      "trade_date": "2025-07-25",
-      "party": "Republican",
-      "ticker": "BA",
-      "suspicious": null
-    },
-    {
-      "id": "H002471749202512190043",
-      "size": "$1K-$15K",
-      "reporting_gap": "24 Days",
+      "reporting_gap": "19 Days",
       "name": "Gil Cisneros",
-      "trade_type": "buy",
+      "trade_type": "sell",
       "filing_date": "2026-01-12",
       "state": "CA",
-      "trade_date": "2025-12-19",
+      "trade_date": "2025-12-24",
       "party": "Democrat",
-      "ticker": "BA",
+      "ticker": "NET",
       "suspicious": null
     },
     {
-      "id": "H002486457202512120002",
-      "size": "$1K-$15K",
-      "reporting_gap": "26 Days",
-      "name": "Gary C. Peters",
-      "trade_type": "buy",
-      "filing_date": "2026-01-07",
-      "state": "MI",
-      "trade_date": "2025-12-12",
-      "party": "Democrat",
-      "ticker": "VZ",
-      "suspicious": null
-    },
-    {
-      "id": "H002476517202512090001",
-      "size": "$1K-$15K",
-      "reporting_gap": "29 Days",
-      "name": "David Rouzer",
-      "trade_type": "sell",
-      "filing_date": "2026-01-07",
-      "state": "NC",
-      "trade_date": "2025-12-09",
-      "party": "Republican",
-      "ticker": "BA",
-      "suspicious": null
-    },
-    {
-      "id": "H002476517202512090002",
-      "size": "$1K-$15K",
-      "reporting_gap": "29 Days",
-      "name": "David Rouzer",
-      "trade_type": "sell",
-      "filing_date": "2026-01-07",
-      "state": "NC",
-      "trade_date": "2025-12-09",
-      "party": "Republican",
-      "ticker": "BA",
-      "suspicious": null
-    },
-    {
-      "id": "H003087728202512100001",
-      "size": "$15K-$50K",
-      "reporting_gap": "9 Days",
-      "name": "Tim Moore",
-      "trade_type": "buy",
-      "filing_date": "2025-12-19",
-      "state": "NC",
-      "trade_date": "2025-12-10",
-      "party": "Republican",
-      "ticker": "VZ",
-      "suspicious": "Short-Term Event Window"
-    },
-    {
-      "id": "H002471749202511120020",
-      "size": "$1K-$15K",
-      "reporting_gap": "33 Days",
-      "name": "Gil Cisneros",
-      "trade_type": "sell",
-      "filing_date": "2025-12-15",
-      "state": "CA",
-      "trade_date": "2025-11-12",
-      "party": "Democrat",
-      "ticker": "BA",
-      "suspicious": null
-    },
-    {
-      "id": "H002471749202511180003",
+      "id": "H002471749202511180045",
       "size": "$1K-$15K",
       "reporting_gap": "27 Days",
       "name": "Gil Cisneros",
@@ -1089,76 +877,11 @@
       "state": "CA",
       "trade_date": "2025-11-18",
       "party": "Democrat",
-      "ticker": "CAT",
+      "ticker": "NET",
       "suspicious": null
     },
     {
-      "id": "H003087748202511130047",
-      "size": "$1K-$15K",
-      "reporting_gap": "28 Days",
-      "name": "Julie Johnson",
-      "trade_type": "sell",
-      "filing_date": "2025-12-11",
-      "state": "TX",
-      "trade_date": "2025-11-13",
-      "party": "Democrat",
-      "ticker": "VZ",
-      "suspicious": null
-    },
-    {
-      "id": "H002477647202511100017",
-      "size": "$1K-$15K",
-      "reporting_gap": "28 Days",
-      "name": "Ro Khanna",
-      "trade_type": "buy",
-      "filing_date": "2025-12-08",
-      "state": "CA",
-      "trade_date": "2025-11-10",
-      "party": "Democrat",
-      "ticker": "VZ",
-      "suspicious": null
-    },
-    {
-      "id": "H002477647202511250007",
-      "size": "$1K-$15K",
-      "reporting_gap": "13 Days",
-      "name": "Ro Khanna",
-      "trade_type": "sell",
-      "filing_date": "2025-12-08",
-      "state": "CA",
-      "trade_date": "2025-11-25",
-      "party": "Democrat",
-      "ticker": "CAT",
-      "suspicious": "Short-Term Event Window"
-    },
-    {
-      "id": "H003087728202511190001",
-      "size": "$100K-$250K",
-      "reporting_gap": "13 Days",
-      "name": "Tim Moore",
-      "trade_type": "sell",
-      "filing_date": "2025-12-02",
-      "state": "NC",
-      "trade_date": "2025-11-19",
-      "party": "Republican",
-      "ticker": "VZ",
-      "suspicious": "Short-Term Event Window"
-    },
-    {
-      "id": "H003087728202511190002",
-      "size": "$100K-$250K",
-      "reporting_gap": "13 Days",
-      "name": "Tim Moore",
-      "trade_type": "sell",
-      "filing_date": "2025-12-02",
-      "state": "NC",
-      "trade_date": "2025-11-19",
-      "party": "Republican",
-      "ticker": "VZ",
-      "suspicious": "Short-Term Event Window"
-    },
-    {
-      "id": "H002471749202510170007",
+      "id": "H002471749202510170010",
       "size": "$1K-$15K",
       "reporting_gap": "32 Days",
       "name": "Gil Cisneros",
@@ -1167,111 +890,202 @@
       "state": "CA",
       "trade_date": "2025-10-17",
       "party": "Democrat",
-      "ticker": "CAT",
+      "ticker": "NET",
       "suspicious": null
     },
     {
-      "id": "H002477647202510270002",
+      "id": "H002471749202509120007",
       "size": "$1K-$15K",
-      "reporting_gap": "18 Days",
-      "name": "Ro Khanna",
-      "trade_type": "sell",
-      "filing_date": "2025-11-14",
-      "state": "CA",
-      "trade_date": "2025-10-27",
-      "party": "Democrat",
-      "ticker": "CAT",
-      "suspicious": null
-    },
-    {
-      "id": "H002477647202510230001",
-      "size": "$1K-$15K",
-      "reporting_gap": "22 Days",
-      "name": "Ro Khanna",
-      "trade_type": "sell",
-      "filing_date": "2025-11-14",
-      "state": "CA",
-      "trade_date": "2025-10-23",
-      "party": "Democrat",
-      "ticker": "CAT",
-      "suspicious": null
-    },
-    {
-      "id": "H002471890202509230124",
-      "size": "$1K-$15K",
-      "reporting_gap": "17 Days",
-      "name": "Val Hoyle",
-      "trade_type": "sell",
-      "filing_date": "2025-10-10",
-      "state": "OR",
-      "trade_date": "2025-09-23",
-      "party": "Democrat",
-      "ticker": "BA",
-      "suspicious": null
-    },
-    {
-      "id": "H002471890202509230217",
-      "size": "$1K-$15K",
-      "reporting_gap": "17 Days",
-      "name": "Val Hoyle",
-      "trade_type": "sell",
-      "filing_date": "2025-10-10",
-      "state": "OR",
-      "trade_date": "2025-09-23",
-      "party": "Democrat",
-      "ticker": "BA",
-      "suspicious": null
-    },
-    {
-      "id": "H002477647202508040102",
-      "size": "$1K-$15K",
-      "reporting_gap": "39 Days",
-      "name": "Ro Khanna",
-      "trade_type": "sell",
-      "filing_date": "2025-09-12",
-      "state": "CA",
-      "trade_date": "2025-08-04",
-      "party": "Democrat",
-      "ticker": "CAT",
-      "suspicious": null
-    },
-    {
-      "id": "H002477647202508040129",
-      "size": "$1K-$15K",
-      "reporting_gap": "39 Days",
-      "name": "Ro Khanna",
+      "reporting_gap": "28 Days",
+      "name": "Gil Cisneros",
       "trade_type": "buy",
-      "filing_date": "2025-09-12",
+      "filing_date": "2025-10-10",
       "state": "CA",
-      "trade_date": "2025-08-04",
+      "trade_date": "2025-09-12",
       "party": "Democrat",
-      "ticker": "CAT",
+      "ticker": "NET",
       "suspicious": null
     },
     {
-      "id": "H002477647202507240003",
+      "id": "H002472330202506200002",
       "size": "$1K-$15K",
-      "reporting_gap": "15 Days",
-      "name": "Ro Khanna",
-      "trade_type": "sell",
-      "filing_date": "2025-08-08",
-      "state": "CA",
-      "trade_date": "2025-07-24",
+      "reporting_gap": "26 Days",
+      "name": "Josh S. Gottheimer",
+      "trade_type": "buy",
+      "filing_date": "2025-07-16",
+      "state": "NJ",
+      "trade_date": "2025-06-20",
       "party": "Democrat",
-      "ticker": "CAT",
+      "ticker": "NET",
+      "suspicious": null
+    },
+    {
+      "id": "H002471856202506170002",
+      "size": "$1K-$15K",
+      "reporting_gap": "6 Days",
+      "name": "Marjorie Taylor Greene",
+      "trade_type": "buy",
+      "filing_date": "2025-06-23",
+      "state": "GA",
+      "trade_date": "2025-06-17",
+      "party": "Republican",
+      "ticker": "SNOW",
       "suspicious": "Short-Term Event Window"
     },
     {
-      "id": "H002471749202505300012",
+      "id": "H003087775202505230006",
       "size": "$1K-$15K",
-      "reporting_gap": "7 Days",
-      "name": "Gil Cisneros",
+      "reporting_gap": "31 Days",
+      "name": "Robert P. Bresnahan",
       "trade_type": "buy",
-      "filing_date": "2025-06-06",
+      "filing_date": "2025-06-23",
+      "state": "PA",
+      "trade_date": "2025-05-23",
+      "party": "Republican",
+      "ticker": "SNOW",
+      "suspicious": null
+    },
+    {
+      "id": "H003088719202505120070",
+      "size": "$15K-$50K",
+      "reporting_gap": "41 Days",
+      "name": "Jefferson Shreve",
+      "trade_type": "sell",
+      "filing_date": "2025-06-22",
+      "state": "IN",
+      "trade_date": "2025-05-12",
+      "party": "Republican",
+      "ticker": "SNOW",
+      "suspicious": null
+    },
+    {
+      "id": "H003088719202505120050",
+      "size": "$15K-$50K",
+      "reporting_gap": "41 Days",
+      "name": "Jefferson Shreve",
+      "trade_type": "sell",
+      "filing_date": "2025-06-22",
+      "state": "IN",
+      "trade_date": "2025-05-12",
+      "party": "Republican",
+      "ticker": "NET",
+      "suspicious": null
+    },
+    {
+      "id": "H002471856202506060004",
+      "size": "$1K-$15K",
+      "reporting_gap": "12 Days",
+      "name": "Marjorie Taylor Greene",
+      "trade_type": "buy",
+      "filing_date": "2025-06-18",
+      "state": "GA",
+      "trade_date": "2025-06-06",
+      "party": "Republican",
+      "ticker": "SNOW",
+      "suspicious": "Short-Term Event Window"
+    },
+    {
+      "id": "H002477647202504230093",
+      "size": "$1K-$15K",
+      "reporting_gap": "19 Days",
+      "name": "Ro Khanna",
+      "trade_type": "sell",
+      "filing_date": "2025-05-12",
       "state": "CA",
-      "trade_date": "2025-05-30",
+      "trade_date": "2025-04-23",
       "party": "Democrat",
-      "ticker": "BA",
+      "ticker": "NET",
+      "suspicious": null
+    },
+    {
+      "id": "H003087775202504080045",
+      "size": "$1K-$15K",
+      "reporting_gap": "30 Days",
+      "name": "Robert P. Bresnahan",
+      "trade_type": "sell",
+      "filing_date": "2025-05-08",
+      "state": "PA",
+      "trade_date": "2025-04-08",
+      "party": "Republican",
+      "ticker": "NET",
+      "suspicious": null
+    },
+    {
+      "id": "H002472330202503190001",
+      "size": "$1K-$15K",
+      "reporting_gap": "22 Days",
+      "name": "Josh S. Gottheimer",
+      "trade_type": "sell",
+      "filing_date": "2025-04-10",
+      "state": "NJ",
+      "trade_date": "2025-03-19",
+      "party": "Democrat",
+      "ticker": "SNOW",
+      "suspicious": null
+    },
+    {
+      "id": "H003087775202503030004",
+      "size": "$1K-$15K",
+      "reporting_gap": "24 Days",
+      "name": "Robert P. Bresnahan",
+      "trade_type": "buy",
+      "filing_date": "2025-03-27",
+      "state": "PA",
+      "trade_date": "2025-03-03",
+      "party": "Republican",
+      "ticker": "SNOW",
+      "suspicious": null
+    },
+    {
+      "id": "H003087775202502260004",
+      "size": "$1K-$15K",
+      "reporting_gap": "29 Days",
+      "name": "Robert P. Bresnahan",
+      "trade_type": "buy",
+      "filing_date": "2025-03-27",
+      "state": "PA",
+      "trade_date": "2025-02-26",
+      "party": "Republican",
+      "ticker": "SNOW",
+      "suspicious": null
+    },
+    {
+      "id": "H003087775202502130001",
+      "size": "$1K-$15K",
+      "reporting_gap": "22 Days",
+      "name": "Robert P. Bresnahan",
+      "trade_type": "buy",
+      "filing_date": "2025-03-07",
+      "state": "PA",
+      "trade_date": "2025-02-13",
+      "party": "Republican",
+      "ticker": "SNOW",
+      "suspicious": null
+    },
+    {
+      "id": "H003087775202502120002",
+      "size": "$1K-$15K",
+      "reporting_gap": "23 Days",
+      "name": "Robert P. Bresnahan",
+      "trade_type": "buy",
+      "filing_date": "2025-03-07",
+      "state": "PA",
+      "trade_date": "2025-02-12",
+      "party": "Republican",
+      "ticker": "SNOW",
+      "suspicious": null
+    },
+    {
+      "id": "H002472330202502210009",
+      "size": "$1K-$15K",
+      "reporting_gap": "13 Days",
+      "name": "Josh S. Gottheimer",
+      "trade_type": "buy",
+      "filing_date": "2025-03-06",
+      "state": "NJ",
+      "trade_date": "2025-02-21",
+      "party": "Democrat",
+      "ticker": "SNOW",
       "suspicious": "Short-Term Event Window"
     }
   ]

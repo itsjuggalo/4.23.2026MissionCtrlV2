@@ -3101,5 +3101,35 @@
     "message": "Reached SellTarget2 @395. Take profits and ride the runners. Gain: 8.22%",
     "symbol": "CLS",
     "title": "CLS: STC"
+  },
+  "1777554082": {
+    "category": "SWING",
+    "message": "Reached Target 343.4 and that's 5.94%! Lock some in and wait for next target. Raise the stops to 324.15",
+    "symbol": "AMD",
+    "title": "AMD : STC"
+  },
+  "1777554257": {
+    "category": "SWING",
+    "message": "Take profits at revised SellTarget 66.8. Gain: 0.54%",
+    "symbol": "SLV",
+    "title": "SLV: STC"
+  },
+  "1777554273": {
+    "category": "SWING",
+    "message": "Exit the few runners at 26.8.",
+    "symbol": "CMCSA",
+    "title": "CMCSA: STC"
+  },
+  "1777556204": {
+    "category": "SWING",
+    "message": "Reached Target 405.0 and that's 10.96%! Lock some in and wait for next target. Raise the stops to 392.9",
+    "symbol": "CLS",
+    "title": "CLS : STC"
+  },
+  "1777556264": {
+    "category": "SWING",
+    "message": "Close the trade as it hit trailing stop at 385.2!",
+    "symbol": "CLS",
+    "title": "CLS : STC"
   }
 }

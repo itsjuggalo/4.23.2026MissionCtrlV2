@@ -1,33 +1,4 @@
 {
-  "1774534699": {
-    "buyTarget": "175.27",
-    "category": "LONGTERM",
-    "discordMessageId": "1486731030403616969",
-    "discordThreadId": "1486731030403616969",
-    "earlyTarget": "180.53",
-    "exit1": "180.53",
-    "exit2": "211.5",
-    "exit2Time": 1777296972,
-    "free": 1,
-    "isWeekly": 1,
-    "quote": {
-      "closePrice": 213.07,
-      "highPrice": 212.715,
-      "lastPrice": 209.035,
-      "lowPrice": 207.5758,
-      "openPrice": 212.715,
-      "quoteTimeInLong": 1777492752,
-      "tradeTimeInLong": 1777492752
-    },
-    "reduceLoss": "157.74",
-    "sellTarget": "180.53",
-    "sellTarget2": "185.79",
-    "sellTarget3": "217.8",
-    "shortName": "NVIDIA Corporation",
-    "status": "Booked profits @211.5 and riding runners",
-    "stopLoss": "205.2",
-    "symbol": "NVDA"
-  },
   "1776367851": {
     "buyTarget": "138.53",
     "category": "LONGTERM",
@@ -39,13 +10,13 @@
     "free": 0,
     "isWeekly": 1,
     "quote": {
-      "closePrice": 130.85,
-      "highPrice": 132.03,
-      "lastPrice": 130.43,
-      "lowPrice": 129.98,
-      "openPrice": 131.95,
-      "quoteTimeInLong": 1777492751,
-      "tradeTimeInLong": 1777492751
+      "closePrice": 130.43,
+      "highPrice": 132.04,
+      "lastPrice": 131.86,
+      "lowPrice": 129.36,
+      "openPrice": 130.15,
+      "quoteTimeInLong": 1777562529,
+      "tradeTimeInLong": 1777562529
     },
     "reduceLoss": "124.68",
     "sellTarget": "142.69",
@@ -63,13 +34,13 @@
     "free": 0,
     "isWeekly": 1,
     "quote": {
-      "closePrice": 92.295,
-      "highPrice": 92.855,
-      "lastPrice": 92.095,
-      "lowPrice": 90.86,
-      "openPrice": 91.225,
-      "quoteTimeInLong": 1777492752,
-      "tradeTimeInLong": 1777492752
+      "closePrice": 92.12,
+      "highPrice": 93.247,
+      "lastPrice": 93.18,
+      "lowPrice": 90.77,
+      "openPrice": 91.34,
+      "quoteTimeInLong": 1777562530,
+      "tradeTimeInLong": 1777562530
     },
     "reduceLoss": "84.20",
     "risk": "HI",
@@ -87,13 +58,13 @@
     "free": 0,
     "isWeekly": 1,
     "quote": {
-      "closePrice": 18.36,
-      "highPrice": 16.59,
-      "lastPrice": 15.545,
-      "lowPrice": 15.5,
-      "openPrice": 16.55,
-      "quoteTimeInLong": 1777492751,
-      "tradeTimeInLong": 1777492751
+      "closePrice": 15.525,
+      "highPrice": 16.31,
+      "lastPrice": 16.295,
+      "lowPrice": 15.54,
+      "openPrice": 15.76,
+      "quoteTimeInLong": 1777562531,
+      "tradeTimeInLong": 1777562531
     },
     "reduceLoss": "14.39",
     "risk": "HI",

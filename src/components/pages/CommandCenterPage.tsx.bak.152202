@@ -731,7 +731,7 @@ export function CommandCenterPage() {
                 const c = cat(a);
                 const v = a.totalFlowValue || 0;
                 const fmtV = (n: number) => n >= 1000000 ? '$' + (n/1000000).toFixed(2) + 'M' : '$' + (n/1000).toFixed(0) + 'K';
-                const expStr = a.Expiry ? new Date(a.Expiry * 1000).toLocaleDateString('en-US', { month: 'numeric', day: 'numeric' }) : '';
+                const expStr = a.Expiry ? new Date(a.Expiry).toLocaleDateString('en-US', { month: 'numeric', day: 'numeric' }) : '';
                 const ago = (() => { const m = Math.floor((Date.now() - (a.Updated||0)) / 60000); return m < 1 ? 'now' : m < 60 ? m+'m' : m < 1440 ? Math.floor(m/60)+'h' : Math.floor(m/1440)+'d'; })();
                 return (
                   <div key={i} onClick={() => setSelectedItem({ type: 'alert', data: a })} style={{ cursor: 'pointer', display: 'grid', gridTemplateColumns: '34px 42px 50px 82px 44px 1fr 90px', gap: '6px', alignItems: 'center', padding: '5px 8px', borderLeft: '2px solid ' + catColor(c), background: '#0d1117', fontSize: 'var(--mc-font-label)', fontFamily: 'var(--font-mc-mono)' }}>
@@ -864,7 +864,7 @@ export function CommandCenterPage() {
             const v = a.totalFlowValue || 0;
             const valColor = v >= 5000000 ? '#e040fb' : v >= 2000000 ? '#ffd600' : '#ff9800';
             const fmtV = (n: number) => n >= 1000000 ? '$' + (n/1000000).toFixed(2) + 'M' : '$' + (n/1000).toFixed(0) + 'K';
-            const expStr = a.Expiry ? new Date(a.Expiry * 1000).toLocaleDateString('en-US', { month: 'numeric', day: 'numeric' }) : '';
+            const expStr = a.Expiry ? new Date(a.Expiry).toLocaleDateString('en-US', { month: 'numeric', day: 'numeric' }) : '';
             const dirColor = a.isBullish ? '#66bb6a' : '#ef5350';
             return (
               <div key={i} onClick={() => setSelectedItem({ type: 'huge', data: a })} style={{ cursor: 'pointer', display: 'grid', gridTemplateColumns: '8px 60px 50px 60px 1fr 70px', gap: '6px', alignItems: 'center', padding: '5px 8px', borderBottom: '1px solid #1a3a4a', fontSize: 'var(--mc-font-label)', fontFamily: 'var(--font-mc-mono)' }}>
@@ -979,7 +979,7 @@ export function CommandCenterPage() {
             const a = selectedItem.data;
             const v = a.totalFlowValue || 0;
             const fmtV = (n: number) => n >= 1000000 ? '$' + (n/1000000).toFixed(2) + 'M' : '$' + (n/1000).toFixed(0) + 'K';
-            const expStr = a.Expiry ? new Date(a.Expiry * 1000).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : '—';
+            const expStr = a.Expiry ? new Date(a.Expiry).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : '—';
             return (
               <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
                 <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px' }}>

@@ -6584,5 +6584,47 @@
     "message": "Reached final SellTarget @30.05 with gain: 40.42%. Take profits or ride for new target @36.06 with stops @24.04",
     "symbol": "AMD",
     "title": "AMD 320C 05/15 : SELL"
+  },
+  "1777555933": {
+    "category": "SWING",
+    "message": "Reached SellTarget1 @16.06 with gain: 22.60%. Take profits and ride for next target with stops @11.24",
+    "symbol": "AMZN",
+    "title": "AMZN 265C 06/05 : SELL"
+  },
+  "1777556178": {
+    "category": "SWING",
+    "message": "Take trailing stop at 10.10 to exit trade!",
+    "symbol": "AMZN",
+    "title": "AMZN 265C 06/05 : SELL"
+  },
+  "1777558197": {
+    "category": "SWING",
+    "message": "Reached final SellTarget @36.70 with gain: 71.50%. Take profits or ride for new target @44.04 with stops @29.36",
+    "symbol": "AMD",
+    "title": "AMD 320C 05/15 : SELL"
+  },
+  "1777558258": {
+    "category": "SCALP",
+    "message": "Buy below 2.53, Sell above 2.91\nScalp, VH risk",
+    "symbol": "SPY",
+    "title": "SPY 710P 5/1: BUY"
+  },
+  "1777560440": {
+    "category": "SCALP",
+    "message": "Add more at 1.57 for dollar cost averaging.",
+    "symbol": "SPY",
+    "title": "SPY 710P 5/1: DCA"
+  },
+  "1777561960": {
+    "category": "SCALP",
+    "message": "Add more at 1.1 for dollar cost averaging.",
+    "symbol": "SPY",
+    "title": "SPY 710P 5/1: DCA"
+  },
+  "1777562525": {
+    "category": "SWING",
+    "message": "Buy below 1.70, Sell above 1.96\nSwing, Moderate risk",
+    "symbol": "CVS",
+    "title": "CVS 90C 6/18: BUY"
   }
 }
