@@ -480,40 +480,6 @@ def load_orion_skills():
         return ""
 
 
-def load_best_options(max_show=15, min_premium=1_000_000):
-    """Load today's best options snapshot from ~/.openclaw/data/best-options/YYYY-MM-DD.json.
-    Returns a formatted prompt block of the top T1+T2 contracts sorted by premium DESC.
-    Used to give Boba context on whale-tier flow alerts deduped across the day."""
-    from pathlib import Path as _Path
-    from datetime import datetime as _dt, timezone as _tz, timedelta as _td
-    et_now = _dt.now(_tz.utc) + _td(hours=-4)
-    date_str = et_now.strftime("%Y-%m-%d")
-    fp = _Path.home() / ".openclaw" / "data" / "best-options" / f"{date_str}.json"
-    if not fp.exists():
-        return ""
-    try:
-        snap = json.loads(fp.read_text())
-    except Exception:
-        return ""
-    contracts = snap.get("sorted_by_premium", []) or []
-    # Filter to T1 + T2 only (whale tier) and premium above floor
-    whale = [c for c in contracts if c.get("tier") in ("T1_HUGE", "T2_UNUSUAL_HUGE") and c.get("premium", 0) >= min_premium]
-    if not whale:
-        return ""
-    whale = whale[:max_show]
-    tier_counts = snap.get("tier_counts", {})
-    last_run = snap.get("last_run_human", "?")
-    lines = [f"\n# Today's whale flow archive (T1+T2, deduped by contract, sorted by premium DESC)"]
-    lines.append(f"# Snapshot: {last_run} | T1: {tier_counts.get('T1_HUGE',0)} | T2: {tier_counts.get('T2_UNUSUAL_HUGE',0)}")
-    for c in whale:
-        bull = "BULL" if c.get("is_bullish") else "BEAR"
-        lines.append(
-            f"  ${c.get('premium',0):>11,}  {c.get('ticker','?'):5s} ${c.get('strike',0):>6.0f} {c.get('option_type','?'):4s} "
-            f"{c.get('expiry','?'):10s} {bull} | V:{c.get('volume',0):>5} OI:{c.get('oi',0):>5} SW:{c.get('sweeps',0):>3} BL:{c.get('blocks',0):>2} | {c.get('tier','?')}"
-        )
-    return "\n".join(lines) + "\n"
-
-
 def load_market_briefing():
     """Read hourly market briefing (regime, F&G, BTC). Compact summary."""
     try:
@@ -592,7 +558,6 @@ def build_boba_prompt(account, positions, shortlist_with_kronos, remaining_budge
                 shortlist_text += f"  → Kronos CONFLICTS with option thesis ❌\n"
 
     firebase_signals_text = format_firebase_signals_for_prompt(load_firebase_signals(), max_show=20)
-    best_options_text = load_best_options(max_show=15, min_premium=1_000_000) or ""
     market_briefing_text = load_market_briefing() or ""
     grok_brief_text = load_grok_brief() or ""
     orion_skills_text = load_orion_skills() or ""
@@ -617,7 +582,6 @@ Open positions:
 # Trade signals from providers (Name / Name2 / Vivid — last 20)
 These are curated buy/sell calls from human-run provider services. Use them as INDEPENDENT confirmation: if a provider has called the same direction as a whale flow above, that's stronger alignment. Disagreement is also informative. Do NOT take a pick just because a provider called it — use these alongside whale flow + Kronos.
 {firebase_signals_text}
-{best_options_text}
 
 # Your task — TWO parts every cycle
 
@@ -1051,7 +1015,6 @@ def execute_pick_on_alpaca(pick):
             "symbol": occ_symbol,
             "qty": str(qty),
             "side": "sell",
-            "position_intent": "sell_to_close",
             "type": "stop_limit",
             "time_in_force": "gtc",
             "stop_price": str(stop_trigger),
@@ -1074,7 +1037,6 @@ def execute_pick_on_alpaca(pick):
                 "symbol": occ_symbol,
                 "qty": str(qty),
                 "side": "sell",
-                "position_intent": "sell_to_close",
                 "type": "limit",
                 "time_in_force": "gtc",
                 "limit_price": str(tp_price),
@@ -1184,7 +1146,6 @@ def execute_position_action(action_dict, positions):
 
             sell_body = {
                 "symbol": sym, "qty": str(close_qty), "side": "sell",
-                "position_intent": "sell_to_close",
                 "type": "limit", "time_in_force": "day",
                 "limit_price": f"{limit_p:.2f}",
             }
@@ -1201,7 +1162,6 @@ def execute_position_action(action_dict, positions):
                 tp_p = round(max(avg_entry * (1 + tp_pct/100), 0.01), 2)
                 oco = {
                     "symbol": sym, "qty": str(remaining), "side": "sell",
-                    "position_intent": "sell_to_close",
                     "type": "limit", "time_in_force": "gtc", "order_class": "oco",
                     "take_profit": {"limit_price": str(tp_p)},
                     "stop_loss": {"stop_price": str(stop_t), "limit_price": str(stop_l)},
@@ -1213,7 +1173,6 @@ def execute_position_action(action_dict, positions):
         elif act == "EXIT":
             sell_body = {
                 "symbol": sym, "qty": str(qty), "side": "sell",
-                "position_intent": "sell_to_close",
                 "type": "limit", "time_in_force": "day",
                 "limit_price": f"{limit_p:.2f}",
             }
@@ -1231,7 +1190,6 @@ def execute_position_action(action_dict, positions):
             tp_p = round(max(avg_entry * (1 + tp_pct/100), 0.01), 2)
             oco = {
                 "symbol": sym, "qty": str(qty), "side": "sell",
-                "position_intent": "sell_to_close",
                 "type": "limit", "time_in_force": "gtc", "order_class": "oco",
                 "take_profit": {"limit_price": str(tp_p)},
                 "stop_loss": {"stop_price": str(stop_t), "limit_price": str(stop_l)},
