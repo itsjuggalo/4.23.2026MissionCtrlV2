@@ -6540,8 +6540,8 @@
     "discordThreadId": "1499051483143077978",
     "earlyTarget": "24.61",
     "exit1": "24.70",
-    "exit2": "30.05",
-    "exitTime": 1777485716,
+    "exit2": "36.70",
+    "exitTime": 1777558197,
     "expiry": "1778803200",
     "free": 1,
     "isWeekly": 1,
@@ -6552,11 +6552,32 @@
     },
     "reduceLoss": "13.91",
     "sellTarget": "24.70",
-    "sellTarget2": "30.05",
+    "sellTarget2": "36.70",
     "shortName": "Advanced Micro Devices, Inc.",
-    "status": "Booked profits @30.05 and riding runners",
-    "stopLoss": "24.04",
+    "status": "Booked profits @36.70 and riding runners",
+    "stopLoss": "29.36",
     "strike": "320",
     "symbol": "AMD"
+  },
+  "1777475765": {
+    "buyTarget": "13.10",
+    "category": "SWING",
+    "earlyTarget": "15.07",
+    "exitTime": 1777556178,
+    "expiry": "1780621200",
+    "free": 1,
+    "isWeekly": 1,
+    "reasoning": {
+      "\ud83d\udc0b Unusual Flows": "Newly opened option sweeps were detected with Sweep Volume > Open Interest.",
+      "\ud83d\udcc8 Bullish Sweeps": "Bullish sweeps indicate some hedge fund managers expect the stock to go up in short term.",
+      "\ud83d\udcca Technical Analysis": "Technical Analysis indicates that the analyst has verified chart pattern, support and resistance levels, moving averages, RSI and VWAP for this entry."
+    },
+    "reduceLoss": "8.52",
+    "sellTarget": "16.06",
+    "sellTarget2": "10.10",
+    "status": "Booked full profits.",
+    "stopLoss": "11.24",
+    "strike": "265",
+    "symbol": "AMZN"
   }
 }

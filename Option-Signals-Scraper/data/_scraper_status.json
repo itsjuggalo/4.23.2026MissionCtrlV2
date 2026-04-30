@@ -1,13 +1,13 @@
 {
   "scraper": "option-signals-firebase",
-  "updated_at": "2026-04-30T15:28:35.925807+00:00",
+  "updated_at": "2026-04-30T16:20:48.485171+00:00",
   "endpoints": {
     "flow_live_last100": {
       "tier": "tier1",
       "interval_min": 5,
-      "last_fetch": "2026-04-30T15:28:25.614243+00:00",
+      "last_fetch": "2026-04-30T16:20:37.015155+00:00",
       "firebase_path": "/FlowGreeks/LiveFlowLast100.json",
-      "ok": 205,
+      "ok": 215,
       "fail": 0,
       "last_count": 100,
       "last_status": "ok"
@@ -15,29 +15,29 @@
     "flow_alerts_today": {
       "tier": "tier1",
       "interval_min": 5,
-      "last_fetch": "2026-04-30T15:28:25.614243+00:00",
+      "last_fetch": "2026-04-30T16:20:37.015155+00:00",
       "firebase_path": "/FlowGreeks/Alerts/today.json",
-      "ok": 205,
+      "ok": 215,
       "fail": 0,
-      "last_count": 99,
+      "last_count": 117,
       "last_status": "ok"
     },
     "flow2_alerts_today": {
       "tier": "tier1",
       "interval_min": 5,
-      "last_fetch": "2026-04-30T15:28:25.614243+00:00",
+      "last_fetch": "2026-04-30T16:20:37.015155+00:00",
       "firebase_path": "/FlowGreeks2/Alerts/today.json",
-      "ok": 205,
+      "ok": 215,
       "fail": 0,
-      "last_count": 99,
+      "last_count": 127,
       "last_status": "ok"
     },
     "short_term_options": {
       "tier": "tier1",
       "interval_min": 5,
-      "last_fetch": "2026-04-30T15:28:25.614243+00:00",
+      "last_fetch": "2026-04-30T16:20:37.015155+00:00",
       "firebase_path": "/Vivid2/ShortTermOptions.json",
-      "ok": 205,
+      "ok": 215,
       "fail": 0,
       "last_count": 5,
       "last_status": "ok"
@@ -45,9 +45,9 @@
     "short_term_stocks": {
       "tier": "tier1",
       "interval_min": 5,
-      "last_fetch": "2026-04-30T15:28:25.614243+00:00",
+      "last_fetch": "2026-04-30T16:20:37.015155+00:00",
       "firebase_path": "/Vivid2/ShortTermStocks.json",
-      "ok": 205,
+      "ok": 215,
       "fail": 0,
       "last_count": 15,
       "last_status": "ok"
@@ -55,29 +55,29 @@
     "option_notifications": {
       "tier": "tier1",
       "interval_min": 5,
-      "last_fetch": "2026-04-30T15:28:25.614243+00:00",
+      "last_fetch": "2026-04-30T16:20:37.015155+00:00",
       "firebase_path": "/Vivid2/OptionNotifications.json",
-      "ok": 205,
+      "ok": 215,
       "fail": 0,
-      "last_count": 791,
+      "last_count": 794,
       "last_status": "ok"
     },
     "stock_notifications": {
       "tier": "tier1",
       "interval_min": 5,
-      "last_fetch": "2026-04-30T15:28:25.614243+00:00",
+      "last_fetch": "2026-04-30T16:20:37.015155+00:00",
       "firebase_path": "/Vivid2/StockNotifications.json",
-      "ok": 205,
+      "ok": 215,
       "fail": 0,
-      "last_count": 521,
+      "last_count": 524,
       "last_status": "ok"
     },
     "ts_short_term_options": {
       "tier": "tier1",
       "interval_min": 5,
-      "last_fetch": "2026-04-30T15:28:25.614243+00:00",
+      "last_fetch": "2026-04-30T16:20:37.015155+00:00",
       "firebase_path": "/Name/ShortTermOptions.json",
-      "ok": 205,
+      "ok": 215,
       "fail": 0,
       "last_count": 4,
       "last_status": "ok"
@@ -85,9 +85,9 @@
     "ts_short_term_stocks": {
       "tier": "tier1",
       "interval_min": 5,
-      "last_fetch": "2026-04-30T15:28:25.614243+00:00",
+      "last_fetch": "2026-04-30T16:20:37.015155+00:00",
       "firebase_path": "/Name/ShortTermStocks.json",
-      "ok": 205,
+      "ok": 215,
       "fail": 0,
       "last_count": 13,
       "last_status": "ok"
@@ -95,9 +95,9 @@
     "ts_option_notifications": {
       "tier": "tier1",
       "interval_min": 5,
-      "last_fetch": "2026-04-30T15:28:25.614243+00:00",
+      "last_fetch": "2026-04-30T16:20:37.015155+00:00",
       "firebase_path": "/Name/OptionNotifications.json",
-      "ok": 205,
+      "ok": 215,
       "fail": 0,
       "last_count": 980,
       "last_status": "ok"
@@ -105,29 +105,29 @@
     "ts_stock_notifications": {
       "tier": "tier1",
       "interval_min": 5,
-      "last_fetch": "2026-04-30T15:28:25.614243+00:00",
+      "last_fetch": "2026-04-30T16:20:37.015155+00:00",
       "firebase_path": "/Name/StockNotifications.json",
-      "ok": 205,
+      "ok": 215,
       "fail": 0,
-      "last_count": 688,
+      "last_count": 689,
       "last_status": "ok"
     },
     "ss_short_term_options": {
       "tier": "tier1",
       "interval_min": 5,
-      "last_fetch": "2026-04-30T15:28:25.614243+00:00",
+      "last_fetch": "2026-04-30T16:20:37.015155+00:00",
       "firebase_path": "/Name2/ShortTermOptions.json",
-      "ok": 205,
+      "ok": 215,
       "fail": 0,
-      "last_count": 4,
+      "last_count": 3,
       "last_status": "ok"
     },
     "ss_short_term_stocks": {
       "tier": "tier1",
       "interval_min": 5,
-      "last_fetch": "2026-04-30T15:28:25.614243+00:00",
+      "last_fetch": "2026-04-30T16:20:37.015155+00:00",
       "firebase_path": "/Name2/ShortTermStocks.json",
-      "ok": 205,
+      "ok": 215,
       "fail": 0,
       "last_count": 10,
       "last_status": "ok"
@@ -135,19 +135,19 @@
     "ss_option_notifications": {
       "tier": "tier1",
       "interval_min": 5,
-      "last_fetch": "2026-04-30T15:28:25.614243+00:00",
+      "last_fetch": "2026-04-30T16:20:37.015155+00:00",
       "firebase_path": "/Name2/OptionNotifications.json",
-      "ok": 205,
+      "ok": 215,
       "fail": 0,
-      "last_count": 1103,
+      "last_count": 1104,
       "last_status": "ok"
     },
     "ss_stock_notifications": {
       "tier": "tier1",
       "interval_min": 5,
-      "last_fetch": "2026-04-30T15:28:25.614243+00:00",
+      "last_fetch": "2026-04-30T16:20:37.015155+00:00",
       "firebase_path": "/Name2/StockNotifications.json",
-      "ok": 205,
+      "ok": 215,
       "fail": 0,
       "last_count": 4281,
       "last_status": "ok"
@@ -155,9 +155,9 @@
     "long_term_options": {
       "tier": "tier2",
       "interval_min": 30,
-      "last_fetch": "2026-04-30T15:22:58.820122+00:00",
+      "last_fetch": "2026-04-30T15:53:25.941472+00:00",
       "firebase_path": "/Vivid2/LongTermOptions.json",
-      "ok": 36,
+      "ok": 37,
       "fail": 0,
       "last_count": 3,
       "last_status": "ok"
@@ -165,9 +165,9 @@
     "long_term_stocks": {
       "tier": "tier2",
       "interval_min": 30,
-      "last_fetch": "2026-04-30T15:22:58.820122+00:00",
+      "last_fetch": "2026-04-30T15:53:25.941472+00:00",
       "firebase_path": "/Vivid2/LongTermStocks.json",
-      "ok": 36,
+      "ok": 37,
       "fail": 0,
       "last_count": 4,
       "last_status": "ok"
@@ -175,19 +175,19 @@
     "flow_liveflows_today": {
       "tier": "tier2",
       "interval_min": 30,
-      "last_fetch": "2026-04-30T15:22:58.820122+00:00",
+      "last_fetch": "2026-04-30T15:53:25.941472+00:00",
       "firebase_path": "/FlowGreeks/LiveFlows/today.json",
-      "ok": 36,
+      "ok": 37,
       "fail": 0,
-      "last_count": 11035,
+      "last_count": 12729,
       "last_status": "ok"
     },
     "flow_bullbears_today": {
       "tier": "tier2",
       "interval_min": 30,
-      "last_fetch": "2026-04-30T15:22:58.820122+00:00",
+      "last_fetch": "2026-04-30T15:53:25.941472+00:00",
       "firebase_path": "/FlowGreeks/BullBears/today.json",
-      "ok": 36,
+      "ok": 37,
       "fail": 0,
       "last_count": 0,
       "last_status": "ok"
@@ -195,19 +195,19 @@
     "flow2_liveflows_today": {
       "tier": "tier2",
       "interval_min": 30,
-      "last_fetch": "2026-04-30T15:22:58.820122+00:00",
+      "last_fetch": "2026-04-30T15:53:25.941472+00:00",
       "firebase_path": "/FlowGreeks2/LiveFlows/today.json",
-      "ok": 36,
+      "ok": 37,
       "fail": 0,
-      "last_count": 15999,
+      "last_count": 18350,
       "last_status": "ok"
     },
     "flow2_bullbears": {
       "tier": "tier2",
       "interval_min": 30,
-      "last_fetch": "2026-04-30T15:22:58.820122+00:00",
+      "last_fetch": "2026-04-30T15:53:25.941472+00:00",
       "firebase_path": "/FlowGreeks2/BullBears.json",
-      "ok": 36,
+      "ok": 37,
       "fail": 0,
       "last_count": 1,
       "last_status": "ok"
@@ -215,9 +215,9 @@
     "ts_long_term_options": {
       "tier": "tier2",
       "interval_min": 30,
-      "last_fetch": "2026-04-30T15:22:58.820122+00:00",
+      "last_fetch": "2026-04-30T15:53:25.941472+00:00",
       "firebase_path": "/Name/LongTermOptions.json",
-      "ok": 36,
+      "ok": 37,
       "fail": 0,
       "last_count": 4,
       "last_status": "ok"
@@ -225,9 +225,9 @@
     "ts_long_term_stocks": {
       "tier": "tier2",
       "interval_min": 30,
-      "last_fetch": "2026-04-30T15:22:58.820122+00:00",
+      "last_fetch": "2026-04-30T15:53:25.941472+00:00",
       "firebase_path": "/Name/LongTermStocks.json",
-      "ok": 36,
+      "ok": 37,
       "fail": 0,
       "last_count": 3,
       "last_status": "ok"
@@ -235,9 +235,9 @@
     "ss_long_term_options": {
       "tier": "tier2",
       "interval_min": 30,
-      "last_fetch": "2026-04-30T15:22:58.820122+00:00",
+      "last_fetch": "2026-04-30T15:53:25.941472+00:00",
       "firebase_path": "/Name2/LongTermOptions.json",
-      "ok": 36,
+      "ok": 37,
       "fail": 0,
       "last_count": 2,
       "last_status": "ok"
@@ -245,9 +245,9 @@
     "ss_long_term_stocks": {
       "tier": "tier2",
       "interval_min": 30,
-      "last_fetch": "2026-04-30T15:22:58.820122+00:00",
+      "last_fetch": "2026-04-30T15:53:25.941472+00:00",
       "firebase_path": "/Name2/LongTermStocks.json",
-      "ok": 36,
+      "ok": 37,
       "fail": 0,
       "last_count": 3,
       "last_status": "ok"
@@ -255,29 +255,29 @@
     "closed_options": {
       "tier": "tier3",
       "interval_min": 360,
-      "last_fetch": "2026-04-30T09:46:39.886605+00:00",
+      "last_fetch": "2026-04-30T15:47:08.476114+00:00",
       "firebase_path": "/Vivid2/ClosedOptions.json",
-      "ok": 3,
+      "ok": 4,
       "fail": 0,
-      "last_count": 339,
+      "last_count": 345,
       "last_status": "ok"
     },
     "closed_stocks": {
       "tier": "tier3",
       "interval_min": 360,
-      "last_fetch": "2026-04-30T09:46:39.886605+00:00",
+      "last_fetch": "2026-04-30T15:47:08.476114+00:00",
       "firebase_path": "/Vivid2/ClosedStocks.json",
-      "ok": 3,
+      "ok": 4,
       "fail": 0,
-      "last_count": 161,
+      "last_count": 162,
       "last_status": "ok"
     },
     "closed_options_older": {
       "tier": "tier3",
       "interval_min": 360,
-      "last_fetch": "2026-04-30T09:46:39.886605+00:00",
+      "last_fetch": "2026-04-30T15:47:08.476114+00:00",
       "firebase_path": "/Vivid2/ClosedOptionssOlder.json",
-      "ok": 3,
+      "ok": 4,
       "fail": 0,
       "last_count": 2609,
       "last_status": "ok"
@@ -285,9 +285,9 @@
     "closed_stocks_older": {
       "tier": "tier3",
       "interval_min": 360,
-      "last_fetch": "2026-04-30T09:46:39.886605+00:00",
+      "last_fetch": "2026-04-30T15:47:08.476114+00:00",
       "firebase_path": "/Vivid2/ClosedStocksOlder.json",
-      "ok": 3,
+      "ok": 4,
       "fail": 0,
       "last_count": 933,
       "last_status": "ok"
@@ -295,9 +295,9 @@
     "closed_options_2022": {
       "tier": "tier3",
       "interval_min": 360,
-      "last_fetch": "2026-04-30T09:46:39.886605+00:00",
+      "last_fetch": "2026-04-30T15:47:08.476114+00:00",
       "firebase_path": "/Vivid2/ClosedOptions2022AndOld.json",
-      "ok": 3,
+      "ok": 4,
       "fail": 0,
       "last_count": 743,
       "last_status": "ok"
@@ -305,39 +305,39 @@
     "ts_closed_options": {
       "tier": "tier3",
       "interval_min": 360,
-      "last_fetch": "2026-04-30T09:46:39.886605+00:00",
+      "last_fetch": "2026-04-30T15:47:08.476114+00:00",
       "firebase_path": "/Name/ClosedOptions.json",
-      "ok": 3,
+      "ok": 4,
       "fail": 0,
-      "last_count": 254,
+      "last_count": 259,
       "last_status": "ok"
     },
     "ts_closed_stocks": {
       "tier": "tier3",
       "interval_min": 360,
-      "last_fetch": "2026-04-30T09:46:39.886605+00:00",
+      "last_fetch": "2026-04-30T15:47:08.476114+00:00",
       "firebase_path": "/Name/ClosedStocks.json",
-      "ok": 3,
+      "ok": 4,
       "fail": 0,
-      "last_count": 223,
+      "last_count": 225,
       "last_status": "ok"
     },
     "ss_closed_options": {
       "tier": "tier3",
       "interval_min": 360,
-      "last_fetch": "2026-04-30T09:46:39.886605+00:00",
+      "last_fetch": "2026-04-30T15:47:08.476114+00:00",
       "firebase_path": "/Name2/ClosedOptions.json",
-      "ok": 3,
+      "ok": 4,
       "fail": 0,
-      "last_count": 285,
+      "last_count": 286,
       "last_status": "ok"
     },
     "ss_closed_stocks": {
       "tier": "tier3",
       "interval_min": 360,
-      "last_fetch": "2026-04-30T09:46:39.886605+00:00",
+      "last_fetch": "2026-04-30T15:47:08.476114+00:00",
       "firebase_path": "/Name2/ClosedStocks.json",
-      "ok": 3,
+      "ok": 4,
       "fail": 0,
       "last_count": 2279,
       "last_status": "ok"
@@ -394,8 +394,8 @@
     }
   },
   "summary": {
-    "total_fetches": 3467,
-    "successful": 3467,
+    "total_fetches": 3636,
+    "successful": 3636,
     "failed": 0,
     "success_rate": "100.0%"
   }

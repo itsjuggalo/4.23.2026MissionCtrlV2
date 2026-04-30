@@ -4140,5 +4140,11 @@
     "message": "Reached SellTarget1 @32.70 with gain: 3.19%. Take profits and ride for next target with stops @28.52",
     "symbol": "KMI",
     "title": "KMI : SELL"
+  },
+  "1777565865": {
+    "category": "SWING",
+    "message": "Reached SellTarget1 @57.25 with gain: 3.38%. Take profits and ride for next target with stops @49.84",
+    "symbol": "BWA",
+    "title": "BWA : SELL"
   }
 }

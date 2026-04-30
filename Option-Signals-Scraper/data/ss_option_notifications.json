@@ -6626,5 +6626,11 @@
     "message": "Buy below 1.70, Sell above 1.96\nSwing, Moderate risk",
     "symbol": "CVS",
     "title": "CVS 90C 6/18: BUY"
+  },
+  "1777565642": {
+    "category": "SCALP",
+    "message": "Stopped out at 0.88",
+    "symbol": "SPY",
+    "title": "SPY 710P 05/01 : SELL"
   }
 }

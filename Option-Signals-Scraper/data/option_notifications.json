@@ -4749,5 +4749,24 @@
     "message": "Reached Target 2.39 and that's 17.16%! Lock some in and wait for next target. Raise the stops to 1.67",
     "symbol": "NVDA",
     "title": "NVDA 200P 05/04 : STC"
+  },
+  "1777563427": {
+    "category": "SWING",
+    "message": "Reached Target 23.88 and that's 32.67%! Lock some in and wait for next target. Raise the stops to 18.00",
+    "symbol": "MRVL",
+    "title": "MRVL 175C 08/21 : STC"
+  },
+  "1777563531": {
+    "category": "SCALP",
+    "free": 1,
+    "message": "Reached SellTarget2 @2.65. Take profits and ride the runners. Gain: 29.90%",
+    "symbol": "NVDA",
+    "title": "NVDA 200P 5/4: STC"
+  },
+  "1777565765": {
+    "category": "SWING",
+    "message": "Reached Target 2.85 and that's 32.56%! Lock some in and wait for next target. Raise the stops to 2.15",
+    "symbol": "BWA",
+    "title": "BWA 70C 10/16 : STC"
   }
 }

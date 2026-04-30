@@ -771,14 +771,17 @@ export function CommandCenterPage() {
             const fmtV = (n: number) => n >= 1000000 ? '$' + (n/1000000).toFixed(1) + 'M' : n >= 1000 ? '$' + (n/1000).toFixed(0) + 'K' : '$' + n;
             const timeAgo = (ts: number) => { const m = Math.floor((Date.now() - ts) / 60000); if (m < 1) return 'now'; if (m < 60) return m + 'm'; const h = Math.floor(m/60); if (h < 24) return h + 'h'; return Math.floor(h/24) + 'd'; };
             return (
-              <div key={i} onClick={() => setSelectedItem({ type: 'huge', data: { ...f, totalFlowValue: f.Value, SWEEPS: f.BlockType === 'SWEEP' ? 1 : 0, BLOCKS: f.BlockType === 'BLOCK' || f.BlockType === 'BLOCKS' ? 1 : 0, AlertType: f.BlockType || 'unusual_flow', AlertPrice: f.Spot || null, isBullish: bullish, DTE: f.ExpiryStr ? Math.max(0, Math.ceil((new Date(f.ExpiryStr + 'T00:00:00').getTime() - Date.now()) / 86400000)) : null } })} style={{ cursor: 'pointer', display: 'grid', gridTemplateColumns: '34px 14px 60px 60px 50px 1fr 70px', gap: '6px', alignItems: 'center', padding: '7px 10px', borderBottom: '1px solid #1a3a4a', borderLeft: '3px solid #ffd600', fontSize: 'var(--mc-font-label)', fontFamily: 'var(--font-mc-mono)' }}>
-                <span style={{ color: '#607d8b' }}>{timeAgo(f.Time)}</span>
-                <span style={{ color: sColor, fontWeight: 700 }}>{bullish ? '▲' : '▼'}</span>
-                <span style={{ color: '#e0e0e0', fontWeight: 700 }}>{f.Symbol}</span>
-                <span style={{ color: isCall ? '#66bb6a' : '#ef5350' }}>{isCall ? 'C' : 'P'} ${f.Strike}</span>
-                <span style={{ color: '#90a4ae' }}>{f.ExpiryStr ? (() => { const d = new Date(f.ExpiryStr + 'T00:00:00'); return (d.getMonth()+1) + '/' + d.getDate(); })() : ''}</span>
-                <span style={{ color: '#607d8b', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{isSweep ? '1sw ' : '1bk '}{f.ExpiryStr ? Math.max(0, Math.ceil((new Date(f.ExpiryStr + 'T00:00:00').getTime() - Date.now()) / 86400000)) + 'd' : ''}</span>
-                <span style={{ color: valColor, fontWeight: 700, textAlign: 'right' }}>{fmtV(f.Value)}</span>
+              <div key={i} onClick={() => setSelectedItem({ type: 'huge', data: { ...f, totalFlowValue: f.Value, SWEEPS: f.BlockType === 'SWEEP' ? 1 : 0, BLOCKS: f.BlockType === 'BLOCK' || f.BlockType === 'BLOCKS' ? 1 : 0, AlertType: f.BlockType || 'unusual_flow', AlertPrice: f.Spot || null, isBullish: ((f.OptionType === 'CALL') === (f.BidAskType === 'A' || f.BidAskType === 'AA')) } })} style={{ cursor: 'pointer', display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '7px 10px', borderBottom: '1px solid #0d1117', borderLeft: '3px solid #ffd600' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                  <span style={{ width: '8px', height: '8px', borderRadius: '50%', background: sColor, boxShadow: '0 0 4px ' + sColor }} />
+                  <span style={{ fontSize: 'var(--mc-font-label)', color: '#455a64', fontFamily: 'var(--font-mc-mono)' }}>{timeAgo(f.Time)}</span>
+                  <span style={{ fontSize: 'var(--mc-font-sm)', color: sColor, fontWeight: 700, fontFamily: 'var(--font-mc-mono)' }}>{f.Symbol}</span>
+                  <span style={{ fontSize: 'var(--mc-font-label)', color: sColor }}>{f.OptionType?.slice(0,1)} ${f.Strike}</span>
+                </div>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                  <span style={{ fontSize: 'var(--mc-font-sm)', color: valColor, fontWeight: 700, fontFamily: 'var(--font-mc-mono)' }}>{fmtV(f.Value)}</span>
+                  <span style={{ fontSize: 'var(--mc-font-label)', fontWeight: 700, padding: '1px 4px', borderRadius: '3px', background: isSweep ? '#ff980022' : '#4fc3f722', color: isSweep ? '#ff9800' : '#4fc3f7' }}>{isSweep ? 'SWP' : 'BLK'}</span>
+                </div>
               </div>
             );
           }) : <div style={{ color: '#455a64', fontSize: 'var(--mc-font-badge)', fontFamily: 'var(--font-mc-mono)', textAlign: 'center', padding: '30px' }}>No unusual flow detected</div>}
@@ -863,11 +866,8 @@ export function CommandCenterPage() {
             const fmtV = (n: number) => n >= 1000000 ? '$' + (n/1000000).toFixed(2) + 'M' : '$' + (n/1000).toFixed(0) + 'K';
             const expStr = a.Expiry ? new Date(a.Expiry * 1000).toLocaleDateString('en-US', { month: 'numeric', day: 'numeric' }) : '';
             const dirColor = a.isBullish ? '#66bb6a' : '#ef5350';
-            const ageMs = a.Updated || a.Time || 0;
-            const ageStr = ageMs ? (() => { const m = Math.floor((Date.now() - ageMs) / 60000); if (m < 1) return 'now'; if (m < 60) return m + 'm'; const h = Math.floor(m/60); if (h < 24) return h + 'h'; return Math.floor(h/24) + 'd'; })() : '';
             return (
-              <div key={i} onClick={() => setSelectedItem({ type: 'huge', data: a })} style={{ cursor: 'pointer', display: 'grid', gridTemplateColumns: '34px 14px 60px 60px 50px 1fr 70px', gap: '6px', alignItems: 'center', padding: '7px 10px', borderBottom: '1px solid #1a3a4a', borderLeft: '3px solid #e040fb', fontSize: 'var(--mc-font-label)', fontFamily: 'var(--font-mc-mono)' }}>
-                <span style={{ color: '#607d8b' }}>{ageStr}</span>
+              <div key={i} onClick={() => setSelectedItem({ type: 'huge', data: a })} style={{ cursor: 'pointer', display: 'grid', gridTemplateColumns: '8px 60px 50px 60px 1fr 70px', gap: '6px', alignItems: 'center', padding: '5px 8px', borderBottom: '1px solid #1a3a4a', fontSize: 'var(--mc-font-label)', fontFamily: 'var(--font-mc-mono)' }}>
                 <span style={{ color: dirColor, fontWeight: 700 }}>{a.isBullish ? '▲' : '▼'}</span>
                 <span style={{ color: '#e0e0e0', fontWeight: 700 }}>{a.Symbol}</span>
                 <span style={{ color: a.OptionType === 'CALL' ? '#66bb6a' : '#ef5350' }}>{a.OptionType === 'CALL' ? 'C' : 'P'} ${a.Strike}</span>

@@ -3131,5 +3131,23 @@
     "message": "Close the trade as it hit trailing stop at 385.2!",
     "symbol": "CLS",
     "title": "CLS : STC"
+  },
+  "1777563148": {
+    "category": "SWING",
+    "message": "Reached Target 165.3 and that's 8.08%! Lock some in and wait for next target. Raise the stops to 160.3",
+    "symbol": "MRVL",
+    "title": "MRVL : STC"
+  },
+  "1777563284": {
+    "category": "SWING",
+    "message": "Reached Target 350.7 and that's 8.19%! Lock some in and wait for next target. Raise the stops to 340.2",
+    "symbol": "AMD",
+    "title": "AMD : STC"
+  },
+  "1777565745": {
+    "category": "SWING",
+    "message": "Reached Target 57.12 and that's 2.04%! Lock some in and wait for next target. Raise the stops to 51.50",
+    "symbol": "BWA",
+    "title": "BWA : STC"
   }
 }
