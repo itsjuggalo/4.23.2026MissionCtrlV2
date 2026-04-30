@@ -4780,5 +4780,11 @@
     "message": "Close the trade as it hit trailing stop at 2.47!",
     "symbol": "NVDA",
     "title": "NVDA 200P 05/04 : STC"
+  },
+  "1777570385": {
+    "category": "SWING",
+    "message": "Reached Target 23.70 and that's 121.50%! Lock some in and wait for next target. Raise the stops to 18.96",
+    "symbol": "AMD",
+    "title": "AMD 350C 05/15 : STC"
   }
 }

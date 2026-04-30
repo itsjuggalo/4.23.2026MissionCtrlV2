@@ -119,65 +119,31 @@ export function ActivityPage() {
         </span>
       </div>
 
-      {/* Activity Feed — per-agent blocks grid */}
-      <div style={{ flex: 1, overflow: 'auto', minHeight: 0 }}>
+      {/* Activity Feed — scrollable */}
+      <div style={{ flex: 1, overflow: 'auto', display: 'flex', flexDirection: 'column', gap: '4px', minHeight: 0 }}>
         {filtered.length === 0 ? (
           <div style={{ padding: '60px', textAlign: 'center', color: '#455a64', fontFamily: 'var(--font-mc-mono)', fontSize: 'var(--mc-font-sm)', background: '#0a1929', borderRadius: '8px', border: '1px solid #1a3a4a' }}>
             No activity matches filters
           </div>
-        ) : (() => {
-          // Bucket grouped events by agent
-          const byAgent: Record<string, GroupedActivity[]> = {};
-          for (const g of grouped) {
-            if (!byAgent[g.agent]) byAgent[g.agent] = [];
-            byAgent[g.agent].push(g);
-          }
-          // Sort agents: most recent activity first
-          const agentOrder = Object.keys(byAgent).sort((a, b) => {
-            const ta = new Date(byAgent[a][0].time).getTime();
-            const tb = new Date(byAgent[b][0].time).getTime();
-            return tb - ta;
-          });
-
+        ) : grouped.map((a, i) => {
+          const cfg = TYPE_CONFIG[a.type] || { color: '#607d8b', icon: '📌' };
+          const sevColor = isError(a) ? '#ef5350' : isWarn(a) ? '#ff9800' : cfg.color;
+          const bgColor = isError(a) ? '#1a0a0d' : '#0a1929';
           return (
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(420px, 1fr))', gap: '12px', alignContent: 'start' }}>
-              {agentOrder.map(agentName => {
-                const items = byAgent[agentName];
-                const headType = items[0].type;
-                const cfg = TYPE_CONFIG[headType] || { color: '#607d8b', icon: '📌' };
-                const totalEvents = items.reduce((sum, x) => sum + x._count, 0);
-                const errCount = items.filter(x => isError(x)).reduce((sum, x) => sum + x._count, 0);
-                return (
-                  <div key={agentName} style={{ background: '#0a1929', border: '1px solid #1a3a4a', borderRadius: '8px', borderLeft: `3px solid ${cfg.color}`, display: 'flex', flexDirection: 'column', maxHeight: '380px', overflow: 'hidden' }}>
-                    {/* Block header */}
-                    <div style={{ padding: '10px 14px', borderBottom: '1px solid #1a3a4a', display: 'flex', alignItems: 'center', gap: '8px', flexShrink: 0 }}>
-                      <span style={{ fontSize: 'var(--mc-font-sm)' }}>{cfg.icon}</span>
-                      <span style={{ fontSize: 'var(--mc-font-xs)', fontWeight: 700, color: cfg.color, fontFamily: 'var(--font-mc-mono)' }}>{agentName}</span>
-                      <span style={{ fontSize: '10px', padding: '1px 6px', borderRadius: '3px', background: `${cfg.color}22`, color: cfg.color, fontFamily: 'var(--font-mc-mono)' }}>{headType}</span>
-                      <span style={{ marginLeft: 'auto', fontSize: 'var(--mc-font-label)', color: '#607d8b', fontFamily: 'var(--font-mc-mono)' }}>
-                        {totalEvents} event{totalEvents !== 1 ? 's' : ''}{errCount > 0 ? <span style={{ color: '#ef5350', marginLeft: '6px' }}>· {errCount} err</span> : null}
-                      </span>
-                    </div>
-                    {/* Block body — scrollable rows */}
-                    <div style={{ flex: 1, overflow: 'auto', padding: '6px', display: 'flex', flexDirection: 'column', gap: '3px' }}>
-                      {items.map((a, i) => {
-                        const sevColor = isError(a) ? '#ef5350' : isWarn(a) ? '#ff9800' : cfg.color;
-                        const bgColor = isError(a) ? '#1a0a0d' : '#0d1117';
-                        return (
-                          <div key={i} style={{ padding: '6px 10px', background: bgColor, borderRadius: '4px', borderLeft: `2px solid ${sevColor}`, display: 'flex', alignItems: 'center', gap: '8px', minWidth: 0 }}>
-                            {a._count > 1 && <span style={{ fontSize: '10px', fontWeight: 700, color: '#0d1117', background: sevColor, padding: '1px 5px', borderRadius: '10px', fontFamily: 'var(--font-mc-mono)', flexShrink: 0 }}>×{a._count}</span>}
-                            <span style={{ fontSize: 'var(--mc-font-label)', color: '#b0bec5', fontFamily: 'var(--font-mc-mono)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', flex: 1, minWidth: 0 }} title={a.action}>{a.action}</span>
-                            <span style={{ fontSize: '10px', color: '#455a64', fontFamily: 'var(--font-mc-mono)', flexShrink: 0 }} title={a.time}>{timeAgo(a.time)}</span>
-                          </div>
-                        );
-                      })}
-                    </div>
-                  </div>
-                );
-              })}
+            <div key={i} style={{ padding: '10px 14px', background: bgColor, border: '1px solid #1a3a4a', borderRadius: '6px', borderLeft: `3px solid ${sevColor}`, transition: 'border-color 0.2s' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flex: 1, minWidth: 0 }}>
+                  <span style={{ fontSize: 'var(--mc-font-sm)', flexShrink: 0 }}>{cfg.icon}</span>
+                  <span style={{ fontSize: 'var(--mc-font-xs)', fontWeight: 700, color: cfg.color, fontFamily: 'var(--font-mc-mono)', flexShrink: 0 }}>{a.agent}</span>
+                  {a._count > 1 && <span style={{ fontSize: '10px', fontWeight: 700, color: '#0d1117', background: sevColor, padding: '1px 6px', borderRadius: '10px', fontFamily: 'var(--font-mc-mono)', flexShrink: 0 }}>×{a._count}</span>}
+                  <span style={{ fontSize: 'var(--mc-font-label)', padding: '1px 6px', borderRadius: '3px', background: `${cfg.color}22`, color: cfg.color, fontFamily: 'var(--font-mc-mono)', flexShrink: 0 }}>{a.type}</span>
+                  <span style={{ fontSize: 'var(--mc-font-badge)', color: '#b0bec5', fontFamily: 'var(--font-mc-mono)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{a.action}</span>
+                </div>
+                <span style={{ fontSize: 'var(--mc-font-label)', color: '#455a64', fontFamily: 'var(--font-mc-mono)', flexShrink: 0, marginLeft: '12px' }} title={a.time}>{timeAgo(a.time)}</span>
+              </div>
             </div>
           );
-        })()}
+        })}
       </div>
     </div>
   );
