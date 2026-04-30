@@ -59,24 +59,6 @@ export function ActivityPage() {
   if (agentFilter !== 'all') filtered = filtered.filter(a => a.agent === agentFilter);
   if (search) { const q = search.toLowerCase(); filtered = filtered.filter(a => a.action?.toLowerCase().includes(q) || a.agent?.toLowerCase().includes(q)); }
 
-  // Group consecutive identical events (same agent + same action text) into a single row with count
-  type GroupedActivity = ActivityEntry & { _count: number; _firstTime: string; _lastTime: string };
-  const grouped: GroupedActivity[] = [];
-  for (const a of filtered) {
-    const last = grouped[grouped.length - 1];
-    if (last && last.agent === a.agent && last.action === a.action && last.type === a.type) {
-      last._count += 1;
-      last._lastTime = last.time;
-      last.time = a.time; // keep most-recent timestamp visible
-    } else {
-      grouped.push({ ...a, _count: 1, _firstTime: a.time, _lastTime: a.time });
-    }
-  }
-
-  // Detect error severity from action text
-  const isError = (a: ActivityEntry) => /error|fail|409|500|timeout|exception|crash/i.test(a.action || '');
-  const isWarn  = (a: ActivityEntry) => /warn|retry|reconnect|throttle/i.test(a.action || '');
-
   const typeCounts: Record<string, number> = {};
   activities.forEach(a => { typeCounts[a.type] = (typeCounts[a.type] || 0) + 1; });
 
@@ -115,7 +97,7 @@ export function ActivityPage() {
           style={{ ...selectStyle, width: '120px' }} />
 
         <span style={{ fontSize: 'var(--mc-font-label)', color: '#455a64', fontFamily: 'var(--font-mc-mono)', marginLeft: 'auto' }}>
-          {grouped.length} groups · {filtered.length} of {activities.length} events
+          {filtered.length} of {activities.length}
         </span>
       </div>
 
@@ -125,7 +107,7 @@ export function ActivityPage() {
           <div style={{ padding: '60px', textAlign: 'center', color: '#455a64', fontFamily: 'var(--font-mc-mono)', fontSize: 'var(--mc-font-sm)', background: '#0a1929', borderRadius: '8px', border: '1px solid #1a3a4a' }}>
             No activity matches filters
           </div>
-        ) : grouped.map((a, i) => {
+        ) : filtered.map((a, i) => {
           const cfg = TYPE_CONFIG[a.type] || { color: '#607d8b', icon: '📌' };
           return (
             <div key={i} style={{ padding: '10px 14px', background: '#0a1929', border: '1px solid #1a3a4a', borderRadius: '6px', borderLeft: `3px solid ${cfg.color}`, transition: 'border-color 0.2s' }}>
