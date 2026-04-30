@@ -127,15 +127,12 @@ export function ActivityPage() {
           </div>
         ) : grouped.map((a, i) => {
           const cfg = TYPE_CONFIG[a.type] || { color: '#607d8b', icon: '📌' };
-          const sevColor = isError(a) ? '#ef5350' : isWarn(a) ? '#ff9800' : cfg.color;
-          const bgColor = isError(a) ? '#1a0a0d' : '#0a1929';
           return (
-            <div key={i} style={{ padding: '10px 14px', background: bgColor, border: '1px solid #1a3a4a', borderRadius: '6px', borderLeft: `3px solid ${sevColor}`, transition: 'border-color 0.2s' }}>
+            <div key={i} style={{ padding: '10px 14px', background: '#0a1929', border: '1px solid #1a3a4a', borderRadius: '6px', borderLeft: `3px solid ${cfg.color}`, transition: 'border-color 0.2s' }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flex: 1, minWidth: 0 }}>
                   <span style={{ fontSize: 'var(--mc-font-sm)', flexShrink: 0 }}>{cfg.icon}</span>
                   <span style={{ fontSize: 'var(--mc-font-xs)', fontWeight: 700, color: cfg.color, fontFamily: 'var(--font-mc-mono)', flexShrink: 0 }}>{a.agent}</span>
-                  {a._count > 1 && <span style={{ fontSize: '10px', fontWeight: 700, color: '#0d1117', background: sevColor, padding: '1px 6px', borderRadius: '10px', fontFamily: 'var(--font-mc-mono)', flexShrink: 0 }}>×{a._count}</span>}
                   <span style={{ fontSize: 'var(--mc-font-label)', padding: '1px 6px', borderRadius: '3px', background: `${cfg.color}22`, color: cfg.color, fontFamily: 'var(--font-mc-mono)', flexShrink: 0 }}>{a.type}</span>
                   <span style={{ fontSize: 'var(--mc-font-badge)', color: '#b0bec5', fontFamily: 'var(--font-mc-mono)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{a.action}</span>
                 </div>
