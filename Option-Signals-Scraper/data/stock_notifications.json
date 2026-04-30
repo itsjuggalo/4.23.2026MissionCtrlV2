@@ -3149,5 +3149,11 @@
     "message": "Reached Target 57.12 and that's 2.04%! Lock some in and wait for next target. Raise the stops to 51.50",
     "symbol": "BWA",
     "title": "BWA : STC"
+  },
+  "1777571755": {
+    "category": "SWING",
+    "message": "Buy To Open at 402.26 with first target above 410.31",
+    "symbol": "MSFT",
+    "title": "MSFT: BTO"
   }
 }

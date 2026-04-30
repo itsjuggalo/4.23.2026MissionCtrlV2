@@ -4786,5 +4786,11 @@
     "message": "Reached Target 23.70 and that's 121.50%! Lock some in and wait for next target. Raise the stops to 18.96",
     "symbol": "AMD",
     "title": "AMD 350C 05/15 : STC"
+  },
+  "1777571751": {
+    "category": "SWING",
+    "message": "Buy To Open at 3.80 with first target above 4.37",
+    "symbol": "MSFT",
+    "title": "MSFT 450C 6/18: BTO"
   }
 }

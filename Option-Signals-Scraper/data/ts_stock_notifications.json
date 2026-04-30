@@ -4146,5 +4146,11 @@
     "message": "Reached SellTarget1 @57.25 with gain: 3.38%. Take profits and ride for next target with stops @49.84",
     "symbol": "BWA",
     "title": "BWA : SELL"
+  },
+  "1777571771": {
+    "category": "LONGTERM",
+    "message": "Buy below 402.41, Sell above 414.48\nLongTerm, Moderate risk",
+    "symbol": "MSFT",
+    "title": "MSFT: BUY"
   }
 }

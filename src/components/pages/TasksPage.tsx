@@ -1,181 +1,142 @@
 'use client';
 import { useState, useEffect } from 'react';
 
-interface Task {
-  id: string;
-  title: string;
-  description: string;
-  status: 'backlog' | 'active' | 'review' | 'done';
-  priority: 'critical' | 'high' | 'medium' | 'low';
-  agent?: string;
-  created: string;
-  updated: string;
+interface AgentTask {
+  task: string;
+  type?: string;
+  schedule?: string;
+  source?: string;
+  ticker?: string;
+  discovered_at?: string;
 }
 
-const PRIORITY_COLORS: Record<string, string> = {
-  critical: '#ef5350', high: '#ff9800', medium: '#4fc3f7', low: '#66bb6a',
-};
+interface AgentData {
+  color: string;
+  icon: string;
+  role: string;
+  default_tasks: AgentTask[];
+  discovered_tasks: AgentTask[];
+}
 
-const COLUMN_CONFIG = [
-  { key: 'backlog' as const, label: 'BACKLOG', color: '#607d8b' },
-  { key: 'active' as const, label: 'IN PROGRESS', color: '#4fc3f7' },
-  { key: 'review' as const, label: 'REVIEW', color: '#ff9800' },
-  { key: 'done' as const, label: 'DONE', color: '#66bb6a' },
-];
+interface AgentsPayload {
+  version?: number;
+  agents: Record<string, AgentData>;
+  error?: string;
+}
 
 function timeAgo(ts: string): string {
   const diff = Date.now() - new Date(ts).getTime();
   const mins = Math.floor(diff / 60000);
-  if (mins < 1) return 'just now';
-  if (mins < 60) return `${mins}m ago`;
+  if (mins < 1) return 'now';
+  if (mins < 60) return `${mins}m`;
   const hrs = Math.floor(mins / 60);
-  if (hrs < 24) return `${hrs}h ago`;
-  const days = Math.floor(hrs / 24);
-  return `${days}d ago`;
+  if (hrs < 24) return `${hrs}h`;
+  return `${Math.floor(hrs / 24)}d`;
 }
 
-const DEFAULT_TASKS: Task[] = [
-  { id: '1', title: 'Pine Script Strategies', description: 'Holy Grail, DayTrader v1, Grid Bot v1 — build and deploy on TradingView', status: 'backlog', priority: 'high', agent: 'Boba', created: '2026-04-17T00:00:00Z', updated: '2026-04-17T00:00:00Z' },
-  { id: '2', title: '30m SuperTrend Layer', description: 'Add 30-minute SuperTrend as second signal layer alongside 1H', status: 'backlog', priority: 'medium', agent: 'Boba', created: '2026-04-17T00:00:00Z', updated: '2026-04-17T00:00:00Z' },
-  { id: '3', title: 'Massage Therapy Website', description: 'Marketing site on second Oracle Cloud instance with nginx + NoIP DNS', status: 'backlog', priority: 'medium', created: '2026-04-17T00:00:00Z', updated: '2026-04-17T00:00:00Z' },
-  { id: '4', title: 'Boba Brief Prompt Upgrade', description: 'Sonnet should get the best brief prompt — currently same as others', status: 'backlog', priority: 'high', agent: 'Boba', created: '2026-04-17T00:00:00Z', updated: '2026-04-17T00:00:00Z' },
-  { id: '5', title: 'WebSocket Real-Time Updates', description: 'Replace polling with SSE/WebSocket for live data push on dashboard', status: 'backlog', priority: 'medium', created: '2026-04-17T00:00:00Z', updated: '2026-04-17T00:00:00Z' },
-  { id: '6', title: 'Wallet Page — Complete', description: 'All 5 wallets live with full position data, avg cost, return %', status: 'done', priority: 'critical', created: '2026-04-17T00:00:00Z', updated: '2026-04-18T00:00:00Z' },
-  { id: '7', title: 'SQLite Database', description: '8 tables, 282 trades, daily snapshots, agent metrics', status: 'done', priority: 'critical', created: '2026-04-17T00:00:00Z', updated: '2026-04-17T00:00:00Z' },
-  { id: '8', title: 'SuperTrend Auto-Trader', description: 'Signal receiver + auto-trader pipeline with Discord/Telegram alerts', status: 'done', priority: 'critical', agent: 'Boba', created: '2026-04-17T00:00:00Z', updated: '2026-04-17T00:00:00Z' },
-  { id: '9', title: 'Hybrid Brief System', description: '5 daily briefs with real market data, no hallucinations', status: 'done', priority: 'high', agent: 'Boba', created: '2026-04-17T00:00:00Z', updated: '2026-04-17T00:00:00Z' },
-  { id: '10', title: 'Security Hardening', description: 'Secrets consolidated, chmod 600, nginx blocks, wallet auth', status: 'done', priority: 'high', created: '2026-04-17T00:00:00Z', updated: '2026-04-17T00:00:00Z' },
-  { id: '11', title: 'Rotate Exposed Keys', description: 'Hyperliquid private key shared in chat — rotate ASAP', status: 'active', priority: 'critical', created: '2026-04-18T00:00:00Z', updated: '2026-04-18T00:00:00Z' },
-  { id: '12', title: 'Signals + Telegram Pages', description: 'Clean up expired signals, build Telegram page with channel filters', status: 'active', priority: 'high', created: '2026-04-18T00:00:00Z', updated: '2026-04-18T00:00:00Z' },
-  { id: '13', title: 'Wire Remaining Pages', description: 'Scanner, Risk, Office pages — apply Terran theme', status: 'backlog', priority: 'medium', created: '2026-04-18T00:00:00Z', updated: '2026-04-18T00:00:00Z' },
-  { id: '14', title: 'Hardcoded API Keys', description: '4 source files still have hardcoded keys — extract to secrets', status: 'active', priority: 'high', created: '2026-04-17T00:00:00Z', updated: '2026-04-17T00:00:00Z' },
-];
-
 export function TasksPage() {
-  const [tasks, setTasks] = useState<Task[]>(DEFAULT_TASKS);
-  const [adding, setAdding] = useState(false);
-  const [newTitle, setNewTitle] = useState('');
-  const [newDesc, setNewDesc] = useState('');
-  const [newPriority, setNewPriority] = useState<Task['priority']>('medium');
-  const [dragId, setDragId] = useState<string | null>(null);
+  const [data, setData] = useState<AgentsPayload>({ agents: {} });
+  const [loading, setLoading] = useState(true);
 
-  const moveTask = (id: string, newStatus: Task['status']) => {
-    setTasks(prev => prev.map(t => t.id === id ? { ...t, status: newStatus, updated: new Date().toISOString() } : t));
-  };
+  useEffect(() => {
+    async function fetchData() {
+      try {
+        const res = await fetch('/api/agent-tasks');
+        const j = await res.json();
+        setData(j);
+      } catch {}
+      setLoading(false);
+    }
+    fetchData();
+    const i = setInterval(fetchData, 30000);
+    return () => clearInterval(i);
+  }, []);
 
-  const addTask = () => {
-    if (!newTitle.trim()) return;
-    const task: Task = {
-      id: String(Date.now()),
-      title: newTitle.trim(),
-      description: newDesc.trim(),
-      status: 'backlog',
-      priority: newPriority,
-      created: new Date().toISOString(),
-      updated: new Date().toISOString(),
-    };
-    setTasks(prev => [...prev, task]);
-    setNewTitle(''); setNewDesc(''); setAdding(false);
-  };
+  if (loading) return (
+    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '40vh', color: '#4fc3f7', fontFamily: 'var(--font-mc-mono)', fontSize: 'var(--mc-font-lg)' }}>
+      LOADING AGENT TASKS...
+    </div>
+  );
 
-  const deleteTask = (id: string) => {
-    setTasks(prev => prev.filter(t => t.id !== id));
-  };
+  const agentNames = Object.keys(data.agents || {});
+  const totalDefault = agentNames.reduce((s, n) => s + (data.agents[n]?.default_tasks?.length || 0), 0);
+  const totalDiscovered = agentNames.reduce((s, n) => s + (data.agents[n]?.discovered_tasks?.length || 0), 0);
 
   return (
-    <div style={{ padding: '24px' }}>
-      <style>{`
-        .kb-col { background: #0a192911; border-radius: 8px; padding: 12px; min-height: 300px; }
-        .kb-card { background: linear-gradient(180deg, #0a1929 0%, #0d1420 100%); border: 1px solid #1a3a4a; border-radius: 8px; padding: 14px; margin-bottom: 8px; cursor: grab; transition: border-color 0.2s, transform 0.1s; }
-        .kb-card:hover { border-color: #4fc3f744; }
-        .kb-card.dragging { opacity: 0.5; transform: scale(0.95); }
-        .kb-col.dragover { background: #4fc3f711; border: 1px dashed #4fc3f744; }
-      `}</style>
-
-      {/* Header + Add Button */}
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
-        <div>
-          <h1 style={{ fontSize: 'var(--mc-font-xl)', fontWeight: 700, color: '#4fc3f7', fontFamily: 'var(--font-mc-mono)', letterSpacing: '2px', margin: 0 }}>MISSION BOARD</h1>
-          <p style={{ fontSize: 'var(--mc-font-badge)', color: '#607d8b', fontFamily: 'var(--font-mc-mono)', margin: '4px 0 0' }}>
-            {tasks.filter(t => t.status === 'done').length}/{tasks.length} completed
-          </p>
-        </div>
-        <button onClick={() => setAdding(!adding)} style={{ padding: '8px 18px', background: '#4fc3f722', border: '1px solid #4fc3f744', borderRadius: '6px', color: '#4fc3f7', fontFamily: 'var(--font-mc-mono)', fontSize: 'var(--mc-font-badge)', fontWeight: 700, cursor: 'pointer', letterSpacing: '1px' }}>
-          {adding ? 'CANCEL' : '+ NEW TASK'}
-        </button>
+    <div style={{ padding: '16px 20px', height: '100%', display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
+      {/* Header */}
+      <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '14px', flexWrap: 'wrap' }}>
+        <span style={{ fontSize: 'var(--mc-font-xl)', fontWeight: 700, color: '#4fc3f7', fontFamily: 'var(--font-mc-mono)', letterSpacing: '2px' }}>AGENT OPERATIONS</span>
+        <span style={{ fontSize: 'var(--mc-font-label)', color: '#607d8b', fontFamily: 'var(--font-mc-mono)' }}>
+          {agentNames.length} agents · {totalDefault} core duties · {totalDiscovered} discovered
+        </span>
+        <span style={{ marginLeft: 'auto', fontSize: 'var(--mc-font-label)', color: '#455a64', fontFamily: 'var(--font-mc-mono)' }}>
+          Polling 30s
+        </span>
       </div>
 
-      {/* Add Task Form */}
-      {adding && (
-        <div style={{ background: '#0a1929', border: '1px solid #1a3a4a', borderRadius: '10px', padding: '20px', marginBottom: '20px' }}>
-          <input value={newTitle} onChange={e => setNewTitle(e.target.value)} placeholder="Task title..."
-            style={{ width: '100%', padding: '10px 14px', background: '#0d1117', border: '1px solid #1a3a4a', borderRadius: '6px', color: '#e0e0e0', fontFamily: 'var(--font-mc-mono)', fontSize: 'var(--mc-font-sm)', marginBottom: '10px', outline: 'none', boxSizing: 'border-box' }} />
-          <input value={newDesc} onChange={e => setNewDesc(e.target.value)} placeholder="Description..."
-            style={{ width: '100%', padding: '10px 14px', background: '#0d1117', border: '1px solid #1a3a4a', borderRadius: '6px', color: '#e0e0e0', fontFamily: 'var(--font-mc-mono)', fontSize: 'var(--mc-font-badge)', marginBottom: '10px', outline: 'none', boxSizing: 'border-box' }} />
-          <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
-            {(['critical', 'high', 'medium', 'low'] as const).map(p => (
-              <button key={p} onClick={() => setNewPriority(p)}
-                style={{ padding: '4px 12px', borderRadius: '4px', border: newPriority === p ? `1px solid ${PRIORITY_COLORS[p]}` : '1px solid #1a3a4a', background: newPriority === p ? `${PRIORITY_COLORS[p]}22` : 'transparent', color: newPriority === p ? PRIORITY_COLORS[p] : '#607d8b', fontFamily: 'var(--font-mc-mono)', fontSize: 'var(--mc-font-label)', cursor: 'pointer', fontWeight: 600, textTransform: 'uppercase' }}>
-                {p}
-              </button>
-            ))}
-            <button onClick={addTask} style={{ marginLeft: 'auto', padding: '8px 20px', background: '#66bb6a22', border: '1px solid #66bb6a44', borderRadius: '6px', color: '#66bb6a', fontFamily: 'var(--font-mc-mono)', fontSize: 'var(--mc-font-badge)', fontWeight: 700, cursor: 'pointer' }}>
-              ADD
-            </button>
+      {/* Agent column grid */}
+      <div style={{ flex: 1, overflow: 'auto', minHeight: 0 }}>
+        {agentNames.length === 0 ? (
+          <div style={{ padding: '60px', textAlign: 'center', color: '#455a64', fontFamily: 'var(--font-mc-mono)', fontSize: 'var(--mc-font-sm)', background: '#0a1929', borderRadius: '8px', border: '1px solid #1a3a4a' }}>
+            No agent data loaded {data.error ? `(${data.error})` : ''}
           </div>
-        </div>
-      )}
+        ) : (
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(360px, 1fr))', gap: '12px', alignContent: 'start' }}>
+            {agentNames.map(name => {
+              const a = data.agents[name];
+              const totalTasks = (a.default_tasks?.length || 0) + (a.discovered_tasks?.length || 0);
+              return (
+                <div key={name} style={{ background: '#0a1929', border: '1px solid #1a3a4a', borderRadius: '8px', borderLeft: `3px solid ${a.color}`, display: 'flex', flexDirection: 'column', maxHeight: '560px', overflow: 'hidden' }}>
+                  {/* Card header */}
+                  <div style={{ padding: '12px 14px', borderBottom: '1px solid #1a3a4a', flexShrink: 0 }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '4px' }}>
+                      <span style={{ fontSize: 'var(--mc-font-md)' }}>{a.icon}</span>
+                      <span style={{ fontSize: 'var(--mc-font-sm)', fontWeight: 700, color: a.color, fontFamily: 'var(--font-mc-mono)' }}>{name}</span>
+                      <span style={{ marginLeft: 'auto', fontSize: '10px', padding: '2px 7px', borderRadius: '10px', background: `${a.color}22`, color: a.color, fontFamily: 'var(--font-mc-mono)', fontWeight: 700 }}>{totalTasks}</span>
+                    </div>
+                    <div style={{ fontSize: 'var(--mc-font-label)', color: '#90a4ae', fontFamily: 'var(--font-mc-mono)' }}>{a.role}</div>
+                  </div>
 
-      {/* Kanban Board */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '12px' }}>
-        {COLUMN_CONFIG.map(col => {
-          const colTasks = tasks.filter(t => t.status === col.key).sort((a, b) => {
-            const order = { critical: 0, high: 1, medium: 2, low: 3 };
-            return order[a.priority] - order[b.priority];
-          });
-          return (
-            <div key={col.key} className="kb-col"
-              onDragOver={e => { e.preventDefault(); e.currentTarget.classList.add('dragover'); }}
-              onDragLeave={e => { e.currentTarget.classList.remove('dragover'); }}
-              onDrop={e => { e.currentTarget.classList.remove('dragover'); if (dragId) moveTask(dragId, col.key); setDragId(null); }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '12px', paddingBottom: '8px', borderBottom: `2px solid ${col.color}44` }}>
-                <span style={{ fontSize: 'var(--mc-font-badge)', fontWeight: 700, color: col.color, fontFamily: 'var(--font-mc-mono)', letterSpacing: '1px' }}>{col.label}</span>
-                <span style={{ fontSize: 'var(--mc-font-label)', fontWeight: 700, padding: '1px 7px', borderRadius: '10px', background: `${col.color}22`, color: col.color, fontFamily: 'var(--font-mc-mono)' }}>{colTasks.length}</span>
-              </div>
-              {colTasks.map(task => (
-                <div key={task.id} className={`kb-card ${dragId === task.id ? 'dragging' : ''}`}
-                  draggable onDragStart={() => setDragId(task.id)} onDragEnd={() => setDragId(null)}
-                  style={{ borderLeft: `3px solid ${PRIORITY_COLORS[task.priority]}` }}>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '6px' }}>
-                    <span style={{ fontSize: 'var(--mc-font-sm)', fontWeight: 700, color: '#e0e0e0', fontFamily: 'var(--font-mc-mono)', lineHeight: '1.3' }}>{task.title}</span>
-                    <button onClick={() => deleteTask(task.id)} style={{ background: 'none', border: 'none', color: '#455a64', cursor: 'pointer', fontSize: 'var(--mc-font-sm)', padding: '0 0 0 8px', lineHeight: 1 }}>x</button>
-                  </div>
-                  {task.description && (
-                    <div style={{ fontSize: 'var(--mc-font-label)', color: '#607d8b', fontFamily: 'var(--font-mc-mono)', lineHeight: '1.4', marginBottom: '8px', maxHeight: '40px', overflow: 'hidden' }}>
-                      {task.description}
-                    </div>
-                  )}
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                    <div style={{ display: 'flex', gap: '6px', alignItems: 'center' }}>
-                      <span style={{ fontSize: 'var(--mc-font-label)', fontWeight: 700, padding: '2px 6px', borderRadius: '3px', background: `${PRIORITY_COLORS[task.priority]}22`, color: PRIORITY_COLORS[task.priority], fontFamily: 'var(--font-mc-mono)', textTransform: 'uppercase' }}>{task.priority}</span>
-                      {task.agent && <span style={{ fontSize: 'var(--mc-font-label)', padding: '2px 6px', borderRadius: '3px', background: '#4fc3f722', color: '#4fc3f7', fontFamily: 'var(--font-mc-mono)' }}>{task.agent}</span>}
-                    </div>
-                    <span style={{ fontSize: 'var(--mc-font-label)', color: '#455a64', fontFamily: 'var(--font-mc-mono)' }}>{timeAgo(task.updated)}</span>
-                  </div>
-                  {/* Move buttons */}
-                  <div style={{ display: 'flex', gap: '4px', marginTop: '8px' }}>
-                    {COLUMN_CONFIG.filter(c => c.key !== col.key).map(c => (
-                      <button key={c.key} onClick={() => moveTask(task.id, c.key)}
-                        style={{ flex: 1, padding: '3px', borderRadius: '3px', border: `1px solid ${c.color}33`, background: 'transparent', color: c.color, fontFamily: 'var(--font-mc-mono)', fontSize: 'var(--mc-font-label)', cursor: 'pointer', fontWeight: 600 }}>
-                        {c.label.slice(0, 3)}
-                      </button>
+                  {/* Card body — tasks */}
+                  <div style={{ flex: 1, overflow: 'auto', padding: '6px', display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                    {/* Default core tasks */}
+                    {(a.default_tasks || []).map((t, i) => (
+                      <div key={`d-${i}`} style={{ padding: '7px 10px', background: '#0d1117', borderRadius: '4px', borderLeft: `2px solid ${a.color}55`, display: 'flex', alignItems: 'flex-start', gap: '6px' }}>
+                        <span style={{ fontSize: '9px', fontWeight: 700, color: a.color, padding: '1px 5px', borderRadius: '3px', background: `${a.color}22`, fontFamily: 'var(--font-mc-mono)', flexShrink: 0, marginTop: '1px' }}>CORE</span>
+                        <div style={{ flex: 1, minWidth: 0 }}>
+                          <div style={{ fontSize: 'var(--mc-font-label)', color: '#cfd8dc', fontFamily: 'var(--font-mc-mono)', lineHeight: 1.4 }}>{t.task}</div>
+                          {t.schedule && <div style={{ fontSize: '10px', color: '#607d8b', fontFamily: 'var(--font-mc-mono)', marginTop: '2px' }}>⏰ {t.schedule}</div>}
+                        </div>
+                      </div>
                     ))}
+
+                    {/* Discovered tasks */}
+                    {(a.discovered_tasks || []).slice().reverse().map((t, i) => (
+                      <div key={`x-${i}`} style={{ padding: '7px 10px', background: '#0d1117', borderRadius: '4px', borderLeft: `2px solid #ffd600`, display: 'flex', alignItems: 'flex-start', gap: '6px' }}>
+                        <span style={{ fontSize: '9px', fontWeight: 700, color: '#ffd600', padding: '1px 5px', borderRadius: '3px', background: '#ffd60022', fontFamily: 'var(--font-mc-mono)', flexShrink: 0, marginTop: '1px' }}>NEW</span>
+                        <div style={{ flex: 1, minWidth: 0 }}>
+                          <div style={{ display: 'flex', alignItems: 'center', gap: '6px', flexWrap: 'wrap' }}>
+                            <span style={{ fontSize: 'var(--mc-font-label)', color: '#e0e0e0', fontFamily: 'var(--font-mc-mono)', lineHeight: 1.4 }}>{t.task}</span>
+                            {t.ticker && <span style={{ fontSize: '10px', color: '#4fc3f7', fontWeight: 700, fontFamily: 'var(--font-mc-mono)' }}>{t.ticker}</span>}
+                          </div>
+                          <div style={{ fontSize: '10px', color: '#607d8b', fontFamily: 'var(--font-mc-mono)', marginTop: '2px', display: 'flex', gap: '8px' }}>
+                            {t.source && <span>src: {t.source}</span>}
+                            {t.discovered_at && <span>{timeAgo(t.discovered_at)}</span>}
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+
+                    {totalTasks === 0 && (
+                      <div style={{ padding: '20px', textAlign: 'center', color: '#455a64', fontSize: 'var(--mc-font-label)', fontFamily: 'var(--font-mc-mono)' }}>No tasks defined</div>
+                    )}
                   </div>
                 </div>
-              ))}
-            </div>
-          );
-        })}
+              );
+            })}
+          </div>
+        )}
       </div>
     </div>
   );
