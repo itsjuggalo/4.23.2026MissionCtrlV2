@@ -91,6 +91,7 @@ const tradingItems: { name: PageName; icon: React.ElementType }[] = [
   { name: 'Scanner', icon: Radar },
   { name: 'Options', icon: BarChart2 },
   { name: 'OptionsWatcher', icon: BarChart2 },
+  { name: 'Flow History', icon: Activity },
   { name: 'Wallets', icon: Wallet },
   { name: 'Trades', icon: TrendingUp },
   { name: 'Journal', icon: BookOpen },
