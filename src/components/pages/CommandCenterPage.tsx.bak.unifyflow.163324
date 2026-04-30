@@ -761,54 +761,27 @@ export function CommandCenterPage() {
             <span style={{ color: '#ffd600' }}>UNUSUAL FLOW (Vol {'>'} OI)</span>
             <span style={{ color: '#ffd600' }}>{unusualFlows.length}</span>
           </div>
-          {(() => {
-            if (unusualFlows.length === 0) {
-              return <div style={{ color: '#455a64', fontSize: 'var(--mc-font-badge)', fontFamily: 'var(--font-mc-mono)', textAlign: 'center', padding: '30px' }}>No unusual flow detected</div>;
-            }
-            const cat = (f: any): string => {
-              const v = f.Value || 0;
-              if (v >= 1_000_000) return 'huge';
-              if (v >= 500_000) return 'unusual';
-              return 'small';
-            };
-            const catColor = (c: string) => c === 'huge' ? '#e040fb' : c === 'unusual' ? '#ffd600' : c === 'small' ? '#4fc3f7' : '#607d8b';
-            return [
-              <div key="legend" style={{ display: 'flex', flexWrap: 'wrap', gap: '10px', padding: '4px 8px 8px', borderBottom: '1px solid #1a3a4a', marginBottom: '4px', fontSize: '10px', fontFamily: 'var(--font-mc-mono)', color: '#607d8b' }}>
-                <span><span style={{ color: '#66bb6a', fontWeight: 700 }}>▲</span> bullish</span>
-                <span><span style={{ color: '#ef5350', fontWeight: 700 }}>▼</span> bearish</span>
-                <span><span style={{ color: '#ff9800' }}>⚡</span> sweep (urgency)</span>
-                <span><span style={{ color: '#ce93d8' }}>▦</span> block (institutional)</span>
-                <span><span style={{ color: '#66bb6a' }}>C</span> call</span>
-                <span><span style={{ color: '#ef5350' }}>P</span> put</span>
-              </div>,
-              ...unusualFlows.map((f: any, i: number) => {
-                const isCall = f.OptionType === 'CALL';
-                const isAsk = f.BidAskType === 'A' || f.BidAskType === 'AA';
-                const bullish = (isCall && isAsk) || (!isCall && !isAsk);
-                const isSweep = f.BlockType === 'SWEEP';
-                const isBlock = f.BlockType === 'BLOCK' || f.BlockType === 'BLOCKS';
-                const c = cat(f);
-                const fmtV = (n: number) => n >= 1000000 ? '$' + (n/1000000).toFixed(2) + 'M' : '$' + (n/1000).toFixed(0) + 'K';
-                const expStr = f.ExpiryStr ? (() => { const d = new Date(f.ExpiryStr + 'T00:00:00'); return (d.getMonth()+1) + '/' + d.getDate(); })() : '';
-                const ago = (() => { const m = Math.floor((Date.now() - (f.Time||0)) / 60000); return m < 1 ? 'now' : m < 60 ? m+'m' : m < 1440 ? Math.floor(m/60)+'h' : Math.floor(m/1440)+'d'; })();
-                return (
-                  <div key={i} onClick={() => setSelectedItem({ type: 'huge', data: { ...f, totalFlowValue: f.Value, SWEEPS: isSweep ? 1 : 0, BLOCKS: isBlock ? 1 : 0, AlertType: f.BlockType || 'unusual_flow', AlertPrice: f.Spot || null, isBullish: bullish, DTE: f.ExpiryStr ? Math.max(0, Math.ceil((new Date(f.ExpiryStr + 'T00:00:00').getTime() - Date.now()) / 86400000)) : null } })} style={{ cursor: 'pointer', display: 'grid', gridTemplateColumns: '34px 42px 50px 82px 44px 1fr 90px', gap: '6px', alignItems: 'center', padding: '5px 8px', borderLeft: '2px solid ' + catColor(c), background: '#0d1117', fontSize: 'var(--mc-font-label)', fontFamily: 'var(--font-mc-mono)' }}>
-                    <span style={{ color: '#607d8b' }}>{ago}</span>
-                    <span style={{ color: catColor(c), fontWeight: 700, fontSize: '9px', textTransform: 'uppercase' }}>{c}</span>
-                    <span style={{ color: '#e0e0e0', fontWeight: 700 }}>{f.Symbol}</span>
-                    <span style={{ color: isCall ? '#66bb6a' : '#ef5350', fontWeight: 600, whiteSpace: 'nowrap' }} title={isCall ? 'CALL option' : 'PUT option'}>{isCall ? 'C' : 'P'} ${f.Strike}</span>
-                    <span style={{ color: '#90a4ae' }}>{expStr}</span>
-                    <span style={{ display: 'flex', alignItems: 'center', gap: '8px', overflow: 'hidden', whiteSpace: 'nowrap' }}>
-                      <span style={{ color: bullish ? '#66bb6a' : '#ef5350', fontWeight: 700 }} title={bullish ? 'Bullish flow (buyers in control)' : 'Bearish flow (sellers in control)'}>{bullish ? '▲' : '▼'}</span>
-                      {isSweep && <span title="Sweep - aggressive multi-exchange fills (urgency)" style={{ color: '#ff9800', fontWeight: 600 }}>⚡1</span>}
-                      {isBlock && <span title="Block - large single negotiated trade (institutional)" style={{ color: '#ce93d8', fontWeight: 600 }}>▦1</span>}
-                    </span>
-                    <span style={{ color: catColor(c), fontWeight: 800, fontSize: 'var(--mc-font-md)', textAlign: 'right' }}>{fmtV(f.Value)}</span>
-                  </div>
-                );
-              })
-            ];
-          })()}
+          {unusualFlows.length > 0 ? unusualFlows.map((f: any, i: number) => {
+            const isCall = f.OptionType === 'CALL';
+            const isAsk = f.BidAskType === 'A' || f.BidAskType === 'AA';
+            const bullish = (isCall && isAsk) || (!isCall && !isAsk);
+            const sColor = bullish ? '#66bb6a' : '#ef5350';
+            const isSweep = f.BlockType === 'SWEEP';
+            const valColor = f.Value >= 5000000 ? '#e040fb' : f.Value >= 1000000 ? '#ffd600' : f.Value >= 500000 ? '#ff9800' : f.Value >= 250000 ? '#4fc3f7' : '#e0e0e0';
+            const fmtV = (n: number) => n >= 1000000 ? '$' + (n/1000000).toFixed(1) + 'M' : n >= 1000 ? '$' + (n/1000).toFixed(0) + 'K' : '$' + n;
+            const timeAgo = (ts: number) => { const m = Math.floor((Date.now() - ts) / 60000); if (m < 1) return 'now'; if (m < 60) return m + 'm'; const h = Math.floor(m/60); if (h < 24) return h + 'h'; return Math.floor(h/24) + 'd'; };
+            return (
+              <div key={i} onClick={() => setSelectedItem({ type: 'huge', data: { ...f, totalFlowValue: f.Value, SWEEPS: f.BlockType === 'SWEEP' ? 1 : 0, BLOCKS: f.BlockType === 'BLOCK' || f.BlockType === 'BLOCKS' ? 1 : 0, AlertType: f.BlockType || 'unusual_flow', AlertPrice: f.Spot || null, isBullish: bullish, DTE: f.ExpiryStr ? Math.max(0, Math.ceil((new Date(f.ExpiryStr + 'T00:00:00').getTime() - Date.now()) / 86400000)) : null } })} style={{ cursor: 'pointer', display: 'grid', gridTemplateColumns: '34px 14px 60px 60px 50px 1fr 70px', gap: '6px', alignItems: 'center', padding: '7px 10px', borderBottom: '1px solid #1a3a4a', borderLeft: '3px solid #ffd600', fontSize: 'var(--mc-font-label)', fontFamily: 'var(--font-mc-mono)' }}>
+                <span style={{ color: '#607d8b' }}>{timeAgo(f.Time)}</span>
+                <span style={{ color: sColor, fontWeight: 700 }}>{bullish ? '▲' : '▼'}</span>
+                <span style={{ color: '#e0e0e0', fontWeight: 700 }}>{f.Symbol}</span>
+                <span style={{ color: isCall ? '#66bb6a' : '#ef5350' }}>{isCall ? 'C' : 'P'} ${f.Strike}</span>
+                <span style={{ color: '#90a4ae' }}>{f.ExpiryStr ? (() => { const d = new Date(f.ExpiryStr + 'T00:00:00'); return (d.getMonth()+1) + '/' + d.getDate(); })() : ''}</span>
+                <span style={{ color: '#607d8b', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{isSweep ? '1sw ' : '1bk '}{f.ExpiryStr ? Math.max(0, Math.ceil((new Date(f.ExpiryStr + 'T00:00:00').getTime() - Date.now()) / 86400000)) + 'd' : ''}</span>
+                <span style={{ color: valColor, fontWeight: 700, textAlign: 'right' }}>{fmtV(f.Value)}</span>
+              </div>
+            );
+          }) : <div style={{ color: '#455a64', fontSize: 'var(--mc-font-badge)', fontFamily: 'var(--font-mc-mono)', textAlign: 'center', padding: '30px' }}>No unusual flow detected</div>}
         </div>
 
         <div className="cc" style={{ padding: '16px' }}>
@@ -884,52 +857,26 @@ export function CommandCenterPage() {
             <span style={{ color: '#e040fb' }}>HUGE FLOW ($1M+)</span>
             <span style={{ color: '#e040fb' }}>{hugeAlerts.length}</span>
           </div>
-          {(() => {
-            if (hugeAlerts.length === 0) {
-              return <div style={{ color: '#455a64', fontSize: 'var(--mc-font-badge)', fontFamily: 'var(--font-mc-mono)', textAlign: 'center', padding: '30px' }}>No huge-flow alerts today</div>;
-            }
-            const cat = (a: any): string => {
-              const t = (a.AlertType || '').toLowerCase();
-              if (t.includes('etf')) return 'etf';
-              if (t.includes('weekly')) return 'weekly';
-              if (t.includes('repeat')) return 'repeat';
-              if (t.includes('unusual')) return 'unusual';
-              return 'huge';
-            };
-            const catColor = (c: string) => c === 'huge' ? '#e040fb' : c === 'unusual' ? '#ffd600' : c === 'repeat' ? '#4fc3f7' : c === 'weekly' ? '#ff9800' : c === 'etf' ? '#66bb6a' : '#607d8b';
-            return [
-              <div key="legend" style={{ display: 'flex', flexWrap: 'wrap', gap: '10px', padding: '4px 8px 8px', borderBottom: '1px solid #1a3a4a', marginBottom: '4px', fontSize: '10px', fontFamily: 'var(--font-mc-mono)', color: '#607d8b' }}>
-                <span><span style={{ color: '#66bb6a', fontWeight: 700 }}>▲</span> bullish</span>
-                <span><span style={{ color: '#ef5350', fontWeight: 700 }}>▼</span> bearish</span>
-                <span><span style={{ color: '#ff9800' }}>⚡</span> sweep (urgency)</span>
-                <span><span style={{ color: '#ce93d8' }}>▦</span> block (institutional)</span>
-                <span><span style={{ color: '#66bb6a' }}>C</span> call</span>
-                <span><span style={{ color: '#ef5350' }}>P</span> put</span>
-              </div>,
-              ...hugeAlerts.slice(0, 30).map((a: any, i: number) => {
-                const v = a.totalFlowValue || 0;
-                const c = cat(a);
-                const fmtV = (n: number) => n >= 1000000 ? '$' + (n/1000000).toFixed(2) + 'M' : '$' + (n/1000).toFixed(0) + 'K';
-                const expStr = a.Expiry ? new Date(a.Expiry * 1000).toLocaleDateString('en-US', { month: 'numeric', day: 'numeric' }) : '';
-                const ago = (() => { const ts = a.Updated || a.Time || 0; if (!ts) return ''; const m = Math.floor((Date.now() - ts) / 60000); return m < 1 ? 'now' : m < 60 ? m+'m' : m < 1440 ? Math.floor(m/60)+'h' : Math.floor(m/1440)+'d'; })();
-                return (
-                  <div key={i} onClick={() => setSelectedItem({ type: 'huge', data: a })} style={{ cursor: 'pointer', display: 'grid', gridTemplateColumns: '34px 42px 50px 82px 44px 1fr 90px', gap: '6px', alignItems: 'center', padding: '5px 8px', borderLeft: '2px solid ' + catColor(c), background: '#0d1117', fontSize: 'var(--mc-font-label)', fontFamily: 'var(--font-mc-mono)' }}>
-                    <span style={{ color: '#607d8b' }}>{ago}</span>
-                    <span style={{ color: catColor(c), fontWeight: 700, fontSize: '9px', textTransform: 'uppercase' }}>{c}</span>
-                    <span style={{ color: '#e0e0e0', fontWeight: 700 }}>{a.Symbol}</span>
-                    <span style={{ color: a.OptionType === 'CALL' ? '#66bb6a' : '#ef5350', fontWeight: 600, whiteSpace: 'nowrap' }} title={a.OptionType === 'CALL' ? 'CALL option' : 'PUT option'}>{a.OptionType === 'CALL' ? 'C' : 'P'} ${a.Strike}</span>
-                    <span style={{ color: '#90a4ae' }}>{expStr}</span>
-                    <span style={{ display: 'flex', alignItems: 'center', gap: '8px', overflow: 'hidden', whiteSpace: 'nowrap' }}>
-                      <span style={{ color: a.isBullish ? '#66bb6a' : '#ef5350', fontWeight: 700 }} title={a.isBullish ? 'Bullish flow (buyers in control)' : 'Bearish flow (sellers in control)'}>{a.isBullish ? '▲' : '▼'}</span>
-                      {(a.SWEEPS || 0) > 0 && <span title={(a.SWEEPS) + ' sweeps - aggressive multi-exchange fills (urgency)'} style={{ color: '#ff9800', fontWeight: 600 }}>⚡{a.SWEEPS}</span>}
-                      {(a.BLOCKS || 0) > 0 && <span title={(a.BLOCKS) + ' blocks - large single negotiated trades (institutional)'} style={{ color: '#ce93d8', fontWeight: 600 }}>▦{a.BLOCKS}</span>}
-                    </span>
-                    <span style={{ color: catColor(c), fontWeight: 800, fontSize: 'var(--mc-font-md)', textAlign: 'right' }}>{fmtV(v)}</span>
-                  </div>
-                );
-              })
-            ];
-          })()}
+          {hugeAlerts.length > 0 ? hugeAlerts.slice(0, 12).map((a: any, i: number) => {
+            const v = a.totalFlowValue || 0;
+            const valColor = v >= 5000000 ? '#e040fb' : v >= 2000000 ? '#ffd600' : '#ff9800';
+            const fmtV = (n: number) => n >= 1000000 ? '$' + (n/1000000).toFixed(2) + 'M' : '$' + (n/1000).toFixed(0) + 'K';
+            const expStr = a.Expiry ? new Date(a.Expiry * 1000).toLocaleDateString('en-US', { month: 'numeric', day: 'numeric' }) : '';
+            const dirColor = a.isBullish ? '#66bb6a' : '#ef5350';
+            const ageMs = a.Updated || a.Time || 0;
+            const ageStr = ageMs ? (() => { const m = Math.floor((Date.now() - ageMs) / 60000); if (m < 1) return 'now'; if (m < 60) return m + 'm'; const h = Math.floor(m/60); if (h < 24) return h + 'h'; return Math.floor(h/24) + 'd'; })() : '';
+            return (
+              <div key={i} onClick={() => setSelectedItem({ type: 'huge', data: a })} style={{ cursor: 'pointer', display: 'grid', gridTemplateColumns: '34px 14px 60px 60px 50px 1fr 70px', gap: '6px', alignItems: 'center', padding: '7px 10px', borderBottom: '1px solid #1a3a4a', borderLeft: '3px solid #e040fb', fontSize: 'var(--mc-font-label)', fontFamily: 'var(--font-mc-mono)' }}>
+                <span style={{ color: '#607d8b' }}>{ageStr}</span>
+                <span style={{ color: dirColor, fontWeight: 700 }}>{a.isBullish ? '▲' : '▼'}</span>
+                <span style={{ color: '#e0e0e0', fontWeight: 700 }}>{a.Symbol}</span>
+                <span style={{ color: a.OptionType === 'CALL' ? '#66bb6a' : '#ef5350' }}>{a.OptionType === 'CALL' ? 'C' : 'P'} ${a.Strike}</span>
+                <span style={{ color: '#90a4ae' }}>{expStr}</span>
+                <span style={{ color: '#607d8b', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{(a.SWEEPS||0)>0?(a.SWEEPS+'sw '):''}{(a.BLOCKS||0)>0?(a.BLOCKS+'bk '):''}{(a.DTE!=null)?(a.DTE+'d'):''}</span>
+                <span style={{ color: valColor, fontWeight: 700, textAlign: 'right' }}>{fmtV(v)}</span>
+              </div>
+            );
+          }) : <div style={{ color: '#455a64', fontSize: 'var(--mc-font-badge)', fontFamily: 'var(--font-mc-mono)', textAlign: 'center', padding: '30px' }}>No huge-flow alerts today</div>}
         </div>
 
         <div className="cc" style={{ padding: '16px' }}>
