@@ -32,7 +32,6 @@ import { PerformancePage } from '../pages/PerformancePage';
 import { RegimePage } from '../pages/RegimePage';
 import UsagePage from '../pages/UsagePage';
 import { CongressPage } from '../pages/CongressPage';
-import { FlowHistoryPage } from '../pages/FlowHistoryPage';
 import { LLMPortfolioPage } from '../pages/LLMPortfolioPage';
 import { SkillsPage } from "../pages/SkillsPage";
 import { TelegramPage } from '@/components/pages/TelegramPage';
@@ -50,7 +49,6 @@ type PageName =
   | 'Sessions'
   | 'Options'
   | 'OptionsWatcher'
-  | 'Flow History'
   | 'Agents'
   | 'Approvals'
   | 'Calendar'
@@ -169,8 +167,6 @@ export function AppShellClient() {
         return <UsagePage />;
       case 'Congress':
         return <CongressPage />;
-      case 'Flow History':
-        return <FlowHistoryPage />;
       case 'LLM Portfolio':
         return <LLMPortfolioPage />;
       case "Skills":
