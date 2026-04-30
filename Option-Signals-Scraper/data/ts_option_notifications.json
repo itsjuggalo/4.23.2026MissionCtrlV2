@@ -5882,5 +5882,11 @@
     "message": "Reached SellTarget2 @22.70 with gain: 30.09%. Take profits and ride for next target @24.43 with stops @17.45",
     "symbol": "MRVL",
     "title": "MRVL 175C 08/21 : SELL"
+  },
+  "1777572146": {
+    "category": "SWING",
+    "message": "Buy below 13.80, Sell above 15.87\nSwing, Hi risk",
+    "symbol": "NVDA",
+    "title": "NVDA 200C 6/18: BUY"
   }
 }

@@ -3155,5 +3155,11 @@
     "message": "Buy To Open at 402.26 with first target above 410.31",
     "symbol": "MSFT",
     "title": "MSFT: BTO"
+  },
+  "1777572027": {
+    "category": "SWING",
+    "message": "Reached Target 385.2 and that's 20.56%! Lock some in and wait for next target. Raise the stops to 373.6",
+    "symbol": "GOOGL",
+    "title": "GOOGL : STC"
   }
 }
