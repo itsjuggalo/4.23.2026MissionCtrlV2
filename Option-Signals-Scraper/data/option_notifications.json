@@ -4743,5 +4743,11 @@
     "message": "Buy To Open at 2.04 with first target above 2.35",
     "symbol": "NVDA",
     "title": "NVDA 200P 5/4: BTO"
+  },
+  "1777562749": {
+    "category": "SCALP",
+    "message": "Reached Target 2.39 and that's 17.16%! Lock some in and wait for next target. Raise the stops to 1.67",
+    "symbol": "NVDA",
+    "title": "NVDA 200P 05/04 : STC"
   }
 }
