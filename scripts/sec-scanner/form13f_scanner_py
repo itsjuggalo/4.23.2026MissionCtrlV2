@@ -295,8 +295,8 @@ def post_whale_summary(whale_name, filing, diffs):
 
     # Header is reproduced on every page so each Discord message is self-contained
     page_header_lines = [
-        f"**Filed:** {filing[\'filing_date\']}",
-        f"**Form:** {filing[\'form\']}",
+        "**Filed:** " + str(filing["filing_date"]) + "",
+        "**Form:** " + str(filing["form"]) + "",
     ]
     HEADER_SIZE = sum(len(l) + 1 for l in page_header_lines)
 
