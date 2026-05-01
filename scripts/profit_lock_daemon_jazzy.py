@@ -81,18 +81,40 @@ def place_stop_limit(sym, qty, stop_price, limit_price, tif="gtc"):
     log("stop_place_fail", f"{sym} HTTP {r.status_code}: {r.text[:200]}")
     return None
 
-def calc_target_stop(entry, current, last_locked_pct):
-    """Return (new_stop_pct_from_entry, tier_label) or (None, None) if no upgrade."""
-    gain_pct = ((current - entry) / entry) * 100
+GIVEBACK_PCT = 8.0  # default trail giveback from peak (percentage points of entry-relative gain)
+
+def calc_tier_floor(gain_pct, last_locked_pct):
     if gain_pct >= 200 and last_locked_pct < 100:
-        return (100, "+200% tier (lock +100%)")
+        return (100, "+200% tier (floor +100%)")
     if gain_pct >= 100 and last_locked_pct < 50:
-        return (50, "+100% tier (lock +50%)")
+        return (50, "+100% tier (floor +50%)")
     if gain_pct >= 50 and last_locked_pct < 20:
-        return (20, "+50% tier (lock +20%)")
+        return (20, "+50% tier (floor +20%)")
     if gain_pct >= 20 and last_locked_pct < 0:
-        return (0, "+20% tier (lock break-even)")
+        return (0, "+20% tier (floor break-even)")
     return (None, None)
+
+def calc_target_stop(entry, current, last_locked_pct, peak_pct):
+    """Combined tier-floor + peak-tracker. Returns (new_stop_pct, label) or (None, None)."""
+    gain_pct = ((current - entry) / entry) * 100
+    tier_pct, tier_label = calc_tier_floor(gain_pct, last_locked_pct)
+    peak_target = None
+    if peak_pct >= 20:
+        peak_target = peak_pct - GIVEBACK_PCT
+    candidates = [last_locked_pct]
+    if tier_pct is not None: candidates.append(tier_pct)
+    if peak_target is not None: candidates.append(peak_target)
+    best = max(candidates)
+    if best <= last_locked_pct:
+        return (None, None)
+    best = round(best, 1)
+    if peak_target is not None and best == round(peak_target, 1) and (tier_pct is None or peak_target > tier_pct):
+        label = f"peak-trail (peak {peak_pct:+.1f}% - {GIVEBACK_PCT:.0f}pp = lock {best:+.1f}%)"
+    elif tier_label:
+        label = tier_label
+    else:
+        label = f"floor lock {best:+.1f}%"
+    return (best, label)
 
 def is_option_symbol(sym):
     """Detect OCC option symbol (e.g. NVDA260508P00202500)."""
@@ -125,10 +147,12 @@ def cycle(state):
         gain_pct = ((current - entry) / entry) * 100
         summary["checked"] += 1
         
-        rec = state.get(sym, {"locked_pct": -999, "first_seen": datetime.now(timezone.utc).isoformat()})
+        rec = state.get(sym, {"locked_pct": -999, "peak_pct": gain_pct, "first_seen": datetime.now(timezone.utc).isoformat()})
         last_locked = rec.get("locked_pct", -999)
+        peak_pct = max(rec.get("peak_pct", gain_pct), gain_pct)
+        rec["peak_pct"] = peak_pct
         
-        new_pct, tier = calc_target_stop(entry, current, last_locked)
+        new_pct, tier = calc_target_stop(entry, current, last_locked, peak_pct)
         
         if new_pct is None:
             continue
@@ -165,7 +189,7 @@ def cycle(state):
         if result:
             action = "lock_added" if last_locked == -999 else "lock_upgraded"
             summary[f"locks_{'added' if last_locked == -999 else 'upgraded'}"] += 1
-            log(action, f"{sym} qty={qty} gain={gain_pct:+.1f}% -> stop ${new_stop:.2f} (lock {new_pct:+d}% from entry) | tier {tier}")
+            log(action, f"{sym} qty={qty} gain={gain_pct:+.1f}% peak={peak_pct:+.1f}% -> stop ${new_stop:.2f} (lock {new_pct:+.1f}% from entry) | {tier}")
             rec["locked_pct"] = new_pct
             rec["last_stop"] = new_stop
             rec["last_update"] = datetime.now(timezone.utc).isoformat()
