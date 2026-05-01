@@ -29,6 +29,7 @@ DATA_DIR.mkdir(parents=True, exist_ok=True)
 
 # Pricing per million tokens [input, output]
 PRICING = {
+    "claude-sonnet-4-5":     [3.00, 15.00],
     "claude-sonnet-4-6":     [3.00, 15.00],
     "claude-sonnet-4-6-20250929": [3.00, 15.00],
     "claude-3-5-sonnet-20241022": [3.00, 15.00],

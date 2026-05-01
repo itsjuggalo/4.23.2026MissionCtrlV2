@@ -290,6 +290,10 @@ def wait_for_kronos_result(ticker, timeout_sec=75, poll_interval=3):
 def get_alpaca_account():
     try:
         import requests
+import sys as _sys_tracker
+_sys_tracker.path.insert(0, '/home/ubuntu/scripts/lib')
+from anthropic_tracker import log_call as _log_anthropic_call
+import time as _time_tracker
         key = read_secret("alpaca-key-id") or read_secret("alpaca_key.txt")
         sec = read_secret("alpaca-secret") or read_secret("alpaca_secret.txt")
         r = requests.get(
@@ -936,6 +940,7 @@ def call_boba(prompt):
     if not api_key:
         return {"error": "no anthropic key"}
 
+    _t0_anthropic = _time_tracker.time()
     try:
         r = requests.post(
             "https://api.anthropic.com/v1/messages",
@@ -951,9 +956,13 @@ def call_boba(prompt):
             },
             timeout=90,
         )
+        _dur_ms = int((_time_tracker.time() - _t0_anthropic) * 1000)
         if r.status_code != 200:
+            _log_anthropic_call("boba_decision_cycle", "claude-sonnet-4-5", None, _dur_ms,
+                                success=False, error=f"HTTP {r.status_code}")
             return {"error": f"API {r.status_code}: {r.text[:500]}"}
         data = r.json()
+        _log_anthropic_call("boba_decision_cycle", "claude-sonnet-4-5", data, _dur_ms, success=True)
         text = ""
         for block in data.get("content", []):
             if block.get("type") == "text":
