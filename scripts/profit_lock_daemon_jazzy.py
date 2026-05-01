@@ -121,9 +121,58 @@ def is_option_symbol(sym):
     if not sym or len(sym) < 15: return False
     return any(c.isdigit() for c in sym[-15:]) and (sym[-9] in ("C","P"))
 
+def cleanup_orphans(positions, orders):
+    pos_qty = {}
+    for p in positions:
+        sym = p.get("symbol", "")
+        if not is_option_symbol(sym):
+            continue
+        try:
+            pos_qty[sym] = int(float(p.get("qty", 0)))
+        except: pass
+    cancelled = 0
+    by_sym = {}
+    for o in orders:
+        if o.get("side") != "sell": continue
+        sym = o.get("symbol", "")
+        if not is_option_symbol(sym): continue
+        by_sym.setdefault(sym, []).append(o)
+    for sym, sell_orders in by_sym.items():
+        cur_qty = pos_qty.get(sym, 0)
+        if cur_qty == 0:
+            for o in sell_orders:
+                try:
+                    cancel_order(o.get("id"))
+                    cancelled += 1
+                    log("orphan_cancel", f"{sym} qty=0 cancelled stale {o.get('order_type')} order {o.get('id','')[:8]}")
+                except: pass
+            continue
+        total_sell = 0
+        try:
+            total_sell = sum(int(float(o.get("qty", 0))) for o in sell_orders)
+        except: pass
+        if total_sell > cur_qty:
+            sorted_orders = sorted(sell_orders, key=lambda o: o.get("created_at",""))
+            excess = total_sell - cur_qty
+            for o in sorted_orders:
+                if excess <= 0: break
+                try:
+                    oq = int(float(o.get("qty", 0)))
+                    cancel_order(o.get("id"))
+                    cancelled += 1
+                    excess -= oq
+                    log("orphan_cancel", f"{sym} cur_qty={cur_qty} total_sell={total_sell} cancelled {o.get('order_type')} qty={oq} {o.get('id','')[:8]}")
+                except: pass
+    return cancelled
+
 def cycle(state):
     positions = get_positions()
     orders = get_open_orders()
+    orphans = cleanup_orphans(positions, orders)
+    if orphans > 0:
+        import time as _t
+        _t.sleep(1)
+        orders = get_open_orders()
     
     summary = {"checked": 0, "locks_added": 0, "locks_upgraded": 0, "skipped": 0}
     

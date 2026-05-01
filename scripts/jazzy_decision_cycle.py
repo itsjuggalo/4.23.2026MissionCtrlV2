@@ -1012,6 +1012,20 @@ def execute_pick_on_alpaca(pick):
         occ_symbol = f"{ticker}{exp_clean}{right}{strike_int:08d}"
         qty = int(pick["contracts"])
 
+        # 0. PRE-FLIGHT: cancel stale sell orders that could block the buy
+        try:
+            existing = requests.get("https://paper-api.alpaca.markets/v2/orders?status=open&limit=100",
+                headers=headers, timeout=10).json()
+            stale = [o for o in existing if o.get("symbol") == occ_symbol and o.get("side") == "sell"]
+            if stale:
+                for so in stale:
+                    requests.delete(f"https://paper-api.alpaca.markets/v2/orders/{so.get('id')}",
+                        headers=headers, timeout=10)
+                _time.sleep(1)
+                _post_bobatrades(f"🧹 Pre-flight cleanup: cancelled {len(stale)} stale sell order(s) on {occ_symbol}")
+        except Exception:
+            pass
+
         # 1. Submit market buy
         buy_order = {
             "symbol": occ_symbol,
@@ -1217,15 +1231,20 @@ def execute_position_action(action_dict, positions):
                 stop_t = round(max(avg_entry * (1 - sl_pct/100), 0.01), 2)
                 stop_l = round(max(stop_t * 0.90, 0.01), 2)
                 tp_p = round(max(avg_entry * (1 + tp_pct/100), 0.01), 2)
-                oco = {
-                    "symbol": sym, "qty": str(remaining), "side": "sell",
+                sl_body = {"symbol": sym, "qty": str(remaining), "side": "sell",
                     "position_intent": "sell_to_close",
-                    "type": "limit", "time_in_force": "gtc", "order_class": "oco",
-                    "take_profit": {"limit_price": str(tp_p)},
-                    "stop_loss": {"stop_price": str(stop_t), "limit_price": str(stop_l)},
-                }
-                requests.post(f"{BASE}/orders", headers=headers, json=oco, timeout=15)
-                details += f" + reissued OCO on {remaining}"
+                    "type": "stop_limit", "time_in_force": "gtc",
+                    "stop_price": str(stop_t), "limit_price": str(stop_l)}
+                sl_r = requests.post(f"{BASE}/orders", headers=headers, json=sl_body, timeout=15)
+                _time.sleep(0.3)
+                tp_body = {"symbol": sym, "qty": str(remaining), "side": "sell",
+                    "position_intent": "sell_to_close",
+                    "type": "limit", "time_in_force": "gtc",
+                    "limit_price": str(tp_p)}
+                tp_r = requests.post(f"{BASE}/orders", headers=headers, json=tp_body, timeout=15)
+                sl_ok = sl_r.status_code in (200, 201)
+                tp_ok = tp_r.status_code in (200, 201)
+                details += f" + reissue SL{'OK' if sl_ok else 'FAIL'}/TP{'OK' if tp_ok else 'FAIL'} on {remaining}"
             return {"ok": ok, "action": act, "symbol": sym, "details": details}
 
         elif act == "EXIT":
@@ -1247,17 +1266,30 @@ def execute_position_action(action_dict, positions):
             stop_t = round(max(avg_entry * (1 - sl_pct/100), 0.01), 2)
             stop_l = round(max(stop_t * 0.90, 0.01), 2)
             tp_p = round(max(avg_entry * (1 + tp_pct/100), 0.01), 2)
-            oco = {
-                "symbol": sym, "qty": str(qty), "side": "sell",
+            try:
+                ex = requests.get(f"{BASE}/orders?status=open&limit=100", headers=headers, timeout=10).json()
+                for eo in ex:
+                    if eo.get("symbol") == sym and eo.get("side") == "sell":
+                        requests.delete(f"{BASE}/orders/{eo.get('id')}", headers=headers, timeout=10)
+                        _time.sleep(0.2)
+            except Exception:
+                pass
+            sl_body = {"symbol": sym, "qty": str(qty), "side": "sell",
                 "position_intent": "sell_to_close",
-                "type": "limit", "time_in_force": "gtc", "order_class": "oco",
-                "take_profit": {"limit_price": str(tp_p)},
-                "stop_loss": {"stop_price": str(stop_t), "limit_price": str(stop_l)},
-            }
-            sr = requests.post(f"{BASE}/orders", headers=headers, json=oco, timeout=15)
-            ok = sr.status_code in (200, 201)
-            err = None if ok else f"HTTP {sr.status_code}: {sr.text[:200]}"
-            return {"ok": ok, "action": act, "symbol": sym, "details": f"OCO tightened SL ${stop_t:.2f} (-{sl_pct:.0f}%)", "error": err}
+                "type": "stop_limit", "time_in_force": "gtc",
+                "stop_price": str(stop_t), "limit_price": str(stop_l)}
+            sl_r = requests.post(f"{BASE}/orders", headers=headers, json=sl_body, timeout=15)
+            _time.sleep(0.3)
+            tp_body = {"symbol": sym, "qty": str(qty), "side": "sell",
+                "position_intent": "sell_to_close",
+                "type": "limit", "time_in_force": "gtc",
+                "limit_price": str(tp_p)}
+            tp_r = requests.post(f"{BASE}/orders", headers=headers, json=tp_body, timeout=15)
+            sl_ok = sl_r.status_code in (200, 201)
+            tp_ok = tp_r.status_code in (200, 201)
+            ok = sl_ok and tp_ok
+            err = None if ok else f"SL HTTP {sl_r.status_code} TP HTTP {tp_r.status_code}"
+            return {"ok": ok, "action": act, "symbol": sym, "details": f"SL ${stop_t:.2f} (-{sl_pct:.0f}%) + TP ${tp_p:.2f} (+{tp_pct:.0f}%)", "error": err}
 
         else:
             return {"ok": False, "action": act, "symbol": sym, "error": f"unknown action: {act}"}
