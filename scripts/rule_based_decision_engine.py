@@ -66,6 +66,38 @@ def load_today_snapshot():
     except Exception:
         return None
 
+def get_existing_positions_by_ticker(account="r2"):
+    """Return set of tickers we already have exposure to (stock OR options)."""
+    try:
+        if account == "r2":
+            key = (SECRETS / "alpaca-key-id").read_text().strip()
+            sec = (SECRETS / "alpaca-secret").read_text().strip()
+        else:
+            key = (SECRETS / "alpaca-jazzy-key-id").read_text().strip()
+            sec = (SECRETS / "alpaca-jazzy-secret").read_text().strip()
+        H = {"APCA-API-KEY-ID": key, "APCA-API-SECRET-KEY": sec}
+        r = requests.get(f"{ALPACA_BASE}/positions", headers=H, timeout=10)
+        if r.status_code != 200:
+            return set()
+        positions = r.json() or []
+        tickers = set()
+        for p in positions:
+            sym = p.get("symbol", "")
+            # Option symbols start with ticker (e.g. TSLA260501C00390000)
+            # Stock symbols are just the ticker
+            # Extract underlying ticker
+            import re
+            m = re.match(r"^([A-Z]+)\d{6}[CP]\d+$", sym)
+            if m:
+                tickers.add(m.group(1))
+            else:
+                tickers.add(sym)
+        return tickers
+    except Exception as e:
+        log("position_check_fail", str(e))
+        return set()
+
+
 def is_platinum(c):
     if c.get("premium", 0) < 10_000_000: return False
     vol = c.get("volume", 0); oi = c.get("oi", 0)
@@ -284,9 +316,24 @@ def main():
     if not snap:
         log("no_snapshot", f"no data for {et_now().strftime('%Y-%m-%d')}")
         return
+    held_tickers = get_existing_positions_by_ticker(args.account)
+    if held_tickers:
+        log("held_tickers", f"{','.join(sorted(held_tickers))}")
     top, all_scored = analyze(snap)
+    # Filter out picks where we already have exposure
+    if held_tickers:
+        all_scored_filtered = [(s, bd, c) for s, bd, c in all_scored if c.get("ticker") not in held_tickers]
+        if not all_scored_filtered:
+            log("all_filtered", f"all candidates skipped due to existing positions in {held_tickers}")
+            top = None
+        else:
+            removed = len(all_scored) - len(all_scored_filtered)
+            if removed > 0:
+                log("filtered_held", f"removed {removed} candidates already held")
+            top = all_scored_filtered[0]
+            all_scored = all_scored_filtered
     if not top:
-        log("no_candidates", "no T1+ contracts")
+        log("no_candidates", "no T1+ contracts after position filter")
         return
     score, bd, c = top
     decision_msg = format_decision(top, all_scored)
