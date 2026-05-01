@@ -1,0 +1,439 @@
+#!/usr/bin/env python3
+"""
+SEC Form 13F-HR scanner - tracks quarterly position changes for whale funds.
+
+For each whale CIK:
+  1. Check EDGAR submissions API for latest 13F-HR
+  2. If accession number changed from last seen, fetch information table XML
+  3. Parse all positions (cusip, ticker via lookup, value, shares, putcall)
+  4. Diff against prior quarter snapshot
+  5. Post NEW positions, ADDS, CUTS, EXITS to Discord
+
+State persisted in openclaw/state/sec_scanner/13f/<CIK>.json
+"""
+import json
+import os
+import re
+import sys
+import time
+import urllib.request
+import urllib.error
+from datetime import datetime, timezone, timedelta
+from pathlib import Path
+from xml.etree import ElementTree as ET
+
+WEBHOOK_FILE = Path("/home/ubuntu/.openclaw/secrets/discord_sec_scanners_webhook")
+STATE_DIR = Path("/home/ubuntu/.openclaw/state/sec_scanner/13f")
+LOG_FILE = Path("/home/ubuntu/.openclaw/state/sec_scanner/13f_log.jsonl")
+
+USER_AGENT = "MissionCtrl Trading Research mike@missionctrl.serveftp.com"
+
+# Whale fund CIKs - the institutional firms Boba's modeled after + classic value/macro names
+WHALES = {
+    "1067983": "Berkshire Hathaway",
+    "1037389": "Renaissance Technologies",
+    "1350694": "Bridgewater Associates",
+    "1423053": "Citadel Advisors",
+    "1167483": "Point72 Asset Management",
+    "1167601": "Tiger Global Management",
+    "1336528": "Pershing Square Capital",
+    "1697748": "Scion Asset Management",
+    "1029160": "Appaloosa Management",
+    "1656456": "Duquesne Family Office",
+    "1601086": "Soros Fund Management",
+    "1061768": "Coatue Management",
+    "1112520": "D.E. Shaw",
+    "1364742": "Two Sigma Investments",
+    "1061165": "Lone Pine Capital",
+    "1656456": "Duquesne",
+    "1336528": "Pershing Square",
+    "1697748": "Scion",
+}
+
+# Top N positions by reported value get posted regardless of watchlist
+TOP_N_ALWAYS_POST = 10
+
+# Material change thresholds
+ADD_THRESHOLD_PCT = 25.0
+CUT_THRESHOLD_PCT = 25.0
+NEW_POSITION_MIN_VALUE = 5_000_000  # ignore tiny new positions
+
+def http_get(url, accept="application/json,*/*", timeout=20):
+    req = urllib.request.Request(url, headers={
+        "User-Agent": USER_AGENT,
+        "Accept": accept,
+        "Accept-Encoding": "identity",
+    })
+    with urllib.request.urlopen(req, timeout=timeout) as resp:
+        return resp.read().decode("utf-8", errors="replace")
+
+def get_whale_filings(cik):
+    """Return list of recent 13F filings for a whale CIK."""
+    cik_padded = str(cik).zfill(10)
+    url = f"https://data.sec.gov/submissions/CIK{cik_padded}.json"
+    try:
+        data = json.loads(http_get(url))
+    except Exception as e:
+        print(f"[13f] {cik} submissions fetch failed: {e}")
+        return None, []
+
+    name = data.get("name", "")
+    recent = data.get("filings", {}).get("recent", {})
+    forms = recent.get("form", [])
+    accessions = recent.get("accessionNumber", [])
+    dates = recent.get("filingDate", [])
+    primary_docs = recent.get("primaryDocument", [])
+
+    filings = []
+    for i, form in enumerate(forms):
+        if "13F-HR" in form and "13F-HR/A" not in form:
+            filings.append({
+                "form": form,
+                "accession": accessions[i],
+                "filing_date": dates[i],
+                "primary_doc": primary_docs[i] if i < len(primary_docs) else "",
+            })
+    return name, filings[:4]  # most recent 4
+
+def fetch_info_table(cik, accession):
+    """Find and fetch the information table XML from a 13F-HR filing index."""
+    cik_clean = str(cik).lstrip("0") or "0"
+    accession_nodash = accession.replace("-", "")
+    index_url = f"https://www.sec.gov/cgi-bin/browse-edgar?action=getcompany&CIK={cik}&type=13F-HR&dateb=&owner=include&count=10&action=getcompany"
+
+    # More direct: index page at /Archives/edgar/data/<CIK>/<acc-no-dash>/
+    archive_url = f"https://www.sec.gov/Archives/edgar/data/{cik_clean}/{accession_nodash}/"
+    try:
+        index_html = http_get(archive_url, accept="text/html,*/*")
+    except Exception as e:
+        print(f"[13f] archive index fetch failed for {cik}/{accession}: {e}")
+        return None
+
+    # Find the info table xml - usually named like "infotable.xml" or "form13fInfoTable.xml"
+    candidates = re.findall(r'href="([^"]+\.xml)"', index_html)
+    info_table_url = None
+    for c in candidates:
+        cl = c.lower()
+        if "infotable" in cl or "info_table" in cl or "13fInfoTable" in c:
+            info_table_url = c if c.startswith("http") else "https://www.sec.gov" + c
+            break
+
+    if not info_table_url:
+        # Fallback: any non-primary xml that's not the document_format file
+        for c in candidates:
+            if "primary_doc" not in c.lower() and c.endswith(".xml"):
+                info_table_url = c if c.startswith("http") else "https://www.sec.gov" + c
+                break
+
+    if not info_table_url:
+        print(f"[13f] no info table xml found for {cik}/{accession}")
+        return None
+
+    try:
+        return http_get(info_table_url, accept="text/xml,application/xml,*/*")
+    except Exception as e:
+        print(f"[13f] info table fetch failed: {e}")
+        return None
+
+def parse_info_table(xml_text):
+    """Parse 13F information table XML. Returns list of position dicts."""
+    try:
+        # Strip namespaces for simpler parsing
+        cleaned = re.sub(r'\sxmlns(?::\w+)?="[^"]+"', '', xml_text)
+        cleaned = re.sub(r'<(/?)\w+:', r'<\1', cleaned)
+        root = ET.fromstring(cleaned)
+    except ET.ParseError as e:
+        print(f"[13f] info table parse error: {e}")
+        return []
+
+    positions = []
+    # Find all infoTable entries
+    for entry in root.iter("infoTable"):
+        def text(tag):
+            el = entry.find(f".//{tag}")
+            return (el.text or "").strip() if el is not None and el.text else ""
+
+        cusip = text("cusip")
+        if not cusip:
+            continue
+        try:
+            value = float(text("value") or "0")
+        except ValueError:
+            value = 0.0
+        try:
+            shares = float(text("sshPrnamt") or "0")
+        except ValueError:
+            shares = 0.0
+
+        positions.append({
+            "cusip": cusip,
+            "issuer": text("nameOfIssuer"),
+            "class": text("titleOfClass"),
+            "value": value,  # in thousands of dollars per SEC convention - we'll normalize
+            "shares": shares,
+            "putcall": text("putCall"),
+        })
+
+    # Normalize value to dollars (SEC reports in thousands since 2022)
+    for p in positions:
+        p["value_usd"] = p["value"] * 1000.0
+
+    return positions
+
+def aggregate_by_issuer(positions):
+    """Combine multi-class positions by issuer name + put/call type."""
+    agg = {}
+    for p in positions:
+        key = (p["issuer"], p["putcall"] or "LONG")
+        if key not in agg:
+            agg[key] = {
+                "issuer": p["issuer"],
+                "putcall": p["putcall"] or "LONG",
+                "cusips": [p["cusip"]],
+                "value_usd": p["value_usd"],
+                "shares": p["shares"],
+            }
+        else:
+            agg[key]["cusips"].append(p["cusip"])
+            agg[key]["value_usd"] += p["value_usd"]
+            agg[key]["shares"] += p["shares"]
+    return list(agg.values())
+
+def diff_positions(prior_aggs, current_aggs):
+    """Compare two aggregate position lists. Returns dict of changes."""
+    prior_map = {(a["issuer"], a["putcall"]): a for a in prior_aggs}
+    current_map = {(a["issuer"], a["putcall"]): a for a in current_aggs}
+
+    new_positions = []
+    exits = []
+    adds = []
+    cuts = []
+    holds = []
+
+    for key, cur in current_map.items():
+        if key not in prior_map:
+            if cur["value_usd"] >= NEW_POSITION_MIN_VALUE:
+                new_positions.append(cur)
+        else:
+            prior = prior_map[key]
+            if prior["shares"] == 0:
+                continue
+            pct_change = (cur["shares"] - prior["shares"]) / prior["shares"] * 100
+            if pct_change >= ADD_THRESHOLD_PCT:
+                adds.append({**cur, "pct_change": pct_change, "prior_shares": prior["shares"]})
+            elif pct_change <= -CUT_THRESHOLD_PCT:
+                cuts.append({**cur, "pct_change": pct_change, "prior_shares": prior["shares"]})
+            else:
+                holds.append(cur)
+
+    for key, prior in prior_map.items():
+        if key not in current_map:
+            exits.append(prior)
+
+    return {
+        "new": sorted(new_positions, key=lambda x: -x["value_usd"]),
+        "adds": sorted(adds, key=lambda x: -x["value_usd"]),
+        "cuts": sorted(cuts, key=lambda x: -x["value_usd"]),
+        "exits": sorted(exits, key=lambda x: -x["value_usd"]),
+        "holds": holds,
+    }
+
+def post_discord(title, description, color=0x9b59b6):
+    if not WEBHOOK_FILE.exists():
+        print("[13f] webhook missing")
+        return False
+    webhook = WEBHOOK_FILE.read_text().strip()
+    if len(description) > 4000:
+        description = description[:3997] + "..."
+    payload = {
+        "embeds": [{
+            "title": title,
+            "description": description,
+            "color": color,
+            "footer": {"text": f"SEC 13F-HR | {datetime.now(timezone.utc).isoformat()}"},
+        }]
+    }
+    body = json.dumps(payload).encode("utf-8")
+    req = urllib.request.Request(webhook, data=body, headers={
+        "Content-Type": "application/json",
+        "User-Agent": USER_AGENT,
+    })
+    try:
+        resp = urllib.request.urlopen(req, timeout=15)
+        print(f"[13f] posted: {title} (HTTP {resp.status})")
+        return True
+    except Exception as e:
+        print(f"[13f] discord error: {e}")
+        return False
+
+def fmt_position(p, with_pct=False):
+    val = p["value_usd"]
+    if val >= 1e9:
+        val_str = f"${val/1e9:.2f}B"
+    elif val >= 1e6:
+        val_str = f"${val/1e6:.1f}M"
+    else:
+        val_str = f"${val/1e3:.0f}K"
+    putcall = "" if p.get("putcall") in ("", "LONG", None) else f" [{p['putcall']}]"
+    base = f"{p['issuer'][:32]}{putcall} - {val_str}"
+    if with_pct and "pct_change" in p:
+        base += f" ({p['pct_change']:+.0f}%)"
+    return base
+
+def post_whale_summary(whale_name, filing, diffs):
+    new_count = len(diffs["new"])
+    add_count = len(diffs["adds"])
+    cut_count = len(diffs["cuts"])
+    exit_count = len(diffs["exits"])
+
+    # Skip post if literally nothing material changed (rare)
+    if new_count == 0 and add_count == 0 and cut_count == 0 and exit_count == 0:
+        print(f"[13f] {whale_name} - no material changes, skipping post")
+        return
+
+    lines = [
+        f"**Filed:** {filing['filing_date']}",
+        f"**Form:** {filing['form']}",
+        "",
+        f"**NEW positions:** {new_count}",
+    ]
+    for p in diffs["new"][:5]:
+        lines.append(f"  + {fmt_position(p)}")
+    if new_count > 5:
+        lines.append(f"  + ...and {new_count - 5} more")
+
+    lines.append("")
+    lines.append(f"**ADDS (>{int(ADD_THRESHOLD_PCT)}%):** {add_count}")
+    for p in diffs["adds"][:5]:
+        lines.append(f"  ↑ {fmt_position(p, with_pct=True)}")
+    if add_count > 5:
+        lines.append(f"  ↑ ...and {add_count - 5} more")
+
+    lines.append("")
+    lines.append(f"**CUTS (>{int(CUT_THRESHOLD_PCT)}%):** {cut_count}")
+    for p in diffs["cuts"][:5]:
+        lines.append(f"  ↓ {fmt_position(p, with_pct=True)}")
+    if cut_count > 5:
+        lines.append(f"  ↓ ...and {cut_count - 5} more")
+
+    lines.append("")
+    lines.append(f"**EXITS:** {exit_count}")
+    for p in diffs["exits"][:5]:
+        lines.append(f"  X {fmt_position(p)}")
+    if exit_count > 5:
+        lines.append(f"  X ...and {exit_count - 5} more")
+
+    title = f"13F-HR - {whale_name}"
+    post_discord(title, "\n".join(lines), color=0x9b59b6)
+
+def append_log(record):
+    LOG_FILE.parent.mkdir(parents=True, exist_ok=True)
+    with LOG_FILE.open("a") as f:
+        f.write(json.dumps(record, default=str) + "\n")
+
+def state_path(cik):
+    return STATE_DIR / f"{cik}.json"
+
+def load_whale_state(cik):
+    p = state_path(cik)
+    if not p.exists():
+        return None
+    try:
+        return json.loads(p.read_text())
+    except Exception:
+        return None
+
+def save_whale_state(cik, state):
+    STATE_DIR.mkdir(parents=True, exist_ok=True)
+    state_path(cik).write_text(json.dumps(state, indent=2, default=str))
+
+def run(args):
+    dry_run = "--no-post" in args
+    only_cik = None
+    for arg in args:
+        if arg.startswith("--cik="):
+            only_cik = arg.split("=", 1)[1]
+
+    print(f"[13f] starting scan at {datetime.now(timezone.utc).isoformat()}")
+    print(f"[13f] tracking {len(WHALES)} whales")
+
+    whales_to_check = {only_cik: WHALES[only_cik]} if only_cik and only_cik in WHALES else WHALES
+    posted = 0
+    new_filings_seen = 0
+
+    for cik, name in whales_to_check.items():
+        time.sleep(0.5)  # polite rate limit
+
+        whale_name, filings = get_whale_filings(cik)
+        if not filings:
+            print(f"[13f] {name} ({cik}): no 13F filings found")
+            continue
+
+        latest = filings[0]
+        prior_state = load_whale_state(cik)
+
+        # Already processed?
+        if prior_state and prior_state.get("last_accession") == latest["accession"]:
+            print(f"[13f] {name}: already processed {latest['accession']}")
+            continue
+
+        new_filings_seen += 1
+        print(f"[13f] {name}: NEW filing {latest['accession']} dated {latest['filing_date']}")
+
+        # Fetch + parse new info table
+        time.sleep(0.5)
+        xml = fetch_info_table(cik, latest["accession"])
+        if not xml:
+            print(f"[13f] {name}: could not fetch info table, skipping")
+            continue
+
+        positions = parse_info_table(xml)
+        if not positions:
+            print(f"[13f] {name}: empty info table, skipping")
+            continue
+
+        current_aggs = aggregate_by_issuer(positions)
+        prior_aggs = (prior_state or {}).get("aggregates", [])
+
+        diffs = diff_positions(prior_aggs, current_aggs) if prior_aggs else {
+            "new": sorted(current_aggs, key=lambda x: -x["value_usd"])[:TOP_N_ALWAYS_POST],
+            "adds": [], "cuts": [], "exits": [], "holds": [],
+        }
+
+        append_log({
+            "ts": datetime.now(timezone.utc).isoformat(),
+            "whale": name,
+            "cik": cik,
+            "accession": latest["accession"],
+            "filing_date": latest["filing_date"],
+            "total_positions": len(current_aggs),
+            "new_count": len(diffs["new"]),
+            "adds_count": len(diffs["adds"]),
+            "cuts_count": len(diffs["cuts"]),
+            "exits_count": len(diffs["exits"]),
+            "first_filing": prior_aggs == [],
+        })
+
+        if not dry_run:
+            post_whale_summary(name, latest, diffs)
+            posted += 1
+        else:
+            print(f"[13f DRY] would post diff for {name}: new={len(diffs['new'])} adds={len(diffs['adds'])} cuts={len(diffs['cuts'])} exits={len(diffs['exits'])}")
+
+        # Save current as next baseline
+        save_whale_state(cik, {
+            "whale_name": whale_name or name,
+            "last_accession": latest["accession"],
+            "last_filing_date": latest["filing_date"],
+            "aggregates": current_aggs,
+            "scanned_at": datetime.now(timezone.utc).isoformat(),
+        })
+
+    print(f"\n[13f] === Summary ===")
+    print(f"  whales checked:   {len(whales_to_check)}")
+    print(f"  new filings:      {new_filings_seen}")
+    print(f"  posted:           {posted}")
+    return 0
+
+if __name__ == "__main__":
+    sys.exit(run(sys.argv[1:]))
