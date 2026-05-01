@@ -1,0 +1,5 @@
+#!/bin/bash
+BIBLE=/home/ubuntu/.openclaw/data/bible_v3
+if [ -z "$1" ]; then cat "$BIBLE"; else
+awk -v s="$1" 'BEGIN{IGNORECASE=1; p=0} /^## / && !/^### / { if($0~s){p=1; print; next} else if(p){p=0} ; next } p{print}' "$BIBLE"
+fi

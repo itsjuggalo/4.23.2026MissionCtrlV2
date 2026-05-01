@@ -1,0 +1,11 @@
+#!/bin/bash
+BIBLE=/home/ubuntu/.openclaw/data/bible_v3
+OUT=/home/ubuntu/.openclaw/data/bible_v3_pdf
+command -v pandoc >/dev/null || sudo apt-get install -y pandoc 2>&1 | tail -2
+pandoc "$BIBLE" -o "$OUT.pdf" 2>&1 | tail -2
+[ -f "$OUT.pdf" ] && echo "PDF: $OUT.pdf ($(stat -c%s $OUT.pdf) bytes)"
+REPO=/home/ubuntu/.openclaw/data/bible-repo
+if [ -d "$REPO/.git" ] && [ -f "$OUT.pdf" ]; then
+  cp "$OUT.pdf" "$REPO/MissionCtrl_Bible.pdf"
+  cd "$REPO" && git add MissionCtrl_Bible.pdf && git commit -m "PDF regen $(date +%Y-%m-%d)" 2>&1 | tail -1 && git push 2>&1 | tail -1
+fi

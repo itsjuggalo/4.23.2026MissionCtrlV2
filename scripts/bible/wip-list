@@ -1,0 +1,8 @@
+#!/bin/bash
+WIP_LIST="/home/ubuntu/.openclaw/state/code_wip/wip.list"
+if [ ! -s "$WIP_LIST" ]; then
+  echo "No files marked WIP - everything in ~/scripts/ will auto-push"
+else
+  echo "WIP files (skipped from auto-push):"
+  cat "$WIP_LIST" | sed 's/^/  /'
+fi

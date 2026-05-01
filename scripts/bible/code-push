@@ -1,0 +1,30 @@
+#!/bin/bash
+# Auto-push code to itsjuggalo/4.23.2026MissionCtrlV2
+# Skips files listed in ~/.openclaw/state/code_wip/wip.list
+set -e
+REPO_DIR="/home/ubuntu/backup-4.23.2026MCV2"
+SOURCE_ROOT="/home/ubuntu/scripts"
+WIP_LIST="/home/ubuntu/.openclaw/state/code_wip/wip.list"
+COMMIT_TITLE="${1:-auto-push}"
+COMMIT_DETAIL="${2:-}"
+cd "$REPO_DIR"
+git pull --rebase origin main >/dev/null 2>&1 || { echo "[code-push] Pull failed"; exit 1; }
+mkdir -p scripts
+EXCLUDE_ARGS=""
+if [ -f "$WIP_LIST" ]; then
+  while IFS= read -r wip_path; do
+    [ -z "$wip_path" ] && continue
+    rel_path="${wip_path#$SOURCE_ROOT/}"
+    EXCLUDE_ARGS="$EXCLUDE_ARGS --exclude=$rel_path"
+  done < "$WIP_LIST"
+fi
+rsync -a $EXCLUDE_ARGS --exclude="__pycache__/" --exclude="*.pyc" --exclude="weekly_grade/replay/data" "$SOURCE_ROOT/" "$REPO_DIR/scripts/"
+git add -A scripts/
+if git diff --cached --quiet; then echo "[code-push] No code changes to push"; exit 0; fi
+COMMIT_MSG="$COMMIT_TITLE"
+[ -n "$COMMIT_DETAIL" ] && COMMIT_MSG="$COMMIT_MSG
+
+$COMMIT_DETAIL"
+git commit -m "$COMMIT_MSG" >/dev/null
+git push origin main 2>&1 | tail -3
+echo "[code-push] OK"

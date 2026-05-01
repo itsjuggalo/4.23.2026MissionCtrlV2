@@ -80,10 +80,36 @@ def read_secret(name: str) -> str:
     return ""
 
 
+
+def assert_correct_account():
+    """Crash if this daemon is pointed at the wrong Alpaca account."""
+    import requests
+    try:
+        r = requests.get(f"{ALPACA_BASE}/v2/account", headers=alpaca_headers(), timeout=10)
+        if r.status_code != 200:
+            print(f"[FATAL] Cannot reach Alpaca: HTTP {r.status_code}", flush=True)
+            raise SystemExit(1)
+        actual = r.json().get("account_number", "")
+        if actual != EXPECTED_ACCOUNT:
+            print(f"[FATAL] Account mismatch! Expected R1 ({EXPECTED_ACCOUNT}) but got {actual}.", flush=True)
+            print(f"[FATAL] This daemon manages R1 only. Refusing to run on the wrong account.", flush=True)
+            raise SystemExit(2)
+        equity = float(r.json().get("equity", 0))
+        print(f"[startup] ✓ Confirmed R1 account {actual} (equity ${equity:,.0f}) — managing R1 positions only", flush=True)
+    except SystemExit: raise
+    except Exception as e:
+        print(f"[FATAL] Account check exception: {e}", flush=True)
+        raise SystemExit(3)
+
+
+# DAEMON ACCOUNT LOCK: this daemon is hardcoded to R1 (PA3Y7UTNIQFZ).
+# Do not change to alpaca-key-id/alpaca-secret — those are R2 (Boba's account, managed by trail_daemon).
+EXPECTED_ACCOUNT = "PA3Y7UTNIQFZ"  # R1
+
 def alpaca_headers() -> dict:
     return {
-        "APCA-API-KEY-ID": read_secret("alpaca-key-id"),
-        "APCA-API-SECRET-KEY": read_secret("alpaca-secret"),
+        "APCA-API-KEY-ID": read_secret("alpaca-r1-key-id"),
+        "APCA-API-SECRET-KEY": read_secret("alpaca-r1-secret"),
         "Content-Type": "application/json",
     }
 
@@ -98,8 +124,40 @@ def fetch_alpaca_positions() -> list:
         return []
 
 
+def cancel_open_sells_for_symbol(symbol: str) -> int:
+    """
+    Cancel any open sell orders (OCO bracket legs, stop_limits, limits) for this symbol.
+    Needed because Boba's Layer 2 arms OCO brackets that would reject our Layer 1 sell
+    with "insufficient balance" since shares are reserved. Returns count cancelled.
+    """
+    import requests
+    try:
+        r = requests.get(f"{ALPACA_BASE}/v2/orders?status=open&limit=100",
+                         headers=alpaca_headers(), timeout=10)
+        if r.status_code != 200:
+            return 0
+        cancelled = 0
+        for o in r.json():
+            if o.get("symbol") == symbol and o.get("side") == "sell":
+                del_r = requests.delete(f"{ALPACA_BASE}/v2/orders/{o.get('id')}",
+                                        headers=alpaca_headers(), timeout=5)
+                if del_r.status_code in (200, 204):
+                    cancelled += 1
+        # Alpaca needs ~1-2 sec to release reserved shares after cancel
+        if cancelled > 0:
+            import time as _t
+            _t.sleep(2)
+        return cancelled
+    except Exception:
+        return 0
+
+
 def submit_sell_limit(symbol: str, qty: float, limit_price: float) -> dict:
-    """Submit a sell LIMIT order. Returns {ok, order_id, error}."""
+    """Submit a sell LIMIT order. Returns {ok, order_id, error}.
+    First cancels any open OCO/bracket legs for this symbol to release reserved shares."""
+    cancelled = cancel_open_sells_for_symbol(symbol)
+    if cancelled > 0:
+        print(f"  [daemon] cancelled {cancelled} open sell order(s) on {symbol} before new sell")
     import requests
     body = {
         "symbol": symbol,
@@ -339,4 +397,5 @@ def main():
 
 
 if __name__ == "__main__":
+    assert_correct_account()
     sys.exit(main())
