@@ -51,7 +51,7 @@ WHALES = {
 }
 
 # Top N positions by reported value get posted regardless of watchlist
-TOP_N_ALWAYS_POST = 10
+TOP_N_ALWAYS_POST = 100
 
 # Material change thresholds
 ADD_THRESHOLD_PCT = 25.0
@@ -293,10 +293,12 @@ def post_whale_summary(whale_name, filing, diffs):
     # Build sections - ALL items, no slicing
     sections = []
 
-    header = [
-        f"**Filed:** {filing['filing_date']}",
-        f"**Form:** {filing['form']}",
+    # Header is reproduced on every page so each Discord message is self-contained
+    page_header_lines = [
+        f"**Filed:** {filing[\'filing_date\']}",
+        f"**Form:** {filing[\'form\']}",
     ]
+    HEADER_SIZE = sum(len(l) + 1 for l in page_header_lines)
 
     if new_count:
         sec = [f"**NEW positions:** {new_count}"]
@@ -322,22 +324,28 @@ def post_whale_summary(whale_name, filing, diffs):
             sec.append(f"  X {fmt_position(p)}")
         sections.append(("EXITS", sec))
 
-    # Pack sections into pages, respecting Discord 4000-char limit per embed
-    DISCORD_LIMIT = 3800  # safety margin under 4000
+    DISCORD_LIMIT = 3800
     pages = []
-    current_lines = list(header)
-    current_size = sum(len(l) + 1 for l in current_lines)
+    current_lines = list(page_header_lines)
+    current_size = HEADER_SIZE
+
+    def start_new_page(continued_tag=None):
+        # Returns (new lines, new size) - always seeded with the page header
+        lines = list(page_header_lines)
+        if continued_tag:
+            lines.append("")
+            lines.append(f"**{continued_tag} (continued)**")
+        size = sum(len(l) + 1 for l in lines)
+        return lines, size
 
     for tag, sec_lines in sections:
-        # Section header alone first
         sec_header = sec_lines[0]
         sec_items = sec_lines[1:]
 
-        # Check if section header fits on current page
+        # Section header on current page if it fits, otherwise start new
         if current_size + len(sec_header) + 2 > DISCORD_LIMIT:
             pages.append(current_lines)
-            current_lines = []
-            current_size = 0
+            current_lines, current_size = start_new_page()
 
         current_lines.append("")
         current_lines.append(sec_header)
@@ -347,13 +355,11 @@ def post_whale_summary(whale_name, filing, diffs):
             item_size = len(item) + 1
             if current_size + item_size > DISCORD_LIMIT:
                 pages.append(current_lines)
-                # Continue header on next page so reader knows what they're looking at
-                current_lines = [f"**{tag} (continued)**"]
-                current_size = len(current_lines[0]) + 1
+                current_lines, current_size = start_new_page(continued_tag=tag)
             current_lines.append(item)
             current_size += item_size
 
-    if current_lines:
+    if current_lines and len(current_lines) > len(page_header_lines):
         pages.append(current_lines)
 
     total_pages = len(pages)
