@@ -1227,21 +1227,49 @@ def convert_spx_to_spy(pick):
         return pick, f"SPX→SPY conversion error: {e}"
 
 
-def _post_bobatrades(msg: str):
-    """Fire-and-forget Discord webhook to BobaTrades. Never raises."""
-    try:
-        import requests
-        from pathlib import Path
-        hook = Path("/home/ubuntu/.openclaw/secrets/discord_bobatrades_webhook")
-        if not hook.exists():
-            return
-        url = hook.read_text().strip()
-        if not url:
-            return
-        requests.post(url, json={"content": msg}, timeout=5)
-    except Exception:
-        pass
+def _post_bobatrades(msg: str, pick_key: str = None, thread_name: str = None):
+    """Post to #boba-trades channel. Item 36: optional thread routing.
 
+    When pick_key is provided, message is routed into a per-pick thread.
+    First message for a pick creates the thread; follow-ups reuse it.
+    When pick_key is None, posts flat to channel (legacy behavior).
+    """
+    try:
+        hook_path = Path("/home/ubuntu/.openclaw/secrets/discord_bobatrades_webhook")
+        if not hook_path.exists():
+            return
+        webhook_url = hook_path.read_text().strip()
+
+        # Item 36: route through threading helper if pick_key provided
+        if pick_key:
+            try:
+                import sys as _sys
+                _sys.path.insert(0, '/home/ubuntu/scripts/lib')
+                from discord_threading import post_to_pick_thread
+
+                bot_token_path = Path("/home/ubuntu/.openclaw/secrets/discord_bot_token")
+                channel_id = "1497270534482821220"  # #boba-trades
+                bot_token = bot_token_path.read_text().strip() if bot_token_path.exists() else None
+
+                result = post_to_pick_thread(
+                    pick_key=pick_key,
+                    message=msg,
+                    thread_name=thread_name or pick_key,
+                    webhook_url=webhook_url,
+                    bot_token=bot_token,
+                    channel_id=channel_id,
+                )
+                # If threading failed, helper already attempted flat fallback
+                return
+            except Exception as _e:
+                # Threading helper crashed - fall through to flat post
+                print(f"[bobatrades] threading helper failed: {_e}, posting flat", flush=True)
+
+        # Legacy flat post (no pick_key, or threading helper unavailable)
+        import requests as _r
+        _r.post(webhook_url, json={"content": msg[:1900]}, timeout=10)
+    except Exception as e:
+        print(f"[bobatrades] post failed: {e}", flush=True)
 
 def validate_pick_against_guardrails(pick, account, prior_picks_this_cycle):
     """Item 31: hard numeric guardrail validator. Runs AFTER LLM, BEFORE Alpaca submit.
@@ -1379,7 +1407,7 @@ def execute_pick_on_alpaca(pick):
                     requests.delete(f"https://paper-api.alpaca.markets/v2/orders/{so.get('id')}",
                         headers=headers, timeout=10)
                 _time.sleep(1)
-                _post_bobatrades(f"🧹 Pre-flight cleanup: cancelled {len(stale)} stale sell order(s) on {occ_symbol}")
+                _post_bobatrades(f"🧹 Pre-flight cleanup: cancelled {len(stale)} stale sell order(s) on {occ_symbol}", pick_key=occ_symbol, thread_name=f"📊 {occ_symbol}")
         except Exception as _pre_e:
             pass  # best-effort; don't block buy if preflight check fails
 
@@ -1397,7 +1425,7 @@ def execute_pick_on_alpaca(pick):
         )
         if buy_r.status_code not in (200, 201):
             err = f"BUY HTTP {buy_r.status_code}: {buy_r.text[:300]}"
-            _post_bobatrades(f"❌ Boba buy REJECTED {occ_symbol} x{qty}\n{err}")
+            _post_bobatrades(f"❌ Boba buy REJECTED {occ_symbol} x{qty}\n{err}", pick_key=occ_symbol, thread_name=f"📊 {occ_symbol}")
             return {"ok": False, "error": err, "symbol": occ_symbol}
 
         buy_data = buy_r.json()
@@ -1420,7 +1448,8 @@ def execute_pick_on_alpaca(pick):
         if not fill_price:
             _post_bobatrades(
                 f"⏱️ Boba bought {occ_symbol} x{qty} — NOT filled in 10s\n"
-                f"Daemon will trail on next cycle. Order: {buy_id[:8]}"
+                f"Daemon will trail on next cycle. Order: {buy_id[:8]}",
+                pick_key=occ_symbol, thread_name=f"📊 {occ_symbol}"
             )
             return {
                 "ok": True, "symbol": occ_symbol, "order_id": buy_id,
