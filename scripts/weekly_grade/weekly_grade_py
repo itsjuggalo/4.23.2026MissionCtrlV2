@@ -25,7 +25,7 @@ ALPACA_KEY_R1 = load_secret('alpaca-r1-key-id')
 ALPACA_SEC_R1 = load_secret('alpaca-r1-secret')
 ALPACA_KEY_JAZZY = load_secret('alpaca-jazzy-key-id')
 ALPACA_SEC_JAZZY = load_secret('alpaca-jazzy-secret')
-WEBHOOK = load_secret('discord_bobatrades_webhook')
+WEBHOOK = load_secret('discord_performance_weekly_webhook')
 
 def alpaca_get(path, key, sec):
     req = urllib.request.Request(
