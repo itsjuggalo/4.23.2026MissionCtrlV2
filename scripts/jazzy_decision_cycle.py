@@ -661,6 +661,46 @@ def load_platinum_flow(max_show=5):
 
 
 
+def load_multi_day_repeaters():
+    """Read overnight multi-day pattern report. Surfaces tickers/strikes with persistent
+    institutional flow over last 5 days. Generated nightly by multi_day_tracker."""
+    from pathlib import Path as _Path
+    fp = _Path.home() / ".openclaw" / "data" / "multi-day-repeaters.json"
+    if not fp.exists():
+        return ""
+    try:
+        rep = json.loads(fp.read_text())
+    except Exception:
+        return ""
+    tickers = rep.get("tickers", [])
+    strikes = rep.get("strikes", [])
+    if not tickers and not strikes:
+        return ""
+    days = rep.get("available_days", 0)
+    lines = [f"\n# 🔁 MULTI-DAY REPEATER REPORT ({days}-day lookback, T1+T2 only)"]
+    lines.append("# Tickers/strikes appearing in 3+ of last 5 days = sustained institutional positioning.")
+    if tickers:
+        lines.append("\n## Persistent tickers (sorted by 5-day total premium):")
+        for t in tickers[:10]:
+            lines.append(
+                f"  {t['ticker']:5s}  {t['days_present']}/{days}d  "
+                f"${t['total_premium_5d']/1_000_000:>5.1f}M total  "
+                f"avg ${t['avg_daily_premium']/1_000_000:.1f}M/day  "
+                f"{t['bias']} ({t['call_pct']}% calls)  "
+                f"| biggest day: {t['biggest_day']} ${t['biggest_day_premium']/1_000_000:.1f}M"
+            )
+    if strikes:
+        lines.append("\n## Repeated strike+type combos:")
+        for s in strikes[:8]:
+            lines.append(
+                f"  {s['ticker']:5s} ${s['strike']:.0f}{s['type']}  "
+                f"{s['days_present']}/{days}d  "
+                f"${s['total_premium_5d']/1_000_000:.1f}M total  "
+                f"biggest single ${s['biggest_single']/1_000_000:.1f}M"
+            )
+    return "\n".join(lines) + "\n"
+
+
 def load_market_briefing():
     """Read hourly market briefing (regime, F&G, BTC). Compact summary."""
     try:
@@ -742,6 +782,7 @@ def build_boba_prompt(account, positions, shortlist_with_kronos, remaining_budge
     best_options_text = load_best_options(max_show=15, min_premium=1_000_000) or ""
     ticker_rollup_text = load_ticker_rollup(min_total=10_000_000, max_show=10) or ""
     platinum_flow_text = load_platinum_flow(max_show=5) or ""
+    multi_day_repeaters_text = load_multi_day_repeaters() or ""
     market_briefing_text = load_market_briefing() or ""
     grok_brief_text = load_grok_brief() or ""
     orion_skills_text = load_orion_skills() or ""
@@ -767,6 +808,7 @@ Open positions:
 These are curated buy/sell calls from human-run provider services. Use them as INDEPENDENT confirmation: if a provider has called the same direction as a whale flow above, that's stronger alignment. Disagreement is also informative. Do NOT take a pick just because a provider called it — use these alongside whale flow + Kronos.
 {firebase_signals_text}
 {platinum_flow_text}
+{multi_day_repeaters_text}
 {best_options_text}
 {ticker_rollup_text}
 
