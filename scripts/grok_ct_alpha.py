@@ -181,7 +181,7 @@ def main():
     print(f"  Summary: {result.get('summary','')[:200]}")
 
     output = {
-        "generated_at": datetime.now(timezone.utc).isoformat(),
+        "generated_at": datetime.now(timezone.utc).isoformat(), "model_used": "grok-4-fast-non-reasoning",
         "summary": result.get("summary", ""),
         "items": items,
     }

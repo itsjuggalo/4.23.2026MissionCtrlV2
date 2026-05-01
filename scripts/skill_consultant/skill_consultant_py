@@ -173,6 +173,8 @@ def main():
         proposal = {'raw_response': response, 'parse_error': str(e)}
 
     today = datetime.now(timezone.utc).strftime('%Y-%m-%d')
+    if isinstance(proposal, dict):
+        proposal['model_used'] = 'claude-sonnet-4-5-20250929'
     proposal_path = PROPOSALS / f'{today}-skill-suggestions'
     proposal_path.write_text(json.dumps(proposal, indent=2))
     print(f'[skill-consultant] wrote {proposal_path}')

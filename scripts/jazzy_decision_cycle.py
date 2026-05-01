@@ -40,6 +40,8 @@ import time
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
 
+JAZZY_MODEL = "gpt-4o-mini"  # Item 26: surfaced as constant for model_used logging
+
 sys.path.insert(0, "/home/ubuntu/mission-control/agent-team")
 from post_helper import post_to_telegram
 from ops_log import log_to_ops
@@ -965,7 +967,7 @@ def call_boba(prompt):
                 "content-type": "application/json",
             },
             json={
-                "model": "gpt-4o-mini",
+                "model": JAZZY_MODEL,
                 "max_tokens": 2000,
                 "messages": [{"role": "user", "content": prompt}],
             },
@@ -1484,6 +1486,7 @@ def log_decision(cycle_result, picks_executed):
             _pick["entry_criteria"] = []
     entry = {
         "cycle_time": datetime.now(timezone.utc).isoformat(),
+        "model_used": JAZZY_MODEL,
         "cycle_summary": cycle_result.get("cycle_summary", ""),
         "picks_proposed": len(cycle_result.get("picks", [])),
         "picks_executed": picks_executed,
