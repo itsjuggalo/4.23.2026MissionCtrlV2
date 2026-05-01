@@ -61,6 +61,8 @@ FIREBASE_FEED = Path("/home/ubuntu/.openclaw/workspace/directives/firebase_trade
 
 # Tradier live options quotes (bid/ask/IV/greeks) for informed contract selection
 sys.path.insert(0, "/home/ubuntu/scripts/lib")
+from anthropic_tracker import log_call as _log_anthropic_call
+import time as _time_tracker
 try:
     from tradier_client import fetch_option_quote as _tradier_quote
 except Exception:
@@ -290,10 +292,6 @@ def wait_for_kronos_result(ticker, timeout_sec=75, poll_interval=3):
 def get_alpaca_account():
     try:
         import requests
-import sys as _sys_tracker
-_sys_tracker.path.insert(0, '/home/ubuntu/scripts/lib')
-from anthropic_tracker import log_call as _log_anthropic_call
-import time as _time_tracker
         key = read_secret("alpaca-key-id") or read_secret("alpaca_key.txt")
         sec = read_secret("alpaca-secret") or read_secret("alpaca_secret.txt")
         r = requests.get(
