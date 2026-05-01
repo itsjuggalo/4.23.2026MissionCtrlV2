@@ -4,7 +4,7 @@ import json, sys, requests
 from datetime import datetime, timezone, timedelta
 from pathlib import Path
 
-WEBHOOK = (Path.home() / ".openclaw" / "secrets" / "discord_bobatrades_webhook").read_text().strip()
+WEBHOOK = (Path.home() / ".openclaw" / "secrets" / "discord_best_options_webhook").read_text().strip()
 DATA_DIR = Path.home() / ".openclaw" / "data" / "best-options"
 TOP_N = 10
 HEADERS = {"Content-Type": "application/json", "User-Agent": "MissionControl-BestOptionsPoster/1.0"}
