@@ -52,7 +52,7 @@ def log(action, detail):
 
 def post_discord(content):
     try:
-        url = (SECRETS / "discord_bobatrades_webhook").read_text().strip()
+        url = (SECRETS / "discord_rule_engine_webhook").read_text().strip()
         requests.post(url, headers=HEADERS_DISCORD, json={"content": content[:1900]}, timeout=10)
     except Exception:
         pass
