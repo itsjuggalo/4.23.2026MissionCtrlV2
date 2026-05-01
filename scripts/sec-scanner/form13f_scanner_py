@@ -286,45 +286,86 @@ def post_whale_summary(whale_name, filing, diffs):
     cut_count = len(diffs["cuts"])
     exit_count = len(diffs["exits"])
 
-    # Skip post if literally nothing material changed (rare)
     if new_count == 0 and add_count == 0 and cut_count == 0 and exit_count == 0:
         print(f"[13f] {whale_name} - no material changes, skipping post")
         return
 
-    lines = [
+    # Build sections - ALL items, no slicing
+    sections = []
+
+    header = [
         f"**Filed:** {filing['filing_date']}",
         f"**Form:** {filing['form']}",
-        "",
-        f"**NEW positions:** {new_count}",
     ]
-    for p in diffs["new"][:5]:
-        lines.append(f"  + {fmt_position(p)}")
-    if new_count > 5:
-        lines.append(f"  + ...and {new_count - 5} more")
 
-    lines.append("")
-    lines.append(f"**ADDS (>{int(ADD_THRESHOLD_PCT)}%):** {add_count}")
-    for p in diffs["adds"][:5]:
-        lines.append(f"  ↑ {fmt_position(p, with_pct=True)}")
-    if add_count > 5:
-        lines.append(f"  ↑ ...and {add_count - 5} more")
+    if new_count:
+        sec = [f"**NEW positions:** {new_count}"]
+        for p in diffs["new"]:
+            sec.append(f"  + {fmt_position(p)}")
+        sections.append(("NEW", sec))
 
-    lines.append("")
-    lines.append(f"**CUTS (>{int(CUT_THRESHOLD_PCT)}%):** {cut_count}")
-    for p in diffs["cuts"][:5]:
-        lines.append(f"  ↓ {fmt_position(p, with_pct=True)}")
-    if cut_count > 5:
-        lines.append(f"  ↓ ...and {cut_count - 5} more")
+    if add_count:
+        sec = [f"**ADDS (>{int(ADD_THRESHOLD_PCT)}%):** {add_count}"]
+        for p in diffs["adds"]:
+            sec.append(f"  ↑ {fmt_position(p, with_pct=True)}")
+        sections.append(("ADDS", sec))
 
-    lines.append("")
-    lines.append(f"**EXITS:** {exit_count}")
-    for p in diffs["exits"][:5]:
-        lines.append(f"  X {fmt_position(p)}")
-    if exit_count > 5:
-        lines.append(f"  X ...and {exit_count - 5} more")
+    if cut_count:
+        sec = [f"**CUTS (>{int(CUT_THRESHOLD_PCT)}%):** {cut_count}"]
+        for p in diffs["cuts"]:
+            sec.append(f"  ↓ {fmt_position(p, with_pct=True)}")
+        sections.append(("CUTS", sec))
 
-    title = f"13F-HR - {whale_name}"
-    post_discord(title, "\n".join(lines), color=0x9b59b6)
+    if exit_count:
+        sec = [f"**EXITS:** {exit_count}"]
+        for p in diffs["exits"]:
+            sec.append(f"  X {fmt_position(p)}")
+        sections.append(("EXITS", sec))
+
+    # Pack sections into pages, respecting Discord 4000-char limit per embed
+    DISCORD_LIMIT = 3800  # safety margin under 4000
+    pages = []
+    current_lines = list(header)
+    current_size = sum(len(l) + 1 for l in current_lines)
+
+    for tag, sec_lines in sections:
+        # Section header alone first
+        sec_header = sec_lines[0]
+        sec_items = sec_lines[1:]
+
+        # Check if section header fits on current page
+        if current_size + len(sec_header) + 2 > DISCORD_LIMIT:
+            pages.append(current_lines)
+            current_lines = []
+            current_size = 0
+
+        current_lines.append("")
+        current_lines.append(sec_header)
+        current_size += len(sec_header) + 2
+
+        for item in sec_items:
+            item_size = len(item) + 1
+            if current_size + item_size > DISCORD_LIMIT:
+                pages.append(current_lines)
+                # Continue header on next page so reader knows what they're looking at
+                current_lines = [f"**{tag} (continued)**"]
+                current_size = len(current_lines[0]) + 1
+            current_lines.append(item)
+            current_size += item_size
+
+    if current_lines:
+        pages.append(current_lines)
+
+    total_pages = len(pages)
+    base_title = f"13F-HR - {whale_name}"
+
+    for i, page_lines in enumerate(pages, 1):
+        if total_pages > 1:
+            title = f"{base_title} ({i}/{total_pages})"
+        else:
+            title = base_title
+        post_discord(title, "\n".join(page_lines), color=0x9b59b6)
+        time.sleep(1)  # avoid Discord rate limit between pages
 
 def append_log(record):
     LOG_FILE.parent.mkdir(parents=True, exist_ok=True)
