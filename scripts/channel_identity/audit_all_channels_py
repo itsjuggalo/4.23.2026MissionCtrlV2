@@ -1,0 +1,114 @@
+#!/usr/bin/env python3
+"""Item 28: Audit ALL Discord webhook+channel pairs in fleet.
+
+Runs daily 8am ET via cron. Reports any MISMATCH to Discord.
+Mismatches = either webhook is wrong, channel_id record is stale, or
+someone moved a channel without updating the secret.
+"""
+import json, sys, urllib.request, time
+from pathlib import Path
+import importlib.util
+
+SECRETS = Path('/home/ubuntu/.openclaw/secrets')
+
+# Import the verifier as a module from sibling file
+_spec = importlib.util.spec_from_loader(
+    'verify_mod',
+    importlib.machinery.SourceFileLoader(
+        'verify_mod',
+        '/home/ubuntu/scripts/channel_identity/verify_channel_identity_py')
+)
+verify_mod = importlib.util.module_from_spec(_spec)
+_spec.loader.exec_module(verify_mod)
+
+def find_webhook_files():
+    """Find all webhook secret files."""
+    out = []
+    for f in SECRETS.iterdir():
+        if not f.is_file():
+            continue
+        n = f.name
+        if 'webhook' in n.lower() and 'channel' not in n.lower():
+            out.append(n)
+    return sorted(out)
+
+def post_to_discord(content, webhook_name='discord_pattern_alerts_webhook'):
+    """Post audit results to a known-good webhook channel."""
+    p = SECRETS / webhook_name
+    if not p.exists():
+        return
+    url = p.read_text().strip()
+    body = json.dumps({'content': content[:1990]}).encode()
+    req = urllib.request.Request(
+        url, data=body,
+        headers={'content-type': 'application/json',
+                 'User-Agent': 'MissionCtrl-IdentityAudit/1.0'})
+    try:
+        urllib.request.urlopen(req, timeout=15)
+    except Exception as e:
+        print(f'audit webhook err: {e}', file=sys.stderr)
+
+def main():
+    print('[channel-audit] starting fleet audit')
+    webhooks = find_webhook_files()
+    print(f'[channel-audit] found {len(webhooks)} webhook files')
+
+    ok_count = 0
+    mismatch_count = 0
+    no_record_count = 0
+    error_count = 0
+    mismatches = []
+    no_records = []
+    errors = []
+
+    for wh in webhooks:
+        time.sleep(0.3)  # rate limit politeness
+        r = verify_mod.verify_webhook_channel(wh)
+        if r['ok'] is True:
+            ok_count += 1
+        elif r['ok'] is False:
+            mismatch_count += 1
+            mismatches.append(r)
+        elif r['error'] and 'GET failed' in (r['error'] or ''):
+            error_count += 1
+            errors.append(r)
+        else:
+            no_record_count += 1
+            no_records.append(r)
+
+    print(f'[channel-audit] OK={ok_count} MISMATCH={mismatch_count} NO_RECORD={no_record_count} ERROR={error_count}')
+
+    # Post summary only if there are mismatches OR errors (no-record is just informational)
+    if mismatch_count > 0 or error_count > 0:
+        msg = f'**Channel Identity Audit** \n'
+        msg += f'OK: {ok_count}  |  MISMATCH: {mismatch_count}  |  ERROR: {error_count}  |  NO_RECORD: {no_record_count}\n\n'
+        if mismatches:
+            msg += f'**MISMATCHES ({len(mismatches)})** - webhook channel does not match recorded channel_id:\n'
+            for r in mismatches[:10]:
+                msg += f'  - `{r["webhook_name"]}` -> channel `{r["channel_name"]}` (id `{r["actual_channel_id"]}`) expected `{r["expected_channel_id"]}`\n'
+            msg += '\n'
+        if errors:
+            msg += f'**ERRORS ({len(errors)})** - webhook GET failed (likely revoked/deleted):\n'
+            for r in errors[:10]:
+                msg += f'  - `{r["webhook_name"]}`: {r["error"][:100]}\n'
+        post_to_discord(msg)
+    else:
+        print('[channel-audit] all clean - skipping discord post')
+
+    # Save detailed report
+    report_path = Path('/home/ubuntu/.openclaw/state/channel_audit_last_run.json')
+    report_path.parent.mkdir(parents=True, exist_ok=True)
+    report_path.write_text(json.dumps({
+        'ok': ok_count,
+        'mismatch': mismatch_count,
+        'no_record': no_record_count,
+        'error': error_count,
+        'mismatches': mismatches,
+        'no_records': [r['webhook_name'] for r in no_records],
+        'errors': errors,
+    }, indent=2))
+    print(f'[channel-audit] report saved to {report_path}')
+    return 0 if mismatch_count == 0 else 1
+
+if __name__ == '__main__':
+    sys.exit(main())

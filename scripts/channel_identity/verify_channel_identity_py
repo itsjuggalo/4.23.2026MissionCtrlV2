@@ -1,0 +1,99 @@
+#!/usr/bin/env python3
+"""Item 28: Channel identity verifier.
+
+Library function: given a webhook secret filename, query Discord for the
+webhook's actual channel_id and compare against the expected channel_id
+recorded in a sibling _channel file.
+
+Used by:
+- audit_all_channels_py (runs across full fleet)
+- (future) per-agent startup checks
+"""
+import json, urllib.request, sys
+from pathlib import Path
+
+SECRETS = Path('/home/ubuntu/.openclaw/secrets')
+
+def verify_webhook_channel(webhook_secret_name, expected_channel_secret_name=None):
+    """Returns dict: {ok, webhook_name, expected_channel_id, actual_channel_id, channel_name, guild_id, error}."""
+    result = {
+        'ok': False,
+        'webhook_name': webhook_secret_name,
+        'expected_channel_id': None,
+        'actual_channel_id': None,
+        'channel_name': None,
+        'guild_id': None,
+        'error': None,
+    }
+
+    webhook_path = SECRETS / webhook_secret_name
+    if not webhook_path.exists():
+        result['error'] = f'webhook secret file not found: {webhook_secret_name}'
+        return result
+
+    try:
+        webhook_url = webhook_path.read_text().strip()
+    except Exception as e:
+        result['error'] = f'cannot read webhook: {e}'
+        return result
+
+    if not webhook_url.startswith('https://'):
+        result['error'] = f'malformed webhook URL'
+        return result
+
+    # Auto-detect expected_channel name if not provided
+    if not expected_channel_secret_name:
+        # Try common patterns: webhook -> channel
+        candidates = [
+            webhook_secret_name.replace('webhook', 'channel'),
+            webhook_secret_name.replace('_webhook', '_channel'),
+            webhook_secret_name.replace('discord-webhook-', 'discord_').replace('.txt', '_channel'),
+        ]
+        for cand in candidates:
+            if (SECRETS / cand).exists():
+                expected_channel_secret_name = cand
+                break
+
+    if expected_channel_secret_name:
+        chan_path = SECRETS / expected_channel_secret_name
+        if chan_path.exists():
+            try:
+                expected_id = chan_path.read_text().strip()
+                if expected_id:
+                    result['expected_channel_id'] = expected_id
+            except Exception:
+                pass
+
+    # GET the webhook to learn its actual channel_id
+    try:
+        req = urllib.request.Request(
+            webhook_url,
+            headers={'User-Agent': 'MissionCtrl-IdentityCheck/1.0'},
+        )
+        resp = json.loads(urllib.request.urlopen(req, timeout=15).read())
+        result['actual_channel_id'] = str(resp.get('channel_id', ''))
+        result['channel_name'] = resp.get('name')
+        result['guild_id'] = str(resp.get('guild_id', ''))
+    except Exception as e:
+        result['error'] = f'webhook GET failed: {e}'
+        return result
+
+    # Compare
+    if result['expected_channel_id']:
+        result['ok'] = result['actual_channel_id'] == result['expected_channel_id']
+        if not result['ok']:
+            result['error'] = f'MISMATCH: expected {result["expected_channel_id"]} got {result["actual_channel_id"]}'
+    else:
+        # No expected channel recorded - mark as unknown but report what was found
+        result['ok'] = None  # tri-state: True/False/None
+        result['error'] = 'no expected channel_id recorded for comparison'
+
+    return result
+
+if __name__ == '__main__':
+    if len(sys.argv) < 2:
+        print('usage: verify_channel_identity_py <webhook_secret_name> [<expected_channel_secret_name>]')
+        sys.exit(1)
+    r = verify_webhook_channel(sys.argv[1], sys.argv[2] if len(sys.argv) > 2 else None)
+    print(json.dumps(r, indent=2))
+    sys.exit(0 if r.get('ok') else 1)
