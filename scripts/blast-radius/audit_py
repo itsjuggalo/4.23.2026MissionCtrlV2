@@ -1,32 +1,55 @@
 #!/usr/bin/env python3
 """
-Blast-radius audit - maps every PM2 process and cron job to their outputs and consumers.
-Flags single-points-of-failure: outputs that are read by 2+ downstream consumers.
+Blast-radius audit - maps PM2 + cron + script I/O to find SPOFs and health issues.
+
+Modes:
+  --summary  : Post nightly daily-report-card embed (default if no flag)
+  --alerts   : Post only NEW issues since last run (silent if healthy)
+  --both     : Run alerts logic AND post summary
+  --no-post  : Run audit, write report, do not post to Discord
+
+Outputs:
+  /home/ubuntu/.openclaw/data/blast_radius_report.md
+  /home/ubuntu/.openclaw/data/blast_radius_graph.json
+  /home/ubuntu/.openclaw/state/blast_radius/last_state.json (for diff-based alerting)
 """
 import json
 import os
 import re
+import sys
 import subprocess
+import urllib.request
+import urllib.error
 from collections import defaultdict
 from datetime import datetime, timezone, timedelta
 from pathlib import Path
 
 OUTPUT_REPORT = Path("/home/ubuntu/.openclaw/data/blast_radius_report.md")
 OUTPUT_GRAPH = Path("/home/ubuntu/.openclaw/data/blast_radius_graph.json")
+STATE_FILE = Path("/home/ubuntu/.openclaw/state/blast_radius/last_state.json")
+WEBHOOK_FILE = Path("/home/ubuntu/.openclaw/secrets/discord_spofs_webhook")
 SCRIPTS_ROOT = Path("/home/ubuntu/scripts")
 WORKSPACE_ROOT = Path("/home/ubuntu/.openclaw/workspace")
-DATA_ROOT = Path("/home/ubuntu/.openclaw/data")
 
-# === 1. Inventory PM2 processes ===
+CRITICAL_PATHS = [
+    "/home/ubuntu/.openclaw/workspace/directives/firebase_trade_signals.json",
+    "/home/ubuntu/.openclaw/workspace/directives/grok_brief.json",
+    "/home/ubuntu/.openclaw/workspace/directives/market_briefing.json",
+    "/home/ubuntu/.openclaw/workspace/directives/kronos_forecast.json",
+    "/home/ubuntu/.openclaw/workspace/skill_outputs/boba_decisions_validated.json",
+]
+
+STALE_THRESHOLD_MIN = 240  # 4h
+RESTART_HOTSPOT_THRESHOLD = 5
+DISK_ALERT_THRESHOLD = 85  # percent
+
 def get_pm2_processes():
     try:
         out = subprocess.check_output(["pm2", "jlist"], text=True, timeout=10)
         return json.loads(out)
-    except Exception as e:
-        print(f"[audit] pm2 jlist failed: {e}")
+    except Exception:
         return []
 
-# === 2. Inventory crontab ===
 def get_crontab_entries():
     try:
         out = subprocess.check_output(["crontab", "-l"], text=True, timeout=10)
@@ -37,251 +60,360 @@ def get_crontab_entries():
         line = line.strip()
         if not line or line.startswith("#") or line.startswith("TZ="):
             continue
-        # Extract script path - first thing matching /home/ubuntu/...py or .sh
         m = re.search(r"(/home/ubuntu/[^\s>]+\.(?:py|sh))", line)
         if m:
             entries.append({"line": line, "script": m.group(1)})
     return entries
 
-# === 3. Find all output files written by scripts ===
-WRITE_PATTERNS = [
-    re.compile(r"\.write_text\("),
-    re.compile(r"\.write_bytes\("),
-    re.compile(r"open\([^)]*['\"]w['\"]"),
-    re.compile(r"open\([^)]*['\"]wb['\"]"),
-    re.compile(r"json\.dump\("),
-    re.compile(r"with\s+open\([^)]*,\s*['\"]w['\"]"),
+# Improved I/O detection - catches Path() constants and string literals
+PATH_PATTERNS = [
+    re.compile(r"['\"]((?:/home/ubuntu)?/[^'\"]*\.openclaw/[^'\"]+\.json)['\"]"),
+    re.compile(r"['\"]((?:/home/ubuntu)?/[^'\"]*\.openclaw/[^'\"]+\.md)['\"]"),
+    re.compile(r"['\"]((?:/home/ubuntu)?/[^'\"]+/(?:directives|skill_outputs|data)/[^'\"]+\.(?:json|md))['\"]"),
 ]
 
-PATH_PATTERNS = [
-    re.compile(r"['\"](/home/ubuntu/\.openclaw/[^'\"]+)['\"]"),
-    re.compile(r"['\"](/home/ubuntu/mission-control/[^'\"]+)['\"]"),
-    re.compile(r"['\"](/home/ubuntu/mission-control-restored/[^'\"]+)['\"]"),
-    re.compile(r"WORKSPACE_DIR.*['\"]([^'\"]+\.json)['\"]"),
-    re.compile(r"DIRECTIVES.*['\"]([^'\"]+\.json)['\"]"),
-]
+WRITE_NEAR = re.compile(r"(write_text|write_bytes|json\.dump|open\([^)]*['\"]w)", re.MULTILINE)
+READ_NEAR = re.compile(r"(read_text|read_bytes|json\.load|open\([^)]*['\"]r)", re.MULTILINE)
+
+def normalize_path(p):
+    """Make relative paths absolute and tilde-expand."""
+    if p.startswith("~"):
+        p = os.path.expanduser(p)
+    if not p.startswith("/"):
+        p = "/home/ubuntu" + ("/" if not p.startswith("/") else "") + p
+    return p
 
 def scan_script_for_io(script_path):
-    """Returns (writes, reads) lists of file paths the script touches."""
     if not script_path or not os.path.exists(script_path):
-        return [], []
+        return set(), set()
     try:
         text = Path(script_path).read_text(errors="ignore")
     except Exception:
-        return [], []
+        return set(), set()
     writes = set()
     reads = set()
     for pat in PATH_PATTERNS:
         for m in pat.finditer(text):
-            path = m.group(1)
-            # Find context - is this a write or read?
-            start = max(0, m.start() - 100)
-            end = min(len(text), m.end() + 100)
-            context = text[start:end].lower()
-            if any(p.search(context) for p in WRITE_PATTERNS) or "write" in context:
+            path = normalize_path(m.group(1))
+            ctx_start = max(0, m.start() - 200)
+            ctx_end = min(len(text), m.end() + 200)
+            ctx = text[ctx_start:ctx_end]
+            if WRITE_NEAR.search(ctx):
                 writes.add(path)
-            elif "read" in context or "load" in context or "json.load" in context:
+            elif READ_NEAR.search(ctx):
                 reads.add(path)
             else:
                 reads.add(path)
-    return list(writes), list(reads)
+    return writes, reads
 
-# === 4. Find consumers of each output file ===
-def find_consumers_of_path(path, all_scripts):
-    """Returns list of script paths that read this output."""
-    consumers = []
-    fname = os.path.basename(path)
-    # Look for either full path or just filename
-    for s in all_scripts:
-        if not os.path.exists(s) or s.endswith((".bak", ".pyc")):
-            continue
-        try:
-            text = Path(s).read_text(errors="ignore")
-            if path in text or (fname and fname in text):
-                consumers.append(s)
-        except Exception:
-            continue
-    return consumers
-
-# === 5. Health metrics ===
 def file_age_minutes(path):
     if not os.path.exists(path):
         return None
     return (datetime.now().timestamp() - os.path.getmtime(path)) / 60
 
-def main():
-    print("[audit] Starting blast-radius scan")
+def get_disk_pct():
+    try:
+        out = subprocess.check_output(["df", "-h", "/home/ubuntu"], text=True, timeout=5)
+        line = out.strip().splitlines()[-1]
+        pct = re.search(r"(\d+)%", line)
+        return int(pct.group(1)) if pct else 0
+    except Exception:
+        return 0
+
+def post_discord(title, description, color=0x4a9eff):
+    """Post embed to Discord. Returns True on success."""
+    if not WEBHOOK_FILE.exists():
+        print("[audit] webhook missing - skipping post")
+        return False
+    webhook = WEBHOOK_FILE.read_text().strip()
+    if not webhook:
+        return False
+    if len(description) > 4000:
+        description = description[:3997] + "..."
+    payload = {
+        "embeds": [{
+            "title": title,
+            "description": description,
+            "color": color,
+            "footer": {"text": f"Blast Radius | {datetime.now(timezone.utc).strftime('%Y-%m-%dT%H:%M:%SZ')}"},
+        }]
+    }
+    body = json.dumps(payload).encode("utf-8")
+    req = urllib.request.Request(
+        webhook, data=body,
+        headers={"Content-Type": "application/json", "User-Agent": "BlastRadius/1.0"},
+    )
+    try:
+        resp = urllib.request.urlopen(req, timeout=15)
+        print(f"[audit] posted to Discord: {title} (HTTP {resp.status})")
+        return True
+    except urllib.error.HTTPError as e:
+        print(f"[audit] Discord HTTP error: {e.code} {e.reason}")
+        return False
+    except Exception as e:
+        print(f"[audit] Discord error: {e}")
+        return False
+
+def load_state():
+    if not STATE_FILE.exists():
+        return {}
+    try:
+        return json.loads(STATE_FILE.read_text())
+    except Exception:
+        return {}
+
+def save_state(state):
+    STATE_FILE.parent.mkdir(parents=True, exist_ok=True)
+    STATE_FILE.write_text(json.dumps(state, indent=2, default=str))
+
+def run_audit():
+    """Returns dict with all audit findings."""
     pm2 = get_pm2_processes()
     crons = get_crontab_entries()
-    print(f"[audit] {len(pm2)} PM2 procs, {len(crons)} cron entries")
-
-    # Collect all live scripts
     all_scripts = set()
     for p in pm2:
         s = p.get("pm2_env", {}).get("pm_exec_path", "")
-        if s:
+        if s and s.endswith(".py"):
             all_scripts.add(s)
     for c in crons:
-        all_scripts.add(c["script"])
-    # Also include all .py files in /home/ubuntu/scripts (excluding .bak)
+        if c["script"].endswith(".py"):
+            all_scripts.add(c["script"])
     for f in SCRIPTS_ROOT.rglob("*.py"):
         if ".bak" not in str(f) and "__pycache__" not in str(f):
             all_scripts.add(str(f))
     all_scripts = sorted(all_scripts)
-    print(f"[audit] {len(all_scripts)} unique live scripts to analyze")
 
-    # Map producers
-    producers = {}  # path -> [scripts that write it]
-    consumers = defaultdict(list)  # path -> [scripts that read it]
-
+    producers = defaultdict(set)
+    consumers = defaultdict(set)
     for s in all_scripts:
         writes, reads = scan_script_for_io(s)
         for w in writes:
-            producers.setdefault(w, []).append(s)
+            producers[w].add(s)
         for r in reads:
-            consumers[r].append(s)
+            consumers[r].add(s)
 
-    # SPOF detection: outputs read by 2+ consumers AND written by exactly 1 producer
+    # SPOFs: 1 producer, 2+ consumers
     spofs = []
     for path, prods in producers.items():
-        cons = consumers.get(path, [])
+        cons = consumers.get(path, set()) - prods  # consumer != producer
         if len(cons) >= 2 and len(prods) == 1:
             age = file_age_minutes(path)
             spofs.append({
                 "path": path,
-                "producer": prods[0],
+                "producer": list(prods)[0],
                 "consumer_count": len(cons),
-                "consumers": cons[:5],
+                "consumers": sorted(cons)[:5],
                 "age_minutes": round(age, 1) if age is not None else None,
             })
     spofs.sort(key=lambda x: -x["consumer_count"])
 
     # Stale critical files
     stale = []
-    critical_paths = [
-        "/home/ubuntu/.openclaw/workspace/directives/firebase_trade_signals.json",
-        "/home/ubuntu/.openclaw/workspace/directives/grok_brief.json",
-        "/home/ubuntu/.openclaw/workspace/directives/market_briefing.json",
-        "/home/ubuntu/.openclaw/workspace/directives/kronos_forecast.json",
-        "/home/ubuntu/.openclaw/workspace/skill_outputs/boba_decisions_validated.json",
-    ]
-    for cp in critical_paths:
+    for cp in CRITICAL_PATHS:
         age = file_age_minutes(cp)
         if age is None:
-            stale.append({"path": cp, "status": "MISSING"})
-        elif age > 240:  # 4 hours
-            stale.append({"path": cp, "age_minutes": round(age, 1), "status": "STALE"})
+            stale.append({"path": cp, "status": "MISSING", "age_minutes": None})
+        elif age > STALE_THRESHOLD_MIN:
+            stale.append({"path": cp, "status": "STALE", "age_minutes": round(age, 1)})
 
     # Restart hotspots
     restart_hotspots = []
     for p in pm2:
         n = p.get("pm2_env", {}).get("restart_time", 0)
-        if n >= 5:
+        if n >= RESTART_HOTSPOT_THRESHOLD:
             restart_hotspots.append({
                 "name": p.get("name"),
                 "restarts": n,
-                "script": p.get("pm2_env", {}).get("pm_exec_path", "?"),
             })
     restart_hotspots.sort(key=lambda x: -x["restarts"])
 
-    # Cron duplicate detection
-    script_count = defaultdict(int)
-    for c in crons:
-        script_count[c["script"]] += 1
-    cron_duplicates = [(s, n) for s, n in script_count.items() if n >= 5]
-    cron_duplicates.sort(key=lambda x: -x[1])
+    # Disk
+    disk_pct = get_disk_pct()
 
-    # Write graph JSON
-    graph = {
+    return {
         "generated_at": datetime.now(timezone.utc).isoformat(),
         "pm2_count": len(pm2),
         "cron_count": len(crons),
-        "live_scripts": len(all_scripts),
-        "producers": producers,
-        "consumers": dict(consumers),
+        "script_count": len(all_scripts),
         "spofs": spofs,
-        "stale_critical": stale,
+        "stale": stale,
         "restart_hotspots": restart_hotspots,
-        "cron_duplicates": cron_duplicates,
+        "disk_pct": disk_pct,
     }
+
+def write_reports(audit):
     OUTPUT_GRAPH.parent.mkdir(parents=True, exist_ok=True)
-    OUTPUT_GRAPH.write_text(json.dumps(graph, indent=2, default=str))
+    OUTPUT_GRAPH.write_text(json.dumps(audit, indent=2, default=str))
 
-    # Write markdown report (ET timestamps)
     et_now = datetime.now() - timedelta(hours=4)
-    lines = []
-    lines.append(f"# Blast-Radius Audit Report")
-    lines.append(f"**Generated:** {et_now.strftime('%Y-%m-%d %H:%M ET')}")
-    lines.append("")
-    lines.append("## Top-Level Stats")
-    lines.append(f"- PM2 processes: {len(pm2)}")
-    lines.append(f"- Cron entries: {len(crons)}")
-    lines.append(f"- Live scripts analyzed: {len(all_scripts)}")
-    lines.append(f"- Single-points-of-failure detected: {len(spofs)}")
-    lines.append(f"- Stale critical files: {len(stale)}")
-    lines.append(f"- Restart hotspots (>=5 restarts): {len(restart_hotspots)}")
-    lines.append("")
-
-    lines.append("## SINGLE POINTS OF FAILURE (Top 15)")
-    lines.append("Outputs with multiple downstream consumers but only ONE producer.")
-    lines.append("If the producer breaks, ALL consumers degrade silently.")
-    lines.append("")
-    for i, s in enumerate(spofs[:15], 1):
+    lines = [
+        f"# Blast-Radius Audit Report",
+        f"**Generated:** {et_now.strftime('%Y-%m-%d %H:%M ET')}",
+        "",
+        f"- PM2 processes: {audit['pm2_count']}",
+        f"- Cron entries: {audit['cron_count']}",
+        f"- Live scripts: {audit['script_count']}",
+        f"- SPOFs detected: {len(audit['spofs'])}",
+        f"- Stale critical files: {len(audit['stale'])}",
+        f"- Restart hotspots: {len(audit['restart_hotspots'])}",
+        f"- Disk usage: {audit['disk_pct']}%",
+        "",
+        "## SINGLE POINTS OF FAILURE",
+    ]
+    for i, s in enumerate(audit["spofs"][:15], 1):
         lines.append(f"### {i}. {os.path.basename(s['path'])}")
         lines.append(f"- Path: `{s['path']}`")
         lines.append(f"- Producer: `{os.path.basename(s['producer'])}`")
-        lines.append(f"- Consumer count: {s['consumer_count']}")
+        lines.append(f"- Consumers: {s['consumer_count']}")
         if s["age_minutes"] is not None:
             lines.append(f"- Output age: {s['age_minutes']} min")
-        lines.append(f"- Sample consumers: {', '.join(os.path.basename(c) for c in s['consumers'])}")
         lines.append("")
-
     lines.append("## STALE CRITICAL FILES")
-    if stale:
-        for s in stale:
-            if s["status"] == "MISSING":
-                lines.append(f"- {s['path']}: MISSING")
-            else:
-                lines.append(f"- {s['path']}: {s['age_minutes']} min old (STALE)")
-    else:
-        lines.append("All critical files fresh.")
+    for s in audit["stale"]:
+        if s["status"] == "MISSING":
+            lines.append(f"- {s['path']}: MISSING")
+        else:
+            lines.append(f"- {s['path']}: {s['age_minutes']} min stale")
     lines.append("")
-
     lines.append("## PM2 RESTART HOTSPOTS")
-    if restart_hotspots:
-        for r in restart_hotspots:
-            lines.append(f"- {r['name']}: {r['restarts']} restarts ({r['script']})")
-    else:
-        lines.append("No hotspots (all under 5 restarts).")
-    lines.append("")
-
-    lines.append("## CRON DUPLICATES")
-    lines.append("Scripts scheduled 5+ times in the same crontab.")
-    if cron_duplicates:
-        for s, n in cron_duplicates:
-            lines.append(f"- {os.path.basename(s)}: {n} entries ({s})")
-    else:
-        lines.append("No duplicates.")
-    lines.append("")
-
+    for r in audit["restart_hotspots"]:
+        lines.append(f"- {r['name']}: {r['restarts']} restarts")
     OUTPUT_REPORT.write_text("\n".join(lines))
-    print(f"[audit] Report written to {OUTPUT_REPORT}")
-    print(f"[audit] Graph written to {OUTPUT_GRAPH}")
 
-    # Print summary to stdout
-    print()
-    print("=" * 60)
-    print(f"BLAST-RADIUS SUMMARY")
-    print("=" * 60)
-    print(f"SPOFs detected: {len(spofs)}")
-    print(f"Stale critical files: {len(stale)}")
-    print(f"Restart hotspots: {len(restart_hotspots)}")
-    print(f"Cron duplicates: {len(cron_duplicates)}")
-    if spofs:
-        print()
-        print("TOP 5 SPOFs:")
-        for i, s in enumerate(spofs[:5], 1):
-            print(f"  {i}. {os.path.basename(s['path'])} - {s['consumer_count']} consumers")
+def post_summary(audit):
+    et_now = datetime.now() - timedelta(hours=4)
+    spof_count = len(audit["spofs"])
+    stale_count = len(audit["stale"])
+    hotspot_count = len(audit["restart_hotspots"])
+    disk = audit["disk_pct"]
+
+    if spof_count == 0 and stale_count == 0 and hotspot_count == 0 and disk < DISK_ALERT_THRESHOLD:
+        color = 0x2ecc71  # green
+        health = "HEALTHY"
+    elif spof_count > 0 or stale_count > 0 or disk >= DISK_ALERT_THRESHOLD:
+        color = 0xe74c3c  # red
+        health = "ATTENTION"
+    else:
+        color = 0xf39c12  # yellow
+        health = "WARNING"
+
+    lines = [
+        f"**Status:** {health}",
+        "",
+        f"**Counts**",
+        f"- PM2 processes: {audit['pm2_count']}",
+        f"- Cron entries: {audit['cron_count']}",
+        f"- Scripts analyzed: {audit['script_count']}",
+        f"- Disk: {disk}%",
+        "",
+        f"**Issues**",
+        f"- SPOFs: {spof_count}",
+        f"- Stale critical files: {stale_count}",
+        f"- Restart hotspots: {hotspot_count}",
+    ]
+    if audit["spofs"]:
+        lines.append("")
+        lines.append("**Top SPOFs**")
+        for s in audit["spofs"][:5]:
+            lines.append(f"- `{os.path.basename(s['path'])}` ({s['consumer_count']} consumers)")
+    if audit["stale"]:
+        lines.append("")
+        lines.append("**Stale**")
+        for s in audit["stale"][:5]:
+            if s["status"] == "MISSING":
+                lines.append(f"- `{os.path.basename(s['path'])}` MISSING")
+            else:
+                lines.append(f"- `{os.path.basename(s['path'])}` {s['age_minutes']:.0f}min")
+    if audit["restart_hotspots"]:
+        lines.append("")
+        lines.append("**Restart hotspots**")
+        for r in audit["restart_hotspots"][:5]:
+            lines.append(f"- `{r['name']}` {r['restarts']}")
+
+    title = f"Daily Health Report - {et_now.strftime('%Y-%m-%d %H:%M ET')}"
+    post_discord(title, "\n".join(lines), color=color)
+
+def post_alerts(audit, last_state):
+    """Post only NEW issues vs last run. Silent if no new issues."""
+    new_issues = []
+
+    # New SPOFs
+    last_spofs = {s["path"] for s in last_state.get("spofs", [])}
+    for s in audit["spofs"]:
+        if s["path"] not in last_spofs:
+            new_issues.append(("NEW SPOF", f"`{os.path.basename(s['path'])}` - {s['consumer_count']} consumers, producer `{os.path.basename(s['producer'])}`"))
+
+    # New stale files
+    last_stale = {s["path"] for s in last_state.get("stale", [])}
+    for s in audit["stale"]:
+        if s["path"] not in last_stale:
+            if s["status"] == "MISSING":
+                new_issues.append(("MISSING FILE", f"`{os.path.basename(s['path'])}`"))
+            else:
+                new_issues.append(("STALE", f"`{os.path.basename(s['path'])}` ({s['age_minutes']:.0f} min old)"))
+
+    # New restart hotspots
+    last_hotspots = {r["name"]: r["restarts"] for r in last_state.get("restart_hotspots", [])}
+    for r in audit["restart_hotspots"]:
+        prev = last_hotspots.get(r["name"], 0)
+        if r["name"] not in last_hotspots:
+            new_issues.append(("RESTART HOTSPOT", f"`{r['name']}` reached {r['restarts']} restarts"))
+        elif r["restarts"] - prev >= 5:
+            new_issues.append(("RESTART INCREASED", f"`{r['name']}` jumped {prev} → {r['restarts']}"))
+
+    # Disk alert
+    last_disk = last_state.get("disk_pct", 0)
+    if audit["disk_pct"] >= DISK_ALERT_THRESHOLD and last_disk < DISK_ALERT_THRESHOLD:
+        new_issues.append(("DISK", f"{audit['disk_pct']}% used (>{DISK_ALERT_THRESHOLD}%)"))
+
+    if not new_issues:
+        print("[audit] no new issues - silent")
+        return
+
+    et_now = datetime.now() - timedelta(hours=4)
+    lines = [f"**{kind}**: {detail}" for kind, detail in new_issues]
+    title = f"Alert - {et_now.strftime('%H:%M ET')} - {len(new_issues)} new issue(s)"
+    post_discord(title, "\n".join(lines), color=0xe74c3c)
+
+def main():
+    args = sys.argv[1:]
+    mode = "summary"
+    if "--alerts" in args:
+        mode = "alerts"
+    elif "--both" in args:
+        mode = "both"
+    elif "--no-post" in args:
+        mode = "no-post"
+
+    print(f"[audit] running in mode: {mode}")
+    audit = run_audit()
+    write_reports(audit)
+    last_state = load_state()
+
+    if mode == "summary":
+        post_summary(audit)
+    elif mode == "alerts":
+        post_alerts(audit, last_state)
+    elif mode == "both":
+        post_alerts(audit, last_state)
+        post_summary(audit)
+    # no-post: skip
+
+    # Save state for next diff
+    save_state({
+        "generated_at": audit["generated_at"],
+        "spofs": audit["spofs"],
+        "stale": audit["stale"],
+        "restart_hotspots": audit["restart_hotspots"],
+        "disk_pct": audit["disk_pct"],
+    })
+
+    # Console summary
+    print(f"\n=== Blast Radius Summary ===")
+    print(f"SPOFs: {len(audit['spofs'])}")
+    print(f"Stale: {len(audit['stale'])}")
+    print(f"Hotspots: {len(audit['restart_hotspots'])}")
+    print(f"Disk: {audit['disk_pct']}%")
 
 if __name__ == "__main__":
     main()
