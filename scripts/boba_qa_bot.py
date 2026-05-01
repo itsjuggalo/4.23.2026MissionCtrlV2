@@ -24,6 +24,10 @@ from datetime import datetime, timezone, timedelta
 from pathlib import Path
 from collections import defaultdict
 import discord, requests
+import sys as _sys_tracker
+_sys_tracker.path.insert(0, '/home/ubuntu/scripts/lib')
+from anthropic_tracker import log_call as _log_anthropic_call
+import time as _time_tracker
 
 SECRETS = Path.home() / ".openclaw" / "secrets"
 LOG_DIR = Path.home() / ".openclaw" / "workspace" / "logs"
@@ -401,6 +405,7 @@ def call_claude(question, context):
     if not ANTHROPIC_KEY:
         return "(Anthropic key missing — synthesis unavailable)"
     try:
+        _t0 = _time_tracker.time()
         r = requests.post(
             "https://api.anthropic.com/v1/messages",
             headers={
@@ -425,9 +430,12 @@ def call_claude(question, context):
             },
             timeout=60,
         )
+        _dur_ms = int((_time_tracker.time() - _t0) * 1000)
         if r.status_code != 200:
+            _log_anthropic_call("boba_qa_bot", "claude-sonnet-4-5", None, _dur_ms, success=False, error=f"HTTP {r.status_code}")
             return f"Claude API error {r.status_code}: {r.text[:200]}"
         data = r.json()
+        _log_anthropic_call("boba_qa_bot", "claude-sonnet-4-5", data, _dur_ms, success=True)
         return data["content"][0]["text"]
     except Exception as e:
         return f"Claude call failed: {e}"
