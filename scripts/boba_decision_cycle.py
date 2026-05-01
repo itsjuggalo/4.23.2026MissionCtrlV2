@@ -1850,6 +1850,10 @@ def main():
     # 9. Log decision
     log_decision(cycle_result, picks_executed)
 
+    # 9b. 4-file flush protocol — writes structured memory to ~/.openclaw/workspace/boba_memory/
+    # Wrapped internally in try/except — flush failures cannot break the cycle.
+    flush_to_boba_memory(cycle_result, picks_executed)
+
     # Multi-agent: post Boba's cycle summary to #agent-debate
     if _MULTIAGENT_LIB_OK:
         try:
