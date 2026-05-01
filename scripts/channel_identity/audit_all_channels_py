@@ -28,7 +28,7 @@ def find_webhook_files():
         if not f.is_file():
             continue
         n = f.name
-        if 'webhook' in n.lower() and 'channel' not in n.lower():
+        if 'webhook' in n.lower() and 'channel' not in n.lower() and 'discord' in n.lower():
             out.append(n)
     return sorted(out)
 
