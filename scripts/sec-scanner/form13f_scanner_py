@@ -140,6 +140,8 @@ def parse_info_table(xml_text):
     try:
         # Strip namespaces for simpler parsing
         cleaned = re.sub(r'\sxmlns(?::\w+)?="[^"]+"', '', xml_text)
+        # Strip orphan prefixed attributes (xsi:schemaLocation etc - namespace was just removed)
+        cleaned = re.sub(r'\s\w+:\w+\s*=\s*"[^"]*"', '', cleaned)
         cleaned = re.sub(r'<(/?)\w+:', r'<\1', cleaned)
         root = ET.fromstring(cleaned)
     except ET.ParseError as e:
@@ -176,7 +178,7 @@ def parse_info_table(xml_text):
 
     # Normalize value to dollars (SEC reports in thousands since 2022)
     for p in positions:
-        p["value_usd"] = p["value"] * 1000.0
+        p["value_usd"] = p["value"]  # SEC post-2023 schema reports whole dollars
 
     return positions
 
@@ -275,7 +277,8 @@ def fmt_position(p, with_pct=False):
     else:
         val_str = f"${val/1e3:.0f}K"
     putcall = "" if p.get("putcall") in ("", "LONG", None) else f" [{p['putcall']}]"
-    base = f"{p['issuer'][:32]}{putcall} - {val_str}"
+    issuer_name = ' '.join(w.capitalize() for w in p['issuer'].split())[:40]
+    base = f"{issuer_name}{putcall} - {val_str}"
     if with_pct and "pct_change" in p:
         base += f" ({p['pct_change']:+.0f}%)"
     return base
