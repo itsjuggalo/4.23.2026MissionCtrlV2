@@ -26,8 +26,8 @@ STATE.mkdir(parents=True, exist_ok=True)
 PF_DECAY_PCT = 0.30          # alert if PF drops 30% from baseline
 PF_ABSOLUTE_FLOOR = 1.0      # alert if current PF below 1.0 (breakeven)
 WINRATE_DECAY_PCT = 0.20     # alert if winrate drops 20% from baseline
-ROLLING_WINDOW_DAYS = 30
-BASELINE_WINDOW_DAYS = 90
+ROLLING_WINDOW_DAYS = 7
+BASELINE_WINDOW_DAYS = 21  # baseline window covers prior 7d-21d before now (anything older than recent window, capped at 21d back)
 
 def load_secret(name):
     p = SECRETS / name
