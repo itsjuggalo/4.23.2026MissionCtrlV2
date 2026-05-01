@@ -1464,6 +1464,111 @@ def execute_position_action(action_dict, positions):
         return {"ok": False, "action": act, "symbol": sym, "error": str(e)[:200]}
 
 
+
+def flush_to_boba_memory(cycle_result, picks_executed):
+    """
+    4-file flush protocol — writes structured memory at end of every Boba cycle.
+
+    Files (all under ~/.openclaw/workspace/boba_memory/):
+      - daily-log         : append, operational summary per cycle
+      - decisions         : append, each committed pick + full reasoning chain
+      - rejected-ideas    : append, each passed-on signal + specific skip reason
+      - raw-backup-context: append, full raw cycle_result + picks JSON dump
+
+    Failures here MUST NEVER break the Boba cycle. Wrapped in try/except.
+    """
+    try:
+        import json as _json
+        import fcntl as _fcntl
+        from datetime import datetime as _dt
+        from zoneinfo import ZoneInfo as _ZI
+        from pathlib import Path as _P
+
+        MEM_DIR = _P("/home/ubuntu/.openclaw/workspace/boba_memory")
+        if not MEM_DIR.is_dir():
+            print(f"[flush] boba_memory dir missing — skipping", flush=True)
+            return
+
+        ts_et = _dt.now(_ZI("America/New_York"))
+        ts_label = ts_et.strftime("%Y-%m-%d %H:%M %Z")
+        ts_iso = ts_et.isoformat()
+
+        cycle_summary = cycle_result.get("cycle_summary", "(no summary)")
+        passed_on = cycle_result.get("passed_on", [])
+        n_picks = len(picks_executed)
+        n_passed = len(passed_on)
+
+        def _append_locked(filepath, content):
+            with open(filepath, "a", encoding="utf-8") as fh:
+                _fcntl.flock(fh.fileno(), _fcntl.LOCK_EX)
+                try:
+                    fh.write(content)
+                finally:
+                    _fcntl.flock(fh.fileno(), _fcntl.LOCK_UN)
+
+        # 1. daily-log
+        daily_block = (
+            f"\n## {ts_label}\n"
+            f"- Cycle summary: {cycle_summary}\n"
+            f"- Picks committed: {n_picks}\n"
+            f"- Passed on: {n_passed}\n"
+        )
+        if picks_executed:
+            daily_block += "- Tickers committed: " + ", ".join(
+                str(p.get("ticker", "?")) for p in picks_executed
+            ) + "\n"
+        _append_locked(MEM_DIR / "daily-log", daily_block)
+
+        # 2. decisions — full reasoning per pick
+        if picks_executed:
+            dec_block = f"\n## {ts_label}\n"
+            for pk in picks_executed:
+                tk = pk.get("ticker", "?")
+                strike = pk.get("strike", "?")
+                opt = pk.get("option_type", "?")
+                exp = pk.get("expiry", "?")
+                reasoning = pk.get("reasoning", "(none)")
+                conf = pk.get("confidence", "?")
+                proto = pk.get("protocol", "?")
+                pt = pk.get("profit_target_pct", "?")
+                sl = pk.get("stop_loss_pct", "?")
+                exec_info = pk.get("execution", {})
+                ok = exec_info.get("ok") if isinstance(exec_info, dict) else None
+                dec_block += (
+                    f"\n### {tk} ${strike}{opt} {exp}\n"
+                    f"- Protocol: {proto} | Confidence: {conf} | TP: {pt}% | SL: {sl}%\n"
+                    f"- Executed: {ok}\n"
+                    f"- Reasoning: {reasoning}\n"
+                )
+            _append_locked(MEM_DIR / "decisions", dec_block)
+
+        # 3. rejected-ideas — passed-on signals with reasons
+        if passed_on:
+            rej_block = f"\n## {ts_label}\n"
+            for r in passed_on:
+                tk = r.get("ticker", "?") if isinstance(r, dict) else "?"
+                reason = r.get("reason", "(none)") if isinstance(r, dict) else str(r)
+                rej_block += f"- {tk}: {reason}\n"
+            _append_locked(MEM_DIR / "rejected-ideas", rej_block)
+
+        # 4. raw-backup-context — full unmodified dump
+        try:
+            raw_dump = _json.dumps({
+                "timestamp_et": ts_iso,
+                "cycle_result": cycle_result,
+                "picks_executed": picks_executed,
+            }, indent=2, default=str)
+        except Exception as _je:
+            raw_dump = f'{{"timestamp_et": "{ts_iso}", "serialize_error": "{_je}"}}'
+        raw_block = f"\n## {ts_label}\n```json\n{raw_dump}\n```\n"
+        _append_locked(MEM_DIR / "raw-backup-context", raw_block)
+
+        print(f"[flush] boba_memory updated at {ts_label} ({n_picks} picks, {n_passed} passed)", flush=True)
+    except Exception as _flush_e:
+        # Flush failures must never break the cycle
+        print(f"[flush] FAILED (cycle continues): {_flush_e}", flush=True)
+
+
 def log_decision(cycle_result, picks_executed):
     # SCHEMA v2 (2026-04-28): enrich picks with protocol + entry_criteria defaults
     # protocol: "flow" (current flow-driven picks) | "swing" (future Protocol B) | "manual"
