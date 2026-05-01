@@ -102,6 +102,7 @@ def main():
 
     prev = load_prev_state()
     prev_procs = prev.get('procs', {})
+    is_first_run = not prev_procs
 
     alerts = []  # (severity, message)
 
@@ -152,7 +153,12 @@ def main():
             sev = 'CRITICAL' if name in CRITICAL else 'WARNING'
             alerts.append((sev, f'`{name}` restarted {restart_delta} times in last interval (total={cur_restarts})'))
 
-    # Post alerts
+    # Post alerts (skip on first run - we only have baseline, no real transitions)
+    if is_first_run:
+        print(f'[daemon-health] FIRST RUN - establishing baseline for {len(cur)} daemons, no alerts posted')
+        save_state({'ts': now_iso, 'procs': cur})
+        return 0
+
     if alerts:
         critical_msgs = [m for s, m in alerts if s == 'CRITICAL']
         warning_msgs = [m for s, m in alerts if s == 'WARNING']
