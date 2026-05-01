@@ -703,6 +703,92 @@ def load_market_briefing():
         return ""
 
 
+
+def compute_agent_consensus(window_hours=4):
+    """Item 19: scan agent outputs in rolling window, return ticker -> set of agents that mentioned it.
+    Sources today: orion (crypto), jazzyhazzy (multi-skill), grok (ct_alpha), boba (prior cycle).
+    Kronos and DeepSeek hooks reserved for when their writers come online."""
+    import re as _re
+    from datetime import datetime as _dt, timezone as _tz, timedelta as _td
+    cutoff = _dt.now(_tz.utc) - _td(hours=window_hours)
+    votes = {}
+    TICKER_RE = _re.compile(r'\b[A-Z]{2,5}\b')
+    KNOWN_NOISE = {'USD','ETF','SEC','CEO','CFO','IPO','CPI','PPI','GDP','API','URL','HTTP','HTTPS','JSON','XML','RSS','PDF','PM','AM','UTC','EST','PST','EDT','PDT','ET','ATM','ITM','OTM','SH','PUT','CALL','TP','SL','DTE','IV','RSI','MACD','EMA','SMA','BB','ATR','TUE','MON','WED','THU','FRI','SAT','SUN','JAN','FEB','MAR','APR','MAY','JUN','JUL','AUG','SEP','OCT','NOV','DEC','THE','FOR','AND','THIS','THAT','OUR','YOU','PRO','NEW','OLD','BIG','TOP','LOW','HIGH','OK','OFF','ON','ALL','ANY','MID','MAX','MIN','EOD','BOD','PA','LP','LLC','INC','CORP','TR','TRT','TRY','VS'}
+    def _add_vote(ticker, agent_name):
+        t = ticker.strip().upper()
+        if not t or t in KNOWN_NOISE or len(t) < 2: return
+        votes.setdefault(t, set()).add(agent_name)
+    def _file_age_ok(path):
+        try:
+            mtime = _dt.fromtimestamp(path.stat().st_mtime, tz=_tz.utc)
+            return mtime >= cutoff
+        except Exception: return False
+    try:
+        odir = Path('/home/ubuntu/.openclaw/workspace/skill_outputs/orion')
+        if odir.exists():
+            for f in odir.glob('*.json'):
+                if not _file_age_ok(f): continue
+                try:
+                    rec = json.loads(f.read_text())
+                    data = rec.get('data', {})
+                    sym = data.get('symbol')
+                    if sym: _add_vote(sym, 'orion')
+                    for c in data.get('coins', [])[:10]:
+                        if isinstance(c, dict) and c.get('symbol'): _add_vote(c['symbol'], 'orion')
+                except Exception: pass
+    except Exception: pass
+    try:
+        jdir = Path('/home/ubuntu/.openclaw/workspace/skill_outputs/jazzyhazzy')
+        if jdir.exists():
+            for f in jdir.glob('*.json'):
+                if not _file_age_ok(f): continue
+                try:
+                    rec = json.loads(f.read_text())
+                    blob = json.dumps(rec.get('data', {}))
+                    for t in set(TICKER_RE.findall(blob)):
+                        _add_vote(t, 'jazzy')
+                except Exception: pass
+    except Exception: pass
+    try:
+        gf = Path('/home/ubuntu/.openclaw/workspace/skill_outputs/grok_ct_alpha.json')
+        if gf.exists() and _file_age_ok(gf):
+            rec = json.loads(gf.read_text())
+            for item in rec.get('items', []):
+                for t in item.get('tickers', []):
+                    _add_vote(t, 'grok')
+    except Exception: pass
+    try:
+        bf = Path('/home/ubuntu/.openclaw/workspace/skill_outputs/boba_decisions_validated.json')
+        if bf.exists():
+            d = json.loads(bf.read_text())
+            decs = d if isinstance(d, list) else d.get('decisions', [])
+            for dec in decs[-20:]:
+                ts_str = dec.get('cycle_time', '')
+                if not ts_str: continue
+                try:
+                    dts = _dt.fromisoformat(ts_str.replace('Z', '+00:00'))
+                    if dts < cutoff: continue
+                except Exception: continue
+                for pick in (dec.get('picks_executed', []) or []) + (dec.get('passed_on', []) or []):
+                    if isinstance(pick, dict) and pick.get('ticker'):
+                        _add_vote(pick['ticker'], 'boba_prior')
+    except Exception: pass
+    return votes
+
+def format_consensus_for_prompt(votes, threshold=3):
+    """Item 19: format consensus dict for injection into Boba prompt."""
+    if not votes: return ''
+    high = [(t, agents) for t, agents in votes.items() if len(agents) >= threshold]
+    if not high: return ''
+    high.sort(key=lambda x: (-len(x[1]), x[0]))
+    out = '\n# AGENT CONSENSUS (Item 19) - symbols flagged by 3+ agents in last 4h\n'
+    out += 'These are HIGH-CONVICTION tier candidates by virtue of multi-agent overlap.\n'
+    out += 'Treat consensus as an independent signal alongside whale flow tier and Kronos verdict.\n'
+    for ticker, agents in high[:15]:
+        agent_list = ', '.join(sorted(agents))
+        out += f'  - {ticker}: {len(agents)} agents ({agent_list})\n'
+    return out + '\n'
+
 def build_boba_prompt(account, positions, shortlist_with_kronos, remaining_budget=3):
     equity = float(account.get("equity", 0))
     buying_power = float(account.get("buying_power", 0))
@@ -768,7 +854,9 @@ def build_boba_prompt(account, positions, shortlist_with_kronos, remaining_budge
     market_briefing_text = load_market_briefing() or ""
     grok_brief_text = load_grok_brief() or ""
     orion_skills_text = load_orion_skills() or ""
-    multi_agent_context = market_briefing_text + grok_brief_text + orion_skills_text
+    consensus_votes = compute_agent_consensus(window_hours=4)
+    consensus_text = format_consensus_for_prompt(consensus_votes, threshold=3)
+    multi_agent_context = market_briefing_text + grok_brief_text + orion_skills_text + consensus_text
 
     prompt = f"""You are Boba — the decision-making agent in Mission Control's multi-agent trading system.
 
