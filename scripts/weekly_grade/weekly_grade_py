@@ -4,6 +4,10 @@ benchmarks against SPY/QQQ/BTC, calls Sonnet to grade A-F + propose edits."""
 import os, json, sys, urllib.request, urllib.parse
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
+import sys as _sys_tracker
+_sys_tracker.path.insert(0, '/home/ubuntu/scripts/lib')
+from anthropic_tracker import log_call as _log_anthropic_call
+import time as _time_tracker
 
 SECRETS = Path('/home/ubuntu/.openclaw/secrets')
 PROPOSALS = Path('/home/ubuntu/.openclaw/workspace/proposals')

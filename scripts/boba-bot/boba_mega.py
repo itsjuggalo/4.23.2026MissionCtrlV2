@@ -7,7 +7,10 @@ Block 4 will add /trade with arm/disarm safety.
 
 Locked to OWNER_ID. Slash commands sync to GUILD_ID for instant availability.
 """
-import asyncio, json, os, sys, time, logging, re
+import asyncio
+import sys as _sys_t; _sys_t.path.insert(0, '/home/ubuntu/scripts/lib')
+from anthropic_tracker import log_call as _log_anthropic_call
+import time as _time_t, json, os, sys, time, logging, re
 from datetime import datetime, timezone, timedelta
 from pathlib import Path
 from collections import defaultdict
@@ -231,6 +234,7 @@ def _ask_anthropic(question, context_blob=""):
     if context_blob:
         system += f"\n\nCurrent Mission Control context:\n{context_blob}"
     try:
+        _t0 = _time_tracker.time()
         r = requests.post(
             "https://api.anthropic.com/v1/messages",
             headers={
@@ -246,10 +250,14 @@ def _ask_anthropic(question, context_blob=""):
             },
             timeout=45,
         )
+        _dur_ms = int((_time_tracker.time() - _t0) * 1000)
         if r.status_code != 200:
+            _log_anthropic_call("boba_mega", ANTHROPIC_MODEL, None, _dur_ms, success=False, error=f"HTTP {r.status_code}")
             logging.error(f"anthropic {r.status_code}: {r.text[:300]}")
             return f"[Boba] API error {r.status_code}"
-        return r.json().get("content", [{}])[0].get("text", "").strip()
+        _data = r.json()
+        _log_anthropic_call("boba_mega", ANTHROPIC_MODEL, _data, _dur_ms, success=True)
+        return _data.get("content", [{}])[0].get("text", "").strip()
     except Exception as e:
         logging.error(f"anthropic {e}")
         return f"[Boba] error: {e}"
