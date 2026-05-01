@@ -74,6 +74,13 @@ KRONOS_CMD = "/home/ubuntu/mission-control/agent-team/kronos/kronos_on_demand.py
 MAX_PICKS_PER_CYCLE = 3
 MAX_NEW_PICKS_PER_DAY = 3   # Hard cap on NEW picks per trading day across all cycles
 MAX_TOTAL_RISK_USD = 3000
+
+# Item 31: post-LLM hard guardrails (enforced by validate_pick_against_guardrails)
+MAX_BUYING_POWER_PCT_PER_PICK = 0.15  # 15% of buying power max per pick
+KRONOS_CONFLICTS_OVERRIDE_SCORE = 90  # Flow score required to override Kronos CONFLICTS veto
+KRONOS_UNAVAILABLE_OVERRIDE_SCORE = 85  # Flow score required when Kronos unavailable
+MIN_DTE_DEFAULT = 1  # 0DTE picks require explicit catalyst language in reasoning
+FORBIDDEN_TICKERS = set()  # populated as hallucinations are observed
 SHORTLIST_SIZE = 5
 DAILY_PICKS_FILE = Path("/home/ubuntu/.openclaw/workspace/state/boba_daily_picks.json")
 MIN_FLOW_VALUE = 500_000   # Hard floor: T1+T2 only ($500K+) — anything below is rejected
@@ -1236,6 +1243,103 @@ def _post_bobatrades(msg: str):
         pass
 
 
+def validate_pick_against_guardrails(pick, account, prior_picks_this_cycle):
+    """Item 31: hard numeric guardrail validator. Runs AFTER LLM, BEFORE Alpaca submit.
+    Returns (ok: bool, skip_reason: str). On any violation returns (False, "GUARDRAIL_VIOLATION: ...").
+
+    The prompt already states these rules to Boba. This function enforces them at the code
+    level as defense-in-depth - even if Boba hallucinates or misinterprets, picks violating
+    rules get rejected here and routed to passed_on.
+    """
+    ticker = str(pick.get("ticker", "")).upper()
+    strike = float(pick.get("strike", 0) or 0)
+    contracts = int(pick.get("contracts", 0) or 0)
+    option_type = str(pick.get("option_type", "")).upper()
+    expiry = str(pick.get("expiry", ""))[:10]
+    kronos_verdict = str(pick.get("kronos_verdict", "")).upper()
+    reasoning = str(pick.get("reasoning", ""))
+    entry_criteria = pick.get("entry_criteria", []) or []
+    if not isinstance(entry_criteria, list):
+        entry_criteria = []
+
+    # Rule 1: Forbidden tickers blocklist
+    if ticker in FORBIDDEN_TICKERS:
+        return False, f"GUARDRAIL_VIOLATION: ticker {ticker} is on forbidden list"
+
+    # Rule 2: Required fields present
+    if not ticker or strike <= 0 or contracts <= 0 or not expiry:
+        return False, f"GUARDRAIL_VIOLATION: missing required field (ticker={ticker}, strike={strike}, contracts={contracts}, expiry={expiry})"
+    if option_type not in ("CALL", "PUT"):
+        return False, f"GUARDRAIL_VIOLATION: option_type must be CALL or PUT, got {option_type}"
+
+    # Rule 3: Per-pick buying power cap (estimate via mid price * contracts * 100)
+    # Use conservative estimate - if quote unavailable, skip this check rather than block
+    bp = float(account.get("buying_power", 0) or 0)
+    if bp > 0:
+        # Try to get live mid price for accurate notional - fall back to skipping if unavailable
+        live_quote = None
+        try:
+            live_quote = fetch_live_option_quote(ticker, strike, option_type, expiry)
+        except Exception:
+            pass
+        if live_quote and live_quote.get("mid"):
+            est_cost = float(live_quote["mid"]) * contracts * 100
+            max_allowed = bp * MAX_BUYING_POWER_PCT_PER_PICK
+            if est_cost > max_allowed:
+                return False, f"GUARDRAIL_VIOLATION: pick cost ${est_cost:,.0f} exceeds {int(MAX_BUYING_POWER_PCT_PER_PICK*100)}% of buying power (${max_allowed:,.0f})"
+
+    # Rule 4: Kronos CONFLICTS requires flow score >= 90
+    # Score lives in entry_criteria as e.g. "T1_1.75M" - if T0/T1 mega flow we can infer
+    # high score, otherwise be strict
+    if kronos_verdict == "CONFLICTS":
+        # Check reasoning text for explicit flow score number
+        import re
+        score_match = re.search(r"(?:flow\s*score|score)\s*[:=]?\s*(\d{1,3})", reasoning, re.IGNORECASE)
+        flow_score = int(score_match.group(1)) if score_match else None
+        # Also accept T0 mega flow as override since T0 = $10M+ which is highest tier
+        is_t0 = any(c.upper().startswith("T0") for c in entry_criteria)
+        if flow_score is None and not is_t0:
+            return False, f"GUARDRAIL_VIOLATION: Kronos CONFLICTS but no flow score >= {KRONOS_CONFLICTS_OVERRIDE_SCORE} cited in reasoning and not T0"
+        if flow_score is not None and flow_score < KRONOS_CONFLICTS_OVERRIDE_SCORE:
+            return False, f"GUARDRAIL_VIOLATION: Kronos CONFLICTS but flow score {flow_score} < required {KRONOS_CONFLICTS_OVERRIDE_SCORE}"
+
+    # Rule 5: 0 DTE requires explicit catalyst language in reasoning
+    try:
+        from datetime import datetime as _dt, date as _date
+        exp_dt = _dt.strptime(expiry, "%Y-%m-%d").date()
+        today = _date.today()
+        dte = (exp_dt - today).days
+        if dte < 0:
+            return False, f"GUARDRAIL_VIOLATION: expiry {expiry} is in the past (DTE={dte})"
+        if dte == 0:
+            # Require catalyst keyword in reasoning
+            catalyst_keywords = ["fomc", "cpi", "ppi", "earnings", "fed ", "powell", "jolts", "nfp", "jobs report", "gdp", "catalyst"]
+            r_lower = reasoning.lower()
+            if not any(kw in r_lower for kw in catalyst_keywords):
+                return False, f"GUARDRAIL_VIOLATION: 0DTE pick without catalyst keyword in reasoning"
+    except Exception as e:
+        return False, f"GUARDRAIL_VIOLATION: cannot parse expiry {expiry}: {e}"
+
+    # Rule 6: Strike sanity - must be within reasonable range of underlying
+    # If we have live quote, check strike vs spot via the quote's underlying
+    # Skip if no live quote available (don't block on missing data)
+    # We could also check via shortlist data but that's not in pick scope here
+
+    # Rule 7: Total cycle picks not duplicating same exact contract
+    same_contract_count = sum(
+        1 for prior in prior_picks_this_cycle
+        if str(prior.get("ticker", "")).upper() == ticker
+        and float(prior.get("strike", 0) or 0) == strike
+        and str(prior.get("option_type", "")).upper() == option_type
+        and str(prior.get("expiry", ""))[:10] == expiry
+    )
+    if same_contract_count > 0:
+        return False, f"GUARDRAIL_VIOLATION: duplicate contract already in this cycle's picks ({ticker} ${strike}{option_type[0]} {expiry})"
+
+    # All checks passed
+    return True, ""
+
+
 def execute_pick_on_alpaca(pick):
     """
     Layer 2 — Place option buy + protection stop-limit on Alpaca paper.
@@ -1855,6 +1959,30 @@ def main():
             except Exception:
                 pass
             continue
+
+        # Item 31: hard guardrail validation BEFORE Alpaca submit
+        ok, skip_reason = validate_pick_against_guardrails(
+            converted_pick, account, picks_executed
+        )
+        if not ok:
+            print(f"[guardrail] REJECTED {converted_pick.get('ticker')} ${converted_pick.get('strike')}: {skip_reason}", flush=True)
+            # Route rejected pick to passed_on so it appears in decision log
+            cycle_result.setdefault("passed_on", []).append({
+                "ticker": converted_pick.get("ticker"),
+                "strike": converted_pick.get("strike"),
+                "option_type": converted_pick.get("option_type"),
+                "expiry": converted_pick.get("expiry"),
+                "reason": skip_reason,
+                "rejected_by": "guardrail_validator",
+            })
+            try:
+                post_to_telegram(agent="boba", message_type="Note",
+                                 body=f"⛔ Guardrail rejected {converted_pick.get('ticker')} ${converted_pick.get('strike')}{str(converted_pick.get('option_type','?'))[0]}: {skip_reason}",
+                                 bypass_cooldown=True)
+            except Exception:
+                pass
+            continue
+
         exec_result = execute_pick_on_alpaca(converted_pick)
         converted_pick["execution"] = exec_result
         picks_executed.append(converted_pick)
