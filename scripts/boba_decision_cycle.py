@@ -1552,9 +1552,19 @@ def flush_to_boba_memory(cycle_result, picks_executed):
             _append_locked(MEM_DIR / "rejected-ideas", rej_block)
 
         # 4. raw-backup-context — full unmodified dump
+        # Read mike-mindset (Mike's posture context) for inclusion in raw backup
+        mindset_content = ""
+        try:
+            mindset_path = MEM_DIR / "mike-mindset"
+            if mindset_path.exists():
+                mindset_content = mindset_path.read_text(encoding="utf-8")
+        except Exception:
+            mindset_content = "(mindset read failed - file may be missing)"
+
         try:
             raw_dump = _json.dumps({
                 "timestamp_et": ts_iso,
+                "mike_mindset_snapshot": mindset_content[:8000],
                 "cycle_result": cycle_result,
                 "picks_executed": picks_executed,
             }, indent=2, default=str)
