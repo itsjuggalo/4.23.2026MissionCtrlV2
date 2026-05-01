@@ -514,6 +514,69 @@ def load_best_options(max_show=15, min_premium=1_000_000):
     return "\n".join(lines) + "\n"
 
 
+def load_ticker_rollup(min_total=10_000_000, max_show=10):
+    """Aggregate today's whale flow by TICKER not by contract.
+    Returns prompt block showing tickers with combined T1+T2 premium >= min_total,
+    sorted by total premium DESC. Shows direction bias (% calls vs puts) per ticker.
+    Reveals institutional concentration that single-contract ranking misses
+    (e.g. MU spread across 4 contracts at $90M total beats any single $25M trade)."""
+    from pathlib import Path as _Path
+    from datetime import datetime as _dt, timezone as _tz, timedelta as _td
+    et_now = _dt.now(_tz.utc) + _td(hours=-4)
+    fp = _Path.home() / ".openclaw" / "data" / "best-options" / f"{et_now.strftime('%Y-%m-%d')}.json"
+    if not fp.exists():
+        return ""
+    try:
+        snap = json.loads(fp.read_text())
+    except Exception:
+        return ""
+    contracts = snap.get("sorted_by_premium", []) or []
+    whale = [c for c in contracts if c.get("tier") in ("T1_HUGE", "T2_UNUSUAL_HUGE")]
+    if not whale:
+        return ""
+    rollup = {}
+    for c in whale:
+        t = c.get("ticker", "?")
+        if t not in rollup:
+            rollup[t] = {"total": 0, "call_prem": 0, "put_prem": 0,
+                         "calls": 0, "puts": 0, "biggest": 0, "biggest_strike": 0,
+                         "biggest_type": "?", "biggest_exp": "?", "contracts": 0}
+        prem = c.get("premium", 0)
+        opt = c.get("option_type", "?").upper()
+        rollup[t]["total"] += prem
+        rollup[t]["contracts"] += 1
+        if opt.startswith("C"):
+            rollup[t]["call_prem"] += prem
+            rollup[t]["calls"] += 1
+        else:
+            rollup[t]["put_prem"] += prem
+            rollup[t]["puts"] += 1
+        if prem > rollup[t]["biggest"]:
+            rollup[t]["biggest"] = prem
+            rollup[t]["biggest_strike"] = c.get("strike", 0)
+            rollup[t]["biggest_type"] = opt[0] if opt else "?"
+            rollup[t]["biggest_exp"] = c.get("expiry", "?")
+    qualified = [(t, r) for t, r in rollup.items() if r["total"] >= min_total]
+    if not qualified:
+        return ""
+    qualified.sort(key=lambda x: -x[1]["total"])
+    qualified = qualified[:max_show]
+    lines = ["\n# Today's TICKER ROLLUP (T1+T2 aggregate, sorted by total premium DESC)"]
+    lines.append("# Reveals institutional positioning when whale flow spans multiple contracts on same ticker.")
+    for t, r in qualified:
+        cp = r["call_prem"]; pp = r["put_prem"]; total = r["total"]
+        if total > 0:
+            call_pct = int(cp / total * 100)
+            bias = "BULL" if call_pct >= 60 else ("BEAR" if call_pct <= 40 else "MIXED")
+        else:
+            call_pct = 0; bias = "MIXED"
+        lines.append(
+            f"  ${total/1_000_000:>5.1f}M  {t:5s}  {r['contracts']}c ({r['calls']}C/{r['puts']}P)  "
+            f"{bias} ({call_pct}% calls)  | biggest: ${r['biggest']/1_000_000:.1f}M ${r['biggest_strike']:.0f}{r['biggest_type']} {r['biggest_exp']}"
+        )
+    return "\n".join(lines) + "\n"
+
+
 def load_market_briefing():
     """Read hourly market briefing (regime, F&G, BTC). Compact summary."""
     try:
@@ -593,6 +656,7 @@ def build_boba_prompt(account, positions, shortlist_with_kronos, remaining_budge
 
     firebase_signals_text = format_firebase_signals_for_prompt(load_firebase_signals(), max_show=20)
     best_options_text = load_best_options(max_show=15, min_premium=1_000_000) or ""
+    ticker_rollup_text = load_ticker_rollup(min_total=10_000_000, max_show=10) or ""
     market_briefing_text = load_market_briefing() or ""
     grok_brief_text = load_grok_brief() or ""
     orion_skills_text = load_orion_skills() or ""
@@ -618,6 +682,7 @@ Open positions:
 These are curated buy/sell calls from human-run provider services. Use them as INDEPENDENT confirmation: if a provider has called the same direction as a whale flow above, that's stronger alignment. Disagreement is also informative. Do NOT take a pick just because a provider called it — use these alongside whale flow + Kronos.
 {firebase_signals_text}
 {best_options_text}
+{ticker_rollup_text}
 
 # Your task — TWO parts every cycle
 
