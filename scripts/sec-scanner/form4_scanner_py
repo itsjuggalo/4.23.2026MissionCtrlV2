@@ -1,0 +1,488 @@
+#!/usr/bin/env python3
+"""
+SEC Form 4 scanner - polls EDGAR for insider transactions on watchlist tickers.
+
+Watchlist sources (auto-merged):
+  1. Boba decisions validated (recent picks)
+  2. Multi-day repeaters (best-options-logger output)
+  3. Static fallback list (major tickers)
+
+Tier scoring:
+  T1 - CEO/CFO buy ANY size, OR officer/director buy >=$500k     -> Discord
+  T2 - Officer/director buy >=$50k                                -> Discord
+  T3 - Officer/director buy <$50k or sells                        -> log only
+  CLUSTER - 3+ insiders same ticker within 7 days                 -> Discord (overrides tier)
+
+State persisted in openclaw/state/sec_scanner/seen_form4.json.
+"""
+import json
+import os
+import re
+import sys
+import time
+import urllib.request
+import urllib.error
+from collections import defaultdict
+from datetime import datetime, timezone, timedelta
+from pathlib import Path
+from xml.etree import ElementTree as ET
+
+WEBHOOK_FILE = Path("/home/ubuntu/.openclaw/secrets/discord_sec_scanners_webhook")
+STATE_FILE = Path("/home/ubuntu/.openclaw/state/sec_scanner/seen_form4.json")
+LOG_FILE = Path("/home/ubuntu/.openclaw/state/sec_scanner/form4_log.jsonl")
+
+USER_AGENT = "MissionCtrl Trading Research mike@missionctrl.serveftp.com"
+
+EDGAR_FEED = "https://www.sec.gov/cgi-bin/browse-edgar?action=getcurrent&type=4&company=&dateb=&owner=include&count=100&output=atom"
+
+STATIC_WATCHLIST = {
+    "SPY","QQQ","IWM","DIA","VTI",
+    "NVDA","TSLA","AAPL","MSFT","META","GOOGL","AMZN","NFLX",
+    "AMD","MU","INTC","SMCI","ARM","AVGO","TSM",
+    "PLTR","SNOW","NET","DDOG","CRWD","ZS","PANW",
+    "JPM","GS","MS","WFC","BAC","C",
+    "XOM","CVX","SLB","OXY",
+    "JNJ","PFE","UNH","LLY","ABBV","MRNA",
+    "BABA","BIDU","NIO","JD",
+    "COIN","MSTR","HOOD","RBLX","SHOP",
+    "BA","CAT","DE","GE","LMT","RTX",
+    "WMT","TGT","HD","LOW","COST","NKE",
+}
+
+# Insider role tier: ranked by signal strength
+HIGH_SIGNAL_ROLES = re.compile(r"\b(CEO|chief executive|CFO|chief financial|president|chairman)\b", re.IGNORECASE)
+MEDIUM_SIGNAL_ROLES = re.compile(r"\b(officer|director|VP|vice president|chief|CTO|COO)\b", re.IGNORECASE)
+
+T1_THRESHOLD = 500_000   # officer/director big buy
+T2_THRESHOLD = 50_000    # any officer/director buy
+CLUSTER_WINDOW_DAYS = 7
+CLUSTER_MIN_INSIDERS = 3
+
+def http_get(url, accept="application/atom+xml,text/xml,*/*", timeout=20):
+    req = urllib.request.Request(url, headers={
+        "User-Agent": USER_AGENT,
+        "Accept": accept,
+        "Accept-Encoding": "identity",
+    })
+    with urllib.request.urlopen(req, timeout=timeout) as resp:
+        return resp.read().decode("utf-8", errors="replace")
+
+def load_watchlist():
+    """Merge Boba picks + multi-day repeaters + static fallback."""
+    tickers = set(STATIC_WATCHLIST)
+
+    # Boba decisions
+    try:
+        boba = Path("/home/ubuntu/.openclaw/workspace/skill_outputs/boba_decisions_validated.json")
+        if boba.exists():
+            data = json.loads(boba.read_text())
+            entries = data.get("decisions", []) if isinstance(data, dict) else (data if isinstance(data, list) else [])
+            cutoff = datetime.now(timezone.utc) - timedelta(days=14)
+            for e in entries[-500:]:
+                ts_str = e.get("timestamp") or e.get("date") or ""
+                try:
+                    ts = datetime.fromisoformat(ts_str.replace("Z", "+00:00"))
+                    if ts < cutoff:
+                        continue
+                except Exception:
+                    pass
+                t = (e.get("ticker") or e.get("symbol") or "").upper().strip()
+                if t and 1 <= len(t) <= 5 and t.isalpha():
+                    tickers.add(t)
+    except Exception as ex:
+        print(f"[form4] Boba watchlist load error: {ex}")
+
+    # Multi-day repeaters
+    try:
+        mdr_candidates = [
+            Path("/home/ubuntu/.openclaw/data/best-options/multi_day_repeaters.json"),
+            Path("/home/ubuntu/.openclaw/workspace/directives/multi_day_repeaters.json"),
+        ]
+        for mdr in mdr_candidates:
+            if mdr.exists():
+                data = json.loads(mdr.read_text())
+                if isinstance(data, dict):
+                    for ticker in data.keys():
+                        t = ticker.upper().strip()
+                        if t and 1 <= len(t) <= 5 and t.isalpha():
+                            tickers.add(t)
+                break
+    except Exception as ex:
+        print(f"[form4] Multi-day repeaters load error: {ex}")
+
+    return tickers
+
+def load_state():
+    if not STATE_FILE.exists():
+        return {"seen_accession_numbers": [], "filings_by_ticker": {}}
+    try:
+        return json.loads(STATE_FILE.read_text())
+    except Exception:
+        return {"seen_accession_numbers": [], "filings_by_ticker": {}}
+
+def save_state(state):
+    STATE_FILE.parent.mkdir(parents=True, exist_ok=True)
+    # Keep last 5000 accession numbers, trim filings older than 30 days
+    state["seen_accession_numbers"] = state.get("seen_accession_numbers", [])[-5000:]
+    cutoff = (datetime.now(timezone.utc) - timedelta(days=30)).isoformat()
+    new_filings = {}
+    for ticker, fs in state.get("filings_by_ticker", {}).items():
+        kept = [f for f in fs if f.get("filed_at", "") > cutoff]
+        if kept:
+            new_filings[ticker] = kept
+    state["filings_by_ticker"] = new_filings
+    STATE_FILE.write_text(json.dumps(state, indent=2, default=str))
+
+def parse_atom_feed(xml_text):
+    """Returns list of {accession, title, link, filed_at, form_type, raw_company}."""
+    ns = {"atom": "http://www.w3.org/2005/Atom"}
+    try:
+        root = ET.fromstring(xml_text)
+    except ET.ParseError as e:
+        print(f"[form4] feed parse error: {e}")
+        return []
+
+    out = []
+    for entry in root.findall("atom:entry", ns):
+        title_el = entry.find("atom:title", ns)
+        link_el = entry.find("atom:link", ns)
+        updated_el = entry.find("atom:updated", ns)
+        category_el = entry.find("atom:category", ns)
+        id_el = entry.find("atom:id", ns)
+
+        title = title_el.text if title_el is not None else ""
+        link = link_el.get("href") if link_el is not None else ""
+        filed_at = updated_el.text if updated_el is not None else ""
+        form_type = category_el.get("term") if category_el is not None else ""
+        accession = ""
+        if id_el is not None and id_el.text:
+            m = re.search(r"accession-number=([\d-]+)", id_el.text)
+            if m:
+                accession = m.group(1)
+
+        if form_type != "4":
+            continue
+        out.append({
+            "accession": accession,
+            "title": title,
+            "link": link,
+            "filed_at": filed_at,
+            "form_type": form_type,
+            "raw_title": title,
+        })
+    return out
+
+def fetch_form4_xml(filing_url):
+    """Filing index page links to the raw .xml ownership doc. Find and fetch it."""
+    try:
+        index_html = http_get(filing_url, accept="text/html,*/*")
+    except Exception as e:
+        print(f"[form4] index fetch failed: {e}")
+        return None
+    # XML doc links contain "ownership" or end in .xml on Form 4 indexes
+    candidates = re.findall(r'href="(/Archives/edgar/data/[^"]+\.xml)"', index_html)
+    if not candidates:
+        return None
+    # Prefer the one with "ownership" or shortest path (typically the main doc)
+    candidates.sort(key=lambda x: (0 if "ownership" in x.lower() else 1, len(x)))
+    xml_url = "https://www.sec.gov" + candidates[0]
+    try:
+        return http_get(xml_url, accept="text/xml,application/xml,*/*")
+    except Exception as e:
+        print(f"[form4] xml fetch failed: {e}")
+        return None
+
+def parse_form4_xml(xml_text):
+    """Extract: ticker, insider name, insider title, transaction details."""
+    try:
+        root = ET.fromstring(xml_text)
+    except ET.ParseError:
+        return None
+
+    def find_text(elem, path):
+        el = elem.find(path)
+        return el.text.strip() if el is not None and el.text else ""
+
+    # Issuer ticker
+    ticker = find_text(root, ".//issuerTradingSymbol").upper().strip()
+    issuer_name = find_text(root, ".//issuerName")
+
+    # Reporting owner (insider) - name + title
+    insider_name = find_text(root, ".//rptOwnerName")
+    relationship = root.find(".//reportingOwnerRelationship")
+    title_parts = []
+    is_director = False
+    is_officer = False
+    if relationship is not None:
+        if find_text(relationship, "isDirector") in ("1", "true"):
+            title_parts.append("Director")
+            is_director = True
+        if find_text(relationship, "isOfficer") in ("1", "true"):
+            ot = find_text(relationship, "officerTitle")
+            title_parts.append(ot if ot else "Officer")
+            is_officer = True
+        if find_text(relationship, "isTenPercentOwner") in ("1", "true"):
+            title_parts.append("10% Owner")
+    insider_title = ", ".join(title_parts) if title_parts else "Insider"
+
+    # Transactions - sum non-derivative buys (acquisitions, code P or A)
+    total_value = 0.0
+    total_shares = 0.0
+    avg_price = 0.0
+    is_buy = False
+    is_sell = False
+    txn_codes = []
+
+    for txn in root.findall(".//nonDerivativeTransaction"):
+        code = find_text(txn, ".//transactionCode")
+        ad = find_text(txn, ".//transactionAcquiredDisposedCode/value")
+        if not ad:
+            ad = find_text(txn, ".//transactionAcquiredDisposedCode")
+        try:
+            shares = float(find_text(txn, ".//transactionShares/value") or "0")
+            price = float(find_text(txn, ".//transactionPricePerShare/value") or "0")
+        except ValueError:
+            continue
+
+        txn_codes.append(code)
+        # P=open market purchase, A=grant/award (less signal), S=sale, M=option exercise, F=tax
+        if ad == "A" and code in ("P",):
+            is_buy = True
+            total_value += shares * price
+            total_shares += shares
+        elif ad == "D" and code in ("S",):
+            is_sell = True
+            total_value += shares * price
+            total_shares += shares
+
+    if total_shares > 0:
+        avg_price = total_value / total_shares
+
+    return {
+        "ticker": ticker,
+        "issuer_name": issuer_name,
+        "insider_name": insider_name,
+        "insider_title": insider_title,
+        "is_director": is_director,
+        "is_officer": is_officer,
+        "is_buy": is_buy,
+        "is_sell": is_sell,
+        "transaction_codes": txn_codes,
+        "total_value": total_value,
+        "total_shares": total_shares,
+        "avg_price": avg_price,
+    }
+
+def classify_tier(parsed):
+    """Returns (tier, label) where tier is T1/T2/T3/SELL."""
+    if not parsed:
+        return ("T3", "UNPARSED")
+
+    if parsed["is_sell"]:
+        return ("SELL", "INSIDER SELL")
+
+    if not parsed["is_buy"]:
+        return ("T3", "GRANT/OTHER")
+
+    value = parsed["total_value"]
+    title = parsed["insider_title"]
+
+    is_high_role = bool(HIGH_SIGNAL_ROLES.search(title))
+    is_med_role = parsed["is_officer"] or parsed["is_director"] or bool(MEDIUM_SIGNAL_ROLES.search(title))
+
+    if is_high_role and value > 0:
+        return ("T1", f"CEO/CFO/CHAIR BUY")
+    if is_med_role and value >= T1_THRESHOLD:
+        return ("T1", f"BIG INSIDER BUY")
+    if is_med_role and value >= T2_THRESHOLD:
+        return ("T2", f"INSIDER BUY")
+    return ("T3", "SMALL BUY")
+
+def detect_cluster(state, ticker):
+    """Return list of insiders for ticker in last CLUSTER_WINDOW_DAYS days."""
+    cutoff = (datetime.now(timezone.utc) - timedelta(days=CLUSTER_WINDOW_DAYS)).isoformat()
+    filings = state.get("filings_by_ticker", {}).get(ticker, [])
+    recent = [f for f in filings if f.get("filed_at", "") > cutoff and f.get("is_buy")]
+    insiders = {f.get("insider_name") for f in recent if f.get("insider_name")}
+    return list(insiders)
+
+def post_discord(title, description, color=0x4a9eff):
+    if not WEBHOOK_FILE.exists():
+        print("[form4] webhook missing - skipping post")
+        return False
+    webhook = WEBHOOK_FILE.read_text().strip()
+    if not webhook:
+        return False
+    if len(description) > 4000:
+        description = description[:3997] + "..."
+    payload = {
+        "embeds": [{
+            "title": title,
+            "description": description,
+            "color": color,
+            "footer": {"text": f"SEC Form 4 | {datetime.now(timezone.utc).isoformat()}"},
+        }]
+    }
+    body = json.dumps(payload).encode("utf-8")
+    req = urllib.request.Request(webhook, data=body, headers={
+        "Content-Type": "application/json",
+        "User-Agent": USER_AGENT,
+    })
+    try:
+        resp = urllib.request.urlopen(req, timeout=15)
+        print(f"[form4] posted: {title} (HTTP {resp.status})")
+        return True
+    except urllib.error.HTTPError as e:
+        print(f"[form4] discord HTTP error: {e.code} {e.reason}")
+        return False
+    except Exception as e:
+        print(f"[form4] discord error: {e}")
+        return False
+
+def format_cluster_alert(ticker, insiders, latest_filing):
+    lines = [
+        f"**Ticker:** ${ticker}",
+        f"**Cluster:** {len(insiders)} insiders bought in last {CLUSTER_WINDOW_DAYS} days",
+        f"**Insiders:** " + ", ".join(insiders[:6]),
+        f"**Latest:** {latest_filing.get('insider_name')} ({latest_filing.get('insider_title')})",
+        f"**Latest value:** ${latest_filing.get('total_value', 0):,.0f}",
+    ]
+    return "\n".join(lines)
+
+def format_filing_alert(parsed, filing, label):
+    shares_str = f"{parsed['total_shares']:,.0f}" if parsed['total_shares'] else "?"
+    price_str = f"${parsed['avg_price']:,.2f}" if parsed['avg_price'] else "?"
+    value_str = f"${parsed['total_value']:,.0f}" if parsed['total_value'] else "?"
+    lines = [
+        f"**Ticker:** ${parsed['ticker']}",
+        f"**Signal:** {label}",
+        f"**Insider:** {parsed['insider_name']} ({parsed['insider_title']})",
+        f"**Shares:** {shares_str} @ {price_str}",
+        f"**Value:** {value_str}",
+        f"**Codes:** {', '.join(parsed['transaction_codes']) or 'n/a'}",
+        f"[Filing]({filing.get('link', '')})",
+    ]
+    return "\n".join(lines)
+
+def append_log(record):
+    LOG_FILE.parent.mkdir(parents=True, exist_ok=True)
+    with LOG_FILE.open("a") as f:
+        f.write(json.dumps(record, default=str) + "\n")
+
+def run(args):
+    dry_run = "--no-post" in args
+    test_mode = "--test" in args
+
+    print(f"[form4] starting scan at {datetime.now(timezone.utc).isoformat()}")
+    watchlist = load_watchlist()
+    print(f"[form4] watchlist: {len(watchlist)} tickers")
+    if test_mode:
+        print(f"[form4] sample: {sorted(watchlist)[:20]}")
+
+    state = load_state()
+    seen = set(state.get("seen_accession_numbers", []))
+
+    try:
+        feed_xml = http_get(EDGAR_FEED, timeout=20)
+    except Exception as e:
+        print(f"[form4] feed fetch failed: {e}")
+        return 1
+
+    entries = parse_atom_feed(feed_xml)
+    print(f"[form4] feed entries: {len(entries)}")
+
+    new_count = 0
+    posted_count = 0
+    cluster_alerts = set()
+
+    for entry in entries:
+        accession = entry["accession"]
+        if not accession or accession in seen:
+            continue
+        seen.add(accession)
+        new_count += 1
+
+        # Polite rate limit per SEC fair-access policy: 10 req/s max
+        time.sleep(0.15)
+
+        xml = fetch_form4_xml(entry["link"])
+        if not xml:
+            continue
+
+        parsed = parse_form4_xml(xml)
+        if not parsed or not parsed["ticker"]:
+            continue
+
+        if parsed["ticker"] not in watchlist:
+            continue
+
+        # Record in per-ticker history for cluster detection
+        filing_record = {
+            "accession": accession,
+            "filed_at": entry["filed_at"],
+            "insider_name": parsed["insider_name"],
+            "insider_title": parsed["insider_title"],
+            "is_buy": parsed["is_buy"],
+            "is_sell": parsed["is_sell"],
+            "total_value": parsed["total_value"],
+            "link": entry["link"],
+        }
+        state.setdefault("filings_by_ticker", {}).setdefault(parsed["ticker"], []).append(filing_record)
+
+        tier, label = classify_tier(parsed)
+        cluster_insiders = detect_cluster(state, parsed["ticker"])
+
+        record = {
+            "ts": datetime.now(timezone.utc).isoformat(),
+            "tier": tier,
+            "label": label,
+            "ticker": parsed["ticker"],
+            "insider": parsed["insider_name"],
+            "title": parsed["insider_title"],
+            "value": parsed["total_value"],
+            "accession": accession,
+            "cluster_count": len(cluster_insiders),
+        }
+        append_log(record)
+
+        # Posting decision
+        should_post = False
+        post_label = label
+        post_color = 0x4a9eff
+        post_title = f"{tier} - ${parsed['ticker']} - {label}"
+        post_body = format_filing_alert(parsed, entry, label)
+
+        if tier == "T1":
+            should_post = True
+            post_color = 0x2ecc71
+        elif tier == "T2":
+            should_post = True
+            post_color = 0x3498db
+
+        # Cluster overrides - only fire once per ticker per scan
+        if len(cluster_insiders) >= CLUSTER_MIN_INSIDERS and parsed["ticker"] not in cluster_alerts:
+            cluster_alerts.add(parsed["ticker"])
+            cluster_title = f"CLUSTER BUY - ${parsed['ticker']} - {len(cluster_insiders)} insiders"
+            cluster_body = format_cluster_alert(parsed["ticker"], cluster_insiders, parsed)
+            if not dry_run:
+                if post_discord(cluster_title, cluster_body, color=0xe74c3c):
+                    posted_count += 1
+
+        if should_post and not dry_run:
+            if post_discord(post_title, post_body, color=post_color):
+                posted_count += 1
+        elif should_post and dry_run:
+            print(f"[form4 DRY] would post: {post_title}")
+
+    state["seen_accession_numbers"] = list(seen)
+    save_state(state)
+
+    print(f"\n[form4] === Summary ===")
+    print(f"  new filings:      {new_count}")
+    print(f"  watchlist hits:   logged in {LOG_FILE}")
+    print(f"  posted:           {posted_count}")
+    print(f"  cluster alerts:   {len(cluster_alerts)}")
+    return 0
+
+if __name__ == "__main__":
+    sys.exit(run(sys.argv[1:]))
