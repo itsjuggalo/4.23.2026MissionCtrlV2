@@ -596,6 +596,71 @@ def load_ticker_rollup(min_total=10_000_000, max_show=10):
 
 
 
+def load_platinum_flow(max_show=5):
+    """PLATINUM tier — most unusual of unusual. Statistical 1-3% of all whale flow.
+    All 4 conditions must be met:
+      1. premium >= 10M (T0 MEGA threshold)
+      2. volume >= 5x OI (when OI > 0; OI=0 with vol>500 also counts as fresh institutional positioning)
+      3. sweeps >= 80% of total transactions (sweeps + blocks)
+      4. low DTE (<=14 days) OR very high DTE (>=180 days) — extremes only, not middle-DTE filler
+    Returns prompt block of the rarest most-conviction trades. Boba should evaluate these BEFORE
+    T0/T1/T2 since matching all 4 simultaneously is statistically rare and signals urgent institutional intent."""
+    from pathlib import Path as _Path
+    from datetime import datetime as _dt, timezone as _tz, timedelta as _td
+    et_now = _dt.now(_tz.utc) + _td(hours=-4)
+    fp = _Path.home() / ".openclaw" / "data" / "best-options" / f"{et_now.strftime('%Y-%m-%d')}.json"
+    if not fp.exists():
+        return ""
+    try:
+        snap = json.loads(fp.read_text())
+    except Exception:
+        return ""
+    contracts = snap.get("sorted_by_premium", []) or []
+    platinum = []
+    for c in contracts:
+        prem = c.get("premium", 0)
+        if prem < 10_000_000:
+            continue
+        vol = c.get("volume", 0)
+        oi = c.get("oi", 0)
+        sweeps = c.get("sweeps", 0)
+        blocks = c.get("blocks", 0)
+        total_tx = sweeps + blocks
+        dte = c.get("dte", 0)
+        # Volume vs OI check
+        if oi > 0:
+            vol_ratio_ok = vol >= 5 * oi
+        else:
+            vol_ratio_ok = vol >= 500  # OI=0 with significant volume = fresh positioning
+        # Sweep dominance check
+        sweep_pct_ok = (sweeps / total_tx >= 0.80) if total_tx > 0 else False
+        # DTE extremes (urgent or LEAP-style conviction)
+        dte_ok = dte <= 14 or dte >= 180
+        if vol_ratio_ok and sweep_pct_ok and dte_ok:
+            c["_sweep_pct"] = int((sweeps / total_tx) * 100) if total_tx > 0 else 0
+            c["_vol_ratio"] = round(vol / oi, 1) if oi > 0 else float("inf")
+            platinum.append(c)
+    if not platinum:
+        return ""
+    platinum.sort(key=lambda x: -x.get("premium", 0))
+    platinum = platinum[:max_show]
+    lines = ["\n# 💎 PLATINUM TIER — most unusual of unusual (rare 1-3% of flow)"]
+    lines.append("# All 4 conditions met: $10M+ premium, vol >= 5x OI, sweeps >= 80% of tx, DTE extreme (<=14d or >=180d)")
+    lines.append("# Boba: EVALUATE THESE FIRST. Matching all 4 simultaneously signals urgent institutional intent.")
+    for c in platinum:
+        bull = "BULL" if c.get("is_bullish") else "BEAR"
+        side = "C" if c.get("option_type", "?").upper().startswith("C") else "P"
+        ratio = c.get("_vol_ratio")
+        ratio_str = f"{ratio}x" if ratio != float("inf") else "OI=0"
+        lines.append(
+            f"  💎 ${c.get('premium',0)/1_000_000:>5.1f}M  {c.get('ticker','?'):5s} ${c.get('strike',0):.0f}{side} "
+            f"{c.get('expiry','?')} ({c.get('dte',0)}d) {bull} | "
+            f"V/OI:{ratio_str} | Sweep:{c.get('_sweep_pct',0)}% | V:{c.get('volume',0):,}"
+        )
+    return "\n".join(lines) + "\n"
+
+
+
 def load_market_briefing():
     """Read hourly market briefing (regime, F&G, BTC). Compact summary."""
     try:
@@ -676,6 +741,7 @@ def build_boba_prompt(account, positions, shortlist_with_kronos, remaining_budge
     firebase_signals_text = format_firebase_signals_for_prompt(load_firebase_signals(), max_show=20)
     best_options_text = load_best_options(max_show=15, min_premium=1_000_000) or ""
     ticker_rollup_text = load_ticker_rollup(min_total=10_000_000, max_show=10) or ""
+    platinum_flow_text = load_platinum_flow(max_show=5) or ""
     market_briefing_text = load_market_briefing() or ""
     grok_brief_text = load_grok_brief() or ""
     orion_skills_text = load_orion_skills() or ""
@@ -700,6 +766,7 @@ Open positions:
 # Trade signals from providers (Name / Name2 / Vivid — last 20)
 These are curated buy/sell calls from human-run provider services. Use them as INDEPENDENT confirmation: if a provider has called the same direction as a whale flow above, that's stronger alignment. Disagreement is also informative. Do NOT take a pick just because a provider called it — use these alongside whale flow + Kronos.
 {firebase_signals_text}
+{platinum_flow_text}
 {best_options_text}
 {ticker_rollup_text}
 
