@@ -1,0 +1,221 @@
+#!/usr/bin/env python3
+"""Phase 1 — replay last week's Boba decisions through conservative variant.
+Conservative edit: no <14 DTE unless flow_score >= 90 + Kronos 2x breakeven + 65% acc.
+Otherwise substitute with 30 DTE equivalent."""
+import json, urllib.request, urllib.parse, math
+from datetime import datetime, timedelta, timezone
+from pathlib import Path
+SECRETS = Path('/home/ubuntu/.openclaw/secrets')
+BOBA_LOG = Path('/home/ubuntu/.openclaw/workspace/skill_outputs/boba_decisions_validated.json')
+OUT = Path('/home/ubuntu/.openclaw/workspace/proposals/replay-conservative')
+
+def load_secret(n):
+    p = SECRETS / n
+    return p.read_text().strip() if p.exists() else None
+
+def yahoo_history(symbol, days=14):
+    """Get daily OHLC from Yahoo for symbol over last N days."""
+    try:
+        url = f'https://query1.finance.yahoo.com/v8/finance/chart/{symbol}?range=14d&interval=1d'
+        req = urllib.request.Request(url, headers={'User-Agent':'Mozilla/5.0'})
+        d = json.loads(urllib.request.urlopen(req, timeout=15).read())
+        r = d['chart']['result'][0]
+        ts = r['timestamp']
+        q = r['indicators']['quote'][0]
+        out = []
+        for i, t in enumerate(ts):
+            if q['close'][i] is not None:
+                out.append({'date': datetime.fromtimestamp(t, timezone.utc).strftime('%Y-%m-%d'),
+                           'close': q['close'][i], 'high': q['high'][i], 'low': q['low'][i]})
+        return out
+    except Exception as e:
+        return []
+
+def black_scholes(S, K, T_days, r=0.045, sigma=0.40, is_call=True):
+    """Approximate BS price. T in years."""
+    if T_days <= 0:
+        if is_call: return max(S - K, 0)
+        return max(K - S, 0)
+    T = T_days / 365.0
+    if sigma <= 0 or T <= 0: return 0
+    try:
+        d1 = (math.log(S/K) + (r + sigma**2/2) * T) / (sigma * math.sqrt(T))
+        d2 = d1 - sigma * math.sqrt(T)
+        N = lambda x: 0.5 * (1 + math.erf(x / math.sqrt(2)))
+        if is_call:
+            return S * N(d1) - K * math.exp(-r*T) * N(d2)
+        return K * math.exp(-r*T) * N(-d2) - S * N(-d1)
+    except Exception:
+        return 0
+
+def load_decisions():
+    if not BOBA_LOG.exists(): return []
+    try: data = json.loads(BOBA_LOG.read_text())
+    except: return []
+    if not isinstance(data, list): return []
+    cutoff = datetime.now(timezone.utc) - timedelta(days=7)
+    out = []
+    for d in data:
+        ts = d.get('cycle_time') or d.get('timestamp')
+        try:
+            if ts and datetime.fromisoformat(ts.replace('Z','+00:00')) > cutoff:
+                out.append(d)
+        except: pass
+    return out
+
+def conservative_check(pick, cycle_date):
+    """Apply conservative edit. Returns ('keep', None), ('skip', reason), or ('substitute', new_pick)."""
+    expiry = pick.get('expiry')
+    if not expiry: return ('skip', 'no expiry')
+    try:
+        exp_dt = datetime.strptime(expiry, '%Y-%m-%d').replace(tzinfo=timezone.utc)
+        cycle_dt = datetime.fromisoformat(cycle_date.replace('Z','+00:00'))
+        dte = (exp_dt - cycle_dt).days
+    except Exception as e:
+        return ('skip', f'date parse: {e}')
+
+    if dte >= 14:
+        return ('keep', None)
+
+    # <14 DTE — would need flow score >=90, Kronos 2x breakeven, 65% accuracy
+    # We don't have those metadata fields available, so default to substitute
+    # (this matches the spirit: only KEEP if all 3 conditions verified)
+    return ('substitute', None)
+
+def substitute_pick(pick):
+    """Replace short-dated pick with 30 DTE equivalent at same strike."""
+    new = dict(pick)
+    today = datetime.now(timezone.utc)
+    new_expiry = today + timedelta(days=30)
+    # Find next monthly opex (3rd Friday)
+    # Simple approx: next Friday +30d
+    while new_expiry.weekday() != 4:  # Friday
+        new_expiry += timedelta(days=1)
+    new['expiry'] = new_expiry.strftime('%Y-%m-%d')
+    new['_substituted_from_dte'] = pick.get('expiry')
+    return new
+
+def estimate_outcome(pick, cycle_date):
+    """Compute hypothetical P&L for a pick using historical Yahoo data."""
+    ticker = pick.get('ticker')
+    strike = pick.get('strike')
+    is_call = pick.get('option_type') == 'CALL'
+    contracts = pick.get('contracts', 1)
+    expiry = pick.get('expiry')
+    if not all([ticker, strike, expiry]): return None
+
+    hist = yahoo_history(ticker, days=14)
+    if not hist: return None
+
+    # Find entry close (cycle date) and exit close (expiry date or last available)
+    cycle_d = cycle_date[:10]
+    entry_bar = None
+    for b in hist:
+        if b['date'] >= cycle_d:
+            entry_bar = b; break
+    if not entry_bar: return None
+
+    # Exit: at expiry, or last bar if expiry not yet reached
+    exit_bar = None
+    for b in hist:
+        if b['date'] >= expiry:
+            exit_bar = b; break
+    if not exit_bar:
+        exit_bar = hist[-1]
+
+    # Compute entry and exit option prices via BS
+    S_entry = entry_bar['close']
+    S_exit = exit_bar['close']
+
+    # Days from entry to expiry
+    try:
+        e_dt = datetime.strptime(entry_bar['date'], '%Y-%m-%d')
+        x_dt = datetime.strptime(expiry, '%Y-%m-%d')
+        dte_at_entry = max(0, (x_dt - e_dt).days)
+        dte_at_exit = max(0, (x_dt - datetime.strptime(exit_bar['date'], '%Y-%m-%d')).days)
+    except: return None
+
+    entry_price = black_scholes(S_entry, strike, dte_at_entry, is_call=is_call)
+    exit_price = black_scholes(S_exit, strike, dte_at_exit, is_call=is_call)
+
+    if entry_price < 0.01: return None
+    pnl_per_contract = (exit_price - entry_price) * 100
+    return {
+        'ticker': ticker, 'expiry': expiry,
+        'entry_price': round(entry_price, 2), 'exit_price': round(exit_price, 2),
+        'S_entry': round(S_entry, 2), 'S_exit': round(S_exit, 2),
+        'pnl_per_contract': round(pnl_per_contract, 2),
+        'pnl_total': round(pnl_per_contract * contracts, 2),
+        'pnl_pct': round((exit_price - entry_price) / entry_price * 100, 1) if entry_price > 0 else 0,
+    }
+
+def main():
+    decisions = load_decisions()
+    print(f'Replaying {len(decisions)} decisions...')
+
+    aggressive_actual = 0  # what Boba actually did
+    aggressive_simulated = 0  # what BS says Boba would have made
+    conservative_simulated = 0  # what conservative would have made
+
+    pick_results = []
+    for i, d in enumerate(decisions):
+        cycle_date = d.get('cycle_time', '')
+        for pick in d.get('picks_executed', []):
+            # Actual P&L from Alpaca execution data if available
+            exec_data = pick.get('execution', {})
+
+            # Aggressive simulated (what Boba did, replayed)
+            agg = estimate_outcome(pick, cycle_date)
+
+            # Conservative variant
+            action, reason = conservative_check(pick, cycle_date)
+            if action == 'keep':
+                cons_pick = pick
+                cons = estimate_outcome(cons_pick, cycle_date)
+                cons_action = 'kept'
+            elif action == 'substitute':
+                cons_pick = substitute_pick(pick)
+                cons = estimate_outcome(cons_pick, cycle_date)
+                cons_action = f'substituted to {cons_pick["expiry"]}'
+            else:
+                cons = None
+                cons_action = f'skipped: {reason}'
+
+            agg_pnl = agg['pnl_total'] if agg else 0
+            cons_pnl = cons['pnl_total'] if cons else 0
+            aggressive_simulated += agg_pnl
+            conservative_simulated += cons_pnl
+
+            pick_results.append({
+                'cycle': cycle_date[:10],
+                'ticker': pick.get('ticker'),
+                'strike': pick.get('strike'),
+                'type': pick.get('option_type'),
+                'orig_expiry': pick.get('expiry'),
+                'orig_dte': (datetime.strptime(pick['expiry'],'%Y-%m-%d') - datetime.fromisoformat(cycle_date.replace('Z','+00:00')).replace(tzinfo=None)).days if pick.get('expiry') and cycle_date else None,
+                'aggressive_simulated_pnl': agg_pnl,
+                'conservative_action': cons_action,
+                'conservative_simulated_pnl': cons_pnl,
+            })
+
+    summary = {
+        'decision_count': len(decisions),
+        'pick_count': len(pick_results),
+        'aggressive_simulated_total_pnl': round(aggressive_simulated, 2),
+        'conservative_simulated_total_pnl': round(conservative_simulated, 2),
+        'delta': round(conservative_simulated - aggressive_simulated, 2),
+        'verdict': 'conservative_wins' if conservative_simulated > aggressive_simulated else 'aggressive_wins',
+        'picks': pick_results,
+    }
+
+    OUT.write_text(json.dumps(summary, indent=2, default=str))
+    print(f'\n=== REPLAY RESULTS ===')
+    print(f'Picks analyzed: {len(pick_results)}')
+    print(f'Aggressive simulated P&L: ${aggressive_simulated:,.2f}')
+    print(f'Conservative simulated P&L: ${conservative_simulated:,.2f}')
+    print(f'Delta (cons - agg): ${conservative_simulated - aggressive_simulated:,.2f}')
+    print(f'Verdict: {summary["verdict"]}')
+    print(f'\nFull breakdown written to {OUT}')
+
+if __name__ == '__main__':
+    main()

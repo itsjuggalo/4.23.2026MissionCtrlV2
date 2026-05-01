@@ -1,0 +1,245 @@
+#!/usr/bin/env python3
+"""
+Alpaca Multi-Account Snapshot Poster
+Posts rich portfolio snapshots for R1, R2, and JazzyHazzy R1 to #alpaca-account.
+
+Runs every 30 min via cron.
+"""
+import json
+import re
+import urllib.request
+import urllib.parse
+from datetime import datetime, timedelta, timezone
+from pathlib import Path
+
+SECRETS = Path("/home/ubuntu/.openclaw/secrets")
+ALPACA = "https://paper-api.alpaca.markets/v2"
+
+ACCOUNTS = [
+    {"label": "R1 (Boba hold)", "key_file": "alpaca-r1-key-id", "sec_file": "alpaca-r1-secret"},
+    {"label": "R2 (Boba active)", "key_file": "alpaca-key-id", "sec_file": "alpaca-secret"},
+    {"label": "JazzyHazzy R1", "key_file": "alpaca-jazzy-key-id", "sec_file": "alpaca-jazzy-secret"},
+]
+
+def read_secret(name):
+    p = SECRETS / name
+    return p.read_text().strip() if p.exists() else None
+
+def alpaca_get(path, key, sec, params=None):
+    url = f"{ALPACA}{path}"
+    if params:
+        url += "?" + urllib.parse.urlencode(params)
+    try:
+        req = urllib.request.Request(url, headers={
+            "APCA-API-KEY-ID": key,
+            "APCA-API-SECRET-KEY": sec,
+        })
+        with urllib.request.urlopen(req, timeout=15) as r:
+            return json.loads(r.read())
+    except Exception as e:
+        return {"_error": str(e)}
+
+def yahoo_close(symbol, days_ago):
+    try:
+        end = int(datetime.now(timezone.utc).timestamp())
+        start = end - (days_ago + 5) * 86400
+        url = f"https://query1.finance.yahoo.com/v8/finance/chart/{symbol}?period1={start}&period2={end}&interval=1d"
+        req = urllib.request.Request(url, headers={"User-Agent": "Mozilla/5.0"})
+        with urllib.request.urlopen(req, timeout=10) as r:
+            d = json.loads(r.read())
+        closes = d["chart"]["result"][0]["indicators"]["quote"][0]["close"]
+        closes = [c for c in closes if c is not None]
+        if len(closes) < 2:
+            return None
+        latest = closes[-1]
+        # find close approx N days back (handle weekends)
+        target_idx = max(0, len(closes) - 1 - days_ago)
+        past = closes[target_idx]
+        return ((latest - past) / past * 100) if past else None
+    except Exception:
+        return None
+
+def fetch_account_data(acct_cfg):
+    key = read_secret(acct_cfg["key_file"])
+    sec = read_secret(acct_cfg["sec_file"])
+    if not key or not sec:
+        return {"error": "missing keys", "label": acct_cfg["label"]}
+
+    out = {"label": acct_cfg["label"], "account_id": "?"}
+    acct = alpaca_get("/account", key, sec)
+    if "_error" in acct:
+        return {"error": acct["_error"], "label": acct_cfg["label"]}
+
+    out["account_id"] = acct.get("account_number", "?")
+    equity = float(acct.get("equity", 0))
+    last_eq = float(acct.get("last_equity", 0))
+    out["equity"] = equity
+    out["cash"] = float(acct.get("cash", 0))
+    out["bp"] = float(acct.get("buying_power", 0))
+    out["multiplier"] = acct.get("multiplier", "?")
+    out["options_level"] = acct.get("options_trading_level", "?")
+    out["pdt"] = acct.get("pattern_day_trader", False)
+    out["day_trades"] = acct.get("daytrade_count", 0)
+    out["today_pnl"] = equity - last_eq
+    out["today_pnl_pct"] = ((equity - last_eq) / last_eq * 100) if last_eq else 0
+
+    # positions
+    pos = alpaca_get("/positions", key, sec)
+    if isinstance(pos, list):
+        out["positions"] = []
+        for p in pos:
+            out["positions"].append({
+                "symbol": p.get("symbol"),
+                "qty": p.get("qty"),
+                "cost": float(p.get("cost_basis", 0)),
+                "mv": float(p.get("market_value", 0)),
+                "upl": float(p.get("unrealized_pl", 0)),
+                "upl_pct": float(p.get("unrealized_plpc", 0)) * 100,
+            })
+    else:
+        out["positions"] = []
+
+    # open orders
+    orders = alpaca_get("/orders", key, sec, {"status": "open", "limit": "50"})
+    out["open_orders"] = len(orders) if isinstance(orders, list) else 0
+
+    # 7d / 30d performance from portfolio history
+    for window, label in [("7D", "perf_7d"), ("1M", "perf_30d")]:
+        ph = alpaca_get("/account/portfolio/history", key, sec, {
+            "period": window, "timeframe": "1D",
+        })
+        if isinstance(ph, dict) and "equity" in ph:
+            eq = [e for e in ph.get("equity", []) if e]
+            if len(eq) >= 2:
+                start, end_v = eq[0], eq[-1]
+                out[label] = ((end_v - start) / start * 100) if start else 0
+            else:
+                out[label] = 0
+        else:
+            out[label] = None
+
+    return out
+
+def decode_occ_symbol(sym):
+    """Convert OCC option symbol to human-readable format.
+    SOXX260501P00460000 -> SOXX 5/1 $460P
+    Falls back to raw symbol if not OCC format (e.g. equity tickers).
+    """
+    if not sym or len(sym) < 15:
+        return sym
+    m = re.match(r'^([A-Z]{1,6})(\d{2})(\d{2})(\d{2})([CP])(\d{8})$', sym)
+    if not m:
+        return sym
+    ticker, yy, mm, dd, cp, strike_raw = m.groups()
+    strike = int(strike_raw) / 1000
+    strike_str = f"${strike:g}"
+    return f"{ticker} {int(mm)}/{int(dd)} {strike_str}{cp}"
+
+
+def fmt_money(v):
+    if v is None: return "—"
+    if abs(v) >= 1e6: return f"${v/1e6:.2f}M"
+    if abs(v) >= 1e3: return f"${v/1e3:.1f}K"
+    return f"${v:.2f}"
+
+def fmt_pct(v):
+    if v is None: return "—"
+    sign = "+" if v >= 0 else ""
+    return f"{sign}{v:.2f}%"
+
+def emoji_for(v):
+    if v is None: return "⚪"
+    return "🟢" if v >= 0 else "🔴"
+
+def build_embed(acct, spy_7d, spy_30d):
+    if "error" in acct:
+        return {
+            "title": f"⚠️ {acct['label']}",
+            "description": f"Error: {acct['error']}",
+            "color": 0x808080,
+        }
+
+    # vs SPY benchmark
+    vs_spy_7d = (acct.get("perf_7d") or 0) - (spy_7d or 0) if acct.get("perf_7d") is not None else None
+    vs_spy_30d = (acct.get("perf_30d") or 0) - (spy_30d or 0) if acct.get("perf_30d") is not None else None
+
+    title = f"{emoji_for(acct.get('today_pnl', 0))} {acct['label']} ({acct['account_id']})"
+
+    # Account stats block
+    stats = (
+        f"**Equity:** {fmt_money(acct.get('equity'))} | "
+        f"**Cash:** {fmt_money(acct.get('cash'))} | "
+        f"**BP:** {fmt_money(acct.get('bp'))}\n"
+        f"**Today:** {fmt_pct(acct.get('today_pnl_pct'))} ({fmt_money(acct.get('today_pnl'))}) | "
+        f"**Margin:** {acct.get('multiplier')}x | **Opt L:** {acct.get('options_level')}"
+    )
+
+    # Performance block
+    perf = (
+        f"**7d:** {fmt_pct(acct.get('perf_7d'))} (vs SPY: {fmt_pct(vs_spy_7d)})\n"
+        f"**30d:** {fmt_pct(acct.get('perf_30d'))} (vs SPY: {fmt_pct(vs_spy_30d)})"
+    )
+
+    # Positions block
+    positions = acct.get("positions", [])
+    if positions:
+        lines = []
+        for p in sorted(positions, key=lambda x: -abs(x.get("upl", 0)))[:8]:
+            sym = decode_occ_symbol(p["symbol"])[:24]
+            upl_emo = "🟢" if p["upl"] >= 0 else "🔴"
+            lines.append(f"{upl_emo} `{sym}` ×{int(float(p['qty']))} = {fmt_money(p['mv'])} ({fmt_pct(p['upl_pct'])})")
+        if len(positions) > 8:
+            lines.append(f"_...and {len(positions)-8} more_")
+        pos_block = "\n".join(lines)
+    else:
+        pos_block = "_No open positions_"
+
+    # Footer info
+    extras = f"📋 {acct.get('open_orders', 0)} open orders · 🔢 {acct.get('day_trades', 0)} day trades"
+    if acct.get('pdt'):
+        extras += " · ⚠️ PDT flagged"
+
+    desc = f"{stats}\n\n**Performance**\n{perf}\n\n**Positions ({len(positions)})**\n{pos_block}\n\n{extras}"
+
+    color = 0x00C853 if (acct.get('today_pnl_pct', 0) or 0) >= 0 else 0xD32F2F
+    return {"title": title, "description": desc[:4000], "color": color}
+
+def post_to_discord(webhook_url, content, embeds):
+    payload = {"username": "Alpaca Snapshot", "content": content, "embeds": embeds}
+    data = json.dumps(payload).encode()
+    req = urllib.request.Request(webhook_url, data=data, headers={"Content-Type": "application/json", "User-Agent": "Mission-Control-Snapshot/1.0"}, method="POST")
+    try:
+        with urllib.request.urlopen(req, timeout=15) as r:
+            return r.status
+    except urllib.error.HTTPError as e:
+        return f"HTTP {e.code}: {e.read()[:200]}"
+    except Exception as e:
+        return f"err: {e}"
+
+def main():
+    webhook = read_secret("discord_webhook_alpaca.txt")
+    if not webhook:
+        print("ERROR: no discord_webhook_alpaca.txt")
+        return
+
+    # SPY benchmarks (one fetch each)
+    spy_7d = yahoo_close("SPY", 7)
+    spy_30d = yahoo_close("SPY", 30)
+
+    # Header line — ET timestamp
+    now_utc = datetime.now(timezone.utc)
+    et_offset = -4  # EDT; if you're on EST, this would be -5
+    now_et = now_utc + timedelta(hours=et_offset)
+    header = f"📊 **Account Snapshot** — {now_et.strftime('%a %b %d, %I:%M %p ET')}"
+
+    embeds = []
+    for acct_cfg in ACCOUNTS:
+        data = fetch_account_data(acct_cfg)
+        embeds.append(build_embed(data, spy_7d, spy_30d))
+
+    status = post_to_discord(webhook, header, embeds)
+    print(f"[snapshot] posted to discord — status={status}")
+    print(f"[snapshot] SPY 7d={spy_7d} | 30d={spy_30d}")
+
+if __name__ == "__main__":
+    main()
