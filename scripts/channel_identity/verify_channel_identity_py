@@ -59,8 +59,13 @@ def verify_webhook_channel(webhook_secret_name, expected_channel_secret_name=Non
         if chan_path.exists():
             try:
                 expected_id = chan_path.read_text().strip()
-                if expected_id:
+                # Validate: a Discord channel ID is a 17-20 digit number, NOT a URL
+                if expected_id and expected_id.isdigit() and 15 <= len(expected_id) <= 22:
                     result['expected_channel_id'] = expected_id
+                else:
+                    # The sibling file did not contain a clean channel ID - probably another webhook URL
+                    # Treat as no_record rather than false mismatch
+                    pass
             except Exception:
                 pass
 
