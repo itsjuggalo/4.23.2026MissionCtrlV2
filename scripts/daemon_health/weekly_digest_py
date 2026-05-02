@@ -1,0 +1,136 @@
+#!/usr/bin/env python3
+"""Daemon health weekly digest.
+
+Cron Sunday 9pm ET (0 1 * * 1 UTC) reads pm2 jlist, buckets by restart count,
+posts summary to daemon-health Discord. Companion to daemon_health_alert which
+posts on transitions every 5 min. This is the weekly rollup of the population.
+
+Webhook precedence:
+  1. discord_daemon_health_webhook
+  2. discord_webhook_alerts.txt (fallback ops)
+  3. discord_bobatrades_webhook (final fallback)
+"""
+import json
+import subprocess
+import sys
+import urllib.request
+import urllib.error
+from collections import defaultdict
+from pathlib import Path
+
+SECRETS = Path('/home/ubuntu/.openclaw/secrets')
+PM2_BIN = '/home/ubuntu/.npm-global/bin/pm2'
+
+def load_secret(name):
+    p = SECRETS / name
+    return p.read_text().strip() if p.exists() else None
+
+def find_webhook():
+    for c in ('discord_daemon_health_webhook',
+              'discord_webhook_alerts.txt',
+              'discord_bobatrades_webhook'):
+        v = load_secret(c)
+        if v and v.startswith('https://'):
+            return v, c
+    return None, None
+
+def get_pm2_jlist():
+    try:
+        r = subprocess.run([PM2_BIN, 'jlist'],
+                           capture_output=True, text=True, timeout=20)
+        return json.loads(r.stdout) if r.stdout.strip() else []
+    except Exception as e:
+        print(f'[daemon-health-weekly] pm2 err: {e}', file=sys.stderr)
+        return []
+
+def bucket(daemons):
+    buckets = {'healthy_0': [], 'normal_1_5': [], 'flapping_6_20': [], 'crisis_21plus': []}
+    statuses = defaultdict(int)
+    mem_total = 0
+    cpu_total = 0
+    for d in daemons:
+        env = d.get('pm2_env', {}) or {}
+        restarts = env.get('restart_time', 0) or 0
+        status = env.get('status', 'unknown')
+        name = d.get('name', '?')
+        monit = d.get('monit', {}) or {}
+        mem_total += monit.get('memory', 0) or 0
+        cpu_total += monit.get('cpu', 0) or 0
+        statuses[status] += 1
+        entry = (name, restarts, status)
+        if restarts == 0:
+            buckets['healthy_0'].append(entry)
+        elif 1 <= restarts <= 5:
+            buckets['normal_1_5'].append(entry)
+        elif 6 <= restarts <= 20:
+            buckets['flapping_6_20'].append(entry)
+        else:
+            buckets['crisis_21plus'].append(entry)
+    return buckets, statuses, mem_total, cpu_total
+
+def format_digest(daemons, buckets, statuses, mem_total, cpu_total):
+    lines = []
+    lines.append('**Daemon health weekly digest**')
+    lines.append('')
+    lines.append(f'Population: {len(daemons)} PM2 processes  |  '
+                 f'Mem: {mem_total/1024/1024:.0f}MB  |  CPU: {cpu_total:.0f}%')
+    status_str = ' / '.join(f'{k}={v}' for k, v in sorted(statuses.items()))
+    lines.append(f'Status: {status_str}')
+    lines.append('')
+    h = len(buckets['healthy_0'])
+    n = len(buckets['normal_1_5'])
+    f = len(buckets['flapping_6_20'])
+    c = len(buckets['crisis_21plus'])
+    lines.append(f'**Restart buckets:** healthy(0)={h}  normal(1-5)={n}  '
+                 f'flapping(6-20)={f}  crisis(21+)={c}')
+    lines.append('')
+    if buckets['crisis_21plus']:
+        lines.append('**Crisis (21+ restarts):**')
+        for name, restarts, status in sorted(buckets['crisis_21plus'],
+                                              key=lambda x: -x[1]):
+            lines.append(f'  {name}: {restarts}↺ ({status})')
+        lines.append('')
+    if buckets['flapping_6_20']:
+        lines.append('**Flapping (6-20 restarts):**')
+        for name, restarts, status in sorted(buckets['flapping_6_20'],
+                                              key=lambda x: -x[1]):
+            lines.append(f'  {name}: {restarts}↺ ({status})')
+        lines.append('')
+    return '\n'.join(lines)
+
+def post_discord(webhook, content):
+    body = json.dumps({'content': content[:1990]}).encode()
+    req = urllib.request.Request(
+        webhook, data=body,
+        headers={'content-type': 'application/json',
+                 'User-Agent': 'MissionCtrl-DaemonHealthWeekly/1.0'})
+    try:
+        with urllib.request.urlopen(req, timeout=15) as resp:
+            return resp.status, ''
+    except urllib.error.HTTPError as e:
+        return e.code, e.read().decode('utf-8', errors='replace')[:200]
+    except Exception as e:
+        return None, str(e)
+
+def main():
+    webhook, source = find_webhook()
+    if not webhook:
+        print('[daemon-health-weekly] NO webhook found, exiting', flush=True)
+        return 1
+    daemons = get_pm2_jlist()
+    if not daemons:
+        print('[daemon-health-weekly] pm2 jlist empty, skipping', flush=True)
+        return 1
+    buckets, statuses, mem_total, cpu_total = bucket(daemons)
+    body = format_digest(daemons, buckets, statuses, mem_total, cpu_total)
+    code, err = post_discord(webhook, body)
+    if code in (200, 204):
+        print(f'[daemon-health-weekly] posted via {source} -> HTTP {code} '
+              f'({len(daemons)} daemons)', flush=True)
+        return 0
+    print(f'[daemon-health-weekly] FAILED via {source} -> HTTP {code} {err}',
+          flush=True)
+    return 1
+
+if __name__ == '__main__':
+    sys.exit(main())
