@@ -701,25 +701,54 @@ def relay_winners_mirror(state):
             if pct is None and "profits" not in status.lower() and "delivered" not in status.lower() and "winner" not in status.lower():
                 continue
             if pct is not None and pct <= 0: continue
-            if pct is None: emoji, tier = "🏆", "Winner"
-            elif pct >= 500: emoji, tier = "🚀", "Magic"
-            elif pct >= 100: emoji, tier = "💫", "Mega-Win"
-            elif pct >= 50: emoji, tier = "💎", "Diamond Hands"
-            elif pct >= 25: emoji, tier = "🏆", "Bull Run"
-            else: emoji, tier = "🎯", "Win"
+            # Flow Greeks branded tier classification matching app push notifications
+            is_etf = (entry.get("UnderlyingType","") or "").upper() == "ETF" or symbol in ("SPY","QQQ","IWM","DIA","XLF","XLE","XLK","TLT","GLD","ARKK")
+            cat_upper = (category or "").upper()
+            is_scalp = cat_upper == "SCALP"
+            is_weekly = bool(entry.get("isWeekly", 0))
+
+            if pct is None:
+                emoji, brand = "🏆", "Winner Alert"
+            elif pct >= 500:
+                if is_etf: emoji, brand = "💫", "ETF Weekly Magic"
+                else: emoji, brand = "💫", "Weekly Magic"
+            elif pct >= 100:
+                emoji, brand = "⚡", "Lightning Strike"
+            elif pct >= 50:
+                emoji, brand = "🎆", "High Flow Fireworks"
+            elif pct >= 25:
+                emoji, brand = "🎭", "Unusual Pattern"
+            else:
+                emoji, brand = "🎯", "Win Alert"
+
             expiry_str = ""
             try:
                 if expiry and str(expiry).isdigit() and int(expiry) > 1000000000:
                     from datetime import datetime
                     exp_dt = datetime.fromtimestamp(int(expiry))
-                    expiry_str = f" {exp_dt.month}/{exp_dt.day}/{str(exp_dt.year)[2:]}"
+                    expiry_str = f" {exp_dt.month}/{str(exp_dt.day).zfill(2)}"
             except: pass
-            title = f"{symbol} {strike}{expiry_str}" if (kind == "OPTION" and strike) else symbol
-            pct_str = f" +{pct:.1f}%" if pct is not None else ""
-            lines = [f"{emoji} {title} {tier} Alert!{pct_str}"]
-            if status: lines.append(status)
-            if buy and sell: lines.append(f"Buy {buy} → Sell {sell}")
-            if category: lines.append(f"[{category}]")
+
+            # Build ticker-strike-type label like NFLX 94P or QQQ 670C
+            opt_type_letter = "P" if entry.get("isPut", 0) else "C"
+            if kind == "OPTION" and strike:
+                contract_label = f"{symbol} {strike}{opt_type_letter}"
+            else:
+                contract_label = symbol
+
+            pct_str = f" +{pct:.0f}%" if pct is not None else ""
+            lines = [f"{emoji} **{brand}!** {contract_label}{pct_str}"]
+            # Description line matching app voice
+            if pct is not None and pct >= 100:
+                lines.append(f"Pattern recognition pays off! {symbol} {expiry_str.strip()} {strike}{opt_type_letter} hit {pct:.0f}%! ⚡ 🚀💎 LEGENDARY GAINS! Subscribe for real-time alerts 🔔")
+            elif pct is not None and pct >= 50:
+                lines.append(f"High flow fireworks! {symbol} {expiry_str.strip()} {strike}{opt_type_letter} delivered {pct:.0f}%! 🎆 🔥💥 MASSIVE WIN! Subscribe for real-time alerts 🔔")
+            elif pct is not None and pct >= 25:
+                lines.append(f"Unusual pattern alert! {symbol} {expiry_str.strip()} {strike}{opt_type_letter} delivered {pct:.0f}%! Subscribe for real-time alerts 🔔")
+            elif pct is not None:
+                lines.append(f"Weekly pattern pays! {symbol} {expiry_str.strip()} {strike}{opt_type_letter} surged {pct:.0f}%! Subscribe for real-time alerts 🔔")
+            else:
+                lines.append(status)
             msg = "\n".join(lines)
             if _post_to_trade_results(msg, "winners"):
                 new_sent.append(sent_key)
