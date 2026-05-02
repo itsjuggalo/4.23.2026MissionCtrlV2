@@ -279,7 +279,7 @@ def check_fresh_kronos_file(ticker, max_age_minutes=60):
 
 
 
-def wait_for_kronos_result(ticker, timeout_sec=75, poll_interval=3):
+def wait_for_kronos_result(ticker, timeout_sec=240, poll_interval=5):
     """
     After firing Kronos in background, poll latest_<ticker>.json
     for up to timeout_sec seconds waiting for a FRESH result.
@@ -1016,9 +1016,11 @@ Set protocol="swing" in pick. Override TP/SL: profit_target_pct=100, stop_loss_p
 - Never log the same pick under both protocols. Pick one and commit.
 - entry_criteria field MUST list which gates fired (e.g. ["T1_5M+","sweep","repeater_5x","kronos_agrees"] for flow, or ["dte_77","delta_0.48","iv_pct_42","oi_7859","earnings_45d","kronos_agrees"] for swing).
 
-- HARD GATE: Kronos CONFLICTS = AUTOMATIC VETO. Do NOT pick the contract. The ONLY override is if the flow score is ≥ 90 AND you must state the exact score number in your reasoning AND state why the flow override is justified
-- HARD GATE: Kronos UNAVAILABLE (timeout/error) = AUTOMATIC VETO. Do NOT pick the contract unless flow score is ≥ 85 AND you state the exact score in your reasoning
-- Kronos is now a CONSULTANT, not a gate. You may include `kronos_verdict` if relevant (AGREES | CONFLICTS | NEUTRAL | UNAVAILABLE), but it is OPTIONAL and never blocks a pick. Strong flow alone is sufficient.
+- Kronos is a CONSULTANT, not a hard gate. Use it as one input alongside flow strength, T0/T1/T2 tier, IV, and DTE.
+- Set `kronos_verdict` field to one of: AGREES | CONFLICTS | NEUTRAL | UNAVAILABLE based on the forecast block above.
+- If kronos_verdict is CONFLICTS: only proceed if flow score is ≥ 90 AND you state the exact score number in your reasoning. Otherwise pass on the pick.
+- If kronos_verdict is UNAVAILABLE (timeout, error, or skipped index): only proceed if flow score is ≥ 85 AND you state the score in your reasoning.
+- If kronos_verdict is AGREES or NEUTRAL: standard rules apply, no Kronos-specific gate.
 
 # Response format (STRICT JSON, no prose outside the JSON)
 {{
@@ -1929,13 +1931,20 @@ def main():
             # We have a recent forecast — annotate it with option context if needed
             if "option_in_forecast_direction" not in cached or cached.get("option_context") != option_ctx:
                 cached["option_context"] = option_ctx
-                is_call = "C" in option_ctx.upper().split()[0]
-                is_put = "P" in option_ctx.upper().split()[0]
-                direction = cached.get("forecast_24h_direction", "neutral")
-                if is_call:
-                    cached["option_in_forecast_direction"] = (direction == "bullish")
-                elif is_put:
-                    cached["option_in_forecast_direction"] = (direction == "bearish")
+                # Null-safe: if forecast errored or has no direction, set None (UNAVAILABLE)
+                # rather than False which would falsely become CONFLICTS
+                if cached.get("error") or "forecast_24h_direction" not in cached:
+                    cached["option_in_forecast_direction"] = None
+                else:
+                    is_call = "C" in option_ctx.upper().split()[0]
+                    is_put = "P" in option_ctx.upper().split()[0]
+                    direction = cached.get("forecast_24h_direction", "neutral")
+                    if direction == "neutral":
+                        cached["option_in_forecast_direction"] = None
+                    elif is_call:
+                        cached["option_in_forecast_direction"] = (direction == "bullish")
+                    elif is_put:
+                        cached["option_in_forecast_direction"] = (direction == "bearish")
             shortlist_with_kronos.append((sid, s, cached))
             kronos_cached.append(ticker)
             # Still fire a background refresh for NEXT cycle (so cache stays warm)
