@@ -1,0 +1,77 @@
+#!/usr/bin/env python3
+"""Boba Today daily auto-post.
+
+Cron at 4:35pm ET weekdays (35 20 * * 1-5) runs boba-today --both and posts
+the output to Discord.
+
+Webhook precedence:
+  1. discord_webhook_performance_daily (underscore name)
+  2. discord-webhook-performance-daily.txt (dashed name with extension)
+  3. discord_bobatrades_webhook (fallback - boba-today is Boba perf)
+"""
+import json
+import subprocess
+import sys
+import time
+import urllib.request
+import urllib.error
+from pathlib import Path
+
+SECRETS = Path('/home/ubuntu/.openclaw/secrets')
+BOBA_TODAY = '/home/ubuntu/.local/bin/boba-today'
+
+def load_secret(name):
+    p = SECRETS / name
+    return p.read_text().strip() if p.exists() else None
+
+def find_webhook():
+    for c in ('discord_webhook_performance_daily',
+              'discord-webhook-performance-daily.txt',
+              'discord_bobatrades_webhook'):
+        v = load_secret(c)
+        if v and v.startswith('https://'):
+            return v, c
+    return None, None
+
+def run_boba_today():
+    try:
+        r = subprocess.run([BOBA_TODAY, '--both'],
+                           capture_output=True, text=True, timeout=90)
+        return ((r.stdout or '') + (r.stderr if r.returncode else '')).strip()
+    except Exception as e:
+        return f'[boba-today FAILED] {e}'
+
+def post_discord(webhook, content):
+    body = json.dumps({'content': content[:1990]}).encode()
+    req = urllib.request.Request(
+        webhook, data=body,
+        headers={'content-type': 'application/json',
+                 'User-Agent': 'MissionCtrl-BobaTodayDaily/1.0'})
+    try:
+        with urllib.request.urlopen(req, timeout=15) as resp:
+            return resp.status, ''
+    except urllib.error.HTTPError as e:
+        return e.code, e.read().decode('utf-8', errors='replace')[:200]
+    except Exception as e:
+        return None, str(e)
+
+def main():
+    webhook, source = find_webhook()
+    if not webhook:
+        print('[boba-today-daily] NO webhook found, exiting', flush=True)
+        return 1
+    output = run_boba_today()
+    if not output:
+        print('[boba-today-daily] empty output, skipping post', flush=True)
+        return 1
+    ts = time.strftime('%Y-%m-%d %H:%M ET', time.localtime())
+    body = f'**Boba Today daily auto-post** ({ts})\n```\n{output[:1700]}\n```'
+    code, err = post_discord(webhook, body)
+    if code in (200, 204):
+        print(f'[boba-today-daily] posted via {source} -> HTTP {code}', flush=True)
+        return 0
+    print(f'[boba-today-daily] FAILED via {source} -> HTTP {code} {err}', flush=True)
+    return 1
+
+if __name__ == '__main__':
+    sys.exit(main())
