@@ -70,6 +70,14 @@ FIREBASE_FEED = Path("/home/ubuntu/.openclaw/workspace/directives/firebase_trade
 
 # Tradier live options quotes (bid/ask/IV/greeks) for informed contract selection
 sys.path.insert(0, "/home/ubuntu/scripts/lib")
+
+# Skill loader - injects relevant SKILL.md content into JazzyHazzy's prompt
+try:
+    from skill_loader import load_relevant_skills
+except Exception as _e:
+    print(f"[skill_loader] import failed: {_e}", flush=True)
+    def load_relevant_skills(*a, **kw):
+        return ""
 try:
     from tradier_client import fetch_option_quote as _tradier_quote
 except Exception:
@@ -790,7 +798,42 @@ def build_boba_prompt(account, positions, shortlist_with_kronos, remaining_budge
     orion_skills_text = load_orion_skills() or ""
     multi_agent_context = market_briefing_text + grok_brief_text + orion_skills_text
 
-    prompt = f"""You are JazzyHazzy — a CONSERVATIVE decision-making agent in Mission Control's multi-agent trading system, running on the small R1 paper account ($10K). You are a peer agent to Boba (who runs the larger R2 aggressive book). Your edge is patience and theta-safety, not speed.
+    # Skill injection - load relevant SKILL.md content based on decision context
+    try:
+        _skill_ctx_parts = []
+        for _p in (positions or []):
+            _sym = _p.get('symbol', '')
+            if _sym:
+                _skill_ctx_parts.append(_sym)
+        for _sid, _s, _k in (shortlist_with_kronos or []):
+            _t = _s.get('ticker', '') if isinstance(_s, dict) else ''
+            _ot = _s.get('option_type', '') if isinstance(_s, dict) else ''
+            if _t:
+                _skill_ctx_parts.append(_t)
+            if _ot:
+                _skill_ctx_parts.append(_ot)
+        _skill_ctx_parts.extend([
+            'earnings', 'catalyst', 'news', 'sentiment', 'macro', 'fed',
+            'rates', 'sector', 'rotation', 'event-driven', 'insider',
+            'options', 'call', 'put', 'strike', 'IV', 'theta', 'delta',
+            'flow', 'whale', 'risk', 'sizing', 'conservative', 'patience',
+        ])
+        _skill_ctx = ' '.join(_skill_ctx_parts)
+        skills_section = load_relevant_skills(
+            agent='jazzyhazzy',
+            context_text=_skill_ctx,
+            max_skills=4,
+            max_tokens=3500,
+            include_body=True,
+        ) or ''
+        if skills_section:
+            print(f"[skill_loader] injected {skills_section.count(chr(35) + chr(35) + chr(35))} skills into JazzyHazzy prompt", flush=True)
+    except Exception as _e:
+        print(f"[skill_loader] injection failed: {_e}", flush=True)
+        skills_section = ''
+
+    prompt = f"""{skills_section}
+You are JazzyHazzy — a CONSERVATIVE decision-making agent in Mission Control's multi-agent trading system, running on the small R1 paper account ($10K). You are a peer agent to Boba (who runs the larger R2 aggressive book). Your edge is patience and theta-safety, not speed.
 
 # Mission
 Make positive-expected-value options trades using whale-tier T1+T2 options flow signals (T1: $1M+ SWEEP/A,AA, T2: $500K+ Vol>OI SWEEP/A,AA). Kronos is available as a consultant. Target average R:R ≥ 1.5 with HIGHER win rate than Boba — your edge is rejecting marginal short-DTE setups he would take. You are aiming for steady compounding, not lottery tickets.
