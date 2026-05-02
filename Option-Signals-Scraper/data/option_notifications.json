@@ -4792,5 +4792,83 @@
     "message": "Buy To Open at 3.80 with first target above 4.37",
     "symbol": "MSFT",
     "title": "MSFT 450C 6/18: BTO"
+  },
+  "1777573826": {
+    "category": "SWING",
+    "message": "Reached Target 4.40 and that's 15.79%! Lock some in and wait for next target. Raise the stops to 3.08",
+    "symbol": "MSFT",
+    "title": "MSFT 450C 06/18 : STC"
+  },
+  "1777642205": {
+    "category": "SWING",
+    "message": "Reached Target 5.10 and that's 34.21%! Lock some in and wait for next target. Raise the stops to 3.80",
+    "symbol": "MSFT",
+    "title": "MSFT 450C 06/18 : STC"
+  },
+  "1777642506": {
+    "category": "SWING",
+    "message": "Reached Target 5.80 and that's 52.63%! Lock some in and wait for next target. Raise the stops to 4.64",
+    "symbol": "MSFT",
+    "title": "MSFT 450C 06/18 : STC"
+  },
+  "1777643443": {
+    "category": "SCALP",
+    "message": "Buy To Open at 2.25 with first target above 2.59",
+    "symbol": "GOOGL",
+    "title": "GOOGL 392.5C 5/8: BTO"
+  },
+  "1777643546": {
+    "category": "SCALP",
+    "message": "Reached Target 2.62 and that's 16.44%! Lock some in and wait for next target. Raise the stops to 1.83",
+    "symbol": "GOOGL",
+    "title": "GOOGL 392.5C 05/08 : STC"
+  },
+  "1777643727": {
+    "category": "SCALP",
+    "message": "Reached Target 3.10 and that's 37.78%! Lock some in and wait for next target. Raise the stops to 2.25",
+    "symbol": "GOOGL",
+    "title": "GOOGL 392.5C 05/08 : STC"
+  },
+  "1777644026": {
+    "category": "SWING",
+    "message": "Reached Target 40.00 and that's 102.02%! Lock some in and wait for next target. Raise the stops to 32.00",
+    "symbol": "CLS",
+    "title": "CLS 450C 07/17 : STC"
+  },
+  "1777644061": {
+    "category": "SCALP",
+    "message": "Reached Target 3.45 and that's 53.33%! Lock some in and wait for next target. Raise the stops to 2.76",
+    "symbol": "GOOGL",
+    "title": "GOOGL 392.5C 05/08 : STC"
+  },
+  "1777644508": {
+    "category": "SWING",
+    "message": "Close the trade as it hit trailing stop at 4.60!",
+    "symbol": "MSFT",
+    "title": "MSFT 450C 06/18 : STC"
+  },
+  "1777645326": {
+    "category": "SCALP",
+    "message": "Reached Target 4.15 and that's 84.44%! Lock some in and wait for next target. Raise the stops to 3.32",
+    "symbol": "GOOGL",
+    "title": "GOOGL 392.5C 05/08 : STC"
+  },
+  "1777645930": {
+    "category": "SCALP",
+    "message": "Close the trade as it hit trailing stop at 3.20!",
+    "symbol": "GOOGL",
+    "title": "GOOGL 392.5C 05/08 : STC"
+  },
+  "1777649086": {
+    "category": "SWING",
+    "message": "Buy To Open at 6.65 with first target above 7.65",
+    "symbol": "PLTR",
+    "title": "PLTR 150C 5/22: BTO"
+  },
+  "1777658305": {
+    "category": "SWING",
+    "message": "Buy To Open at 17.50 with first target above 20.12",
+    "symbol": "META",
+    "title": "META 720C 8/21: BTO"
   }
 }

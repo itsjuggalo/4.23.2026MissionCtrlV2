@@ -25733,5 +25733,59 @@
     "message": "Buy below 402.21, Sell above 414.28\nSwing, Moderate risk",
     "symbol": "MSFT",
     "title": "MSFT: BUY"
+  },
+  "1777578535": {
+    "category": "SWING",
+    "message": "Buy below 31.47, Sell above 32.41\nSwing, Moderate risk",
+    "symbol": "ASX",
+    "title": "ASX: BUY"
+  },
+  "1777640441": {
+    "category": "LONGTERM",
+    "message": "Reached final SellTarget @280.0 with gain: 10.99%. Take profits or ride for new target @288.4 with stops @271.6",
+    "symbol": "AAPL",
+    "title": "AAPL : SELL"
+  },
+  "1777642345": {
+    "category": "SWING",
+    "message": "Reached SellTarget1 @414.4 with gain: 3.03%. Take profits and ride for next target with stops @362.0",
+    "symbol": "MSFT",
+    "title": "MSFT : SELL"
+  },
+  "1777642465": {
+    "category": "SWING",
+    "message": "Reached final SellTarget @355.9 with gain: 10.25%. Take profits or ride for new target @366.6 with stops @345.2",
+    "symbol": "AMD",
+    "title": "AMD : SELL"
+  },
+  "1777643065": {
+    "category": "SWING",
+    "message": "Reached SellTarget1 @68.48 with gain: 3.04%. Take profits and ride for next target with stops @59.81",
+    "symbol": "SLV",
+    "title": "SLV : SELL"
+  },
+  "1777650332": {
+    "category": "LONGTERM",
+    "message": "Reached SellTarget1 @16.45 with gain: 3.01%. Take profits and ride for next target with stops @14.37",
+    "symbol": "SOFI",
+    "title": "SOFI : SELL"
+  },
+  "1777653083": {
+    "category": "SCALP",
+    "message": "Buy below 9.34, Sell above 9.62\nScalp, VH risk",
+    "symbol": "DJT",
+    "title": "DJT: BUY"
+  },
+  "1777658458": {
+    "category": "SCALP",
+    "message": "Reached SellTarget1 @9.69 with gain: 3.75%. Take profits and ride for next target with stops @8.41",
+    "symbol": "DJT",
+    "title": "DJT : SELL"
+  },
+  "1777664102": {
+    "category": "LONGTERM",
+    "message": "Buy below 199.84, Sell above 205.84\nLongTerm, Moderate risk",
+    "symbol": "NVDA",
+    "title": "NVDA: BUY"
   }
 }

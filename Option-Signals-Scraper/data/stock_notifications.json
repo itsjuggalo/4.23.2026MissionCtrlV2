@@ -3161,5 +3161,47 @@
     "message": "Reached Target 385.2 and that's 20.56%! Lock some in and wait for next target. Raise the stops to 373.6",
     "symbol": "GOOGL",
     "title": "GOOGL : STC"
+  },
+  "1777640484": {
+    "category": "SWING",
+    "message": "Reached Target 410.4 and that's 2.02%! Lock some in and wait for next target. Raise the stops to 370.1",
+    "symbol": "MSFT",
+    "title": "MSFT : STC"
+  },
+  "1777640687": {
+    "category": "SWING",
+    "message": "Reached Target 280.4 and that's 8.01%! Lock some in and wait for next target. Raise the stops to 272.0",
+    "symbol": "AAPL",
+    "title": "AAPL : STC"
+  },
+  "1777640807": {
+    "category": "SWING",
+    "message": "Reached Target 280.8 and that's 8.02%! Lock some in and wait for next target. Raise the stops to 272.4",
+    "symbol": "AAPL",
+    "title": "AAPL : STC"
+  },
+  "1777642244": {
+    "category": "SWING",
+    "message": "Reached Target 281.6 and that's 11.49%! Lock some in and wait for next target. Raise the stops to 273.2",
+    "symbol": "AAPL",
+    "title": "AAPL : STC"
+  },
+  "1777649090": {
+    "category": "SWING",
+    "message": "Buy To Open at 143.95 with first target above 146.83",
+    "symbol": "PLTR",
+    "title": "PLTR: BTO"
+  },
+  "1777657424": {
+    "category": "SWING",
+    "message": "Reached Target 361.8 and that's 11.61%! Lock some in and wait for next target. Raise the stops to 350.9",
+    "symbol": "AMD",
+    "title": "AMD : STC"
+  },
+  "1777658308": {
+    "category": "SWING",
+    "message": "Buy To Open at 612.28 with first target above 624.53",
+    "symbol": "META",
+    "title": "META: BTO"
   }
 }

@@ -4158,5 +4158,71 @@
     "message": "Buy below 201.59, Sell above 207.64\nSwing, Hi risk",
     "symbol": "NVDA",
     "title": "NVDA: BUY"
+  },
+  "1777574079": {
+    "category": "LONGTERM",
+    "message": "Buy below 616.06, Sell above 634.54\nLongTerm, Moderate risk",
+    "symbol": "META",
+    "title": "META: BUY"
+  },
+  "1777578587": {
+    "category": "SWING",
+    "message": "Buy below 22.02, Sell above 22.68\nSwing, Moderate risk",
+    "symbol": "PBR",
+    "title": "PBR: BUY"
+  },
+  "1777578634": {
+    "category": "SCALP",
+    "message": "Buy below 73.11, Sell above 75.30\nScalp, VH risk",
+    "symbol": "FLS",
+    "title": "FLS: BUY"
+  },
+  "1777640439": {
+    "category": "SWING",
+    "message": "Reached final SellTarget @280.1 with gain: 10.51%. Take profits or ride for new target @288.5 with stops @271.7",
+    "symbol": "AAPL",
+    "title": "AAPL : SELL"
+  },
+  "1777642332": {
+    "category": "LONGTERM",
+    "message": "Reached SellTarget1 @414.6 with gain: 3.03%. Take profits and ride for next target with stops @362.2",
+    "symbol": "MSFT",
+    "title": "MSFT : SELL"
+  },
+  "1777642383": {
+    "category": "SCALP",
+    "message": "Reached final SellTarget @64.41 with gain: 10.52%. Take profits or ride for new target @66.34 with stops @62.48",
+    "symbol": "TQQQ",
+    "title": "TQQQ : SELL"
+  },
+  "1777642803": {
+    "category": "SWING",
+    "message": "Reached final SellTarget @357.3 with gain: 10.22%. Take profits or ride for new target @368.0 with stops @346.6",
+    "symbol": "AMD",
+    "title": "AMD : SELL"
+  },
+  "1777643264": {
+    "category": "SWING",
+    "message": "Buy below 958.24, Sell above 986.99\nSwing, Moderate risk",
+    "symbol": "URI",
+    "title": "URI: BUY"
+  },
+  "1777643583": {
+    "category": "SWING",
+    "message": "Reached final SellTarget @284.7 with gain: 10.06%. Take profits or ride for new target @293.2 with stops @276.2",
+    "symbol": "AAPL",
+    "title": "AAPL : SELL"
+  },
+  "1777654332": {
+    "category": "LONGTERM",
+    "message": "Reached SellTarget1 @16.54 with gain: 3.44%. Take profits and ride for next target with stops @14.39",
+    "symbol": "SOFI",
+    "title": "SOFI : SELL"
+  },
+  "1777664070": {
+    "category": "SCALP",
+    "message": "Buy below 13.35, Sell above 13.75\nScalp, VH risk",
+    "symbol": "NOK",
+    "title": "NOK: BUY"
   }
 }

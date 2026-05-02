@@ -1,5 +1,5 @@
 {
-  "last_updated": "2026-04-30T16:01:01.350158",
+  "last_updated": "2026-05-02T16:00:36.623148",
   "leaderboard": [
     {
       "rank": 0,
@@ -8,8 +8,8 @@
       "color": "#4fc3f7",
       "total_trades": 100,
       "holdings_count": 0,
-      "buy_volume": 431090.49,
-      "sell_volume": 431720.91
+      "buy_volume": 306206.63,
+      "sell_volume": 315390.65
     },
     {
       "rank": 0,
@@ -18,8 +18,8 @@
       "color": "#66bb6a",
       "total_trades": 100,
       "holdings_count": 6,
-      "buy_volume": 30459.98,
-      "sell_volume": 31970.38
+      "buy_volume": 30659.98,
+      "sell_volume": 32179.46
     },
     {
       "rank": 0,
@@ -28,8 +28,8 @@
       "color": "#ff9800",
       "total_trades": 100,
       "holdings_count": 2,
-      "buy_volume": 88331.74,
-      "sell_volume": 95459.78
+      "buy_volume": 93331.74,
+      "sell_volume": 93490.36
     },
     {
       "rank": 0,
@@ -47,9 +47,9 @@
       "model": "Gemini 2.5 Pro",
       "color": "#81d4fa",
       "total_trades": 100,
-      "holdings_count": 3,
-      "buy_volume": 22754.78,
-      "sell_volume": 22828.97
+      "holdings_count": 4,
+      "buy_volume": 25155.28,
+      "sell_volume": 27726.23
     },
     {
       "rank": 0,
@@ -57,9 +57,9 @@
       "model": "GPT-5",
       "color": "#ef5350",
       "total_trades": 100,
-      "holdings_count": 3,
-      "buy_volume": 62749.94,
-      "sell_volume": 63040.79
+      "holdings_count": 6,
+      "buy_volume": 67749.94,
+      "sell_volume": 65495.51
     }
   ],
   "models": {
@@ -69,1312 +69,1312 @@
       "color": "#4fc3f7",
       "account_id": "1800473182_15",
       "total_trades": 100,
-      "total_buy_value": 431090.49,
-      "total_sell_value": 431720.91,
+      "total_buy_value": 306206.63,
+      "total_sell_value": 315390.65,
       "current_holdings": {},
       "holdings_count": 0,
       "recent_trades": [
         {
-          "date": "2026-04-30",
-          "side": "buy",
-          "symbol": "F",
-          "company": "Ford Motor",
-          "price": 11.83,
-          "quantity": 760.0,
-          "value": 8990.8,
-          "order_id": "0639613092762615808"
-        },
-        {
-          "date": "2026-04-30",
-          "side": "buy",
-          "symbol": "F",
-          "company": "Ford Motor",
-          "price": 11.83,
-          "quantity": 760.0,
-          "value": 8990.8,
-          "order_id": "0639612589848068096"
-        },
-        {
-          "date": "2026-04-30",
-          "side": "buy",
-          "symbol": "AGNC",
-          "company": "AGNC Investment",
-          "price": 11.03,
-          "quantity": 815.0,
-          "value": 8989.45,
-          "order_id": "0639611853228343296"
-        },
-        {
-          "date": "2026-04-30",
-          "side": "buy",
-          "symbol": "WLDN",
-          "company": "Willdan Group",
-          "price": 74.97,
-          "quantity": 119.0,
-          "value": 8921.43,
-          "order_id": "0639608826127941632"
-        },
-        {
-          "date": "2026-04-30",
-          "side": "buy",
-          "symbol": "AGNC",
-          "company": "AGNC Investment",
-          "price": 11.0,
-          "quantity": 818.0,
-          "value": 8998.0,
-          "order_id": "0639602280182546432"
-        },
-        {
-          "date": "2026-04-30",
-          "side": "buy",
-          "symbol": "AGNC",
-          "company": "AGNC Investment",
-          "price": 11.0,
-          "quantity": 818.0,
-          "value": 8998.0,
-          "order_id": "0639601775741173760"
-        },
-        {
-          "date": "2026-04-30",
-          "side": "buy",
-          "symbol": "AGNC",
-          "company": "AGNC Investment",
-          "price": 10.99,
-          "quantity": 818.0,
-          "value": 8989.82,
-          "order_id": "0639600269131218944"
-        },
-        {
-          "date": "2026-04-30",
-          "side": "buy",
-          "symbol": "F",
-          "company": "Ford Motor",
-          "price": 11.82,
-          "quantity": 761.0,
-          "value": 8995.02,
-          "order_id": "0639597993691906048"
-        },
-        {
-          "date": "2026-04-30",
-          "side": "buy",
-          "symbol": "AGNC",
-          "company": "AGNC Investment",
-          "price": 10.97,
-          "quantity": 820.0,
-          "value": 8995.4,
-          "order_id": "0639595990026780672"
-        },
-        {
-          "date": "2026-04-30",
-          "side": "buy",
-          "symbol": "AGNC",
-          "company": "AGNC Investment",
-          "price": 10.97,
-          "quantity": 820.0,
-          "value": 8995.4,
-          "order_id": "0639595499930648576"
-        },
-        {
-          "date": "2026-04-30",
-          "side": "buy",
-          "symbol": "AGNC",
-          "company": "AGNC Investment",
-          "price": 10.97,
-          "quantity": 820.0,
-          "value": 8995.4,
-          "order_id": "0639594988468928512"
-        },
-        {
-          "date": "2026-04-30",
-          "side": "buy",
-          "symbol": "AGNC",
-          "company": "AGNC Investment",
-          "price": 10.97,
-          "quantity": 820.0,
-          "value": 8995.4,
-          "order_id": "0639592971184766976"
-        },
-        {
-          "date": "2026-04-30",
+          "date": "2026-05-01",
           "side": "buy",
           "symbol": "AGNC",
           "company": "AGNC Investment",
           "price": 10.96,
           "quantity": 821.0,
           "value": 8998.16,
-          "order_id": "0639591203910582272"
+          "order_id": "0640034390927409152"
         },
         {
-          "date": "2026-04-30",
+          "date": "2026-05-01",
           "side": "buy",
           "symbol": "ET",
           "company": "Energy Transfer",
-          "price": 19.85,
-          "quantity": 453.0,
-          "value": 8992.05,
-          "order_id": "0639588186201128960"
+          "price": 19.98,
+          "quantity": 450.0,
+          "value": 8991.0,
+          "order_id": "0640033623038427136"
         },
         {
-          "date": "2026-04-30",
+          "date": "2026-05-01",
+          "side": "buy",
+          "symbol": "AGNC",
+          "company": "AGNC Investment",
+          "price": 10.96,
+          "quantity": 821.0,
+          "value": 8998.16,
+          "order_id": "0640033373230661632"
+        },
+        {
+          "date": "2026-05-01",
+          "side": "buy",
+          "symbol": "ET",
+          "company": "Energy Transfer",
+          "price": 19.97,
+          "quantity": 450.0,
+          "value": 8986.5,
+          "order_id": "0640031107441688576"
+        },
+        {
+          "date": "2026-05-01",
+          "side": "buy",
+          "symbol": "PFF",
+          "company": "iShares Preferred and Income Securities ETF",
+          "price": 31.38,
+          "quantity": 286.0,
+          "value": 8973.25,
+          "order_id": "0640029852355756032"
+        },
+        {
+          "date": "2026-05-01",
+          "side": "buy",
+          "symbol": "ET",
+          "company": "Energy Transfer",
+          "price": 19.97,
+          "quantity": 450.0,
+          "value": 8986.5,
+          "order_id": "0640022803966197760"
+        },
+        {
+          "date": "2026-05-01",
+          "side": "buy",
+          "symbol": "PFF",
+          "company": "iShares Preferred and Income Securities ETF",
+          "price": 31.38,
+          "quantity": 286.0,
+          "value": 8974.68,
+          "order_id": "0640020548507860992"
+        },
+        {
+          "date": "2026-05-01",
+          "side": "buy",
+          "symbol": "AGNC",
+          "company": "AGNC Investment",
+          "price": 10.94,
+          "quantity": 4.0,
+          "value": 43.76,
+          "order_id": "0640018776222302208"
+        },
+        {
+          "date": "2026-05-01",
           "side": "buy",
           "symbol": "WLDN",
           "company": "Willdan Group",
-          "price": 73.84,
-          "quantity": 121.0,
-          "value": 8934.64,
-          "order_id": "0639586925523468288"
+          "price": 73.03,
+          "quantity": 123.0,
+          "value": 8982.7,
+          "order_id": "0640018284687523840"
         },
         {
-          "date": "2026-04-30",
-          "side": "sell",
-          "symbol": "F",
-          "company": "Ford Motor",
-          "price": 11.86,
-          "quantity": 760.0,
-          "value": 9013.6,
-          "order_id": "0639613847375904768"
-        },
-        {
-          "date": "2026-04-30",
-          "side": "sell",
+          "date": "2026-05-01",
+          "side": "buy",
           "symbol": "F",
           "company": "Ford Motor",
           "price": 11.84,
-          "quantity": 760.0,
-          "value": 8998.4,
-          "order_id": "0639612841284009984"
+          "quantity": 8.0,
+          "value": 94.72,
+          "order_id": "0640017005101121536"
         },
         {
-          "date": "2026-04-30",
-          "side": "sell",
-          "symbol": "WLDN",
-          "company": "Willdan Group",
-          "price": 75.21,
-          "quantity": 119.0,
-          "value": 8949.99,
-          "order_id": "0639611842121891840"
+          "date": "2026-05-01",
+          "side": "buy",
+          "symbol": "PFF",
+          "company": "iShares Preferred and Income Securities ETF",
+          "price": 31.4,
+          "quantity": 286.0,
+          "value": 8980.4,
+          "order_id": "0640016512115212288"
         },
         {
-          "date": "2026-04-30",
-          "side": "sell",
-          "symbol": "AGNC",
-          "company": "AGNC Investment",
-          "price": 11.04,
-          "quantity": 815.0,
-          "value": 8997.6,
-          "order_id": "0639612100428103680"
-        },
-        {
-          "date": "2026-04-30",
-          "side": "sell",
-          "symbol": "AGNC",
-          "company": "AGNC Investment",
-          "price": 11.01,
-          "quantity": 818.0,
-          "value": 9006.18,
-          "order_id": "0639603033089441792"
-        },
-        {
-          "date": "2026-04-30",
-          "side": "sell",
-          "symbol": "AGNC",
-          "company": "AGNC Investment",
-          "price": 11.01,
-          "quantity": 818.0,
-          "value": 9006.18,
-          "order_id": "0639602031992897536"
-        },
-        {
-          "date": "2026-04-30",
-          "side": "sell",
-          "symbol": "AGNC",
-          "company": "AGNC Investment",
-          "price": 11.01,
-          "quantity": 818.0,
-          "value": 9006.18,
-          "order_id": "0639600515693379584"
-        },
-        {
-          "date": "2026-04-30",
-          "side": "sell",
-          "symbol": "F",
-          "company": "Ford Motor",
-          "price": 11.83,
-          "quantity": 761.0,
-          "value": 9004.76,
-          "order_id": "0639598495565479936"
-        },
-        {
-          "date": "2026-04-30",
-          "side": "sell",
-          "symbol": "AGNC",
-          "company": "AGNC Investment",
-          "price": 10.99,
-          "quantity": 820.0,
-          "value": 9015.9,
-          "order_id": "0639596489480208384"
-        },
-        {
-          "date": "2026-04-30",
-          "side": "sell",
-          "symbol": "AGNC",
-          "company": "AGNC Investment",
-          "price": 10.98,
-          "quantity": 820.0,
-          "value": 9003.6,
-          "order_id": "0639595734367141888"
-        },
-        {
-          "date": "2026-04-30",
-          "side": "sell",
-          "symbol": "AGNC",
-          "company": "AGNC Investment",
-          "price": 10.98,
-          "quantity": 820.0,
-          "value": 9003.6,
-          "order_id": "0639595230908055552"
-        },
-        {
-          "date": "2026-04-30",
-          "side": "sell",
-          "symbol": "AGNC",
-          "company": "AGNC Investment",
-          "price": 10.98,
-          "quantity": 820.0,
-          "value": 9003.6,
-          "order_id": "0639593218657189888"
-        },
-        {
-          "date": "2026-04-30",
-          "side": "sell",
-          "symbol": "AGNC",
-          "company": "AGNC Investment",
-          "price": 10.98,
-          "quantity": 821.0,
-          "value": 9012.03,
-          "order_id": "0639591461289852928"
-        },
-        {
-          "date": "2026-04-30",
-          "side": "sell",
+          "date": "2026-05-01",
+          "side": "buy",
           "symbol": "ET",
           "company": "Energy Transfer",
-          "price": 19.86,
-          "quantity": 453.0,
-          "value": 8996.58,
-          "order_id": "0639588434818564096"
+          "price": 19.95,
+          "quantity": 451.0,
+          "value": 8997.45,
+          "order_id": "0640015505067737088"
         },
         {
-          "date": "2026-04-30",
-          "side": "sell",
+          "date": "2026-05-01",
+          "side": "buy",
           "symbol": "WLDN",
           "company": "Willdan Group",
-          "price": 74.53,
-          "quantity": 121.0,
-          "value": 9018.69,
-          "order_id": "0639587934667997184"
+          "price": 73.21,
+          "quantity": 122.0,
+          "value": 8931.62,
+          "order_id": "0640015001449332736"
+        },
+        {
+          "date": "2026-05-01",
+          "side": "buy",
+          "symbol": "PFF",
+          "company": "iShares Preferred and Income Securities ETF",
+          "price": 31.4,
+          "quantity": 286.0,
+          "value": 8980.4,
+          "order_id": "0640014000122200064"
+        },
+        {
+          "date": "2026-05-01",
+          "side": "buy",
+          "symbol": "F",
+          "company": "Ford Motor",
+          "price": 11.85,
+          "quantity": 759.0,
+          "value": 8994.15,
+          "order_id": "0640013985986576384"
+        },
+        {
+          "date": "2026-05-01",
+          "side": "buy",
+          "symbol": "PFF",
+          "company": "iShares Preferred and Income Securities ETF",
+          "price": 31.39,
+          "quantity": 286.0,
+          "value": 8977.54,
+          "order_id": "0640011733323186176"
+        },
+        {
+          "date": "2026-05-01",
+          "side": "buy",
+          "symbol": "F",
+          "company": "Ford Motor",
+          "price": 11.86,
+          "quantity": 8.0,
+          "value": 94.88,
+          "order_id": "0640011216429711360"
+        },
+        {
+          "date": "2026-05-01",
+          "side": "buy",
+          "symbol": "WLDN",
+          "company": "Willdan Group",
+          "price": 73.45,
+          "quantity": 122.0,
+          "value": 8960.67,
+          "order_id": "0640009217864859648"
+        },
+        {
+          "date": "2026-05-01",
+          "side": "buy",
+          "symbol": "PFF",
+          "company": "iShares Preferred and Income Securities ETF",
+          "price": 31.43,
+          "quantity": 286.0,
+          "value": 8988.98,
+          "order_id": "0640006706482577408"
+        },
+        {
+          "date": "2026-05-01",
+          "side": "buy",
+          "symbol": "PFF",
+          "company": "iShares Preferred and Income Securities ETF",
+          "price": 31.42,
+          "quantity": 286.0,
+          "value": 8986.12,
+          "order_id": "0640003436012503040"
+        },
+        {
+          "date": "2026-05-01",
+          "side": "buy",
+          "symbol": "PFF",
+          "company": "iShares Preferred and Income Securities ETF",
+          "price": 31.42,
+          "quantity": 286.0,
+          "value": 8986.12,
+          "order_id": "0640000658154389504"
+        },
+        {
+          "date": "2026-05-01",
+          "side": "buy",
+          "symbol": "ET",
+          "company": "Energy Transfer",
+          "price": 19.88,
+          "quantity": 3.0,
+          "value": 59.64,
+          "order_id": "0639999398033686528"
+        },
+        {
+          "date": "2026-05-01",
+          "side": "buy",
+          "symbol": "ET",
+          "company": "Energy Transfer",
+          "price": 19.9,
+          "quantity": 3.0,
+          "value": 59.7,
+          "order_id": "0639998393305759744"
+        },
+        {
+          "date": "2026-05-01",
+          "side": "buy",
+          "symbol": "ET",
+          "company": "Energy Transfer",
+          "price": 19.9,
+          "quantity": 3.0,
+          "value": 59.7,
+          "order_id": "0639997895856291840"
+        },
+        {
+          "date": "2026-05-01",
+          "side": "buy",
+          "symbol": "ET",
+          "company": "Energy Transfer",
+          "price": 19.91,
+          "quantity": 452.0,
+          "value": 8999.32,
+          "order_id": "0639996380350218240"
+        },
+        {
+          "date": "2026-05-01",
+          "side": "buy",
+          "symbol": "PFF",
+          "company": "iShares Preferred and Income Securities ETF",
+          "price": 31.41,
+          "quantity": 286.0,
+          "value": 8983.26,
+          "order_id": "0639991345864179712"
+        },
+        {
+          "date": "2026-05-01",
+          "side": "buy",
+          "symbol": "ET",
+          "company": "Energy Transfer",
+          "price": 19.93,
+          "quantity": 1.0,
+          "value": 19.93,
+          "order_id": "0639992352367116288"
+        },
+        {
+          "date": "2026-05-01",
+          "side": "buy",
+          "symbol": "ET",
+          "company": "Energy Transfer",
+          "price": 19.92,
+          "quantity": 1.0,
+          "value": 19.92,
+          "order_id": "0639990838240182272"
+        },
+        {
+          "date": "2026-05-01",
+          "side": "buy",
+          "symbol": "F",
+          "company": "Ford Motor",
+          "price": 11.81,
+          "quantity": 2.0,
+          "value": 23.62,
+          "order_id": "0639989322674470912"
+        },
+        {
+          "date": "2026-05-01",
+          "side": "buy",
+          "symbol": "WLDN",
+          "company": "Willdan Group",
+          "price": 73.88,
+          "quantity": 120.0,
+          "value": 8865.6,
+          "order_id": "0639988323872374784"
         }
       ],
       "all_trades": [
         {
-          "date": "2026-04-30",
-          "side": "buy",
-          "symbol": "F",
-          "company": "Ford Motor",
-          "price": 11.83,
-          "quantity": 760.0,
-          "value": 8990.8,
-          "order_id": "0639613092762615808"
-        },
-        {
-          "date": "2026-04-30",
-          "side": "buy",
-          "symbol": "F",
-          "company": "Ford Motor",
-          "price": 11.83,
-          "quantity": 760.0,
-          "value": 8990.8,
-          "order_id": "0639612589848068096"
-        },
-        {
-          "date": "2026-04-30",
-          "side": "buy",
-          "symbol": "AGNC",
-          "company": "AGNC Investment",
-          "price": 11.03,
-          "quantity": 815.0,
-          "value": 8989.45,
-          "order_id": "0639611853228343296"
-        },
-        {
-          "date": "2026-04-30",
-          "side": "buy",
-          "symbol": "WLDN",
-          "company": "Willdan Group",
-          "price": 74.97,
-          "quantity": 119.0,
-          "value": 8921.43,
-          "order_id": "0639608826127941632"
-        },
-        {
-          "date": "2026-04-30",
-          "side": "buy",
-          "symbol": "AGNC",
-          "company": "AGNC Investment",
-          "price": 11.0,
-          "quantity": 818.0,
-          "value": 8998.0,
-          "order_id": "0639602280182546432"
-        },
-        {
-          "date": "2026-04-30",
-          "side": "buy",
-          "symbol": "AGNC",
-          "company": "AGNC Investment",
-          "price": 11.0,
-          "quantity": 818.0,
-          "value": 8998.0,
-          "order_id": "0639601775741173760"
-        },
-        {
-          "date": "2026-04-30",
-          "side": "buy",
-          "symbol": "AGNC",
-          "company": "AGNC Investment",
-          "price": 10.99,
-          "quantity": 818.0,
-          "value": 8989.82,
-          "order_id": "0639600269131218944"
-        },
-        {
-          "date": "2026-04-30",
-          "side": "buy",
-          "symbol": "F",
-          "company": "Ford Motor",
-          "price": 11.82,
-          "quantity": 761.0,
-          "value": 8995.02,
-          "order_id": "0639597993691906048"
-        },
-        {
-          "date": "2026-04-30",
-          "side": "buy",
-          "symbol": "AGNC",
-          "company": "AGNC Investment",
-          "price": 10.97,
-          "quantity": 820.0,
-          "value": 8995.4,
-          "order_id": "0639595990026780672"
-        },
-        {
-          "date": "2026-04-30",
-          "side": "buy",
-          "symbol": "AGNC",
-          "company": "AGNC Investment",
-          "price": 10.97,
-          "quantity": 820.0,
-          "value": 8995.4,
-          "order_id": "0639595499930648576"
-        },
-        {
-          "date": "2026-04-30",
-          "side": "buy",
-          "symbol": "AGNC",
-          "company": "AGNC Investment",
-          "price": 10.97,
-          "quantity": 820.0,
-          "value": 8995.4,
-          "order_id": "0639594988468928512"
-        },
-        {
-          "date": "2026-04-30",
-          "side": "buy",
-          "symbol": "AGNC",
-          "company": "AGNC Investment",
-          "price": 10.97,
-          "quantity": 820.0,
-          "value": 8995.4,
-          "order_id": "0639592971184766976"
-        },
-        {
-          "date": "2026-04-30",
+          "date": "2026-05-01",
           "side": "buy",
           "symbol": "AGNC",
           "company": "AGNC Investment",
           "price": 10.96,
           "quantity": 821.0,
           "value": 8998.16,
-          "order_id": "0639591203910582272"
+          "order_id": "0640034390927409152"
         },
         {
-          "date": "2026-04-30",
+          "date": "2026-05-01",
           "side": "buy",
           "symbol": "ET",
           "company": "Energy Transfer",
-          "price": 19.85,
-          "quantity": 453.0,
-          "value": 8992.05,
-          "order_id": "0639588186201128960"
+          "price": 19.98,
+          "quantity": 450.0,
+          "value": 8991.0,
+          "order_id": "0640033623038427136"
         },
         {
-          "date": "2026-04-30",
+          "date": "2026-05-01",
+          "side": "buy",
+          "symbol": "AGNC",
+          "company": "AGNC Investment",
+          "price": 10.96,
+          "quantity": 821.0,
+          "value": 8998.16,
+          "order_id": "0640033373230661632"
+        },
+        {
+          "date": "2026-05-01",
+          "side": "buy",
+          "symbol": "ET",
+          "company": "Energy Transfer",
+          "price": 19.97,
+          "quantity": 450.0,
+          "value": 8986.5,
+          "order_id": "0640031107441688576"
+        },
+        {
+          "date": "2026-05-01",
+          "side": "buy",
+          "symbol": "PFF",
+          "company": "iShares Preferred and Income Securities ETF",
+          "price": 31.38,
+          "quantity": 286.0,
+          "value": 8973.25,
+          "order_id": "0640029852355756032"
+        },
+        {
+          "date": "2026-05-01",
+          "side": "buy",
+          "symbol": "ET",
+          "company": "Energy Transfer",
+          "price": 19.97,
+          "quantity": 450.0,
+          "value": 8986.5,
+          "order_id": "0640022803966197760"
+        },
+        {
+          "date": "2026-05-01",
+          "side": "buy",
+          "symbol": "PFF",
+          "company": "iShares Preferred and Income Securities ETF",
+          "price": 31.38,
+          "quantity": 286.0,
+          "value": 8974.68,
+          "order_id": "0640020548507860992"
+        },
+        {
+          "date": "2026-05-01",
+          "side": "buy",
+          "symbol": "AGNC",
+          "company": "AGNC Investment",
+          "price": 10.94,
+          "quantity": 4.0,
+          "value": 43.76,
+          "order_id": "0640018776222302208"
+        },
+        {
+          "date": "2026-05-01",
           "side": "buy",
           "symbol": "WLDN",
           "company": "Willdan Group",
-          "price": 73.84,
-          "quantity": 121.0,
-          "value": 8934.64,
-          "order_id": "0639586925523468288"
+          "price": 73.03,
+          "quantity": 123.0,
+          "value": 8982.7,
+          "order_id": "0640018284687523840"
         },
         {
-          "date": "2026-04-30",
+          "date": "2026-05-01",
+          "side": "buy",
+          "symbol": "F",
+          "company": "Ford Motor",
+          "price": 11.84,
+          "quantity": 8.0,
+          "value": 94.72,
+          "order_id": "0640017005101121536"
+        },
+        {
+          "date": "2026-05-01",
+          "side": "buy",
+          "symbol": "PFF",
+          "company": "iShares Preferred and Income Securities ETF",
+          "price": 31.4,
+          "quantity": 286.0,
+          "value": 8980.4,
+          "order_id": "0640016512115212288"
+        },
+        {
+          "date": "2026-05-01",
+          "side": "buy",
+          "symbol": "ET",
+          "company": "Energy Transfer",
+          "price": 19.95,
+          "quantity": 451.0,
+          "value": 8997.45,
+          "order_id": "0640015505067737088"
+        },
+        {
+          "date": "2026-05-01",
+          "side": "buy",
+          "symbol": "WLDN",
+          "company": "Willdan Group",
+          "price": 73.21,
+          "quantity": 122.0,
+          "value": 8931.62,
+          "order_id": "0640015001449332736"
+        },
+        {
+          "date": "2026-05-01",
+          "side": "buy",
+          "symbol": "PFF",
+          "company": "iShares Preferred and Income Securities ETF",
+          "price": 31.4,
+          "quantity": 286.0,
+          "value": 8980.4,
+          "order_id": "0640014000122200064"
+        },
+        {
+          "date": "2026-05-01",
+          "side": "buy",
+          "symbol": "F",
+          "company": "Ford Motor",
+          "price": 11.85,
+          "quantity": 759.0,
+          "value": 8994.15,
+          "order_id": "0640013985986576384"
+        },
+        {
+          "date": "2026-05-01",
+          "side": "buy",
+          "symbol": "PFF",
+          "company": "iShares Preferred and Income Securities ETF",
+          "price": 31.39,
+          "quantity": 286.0,
+          "value": 8977.54,
+          "order_id": "0640011733323186176"
+        },
+        {
+          "date": "2026-05-01",
+          "side": "buy",
+          "symbol": "F",
+          "company": "Ford Motor",
+          "price": 11.86,
+          "quantity": 8.0,
+          "value": 94.88,
+          "order_id": "0640011216429711360"
+        },
+        {
+          "date": "2026-05-01",
+          "side": "buy",
+          "symbol": "WLDN",
+          "company": "Willdan Group",
+          "price": 73.45,
+          "quantity": 122.0,
+          "value": 8960.67,
+          "order_id": "0640009217864859648"
+        },
+        {
+          "date": "2026-05-01",
+          "side": "buy",
+          "symbol": "PFF",
+          "company": "iShares Preferred and Income Securities ETF",
+          "price": 31.43,
+          "quantity": 286.0,
+          "value": 8988.98,
+          "order_id": "0640006706482577408"
+        },
+        {
+          "date": "2026-05-01",
+          "side": "buy",
+          "symbol": "PFF",
+          "company": "iShares Preferred and Income Securities ETF",
+          "price": 31.42,
+          "quantity": 286.0,
+          "value": 8986.12,
+          "order_id": "0640003436012503040"
+        },
+        {
+          "date": "2026-05-01",
+          "side": "buy",
+          "symbol": "PFF",
+          "company": "iShares Preferred and Income Securities ETF",
+          "price": 31.42,
+          "quantity": 286.0,
+          "value": 8986.12,
+          "order_id": "0640000658154389504"
+        },
+        {
+          "date": "2026-05-01",
+          "side": "buy",
+          "symbol": "ET",
+          "company": "Energy Transfer",
+          "price": 19.88,
+          "quantity": 3.0,
+          "value": 59.64,
+          "order_id": "0639999398033686528"
+        },
+        {
+          "date": "2026-05-01",
+          "side": "buy",
+          "symbol": "ET",
+          "company": "Energy Transfer",
+          "price": 19.9,
+          "quantity": 3.0,
+          "value": 59.7,
+          "order_id": "0639998393305759744"
+        },
+        {
+          "date": "2026-05-01",
+          "side": "buy",
+          "symbol": "ET",
+          "company": "Energy Transfer",
+          "price": 19.9,
+          "quantity": 3.0,
+          "value": 59.7,
+          "order_id": "0639997895856291840"
+        },
+        {
+          "date": "2026-05-01",
+          "side": "buy",
+          "symbol": "ET",
+          "company": "Energy Transfer",
+          "price": 19.91,
+          "quantity": 452.0,
+          "value": 8999.32,
+          "order_id": "0639996380350218240"
+        },
+        {
+          "date": "2026-05-01",
+          "side": "buy",
+          "symbol": "PFF",
+          "company": "iShares Preferred and Income Securities ETF",
+          "price": 31.41,
+          "quantity": 286.0,
+          "value": 8983.26,
+          "order_id": "0639991345864179712"
+        },
+        {
+          "date": "2026-05-01",
+          "side": "buy",
+          "symbol": "ET",
+          "company": "Energy Transfer",
+          "price": 19.93,
+          "quantity": 1.0,
+          "value": 19.93,
+          "order_id": "0639992352367116288"
+        },
+        {
+          "date": "2026-05-01",
+          "side": "buy",
+          "symbol": "ET",
+          "company": "Energy Transfer",
+          "price": 19.92,
+          "quantity": 1.0,
+          "value": 19.92,
+          "order_id": "0639990838240182272"
+        },
+        {
+          "date": "2026-05-01",
+          "side": "buy",
+          "symbol": "F",
+          "company": "Ford Motor",
+          "price": 11.81,
+          "quantity": 2.0,
+          "value": 23.62,
+          "order_id": "0639989322674470912"
+        },
+        {
+          "date": "2026-05-01",
+          "side": "buy",
+          "symbol": "WLDN",
+          "company": "Willdan Group",
+          "price": 73.88,
+          "quantity": 120.0,
+          "value": 8865.6,
+          "order_id": "0639988323872374784"
+        },
+        {
+          "date": "2026-05-01",
+          "side": "buy",
+          "symbol": "AGNC",
+          "company": "AGNC Investment",
+          "price": 10.94,
+          "quantity": 8.0,
+          "value": 87.52,
+          "order_id": "0639985304530518016"
+        },
+        {
+          "date": "2026-05-01",
+          "side": "buy",
+          "symbol": "AGNC",
+          "company": "AGNC Investment",
+          "price": 10.94,
+          "quantity": 822.0,
+          "value": 8992.68,
+          "order_id": "0639984801730756608"
+        },
+        {
+          "date": "2026-05-01",
+          "side": "buy",
+          "symbol": "PFF",
+          "company": "iShares Preferred and Income Securities ETF",
+          "price": 31.4,
+          "quantity": 286.0,
+          "value": 8980.4,
+          "order_id": "0639983550037196800"
+        },
+        {
+          "date": "2026-05-01",
+          "side": "buy",
+          "symbol": "WLDN",
+          "company": "Willdan Group",
+          "price": 74.31,
+          "quantity": 120.0,
+          "value": 8917.2,
+          "order_id": "0639983291865202688"
+        },
+        {
+          "date": "2026-05-01",
+          "side": "buy",
+          "symbol": "PFF",
+          "company": "iShares Preferred and Income Securities ETF",
+          "price": 31.43,
+          "quantity": 286.0,
+          "value": 8990.41,
+          "order_id": "0639982287487959040"
+        },
+        {
+          "date": "2026-05-01",
+          "side": "buy",
+          "symbol": "F",
+          "company": "Ford Motor",
+          "price": 11.81,
+          "quantity": 762.0,
+          "value": 8999.22,
+          "order_id": "0639981268734246912"
+        },
+        {
+          "date": "2026-05-01",
+          "side": "buy",
+          "symbol": "F",
+          "company": "Ford Motor",
+          "price": 11.83,
+          "quantity": 11.0,
+          "value": 130.13,
+          "order_id": "0639976242271944704"
+        },
+        {
+          "date": "2026-05-01",
+          "side": "buy",
+          "symbol": "WLDN",
+          "company": "Willdan Group",
+          "price": 74.25,
+          "quantity": 121.0,
+          "value": 8984.25,
+          "order_id": "0639974491435237376"
+        },
+        {
+          "date": "2026-05-01",
+          "side": "buy",
+          "symbol": "PFF",
+          "company": "iShares Preferred and Income Securities ETF",
+          "price": 31.46,
+          "quantity": 3.0,
+          "value": 94.38,
+          "order_id": "0639974236899737600"
+        },
+        {
+          "date": "2026-05-01",
+          "side": "buy",
+          "symbol": "F",
+          "company": "Ford Motor",
+          "price": 11.89,
+          "quantity": 756.0,
+          "value": 8988.84,
+          "order_id": "0639974223939338240"
+        },
+        {
+          "date": "2026-05-01",
+          "side": "buy",
+          "symbol": "F",
+          "company": "Ford Motor",
+          "price": 11.89,
+          "quantity": 756.0,
+          "value": 8988.84,
+          "order_id": "0639973216379404288"
+        },
+        {
+          "date": "2026-05-01",
+          "side": "buy",
+          "symbol": "WLDN",
+          "company": "Willdan Group",
+          "price": 74.03,
+          "quantity": 1.0,
+          "value": 74.03,
+          "order_id": "0639972222350262272"
+        },
+        {
+          "date": "2026-05-01",
+          "side": "buy",
+          "symbol": "F",
+          "company": "Ford Motor",
+          "price": 11.9,
+          "quantity": 756.0,
+          "value": 8996.4,
+          "order_id": "0639971203306356736"
+        },
+        {
+          "date": "2026-05-01",
+          "side": "buy",
+          "symbol": "F",
+          "company": "Ford Motor",
+          "price": 11.92,
+          "quantity": 755.0,
+          "value": 8999.6,
+          "order_id": "0639968938134011904"
+        },
+        {
+          "date": "2026-05-01",
+          "side": "buy",
+          "symbol": "F",
+          "company": "Ford Motor",
+          "price": 11.92,
+          "quantity": 2.0,
+          "value": 23.84,
+          "order_id": "0639968434515542016"
+        },
+        {
+          "date": "2026-05-01",
+          "side": "buy",
+          "symbol": "PFF",
+          "company": "iShares Preferred and Income Securities ETF",
+          "price": 31.43,
+          "quantity": 1.0,
+          "value": 31.43,
+          "order_id": "0639968205037568000"
+        },
+        {
+          "date": "2026-05-01",
+          "side": "buy",
+          "symbol": "WLDN",
+          "company": "Willdan Group",
+          "price": 74.03,
+          "quantity": 121.0,
+          "value": 8957.63,
+          "order_id": "0639968192202932224"
+        },
+        {
+          "date": "2026-05-01",
+          "side": "buy",
+          "symbol": "ET",
+          "company": "Energy Transfer",
+          "price": 20.02,
+          "quantity": 449.0,
+          "value": 8988.98,
+          "order_id": "0639965422112669696"
+        },
+        {
+          "date": "2026-05-01",
+          "side": "buy",
+          "symbol": "ET",
+          "company": "Energy Transfer",
+          "price": 20.05,
+          "quantity": 448.0,
+          "value": 8982.4,
+          "order_id": "0639963660538576896"
+        },
+        {
+          "date": "2026-05-01",
+          "side": "sell",
+          "symbol": "AGNC",
+          "company": "AGNC Investment",
+          "price": 10.95,
+          "quantity": 821.0,
+          "value": 8989.95,
+          "order_id": "0640034919921418240"
+        },
+        {
+          "date": "2026-05-01",
+          "side": "sell",
+          "symbol": "ET",
+          "company": "Energy Transfer",
+          "price": 20.02,
+          "quantity": 450.0,
+          "value": 9009.0,
+          "order_id": "0640034378513055744"
+        },
+        {
+          "date": "2026-05-01",
+          "side": "sell",
+          "symbol": "AGNC",
+          "company": "AGNC Investment",
+          "price": 10.97,
+          "quantity": 821.0,
+          "value": 9007.93,
+          "order_id": "0640033876361805824"
+        },
+        {
+          "date": "2026-05-01",
+          "side": "sell",
+          "symbol": "PFF",
+          "company": "iShares Preferred and Income Securities ETF",
+          "price": 31.39,
+          "quantity": 286.0,
+          "value": 8977.54,
+          "order_id": "0640031121702322176"
+        },
+        {
+          "date": "2026-05-01",
+          "side": "sell",
+          "symbol": "ET",
+          "company": "Energy Transfer",
+          "price": 19.98,
+          "quantity": 450.0,
+          "value": 8993.25,
+          "order_id": "0640031360832962560"
+        },
+        {
+          "date": "2026-05-01",
+          "side": "sell",
+          "symbol": "ET",
+          "company": "Energy Transfer",
+          "price": 19.98,
+          "quantity": 450.0,
+          "value": 8991.0,
+          "order_id": "0640023066763788288"
+        },
+        {
+          "date": "2026-05-01",
+          "side": "sell",
+          "symbol": "PFF",
+          "company": "iShares Preferred and Income Securities ETF",
+          "price": 31.39,
+          "quantity": 286.0,
+          "value": 8977.54,
+          "order_id": "0640021293530218496"
+        },
+        {
+          "date": "2026-05-01",
+          "side": "sell",
+          "symbol": "WLDN",
+          "company": "Willdan Group",
+          "price": 73.14,
+          "quantity": 123.0,
+          "value": 8995.6,
+          "order_id": "0640020035436150784"
+        },
+        {
+          "date": "2026-05-01",
+          "side": "sell",
+          "symbol": "PFF",
+          "company": "iShares Preferred and Income Securities ETF",
+          "price": 31.39,
+          "quantity": 286.0,
+          "value": 8977.54,
+          "order_id": "0640019544026578944"
+        },
+        {
+          "date": "2026-05-01",
+          "side": "sell",
+          "symbol": "AGNC",
+          "company": "AGNC Investment",
+          "price": 10.96,
+          "quantity": 4.0,
+          "value": 43.82,
+          "order_id": "0640019031206625280"
+        },
+        {
+          "date": "2026-05-01",
+          "side": "sell",
+          "symbol": "F",
+          "company": "Ford Motor",
+          "price": 11.85,
+          "quantity": 8.0,
+          "value": 94.8,
+          "order_id": "0640017256860811264"
+        },
+        {
+          "date": "2026-05-01",
+          "side": "sell",
+          "symbol": "WLDN",
+          "company": "Willdan Group",
+          "price": 73.25,
+          "quantity": 122.0,
+          "value": 8936.5,
+          "order_id": "0640017017319948288"
+        },
+        {
+          "date": "2026-05-01",
+          "side": "sell",
+          "symbol": "ET",
+          "company": "Energy Transfer",
+          "price": 19.97,
+          "quantity": 451.0,
+          "value": 9006.47,
+          "order_id": "0640015757090947072"
+        },
+        {
+          "date": "2026-05-01",
+          "side": "sell",
+          "symbol": "PFF",
+          "company": "iShares Preferred and Income Securities ETF",
+          "price": 31.41,
+          "quantity": 286.0,
+          "value": 8984.69,
+          "order_id": "0640014250371055616"
+        },
+        {
+          "date": "2026-05-01",
+          "side": "sell",
+          "symbol": "F",
+          "company": "Ford Motor",
+          "price": 11.87,
+          "quantity": 759.0,
+          "value": 9009.33,
+          "order_id": "0640014236538241024"
+        },
+        {
+          "date": "2026-05-01",
+          "side": "sell",
+          "symbol": "PFF",
+          "company": "iShares Preferred and Income Securities ETF",
+          "price": 31.41,
+          "quantity": 286.0,
+          "value": 8983.26,
+          "order_id": "0640012988464365568"
+        },
+        {
+          "date": "2026-05-01",
+          "side": "sell",
+          "symbol": "WLDN",
+          "company": "Willdan Group",
+          "price": 73.42,
+          "quantity": 122.0,
+          "value": 8957.24,
+          "order_id": "0640012737501659136"
+        },
+        {
+          "date": "2026-05-01",
           "side": "sell",
           "symbol": "F",
           "company": "Ford Motor",
           "price": 11.86,
-          "quantity": 760.0,
-          "value": 9013.6,
-          "order_id": "0639613847375904768"
+          "quantity": 8.0,
+          "value": 94.9,
+          "order_id": "0640011720186527744"
         },
         {
-          "date": "2026-04-30",
+          "date": "2026-05-01",
           "side": "sell",
-          "symbol": "F",
-          "company": "Ford Motor",
-          "price": 11.84,
-          "quantity": 760.0,
-          "value": 8998.4,
-          "order_id": "0639612841284009984"
+          "symbol": "PFF",
+          "company": "iShares Preferred and Income Securities ETF",
+          "price": 31.4,
+          "quantity": 286.0,
+          "value": 8980.4,
+          "order_id": "0640011487314575360"
         },
         {
-          "date": "2026-04-30",
+          "date": "2026-05-01",
+          "side": "sell",
+          "symbol": "PFF",
+          "company": "iShares Preferred and Income Securities ETF",
+          "price": 31.44,
+          "quantity": 286.0,
+          "value": 8991.84,
+          "order_id": "0640005448182988800"
+        },
+        {
+          "date": "2026-05-01",
+          "side": "sell",
+          "symbol": "PFF",
+          "company": "iShares Preferred and Income Securities ETF",
+          "price": 31.43,
+          "quantity": 286.0,
+          "value": 8988.98,
+          "order_id": "0640002420261126144"
+        },
+        {
+          "date": "2026-05-01",
+          "side": "sell",
+          "symbol": "ET",
+          "company": "Energy Transfer",
+          "price": 19.88,
+          "quantity": 3.0,
+          "value": 59.64,
+          "order_id": "0640001412328030208"
+        },
+        {
+          "date": "2026-05-01",
+          "side": "sell",
+          "symbol": "PFF",
+          "company": "iShares Preferred and Income Securities ETF",
+          "price": 31.43,
+          "quantity": 286.0,
+          "value": 8988.98,
+          "order_id": "0639999658748149760"
+        },
+        {
+          "date": "2026-05-01",
+          "side": "sell",
+          "symbol": "ET",
+          "company": "Energy Transfer",
+          "price": 19.9,
+          "quantity": 3.0,
+          "value": 59.7,
+          "order_id": "0639998896017440768"
+        },
+        {
+          "date": "2026-05-01",
+          "side": "sell",
+          "symbol": "ET",
+          "company": "Energy Transfer",
+          "price": 19.91,
+          "quantity": 3.0,
+          "value": 59.73,
+          "order_id": "0639998144369623040"
+        },
+        {
+          "date": "2026-05-01",
+          "side": "sell",
+          "symbol": "ET",
+          "company": "Energy Transfer",
+          "price": 19.91,
+          "quantity": 452.0,
+          "value": 8999.32,
+          "order_id": "0639997383245955072"
+        },
+        {
+          "date": "2026-05-01",
+          "side": "sell",
+          "symbol": "ET",
+          "company": "Energy Transfer",
+          "price": 19.91,
+          "quantity": 1.0,
+          "value": 19.91,
+          "order_id": "0639995120095985664"
+        },
+        {
+          "date": "2026-05-01",
+          "side": "sell",
+          "symbol": "ET",
+          "company": "Energy Transfer",
+          "price": 19.95,
+          "quantity": 1.0,
+          "value": 19.95,
+          "order_id": "0639991848144601088"
+        },
+        {
+          "date": "2026-05-01",
           "side": "sell",
           "symbol": "WLDN",
           "company": "Willdan Group",
-          "price": 75.21,
-          "quantity": 119.0,
-          "value": 8949.99,
-          "order_id": "0639611842121891840"
+          "price": 74.28,
+          "quantity": 120.0,
+          "value": 8914.2,
+          "order_id": "0639991099058782208"
         },
         {
-          "date": "2026-04-30",
-          "side": "sell",
-          "symbol": "AGNC",
-          "company": "AGNC Investment",
-          "price": 11.04,
-          "quantity": 815.0,
-          "value": 8997.6,
-          "order_id": "0639612100428103680"
-        },
-        {
-          "date": "2026-04-30",
-          "side": "sell",
-          "symbol": "AGNC",
-          "company": "AGNC Investment",
-          "price": 11.01,
-          "quantity": 818.0,
-          "value": 9006.18,
-          "order_id": "0639603033089441792"
-        },
-        {
-          "date": "2026-04-30",
-          "side": "sell",
-          "symbol": "AGNC",
-          "company": "AGNC Investment",
-          "price": 11.01,
-          "quantity": 818.0,
-          "value": 9006.18,
-          "order_id": "0639602031992897536"
-        },
-        {
-          "date": "2026-04-30",
-          "side": "sell",
-          "symbol": "AGNC",
-          "company": "AGNC Investment",
-          "price": 11.01,
-          "quantity": 818.0,
-          "value": 9006.18,
-          "order_id": "0639600515693379584"
-        },
-        {
-          "date": "2026-04-30",
+          "date": "2026-05-01",
           "side": "sell",
           "symbol": "F",
           "company": "Ford Motor",
           "price": 11.83,
-          "quantity": 761.0,
-          "value": 9004.76,
-          "order_id": "0639598495565479936"
+          "quantity": 2.0,
+          "value": 23.66,
+          "order_id": "0639989574282379264"
         },
         {
-          "date": "2026-04-30",
-          "side": "sell",
-          "symbol": "AGNC",
-          "company": "AGNC Investment",
-          "price": 10.99,
-          "quantity": 820.0,
-          "value": 9015.9,
-          "order_id": "0639596489480208384"
-        },
-        {
-          "date": "2026-04-30",
-          "side": "sell",
-          "symbol": "AGNC",
-          "company": "AGNC Investment",
-          "price": 10.98,
-          "quantity": 820.0,
-          "value": 9003.6,
-          "order_id": "0639595734367141888"
-        },
-        {
-          "date": "2026-04-30",
-          "side": "sell",
-          "symbol": "AGNC",
-          "company": "AGNC Investment",
-          "price": 10.98,
-          "quantity": 820.0,
-          "value": 9003.6,
-          "order_id": "0639595230908055552"
-        },
-        {
-          "date": "2026-04-30",
-          "side": "sell",
-          "symbol": "AGNC",
-          "company": "AGNC Investment",
-          "price": 10.98,
-          "quantity": 820.0,
-          "value": 9003.6,
-          "order_id": "0639593218657189888"
-        },
-        {
-          "date": "2026-04-30",
-          "side": "sell",
-          "symbol": "AGNC",
-          "company": "AGNC Investment",
-          "price": 10.98,
-          "quantity": 821.0,
-          "value": 9012.03,
-          "order_id": "0639591461289852928"
-        },
-        {
-          "date": "2026-04-30",
-          "side": "sell",
-          "symbol": "ET",
-          "company": "Energy Transfer",
-          "price": 19.86,
-          "quantity": 453.0,
-          "value": 8996.58,
-          "order_id": "0639588434818564096"
-        },
-        {
-          "date": "2026-04-30",
+          "date": "2026-05-01",
           "side": "sell",
           "symbol": "WLDN",
           "company": "Willdan Group",
-          "price": 74.53,
-          "quantity": 121.0,
-          "value": 9018.69,
-          "order_id": "0639587934667997184"
+          "price": 74.11,
+          "quantity": 120.0,
+          "value": 8892.95,
+          "order_id": "0639988071823245312"
         },
         {
-          "date": "2026-04-29",
-          "side": "buy",
-          "symbol": "PFF",
-          "company": "iShares Preferred and Income Securities ETF",
-          "price": 31.18,
-          "quantity": 288.0,
-          "value": 8979.84,
-          "order_id": "0639308348546580480"
-        },
-        {
-          "date": "2026-04-29",
-          "side": "buy",
-          "symbol": "PFF",
-          "company": "iShares Preferred and Income Securities ETF",
-          "price": 31.18,
-          "quantity": 288.0,
-          "value": 8979.84,
-          "order_id": "0639307843116171264"
-        },
-        {
-          "date": "2026-04-29",
-          "side": "buy",
-          "symbol": "WLDN",
-          "company": "Willdan Group",
-          "price": 72.68,
-          "quantity": 123.0,
-          "value": 8939.64,
-          "order_id": "0639307338859347968"
-        },
-        {
-          "date": "2026-04-29",
-          "side": "buy",
-          "symbol": "F",
-          "company": "Ford Motor",
-          "price": 12.14,
-          "quantity": 741.0,
-          "value": 8995.52,
-          "order_id": "0639306322102157312"
-        },
-        {
-          "date": "2026-04-29",
-          "side": "buy",
-          "symbol": "PFF",
-          "company": "iShares Preferred and Income Securities ETF",
-          "price": 31.19,
-          "quantity": 288.0,
-          "value": 8982.72,
-          "order_id": "0639305830558990336"
-        },
-        {
-          "date": "2026-04-29",
-          "side": "buy",
-          "symbol": "WLDN",
-          "company": "Willdan Group",
-          "price": 72.94,
-          "quantity": 123.0,
-          "value": 8971.31,
-          "order_id": "0639304075817385984"
-        },
-        {
-          "date": "2026-04-29",
-          "side": "buy",
-          "symbol": "WLDN",
-          "company": "Willdan Group",
-          "price": 72.91,
-          "quantity": 123.0,
-          "value": 8968.35,
-          "order_id": "0639302305384890368"
-        },
-        {
-          "date": "2026-04-29",
-          "side": "buy",
-          "symbol": "WLDN",
-          "company": "Willdan Group",
-          "price": 72.61,
-          "quantity": 123.0,
-          "value": 8931.04,
-          "order_id": "0639301802138992640"
-        },
-        {
-          "date": "2026-04-29",
-          "side": "buy",
-          "symbol": "AGNC",
-          "company": "AGNC Investment",
-          "price": 10.92,
-          "quantity": 824.0,
-          "value": 8998.08,
-          "order_id": "0639298283005476864"
-        },
-        {
-          "date": "2026-04-29",
-          "side": "buy",
-          "symbol": "WLDN",
-          "company": "Willdan Group",
-          "price": 72.64,
-          "quantity": 123.0,
-          "value": 8935.09,
-          "order_id": "0639295763570163712"
-        },
-        {
-          "date": "2026-04-29",
-          "side": "buy",
-          "symbol": "PFF",
-          "company": "iShares Preferred and Income Securities ETF",
-          "price": 31.17,
-          "quantity": 288.0,
-          "value": 8976.96,
-          "order_id": "0639293259730780160"
-        },
-        {
-          "date": "2026-04-29",
-          "side": "buy",
-          "symbol": "WLDN",
-          "company": "Willdan Group",
-          "price": 72.68,
-          "quantity": 123.0,
-          "value": 8940.22,
-          "order_id": "0639292995892379648"
-        },
-        {
-          "date": "2026-04-29",
-          "side": "buy",
-          "symbol": "WLDN",
-          "company": "Willdan Group",
-          "price": 72.46,
-          "quantity": 124.0,
-          "value": 8985.04,
-          "order_id": "0639290228477198336"
-        },
-        {
-          "date": "2026-04-29",
-          "side": "buy",
-          "symbol": "F",
-          "company": "Ford Motor",
-          "price": 12.15,
-          "quantity": 740.0,
-          "value": 8991.0,
-          "order_id": "0639289713002250240"
-        },
-        {
-          "date": "2026-04-29",
-          "side": "buy",
-          "symbol": "ET",
-          "company": "Energy Transfer",
-          "price": 19.62,
-          "quantity": 458.0,
-          "value": 8985.96,
-          "order_id": "0639286954147643392"
-        },
-        {
-          "date": "2026-04-29",
-          "side": "buy",
-          "symbol": "PFF",
-          "company": "iShares Preferred and Income Securities ETF",
-          "price": 31.2,
-          "quantity": 288.0,
-          "value": 8984.16,
-          "order_id": "0639283688060682240"
-        },
-        {
-          "date": "2026-04-29",
-          "side": "buy",
-          "symbol": "ET",
-          "company": "Energy Transfer",
-          "price": 19.62,
-          "quantity": 458.0,
-          "value": 8985.96,
-          "order_id": "0639281417012838400"
-        },
-        {
-          "date": "2026-04-29",
-          "side": "buy",
-          "symbol": "WLDN",
-          "company": "Willdan Group",
-          "price": 72.72,
-          "quantity": 123.0,
-          "value": 8944.51,
-          "order_id": "0639278650089144320"
-        },
-        {
-          "date": "2026-04-29",
-          "side": "buy",
-          "symbol": "F",
-          "company": "Ford Motor",
-          "price": 12.15,
-          "quantity": 740.0,
-          "value": 8991.0,
-          "order_id": "0639278891890835456"
-        },
-        {
-          "date": "2026-04-29",
-          "side": "buy",
-          "symbol": "WLDN",
-          "company": "Willdan Group",
-          "price": 72.69,
-          "quantity": 123.0,
-          "value": 8941.49,
-          "order_id": "0639277659210055680"
-        },
-        {
-          "date": "2026-04-29",
-          "side": "buy",
-          "symbol": "F",
-          "company": "Ford Motor",
-          "price": 12.16,
-          "quantity": 740.0,
-          "value": 8998.4,
-          "order_id": "0639277644534120448"
-        },
-        {
-          "date": "2026-04-29",
-          "side": "buy",
-          "symbol": "ET",
-          "company": "Energy Transfer",
-          "price": 19.63,
-          "quantity": 458.0,
-          "value": 8990.54,
-          "order_id": "0639275377570807808"
-        },
-        {
-          "date": "2026-04-29",
-          "side": "buy",
-          "symbol": "ET",
-          "company": "Energy Transfer",
-          "price": 19.63,
-          "quantity": 458.0,
-          "value": 8990.54,
-          "order_id": "0639273868897222656"
-        },
-        {
-          "date": "2026-04-29",
-          "side": "buy",
-          "symbol": "WLDN",
-          "company": "Willdan Group",
-          "price": 72.75,
-          "quantity": 123.0,
-          "value": 8948.25,
-          "order_id": "0639272871620968448"
-        },
-        {
-          "date": "2026-04-29",
-          "side": "buy",
-          "symbol": "F",
-          "company": "Ford Motor",
-          "price": 12.16,
-          "quantity": 740.0,
-          "value": 8998.4,
-          "order_id": "0639272850561368064"
-        },
-        {
-          "date": "2026-04-29",
-          "side": "buy",
-          "symbol": "F",
-          "company": "Ford Motor",
-          "price": 12.16,
-          "quantity": 740.0,
-          "value": 8998.4,
-          "order_id": "0639272350521458688"
-        },
-        {
-          "date": "2026-04-29",
-          "side": "buy",
-          "symbol": "WLDN",
-          "company": "Willdan Group",
-          "price": 72.51,
-          "quantity": 123.0,
-          "value": 8918.73,
-          "order_id": "0639269593731170304"
-        },
-        {
-          "date": "2026-04-29",
-          "side": "buy",
-          "symbol": "F",
-          "company": "Ford Motor",
-          "price": 12.18,
-          "quantity": 738.0,
-          "value": 8988.84,
-          "order_id": "0639269580040962048"
-        },
-        {
-          "date": "2026-04-29",
-          "side": "buy",
-          "symbol": "ET",
-          "company": "Energy Transfer",
-          "price": 19.63,
-          "quantity": 458.0,
-          "value": 8990.54,
-          "order_id": "0639266318294417408"
-        },
-        {
-          "date": "2026-04-29",
-          "side": "buy",
-          "symbol": "ET",
-          "company": "Energy Transfer",
-          "price": 19.65,
-          "quantity": 457.0,
-          "value": 8981.88,
-          "order_id": "0639262291624067072"
-        },
-        {
-          "date": "2026-04-29",
-          "side": "buy",
-          "symbol": "WLDN",
-          "company": "Willdan Group",
-          "price": 72.15,
-          "quantity": 1.0,
-          "value": 72.15,
-          "order_id": "0639262041814794240"
-        },
-        {
-          "date": "2026-04-29",
-          "side": "buy",
-          "symbol": "PFF",
-          "company": "iShares Preferred and Income Securities ETF",
-          "price": 31.19,
-          "quantity": 6.0,
-          "value": 187.14,
-          "order_id": "0639260046887157760"
-        },
-        {
-          "date": "2026-04-29",
-          "side": "buy",
-          "symbol": "WLDN",
-          "company": "Willdan Group",
-          "price": 72.45,
-          "quantity": 123.0,
-          "value": 8911.3,
-          "order_id": "0639260034102853632"
-        },
-        {
-          "date": "2026-04-29",
-          "side": "buy",
-          "symbol": "WLDN",
-          "company": "Willdan Group",
-          "price": 72.47,
-          "quantity": 124.0,
-          "value": 8986.64,
-          "order_id": "0639257267229655040"
-        },
-        {
-          "date": "2026-04-29",
-          "side": "buy",
-          "symbol": "WLDN",
-          "company": "Willdan Group",
-          "price": 72.69,
-          "quantity": 123.0,
-          "value": 8941.24,
-          "order_id": "0639254242033270784"
-        },
-        {
-          "date": "2026-04-29",
-          "side": "sell",
-          "symbol": "PFF",
-          "company": "iShares Preferred and Income Securities ETF",
-          "price": 31.18,
-          "quantity": 288.0,
-          "value": 8979.84,
-          "order_id": "0639309856885309440"
-        },
-        {
-          "date": "2026-04-29",
-          "side": "sell",
-          "symbol": "WLDN",
-          "company": "Willdan Group",
-          "price": 72.8,
-          "quantity": 123.0,
-          "value": 8954.52,
-          "order_id": "0639309604111450112"
-        },
-        {
-          "date": "2026-04-29",
-          "side": "sell",
-          "symbol": "PFF",
-          "company": "iShares Preferred and Income Securities ETF",
-          "price": 31.19,
-          "quantity": 288.0,
-          "value": 8982.72,
-          "order_id": "0639308108019204096"
-        },
-        {
-          "date": "2026-04-29",
-          "side": "sell",
-          "symbol": "PFF",
-          "company": "iShares Preferred and Income Securities ETF",
-          "price": 31.19,
-          "quantity": 288.0,
-          "value": 8982.72,
-          "order_id": "0639306838303440896"
-        },
-        {
-          "date": "2026-04-29",
-          "side": "sell",
-          "symbol": "F",
-          "company": "Ford Motor",
-          "price": 12.15,
-          "quantity": 741.0,
-          "value": 9004.11,
-          "order_id": "0639306825066217472"
-        },
-        {
-          "date": "2026-04-29",
-          "side": "sell",
-          "symbol": "WLDN",
-          "company": "Willdan Group",
-          "price": 73.26,
-          "quantity": 123.0,
-          "value": 9010.98,
-          "order_id": "0639305588686061568"
-        },
-        {
-          "date": "2026-04-29",
-          "side": "sell",
-          "symbol": "WLDN",
-          "company": "Willdan Group",
-          "price": 73.19,
-          "quantity": 123.0,
-          "value": 9002.2,
-          "order_id": "0639303312550592512"
-        },
-        {
-          "date": "2026-04-29",
-          "side": "sell",
-          "symbol": "WLDN",
-          "company": "Willdan Group",
-          "price": 73.24,
-          "quantity": 123.0,
-          "value": 9007.93,
-          "order_id": "0639302056054489088"
-        },
-        {
-          "date": "2026-04-29",
+          "date": "2026-05-01",
           "side": "sell",
           "symbol": "AGNC",
           "company": "AGNC Investment",
           "price": 10.94,
-          "quantity": 824.0,
-          "value": 9010.44,
-          "order_id": "0639298529558462464"
+          "quantity": 8.0,
+          "value": 87.54,
+          "order_id": "0639985809395482624"
         },
         {
-          "date": "2026-04-29",
+          "date": "2026-05-01",
           "side": "sell",
-          "symbol": "WLDN",
-          "company": "Willdan Group",
-          "price": 73.22,
-          "quantity": 123.0,
-          "value": 9006.06,
-          "order_id": "0639297024559022080"
+          "symbol": "AGNC",
+          "company": "AGNC Investment",
+          "price": 10.95,
+          "quantity": 822.0,
+          "value": 9003.37,
+          "order_id": "0639985054843600896"
         },
         {
-          "date": "2026-04-29",
-          "side": "sell",
-          "symbol": "PFF",
-          "company": "iShares Preferred and Income Securities ETF",
-          "price": 31.17,
-          "quantity": 288.0,
-          "value": 8976.96,
-          "order_id": "0639294013879287808"
-        },
-        {
-          "date": "2026-04-29",
-          "side": "sell",
-          "symbol": "WLDN",
-          "company": "Willdan Group",
-          "price": 72.75,
-          "quantity": 123.0,
-          "value": 8948.25,
-          "order_id": "0639294000839229440"
-        },
-        {
-          "date": "2026-04-29",
-          "side": "sell",
-          "symbol": "WLDN",
-          "company": "Willdan Group",
-          "price": 72.67,
-          "quantity": 124.0,
-          "value": 9011.48,
-          "order_id": "0639290481495113728"
-        },
-        {
-          "date": "2026-04-29",
-          "side": "sell",
-          "symbol": "F",
-          "company": "Ford Motor",
-          "price": 12.16,
-          "quantity": 740.0,
-          "value": 8998.4,
-          "order_id": "0639290216004059136"
-        },
-        {
-          "date": "2026-04-29",
-          "side": "sell",
-          "symbol": "ET",
-          "company": "Energy Transfer",
-          "price": 19.63,
-          "quantity": 458.0,
-          "value": 8990.54,
-          "order_id": "0639287204238032896"
-        },
-        {
-          "date": "2026-04-29",
+          "date": "2026-05-01",
           "side": "sell",
           "symbol": "PFF",
           "company": "iShares Preferred and Income Securities ETF",
-          "price": 31.19,
-          "quantity": 288.0,
-          "value": 8982.72,
-          "order_id": "0639286714820657152"
+          "price": 31.41,
+          "quantity": 286.0,
+          "value": 8983.26,
+          "order_id": "0639984048404365312"
         },
         {
-          "date": "2026-04-29",
+          "date": "2026-05-01",
           "side": "sell",
-          "symbol": "WLDN",
-          "company": "Willdan Group",
-          "price": 72.4,
-          "quantity": 123.0,
-          "value": 8904.68,
-          "order_id": "0639285444048027648"
+          "symbol": "PFF",
+          "company": "iShares Preferred and Income Securities ETF",
+          "price": 31.42,
+          "quantity": 286.0,
+          "value": 8986.12,
+          "order_id": "0639983040303431680"
         },
         {
-          "date": "2026-04-29",
-          "side": "sell",
-          "symbol": "ET",
-          "company": "Energy Transfer",
-          "price": 19.63,
-          "quantity": 458.0,
-          "value": 8990.54,
-          "order_id": "0639282171336654848"
-        },
-        {
-          "date": "2026-04-29",
-          "side": "sell",
-          "symbol": "F",
-          "company": "Ford Motor",
-          "price": 12.16,
-          "quantity": 740.0,
-          "value": 8998.4,
-          "order_id": "0639279143293157376"
-        },
-        {
-          "date": "2026-04-29",
-          "side": "sell",
-          "symbol": "WLDN",
-          "company": "Willdan Group",
-          "price": 72.82,
-          "quantity": 123.0,
-          "value": 8956.86,
-          "order_id": "0639278400666533888"
-        },
-        {
-          "date": "2026-04-29",
-          "side": "sell",
-          "symbol": "F",
-          "company": "Ford Motor",
-          "price": 12.17,
-          "quantity": 740.0,
-          "value": 9004.84,
-          "order_id": "0639278387147505664"
-        },
-        {
-          "date": "2026-04-29",
-          "side": "sell",
-          "symbol": "WLDN",
-          "company": "Willdan Group",
-          "price": 72.72,
-          "quantity": 123.0,
-          "value": 8944.86,
-          "order_id": "0639276888997363712"
-        },
-        {
-          "date": "2026-04-29",
+          "date": "2026-05-01",
           "side": "sell",
           "symbol": "ET",
           "company": "Energy Transfer",
-          "price": 19.63,
-          "quantity": 458.0,
-          "value": 8990.54,
-          "order_id": "0639276382942068736"
+          "price": 19.92,
+          "quantity": 449.0,
+          "value": 8944.08,
+          "order_id": "0639982785586724864"
         },
         {
-          "date": "2026-04-29",
-          "side": "sell",
-          "symbol": "ET",
-          "company": "Energy Transfer",
-          "price": 19.64,
-          "quantity": 458.0,
-          "value": 8995.12,
-          "order_id": "0639274370921791488"
-        },
-        {
-          "date": "2026-04-29",
+          "date": "2026-05-01",
           "side": "sell",
           "symbol": "F",
           "company": "Ford Motor",
-          "price": 12.18,
-          "quantity": 740.0,
-          "value": 9013.2,
-          "order_id": "0639273356135170048"
+          "price": 11.84,
+          "quantity": 762.0,
+          "value": 9022.08,
+          "order_id": "0639981520900030464"
         },
         {
-          "date": "2026-04-29",
-          "side": "sell",
-          "symbol": "F",
-          "company": "Ford Motor",
-          "price": 12.17,
-          "quantity": 740.0,
-          "value": 9005.8,
-          "order_id": "0639272614775160832"
-        },
-        {
-          "date": "2026-04-29",
-          "side": "sell",
-          "symbol": "F",
-          "company": "Ford Motor",
-          "price": 12.18,
-          "quantity": 738.0,
-          "value": 8992.46,
-          "order_id": "0639271090786598912"
-        },
-        {
-          "date": "2026-04-29",
+          "date": "2026-05-01",
           "side": "sell",
           "symbol": "WLDN",
           "company": "Willdan Group",
-          "price": 72.78,
-          "quantity": 123.0,
-          "value": 8951.94,
-          "order_id": "0639270596090200064"
+          "price": 74.19,
+          "quantity": 121.0,
+          "value": 8976.8,
+          "order_id": "0639977754406551552"
         },
         {
-          "date": "2026-04-29",
+          "date": "2026-05-01",
           "side": "sell",
-          "symbol": "ET",
-          "company": "Energy Transfer",
-          "price": 19.65,
-          "quantity": 458.0,
-          "value": 8999.7,
-          "order_id": "0639267577663455232"
+          "symbol": "F",
+          "company": "Ford Motor",
+          "price": 11.82,
+          "quantity": 11.0,
+          "value": 130.02,
+          "order_id": "0639977242755989504"
         },
         {
-          "date": "2026-04-29",
+          "date": "2026-05-01",
+          "side": "sell",
+          "symbol": "PFF",
+          "company": "iShares Preferred and Income Securities ETF",
+          "price": 31.47,
+          "quantity": 3.0,
+          "value": 94.41,
+          "order_id": "0639974503137280000"
+        },
+        {
+          "date": "2026-05-01",
+          "side": "sell",
+          "symbol": "F",
+          "company": "Ford Motor",
+          "price": 11.9,
+          "quantity": 756.0,
+          "value": 8996.4,
+          "order_id": "0639974474204971008"
+        },
+        {
+          "date": "2026-05-01",
+          "side": "sell",
+          "symbol": "F",
+          "company": "Ford Motor",
+          "price": 11.9,
+          "quantity": 756.0,
+          "value": 8996.4,
+          "order_id": "0639973970959794176"
+        },
+        {
+          "date": "2026-05-01",
           "side": "sell",
           "symbol": "WLDN",
           "company": "Willdan Group",
-          "price": 72.86,
+          "price": 74.24,
           "quantity": 1.0,
-          "value": 72.86,
-          "order_id": "0639266073699352576"
+          "value": 74.24,
+          "order_id": "0639972971331387392"
         },
         {
-          "date": "2026-04-29",
+          "date": "2026-05-01",
           "side": "sell",
-          "symbol": "ET",
-          "company": "Energy Transfer",
-          "price": 19.64,
-          "quantity": 457.0,
-          "value": 8975.48,
-          "order_id": "0639264304277716992"
+          "symbol": "F",
+          "company": "Ford Motor",
+          "price": 11.9,
+          "quantity": 756.0,
+          "value": 8996.4,
+          "order_id": "0639972711355777024"
         },
         {
-          "date": "2026-04-29",
+          "date": "2026-05-01",
           "side": "sell",
-          "symbol": "WLDN",
-          "company": "Willdan Group",
-          "price": 72.19,
-          "quantity": 123.0,
-          "value": 8879.41,
-          "order_id": "0639260780583387136"
+          "symbol": "F",
+          "company": "Ford Motor",
+          "price": 11.91,
+          "quantity": 755.0,
+          "value": 8992.05,
+          "order_id": "0639970951362969600"
         },
         {
-          "date": "2026-04-29",
+          "date": "2026-05-01",
           "side": "sell",
           "symbol": "PFF",
           "company": "iShares Preferred and Income Securities ETF",
-          "price": 31.19,
-          "quantity": 6.0,
-          "value": 187.14,
-          "order_id": "0639260533501132800"
+          "price": 31.44,
+          "quantity": 1.0,
+          "value": 31.44,
+          "order_id": "0639969715188334592"
         },
         {
-          "date": "2026-04-29",
+          "date": "2026-05-01",
+          "side": "sell",
+          "symbol": "F",
+          "company": "Ford Motor",
+          "price": 11.94,
+          "quantity": 2.0,
+          "value": 23.88,
+          "order_id": "0639968687122513920"
+        },
+        {
+          "date": "2026-05-01",
           "side": "sell",
           "symbol": "WLDN",
           "company": "Willdan Group",
-          "price": 72.61,
-          "quantity": 124.0,
-          "value": 9003.62,
-          "order_id": "0639258013639507968"
+          "price": 74.18,
+          "quantity": 121.0,
+          "value": 8975.78,
+          "order_id": "0639968446226825216"
         },
         {
-          "date": "2026-04-29",
+          "date": "2026-05-01",
+          "side": "sell",
+          "symbol": "ET",
+          "company": "Energy Transfer",
+          "price": 20.06,
+          "quantity": 448.0,
+          "value": 8986.88,
+          "order_id": "0639964924718481408"
+        },
+        {
+          "date": "2026-05-01",
+          "side": "sell",
+          "symbol": "PFF",
+          "company": "iShares Preferred and Income Securities ETF",
+          "price": 31.42,
+          "quantity": 286.0,
+          "value": 8986.12,
+          "order_id": "0639963427359621120"
+        },
+        {
+          "date": "2026-05-01",
           "side": "sell",
           "symbol": "WLDN",
           "company": "Willdan Group",
-          "price": 72.9,
-          "quantity": 123.0,
-          "value": 8966.7,
-          "order_id": "0639254497227309056"
+          "price": 73.76,
+          "quantity": 1.0,
+          "value": 73.76,
+          "order_id": "0639963167388270592"
         }
       ]
     },
@@ -1384,10 +1384,10 @@
       "color": "#66bb6a",
       "account_id": "1800473182_16",
       "total_trades": 100,
-      "total_buy_value": 30459.98,
-      "total_sell_value": 31970.38,
+      "total_buy_value": 30659.98,
+      "total_sell_value": 32179.46,
       "current_holdings": {
-        "META": 1.07,
+        "AAPL": 3.87,
         "NVDA": 1.49,
         "SMH": 1.06,
         "XLE": 2.81,
@@ -1396,6 +1396,26 @@
       },
       "holdings_count": 6,
       "recent_trades": [
+        {
+          "date": "2026-05-01",
+          "side": "buy",
+          "symbol": "AAPL",
+          "company": "Apple",
+          "price": 284.42,
+          "quantity": 3.87,
+          "value": 1100.0,
+          "order_id": "0639955041612857344"
+        },
+        {
+          "date": "2026-04-30",
+          "side": "sell",
+          "symbol": "META",
+          "company": "Meta",
+          "price": 608.2,
+          "quantity": 1.07,
+          "value": 651.76,
+          "order_id": "0639637981564698624"
+        },
         {
           "date": "2026-04-30",
           "side": "sell",
@@ -1675,29 +1695,29 @@
           "quantity": 1.0,
           "value": 249.6,
           "order_id": "0633869902184972288"
-        },
-        {
-          "date": "2026-04-14",
-          "side": "sell",
-          "symbol": "NVDA",
-          "company": "Nvidia",
-          "price": 196.31,
-          "quantity": 1.0,
-          "value": 196.31,
-          "order_id": "0633869901908148224"
-        },
-        {
-          "date": "2026-04-14",
-          "side": "sell",
-          "symbol": "MU",
-          "company": "Micron Technology",
-          "price": 443.76,
-          "quantity": 1.04,
-          "value": 461.01,
-          "order_id": "0633824509741629440"
         }
       ],
       "all_trades": [
+        {
+          "date": "2026-05-01",
+          "side": "buy",
+          "symbol": "AAPL",
+          "company": "Apple",
+          "price": 284.42,
+          "quantity": 3.87,
+          "value": 1100.0,
+          "order_id": "0639955041612857344"
+        },
+        {
+          "date": "2026-04-30",
+          "side": "sell",
+          "symbol": "META",
+          "company": "Meta",
+          "price": 608.2,
+          "quantity": 1.07,
+          "value": 651.76,
+          "order_id": "0639637981564698624"
+        },
         {
           "date": "2026-04-30",
           "side": "sell",
@@ -2677,26 +2697,6 @@
           "quantity": 29.27,
           "value": 900.15,
           "order_id": "0621473372672589824"
-        },
-        {
-          "date": "2026-03-10",
-          "side": "buy",
-          "symbol": "PSQ",
-          "company": "ProShares Short QQQ",
-          "price": 30.75,
-          "quantity": 29.27,
-          "value": 900.0,
-          "order_id": "0621186502780649472"
-        },
-        {
-          "date": "2026-03-10",
-          "side": "sell",
-          "symbol": "TLT",
-          "company": "iShares 20+ Year Treasury Bond ETF",
-          "price": 88.54,
-          "quantity": 5.0,
-          "value": 442.68,
-          "order_id": "0621171261380427776"
         }
       ]
     },
@@ -2706,14 +2706,24 @@
       "color": "#ff9800",
       "account_id": "1800473182_17",
       "total_trades": 100,
-      "total_buy_value": 88331.74,
-      "total_sell_value": 95459.78,
+      "total_buy_value": 93331.74,
+      "total_sell_value": 93490.36,
       "current_holdings": {
-        "NVDA": 10.08,
+        "NVDA": 35.11,
         "INTC": 31.78
       },
       "holdings_count": 2,
       "recent_trades": [
+        {
+          "date": "2026-05-01",
+          "side": "buy",
+          "symbol": "NVDA",
+          "company": "Nvidia",
+          "price": 199.73,
+          "quantity": 25.03,
+          "value": 5000.0,
+          "order_id": "0640030566372278272"
+        },
         {
           "date": "2026-04-29",
           "side": "sell",
@@ -3003,19 +3013,19 @@
           "quantity": 98.51,
           "value": 1861.39,
           "order_id": "0632420343999889408"
-        },
-        {
-          "date": "2026-04-06",
-          "side": "sell",
-          "symbol": "VOR",
-          "company": "Vor Biopharma",
-          "price": 16.8,
-          "quantity": 112.96,
-          "value": 1897.31,
-          "order_id": "0630925464530583552"
         }
       ],
       "all_trades": [
+        {
+          "date": "2026-05-01",
+          "side": "buy",
+          "symbol": "NVDA",
+          "company": "Nvidia",
+          "price": 199.73,
+          "quantity": 25.03,
+          "value": 5000.0,
+          "order_id": "0640030566372278272"
+        },
         {
           "date": "2026-04-29",
           "side": "sell",
@@ -4005,16 +4015,6 @@
           "quantity": 81.93,
           "value": 1526.06,
           "order_id": "0601994748039954432"
-        },
-        {
-          "date": "2026-01-15",
-          "side": "sell",
-          "symbol": "CALX",
-          "company": "Calix",
-          "price": 60.16,
-          "quantity": 32.74,
-          "value": 1969.42,
-          "order_id": "0601587019064410112"
         }
       ]
     },
@@ -5351,15 +5351,126 @@
       "color": "#81d4fa",
       "account_id": "1800473182_19",
       "total_trades": 100,
-      "total_buy_value": 22754.78,
-      "total_sell_value": 22828.97,
+      "total_buy_value": 25155.28,
+      "total_sell_value": 27726.23,
       "current_holdings": {
-        "AVGO": 4.85,
-        "MRVL": 12.09,
-        "NVDA": 5.11
+        "MU": 1.02,
+        "MRVL": 3.15,
+        "NVDA": 0.06,
+        "AVGO": 0.35
       },
-      "holdings_count": 3,
+      "holdings_count": 4,
       "recent_trades": [
+        {
+          "date": "2026-05-01",
+          "side": "buy",
+          "symbol": "MU",
+          "company": "Micron Technology",
+          "price": 542.62,
+          "quantity": 0.92,
+          "value": 500.0,
+          "order_id": "0640015336879620096"
+        },
+        {
+          "date": "2026-05-01",
+          "side": "buy",
+          "symbol": "MRVL",
+          "company": "Marvell Technology",
+          "price": 164.89,
+          "quantity": 6.06,
+          "value": 1000.0,
+          "order_id": "0639970241166671872"
+        },
+        {
+          "date": "2026-05-01",
+          "side": "buy",
+          "symbol": "NVDA",
+          "company": "Nvidia",
+          "price": 202.12,
+          "quantity": 4.95,
+          "value": 1000.0,
+          "order_id": "0639939905182695424"
+        },
+        {
+          "date": "2026-05-01",
+          "side": "sell",
+          "symbol": "MRVL",
+          "company": "Marvell Technology",
+          "price": 165.18,
+          "quantity": 10.0,
+          "value": 1651.8,
+          "order_id": "0640030566309363712"
+        },
+        {
+          "date": "2026-05-01",
+          "side": "sell",
+          "symbol": "NVDA",
+          "company": "Nvidia",
+          "price": 199.01,
+          "quantity": 10.0,
+          "value": 1990.1,
+          "order_id": "0640015334107971584"
+        },
+        {
+          "date": "2026-05-01",
+          "side": "sell",
+          "symbol": "AVGO",
+          "company": "Broadcom",
+          "price": 421.76,
+          "quantity": 0.5,
+          "value": 210.88,
+          "order_id": "0640000259963944960"
+        },
+        {
+          "date": "2026-05-01",
+          "side": "sell",
+          "symbol": "AVGO",
+          "company": "Broadcom",
+          "price": 421.56,
+          "quantity": 1.0,
+          "value": 421.56,
+          "order_id": "0639970238746460160"
+        },
+        {
+          "date": "2026-05-01",
+          "side": "sell",
+          "symbol": "AVGO",
+          "company": "Broadcom",
+          "price": 418.92,
+          "quantity": 1.0,
+          "value": 418.92,
+          "order_id": "0639955041545846784"
+        },
+        {
+          "date": "2026-05-01",
+          "side": "sell",
+          "symbol": "AVGO",
+          "company": "Broadcom",
+          "price": 415.82,
+          "quantity": 2.0,
+          "value": 831.65,
+          "order_id": "0639939902603984896"
+        },
+        {
+          "date": "2026-04-30",
+          "side": "buy",
+          "symbol": "MU",
+          "company": "Micron Technology",
+          "price": 514.2,
+          "quantity": 1.65,
+          "value": 850.49,
+          "order_id": "0639652935227342848"
+        },
+        {
+          "date": "2026-04-30",
+          "side": "buy",
+          "symbol": "CRDO",
+          "company": "Credo Technology",
+          "price": 175.52,
+          "quantity": 2.85,
+          "value": 500.0,
+          "order_id": "0639637988137893888"
+        },
         {
           "date": "2026-04-30",
           "side": "buy",
@@ -5369,6 +5480,26 @@
           "quantity": 4.85,
           "value": 2000.0,
           "order_id": "0639607667078135808"
+        },
+        {
+          "date": "2026-04-30",
+          "side": "sell",
+          "symbol": "CRDO",
+          "company": "Credo Technology",
+          "price": 174.06,
+          "quantity": 2.85,
+          "value": 495.84,
+          "order_id": "0639667975964524544"
+        },
+        {
+          "date": "2026-04-30",
+          "side": "sell",
+          "symbol": "MRVL",
+          "company": "Marvell Technology",
+          "price": 164.34,
+          "quantity": 5.0,
+          "value": 821.72,
+          "order_id": "0639637981611622400"
         },
         {
           "date": "2026-04-30",
@@ -5529,139 +5660,119 @@
           "quantity": 0.81,
           "value": 311.37,
           "order_id": "0638898148115447808"
-        },
-        {
-          "date": "2026-04-28",
-          "side": "sell",
-          "symbol": "SIMO",
-          "company": "Silicon Motion Technology",
-          "price": 142.15,
-          "quantity": 5.05,
-          "value": 717.66,
-          "order_id": "0638853016016093184"
-        },
-        {
-          "date": "2026-04-27",
-          "side": "buy",
-          "symbol": "SIMO",
-          "company": "Silicon Motion Technology",
-          "price": 148.56,
-          "quantity": 5.05,
-          "value": 750.0,
-          "order_id": "0638580776632582144"
-        },
-        {
-          "date": "2026-04-27",
-          "side": "sell",
-          "symbol": "MU",
-          "company": "Micron Technology",
-          "price": 520.23,
-          "quantity": 0.5,
-          "value": 260.12,
-          "order_id": "0638580773478563840"
-        },
-        {
-          "date": "2026-04-27",
-          "side": "sell",
-          "symbol": "ADI",
-          "company": "Analog Devices",
-          "price": 391.88,
-          "quantity": 0.5,
-          "value": 195.94,
-          "order_id": "0638580773415124992"
-        },
-        {
-          "date": "2026-04-27",
-          "side": "sell",
-          "symbol": "INTC",
-          "company": "Intel",
-          "price": 83.17,
-          "quantity": 0.41,
-          "value": 33.88,
-          "order_id": "0638520493981564928"
-        },
-        {
-          "date": "2026-04-27",
-          "side": "sell",
-          "symbol": "ON",
-          "company": "On Semiconductor",
-          "price": 97.95,
-          "quantity": 3.0,
-          "value": 293.85,
-          "order_id": "0638520494455095296"
-        },
-        {
-          "date": "2026-04-27",
-          "side": "sell",
-          "symbol": "ADI",
-          "company": "Analog Devices",
-          "price": 398.34,
-          "quantity": 0.5,
-          "value": 199.17,
-          "order_id": "0638490439968980992"
-        },
-        {
-          "date": "2026-04-27",
-          "side": "sell",
-          "symbol": "INTC",
-          "company": "Intel",
-          "price": 83.55,
-          "quantity": 0.5,
-          "value": 41.78,
-          "order_id": "0638490439939522560"
-        },
-        {
-          "date": "2026-04-24",
-          "side": "buy",
-          "symbol": "INTC",
-          "company": "Intel",
-          "price": 81.51,
-          "quantity": 4.91,
-          "value": 400.0,
-          "order_id": "0637448468202618880"
-        },
-        {
-          "date": "2026-04-24",
-          "side": "buy",
-          "symbol": "MRVL",
-          "company": "Marvell Technology",
-          "price": 160.51,
-          "quantity": 6.23,
-          "value": 1000.0,
-          "order_id": "0637418777689161728"
-        },
-        {
-          "date": "2026-04-24",
-          "side": "sell",
-          "symbol": "INTC",
-          "company": "Intel",
-          "price": 80.94,
-          "quantity": 2.0,
-          "value": 161.87,
-          "order_id": "0637478914084798464"
-        },
-        {
-          "date": "2026-04-24",
-          "side": "sell",
-          "symbol": "INTC",
-          "company": "Intel",
-          "price": 81.07,
-          "quantity": 2.0,
-          "value": 162.14,
-          "order_id": "0637464040520777728"
-        },
-        {
-          "date": "2026-04-24",
-          "side": "sell",
-          "symbol": "ON",
-          "company": "On Semiconductor",
-          "price": 98.66,
-          "quantity": 2.0,
-          "value": 197.32,
-          "order_id": "0637448456755838976"
         }
       ],
       "all_trades": [
+        {
+          "date": "2026-05-01",
+          "side": "buy",
+          "symbol": "MU",
+          "company": "Micron Technology",
+          "price": 542.62,
+          "quantity": 0.92,
+          "value": 500.0,
+          "order_id": "0640015336879620096"
+        },
+        {
+          "date": "2026-05-01",
+          "side": "buy",
+          "symbol": "MRVL",
+          "company": "Marvell Technology",
+          "price": 164.89,
+          "quantity": 6.06,
+          "value": 1000.0,
+          "order_id": "0639970241166671872"
+        },
+        {
+          "date": "2026-05-01",
+          "side": "buy",
+          "symbol": "NVDA",
+          "company": "Nvidia",
+          "price": 202.12,
+          "quantity": 4.95,
+          "value": 1000.0,
+          "order_id": "0639939905182695424"
+        },
+        {
+          "date": "2026-05-01",
+          "side": "sell",
+          "symbol": "MRVL",
+          "company": "Marvell Technology",
+          "price": 165.18,
+          "quantity": 10.0,
+          "value": 1651.8,
+          "order_id": "0640030566309363712"
+        },
+        {
+          "date": "2026-05-01",
+          "side": "sell",
+          "symbol": "NVDA",
+          "company": "Nvidia",
+          "price": 199.01,
+          "quantity": 10.0,
+          "value": 1990.1,
+          "order_id": "0640015334107971584"
+        },
+        {
+          "date": "2026-05-01",
+          "side": "sell",
+          "symbol": "AVGO",
+          "company": "Broadcom",
+          "price": 421.76,
+          "quantity": 0.5,
+          "value": 210.88,
+          "order_id": "0640000259963944960"
+        },
+        {
+          "date": "2026-05-01",
+          "side": "sell",
+          "symbol": "AVGO",
+          "company": "Broadcom",
+          "price": 421.56,
+          "quantity": 1.0,
+          "value": 421.56,
+          "order_id": "0639970238746460160"
+        },
+        {
+          "date": "2026-05-01",
+          "side": "sell",
+          "symbol": "AVGO",
+          "company": "Broadcom",
+          "price": 418.92,
+          "quantity": 1.0,
+          "value": 418.92,
+          "order_id": "0639955041545846784"
+        },
+        {
+          "date": "2026-05-01",
+          "side": "sell",
+          "symbol": "AVGO",
+          "company": "Broadcom",
+          "price": 415.82,
+          "quantity": 2.0,
+          "value": 831.65,
+          "order_id": "0639939902603984896"
+        },
+        {
+          "date": "2026-04-30",
+          "side": "buy",
+          "symbol": "MU",
+          "company": "Micron Technology",
+          "price": 514.2,
+          "quantity": 1.65,
+          "value": 850.49,
+          "order_id": "0639652935227342848"
+        },
+        {
+          "date": "2026-04-30",
+          "side": "buy",
+          "symbol": "CRDO",
+          "company": "Credo Technology",
+          "price": 175.52,
+          "quantity": 2.85,
+          "value": 500.0,
+          "order_id": "0639637988137893888"
+        },
         {
           "date": "2026-04-30",
           "side": "buy",
@@ -5671,6 +5782,26 @@
           "quantity": 4.85,
           "value": 2000.0,
           "order_id": "0639607667078135808"
+        },
+        {
+          "date": "2026-04-30",
+          "side": "sell",
+          "symbol": "CRDO",
+          "company": "Credo Technology",
+          "price": 174.06,
+          "quantity": 2.85,
+          "value": 495.84,
+          "order_id": "0639667975964524544"
+        },
+        {
+          "date": "2026-04-30",
+          "side": "sell",
+          "symbol": "MRVL",
+          "company": "Marvell Technology",
+          "price": 164.34,
+          "quantity": 5.0,
+          "value": 821.72,
+          "order_id": "0639637981611622400"
         },
         {
           "date": "2026-04-30",
@@ -6524,66 +6655,6 @@
         },
         {
           "date": "2026-04-14",
-          "side": "buy",
-          "symbol": "ON",
-          "company": "On Semiconductor",
-          "price": 72.38,
-          "quantity": 4.14,
-          "value": 300.0,
-          "order_id": "0633854809267896320"
-        },
-        {
-          "date": "2026-04-14",
-          "side": "buy",
-          "symbol": "CRDO",
-          "company": "Credo Technology",
-          "price": 162.95,
-          "quantity": 3.07,
-          "value": 500.0,
-          "order_id": "0633839604214792192"
-        },
-        {
-          "date": "2026-04-14",
-          "side": "buy",
-          "symbol": "CRDO",
-          "company": "Credo Technology",
-          "price": 158.25,
-          "quantity": 0.63,
-          "value": 100.0,
-          "order_id": "0633824514162229248"
-        },
-        {
-          "date": "2026-04-14",
-          "side": "buy",
-          "symbol": "MU",
-          "company": "Micron Technology",
-          "price": 443.81,
-          "quantity": 0.23,
-          "value": 100.0,
-          "order_id": "0633824514330001408"
-        },
-        {
-          "date": "2026-04-14",
-          "side": "buy",
-          "symbol": "SNDK",
-          "company": "Sandisk",
-          "price": 927.52,
-          "quantity": 0.11,
-          "value": 100.0,
-          "order_id": "0633809555957153792"
-        },
-        {
-          "date": "2026-04-14",
-          "side": "buy",
-          "symbol": "MU",
-          "company": "Micron Technology",
-          "price": 438.07,
-          "quantity": 0.34,
-          "value": 150.0,
-          "order_id": "0633809555659685888"
-        },
-        {
-          "date": "2026-04-14",
           "side": "sell",
           "symbol": "INTC",
           "company": "Intel",
@@ -6591,76 +6662,6 @@
           "quantity": 5.0,
           "value": 317.88,
           "order_id": "0633869902545682432"
-        },
-        {
-          "date": "2026-04-14",
-          "side": "sell",
-          "symbol": "INTC",
-          "company": "Intel",
-          "price": 62.81,
-          "quantity": 10.0,
-          "value": 628.15,
-          "order_id": "0633854806315237376"
-        },
-        {
-          "date": "2026-04-14",
-          "side": "sell",
-          "symbol": "SNDK",
-          "company": "Sandisk",
-          "price": 939.0,
-          "quantity": 0.12,
-          "value": 111.43,
-          "order_id": "0633839601153409024"
-        },
-        {
-          "date": "2026-04-14",
-          "side": "sell",
-          "symbol": "INTC",
-          "company": "Intel",
-          "price": 62.9,
-          "quantity": 10.0,
-          "value": 629.0,
-          "order_id": "0633839601014996992"
-        },
-        {
-          "date": "2026-04-14",
-          "side": "sell",
-          "symbol": "SNDK",
-          "company": "Sandisk",
-          "price": 928.2,
-          "quantity": 0.2,
-          "value": 185.64,
-          "order_id": "0633824510400266240"
-        },
-        {
-          "date": "2026-04-14",
-          "side": "sell",
-          "symbol": "INTC",
-          "company": "Intel",
-          "price": 62.33,
-          "quantity": 5.0,
-          "value": 311.65,
-          "order_id": "0633824510060396544"
-        },
-        {
-          "date": "2026-04-14",
-          "side": "sell",
-          "symbol": "CRDO",
-          "company": "Credo Technology",
-          "price": 158.68,
-          "quantity": 0.5,
-          "value": 79.34,
-          "order_id": "0633809550081261568"
-        },
-        {
-          "date": "2026-04-13",
-          "side": "buy",
-          "symbol": "SNDK",
-          "company": "Sandisk",
-          "price": 948.47,
-          "quantity": 0.21,
-          "value": 199.99,
-          "order_id": "0633507445151105024"
         }
       ]
     },
@@ -6670,15 +6671,108 @@
       "color": "#ef5350",
       "account_id": "1800473182_20",
       "total_trades": 100,
-      "total_buy_value": 62749.94,
-      "total_sell_value": 63040.79,
+      "total_buy_value": 67749.94,
+      "total_sell_value": 65495.51,
       "current_holdings": {
-        "UNH": 5.41,
-        "MU": 6.88,
-        "AMZN": 14.22
+        "AAPL": 5.35,
+        "C": 7.83,
+        "SAIA": 5.91,
+        "UNH": 7.48,
+        "MU": 0.02,
+        "AMZN": 6.22
       },
-      "holdings_count": 3,
+      "holdings_count": 6,
       "recent_trades": [
+        {
+          "date": "2026-05-01",
+          "side": "buy",
+          "symbol": "AAPL",
+          "company": "Apple",
+          "price": 280.31,
+          "quantity": 5.35,
+          "value": 1500.0,
+          "order_id": "0640030567002243072"
+        },
+        {
+          "date": "2026-05-01",
+          "side": "buy",
+          "symbol": "C",
+          "company": "Citigroup",
+          "price": 127.64,
+          "quantity": 7.83,
+          "value": 1000.0,
+          "order_id": "0640000259988324352"
+        },
+        {
+          "date": "2026-05-01",
+          "side": "buy",
+          "symbol": "SAIA",
+          "company": "Saia",
+          "price": 447.98,
+          "quantity": 2.23,
+          "value": 1000.0,
+          "order_id": "0639970241443397632"
+        },
+        {
+          "date": "2026-05-01",
+          "side": "buy",
+          "symbol": "UNH",
+          "company": "UnitedHealth Group",
+          "price": 368.63,
+          "quantity": 4.07,
+          "value": 1500.0,
+          "order_id": "0639955044326670336"
+        },
+        {
+          "date": "2026-05-01",
+          "side": "buy",
+          "symbol": "SAIA",
+          "company": "Saia",
+          "price": 457.61,
+          "quantity": 2.19,
+          "value": 1000.0,
+          "order_id": "0639939905262387200"
+        },
+        {
+          "date": "2026-05-01",
+          "side": "sell",
+          "symbol": "SAIA",
+          "company": "Saia",
+          "price": 448.61,
+          "quantity": 3.0,
+          "value": 1345.84,
+          "order_id": "0640015334351175680"
+        },
+        {
+          "date": "2026-05-01",
+          "side": "sell",
+          "symbol": "UNH",
+          "company": "UnitedHealth Group",
+          "price": 369.9,
+          "quantity": 2.0,
+          "value": 739.81,
+          "order_id": "0640015334145720320"
+        },
+        {
+          "date": "2026-05-01",
+          "side": "sell",
+          "symbol": "MU",
+          "company": "Micron Technology",
+          "price": 529.92,
+          "quantity": 1.86,
+          "value": 983.64,
+          "order_id": "0639985135802875904"
+        },
+        {
+          "date": "2026-04-30",
+          "side": "buy",
+          "symbol": "SAIA",
+          "company": "Saia",
+          "price": 445.52,
+          "quantity": 4.49,
+          "value": 2000.0,
+          "order_id": "0639622803465666560"
+        },
         {
           "date": "2026-04-30",
           "side": "buy",
@@ -6708,6 +6802,46 @@
           "quantity": 11.23,
           "value": 3000.0,
           "order_id": "0639577782599221248"
+        },
+        {
+          "date": "2026-04-30",
+          "side": "sell",
+          "symbol": "AMZN",
+          "company": "Amazon.com",
+          "price": 265.89,
+          "quantity": 2.0,
+          "value": 531.78,
+          "order_id": "0639667976019050496"
+        },
+        {
+          "date": "2026-04-30",
+          "side": "sell",
+          "symbol": "MU",
+          "company": "Micron Technology",
+          "price": 514.7,
+          "quantity": 2.0,
+          "value": 1029.4,
+          "order_id": "0639667976073510912"
+        },
+        {
+          "date": "2026-04-30",
+          "side": "sell",
+          "symbol": "AMZN",
+          "company": "Amazon.com",
+          "price": 259.6,
+          "quantity": 6.0,
+          "value": 1557.57,
+          "order_id": "0639622800856809472"
+        },
+        {
+          "date": "2026-04-30",
+          "side": "sell",
+          "symbol": "MU",
+          "company": "Micron Technology",
+          "price": 511.5,
+          "quantity": 3.0,
+          "value": 1534.5,
+          "order_id": "0639622800927293440"
         },
         {
           "date": "2026-04-30",
@@ -6848,139 +6982,99 @@
           "quantity": 4.0,
           "value": 1044.56,
           "order_id": "0638580773691949056"
-        },
-        {
-          "date": "2026-04-27",
-          "side": "sell",
-          "symbol": "INTC",
-          "company": "Intel",
-          "price": 83.14,
-          "quantity": 16.0,
-          "value": 1330.32,
-          "order_id": "0638550624607502336"
-        },
-        {
-          "date": "2026-04-27",
-          "side": "sell",
-          "symbol": "ON",
-          "company": "On Semiconductor",
-          "price": 97.76,
-          "quantity": 25.55,
-          "value": 2497.83,
-          "order_id": "0638535646412374016"
-        },
-        {
-          "date": "2026-04-27",
-          "side": "sell",
-          "symbol": "XOM",
-          "company": "Exxon Mobil",
-          "price": 149.15,
-          "quantity": 9.99,
-          "value": 1489.71,
-          "order_id": "0638520494673199104"
-        },
-        {
-          "date": "2026-04-27",
-          "side": "sell",
-          "symbol": "XSD",
-          "company": "State Street SPDR S&P Semiconductor ETF",
-          "price": 473.05,
-          "quantity": 1.5,
-          "value": 709.58,
-          "order_id": "0638490440598126592"
-        },
-        {
-          "date": "2026-04-27",
-          "side": "sell",
-          "symbol": "MU",
-          "company": "Micron Technology",
-          "price": 515.0,
-          "quantity": 0.7,
-          "value": 360.5,
-          "order_id": "0638490440837070848"
-        },
-        {
-          "date": "2026-04-27",
-          "side": "sell",
-          "symbol": "INTC",
-          "company": "Intel",
-          "price": 83.55,
-          "quantity": 15.0,
-          "value": 1253.29,
-          "order_id": "0638490440199667712"
-        },
-        {
-          "date": "2026-04-24",
-          "side": "buy",
-          "symbol": "INTC",
-          "company": "Intel",
-          "price": 80.86,
-          "quantity": 18.55,
-          "value": 1500.0,
-          "order_id": "0637493719851696128"
-        },
-        {
-          "date": "2026-04-24",
-          "side": "buy",
-          "symbol": "INTC",
-          "company": "Intel",
-          "price": 82.64,
-          "quantity": 18.15,
-          "value": 1500.0,
-          "order_id": "0637433449465249792"
-        },
-        {
-          "date": "2026-04-24",
-          "side": "buy",
-          "symbol": "INTC",
-          "company": "Intel",
-          "price": 81.89,
-          "quantity": 12.21,
-          "value": 1000.0,
-          "order_id": "0637418778012123136"
-        },
-        {
-          "date": "2026-04-24",
-          "side": "buy",
-          "symbol": "INTC",
-          "company": "Intel",
-          "price": 83.93,
-          "quantity": 11.91,
-          "value": 1000.0,
-          "order_id": "0637403201658945536"
-        },
-        {
-          "date": "2026-04-24",
-          "side": "sell",
-          "symbol": "INTC",
-          "company": "Intel",
-          "price": 80.94,
-          "quantity": 14.0,
-          "value": 1133.11,
-          "order_id": "0637478914365423616"
-        },
-        {
-          "date": "2026-04-24",
-          "side": "sell",
-          "symbol": "AMD",
-          "company": "Advanced Micro Devices",
-          "price": 352.26,
-          "quantity": 2.85,
-          "value": 1004.54,
-          "order_id": "0637448457103966208"
-        },
-        {
-          "date": "2026-04-24",
-          "side": "sell",
-          "symbol": "BLK",
-          "company": "BlackRock",
-          "price": 1053.74,
-          "quantity": 0.49,
-          "value": 513.31,
-          "order_id": "0637433425712906240"
         }
       ],
       "all_trades": [
+        {
+          "date": "2026-05-01",
+          "side": "buy",
+          "symbol": "AAPL",
+          "company": "Apple",
+          "price": 280.31,
+          "quantity": 5.35,
+          "value": 1500.0,
+          "order_id": "0640030567002243072"
+        },
+        {
+          "date": "2026-05-01",
+          "side": "buy",
+          "symbol": "C",
+          "company": "Citigroup",
+          "price": 127.64,
+          "quantity": 7.83,
+          "value": 1000.0,
+          "order_id": "0640000259988324352"
+        },
+        {
+          "date": "2026-05-01",
+          "side": "buy",
+          "symbol": "SAIA",
+          "company": "Saia",
+          "price": 447.98,
+          "quantity": 2.23,
+          "value": 1000.0,
+          "order_id": "0639970241443397632"
+        },
+        {
+          "date": "2026-05-01",
+          "side": "buy",
+          "symbol": "UNH",
+          "company": "UnitedHealth Group",
+          "price": 368.63,
+          "quantity": 4.07,
+          "value": 1500.0,
+          "order_id": "0639955044326670336"
+        },
+        {
+          "date": "2026-05-01",
+          "side": "buy",
+          "symbol": "SAIA",
+          "company": "Saia",
+          "price": 457.61,
+          "quantity": 2.19,
+          "value": 1000.0,
+          "order_id": "0639939905262387200"
+        },
+        {
+          "date": "2026-05-01",
+          "side": "sell",
+          "symbol": "SAIA",
+          "company": "Saia",
+          "price": 448.61,
+          "quantity": 3.0,
+          "value": 1345.84,
+          "order_id": "0640015334351175680"
+        },
+        {
+          "date": "2026-05-01",
+          "side": "sell",
+          "symbol": "UNH",
+          "company": "UnitedHealth Group",
+          "price": 369.9,
+          "quantity": 2.0,
+          "value": 739.81,
+          "order_id": "0640015334145720320"
+        },
+        {
+          "date": "2026-05-01",
+          "side": "sell",
+          "symbol": "MU",
+          "company": "Micron Technology",
+          "price": 529.92,
+          "quantity": 1.86,
+          "value": 983.64,
+          "order_id": "0639985135802875904"
+        },
+        {
+          "date": "2026-04-30",
+          "side": "buy",
+          "symbol": "SAIA",
+          "company": "Saia",
+          "price": 445.52,
+          "quantity": 4.49,
+          "value": 2000.0,
+          "order_id": "0639622803465666560"
+        },
         {
           "date": "2026-04-30",
           "side": "buy",
@@ -7010,6 +7104,46 @@
           "quantity": 11.23,
           "value": 3000.0,
           "order_id": "0639577782599221248"
+        },
+        {
+          "date": "2026-04-30",
+          "side": "sell",
+          "symbol": "AMZN",
+          "company": "Amazon.com",
+          "price": 265.89,
+          "quantity": 2.0,
+          "value": 531.78,
+          "order_id": "0639667976019050496"
+        },
+        {
+          "date": "2026-04-30",
+          "side": "sell",
+          "symbol": "MU",
+          "company": "Micron Technology",
+          "price": 514.7,
+          "quantity": 2.0,
+          "value": 1029.4,
+          "order_id": "0639667976073510912"
+        },
+        {
+          "date": "2026-04-30",
+          "side": "sell",
+          "symbol": "AMZN",
+          "company": "Amazon.com",
+          "price": 259.6,
+          "quantity": 6.0,
+          "value": 1557.57,
+          "order_id": "0639622800856809472"
+        },
+        {
+          "date": "2026-04-30",
+          "side": "sell",
+          "symbol": "MU",
+          "company": "Micron Technology",
+          "price": 511.5,
+          "quantity": 3.0,
+          "value": 1534.5,
+          "order_id": "0639622800927293440"
         },
         {
           "date": "2026-04-30",
@@ -7843,16 +7977,6 @@
         },
         {
           "date": "2026-04-13",
-          "side": "buy",
-          "symbol": "CRDO",
-          "company": "Credo Technology",
-          "price": 132.92,
-          "quantity": 3.76,
-          "value": 500.0,
-          "order_id": "0633447212467486720"
-        },
-        {
-          "date": "2026-04-13",
           "side": "sell",
           "symbol": "MO",
           "company": "Altria Group",
@@ -7860,126 +7984,6 @@
           "quantity": 15.0,
           "value": 1000.73,
           "order_id": "0633507442169610240"
-        },
-        {
-          "date": "2026-04-13",
-          "side": "sell",
-          "symbol": "VRT",
-          "company": "Vertiv Holdings",
-          "price": 298.65,
-          "quantity": 2.02,
-          "value": 604.53,
-          "order_id": "0633477236650409984"
-        },
-        {
-          "date": "2026-04-13",
-          "side": "sell",
-          "symbol": "SMCI",
-          "company": "Super Micro Computer",
-          "price": 25.84,
-          "quantity": 10.42,
-          "value": 269.28,
-          "order_id": "0633477237006598144"
-        },
-        {
-          "date": "2026-04-13",
-          "side": "sell",
-          "symbol": "VRT",
-          "company": "Vertiv Holdings",
-          "price": 299.6,
-          "quantity": 1.5,
-          "value": 449.4,
-          "order_id": "0633462198359293952"
-        },
-        {
-          "date": "2026-04-13",
-          "side": "sell",
-          "symbol": "SMCI",
-          "company": "Super Micro Computer",
-          "price": 25.84,
-          "quantity": 9.0,
-          "value": 232.51,
-          "order_id": "0633462198685663232"
-        },
-        {
-          "date": "2026-04-10",
-          "side": "buy",
-          "symbol": "MO",
-          "company": "Altria Group",
-          "price": 67.1,
-          "quantity": 14.9,
-          "value": 1000.0,
-          "order_id": "0632390230843326464"
-        },
-        {
-          "date": "2026-04-10",
-          "side": "buy",
-          "symbol": "MO",
-          "company": "Altria Group",
-          "price": 67.08,
-          "quantity": 14.91,
-          "value": 1000.0,
-          "order_id": "0632360299040079872"
-        },
-        {
-          "date": "2026-04-10",
-          "side": "buy",
-          "symbol": "BBAI",
-          "company": "BigBear.ai Holdings",
-          "price": 3.37,
-          "quantity": 148.59,
-          "value": 500.0,
-          "order_id": "0632330058334601216"
-        },
-        {
-          "date": "2026-04-10",
-          "side": "sell",
-          "symbol": "ASML",
-          "company": "ASML Holding",
-          "price": 1484.26,
-          "quantity": 0.5,
-          "value": 742.13,
-          "order_id": "0632420344670846976"
-        },
-        {
-          "date": "2026-04-10",
-          "side": "sell",
-          "symbol": "SMCI",
-          "company": "Super Micro Computer",
-          "price": 25.19,
-          "quantity": 15.0,
-          "value": 377.85,
-          "order_id": "0632420345065111552"
-        },
-        {
-          "date": "2026-04-10",
-          "side": "sell",
-          "symbol": "SMCI",
-          "company": "Super Micro Computer",
-          "price": 25.05,
-          "quantity": 30.0,
-          "value": 751.35,
-          "order_id": "0632375171215654912"
-        },
-        {
-          "date": "2026-04-10",
-          "side": "sell",
-          "symbol": "BBAI",
-          "company": "BigBear.ai Holdings",
-          "price": 3.33,
-          "quantity": 148.59,
-          "value": 494.29,
-          "order_id": "0632360294518620160"
-        },
-        {
-          "date": "2026-04-10",
-          "side": "sell",
-          "symbol": "ASML",
-          "company": "ASML Holding",
-          "price": 1496.09,
-          "quantity": 0.9,
-          "value": 1346.48,
-          "order_id": "0632345057027293184"
         }
       ]
     }

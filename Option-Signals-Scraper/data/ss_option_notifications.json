@@ -6638,5 +6638,59 @@
     "message": "Buy below 3.70, Sell above 4.26\nSwing, Moderate risk",
     "symbol": "MSFT",
     "title": "MSFT 450C 6/18: BUY"
+  },
+  "1777573736": {
+    "category": "SWING",
+    "message": "Reached SellTarget1 @4.25 with gain: 14.86%. Take profits and ride for next target with stops @2.97",
+    "symbol": "MSFT",
+    "title": "MSFT 450C 06/18 : SELL"
+  },
+  "1777574544": {
+    "category": "SWING",
+    "message": "Buy below 8.80, Sell above 10.12\nSwing, Moderate risk",
+    "symbol": "NVDA",
+    "title": "NVDA 205C 5/29: BUY"
+  },
+  "1777577139": {
+    "category": "SWING",
+    "message": "Reached SellTarget2 @4.70 with gain: 27.03%. Take profits and ride for next target @5.18 with stops @3.70",
+    "symbol": "MSFT",
+    "title": "MSFT 450C 06/18 : SELL"
+  },
+  "1777578530": {
+    "category": "SWING",
+    "message": "Buy below 1.73, Sell above 1.99\nSwing, Moderate risk",
+    "symbol": "ASX",
+    "title": "ASX 35C 6/18: BUY"
+  },
+  "1777642218": {
+    "category": "SWING",
+    "message": "Reached final SellTarget @5.18 with gain: 40.00%. Take profits or ride for new target @6.22 with stops @4.14",
+    "symbol": "MSFT",
+    "title": "MSFT 450C 06/18 : SELL"
+  },
+  "1777642878": {
+    "category": "SWING",
+    "message": "Reached final SellTarget @45.00 with gain: 110.28%. Take profits or ride for new target @54.00 with stops @36.00",
+    "symbol": "AMD",
+    "title": "AMD 320C 05/15 : SELL"
+  },
+  "1777645399": {
+    "category": "SCALP",
+    "message": "Buy below 2.34, Sell above 2.69\nScalp, VH risk",
+    "symbol": "AAPL",
+    "title": "AAPL 290C 5/8: BUY"
+  },
+  "1777646477": {
+    "category": "SCALP",
+    "message": "Take stop at 1.54.",
+    "symbol": "AAPL",
+    "title": "AAPL 290C 5/8: SELL"
+  },
+  "1777648934": {
+    "category": "SWING",
+    "message": "Buy below 6.60, Sell above 7.59\nSwing, Moderate risk",
+    "symbol": "PLTR",
+    "title": "PLTR 150C 5/22: BUY"
   }
 }
