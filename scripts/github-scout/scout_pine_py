@@ -80,10 +80,16 @@ def append_log(rec):
 
 
 def search_pine_repos():
-    """Returns list of repo dicts matching filter criteria."""
+    """Returns list of repo dicts matching filter criteria.
+
+    GitHub's language: qualifier is unreliable for multi-word names like Pine Script.
+    Strategy: query by topics that Pine devs tag (tradingview, pinescript, pine-script),
+    then client-side filter results where language field == "Pine Script".
+    """
     token = load_token()
     cutoff = (datetime.now(timezone.utc) - timedelta(days=PUSHED_WITHIN_DAYS)).strftime("%Y-%m-%d")
-    q = f'language:"Pine Script" stars:>={MIN_STARS} pushed:>{cutoff}'
+    # Combine three topic variants to maximize coverage
+    q = f"topic:tradingview topic:pinescript stars:>={MIN_STARS} pushed:>{cutoff}"
     url = f"https://api.github.com/search/repositories?q={urllib.parse.quote(q)}&sort=stars&order=desc&per_page=30"
 
     headers = {
@@ -104,7 +110,15 @@ def search_pine_repos():
 
     items = data.get("items", [])
     print(f"[scout] github returned {len(items)} repos (total available: {data.get('total_count', '?')})")
-    return items
+    # Client-side filter: only keep repos where language is exactly "Pine Script" or topic-confirmed
+    pine_repos = []
+    for r in items:
+        lang = r.get("language") or ""
+        topics = r.get("topics") or []
+        if lang == "Pine Script" or "pinescript" in topics or "pine-script" in topics or "tradingview" in topics:
+            pine_repos.append(r)
+    print(f"[scout] after client-side filter: {len(pine_repos)} actually Pine repos")
+    return pine_repos
 
 
 def is_noise(repo):
