@@ -272,6 +272,117 @@ def relay_flow_alerts(state):
     state["flow_alerts"] = list(sent | set(new_sent))
     return state
 
+
+# ─── RELAY: FLOW PEAK GAINS (Multi-Winner Alerts) ─────────────────────────────
+# Watches flow_alerts_today entries for peak gain crossings (DayHigh vs AlertPrice).
+# Posts branded celebrations to flow_trade_results channel (TradeFlow) when a
+# previously-alerted contract crosses 25/50/100/300/500% thresholds. Each
+# (contract, threshold) pair posts exactly once. Mirrors the app's "Multi-Winner
+# Alert" push notifications but generated locally from polled data.
+def relay_flow_peak_gains(state):
+    data = read_data("flow_alerts_today")
+    if not data or not isinstance(data, dict):
+        return state
+
+    # Dedup state per (contract, threshold) tuple, stored as "OPTSYM|THRESH"
+    sent = set(state.get("flow_peak_gains", []))
+    new_sent = []
+    posted_count = 0
+    max_per_cycle = 30
+
+    THRESHOLDS = [25, 50, 100, 300, 500]
+    ETF_SYMS = {"SPY","QQQ","IWM","DIA","XLF","XLE","XLK","XLV","XLY","XLI","XLP","XLU","XLB","XRT","XBI","SMH","SOXX","TLT","GLD","SLV","ARKK","KWEB","FXI","EWZ","EWJ","RSP","BUG","IGV"}
+
+    for key, entry in data.items():
+        if posted_count >= max_per_cycle:
+            break
+        alert = entry.get("alert", {}) or {}
+        quote = entry.get("quote", {}) or {}
+
+        alert_price = alert.get("AlertPrice")
+        day_high = quote.get("High") or quote.get("DayHigh")
+        if not alert_price or not day_high:
+            continue
+        try:
+            ap = float(alert_price)
+            dh = float(day_high)
+            if ap <= 0:
+                continue
+            peak_pct = (dh - ap) / ap * 100.0
+        except (TypeError, ValueError):
+            continue
+
+        sym = alert.get("Symbol", "?")
+        strike = alert.get("Strike", "?")
+        opt_type = (alert.get("OptionType", "?") or "?").upper()
+        opt_letter = "C" if opt_type.startswith("C") else ("P" if opt_type.startswith("P") else opt_type[:1])
+        expiry_str = format_expiry(alert.get("Expiry", 0)) if alert.get("Expiry") else ""
+        alert_type = (alert.get("AlertType", "") or "").lower()
+        underlying_type = (alert.get("UnderlyingType", "") or "").upper()
+        is_etf = underlying_type == "ETF" or sym in ETF_SYMS or "etf" in alert_type
+
+        # Find the highest crossed threshold not yet celebrated for this contract
+        for thresh in sorted(THRESHOLDS, reverse=True):
+            if peak_pct < thresh:
+                continue
+            sent_key = f"{key}|{thresh}"
+            if sent_key in sent:
+                break  # already celebrated this or higher tier - skip lower ones too
+            # Build branded celebration message
+            if thresh >= 500:
+                if is_etf:
+                    brand = "ETF Weekly Magic"
+                    emoji = "💫"
+                    flavor = f"ETF LEGENDARY GAINS! {sym} {expiry_str.strip()} {strike}{opt_letter} exploded {peak_pct:.0f}%! 🔔"
+                else:
+                    brand = "Weekly Magic"
+                    emoji = "💫"
+                    flavor = f"LEGENDARY GAINS! {sym} {expiry_str.strip()} {strike}{opt_letter} exploded {peak_pct:.0f}%! 🔔"
+            elif thresh >= 300:
+                brand = "Lightning Strike"
+                emoji = "⚡"
+                flavor = f"MASSIVE WIN! {sym} {expiry_str.strip()} {strike}{opt_letter} surged {peak_pct:.0f}%! 🔔"
+            elif thresh >= 100:
+                brand = "Lightning Strike"
+                emoji = "⚡"
+                flavor = f"Triple-bagger! {sym} {expiry_str.strip()} {strike}{opt_letter} ran +{peak_pct:.0f}%! 🔔"
+            elif thresh >= 50:
+                brand = "High Flow Fireworks"
+                emoji = "🎆"
+                flavor = f"Strong move! {sym} {expiry_str.strip()} {strike}{opt_letter} +{peak_pct:.0f}%! 🔔"
+            else:  # 25
+                brand = "Unusual Pattern"
+                emoji = "🎭"
+                flavor = f"Pattern playing out: {sym} {expiry_str.strip()} {strike}{opt_letter} +{peak_pct:.0f}% from alert! 🔔"
+
+            header = f"{emoji} **{brand}!** {sym} {strike}{opt_letter} +{peak_pct:.0f}%"
+            msg = f"{header}\n{flavor}"
+
+            # Post to TradeFlow channel (flow_trade_results webhook)
+            url = WEBHOOKS.get("flow_trade_results")
+            if url:
+                try:
+                    r = requests.post(url, json={"content": msg}, timeout=10)
+                    if r.status_code in (200, 204):
+                        new_sent.append(sent_key)
+                        posted_count += 1
+                        logging.info(f"[peak_gains] posted {sym} {strike}{opt_letter} +{peak_pct:.0f}% brand={brand}")
+                        time.sleep(1.2)
+                    elif r.status_code == 429:
+                        try:
+                            wait = float(r.json().get("retry_after", 1.5))
+                        except Exception:
+                            wait = 1.5
+                        logging.info(f"[peak_gains] rate limited, sleeping {wait}s")
+                        time.sleep(wait)
+                except Exception as e:
+                    logging.warning(f"[peak_gains] post error: {e}")
+            break  # Only post highest threshold per contract per cycle
+
+    if new_sent:
+        state["flow_peak_gains"] = list(sent | set(new_sent))[-10000:]
+    return state
+
 # ─── RELAY: LIVE FLOW ─────────────────────────────────────────────────────────
 def relay_flow_live(state):
     data = read_data("flow_live_last100")
