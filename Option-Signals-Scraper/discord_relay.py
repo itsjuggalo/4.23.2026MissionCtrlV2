@@ -764,7 +764,7 @@ def relay_winners_mirror(state):
             msg = "\n".join(lines)
             if _post_to_trade_results(msg, "winners"):
                 new_sent.append(sent_key)
-                logging.info(f"[winners] posted {symbol} pct={pct} tier={tier}")
+                logging.info(f"[winners] posted {symbol} pct={pct} brand={brand}")
             _posted_count += 1
             if _posted_count >= _max_per_cycle:
                 if new_sent: state["winners_mirror_sent"] = list(set(state.get("winners_mirror_sent", []) + new_sent))[-5000:]
