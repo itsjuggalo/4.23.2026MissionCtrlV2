@@ -909,7 +909,7 @@ def build_boba_prompt(account, positions, shortlist_with_kronos, remaining_budge
         print(f"[skill_loader] injection failed: {_e}", flush=True)
         skills_section = ''
 
-        prompt = f"""{skills_section}
+    prompt = f"""{skills_section}
 You are Boba — the decision-making agent in Mission Control's multi-agent trading system.
 
 # Mission
