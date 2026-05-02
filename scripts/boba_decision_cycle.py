@@ -87,6 +87,10 @@ MAX_TOTAL_RISK_USD = 3000
 MAX_BUYING_POWER_PCT_PER_PICK = 0.15  # 15% of buying power max per pick
 KRONOS_CONFLICTS_OVERRIDE_SCORE = 90  # Flow score required to override Kronos CONFLICTS veto
 KRONOS_UNAVAILABLE_OVERRIDE_SCORE = 85  # Flow score required when Kronos unavailable
+
+# Tickers Kronos cannot forecast (Alpaca has no bars for indices)
+# These get UNAVAILABLE verdict immediately without inference attempt
+KRONOS_SKIP_TICKERS = {"SPX", "NDX", "RUT", "VIX", "XSP", "OEX", "DJX", "XEO", "DJI"}
 MIN_DTE_DEFAULT = 1  # 0DTE picks require explicit catalyst language in reasoning
 FORBIDDEN_TICKERS = set()  # populated as hallucinations are observed
 SHORTLIST_SIZE = 5
@@ -1926,6 +1930,18 @@ def main():
 
         # Check for fresh cached forecast first
         # 90 min window matches TRADER cron interval (10:30, 12:00, 13:30, 15:00 ET)
+        # Skip Kronos entirely for tickers it cannot forecast (indices, no Alpaca bars)
+        if ticker in KRONOS_SKIP_TICKERS:
+            placeholder = {
+                "ticker": ticker,
+                "error": f"kronos skipped - {ticker} not supported (index symbol)",
+                "option_context": option_ctx,
+                "option_in_forecast_direction": None,
+                "skipped": True,
+            }
+            shortlist_with_kronos.append((sid, s, placeholder))
+            kronos_timeout.append(ticker)
+            continue
         cached = check_fresh_kronos_file(ticker, max_age_minutes=90)
         if cached and "error" not in cached:
             # We have a recent forecast — annotate it with option context if needed
@@ -1955,7 +1971,7 @@ def main():
             fire_kronos_background(ticker, option_ctx)
             kronos_fired.append(ticker)
             # Item 11 mitigation: indices have huge option chains, allow extra time
-            kronos_timeout_sec = 120 if ticker in ("SPX", "SPY", "QQQ", "IWM", "DIA") else 75
+            kronos_timeout_sec = 240 if ticker in ("SPY", "QQQ", "IWM", "DIA") else 240
             waited = wait_for_kronos_result(ticker, timeout_sec=kronos_timeout_sec, poll_interval=3)
             if waited:
                 # Got real result — annotate with option context
