@@ -94,23 +94,25 @@ def tokenize(text):
 
 
 def score_skill(skill, context_tokens):
-    """Count keyword overlap between context and skill name+description.
+    """Count keyword overlap, weighted: name 5x, description 3x, body 1x.
 
-    Heavier weight on name matches than description matches.
+    Body match is weighted lowest because long bodies would otherwise
+    dominate. Name + description must contribute meaningfully.
     """
     if not skill or not context_tokens:
         return 0
-    skill_text = (skill.get('name', '') + ' ' + skill.get('description', '')).lower()
-    skill_tokens = tokenize(skill_text)
-    if not skill_tokens:
-        return 0
-    skill_set = set(skill_tokens)
     name_tokens = set(tokenize(skill.get('name', '')))
+    desc_tokens = set(tokenize(skill.get('description', '')))
+    # Cap body scan to first 4000 chars to keep tokenization fast
+    body_tokens = set(tokenize((skill.get('body', '') or '')[:4000]))
+    context_set = set(context_tokens)
     score = 0
-    for t in context_tokens:
+    for t in context_set:
         if t in name_tokens:
-            score += 3  # name match worth 3x
-        elif t in skill_set:
+            score += 5
+        elif t in desc_tokens:
+            score += 3
+        elif t in body_tokens:
             score += 1
     return score
 
