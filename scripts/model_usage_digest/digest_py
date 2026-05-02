@@ -1,0 +1,140 @@
+#!/usr/bin/env python3
+"""Model usage weekly digest.
+
+Cron Sunday 8pm ET (0 0 * * 1 UTC) reads last 7 days of jsonl files from
+/home/ubuntu/.openclaw/data/anthropic_usage/, aggregates by model + caller,
+posts summary to perf-weekly Discord.
+
+Webhook precedence:
+  1. discord_performance_weekly_webhook (underscore name)
+  2. discord-webhook-performance-weekly.txt (dashed with extension)
+  3. discord_bobatrades_webhook (fallback)
+"""
+import json
+import sys
+import urllib.request
+import urllib.error
+from collections import defaultdict
+from datetime import datetime, timedelta, timezone
+from pathlib import Path
+
+DATA_DIR = Path('/home/ubuntu/.openclaw/data/anthropic_usage')
+SECRETS = Path('/home/ubuntu/.openclaw/secrets')
+
+def load_secret(name):
+    p = SECRETS / name
+    return p.read_text().strip() if p.exists() else None
+
+def find_webhook():
+    for c in ('discord_performance_weekly_webhook',
+              'discord-webhook-performance-weekly.txt',
+              'discord_bobatrades_webhook'):
+        v = load_secret(c)
+        if v and v.startswith('https://'):
+            return v, c
+    return None, None
+
+def load_last_7_days():
+    cutoff = datetime.now(timezone.utc) - timedelta(days=7)
+    entries = []
+    for fp in sorted(DATA_DIR.glob('*.jsonl')):
+        try:
+            text = fp.read_text()
+        except Exception:
+            continue
+        for line in text.splitlines():
+            line = line.strip()
+            if not line:
+                continue
+            try:
+                e = json.loads(line)
+                ts_str = e.get('ts', '').replace('Z', '+00:00')
+                ts = datetime.fromisoformat(ts_str)
+                if ts >= cutoff:
+                    entries.append(e)
+            except Exception:
+                pass
+    return entries
+
+def aggregate(entries):
+    by_model = defaultdict(lambda: {'calls': 0, 'cost': 0.0, 'in_tok': 0, 'out_tok': 0})
+    by_caller = defaultdict(lambda: {'calls': 0, 'cost': 0.0, 'fails': 0})
+    total = {'calls': 0, 'cost': 0.0, 'in_tok': 0, 'out_tok': 0, 'fails': 0}
+    for e in entries:
+        m = e.get('model', 'unknown')
+        c = e.get('caller', 'unknown')
+        cost = e.get('cost_usd', 0) or 0
+        in_t = e.get('input_tokens', 0) or 0
+        out_t = e.get('output_tokens', 0) or 0
+        ok = e.get('success', True)
+        by_model[m]['calls'] += 1
+        by_model[m]['cost'] += cost
+        by_model[m]['in_tok'] += in_t
+        by_model[m]['out_tok'] += out_t
+        by_caller[c]['calls'] += 1
+        by_caller[c]['cost'] += cost
+        if not ok:
+            by_caller[c]['fails'] += 1
+        total['calls'] += 1
+        total['cost'] += cost
+        total['in_tok'] += in_t
+        total['out_tok'] += out_t
+        if not ok:
+            total['fails'] += 1
+    return by_model, by_caller, total
+
+def format_digest(by_model, by_caller, total, days_covered):
+    lines = []
+    lines.append(f'**Anthropic API weekly digest** ({days_covered} days of data)')
+    lines.append('')
+    lines.append(f"Total: {total['calls']} calls, ${total['cost']:.2f}, "
+                 f"{total['in_tok']:,} in / {total['out_tok']:,} out tokens, "
+                 f"{total['fails']} fails")
+    lines.append('')
+    lines.append('**By model:**')
+    for m, s in sorted(by_model.items(), key=lambda x: -x[1]['cost']):
+        lines.append(f"  {m}: {s['calls']} calls, ${s['cost']:.2f}")
+    lines.append('')
+    lines.append('**Top callers:**')
+    top = sorted(by_caller.items(), key=lambda x: -x[1]['cost'])[:10]
+    for c, s in top:
+        fails = f" ({s['fails']} fails)" if s['fails'] else ''
+        lines.append(f"  {c}: {s['calls']} calls, ${s['cost']:.2f}{fails}")
+    return '\n'.join(lines)
+
+def post_discord(webhook, content):
+    body = json.dumps({'content': content[:1990]}).encode()
+    req = urllib.request.Request(
+        webhook, data=body,
+        headers={'content-type': 'application/json',
+                 'User-Agent': 'MissionCtrl-ModelUsageDigest/1.0'})
+    try:
+        with urllib.request.urlopen(req, timeout=15) as resp:
+            return resp.status, ''
+    except urllib.error.HTTPError as e:
+        return e.code, e.read().decode('utf-8', errors='replace')[:200]
+    except Exception as e:
+        return None, str(e)
+
+def main():
+    webhook, source = find_webhook()
+    if not webhook:
+        print('[model-usage-digest] NO webhook found, exiting', flush=True)
+        return 1
+    entries = load_last_7_days()
+    if not entries:
+        print('[model-usage-digest] no entries in last 7 days, skipping', flush=True)
+        return 1
+    by_model, by_caller, total = aggregate(entries)
+    days_covered = len({e.get('ts', '')[:10] for e in entries})
+    body = format_digest(by_model, by_caller, total, days_covered)
+    code, err = post_discord(webhook, body)
+    if code in (200, 204):
+        print(f"[model-usage-digest] posted via {source} -> HTTP {code} "
+              f"({total['calls']} calls / ${total['cost']:.2f})", flush=True)
+        return 0
+    print(f'[model-usage-digest] FAILED via {source} -> HTTP {code} {err}', flush=True)
+    return 1
+
+if __name__ == '__main__':
+    sys.exit(main())
