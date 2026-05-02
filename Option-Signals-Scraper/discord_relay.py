@@ -698,6 +698,18 @@ def relay_winners_mirror(state):
             strike = entry.get("strike", "")
             expiry = entry.get("expiry", "")
             category = entry.get("category", "")
+            # Fallback - if no pct in status text, compute from buy and sell targets
+            if pct is None:
+                try:
+                    b = float(buy) if buy else 0
+                    s = float(sell) if sell else 0
+                    # Use exit1 or sellTarget3 as final exit if sellTarget unavailable
+                    if s == 0:
+                        s = float(entry.get("exit1", 0) or 0) or float(entry.get("sellTarget3", 0) or 0)
+                    if b > 0 and s > 0:
+                        pct = round((s - b) / b * 100, 1)
+                except Exception:
+                    pass
             if pct is None and "profits" not in status.lower() and "delivered" not in status.lower() and "winner" not in status.lower():
                 continue
             if pct is not None and pct <= 0: continue
