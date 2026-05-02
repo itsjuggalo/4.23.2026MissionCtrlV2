@@ -51,36 +51,52 @@ def post(header, body):
 
 
 def digest_consensus():
-    """Item 20: read recent boba decisions, surface consensus signals."""
+    """Item 20: read recent boba decisions, surface consensus signals.
+    
+    Shape: top-level is list of cycle objects with cycle_time, picks_executed, passed_on.
+    Each pick has ticker/symbol, option_type, score, agent.
+    """
     p = Path.home() / ".openclaw" / "workspace" / "skill_outputs" / "boba_decisions_validated.json"
     if not p.exists():
         post("[20-consensus]", "No boba decisions file yet")
         return
     try:
         data = json.loads(p.read_text())
-        if isinstance(data, list):
-            recent = data[-20:] if len(data) > 20 else data
-        else:
-            recent = []
-        ticker_votes = defaultdict(lambda: {"agents": set(), "directions": []})
-        for entry in recent:
-            if not isinstance(entry, dict):
-                continue
-            t = entry.get("ticker") or entry.get("symbol")
-            agent = entry.get("agent") or entry.get("model_used", "unknown")
-            direction = entry.get("option_type") or entry.get("direction", "?")
-            if t and agent:
-                ticker_votes[t]["agents"].add(agent)
-                ticker_votes[t]["directions"].append(direction)
-        consensus = [(t, len(d["agents"]), d["directions"]) for t, d in ticker_votes.items() if len(d["agents"]) >= 2]
-        consensus.sort(key=lambda x: -x[1])
-        if not consensus:
-            post("[20-consensus]", "No multi-agent consensus signals in last 20 decisions")
+        if not isinstance(data, list):
+            post("[20-consensus]", "Unexpected shape: " + type(data).__name__)
             return
-        lines = []
-        for ticker, n_agents, dirs in consensus[:10]:
-            dir_summary = "/".join(set(dirs))
-            lines.append(ticker + ": " + str(n_agents) + " agents agree (" + dir_summary + ")")
+        recent_cycles = data[-10:]  # last 10 cycles
+        ticker_votes = defaultdict(lambda: {"calls": 0, "puts": 0, "scores": [], "cycles": 0})
+        for cycle in recent_cycles:
+            if not isinstance(cycle, dict):
+                continue
+            for pick_list_key in ("picks_executed", "picks_proposed", "passed_on"):
+                for pick in cycle.get(pick_list_key, []) or []:
+                    if not isinstance(pick, dict):
+                        continue
+                    t = pick.get("ticker") or pick.get("symbol")
+                    direction = (pick.get("option_type") or "").upper()
+                    score = pick.get("score") or 0
+                    if t:
+                        ticker_votes[t]["cycles"] += 1
+                        if direction == "CALL":
+                            ticker_votes[t]["calls"] += 1
+                        elif direction == "PUT":
+                            ticker_votes[t]["puts"] += 1
+                        if score:
+                            try: ticker_votes[t]["scores"].append(float(score))
+                            except: pass
+        # Filter for tickers proposed multiple times
+        repeats = [(t, d) for t, d in ticker_votes.items() if d["cycles"] >= 2]
+        repeats.sort(key=lambda x: -x[1]["cycles"])
+        if not repeats:
+            post("[20-consensus]", "No tickers repeated across last 10 cycles (current cycles: " + str(len(recent_cycles)) + ")")
+            return
+        lines = ["Tickers repeated across last " + str(len(recent_cycles)) + " cycles:"]
+        for t, d in repeats[:10]:
+            avg_score = sum(d["scores"]) / len(d["scores"]) if d["scores"] else 0
+            direction = "CALL" if d["calls"] > d["puts"] else ("PUT" if d["puts"] > d["calls"] else "MIXED")
+            lines.append(t + ": " + str(d["cycles"]) + "x in cycles (" + direction + ", avg score " + ("%.0f" % avg_score) + ")")
         post("[20-consensus]", "\n".join(lines))
     except Exception as e:
         post("[20-consensus]", "ERROR: " + str(e))

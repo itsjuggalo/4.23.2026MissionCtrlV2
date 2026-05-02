@@ -1527,7 +1527,8 @@ def execute_pick_on_alpaca(pick):
             _post_bobatrades(
                 f"⚠️ Boba bought {occ_symbol} x{qty} @ ${fill_price:.2f} "
                 f"BUT protection FAILED (HTTP {prot_r.status_code})\n"
-                f"Daemon will trail. {prot_r.text[:150]}"
+                f"Daemon will trail. {prot_r.text[:150]}",
+                pick_key=occ_symbol, thread_name=f"📊 {occ_symbol}"
             )
             return {
                 "ok": True, "symbol": occ_symbol, "order_id": buy_id,
@@ -1901,7 +1902,9 @@ def main():
             # Kronos typically takes ~50s. If it doesn't finish, use placeholder.
             fire_kronos_background(ticker, option_ctx)
             kronos_fired.append(ticker)
-            waited = wait_for_kronos_result(ticker, timeout_sec=75, poll_interval=3)
+            # Item 11 mitigation: indices have huge option chains, allow extra time
+            kronos_timeout_sec = 120 if ticker in ("SPX", "SPY", "QQQ", "IWM", "DIA") else 75
+            waited = wait_for_kronos_result(ticker, timeout_sec=kronos_timeout_sec, poll_interval=3)
             if waited:
                 # Got real result — annotate with option context
                 waited["option_context"] = option_ctx
@@ -2062,7 +2065,8 @@ def main():
                     _post_bobatrades(
                         f"⚙️ Boba position action: {sym} {act}\n"
                         f"{details}\n"
-                        f"Reason: {reason}"
+                        f"Reason: {reason}",
+                        pick_key=sym, thread_name=f"📊 {sym}"
                     )
                 except Exception:
                     pass
@@ -2073,7 +2077,8 @@ def main():
                     _post_bobatrades(
                         f"❌ Boba position action FAILED: {sym} {act}\n"
                         f"Error: {err}\n"
-                        f"Reason: {reason}"
+                        f"Reason: {reason}",
+                        pick_key=sym, thread_name=f"📊 {sym}"
                     )
                 except Exception:
                     pass
