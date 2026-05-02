@@ -91,7 +91,8 @@ def search_pine_repos():
         "User-Agent": USER_AGENT,
     }
     if token:
-        headers["Authorization"] = f"Bearer {token}"
+        # GitHub accepts both "Bearer" and "token" prefix - "token" works with older PATs that "Bearer" rejects
+        headers["Authorization"] = f"token {token}"
 
     req = urllib.request.Request(url, headers=headers)
     try:
