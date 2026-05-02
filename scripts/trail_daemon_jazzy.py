@@ -263,6 +263,16 @@ def process_position(p, hwm_state, journal, open_orders):
     if new_stop_trigger <= existing_stop:
         return
 
+    # Minimum-step guard: skip ratchet if change is under 5%.
+    # Prevents stop-storm churn during fast-moving 0DTE / high-gamma sessions.
+    # Each cancel+resubmit is a wasted API call AND a tiny window where the
+    # position is unprotected. Better to ratchet less frequently in larger steps.
+    if existing_stop > 0:
+        step_pct = (new_stop_trigger - existing_stop) / existing_stop * 100
+        if step_pct < 5.0:
+            log("skip_small_step", {"sym": sym, "existing": existing_stop, "proposed": new_stop_trigger, "step_pct": round(step_pct, 2)})
+            return
+
     # Cancel old, place new
     if cancel_order(existing["id"]):
         time.sleep(0.5)  # Alpaca needs a beat
