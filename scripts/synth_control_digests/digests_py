@@ -16,7 +16,7 @@ Subcommands:
     blast        - Item 17 blast-radius weekly summary
     all          - Run every digest sequentially
 """
-import json, sys, os, subprocess, glob
+import json, sys, os, subprocess, glob, time
 from pathlib import Path
 from datetime import datetime, timezone, timedelta
 from collections import defaultdict
@@ -329,12 +329,14 @@ def main():
         sys.exit(1)
     cmd = sys.argv[1]
     if cmd == "all":
-        for name, fn in DIGESTS.items():
+        for i, (name, fn) in enumerate(DIGESTS.items()):
             print("Running " + name + "...")
             try:
                 fn()
             except Exception as e:
                 print("  " + name + " failed: " + str(e))
+            if i < len(DIGESTS) - 1:
+                time.sleep(1.5)  # avoid Discord rate limit
     elif cmd in DIGESTS:
         DIGESTS[cmd]()
     else:
