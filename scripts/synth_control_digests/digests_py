@@ -1,0 +1,346 @@
+#!/usr/bin/env python3
+"""Kitchen-sink synth-control digests.
+
+Single script with multiple subcommand digests, each posts to synth-control webhook.
+Every post header is bracket-prefixed so Mike can grep/triage later.
+
+Subcommands:
+    consensus    - Item 20 N-of-M consensus from boba decision cycle
+    optimizer    - Item 21 SuperTrend optimizer daily summary
+    self-grade   - Item 15 Boba weekly self-grade tee
+    sec-whales   - Item 27 SEC weekly whale digest
+    fleet-mem    - Item 23 fleet_memory updates this week
+    kronos       - Kronos reliability stats
+    mc-restarts  - Mission-control PM2 restart watcher
+    edge-decay   - Item 22 edge-decay weekly roll-up
+    blast        - Item 17 blast-radius weekly summary
+    all          - Run every digest sequentially
+"""
+import json, sys, os, subprocess, glob
+from pathlib import Path
+from datetime import datetime, timezone, timedelta
+from collections import defaultdict
+import urllib.request
+
+SECRETS = Path.home() / ".openclaw" / "secrets"
+WEBHOOK_FILE = SECRETS / "discord_synthcontrol_webhook"
+STATE = Path.home() / ".openclaw" / "state" / "synth_control_digests"
+STATE.mkdir(parents=True, exist_ok=True)
+
+
+def post(header, body):
+    """Post header + body to synth-control. Header format: [item-name]"""
+    if not WEBHOOK_FILE.exists():
+        print("[digest] webhook missing")
+        return False
+    url = WEBHOOK_FILE.read_text().strip()
+    if not url:
+        return False
+    msg = "**" + header + "**\n" + body
+    if len(msg) > 1900:
+        msg = msg[:1850] + "\n... (truncated)"
+    try:
+        req = urllib.request.Request(url, method="POST",
+            data=json.dumps({"content": msg}).encode("utf-8"),
+            headers={"Content-Type": "application/json"})
+        with urllib.request.urlopen(req, timeout=10) as r:
+            return r.status in (200, 204)
+    except Exception as e:
+        print("[digest] post failed: " + str(e))
+        return False
+
+
+def digest_consensus():
+    """Item 20: read recent boba decisions, surface consensus signals."""
+    p = Path.home() / ".openclaw" / "workspace" / "skill_outputs" / "boba_decisions_validated.json"
+    if not p.exists():
+        post("[20-consensus]", "No boba decisions file yet")
+        return
+    try:
+        data = json.loads(p.read_text())
+        if isinstance(data, list):
+            recent = data[-20:] if len(data) > 20 else data
+        else:
+            recent = []
+        ticker_votes = defaultdict(lambda: {"agents": set(), "directions": []})
+        for entry in recent:
+            if not isinstance(entry, dict):
+                continue
+            t = entry.get("ticker") or entry.get("symbol")
+            agent = entry.get("agent") or entry.get("model_used", "unknown")
+            direction = entry.get("option_type") or entry.get("direction", "?")
+            if t and agent:
+                ticker_votes[t]["agents"].add(agent)
+                ticker_votes[t]["directions"].append(direction)
+        consensus = [(t, len(d["agents"]), d["directions"]) for t, d in ticker_votes.items() if len(d["agents"]) >= 2]
+        consensus.sort(key=lambda x: -x[1])
+        if not consensus:
+            post("[20-consensus]", "No multi-agent consensus signals in last 20 decisions")
+            return
+        lines = []
+        for ticker, n_agents, dirs in consensus[:10]:
+            dir_summary = "/".join(set(dirs))
+            lines.append(ticker + ": " + str(n_agents) + " agents agree (" + dir_summary + ")")
+        post("[20-consensus]", "\n".join(lines))
+    except Exception as e:
+        post("[20-consensus]", "ERROR: " + str(e))
+
+
+def digest_optimizer():
+    """Item 21: read latest supertrend results."""
+    results_dir = Path.home() / "mission-control" / "supertrend-engine" / "results"
+    if not results_dir.exists():
+        post("[21-optimizer]", "Results directory missing")
+        return
+    configs = sorted(results_dir.glob("supertrend_config_*.json"), key=lambda p: p.stat().st_mtime)[-10:]
+    if not configs:
+        post("[21-optimizer]", "No recent optimizer runs")
+        return
+    lines = ["Last 10 optimizer runs:"]
+    for c in configs[-10:]:
+        try:
+            d = json.loads(c.read_text())
+            sym = d.get("symbol", c.name)
+            tf = d.get("timeframe", "?")
+            pf = d.get("profit_factor", "?")
+            wr = d.get("win_rate", "?")
+            try: pf_str = "%.2f" % float(pf)
+            except: pf_str = str(pf)
+            try: wr_str = "%.0f%%" % (float(wr)*100) if isinstance(wr,(int,float)) and wr<=1 else str(wr)
+            except: wr_str = str(wr)
+            lines.append(sym + " " + str(tf) + ": PF " + pf_str + " WR " + wr_str)
+        except Exception:
+            lines.append(c.name + ": parse error")
+    post("[21-optimizer]", "\n".join(lines))
+
+
+def digest_self_grade():
+    """Item 15: most recent weekly grade tee."""
+    proposals = Path.home() / ".openclaw" / "workspace" / "proposals"
+    grades = sorted(proposals.glob("*-weekly-grade"), key=lambda p: p.stat().st_mtime)
+    if not grades:
+        post("[15-self-grade]", "No weekly grades yet")
+        return
+    latest = grades[-1]
+    try:
+        content = latest.read_text()
+        first_lines = "\n".join(content.split("\n")[:25])
+        post("[15-self-grade]", "Latest: " + latest.name + "\n\n" + first_lines)
+    except Exception as e:
+        post("[15-self-grade]", "ERROR: " + str(e))
+
+
+def digest_sec_whales():
+    """Item 27: SEC 13F weekly whale digest from log."""
+    log_path = Path.home() / ".openclaw" / "state" / "sec_scanner" / "13f_log.jsonl"
+    if not log_path.exists():
+        post("[27-sec-whales]", "13f log missing")
+        return
+    cutoff = datetime.now(timezone.utc) - timedelta(days=7)
+    by_whale = defaultdict(lambda: {"adds": 0, "cuts": 0, "new": 0, "exit": 0, "tickers": []})
+    try:
+        for line in open(log_path):
+            try:
+                rec = json.loads(line)
+                ts = rec.get("ts", rec.get("timestamp", ""))
+                if not ts:
+                    continue
+                try:
+                    rt = datetime.fromisoformat(ts.replace("Z","+00:00"))
+                except Exception:
+                    continue
+                if rt < cutoff:
+                    continue
+                whale = rec.get("whale", rec.get("fund", "unknown"))
+                action = rec.get("action", rec.get("change_type", "")).upper()
+                ticker = rec.get("ticker", rec.get("symbol", "?"))
+                if "NEW" in action:
+                    by_whale[whale]["new"] += 1
+                elif "ADD" in action:
+                    by_whale[whale]["adds"] += 1
+                elif "CUT" in action:
+                    by_whale[whale]["cuts"] += 1
+                elif "EXIT" in action:
+                    by_whale[whale]["exit"] += 1
+                if len(by_whale[whale]["tickers"]) < 5:
+                    by_whale[whale]["tickers"].append(ticker + ":" + action)
+            except Exception:
+                continue
+    except Exception as e:
+        post("[27-sec-whales]", "ERROR reading log: " + str(e))
+        return
+    if not by_whale:
+        post("[27-sec-whales]", "No 13F changes in last 7 days")
+        return
+    lines = []
+    for whale, d in sorted(by_whale.items(), key=lambda x: -(x[1]["adds"]+x[1]["new"]+x[1]["cuts"]+x[1]["exit"]))[:10]:
+        total = d["adds"]+d["new"]+d["cuts"]+d["exit"]
+        lines.append(whale + ": " + str(total) + " moves (NEW " + str(d["new"]) + " ADD " + str(d["adds"]) + " CUT " + str(d["cuts"]) + " EXIT " + str(d["exit"]) + ")")
+    post("[27-sec-whales]", "\n".join(lines))
+
+
+def digest_fleet_mem():
+    """Item 23: fleet_memory files updated in last 7 days."""
+    fm_dir = Path.home() / ".openclaw" / "workspace" / "fleet_memory"
+    if not fm_dir.exists():
+        post("[23-fleet-mem]", "fleet_memory dir missing")
+        return
+    cutoff = datetime.now(timezone.utc) - timedelta(days=7)
+    recent = []
+    for f in fm_dir.iterdir():
+        if f.is_file():
+            mtime = datetime.fromtimestamp(f.stat().st_mtime, tz=timezone.utc)
+            if mtime > cutoff:
+                size_kb = f.stat().st_size / 1024
+                recent.append((f.name, mtime, size_kb))
+    if not recent:
+        post("[23-fleet-mem]", "No fleet_memory updates in last 7 days")
+        return
+    recent.sort(key=lambda x: -x[1].timestamp())
+    lines = []
+    for name, mtime, size in recent:
+        lines.append(name + ": " + mtime.strftime("%a %b %d %H:%M ET") + " (" + ("%.1f" % size) + "KB)")
+    post("[23-fleet-mem]", "\n".join(lines))
+
+
+def digest_kronos():
+    """Kronos reliability from boba_cycle log."""
+    log_path = Path("/tmp/boba_cycle.log")
+    if not log_path.exists():
+        post("[kronos-reliability]", "boba_cycle.log missing")
+        return
+    timeouts = 0
+    ready = 0
+    cached = 0
+    waited_ok = 0
+    tickers = defaultdict(int)
+    try:
+        with open(log_path) as f:
+            for line in f.readlines()[-2000:]:
+                if "[kronos]" in line:
+                    if "timed out" in line:
+                        timeouts += 1
+                        for tok in line.split():
+                            if tok.isupper() and 1 < len(tok) <= 6:
+                                tickers[tok] += 1
+                                break
+                    elif "forecast ready" in line:
+                        ready += 1
+                        for tok in line.split():
+                            if tok.isupper() and 1 < len(tok) <= 6:
+                                tickers[tok] += 1
+                                break
+                    elif "cached" in line:
+                        for tok in line.split():
+                            if tok.isdigit():
+                                cached += int(tok)
+                                break
+    except Exception as e:
+        post("[kronos-reliability]", "ERROR: " + str(e))
+        return
+    total = timeouts + ready
+    rate = (ready / total * 100) if total else 0
+    top5 = sorted(tickers.items(), key=lambda x: -x[1])[:5]
+    body = "Last 2000 log lines: " + str(ready) + " ready, " + str(timeouts) + " timeouts (" + ("%.0f" % rate) + "% success)\n"
+    body += "Top 5 forecasted tickers: " + ", ".join([t + " " + str(c) for t,c in top5])
+    post("[kronos-reliability]", body)
+
+
+def digest_mc_restarts():
+    """Mission-control PM2 restart watcher."""
+    try:
+        result = subprocess.run(["pm2", "jlist"], capture_output=True, text=True, timeout=10)
+        procs = json.loads(result.stdout)
+    except Exception as e:
+        post("[mc-restarts]", "ERROR pm2 jlist: " + str(e))
+        return
+    mc = next((p for p in procs if p.get("name") == "mission-control"), None)
+    if not mc:
+        post("[mc-restarts]", "mission-control proc not found")
+        return
+    restarts = mc.get("pm2_env", {}).get("restart_time", 0)
+    uptime_ms = mc.get("pm2_env", {}).get("pm_uptime", 0)
+    mem_mb = mc.get("monit", {}).get("memory", 0) / 1024 / 1024
+    state_file = STATE / "mc_restarts.json"
+    prev = 0
+    if state_file.exists():
+        try:
+            prev = json.loads(state_file.read_text()).get("restarts", 0)
+        except Exception:
+            pass
+    delta = restarts - prev
+    state_file.write_text(json.dumps({"restarts": restarts, "ts": datetime.now(timezone.utc).isoformat()}))
+    body = "PM2 restart_time: " + str(restarts) + " (delta since last check: +" + str(delta) + ")\n"
+    body += "Memory: " + ("%.0f" % mem_mb) + "MB"
+    if delta > 0:
+        body = "⚠️ " + body
+    post("[mc-restarts]", body)
+
+
+def digest_edge_decay():
+    """Item 22 edge-decay weekly roll-up."""
+    state_path = Path.home() / ".openclaw" / "state" / "edge_decay" / "last_run.json"
+    if not state_path.exists():
+        post("[22-edge-decay]", "No last_run.json")
+        return
+    try:
+        d = json.loads(state_path.read_text())
+        body = "Strategies checked: " + str(d.get("strategies_checked", 0)) + "\n"
+        body += "Healthy: " + str(d.get("healthy", 0)) + " | Insufficient data: " + str(d.get("insufficient", 0)) + "\n"
+        alerts = d.get("alerts", [])
+        body += "Active decay alerts: " + str(len(alerts))
+        if alerts:
+            body += "\n" + "\n".join(["  " + str(a) for a in alerts[:5]])
+        post("[22-edge-decay]", body)
+    except Exception as e:
+        post("[22-edge-decay]", "ERROR: " + str(e))
+
+
+def digest_blast():
+    """Item 17 blast-radius weekly summary."""
+    report = Path.home() / ".openclaw" / "data" / "blast_radius_report.md"
+    if not report.exists():
+        post("[17-blast-radius]", "Report missing")
+        return
+    try:
+        lines = report.read_text().split("\n")
+        snippet = "\n".join(lines[:20])
+        post("[17-blast-radius]", snippet)
+    except Exception as e:
+        post("[17-blast-radius]", "ERROR: " + str(e))
+
+
+DIGESTS = {
+    "consensus": digest_consensus,
+    "optimizer": digest_optimizer,
+    "self-grade": digest_self_grade,
+    "sec-whales": digest_sec_whales,
+    "fleet-mem": digest_fleet_mem,
+    "kronos": digest_kronos,
+    "mc-restarts": digest_mc_restarts,
+    "edge-decay": digest_edge_decay,
+    "blast": digest_blast,
+}
+
+
+def main():
+    if len(sys.argv) < 2:
+        print("Usage: digests_py <" + "|".join(list(DIGESTS.keys()) + ["all"]) + ">")
+        sys.exit(1)
+    cmd = sys.argv[1]
+    if cmd == "all":
+        for name, fn in DIGESTS.items():
+            print("Running " + name + "...")
+            try:
+                fn()
+            except Exception as e:
+                print("  " + name + " failed: " + str(e))
+    elif cmd in DIGESTS:
+        DIGESTS[cmd]()
+    else:
+        print("Unknown digest: " + cmd)
+        sys.exit(1)
+
+
+if __name__ == "__main__":
+    main()
