@@ -1,0 +1,213 @@
+#!/usr/bin/env python3
+"""
+Outcome extractor — reads closed_*.json files from Option-Signals-Scraper data,
+extracts (ticker, strike, type, expiry, buy, sell, exit_time, pct_return, status)
+tuples and writes structured JSON to openclaw/data/contract-outcomes/.
+
+Drives Item 33 flow tier auto-research framework. Item 33's load_closed_positions
+will read from contract-outcomes/ to compute win-rate per tier.
+
+Sources (closed* files only):
+  - /home/ubuntu/mission-control-restored/Option-Signals-Scraper/data/closed_options.json
+  - .../closed_stocks.json
+  - .../ss_closed_options.json (Source S - flow_alerts based)
+  - .../ts_closed_options.json (Source T - additional)
+  - .../closed_options_2022.json (older archive)
+  - .../closed_options_older.json (older archive)
+  - .../closed_stocks_older.json
+  - .../ss_closed_stocks.json
+  - .../ts_closed_stocks.json
+
+Output structure:
+  ~/.openclaw/data/contract-outcomes/all-time.json — full history
+  ~/.openclaw/data/contract-outcomes/recent-30d.json — last 30 days only
+
+Run as cron every 30 min - data churns frequently.
+"""
+import json
+import re
+import sys
+from datetime import datetime, timezone, timedelta
+from pathlib import Path
+
+DATA_DIR = Path("/home/ubuntu/mission-control-restored/Option-Signals-Scraper/data")
+OUT_DIR = Path("/home/ubuntu/.openclaw/data/contract-outcomes")
+OUT_DIR.mkdir(parents=True, exist_ok=True)
+
+CLOSED_FILES = [
+    ("closed_options.json", "options", "live"),
+    ("closed_stocks.json", "stocks", "live"),
+    ("ss_closed_options.json", "options", "ss"),
+    ("ts_closed_options.json", "options", "ts"),
+    ("ss_closed_stocks.json", "stocks", "ss"),
+    ("ts_closed_stocks.json", "stocks", "ts"),
+    ("closed_options_2022.json", "options", "archive_2022"),
+    ("closed_options_older.json", "options", "archive_older"),
+    ("closed_stocks_older.json", "stocks", "archive_older"),
+]
+
+
+def extract_pct_from_status(status):
+    """Find a percentage in status text. Returns float or None."""
+    if not status:
+        return None
+    # Match patterns like "32.56%" or "+222%" or "for 16%"
+    m = re.search(r'([\+\-]?\d+\.?\d*)\s*%', status)
+    if m:
+        try:
+            return float(m.group(1))
+        except Exception:
+            pass
+    return None
+
+
+def calc_pct_from_targets(buy, sell):
+    """When status lacks pct, calculate from buyTarget / sellTarget."""
+    try:
+        b = float(buy)
+        s = float(sell)
+        if b > 0:
+            return round((s - b) / b * 100, 2)
+    except Exception:
+        pass
+    return None
+
+
+def is_winner(status):
+    """Classify entry as winner if status indicates profit booking."""
+    if not status:
+        return False
+    sl = status.lower()
+    return any(p in sl for p in (
+        "profit", "delivered", "winner", "booked", "locked", "ride", "riding",
+    ))
+
+
+def is_loser(status):
+    """Classify entry as loser if stopped out or expired worthless."""
+    if not status:
+        return False
+    sl = status.lower()
+    return any(p in sl for p in (
+        "stopped out", "stop loss hit", "expired worthless", "loss booked",
+    ))
+
+
+def extract_entry(entry, source_kind, source_label):
+    """Build a normalized outcome record from one entry."""
+    if not isinstance(entry, dict):
+        return None
+
+    status = entry.get("status", "") or entry.get("message", "")
+
+    # Skip active trades
+    sl = status.lower() if status else ""
+    if "waiting" in sl or "active" in sl:
+        return None
+    # Must be closed or post-target
+    if not (is_winner(status) or is_loser(status)):
+        return None
+
+    pct = extract_pct_from_status(status)
+    buy = entry.get("buyTarget", "")
+    sell = entry.get("sellTarget", "") or entry.get("exit1", "") or entry.get("sellTarget2", "")
+    if pct is None:
+        pct = calc_pct_from_targets(buy, sell)
+
+    exit_time = entry.get("exitTime") or entry.get("exit1Time") or entry.get("exit2Time")
+    try:
+        exit_dt = datetime.fromtimestamp(int(exit_time), tz=timezone.utc).isoformat() if exit_time else None
+    except Exception:
+        exit_dt = None
+
+    expiry = entry.get("expiry", "")
+    expiry_iso = None
+    try:
+        if expiry and str(expiry).isdigit() and int(expiry) > 1000000000:
+            expiry_iso = datetime.fromtimestamp(int(expiry), tz=timezone.utc).strftime("%Y-%m-%d")
+    except Exception:
+        pass
+
+    return {
+        "symbol": entry.get("symbol", "?"),
+        "kind": source_kind,
+        "source": source_label,
+        "strike": str(entry.get("strike", "")) if source_kind == "options" else None,
+        "is_put": bool(entry.get("isPut", 0)),
+        "expiry": expiry_iso,
+        "category": entry.get("category", ""),
+        "buy_target": str(buy) if buy else None,
+        "sell_target": str(sell) if sell else None,
+        "exit_time": exit_dt,
+        "exit_ts": int(exit_time) if exit_time else None,
+        "pct_return": pct,
+        "outcome": "WIN" if is_winner(status) else ("LOSS" if is_loser(status) else "UNKNOWN"),
+        "status_raw": status[:120],
+    }
+
+
+def main():
+    all_outcomes = []
+    counts = {}
+
+    for fname, kind, label in CLOSED_FILES:
+        fpath = DATA_DIR / fname
+        if not fpath.exists():
+            counts[fname] = "missing"
+            continue
+        try:
+            data = json.loads(fpath.read_text())
+        except Exception as e:
+            counts[fname] = f"parse_err: {e}"
+            continue
+        if not isinstance(data, dict):
+            counts[fname] = "not_dict"
+            continue
+
+        c = 0
+        for entry_id, entry in data.items():
+            rec = extract_entry(entry, kind, label)
+            if rec:
+                rec["entry_id"] = entry_id
+                all_outcomes.append(rec)
+                c += 1
+        counts[fname] = c
+
+    # Sort by exit_ts descending (most recent first)
+    all_outcomes.sort(key=lambda x: x.get("exit_ts") or 0, reverse=True)
+
+    # Write all-time
+    all_time_path = OUT_DIR / "all-time.json"
+    all_time_path.write_text(json.dumps(all_outcomes, indent=2, default=str))
+
+    # Write recent 30 days
+    cutoff = (datetime.now(timezone.utc) - timedelta(days=30)).timestamp()
+    recent = [o for o in all_outcomes if (o.get("exit_ts") or 0) >= cutoff]
+    recent_path = OUT_DIR / "recent-30d.json"
+    recent_path.write_text(json.dumps(recent, indent=2, default=str))
+
+    # Print summary
+    print(f"[outcome-extractor] processed {len(CLOSED_FILES)} files")
+    for fname, c in counts.items():
+        print(f"  {fname}: {c}")
+    print()
+    print(f"[outcome-extractor] total outcomes extracted: {len(all_outcomes)}")
+    print(f"[outcome-extractor] last 30 days: {len(recent)}")
+    print(f"[outcome-extractor] wrote {all_time_path}")
+    print(f"[outcome-extractor] wrote {recent_path}")
+
+    # Quick stats
+    wins = sum(1 for o in all_outcomes if o["outcome"] == "WIN")
+    losses = sum(1 for o in all_outcomes if o["outcome"] == "LOSS")
+    pct_present = [o["pct_return"] for o in all_outcomes if o.get("pct_return") is not None]
+    print()
+    print(f"[summary] WIN={wins}  LOSS={losses}  pct_data_present={len(pct_present)}")
+    if pct_present:
+        avg_pct = sum(pct_present) / len(pct_present)
+        win_pcts = [p for p in pct_present if p > 0]
+        big_wins = [p for p in pct_present if p >= 100]
+        print(f"[summary] avg_pct={avg_pct:.1f}%  positives={len(win_pcts)}  >=100%={len(big_wins)}")
+
+
+if __name__ == "__main__":
+    main()

@@ -64,24 +64,49 @@ def load_decisions():
         return []
 
 
+CONTRACT_OUTCOMES_FILE = Path("/home/ubuntu/.openclaw/data/contract-outcomes/recent-30d.json")
+
+
 def load_closed_positions():
-    """Build dict of {symbol_key: {pnl, opened_at, closed_at}} from position daemon state."""
+    """Build dict of {ticker: outcome_dict} from outcome_extractor output.
+
+    Reads contract-outcomes/recent-30d.json which is populated every 30min by
+    outcome_extractor reading closed_*.json files from Option-Signals-Scraper.
+    """
     closed = {}
-    # Try position_daemon dir first
-    if POSITION_DAEMON_DIR.is_dir():
-        for f in POSITION_DAEMON_DIR.glob("*.json"):
-            try:
-                d = json.loads(f.read_text())
-                if isinstance(d, dict):
-                    for k, v in d.items():
-                        if isinstance(v, dict) and v.get("status") == "closed" or v.get("realized_pnl") is not None:
-                            closed[k] = v
-                elif isinstance(d, list):
-                    for v in d:
-                        if isinstance(v, dict) and v.get("symbol"):
-                            closed[v["symbol"]] = v
-            except Exception:
-                continue
+    if not CONTRACT_OUTCOMES_FILE.exists():
+        return closed
+    try:
+        outcomes = json.loads(CONTRACT_OUTCOMES_FILE.read_text())
+    except Exception as e:
+        print(f"[research] load_closed_positions failed: {e}", file=sys.stderr)
+        return closed
+    for o in outcomes:
+        if not isinstance(o, dict):
+            continue
+        sym = o.get("symbol", "")
+        if not sym:
+            continue
+        # Multi-key for matching: ticker alone + ticker_strike + ticker_strike_expiry
+        pnl = o.get("pct_return")
+        if pnl is None:
+            continue
+        # Convert pct to dollar-equivalent for compatibility with existing code
+        rec = {
+            "realized_pnl": float(pnl),
+            "outcome": o.get("outcome"),
+            "exit_time": o.get("exit_time"),
+            "category": o.get("category"),
+        }
+        # Index by symbol alone (most relaxed match for picks_with_pnl join)
+        closed[sym] = rec
+        # Also indexed by symbol_strike if available
+        strike = o.get("strike")
+        if strike:
+            closed[f"{sym}_{strike}"] = rec
+            expiry = o.get("expiry")
+            if expiry:
+                closed[f"{sym}_{strike}_{expiry}"] = rec
     return closed
 
 
