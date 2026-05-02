@@ -63,6 +63,14 @@ FIREBASE_FEED = Path("/home/ubuntu/.openclaw/workspace/directives/firebase_trade
 
 # Tradier live options quotes (bid/ask/IV/greeks) for informed contract selection
 sys.path.insert(0, "/home/ubuntu/scripts/lib")
+
+# Skill loader - injects relevant SKILL.md content into Boba's prompt
+try:
+    from skill_loader import load_relevant_skills
+except Exception as _e:
+    print(f"[skill_loader] import failed: {_e}", flush=True)
+    def load_relevant_skills(*a, **kw):
+        return ""
 from anthropic_tracker import log_call as _log_anthropic_call
 import time as _time_tracker
 try:
@@ -867,7 +875,42 @@ def build_boba_prompt(account, positions, shortlist_with_kronos, remaining_budge
     consensus_text = format_consensus_for_prompt(consensus_votes, threshold=3)
     multi_agent_context = market_briefing_text + grok_brief_text + orion_skills_text + consensus_text
 
-    prompt = f"""You are Boba — the decision-making agent in Mission Control's multi-agent trading system.
+    # Skill injection - load relevant SKILL.md content based on decision context
+    try:
+        _skill_ctx_parts = []
+        for _p in (positions or []):
+            _sym = _p.get('symbol', '')
+            if _sym:
+                _skill_ctx_parts.append(_sym)
+        for _sid, _s, _k in (shortlist_with_kronos or []):
+            _t = _s.get('ticker', '') if isinstance(_s, dict) else ''
+            _ot = _s.get('option_type', '') if isinstance(_s, dict) else ''
+            if _t:
+                _skill_ctx_parts.append(_t)
+            if _ot:
+                _skill_ctx_parts.append(_ot)
+        _skill_ctx_parts.extend([
+            'options', 'call', 'put', 'strike', 'expiry', 'IV', 'greeks',
+            'delta', 'theta', 'gamma', 'vega', 'flow', 'whale', 'unusual',
+            'volume', 'open-interest', 'sweep', 'block', 'bullish', 'bearish',
+            'risk', 'sizing', 'position', 'portfolio', 'kronos', 'forecast',
+        ])
+        _skill_ctx = ' '.join(_skill_ctx_parts)
+        skills_section = load_relevant_skills(
+            agent='boba',
+            context_text=_skill_ctx,
+            max_skills=4,
+            max_tokens=3500,
+            include_body=True,
+        ) or ''
+        if skills_section:
+            print(f"[skill_loader] injected {skills_section.count(chr(35) + chr(35) + chr(35))} skills into Boba prompt", flush=True)
+    except Exception as _e:
+        print(f"[skill_loader] injection failed: {_e}", flush=True)
+        skills_section = ''
+
+        prompt = f"""{skills_section}
+You are Boba — the decision-making agent in Mission Control's multi-agent trading system.
 
 # Mission
 Make positive-expected-value options trades using whale-tier T1+T2 options flow signals (T1: $1M+ SWEEP/A,AA, T2: $500K+ Vol>OI SWEEP/A,AA), Kronos is available as a consultant — you may consider its forecast when relevant, but flow strength alone justifies a pick. Target average R:R ≥ 1.5. You are NOT aiming for 80%+ win rate — you're aiming for edge × sizing × discipline.
