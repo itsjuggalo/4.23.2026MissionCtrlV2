@@ -1,0 +1,198 @@
+#!/usr/bin/env python3
+"""Item 25: Skill-consultant pattern.
+
+Weekly cron scans Boba's last 30 days of decisions, identifies patterns of
+repeated work that could become skills, and proposes them to a Discord channel
+for Mike's manual approval.
+
+Mike approves by moving proposal file from proposals/ to proposals/approved/.
+A future phase-2 script can scan proposals/approved/ to stub out new skills.
+"""
+import json, os, sys, urllib.request
+from pathlib import Path
+from datetime import datetime, timedelta, timezone
+
+SECRETS = Path('/home/ubuntu/.openclaw/secrets')
+PROPOSALS = Path('/home/ubuntu/.openclaw/workspace/proposals')
+DECISIONS = Path('/home/ubuntu/.openclaw/workspace/skill_outputs/boba_decisions_validated.json')
+SKILL_ASSIGNMENTS = Path('/home/ubuntu/.openclaw/skills/SKILL_ASSIGNMENTS.md')
+
+PROPOSALS.mkdir(parents=True, exist_ok=True)
+
+def load_secret(name):
+    p = SECRETS / name
+    return p.read_text().strip() if p.exists() else None
+
+WEBHOOK = load_secret('discord_skill_consultant_webhook')
+ANTHROPIC_KEY = load_secret('anthropic_api_key')
+
+def post_discord(content):
+    if not WEBHOOK:
+        print('[skill-consultant] no webhook configured, skipping post')
+        return
+    body = json.dumps({'content': content[:1990]}).encode()
+    req = urllib.request.Request(
+        WEBHOOK, data=body,
+        headers={'content-type': 'application/json',
+                 'User-Agent': 'MissionCtrl-SkillConsultant/1.0 (+https://missionctrl.serveftp.com)'})
+    try:
+        urllib.request.urlopen(req, timeout=15)
+        print('[skill-consultant] discord post sent')
+    except Exception as e:
+        print(f'[skill-consultant] webhook err: {e}', file=sys.stderr)
+
+def call_claude(prompt):
+    if not ANTHROPIC_KEY:
+        return None
+    body = json.dumps({
+        'model': 'claude-sonnet-4-5-20250929',
+        'max_tokens': 4096,
+        'messages': [{'role': 'user', 'content': prompt}],
+    }).encode()
+    req = urllib.request.Request(
+        'https://api.anthropic.com/v1/messages',
+        data=body,
+        headers={
+            'content-type': 'application/json',
+            'x-api-key': ANTHROPIC_KEY,
+            'anthropic-version': '2023-06-01',
+        })
+    try:
+        resp = json.loads(urllib.request.urlopen(req, timeout=120).read())
+        for block in resp.get('content', []):
+            if block.get('type') == 'text':
+                return block.get('text', '')
+        return None
+    except Exception as e:
+        print(f'[skill-consultant] claude err: {e}', file=sys.stderr)
+        return None
+
+def load_recent_decisions(days=30):
+    if not DECISIONS.exists():
+        return []
+    d = json.loads(DECISIONS.read_text())
+    decs = d if isinstance(d, list) else d.get('decisions', [])
+    cutoff = datetime.now(timezone.utc) - timedelta(days=days)
+    out = []
+    for dec in decs:
+        ts_str = dec.get('cycle_time', '')
+        try:
+            dts = datetime.fromisoformat(ts_str.replace('Z', '+00:00'))
+            if dts < cutoff:
+                continue
+        except Exception:
+            continue
+        out.append({
+            'cycle_time': ts_str,
+            'cycle_summary': dec.get('cycle_summary', ''),
+            'picks_executed': [p.get('ticker') for p in (dec.get('picks_executed') or []) if isinstance(p, dict)],
+            'passed_on': [p.get('ticker') for p in (dec.get('passed_on') or []) if isinstance(p, dict)],
+        })
+    return out
+
+def load_existing_skills():
+    """Read SKILL_ASSIGNMENTS to know what skills already exist - avoid suggesting duplicates."""
+    if SKILL_ASSIGNMENTS.exists():
+        return SKILL_ASSIGNMENTS.read_text()
+    return '(no skill assignments file found)'
+
+def build_consultant_prompt(decisions, existing_skills):
+    summaries = '\n'.join(
+        f'- [{d["cycle_time"][:16]}] {d["cycle_summary"]}'
+        for d in decisions
+        if d.get('cycle_summary')
+    )[:15000]
+    return f'''You are a skill-consultant analyzing Boba's recent trading decisions to identify
+patterns of REPEATED MANUAL WORK that could become reusable skills.
+
+Boba is the decision-making agent in Mission Control. When Boba does the same
+analytical work repeatedly across cycles, that's a candidate for a skill - a small
+script that pre-computes the answer and feeds it into Boba's prompt instead of
+forcing Boba to redo the reasoning from raw data each cycle.
+
+# Boba's last {len(decisions)} decision summaries
+{summaries}
+
+# Skills that already exist (do NOT suggest duplicates)
+{existing_skills[:3000]}
+
+# Your task
+Identify 1-3 NEW skills that would save Boba meaningful work. For each:
+1. Skill name (kebab-case, like "iv-crush-estimator")
+2. What it does (one sentence)
+3. Inputs (what it reads to do its work)
+4. Output (what JSON it writes)
+5. Cron suggestion (how often)
+6. Justification (concrete examples from the summaries above showing repeated work)
+
+Format your response as JSON ONLY (no markdown fences, no preamble):
+
+{{
+  "skills_proposed": [
+    {{
+      "name": "kebab-case-name",
+      "description": "one sentence",
+      "inputs": ["input source 1", "input source 2"],
+      "output_schema": "what shape the output JSON has",
+      "cron": "cron expression suggestion",
+      "justification": "concrete examples from Boba's summaries showing the repeated work"
+    }}
+  ],
+  "summary": "one-line summary of the proposal batch"
+}}
+
+If no patterns warrant a skill, return: {{"skills_proposed": [], "summary": "no actionable patterns this week"}}.
+'''
+
+def main():
+    print(f'[skill-consultant] starting at {datetime.now(timezone.utc).isoformat()}')
+    decisions = load_recent_decisions(days=30)
+    print(f'[skill-consultant] loaded {len(decisions)} decisions in last 30 days')
+    if len(decisions) < 5:
+        print('[skill-consultant] insufficient decision history (<5), skipping this week')
+        return 0
+
+    existing = load_existing_skills()
+    prompt = build_consultant_prompt(decisions, existing)
+    response = call_claude(prompt)
+    if not response:
+        print('[skill-consultant] claude call failed')
+        return 1
+
+    # Try to parse JSON from response
+    cleaned = response.strip()
+    if cleaned.startswith('```'):
+        cleaned = cleaned.split('```')[1]
+        if cleaned.startswith('json'):
+            cleaned = cleaned[4:]
+        cleaned = cleaned.strip()
+    try:
+        proposal = json.loads(cleaned)
+    except Exception as e:
+        print(f'[skill-consultant] JSON parse error: {e}')
+        proposal = {'raw_response': response, 'parse_error': str(e)}
+
+    today = datetime.now(timezone.utc).strftime('%Y-%m-%d')
+    if isinstance(proposal, dict):
+        proposal['model_used'] = 'claude-sonnet-4-5-20250929'
+    proposal_path = PROPOSALS / f'{today}-skill-suggestions'
+    proposal_path.write_text(json.dumps(proposal, indent=2))
+    print(f'[skill-consultant] wrote {proposal_path}')
+
+    # Discord summary
+    skills = proposal.get('skills_proposed', [])
+    if not skills:
+        msg = f'**Skill-Consultant** {today}\n\nNo actionable patterns identified this week.\n_{proposal.get("summary", "")}_'
+    else:
+        msg = f'**Skill-Consultant** {today} - {len(skills)} skill suggestion{"s" if len(skills) > 1 else ""}\n\n'
+        for s in skills[:3]:
+            msg += f'**{s.get("name", "?")}** - {s.get("description", "")}\n'
+            msg += f'  - cron: `{s.get("cron", "?")}`\n'
+            msg += f'  - why: {s.get("justification", "")[:200]}\n\n'
+        msg += f'\nFull proposal: `proposals/{today}-skill-suggestions`\n'
+        msg += f'Approve by moving to `proposals/approved/` - reject by moving to `proposals/rejected/`'
+    post_discord(msg)
+    return 0
+
+if __name__ == '__main__':
+    sys.exit(main())

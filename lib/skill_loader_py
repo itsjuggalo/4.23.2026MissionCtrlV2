@@ -1,0 +1,231 @@
+"""Skill loader for Mission Control agents.
+
+Reads SKILL.md files from /home/ubuntu/.openclaw/skills/<agent>/ and
+selects the most relevant skills for a given decision context, scored
+by keyword overlap between context text and skill description/name.
+
+Returns a formatted markdown block ready to inject into agent prompts.
+
+Token budget defaults conservatively to 4000 tokens (~16KB text) so it
+fits comfortably inside the 200k Sonnet context window without crowding
+out the existing prompt sections.
+
+Usage:
+    from skill_loader_py import load_relevant_skills
+
+    block = load_relevant_skills(
+        agent='boba',
+        context_text='AAPL TSLA SPY options call put earnings',
+        max_skills=5,
+        max_tokens=4000,
+    )
+    # Inject `block` into prompt template
+"""
+import re
+from pathlib import Path
+from collections import Counter
+
+SKILLS_ROOT = Path('/home/ubuntu/.openclaw/skills')
+
+# Stopwords to ignore when matching context to skill descriptions
+STOPWORDS = {
+    'a', 'an', 'and', 'are', 'as', 'at', 'be', 'by', 'for', 'from', 'has',
+    'have', 'in', 'is', 'it', 'its', 'of', 'on', 'or', 'that', 'the', 'this',
+    'to', 'was', 'were', 'will', 'with', 'use', 'used', 'using', 'can',
+    'should', 'would', 'could', 'may', 'when', 'how', 'what', 'which', 'who',
+    'i', 'you', 'we', 'they', 'he', 'she', 'them', 'their', 'our', 'your',
+    'skill', 'category', 'name', 'description', 'purpose', 'overview',
+}
+
+
+def parse_skill_md(path):
+    """Parse a SKILL.md file, return dict with name, description, body, path.
+
+    Handles both YAML frontmatter format and plain markdown headers.
+    Returns None if file is unreadable or empty.
+    """
+    try:
+        text = path.read_text(encoding='utf-8', errors='replace')
+    except Exception:
+        return None
+    if not text.strip():
+        return None
+
+    name = path.parent.name  # default to folder name
+    description = ''
+    body = text
+
+    # YAML frontmatter detection
+    if text.startswith('---\n'):
+        end = text.find('\n---\n', 4)
+        if end > 0:
+            front = text[4:end]
+            body = text[end + 5:]
+            for line in front.splitlines():
+                if ':' not in line:
+                    continue
+                k, _, v = line.partition(':')
+                k = k.strip().lower()
+                v = v.strip().strip('"').strip("'")
+                if k == 'name':
+                    name = v
+                elif k == 'description':
+                    description = v
+
+    # Fallback - extract description from first paragraph after first heading
+    if not description:
+        m = re.search(r'^#{1,3}\s+\w.*?\n+(.+?)(?:\n\n|$)', body, re.S | re.M)
+        if m:
+            description = m.group(1).strip().split('\n')[0][:300]
+
+    return {
+        'name': name,
+        'description': description,
+        'body': body.strip(),
+        'path': str(path),
+        'bytes': len(body),
+    }
+
+
+def tokenize(text):
+    """Lowercase + split on non-word, drop stopwords + 1-char tokens."""
+    toks = re.findall(r'[a-zA-Z][a-zA-Z0-9_-]+', (text or '').lower())
+    return [t for t in toks if len(t) > 1 and t not in STOPWORDS]
+
+
+def score_skill(skill, context_tokens):
+    """Count keyword overlap, weighted: name 5x, description 3x, body 1x.
+
+    Body match is weighted lowest because long bodies would otherwise
+    dominate. Name + description must contribute meaningfully.
+    """
+    if not skill or not context_tokens:
+        return 0
+    name_tokens = set(tokenize(skill.get('name', '')))
+    desc_tokens = set(tokenize(skill.get('description', '')))
+    # Cap body scan to first 4000 chars to keep tokenization fast
+    body_tokens = set(tokenize((skill.get('body', '') or '')[:4000]))
+    context_set = set(context_tokens)
+    score = 0
+    for t in context_set:
+        if t in name_tokens:
+            score += 5
+        elif t in desc_tokens:
+            score += 3
+        elif t in body_tokens:
+            score += 1
+    return score
+
+
+def estimate_tokens(text):
+    """Rough token estimate - 1 token per 4 chars (English avg)."""
+    return len(text) // 4
+
+
+def list_skills_for_agent(agent):
+    """Return list of parsed skills for an agent, including 'shared' as fallback."""
+    skills = []
+    seen = set()
+    for folder in (agent, 'shared'):
+        d = SKILLS_ROOT / folder
+        if not d.is_dir():
+            continue
+        for skill_md in d.glob('*/SKILL.md'):
+            parsed = parse_skill_md(skill_md)
+            if parsed and parsed['name'] not in seen:
+                skills.append(parsed)
+                seen.add(parsed['name'])
+    return skills
+
+
+def load_relevant_skills(agent, context_text, max_skills=5, max_tokens=4000,
+                         min_score=1, include_body=True):
+    """Pick top skills by relevance, return formatted markdown block.
+
+    Args:
+        agent: 'boba', 'jazzyhazzy', 'orion' etc - matches folder under skills/
+        context_text: free-form text describing current decision context
+            (e.g. ticker symbols, position summary, candidate descriptions)
+        max_skills: hard cap on number of skills returned
+        max_tokens: budget for total skill content in returned block
+        min_score: skills below this relevance score are skipped
+        include_body: if True, include full SKILL.md body. If False, just
+            name + description (much shorter, useful for first-pass loaders).
+
+    Returns:
+        Markdown string ready to inject. Empty string if no skills match.
+    """
+    skills = list_skills_for_agent(agent)
+    if not skills:
+        return ''
+    context_tokens = tokenize(context_text)
+    if not context_tokens:
+        return ''
+
+    # Score and rank
+    scored = []
+    for s in skills:
+        sc = score_skill(s, context_tokens)
+        if sc >= min_score:
+            scored.append((sc, s))
+    scored.sort(key=lambda x: -x[0])
+    if not scored:
+        return ''
+
+    # Token-budgeted selection
+    chosen = []
+    used_tokens = 0
+    header_overhead = 50  # tokens for the wrapper text
+    for sc, s in scored[:max_skills * 2]:  # check up to 2x in case some overflow
+        content = s['body'] if include_body else s.get('description', '')
+        cost = estimate_tokens(content) + 30  # 30 token overhead per skill block
+        if used_tokens + cost + header_overhead > max_tokens:
+            if not include_body:
+                continue
+            # Try description-only fallback for this skill
+            desc_cost = estimate_tokens(s.get('description', '')) + 30
+            if used_tokens + desc_cost + header_overhead <= max_tokens:
+                chosen.append((sc, s, s.get('description', ''), True))
+                used_tokens += desc_cost
+            continue
+        chosen.append((sc, s, content, False))
+        used_tokens += cost
+        if len(chosen) >= max_skills:
+            break
+
+    if not chosen:
+        return ''
+
+    # Format output
+    lines = []
+    lines.append('## Relevant Skills (for this decision context)')
+    lines.append('')
+    lines.append(f'_{len(chosen)} skill(s) selected from {len(skills)} available '
+                 f'for {agent}, ranked by context relevance:_')
+    lines.append('')
+    for i, (score, skill, content, truncated) in enumerate(chosen, 1):
+        lines.append(f"### {i}. {skill['name']} (relevance={score})")
+        if skill.get('description'):
+            lines.append(f"_{skill['description']}_")
+            lines.append('')
+        if truncated:
+            lines.append('(description only — full skill exceeded token budget)')
+        else:
+            lines.append(content[:8000])  # hard char cap per skill
+        lines.append('')
+    return '\n'.join(lines)
+
+
+def __selftest():
+    """Manual smoke test - run directly to verify."""
+    block = load_relevant_skills(
+        agent='boba',
+        context_text='AAPL TSLA SPY options call put strike expiry IV greeks delta theta earnings catalyst',
+        max_skills=5,
+        max_tokens=4000,
+    )
+    return block
+
+
+if __name__ == '__main__':
+    print(__selftest())

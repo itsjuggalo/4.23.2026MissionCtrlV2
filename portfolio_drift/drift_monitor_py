@@ -1,0 +1,294 @@
+#!/usr/bin/env python3
+"""Item 38: Portfolio drift monitor.
+
+Pulls live Alpaca positions for R1 (Jazzy, $150K) and R2 (Boba, $503K),
+computes concentration drift metrics, posts to risk-alerts when thresholds
+are breached. Cron-driven daily after market close.
+
+Thresholds (drawn from existing risk_rules at mission-control risk-manager):
+- max_single_position_pct: 15 (warn) / 25 (alert)
+- max_top3_concentration_pct: 50 (warn)
+- max_sector_pct: 40 (warn) - requires yfinance for sector data
+- max_total_exposure_pct: 100 (warn at 110, alert at 130) - leverage check
+
+Output: ~/.openclaw/state/portfolio_drift/state.json (last run + breaches)
+Discord: discord-webhook-risk-alerts.txt on any threshold breach.
+Always: prints summary to stdout for cron log.
+
+Per Mike rule "preserve features": existing portfolio-monitor and risk-manager
+at /home/ubuntu/mission-control are LEFT UNTOUCHED. This is a focused new
+monitor in the new architecture, not a replacement.
+"""
+import json, sys, time, argparse
+from datetime import datetime, timezone
+from pathlib import Path
+import requests
+
+SECRETS = Path.home() / ".openclaw" / "secrets"
+STATE_DIR = Path.home() / ".openclaw" / "state" / "portfolio_drift"
+STATE_DIR.mkdir(parents=True, exist_ok=True)
+STATE_FILE = STATE_DIR / "state.json"
+
+ALPACA_BASE = "https://paper-api.alpaca.markets/v2"
+
+# Thresholds
+SINGLE_POS_WARN = 15.0    # any one position > 15% of equity = warn
+SINGLE_POS_ALERT = 25.0   # any one position > 25% of equity = alert
+TOP3_WARN = 50.0          # top 3 positions sum > 50% = warn
+SECTOR_WARN = 40.0        # any single sector > 40% = warn
+EXPOSURE_WARN = 110.0     # gross exposure > 110% (leveraged) = warn
+EXPOSURE_ALERT = 130.0    # gross exposure > 130% = alert
+
+# Account configs - read keys from secrets, label for Discord output
+ACCOUNTS = [
+    {
+        "label": "R1 (Jazzy)",
+        "key_file": "alpaca-jazzy-key-id",
+        "sec_file": "alpaca-jazzy-secret",
+    },
+    {
+        "label": "R2 (Boba)",
+        "key_file": "alpaca-key-id",
+        "sec_file": "alpaca-secret",
+    },
+]
+
+
+def read_secret(name):
+    p = SECRETS / name
+    if not p.exists():
+        return None
+    return p.read_text().strip()
+
+
+def alpaca_get(path, key, sec, params=None):
+    headers = {"APCA-API-KEY-ID": key, "APCA-API-SECRET-KEY": sec}
+    try:
+        r = requests.get(f"{ALPACA_BASE}{path}", headers=headers, params=params, timeout=15)
+        if r.status_code != 200:
+            return None
+        return r.json()
+    except Exception as e:
+        print(f"[drift_monitor] alpaca_get {path} failed: {e}", file=sys.stderr)
+        return None
+
+
+def get_sector(symbol):
+    """Lookup sector via yfinance. Falls back to None on any error.
+    Cached per-process via dict to avoid repeat lookups within one run.
+    """
+    try:
+        import yfinance as yf
+        if not hasattr(get_sector, "_cache"):
+            get_sector._cache = {}
+        if symbol in get_sector._cache:
+            return get_sector._cache[symbol]
+        t = yf.Ticker(symbol)
+        info = t.info or {}
+        sector = info.get("sector") or "Unknown"
+        get_sector._cache[symbol] = sector
+        return sector
+    except Exception:
+        return None
+
+
+def analyze_account(acct_cfg):
+    """Pull positions, compute drift metrics. Returns dict or None on error."""
+    key = read_secret(acct_cfg["key_file"])
+    sec = read_secret(acct_cfg["sec_file"])
+    if not key or not sec:
+        return {"label": acct_cfg["label"], "error": "missing creds"}
+
+    acct = alpaca_get("/account", key, sec)
+    pos = alpaca_get("/positions", key, sec)
+    if acct is None or pos is None:
+        return {"label": acct_cfg["label"], "error": "alpaca fetch failed"}
+
+    equity = float(acct.get("equity", 0))
+    if equity <= 0:
+        return {"label": acct_cfg["label"], "error": f"zero equity {equity}"}
+
+    positions = []
+    gross_mv = 0.0
+    for p in pos:
+        sym = p.get("symbol", "")
+        qty = float(p.get("qty", 0))
+        mv = float(p.get("market_value", 0))
+        # market_value can be negative for shorts - use absolute for concentration
+        gross_mv += abs(mv)
+        positions.append({
+            "symbol": sym,
+            "qty": qty,
+            "market_value": mv,
+            "abs_mv": abs(mv),
+            "pct_of_equity": (abs(mv) / equity * 100) if equity else 0,
+        })
+
+    # Sort by abs_mv desc
+    positions.sort(key=lambda x: x["abs_mv"], reverse=True)
+
+    # Single-position max
+    single_max = positions[0]["pct_of_equity"] if positions else 0
+    single_max_sym = positions[0]["symbol"] if positions else None
+
+    # Top 3 concentration
+    top3_pct = sum(p["pct_of_equity"] for p in positions[:3])
+
+    # Total exposure
+    exposure_pct = (gross_mv / equity * 100) if equity else 0
+
+    # Sector aggregation (yfinance opt-in)
+    sectors = {}
+    for p in positions:
+        sec_name = get_sector(p["symbol"])
+        if sec_name is None:
+            sec_name = "Unclassified"
+        sectors[sec_name] = sectors.get(sec_name, 0) + p["pct_of_equity"]
+
+    sector_max_pct = 0.0
+    sector_max_name = None
+    for name, pct in sectors.items():
+        if pct > sector_max_pct:
+            sector_max_pct = pct
+            sector_max_name = name
+
+    # Build breach list
+    breaches = []
+    if single_max >= SINGLE_POS_ALERT:
+        breaches.append({
+            "level": "ALERT",
+            "metric": "single_position",
+            "msg": f"{single_max_sym} is {single_max:.1f}% of equity (alert at {SINGLE_POS_ALERT}%)",
+        })
+    elif single_max >= SINGLE_POS_WARN:
+        breaches.append({
+            "level": "WARN",
+            "metric": "single_position",
+            "msg": f"{single_max_sym} is {single_max:.1f}% of equity (warn at {SINGLE_POS_WARN}%)",
+        })
+
+    if top3_pct >= TOP3_WARN:
+        top3_syms = ", ".join(p["symbol"] for p in positions[:3])
+        breaches.append({
+            "level": "WARN",
+            "metric": "top3_concentration",
+            "msg": f"Top 3 ({top3_syms}) = {top3_pct:.1f}% (warn at {TOP3_WARN}%)",
+        })
+
+    if sector_max_pct >= SECTOR_WARN and sector_max_name not in (None, "Unclassified", "Unknown"):
+        breaches.append({
+            "level": "WARN",
+            "metric": "sector_concentration",
+            "msg": f"Sector '{sector_max_name}' = {sector_max_pct:.1f}% (warn at {SECTOR_WARN}%)",
+        })
+
+    if exposure_pct >= EXPOSURE_ALERT:
+        breaches.append({
+            "level": "ALERT",
+            "metric": "total_exposure",
+            "msg": f"Gross exposure {exposure_pct:.1f}% (alert at {EXPOSURE_ALERT}%) - leveraged",
+        })
+    elif exposure_pct >= EXPOSURE_WARN:
+        breaches.append({
+            "level": "WARN",
+            "metric": "total_exposure",
+            "msg": f"Gross exposure {exposure_pct:.1f}% (warn at {EXPOSURE_WARN}%)",
+        })
+
+    return {
+        "label": acct_cfg["label"],
+        "equity": equity,
+        "gross_mv": gross_mv,
+        "exposure_pct": round(exposure_pct, 2),
+        "n_positions": len(positions),
+        "single_max_symbol": single_max_sym,
+        "single_max_pct": round(single_max, 2),
+        "top3_pct": round(top3_pct, 2),
+        "top3_symbols": [p["symbol"] for p in positions[:3]],
+        "sector_max_name": sector_max_name,
+        "sector_max_pct": round(sector_max_pct, 2),
+        "sectors": {k: round(v, 2) for k, v in sectors.items()},
+        "positions": positions,
+        "breaches": breaches,
+    }
+
+
+def post_discord(account_results):
+    """Post breach summary to discord-webhook-risk-alerts when any breach exists."""
+    hook_path = SECRETS / "discord-webhook-risk-alerts.txt"
+    if not hook_path.exists():
+        print("[drift_monitor] no risk-alerts webhook found", file=sys.stderr)
+        return False
+    webhook_url = hook_path.read_text().strip()
+    if not webhook_url:
+        return False
+
+    has_any_breach = any(r.get("breaches") for r in account_results if not r.get("error"))
+    if not has_any_breach:
+        return False
+
+    lines = ["**Portfolio Drift Monitor - breaches detected**"]
+    for r in account_results:
+        if r.get("error"):
+            lines.append(f"\n**{r['label']}**: ERROR - {r['error']}")
+            continue
+        if not r.get("breaches"):
+            continue
+        lines.append(f"\n**{r['label']}** equity ${r['equity']:,.0f} | exposure {r['exposure_pct']:.1f}% | {r['n_positions']} positions")
+        for b in r["breaches"]:
+            emoji = "🚨" if b["level"] == "ALERT" else "⚠️"
+            lines.append(f"  {emoji} {b['level']}: {b['msg']}")
+    msg = "\n".join(lines)[:1900]
+    try:
+        r = requests.post(webhook_url, json={"content": msg}, timeout=10)
+        return r.status_code in (200, 204)
+    except Exception as e:
+        print(f"[drift_monitor] Discord post failed: {e}", file=sys.stderr)
+        return False
+
+
+def write_state(account_results):
+    payload = {
+        "timestamp": datetime.now(timezone.utc).isoformat(),
+        "accounts": account_results,
+    }
+    STATE_FILE.write_text(json.dumps(payload, indent=2, default=str))
+
+
+def main():
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--discord", action="store_true", help="Post breaches to risk-alerts")
+    parser.add_argument("--no-sector", action="store_true", help="Skip yfinance sector enrichment")
+    args = parser.parse_args()
+
+    if args.no_sector:
+        # Monkey-patch get_sector to short-circuit
+        def _no_sector(symbol):
+            return None
+        globals()["get_sector"] = _no_sector
+
+    results = [analyze_account(cfg) for cfg in ACCOUNTS]
+    write_state(results)
+
+    # Compact human-readable summary for cron log
+    for r in results:
+        if r.get("error"):
+            print(f"[{r['label']}] ERROR: {r['error']}")
+            continue
+        print(f"[{r['label']}] equity=${r['equity']:,.0f} exposure={r['exposure_pct']:.1f}% positions={r['n_positions']}")
+        print(f"  single_max: {r['single_max_symbol']} {r['single_max_pct']:.1f}% | top3: {r['top3_pct']:.1f}% {r['top3_symbols']}")
+        if r['sector_max_name']:
+            print(f"  sector_max: {r['sector_max_name']} {r['sector_max_pct']:.1f}%")
+        if r['breaches']:
+            for b in r['breaches']:
+                print(f"  BREACH {b['level']}: {b['msg']}")
+        else:
+            print(f"  no breaches")
+
+    if args.discord:
+        posted = post_discord(results)
+        print(f"[drift_monitor] discord_posted={posted}")
+
+
+if __name__ == "__main__":
+    main()

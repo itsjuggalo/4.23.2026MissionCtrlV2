@@ -16,6 +16,10 @@ import sys
 import urllib.request
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
+import sys as _sys_tracker
+_sys_tracker.path.insert(0, '/home/ubuntu/scripts/lib')
+from anthropic_tracker import log_call as _log_anthropic_call
+import time as _time_tracker
 
 SECRETS_DIR = Path.home() / ".openclaw" / "secrets"
 STATE_DIR = Path.home() / ".openclaw" / "workspace" / "state"

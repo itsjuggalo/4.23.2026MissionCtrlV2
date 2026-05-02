@@ -1,0 +1,129 @@
+#!/usr/bin/env python3
+"""Item 27: Log retention policy.
+
+Rotates ephemeral cron + tmp logs while preserving analytical files.
+
+PRESERVE LIST (NEVER touched - these are analytical inputs that compound):
+  /home/ubuntu/.openclaw/workspace/skill_outputs/
+  /home/ubuntu/.openclaw/workspace/fleet_memory/
+  /home/ubuntu/.openclaw/workspace/boba_memory/
+  /home/ubuntu/.openclaw/workspace/proposals/
+  /home/ubuntu/.openclaw/workspace/edge_decay_history/
+  /home/ubuntu/.openclaw/state/
+  /home/ubuntu/mission-control/signal-receiver/logs/scored_signals.jsonl
+
+ROTATE LIST:
+  /tmp/*.log  - truncate to last 1000 lines if larger than 5MB, delete if older than 30d
+
+Default mode: --dry-run reports what would happen.
+Use --execute to actually do it. Mike's standing rule: no deletes without approval.
+"""
+import argparse, os, sys
+from pathlib import Path
+from datetime import datetime, timedelta, timezone
+
+PRESERVE_DIRS = [
+    Path('/home/ubuntu/.openclaw/workspace/skill_outputs'),
+    Path('/home/ubuntu/.openclaw/workspace/fleet_memory'),
+    Path('/home/ubuntu/.openclaw/workspace/boba_memory'),
+    Path('/home/ubuntu/.openclaw/workspace/proposals'),
+    Path('/home/ubuntu/.openclaw/workspace/edge_decay_history'),
+    Path('/home/ubuntu/.openclaw/state'),
+]
+PRESERVE_FILES = [
+    Path('/home/ubuntu/mission-control/signal-receiver/logs/scored_signals.jsonl'),
+]
+
+TMP_LOG_DIR = Path('/tmp')
+SIZE_TRUNCATE_THRESHOLD_MB = 5     # truncate to last 1000 lines if file exceeds this
+AGE_DELETE_THRESHOLD_DAYS = 30     # delete if mtime older than this AND size < threshold
+
+def is_preserved(path):
+    """Check if a file is in the preserve list - never touch these."""
+    p = path.resolve()
+    for d in PRESERVE_DIRS:
+        try:
+            p.relative_to(d.resolve())
+            return True
+        except ValueError:
+            continue
+    for f in PRESERVE_FILES:
+        if p == f.resolve():
+            return True
+    return False
+
+def find_rotation_candidates():
+    """Find /tmp/*.log files that are candidates for rotation."""
+    actions = []  # list of (path, action, reason, bytes_freed_estimate)
+    now = datetime.now(timezone.utc)
+    age_cutoff = now - timedelta(days=AGE_DELETE_THRESHOLD_DAYS)
+    size_threshold_bytes = SIZE_TRUNCATE_THRESHOLD_MB * 1024 * 1024
+    for f in TMP_LOG_DIR.glob('*.log'):
+        if not f.is_file():
+            continue
+        if is_preserved(f):
+            continue
+        try:
+            size = f.stat().st_size
+            mtime = datetime.fromtimestamp(f.stat().st_mtime, tz=timezone.utc)
+        except Exception:
+            continue
+        if size > size_threshold_bytes:
+            # Truncate to last 1000 lines
+            actions.append((f, 'truncate', f'size {size/1024/1024:.1f}MB > {SIZE_TRUNCATE_THRESHOLD_MB}MB', size - 100*1024))
+        elif mtime < age_cutoff:
+            actions.append((f, 'delete', f'older than {AGE_DELETE_THRESHOLD_DAYS}d (mtime={mtime.date()})', size))
+    return actions
+
+def execute_action(path, action):
+    if action == 'truncate':
+        try:
+            with open(path, 'r') as r:
+                lines = r.readlines()
+            tail = lines[-1000:]
+            with open(path, 'w') as w:
+                w.writelines(tail)
+            return True
+        except Exception as e:
+            print(f'  ERR truncating {path}: {e}', file=sys.stderr)
+            return False
+    elif action == 'delete':
+        try:
+            path.unlink()
+            return True
+        except Exception as e:
+            print(f'  ERR deleting {path}: {e}', file=sys.stderr)
+            return False
+    return False
+
+def main():
+    ap = argparse.ArgumentParser()
+    ap.add_argument('--execute', action='store_true', help='Actually perform actions (default is dry-run)')
+    args = ap.parse_args()
+
+    print(f'[log-retention] {"EXECUTE" if args.execute else "DRY-RUN"} mode at {datetime.now(timezone.utc).isoformat()}')
+    print(f'[log-retention] preserve dirs: {len(PRESERVE_DIRS)}, preserve files: {len(PRESERVE_FILES)}')
+
+    actions = find_rotation_candidates()
+    if not actions:
+        print('[log-retention] no candidates found - nothing to do')
+        return 0
+
+    total_bytes = 0
+    print(f'[log-retention] {len(actions)} candidate(s):')
+    for path, action, reason, est_bytes in actions:
+        marker = '[would]' if not args.execute else '[doing]'
+        print(f'  {marker} {action.upper():10s} {path}  ({reason})  ~{est_bytes/1024:.0f} KB')
+        total_bytes += est_bytes
+        if args.execute:
+            ok = execute_action(path, action)
+            if not ok:
+                print(f'    FAILED')
+
+    print(f'[log-retention] estimated bytes affected: {total_bytes/1024/1024:.1f} MB')
+    if not args.execute:
+        print('[log-retention] DRY-RUN ONLY - re-run with --execute to perform actions')
+    return 0
+
+if __name__ == '__main__':
+    sys.exit(main())

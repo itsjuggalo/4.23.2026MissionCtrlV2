@@ -7,10 +7,7 @@ Block 4 will add /trade with arm/disarm safety.
 
 Locked to OWNER_ID. Slash commands sync to GUILD_ID for instant availability.
 """
-import asyncio
-import sys as _sys_t; _sys_t.path.insert(0, '/home/ubuntu/scripts/lib')
-from anthropic_tracker import log_call as _log_anthropic_call
-import time as _time_t, json, os, sys, time, logging, re
+import asyncio, json, os, sys, time, logging, re
 from datetime import datetime, timezone, timedelta
 from pathlib import Path
 from collections import defaultdict
@@ -166,59 +163,6 @@ def _grok_news(symbol, limit=4):
         return None
 
 
-
-def _load_best_options_archive(min_age_min=0, max_age_min=240, max_show=10, min_premium=500_000):
-    """Read today's whale flow archive. Returns formatted text + list for prompts.
-    
-    Args:
-        min_age_min: only include contracts updated AT LEAST this many min ago (0 = all)
-        max_age_min: drop contracts updated more than this many min ago (default 4h)
-        max_show: cap on returned contracts
-        min_premium: floor on totalFlowValue (default $500K = T2+)
-    """
-    from datetime import datetime as _dt, timezone as _tz, timedelta as _td
-    et_now = _dt.now(_tz.utc) + _td(hours=-4)
-    date_str = et_now.strftime("%Y-%m-%d")
-    fp = Path.home() / ".openclaw" / "data" / "best-options" / f"{date_str}.json"
-    if not fp.exists():
-        return ("", [])
-    try:
-        snap = json.loads(fp.read_text())
-    except Exception:
-        return ("", [])
-    contracts = snap.get("sorted_by_premium", []) or []
-    now_ms = int(_dt.now(_tz.utc).timestamp() * 1000)
-    rows = []
-    for c in contracts:
-        if c.get("premium", 0) < min_premium:
-            continue
-        last_ms = c.get("last_updated_ms") or c.get("first_seen_ms") or 0
-        if not last_ms:
-            continue
-        age_min = (now_ms - last_ms) / 60000
-        if age_min < min_age_min or age_min > max_age_min:
-            continue
-        rows.append({**c, "_age_min": age_min})
-        if len(rows) >= max_show:
-            break
-    if not rows:
-        return ("", [])
-    last_run = snap.get("last_run_human", "?")
-    tier_counts = snap.get("tier_counts", {})
-    lines = [f"# Whale flow archive (snapshot {last_run}, age <= {max_age_min}min, premium >= ${min_premium:,})"]
-    lines.append(f"# T1 today: {tier_counts.get('T1_HUGE',0)} | T2: {tier_counts.get('T2_UNUSUAL_HUGE',0)} | showing {len(rows)} fresh")
-    for c in rows:
-        bull = "BULL" if c.get("is_bullish") else "BEAR"
-        age = c.get("_age_min", 0)
-        age_str = f"{int(age)}m ago" if age < 60 else f"{age/60:.1f}h ago"
-        lines.append(
-            f"  ${c.get('premium',0):>11,}  {c.get('ticker','?'):5s} ${c.get('strike',0):>6.0f} {c.get('option_type','?'):4s} "
-            f"{c.get('expiry','?'):10s} {bull} | V:{c.get('volume',0):>5} OI:{c.get('oi',0):>5} "
-            f"SW:{c.get('sweeps',0):>3} BL:{c.get('blocks',0):>2} | {c.get('tier','?'):16s} | {age_str}"
-        )
-    return ("\n".join(lines) + "\n", rows)
-
-
 def _ask_anthropic(question, context_blob=""):
     """Send question to Claude with current MC context. Returns text response."""
     system = (
@@ -234,7 +178,6 @@ def _ask_anthropic(question, context_blob=""):
     if context_blob:
         system += f"\n\nCurrent Mission Control context:\n{context_blob}"
     try:
-        _t0 = _time_tracker.time()
         r = requests.post(
             "https://api.anthropic.com/v1/messages",
             headers={
@@ -250,14 +193,10 @@ def _ask_anthropic(question, context_blob=""):
             },
             timeout=45,
         )
-        _dur_ms = int((_time_tracker.time() - _t0) * 1000)
         if r.status_code != 200:
-            _log_anthropic_call("boba_mega", ANTHROPIC_MODEL, None, _dur_ms, success=False, error=f"HTTP {r.status_code}")
             logging.error(f"anthropic {r.status_code}: {r.text[:300]}")
             return f"[Boba] API error {r.status_code}"
-        _data = r.json()
-        _log_anthropic_call("boba_mega", ANTHROPIC_MODEL, _data, _dur_ms, success=True)
-        return _data.get("content", [{}])[0].get("text", "").strip()
+        return r.json().get("content", [{}])[0].get("text", "").strip()
     except Exception as e:
         logging.error(f"anthropic {e}")
         return f"[Boba] error: {e}"
@@ -794,59 +733,6 @@ async def trade(
 
 
 # ─── /boba_help ──────────────────────────────────────────────────────
-
-@bot.tree.command(name="flowtop", description="Best whale flow signal of the day (Boba's read on T1/T2 unusual flow)")
-@app_commands.describe(
-    max_age_hours="Only include contracts updated within last N hours (default 4)",
-    min_premium_k="Minimum premium in $K to consider (default 500 = $500K, use 1000 for T1 only)",
-    show_count="How many contracts to feed Boba (default 10, max 20)",
-)
-async def flowtop_cmd(interaction: discord.Interaction, max_age_hours: int = 4, min_premium_k: int = 500, show_count: int = 10):
-    if interaction.user.id != OWNER_ID:
-        await interaction.response.send_message("Owner only", ephemeral=True)
-        return
-    await interaction.response.defer()
-    
-    show_count = max(1, min(show_count, 20))
-    text, rows = _load_best_options_archive(
-        min_age_min=0,
-        max_age_min=max_age_hours * 60,
-        max_show=show_count,
-        min_premium=min_premium_k * 1000,
-    )
-    if not rows:
-        await interaction.followup.send(
-            f"No fresh whale flow in last {max_age_hours}h with premium >= ${min_premium_k}K. "
-            f"Either market's quiet or logger hasn't seen anything new — check `/api/best-options-history` directly."
-        )
-        return
-    
-    # Ask Boba to pick the best signal
-    question = (
-        f"Below is today's whale flow archive — only contracts updated in the last {max_age_hours}h "
-        f"with premium at least ${min_premium_k}K. Apply our priority rules:\n"
-        f"- T1 Huge ($1M+ premium, SWEEP, Vol>OI) RANKS FIRST\n"
-        f"- T2 Unusual Huge ($500K+, SWEEP, Vol>OI) RANKS SECOND\n"
-        f"- Within tier, freshness (recently updated) and conviction (sweeps/blocks count) decide\n\n"
-        f"Pick the SINGLE strongest signal and tell me:\n"
-        f"1. The contract (ticker / strike / type / expiry)\n"
-        f"2. Why it's the strongest (tier, premium, sweeps, freshness)\n"
-        f"3. Bull or bear thesis based on Bid/Ask sentiment\n"
-        f"4. ONE concrete trade idea (entry / stop / target) IF you'd trade it, or 'pass' with reason\n"
-        f"Be terse — under 200 words total."
-    )
-    loop = asyncio.get_running_loop()
-    answer = await loop.run_in_executor(None, _ask_anthropic, question, text)
-    
-    # Send Boba's pick
-    header = f"**Whale flow pick** (top {len(rows)} fresh, last {max_age_hours}h, >${min_premium_k}K):\n"
-    msg = header + answer
-    # Discord 2000 char limit
-    if len(msg) > 1900:
-        msg = msg[:1880] + "\n...(truncated)"
-    await interaction.followup.send(msg)
-
-
 @bot.tree.command(name="boba_help", description="Show Boba's available commands")
 async def boba_help(interaction: discord.Interaction):
     if not is_owner(interaction):
@@ -891,12 +777,6 @@ async def boba_qa(ctx, *, question: str = None):
     async with ctx.typing():
         loop = asyncio.get_event_loop()
         context_blob = await loop.run_in_executor(None, _build_context_blob)
-        # Auto-inject whale flow archive if question mentions flow/whale/unusual
-        flow_kw = re.search(r"\b(flow|whale|unusual|sweep|premium|biggest|best.*signal|t1|t2)\b", question, re.IGNORECASE)
-        if flow_kw:
-            flow_text, flow_rows = _load_best_options_archive(max_age_min=240, max_show=10, min_premium=500_000)
-            if flow_rows:
-                context_blob = (context_blob or "") + "\n\n" + flow_text
         answer = await loop.run_in_executor(None, _ask_anthropic, question, context_blob)
 
     chunks = _chunk_message(answer)

@@ -1,0 +1,185 @@
+#!/usr/bin/env python3
+"""Item 29: Daemon health alerter.
+
+State-tracked PM2 process monitor. Runs every 5 minutes. Alerts to Discord
+ONLY on transitions:
+  - critical daemon goes offline -> CRITICAL alert
+  - critical daemon comes back online -> RECOVERY alert
+  - non-critical daemon offline > 30 min -> WARNING alert
+  - daemon restart count jumps by 5+ in last interval -> WARNING alert
+
+Does not duplicate /scripts/agent_health.py which scores agent trust and
+posts to MC dashboard. This focuses on PM2 up/down events for ops alerting.
+
+Per Mike rule: NEVER kills processes, only observes and alerts.
+"""
+import json, sys, subprocess, urllib.request
+from pathlib import Path
+from datetime import datetime, timezone
+
+SECRETS = Path('/home/ubuntu/.openclaw/secrets')
+STATE = Path('/home/ubuntu/.openclaw/state/daemon_health')
+STATE.mkdir(parents=True, exist_ok=True)
+STATE_FILE = STATE / 'last_state.json'
+
+# Critical daemons - going offline = trade infrastructure broken
+CRITICAL = {
+    'option-signals',
+    'option-signals-relay',
+    'signal-receiver',
+    'firebase-signal-relay',
+    'flow-monitor',
+    'whale-alert-bot',
+    'trail-daemon',
+    'trail-daemon-jazzy',
+    'profit-lock-daemon',
+    'profit-lock-daemon-jazzy',
+    'alpaca-fill-listener',
+    'telegram-listener',
+}
+
+# Restart-count delta that triggers a flap warning
+RESTART_DELTA_THRESHOLD = 5
+# Minutes a non-critical daemon can be offline before warning
+OFFLINE_WARN_MINUTES = 30
+
+def load_secret(name):
+    p = SECRETS / name
+    return p.read_text().strip() if p.exists() else None
+
+WEBHOOK = load_secret('discord_daemon_health_webhook')
+
+def post_discord(content):
+    if not WEBHOOK:
+        print('[daemon-health] no webhook')
+        return
+    body = json.dumps({'content': content[:1990]}).encode()
+    req = urllib.request.Request(
+        WEBHOOK, data=body,
+        headers={'content-type': 'application/json',
+                 'User-Agent': 'MissionCtrl-DaemonHealth/1.0'})
+    try:
+        urllib.request.urlopen(req, timeout=15)
+    except Exception as e:
+        print(f'[daemon-health] webhook err: {e}', file=sys.stderr)
+
+def get_pm2_state():
+    """Return dict: name -> {status, restart_time}."""
+    try:
+        result = subprocess.run(['pm2', 'jlist'], capture_output=True, text=True, timeout=15)
+        procs = json.loads(result.stdout)
+    except Exception as e:
+        print(f'[daemon-health] pm2 jlist failed: {e}')
+        return None
+    out = {}
+    for p in procs:
+        name = p.get('name', '')
+        env = p.get('pm2_env', {})
+        out[name] = {
+            'status': env.get('status', 'unknown'),
+            'restart_time': env.get('restart_time', 0),
+        }
+    return out
+
+def load_prev_state():
+    if STATE_FILE.exists():
+        try:
+            return json.loads(STATE_FILE.read_text())
+        except Exception:
+            return {}
+    return {}
+
+def save_state(state):
+    STATE_FILE.write_text(json.dumps(state, indent=2))
+
+def main():
+    now_iso = datetime.now(timezone.utc).isoformat()
+    print(f'[daemon-health] {now_iso}')
+
+    cur = get_pm2_state()
+    if cur is None:
+        return 1
+
+    prev = load_prev_state()
+    prev_procs = prev.get('procs', {})
+    is_first_run = not prev_procs
+
+    alerts = []  # (severity, message)
+
+    for name, info in cur.items():
+        prev_info = prev_procs.get(name, {})
+        prev_status = prev_info.get('status', 'unknown')
+        prev_restarts = prev_info.get('restart_time', 0)
+        prev_offline_since = prev_info.get('offline_since')
+        cur_status = info['status']
+        cur_restarts = info['restart_time']
+
+        # Track when offline started
+        if cur_status != 'online':
+            if not prev_offline_since:
+                info['offline_since'] = now_iso
+            else:
+                info['offline_since'] = prev_offline_since
+        else:
+            info['offline_since'] = None
+
+        # Transition: was online, now not
+        if prev_status == 'online' and cur_status != 'online':
+            if name in CRITICAL:
+                alerts.append(('CRITICAL', f'**CRITICAL** `{name}` went offline (status={cur_status})'))
+            else:
+                # non-critical: just log, alert later if stays offline
+                print(f'[daemon-health] non-critical {name} offline')
+
+        # Transition: was offline, now online (recovery)
+        if prev_status != 'online' and cur_status == 'online':
+            alerts.append(('RECOVERY', f'`{name}` recovered (back online)'))
+
+        # Non-critical offline duration check
+        if cur_status != 'online' and name not in CRITICAL:
+            if info.get('offline_since'):
+                try:
+                    offline_dt = datetime.fromisoformat(info['offline_since'])
+                    mins = (datetime.now(timezone.utc) - offline_dt).total_seconds() / 60
+                    if mins > OFFLINE_WARN_MINUTES and not prev_info.get('warned_long_offline'):
+                        alerts.append(('WARNING', f'`{name}` has been offline for {mins:.0f} min'))
+                        info['warned_long_offline'] = True
+                except Exception:
+                    pass
+
+        # Restart flap detection
+        restart_delta = cur_restarts - prev_restarts
+        if restart_delta >= RESTART_DELTA_THRESHOLD:
+            sev = 'CRITICAL' if name in CRITICAL else 'WARNING'
+            alerts.append((sev, f'`{name}` restarted {restart_delta} times in last interval (total={cur_restarts})'))
+
+    # Post alerts (skip on first run - we only have baseline, no real transitions)
+    if is_first_run:
+        print(f'[daemon-health] FIRST RUN - establishing baseline for {len(cur)} daemons, no alerts posted')
+        save_state({'ts': now_iso, 'procs': cur})
+        return 0
+
+    if alerts:
+        critical_msgs = [m for s, m in alerts if s == 'CRITICAL']
+        warning_msgs = [m for s, m in alerts if s == 'WARNING']
+        recovery_msgs = [m for s, m in alerts if s == 'RECOVERY']
+        msg_parts = []
+        if critical_msgs:
+            msg_parts.append('🔴 **CRITICAL**')
+            msg_parts.extend(critical_msgs)
+        if warning_msgs:
+            msg_parts.append('🟡 **WARNING**')
+            msg_parts.extend(warning_msgs)
+        if recovery_msgs:
+            msg_parts.append('🟢 **RECOVERY**')
+            msg_parts.extend(recovery_msgs)
+        post_discord('\n'.join(msg_parts))
+        print(f'[daemon-health] posted {len(alerts)} alerts ({len(critical_msgs)} critical, {len(warning_msgs)} warning, {len(recovery_msgs)} recovery)')
+    else:
+        print(f'[daemon-health] all clean ({len(cur)} daemons checked)')
+
+    save_state({'ts': now_iso, 'procs': cur})
+    return 0
+
+if __name__ == '__main__':
+    sys.exit(main())

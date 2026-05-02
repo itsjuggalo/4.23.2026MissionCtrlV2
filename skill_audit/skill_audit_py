@@ -1,0 +1,254 @@
+#!/usr/bin/env python3
+"""
+Skill audit — Items 41 + 43.
+
+Scans all in-scope SKILL.md files (boba, jazzyhazzy, orion, shared, reference)
+and flags issues that hurt skill_loader matching quality:
+
+  1. Missing Triggers section (or Triggers + Purpose combined which is weaker)
+  2. Missing Purpose section
+  3. Triggers section with fewer than 3 trigger phrases
+  4. Description too short (< 50 chars) - hurts loader scoring
+  5. File unchanged 90+ days (potentially stale)
+  6. Duplicate skill names across agents
+
+Posts a digest to Discord pattern-alerts channel.
+Writes full report JSON to state dir for MC dashboard consumption.
+
+Run modes:
+    --once           one-shot scan, post + write state
+    --no-post        don't post to Discord (testing)
+    --verbose        dump full per-skill output
+"""
+import argparse
+import json
+import re
+import sys
+import time
+import urllib.request
+from datetime import datetime, timezone
+from pathlib import Path
+from collections import defaultdict, Counter
+
+SKILLS_ROOT = Path("/home/ubuntu/.openclaw/skills")
+IN_SCOPE_AGENTS = ["boba", "jazzyhazzy", "orion", "shared", "reference"]
+STATE_FILE = Path("/home/ubuntu/.openclaw/state/skill_audit_last_run.json")
+SECRETS = Path("/home/ubuntu/.openclaw/secrets")
+
+STALE_DAYS = 90
+SHORT_DESC_THRESHOLD = 50
+MIN_TRIGGERS = 3
+
+
+def load_webhook():
+    for cand in ("discord_pattern_alerts_webhook", "discord_skill_consultant_webhook"):
+        f = SECRETS / cand
+        if f.exists():
+            url = f.read_text().strip()
+            if url.startswith("http"):
+                return url
+    return None
+
+
+def post_discord(msg, webhook_url):
+    if not webhook_url:
+        print("[no webhook] skipping post")
+        return False
+    try:
+        req = urllib.request.Request(
+            webhook_url,
+            data=json.dumps({"content": msg[:1900]}).encode("utf-8"),
+            headers={"Content-Type": "application/json", "User-Agent": "MissionControl-SkillAudit/1.0"},
+        )
+        with urllib.request.urlopen(req, timeout=10) as r:
+            return r.status in (200, 204)
+    except Exception as e:
+        print(f"[discord post failed] {e}")
+        return False
+
+
+def parse_skill(path: Path):
+    """Return dict with audit findings for one SKILL.md."""
+    text = path.read_text(errors="replace")
+    skill_name = path.parent.name if path.parent.name != "skills" else path.stem
+
+    issues = []
+
+    # Description: from YAML frontmatter `description:` field, or first paragraph
+    desc = ""
+    yaml_match = re.search(r"^---\s*\n(.*?)\n---", text, re.DOTALL | re.MULTILINE)
+    if yaml_match:
+        for line in yaml_match.group(1).splitlines():
+            if line.strip().lower().startswith("description:"):
+                desc = line.split(":", 1)[1].strip()
+                break
+    if not desc:
+        # First non-header paragraph after the title
+        m = re.search(r"^#[^\n]*\n+([^\n#].+?)(?:\n\s*\n|\n#)", text, re.DOTALL | re.MULTILINE)
+        if m:
+            desc = m.group(1).strip()[:200]
+
+    if len(desc) < SHORT_DESC_THRESHOLD:
+        issues.append(f"description too short ({len(desc)}c < {SHORT_DESC_THRESHOLD})")
+
+    # Triggers section detection - flexible matching
+    has_explicit_triggers = bool(re.search(r"^##\s+Triggers\s*$", text, re.MULTILINE | re.IGNORECASE))
+    has_combined_triggers = bool(re.search(r"^##\s+Purpose\s+and\s+Triggers\s*$", text, re.MULTILINE | re.IGNORECASE))
+
+    if not has_explicit_triggers and not has_combined_triggers:
+        issues.append("missing Triggers section (skill_loader matches on this)")
+
+    # Count actual trigger phrases - look for bullet list under Triggers header
+    trigger_count = 0
+    if has_explicit_triggers:
+        m = re.search(r"^##\s+Triggers\s*\n+((?:[-*][^\n]+\n?)+)", text, re.MULTILINE | re.IGNORECASE)
+        if m:
+            trigger_count = len([ln for ln in m.group(1).splitlines() if ln.strip().startswith(("-", "*"))])
+    if has_explicit_triggers and trigger_count > 0 and trigger_count < MIN_TRIGGERS:
+        issues.append(f"only {trigger_count} triggers (need >= {MIN_TRIGGERS})")
+
+    # Purpose section
+    has_purpose = bool(re.search(r"^##\s+Purpose\b", text, re.MULTILINE | re.IGNORECASE))
+    if not has_purpose and not has_combined_triggers:
+        issues.append("missing Purpose section")
+
+    # Stale check
+    age_days = (time.time() - path.stat().st_mtime) / 86400
+    if age_days > STALE_DAYS:
+        issues.append(f"unchanged {int(age_days)}d (stale, review needed)")
+
+    return {
+        "path": str(path),
+        "agent": path.parts[-3] if len(path.parts) > 3 else "?",
+        "skill_name": skill_name,
+        "size_bytes": len(text),
+        "lines": text.count("\n"),
+        "desc_chars": len(desc),
+        "has_triggers": has_explicit_triggers,
+        "has_combined_triggers": has_combined_triggers,
+        "trigger_count": trigger_count,
+        "has_purpose": has_purpose,
+        "age_days": round(age_days, 1),
+        "issues": issues,
+        "issue_count": len(issues),
+    }
+
+
+def find_duplicates(records):
+    """Skills with the same name in multiple agent folders."""
+    name_map = defaultdict(list)
+    for r in records:
+        name_map[r["skill_name"]].append(r["agent"])
+    return {n: agents for n, agents in name_map.items() if len(agents) > 1 and n not in ("scripts", "SKILL", "")}
+
+
+def build_report(records):
+    total = len(records)
+    by_agent = Counter(r["agent"] for r in records)
+
+    missing_triggers = [r for r in records if not r["has_triggers"] and not r["has_combined_triggers"]]
+    missing_purpose = [r for r in records if not r["has_purpose"] and not r["has_combined_triggers"]]
+    stale = [r for r in records if r["age_days"] > STALE_DAYS]
+    short_desc = [r for r in records if r["desc_chars"] < SHORT_DESC_THRESHOLD]
+    weak_triggers = [r for r in records if r["has_triggers"] and 0 < r["trigger_count"] < MIN_TRIGGERS]
+    duplicates = find_duplicates(records)
+
+    # Top 10 worst offenders by issue count
+    worst = sorted(records, key=lambda r: (-r["issue_count"], r["skill_name"]))[:10]
+
+    return {
+        "generated_at": datetime.now(timezone.utc).isoformat(),
+        "total_in_scope": total,
+        "by_agent": dict(by_agent),
+        "missing_triggers_count": len(missing_triggers),
+        "missing_purpose_count": len(missing_purpose),
+        "stale_count": len(stale),
+        "short_desc_count": len(short_desc),
+        "weak_triggers_count": len(weak_triggers),
+        "duplicate_names": duplicates,
+        "worst_offenders": [
+            {"agent": r["agent"], "name": r["skill_name"], "issues": r["issues"], "count": r["issue_count"]}
+            for r in worst if r["issue_count"] > 0
+        ],
+    }
+
+
+def format_discord(report):
+    lines = []
+    lines.append("Skill Audit Digest")
+    lines.append(f"Generated: {report['generated_at'][:19].replace('T', ' ')} UTC")
+    lines.append("")
+    lines.append(f"Total skills in scope: {report['total_in_scope']}")
+    lines.append(f"  by agent: " + ", ".join(f"{a}={c}" for a, c in sorted(report["by_agent"].items())))
+    lines.append("")
+    lines.append("Issues found:")
+    lines.append(f"  missing Triggers section:  {report['missing_triggers_count']}")
+    lines.append(f"  missing Purpose section:   {report['missing_purpose_count']}")
+    lines.append(f"  weak trigger lists (<3):   {report['weak_triggers_count']}")
+    lines.append(f"  short description (<50c):  {report['short_desc_count']}")
+    lines.append(f"  stale (>{STALE_DAYS}d unchanged):  {report['stale_count']}")
+    lines.append(f"  duplicate names:           {len(report['duplicate_names'])}")
+    lines.append("")
+
+    worst = report["worst_offenders"][:10]
+    if worst:
+        lines.append("Top 10 worst offenders:")
+        for r in worst:
+            issues_str = "; ".join(r["issues"][:3])
+            if len(r["issues"]) > 3:
+                issues_str += f" (+{len(r['issues'])-3} more)"
+            lines.append(f"  [{r['agent']}/{r['name']}]: {issues_str}")
+
+    if report["duplicate_names"]:
+        lines.append("")
+        lines.append("Duplicate skill names across agents:")
+        for name, agents in list(report["duplicate_names"].items())[:5]:
+            lines.append(f"  {name}: {', '.join(agents)}")
+
+    lines.append("")
+    lines.append("Full report at openclaw state skill audit last run")
+    return "\n".join(lines)
+
+
+def main():
+    ap = argparse.ArgumentParser()
+    ap.add_argument("--once", action="store_true", default=True)
+    ap.add_argument("--no-post", action="store_true")
+    ap.add_argument("--verbose", action="store_true")
+    args = ap.parse_args()
+
+    print(f"[skill-audit] scanning {SKILLS_ROOT}")
+    records = []
+    for agent in IN_SCOPE_AGENTS:
+        agent_dir = SKILLS_ROOT / agent
+        if not agent_dir.exists():
+            continue
+        for f in agent_dir.rglob("SKILL.md"):
+            try:
+                records.append(parse_skill(f))
+            except Exception as e:
+                print(f"[parse-fail] {f}: {e}")
+
+    print(f"[skill-audit] parsed {len(records)} skills")
+
+    report = build_report(records)
+    STATE_FILE.parent.mkdir(parents=True, exist_ok=True)
+    STATE_FILE.write_text(json.dumps({"report": report, "records": records}, indent=2, default=str))
+    print(f"[skill-audit] wrote report to {STATE_FILE}")
+
+    msg = format_discord(report)
+    print()
+    print(msg)
+    print()
+
+    if args.no_post:
+        print("[--no-post] skipping Discord")
+        return
+
+    webhook = load_webhook()
+    posted = post_discord(msg, webhook)
+    print(f"[discord] posted: {posted}")
+
+
+if __name__ == "__main__":
+    main()

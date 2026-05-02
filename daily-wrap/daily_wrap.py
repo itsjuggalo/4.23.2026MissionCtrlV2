@@ -116,6 +116,42 @@ def signal_counts():
     return counts
 
 
+def spy_today_pct():
+    """Item 32: SPY today percent change for benchmark.
+    Returns dict {pct, close, prev_close} or None on failure.
+    Uses Yahoo Finance v8 quote endpoint - same pattern as account_snapshot_post_py.
+    """
+    try:
+        r = requests.get(
+            "https://query1.finance.yahoo.com/v8/finance/chart/SPY",
+            params={"interval": "1d", "range": "5d"},
+            headers={"User-Agent": "MissionCtrl-DailyWrap/1.0"},
+            timeout=10,
+        )
+        if r.status_code != 200:
+            logging.error(f"SPY fetch failed status {r.status_code}")
+            return None
+        d = r.json()
+        result = (d.get("chart") or {}).get("result") or []
+        if not result:
+            return None
+        ind = (result[0].get("indicators") or {}).get("quote") or []
+        if not ind:
+            return None
+        closes = ind[0].get("close") or []
+        # Filter out None values that Yahoo sometimes returns
+        closes = [c for c in closes if c is not None]
+        if len(closes) < 2:
+            return None
+        latest = float(closes[-1])
+        prev = float(closes[-2])
+        pct = ((latest - prev) / prev * 100) if prev > 0 else 0
+        return {"pct": pct, "close": latest, "prev_close": prev}
+    except Exception as e:
+        logging.error(f"spy_today_pct failed: {e}")
+        return None
+
+
 def build_embed():
     now_et = datetime.now()
     ts_str = now_et.strftime("%A, %B %-d %Y")
@@ -130,6 +166,23 @@ def build_embed():
     else: color = 0xf1c40f
 
     fields = []
+
+    # Item 32: SPY benchmark prepended so it leads every wrap
+    spy = spy_today_pct()
+    if spy is not None:
+        sign = "+" if spy["pct"] >= 0 else ""
+        emoji = "📈" if spy["pct"] >= 0 else "📉"
+        fields.append({
+            "name": f"{emoji} SPY Benchmark",
+            "value": f"`SPY {sign}{spy['pct']:.2f}%  ${spy['close']:,.2f}` (prev close ${spy['prev_close']:,.2f})",
+            "inline": False,
+        })
+    else:
+        fields.append({
+            "name": "📈 SPY Benchmark",
+            "value": "_SPY data unavailable_",
+            "inline": False,
+        })
 
     if flow["rows"]:
         fields.append({

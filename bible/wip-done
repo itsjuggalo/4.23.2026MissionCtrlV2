@@ -1,0 +1,10 @@
+#!/bin/bash
+F="$1"
+[ -z "$F" ] && { echo "Usage: wip-done <file>"; exit 1; }
+ABS="$(realpath "$F" 2>/dev/null || echo "$F")"
+WIP_LIST="/home/ubuntu/.openclaw/state/code_wip/wip.list"
+[ ! -f "$WIP_LIST" ] && { echo "No WIP list yet"; exit 0; }
+grep -vxF "$ABS" "$WIP_LIST" > "$WIP_LIST.tmp" || true
+mv "$WIP_LIST.tmp" "$WIP_LIST"
+echo "DONE: $ABS"
+echo "Total WIP: $(wc -l < "$WIP_LIST" 2>/dev/null || echo 0)"

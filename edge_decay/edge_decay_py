@@ -1,0 +1,244 @@
+#!/usr/bin/env python3
+"""Item 21: Edge-decay detector for active strategies.
+
+Generic framework: each registered strategy provides a callable that returns
+recent performance metrics (profit_factor, win_rate, sample_size, ts).
+The detector computes rolling baseline vs current, alerts when degradation
+crosses thresholds.
+
+Today's registry: SuperTrend optimizer results (one entry per symbol/timeframe).
+Future: Pine strategies firing TradingView webhooks (each becomes a registry entry).
+"""
+import json, os, sys, urllib.request
+from pathlib import Path
+from datetime import datetime, timedelta, timezone
+from collections import defaultdict
+
+SECRETS = Path('/home/ubuntu/.openclaw/secrets')
+HISTORY = Path('/home/ubuntu/.openclaw/workspace/edge_decay_history')
+STATE = Path('/home/ubuntu/.openclaw/state/edge_decay')
+SUPERTREND_RESULTS = Path('/home/ubuntu/mission-control/supertrend-engine/results')
+
+HISTORY.mkdir(parents=True, exist_ok=True)
+STATE.mkdir(parents=True, exist_ok=True)
+
+# Decay thresholds - tunable. Triggered if EITHER threshold crosses.
+PF_DECAY_PCT = 0.30          # alert if PF drops 30% from baseline
+PF_ABSOLUTE_FLOOR = 1.0      # alert if current PF below 1.0 (breakeven)
+WINRATE_DECAY_PCT = 0.20     # alert if winrate drops 20% from baseline
+ROLLING_WINDOW_DAYS = 7
+BASELINE_WINDOW_DAYS = 21  # baseline window covers prior 7d-21d before now (anything older than recent window, capped at 21d back)
+
+def load_secret(name):
+    p = SECRETS / name
+    return p.read_text().strip() if p.exists() else None
+
+WEBHOOK = load_secret('discord_edge_decay_webhook')
+
+def post_discord(content):
+    if not WEBHOOK:
+        print('[edge-decay] no webhook configured, skipping post')
+        return
+    body = json.dumps({'content': content[:1990]}).encode()
+    req = urllib.request.Request(
+        WEBHOOK, data=body,
+        headers={'content-type': 'application/json',
+                 'User-Agent': 'MissionCtrl-EdgeDecay/1.0 (+https://missionctrl.serveftp.com)'})
+    try:
+        urllib.request.urlopen(req, timeout=15)
+        print('[edge-decay] discord post sent')
+    except Exception as e:
+        print(f'[edge-decay] webhook err: {e}', file=sys.stderr)
+
+# ============================================================
+# Strategy registry - each entry: { name, kind, loader_fn }
+# loader_fn returns list of {ts, profit_factor, win_rate, sample_size}
+# ============================================================
+
+def load_supertrend_results():
+    """Load all SuperTrend optimizer results, group by symbol/timeframe.
+    Each result file shape: {run_time, symbol, timeframe, top_10: [{profit_factor, win_rate, total_trades, ...}]}
+    For decay tracking we use top_10[0] (best params from that nightly run) as the strategy's edge that day.
+    Returns dict: strategy_name -> list of {ts, profit_factor, win_rate, sample_size}"""
+    out = defaultdict(list)
+    if not SUPERTREND_RESULTS.exists():
+        return dict(out)
+    for f in SUPERTREND_RESULTS.glob('optimization_*.json'):
+        try:
+            rec = json.loads(f.read_text())
+            symbol = rec.get('symbol', '').replace('/USD', '').replace('/USDT', '')
+            tf = rec.get('timeframe', '')
+            ts = rec.get('run_time')
+            top = rec.get('top_10', [])
+            if not (symbol and tf and top and isinstance(top, list)):
+                continue
+            best = top[0]
+            if not isinstance(best, dict):
+                continue
+            pf = best.get('profit_factor')
+            wr = best.get('win_rate')
+            trades = best.get('total_trades', 0)
+            if pf is None:
+                continue
+            if not ts:
+                ts = datetime.fromtimestamp(f.stat().st_mtime, tz=timezone.utc).isoformat()
+            key = f'SuperTrend_{symbol}_{tf}'
+            out[key].append({
+                'ts': ts,
+                'profit_factor': float(pf),
+                'win_rate': float(wr) / 100.0 if wr is not None else None,  # convert pct to decimal
+                'sample_size': int(trades),
+                'source_file': f.name,
+            })
+        except Exception as e:
+            print(f'[edge-decay] error loading {f.name}: {e}', file=sys.stderr)
+    return dict(out)
+
+def load_pine_strategies():
+    """Reserved: Pine strategies firing TV webhooks will register here.
+    Currently returns empty - Pine scripts not yet wired. When Mike pastes them
+    later, this loader will read from ~/.openclaw/state/pine_signals/ (TBD)."""
+    return {}
+
+REGISTRY = {
+    'supertrend': load_supertrend_results,
+    'pine': load_pine_strategies,
+}
+
+# ============================================================
+# Decay computation
+# ============================================================
+
+def parse_ts(ts_str):
+    try:
+        return datetime.fromisoformat(ts_str.replace('Z', '+00:00'))
+    except Exception:
+        return None
+
+def compute_decay(strategy_name, history):
+    """Given history list, split into baseline window vs recent window, compute decay."""
+    if not history or len(history) < 2:
+        return None
+    now = datetime.now(timezone.utc)
+    rolling_cutoff = now - timedelta(days=ROLLING_WINDOW_DAYS)
+    baseline_cutoff = now - timedelta(days=BASELINE_WINDOW_DAYS)
+
+    parsed = []
+    for h in history:
+        dt = parse_ts(h.get('ts', ''))
+        if dt:
+            parsed.append((dt, h))
+    parsed.sort(key=lambda x: x[0])
+
+    if not parsed:
+        return None
+
+    recent = [h for dt, h in parsed if dt >= rolling_cutoff]
+    baseline = [h for dt, h in parsed if baseline_cutoff <= dt < rolling_cutoff]
+
+    if not recent or not baseline:
+        return {
+            'strategy': strategy_name,
+            'status': 'insufficient_data',
+            'recent_n': len(recent),
+            'baseline_n': len(baseline),
+        }
+
+    def avg(lst, key):
+        vals = [x.get(key) for x in lst if x.get(key) is not None]
+        return sum(vals) / len(vals) if vals else None
+
+    recent_pf = avg(recent, 'profit_factor')
+    baseline_pf = avg(baseline, 'profit_factor')
+    recent_wr = avg(recent, 'win_rate')
+    baseline_wr = avg(baseline, 'win_rate')
+
+    alerts = []
+    if recent_pf is not None and baseline_pf is not None and baseline_pf > 0:
+        pf_change = (recent_pf - baseline_pf) / baseline_pf
+        if pf_change <= -PF_DECAY_PCT:
+            alerts.append(f'PF down {abs(pf_change)*100:.0f}% ({baseline_pf:.2f} -> {recent_pf:.2f})')
+    if recent_pf is not None and recent_pf < PF_ABSOLUTE_FLOOR:
+        alerts.append(f'PF below floor: {recent_pf:.2f} < {PF_ABSOLUTE_FLOOR}')
+    if recent_wr is not None and baseline_wr is not None and baseline_wr > 0:
+        wr_change = (recent_wr - baseline_wr) / baseline_wr
+        if wr_change <= -WINRATE_DECAY_PCT:
+            alerts.append(f'WinRate down {abs(wr_change)*100:.0f}% ({baseline_wr:.2%} -> {recent_wr:.2%})')
+
+    return {
+        'strategy': strategy_name,
+        'status': 'decay' if alerts else 'ok',
+        'recent_pf': recent_pf,
+        'baseline_pf': baseline_pf,
+        'recent_wr': recent_wr,
+        'baseline_wr': baseline_wr,
+        'recent_n': len(recent),
+        'baseline_n': len(baseline),
+        'alerts': alerts,
+    }
+
+# ============================================================
+# Main loop
+# ============================================================
+
+def run(post=True):
+    print(f'[edge-decay] starting at {datetime.now(timezone.utc).isoformat()}')
+    all_strategies = {}
+    for source_name, loader in REGISTRY.items():
+        try:
+            data = loader()
+            print(f'[edge-decay] {source_name}: {len(data)} strategies')
+            all_strategies.update(data)
+        except Exception as e:
+            print(f'[edge-decay] error in {source_name}: {e}')
+
+    if not all_strategies:
+        print('[edge-decay] no strategies registered yet - framework ready for when Pine scripts come online')
+        # still write empty state file so MC can detect framework is alive
+        STATE.joinpath('last_run.json').write_text(json.dumps({
+            'ts': datetime.now(timezone.utc).isoformat(),
+            'strategies_checked': 0,
+            'alerts': [],
+        }))
+        return 0
+
+    decay_alerts = []
+    insufficient = []
+    healthy = []
+    for name, history in all_strategies.items():
+        result = compute_decay(name, history)
+        if not result:
+            continue
+        if result['status'] == 'decay':
+            decay_alerts.append(result)
+        elif result['status'] == 'insufficient_data':
+            insufficient.append(result)
+        else:
+            healthy.append(result)
+
+    print(f'[edge-decay] healthy: {len(healthy)}, insufficient: {len(insufficient)}, decay alerts: {len(decay_alerts)}')
+
+    # Save full snapshot to state
+    STATE.joinpath('last_run.json').write_text(json.dumps({
+        'ts': datetime.now(timezone.utc).isoformat(),
+        'strategies_checked': len(all_strategies),
+        'healthy': len(healthy),
+        'insufficient': len(insufficient),
+        'alerts': [{'strategy': a['strategy'], 'alerts': a['alerts']} for a in decay_alerts],
+    }, indent=2))
+
+    if decay_alerts and post:
+        msg = f'**Edge-Decay Alert** - {len(decay_alerts)} strateg{"y" if len(decay_alerts)==1 else "ies"} degrading\n\n'
+        for a in decay_alerts[:10]:
+            msg += f'**{a["strategy"]}** (n={a["recent_n"]} recent vs n={a["baseline_n"]} baseline)\n'
+            for alert in a['alerts']:
+                msg += f'  - {alert}\n'
+            msg += '\n'
+        post_discord(msg)
+    elif post and not decay_alerts:
+        print('[edge-decay] no decay alerts - skipping discord post')
+    return len(decay_alerts)
+
+if __name__ == '__main__':
+    post = '--no-post' not in sys.argv
+    sys.exit(0 if run(post=post) >= 0 else 1)

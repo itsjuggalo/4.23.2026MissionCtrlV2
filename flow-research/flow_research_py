@@ -1,0 +1,384 @@
+#!/usr/bin/env python3
+"""
+Flow tier auto-research framework - Item 33.
+
+DRY-RUN mode: analyzes historical Boba decisions grouped by flow tier,
+computes win/loss/PF per tier, suggests threshold adjustments. Does NOT
+modify thresholds. Activation requires explicit --apply flag once data
+volume is sufficient (suggested 30+ days, 100+ closed picks).
+
+Pipeline:
+  1. Load all entries from boba_decisions_validated json
+  2. Extract picks_executed with tier markers in entry_criteria
+  3. Cross-reference with closed positions for P&L outcomes
+  4. Group by tier (T0_MEGA, T1_HUGE, T2_UNUSUAL_HUGE)
+  5. Compute per-tier: count, win_rate, avg_pnl, profit_factor
+  6. Suggest threshold tweaks if a tier underperforms (WR<40% or PF<1.0)
+  7. Post weekly digest to discord_daily_optimize_webhook
+
+State: openclaw/state/flow_research/
+  - last_run.json (timestamp + tier stats summary)
+  - history.jsonl (full per-run snapshots)
+
+Cron: Sundays 11pm ET (UTC Mon 03:00). Doesn't conflict with other Sun jobs.
+"""
+import json
+import sys
+import argparse
+import urllib.request
+from datetime import datetime, timezone, timedelta
+from pathlib import Path
+from collections import defaultdict
+
+DECISIONS_FILE = Path("/home/ubuntu/.openclaw/workspace/skill_outputs/boba_decisions_validated.json")
+POSITION_DAEMON_DIR = Path("/home/ubuntu/.openclaw/state/position_daemon")
+AUTO_TRADER_STATE = Path("/home/ubuntu/.openclaw/state/auto_trader_state.json")
+SECRETS = Path("/home/ubuntu/.openclaw/secrets")
+WEBHOOK_FILE = SECRETS / "discord_daily_optimize_webhook"
+
+STATE_DIR = Path("/home/ubuntu/.openclaw/state/flow_research")
+STATE_DIR.mkdir(parents=True, exist_ok=True)
+STATE_FILE = STATE_DIR / "last_run.json"
+HISTORY_FILE = STATE_DIR / "history.jsonl"
+
+USER_AGENT = "MissionCtrl-FlowResearch/1.0"
+
+# Activation thresholds - dry-run continues until ALL met
+MIN_TOTAL_PICKS = 100
+MIN_DAYS_HISTORY = 30
+MIN_PICKS_PER_TIER = 15  # need this much per-tier volume for stats to be meaningful
+
+# Threshold tweak heuristics (only fire suggestions, never apply)
+WR_TWEAK_THRESHOLD = 0.40   # tier WR below 40% = suggest tighten
+PF_TWEAK_THRESHOLD = 1.0    # tier PF below 1.0 = suggest tighten
+
+
+def load_decisions():
+    if not DECISIONS_FILE.exists():
+        return []
+    try:
+        d = json.loads(DECISIONS_FILE.read_text())
+        return d.get("decisions", []) if isinstance(d, dict) else (d if isinstance(d, list) else [])
+    except Exception as e:
+        print(f"[research] load decisions failed: {e}", file=sys.stderr)
+        return []
+
+
+CONTRACT_OUTCOMES_FILE = Path("/home/ubuntu/.openclaw/data/contract-outcomes/recent-30d.json")
+
+
+def load_closed_positions():
+    """Build dict of {ticker: outcome_dict} from outcome_extractor output.
+
+    Reads contract-outcomes/recent-30d.json which is populated every 30min by
+    outcome_extractor reading closed_*.json files from Option-Signals-Scraper.
+    """
+    closed = {}
+    if not CONTRACT_OUTCOMES_FILE.exists():
+        return closed
+    try:
+        outcomes = json.loads(CONTRACT_OUTCOMES_FILE.read_text())
+    except Exception as e:
+        print(f"[research] load_closed_positions failed: {e}", file=sys.stderr)
+        return closed
+    for o in outcomes:
+        if not isinstance(o, dict):
+            continue
+        sym = o.get("symbol", "")
+        if not sym:
+            continue
+        # Multi-key for matching: ticker alone + ticker_strike + ticker_strike_expiry
+        pnl = o.get("pct_return")
+        if pnl is None:
+            continue
+        # Convert pct to dollar-equivalent for compatibility with existing code
+        rec = {
+            "realized_pnl": float(pnl),
+            "outcome": o.get("outcome"),
+            "exit_time": o.get("exit_time"),
+            "category": o.get("category"),
+        }
+        # Index by symbol alone (most relaxed match for picks_with_pnl join)
+        closed[sym] = rec
+        # Also indexed by symbol_strike if available
+        strike = o.get("strike")
+        if strike:
+            closed[f"{sym}_{strike}"] = rec
+            expiry = o.get("expiry")
+            if expiry:
+                closed[f"{sym}_{strike}_{expiry}"] = rec
+    return closed
+
+
+def extract_tier_from_pick(pick):
+    """Look at entry_criteria for T0/T1/T2 markers."""
+    if not isinstance(pick, dict):
+        return None
+    crit = pick.get("entry_criteria", []) or []
+    if isinstance(crit, str):
+        crit = [crit]
+    for c in crit:
+        cu = str(c).upper()
+        if "T0" in cu or "MEGA" in cu:
+            return "T0_MEGA"
+        if "T1" in cu or "HUGE_FLOW" in cu:
+            return "T1_HUGE"
+        if "T2" in cu or "UNUSUAL_HUGE" in cu:
+            return "T2_UNUSUAL"
+    # Fallback: infer from premium if available
+    prem = pick.get("flow_premium", 0) or pick.get("premium", 0) or 0
+    try:
+        prem = float(prem)
+        if prem >= 10_000_000:
+            return "T0_MEGA"
+        if prem >= 1_000_000:
+            return "T1_HUGE"
+        if prem >= 500_000:
+            return "T2_UNUSUAL"
+    except Exception:
+        pass
+    return None
+
+
+def parse_decisions(entries):
+    """Walk entries, extract picks with tier + ticker + timestamp."""
+    picks = []
+    for e in entries:
+        if not isinstance(e, dict):
+            continue
+        ts = e.get("cycle_time") or e.get("timestamp") or e.get("date") or ""
+        executed = e.get("picks_executed", []) or []
+        if not isinstance(executed, list):
+            continue
+        for p in executed:
+            if not isinstance(p, dict):
+                continue
+            tier = extract_tier_from_pick(p)
+            if not tier:
+                continue
+            picks.append({
+                "ts": ts[:19] if ts else "",
+                "ticker": (p.get("ticker") or "").upper(),
+                "strike": p.get("strike"),
+                "option_type": p.get("option_type"),
+                "expiry": p.get("expiry"),
+                "tier": tier,
+                "contracts": p.get("contracts", 0),
+            })
+    return picks
+
+
+def join_outcomes(picks, closed):
+    """Match picks to closed positions by ticker + strike + expiry, attach pnl."""
+    out = []
+    for p in picks:
+        key_variants = [
+            f"{p['ticker']}_{p.get('strike')}_{p.get('expiry')}",
+            p["ticker"],
+        ]
+        pnl = None
+        for k in key_variants:
+            if k in closed:
+                cv = closed[k]
+                pnl = cv.get("realized_pnl") or cv.get("pnl")
+                break
+        if pnl is not None:
+            try:
+                p["pnl"] = float(pnl)
+            except Exception:
+                p["pnl"] = None
+        out.append(p)
+    return out
+
+
+def compute_tier_stats(picks_with_pnl):
+    """Per-tier: count, with-outcome, wins, losses, win_rate, total_pnl, avg_pnl, profit_factor."""
+    by_tier = defaultdict(lambda: {
+        "total": 0, "with_outcome": 0, "wins": 0, "losses": 0,
+        "total_pnl": 0.0, "win_pnl": 0.0, "loss_pnl": 0.0,
+    })
+
+    for p in picks_with_pnl:
+        t = p["tier"]
+        by_tier[t]["total"] += 1
+        pnl = p.get("pnl")
+        if pnl is None:
+            continue
+        by_tier[t]["with_outcome"] += 1
+        by_tier[t]["total_pnl"] += pnl
+        if pnl > 0:
+            by_tier[t]["wins"] += 1
+            by_tier[t]["win_pnl"] += pnl
+        else:
+            by_tier[t]["losses"] += 1
+            by_tier[t]["loss_pnl"] += abs(pnl)
+
+    # Add derived metrics
+    for t, s in by_tier.items():
+        if s["with_outcome"] > 0:
+            s["win_rate"] = s["wins"] / s["with_outcome"]
+            s["avg_pnl"] = s["total_pnl"] / s["with_outcome"]
+        else:
+            s["win_rate"] = 0
+            s["avg_pnl"] = 0
+        s["profit_factor"] = (s["win_pnl"] / s["loss_pnl"]) if s["loss_pnl"] > 0 else (s["win_pnl"] if s["win_pnl"] > 0 else 0)
+
+    return dict(by_tier)
+
+
+def check_activation_ready(picks_with_pnl, by_tier):
+    """Return (ready, reasons). Activation = enough volume to suggest tweaks."""
+    reasons = []
+    total = len(picks_with_pnl)
+    if total < MIN_TOTAL_PICKS:
+        reasons.append(f"only {total} total picks (need {MIN_TOTAL_PICKS}+)")
+
+    # Check days of history
+    if picks_with_pnl:
+        dates = [p["ts"][:10] for p in picks_with_pnl if p.get("ts")]
+        if dates:
+            dates = sorted(set(dates))
+            try:
+                first = datetime.strptime(dates[0], "%Y-%m-%d")
+                last = datetime.strptime(dates[-1], "%Y-%m-%d")
+                days = (last - first).days
+                if days < MIN_DAYS_HISTORY:
+                    reasons.append(f"only {days} days history (need {MIN_DAYS_HISTORY}+)")
+            except Exception:
+                pass
+
+    # Per-tier volume
+    for t in ("T0_MEGA", "T1_HUGE", "T2_UNUSUAL"):
+        s = by_tier.get(t, {})
+        if s.get("with_outcome", 0) < MIN_PICKS_PER_TIER:
+            reasons.append(f"{t}: only {s.get('with_outcome', 0)} closed picks (need {MIN_PICKS_PER_TIER}+)")
+
+    return (len(reasons) == 0, reasons)
+
+
+def suggest_tweaks(by_tier, ready):
+    """Return list of suggested threshold changes. Only meaningful when ready=True."""
+    if not ready:
+        return []
+    suggestions = []
+    for t, s in by_tier.items():
+        if s["with_outcome"] < MIN_PICKS_PER_TIER:
+            continue
+        if s["win_rate"] < WR_TWEAK_THRESHOLD:
+            suggestions.append(f"{t}: WR {s['win_rate']*100:.1f}% < {WR_TWEAK_THRESHOLD*100:.0f}% threshold - SUGGEST TIGHTEN tier minimum premium")
+        if s["profit_factor"] < PF_TWEAK_THRESHOLD:
+            suggestions.append(f"{t}: PF {s['profit_factor']:.2f} < {PF_TWEAK_THRESHOLD:.2f} - SUGGEST TIGHTEN tier or pause")
+    return suggestions
+
+
+def format_digest(picks_with_pnl, by_tier, ready, reasons, suggestions):
+    lines = ["**Flow Tier Auto-Research - weekly digest**", ""]
+    lines.append(f"Total picks analyzed: {len(picks_with_pnl)}")
+    closed_count = sum(1 for p in picks_with_pnl if p.get("pnl") is not None)
+    lines.append(f"With outcome (closed): {closed_count}")
+    lines.append("")
+
+    if not by_tier:
+        lines.append("No tier-tagged picks found. Check entry_criteria T0/T1/T2 markers.")
+        return "\n".join(lines)
+
+    lines.append("Per-tier stats:")
+    for t in ("T0_MEGA", "T1_HUGE", "T2_UNUSUAL"):
+        s = by_tier.get(t, {})
+        lines.append(
+            f"  {t:<14} total={s.get('total',0):>3}  closed={s.get('with_outcome',0):>3}  "
+            f"WR={s.get('win_rate',0)*100:>5.1f}%  PF={s.get('profit_factor',0):>4.2f}  "
+            f"avg_pnl=${s.get('avg_pnl',0):>+8.2f}"
+        )
+    lines.append("")
+
+    if ready:
+        lines.append("STATUS: ACTIVATION READY (sufficient data volume)")
+    else:
+        lines.append("STATUS: DRY-RUN (insufficient data for confident tweaks)")
+        for r in reasons:
+            lines.append(f"  pending: {r}")
+    lines.append("")
+
+    if suggestions:
+        lines.append("Threshold suggestions:")
+        for s in suggestions:
+            lines.append(f"  - {s}")
+    else:
+        lines.append("No tweaks suggested at this run.")
+
+    return "\n".join(lines)
+
+
+def post_discord(msg):
+    if not WEBHOOK_FILE.exists():
+        print("[research] no webhook file")
+        return False
+    url = WEBHOOK_FILE.read_text().strip()
+    if not url.startswith("http"):
+        return False
+    try:
+        req = urllib.request.Request(
+            url,
+            data=json.dumps({"content": msg[:1900]}).encode("utf-8"),
+            headers={"Content-Type": "application/json", "User-Agent": USER_AGENT},
+        )
+        with urllib.request.urlopen(req, timeout=10) as r:
+            return r.status in (200, 204)
+    except Exception as e:
+        print(f"[research] discord post failed: {e}", file=sys.stderr)
+        return False
+
+
+def main():
+    ap = argparse.ArgumentParser()
+    ap.add_argument("--no-post", action="store_true", help="Skip Discord post (test mode)")
+    ap.add_argument("--apply", action="store_true", help="Apply threshold suggestions (NOT IMPLEMENTED in dry-run)")
+    args = ap.parse_args()
+
+    if args.apply:
+        print("[research] --apply mode is reserved for activation phase, not implemented in dry-run")
+        return
+
+    entries = load_decisions()
+    print(f"[research] loaded {len(entries)} decision entries")
+    if not entries:
+        return
+
+    closed = load_closed_positions()
+    print(f"[research] loaded {len(closed)} closed positions")
+
+    picks = parse_decisions(entries)
+    print(f"[research] extracted {len(picks)} tier-tagged picks")
+
+    picks_with_pnl = join_outcomes(picks, closed)
+    by_tier = compute_tier_stats(picks_with_pnl)
+    ready, reasons = check_activation_ready(picks_with_pnl, by_tier)
+    suggestions = suggest_tweaks(by_tier, ready)
+
+    digest = format_digest(picks_with_pnl, by_tier, ready, reasons, suggestions)
+    print()
+    print(digest)
+    print()
+
+    # Save state
+    snapshot = {
+        "ts": datetime.now(timezone.utc).isoformat(),
+        "total_picks": len(picks_with_pnl),
+        "by_tier": {t: {k: (v if not isinstance(v, float) else round(v, 4)) for k, v in s.items()} for t, s in by_tier.items()},
+        "ready": ready,
+        "reasons": reasons,
+        "suggestions": suggestions,
+    }
+    STATE_FILE.write_text(json.dumps(snapshot, indent=2, default=str))
+    with HISTORY_FILE.open("a") as f:
+        f.write(json.dumps(snapshot, default=str) + "\n")
+    print(f"[research] state saved")
+
+    if not args.no_post:
+        posted = post_discord(digest)
+        print(f"[research] discord posted: {posted}")
+
+
+if __name__ == "__main__":
+    main()

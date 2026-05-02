@@ -1,8 +1,9 @@
 #!/usr/bin/env python3
 """
-Layer 2.5 trail daemon — ratcheting stops for swing positions.
+Layer 2.5 trail daemon — JazzyHazzy variant — ratcheting stops for swing positions.
 
-Runs every 5 min via PM2. For each Alpaca R2 option position:
+Forked from trail_daemon.py for JazzyHazzy R1 paper account (PA38IUKNR237).
+Runs every 5 min via PM2. For each Alpaca JazzyHazzy option position:
 1. Check if it's a swing position (journal has protocol="swing", or fallback: DTE>=45 at entry)
 2. Fetch current mid price
 3. Update high-water mark in state
@@ -28,10 +29,10 @@ import requests
 SECRETS = Path.home() / ".openclaw" / "secrets"
 STATE_DIR = Path.home() / ".openclaw" / "workspace" / "state"
 STATE_DIR.mkdir(parents=True, exist_ok=True)
-HWM_STATE = STATE_DIR / "trail_daemon_hwm.json"
-LOG_FILE = Path.home() / ".openclaw" / "workspace" / "memory" / "trail_daemon.jsonl"
+HWM_STATE = STATE_DIR / "trail_daemon_jazzy_hwm.json"
+LOG_FILE = Path.home() / ".openclaw" / "workspace" / "memory" / "trail_daemon_jazzy.jsonl"
 LOG_FILE.parent.mkdir(parents=True, exist_ok=True)
-JOURNAL = Path.home() / ".openclaw" / "workspace" / "skill_outputs" / "boba_decisions_validated.json"
+JOURNAL = Path.home() / ".openclaw" / "workspace" / "skill_outputs" / "jazzy_decisions_validated.json"
 
 POLL_INTERVAL_SEC = 300  # 5 minutes
 ALPACA_BASE = "https://paper-api.alpaca.markets/v2"
@@ -40,12 +41,12 @@ def _read(name):
     p = SECRETS / name
     return p.read_text().strip() if p.exists() else ""
 
-# DAEMON ACCOUNT LOCK: this daemon is hardcoded to R2 (PA3R6MOPBWF7, Boba's account).
-# Do not change to alpaca-r1-* — those are R1 (managed by position_sell_daemon).
-EXPECTED_ACCOUNT = "PA3R6MOPBWF7"  # R2
+# DAEMON ACCOUNT LOCK: this daemon is hardcoded to JazzyHazzy R1 (PA38IUKNR237).
+# Do not change to alpaca-key-id (R2) or alpaca-r1-* (Boba R1 hold).
+EXPECTED_ACCOUNT = "PA38IUKNR237"  # JazzyHazzy R1 paper
 
-KEY = _read("alpaca-key-id") or _read("alpaca_key.txt")
-SEC = _read("alpaca-secret") or _read("alpaca_secret.txt")
+KEY = _read("alpaca-jazzy-key-id")
+SEC = _read("alpaca-jazzy-secret")
 DISCORD_WH = _read("discord_bobatrades_webhook")
 
 
@@ -58,10 +59,10 @@ def assert_correct_account():
             raise SystemExit(1)
         actual = r.json().get("account_number", "")
         if actual != EXPECTED_ACCOUNT:
-            log("fatal_account_mismatch", f"Expected R2 ({EXPECTED_ACCOUNT}) but got {actual}. Refusing to run on wrong account.")
+            log("fatal_account_mismatch", f"Expected JazzyHazzy ({EXPECTED_ACCOUNT}) but got {actual}. Refusing to run on wrong account.")
             raise SystemExit(2)
         equity = float(r.json().get("equity", 0))
-        log("startup_account_check", f"✓ Confirmed R2 account {actual} (equity ${equity:,.0f}) — managing R2 swing positions only")
+        log("startup_account_check", f"✓ Confirmed JazzyHazzy account {actual} (equity ${equity:,.0f}) — managing JazzyHazzy swing positions only")
     except SystemExit: raise
     except Exception as e:
         log("fatal_account_check", str(e))
