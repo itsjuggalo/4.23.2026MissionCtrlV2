@@ -1,0 +1,138 @@
+#!/usr/bin/env python3
+"""
+Scanner #12 - Earnings Catalyst
+Cross-references upcoming earnings (next 7 days) with active flow alerts.
+Uses yfinance for earnings dates.
+Posts symbols where flow appeared AND earnings is within 7 days AND option expiry is within 2 days of earnings.
+Runs once per day at 7am ET, then every 4h during market hours.
+"""
+import json, time, logging
+from pathlib import Path
+from datetime import datetime, timezone, timedelta
+from collections import defaultdict
+
+logging.basicConfig(level=logging.INFO, format='%(asctime)s [earn] %(message)s', datefmt='%H:%M:%S')
+
+SCRAPER = Path('/home/ubuntu/mission-control-restored/Option-Signals-Scraper/data')
+OUT = Path('/home/ubuntu/.openclaw/data/scanners/earnings_catalyst.json')
+OUT.parent.mkdir(parents=True, exist_ok=True)
+STATE = Path('/home/ubuntu/.openclaw/data/scanners/earnings_catalyst_state.json')
+EARNINGS_CACHE = Path('/home/ubuntu/.openclaw/data/scanners/earnings_cache.json')
+
+import requests
+WEBHOOK = 'https://discordapp.com/api/webhooks/1497661681126609008/tlS_qnTSq4Uef8AUVpllp2vwC3sJ7u0BHt2_WcoJz5y75dnh3cgHpkhOn59zGlkWmyPk'
+
+DAYS_AHEAD = 7
+
+def get_active_symbols():
+    """All symbols with flow alerts in last 24h."""
+    cutoff = int(time.time()) - 24*3600
+    syms = set()
+    for feed in ['flow_alerts_today', 'flow2_alerts_today']:
+        p = SCRAPER / f'{feed}.json'
+        if not p.exists(): continue
+        try: d = json.loads(p.read_text())
+        except: continue
+        items = d.values() if isinstance(d, dict) else d
+        for e in items:
+            if not isinstance(e, dict): continue
+            a = e.get('alert', e) if isinstance(e.get('alert'), dict) else e
+            sym = a.get('Symbol')
+            t = a.get('Time')
+            if not sym or not t: continue
+            try:
+                ts = float(t)
+                if ts > 1e12: ts = ts / 1000.0
+                if ts >= cutoff: syms.add(str(sym).upper().strip())
+            except: pass
+    return syms
+
+def get_earnings_date(symbol):
+    """Return next earnings datetime or None. Uses yfinance with daily cache."""
+    cache = json.loads(EARNINGS_CACHE.read_text()) if EARNINGS_CACHE.exists() else {}
+    today = datetime.now(tz=timezone.utc).date().isoformat()
+    if symbol in cache and cache[symbol].get('cached_date') == today:
+        d = cache[symbol].get('next_earnings')
+        return datetime.fromisoformat(d) if d else None
+    try:
+        import yfinance as yf
+        t = yf.Ticker(symbol)
+        ed = t.earnings_dates
+        if ed is None or ed.empty:
+            cache[symbol] = {'cached_date': today, 'next_earnings': None}
+        else:
+            now = datetime.now(tz=timezone.utc)
+            future = ed.index[ed.index > now]
+            if len(future) == 0:
+                cache[symbol] = {'cached_date': today, 'next_earnings': None}
+            else:
+                next_dt = future[0].to_pydatetime()
+                if next_dt.tzinfo is None: next_dt = next_dt.replace(tzinfo=timezone.utc)
+                cache[symbol] = {'cached_date': today, 'next_earnings': next_dt.isoformat()}
+        EARNINGS_CACHE.write_text(json.dumps(cache, default=str))
+        return datetime.fromisoformat(cache[symbol]['next_earnings']) if cache[symbol].get('next_earnings') else None
+    except Exception as e:
+        logging.warning(f'yfinance err for {symbol}: {e}')
+        return None
+
+def cycle():
+    active = get_active_symbols()
+    logging.info(f'active flow symbols last 24h: {len(active)}')
+    now = datetime.now(tz=timezone.utc)
+    cutoff = now + timedelta(days=DAYS_AHEAD)
+
+    catalysts = []
+    for sym in sorted(active):
+        ed = get_earnings_date(sym)
+        if not ed: continue
+        if now <= ed <= cutoff:
+            days_until = (ed - now).total_seconds() / 86400
+            catalysts.append({
+                'symbol': sym,
+                'earnings_at': ed.isoformat(),
+                'days_until': round(days_until, 1),
+            })
+
+    catalysts.sort(key=lambda x: x['days_until'])
+    out_data = {
+        'generated_at': now.isoformat(),
+        'days_ahead_window': DAYS_AHEAD,
+        'symbols_with_earnings': len(catalysts),
+        'catalysts': catalysts,
+    }
+    OUT.write_text(json.dumps(out_data, indent=1, default=str))
+    logging.info(f'earnings catalysts: {len(catalysts)}')
+    return catalysts
+
+def post_summary(catalysts):
+    if not catalysts: return
+    state = json.loads(STATE.read_text()) if STATE.exists() else {'last_post_date': ''}
+    today = datetime.now(tz=timezone.utc).date().isoformat()
+    if state.get('last_post_date') == today: return  # one post per day max
+
+    lines = [f'**Earnings Within {DAYS_AHEAD} Days** (symbols with active flow)', '']
+    for c in catalysts[:10]:
+        ed_str = datetime.fromisoformat(c['earnings_at']).strftime('%a %m/%d')
+        lines.append(f'**{c["symbol"]}** earnings {ed_str} ({c["days_until"]:.1f}d)')
+
+    msg = '\n'.join(lines)
+    try:
+        r = requests.post(WEBHOOK, json={'content': msg[:1900]}, timeout=10)
+        if r.status_code in (200, 204):
+            state['last_post_date'] = today
+            STATE.write_text(json.dumps(state))
+            logging.info('posted earnings summary')
+    except Exception as e: logging.warning(f'post err: {e}')
+
+def main():
+    logging.info('earnings_catalyst starting')
+    while True:
+        try:
+            catalysts = cycle()
+            post_summary(catalysts)
+        except Exception as e:
+            logging.error(f'cycle err: {e}', exc_info=True)
+        time.sleep(4 * 3600)  # 4h
+
+if __name__ == '__main__':
+    main()

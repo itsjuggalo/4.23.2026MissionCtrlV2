@@ -1,0 +1,141 @@
+#!/usr/bin/env python3
+"""
+Scanner #10 - Multi-Feed Overlap Detector
+Cross-references symbols appearing in 2+ feeds within last 24h.
+Confluence symbols are stronger signals than any one feed alone.
+Runs every 30 min as a daemon.
+"""
+import json, time, logging, requests
+from pathlib import Path
+from datetime import datetime, timezone, timedelta
+from collections import defaultdict
+
+logging.basicConfig(level=logging.INFO, format='%(asctime)s [overlap] %(message)s', datefmt='%H:%M:%S')
+
+SCRAPER = Path('/home/ubuntu/mission-control-restored/Option-Signals-Scraper/data')
+OUT = Path('/home/ubuntu/.openclaw/data/scanners/multi_feed_overlap.json')
+OUT.parent.mkdir(parents=True, exist_ok=True)
+STATE = Path('/home/ubuntu/.openclaw/data/scanners/multi_feed_overlap_state.json')
+
+WEBHOOK = 'https://discordapp.com/api/webhooks/1497661681126609008/tlS_qnTSq4Uef8AUVpllp2vwC3sJ7u0BHt2_WcoJz5y75dnh3cgHpkhOn59zGlkWmyPk'
+
+CUTOFF_HOURS = 24
+MIN_FEEDS = 2
+
+def read_data(name):
+    p = SCRAPER / f'{name}.json'
+    if not p.exists(): return None
+    try: return json.loads(p.read_text())
+    except: return None
+
+def extract_symbol(entry):
+    if not isinstance(entry, dict): return None
+    a = entry.get('alert') if 'alert' in entry else entry
+    if not isinstance(a, dict): return None
+    return a.get('Symbol') or a.get('symbol') or a.get('ticker')
+
+def extract_time(entry):
+    if not isinstance(entry, dict): return None
+    a = entry.get('alert') if 'alert' in entry else entry
+    if not isinstance(a, dict): a = entry
+    t = a.get('Time') or a.get('time') or a.get('exitTime') or a.get('alertTime')
+    if not t: return None
+    try:
+        t = float(t)
+        # Handle ms vs s timestamps
+        if t > 1e12: t = t / 1000.0
+        return int(t)
+    except: return None
+
+def cycle():
+    cutoff = int(time.time()) - CUTOFF_HOURS * 3600
+    feeds_by_symbol = defaultdict(set)
+    counts_by_symbol_feed = defaultdict(lambda: defaultdict(int))
+
+    feeds = [
+        'flow_alerts_today', 'flow_alerts_history',
+        'flow2_alerts_today', 'flow2_alerts_history',
+        'ss_option_notifications', 'ts_option_notifications',
+        'analyst_name_shorttermoptions', 'analyst_name_longtermoptions',
+        'analyst_name2_shorttermoptions', 'analyst_name2_longtermoptions',
+        'analyst_vivid_shorttermoptions', 'analyst_vivid_longtermoptions',
+        'analyst_vivid2_shorttermoptions', 'analyst_vivid2_longtermoptions',
+    ]
+
+    for feed in feeds:
+        d = read_data(feed)
+        if not d: continue
+        items = d.values() if isinstance(d, dict) else (d if isinstance(d, list) else [])
+        for e in items:
+            sym = extract_symbol(e)
+            if not sym: continue
+            ts = extract_time(e)
+            # If no timestamp or older than cutoff skip
+            if ts is not None and ts < cutoff: continue
+            sym = str(sym).upper().strip()
+            if not sym or len(sym) > 6: continue
+            feeds_by_symbol[sym].add(feed)
+            counts_by_symbol_feed[sym][feed] += 1
+
+    overlap = []
+    for sym, feedset in feeds_by_symbol.items():
+        if len(feedset) >= MIN_FEEDS:
+            overlap.append({
+                'symbol': sym,
+                'feed_count': len(feedset),
+                'feeds': sorted(feedset),
+                'total_alerts': sum(counts_by_symbol_feed[sym].values()),
+                'per_feed_counts': dict(counts_by_symbol_feed[sym]),
+            })
+    overlap.sort(key=lambda x: (-x['feed_count'], -x['total_alerts']))
+
+    out_data = {
+        'generated_at': datetime.now(tz=timezone.utc).isoformat(),
+        'cutoff_hours': CUTOFF_HOURS,
+        'total_overlap_symbols': len(overlap),
+        'top_50': overlap[:50],
+    }
+    OUT.write_text(json.dumps(out_data, indent=1, default=str))
+    logging.info(f'overlap symbols: {len(overlap)}, top: {[o["symbol"] for o in overlap[:5]]}')
+    return overlap, out_data
+
+def post_summary(overlap):
+    if not overlap: return
+    state = json.loads(STATE.read_text()) if STATE.exists() else {'last_post': 0, 'last_top5': []}
+    now = int(time.time())
+    if now - state.get('last_post', 0) < 1800: return  # max 1 post per 30min
+    top5_now = [o['symbol'] for o in overlap[:5] if o['feed_count'] >= 3]
+    if top5_now == state.get('last_top5', []): return  # no change
+    if not top5_now: return
+
+    lines = ['**Multi-Feed Confluence Update**', f'_{len(overlap)} symbols in 2+ feeds last {CUTOFF_HOURS}h_', '']
+    for o in overlap[:5]:
+        if o['feed_count'] < 3: continue
+        lines.append(f'**{o["symbol"]}**: {o["feed_count"]} feeds, {o["total_alerts"]} alerts')
+        feed_short = [f.replace('analyst_', '').replace('_options', '').replace('_alerts','').replace('_today','').replace('_notifications','') for f in o['feeds']]
+        lines.append(f'  feeds: {", ".join(feed_short[:6])}')
+
+    if len(lines) <= 3: return
+    msg = '\n'.join(lines)
+    try:
+        r = requests.post(WEBHOOK, json={'content': msg[:1900]}, timeout=10)
+        if r.status_code in (200, 204):
+            state['last_post'] = now
+            state['last_top5'] = top5_now
+            STATE.write_text(json.dumps(state))
+            logging.info(f'posted confluence summary, {len([o for o in overlap if o["feed_count"]>=3])} 3+ feed symbols')
+    except Exception as e:
+        logging.warning(f'post err: {e}')
+
+def main():
+    logging.info('multi_feed_overlap starting')
+    while True:
+        try:
+            overlap, _ = cycle()
+            post_summary(overlap)
+        except Exception as e:
+            logging.error(f'cycle err: {e}', exc_info=True)
+        time.sleep(1800)  # 30 min
+
+if __name__ == '__main__':
+    main()

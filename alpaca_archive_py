@@ -1,0 +1,192 @@
+#!/usr/bin/env python3
+"""
+alpaca_archive - Full history scrape for a paper account.
+Fetches: account snapshot, orders (all statuses), activities (fills/dividends/etc),
+positions (current + closed via portfolio history), portfolio_history daily.
+Writes timestamped JSON archive per account.
+"""
+import json, sys, time, os
+from datetime import datetime, timezone, timedelta
+from pathlib import Path
+import requests
+
+ARCHIVE = Path('/home/ubuntu/.openclaw/data/alpaca-archive')
+ARCHIVE.mkdir(parents=True, exist_ok=True)
+SECRETS = Path('/home/ubuntu/.openclaw/secrets')
+BASE = 'https://paper-api.alpaca.markets'
+
+
+def call(endpoint, key, secret, params=None):
+    headers = {'APCA-API-KEY-ID': key, 'APCA-API-SECRET-KEY': secret}
+    try:
+        r = requests.get(f'{BASE}{endpoint}', headers=headers, params=params, timeout=30)
+        if r.status_code == 200: return r.json()
+        print(f'  WARN {endpoint} -> {r.status_code}: {r.text[:200]}')
+        return None
+    except Exception as e:
+        print(f'  ERR {endpoint}: {e}')
+        return None
+
+
+def paginate_orders(key, secret):
+    """Pull every order ever placed - paginate by 'until' parameter."""
+    all_orders = []
+    until = None
+    page = 0
+    while page < 200:  # safety cap 200 pages = 100,000 orders max
+        params = {
+            'status': 'all',
+            'limit': 500,
+            'direction': 'desc',
+            'nested': 'true',  # include child legs of bracket/oco orders
+        }
+        if until: params['until'] = until
+        batch = call('/v2/orders', key, secret, params=params)
+        if not batch or len(batch) == 0: break
+        all_orders.extend(batch)
+        page += 1
+        # Set 'until' to the oldest order's submitted_at for next page
+        oldest = batch[-1].get('submitted_at')
+        if not oldest or len(batch) < 500: break
+        until = oldest
+        time.sleep(0.3)  # polite rate limit
+        print(f'    orders fetched: {len(all_orders)} (page {page})')
+    return all_orders
+
+
+def paginate_activities(key, secret):
+    """Pull every activity - fills, dividends, deposits, transfers."""
+    all_acts = []
+    page_token = None
+    page = 0
+    while page < 200:
+        params = {'page_size': 100, 'direction': 'desc'}
+        if page_token: params['page_token'] = page_token
+        batch = call('/v2/account/activities', key, secret, params=params)
+        if not batch or len(batch) == 0: break
+        all_acts.extend(batch)
+        page += 1
+        if len(batch) < 100: break
+        # Use last activity ID as next page token
+        last_id = batch[-1].get('id')
+        if not last_id: break
+        page_token = last_id
+        time.sleep(0.3)
+        print(f'    activities fetched: {len(all_acts)} (page {page})')
+    return all_acts
+
+
+def fetch_portfolio_history(key, secret):
+    """Daily portfolio history for max range Alpaca allows."""
+    history = {}
+    for period in ['1A', '5A', 'all']:
+        for tf in ['1D']:
+            params = {'period': period, 'timeframe': tf}
+            data = call('/v2/account/portfolio/history', key, secret, params=params)
+            if data:
+                history[f'{period}_{tf}'] = data
+                if data.get('timestamp'):
+                    print(f'    portfolio_history {period}: {len(data["timestamp"])} bars')
+                break
+    return history
+
+
+def archive_account(label, key_file, secret_file):
+    """Build complete archive for one account."""
+    print(f'\n===== Archiving {label} =====')
+    key = (SECRETS / key_file).read_text().strip()
+    secret = (SECRETS / secret_file).read_text().strip()
+
+    print(f'1. account snapshot...')
+    account = call('/v2/account', key, secret)
+    if not account:
+        print(f'  AUTH FAILED for {label} - skipping')
+        return None
+    acct_num = account.get('account_number', 'unknown')
+    print(f'  account_number: {acct_num}, equity: ${float(account.get("equity",0)):,.2f}')
+
+    print(f'2. configurations...')
+    config = call('/v2/account/configurations', key, secret)
+
+    print(f'3. open positions...')
+    positions = call('/v2/positions', key, secret) or []
+    print(f'  open positions: {len(positions)}')
+
+    print(f'4. all orders (paginating)...')
+    orders = paginate_orders(key, secret)
+    print(f'  total orders: {len(orders)}')
+
+    print(f'5. activities (paginating)...')
+    activities = paginate_activities(key, secret)
+    print(f'  total activities: {len(activities)}')
+
+    print(f'6. portfolio history...')
+    portfolio = fetch_portfolio_history(key, secret)
+
+    print(f'7. assets watchlist (if any)...')
+    watchlists = call('/v2/watchlists', key, secret)
+
+    archive = {
+        'archive_metadata': {
+            'label': label,
+            'account_number': acct_num,
+            'archived_at': datetime.now(timezone.utc).isoformat(),
+            'archive_version': 1,
+            'key_file': key_file,
+        },
+        'account_snapshot': account,
+        'configurations': config,
+        'open_positions': positions,
+        'orders_all': orders,
+        'orders_count': len(orders),
+        'activities_all': activities,
+        'activities_count': len(activities),
+        'portfolio_history': portfolio,
+        'watchlists': watchlists,
+    }
+    return archive
+
+
+def main():
+    accounts_to_archive = [
+        ('R1', 'alpaca-r1-key-id', 'alpaca-r1-secret'),
+        ('R2', 'alpaca-key-id', 'alpaca-secret'),
+        ('R3-jazzy', 'alpaca-jazzy-key-id', 'alpaca-jazzy-secret'),
+    ]
+    timestamp = datetime.now(timezone.utc).strftime('%Y%m%d-%H%M%S')
+    summary = []
+
+    for label, kf, sf in accounts_to_archive:
+        if not (SECRETS / kf).exists() or not (SECRETS / sf).exists():
+            print(f'\n{label}: keys missing, skipping')
+            continue
+        archive = archive_account(label, kf, sf)
+        if not archive: continue
+        out_file = ARCHIVE / f'{label}_{timestamp}.json'
+        out_file.write_text(json.dumps(archive, indent=2, default=str))
+        size_mb = out_file.stat().st_size / 1_000_000
+        summary.append({
+            'label': label,
+            'account_number': archive['archive_metadata']['account_number'],
+            'orders': archive['orders_count'],
+            'activities': archive['activities_count'],
+            'positions': len(archive['open_positions']),
+            'equity': float(archive['account_snapshot'].get('equity', 0)),
+            'file_mb': round(size_mb, 2),
+            'path': str(out_file),
+        })
+        print(f'  ARCHIVED: {out_file} ({size_mb:.1f} MB)')
+
+    # Write summary index
+    summary_file = ARCHIVE / f'INDEX_{timestamp}.json'
+    summary_file.write_text(json.dumps({
+        'timestamp': timestamp,
+        'accounts_archived': summary,
+    }, indent=2))
+    print(f'\n===== INDEX written: {summary_file} =====')
+    for s in summary:
+        print(f'  {s["label"]:10s} {s["account_number"]:14s} ${s["equity"]:>12,.2f}  {s["orders"]:>5d} orders  {s["activities"]:>6d} activities  {s["file_mb"]:.1f}MB')
+
+
+if __name__ == '__main__':
+    main()

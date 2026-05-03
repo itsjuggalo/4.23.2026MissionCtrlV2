@@ -1,0 +1,234 @@
+#!/usr/bin/env python3
+"""
+Build a single human-readable transaction history file from the JSON archives.
+Output: /home/ubuntu/alpaca_transaction_history (no extension - dot-free per Mike's rules)
+Sections per account:
+  1. Account snapshot
+  2. Every order (timestamp, symbol, qty, price, status)
+  3. Filled orders only (cleaner view)
+  4. Trade pairs with P&L (buy matched to sell)
+"""
+import json, sys
+from datetime import datetime, timezone
+from pathlib import Path
+from collections import defaultdict
+
+ARCHIVE = Path('/home/ubuntu/.openclaw/data/alpaca-archive')
+OUT = Path('/home/ubuntu/alpaca_transaction_history')
+
+def utc_to_et(ts_str):
+    if not ts_str: return ''
+    try:
+        s = ts_str.replace('Z', '+00:00')
+        dt = datetime.fromisoformat(s)
+        from zoneinfo import ZoneInfo
+        et = dt.astimezone(ZoneInfo('America/New_York'))
+        return et.strftime('%Y-%m-%d %H:%M:%S ET')
+    except Exception:
+        return ts_str
+
+def fmt_money(v):
+    try: return f'${float(v):,.2f}'
+    except: return '$0.00'
+
+def fmt_qty(q):
+    try:
+        f = float(q)
+        if f == int(f): return str(int(f))
+        return f'{f:.6f}'.rstrip('0').rstrip('.')
+    except: return str(q)
+
+def write_section(out, archive_path):
+    a = json.loads(archive_path.read_text())
+    meta = a['archive_metadata']
+    snap = a['account_snapshot']
+    orders = a.get('orders_all', []) or []
+    activities = a.get('activities_all', []) or []
+    positions = a.get('open_positions', []) or []
+
+    lines = []
+    lines.append('=' * 78)
+    lines.append(f"  ACCOUNT: {meta['label']}  ({snap.get('account_number','?')})")
+    lines.append('=' * 78)
+    lines.append('')
+    lines.append('--- ACCOUNT SNAPSHOT (as of archive time) ---')
+    lines.append(f"  Archived at:        {utc_to_et(meta['archived_at'])}")
+    lines.append(f"  Equity:             {fmt_money(snap.get('equity'))}")
+    lines.append(f"  Cash:               {fmt_money(snap.get('cash'))}")
+    lines.append(f"  Buying power:       {fmt_money(snap.get('buying_power'))}")
+    lines.append(f"  Options BP:         {fmt_money(snap.get('options_buying_power'))}")
+    lines.append(f"  Options level:      {snap.get('options_approved_level')}")
+    lines.append(f"  Status:             {snap.get('status')}")
+    lines.append(f"  Open positions:     {len(positions)}")
+    if positions:
+        for p in positions:
+            sym = p.get('symbol', '?')
+            qty = fmt_qty(p.get('qty', 0))
+            avg = fmt_money(p.get('avg_entry_price'))
+            mv = fmt_money(p.get('market_value'))
+            pl = fmt_money(p.get('unrealized_pl'))
+            lines.append(f"      {sym}  qty={qty}  avg={avg}  mv={mv}  unrealized={pl}")
+    lines.append('')
+
+    # Section 1: every order
+    lines.append('--- SECTION 1: EVERY ORDER (all statuses) ---')
+    lines.append(f'  Total orders: {len(orders)}')
+    lines.append('')
+    if orders:
+        lines.append(f"  {'Time (ET)':<24} {'Symbol':<22} {'Side':<5} {'Qty':<8} {'Type':<11} {'Status':<14} {'Limit':<10} {'Stop':<10} {'Filled@':<10}")
+        lines.append('  ' + '-' * 120)
+        # Sort oldest first
+        ordered = sorted(orders, key=lambda x: x.get('submitted_at') or '')
+        for o in ordered:
+            t = utc_to_et(o.get('submitted_at', ''))
+            sym = (o.get('symbol') or '')[:22]
+            side = (o.get('side') or '')[:5]
+            qty = fmt_qty(o.get('qty', 0))[:8]
+            otype = (o.get('order_type') or o.get('type') or '')[:11]
+            status = (o.get('status') or '')[:14]
+            limit_p = o.get('limit_price')
+            stop_p = o.get('stop_price')
+            fill_p = o.get('filled_avg_price')
+            limit_str = fmt_money(limit_p) if limit_p else '-'
+            stop_str = fmt_money(stop_p) if stop_p else '-'
+            fill_str = fmt_money(fill_p) if fill_p else '-'
+            lines.append(f"  {t:<24} {sym:<22} {side:<5} {qty:<8} {otype:<11} {status:<14} {limit_str:<10} {stop_str:<10} {fill_str:<10}")
+    lines.append('')
+
+    # Section 2: filled orders only
+    fills = [o for o in orders if (o.get('status') == 'filled' or o.get('filled_qty') and float(o.get('filled_qty', 0)) > 0)]
+    lines.append('--- SECTION 2: FILLED ORDERS ONLY ---')
+    lines.append(f'  Total fills: {len(fills)}')
+    lines.append('')
+    if fills:
+        lines.append(f"  {'Filled At (ET)':<24} {'Symbol':<22} {'Side':<5} {'Qty':<8} {'Price':<11} {'Notional':<12}")
+        lines.append('  ' + '-' * 90)
+        fills_sorted = sorted(fills, key=lambda x: x.get('filled_at') or x.get('submitted_at') or '')
+        total_buy_notional = 0
+        total_sell_notional = 0
+        for o in fills_sorted:
+            t = utc_to_et(o.get('filled_at') or o.get('submitted_at', ''))
+            sym = (o.get('symbol') or '')[:22]
+            side = (o.get('side') or '')[:5]
+            qty = float(o.get('filled_qty') or 0)
+            qty_str = fmt_qty(qty)[:8]
+            price = float(o.get('filled_avg_price') or 0)
+            price_str = fmt_money(price)
+            notional = qty * price
+            # For options, multiply by 100
+            if len(sym) > 10 and any(c in sym for c in 'CP'):
+                notional *= 100
+            notional_str = fmt_money(notional)
+            if side == 'buy': total_buy_notional += notional
+            elif side == 'sell': total_sell_notional += notional
+            lines.append(f"  {t:<24} {sym:<22} {side:<5} {qty_str:<8} {price_str:<11} {notional_str:<12}")
+        lines.append('  ' + '-' * 90)
+        lines.append(f'  Total buy notional:  {fmt_money(total_buy_notional)}')
+        lines.append(f'  Total sell notional: {fmt_money(total_sell_notional)}')
+        lines.append(f'  Net flow:            {fmt_money(total_sell_notional - total_buy_notional)}  (pos = realized profit, neg = cost basis still held)')
+    lines.append('')
+
+    # Section 3: trade pairs with P&L
+    lines.append('--- SECTION 3: TRADE PAIRS WITH P&L (FIFO matching per symbol) ---')
+    lines.append('')
+    by_sym = defaultdict(list)
+    for o in fills:
+        sym = o.get('symbol')
+        if not sym: continue
+        by_sym[sym].append(o)
+    pairs = []
+    total_pnl = 0
+    for sym, fs in by_sym.items():
+        fs_sorted = sorted(fs, key=lambda x: x.get('filled_at') or x.get('submitted_at') or '')
+        buy_queue = []  # list of (qty_remaining, price, time)
+        is_option = len(sym) > 10 and any(c in sym for c in 'CP')
+        multiplier = 100 if is_option else 1
+        for o in fs_sorted:
+            side = o.get('side')
+            qty = float(o.get('filled_qty') or 0)
+            price = float(o.get('filled_avg_price') or 0)
+            t = utc_to_et(o.get('filled_at') or o.get('submitted_at', ''))
+            if qty <= 0: continue
+            if side == 'buy':
+                buy_queue.append([qty, price, t])
+            elif side == 'sell':
+                remaining = qty
+                while remaining > 0 and buy_queue:
+                    bq, bp, bt = buy_queue[0]
+                    matched = min(remaining, bq)
+                    pnl = (price - bp) * matched * multiplier
+                    pairs.append({
+                        'symbol': sym, 'qty': matched,
+                        'buy_time': bt, 'buy_price': bp,
+                        'sell_time': t, 'sell_price': price,
+                        'pnl': pnl,
+                    })
+                    total_pnl += pnl
+                    buy_queue[0][0] -= matched
+                    remaining -= matched
+                    if buy_queue[0][0] <= 0: buy_queue.pop(0)
+        # Any leftover buys = still held
+    if pairs:
+        lines.append(f"  {'Symbol':<22} {'Qty':<8} {'Buy Time':<24} {'Buy@':<9} {'Sell Time':<24} {'Sell@':<9} {'P&L':<12}")
+        lines.append('  ' + '-' * 120)
+        for p in pairs:
+            lines.append(f"  {p['symbol'][:22]:<22} {fmt_qty(p['qty'])[:8]:<8} {p['buy_time']:<24} {fmt_money(p['buy_price']):<9} {p['sell_time']:<24} {fmt_money(p['sell_price']):<9} {fmt_money(p['pnl']):<12}")
+        lines.append('  ' + '-' * 120)
+        wins = [p for p in pairs if p['pnl'] > 0]
+        losses = [p for p in pairs if p['pnl'] < 0]
+        win_rate = (len(wins) / len(pairs) * 100) if pairs else 0
+        avg_win = sum(p['pnl'] for p in wins) / len(wins) if wins else 0
+        avg_loss = sum(p['pnl'] for p in losses) / len(losses) if losses else 0
+        lines.append(f'  Total realized P&L:  {fmt_money(total_pnl)}')
+        lines.append(f'  Total trade pairs:   {len(pairs)}  ({len(wins)} wins, {len(losses)} losses)')
+        lines.append(f'  Win rate:            {win_rate:.1f}%')
+        lines.append(f'  Avg win:             {fmt_money(avg_win)}')
+        lines.append(f'  Avg loss:            {fmt_money(avg_loss)}')
+    else:
+        lines.append('  (no closed trade pairs found)')
+    lines.append('')
+    lines.append('')
+    out.extend(lines)
+
+
+def main():
+    indexes = sorted(ARCHIVE.glob('INDEX_*.json'), reverse=True)
+    if not indexes:
+        print('No archive index found. Run alpaca_archive_py first.')
+        sys.exit(1)
+    latest = indexes[0]
+    idx = json.loads(latest.read_text())
+    timestamp = idx['timestamp']
+
+    output = []
+    output.append('#' * 78)
+    output.append('#')
+    output.append('#  ALPACA PAPER TRADING - TRANSACTION HISTORY')
+    output.append(f'#  Generated: {datetime.now().strftime("%Y-%m-%d %H:%M ET")}')
+    output.append(f'#  Source archive: {timestamp}')
+    output.append(f'#  Accounts:       {len(idx["accounts_archived"])}')
+    output.append('#')
+    output.append('#' * 78)
+    output.append('')
+    output.append('')
+
+    # Build account label -> archive file mapping
+    for acct in idx['accounts_archived']:
+        label = acct['label']
+        archive_file = ARCHIVE / f'{label}_{timestamp}.json'
+        if not archive_file.exists():
+            output.append(f'## {label}: archive file missing at {archive_file}')
+            continue
+        write_section(output, archive_file)
+
+    output.append('#' * 78)
+    output.append('# END OF HISTORY')
+    output.append('#' * 78)
+
+    OUT.write_text('\n'.join(output))
+    print(f'Wrote {OUT}')
+    print(f'Size: {OUT.stat().st_size:,} bytes')
+
+
+if __name__ == '__main__':
+    main()

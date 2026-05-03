@@ -1,0 +1,341 @@
+#!/usr/bin/env python3
+"""
+Option Price Watcher
+- Ingests every contract from every alert feed (flow, flow2, ss, ts, analyst, boba picks)
+- Polls Tradier batched 100/req, every 60s
+- Tracks peak_price + peak_pct since alert entry
+- Fires branded Discord posts when peak crosses 25/50/100/300/500%
+- Lifecycle: drops contracts after expiry or 90 days
+"""
+import json, os, sys, time, logging, requests, re
+from datetime import datetime, timezone, timedelta
+from pathlib import Path
+
+logging.basicConfig(level=logging.INFO, format='%(asctime)s [watcher] %(message)s', datefmt='%H:%M:%S')
+
+# Paths
+DATA_DIR = Path('/home/ubuntu/.openclaw/data/option-watcher')
+DATA_DIR.mkdir(parents=True, exist_ok=True)
+POSITIONS_FILE = DATA_DIR / 'positions.json'
+SCRAPER_DATA = Path('/home/ubuntu/mission-control-restored/Option-Signals-Scraper/data')
+BOBA_PICKS = Path('/home/ubuntu/.openclaw/data/contract-outcomes/boba_picks_extracted.json')
+
+# Tradier
+TRADIER_KEY_FILE = Path('/home/ubuntu/.openclaw/secrets/tradier-sandbox-key')
+TRADIER_KEY = TRADIER_KEY_FILE.read_text().strip() if TRADIER_KEY_FILE.exists() else os.getenv('TRADIER_API_KEY','')
+TRADIER_BASE = 'https://sandbox.tradier.com/v1'
+BATCH_SIZE = 100
+
+# Discord
+WEBHOOK_TRADEFLOW = 'https://discordapp.com/api/webhooks/1497661681126609008/tlS_qnTSq4Uef8AUVpllp2vwC3sJ7u0BHt2_WcoJz5y75dnh3cgHpkhOn59zGlkWmyPk'
+
+# Thresholds and brand tiers
+THRESHOLDS = [25, 50, 100, 300, 500]
+MAX_ENTRY_AGE_DAYS = 14  # only fire on contracts alerted in last 14 days
+def brand_for(pct, is_etf):
+    if pct >= 500: return ('ETF Weekly Magic', '\U0001F4AB') if is_etf else ('Weekly Magic', '\U0001F4AB')
+    if pct >= 300: return ('Triple Threat', '\U0001F525')
+    if pct >= 100: return ('Lightning Strike', '\u26A1')
+    if pct >= 50:  return ('High Flow Fireworks', '\U0001F386')
+    if pct >= 25:  return ('Unusual Pattern', '\U0001F3AD')
+    return ('Win Alert', '\U0001F3AF')
+
+ETF_SET = {'SPY','QQQ','IWM','DIA','XLF','XLE','XLK','XLV','XLU','XLI','XLP','XLY','XLB','XLRE','EEM','TLT','GLD','SLV','HYG','LQD','VXX','UVXY','SOXL','TQQQ','SQQQ','TZA','SPXS','SPXL'}
+
+# OCC symbol regex: TICKER + YYMMDD + C/P + 8-digit strike
+OCC_RE = re.compile(r'^([A-Z]{1,6})(\d{6})([CP])(\d{8})$')
+
+def load_state():
+    if POSITIONS_FILE.exists():
+        try:
+            return json.loads(POSITIONS_FILE.read_text())
+        except Exception as e:
+            logging.warning(f'state load fail: {e}, starting empty')
+    return {'positions': {}, 'thresholds_fired': []}
+
+def save_state(state):
+    POSITIONS_FILE.parent.mkdir(parents=True, exist_ok=True)
+    tmp = POSITIONS_FILE.with_suffix('.tmp')
+    try:
+        tmp.write_text(json.dumps(state, indent=1, default=str))
+        tmp.replace(POSITIONS_FILE)
+    except Exception as e:
+        logging.error(f'save_state FAILED: {e}', exc_info=True)
+
+def read_scraper_file(name):
+    p = SCRAPER_DATA / f'{name}.json'
+    if not p.exists(): return None
+    try:
+        return json.loads(p.read_text())
+    except Exception:
+        return None
+
+def build_occ(symbol, expiry_unix, strike, is_put):
+    """Build OCC symbol from components. expiry_unix is seconds; strike is float."""
+    try:
+        if not symbol or not expiry_unix or strike is None: return None
+        sym = str(symbol).upper().strip()
+        exp = datetime.fromtimestamp(int(expiry_unix), tz=timezone.utc)
+        date_part = exp.strftime('%y%m%d')
+        cp = 'P' if (is_put in (1, '1', True, 'true', 'True')) else 'C'
+        strike_int = int(round(float(strike) * 1000))
+        strike_part = f'{strike_int:08d}'
+        return f'{sym}{date_part}{cp}{strike_part}'
+    except Exception:
+        return None
+
+def parse_occ(occ):
+    """Return (symbol, expiry_date, is_put, strike) or None."""
+    m = OCC_RE.match(occ)
+    if not m: return None
+    sym, ymd, cp, strike8 = m.groups()
+    try:
+        exp = datetime.strptime(ymd, '%y%m%d').replace(tzinfo=timezone.utc)
+    except Exception:
+        return None
+    return sym, exp, cp == 'P', int(strike8) / 1000.0
+
+def ingest_flow_feeds(state):
+    """Read flow alert feeds and add new contracts to watchlist."""
+    added = 0
+    for fname in ['flow_alerts_today', 'flow_alerts_history', 'flow2_alerts_today', 'flow2_alerts_history']:
+        d = read_scraper_file(fname)
+        if not d: continue
+        items = d.values() if isinstance(d, dict) else (d if isinstance(d, list) else [])
+        for e in items:
+            if not isinstance(e, dict): continue
+            occ = e.get('OptionSymbol') or e.get('option_symbol') or e.get('OCC')
+            if not occ:
+                # Reconstruct from components
+                occ = build_occ(e.get('Symbol') or e.get('symbol'), e.get('Expiration') or e.get('expiration'), e.get('Strike') or e.get('strike'), e.get('IsPut') or e.get('isPut') or 0)
+            if not occ or not OCC_RE.match(occ): continue
+            if occ in state['positions']: continue
+            entry_price = e.get('AlertPrice') or e.get('Price') or e.get('alertPrice')
+            if entry_price is None: continue
+            try: entry_price = float(entry_price)
+            except: continue
+            if entry_price <= 0: continue
+            state['positions'][occ] = {
+                'occ': occ,
+                'symbol': e.get('Symbol') or e.get('symbol') or '',
+                'entry_price': entry_price,
+                'entry_time': int(e.get('Time') or e.get('AlertTime') or time.time()),
+                'source': fname,
+                'peak_price': entry_price,
+                'peak_pct': 0.0,
+                'last_quote': entry_price,
+                'last_quote_time': 0,
+                'status': 'active',
+            }
+            added += 1
+    return added
+
+def ingest_dict_feeds(state):
+    """Read dict-shaped option feeds (closed_options + analyst_*_closedoptions + ss_option_notifications + ts_option_notifications)."""
+    added = 0
+    feeds = [
+        'closed_options', 'analyst_name_closedoptions', 'analyst_name2_closedoptions',
+        'analyst_vivid_closedoptions', 'analyst_vivid2_closedoptions',
+        'ss_option_notifications', 'ts_option_notifications',
+        'option_notifications',
+    ]
+    for fname in feeds:
+        d = read_scraper_file(fname)
+        if not d: continue
+        items = d.items() if isinstance(d, dict) else [(str(i), e) for i, e in enumerate(d) if isinstance(e, dict)]
+        for k, e in items:
+            if not isinstance(e, dict): continue
+            sym = e.get('symbol') or e.get('Symbol')
+            strike = e.get('strike') or e.get('Strike')
+            expiry = e.get('expiry') or e.get('Expiration') or e.get('exp')
+            is_put = e.get('isPut') or e.get('IsPut') or 0
+            occ = build_occ(sym, expiry, strike, is_put)
+            if not occ: continue
+            if occ in state['positions']: continue
+            entry_price = e.get('buyTarget') or e.get('AlertPrice') or e.get('alertPrice')
+            if entry_price is None: continue
+            try: entry_price = float(entry_price)
+            except: continue
+            if entry_price <= 0: continue
+            state['positions'][occ] = {
+                'occ': occ,
+                'symbol': sym or '',
+                'entry_price': entry_price,
+                'entry_time': int(e.get('exitTime') or time.time()),
+                'source': fname,
+                'peak_price': entry_price,
+                'peak_pct': 0.0,
+                'last_quote': entry_price,
+                'last_quote_time': 0,
+                'status': 'active',
+            }
+            added += 1
+    return added
+
+def ingest_boba_picks(state):
+    if not BOBA_PICKS.exists(): return 0
+    try:
+        d = json.loads(BOBA_PICKS.read_text())
+    except Exception: return 0
+    added = 0
+    picks = d if isinstance(d, list) else d.get('picks', [])
+    for p in picks:
+        if not isinstance(p, dict): continue
+        occ = p.get('occ') or p.get('OptionSymbol')
+        if not occ: continue
+        if occ in state['positions']: continue
+        entry_price = p.get('entry_price') or p.get('fill_price')
+        if entry_price is None: continue
+        try: entry_price = float(entry_price)
+        except: continue
+        state['positions'][occ] = {
+            'occ': occ,
+            'symbol': p.get('symbol') or (parse_occ(occ)[0] if parse_occ(occ) else ''),
+            'entry_price': entry_price,
+            'entry_time': int(p.get('entry_time') or time.time()),
+            'source': 'boba_picks',
+            'peak_price': entry_price,
+            'peak_pct': 0.0,
+            'last_quote': entry_price,
+            'last_quote_time': 0,
+            'status': 'active',
+        }
+        added += 1
+    return added
+
+def cleanup_expired(state):
+    """Drop contracts past expiry or older than 90 days."""
+    now = datetime.now(tz=timezone.utc)
+    cutoff = now - timedelta(days=90)
+    drop = []
+    for occ, pos in state['positions'].items():
+        parsed = parse_occ(occ)
+        if not parsed:
+            drop.append(occ); continue
+        _, expiry_dt, _, _ = parsed
+        if expiry_dt < now - timedelta(days=2):
+            drop.append(occ); continue
+        entry_dt = datetime.fromtimestamp(pos.get('entry_time', 0), tz=timezone.utc)
+        if entry_dt < cutoff:
+            drop.append(occ); continue
+    for occ in drop:
+        del state['positions'][occ]
+    return len(drop)
+
+def fetch_quotes_batch(occ_list):
+    """Fetch quotes for batch of OCC symbols. Returns dict occ->last_price."""
+    if not occ_list or not TRADIER_KEY: return {}
+    try:
+        r = requests.get(
+            f'{TRADIER_BASE}/markets/quotes',
+            params={'symbols': ','.join(occ_list), 'greeks': 'false'},
+            headers={'Authorization': f'Bearer {TRADIER_KEY}', 'Accept': 'application/json'},
+            timeout=15
+        )
+        if r.status_code != 200:
+            logging.warning(f'tradier {r.status_code}: {r.text[:120]}')
+            return {}
+        data = r.json().get('quotes', {}).get('quote', [])
+        if isinstance(data, dict): data = [data]
+        out = {}
+        for q in data:
+            sym = q.get('symbol')
+            last = q.get('last') or q.get('close') or q.get('prevclose')
+            if sym and last is not None:
+                try: out[sym] = float(last)
+                except: pass
+        return out
+    except Exception as e:
+        logging.warning(f'tradier err: {e}')
+        return {}
+
+def post_threshold(occ, pos, threshold, peak_pct):
+    """Post branded threshold-crossed message to Discord."""
+    parsed = parse_occ(occ)
+    if not parsed: return False
+    sym, expiry_dt, is_put, strike = parsed
+    is_etf = sym in ETF_SET
+    brand, emoji = brand_for(peak_pct, is_etf)
+    cp = 'P' if is_put else 'C'
+    exp_str = expiry_dt.strftime('%m/%d')
+    direction = 'PUT' if is_put else 'CALL'
+    msg = (f'{emoji} **{brand}** {emoji}\n'
+           f'**{sym}** ${strike:g}{cp} {exp_str} ({direction}) crossed **+{peak_pct:.0f}%**!\n'
+           f'Entry ${pos["entry_price"]:.2f} \u2192 Peak ${pos["peak_price"]:.2f}\n'
+           f'Source: {pos["source"]}')
+    try:
+        r = requests.post(WEBHOOK_TRADEFLOW, json={'content': msg[:1900]}, timeout=10)
+        if r.status_code in (200, 204): return True
+        if r.status_code == 429:
+            retry = r.json().get('retry_after', 5)
+            time.sleep(retry)
+        return False
+    except Exception as e:
+        logging.warning(f'discord post err: {e}')
+        return False
+
+def cycle(state):
+    # Ingest new contracts
+    added_flow = ingest_flow_feeds(state)
+    added_dict = ingest_dict_feeds(state)
+    added_boba = ingest_boba_picks(state)
+    dropped = cleanup_expired(state)
+    if added_flow or added_dict or added_boba or dropped:
+        logging.info(f'ingest +flow={added_flow} +dict={added_dict} +boba={added_boba} -dropped={dropped}')
+
+    # Build poll list
+    active = [occ for occ, p in state['positions'].items() if p.get('status') == 'active']
+    if not active:
+        logging.info('no active positions')
+        return
+
+    # Batch poll Tradier
+    fired = set(state.get('thresholds_fired', []))
+    quote_count = 0
+    posts = 0
+    for i in range(0, len(active), BATCH_SIZE):
+        batch = active[i:i+BATCH_SIZE]
+        quotes = fetch_quotes_batch(batch)
+        quote_count += len(quotes)
+        now = int(time.time())
+        for occ, last in quotes.items():
+            pos = state['positions'].get(occ)
+            if not pos: continue
+            pos['last_quote'] = last
+            pos['last_quote_time'] = now
+            if last > pos.get('peak_price', 0):
+                pos['peak_price'] = last
+                pos['peak_pct'] = (last - pos['entry_price']) / pos['entry_price'] * 100.0
+                # Skip threshold posts on stale entries (alerts older than MAX_ENTRY_AGE_DAYS)
+                entry_age_days = (now - pos.get('entry_time', now)) / 86400.0
+                if entry_age_days > MAX_ENTRY_AGE_DAYS:
+                    continue
+                # Check thresholds
+                for t in THRESHOLDS:
+                    key = f'{occ}|{t}'
+                    if pos['peak_pct'] >= t and key not in fired:
+                        if post_threshold(occ, pos, t, pos['peak_pct']):
+                            fired.add(key)
+                            posts += 1
+                            logging.info(f'posted {occ} +{pos["peak_pct"]:.0f}% (age={entry_age_days:.1f}d threshold={t})')
+
+    state['thresholds_fired'] = list(fired)
+    save_state(state)
+    logging.info(f'cycle done: {len(active)} active, {quote_count} quotes, {posts} posts')
+
+def main():
+    if not TRADIER_KEY:
+        logging.error('TRADIER_KEY missing - check ~/.openclaw/secrets/tradier-sandbox-key')
+        sys.exit(1)
+    logging.info(f'option_price_watcher starting, key loaded ({len(TRADIER_KEY)} chars)')
+    state = load_state()
+    logging.info(f'loaded {len(state.get("positions",{}))} positions, {len(state.get("thresholds_fired",[]))} fired thresholds')
+    while True:
+        try:
+            cycle(state)
+        except Exception as e:
+            logging.error(f'cycle exception: {e}', exc_info=True)
+        time.sleep(60)
+
+if __name__ == '__main__':
+    main()

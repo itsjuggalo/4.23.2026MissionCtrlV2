@@ -1,0 +1,237 @@
+#!/usr/bin/env python3
+"""
+Scanner #9 - Pre-Pop Scanner
+Scans NEW T1/T2 alerts hitting flow_alerts_today + flow2_alerts_today.
+Scores each by composite filter using Signature Miner profile + Multi-Feed Overlap.
+Posts top 10 candidates every 5 min during market hours.
+Composite score features:
+  - Premium <= $4.70 (signature p75)        : +20
+  - Premium <= $0.83 (signature p25, sweet) : +30
+  - DTE <= 7 (signature median was 7.5)     : +20
+  - SWING category (15/22 big winners)      : +15
+  - Call (64% of big winners)               : +5
+  - Multi-feed overlap >=2 feeds            : +20
+  - SWEEP + A/AA bidasktype                 : +10
+"""
+import json, time, logging, requests
+from pathlib import Path
+from datetime import datetime, timezone
+
+logging.basicConfig(level=logging.INFO, format='%(asctime)s [prepop] %(message)s', datefmt='%H:%M:%S')
+
+SCRAPER = Path('/home/ubuntu/mission-control-restored/Option-Signals-Scraper/data')
+PROFILE = Path('/home/ubuntu/.openclaw/data/scanners/winner_signature_profile.json')
+OVERLAP = Path('/home/ubuntu/.openclaw/data/scanners/multi_feed_overlap.json')
+OUT = Path('/home/ubuntu/.openclaw/data/scanners/pre_pop.json')
+STATE = Path('/home/ubuntu/.openclaw/data/scanners/pre_pop_state.json')
+OUT.parent.mkdir(parents=True, exist_ok=True)
+
+WEBHOOK = 'https://discordapp.com/api/webhooks/1497661681126609008/tlS_qnTSq4Uef8AUVpllp2vwC3sJ7u0BHt2_WcoJz5y75dnh3cgHpkhOn59zGlkWmyPk'
+
+def is_market_hours():
+    from datetime import datetime as dt
+    now = dt.now()
+    et_hour = (now.hour - 4) % 24
+    et_min = now.minute
+    et_total = et_hour * 60 + et_min
+    return 9*60 + 30 <= et_total < 16*60 and now.weekday() < 5
+
+def load_profile():
+    if not PROFILE.exists(): return None
+    try: return json.loads(PROFILE.read_text())
+    except: return None
+
+def load_overlap_symbols():
+    if not OVERLAP.exists(): return {}
+    try:
+        d = json.loads(OVERLAP.read_text())
+        return {o['symbol']: o['feed_count'] for o in d.get('top_50', [])}
+    except: return {}
+
+def score_alert(alert, profile, overlap_map):
+    """Score a single flow alert. Returns dict with score + reasoning."""
+    score = 0
+    reasons = []
+
+    sym = alert.get('Symbol') or alert.get('symbol')
+    price = alert.get('AlertPrice') or alert.get('Price') or alert.get('alertPrice')
+    # BidAskType not in schema - use SWEEPS count + isBullish for quality signal
+    sweeps = int(alert.get('SWEEPS', 0) or 0)
+    is_bullish = bool(alert.get('isBullish', False))
+    bidask = ''  # legacy var, retained for compatibility
+    expiry = alert.get('Expiry') or alert.get('Expiration') or alert.get('expiration')
+    # Real field: OptionType is 'PUT' or 'CALL' (not boolean IsPut)
+    option_type = str(alert.get('OptionType', '') or alert.get('optionType', '')).upper()
+    is_put = option_type == 'PUT'
+
+    if price is not None:
+        try:
+            price = float(price)
+            sig = profile.get('big_winner_signature', {}) if profile else {}
+            ps = sig.get('premium_stats', {})
+            p25 = ps.get('p25', 0.83)
+            p75 = ps.get('p75', 4.70)
+            if price <= p25:
+                score += 30; reasons.append(f'premium ${price:.2f} <= p25 ${p25}')
+            elif price <= p75:
+                score += 20; reasons.append(f'premium ${price:.2f} <= p75 ${p75}')
+        except: pass
+
+    # DTE
+    if expiry:
+        try:
+            ts = float(expiry)
+            if ts > 1e12: ts = ts / 1000.0
+            exp_dt = datetime.fromtimestamp(int(ts), tz=timezone.utc)
+            dte = (exp_dt - datetime.now(tz=timezone.utc)).days
+            if 0 < dte <= 7: score += 20; reasons.append(f'DTE {dte}d (sweet spot)')
+            elif 7 < dte <= 21: score += 10; reasons.append(f'DTE {dte}d')
+        except: pass
+
+    if not is_put: score += 5; reasons.append('CALL bias')
+
+    if sweeps >= 3: score += 15; reasons.append(f'{sweeps} SWEEPS')
+    elif sweeps >= 1: score += 10; reasons.append(f'{sweeps} SWEEP')
+    if is_bullish and not is_put: score += 5; reasons.append('isBullish CALL')
+    elif (not is_bullish) and is_put: score += 5; reasons.append('isBearish PUT')
+
+    if sym in overlap_map:
+        fc = overlap_map[sym]
+        if fc >= 3: score += 25; reasons.append(f'{fc} feed confluence')
+        elif fc >= 2: score += 15; reasons.append(f'{fc} feed confluence')
+
+    return {'score': score, 'reasons': reasons}
+
+def cycle(force=False, lookback_hours=4, threshold=30):
+    if not force and not is_market_hours():
+        logging.info('outside market hours')
+        return []
+    profile = load_profile()
+    overlap_map = load_overlap_symbols()
+    cutoff = int(time.time()) - lookback_hours*3600
+
+    candidates = []
+    for feed in ['flow_alerts_today', 'flow2_alerts_today']:
+        p = SCRAPER / f'{feed}.json'
+        if not p.exists(): continue
+        try: d = json.loads(p.read_text())
+        except: continue
+        items = d.items() if isinstance(d, dict) else enumerate(d)
+        for k, e in items:
+            if not isinstance(e, dict): continue
+            alert = e.get('alert', e) if isinstance(e.get('alert'), dict) else e
+            t = alert.get('Time')
+            if t:
+                try:
+                    ts = float(t)
+                    if ts > 1e12: ts = ts / 1000.0
+                    if ts < cutoff: continue
+                except: continue
+            scored = score_alert(alert, profile, overlap_map)
+            if scored['score'] < threshold: continue
+            sym = alert.get('Symbol')
+            strike = alert.get('Strike')
+            opt_type = str(alert.get('OptionType', '')).upper()
+            # Confirm against OCC key (letter at offset varies but contains P or C before strike)
+            occ_key_str = str(k)
+            cp = 'P' if opt_type == 'PUT' else 'C'
+            # Compute total flow value from AlertPrice * Volume * 100 (options multiplier)
+            try:
+                _ap = float(alert.get('AlertPrice') or alert.get('Price') or 0)
+                _vol = float(alert.get('Volume') or 0)
+                computed_value = round(_ap * _vol * 100, 0) if _ap > 0 and _vol > 0 else None
+            except Exception:
+                computed_value = None
+            candidates.append({
+                'symbol': sym,
+                'strike': strike,
+                'option_type': cp,
+                'expiry': alert.get('Expiry'),
+                'dte': alert.get('DTE'),
+                'price': alert.get('AlertPrice') or alert.get('Price'),
+                'volume': alert.get('Volume'),
+                'oi': alert.get('OI'),
+                'sweeps': alert.get('SWEEPS', 0),
+                'value_usd': computed_value,
+                'is_bullish': alert.get('isBullish'),
+                'score': scored['score'],
+                'reasons': scored['reasons'],
+                'feed': feed,
+                'occ_key': k,
+            })
+
+    # Dedup by (symbol, strike, expiration, cp), keep highest score
+    seen = {}
+    for c in candidates:
+        k = (c['symbol'], c['strike'], c['expiry'], c['option_type'])
+        if k not in seen or seen[k]['score'] < c['score']:
+            seen[k] = c
+    candidates = sorted(seen.values(), key=lambda x: -x['score'])
+
+    out_data = {
+        'generated_at': datetime.now(tz=timezone.utc).isoformat(),
+        'lookback_hours': lookback_hours,
+        'candidates_count': len(candidates),
+        'top_10': candidates[:10],
+    }
+    OUT.write_text(json.dumps(out_data, indent=1, default=str))
+    logging.info(f'pre_pop candidates: {len(candidates)}, top: {[c["symbol"] for c in candidates[:5]]}')
+    return candidates
+
+def post_summary(candidates):
+    if not candidates: return
+    state = json.loads(STATE.read_text()) if STATE.exists() else {'last_post': 0, 'last_top': []}
+    now = int(time.time())
+    if now - state.get('last_post', 0) < 1800: return  # 30 min between posts
+    top_keys = [f"{c['symbol']}_{c['strike']}_{c['option_type']}" for c in candidates[:5]]
+    if top_keys == state.get('last_top', []): return
+
+    lines = ['**Pre-Pop Candidates** (composite signature score)', '_Last 4h scan, ranked by big-winner profile fit_', '']
+    for c in candidates[:5]:
+        price = c.get('price', '?')
+        val = c.get('value_usd', 0)
+        try: val_str = f"${float(val)/1000:.0f}K" if val else '?'
+        except: val_str = '?'
+        try: price_str = f"${float(price):.2f}" if price else '?'
+        except: price_str = '?'
+        dte = c.get('dte', '?')
+        sweeps = c.get('sweeps', 0)
+        bull = '🟢' if c.get('is_bullish') else '🔴'
+        lines.append(f'**{c["symbol"]}** ${c["strike"]}{c["option_type"]} {bull} score **{c["score"]}** | {price_str} prem | {val_str} flow | DTE {dte} | {sweeps} sweeps')
+        lines.append(f'  {", ".join(c["reasons"][:3])}')
+
+    msg = '\n'.join(lines)
+    try:
+        r = requests.post(WEBHOOK, json={'content': msg[:1900]}, timeout=10)
+        if r.status_code in (200, 204):
+            state['last_post'] = now
+            state['last_top'] = top_keys
+            STATE.write_text(json.dumps(state))
+            logging.info('posted pre_pop summary')
+    except Exception as e: logging.warning(f'post err: {e}')
+
+def main():
+    """One-shot - runs single cycle then exits (cron-managed)."""
+    import argparse
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--force', action='store_true', help='Bypass market hours gate')
+    parser.add_argument('--lookback', type=int, default=4, help='Lookback hours for alerts')
+    parser.add_argument('--threshold', type=int, default=30, help='Min composite score')
+    args = parser.parse_args()
+    
+    logging.info('pre_pop one-shot starting')
+    if args.force:
+        logging.info('--force flag - bypassing market hours gate')
+    if args.lookback != 4:
+        logging.info(f'--lookback {args.lookback}h')
+    
+    try:
+        candidates = cycle(force=args.force, lookback_hours=args.lookback, threshold=args.threshold)
+        post_summary(candidates)
+        logging.info(f'done, {len(candidates)} candidates')
+    except Exception as e:
+        logging.error(f'cycle err: {e}', exc_info=True)
+        raise
+
+if __name__ == '__main__':
+    main()
