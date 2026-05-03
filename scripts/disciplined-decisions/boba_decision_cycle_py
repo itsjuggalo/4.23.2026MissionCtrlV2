@@ -165,6 +165,10 @@ def main():
     cash = float(account.get('cash', 0))
     equity = float(account.get('equity', 0))
     log.info(f'boba equity ${equity:.2f} cash ${cash:.2f}')
+    killswitch = Path(f'/home/ubuntu/.openclaw/workspace/state/disciplined/boba_killswitch')
+    if killswitch.exists():
+        log.warning(f'CIRCUIT BREAKER TRIPPED - skipping cycle')
+        return
 
     if len(core.get_open_positions(bk, bs)) >= core.HARD_CAP_OPEN_POSITIONS:
         log.info('open position cap reached, skip')
@@ -181,8 +185,15 @@ def main():
         return
 
     other_picks = core.get_other_agents_occ_today('boba')
+    pre_skip = len(scored)
     scored = [s for s in scored if s['occ'] not in other_picks]
     log.info(f'after cross-agent skip: {len(scored)}')
+    skipped_count = pre_skip - len(scored)
+    if skipped_count > 0:
+        try:
+            requests.post(WEBHOOK, json={'content': f'🤝 **Boba** skipped {skipped_count} OCC(s) already picked by Jazzy today'}, timeout=10)
+        except Exception:
+            pass
     if not scored:
         log.info('no candidates left after skipping other agents picks, skip')
         return

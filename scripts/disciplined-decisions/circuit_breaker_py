@@ -1,0 +1,105 @@
+#!/usr/bin/env python3
+"""
+circuit_breaker - Daily loss circuit breaker for both Boba and Jazzy.
+If either account loses >50% of starting capital from any single trade,
+write a killswitch file that decision daemons check before placing orders.
+
+Logic:
+  - Reads each account's portfolio history vs starting equity ($1000 baseline).
+  - If realized loss in any single closed trade exceeds 50% of starting cap ($500),
+    write killswitch file with reason.
+  - Decision daemons check for killswitch at start of each cycle and skip if present.
+  - Killswitch must be cleared manually via clear-circuit-breaker.
+
+Polls every 5 min during market hours.
+"""
+import json, sys, time, requests
+from datetime import datetime, date
+from pathlib import Path
+
+sys.path.insert(0, '/home/ubuntu/scripts/disciplined-decisions')
+import core
+
+WEBHOOK = 'https://discordapp.com/api/webhooks/1497661681126609008/tlS_qnTSq4Uef8AUVpllp2vwC3sJ7u0BHt2_WcoJz5y75dnh3cgHpkhOn59zGlkWmyPk'
+STARTING_CAPITAL = 1000.00
+LOSS_THRESHOLD_PCT = 50.0  # 50% loss = $500 single trade
+LOSS_THRESHOLD_USD = STARTING_CAPITAL * LOSS_THRESHOLD_PCT / 100
+
+KILLSWITCH_DIR = Path('/home/ubuntu/.openclaw/workspace/state/disciplined')
+KILLSWITCH_DIR.mkdir(parents=True, exist_ok=True)
+
+
+def check_account(agent_name, key_file, secret_file):
+    key = core.read_secret(key_file)
+    secret = core.read_secret(secret_file)
+    if not key or not secret:
+        return
+    
+    # Get all closed orders today
+    today = date.today().isoformat()
+    closed = core.alpaca_call('/v2/orders', key, secret, 
+                               params={'status': 'closed', 'limit': 100, 'after': f'{today}T00:00:00Z'}) or []
+    if not isinstance(closed, list):
+        return
+    
+    # Look for filled sells with significant losses
+    biggest_loss = 0
+    biggest_loss_symbol = None
+    for o in closed:
+        if o.get('side') != 'sell' or o.get('status') != 'filled':
+            continue
+        fill_price = float(o.get('filled_avg_price', 0) or 0)
+        qty = float(o.get('filled_qty', 0) or 0)
+        if fill_price <= 0 or qty <= 0:
+            continue
+        # Estimate cost basis from corresponding buy by symbol
+        symbol = o.get('symbol')
+        sells_value = fill_price * qty * 100  # options multiplier
+        # Find matching buy
+        for buy in closed:
+            if (buy.get('symbol') == symbol and buy.get('side') == 'buy' 
+                and buy.get('status') == 'filled'):
+                buy_price = float(buy.get('filled_avg_price', 0) or 0)
+                buy_qty = float(buy.get('filled_qty', 0) or 0)
+                if buy_price > 0 and buy_qty > 0:
+                    buy_value = buy_price * buy_qty * 100
+                    pnl = sells_value - buy_value
+                    if pnl < -biggest_loss:
+                        biggest_loss = -pnl
+                        biggest_loss_symbol = symbol
+                break
+    
+    killswitch_path = KILLSWITCH_DIR / f'{agent_name}_killswitch'
+    if biggest_loss >= LOSS_THRESHOLD_USD:
+        if not killswitch_path.exists():
+            killswitch_path.write_text(json.dumps({
+                'agent': agent_name,
+                'tripped_at': datetime.now().isoformat(),
+                'biggest_loss': biggest_loss,
+                'symbol': biggest_loss_symbol,
+                'reason': f'Single trade loss ${biggest_loss:.2f} exceeds ${LOSS_THRESHOLD_USD:.2f} threshold',
+            }, indent=2))
+            try:
+                requests.post(WEBHOOK, json={'content': 
+                    f'🔴 **CIRCUIT BREAKER TRIPPED** {agent_name.upper()}\n'
+                    f'Single trade loss: ${biggest_loss:.2f} on {biggest_loss_symbol}\n'
+                    f'Threshold: ${LOSS_THRESHOLD_USD:.2f} ({LOSS_THRESHOLD_PCT:.0f}% of start)\n'
+                    f'Account paused. Clear with: rm killswitch file then resume.'
+                }, timeout=10)
+            except Exception:
+                pass
+            print(f'  {agent_name}: TRIPPED biggest_loss=${biggest_loss:.2f}')
+        else:
+            print(f'  {agent_name}: already tripped, killswitch in place')
+    else:
+        print(f'  {agent_name}: ok, biggest_loss=${biggest_loss:.2f} threshold=${LOSS_THRESHOLD_USD:.2f}')
+
+
+def main():
+    print(f'=== circuit breaker check {datetime.now().strftime("%H:%M:%S")} ===')
+    check_account('boba', 'alpaca-boba-key-id', 'alpaca-boba-secret')
+    check_account('jazzy', 'alpaca-jazzy-key-id', 'alpaca-jazzy-secret')
+
+
+if __name__ == '__main__':
+    main()
