@@ -63,16 +63,63 @@ def deterministic_decision(setup_data):
 
 
 def submit_order(occ, qty, limit, stop, tp, key, secret, dry_run):
-    # Options do not support bracket on Alpaca paper - submit simple limit buy
-    # Trail daemon adds OCO close once position is detected
-    payload = {
+    """
+    Two-step pattern for options on Alpaca paper:
+    1. Submit limit buy (no bracket - Alpaca rejects complex orders on options)
+    2. Poll for fill up to 10s
+    3. Once filled, submit stop_limit sell with position_intent=sell_to_close
+    Trail daemon takes over ratcheting the stop_limit up as price rises.
+    """
+    import time as _t
+    buy_payload = {
         'symbol': occ, 'qty': str(qty), 'side': 'buy', 'type': 'limit', 'time_in_force': 'day',
         'limit_price': str(round(limit, 2)),
     }
     log.info(f'  ORDER {"DRY " if dry_run else ""}{occ} qty={qty} limit=${limit:.2f} stop=${stop:.2f} TP=${tp:.2f}')
     if dry_run:
-        return {'dry_run': True, 'payload': payload}
-    return core.alpaca_call('/v2/orders', key, secret, method='POST', json=payload)
+        return {'dry_run': True, 'payload': buy_payload}
+    
+    # Step 1: submit buy
+    buy_resp = core.alpaca_call('/v2/orders', key, secret, method='POST', json=buy_payload)
+    if not buy_resp or not buy_resp.get('id'):
+        log.error('    BUY submission failed')
+        return None
+    buy_id = buy_resp['id']
+    log.info(f'    BUY submitted id={buy_id[:12]}... waiting for fill')
+    
+    # Step 2: poll for fill (Sunday market closed = will not fill, return early)
+    fill_price = None
+    for i in range(20):
+        _t.sleep(0.5)
+        poll = core.alpaca_call(f'/v2/orders/{buy_id}', key, secret)
+        if poll and poll.get('status') == 'filled':
+            fill_price = float(poll.get('filled_avg_price') or 0)
+            log.info(f'    FILLED at ${fill_price:.2f}')
+            break
+        elif poll and poll.get('status') in ('canceled', 'rejected', 'expired'):
+            log.warning(f'    BUY {poll.get("status")}, no SL armed')
+            return buy_resp
+    
+    if not fill_price:
+        log.info(f'    BUY pending - SL will be armed by trail_daemon when position appears')
+        return buy_resp
+    
+    # Step 3: arm stop_limit SL with position_intent=sell_to_close
+    stop_trigger = round(max(fill_price * 0.95, 0.01), 2)
+    stop_limit_p = round(max(stop_trigger * 0.90, 0.01), 2)
+    sl_payload = {
+        'symbol': occ, 'qty': str(qty), 'side': 'sell',
+        'type': 'stop_limit', 'time_in_force': 'gtc',
+        'stop_price': str(stop_trigger), 'limit_price': str(stop_limit_p),
+        'position_intent': 'sell_to_close',
+    }
+    sl_resp = core.alpaca_call('/v2/orders', key, secret, method='POST', json=sl_payload)
+    if sl_resp and sl_resp.get('id'):
+        log.info(f'    SL ARMED stop=${stop_trigger:.2f} limit=${stop_limit_p:.2f}')
+    else:
+        log.warning(f'    SL submit failed - trail_daemon will retry')
+    
+    return buy_resp
 
 
 def post_discord(setup, decision, dry_run):

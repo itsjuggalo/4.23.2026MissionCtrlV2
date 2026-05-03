@@ -68,17 +68,19 @@ def cancel_order(order_id, key, secret):
 
 
 def submit_oco_close(occ, qty, stop_price, tp_price, key, secret):
-    """Submit a sell OCO with stop_loss + take_profit legs to close long option position."""
+    """
+    Options on Alpaca paper do NOT support OCO bracket - submit stop_limit only.
+    TP handled by trail ratcheting the stop up as peak rises - no separate TP order needed.
+    """
+    stop_limit_p = round(max(stop_price * 0.90, 0.01), 2)
     payload = {
         'symbol': occ,
         'qty': str(qty),
         'side': 'sell',
-        'type': 'limit',
+        'type': 'stop_limit',
         'time_in_force': 'gtc',
-        'limit_price': str(round(tp_price, 2)),
-        'order_class': 'oco',
-        'stop_loss': {'stop_price': str(round(stop_price, 2))},
-        'take_profit': {'limit_price': str(round(tp_price, 2))},
+        'stop_price': str(round(stop_price, 2)),
+        'limit_price': str(stop_limit_p),
         'position_intent': 'sell_to_close',
     }
     return core.alpaca_call('/v2/orders', key, secret, method='POST', json=payload)
