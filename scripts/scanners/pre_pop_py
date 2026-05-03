@@ -55,9 +55,14 @@ def score_alert(alert, profile, overlap_map):
 
     sym = alert.get('Symbol') or alert.get('symbol')
     price = alert.get('AlertPrice') or alert.get('Price') or alert.get('alertPrice')
-    bidask = alert.get('BidAskType') or alert.get('Type','')
-    expiry = alert.get('Expiration') or alert.get('Expiry') or alert.get('expiration')
-    is_put = alert.get('IsPut') or alert.get('isPut') or False
+    # BidAskType not in schema - use SWEEPS count + isBullish for quality signal
+    sweeps = int(alert.get('SWEEPS', 0) or 0)
+    is_bullish = bool(alert.get('isBullish', False))
+    bidask = ''  # legacy var, retained for compatibility
+    expiry = alert.get('Expiry') or alert.get('Expiration') or alert.get('expiration')
+    # Real field: OptionType is 'PUT' or 'CALL' (not boolean IsPut)
+    option_type = str(alert.get('OptionType', '') or alert.get('optionType', '')).upper()
+    is_put = option_type == 'PUT'
 
     if price is not None:
         try:
@@ -85,8 +90,10 @@ def score_alert(alert, profile, overlap_map):
 
     if not is_put: score += 5; reasons.append('CALL bias')
 
-    if 'SWEEP' in str(bidask).upper(): score += 10; reasons.append('SWEEP')
-    if str(bidask).upper() in ('A','AA'): score += 10; reasons.append(f'bidask {bidask}')
+    if sweeps >= 3: score += 15; reasons.append(f'{sweeps} SWEEPS')
+    elif sweeps >= 1: score += 10; reasons.append(f'{sweeps} SWEEP')
+    if is_bullish and not is_put: score += 5; reasons.append('isBullish CALL')
+    elif (not is_bullish) and is_put: score += 5; reasons.append('isBearish PUT')
 
     if sym in overlap_map:
         fc = overlap_map[sym]
@@ -124,15 +131,29 @@ def cycle(force=False, lookback_hours=4, threshold=30):
             if scored['score'] < threshold: continue
             sym = alert.get('Symbol')
             strike = alert.get('Strike')
-            is_put = alert.get('IsPut', 0)
-            cp = 'P' if is_put else 'C'
+            opt_type = str(alert.get('OptionType', '')).upper()
+            # Confirm against OCC key (letter at offset varies but contains P or C before strike)
+            occ_key_str = str(k)
+            cp = 'P' if opt_type == 'PUT' else 'C'
+            # Compute total flow value from AlertPrice * Volume * 100 (options multiplier)
+            try:
+                _ap = float(alert.get('AlertPrice') or alert.get('Price') or 0)
+                _vol = float(alert.get('Volume') or 0)
+                computed_value = round(_ap * _vol * 100, 0) if _ap > 0 and _vol > 0 else None
+            except Exception:
+                computed_value = None
             candidates.append({
                 'symbol': sym,
                 'strike': strike,
                 'option_type': cp,
-                'expiration': alert.get('Expiration'),
+                'expiry': alert.get('Expiry'),
+                'dte': alert.get('DTE'),
                 'price': alert.get('AlertPrice') or alert.get('Price'),
-                'value': alert.get('Value'),
+                'volume': alert.get('Volume'),
+                'oi': alert.get('OI'),
+                'sweeps': alert.get('SWEEPS', 0),
+                'value_usd': computed_value,
+                'is_bullish': alert.get('isBullish'),
                 'score': scored['score'],
                 'reasons': scored['reasons'],
                 'feed': feed,
@@ -142,7 +163,7 @@ def cycle(force=False, lookback_hours=4, threshold=30):
     # Dedup by (symbol, strike, expiration, cp), keep highest score
     seen = {}
     for c in candidates:
-        k = (c['symbol'], c['strike'], c['expiration'], c['option_type'])
+        k = (c['symbol'], c['strike'], c['expiry'], c['option_type'])
         if k not in seen or seen[k]['score'] < c['score']:
             seen[k] = c
     candidates = sorted(seen.values(), key=lambda x: -x['score'])
@@ -168,12 +189,15 @@ def post_summary(candidates):
     lines = ['**Pre-Pop Candidates** (composite signature score)', '_Last 4h scan, ranked by big-winner profile fit_', '']
     for c in candidates[:5]:
         price = c.get('price', '?')
-        val = c.get('value', 0)
-        try: val_str = f"${float(val)/1000:.0f}K" if val else 'unknown value'
-        except: val_str = 'unknown value'
+        val = c.get('value_usd', 0)
+        try: val_str = f"${float(val)/1000:.0f}K" if val else '?'
+        except: val_str = '?'
         try: price_str = f"${float(price):.2f}" if price else '?'
         except: price_str = '?'
-        lines.append(f'**{c["symbol"]}** ${c["strike"]}{c["option_type"]}: score **{c["score"]}**, premium {price_str}, {val_str}')
+        dte = c.get('dte', '?')
+        sweeps = c.get('sweeps', 0)
+        bull = '🟢' if c.get('is_bullish') else '🔴'
+        lines.append(f'**{c["symbol"]}** ${c["strike"]}{c["option_type"]} {bull} score **{c["score"]}** | {price_str} prem | {val_str} flow | DTE {dte} | {sweeps} sweeps')
         lines.append(f'  {", ".join(c["reasons"][:3])}')
 
     msg = '\n'.join(lines)

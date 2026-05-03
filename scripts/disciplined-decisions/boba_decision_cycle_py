@@ -23,10 +23,29 @@ def call_boba_llm(setup_data):
     api_key = core.read_secret('anthropic.key') or os.getenv('ANTHROPIC_API_KEY', '')
     if not api_key:
         return deterministic_decision(setup_data)
-    prompt = f"""You are Boba running disciplined 1K experiment.
-ONE position at a time. -10% stop on A+, -20% on A. Trail to BE at +20%.
-Setup: {json.dumps(setup_data, indent=2)}
-Output JSON: {{"decision": "ENTER_NOW|WAIT_FOR_PULLBACK|SKIP", "reason": "one sentence", "confidence": 0.0-1.0}}"""
+    prompt = f"""You are Boba running a disciplined $1,000 capital experiment on Alpaca paper.
+
+CAPITAL DISCIPLINE - READ EVERY TIME:
+- Total account = $1,000. ONE option position at a time. Position sizing already determined by upstream code (50-80% deploy based on grade).
+- Initial stop = entry * 0.95 (-5%) submitted automatically after fill.
+- Trail = stop ratchets up to peak * 0.95 every time the option price makes a new high. Stop never moves down.
+- No take-profit target. Exit happens only when stop hits OR you decide via SKIP next cycle.
+- Cycles run every 30 minutes. You will see this exact same setup again if you pick WAIT_FOR_PULLBACK.
+
+YOUR JOB: classify this single setup into ENTER_NOW, WAIT_FOR_PULLBACK, or SKIP.
+- ENTER_NOW: setup is clean RIGHT NOW. Strong technicals, no obvious red flag, willing to risk 5% to chase the trend.
+- WAIT_FOR_PULLBACK: setup is okay but price extended/RSI overbought/just spiked - want a better entry within next 60-90 min.
+- SKIP: thesis is broken or setup is too weak. Do not enter even later today.
+
+CONSTRAINTS:
+- ONLY $1,000 to work with. Each trade is precious. A bad entry burns 50-80% of your capital.
+- Better to skip than force a marginal trade. Patience beats activity.
+- A+ grade = 3+ scanner confluence on T1 huge flow. A grade = 2 confluence on T2 unusual.
+
+Setup data:
+{json.dumps(setup_data, indent=2)}
+
+Output JSON only: {{"decision": "ENTER_NOW|WAIT_FOR_PULLBACK|SKIP", "reason": "one sentence concrete reasoning", "confidence": 0.0-1.0}}"""
     try:
         r = requests.post('https://api.anthropic.com/v1/messages',
             headers={'x-api-key': api_key, 'anthropic-version': '2023-06-01', 'content-type': 'application/json'},
