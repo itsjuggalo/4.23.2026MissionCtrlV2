@@ -278,39 +278,54 @@ def get_account_state(key, secret):
 def get_open_positions(key, secret):
     return alpaca_call('/v2/positions', key, secret) or []
 
-
-
 def fetch_scanner_confluence(symbol):
+    """
+    Walk all scanner JSON files recursively looking for symbol presence.
+    Returns list of scanner names where the symbol appears anywhere.
+    Handles any JSON structure - dict keys, list of dicts, nested objects.
+    """
     confluence = []
-    for scanner_file in ['multi_feed_overlap.json', 'gamma_squeeze.json',
-                         'congress_catalyst.json', 'pre_pop.json',
-                         'earnings_catalyst.json']:
-        p = SCANNER_DATA / scanner_file
-        if not p.exists():
+    target = symbol.upper()
+    
+    for p in sorted(SCANNER_DATA.glob('*.json')):
+        if 'state' in p.name:
             continue
+        scanner_name = p.stem
         try:
             d = json.loads(p.read_text())
         except Exception:
             continue
-        scanner_name = scanner_file.replace('.json', '')
-        candidates_field = None
-        for key in ['top_15', 'top_10', 'overlap_symbols', 'candidates', 'top_candidates']:
-            if key in d:
-                candidates_field = d[key]
-                break
-        if candidates_field is None:
-            continue
-        if isinstance(candidates_field, list):
-            for c in candidates_field:
-                if isinstance(c, dict) and c.get('symbol') == symbol:
-                    confluence.append(scanner_name)
-                    break
-                elif isinstance(c, str) and c == symbol:
-                    confluence.append(scanner_name)
-                    break
-        elif isinstance(candidates_field, dict) and symbol in candidates_field:
+        
+        found = False
+        def walk(obj):
+            nonlocal found
+            if found:
+                return
+            if isinstance(obj, str):
+                if obj.upper() == target:
+                    found = True
+            elif isinstance(obj, dict):
+                for k, v in obj.items():
+                    if isinstance(k, str) and k.upper() == target:
+                        found = True
+                        return
+                    walk(v)
+                    if found:
+                        return
+            elif isinstance(obj, list):
+                for item in obj:
+                    walk(item)
+                    if found:
+                        return
+        walk(d)
+        
+        if found:
             confluence.append(scanner_name)
+    
     return confluence
+
+
+
 
 
 def fetch_inline_ta(symbol, alpaca_key=None, alpaca_secret=None):
