@@ -1,0 +1,233 @@
+#!/usr/bin/env python3
+"""
+Scanner #13 - Congress Catalyst
+Cross-references Quiver congresstrading (/beta/live, free no-auth) with active flow alerts.
+Flags symbols where:
+  - Member of Congress filed a Purchase in last 30 days
+  - AND the symbol has whale flow alert in last 7 days
+  - AND the trade size suggests conviction ($15K+ low end)
+Posts top candidates to Discord, runs every 4h.
+"""
+import json, time, logging, requests, re
+from pathlib import Path
+from datetime import datetime, timezone, timedelta
+from collections import defaultdict
+
+logging.basicConfig(level=logging.INFO, format='%(asctime)s [congress] %(message)s', datefmt='%H:%M:%S')
+
+SCRAPER = Path('/home/ubuntu/mission-control-restored/Option-Signals-Scraper/data')
+OUT = Path('/home/ubuntu/.openclaw/data/scanners/congress_catalyst.json')
+OUT.parent.mkdir(parents=True, exist_ok=True)
+STATE = Path('/home/ubuntu/.openclaw/data/scanners/congress_catalyst_state.json')
+
+WEBHOOK = 'https://discordapp.com/api/webhooks/1497661681126609008/tlS_qnTSq4Uef8AUVpllp2vwC3sJ7u0BHt2_WcoJz5y75dnh3cgHpkhOn59zGlkWmyPk'
+QUIVER_URL = 'https://api.quiverquant.com/beta/live/congresstrading'
+
+LOOKBACK_DAYS_TRADE = 30
+LOOKBACK_DAYS_FLOW = 7
+
+def fetch_congress():
+    headers = {
+        'User-Agent': 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36',
+        'Accept': 'application/json',
+        'Origin': 'https://www.quiverquant.com',
+        'Referer': 'https://www.quiverquant.com/',
+    }
+    # Optional API key if available
+    key_file = Path('/home/ubuntu/.openclaw/secrets/quiver-api-key')
+    if key_file.exists():
+        headers['Authorization'] = f'Token {key_file.read_text().strip()}'
+    try:
+        r = requests.get(QUIVER_URL, headers=headers, timeout=20)
+        if r.status_code != 200:
+            logging.warning(f'quiver {r.status_code}: {r.text[:200]}')
+            return []
+        return r.json()
+    except Exception as e:
+        logging.warning(f'quiver err: {e}')
+        return []
+
+def parse_range(rng):
+    """Parse '$15,001 - $50,000' style range to (low, high) ints."""
+    if not rng: return (0, 0)
+    nums = re.findall(r'[\d,]+', str(rng))
+    cleaned = [int(n.replace(',', '')) for n in nums if n.replace(',', '').isdigit()]
+    if len(cleaned) >= 2: return (cleaned[0], cleaned[1])
+    if len(cleaned) == 1: return (cleaned[0], cleaned[0])
+    return (0, 0)
+
+def get_active_flow_symbols():
+    """Symbols with flow alerts in last LOOKBACK_DAYS_FLOW days."""
+    cutoff = int(time.time()) - LOOKBACK_DAYS_FLOW * 86400
+    sym_map = {}  # symbol -> latest_alert_time
+    for feed in ['flow_alerts_today', 'flow_alerts_history', 'flow2_alerts_today', 'flow2_alerts_history']:
+        p = SCRAPER / f'{feed}.json'
+        if not p.exists(): continue
+        try: d = json.loads(p.read_text())
+        except: continue
+        items = d.values() if isinstance(d, dict) else d
+        for e in items:
+            if not isinstance(e, dict): continue
+            a = e.get('alert', e) if isinstance(e.get('alert'), dict) else e
+            sym = a.get('Symbol')
+            t = a.get('Time')
+            if not sym or not t: continue
+            try:
+                ts = float(t)
+                if ts > 1e12: ts = ts / 1000.0
+                ts = int(ts)
+                if ts >= cutoff:
+                    s = str(sym).upper().strip()
+                    if s not in sym_map or sym_map[s] < ts:
+                        sym_map[s] = ts
+            except: pass
+    return sym_map
+
+def cycle():
+    congress = fetch_congress()
+    if not congress:
+        logging.info('no congress data')
+        return []
+    logging.info(f'congress trades fetched: {len(congress)}')
+
+    # Filter recent purchases
+    cutoff = datetime.now(tz=timezone.utc) - timedelta(days=LOOKBACK_DAYS_TRADE)
+    recent_purchases = []
+    for t in congress:
+        if not isinstance(t, dict): continue
+        txn_type = (t.get('Transaction') or '').lower()
+        # accept Purchase, Sale (Full), Sale (Partial), Exchange
+        if not any(k in txn_type for k in ['purchase', 'buy', 'sale', 'exchange']): continue
+        is_sale = 'sale' in txn_type or 'sell' in txn_type
+        t['_is_sale'] = is_sale
+        date_str = t.get('TransactionDate') or t.get('Filed') or t.get('TradedDate')
+        if not date_str: continue
+        try:
+            dt = datetime.fromisoformat(date_str.replace('Z','+00:00')) if 'T' in str(date_str) else datetime.strptime(str(date_str)[:10], '%Y-%m-%d').replace(tzinfo=timezone.utc)
+        except:
+            try: dt = datetime.strptime(str(date_str)[:10], '%Y-%m-%d').replace(tzinfo=timezone.utc)
+            except: continue
+        if dt < cutoff: continue
+        recent_purchases.append({**t, '_parsed_date': dt})
+
+    logging.info(f'recent purchases (last {LOOKBACK_DAYS_TRADE}d): {len(recent_purchases)}')
+
+    # Cross-reference with active flow
+    active_flow = get_active_flow_symbols()
+    logging.info(f'active flow symbols (last {LOOKBACK_DAYS_FLOW}d): {len(active_flow)}')
+
+    # Aggregate by symbol
+    by_symbol = defaultdict(lambda: {'trades': [], 'total_low': 0, 'total_high': 0, 'representatives': set()})
+    for p in recent_purchases:
+        sym = (p.get('Ticker') or '').upper().strip()
+        if not sym or sym not in active_flow: continue
+        low, high = parse_range(p.get('Range'))
+        rep = p.get('Representative') or p.get('Senator') or 'Unknown'
+        by_symbol[sym]['trades'].append({
+            'representative': rep,
+            'date': p['_parsed_date'].strftime('%Y-%m-%d'),
+            'range': p.get('Range'),
+            'range_low': low,
+            'range_high': high,
+            'house': p.get('House') or 'Unknown',
+            'transaction': p.get('Transaction'),
+            'is_sale': p.get('_is_sale', False),
+        })
+        if p.get('_is_sale'):
+            by_symbol[sym]['sale_count'] = by_symbol[sym].get('sale_count', 0) + 1
+        else:
+            by_symbol[sym]['buy_count'] = by_symbol[sym].get('buy_count', 0) + 1
+        by_symbol[sym]['total_low'] += low
+        by_symbol[sym]['total_high'] += high
+        by_symbol[sym]['representatives'].add(rep)
+
+    # Score and rank
+    candidates = []
+    for sym, agg in by_symbol.items():
+        if agg['total_low'] < 1000: continue  # min disclosure tier $1,001
+        flow_age_days = (int(time.time()) - active_flow.get(sym, 0)) / 86400.0
+        score = 0
+        score += min(40, len(agg['trades']) * 10)  # multiple trades = signal
+        score += min(25, agg['total_low'] / 5000)  # dollar conviction (higher = more weight)
+        score += min(15, len(agg['representatives']) * 5)  # multi-rep consensus bonus
+        if flow_age_days < 1: score += 20
+        elif flow_age_days < 3: score += 10
+        # bonus for clear directional consensus (not mixed)
+        buy_count = agg.get('buy_count', 0)
+        sale_count = agg.get('sale_count', 0)
+        if buy_count > 0 and sale_count == 0: score += 10  # all buys
+        elif sale_count > 0 and buy_count == 0: score += 5  # all sells (less weight)
+
+        buy_count = agg.get('buy_count', 0)
+        sale_count = agg.get('sale_count', 0)
+        # direction: BUY-heavy = bullish, SALE-heavy = bearish, MIXED = uncertain
+        if buy_count > sale_count: direction = 'BULLISH'
+        elif sale_count > buy_count: direction = 'BEARISH'
+        else: direction = 'MIXED'
+        candidates.append({
+            'symbol': sym,
+            'direction': direction,
+            'buy_count': buy_count,
+            'sale_count': sale_count,
+            'congress_trades_count': len(agg['trades']),
+            'unique_representatives': len(agg['representatives']),
+            'total_purchase_low_usd': agg['total_low'],
+            'total_purchase_high_usd': agg['total_high'],
+            'flow_age_days': round(flow_age_days, 1),
+            'score': score,
+            'trades': agg['trades'][:10],
+        })
+    candidates.sort(key=lambda x: -x['score'])
+
+    out_data = {
+        'generated_at': datetime.now(tz=timezone.utc).isoformat(),
+        'lookback_trade_days': LOOKBACK_DAYS_TRADE,
+        'lookback_flow_days': LOOKBACK_DAYS_FLOW,
+        'total_recent_purchases': len(recent_purchases),
+        'symbols_with_active_flow_overlap': len(candidates),
+        'top_15': candidates[:15],
+    }
+    OUT.write_text(json.dumps(out_data, indent=1, default=str))
+    logging.info(f'congress catalysts: {len(candidates)}, top: {[c["symbol"] for c in candidates[:5]]}')
+    return candidates
+
+def post_summary(candidates):
+    if not candidates: return
+    state = json.loads(STATE.read_text()) if STATE.exists() else {'last_post': 0, 'last_top': []}
+    now = int(time.time())
+    if now - state.get('last_post', 0) < 4 * 3600: return
+    top_keys = [c['symbol'] for c in candidates[:5]]
+    if top_keys == state.get('last_top', []): return
+
+    lines = ['**Congress Catalyst Update**', f'_Reps buying + active flow last {LOOKBACK_DAYS_FLOW}d_', '']
+    for c in candidates[:8]:
+        if c['score'] < 10: continue
+        rep_label = f'{c["unique_representatives"]} rep' if c['unique_representatives'] == 1 else f'{c["unique_representatives"]} reps'
+        arrow = '↑' if c['direction']=='BULLISH' else ('↓' if c['direction']=='BEARISH' else '↔')
+        bs = f'{c["buy_count"]}B/{c["sale_count"]}S'
+        lines.append(f'**{c["symbol"]}** {arrow} {c["direction"]} score **{c["score"]:.0f}**: {rep_label}, {bs}, ${c["total_purchase_low_usd"]:,}-${c["total_purchase_high_usd"]:,}')
+        lines.append(f'  flow age {c["flow_age_days"]:.1f}d, latest: {c["trades"][0]["representative"]} on {c["trades"][0]["date"]}')
+
+    if len(lines) <= 3: return
+    msg = '\n'.join(lines)
+    try:
+        r = requests.post(WEBHOOK, json={'content': msg[:1900]}, timeout=10)
+        if r.status_code in (200, 204):
+            state['last_post'] = now
+            state['last_top'] = top_keys
+            STATE.write_text(json.dumps(state))
+            logging.info('posted congress summary')
+    except Exception as e: logging.warning(f'post err: {e}')
+
+def main():
+    logging.info('congress_catalyst starting')
+    while True:
+        try:
+            candidates = cycle()
+            post_summary(candidates)
+        except Exception as e:
+            logging.error(f'cycle err: {e}', exc_info=True)
+        time.sleep(4 * 3600)  # 4h
+
+if __name__ == '__main__':
+    main()

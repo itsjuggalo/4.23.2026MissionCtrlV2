@@ -1,0 +1,193 @@
+#!/usr/bin/env python3
+"""
+boba_decision_cycle - Disciplined 1K Boba paper account.
+Sort strategy: tier first (T1 over T2), then confluence DESC, then flow value DESC.
+LLM: Anthropic Sonnet 4.
+"""
+import argparse, json, logging, sys, os
+from datetime import datetime, timezone
+from pathlib import Path
+import requests
+
+sys.path.insert(0, '/home/ubuntu/scripts/disciplined-decisions')
+import core
+
+logging.basicConfig(level=logging.INFO, format='%(asctime)s [boba] %(message)s', datefmt='%H:%M:%S')
+log = logging.getLogger('boba')
+
+WEBHOOK = 'https://discordapp.com/api/webhooks/1497661681126609008/tlS_qnTSq4Uef8AUVpllp2vwC3sJ7u0BHt2_WcoJz5y75dnh3cgHpkhOn59zGlkWmyPk'
+DECISION_LOG = Path('/home/ubuntu/.openclaw/workspace/logs/boba_decisions_jsonl')
+
+
+def call_boba_llm(setup_data):
+    api_key = core.read_secret('anthropic.key') or os.getenv('ANTHROPIC_API_KEY', '')
+    if not api_key:
+        return deterministic_decision(setup_data)
+    prompt = f"""You are Boba running disciplined 1K experiment.
+ONE position at a time. -10% stop on A+, -20% on A. Trail to BE at +20%.
+Setup: {json.dumps(setup_data, indent=2)}
+Output JSON: {{"decision": "ENTER_NOW|WAIT_FOR_PULLBACK|SKIP", "reason": "one sentence", "confidence": 0.0-1.0}}"""
+    try:
+        r = requests.post('https://api.anthropic.com/v1/messages',
+            headers={'x-api-key': api_key, 'anthropic-version': '2023-06-01', 'content-type': 'application/json'},
+            json={'model': 'claude-sonnet-4-20250514', 'max_tokens': 300, 'messages': [{'role': 'user', 'content': prompt}]},
+            timeout=30)
+        if r.status_code != 200:
+            return deterministic_decision(setup_data)
+        text = r.json()['content'][0]['text']
+        s, e = text.find('{'), text.rfind('}')
+        if s >= 0 and e > s:
+            return json.loads(text[s:e+1])
+    except Exception:
+        pass
+    return deterministic_decision(setup_data)
+
+
+def deterministic_decision(setup_data):
+    ta = setup_data.get('ta', {})
+    pe9 = ta.get('price_vs_ema9', 0)
+    rsi = ta.get('rsi', 50)
+    if not setup_data.get('is_put', False):
+        if pe9 < -2 and 30 <= rsi <= 50:
+            return {'decision': 'ENTER_NOW', 'reason': 'call pullback to EMA9 healthy RSI', 'confidence': 0.7}
+        elif pe9 > 3 and rsi > 70:
+            return {'decision': 'WAIT_FOR_PULLBACK', 'reason': 'extended overbought', 'confidence': 0.6}
+    else:
+        if pe9 > 2 and 50 <= rsi <= 70:
+            return {'decision': 'ENTER_NOW', 'reason': 'put rally healthy', 'confidence': 0.7}
+    return {'decision': 'WAIT_FOR_PULLBACK', 'reason': 'no clean signal', 'confidence': 0.5}
+
+
+def submit_order(occ, qty, limit, stop, tp, key, secret, dry_run):
+    payload = {
+        'symbol': occ, 'qty': str(qty), 'side': 'buy', 'type': 'limit', 'time_in_force': 'day',
+        'limit_price': str(round(limit, 2)),
+        'order_class': 'bracket',
+        'stop_loss': {'stop_price': str(round(stop, 2))},
+        'take_profit': {'limit_price': str(round(tp, 2))},
+    }
+    log.info(f'  ORDER {"DRY " if dry_run else ""}{occ} qty={qty} limit=${limit:.2f} stop=${stop:.2f} TP=${tp:.2f}')
+    if dry_run:
+        return {'dry_run': True, 'payload': payload}
+    return core.alpaca_call('/v2/orders', key, secret, method='POST', json=payload)
+
+
+def post_discord(setup, decision, dry_run):
+    sym = setup['symbol']
+    grade = setup.get('grade')
+    occ = setup.get('occ')
+    rsn = decision.get('reason', '')
+    conf = decision.get('confidence', 0)
+    dec = decision.get('decision', 'SKIP')
+    emoji = {'ENTER_NOW': '🟢', 'WAIT_FOR_PULLBACK': '🟡', 'SKIP': '🔴'}.get(dec, '⚪')
+    msg = (
+        f"{'🧪 DRY ' if dry_run else ''}**Boba** {emoji}\n"
+        f"**{sym}** ({occ}) Grade **{grade}** Tier {setup.get('tier')}\n"
+        f"Confluence: {setup.get('confluence_count')} scanners\n"
+        f"TA: RSI {setup.get('ta',{}).get('rsi')}, EMA9 dev {setup.get('ta',{}).get('price_vs_ema9')}%\n"
+        f"→ **{dec}** ({conf:.0%}): {rsn}"
+    )
+    try:
+        requests.post(WEBHOOK, json={'content': msg[:1900]}, timeout=10)
+    except Exception:
+        pass
+
+
+def append_log(setup, decision, dry_run):
+    DECISION_LOG.parent.mkdir(parents=True, exist_ok=True)
+    entry = {
+        'ts': datetime.now(timezone.utc).isoformat(),
+        'agent': 'boba', 'dry_run': dry_run,
+        'symbol': setup.get('symbol'), 'occ': setup.get('occ'),
+        'grade': setup.get('grade'), 'tier': setup.get('tier'),
+        'confluence': setup.get('confluence'),
+        'flow_value': setup.get('flow_value'),
+        'ta': setup.get('ta'),
+        'option_quote': setup.get('option_quote'),
+        'decision': decision,
+    }
+    with DECISION_LOG.open('a') as f:
+        f.write(json.dumps(entry) + '\n')
+
+
+def main():
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--dry-run', action='store_true')
+    args = parser.parse_args()
+    log.info(f'=== boba cycle (dry_run={args.dry_run}) ===')
+
+    bk, bs = core.read_secret('alpaca-boba-key-id'), core.read_secret('alpaca-boba-secret')
+    if not bk or not bs:
+        log.error('boba keys missing')
+        return
+
+    account = core.get_account_state(bk, bs)
+    if not account:
+        log.error('cannot read account state')
+        return
+    cash = float(account.get('cash', 0))
+    equity = float(account.get('equity', 0))
+    log.info(f'boba equity ${equity:.2f} cash ${cash:.2f}')
+
+    if len(core.get_open_positions(bk, bs)) >= core.HARD_CAP_OPEN_POSITIONS:
+        log.info('open position cap reached, skip')
+        return
+
+    candidates = core.fetch_active_flow()
+    log.info(f'flow candidates: {len(candidates)}')
+    if not candidates:
+        return
+
+    scored = core.filter_and_score_candidates(candidates, sort_strategy='boba')
+    log.info(f'after confluence filter: {len(scored)}')
+    if not scored:
+        return
+
+    other_picks = core.get_other_agents_occ_today('boba')
+    scored = [s for s in scored if s['occ'] not in other_picks]
+    log.info(f'after cross-agent skip: {len(scored)}')
+    if not scored:
+        log.info('no candidates left after skipping other agents picks, skip')
+        return
+
+    best = scored[0]
+    log.info(f'pick: {best["symbol"]} {best["occ"]} grade {best["grade"]}')
+    best['ta'] = core.fetch_inline_ta(best['symbol'], bk, bs)
+    best['option_quote'] = core.fetch_tradier_quote(best['occ'])
+    if best['option_quote']:
+        sp = best['option_quote'].get('spread_pct', 100)
+        if sp > core.MAX_BIDASK_SPREAD_PCT:
+            log.info(f'spread {sp}% too wide, skip')
+            return
+
+    decision = call_boba_llm(best)
+    log.info(f'decision: {decision}')
+    append_log(best, decision, args.dry_run)
+    post_discord(best, decision, args.dry_run)
+
+    if decision.get('decision') == 'ENTER_NOW':
+        if not best.get('option_quote'):
+            return
+        ask = best['option_quote']['ask']
+        if ask <= 0:
+            return
+        deploy = cash * best['sizing_pct']
+        qty = max(1, int(deploy / (ask * 100)))
+        qty = min(qty, 3)
+        if qty * ask * 100 > cash * 0.95:
+            qty = max(1, int(cash * 0.95 / (ask * 100)))
+        if qty < 1:
+            log.info(f'cant afford 1 contract at ${ask:.2f}')
+            return
+        stop_p = round(ask * 0.95, 2)  # uniform 5 pct initial stop applies trail logic from entry
+        tp_p = round(ask * 2.0, 2)
+        result = submit_order(best['occ'], qty, ask, stop_p, tp_p, bk, bs, args.dry_run)
+        log.info(f'result: {json.dumps(result)[:300] if result else "FAIL"}')
+        # Record pick AFTER successful submit (or in dry-run)
+        if result:
+            core.record_agent_pick('boba', best['occ'])
+    log.info('=== done ===')
+
+
+if __name__ == '__main__':
+    main()

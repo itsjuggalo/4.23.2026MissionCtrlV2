@@ -1,0 +1,159 @@
+#!/usr/bin/env python3
+"""
+Signature Miner - Scanner #8
+One-shot analysis of /home/ubuntu/.openclaw/data/contract-outcomes/all-time.json
+Question: "of contracts that hit +100%+ peak, what did their alert-time signature look like?"
+
+Output: /home/ubuntu/.openclaw/data/scanners/winner_signature_profile.json
+This file is consumed by Pre-Pop Scanner (#9) to weight new alerts.
+"""
+import json, statistics
+from pathlib import Path
+from datetime import datetime, timezone
+from collections import Counter
+
+ALL_TIME = Path('/home/ubuntu/.openclaw/data/contract-outcomes/all-time.json')
+OUT_FILE = Path('/home/ubuntu/.openclaw/data/scanners/winner_signature_profile.json')
+OUT_FILE.parent.mkdir(parents=True, exist_ok=True)
+
+def main():
+    if not ALL_TIME.exists():
+        print(f'ERROR: {ALL_TIME} missing'); return
+    data = json.loads(ALL_TIME.read_text())
+    print(f'Loaded {len(data)} outcomes')
+
+    # Filter options only with valid pct_return
+    options = [e for e in data if e.get('kind') == 'options' and isinstance(e.get('pct_return'), (int, float))]
+    print(f'Options with returns: {len(options)}')
+
+    # Tier definitions
+    tiers = {
+        'big_winner_100pct': lambda e: e['pct_return'] >= 100,
+        'mid_winner_50pct': lambda e: 50 <= e['pct_return'] < 100,
+        'small_winner_25pct': lambda e: 25 <= e['pct_return'] < 50,
+        'flat_or_loss': lambda e: e['pct_return'] < 25,
+    }
+    counts = {tier: sum(1 for e in options if fn(e)) for tier, fn in tiers.items()}
+    print(f'\nTier breakdown:')
+    for t, c in counts.items(): print(f'  {t}: {c} ({c/len(options)*100:.1f}%)')
+
+    # Profile big winners (the ones we want to find pre-flight)
+    big_winners = [e for e in options if e['pct_return'] >= 100]
+
+    # Source feed distribution among big winners
+    source_counter = Counter(e.get('source') for e in big_winners)
+
+    # Category distribution
+    cat_counter = Counter(e.get('category') for e in big_winners)
+
+    # is_put distribution
+    put_count = sum(1 for e in big_winners if e.get('is_put'))
+    call_count = len(big_winners) - put_count
+
+    # Premium analysis - need buy_target as float
+    premiums = []
+    for e in big_winners:
+        try:
+            p = float(e.get('buy_target', 0))
+            if 0 < p < 100: premiums.append(p)
+        except: pass
+
+    # DTE analysis - days from entry to expiry (we have exit_time + expiry but not entry_time per contract)
+    # Use exit_time as proxy for "when contract was active"
+    dte_at_exit = []
+    for e in big_winners:
+        try:
+            expiry = e.get('expiry')
+            exit_ts = e.get('exit_ts')
+            if expiry and exit_ts:
+                exp_dt = datetime.strptime(expiry[:10], '%Y-%m-%d').replace(tzinfo=timezone.utc)
+                exit_dt = datetime.fromtimestamp(exit_ts, tz=timezone.utc)
+                dte = (exp_dt - exit_dt).days
+                if -10 < dte < 365: dte_at_exit.append(dte)
+        except: pass
+
+    # Strike analysis - just collect them with symbols for spread analysis
+    strikes_by_symbol = {}
+    for e in big_winners:
+        sym = e.get('symbol')
+        try:
+            strike = float(e.get('strike', 0))
+            if sym and strike > 0:
+                strikes_by_symbol.setdefault(sym, []).append(strike)
+        except: pass
+
+    # Source hit rates - what % of each source becomes a big winner
+    by_source = {}
+    for source in set(e.get('source') for e in options):
+        if not source: continue
+        src_total = [e for e in options if e.get('source') == source]
+        src_big = [e for e in src_total if e['pct_return'] >= 100]
+        by_source[source] = {
+            'total_contracts': len(src_total),
+            'big_winners_100pct': len(src_big),
+            'hit_rate_pct': len(src_big) / len(src_total) * 100 if src_total else 0,
+            'avg_return': statistics.mean(e['pct_return'] for e in src_total) if src_total else 0,
+            'median_return': statistics.median(e['pct_return'] for e in src_total) if src_total else 0,
+        }
+
+    # Top symbols among big winners
+    sym_counter = Counter(e.get('symbol') for e in big_winners if e.get('symbol'))
+
+    # Build the profile output
+    profile = {
+        'generated_at': datetime.now(tz=timezone.utc).isoformat(),
+        'total_options_analyzed': len(options),
+        'tier_counts': counts,
+        'big_winner_signature': {
+            'count': len(big_winners),
+            'sample_pct_of_total': len(big_winners) / len(options) * 100,
+            'avg_return': statistics.mean(e['pct_return'] for e in big_winners),
+            'median_return': statistics.median(e['pct_return'] for e in big_winners),
+            'max_return': max(e['pct_return'] for e in big_winners),
+            'call_pct': call_count / len(big_winners) * 100 if big_winners else 0,
+            'put_pct': put_count / len(big_winners) * 100 if big_winners else 0,
+            'source_distribution': dict(source_counter.most_common()),
+            'category_distribution': dict(cat_counter.most_common()),
+            'top_20_symbols': dict(sym_counter.most_common(20)),
+            'premium_stats': {
+                'count': len(premiums),
+                'mean': statistics.mean(premiums) if premiums else 0,
+                'median': statistics.median(premiums) if premiums else 0,
+                'p25': sorted(premiums)[len(premiums)//4] if len(premiums) >= 4 else None,
+                'p75': sorted(premiums)[3*len(premiums)//4] if len(premiums) >= 4 else None,
+                'min': min(premiums) if premiums else 0,
+                'max': max(premiums) if premiums else 0,
+            },
+            'dte_at_exit_stats': {
+                'count': len(dte_at_exit),
+                'mean': statistics.mean(dte_at_exit) if dte_at_exit else 0,
+                'median': statistics.median(dte_at_exit) if dte_at_exit else 0,
+            },
+        },
+        'source_hit_rates': by_source,
+    }
+
+    OUT_FILE.write_text(json.dumps(profile, indent=2, default=str))
+    print(f'\nProfile written: {OUT_FILE}')
+
+    # Print key findings
+    print(f'\n=== KEY FINDINGS ===')
+    print(f'Total options outcomes: {len(options)}')
+    print(f'Big winners (+100% or more): {len(big_winners)} ({len(big_winners)/len(options)*100:.1f}%)')
+    print(f'\nMost productive source feeds (highest hit rate):')
+    sorted_sources = sorted(by_source.items(), key=lambda x: x[1]['hit_rate_pct'], reverse=True)
+    for src, stats in sorted_sources[:5]:
+        print(f'  {src}: {stats["hit_rate_pct"]:.1f}% hit rate ({stats["big_winners_100pct"]}/{stats["total_contracts"]}, avg return {stats["avg_return"]:.1f}%)')
+    print(f'\nPremium sweet spot for big winners:')
+    if premiums:
+        ps = sorted(premiums)
+        print(f'  median: ${statistics.median(premiums):.2f}')
+        print(f'  p25: ${ps[len(ps)//4]:.2f}')
+        print(f'  p75: ${ps[3*len(ps)//4]:.2f}')
+    print(f'\nCall vs Put split: {call_count} calls ({call_count/len(big_winners)*100:.0f}%) / {put_count} puts ({put_count/len(big_winners)*100:.0f}%)')
+    print(f'\nTop 10 symbols among big winners:')
+    for sym, count in sym_counter.most_common(10):
+        print(f'  {sym}: {count}')
+
+if __name__ == '__main__':
+    main()

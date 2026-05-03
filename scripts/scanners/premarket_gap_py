@@ -1,0 +1,140 @@
+#!/usr/bin/env python3
+"""
+Scanner #14 - Pre-market Gap Scanner
+Runs 4AM-9:30AM ET only. Reads flow alerts last 24h, gets pre-market quotes via Alpaca, flags
+symbols gapping >3% with active flow.
+"""
+import json, time, logging, requests
+from pathlib import Path
+from datetime import datetime, timezone
+
+logging.basicConfig(level=logging.INFO, format='%(asctime)s [pmgap] %(message)s', datefmt='%H:%M:%S')
+
+SCRAPER = Path('/home/ubuntu/mission-control-restored/Option-Signals-Scraper/data')
+OUT = Path('/home/ubuntu/.openclaw/data/scanners/premarket_gap.json')
+OUT.parent.mkdir(parents=True, exist_ok=True)
+STATE = Path('/home/ubuntu/.openclaw/data/scanners/premarket_gap_state.json')
+
+ALPACA_KEY = Path('/home/ubuntu/.openclaw/secrets/alpaca-key-id').read_text().strip() if Path('/home/ubuntu/.openclaw/secrets/alpaca-key-id').exists() else ''
+ALPACA_SECRET = Path('/home/ubuntu/.openclaw/secrets/alpaca-secret').read_text().strip() if Path('/home/ubuntu/.openclaw/secrets/alpaca-secret').exists() else ''
+ALPACA_DATA_BASE = 'https://data.alpaca.markets/v2'
+WEBHOOK = 'https://discordapp.com/api/webhooks/1497661681126609008/tlS_qnTSq4Uef8AUVpllp2vwC3sJ7u0BHt2_WcoJz5y75dnh3cgHpkhOn59zGlkWmyPk'
+
+GAP_PCT = 3.0
+
+def is_premarket_hours():
+    """4AM-9:30AM ET window."""
+    from datetime import datetime as dt
+    now = dt.now()  # server is UTC, ET is UTC-4 (EDT)
+    et_hour = (now.hour - 4) % 24
+    et_min = now.minute
+    et_total_min = et_hour * 60 + et_min
+    return 4*60 <= et_total_min < 9*60 + 30
+
+def get_active_symbols():
+    cutoff = int(time.time()) - 24*3600
+    syms = set()
+    for feed in ['flow_alerts_today', 'flow2_alerts_today']:
+        p = SCRAPER / f'{feed}.json'
+        if not p.exists(): continue
+        try: d = json.loads(p.read_text())
+        except: continue
+        items = d.values() if isinstance(d, dict) else d
+        for e in items:
+            if not isinstance(e, dict): continue
+            a = e.get('alert', e) if isinstance(e.get('alert'), dict) else e
+            sym = a.get('Symbol')
+            t = a.get('Time')
+            if not sym or not t: continue
+            try:
+                ts = float(t)
+                if ts > 1e12: ts = ts / 1000.0
+                if ts >= cutoff: syms.add(str(sym).upper().strip())
+            except: pass
+    return syms
+
+def get_snapshot_batch(symbols):
+    if not symbols or not ALPACA_KEY: return {}
+    try:
+        r = requests.get(
+            f'{ALPACA_DATA_BASE}/stocks/snapshots',
+            params={'symbols': ','.join(symbols)},
+            headers={'APCA-API-KEY-ID': ALPACA_KEY, 'APCA-API-SECRET-KEY': ALPACA_SECRET},
+            timeout=15
+        )
+        if r.status_code != 200:
+            logging.warning(f'alpaca {r.status_code}: {r.text[:120]}')
+            return {}
+        return r.json()
+    except Exception as e:
+        logging.warning(f'alpaca err: {e}')
+        return {}
+
+def cycle():
+    if not is_premarket_hours():
+        logging.info('outside premarket window, sleeping')
+        return []
+    active = sorted(get_active_symbols())
+    logging.info(f'active symbols: {len(active)}')
+    if not active: return []
+
+    snaps = get_snapshot_batch(active[:200])  # alpaca cap
+    gaps = []
+    for sym, snap in snaps.items():
+        if not isinstance(snap, dict): continue
+        prev = snap.get('prevDailyBar', {}) or snap.get('prev_daily_bar', {})
+        latest = snap.get('latestQuote', {}) or snap.get('latest_quote', {})
+        prev_close = prev.get('c') if prev else None
+        latest_price = latest.get('ap') or latest.get('bp') if latest else None
+        if not prev_close or not latest_price: continue
+        gap = (float(latest_price) - float(prev_close)) / float(prev_close) * 100
+        if abs(gap) >= GAP_PCT:
+            gaps.append({
+                'symbol': sym,
+                'prev_close': float(prev_close),
+                'premarket': float(latest_price),
+                'gap_pct': round(gap, 2),
+            })
+    gaps.sort(key=lambda x: -abs(x['gap_pct']))
+    out_data = {
+        'generated_at': datetime.now(tz=timezone.utc).isoformat(),
+        'window': 'premarket_4am_to_930am_et',
+        'gaps_count': len(gaps),
+        'top_15': gaps[:15],
+    }
+    OUT.write_text(json.dumps(out_data, indent=1, default=str))
+    logging.info(f'premarket gaps: {len(gaps)}, top: {[g["symbol"] for g in gaps[:5]]}')
+    return gaps
+
+def post_summary(gaps):
+    if not gaps: return
+    state = json.loads(STATE.read_text()) if STATE.exists() else {'last_post': 0}
+    now = int(time.time())
+    if now - state.get('last_post', 0) < 1800: return
+
+    lines = ['**Pre-Market Gap Alert** (symbols with active flow last 24h)', '']
+    for g in gaps[:10]:
+        arrow = '\U0001F4C8' if g['gap_pct'] > 0 else '\U0001F4C9'
+        lines.append(f'{arrow} **{g["symbol"]}** {g["gap_pct"]:+.1f}%  ${g["prev_close"]:.2f} \u2192 ${g["premarket"]:.2f}')
+
+    msg = '\n'.join(lines)
+    try:
+        r = requests.post(WEBHOOK, json={'content': msg[:1900]}, timeout=10)
+        if r.status_code in (200, 204):
+            state['last_post'] = now
+            STATE.write_text(json.dumps(state))
+            logging.info('posted premarket gap summary')
+    except Exception as e: logging.warning(f'post err: {e}')
+
+def main():
+    logging.info('premarket_gap starting')
+    while True:
+        try:
+            gaps = cycle()
+            post_summary(gaps)
+        except Exception as e:
+            logging.error(f'cycle err: {e}', exc_info=True)
+        time.sleep(300)  # 5 min
+
+if __name__ == '__main__':
+    main()

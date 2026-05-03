@@ -1,0 +1,106 @@
+#!/usr/bin/env python3
+"""
+Scanner #8 v2 - Signature Miner (live source only)
+Profiles winners only from source='live' to avoid archive dilution.
+Outputs to winner_signature_profile_live_only.
+"""
+import json, statistics
+from collections import Counter
+from pathlib import Path
+from datetime import datetime, timezone
+
+OUT = Path('/home/ubuntu/.openclaw/data/scanners/winner_signature_profile_live_only.json')
+
+def main():
+    d = json.load(open('/home/ubuntu/.openclaw/data/contract-outcomes/all-time.json'))
+    opts = [e for e in d if e.get('kind') == 'options' and e.get('pct_return') is not None and e.get('source') == 'live']
+    print(f'Live-only options analyzed: {len(opts)}')
+
+    big = [e for e in opts if e.get('pct_return') >= 100]
+    mid = [e for e in opts if 50 <= e.get('pct_return') < 100]
+    small = [e for e in opts if 25 <= e.get('pct_return') < 50]
+    flat = [e for e in opts if e.get('pct_return') < 25]
+
+    print(f'\\nTier breakdown:')
+    print(f'  big_winner_100pct: {len(big)} ({100*len(big)/max(1,len(opts)):.1f}%)')
+    print(f'  mid_winner_50pct: {len(mid)} ({100*len(mid)/max(1,len(opts)):.1f}%)')
+    print(f'  small_winner_25pct: {len(small)} ({100*len(small)/max(1,len(opts)):.1f}%)')
+    print(f'  flat_or_loss: {len(flat)} ({100*len(flat)/max(1,len(opts)):.1f}%)')
+
+    def stats(group):
+        if not group: return {}
+        prems = [float(e.get('buy_target', 0) or 0) for e in group if e.get('buy_target')]
+        prems = [p for p in prems if p > 0]
+        rets = [e.get('pct_return', 0) for e in group]
+        cats = Counter(e.get('category') for e in group)
+        syms = Counter(e.get('symbol') for e in group)
+        is_call = sum(1 for e in group if not e.get('is_put'))
+        is_put = sum(1 for e in group if e.get('is_put'))
+        # DTE
+        dtes = []
+        for e in group:
+            try:
+                if e.get('expiry') and e.get('exit_time'):
+                    exp = datetime.strptime(e['expiry'], '%Y-%m-%d').replace(tzinfo=timezone.utc)
+                    exit_t = datetime.fromisoformat(e['exit_time'].replace('Z','+00:00'))
+                    dtes.append((exp - exit_t).days)
+            except: pass
+        return {
+            'count': len(group),
+            'avg_return': round(statistics.mean(rets), 2) if rets else 0,
+            'median_return': round(statistics.median(rets), 2) if rets else 0,
+            'max_return': round(max(rets), 2) if rets else 0,
+            'call_pct': round(100*is_call/max(1,is_call+is_put), 1),
+            'put_pct': round(100*is_put/max(1,is_call+is_put), 1),
+            'category_distribution': dict(cats.most_common()),
+            'top_20_symbols': dict(syms.most_common(20)),
+            'premium_stats': {
+                'count': len(prems),
+                'mean': round(statistics.mean(prems), 2) if prems else 0,
+                'median': round(statistics.median(prems), 2) if prems else 0,
+                'p25': round(statistics.quantiles(prems, n=4)[0], 2) if len(prems) >= 4 else 0,
+                'p75': round(statistics.quantiles(prems, n=4)[2], 2) if len(prems) >= 4 else 0,
+                'min': round(min(prems), 2) if prems else 0,
+                'max': round(max(prems), 2) if prems else 0,
+            } if prems else {},
+            'dte_at_exit_stats': {
+                'count': len(dtes),
+                'mean': round(statistics.mean(dtes), 1) if dtes else 0,
+                'median': round(statistics.median(dtes), 1) if dtes else 0,
+            } if dtes else {},
+        }
+
+    profile = {
+        'generated_at': datetime.now(tz=timezone.utc).isoformat(),
+        'source_filter': 'live',
+        'total_options_analyzed': len(opts),
+        'tier_counts': {
+            'big_winner_100pct': len(big),
+            'mid_winner_50pct': len(mid),
+            'small_winner_25pct': len(small),
+            'flat_or_loss': len(flat),
+        },
+        'big_winner_signature': stats(big),
+        'mid_winner_signature': stats(mid),
+        'small_winner_signature': stats(small),
+    }
+    OUT.write_text(json.dumps(profile, indent=1, default=str))
+    print(f'\\nProfile written to: {OUT}')
+
+    print(f'\\n=== KEY FINDINGS (live-only) ===')
+    print(f'Big winners 100pct: {len(big)} of {len(opts)} ({100*len(big)/max(1,len(opts)):.1f}%)')
+    if big:
+        bs = profile['big_winner_signature']
+        print(f'  median return: {bs.get("median_return")}%')
+        print(f'  call/put: {bs.get("call_pct")}%/{bs.get("put_pct")}%')
+        if bs.get('premium_stats'):
+            ps = bs['premium_stats']
+            print(f'  premium median: ${ps.get("median")}, p25-p75: ${ps.get("p25")}-${ps.get("p75")}')
+        if bs.get('dte_at_exit_stats'):
+            ds = bs['dte_at_exit_stats']
+            print(f'  DTE at exit median: {ds.get("median")}d')
+        cats = bs.get('category_distribution', {})
+        print(f'  category mix: {cats}')
+
+if __name__ == '__main__':
+    main()

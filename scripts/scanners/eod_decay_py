@@ -1,0 +1,159 @@
+#!/usr/bin/env python3
+"""
+Scanner #15 - EOD Decay Scanner
+Runs 3PM-4PM ET only. Identifies high-IV options expiring this week with NO whale flow.
+These are candidates to sell premium against, not buy.
+"""
+import json, time, logging, requests
+from pathlib import Path
+from datetime import datetime, timezone, timedelta
+
+logging.basicConfig(level=logging.INFO, format='%(asctime)s [decay] %(message)s', datefmt='%H:%M:%S')
+
+OUT = Path('/home/ubuntu/.openclaw/data/scanners/eod_decay.json')
+OUT.parent.mkdir(parents=True, exist_ok=True)
+STATE = Path('/home/ubuntu/.openclaw/data/scanners/eod_decay_state.json')
+SCRAPER = Path('/home/ubuntu/mission-control-restored/Option-Signals-Scraper/data')
+
+TRADIER_KEY = Path('/home/ubuntu/.openclaw/secrets/tradier-sandbox-key').read_text().strip() if Path('/home/ubuntu/.openclaw/secrets/tradier-sandbox-key').exists() else ''
+TRADIER_BASE = 'https://sandbox.tradier.com/v1'
+WEBHOOK = 'https://discordapp.com/api/webhooks/1497661681126609008/tlS_qnTSq4Uef8AUVpllp2vwC3sJ7u0BHt2_WcoJz5y75dnh3cgHpkhOn59zGlkWmyPk'
+
+# Liquid optionable underlyings without whale-flow noise
+WATCH_SYMBOLS = ['SPY','QQQ','IWM','AAPL','TSLA','NVDA','AMD','MSFT','GOOGL','META','AMZN','NFLX']
+
+def is_eod_window():
+    from datetime import datetime as dt
+    now = dt.now()  # UTC
+    et_hour = (now.hour - 4) % 24
+    et_min = now.minute
+    et_total_min = et_hour * 60 + et_min
+    return 15*60 <= et_total_min < 16*60
+
+def get_whale_symbols():
+    """Symbols that DO have whale flow we should exclude."""
+    cutoff = int(time.time()) - 24*3600
+    syms = set()
+    for feed in ['flow_alerts_today', 'flow2_alerts_today']:
+        p = SCRAPER / f'{feed}.json'
+        if not p.exists(): continue
+        try: d = json.loads(p.read_text())
+        except: continue
+        items = d.values() if isinstance(d, dict) else d
+        for e in items:
+            if not isinstance(e, dict): continue
+            a = e.get('alert', e) if isinstance(e.get('alert'), dict) else e
+            sym = a.get('Symbol')
+            t = a.get('Time')
+            if not sym or not t: continue
+            try:
+                ts = float(t)
+                if ts > 1e12: ts = ts / 1000.0
+                if ts >= cutoff: syms.add(str(sym).upper().strip())
+            except: pass
+    return syms
+
+def get_chain_with_iv(symbol, expiry_iso):
+    if not TRADIER_KEY: return []
+    try:
+        r = requests.get(
+            f'{TRADIER_BASE}/markets/options/chains',
+            params={'symbol': symbol, 'expiration': expiry_iso, 'greeks': 'true'},
+            headers={'Authorization': f'Bearer {TRADIER_KEY}', 'Accept': 'application/json'},
+            timeout=15
+        )
+        if r.status_code != 200: return []
+        d = r.json().get('options', {}).get('option', [])
+        if isinstance(d, dict): d = [d]
+        return d
+    except Exception as e:
+        logging.warning(f'tradier chain err {symbol}: {e}')
+        return []
+
+def find_friday_expiry():
+    """Next Friday ISO date (this week's weekly options)."""
+    now = datetime.now(tz=timezone.utc)
+    days_to_fri = (4 - now.weekday()) % 7
+    if days_to_fri == 0 and now.hour > 16: days_to_fri = 7
+    if days_to_fri == 0: days_to_fri = 7  # already past, get next
+    fri = now + timedelta(days=days_to_fri)
+    return fri.strftime('%Y-%m-%d')
+
+def cycle():
+    if not is_eod_window():
+        logging.info('outside EOD window')
+        return []
+    whale_syms = get_whale_symbols()
+    target_syms = [s for s in WATCH_SYMBOLS if s not in whale_syms]
+    expiry = find_friday_expiry()
+    logging.info(f'whale symbols excluded: {len(whale_syms)}, scanning: {target_syms}, expiry: {expiry}')
+
+    candidates = []
+    for sym in target_syms:
+        chain = get_chain_with_iv(sym, expiry)
+        if not chain: continue
+        for c in chain:
+            iv = c.get('greeks', {}).get('mid_iv') or c.get('greeks', {}).get('smv_vol')
+            theta = c.get('greeks', {}).get('theta')
+            if not iv or not theta: continue
+            try: iv = float(iv); theta = float(theta)
+            except: continue
+            if iv < 0.40: continue  # 40% IV minimum
+            bid = c.get('bid', 0) or 0
+            if bid < 0.10: continue  # need real premium
+            candidates.append({
+                'symbol': sym,
+                'occ': c.get('symbol'),
+                'strike': c.get('strike'),
+                'option_type': c.get('option_type'),
+                'iv': round(iv, 3),
+                'theta': round(theta, 3),
+                'bid': round(float(bid), 2),
+                'volume': c.get('volume', 0),
+                'open_interest': c.get('open_interest', 0),
+            })
+
+    candidates.sort(key=lambda x: -x['iv'])
+    out_data = {
+        'generated_at': datetime.now(tz=timezone.utc).isoformat(),
+        'window': 'eod_3pm_to_4pm_et',
+        'expiry_targeted': expiry,
+        'candidates_count': len(candidates),
+        'top_15': candidates[:15],
+    }
+    OUT.write_text(json.dumps(out_data, indent=1, default=str))
+    logging.info(f'eod decay candidates: {len(candidates)}')
+    return candidates
+
+def post_summary(candidates):
+    if not candidates: return
+    state = json.loads(STATE.read_text()) if STATE.exists() else {'last_post_date': ''}
+    today = datetime.now(tz=timezone.utc).date().isoformat()
+    if state.get('last_post_date') == today: return
+
+    lines = ['**EOD Decay Candidates** (high IV, no whale flow, this Friday expiry)', '_Sell premium, not buy_', '']
+    for c in candidates[:8]:
+        cp = c.get('option_type','?')[0].upper() if c.get('option_type') else '?'
+        lines.append(f'**{c["symbol"]}** ${c["strike"]:g}{cp}: IV {c["iv"]*100:.0f}%, theta {c["theta"]:.2f}, bid ${c["bid"]:.2f}')
+
+    msg = '\n'.join(lines)
+    try:
+        r = requests.post(WEBHOOK, json={'content': msg[:1900]}, timeout=10)
+        if r.status_code in (200, 204):
+            state['last_post_date'] = today
+            STATE.write_text(json.dumps(state))
+            logging.info('posted eod decay summary')
+    except Exception as e: logging.warning(f'post err: {e}')
+
+def main():
+    logging.info('eod_decay starting')
+    while True:
+        try:
+            candidates = cycle()
+            post_summary(candidates)
+        except Exception as e:
+            logging.error(f'cycle err: {e}', exc_info=True)
+        time.sleep(600)  # 10 min
+
+if __name__ == '__main__':
+    main()
