@@ -483,7 +483,8 @@ def filter_and_score_candidates(candidates, sort_strategy):
                    'jazzy' = (-confluence, tier, -alert_time)
     """
     scored = []
-    for occ, c in candidates.items():
+    for c in candidates:
+        occ = c.get('occ')
         confluence = fetch_scanner_confluence(c['symbol'])
         c['confluence'] = confluence
         c['confluence_count'] = len(confluence)
