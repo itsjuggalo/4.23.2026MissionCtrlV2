@@ -63,12 +63,11 @@ def deterministic_decision(setup_data):
 
 
 def submit_order(occ, qty, limit, stop, tp, key, secret, dry_run):
+    # Options do not support bracket on Alpaca paper - submit simple limit buy
+    # Trail daemon adds OCO close once position is detected
     payload = {
         'symbol': occ, 'qty': str(qty), 'side': 'buy', 'type': 'limit', 'time_in_force': 'day',
         'limit_price': str(round(limit, 2)),
-        'order_class': 'bracket',
-        'stop_loss': {'stop_price': str(round(stop, 2))},
-        'take_profit': {'limit_price': str(round(tp, 2))},
     }
     log.info(f'  ORDER {"DRY " if dry_run else ""}{occ} qty={qty} limit=${limit:.2f} stop=${stop:.2f} TP=${tp:.2f}')
     if dry_run:
