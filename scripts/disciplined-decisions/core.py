@@ -133,6 +133,120 @@ def fetch_flow_candidates():
     return candidates
 
 
+
+def fetch_active_flow():
+    """
+    Read flow_alerts_today and flow2_alerts_today JSON files.
+    Handles nested alert sub-dict structure from Option Signals scraper.
+    Returns list of candidate dicts that pass T1/T2 hard filter.
+    """
+    import time
+    from datetime import datetime
+    candidates = []
+    seen_occ = set()
+    now = int(time.time())
+    cutoff = now - 72 * 3600  # 72h cutoff handles weekend gap
+
+    for fname in ['flow_alerts_today.json', 'flow2_alerts_today.json']:
+        f = FLOW_DATA / fname
+        if not f.exists():
+            continue
+        try:
+            d = json.loads(f.read_text())
+        except Exception:
+            continue
+        items = list(d.values()) if isinstance(d, dict) else d
+
+        for entry in items:
+            if not isinstance(entry, dict):
+                continue
+            # Handle nested alert structure (most entries) and flat (fallback)
+            a = entry.get('alert') if isinstance(entry.get('alert'), dict) else entry
+            if not isinstance(a, dict):
+                continue
+
+            symbol = a.get('Symbol')
+            t = a.get('Time')
+            if not symbol or not t:
+                continue
+            try:
+                ts = float(t)
+                if ts > 1e12:
+                    ts /= 1000.0
+                if int(ts) < cutoff:
+                    continue
+            except Exception:
+                continue
+
+            value = float(a.get('totalFlowValue', 0) or 0)
+            sweeps = int(a.get('SWEEPS', 0) or 0)
+            blocks = int(a.get('BLOCKS', 0) or 0)
+            volume = float(a.get('Volume', 0) or 0)
+            oi = float(a.get('OI', 0) or 0)
+
+            tier = None
+            if value >= MIN_FLOW_T1 and sweeps > 0:
+                tier = 'T1'
+            elif value >= MIN_FLOW_T2 and sweeps > 0 and volume > oi and oi > 0:
+                tier = 'T2'
+            else:
+                continue
+
+            dte = int(a.get('DTE', 0) or 0)
+            if dte < MIN_DTE:
+                continue
+
+            opt_type = (a.get('OptionType') or '').upper()
+            is_put = ('PUT' in opt_type) or bool(a.get('IsPut'))
+
+            try:
+                strike = float(a.get('Strike', 0) or 0)
+                # Expiry could be unix ts or YYYY-MM-DD
+                expiry_raw = a.get('Expiry') or a.get('Expiration', '')
+                if isinstance(expiry_raw, (int, float)):
+                    exp_ts = float(expiry_raw)
+                    if exp_ts > 1e12:
+                        exp_ts /= 1000.0
+                    exp_dt = datetime.fromtimestamp(exp_ts)
+                elif '-' in str(expiry_raw):
+                    exp_dt = datetime.fromisoformat(str(expiry_raw)[:10])
+                else:
+                    exp_dt = datetime.strptime(str(expiry_raw)[:8], '%Y%m%d')
+                strike_int = int(round(strike * 1000))
+                occ = f"{symbol}{exp_dt.strftime('%y%m%d')}{'P' if is_put else 'C'}{strike_int:08d}"
+            except Exception:
+                # Fall back to scraper-provided OptionSymbol
+                occ = a.get('OptionSymbol')
+                if not occ:
+                    continue
+                strike = 0.0
+
+            # Dedupe across both flow files
+            if occ in seen_occ:
+                continue
+            seen_occ.add(occ)
+
+            candidates.append({
+                'symbol': symbol,
+                'occ': occ,
+                'tier': tier,
+                'flow_value': value,
+                'value': value,  # alias for legacy callers
+                'sweeps': sweeps,
+                'blocks': blocks,
+                'volume': volume,
+                'oi': oi,
+                'is_put': is_put,
+                'strike': strike,
+                'expiry': str(a.get('Expiry') or a.get('Expiration', '')),
+                'dte': dte,
+                'is_bullish': bool(a.get('isBullish')),
+                'alert_time': int(ts),
+                'spot': a.get('Spot'),
+                'alert_price': a.get('AlertPrice'),
+            })
+    return candidates
+
 def read_secret(name):
     p = SECRETS / name
     return p.read_text().strip() if p.exists() and p.stat().st_size > 0 else ''
@@ -164,61 +278,6 @@ def get_account_state(key, secret):
 def get_open_positions(key, secret):
     return alpaca_call('/v2/positions', key, secret) or []
 
-
-def fetch_active_flow():
-    """T1 huge or T2 unusual SWEEP + A/AA - last 24h."""
-    cutoff = int(time.time()) - 24 * 3600
-    candidates = {}
-    for feed_name in ['flow_alerts_today', 'flow2_alerts_today']:
-        p = FLOW_DATA / f'{feed_name}.json'
-        if not p.exists():
-            continue
-        try:
-            d = json.loads(p.read_text())
-        except Exception:
-            continue
-        items = d.values() if isinstance(d, dict) else d
-        for entry in items:
-            if not isinstance(entry, dict):
-                continue
-            a = entry.get('alert', entry) if isinstance(entry.get('alert'), dict) else entry
-            symbol = a.get('Symbol')
-            t = a.get('Time')
-            value = float(a.get('Value', 0) or 0)
-            bidask = (a.get('BidAskType') or '').upper()
-            block_type = (a.get('BlockType') or '').upper()
-            volume = float(a.get('Volume', 0) or 0)
-            oi = float(a.get('OpenInterest', 0) or 0)
-            if not symbol or not t:
-                continue
-            try:
-                ts = float(t)
-                if ts > 1e12:
-                    ts /= 1000.0
-                if int(ts) < cutoff:
-                    continue
-            except Exception:
-                continue
-            is_t1 = (value >= MIN_FLOW_T1 and 'SWEEP' in block_type and bidask in ('A', 'AA'))
-            is_t2 = (value >= MIN_FLOW_T2 and 'SWEEP' in block_type and bidask in ('A', 'AA') and volume > oi)
-            if not (is_t1 or is_t2):
-                continue
-            try:
-                strike = float(a.get('Strike'))
-                expiry = a.get('Expiration') or a.get('ExpiryStr', '')
-                is_put = a.get('IsPut', False)
-                exp_dt = datetime.fromisoformat(expiry[:10])
-                strike_int = int(round(strike * 1000))
-                occ = f"{symbol}{exp_dt.strftime('%y%m%d')}{'P' if is_put else 'C'}{strike_int:08d}"
-            except Exception:
-                continue
-            candidates[occ] = {
-                'symbol': symbol, 'strike': strike, 'expiry': expiry, 'is_put': is_put,
-                'value': value, 'bidask': bidask, 'block_type': block_type,
-                'volume': volume, 'oi': oi, 'tier': 'T1' if is_t1 else 'T2',
-                'alert_time': int(ts), 'occ': occ,
-            }
-    return candidates
 
 
 def fetch_scanner_confluence(symbol):
