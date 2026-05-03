@@ -336,3 +336,89 @@ def filter_and_score_candidates(candidates, sort_strategy):
     elif sort_strategy == 'jazzy':
         scored.sort(key=lambda x: (-x['confluence_count'], x['tier'] != 'T1', -x['alert_time']))
     return scored
+
+
+def fetch_flow_candidates():
+    """
+    Read flow_alerts_today and flow2_alerts_today, return list of candidates passing hard filter.
+    Field mapping: actual scraper uses totalFlowValue, OI, Expiry, OptionType, SWEEPS counts.
+    Tier classification:
+      T1 huge:    totalFlowValue >= 1M  AND  SWEEPS > 0  AND  bullish/bearish flag set
+      T2 unusual: totalFlowValue >= 500K AND SWEEPS > 0  AND  Volume > OI
+    """
+    import time
+    candidates = []
+    now = int(time.time())
+    cutoff = now - 72 * 3600  # 72h cutoff to avoid weekend lockout
+
+    for fname in ['flow_alerts_today.json', 'flow2_alerts_today.json']:
+        f = FLOW_DATA / fname
+        if not f.exists():
+            continue
+        try:
+            d = json.loads(f.read_text())
+        except Exception:
+            continue
+        items = list(d.values()) if isinstance(d, dict) else d
+
+        for entry in items:
+            if not isinstance(entry, dict):
+                continue
+            symbol = entry.get('Symbol')
+            t = entry.get('Time')
+            if not symbol or not t:
+                continue
+            try:
+                ts = float(t)
+                if ts > 1e12:
+                    ts /= 1000.0
+                if int(ts) < cutoff:
+                    continue
+            except Exception:
+                continue
+
+            value = float(entry.get('totalFlowValue', 0) or entry.get('Value', 0) or 0)
+            sweeps = int(entry.get('SWEEPS', 0) or 0)
+            blocks = int(entry.get('BLOCKS', 0) or 0)
+            volume = float(entry.get('Volume', 0) or 0)
+            oi = float(entry.get('OI', 0) or entry.get('OpenInterest', 0) or 0)
+            opt_type = (entry.get('OptionType') or '').upper()
+            is_put = ('PUT' in opt_type) or bool(entry.get('IsPut'))
+            strike = float(entry.get('Strike', 0) or 0)
+            expiry = entry.get('Expiry') or entry.get('Expiration')
+            dte = int(entry.get('DTE', 0) or 0)
+            is_bullish = bool(entry.get('isBullish'))
+
+            # Tier classification
+            tier = None
+            if value >= MIN_FLOW_T1 and sweeps > 0:
+                tier = 'T1'
+            elif value >= MIN_FLOW_T2 and sweeps > 0 and volume > oi and oi > 0:
+                tier = 'T2'
+            else:
+                continue
+
+            if dte < MIN_DTE:
+                continue
+
+            candidates.append({
+                'symbol': symbol,
+                'tier': tier,
+                'value': value,
+                'sweeps': sweeps,
+                'blocks': blocks,
+                'volume': volume,
+                'oi': oi,
+                'is_put': is_put,
+                'strike': strike,
+                'expiry': expiry,
+                'dte': dte,
+                'is_bullish': is_bullish,
+                'time_ts': int(ts),
+                'option_symbol': entry.get('OptionSymbol'),
+                'spot': entry.get('Spot'),
+                'alert_price': entry.get('AlertPrice'),
+            })
+    return candidates
+
+
