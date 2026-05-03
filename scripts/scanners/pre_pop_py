@@ -95,13 +95,13 @@ def score_alert(alert, profile, overlap_map):
 
     return {'score': score, 'reasons': reasons}
 
-def cycle():
-    if not is_market_hours():
+def cycle(force=False, lookback_hours=4, threshold=30):
+    if not force and not is_market_hours():
         logging.info('outside market hours')
         return []
     profile = load_profile()
     overlap_map = load_overlap_symbols()
-    cutoff = int(time.time()) - 4*3600  # alerts from last 4h
+    cutoff = int(time.time()) - lookback_hours*3600
 
     candidates = []
     for feed in ['flow_alerts_today', 'flow2_alerts_today']:
@@ -121,7 +121,7 @@ def cycle():
                     if ts < cutoff: continue
                 except: continue
             scored = score_alert(alert, profile, overlap_map)
-            if scored['score'] < 30: continue  # threshold
+            if scored['score'] < threshold: continue
             sym = alert.get('Symbol')
             strike = alert.get('Strike')
             is_put = alert.get('IsPut', 0)
@@ -149,7 +149,7 @@ def cycle():
 
     out_data = {
         'generated_at': datetime.now(tz=timezone.utc).isoformat(),
-        'lookback_hours': 4,
+        'lookback_hours': lookback_hours,
         'candidates_count': len(candidates),
         'top_10': candidates[:10],
     }
@@ -187,14 +187,27 @@ def post_summary(candidates):
     except Exception as e: logging.warning(f'post err: {e}')
 
 def main():
-    logging.info('pre_pop starting')
-    while True:
-        try:
-            candidates = cycle()
-            post_summary(candidates)
-        except Exception as e:
-            logging.error(f'cycle err: {e}', exc_info=True)
-        time.sleep(300)  # 5 min
+    """One-shot - runs single cycle then exits (cron-managed)."""
+    import argparse
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--force', action='store_true', help='Bypass market hours gate')
+    parser.add_argument('--lookback', type=int, default=4, help='Lookback hours for alerts')
+    parser.add_argument('--threshold', type=int, default=30, help='Min composite score')
+    args = parser.parse_args()
+    
+    logging.info('pre_pop one-shot starting')
+    if args.force:
+        logging.info('--force flag - bypassing market hours gate')
+    if args.lookback != 4:
+        logging.info(f'--lookback {args.lookback}h')
+    
+    try:
+        candidates = cycle(force=args.force, lookback_hours=args.lookback, threshold=args.threshold)
+        post_summary(candidates)
+        logging.info(f'done, {len(candidates)} candidates')
+    except Exception as e:
+        logging.error(f'cycle err: {e}', exc_info=True)
+        raise
 
 if __name__ == '__main__':
     main()
