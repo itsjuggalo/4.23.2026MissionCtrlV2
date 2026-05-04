@@ -438,6 +438,29 @@ def relay_flow_live(state):
     return state
 
 # ─── RELAY: OPTION NOTIFICATIONS (SCALPS + SWINGS) ────────────────────────────
+
+# ── BACKLOG GUARDS (fix A + B) ────────────────────────────────────────────────
+# A: bootstrap_seen — first time a bucket runs, mark all current scraped IDs as
+#    already-sent. Prevents 988-message dumps when a new bucket is introduced.
+# B: SEND_CAP_PER_CYCLE — hard cap on posts per bucket per cycle. Drains
+#    backlog gradually instead of triggering Discord 429 rate-limit storms.
+
+SEND_CAP_PER_CYCLE = 5
+
+def bootstrap_seen(state, bucket_key, scraped_ids):
+    """If this sent-bucket has never been populated, mark current scraped data
+    as already-sent. Returns the (now-bootstrapped) sent set."""
+    sent = set(state.get(bucket_key, []))
+    if not sent and scraped_ids:
+        sent = set(str(x) for x in scraped_ids)
+        state[bucket_key] = list(sent)
+        try:
+            logging.warning(f"[bootstrap] {bucket_key}: marked {len(sent)} IDs as already-sent (first run protection)")
+        except Exception:
+            pass
+    return sent
+# ──────────────────────────────────────────────────────────────────────────────
+
 def relay_option_notifications(state):
     data = read_data("option_notifications")
     if not data or not isinstance(data, dict):
@@ -1101,6 +1124,10 @@ def relay_ts_picks(state):
     _max_per_cycle = 200
     _posted_count = 0
     sent = set(state.get("ts_picks_sent", []))
+    _bucket = "ts_picks_sent"  # patched
+    _scraped_keys_seed = set()
+    _posted_this_cycle = 0
+
     new = []
     for fname, label in [("ts_short_term_options", "TS ST OPTION"),
                           ("ts_long_term_options", "TS LT OPTION"),
@@ -1128,6 +1155,10 @@ def relay_ts_closed(state):
     _max_per_cycle = 200
     _posted_count = 0
     sent = set(state.get("ts_closed_sent", []))
+    _bucket = "ts_closed_sent"  # patched
+    _scraped_keys_seed = set()
+    _posted_this_cycle = 0
+
     new = []
     for fname, kind in [("ts_closed_options", "OPTION"), ("ts_closed_stocks", "STOCK")]:
         d = read_data(fname)
@@ -1152,6 +1183,10 @@ def relay_ts_mgmt(state):
     _max_per_cycle = 200
     _posted_count = 0
     sent = set(state.get("ts_mgmt_sent", []))
+    _bucket = "ts_mgmt_sent"  # patched
+    _scraped_keys_seed = set()
+    _posted_this_cycle = 0
+
     new = []
     for fname in ["ts_option_notifications", "ts_stock_notifications"]:
         d = read_data(fname)
@@ -1178,6 +1213,10 @@ def relay_ss_picks(state):
     _max_per_cycle = 200
     _posted_count = 0
     sent = set(state.get("ss_picks_sent", []))
+    _bucket = "ss_picks_sent"  # patched
+    _scraped_keys_seed = set()
+    _posted_this_cycle = 0
+
     new = []
     for fname, label in [("ss_short_term_options", "SS ST OPTION"),
                           ("ss_long_term_options", "SS LT OPTION"),
@@ -1229,6 +1268,10 @@ def relay_ss_mgmt(state):
     _max_per_cycle = 200
     _posted_count = 0
     sent = set(state.get("ss_mgmt_sent", []))
+    _bucket = "ss_mgmt_sent"  # patched
+    _scraped_keys_seed = set()
+    _posted_this_cycle = 0
+
     new = []
     for fname in ["ss_option_notifications", "ss_stock_notifications"]:
         d = read_data(fname)
