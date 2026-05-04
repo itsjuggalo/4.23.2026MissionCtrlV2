@@ -1,6 +1,6 @@
 """
 flow_greeks_relay - polls AInvest Firebase RTDB /FlowGreeks/Alerts/today
-and /FlowGreeks2/Alerts/today, forwards NotifyAlert==1 to Discord.
+and /FlowGreeks2/Alerts/today, forwards ALL new alerts to Discord.
 
 Mirrors the alert stream that drives Flow Greeks app push notifications,
 no FCM / phone / BlueStacks needed.
@@ -148,7 +148,7 @@ def main():
     seen = load_seen()
     log.info(f"starting; {len(seen)} previously seen alerts in state")
     log.info(f"polling every {POLL_INTERVAL}s")
-    log.info(f"sources: FlowGreeks + FlowGreeks2 (NotifyAlert==1 only)")
+    log.info(f"sources: FlowGreeks + FlowGreeks2 (ALL alerts, NotifyAlert in footer)")
 
     while True:
         try:
