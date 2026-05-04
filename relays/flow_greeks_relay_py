@@ -126,7 +126,10 @@ def post_to_discord(webhook, embed):
     req = urllib.request.Request(
         webhook,
         data=body,
-        headers={"Content-Type": "application/json"},
+        headers={
+            "Content-Type": "application/json",
+            "User-Agent": "MissionCtrl-flow-relay/1.0 (+https://github.com/itsjuggalo)",
+        },
         method="POST",
     )
     try:
