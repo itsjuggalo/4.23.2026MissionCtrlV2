@@ -1,11 +1,12 @@
 """
-flow_greeks_relay - polls AInvest Firebase RTDB /FlowGreeks/Alerts/today
+flow_greeks_relay - polls stock-signal-72772 vendor RTDB (Option Signals + Flow Greeks publisher) /FlowGreeks/Alerts/today
 and /FlowGreeks2/Alerts/today, forwards ALL new alerts to Discord.
 
 Mirrors the alert stream that drives Flow Greeks app push notifications,
 no FCM / phone / BlueStacks needed.
 """
 import json
+import re
 import os
 import time
 import logging
@@ -80,6 +81,21 @@ CATEGORY_EMOJI = {
 }
 
 
+def format_occ(occ):
+    """Convert OCC symbol like AMZN270115C00310000 to human form 'AMZN 1/15/27 $310C'."""
+    try:
+        m = re.match(r'^([A-Z]+)(\d{6})([CP])(\d{8})$', occ)
+        if not m:
+            return occ
+        sym, yymmdd, cp, strike_raw = m.groups()
+        yy, mm, dd = yymmdd[:2], yymmdd[2:4], yymmdd[4:6]
+        strike = int(strike_raw) / 1000
+        strike_str = f"{int(strike)}" if strike == int(strike) else f"{strike:g}"
+        return f"{sym} {int(mm)}/{int(dd)}/{yy} ${strike_str}{cp}"
+    except Exception:
+        return occ
+
+
 def fmt_alert(opt_key, alert, source):
     sym = alert.get("Symbol", "?")
     typ = alert.get("OptionType", "?")
@@ -87,7 +103,9 @@ def fmt_alert(opt_key, alert, source):
     dte = alert.get("DTE", "?")
     cat = alert.get("AlertType", "unknown")
     emoji = CATEGORY_EMOJI.get(cat, "⚡")
-    bull = "🟢 CALL" if alert.get("isBullish") else "🔴 PUT"
+    type_label = "CALL" if str(typ).upper().startswith("C") else "PUT"
+    sentiment_emoji = "🟢" if alert.get("isBullish") else "🔴"
+    bull = f"{sentiment_emoji} {type_label}"
     flow_val = alert.get("totalFlowValue", 0) or 0
     sweeps = alert.get("SWEEPS", 0)
     blocks = alert.get("BLOCKS", 0)
@@ -116,7 +134,7 @@ def fmt_alert(opt_key, alert, source):
         "title": title,
         "color": color,
         "fields": fields,
-        "footer": {"text": f"{source} · {opt_key} · {et} · NotifyAlert={alert.get('NotifyAlert', '?')}"},
+        "footer": {"text": f"{source} · {format_occ(opt_key)} · {et}"},
     }
     return embed
 
