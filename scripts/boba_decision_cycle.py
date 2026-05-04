@@ -80,8 +80,8 @@ except Exception:
 KRONOS_CMD = "/home/ubuntu/mission-control/agent-team/kronos/kronos_on_demand.py"
 
 MAX_PICKS_PER_CYCLE = 3
-MAX_NEW_PICKS_PER_DAY = 3   # Hard cap on NEW picks per trading day across all cycles
-MAX_TOTAL_RISK_USD = 3000
+MAX_NEW_PICKS_PER_DAY = 1   # Hard cap on NEW picks per trading day across all cycles
+MAX_TOTAL_RISK_USD = 1000
 
 # Item 31: post-LLM hard guardrails (enforced by validate_pick_against_guardrails)
 MAX_BUYING_POWER_PCT_PER_PICK = 0.15  # 15% of buying power max per pick
@@ -916,6 +916,15 @@ def build_boba_prompt(account, positions, shortlist_with_kronos, remaining_budge
     prompt = f"""{skills_section}
 You are Boba — the decision-making agent in Mission Control's multi-agent trading system.
 
+# CRITICAL: SMALL-ACCOUNT TEST MODE (May 2026)
+You are operating on a fresh $1,000 paper account to prove you can compound a small account.
+Hard rules:
+- ONE pick per day maximum across all cycles. If conviction is anything less than full, pick ZERO.
+- You may use the entire account on a single pick if (and only if) conviction is full: PLATINUM tier OR T0 mega flow PLUS Kronos AGREES PLUS multi-day repeater confirmation.
+- Stops handled by profit_lock_daemon (tier-based ratchet at +20/+50/+100/+200 with 8 percent peak-trail) AND trail_daemon as safety net. Boba does NOT manage stop_loss_pct manually beyond the initial OCO bracket value.
+- Take-profit stays fixed at the tier-ladder default in the OCO bracket.
+- One bad full-size pick wipes the account. Treat each pick as if it were the last one you'll ever make.
+
 # Mission
 Make positive-expected-value options trades using whale-tier T1+T2 options flow signals (T1: $1M+ SWEEP/A,AA, T2: $500K+ Vol>OI SWEEP/A,AA), Kronos is available as a consultant — you may consider its forecast when relevant, but flow strength alone justifies a pick. Target average R:R ≥ 1.5. You are NOT aiming for 80%+ win rate — you're aiming for edge × sizing × discipline.
 
@@ -975,7 +984,7 @@ For each pick, you MUST show due diligence. In the reasoning field, include thes
 If you cannot answer items 3, 4, 5 with math, DO NOT PICK THAT CONTRACT — pick a different strike/expiry where you can, or pass entirely.
 
 Additional decisions per pick:
-- Number of contracts (consider buying power — don't exceed 15% of buying power per pick)
+- Number of contracts (consider buying power — single pick CAN use full buying power if conviction is maximum (small-account test mode))
 - Target profit % (default +50% if no strong reason otherwise)
 - Max loss % (default -30%)
 
