@@ -878,11 +878,11 @@ def relay_winners_mirror(state):
                 logging.info(f"[winners] posted {symbol} pct={pct} brand={brand}")
             _posted_count += 1
             if _posted_count >= _max_per_cycle:
-                if new_sent: state["winners_mirror_sent"] = list(set(state.get("winners_mirror_sent", []) + new_sent))[-5000:]
+                if new_sent: state["winners_mirror_sent"] = list(set(state.get("winners_mirror_sent", []) + new_sent))[-50000:]
                 return state
                 time.sleep(1.2)
     if new_sent:
-        state["winners_mirror_sent"] = list(sent | set(new_sent))[-5000:]
+        state["winners_mirror_sent"] = list(sent | set(new_sent))[-50000:]
     return state
 
 
@@ -933,7 +933,7 @@ def relay_picks_mirror(state):
                 logging.info(f"[picks] posted {symbol} {label}")
                 time.sleep(1.2)
     if new_sent:
-        state["picks_mirror_sent"] = list(sent | set(new_sent))[-5000:]
+        state["picks_mirror_sent"] = list(sent | set(new_sent))[-50000:]
     return state
 
 
@@ -964,7 +964,7 @@ def relay_management_mirror(state):
                 logging.info(f"[mgmt] posted {title or entry_id}")
                 time.sleep(1.2)
     if new_sent:
-        state["management_mirror_sent"] = list(sent | set(new_sent))[-5000:]
+        state["management_mirror_sent"] = list(sent | set(new_sent))[-50000:]
     return state
 
 
@@ -1002,7 +1002,7 @@ def relay_fg1_mirror(state):
             logging.info(f"[fg1] posted {sym} {at}")
             time.sleep(1.2)
     if new_sent:
-        state["fg1_mirror_sent"] = list(sent | set(new_sent))[-5000:]
+        state["fg1_mirror_sent"] = list(sent | set(new_sent))[-50000:]
     return state
 
 
@@ -1117,10 +1117,10 @@ def relay_ts_picks(state):
                 logging.info(f"[ts_picks] posted {e.get('symbol','?')}")
             _posted_count += 1
             if _posted_count >= _max_per_cycle:
-                if new: state["ts_picks_sent"] = list(set(state.get("ts_picks_sent", []) + new))[-5000:]
+                if new: state["ts_picks_sent"] = list(set(state.get("ts_picks_sent", []) + new))[-50000:]
                 return state
                 time.sleep(1.2)
-    if new: state["ts_picks_sent"] = list(sent | set(new))[-5000:]
+    if new: state["ts_picks_sent"] = list(sent | set(new))[-50000:]
     return state
 
 
@@ -1141,10 +1141,10 @@ def relay_ts_closed(state):
                 logging.info(f"[ts_closed] posted {e.get('symbol','?')}")
             _posted_count += 1
             if _posted_count >= _max_per_cycle:
-                if new: state["ts_closed_sent"] = list(set(state.get("ts_closed_sent", []) + new))[-5000:]
+                if new: state["ts_closed_sent"] = list(set(state.get("ts_closed_sent", []) + new))[-50000:]
                 return state
                 time.sleep(1.2)
-    if new: state["ts_closed_sent"] = list(sent | set(new))[-5000:]
+    if new: state["ts_closed_sent"] = list(sent | set(new))[-50000:]
     return state
 
 
@@ -1166,10 +1166,10 @@ def relay_ts_mgmt(state):
                 logging.info(f"[ts_mgmt] posted {e.get('title','?')[:30]}")
             _posted_count += 1
             if _posted_count >= _max_per_cycle:
-                if new: state["ts_mgmt_sent"] = list(set(state.get("ts_mgmt_sent", []) + new))[-5000:]
+                if new: state["ts_mgmt_sent"] = list(set(state.get("ts_mgmt_sent", []) + new))[-50000:]
                 return state
                 time.sleep(1.2)
-    if new: state["ts_mgmt_sent"] = list(sent | set(new))[-5000:]
+    if new: state["ts_mgmt_sent"] = list(sent | set(new))[-50000:]
     return state
 
 
@@ -1194,10 +1194,10 @@ def relay_ss_picks(state):
                 logging.info(f"[ss_picks] posted {e.get('symbol','?')}")
             _posted_count += 1
             if _posted_count >= _max_per_cycle:
-                if new: state["ss_picks_sent"] = list(set(state.get("ss_picks_sent", []) + new))[-5000:]
+                if new: state["ss_picks_sent"] = list(set(state.get("ss_picks_sent", []) + new))[-50000:]
                 return state
                 time.sleep(1.2)
-    if new: state["ss_picks_sent"] = list(sent | set(new))[-5000:]
+    if new: state["ss_picks_sent"] = list(sent | set(new))[-50000:]
     return state
 
 
@@ -1218,10 +1218,10 @@ def relay_ss_closed(state):
                 logging.info(f"[ss_closed] posted {e.get('symbol','?')}")
             _posted_count += 1
             if _posted_count >= _max_per_cycle:
-                if new: state["ss_closed_sent"] = list(set(state.get("ss_closed_sent", []) + new))[-5000:]
+                if new: state["ss_closed_sent"] = list(set(state.get("ss_closed_sent", []) + new))[-50000:]
                 return state
                 time.sleep(1.2)
-    if new: state["ss_closed_sent"] = list(sent | set(new))[-5000:]
+    if new: state["ss_closed_sent"] = list(sent | set(new))[-50000:]
     return state
 
 
@@ -1238,15 +1238,17 @@ def relay_ss_mgmt(state):
             sk = f"ssm|{fname}|{k}"
             if sk in sent: continue
             if not (e.get("title") or e.get("message")): continue
-            if _post_to("ss_mgmt", _format_mgmt(e), "ss_mgmt"):
-                new.append(sk)
+            # Mark as attempted FIRST so rate-limit retries dedup correctly
+            new.append(sk)
+            ok = _post_to("ss_mgmt", _format_mgmt(e), "ss_mgmt")
+            if ok:
                 logging.info(f"[ss_mgmt] posted {e.get('title','?')[:30]}")
-            _posted_count += 1
+                _posted_count += 1
             if _posted_count >= _max_per_cycle:
-                if new: state["ss_mgmt_sent"] = list(set(state.get("ss_mgmt_sent", []) + new))[-5000:]
+                state["ss_mgmt_sent"] = list(set(state.get("ss_mgmt_sent", []) + new))[-50000:]
                 return state
-                time.sleep(1.2)
-    if new: state["ss_mgmt_sent"] = list(sent | set(new))[-5000:]
+            time.sleep(0.3)
+    if new: state["ss_mgmt_sent"] = list(sent | set(new))[-50000:]
     return state
 
 
@@ -1267,10 +1269,10 @@ def relay_os_closed_stocks(state):
             logging.info(f"[os_closed_stocks] posted {e.get('symbol','?')}")
             _posted_count += 1
             if _posted_count >= _max_per_cycle:
-                if new: state["os_closed_stocks_sent"] = list(set(state.get("os_closed_stocks_sent", []) + new))[-5000:]
+                if new: state["os_closed_stocks_sent"] = list(set(state.get("os_closed_stocks_sent", []) + new))[-50000:]
                 return state
             time.sleep(1.2)
-    if new: state["os_closed_stocks_sent"] = list(sent | set(new))[-5000:]
+    if new: state["os_closed_stocks_sent"] = list(sent | set(new))[-50000:]
     return state
 
 
@@ -1601,7 +1603,7 @@ def relay_flow2_phone_mirror(state):
     if new_sent:
         all_sent = list(sent | set(new_sent))
         # Cap tracked IDs to last 5000 to avoid unbounded growth
-        state["flow2_phone_sent"] = all_sent[-5000:]
+        state["flow2_phone_sent"] = all_sent[-50000:]
     return state
 
 

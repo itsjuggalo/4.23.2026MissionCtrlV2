@@ -1,0 +1,23 @@
+package i9;
+
+/* JADX INFO: compiled from: r8-map-id-f7c0ba7912e30bee969b60fc55dfe505a38d9b7b2320734346e2a4068d44c6f7 */
+/* JADX INFO: loaded from: classes.dex */
+public interface m1 {
+    void d(j9.k kVar);
+
+    void e(j9.k kVar);
+
+    void g();
+
+    void h(n1 n1Var);
+
+    long i();
+
+    void m(j9.k kVar);
+
+    void n(j9.k kVar);
+
+    void o(n4 n4Var);
+
+    void onTransactionCommitted();
+}

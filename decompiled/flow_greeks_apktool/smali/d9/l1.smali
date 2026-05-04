@@ -1,0 +1,120 @@
+.class public final synthetic Ld9/l1;
+.super Ljava/lang/Object;
+.source "r8-map-id-f7c0ba7912e30bee969b60fc55dfe505a38d9b7b2320734346e2a4068d44c6f7"
+
+# interfaces
+.implements Ld9/r;
+
+
+# instance fields
+.field public final synthetic a:Lcom/google/firebase/firestore/i;
+
+.field public final synthetic b:Ld9/r;
+
+
+# direct methods
+.method public synthetic constructor <init>(Lcom/google/firebase/firestore/i;Ld9/r;)V
+    .locals 0
+
+    .line 1
+    invoke-direct {p0}, Ljava/lang/Object;-><init>()V
+
+    .line 2
+    .line 3
+    .line 4
+    iput-object p1, p0, Ld9/l1;->a:Lcom/google/firebase/firestore/i;
+
+    .line 5
+    .line 6
+    iput-object p2, p0, Ld9/l1;->b:Ld9/r;
+
+    .line 7
+    .line 8
+    return-void
+    .line 9
+    .line 10
+    .line 11
+    .line 12
+    .line 13
+    .line 14
+    .line 15
+    .line 16
+    .line 17
+    .line 18
+    .line 19
+    .line 20
+    .line 21
+    .line 22
+    .line 23
+    .line 24
+    .line 25
+    .line 26
+    .line 27
+    .line 28
+    .line 29
+    .line 30
+    .line 31
+    .line 32
+    .line 33
+    .line 34
+    .line 35
+    .line 36
+    .line 37
+    .line 38
+    .line 39
+.end method
+
+
+# virtual methods
+.method public final a(Ljava/lang/Object;Lcom/google/firebase/firestore/f;)V
+    .locals 2
+
+    .line 1
+    iget-object v0, p0, Ld9/l1;->a:Lcom/google/firebase/firestore/i;
+
+    .line 2
+    .line 3
+    iget-object v1, p0, Ld9/l1;->b:Ld9/r;
+
+    .line 4
+    .line 5
+    check-cast p1, Lg9/y1;
+
+    .line 6
+    .line 7
+    invoke-static {v0, v1, p1, p2}, Lcom/google/firebase/firestore/i;->e(Lcom/google/firebase/firestore/i;Ld9/r;Lg9/y1;Lcom/google/firebase/firestore/f;)V
+
+    .line 8
+    .line 9
+    .line 10
+    return-void
+    .line 11
+    .line 12
+    .line 13
+    .line 14
+    .line 15
+    .line 16
+    .line 17
+    .line 18
+    .line 19
+    .line 20
+    .line 21
+    .line 22
+    .line 23
+    .line 24
+    .line 25
+    .line 26
+    .line 27
+    .line 28
+    .line 29
+    .line 30
+    .line 31
+    .line 32
+    .line 33
+    .line 34
+    .line 35
+    .line 36
+    .line 37
+    .line 38
+    .line 39
+.end method

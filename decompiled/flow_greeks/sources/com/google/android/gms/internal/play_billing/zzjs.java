@@ -1,0 +1,44 @@
+package com.google.android.gms.internal.play_billing;
+
+/* JADX INFO: compiled from: r8-map-id-f7c0ba7912e30bee969b60fc55dfe505a38d9b7b2320734346e2a4068d44c6f7 */
+/* JADX INFO: loaded from: classes.dex */
+public final class zzjs extends zzfi implements zzgm {
+    private static final zzjs zzb;
+    private int zzd;
+    private int zze;
+
+    static {
+        zzjs zzjsVar = new zzjs();
+        zzb = zzjsVar;
+        zzfi.zzw(zzjs.class, zzjsVar);
+    }
+
+    private zzjs() {
+    }
+
+    public static zzjs zzd() {
+        return zzb;
+    }
+
+    @Override // com.google.android.gms.internal.play_billing.zzfi
+    public final Object zzb(int i10, Object obj, Object obj2) {
+        int i11 = i10 - 1;
+        if (i11 == 0) {
+            return (byte) 1;
+        }
+        if (i11 == 2) {
+            return zzfi.zzt(zzb, "\u0004\u0001\u0000\u0001\u0001\u0001\u0001\u0000\u0000\u0000\u0001᠌\u0000", new Object[]{"zzd", "zze", zzjq.zza});
+        }
+        if (i11 == 3) {
+            return new zzjs();
+        }
+        zzjr zzjrVar = null;
+        if (i11 == 4) {
+            return new zzjp(zzjrVar);
+        }
+        if (i11 == 5) {
+            return zzb;
+        }
+        throw null;
+    }
+}

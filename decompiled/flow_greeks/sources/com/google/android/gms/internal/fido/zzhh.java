@@ -1,0 +1,42 @@
+package com.google.android.gms.internal.fido;
+
+import java.util.Arrays;
+
+/* JADX INFO: compiled from: r8-map-id-f7c0ba7912e30bee969b60fc55dfe505a38d9b7b2320734346e2a4068d44c6f7 */
+/* JADX INFO: loaded from: classes.dex */
+public final class zzhh extends zzhp {
+    private final boolean zza;
+
+    public zzhh(boolean z10) {
+        this.zza = z10;
+    }
+
+    @Override // java.lang.Comparable
+    public final /* bridge */ /* synthetic */ int compareTo(Object obj) {
+        zzhp zzhpVar = (zzhp) obj;
+        if (zzhp.zzd((byte) -32) != zzhpVar.zza()) {
+            return zzhp.zzd((byte) -32) - zzhpVar.zza();
+        }
+        return (true != this.zza ? 20 : 21) - (true != ((zzhh) zzhpVar).zza ? 20 : 21);
+    }
+
+    public final boolean equals(Object obj) {
+        if (this == obj) {
+            return true;
+        }
+        return obj != null && zzhh.class == obj.getClass() && this.zza == ((zzhh) obj).zza;
+    }
+
+    public final int hashCode() {
+        return Arrays.hashCode(new Object[]{Integer.valueOf(zzhp.zzd((byte) -32)), Boolean.valueOf(this.zza)});
+    }
+
+    public final String toString() {
+        return Boolean.toString(this.zza);
+    }
+
+    @Override // com.google.android.gms.internal.fido.zzhp
+    public final int zza() {
+        return zzhp.zzd((byte) -32);
+    }
+}

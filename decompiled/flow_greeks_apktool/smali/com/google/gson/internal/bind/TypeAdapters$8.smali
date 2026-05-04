@@ -1,0 +1,234 @@
+.class Lcom/google/gson/internal/bind/TypeAdapters$8;
+.super Lcom/google/gson/TypeAdapter;
+.source "r8-map-id-f7c0ba7912e30bee969b60fc55dfe505a38d9b7b2320734346e2a4068d44c6f7"
+
+
+# annotations
+.annotation system Ldalvik/annotation/EnclosingClass;
+    value = Lcom/google/gson/internal/bind/TypeAdapters;
+.end annotation
+
+.annotation system Ldalvik/annotation/InnerClass;
+    accessFlags = 0x1
+    name = null
+.end annotation
+
+.annotation system Ldalvik/annotation/Signature;
+    value = {
+        "Lcom/google/gson/TypeAdapter;"
+    }
+.end annotation
+
+
+# direct methods
+.method public constructor <init>()V
+    .locals 0
+
+    .line 1
+    invoke-direct {p0}, Lcom/google/gson/TypeAdapter;-><init>()V
+
+    .line 2
+    .line 3
+    .line 4
+    return-void
+    .line 5
+    .line 6
+    .line 7
+    .line 8
+    .line 9
+    .line 10
+    .line 11
+    .line 12
+    .line 13
+    .line 14
+    .line 15
+    .line 16
+.end method
+
+
+# virtual methods
+.method public bridge synthetic c(Lgb/a;)Ljava/lang/Object;
+    .locals 0
+
+    .line 1
+    invoke-virtual {p0, p1}, Lcom/google/gson/internal/bind/TypeAdapters$8;->f(Lgb/a;)Ljava/util/concurrent/atomic/AtomicInteger;
+
+    .line 2
+    .line 3
+    .line 4
+    move-result-object p1
+
+    .line 5
+    return-object p1
+    .line 6
+    .line 7
+    .line 8
+    .line 9
+    .line 10
+    .line 11
+    .line 12
+    .line 13
+    .line 14
+    .line 15
+    .line 16
+    .line 17
+    .line 18
+    .line 19
+    .line 20
+    .line 21
+    .line 22
+    .line 23
+    .line 24
+.end method
+
+.method public bridge synthetic e(Lgb/c;Ljava/lang/Object;)V
+    .locals 0
+
+    .line 1
+    check-cast p2, Ljava/util/concurrent/atomic/AtomicInteger;
+
+    .line 2
+    .line 3
+    invoke-virtual {p0, p1, p2}, Lcom/google/gson/internal/bind/TypeAdapters$8;->g(Lgb/c;Ljava/util/concurrent/atomic/AtomicInteger;)V
+
+    .line 4
+    .line 5
+    .line 6
+    return-void
+    .line 7
+    .line 8
+    .line 9
+    .line 10
+    .line 11
+    .line 12
+    .line 13
+    .line 14
+    .line 15
+    .line 16
+    .line 17
+    .line 18
+    .line 19
+    .line 20
+    .line 21
+    .line 22
+    .line 23
+    .line 24
+    .line 25
+    .line 26
+    .line 27
+    .line 28
+    .line 29
+    .line 30
+    .line 31
+    .line 32
+    .line 33
+    .line 34
+    .line 35
+    .line 36
+    .line 37
+    .line 38
+    .line 39
+.end method
+
+.method public f(Lgb/a;)Ljava/util/concurrent/atomic/AtomicInteger;
+    .locals 1
+
+    .line 1
+    :try_start_0
+    new-instance v0, Ljava/util/concurrent/atomic/AtomicInteger;
+
+    .line 2
+    .line 3
+    invoke-virtual {p1}, Lgb/a;->f0()I
+
+    .line 4
+    .line 5
+    .line 6
+    move-result p1
+
+    .line 7
+    invoke-direct {v0, p1}, Ljava/util/concurrent/atomic/AtomicInteger;-><init>(I)V
+    :try_end_0
+    .catch Ljava/lang/NumberFormatException; {:try_start_0 .. :try_end_0} :catch_0
+
+    .line 8
+    .line 9
+    .line 10
+    return-object v0
+
+    .line 11
+    :catch_0
+    move-exception p1
+
+    .line 12
+    new-instance v0, Lcom/google/gson/p;
+
+    .line 13
+    .line 14
+    invoke-direct {v0, p1}, Lcom/google/gson/p;-><init>(Ljava/lang/Throwable;)V
+
+    .line 15
+    .line 16
+    .line 17
+    throw v0
+    .line 18
+    .line 19
+    .line 20
+    .line 21
+    .line 22
+    .line 23
+    .line 24
+.end method
+
+.method public g(Lgb/c;Ljava/util/concurrent/atomic/AtomicInteger;)V
+    .locals 2
+
+    .line 1
+    invoke-virtual {p2}, Ljava/util/concurrent/atomic/AtomicInteger;->get()I
+
+    .line 2
+    .line 3
+    .line 4
+    move-result p2
+
+    .line 5
+    int-to-long v0, p2
+
+    .line 6
+    invoke-virtual {p1, v0, v1}, Lgb/c;->l0(J)Lgb/c;
+
+    .line 7
+    .line 8
+    .line 9
+    return-void
+    .line 10
+    .line 11
+    .line 12
+    .line 13
+    .line 14
+    .line 15
+    .line 16
+    .line 17
+    .line 18
+    .line 19
+    .line 20
+    .line 21
+    .line 22
+    .line 23
+    .line 24
+    .line 25
+    .line 26
+    .line 27
+    .line 28
+    .line 29
+    .line 30
+    .line 31
+    .line 32
+    .line 33
+    .line 34
+    .line 35
+    .line 36
+    .line 37
+    .line 38
+    .line 39
+.end method

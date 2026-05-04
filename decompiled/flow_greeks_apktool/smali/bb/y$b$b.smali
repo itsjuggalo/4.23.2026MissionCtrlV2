@@ -1,0 +1,195 @@
+.class public final Lbb/y$b$b;
+.super Lcom/google/protobuf/y$a;
+.source "r8-map-id-f7c0ba7912e30bee969b60fc55dfe505a38d9b7b2320734346e2a4068d44c6f7"
+
+# interfaces
+.implements Lcom/google/protobuf/v0;
+
+
+# annotations
+.annotation system Ldalvik/annotation/EnclosingClass;
+    value = Lbb/y$b;
+.end annotation
+
+.annotation system Ldalvik/annotation/InnerClass;
+    accessFlags = 0x19
+    name = "b"
+.end annotation
+
+
+# direct methods
+.method public constructor <init>()V
+    .locals 1
+
+    .line 2
+    invoke-static {}, Lbb/y$b;->Z()Lbb/y$b;
+
+    move-result-object v0
+
+    invoke-direct {p0, v0}, Lcom/google/protobuf/y$a;-><init>(Lcom/google/protobuf/y;)V
+
+    return-void
+.end method
+
+.method public synthetic constructor <init>(Lbb/y$a;)V
+    .locals 0
+
+    .line 1
+    invoke-direct {p0}, Lbb/y$b$b;-><init>()V
+
+    return-void
+.end method
+
+
+# virtual methods
+.method public A(Lbb/y$b$d;)Lbb/y$b$b;
+    .locals 1
+
+    .line 1
+    invoke-virtual {p0}, Lcom/google/protobuf/y$a;->q()V
+
+    .line 2
+    .line 3
+    .line 4
+    iget-object v0, p0, Lcom/google/protobuf/y$a;->b:Lcom/google/protobuf/y;
+
+    .line 5
+    .line 6
+    check-cast v0, Lbb/y$b;
+
+    .line 7
+    .line 8
+    invoke-static {v0, p1}, Lbb/y$b;->b0(Lbb/y$b;Lbb/y$b$d;)V
+
+    .line 9
+    .line 10
+    .line 11
+    return-object p0
+    .line 12
+    .line 13
+    .line 14
+    .line 15
+    .line 16
+    .line 17
+    .line 18
+    .line 19
+    .line 20
+    .line 21
+    .line 22
+    .line 23
+    .line 24
+.end method
+
+.method public x(Ljava/lang/String;)Lbb/y$b$b;
+    .locals 1
+
+    .line 1
+    invoke-virtual {p0}, Lcom/google/protobuf/y$a;->q()V
+
+    .line 2
+    .line 3
+    .line 4
+    iget-object v0, p0, Lcom/google/protobuf/y$a;->b:Lcom/google/protobuf/y;
+
+    .line 5
+    .line 6
+    check-cast v0, Lbb/y$b;
+
+    .line 7
+    .line 8
+    invoke-static {v0, p1}, Lbb/y$b;->d0(Lbb/y$b;Ljava/lang/String;)V
+
+    .line 9
+    .line 10
+    .line 11
+    return-object p0
+    .line 12
+    .line 13
+    .line 14
+    .line 15
+    .line 16
+    .line 17
+    .line 18
+    .line 19
+    .line 20
+    .line 21
+    .line 22
+    .line 23
+    .line 24
+.end method
+
+.method public y(Lbb/y$b$a;)Lbb/y$b$b;
+    .locals 1
+
+    .line 1
+    invoke-virtual {p0}, Lcom/google/protobuf/y$a;->q()V
+
+    .line 2
+    .line 3
+    .line 4
+    iget-object v0, p0, Lcom/google/protobuf/y$a;->b:Lcom/google/protobuf/y;
+
+    .line 5
+    .line 6
+    check-cast v0, Lbb/y$b;
+
+    .line 7
+    .line 8
+    invoke-static {v0, p1}, Lbb/y$b;->c0(Lbb/y$b;Lbb/y$b$a;)V
+
+    .line 9
+    .line 10
+    .line 11
+    return-object p0
+    .line 12
+    .line 13
+    .line 14
+    .line 15
+    .line 16
+    .line 17
+    .line 18
+    .line 19
+    .line 20
+    .line 21
+    .line 22
+    .line 23
+    .line 24
+.end method
+
+.method public z(Lbb/y$b$c;)Lbb/y$b$b;
+    .locals 1
+
+    .line 1
+    invoke-virtual {p0}, Lcom/google/protobuf/y$a;->q()V
+
+    .line 2
+    .line 3
+    .line 4
+    iget-object v0, p0, Lcom/google/protobuf/y$a;->b:Lcom/google/protobuf/y;
+
+    .line 5
+    .line 6
+    check-cast v0, Lbb/y$b;
+
+    .line 7
+    .line 8
+    invoke-static {v0, p1}, Lbb/y$b;->a0(Lbb/y$b;Lbb/y$b$c;)V
+
+    .line 9
+    .line 10
+    .line 11
+    return-object p0
+    .line 12
+    .line 13
+    .line 14
+    .line 15
+    .line 16
+    .line 17
+    .line 18
+    .line 19
+    .line 20
+    .line 21
+    .line 22
+    .line 23
+    .line 24
+.end method

@@ -1,0 +1,175 @@
+package com.amazon.a.a.o.b;
+
+import android.app.Application;
+import java.io.IOException;
+import java.security.GeneralSecurityException;
+import java.security.PublicKey;
+import java.security.cert.CertPath;
+import java.security.cert.Certificate;
+import java.security.cert.CertificateFactory;
+import java.security.cert.X509Certificate;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Enumeration;
+import java.util.List;
+import java.util.jar.JarEntry;
+import java.util.jar.JarFile;
+
+/* JADX INFO: compiled from: r8-map-id-f7c0ba7912e30bee969b60fc55dfe505a38d9b7b2320734346e2a4068d44c6f7 */
+/* JADX INFO: loaded from: classes.dex */
+public class c implements b {
+
+    /* JADX INFO: renamed from: a, reason: collision with root package name */
+    private static final com.amazon.a.a.o.c f4584a = new com.amazon.a.a.o.c("DataAuthenticationKeyLoaderV2");
+
+    /* JADX INFO: renamed from: b, reason: collision with root package name */
+    private static final String f4585b = "kiwi";
+
+    /* JADX INFO: renamed from: c, reason: collision with root package name */
+    private static final int f4586c = 0;
+
+    /* JADX INFO: renamed from: d, reason: collision with root package name */
+    @com.amazon.a.a.k.a
+    private Application f4587d;
+
+    /* JADX INFO: renamed from: e, reason: collision with root package name */
+    @com.amazon.a.a.k.a
+    private com.amazon.a.a.m.c f4588e;
+
+    private PublicKey b() {
+        if (com.amazon.a.a.o.c.f4603a) {
+            f4584a.a("Checking KiwiDataStore for key...");
+        }
+        PublicKey publicKey = (PublicKey) this.f4588e.a(com.amazon.a.a.m.c.f4392a);
+        if (com.amazon.a.a.o.c.f4603a) {
+            com.amazon.a.a.o.c cVar = f4584a;
+            StringBuilder sb2 = new StringBuilder();
+            sb2.append("Key was cached: ");
+            sb2.append(publicKey != null);
+            cVar.a(sb2.toString());
+        }
+        return publicKey;
+    }
+
+    private PublicKey c() throws com.amazon.a.a.o.b.a.a {
+        if (com.amazon.a.a.o.c.f4603a) {
+            f4584a.a("Loading authentication key from apk...");
+        }
+        CertPath certPathD = d();
+        if (!a(certPathD)) {
+            throw com.amazon.a.a.o.b.a.a.e();
+        }
+        d(certPathD);
+        return b(certPathD);
+    }
+
+    private CertPath d() throws com.amazon.a.a.o.b.a.a {
+        JarFile jarFileE = e();
+        return a(jarFileE, a(jarFileE));
+    }
+
+    private JarFile e() throws com.amazon.a.a.o.b.a.a {
+        String packageCodePath = this.f4587d.getPackageCodePath();
+        if (com.amazon.a.a.o.c.f4603a) {
+            f4584a.a("Opening apk: " + packageCodePath);
+        }
+        try {
+            return new JarFile(packageCodePath, false);
+        } catch (IOException e10) {
+            throw com.amazon.a.a.o.b.a.a.a((Throwable) e10);
+        }
+    }
+
+    private a f() throws com.amazon.a.a.o.b.a.a {
+        try {
+            return new a();
+        } catch (GeneralSecurityException e10) {
+            throw com.amazon.a.a.o.b.a.a.b((Throwable) e10);
+        }
+    }
+
+    @Override // com.amazon.a.a.o.b.b
+    public PublicKey a() throws com.amazon.a.a.o.b.a.a {
+        if (com.amazon.a.a.o.c.f4603a) {
+            f4584a.a("Loading data authentication key...");
+        }
+        PublicKey publicKeyB = b();
+        if (publicKeyB != null) {
+            return publicKeyB;
+        }
+        PublicKey publicKeyC = c();
+        a(publicKeyC);
+        return publicKeyC;
+    }
+
+    private void d(CertPath certPath) throws com.amazon.a.a.o.b.a.a {
+        if (!f().a(certPath)) {
+            throw com.amazon.a.a.o.b.a.a.f();
+        }
+    }
+
+    private JarEntry a(JarFile jarFile) throws com.amazon.a.a.o.b.a.a {
+        if (com.amazon.a.a.o.c.f4603a) {
+            f4584a.a("Searching for cert in apk");
+        }
+        Enumeration<JarEntry> enumerationEntries = jarFile.entries();
+        while (enumerationEntries.hasMoreElements()) {
+            JarEntry jarEntryNextElement = enumerationEntries.nextElement();
+            if (!jarEntryNextElement.isDirectory() && jarEntryNextElement.getName().equals(f4585b)) {
+                return jarEntryNextElement;
+            }
+        }
+        throw com.amazon.a.a.o.b.a.a.d();
+    }
+
+    private PublicKey b(CertPath certPath) {
+        return c(certPath).getPublicKey();
+    }
+
+    private X509Certificate c(CertPath certPath) {
+        return (X509Certificate) certPath.getCertificates().get(0);
+    }
+
+    private CertPath a(JarFile jarFile, JarEntry jarEntry) throws com.amazon.a.a.o.b.a.a {
+        try {
+            if (com.amazon.a.a.o.c.f4603a) {
+                f4584a.a("Extracting cert from entry: " + jarEntry.getName());
+            }
+            CertificateFactory certificateFactory = CertificateFactory.getInstance("X.509");
+            if (com.amazon.a.a.o.c.f4603a) {
+                f4584a.a("Generating certificates from entry input stream");
+            }
+            return certificateFactory.generateCertPath(a(certificateFactory.generateCertificates(jarFile.getInputStream(jarEntry))));
+        } catch (Exception e10) {
+            throw com.amazon.a.a.o.b.a.a.a((Throwable) e10);
+        }
+    }
+
+    public List<? extends Certificate> a(Collection<? extends Certificate> collection) {
+        return new ArrayList(collection);
+    }
+
+    private boolean a(CertPath certPath) {
+        if (certPath == null || certPath.getCertificates().size() <= 0) {
+            return false;
+        }
+        Certificate certificate = certPath.getCertificates().get(0);
+        if (certificate instanceof X509Certificate) {
+            String name = ((X509Certificate) certificate).getSubjectX500Principal().getName();
+            if (com.amazon.a.a.o.c.f4603a) {
+                f4584a.a("Kiwi Cert Details: " + name);
+            }
+            if (name.contains("O=Amazon.com\\, Inc.") && name.contains("C=US") && name.contains("ST=Washington") && name.contains("L=Seattle")) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private void a(PublicKey publicKey) {
+        if (com.amazon.a.a.o.c.f4603a) {
+            f4584a.a("Placing auth key into storage");
+        }
+        this.f4588e.a(com.amazon.a.a.m.c.f4392a, publicKey);
+    }
+}

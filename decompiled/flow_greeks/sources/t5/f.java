@@ -1,0 +1,18 @@
+package t5;
+
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
+
+/* JADX INFO: compiled from: r8-map-id-f7c0ba7912e30bee969b60fc55dfe505a38d9b7b2320734346e2a4068d44c6f7 */
+/* JADX INFO: loaded from: classes.dex */
+public abstract class f {
+    public static List a(Object obj) {
+        return Collections.singletonList(obj);
+    }
+
+    public static List b(Object... objArr) {
+        int length = objArr.length;
+        return length != 0 ? length != 1 ? Collections.unmodifiableList(Arrays.asList(objArr)) : Collections.singletonList(objArr[0]) : Collections.EMPTY_LIST;
+    }
+}

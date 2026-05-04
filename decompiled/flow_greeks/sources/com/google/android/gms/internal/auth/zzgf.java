@@ -1,0 +1,31 @@
+package com.google.android.gms.internal.auth;
+
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
+
+/* JADX INFO: compiled from: r8-map-id-f7c0ba7912e30bee969b60fc55dfe505a38d9b7b2320734346e2a4068d44c6f7 */
+/* JADX INFO: loaded from: classes.dex */
+final class zzgf {
+    private static final zzgf zza = new zzgf();
+    private final ConcurrentMap zzc = new ConcurrentHashMap();
+    private final zzgj zzb = new zzfp();
+
+    private zzgf() {
+    }
+
+    public static zzgf zza() {
+        return zza;
+    }
+
+    public final zzgi zzb(Class cls) {
+        zzfa.zzc(cls, "messageType");
+        zzgi zzgiVar = (zzgi) this.zzc.get(cls);
+        if (zzgiVar != null) {
+            return zzgiVar;
+        }
+        zzgi zzgiVarZza = this.zzb.zza(cls);
+        zzfa.zzc(cls, "messageType");
+        zzgi zzgiVar2 = (zzgi) this.zzc.putIfAbsent(cls, zzgiVarZza);
+        return zzgiVar2 == null ? zzgiVarZza : zzgiVar2;
+    }
+}

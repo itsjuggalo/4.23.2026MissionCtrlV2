@@ -1,0 +1,28 @@
+package io.flutter.plugins.webviewflutter;
+
+import android.webkit.PermissionRequest;
+import java.util.Arrays;
+import java.util.List;
+
+/* JADX INFO: compiled from: r8-map-id-f7c0ba7912e30bee969b60fc55dfe505a38d9b7b2320734346e2a4068d44c6f7 */
+/* JADX INFO: loaded from: classes3.dex */
+public class PermissionRequestProxyApi extends PigeonApiPermissionRequest {
+    public PermissionRequestProxyApi(ProxyApiRegistrar proxyApiRegistrar) {
+        super(proxyApiRegistrar);
+    }
+
+    @Override // io.flutter.plugins.webviewflutter.PigeonApiPermissionRequest
+    public void deny(PermissionRequest permissionRequest) {
+        permissionRequest.deny();
+    }
+
+    @Override // io.flutter.plugins.webviewflutter.PigeonApiPermissionRequest
+    public void grant(PermissionRequest permissionRequest, List<String> list) {
+        permissionRequest.grant((String[]) list.toArray(new String[0]));
+    }
+
+    @Override // io.flutter.plugins.webviewflutter.PigeonApiPermissionRequest
+    public List<String> resources(PermissionRequest permissionRequest) {
+        return Arrays.asList(permissionRequest.getResources());
+    }
+}

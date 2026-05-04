@@ -1,0 +1,21 @@
+.class public interface abstract Lve/r;
+.super Ljava/lang/Object;
+.source "r8-map-id-f7c0ba7912e30bee969b60fc55dfe505a38d9b7b2320734346e2a4068d44c6f7"
+
+# interfaces
+.implements Lve/q;
+.implements Lve/z;
+
+
+# virtual methods
+.method public abstract K()Z
+.end method
+
+.method public abstract getReturnType()Lve/x;
+.end method
+
+.method public abstract i()Ljava/util/List;
+.end method
+
+.method public abstract r()Lve/b;
+.end method
