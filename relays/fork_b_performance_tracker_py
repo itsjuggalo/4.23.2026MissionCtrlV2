@@ -1,0 +1,190 @@
+#!/usr/bin/env python3
+"""
+fork_b_performance_tracker - Build our own Magic/Lightning replacement.
+
+Reads flow_alerts_today.json + flow2_alerts_today.json (already scraped),
+tracks each contract's entry price, queries Tradier for current price every
+run, computes gain since alert, posts to Discord on +50/+100/+200% crossings.
+
+Replaces the FCM Magic/Lightning notification stream we can't subscribe to.
+Captures EVERY flow alert's performance, not just vendor cherry-picks.
+
+Cron: */15 13-20 * * 1-5 (every 15 min market hours weekdays ET)
+State: /home/ubuntu/.openclaw/state/fork_b_alert_history.json
+Webhook: discord_webhook_flow_alerts (reuse existing flow channel)
+"""
+import json, sys, time, urllib.request, urllib.error
+from pathlib import Path
+from datetime import datetime, timezone, timedelta
+
+DATA = Path("/home/ubuntu/mission-control-restored/Option-Signals-Scraper")
+SECRETS = Path("/home/ubuntu/.openclaw/secrets")
+STATE = Path("/home/ubuntu/.openclaw/state/fork_b_alert_history.json")
+THRESHOLDS = [50, 100, 200]  # percent gain milestones
+EMOJI = {50: "🎯", 100: "🚀", 200: "💎"}
+
+sys.path.insert(0, "/home/ubuntu/scripts/lib")
+try:
+    from tradier_client import fetch_option_quote
+except Exception as e:
+    print(f"[fork_b] tradier_client import failed: {e}", flush=True)
+    fetch_option_quote = None
+
+def load_webhook():
+    for name in ["discord_webhook_flow_alerts", "discord-webhook-flow-alerts-fg.txt"]:
+        p = SECRETS / name
+        if p.exists():
+            v = p.read_text().strip()
+            if v.startswith("https://"):
+                return v
+    return None
+
+def load_state():
+    if STATE.exists():
+        try: return json.loads(STATE.read_text())
+        except Exception: return {}
+    return {}
+
+def save_state(s):
+    STATE.parent.mkdir(parents=True, exist_ok=True)
+    STATE.write_text(json.dumps(s, indent=2))
+
+def load_alerts():
+    """Return list of alert dicts with normalized keys."""
+    out = []
+    for path, source in [(DATA/"flow_alerts_today.json", "FlowGreeks"),
+                         (DATA/"flow2_alerts_today.json", "FlowGreeks2")]:
+        if not path.exists():
+            continue
+        try:
+            d = json.load(open(path))
+        except Exception:
+            continue
+        items = d.values() if isinstance(d, dict) else (d if isinstance(d, list) else [])
+        for rec in items:
+            alert = rec.get("alert", rec) if isinstance(rec, dict) else {}
+            if not alert: continue
+            occ = alert.get("OptionSymbol") or alert.get("OCC")
+            if not occ: continue
+            out.append({
+                "occ": occ,
+                "source": source,
+                "ticker": alert.get("Symbol", "?"),
+                "alert_price": float(alert.get("AlertPrice", 0) or 0),
+                "alert_type": alert.get("AlertType", "?"),
+                "flow_value": float(alert.get("totalFlowValue", 0) or 0),
+                "alert_time": alert.get("Time", 0),
+            })
+    return out
+
+def parse_occ(occ):
+    """AMZN270115C00310000 -> (sym, yymmdd, C/P, strike_float)"""
+    import re
+    m = re.match(r'^([A-Z]+)(\d{6})([CP])(\d{8})$', occ)
+    if not m: return None
+    sym, yymmdd, cp, strike_raw = m.groups()
+    return sym, yymmdd, cp, int(strike_raw) / 1000
+
+def fetch_current_price(occ):
+    """Query Tradier for current mid via OCC symbol."""
+    if not fetch_option_quote:
+        return None
+    parsed = parse_occ(occ)
+    if not parsed:
+        return None
+    sym, yymmdd, cp, strike = parsed
+    expiry = f"20{yymmdd[:2]}-{yymmdd[2:4]}-{yymmdd[4:6]}"
+    opt_type = "call" if cp == "C" else "put"
+    try:
+        q = fetch_option_quote(sym, strike, opt_type, expiry)
+        if q and q.get("mid"):
+            return float(q["mid"])
+        if q and q.get("last"):
+            return float(q["last"])
+    except Exception as e:
+        print(f"[fork_b] tradier query failed for {occ}: {e}", flush=True)
+    return None
+
+def post_milestone(webhook, alert_info, threshold, current_px, entry_px, gain_pct):
+    sym = alert_info["ticker"]
+    occ = alert_info["occ"]
+    parsed = parse_occ(occ)
+    if parsed:
+        s, ymd, cp, strike = parsed
+        contract = f"{s} {int(ymd[2:4])}/{int(ymd[4:6])}/{ymd[:2]} ${int(strike) if strike==int(strike) else strike}{cp}"
+    else:
+        contract = occ
+    embed = {
+        "title": f"{EMOJI[threshold]} +{threshold}% — {contract}",
+        "description": f"**{alert_info['alert_type'].replace('_',' ').title()}** flow alert paid off",
+        "color": 0xff9800 if threshold == 50 else 0xe74c3c if threshold == 100 else 0x9c27b0,
+        "fields": [
+            {"name": "Entry @ alert", "value": f"${entry_px:.2f}", "inline": True},
+            {"name": "Current", "value": f"${current_px:.2f}", "inline": True},
+            {"name": "Gain", "value": f"+{gain_pct:.1f}%", "inline": True},
+            {"name": "Flow value", "value": f"${alert_info['flow_value']:,.0f}", "inline": True},
+            {"name": "Source", "value": alert_info["source"], "inline": True},
+        ],
+        "footer": {"text": f"Fork B perf tracker · {time.strftime('%H:%M ET')}"},
+    }
+    body = json.dumps({"embeds": [embed]}).encode()
+    req = urllib.request.Request(webhook, data=body,
+                                 headers={"Content-Type": "application/json",
+                                          "User-Agent": "MissionCtrl-fork-b/1.0"},
+                                 method="POST")
+    try:
+        with urllib.request.urlopen(req, timeout=10) as r:
+            return r.status in (200, 204)
+    except Exception as e:
+        print(f"[fork_b] discord post failed: {e}", flush=True)
+        return False
+
+def main():
+    webhook = load_webhook()
+    if not webhook:
+        print("[fork_b] no webhook configured, exiting", flush=True)
+        return
+    state = load_state()
+    alerts = load_alerts()
+    print(f"[fork_b] loaded {len(alerts)} alerts, state has {len(state)} tracked contracts", flush=True)
+    new_milestones = 0
+    queries = 0
+    for a in alerts:
+        occ = a["occ"]
+        rec = state.setdefault(occ, {
+            "entry_px": a["alert_price"],
+            "ticker": a["ticker"],
+            "alert_type": a["alert_type"],
+            "first_seen": a["alert_time"],
+            "alerted": [],  # thresholds already posted
+            "max_gain_pct": 0,
+        })
+        # Skip if alert price is 0 (no baseline)
+        if rec["entry_px"] <= 0:
+            continue
+        # Skip if all 3 thresholds already alerted
+        if all(t in rec["alerted"] for t in THRESHOLDS):
+            continue
+        # Query current price
+        current = fetch_current_price(occ)
+        queries += 1
+        if not current:
+            continue
+        gain_pct = (current - rec["entry_px"]) / rec["entry_px"] * 100
+        rec["max_gain_pct"] = max(rec.get("max_gain_pct", 0), gain_pct)
+        rec["last_check_px"] = current
+        rec["last_check_ts"] = int(time.time())
+        # Check thresholds
+        for t in THRESHOLDS:
+            if gain_pct >= t and t not in rec["alerted"]:
+                ok = post_milestone(webhook, a, t, current, rec["entry_px"], gain_pct)
+                if ok:
+                    rec["alerted"].append(t)
+                    new_milestones += 1
+                    print(f"[fork_b] posted +{t}% {a['ticker']} {occ} entry=${rec['entry_px']:.2f} current=${current:.2f}", flush=True)
+                    time.sleep(0.5)
+    save_state(state)
+    print(f"[fork_b] cycle done: {queries} tradier queries, {new_milestones} new milestone alerts posted", flush=True)
+
+if __name__ == "__main__":
+    main()
