@@ -81,6 +81,56 @@ CATEGORY_EMOJI = {
 }
 
 
+
+SECRETS_DIR = "/home/ubuntu/.openclaw/secrets"
+_SPOT_CACHE = {}  # sym -> (price, timestamp)
+_SPOT_TTL = 60   # seconds
+
+def _read_secret(name):
+    try:
+        with open(f"{SECRETS_DIR}/{name}") as f:
+            return f.read().strip()
+    except Exception:
+        return ""
+
+def fetch_spot(sym):
+    """Get live spot price for ticker via Alpaca snapshot. 60s cache. Returns float or None."""
+    if not sym:
+        return None
+    now = time.time()
+    cached = _SPOT_CACHE.get(sym)
+    if cached and (now - cached[1]) < _SPOT_TTL:
+        return cached[0]
+    try:
+        key = _read_secret("alpaca-boba-key-id")
+        sec = _read_secret("alpaca-boba-secret")
+        if not key or not sec:
+            return None
+        url = f"https://data.alpaca.markets/v2/stocks/{sym}/snapshot"
+        req = urllib.request.Request(url, headers={
+            "APCA-API-KEY-ID": key,
+            "APCA-API-SECRET-KEY": sec,
+        })
+        with urllib.request.urlopen(req, timeout=5) as r:
+            data = json.loads(r.read())
+        # Try latestTrade.p first, fallback to latestQuote midpoint
+        price = None
+        lt = (data.get("latestTrade") or {}).get("p")
+        if lt:
+            price = float(lt)
+        else:
+            lq = data.get("latestQuote") or {}
+            bid = lq.get("bp"); ask = lq.get("ap")
+            if bid and ask:
+                price = (float(bid) + float(ask)) / 2
+        if price:
+            _SPOT_CACHE[sym] = (price, now)
+        return price
+    except Exception as e:
+        log.warning(f"fetch_spot {sym} failed: {e}")
+        return None
+
+
 def format_occ(occ):
     """Convert OCC symbol like AMZN270115C00310000 to human form 'AMZN 1/15/27 $310C'."""
     try:
@@ -128,7 +178,7 @@ def fmt_alert(opt_key, alert, source):
         {"name": "DTE", "value": str(dte), "inline": True},
         {"name": "Sweeps / Blocks", "value": f"{sweeps} / {blocks}", "inline": True},
         {"name": "Alert Price", "value": f"${px}", "inline": True},
-        {"name": "Spot", "value": f"${spot:.2f}" if isinstance(spot, (int, float)) else str(spot), "inline": True},
+        {"name": "Spot", "value": (lambda s, sym: f"${s:.2f}" if s else (f"${fetch_spot(sym):.2f}" if fetch_spot(sym) else "n/a"))(spot, sym), "inline": True},
     ]
     embed = {
         "title": title,
