@@ -85,8 +85,8 @@ except Exception:
 KRONOS_CMD = "/home/ubuntu/mission-control/agent-team/kronos/kronos_on_demand.py"
 
 MAX_PICKS_PER_CYCLE = 3
-MAX_NEW_PICKS_PER_DAY = 3   # Hard cap on NEW picks per trading day across all cycles
-MAX_TOTAL_RISK_USD = 3000
+MAX_NEW_PICKS_PER_DAY = 1   # Hard cap on NEW picks per trading day across all cycles
+MAX_TOTAL_RISK_USD = 1000
 SHORTLIST_SIZE = 5
 DAILY_PICKS_FILE = Path("/home/ubuntu/.openclaw/workspace/state/boba_daily_picks.json")
 MIN_FLOW_VALUE = 500_000   # Hard floor: T1+T2 only ($500K+) — anything below is rejected
