@@ -10,7 +10,7 @@ Runs every 60s via PM2. For each R2 options position with unrealized gain:
 
 Only RATCHETS UP. Never lowers existing stops.
 
-Account lock: PA3R6MOPBWF7 (R2). Will refuse to run on any other account.
+Account lock: PA3QIBJEYMB3 (R2). Will refuse to run on any other account.
 Skips: stocks, crypto, positions without unrealized gain.
 """
 import json, sys, time
@@ -27,7 +27,7 @@ LOG_FILE.parent.mkdir(parents=True, exist_ok=True)
 
 POLL_INTERVAL_SEC = 60
 ALPACA_BASE = "https://paper-api.alpaca.markets/v2"
-EXPECTED_ACCOUNT = "PA3R6MOPBWF7"
+EXPECTED_ACCOUNT = "PA3QIBJEYMB3"
 
 def _read(name):
     p = SECRETS / name
