@@ -1,0 +1,186 @@
+"""
+flow_greeks_relay - polls AInvest Firebase RTDB /FlowGreeks/Alerts/today
+and /FlowGreeks2/Alerts/today, forwards NotifyAlert==1 to Discord.
+
+Mirrors the alert stream that drives Flow Greeks app push notifications,
+no FCM / phone / BlueStacks needed.
+"""
+import json
+import os
+import time
+import logging
+import urllib.request
+from datetime import datetime, timezone, timedelta
+
+ET = timezone(timedelta(hours=-4))  # EDT; flip to -5 in winter
+
+DB = "https://stock-signal-72772-default-rtdb.firebaseio.com"
+PATHS = [
+    f"{DB}/FlowGreeks/Alerts/today.json",
+    f"{DB}/FlowGreeks2/Alerts/today.json",
+]
+WEBHOOK_FILE = os.path.expanduser("~/.openclaw/secrets/discord_webhook_flow_alerts")
+SEEN_FILE = os.path.expanduser("~/.openclaw/state/flow_greeks_seen.json")
+POLL_INTERVAL = 30   # seconds
+MAX_SEEN = 5000
+
+logging.basicConfig(
+    format="%(asctime)s [flow_greeks_relay] %(message)s",
+    datefmt="%H:%M:%S",
+    level=logging.INFO,
+)
+log = logging.getLogger()
+
+
+def load_webhook():
+    try:
+        with open(WEBHOOK_FILE) as f:
+            return f.read().strip()
+    except Exception as e:
+        log.error(f"webhook missing: {e}")
+        return ""
+
+
+def load_seen():
+    try:
+        with open(SEEN_FILE) as f:
+            return set(json.load(f))
+    except Exception:
+        return set()
+
+
+def save_seen(seen):
+    os.makedirs(os.path.dirname(SEEN_FILE), exist_ok=True)
+    arr = list(seen)
+    if len(arr) > MAX_SEEN:
+        arr = arr[-MAX_SEEN:]
+    with open(SEEN_FILE, "w") as f:
+        json.dump(arr, f)
+
+
+def fetch_alerts(path):
+    try:
+        req = urllib.request.Request(path, headers={"User-Agent": "MissionCtrl-flow-relay"})
+        with urllib.request.urlopen(req, timeout=15) as r:
+            return json.loads(r.read())
+    except Exception as e:
+        log.error(f"fetch failed {path}: {e}")
+        return None
+
+
+CATEGORY_EMOJI = {
+    "unusual_high_flow": "🔥",
+    "unusual_high_flow_etf": "🔥",
+    "high_flow": "💎",
+    "high_flow_etf": "💎",
+    "repeat_flow": "🔁",
+    "repeat_flow_etf": "🔁",
+    "weekly_flow": "📅",
+    "weekly_flow_etf": "📅",
+}
+
+
+def fmt_alert(opt_key, alert, source):
+    sym = alert.get("Symbol", "?")
+    typ = alert.get("OptionType", "?")
+    strike = alert.get("Strike", 0)
+    dte = alert.get("DTE", "?")
+    cat = alert.get("AlertType", "unknown")
+    emoji = CATEGORY_EMOJI.get(cat, "⚡")
+    bull = "🟢 CALL" if alert.get("isBullish") else "🔴 PUT"
+    flow_val = alert.get("totalFlowValue", 0) or 0
+    sweeps = alert.get("SWEEPS", 0)
+    blocks = alert.get("BLOCKS", 0)
+    spot = alert.get("Spot", 0)
+    px = alert.get("AlertPrice", 0)
+    t_ms = alert.get("Time", 0) or 0
+    et = datetime.fromtimestamp(t_ms / 1000, tz=ET).strftime("%H:%M:%S ET") if t_ms else "?"
+
+    try:
+        strike_str = f"{int(strike)}" if float(strike).is_integer() else f"{strike}"
+    except Exception:
+        strike_str = str(strike)
+
+    color = 0x2ecc71 if alert.get("isBullish") else 0xe74c3c
+    title = f"{emoji} {sym} ${strike_str}{typ[:1]} — {cat.replace('_', ' ').title()}"
+
+    fields = [
+        {"name": "Direction", "value": bull, "inline": True},
+        {"name": "Flow Value", "value": f"${flow_val:,}", "inline": True},
+        {"name": "DTE", "value": str(dte), "inline": True},
+        {"name": "Sweeps / Blocks", "value": f"{sweeps} / {blocks}", "inline": True},
+        {"name": "Alert Price", "value": f"${px}", "inline": True},
+        {"name": "Spot", "value": f"${spot:.2f}" if isinstance(spot, (int, float)) else str(spot), "inline": True},
+    ]
+    embed = {
+        "title": title,
+        "color": color,
+        "fields": fields,
+        "footer": {"text": f"{source} · {opt_key} · {et}"},
+    }
+    return embed
+
+
+def post_to_discord(webhook, embed):
+    body = json.dumps({"embeds": [embed]}).encode()
+    req = urllib.request.Request(
+        webhook,
+        data=body,
+        headers={
+            "Content-Type": "application/json",
+            "User-Agent": "MissionCtrl-flow-relay/1.0 (+https://github.com/itsjuggalo)",
+        },
+        method="POST",
+    )
+    try:
+        with urllib.request.urlopen(req, timeout=10) as r:
+            return r.status in (200, 204)
+    except Exception as e:
+        log.error(f"discord post failed: {e}")
+        return False
+
+
+def main():
+    webhook = load_webhook()
+    if not webhook:
+        log.error("no webhook configured, exiting")
+        return
+    seen = load_seen()
+    log.info(f"starting; {len(seen)} previously seen alerts in state")
+    log.info(f"polling every {POLL_INTERVAL}s")
+    log.info(f"sources: FlowGreeks + FlowGreeks2 (NotifyAlert==1 only)")
+
+    while True:
+        try:
+            new_count = 0
+            for path in PATHS:
+                source = "FlowGreeks2" if "FlowGreeks2" in path else "FlowGreeks"
+                data = fetch_alerts(path)
+                if not data:
+                    continue
+                for opt_key, rec in data.items():
+                    alert = (rec or {}).get("alert", {})
+                    if alert.get("NotifyAlert") != 1:
+                        continue
+                    t_ms = alert.get("Time", 0)
+                    uid = f"{source}:{opt_key}:{t_ms}:{alert.get('AlertType','')}"
+                    if uid in seen:
+                        continue
+                    embed = fmt_alert(opt_key, alert, source)
+                    if post_to_discord(webhook, embed):
+                        seen.add(uid)
+                        new_count += 1
+                        sym = alert.get("Symbol")
+                        cat = alert.get("AlertType")
+                        log.info(f"posted {sym} {cat} ({source})")
+                        time.sleep(0.5)
+            if new_count:
+                save_seen(seen)
+                log.info(f"cycle done, posted {new_count} new alerts")
+        except Exception as e:
+            log.error(f"cycle error: {e}")
+        time.sleep(POLL_INTERVAL)
+
+
+if __name__ == "__main__":
+    main()
