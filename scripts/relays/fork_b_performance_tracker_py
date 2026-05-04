@@ -17,7 +17,7 @@ import json, sys, time, urllib.request, urllib.error
 from pathlib import Path
 from datetime import datetime, timezone, timedelta
 
-DATA = Path("/home/ubuntu/mission-control-restored/Option-Signals-Scraper")
+DATA = Path("/home/ubuntu/mission-control-restored/Option-Signals-Scraper/data")
 SECRETS = Path("/home/ubuntu/.openclaw/secrets")
 STATE = Path("/home/ubuntu/.openclaw/state/fork_b_alert_history.json")
 THRESHOLDS = [50, 100, 200]  # percent gain milestones
