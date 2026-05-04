@@ -1759,7 +1759,15 @@ def main():
     if effective_cap < len(cycle_picks):
         print(f"[daily_budget] LLM returned {len(cycle_picks)} picks, executing first {effective_cap}", flush=True)
     picks_executed = []
+    prior_picks_this_cycle = []  # Item 31: track for duplicate-contract guardrail
     for pick in cycle_picks[:effective_cap]:
+        # Item 31: hard guardrail validation BEFORE execute (mirrors Boba pattern)
+        ok, skip_reason = validate_pick_against_guardrails(pick, account, prior_picks_this_cycle)
+        if not ok:
+            print(f"[guardrail] Skipping pick {pick.get('ticker','?')}: {skip_reason}", flush=True)
+            cycle_result.setdefault("passed_on", []).append({**pick, "skip_reason": skip_reason})
+            continue
+        prior_picks_this_cycle.append(pick)
         # Auto-convert SPX picks to SPY equivalents (Alpaca can't trade SPX)
         converted_pick, conversion_note = convert_spx_to_spy(pick)
         if conversion_note:
