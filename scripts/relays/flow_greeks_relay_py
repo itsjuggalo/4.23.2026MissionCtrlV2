@@ -116,7 +116,7 @@ def fmt_alert(opt_key, alert, source):
         "title": title,
         "color": color,
         "fields": fields,
-        "footer": {"text": f"{source} · {opt_key} · {et}"},
+        "footer": {"text": f"{source} · {opt_key} · {et} · NotifyAlert={alert.get('NotifyAlert', '?')}"},
     }
     return embed
 
@@ -160,7 +160,10 @@ def main():
                     continue
                 for opt_key, rec in data.items():
                     alert = (rec or {}).get("alert", {})
-                    if alert.get("NotifyAlert") != 1:
+                    # forward all alerts - phone pushes fire on NotifyAlert=0 too
+                    # (verified May 3 against screenshot: TSLA Weekly Magic and QQQ
+                    # ETF alerts were NotifyAlert=0 but appeared on phone)
+                    if not alert:
                         continue
                     t_ms = alert.get("Time", 0)
                     uid = f"{source}:{opt_key}:{t_ms}:{alert.get('AlertType','')}"
