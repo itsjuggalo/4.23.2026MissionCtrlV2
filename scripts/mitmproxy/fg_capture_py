@@ -1,0 +1,56 @@
+"""
+mitmproxy filter that logs only requests relevant to Flow Greeks topic subscription
+and vendor backend (the AWS ELB). Strips noise from analytics/firebase auth churn.
+Logs to /tmp/fg_mitm_capture.log and prints to stdout.
+"""
+from mitmproxy import http
+import json, time
+
+LOG = "/tmp/fg_mitm_capture.log"
+INTEREST = [
+    "iid.googleapis.com",
+    "fcmregistrations.googleapis.com",
+    "/topics/",
+    "options_paid",
+    "optionflow-api-load-balancer",
+    "stock-signal-72772",
+    "/subscribe",
+    "/registrations",
+    "/install",
+    "/rel/topics",
+]
+
+def _interesting(flow):
+    s = flow.request.pretty_url
+    return any(x in s for x in INTEREST)
+
+def request(flow: http.HTTPFlow) -> None:
+    if not _interesting(flow):
+        return
+    line = f"\n{'='*60}\n{time.strftime('%H:%M:%S')} REQ {flow.request.method} {flow.request.pretty_url}\n"
+    line += f"--- headers ---\n"
+    for k, v in flow.request.headers.items():
+        line += f"  {k}: {v}\n"
+    if flow.request.content:
+        try:
+            body = flow.request.content.decode('utf-8', 'replace')[:1000]
+        except Exception:
+            body = repr(flow.request.content[:200])
+        line += f"--- body ---\n{body}\n"
+    print(line, flush=True)
+    with open(LOG, "a") as f:
+        f.write(line)
+
+def response(flow: http.HTTPFlow) -> None:
+    if not _interesting(flow):
+        return
+    line = f"\n{time.strftime('%H:%M:%S')} RSP {flow.response.status_code} for {flow.request.method} {flow.request.pretty_url}\n"
+    if flow.response.content:
+        try:
+            body = flow.response.content.decode('utf-8', 'replace')[:1000]
+        except Exception:
+            body = repr(flow.response.content[:200])
+        line += f"--- response body ---\n{body}\n"
+    print(line, flush=True)
+    with open(LOG, "a") as f:
+        f.write(line)
