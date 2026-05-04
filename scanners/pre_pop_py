@@ -186,23 +186,40 @@ def post_summary(candidates):
     top_keys = [f"{c['symbol']}_{c['strike']}_{c['option_type']}" for c in candidates[:5]]
     if top_keys == state.get('last_top', []): return
 
-    lines = ['**Pre-Pop Candidates** (composite signature score)', '_Last 4h scan, ranked by big-winner profile fit_', '']
-    for c in candidates[:5]:
-        price = c.get('price', '?')
-        val = c.get('value_usd', 0)
-        try: val_str = f"${float(val)/1000:.0f}K" if val else '?'
-        except: val_str = '?'
-        try: price_str = f"${float(price):.2f}" if price else '?'
-        except: price_str = '?'
-        dte = c.get('dte', '?')
-        sweeps = c.get('sweeps', 0)
-        bull = '🟢' if c.get('is_bullish') else '🔴'
-        lines.append(f'**{c["symbol"]}** ${c["strike"]}{c["option_type"]} {bull} score **{c["score"]}** | {price_str} prem | {val_str} flow | DTE {dte} | {sweeps} sweeps')
-        lines.append(f'  {", ".join(c["reasons"][:3])}')
+    from datetime import datetime as _dt, timezone as _tz
+    fields = []
+    for i, c in enumerate(candidates[:5], 1):
+        try: val_str = f"${float(c.get('value_usd',0))/1000:.0f}K" if c.get('value_usd') else '—'
+        except: val_str = '—'
+        try: price_str = f"${float(c.get('price',0)):.2f}" if c.get('price') else '—'
+        except: price_str = '—'
+        sweeps = int(c.get('sweeps', 0) or 0)
+        sweep_word = 'sweep' if sweeps == 1 else 'sweeps'
+        bull = '🟢 CALL' if c.get('is_bullish') else '🔴 PUT'
+        try:
+            sk = float(c.get('strike', 0))
+            strike_str = f"{int(sk)}" if sk.is_integer() else f"{sk:.1f}"
+        except: strike_str = str(c.get('strike', '?'))
+        exp_str = ''
+        try:
+            exp_str = ' ' + _dt.fromtimestamp(int(c.get('expiry',0)), tz=_tz.utc).strftime('%-m/%-d')
+        except: pass
+        reasons = ' · '.join(c.get('reasons', [])[:3]) or '—'
+        name = f"#{i}  {c['symbol']}  ${strike_str}{exp_str}  {bull}"
+        value = (f"**Score {c['score']}**  ·  {price_str} prem  ·  {val_str} flow  ·  DTE {c.get('dte','?')}  ·  {sweeps} {sweep_word}\n_{reasons}_")
+        fields.append({"name": name, "value": value, "inline": False})
 
-    msg = '\n'.join(lines)
+    embed = {
+        "title": "🎯 Pre-Pop Candidates",
+        "description": "_Top by composite signature score · big-winner profile fit_",
+        "color": 0x4a90e2,
+        "fields": fields,
+        "footer": {"text": "Pre-Pop Scanner · Mon–Fri 9:30–4:00 ET"},
+        "timestamp": _dt.now(_tz.utc).isoformat()
+    }
+
     try:
-        r = requests.post(WEBHOOK, json={'content': msg[:1900]}, timeout=10)
+        r = requests.post(WEBHOOK, json={'embeds': [embed]}, timeout=10)
         if r.status_code in (200, 204):
             state['last_post'] = now
             state['last_top'] = top_keys
