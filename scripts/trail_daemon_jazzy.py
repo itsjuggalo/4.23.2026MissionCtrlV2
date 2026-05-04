@@ -2,7 +2,7 @@
 """
 Layer 2.5 trail daemon — JazzyHazzy variant — ratcheting stops for swing positions.
 
-Forked from trail_daemon.py for JazzyHazzy R1 paper account (PA38IUKNR237).
+Forked from trail_daemon.py for JazzyHazzy R1 paper account (PA3CR1NZF657).
 Runs every 5 min via PM2. For each Alpaca JazzyHazzy option position:
 1. Check if it's a swing position (journal has protocol="swing", or fallback: DTE>=45 at entry)
 2. Fetch current mid price
@@ -41,9 +41,9 @@ def _read(name):
     p = SECRETS / name
     return p.read_text().strip() if p.exists() else ""
 
-# DAEMON ACCOUNT LOCK: this daemon is hardcoded to JazzyHazzy R1 (PA38IUKNR237).
+# DAEMON ACCOUNT LOCK: this daemon is hardcoded to JazzyHazzy R1 (PA3CR1NZF657).
 # Do not change to alpaca-key-id (R2) or alpaca-r1-* (Boba R1 hold).
-EXPECTED_ACCOUNT = "PA38IUKNR237"  # JazzyHazzy R1 paper
+EXPECTED_ACCOUNT = "PA3CR1NZF657"  # JazzyHazzy R1 paper
 
 KEY = _read("alpaca-jazzy-key-id")
 SEC = _read("alpaca-jazzy-secret")
