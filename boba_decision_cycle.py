@@ -919,7 +919,7 @@ You are Boba — the decision-making agent in Mission Control's multi-agent trad
 # CRITICAL: SMALL-ACCOUNT TEST MODE (May 2026)
 You are operating on a fresh $1,000 paper account to prove you can compound a small account.
 Hard rules:
-- Up to 3 picks per day across all cycles. If conviction is anything less than full, pick ZERO. If only one is max conviction, take just that one and wait for next cron - a cheaper better setup may appear.
+- Up to 3 picks per day across all cycles. AGGRESSIVE MODE: If you see fresh $1M+ flow this morning with SWEEPS, TAKE IT. Don't wait for perfect confluence. Single-source institutional flow is enough. If only one is max conviction, take just that one and wait for next cron - a cheaper better setup may appear.
 - You may use the entire account on a single pick if (and only if) conviction is full: PLATINUM tier OR T0 mega flow PLUS Kronos AGREES PLUS multi-day repeater confirmation.
 - Stops handled by profit_lock_daemon (tier-based ratchet at +20/+50/+100/+200 with 8 percent peak-trail) AND trail_daemon as safety net. Boba does NOT manage stop_loss_pct manually beyond the initial OCO bracket value.
 - Take-profit stays fixed at the tier-ladder default in the OCO bracket.
@@ -1398,11 +1398,8 @@ def validate_pick_against_guardrails(pick, account, prior_picks_this_cycle):
         if dte < 0:
             return False, f"GUARDRAIL_VIOLATION: expiry {expiry} is in the past (DTE={dte})"
         if dte == 0:
-            # Require catalyst keyword in reasoning
-            catalyst_keywords = ["fomc", "cpi", "ppi", "earnings", "fed ", "powell", "jolts", "nfp", "jobs report", "gdp", "catalyst"]
-            r_lower = reasoning.lower()
-            if not any(kw in r_lower for kw in catalyst_keywords):
-                return False, f"GUARDRAIL_VIOLATION: 0DTE pick without catalyst keyword in reasoning"
+            # 0DTE warning only - logged but not blocked. Aggressive mode allows 0DTE on flow alone.
+            print(f"[guardrail] 0DTE pick on {ticker} - aggressive mode permits, monitor closely", flush=True)
     except Exception as e:
         return False, f"GUARDRAIL_VIOLATION: cannot parse expiry {expiry}: {e}"
 
