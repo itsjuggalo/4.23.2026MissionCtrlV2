@@ -85,13 +85,13 @@ except Exception:
 KRONOS_CMD = "/home/ubuntu/mission-control/agent-team/kronos/kronos_on_demand.py"
 
 MAX_PICKS_PER_CYCLE = 3
-MAX_NEW_PICKS_PER_DAY = 1   # Hard cap on NEW picks per trading day across all cycles
+MAX_NEW_PICKS_PER_DAY = 3   # Hard cap on NEW picks per trading day across all cycles
 MAX_TOTAL_RISK_USD = 1000
 SHORTLIST_SIZE = 5
 DAILY_PICKS_FILE = Path("/home/ubuntu/.openclaw/workspace/state/boba_daily_picks.json")
 MIN_FLOW_VALUE = 500_000   # Hard floor: T1+T2 only ($500K+) — anything below is rejected
 # Item 31 (mirrored from Boba May 4): post-LLM hard guardrails (enforced by validate_pick_against_guardrails)
-MAX_BUYING_POWER_PCT_PER_PICK = 0.15  # 15% of buying power max per pick
+MAX_BUYING_POWER_PCT_PER_PICK = 1.0   # SMALL-ACCOUNT TEST MODE: full BP allowed on max conviction (was 0.15)
 KRONOS_CONFLICTS_OVERRIDE_SCORE = 90  # Flow score required to override Kronos CONFLICTS veto
 KRONOS_UNAVAILABLE_OVERRIDE_SCORE = 85  # Flow score required when Kronos unavailable
 KRONOS_SKIP_TICKERS = {"SPX", "NDX", "RUT", "VIX", "XSP", "OEX", "DJX", "XEO", "DJI"}
