@@ -875,6 +875,20 @@ Available actions per position:
 - EXIT — fully close the position (use when thesis broken, max loss approaching, or better setup elsewhere)
 You MUST emit one action per open position. If positions list is empty, position_actions = [].
 
+
+
+# CRITICAL CONTRACT SIZING MATH (read BEFORE choosing any contract):
+# - Per-contract cost = AlertPrice * 100
+# - Your AVAILABLE BUYING POWER is shown above in account state as "Buying power: $X"
+# - You CANNOT pick a contract where (AlertPrice * 100 * contracts) exceeds available BP
+# - Examples for $1000 account:
+#   - AlertPrice $1.50 -> $150/contract -> 1c=$150 (good fit)
+#   - AlertPrice $5.00 -> $500/contract -> 1c=$500 (preserves $500 BP)
+#   - AlertPrice $10.00 -> $1000/contract -> 1c=$1000 (full BP, no reserve)
+#   - AlertPrice $50.00 -> $5000/contract -> CANNOT AFFORD, SKIP
+# - PREFER AlertPrice $1.50-$5.00 range = $150-$500/contract for compounding velocity
+# - If a candidate's AlertPrice * 100 > available BP, REJECT and pick a cheaper strike on
+#   that ticker (further OTM same expiry usually has lower premium) OR skip the ticker
 ## TASK 2: NEW PICKS (up to remaining daily budget)
 You have {remaining_budget} NEW pick(s) remaining in today's daily budget (cap is {MAX_NEW_PICKS_PER_DAY}/day across ALL cycles).
 Pick 0 to {remaining_budget} NEW options to buy on Alpaca paper. Only pick if the setup is genuinely good — if nothing is compelling, say so and pick zero.
