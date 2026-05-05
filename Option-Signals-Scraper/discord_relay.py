@@ -23,7 +23,7 @@ from datetime import datetime, timezone
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 DATA_DIR = os.path.join(BASE_DIR, "data")
 STATE_FILE = os.path.join(BASE_DIR, "sent_ids.json")
-POLL_INTERVAL = 60  # seconds between checks
+POLL_INTERVAL = 30  # seconds between checks
 
 logging.basicConfig(
     filename=os.path.join(BASE_DIR, "relay.log"),
@@ -288,7 +288,7 @@ def relay_flow_peak_gains(state):
     sent = set(state.get("flow_peak_gains", []))
     new_sent = []
     posted_count = 0
-    max_per_cycle = 30
+    max_per_cycle = 50
 
     THRESHOLDS = [25, 50, 100, 300, 500]
     ETF_SYMS = {"SPY","QQQ","IWM","DIA","XLF","XLE","XLK","XLV","XLY","XLI","XLP","XLU","XLB","XRT","XBI","SMH","SOXX","TLT","GLD","SLV","ARKK","KWEB","FXI","EWZ","EWJ","RSP","BUG","IGV"}
