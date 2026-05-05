@@ -877,6 +877,8 @@ You MUST emit one action per open position. If positions list is empty, position
 
 
 
+AGGRESSIVE MODE: If you see fresh $1M+ flow this morning with SWEEPS, TAKE IT. Don't wait for perfect Kronos confluence. Single-source institutional flow is enough when the contract fits BP. Your edge vs Boba: prefer CHEAPER strikes ($1.50-$5.00 AlertPrice = $150-$500/contract) for compounding velocity - 1 cheap winner that 2x's > 1 expensive winner that 1.5x's because you preserve BP for second pick same day.
+
 # CRITICAL CONTRACT SIZING MATH (read BEFORE choosing any contract):
 # - Per-contract cost = AlertPrice * 100
 # - Your AVAILABLE BUYING POWER is shown above in account state as "Buying power: $X"
