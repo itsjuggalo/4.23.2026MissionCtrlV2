@@ -100,11 +100,17 @@ def main():
         
         forecast = load_kronos_forecast(ticker)
         if not forecast: continue
+        # Skip errored forecasts (file has 'error' key, no forecast data)
+        if forecast.get('error'):
+            continue
         
         direction = forecast.get("forecast_24h_direction", "?")
         confidence = forecast.get("forecast_24h_confidence", "?")
         target = forecast.get("forecast_24h_target", "?")
         current = forecast.get("current_price", "?")
+        # Skip if any required field is missing/'?' (avoid posting placeholder garbage)
+        if "?" in (str(direction), str(confidence), str(target), str(current)):
+            continue
         
         # Only speak when confidence is high or direction is strong
         if str(confidence).lower() in ("low", "very_low"): continue

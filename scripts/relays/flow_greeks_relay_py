@@ -238,7 +238,10 @@ def main():
                     if uid in seen:
                         continue
                     embed = fmt_alert(opt_key, alert, source)
-                    if post_to_discord(webhook, embed):
+                    # Route to category-specific channel based on AlertType
+                    alert_type = alert.get("AlertType", "")
+                    routed_webhook = load_webhook(alert_type) or webhook
+                    if post_to_discord(routed_webhook, embed):
                         seen.add(uid)
                         new_count += 1
                         sym = alert.get("Symbol")
