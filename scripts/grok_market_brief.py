@@ -79,7 +79,7 @@ if _GROK_DEBATE_OK:
         out_file = Path("/home/ubuntu/.openclaw/workspace/directives/grok_brief.json")
         if out_file.exists():
             d = _json.loads(out_file.read_text())
-            brief = d.get("brief","")[:1500]
+            brief = d.get("brief_text", d.get("brief", ""))[:1500]
             _post_grok_debate("grok", f"**Grok 30m Macro Brief**\n\n{brief}")
             print("[grok] posted brief to #agent-debate")
     except Exception as _e:

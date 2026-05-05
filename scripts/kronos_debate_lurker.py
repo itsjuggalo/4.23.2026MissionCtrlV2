@@ -111,7 +111,13 @@ def main():
         
         body = f"**Kronos forecast on {ticker}:**\n"
         body += f"Direction: **{direction}** (confidence: {confidence})\n"
-        body += f"24h target: ${target} (current ${current})\n\n"
+        try:
+            target_str = f"{float(target):.2f}"
+            current_str = f"{float(current):.2f}"
+        except Exception:
+            target_str = str(target)
+            current_str = str(current)
+        body += f"24h target: ${target_str} (current ${current_str})\n\n"
         body += f"_Reacting to mentions in #agent-debate ({len(mentions)} message(s)). I am consultant only — do not let this block your call._"
         
         ok = post_to_debate("kronos", body, related_symbol=ticker)
