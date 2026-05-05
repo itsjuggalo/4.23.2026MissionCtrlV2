@@ -84,7 +84,7 @@ MAX_NEW_PICKS_PER_DAY = 1   # Hard cap on NEW picks per trading day across all c
 MAX_TOTAL_RISK_USD = 1000
 
 # Item 31: post-LLM hard guardrails (enforced by validate_pick_against_guardrails)
-MAX_BUYING_POWER_PCT_PER_PICK = 0.15  # 15% of buying power max per pick
+MAX_BUYING_POWER_PCT_PER_PICK = 1.0   # SMALL-ACCOUNT TEST MODE: full BP allowed on max conviction (was 0.15, mismatched prompt)
 KRONOS_CONFLICTS_OVERRIDE_SCORE = 90  # Flow score required to override Kronos CONFLICTS veto
 KRONOS_UNAVAILABLE_OVERRIDE_SCORE = 85  # Flow score required when Kronos unavailable
 
