@@ -86,21 +86,24 @@ def parse_occ(occ):
     return sym, yymmdd, cp, int(strike_raw) / 1000
 
 def fetch_current_price(occ):
-    """Query Tradier for current mid via OCC symbol."""
+    """Query Tradier for current mid via OCC symbol (lib takes occ string directly)."""
     if not fetch_option_quote:
         return None
-    parsed = parse_occ(occ)
-    if not parsed:
-        return None
-    sym, yymmdd, cp, strike = parsed
-    expiry = f"20{yymmdd[:2]}-{yymmdd[2:4]}-{yymmdd[4:6]}"
-    opt_type = "call" if cp == "C" else "put"
     try:
-        q = fetch_option_quote(sym, strike, opt_type, expiry)
-        if q and q.get("mid"):
-            return float(q["mid"])
-        if q and q.get("last"):
-            return float(q["last"])
+        q = fetch_option_quote(occ)
+        if not q:
+            return None
+        # tradier_client returns dict with bid/ask/last - compute mid
+        bid = q.get("bid")
+        ask = q.get("ask")
+        if bid and ask and float(bid) > 0 and float(ask) > 0:
+            return (float(bid) + float(ask)) / 2
+        last = q.get("last")
+        if last and float(last) > 0:
+            return float(last)
+        mid = q.get("mid")
+        if mid and float(mid) > 0:
+            return float(mid)
     except Exception as e:
         print(f"[fork_b] tradier query failed for {occ}: {e}", flush=True)
     return None
