@@ -1707,7 +1707,7 @@ def main():
             else:
                 # Timeout — LLM sees it's unavailable
                 placeholder = {
-                    "note": f"Kronos forecast timed out after 75s — unavailable",
+                    "note": f"Kronos forecast timed out after 240s — unavailable",
                     "forecast_24h_direction": "unavailable",
                     "forecast_24h_confidence": "unavailable",
                 }
