@@ -1,0 +1,131 @@
+#!/usr/bin/env python3
+"""flow-pinger: event-driven trigger on DIAMOND+ flow alerts. Pings Boba+Jazzy + posts to agent-debate."""
+import json, sys, time, subprocess, glob, requests
+from datetime import datetime, timezone, timedelta
+from pathlib import Path
+
+PREMIUM_THRESHOLD = 15_000_000   # DIAMOND+
+COOLDOWN_SEC = 300               # 5 min per OCC
+POLL_INTERVAL_SEC = 30
+WEBHOOK_FILE = Path("/home/ubuntu/.openclaw/secrets/discord-webhook-agent-debate")
+SECRETS_DIR = Path("/home/ubuntu/.openclaw/secrets")
+STATE_FILE = Path("/home/ubuntu/.openclaw/state/flow_pinger_state.json")
+BEST_OPTIONS_DIR = Path("/home/ubuntu/.openclaw/data/best-options")
+ALPACA_PAPER = "https://paper-api.alpaca.markets"
+
+def log(action, msg):
+    print(f"[flow-pinger] {action}: {msg}", flush=True)
+
+def load_state():
+    try: return json.loads(STATE_FILE.read_text())
+    except Exception: return {"cooldowns": {}}
+
+def save_state(state):
+    STATE_FILE.parent.mkdir(parents=True, exist_ok=True)
+    STATE_FILE.write_text(json.dumps(state, indent=2))
+
+def in_cooldown(occ, state):
+    cd = state.get("cooldowns", {})
+    return occ in cd and (time.time() - cd[occ]) < COOLDOWN_SEC
+
+def mark_cooldown(occ, state):
+    state.setdefault("cooldowns", {})[occ] = time.time()
+    cutoff = time.time() - 3600
+    state["cooldowns"] = {k: v for k, v in state["cooldowns"].items() if v > cutoff}
+
+def get_account_bp(agent):
+    try:
+        key = (SECRETS_DIR / f"alpaca-{agent}-key-id").read_text().strip()
+        sec = (SECRETS_DIR / f"alpaca-{agent}-secret").read_text().strip()
+        r = requests.get(f"{ALPACA_PAPER}/v2/account",
+            headers={"APCA-API-KEY-ID": key, "APCA-API-SECRET-KEY": sec}, timeout=10)
+        if r.ok: return float(r.json().get("buying_power", 0))
+    except Exception as e:
+        log("bp_check_fail", f"{agent}: {e}")
+    return 0.0
+
+def post_discord(webhook_url, c, agents_pinged):
+    occ = c.get("option_symbol", "?")
+    ticker = c.get("ticker", "?")
+    strike = c.get("strike", 0)
+    opt = c.get("option_type", "?")
+    exp = c.get("expiry", "?")
+    prem = float(c.get("premium", 0))
+    sweeps = c.get("sweeps", 0)
+    blocks = c.get("blocks", 0)
+    ap = float(c.get("alert_price", 0))
+    cost = ap * 100
+    direction = "[CALL]" if "CALL" in str(opt).upper() else "[PUT]"
+    tier_band = "PLATINUM" if prem >= 20e6 else "DIAMOND"
+    color = 0xA32D2D if prem >= 20e6 else 0x9B30FF
+    embed = {
+        "title": f"FLOW PINGER {tier_band}: {ticker} ${strike}{opt[0]} {exp}",
+        "description": f"**Premium**: ${prem/1e6:.2f}M | **AlertPrice**: ${ap:.2f} | **Cost/contract**: ${cost:.0f}",
+        "color": color,
+        "fields": [
+            {"name": "Direction", "value": direction, "inline": True},
+            {"name": "Sweeps/Blocks", "value": f"{sweeps}/{blocks}", "inline": True},
+            {"name": "Sweep ratio", "value": (f"{sweeps/max(blocks,1):.1f}:1" if blocks else f"{sweeps}:0 pure sweep"), "inline": True},
+            {"name": "OCC", "value": f"`{occ}`", "inline": False},
+            {"name": "Agents pinged", "value": ", ".join(agents_pinged) if agents_pinged else "none (BP insufficient)", "inline": False},
+        ],
+        "timestamp": datetime.now(timezone.utc).isoformat(),
+        "footer": {"text": f"flow-pinger | threshold ${PREMIUM_THRESHOLD/1e6:.0f}M+ | {COOLDOWN_SEC//60}min OCC cooldown"},
+    }
+    try:
+        r = requests.post(webhook_url, json={"embeds": [embed]}, timeout=10)
+        if not r.ok: log("discord_fail", f"HTTP {r.status_code}: {r.text[:200]}")
+    except Exception as e:
+        log("discord_fail", str(e))
+
+def trigger_agent(agent, occ):
+    script = f"/home/ubuntu/scripts/{agent}_decision_cycle.py"
+    logf = open(f"/tmp/{agent}_singlepick.log", "ab")
+    try:
+        subprocess.Popen(["python3", script, f"--single-pick={occ}"],
+            stdout=logf, stderr=subprocess.STDOUT, cwd="/home/ubuntu/scripts")
+        log("triggered", f"{agent} on {occ}")
+    except Exception as e:
+        log("trigger_fail", f"{agent} on {occ}: {e}")
+
+def scan_best_options():
+    try:
+        files = sorted(glob.glob(str(BEST_OPTIONS_DIR / "*.json")), reverse=True)
+        if not files: return []
+        d = json.loads(Path(files[0]).read_text())
+        contracts = d.get("contracts", {})
+        return [(occ, c) for occ, c in contracts.items() if float(c.get("premium", 0)) >= PREMIUM_THRESHOLD]
+    except Exception as e:
+        log("scan_fail", str(e))
+        return []
+
+def main():
+    log("startup", f"online | threshold ${PREMIUM_THRESHOLD/1e6:.0f}M+ | cooldown {COOLDOWN_SEC}s | poll {POLL_INTERVAL_SEC}s")
+    if not WEBHOOK_FILE.exists():
+        log("fatal", f"webhook not found at {WEBHOOK_FILE}")
+        return 1
+    webhook_url = WEBHOOK_FILE.read_text().strip()
+    state = load_state()
+    while True:
+        try:
+            alerts = scan_best_options()
+            for occ, c in alerts:
+                if in_cooldown(occ, state): continue
+                ap = float(c.get("alert_price", 0))
+                cost = ap * 100
+                boba_bp = get_account_bp("boba")
+                jazzy_bp = get_account_bp("jazzy")
+                agents = []
+                if boba_bp >= cost:
+                    trigger_agent("boba", occ); agents.append("Boba")
+                if jazzy_bp >= cost:
+                    trigger_agent("jazzy", occ); agents.append("Jazzy")
+                post_discord(webhook_url, c, agents)
+                mark_cooldown(occ, state); save_state(state)
+                log("alert", f"{occ} prem ${float(c.get('premium',0))/1e6:.2f}M cost ${cost:.0f} pinged={agents}")
+        except Exception as e:
+            log("loop_error", str(e))
+        time.sleep(POLL_INTERVAL_SEC)
+
+if __name__ == "__main__":
+    sys.exit(main() or 0)

@@ -159,10 +159,15 @@ def _load_target_from_best_options(occ_symbol):
     try:
         from pathlib import Path
         from datetime import datetime, timezone, timedelta
-        et = timezone(timedelta(hours=-4))
-        today = datetime.now(et).strftime("%Y-%m-%d")
-        f = Path(f"/home/ubuntu/.openclaw/data/best-options/{today}.json")
-        if not f.exists():
+        import glob
+        # Try most recent best-options file (today, then walk back)
+        candidates = sorted(glob.glob("/home/ubuntu/.openclaw/data/best-options/*.json"), reverse=True)
+        f = None
+        for c in candidates[:3]:
+            if Path(c).exists():
+                f = Path(c)
+                break
+        if f is None:
             return None
         data = json.loads(f.read_text())
         c = data.get("contracts", {}).get(occ_symbol)
