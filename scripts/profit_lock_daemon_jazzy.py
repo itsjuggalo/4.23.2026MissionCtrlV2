@@ -2,7 +2,7 @@
 """
 profit_lock_daemon — JazzyHazzy variant — ratchets stop_limit orders up as positions gain.
 
-Forked from profit_lock_daemon.py for JazzyHazzy R1 paper account (PA3CR1NZF657).
+Forked from profit_lock_daemon.py for JazzyHazzy R1 paper account (PA3AZU6NZNLZ).
 Runs every 60s via PM2. For each JazzyHazzy options position with unrealized gain:
 - Cross +20% gain  -> stop arms at break-even (entry price)
 - Cross +50% gain  -> stop ratchets to entry +20% (locks 20% min)
@@ -11,7 +11,7 @@ Runs every 60s via PM2. For each JazzyHazzy options position with unrealized gai
 
 Only RATCHETS UP. Never lowers existing stops.
 
-Account lock: PA3CR1NZF657 (JazzyHazzy R1 paper). Will refuse to run on any other account.
+Account lock: PA3AZU6NZNLZ (JazzyHazzy R1 paper). Will refuse to run on any other account.
 Skips: stocks, crypto, positions without unrealized gain.
 """
 import json, sys, time
@@ -28,7 +28,7 @@ LOG_FILE.parent.mkdir(parents=True, exist_ok=True)
 
 POLL_INTERVAL_SEC = 20
 ALPACA_BASE = "https://paper-api.alpaca.markets/v2"
-EXPECTED_ACCOUNT = "PA3CR1NZF657"
+EXPECTED_ACCOUNT = "PA3AZU6NZNLZ"
 
 def _read(name):
     p = SECRETS / name
