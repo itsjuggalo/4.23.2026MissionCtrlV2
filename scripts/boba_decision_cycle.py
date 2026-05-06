@@ -86,7 +86,7 @@ MAX_TOTAL_RISK_USD = 1000
 # Item 31: post-LLM hard guardrails (enforced by validate_pick_against_guardrails)
 MAX_BUYING_POWER_PCT_PER_PICK = 1.0   # SMALL-ACCOUNT TEST MODE: full BP allowed on max conviction (was 0.15, mismatched prompt)
 KRONOS_CONFLICTS_OVERRIDE_SCORE = 90  # Flow score required to override Kronos CONFLICTS veto
-KRONOS_UNAVAILABLE_OVERRIDE_SCORE = 85  # Flow score required when Kronos unavailable
+KRONOS_UNAVAILABLE_OVERRIDE_SCORE = 75  # Flow score required when Kronos unavailable
 
 # Tickers Kronos cannot forecast (Alpaca has no bars for indices)
 # These get UNAVAILABLE verdict immediately without inference attempt
@@ -294,29 +294,24 @@ def check_fresh_kronos_file(ticker, max_age_minutes=60):
 
 
 def wait_for_kronos_result(ticker, timeout_sec=90, poll_interval=3):
-    """
-    After firing Kronos in background, poll latest_<ticker>.json
-    for up to timeout_sec seconds waiting for a FRESH result.
-    A result counts as fresh if file mtime advanced after we started waiting.
-    Returns the forecast dict if result arrives in time, None if timeout.
-    """
+    """NON-BLOCKING: returns fresh cached forecast (<15min) or None immediately.
+    Frog-on-whale: do not wait for forecast - use whatever is already cached.
+    The kronos subprocess fired earlier in cycle populates cache for NEXT cycle."""
     latest = Path("/home/ubuntu/.openclaw/workspace/directives/kronos_forecasts") / f"latest_{ticker}.json"
-    start_time = time.time()
-    initial_mtime = latest.stat().st_mtime if latest.exists() else 0
-    while time.time() - start_time < timeout_sec:
-        time.sleep(poll_interval)
-        if latest.exists():
-            current_mtime = latest.stat().st_mtime
-            if current_mtime > initial_mtime:
-                try:
-                    data = json.loads(latest.read_text())
-                    if "error" not in data and "forecast_24h_direction" in data:
-                        elapsed = int(time.time() - start_time)
-                        print(f"[kronos] {ticker} forecast ready after {elapsed}s", file=sys.stderr)
-                        return data
-                except Exception:
-                    continue
-    print(f"[kronos] {ticker} timed out after {timeout_sec}s", file=sys.stderr)
+    if not latest.exists():
+        print(f"[kronos] {ticker} no cache - skip", file=sys.stderr)
+        return None
+    age = time.time() - latest.stat().st_mtime
+    if age > 900:
+        print(f"[kronos] {ticker} cache stale {int(age)}s - skip", file=sys.stderr)
+        return None
+    try:
+        data = json.loads(latest.read_text())
+        if "error" not in data and "forecast_24h_direction" in data:
+            print(f"[kronos] {ticker} cache hit (age {int(age)}s)", file=sys.stderr)
+            return data
+    except Exception:
+        pass
     return None
 
 
@@ -943,7 +938,10 @@ Hard rules:
 # - PREFER AlertPrice $1.50-$5.00 range = $150-$500/contract for compounding velocity
 # - If a candidate's AlertPrice * 100 > available BP, REJECT and pick a cheaper strike on
 #   that ticker (further OTM same expiry usually has lower premium) OR skip the ticker
-- Up to 3 picks per day across all cycles. AGGRESSIVE MODE: If you see fresh $1M+ flow this morning with SWEEPS, TAKE IT. Don't wait for perfect confluence. Single-source institutional flow is enough. If only one is max conviction, take just that one and wait for next cron - a cheaper better setup may appear.
+- **CONTRACT SIZING (FROG-ON-WHALE)**: 1 contract per pick by default. 2 contracts ONLY when ALL of: (T0 OR T1 tier) + sweep + ASK aggressor + multi-day repeater. HARD CAP 2 regardless of BP. Extra BP rolls to next cron tick - whales hop, not pile in.
+- **NO FIXED TP**: profit-lock daemon trails the stop up automatically at +20/+50/+100/+200% peaks with 8pp giveback. Do NOT suggest profit_target_pct - it is ignored. Just specify stop_loss_pct=15 or omit (default).
+
+- Up to 3 picks per day across all cycles. AGGRESSIVE FIRST-LOOK: In first 30 min of market open, if you see fresh $10M+ T0 SWEEP flow, TAKE IT WITHOUT waiting for full confluence. Below $10M still requires multi-confluence and Kronos check. If only one is max conviction, take just that one and wait for next cron - a cheaper better setup may appear.
 - You may use the entire account on a single pick if (and only if) conviction is full: PLATINUM tier OR T0 mega flow PLUS Kronos AGREES PLUS multi-day repeater confirmation.
 - Stops handled by profit_lock_daemon (tier-based ratchet at +20/+50/+100/+200 with 8 percent peak-trail) AND trail_daemon as safety net. Boba does NOT manage stop_loss_pct manually beyond the initial OCO bracket value.
 - Take-profit stays fixed at the tier-ladder default in the OCO bracket.
@@ -1016,11 +1014,12 @@ Hard limits:
 - Max NEW picks this cycle: {remaining_budget} (out of daily cap {MAX_NEW_PICKS_PER_DAY})
 - Max ${MAX_TOTAL_RISK_USD:,} total notional risk across all picks
 - PREMIUM TIER LADDER (rank picks highest tier first — if T0 hits exist, ignore lower tiers):
-  - T0 MEGA FLOW ($10M+ premium): profit_target_pct=80, stop_loss_pct=15 (highest conviction, tightest risk)
-  - T1 HUGE FLOW ($5M+ premium): profit_target_pct=60, stop_loss_pct=20 (high conviction)
-  - T2 BIG FLOW ($1M+ premium): profit_target_pct=50, stop_loss_pct=25 (standard)
-  - T3 STANDARD ($500K+ SWEEP + A/AA + Vol>OI): profit_target_pct=40, stop_loss_pct=30 (lower)
-  - T4 UNUSUAL (Vol>OI yellow): profit_target_pct=30, stop_loss_pct=35 (last resort)
+  - UNIFIED RISK MODEL: All picks use stop_loss_pct=15. NO fixed take-profit - profit-lock daemon trails the stop UP at +20/+50/+100/+200% peaks with 8pp giveback. Winners ride indefinitely.
+  - T0 MEGA FLOW ($10M+ premium): always check FIRST. Highest conviction. 2 contracts allowed if BP supports.
+  - T1 HUGE FLOW ($5M+ premium): high conviction. 2 contracts allowed when sweep + ASK aggressor + multi-day repeater all present.
+  - T2 BIG FLOW ($1M+ premium): standard. 1 contract.
+  - T3 STANDARD ($500K+ SWEEP + A/AA + Vol>OI): 1 contract only.
+  - T4 UNUSUAL (Vol>OI yellow): last resort. 1 contract only.
 - WITHIN-TIER RANKING (co-primary tiebreakers): repeater_count (same contract appearing 3+ times today) AND DTE (shorter wins). Then sweep>block>split, then A/AA bid-ask, then Vol/OI ratio.
 
 # DUAL PROTOCOL — Boba picks under whichever protocol fits each candidate
@@ -1539,7 +1538,7 @@ def execute_pick_on_alpaca(pick):
         # 3. Submit stop_limit SL — Alpaca rejects OCO on options (complex orders not supported).
         # TP is handled by daemon trailing SL up + Boba position_actions TRIM/EXIT.
         stop_loss_pct = float(pick.get("stop_loss_pct", 30))
-        profit_target_pct = float(pick.get("profit_target_pct", 50))
+        profit_target_pct = float(pick.get("profit_target_pct", 0))  # NO TP - profit-lock trails
         stop_trigger = round(max(fill_price * (1 - stop_loss_pct / 100), 0.01), 2)
         stop_limit = round(max(stop_trigger * 0.90, 0.01), 2)
         tp_price = round(max(fill_price * (1 + profit_target_pct / 100), 0.01), 2)
@@ -1564,7 +1563,7 @@ def execute_pick_on_alpaca(pick):
             cost = fill_price * qty * 100
 
             # 4. Submit TP limit leg (Layer 2 bracket — profit side)
-            profit_target_pct = float(pick.get("profit_target_pct", 50))
+            profit_target_pct = float(pick.get("profit_target_pct", 0))  # NO TP - profit-lock trails
             tp_price = round(max(fill_price * (1 + profit_target_pct / 100), 0.01), 2)
 
             tp_order = {

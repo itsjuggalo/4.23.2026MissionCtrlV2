@@ -93,7 +93,7 @@ MIN_FLOW_VALUE = 500_000   # Hard floor: T1+T2 only ($500K+) — anything below 
 # Item 31 (mirrored from Boba May 4): post-LLM hard guardrails (enforced by validate_pick_against_guardrails)
 MAX_BUYING_POWER_PCT_PER_PICK = 1.0   # SMALL-ACCOUNT TEST MODE: full BP allowed on max conviction (was 0.15)
 KRONOS_CONFLICTS_OVERRIDE_SCORE = 90  # Flow score required to override Kronos CONFLICTS veto
-KRONOS_UNAVAILABLE_OVERRIDE_SCORE = 75  # Flow score required when Kronos unavailable
+KRONOS_UNAVAILABLE_OVERRIDE_SCORE = 85  # Flow score required when Kronos unavailable
 KRONOS_SKIP_TICKERS = {"SPX", "NDX", "RUT", "VIX", "XSP", "OEX", "DJX", "XEO", "DJI"}
 MIN_DTE_DEFAULT = 1  # 0DTE picks require explicit catalyst language in reasoning
 FORBIDDEN_TICKERS = set()  # populated as hallucinations are observed
@@ -306,24 +306,29 @@ def check_fresh_kronos_file(ticker, max_age_minutes=60):
 
 
 def wait_for_kronos_result(ticker, timeout_sec=90, poll_interval=3):
-    """NON-BLOCKING: returns fresh cached forecast (<15min) or None immediately.
-    Frog-on-whale: do not wait for forecast - use whatever is already cached.
-    The kronos subprocess fired earlier in cycle populates cache for NEXT cycle."""
+    """
+    After firing Kronos in background, poll latest_<ticker>.json
+    for up to timeout_sec seconds waiting for a FRESH result.
+    A result counts as fresh if file mtime advanced after we started waiting.
+    Returns the forecast dict if result arrives in time, None if timeout.
+    """
     latest = Path("/home/ubuntu/.openclaw/workspace/directives/kronos_forecasts") / f"latest_{ticker}.json"
-    if not latest.exists():
-        print(f"[kronos] {ticker} no cache - skip", file=sys.stderr)
-        return None
-    age = time.time() - latest.stat().st_mtime
-    if age > 900:
-        print(f"[kronos] {ticker} cache stale {int(age)}s - skip", file=sys.stderr)
-        return None
-    try:
-        data = json.loads(latest.read_text())
-        if "error" not in data and "forecast_24h_direction" in data:
-            print(f"[kronos] {ticker} cache hit (age {int(age)}s)", file=sys.stderr)
-            return data
-    except Exception:
-        pass
+    start_time = time.time()
+    initial_mtime = latest.stat().st_mtime if latest.exists() else 0
+    while time.time() - start_time < timeout_sec:
+        time.sleep(poll_interval)
+        if latest.exists():
+            current_mtime = latest.stat().st_mtime
+            if current_mtime > initial_mtime:
+                try:
+                    data = json.loads(latest.read_text())
+                    if "error" not in data and "forecast_24h_direction" in data:
+                        elapsed = int(time.time() - start_time)
+                        print(f"[kronos] {ticker} forecast ready after {elapsed}s", file=sys.stderr)
+                        return data
+                except Exception:
+                    continue
+    print(f"[kronos] {ticker} timed out after {timeout_sec}s", file=sys.stderr)
     return None
 
 
@@ -930,12 +935,11 @@ Hard limits:
 - Max NEW picks this cycle: {remaining_budget} (out of daily cap {MAX_NEW_PICKS_PER_DAY})
 - Max ${MAX_TOTAL_RISK_USD:,} total notional risk across all picks
 - PREMIUM TIER LADDER (rank picks highest tier first — if T0 hits exist, ignore lower tiers):
-  - UNIFIED RISK MODEL: All picks use stop_loss_pct=15. NO fixed take-profit - profit-lock daemon trails the stop UP at +20/+50/+100/+200% peaks with 8pp giveback. Winners ride indefinitely.
-  - T0 MEGA FLOW ($10M+ premium): always check FIRST. Highest conviction. 2 contracts allowed if BP supports.
-  - T1 HUGE FLOW ($5M+ premium): high conviction. 2 contracts allowed when sweep + ASK aggressor + multi-day repeater all present.
-  - T2 BIG FLOW ($1M+ premium): standard. 1 contract.
-  - T3 STANDARD ($500K+ SWEEP + A/AA + Vol>OI): 1 contract only.
-  - T4 UNUSUAL (Vol>OI yellow): last resort. 1 contract only.
+  - T0 MEGA FLOW ($10M+ premium): profit_target_pct=80, stop_loss_pct=15 (highest conviction, tightest risk)
+  - T1 HUGE FLOW ($5M+ premium): profit_target_pct=60, stop_loss_pct=20 (high conviction)
+  - T2 BIG FLOW ($1M+ premium): profit_target_pct=50, stop_loss_pct=25 (standard)
+  - T3 STANDARD ($500K+ SWEEP + A/AA + Vol>OI): profit_target_pct=40, stop_loss_pct=30 (lower)
+  - T4 UNUSUAL (Vol>OI yellow): profit_target_pct=30, stop_loss_pct=35 (last resort)
 - WITHIN-TIER RANKING (co-primary tiebreakers): repeater_count (same contract appearing 3+ times today) AND DTE (shorter wins). Then sweep>block>split, then A/AA bid-ask, then Vol/OI ratio.
 
 # DUAL PROTOCOL — JazzyHazzy picks under whichever protocol fits each candidate
@@ -1391,7 +1395,7 @@ def execute_pick_on_alpaca(pick):
         # 3. Submit stop_limit SL — Alpaca rejects OCO on options (complex orders not supported).
         # TP is handled by daemon trailing SL up + JazzyHazzy position_actions TRIM/EXIT.
         stop_loss_pct = float(pick.get("stop_loss_pct", 30))
-        profit_target_pct = float(pick.get("profit_target_pct", 0))  # NO TP - profit-lock trails
+        profit_target_pct = float(pick.get("profit_target_pct", 50))
         stop_trigger = round(max(fill_price * (1 - stop_loss_pct / 100), 0.01), 2)
         stop_limit = round(max(stop_trigger * 0.90, 0.01), 2)
         tp_price = round(max(fill_price * (1 + profit_target_pct / 100), 0.01), 2)
@@ -1416,7 +1420,7 @@ def execute_pick_on_alpaca(pick):
             cost = fill_price * qty * 100
 
             # 4. Submit TP limit leg (Layer 2 bracket — profit side)
-            profit_target_pct = float(pick.get("profit_target_pct", 0))  # NO TP - profit-lock trails
+            profit_target_pct = float(pick.get("profit_target_pct", 50))
             tp_price = round(max(fill_price * (1 + profit_target_pct / 100), 0.01), 2)
 
             tp_order = {
