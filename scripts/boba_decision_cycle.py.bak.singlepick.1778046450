@@ -134,61 +134,6 @@ def load_firebase_signals():
         return []
 
 
-
-def _occ_from_signal(s):
-    """Construct OCC symbol from signal fields. Returns None if can't build."""
-    try:
-        tk = str(s.get("ticker","")).upper()
-        exp = s.get("expiry","")
-        if "/" in str(exp):
-            mm, dd, yy = exp.split("/")
-            dt = f"{yy[-2:].zfill(2)}{mm.zfill(2)}{dd.zfill(2)}"
-        elif "-" in str(exp):
-            yyyy, mm, dd = exp.split("-")
-            dt = f"{yyyy[-2:]}{mm.zfill(2)}{dd.zfill(2)}"
-        else:
-            return None
-        cp = "C" if "CALL" in str(s.get("option_type","")).upper() else "P"
-        strike = int(round(float(s.get("strike", 0)) * 1000))
-        return f"{tk}{dt}{cp}{strike:08d}"
-    except Exception:
-        return None
-
-def _load_target_from_best_options(occ_symbol):
-    """Fallback: look up OCC directly in best-options data (richer shape)."""
-    try:
-        from pathlib import Path
-        from datetime import datetime, timezone, timedelta
-        et = timezone(timedelta(hours=-4))
-        today = datetime.now(et).strftime("%Y-%m-%d")
-        f = Path(f"/home/ubuntu/.openclaw/data/best-options/{today}.json")
-        if not f.exists():
-            return None
-        data = json.loads(f.read_text())
-        c = data.get("contracts", {}).get(occ_symbol)
-        if not c:
-            return None
-        return {
-            "ticker": c.get("ticker"),
-            "strike": float(c.get("strike", 0)),
-            "option_type": c.get("option_type", "CALL"),
-            "expiry": c.get("expiry", ""),
-            "dte": c.get("dte", 0),
-            "spot": c.get("spot", 0),
-            "flow_value": c.get("premium", 0),
-            "flow_value_raw": f"${c.get('premium',0)/1e6:.2f}M",
-            "tier": c.get("tier", "T1_HUGE"),
-            "volume": c.get("volume", 0),
-            "oi": c.get("oi", 0),
-            "sweeps": c.get("sweeps", 0),
-            "blocks": c.get("blocks", 0),
-            "timestamp": datetime.now(timezone.utc).isoformat(),
-            "option_symbol": occ_symbol,
-            "single_pick_mode": True,
-        }
-    except Exception:
-        return None
-
 def load_sidecar():
     if not SIDECAR.exists():
         return []
@@ -1973,10 +1918,8 @@ def log_decision(cycle_result, picks_executed):
 
 def main():
     p = argparse.ArgumentParser()
-    _log_agent = "boba_cycle"
     p.add_argument("--dry-run", action="store_true", help="Build prompt + show but don't call Boba or execute")
     p.add_argument("--force", action="store_true", help="Ignore killswitch")
-    p.add_argument("--single-pick", type=str, default=None, help="OCC to evaluate as single contract, bypassing fresh+dedupe filter")
     args = p.parse_args()
 
     cycle_start = datetime.now(timezone.utc).isoformat()
@@ -1989,24 +1932,9 @@ def main():
 
     log_to_ops("boba_cycle", "INFO", "Cycle start")
 
-    # 1. Load today's fresh whale signals (or single-pick override)
-    if args.single_pick:
-        log_to_ops(_log_agent, "INFO", f"single-pick mode: {args.single_pick}")
-        target = _load_target_from_best_options(args.single_pick)
-        if not target:
-            sigs = load_sidecar()
-            for _s in sigs:
-                if _occ_from_signal(_s) == args.single_pick:
-                    target = _s
-                    break
-        if not target:
-            print(f"[single-pick] {args.single_pick} not found in any source")
-            return 1
-        seen = set()
-        fresh = [(signal_id(target), target)]
-    else:
-        seen = load_seen()
-        fresh = get_todays_whale_signals(seen)
+    # 1. Load today's fresh whale signals
+    seen = load_seen()
+    fresh = get_todays_whale_signals(seen)
     log_to_ops("boba_cycle", "DATA", f"Today's fresh signals: {len(fresh)} (seen: {len(seen)})")
     if not fresh:
         post_to_telegram(
