@@ -305,7 +305,7 @@ def check_fresh_kronos_file(ticker, max_age_minutes=60):
 
 
 
-def wait_for_kronos_result(ticker, timeout_sec=120, poll_interval=3):
+def wait_for_kronos_result(ticker, timeout_sec=90, poll_interval=3):
     """
     After firing Kronos in background, poll latest_<ticker>.json
     for up to timeout_sec seconds waiting for a FRESH result.
@@ -1718,7 +1718,7 @@ def main():
             # Kronos typically takes ~50s. If it doesn't finish, use placeholder.
             fire_kronos_background(ticker, option_ctx)
             kronos_fired.append(ticker)
-            waited = wait_for_kronos_result(ticker, timeout_sec=120, poll_interval=3)
+            waited = wait_for_kronos_result(ticker, timeout_sec=90, poll_interval=3)
             if waited:
                 # Got real result — annotate with option context
                 waited["option_context"] = option_ctx
