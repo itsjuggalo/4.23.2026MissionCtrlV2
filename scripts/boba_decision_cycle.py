@@ -190,10 +190,20 @@ def increment_daily_picks(pick_summary):
 
 def get_todays_whale_signals(seen_ids):
     sigs = load_sidecar()
-    today = datetime.now(timezone.utc).strftime("%Y-%m-%d")
+    from datetime import timedelta as _td
+    et = timezone(_td(hours=-4))
+    today_et = datetime.now(et).strftime("%Y-%m-%d")
     fresh = []
     for s in sigs:
-        if s.get("timestamp", "")[:10] != today:
+        ts = s.get("timestamp", "")
+        if not ts: continue
+        try:
+            sig_dt = datetime.fromisoformat(ts.replace("Z", "+00:00"))
+            if sig_dt.tzinfo is None:
+                sig_dt = sig_dt.replace(tzinfo=timezone.utc)
+            if sig_dt.astimezone(et).strftime("%Y-%m-%d") != today_et:
+                continue
+        except Exception:
             continue
         sid = signal_id(s)
         if sid in seen_ids:
