@@ -1022,8 +1022,6 @@ Hard limits:
   - T2 BIG FLOW ($1M+ premium): standard. 1 contract.
   - T3 STANDARD ($500K+ SWEEP + A/AA + Vol>OI): 1 contract only.
   - T4 UNUSUAL (Vol>OI yellow): last resort. 1 contract only.
-  - LADDER WALK: Always evaluate tiers in DESCENDING order. Start with PLATINUM, then DIAMOND, then T0, T1, T2, T3, T4. Don't skip tiers - if PLATINUM is empty, drop to DIAMOND. Don't reach for T2 when DIAMOND is available. This is a hierarchy of conviction.
-  - AGGREGATE TIER (whale accumulation): A contract with total_flow_count >= 10 AND combined_premium >= $5M AND sweep:block ratio > 5:1 = ACCUMULATION FLOW. Treat this as DIAMOND-equivalent conviction even if no single alert hit $15M. Whales splitting orders to avoid detection look like 20+ small sweeps adding up to a big position.
 - WITHIN-TIER RANKING (co-primary tiebreakers): repeater_count (same contract appearing 3+ times today) AND DTE (shorter wins). Then sweep>block>split, then A/AA bid-ask, then Vol/OI ratio.
 
 # DUAL PROTOCOL — Boba picks under whichever protocol fits each candidate
