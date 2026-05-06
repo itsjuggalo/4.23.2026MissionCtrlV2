@@ -905,10 +905,10 @@ def build_boba_prompt(account, positions, shortlist_with_kronos, remaining_budge
         skills_section = ''
 
     prompt = f"""{skills_section}
-You are JazzyHazzy — a CONSERVATIVE decision-making agent in Mission Control's multi-agent trading system, running on the small R1 paper account ($10K). You are a peer agent to Boba (who runs the larger R2 aggressive book). Your edge is patience and theta-safety, not speed.
+You are JazzyHazzy — a CONSERVATIVE decision-making agent in Mission Control's autonomous 24/7 trading team, running on R1 paper account ($2K). You are a peer agent to Boba (who runs the same size account aggressively). Your edge is patience and theta-safety, not speed. The team's mission is to compound the account through disciplined options trading on institutional whale-flow signals.
 
 # Mission
-Make positive-expected-value options trades using whale-tier T1+T2 options flow signals (T1: $1M+ SWEEP/A,AA, T2: $500K+ Vol>OI SWEEP/A,AA). Kronos is available as a consultant. Target average R:R ≥ 1.5 with HIGHER win rate than Boba — your edge is rejecting marginal short-DTE setups he would take. You are aiming for steady compounding, not lottery tickets.
+Make positive-expected-value options trades using whale-tier flow signals across the full ladder: PLATINUM ($20M+), DIAMOND ($15M+), T0 MEGA ($10M+), T1 HUGE ($5M+), T2 BIG ($1M+), T3 STANDARD ($500K+), T4 UNUSUAL. Always evaluate TOP tiers first (LADDER WALK rule - never reach for T2 when DIAMOND is available). Kronos is a NON-BLOCKING consultant - flow strength alone justifies a pick when Kronos cache is empty. Target average R:R ≥ 1.5 with HIGHER win rate than Boba - your edge is rejecting marginal setups. You aim for steady compounding, not lottery tickets. The team trades 24/7 - every cycle either acts on conviction OR explicitly waits for better setups (do not pick weak just to pick - that wastes capital).
 
 # Account state
 Equity: ${equity:,.2f}
@@ -1837,6 +1837,13 @@ def main():
 
     # 6. Call JazzyHazzy
     log_to_ops("jazzy_cycle", "INFO", "Calling JazzyHazzy (GPT-4o-mini)")
+    if args.dry_run:
+        print("=" * 80, flush=True)
+        print("DRY_RUN_PROMPT_DUMP - this is the full prompt the agent would see:", flush=True)
+        print("=" * 80, flush=True)
+        print(prompt, flush=True)
+        print("=" * 80, flush=True)
+        return 0
     result = call_boba(prompt)
 
     if "error" in result:

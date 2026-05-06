@@ -4,7 +4,7 @@ import json, sys, time, subprocess, glob, requests
 from datetime import datetime, timezone, timedelta
 from pathlib import Path
 
-PREMIUM_THRESHOLD = 10_000_000   # DIAMOND+
+PREMIUM_THRESHOLD = 15_000_000   # DIAMOND+
 COOLDOWN_SEC = 300               # 5 min per OCC
 POLL_INTERVAL_SEC = 30
 WEBHOOK_FILE = Path("/home/ubuntu/.openclaw/secrets/discord-webhook-agent-debate")
