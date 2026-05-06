@@ -25,7 +25,7 @@ LOCK_STATE = STATE_DIR / "profit_lock_state.json"
 LOG_FILE = Path.home() / ".openclaw" / "workspace" / "memory" / "profit_lock_daemon.jsonl"
 LOG_FILE.parent.mkdir(parents=True, exist_ok=True)
 
-POLL_INTERVAL_SEC = 60
+POLL_INTERVAL_SEC = 20
 ALPACA_BASE = "https://paper-api.alpaca.markets/v2"
 EXPECTED_ACCOUNT = "PA3QIBJEYMB3"
 
@@ -105,8 +105,11 @@ def calc_target_stop(entry, current, last_locked_pct, peak_pct):
     tier_pct, tier_label = calc_tier_floor(gain_pct, last_locked_pct)
     # Peak-tracker target: peak minus giveback. Only valid once peak >= +20 (don't trail negatives).
     peak_target = None
-    if peak_pct >= 20:
-        peak_target = peak_pct - GIVEBACK_PCT
+    if peak_pct >= TRAIL_START_PEAK_PCT:
+        # NEW: percentage-of-peak-PRICE trail. peak_price = entry*(1+peak_pct/100); stop = peak_price*(1-GIVEBACK/100)
+        peak_target = ((1 + peak_pct / 100.0) * (1 - GIVEBACK_PCT / 100.0) - 1) * 100.0
+    elif peak_pct >= FREE_TRADE_PEAK_PCT:
+        peak_target = FREE_TRADE_LOCK_PCT
     # Final target = max of the three (existing locked, tier floor, peak target)
     candidates = [last_locked_pct]
     if tier_pct is not None: candidates.append(tier_pct)
