@@ -897,7 +897,7 @@ AGGRESSIVE MODE: If you see fresh $1M+ flow this morning with SWEEPS, TAKE IT. D
 # - If a candidate's AlertPrice * 100 > available BP, REJECT and pick a cheaper strike on
 #   that ticker (further OTM same expiry usually has lower premium) OR skip the ticker
 ## TASK 2: NEW PICKS (up to remaining daily budget)
-You have {remaining_budget} NEW pick(s) remaining in today's daily budget (cap is {MAX_NEW_PICKS_PER_DAY}/day across ALL cycles).
+Buying power available: ${buying_power:,.0f}. Use it on highest-conviction picks (frog-on-whale: 1 contract default, 2 max on full conviction T0/T1+sweep+ASK+repeater). Each contract cost = AlertPrice * 100.
 Pick 0 to {remaining_budget} NEW options to buy on Alpaca paper. Only pick if the setup is genuinely good — if nothing is compelling, say so and pick zero.
 
 ### Same-ticker re-flow rule
@@ -927,7 +927,7 @@ Additional decisions per pick:
 - Max loss % (default -30%)
 
 Hard limits:
-- Max NEW picks this cycle: {remaining_budget} (out of daily cap {MAX_NEW_PICKS_PER_DAY})
+- Sizing gate: BP-based. Each contract cost = AlertPrice * 100. Hard cap 2 contracts per pick.
 - Max ${MAX_TOTAL_RISK_USD:,} total notional risk across all picks
 - PREMIUM TIER LADDER (rank picks highest tier first — if T0 hits exist, ignore lower tiers):
   - UNIFIED RISK MODEL: All picks use stop_loss_pct=15. NO fixed take-profit - profit-lock daemon trails the stop UP at +20/+50/+100/+200% peaks with 8pp giveback. Winners ride indefinitely.
@@ -1775,7 +1775,7 @@ def main():
 
     # 7. Execute picks — gated by daily NEW picks budget
     remaining_budget = remaining_picks_today()
-    print(f"[daily_budget] {remaining_budget} NEW picks remaining today (cap {MAX_NEW_PICKS_PER_DAY})", flush=True)
+    print(f"[budget] BP=${buying_power:,.0f} | open_positions={len(positions) if positions else 0} | realized_today=${realized_pnl_today:.2f} | picks_today={state.get('new_picks_count', 0)}", flush=True)
     cycle_picks = cycle_result.get("picks", [])
     # Cap at min(per-cycle limit, remaining daily budget)
     effective_cap = min(MAX_PICKS_PER_CYCLE, remaining_budget)
