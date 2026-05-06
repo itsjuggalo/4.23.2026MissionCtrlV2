@@ -85,7 +85,7 @@ except Exception:
 KRONOS_CMD = "/home/ubuntu/mission-control/agent-team/kronos/kronos_on_demand.py"
 
 MAX_PICKS_PER_CYCLE = 3
-MAX_NEW_PICKS_PER_DAY = 999   # Hard cap on NEW picks per trading day across all cycles
+MAX_NEW_PICKS_PER_DAY = 3   # Hard cap on NEW picks per trading day across all cycles
 MAX_TOTAL_RISK_USD = 1000
 SHORTLIST_SIZE = 5
 DAILY_PICKS_FILE = Path("/home/ubuntu/.openclaw/workspace/state/boba_daily_picks.json")
@@ -202,20 +202,10 @@ def increment_daily_picks(pick_summary):
 
 def get_todays_whale_signals(seen_ids):
     sigs = load_sidecar()
-    from datetime import timedelta as _td
-    et = timezone(_td(hours=-4))  # EDT (use -5 for EST in winter)
-    today_et = datetime.now(et).strftime("%Y-%m-%d")
+    today = datetime.now(timezone.utc).strftime("%Y-%m-%d")
     fresh = []
     for s in sigs:
-        ts = s.get("timestamp", "")
-        if not ts: continue
-        try:
-            sig_dt = datetime.fromisoformat(ts.replace("Z", "+00:00"))
-            if sig_dt.tzinfo is None:
-                sig_dt = sig_dt.replace(tzinfo=timezone.utc)
-            if sig_dt.astimezone(et).strftime("%Y-%m-%d") != today_et:
-                continue
-        except Exception:
+        if s.get("timestamp", "")[:10] != today:
             continue
         sid = signal_id(s)
         if sid in seen_ids:
@@ -1052,11 +1042,10 @@ def call_boba(prompt):
         if r.status_code != 200:
             return {"error": f"API {r.status_code}: {r.text[:500]}"}
         data = r.json()
-        # OpenAI response shape (was incorrectly using Anthropic shape)
-        try:
-            text = data["choices"][0]["message"]["content"] or ""
-        except (KeyError, IndexError, TypeError) as _e:
-            return {"error": f"OpenAI response missing choices: {str(data)[:300]}"}
+        text = ""
+        for block in data.get("content", []):
+            if block.get("type") == "text":
+                text += block.get("text", "")
         # Parse JSON from response
         text = text.strip()
         if text.startswith("```"):

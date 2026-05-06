@@ -80,7 +80,7 @@ except Exception:
 KRONOS_CMD = "/home/ubuntu/mission-control/agent-team/kronos/kronos_on_demand.py"
 
 MAX_PICKS_PER_CYCLE = 3
-MAX_NEW_PICKS_PER_DAY = 3   # Hard cap on NEW picks per trading day across all cycles
+MAX_NEW_PICKS_PER_DAY = 999   # Hard cap on NEW picks per trading day across all cycles
 MAX_TOTAL_RISK_USD = 1000
 
 # Item 31: post-LLM hard guardrails (enforced by validate_pick_against_guardrails)
