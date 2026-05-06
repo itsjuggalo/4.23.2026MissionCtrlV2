@@ -931,9 +931,7 @@ Hard limits:
 - Max ${MAX_TOTAL_RISK_USD:,} total notional risk across all picks
 - PREMIUM TIER LADDER (rank picks highest tier first — if T0 hits exist, ignore lower tiers):
   - UNIFIED RISK MODEL: All picks use stop_loss_pct=15. NO fixed take-profit - profit-lock daemon trails the stop UP at +20/+50/+100/+200% peaks with 8pp giveback. Winners ride indefinitely.
-  - PLATINUM FLOW ($20M+ premium): NEW TOP TIER. Always check FIRST. Absolute max conviction. 2 contracts allowed regardless of other confluences.
-  - DIAMOND FLOW ($15M+ premium): NEW SECOND TIER. Very high conviction. 2 contracts allowed when sweep + ASK aggressor present.
-  - T0 MEGA FLOW ($10M+ premium): high conviction. 2 contracts allowed if BP supports + sweep + ASK.
+  - T0 MEGA FLOW ($10M+ premium): always check FIRST. Highest conviction. 2 contracts allowed if BP supports.
   - T1 HUGE FLOW ($5M+ premium): high conviction. 2 contracts allowed when sweep + ASK aggressor + multi-day repeater all present.
   - T2 BIG FLOW ($1M+ premium): standard. 1 contract.
   - T3 STANDARD ($500K+ SWEEP + A/AA + Vol>OI): 1 contract only.

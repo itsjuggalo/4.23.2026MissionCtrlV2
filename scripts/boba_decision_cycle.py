@@ -941,7 +941,7 @@ Hard rules:
 - **CONTRACT SIZING (FROG-ON-WHALE)**: 1 contract per pick by default. 2 contracts ONLY when ALL of: (T0 OR T1 tier) + sweep + ASK aggressor + multi-day repeater. HARD CAP 2 regardless of BP. Extra BP rolls to next cron tick - whales hop, not pile in.
 - **NO FIXED TP**: profit-lock daemon trails the stop up automatically at +20/+50/+100/+200% peaks with 8pp giveback. Do NOT suggest profit_target_pct - it is ignored. Just specify stop_loss_pct=15 or omit (default).
 
-- Up to 3 picks per day across all cycles. AGGRESSIVE FIRST-LOOK: In first 30 min of market open, if you see fresh $10M+ T0 SWEEP flow, TAKE IT WITHOUT waiting for full confluence. Below $10M still requires multi-confluence and Kronos check. If only one is max conviction, take just that one and wait for next cron - a cheaper better setup may appear.
+- Up to 3 picks per day across all cycles. AGGRESSIVE FIRST-LOOK: In first 30 min of market open, if you see fresh $20M+ PLATINUM SWEEP flow, TAKE IT WITHOUT waiting for full confluence. Below $20M still requires multi-confluence and Kronos check. If only one is max conviction, take just that one and wait for next cron - a cheaper better setup may appear.
 - You may use the entire account on a single pick if (and only if) conviction is full: PLATINUM tier OR T0 mega flow PLUS Kronos AGREES PLUS multi-day repeater confirmation.
 - Stops handled by profit_lock_daemon (tier-based ratchet at +20/+50/+100/+200 with 8 percent peak-trail) AND trail_daemon as safety net. Boba does NOT manage stop_loss_pct manually beyond the initial OCO bracket value.
 - Take-profit stays fixed at the tier-ladder default in the OCO bracket.
@@ -1015,7 +1015,9 @@ Hard limits:
 - Max ${MAX_TOTAL_RISK_USD:,} total notional risk across all picks
 - PREMIUM TIER LADDER (rank picks highest tier first — if T0 hits exist, ignore lower tiers):
   - UNIFIED RISK MODEL: All picks use stop_loss_pct=15. NO fixed take-profit - profit-lock daemon trails the stop UP at +20/+50/+100/+200% peaks with 8pp giveback. Winners ride indefinitely.
-  - T0 MEGA FLOW ($10M+ premium): always check FIRST. Highest conviction. 2 contracts allowed if BP supports.
+  - PLATINUM FLOW ($20M+ premium): NEW TOP TIER. Always check FIRST. Absolute max conviction. 2 contracts allowed regardless of other confluences.
+  - DIAMOND FLOW ($15M+ premium): NEW SECOND TIER. Very high conviction. 2 contracts allowed when sweep + ASK aggressor present.
+  - T0 MEGA FLOW ($10M+ premium): high conviction. 2 contracts allowed if BP supports + sweep + ASK.
   - T1 HUGE FLOW ($5M+ premium): high conviction. 2 contracts allowed when sweep + ASK aggressor + multi-day repeater all present.
   - T2 BIG FLOW ($1M+ premium): standard. 1 contract.
   - T3 STANDARD ($500K+ SWEEP + A/AA + Vol>OI): 1 contract only.
@@ -2062,7 +2064,14 @@ def main():
 
     # 7. Execute picks — gated by daily NEW picks budget
     remaining_budget = remaining_picks_today()
-    print(f"[budget] BP=${buying_power:,.0f} | open_positions={len(positions) if positions else 0} | realized_today=${realized_pnl_today:.2f} | picks_today={state.get('new_picks_count', 0)}", flush=True)
+    try:
+        _bp = float((account or {}).get('buying_power', 0)) if 'account' in dir() else 0
+        _eq = float((account or {}).get('equity', 0)) if 'account' in dir() else 0
+        _pos = len(positions) if 'positions' in dir() and positions else 0
+        _picks = state.get('new_picks_count', 0) if 'state' in dir() else 0
+        print(f"[budget] BP=${_bp:,.0f} | equity=${_eq:,.0f} | open_positions={_pos} | picks_today={_picks}", flush=True)
+    except Exception as _e:
+        print(f"[budget] log failed: {_e}", flush=True)
     cycle_picks = cycle_result.get("picks", [])
     # Cap at min(per-cycle limit, remaining daily budget)
     effective_cap = min(MAX_PICKS_PER_CYCLE, remaining_budget)
