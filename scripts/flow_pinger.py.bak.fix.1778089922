@@ -5,12 +5,6 @@ from datetime import datetime, timezone, timedelta
 from pathlib import Path
 
 PREMIUM_THRESHOLD = 10_000_000   # DIAMOND+
-ACCUM_PREMIUM_MIN = 5_000_000
-ACCUM_FLOW_COUNT_MIN = 10
-TICKER_HEAT_MIN_CONTRACTS = 5
-TICKER_HEAT_MIN_PREMIUM = 20_000_000
-TICKER_HEAT_DIR_PCT = 0.70
-TICKER_HEAT_COOLDOWN_SEC = 1800
 COOLDOWN_SEC = 300               # 5 min per OCC
 POLL_INTERVAL_SEC = 30
 WEBHOOK_FILE = Path("/home/ubuntu/.openclaw/secrets/discord-webhook-agent-debate")
@@ -58,7 +52,7 @@ def get_account_bp(agent):
         log("bp_check_fail", f"{agent}: {e}")
     return 0.0
 
-def post_discord(webhook_url, c, agents_pinged, trigger_type="T0+_PREMIUM"):
+def post_discord(webhook_url, c, agents_pinged):
     occ = c.get("option_symbol", "?")
     ticker = c.get("ticker", "?")
     strike = c.get("strike", 0)
@@ -70,18 +64,8 @@ def post_discord(webhook_url, c, agents_pinged, trigger_type="T0+_PREMIUM"):
     ap = float(c.get("alert_price", 0))
     cost = ap * 100
     direction = "[CALL]" if "CALL" in str(opt).upper() else "[PUT]"
-    if trigger_type.startswith("TICKER_HEAT"):
-        cnt = c.get("_ticker_heat_count", "?")
-        total = c.get("_ticker_heat_total_prem", 0)
-        direction = c.get("_ticker_heat_direction", "?")
-        tier_band = f"TICKER_HEAT_{direction} x{cnt} contracts ${total/1e6:.0f}M total"
-        color = 0xE0AC0E
-    elif trigger_type == "ACCUMULATION":
-        tier_band = f"ACCUMULATION x{c.get('total_flow_count', '?')}"
-        color = 0x1F8F3F
-    else:
-        tier_band = "PLATINUM" if prem >= 20e6 else ("DIAMOND" if prem >= 15e6 else "T0 MEGA")
-        color = 0xA32D2D if prem >= 20e6 else (0x9B30FF if prem >= 15e6 else 0xC76A00)
+    tier_band = "PLATINUM" if prem >= 20e6 else "DIAMOND"
+    color = 0xA32D2D if prem >= 20e6 else 0x9B30FF
     embed = {
         "title": f"FLOW PINGER {tier_band}: {ticker} ${strike}{opt[0]} {exp}",
         "description": f"**Premium**: ${prem/1e6:.2f}M | **AlertPrice**: ${ap:.2f} | **Cost/contract**: ${cost:.0f}",
@@ -103,67 +87,25 @@ def post_discord(webhook_url, c, agents_pinged, trigger_type="T0+_PREMIUM"):
         log("discord_fail", str(e))
 
 def trigger_agent(agent, occ):
-    """Spawn DETACHED subprocess so it survives pinger restarts (setsid + new session)."""
-    import os
     script = f"/home/ubuntu/scripts/{agent}_decision_cycle.py"
     logf = open(f"/tmp/{agent}_singlepick.log", "ab")
     try:
         subprocess.Popen(["python3", script, f"--single-pick={occ}"],
-            stdout=logf, stderr=subprocess.STDOUT, cwd="/home/ubuntu/scripts",
-            start_new_session=True)  # NEW: detach from parent process group
-        log("triggered", f"{agent} on {occ} (detached)")
+            stdout=logf, stderr=subprocess.STDOUT, cwd="/home/ubuntu/scripts")
+        log("triggered", f"{agent} on {occ}")
     except Exception as e:
         log("trigger_fail", f"{agent} on {occ}: {e}")
 
 def scan_best_options():
-    """Returns list of (occ, contract, trigger_type) tuples for qualifying alerts."""
     try:
         files = sorted(glob.glob(str(BEST_OPTIONS_DIR / "*.json")), reverse=True)
         if not files: return []
         d = json.loads(Path(files[0]).read_text())
         contracts = d.get("contracts", {})
-        out = []
-        # Pass 1: per-OCC triggers
-        for occ, c in contracts.items():
-            prem = float(c.get("premium", 0))
-            flow_count = int(c.get("total_flow_count", c.get("trade_count", 1)) or 1)
-            sweeps = int(c.get("sweeps", 0) or 0)
-            blocks = int(c.get("blocks", 0) or 0)
-            if prem >= PREMIUM_THRESHOLD:
-                out.append((occ, c, "T0+_PREMIUM"))
-                continue
-            if prem >= ACCUM_PREMIUM_MIN and flow_count >= ACCUM_FLOW_COUNT_MIN and (sweeps / max(blocks, 1)) > 5:
-                out.append((occ, c, "ACCUMULATION"))
-        # Pass 2: ticker-heat across ticker
-        from collections import defaultdict
-        ticker_groups = defaultdict(list)
-        for occ, c in contracts.items():
-            if float(c.get("premium", 0)) >= 1_000_000:
-                ticker_groups[c.get("ticker")].append((occ, c))
-        for ticker, items in ticker_groups.items():
-            if len(items) < TICKER_HEAT_MIN_CONTRACTS: continue
-            total_prem = sum(float(c.get("premium", 0)) for _, c in items)
-            if total_prem < TICKER_HEAT_MIN_PREMIUM: continue
-            calls = sum(1 for _, c in items if "CALL" in str(c.get("option_type","")).upper())
-            puts = len(items) - calls
-            direction = None
-            if calls / len(items) >= TICKER_HEAT_DIR_PCT: direction = "CALLS"
-            elif puts / len(items) >= TICKER_HEAT_DIR_PCT: direction = "PUTS"
-            if not direction: continue
-            wanted = [it for it in items if (direction == "CALLS" and "CALL" in str(it[1].get("option_type","")).upper()) or
-                                              (direction == "PUTS"  and "PUT"  in str(it[1].get("option_type","")).upper())]
-            if not wanted: continue
-            cheapest_occ, cheapest_c = min(wanted, key=lambda it: float(it[1].get("alert_price", 9e9) or 9e9))
-            cheapest_c = dict(cheapest_c)
-            cheapest_c["_ticker_heat_total_prem"] = total_prem
-            cheapest_c["_ticker_heat_count"] = len(items)
-            cheapest_c["_ticker_heat_direction"] = direction
-            out.append((cheapest_occ, cheapest_c, f"TICKER_HEAT_{direction}"))
-        return out
+        return [(occ, c) for occ, c in contracts.items() if float(c.get("premium", 0)) >= PREMIUM_THRESHOLD]
     except Exception as e:
         log("scan_fail", str(e))
         return []
-
 
 def main():
     log("startup", f"online | threshold ${PREMIUM_THRESHOLD/1e6:.0f}M+ | cooldown {COOLDOWN_SEC}s | poll {POLL_INTERVAL_SEC}s")
@@ -175,8 +117,8 @@ def main():
     while True:
         try:
             alerts = scan_best_options()
-            for occ, c, trigger_type in alerts:
-                if in_cooldown(occ, state, trigger_type): continue
+            for occ, c in alerts:
+                if in_cooldown(occ, state): continue
                 ap = float(c.get("alert_price", 0))
                 cost = ap * 100
                 boba_bp = get_account_bp("boba")
@@ -186,9 +128,9 @@ def main():
                     trigger_agent("boba", occ); agents.append("Boba")
                 if jazzy_bp >= cost:
                     trigger_agent("jazzy", occ); agents.append("Jazzy")
-                post_discord(webhook_url, c, agents, trigger_type)
+                post_discord(webhook_url, c, agents)
                 mark_cooldown(occ, state, trigger_type); save_state(state)
-                log("alert", f"{occ} [{trigger_type}] prem ${float(c.get('premium',0))/1e6:.2f}M cost ${cost:.0f} pinged={agents}")
+                log("alert", f"{occ} prem ${float(c.get('premium',0))/1e6:.2f}M cost ${cost:.0f} pinged={agents}")
         except Exception as e:
             log("loop_error", str(e))
         time.sleep(POLL_INTERVAL_SEC)
