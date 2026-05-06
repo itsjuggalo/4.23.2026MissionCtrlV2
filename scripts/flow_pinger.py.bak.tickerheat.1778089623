@@ -24,21 +24,13 @@ def save_state(state):
     STATE_FILE.parent.mkdir(parents=True, exist_ok=True)
     STATE_FILE.write_text(json.dumps(state, indent=2))
 
-def in_cooldown(occ, state, trigger_type="T0+_PREMIUM"):
+def in_cooldown(occ, state):
     cd = state.get("cooldowns", {})
-    if trigger_type.startswith("TICKER_HEAT"):
-        # Use ticker-level key
-        ticker = occ[:5].rstrip("0123456789")  # strip date+strike, keep ticker
-        key = f"TICKER:{ticker}"
-        return key in cd and (time.time() - cd[key]) < TICKER_HEAT_COOLDOWN_SEC
     return occ in cd and (time.time() - cd[occ]) < COOLDOWN_SEC
 
-def mark_cooldown(occ, state, trigger_type="T0+_PREMIUM"):
-    if trigger_type.startswith("TICKER_HEAT"):
-        ticker = occ[:5].rstrip("0123456789")
-        state.setdefault("cooldowns", {})[f"TICKER:{ticker}"] = time.time()
+def mark_cooldown(occ, state):
     state.setdefault("cooldowns", {})[occ] = time.time()
-    cutoff = time.time() - 7200
+    cutoff = time.time() - 3600
     state["cooldowns"] = {k: v for k, v in state["cooldowns"].items() if v > cutoff}
 
 def get_account_bp(agent):
@@ -129,7 +121,7 @@ def main():
                 if jazzy_bp >= cost:
                     trigger_agent("jazzy", occ); agents.append("Jazzy")
                 post_discord(webhook_url, c, agents)
-                mark_cooldown(occ, state, trigger_type); save_state(state)
+                mark_cooldown(occ, state); save_state(state)
                 log("alert", f"{occ} prem ${float(c.get('premium',0))/1e6:.2f}M cost ${cost:.0f} pinged={agents}")
         except Exception as e:
             log("loop_error", str(e))
