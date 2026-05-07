@@ -47,6 +47,17 @@ def mark_cooldown(occ, state, trigger_type="T0+_PREMIUM"):
     cutoff = time.time() - 7200
     state["cooldowns"] = {k: v for k, v in state["cooldowns"].items() if v > cutoff}
 
+
+def agent_holds_occ(agent, occ):
+    """Check if agent already has a position in this OCC. Returns True if held."""
+    try:
+        key = (SECRETS_DIR / f"alpaca-{agent}-key-id").read_text().strip()
+        sec = (SECRETS_DIR / f"alpaca-{agent}-secret").read_text().strip()
+        r = requests.get(f"{ALPACA_PAPER}/v2/positions/{occ}",
+            headers={"APCA-API-KEY-ID": key, "APCA-API-SECRET-KEY": sec}, timeout=8)
+        return r.status_code == 200
+    except Exception:
+        return False
 def get_account_bp(agent):
     try:
         key = (SECRETS_DIR / f"alpaca-{agent}-key-id").read_text().strip()
@@ -182,10 +193,14 @@ def main():
                 boba_bp = get_account_bp("boba")
                 jazzy_bp = get_account_bp("jazzy")
                 agents = []
-                if boba_bp >= cost:
+                if boba_bp >= cost and not agent_holds_occ("boba", occ):
                     trigger_agent("boba", occ); agents.append("Boba")
-                if jazzy_bp >= cost:
+                elif boba_bp >= cost:
+                    log("skip_already_held", f"boba already holds {occ}")
+                if jazzy_bp >= cost and not agent_holds_occ("jazzy", occ):
                     trigger_agent("jazzy", occ); agents.append("Jazzy")
+                elif jazzy_bp >= cost:
+                    log("skip_already_held", f"jazzy already holds {occ}")
                 post_discord(webhook_url, c, agents, trigger_type)
                 mark_cooldown(occ, state, trigger_type); save_state(state)
                 log("alert", f"{occ} [{trigger_type}] prem ${float(c.get('premium',0))/1e6:.2f}M cost ${cost:.0f} pinged={agents}")
