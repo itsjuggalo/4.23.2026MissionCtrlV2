@@ -2,6 +2,9 @@ import { NextResponse } from 'next/server';
 import { readFileSync } from 'fs';
 
 function getSecret(name: string): string {
+  // Prefer env var (Vercel); fall back to local filesystem (openclaw box)
+  const envKey = name.toUpperCase().replace(/-/g, '_');
+  if (process.env[envKey]) return process.env[envKey]!.trim();
   try { return readFileSync(`/home/ubuntu/.openclaw/secrets/${name}`, 'utf-8').trim(); }
   catch { return ''; }
 }
