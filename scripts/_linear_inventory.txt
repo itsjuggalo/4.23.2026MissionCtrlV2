@@ -1,0 +1,1681 @@
+=== PM2 PROCESSES ===
+pm2-logrotate | /home/ubuntu/.pm2/modules/pm2-logrotate/node_modules/pm2-logrotate/app.js | /home/ubuntu/.pm2/modules/pm2-logrotate/node_modules/pm2-logrotate
+option-signals | /home/ubuntu/mission-control-restored/Option-Signals-Scraper/scraper.py | ?
+signal-receiver | /home/ubuntu/mission-control/signal-receiver/run.sh | ?
+flow-monitor | /home/ubuntu/mission-control/signal-receiver/run_flow_monitor.sh | ?
+deepseek-bot | /home/ubuntu/mission-control-restored/bots/deepseek_telegram.py | ?
+grok-bot | /home/ubuntu/mission-control-restored/bots/grok_telegram.py | ?
+brief-forwarder | /home/ubuntu/mission-control-restored/bots/discord_brief_forwarder.py | ?
+coupon-monitor | /home/ubuntu/coupon-claw/site_monitor.py | ?
+coupon-claw | /home/ubuntu/coupon-claw/bot.py | ?
+firebase-signal-relay | /home/ubuntu/mission-control-restored/bots/firebase_signal_relay.py | ?
+reminder-bot | /home/ubuntu/scripts/bots/reminder_bot.py | ?
+askgrok-bot | /home/ubuntu/scripts/askgrok_bot.py | ?
+todo-bot | /home/ubuntu/scripts/todo_bot.py | ?
+synth-control-bot | /home/ubuntu/mission-control-restored/Option-Signals-Scraper/synth_control_bot.py | ?
+option-signals-relay | /home/ubuntu/mission-control-restored/Option-Signals-Scraper/discord_relay.py | ?
+boba-autothread | /home/ubuntu/scripts/boba-bot/boba_autothread.py | ?
+boba-mega | /home/ubuntu/scripts/boba-bot/boba_mega.py | ?
+tgbridge | /home/ubuntu/scripts/tg-bridge/tgbridge.py | ?
+captcha-bot | /home/ubuntu/scripts/captcha-bot/captcha_bot.py | ?
+spacer-bot | /home/ubuntu/scripts/spacer-bot/spacer_bot.py | ?
+liq-collector | /home/ubuntu/scripts/liquidation-tracker/liq_collector.py | ?
+boba-qa | /home/ubuntu/scripts/boba_qa_bot.py | ?
+trail-daemon | /home/ubuntu/scripts/trail_daemon.py | ?
+status-bot | /home/ubuntu/scripts/status_bot.py | ?
+mission-control | /usr/bin/npm | ?
+skill-scheduler | /usr/bin/python3 | ?
+watchlist-editor-bot | /usr/bin/python3 | ?
+telegram-listener | /home/ubuntu/mission-control/telegram-listener/listener.py | /home/ubuntu/mission-control/telegram-listener
+profit-lock-daemon | /home/ubuntu/scripts/profit_lock_daemon.py | ?
+profit-lock-daemon-jazzy | /home/ubuntu/scripts/profit_lock_daemon_jazzy.py | ?
+alpaca-fill-listener | /home/ubuntu/scripts/alpaca_fill_listener.py | ?
+option-price-watcher | /home/ubuntu/scripts/option-watcher/watcher_py | ?
+scanner-overlap | /home/ubuntu/scripts/scanners/multi_feed_overlap_py | ?
+scanner-gamma | /home/ubuntu/scripts/scanners/gamma_squeeze_py | ?
+scanner-earnings | /home/ubuntu/scripts/scanners/earnings_catalyst_py | ?
+scanner-pmgap | /home/ubuntu/scripts/scanners/premarket_gap_py | ?
+scanner-decay | /home/ubuntu/scripts/scanners/eod_decay_py | ?
+scanner-prepop | /home/ubuntu/scripts/scanners/pre_pop_py | ?
+scanner-congress | /home/ubuntu/scripts/scanners/congress_catalyst_py | ?
+flow-greeks-relay | /home/ubuntu/scripts/relays/flow_greeks_relay_py | /home/ubuntu/scripts/relays
+trail-daemon-jazzy | /home/ubuntu/scripts/trail_daemon_jazzy.py | /home/ubuntu/scripts
+whale-alert-bot | /home/ubuntu/scripts/whale_alert_bot.py | /home/ubuntu/scripts
+boba-today-bot | /home/ubuntu/scripts/boba-today-bot/boba_today_bot.py | /home/ubuntu/scripts/boba-today-bot
+flow-watcher | /home/ubuntu/flow-watcher/watcher.js | ?
+flow-pinger | /home/ubuntu/scripts/flow_pinger.py | ?
+contract-tracker | /home/ubuntu/scripts/contract_tracker.py | ?
+linear-bridge | /home/ubuntu/linear-bridge/bridge | ?
+linear-pm2-watcher | /home/ubuntu/linear-pm2-watcher/watcher | ?
+
+=== CRONTAB ===
+
+# 12:00 PM EDT = 16:00 UTC — MIDDAY (London closing, NYSE active)
+# 1:00 AM EDT = 5:00 UTC — OVERNIGHT CHECK (Asia active, Middle East morning)
+# 4:00 AM EDT = 8:00 UTC — PREMARKET (Asia closing, London open, US premarket)
+# 4:15 PM EDT = 20:15 UTC — CLOSING (NYSE close, after-hours start)
+# 7:15 AM EDT = 11:15 UTC — MORNING (London midday, NYSE prep)
+# 9:00 PM EDT = 1:00 UTC (next day) — EVENING (Asia opening, after-hours movers)
+# === BRIEF DATA FETCHERS ===
+# === Watchdogs (Apr 24 2026) ===
+# ============================================
+# All times UTC (EDT = UTC - 4)
+# Boba decision cycle — 10:30, 12:00, 13:30, 15:00 ET weekdays (UTC-4)
+# Cost watchdog — hourly check of Anthropic burn rate ($1/h threshold default)
+# DNS renewal reminder — Mon & Thu at 9am ET (13:00 UTC) → #dns-renewal webhook
+# Grok CT Alpha scraper — every 20min during US market hours (Mon-Fri 13-21 UTC), every 4h otherwise
+# Kronos daily summary — post to Discord at 4:30 PM ET (20:30 UTC)
+# Kronos tracker — record new forecasts hourly, evaluate 24h+ old
+# Kronos weekly report — Fridays 5:00 PM ET (21:00 UTC)
+# Liquidation summary post — every 4h ET
+# MISSION CONTROL BRIEFS — 7 DAYS/WEEK
+# Mission Control cron batch (4 scripts) — added Apr 26 2026
+# Multi-agent briefs (ET)
+# Oracle gateway health — every 15 min → BobaTrades webhook
+# Orion — morning flow brief to Telegram team (8:45 ET premarket)
+# Position sell daemon — every 15 min during market hours (weekdays 9:30-16:00 ET = 13:30-20:00 UTC)
+# Pre-processor runs before each JH brief
+# Squeeze scanner — every 4h M-F (ET)
+# Squeeze scanner — every 4h M-F during/around market
+# Zero-token alert scripts (replaced LLM cron jobs)
+* * * * * python3 /home/ubuntu/.openclaw/workspace/scripts/btc-monitor-24h.py >> /tmp/btc-monitor.log 2>&1
+*/10 * * * * /usr/bin/python3 /home/ubuntu/scripts/cron-batch/whale_alert.py >> /home/ubuntu/.openclaw/workspace/logs/whale_alert.cron.log 2>&1
+*/10 * * * * python3 /home/ubuntu/scripts/activity_logger.py >> /tmp/activity_logger.log 2>&1
+*/15 * * * * /usr/bin/python3 /home/ubuntu/scripts/watchdogs/oracle_gateway_health.py >> /home/ubuntu/.openclaw/state/watchdogs/gateway.log 2>&1
+*/15 * * * * python3 /home/ubuntu/.openclaw/workspace/scripts/alerts/altcoin_alert.py >> /home/ubuntu/.pm2/logs/altcoin-alert.log 2>&1
+*/15 * * * * python3 /home/ubuntu/.openclaw/workspace/scripts/alerts/btc_alert.py >> /home/ubuntu/.pm2/logs/btc-alert.log 2>&1
+*/15 * * * * python3 /home/ubuntu/.openclaw/workspace/scripts/alerts/stock_alert.py >> /home/ubuntu/.pm2/logs/stock-alert.log 2>&1
+*/15 13-20 * * 1-5 /usr/bin/python3 /home/ubuntu/scripts/pattern-bot/pattern_bot.py >> /home/ubuntu/.openclaw/workspace/logs/pattern_bot.cron.log 2>&1
+*/15 13-20 * * 1-5 python3 /home/ubuntu/scripts/position_sell_daemon.py --execute >> /tmp/position_daemon.log 2>&1
+*/2 * * * * bash /home/ubuntu/scripts/gateway-watchdog.sh
+*/2 * * * * cd /home/ubuntu/mission-control-restored/Option-Signals-Scraper && /usr/bin/python3 analyst_signals_pull.py >> /tmp/analyst_signals_cron.log 2>&1
+*/20 13-21 * * 1-5  /usr/bin/python3 /home/ubuntu/scripts/grok_ct_alpha.py >> /home/ubuntu/.openclaw/workspace/logs/grok_ct_alpha.log 2>&1
+*/30 * * * * /home/ubuntu/scripts/heartbeat-check.sh
+*/30 * * * * /usr/bin/python3 /home/ubuntu/scripts/cron-batch/signal_tracker.py >> /home/ubuntu/.openclaw/workspace/logs/signal_tracker.cron.log 2>&1
+*/30 * * * * python3 /home/ubuntu/scripts/agent_health.py >> /tmp/agent_health.log 2>&1
+*/30 13-21 * * 1-5 python3 /home/ubuntu/scripts/grok_market_brief.py >> /tmp/grok_brief.log 2>&1
+*/5 * * * * /usr/bin/python3 /home/ubuntu/scripts/sentiment-alerts/sentiment_alerts.py >> /home/ubuntu/.openclaw/workspace/logs/sentiment_alerts.cron.log 2>&1
+*/5 * * * * cd /home/ubuntu/go-trader && bash sync-trades.sh >> /home/ubuntu/go-trader/logs/sync-cron.log 2>&1
+*/5 * * * * cd /home/ubuntu/scripts/cron-batch && /usr/bin/python3 whale_alert_sol.py >> /home/ubuntu/.openclaw/workspace/logs/whale_alert_sol.cron.log 2>&1
+*/5 * * * * python3 /home/ubuntu/scripts/auto_trader.py >> /tmp/auto_trader.log 2>&1
+*/5 * * * * python3 /home/ubuntu/scripts/whale_flow_filter.py
+0  13 * * 1-5 cd /home/ubuntu/scripts/multi-agent-brief && /usr/bin/python3 brief_bot.py midday     >> /home/ubuntu/.openclaw/workspace/logs/brief_midday.cron.log 2>&1
+0  16 * * 1-5 cd /home/ubuntu/scripts/multi-agent-brief && /usr/bin/python3 brief_bot.py eod        >> /home/ubuntu/.openclaw/workspace/logs/brief_eod.cron.log 2>&1
+0 * * * * /home/ubuntu/mission-control/market-aggregator/run_aggregator.sh >> /home/ubuntu/mission-control/market-aggregator/logs/cron.log 2>&1
+0 * * * * python3 /home/ubuntu/scripts/briefs_to_discord.py >> /tmp/briefs_to_discord.log 2>&1
+0 */2 * * * /usr/bin/python3 /home/ubuntu/mission-control-restored/bots/market_data_fetcher.py >> /home/ubuntu/.openclaw/workspace/logs/market_data_fetcher.log 2>&1
+0 */4 * * * /home/ubuntu/mission-control/regime-detector/run_regime.sh >> /home/ubuntu/mission-control/regime-detector/logs/cron.log 2>&1
+0 */4 * * * python3 /home/ubuntu/scripts/boba_decision_cycle.py --crypto-only >> /tmp/boba_crypto_cycle.log 2>&1
+0 */4 * * * python3 ~/mission-control-restored/bots/llm_portfolio_scraper.py >> /tmp/llm-portfolio.log 2>&1
+0 */4 * * 0,6        /usr/bin/python3 /home/ubuntu/scripts/grok_ct_alpha.py >> /home/ubuntu/.openclaw/workspace/logs/grok_ct_alpha.log 2>&1
+0 */6 * * * /usr/bin/python3 /home/ubuntu/scripts/cron-batch/signal_discovery.py >> /home/ubuntu/.openclaw/workspace/logs/signal_discovery.cron.log 2>&1
+0 */6 * * * python3 ~/mission-control-restored/bots/calendar_scraper.py >> /tmp/calendar-scraper.log 2>&1
+0 */6 * * * python3 ~/mission-control-restored/bots/congress_scraper.py >> /tmp/congress-scraper.log 2>&1
+0 0,4,8,12,16,20 * * * cd /home/ubuntu/Kronos && python3 /home/ubuntu/scripts/kronos_forecast.py >> /home/ubuntu/logs/kronos.log 2>&1
+0 0,4,8,12,16,20 * * * cd /home/ubuntu/scripts/liquidation-tracker && /usr/bin/python3 liq_summary.py >> /home/ubuntu/.openclaw/workspace/logs/liq_summary.cron.log 2>&1
+0 0,4,8,22 * * 1-5  /usr/bin/python3 /home/ubuntu/scripts/grok_ct_alpha.py >> /home/ubuntu/.openclaw/workspace/logs/grok_ct_alpha.log 2>&1
+0 1 * * * /usr/bin/python3 /home/ubuntu/scripts/daily-wrap/daily_wrap.py >> /home/ubuntu/.openclaw/workspace/logs/daily_wrap.cron.log 2>&1
+0 1 * * * python3 /home/ubuntu/scripts/brief_sender.py evening >> /tmp/brief_sender.log 2>&1
+0 11 * * 1-5 python3 /home/ubuntu/scripts/boba_decision_cycle.py >> /tmp/boba_cycle.log 2>&1
+0 11,20 * * * /usr/bin/python3 /home/ubuntu/scripts/cron-batch/fred_calendar.py >> /home/ubuntu/.openclaw/workspace/logs/fred_calendar.cron.log 2>&1
+0 12 * * 1-5 cd /home/ubuntu/scripts/earnings-playbook && /usr/bin/python3 earnings_bot.py >> /home/ubuntu/.openclaw/workspace/logs/earnings_bot.cron.log 2>&1
+0 13 * * 1,4 /usr/bin/python3 /home/ubuntu/scripts/watchdogs/dns_renewal_reminder.py >> /home/ubuntu/.openclaw/state/watchdogs/dns.log 2>&1
+0 14 * * * /usr/bin/python3 /home/ubuntu/mission-control-restored/bots/watchlist_news_filings.py >> /home/ubuntu/.openclaw/workspace/logs/news_filings.log 2>&1
+0 14 * * 1-5 python3 /home/ubuntu/scripts/boba_decision_cycle.py >> /tmp/boba_cycle.log 2>&1
+0 15 * * 1-5 python3 /home/ubuntu/scripts/boba_decision_cycle.py >> /tmp/boba_cycle.log 2>&1
+0 16 * * * python3 /home/ubuntu/scripts/brief_sender.py midday >> /tmp/brief_sender.log 2>&1
+0 16 * * 1-5 python3 /home/ubuntu/scripts/boba_decision_cycle.py >> /tmp/boba_cycle.log 2>&1
+0 19 * * 1-5 python3 /home/ubuntu/scripts/boba_decision_cycle.py >> /tmp/boba_cycle.log 2>&1
+0 20 * * 1-5 python3 /home/ubuntu/scripts/boba_decision_cycle.py >> /tmp/boba_cycle.log 2>&1
+0 21 * * 5 python3 /home/ubuntu/mission-control/kronos-tracker/kronos_weekly_report.py >> /tmp/kronos_tracker.log 2>&1
+0 22 * * * /home/ubuntu/mission-control/supertrend-engine/daily_optimize.sh >> /home/ubuntu/mission-control/supertrend-engine/logs/cron.log 2>&1
+0 5 * * * python3 /home/ubuntu/mission-control/scripts/build-memories.py >> /home/ubuntu/mission-control/scripts/memories-build.log 2>&1
+0 5 * * * python3 /home/ubuntu/scripts/brief_sender.py overnight >> /tmp/brief_sender.log 2>&1
+0 8 * * * python3 /home/ubuntu/scripts/brief_sender.py premarket >> /tmp/brief_sender.log 2>&1
+0 9,13,16 * * 1-5 cd /home/ubuntu/scripts/squeeze-scanner && /usr/bin/python3 squeeze_scanner.py >> /home/ubuntu/.openclaw/workspace/logs/squeeze_scanner.cron.log 2>&1
+10 * * * * python3 /home/ubuntu/mission-control/kronos-tracker/kronos_tracker.py record >> /tmp/kronos_tracker.log 2>&1
+15 * * * * python3 /home/ubuntu/mission-control/kronos-tracker/kronos_tracker.py evaluate >> /tmp/kronos_tracker.log 2>&1
+15 11 * * * python3 /home/ubuntu/scripts/brief_sender.py morning >> /tmp/brief_sender.log 2>&1
+15 20 * * * python3 /home/ubuntu/scripts/brief_sender.py closing >> /tmp/brief_sender.log 2>&1
+25 20 * * * python3 /home/ubuntu/scripts/market_data_fetch.py >> /tmp/market_data_fetch.log 2>&1
+25 7 * * * python3 /home/ubuntu/scripts/market_data_fetch.py >> /tmp/market_data_fetch.log 2>&1
+30 13 * * * /usr/bin/python3 /home/ubuntu/mission-control-restored/bots/watchlist_deep_intel.py >> /home/ubuntu/.openclaw/workspace/logs/deep_intel.log 2>&1
+30 13 * * 1-5 python3 /home/ubuntu/scripts/boba_decision_cycle.py >> /tmp/boba_cycle.log 2>&1
+30 17 * * 1-5 python3 /home/ubuntu/scripts/boba_decision_cycle.py >> /tmp/boba_cycle.log 2>&1
+30 20 * * 1-5 cd /home/ubuntu/scripts/multi-agent-brief && /usr/bin/python3 brief_bot.py afterhours >> /home/ubuntu/.openclaw/workspace/logs/brief_afterhours.cron.log 2>&1
+30 20 * * 1-5 python3 /home/ubuntu/mission-control/kronos-tracker/kronos_daily_summary.py >> /tmp/kronos_tracker.log 2>&1
+45 12 * * 1-5 python3 /home/ubuntu/scripts/orion_morning_flow_brief.py >> /tmp/orion_flow_brief.log 2>&1
+45 7  * * 1-5 cd /home/ubuntu/scripts/multi-agent-brief && /usr/bin/python3 brief_bot.py premarket  >> /home/ubuntu/.openclaw/workspace/logs/brief_premarket.cron.log 2>&1
+45 9  * * 1-5 cd /home/ubuntu/scripts/multi-agent-brief && /usr/bin/python3 brief_bot.py morning    >> /home/ubuntu/.openclaw/workspace/logs/brief_morning.cron.log 2>&1
+5 * * * * python3 /home/ubuntu/scripts/cost_watchdog.py >> /tmp/cost_watchdog.log 2>&1
+5 */2 * * * /usr/bin/python3 /home/ubuntu/mission-control-restored/bots/market_data_json.py >> /home/ubuntu/.openclaw/workspace/logs/dashboard_json.log 2>&1
+5 16 * * 1-5 python3 /home/ubuntu/scripts/daily_snapshot.py >> /tmp/daily_snapshot.log 2>&1
+55 12 * * 1-5 python3 /home/ubuntu/scripts/market_data_fetch.py --quick >> /tmp/market_data_fetch.log 2>&1
+55 15 * * 1-5 python3 /home/ubuntu/scripts/market_data_fetch.py >> /tmp/market_data_fetch.log 2>&1
+55 23 * * * /home/ubuntu/mission-control/daily-reports/run_daily_report.sh >> /home/ubuntu/mission-control/daily-reports/logs/cron.log 2>&1
+55 3 * * * python3 /home/ubuntu/scripts/market_data_fetch.py >> /tmp/market_data_fetch.log 2>&1
+TZ=America/New_York
+*/5 13-21 * * 1-5 python3 /home/ubuntu/scripts/kronos_debate_lurker.py >> /tmp/kronos_lurker.log 2>&1
+*/30 13-21 * * 1-5 python3 /home/ubuntu/scripts/deepseek_flow_observer.py >> /tmp/deepseek_observer.log 2>&1
+*/15 8-23 * * 1-5 /usr/bin/python3 /home/ubuntu/scripts/best-options-logger/best_options_logger.py >> /tmp/best_options_logger.log 2>&1
+
+# Account snapshot poster — every 30 min, every day, all 3 Alpaca accounts to #alpaca-account
+*/30 * * * * python3 /home/ubuntu/scripts/snapshots/account_snapshot_post_py >> /tmp/snapshot_post.log 2>&1
+
+# Weekly grader — Fridays 4pm ET (8pm UTC) — grades Boba's week + proposes edits
+0 20 * * 5 python3 /home/ubuntu/scripts/weekly_grade/weekly_grade_py >> /tmp/weekly_grade.log 2>&1
+
+# JazzyHazzy decision cycle — matches Boba schedule exactly, GPT-4o-mini, R1 paper PA38IUKNR237 conservative
+0 11 * * 1-5 python3 /home/ubuntu/scripts/jazzy_decision_cycle.py >> /tmp/jazzy_cycle.log 2>&1
+30 13 * * 1-5 python3 /home/ubuntu/scripts/jazzy_decision_cycle.py >> /tmp/jazzy_cycle.log 2>&1
+0 14 * * 1-5 python3 /home/ubuntu/scripts/jazzy_decision_cycle.py >> /tmp/jazzy_cycle.log 2>&1
+0 15 * * 1-5 python3 /home/ubuntu/scripts/jazzy_decision_cycle.py >> /tmp/jazzy_cycle.log 2>&1
+0 16 * * 1-5 python3 /home/ubuntu/scripts/jazzy_decision_cycle.py >> /tmp/jazzy_cycle.log 2>&1
+30 17 * * 1-5 python3 /home/ubuntu/scripts/jazzy_decision_cycle.py >> /tmp/jazzy_cycle.log 2>&1
+0 19 * * 1-5 python3 /home/ubuntu/scripts/jazzy_decision_cycle.py >> /tmp/jazzy_cycle.log 2>&1
+0 20 * * 1-5 python3 /home/ubuntu/scripts/jazzy_decision_cycle.py >> /tmp/jazzy_cycle.log 2>&1
+# Added May 1 — extra decision cycles for both Boba and JazzyHazzy
+0 12 * * 1-5 python3 /home/ubuntu/scripts/boba_decision_cycle.py >> /tmp/boba_cycle.log 2>&1
+30 14 * * 1-5 python3 /home/ubuntu/scripts/boba_decision_cycle.py >> /tmp/boba_cycle.log 2>&1
+0 18 * * 1-5 python3 /home/ubuntu/scripts/boba_decision_cycle.py >> /tmp/boba_cycle.log 2>&1
+30 18 * * 1-5 python3 /home/ubuntu/scripts/boba_decision_cycle.py >> /tmp/boba_cycle.log 2>&1
+30 19 * * 1-5 python3 /home/ubuntu/scripts/boba_decision_cycle.py >> /tmp/boba_cycle.log 2>&1
+0 12 * * 1-5 python3 /home/ubuntu/scripts/jazzy_decision_cycle.py >> /tmp/jazzy_cycle.log 2>&1
+30 14 * * 1-5 python3 /home/ubuntu/scripts/jazzy_decision_cycle.py >> /tmp/jazzy_cycle.log 2>&1
+0 18 * * 1-5 python3 /home/ubuntu/scripts/jazzy_decision_cycle.py >> /tmp/jazzy_cycle.log 2>&1
+30 18 * * 1-5 python3 /home/ubuntu/scripts/jazzy_decision_cycle.py >> /tmp/jazzy_cycle.log 2>&1
+30 19 * * 1-5 python3 /home/ubuntu/scripts/jazzy_decision_cycle.py >> /tmp/jazzy_cycle.log 2>&1
+30 4 * * * /usr/bin/python3 /home/ubuntu/scripts/best-options-logger/multi_day_tracker.py >> /tmp/multi_day_tracker.cron.log 2>&1
+# best-options-poster — institutional flow windows only (10 posts/day)
+30 13 * * 1-5 /usr/bin/python3 /home/ubuntu/scripts/best-options-logger/best_options_poster.py >> /tmp/best_options_poster.log 2>&1
+1 14 * * 1-5 /usr/bin/python3 /home/ubuntu/scripts/best-options-logger/best_options_poster.py >> /tmp/best_options_poster.log 2>&1
+1 15 * * 1-5 /usr/bin/python3 /home/ubuntu/scripts/best-options-logger/best_options_poster.py >> /tmp/best_options_poster.log 2>&1
+1 16 * * 1-5 /usr/bin/python3 /home/ubuntu/scripts/best-options-logger/best_options_poster.py >> /tmp/best_options_poster.log 2>&1
+1 17 * * 1-5 /usr/bin/python3 /home/ubuntu/scripts/best-options-logger/best_options_poster.py >> /tmp/best_options_poster.log 2>&1
+1 18 * * 1-5 /usr/bin/python3 /home/ubuntu/scripts/best-options-logger/best_options_poster.py >> /tmp/best_options_poster.log 2>&1
+1 19 * * 1-5 /usr/bin/python3 /home/ubuntu/scripts/best-options-logger/best_options_poster.py >> /tmp/best_options_poster.log 2>&1
+30 19 * * 1-5 /usr/bin/python3 /home/ubuntu/scripts/best-options-logger/best_options_poster.py >> /tmp/best_options_poster.log 2>&1
+1 20 * * 1-5 /usr/bin/python3 /home/ubuntu/scripts/best-options-logger/best_options_poster.py >> /tmp/best_options_poster.log 2>&1
+30 20 * * 1-5 /usr/bin/python3 /home/ubuntu/scripts/best-options-logger/best_options_poster.py >> /tmp/best_options_poster.log 2>&1
+# Rule-based decision engine — DRY-RUN mode, fires alongside Boba/Jazzy on weekdays
+0 11 * * 1-5 /usr/bin/python3 /home/ubuntu/scripts/rule_based_decision_engine.py --quiet >> /tmp/rule_engine.log 2>&1
+0 12 * * 1-5 /usr/bin/python3 /home/ubuntu/scripts/rule_based_decision_engine.py --quiet >> /tmp/rule_engine.log 2>&1
+30 13 * * 1-5 /usr/bin/python3 /home/ubuntu/scripts/rule_based_decision_engine.py --quiet >> /tmp/rule_engine.log 2>&1
+0 14 * * 1-5 /usr/bin/python3 /home/ubuntu/scripts/rule_based_decision_engine.py --quiet >> /tmp/rule_engine.log 2>&1
+30 14 * * 1-5 /usr/bin/python3 /home/ubuntu/scripts/rule_based_decision_engine.py --quiet >> /tmp/rule_engine.log 2>&1
+0 15 * * 1-5 /usr/bin/python3 /home/ubuntu/scripts/rule_based_decision_engine.py --quiet >> /tmp/rule_engine.log 2>&1
+0 16 * * 1-5 /usr/bin/python3 /home/ubuntu/scripts/rule_based_decision_engine.py --quiet >> /tmp/rule_engine.log 2>&1
+30 17 * * 1-5 /usr/bin/python3 /home/ubuntu/scripts/rule_based_decision_engine.py --quiet >> /tmp/rule_engine.log 2>&1
+0 18 * * 1-5 /usr/bin/python3 /home/ubuntu/scripts/rule_based_decision_engine.py --quiet >> /tmp/rule_engine.log 2>&1
+30 18 * * 1-5 /usr/bin/python3 /home/ubuntu/scripts/rule_based_decision_engine.py --quiet >> /tmp/rule_engine.log 2>&1
+0 19 * * 1-5 /usr/bin/python3 /home/ubuntu/scripts/rule_based_decision_engine.py --quiet >> /tmp/rule_engine.log 2>&1
+30 19 * * 1-5 /usr/bin/python3 /home/ubuntu/scripts/rule_based_decision_engine.py --quiet >> /tmp/rule_engine.log 2>&1
+0 20 * * 1-5 /usr/bin/python3 /home/ubuntu/scripts/rule_based_decision_engine.py --quiet >> /tmp/rule_engine.log 2>&1
+55 3 * * * /usr/bin/python3 /home/ubuntu/scripts/anthropic_usage_summary.py >> /tmp/anthropic_usage_summary.cron.log 2>&1
+0 5 * * * python3 /home/ubuntu/scripts/blast-radius/audit_py --summary >> /tmp/blast_radius_audit.log 2>&1
+0 * * * * python3 /home/ubuntu/scripts/blast-radius/audit_py --alerts >> /tmp/blast_radius_audit.log 2>&1
+*/30 13-21 * * 1-5 python3 /home/ubuntu/scripts/sec-scanner/form4_scanner_py >> /tmp/form4_scanner.log 2>&1
+0 1 * * * python3 /home/ubuntu/scripts/sec-scanner/form13f_scanner_py >> /tmp/form13f_scanner.log 2>&1
+# Edge-decay detector - daily 1am ET (5am UTC) after nightly SuperTrend optimizer
+0 5 * * * /usr/bin/python3 /home/ubuntu/scripts/edge_decay/edge_decay_py >> /tmp/edge_decay.cron.log 2>&1
+# Skill-consultant - Sundays 8pm ET (Mondays 0am UTC) scans Boba decisions, proposes skills
+0 0 * * 1 /usr/bin/python3 /home/ubuntu/scripts/skill_consultant/skill_consultant_py >> /tmp/skill_consultant.cron.log 2>&1
+# Log retention - daily 2am ET (6am UTC) DRY-RUN reports candidates for rotation. Mike approves switch to --execute manually.
+0 6 * * * /usr/bin/python3 /home/ubuntu/scripts/log_retention/log_retention_py --execute >> /tmp/log_retention.cron.log 2>&1
+# Channel identity audit - daily 8am ET (12pm UTC) verifies all Discord webhooks point to expected channels
+0 12 * * * /usr/bin/python3 /home/ubuntu/scripts/channel_identity/audit_all_channels_py >> /tmp/channel_audit.cron.log 2>&1
+# Daemon health alerter - every 5 minutes, alerts on PM2 process transitions
+*/5 * * * * /usr/bin/python3 /home/ubuntu/scripts/daemon_health/daemon_health_alert_py >> /tmp/daemon_health_alert.cron.log 2>&1
+# Item 37: Fed speech sentiment monitor - 8am 1pm 6pm ET weekdays
+0 12,17,22 * * 1-5 /usr/bin/python3 /home/ubuntu/.openclaw/skills/jazzyhazzy/fed-speech-monitor/fed_monitor.py --discord --llm-refine >> /home/ubuntu/.openclaw/workspace/logs/fed_monitor.cron.log 2>&1
+# Item 38: Portfolio drift monitor - 4:30pm ET weekdays after market close
+30 20 * * 1-5 /usr/bin/python3 /home/ubuntu/scripts/portfolio_drift/drift_monitor_py --discord >> /home/ubuntu/.openclaw/workspace/logs/portfolio_drift.cron.log 2>&1
+# Synth-control digests - kitchen-sink integrations
+# mc-restart watcher - daily 9am ET
+0 13 * * * /usr/bin/python3 /home/ubuntu/scripts/synth_control_digests/digests_py mc-restarts >> /home/ubuntu/.openclaw/workspace/logs/synth_control_digests.cron.log 2>&1
+# kronos reliability - daily 5pm ET after market close
+0 21 * * 1-5 /usr/bin/python3 /home/ubuntu/scripts/synth_control_digests/digests_py kronos >> /home/ubuntu/.openclaw/workspace/logs/synth_control_digests.cron.log 2>&1
+# Multi-agent consensus - 4x daily
+0 12,16,20,0 * * 1-5 /usr/bin/python3 /home/ubuntu/scripts/synth_control_digests/digests_py consensus >> /home/ubuntu/.openclaw/workspace/logs/synth_control_digests.cron.log 2>&1
+# SEC whales weekly - Sun 10pm ET
+0 2 * * 1 /usr/bin/python3 /home/ubuntu/scripts/synth_control_digests/digests_py sec-whales >> /home/ubuntu/.openclaw/workspace/logs/synth_control_digests.cron.log 2>&1
+# Fleet memory weekly - Sun 10pm ET
+0 2 * * 1 /usr/bin/python3 /home/ubuntu/scripts/synth_control_digests/digests_py fleet-mem >> /home/ubuntu/.openclaw/workspace/logs/synth_control_digests.cron.log 2>&1
+# Edge decay weekly - Sun 10pm ET
+0 2 * * 1 /usr/bin/python3 /home/ubuntu/scripts/synth_control_digests/digests_py edge-decay >> /home/ubuntu/.openclaw/workspace/logs/synth_control_digests.cron.log 2>&1
+# Blast-radius weekly - Sun 10pm ET
+0 2 * * 1 /usr/bin/python3 /home/ubuntu/scripts/synth_control_digests/digests_py blast >> /home/ubuntu/.openclaw/workspace/logs/synth_control_digests.cron.log 2>&1
+# Optimizer summary - daily 4:45pm ET weekdays
+45 20 * * 1-5 /usr/bin/python3 /home/ubuntu/scripts/synth_control_digests/digests_py optimizer >> /home/ubuntu/.openclaw/workspace/logs/synth_control_digests.cron.log 2>&1
+# Boba self-grade tee - Fri 4:30pm ET (30min after weekly_grade_py)
+30 20 * * 5 /usr/bin/python3 /home/ubuntu/scripts/synth_control_digests/digests_py self-grade >> /home/ubuntu/.openclaw/workspace/logs/synth_control_digests.cron.log 2>&1
+35 20 * * 1-5 /usr/bin/python3 /home/ubuntu/scripts/boba_today_daily/daily_post_py >> /home/ubuntu/.openclaw/workspace/logs/boba_today_daily.cron.log 2>&1
+0 0 * * 1 /usr/bin/python3 /home/ubuntu/scripts/model_usage_digest/digest_py >> /home/ubuntu/.openclaw/workspace/logs/model_usage_digest.cron.log 2>&1
+0 1 * * 1 /usr/bin/python3 /home/ubuntu/scripts/daemon_health/weekly_digest_py >> /home/ubuntu/.openclaw/workspace/logs/daemon_health_weekly.cron.log 2>&1
+# Item 43: Monthly skill audit - 1st of month 8pm ET (UTC 00:00 day 2)
+0 0 2 * * /usr/bin/python3 /home/ubuntu/scripts/skill_audit/skill_audit_py >> /tmp/skill_audit.cron.log 2>&1
+# Item 35: Congress scanner - daily 9pm ET (UTC 1:00 next day)
+0 1 * * * /usr/bin/python3 /home/ubuntu/scripts/congress-scanner/congress_scanner_py >> /tmp/congress_scanner.log 2>&1
+# Item 44: Fed monitor deep-score - 4x weekday offset 30min from basic monitor
+30 12,17,20,23 * * 1-5 /usr/bin/python3 /home/ubuntu/.openclaw/skills/jazzyhazzy/fed-speech-monitor/fed_monitor.py --deep-score >> /home/ubuntu/.openclaw/workspace/logs/fed_monitor_deep.cron.log 2>&1
+# Item 36: GitHub Pine strategy scout - weekly Sun 10pm ET
+0 2 * * 1 /usr/bin/python3 /home/ubuntu/scripts/github-scout/scout_pine_py >> /tmp/github_scout.log 2>&1
+# Item 33: Flow tier auto-research - weekly Sun 11pm ET
+0 3 * * 1 /usr/bin/python3 /home/ubuntu/scripts/flow-research/flow_research_py >> /tmp/flow_research.log 2>&1
+# Item 33 outcome extractor - every 30 min
+*/30 * * * * /usr/bin/python3 /home/ubuntu/scripts/outcome-extractor/outcome_extractor_py >> /tmp/outcome_extractor.log 2>&1
+59 23 * * * TZ=America/New_York /usr/bin/python3 /home/ubuntu/scripts/spacer-bot/spacer_daily.py --pass=eod >> /home/ubuntu/.openclaw/workspace/logs/spacer_daily.cron.log 2>&1
+5 0 * * * TZ=America/New_York /usr/bin/python3 /home/ubuntu/scripts/spacer-bot/spacer_daily.py --pass=morning >> /home/ubuntu/.openclaw/workspace/logs/spacer_daily.cron.log 2>&1
+# Pre-pop scanner - posts Discord alerts on T1/T2 fresh signals every 5 min market hours
+*/5 13-20 * * 1-5 /usr/bin/python3 /home/ubuntu/scripts/scanners/pre_pop_py >> /tmp/pre_pop.log 2>&1
+*/15 13-20 * * 1-5 /usr/bin/python3 /home/ubuntu/scripts/relays/fork_b_performance_tracker_py >> /tmp/fork_b_perf.log 2>&1
+
+=== SYSTEMD ===
+UNIT FILE                                                  STATE   VENDOR PRESET
+apparmor.service                                           enabled enabled
+blk-availability.service                                   enabled enabled
+cloud-config.service                                       enabled enabled
+cloud-final.service                                        enabled enabled
+cloud-init-local.service                                   enabled enabled
+cloud-init.service                                         enabled enabled
+console-setup.service                                      enabled enabled
+cron.service                                               enabled enabled
+dmesg.service                                              enabled enabled
+e2scrub_reap.service                                       enabled enabled
+finalrd.service                                            enabled enabled
+getty@.service                                             enabled enabled
+grub-common.service                                        enabled enabled
+grub-initrd-fallback.service                               enabled enabled
+irqbalance.service                                         enabled enabled
+iscsid.service                                             enabled enabled
+keyboard-setup.service                                     enabled enabled
+lvm2-monitor.service                                       enabled enabled
+lxd-agent.service                                          enabled enabled
+multipathd.service                                         enabled enabled
+netfilter-persistent.service                               enabled enabled
+networkd-dispatcher.service                                enabled enabled
+nginx.service                                              enabled enabled
+open-iscsi.service                                         enabled enabled
+open-vm-tools.service                                      enabled enabled
+pm2-ubuntu.service                                         enabled enabled
+pollinate.service                                          enabled enabled
+rpcbind.service                                            enabled enabled
+rsyslog.service                                            enabled enabled
+secureboot-db.service                                      enabled enabled
+setvtrgb.service                                           enabled enabled
+snap.lxd.activate.service                                  enabled enabled
+snap.oracle-cloud-agent.oracle-cloud-agent-updater.service enabled enabled
+snap.oracle-cloud-agent.oracle-cloud-agent.service         enabled enabled
+snapd.apparmor.service                                     enabled enabled
+snapd.autoimport.service                                   enabled enabled
+snapd.core-fixup.service                                   enabled enabled
+snapd.recovery-chooser-trigger.service                     enabled enabled
+snapd.seeded.service                                       enabled enabled
+
+=== SCRIPTS DIR TREE (depth 3) ===
+/home/ubuntu/scripts/.gitignore
+/home/ubuntu/scripts/_linear_inventory.txt
+/home/ubuntu/scripts/activity_logger.py
+/home/ubuntu/scripts/agent_health.py
+/home/ubuntu/scripts/alpaca_archive_py
+/home/ubuntu/scripts/alpaca_fill_listener.py
+/home/ubuntu/scripts/alpaca_history_writer_py
+/home/ubuntu/scripts/anthropic_usage_summary.py
+/home/ubuntu/scripts/askgrok_bot.py
+/home/ubuntu/scripts/auto_trader.py
+/home/ubuntu/scripts/auto_trader_state.json
+/home/ubuntu/scripts/backtest-runner/backtester.py
+/home/ubuntu/scripts/backtest-runner/data_fetcher.py
+/home/ubuntu/scripts/backtest-runner/run.py
+/home/ubuntu/scripts/backtest-runner/supertrend.py
+/home/ubuntu/scripts/backtest-runner/validate_strategy_py
+/home/ubuntu/scripts/best-options-logger/best_options_logger.py
+/home/ubuntu/scripts/best-options-logger/best_options_poster.py
+/home/ubuntu/scripts/best-options-logger/multi_day_tracker.py
+/home/ubuntu/scripts/bible/bible-log
+/home/ubuntu/scripts/bible/bible-pdf
+/home/ubuntu/scripts/bible/bible-show
+/home/ubuntu/scripts/bible/code-push
+/home/ubuntu/scripts/bible/wip-done
+/home/ubuntu/scripts/bible/wip-list
+/home/ubuntu/scripts/bible/wip-mark
+/home/ubuntu/scripts/blast-radius/audit_py
+/home/ubuntu/scripts/boba-bot/boba_autothread.py
+/home/ubuntu/scripts/boba-bot/boba_mega.py
+/home/ubuntu/scripts/boba-bot/boba_mega.py.bak.040926
+/home/ubuntu/scripts/boba-today-bot/boba_today_bot.py
+/home/ubuntu/scripts/boba_decision_cycle.py
+/home/ubuntu/scripts/boba_decision_cycle.py.bak-20260421-152404
+/home/ubuntu/scripts/boba_decision_cycle.py.bak-20260421-180123
+/home/ubuntu/scripts/boba_decision_cycle.py.bak-20260428-142516
+/home/ubuntu/scripts/boba_decision_cycle.py.bak-duediligence-20260421-180535
+/home/ubuntu/scripts/boba_decision_cycle.py.bak-example-20260421-180714
+/home/ubuntu/scripts/boba_decision_cycle.py.bak-kronos-timing-20260421-203144
+/home/ubuntu/scripts/boba_decision_cycle.py.bak-pre-brackets-20260424-175348
+/home/ubuntu/scripts/boba_decision_cycle.py.bak-step2-20260428-154312
+/home/ubuntu/scripts/boba_decision_cycle.py.bak.20260429_214009
+/home/ubuntu/scripts/boba_decision_cycle.py.bak.aggtier.1778046287
+/home/ubuntu/scripts/boba_decision_cycle.py.bak.budget.1778038665
+/home/ubuntu/scripts/boba_decision_cycle.py.bak.kronos.1778031096
+/home/ubuntu/scripts/boba_decision_cycle.py.bak.mission.1778047899
+/home/ubuntu/scripts/boba_decision_cycle.py.bak.singlepick.1778046450
+/home/ubuntu/scripts/boba_decision_cycle.py.bak.spec.1778036848
+/home/ubuntu/scripts/boba_decision_cycle.py.bak.tiers.1778039803
+/home/ubuntu/scripts/boba_decision_cycle.py.bak2.214707
+/home/ubuntu/scripts/boba_decision_cycle.py.bak3.014947
+/home/ubuntu/scripts/boba_decision_cycle.py.bak4.025810
+/home/ubuntu/scripts/boba_qa_bot.py
+/home/ubuntu/scripts/boba_today_daily/daily_post_py
+/home/ubuntu/scripts/bots/reminder_bot.py
+/home/ubuntu/scripts/bracket_cleaner_daemon.py
+/home/ubuntu/scripts/brief_data_fetcher.py
+/home/ubuntu/scripts/brief_prompts/eod_prompt.txt
+/home/ubuntu/scripts/brief_prompts/midday_prompt.txt
+/home/ubuntu/scripts/brief_prompts/morning_prompt.txt
+/home/ubuntu/scripts/brief_prompts/nightly_prompt.txt
+/home/ubuntu/scripts/brief_prompts/premarket_prompt.txt
+/home/ubuntu/scripts/brief_sender.py
+/home/ubuntu/scripts/briefs_to_discord.py
+/home/ubuntu/scripts/captcha-bot/captcha_bot.py
+/home/ubuntu/scripts/channel_identity/audit_all_channels_py
+/home/ubuntu/scripts/channel_identity/verify_channel_identity_py
+/home/ubuntu/scripts/coinbase-holdings.py
+/home/ubuntu/scripts/congress-scanner/congress_scanner_py
+/home/ubuntu/scripts/contract_tracker.py
+/home/ubuntu/scripts/cost_watchdog.py
+/home/ubuntu/scripts/cron-batch/fred_calendar.py
+/home/ubuntu/scripts/cron-batch/signal_discovery.py
+/home/ubuntu/scripts/cron-batch/signal_tracker.py
+/home/ubuntu/scripts/cron-batch/whale_alert.py
+/home/ubuntu/scripts/cron-batch/whale_alert_sol.py
+/home/ubuntu/scripts/daemon_health/daemon_health_alert_py
+/home/ubuntu/scripts/daemon_health/weekly_digest_py
+/home/ubuntu/scripts/daily-wrap/daily_wrap.py
+/home/ubuntu/scripts/daily_snapshot.py
+/home/ubuntu/scripts/deepseek_flow_observer.py
+/home/ubuntu/scripts/deploy_briefs.sh
+/home/ubuntu/scripts/earnings-playbook/earnings_bot.py
+/home/ubuntu/scripts/edge_decay/edge_decay_py
+/home/ubuntu/scripts/flow-research/flow_research_py
+/home/ubuntu/scripts/flow_pinger.py
+/home/ubuntu/scripts/flow_pinger.py.bak.1778047899
+/home/ubuntu/scripts/flow_pinger.py.bak.fix.1778089922
+/home/ubuntu/scripts/flow_pinger.py.bak.tickerheat.1778089623
+/home/ubuntu/scripts/gateway-watchdog.sh
+/home/ubuntu/scripts/github-scout/scout_pine_py
+/home/ubuntu/scripts/grab_a1_capacity.sh
+/home/ubuntu/scripts/grok_ct_alpha.py
+/home/ubuntu/scripts/grok_market_brief.py
+/home/ubuntu/scripts/heartbeat-check.sh
+/home/ubuntu/scripts/jazzy_decision_cycle.py
+/home/ubuntu/scripts/jazzy_decision_cycle.py.bak.aggtier.1778046287
+/home/ubuntu/scripts/jazzy_decision_cycle.py.bak.budget.1778038665
+/home/ubuntu/scripts/jazzy_decision_cycle.py.bak.kronos.1778031096
+/home/ubuntu/scripts/jazzy_decision_cycle.py.bak.mission.1778047899
+/home/ubuntu/scripts/jazzy_decision_cycle.py.bak.openai-fix.1778029043
+/home/ubuntu/scripts/jazzy_decision_cycle.py.bak.singlepick.1778046450
+/home/ubuntu/scripts/jazzy_decision_cycle.py.bak.spec.1778036848
+/home/ubuntu/scripts/jazzy_decision_cycle.py.bak.tiers.1778039803
+/home/ubuntu/scripts/kronos_debate_lurker.py
+/home/ubuntu/scripts/kronos_forecast.py
+/home/ubuntu/scripts/kronos_forecast_v2.py
+/home/ubuntu/scripts/kronos_forecast_v2.py.bak-kronosfix-20260421-181518
+/home/ubuntu/scripts/lib/agent_debate.py
+/home/ubuntu/scripts/lib/agent_tasks.py
+/home/ubuntu/scripts/lib/anthropic_tracker.py
+/home/ubuntu/scripts/lib/discord_threading.py
+/home/ubuntu/scripts/lib/doc_converter.py
+/home/ubuntu/scripts/lib/flow_channel_reader.py
+/home/ubuntu/scripts/lib/skill_loader_py
+/home/ubuntu/scripts/lib/tradier_client.py
+/home/ubuntu/scripts/lib/web_scraper.py
+/home/ubuntu/scripts/liquidation-tracker/liq_collector.py
+/home/ubuntu/scripts/liquidation-tracker/liq_summary.py
+/home/ubuntu/scripts/log_retention/log_retention_py
+/home/ubuntu/scripts/market_data_fetch.py
+/home/ubuntu/scripts/mc-status.sh
+/home/ubuntu/scripts/mitmproxy/fg_capture_py
+/home/ubuntu/scripts/model_usage_digest/digest_py
+/home/ubuntu/scripts/multi-agent-brief/brief_bot.py
+/home/ubuntu/scripts/nginx-configs/mission-control
+/home/ubuntu/scripts/nginx-configs/missionctrl
+/home/ubuntu/scripts/nginx-configs/webhook
+/home/ubuntu/scripts/option-watcher/watcher_py
+/home/ubuntu/scripts/options_engine.py
+/home/ubuntu/scripts/orion_morning_flow_brief.py
+/home/ubuntu/scripts/outcome-extractor/outcome_extractor_py
+/home/ubuntu/scripts/pattern-bot/ohlc_provider.py
+/home/ubuntu/scripts/pattern-bot/pattern_bot.py
+/home/ubuntu/scripts/pattern-bot/pattern_detector.py
+/home/ubuntu/scripts/performance-tracker/performance_tracker.py
+/home/ubuntu/scripts/portfolio_drift/drift_monitor_py
+/home/ubuntu/scripts/position_sell_daemon.py
+/home/ubuntu/scripts/position_sell_daemon.py.bak-pre-upgrade-20260424-172347
+/home/ubuntu/scripts/profit_lock_daemon.py
+/home/ubuntu/scripts/profit_lock_daemon.py.bak.trail.1778041515
+/home/ubuntu/scripts/profit_lock_daemon_jazzy.py
+/home/ubuntu/scripts/profit_lock_daemon_jazzy.py.bak.trail.1778041515
+/home/ubuntu/scripts/relays/fg_push_relay_py
+/home/ubuntu/scripts/relays/flow_greeks_relay_py
+/home/ubuntu/scripts/relays/fork_b_performance_tracker_py
+/home/ubuntu/scripts/robinhood-full-portfolio.py
+/home/ubuntu/scripts/robinhood-holdings.py
+/home/ubuntu/scripts/rule_based_decision_engine.py
+/home/ubuntu/scripts/run_backup.sh
+/home/ubuntu/scripts/scanners/congress_catalyst_py
+/home/ubuntu/scripts/scanners/earnings_catalyst_py
+/home/ubuntu/scripts/scanners/eod_decay_py
+/home/ubuntu/scripts/scanners/gamma_squeeze_py
+/home/ubuntu/scripts/scanners/multi_feed_overlap_py
+/home/ubuntu/scripts/scanners/pre_pop_py
+/home/ubuntu/scripts/scanners/premarket_gap_py
+/home/ubuntu/scripts/scanners/signature_miner_py
+/home/ubuntu/scripts/scanners/signature_miner_v2_py
+/home/ubuntu/scripts/sec-scanner/form13f_scanner_py
+/home/ubuntu/scripts/sec-scanner/form4_scanner_py
+/home/ubuntu/scripts/security_audit.py
+/home/ubuntu/scripts/sentiment-alerts/sentiment_alerts.py
+/home/ubuntu/scripts/show_flow_reasoning.py
+/home/ubuntu/scripts/skill_audit/skill_audit_py
+/home/ubuntu/scripts/skill_consultant/skill_consultant_py
+/home/ubuntu/scripts/snapshots/account_snapshot_post_py
+/home/ubuntu/scripts/spacer-bot/spacer_bot.py
+/home/ubuntu/scripts/spacer-bot/spacer_daily.py
+/home/ubuntu/scripts/spacer-bot/spacer_daily.py.bak.1777825871
+/home/ubuntu/scripts/spacer-bot/spacer_daily.py.bak.1777825985
+/home/ubuntu/scripts/squeeze-scanner/seed_watchlist.txt
+/home/ubuntu/scripts/squeeze-scanner/squeeze_scanner.py
+/home/ubuntu/scripts/status_bot.py
+/home/ubuntu/scripts/supertrend_optimizer.py
+/home/ubuntu/scripts/synth_control_digests/digests_py
+/home/ubuntu/scripts/ta_engine.py
+/home/ubuntu/scripts/telegram_to_discord_briefs.py
+/home/ubuntu/scripts/tg-bridge/tgbridge.py
+/home/ubuntu/scripts/tighten_car_stop.py
+/home/ubuntu/scripts/todo_bot.py
+/home/ubuntu/scripts/token_tracker.py
+/home/ubuntu/scripts/trail_daemon.py
+/home/ubuntu/scripts/trail_daemon_jazzy.py
+/home/ubuntu/scripts/unpause_boba.sh
+/home/ubuntu/scripts/verify_r1_orders.py
+/home/ubuntu/scripts/watchdogs/dns_renewal_reminder.py
+/home/ubuntu/scripts/watchdogs/oracle_gateway_health.py
+/home/ubuntu/scripts/weekly_grade/replay/replay_conservative_py
+/home/ubuntu/scripts/weekly_grade/weekly_grade_py
+/home/ubuntu/scripts/whale_alert_bot.py
+/home/ubuntu/scripts/whale_flow_filter.py
+
+=== NEXT.JS APP (mission-control-official) ===
+/home/ubuntu/mission-control-official/src/app/[[...panel]]/page.tsx
+/home/ubuntu/mission-control-official/src/app/activity/page.tsx
+/home/ubuntu/mission-control-official/src/app/agents/page.tsx
+/home/ubuntu/mission-control-official/src/app/alerts/page.tsx
+/home/ubuntu/mission-control-official/src/app/approvals/page.tsx
+/home/ubuntu/mission-control-official/src/app/avatar-preview/page.tsx
+/home/ubuntu/mission-control-official/src/app/calendar/page.tsx
+/home/ubuntu/mission-control-official/src/app/command/page.tsx
+/home/ubuntu/mission-control-official/src/app/dashboard/page.tsx
+/home/ubuntu/mission-control-official/src/app/docs/page.tsx
+/home/ubuntu/mission-control-official/src/app/layout.tsx
+/home/ubuntu/mission-control-official/src/app/login/page.tsx
+/home/ubuntu/mission-control-official/src/app/memory/page.tsx
+/home/ubuntu/mission-control-official/src/app/office/page.tsx
+/home/ubuntu/mission-control-official/src/app/optimization/page.tsx
+/home/ubuntu/mission-control-official/src/app/options/page.tsx
+/home/ubuntu/mission-control-official/src/app/performance/page.tsx
+/home/ubuntu/mission-control-official/src/app/positions/page.tsx
+/home/ubuntu/mission-control-official/src/app/projects/page.tsx
+/home/ubuntu/mission-control-official/src/app/regime/page.tsx
+/home/ubuntu/mission-control-official/src/app/risk/page.tsx
+/home/ubuntu/mission-control-official/src/app/scanner/page.tsx
+/home/ubuntu/mission-control-official/src/app/setup/page.tsx
+/home/ubuntu/mission-control-official/src/app/tasks/page.tsx
+/home/ubuntu/mission-control-official/src/app/trading/page.tsx
+/home/ubuntu/mission-control-official/src/app/wallets/page.tsx
+
+=== AGENT/BOT DIRS UNDER /home/ubuntu/mission-control ===
+/home/ubuntu/mission-control
+/home/ubuntu/mission-control/.claude
+/home/ubuntu/mission-control/.git
+/home/ubuntu/mission-control/.git/branches
+/home/ubuntu/mission-control/.git/hooks
+/home/ubuntu/mission-control/.git/info
+/home/ubuntu/mission-control/.git/logs
+/home/ubuntu/mission-control/.git/objects
+/home/ubuntu/mission-control/.git/refs
+/home/ubuntu/mission-control/agent-team
+/home/ubuntu/mission-control/agent-team/__pycache__
+/home/ubuntu/mission-control/agent-team/kronos
+/home/ubuntu/mission-control/analyst
+/home/ubuntu/mission-control/analyst/__pycache__
+/home/ubuntu/mission-control/analyst/archive
+/home/ubuntu/mission-control/auditor
+/home/ubuntu/mission-control/auditor/__pycache__
+/home/ubuntu/mission-control/broadcaster
+/home/ubuntu/mission-control/broadcaster/__pycache__
+/home/ubuntu/mission-control/counter-intelligence
+/home/ubuntu/mission-control/counter-intelligence/__pycache__
+/home/ubuntu/mission-control/crypto-sniper
+/home/ubuntu/mission-control/crypto-sniper/archive
+/home/ubuntu/mission-control/daily-reports
+/home/ubuntu/mission-control/daily-reports/calendar
+/home/ubuntu/mission-control/daily-reports/logs
+/home/ubuntu/mission-control/daily-reports/reports
+/home/ubuntu/mission-control/execution-specialist
+/home/ubuntu/mission-control/execution-specialist/__pycache__
+/home/ubuntu/mission-control/flow-monitor
+/home/ubuntu/mission-control/flow-monitor/reasoning
+/home/ubuntu/mission-control/kronos-tracker
+/home/ubuntu/mission-control/macro-strategist
+/home/ubuntu/mission-control/market-aggregator
+/home/ubuntu/mission-control/market-aggregator/logs
+/home/ubuntu/mission-control/portfolio-monitor
+/home/ubuntu/mission-control/portfolio-monitor/__pycache__
+/home/ubuntu/mission-control/regime-detector
+/home/ubuntu/mission-control/regime-detector/logs
+/home/ubuntu/mission-control/regime-detector/results
+/home/ubuntu/mission-control/risk-manager
+/home/ubuntu/mission-control/risk-manager/__pycache__
+/home/ubuntu/mission-control/scripts
+/home/ubuntu/mission-control/shared
+/home/ubuntu/mission-control/shared/__pycache__
+/home/ubuntu/mission-control/signal-receiver
+/home/ubuntu/mission-control/signal-receiver/__pycache__
+/home/ubuntu/mission-control/signal-receiver/data
+/home/ubuntu/mission-control/signal-receiver/logs
+/home/ubuntu/mission-control/supertrend-engine
+/home/ubuntu/mission-control/supertrend-engine/__pycache__
+/home/ubuntu/mission-control/supertrend-engine/cache
+/home/ubuntu/mission-control/supertrend-engine/logs
+/home/ubuntu/mission-control/supertrend-engine/results
+/home/ubuntu/mission-control/telegram-listener
+/home/ubuntu/mission-control/telegram-listener/__pycache__
+/home/ubuntu/mission-control/telegram-listener/archive
+/home/ubuntu/mission-control/tweak
+
+=== OPENCLAW DATA STRUCTURE ===
+/home/ubuntu/.openclaw
+/home/ubuntu/.openclaw/_archive
+/home/ubuntu/.openclaw/_archive/disciplined-decisions.archived-may4
+/home/ubuntu/.openclaw/_archive/disciplined-decisions.archived-may4/__pycache__
+/home/ubuntu/.openclaw/agents
+/home/ubuntu/.openclaw/agents/boba
+/home/ubuntu/.openclaw/agents/boba/agent
+/home/ubuntu/.openclaw/agents/boba/sessions
+/home/ubuntu/.openclaw/agents/claude-code
+/home/ubuntu/.openclaw/agents/claude-code/sessions
+/home/ubuntu/.openclaw/agents/jazzyhazzy
+/home/ubuntu/.openclaw/agents/jazzyhazzy/agent
+/home/ubuntu/.openclaw/agents/jazzyhazzy/sessions
+/home/ubuntu/.openclaw/agents/main
+/home/ubuntu/.openclaw/agents/main/agent
+/home/ubuntu/.openclaw/agents/main/sessions
+/home/ubuntu/.openclaw/agents/orion
+/home/ubuntu/.openclaw/agents/orion/agent
+/home/ubuntu/.openclaw/agents/orion/sessions
+/home/ubuntu/.openclaw/bots
+/home/ubuntu/.openclaw/bots/__pycache__
+/home/ubuntu/.openclaw/canvas
+/home/ubuntu/.openclaw/completions
+/home/ubuntu/.openclaw/config
+/home/ubuntu/.openclaw/credentials
+/home/ubuntu/.openclaw/cron
+/home/ubuntu/.openclaw/cron/runs
+/home/ubuntu/.openclaw/data
+/home/ubuntu/.openclaw/data/alpaca-archive
+/home/ubuntu/.openclaw/data/anthropic_usage
+/home/ubuntu/.openclaw/data/best-options
+/home/ubuntu/.openclaw/data/bible-repo
+/home/ubuntu/.openclaw/data/bible-repo/.git
+/home/ubuntu/.openclaw/data/contract-outcomes
+/home/ubuntu/.openclaw/data/option-watcher
+/home/ubuntu/.openclaw/data/scanners
+/home/ubuntu/.openclaw/data/transcripts
+/home/ubuntu/.openclaw/data_cache
+/home/ubuntu/.openclaw/delivery-queue
+/home/ubuntu/.openclaw/delivery-queue/failed
+/home/ubuntu/.openclaw/devices
+/home/ubuntu/.openclaw/extensions
+/home/ubuntu/.openclaw/extensions/preclick-openclaw
+/home/ubuntu/.openclaw/extensions/preclick-openclaw/node_modules
+/home/ubuntu/.openclaw/extensions/preclick-openclaw/skills
+/home/ubuntu/.openclaw/extensions/preclick-openclaw/src
+/home/ubuntu/.openclaw/flows
+/home/ubuntu/.openclaw/identity
+/home/ubuntu/.openclaw/logs
+/home/ubuntu/.openclaw/media
+/home/ubuntu/.openclaw/media/inbound
+/home/ubuntu/.openclaw/memory
+/home/ubuntu/.openclaw/qqbot
+/home/ubuntu/.openclaw/qqbot/data
+/home/ubuntu/.openclaw/secrets
+/home/ubuntu/.openclaw/secrets/.git
+/home/ubuntu/.openclaw/secrets/.git/branches
+/home/ubuntu/.openclaw/secrets/.git/hooks
+/home/ubuntu/.openclaw/secrets/.git/info
+/home/ubuntu/.openclaw/secrets/.git/logs
+/home/ubuntu/.openclaw/secrets/.git/objects
+/home/ubuntu/.openclaw/secrets/.git/refs
+/home/ubuntu/.openclaw/secrets/_archive
+/home/ubuntu/.openclaw/secrets/env-backup-20260406
+/home/ubuntu/.openclaw/skills
+/home/ubuntu/.openclaw/skills/__pycache__
+/home/ubuntu/.openclaw/skills/_archive
+/home/ubuntu/.openclaw/skills/_archive/catalyst-scanner
+/home/ubuntu/.openclaw/skills/_archive/dcf-model.shared.bak.20260502
+/home/ubuntu/.openclaw/skills/_archive/financial-analysis.shared.bak.20260502
+/home/ubuntu/.openclaw/skills/_archive/market-data-api
+/home/ubuntu/.openclaw/skills/_downloaded
+/home/ubuntu/.openclaw/skills/_downloaded/3-statement-model
+/home/ubuntu/.openclaw/skills/_downloaded/ARK-Invest-2026-Big-Ideas
+/home/ubuntu/.openclaw/skills/_downloaded/BlackRock-2026-Global-Outlook
+/home/ubuntu/.openclaw/skills/_downloaded/George-Soros-Financial-Alchemy
+/home/ubuntu/.openclaw/skills/_downloaded/Howard-Marks-Oaktree-Memos
+/home/ubuntu/.openclaw/skills/_downloaded/Mark-Douglas-Trading-Psychology
+/home/ubuntu/.openclaw/skills/_downloaded/Peter-Lynch-Beating-the-Street
+/home/ubuntu/.openclaw/skills/_downloaded/Philip-Fisher-Common-Stocks
+/home/ubuntu/.openclaw/skills/_downloaded/Ray-Dalio-Principles
+/home/ubuntu/.openclaw/skills/_downloaded/Robert-Kiyosaki-Rich-Dad
+/home/ubuntu/.openclaw/skills/_downloaded/Templeton-Reverse-Investment
+/home/ubuntu/.openclaw/skills/_downloaded/Vanguard-2026-Economic-Outlook
+/home/ubuntu/.openclaw/skills/_downloaded/ai-readiness
+/home/ubuntu/.openclaw/skills/_downloaded/algo-builder
+/home/ubuntu/.openclaw/skills/_downloaded/announcement-search
+/home/ubuntu/.openclaw/skills/_downloaded/audit-xls
+/home/ubuntu/.openclaw/skills/_downloaded/auto-trading-strategy
+/home/ubuntu/.openclaw/skills/_downloaded/backtesting-trading-strategies
+/home/ubuntu/.openclaw/skills/_downloaded/bond-futures-basis
+/home/ubuntu/.openclaw/skills/_downloaded/bond-relative-value
+/home/ubuntu/.openclaw/skills/_downloaded/buyer-list
+/home/ubuntu/.openclaw/skills/_downloaded/catalyst-calendar
+/home/ubuntu/.openclaw/skills/_downloaded/chart-visualization
+/home/ubuntu/.openclaw/skills/_downloaded/cim-builder
+/home/ubuntu/.openclaw/skills/_downloaded/clean-data-xls
+/home/ubuntu/.openclaw/skills/_downloaded/client-report
+/home/ubuntu/.openclaw/skills/_downloaded/client-review
+/home/ubuntu/.openclaw/skills/_downloaded/competitive-analysis
+/home/ubuntu/.openclaw/skills/_downloaded/comps-analysis
+/home/ubuntu/.openclaw/skills/_downloaded/crypto-comprehensive-diagnosis
+/home/ubuntu/.openclaw/skills/_downloaded/crypto-funding-alert
+/home/ubuntu/.openclaw/skills/_downloaded/crypto-historical-data
+/home/ubuntu/.openclaw/skills/_downloaded/crypto-historical-trend
+/home/ubuntu/.openclaw/skills/_downloaded/crypto-investment-strategist
+/home/ubuntu/.openclaw/skills/_downloaded/crypto-portfolio-tracker
+/home/ubuntu/.openclaw/skills/_downloaded/crypto-screener
+/home/ubuntu/.openclaw/skills/_downloaded/crypto-screener-rankings
+/home/ubuntu/.openclaw/skills/_downloaded/crypto-snapshot-diagnosis
+/home/ubuntu/.openclaw/skills/_downloaded/crypto-technical-analysis
+/home/ubuntu/.openclaw/skills/_downloaded/crypto-technical-indicators
+/home/ubuntu/.openclaw/skills/_downloaded/crypto_asset_info
+/home/ubuntu/.openclaw/skills/_downloaded/crypto_price_market_data
+/home/ubuntu/.openclaw/skills/_downloaded/currency-conversion
+/home/ubuntu/.openclaw/skills/_downloaded/datapack-builder
+/home/ubuntu/.openclaw/skills/_downloaded/dcf-model
+/home/ubuntu/.openclaw/skills/_downloaded/dd-meeting-prep
+/home/ubuntu/.openclaw/skills/_downloaded/deal-screening
+/home/ubuntu/.openclaw/skills/_downloaded/deal-sourcing
+/home/ubuntu/.openclaw/skills/_downloaded/deal-tracker
+/home/ubuntu/.openclaw/skills/_downloaded/deck-refresh
+/home/ubuntu/.openclaw/skills/_downloaded/defi-dex-volume
+/home/ubuntu/.openclaw/skills/_downloaded/defi-stablecoin-analysis
+/home/ubuntu/.openclaw/skills/_downloaded/defi-tvl-snapshot
+/home/ubuntu/.openclaw/skills/_downloaded/defi-yield-screener
+/home/ubuntu/.openclaw/skills/_downloaded/dividend-aristocrat-calculator
+/home/ubuntu/.openclaw/skills/_downloaded/earnings-analysis
+/home/ubuntu/.openclaw/skills/_downloaded/earnings-call-search
+/home/ubuntu/.openclaw/skills/_downloaded/earnings-preview
+/home/ubuntu/.openclaw/skills/_downloaded/earnings-preview-beta
+/home/ubuntu/.openclaw/skills/_downloaded/equity-research
+/home/ubuntu/.openclaw/skills/_downloaded/esg-screener
+/home/ubuntu/.openclaw/skills/_downloaded/event-driven-detector
+/home/ubuntu/.openclaw/skills/_downloaded/finance-encyclopedia-search
+/home/ubuntu/.openclaw/skills/_downloaded/financial-analysis
+/home/ubuntu/.openclaw/skills/_downloaded/financial-plan
+/home/ubuntu/.openclaw/skills/_downloaded/financial-statement-analyzer
+/home/ubuntu/.openclaw/skills/_downloaded/findata-toolkit-us
+/home/ubuntu/.openclaw/skills/_downloaded/fixed-income-portfolio
+/home/ubuntu/.openclaw/skills/_downloaded/funding-digest
+/home/ubuntu/.openclaw/skills/_downloaded/fx-carry-trade
+/home/ubuntu/.openclaw/skills/_downloaded/gemini
+/home/ubuntu/.openclaw/skills/_downloaded/github
+/home/ubuntu/.openclaw/skills/_downloaded/ib-check-deck
+/home/ubuntu/.openclaw/skills/_downloaded/ic-memo
+/home/ubuntu/.openclaw/skills/_downloaded/idea-generation
+/home/ubuntu/.openclaw/skills/_downloaded/image-search
+/home/ubuntu/.openclaw/skills/_downloaded/index-historical-data
+/home/ubuntu/.openclaw/skills/_downloaded/index-price-market-data
+/home/ubuntu/.openclaw/skills/_downloaded/index-technical-indicators
+/home/ubuntu/.openclaw/skills/_downloaded/index-valuation-dividends
+/home/ubuntu/.openclaw/skills/_downloaded/initiating-coverage
+/home/ubuntu/.openclaw/skills/_downloaded/insider-trading-analyzer
+/home/ubuntu/.openclaw/skills/_downloaded/investment-proposal
+/home/ubuntu/.openclaw/skills/_downloaded/japanese-candlestick-analysis-en
+/home/ubuntu/.openclaw/skills/_downloaded/lbo-model
+/home/ubuntu/.openclaw/skills/_downloaded/macro-rates-monitor
+/home/ubuntu/.openclaw/skills/_downloaded/macro-regime-analyst
+/home/ubuntu/.openclaw/skills/_downloaded/market-sentiment-pulse
+/home/ubuntu/.openclaw/skills/_downloaded/mcp-builder
+/home/ubuntu/.openclaw/skills/_downloaded/merger-model
+/home/ubuntu/.openclaw/skills/_downloaded/model-update
+/home/ubuntu/.openclaw/skills/_downloaded/model-usage
+/home/ubuntu/.openclaw/skills/_downloaded/morning-note
+/home/ubuntu/.openclaw/skills/_downloaded/news-search
+/home/ubuntu/.openclaw/skills/_downloaded/news-sentiment
+/home/ubuntu/.openclaw/skills/_downloaded/openai-integration
+/home/ubuntu/.openclaw/skills/_downloaded/option-vol-analysis
+/home/ubuntu/.openclaw/skills/_downloaded/pitch-deck
+/home/ubuntu/.openclaw/skills/_downloaded/portfolio-diagnostic
+/home/ubuntu/.openclaw/skills/_downloaded/portfolio-health-check
+/home/ubuntu/.openclaw/skills/_downloaded/portfolio-manager
+/home/ubuntu/.openclaw/skills/_downloaded/portfolio-monitoring
+/home/ubuntu/.openclaw/skills/_downloaded/portfolio-optimizer
+/home/ubuntu/.openclaw/skills/_downloaded/portfolio-rebalance
+/home/ubuntu/.openclaw/skills/_downloaded/portfolio-risk-manager
+/home/ubuntu/.openclaw/skills/_downloaded/portfolio-tracker
+/home/ubuntu/.openclaw/skills/_downloaded/portfolio-watcher
+/home/ubuntu/.openclaw/skills/_downloaded/ppt-template-creator
+/home/ubuntu/.openclaw/skills/_downloaded/process-letter
+/home/ubuntu/.openclaw/skills/_downloaded/quant-analyst
+/home/ubuntu/.openclaw/skills/_downloaded/quant-factor-screener
+/home/ubuntu/.openclaw/skills/_downloaded/research-report-search
+/home/ubuntu/.openclaw/skills/_downloaded/returns-analysis
+/home/ubuntu/.openclaw/skills/_downloaded/risk-adjusted-return-optimizer
+/home/ubuntu/.openclaw/skills/_downloaded/sector-overview
+/home/ubuntu/.openclaw/skills/_downloaded/sector-rotation-detector
+/home/ubuntu/.openclaw/skills/_downloaded/sentiment-bot
+/home/ubuntu/.openclaw/skills/_downloaded/sentiment-reality-gap
+/home/ubuntu/.openclaw/skills/_downloaded/sentiment-score
+/home/ubuntu/.openclaw/skills/_downloaded/sentiment-tracker
+/home/ubuntu/.openclaw/skills/_downloaded/session-logs
+/home/ubuntu/.openclaw/skills/_downloaded/single-asset-backtest
+/home/ubuntu/.openclaw/skills/_downloaded/small-cap-growth-identifier
+/home/ubuntu/.openclaw/skills/_downloaded/social-sentiment
+/home/ubuntu/.openclaw/skills/_downloaded/stock-analysis
+/home/ubuntu/.openclaw/skills/_downloaded/stock-screener
+/home/ubuntu/.openclaw/skills/_downloaded/suitability-report-generator
+/home/ubuntu/.openclaw/skills/_downloaded/summarize
+/home/ubuntu/.openclaw/skills/_downloaded/swap-curve-strategy
+/home/ubuntu/.openclaw/skills/_downloaded/tax-loss-harvesting
+/home/ubuntu/.openclaw/skills/_downloaded/tear-sheet
+/home/ubuntu/.openclaw/skills/_downloaded/teaser
+/home/ubuntu/.openclaw/skills/_downloaded/tech-hype-vs-fundamentals
+/home/ubuntu/.openclaw/skills/_downloaded/thesis-tracker
+/home/ubuntu/.openclaw/skills/_downloaded/ticker-recommender
+/home/ubuntu/.openclaw/skills/_downloaded/trading
+/home/ubuntu/.openclaw/skills/_downloaded/trading-analysis
+/home/ubuntu/.openclaw/skills/_downloaded/trading-devbox
+/home/ubuntu/.openclaw/skills/_downloaded/undervalued-stock-screener
+/home/ubuntu/.openclaw/skills/_downloaded/unit-economics
+/home/ubuntu/.openclaw/skills/_downloaded/us-stock-financial-data-query
+/home/ubuntu/.openclaw/skills/_downloaded/value-creation-plan
+/home/ubuntu/.openclaw/skills/_downloaded/webhook
+/home/ubuntu/.openclaw/skills/_downloaded/webhook-integration
+/home/ubuntu/.openclaw/skills/_downloaded_new
+/home/ubuntu/.openclaw/skills/_irrelevant
+/home/ubuntu/.openclaw/skills/_irrelevant/ai-readiness
+/home/ubuntu/.openclaw/skills/_irrelevant/audit-xls
+/home/ubuntu/.openclaw/skills/_irrelevant/bond-futures-basis
+/home/ubuntu/.openclaw/skills/_irrelevant/bond-relative-value
+/home/ubuntu/.openclaw/skills/_irrelevant/buyer-list
+/home/ubuntu/.openclaw/skills/_irrelevant/cim-builder
+/home/ubuntu/.openclaw/skills/_irrelevant/clean-data-xls
+/home/ubuntu/.openclaw/skills/_irrelevant/client-report
+/home/ubuntu/.openclaw/skills/_irrelevant/client-review
+/home/ubuntu/.openclaw/skills/_irrelevant/comps-analysis
+/home/ubuntu/.openclaw/skills/_irrelevant/datapack-builder
+/home/ubuntu/.openclaw/skills/_irrelevant/dd-meeting-prep
+/home/ubuntu/.openclaw/skills/_irrelevant/deal-screening
+/home/ubuntu/.openclaw/skills/_irrelevant/deal-sourcing
+/home/ubuntu/.openclaw/skills/_irrelevant/deal-tracker
+/home/ubuntu/.openclaw/skills/_irrelevant/deck-refresh
+/home/ubuntu/.openclaw/skills/_irrelevant/defi-dex-volume
+/home/ubuntu/.openclaw/skills/_irrelevant/defi-stablecoin-analysis
+/home/ubuntu/.openclaw/skills/_irrelevant/defi-tvl-snapshot
+/home/ubuntu/.openclaw/skills/_irrelevant/defi-yield-screener
+/home/ubuntu/.openclaw/skills/_irrelevant/financial-plan
+/home/ubuntu/.openclaw/skills/_irrelevant/fixed-income-portfolio
+/home/ubuntu/.openclaw/skills/_irrelevant/fx-carry-trade
+/home/ubuntu/.openclaw/skills/_irrelevant/ib-check-deck
+/home/ubuntu/.openclaw/skills/_irrelevant/ic-memo
+/home/ubuntu/.openclaw/skills/_irrelevant/investment-proposal
+/home/ubuntu/.openclaw/skills/_irrelevant/lbo-model
+/home/ubuntu/.openclaw/skills/_irrelevant/mcp-builder
+/home/ubuntu/.openclaw/skills/_irrelevant/merger-model
+/home/ubuntu/.openclaw/skills/_irrelevant/model-update
+/home/ubuntu/.openclaw/skills/_irrelevant/pitch-deck
+/home/ubuntu/.openclaw/skills/_irrelevant/ppt-template-creator
+/home/ubuntu/.openclaw/skills/_irrelevant/process-letter
+/home/ubuntu/.openclaw/skills/_irrelevant/returns-analysis
+/home/ubuntu/.openclaw/skills/_irrelevant/scripts
+/home/ubuntu/.openclaw/skills/_irrelevant/suitability-report-generator
+/home/ubuntu/.openclaw/skills/_irrelevant/swap-curve-strategy
+/home/ubuntu/.openclaw/skills/_irrelevant/tear-sheet
+/home/ubuntu/.openclaw/skills/_irrelevant/teaser
+/home/ubuntu/.openclaw/skills/_irrelevant/unit-economics
+/home/ubuntu/.openclaw/skills/_irrelevant/value-creation-plan
+/home/ubuntu/.openclaw/skills/_new_pulls
+/home/ubuntu/.openclaw/skills/_new_pulls/brave-search
+/home/ubuntu/.openclaw/skills/_new_pulls/find-skills
+/home/ubuntu/.openclaw/skills/_new_pulls/frontend-design
+/home/ubuntu/.openclaw/skills/_new_pulls/gmail
+/home/ubuntu/.openclaw/skills/_new_pulls/notion
+/home/ubuntu/.openclaw/skills/_new_pulls/skill-creator
+/home/ubuntu/.openclaw/skills/_new_pulls/slack
+/home/ubuntu/.openclaw/skills/_new_pulls/tavily-search
+/home/ubuntu/.openclaw/skills/_new_pulls/weather
+/home/ubuntu/.openclaw/skills/_new_pulls/youtube-api-skill
+/home/ubuntu/.openclaw/skills/_new_pulls/youtube-watcher
+/home/ubuntu/.openclaw/skills/_quarantine
+/home/ubuntu/.openclaw/skills/_quarantine/.clawhub
+/home/ubuntu/.openclaw/skills/boba
+/home/ubuntu/.openclaw/skills/boba/alpaca-trading
+/home/ubuntu/.openclaw/skills/boba/auto-trading-strategy
+/home/ubuntu/.openclaw/skills/boba/comprehensive-risk-analytics
+/home/ubuntu/.openclaw/skills/boba/crypto-bot-builder
+/home/ubuntu/.openclaw/skills/boba/crypto-investment-strategist
+/home/ubuntu/.openclaw/skills/boba/dcf-model
+/home/ubuntu/.openclaw/skills/boba/enhanced-trading-advisor-v2
+/home/ubuntu/.openclaw/skills/boba/factor-research
+/home/ubuntu/.openclaw/skills/boba/financial-analysis
+/home/ubuntu/.openclaw/skills/boba/gemini
+/home/ubuntu/.openclaw/skills/boba/github
+/home/ubuntu/.openclaw/skills/boba/model-usage
+/home/ubuntu/.openclaw/skills/boba/multi-agent-analysis
+/home/ubuntu/.openclaw/skills/boba/openai-integration
+/home/ubuntu/.openclaw/skills/boba/options-advanced
+/home/ubuntu/.openclaw/skills/boba/options-payoff
+/home/ubuntu/.openclaw/skills/boba/options-strategy
+/home/ubuntu/.openclaw/skills/boba/pair-trading
+/home/ubuntu/.openclaw/skills/boba/portfolio-diagnostic
+/home/ubuntu/.openclaw/skills/boba/portfolio-health-check
+/home/ubuntu/.openclaw/skills/boba/portfolio-manager
+/home/ubuntu/.openclaw/skills/boba/portfolio-monitoring
+/home/ubuntu/.openclaw/skills/boba/portfolio-optimizer
+/home/ubuntu/.openclaw/skills/boba/portfolio-rebalance
+/home/ubuntu/.openclaw/skills/boba/portfolio-risk-manager
+/home/ubuntu/.openclaw/skills/boba/portfolio-tracker
+/home/ubuntu/.openclaw/skills/boba/portfolio-watcher
+/home/ubuntu/.openclaw/skills/boba/returns-analysis
+/home/ubuntu/.openclaw/skills/boba/risk-adjusted-return-optimizer
+/home/ubuntu/.openclaw/skills/boba/scripts
+/home/ubuntu/.openclaw/skills/boba/session-logs
+/home/ubuntu/.openclaw/skills/boba/smc
+/home/ubuntu/.openclaw/skills/boba/strategy-voting-engine
+/home/ubuntu/.openclaw/skills/boba/thesis-tracker
+/home/ubuntu/.openclaw/skills/boba/trading
+/home/ubuntu/.openclaw/skills/boba/trading-brain
+/home/ubuntu/.openclaw/skills/jazzyhazzy
+/home/ubuntu/.openclaw/skills/jazzyhazzy/catalyst-calendar
+/home/ubuntu/.openclaw/skills/jazzyhazzy/catalyst-scanner-v2
+/home/ubuntu/.openclaw/skills/jazzyhazzy/competitive-analysis
+/home/ubuntu/.openclaw/skills/jazzyhazzy/earnings-analysis
+/home/ubuntu/.openclaw/skills/jazzyhazzy/earnings-call-search
+/home/ubuntu/.openclaw/skills/jazzyhazzy/earnings-preview
+/home/ubuntu/.openclaw/skills/jazzyhazzy/earnings-preview-beta
+/home/ubuntu/.openclaw/skills/jazzyhazzy/earnings-screener
+/home/ubuntu/.openclaw/skills/jazzyhazzy/event-driven-detector
+/home/ubuntu/.openclaw/skills/jazzyhazzy/fed-speech-monitor
+/home/ubuntu/.openclaw/skills/jazzyhazzy/funding-digest
+/home/ubuntu/.openclaw/skills/jazzyhazzy/idea-generation
+/home/ubuntu/.openclaw/skills/jazzyhazzy/insider-trading-analyzer
+/home/ubuntu/.openclaw/skills/jazzyhazzy/macro-rates-monitor
+/home/ubuntu/.openclaw/skills/jazzyhazzy/macro-regime-analyst
+/home/ubuntu/.openclaw/skills/jazzyhazzy/morning-note
+/home/ubuntu/.openclaw/skills/jazzyhazzy/news-search
+/home/ubuntu/.openclaw/skills/jazzyhazzy/news-sentiment
+/home/ubuntu/.openclaw/skills/jazzyhazzy/research-report-search
+/home/ubuntu/.openclaw/skills/jazzyhazzy/scripts
+/home/ubuntu/.openclaw/skills/jazzyhazzy/sector-overview
+/home/ubuntu/.openclaw/skills/jazzyhazzy/sector-rotation-detector
+/home/ubuntu/.openclaw/skills/jazzyhazzy/summarize
+/home/ubuntu/.openclaw/skills/orion
+/home/ubuntu/.openclaw/skills/orion/backtesting-trading-strategies
+/home/ubuntu/.openclaw/skills/orion/crypto-comprehensive-diagnosis
+/home/ubuntu/.openclaw/skills/orion/crypto-funding-alert
+/home/ubuntu/.openclaw/skills/orion/crypto-historical-data
+/home/ubuntu/.openclaw/skills/orion/crypto-historical-trend
+/home/ubuntu/.openclaw/skills/orion/crypto-screener
+/home/ubuntu/.openclaw/skills/orion/crypto-screener-rankings
+/home/ubuntu/.openclaw/skills/orion/crypto-snapshot-diagnosis
+/home/ubuntu/.openclaw/skills/orion/crypto-technical-analysis
+/home/ubuntu/.openclaw/skills/orion/crypto-technical-indicators
+/home/ubuntu/.openclaw/skills/orion/dividend-aristocrat-calculator
+/home/ubuntu/.openclaw/skills/orion/equity-research
+/home/ubuntu/.openclaw/skills/orion/esg-screener
+/home/ubuntu/.openclaw/skills/orion/index-historical-data
+/home/ubuntu/.openclaw/skills/orion/index-price-market-data
+/home/ubuntu/.openclaw/skills/orion/index-technical-indicators
+/home/ubuntu/.openclaw/skills/orion/index-valuation-dividends
+/home/ubuntu/.openclaw/skills/orion/initiating-coverage
+/home/ubuntu/.openclaw/skills/orion/intraday-pattern-scanner
+/home/ubuntu/.openclaw/skills/orion/japanese-candlestick-analysis-en
+/home/ubuntu/.openclaw/skills/orion/onchain-analysis
+/home/ubuntu/.openclaw/skills/orion/option-block-monitor
+/home/ubuntu/.openclaw/skills/orion/option-vol-analysis
+/home/ubuntu/.openclaw/skills/orion/pine-script
+/home/ubuntu/.openclaw/skills/orion/quant-analyst
+/home/ubuntu/.openclaw/skills/orion/quant-factor-screener
+/home/ubuntu/.openclaw/skills/orion/scripts
+/home/ubuntu/.openclaw/skills/orion/sentiment-reality-gap
+/home/ubuntu/.openclaw/skills/orion/single-asset-backtest
+/home/ubuntu/.openclaw/skills/orion/small-cap-growth-identifier
+/home/ubuntu/.openclaw/skills/orion/stock-analysis
+/home/ubuntu/.openclaw/skills/orion/stock-screener
+/home/ubuntu/.openclaw/skills/orion/tech-hype-vs-fundamentals
+/home/ubuntu/.openclaw/skills/orion/ticker-recommender
+/home/ubuntu/.openclaw/skills/orion/trading-analysis
+/home/ubuntu/.openclaw/skills/orion/trading-devbox
+/home/ubuntu/.openclaw/skills/orion/undervalued-stock-screener
+/home/ubuntu/.openclaw/skills/reference
+/home/ubuntu/.openclaw/skills/reference/BlackRock-2026-Global-Outlook
+/home/ubuntu/.openclaw/skills/reference/George-Soros-Financial-Alchemy
+/home/ubuntu/.openclaw/skills/reference/Howard-Marks-Oaktree-Memos
+/home/ubuntu/.openclaw/skills/reference/Mark-Douglas-Trading-Psychology
+/home/ubuntu/.openclaw/skills/reference/Peter-Lynch-Beating-the-Street
+/home/ubuntu/.openclaw/skills/reference/Philip-Fisher-Common-Stocks
+/home/ubuntu/.openclaw/skills/reference/Ray-Dalio-Principles
+/home/ubuntu/.openclaw/skills/reference/Robert-Kiyosaki-Rich-Dad
+/home/ubuntu/.openclaw/skills/reference/Templeton-Reverse-Investment
+/home/ubuntu/.openclaw/skills/reference/Vanguard-2026-Economic-Outlook
+/home/ubuntu/.openclaw/skills/reference/scripts
+/home/ubuntu/.openclaw/skills/shared
+/home/ubuntu/.openclaw/skills/shared/__pycache__
+/home/ubuntu/.openclaw/skills/shared/crypto-portfolio-tracker
+/home/ubuntu/.openclaw/skills/shared/crypto-sentiment-dashboard
+/home/ubuntu/.openclaw/skills/shared/crypto_asset_info
+/home/ubuntu/.openclaw/skills/shared/currency-conversion
+/home/ubuntu/.openclaw/skills/shared/datapack-builder
+/home/ubuntu/.openclaw/skills/shared/finance-encyclopedia-search
+/home/ubuntu/.openclaw/skills/shared/financial-statement-analyzer
+/home/ubuntu/.openclaw/skills/shared/findata-toolkit-us
+/home/ubuntu/.openclaw/skills/shared/image-search
+/home/ubuntu/.openclaw/skills/shared/market-sentiment-pulse
+/home/ubuntu/.openclaw/skills/shared/mc-utils
+/home/ubuntu/.openclaw/skills/shared/scripts
+/home/ubuntu/.openclaw/skills/shared/sentiment-bot
+/home/ubuntu/.openclaw/skills/shared/sentiment-score
+/home/ubuntu/.openclaw/skills/shared/sentiment-tracker
+/home/ubuntu/.openclaw/skills/shared/social-sentiment
+/home/ubuntu/.openclaw/skills/shared/tax-loss-harvesting
+/home/ubuntu/.openclaw/skills/shared/unified-market-data-api
+/home/ubuntu/.openclaw/skills/shared/us-stock-financial-data-query
+/home/ubuntu/.openclaw/skills/shared/webhook
+/home/ubuntu/.openclaw/skills/shared/webhook-integration
+/home/ubuntu/.openclaw/skills/{boba,jazzyhazzy,orion,shared,reference,_quarantine,_irrelevant}
+/home/ubuntu/.openclaw/state
+/home/ubuntu/.openclaw/state/backtest_validator
+/home/ubuntu/.openclaw/state/blast_radius
+/home/ubuntu/.openclaw/state/code_wip
+/home/ubuntu/.openclaw/state/congress_scanner
+/home/ubuntu/.openclaw/state/daemon_health
+/home/ubuntu/.openclaw/state/edge_decay
+/home/ubuntu/.openclaw/state/fed_monitor
+/home/ubuntu/.openclaw/state/flow_research
+/home/ubuntu/.openclaw/state/github_scout
+/home/ubuntu/.openclaw/state/portfolio_drift
+/home/ubuntu/.openclaw/state/sec_scanner
+/home/ubuntu/.openclaw/state/sec_scanner/13f
+/home/ubuntu/.openclaw/state/synth_control_digests
+/home/ubuntu/.openclaw/state/watchdogs
+/home/ubuntu/.openclaw/subagents
+/home/ubuntu/.openclaw/tasks
+/home/ubuntu/.openclaw/telegram
+/home/ubuntu/.openclaw/workspace
+/home/ubuntu/.openclaw/workspace-jazzyhazzy
+/home/ubuntu/.openclaw/workspace-jazzyhazzy/.openclaw
+/home/ubuntu/.openclaw/workspace-jazzyhazzy/memory
+/home/ubuntu/.openclaw/workspace-jazzyhazzy/skills
+/home/ubuntu/.openclaw/workspace-jazzyhazzy/skills/3-statement-model
+/home/ubuntu/.openclaw/workspace-jazzyhazzy/skills/ARK-Invest-2026-Big-Ideas
+/home/ubuntu/.openclaw/workspace-jazzyhazzy/skills/BlackRock-2026-Global-Outlook
+/home/ubuntu/.openclaw/workspace-jazzyhazzy/skills/George-Soros-Financial-Alchemy
+/home/ubuntu/.openclaw/workspace-jazzyhazzy/skills/Howard-Marks-Oaktree-Memos
+/home/ubuntu/.openclaw/workspace-jazzyhazzy/skills/Mark-Douglas-Trading-Psychology
+/home/ubuntu/.openclaw/workspace-jazzyhazzy/skills/Peter-Lynch-Beating-the-Street
+/home/ubuntu/.openclaw/workspace-jazzyhazzy/skills/Philip-Fisher-Common-Stocks
+/home/ubuntu/.openclaw/workspace-jazzyhazzy/skills/Ray-Dalio-Principles
+/home/ubuntu/.openclaw/workspace-jazzyhazzy/skills/Robert-Kiyosaki-Rich-Dad
+/home/ubuntu/.openclaw/workspace-jazzyhazzy/skills/Templeton-Reverse-Investment
+/home/ubuntu/.openclaw/workspace-jazzyhazzy/skills/Vanguard-2026-Economic-Outlook
+/home/ubuntu/.openclaw/workspace-jazzyhazzy/skills/_archive
+/home/ubuntu/.openclaw/workspace-jazzyhazzy/skills/_downloaded
+/home/ubuntu/.openclaw/workspace-jazzyhazzy/skills/ai-readiness
+/home/ubuntu/.openclaw/workspace-jazzyhazzy/skills/algo-builder
+/home/ubuntu/.openclaw/workspace-jazzyhazzy/skills/alpaca-trading
+/home/ubuntu/.openclaw/workspace-jazzyhazzy/skills/announcement-search
+/home/ubuntu/.openclaw/workspace-jazzyhazzy/skills/audit-xls
+/home/ubuntu/.openclaw/workspace-jazzyhazzy/skills/auto-trading-strategy
+/home/ubuntu/.openclaw/workspace-jazzyhazzy/skills/backtesting-trading-strategies
+/home/ubuntu/.openclaw/workspace-jazzyhazzy/skills/bond-futures-basis
+/home/ubuntu/.openclaw/workspace-jazzyhazzy/skills/bond-relative-value
+/home/ubuntu/.openclaw/workspace-jazzyhazzy/skills/buyer-list
+/home/ubuntu/.openclaw/workspace-jazzyhazzy/skills/catalyst-calendar
+/home/ubuntu/.openclaw/workspace-jazzyhazzy/skills/catalyst-scanner-v2
+/home/ubuntu/.openclaw/workspace-jazzyhazzy/skills/chart-visualization
+/home/ubuntu/.openclaw/workspace-jazzyhazzy/skills/cim-builder
+/home/ubuntu/.openclaw/workspace-jazzyhazzy/skills/clean-data-xls
+/home/ubuntu/.openclaw/workspace-jazzyhazzy/skills/client-report
+/home/ubuntu/.openclaw/workspace-jazzyhazzy/skills/client-review
+/home/ubuntu/.openclaw/workspace-jazzyhazzy/skills/competitive-analysis
+/home/ubuntu/.openclaw/workspace-jazzyhazzy/skills/comprehensive-risk-analytics
+/home/ubuntu/.openclaw/workspace-jazzyhazzy/skills/comps-analysis
+/home/ubuntu/.openclaw/workspace-jazzyhazzy/skills/crypto-comprehensive-diagnosis
+/home/ubuntu/.openclaw/workspace-jazzyhazzy/skills/crypto-funding-alert
+/home/ubuntu/.openclaw/workspace-jazzyhazzy/skills/crypto-historical-data
+/home/ubuntu/.openclaw/workspace-jazzyhazzy/skills/crypto-historical-trend
+/home/ubuntu/.openclaw/workspace-jazzyhazzy/skills/crypto-investment-strategist
+/home/ubuntu/.openclaw/workspace-jazzyhazzy/skills/crypto-portfolio-tracker
+/home/ubuntu/.openclaw/workspace-jazzyhazzy/skills/crypto-screener
+/home/ubuntu/.openclaw/workspace-jazzyhazzy/skills/crypto-screener-rankings
+/home/ubuntu/.openclaw/workspace-jazzyhazzy/skills/crypto-snapshot-diagnosis
+/home/ubuntu/.openclaw/workspace-jazzyhazzy/skills/crypto-technical-analysis
+/home/ubuntu/.openclaw/workspace-jazzyhazzy/skills/crypto-technical-indicators
+/home/ubuntu/.openclaw/workspace-jazzyhazzy/skills/crypto_asset_info
+/home/ubuntu/.openclaw/workspace-jazzyhazzy/skills/crypto_price_market_data
+/home/ubuntu/.openclaw/workspace-jazzyhazzy/skills/currency-conversion
+/home/ubuntu/.openclaw/workspace-jazzyhazzy/skills/datapack-builder
+/home/ubuntu/.openclaw/workspace-jazzyhazzy/skills/dcf-model
+/home/ubuntu/.openclaw/workspace-jazzyhazzy/skills/dd-meeting-prep
+/home/ubuntu/.openclaw/workspace-jazzyhazzy/skills/deal-screening
+/home/ubuntu/.openclaw/workspace-jazzyhazzy/skills/deal-sourcing
+/home/ubuntu/.openclaw/workspace-jazzyhazzy/skills/deal-tracker
+/home/ubuntu/.openclaw/workspace-jazzyhazzy/skills/deck-refresh
+/home/ubuntu/.openclaw/workspace-jazzyhazzy/skills/defi-dex-volume
+/home/ubuntu/.openclaw/workspace-jazzyhazzy/skills/defi-stablecoin-analysis
+/home/ubuntu/.openclaw/workspace-jazzyhazzy/skills/defi-tvl-snapshot
+/home/ubuntu/.openclaw/workspace-jazzyhazzy/skills/defi-yield-screener
+/home/ubuntu/.openclaw/workspace-jazzyhazzy/skills/dividend-aristocrat-calculator
+/home/ubuntu/.openclaw/workspace-jazzyhazzy/skills/earnings-analysis
+/home/ubuntu/.openclaw/workspace-jazzyhazzy/skills/earnings-call-search
+/home/ubuntu/.openclaw/workspace-jazzyhazzy/skills/earnings-preview
+/home/ubuntu/.openclaw/workspace-jazzyhazzy/skills/earnings-preview-beta
+/home/ubuntu/.openclaw/workspace-jazzyhazzy/skills/earnings-screener
+/home/ubuntu/.openclaw/workspace-jazzyhazzy/skills/enhanced-trading-advisor-v2
+/home/ubuntu/.openclaw/workspace-jazzyhazzy/skills/equity-research
+/home/ubuntu/.openclaw/workspace-jazzyhazzy/skills/esg-screener
+/home/ubuntu/.openclaw/workspace-jazzyhazzy/skills/event-driven-detector
+/home/ubuntu/.openclaw/workspace-jazzyhazzy/skills/fed-speech-monitor
+/home/ubuntu/.openclaw/workspace-jazzyhazzy/skills/finance-encyclopedia-search
+/home/ubuntu/.openclaw/workspace-jazzyhazzy/skills/financial-analysis
+/home/ubuntu/.openclaw/workspace-jazzyhazzy/skills/financial-plan
+/home/ubuntu/.openclaw/workspace-jazzyhazzy/skills/financial-statement-analyzer
+/home/ubuntu/.openclaw/workspace-jazzyhazzy/skills/findata-toolkit-us
+/home/ubuntu/.openclaw/workspace-jazzyhazzy/skills/fixed-income-portfolio
+/home/ubuntu/.openclaw/workspace-jazzyhazzy/skills/funding-digest
+/home/ubuntu/.openclaw/workspace-jazzyhazzy/skills/fx-carry-trade
+/home/ubuntu/.openclaw/workspace-jazzyhazzy/skills/gemini
+/home/ubuntu/.openclaw/workspace-jazzyhazzy/skills/github
+/home/ubuntu/.openclaw/workspace-jazzyhazzy/skills/ib-check-deck
+/home/ubuntu/.openclaw/workspace-jazzyhazzy/skills/ic-memo
+/home/ubuntu/.openclaw/workspace-jazzyhazzy/skills/idea-generation
+/home/ubuntu/.openclaw/workspace-jazzyhazzy/skills/image-search
+/home/ubuntu/.openclaw/workspace-jazzyhazzy/skills/index-historical-data
+/home/ubuntu/.openclaw/workspace-jazzyhazzy/skills/index-price-market-data
+/home/ubuntu/.openclaw/workspace-jazzyhazzy/skills/index-technical-indicators
+/home/ubuntu/.openclaw/workspace-jazzyhazzy/skills/index-valuation-dividends
+/home/ubuntu/.openclaw/workspace-jazzyhazzy/skills/initiating-coverage
+/home/ubuntu/.openclaw/workspace-jazzyhazzy/skills/insider-trading-analyzer
+/home/ubuntu/.openclaw/workspace-jazzyhazzy/skills/intraday-pattern-scanner
+/home/ubuntu/.openclaw/workspace-jazzyhazzy/skills/investment-proposal
+/home/ubuntu/.openclaw/workspace-jazzyhazzy/skills/japanese-candlestick-analysis-en
+/home/ubuntu/.openclaw/workspace-jazzyhazzy/skills/lbo-model
+/home/ubuntu/.openclaw/workspace-jazzyhazzy/skills/macro-rates-monitor
+/home/ubuntu/.openclaw/workspace-jazzyhazzy/skills/macro-regime-analyst
+/home/ubuntu/.openclaw/workspace-jazzyhazzy/skills/market-sentiment-pulse
+/home/ubuntu/.openclaw/workspace-jazzyhazzy/skills/mcp-builder
+/home/ubuntu/.openclaw/workspace-jazzyhazzy/skills/merger-model
+/home/ubuntu/.openclaw/workspace-jazzyhazzy/skills/model-update
+/home/ubuntu/.openclaw/workspace-jazzyhazzy/skills/model-usage
+/home/ubuntu/.openclaw/workspace-jazzyhazzy/skills/morning-note
+/home/ubuntu/.openclaw/workspace-jazzyhazzy/skills/news-search
+/home/ubuntu/.openclaw/workspace-jazzyhazzy/skills/news-sentiment
+/home/ubuntu/.openclaw/workspace-jazzyhazzy/skills/openai-integration
+/home/ubuntu/.openclaw/workspace-jazzyhazzy/skills/option-block-monitor
+/home/ubuntu/.openclaw/workspace-jazzyhazzy/skills/option-vol-analysis
+/home/ubuntu/.openclaw/workspace-jazzyhazzy/skills/pitch-deck
+/home/ubuntu/.openclaw/workspace-jazzyhazzy/skills/portfolio-diagnostic
+/home/ubuntu/.openclaw/workspace-jazzyhazzy/skills/portfolio-health-check
+/home/ubuntu/.openclaw/workspace-jazzyhazzy/skills/portfolio-manager
+/home/ubuntu/.openclaw/workspace-jazzyhazzy/skills/portfolio-monitoring
+/home/ubuntu/.openclaw/workspace-jazzyhazzy/skills/portfolio-optimizer
+/home/ubuntu/.openclaw/workspace-jazzyhazzy/skills/portfolio-rebalance
+/home/ubuntu/.openclaw/workspace-jazzyhazzy/skills/portfolio-risk-manager
+/home/ubuntu/.openclaw/workspace-jazzyhazzy/skills/portfolio-tracker
+/home/ubuntu/.openclaw/workspace-jazzyhazzy/skills/portfolio-watcher
+/home/ubuntu/.openclaw/workspace-jazzyhazzy/skills/ppt-template-creator
+/home/ubuntu/.openclaw/workspace-jazzyhazzy/skills/process-letter
+/home/ubuntu/.openclaw/workspace-jazzyhazzy/skills/quant-analyst
+/home/ubuntu/.openclaw/workspace-jazzyhazzy/skills/quant-factor-screener
+/home/ubuntu/.openclaw/workspace-jazzyhazzy/skills/research-report-search
+/home/ubuntu/.openclaw/workspace-jazzyhazzy/skills/returns-analysis
+/home/ubuntu/.openclaw/workspace-jazzyhazzy/skills/risk-adjusted-return-optimizer
+/home/ubuntu/.openclaw/workspace-jazzyhazzy/skills/sector-overview
+/home/ubuntu/.openclaw/workspace-jazzyhazzy/skills/sector-rotation-detector
+/home/ubuntu/.openclaw/workspace-jazzyhazzy/skills/sentiment-bot
+/home/ubuntu/.openclaw/workspace-jazzyhazzy/skills/sentiment-reality-gap
+/home/ubuntu/.openclaw/workspace-jazzyhazzy/skills/sentiment-score
+/home/ubuntu/.openclaw/workspace-jazzyhazzy/skills/sentiment-tracker
+/home/ubuntu/.openclaw/workspace-jazzyhazzy/skills/session-logs
+/home/ubuntu/.openclaw/workspace-jazzyhazzy/skills/single-asset-backtest
+/home/ubuntu/.openclaw/workspace-jazzyhazzy/skills/small-cap-growth-identifier
+/home/ubuntu/.openclaw/workspace-jazzyhazzy/skills/social-sentiment
+/home/ubuntu/.openclaw/workspace-jazzyhazzy/skills/stock-analysis
+/home/ubuntu/.openclaw/workspace-jazzyhazzy/skills/stock-screener
+/home/ubuntu/.openclaw/workspace-jazzyhazzy/skills/suitability-report-generator
+/home/ubuntu/.openclaw/workspace-jazzyhazzy/skills/summarize
+/home/ubuntu/.openclaw/workspace-jazzyhazzy/skills/swap-curve-strategy
+/home/ubuntu/.openclaw/workspace-jazzyhazzy/skills/tax-loss-harvesting
+/home/ubuntu/.openclaw/workspace-jazzyhazzy/skills/tear-sheet
+/home/ubuntu/.openclaw/workspace-jazzyhazzy/skills/teaser
+/home/ubuntu/.openclaw/workspace-jazzyhazzy/skills/tech-hype-vs-fundamentals
+/home/ubuntu/.openclaw/workspace-jazzyhazzy/skills/thesis-tracker
+/home/ubuntu/.openclaw/workspace-jazzyhazzy/skills/ticker-recommender
+/home/ubuntu/.openclaw/workspace-jazzyhazzy/skills/trading
+/home/ubuntu/.openclaw/workspace-jazzyhazzy/skills/trading-analysis
+/home/ubuntu/.openclaw/workspace-jazzyhazzy/skills/trading-brain
+/home/ubuntu/.openclaw/workspace-jazzyhazzy/skills/trading-devbox
+/home/ubuntu/.openclaw/workspace-jazzyhazzy/skills/undervalued-stock-screener
+/home/ubuntu/.openclaw/workspace-jazzyhazzy/skills/unit-economics
+/home/ubuntu/.openclaw/workspace-jazzyhazzy/skills/us-stock-financial-data-query
+/home/ubuntu/.openclaw/workspace-jazzyhazzy/skills/value-creation-plan
+/home/ubuntu/.openclaw/workspace-jazzyhazzy/skills/webhook
+/home/ubuntu/.openclaw/workspace-jazzyhazzy/skills/webhook-integration
+/home/ubuntu/.openclaw/workspace-main
+/home/ubuntu/.openclaw/workspace-main/.git
+/home/ubuntu/.openclaw/workspace-main/.git/branches
+/home/ubuntu/.openclaw/workspace-main/.git/hooks
+/home/ubuntu/.openclaw/workspace-main/.git/info
+/home/ubuntu/.openclaw/workspace-main/.git/objects
+/home/ubuntu/.openclaw/workspace-main/.git/refs
+/home/ubuntu/.openclaw/workspace-main/.openclaw
+/home/ubuntu/.openclaw/workspace-orion
+/home/ubuntu/.openclaw/workspace-orion/.openclaw
+/home/ubuntu/.openclaw/workspace-orion/broadcaster
+/home/ubuntu/.openclaw/workspace-orion/memory
+/home/ubuntu/.openclaw/workspace-orion/skills
+/home/ubuntu/.openclaw/workspace-orion/skills/3-statement-model
+/home/ubuntu/.openclaw/workspace-orion/skills/ARK-Invest-2026-Big-Ideas
+/home/ubuntu/.openclaw/workspace-orion/skills/BlackRock-2026-Global-Outlook
+/home/ubuntu/.openclaw/workspace-orion/skills/George-Soros-Financial-Alchemy
+/home/ubuntu/.openclaw/workspace-orion/skills/Howard-Marks-Oaktree-Memos
+/home/ubuntu/.openclaw/workspace-orion/skills/Mark-Douglas-Trading-Psychology
+/home/ubuntu/.openclaw/workspace-orion/skills/Peter-Lynch-Beating-the-Street
+/home/ubuntu/.openclaw/workspace-orion/skills/Philip-Fisher-Common-Stocks
+/home/ubuntu/.openclaw/workspace-orion/skills/Ray-Dalio-Principles
+/home/ubuntu/.openclaw/workspace-orion/skills/Robert-Kiyosaki-Rich-Dad
+/home/ubuntu/.openclaw/workspace-orion/skills/Templeton-Reverse-Investment
+/home/ubuntu/.openclaw/workspace-orion/skills/Vanguard-2026-Economic-Outlook
+/home/ubuntu/.openclaw/workspace-orion/skills/ai-readiness
+/home/ubuntu/.openclaw/workspace-orion/skills/algo-builder
+/home/ubuntu/.openclaw/workspace-orion/skills/alpaca-trading
+/home/ubuntu/.openclaw/workspace-orion/skills/announcement-search
+/home/ubuntu/.openclaw/workspace-orion/skills/audit-xls
+/home/ubuntu/.openclaw/workspace-orion/skills/auto-trading-strategy
+/home/ubuntu/.openclaw/workspace-orion/skills/backtesting-trading-strategies
+/home/ubuntu/.openclaw/workspace-orion/skills/bond-futures-basis
+/home/ubuntu/.openclaw/workspace-orion/skills/bond-relative-value
+/home/ubuntu/.openclaw/workspace-orion/skills/buyer-list
+/home/ubuntu/.openclaw/workspace-orion/skills/catalyst-calendar
+/home/ubuntu/.openclaw/workspace-orion/skills/catalyst-scanner-v2
+/home/ubuntu/.openclaw/workspace-orion/skills/chart-visualization
+/home/ubuntu/.openclaw/workspace-orion/skills/cim-builder
+/home/ubuntu/.openclaw/workspace-orion/skills/clean-data-xls
+/home/ubuntu/.openclaw/workspace-orion/skills/client-report
+/home/ubuntu/.openclaw/workspace-orion/skills/client-review
+/home/ubuntu/.openclaw/workspace-orion/skills/competitive-analysis
+/home/ubuntu/.openclaw/workspace-orion/skills/comprehensive-risk-analytics
+/home/ubuntu/.openclaw/workspace-orion/skills/comps-analysis
+/home/ubuntu/.openclaw/workspace-orion/skills/crypto-comprehensive-diagnosis
+/home/ubuntu/.openclaw/workspace-orion/skills/crypto-funding-alert
+/home/ubuntu/.openclaw/workspace-orion/skills/crypto-historical-data
+/home/ubuntu/.openclaw/workspace-orion/skills/crypto-historical-trend
+/home/ubuntu/.openclaw/workspace-orion/skills/crypto-investment-strategist
+/home/ubuntu/.openclaw/workspace-orion/skills/crypto-portfolio-tracker
+/home/ubuntu/.openclaw/workspace-orion/skills/crypto-screener
+/home/ubuntu/.openclaw/workspace-orion/skills/crypto-screener-rankings
+/home/ubuntu/.openclaw/workspace-orion/skills/crypto-snapshot-diagnosis
+/home/ubuntu/.openclaw/workspace-orion/skills/crypto-technical-analysis
+/home/ubuntu/.openclaw/workspace-orion/skills/crypto-technical-indicators
+/home/ubuntu/.openclaw/workspace-orion/skills/crypto_asset_info
+/home/ubuntu/.openclaw/workspace-orion/skills/crypto_price_market_data
+/home/ubuntu/.openclaw/workspace-orion/skills/currency-conversion
+/home/ubuntu/.openclaw/workspace-orion/skills/datapack-builder
+/home/ubuntu/.openclaw/workspace-orion/skills/dcf-model
+/home/ubuntu/.openclaw/workspace-orion/skills/dd-meeting-prep
+/home/ubuntu/.openclaw/workspace-orion/skills/deal-screening
+/home/ubuntu/.openclaw/workspace-orion/skills/deal-sourcing
+/home/ubuntu/.openclaw/workspace-orion/skills/deal-tracker
+/home/ubuntu/.openclaw/workspace-orion/skills/deck-refresh
+/home/ubuntu/.openclaw/workspace-orion/skills/defi-dex-volume
+/home/ubuntu/.openclaw/workspace-orion/skills/defi-stablecoin-analysis
+/home/ubuntu/.openclaw/workspace-orion/skills/defi-tvl-snapshot
+/home/ubuntu/.openclaw/workspace-orion/skills/defi-yield-screener
+/home/ubuntu/.openclaw/workspace-orion/skills/dividend-aristocrat-calculator
+/home/ubuntu/.openclaw/workspace-orion/skills/earnings-analysis
+/home/ubuntu/.openclaw/workspace-orion/skills/earnings-call-search
+/home/ubuntu/.openclaw/workspace-orion/skills/earnings-preview
+/home/ubuntu/.openclaw/workspace-orion/skills/earnings-preview-beta
+/home/ubuntu/.openclaw/workspace-orion/skills/earnings-screener
+/home/ubuntu/.openclaw/workspace-orion/skills/enhanced-trading-advisor-v2
+/home/ubuntu/.openclaw/workspace-orion/skills/equity-research
+/home/ubuntu/.openclaw/workspace-orion/skills/esg-screener
+/home/ubuntu/.openclaw/workspace-orion/skills/event-driven-detector
+/home/ubuntu/.openclaw/workspace-orion/skills/fed-speech-monitor
+/home/ubuntu/.openclaw/workspace-orion/skills/finance-encyclopedia-search
+/home/ubuntu/.openclaw/workspace-orion/skills/financial-analysis
+/home/ubuntu/.openclaw/workspace-orion/skills/financial-plan
+/home/ubuntu/.openclaw/workspace-orion/skills/financial-statement-analyzer
+/home/ubuntu/.openclaw/workspace-orion/skills/findata-toolkit-us
+/home/ubuntu/.openclaw/workspace-orion/skills/fixed-income-portfolio
+/home/ubuntu/.openclaw/workspace-orion/skills/funding-digest
+/home/ubuntu/.openclaw/workspace-orion/skills/fx-carry-trade
+/home/ubuntu/.openclaw/workspace-orion/skills/gemini
+/home/ubuntu/.openclaw/workspace-orion/skills/github
+/home/ubuntu/.openclaw/workspace-orion/skills/ib-check-deck
+/home/ubuntu/.openclaw/workspace-orion/skills/ic-memo
+/home/ubuntu/.openclaw/workspace-orion/skills/idea-generation
+/home/ubuntu/.openclaw/workspace-orion/skills/image-search
+/home/ubuntu/.openclaw/workspace-orion/skills/index-historical-data
+/home/ubuntu/.openclaw/workspace-orion/skills/index-price-market-data
+/home/ubuntu/.openclaw/workspace-orion/skills/index-technical-indicators
+/home/ubuntu/.openclaw/workspace-orion/skills/index-valuation-dividends
+/home/ubuntu/.openclaw/workspace-orion/skills/initiating-coverage
+/home/ubuntu/.openclaw/workspace-orion/skills/insider-trading-analyzer
+/home/ubuntu/.openclaw/workspace-orion/skills/intraday-pattern-scanner
+/home/ubuntu/.openclaw/workspace-orion/skills/investment-proposal
+/home/ubuntu/.openclaw/workspace-orion/skills/japanese-candlestick-analysis-en
+/home/ubuntu/.openclaw/workspace-orion/skills/lbo-model
+/home/ubuntu/.openclaw/workspace-orion/skills/macro-rates-monitor
+/home/ubuntu/.openclaw/workspace-orion/skills/macro-regime-analyst
+/home/ubuntu/.openclaw/workspace-orion/skills/market-sentiment-pulse
+/home/ubuntu/.openclaw/workspace-orion/skills/mcp-builder
+/home/ubuntu/.openclaw/workspace-orion/skills/merger-model
+/home/ubuntu/.openclaw/workspace-orion/skills/model-update
+/home/ubuntu/.openclaw/workspace-orion/skills/model-usage
+/home/ubuntu/.openclaw/workspace-orion/skills/morning-note
+/home/ubuntu/.openclaw/workspace-orion/skills/news-search
+/home/ubuntu/.openclaw/workspace-orion/skills/news-sentiment
+/home/ubuntu/.openclaw/workspace-orion/skills/openai-integration
+/home/ubuntu/.openclaw/workspace-orion/skills/option-block-monitor
+/home/ubuntu/.openclaw/workspace-orion/skills/option-vol-analysis
+/home/ubuntu/.openclaw/workspace-orion/skills/pitch-deck
+/home/ubuntu/.openclaw/workspace-orion/skills/portfolio-diagnostic
+/home/ubuntu/.openclaw/workspace-orion/skills/portfolio-health-check
+/home/ubuntu/.openclaw/workspace-orion/skills/portfolio-manager
+/home/ubuntu/.openclaw/workspace-orion/skills/portfolio-monitoring
+/home/ubuntu/.openclaw/workspace-orion/skills/portfolio-optimizer
+/home/ubuntu/.openclaw/workspace-orion/skills/portfolio-rebalance
+/home/ubuntu/.openclaw/workspace-orion/skills/portfolio-risk-manager
+/home/ubuntu/.openclaw/workspace-orion/skills/portfolio-tracker
+/home/ubuntu/.openclaw/workspace-orion/skills/portfolio-watcher
+/home/ubuntu/.openclaw/workspace-orion/skills/ppt-template-creator
+/home/ubuntu/.openclaw/workspace-orion/skills/process-letter
+/home/ubuntu/.openclaw/workspace-orion/skills/quant-analyst
+/home/ubuntu/.openclaw/workspace-orion/skills/quant-factor-screener
+/home/ubuntu/.openclaw/workspace-orion/skills/research-report-search
+/home/ubuntu/.openclaw/workspace-orion/skills/returns-analysis
+/home/ubuntu/.openclaw/workspace-orion/skills/risk-adjusted-return-optimizer
+/home/ubuntu/.openclaw/workspace-orion/skills/sector-overview
+/home/ubuntu/.openclaw/workspace-orion/skills/sector-rotation-detector
+/home/ubuntu/.openclaw/workspace-orion/skills/sentiment-bot
+/home/ubuntu/.openclaw/workspace-orion/skills/sentiment-reality-gap
+/home/ubuntu/.openclaw/workspace-orion/skills/sentiment-score
+/home/ubuntu/.openclaw/workspace-orion/skills/sentiment-tracker
+/home/ubuntu/.openclaw/workspace-orion/skills/session-logs
+/home/ubuntu/.openclaw/workspace-orion/skills/single-asset-backtest
+/home/ubuntu/.openclaw/workspace-orion/skills/small-cap-growth-identifier
+/home/ubuntu/.openclaw/workspace-orion/skills/social-sentiment
+/home/ubuntu/.openclaw/workspace-orion/skills/stock-analysis
+/home/ubuntu/.openclaw/workspace-orion/skills/stock-screener
+/home/ubuntu/.openclaw/workspace-orion/skills/suitability-report-generator
+/home/ubuntu/.openclaw/workspace-orion/skills/summarize
+/home/ubuntu/.openclaw/workspace-orion/skills/swap-curve-strategy
+/home/ubuntu/.openclaw/workspace-orion/skills/tax-loss-harvesting
+/home/ubuntu/.openclaw/workspace-orion/skills/tear-sheet
+/home/ubuntu/.openclaw/workspace-orion/skills/teaser
+/home/ubuntu/.openclaw/workspace-orion/skills/tech-hype-vs-fundamentals
+/home/ubuntu/.openclaw/workspace-orion/skills/thesis-tracker
+/home/ubuntu/.openclaw/workspace-orion/skills/ticker-recommender
+/home/ubuntu/.openclaw/workspace-orion/skills/trading
+/home/ubuntu/.openclaw/workspace-orion/skills/trading-analysis
+/home/ubuntu/.openclaw/workspace-orion/skills/trading-brain
+/home/ubuntu/.openclaw/workspace-orion/skills/trading-devbox
+/home/ubuntu/.openclaw/workspace-orion/skills/undervalued-stock-screener
+/home/ubuntu/.openclaw/workspace-orion/skills/unit-economics
+/home/ubuntu/.openclaw/workspace-orion/skills/us-stock-financial-data-query
+/home/ubuntu/.openclaw/workspace-orion/skills/value-creation-plan
+/home/ubuntu/.openclaw/workspace-orion/skills/webhook
+/home/ubuntu/.openclaw/workspace-orion/skills/webhook-integration
+/home/ubuntu/.openclaw/workspace-orion/tivimate
+/home/ubuntu/.openclaw/workspace/.clawhub
+/home/ubuntu/.openclaw/workspace/.git
+/home/ubuntu/.openclaw/workspace/.git/branches
+/home/ubuntu/.openclaw/workspace/.git/hooks
+/home/ubuntu/.openclaw/workspace/.git/info
+/home/ubuntu/.openclaw/workspace/.git/logs
+/home/ubuntu/.openclaw/workspace/.git/objects
+/home/ubuntu/.openclaw/workspace/.git/refs
+/home/ubuntu/.openclaw/workspace/.obsidian
+/home/ubuntu/.openclaw/workspace/.obsidian/plugins
+/home/ubuntu/.openclaw/workspace/.obsidian/templates
+/home/ubuntu/.openclaw/workspace/.openclaw
+/home/ubuntu/.openclaw/workspace/Y
+/home/ubuntu/.openclaw/workspace/apk-scanner
+/home/ubuntu/.openclaw/workspace/apk-scanner/inbox
+/home/ubuntu/.openclaw/workspace/apk-scanner/reports
+/home/ubuntu/.openclaw/workspace/assets
+/home/ubuntu/.openclaw/workspace/boba_memory
+/home/ubuntu/.openclaw/workspace/cache
+/home/ubuntu/.openclaw/workspace/cache/flow_channels
+/home/ubuntu/.openclaw/workspace/context
+/home/ubuntu/.openclaw/workspace/directives
+/home/ubuntu/.openclaw/workspace/directives/kronos_forecasts
+/home/ubuntu/.openclaw/workspace/docs
+/home/ubuntu/.openclaw/workspace/edge_decay_history
+/home/ubuntu/.openclaw/workspace/fleet_memory
+/home/ubuntu/.openclaw/workspace/go-trader
+/home/ubuntu/.openclaw/workspace/go-trader/.git
+/home/ubuntu/.openclaw/workspace/go-trader/.github
+/home/ubuntu/.openclaw/workspace/go-trader/archive
+/home/ubuntu/.openclaw/workspace/go-trader/backtest
+/home/ubuntu/.openclaw/workspace/go-trader/docs
+/home/ubuntu/.openclaw/workspace/go-trader/platforms
+/home/ubuntu/.openclaw/workspace/go-trader/scheduler
+/home/ubuntu/.openclaw/workspace/go-trader/shared_scripts
+/home/ubuntu/.openclaw/workspace/go-trader/shared_strategies
+/home/ubuntu/.openclaw/workspace/go-trader/shared_tools
+/home/ubuntu/.openclaw/workspace/logs
+/home/ubuntu/.openclaw/workspace/memory
+/home/ubuntu/.openclaw/workspace/memory/patterns
+/home/ubuntu/.openclaw/workspace/memory/playbooks
+/home/ubuntu/.openclaw/workspace/memory/trades
+/home/ubuntu/.openclaw/workspace/mission-control
+/home/ubuntu/.openclaw/workspace/mission-control/.git
+/home/ubuntu/.openclaw/workspace/mission-control/.next
+/home/ubuntu/.openclaw/workspace/mission-control/logs
+/home/ubuntu/.openclaw/workspace/mission-control/memory
+/home/ubuntu/.openclaw/workspace/mission-control/node_modules
+/home/ubuntu/.openclaw/workspace/mission-control/public
+/home/ubuntu/.openclaw/workspace/mission-control/scripts
+/home/ubuntu/.openclaw/workspace/mission-control/src
+/home/ubuntu/.openclaw/workspace/proposals
+/home/ubuntu/.openclaw/workspace/proposals/approved
+/home/ubuntu/.openclaw/workspace/proposals/rejected
+/home/ubuntu/.openclaw/workspace/scripts
+/home/ubuntu/.openclaw/workspace/scripts/__pycache__
+/home/ubuntu/.openclaw/workspace/scripts/alerts
+/home/ubuntu/.openclaw/workspace/scripts/openai
+/home/ubuntu/.openclaw/workspace/second-brain
+/home/ubuntu/.openclaw/workspace/second-brain/concepts
+/home/ubuntu/.openclaw/workspace/second-brain/documents
+/home/ubuntu/.openclaw/workspace/second-brain/journal
+/home/ubuntu/.openclaw/workspace/skill_outputs
+/home/ubuntu/.openclaw/workspace/skill_outputs/boba
+/home/ubuntu/.openclaw/workspace/skill_outputs/jazzyhazzy
+/home/ubuntu/.openclaw/workspace/skill_outputs/orion
+/home/ubuntu/.openclaw/workspace/skill_outputs/shared
+/home/ubuntu/.openclaw/workspace/skills
+/home/ubuntu/.openclaw/workspace/skills/3-statement-model
+/home/ubuntu/.openclaw/workspace/skills/ARK-Invest-2026-Big-Ideas
+/home/ubuntu/.openclaw/workspace/skills/BlackRock-2026-Global-Outlook
+/home/ubuntu/.openclaw/workspace/skills/George-Soros-Financial-Alchemy
+/home/ubuntu/.openclaw/workspace/skills/Howard-Marks-Oaktree-Memos
+/home/ubuntu/.openclaw/workspace/skills/Mark-Douglas-Trading-Psychology
+/home/ubuntu/.openclaw/workspace/skills/Peter-Lynch-Beating-the-Street
+/home/ubuntu/.openclaw/workspace/skills/Philip-Fisher-Common-Stocks
+/home/ubuntu/.openclaw/workspace/skills/Ray-Dalio-Principles
+/home/ubuntu/.openclaw/workspace/skills/Robert-Kiyosaki-Rich-Dad
+/home/ubuntu/.openclaw/workspace/skills/Templeton-Reverse-Investment
+/home/ubuntu/.openclaw/workspace/skills/Vanguard-2026-Economic-Outlook
+/home/ubuntu/.openclaw/workspace/skills/_archive
+/home/ubuntu/.openclaw/workspace/skills/_downloaded
+/home/ubuntu/.openclaw/workspace/skills/_quarantine
+/home/ubuntu/.openclaw/workspace/skills/ai-readiness
+/home/ubuntu/.openclaw/workspace/skills/algo-builder
+/home/ubuntu/.openclaw/workspace/skills/alpaca-trading
+/home/ubuntu/.openclaw/workspace/skills/announcement-search
+/home/ubuntu/.openclaw/workspace/skills/audit-xls
+/home/ubuntu/.openclaw/workspace/skills/auto-trading-strategy
+/home/ubuntu/.openclaw/workspace/skills/backtesting-trading-strategies
+/home/ubuntu/.openclaw/workspace/skills/bond-futures-basis
+/home/ubuntu/.openclaw/workspace/skills/bond-relative-value
+/home/ubuntu/.openclaw/workspace/skills/buyer-list
+/home/ubuntu/.openclaw/workspace/skills/catalyst-calendar
+/home/ubuntu/.openclaw/workspace/skills/catalyst-scanner-v2
+/home/ubuntu/.openclaw/workspace/skills/chart-visualization
+/home/ubuntu/.openclaw/workspace/skills/cim-builder
+/home/ubuntu/.openclaw/workspace/skills/clean-data-xls
+/home/ubuntu/.openclaw/workspace/skills/client-report
+/home/ubuntu/.openclaw/workspace/skills/client-review
+/home/ubuntu/.openclaw/workspace/skills/competitive-analysis
+/home/ubuntu/.openclaw/workspace/skills/comprehensive-risk-analytics
+/home/ubuntu/.openclaw/workspace/skills/comps-analysis
+/home/ubuntu/.openclaw/workspace/skills/correlation-analysis
+/home/ubuntu/.openclaw/workspace/skills/crypto-comprehensive-diagnosis
+/home/ubuntu/.openclaw/workspace/skills/crypto-funding-alert
+/home/ubuntu/.openclaw/workspace/skills/crypto-historical-data
+/home/ubuntu/.openclaw/workspace/skills/crypto-historical-trend
+/home/ubuntu/.openclaw/workspace/skills/crypto-investment-strategist
+/home/ubuntu/.openclaw/workspace/skills/crypto-portfolio-tracker
+/home/ubuntu/.openclaw/workspace/skills/crypto-screener
+/home/ubuntu/.openclaw/workspace/skills/crypto-screener-rankings
+/home/ubuntu/.openclaw/workspace/skills/crypto-snapshot-diagnosis
+/home/ubuntu/.openclaw/workspace/skills/crypto-technical-analysis
+/home/ubuntu/.openclaw/workspace/skills/crypto-technical-indicators
+/home/ubuntu/.openclaw/workspace/skills/crypto_asset_info
+/home/ubuntu/.openclaw/workspace/skills/crypto_price_market_data
+/home/ubuntu/.openclaw/workspace/skills/currency-conversion
+/home/ubuntu/.openclaw/workspace/skills/datapack-builder
+/home/ubuntu/.openclaw/workspace/skills/dcf-model
+/home/ubuntu/.openclaw/workspace/skills/dd-meeting-prep
+/home/ubuntu/.openclaw/workspace/skills/deal-screening
+/home/ubuntu/.openclaw/workspace/skills/deal-sourcing
+/home/ubuntu/.openclaw/workspace/skills/deal-tracker
+/home/ubuntu/.openclaw/workspace/skills/deck-refresh
+/home/ubuntu/.openclaw/workspace/skills/defi-dex-volume
+/home/ubuntu/.openclaw/workspace/skills/defi-stablecoin-analysis
+/home/ubuntu/.openclaw/workspace/skills/defi-tvl-snapshot
+/home/ubuntu/.openclaw/workspace/skills/defi-yield-screener
+/home/ubuntu/.openclaw/workspace/skills/dividend-aristocrat-calculator
+/home/ubuntu/.openclaw/workspace/skills/earnings-analysis
+/home/ubuntu/.openclaw/workspace/skills/earnings-call-search
+/home/ubuntu/.openclaw/workspace/skills/earnings-preview
+/home/ubuntu/.openclaw/workspace/skills/earnings-preview-beta
+/home/ubuntu/.openclaw/workspace/skills/earnings-screener
+/home/ubuntu/.openclaw/workspace/skills/enhanced-trading-advisor-v2
+/home/ubuntu/.openclaw/workspace/skills/equity-research
+/home/ubuntu/.openclaw/workspace/skills/esg-screener
+/home/ubuntu/.openclaw/workspace/skills/event-driven-detector
+/home/ubuntu/.openclaw/workspace/skills/factor-research
+/home/ubuntu/.openclaw/workspace/skills/fed-speech-monitor
+/home/ubuntu/.openclaw/workspace/skills/finance-encyclopedia-search
+/home/ubuntu/.openclaw/workspace/skills/financial-analysis
+/home/ubuntu/.openclaw/workspace/skills/financial-plan
+/home/ubuntu/.openclaw/workspace/skills/financial-statement-analyzer
+/home/ubuntu/.openclaw/workspace/skills/findata-toolkit-us
+/home/ubuntu/.openclaw/workspace/skills/fixed-income-portfolio
+/home/ubuntu/.openclaw/workspace/skills/funding-digest
+/home/ubuntu/.openclaw/workspace/skills/fx-carry-trade
+/home/ubuntu/.openclaw/workspace/skills/gemini
+/home/ubuntu/.openclaw/workspace/skills/github
+/home/ubuntu/.openclaw/workspace/skills/ib-check-deck
+/home/ubuntu/.openclaw/workspace/skills/ic-memo
+/home/ubuntu/.openclaw/workspace/skills/idea-generation
+/home/ubuntu/.openclaw/workspace/skills/image-search
+/home/ubuntu/.openclaw/workspace/skills/index-historical-data
+/home/ubuntu/.openclaw/workspace/skills/index-price-market-data
+/home/ubuntu/.openclaw/workspace/skills/index-technical-indicators
+/home/ubuntu/.openclaw/workspace/skills/index-valuation-dividends
+/home/ubuntu/.openclaw/workspace/skills/initiating-coverage
+/home/ubuntu/.openclaw/workspace/skills/insider-trading-analyzer
+/home/ubuntu/.openclaw/workspace/skills/intraday-pattern-scanner
+/home/ubuntu/.openclaw/workspace/skills/investment-proposal
+/home/ubuntu/.openclaw/workspace/skills/japanese-candlestick-analysis-en
+/home/ubuntu/.openclaw/workspace/skills/lbo-model
+/home/ubuntu/.openclaw/workspace/skills/macro-rates-monitor
+/home/ubuntu/.openclaw/workspace/skills/macro-regime-analyst
+/home/ubuntu/.openclaw/workspace/skills/market-sentiment-pulse
+/home/ubuntu/.openclaw/workspace/skills/mcp-builder
+/home/ubuntu/.openclaw/workspace/skills/merger-model
+/home/ubuntu/.openclaw/workspace/skills/model-update
+/home/ubuntu/.openclaw/workspace/skills/model-usage
+/home/ubuntu/.openclaw/workspace/skills/morning-note
+/home/ubuntu/.openclaw/workspace/skills/news-search
+/home/ubuntu/.openclaw/workspace/skills/news-sentiment
+/home/ubuntu/.openclaw/workspace/skills/onchain-analysis
+/home/ubuntu/.openclaw/workspace/skills/openai-integration
+/home/ubuntu/.openclaw/workspace/skills/option-block-monitor
+/home/ubuntu/.openclaw/workspace/skills/option-vol-analysis
+/home/ubuntu/.openclaw/workspace/skills/options-advanced
+/home/ubuntu/.openclaw/workspace/skills/options-payoff
+/home/ubuntu/.openclaw/workspace/skills/options-strategy
+/home/ubuntu/.openclaw/workspace/skills/pair-trading
+/home/ubuntu/.openclaw/workspace/skills/pine-script
+/home/ubuntu/.openclaw/workspace/skills/pitch-deck
+/home/ubuntu/.openclaw/workspace/skills/portfolio-diagnostic
+/home/ubuntu/.openclaw/workspace/skills/portfolio-health-check
+/home/ubuntu/.openclaw/workspace/skills/portfolio-manager
+/home/ubuntu/.openclaw/workspace/skills/portfolio-monitoring
+/home/ubuntu/.openclaw/workspace/skills/portfolio-optimizer
+/home/ubuntu/.openclaw/workspace/skills/portfolio-rebalance
+/home/ubuntu/.openclaw/workspace/skills/portfolio-risk-manager
+/home/ubuntu/.openclaw/workspace/skills/portfolio-tracker
+/home/ubuntu/.openclaw/workspace/skills/portfolio-watcher
+/home/ubuntu/.openclaw/workspace/skills/ppt-template-creator
+/home/ubuntu/.openclaw/workspace/skills/process-letter
+/home/ubuntu/.openclaw/workspace/skills/quant-analyst
+/home/ubuntu/.openclaw/workspace/skills/quant-factor-screener
+/home/ubuntu/.openclaw/workspace/skills/research-report-search
+/home/ubuntu/.openclaw/workspace/skills/returns-analysis
+/home/ubuntu/.openclaw/workspace/skills/risk-adjusted-return-optimizer
+/home/ubuntu/.openclaw/workspace/skills/sector-overview
+/home/ubuntu/.openclaw/workspace/skills/sector-rotation-detector
+/home/ubuntu/.openclaw/workspace/skills/sentiment-bot
+/home/ubuntu/.openclaw/workspace/skills/sentiment-reality-gap
+/home/ubuntu/.openclaw/workspace/skills/sentiment-score
+/home/ubuntu/.openclaw/workspace/skills/sentiment-tracker
+/home/ubuntu/.openclaw/workspace/skills/session-logs
+/home/ubuntu/.openclaw/workspace/skills/single-asset-backtest
+/home/ubuntu/.openclaw/workspace/skills/small-cap-growth-identifier
+/home/ubuntu/.openclaw/workspace/skills/smc
+/home/ubuntu/.openclaw/workspace/skills/social-sentiment
+/home/ubuntu/.openclaw/workspace/skills/stock-analysis
+/home/ubuntu/.openclaw/workspace/skills/stock-screener
+/home/ubuntu/.openclaw/workspace/skills/suitability-report-generator
+/home/ubuntu/.openclaw/workspace/skills/summarize
+/home/ubuntu/.openclaw/workspace/skills/swap-curve-strategy
+/home/ubuntu/.openclaw/workspace/skills/tax-loss-harvesting
+/home/ubuntu/.openclaw/workspace/skills/tear-sheet
+/home/ubuntu/.openclaw/workspace/skills/teaser
+/home/ubuntu/.openclaw/workspace/skills/tech-hype-vs-fundamentals
+/home/ubuntu/.openclaw/workspace/skills/thesis-tracker
+/home/ubuntu/.openclaw/workspace/skills/ticker-recommender
+/home/ubuntu/.openclaw/workspace/skills/trading
+/home/ubuntu/.openclaw/workspace/skills/trading-analysis
+/home/ubuntu/.openclaw/workspace/skills/trading-brain
+/home/ubuntu/.openclaw/workspace/skills/trading-devbox
+/home/ubuntu/.openclaw/workspace/skills/undervalued-stock-screener
+/home/ubuntu/.openclaw/workspace/skills/unit-economics
+/home/ubuntu/.openclaw/workspace/skills/us-stock-financial-data-query
+/home/ubuntu/.openclaw/workspace/skills/value-creation-plan
+/home/ubuntu/.openclaw/workspace/skills/webhook
+/home/ubuntu/.openclaw/workspace/skills/webhook-integration
+/home/ubuntu/.openclaw/workspace/state
+/home/ubuntu/.openclaw/workspace/state/disciplined
+/home/ubuntu/.openclaw/workspace/state/liquidations
+/home/ubuntu/.openclaw/workspace/state/ohlc_cache
+/home/ubuntu/.openclaw/workspace/state/position_daemon
+/home/ubuntu/.openclaw/workspace/state/tradier_cache
+/home/ubuntu/.openclaw/workspace/todos
+
+=== TOP-LEVEL HOME DIR ===
+total 1098204
+drwxr-x---  49 ubuntu ubuntu       4096 May  6 23:40 .
+drwxr-xr-x   4 root   root         4096 Mar 17 20:48 ..
+drwxrwxr-x   3 ubuntu ubuntu       4096 Apr  2 19:45 .acpx
+drwxrwxr-x   3 ubuntu ubuntu       4096 Mar 26 23:03 .aime-skillhub
+-rw-------   1 ubuntu ubuntu      94789 May  6 23:54 .bash_history
+-rw-r--r--   1 ubuntu ubuntu        220 Jan  6  2022 .bash_logout
+-rw-rw-r--   1 ubuntu ubuntu       6049 Apr 28 23:55 .bashrc
+-rw-rw-r--   1 ubuntu ubuntu       5365 Apr 23 03:01 .bashrc.backup
+drwx------  16 ubuntu ubuntu       4096 May  6 23:40 .cache
+drwxrwxr-x  13 ubuntu ubuntu       4096 May  6 23:40 .claude
+-rw-------   1 ubuntu ubuntu      28089 May  6 23:40 .claude.json
+drwxrwxr-x   8 ubuntu ubuntu       4096 Apr 28 12:07 .codex
+drwxrwxr-x  11 ubuntu ubuntu       4096 Apr  4 18:40 .config
+-rw-------   1 ubuntu ubuntu        201 Apr  6 06:01 .env
+-rw-------   1 ubuntu ubuntu        146 May  6 23:40 .git-credentials
+-rw-rw-r--   1 ubuntu ubuntu        266 Apr  5 17:19 .gitconfig
+-rw-------   1 ubuntu ubuntu         20 May  5 16:37 .lesshst
+drwxrwxr-x   7 ubuntu ubuntu       4096 Apr 14 20:51 .local
+drwxrwxr-x   2 ubuntu ubuntu       4096 Apr 17 21:26 .mission-control
+drwxrwxr-x   2 ubuntu ubuntu       4096 May  4 21:03 .mitmproxy
+drwxrwxr-x   6 ubuntu ubuntu       4096 Apr 14 01:45 .next
+drwxrwxr-x   6 ubuntu ubuntu       4096 Apr  4 03:31 .npm
+drwxrwxr-x   4 ubuntu ubuntu       4096 Mar 19 02:25 .npm-global
+-rw-------   1 ubuntu ubuntu         32 Mar 19 02:24 .npmrc
+drwxrwxr-x   2 ubuntu ubuntu       4096 Apr 23 03:07 .oci
+drwx------  31 ubuntu ubuntu       4096 May  6 20:31 .openclaw
+drwx------   3 ubuntu ubuntu       4096 Apr  8 03:09 .pki
+drwxrwxr-x   5 ubuntu ubuntu       4096 May  6 21:27 .pm2
+-rw-r--r--   1 ubuntu ubuntu        807 Jan  6  2022 .profile
+-rw-rw-r--   1 ubuntu ubuntu         66 Apr  4 17:11 .selected_editor
+drwx------   2 ubuntu ubuntu       4096 Apr 22 20:42 .ssh
+-rw-r--r--   1 ubuntu ubuntu          0 Mar 18 22:00 .sudo_as_admin_successful
+drwxrwxr-x   2 ubuntu ubuntu       4096 Apr 18 01:30 .tokens
+-rw-rw-r--   1 ubuntu ubuntu        165 Apr 17 02:57 .wget-hsts
+-rw-rw-r--   1 ubuntu ubuntu          0 Apr  2 15:34 Accept:
+-rw-rw-r--   1 ubuntu ubuntu       4138 May  6 23:40 CLAUDE.md
+-rw-rw-r--   1 ubuntu ubuntu      32484 Apr  8 01:26 COUPONCLAW_PROJECT_SPEC.md
+-rw-rw-r--   1 ubuntu ubuntu          0 Apr  2 15:34 GET
+-rw-rw-r--   1 ubuntu ubuntu          0 Apr  2 15:34 Host:
+drwxrwxr-x  11 ubuntu ubuntu       4096 Apr 20 02:18 Kronos
+-rw-rw-r--   1 ubuntu ubuntu 1123499349 Apr 22 20:53 UpgradedMC42026-backup-20260422-204818.zip
+-rw-rw-r--   1 ubuntu ubuntu          0 Apr  2 15:34 User-Agent:
+-rw-rw-r--   1 ubuntu ubuntu       6673 Mar 25 23:24 agents-route.ts
+-rw-rw-r--   1 ubuntu ubuntu     296654 Apr  2 16:50 all-skills.md
+-rw-rw-r--   1 ubuntu ubuntu      34549 May  3 18:16 alpaca_transaction_history
+drwxrwxr-x  37 ubuntu ubuntu       4096 May  3 19:21 backup-4.23.2026MCV2
+drwxrwxr-x   2 ubuntu ubuntu       4096 Apr 23 04:03 backups
+drwxrwxr-x   3 ubuntu ubuntu       4096 Apr 23 03:01 bin
+drwxrwxr-x   5 ubuntu ubuntu       4096 May  6 09:34 coupon-claw
+-rw-rw-r--   1 ubuntu ubuntu       5054 Apr 20 13:32 crontab_backup_20260420.txt
+drwxrwxr-x   3 ubuntu ubuntu       4096 Mar 24 16:54 discord-setup
+-rw-rw-r--   1 ubuntu ubuntu          0 Apr  6 16:45 file_map.txt
+drwxrwxr-x   3 ubuntu ubuntu       4096 May  5 23:45 flow-watcher
+-rwxrwxr-x   1 ubuntu ubuntu      14145 Apr 28 02:31 full_recon.sh
+drwxrwxr-x   3 ubuntu ubuntu       4096 Apr  3 23:08 go
+drwxrwxr-x  14 ubuntu ubuntu       4096 Apr  3 23:17 go-trader
+-rw-rw-r--   1 ubuntu ubuntu       8207 Apr  4 03:24 index.html
+drwxrwxr-x   4 ubuntu ubuntu       4096 Apr 17 02:57 jadx
+drwxrwxr-x   3 ubuntu ubuntu       4096 Apr 23 02:59 lib
+drwxrwxr-x   3 ubuntu ubuntu       4096 May  6 22:51 linear-bridge
+drwxrwxr-x   3 ubuntu ubuntu       4096 May  6 22:59 linear-pm2-watcher
+drwxrwxr-x   2 ubuntu ubuntu       4096 Apr 20 04:00 logs
+-rw-rw-r--   1 ubuntu ubuntu         63 Apr 27 14:15 market-alerts-state.json
+drwxrwxr-x  25 ubuntu ubuntu       4096 May  4 17:03 mission-control
+drwxrwxr-x  15 ubuntu ubuntu       4096 Apr 14 20:51 mission-control-official
+drwxrwxr-x  39 ubuntu ubuntu       4096 May  5 04:39 mission-control-restored
+drwxrwxr-x   3 ubuntu ubuntu       4096 Apr 28 02:32 missionctrl-bible-recon
+-rw-rw-r--   1 ubuntu ubuntu        201 Apr  4 20:59 next-env.d.ts
+drwxrwxr-x 155 ubuntu ubuntu       4096 Apr  4 20:58 node_modules
+drwxrwxr-x  13 ubuntu ubuntu       4096 Mar 25 01:42 openclaw-office
+-rw-rw-r--   1 ubuntu ubuntu       9290 Apr 20 20:56 options_checklist_fix.py
+-rw-rw-r--   1 ubuntu ubuntu        674 Apr  3 02:26 package.json
+drwxrwxr-x   2 ubuntu ubuntu       4096 Apr 28 02:32 recon-dump
+drwxrwxr-x  48 ubuntu ubuntu      12288 May  7 00:30 scripts
+drwxrwxr-x   2 ubuntu ubuntu       4096 Apr 22 04:36 skillhub_cache
+drwxrwxr-x   4 ubuntu ubuntu       4096 Apr 22 03:15 skills-backups
+drwxrwxr-x  19 ubuntu ubuntu       4096 Apr 21 22:46 skills-rewrites-v2
+-rw-rw-r--   1 ubuntu ubuntu      98727 Apr 21 22:36 skills-rewrites-v2.zip
+drwxrwxr-x   3 ubuntu ubuntu       4096 Apr 22 02:20 skills-v3
+-rw-rw-r--   1 ubuntu ubuntu      32018 Apr 22 02:16 skills-v3.zip
+drwxrwxr-x   5 ubuntu ubuntu       4096 Mar 23 05:16 src
+-rw-rw-r--   1 ubuntu ubuntu        363 Mar 23 05:14 tailwind.config.ts
+drwxrwxr-x   3 ubuntu ubuntu       4096 Apr  3 23:07 tools
+-rw-rw-r--   1 ubuntu ubuntu        538 Mar 23 05:14 tsconfig.json
+-rw-rw-r--   1 ubuntu ubuntu      11217 Apr 20 21:18 update_options_final.py
+-rw-rw-r--   1 ubuntu ubuntu      20854 Apr 20 16:00 update_options_page.py
+-rw-rw-r--   1 ubuntu ubuntu      17387 Apr 20 16:09 update_options_v2.py
+-rw-rw-r--   1 ubuntu ubuntu      17521 Apr 20 21:32 update_options_v3.py
+drwxrwxr-x   9 ubuntu ubuntu       4096 Apr  3 14:52 web-search-mcp
