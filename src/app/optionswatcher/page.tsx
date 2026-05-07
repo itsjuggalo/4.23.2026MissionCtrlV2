@@ -1,8 +1,8 @@
-'use client';
 import dynamic from 'next/dynamic';
 
+// Server-component wrapper that mounts AppShellClient client-side only
 const AppShellClient = dynamic(
-  () => import('@/components/layout/AppShellClient').then(m => m.default ?? m),
+  () => import('@/components/layout/AppShellClient'),
   { ssr: false }
 );
 
