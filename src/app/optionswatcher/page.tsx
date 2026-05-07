@@ -1,6 +1,10 @@
-import AppShellClient from '@/components/layout/AppShellClient';
+'use client';
+import dynamic from 'next/dynamic';
 
-export const dynamic = 'force-dynamic';
+const AppShellClient = dynamic(
+  () => import('@/components/layout/AppShellClient').then(m => m.default ?? m),
+  { ssr: false }
+);
 
 export default function Page() {
   return <AppShellClient initialPage="OptionsWatcher" />;
