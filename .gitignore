@@ -6,3 +6,12 @@ __pycache__/
 *.session
 *.apk
 *.apk
+
+# Sentry Config File
+.env.sentry-build-plugin
+
+# Local secrets and state (added by sentry setup)
+.openclaw/
+data/*.json
+Option-Signals-Scraper/sent_ids.json
+memory/memories.json
