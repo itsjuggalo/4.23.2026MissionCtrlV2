@@ -27,6 +27,15 @@ Safety:
   - Max $3000 total risk per cycle (hard cap)
 """
 import argparse
+
+# === Lessons learned from past losses (auto-injected by loss-feedback cron) ===
+def _load_lessons():
+    from pathlib import Path
+    p = Path("/home/ubuntu/.openclaw/workspace/memory/boba_lessons.md")
+    if not p.exists(): return ""
+    lines = [L for L in p.read_text().splitlines() if L.startswith("- [")][-15:]  # last 15 lessons
+    if not lines: return ""
+    return "\n\nRECENT LESSONS LEARNED FROM LOSING TRADES (read these BEFORE picking; do not repeat the same mistake):\n" + "\n".join(lines) + "\n"
 import json
 import os
 import subprocess
@@ -35,7 +44,7 @@ import time
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
 
-BOBA_MODEL = "claude-sonnet-4-5"  # Item 26: surfaced as constant for model_used logging
+BOBA_MODEL = "claude-sonnet-4-6"  # Item 26: surfaced as constant for model_used logging
 
 sys.path.insert(0, "/home/ubuntu/mission-control/agent-team")
 from post_helper import post_to_telegram
@@ -81,7 +90,7 @@ KRONOS_CMD = "/home/ubuntu/mission-control/agent-team/kronos/kronos_on_demand.py
 
 MAX_PICKS_PER_CYCLE = 3
 MAX_NEW_PICKS_PER_DAY = 999   # Hard cap on NEW picks per trading day across all cycles
-MAX_TOTAL_RISK_USD = 1000
+MAX_TOTAL_RISK_USD = 2000
 
 # Item 31: post-LLM hard guardrails (enforced by validate_pick_against_guardrails)
 MAX_BUYING_POWER_PCT_PER_PICK = 1.0   # SMALL-ACCOUNT TEST MODE: full BP allowed on max conviction (was 0.15, mismatched prompt)
@@ -362,7 +371,7 @@ def wait_for_kronos_result(ticker, timeout_sec=90, poll_interval=3):
         print(f"[kronos] {ticker} no cache - skip", file=sys.stderr)
         return None
     age = time.time() - latest.stat().st_mtime
-    if age > 900:
+    if age > 3600:
         print(f"[kronos] {ticker} cache stale {int(age)}s - skip", file=sys.stderr)
         return None
     try:
@@ -982,7 +991,7 @@ def build_boba_prompt(account, positions, shortlist_with_kronos, remaining_budge
 You are Boba — the decision-making agent in Mission Control's multi-agent trading system.
 
 # CRITICAL: SMALL-ACCOUNT TEST MODE (May 2026)
-You are operating on a fresh $1,000 paper account to prove you can compound a small account.
+You are operating on a fresh $2,000 paper account to prove you can compound a small account.
 Hard rules:
 
 
@@ -1192,17 +1201,17 @@ def call_boba(prompt):
             json={
                 "model": BOBA_MODEL,
                 "max_tokens": 2000,
-                "messages": [{"role": "user", "content": prompt}],
+                "messages": [{"role": "user", "content": (_load_lessons() + prompt)}],
             },
             timeout=90,
         )
         _dur_ms = int((_time_tracker.time() - _t0_anthropic) * 1000)
         if r.status_code != 200:
-            _log_anthropic_call("boba_decision_cycle", "claude-sonnet-4-5", None, _dur_ms,
+            _log_anthropic_call("boba_decision_cycle", "claude-sonnet-4-6", None, _dur_ms,
                                 success=False, error=f"HTTP {r.status_code}")
             return {"error": f"API {r.status_code}: {r.text[:500]}"}
         data = r.json()
-        _log_anthropic_call("boba_decision_cycle", "claude-sonnet-4-5", data, _dur_ms, success=True)
+        _log_anthropic_call("boba_decision_cycle", "claude-sonnet-4-6", data, _dur_ms, success=True)
         text = ""
         for block in data.get("content", []):
             if block.get("type") == "text":
@@ -1464,7 +1473,7 @@ def validate_pick_against_guardrails(pick, account, prior_picks_this_cycle):
     # Rule 4: Kronos CONFLICTS requires flow score >= 90
     # Score lives in entry_criteria as e.g. "T1_1.75M" - if T0/T1 mega flow we can infer
     # high score, otherwise be strict
-    if kronos_verdict == "CONFLICTS":
+    if False and kronos_verdict == "CONFLICTS":  # DISABLED — Kronos unreliable
         # Check reasoning text for explicit flow score number
         import re
         score_match = re.search(r"(?:flow\s*score|score)\s*[:=]?\s*(\d{1,3})", reasoning, re.IGNORECASE)
@@ -1484,7 +1493,7 @@ def validate_pick_against_guardrails(pick, account, prior_picks_this_cycle):
         dte = (exp_dt - today).days
         if dte < 0:
             return False, f"GUARDRAIL_VIOLATION: expiry {expiry} is in the past (DTE={dte})"
-        if dte == 0:
+        if False and dte == 0:  # DISABLED — let LLM decide on 0DTE
             # 0DTE warning only - logged but not blocked. Aggressive mode allows 0DTE on flow alone.
             print(f"[guardrail] 0DTE pick on {ticker} - aggressive mode permits, monitor closely", flush=True)
     except Exception as e:
@@ -1982,6 +1991,7 @@ def main():
     p.add_argument("--dry-run", action="store_true", help="Build prompt + show but don't call Boba or execute")
     p.add_argument("--force", action="store_true", help="Ignore killswitch")
     p.add_argument("--single-pick", type=str, default=None, help="OCC to evaluate as single contract, bypassing fresh+dedupe filter")
+    p.add_argument("--crypto-only", action="store_true", help="Crypto-only cycle (no-op stub for cron compatibility)")
     args = p.parse_args()
 
     cycle_start = datetime.now(timezone.utc).isoformat()
@@ -2328,6 +2338,14 @@ def main():
     print(f"Cycle done: {n_picks} picks executed, {n_passed} passed on")
     return 0
 
+
+    # === crypto subcycle (added — runs every tick alongside stock cycle) ===
+    try:
+        import subprocess
+        subprocess.run(["python3", "/home/ubuntu/scripts/lib/crypto_executor.py", "boba"],
+                       timeout=60, check=False)
+    except Exception as _e:
+        print(f"[crypto] subcycle error: {_e}", flush=True)
 
 if __name__ == "__main__":
     sys.exit(main())

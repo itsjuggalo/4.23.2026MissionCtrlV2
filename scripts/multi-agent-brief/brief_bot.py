@@ -104,7 +104,7 @@ OUTPUT — Discord embed-friendly:
 - 3-4 labeled bullet sections
 - End: TODAY'S TOP TRADE IDEA — ticker, direction, conviction (or "no setup")
 - Max 1500 chars total. All numbers when possible. No fluff."""
-    msg = client.messages.create(model="claude-sonnet-4-6", max_tokens=2000,
+    msg = client.messages.create(model="claude-haiku-4-5-20251001", max_tokens=2000,
                                   messages=[{"role":"user","content":prompt}])
     return msg.content[0].text
 

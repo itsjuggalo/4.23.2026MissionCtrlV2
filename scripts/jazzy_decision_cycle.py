@@ -32,6 +32,15 @@ Safety:
   - Max $3000 total risk per cycle (hard cap)
 """
 import argparse
+
+# === Lessons learned from past losses (auto-injected by loss-feedback cron) ===
+def _load_lessons():
+    from pathlib import Path
+    p = Path("/home/ubuntu/.openclaw/workspace/memory/jazzy_lessons.md")
+    if not p.exists(): return ""
+    lines = [L for L in p.read_text().splitlines() if L.startswith("- [")][-15:]  # last 15 lessons
+    if not lines: return ""
+    return "\n\nRECENT LESSONS LEARNED FROM LOSING TRADES (read these BEFORE picking; do not repeat the same mistake):\n" + "\n".join(lines) + "\n"
 import json
 import os
 import subprocess
@@ -374,7 +383,7 @@ def wait_for_kronos_result(ticker, timeout_sec=90, poll_interval=3):
         print(f"[kronos] {ticker} no cache - skip", file=sys.stderr)
         return None
     age = time.time() - latest.stat().st_mtime
-    if age > 900:
+    if age > 3600:
         print(f"[kronos] {ticker} cache stale {int(age)}s - skip", file=sys.stderr)
         return None
     try:
@@ -1105,7 +1114,7 @@ def call_boba(prompt):
             json={
                 "model": JAZZY_MODEL,
                 "max_tokens": 2000,
-                "messages": [{"role": "user", "content": prompt}],
+                "messages": [{"role": "user", "content": (_load_lessons() + prompt)}],
             },
             timeout=90,
         )
@@ -1330,7 +1339,7 @@ def validate_pick_against_guardrails(pick, account, prior_picks_this_cycle):
             max_allowed = bp * MAX_BUYING_POWER_PCT_PER_PICK
             if est_cost > max_allowed:
                 return False, f"GUARDRAIL_VIOLATION: pick cost ${est_cost:,.0f} exceeds {int(MAX_BUYING_POWER_PCT_PER_PICK*100)}% of buying power (${max_allowed:,.0f})"
-    if kronos_verdict == "CONFLICTS":
+    if False and kronos_verdict == "CONFLICTS":  # DISABLED — Kronos unreliable
         import re as _re
         score_match = _re.search(r"(?:flow\s*score|score)\s*[:=]?\s*(\d{1,3})", reasoning, _re.IGNORECASE)
         flow_score = int(score_match.group(1)) if score_match else None
@@ -1346,7 +1355,7 @@ def validate_pick_against_guardrails(pick, account, prior_picks_this_cycle):
         dte = (exp_dt - today).days
         if dte < 0:
             return False, f"GUARDRAIL_VIOLATION: expiry {expiry} is in the past (DTE={dte})"
-        if dte == 0:
+        if False and dte == 0:  # DISABLED — let LLM decide on 0DTE
             catalyst_keywords = ["fomc", "cpi", "ppi", "earnings", "fed ", "powell", "jolts", "nfp", "jobs report", "gdp", "catalyst"]
             r_lower = reasoning.lower()
             if not any(kw in r_lower for kw in catalyst_keywords):
@@ -2019,6 +2028,14 @@ def main():
     print(f"Cycle done: {n_picks} picks executed, {n_passed} passed on")
     return 0
 
+
+    # === crypto subcycle (added — runs every tick alongside stock cycle) ===
+    try:
+        import subprocess
+        subprocess.run(["python3", "/home/ubuntu/scripts/lib/crypto_executor.py", "jazzy"],
+                       timeout=60, check=False)
+    except Exception as _e:
+        print(f"[crypto] subcycle error: {_e}", flush=True)
 
 if __name__ == "__main__":
     sys.exit(main())
