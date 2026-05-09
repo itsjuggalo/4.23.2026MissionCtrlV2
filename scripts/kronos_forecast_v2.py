@@ -141,7 +141,7 @@ def run_kronos_inference(df: pd.DataFrame, ticker: str) -> tuple:
     print("[kronos] Loading model...")
     t0 = time.time()
     tokenizer = KronosTokenizer.from_pretrained("NeoQuasar/Kronos-Tokenizer-base")
-    model = Kronos.from_pretrained("NeoQuasar/Kronos-small")
+    model = Kronos.from_pretrained(f"NeoQuasar/Kronos-{args.model}")
     predictor = KronosPredictor(model, tokenizer, device="cpu", max_context=512)
     print(f"[kronos] Model loaded in {time.time()-t0:.1f}s")
 
@@ -207,7 +207,7 @@ def build_forecast_json(ticker: str, pred: pd.DataFrame, y_ts, current_price: fl
         "forecast_24h_high": pred_high,
         "forecast_24h_low": pred_low,
         "forecast_range_pct": round((pred_high - pred_low) / current_price * 100, 2),
-        "model": "Kronos-small",
+        "model": f"Kronos-{args.model}",
         "sample_paths": SAMPLE_COUNT,
         "hourly_predictions": [
             {
@@ -261,7 +261,7 @@ def post_to_discord(forecast: dict):
             "title": title,
             "description": "\n".join(desc),
             "color": color,
-            "footer": {"text": f"Kronos-small • {forecast['candles_analyzed']} candles • {datetime.now(timezone.utc).strftime('%H:%M UTC')}"},
+            "footer": {"text": f"Kronos-{args.model} • {forecast['candles_analyzed']} candles • {datetime.now(timezone.utc).strftime('%H:%M UTC')}"},
         }]
     }
     try:
@@ -275,6 +275,7 @@ def post_to_discord(forecast: dict):
 def main():
     p = argparse.ArgumentParser()
     p.add_argument("--ticker", required=True, help="e.g. NVDA, QQQ, BTC")
+    p.add_argument("--model", default="small", choices=["mini","small","base","large"], help="Kronos model variant")
     p.add_argument("--option-context", default="", help="e.g. '648C 05/15/26'")
     p.add_argument("--candles", type=int, default=400)
     p.add_argument("--no-discord", action="store_true")
