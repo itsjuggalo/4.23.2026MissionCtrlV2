@@ -278,6 +278,7 @@ def main():
     p = argparse.ArgumentParser()
     p.add_argument("--ticker", required=True, help="e.g. NVDA, QQQ, BTC")
     p.add_argument("--model", default="small", choices=["mini","small","base","large"], help="Kronos model variant")
+    p.add_argument("--no-disk", action="store_true", help="Skip writing forecast JSON to disk; only print to stdout")
     p.add_argument("--option-context", default="", help="e.g. '648C 05/15/26'")
     p.add_argument("--candles", type=int, default=400)
     p.add_argument("--no-discord", action="store_true")
