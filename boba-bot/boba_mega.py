@@ -43,7 +43,7 @@ RELAY_DATA = Path.home() / "mission-control-restored" / "Option-Signals-Scraper"
 ANTHROPIC_KEY = (SECRETS / "anthropic_api_key").read_text().strip()
 GROK_KEY_FILE = SECRETS / "xai_api_key"
 GROK_KEY = GROK_KEY_FILE.read_text().strip() if GROK_KEY_FILE.exists() else None
-ANTHROPIC_MODEL = "claude-sonnet-4-6"
+ANTHROPIC_MODEL = "claude-haiku-4-5-20251001"
 
 
 def _fmt_prem(v):
@@ -866,7 +866,7 @@ async def boba_help(interaction: discord.Interaction):
         "• `/boba_help` — this menu\n"
         "\n"
         "**Text commands:**\n"
-        "• `!boba <question>` — Q&A via Anthropic claude-sonnet-4-6\n"
+        "• `!boba <question>` — Q&A via Anthropic claude-haiku-4-5-20251001\n"
         "• `!arm` — switch /trade to LIVE mode for 15 min\n"
         "• `!disarm` — back to PAPER\n"
         "• `!armstatus` — check current mode\n"
