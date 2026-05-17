@@ -45,6 +45,7 @@ JAZZY_MODEL = "gpt-4o-mini"  # Item 26: surfaced as constant for model_used logg
 sys.path.insert(0, "/home/ubuntu/mission-control/agent-team")
 from post_helper import post_to_telegram
 from ops_log import log_to_ops
+import firebase_signals
 
 # Multi-agent debate posting (optional — gracefully degrades if lib missing)
 try:
@@ -66,7 +67,6 @@ KILLSWITCH = STATE_DIR / "jazzy_killswitch"
 DECISIONS_LOG = Path("/home/ubuntu/.openclaw/workspace/skill_outputs/jazzy_decisions_validated.json")
 DECISIONS_LOG.parent.mkdir(parents=True, exist_ok=True)
 SIDECAR = Path("/home/ubuntu/mission-control/signal-receiver/data/scored_signals_recent.json")
-FIREBASE_FEED = Path("/home/ubuntu/.openclaw/workspace/directives/firebase_trade_signals.json")
 
 # Tradier live options quotes (bid/ask/IV/greeks) for informed contract selection
 sys.path.insert(0, "/home/ubuntu/scripts/lib")
@@ -134,16 +134,6 @@ def load_seen():
 
 def save_seen(seen):
     SEEN_FILE.write_text(json.dumps(list(seen)))
-
-
-def load_firebase_signals():
-    """Load Firebase Name/Name2/Vivid trade signals (last 50)."""
-    if not FIREBASE_FEED.exists():
-        return []
-    try:
-        return json.loads(FIREBASE_FEED.read_text())
-    except Exception:
-        return []
 
 
 def load_sidecar():
@@ -398,42 +388,6 @@ def fetch_live_option_quote(ticker, strike, option_type, expiry):
         }
     except Exception:
         return None
-
-
-def format_firebase_signals_for_prompt(signals, max_show=20):
-    """Format last N Firebase trade signals (Name/Name2/Vivid) into prompt-ready text."""
-    if not signals:
-        return "  (no recent provider trade signals)"
-    # Most recent first, cap at max_show
-    recent = sorted(signals, key=lambda x: x.get("captured_at", ""), reverse=True)[:max_show]
-    lines = []
-    for s in recent:
-        side = "PUT" if s.get("is_put") else "CALL"
-        cat = s.get("category", "?")
-        ticker = s.get("ticker", "?")
-        strike = s.get("strike", "?")
-        buy = s.get("buy_target", "?")
-        sell = s.get("sell_target", "?")
-        sl = s.get("stop_loss", "?")
-        source = s.get("source", "?")
-        risk = s.get("risk") or "?"
-        is_free = s.get("is_free", False)
-        free_tag = "FREE" if is_free else "PREMIUM"
-        # Convert expiry timestamp to MM/DD if available
-        exp_str = "?"
-        ts = s.get("expiry_ts")
-        if ts:
-            try:
-                from datetime import datetime as _dt
-                exp_str = _dt.fromtimestamp(int(ts)).strftime("%m/%d")
-            except Exception:
-                pass
-        lines.append(
-            f"  - [{source}] {cat}: {ticker} ${strike} {side} exp {exp_str} | "
-            f"Entry ${buy} → Target ${sell} | SL ${sl} | Risk: {risk} | {free_tag}"
-        )
-    return "\n".join(lines)
-
 
 
 # === UNUSUAL FLOW PRIORITY RULE (memory #12) ===
@@ -795,7 +749,7 @@ def build_boba_prompt(account, positions, shortlist_with_kronos, remaining_budge
             elif agree is False:
                 shortlist_text += f"  → Kronos CONFLICTS with option thesis ❌\n"
 
-    firebase_signals_text = format_firebase_signals_for_prompt(load_firebase_signals(), max_show=20)
+    firebase_signals_text = firebase_signals.format_for_prompt(firebase_signals.load_signals(), max_show=20)
     best_options_text = load_best_options(max_show=15, min_premium=1_000_000) or ""
     ticker_rollup_text = load_ticker_rollup(min_total=10_000_000, max_show=10) or ""
     platinum_flow_text = load_platinum_flow(max_show=5) or ""
