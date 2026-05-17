@@ -1179,55 +1179,47 @@ Respond with ONLY the JSON. No preamble, no markdown fences.
 
 
 def call_boba(prompt):
-    """Call Claude Sonnet with the prompt."""
-    try:
-        import requests
-    except ImportError:
-        return {"error": "requests not installed"}
+    """Call Claude Sonnet via CLI subprocess."""
+    CLAUDE_BIN = "/home/ubuntu/.npm-global/bin/claude"
+    full_prompt = _load_lessons() + prompt
 
-    api_key = get_anthropic_key()
-    if not api_key:
-        return {"error": "no anthropic key"}
-
-    _t0_anthropic = _time_tracker.time()
+    _t0 = _time_tracker.time()
     try:
-        r = requests.post(
-            "https://api.anthropic.com/v1/messages",
-            headers={
-                "x-api-key": api_key,
-                "anthropic-version": "2023-06-01",
-                "content-type": "application/json",
-            },
-            json={
-                "model": BOBA_MODEL,
-                "max_tokens": 2000,
-                "messages": [{"role": "user", "content": (_load_lessons() + prompt)}],
-            },
-            timeout=90,
+        result = subprocess.run(
+            [CLAUDE_BIN, "-p", "--model", "sonnet", "--output-format", "text",
+             "--no-session-persistence", "--tools", ""],
+            input=full_prompt,
+            capture_output=True,
+            text=True,
+            timeout=120,
         )
-        _dur_ms = int((_time_tracker.time() - _t0_anthropic) * 1000)
-        if r.status_code != 200:
+        _dur_ms = int((_time_tracker.time() - _t0) * 1000)
+
+        if result.returncode != 0:
             _log_anthropic_call("boba_decision_cycle", "claude-sonnet-4-6", None, _dur_ms,
-                                success=False, error=f"HTTP {r.status_code}")
-            return {"error": f"API {r.status_code}: {r.text[:500]}"}
-        data = r.json()
-        _log_anthropic_call("boba_decision_cycle", "claude-sonnet-4-6", data, _dur_ms, success=True)
-        text = ""
-        for block in data.get("content", []):
-            if block.get("type") == "text":
-                text += block.get("text", "")
-        # Parse JSON from response
-        text = text.strip()
-        if text.startswith("```"):
-            text = text.split("```")[1]
-            if text.startswith("json"):
-                text = text[4:]
+                                success=False, error=f"CLI exit {result.returncode}")
+            return {"error": f"CLI exit {result.returncode}: {result.stderr[:500]}"}
+
+        _log_anthropic_call("boba_decision_cycle", "claude-sonnet-4-6", None, _dur_ms, success=True)
+
+        text = result.stdout.strip()
+        # Extract JSON object: slice from first { to last }
+        brace_start = text.find("{")
+        brace_end = text.rfind("}")
+        if brace_start >= 0 and brace_end > brace_start:
+            text = text[brace_start:brace_end + 1]
         try:
-            return {"ok": True, "response": json.loads(text.strip()), "usage": data.get("usage", {})}
+            return {"ok": True, "response": json.loads(text), "usage": {}}
         except Exception as e:
             return {"error": f"JSON parse failed: {e}", "raw": text[:2000]}
+
+    except subprocess.TimeoutExpired:
+        _dur_ms = int((_time_tracker.time() - _t0) * 1000)
+        _log_anthropic_call("boba_decision_cycle", "claude-sonnet-4-6", None, _dur_ms,
+                            success=False, error="timeout 120s")
+        return {"error": "CLI timeout (120s)"}
     except Exception as e:
-        return {"error": f"API call failed: {e}"}
+        return {"error": f"CLI call failed: {e}"}
 
 
 def convert_spx_to_spy(pick):
