@@ -1,5 +1,6 @@
 "use client";
 import { Component, ReactNode } from "react";
+import * as Sentry from "@sentry/nextjs";
 
 interface Props { children: ReactNode; pageName?: string; }
 interface State { hasError: boolean; error?: Error; }
@@ -13,6 +14,10 @@ export default class PageErrorBoundary extends Component<Props, State> {
 
   componentDidCatch(error: Error, info: any) {
     console.error("PageErrorBoundary caught:", error, info);
+    Sentry.captureException(error, {
+      tags: { errorBoundary: "PageErrorBoundary", page: this.props.pageName ?? "unknown" },
+      extra: { componentStack: info?.componentStack },
+    });
   }
 
   reset = () => this.setState({ hasError: false, error: undefined });

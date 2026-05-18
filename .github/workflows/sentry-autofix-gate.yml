@@ -1,0 +1,89 @@
+name: Sentry Autofix Gate
+
+# Gates Sentry / Seer autofix PRs.
+#   UI-only changes        -> auto-merge (after required checks pass)
+#   API / scripts / config / trade-execution changes -> labelled for human review
+#
+# The denylist below is intentionally conservative: a trading app, so anything
+# that smells like data, execution, or money routes to a human. Tune the
+# grep patterns in the "Classify" step if it is too strict.
+
+on:
+  pull_request:
+    types: [opened, reopened, synchronize]
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  gate:
+    runs-on: ubuntu-latest
+    # Only act on Sentry / Seer-authored PRs. If your Seer PRs come through
+    # under a different bot login or branch prefix, add it here.
+    if: >-
+      contains(github.event.pull_request.user.login, 'seer') ||
+      contains(github.event.pull_request.user.login, 'sentry') ||
+      startsWith(github.event.pull_request.head.ref, 'seer/') ||
+      startsWith(github.event.pull_request.head.ref, 'sentry-autofix/') ||
+      startsWith(github.event.pull_request.head.ref, 'autofix/')
+    steps:
+      - name: Ensure labels exist
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh label create "auto-merge-ui-fix" --repo "$GITHUB_REPOSITORY" \
+            --color 0e8a16 --description "Sentry UI-only autofix, auto-merged" 2>/dev/null || true
+          gh label create "needs-human-review" --repo "$GITHUB_REPOSITORY" \
+            --color b60205 --description "Sentry autofix touching non-UI code" 2>/dev/null || true
+
+      - name: Get changed files
+        env:
+          GH_TOKEN: ${{ github.token }}
+          PR: ${{ github.event.pull_request.number }}
+        run: |
+          gh pr diff "$PR" --repo "$GITHUB_REPOSITORY" --name-only > changed.txt
+          echo "--- changed files ---"; cat changed.txt
+
+      - name: Classify UI-only vs needs-review
+        id: classify
+        run: |
+          ui_only=true
+          while IFS= read -r f; do
+            [ -z "$f" ] && continue
+            # DENY: API routes, python scripts, config files, anything touching
+            # data / orders / execution / risk / wallets / money.
+            if echo "$f" | grep -qiE '^src/app/api/|^scripts/|\.config\.|trade|order|execution|risk|wallet|portfolio'; then
+              echo "non-UI : $f"; ui_only=false; continue
+            fi
+            # ALLOW: display components, page/layout files, stylesheets.
+            if echo "$f" | grep -qE '^src/components/|^src/app/.*/page\.tsx$|^src/app/.*/layout\.tsx$|\.css$'; then
+              echo "ui     : $f"; continue
+            fi
+            # Anything else is not clearly UI -> route to review.
+            echo "unknown: $f"; ui_only=false
+          done < changed.txt
+          echo "ui_only=$ui_only" >> "$GITHUB_OUTPUT"
+          echo "Result: ui_only=$ui_only"
+
+      - name: Auto-merge UI-only fix
+        if: steps.classify.outputs.ui_only == 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          PR: ${{ github.event.pull_request.number }}
+        run: |
+          gh pr edit "$PR" --repo "$GITHUB_REPOSITORY" --add-label "auto-merge-ui-fix"
+          # --auto waits for required status checks (the build) before merging.
+          gh pr merge "$PR" --repo "$GITHUB_REPOSITORY" --auto --squash
+          echo "UI-only Sentry fix: auto-merge enabled (merges once checks pass)."
+
+      - name: Flag non-UI fix for human review
+        if: steps.classify.outputs.ui_only != 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          PR: ${{ github.event.pull_request.number }}
+        run: |
+          gh pr edit "$PR" --repo "$GITHUB_REPOSITORY" --add-label "needs-human-review"
+          gh pr comment "$PR" --repo "$GITHUB_REPOSITORY" --body \
+            "Sentry autofix gate: this PR changes API / scripts / config / trade-execution code. Auto-merge is **blocked** — review required before merging."
+          echo "Non-UI Sentry fix: labelled needs-human-review."
