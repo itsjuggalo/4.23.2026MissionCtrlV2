@@ -1,11 +1,13 @@
 import { NextResponse } from 'next/server';
 import { readFile } from 'fs/promises';
+import { proxyToServeftp } from "../../../lib/proxyToServeftp";
 
 export const dynamic = 'force-dynamic';
 
 const DATA_DIR = '/home/ubuntu/mission-control/signal-receiver/data';
 
-export async function GET() {
+export async function GET(request: Request) {
+  const __proxied = await proxyToServeftp(request); if (__proxied) return __proxied;
   try {
     const data = JSON.parse(await readFile(`${DATA_DIR}/market_regime.json`, 'utf-8'));
     return NextResponse.json(data);

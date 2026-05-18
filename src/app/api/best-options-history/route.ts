@@ -1,6 +1,7 @@
-import { NextResponse } from 'next/server';
+import {NextResponse, NextRequest } from 'next/server';
 import { promises as fs } from 'fs';
 import path from 'path';
+import { proxyToServeftp } from "../../../lib/proxyToServeftp";
 
 export const dynamic = 'force-dynamic';
 const DATA_DIR = '/home/ubuntu/.openclaw/data/best-options';
@@ -12,6 +13,7 @@ function todayET(): string {
 }
 
 export async function GET(req: Request) {
+  const __proxied = await proxyToServeftp(req); if (__proxied) return __proxied;
   const url = new URL(req.url);
   const date = url.searchParams.get('date') || todayET();
   const tier = url.searchParams.get('tier');

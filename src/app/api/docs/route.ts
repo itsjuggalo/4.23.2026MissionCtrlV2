@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { readdirSync, statSync, readFileSync } from 'fs';
 import { join, relative, extname, basename } from 'path';
+import { proxyToServeftp } from "../../../lib/proxyToServeftp";
 
 const WORKSPACE = join(process.env.HOME || '/home/ubuntu', '.openclaw/workspace');
 

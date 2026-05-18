@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { readFile } from 'fs/promises';
+import { proxyToServeftp } from "../../../lib/proxyToServeftp";
 
 export const dynamic = 'force-dynamic';
 
@@ -15,6 +16,7 @@ async function safeRead(path: string) {
 }
 
 export async function GET(req: NextRequest) {
+  const __proxied = await proxyToServeftp(req); if (__proxied) return __proxied;
   const { searchParams } = new URL(req.url);
   const type = searchParams.get('type') || 'params';
 

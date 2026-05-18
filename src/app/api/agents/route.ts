@@ -3,6 +3,7 @@ import { exec } from 'child_process';
 import { promisify } from 'util';
 import { readFile } from 'fs/promises';
 import path from 'path';
+import { proxyToServeftp } from "../../../lib/proxyToServeftp";
 
 const execAsync = promisify(exec);
 
@@ -22,7 +23,7 @@ const AGENT_DEFINITIONS = {
   'counter-intel': { name: 'Counter-Intelligence', tier: 5, role: 'Strategy Protection & ML', dna: '', emoji: '🛡️', specialty: 'Security & ML' },
   'codex-expert': { name: 'Codex Expert', tier: 5, role: 'System Health & Auto-Fix', dna: '', emoji: '🤖', specialty: 'System health' },
   'btc-bias-scorer': { name: 'BTC Bias Scorer', tier: 1, role: 'Bitcoin Directional Bias', dna: '', emoji: '₿', specialty: 'BTC bias scoring', isCron: true },
-  'tweak': { name: 'Tweak', tier: 3, role: 'Trading Bot', dna: '', emoji: '🎯', specialty: 'Automated trading' },
+  'tweak': { name: 'Boba', tier: 3, role: 'Trading Bot', dna: '', emoji: '🎯', specialty: 'Automated trading' },
   'mission-control': { name: 'Mission Control', tier: 5, role: 'Dashboard & UI', dna: '', emoji: '🖥️', specialty: 'Web dashboard' },
 };
 
@@ -39,7 +40,8 @@ async function getLastLogLine(name: string): Promise<string> {
   }
 }
 
-export async function GET() {
+export async function GET(request: Request) {
+  const __proxied = await proxyToServeftp(request); if (__proxied) return __proxied;
   try {
     const { stdout } = await execAsync('pm2 jlist', { timeout: 10000 });
     const procs: Array<Record<string, unknown>> = JSON.parse(stdout);

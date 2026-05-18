@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import fs from "fs";
 import path from "path";
 import os from "os";
+import { proxyToServeftp } from "../../../lib/proxyToServeftp";
 
 const CALENDAR_FILE = path.join(os.homedir(), "mission-control-restored", "data", "calendar_events.json");
 
@@ -23,6 +24,7 @@ interface CalendarData {
 }
 
 export async function GET(request: Request) {
+  const __proxied = await proxyToServeftp(request); if (__proxied) return __proxied;
   try {
     const { searchParams } = new URL(request.url);
     const month = searchParams.get("month"); // YYYY-MM

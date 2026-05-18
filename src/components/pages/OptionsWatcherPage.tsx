@@ -1,4 +1,6 @@
 'use client';
+// MC_WATCHER_GUARD
+if (typeof window !== 'undefined') { window.addEventListener('unhandledrejection', (e) => { console.warn('[OptionsWatcher]', e.reason); e.preventDefault(); }); }
 import { useState, useEffect, useRef, useMemo } from 'react';
 
 // ── TYPES ──
@@ -16,9 +18,9 @@ type FilterType = 'both' | 'call' | 'put';
 type MoneynessType = 'both' | 'itm' | 'otm';
 
 // ── HELPERS ──
-const fmtVal = (n: number) => n >= 1e6 ? `$${(n/1e6).toFixed(1)}M` : n >= 1e3 ? `$${(n/1e3).toFixed(0)}K` : `$${n}`;
-const fmtPct = (n: number) => `${n >= 0 ? '+' : ''}${n.toFixed(2)}%`;
-const fmtPrice = (n: number) => n >= 1000 ? `$${n.toFixed(2)}` : n >= 1 ? `$${n.toFixed(2)}` : `$${n.toFixed(4)}`;
+const fmtVal = (n: number | null | undefined) => { if (n == null || !isFinite(n)) return '-'; return n >= 1e6 ? `$${(n/1e6).toFixed(1)}M` : n >= 1e3 ? `$${(n/1e3).toFixed(0)}K` : `$${n}`; };
+const fmtPct = (n: number | null | undefined) => { if (n == null || !isFinite(n)) return '-'; return `${n >= 0 ? '+' : ''}${(n ?? 0).toFixed(2)}%`; };
+const fmtPrice = (n: number | null | undefined) => { if (n == null || !isFinite(n)) return '-'; return n >= 1000 ? `$${(n ?? 0).toFixed(2)}` : n >= 1 ? `$${(n ?? 0).toFixed(2)}` : `$${(n ?? 0).toFixed(4)}`; };
 const timeAgo = (ts: number) => { const m = Math.floor((Date.now()-ts)/60000); return m<1?'now':m<60?m+'m':m<1440?Math.floor(m/60)+'h':Math.floor(m/1440)+'d'; };
 const premiumColor = (v: number) => v>=5e6?'#e040fb':v>=1e6?'#ffd600':v>=5e5?'#ff9800':v>=25e4?'#4fc3f7':v>=1e5?'#e0e0e0':v>=5e4?'#90a4ae':'#607d8b';
 
@@ -82,10 +84,10 @@ function ChainRow({ call, put, strike, currentPrice }: { call?: OptionContract; 
     <tr style={{ borderBottom: '1px solid #0d1117', background: isATM ? '#4fc3f710' : 'transparent' }}>
       {/* CALL SIDE */}
       <td style={{ ...cellStyle(isITMCall), color: deltaColor(call?.greeks?.delta || 0) }}>{call?.greeks?.delta?.toFixed(4) || '--'}</td>
-      <td style={{ ...cellStyle(isITMCall), color: ivColor(call?.greeks?.mid_iv || 0) }}>{call?.greeks?.mid_iv ? (call.greeks.mid_iv * 100).toFixed(1) + '%' : '--'}</td>
+      <td style={{ ...cellStyle(isITMCall), color: ivColor(call?.greeks?.mid_iv || 0) }}>{call?.greeks?.mid_iv ? ((call?.greeks?.mid_iv ?? 0) * 100).toFixed(1) + '%' : '--'}</td>
       <td style={{ ...cellStyle(isITMCall), color: volColor(call?.open_interest || 0) }}>{call?.open_interest?.toLocaleString() || '--'}</td>
       <td style={{ ...cellStyle(isITMCall), color: volColor(call?.volume || 0) }}>{call?.volume?.toLocaleString() || '--'}</td>
-      <td style={{ ...cellStyle(isITMCall), color: (call?.change || 0) >= 0 ? '#66bb6a' : '#ef5350' }}>{call?.change !== undefined ? (call.change >= 0 ? '+' : '') + call.change.toFixed(2) : '--'}</td>
+      <td style={{ ...cellStyle(isITMCall), color: (call?.change || 0) >= 0 ? '#66bb6a' : '#ef5350' }}>{call?.change !== undefined ? ((call.change ?? 0) >= 0 ? "+" : "") + ((call.change ?? 0).toFixed(2)) : '--'}</td>
       <td style={{ ...cellStyle(isITMCall), fontWeight: 600 }}>{call?.last?.toFixed(2) || '--'}</td>
       <td style={{ ...cellStyle(isITMCall) }}>{call?.ask?.toFixed(2) || '--'}</td>
       <td style={{ ...cellStyle(isITMCall) }}>{call?.bid?.toFixed(2) || '--'}</td>
@@ -101,10 +103,10 @@ function ChainRow({ call, put, strike, currentPrice }: { call?: OptionContract; 
       <td style={{ ...cellStyle(isITMPut) }}>{put?.bid?.toFixed(2) || '--'}</td>
       <td style={{ ...cellStyle(isITMPut) }}>{put?.ask?.toFixed(2) || '--'}</td>
       <td style={{ ...cellStyle(isITMPut), fontWeight: 600 }}>{put?.last?.toFixed(2) || '--'}</td>
-      <td style={{ ...cellStyle(isITMPut), color: (put?.change || 0) >= 0 ? '#66bb6a' : '#ef5350' }}>{put?.change !== undefined ? (put.change >= 0 ? '+' : '') + put.change.toFixed(2) : '--'}</td>
+      <td style={{ ...cellStyle(isITMPut), color: (put?.change || 0) >= 0 ? '#66bb6a' : '#ef5350' }}>{put?.change !== undefined ? ((put.change ?? 0) >= 0 ? "+" : "") + ((put.change ?? 0).toFixed(2)) : '--'}</td>
       <td style={{ ...cellStyle(isITMPut), color: volColor(put?.volume || 0) }}>{put?.volume?.toLocaleString() || '--'}</td>
       <td style={{ ...cellStyle(isITMPut), color: volColor(put?.open_interest || 0) }}>{put?.open_interest?.toLocaleString() || '--'}</td>
-      <td style={{ ...cellStyle(isITMPut), color: ivColor(put?.greeks?.mid_iv || 0) }}>{put?.greeks?.mid_iv ? (put.greeks.mid_iv * 100).toFixed(1) + '%' : '--'}</td>
+      <td style={{ ...cellStyle(isITMPut), color: ivColor(put?.greeks?.mid_iv || 0) }}>{put?.greeks?.mid_iv ? ((put?.greeks?.mid_iv ?? 0) * 100).toFixed(1) + '%' : '--'}</td>
       <td style={{ ...cellStyle(isITMPut), color: deltaColor(put?.greeks?.delta || 0) }}>{put?.greeks?.delta?.toFixed(4) || '--'}</td>
     </tr>
   );
@@ -175,10 +177,10 @@ function PayoffChart({ legs, currentPrice, lotSize }: { legs: { type: string; si
         <path d={`${pathD} L ${toX(xMax)} ${zeroY} L ${toX(xMin)} ${zeroY} Z`} fill="#66bb6a10" />
       )}
       {/* Labels */}
-      <text x={pad} y={h - 5} fill="#607d8b" fontSize="9" fontFamily="var(--font-mc-mono)">${xMin.toFixed(0)}</text>
-      <text x={w - pad} y={h - 5} fill="#607d8b" fontSize="9" fontFamily="var(--font-mc-mono)" textAnchor="end">${xMax.toFixed(0)}</text>
-      <text x={5} y={toY(maxY)} fill="#66bb6a" fontSize="9" fontFamily="var(--font-mc-mono)">${maxY.toFixed(0)}</text>
-      <text x={5} y={toY(minY)} fill="#ef5350" fontSize="9" fontFamily="var(--font-mc-mono)">${minY.toFixed(0)}</text>
+      <text x={pad} y={h - 5} fill="#607d8b" fontSize="9" fontFamily="var(--font-mc-mono)">${(xMin ?? 0).toFixed(0)}</text>
+      <text x={w - pad} y={h - 5} fill="#607d8b" fontSize="9" fontFamily="var(--font-mc-mono)" textAnchor="end">${(xMax ?? 0).toFixed(0)}</text>
+      <text x={5} y={toY(maxY)} fill="#66bb6a" fontSize="9" fontFamily="var(--font-mc-mono)">${(maxY ?? 0).toFixed(0)}</text>
+      <text x={5} y={toY(minY)} fill="#ef5350" fontSize="9" fontFamily="var(--font-mc-mono)">${(minY ?? 0).toFixed(0)}</text>
       <text x={toX(currentPrice)} y={pad / 2 - 2} fill="#4fc3f7" fontSize="9" fontFamily="var(--font-mc-mono)" textAnchor="middle">NOW</text>
     </svg>
   );
@@ -363,8 +365,8 @@ export function OptionsWatcherPage() {
       const put = puts.find(p => p.strike === strike);
       return {
         strike,
-        callIV: call?.greeks?.mid_iv ? call.greeks.mid_iv * 100 : null,
-        putIV: put?.greeks?.mid_iv ? put.greeks.mid_iv * 100 : null,
+        callIV: call?.greeks?.mid_iv ? (call?.greeks?.mid_iv ?? 0) * 100 : null,
+        putIV: put?.greeks?.mid_iv ? (put?.greeks?.mid_iv ?? 0) * 100 : null,
       };
     }).filter(d => d.callIV || d.putIV);
   }, [filteredStrikes, calls, puts]);
@@ -667,7 +669,7 @@ export function OptionsWatcherPage() {
                 </div>
                 <div>
                   <div style={{ fontSize: 'var(--mc-font-label)', color: '#607d8b', fontFamily: 'var(--font-mc-mono)', marginBottom: '4px' }}>Underlying</div>
-                  <div style={{ padding: '6px 10px', background: '#0d1117', border: '1px solid #1a3a4a', borderRadius: '4px', color: '#4fc3f7', fontWeight: 700, fontFamily: 'var(--font-mc-mono)', fontSize: 'var(--mc-font-sm)' }}>${currentPrice.toFixed(2)}</div>
+                  <div style={{ padding: '6px 10px', background: '#0d1117', border: '1px solid #1a3a4a', borderRadius: '4px', color: '#4fc3f7', fontWeight: 700, fontFamily: 'var(--font-mc-mono)', fontSize: 'var(--mc-font-sm)' }}>${(currentPrice ?? 0).toFixed(2)}</div>
                 </div>
               </div>
 
@@ -679,9 +681,9 @@ export function OptionsWatcherPage() {
                   {/* Results grid */}
                   <div style={{ display: 'grid', gridTemplateColumns: 'repeat(5, 1fr)', gap: '8px', marginTop: '12px' }}>
                     {[
-                      { l: 'Max Profit', v: strategyPayoff.maxProfit === Infinity ? 'Unlimited' : `$${strategyPayoff.maxProfit.toFixed(0)}`, c: '#66bb6a' },
-                      { l: 'Max Loss', v: strategyPayoff.maxLoss === -Infinity ? 'Unlimited' : `$${strategyPayoff.maxLoss.toFixed(0)}`, c: '#ef5350' },
-                      { l: 'Breakeven', v: strategyPayoff.breakevens.length > 0 ? strategyPayoff.breakevens.map(b => '$' + b.toFixed(2)).join(', ') : '--', c: '#e0e0e0' },
+                      { l: 'Max Profit', v: strategyPayoff.maxProfit === Infinity ? 'Unlimited' : `$${(strategyPayoff.maxProfit ?? 0).toFixed(0)}`, c: '#66bb6a' },
+                      { l: 'Max Loss', v: strategyPayoff.maxLoss === -Infinity ? 'Unlimited' : `$${(strategyPayoff.maxLoss ?? 0).toFixed(0)}`, c: '#ef5350' },
+                      { l: 'Breakeven', v: strategyPayoff.breakevens.length > 0 ? strategyPayoff.breakevens.map(b => '$' + (b ?? 0).toFixed(2)).join(', ') : '--', c: '#e0e0e0' },
                       { l: 'Lot Size', v: String(lotSize), c: '#4fc3f7' },
                       { l: 'Strategy', v: selectedStrategy, c: '#ff9800' },
                     ].map((s, i) => (
@@ -695,11 +697,11 @@ export function OptionsWatcherPage() {
                   {/* Greeks */}
                   <div style={{ display: 'grid', gridTemplateColumns: 'repeat(5, 1fr)', gap: '8px', marginTop: '8px' }}>
                     {[
-                      { l: 'Delta', v: strategyPayoff.delta.toFixed(4) },
-                      { l: 'Gamma', v: strategyPayoff.gamma.toFixed(4) },
-                      { l: 'Theta', v: strategyPayoff.theta.toFixed(4) },
-                      { l: 'Vega', v: strategyPayoff.vega.toFixed(4) },
-                      { l: 'Rho', v: strategyPayoff.rho.toFixed(4) },
+                      { l: 'Delta', v: (strategyPayoff.delta ?? 0).toFixed(4) },
+                      { l: 'Gamma', v: (strategyPayoff.gamma ?? 0).toFixed(4) },
+                      { l: 'Theta', v: (strategyPayoff.theta ?? 0).toFixed(4) },
+                      { l: 'Vega', v: (strategyPayoff.vega ?? 0).toFixed(4) },
+                      { l: 'Rho', v: (strategyPayoff.rho ?? 0).toFixed(4) },
                     ].map((g, i) => (
                       <div key={i} style={{ background: '#0d1117', border: '1px solid #1a3a4a', borderRadius: '6px', padding: '8px', textAlign: 'center' }}>
                         <div style={{ fontSize: '8px', color: '#607d8b', fontFamily: 'var(--font-mc-mono)', letterSpacing: '0.5px', marginBottom: '4px' }}>{g.l}</div>

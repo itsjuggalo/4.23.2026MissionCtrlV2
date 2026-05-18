@@ -1,70 +1,20 @@
-'use client';
+"use client";
+import { useState } from "react";
+import { Bell, Settings, ChevronLeft, ChevronRight,
+  LayoutDashboard, BarChart3, TrendingUp, Activity, Radar, Bot, Brain, Briefcase,
+  ShieldAlert, Building2, MessageSquare, ClipboardCheck, Calendar, FolderKanban,
+  ListTodo, FileText, BookOpen, Wallet, LineChart, Home, Search, Zap, Target,
+  Eye, Send, Network, History, BookMarked, Database, Users, AlertTriangle, Rocket,
+} from "lucide-react";
+import BestOptionsWidget from '@/components/widgets/BestOptionsWidget';
 
-import { useState, useEffect } from 'react';
-import { BookOpen,
-  LayoutDashboard,
-  Radar,
-  ListTodo,
-  Bot,
-  CheckCircle,
-  Calendar,
-  FolderKanban,
-  Brain,
-  FileText,
-  Wallet,
-  Activity,
-  ShieldAlert,
-  Zap,
-  Send,
-  GitBranch,
-  Building2,
-  TrendingUp,
-  Cpu,
-  Target,
-  BarChart2,
-  Globe,
-  LineChart,
-  Bell,
-  Settings,
-  Users,
-} from 'lucide-react';
-import { TerranLogo } from '../ui/TerranLogo';
-
-type PageName =
-  | 'Dashboard'
-  | 'Signals'
-  | 'Telegram'
-  | 'Scanner'
-  | 'Tasks'
-  | 'Options'
-  | 'OptionsWatcher'
-  | 'Flow History'
-  | 'Sessions'
-  | 'Agents'
-  | 'Approvals'
-  | 'Calendar'
-  | 'Projects'
-  | 'Memory'
-  | 'Memory Graph'
-  | 'Office'
-  | 'Alerts'
-  | 'Docs'
-  | 'Wallets'
-  | 'Trades'
-  | 'Journal'
-  | 'Activity'
-  | 'Risk'
-  | 'TV Chart'
-  | 'PowerTrader'
-  | 'GoTrader'
-  | 'Command Center'
-  | 'Performance'
-  | 'Regime'
-  | 'Congress'
-  | 'LLM Portfolio'
-  | 'Skills'
-  | 'Usage'
-  | 'Landing';
+export type PageName =
+  "Landing" | "Command Center" | "Performance" | "Regime" | "Activity"
+  | "Signals" | "Flow History" | "TV Chart" | "Trades" | "PowerTrader"
+  | "GoTrader" | "Wallets" | "Agents" | "Risk" | "Office" | "Memory"
+  | "Memory Graph" | "Telegram" | "Approvals" | "Calendar" | "Tasks"
+  | "Projects" | "Alerts" | "Usage" | "Congress" | "LLM Portfolio"
+  | "Journal" | "Docs" | "Skills" | "Dashboard" | "Scanner" | "Sessions" | "Options" | "OptionsWatcher";
 
 interface SidebarProps {
   activePage: PageName;
@@ -75,359 +25,150 @@ interface SidebarProps {
   pendingApprovalsCount: number;
 }
 
-// COMMAND section — mission ops
-const commandItems: { name: PageName; icon: React.ElementType }[] = [
-  { name: 'Landing', icon: Zap },
-  { name: 'Command Center', icon: Target },
-  { name: 'Performance', icon: BarChart2 },
-  { name: 'Regime', icon: Globe },
-  { name: 'Activity', icon: Bell },
-];
+type Item = { name: PageName; icon: React.ElementType; badge?: number };
 
-// TRADING section
-const tradingItems: { name: PageName; icon: React.ElementType }[] = [
-  { name: 'Dashboard', icon: LayoutDashboard },
-  { name: 'TV Chart', icon: LineChart },
-  { name: 'Scanner', icon: Radar },
-  { name: 'Options', icon: BarChart2 },
-  { name: 'OptionsWatcher', icon: BarChart2 },
-  { name: 'Flow History', icon: Activity },
-  { name: 'Wallets', icon: Wallet },
-  { name: 'Trades', icon: TrendingUp },
-  { name: 'Journal', icon: BookOpen },
-  { name: 'GoTrader', icon: Bot },
-  { name: 'Risk', icon: ShieldAlert },
-  { name: 'PowerTrader', icon: Cpu },
-];
+export function Sidebar({ activePage, onNavigate, isCollapsed, onToggle, newSignalsCount, pendingApprovalsCount }: SidebarProps) {
+  const sections: { label: string; items: Item[] }[] = [
+    { label: "OVERVIEW", items: [
+      { name: "Landing", icon: Zap },
+      { name: "Dashboard", icon: LayoutDashboard },
+      { name: "Command Center", icon: Briefcase },
+      { name: "Performance", icon: BarChart3 },
+      { name: "Regime", icon: TrendingUp },
+      { name: "Activity", icon: Activity },
+    ]},
+    { label: "SIGNALS", items: [
+      { name: "Signals", icon: Radar, badge: newSignalsCount },
+      { name: "Scanner", icon: Search },
+      { name: "Flow History", icon: History },
+    ]},
+    { label: "EXECUTION", items: [
+      { name: "PowerTrader", icon: Rocket },
+      { name: "GoTrader", icon: Target },
+      { name: "TV Chart", icon: LineChart },
+      { name: "Trades", icon: Briefcase },
+      { name: "Wallets", icon: Wallet },
+      { name: "Options", icon: Target },
+      { name: "OptionsWatcher", icon: Eye },
+    ]},
+    { label: "AGENTS", items: [
+      { name: "Agents", icon: Bot },
+      { name: "Risk", icon: ShieldAlert },
+      { name: "Office", icon: Building2 },
+      { name: "Telegram", icon: Send },
+    ]},
+    { label: "KNOWLEDGE", items: [
+      { name: "Memory", icon: Brain },
+      { name: "Memory Graph", icon: Network },
+      { name: "Docs", icon: BookOpen },
+      { name: "Skills", icon: Database },
+    ]},
+    { label: "ADMIN", items: [
+      { name: "Tasks", icon: ListTodo },
+      { name: "Projects", icon: FolderKanban },
+      { name: "Sessions", icon: MessageSquare },
+      { name: "Approvals", icon: ClipboardCheck, badge: pendingApprovalsCount },
+      { name: "Calendar", icon: Calendar },
+      { name: "Alerts", icon: AlertTriangle },
+      { name: "Journal", icon: BookMarked },
+      { name: "LLM Portfolio", icon: Users },
+      { name: "Congress", icon: FileText },
+      { name: "Usage", icon: Settings },
+    ]},
+  ];
 
-// SYSTEM section
-const systemItems: { name: PageName; icon: React.ElementType }[] = [
-  { name: 'Office', icon: Users },
-  { name: 'Agents', icon: Bot },
-  { name: 'Memory', icon: Brain },
-  { name: 'Signals', icon: Zap },
-  { name: 'Sessions', icon: Activity },
-  { name: 'Telegram', icon: Send },
-  { name: 'Tasks', icon: ListTodo },
-  { name: 'Approvals', icon: CheckCircle },
-  { name: 'Calendar', icon: Calendar },
-  { name: 'Projects', icon: FolderKanban },
-  { name: 'Usage', icon: BarChart2 },
-  { name: 'Congress', icon: Users },
-  { name: 'LLM Portfolio', icon: Cpu },
-  { name: 'Skills', icon: BookOpen },
-  { name: 'Docs', icon: FileText },
-];
-
-// Keep for compatibility
-const navItems = tradingItems;
-
-export function Sidebar({
-  activePage,
-  onNavigate,
-  isCollapsed,
-  onToggle,
-  newSignalsCount,
-  pendingApprovalsCount,
-}: SidebarProps) {
-  const width = isCollapsed ? 56 : 200;
-  const [balance, setBalance] = useState<number>(500000);
-  const [loading, setLoading] = useState(false);
-
-  useEffect(() => {
-    const fetchBalance = async () => {
-      try {
-        const res = await fetch('/api/portfolio');
-        const data = await res.json();
-        if (data.balance) setBalance(data.balance);
-      } catch (err) {
-        console.error('Portfolio fetch failed:', err);
-      }
-    };
-
-    fetchBalance();
-    const interval = setInterval(fetchBalance, 5000); // Refresh every 5s
-    return () => clearInterval(interval);
-  }, []);
-
-  // Best Options of the Day — top call + top put by Value from unusual flows
-  const [bestCall, setBestCall] = useState<any>(null);
-  const [bestPut, setBestPut] = useState<any>(null);
-  useEffect(() => {
-    const fetchFlows = async () => {
-      try {
-        const res = await fetch('/api/options-flow');
-        const d = await res.json();
-        const flows = d?.flows || [];
-        // Aggregate by Symbol+Strike+Expiry+OptionType so multiple sweeps on same contract roll up
-        const agg: Record<string, any> = {};
-        for (const f of flows) {
-          const key = `${f.Symbol}|${f.Strike}|${f.Expiry}|${f.OptionType}`;
-          if (!agg[key]) {
-            agg[key] = { Symbol: f.Symbol, Strike: f.Strike, Expiry: f.Expiry, ExpiryStr: f.ExpiryStr, OptionType: f.OptionType, Value: 0, Volume: 0, count: 0 };
-          }
-          agg[key].Value += Number(f.Value || 0);
-          agg[key].Volume += Number(f.Volume || 0);
-          agg[key].count += 1;
-        }
-        const rolled = Object.values(agg);
-        const calls = rolled.filter((f: any) => String(f.OptionType || '').toLowerCase() === 'call').sort((a: any, b: any) => b.Value - a.Value);
-        const puts  = rolled.filter((f: any) => String(f.OptionType || '').toLowerCase() === 'put').sort((a: any, b: any) => b.Value - a.Value);
-        setBestCall(calls[0] || null);
-        setBestPut(puts[0] || null);
-      } catch (err) {
-        console.error('Options flow fetch failed:', err);
-      }
-    };
-    fetchFlows();
-    const iv = setInterval(fetchFlows, 30000);
-    return () => clearInterval(iv);
-  }, []);
-
-  // Helpers for Best Options display
-  const fmtExpiry = (o: any): string => {
-    if (!o) return '';
-    // Build a Date and format as MM/DD/YY
-    let d: Date | null = null;
-    if (o.ExpiryStr) {
-      // "2026-08-20" — append T00:00:00 to avoid TZ weirdness
-      d = new Date(String(o.ExpiryStr) + 'T00:00:00');
-    } else if (o.Expiry) {
-      const ts = Number(o.Expiry);
-      if (ts) d = new Date(ts > 1e12 ? ts : ts * 1000);
-    }
-    if (!d || isNaN(d.getTime())) return '';
-    const mm = String(d.getMonth() + 1).padStart(2, '0');
-    const dd = String(d.getDate()).padStart(2, '0');
-    const yy = String(d.getFullYear()).slice(-2);
-    return `${mm}/${dd}/${yy}`;
-  };
-  const fmtValue = (v: number): string => {
-    if (!v) return '$0';
-    if (v >= 1e6) return `$${(v / 1e6).toFixed(2)}M`;
-    if (v >= 1e3) return `$${Math.round(v / 1e3)}K`;
-    return `$${Math.round(v)}`;
-  };
-  const fmtVol = (v: number): string => {
-    if (!v) return '0';
-    if (v >= 1e6) return `${(v / 1e6).toFixed(1)}M`;
-    if (v >= 1e3) return `${(v / 1e3).toFixed(1)}K`;
-    return String(v);
-  };
-
-  const percent = Math.min(((balance - 500000) / 500000) * 100, 100);
-
+  const w = isCollapsed ? 64 : 220;
   return (
-    <div
-      style={{
-        width,
-        minWidth: width,
-        height: '100vh',
-        background: '#0d1117',
-        borderRight: '1px solid #1a3a4a',
-        display: 'flex',
-        flexDirection: 'column',
-        transition: 'width 0.2s ease, min-width 0.2s ease',
-        overflow: 'hidden',
-        position: 'sticky',
-        top: 0,
-        flexShrink: 0,
-      }}
-    >
+    <aside style={{
+      width: w, minWidth: w, background: "#0a1117", color: "#cfd6dd",
+      borderRight: "1px solid #1a2530", display: "flex", flexDirection: "column",
+      fontFamily: "ui-sans-serif, system-ui, sans-serif", fontSize: 13,
+      transition: "width 0.15s ease",
+    }}>
       {/* Logo */}
-      <button
-        onClick={onToggle}
-        style={{
-          display: 'flex',
-          alignItems: 'center',
-          gap: 10,
-          padding: isCollapsed ? '16px 10px' : '16px 14px',
-          cursor: 'pointer',
-          background: 'transparent',
-          border: 'none',
-          borderBottom: '1px solid #1a3a4a',
-          width: '100%',
-          textAlign: 'left',
-          flexShrink: 0,
-        }}
-      >
-        <TerranLogo collapsed={isCollapsed} />
-      </button>
-
-      {/* Nav items */}
-      <nav style={{ flex: 1, padding: '8px 0', overflowY: 'auto' }}>
-        {/* COMMAND section */}
+      <div style={{ padding: "14px 16px", borderBottom: "1px solid #1a2530", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
         {!isCollapsed && (
-          <div style={{ padding: '6px 14px 2px', fontSize: 9, fontFamily: "'JetBrains Mono', monospace", color: '#3d3d52', letterSpacing: '1.5px', fontWeight: 700 }}>COMMAND</div>
+          <div style={{ fontSize: 16, fontWeight: 700 }}>
+            <span style={{ color: "#fff" }}>Mission</span>
+            <span style={{ color: "#5fa3ff" }}>CTRL</span>
+          </div>
         )}
-        {commandItems.map(({ name, icon: Icon }) => {
-          const isActive = activePage === name;
+        <button onClick={onToggle} style={{ background: "transparent", border: "none", color: "#8a99a8", cursor: "pointer", padding: 4 }}>
+          {isCollapsed ? <ChevronRight size={16}/> : <ChevronLeft size={16}/>}
+        </button>
+      </div>
+
+      {/* Sections */}
+      <div style={{ flex: 1, overflowY: "auto", padding: "8px 0" }}>
+        {sections.map(sec => (
+          <div key={sec.label} style={{ marginBottom: 8 }}>
+            {!isCollapsed && (
+              <div style={{ padding: "8px 16px 4px", fontSize: 10, color: "#5a6470", letterSpacing: 1, fontWeight: 600 }}>{sec.label}</div>
+            )}
+            {sec.items.map(it => {
+              const active = activePage === it.name;
+              const Icon = it.icon;
+              return (
+                <button key={it.name} onClick={() => onNavigate(it.name)} title={it.name} style={{
+                  display: "flex", alignItems: "center", gap: 10,
+                  width: "100%", padding: "8px 16px", background: "transparent",
+                  border: "none", borderLeft: active ? "3px solid #5fa3ff" : "3px solid transparent",
+                  cursor: "pointer", textAlign: "left", color: active ? "#fff" : "#8a99a8",
+                  fontFamily: "inherit", fontSize: 13, fontWeight: active ? 500 : 400,
+                  backgroundColor: active ? "rgba(95, 163, 255, 0.12)" : "transparent",
+                  justifyContent: isCollapsed ? "center" : "flex-start",
+                }}
+                onMouseEnter={e => { if (!active) { (e.currentTarget as HTMLElement).style.color = "#5fa3ff"; (e.currentTarget as HTMLElement).style.backgroundColor = "rgba(95, 163, 255, 0.06)"; } }}
+                onMouseLeave={e => { if (!active) { (e.currentTarget as HTMLElement).style.color = "#8a99a8"; (e.currentTarget as HTMLElement).style.backgroundColor = "transparent"; } }}>
+                  <Icon size={16} style={{ color: active ? "#5fa3ff" : undefined, flexShrink: 0 }}/>
+                  {!isCollapsed && <span style={{ flex: 1 }}>{it.name}</span>}
+                  {!isCollapsed && it.badge && it.badge > 0 ? (
+                    <span style={{ background: "#5fa3ff", color: "#000", fontSize: 10, padding: "1px 6px", borderRadius: 9, fontWeight: 700 }}>{it.badge}</span>
+                  ) : null}
+                </button>
+              );
+            })}
+          </div>
+        ))}
+      </div>
+
+      {/* Bottom utility */}
+      <div style={{ borderTop: "1px solid #1a2530", padding: "8px 0" }}>
+        {([
+          { name: "Alerts" as PageName, icon: Bell },
+        ]).map(it => {
+          const active = activePage === it.name;
+          const Icon = it.icon;
           return (
-            <button
-              key={name}
-              onClick={() => name === 'Landing' ? (window.location.href = '/landing') : onNavigate(name)}
-              style={{
-                display: 'flex', alignItems: 'center', gap: 10,
-                padding: isCollapsed ? '9px 10px' : '9px 14px',
-                width: '100%', cursor: 'pointer', background: isActive ? 'rgba(108,92,231,0.12)' : 'transparent',
-                border: 'none', borderLeft: isActive ? '2px solid #4fc3f7' : '2px solid transparent',
-                color: isActive ? '#81d4fa' : '#455a64', transition: 'background 0.15s, color 0.15s',
-              }}
-            >
-              <Icon size={16} style={{ flexShrink: 0 }} />
-              {!isCollapsed && <span style={{ fontSize: 13, fontFamily: "'Inter', -apple-system, sans-serif", whiteSpace: 'nowrap' }}>{name}</span>}
+            <button key={it.name} onClick={() => onNavigate(it.name)} style={{
+              display: "flex", alignItems: "center", gap: 10,
+              width: "100%", padding: "8px 16px", background: "transparent",
+              border: "none", borderLeft: active ? "3px solid #5fa3ff" : "3px solid transparent",
+              cursor: "pointer", textAlign: "left", color: active ? "#fff" : "#8a99a8",
+              fontFamily: "inherit", fontSize: 13,
+              backgroundColor: active ? "rgba(95, 163, 255, 0.12)" : "transparent",
+              justifyContent: isCollapsed ? "center" : "flex-start",
+            }}
+            onMouseEnter={e => { if (!active) { (e.currentTarget as HTMLElement).style.color = "#5fa3ff"; (e.currentTarget as HTMLElement).style.backgroundColor = "rgba(95, 163, 255, 0.06)"; } }}
+            onMouseLeave={e => { if (!active) { (e.currentTarget as HTMLElement).style.color = "#8a99a8"; (e.currentTarget as HTMLElement).style.backgroundColor = "transparent"; } }}>
+              <Icon size={16} style={{ color: active ? "#5fa3ff" : undefined }}/>
+              {!isCollapsed && <span>{it.name}</span>}
             </button>
           );
         })}
+        {!isCollapsed && <BestOptionsWidget />}
         {!isCollapsed && (
-          <div style={{ padding: '8px 14px 2px', fontSize: 9, fontFamily: "'JetBrains Mono', monospace", color: '#3d3d52', letterSpacing: '1.5px', fontWeight: 700, marginTop: 4 }}>TRADING</div>
-        )}
-        {tradingItems.map(({ name, icon: Icon }) => {
-          const isActive = activePage === name;
-          const badge =
-            name === 'Scanner' && newSignalsCount > 0
-              ? newSignalsCount
-              : name === 'Approvals' && pendingApprovalsCount > 0
-              ? pendingApprovalsCount
-              : null;
-
-          return (
-            <button
-              key={name}
-              onClick={() => name === 'Landing' ? (window.location.href = '/landing') : onNavigate(name)}
-              title={isCollapsed ? name : undefined}
-              style={{
-                display: 'flex',
-                alignItems: 'center',
-                gap: 10,
-                width: '100%',
-                padding: isCollapsed ? '9px 0' : '9px 14px',
-                justifyContent: isCollapsed ? 'center' : 'flex-start',
-                background: isActive ? 'rgba(108, 92, 231, 0.08)' : 'transparent',
-                border: 'none',
-                borderRadius: 0,
-                cursor: 'pointer',
-                color: isActive ? '#81d4fa' : '#455a64',
-                position: 'relative',
-                transition: 'background 0.15s, color 0.15s',
-              }}
-            >
-              <Icon size={16} style={{ flexShrink: 0 }} />
-              {!isCollapsed && (
-                <span
-                  style={{
-                    fontSize: 13,
-                    fontFamily: "'Inter', -apple-system, sans-serif",
-                    whiteSpace: 'nowrap',
-                    flex: 1,
-                    textAlign: 'left',
-                  }}
-                >
-                  {name}
-                </span>
-              )}
-              {badge !== null && !isCollapsed && (
-                <span
-                  style={{
-                    background: '#4fc3f7',
-                    color: '#fff',
-                    fontSize: 10,
-                    fontFamily: "'JetBrains Mono', monospace",
-                    fontWeight: 700,
-                    borderRadius: '10px',
-                    padding: '1px 6px',
-                    minWidth: 18,
-                    textAlign: 'center',
-                  }}
-                >
-                  {badge}
-                </span>
-              )}
-              {badge !== null && isCollapsed && (
-                <span
-                  style={{
-                    position: 'absolute',
-                    top: 6,
-                    right: 8,
-                    background: '#4fc3f7',
-                    color: '#fff',
-                    fontSize: 9,
-                    fontFamily: "'JetBrains Mono', monospace",
-                    fontWeight: 700,
-                    borderRadius: '50%',
-                    width: 14,
-                    height: 14,
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                  }}
-                >
-                  {badge}
-                </span>
-              )}
-            </button>
-          );
-        })}
-
-        {/* SYSTEM section */}
-        {!isCollapsed && (
-          <div style={{ padding: '8px 14px 2px', fontSize: 9, fontFamily: "'JetBrains Mono', monospace", color: '#3d3d52', letterSpacing: '1.5px', fontWeight: 700, marginTop: 4 }}>SYSTEM</div>
-        )}
-        {systemItems.map(({ name, icon: Icon }) => {
-          const isActive = activePage === name;
-          const badge = name === 'Scanner' && newSignalsCount > 0 ? newSignalsCount : name === 'Approvals' && pendingApprovalsCount > 0 ? pendingApprovalsCount : null;
-          return (
-            <button key={name} onClick={() => name === 'Landing' ? (window.location.href = '/landing') : onNavigate(name)} title={isCollapsed ? name : undefined}
-              style={{ display: 'flex', alignItems: 'center', gap: 10, width: '100%', padding: isCollapsed ? '9px 0' : '9px 14px',
-                justifyContent: isCollapsed ? 'center' : 'flex-start', background: isActive ? 'rgba(108,92,231,0.08)' : 'transparent',
-                border: 'none', cursor: 'pointer', color: isActive ? '#81d4fa' : '#455a64', transition: 'background 0.15s, color 0.15s', position: 'relative' }}
-            >
-              <Icon size={16} style={{ flexShrink: 0 }} />
-              {!isCollapsed && <span style={{ fontSize: 13, fontFamily: "'Inter', -apple-system, sans-serif", whiteSpace: 'nowrap', flex: 1, textAlign: 'left' }}>{name}</span>}
-              {badge !== null && !isCollapsed && <span style={{ background: '#4fc3f7', color: '#fff', fontSize: 10, fontWeight: 700, borderRadius: '10px', padding: '1px 6px' }}>{badge}</span>}
-            </button>
-          );
-        })}
-      </nav>
-
-
-      {/* Footer — Best Options of the Day */}
-      {!isCollapsed && (
-        <div
-          style={{
-            padding: '12px 14px',
-            borderTop: '1px solid #1a3a4a',
-            fontSize: 11,
-            fontFamily: "'JetBrains Mono', 'SF Mono', 'Fira Code', monospace",
-          }}
-        >
-          <div style={{ color: '#ffd600', fontWeight: 700, marginBottom: 8, fontSize: 11, letterSpacing: '0.5px' }}>BEST OPTIONS OF THE DAY</div>
-          {bestCall ? (
-            <div style={{ marginBottom: 8 }}>
-              <div style={{ display: 'flex', alignItems: 'baseline', gap: 6, marginBottom: 2 }}>
-                <span style={{ color: '#66bb6a', fontWeight: 700, fontSize: 10, letterSpacing: '0.5px' }}>CALL</span>
-                <span style={{ color: '#e0e0e0', fontSize: 11, fontWeight: 600 }}>{bestCall.Symbol || '?'} ${bestCall.Strike || '?'}C</span>
-                <span style={{ color: '#90a4ae', fontSize: 10 }}>{fmtExpiry(bestCall)}</span>
-              </div>
-              <div style={{ color: '#4fc3f7', fontSize: 10 }}>{fmtValue(bestCall.Value || 0)} · {fmtVol(bestCall.Volume || 0)} vol</div>
+          <div style={{ padding: "10px 16px", display: "flex", alignItems: "center", gap: 10, marginTop: 4 }}>
+            <div style={{ width: 28, height: 28, borderRadius: 14, background: "linear-gradient(135deg, #5fa3ff, #4fc3f7)", display: "flex", alignItems: "center", justifyContent: "center", color: "#000", fontWeight: 700, fontSize: 11, boxShadow: "0 0 10px rgba(95,163,255,0.6), 0 0 20px rgba(95,163,255,0.3)", animation: "mcLogoPulse 2.5s ease-in-out infinite" }}>MC</div><style>{`@keyframes mcLogoPulse{0%,100%{box-shadow:0 0 10px rgba(95,163,255,0.6),0 0 20px rgba(95,163,255,0.3)}50%{box-shadow:0 0 18px rgba(95,163,255,0.95),0 0 36px rgba(95,163,255,0.55)}}`}</style>
+            <div style={{ flex: 1, fontSize: 11 }}>
+              <div style={{ color: "#fff", fontWeight: 500 }}>Mission Ctrl</div>
+              <div style={{ color: "#5a6470" }}>v3.0.4</div>
             </div>
-          ) : (
-            <div style={{ color: '#607d8b', fontSize: 10, marginBottom: 8 }}>CALL: scanning...</div>
-          )}
-          {bestPut ? (
-            <div>
-              <div style={{ display: 'flex', alignItems: 'baseline', gap: 6, marginBottom: 2 }}>
-                <span style={{ color: '#ef5350', fontWeight: 700, fontSize: 10, letterSpacing: '0.5px' }}>PUT</span>
-                <span style={{ color: '#e0e0e0', fontSize: 11, fontWeight: 600 }}>{bestPut.Symbol || '?'} ${bestPut.Strike || '?'}P</span>
-                <span style={{ color: '#90a4ae', fontSize: 10 }}>{fmtExpiry(bestPut)}</span>
-              </div>
-              <div style={{ color: '#4fc3f7', fontSize: 10 }}>{fmtValue(bestPut.Value || 0)} · {fmtVol(bestPut.Volume || 0)} vol</div>
-            </div>
-          ) : (
-            <div style={{ color: '#607d8b', fontSize: 10 }}>PUT: scanning...</div>
-          )}
-        </div>
-      )}
-    </div>
+          </div>
+        )}
+      </div>
+    </aside>
   );
 }
+
+export default Sidebar;

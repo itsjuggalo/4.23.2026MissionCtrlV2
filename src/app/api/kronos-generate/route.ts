@@ -15,9 +15,24 @@ export async function POST(req: NextRequest) {
   if (ticker === 'BTCUSDT' || ticker === 'BTCUSD') scriptTicker = 'BTC';
   if (ticker === 'ETHUSDT' || ticker === 'ETHUSD') scriptTicker = 'ETH';
 
+  // Proxy fallback: when running on Vercel, the local spawn won't work (no Python).
+  // Try openclaw first; only fall through to local spawn if proxy unreachable.
+  try {
+    const proxyR = await fetch('https://claudeclaw.serveftp.com/api/kronos-generate', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ ticker, model: body.model || 'small', source: 'vercel' }),
+      cache: 'no-store',
+    });
+    if (proxyR.ok) {
+      const data = await proxyR.json();
+      return NextResponse.json({ ...data, _via: 'proxy' });
+    }
+  } catch (_) {}
+
   // Spawn in background, fire-and-forget
   try {
-    const child = spawn('python3', ['/home/ubuntu/scripts/kronos_forecast_v2.py', '--ticker', scriptTicker], {
+    const child = spawn('python3', ['/home/ubuntu/scripts/kronos_forecast_v2.py', '--ticker', scriptTicker, '--model', body.model || 'small'], {
       detached: true,
       stdio: 'ignore',
       cwd: '/home/ubuntu',

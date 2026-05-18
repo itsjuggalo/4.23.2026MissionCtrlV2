@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { promises as fs } from 'fs';
 import path from 'path';
+import { proxyToServeftp } from "../../../lib/proxyToServeftp";
 
 const WORKSPACE = '/home/ubuntu/.openclaw/workspace';
 const MEMORY_FILE = '/home/ubuntu/mission-control-restored/memory/memories.json';
@@ -98,6 +99,7 @@ export async function GET() {
 }
 
 export async function POST(req: Request) {
+  const __proxied = await proxyToServeftp(req); if (__proxied) return __proxied;
   try {
     const body = await req.json();
     let memories: any[] = [];

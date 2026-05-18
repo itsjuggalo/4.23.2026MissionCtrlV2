@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { readFileSync, existsSync } from 'fs';
 import { join } from 'path';
+import { proxyToServeftp } from "../../../lib/proxyToServeftp";
 
 const DB_PATH = join(process.env.HOME || '/home/ubuntu', '.mission-control/mission-control.db');
 const PM2_LOGS = join(process.env.HOME || '/home/ubuntu', '.pm2/logs');
@@ -58,6 +59,7 @@ function getFromPm2Logs(limit: number): Activity[] {
 }
 
 export async function GET(req: Request) {
+  const __proxied = await proxyToServeftp(req); if (__proxied) return __proxied;
   const url = new URL(req.url);
   const limit = parseInt(url.searchParams.get('limit') || '50');
 

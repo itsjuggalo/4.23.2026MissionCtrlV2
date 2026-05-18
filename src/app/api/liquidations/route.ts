@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { readFile } from 'fs/promises';
 import path from 'path';
+import { proxyToServeftp } from "../../../lib/proxyToServeftp";
 
 const JSONL = path.join(
   process.env.HOME || '/home/ubuntu',

@@ -1,6 +1,7 @@
 import { NextRequest } from 'next/server';
 import { readFileSync, existsSync } from 'fs';
 import { join } from 'path';
+import { proxyToServeftp } from "../../../lib/proxyToServeftp";
 
 const SECRETS = join(process.env.HOME || '/home/ubuntu', '.openclaw/secrets');
 
@@ -60,6 +61,7 @@ async function getRegime() {
 }
 
 export async function GET(req: NextRequest) {
+  const __proxied = await proxyToServeftp(req); if (__proxied) return __proxied;
   const encoder = new TextEncoder();
   let closed = false;
 

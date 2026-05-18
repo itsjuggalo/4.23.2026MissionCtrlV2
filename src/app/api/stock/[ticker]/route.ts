@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { execSync } from 'child_process';
+import { proxyToServeftp } from '../../../../lib/proxyToServeftp';
 
 const FINNHUB_KEY = process.env.FINNHUB_API_KEY || 'd70ov6hr01ql6rg044r0';
 const FINNHUB = 'https://finnhub.io/api/v1';
@@ -97,6 +98,7 @@ export async function GET(
   _req: Request,
   { params }: { params: Promise<{ ticker: string }> }
 ) {
+  const __proxied = await proxyToServeftp(_req); if (__proxied) return __proxied;
   const { ticker: raw } = await params;
   const ticker = raw.toUpperCase();
 

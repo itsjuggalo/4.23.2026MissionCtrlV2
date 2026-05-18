@@ -1,5 +1,6 @@
-import { NextResponse } from 'next/server';
+import {NextResponse, NextRequest } from 'next/server';
 import { readFileSync } from 'fs';
+import { proxyToServeftp } from "../../../lib/proxyToServeftp";
 
 function getSecret(name: string): string {
   // Prefer env var (Vercel); fall back to local filesystem (openclaw box)
@@ -13,6 +14,7 @@ function getSecret(name: string): string {
 let chainCache: { key: string; data: any; ts: number } = { key: '', data: null, ts: 0 };
 
 export async function GET(req: Request) {
+  const __proxied = await proxyToServeftp(req); if (__proxied) return __proxied;
   const url = new URL(req.url);
   const symbol = (url.searchParams.get('symbol') || 'SPY').toUpperCase();
   const expiration = url.searchParams.get('expiration') || '';

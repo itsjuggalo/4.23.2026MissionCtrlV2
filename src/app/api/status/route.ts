@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { readFileSync } from "fs";
+import { proxyToServeftp } from "../../../lib/proxyToServeftp";
 
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
@@ -26,6 +27,9 @@ async function alpaca(account: string) {
       fetch(`${base}/v2/positions`, { headers: h }).then(r=>r.json()),
       fetch(`${base}/v2/orders?status=all&limit=20&direction=desc&after=${since}`, { headers: h }).then(r=>r.json()),
     ]);
+    if (acct && (acct.message || acct.code)) {
+      return { error: `alpaca: ${acct.message || acct.code}` };
+    }
     return {
       equity: parseFloat(acct.equity || "0"),
       cash: parseFloat(acct.cash || "0"),
@@ -48,7 +52,8 @@ async function alpaca(account: string) {
   }
 }
 
-export async function GET() {
+export async function GET(request: Request) {
+  const __proxied = await proxyToServeftp(request); if (__proxied) return __proxied;
   const [boba, jazzy] = await Promise.all([alpaca("boba"), alpaca("jazzy")]);
   return NextResponse.json({
     timestamp: new Date().toISOString(),

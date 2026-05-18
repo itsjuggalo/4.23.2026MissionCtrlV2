@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import fs from 'fs';
 import { tickerLogoUrl } from '@/lib/tickerDomains';
 import path from 'path';
+import { proxyToServeftp } from "../../../lib/proxyToServeftp";
 
 export const dynamic = 'force-dynamic';
 export const revalidate = 0;
@@ -150,17 +151,24 @@ function computeStats(open: EnrichedSignal[], closed: EnrichedSignal[]) {
   };
 }
 
-export async function GET() {
+export async function GET(request: Request) {
   try {
-    if (!fs.existsSync(MERGED_PATH)) {
-      return NextResponse.json({
-        error: 'Merged signal file not yet generated',
-        generated_at: null,
-        open: [], closed: [], stats: null,
-      }, { status: 200 });
+    const __proxied = await proxyToServeftp(request); if (__proxied) return __proxied;
+    let raw: string;
+    if (fs.existsSync(MERGED_PATH)) {
+      raw = fs.readFileSync(MERGED_PATH, 'utf-8');
+    } else {
+      const remoteUrl = process.env.MERGED_SIGNALS_URL || 'https://missionctrl.serveftp.com/raw/analyst-signals-merged';
+      const resp = await fetch(remoteUrl, { cache: 'no-store' });
+      if (!resp.ok) {
+        return NextResponse.json({
+          error: 'Remote signals fetch failed: ' + resp.status,
+          generated_at: null,
+          open: [], closed: [], stats: null,
+        }, { status: 200 });
+      }
+      raw = await resp.text();
     }
-
-    const raw = fs.readFileSync(MERGED_PATH, 'utf-8');
     const parsed = JSON.parse(raw);
 
     // Auto-close stale signals: anything with expiry in the past or no exitTime+old buy date

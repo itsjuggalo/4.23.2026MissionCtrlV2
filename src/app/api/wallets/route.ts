@@ -4,11 +4,13 @@ import { readFileSync, existsSync } from 'fs';
 import { join } from 'path';
 import { execSync } from 'child_process';
 import * as jose from 'jose';
+import { proxyToServeftp } from '../../../lib/proxyToServeftp';
 
 const SECRETS = join(process.env.HOME || '/home/ubuntu', '.openclaw/secrets');
 const HL_STATE = join(process.env.HOME || '/home/ubuntu', 'go-trader/platforms/hyperliquid/state.json');
 
-export async function GET() {
+export async function GET(req: Request) {
+  const __proxied = await proxyToServeftp(req); if (__proxied) return __proxied;
   const walletPassword = process.env.WALLET_PASSWORD;
   if (walletPassword) {
     const cookieStore = await cookies();

@@ -1,8 +1,10 @@
-import { NextResponse } from 'next/server';
+import {NextResponse, NextRequest } from 'next/server';
 import { getEquityHistory, saveDailySnapshot } from '@/lib/db';
+import { proxyToServeftp } from "../../../lib/proxyToServeftp";
 
 // GET - retrieve equity history for charting
 export async function GET(request: Request) {
+  const __proxied = await proxyToServeftp(request); if (__proxied) return __proxied;
   try {
     const url = new URL(request.url);
     const days = parseInt(url.searchParams.get('days') || '90');

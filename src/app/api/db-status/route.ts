@@ -1,7 +1,9 @@
 import { NextResponse } from 'next/server';
 import { getDbStats, getTradeStats } from '@/lib/db';
+import { proxyToServeftp } from "../../../lib/proxyToServeftp";
 
-export async function GET() {
+export async function GET(request: Request) {
+  const __proxied = await proxyToServeftp(request); if (__proxied) return __proxied;
   try {
     const dbStats = getDbStats();
     const tradeStats = getTradeStats();

@@ -308,7 +308,7 @@ export function TradesPage() {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-3xl font-bold text-white">Trades</h1>
-          <p className="text-gray-400 mt-1">Tweak's automated trading activity</p>
+          <p className="text-gray-400 mt-1">Boba's automated trading activity</p>
         </div>
         <div className="flex items-center space-x-4">
           <div className="px-4 py-2 rounded-lg bg-blue-500/20 text-blue-400">
@@ -416,7 +416,7 @@ export function TradesPage() {
         </h2>
         {filteredTrades.length === 0 ? (
           <div className="text-center text-gray-400 py-8">
-            No trades yet. Tweak is monitoring markets...
+            No trades yet. Boba is monitoring markets...
           </div>
         ) : (
           <div className="space-y-1.5 max-h-96 overflow-y-auto pr-1">

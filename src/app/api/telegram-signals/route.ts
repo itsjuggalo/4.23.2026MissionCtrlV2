@@ -1,13 +1,15 @@
-import { NextRequest, NextResponse } from 'next/server';
+import { NextResponse } from 'next/server';
 import { readFile } from 'fs/promises';
 import path from 'path';
+import { proxyToServeftp } from "../../../lib/proxyToServeftp";
 
 const SIGNALS_FILE = path.join(
   process.env.HOME || '/home/ubuntu',
   'mission-control/telegram-listener/signals.json'
 );
 
-export async function GET(request: NextRequest) {
+export async function GET(request: Request) {
+  const __proxied = await proxyToServeftp(request); if (__proxied) return __proxied;
   const { searchParams } = new URL(request.url);
   const limit = parseInt(searchParams.get('limit') ?? '200', 10);
 

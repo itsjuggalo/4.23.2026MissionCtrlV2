@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import fs from 'fs';
 import path from 'path';
 import os from 'os';
+import { proxyToServeftp } from "../../../lib/proxyToServeftp";
 
 function readSecret(name: string): string {
   try {
@@ -108,6 +109,7 @@ Mission Control is a Next.js trading dashboard running on Oracle Cloud Ubuntu. I
 Be warm, patient, and thorough. Explain things clearly. If you don't know something specific about the system, say so honestly.`;
 
 export async function POST(req: Request) {
+  const __proxied = await proxyToServeftp(req); if (__proxied) return __proxied;
   try {
     const body = await req.json();
     const message = String(body.message || '').trim();

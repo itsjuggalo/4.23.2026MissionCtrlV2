@@ -1,10 +1,12 @@
 import { NextResponse } from 'next/server';
 import { readFileSync, existsSync } from 'fs';
 import { join } from 'path';
+import { proxyToServeftp } from "../../../lib/proxyToServeftp";
 
 const TASKS_FILE = join(process.env.HOME || '/home/ubuntu', '.openclaw/data/agent-tasks.json');
 
-export async function GET() {
+export async function GET(req: Request) {
+  const __proxied = await proxyToServeftp(req); if (__proxied) return __proxied;
   try {
     if (!existsSync(TASKS_FILE)) {
       return NextResponse.json({ error: 'tasks file missing', agents: {} });

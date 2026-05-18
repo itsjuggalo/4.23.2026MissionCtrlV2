@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import { tickerLogoUrl } from '@/lib/tickerDomains';
 import fs from 'fs';
 import path from 'path';
+import { proxyToServeftp } from "../../../lib/proxyToServeftp";
 
 const DB = 'https://stock-signal-72772-default-rtdb.firebaseio.com';
 const HISTORY_PATH = path.join(
@@ -18,7 +19,9 @@ function loadHistory(): Record<string, any> {
   }
 }
 
-export async function GET() {
+export async function GET(req: Request) {
+  const __proxied = await proxyToServeftp(req); if (__proxied) return __proxied;
+
   try {
     const [flowRes, alerts1Res, alerts2Res] = await Promise.all([
       fetch(`${DB}/FlowGreeks/LiveFlowLast100.json`).then(r => r.json()).catch(() => null),

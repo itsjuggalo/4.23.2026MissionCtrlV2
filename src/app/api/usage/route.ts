@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import { execSync } from 'child_process';
 import { readFileSync, existsSync } from 'fs';
 import { join } from 'path';
+import { proxyToServeftp } from "../../../lib/proxyToServeftp";
 
 const DATA_DIR = join(process.env.HOME || '/home/ubuntu', '.mission-control');
 const USAGE_FILE = join(DATA_DIR, 'api_usage.json');

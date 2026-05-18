@@ -1,8 +1,10 @@
 import { NextResponse } from 'next/server';
 import { insertTrade, closeTrade, getRecentTrades, getTradeStats } from '@/lib/db';
+import { proxyToServeftp } from "../../../lib/proxyToServeftp";
 
 // GET - retrieve trade history + stats
 export async function GET(request: Request) {
+  const __proxied = await proxyToServeftp(request); if (__proxied) return __proxied;
   try {
     const url = new URL(request.url);
     const limit = parseInt(url.searchParams.get('limit') || '50');

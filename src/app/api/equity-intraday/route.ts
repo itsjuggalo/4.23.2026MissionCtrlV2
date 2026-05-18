@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { readFile } from 'fs/promises';
+import { proxyToServeftp } from "../../../lib/proxyToServeftp";
 
 export const dynamic = 'force-dynamic';
 
@@ -10,7 +11,8 @@ async function readSecret(name: string): Promise<string> {
   catch { return ''; }
 }
 
-export async function GET() {
+export async function GET(req: Request) {
+  const __proxied = await proxyToServeftp(req); if (__proxied) return __proxied;
   try {
     // R2 default account (paper)
     const keyId = await readSecret('alpaca-key-id');

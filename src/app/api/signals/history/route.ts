@@ -1,11 +1,14 @@
-import { NextRequest, NextResponse } from 'next/server';
+import { NextResponse } from 'next/server';
 import { readFile } from 'fs/promises';
+import { proxyToServeftp } from "../../../../lib/proxyToServeftp";
 
 export const dynamic = 'force-dynamic';
 
 const HISTORY_FILE = '/home/ubuntu/mission-control/signal-receiver/data/signals_history.jsonl';
 
-export async function GET(req: NextRequest) {
+export async function GET(req: Request) {
+  const __proxied = await proxyToServeftp(req); if (__proxied) return __proxied;
+
   const { searchParams } = new URL(req.url);
   const ticker = (searchParams.get('ticker') || '').toUpperCase();
   const limit = parseInt(searchParams.get('limit') || '50', 10);

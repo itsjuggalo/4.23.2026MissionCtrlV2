@@ -5,6 +5,8 @@ import { useEffect, useState } from 'react';
 import type { Approval } from '@/lib/types';
 const initialApprovals: any[] = []; const signals: any[] = [];
 import { Sidebar } from './Sidebar';
+import PageErrorBoundary from "./PageErrorBoundary";
+import MissionMetrics from "./MissionMetrics";
 import { Header } from './Header';
 import { DashboardPage } from '../pages/DashboardPage';
 import { ScannerPage } from '../pages/ScannerPage';
@@ -181,13 +183,16 @@ export function AppShellClient() {
   }
 
   return (
-    <div className="flex h-screen bg-slate-950 text-slate-100">
-      <Sidebar activePage={activePage} onNavigate={(page) => { setActivePage(page as any); window.history.replaceState(null, '', '/?page=' + (page as string).toLowerCase().replace(/\s+/g, '-')); }} isCollapsed={isCollapsed} onToggle={() => setIsCollapsed(!isCollapsed)} newSignalsCount={newSignalsCount} pendingApprovalsCount={pendingApprovalsCount} />
+    <div className="flex flex-col h-screen bg-slate-950 text-slate-100">
+      <MissionMetrics />
+      <div className="flex flex-1 overflow-hidden">
+      <Sidebar activePage={activePage} onNavigate={(page) => { if (page === 'Landing') { window.location.href = '/landing'; return; } setActivePage(page as any); window.history.replaceState(null, '', '/?page=' + (page as string).toLowerCase().replace(/\s+/g, '-')); }} isCollapsed={isCollapsed} onToggle={() => setIsCollapsed(!isCollapsed)} newSignalsCount={newSignalsCount} pendingApprovalsCount={pendingApprovalsCount} />
       <div className="flex-1 flex flex-col overflow-hidden">
         <Header title={activePage} />
         <main className="flex-1 overflow-auto">
-          {renderPage()}
+          <PageErrorBoundary pageName={activePage}>{renderPage()}</PageErrorBoundary>
         </main>
+      </div>
       </div>
       <PsychChatWidget />
     </div>

@@ -1,64 +1,59 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { readFile, readdir, stat } from 'fs/promises';
+import { readFile } from 'fs/promises';
 import path from 'path';
 
 export const dynamic = 'force-dynamic';
+export const revalidate = 0;
+export const runtime = 'nodejs';
 
-const FORECASTS_DIR = '/home/ubuntu/.openclaw/workspace/directives/kronos_forecasts';
-const FALLBACK = '/home/ubuntu/.openclaw/workspace/directives/kronos_forecast.json';
-
-async function findLatestForSymbol(symbol: string): Promise<string | null> {
-  try {
-    const files = await readdir(FORECASTS_DIR);
-    const sym = symbol.toUpperCase();
-    // Try base + variants stripped of USDT/USD
-    const candidates = [sym];
-    const stripped = sym.replace(/USDT?$/, '');
-    if (stripped !== sym) candidates.push(stripped);
-    if (sym === 'BTCUSDT' || sym === 'BTCUSD') candidates.push('BTC');
-    if (sym === 'ETHUSDT' || sym === 'ETHUSD') candidates.push('ETH');
-
-    let bestPath: string | null = null;
-    let bestMtime = 0;
-    for (const c of candidates) {
-      // Match files starting with SYMBOL_ or SYMBOL.json exactly
-      const matches = files.filter(f =>
-        f.toUpperCase().startsWith(c + '_') || f.toUpperCase() === c + '.JSON'
-      );
-      for (const m of matches) {
-        const fp = path.join(FORECASTS_DIR, m);
-        try {
-          const st = await stat(fp);
-          if (st.mtimeMs > bestMtime) { bestMtime = st.mtimeMs; bestPath = fp; }
-        } catch {}
-      }
-      if (bestPath) break; // prefer first matched candidate base
-    }
-    return bestPath;
-  } catch { return null; }
-}
+const FALLBACK = path.join(process.cwd(), 'public', 'kronos-forecast.json');
+const SIDECAR = 'https://claudeclaw.serveftp.com/raw/kronos-forecast';
+const GENERATE = 'https://claudeclaw.serveftp.com/api/kronos-generate';
 
 export async function GET(req: NextRequest) {
-  const symbol = (req.nextUrl.searchParams.get('symbol') || '').toUpperCase();
+  const { searchParams } = req.nextUrl;
+  const symbol = (searchParams.get('symbol') || searchParams.get('ticker') || '').toUpperCase().trim();
+  const model = (searchParams.get('model') || '').toLowerCase().trim();
+
   if (symbol) {
-    const fp = await findLatestForSymbol(symbol);
-    if (fp) {
-      try {
-        const txt = await readFile(fp, 'utf-8');
-        const data = JSON.parse(txt);
-        return NextResponse.json({ ...data, _file: path.basename(fp) });
-      } catch (e: any) {
-        return NextResponse.json({ error: 'parse error: ' + e.message, symbol }, { status: 500 });
+    try {
+      const url = `${SIDECAR}?symbol=${encodeURIComponent(symbol)}&model=${encodeURIComponent(model)}`;
+      const r = await fetch(url, { cache: 'no-store' });
+      if (r.ok) {
+        const data = await r.json();
+        return NextResponse.json({ ...data, _via: 'sidecar', _model: model || data.model, _symbol: symbol });
       }
-    }
-    // Symbol requested but no file — return 404 so frontend can offer to generate
-    return NextResponse.json({ error: 'No forecast found for ' + symbol, symbol, missing: true }, { status: 404 });
+    } catch (_) {}
   }
-  // No symbol — fallback to default file
+
   try {
     const txt = await readFile(FALLBACK, 'utf-8');
-    return NextResponse.json(JSON.parse(txt));
-  } catch {
-    return NextResponse.json({ error: 'No default forecast' }, { status: 404 });
-  }
+    const data = JSON.parse(txt);
+    return NextResponse.json({ ...data, _file: 'fallback', _fallback: true, _requested_symbol: symbol || null });
+  } catch (_) {}
+
+  return NextResponse.json({ error: symbol ? `No forecast for ${symbol}` : 'No default forecast', symbol: symbol || null, missing: true }, { status: 404 });
+}
+
+// POST handler: trigger a new forecast generation via the sidecar
+export async function POST(req: NextRequest) {
+  const body = await req.json().catch(() => ({}));
+  const ticker = (body.ticker || body.symbol || '').toUpperCase().trim();
+  const model = (body.model || 'small').toLowerCase();
+  if (!ticker) return NextResponse.json({ error: 'ticker required' }, { status: 400 });
+
+  try {
+    const r = await fetch(GENERATE, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ ticker, model, source: 'vercel' }),
+      cache: 'no-store',
+    });
+    if (r.ok) {
+      const data = await r.json();
+      return NextResponse.json({ ...data, _via: 'sidecar' });
+    }
+  } catch (_) {}
+
+  return NextResponse.json({ error: 'Failed to reach forecast service' }, { status: 502 });
 }

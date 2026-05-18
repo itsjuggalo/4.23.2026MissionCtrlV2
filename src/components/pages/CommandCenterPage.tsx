@@ -52,6 +52,7 @@ export function CommandCenterPage() {
   const [equityIntraday, setEquityIntraday] = useState<any[]>([]);
   const [liveQuotes, setLiveQuotes] = useState<Record<string, any>>({});
   const [kronosSymbol, setKronosSymbol] = useState<string>('BTCUSDT');
+  const [kronosModel, setKronosModel] = useState<string>('small');
   const [showKronosInput, setShowKronosInput] = useState(false);
   const [kronosInput, setKronosInput] = useState('');
   const [kronosHistory, setKronosHistory] = useState<string[]>([]);
@@ -97,7 +98,7 @@ export function CommandCenterPage() {
       unusual._allFlows = flows;
       setUnusualFlows(unusual);
     }).catch(() => {});
-    fetch('/api/kronos-forecast?symbol=' + encodeURIComponent(kronosSymbol)).then(r => r.ok ? r.json() : null).then(d => { if (d) setKronosForecast(d); }).catch(() => {});
+    fetch('/api/kronos-forecast?symbol=' + encodeURIComponent(kronosSymbol) + '&model=' + encodeURIComponent(kronosModel)).then(r => r.ok ? r.json() : null).then(d => { if (d) setKronosForecast(d); }).catch(() => {});
     fetch('/api/options-flow').then(r => r.ok ? r.json() : { flows: [], alerts: [] }).then(d => {
       const flows = d.flows || [];
       const alerts = d.alerts || [];
@@ -106,7 +107,7 @@ export function CommandCenterPage() {
       unusual._allFlows = flows;
       setUnusualFlows(unusual);
     }).catch(() => {});
-    fetch('/api/kronos-forecast?symbol=' + encodeURIComponent(kronosSymbol)).then(r => r.ok ? r.json() : null).then(d => { if (d) setKronosForecast(d); }).catch(() => {});
+    fetch('/api/kronos-forecast?symbol=' + encodeURIComponent(kronosSymbol) + '&model=' + encodeURIComponent(kronosModel)).then(r => r.ok ? r.json() : null).then(d => { if (d) setKronosForecast(d); }).catch(() => {});
     fetch('/api/wallets').then(r => r.ok ? r.json() : []).then(wallets => {
       const tickers: any[] = []; let rhTotal = 0;
       for (const w of wallets) {
@@ -214,7 +215,7 @@ export function CommandCenterPage() {
   // Refetch Kronos when symbol changes — handles 404 + updates history
   useEffect(() => {
     setKronosError(''); setKronosLoading(true);
-    fetch('/api/kronos-forecast?symbol=' + encodeURIComponent(kronosSymbol))
+    fetch('/api/kronos-forecast?symbol=' + encodeURIComponent(kronosSymbol) + '&model=' + encodeURIComponent(kronosModel))
       .then(async r => {
         if (r.ok) { return r.json(); }
         const j = await r.json().catch(() => ({}));
@@ -225,7 +226,7 @@ export function CommandCenterPage() {
         }
         return null;
       })
-      .then(d => { if (d) { setKronosForecast(d); setKronosError(''); } })
+      .then(d => { if (d) { setKronosForecast(d); setKronosError(''); } else { setKronosForecast(null); } })
       .catch(() => setKronosError('Network error'))
       .finally(() => setKronosLoading(false));
     // Update history (de-dupe, prepend, cap 10)
@@ -813,22 +814,23 @@ export function CommandCenterPage() {
 
         <div className="cc" style={{ padding: '16px' }}>
           <div className="lbl" style={{ marginBottom: '10px', display: 'flex', justifyContent: 'space-between' }}>
-            <span style={{ color: '#ce93d8' }}>KRONOS {kronosForecast?.symbol || kronosSymbol} FORECAST</span>
+            <span style={{ color: '#ce93d8' }}>KRONOS {kronosForecast?.ticker || kronosForecast?.symbol || kronosSymbol} FORECAST</span>
             <span style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
               <span style={{ color: '#4fc3f7', fontWeight: 700 }}>{kronosForecast?.symbol || kronosSymbol}</span>
               <button onClick={() => setShowKronosInput(v => !v)} style={{ background: showKronosInput ? '#ef5350' : '#1a3a4a', color: '#e0e0e0', border: 'none', borderRadius: '3px', width: '20px', height: '20px', cursor: 'pointer', fontSize: '12px', fontWeight: 700, lineHeight: '14px', fontFamily: 'var(--font-mc-mono)' }}>{showKronosInput ? '×' : '✎'}</button>
               <button onClick={() => setShowKronosHistory(v => !v)} title="History" style={{ background: '#1a3a4a', color: '#e0e0e0', border: 'none', borderRadius: '3px', padding: '2px 6px', cursor: 'pointer', fontSize: '10px', fontWeight: 700, fontFamily: 'var(--font-mc-mono)' }}>HIST</button>
+              <select value={kronosModel} onChange={e => setKronosModel(e.target.value)} style={{ background: '#1a3a4a', color: '#5fa3ff', border: '1px solid #1a3a4a', borderRadius: '3px', padding: '2px 6px', cursor: 'pointer', fontSize: '10px', fontWeight: 700, fontFamily: 'var(--font-mc-mono)', marginRight: '4px' }}><option value="mini">mini</option><option value="small">small</option><option value="base">base</option></select>
               <button onClick={async () => {
                 setKronosLoading(true); setKronosError('');
                 try {
-                  const r = await fetch('/api/kronos-generate', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ ticker: kronosSymbol }) });
+                  const r = await fetch('/api/kronos-generate', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ ticker: kronosSymbol, model: kronosModel }) });
                   const j = await r.json();
                   if (j.status === 'generating') {
                     setKronosError('Generating ' + kronosSymbol + '... checking every 20s (~3 min)');
                     let attempts = 0;
                     const poll = setInterval(() => {
                       attempts++;
-                      fetch('/api/kronos-forecast?symbol=' + encodeURIComponent(kronosSymbol)).then(r => r.ok ? r.json() : null).then(d => {
+                      fetch('/api/kronos-forecast?symbol=' + encodeURIComponent(kronosSymbol) + '&model=' + encodeURIComponent(kronosModel)).then(r => r.ok ? r.json() : null).then(d => {
                         if (d && !d.error) { setKronosForecast(d); setKronosError(''); setKronosLoading(false); clearInterval(poll); }
                       });
                       if (attempts > 20) { setKronosError('Timeout waiting for forecast.'); setKronosLoading(false); clearInterval(poll); }
@@ -861,16 +863,16 @@ export function CommandCenterPage() {
                 </div>
                 <div style={{ background: '#0d1117', borderRadius: '6px', padding: '10px', textAlign: 'center' }}>
                   <div style={{ fontSize: 'var(--mc-font-label)', color: '#607d8b', fontFamily: 'var(--font-mc-mono)', marginBottom: '4px' }}>24H FORECAST</div>
-                  <div style={{ fontSize: 'var(--mc-font-lg)', fontWeight: 700, color: kronosForecast.summary?.direction === 'BULLISH' ? '#66bb6a' : '#ef5350', fontFamily: 'var(--font-mc-mono)' }}>${kronosForecast.summary?.price_in_24h?.toLocaleString()}</div>
+                  <div style={{ fontSize: 'var(--mc-font-lg)', fontWeight: 700, color: kronosForecast.forecast_24h_direction === 'bullish' ? '#66bb6a' : '#ef5350', fontFamily: 'var(--font-mc-mono)' }}>${kronosForecast.forecast_24h_target?.toLocaleString()}</div>
                 </div>
                 <div style={{ background: '#0d1117', borderRadius: '6px', padding: '10px', textAlign: 'center' }}>
                   <div style={{ fontSize: 'var(--mc-font-label)', color: '#607d8b', fontFamily: 'var(--font-mc-mono)', marginBottom: '4px' }}>DIRECTION</div>
-                  <div style={{ fontSize: 'var(--mc-font-lg)', fontWeight: 700, color: kronosForecast.summary?.direction === 'BULLISH' ? '#66bb6a' : '#ef5350', fontFamily: 'var(--font-mc-mono)' }}>{kronosForecast.summary?.direction}</div>
+                  <div style={{ fontSize: 'var(--mc-font-lg)', fontWeight: 700, color: kronosForecast.forecast_24h_direction === 'bullish' ? '#66bb6a' : '#ef5350', fontFamily: 'var(--font-mc-mono)' }}>{kronosForecast.forecast_24h_direction?.toUpperCase()}</div>
                 </div>
               </div>
               <div style={{ display: 'flex', justifyContent: 'space-between', padding: '8px 12px', background: '#0d1117', borderRadius: '6px' }}>
-                <span style={{ fontSize: 'var(--mc-font-label)', color: '#607d8b', fontFamily: 'var(--font-mc-mono)' }}>Change: <span style={{ color: kronosForecast.summary?.change_pct >= 0 ? '#66bb6a' : '#ef5350', fontWeight: 700 }}>{kronosForecast.summary?.change_pct >= 0 ? '+' : ''}{kronosForecast.summary?.change_pct?.toFixed(2)}%</span></span>
-                <span style={{ fontSize: 'var(--mc-font-label)', color: '#607d8b', fontFamily: 'var(--font-mc-mono)' }}>Range: <span style={{ color: '#ff9800' }}>${kronosForecast.summary?.predicted_low?.toLocaleString()} — ${kronosForecast.summary?.predicted_high?.toLocaleString()}</span></span>
+                <span style={{ fontSize: 'var(--mc-font-label)', color: '#607d8b', fontFamily: 'var(--font-mc-mono)' }}>Change: <span style={{ color: kronosForecast.forecast_24h_change_pct >= 0 ? '#66bb6a' : '#ef5350', fontWeight: 700 }}>{kronosForecast.forecast_24h_change_pct >= 0 ? '+' : ''}{kronosForecast.forecast_24h_change_pct?.toFixed(2)}%</span></span>
+                <span style={{ fontSize: 'var(--mc-font-label)', color: '#607d8b', fontFamily: 'var(--font-mc-mono)' }}>Range: <span style={{ color: '#ff9800' }}>${kronosForecast.forecast_24h_low?.toLocaleString()} — ${kronosForecast.forecast_24h_high?.toLocaleString()}</span></span>
               </div>
             </div>
           ) : <div style={{ color: '#455a64', fontSize: 'var(--mc-font-badge)', fontFamily: 'var(--font-mc-mono)', textAlign: 'center', padding: '30px' }}>Awaiting Kronos forecast...</div>}

@@ -389,9 +389,18 @@ const PriceChart: React.FC<{ candles: Candles | null; bullish: boolean; mode?: '
             <rect x="0" y="0" width={CHART_W} height={H - AXIS_H} />
           </clipPath>
         </defs>
-        {[0.2, 0.4, 0.6, 0.8].map((pct, i) => (
-          <line key={i} x1={PAD} x2={CHART_W - PAD} y1={7 + pct * ((H - AXIS_H) - 14)} y2={7 + pct * ((H - AXIS_H) - 14)} stroke="#2a3442" strokeWidth="0.6" strokeDasharray="2 4" opacity="0.7" />
-        ))}
+        {[0.2, 0.4, 0.6, 0.8].map((pct, i) => {
+              const gy = 7 + pct * ((H - AXIS_H) - 14);
+              const priceAtGy = (typeof yMax === 'number' && typeof yMin === 'number') ? (yMax - pct * (yMax - yMin)) : null;
+              return (
+                <g key={i}>
+                  <line x1={PAD} x2={CHART_W - PAD} y1={gy} y2={gy} stroke="#2a3442" strokeWidth="0.6" strokeDasharray="2 4" opacity="0.7" />
+                  {priceAtGy != null && (
+                    <text x={PAD - 3} y={gy + 3} textAnchor="end" fontSize="8" fill="#8a9aab" fontFamily="var(--font-mc-mono)">${priceAtGy.toFixed(2)}</text>
+                  )}
+                </g>
+              );
+            })}
         <rect x={PAD} y={scaleY(resistance)} width={CHART_W - PAD*2} height={10} fill="url(#resistanceGrad)" />
         <rect x={PAD} y={scaleY(support) - 10} width={CHART_W - PAD*2} height={10} fill="url(#supportGrad)" />
         <line x1={PAD} x2={CHART_W - PAD} y1={scaleY(support)} y2={scaleY(support)} stroke="#66bb6a" strokeWidth="1" strokeDasharray="4 3" opacity="0.9" />

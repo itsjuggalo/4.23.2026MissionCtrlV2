@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import fs from "fs";
 import path from "path";
 import os from "os";
+import { proxyToServeftp } from "../../../lib/proxyToServeftp";
 
 // NOTE: signal-receiver data lives under ~/mission-control/ (not mission-control-restored)
 const DATA_DIR = path.join(os.homedir(), "mission-control", "signal-receiver", "data");
@@ -38,7 +39,8 @@ function safeReadJSONL(filename: string, maxLines: number = 50): Record<string, 
   }
 }
 
-export async function GET() {
+export async function GET(req: Request) {
+  const __proxied = await proxyToServeftp(req); if (__proxied) return __proxied;
   try {
     const regime = safeReadJSON("market_regime.json");
     const optimal_params = safeReadJSON("optimal_params.json");

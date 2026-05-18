@@ -1,5 +1,6 @@
-import { NextResponse } from 'next/server';
+import {NextResponse, NextRequest } from 'next/server';
 import { readFileSync } from 'fs';
+import { proxyToServeftp } from "../../../lib/proxyToServeftp";
 
 function getSecret(name: string): string {
   try {
@@ -8,6 +9,7 @@ function getSecret(name: string): string {
 }
 
 export async function GET(req: Request) {
+  const __proxied = await proxyToServeftp(req); if (__proxied) return __proxied;
   const url = new URL(req.url);
   const symbols = url.searchParams.get('symbols')?.split(',').filter(Boolean) || [];
   

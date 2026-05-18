@@ -50,32 +50,52 @@ function RightNowBlock() {
 // 2. KRONOS QUERY
 function KronosBlock() {
   const [ticker, setTicker] = useState('');
+  const [model, setModel] = useState('small');
   const [result, setResult] = useState<any>(null);
   const [running, setRunning] = useState(false);
   const [error, setError] = useState('');
+  const [pollCount, setPollCount] = useState(0);
 
   const lookup = async (t: string) => {
     setError('');
     setResult(null);
     if (!t) return;
     try {
-      const r = await fetch(`/api/kronos-forecast?ticker=${encodeURIComponent(t)}`, { cache: 'no-store' });
-      if (r.ok) setResult(await r.json());
-      else setError((await r.json()).error || 'not found');
-    } catch (e: any) { setError(e.message); }
+      const r = await fetch(`/api/kronos-forecast?ticker=${encodeURIComponent(t)}&model=${encodeURIComponent(model)}`, { cache: 'no-store' });
+      if (r.ok) { const d = await r.json(); if (!d.error) { setResult(d); return true; } }
+      setError('No forecast found');
+      return false;
+    } catch (e: any) { setError(e.message); return false; }
   };
 
   const runLive = async () => {
     if (!ticker) return;
-    setRunning(true); setError(''); setResult(null);
+    setRunning(true); setError(''); setResult(null); setPollCount(0);
     try {
-      const r = await fetch('/api/kronos-forecast', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ ticker: ticker.toUpperCase() }) });
+      const r = await fetch('/api/kronos-forecast', {
+        method: 'POST',
+        headers: { 'content-type': 'application/json' },
+        body: JSON.stringify({ ticker: ticker.toUpperCase(), model }),
+      });
       const j = await r.json();
-      if (!r.ok) setError(j.error || 'failed');
-      else { await new Promise(r => setTimeout(r, 1500)); await lookup(ticker.toUpperCase()); }
-    } catch (e: any) { setError(e.message); }
-    setRunning(false);
+      if (!r.ok) { setError(j.error || 'failed'); setRunning(false); return; }
+      // Poll for result (inference takes 2-4 min)
+      let attempts = 0;
+      const poll = async () => {
+        attempts++;
+        setPollCount(attempts);
+        if (attempts > 40) { setError('Timed out waiting for forecast'); setRunning(false); return; }
+        await new Promise(r => setTimeout(r, 10000));
+        const found = await lookup(ticker.toUpperCase());
+        if (found) { setRunning(false); return; }
+        await poll();
+      };
+      await poll();
+    } catch (e: any) { setError(e.message); setRunning(false); }
   };
+
+  const dirColor = result?.forecast_24h_direction === 'bullish' ? '#00d2a0' : result?.forecast_24h_direction === 'bearish' ? '#ef5350' : '#ffa502';
+  const changePct = result?.forecast_24h_change_pct;
 
   return (
     <div className="db-card" style={{ padding: 16, minHeight: 240 }}>
@@ -89,17 +109,38 @@ function KronosBlock() {
           maxLength={8}
           style={{ flex: 1, padding: '6px 10px', fontSize: 13, background: '#0a1929', color: '#e8e8ed', border: '1px solid #1a3a4a', borderRadius: 4, fontFamily: 'var(--font-mc-mono)' }}
         />
+        <select
+          value={model}
+          onChange={e => setModel(e.target.value)}
+          style={{ padding: '6px 6px', fontSize: 11, background: '#0a1929', color: '#e8e8ed', border: '1px solid #1a3a4a', borderRadius: 4, fontFamily: 'var(--font-mc-mono)' }}
+        >
+          <option value="mini">MINI</option>
+          <option value="small">SMALL</option>
+          <option value="base">BASE</option>
+        </select>
         <button onClick={() => lookup(ticker)} style={{ padding: '6px 10px', fontSize: 11, background: '#1a3a4a', color: '#e8e8ed', border: 'none', borderRadius: 4, cursor: 'pointer' }}>CACHED</button>
-        <button onClick={runLive} disabled={running} style={{ padding: '6px 10px', fontSize: 11, background: running ? '#2a4a5a' : '#00d2a0', color: running ? '#607d8b' : '#0a1929', border: 'none', borderRadius: 4, cursor: running ? 'wait' : 'pointer', fontWeight: 700 }}>{running ? 'RUNNING…' : 'LIVE'}</button>
+        <button onClick={runLive} disabled={running} style={{ padding: '6px 10px', fontSize: 11, background: running ? '#2a4a5a' : '#00d2a0', color: running ? '#607d8b' : '#0a1929', border: 'none', borderRadius: 4, cursor: running ? 'wait' : 'pointer', fontWeight: 700 }}>{running ? `RUNNING${pollCount > 0 ? ` (${pollCount * 10}s)` : '...'}` : 'LIVE'}</button>
       </div>
       {error && <div style={{ color: '#ef5350', fontSize: 11 }}>{error}</div>}
+      {running && !result && <div style={{ color: '#607d8b', fontSize: 11 }}>Generating forecast (2-4 min)... polling every 10s</div>}
       {result && (
-        <div style={{ fontSize: 12, color: '#e8e8ed', fontFamily: 'var(--font-mc-mono)', lineHeight: 1.6 }}>
-          <div><span style={{ color: '#607d8b' }}>Direction:</span> <b style={{ color: result.forecast_24h_direction === 'bullish' ? '#00d2a0' : result.forecast_24h_direction === 'bearish' ? '#ef5350' : '#ffa502' }}>{String(result.forecast_24h_direction || '—').toUpperCase()}</b></div>
-          <div><span style={{ color: '#607d8b' }}>Current:</span> ${result.current_price?.toFixed(2) ?? '—'}</div>
-          <div><span style={{ color: '#607d8b' }}>24h target:</span> ${result.forecast_24h_target?.toFixed(2) ?? '—'}</div>
-          <div><span style={{ color: '#607d8b' }}>Confidence:</span> {result.forecast_24h_confidence || '—'}</div>
-          <div style={{ fontSize: 10, color: '#607d8b', marginTop: 6 }}>Updated: {fmtTimeAgo(result._file_mtime || result.generated_at)}</div>
+        <div style={{ fontSize: 12, color: '#e8e8ed', fontFamily: 'var(--font-mc-mono)', lineHeight: 1.7 }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', marginBottom: 4 }}>
+            <b style={{ color: dirColor, fontSize: 14 }}>{String(result.forecast_24h_direction || '---').toUpperCase()}</b>
+            <span style={{ fontSize: 10, color: '#607d8b' }}>{result.forecast_24h_confidence?.toUpperCase() || '---'} confidence</span>
+          </div>
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '2px 12px' }}>
+            <div><span style={{ color: '#607d8b' }}>Current:</span> ${result.current_price?.toFixed(2) ?? '---'}</div>
+            <div><span style={{ color: '#607d8b' }}>24h target:</span> <span style={{ color: dirColor }}>${result.forecast_24h_target?.toFixed(2) ?? '---'}</span></div>
+            <div><span style={{ color: '#607d8b' }}>Change:</span> <span style={{ color: changePct >= 0 ? '#00d2a0' : '#ef5350' }}>{changePct >= 0 ? '+' : ''}{changePct?.toFixed(2) ?? '---'}%</span></div>
+            <div><span style={{ color: '#607d8b' }}>Range:</span> {result.forecast_range_pct?.toFixed(1) ?? '---'}%</div>
+            <div><span style={{ color: '#607d8b' }}>Low:</span> ${result.forecast_24h_low?.toFixed(2) ?? '---'}</div>
+            <div><span style={{ color: '#607d8b' }}>High:</span> ${result.forecast_24h_high?.toFixed(2) ?? '---'}</div>
+          </div>
+          <div style={{ fontSize: 10, color: '#607d8b', marginTop: 6, display: 'flex', justifyContent: 'space-between' }}>
+            <span>{result.model || result._model || '---'} | {result.candles_analyzed || '---'} candles | {result.sample_paths || 1} path(s)</span>
+            <span>{fmtTimeAgo(result._file_mtime || result.generated_at)}</span>
+          </div>
         </div>
       )}
     </div>

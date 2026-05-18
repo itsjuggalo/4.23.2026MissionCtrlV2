@@ -1,4 +1,6 @@
 "use client";
+// MC_FLOW_GUARD
+if (typeof window !== "undefined") { window.addEventListener("unhandledrejection", (e) => { console.warn("[FlowHistory]", e.reason); e.preventDefault(); }); }
 
 import { useState, useEffect, useCallback, useMemo } from "react";
 
@@ -119,7 +121,13 @@ export function FlowHistoryPage() {
       if (res.status === 404) {
         const body = await res.json();
         setData(null);
-        setAvailableDates(body.available_dates || []);
+        const avail = (body.available_dates || []).sort().reverse();
+        setAvailableDates(avail);
+        const latest = avail[0];
+        if (latest && latest !== date) {
+          setDate(latest);
+          return;
+        }
         setError(`No data for ${date}`);
       } else if (res.ok) {
         const body: ApiResp = await res.json();

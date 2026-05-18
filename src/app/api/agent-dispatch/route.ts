@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { readFileSync, existsSync } from 'fs';
 import { join } from 'path';
+import { proxyToServeftp } from "../../../lib/proxyToServeftp";
 
 const SECRETS = join(process.env.HOME || '/home/ubuntu', '.openclaw/secrets');
 
@@ -14,6 +15,7 @@ async function sendDiscordMessage(webhookUrl: string, content: string) {
 }
 
 export async function POST(req: Request) {
+  const __proxied = await proxyToServeftp(req); if (__proxied) return __proxied;
   try {
     const { agent, message, channel } = await req.json();
 

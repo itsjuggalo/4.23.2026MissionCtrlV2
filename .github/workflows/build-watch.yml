@@ -1,0 +1,56 @@
+name: Build Watch (vercel branch)
+
+on:
+  push:
+    branches: [vercel]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: 'npm'
+
+      - name: Install
+        run: npm ci
+
+      - name: Next build (capture output)
+        id: build
+        run: |
+          set +e
+          npm run build > build_output.log 2>&1
+          echo "exit_code=$?" >> $GITHUB_OUTPUT
+          tail -200 build_output.log
+        continue-on-error: true
+
+      - name: Create Linear issue on failure
+        if: steps.build.outputs.exit_code != '0'
+        env:
+          LINEAR_API_KEY: ${{ secrets.LINEAR_API_KEY }}
+          LINEAR_TEAM_ID: ${{ secrets.LINEAR_TEAM_ID }}
+          COMMIT_SHA: ${{ github.sha }}
+          COMMIT_MSG: ${{ github.event.head_commit.message }}
+          REPO: ${{ github.repository }}
+          RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+        run: |
+          # tail of build log as description
+          LOG=$(tail -100 build_output.log | sed 's/"/\\"/g' | tr -d '\r')
+          DESC="**Commit**: \`${COMMIT_SHA:0:7}\` — ${COMMIT_MSG}\\n\\n**Run**: ${RUN_URL}\\n\\n\`\`\`\\n${LOG}\\n\`\`\`"
+          curl -s -X POST https://api.linear.app/graphql \
+            -H "Authorization: ${LINEAR_API_KEY}" \
+            -H "Content-Type: application/json" \
+            -d "{\"query\":\"mutation { issueCreate(input: { teamId: \\\"${LINEAR_TEAM_ID}\\\", title: \\\"[autofix] Vercel build failed @ ${COMMIT_SHA:0:7}\\\", description: \\\"${DESC}\\\" }) { success issue { id identifier url } } }\"}" \
+            | tee linear_response.json
+          echo ""
+          # If autofix failed too, fail the workflow
+          grep -q '"success":true' linear_response.json || (echo "Linear issue creation failed" && exit 1)
+
+      - name: Fail if build failed
+        if: steps.build.outputs.exit_code != '0'
+        run: |
+          echo "Build failed (exit ${{ steps.build.outputs.exit_code }}). Linear issue created."
+          exit 1

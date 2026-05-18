@@ -1,10 +1,12 @@
 import { NextResponse } from 'next/server';
 import { readFileSync, existsSync } from 'fs';
 import { join } from 'path';
+import { proxyToServeftp } from "../../../../lib/proxyToServeftp";
 
 const WORKSPACE = join(process.env.HOME || '/home/ubuntu', '.openclaw/workspace');
 
 export async function GET(request: Request) {
+  const __proxied = await proxyToServeftp(req); if (__proxied) return __proxied;
   try {
     const url = new URL(request.url);
     const filePath = url.searchParams.get('path');

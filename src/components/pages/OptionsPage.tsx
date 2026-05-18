@@ -637,7 +637,7 @@ export function OptionsPage() {
 
   const filteredSignals = useMemo(() => {
     if (!analystData) return { open: [], closed: [] };
-    const tabData = analystData.byTab[activeTab as 'scalps' | 'swings' | 'leaps'];
+    const tabData = analystData?.byTab?.[activeTab as 'scalps' | 'swings' | 'leaps'];
     if (!tabData) return { open: [], closed: [] };
     const filterFn = (s: AnalystSignal) =>
       sourceFilter === 'all' ? true : s.sourceGroup === sourceFilter;
@@ -650,9 +650,9 @@ export function OptionsPage() {
 
   const notificationsForActiveTab = useMemo<NotificationItem[]>(() => {
     if (!notificationsData?.byTab) return [];
-    if (activeTab === 'scalps') return notificationsData.byTab.scalps || [];
-    if (activeTab === 'swings') return notificationsData.byTab.swings || [];
-    if (activeTab === 'leaps')  return notificationsData.byTab.leaps  || [];
+    if (activeTab === 'scalps') return notificationsData?.byTab?.scalps || [];
+    if (activeTab === 'swings') return notificationsData?.byTab?.swings || [];
+    if (activeTab === 'leaps')  return notificationsData?.byTab?.leaps  || [];
     return [];
   }, [notificationsData, activeTab]);
 
@@ -743,6 +743,15 @@ export function OptionsPage() {
           <PrimaryTabButton label="Flow Alerts" count={counts.flowAlerts} active={activeTab === 'flowAlerts'} onClick={() => setActiveTab('flowAlerts')} />
           <PrimaryTabButton label="Option Flow" count={counts.optionFlow} active={activeTab === 'optionFlow'} onClick={() => setActiveTab('optionFlow')} />
         </div>
+
+                {/* Active filters indicator */}
+        {((activeTab === 'flowAlerts' && !isFiltersDefault(alertFilters)) || (activeTab === 'optionFlow' && !isFiltersDefault(flowFilters))) ? (
+          <div data-x="ActiveFiltersChip" style={{ padding: '6px 14px', display: 'flex', alignItems: 'center', gap: 8, fontSize: 11, color: '#ffd600', background: 'rgba(255,214,0,0.08)', borderBottom: '1px solid #0d1117' }}>
+            <span style={{ fontWeight: 700 }}>FILTERS ACTIVE</span>
+            <span style={{ color: '#90a4ae' }}>showing only matches - click filter icon to adjust</span>
+            <button onClick={() => { if (activeTab === 'flowAlerts') setAlertFilters(DEFAULT_FILTERS); else setFlowFilters(DEFAULT_FILTERS); }} style={{ marginLeft: 'auto', background: 'none', border: '1px solid #ffd600', color: '#ffd600', fontSize: 10, padding: '2px 8px', borderRadius: 4, cursor: 'pointer' }}>CLEAR</button>
+          </div>
+        ) : null}
 
         {/* Sub-tabs: signal source filter OR alert category */}
         {(activeTab === 'scalps' || activeTab === 'swings' || activeTab === 'leaps') && (

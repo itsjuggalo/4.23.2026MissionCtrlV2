@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { promises as fs } from 'fs';
 import path from 'path';
+import { proxyToServeftp } from "../../../lib/proxyToServeftp";
 
 // Coinbase public API — no key, no geo-restrictions
 const COINBASE_BASE = 'https://api.coinbase.com/v2/prices';

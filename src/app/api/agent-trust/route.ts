@@ -1,8 +1,10 @@
 import { NextResponse } from 'next/server';
 import { getDb } from '@/lib/db';
+import { proxyToServeftp } from "../../../lib/proxyToServeftp";
 
 // Agent trust scoring — grades each agent on reliability, accuracy, speed
-export async function GET() {
+export async function GET(request: Request) {
+  const __proxied = await proxyToServeftp(request); if (__proxied) return __proxied;
   try {
     const db = getDb();
 

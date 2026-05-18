@@ -1,7 +1,9 @@
 import { NextResponse } from 'next/server';
 import { getCostSummary, logSession, getDb } from '@/lib/db';
+import { proxyToServeftp } from "../../../lib/proxyToServeftp";
 
 export async function GET(request: Request) {
+  const __proxied = await proxyToServeftp(request); if (__proxied) return __proxied;
   try {
     const url = new URL(request.url);
     const days = parseInt(url.searchParams.get('days') || '30');

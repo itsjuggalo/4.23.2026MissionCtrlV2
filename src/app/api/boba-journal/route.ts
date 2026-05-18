@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import fs from 'fs/promises';
 import path from 'path';
 import os from 'os';
+import { proxyToServeftp } from "../../../lib/proxyToServeftp";
 
 /**
  * Boba Journal — aggregates Boba's existing decision log with live SQLite trade outcomes.
@@ -136,6 +137,7 @@ function flattenAutoTrader(entries: any[]): JournalEntry[] {
 }
 
 export async function GET(req: Request) {
+  const __proxied = await proxyToServeftp(req); if (__proxied) return __proxied;
   try {
     const url = new URL(req.url);
     const sourceFilter = url.searchParams.get('source'); // 'boba-options' | 'auto-trader-btc' | null (all)
