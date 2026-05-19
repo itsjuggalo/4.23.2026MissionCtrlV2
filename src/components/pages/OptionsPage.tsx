@@ -576,11 +576,37 @@ function todayET(): string {
   return new Date().toLocaleDateString('en-CA', { timeZone: 'America/New_York' });
 }
 
-function flowDayLabel(dateStr: string): string {
-  const d = new Date(dateStr + 'T12:00:00');
-  const wd = d.toLocaleDateString('en-US', { weekday: 'short' });
-  const md = d.toLocaleDateString('en-US', { month: '2-digit', day: '2-digit' });
-  return dateStr === todayET() ? `${wd} ${md} · Today` : `${wd} ${md}`;
+// Monday-of-week (YYYY-MM-DD) for any ET day string. Treats Sat/Sun as
+// belonging to the prior Mon-Fri trading week so the weekend default
+// lands on the most recent business week.
+function weekStartET(dateStr: string): string {
+  const d = new Date(dateStr + 'T12:00:00Z');
+  const dow = d.getUTCDay(); // 0=Sun .. 6=Sat
+  const back = dow === 0 ? 6 : dow === 6 ? 5 : dow - 1; // days since Monday
+  d.setUTCDate(d.getUTCDate() - back);
+  return d.toISOString().slice(0, 10);
+}
+
+// Distinct Monday keys derived from the available-dates list, newest first.
+function weeksFromDates(dates: string[]): string[] {
+  const seen = new Set<string>();
+  const out: string[] = [];
+  for (const d of dates) {
+    const w = weekStartET(d);
+    if (!seen.has(w)) { seen.add(w); out.push(w); }
+  }
+  return out;
+}
+
+// "Week of 5/12 — 5/16" (Mon–Fri), with " · This week" tacked on for the current week.
+function flowWeekLabel(mondayStr: string): string {
+  const mon = new Date(mondayStr + 'T12:00:00Z');
+  const fri = new Date(mon);
+  fri.setUTCDate(mon.getUTCDate() + 4);
+  const fmt = (d: Date) =>
+    d.toLocaleDateString('en-US', { timeZone: 'UTC', month: 'numeric', day: 'numeric' });
+  const label = `Week of ${fmt(mon)} — ${fmt(fri)}`;
+  return mondayStr === weekStartET(todayET()) ? `${label} · This week` : label;
 }
 
 export function OptionsPage() {
@@ -597,7 +623,7 @@ export function OptionsPage() {
 
   const [analystData, setAnalystData] = useState<AnalystResponse | null>(null);
   const [flowData, setFlowData] = useState<FlowResponse | null>(null);
-  const [flowDate, setFlowDate] = useState<string>(todayET());
+  const [flowWeek, setFlowWeek] = useState<string>(weekStartET(todayET()));
   const [notificationsData, setNotificationsData] = useState<NotificationsResponse | null>(null);
   const [loading, setLoading] = useState(true);
   const [drawerTicker, setDrawerTicker] = useState<string | null>(null);
@@ -617,12 +643,12 @@ export function OptionsPage() {
     return () => { cancelled = true; clearInterval(id); };
   }, []);
 
-  // Data fetching — flow + alerts (flow tape is scoped to the selected day)
+  // Data fetching — flow + alerts (flow tape is scoped to the selected Mon-Fri week)
   useEffect(() => {
     let cancelled = false;
     const pull = async () => {
       try {
-        const r = await fetch(`/api/options-flow?date=${flowDate}`);
+        const r = await fetch(`/api/options-flow?week=${flowWeek}`);
         const d = await r.json();
         if (!cancelled) {
           setFlowData(d);
@@ -633,15 +659,15 @@ export function OptionsPage() {
     pull();
     const id = setInterval(pull, 10000);
     return () => { cancelled = true; clearInterval(id); };
-  }, [flowDate]);
+  }, [flowWeek]);
 
-  // Snap the picker to a day that actually has data once the list arrives.
+  // Snap the picker to a week that actually has data once the list arrives.
   useEffect(() => {
     const avail = flowData?.availableDates;
-    if (avail && avail.length && !avail.includes(flowDate)) {
-      setFlowDate(avail[0]);
-    }
-  }, [flowData, flowDate]);
+    if (!avail || !avail.length) return;
+    const weeks = weeksFromDates(avail);
+    if (!weeks.includes(flowWeek)) setFlowWeek(weeks[0]);
+  }, [flowData, flowWeek]);
 
   // Derived: filter signals by source group
   // Data fetching — notifications (live from Firebase via /api/notifications)
@@ -881,8 +907,8 @@ export function OptionsPage() {
           <>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '10px', gap: '10px' }}>
               <select
-                value={flowDate}
-                onChange={(e) => setFlowDate(e.target.value)}
+                value={flowWeek}
+                onChange={(e) => setFlowWeek(e.target.value)}
                 style={{
                   background: '#0d1117', color: '#e8e8ed',
                   border: '1px solid #1a2332', borderRadius: '4px',
@@ -890,9 +916,14 @@ export function OptionsPage() {
                   fontFamily: 'var(--font-mc-mono)',
                 }}
               >
-                {(flowData.availableDates?.length ? flowData.availableDates : [flowDate]).map((d) => (
-                  <option key={d} value={d}>{flowDayLabel(d)}</option>
-                ))}
+                {(() => {
+                  const weeks = flowData.availableDates?.length
+                    ? weeksFromDates(flowData.availableDates)
+                    : [flowWeek];
+                  return weeks.map((w) => (
+                    <option key={w} value={w}>{flowWeekLabel(w)}</option>
+                  ));
+                })()}
               </select>
               <FilterIconButton active={!isFiltersDefault(flowFilters)} onClick={() => setFilterModalOpen(true)} />
             </div>
@@ -920,7 +951,7 @@ export function OptionsPage() {
                   .filter(f => matchesFilters(f, flowFilters))
                   .slice(0, 500);
                 if (rows.length === 0) {
-                  return <div style={{ padding: '24px 16px', textAlign: 'center', color: '#5c5c72', fontSize: '13px' }}>No option flow recorded for this day.</div>;
+                  return <div style={{ padding: '24px 16px', textAlign: 'center', color: '#5c5c72', fontSize: '13px' }}>No option flow recorded for this week.</div>;
                 }
                 return rows.map((f, i) => <FlowTapeRow key={f.OptionSymbol + '_' + i} f={f} onSymbolClick={setDrawerTicker} />);
               })()}

@@ -54,8 +54,12 @@ async function flowsForDate(date: string): Promise<any[]> {
 export async function GET(req: Request) {
   const __proxied = await proxyToServeftp(req); if (__proxied) return __proxied;
 
-  // ?date=YYYY-MM-DD (ET) -> multi-day tape from flow.db. No date -> live last-100.
-  const date = new URL(req.url).searchParams.get('date');
+  // ?week=YYYY-MM-DD (Monday, ET) -> Mon-Fri tape from flow.db.
+  // ?date=YYYY-MM-DD (ET)         -> single-day tape (kept for back-compat).
+  // No week/date                  -> live last-100 from Firebase.
+  const url = new URL(req.url);
+  const date = url.searchParams.get('date');
+  const week = url.searchParams.get('week');
 
   try {
     // Flow Alerts are always "today", live from Firebase.
@@ -67,10 +71,22 @@ export async function GET(req: Request) {
         .then(r => r.ok ? r.json() : []).catch(() => []),
     ]);
 
-    // Option Flow tape: flow.db (date-aware, multi-day) when a date is
-    // requested, otherwise the Firebase live last-100 feed.
+    // Option Flow tape: flow.db when a week or date is requested, otherwise
+    // the Firebase live last-100 feed.
     let flows: any[];
-    if (date) {
+    if (week) {
+      // Fan out to 5 weekdays starting at the requested Monday. Each
+      // flow-api call is already capped at 500 rows; merge + sort desc.
+      const days: string[] = [];
+      const base = new Date(week + 'T12:00:00Z');
+      for (let i = 0; i < 5; i++) {
+        const d = new Date(base);
+        d.setUTCDate(base.getUTCDate() + i);
+        days.push(d.toISOString().slice(0, 10));
+      }
+      const perDay = await Promise.all(days.map(flowsForDate));
+      flows = perDay.flat().sort((a, b) => (b.Time || 0) - (a.Time || 0));
+    } else if (date) {
       flows = await flowsForDate(date);
     } else {
       const flowRes = await fetch(`${DB}/FlowGreeks/LiveFlowLast100.json`)
