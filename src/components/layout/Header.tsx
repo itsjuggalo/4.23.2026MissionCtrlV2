@@ -35,11 +35,24 @@ const SUBTITLES: Record<string, string> = {
 
 interface HeaderProps {
   title: string;
+  onMenuClick?: () => void;
 }
+
+// Compact account pill — shown centered in the header (Alpaca account info).
+function Pill({ label, value, color }: { label: string; value: string; color?: string }) {
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', padding: '1px 10px', borderRadius: 4, background: '#101a26', border: '1px solid #1f2a36', flexShrink: 0 }}>
+      <span style={{ fontSize: 8, color: '#8a99a8', textTransform: 'uppercase', letterSpacing: 0.5 }}>{label}</span>
+      <span style={{ fontSize: 12, fontWeight: 600, color: color || '#e8edf2' }}>{value}</span>
+    </div>
+  );
+}
+
 export function Header({
- title }: HeaderProps) {
+ title, onMenuClick }: HeaderProps) {
   const live = useLiveStream(true);
   const [time, setTime] = useState('');
+  const [status, setStatus] = useState<any>(null);
   useEffect(() => {
     const update = () => {
       setTime(new Date().toLocaleTimeString("en-US", { hour12: true, timeZone: "America/New_York", timeZoneName: "short" }));
@@ -48,7 +61,33 @@ export function Header({
     const id = setInterval(update, 1000);
     return () => clearInterval(id);
   }, []);
+
+  // Alpaca account info — fetched here so it can live on the header line.
+  useEffect(() => {
+    const refresh = async () => {
+      try {
+        const s = await fetch('/api/status', { cache: 'no-store' }).then(r => r.json());
+        setStatus(s);
+      } catch {}
+    };
+    refresh();
+    const i = setInterval(refresh, 30000);
+    return () => clearInterval(i);
+  }, []);
+
   const subtitle = SUBTITLES[title] || '';
+
+  const fmt = (n?: number) => typeof n === 'number' ? `$${n.toFixed(2)}` : '—';
+  const bobaEq = status?.accounts?.boba?.equity || 0;
+  const jazzyEq = status?.accounts?.jazzy?.equity || 0;
+  const totalEq = bobaEq + jazzyEq;
+  const totalPnL = (bobaEq - 2000) + (jazzyEq - 2000);
+  const pnlColor = totalPnL >= 0 ? '#5fff5f' : '#ff6b6b';
+  const posList = [...(status?.accounts?.boba?.positions || []), ...(status?.accounts?.jazzy?.positions || [])];
+  const winners = posList.filter((p: any) => (p.pnl || 0) > 0).length;
+  const losers = posList.filter((p: any) => (p.pnl || 0) < 0).length;
+  const posCount = (status?.accounts?.boba?.positions?.length || 0) + (status?.accounts?.jazzy?.positions?.length || 0);
+
   return (
     <div
       style={{
@@ -57,18 +96,33 @@ export function Header({
         borderBottom: '1px solid #1a3a4a',
         display: 'flex',
         alignItems: 'center',
-        justifyContent: 'space-between',
+        gap: 12,
         padding: '0 20px',
         flexShrink: 0,
       }}
     >
-      <div style={{ display: 'flex', alignItems: 'baseline', gap: 12 }}>
+      {/* Left zone — page title + subtitle */}
+      <div style={{ flex: 1, display: 'flex', alignItems: 'center', gap: 12, minWidth: 0 }}>
+        {onMenuClick && (
+          <button
+            onClick={onMenuClick}
+            aria-label="Open menu"
+            style={{ background: 'transparent', border: 'none', color: '#e0e0e0', cursor: 'pointer', padding: 4, display: 'flex', alignItems: 'center' }}
+          >
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
+              <line x1="3" y1="6" x2="21" y2="6" />
+              <line x1="3" y1="12" x2="21" y2="12" />
+              <line x1="3" y1="18" x2="21" y2="18" />
+            </svg>
+          </button>
+        )}
         <span
           style={{
             fontSize: 16,
             fontWeight: 600,
             fontFamily: "'Inter', -apple-system, sans-serif",
             color: '#e0e0e0',
+            whiteSpace: 'nowrap',
           }}
         >
           {title}
@@ -81,13 +135,28 @@ export function Header({
               color: '#4fc3f7',
               fontStyle: 'italic',
               letterSpacing: '0.5px',
+              whiteSpace: 'nowrap',
+              overflow: 'hidden',
+              textOverflow: 'ellipsis',
             }}
           >
             {subtitle}
           </span>
         )}
       </div>
-      <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+
+      {/* Center zone — Alpaca account info, on the header line */}
+      <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexShrink: 0, fontFamily: 'ui-monospace,monospace', overflowX: 'auto' }}>
+        <Pill label="Total" value={fmt(totalEq)} />
+        <Pill label="P&L" value={`${totalPnL >= 0 ? '+' : ''}$${totalPnL.toFixed(2)}`} color={pnlColor} />
+        <Pill label="Boba" value={fmt(bobaEq || undefined)} />
+        <Pill label="Jazzy" value={fmt(jazzyEq || undefined)} />
+        <Pill label="Pos" value={String(posCount)} />
+        <Pill label="W/L" value={winners + '/' + losers} color="#8a99a8" />
+      </div>
+
+      {/* Right zone — live indicator + clock */}
+      <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'flex-end', gap: 10 }}>
         <span
           style={{
             display: 'inline-block',
