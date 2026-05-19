@@ -5,8 +5,9 @@ import path from 'path';
 import { proxyToServeftp } from "../../../lib/proxyToServeftp";
 
 const DB = 'https://stock-signal-72772-default-rtdb.firebaseio.com';
+const FLOW_API = process.env.FLOW_API_URL || 'http://127.0.0.1:8500';
 const HISTORY_PATH = path.join(
-  process.env.HOME || '/home/ubuntu',
+  process.env.HOME || '/home/itsju',
   'mission-control-restored/Option-Signals-Scraper/data/flow_alerts_history.json'
 );
 
@@ -19,19 +20,68 @@ function loadHistory(): Record<string, any> {
   }
 }
 
+// Option Flow tape for one ET day, pulled from flow.db via flow-api and
+// reshaped into the FlowEntry shape the Options page expects.
+async function flowsForDate(date: string): Promise<any[]> {
+  try {
+    const r = await fetch(
+      `${FLOW_API}/flow_tape?date=${encodeURIComponent(date)}&limit=500`,
+      { cache: 'no-store' },
+    );
+    if (!r.ok) return [];
+    const rows = await r.json();
+    if (!Array.isArray(rows)) return [];
+    return rows.map((row: any) => ({
+      Symbol: row.symbol,
+      OptionSymbol: `${row.symbol}|${row.strike}|${row.option_type}|${row.expiry}|${row.event_time}`,
+      Strike: row.strike,
+      OptionType: row.option_type,
+      ExpiryStr: row.expiry || '',
+      Price: row.price,
+      Value: row.premium,
+      Volume: row.volume,
+      OI: row.open_interest,
+      BidAskType: row.bid_ask || '',
+      BlockType: row.block_type || '',
+      Time: row.event_time ? Math.floor(row.event_time / 1000) : 0,
+      logoUrl: tickerLogoUrl(row.symbol),
+    }));
+  } catch {
+    return [];
+  }
+}
+
 export async function GET(req: Request) {
   const __proxied = await proxyToServeftp(req); if (__proxied) return __proxied;
 
+  // ?date=YYYY-MM-DD (ET) -> multi-day tape from flow.db. No date -> live last-100.
+  const date = new URL(req.url).searchParams.get('date');
+
   try {
-    const [flowRes, alerts1Res, alerts2Res] = await Promise.all([
-      fetch(`${DB}/FlowGreeks/LiveFlowLast100.json`).then(r => r.json()).catch(() => null),
+    // Flow Alerts are always "today", live from Firebase.
+    // availableDates: ET days that actually have flow.db data (for the picker).
+    const [alerts1Res, alerts2Res, availableDates] = await Promise.all([
       fetch(`${DB}/FlowGreeks/Alerts/today.json`).then(r => r.json()).catch(() => null),
       fetch(`${DB}/FlowGreeks2/Alerts/today.json`).then(r => r.json()).catch(() => null),
+      fetch(`${FLOW_API}/flow_dates`, { cache: 'no-store' })
+        .then(r => r.ok ? r.json() : []).catch(() => []),
     ]);
 
-    const flows = flowRes
-      ? (Array.isArray(flowRes) ? flowRes : Object.values(flowRes))
-      : [];
+    // Option Flow tape: flow.db (date-aware, multi-day) when a date is
+    // requested, otherwise the Firebase live last-100 feed.
+    let flows: any[];
+    if (date) {
+      flows = await flowsForDate(date);
+    } else {
+      const flowRes = await fetch(`${DB}/FlowGreeks/LiveFlowLast100.json`)
+        .then(r => r.json()).catch(() => null);
+      const rawFlows = flowRes
+        ? (Array.isArray(flowRes) ? flowRes : Object.values(flowRes))
+        : [];
+      flows = rawFlows
+        .filter((f: any) => f?.Symbol)
+        .map((f: any) => ({ ...f, logoUrl: tickerLogoUrl(f.Symbol) }));
+    }
 
     const extract = (raw: any) =>
       !raw ? [] : (Array.isArray(raw) ? raw : Object.values(raw))
@@ -74,8 +124,10 @@ export async function GET(req: Request) {
     });
 
     return NextResponse.json({
-      flows: flows.filter((f: any) => f?.Symbol).map((f: any) => ({ ...f, logoUrl: tickerLogoUrl(f.Symbol) })),
+      flows,
       alerts: alertsWithHistory,
+      flowDate: date || null,
+      availableDates,
       timestamp: new Date().toISOString(),
     });
   } catch (e) {

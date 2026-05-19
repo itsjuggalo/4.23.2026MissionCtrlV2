@@ -133,6 +133,7 @@ interface AlertEntry {
 interface FlowResponse {
   alerts: AlertEntry[];
   flows: FlowEntry[];
+  availableDates?: string[];
 }
 
 type PrimaryTab = 'scalps' | 'swings' | 'leaps' | 'flowAlerts' | 'optionFlow';
@@ -485,7 +486,9 @@ const FlowTapeRow: React.FC<{ f: FlowEntry; onSymbolClick?: (s: string) => void 
   // YELLOW pill border: Volume > OI (Help Center unusual-flow rule)
   const isUnusual = f.Volume > f.OI;
 
-  const time = new Date(f.Time * 1000).toLocaleTimeString('en-US', { hour12: false });
+  const dt = new Date(f.Time * 1000);
+  const dateStr = dt.toLocaleDateString('en-US', { month: '2-digit', day: '2-digit', timeZone: 'America/New_York' });
+  const time = dt.toLocaleTimeString('en-US', { hour12: false, timeZone: 'America/New_York' });
 
   // Pill color matches sentiment (green for bull, red for bear, grey for unknown)
   const pillFg = color;
@@ -496,14 +499,14 @@ const FlowTapeRow: React.FC<{ f: FlowEntry; onSymbolClick?: (s: string) => void 
   return (
     <div style={{
       display: 'grid',
-      gridTemplateColumns: '1.2fr 1fr 1.4fr 0.8fr 0.5fr 1.4fr 0.7fr 1fr',
+      gridTemplateColumns: '1.7fr 1fr 1.4fr 0.8fr 0.5fr 1.4fr 0.7fr 1fr',
       gap: '12px', padding: '8px 16px', fontSize: '15px', alignItems: 'center',
       borderBottom: '1px solid #0a1220',
       background: isBigMoney ? '#ffd60015' : 'transparent',
       borderLeft: isBigMoney ? '3px solid #ffd600' : '3px solid transparent',
       color,
     }}>
-      <span>{time}</span>
+      <span style={{ whiteSpace: 'nowrap' }}>{dateStr}&nbsp;{time}</span>
       <span onClick={(e) => { e.stopPropagation(); onSymbolClick?.(f.Symbol); }} style={{ fontWeight: 500, cursor: onSymbolClick ? 'pointer' : 'default', textDecoration: onSymbolClick ? 'underline' : 'none', textDecorationColor: '#ffffff22', display: 'flex', alignItems: 'center', gap: '6px' }}><TickerLogo symbol={f.Symbol} size="sm" logoUrl={f.logoUrl} />{f.Symbol}</span>
       <span>{f.ExpiryStr?.slice(2) || ''}</span>
       <span>{f.Strike}</span>
@@ -568,6 +571,18 @@ const SubTabButton: React.FC<{
 // ──────────────────────────────────────────────────────────
 // Main component
 // ──────────────────────────────────────────────────────────
+// ET calendar date (YYYY-MM-DD) — the Option Flow picker's default and labels.
+function todayET(): string {
+  return new Date().toLocaleDateString('en-CA', { timeZone: 'America/New_York' });
+}
+
+function flowDayLabel(dateStr: string): string {
+  const d = new Date(dateStr + 'T12:00:00');
+  const wd = d.toLocaleDateString('en-US', { weekday: 'short' });
+  const md = d.toLocaleDateString('en-US', { month: '2-digit', day: '2-digit' });
+  return dateStr === todayET() ? `${wd} ${md} · Today` : `${wd} ${md}`;
+}
+
 export function OptionsPage() {
   const [activeTab, setActiveTab] = useState<PrimaryTab>('swings');
   const [filterModalOpen, setFilterModalOpen] = useState(false);
@@ -582,6 +597,7 @@ export function OptionsPage() {
 
   const [analystData, setAnalystData] = useState<AnalystResponse | null>(null);
   const [flowData, setFlowData] = useState<FlowResponse | null>(null);
+  const [flowDate, setFlowDate] = useState<string>(todayET());
   const [notificationsData, setNotificationsData] = useState<NotificationsResponse | null>(null);
   const [loading, setLoading] = useState(true);
   const [drawerTicker, setDrawerTicker] = useState<string | null>(null);
@@ -601,12 +617,12 @@ export function OptionsPage() {
     return () => { cancelled = true; clearInterval(id); };
   }, []);
 
-  // Data fetching — flow + alerts
+  // Data fetching — flow + alerts (flow tape is scoped to the selected day)
   useEffect(() => {
     let cancelled = false;
     const pull = async () => {
       try {
-        const r = await fetch('/api/options-flow');
+        const r = await fetch(`/api/options-flow?date=${flowDate}`);
         const d = await r.json();
         if (!cancelled) {
           setFlowData(d);
@@ -617,7 +633,15 @@ export function OptionsPage() {
     pull();
     const id = setInterval(pull, 10000);
     return () => { cancelled = true; clearInterval(id); };
-  }, []);
+  }, [flowDate]);
+
+  // Snap the picker to a day that actually has data once the list arrives.
+  useEffect(() => {
+    const avail = flowData?.availableDates;
+    if (avail && avail.length && !avail.includes(flowDate)) {
+      setFlowDate(avail[0]);
+    }
+  }, [flowData, flowDate]);
 
   // Derived: filter signals by source group
   // Data fetching — notifications (live from Firebase via /api/notifications)
@@ -855,19 +879,33 @@ export function OptionsPage() {
           {/* Option Flow tab */}
         {activeTab === 'optionFlow' && flowData && (
           <>
-            <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: '10px' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '10px', gap: '10px' }}>
+              <select
+                value={flowDate}
+                onChange={(e) => setFlowDate(e.target.value)}
+                style={{
+                  background: '#0d1117', color: '#e8e8ed',
+                  border: '1px solid #1a2332', borderRadius: '4px',
+                  padding: '6px 10px', fontSize: '13px', cursor: 'pointer',
+                  fontFamily: 'var(--font-mc-mono)',
+                }}
+              >
+                {(flowData.availableDates?.length ? flowData.availableDates : [flowDate]).map((d) => (
+                  <option key={d} value={d}>{flowDayLabel(d)}</option>
+                ))}
+              </select>
               <FilterIconButton active={!isFiltersDefault(flowFilters)} onClick={() => setFilterModalOpen(true)} />
             </div>
             <div style={{ background: '#05080c', borderRadius: '6px', border: '1px solid #1a2332' }}>
               <div style={{
                 display: 'grid',
-                gridTemplateColumns: '1.2fr 1fr 1.4fr 0.8fr 0.5fr 1.4fr 0.7fr 1fr',
+                gridTemplateColumns: '1.7fr 1fr 1.4fr 0.8fr 0.5fr 1.4fr 0.7fr 1fr',
                 gap: '12px', padding: '10px 16px',
                 color: '#607d8b', fontSize: '12px', fontWeight: 600,
                 textTransform: 'uppercase', letterSpacing: '0.4px',
                 borderBottom: '1px solid #1a2332',
               }}>
-                <span>Time</span>
+                <span>Date / Time</span>
                 <span>Symbol</span>
                 <span>Exp</span>
                 <span>Strike</span>
@@ -876,7 +914,16 @@ export function OptionsPage() {
                 <span>Type</span>
                 <span style={{ textAlign: 'right' }}>Value</span>
               </div>
-              {[...(flowData.flows || [])].sort((a, b) => (b.Time || 0) - (a.Time || 0)).filter(f => matchesFilters(f, flowFilters)).slice(0, 300).map((f, i) => <FlowTapeRow key={f.OptionSymbol + '_' + i} f={f} onSymbolClick={setDrawerTicker} />)}
+              {(() => {
+                const rows = [...(flowData.flows || [])]
+                  .sort((a, b) => (b.Time || 0) - (a.Time || 0))
+                  .filter(f => matchesFilters(f, flowFilters))
+                  .slice(0, 500);
+                if (rows.length === 0) {
+                  return <div style={{ padding: '24px 16px', textAlign: 'center', color: '#5c5c72', fontSize: '13px' }}>No option flow recorded for this day.</div>;
+                }
+                return rows.map((f, i) => <FlowTapeRow key={f.OptionSymbol + '_' + i} f={f} onSymbolClick={setDrawerTicker} />);
+              })()}
             </div>
           </>
           )}
