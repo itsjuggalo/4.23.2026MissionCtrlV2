@@ -3,11 +3,10 @@ import { cookies } from 'next/headers';
 import { readFileSync, existsSync } from 'fs';
 import { join } from 'path';
 import { execSync } from 'child_process';
-import * as jose from 'jose';
 import { proxyToServeftp } from '../../../lib/proxyToServeftp';
 
-const SECRETS = join(process.env.HOME || '/home/ubuntu', '.openclaw/secrets');
-const HL_STATE = join(process.env.HOME || '/home/ubuntu', 'go-trader/platforms/hyperliquid/state.json');
+const SECRETS = join(process.env.HOME || '/home/itsju', '.openclaw/secrets');
+const HL_STATE = join(process.env.HOME || '/home/itsju', 'go-trader/platforms/hyperliquid/state.json');
 
 export async function GET(req: Request) {
   const __proxied = await proxyToServeftp(req); if (__proxied) return __proxied;
@@ -49,58 +48,47 @@ export async function GET(req: Request) {
     wallets.push({ name: 'Alpaca Paper', type: 'Brokerage (Paper)', badge: 'PAPER', balance: 0, cash: 0, buying_power: 0, status: 'error', notes: String(e).slice(0, 80) });
   }
 
-  // === 2. COINBASE (JWT) ===
+  // === 2. COINBASE (from saved CSV holdings, not the live API) ===
   try {
-    const cbKeyPath = join(SECRETS, 'coinbase-api-key.txt');
-    const cbPemPath = join(SECRETS, 'coinbase-private-pkcs8.pem');
-    if (existsSync(cbKeyPath) && existsSync(cbPemPath)) {
-      const apiKey = readFileSync(cbKeyPath, 'utf-8').trim();
-      const pemRaw = readFileSync(cbPemPath, 'utf-8').trim();
-      const uri = 'GET api.coinbase.com/api/v3/brokerage/accounts';
-      const privateKey = await jose.importPKCS8(pemRaw, 'ES256');
-      const now = Math.floor(Date.now() / 1000);
-      const jwt = await new jose.SignJWT({ sub: apiKey, iss: 'cdp', uri })
-        .setProtectedHeader({ alg: 'ES256', kid: apiKey, nonce: String(now), typ: 'JWT' })
-        .setIssuedAt(now).setExpirationTime(now + 120).setNotBefore(now)
-        .sign(privateKey);
-      const cbRes = await fetch('https://api.coinbase.com/api/v3/brokerage/accounts', {
-        headers: { Authorization: `Bearer ${jwt}` },
+    const result = execSync(
+      'PATH=/home/itsju/.local/bin:/usr/local/bin:/usr/bin:/bin /home/itsju/.local/bin/uv run /home/itsju/scripts/coinbase-from-csv.py',
+      { timeout: 60000, encoding: 'utf-8' }
+    );
+    const cb = JSON.parse(result.trim());
+    if (cb.error) {
+      wallets.push({ name: 'Coinbase', type: 'Exchange (CSV)', badge: 'CSV', balance: 0, cash: 0, buying_power: 0, status: 'error', notes: cb.error.slice(0, 100) });
+    } else {
+      const holdings = cb.holdings || [];
+      const topNotes = holdings.filter((h: any) => h.value_usd > 1).slice(0, 6).map((h: any) => `${h.currency}: $${h.value_usd.toFixed(0)}`);
+      const fundedCount = holdings.filter((h: any) => h.value_usd > 0.01).length;
+      wallets.push({
+        name: 'Coinbase',
+        type: 'Exchange (CSV)',
+        badge: 'CSV',
+        balance: cb.total_usd || 0,
+        cash: 0,
+        buying_power: 0,
+        status: 'live',
+        positions: holdings.map((h: any) => ({
+          symbol: h.currency,
+          quantity: h.balance,
+          price: h.price_usd,
+          equity: h.value_usd,
+          type: 'crypto',
+        })),
+        notes: `${fundedCount} assets · ${topNotes.join(' | ') || 'no holdings'}`,
+        as_of: cb.as_of,
       });
-      if (cbRes.ok) {
-        const cbData = await cbRes.json();
-        const accounts = cbData.accounts || [];
-        let usdValue = 0;
-        const holdings: string[] = [];
-        for (const acct of accounts) {
-          const bal = parseFloat(acct.available_balance?.value || '0') + parseFloat(acct.hold?.value || '0');
-          if (bal > 0.01) {
-            const cur = acct.currency || 'USD';
-            let price = 1;
-            if (!['USD','USDC','USDT'].includes(cur)) {
-              try {
-                const pRes = await fetch(`https://api.coinbase.com/v2/prices/${cur}-USD/spot`);
-                if (pRes.ok) { const pd = await pRes.json(); price = parseFloat(pd.data?.amount || '0'); }
-              } catch {}
-            }
-            const valUsd = bal * price;
-            usdValue += valUsd;
-            if (valUsd > 1) holdings.push(`${cur}: $${valUsd.toFixed(2)}`);
-          }
-        }
-        wallets.push({ name: 'Coinbase', type: 'Exchange (Live)', badge: 'LIVE', balance: usdValue, cash: 0, buying_power: 0, status: 'live', notes: holdings. join(' | ') || 'No holdings' });
-      } else {
-        wallets.push({ name: 'Coinbase', type: 'Exchange (Live)', badge: 'LIVE', balance: 0, cash: 0, buying_power: 0, status: 'error', notes: `API ${cbRes.status}` });
-      }
     }
   } catch (e) {
-    wallets.push({ name: 'Coinbase', type: 'Exchange (Live)', badge: 'LIVE', balance: 0, cash: 0, buying_power: 0, status: 'error', notes: String(e).slice(0, 80) });
+    wallets.push({ name: 'Coinbase', type: 'Exchange (CSV)', badge: 'CSV', balance: 0, cash: 0, buying_power: 0, status: 'error', notes: String(e).slice(0, 100) });
   }
 
   // === 3. ROBINHOOD (split: stocks + crypto) ===
   try {
     const result = execSync(
-      'python3 /home/ubuntu/scripts/robinhood-full-portfolio.py',
-      { timeout: 45000, encoding: 'utf-8' }
+      'PATH=/home/itsju/.local/bin:/usr/local/bin:/usr/bin:/bin /home/itsju/.local/bin/uv run /home/itsju/scripts/robinhood-full-portfolio.py',
+      { timeout: 60000, encoding: 'utf-8' }
     );
     const rhData = JSON.parse(result.trim());
     if (rhData.error) {

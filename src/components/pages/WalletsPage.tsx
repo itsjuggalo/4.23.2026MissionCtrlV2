@@ -88,7 +88,9 @@ export function WalletsPage() {
       .finally(() => setChecking(false));
   }, []);
 
-  const totalBalance = wallets.reduce((s, w) => s + (w.balance || 0), 0);
+  // Total + 7-day chart track REAL-MONEY accounts only — paper accounts
+  // (Alpaca, go-trader) are excluded so the chart reflects actual capital.
+  const totalBalance = wallets.filter(w => !isPaper(w)).reduce((s, w) => s + (w.balance || 0), 0);
 
   useEffect(() => {
     if (totalBalance <= 0) return;
