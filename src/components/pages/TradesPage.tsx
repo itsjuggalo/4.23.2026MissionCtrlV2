@@ -1,4 +1,15 @@
 import React, { useState, useEffect } from 'react';
+import { StockDetailDrawer } from '@/components/drawers/StockDetailDrawer';
+
+function tradesTickerOnly(sym: string): string {
+  if (!sym) return '';
+  const s = String(sym).trim().toUpperCase();
+  const stripped = s.replace(/USDT$|USD$|-PERP$/, '');
+  const occMatch = stripped.match(/^([A-Z]+)\d{6}[CP]/);
+  if (occMatch) return occMatch[1];
+  const firstWord = stripped.split(/[\s/]/)[0];
+  return firstWord.replace(/[^A-Z]/g, '') || stripped;
+}
 
 interface Trade {
   id: string;
@@ -101,6 +112,7 @@ export function TradesPage() {
   const [cryptoPage, setCryptoPage] = useState(0);
   const [stockPage,  setStockPage]  = useState(0);
   const [optionPage, setOptionPage] = useState(0);
+  const [drawerTicker, setDrawerTicker] = useState<string | null>(null);
   const POS_PER_PAGE = 8;
 
   useEffect(() => {
@@ -240,7 +252,7 @@ export function TradesPage() {
                 return (
                   <tr key={position.id} className="border-b border-gray-700/40 hover:bg-slate-700/30 transition-colors">
                     <td className="py-2.5 font-semibold text-white">
-                      {position.symbol}
+                      <span onClick={() => setDrawerTicker(tradesTickerOnly(position.symbol))} style={{ cursor: 'pointer' }}>{position.symbol}</span>
                       {position.score && (
                         <span className="ml-1.5 text-xs text-gray-500">⭐{position.score}</span>
                       )}
@@ -433,7 +445,7 @@ export function TradesPage() {
                     }`}>
                       {side.toUpperCase() || 'N/A'}
                     </span>
-                    <span className="text-white font-semibold">{trade.symbol}</span>
+                    <span onClick={() => setDrawerTicker(tradesTickerOnly(trade.symbol))} className="text-white font-semibold" style={{ cursor: 'pointer' }}>{trade.symbol}</span>
                     <span className="text-gray-400 tabular-nums">{fmt.currency(trade.size_usd || trade.size)}</span>
                     <span className="text-gray-500">@</span>
                     <span className="text-gray-400 tabular-nums">{fmt.currency(trade.price)}</span>
@@ -453,6 +465,7 @@ export function TradesPage() {
           </div>
         )}
       </div>
+      <StockDetailDrawer ticker={drawerTicker} onClose={() => setDrawerTicker(null)} />
     </div>
   );
 }

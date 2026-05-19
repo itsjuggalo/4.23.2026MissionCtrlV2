@@ -1,7 +1,18 @@
 'use client';
 import { useState, useEffect } from 'react';
+import { StockDetailDrawer } from '@/components/drawers/StockDetailDrawer';
+
+function tickerOnly(sym: string): string {
+  if (!sym) return '';
+  const s = String(sym).trim().toUpperCase();
+  const occMatch = s.match(/^([A-Z]+)\d{6}[CP]/);
+  if (occMatch) return occMatch[1];
+  const firstWord = s.split(/[\s/]/)[0];
+  return firstWord.replace(/[^A-Z]/g, '') || s;
+}
 
 export function ScannerPage() {
+  const [drawerTicker, setDrawerTicker] = useState<string | null>(null);
   const [crypto, setCrypto] = useState<any>(null);
   const [regime, setRegime] = useState<any>(null);
   const [signals, setSignals] = useState<any>(null);
@@ -113,7 +124,7 @@ export function ScannerPage() {
           </div>
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(260px, 1fr))', gap: '8px', marginBottom: '20px' }}>
             {hotSignals.map((s: any, i: number) => (
-              <div key={i} className="scan-card" style={{ padding: '14px 16px', borderLeft: `3px solid ${s.direction === 'LONG' ? '#66bb6a' : s.direction === 'SHORT' ? '#ef5350' : '#ff9800'}` }}>
+              <div key={i} className="scan-card" onClick={() => setDrawerTicker(tickerOnly(s.symbol || ''))} style={{ padding: '14px 16px', borderLeft: `3px solid ${s.direction === 'LONG' ? '#66bb6a' : s.direction === 'SHORT' ? '#ef5350' : '#ff9800'}`, cursor: 'pointer' }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '6px' }}>
                   <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                     <span style={{ fontSize: 'var(--mc-font-lg)', fontWeight: 700, color: '#4fc3f7', fontFamily: 'var(--font-mc-mono)' }}>{s.symbol || '?'}</span>
@@ -139,7 +150,7 @@ export function ScannerPage() {
             {squeeze.candidates.slice(0, 12).map((c: any, i: number) => {
               const tone = c.score >= 70 ? '#ef5350' : c.score >= 60 ? '#ff9800' : '#fdd835';
               return (
-                <div key={i} className="scan-card" style={{ padding: '12px 14px', borderLeft: `3px solid ${tone}` }}>
+                <div key={i} className="scan-card" onClick={() => setDrawerTicker(tickerOnly(c.ticker || ''))} style={{ padding: '12px 14px', borderLeft: `3px solid ${tone}`, cursor: 'pointer' }}>
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '6px' }}>
                     <span style={{ fontSize: 'var(--mc-font-lg)', fontWeight: 700, color: '#4fc3f7', fontFamily: 'var(--font-mc-mono)' }}>{c.ticker}</span>
                     <span style={{ fontSize: 'var(--mc-font-badge)', fontWeight: 700, padding: '2px 8px', borderRadius: '4px', background: `${tone}22`, color: tone, fontFamily: 'var(--font-mc-mono)' }}>{c.score}</span>
@@ -222,6 +233,7 @@ export function ScannerPage() {
           </div>
         ))}
       </div>
+      <StockDetailDrawer ticker={drawerTicker} onClose={() => setDrawerTicker(null)} />
     </div>
   );
 }

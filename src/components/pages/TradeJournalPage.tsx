@@ -1,5 +1,15 @@
 'use client';
 import React, { useEffect, useState } from 'react';
+import { StockDetailDrawer } from '@/components/drawers/StockDetailDrawer';
+
+function tjTickerOnly(sym: string): string {
+  if (!sym) return '';
+  const s = String(sym).trim().toUpperCase();
+  const occMatch = s.match(/^([A-Z]+)\d{6}[CP]/);
+  if (occMatch) return occMatch[1];
+  const firstWord = s.split(/[\s/]/)[0];
+  return firstWord.replace(/[^A-Z]/g, '') || s;
+}
 
 interface JournalEntry {
   id: string;
@@ -65,6 +75,7 @@ export default function TradeJournalPage() {
   const [stats, setStats] = useState<Stats | null>(null);
   const [sourceFilter, setSourceFilter] = useState<'all' | 'boba-options' | 'auto-trader-btc'>('all');
   const [expandedId, setExpandedId] = useState<string | null>(null);
+  const [drawerTicker, setDrawerTicker] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
 
   const load = async () => {
@@ -152,6 +163,7 @@ export default function TradeJournalPage() {
             e={e}
             expanded={expandedId === e.id}
             onToggle={() => setExpandedId(expandedId === e.id ? null : e.id)}
+            onTickerClick={(sym) => setDrawerTicker(tjTickerOnly(sym))}
           />
         ))}
       </div>
@@ -177,6 +189,7 @@ export default function TradeJournalPage() {
           </div>
         </div>
       )}
+      <StockDetailDrawer ticker={drawerTicker} onClose={() => setDrawerTicker(null)} />
     </div>
   );
 }
@@ -189,7 +202,7 @@ const StatCard: React.FC<{ label: string; value: string; sub?: string; color: st
   </div>
 );
 
-const EntryCard: React.FC<{ e: JournalEntry; expanded: boolean; onToggle: () => void }> = ({ e, expanded, onToggle }) => {
+const EntryCard: React.FC<{ e: JournalEntry; expanded: boolean; onToggle: () => void; onTickerClick: (sym: string) => void }> = ({ e, expanded, onToggle, onTickerClick }) => {
   // Parse reasoning into structured bullets if it has • separators
   const reasonParts = e.reasoning.split(/[•·]/).map(s => s.trim()).filter(Boolean);
   const isStructured = reasonParts.length > 1;
@@ -209,7 +222,9 @@ const EntryCard: React.FC<{ e: JournalEntry; expanded: boolean; onToggle: () => 
       <div style={{ display: 'grid', gridTemplateColumns: '110px 70px 80px 70px 1fr auto', gap: 12, alignItems: 'center' }}>
         <div style={{ fontSize: 11, color: '#607d8b' }}>{fmtTime(e.timestamp)}</div>
         <div style={{ fontSize: 9, color: sourceColor, fontWeight: 700, letterSpacing: '0.5px', padding: '2px 6px', background: '#05080c', border: `1px solid ${sourceColor}44`, borderRadius: 2, textAlign: 'center' }}>{sourceLabel}</div>
-        <div style={{ fontSize: 16, fontWeight: 800, color: '#4fc3f7' }}>{e.symbol}</div>
+        <div style={{ fontSize: 16, fontWeight: 800, color: '#4fc3f7' }}>
+          <span onClick={(ev) => { ev.stopPropagation(); onTickerClick(e.symbol); }} style={{ cursor: 'pointer' }}>{e.symbol}</span>
+        </div>
         <div style={{ fontSize: 11, fontWeight: 700, color: sideColor(e.side), letterSpacing: '0.5px', textTransform: 'uppercase' }}>
           {e.side}
           {e.strike && <span style={{ color: '#607d8b' }}> ${e.strike}</span>}

@@ -2,6 +2,7 @@
 // MC_WATCHER_GUARD
 if (typeof window !== 'undefined') { window.addEventListener('unhandledrejection', (e) => { console.warn('[OptionsWatcher]', e.reason); e.preventDefault(); }); }
 import { useState, useEffect, useRef, useMemo } from 'react';
+import { StockDetailDrawer } from '@/components/drawers/StockDetailDrawer';
 
 // ── TYPES ──
 interface OptionContract {
@@ -113,12 +114,12 @@ function ChainRow({ call, put, strike, currentPrice }: { call?: OptionContract; 
 }
 
 // ── FLOW ROW ──
-function FlowRow({ f }: { f: FlowEntry }) {
+function FlowRow({ f, onClick }: { f: FlowEntry; onClick?: () => void }) {
   const sentiment = getSentiment(f);
   const sc = sentiment === 'BULLISH' ? '#66bb6a' : '#ef5350';
   const unusual = f.Volume > f.OI && f.OI >= 0;
   return (
-    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '5px 8px', borderBottom: '1px solid #0d1117', borderLeft: unusual ? '3px solid #ffd600' : '3px solid transparent', fontSize: 'var(--mc-font-label)' }}>
+    <div onClick={onClick} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '5px 8px', borderBottom: '1px solid #0d1117', borderLeft: unusual ? '3px solid #ffd600' : '3px solid transparent', fontSize: 'var(--mc-font-label)', cursor: onClick ? 'pointer' : 'default' }}>
       <div style={{ display: 'flex', alignItems: 'center', gap: '5px' }}>
         <span style={{ width: '6px', height: '6px', borderRadius: '50%', background: sc, display: 'inline-block' }} />
         <span style={{ color: '#455a64', fontFamily: 'var(--font-mc-mono)', width: '24px' }}>{timeAgo(f.Time)}</span>
@@ -213,6 +214,7 @@ export function OptionsWatcherPage() {
 
   // Flows
   const [flows, setFlows] = useState<FlowEntry[]>([]);
+  const [drawerTicker, setDrawerTicker] = useState<string | null>(null);
 
   // Strategy Builder
   const [stratCategory, setStratCategory] = useState('Bullish');
@@ -412,7 +414,10 @@ export function OptionsWatcherPage() {
             <button onClick={() => setTicker(searchInput)} style={{ padding: '6px 12px', background: '#4fc3f718', border: '1px solid #4fc3f7', borderRadius: '4px', color: '#4fc3f7', fontFamily: 'var(--font-mc-mono)', fontSize: 'var(--mc-font-xs)', cursor: 'pointer', fontWeight: 700 }}>GO</button>
           </div>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline' }}>
-            <span style={{ fontSize: 'var(--mc-font-2xl)', fontWeight: 800, color: '#e0e0e0', fontFamily: 'var(--font-mc-mono)' }}>{ticker}</span>
+            <span style={{ display: 'inline-flex', alignItems: 'center', gap: '8px' }}>
+              <span style={{ fontSize: 'var(--mc-font-2xl)', fontWeight: 800, color: '#e0e0e0', fontFamily: 'var(--font-mc-mono)' }}>{ticker}</span>
+              <span onClick={() => setDrawerTicker(ticker)} style={{ cursor: 'pointer', padding: '2px 8px', border: '1px solid #4fc3f755', borderRadius: '3px', fontSize: 10, color: '#4fc3f7', fontWeight: 700, letterSpacing: '1px', fontFamily: 'var(--font-mc-mono)' }}>TA</span>
+            </span>
             <span style={{ fontSize: 'var(--mc-font-xl)', fontWeight: 700, color: '#4fc3f7', fontFamily: 'var(--font-mc-mono)' }}>{currentPrice ? fmtPrice(currentPrice) : '--'}</span>
           </div>
           <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '4px' }}>
@@ -438,7 +443,7 @@ export function OptionsWatcherPage() {
           <span style={{ fontSize: 'var(--mc-font-label)', color: '#607d8b', fontFamily: 'var(--font-mc-mono)' }}>{flows.length}</span>
         </div>
         <div style={{ flex: 1, overflow: 'auto' }}>
-          {flows.slice(0, 50).map((f, i) => <FlowRow key={i} f={f} />)}
+          {flows.slice(0, 50).map((f, i) => <FlowRow key={i} f={f} onClick={() => setDrawerTicker(f.Symbol)} />)}
           {flows.length === 0 && <div style={{ padding: '20px', textAlign: 'center', color: '#455a64', fontSize: 'var(--mc-font-label)', fontFamily: 'var(--font-mc-mono)' }}>No flow data for {ticker}</div>}
         </div>
       </div>
@@ -718,6 +723,7 @@ export function OptionsWatcherPage() {
           )}
         </div>
       </div>
+      <StockDetailDrawer ticker={drawerTicker} onClose={() => setDrawerTicker(null)} />
     </div>
   );
 }

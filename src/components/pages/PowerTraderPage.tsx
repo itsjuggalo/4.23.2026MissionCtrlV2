@@ -1,5 +1,6 @@
 'use client';
 import { useState, useEffect, useCallback } from 'react';
+import { StockDetailDrawer } from '@/components/drawers/StockDetailDrawer';
 
 interface TraderStatus {
   status?: string;
@@ -51,6 +52,7 @@ export function PowerTraderPage() {
   const [data, setData]       = useState<PowerTraderData | null>(null);
   const [loading, setLoading] = useState(true);
   const [tab, setTab]         = useState<'overview' | 'trades' | 'holdings' | 'settings'>('overview');
+  const [drawerTicker, setDrawerTicker] = useState<string | null>(null);
 
   const fetchData = useCallback(async () => {
     try {
@@ -162,9 +164,9 @@ export function PowerTraderPage() {
           const holding = status.holdings?.[coin];
           const coinPnl = pnl.by_coin?.[coin];
           return (
-            <div key={coin} style={{
+            <div key={coin} onClick={() => setDrawerTicker(coin)} style={{
               background: '#111118', border: '1px solid #1a3a4a',
-              borderRadius: 10, padding: '12px 14px',
+              borderRadius: 10, padding: '12px 14px', cursor: 'pointer',
             }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
                 <span style={{ color: '#e0e0e0', fontFamily: 'monospace', fontWeight: 700, fontSize: 14 }}>{coin}</span>
@@ -264,7 +266,7 @@ export function PowerTraderPage() {
                       }}>
                         {(trade.side || '').toUpperCase()}
                       </span>
-                      <span style={{ color: '#e0e0e0', fontFamily: 'monospace', fontSize: 12, fontWeight: 600 }}>
+                      <span onClick={() => setDrawerTicker((trade.coin || trade.symbol || '') as string)} style={{ color: '#e0e0e0', fontFamily: 'monospace', fontSize: 12, fontWeight: 600, cursor: 'pointer' }}>
                         {trade.coin || trade.symbol}
                       </span>
                       <span style={{ color: '#607d8b', fontFamily: 'monospace', fontSize: 11 }}>
@@ -335,7 +337,7 @@ export function PowerTraderPage() {
                           {(trade.side || '').toUpperCase()}
                         </span>
                       </td>
-                      <td style={{ padding: '8px 12px 8px 0', color: '#e0e0e0', fontWeight: 600 }}>{trade.coin || trade.symbol}</td>
+                      <td onClick={() => setDrawerTicker((trade.coin || trade.symbol || '') as string)} style={{ padding: '8px 12px 8px 0', color: '#e0e0e0', fontWeight: 600, cursor: 'pointer' }}>{trade.coin || trade.symbol}</td>
                       <td style={{ padding: '8px 12px 8px 0', color: '#455a64' }}>{fmt.qty(trade.qty)}</td>
                       <td style={{ padding: '8px 12px 8px 0', color: '#455a64' }}>{fmt.currency(trade.price)}</td>
                       <td style={{ padding: '8px 12px 8px 0', color: '#455a64' }}>{fmt.currency(trade.cost)}</td>
@@ -372,7 +374,7 @@ export function PowerTraderPage() {
               <tbody>
                 {Object.entries(status.holdings).map(([coin, h]) => (
                   <tr key={coin} style={{ borderBottom: '1px solid #1a3a4a22' }}>
-                    <td style={{ padding: '8px 12px 8px 0', color: '#e0e0e0', fontWeight: 700 }}>{coin}</td>
+                    <td onClick={() => setDrawerTicker(coin)} style={{ padding: '8px 12px 8px 0', color: '#e0e0e0', fontWeight: 700, cursor: 'pointer' }}>{coin}</td>
                     <td style={{ padding: '8px 12px 8px 0', color: '#455a64' }}>{fmt.qty(h.qty)}</td>
                     <td style={{ padding: '8px 12px 8px 0', color: '#455a64' }}>{fmt.currency(h.avg_cost)}</td>
                     <td style={{ padding: '8px 12px 8px 0', color: '#455a64' }}>{fmt.currency(h.current_price)}</td>
@@ -434,6 +436,7 @@ export function PowerTraderPage() {
         </div>
       )}
 
+      <StockDetailDrawer ticker={drawerTicker} onClose={() => setDrawerTicker(null)} />
     </div>
   );
 }

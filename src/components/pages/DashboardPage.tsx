@@ -4,6 +4,16 @@ import { LiveIndicator } from '@/components/ui/LiveIndicator';
 import { useEffect, useState } from 'react';
 import { CopilotSection } from './CopilotSection';
 import { BTCBiasWidget } from '../ui/BTCBiasWidget';
+import { StockDetailDrawer } from '@/components/drawers/StockDetailDrawer';
+
+function dbTickerOnly(sym: string): string {
+  if (!sym) return '';
+  const s = String(sym).trim().toUpperCase();
+  const occMatch = s.match(/^([A-Z]+)\d{6}[CP]/);
+  if (occMatch) return occMatch[1];
+  const firstWord = s.split(/[\s/]/)[0];
+  return firstWord.replace(/[^A-Z]/g, '') || s;
+}
 
 // ============================================================================
 // TERRAN DASHBOARD — Trading Decision Headquarters
@@ -199,6 +209,7 @@ export function DashboardPage() {
   const [loading, setLoading] = useState(true);
   const [equityHist, setEquityHist] = useState<any[]>([]);
   const [tick, setTick] = useState(0);
+  const [drawerTicker, setDrawerTicker] = useState<string | null>(null);
 
   const fetchAll = async () => {
     try {
@@ -295,9 +306,10 @@ export function DashboardPage() {
           { sym: 'SOL', price: crypto?.solana?.usd || 0, chg: crypto?.solana?.usd_24h_change || 0 },
           { sym: '$1M+ FLOWS', price: topFlowsCount, chg: 0, isCount: true },
         ].map((c, i) => (
-          <div key={i} style={{
+          <div key={i} onClick={() => { if (!(c as any).isCount) setDrawerTicker(c.sym); }} style={{
             background: '#0a1929', border: '1px solid #1a3a4a', borderRadius: '8px',
             padding: '12px 16px', display: 'flex', justifyContent: 'space-between', alignItems: 'center',
+            cursor: (c as any).isCount ? 'default' : 'pointer',
           }}>
             <div>
               <div style={{ fontSize: 'var(--mc-font-label)', color: '#4fc3f7', fontFamily: 'var(--font-mc-mono)', fontWeight: 600 }}>{c.sym}</div>
@@ -364,7 +376,7 @@ export function DashboardPage() {
                     marginBottom: '8px', animation: `db-slide 0.3s ease-out ${i * 0.1}s both`,
                   }}>
                     <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '6px' }}>
-                      <span style={{ fontSize: 'var(--mc-font-lg)', fontWeight: 700, color: '#e0e0e0', fontFamily: 'var(--font-mc-mono)' }}>{p.symbol}</span>
+                      <span onClick={() => setDrawerTicker(dbTickerOnly(p.symbol))} style={{ fontSize: 'var(--mc-font-lg)', fontWeight: 700, color: '#e0e0e0', fontFamily: 'var(--font-mc-mono)', cursor: 'pointer' }}>{p.symbol}</span>
                       <span style={{ fontSize: 'var(--mc-font-lg)', fontWeight: 700, color: g ? '#66bb6a' : '#ef5350', fontFamily: 'var(--font-mc-mono)' }}>
                         {g ? '+' : ''}{fmt(pnlPct, 1)}%
                       </span>
@@ -399,7 +411,7 @@ export function DashboardPage() {
                     marginBottom: '8px', animation: `db-slide 0.3s ease-out ${i * 0.1}s both`,
                   }}>
                     <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '6px' }}>
-                      <span style={{ fontSize: 'var(--mc-font-lg)', fontWeight: 700, color: '#e0e0e0', fontFamily: 'var(--font-mc-mono)' }}>{p.symbol}</span>
+                      <span onClick={() => setDrawerTicker(dbTickerOnly(p.symbol))} style={{ fontSize: 'var(--mc-font-lg)', fontWeight: 700, color: '#e0e0e0', fontFamily: 'var(--font-mc-mono)', cursor: 'pointer' }}>{p.symbol}</span>
                       <span style={{ fontSize: 'var(--mc-font-lg)', fontWeight: 700, color: g ? '#66bb6a' : '#ef5350', fontFamily: 'var(--font-mc-mono)' }}>
                         {g ? '+' : ''}{fmt(pnlPct, 1)}%
                       </span>
@@ -585,6 +597,7 @@ export function DashboardPage() {
         </div>
       </div>
       <CopilotSection />
+      <StockDetailDrawer ticker={drawerTicker} onClose={() => setDrawerTicker(null)} />
     </div>
   );
 }

@@ -1,5 +1,6 @@
 'use client';
 import { useState, useEffect, useCallback } from 'react';
+import { StockDetailDrawer } from '@/components/drawers/StockDetailDrawer';
 
 interface Signal {
   id: string; symbol: string; shortName?: string; strike?: string; expiry?: number;
@@ -22,7 +23,7 @@ const M = 'var(--font-mc-mono)';
 const F = 'var(--mc-font-label)';
 const catColor = (c?: string) => c === 'SWING' ? '#4fc3f7' : c === 'SCALP' ? '#ff9800' : c === 'LONGTERM' ? '#ce93d8' : c?.includes('ER') ? '#ffeb3b' : '#607d8b';
 
-function SignalCard({ sig, onClick, isSelected }: { sig: Signal; onClick: () => void; isSelected: boolean }) {
+function SignalCard({ sig, onClick, isSelected, onTAClick }: { sig: Signal; onClick: () => void; isSelected: boolean; onTAClick: (sym: string) => void }) {
   const dte = daysTo(sig.expiry);
   const isCall = !sig.isPut;
   return (
@@ -30,6 +31,7 @@ function SignalCard({ sig, onClick, isSelected }: { sig: Signal; onClick: () => 
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
           <span style={{ fontSize: 'var(--mc-font-md)', fontWeight: 800, color: '#e0e0e0', fontFamily: M }}>{sig.symbol}</span>
+          <span onClick={(e) => { e.stopPropagation(); onTAClick(sig.symbol); }} style={{ cursor: 'pointer', padding: '1px 6px', border: '1px solid #4fc3f755', borderRadius: '3px', fontSize: '9px', color: '#4fc3f7', fontWeight: 700, letterSpacing: '1px', fontFamily: M }}>TA</span>
           {sig.strike && <span style={{ fontSize: F, color: '#b0bec5', fontFamily: M, fontWeight: 600 }}>${sig.strike}{isCall ? 'C' : 'P'}</span>}
           <span style={{ display: 'inline-flex', alignItems: 'center', padding: '1px 6px', borderRadius: '3px', background: catColor(sig.category) + '22', border: '1px solid ' + catColor(sig.category) + '55', fontSize: 'var(--mc-font-label)', fontFamily: M, color: catColor(sig.category), fontWeight: 700, lineHeight: 1.2, whiteSpace: 'nowrap' }}>{sig.category}</span>
         </div>
@@ -100,6 +102,16 @@ export function SignalsPage() {
   const [ageFilter, setAgeFilter] = useState('30d');
   const [search, setSearch] = useState('');
   const [selected, setSelected] = useState<Signal | null>(null);
+  const [drawerTicker, setDrawerTicker] = useState<string | null>(null);
+  const tickerOnly = (sym: string) => {
+    if (!sym) return '';
+    const s = String(sym).trim().toUpperCase();
+    const occMatch = s.match(/^([A-Z]+)\d{6}[CP]/);
+    if (occMatch) return occMatch[1];
+    const firstWord = s.split(/[\s/]/)[0];
+    return firstWord.replace(/[^A-Z]/g, '') || s;
+  };
+  const openTA = (sym: string) => setDrawerTicker(tickerOnly(sym));
 
   const fetchData = useCallback(async () => {
     try {
@@ -174,19 +186,19 @@ export function SignalsPage() {
       <div style={{ display: 'grid', gridTemplateColumns: selected ? '1fr 340px' : '1fr', gap: '10px', flex: 1, overflow: 'hidden', minHeight: 0 }}>
         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gridTemplateRows: '1fr 1fr', gap: '10px', overflow: 'hidden', minHeight: 0 }}>
         <GridBox title="SWING" color="#4fc3f7" count={swings.length}>
-          {swings.length > 0 ? swings.map((s, i) => <SignalCard key={s.source + s.id + i} sig={s} isSelected={sel?.id === s.id && sel?.source === s.source} onClick={() => setSelected(sel?.id === s.id && sel?.source === s.source ? null : s)} />) : noSig}
+          {swings.length > 0 ? swings.map((s, i) => <SignalCard key={s.source + s.id + i} sig={s} isSelected={sel?.id === s.id && sel?.source === s.source} onClick={() => setSelected(sel?.id === s.id && sel?.source === s.source ? null : s)} onTAClick={openTA} />) : noSig}
         </GridBox>
 
         <GridBox title="SCALP" color="#ff9800" count={scalps.length}>
-          {scalps.length > 0 ? scalps.map((s, i) => <SignalCard key={s.source + s.id + i} sig={s} isSelected={sel?.id === s.id && sel?.source === s.source} onClick={() => setSelected(sel?.id === s.id && sel?.source === s.source ? null : s)} />) : noSig}
+          {scalps.length > 0 ? scalps.map((s, i) => <SignalCard key={s.source + s.id + i} sig={s} isSelected={sel?.id === s.id && sel?.source === s.source} onClick={() => setSelected(sel?.id === s.id && sel?.source === s.source ? null : s)} onTAClick={openTA} />) : noSig}
         </GridBox>
 
         <GridBox title="ER PLAY & STOCKS" color="#ffeb3b" count={erStocks.length}>
-          {erStocks.length > 0 ? erStocks.map((s, i) => <SignalCard key={s.source + s.id + i} sig={s} isSelected={sel?.id === s.id && sel?.source === s.source} onClick={() => setSelected(sel?.id === s.id && sel?.source === s.source ? null : s)} />) : noSig}
+          {erStocks.length > 0 ? erStocks.map((s, i) => <SignalCard key={s.source + s.id + i} sig={s} isSelected={sel?.id === s.id && sel?.source === s.source} onClick={() => setSelected(sel?.id === s.id && sel?.source === s.source ? null : s)} onTAClick={openTA} />) : noSig}
         </GridBox>
 
         <GridBox title="LONGTERM" color="#ce93d8" count={longterm.length}>
-          {longterm.length > 0 ? longterm.map((s, i) => <SignalCard key={s.source + s.id + i} sig={s} isSelected={sel?.id === s.id && sel?.source === s.source} onClick={() => setSelected(sel?.id === s.id && sel?.source === s.source ? null : s)} />) : noSig}
+          {longterm.length > 0 ? longterm.map((s, i) => <SignalCard key={s.source + s.id + i} sig={s} isSelected={sel?.id === s.id && sel?.source === s.source} onClick={() => setSelected(sel?.id === s.id && sel?.source === s.source ? null : s)} onTAClick={openTA} />) : noSig}
         </GridBox>
 
         <GridBox title="RECENTLY CLOSED" color="#ef5350" count={closedFiltered.length}>
@@ -201,7 +213,10 @@ export function SignalsPage() {
               <button onClick={() => setSelected(null)} style={{ background: 'none', border: '1px solid #1a3a4a', borderRadius: '4px', color: '#607d8b', padding: '1px 8px', cursor: 'pointer', fontFamily: M, fontSize: 'var(--mc-font-label)' }}>{'\u2715'}</button>
             </div>
             <div style={{ overflow: 'auto', padding: '12px', flex: 1 }}>
-              <div style={{ fontSize: 'var(--mc-font-xl)', fontWeight: 800, color: '#e0e0e0', fontFamily: M, marginBottom: '4px' }}>{sel.symbol}</div>
+              <div style={{ fontSize: 'var(--mc-font-xl)', fontWeight: 800, color: '#e0e0e0', fontFamily: M, marginBottom: '4px', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                <span>{sel.symbol}</span>
+                <span onClick={() => openTA(sel.symbol)} style={{ cursor: 'pointer', padding: '2px 8px', border: '1px solid #4fc3f755', borderRadius: '3px', fontSize: '10px', color: '#4fc3f7', fontWeight: 700, letterSpacing: '1px' }}>TA</span>
+              </div>
               {sel.shortName && <div style={{ fontSize: F, color: '#607d8b', fontFamily: M, marginBottom: '12px' }}>{sel.shortName}</div>}
               <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap', marginBottom: '16px' }}>
                 <span style={{ display: 'inline-flex', alignItems: 'center', padding: '2px 8px', borderRadius: '4px', background: !sel.isPut ? '#66bb6a22' : '#ef535022', border: !sel.isPut ? '1px solid #66bb6a55' : '1px solid #ef535055', fontSize: 'var(--mc-font-label)', fontFamily: M, color: !sel.isPut ? '#66bb6a' : '#ef5350', fontWeight: 700, lineHeight: 1.2, whiteSpace: 'nowrap' }}>{sel.type === 'stock' ? 'STOCK' : !sel.isPut ? 'CALL' : 'PUT'}</span>
@@ -238,6 +253,7 @@ export function SignalsPage() {
           </div>
         ) : null}
       </div>
+      <StockDetailDrawer ticker={drawerTicker} onClose={() => setDrawerTicker(null)} />
     </div>
   );
 }

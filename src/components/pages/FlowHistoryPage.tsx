@@ -3,6 +3,7 @@
 if (typeof window !== "undefined") { window.addEventListener("unhandledrejection", (e) => { console.warn("[FlowHistory]", e.reason); e.preventDefault(); }); }
 
 import { useState, useEffect, useCallback, useMemo } from "react";
+import { StockDetailDrawer } from "@/components/drawers/StockDetailDrawer";
 
 interface Contract {
   option_symbol: string;
@@ -109,6 +110,7 @@ export function FlowHistoryPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [availableDates, setAvailableDates] = useState<string[]>([]);
+  const [drawerTicker, setDrawerTicker] = useState<string | null>(null);
 
   const fetchData = useCallback(async () => {
     setLoading(true);
@@ -234,7 +236,7 @@ export function FlowHistoryPage() {
             {topTickers.map((t) => {
               const bullPct = t.total_premium > 0 ? (t.bull_premium / t.total_premium) * 100 : 0;
               return (
-                <div key={t.ticker} style={{ background: "#0d1f2a", border: "1px solid #1a3a4a", borderRadius: 6, padding: "8px 10px" }}>
+                <div key={t.ticker} onClick={() => setDrawerTicker(t.ticker)} style={{ background: "#0d1f2a", border: "1px solid #1a3a4a", borderRadius: 6, padding: "8px 10px", cursor: "pointer" }}>
                   <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 4 }}>
                     <span style={{ color: "#e0e0e0", fontWeight: 600, fontSize: 13 }}>{t.ticker}</span>
                     <span style={{ color: "#90a4ae", fontSize: 10 }}>{t.contract_count} contracts</span>
@@ -331,7 +333,7 @@ export function FlowHistoryPage() {
                     <td style={{ padding: "8px 10px" }}>
                       <span style={{ color: c.is_bullish ? "#66bb6a" : "#ef5350", fontWeight: 700, fontSize: 10 }}>{c.is_bullish ? "BULL" : "BEAR"}</span>
                     </td>
-                    <td style={{ padding: "7px 10px", color: "#e0e0e0", fontWeight: 700, fontSize: 13 }}>{c.ticker}</td>
+                    <td onClick={() => setDrawerTicker(c.ticker)} style={{ padding: "7px 10px", color: "#e0e0e0", fontWeight: 700, fontSize: 13, cursor: "pointer" }}>{c.ticker}</td>
                     <td style={{ padding: "7px 10px", color: "#cfd8dc", textAlign: "right", fontWeight: 500 }}>${c.strike}</td>
                     <td style={{ padding: "7px 10px", color: c.option_type === "CALL" ? "#66bb6a" : "#ef5350", fontWeight: 600 }}>{c.option_type}</td>
                     <td style={{ padding: "7px 10px", color: "#90a4ae" }}>{c.expiry}</td>
@@ -364,6 +366,7 @@ export function FlowHistoryPage() {
           )}
         </div>
       </div>
+      <StockDetailDrawer ticker={drawerTicker} onClose={() => setDrawerTicker(null)} />
     </div>
   );
 }

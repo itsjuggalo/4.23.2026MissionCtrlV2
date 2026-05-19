@@ -1,5 +1,15 @@
 'use client';
 import { useEffect, useState } from 'react';
+import { StockDetailDrawer } from '@/components/drawers/StockDetailDrawer';
+
+function perfTickerOnly(sym: string): string {
+  if (!sym) return '';
+  const s = String(sym).trim().toUpperCase();
+  const occMatch = s.match(/^([A-Z]+)\d{6}[CP]/);
+  if (occMatch) return occMatch[1];
+  const firstWord = s.split(/[\s/]/)[0];
+  return firstWord.replace(/[^A-Z]/g, '') || s;
+}
 
 // ============================================================================
 // TERRAN PERFORMANCE ANALYTICS — Trading Intelligence Terminal
@@ -15,6 +25,7 @@ export function PerformancePage() {
   const [equityHist, setEquityHist] = useState<any[]>([]);
   const [tick, setTick] = useState(0);
   const [bobaJournal, setBobaJournal] = useState<any[]>([]);
+  const [drawerTicker, setDrawerTicker] = useState<string | null>(null);
   const [protocolFilter, setProtocolFilter] = useState<'all' | 'flow' | 'swing' | 'manual' | 'auto-btc'>(
     () => {
       if (typeof window === 'undefined') return 'all';
@@ -261,7 +272,7 @@ export function PerformancePage() {
               <div key={i} style={{ marginBottom: '14px' }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '6px' }}>
                   <div>
-                    <span style={{ fontSize: 'var(--mc-font-md)', fontWeight: 700, color: '#e0e0e0', fontFamily: 'var(--font-mc-mono)' }}>{p.symbol}</span>
+                    <span onClick={() => setDrawerTicker(perfTickerOnly(p.symbol))} style={{ fontSize: 'var(--mc-font-md)', fontWeight: 700, color: '#e0e0e0', fontFamily: 'var(--font-mc-mono)', cursor: 'pointer' }}>{p.symbol}</span>
                     <span style={{ fontSize: 'var(--mc-font-label)', color: '#455a64', marginLeft: '8px' }}>{p.qty} @ ${fmt(parseFloat(p.avg_entry_price || '0'))}</span>
                   </div>
                   <div style={{ textAlign: 'right' }}>
@@ -400,6 +411,7 @@ export function PerformancePage() {
           </div>
         )}
       </div>
+      <StockDetailDrawer ticker={drawerTicker} onClose={() => setDrawerTicker(null)} />
     </div>
   );
 }

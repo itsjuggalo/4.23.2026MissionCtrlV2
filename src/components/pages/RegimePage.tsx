@@ -1,5 +1,6 @@
 'use client';
 import { useEffect, useState } from 'react';
+import { StockDetailDrawer } from '@/components/drawers/StockDetailDrawer';
 
 // ============================================================================
 // TERRAN REGIME ANALYZER — Market Conditions Intelligence
@@ -13,6 +14,7 @@ export function RegimePage() {
   const [macro, setMacro] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [tick, setTick] = useState(0);
+  const [drawerTicker, setDrawerTicker] = useState<string | null>(null);
 
   const fetchAll = async () => {
     try {
@@ -199,7 +201,7 @@ export function RegimePage() {
                 <div>SYM</div><div>SECTOR</div><div style={{ textAlign: 'right' }}>5D %</div><div style={{ textAlign: 'right' }}>20D %</div>
               </div>
               {macro.sectors.map((s: any, i: number) => (
-                <div key={i} style={{ display: 'grid', gridTemplateColumns: '60px 1fr 100px 100px', gap: '8px', alignItems: 'center', padding: '8px 10px', borderBottom: '1px solid #0d1117', fontSize: 'var(--mc-font-sm)', fontFamily: 'var(--font-mc-mono)' }}>
+                <div key={i} onClick={() => setDrawerTicker(s.symbol)} style={{ display: 'grid', gridTemplateColumns: '60px 1fr 100px 100px', gap: '8px', alignItems: 'center', padding: '8px 10px', borderBottom: '1px solid #0d1117', fontSize: 'var(--mc-font-sm)', fontFamily: 'var(--font-mc-mono)', cursor: 'pointer' }}>
                   <div style={{ fontWeight: 700, color: '#ffd600' }}>{s.symbol}</div>
                   <div style={{ color: '#e0e0e0' }}>{s.name}</div>
                   <div style={{ textAlign: 'right', fontWeight: 700, color: s.return5d >= 0 ? '#66bb6a' : '#ef5350' }}>{s.return5d >= 0 ? '+' : ''}{s.return5d?.toFixed(2)}%</div>
@@ -382,6 +384,7 @@ export function RegimePage() {
           ))}
         </div>
       </div>
+      <StockDetailDrawer ticker={drawerTicker} onClose={() => setDrawerTicker(null)} />
     </div>
   );
 }

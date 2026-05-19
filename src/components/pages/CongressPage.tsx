@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
+import { StockDetailDrawer } from "@/components/drawers/StockDetailDrawer";
 
 interface Trade {
   id: string;
@@ -45,6 +46,7 @@ export function CongressPage() {
   const [filter, setFilter] = useState<"all" | "buy" | "sell">("all");
   const [partyFilter, setPartyFilter] = useState<string>("all");
   const [loading, setLoading] = useState(true);
+  const [drawerTicker, setDrawerTicker] = useState<string | null>(null);
 
   const fetchData = useCallback(async () => {
     try {
@@ -78,7 +80,7 @@ export function CongressPage() {
           </h2>
           <div style={{ display: "flex", gap: 12, overflowX: "auto", paddingBottom: 8 }}>
             {data.suspicious.slice(0, 6).map((t, i) => (
-              <div key={i} style={{ minWidth: 220, background: "#0a1929", border: "1px solid #1a3a4a", borderRadius: 8, padding: 14, flexShrink: 0 }}>
+              <div key={i} onClick={() => setDrawerTicker(t.ticker)} style={{ minWidth: 220, background: "#0a1929", border: "1px solid #1a3a4a", borderRadius: 8, padding: 14, flexShrink: 0, cursor: "pointer" }}>
                 <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 8 }}>
                   <span style={{ fontSize: 14, fontWeight: 700, color: "#e0e0e0", fontFamily: "var(--font-mc-mono, monospace)" }}>{t.ticker}</span>
                   <span style={{ fontSize: 10, padding: "2px 8px", borderRadius: 4, background: t.trade_type === "buy" ? "rgba(102,187,106,0.15)" : "rgba(239,83,80,0.15)", color: t.trade_type === "buy" ? "#66bb6a" : "#ef5350", fontFamily: "var(--font-mc-mono, monospace)", fontWeight: 600, textTransform: "uppercase" }}>{t.trade_type}</span>
@@ -155,7 +157,7 @@ export function CongressPage() {
                 <tr key={i} style={{ borderBottom: "1px solid rgba(26,58,74,0.3)" }}
                   onMouseEnter={e => { e.currentTarget.style.background = "rgba(79,195,247,0.03)"; }}
                   onMouseLeave={e => { e.currentTarget.style.background = "transparent"; }}>
-                  <td style={{ padding: "10px 12px", fontWeight: 700, color: "#e0e0e0" }}>{t.ticker}</td>
+                  <td onClick={() => setDrawerTicker(t.ticker)} style={{ padding: "10px 12px", fontWeight: 700, color: "#e0e0e0", cursor: "pointer" }}>{t.ticker}</td>
                   <td style={{ padding: "10px 12px", color: "#e0e0e0" }}>{t.name}</td>
                   <td style={{ padding: "10px 12px", color: PARTY_COLORS[t.party] || "#607d8b" }}>{t.party?.charAt(0)}</td>
                   <td style={{ padding: "10px 12px" }}>
@@ -176,6 +178,7 @@ export function CongressPage() {
           </table>
         )}
       </div>
+      <StockDetailDrawer ticker={drawerTicker} onClose={() => setDrawerTicker(null)} />
     </div>
   );
 }

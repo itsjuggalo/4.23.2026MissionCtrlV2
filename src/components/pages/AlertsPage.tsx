@@ -1,5 +1,6 @@
 'use client';
 import { useState, useEffect, useCallback, useMemo } from 'react';
+import { StockDetailDrawer } from '@/components/drawers/StockDetailDrawer';
 
 interface AlertItem {
   id: string;
@@ -9,6 +10,7 @@ interface AlertItem {
   title: string;
   detail: string;
   value?: string;
+  symbol?: string;
 }
 
 const SEVERITY = {
@@ -42,6 +44,7 @@ export function AlertsPage() {
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState<string>('all');
   const [lastUpdate, setLastUpdate] = useState(new Date());
+  const [drawerTicker, setDrawerTicker] = useState<string | null>(null);
 
   const fetchAlerts = useCallback(async () => {
     try {
@@ -82,17 +85,17 @@ export function AlertsPage() {
           const sym = p.symbol;
           if (pnlPct < -5) {
             newAlerts.push({ id: `pos${id++}`, time: now, severity: 'critical', category: 'Position',
-              title: `${sym} Down ${pnlPct.toFixed(1)}%`, detail: `Consider stop loss — entry $${parseFloat(p.avg_entry_price).toFixed(2)} → $${parseFloat(p.current_price).toFixed(2)}`, value: `${pnlPct.toFixed(1)}%` });
+              title: `${sym} Down ${pnlPct.toFixed(1)}%`, detail: `Consider stop loss — entry $${parseFloat(p.avg_entry_price).toFixed(2)} → $${parseFloat(p.current_price).toFixed(2)}`, value: `${pnlPct.toFixed(1)}%`, symbol: sym });
           } else if (pnlPct < -3) {
             newAlerts.push({ id: `pos${id++}`, time: now, severity: 'warning', category: 'Position',
-              title: `${sym} Down ${pnlPct.toFixed(1)}%`, detail: `Tighten stop — entry $${parseFloat(p.avg_entry_price).toFixed(2)} → $${parseFloat(p.current_price).toFixed(2)}`, value: `${pnlPct.toFixed(1)}%` });
+              title: `${sym} Down ${pnlPct.toFixed(1)}%`, detail: `Tighten stop — entry $${parseFloat(p.avg_entry_price).toFixed(2)} → $${parseFloat(p.current_price).toFixed(2)}`, value: `${pnlPct.toFixed(1)}%`, symbol: sym });
           }
           if (pnlPct > 20) {
             newAlerts.push({ id: `pos${id++}`, time: now, severity: 'warning', category: 'Position',
-              title: `${sym} Up ${pnlPct.toFixed(1)}% — Take Profit?`, detail: `Extended position — consider partial profit at $${parseFloat(p.current_price).toFixed(2)}`, value: `+${pnlPct.toFixed(1)}%` });
+              title: `${sym} Up ${pnlPct.toFixed(1)}% — Take Profit?`, detail: `Extended position — consider partial profit at $${parseFloat(p.current_price).toFixed(2)}`, value: `+${pnlPct.toFixed(1)}%`, symbol: sym });
           } else if (pnlPct > 10) {
             newAlerts.push({ id: `pos${id++}`, time: now, severity: 'info', category: 'Position',
-              title: `${sym} Up ${pnlPct.toFixed(1)}%`, detail: `On track — current $${parseFloat(p.current_price).toFixed(2)}`, value: `+${pnlPct.toFixed(1)}%` });
+              title: `${sym} Up ${pnlPct.toFixed(1)}%`, detail: `On track — current $${parseFloat(p.current_price).toFixed(2)}`, value: `+${pnlPct.toFixed(1)}%`, symbol: sym });
           }
         }
       }
@@ -218,6 +221,9 @@ export function AlertsPage() {
                 <div style={{ flex: 1, minWidth: 0 }}>
                   <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '4px' }}>
                     <span style={{ fontSize: 'var(--mc-font-sm)', fontWeight: 600, color: sev.color }}>{alert.title}</span>
+                    {alert.symbol && (
+                      <span onClick={() => setDrawerTicker(alert.symbol!)} style={{ cursor: 'pointer', padding: '1px 6px', marginLeft: '0', border: '1px solid #4fc3f755', borderRadius: '3px', fontSize: '9px', color: '#4fc3f7', fontWeight: 700, letterSpacing: '1px' }}>TA</span>
+                    )}
                     <span style={{
                       fontSize: 'var(--mc-font-label)', padding: '2px 8px', borderRadius: '10px',
                       background: '#ffffff08', color: '#888', border: '1px solid #ffffff10',
@@ -239,6 +245,7 @@ export function AlertsPage() {
           })}
         </div>
       )}
+      <StockDetailDrawer ticker={drawerTicker} onClose={() => setDrawerTicker(null)} />
     </div>
   );
 }

@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
+import { StockDetailDrawer } from "@/components/drawers/StockDetailDrawer";
 
 interface LLMTrade {
   date: string;
@@ -56,6 +57,7 @@ export function LLMPortfolioPage() {
   const [data, setData] = useState<PortfolioData | null>(null);
   const [selectedModel, setSelectedModel] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
+  const [drawerTicker, setDrawerTicker] = useState<string | null>(null);
 
   const fetchData = useCallback(async () => {
     try {
@@ -131,9 +133,9 @@ export function LLMPortfolioPage() {
             </h2>
             <div style={{ maxHeight: 300, overflowY: "auto" }}>
               {Object.entries(active.current_holdings || {}).sort((a, b) => b[1] - a[1]).map(([sym, qty]) => (
-                <div key={sym} style={{
+                <div key={sym} onClick={() => setDrawerTicker(sym)} style={{
                   display: "flex", justifyContent: "space-between", padding: "8px 0",
-                  borderBottom: "1px solid rgba(26,58,74,0.3)", fontSize: 13, fontFamily: "var(--font-mc-mono, monospace)"
+                  borderBottom: "1px solid rgba(26,58,74,0.3)", fontSize: 13, fontFamily: "var(--font-mc-mono, monospace)", cursor: "pointer"
                 }}>
                   <span style={{ color: "#e0e0e0", fontWeight: 600 }}>{sym}</span>
                   <span style={{ color: "#607d8b" }}>{qty} shares</span>
@@ -152,9 +154,9 @@ export function LLMPortfolioPage() {
             </h2>
             <div style={{ maxHeight: 300, overflowY: "auto" }}>
               {(active.recent_trades || []).map((t, i) => (
-                <div key={i} style={{
+                <div key={i} onClick={() => setDrawerTicker(t.symbol)} style={{
                   display: "flex", justifyContent: "space-between", alignItems: "center", padding: "8px 0",
-                  borderBottom: "1px solid rgba(26,58,74,0.3)", fontSize: 12, fontFamily: "var(--font-mc-mono, monospace)"
+                  borderBottom: "1px solid rgba(26,58,74,0.3)", fontSize: 12, fontFamily: "var(--font-mc-mono, monospace)", cursor: "pointer"
                 }}>
                   <div>
                     <span style={{
@@ -199,7 +201,7 @@ export function LLMPortfolioPage() {
                   if (!m?.recent_trades) return [];
                   return m.recent_trades.slice(0, 3).map((t, i) => ({...t, modelKey: key, modelColor: m.color}));
                 }).sort((a, b) => b.date.localeCompare(a.date)).slice(0, 20).map((t, i) => (
-                  <tr key={i} style={{ borderBottom: "1px solid rgba(26,58,74,0.3)" }}>
+                  <tr key={i} onClick={() => setDrawerTicker(t.symbol)} style={{ borderBottom: "1px solid rgba(26,58,74,0.3)", cursor: "pointer" }}>
                     <td style={{ padding: "8px 12px", color: t.modelColor, fontWeight: 600 }}>{t.modelKey}</td>
                     <td style={{ padding: "8px 12px" }}>
                       <span style={{ padding: "1px 6px", borderRadius: 3, fontSize: 10, fontWeight: 600,
@@ -223,6 +225,7 @@ export function LLMPortfolioPage() {
           )}
         </div>
       )}
+      <StockDetailDrawer ticker={drawerTicker} onClose={() => setDrawerTicker(null)} />
     </div>
   );
 }

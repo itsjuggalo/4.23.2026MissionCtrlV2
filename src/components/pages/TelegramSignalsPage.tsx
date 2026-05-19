@@ -1,6 +1,18 @@
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
+import { StockDetailDrawer } from '@/components/drawers/StockDetailDrawer';
+
+function tgTickerOnly(sym: string): string {
+  if (!sym) return '';
+  const s = String(sym).trim().toUpperCase();
+  // strip common crypto pair suffixes
+  const stripped = s.replace(/USDT$|USD$|-PERP$/, '');
+  const occMatch = stripped.match(/^([A-Z]+)\d{6}[CP]/);
+  if (occMatch) return occMatch[1];
+  const firstWord = stripped.split(/[\s/]/)[0];
+  return firstWord.replace(/[^A-Z]/g, '') || stripped;
+}
 
 interface TelegramSignal {
   id: string;
@@ -183,6 +195,7 @@ export function TelegramSignalsPage() {
   const [sourceTab, setSourceTab] = useState<SourceTab>('All Sources');
   const [dirTab,    setDirTab]    = useState<DirTab>('All Directions');
   const [expanded,  setExpanded]  = useState<Set<string>>(new Set());
+  const [drawerTicker, setDrawerTicker] = useState<string | null>(null);
   const [, setTick] = useState(0);
 
   const fetchSignals = useCallback(async () => {
@@ -307,9 +320,10 @@ export function TelegramSignalsPage() {
 
                 {/* Symbol + direction + leverage */}
                 <div style={{ display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap' }}>
-                  <span style={{ fontSize: 22, fontWeight: 700, color: '#81d4fa', fontFamily: "'JetBrains Mono', monospace", letterSpacing: '0.5px' }}>
+                  <span onClick={() => setDrawerTicker(tgTickerOnly(sym))} style={{ fontSize: 22, fontWeight: 700, color: '#81d4fa', fontFamily: "'JetBrains Mono', monospace", letterSpacing: '0.5px', cursor: 'pointer' }}>
                     {sym}
                   </span>
+                  <span onClick={() => setDrawerTicker(tgTickerOnly(sym))} style={{ cursor: 'pointer', padding: '2px 8px', border: '1px solid #4fc3f755', borderRadius: '4px', fontSize: 10, color: '#4fc3f7', fontWeight: 700, letterSpacing: '1px', fontFamily: "'JetBrains Mono', monospace" }}>TA</span>
                   {sig.direction && (
                     <span style={{ ...dirStyle, fontSize: 11, fontWeight: 700, fontFamily: "'JetBrains Mono', monospace", padding: '3px 10px', borderRadius: 6, letterSpacing: '0.5px' }}>
                       {sig.direction}
@@ -397,6 +411,7 @@ export function TelegramSignalsPage() {
       )}
 
       <style>{`@keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.4; } }`}</style>
+      <StockDetailDrawer ticker={drawerTicker} onClose={() => setDrawerTicker(null)} />
     </div>
   );
 }
