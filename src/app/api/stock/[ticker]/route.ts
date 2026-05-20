@@ -19,75 +19,16 @@ async function finnhub(path: string, params: Record<string, string> = {}): Promi
   }
 }
 
+// yfinance lives in an ephemeral uv venv, not in system python. The script
+// at ~/scripts/stock-info.py has a PEP 723 dep block declaring yfinance.
+// PATH prefix avoids Node's inherited Windows /mnt/c paths clobbering uv.
 function yfinanceFetch(ticker: string): any {
   try {
-    const script = `
-import yfinance as yf, json, sys
-try:
-    t = yf.Ticker("${ticker}")
-    info = t.info or {}
-    # earnings history
-    rows = []
-    try:
-        ed = t.earnings_dates
-        if ed is not None:
-            for ts, row in ed.head(10).iterrows():
-                est = row.get("EPS Estimate")
-                act = row.get("Reported EPS")
-                rows.append({
-                    "date": ts.strftime("%Y-%m-%d") if hasattr(ts, "strftime") else str(ts)[:10],
-                    "est": float(est) if est is not None and str(est) != "nan" else None,
-                    "act": float(act) if act is not None and str(act) != "nan" else None,
-                })
-    except Exception:
-        pass
-    # next earnings
-    next_eps = None
-    try:
-        cal = t.calendar
-        if cal and "Earnings Date" in cal:
-            d = cal["Earnings Date"]
-            if isinstance(d, list) and d:
-                next_eps = str(d[0])[:10]
-    except Exception:
-        pass
-    out = {
-        "description": info.get("longBusinessSummary", ""),
-        "exchange": info.get("exchange", ""),
-        "industry": info.get("industry", "") or info.get("sector", ""),
-        "website": info.get("website", ""),
-        "marketCap": info.get("marketCap"),
-        "pe": info.get("trailingPE"),
-        "eps": info.get("trailingEps"),
-        "avgVol": info.get("averageVolume"),
-        "volume": info.get("volume"),
-        "targetPrice": info.get("targetMeanPrice"),
-        "recommendation": info.get("recommendationKey", ""),
-        "wk52High": info.get("fiftyTwoWeekHigh"),
-        "wk52Low": info.get("fiftyTwoWeekLow"),
-        "bookValue": info.get("bookValue"),
-        "open": info.get("open"),
-        "dayHigh": info.get("dayHigh"),
-        "dayLow": info.get("dayLow"),
-        "prevClose": info.get("previousClose"),
-        "regularPrice": info.get("regularMarketPrice"),
-        "regularChange": info.get("regularMarketChange"),
-        "regularChangePct": info.get("regularMarketChangePercent"),
-        "postPrice": info.get("postMarketPrice"),
-        "postChange": info.get("postMarketChange"),
-        "postChangePct": info.get("postMarketChangePercent"),
-        "earnings": rows,
-        "nextEarnings": next_eps,
-    }
-    print(json.dumps(out, default=str))
-except Exception as e:
-    print(json.dumps({"err": str(e)[:200]}))
-`;
-    const out = execSync(`python3 -c '${script.replace(/'/g, "'\\''")}' 2>/dev/null`, {
-      timeout: 10000,
-      encoding: 'utf-8',
-      maxBuffer: 2 * 1024 * 1024,
-    });
+    const safe = ticker.replace(/[^A-Z0-9.\-]/gi, '');
+    const out = execSync(
+      `PATH=/home/itsju/.local/bin:/usr/local/bin:/usr/bin:/bin /home/itsju/.local/bin/uv run /home/itsju/scripts/stock-info.py ${safe}`,
+      { timeout: 20000, encoding: 'utf-8', maxBuffer: 4 * 1024 * 1024 },
+    );
     return JSON.parse(out.trim());
   } catch {
     return {};

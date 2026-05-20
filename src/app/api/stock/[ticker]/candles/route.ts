@@ -50,27 +50,14 @@ function tfToYfPeriod(tf: string): { period: string; interval: string } {
 function yfinanceCandles(ticker: string, tf: string): any {
   const { period, interval } = tfToYfPeriod(tf);
   try {
-    const script = `
-import yfinance as yf, json
-try:
-    t = yf.Ticker("${ticker}")
-    h = t.history(period="${period}", interval="${interval}", auto_adjust=False, prepost=False)
-    points = []
-    for ts, row in h.iterrows():
-        try:
-            points.append({
-                "t": int(ts.timestamp()),
-                "c": float(row["Close"]),
-            })
-        except Exception:
-            pass
-    print(json.dumps({"points": points}))
-except Exception as e:
-    print(json.dumps({"points": [], "err": str(e)[:200]}))
-`;
-    const out = execSync(`python3 -c '${script.replace(/'/g, "'\\''")}' 2>/dev/null`, {
-      timeout: 10000, encoding: 'utf-8', maxBuffer: 4 * 1024 * 1024,
-    });
+    // yfinance via the uv-managed script — system python doesn't have it.
+    const safeTicker = ticker.replace(/[^A-Z0-9.\-]/gi, '');
+    const safePeriod = period.replace(/[^a-z0-9]/gi, '');
+    const safeInterval = interval.replace(/[^a-z0-9]/gi, '');
+    const out = execSync(
+      `PATH=/home/itsju/.local/bin:/usr/local/bin:/usr/bin:/bin /home/itsju/.local/bin/uv run /home/itsju/scripts/stock-candles.py ${safeTicker} ${safePeriod} ${safeInterval}`,
+      { timeout: 20000, encoding: 'utf-8', maxBuffer: 4 * 1024 * 1024 },
+    );
     return JSON.parse(out.trim());
   } catch {
     return { points: [] };
