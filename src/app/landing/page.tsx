@@ -1,8 +1,10 @@
 'use client';
 import { useState, useRef, useEffect } from 'react';
 import Link from 'next/link';
+import { Monitor, Smartphone } from 'lucide-react';
 import LandingBanner from '@/components/starcraft/LandingBanner';
 import { AssistantContent } from './CopilotCards';
+import { useViewMode } from '@/lib/useViewMode';
 
 interface WatchlistPin { symbol: string; pinned_at: string; hits: number }
 interface PromptItem { id: string; query: string; category: string; likes: number }
@@ -100,6 +102,63 @@ function SparkleIcon() {
       <path d="M12 2l1.5 5.5L19 9l-5.5 1.5L12 16l-1.5-5.5L5 9l5.5-1.5z" />
       <path d="M19 15l.75 2.75L22 18.5l-2.25.75L19 22l-.75-2.75L16 18.5l2.25-.75z" />
     </svg>
+  );
+}
+
+// ============================================================================
+// VIEW-MODE TOGGLE (Desktop ↔ Mobile)
+// Renders the same shape the sidebar shows; preference is persisted to
+// localStorage via useViewMode so toggling here updates the dashboard too.
+// ============================================================================
+
+function ViewModeToggle() {
+  const [mode, setMode, hydrated] = useViewMode();
+  if (!hydrated) {
+    // SSR placeholder — same dimensions as the live toggle so layout doesn't jump.
+    return <div style={{ width: 76, height: 26 }} aria-hidden />;
+  }
+  return (
+    <div style={{
+      display: 'flex',
+      background: 'rgba(13,22,33,0.6)',
+      border: '1px solid #1a3a4a',
+      borderRadius: 100,
+      padding: 2,
+      gap: 2,
+    }} role="group" aria-label="View mode">
+      {([
+        { value: 'desktop' as const, Icon: Monitor, label: 'Desktop' },
+        { value: 'mobile' as const, Icon: Smartphone, label: 'Mobile' },
+      ]).map(opt => {
+        const active = mode === opt.value;
+        const Icon = opt.Icon;
+        return (
+          <button key={opt.value}
+            onClick={() => setMode(opt.value)}
+            data-mc-compact
+            title={`${opt.label} view`}
+            aria-pressed={active}
+            style={{
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: 6,
+              padding: '4px 10px',
+              background: active ? 'rgba(79,195,247,0.18)' : 'transparent',
+              border: 'none',
+              borderRadius: 100,
+              color: active ? '#4fc3f7' : '#607d8b',
+              fontSize: 11,
+              fontWeight: active ? 700 : 500,
+              cursor: 'pointer',
+              fontFamily: "'Inter', sans-serif",
+            }}
+          >
+            <Icon size={13} />
+            <span>{opt.label}</span>
+          </button>
+        );
+      })}
+    </div>
   );
 }
 
@@ -377,19 +436,22 @@ export default function WelcomePage() {
           <div style={{ width: 8, height: 8, borderRadius: '50%', background: '#66bb6a', boxShadow: '0 0 8px #66bb6a', animation: 'wb 1.4s infinite' }} />
           <span style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: 11, color: '#66bb6a', fontWeight: 700, letterSpacing: 1 }}>SYSTEMS ONLINE</span>
         </div>
-        <Link href="/dashboard" style={{ fontFamily: "'Orbitron', monospace", fontSize: 11, fontWeight: 900, letterSpacing: 2, color: '#ff9800', textDecoration: 'none', padding: '9px 18px', border: '1px solid #ff9800', borderRadius: 20, background: 'rgba(255,152,0,0.06)' }}>ENTER MISSION CTRL →</Link>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+          <ViewModeToggle />
+          <Link href="/dashboard" style={{ fontFamily: "'Orbitron', monospace", fontSize: 11, fontWeight: 900, letterSpacing: 2, color: '#ff9800', textDecoration: 'none', padding: '9px 18px', border: '1px solid #ff9800', borderRadius: 20, background: 'rgba(255,152,0,0.06)' }}>ENTER MISSION CTRL →</Link>
+        </div>
       </div>
 
       {/* HERO */}
-      <div style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '0 24px 60px', position: 'relative', zIndex: 5 }}>
+      <div className="mc-copilot-wrap" style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '0 24px 60px', position: 'relative', zIndex: 5 }}>
         {/* Pill badge */}
         <div style={{ display: 'inline-flex', alignItems: 'center', gap: 6, padding: '5px 14px', background: 'linear-gradient(90deg, rgba(79,195,247,0.2), rgba(129,212,250,0.2))', border: '1px solid rgba(79,195,247,0.4)', borderRadius: 100, fontSize: 13, fontWeight: 600, color: '#81d4fa', marginBottom: 18, backdropFilter: 'blur(10px)' }}>
           <span style={{ color: '#4fc3f7', display: 'inline-flex' }}><SparkleIcon /></span>
           <span>Copilot</span>
         </div>
 
-        {/* StarCraft landing banner */}
-        <div style={{ width: '100%', maxWidth: 900, marginBottom: 28 }}>
+        {/* StarCraft landing banner — desktop only (saves ~200px vertical on phones) */}
+        <div className="mc-copilot-desktop-only" style={{ width: '100%', maxWidth: 900, marginBottom: 28 }}>
           <LandingBanner height={180} />
         </div>
 
@@ -405,11 +467,11 @@ export default function WelcomePage() {
         <div style={{ width: '100%', maxWidth: 780, marginTop: 44, position: 'relative' }}>
           <div className="wgb" style={{ padding: 2, borderRadius: 20 }}>
             <div style={{ background: 'rgba(10,25,41,0.92)', borderRadius: 18, padding: '22px 24px 14px', minHeight: 160, position: 'relative', backdropFilter: 'blur(20px)' }}>
-              <textarea ref={inputRef} className="wi" value={input} onChange={(e) => setInput(e.target.value)} onKeyDown={onKeyDown} placeholder="Ask me anything..." rows={3}
+              <textarea ref={inputRef} className="wi mc-copilot-input" value={input} onChange={(e) => setInput(e.target.value)} onKeyDown={onKeyDown} placeholder="Ask me anything..." rows={3}
                 style={{ width: '100%', background: 'transparent', border: 'none', color: '#e0e0e0', fontFamily: "'Inter', sans-serif", fontSize: 16, resize: 'none', lineHeight: 1.5, boxSizing: 'border-box', padding: 0, minHeight: 72 }} />
 
               {/* Bottom bar: mode pill | upload buttons | submit */}
-              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginTop: 8 }}>
+              <div className="mc-copilot-input-row" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginTop: 8 }}>
                 {/* Mode dropdown pill */}
                 <div ref={modeMenuRef} style={{ position: 'relative' }}>
                   <button onClick={() => setModeOpen((v) => !v)}
@@ -449,7 +511,7 @@ export default function WelcomePage() {
                 <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
                   <button className="ub" title="Attach file (coming soon)" onClick={() => {}}><PaperclipIcon /></button>
                   <button className="ub" title="Upload image (coming soon)" onClick={() => {}}><ImageIcon /></button>
-                  <button onClick={() => submit()} disabled={!input.trim() || loading}
+                  <button onClick={() => submit()} disabled={!input.trim() || loading} className="mc-copilot-input-send"
                     style={{ width: 42, height: 42, borderRadius: '50%', border: 'none', marginLeft: 4,
                       background: input.trim() && !loading ? 'linear-gradient(135deg, #4fc3f7, #0288d1)' : '#1a3a4a',
                       color: input.trim() && !loading ? '#ffffff' : '#455a64',
@@ -556,7 +618,7 @@ export default function WelcomePage() {
 
           {/* Conversation area */}
           {(messages.length > 0 || error || loading) && (
-            <div ref={scrollRef} style={{ marginTop: 24, padding: '20px 24px', background: 'rgba(10,25,41,0.7)', border: '1px solid #1a3a4a', borderRadius: 16, backdropFilter: 'blur(10px)', maxHeight: 560, overflowY: 'auto' }}>
+            <div ref={scrollRef} className="mc-copilot-conversation" style={{ marginTop: 24, padding: '20px 24px', background: 'rgba(10,25,41,0.7)', border: '1px solid #1a3a4a', borderRadius: 16, backdropFilter: 'blur(10px)', maxHeight: 560, overflowY: 'auto' }}>
               {/* Thread header: model + agent + new-thread button */}
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 14, paddingBottom: 10, borderBottom: '1px solid #1a3a4a' }}>
                 <div style={{ fontSize: 10, color: '#607d8b', fontFamily: "'JetBrains Mono', monospace", letterSpacing: 1, display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>

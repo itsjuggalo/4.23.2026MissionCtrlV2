@@ -74,3 +74,91 @@
     scrollbar-color: #4fc3f7 #0a1117;
   }
 }
+
+/* ============================================================
+   Mobile view mode overrides
+   Toggled by the Desktop/Mobile button in the sidebar (and the
+   landing page header). The body class `view-mobile` is added by
+   useViewMode (src/lib/useViewMode.ts). Pages opt in either by
+   doing nothing (these globals apply) or by reading the hook
+   directly when they need to fork layout.
+   ============================================================ */
+
+body.view-mobile {
+  /* Bump base text size for thumb-readable copy */
+  font-size: 15px;
+}
+
+/* Touch-target floor on interactive elements, EXCEPT when they're
+   inside the sidebar (the dense nav stays dense — it's the off-canvas
+   drawer when in mobile mode and looks fine at its native size).
+   Components opt out by setting `data-mc-compact` on the element. */
+body.view-mobile button:not([data-mc-compact]):not(aside button),
+body.view-mobile a.mc-tap:not(aside a),
+body.view-mobile input[type="text"]:not([data-mc-compact]),
+body.view-mobile textarea:not([data-mc-compact]) {
+  min-height: 44px;
+}
+
+/* Landing/copilot page mobile tweaks. The copilot UI is at /landing
+   and doesn't share AppShell, so it lives entirely in landing/page.tsx.
+   These overrides target structural classes we add there. */
+body.view-mobile .mc-copilot-wrap {
+  padding-left: 14px !important;
+  padding-right: 14px !important;
+}
+
+body.view-mobile .mc-copilot-modes {
+  /* Mode chip row — make it horizontally scrollable instead of
+     wrapping into a tall grid on narrow screens */
+  flex-wrap: nowrap !important;
+  overflow-x: auto !important;
+  scrollbar-width: none;
+  -webkit-overflow-scrolling: touch;
+}
+body.view-mobile .mc-copilot-modes::-webkit-scrollbar {
+  display: none;
+}
+body.view-mobile .mc-copilot-modes > * {
+  flex-shrink: 0 !important;
+}
+
+body.view-mobile .mc-copilot-conversation {
+  /* Less side padding, more usable width on a phone */
+  padding: 14px 14px !important;
+  max-height: 70vh !important;
+  border-radius: 12px !important;
+  font-size: 15px;
+}
+
+body.view-mobile .mc-copilot-input {
+  /* Input area: bigger touch targets, easier thumb typing */
+  font-size: 16px !important;  /* prevents iOS zoom-on-focus */
+  padding: 14px 16px !important;
+  border-radius: 14px !important;
+}
+
+body.view-mobile .mc-copilot-input-send {
+  min-height: 48px !important;
+  min-width: 48px !important;
+  padding: 10px 16px !important;
+  border-radius: 12px !important;
+}
+
+/* Bigger send button + input area parent gets some breathing room */
+body.view-mobile .mc-copilot-input-row {
+  gap: 8px !important;
+}
+
+/* Markdown rendering — bump the prose typography */
+body.view-mobile .mc-copilot-conversation table {
+  font-size: 12px;
+}
+body.view-mobile .mc-copilot-conversation pre {
+  font-size: 12px;
+}
+
+/* Hide some chrome on small screens to give chat more room */
+body.view-mobile .mc-copilot-desktop-only {
+  display: none !important;
+}

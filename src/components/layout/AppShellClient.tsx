@@ -5,6 +5,7 @@ import { useEffect, useState } from 'react';
 import type { Approval } from '@/lib/types';
 const initialApprovals: any[] = []; const signals: any[] = [];
 import { Sidebar } from './Sidebar';
+import { useViewMode } from '@/lib/useViewMode';
 import PageErrorBoundary from "./PageErrorBoundary";
 import MissionMetrics from "./MissionMetrics";
 import { Header } from './Header';
@@ -84,16 +85,14 @@ export function AppShellClient() {
   const [activePage, setActivePage] = useState<PageName>('Command Center');
   const [isCollapsed, setIsCollapsed] = useState(false);
   const [approvals, setApprovals] = useState<Approval[]>(initialApprovals);
-  const [isMobile, setIsMobile] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
 
-  // Track viewport so the sidebar becomes an off-canvas drawer on phones
-  useEffect(() => {
-    const check = () => setIsMobile(window.innerWidth < 768);
-    check();
-    window.addEventListener('resize', check);
-    return () => window.removeEventListener('resize', check);
-  }, []);
+  // Explicit view-mode preference (Sidebar toggle, persisted to localStorage).
+  // The off-canvas drawer behaviour kicks in whenever the user picks "mobile",
+  // regardless of the actual viewport width. First-visit default is auto-
+  // detected from window.innerWidth inside the hook.
+  const [viewMode] = useViewMode();
+  const isMobile = viewMode === 'mobile';
 
   const newSignalsCount = signals.filter((s) => s.status === 'new').length;
   const pendingApprovalsCount = approvals.filter((a) => a.status === 'pending').length;
