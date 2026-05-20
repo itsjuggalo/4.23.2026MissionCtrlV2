@@ -4,7 +4,7 @@ import path from 'path';
 import { proxyToServeftp } from "../../../lib/proxyToServeftp";
 
 const JSONL = path.join(
-  process.env.HOME || '/home/ubuntu',
+  process.env.HOME || '/home/itsju',
   '.openclaw/workspace/state/liquidations/binance_liqs.jsonl'
 );
 

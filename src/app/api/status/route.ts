@@ -8,7 +8,7 @@ export const revalidate = 0;
 function getSecret(name: string): string {
   const envKey = name.toUpperCase().replace(/-/g, "_");
   if (process.env[envKey]) return process.env[envKey]!.trim();
-  try { return readFileSync(`/home/ubuntu/.openclaw/secrets/${name}`, "utf-8").trim(); }
+  try { return readFileSync(`/home/itsju/.openclaw/secrets/${name}`, "utf-8").trim(); }
   catch { return ""; }
 }
 

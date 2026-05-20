@@ -3,7 +3,7 @@ import { readFileSync, existsSync } from 'fs';
 import { join } from 'path';
 import { proxyToServeftp } from "../../../lib/proxyToServeftp";
 
-const SECRETS = join(process.env.HOME || '/home/ubuntu', '.openclaw/secrets');
+const SECRETS = join(process.env.HOME || '/home/itsju', '.openclaw/secrets');
 
 async function getPortfolioData() {
   try {
@@ -34,7 +34,7 @@ async function getCryptoPrices() {
 
 async function getLatestSignal() {
   try {
-    const stateFile = join(process.env.HOME || '/home/ubuntu', 'mission-control/signal-receiver/data/latest_state.json');
+    const stateFile = join(process.env.HOME || '/home/itsju', 'mission-control/signal-receiver/data/latest_state.json');
     if (existsSync(stateFile)) {
       const state = JSON.parse(readFileSync(stateFile, 'utf-8'));
       const btc = state.BTCUSD || {};
@@ -51,7 +51,7 @@ async function getLatestSignal() {
 
 async function getRegime() {
   try {
-    const regimeFile = join(process.env.HOME || '/home/ubuntu', 'mission-control/signal-receiver/data/market_regime.json');
+    const regimeFile = join(process.env.HOME || '/home/itsju', 'mission-control/signal-receiver/data/market_regime.json');
     if (existsSync(regimeFile)) {
       const data = JSON.parse(readFileSync(regimeFile, 'utf-8'));
       return { regime: data.regime || data.current_regime || 'unknown' };

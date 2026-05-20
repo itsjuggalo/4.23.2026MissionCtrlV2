@@ -3,7 +3,7 @@ import { readFileSync, existsSync, statSync } from 'fs';
 import { join } from 'path';
 import { proxyToServeftp } from "../../../lib/proxyToServeftp";
 
-const PM2_LOGS = join(process.env.HOME || '/home/ubuntu', '.pm2/logs');
+const PM2_LOGS = join(process.env.HOME || '/home/itsju', '.pm2/logs');
 
 const SOURCES = [
   { out: 'mission-control-out.log', err: 'mission-control-error.log', name: 'Mission Control' },

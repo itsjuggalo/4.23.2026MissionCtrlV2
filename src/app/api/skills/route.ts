@@ -7,7 +7,7 @@ import { proxyToServeftp } from "../../../lib/proxyToServeftp";
 
 const execAsync = promisify(exec);
 
-const SKILLS_DIR = '/home/ubuntu/.openclaw/workspace/skills';
+const SKILLS_DIR = '/home/itsju/.openclaw/workspace/skills';
 
 const AGENT_MAP: Record<string, string> = {
   'alpaca-trading': 'boba',

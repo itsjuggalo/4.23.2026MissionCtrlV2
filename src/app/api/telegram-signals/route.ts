@@ -4,7 +4,7 @@ import path from 'path';
 import { proxyToServeftp } from "../../../lib/proxyToServeftp";
 
 const SIGNALS_FILE = path.join(
-  process.env.HOME || '/home/ubuntu',
+  process.env.HOME || '/home/itsju',
   'mission-control/telegram-listener/signals.json'
 );
 

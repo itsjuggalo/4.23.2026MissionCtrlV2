@@ -3,8 +3,8 @@ import { readFileSync, existsSync } from 'fs';
 import { join } from 'path';
 import { proxyToServeftp } from "../../../lib/proxyToServeftp";
 
-const DB_PATH = join(process.env.HOME || '/home/ubuntu', '.mission-control/mission-control.db');
-const PM2_LOGS = join(process.env.HOME || '/home/ubuntu', '.pm2/logs');
+const DB_PATH = join(process.env.HOME || '/home/itsju', '.mission-control/mission-control.db');
+const PM2_LOGS = join(process.env.HOME || '/home/itsju', '.pm2/logs');
 
 interface Activity {
   time: string;

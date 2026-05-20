@@ -2,8 +2,8 @@ import { NextResponse } from 'next/server';
 import { readFileSync, existsSync } from 'fs';
 import { proxyToServeftp } from "../../../lib/proxyToServeftp";
 
-const SIDECAR = '/home/ubuntu/mission-control/signal-receiver/data/scored_signals_recent.json';
-const JOURNAL = '/home/ubuntu/.openclaw/workspace/skill_outputs/boba_decisions_validated.json';
+const SIDECAR = '/home/itsju/mission-control/signal-receiver/data/scored_signals_recent.json';
+const JOURNAL = '/home/itsju/.openclaw/workspace/skill_outputs/boba_decisions_validated.json';
 
 export async function GET() {
   let signals: any[] = [];

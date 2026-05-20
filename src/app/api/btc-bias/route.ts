@@ -4,7 +4,7 @@ import path from 'path';
 import { proxyToServeftp } from "../../../lib/proxyToServeftp";
 
 const BIAS_FILE = path.join(
-  process.env.HOME || '/home/ubuntu',
+  process.env.HOME || '/home/itsju',
   'mission-control/btc-bias/btc-bias.json'
 );
 

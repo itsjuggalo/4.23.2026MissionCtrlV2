@@ -4,7 +4,7 @@ import { proxyToServeftp } from "../../../../lib/proxyToServeftp";
 
 export const dynamic = 'force-dynamic';
 
-const HISTORY_FILE = '/home/ubuntu/mission-control/signal-receiver/data/signals_history.jsonl';
+const HISTORY_FILE = '/home/itsju/mission-control/signal-receiver/data/signals_history.jsonl';
 
 export async function GET(req: Request) {
   const __proxied = await proxyToServeftp(req); if (__proxied) return __proxied;

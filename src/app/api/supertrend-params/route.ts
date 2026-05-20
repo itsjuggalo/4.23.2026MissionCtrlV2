@@ -4,8 +4,8 @@ import { proxyToServeftp } from "../../../lib/proxyToServeftp";
 
 export const dynamic = 'force-dynamic';
 
-const DATA_DIR = '/home/ubuntu/mission-control/signal-receiver/data';
-const DIRECTIVES = '/home/ubuntu/.openclaw/workspace/directives';
+const DATA_DIR = '/home/itsju/mission-control/signal-receiver/data';
+const DIRECTIVES = '/home/itsju/.openclaw/workspace/directives';
 
 async function safeRead(path: string) {
   try {

@@ -4,7 +4,7 @@ import { proxyToServeftp } from "../../../lib/proxyToServeftp";
 
 export const dynamic = 'force-dynamic';
 
-const SECRETS = '/home/ubuntu/.openclaw/secrets';
+const SECRETS = '/home/itsju/.openclaw/secrets';
 
 async function readSecret(name: string): Promise<string> {
   try { return (await readFile(`${SECRETS}/${name}`, 'utf-8')).trim(); }

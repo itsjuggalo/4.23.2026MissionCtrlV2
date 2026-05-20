@@ -7,7 +7,7 @@ import { proxyToServeftp } from "../../../lib/proxyToServeftp";
 export const dynamic = 'force-dynamic';
 export const revalidate = 0;
 
-const MERGED_PATH = '/home/ubuntu/mission-control-restored/Option-Signals-Scraper/data/analyst_signals_merged.json';
+const MERGED_PATH = '/home/itsju/mission-control-restored/Option-Signals-Scraper/data/analyst_signals_merged.json';
 
 interface RawSignal {
   id: string;

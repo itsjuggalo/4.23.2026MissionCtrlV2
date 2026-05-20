@@ -7,7 +7,7 @@ import { proxyToServeftp } from "../../../lib/proxyToServeftp";
 
 const execAsync = promisify(exec);
 
-const HUB_DATA = '/home/ubuntu/mission-control/powertrader-ai/hub_data';
+const HUB_DATA = '/home/itsju/mission-control/powertrader-ai/hub_data';
 
 async function readJson(filePath: string): Promise<any> {
   try {

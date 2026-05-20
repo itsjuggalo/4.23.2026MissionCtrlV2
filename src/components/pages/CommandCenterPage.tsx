@@ -324,7 +324,23 @@ export function CommandCenterPage() {
   })();
   const quotes = dashData?.quotes || {};
   const intel = dashData?.intel || {};
-  const news = dashData?.news || [];
+  // Top-level news feed. When the generator leaves it empty, fall back to
+  // aggregating per-ticker intel news so the Market News block still populates.
+  const news = (() => {
+    const top = dashData?.news || [];
+    if (top.length > 0) return top;
+    const seen = new Set<string>();
+    const merged: any[] = [];
+    for (const sym of Object.keys(intel)) {
+      for (const n of (intel[sym]?.news || [])) {
+        const key = String(n?.headline || '').trim();
+        if (!key || seen.has(key)) continue;
+        seen.add(key);
+        merged.push(n);
+      }
+    }
+    return merged.sort((a, b) => String(b?.time || '').localeCompare(String(a?.time || '')));
+  })();
 
   // Multi-timeframe regime data for SuperTrend MTF Quorum tile
   const tfData = regime?.timeframes || {};

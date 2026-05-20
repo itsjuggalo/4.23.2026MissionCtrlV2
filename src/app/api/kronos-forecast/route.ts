@@ -7,8 +7,8 @@ export const revalidate = 0;
 export const runtime = 'nodejs';
 
 const FALLBACK = path.join(process.cwd(), 'public', 'kronos-forecast.json');
-const SIDECAR = 'https://claudeclaw.serveftp.com/raw/kronos-forecast';
-const GENERATE = 'https://claudeclaw.serveftp.com/api/kronos-generate';
+const SIDECAR = 'http://localhost:4711/forecast';
+const GENERATE = 'http://localhost:4711/generate';
 
 export async function GET(req: NextRequest) {
   const { searchParams } = req.nextUrl;

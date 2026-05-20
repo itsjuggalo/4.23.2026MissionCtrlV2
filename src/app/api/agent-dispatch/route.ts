@@ -3,7 +3,7 @@ import { readFileSync, existsSync } from 'fs';
 import { join } from 'path';
 import { proxyToServeftp } from "../../../lib/proxyToServeftp";
 
-const SECRETS = join(process.env.HOME || '/home/ubuntu', '.openclaw/secrets');
+const SECRETS = join(process.env.HOME || '/home/itsju', '.openclaw/secrets');
 
 async function sendDiscordMessage(webhookUrl: string, content: string) {
   const res = await fetch(webhookUrl, {

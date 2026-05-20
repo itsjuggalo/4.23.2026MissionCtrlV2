@@ -3,7 +3,7 @@ import { readdirSync, statSync, readFileSync } from 'fs';
 import { join, relative, extname, basename } from 'path';
 import { proxyToServeftp } from "../../../lib/proxyToServeftp";
 
-const WORKSPACE = join(process.env.HOME || '/home/ubuntu', '.openclaw/workspace');
+const WORKSPACE = join(process.env.HOME || '/home/itsju', '.openclaw/workspace');
 
 const SCAN_DIRS = [
   { path: WORKSPACE, label: 'Root' },

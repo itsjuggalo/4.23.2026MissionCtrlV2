@@ -65,7 +65,7 @@ async function fetchLivePrices(rawSymbols: string[]): Promise<Record<string, num
 
 export async function GET() {
   try {
-    const tweakDir = '/home/ubuntu/mission-control/tweak';
+    const tweakDir = '/home/itsju/mission-control/tweak';
 
     // ── Read wallet ──────────────────────────────────────────────────────────
     let base_wallet_balance = 0;

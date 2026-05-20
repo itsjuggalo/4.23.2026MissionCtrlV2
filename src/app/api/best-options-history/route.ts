@@ -4,7 +4,7 @@ import path from 'path';
 import { proxyToServeftp } from "../../../lib/proxyToServeftp";
 
 export const dynamic = 'force-dynamic';
-const DATA_DIR = '/home/ubuntu/.openclaw/data/best-options';
+const DATA_DIR = '/home/itsju/.openclaw/data/best-options';
 
 function todayET(): string {
   return new Intl.DateTimeFormat('en-CA', {
@@ -39,8 +39,23 @@ export async function GET(req: Request) {
         const files = await fs.readdir(DATA_DIR);
         const dates = files.filter(f => /^\d{4}-\d{2}-\d{2}\.json$/.test(f))
           .map(f => f.replace('.json', '')).sort().reverse();
-        return NextResponse.json({ date, error: 'No data', available_dates: dates }, { status: 404 });
-      } catch { return NextResponse.json({ date, error: 'No data dir' }, { status: 404 }); }
+        if (dates.length) {
+          // No snapshot for the requested date — serve the most recent one instead
+          const latest = dates[0];
+          const raw = await fs.readFile(path.join(DATA_DIR, `${latest}.json`), 'utf-8');
+          const snap = JSON.parse(raw);
+          let list = snap.sorted_by_premium || [];
+          if (tier) list = list.filter((c: any) => c.tier === tier);
+          list = list.slice(0, limit);
+          return NextResponse.json({
+            date: snap.date, requested_date: date, fallback: true,
+            last_run_at: snap.last_run_at, last_run_human: snap.last_run_human,
+            total_contracts: snap.total_contracts, tier_counts: snap.tier_counts,
+            highest_premium: snap.highest_premium, available_dates: dates, contracts: list,
+          });
+        }
+        return NextResponse.json({ date, error: 'No data', available_dates: [], contracts: [] }, { status: 404 });
+      } catch { return NextResponse.json({ date, error: 'No data dir', contracts: [] }, { status: 404 }); }
     }
     return NextResponse.json({ date, error: String(e) }, { status: 500 });
   }

@@ -84,6 +84,16 @@ export function AppShellClient() {
   const [activePage, setActivePage] = useState<PageName>('Command Center');
   const [isCollapsed, setIsCollapsed] = useState(false);
   const [approvals, setApprovals] = useState<Approval[]>(initialApprovals);
+  const [isMobile, setIsMobile] = useState(false);
+  const [mobileOpen, setMobileOpen] = useState(false);
+
+  // Track viewport so the sidebar becomes an off-canvas drawer on phones
+  useEffect(() => {
+    const check = () => setIsMobile(window.innerWidth < 768);
+    check();
+    window.addEventListener('resize', check);
+    return () => window.removeEventListener('resize', check);
+  }, []);
 
   const newSignalsCount = signals.filter((s) => s.status === 'new').length;
   const pendingApprovalsCount = approvals.filter((a) => a.status === 'pending').length;
@@ -182,17 +192,53 @@ export function AppShellClient() {
     }
   }
 
+  const handleNavigate = (page: PageName) => {
+    if (page === 'Landing') { window.location.href = '/landing'; return; }
+    setActivePage(page as any);
+    window.history.replaceState(null, '', '/?page=' + (page as string).toLowerCase().replace(/\s+/g, '-'));
+    setMobileOpen(false);
+  };
+
+  const sidebar = (
+    <Sidebar
+      activePage={activePage}
+      onNavigate={handleNavigate}
+      isCollapsed={isMobile ? false : isCollapsed}
+      onToggle={() => (isMobile ? setMobileOpen(false) : setIsCollapsed(!isCollapsed))}
+      newSignalsCount={newSignalsCount}
+      pendingApprovalsCount={pendingApprovalsCount}
+    />
+  );
+
   return (
     <div className="flex flex-col h-screen bg-slate-950 text-slate-100">
       <MissionMetrics />
       <div className="flex flex-1 overflow-hidden">
-      <Sidebar activePage={activePage} onNavigate={(page) => { if (page === 'Landing') { window.location.href = '/landing'; return; } setActivePage(page as any); window.history.replaceState(null, '', '/?page=' + (page as string).toLowerCase().replace(/\s+/g, '-')); }} isCollapsed={isCollapsed} onToggle={() => setIsCollapsed(!isCollapsed)} newSignalsCount={newSignalsCount} pendingApprovalsCount={pendingApprovalsCount} />
-      <div className="flex-1 flex flex-col overflow-hidden">
-        <Header title={activePage} />
-        <main className="flex-1 overflow-auto">
-          <PageErrorBoundary pageName={activePage}>{renderPage()}</PageErrorBoundary>
-        </main>
-      </div>
+        {isMobile ? (
+          <>
+            {mobileOpen && (
+              <div
+                onClick={() => setMobileOpen(false)}
+                style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.6)', zIndex: 200 }}
+              />
+            )}
+            <div
+              style={{
+                position: 'fixed', top: 0, left: 0, bottom: 0, zIndex: 201, display: 'flex',
+                transform: mobileOpen ? 'translateX(0)' : 'translateX(-100%)',
+                transition: 'transform 0.2s ease',
+              }}
+            >
+              {sidebar}
+            </div>
+          </>
+        ) : sidebar}
+        <div className="flex-1 flex flex-col overflow-hidden">
+          <Header title={activePage} onMenuClick={isMobile ? () => setMobileOpen(true) : undefined} />
+          <main className="flex-1 overflow-auto">
+            <PageErrorBoundary pageName={activePage}>{renderPage()}</PageErrorBoundary>
+          </main>
+        </div>
       </div>
       <PsychChatWidget />
     </div>

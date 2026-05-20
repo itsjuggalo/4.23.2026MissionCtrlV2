@@ -7,7 +7,7 @@ import { proxyToServeftp } from "../../../lib/proxyToServeftp";
 
 const execAsync = promisify(exec);
 
-const PM2_LOG_DIR = path.join(process.env.HOME || '/home/ubuntu', '.pm2/logs');
+const PM2_LOG_DIR = path.join(process.env.HOME || '/home/itsju', '.pm2/logs');
 
 // Agent definitions with tiers
 const AGENT_DEFINITIONS = {
@@ -103,11 +103,22 @@ export async function GET(request: Request) {
       timestamp: new Date().toISOString(),
     });
   } catch (err) {
+    const msg = err instanceof Error ? err.message : String(err);
+    // pm2 isn't installed on every host (e.g. the local laptop). That's not a
+    // server error — there are simply no pm2-managed agents to report.
+    if (/not found|ENOENT|command not found/i.test(msg)) {
+      return NextResponse.json({
+        success: true,
+        agents: [],
+        note: 'pm2 not available on this host',
+        timestamp: new Date().toISOString(),
+      });
+    }
     console.error('Error in agents API:', err);
     return NextResponse.json({
       success: false,
       agents: [],
-      error: err instanceof Error ? err.message : 'Unknown error',
+      error: msg,
       timestamp: new Date().toISOString(),
     }, { status: 500 });
   }

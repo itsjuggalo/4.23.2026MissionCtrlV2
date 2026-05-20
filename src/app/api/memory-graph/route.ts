@@ -3,20 +3,24 @@ import { promises as fs } from 'fs';
 import path from 'path';
 import { proxyToServeftp } from "../../../lib/proxyToServeftp";
 
-const WORKSPACE = '/home/ubuntu/.openclaw/workspace';
-const MEMORY_FILE = '/home/ubuntu/mission-control-restored/memory/memories.json';
+const WORKSPACE = '/home/itsju/.openclaw/workspace';
+const MEMORY_FILE = '/home/itsju/mission-control-restored/memory/memories.json';
 
-async function scanMarkdownFiles(dir: string, depth = 0): Promise<any[]> {
-  if (depth > 3) return [];
-  const files: any[] = [];
+// Hard cap — the workspace can hold thousands of files. Scanning all of them
+// and running the O(n^2) edge match below would freeze (and OOM) the server.
+const MAX_FILES = 300;
+
+async function scanMarkdownFiles(dir: string, acc: any[], depth = 0): Promise<void> {
+  if (depth > 3 || acc.length >= MAX_FILES) return;
   try {
     const entries = await fs.readdir(dir, { withFileTypes: true });
     for (const entry of entries) {
+      if (acc.length >= MAX_FILES) return;
       const fullPath = path.join(dir, entry.name);
       if (entry.isFile() && (entry.name.endsWith('.md') || entry.name.endsWith('.json'))) {
         try {
           const content = await fs.readFile(fullPath, 'utf-8');
-          files.push({
+          acc.push({
             id: entry.name.replace(/[^a-zA-Z0-9]/g, '_'),
             name: entry.name,
             path: fullPath,
@@ -27,17 +31,16 @@ async function scanMarkdownFiles(dir: string, depth = 0): Promise<any[]> {
           });
         } catch { /* skip */ }
       } else if (entry.isDirectory() && !entry.name.startsWith('.') && entry.name !== 'node_modules') {
-        const sub = await scanMarkdownFiles(fullPath, depth + 1);
-        files.push(...sub);
+        await scanMarkdownFiles(fullPath, acc, depth + 1);
       }
     }
   } catch { /* dir not found */ }
-  return files;
 }
 
 export async function GET() {
   try {
-    const files = await scanMarkdownFiles(WORKSPACE);
+    const files: any[] = [];
+    await scanMarkdownFiles(WORKSPACE, files);
 
     const nodes = files.map((f) => ({
       id: f.id,
@@ -77,10 +80,12 @@ export async function GET() {
     return NextResponse.json({
       success: true,
       workspace: WORKSPACE,
+      truncated: files.length >= MAX_FILES,
       nodes,
       edges,
-      files,
-      memories,
+      // Strip the bulky per-file content — nodes already carry the graph data
+      files: files.map(({ content, ...rest }) => rest),
+      memories: memories.slice(0, 500),
       stats: { total: memories.length + nodes.length, critical, high, bySource: sourceMap },
       timestamp: new Date().toISOString(),
     }, { headers: { 'Cache-Control': 'no-store' } });

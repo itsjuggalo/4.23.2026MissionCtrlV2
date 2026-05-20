@@ -4,7 +4,7 @@ import { readFileSync, existsSync } from 'fs';
 import { join } from 'path';
 import { proxyToServeftp } from "../../../lib/proxyToServeftp";
 
-const DATA_DIR = join(process.env.HOME || '/home/ubuntu', '.mission-control');
+const DATA_DIR = join(process.env.HOME || '/home/itsju', '.mission-control');
 const USAGE_FILE = join(DATA_DIR, 'api_usage.json');
 
 export async function GET() {
@@ -22,7 +22,7 @@ export async function GET() {
 
   // Estimate API costs from log activity
   let anthropicCalls = 0, openaiCalls = 0, geminiCalls = 0, deepseekCalls = 0, xaiCalls = 0;
-  const logDir = join(process.env.HOME || '/home/ubuntu', '.pm2/logs');
+  const logDir = join(process.env.HOME || '/home/itsju', '.pm2/logs');
   
   try {
     // Count API calls from skill scheduler logs (today)

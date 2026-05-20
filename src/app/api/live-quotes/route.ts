@@ -4,7 +4,7 @@ import { proxyToServeftp } from "../../../lib/proxyToServeftp";
 
 function getSecret(name: string): string {
   try {
-    return readFileSync(`/home/ubuntu/.openclaw/secrets/${name}`, 'utf-8').trim();
+    return readFileSync(`/home/itsju/.openclaw/secrets/${name}`, 'utf-8').trim();
   } catch { return ''; }
 }
 

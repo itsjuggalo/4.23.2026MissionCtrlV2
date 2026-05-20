@@ -3,7 +3,7 @@ import { readFileSync } from 'fs';
 import { join } from 'path';
 import { proxyToServeftp } from "../../../lib/proxyToServeftp";
 
-const DIR = join(process.env.HOME || '/home/ubuntu', '.openclaw/workspace/directives');
+const DIR = join(process.env.HOME || '/home/itsju', '.openclaw/workspace/directives');
 
 export async function GET(req: Request) {
   const __proxied = await proxyToServeftp(req); if (__proxied) return __proxied;

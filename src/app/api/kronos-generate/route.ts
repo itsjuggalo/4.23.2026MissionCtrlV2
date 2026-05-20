@@ -32,10 +32,10 @@ export async function POST(req: NextRequest) {
 
   // Spawn in background, fire-and-forget
   try {
-    const child = spawn('python3', ['/home/ubuntu/scripts/kronos_forecast_v2.py', '--ticker', scriptTicker, '--model', body.model || 'small'], {
+    const child = spawn('python3', ['/home/itsju/scripts/kronos_forecast_v2.py', '--ticker', scriptTicker, '--model', body.model || 'small'], {
       detached: true,
       stdio: 'ignore',
-      cwd: '/home/ubuntu',
+      cwd: '/home/itsju',
     });
     child.unref();
     return NextResponse.json({ status: 'generating', ticker: scriptTicker, pid: child.pid });
