@@ -10,7 +10,7 @@ Runs every 60s via PM2. For each R2 options position with unrealized gain:
 
 Only RATCHETS UP. Never lowers existing stops.
 
-Account lock: PA3QIBJEYMB3 (R2). Will refuse to run on any other account.
+Account lock: PA3OVUKWYHVC (R2). Will refuse to run on any other account.
 Skips: stocks, crypto, positions without unrealized gain.
 """
 import json, sys, time
@@ -25,9 +25,9 @@ LOCK_STATE = STATE_DIR / "profit_lock_state.json"
 LOG_FILE = Path.home() / ".openclaw" / "workspace" / "memory" / "profit_lock_daemon.jsonl"
 LOG_FILE.parent.mkdir(parents=True, exist_ok=True)
 
-POLL_INTERVAL_SEC = 60
+POLL_INTERVAL_SEC = 20
 ALPACA_BASE = "https://paper-api.alpaca.markets/v2"
-EXPECTED_ACCOUNT = "PA3QIBJEYMB3"
+EXPECTED_ACCOUNT = "PA3OVUKWYHVC"
 
 def _read(name):
     p = SECRETS / name
@@ -80,7 +80,10 @@ def place_stop_limit(sym, qty, stop_price, limit_price, tif="gtc"):
     log("stop_place_fail", f"{sym} HTTP {r.status_code}: {r.text[:200]}")
     return None
 
-GIVEBACK_PCT = 8.0  # default trail giveback from peak (percentage points of entry-relative gain)
+GIVEBACK_PCT = 7.0  # NEW: percentage of CURRENT PEAK PRICE (not entry-relative pp). Trail = peak * (1 - 7/100).
+FREE_TRADE_PEAK_PCT = 10.0  # NEW: at peak >= +10%, lock stop at FREE_TRADE_LOCK_PCT
+FREE_TRADE_LOCK_PCT = 2.0   # NEW: free-trade safety lock above entry
+TRAIL_START_PEAK_PCT = 20.0 # NEW: at peak >= +20%, percentage-of-peak trail kicks in
 
 def calc_tier_floor(gain_pct, last_locked_pct):
     """Return (new_floor_pct, tier_label) when gain crosses next tier; else (None, None).
@@ -102,8 +105,11 @@ def calc_target_stop(entry, current, last_locked_pct, peak_pct):
     tier_pct, tier_label = calc_tier_floor(gain_pct, last_locked_pct)
     # Peak-tracker target: peak minus giveback. Only valid once peak >= +20 (don't trail negatives).
     peak_target = None
-    if peak_pct >= 20:
-        peak_target = peak_pct - GIVEBACK_PCT
+    if peak_pct >= TRAIL_START_PEAK_PCT:
+        # NEW: percentage-of-peak-PRICE trail. peak_price = entry*(1+peak_pct/100); stop = peak_price*(1-GIVEBACK/100)
+        peak_target = ((1 + peak_pct / 100.0) * (1 - GIVEBACK_PCT / 100.0) - 1) * 100.0
+    elif peak_pct >= FREE_TRADE_PEAK_PCT:
+        peak_target = FREE_TRADE_LOCK_PCT
     # Final target = max of the three (existing locked, tier floor, peak target)
     candidates = [last_locked_pct]
     if tier_pct is not None: candidates.append(tier_pct)
@@ -114,7 +120,7 @@ def calc_target_stop(entry, current, last_locked_pct, peak_pct):
     # Round to 1 decimal place to keep stops clean
     best = round(best, 1)
     if peak_target is not None and best == round(peak_target, 1) and (tier_pct is None or peak_target > tier_pct):
-        label = f"peak-trail (peak {peak_pct:+.1f}% - {GIVEBACK_PCT:.0f}pp = lock {best:+.1f}%)"
+        label = f"peak-trail (peak {peak_pct:+.1f}% * (1-{GIVEBACK_PCT:.0f}%) = lock {best:+.1f}%)" if peak_pct >= TRAIL_START_PEAK_PCT else f"free-trade (peak {peak_pct:+.1f}% -> lock +{FREE_TRADE_LOCK_PCT:.0f}%)"
     elif tier_label:
         label = tier_label
     else:

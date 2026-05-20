@@ -40,9 +40,9 @@ def _read(name):
     p = SECRETS / name
     return p.read_text().strip() if p.exists() else ""
 
-# DAEMON ACCOUNT LOCK: this daemon is hardcoded to R2 (PA3QIBJEYMB3, Boba's account).
+# DAEMON ACCOUNT LOCK: this daemon is hardcoded to R2 (PA3OVUKWYHVC, Boba's account).
 # Do not change to alpaca-r1-* — those are R1 (managed by position_sell_daemon).
-EXPECTED_ACCOUNT = "PA3QIBJEYMB3"  # R2
+EXPECTED_ACCOUNT = "PA3OVUKWYHVC"  # R2
 
 KEY = _read("alpaca-key-id") or _read("alpaca_key.txt")
 SEC = _read("alpaca-secret") or _read("alpaca_secret.txt")

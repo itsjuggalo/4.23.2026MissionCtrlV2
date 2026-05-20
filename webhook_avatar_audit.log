@@ -1,0 +1,51 @@
+== 48 webhook files ==
+  [ 1] discord-webhook-agent-debate  (Spidey Bot) -> Hellion  IMG-FAIL
+  [ 2] discord-webhook-analyst-setups.txt  SKIP not webhook
+  [ 3] discord-webhook-analyst-watchlist.txt  SKIP not webhook
+  [ 4] discord-webhook-archive-analyst.txt  (Mission Control — Analyst) -> SCV  IMG-FAIL
+  [ 5] discord-webhook-archive-auditor.txt  (Mission Control — Auditor) -> Science_Vessel  IMG-FAIL
+  [ 6] discord-webhook-archive-broadcaster.txt  (Mission Control — Broadcaster) -> Battlecruiser  IMG-FAIL
+  [ 7] discord-webhook-archive-ci.txt  (Mission Control — Counter-Intel) -> Wraith  IMG-FAIL
+  [ 8] discord-webhook-archive-eric.txt  (Mission Control — Eric) -> Marauder  IMG-FAIL
+  [ 9] discord-webhook-archive-executions.txt  (Mission Control — Executions) -> Reaper  IMG-FAIL
+  [10] discord-webhook-archive-macro.txt  (Mission Control — Macro) -> Hellion  IMG-FAIL
+  [11] discord-webhook-archive-portfolio.txt  (Mission Control — Portfolio) -> Banshee  IMG-FAIL
+  [12] discord-webhook-archive-risk.txt  (Mission Control — Risk) -> Viking  IMG-FAIL
+  [13] discord-webhook-broadcast-log.txt  SKIP not webhook
+  [14] discord-webhook-ci-ml.txt  SKIP not webhook
+  [15] discord-webhook-ci-obfuscation.txt  SKIP not webhook
+  [16] discord-webhook-ci-report.txt  SKIP not webhook
+  [17] discord-webhook-ci-threat.txt  SKIP not webhook
+  [18] discord-webhook-ci-upgrades.txt  SKIP not webhook
+  [19] discord-webhook-eod-brief.txt  SKIP not webhook
+  [20] discord-webhook-eric-rejected.txt  SKIP not webhook
+  [21] discord-webhook-eric-signals.txt  SKIP not webhook
+  [22] discord-webhook-execution-notes.txt  SKIP not webhook
+  [23] discord-webhook-executions-live.txt  SKIP not webhook
+  [24] discord-webhook-executions-pending.txt  SKIP not webhook
+  [25] discord-webhook-flow-alerts-fg.txt  SKIP not webhook
+  [26] discord-webhook-flow-etf.txt  SKIP not webhook
+  [27] discord-webhook-flow-huge.txt  SKIP not webhook
+  [28] discord-webhook-flow-repeaters.txt  SKIP not webhook
+  [29] discord-webhook-flow-unusual.txt  SKIP not webhook
+  [30] discord-webhook-flow-weekly.txt  SKIP not webhook
+  [31] discord-webhook-kronos.txt  SKIP not webhook
+  [32] discord-webhook-lessons.txt  SKIP not webhook
+  [33] discord-webhook-macro-alerts.txt  SKIP not webhook
+  [34] discord-webhook-macro-outlook.txt  SKIP not webhook
+  [35] discord-webhook-midday-brief.txt  SKIP not webhook
+  [36] discord-webhook-morning-brief.txt  SKIP not webhook
+  [37] discord-webhook-nightly-brief.txt  SKIP not webhook
+  [38] discord-webhook-performance-daily.txt  SKIP not webhook
+  [39] discord-webhook-performance-monthly.txt  SKIP not webhook
+  [40] discord-webhook-performance-weekly.txt  SKIP not webhook
+  [41] discord-webhook-portfolio-rebalance.txt  SKIP not webhook
+  [42] discord-webhook-portfolio-status.txt  SKIP not webhook
+  [43] discord-webhook-risk-alerts.txt  SKIP not webhook
+  [44] discord-webhook-risk-decisions.txt  SKIP not webhook
+  [45] discord-webhook-signals-name.txt  SKIP not webhook
+  [46] discord-webhook-signals-name2.txt  SKIP not webhook
+  [47] discord-webhook-signals-vivid.txt  SKIP not webhook
+  [48] discord-webhook-trade-reviews.txt  SKIP not webhook
+
+DONE  ok=0 fail=10 skipped=38

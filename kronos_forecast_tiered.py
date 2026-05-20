@@ -26,10 +26,16 @@ import requests
 sys.path.insert(0, '/home/ubuntu/Kronos')
 
 LOOKBACK = 400
+# Tier configuration -- set by --tier argument, default "small"
+KRONOS_TIERS = {
+    "mini":  {"model": "NeoQuasar/Kronos-mini",  "tokenizer": "NeoQuasar/Kronos-Tokenizer-base", "pred_len": 24, "sample_count": 1, "max_context": 512},
+    "small": {"model": "NeoQuasar/Kronos-small", "tokenizer": "NeoQuasar/Kronos-Tokenizer-base", "pred_len": 24, "sample_count": 1, "max_context": 512},
+    "base":  {"model": "NeoQuasar/Kronos-base",  "tokenizer": "NeoQuasar/Kronos-Tokenizer-base", "pred_len": 24, "sample_count": 5, "max_context": 512},
+}
+TIER = "small"  # overwritten by argparse before model load
+
 PRED_LEN = 24
 SAMPLE_COUNT = 1  # ⚠ CRITICAL: reduced from 5 to 1 — 5 samples = 5x inference time
-import os as _os_kronos
-KRONOS_MODEL = _os_kronos.environ.get("KRONOS_MODEL", "small")
 OUTPUT_DIR = Path("/home/ubuntu/.openclaw/workspace/directives/kronos_forecasts")
 OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
 SECRETS = Path("/home/ubuntu/.openclaw/secrets")
@@ -142,9 +148,9 @@ def run_kronos_inference(df: pd.DataFrame, ticker: str) -> tuple:
 
     print("[kronos] Loading model...")
     t0 = time.time()
-    tokenizer = KronosTokenizer.from_pretrained("NeoQuasar/Kronos-Tokenizer-base")
-    model = Kronos.from_pretrained(f"NeoQuasar/Kronos-{KRONOS_MODEL}")
-    predictor = KronosPredictor(model, tokenizer, device="cpu", max_context=512)
+    tokenizer = KronosTokenizer.from_pretrained(KRONOS_TIERS[TIER]["tokenizer"])
+    model = Kronos.from_pretrained(KRONOS_TIERS[TIER]["model"])
+    predictor = KronosPredictor(model, tokenizer, device="cpu", max_context=KRONOS_TIERS[TIER]["max_context"])
     print(f"[kronos] Model loaded in {time.time()-t0:.1f}s")
 
     # Normalize timestamps to naive UTC
@@ -164,7 +170,7 @@ def run_kronos_inference(df: pd.DataFrame, ticker: str) -> tuple:
     t1 = time.time()
     pred = predictor.predict(
         df=x_df, x_timestamp=x_ts, y_timestamp=y_ts,
-        pred_len=PRED_LEN, T=1.0, top_p=0.9, sample_count=SAMPLE_COUNT,
+        pred_len=KRONOS_TIERS[TIER]["pred_len"], T=1.0, top_p=0.9, sample_count=KRONOS_TIERS[TIER]["sample_count"],
         verbose=False,
     )
     print(f"[kronos] Inference done in {time.time()-t1:.1f}s")
@@ -209,7 +215,7 @@ def build_forecast_json(ticker: str, pred: pd.DataFrame, y_ts, current_price: fl
         "forecast_24h_high": pred_high,
         "forecast_24h_low": pred_low,
         "forecast_range_pct": round((pred_high - pred_low) / current_price * 100, 2),
-        "model": f"Kronos-{KRONOS_MODEL}",
+        "model": "Kronos-small",
         "sample_paths": SAMPLE_COUNT,
         "hourly_predictions": [
             {
@@ -263,7 +269,7 @@ def post_to_discord(forecast: dict):
             "title": title,
             "description": "\n".join(desc),
             "color": color,
-            "footer": {"text": f"Kronos-{KRONOS_MODEL} • {forecast['candles_analyzed']} candles • {datetime.now(timezone.utc).strftime('%H:%M UTC')}"},
+            "footer": {"text": f"Kronos-small • {forecast['candles_analyzed']} candles • {datetime.now(timezone.utc).strftime('%H:%M UTC')}"},
         }]
     }
     try:
@@ -276,15 +282,14 @@ def post_to_discord(forecast: dict):
 
 def main():
     p = argparse.ArgumentParser()
+    p.add_argument("--tier", default="small", choices=["mini","small","base"], help="Kronos model tier")
     p.add_argument("--ticker", required=True, help="e.g. NVDA, QQQ, BTC")
-    p.add_argument("--model", default="small", choices=["mini","small","base","large"], help="Kronos model variant")
-    p.add_argument("--no-disk", action="store_true", help="Skip writing forecast JSON to disk; only print to stdout")
     p.add_argument("--option-context", default="", help="e.g. '648C 05/15/26'")
     p.add_argument("--candles", type=int, default=400)
     p.add_argument("--no-discord", action="store_true")
     args = p.parse_args()
-    _os_kronos.environ["KRONOS_MODEL"] = args.model
-    global KRONOS_MODEL; KRONOS_MODEL = args.model
+    global TIER
+    TIER = args.tier
 
     ticker = args.ticker.upper()
     print(f"{'='*60}\nKRONOS FORECAST: {ticker}\n{'='*60}")

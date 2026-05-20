@@ -1,0 +1,17 @@
+#!/bin/bash
+RAW=/home/ubuntu/wallets-snapshot.raw
+TMP=/home/ubuntu/wallets-snapshot.tmp
+OUT=/home/ubuntu/wallets-snapshot
+LOG=/home/ubuntu/wallets-snapshot.log
+curl -s -m 90 http://localhost:3033/api/wallets > "$RAW" 2>/dev/null
+if [ -s "$RAW" ] && python3 -c "import json; json.load(open('$RAW'))" 2>/dev/null; then
+  python3 -c "
+import json
+with open('$RAW') as f: data = json.load(f)
+filtered = [w for w in data if 'go-trader' not in (w.get('name') or '')]
+print(json.dumps(filtered))
+" > "$TMP" && mv "$TMP" "$OUT" && chmod 644 "$OUT"
+  echo "$(date +%FT%T%z) snapshot OK ($(wc -c < $OUT) bytes)" >> "$LOG"
+else
+  echo "$(date +%FT%T%z) snapshot FAIL" >> "$LOG"
+fi
