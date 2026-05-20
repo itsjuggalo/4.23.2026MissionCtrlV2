@@ -585,17 +585,25 @@ export default function WelcomePage() {
 
               {/* Messages */}
               {messages.map((m, i) => (
-                <div key={i} style={{ marginBottom: 14, display: 'flex', flexDirection: m.role === 'user' ? 'row-reverse' : 'row' }}>
+                <div key={i} style={{ marginBottom: 18, display: 'flex', flexDirection: m.role === 'user' ? 'row-reverse' : 'row' }}>
                   <div style={{
-                    maxWidth: '88%',
-                    padding: '10px 14px',
-                    borderRadius: m.role === 'user' ? '14px 14px 4px 14px' : '14px 14px 14px 4px',
-                    background: m.role === 'user' ? 'rgba(79,195,247,0.10)' : 'rgba(255,255,255,0.03)',
-                    border: m.role === 'user' ? '1px solid rgba(79,195,247,0.25)' : '1px solid #1a3a4a',
+                    maxWidth: m.role === 'user' ? '78%' : '92%',
+                    padding: m.role === 'user' ? '10px 14px' : '14px 18px',
+                    borderRadius: m.role === 'user' ? '14px 14px 4px 14px' : '4px 14px 14px 14px',
+                    background: m.role === 'user'
+                      ? 'linear-gradient(135deg, rgba(79,195,247,0.14), rgba(79,195,247,0.06))'
+                      : 'linear-gradient(180deg, rgba(13,22,33,0.85), rgba(10,18,28,0.75))',
+                    border: m.role === 'user'
+                      ? '1px solid rgba(79,195,247,0.28)'
+                      : '1px solid #1f4054',
+                    borderLeft: m.role === 'assistant' ? '3px solid #4fc3f7' : '1px solid rgba(79,195,247,0.28)',
                     color: '#e0e0e0',
                     fontSize: 14,
                     lineHeight: 1.65,
                     fontFamily: "'Inter', sans-serif",
+                    boxShadow: m.role === 'assistant'
+                      ? '0 1px 0 rgba(79,195,247,0.05) inset, 0 8px 20px -12px rgba(0,0,0,0.6)'
+                      : 'none',
                   }}>
                     {m.role === 'assistant'
                       ? <AssistantContent content={m.content} />
