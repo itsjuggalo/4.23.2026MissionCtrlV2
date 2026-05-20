@@ -2,6 +2,11 @@
 import { useState, useRef, useEffect } from 'react';
 import Link from 'next/link';
 import LandingBanner from '@/components/starcraft/LandingBanner';
+import { AssistantContent } from './CopilotCards';
+
+interface WatchlistPin { symbol: string; pinned_at: string; hits: number }
+interface PromptItem { id: string; query: string; category: string; likes: number }
+type PromptsByCategory = Record<string, PromptItem[]>;
 
 type ModeKey = 'auto' | 'fast' | 'expert' | 'copilot' | 'support';
 
@@ -102,20 +107,86 @@ function SparkleIcon() {
 // MAIN PAGE
 // ============================================================================
 
+type ChatMessage = { role: 'user' | 'assistant'; content: string };
+
 export default function WelcomePage() {
   const [input, setInput] = useState('');
   const [mode, setMode] = useState<ModeKey>('auto');
   const [modeOpen, setModeOpen] = useState(false);
-  const [answer, setAnswer] = useState('');
+  const [messages, setMessages] = useState<ChatMessage[]>([]);
+  const [threadId, setThreadId] = useState<string | null>(null);
+  const [activeAgent, setActiveAgent] = useState<string | null>(null);
+  const [toolStatus, setToolStatus] = useState<string | null>(null);
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const [modelUsed, setModelUsed] = useState('');
+  const [pins, setPins] = useState<WatchlistPin[]>([]);
+  const [promptDrawerOpen, setPromptDrawerOpen] = useState(false);
+  const [promptCatalog, setPromptCatalog] = useState<PromptsByCategory>({});
   const [showMoreActions, setShowMoreActions] = useState(false);
   const inputRef = useRef<HTMLTextAreaElement>(null);
   const modeMenuRef = useRef<HTMLDivElement>(null);
   const actionsRef = useRef<HTMLDivElement>(null);
+  const scrollRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => { inputRef.current?.focus(); }, []);
+
+  // Auto-scroll the conversation area to the latest message
+  useEffect(() => {
+    if (scrollRef.current) {
+      scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
+    }
+  }, [messages, loading]);
+
+  // Load initial pins + prompt catalog + most-recent thread on mount
+  useEffect(() => {
+    fetch('/api/copilot/watchlist').then((r) => r.json()).then((d) => setPins(d.pins || [])).catch(() => {});
+    fetch('/api/copilot/prompts?per_category=5').then((r) => r.json()).then((d) => setPromptCatalog(d.prompts || {})).catch(() => {});
+
+    // Resume the most recent thread if it's very recent (last 18h) — gives the
+    // "AIME was working overnight" feeling when the morning_digest seeded one.
+    fetch('/api/copilot/threads?limit=1')
+      .then((r) => r.json())
+      .then(async (d) => {
+        const t = d.threads?.[0];
+        if (!t || !t.thread_id) return;
+        const updatedAt = new Date(t.updated_at + 'Z').getTime();
+        const ageHours = (Date.now() - updatedAt) / 3_600_000;
+        if (ageHours > 18) return; // too old, start fresh
+        const r = await fetch(`/api/copilot/threads/${t.thread_id}`);
+        const full = await r.json();
+        if (Array.isArray(full.messages) && full.messages.length > 0) {
+          setMessages(full.messages);
+          setThreadId(full.thread_id);
+          if (full.model_last && full.model_last !== 'overnight-digest') setModelUsed(full.model_last);
+        }
+      })
+      .catch(() => {});
+  }, []);
+
+  async function unpinTicker(symbol: string) {
+    try {
+      const r = await fetch('/api/copilot/watchlist', {
+        method: 'DELETE',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ symbol }),
+      });
+      const d = await r.json();
+      if (Array.isArray(d.pins)) setPins(d.pins);
+    } catch { /* swallow */ }
+  }
+
+  async function pinFromMessage(text: string) {
+    try {
+      const r = await fetch('/api/copilot/watchlist', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ text }),
+      });
+      const d = await r.json();
+      if (Array.isArray(d.pins)) setPins(d.pins);
+    } catch { /* swallow */ }
+  }
 
   useEffect(() => {
     function handler(e: MouseEvent) {
@@ -129,19 +200,127 @@ export default function WelcomePage() {
   async function submit(text?: string) {
     const msg = (text || input).trim();
     if (!msg || loading) return;
-    if (!text) { /* user typed it, it's already in input */ } else { setInput(msg); }
-    setLoading(true); setError(''); setAnswer(''); setModelUsed('');
+    // Append user message + an empty assistant placeholder we'll stream into
+    const placeholderIdx = messages.length + 1;
+    const nextHistory: ChatMessage[] = [
+      ...messages,
+      { role: 'user', content: msg },
+      { role: 'assistant', content: '' },
+    ];
+    setMessages(nextHistory);
+    setInput('');
+    setLoading(true); setError(''); setModelUsed('');
+    setActiveAgent(null);
+    setToolStatus(null);
+
+    // Fire-and-forget: extract tickers from this message and pin them
+    pinFromMessage(msg);
+
     try {
-      const res = await fetch('/api/copilot', {
+      const historyForServer = nextHistory.slice(0, -1); // drop the empty placeholder
+      const res = await fetch('/api/copilot?stream=1', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ message: msg, mode }),
+        headers: { 'Content-Type': 'application/json', 'Accept': 'text/event-stream' },
+        body: JSON.stringify({ messages: historyForServer, mode, thread_id: threadId }),
       });
-      const data = await res.json();
-      if (data.error) setError(data.error);
-      else { setAnswer(data.response || '(empty)'); setModelUsed(data.model || ''); }
-    } catch (e) { setError(e instanceof Error ? e.message : String(e)); }
-    finally { setLoading(false); }
+
+      if (!res.ok || !res.body) {
+        const errText = await res.text().catch(() => '');
+        let parsed: { error?: string } = {};
+        try { parsed = JSON.parse(errText); } catch { /* leave parsed empty */ }
+        setError(parsed.error || `HTTP ${res.status}`);
+        return;
+      }
+
+      const reader = res.body.getReader();
+      const decoder = new TextDecoder('utf-8');
+      let buffer = '';
+      let assistantText = '';
+
+      while (true) {
+        const { value, done } = await reader.read();
+        if (done) break;
+        buffer += decoder.decode(value, { stream: true });
+
+        // SSE events are separated by blank lines; each event has `data: {...}` lines
+        let sep;
+        while ((sep = buffer.indexOf('\n\n')) !== -1) {
+          const rawEvent = buffer.slice(0, sep);
+          buffer = buffer.slice(sep + 2);
+          const dataLines = rawEvent.split('\n').filter((l) => l.startsWith('data:')).map((l) => l.slice(5).trim());
+          if (dataLines.length === 0) continue;
+          let payload: Record<string, unknown> | null = null;
+          try { payload = JSON.parse(dataLines.join('\n')); } catch { continue; }
+          if (!payload) continue;
+
+          switch (payload.type) {
+            case 'thread': {
+              if (typeof payload.thread_id === 'string') setThreadId(payload.thread_id);
+              if (typeof payload.agent === 'string' && payload.agent) setActiveAgent(payload.agent);
+              break;
+            }
+            case 'delta': {
+              const t = typeof payload.text === 'string' ? payload.text : '';
+              if (t) {
+                assistantText += t;
+                setMessages((prev) => {
+                  const copy = [...prev];
+                  if (copy[placeholderIdx]) {
+                    copy[placeholderIdx] = { role: 'assistant', content: assistantText };
+                  }
+                  return copy;
+                });
+              }
+              break;
+            }
+            case 'tool_use': {
+              const name = typeof payload.name === 'string' ? payload.name : 'tool';
+              setToolStatus(`using ${name}…`);
+              break;
+            }
+            case 'tool_result': {
+              setToolStatus(null);
+              break;
+            }
+            case 'status': {
+              // optional: surface init/status pings; for now just clear stale tool chip on init
+              if (payload.subtype === 'init') setToolStatus(null);
+              break;
+            }
+            case 'done': {
+              if (typeof payload.model === 'string') setModelUsed(payload.model);
+              setToolStatus(null);
+              break;
+            }
+            case 'error': {
+              setError(typeof payload.message === 'string' ? payload.message : 'stream error');
+              break;
+            }
+          }
+        }
+      }
+
+      // Safety net: if no delta arrived (e.g. CLI failure), drop the empty placeholder
+      if (assistantText.length === 0) {
+        setMessages((prev) => prev.slice(0, -1));
+      }
+    } catch (e) {
+      setError(e instanceof Error ? e.message : String(e));
+      setMessages((prev) => (prev.length > 0 && prev[prev.length - 1].content === '' ? prev.slice(0, -1) : prev));
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  function newThread() {
+    setMessages([]);
+    setThreadId(null);
+    setActiveAgent(null);
+    setToolStatus(null);
+    setError('');
+    setModelUsed('');
+    setInput('');
+    setTimeout(() => inputRef.current?.focus(), 50);
   }
 
   function onKeyDown(e: React.KeyboardEvent) {
@@ -314,34 +493,126 @@ export default function WelcomePage() {
                 </div>
               )}
             </div>
+
+            {/* ✦ Trending prompts (from AInvest community harvest) */}
+            <button
+              className="qa-btn"
+              onClick={() => setPromptDrawerOpen((v) => !v)}
+              style={{ padding: '7px 14px' }}
+              title="Trending community prompts from AInvest"
+            >
+              <span style={{ fontSize: 13 }}>✦</span>
+              <span>Trending</span>
+            </button>
           </div>
+
+          {/* Prompt drawer */}
+          {promptDrawerOpen && Object.keys(promptCatalog).length > 0 && (
+            <div style={{ marginTop: 10, padding: 14, background: 'rgba(10,25,41,0.7)', border: '1px solid #1a3a4a', borderRadius: 12, animation: 'wfi 0.15s ease-out' }}>
+              <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', marginBottom: 10 }}>
+                <span style={{ fontSize: 11, color: '#607d8b', fontFamily: "'JetBrains Mono', monospace", letterSpacing: 1 }}>TRENDING PROMPTS · {Object.values(promptCatalog).reduce((s, v) => s + v.length, 0)} surfaced</span>
+                <button onClick={() => setPromptDrawerOpen(false)} style={{ background: 'transparent', border: 'none', color: '#607d8b', fontSize: 14, cursor: 'pointer' }}>×</button>
+              </div>
+              {Object.entries(promptCatalog).map(([cat, items]) => (
+                <div key={cat} style={{ marginBottom: 10 }}>
+                  <div style={{ fontSize: 10, color: '#81d4fa', fontWeight: 700, letterSpacing: 1, textTransform: 'uppercase', marginBottom: 6 }}>{cat}</div>
+                  <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
+                    {items.map((p) => (
+                      <button
+                        key={p.id}
+                        onClick={() => { setInput(p.query); setPromptDrawerOpen(false); setTimeout(() => inputRef.current?.focus(), 50); }}
+                        title={`${p.likes} likes`}
+                        style={{ padding: '6px 12px', background: 'rgba(79,195,247,0.05)', border: '1px solid #1a3a4a', borderRadius: 100, color: '#e0e0e0', fontFamily: "'Inter', sans-serif", fontSize: 12, cursor: 'pointer', maxWidth: 360, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}
+                        onMouseEnter={(e) => { e.currentTarget.style.borderColor = '#4fc3f7'; }}
+                        onMouseLeave={(e) => { e.currentTarget.style.borderColor = '#1a3a4a'; }}
+                      >
+                        {p.query}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+
+          {/* Watchlist chips — implicit ticker pins surfaced from chat */}
+          {pins.length > 0 && (
+            <div style={{ marginTop: 12, display: 'flex', flexWrap: 'wrap', gap: 6, alignItems: 'center' }}>
+              <span style={{ fontSize: 10, color: '#607d8b', fontFamily: "'JetBrains Mono', monospace", letterSpacing: 1, marginRight: 4 }}>WATCHING</span>
+              {pins.map((p) => (
+                <span key={p.symbol} style={{ display: 'inline-flex', alignItems: 'center', gap: 5, padding: '4px 10px', background: 'rgba(255,152,0,0.10)', border: '1px solid rgba(255,152,0,0.30)', borderRadius: 100, color: '#ffb74d', fontFamily: "'JetBrains Mono', monospace", fontSize: 11, fontWeight: 700 }}>
+                  {p.symbol}
+                  {p.hits > 1 && <span style={{ color: '#ff9800', fontSize: 9, opacity: 0.7 }}>×{p.hits}</span>}
+                  <button onClick={() => unpinTicker(p.symbol)} title="Unpin" style={{ background: 'transparent', border: 'none', color: '#ffb74d', fontSize: 13, cursor: 'pointer', padding: 0, lineHeight: 1, marginLeft: 2 }}>×</button>
+                </span>
+              ))}
+            </div>
+          )}
 
           {/* Disclaimer — matches AInvest */}
           <div style={{ textAlign: 'center', marginTop: 10, fontFamily: "'Inter', sans-serif", fontSize: 11, color: '#455a64' }}>
             Not intended as financial advice <span style={{ color: '#607d8b', cursor: 'pointer' }}>›</span>
           </div>
 
-          {/* Response area */}
-          {(answer || error || loading) && (
-            <div style={{ marginTop: 24, padding: '20px 24px', background: 'rgba(10,25,41,0.7)', border: '1px solid #1a3a4a', borderRadius: 16, backdropFilter: 'blur(10px)' }}>
+          {/* Conversation area */}
+          {(messages.length > 0 || error || loading) && (
+            <div ref={scrollRef} style={{ marginTop: 24, padding: '20px 24px', background: 'rgba(10,25,41,0.7)', border: '1px solid #1a3a4a', borderRadius: 16, backdropFilter: 'blur(10px)', maxHeight: 560, overflowY: 'auto' }}>
+              {/* Thread header: model + agent + new-thread button */}
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 14, paddingBottom: 10, borderBottom: '1px solid #1a3a4a' }}>
+                <div style={{ fontSize: 10, color: '#607d8b', fontFamily: "'JetBrains Mono', monospace", letterSpacing: 1, display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
+                  {modelUsed ? <><span style={{ color: '#66bb6a' }}>●</span><span>{modelUsed}</span></> : <span style={{ color: '#455a64' }}>—</span>}
+                  {threadId && <span style={{ color: '#455a64', marginLeft: 8 }}>thread {threadId.slice(0, 8)}</span>}
+                  {activeAgent && (
+                    <span style={{ marginLeft: 8, padding: '2px 8px', background: 'rgba(255,152,0,0.12)', border: '1px solid rgba(255,152,0,0.35)', borderRadius: 100, color: '#ffb74d', fontSize: 10, fontWeight: 700, letterSpacing: 0.5 }}>
+                      @{activeAgent}
+                    </span>
+                  )}
+                  {toolStatus && (
+                    <span style={{ marginLeft: 4, color: '#4fc3f7', fontSize: 10 }}>
+                      ⚙ {toolStatus}
+                    </span>
+                  )}
+                </div>
+                {messages.length > 0 && (
+                  <button onClick={newThread}
+                    style={{ padding: '5px 11px', background: 'transparent', border: '1px solid #1a3a4a', borderRadius: 100, color: '#81d4fa', fontSize: 11, cursor: 'pointer', fontFamily: "'Inter', sans-serif", fontWeight: 600, letterSpacing: 0.5 }}
+                    onMouseEnter={(e) => { e.currentTarget.style.borderColor = '#4fc3f7'; }}
+                    onMouseLeave={(e) => { e.currentTarget.style.borderColor = '#1a3a4a'; }}>
+                    New thread
+                  </button>
+                )}
+              </div>
+
+              {/* Messages */}
+              {messages.map((m, i) => (
+                <div key={i} style={{ marginBottom: 14, display: 'flex', flexDirection: m.role === 'user' ? 'row-reverse' : 'row' }}>
+                  <div style={{
+                    maxWidth: '88%',
+                    padding: '10px 14px',
+                    borderRadius: m.role === 'user' ? '14px 14px 4px 14px' : '14px 14px 14px 4px',
+                    background: m.role === 'user' ? 'rgba(79,195,247,0.10)' : 'rgba(255,255,255,0.03)',
+                    border: m.role === 'user' ? '1px solid rgba(79,195,247,0.25)' : '1px solid #1a3a4a',
+                    color: '#e0e0e0',
+                    fontSize: 14,
+                    lineHeight: 1.65,
+                    fontFamily: "'Inter', sans-serif",
+                  }}>
+                    {m.role === 'assistant'
+                      ? <AssistantContent content={m.content} />
+                      : <div style={{ whiteSpace: 'pre-wrap' }}>{m.content}</div>}
+                  </div>
+                </div>
+              ))}
+
+              {/* Loading bubble */}
               {loading && (
-                <div style={{ display: 'flex', alignItems: 'center', gap: 10, color: '#4fc3f7', fontFamily: "'JetBrains Mono', monospace", fontSize: 12, letterSpacing: 1 }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 10, color: '#4fc3f7', fontFamily: "'JetBrains Mono', monospace", fontSize: 12, letterSpacing: 1, padding: '6px 0' }}>
                   <span style={{ width: 8, height: 8, borderRadius: '50%', background: '#4fc3f7', animation: 'wb 0.8s infinite' }} />
                   Thinking via {MODES[mode].label}...
                 </div>
               )}
-              {error && <div style={{ color: '#ef5350', fontFamily: "'JetBrains Mono', monospace", fontSize: 13 }}>Error: {error}</div>}
-              {answer && (
-                <>
-                  {modelUsed && (
-                    <div style={{ fontSize: 10, color: '#607d8b', fontFamily: "'JetBrains Mono', monospace", letterSpacing: 1, marginBottom: 12, display: 'flex', alignItems: 'center', gap: 8 }}>
-                      <span style={{ color: '#66bb6a' }}>●</span>
-                      <span>{modelUsed}</span>
-                    </div>
-                  )}
-                  <div style={{ color: '#e0e0e0', fontSize: 15, lineHeight: 1.7, whiteSpace: 'pre-wrap' }}>{answer}</div>
-                </>
-              )}
+
+              {error && <div style={{ color: '#ef5350', fontFamily: "'JetBrains Mono', monospace", fontSize: 13, marginTop: 8 }}>Error: {error}</div>}
             </div>
           )}
         </div>

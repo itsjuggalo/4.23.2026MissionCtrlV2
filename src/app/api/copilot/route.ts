@@ -1,8 +1,342 @@
 import { NextResponse } from 'next/server';
+import { spawn } from 'child_process';
 import fs from 'fs';
 import path from 'path';
 import os from 'os';
+import crypto from 'crypto';
+import Database from 'better-sqlite3';
 import { proxyToServeftp } from "../../../lib/proxyToServeftp";
+
+// Claude Code CLI binary. Resolve at module-load time so the service
+// (which has a minimal PATH from `bash -lc 'npm start'`) doesn't fail with
+// ENOENT. Override via the CLAUDE_CLI_PATH env var.
+function resolveClaudeBin(): string {
+  if (process.env.CLAUDE_CLI_PATH) return process.env.CLAUDE_CLI_PATH;
+  // Prefer the Linux-native binary (bundled with the agent SDK) over the
+  // Windows shim — Windows has a tight command-line length limit that the
+  // copilot's full system prompt with alt_signals context overruns.
+  const candidates = [
+    '/home/itsju/claudeclaw-os/node_modules/@anthropic-ai/claude-agent-sdk-linux-x64/claude',
+    '/home/itsju/AiData/claudeclaw-1/node_modules/@anthropic-ai/claude-agent-sdk-linux-x64/claude',
+    '/mnt/c/Users/itsju/AppData/Roaming/npm/claude',
+    '/home/itsju/.npm-global/bin/claude',
+    '/usr/local/bin/claude',
+  ];
+  for (const p of candidates) {
+    try { if (fs.existsSync(p)) return p; } catch { /* noop */ }
+  }
+  return 'claude';
+}
+const CLAUDE_BIN = resolveClaudeBin();
+
+interface ClaudeCliResult {
+  result?: string;
+  is_error?: boolean;
+  usage?: { input_tokens?: number; output_tokens?: number; cache_read_input_tokens?: number };
+  total_cost_usd?: number;
+  duration_ms?: number;
+  model?: string;
+  session_id?: string;
+}
+
+// Known subagent slugs (loaded from ~/.claude/agents/*.md). Used to validate
+// /agent-name slash commands at the start of a user message and pass --agent.
+const AGENT_SLUGS = new Set([
+  'analyst', 'auditor', 'comms-utility', 'crypto-sniper', 'executor',
+  'investment-banker', 'macro-strategist', 'portfolio-monitor',
+  'quant-engineer', 'research-desk', 'risk-manager', 'signal-filter',
+  'stock-researcher', 'web-researcher', 'workflow-builder',
+  // Useful built-ins
+  'explore', 'plan', 'general-purpose',
+]);
+
+// Slash aliases the user can type at the start of a message
+const SLASH_ALIASES: Record<string, string> = {
+  aladdin: 'signal-filter', // BlackRock DNA persona slug
+  filter: 'signal-filter',
+  signal: 'signal-filter',
+  risk: 'risk-manager',
+  macro: 'macro-strategist',
+  portfolio: 'portfolio-monitor',
+  exec: 'executor',
+  ib: 'investment-banker',
+  research: 'research-desk',
+  crypto: 'crypto-sniper',
+  quant: 'quant-engineer',
+  comms: 'comms-utility',
+  workflow: 'workflow-builder',
+};
+
+/** Returns {agentSlug, prompt} if the message starts with a /<agent>; else {null, prompt}. */
+function parseSlashCommand(prompt: string): { agentSlug: string | null; prompt: string } {
+  const m = prompt.match(/^\/([\w-]+)\s+([\s\S]+)$/);
+  if (!m) return { agentSlug: null, prompt };
+  const cmd = m[1].toLowerCase();
+  const rest = m[2];
+  const slug = SLASH_ALIASES[cmd] || cmd;
+  if (AGENT_SLUGS.has(slug)) return { agentSlug: slug, prompt: rest };
+  return { agentSlug: null, prompt };
+}
+
+interface ClaudeCliArgs {
+  prompt: string;
+  systemPrompt: string;
+  model: string;
+  agentSlug?: string | null;
+  /** If false, tools are disabled (`--tools ""`). Default true for in-chat agent ops. */
+  enableTools?: boolean;
+}
+
+/**
+ * Build the CLI argv. We use `--strict-mcp-config` to prevent the 280+ MCP
+ * servers configured in ~/.claude/settings.json from auto-loading and
+ * blowing the context window. Subagents still load via `--setting-sources user`.
+ */
+function buildClaudeArgs(opts: ClaudeCliArgs, outputFormat: 'json' | 'stream-json'): string[] {
+  const args: string[] = [
+    '-p',
+    '--output-format', outputFormat,
+    '--no-session-persistence',
+    '--strict-mcp-config',
+    '--setting-sources', 'user',
+    '--permission-mode', 'bypassPermissions',
+    '--model', opts.model,
+    '--system-prompt', opts.systemPrompt,
+  ];
+  if (opts.enableTools === false) {
+    args.push('--tools', '');
+  } else {
+    // Safe read + subagent invocation. No Edit/Write/NotebookEdit.
+    // Bash is intentionally omitted to keep the chat from running shell commands.
+    args.push('--tools', 'Task,Read,Grep,Glob');
+  }
+  if (outputFormat === 'stream-json') {
+    args.push('--include-partial-messages');
+    args.push('--verbose');
+  }
+  if (opts.agentSlug) {
+    args.push('--agent', opts.agentSlug);
+  }
+  return args;
+}
+
+/**
+ * Run the Claude Code CLI in non-interactive print mode and return the JSON result.
+ *
+ * Uses the OAuth credentials at ~/.claude/.credentials.json (Claude Max
+ * subscription) — no API key needed.
+ */
+async function runClaudeCli(opts: ClaudeCliArgs & { timeoutMs?: number }): Promise<ClaudeCliResult> {
+  return new Promise((resolve, reject) => {
+    const args = buildClaudeArgs(opts, 'json');
+    const child = spawn(CLAUDE_BIN, args, {
+      stdio: ['pipe', 'pipe', 'pipe'],
+      env: { ...process.env, HOME: os.homedir() },
+    });
+
+    const stdoutChunks: Buffer[] = [];
+    const stderrChunks: Buffer[] = [];
+    child.stdout.on('data', (c: Buffer) => stdoutChunks.push(c));
+    child.stderr.on('data', (c: Buffer) => stderrChunks.push(c));
+
+    const timeoutMs = opts.timeoutMs ?? 120000;
+    const t = setTimeout(() => {
+      child.kill('SIGKILL');
+      reject(new Error(`Claude CLI timed out after ${timeoutMs}ms`));
+    }, timeoutMs);
+
+    child.on('error', (err) => {
+      clearTimeout(t);
+      reject(err);
+    });
+    child.on('close', (code) => {
+      clearTimeout(t);
+      const stdout = Buffer.concat(stdoutChunks).toString('utf-8');
+      const stderr = Buffer.concat(stderrChunks).toString('utf-8');
+      if (code !== 0) {
+        reject(new Error(`Claude CLI exited ${code}: ${stderr.slice(0, 400) || stdout.slice(0, 400)}`));
+        return;
+      }
+      const trimmed = stdout.trim();
+      const lastLine = trimmed.split('\n').filter((l) => l.trim().length > 0).pop() || trimmed;
+      try {
+        const data: ClaudeCliResult = JSON.parse(lastLine);
+        resolve(data);
+      } catch (e) {
+        reject(new Error(`Failed to parse Claude CLI output: ${e instanceof Error ? e.message : String(e)}; stdout head: ${stdout.slice(0, 400)}`));
+      }
+    });
+
+    child.stdin.write(opts.prompt);
+    child.stdin.end();
+  });
+}
+
+// ---- streaming ----
+
+interface SseEvent {
+  type: 'delta' | 'tool_use' | 'tool_result' | 'thread' | 'done' | 'error' | 'status';
+  [k: string]: unknown;
+}
+
+function sse(event: SseEvent): string {
+  return `data: ${JSON.stringify(event)}\n\n`;
+}
+
+/**
+ * Spawn the CLI in stream-json mode and turn its line-delimited output into
+ * a ReadableStream of SSE-formatted events.
+ *
+ * onComplete receives the assembled assistant text and final usage so the
+ * route can persist the thread.
+ */
+function streamClaudeCli(
+  opts: ClaudeCliArgs,
+  onComplete: (data: { fullText: string; usage: ClaudeCliResult['usage']; model: string }) => Promise<void> | void,
+): ReadableStream<Uint8Array> {
+  const encoder = new TextEncoder();
+  return new ReadableStream<Uint8Array>({
+    start(controller) {
+      const args = buildClaudeArgs(opts, 'stream-json');
+      const child = spawn(CLAUDE_BIN, args, {
+        stdio: ['pipe', 'pipe', 'pipe'],
+        env: { ...process.env, HOME: os.homedir() },
+      });
+
+      let stdoutBuffer = '';
+      let fullText = '';
+      let finalUsage: ClaudeCliResult['usage'] = undefined;
+      let finalModel = opts.model;
+      let finished = false;
+
+      const emit = (ev: SseEvent) => {
+        controller.enqueue(encoder.encode(sse(ev)));
+      };
+
+      const timeoutMs = 180000;
+      const t = setTimeout(() => {
+        child.kill('SIGKILL');
+        if (!finished) {
+          emit({ type: 'error', message: `CLI timed out after ${timeoutMs}ms` });
+          controller.close();
+          finished = true;
+        }
+      }, timeoutMs);
+
+      child.stdout.on('data', (chunk: Buffer) => {
+        stdoutBuffer += chunk.toString('utf-8');
+        let nl;
+        while ((nl = stdoutBuffer.indexOf('\n')) !== -1) {
+          const line = stdoutBuffer.slice(0, nl).trim();
+          stdoutBuffer = stdoutBuffer.slice(nl + 1);
+          if (!line) continue;
+          let msg: Record<string, unknown>;
+          try { msg = JSON.parse(line); } catch { continue; }
+          const t = msg.type as string;
+          if (t === 'stream_event') {
+            const ev = (msg.event || {}) as Record<string, unknown>;
+            const evType = ev.type as string;
+            if (evType === 'content_block_delta') {
+              const delta = (ev.delta || {}) as Record<string, unknown>;
+              if (delta.type === 'text_delta' && typeof delta.text === 'string') {
+                if (delta.text.length > 0) {
+                  fullText += delta.text;
+                  emit({ type: 'delta', text: delta.text });
+                }
+              } else if (delta.type === 'input_json_delta') {
+                // tool args streaming — we only signal that a tool is in flight
+              }
+            } else if (evType === 'content_block_start') {
+              const block = (ev.content_block || {}) as Record<string, unknown>;
+              if (block.type === 'tool_use') {
+                emit({ type: 'tool_use', name: String(block.name || ''), id: String(block.id || '') });
+              }
+            }
+          } else if (t === 'user') {
+            // Tool result coming back from a tool the model invoked
+            const content = ((msg.message as Record<string, unknown>)?.content || []) as Array<Record<string, unknown>>;
+            for (const c of content) {
+              if (c.type === 'tool_result') {
+                const result = typeof c.content === 'string' ? c.content : JSON.stringify(c.content);
+                emit({ type: 'tool_result', tool_use_id: String(c.tool_use_id || ''), content: result.slice(0, 600) });
+              }
+            }
+          } else if (t === 'result') {
+            // Final aggregate. Capture usage + model.
+            const usage = msg.usage as ClaudeCliResult['usage'];
+            if (usage) finalUsage = usage;
+            const modelUsage = msg.modelUsage as Record<string, unknown> | undefined;
+            if (modelUsage) {
+              const firstModel = Object.keys(modelUsage)[0];
+              if (firstModel) finalModel = firstModel;
+            }
+            // Prefer the result text if streaming missed something
+            const resultText = msg.result as string | undefined;
+            if (resultText && fullText.length === 0) fullText = resultText;
+          } else if (t === 'system' && (msg.subtype === 'status' || msg.subtype === 'init')) {
+            emit({ type: 'status', subtype: String(msg.subtype) });
+          }
+        }
+      });
+
+      child.stderr.on('data', (chunk: Buffer) => {
+        const txt = chunk.toString('utf-8');
+        // Stream non-fatal warnings as status events to aid debugging
+        if (txt.trim()) emit({ type: 'status', stderr: txt.slice(0, 200) });
+      });
+
+      child.on('error', (err) => {
+        clearTimeout(t);
+        if (!finished) {
+          emit({ type: 'error', message: err.message });
+          controller.close();
+          finished = true;
+        }
+      });
+
+      child.on('close', async (code) => {
+        clearTimeout(t);
+        if (finished) return;
+        if (code !== 0) {
+          emit({ type: 'error', message: `CLI exited with code ${code}` });
+          controller.close();
+          finished = true;
+          return;
+        }
+        try {
+          await onComplete({ fullText, usage: finalUsage, model: finalModel });
+        } catch { /* persistence failures shouldn't break the stream */ }
+        emit({ type: 'done', model: finalModel, tokens: {
+          input: finalUsage?.input_tokens || 0,
+          output: finalUsage?.output_tokens || 0,
+        }});
+        controller.close();
+        finished = true;
+      });
+
+      child.stdin.write(opts.prompt);
+      child.stdin.end();
+    },
+  });
+}
+
+function formatHistoryAsPrompt(messages: { role: string; content: string }[]): string {
+  // The CLI is single-shot in `-p` mode, so we serialize the whole history
+  // into one prompt. The most recent user message is the one to respond to.
+  if (messages.length === 1) return messages[0].content;
+  const lines: string[] = [
+    '<conversation_history>',
+    ...messages.slice(0, -1).map((m) => `[${m.role === 'user' ? 'User' : 'Assistant'}]: ${m.content}`),
+    '</conversation_history>',
+    '',
+    'Continue the conversation. Respond to the most recent User message:',
+    '',
+    messages[messages.length - 1].content,
+  ];
+  return lines.join('\n');
+}
+
+// ---- secrets / file helpers ----
 
 function readSecret(name: string): string {
   try {
@@ -17,6 +351,73 @@ function safeReadJSON(filepath: string): unknown {
     if (!fs.existsSync(filepath)) return null;
     return JSON.parse(fs.readFileSync(filepath, 'utf-8'));
   } catch { return null; }
+}
+
+// ---- flow.db helpers (alt_signals + threads) ----
+
+const FLOW_DB = path.join(os.homedir(), 'flow-data', 'flow.db');
+
+function openFlowDb(): Database.Database | null {
+  try {
+    if (!fs.existsSync(FLOW_DB)) return null;
+    const db = new Database(FLOW_DB, { fileMustExist: true });
+    db.pragma('journal_mode = WAL');
+    db.pragma('busy_timeout = 5000');
+    return db;
+  } catch { return null; }
+}
+
+function fetchAltSignalsContext(): Record<string, unknown> {
+  const db = openFlowDb();
+  if (!db) return {};
+  try {
+    const top: unknown[] = db.prepare(`
+      SELECT source, symbol, headline, quality_score, ts, url
+      FROM alt_signals
+      WHERE ts >= datetime('now', '-24 hours') AND quality_score >= 60
+      ORDER BY quality_score DESC, ts DESC
+      LIMIT 30
+    `).all();
+
+    const sourceCounts: unknown[] = db.prepare(`
+      SELECT source, COUNT(*) AS n, AVG(quality_score) AS avg_q
+      FROM alt_signals
+      WHERE ts >= datetime('now', '-24 hours')
+      GROUP BY source
+      ORDER BY n DESC
+    `).all();
+
+    const vix: unknown = db.prepare(`
+      SELECT ts, vix9d, vix, vix3m, vix6m, contango_vix_3m, regime
+      FROM alt_vix_term_structure
+      ORDER BY ts DESC LIMIT 1
+    `).get();
+
+    const dix: unknown = db.prepare(`
+      SELECT ts, dix, gex, spx_close
+      FROM alt_dix_gex
+      ORDER BY ts DESC LIMIT 1
+    `).get();
+
+    const cot: unknown[] = db.prepare(`
+      SELECT market, noncomm_net, noncomm_net_z, week_of
+      FROM alt_cot_positioning
+      ORDER BY week_of DESC, market
+      LIMIT 12
+    `).all();
+
+    return {
+      alt_signals_top_24h: top,
+      alt_signals_by_source_24h: sourceCounts,
+      vix_term_structure_latest: vix,
+      dix_gex_latest: dix,
+      cot_latest_by_market: cot,
+    };
+  } catch (e) {
+    return { alt_signals_error: e instanceof Error ? e.message : String(e) };
+  } finally {
+    db.close();
+  }
 }
 
 async function buildDashboardContext(): Promise<string> {
@@ -69,9 +470,15 @@ async function buildDashboardContext(): Promise<string> {
     ctx.upcoming_events = upcoming.slice(0, 15);
   }
 
+  // NEW: alt-signals pipeline (8-source ingester output)
+  const altCtx = fetchAltSignalsContext();
+  Object.assign(ctx, altCtx);
+
   const str = JSON.stringify(ctx, null, 2);
-  return str.length > 40000 ? str.slice(0, 40000) + '\n... (truncated)' : str;
+  return str.length > 50000 ? str.slice(0, 50000) + '\n... (truncated)' : str;
 }
+
+// ---- model selection ----
 
 const MODEL_SONNET = 'claude-sonnet-4-6';
 const MODEL_HAIKU = 'claude-haiku-4-5-20251001';
@@ -83,18 +490,20 @@ function pickAutoModel(message: string): string {
   return MODEL_HAIKU;
 }
 
-const BASE_SYSTEM = `You are the Mission Control copilot — an AI trading assistant for Commander Mike. He runs a multi-agent AI trading system on Oracle Cloud:
+const BASE_SYSTEM = `You are the Mission Control copilot — an AI trading assistant for Commander Mike. He runs a multi-agent AI trading system migrated into WSL Ubuntu on his laptop:
 
 - Agents: Boba (Claude Sonnet, orchestrator), JazzyHazzy (GPT-4o-mini, research/news), Orion (Gemini Flash, scanner/technicals)
+- Hedge-fund persona roster on call: Aladdin (BlackRock signal filter), Analyst, Risk-Manager, Macro-Strategist, Executor, Portfolio-Monitor, Auditor, Investment-Banker, Research-Desk, Crypto-Sniper, Quant-Engineer, Comms-Utility, Workflow-Builder
 - Alpaca paper account: ~$137K equity (from $100K start)
 - BTCUSD systematic strategy: SuperTrend on Coinbase 1H via TradingView webhooks
-- Dashboard: Next.js on port 3033 with live signals, regime detection, congress trading, LLM portfolio tracking
+- alt-signals pipeline: 8 free Tier 2/3 sources writing to flow.db (SEC 8-K live, FINRA short interest, CME COT, VIX term structure, DIX/GEX, AInvest prompts, WSB ticker scan, HN + r/algotrading)
+- Dashboard: Next.js on port 3033
 
-Be direct, concise, and tactical. Use numbers. No fluff.`;
+Be direct, concise, and tactical. Use numbers. No fluff. Reference the live context blocks below by name when relevant.`;
 
 const SUPPORT_SYSTEM = `You are the Mission Control support assistant. You help Commander Mike with questions about how to use Mission Control, troubleshoot issues, configure settings, and understand what each feature does.
 
-Mission Control is a Next.js trading dashboard running on Oracle Cloud Ubuntu. It has these pages:
+Mission Control is a Next.js trading dashboard running in WSL Ubuntu on his laptop. It has these pages:
 - Dashboard: portfolio overview, positions, regime, strategy params
 - TV Chart: TradingView embed with signal panel
 - Tasks: pipeline kanban showing trade ideas flowing through stages
@@ -108,84 +517,241 @@ Mission Control is a Next.js trading dashboard running on Oracle Cloud Ubuntu. I
 
 Be warm, patient, and thorough. Explain things clearly. If you don't know something specific about the system, say so honestly.`;
 
+// ---- types ----
+
+type ChatMessage = { role: 'user' | 'assistant'; content: string };
+
+function genThreadId(): string {
+  return crypto.randomBytes(8).toString('hex');
+}
+
+function makeTitle(firstUserMessage: string): string {
+  const t = firstUserMessage.trim().replace(/\s+/g, ' ');
+  return t.length <= 60 ? t : t.slice(0, 57) + '...';
+}
+
+// ---- POST handler ----
+
 export async function POST(req: Request) {
   const __proxied = await proxyToServeftp(req); if (__proxied) return __proxied;
   try {
-    const body = await req.json();
-    const message = String(body.message || '').trim();
-    const mode = String(body.mode || 'auto').toLowerCase();
+    const url = new URL(req.url);
+    const wantsStream =
+      url.searchParams.get('stream') === '1' ||
+      (req.headers.get('accept') || '').includes('text/event-stream');
 
-    if (!message) {
-      return NextResponse.json({ error: 'Message is required' }, { status: 400 });
+    const body = await req.json();
+    const mode = String(body.mode || 'auto').toLowerCase();
+    const thread_id_in = typeof body.thread_id === 'string' && body.thread_id ? String(body.thread_id) : null;
+
+    // Accept BOTH shapes:
+    //   legacy: { message: "...", mode }
+    //   new:    { messages: [{role,content}, ...], mode, thread_id? }
+    let messages: ChatMessage[] = [];
+    if (Array.isArray(body.messages)) {
+      messages = (body.messages as Array<Record<string, unknown>>)
+        .map((m) => ({
+          role: m.role === 'assistant' ? 'assistant' : 'user',
+          content: String(m.content || ''),
+        }))
+        .filter((m) => m.content.length > 0) as ChatMessage[];
+    } else if (typeof body.message === 'string' && body.message.trim()) {
+      messages = [{ role: 'user', content: body.message.trim() }];
     }
 
-    // Model selection
+    if (messages.length === 0 || messages[messages.length - 1].role !== 'user') {
+      return NextResponse.json({ error: 'Need at least one user message' }, { status: 400 });
+    }
+
+    // ---- parse slash-command for agent handoff on the LAST user message ----
+    const rawLast = messages[messages.length - 1].content;
+    const { agentSlug, prompt: cleanedLast } = parseSlashCommand(rawLast);
+    if (agentSlug) {
+      // Replace the last user message with the agent-routed version for both
+      // the CLI invocation and the persisted thread.
+      messages = [...messages.slice(0, -1), { role: 'user', content: cleanedLast }];
+    }
+    const lastUserText = messages[messages.length - 1].content;
+
+    // ---- model + system prompt ----
     let model = MODEL_SONNET;
     if (mode === 'fast') model = MODEL_HAIKU;
-    else if (mode === 'auto') model = pickAutoModel(message);
-    // expert, copilot, support all use Sonnet
+    else if (mode === 'auto') model = pickAutoModel(lastUserText);
 
-    // System prompt
     let systemPrompt = BASE_SYSTEM;
     if (mode === 'support') {
       systemPrompt = SUPPORT_SYSTEM;
     } else if (mode === 'copilot') {
       const context = await buildDashboardContext();
-      systemPrompt += `\n\n=== LIVE DASHBOARD CONTEXT ===\n${context}\n=== END CONTEXT ===\n\nWhen answering, reference this live data directly. Cite specific numbers, positions, and states.`;
+      systemPrompt += `\n\n=== LIVE DASHBOARD CONTEXT ===\n${context}\n=== END CONTEXT ===\n\nWhen answering, reference this live data directly. Cite specific numbers, positions, and states. alt_signals_top_24h is the new 8-source feed — surface those headlines when relevant.`;
     }
+    // Tool guidance — let the model know how to reach the subagents and read files
+    systemPrompt += `\n\nYou have a Task tool that can delegate to specialist subagents on this machine. Use it when the request is best served by Aladdin/signal-filter (signal triage), analyst (technicals), risk-manager, macro-strategist, executor, portfolio-monitor, auditor, investment-banker, research-desk, crypto-sniper, quant-engineer, comms-utility, or workflow-builder. You also have Read/Grep/Glob to read files (flow.db is at ~/flow-data/flow.db; alt-signals scripts are at ~/scripts/alt-signals/). Be tight: cite numbers, route work, return a short verdict.`;
 
-    const apiKey = readSecret('anthropic_api_key');
-    if (!apiKey) {
-      return NextResponse.json({ error: 'Anthropic API key not found at ~/.openclaw/secrets/anthropic_api_key' }, { status: 500 });
-    }
+    // Structured output cards. When the model emits these fenced blocks, the
+    // UI replaces them with React cards inline. Use them sparingly — only when
+    // the data is well-defined; otherwise plain text or markdown tables.
+    systemPrompt += `
 
-    const r = await fetch('https://api.anthropic.com/v1/messages', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'x-api-key': apiKey,
-        'anthropic-version': '2023-06-01',
-      },
-      body: JSON.stringify({
+When a response NATURALLY fits one of these shapes, emit it as a fenced JSON code block AT THE END of your message. The UI renders these as cards. Always include the trailing prose summary OUTSIDE the block.
+
+\`\`\`trade-frame
+{"symbol":"NVDA","direction":"long","entry":485.20,"stop":472.00,"target":520.00,"size_hint":"1% NAV","conviction":"medium","rationale":"<=20 chars"}
+\`\`\`
+
+\`\`\`backtest
+{"setup":"Item 4.02 + DIX<0.40","n_trades":18,"win_rate":0.61,"avg_win":0.072,"avg_loss":-0.034,"max_dd":-0.18,"sharpe":1.3,"period":"24mo"}
+\`\`\`
+
+\`\`\`chart
+{"symbol":"BTC-USD","period":"1mo","interval":"1d","note":"<=60 chars","levels":[{"label":"S1","price":92000},{"label":"R1","price":108000}]}
+\`\`\`
+
+Do NOT emit a card unless explicitly asked or the user's intent obviously matches. Most replies should be plain text.`;
+
+    const thread_id = thread_id_in || genThreadId();
+    const promptForCli = formatHistoryAsPrompt(messages);
+
+    // ---- persistence helper (used by both buffered and streaming paths) ----
+    const persistThread = async (responseText: string, usage: ClaudeCliResult['usage'] | undefined): Promise<boolean> => {
+      try {
+        const db = openFlowDb();
+        if (!db) return false;
+        try {
+          const fullHistory: ChatMessage[] = [...messages, { role: 'assistant', content: responseText }];
+          const existing = db.prepare('SELECT thread_id FROM copilot_threads WHERE thread_id = ?').get(thread_id);
+          const title = makeTitle(messages.find((m) => m.role === 'user')?.content || lastUserText);
+          if (existing) {
+            db.prepare(`
+              UPDATE copilot_threads
+              SET updated_at = CURRENT_TIMESTAMP,
+                  messages_json = ?, msg_count = ?, mode = ?, model_last = ?
+              WHERE thread_id = ?
+            `).run(JSON.stringify(fullHistory), fullHistory.length, mode, model, thread_id);
+          } else {
+            db.prepare(`
+              INSERT INTO copilot_threads
+                (thread_id, title, mode, model_last, msg_count, messages_json)
+              VALUES (?, ?, ?, ?, ?, ?)
+            `).run(thread_id, title, mode, model, fullHistory.length, JSON.stringify(fullHistory));
+          }
+        } finally {
+          db.close();
+        }
+        // usage logging
+        try {
+          const logPath = path.join(os.homedir(), 'mission-control-restored', 'data', 'api_usage.json');
+          let log: Record<string, unknown> = {};
+          if (fs.existsSync(logPath)) log = JSON.parse(fs.readFileSync(logPath, 'utf-8'));
+          const entries = (log.entries as unknown[] | undefined) || [];
+          entries.push({
+            timestamp: new Date().toISOString(),
+            source: 'copilot',
+            provider: 'anthropic',
+            model,
+            input_tokens: usage?.input_tokens || 0,
+            output_tokens: usage?.output_tokens || 0,
+            mode,
+            thread_id,
+            agent: agentSlug || null,
+          });
+          log.entries = entries;
+          log.last_updated = new Date().toISOString();
+          fs.writeFileSync(logPath, JSON.stringify(log, null, 2));
+        } catch { /* swallow */ }
+        return true;
+      } catch { return false; }
+    };
+
+    // ---- STREAMING PATH (SSE) ----
+    if (wantsStream) {
+      const stream = streamClaudeCli({
+        prompt: promptForCli,
+        systemPrompt,
         model,
-        max_tokens: 1024,
-        system: systemPrompt,
-        messages: [{ role: 'user', content: message }],
-      }),
-    });
-
-    const data = await r.json();
-
-    if (!r.ok) {
-      return NextResponse.json({ error: data?.error?.message || `API error ${r.status}` }, { status: 500 });
-    }
-
-    const text = data.content?.[0]?.text || '';
-
-    // Usage logging
-    try {
-      const logPath = path.join(os.homedir(), 'mission-control-restored', 'data', 'api_usage.json');
-      let log: Record<string, unknown> = {};
-      if (fs.existsSync(logPath)) log = JSON.parse(fs.readFileSync(logPath, 'utf-8'));
-      const entries = (log.entries as unknown[] | undefined) || [];
-      entries.push({
-        timestamp: new Date().toISOString(),
-        source: 'copilot',
-        provider: 'anthropic',
-        model,
-        input_tokens: data.usage?.input_tokens || 0,
-        output_tokens: data.usage?.output_tokens || 0,
-        mode,
+        agentSlug,
+        enableTools: true,
+      }, async ({ fullText, usage, model: finalModel }) => {
+        await persistThread(fullText, usage);
+        // Send a thread event before `done` so the client knows the id
+        // (SSE writes here would race with controller close — handled inside
+        // streamClaudeCli's final `done` event which includes everything).
+        void finalModel;
       });
-      log.entries = entries;
-      log.last_updated = new Date().toISOString();
-      fs.writeFileSync(logPath, JSON.stringify(log, null, 2));
-    } catch { /* don't fail on logging */ }
+      // Inject the thread_id by tagging the stream — wrap it.
+      const headers = new Headers({
+        'Content-Type': 'text/event-stream; charset=utf-8',
+        'Cache-Control': 'no-cache, no-transform',
+        'Connection': 'keep-alive',
+        'X-Thread-Id': thread_id,
+        'X-Agent': agentSlug || '',
+      });
+      // Prepend an SSE event with thread metadata before the model output
+      const prefixStream = new ReadableStream<Uint8Array>({
+        start(controller) {
+          const enc = new TextEncoder();
+          controller.enqueue(enc.encode(sse({ type: 'thread', thread_id, agent: agentSlug })));
+          controller.close();
+        },
+      });
+      // Concatenate prefix + main stream
+      const combined = new ReadableStream<Uint8Array>({
+        async start(controller) {
+          const reader1 = prefixStream.getReader();
+          while (true) {
+            const r = await reader1.read();
+            if (r.done) break;
+            controller.enqueue(r.value);
+          }
+          const reader2 = stream.getReader();
+          while (true) {
+            const r = await reader2.read();
+            if (r.done) break;
+            controller.enqueue(r.value);
+          }
+          controller.close();
+        },
+      });
+      return new Response(combined, { headers });
+    }
+
+    // ---- BUFFERED PATH (legacy) ----
+    let cliResult: ClaudeCliResult;
+    try {
+      cliResult = await runClaudeCli({
+        prompt: promptForCli,
+        systemPrompt,
+        model,
+        agentSlug,
+        enableTools: true,
+        timeoutMs: 180000,
+      });
+    } catch (e) {
+      return NextResponse.json({
+        error: `Claude CLI invocation failed: ${e instanceof Error ? e.message : String(e)}`,
+      }, { status: 500 });
+    }
+
+    if (cliResult.is_error) {
+      return NextResponse.json({ error: cliResult.result || 'Claude CLI returned is_error=true' }, { status: 500 });
+    }
+
+    const responseText = cliResult.result || '';
+    const data = {
+      usage: {
+        input_tokens: cliResult.usage?.input_tokens || 0,
+        output_tokens: cliResult.usage?.output_tokens || 0,
+      },
+    };
+
+    const persisted = await persistThread(responseText, cliResult.usage);
 
     return NextResponse.json({
-      response: text,
+      response: responseText,
       model,
       mode,
+      thread_id,
+      persisted,
       tokens: { input: data.usage?.input_tokens || 0, output: data.usage?.output_tokens || 0 },
     });
   } catch (err) {
