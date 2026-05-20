@@ -67,24 +67,179 @@ const SLASH_ALIASES: Record<string, string> = {
   workflow: 'workflow-builder',
 };
 
-/** Returns {agentSlug, prompt} if the message starts with a /<agent>; else {null, prompt}. */
-function parseSlashCommand(prompt: string): { agentSlug: string | null; prompt: string } {
+/**
+ * Vertical chat experiences — mirror of AInvest's `prompt_type` taxonomy
+ * (captured from their public square_list payload, 2026-05-20). Same chat-send
+ * endpoint; the vertical decides the output shape and which structured card,
+ * if any, the model should emit.
+ *
+ *   analysis  — Data-Agent style stock/numeric deep-dive
+ *   screen    — natural-language → screener result table
+ *   charts    — AI Charts: returns a chart card with levels
+ *   news      — news digest with sentiment + ticker tags
+ *   crypto    — crypto-asset chat (overlaps /crypto agent; orthogonal)
+ *   educate   — finance encyclopedia entry
+ *   explain   — "why did X surge?" event explainer
+ *   predict   — forecast / probability framing
+ *   help      — Mission Control how-to
+ *   wiki      — wiki lookup (entity / definition)
+ */
+const VERTICAL_SLUGS = new Set([
+  'analysis', 'screen', 'charts', 'news', 'crypto',
+  'educate', 'explain', 'predict', 'help', 'wiki',
+]);
+
+const VERTICAL_ALIASES: Record<string, string> = {
+  data: 'analysis',
+  dataagent: 'analysis',
+  'data-agent': 'analysis',
+  screener: 'screen',
+  scan: 'screen',
+  chart: 'charts',
+  news: 'news',
+  explainer: 'explain',
+  why: 'explain',
+  forecast: 'predict',
+  prediction: 'predict',
+  edu: 'educate',
+  howto: 'help',
+};
+
+/**
+ * Returns {agentSlug, verticalSlug, prompt} from a leading slash command.
+ * Resolution order:
+ *   1. If the slash maps to an agent slug → route to that agent (existing behavior).
+ *      Vertical is left for the body to set (orthogonal).
+ *   2. Else if the slash maps to a vertical slug → set vertical, no agent.
+ *   3. Else → unknown command, leave the original prompt intact.
+ */
+function parseSlashCommand(prompt: string): {
+  agentSlug: string | null;
+  verticalSlug: string | null;
+  prompt: string;
+} {
   const m = prompt.match(/^\/([\w-]+)\s+([\s\S]+)$/);
-  if (!m) return { agentSlug: null, prompt };
+  if (!m) return { agentSlug: null, verticalSlug: null, prompt };
   const cmd = m[1].toLowerCase();
   const rest = m[2];
-  const slug = SLASH_ALIASES[cmd] || cmd;
-  if (AGENT_SLUGS.has(slug)) return { agentSlug: slug, prompt: rest };
-  return { agentSlug: null, prompt };
+
+  // Agent shortcut takes priority — preserves /aladdin, /crypto-sniper, /risk, etc.
+  const agentSlug = SLASH_ALIASES[cmd] || cmd;
+  if (AGENT_SLUGS.has(agentSlug)) {
+    return { agentSlug, verticalSlug: null, prompt: rest };
+  }
+
+  // Vertical shortcut — /screen, /charts, /news, /predict, /educate, /wiki, ...
+  const verticalSlug = VERTICAL_ALIASES[cmd] || cmd;
+  if (VERTICAL_SLUGS.has(verticalSlug)) {
+    return { agentSlug: null, verticalSlug, prompt: rest };
+  }
+
+  return { agentSlug: null, verticalSlug: null, prompt };
 }
+
+/** Normalize a body.vertical input; returns null when unrecognized. */
+function normalizeVertical(raw: unknown): string | null {
+  if (typeof raw !== 'string') return null;
+  const v = raw.trim().toLowerCase();
+  if (!v) return null;
+  const alias = VERTICAL_ALIASES[v] || v;
+  return VERTICAL_SLUGS.has(alias) ? alias : null;
+}
+
+/**
+ * Per-vertical system-prompt addendum. Each block tells the model what
+ * SHAPE the user expects for this vertical, including any preferred
+ * structured card. Keep blocks short — they stack on top of the base
+ * + persona prompts and we don't want to drown the model.
+ */
+const VERTICAL_PROMPTS: Record<string, string> = {
+  analysis: `=== VERTICAL: analysis (Data Agent) ===
+The user is in the data-agent vertical. They want a numeric / factual deep-dive
+on a single ticker, fund, or event. Lead with the answer in one sentence, then
+1–3 supporting numbers (cite source: dashboard context, flow.db, or stated tool
+result). Avoid trade-frame cards in this vertical — the user is researching, not
+sizing. If a chart would clarify, emit a \`chart\` card with key levels.`,
+
+  screen: `=== VERTICAL: screen (AI Screener) ===
+The user wants a natural-language screener. Parse their criteria, return a
+\`screener\` card listing the top matches, and follow it with a 1-sentence note
+on what was excluded. Pull universe candidates from the live dashboard context
+(alt_signals_top_24h, holdings) where it fits — don't invent tickers.
+
+\`\`\`screener
+{"criteria":"FINRA short>50% AND ADV>500K","universe":"alt_signals_top_24h","results":[{"symbol":"ARTC","note":"64% short, 500K ADV","score":95},{"symbol":"MACI","note":"...","score":80}],"excluded":"warrants, SPAC units, <100K ADV"}
+\`\`\``,
+
+  charts: `=== VERTICAL: charts (AI Charts) ===
+The user wants chart-flavored analysis on a ticker. Identify the pattern in
+one sentence, then emit a \`chart\` card with 2–4 named price levels (support,
+resistance, gap, MA). If the live quote isn't available, fill levels with
+null prices and note "verify levels before sizing".`,
+
+  news: `=== VERTICAL: news (AI News) ===
+The user wants a news-flavored answer. Surface 2–4 recent headlines from the
+live dashboard context (or note "no fresh news in feed" if absent), each as one
+line: \`• [ticker] headline — sentiment (+/-/neutral)\`. End with a 1-sentence
+synthesis. No trade-frame cards.`,
+
+  crypto: `=== VERTICAL: crypto ===
+The user is asking about a crypto asset. Cover spot trend, on-chain/funding if
+available, and the top catalyst in 3 lines. Use 24h, 7d framing. If they ask for
+levels, emit a \`chart\` card with S1/R1.`,
+
+  educate: `=== VERTICAL: educate (encyclopedia) ===
+The user wants a definition / explainer. Give a 2-paragraph answer: definition
+first, then a worked example with real numbers. Avoid jargon without a gloss.
+No structured cards.`,
+
+  explain: `=== VERTICAL: explain (event explainer) ===
+The user is asking "why did X happen / surge / drop?". Identify the catalyst in
+one line, then 2–3 supporting facts (filing, headline, flow). Cite where each
+fact came from (dashboard / news feed / 8-K). No cards.`,
+
+  predict: `=== VERTICAL: predict (forecast) ===
+The user is asking for a probability framing on a future event. Give a base
+rate, then the catalysts moving it up/down, then your point estimate as a range
+("60–70%"). Add a one-line "what would change my mind". No cards.`,
+
+  help: `=== VERTICAL: help (Mission Control how-to) ===
+The user is asking how to use Mission Control. Give a 2–4 step procedure with
+the exact slash command, file path, or button to click. Cite the page route
+(e.g. /signals, /risk). Suppress agent persona language in this vertical — be
+plain and operational.`,
+
+  wiki: `=== VERTICAL: wiki (entity lookup) ===
+The user wants a brief wiki-style entry on an entity (company, fund, regulator,
+indicator). Give 3–5 lines: what it is, who runs it, why it matters to a
+trader. No structured cards.`,
+};
 
 interface ClaudeCliArgs {
   prompt: string;
   systemPrompt: string;
   model: string;
-  agentSlug?: string | null;
   /** If false, tools are disabled (`--tools ""`). Default true for in-chat agent ops. */
   enableTools?: boolean;
+}
+
+/**
+ * Load an agent's persona body (post-frontmatter) from ~/.claude/agents/<slug>.md.
+ * Returns null if the file doesn't exist or can't be parsed.
+ *
+ * We deliberately do NOT use the CLI's `--agent` flag for slash-command routing
+ * because that grants the agent its full tool-list (e.g. Bash, WebFetch),
+ * bypassing our safe-tool allowlist. Instead we inject the persona as a
+ * system-prompt addendum and keep --tools "Task,Read,Grep,Glob" enforced.
+ */
+function loadAgentPersona(slug: string): string | null {
+  try {
+    const p = path.join(os.homedir(), '.claude', 'agents', `${slug}.md`);
+    if (!fs.existsSync(p)) return null;
+    const raw = fs.readFileSync(p, 'utf-8');
+    const m = raw.match(/^---\n[\s\S]*?\n---\n([\s\S]*)$/);
+    return (m ? m[1] : raw).trim();
+  } catch { return null; }
 }
 
 /**
@@ -113,9 +268,6 @@ function buildClaudeArgs(opts: ClaudeCliArgs, outputFormat: 'json' | 'stream-jso
   if (outputFormat === 'stream-json') {
     args.push('--include-partial-messages');
     args.push('--verbose');
-  }
-  if (opts.agentSlug) {
-    args.push('--agent', opts.agentSlug);
   }
   return args;
 }
@@ -563,14 +715,18 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: 'Need at least one user message' }, { status: 400 });
     }
 
-    // ---- parse slash-command for agent handoff on the LAST user message ----
+    // ---- parse slash-command for agent OR vertical handoff on the LAST user message ----
     const rawLast = messages[messages.length - 1].content;
-    const { agentSlug, prompt: cleanedLast } = parseSlashCommand(rawLast);
-    if (agentSlug) {
-      // Replace the last user message with the agent-routed version for both
-      // the CLI invocation and the persisted thread.
+    const { agentSlug, verticalSlug: slashVertical, prompt: cleanedLast } = parseSlashCommand(rawLast);
+    if (agentSlug || slashVertical) {
+      // Replace the last user message with the cleaned version (slash stripped)
+      // for both the CLI invocation and the persisted thread.
       messages = [...messages.slice(0, -1), { role: 'user', content: cleanedLast }];
     }
+    // Vertical resolution: explicit body.vertical wins; otherwise the slash
+    // shortcut (if any). Agents and verticals are orthogonal, so /aladdin
+    // can still run inside a screener vertical if both are sent.
+    const vertical: string | null = normalizeVertical(body.vertical) || slashVertical || null;
     const lastUserText = messages[messages.length - 1].content;
 
     // ---- model + system prompt ----
@@ -586,7 +742,25 @@ export async function POST(req: Request) {
       systemPrompt += `\n\n=== LIVE DASHBOARD CONTEXT ===\n${context}\n=== END CONTEXT ===\n\nWhen answering, reference this live data directly. Cite specific numbers, positions, and states. alt_signals_top_24h is the new 8-source feed — surface those headlines when relevant.`;
     }
     // Tool guidance — let the model know how to reach the subagents and read files
-    systemPrompt += `\n\nYou have a Task tool that can delegate to specialist subagents on this machine. Use it when the request is best served by Aladdin/signal-filter (signal triage), analyst (technicals), risk-manager, macro-strategist, executor, portfolio-monitor, auditor, investment-banker, research-desk, crypto-sniper, quant-engineer, comms-utility, or workflow-builder. You also have Read/Grep/Glob to read files (flow.db is at ~/flow-data/flow.db; alt-signals scripts are at ~/scripts/alt-signals/). Be tight: cite numbers, route work, return a short verdict.`;
+    systemPrompt += `\n\nYou have a Task tool that can delegate to specialist subagents on this machine. Use it when the request is best served by Aladdin/signal-filter (signal triage), analyst (technicals), risk-manager, macro-strategist, executor, portfolio-monitor, auditor, investment-banker, research-desk, crypto-sniper, quant-engineer, comms-utility, or workflow-builder. You also have Read/Grep/Glob to read files (flow.db is at ~/flow-data/flow.db; alt-signals scripts are at ~/scripts/alt-signals/). Be tight: cite numbers, route work, return a short verdict.
+
+DISCIPLINE: do not pre-emptively read files or list directories unless the user's request actually requires it. If the live context above already answers the question, answer directly. Tool use is for filling gaps, not exploration.`;
+
+    // Persona injection — when a /agent slash-command routed, append the
+    // agent's persona body to the system prompt INSTEAD of using --agent
+    // (which would unlock the agent's full tool grants, including Bash).
+    if (agentSlug) {
+      const persona = loadAgentPersona(agentSlug);
+      if (persona) {
+        systemPrompt += `\n\n=== ACTIVE PERSONA: ${agentSlug} ===\n${persona}\n=== END PERSONA ===\n\nRespond in this persona's voice, discipline, and decision framework. The user invoked you via /${agentSlug}. Stay in role for this entire response.`;
+      }
+    }
+
+    // Vertical injection — orthogonal to the agent persona. Tells the model
+    // what SHAPE the user expects (free-text vs screener table vs chart card).
+    if (vertical && VERTICAL_PROMPTS[vertical]) {
+      systemPrompt += `\n\n${VERTICAL_PROMPTS[vertical]}\n=== END VERTICAL ===`;
+    }
 
     // Structured output cards. When the model emits these fenced blocks, the
     // UI replaces them with React cards inline. Use them sparingly — only when
@@ -607,7 +781,16 @@ When a response NATURALLY fits one of these shapes, emit it as a fenced JSON cod
 {"symbol":"BTC-USD","period":"1mo","interval":"1d","note":"<=60 chars","levels":[{"label":"S1","price":92000},{"label":"R1","price":108000}]}
 \`\`\`
 
-Do NOT emit a card unless explicitly asked or the user's intent obviously matches. Most replies should be plain text.`;
+\`\`\`screener
+{"criteria":"FINRA short>50% AND ADV>500K","universe":"alt_signals_top_24h","results":[{"symbol":"ARTC","note":"64% short, 500K ADV","score":95}],"excluded":"warrants, SPAC units, <100K ADV"}
+\`\`\`
+
+Do NOT emit a card unless explicitly asked or the user's intent obviously matches. Most replies should be plain text.
+
+PRICE DISCIPLINE for trade-frame cards: never invent entry/stop/target. If you have NOT verified a live quote from the LIVE DASHBOARD CONTEXT block or via a tool call, either:
+  (a) emit the card with entry=null, stop=null, target=null, and rationale="price reference needed — verify quote before sending", OR
+  (b) skip the card entirely and describe the setup as prose with relative levels (e.g. "short on bounce to 52-week high, stop above weekly resistance").
+Inventing a plausible-looking price like "$12" because the ticker is in the alt_signals feed is unacceptable — those signals are catalyst-flagged, not priced.`;
 
     const thread_id = thread_id_in || genThreadId();
     const promptForCli = formatHistoryAsPrompt(messages);
@@ -618,6 +801,11 @@ Do NOT emit a card unless explicitly asked or the user's intent obviously matche
         const db = openFlowDb();
         if (!db) return false;
         try {
+          // Idempotent migration: add `vertical` column on first write per process.
+          // SQLite's ADD COLUMN throws if it already exists; we swallow that.
+          try { db.exec(`ALTER TABLE copilot_threads ADD COLUMN vertical TEXT`); }
+          catch { /* column already exists — fine */ }
+
           const fullHistory: ChatMessage[] = [...messages, { role: 'assistant', content: responseText }];
           const existing = db.prepare('SELECT thread_id FROM copilot_threads WHERE thread_id = ?').get(thread_id);
           const title = makeTitle(messages.find((m) => m.role === 'user')?.content || lastUserText);
@@ -625,15 +813,15 @@ Do NOT emit a card unless explicitly asked or the user's intent obviously matche
             db.prepare(`
               UPDATE copilot_threads
               SET updated_at = CURRENT_TIMESTAMP,
-                  messages_json = ?, msg_count = ?, mode = ?, model_last = ?
+                  messages_json = ?, msg_count = ?, mode = ?, model_last = ?, vertical = COALESCE(?, vertical)
               WHERE thread_id = ?
-            `).run(JSON.stringify(fullHistory), fullHistory.length, mode, model, thread_id);
+            `).run(JSON.stringify(fullHistory), fullHistory.length, mode, model, vertical, thread_id);
           } else {
             db.prepare(`
               INSERT INTO copilot_threads
-                (thread_id, title, mode, model_last, msg_count, messages_json)
-              VALUES (?, ?, ?, ?, ?, ?)
-            `).run(thread_id, title, mode, model, fullHistory.length, JSON.stringify(fullHistory));
+                (thread_id, title, mode, model_last, msg_count, messages_json, vertical)
+              VALUES (?, ?, ?, ?, ?, ?, ?)
+            `).run(thread_id, title, mode, model, fullHistory.length, JSON.stringify(fullHistory), vertical);
           }
         } finally {
           db.close();
@@ -654,6 +842,7 @@ Do NOT emit a card unless explicitly asked or the user's intent obviously matche
             mode,
             thread_id,
             agent: agentSlug || null,
+            vertical: vertical || null,
           });
           log.entries = entries;
           log.last_updated = new Date().toISOString();
@@ -669,7 +858,6 @@ Do NOT emit a card unless explicitly asked or the user's intent obviously matche
         prompt: promptForCli,
         systemPrompt,
         model,
-        agentSlug,
         enableTools: true,
       }, async ({ fullText, usage, model: finalModel }) => {
         await persistThread(fullText, usage);
@@ -685,12 +873,13 @@ Do NOT emit a card unless explicitly asked or the user's intent obviously matche
         'Connection': 'keep-alive',
         'X-Thread-Id': thread_id,
         'X-Agent': agentSlug || '',
+        'X-Vertical': vertical || '',
       });
       // Prepend an SSE event with thread metadata before the model output
       const prefixStream = new ReadableStream<Uint8Array>({
         start(controller) {
           const enc = new TextEncoder();
-          controller.enqueue(enc.encode(sse({ type: 'thread', thread_id, agent: agentSlug })));
+          controller.enqueue(enc.encode(sse({ type: 'thread', thread_id, agent: agentSlug, vertical })));
           controller.close();
         },
       });
@@ -722,7 +911,6 @@ Do NOT emit a card unless explicitly asked or the user's intent obviously matche
         prompt: promptForCli,
         systemPrompt,
         model,
-        agentSlug,
         enableTools: true,
         timeoutMs: 180000,
       });
@@ -750,6 +938,8 @@ Do NOT emit a card unless explicitly asked or the user's intent obviously matche
       response: responseText,
       model,
       mode,
+      vertical,
+      agent: agentSlug,
       thread_id,
       persisted,
       tokens: { input: data.usage?.input_tokens || 0, output: data.usage?.output_tokens || 0 },

@@ -26,8 +26,13 @@ export async function GET(req: Request) {
     return NextResponse.json({ threads: [], error: 'flow.db not available' }, { status: 200 });
   }
   try {
+    // Ensure the vertical column exists on older DBs so the SELECT below
+    // doesn't error against a fresh-schema flow.db.
+    try { db.exec(`ALTER TABLE copilot_threads ADD COLUMN vertical TEXT`); }
+    catch { /* column already exists — fine */ }
+
     const rows = db.prepare(`
-      SELECT thread_id, title, mode, model_last, msg_count, created_at, updated_at
+      SELECT thread_id, title, mode, model_last, msg_count, created_at, updated_at, vertical
       FROM copilot_threads
       ORDER BY updated_at DESC
       LIMIT ?

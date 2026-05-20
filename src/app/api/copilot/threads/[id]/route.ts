@@ -26,8 +26,12 @@ export async function GET(_req: Request, ctx: Ctx) {
   if (!db) return NextResponse.json({ error: 'flow.db not available' }, { status: 500 });
 
   try {
+    // Idempotent column ensure — protects older flow.db files.
+    try { db.exec(`ALTER TABLE copilot_threads ADD COLUMN vertical TEXT`); }
+    catch { /* already exists */ }
+
     const row = db.prepare(`
-      SELECT thread_id, title, mode, model_last, msg_count, created_at, updated_at, messages_json
+      SELECT thread_id, title, mode, model_last, msg_count, created_at, updated_at, vertical, messages_json
       FROM copilot_threads
       WHERE thread_id = ?
     `).get(id) as Record<string, unknown> | undefined;
@@ -45,6 +49,7 @@ export async function GET(_req: Request, ctx: Ctx) {
       msg_count: row.msg_count,
       created_at: row.created_at,
       updated_at: row.updated_at,
+      vertical: row.vertical,
       messages,
     });
   } finally {
