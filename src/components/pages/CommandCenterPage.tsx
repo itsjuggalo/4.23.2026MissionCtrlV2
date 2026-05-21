@@ -152,7 +152,9 @@ export function CommandCenterPage() {
     return () => clearInterval(iv);
   }, [watchlist, portfolio]);
 
-  // Arrow-key navigation for Market News ticker (when focused)
+  // Arrow-key navigation for Market News ticker (when focused). On mobile the
+  // user navigates by swipe (handled in the ticker JSX via onTouchStart/End)
+  // or by tapping the chevron buttons; arrow keys remain as a desktop convenience.
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
       const ticker = newsTickerRef.current;
@@ -161,12 +163,41 @@ export function CommandCenterPage() {
       if (!focused) return;
       const newsLen = (dashData?.news?.length || 0);
       if (newsLen === 0) return;
-      if (e.key === 'ArrowRight') { e.preventDefault(); setNewsIdx(i => Math.min(i + 1, newsLen - 1)); }
-      else if (e.key === 'ArrowLeft') { e.preventDefault(); setNewsIdx(i => Math.max(i - 1, 0)); }
+      if (e.key === 'ArrowRight') { e.preventDefault(); setNewsIdx(i => (i + 1) % newsLen); }
+      else if (e.key === 'ArrowLeft') { e.preventDefault(); setNewsIdx(i => (i - 1 + newsLen) % newsLen); }
     };
     window.addEventListener('keydown', onKey);
     return () => window.removeEventListener('keydown', onKey);
   }, [dashData]);
+
+  // Auto-cycle news every 8s. Pause-until is kept in a ref so the interval
+  // is NOT torn down on every hover/touch (which was making the timer
+  // perpetually restart). A separate display state drives the paused badge.
+  const newsPausedUntilRef = useRef(0);
+  const newsSwipedAtRef = useRef(0);
+  const newsTouchStartRef = useRef({ x: 0, y: 0 });
+  const [newsPausedDisplay, setNewsPausedDisplay] = useState(false);
+
+  const pauseNews = (ms = 20000) => {
+    newsPausedUntilRef.current = Date.now() + ms;
+    setNewsPausedDisplay(true);
+  };
+
+  useEffect(() => {
+    const newsLen = (dashData?.news?.length || 0);
+    if (newsLen <= 1) return;
+    const id = setInterval(() => {
+      if (Date.now() < newsPausedUntilRef.current) {
+        if (!newsPausedDisplay) setNewsPausedDisplay(true);
+        return;
+      }
+      if (newsPausedDisplay) setNewsPausedDisplay(false);
+      setNewsIdx(i => (i + 1) % newsLen);
+    }, 8000);
+    return () => clearInterval(id);
+    // Intentionally only re-init when the news count changes, not on every pause.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [dashData?.news?.length]);
 
   // Load watchlist from localStorage on mount
   useEffect(() => {
@@ -423,21 +454,123 @@ export function CommandCenterPage() {
         </div>
       </div>
 
-      {/* MARKET NEWS - full-width keyboard-navigable ticker */}
-      <div className="cc" tabIndex={0} ref={newsTickerRef} style={{ padding: '12px 18px', marginBottom: '12px', cursor: 'pointer', outline: 'none' }} onClick={() => newsTickerRef.current?.focus()}>
+      {/* MARKET NEWS — auto-cycling ticker with swipe + chevrons.
+          - Rotates every 8s (paused 20s after any user interaction)
+          - Touch swipe left/right navigates prev/next (horizontal-dominant only)
+          - Tap chevrons or arrow keys on desktop
+          - Tap the headline opens the article (suppressed if it was a swipe)
+          - The ‹ / › chevrons and the whitespace around them are all swipe area.
+          - touchAction: pan-y so vertical scroll still works while we own horizontal.
+          - Only the headline span is the link, so touches on time / source / chrome
+            are pure swipe targets (no accidental link opens). */}
+      <div
+        className="cc"
+        tabIndex={0}
+        ref={newsTickerRef}
+        style={{
+          padding: '12px 18px', marginBottom: '12px', outline: 'none',
+          position: 'relative', touchAction: 'pan-y',
+        }}
+        onMouseEnter={() => pauseNews()}
+        onTouchStart={(e) => {
+          newsTouchStartRef.current = {
+            x: e.touches[0]?.clientX ?? 0,
+            y: e.touches[0]?.clientY ?? 0,
+          };
+          pauseNews();
+        }}
+        onTouchEnd={(e) => {
+          const dx = (e.changedTouches[0]?.clientX ?? 0) - newsTouchStartRef.current.x;
+          const dy = (e.changedTouches[0]?.clientY ?? 0) - newsTouchStartRef.current.y;
+          const newsLen = news.length;
+          // Horizontal-dominant swipe only, so vertical page-scroll still works.
+          if (newsLen > 1 && Math.abs(dx) > 35 && Math.abs(dx) > Math.abs(dy)) {
+            newsSwipedAtRef.current = Date.now();
+            if (dx < 0) setNewsIdx(i => (i + 1) % newsLen);
+            else        setNewsIdx(i => (i - 1 + newsLen) % newsLen);
+          }
+        }}
+      >
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
           <div className="lbl">MARKET NEWS</div>
-          <div style={{ fontSize: 'var(--mc-font-label)', color: '#455a64', fontFamily: 'var(--font-mc-mono)' }}>
-            {'←'} / {'→'} arrow keys · {newsIdx + 1} of {news.length || 0}
+          <div style={{ fontSize: 'var(--mc-font-label)', color: '#455a64', fontFamily: 'var(--font-mc-mono)', display: 'flex', alignItems: 'center', gap: 8 }}>
+            <span>{news.length > 0 ? `${newsIdx + 1} / ${news.length}` : '0 / 0'}</span>
+            <span style={{ color: newsPausedDisplay ? '#ff9800' : '#66bb6a' }}>
+              {newsPausedDisplay ? '❚❚ paused' : '▶ auto'}
+            </span>
           </div>
         </div>
         {news.length > 0 && news[newsIdx] ? (
-          <a href={news[newsIdx]?.url} target="_blank" rel="noopener noreferrer" style={{ display: 'flex', gap: '12px', alignItems: 'center', textDecoration: 'none', color: '#e0e0e0' }}>
-            <span style={{ minWidth: '50px', color: '#4fc3f7', fontFamily: 'var(--font-mc-mono)', fontWeight: 600, fontSize: 'var(--mc-font-label)' }}>{news[newsIdx]?.time || ''}</span>
-            <span style={{ flex: 1, fontSize: 'var(--mc-font-md)', fontWeight: 500, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{news[newsIdx]?.headline || ''}</span>
-            <span style={{ minWidth: '70px', textAlign: 'right', color: '#607d8b', fontSize: 'var(--mc-font-label)', fontFamily: 'var(--font-mc-mono)' }}>{news[newsIdx]?.source || ''}</span>
-          </a>
+          <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+            <button
+              type="button"
+              aria-label="Previous story"
+              onClick={(e) => {
+                e.stopPropagation();
+                pauseNews();
+                const newsLen = news.length;
+                if (newsLen > 1) setNewsIdx(i => (i - 1 + newsLen) % newsLen);
+              }}
+              style={{
+                flexShrink: 0, width: 36, height: 36, borderRadius: 8,
+                background: '#0a1929', border: '1px solid #1a3a4a',
+                color: '#4fc3f7', cursor: 'pointer',
+                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                fontSize: 20, fontWeight: 700, lineHeight: 1,
+              }}
+            >‹</button>
+            <div style={{ flex: 1, minWidth: 0, display: 'flex', gap: 12, alignItems: 'center' }}>
+              <span style={{ minWidth: 50, color: '#4fc3f7', fontFamily: 'var(--font-mc-mono)', fontWeight: 600, fontSize: 'var(--mc-font-label)', flexShrink: 0 }}>{news[newsIdx]?.time || ''}</span>
+              {/* Only the headline TEXT is the link, so touches on time/source
+                  spans are pure swipe area and don't open the article. */}
+              <a
+                href={news[newsIdx]?.url}
+                target="_blank"
+                rel="noopener noreferrer"
+                onClick={(e) => {
+                  // Suppress the article-open when the tap was really a swipe.
+                  if (Date.now() - newsSwipedAtRef.current < 350) { e.preventDefault(); return; }
+                }}
+                style={{ flex: 1, minWidth: 0, fontSize: 'var(--mc-font-md)', fontWeight: 500, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', color: '#e0e0e0', textDecoration: 'none' }}
+              >{news[newsIdx]?.headline || ''}</a>
+              <span style={{ minWidth: 70, textAlign: 'right', color: '#607d8b', fontSize: 'var(--mc-font-label)', fontFamily: 'var(--font-mc-mono)', flexShrink: 0 }}>{news[newsIdx]?.source || ''}</span>
+            </div>
+            <button
+              type="button"
+              aria-label="Next story"
+              onClick={(e) => {
+                e.stopPropagation();
+                pauseNews();
+                const newsLen = news.length;
+                if (newsLen > 1) setNewsIdx(i => (i + 1) % newsLen);
+              }}
+              style={{
+                flexShrink: 0, width: 36, height: 36, borderRadius: 8,
+                background: '#0a1929', border: '1px solid #1a3a4a',
+                color: '#4fc3f7', cursor: 'pointer',
+                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                fontSize: 20, fontWeight: 700, lineHeight: 1,
+              }}
+            >›</button>
+          </div>
         ) : <div style={{ color: '#455a64', fontSize: 'var(--mc-font-label)', textAlign: 'center', padding: '8px' }}>No news available</div>}
+
+        {/* Dot indicators — up to 12, current highlighted in cyan */}
+        {news.length > 1 && (
+          <div style={{ display: 'flex', justifyContent: 'center', gap: 5, marginTop: 8 }}>
+            {Array.from({ length: Math.min(news.length, 12) }).map((_, i) => {
+              const dotForIdx = Math.floor((newsIdx / news.length) * Math.min(news.length, 12));
+              return (
+                <div key={i} style={{
+                  width: i === dotForIdx ? 18 : 6, height: 6,
+                  borderRadius: 3,
+                  background: i === dotForIdx ? '#4fc3f7' : '#1f2a36',
+                  transition: 'width 0.2s ease',
+                }} />
+              );
+            })}
+          </div>
+        )}
       </div>
 
       {/* METRIC CARDS - 5 tiles with redesigned SuperTrend MTF + Regime Tradeability */}
