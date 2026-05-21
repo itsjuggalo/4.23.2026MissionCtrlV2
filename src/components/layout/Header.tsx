@@ -1,6 +1,7 @@
 'use client';
 import { useLiveStream } from '@/hooks/useLiveStream';
 import { LiveIndicator } from '@/components/ui/LiveIndicator';
+import { useViewMode } from '@/lib/useViewMode';
 import { useEffect, useState } from 'react';
 
 const SUBTITLES: Record<string, string> = {
@@ -51,6 +52,8 @@ function Pill({ label, value, color }: { label: string; value: string; color?: s
 export function Header({
  title, onMenuClick }: HeaderProps) {
   const live = useLiveStream(true);
+  const [viewMode] = useViewMode();
+  const isMobile = viewMode === 'mobile';
   const [time, setTime] = useState('');
   const [status, setStatus] = useState<any>(null);
   useEffect(() => {
@@ -145,18 +148,25 @@ export function Header({
         )}
       </div>
 
-      {/* Center zone — Alpaca account info, on the header line */}
-      <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexShrink: 0, fontFamily: 'ui-monospace,monospace', overflowX: 'auto' }}>
+      {/* Center zone — Alpaca account info. Mobile collapses to Total + P&L
+          only; the remaining detail (Boba/Jazzy/Pos/W/L) is hidden so the
+          header fits on a 390px iPhone without horizontal scroll. */}
+      <div style={{ display: 'flex', alignItems: 'center', gap: isMobile ? 6 : 8, flexShrink: 0, fontFamily: 'ui-monospace,monospace', overflowX: 'auto' }}>
         <Pill label="Total" value={fmt(totalEq)} />
         <Pill label="P&L" value={`${totalPnL >= 0 ? '+' : ''}$${totalPnL.toFixed(2)}`} color={pnlColor} />
-        <Pill label="Boba" value={fmt(bobaEq || undefined)} />
-        <Pill label="Jazzy" value={fmt(jazzyEq || undefined)} />
-        <Pill label="Pos" value={String(posCount)} />
-        <Pill label="W/L" value={winners + '/' + losers} color="#8a99a8" />
+        {!isMobile && (
+          <>
+            <Pill label="Boba" value={fmt(bobaEq || undefined)} />
+            <Pill label="Jazzy" value={fmt(jazzyEq || undefined)} />
+            <Pill label="Pos" value={String(posCount)} />
+            <Pill label="W/L" value={winners + '/' + losers} color="#8a99a8" />
+          </>
+        )}
       </div>
 
-      {/* Right zone — live indicator + clock */}
-      <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'flex-end', gap: 10 }}>
+      {/* Right zone — live indicator + clock. Mobile drops the clock and
+          shows just a compact LIVE dot. */}
+      <div style={{ flex: isMobile ? 0 : 1, display: 'flex', alignItems: 'center', justifyContent: 'flex-end', gap: isMobile ? 4 : 10 }}>
         <span
           style={{
             display: 'inline-block',
@@ -168,26 +178,30 @@ export function Header({
             animation: 'pulse 2s infinite',
           }}
         />
-        <span
-          style={{
-            fontSize: 12,
-            fontFamily: "'JetBrains Mono', 'SF Mono', 'Fira Code', monospace",
-            color: '#66bb6a',
-            fontWeight: 600,
-            letterSpacing: '1px',
-          }}
-        >
-          LIVE
-        </span>
-        <span
-          style={{
-            fontSize: 13,
-            fontFamily: "'JetBrains Mono', 'SF Mono', 'Fira Code', monospace",
-            color: '#455a64',
-          }}
-        >
-          {time}
-        </span>
+        {!isMobile && (
+          <>
+            <span
+              style={{
+                fontSize: 12,
+                fontFamily: "'JetBrains Mono', 'SF Mono', 'Fira Code', monospace",
+                color: '#66bb6a',
+                fontWeight: 600,
+                letterSpacing: '1px',
+              }}
+            >
+              LIVE
+            </span>
+            <span
+              style={{
+                fontSize: 13,
+                fontFamily: "'JetBrains Mono', 'SF Mono', 'Fira Code', monospace",
+                color: '#455a64',
+              }}
+            >
+              {time}
+            </span>
+          </>
+        )}
       </div>
       <style>{`
         @keyframes pulse {

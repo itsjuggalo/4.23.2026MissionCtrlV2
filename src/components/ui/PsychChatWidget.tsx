@@ -1,5 +1,6 @@
 'use client';
 import { useState, useRef, useEffect } from 'react';
+import { useViewMode } from '@/lib/useViewMode';
 
 const PSYCH_SYSTEM_PROMPT = `You are PsychTechologist, the behavioral finance and trading psychology specialist on an elite trading team modeled after AQR Capital's behavioral finance research.
 
@@ -18,6 +19,8 @@ interface Message {
 
 export function PsychChatWidget() {
   const [isOpen, setIsOpen] = useState(false);
+  const [viewMode] = useViewMode();
+  const isMobile = viewMode === 'mobile';
   const [messages, setMessages] = useState<Message[]>([
     { role: 'alert', type: 'manipulation', icon: '🎭', message: 'Detected potential stop hunt on ETH/USDT. Price wicked below support but recovered. Thesis intact.', time: '2m ago' },
     { role: 'alert', type: 'confidence', icon: '📊', message: 'BTC position tracking Dec 2023 post-Fed pattern. Historical win rate: 73% within 48hrs.', time: '18m ago' },
@@ -68,8 +71,25 @@ export function PsychChatWidget() {
         .psych-scroll::-webkit-scrollbar { width: 3px; } .psych-scroll::-webkit-scrollbar-track { background: transparent; } .psych-scroll::-webkit-scrollbar-thumb { background: #1a3a4a; border-radius: 3px; }
       `}</style>
 
+      {/* Mobile-only backdrop, dismisses on tap. Desktop has none. */}
+      {isOpen && isMobile && (
+        <div onClick={() => setIsOpen(false)} style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.5)', zIndex: 9998 }} />
+      )}
+
       {isOpen && (
-        <div style={{ position: 'fixed', bottom: 88, right: 24, width: 370, height: 520, background: '#0d1117', borderRadius: 12, border: '1px solid #1a3a4a', boxShadow: '0 20px 60px rgba(0,0,0,0.5)', display: 'flex', flexDirection: 'column', overflow: 'hidden', animation: 'psychSlideUp 0.25s ease-out', zIndex: 9999 }}>
+        <div style={{
+          position: 'fixed',
+          // Desktop: floating 370×520 panel anchored bottom-right.
+          // Mobile: full-width bottom sheet so it doesn't clip on a 390px viewport.
+          ...(isMobile
+            ? { left: 8, right: 8, bottom: 88, height: 'min(70vh, 560px)' }
+            : { bottom: 88, right: 24, width: 370, height: 520 }
+          ),
+          background: '#0d1117', borderRadius: 12, border: '1px solid #1a3a4a',
+          boxShadow: '0 20px 60px rgba(0,0,0,0.5)',
+          display: 'flex', flexDirection: 'column', overflow: 'hidden',
+          animation: 'psychSlideUp 0.25s ease-out', zIndex: 9999,
+        }}>
           {/* Header */}
           <div style={{ padding: '14px 16px', background: '#111118', borderBottom: '1px solid #1a3a4a', display: 'flex', alignItems: 'center', gap: 10, flexShrink: 0 }}>
             <div style={{ position: 'relative' }}>

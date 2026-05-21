@@ -162,3 +162,36 @@ body.view-mobile .mc-copilot-conversation pre {
 body.view-mobile .mc-copilot-desktop-only {
   display: none !important;
 }
+
+/* ============================================================
+   Option Signals app design tokens
+   Used by OptionsPageMobile and any future mobile page that
+   wants to mirror the Option Signals Android app's visual
+   language (pure-black OLED background, vivid greens/reds,
+   dense card layouts). Reference screenshots at
+   ~/Pictures/options-app-screens/.
+   ============================================================ */
+:root {
+  --opt-app-bg: #000000;
+  --opt-app-card: #15171c;
+  --opt-app-card-elev: #1a1d24;
+  --opt-app-border: #1f2329;
+  --opt-app-border-dim: #2a2f37;
+  --opt-app-green: #10C77A;
+  --opt-app-green-dim: #10C77A33;
+  --opt-app-red: #F2435F;
+  --opt-app-red-dim: #F2435F33;
+  --opt-app-cyan: #4FC3F7;
+  --opt-app-amber: #FFB300;
+  --opt-app-pink: #E040FB;
+  --opt-app-yellow: #FFD600;
+  --opt-app-text: #FFFFFF;
+  --opt-app-text-muted: #8A99A8;
+  --opt-app-text-dim: #455A64;
+}
+
+/* iPhone safe area: bottom tab bar in OptionsPageMobile floats above
+   the home-indicator zone. */
+.opt-bottom-tab-bar {
+  padding-bottom: calc(10px + env(safe-area-inset-bottom, 0px)) !important;
+}

@@ -41,6 +41,7 @@ import { SkillsPage } from "../pages/SkillsPage";
 import { TelegramPage } from '@/components/pages/TelegramPage';
 import { OptionsPage } from '@/components/pages/OptionsPage';
 import { OptionsWatcherPage } from '@/components/pages/OptionsWatcherPage';
+import { OptionsPageMobile } from '@/components/pages/OptionsPageMobile';
 import { SessionViewerPage } from '@/components/pages/SessionViewerPage';
 import { PsychChatWidget } from '../ui/PsychChatWidget';
 
@@ -208,6 +209,36 @@ export function AppShellClient() {
       pendingApprovalsCount={pendingApprovalsCount}
     />
   );
+
+  // Mobile standalone branch: when on Options/OptionsWatcher, render the
+  // Option Signals app-style mobile page full-screen (no Header, no
+  // MissionMetrics, no PsychChatWidget). The sidebar still works via the
+  // off-canvas drawer triggered by the hamburger button in OptionsPageMobile.
+  if (isMobile && (activePage === 'Options' || activePage === 'OptionsWatcher')) {
+    return (
+      <>
+        {mobileOpen && (
+          <div
+            onClick={() => setMobileOpen(false)}
+            style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.6)', zIndex: 200 }}
+          />
+        )}
+        <div
+          style={{
+            position: 'fixed', top: 0, left: 0, bottom: 0, zIndex: 201, display: 'flex',
+            transform: mobileOpen ? 'translateX(0)' : 'translateX(-100%)',
+            transition: 'transform 0.2s ease',
+          }}
+        >
+          {sidebar}
+        </div>
+        <OptionsPageMobile
+          onMenuClick={() => setMobileOpen(true)}
+          initialTab={activePage === 'OptionsWatcher' ? 'chain' : 'swings'}
+        />
+      </>
+    );
+  }
 
   return (
     <div className="flex flex-col h-screen bg-slate-950 text-slate-100">
