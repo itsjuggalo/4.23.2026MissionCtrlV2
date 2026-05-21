@@ -24,6 +24,10 @@ const orbitron = Orbitron({
 export const viewport: Viewport = {
   width: 'device-width',
   initialScale: 1,
+  // viewportFit: 'cover' lets pages reserve their own safe-area padding via
+  // env(safe-area-inset-top/bottom). Required for the mobile Options page so
+  // its top bar doesn't sit underneath the Android status bar / iPhone notch.
+  viewportFit: 'cover',
 };
 
 export const metadata: Metadata = {

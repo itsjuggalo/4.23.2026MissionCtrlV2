@@ -648,8 +648,13 @@ const ChainView: React.FC = () => {
 const TopBar: React.FC<{ title: string; onMenuClick?: () => void; rightExtras?: React.ReactNode }> = ({ title, onMenuClick, rightExtras }) => (
   <div style={{
     display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-    padding: '14px 16px 10px', background: OPT.bg,
+    // Reserve the system status-bar height at the top (Android clock /
+    // signal / battery, iPhone notch). The 14px floor is what we use
+    // when env() returns 0 (regular browser chrome).
+    padding: 'calc(env(safe-area-inset-top, 0px) + 14px) 16px 12px',
+    background: OPT.bg,
     borderBottom: `1px solid ${OPT.borderDim}`,
+    flexShrink: 0,
   }}>
     <button onClick={onMenuClick} aria-label="Open menu" style={{
       background: 'transparent', border: 'none', color: OPT.green, cursor: 'pointer',

@@ -81,9 +81,30 @@ type PageName =
   | 'Skills'
   | 'Landing';
 
+// Centralized list of valid pages — referenced by both the initial-state
+// resolver and the searchParams useEffect so they can't drift.
+const VALID_PAGES: PageName[] = [
+  'Dashboard', 'Signals', 'Telegram', 'Scanner', 'Tasks', 'Sessions', 'Options', 'OptionsWatcher', 'Agents',
+  'Approvals', 'Calendar', 'Projects', 'Memory', 'Memory Graph',
+  'Office', 'Docs', 'Wallets', 'Trades', 'Journal', 'Activity', 'Risk', 'TV Chart', 'PowerTrader',
+  'Command Center', 'Performance', 'Regime', 'Usage', 'Landing', 'Congress', 'LLM Portfolio', 'Skills',
+];
+
+function resolvePageFromParam(page: string | null): PageName {
+  if (!page) return 'Command Center';
+  // OptionsWatcher is the only multi-cap page id — handle it explicitly so
+  // the lowercased URL form ('optionswatcher') resolves correctly.
+  if (page.toLowerCase() === 'optionswatcher') return 'OptionsWatcher';
+  const pn = (page.charAt(0).toUpperCase() + page.slice(1).toLowerCase()) as PageName;
+  return VALID_PAGES.includes(pn) ? pn : 'Command Center';
+}
+
 export function AppShellClient() {
   const searchParams = useSearchParams();
-  const [activePage, setActivePage] = useState<PageName>('Command Center');
+  // Initialize activePage from URL on the very first render (not after a
+  // useEffect tick) so the mobile-Options branch below can fire on first
+  // paint — otherwise there's a flash of desktop chrome before hydration.
+  const [activePage, setActivePage] = useState<PageName>(() => resolvePageFromParam(searchParams.get('page')));
   const [isCollapsed, setIsCollapsed] = useState(false);
   const [approvals, setApprovals] = useState<Approval[]>(initialApprovals);
   const [mobileOpen, setMobileOpen] = useState(false);
@@ -98,21 +119,11 @@ export function AppShellClient() {
   const newSignalsCount = signals.filter((s) => s.status === 'new').length;
   const pendingApprovalsCount = approvals.filter((a) => a.status === 'pending').length;
 
-  // Handle query parameter for page navigation
+  // Handle query parameter for page navigation. Initial value is already set
+  // by useState's resolver above; this hook just keeps activePage in sync
+  // when the URL changes after first render (e.g. on back/forward navigation).
   useEffect(() => {
-    const page = searchParams.get('page');
-    if (page) {
-      const pageName = (page.charAt(0).toUpperCase() + page.slice(1).toLowerCase()) as PageName;
-      const validPages: PageName[] = [
-        'Dashboard', 'Signals', 'Telegram', 'Scanner', 'Tasks', 'Sessions', 'Options', 'OptionsWatcher', 'Agents', 
-        'Approvals', 'Calendar', 'Projects', 'Memory', 'Memory Graph', 
-        'Office', 'Docs', 'Wallets', 'Trades', 'Journal', 'Activity', 'Risk', 'TV Chart', 'PowerTrader',
-        'Command Center', 'Performance', 'Regime', 'Usage', 'Landing', 'Congress', 'LLM Portfolio', 'Skills'
-      ];
-      if (validPages.includes(pageName)) {
-        setActivePage(pageName);
-      }
-    }
+    setActivePage(resolvePageFromParam(searchParams.get('page')));
   }, [searchParams]);
 
   function handleApprovalUpdate(id: number, status: 'approved' | 'rejected') {
