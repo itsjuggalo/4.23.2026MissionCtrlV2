@@ -1,6 +1,6 @@
 'use client';
 import { StockDetailDrawer } from '@/components/drawers/StockDetailDrawer';
-import { useEffect, useState, useRef } from 'react';
+import { useEffect, useState, useRef, useMemo } from 'react';
 
 
 // Parse OCC option symbol → "TICKER M/D/YY $STRIKEC/P". Returns symbol unchanged if not OCC.
@@ -183,8 +183,31 @@ export function CommandCenterPage() {
     setNewsPausedDisplay(true);
   };
 
+  // Derived news list. Mirrors the fallback used by the render block below:
+  // when the directives generator leaves `dashData.news` empty, aggregate per-
+  // ticker intel news so the ticker still has something to cycle through.
+  // The auto-cycle useEffect below depends on THIS length, not the raw
+  // dashData length — otherwise it sees 0 articles, early-returns, and the
+  // interval is never set up (which was the bug).
+  const news = useMemo(() => {
+    const top = dashData?.news || [];
+    if (top.length > 0) return top;
+    const intel = dashData?.intel || {};
+    const seen = new Set<string>();
+    const merged: any[] = [];
+    for (const sym of Object.keys(intel)) {
+      for (const n of (intel[sym]?.news || [])) {
+        const key = String(n?.headline || '').trim();
+        if (!key || seen.has(key)) continue;
+        seen.add(key);
+        merged.push(n);
+      }
+    }
+    return merged.sort((a, b) => String(b?.time || '').localeCompare(String(a?.time || '')));
+  }, [dashData]);
+
   useEffect(() => {
-    const newsLen = (dashData?.news?.length || 0);
+    const newsLen = news.length;
     if (newsLen <= 1) return;
     const id = setInterval(() => {
       if (Date.now() < newsPausedUntilRef.current) {
@@ -197,7 +220,7 @@ export function CommandCenterPage() {
     return () => clearInterval(id);
     // Intentionally only re-init when the news count changes, not on every pause.
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [dashData?.news?.length]);
+  }, [news.length]);
 
   // Load watchlist from localStorage on mount
   useEffect(() => {
@@ -355,23 +378,8 @@ export function CommandCenterPage() {
   })();
   const quotes = dashData?.quotes || {};
   const intel = dashData?.intel || {};
-  // Top-level news feed. When the generator leaves it empty, fall back to
-  // aggregating per-ticker intel news so the Market News block still populates.
-  const news = (() => {
-    const top = dashData?.news || [];
-    if (top.length > 0) return top;
-    const seen = new Set<string>();
-    const merged: any[] = [];
-    for (const sym of Object.keys(intel)) {
-      for (const n of (intel[sym]?.news || [])) {
-        const key = String(n?.headline || '').trim();
-        if (!key || seen.has(key)) continue;
-        seen.add(key);
-        merged.push(n);
-      }
-    }
-    return merged.sort((a, b) => String(b?.time || '').localeCompare(String(a?.time || '')));
-  })();
+  // `news` is computed once via useMemo at the top of the component so the
+  // auto-cycle useEffect can depend on its length. See the useMemo above.
 
   // Multi-timeframe regime data for SuperTrend MTF Quorum tile
   const tfData = regime?.timeframes || {};
