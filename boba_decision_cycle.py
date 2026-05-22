@@ -27,6 +27,31 @@ Safety:
   - Max $3000 total risk per cycle (hard cap)
 """
 import argparse
+
+# === Lessons learned from past losses (auto-injected by loss-feedback cron) ===
+def _load_lessons():
+    from pathlib import Path
+    p = Path("/home/ubuntu/.openclaw/workspace/memory/boba_lessons.md")
+    if not p.exists(): return ""
+    lines = [L for L in p.read_text().splitlines() if L.startswith("- [")][-15:]
+    if not lines: return ""
+    return "\n\nRECENT LESSONS LEARNED FROM LOSING TRADES (read these BEFORE picking; do not repeat the same mistake):\n" + "\n".join(lines) + "\n"
+
+
+def _load_active_position_rules():
+    """Load explicit per-position exit triggers maintained at
+    ~/.openclaw/workspace/memory/active_position_rules.md.
+    Format: free-form markdown. Returned text is prepended to the cycle prompt."""
+    from pathlib import Path
+    p = Path("/home/ubuntu/.openclaw/workspace/memory/active_position_rules.md")
+    if not p.exists():
+        return ""
+    txt = p.read_text().strip()
+    if not txt:
+        return ""
+    return "\n\n# ACTIVE POSITION EXIT RULES (apply BEFORE picking new contracts)\n" + txt + "\n\n"
+
+
 import json
 import os
 import subprocess
@@ -72,6 +97,25 @@ except Exception as _e:
     def load_relevant_skills(*a, **kw):
         return ""
 from anthropic_tracker import log_call as _log_anthropic_call
+try:
+    from signal_scorer import score_signal, render_breakdown_line
+except Exception as _ss_e:
+    score_signal = None
+    render_breakdown_line = None
+    print(f"[signal-scorer] import failed: {_ss_e}", flush=True)
+
+try:
+    from peer_picks import peer_picks_block
+except Exception as _peer_e:
+    peer_picks_block = None
+    print(f"[peer-picks] import failed: {_peer_e}", flush=True)
+
+try:
+    from pdt_guard import apply_pdt_guard
+except Exception as _pdt_e:
+    apply_pdt_guard = None
+    print(f"[pdt-guard] import failed: {_pdt_e}", flush=True)
+
 import time as _time_tracker
 try:
     from tradier_client import fetch_option_quote as _tradier_quote
@@ -774,14 +818,34 @@ def build_boba_prompt(account, positions, shortlist_with_kronos, remaining_budge
         for p in positions
     ]) or "  (none open)"
 
+    # === Signal scoring pre-pass: compute confidence + drop TRASH-band signals ===
+    _scored_shortlist = []
+    if score_signal:
+        for _sid, _s, _k in shortlist_with_kronos:
+            try:
+                _conf = score_signal(_s, kronos=_k)
+                _s["confidence"] = _conf
+                if _conf["band"] == "TRASH":
+                    print(f"[signal-scorer] DROP TRASH: {_s.get('ticker')} ${_s.get('strike')}{(_s.get('option_type','') or '')[:1]} {_s.get('expiry')} | {render_breakdown_line(_conf)}", flush=True)
+                    continue
+            except Exception as _se:
+                print(f"[signal-scorer] error scoring {_s.get('ticker')}: {_se}", flush=True)
+            _scored_shortlist.append((_sid, _s, _k))
+        # Sort survivors by confidence score DESC
+        _scored_shortlist.sort(key=lambda _x: -(_x[1].get("confidence", {}).get("score", 0)))
+    else:
+        _scored_shortlist = list(shortlist_with_kronos)
+
     shortlist_text = ""
-    for i, (sid, s, k) in enumerate(shortlist_with_kronos, 1):
+    for i, (sid, s, k) in enumerate(_scored_shortlist, 1):
         shortlist_text += f"\n\n--- CANDIDATE {i} ---\n"
         shortlist_text += f"Ticker: {s.get('ticker')}\n"
         shortlist_text += f"Contract: ${s.get('strike')} {s.get('option_type')} exp {s.get('expiry')} ({s.get('dte')} DTE)\n"
         shortlist_text += f"Tier: {s.get('tier','')} | Flow: {s.get('flow_value_raw')} | Vol/OI: {s.get('vol_oi_ratio')}x\n"
         shortlist_text += f"Sweeps/Blocks: {s.get('sweeps')}/{s.get('blocks')} | Spot: ${s.get('spot')}\n"
         shortlist_text += f"Score: {s.get('score')}/100 ({s.get('grade')})\n"
+        if render_breakdown_line and s.get('confidence'):
+            shortlist_text += f"Confidence: {render_breakdown_line(s['confidence'])}\n"
 
         # Live Tradier quote (if available) — gives LLM real bid/ask/IV/greeks
         _lq = fetch_live_option_quote(s.get("ticker"), s.get("strike"),
@@ -822,16 +886,33 @@ def build_boba_prompt(account, positions, shortlist_with_kronos, remaining_budge
                 shortlist_text += f"  → Kronos CONFLICTS with option thesis ❌\n"
 
     firebase_signals_text = firebase_signals.format_for_prompt(firebase_signals.load_signals(), max_show=20)
+    firebase_notifications_text = firebase_signals.format_notifications_for_prompt(firebase_signals.load_notifications(), max_show=15)
+    firebase_flow_alerts_text = firebase_signals.format_flow_alerts_for_prompt(firebase_signals.load_flow_alerts(), max_show=15)
     best_options_text = load_best_options(max_show=15, min_premium=1_000_000) or ""
     ticker_rollup_text = load_ticker_rollup(min_total=10_000_000, max_show=10) or ""
     platinum_flow_text = load_platinum_flow(max_show=5) or ""
+
+    # mc-kb tier enhancements (platinum mandate / confluence / fresh-5min / clusters / sector mix)
+    bfe_enhancements = ""
+    try:
+        import boba_flow_enhancements as _bfe
+        _tickers = []
+        try:
+            _tickers = [s.get("ticker", "") for _, s, _ in shortlist_with_kronos if s and s.get("ticker")]
+        except Exception:
+            _tickers = []
+        _platinum_n = platinum_flow_text.count("\n  💎 $") if platinum_flow_text else 0
+        bfe_enhancements = _bfe.assemble_enhancements(_tickers, platinum_count=_platinum_n)
+    except Exception as _bfe_e:
+        print(f"[bfe] enhancements failed: {_bfe_e!r}", flush=True)
     multi_day_repeaters_text = load_multi_day_repeaters() or ""
     market_briefing_text = load_market_briefing() or ""
     grok_brief_text = load_grok_brief() or ""
     orion_skills_text = load_orion_skills() or ""
     consensus_votes = compute_agent_consensus(window_hours=4)
     consensus_text = format_consensus_for_prompt(consensus_votes, threshold=3)
-    multi_agent_context = market_briefing_text + grok_brief_text + orion_skills_text + consensus_text
+    _peer_block = peer_picks_block("boba", window_hours=6) if peer_picks_block else ""
+    multi_agent_context = market_briefing_text + grok_brief_text + orion_skills_text + consensus_text + _peer_block
 
     # Skill injection - load relevant SKILL.md content based on decision context
     try:
@@ -907,10 +988,18 @@ Open positions:
 # Candidates to review (already filtered to T1+T2 whale tier $500K+ + today's signals)
 {shortlist_text}
 
-# Trade signals from providers (Name / Name2 / Vivid — last 20)
+# Trade signals from providers (Name / Name2 / Vivid / Vivid2 — last 20)
 These are curated buy/sell calls from human-run provider services. Use them as INDEPENDENT confirmation: if a provider has called the same direction as a whale flow above, that's stronger alignment. Disagreement is also informative. Do NOT take a pick just because a provider called it — use these alongside whale flow + Kronos.
 {firebase_signals_text}
-{platinum_flow_text}
+
+# Provider push notifications (Vivid2 / Name / Name2 OptionNotifications + StockNotifications — last 15)
+Text alerts the provider apps push to their users. Often analyst commentary on a previously-issued signal (add/reduce/close), or breaking-news heads-up. Higher recency than the signals above but less actionable.
+{firebase_notifications_text}
+
+# Flow Greeks alerts (FlowGreeks / FlowGreeks2 — last 15)
+Algorithmic unusual-flow detections (sweeps, block trades, volume-over-OI). Independent of analyst signals. A flow alert on the same ticker/direction as a trade signal above is a strong corroborating signal.
+{firebase_flow_alerts_text}
+{platinum_flow_text}{bfe_enhancements}
 {multi_day_repeaters_text}
 {best_options_text}
 {ticker_rollup_text}
@@ -957,15 +1046,24 @@ Additional decisions per pick:
 - Max loss % (default -30%)
 
 Hard limits:
-- Max NEW picks this cycle: {remaining_budget} (out of daily cap {MAX_NEW_PICKS_PER_DAY})
+- Max NEW picks this cycle: {remaining_budget} (PLATINUM OVERRIDE NOTICE: if any candidate scores PLATINUM band [confidence ≥ 90], take it ANYWAY — once per day, PLATINUM picks bypass the cap) (out of daily cap {MAX_NEW_PICKS_PER_DAY})
 - Max ${MAX_TOTAL_RISK_USD:,} total notional risk across all picks
 - PREMIUM TIER LADDER (rank picks highest tier first — if T0 hits exist, ignore lower tiers):
-  - T0 MEGA FLOW ($10M+ premium): profit_target_pct=80, stop_loss_pct=15 (highest conviction, tightest risk)
-  - T1 HUGE FLOW ($5M+ premium): profit_target_pct=60, stop_loss_pct=20 (high conviction)
-  - T2 BIG FLOW ($1M+ premium): profit_target_pct=50, stop_loss_pct=25 (standard)
-  - T3 STANDARD ($500K+ SWEEP + A/AA + Vol>OI): profit_target_pct=40, stop_loss_pct=30 (lower)
-  - T4 UNUSUAL (Vol>OI yellow): profit_target_pct=30, stop_loss_pct=35 (last resort)
-- WITHIN-TIER RANKING (co-primary tiebreakers): repeater_count (same contract appearing 3+ times today) AND DTE (shorter wins). Then sweep>block>split, then A/AA bid-ask, then Vol/OI ratio.
+  - T0 MEGA FLOW ($10M+ premium): profit_target_pct=80, stop_loss_pct=15 (highest conviction; if IV%>60 widen stop to 22)
+  - T1 HUGE FLOW ($5M+ premium): profit_target_pct=60, stop_loss_pct=20 (high conviction; if IV%>60 widen stop to 30)
+  - T2 BIG FLOW ($1M+ premium): profit_target_pct=50, stop_loss_pct=25 (standard; if IV%>60 widen stop to 37)
+  - T3 STANDARD ($500K+ SWEEP + A/AA + Vol>OI): profit_target_pct=40, stop_loss_pct=30 (lower; if IV%>60 widen stop to 45)
+  - T4 UNUSUAL (Vol>OI yellow): profit_target_pct=30, stop_loss_pct=35 (last resort; if IV%>60 widen stop to 52)
+- WITHIN-TIER RANKING (priority order; ties broken in order shown):
+  1. repeater_count (same contract 3+ times today)
+  2. ticker-strike cluster (3+ distinct strikes on same ticker today — see STRIKE CLUSTERS above)
+  3. multi-source confluence (≥3 sources agreeing direction — see MULTI-SOURCE CONFLUENCE above; ≥3 = treat as one tier upgraded)
+  4. fresh-5min flag (institutional opens beat 3:55 PM muppet flow)
+  5. DTE (shorter wins for flow)
+  6. Kronos confidence (HIGH AGREE > MED AGREE > LOW AGREE > NEUTRAL; CONFLICTS = veto)
+  7. sweep>block>split
+  8. A/AA bid-ask
+  9. Vol/OI ratio
 
 # DUAL PROTOCOL — Boba picks under whichever protocol fits each candidate
 
@@ -1045,62 +1143,151 @@ Set protocol="swing" in pick. Override TP/SL: profit_target_pct=100, stop_loss_p
   ]
 }}
 
+
+# ADDITIONAL REQUIRED FIELDS PER PICK (INDEPENDENT_THESIS_BLOCK_INSERTED)
+For each pick in the picks array, you MUST include:
+  - "institutional_thesis": A 1-2 sentence answer to "Why would an institution put this much money on this specific contract right now?"
+        Examples that are useful: "Hedge fund rotating from semis into defensives ahead of CPI"; "Earnings play on NVDA pre-report — implied vol cheap relative to history"; "Block hedger covering long-stock exposure after Powell speech"; "Activist pre-positioning ahead of board meeting next Tuesday".
+        Avoid: tautologies ("they think it goes up") or restating the flow data ("$7M flow on the strike").
+  - "convergence_rationale": REQUIRED ONLY IF you are picking a contract the peer agent already took today.
+        Default policy is to pick DIFFERENT contracts. If you converge, explain the DISTINCT edge — e.g., "I size larger because Kronos HIGH-confidence agreement is new since their pick" or "Same contract but different protocol — they took flow, I'm taking earnings".
+        If you are picking a contract NOT on the peer's list, OMIT this field.
+
+These two fields will be logged to the journal and reviewed by the daily grader — they are not optional.
+
 Respond with ONLY the JSON. No preamble, no markdown fences.
 """
     return prompt
 
 
-def call_boba(prompt):
-    """Call Claude Sonnet with the prompt."""
-    try:
-        import requests
-    except ImportError:
-        return {"error": "requests not installed"}
+def _mc_kb_recall():
+    """Build a rich pre-prompt context block (ticker-aware).
 
-    api_key = get_anthropic_key()
-    if not api_key:
-        return {"error": "no anthropic key"}
+    1) Top-5 flow tickers in last 24h from options_flow.sqlite
+    2) Today's signal tickers from scored_signals_recent.json
+    3) mc-kb RAG query using those tickers — returns per-ticker memory chunks
 
-    _t0_anthropic = _time_tracker.time()
+    Never raises; returns "" on any failure (so the cycle proceeds even when
+    laptop is offline / sqlite locked / etc).
+    """
     try:
-        r = requests.post(
-            "https://api.anthropic.com/v1/messages",
-            headers={
-                "x-api-key": api_key,
-                "anthropic-version": "2023-06-01",
-                "content-type": "application/json",
-            },
-            json={
-                "model": BOBA_MODEL,
-                "max_tokens": 2000,
-                "messages": [{"role": "user", "content": prompt}],
-            },
-            timeout=90,
-        )
-        _dur_ms = int((_time_tracker.time() - _t0_anthropic) * 1000)
-        if r.status_code != 200:
-            _log_anthropic_call("boba_decision_cycle", "claude-sonnet-4-5", None, _dur_ms,
-                                success=False, error=f"HTTP {r.status_code}")
-            return {"error": f"API {r.status_code}: {r.text[:500]}"}
-        data = r.json()
-        _log_anthropic_call("boba_decision_cycle", "claude-sonnet-4-5", data, _dur_ms, success=True)
-        text = ""
-        for block in data.get("content", []):
-            if block.get("type") == "text":
-                text += block.get("text", "")
-        # Parse JSON from response
-        text = text.strip()
-        if text.startswith("```"):
-            text = text.split("```")[1]
-            if text.startswith("json"):
-                text = text[4:]
+        import json as _j
+        import sqlite3 as _s
+        from datetime import datetime as _dt, timezone as _tz
+        from pathlib import Path as _P
+
+        # 1) Top-5 flow tickers (by flow value, last 24h)
+        flow_block = ""
+        top_tickers = []
         try:
-            return {"ok": True, "response": json.loads(text.strip()), "usage": data.get("usage", {})}
-        except Exception as e:
-            return {"error": f"JSON parse failed: {e}", "raw": text[:2000]}
-    except Exception as e:
-        return {"error": f"API call failed: {e}"}
+            con = _s.connect("/home/ubuntu/mission-control-restored/data/options_flow.sqlite")
+            cur = con.cursor()
+            rows = cur.execute(
+                """SELECT ticker, COUNT(*), COALESCE(SUM(flow_value),0)
+                   FROM flow_alerts
+                   WHERE captured_at > datetime('now','-24 hours') AND ticker IS NOT NULL
+                   GROUP BY ticker
+                   ORDER BY 3 DESC, 2 DESC
+                   LIMIT 5"""
+            ).fetchall()
+            con.close()
+            if rows:
+                top_tickers = [r[0] for r in rows]
+                flow_block = "## Top flow tickers (last 24h, premium-weighted)\n\n"
+                for t, n, p in rows:
+                    flow_block += f"- **{t}**: {n} alerts, ${int(p):,} premium\n"
+                flow_block += "\n"
+        except Exception as _e:
+            flow_block = f"_(flow_value query failed: {_e})_\n\n"
 
+        # 2) Today's signal tickers
+        sig_tickers = []
+        try:
+            sig_path = _P("/home/ubuntu/mission-control/signal-receiver/data/scored_signals_recent.json")
+            if sig_path.exists():
+                today = _dt.now(_tz.utc).strftime("%Y-%m-%d")
+                sigs = _j.loads(sig_path.read_text())
+                sig_tickers = sorted({s.get("ticker","") for s in sigs
+                                       if isinstance(s, dict) and s.get("timestamp","")[:10] == today and s.get("ticker")})
+        except Exception:
+            pass
+
+        # 3) Ticker-aware mc-kb recall
+        query_tickers = list(dict.fromkeys(top_tickers + sig_tickers))[:8]  # dedupe, keep order, cap at 8
+        if query_tickers:
+            query = f"trading decisions options flow patterns for {' '.join(query_tickers)} current rules"
+        else:
+            query = "trading decisions current rules identity critical context"
+
+        kb_block = ""
+        try:
+            import mc_kb_client
+            kb_block = mc_kb_client.recall(query, top=5, tiers=["identity", "critical"], timeout=8) or ""
+        except Exception as _e:
+            kb_block = f"_(mc-kb recall failed: {_e})_\n\n"
+
+        result = flow_block + kb_block
+        return (result + "\n\n---\n\n") if result.strip() else ""
+    except Exception:
+        return ""
+
+
+
+def call_boba(prompt):
+    """Call Claude Sonnet via CLI subprocess (Max plan, no API credits)."""
+    CLAUDE_BIN = "/home/ubuntu/.local/bin/claude"
+    full_prompt = _load_lessons() + _load_active_position_rules() + _mc_kb_recall() + prompt
+
+    _t0 = _time_tracker.time()
+    try:
+        result = subprocess.run(
+            [CLAUDE_BIN, "-p", "--model", "sonnet", "--output-format", "text",
+             "--no-session-persistence", "--tools", ""],
+            input=full_prompt,
+            capture_output=True,
+            text=True,
+            timeout=240,
+        )
+        _dur_ms = int((_time_tracker.time() - _t0) * 1000)
+
+        print(f"[boba-debug] returncode={result.returncode} stdout_len={len(result.stdout)} stderr_len={len(result.stderr)}", flush=True)
+        if result.stdout:
+            print(f"[boba-debug] stdout_head: {repr(result.stdout[:300])}", flush=True)
+        if result.stderr:
+            print(f"[boba-debug] stderr_head: {repr(result.stderr[:300])}", flush=True)
+        if result.returncode != 0:
+            _log_anthropic_call("boba_decision_cycle", BOBA_MODEL, None, _dur_ms,
+                                success=False, error=f"CLI exit {result.returncode}")
+            return {"error": f"CLI exit {result.returncode}: {result.stderr[:500]}"}
+
+        _log_anthropic_call("boba_decision_cycle", BOBA_MODEL, None, _dur_ms, success=True)
+
+        text = result.stdout.strip()
+        # Strip leading markdown fence if present (```json ... ``` or ``` ... ```)
+        if text.startswith("```"):
+            text = text.split("\n", 1)[1] if "\n" in text else text[3:]
+            text = text.strip()
+        # Trim to first { so leading prose is dropped
+        brace_idx = text.find("{")
+        if brace_idx > 0:
+            text = text[brace_idx:]
+        print(f"[boba-debug] post-clean text_len={len(text)}", flush=True)
+        print(f"[boba-debug] text_head: {repr(text[:300])}", flush=True)
+        try:
+            parsed, _end = json.JSONDecoder().raw_decode(text)
+            print(f"[boba-debug] JSON parse OK, picks={len(parsed.get('picks',[]))}", flush=True)
+            return {"ok": True, "response": parsed, "usage": {}}
+        except Exception as e:
+            print(f"[boba-debug] JSON parse FAILED: {e}", flush=True)
+            return {"error": f"JSON parse failed: {e}", "raw": text[:2000]}
+
+    except subprocess.TimeoutExpired:
+        _dur_ms = int((_time_tracker.time() - _t0) * 1000)
+        _log_anthropic_call("boba_decision_cycle", BOBA_MODEL, None, _dur_ms,
+                            success=False, error="timeout 240s")
+        return {"error": "CLI timeout (240s)"}
+    except Exception as e:
+        return {"error": f"CLI call failed: {e}"}
 
 def convert_spx_to_spy(pick):
     """
@@ -2009,12 +2196,55 @@ def main():
     remaining_budget = remaining_picks_today()
     print(f"[daily_budget] {remaining_budget} NEW picks remaining today (cap {MAX_NEW_PICKS_PER_DAY})", flush=True)
     cycle_picks = cycle_result.get("picks", [])
-    # Cap at min(per-cycle limit, remaining daily budget)
+
+    # === PDT guard: under-$25K accounts only get 4 daytrades / 5 days ===
+    if apply_pdt_guard and cycle_picks:
+        cycle_picks, _pdt_notes = apply_pdt_guard(cycle_picks, account, agent="boba")
+        for _n in _pdt_notes:
+            print(_n, flush=True)
+
+
+    # 2-min research-and-confirm before order execution (env BOBA_VALIDATE_PICKS=0 to skip).
+    # Gathers live quote + recent flow + mc-kb recall, then asks Claude PROCEED/ABORT per pick.
+    # Fail-open: any error returns the original picks unchanged.
+    import os as _os
+    if _os.environ.get("BOBA_VALIDATE_PICKS", "1") != "0" and cycle_picks:
+        try:
+            from pick_validator import validate_picks as _validate_picks
+            print(f"[pick-validator] validating {len(cycle_picks)} pick(s) with 2-min research pass", flush=True)
+            cycle_picks = _validate_picks(cycle_picks, account="boba", sleep_sec=120)
+            cycle_result["picks"] = cycle_picks  # keep cycle_result in sync for journaling
+        except Exception as _ve:
+            print(f"[pick-validator] failed, fail-open: {_ve!r}", flush=True)
+
+    # Cap at min(per-cycle limit, remaining daily budget) — with PLATINUM override.
+    # PLATINUM-band picks (confidence ≥ 90) can bypass the daily cap up to once per day.
     effective_cap = min(MAX_PICKS_PER_CYCLE, remaining_budget)
-    if effective_cap < len(cycle_picks):
-        print(f"[daily_budget] LLM returned {len(cycle_picks)} picks, executing first {effective_cap}", flush=True)
+    state = load_daily_picks_state()
+    _platinum_override_used = state.get("platinum_overrides_used", 0)
+    PLATINUM_OVERRIDES_PER_DAY = 1
+
+    _platinum_picks = [_p for _p in cycle_picks if _p.get("confidence", {}).get("band") == "PLATINUM"]
+    _nonplat_picks  = [_p for _p in cycle_picks if _p.get("confidence", {}).get("band") != "PLATINUM"]
+
+    _allow_platinum = min(
+        len(_platinum_picks),
+        max(0, PLATINUM_OVERRIDES_PER_DAY - _platinum_override_used),
+    ) if remaining_budget == 0 else len(_platinum_picks)
+
+    _allow_nonplat = max(0, effective_cap - 0)  # non-PLATINUM picks count against cap
+    _pick_queue = _platinum_picks[:_allow_platinum] + _nonplat_picks[:_allow_nonplat]
+    _pick_queue = _pick_queue[:max(_allow_platinum + effective_cap, _allow_platinum)]
+
+    if _allow_platinum and remaining_budget == 0:
+        print(f"[daily_budget] PLATINUM OVERRIDE: {_allow_platinum} pick(s) allowed despite budget=0 (override {_platinum_override_used + _allow_platinum}/{PLATINUM_OVERRIDES_PER_DAY} today)", flush=True)
+        state["platinum_overrides_used"] = _platinum_override_used + _allow_platinum
+        save_daily_picks_state(state)
+
+    if len(_pick_queue) < len(cycle_picks):
+        print(f"[daily_budget] LLM returned {len(cycle_picks)} picks, executing {len(_pick_queue)} (cap={effective_cap}, platinum_allowed={_allow_platinum})", flush=True)
     picks_executed = []
-    for pick in cycle_picks[:effective_cap]:
+    for pick in _pick_queue:
         # Auto-convert SPX picks to SPY equivalents (Alpaca can't trade SPX)
         converted_pick, conversion_note = convert_spx_to_spy(pick)
         if conversion_note:
@@ -2176,6 +2406,28 @@ def main():
 
     log_to_ops("boba_cycle", "INFO", f"Cycle complete — {n_picks} picks, {n_passed} passed")
     print(f"Cycle done: {n_picks} picks executed, {n_passed} passed on")
+
+    # mc-kb: log this cycle to the daemon's /hive page (graceful-fail if tunnel down)
+    try:
+        import mc_kb_client
+        _tickers = [pk.get("ticker", "?") for pk in cycle_result.get("picks", [])][:8]
+        _passed_tickers = [pk.get("ticker", "?") for pk in cycle_result.get("passed_on", [])][:8]
+        _cycle_summary = (cycle_result.get("cycle_summary") or "").strip()[:300]
+        _hive_summary = (
+            f"{n_picks} pick(s) committed, {n_passed} passed. "
+            + (f"Tickers: {', '.join(_tickers)}. " if _tickers else "")
+            + _cycle_summary
+        )
+        mc_kb_client.log_event(
+            agent_id="boba",
+            action="decision_cycle",
+            summary=_hive_summary,
+            artifacts={"picks": _tickers, "passed_on": _passed_tickers},
+            chat_id="trading",
+        )
+    except Exception as _e:
+        print(f"[mc-kb] log_event failed: {_e!r}", flush=True)
+
     return 0
 
 
