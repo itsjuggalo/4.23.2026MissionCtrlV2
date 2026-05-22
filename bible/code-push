@@ -45,8 +45,29 @@ if [ -f "$WIP_LIST" ]; then
   done < "$WIP_LIST"
 fi
 
+
+# Hardcoded sensitive file exclusions (added after Discord token leak May 2026)
+SAFE_EXCLUDES=(
+  --exclude="*_token*"
+  --exclude="*token.txt"
+  --exclude="*token.key"
+  --exclude="*_key*"
+  --exclude="*key.txt"
+  --exclude="*_secret*"
+  --exclude="*secret.txt"
+  --exclude="*_password*"
+  --exclude="*password.txt"
+  --exclude="*.env"
+  --exclude=".env*"
+  --exclude="*.pem"
+  --exclude="*.b64"
+  --exclude="*api_key*"
+  --exclude="*_api*"
+  --exclude="creds*"
+  --exclude="credentials*"
+)
 # Rsync source to repo using array expansion (proper quoting)
-rsync -a "${EXCLUDE_ARGS[@]}" --exclude="__pycache__/" --exclude="*.pyc" --exclude="weekly_grade/replay/data" "$SOURCE_ROOT/" "$REPO_DIR/scripts/"
+rsync -a "${EXCLUDE_ARGS[@]}" "${SAFE_EXCLUDES[@]}" --exclude="__pycache__/" --exclude="*.pyc" --exclude="weekly_grade/replay/data" "$SOURCE_ROOT/" "$REPO_DIR/scripts/"
 
 git add -A scripts/
 

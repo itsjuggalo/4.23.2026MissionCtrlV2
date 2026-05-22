@@ -1,7 +1,19 @@
 #!/bin/bash
 BIBLE=/home/ubuntu/.openclaw/data/bible_v3
 [ -f "$BIBLE" ] || { echo "bible_v3 not found"; exit 1; }
-if [ $# -lt 2 ]; then echo "Usage: bible-log title change [details]"; exit 1; fi
+
+ISSUE=""
+ARGS=()
+while [ $# -gt 0 ]; do
+  case "$1" in
+    --issue)    ISSUE="$2"; shift 2 ;;
+    --issue=*)  ISSUE="${1#--issue=}"; shift ;;
+    *)          ARGS+=("$1"); shift ;;
+  esac
+done
+set -- "${ARGS[@]}"
+
+if [ $# -lt 2 ]; then echo "Usage: bible-log title change [details] [--issue MIS-N]"; exit 1; fi
 TITLE="$1"; CHANGE="$2"; DETAILS="${3:-}"
 DATE=$(TZ='America/New_York' date +'%Y-%m-%d %H:%M ET')
 {
@@ -9,12 +21,38 @@ DATE=$(TZ='America/New_York' date +'%Y-%m-%d %H:%M ET')
   echo "### $DATE - $TITLE"
   echo "- Change: $CHANGE"
   [ -n "$DETAILS" ] && echo "- Details: $DETAILS"
+  [ -n "$ISSUE" ]   && echo "- Linear: $ISSUE"
 } >> "$BIBLE"
 echo "Bible updated: $TITLE"
+
 REPO=/home/ubuntu/.openclaw/data/bible-repo
 if [ -d "$REPO/.git" ]; then
   cp "$BIBLE" "$REPO/README.md"
   cd "$REPO" && git add README.md && git commit -m "$TITLE" 2>&1 | tail -1 && git push 2>&1 | tail -1
+fi
+
+# Linear comment if --issue provided
+BRIDGE_ENV=/home/ubuntu/linear-bridge/env
+if [ -n "$ISSUE" ] && [ -f "$BRIDGE_ENV" ]; then
+  TOKEN=$(grep '^BRIDGE_TOKEN=' "$BRIDGE_ENV" | cut -d= -f2-)
+  PORT=$(grep '^PORT=' "$BRIDGE_ENV" | cut -d= -f2-)
+  PORT="${PORT:-4717}"
+  if [ -n "$TOKEN" ]; then
+    PAYLOAD=$(python3 -c "
+import sys, json
+title, change, details, date, issue = sys.argv[1:6]
+body = f'**Bible entry shipped**\n\n**Title:** {title}\n**Change:** {change}'
+if details:
+    body += f'\n**Details:** {details}'
+body += f'\n**Time:** {date}'
+print(json.dumps({'issue': issue, 'body': body}))
+" "$TITLE" "$CHANGE" "$DETAILS" "$DATE" "$ISSUE")
+    RESULT=$(curl -s -X POST "http://127.0.0.1:$PORT/comment" \
+      -H "Authorization: Bearer $TOKEN" \
+      -H "Content-Type: application/json" \
+      -d "$PAYLOAD" 2>&1 || true)
+    echo "[linear] $RESULT"
+  fi
 fi
 
 # Auto-push code to GitHub after bible-log

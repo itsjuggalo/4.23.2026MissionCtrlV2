@@ -1,0 +1,54 @@
+#!/usr/bin/env python3
+"""Kronos mini pre-warm: runs forecast on rotating top tickers every 5 min."""
+import subprocess, sys, time, json
+from pathlib import Path
+from datetime import datetime
+from zoneinfo import ZoneInfo
+
+# Top 20 watchlist (most-traded by us)
+WATCH = [
+    "SPY","QQQ","NVDA","AAPL","MSFT","TSLA","AMZN","META","GOOGL","AMD",
+    "AVGO","NFLX","COIN","PLTR","SMCI","CRM","ORCL","UBER","DIS","BA",
+]
+
+# Rotate through tickers — read last index from state file, advance by 4 each cycle
+STATE = Path("/home/ubuntu/.openclaw/workspace/state/kronos_mini_prewarm.json")
+STATE.parent.mkdir(parents=True, exist_ok=True)
+
+def get_idx():
+    if STATE.exists():
+        try: return json.loads(STATE.read_text()).get("idx", 0)
+        except: return 0
+    return 0
+
+def save_idx(i):
+    STATE.write_text(json.dumps({"idx": i, "ts": datetime.now(ZoneInfo("America/New_York")).isoformat()}))
+
+# Skip outside US market hours
+now = datetime.now(ZoneInfo("America/New_York"))
+if now.weekday() >= 5 or not (9 <= now.hour < 16):
+    print(f"[skip] outside market hours: {now.isoformat()}")
+    sys.exit(0)
+
+idx = get_idx()
+batch = []
+for j in range(4):
+    batch.append(WATCH[(idx + j) % len(WATCH)])
+save_idx((idx + 4) % len(WATCH))
+
+print(f"[mini-prewarm] {now.strftime('%H:%M ET')} - tickers: {batch}")
+for t in batch:
+    print(f"  -> {t}")
+    r = subprocess.run(
+        ["python3", "/home/ubuntu/scripts/kronos_forecast_tiered.py",
+         "--ticker", t, "--tier", "mini", "--no-discord"],
+        capture_output=True, text=True, timeout=120,
+    )
+    if r.returncode != 0:
+        print(f"     FAIL: {r.stderr[:200]}")
+    else:
+        # read last forecast file to confirm
+        f = Path(f"/home/ubuntu/.openclaw/workspace/directives/kronos_forecasts/latest_{t}.json")
+        if f.exists():
+            d = json.loads(f.read_text())
+            print(f"     OK: {d.get('forecast_24h_direction','?')} conf={d.get('forecast_24h_confidence','?')}")

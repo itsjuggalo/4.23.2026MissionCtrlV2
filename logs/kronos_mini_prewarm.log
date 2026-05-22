@@ -1,0 +1,1865 @@
+[skip] outside market hours: 2026-05-11T05:00:03.181667-04:00
+[skip] outside market hours: 2026-05-11T05:05:02.897931-04:00
+[skip] outside market hours: 2026-05-11T05:10:02.543809-04:00
+[skip] outside market hours: 2026-05-11T05:15:03.419337-04:00
+[skip] outside market hours: 2026-05-11T05:20:03.270999-04:00
+[skip] outside market hours: 2026-05-11T05:25:02.512778-04:00
+[skip] outside market hours: 2026-05-11T05:30:03.294820-04:00
+[skip] outside market hours: 2026-05-11T05:35:02.374128-04:00
+[skip] outside market hours: 2026-05-11T05:40:02.843407-04:00
+[skip] outside market hours: 2026-05-11T05:45:02.615946-04:00
+[skip] outside market hours: 2026-05-11T05:50:01.873078-04:00
+[skip] outside market hours: 2026-05-11T05:55:02.052040-04:00
+[skip] outside market hours: 2026-05-11T06:00:03.271119-04:00
+[skip] outside market hours: 2026-05-11T06:05:02.845025-04:00
+[skip] outside market hours: 2026-05-11T06:10:02.493856-04:00
+[skip] outside market hours: 2026-05-11T06:15:04.381377-04:00
+[skip] outside market hours: 2026-05-11T06:20:33.521851-04:00
+[skip] outside market hours: 2026-05-11T06:25:04.135621-04:00
+[skip] outside market hours: 2026-05-11T06:30:06.396036-04:00
+[skip] outside market hours: 2026-05-11T06:35:02.849038-04:00
+[skip] outside market hours: 2026-05-11T06:40:03.028918-04:00
+[skip] outside market hours: 2026-05-11T06:45:02.218848-04:00
+[skip] outside market hours: 2026-05-11T06:50:02.051988-04:00
+[skip] outside market hours: 2026-05-11T06:55:02.872681-04:00
+[skip] outside market hours: 2026-05-11T07:00:05.156654-04:00
+[skip] outside market hours: 2026-05-11T07:05:02.770623-04:00
+[mini-prewarm] 09:15 ET - tickers: ['SPY', 'QQQ', 'NVDA', 'AAPL']
+  -> SPY
+Traceback (most recent call last):
+  File "/home/ubuntu/scripts/kronos_mini_prewarm", line 42, in <module>
+    r = subprocess.run(
+  File "/usr/lib/python3.10/subprocess.py", line 505, in run
+    stdout, stderr = process.communicate(input, timeout=timeout)
+  File "/usr/lib/python3.10/subprocess.py", line 1154, in communicate
+    stdout, stderr = self._communicate(input, endtime, timeout)
+  File "/usr/lib/python3.10/subprocess.py", line 2022, in _communicate
+    self._check_timeout(endtime, orig_timeout, stdout, stderr)
+  File "/usr/lib/python3.10/subprocess.py", line 1198, in _check_timeout
+    raise TimeoutExpired(
+subprocess.TimeoutExpired: Command '['python3', '/home/ubuntu/scripts/kronos_forecast_tiered.py', '--ticker', 'SPY', '--tier', 'mini', '--no-discord']' timed out after 120 seconds
+[mini-prewarm] 09:20 ET - tickers: ['MSFT', 'TSLA', 'AMZN', 'META']
+  -> MSFT
+Traceback (most recent call last):
+  File "/home/ubuntu/scripts/kronos_mini_prewarm", line 42, in <module>
+    r = subprocess.run(
+  File "/usr/lib/python3.10/subprocess.py", line 505, in run
+    stdout, stderr = process.communicate(input, timeout=timeout)
+  File "/usr/lib/python3.10/subprocess.py", line 1154, in communicate
+    stdout, stderr = self._communicate(input, endtime, timeout)
+  File "/usr/lib/python3.10/subprocess.py", line 2022, in _communicate
+    self._check_timeout(endtime, orig_timeout, stdout, stderr)
+  File "/usr/lib/python3.10/subprocess.py", line 1198, in _check_timeout
+    raise TimeoutExpired(
+subprocess.TimeoutExpired: Command '['python3', '/home/ubuntu/scripts/kronos_forecast_tiered.py', '--ticker', 'MSFT', '--tier', 'mini', '--no-discord']' timed out after 120 seconds
+[mini-prewarm] 09:25 ET - tickers: ['GOOGL', 'AMD', 'AVGO', 'NFLX']
+  -> GOOGL
+     OK: bearish conf=high
+  -> AMD
+     OK: bearish conf=high
+  -> AVGO
+     OK: bearish conf=high
+  -> NFLX
+     OK: bullish conf=high
+[mini-prewarm] 09:30 ET - tickers: ['COIN', 'PLTR', 'SMCI', 'CRM']
+  -> COIN
+     OK: bearish conf=high
+  -> PLTR
+     OK: bullish conf=high
+  -> SMCI
+     OK: bearish conf=high
+  -> CRM
+     OK: bullish conf=medium
+[mini-prewarm] 09:35 ET - tickers: ['ORCL', 'UBER', 'DIS', 'BA']
+  -> ORCL
+     OK: bearish conf=high
+  -> UBER
+     OK: bearish conf=low
+  -> DIS
+     OK: bearish conf=high
+  -> BA
+     OK: bullish conf=medium
+[mini-prewarm] 09:40 ET - tickers: ['SPY', 'QQQ', 'NVDA', 'AAPL']
+  -> SPY
+     OK: bearish conf=high
+  -> QQQ
+     OK: bearish conf=high
+  -> NVDA
+     OK: bearish conf=high
+  -> AAPL
+     OK: bearish conf=high
+[mini-prewarm] 09:45 ET - tickers: ['MSFT', 'TSLA', 'AMZN', 'META']
+  -> MSFT
+     OK: bearish conf=low
+  -> TSLA
+     OK: bearish conf=high
+  -> AMZN
+     OK: bearish conf=high
+  -> META
+     OK: bullish conf=high
+[mini-prewarm] 09:50 ET - tickers: ['GOOGL', 'AMD', 'AVGO', 'NFLX']
+  -> GOOGL
+     OK: bearish conf=high
+  -> AMD
+     OK: bearish conf=high
+  -> AVGO
+     OK: bearish conf=high
+  -> NFLX
+     OK: bullish conf=high
+[mini-prewarm] 09:55 ET - tickers: ['COIN', 'PLTR', 'SMCI', 'CRM']
+  -> COIN
+     OK: bearish conf=high
+  -> PLTR
+     OK: bullish conf=high
+  -> SMCI
+     OK: bearish conf=high
+  -> CRM
+     OK: bullish conf=high
+[mini-prewarm] 10:00 ET - tickers: ['ORCL', 'UBER', 'DIS', 'BA']
+  -> ORCL
+Traceback (most recent call last):
+  File "/home/ubuntu/scripts/kronos_mini_prewarm", line 42, in <module>
+    r = subprocess.run(
+  File "/usr/lib/python3.10/subprocess.py", line 505, in run
+    stdout, stderr = process.communicate(input, timeout=timeout)
+  File "/usr/lib/python3.10/subprocess.py", line 1154, in communicate
+    stdout, stderr = self._communicate(input, endtime, timeout)
+  File "/usr/lib/python3.10/subprocess.py", line 2022, in _communicate
+    self._check_timeout(endtime, orig_timeout, stdout, stderr)
+  File "/usr/lib/python3.10/subprocess.py", line 1198, in _check_timeout
+    raise TimeoutExpired(
+subprocess.TimeoutExpired: Command '['python3', '/home/ubuntu/scripts/kronos_forecast_tiered.py', '--ticker', 'ORCL', '--tier', 'mini', '--no-discord']' timed out after 120 seconds
+[mini-prewarm] 10:05 ET - tickers: ['SPY', 'QQQ', 'NVDA', 'AAPL']
+  -> SPY
+     OK: bearish conf=high
+  -> QQQ
+     OK: bearish conf=high
+  -> NVDA
+     OK: bearish conf=high
+  -> AAPL
+     OK: bearish conf=high
+[mini-prewarm] 10:10 ET - tickers: ['MSFT', 'TSLA', 'AMZN', 'META']
+  -> MSFT
+     OK: bearish conf=medium
+  -> TSLA
+     OK: bearish conf=high
+  -> AMZN
+     OK: bearish conf=high
+  -> META
+     OK: bullish conf=high
+[mini-prewarm] 10:15 ET - tickers: ['GOOGL', 'AMD', 'AVGO', 'NFLX']
+  -> GOOGL
+     OK: bearish conf=high
+  -> AMD
+     OK: bearish conf=high
+  -> AVGO
+     OK: bearish conf=high
+  -> NFLX
+     OK: bullish conf=high
+[mini-prewarm] 10:20 ET - tickers: ['COIN', 'PLTR', 'SMCI', 'CRM']
+  -> COIN
+     OK: bearish conf=high
+  -> PLTR
+     OK: bearish conf=medium
+  -> SMCI
+     OK: bearish conf=high
+  -> CRM
+     OK: bearish conf=low
+[mini-prewarm] 10:25 ET - tickers: ['ORCL', 'UBER', 'DIS', 'BA']
+  -> ORCL
+     OK: bearish conf=high
+  -> UBER
+     OK: bearish conf=high
+  -> DIS
+     OK: bearish conf=high
+  -> BA
+     OK: bearish conf=high
+[mini-prewarm] 10:30 ET - tickers: ['SPY', 'QQQ', 'NVDA', 'AAPL']
+  -> SPY
+Traceback (most recent call last):
+  File "/home/ubuntu/scripts/kronos_mini_prewarm", line 42, in <module>
+    r = subprocess.run(
+  File "/usr/lib/python3.10/subprocess.py", line 505, in run
+    stdout, stderr = process.communicate(input, timeout=timeout)
+  File "/usr/lib/python3.10/subprocess.py", line 1154, in communicate
+    stdout, stderr = self._communicate(input, endtime, timeout)
+  File "/usr/lib/python3.10/subprocess.py", line 2022, in _communicate
+    self._check_timeout(endtime, orig_timeout, stdout, stderr)
+  File "/usr/lib/python3.10/subprocess.py", line 1198, in _check_timeout
+    raise TimeoutExpired(
+subprocess.TimeoutExpired: Command '['python3', '/home/ubuntu/scripts/kronos_forecast_tiered.py', '--ticker', 'SPY', '--tier', 'mini', '--no-discord']' timed out after 120 seconds
+[mini-prewarm] 10:35 ET - tickers: ['MSFT', 'TSLA', 'AMZN', 'META']
+  -> MSFT
+     OK: bearish conf=high
+  -> TSLA
+     OK: bearish conf=high
+  -> AMZN
+     OK: bearish conf=high
+  -> META
+     OK: bullish conf=high
+[mini-prewarm] 10:40 ET - tickers: ['GOOGL', 'AMD', 'AVGO', 'NFLX']
+  -> GOOGL
+     OK: bearish conf=high
+  -> AMD
+     OK: bearish conf=high
+  -> AVGO
+     OK: bearish conf=high
+  -> NFLX
+     OK: bullish conf=high
+[mini-prewarm] 10:45 ET - tickers: ['COIN', 'PLTR', 'SMCI', 'CRM']
+  -> COIN
+     OK: bearish conf=medium
+  -> PLTR
+     OK: bullish conf=high
+  -> SMCI
+     OK: bearish conf=high
+  -> CRM
+     OK: bearish conf=high
+[mini-prewarm] 10:50 ET - tickers: ['ORCL', 'UBER', 'DIS', 'BA']
+  -> ORCL
+     OK: bearish conf=high
+  -> UBER
+     OK: bearish conf=high
+  -> DIS
+     OK: bearish conf=high
+  -> BA
+     OK: bearish conf=high
+[mini-prewarm] 10:55 ET - tickers: ['SPY', 'QQQ', 'NVDA', 'AAPL']
+  -> SPY
+     OK: bearish conf=high
+  -> QQQ
+     OK: bearish conf=high
+  -> NVDA
+     OK: bearish conf=high
+  -> AAPL
+     OK: bearish conf=high
+[mini-prewarm] 11:00 ET - tickers: ['MSFT', 'TSLA', 'AMZN', 'META']
+  -> MSFT
+     OK: bullish conf=medium
+  -> TSLA
+     OK: bearish conf=high
+  -> AMZN
+     OK: bearish conf=high
+  -> META
+     OK: bullish conf=medium
+[mini-prewarm] 11:05 ET - tickers: ['GOOGL', 'AMD', 'AVGO', 'NFLX']
+  -> GOOGL
+     OK: bearish conf=high
+  -> AMD
+     OK: bearish conf=high
+  -> AVGO
+     OK: bearish conf=high
+  -> NFLX
+     OK: bullish conf=high
+[mini-prewarm] 11:10 ET - tickers: ['COIN', 'PLTR', 'SMCI', 'CRM']
+  -> COIN
+     OK: bearish conf=high
+  -> PLTR
+     OK: bullish conf=high
+  -> SMCI
+     OK: bearish conf=high
+  -> CRM
+     OK: bullish conf=high
+[mini-prewarm] 11:15 ET - tickers: ['ORCL', 'UBER', 'DIS', 'BA']
+  -> ORCL
+Traceback (most recent call last):
+  File "/home/ubuntu/scripts/kronos_mini_prewarm", line 42, in <module>
+    r = subprocess.run(
+  File "/usr/lib/python3.10/subprocess.py", line 505, in run
+    stdout, stderr = process.communicate(input, timeout=timeout)
+  File "/usr/lib/python3.10/subprocess.py", line 1154, in communicate
+    stdout, stderr = self._communicate(input, endtime, timeout)
+  File "/usr/lib/python3.10/subprocess.py", line 2022, in _communicate
+    self._check_timeout(endtime, orig_timeout, stdout, stderr)
+  File "/usr/lib/python3.10/subprocess.py", line 1198, in _check_timeout
+    raise TimeoutExpired(
+subprocess.TimeoutExpired: Command '['python3', '/home/ubuntu/scripts/kronos_forecast_tiered.py', '--ticker', 'ORCL', '--tier', 'mini', '--no-discord']' timed out after 120 seconds
+[mini-prewarm] 11:20 ET - tickers: ['SPY', 'QQQ', 'NVDA', 'AAPL']
+  -> SPY
+     OK: bearish conf=high
+  -> QQQ
+     OK: bearish conf=high
+  -> NVDA
+     OK: bearish conf=high
+  -> AAPL
+     OK: bearish conf=high
+[mini-prewarm] 11:25 ET - tickers: ['MSFT', 'TSLA', 'AMZN', 'META']
+  -> MSFT
+     OK: bearish conf=high
+  -> TSLA
+     OK: bearish conf=high
+  -> AMZN
+     OK: bearish conf=high
+  -> META
+     OK: bearish conf=high
+[mini-prewarm] 11:30 ET - tickers: ['GOOGL', 'AMD', 'AVGO', 'NFLX']
+  -> GOOGL
+     OK: bearish conf=high
+  -> AMD
+     OK: bearish conf=high
+  -> AVGO
+     OK: bearish conf=high
+  -> NFLX
+     OK: bullish conf=high
+[mini-prewarm] 11:35 ET - tickers: ['COIN', 'PLTR', 'SMCI', 'CRM']
+  -> COIN
+     OK: bearish conf=high
+  -> PLTR
+     OK: bullish conf=high
+  -> SMCI
+     OK: bullish conf=medium
+  -> CRM
+     OK: bullish conf=high
+[mini-prewarm] 11:40 ET - tickers: ['ORCL', 'UBER', 'DIS', 'BA']
+  -> ORCL
+     OK: bearish conf=high
+  -> UBER
+     OK: bearish conf=high
+  -> DIS
+     OK: bearish conf=high
+  -> BA
+     OK: bearish conf=high
+[mini-prewarm] 11:45 ET - tickers: ['SPY', 'QQQ', 'NVDA', 'AAPL']
+  -> SPY
+     OK: bearish conf=high
+  -> QQQ
+     OK: bearish conf=high
+  -> NVDA
+     OK: bearish conf=high
+  -> AAPL
+     OK: bearish conf=high
+[mini-prewarm] 11:50 ET - tickers: ['MSFT', 'TSLA', 'AMZN', 'META']
+  -> MSFT
+     OK: bullish conf=high
+  -> TSLA
+     OK: bearish conf=high
+  -> AMZN
+     OK: bearish conf=high
+  -> META
+     OK: bullish conf=high
+[mini-prewarm] 11:55 ET - tickers: ['GOOGL', 'AMD', 'AVGO', 'NFLX']
+  -> GOOGL
+     OK: bearish conf=high
+  -> AMD
+     OK: bearish conf=high
+  -> AVGO
+     OK: bearish conf=high
+  -> NFLX
+     OK: bullish conf=high
+[mini-prewarm] 09:00 ET - tickers: ['COIN', 'PLTR', 'SMCI', 'CRM']
+  -> COIN
+     FAIL: 
+  -> PLTR
+     FAIL: 
+  -> SMCI
+     FAIL: 
+  -> CRM
+     FAIL: 
+[mini-prewarm] 09:05 ET - tickers: ['ORCL', 'UBER', 'DIS', 'BA']
+  -> ORCL
+     FAIL: 
+  -> UBER
+     FAIL: 
+  -> DIS
+     FAIL: 
+  -> BA
+     FAIL: 
+[mini-prewarm] 09:10 ET - tickers: ['SPY', 'QQQ', 'NVDA', 'AAPL']
+  -> SPY
+     FAIL: 
+  -> QQQ
+     FAIL: 
+  -> NVDA
+     FAIL: 
+  -> AAPL
+     FAIL: 
+[mini-prewarm] 09:15 ET - tickers: ['MSFT', 'TSLA', 'AMZN', 'META']
+  -> MSFT
+     FAIL: 
+  -> TSLA
+     FAIL: 
+  -> AMZN
+     FAIL: 
+  -> META
+     FAIL: 
+[mini-prewarm] 09:20 ET - tickers: ['GOOGL', 'AMD', 'AVGO', 'NFLX']
+  -> GOOGL
+     FAIL: 
+  -> AMD
+     FAIL: 
+  -> AVGO
+     FAIL: 
+  -> NFLX
+     FAIL: 
+[mini-prewarm] 09:25 ET - tickers: ['COIN', 'PLTR', 'SMCI', 'CRM']
+  -> COIN
+     FAIL: 
+  -> PLTR
+     FAIL: 
+  -> SMCI
+     FAIL: 
+  -> CRM
+     FAIL: 
+[mini-prewarm] 09:30 ET - tickers: ['ORCL', 'UBER', 'DIS', 'BA']
+  -> ORCL
+     FAIL: 
+  -> UBER
+     FAIL: 
+  -> DIS
+     FAIL: 
+  -> BA
+     FAIL: 
+[mini-prewarm] 09:35 ET - tickers: ['SPY', 'QQQ', 'NVDA', 'AAPL']
+  -> SPY
+     FAIL: 
+  -> QQQ
+     FAIL: 
+  -> NVDA
+     FAIL: 
+  -> AAPL
+     FAIL: 
+[mini-prewarm] 09:40 ET - tickers: ['MSFT', 'TSLA', 'AMZN', 'META']
+  -> MSFT
+     FAIL: 
+  -> TSLA
+     FAIL: 
+  -> AMZN
+     FAIL: 
+  -> META
+     FAIL: 
+[mini-prewarm] 09:45 ET - tickers: ['GOOGL', 'AMD', 'AVGO', 'NFLX']
+  -> GOOGL
+     FAIL: 
+  -> AMD
+     FAIL: 
+  -> AVGO
+     FAIL: 
+  -> NFLX
+     FAIL: 
+[mini-prewarm] 09:50 ET - tickers: ['COIN', 'PLTR', 'SMCI', 'CRM']
+  -> COIN
+     FAIL: 
+  -> PLTR
+     FAIL: 
+  -> SMCI
+     FAIL: 
+  -> CRM
+     FAIL: 
+[mini-prewarm] 09:55 ET - tickers: ['ORCL', 'UBER', 'DIS', 'BA']
+  -> ORCL
+     FAIL: 
+  -> UBER
+     FAIL: 
+  -> DIS
+     FAIL: 
+  -> BA
+     FAIL: 
+[mini-prewarm] 10:00 ET - tickers: ['SPY', 'QQQ', 'NVDA', 'AAPL']
+  -> SPY
+     FAIL: 
+  -> QQQ
+     FAIL: 
+  -> NVDA
+     FAIL: 
+  -> AAPL
+     FAIL: 
+[mini-prewarm] 10:05 ET - tickers: ['MSFT', 'TSLA', 'AMZN', 'META']
+  -> MSFT
+     FAIL: 
+  -> TSLA
+     FAIL: 
+  -> AMZN
+     FAIL: 
+  -> META
+     FAIL: 
+[mini-prewarm] 10:10 ET - tickers: ['GOOGL', 'AMD', 'AVGO', 'NFLX']
+  -> GOOGL
+     FAIL: 
+  -> AMD
+     FAIL: 
+  -> AVGO
+     FAIL: 
+  -> NFLX
+     FAIL: 
+[mini-prewarm] 10:15 ET - tickers: ['COIN', 'PLTR', 'SMCI', 'CRM']
+  -> COIN
+     FAIL: 
+  -> PLTR
+     FAIL: 
+  -> SMCI
+     FAIL: 
+  -> CRM
+     FAIL: 
+[mini-prewarm] 10:20 ET - tickers: ['ORCL', 'UBER', 'DIS', 'BA']
+  -> ORCL
+     FAIL: 
+  -> UBER
+     FAIL: 
+  -> DIS
+     FAIL: 
+  -> BA
+     FAIL: 
+[mini-prewarm] 10:25 ET - tickers: ['SPY', 'QQQ', 'NVDA', 'AAPL']
+  -> SPY
+     FAIL: 
+  -> QQQ
+     FAIL: 
+  -> NVDA
+     FAIL: 
+  -> AAPL
+     FAIL: 
+[mini-prewarm] 10:30 ET - tickers: ['MSFT', 'TSLA', 'AMZN', 'META']
+  -> MSFT
+     FAIL: 
+  -> TSLA
+     FAIL: 
+  -> AMZN
+     FAIL: 
+  -> META
+     FAIL: 
+[mini-prewarm] 10:35 ET - tickers: ['GOOGL', 'AMD', 'AVGO', 'NFLX']
+  -> GOOGL
+     FAIL: 
+  -> AMD
+     FAIL: 
+  -> AVGO
+     FAIL: 
+  -> NFLX
+     FAIL: 
+[mini-prewarm] 10:40 ET - tickers: ['COIN', 'PLTR', 'SMCI', 'CRM']
+  -> COIN
+     FAIL: 
+  -> PLTR
+     FAIL: 
+  -> SMCI
+     FAIL: 
+  -> CRM
+     FAIL: 
+[mini-prewarm] 10:45 ET - tickers: ['ORCL', 'UBER', 'DIS', 'BA']
+  -> ORCL
+     FAIL: 
+  -> UBER
+     FAIL: 
+  -> DIS
+     FAIL: 
+  -> BA
+     FAIL: 
+[mini-prewarm] 10:50 ET - tickers: ['SPY', 'QQQ', 'NVDA', 'AAPL']
+  -> SPY
+     FAIL: 
+  -> QQQ
+     FAIL: 
+  -> NVDA
+     FAIL: 
+  -> AAPL
+     FAIL: 
+[mini-prewarm] 10:55 ET - tickers: ['MSFT', 'TSLA', 'AMZN', 'META']
+  -> MSFT
+     FAIL: 
+  -> TSLA
+     FAIL: 
+  -> AMZN
+     FAIL: 
+  -> META
+     FAIL: 
+[mini-prewarm] 11:00 ET - tickers: ['GOOGL', 'AMD', 'AVGO', 'NFLX']
+  -> GOOGL
+     FAIL: 
+  -> AMD
+     FAIL: 
+  -> AVGO
+     FAIL: 
+  -> NFLX
+     FAIL: 
+[mini-prewarm] 11:05 ET - tickers: ['COIN', 'PLTR', 'SMCI', 'CRM']
+  -> COIN
+     FAIL: 
+  -> PLTR
+     FAIL: 
+  -> SMCI
+     FAIL: 
+  -> CRM
+     FAIL: 
+[mini-prewarm] 11:10 ET - tickers: ['ORCL', 'UBER', 'DIS', 'BA']
+  -> ORCL
+     FAIL: 
+  -> UBER
+     FAIL: 
+  -> DIS
+     FAIL: 
+  -> BA
+     FAIL: 
+[mini-prewarm] 11:15 ET - tickers: ['SPY', 'QQQ', 'NVDA', 'AAPL']
+  -> SPY
+     FAIL: 
+  -> QQQ
+     FAIL: 
+  -> NVDA
+     FAIL: 
+  -> AAPL
+     FAIL: 
+[mini-prewarm] 11:20 ET - tickers: ['MSFT', 'TSLA', 'AMZN', 'META']
+  -> MSFT
+     FAIL: 
+  -> TSLA
+     FAIL: 
+  -> AMZN
+     FAIL: 
+  -> META
+     FAIL: 
+[mini-prewarm] 11:25 ET - tickers: ['GOOGL', 'AMD', 'AVGO', 'NFLX']
+  -> GOOGL
+     FAIL: 
+  -> AMD
+     FAIL: 
+  -> AVGO
+     FAIL: 
+  -> NFLX
+     FAIL: 
+[mini-prewarm] 11:30 ET - tickers: ['COIN', 'PLTR', 'SMCI', 'CRM']
+  -> COIN
+     FAIL: 
+  -> PLTR
+     FAIL: 
+  -> SMCI
+     FAIL: 
+  -> CRM
+     FAIL: 
+[mini-prewarm] 11:35 ET - tickers: ['ORCL', 'UBER', 'DIS', 'BA']
+  -> ORCL
+     FAIL: 
+  -> UBER
+     FAIL: 
+  -> DIS
+     FAIL: 
+  -> BA
+     FAIL: 
+[mini-prewarm] 11:40 ET - tickers: ['SPY', 'QQQ', 'NVDA', 'AAPL']
+  -> SPY
+     FAIL: 
+  -> QQQ
+     FAIL: 
+  -> NVDA
+     FAIL: 
+  -> AAPL
+     FAIL: 
+[mini-prewarm] 11:45 ET - tickers: ['MSFT', 'TSLA', 'AMZN', 'META']
+  -> MSFT
+     FAIL: 
+  -> TSLA
+     FAIL: 
+  -> AMZN
+     FAIL: 
+  -> META
+     FAIL: 
+[mini-prewarm] 11:50 ET - tickers: ['GOOGL', 'AMD', 'AVGO', 'NFLX']
+  -> GOOGL
+     FAIL: 
+  -> AMD
+     FAIL: 
+  -> AVGO
+     FAIL: 
+  -> NFLX
+     FAIL: 
+[mini-prewarm] 11:55 ET - tickers: ['COIN', 'PLTR', 'SMCI', 'CRM']
+  -> COIN
+     FAIL: 
+  -> PLTR
+     FAIL: 
+  -> SMCI
+     FAIL: 
+  -> CRM
+     FAIL: 
+[mini-prewarm] 12:00 ET - tickers: ['ORCL', 'UBER', 'DIS', 'BA']
+  -> ORCL
+     FAIL: 
+  -> UBER
+     FAIL: 
+  -> DIS
+     FAIL: 
+  -> BA
+     FAIL: 
+[mini-prewarm] 12:05 ET - tickers: ['SPY', 'QQQ', 'NVDA', 'AAPL']
+  -> SPY
+     FAIL: 
+  -> QQQ
+     FAIL: 
+  -> NVDA
+     FAIL: 
+  -> AAPL
+     FAIL: 
+[mini-prewarm] 12:10 ET - tickers: ['MSFT', 'TSLA', 'AMZN', 'META']
+  -> MSFT
+     FAIL: 
+  -> TSLA
+     FAIL: 
+  -> AMZN
+     FAIL: 
+  -> META
+     FAIL: 
+[mini-prewarm] 12:15 ET - tickers: ['GOOGL', 'AMD', 'AVGO', 'NFLX']
+  -> GOOGL
+     FAIL: 
+  -> AMD
+     FAIL: 
+  -> AVGO
+     FAIL: 
+  -> NFLX
+     FAIL: 
+[mini-prewarm] 12:20 ET - tickers: ['COIN', 'PLTR', 'SMCI', 'CRM']
+  -> COIN
+     FAIL: 
+  -> PLTR
+     FAIL: 
+  -> SMCI
+     FAIL: 
+  -> CRM
+     FAIL: 
+[mini-prewarm] 12:25 ET - tickers: ['ORCL', 'UBER', 'DIS', 'BA']
+  -> ORCL
+     FAIL: 
+  -> UBER
+     FAIL: 
+  -> DIS
+     FAIL: 
+  -> BA
+     FAIL: 
+[mini-prewarm] 12:30 ET - tickers: ['SPY', 'QQQ', 'NVDA', 'AAPL']
+  -> SPY
+     FAIL: 
+  -> QQQ
+     FAIL: 
+  -> NVDA
+     FAIL: 
+  -> AAPL
+     FAIL: 
+[mini-prewarm] 12:35 ET - tickers: ['MSFT', 'TSLA', 'AMZN', 'META']
+  -> MSFT
+     FAIL: 
+  -> TSLA
+     FAIL: 
+  -> AMZN
+     FAIL: 
+  -> META
+     FAIL: 
+[mini-prewarm] 12:40 ET - tickers: ['GOOGL', 'AMD', 'AVGO', 'NFLX']
+  -> GOOGL
+     FAIL: 
+  -> AMD
+     FAIL: 
+  -> AVGO
+     FAIL: 
+  -> NFLX
+     FAIL: 
+[mini-prewarm] 12:45 ET - tickers: ['COIN', 'PLTR', 'SMCI', 'CRM']
+  -> COIN
+     FAIL: 
+  -> PLTR
+     FAIL: 
+  -> SMCI
+     FAIL: 
+  -> CRM
+     FAIL: 
+[mini-prewarm] 12:50 ET - tickers: ['ORCL', 'UBER', 'DIS', 'BA']
+  -> ORCL
+     FAIL: 
+  -> UBER
+     FAIL: 
+  -> DIS
+     FAIL: 
+  -> BA
+     FAIL: 
+[mini-prewarm] 12:55 ET - tickers: ['SPY', 'QQQ', 'NVDA', 'AAPL']
+  -> SPY
+     FAIL: 
+  -> QQQ
+     FAIL: 
+  -> NVDA
+     FAIL: 
+  -> AAPL
+     FAIL: 
+[mini-prewarm] 13:00 ET - tickers: ['MSFT', 'TSLA', 'AMZN', 'META']
+  -> MSFT
+     FAIL: 
+  -> TSLA
+     FAIL: 
+  -> AMZN
+     FAIL: 
+  -> META
+     FAIL: 
+[mini-prewarm] 13:05 ET - tickers: ['GOOGL', 'AMD', 'AVGO', 'NFLX']
+  -> GOOGL
+     FAIL: 
+  -> AMD
+     FAIL: 
+  -> AVGO
+     FAIL: 
+  -> NFLX
+     FAIL: 
+[mini-prewarm] 13:10 ET - tickers: ['COIN', 'PLTR', 'SMCI', 'CRM']
+  -> COIN
+     FAIL: 
+  -> PLTR
+     FAIL: 
+  -> SMCI
+     FAIL: 
+  -> CRM
+     FAIL: 
+[mini-prewarm] 13:15 ET - tickers: ['ORCL', 'UBER', 'DIS', 'BA']
+  -> ORCL
+     FAIL: 
+  -> UBER
+     FAIL: 
+  -> DIS
+     FAIL: 
+  -> BA
+     FAIL: 
+[mini-prewarm] 13:20 ET - tickers: ['SPY', 'QQQ', 'NVDA', 'AAPL']
+  -> SPY
+     FAIL: 
+  -> QQQ
+     FAIL: 
+  -> NVDA
+     FAIL: 
+  -> AAPL
+     FAIL: 
+[mini-prewarm] 13:25 ET - tickers: ['MSFT', 'TSLA', 'AMZN', 'META']
+  -> MSFT
+     FAIL: 
+  -> TSLA
+     FAIL: 
+  -> AMZN
+     FAIL: 
+  -> META
+     FAIL: 
+[mini-prewarm] 13:30 ET - tickers: ['GOOGL', 'AMD', 'AVGO', 'NFLX']
+  -> GOOGL
+     FAIL: 
+  -> AMD
+     FAIL: 
+  -> AVGO
+     FAIL: 
+  -> NFLX
+     FAIL: 
+[mini-prewarm] 13:35 ET - tickers: ['COIN', 'PLTR', 'SMCI', 'CRM']
+  -> COIN
+     FAIL: 
+  -> PLTR
+     FAIL: 
+  -> SMCI
+     FAIL: 
+  -> CRM
+     FAIL: 
+[mini-prewarm] 13:40 ET - tickers: ['ORCL', 'UBER', 'DIS', 'BA']
+  -> ORCL
+     FAIL: 
+  -> UBER
+     FAIL: 
+  -> DIS
+     FAIL: 
+  -> BA
+     FAIL: 
+[mini-prewarm] 13:45 ET - tickers: ['SPY', 'QQQ', 'NVDA', 'AAPL']
+  -> SPY
+     FAIL: 
+  -> QQQ
+     FAIL: 
+  -> NVDA
+     FAIL: 
+  -> AAPL
+     FAIL: 
+[mini-prewarm] 13:50 ET - tickers: ['MSFT', 'TSLA', 'AMZN', 'META']
+  -> MSFT
+     FAIL: 
+  -> TSLA
+     FAIL: 
+  -> AMZN
+     FAIL: 
+  -> META
+     FAIL: 
+[mini-prewarm] 13:55 ET - tickers: ['GOOGL', 'AMD', 'AVGO', 'NFLX']
+  -> GOOGL
+     FAIL: 
+  -> AMD
+     FAIL: 
+  -> AVGO
+     FAIL: 
+  -> NFLX
+     FAIL: 
+[mini-prewarm] 14:00 ET - tickers: ['COIN', 'PLTR', 'SMCI', 'CRM']
+  -> COIN
+     FAIL: 
+  -> PLTR
+     FAIL: 
+  -> SMCI
+     FAIL: 
+  -> CRM
+     FAIL: 
+[mini-prewarm] 14:05 ET - tickers: ['ORCL', 'UBER', 'DIS', 'BA']
+  -> ORCL
+     FAIL: 
+  -> UBER
+     FAIL: 
+  -> DIS
+     FAIL: 
+  -> BA
+     FAIL: 
+[mini-prewarm] 14:10 ET - tickers: ['SPY', 'QQQ', 'NVDA', 'AAPL']
+  -> SPY
+     FAIL: 
+  -> QQQ
+     FAIL: 
+  -> NVDA
+     FAIL: 
+  -> AAPL
+     FAIL: 
+[mini-prewarm] 14:15 ET - tickers: ['MSFT', 'TSLA', 'AMZN', 'META']
+  -> MSFT
+     FAIL: 
+  -> TSLA
+     FAIL: 
+  -> AMZN
+     FAIL: 
+  -> META
+     FAIL: 
+[mini-prewarm] 14:20 ET - tickers: ['GOOGL', 'AMD', 'AVGO', 'NFLX']
+  -> GOOGL
+     FAIL: 
+  -> AMD
+     FAIL: 
+  -> AVGO
+     FAIL: 
+  -> NFLX
+     FAIL: 
+[mini-prewarm] 14:25 ET - tickers: ['COIN', 'PLTR', 'SMCI', 'CRM']
+  -> COIN
+     FAIL: 
+  -> PLTR
+     FAIL: 
+  -> SMCI
+     FAIL: 
+  -> CRM
+     FAIL: 
+[mini-prewarm] 14:30 ET - tickers: ['ORCL', 'UBER', 'DIS', 'BA']
+  -> ORCL
+     FAIL: 
+  -> UBER
+     FAIL: 
+  -> DIS
+     FAIL: 
+  -> BA
+     FAIL: 
+[mini-prewarm] 14:35 ET - tickers: ['SPY', 'QQQ', 'NVDA', 'AAPL']
+  -> SPY
+     FAIL: 
+  -> QQQ
+     FAIL: 
+  -> NVDA
+     FAIL: 
+  -> AAPL
+     FAIL: 
+[mini-prewarm] 14:40 ET - tickers: ['MSFT', 'TSLA', 'AMZN', 'META']
+  -> MSFT
+     FAIL: 
+  -> TSLA
+     FAIL: 
+  -> AMZN
+     FAIL: 
+  -> META
+     FAIL: 
+[mini-prewarm] 14:45 ET - tickers: ['GOOGL', 'AMD', 'AVGO', 'NFLX']
+  -> GOOGL
+     FAIL: 
+  -> AMD
+     FAIL: 
+  -> AVGO
+     FAIL: 
+  -> NFLX
+     FAIL: 
+[mini-prewarm] 14:50 ET - tickers: ['COIN', 'PLTR', 'SMCI', 'CRM']
+  -> COIN
+     FAIL: 
+  -> PLTR
+     FAIL: 
+  -> SMCI
+     FAIL: 
+  -> CRM
+     FAIL: 
+[mini-prewarm] 14:55 ET - tickers: ['ORCL', 'UBER', 'DIS', 'BA']
+  -> ORCL
+     FAIL: 
+  -> UBER
+     FAIL: 
+  -> DIS
+     FAIL: 
+  -> BA
+     FAIL: 
+[mini-prewarm] 15:00 ET - tickers: ['SPY', 'QQQ', 'NVDA', 'AAPL']
+  -> SPY
+     FAIL: 
+  -> QQQ
+     FAIL: 
+  -> NVDA
+     FAIL: 
+  -> AAPL
+     FAIL: 
+[mini-prewarm] 15:05 ET - tickers: ['MSFT', 'TSLA', 'AMZN', 'META']
+  -> MSFT
+     FAIL: 
+  -> TSLA
+     FAIL: 
+  -> AMZN
+     FAIL: 
+  -> META
+     FAIL: 
+[mini-prewarm] 15:10 ET - tickers: ['GOOGL', 'AMD', 'AVGO', 'NFLX']
+  -> GOOGL
+     FAIL: 
+  -> AMD
+     FAIL: 
+  -> AVGO
+     FAIL: 
+  -> NFLX
+     FAIL: 
+[mini-prewarm] 15:15 ET - tickers: ['COIN', 'PLTR', 'SMCI', 'CRM']
+  -> COIN
+     FAIL: 
+  -> PLTR
+     FAIL: 
+  -> SMCI
+     FAIL: 
+  -> CRM
+     FAIL: 
+[mini-prewarm] 15:20 ET - tickers: ['ORCL', 'UBER', 'DIS', 'BA']
+  -> ORCL
+     FAIL: 
+  -> UBER
+     FAIL: 
+  -> DIS
+     FAIL: 
+  -> BA
+     FAIL: 
+[mini-prewarm] 15:25 ET - tickers: ['SPY', 'QQQ', 'NVDA', 'AAPL']
+  -> SPY
+     FAIL: 
+  -> QQQ
+     FAIL: 
+  -> NVDA
+     FAIL: 
+  -> AAPL
+     FAIL: 
+[mini-prewarm] 15:30 ET - tickers: ['MSFT', 'TSLA', 'AMZN', 'META']
+  -> MSFT
+     FAIL: 
+  -> TSLA
+     FAIL: 
+  -> AMZN
+     FAIL: 
+  -> META
+     FAIL: 
+[mini-prewarm] 15:35 ET - tickers: ['GOOGL', 'AMD', 'AVGO', 'NFLX']
+  -> GOOGL
+     FAIL: 
+  -> AMD
+     FAIL: 
+  -> AVGO
+     FAIL: 
+  -> NFLX
+     FAIL: 
+[mini-prewarm] 15:40 ET - tickers: ['COIN', 'PLTR', 'SMCI', 'CRM']
+  -> COIN
+     FAIL: 
+  -> PLTR
+     FAIL: 
+  -> SMCI
+     FAIL: 
+  -> CRM
+     FAIL: 
+[mini-prewarm] 15:45 ET - tickers: ['ORCL', 'UBER', 'DIS', 'BA']
+  -> ORCL
+     FAIL: 
+  -> UBER
+     FAIL: 
+  -> DIS
+     FAIL: 
+  -> BA
+     FAIL: 
+[mini-prewarm] 15:50 ET - tickers: ['SPY', 'QQQ', 'NVDA', 'AAPL']
+  -> SPY
+     FAIL: 
+  -> QQQ
+     FAIL: 
+  -> NVDA
+     FAIL: 
+  -> AAPL
+     FAIL: 
+[mini-prewarm] 15:55 ET - tickers: ['MSFT', 'TSLA', 'AMZN', 'META']
+  -> MSFT
+     FAIL: 
+  -> TSLA
+     FAIL: 
+  -> AMZN
+     FAIL: 
+  -> META
+     FAIL: 
+[mini-prewarm] 09:00 ET - tickers: ['GOOGL', 'AMD', 'AVGO', 'NFLX']
+  -> GOOGL
+     FAIL: 
+  -> AMD
+     FAIL: 
+  -> AVGO
+     FAIL: 
+  -> NFLX
+     FAIL: 
+[mini-prewarm] 09:05 ET - tickers: ['COIN', 'PLTR', 'SMCI', 'CRM']
+  -> COIN
+     FAIL: 
+  -> PLTR
+     FAIL: 
+  -> SMCI
+     FAIL: 
+  -> CRM
+     FAIL: 
+[mini-prewarm] 09:10 ET - tickers: ['ORCL', 'UBER', 'DIS', 'BA']
+  -> ORCL
+     FAIL: 
+  -> UBER
+     FAIL: 
+  -> DIS
+     FAIL: 
+  -> BA
+     FAIL: 
+[mini-prewarm] 09:15 ET - tickers: ['SPY', 'QQQ', 'NVDA', 'AAPL']
+  -> SPY
+     FAIL: 
+  -> QQQ
+     FAIL: 
+  -> NVDA
+     FAIL: 
+  -> AAPL
+     FAIL: 
+[mini-prewarm] 09:20 ET - tickers: ['MSFT', 'TSLA', 'AMZN', 'META']
+  -> MSFT
+     FAIL: 
+  -> TSLA
+     FAIL: 
+  -> AMZN
+     FAIL: 
+  -> META
+     FAIL: 
+[mini-prewarm] 09:25 ET - tickers: ['GOOGL', 'AMD', 'AVGO', 'NFLX']
+  -> GOOGL
+     FAIL: 
+  -> AMD
+     FAIL: 
+  -> AVGO
+     FAIL: 
+  -> NFLX
+     FAIL: 
+[mini-prewarm] 09:30 ET - tickers: ['COIN', 'PLTR', 'SMCI', 'CRM']
+  -> COIN
+     FAIL: 
+  -> PLTR
+     FAIL: 
+  -> SMCI
+     FAIL: 
+  -> CRM
+     FAIL: 
+[mini-prewarm] 09:35 ET - tickers: ['ORCL', 'UBER', 'DIS', 'BA']
+  -> ORCL
+     FAIL: 
+  -> UBER
+     FAIL: 
+  -> DIS
+     FAIL: 
+  -> BA
+     FAIL: 
+[mini-prewarm] 09:40 ET - tickers: ['SPY', 'QQQ', 'NVDA', 'AAPL']
+  -> SPY
+     FAIL: 
+  -> QQQ
+     FAIL: 
+  -> NVDA
+     FAIL: 
+  -> AAPL
+     FAIL: 
+[mini-prewarm] 09:45 ET - tickers: ['MSFT', 'TSLA', 'AMZN', 'META']
+  -> MSFT
+     FAIL: 
+  -> TSLA
+     FAIL: 
+  -> AMZN
+     FAIL: 
+  -> META
+     FAIL: 
+[mini-prewarm] 09:50 ET - tickers: ['GOOGL', 'AMD', 'AVGO', 'NFLX']
+  -> GOOGL
+     FAIL: 
+  -> AMD
+     FAIL: 
+  -> AVGO
+     FAIL: 
+  -> NFLX
+     FAIL: 
+[mini-prewarm] 09:55 ET - tickers: ['COIN', 'PLTR', 'SMCI', 'CRM']
+  -> COIN
+     FAIL: 
+  -> PLTR
+     FAIL: 
+  -> SMCI
+     FAIL: 
+  -> CRM
+     FAIL: 
+[mini-prewarm] 10:00 ET - tickers: ['ORCL', 'UBER', 'DIS', 'BA']
+  -> ORCL
+     FAIL: 
+  -> UBER
+     FAIL: 
+  -> DIS
+     FAIL: 
+  -> BA
+     FAIL: 
+[mini-prewarm] 10:05 ET - tickers: ['SPY', 'QQQ', 'NVDA', 'AAPL']
+  -> SPY
+     FAIL: 
+  -> QQQ
+     FAIL: 
+  -> NVDA
+     FAIL: 
+  -> AAPL
+     FAIL: 
+[mini-prewarm] 10:10 ET - tickers: ['MSFT', 'TSLA', 'AMZN', 'META']
+  -> MSFT
+     FAIL: 
+  -> TSLA
+     FAIL: 
+  -> AMZN
+     FAIL: 
+  -> META
+     FAIL: 
+[mini-prewarm] 10:15 ET - tickers: ['GOOGL', 'AMD', 'AVGO', 'NFLX']
+  -> GOOGL
+     FAIL: 
+  -> AMD
+     FAIL: 
+  -> AVGO
+     FAIL: 
+  -> NFLX
+     FAIL: 
+[mini-prewarm] 10:20 ET - tickers: ['COIN', 'PLTR', 'SMCI', 'CRM']
+  -> COIN
+     FAIL: 
+  -> PLTR
+     FAIL: 
+  -> SMCI
+     FAIL: 
+  -> CRM
+     FAIL: 
+[mini-prewarm] 10:25 ET - tickers: ['ORCL', 'UBER', 'DIS', 'BA']
+  -> ORCL
+     FAIL: 
+  -> UBER
+     FAIL: 
+  -> DIS
+     FAIL: 
+  -> BA
+     FAIL: 
+[mini-prewarm] 10:30 ET - tickers: ['SPY', 'QQQ', 'NVDA', 'AAPL']
+  -> SPY
+     FAIL: 
+  -> QQQ
+     FAIL: 
+  -> NVDA
+     FAIL: 
+  -> AAPL
+     FAIL: 
+[mini-prewarm] 10:35 ET - tickers: ['MSFT', 'TSLA', 'AMZN', 'META']
+  -> MSFT
+     FAIL: 
+  -> TSLA
+     FAIL: 
+  -> AMZN
+     FAIL: 
+  -> META
+     FAIL: 
+[mini-prewarm] 10:40 ET - tickers: ['GOOGL', 'AMD', 'AVGO', 'NFLX']
+  -> GOOGL
+     FAIL: 
+  -> AMD
+     FAIL: 
+  -> AVGO
+     FAIL: 
+  -> NFLX
+     FAIL: 
+[mini-prewarm] 10:45 ET - tickers: ['COIN', 'PLTR', 'SMCI', 'CRM']
+  -> COIN
+     FAIL: 
+  -> PLTR
+     FAIL: 
+  -> SMCI
+     FAIL: 
+  -> CRM
+     FAIL: 
+[mini-prewarm] 10:50 ET - tickers: ['ORCL', 'UBER', 'DIS', 'BA']
+  -> ORCL
+     FAIL: 
+  -> UBER
+     FAIL: 
+  -> DIS
+     FAIL: 
+  -> BA
+     FAIL: 
+[mini-prewarm] 10:55 ET - tickers: ['SPY', 'QQQ', 'NVDA', 'AAPL']
+  -> SPY
+     FAIL: 
+  -> QQQ
+     FAIL: 
+  -> NVDA
+     FAIL: 
+  -> AAPL
+     FAIL: 
+[mini-prewarm] 11:00 ET - tickers: ['MSFT', 'TSLA', 'AMZN', 'META']
+  -> MSFT
+     FAIL: 
+  -> TSLA
+     FAIL: 
+  -> AMZN
+     FAIL: 
+  -> META
+     FAIL: 
+[mini-prewarm] 11:05 ET - tickers: ['GOOGL', 'AMD', 'AVGO', 'NFLX']
+  -> GOOGL
+     FAIL: 
+  -> AMD
+     FAIL: 
+  -> AVGO
+     FAIL: 
+  -> NFLX
+     FAIL: 
+[mini-prewarm] 11:10 ET - tickers: ['COIN', 'PLTR', 'SMCI', 'CRM']
+  -> COIN
+     FAIL: 
+  -> PLTR
+     FAIL: 
+  -> SMCI
+     FAIL: 
+  -> CRM
+     FAIL: 
+[mini-prewarm] 11:15 ET - tickers: ['ORCL', 'UBER', 'DIS', 'BA']
+  -> ORCL
+     FAIL: 
+  -> UBER
+     FAIL: 
+  -> DIS
+     FAIL: 
+  -> BA
+     FAIL: 
+[mini-prewarm] 11:20 ET - tickers: ['SPY', 'QQQ', 'NVDA', 'AAPL']
+  -> SPY
+     FAIL: 
+  -> QQQ
+     FAIL: 
+  -> NVDA
+     FAIL: 
+  -> AAPL
+     FAIL: 
+[mini-prewarm] 11:25 ET - tickers: ['MSFT', 'TSLA', 'AMZN', 'META']
+  -> MSFT
+     FAIL: 
+  -> TSLA
+     FAIL: 
+  -> AMZN
+     FAIL: 
+  -> META
+     FAIL: 
+[mini-prewarm] 11:30 ET - tickers: ['GOOGL', 'AMD', 'AVGO', 'NFLX']
+  -> GOOGL
+     FAIL: 
+  -> AMD
+     FAIL: 
+  -> AVGO
+     FAIL: 
+  -> NFLX
+     FAIL: 
+[mini-prewarm] 11:35 ET - tickers: ['COIN', 'PLTR', 'SMCI', 'CRM']
+  -> COIN
+     FAIL: 
+  -> PLTR
+     FAIL: 
+  -> SMCI
+     FAIL: 
+  -> CRM
+     FAIL: 
+[mini-prewarm] 11:40 ET - tickers: ['ORCL', 'UBER', 'DIS', 'BA']
+  -> ORCL
+     FAIL: 
+  -> UBER
+     FAIL: 
+  -> DIS
+     FAIL: 
+  -> BA
+     FAIL: 
+[mini-prewarm] 11:45 ET - tickers: ['SPY', 'QQQ', 'NVDA', 'AAPL']
+  -> SPY
+     FAIL: 
+  -> QQQ
+     FAIL: 
+  -> NVDA
+     FAIL: 
+  -> AAPL
+     FAIL: 
+[mini-prewarm] 11:50 ET - tickers: ['MSFT', 'TSLA', 'AMZN', 'META']
+  -> MSFT
+     FAIL: 
+  -> TSLA
+     FAIL: 
+  -> AMZN
+     FAIL: 
+  -> META
+     FAIL: 
+[mini-prewarm] 11:55 ET - tickers: ['GOOGL', 'AMD', 'AVGO', 'NFLX']
+  -> GOOGL
+     FAIL: 
+  -> AMD
+     FAIL: 
+  -> AVGO
+     FAIL: 
+  -> NFLX
+     FAIL: 
+[mini-prewarm] 12:00 ET - tickers: ['COIN', 'PLTR', 'SMCI', 'CRM']
+  -> COIN
+     FAIL: 
+  -> PLTR
+     FAIL: 
+  -> SMCI
+     FAIL: 
+  -> CRM
+     FAIL: 
+[mini-prewarm] 12:05 ET - tickers: ['ORCL', 'UBER', 'DIS', 'BA']
+  -> ORCL
+     FAIL: 
+  -> UBER
+     FAIL: 
+  -> DIS
+     FAIL: 
+  -> BA
+     FAIL: 
+[mini-prewarm] 12:10 ET - tickers: ['SPY', 'QQQ', 'NVDA', 'AAPL']
+  -> SPY
+     FAIL: 
+  -> QQQ
+     FAIL: 
+  -> NVDA
+     FAIL: 
+  -> AAPL
+     FAIL: 
+[mini-prewarm] 12:15 ET - tickers: ['MSFT', 'TSLA', 'AMZN', 'META']
+  -> MSFT
+     FAIL: 
+  -> TSLA
+     FAIL: 
+  -> AMZN
+     FAIL: 
+  -> META
+     FAIL: 
+[mini-prewarm] 12:20 ET - tickers: ['GOOGL', 'AMD', 'AVGO', 'NFLX']
+  -> GOOGL
+     FAIL: 
+  -> AMD
+     FAIL: 
+  -> AVGO
+     FAIL: 
+  -> NFLX
+     FAIL: 
+[mini-prewarm] 12:25 ET - tickers: ['COIN', 'PLTR', 'SMCI', 'CRM']
+  -> COIN
+     FAIL: 
+  -> PLTR
+     FAIL: 
+  -> SMCI
+     FAIL: 
+  -> CRM
+     FAIL: 
+[mini-prewarm] 12:30 ET - tickers: ['ORCL', 'UBER', 'DIS', 'BA']
+  -> ORCL
+     FAIL: 
+  -> UBER
+     FAIL: 
+  -> DIS
+     FAIL: 
+  -> BA
+     FAIL: 
+[mini-prewarm] 12:35 ET - tickers: ['SPY', 'QQQ', 'NVDA', 'AAPL']
+  -> SPY
+     FAIL: 
+  -> QQQ
+     FAIL: 
+  -> NVDA
+     FAIL: 
+  -> AAPL
+     FAIL: 
+[mini-prewarm] 12:40 ET - tickers: ['MSFT', 'TSLA', 'AMZN', 'META']
+  -> MSFT
+     FAIL: 
+  -> TSLA
+     FAIL: 
+  -> AMZN
+     FAIL: 
+  -> META
+     FAIL: 
+[mini-prewarm] 12:45 ET - tickers: ['GOOGL', 'AMD', 'AVGO', 'NFLX']
+  -> GOOGL
+     FAIL: 
+  -> AMD
+     FAIL: 
+  -> AVGO
+     FAIL: 
+  -> NFLX
+     FAIL: 
+[mini-prewarm] 12:50 ET - tickers: ['COIN', 'PLTR', 'SMCI', 'CRM']
+  -> COIN
+     FAIL: 
+  -> PLTR
+     FAIL: 
+  -> SMCI
+     FAIL: 
+  -> CRM
+     FAIL: 
+[mini-prewarm] 12:55 ET - tickers: ['ORCL', 'UBER', 'DIS', 'BA']
+  -> ORCL
+     FAIL: 
+  -> UBER
+     FAIL: 
+  -> DIS
+     FAIL: 
+  -> BA
+     FAIL: 
+[mini-prewarm] 13:00 ET - tickers: ['SPY', 'QQQ', 'NVDA', 'AAPL']
+  -> SPY
+     FAIL: 
+  -> QQQ
+     FAIL: 
+  -> NVDA
+     FAIL: 
+  -> AAPL
+     FAIL: 
+[mini-prewarm] 13:05 ET - tickers: ['MSFT', 'TSLA', 'AMZN', 'META']
+  -> MSFT
+     FAIL: 
+  -> TSLA
+     FAIL: 
+  -> AMZN
+     FAIL: 
+  -> META
+     FAIL: 
+[mini-prewarm] 13:10 ET - tickers: ['GOOGL', 'AMD', 'AVGO', 'NFLX']
+  -> GOOGL
+     FAIL: 
+  -> AMD
+     FAIL: 
+  -> AVGO
+     FAIL: 
+  -> NFLX
+     FAIL: 
+[mini-prewarm] 13:15 ET - tickers: ['COIN', 'PLTR', 'SMCI', 'CRM']
+  -> COIN
+     FAIL: 
+  -> PLTR
+     FAIL: 
+  -> SMCI
+     FAIL: 
+  -> CRM
+     FAIL: 
+[mini-prewarm] 13:20 ET - tickers: ['ORCL', 'UBER', 'DIS', 'BA']
+  -> ORCL
+     FAIL: 
+  -> UBER
+     FAIL: 
+  -> DIS
+     FAIL: 
+  -> BA
+     FAIL: 
+[mini-prewarm] 13:25 ET - tickers: ['SPY', 'QQQ', 'NVDA', 'AAPL']
+  -> SPY
+     FAIL: 
+  -> QQQ
+     FAIL: 
+  -> NVDA
+     FAIL: 
+  -> AAPL
+     FAIL: 
+[mini-prewarm] 13:30 ET - tickers: ['MSFT', 'TSLA', 'AMZN', 'META']
+  -> MSFT
+     FAIL: 
+  -> TSLA
+     FAIL: 
+  -> AMZN
+     FAIL: 
+  -> META
+     FAIL: 
+[mini-prewarm] 13:35 ET - tickers: ['GOOGL', 'AMD', 'AVGO', 'NFLX']
+  -> GOOGL
+     FAIL: 
+  -> AMD
+     FAIL: 
+  -> AVGO
+     FAIL: 
+  -> NFLX
+     FAIL: 
+[mini-prewarm] 13:40 ET - tickers: ['COIN', 'PLTR', 'SMCI', 'CRM']
+  -> COIN
+     FAIL: 
+  -> PLTR
+     FAIL: 
+  -> SMCI
+     FAIL: 
+  -> CRM
+     FAIL: 
+[mini-prewarm] 13:45 ET - tickers: ['ORCL', 'UBER', 'DIS', 'BA']
+  -> ORCL
+     FAIL: 
+  -> UBER
+     FAIL: 
+  -> DIS
+     FAIL: 
+  -> BA
+     FAIL: 
+[mini-prewarm] 13:50 ET - tickers: ['SPY', 'QQQ', 'NVDA', 'AAPL']
+  -> SPY
+     FAIL: 
+  -> QQQ
+     FAIL: 
+  -> NVDA
+     FAIL: 
+  -> AAPL
+     FAIL: 
+[mini-prewarm] 13:55 ET - tickers: ['MSFT', 'TSLA', 'AMZN', 'META']
+  -> MSFT
+     FAIL: 
+  -> TSLA
+     FAIL: 
+  -> AMZN
+     FAIL: 
+  -> META
+     FAIL: 
+[mini-prewarm] 14:00 ET - tickers: ['GOOGL', 'AMD', 'AVGO', 'NFLX']
+  -> GOOGL
+     FAIL: 
+  -> AMD
+     FAIL: 
+  -> AVGO
+     FAIL: 
+  -> NFLX
+     FAIL: 
+[mini-prewarm] 14:05 ET - tickers: ['COIN', 'PLTR', 'SMCI', 'CRM']
+  -> COIN
+     FAIL: 
+  -> PLTR
+     FAIL: 
+  -> SMCI
+     FAIL: 
+  -> CRM
+     FAIL: 
+[mini-prewarm] 14:10 ET - tickers: ['ORCL', 'UBER', 'DIS', 'BA']
+  -> ORCL
+     FAIL: 
+  -> UBER
+     FAIL: 
+  -> DIS
+     FAIL: 
+  -> BA
+     FAIL: 
+[mini-prewarm] 14:15 ET - tickers: ['SPY', 'QQQ', 'NVDA', 'AAPL']
+  -> SPY
+     FAIL: 
+  -> QQQ
+     FAIL: 
+  -> NVDA
+     FAIL: 
+  -> AAPL
+     FAIL: 
+[mini-prewarm] 14:20 ET - tickers: ['MSFT', 'TSLA', 'AMZN', 'META']
+  -> MSFT
+     FAIL: 
+  -> TSLA
+     FAIL: 
+  -> AMZN
+     FAIL: 
+  -> META
+     FAIL: 
+[mini-prewarm] 14:25 ET - tickers: ['GOOGL', 'AMD', 'AVGO', 'NFLX']
+  -> GOOGL
+     FAIL: 
+  -> AMD
+     FAIL: 
+  -> AVGO
+     FAIL: 
+  -> NFLX
+     FAIL: 
+[mini-prewarm] 14:30 ET - tickers: ['COIN', 'PLTR', 'SMCI', 'CRM']
+  -> COIN
+     FAIL: 
+  -> PLTR
+     FAIL: 
+  -> SMCI
+     FAIL: 
+  -> CRM
+     FAIL: 
+[mini-prewarm] 14:35 ET - tickers: ['ORCL', 'UBER', 'DIS', 'BA']
+  -> ORCL
+     FAIL: 
+  -> UBER
+     FAIL: 
+  -> DIS
+     FAIL: 
+  -> BA
+     FAIL: 
+[mini-prewarm] 14:40 ET - tickers: ['SPY', 'QQQ', 'NVDA', 'AAPL']
+  -> SPY
+     FAIL: 
+  -> QQQ
+     FAIL: 
+  -> NVDA
+     FAIL: 
+  -> AAPL
+     FAIL: 
+[mini-prewarm] 14:45 ET - tickers: ['MSFT', 'TSLA', 'AMZN', 'META']
+  -> MSFT
+     FAIL: 
+  -> TSLA
+     FAIL: 
+  -> AMZN
+     FAIL: 
+  -> META
+     FAIL: 
+[mini-prewarm] 14:50 ET - tickers: ['GOOGL', 'AMD', 'AVGO', 'NFLX']
+  -> GOOGL
+     FAIL: 
+  -> AMD
+     FAIL: 
+  -> AVGO
+     FAIL: 
+  -> NFLX
+     FAIL: 
+[mini-prewarm] 14:55 ET - tickers: ['COIN', 'PLTR', 'SMCI', 'CRM']
+  -> COIN
+     FAIL: 
+  -> PLTR
+     FAIL: 
+  -> SMCI
+     FAIL: 
+  -> CRM
+     FAIL: 
+[mini-prewarm] 15:00 ET - tickers: ['ORCL', 'UBER', 'DIS', 'BA']
+  -> ORCL
+Traceback (most recent call last):
+  File "/home/ubuntu/scripts/kronos_mini_prewarm", line 42, in <module>
+    r = subprocess.run(
+  File "/usr/lib/python3.10/subprocess.py", line 505, in run
+    stdout, stderr = process.communicate(input, timeout=timeout)
+  File "/usr/lib/python3.10/subprocess.py", line 1154, in communicate
+    stdout, stderr = self._communicate(input, endtime, timeout)
+  File "/usr/lib/python3.10/subprocess.py", line 2022, in _communicate
+    self._check_timeout(endtime, orig_timeout, stdout, stderr)
+  File "/usr/lib/python3.10/subprocess.py", line 1198, in _check_timeout
+    raise TimeoutExpired(
+subprocess.TimeoutExpired: Command '['python3', '/home/ubuntu/scripts/kronos_forecast_tiered.py', '--ticker', 'ORCL', '--tier', 'mini', '--no-discord']' timed out after 120 seconds
+[mini-prewarm] 15:05 ET - tickers: ['SPY', 'QQQ', 'NVDA', 'AAPL']
+  -> SPY
+     FAIL: 
+  -> QQQ
+     FAIL: 
+  -> NVDA
+     FAIL: 
+  -> AAPL
+     FAIL: 
+[mini-prewarm] 15:10 ET - tickers: ['MSFT', 'TSLA', 'AMZN', 'META']
+  -> MSFT
+     FAIL: 
+  -> TSLA
+     FAIL: 
+  -> AMZN
+     FAIL: 
+  -> META
+     FAIL: 
+[mini-prewarm] 15:15 ET - tickers: ['GOOGL', 'AMD', 'AVGO', 'NFLX']
+  -> GOOGL
+     FAIL: 
+  -> AMD
+     FAIL: 
+  -> AVGO
+     FAIL: 
+  -> NFLX
+     FAIL: 
+[mini-prewarm] 15:20 ET - tickers: ['COIN', 'PLTR', 'SMCI', 'CRM']
+  -> COIN
+     FAIL: 
+  -> PLTR
+     FAIL: 
+  -> SMCI
+     FAIL: 
+  -> CRM
+     FAIL: 
+[mini-prewarm] 15:25 ET - tickers: ['ORCL', 'UBER', 'DIS', 'BA']
+  -> ORCL
+     FAIL: 
+  -> UBER
+     FAIL: 
+  -> DIS
+     FAIL: 
+  -> BA
+     FAIL: 
+[mini-prewarm] 15:30 ET - tickers: ['SPY', 'QQQ', 'NVDA', 'AAPL']
+  -> SPY
+     FAIL: 
+  -> QQQ
+     FAIL: 
+  -> NVDA
+     FAIL: 
+  -> AAPL
+     FAIL: 
+[mini-prewarm] 15:35 ET - tickers: ['MSFT', 'TSLA', 'AMZN', 'META']
+  -> MSFT
+     FAIL: 
+  -> TSLA
+     FAIL: 
+  -> AMZN
+     FAIL: 
+  -> META
+     FAIL: 
+[mini-prewarm] 15:40 ET - tickers: ['GOOGL', 'AMD', 'AVGO', 'NFLX']
+  -> GOOGL
+     FAIL: 
+  -> AMD
+     FAIL: 
+  -> AVGO
+     FAIL: 
+  -> NFLX
+     FAIL: 
+[mini-prewarm] 15:45 ET - tickers: ['COIN', 'PLTR', 'SMCI', 'CRM']
+  -> COIN
+     FAIL: 
+  -> PLTR
+     FAIL: 
+  -> SMCI
+     FAIL: 
+  -> CRM
+     FAIL: 
+[mini-prewarm] 15:50 ET - tickers: ['ORCL', 'UBER', 'DIS', 'BA']
+  -> ORCL
+     FAIL: 
+  -> UBER
+     FAIL: 
+  -> DIS
+     FAIL: 
+  -> BA
+     FAIL: 
+[mini-prewarm] 15:55 ET - tickers: ['SPY', 'QQQ', 'NVDA', 'AAPL']
+  -> SPY
+     FAIL: 
+  -> QQQ
+     FAIL: 
+  -> NVDA
+     FAIL: 
+  -> AAPL
+     FAIL: 

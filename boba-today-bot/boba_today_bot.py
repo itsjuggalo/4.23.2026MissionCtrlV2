@@ -15,7 +15,7 @@ def _read(name):
     p = SECRETS / name
     return p.read_text().strip() if p.exists() else ""
 
-TOKEN = _read("discord_boba_qa_token") or _read("discord_boba_token")
+TOKEN = _read("discord_boba_today_token") or _read("discord_boba_qa_token")
 if not TOKEN:
     print("FATAL: no Discord bot token", flush=True)
     sys.exit(1)

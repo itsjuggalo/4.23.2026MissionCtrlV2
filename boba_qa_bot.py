@@ -414,7 +414,7 @@ def call_claude(question, context):
                 "content-type": "application/json",
             },
             json={
-                "model": "claude-sonnet-4-5",
+                "model": "claude-haiku-4-5-20251001",
                 "max_tokens": 800,
                 "messages": [{
                     "role": "user",
@@ -432,10 +432,10 @@ def call_claude(question, context):
         )
         _dur_ms = int((_time_tracker.time() - _t0) * 1000)
         if r.status_code != 200:
-            _log_anthropic_call("boba_qa_bot", "claude-sonnet-4-5", None, _dur_ms, success=False, error=f"HTTP {r.status_code}")
+            _log_anthropic_call("boba_qa_bot", "claude-haiku-4-5-20251001", None, _dur_ms, success=False, error=f"HTTP {r.status_code}")
             return f"Claude API error {r.status_code}: {r.text[:200]}"
         data = r.json()
-        _log_anthropic_call("boba_qa_bot", "claude-sonnet-4-5", data, _dur_ms, success=True)
+        _log_anthropic_call("boba_qa_bot", "claude-haiku-4-5-20251001", data, _dur_ms, success=True)
         return data["content"][0]["text"]
     except Exception as e:
         return f"Claude call failed: {e}"

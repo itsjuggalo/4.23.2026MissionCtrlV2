@@ -1,82 +1,120 @@
 #!/usr/bin/env python3
-"""Robinhood full portfolio — stocks + crypto via robin_stocks"""
-import json, sys, os
+# /// script
+# requires-python = ">=3.9"
+# dependencies = ["yfinance"]
+# ///
+"""Robinhood wallet data sourced from ~/portfolio/robinhood_holdings.json.
 
-try:
-    import robin_stocks.robinhood as rh
+Reads the parsed CSV holdings (positions of record), fetches current prices
+via yfinance, and emits the JSON contract /api/wallets/route.ts expects:
+  { stocks: [...], crypto: [...], stock_total, crypto_total, cash, as_of }
 
-    email = open(os.path.expanduser("~/.openclaw/secrets/robinhood-email.txt")).read().strip()
-    password = open(os.path.expanduser("~/.openclaw/secrets/robinhood-password.txt")).read().strip()
+Read-only and offline-safe — no Robinhood API call, no auth required.
+Replaces the previous live-API version after CSV ingest became the source.
+"""
+import json
+import sys
+import warnings
+from pathlib import Path
 
-    import io
-    old_stdout = sys.stdout
-    sys.stdout = io.StringIO()
-    login = rh.login(email, password, store_session=True)
-    sys.stdout = old_stdout
-    if not login:
-        print(json.dumps({"error": "Login failed"}))
-        sys.exit(1)
+warnings.filterwarnings("ignore")
+import yfinance as yf
 
-    # Stock holdings
-    holdings = rh.build_holdings()
-    stocks = []
-    stock_total = 0
-    for symbol, data in holdings.items():
-        equity = float(data.get('equity', 0))
-        stocks.append({
-            "symbol": symbol,
-            "quantity": float(data.get('quantity', 0)),
-            "avg_cost": float(data.get('average_buy_price', 0)),
-            "price": float(data.get('price', 0)),
-            "equity": equity,
-            "pct_change": float(data.get('percent_change', 0)),
-            "type": "stock"
-        })
-        stock_total += equity
+CRYPTO = {"BTC", "ETH", "SOL", "XRP", "DOGE", "ADA", "AVAX", "MATIC", "LINK",
+          "DOT", "LTC", "BCH", "XLM", "ALGO", "ATOM", "UNI", "AAVE", "SHIB",
+          "POL", "HYPE", "GRT", "SAND", "MANA", "FIL", "NEAR", "APE", "PEPE",
+          "FET", "ICP", "RNDR", "OP", "ARB"}
 
-    stocks.sort(key=lambda x: -x['equity'])
+HOLDINGS = Path.home() / "portfolio" / "robinhood_holdings.json"
 
-    # Account profile
-    profile = rh.build_user_profile()
-    total_equity = float(profile.get('equity', 0))
-    cash = float(profile.get('cash', 0))
+if not HOLDINGS.exists():
+    print(json.dumps({
+        "error": "no ~/portfolio/robinhood_holdings.json — upload a Robinhood CSV first"
+    }))
+    sys.exit(0)
 
-    # Crypto (already have this from the other script, but let's get it here too)
-    crypto_positions = []
+d = json.load(open(HOLDINGS))
+raw = d.get("holdings", [])
+
+stock_in = [h for h in raw if h["symbol"] not in CRYPTO]
+crypto_in = [h for h in raw if h["symbol"] in CRYPTO]
+all_yf = ([h["symbol"] for h in stock_in]
+          + [h["symbol"] + "-USD" for h in crypto_in])
+
+prices = {}
+if all_yf:
+    data = yf.download(all_yf, period="2d", progress=False,
+                       auto_adjust=False, group_by="ticker")
+    for s in all_yf:
+        try:
+            if len(set(all_yf)) == 1:
+                px = float(data["Close"].iloc[-1])
+            else:
+                px = float(data[s]["Close"].iloc[-1])
+            prices[s] = px if px == px else 0.0
+        except Exception:
+            prices[s] = 0.0
+
+stocks = []
+for h in stock_in:
+    sym = h["symbol"]
+    px = prices.get(sym, 0.0)
+    qty = h["quantity"]
+    avg = h.get("avg_cost", 0.0)
+    eq = qty * px
+    pct = ((px - avg) / avg * 100) if avg > 0 else 0.0
+    stocks.append({
+        "symbol": sym,
+        "quantity": round(qty, 6),
+        "avg_cost": round(avg, 4),
+        "price": round(px, 4),
+        "equity": round(eq, 2),
+        "pct_change": round(pct, 2),
+    })
+
+crypto = []
+for h in crypto_in:
+    sym = h["symbol"]
+    yfs = sym + "-USD"
+    px = prices.get(yfs, 0.0)
+    qty = h["quantity"]
+    eq = qty * px
+    crypto.append({
+        "symbol": sym,
+        "quantity": round(qty, 8),
+        "price": round(px, 4),
+        "equity": round(eq, 2),
+    })
+
+# Robinhood Crypto holdings come from the live Robinhood Crypto API, snapshot
+# at ~/portfolio/robinhood_crypto_holdings.json (refreshed by robinhood-holdings.py).
+crypto_snap = Path.home() / "portfolio" / "robinhood_crypto_holdings.json"
+if crypto_snap.exists():
     try:
-        crypto = rh.get_crypto_positions()
-        for c in crypto:
-            qty = float(c.get('quantity_available', 0))
-            if qty > 0:
-                code = c.get('currency', {}).get('code', '?')
-                try:
-                    quote = rh.get_crypto_quote(code)
-                    price = float(quote.get('mark_price', 0))
-                except:
-                    price = 0
-                val = qty * price
-                crypto_positions.append({
-                    "symbol": code,
-                    "quantity": qty,
-                    "price": price,
-                    "equity": val,
-                    "type": "crypto"
-                })
-    except:
+        cd = json.load(open(crypto_snap))
+        for r in cd.get("results", []):
+            qty = float(r.get("total_quantity") or 0)
+            if qty <= 0:
+                continue
+            px = float(r.get("price_usd") or 0)
+            crypto.append({
+                "symbol": r.get("asset_code", "?"),
+                "quantity": round(qty, 8),
+                "price": round(px, 4),
+                "equity": round(float(r.get("value_usd") or 0), 2),
+            })
+    except Exception:
         pass
 
-    crypto_total = sum(c['equity'] for c in crypto_positions)
-    crypto_positions.sort(key=lambda x: -x['equity'])
+stocks.sort(key=lambda x: -x["equity"])
+crypto.sort(key=lambda x: -x["equity"])
 
-    print(json.dumps({
-        "stocks": stocks,
-        "crypto": crypto_positions,
-        "stock_total": round(stock_total, 2),
-        "crypto_total": round(crypto_total, 2),
-        "total_equity": round(total_equity, 2),
-        "cash": round(cash, 2),
-        "position_count": len(stocks) + len(crypto_positions),
-    }))
-
-except Exception as ex:
-    print(json.dumps({"error": str(ex)}))
+print(json.dumps({
+    "stocks": stocks,
+    "crypto": crypto,
+    "stock_total": round(sum(x["equity"] for x in stocks), 2),
+    "crypto_total": round(sum(x["equity"] for x in crypto), 2),
+    "cash": 0,
+    "as_of": d.get("as_of"),
+    "source": "csv",
+}))

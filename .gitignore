@@ -5,3 +5,18 @@ __pycache__/
 *.bak-*
 brief_prompts/
 
+*_token*
+*token.txt
+*_key*
+*key.txt
+*_secret*
+*secret.txt
+*_password*
+*password.txt
+*.env
+.env*
+*.pem
+*.b64
+*api_key*
+creds*
+credentials*

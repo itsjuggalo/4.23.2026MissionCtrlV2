@@ -8,6 +8,7 @@ Block 4 will add /trade with arm/disarm safety.
 Locked to OWNER_ID. Slash commands sync to GUILD_ID for instant availability.
 """
 import asyncio
+import subprocess
 import sys as _sys_t; _sys_t.path.insert(0, '/home/ubuntu/scripts/lib')
 from anthropic_tracker import log_call as _log_anthropic_call
 import time as _time_t, json, os, sys, time, logging, re
@@ -43,7 +44,7 @@ RELAY_DATA = Path.home() / "mission-control-restored" / "Option-Signals-Scraper"
 ANTHROPIC_KEY = (SECRETS / "anthropic_api_key").read_text().strip()
 GROK_KEY_FILE = SECRETS / "xai_api_key"
 GROK_KEY = GROK_KEY_FILE.read_text().strip() if GROK_KEY_FILE.exists() else None
-ANTHROPIC_MODEL = "claude-sonnet-4-6"
+ANTHROPIC_MODEL = "claude-haiku-4-5-20251001"
 
 
 def _fmt_prem(v):
@@ -220,7 +221,8 @@ def _load_best_options_archive(min_age_min=0, max_age_min=240, max_show=10, min_
 
 
 def _ask_anthropic(question, context_blob=""):
-    """Send question to Claude with current MC context. Returns text response."""
+    """Send question to Claude Haiku via CLI subprocess. Returns text response."""
+    CLAUDE_BIN = "/home/ubuntu/.npm-global/bin/claude"
     system = (
         "You are Boba, the AI orchestrator for Mike's Mission Control trading system. "
         "Mike runs an algorithmic trading operation with multi-agent intelligence "
@@ -233,33 +235,37 @@ def _ask_anthropic(question, context_blob=""):
     )
     if context_blob:
         system += f"\n\nCurrent Mission Control context:\n{context_blob}"
+
+    _t0 = time.time()
     try:
-        _t0 = _time_tracker.time()
-        r = requests.post(
-            "https://api.anthropic.com/v1/messages",
-            headers={
-                "x-api-key": ANTHROPIC_KEY,
-                "anthropic-version": "2023-06-01",
-                "content-type": "application/json",
-            },
-            json={
-                "model": ANTHROPIC_MODEL,
-                "max_tokens": 1024,
-                "system": system,
-                "messages": [{"role": "user", "content": question}],
-            },
-            timeout=45,
+        result = subprocess.run(
+            [CLAUDE_BIN, "-p", "--model", "haiku", "--output-format", "text",
+             "--no-session-persistence", "--tools", "",
+             "--system-prompt", system],
+            input=question,
+            capture_output=True,
+            text=True,
+            timeout=60,
         )
-        _dur_ms = int((_time_tracker.time() - _t0) * 1000)
-        if r.status_code != 200:
-            _log_anthropic_call("boba_mega", ANTHROPIC_MODEL, None, _dur_ms, success=False, error=f"HTTP {r.status_code}")
-            logging.error(f"anthropic {r.status_code}: {r.text[:300]}")
-            return f"[Boba] API error {r.status_code}"
-        _data = r.json()
-        _log_anthropic_call("boba_mega", ANTHROPIC_MODEL, _data, _dur_ms, success=True)
-        return _data.get("content", [{}])[0].get("text", "").strip()
+        _dur_ms = int((time.time() - _t0) * 1000)
+
+        if result.returncode != 0:
+            _log_anthropic_call("boba_mega", ANTHROPIC_MODEL, None, _dur_ms,
+                                success=False, error=f"CLI exit {result.returncode}")
+            logging.error(f"anthropic CLI exit {result.returncode}: {result.stderr[:300]}")
+            return f"[Boba] API error {result.returncode}"
+
+        _log_anthropic_call("boba_mega", ANTHROPIC_MODEL, None, _dur_ms, success=True)
+        return result.stdout.strip()
+
+    except subprocess.TimeoutExpired:
+        _dur_ms = int((time.time() - _t0) * 1000)
+        _log_anthropic_call("boba_mega", ANTHROPIC_MODEL, None, _dur_ms,
+                            success=False, error="timeout 60s")
+        logging.error("anthropic CLI timeout (60s)")
+        return "[Boba] error: timeout (60s)"
     except Exception as e:
-        logging.error(f"anthropic {e}")
+        logging.error(f"anthropic CLI {e}")
         return f"[Boba] error: {e}"
 
 
@@ -866,7 +872,7 @@ async def boba_help(interaction: discord.Interaction):
         "• `/boba_help` — this menu\n"
         "\n"
         "**Text commands:**\n"
-        "• `!boba <question>` — Q&A via Anthropic claude-sonnet-4-6\n"
+        "• `!boba <question>` — Q&A via Anthropic claude-haiku-4-5-20251001\n"
         "• `!arm` — switch /trade to LIVE mode for 15 min\n"
         "• `!disarm` — back to PAPER\n"
         "• `!armstatus` — check current mode\n"
