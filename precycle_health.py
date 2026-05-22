@@ -39,11 +39,16 @@ SOURCES = [
         "required": True,
     },
     {
+        # Liveness is judged from the relay's own status file, not the feed file.
+        # The feed file only changes when a NEW signal lands (sparse), so its mtime
+        # is a poor freshness proxy; the relay rewrites the status file every poll
+        # (~60s) and records whether Firebase RTDB was actually reachable.
         "id": "firebase_trade_signals",
-        "path": "/home/ubuntu/.openclaw/workspace/directives/firebase_trade_signals.json",
-        "max_age_minutes": 30,
+        "path": "/home/ubuntu/.openclaw/workspace/directives/firebase_signal_relay_status.json",
+        "max_age_minutes": 5,
         "weekday_only": False,
         "required": True,
+        "relay_health": True,
     },
     {
         "id": "grok_brief",
@@ -209,6 +214,18 @@ def check_source(src):
         else:
             record["status"] = "RED" if src["required"] else "YELLOW"
             record["issue"] = f"stale {int(age_min)}min (max {src['max_age_minutes']})"
+
+    # Relay-status sources: a fresh file is not enough — the relay can be polling
+    # on schedule while every RTDB call 401s. Surface that explicitly (MIS-107).
+    if src.get("relay_health") and record["status"] != "RED":
+        try:
+            st = json.loads(p.read_text())
+            if not st.get("last_poll_ok"):
+                fails = st.get("consecutive_failures", 0)
+                record["status"] = "RED" if src["required"] else "YELLOW"
+                record["issue"] = f"relay RTDB unreachable ({fails} consecutive failed polls)"
+        except Exception:
+            pass
 
     return record
 

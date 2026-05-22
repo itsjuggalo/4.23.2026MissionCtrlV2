@@ -392,14 +392,15 @@ async def on_message(message):
             except Exception as e:
                 ctx_blocks.append(f"WHALE FLOW: error ({e})")
 
-            # 2. Firebase trade signals — Name/Name2/Vivid
+            # 2. Firebase trade signals — Name/Name2/Vivid (shared firebase_signals module)
             try:
-                fb = Path("/home/ubuntu/.openclaw/workspace/directives/firebase_trade_signals.json")
-                if fb.exists():
-                    fbs = _json.loads(fb.read_text())
-                    last10 = sorted(fbs, key=lambda x: x.get("captured_at", ""), reverse=True)[:10]
-                    lines = [f"  - [{s.get('source')}] {s.get('category')}: {s.get('ticker')} ${s.get('strike')} {'PUT' if s.get('is_put') else 'CALL'} exp {s.get('expiry')} | entry ${s.get('buy_target')} target ${s.get('sell_target')} SL ${s.get('stop_loss')} risk={s.get('risk')}" for s in last10]
-                    ctx_blocks.append("FIREBASE PROVIDER SIGNALS (Name/Name2/Vivid, last 10):\n" + "\n".join(lines))
+                import firebase_signals
+                fbs = firebase_signals.load_signals()
+                if fbs:
+                    ctx_blocks.append(
+                        "FIREBASE PROVIDER SIGNALS (Name/Name2/Vivid, last 10):\n"
+                        + firebase_signals.format_for_prompt(fbs, max_show=10)
+                    )
                 else:
                     ctx_blocks.append("FIREBASE: feed empty")
             except Exception as e:

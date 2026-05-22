@@ -41,6 +41,21 @@ def _load_lessons():
     lines = [L for L in p.read_text().splitlines() if L.startswith("- [")][-15:]  # last 15 lessons
     if not lines: return ""
     return "\n\nRECENT LESSONS LEARNED FROM LOSING TRADES (read these BEFORE picking; do not repeat the same mistake):\n" + "\n".join(lines) + "\n"
+
+def _load_active_position_rules():
+    """Load explicit per-position exit triggers maintained at
+    ~/.openclaw/workspace/memory/active_position_rules.md.
+    Format: free-form markdown. Returned text is prepended to the cycle prompt."""
+    from pathlib import Path
+    p = Path("/home/ubuntu/.openclaw/workspace/memory/active_position_rules.md")
+    if not p.exists():
+        return ""
+    txt = p.read_text().strip()
+    if not txt:
+        return ""
+    return "\n\n# ACTIVE POSITION EXIT RULES (apply BEFORE picking new contracts)\n" + txt + "\n\n"
+
+
 import json
 import os
 import subprocess
@@ -50,62 +65,145 @@ from datetime import datetime, timedelta, timezone
 from pathlib import Path
 
 JAZZY_MODEL = "gpt-4o-mini"  # Item 26: surfaced as constant for model_used logging
+STATE_DIR = Path("/home/ubuntu/.openclaw/workspace/state")
+KILLSWITCH = STATE_DIR / "jazzy_killswitch"
+SECRETS = Path("/home/ubuntu/.openclaw/secrets")
+SEEN_FILE = STATE_DIR / "jazzy_seen_signals.json"
+DECISIONS_LOG = Path("/home/ubuntu/.openclaw/workspace/skill_outputs/jazzy_decisions_validated.json")
+SIDECAR = Path("/home/ubuntu/mission-control/signal-receiver/data/scored_signals_recent.json")
+KRONOS_CMD = "/home/ubuntu/mission-control/agent-team/kronos/kronos_on_demand.py"
+MAX_PICKS_PER_CYCLE = 3
+MAX_NEW_PICKS_PER_DAY = 3
+MAX_TOTAL_RISK_USD = 1000
+MAX_BUYING_POWER_PCT_PER_PICK = 1.0
+KRONOS_CONFLICTS_OVERRIDE_SCORE = 90
+KRONOS_UNAVAILABLE_OVERRIDE_SCORE = 85
+FORBIDDEN_TICKERS = set()
+SHORTLIST_SIZE = 5
+DAILY_PICKS_FILE = STATE_DIR / "jazzy_daily_picks.json"
+MIN_FLOW_VALUE = 500_000
+try:
+    from tradier_client import fetch_option_quote as _tradier_quote
+except Exception:
+    _tradier_quote = None
 
-sys.path.insert(0, "/home/ubuntu/mission-control/agent-team")
-from post_helper import post_to_telegram
-from ops_log import log_to_ops
+import time as _time_tracker
+try:
+    from signal_scorer import score_signal, render_breakdown_line
+except Exception as _ss_e:
+    score_signal = None
+    render_breakdown_line = None
+    print(f"[signal-scorer] import failed: {_ss_e}", flush=True)
 
-# Multi-agent debate posting (optional — gracefully degrades if lib missing)
+try:
+    from peer_picks import peer_picks_block
+except Exception as _peer_e:
+    peer_picks_block = None
+    print(f"[peer-picks] import failed: {_peer_e}", flush=True)
+
+try:
+    from pdt_guard import apply_pdt_guard
+except Exception as _pdt_e:
+    apply_pdt_guard = None
+    print(f"[pdt-guard] import failed: {_pdt_e}", flush=True)
+
+
+# Multi-agent debate posting (optional)
 try:
     sys.path.insert(0, "/home/ubuntu/scripts/lib")
     from agent_debate import post_to_debate
     _MULTIAGENT_LIB_OK = True
 except Exception as _e:
     _MULTIAGENT_LIB_OK = False
-    def post_to_debate(*_args, **_kwargs): pass  # no-op stub
+    def post_to_debate(*_args, **_kwargs): pass
     print(f"[jazzy] multi-agent debate disabled: {_e}", flush=True)
 
-SECRETS = Path("/home/ubuntu/.openclaw/secrets")
-STATE_DIR = Path("/home/ubuntu/.openclaw/workspace/state")
-STATE_DIR.mkdir(parents=True, exist_ok=True)
-
-EXPECTED_ACCOUNT = "PA38IUKNR237"  # JazzyHazzy R1 paper
-SEEN_FILE = STATE_DIR / "jazzy_seen_signals.json"
-KILLSWITCH = STATE_DIR / "jazzy_killswitch"
-DECISIONS_LOG = Path("/home/ubuntu/.openclaw/workspace/skill_outputs/jazzy_decisions_validated.json")
-DECISIONS_LOG.parent.mkdir(parents=True, exist_ok=True)
-SIDECAR = Path("/home/ubuntu/mission-control/signal-receiver/data/scored_signals_recent.json")
-FIREBASE_FEED = Path("/home/ubuntu/.openclaw/workspace/directives/firebase_trade_signals.json")
-
-# Tradier live options quotes (bid/ask/IV/greeks) for informed contract selection
-sys.path.insert(0, "/home/ubuntu/scripts/lib")
-
-# Skill loader - injects relevant SKILL.md content into JazzyHazzy's prompt
+# Skill loader - injects relevant SKILL.md content into Jazzy's prompt
 try:
     from skill_loader import load_relevant_skills
 except Exception as _e:
     print(f"[skill_loader] import failed: {_e}", flush=True)
     def load_relevant_skills(*a, **kw):
         return ""
-try:
-    from tradier_client import fetch_option_quote as _tradier_quote
-except Exception:
-    _tradier_quote = None
-KRONOS_CMD = "/home/ubuntu/mission-control/agent-team/kronos/kronos_on_demand.py"
 
-MAX_PICKS_PER_CYCLE = 3
-MAX_NEW_PICKS_PER_DAY = 999   # Hard cap on NEW picks per trading day across all cycles
-MAX_TOTAL_RISK_USD = 1000
-SHORTLIST_SIZE = 5
-DAILY_PICKS_FILE = Path("/home/ubuntu/.openclaw/workspace/state/boba_daily_picks.json")
-MIN_FLOW_VALUE = 500_000   # Hard floor: T1+T2 only ($500K+) — anything below is rejected
-# Item 31 (mirrored from Boba May 4): post-LLM hard guardrails (enforced by validate_pick_against_guardrails)
-MAX_BUYING_POWER_PCT_PER_PICK = 1.0   # SMALL-ACCOUNT TEST MODE: full BP allowed on max conviction (was 0.15)
-KRONOS_CONFLICTS_OVERRIDE_SCORE = 90  # Flow score required to override Kronos CONFLICTS veto
-KRONOS_UNAVAILABLE_OVERRIDE_SCORE = 75  # Flow score required when Kronos unavailable
-KRONOS_SKIP_TICKERS = {"SPX", "NDX", "RUT", "VIX", "XSP", "OEX", "DJX", "XEO", "DJI"}
-MIN_DTE_DEFAULT = 1  # 0DTE picks require explicit catalyst language in reasoning
-FORBIDDEN_TICKERS = set()  # populated as hallucinations are observed
+
+
+sys.path.insert(0, "/home/ubuntu/mission-control/agent-team")
+from post_helper import post_to_telegram
+from ops_log import log_to_ops
+import firebase_signals
+
+def _mc_kb_recall():
+    """Build a rich pre-prompt context block (ticker-aware).
+
+    1) Top-5 flow tickers in last 24h from options_flow.sqlite
+    2) Today's signal tickers from scored_signals_recent.json
+    3) mc-kb RAG query using those tickers — returns per-ticker memory chunks
+
+    Never raises; returns "" on any failure (so the cycle proceeds even when
+    laptop is offline / sqlite locked / etc).
+    """
+    try:
+        import json as _j
+        import sqlite3 as _s
+        from datetime import datetime as _dt, timezone as _tz
+        from pathlib import Path as _P
+
+        # 1) Top-5 flow tickers (by flow value, last 24h)
+        flow_block = ""
+        top_tickers = []
+        try:
+            con = _s.connect("/home/ubuntu/mission-control-restored/data/options_flow.sqlite")
+            cur = con.cursor()
+            rows = cur.execute(
+                """SELECT ticker, COUNT(*), COALESCE(SUM(flow_value),0)
+                   FROM flow_alerts
+                   WHERE captured_at > datetime('now','-24 hours') AND ticker IS NOT NULL
+                   GROUP BY ticker
+                   ORDER BY 3 DESC, 2 DESC
+                   LIMIT 5"""
+            ).fetchall()
+            con.close()
+            if rows:
+                top_tickers = [r[0] for r in rows]
+                flow_block = "## Top flow tickers (last 24h, premium-weighted)\n\n"
+                for t, n, p in rows:
+                    flow_block += f"- **{t}**: {n} alerts, ${int(p):,} premium\n"
+                flow_block += "\n"
+        except Exception as _e:
+            flow_block = f"_(flow_value query failed: {_e})_\n\n"
+
+        # 2) Today's signal tickers
+        sig_tickers = []
+        try:
+            sig_path = _P("/home/ubuntu/mission-control/signal-receiver/data/scored_signals_recent.json")
+            if sig_path.exists():
+                today = _dt.now(_tz.utc).strftime("%Y-%m-%d")
+                sigs = _j.loads(sig_path.read_text())
+                sig_tickers = sorted({s.get("ticker","") for s in sigs
+                                       if isinstance(s, dict) and s.get("timestamp","")[:10] == today and s.get("ticker")})
+        except Exception:
+            pass
+
+        # 3) Ticker-aware mc-kb recall
+        query_tickers = list(dict.fromkeys(top_tickers + sig_tickers))[:8]  # dedupe, keep order, cap at 8
+        if query_tickers:
+            query = f"trading decisions options flow patterns for {' '.join(query_tickers)} current rules"
+        else:
+            query = "trading decisions current rules identity critical context"
+
+        kb_block = ""
+        try:
+            import mc_kb_client
+            kb_block = mc_kb_client.recall(query, top=5, tiers=["identity", "critical"], timeout=8) or ""
+        except Exception as _e:
+            kb_block = f"_(mc-kb recall failed: {_e})_\n\n"
+
+        result = flow_block + kb_block
+        return (result + "\n\n---\n\n") if result.strip() else ""
+    except Exception:
+        return ""
+
 
 
 def read_secret(name):
@@ -143,16 +241,6 @@ def load_seen():
 
 def save_seen(seen):
     SEEN_FILE.write_text(json.dumps(list(seen)))
-
-
-def load_firebase_signals():
-    """Load Firebase Name/Name2/Vivid trade signals (last 50)."""
-    if not FIREBASE_FEED.exists():
-        return []
-    try:
-        return json.loads(FIREBASE_FEED.read_text())
-    except Exception:
-        return []
 
 
 
@@ -474,42 +562,6 @@ def fetch_live_option_quote(ticker, strike, option_type, expiry):
         return None
 
 
-def format_firebase_signals_for_prompt(signals, max_show=20):
-    """Format last N Firebase trade signals (Name/Name2/Vivid) into prompt-ready text."""
-    if not signals:
-        return "  (no recent provider trade signals)"
-    # Most recent first, cap at max_show
-    recent = sorted(signals, key=lambda x: x.get("captured_at", ""), reverse=True)[:max_show]
-    lines = []
-    for s in recent:
-        side = "PUT" if s.get("is_put") else "CALL"
-        cat = s.get("category", "?")
-        ticker = s.get("ticker", "?")
-        strike = s.get("strike", "?")
-        buy = s.get("buy_target", "?")
-        sell = s.get("sell_target", "?")
-        sl = s.get("stop_loss", "?")
-        source = s.get("source", "?")
-        risk = s.get("risk") or "?"
-        is_free = s.get("is_free", False)
-        free_tag = "FREE" if is_free else "PREMIUM"
-        # Convert expiry timestamp to MM/DD if available
-        exp_str = "?"
-        ts = s.get("expiry_ts")
-        if ts:
-            try:
-                from datetime import datetime as _dt
-                exp_str = _dt.fromtimestamp(int(ts)).strftime("%m/%d")
-            except Exception:
-                pass
-        lines.append(
-            f"  - [{source}] {cat}: {ticker} ${strike} {side} exp {exp_str} | "
-            f"Entry ${buy} → Target ${sell} | SL ${sl} | Risk: {risk} | {free_tag}"
-        )
-    return "\n".join(lines)
-
-
-
 # === UNUSUAL FLOW PRIORITY RULE (memory #12) ===
 # JazzyHazzy MUST evaluate Tier 1 (Huge Flow $1M+ SWEEP+ASK) and Tier 2 (Unusual Huge $500K+ Vol>OI SWEEP+ASK)
 # candidates BEFORE selecting top 3 each cycle. Same-day NY 4AM-8PM ET only.
@@ -822,14 +874,34 @@ def build_boba_prompt(account, positions, shortlist_with_kronos, remaining_budge
         for p in positions
     ]) or "  (none open)"
 
+    # === Signal scoring pre-pass: compute confidence + drop TRASH-band signals ===
+    _scored_shortlist = []
+    if score_signal:
+        for _sid, _s, _k in shortlist_with_kronos:
+            try:
+                _conf = score_signal(_s, kronos=_k)
+                _s["confidence"] = _conf
+                if _conf["band"] == "TRASH":
+                    print(f"[signal-scorer] DROP TRASH: {_s.get('ticker')} ${_s.get('strike')}{(_s.get('option_type','') or '')[:1]} {_s.get('expiry')} | {render_breakdown_line(_conf)}", flush=True)
+                    continue
+            except Exception as _se:
+                print(f"[signal-scorer] error scoring {_s.get('ticker')}: {_se}", flush=True)
+            _scored_shortlist.append((_sid, _s, _k))
+        # Sort survivors by confidence score DESC
+        _scored_shortlist.sort(key=lambda _x: -(_x[1].get("confidence", {}).get("score", 0)))
+    else:
+        _scored_shortlist = list(shortlist_with_kronos)
+
     shortlist_text = ""
-    for i, (sid, s, k) in enumerate(shortlist_with_kronos, 1):
+    for i, (sid, s, k) in enumerate(_scored_shortlist, 1):
         shortlist_text += f"\n\n--- CANDIDATE {i} ---\n"
         shortlist_text += f"Ticker: {s.get('ticker')}\n"
         shortlist_text += f"Contract: ${s.get('strike')} {s.get('option_type')} exp {s.get('expiry')} ({s.get('dte')} DTE)\n"
         shortlist_text += f"Tier: {s.get('tier','')} | Flow: {s.get('flow_value_raw')} | Vol/OI: {s.get('vol_oi_ratio')}x\n"
         shortlist_text += f"Sweeps/Blocks: {s.get('sweeps')}/{s.get('blocks')} | Spot: ${s.get('spot')}\n"
         shortlist_text += f"Score: {s.get('score')}/100 ({s.get('grade')})\n"
+        if render_breakdown_line and s.get('confidence'):
+            shortlist_text += f"Confidence: {render_breakdown_line(s['confidence'])}\n"
 
         # Live Tradier quote (if available) — gives LLM real bid/ask/IV/greeks
         _lq = fetch_live_option_quote(s.get("ticker"), s.get("strike"),
@@ -869,15 +941,32 @@ def build_boba_prompt(account, positions, shortlist_with_kronos, remaining_budge
             elif agree is False:
                 shortlist_text += f"  → Kronos CONFLICTS with option thesis ❌\n"
 
-    firebase_signals_text = format_firebase_signals_for_prompt(load_firebase_signals(), max_show=20)
+    firebase_signals_text = firebase_signals.format_for_prompt(firebase_signals.load_signals(), max_show=20)
+    firebase_notifications_text = firebase_signals.format_notifications_for_prompt(firebase_signals.load_notifications(), max_show=15)
+    firebase_flow_alerts_text = firebase_signals.format_flow_alerts_for_prompt(firebase_signals.load_flow_alerts(), max_show=15)
     best_options_text = load_best_options(max_show=15, min_premium=1_000_000) or ""
     ticker_rollup_text = load_ticker_rollup(min_total=10_000_000, max_show=10) or ""
     platinum_flow_text = load_platinum_flow(max_show=5) or ""
+
+    # mc-kb tier enhancements (platinum mandate / confluence / fresh-5min / clusters / sector mix)
+    bfe_enhancements = ""
+    try:
+        import boba_flow_enhancements as _bfe
+        _tickers = []
+        try:
+            _tickers = [s.get("ticker", "") for _, s, _ in shortlist_with_kronos if s and s.get("ticker")]
+        except Exception:
+            _tickers = []
+        _platinum_n = platinum_flow_text.count("\n  💎 $") if platinum_flow_text else 0
+        bfe_enhancements = _bfe.assemble_enhancements(_tickers, platinum_count=_platinum_n)
+    except Exception as _bfe_e:
+        print(f"[bfe] enhancements failed: {_bfe_e!r}", flush=True)
     multi_day_repeaters_text = load_multi_day_repeaters() or ""
     market_briefing_text = load_market_briefing() or ""
     grok_brief_text = load_grok_brief() or ""
     orion_skills_text = load_orion_skills() or ""
-    multi_agent_context = market_briefing_text + grok_brief_text + orion_skills_text
+    _peer_block = peer_picks_block("jazzy", window_hours=6) if peer_picks_block else ""
+    multi_agent_context = market_briefing_text + grok_brief_text + orion_skills_text + _peer_block
 
     # Skill injection - load relevant SKILL.md content based on decision context
     try:
@@ -930,10 +1019,18 @@ Open positions:
 # Candidates to review (already filtered to T1+T2 whale tier $500K+ + today's signals)
 {shortlist_text}
 
-# Trade signals from providers (Name / Name2 / Vivid — last 20)
+# Trade signals from providers (Name / Name2 / Vivid / Vivid2 — last 20)
 These are curated buy/sell calls from human-run provider services. Use them as INDEPENDENT confirmation: if a provider has called the same direction as a whale flow above, that's stronger alignment. Disagreement is also informative. Do NOT take a pick just because a provider called it — use these alongside whale flow + Kronos.
 {firebase_signals_text}
-{platinum_flow_text}
+
+# Provider push notifications (Vivid2 / Name / Name2 OptionNotifications + StockNotifications — last 15)
+Text alerts the provider apps push to their users. Often analyst commentary on a previously-issued signal (add/reduce/close), or breaking-news heads-up. Higher recency than the signals above but less actionable.
+{firebase_notifications_text}
+
+# Flow Greeks alerts (FlowGreeks / FlowGreeks2 — last 15)
+Algorithmic unusual-flow detections (sweeps, block trades, volume-over-OI). Independent of analyst signals. A flow alert on the same ticker/direction as a trade signal above is a strong corroborating signal.
+{firebase_flow_alerts_text}
+{platinum_flow_text}{bfe_enhancements}
 {multi_day_repeaters_text}
 {best_options_text}
 {ticker_rollup_text}
@@ -977,6 +1074,9 @@ If a candidate ticker is one you ALREADY hold:
 
 If your daily budget is 0, you cannot make new picks this cycle — only do TASK 1 (position management).
 
+# PLATINUM_PROMPT_NOTICE_v1
+PLATINUM override notice: if any candidate scores PLATINUM band (confidence >= 90), take it ANYWAY — once per day, PLATINUM picks bypass the daily cap. The post-processing layer will allow up to 1 PLATINUM pick over the cap automatically.
+
 For each pick, you MUST show due diligence. In the reasoning field, include these items concisely:
 
 1. THESIS — One sentence on the directional/volatility view (e.g., "QQQ bearish next 10 days").
@@ -1009,7 +1109,16 @@ Hard limits:
   - T4 UNUSUAL (Vol>OI yellow): last resort. 1 contract only.
   - LADDER WALK: Always evaluate tiers in DESCENDING order. Start with PLATINUM, then DIAMOND, then T0, T1, T2, T3, T4. Don't skip tiers - if PLATINUM is empty, drop to DIAMOND. Don't reach for T2 when DIAMOND is available. This is a hierarchy of conviction.
   - AGGREGATE TIER (whale accumulation): A contract with total_flow_count >= 10 AND combined_premium >= $5M AND sweep:block ratio > 5:1 = ACCUMULATION FLOW. Treat this as DIAMOND-equivalent conviction even if no single alert hit $15M. Whales splitting orders to avoid detection look like 20+ small sweeps adding up to a big position.
-- WITHIN-TIER RANKING (co-primary tiebreakers): repeater_count (same contract appearing 3+ times today) AND DTE (shorter wins). Then sweep>block>split, then A/AA bid-ask, then Vol/OI ratio.
+- WITHIN-TIER RANKING (priority order; ties broken in order shown):
+  1. repeater_count (same contract 3+ times today)
+  2. ticker-strike cluster (3+ distinct strikes on same ticker today — see STRIKE CLUSTERS above)
+  3. multi-source confluence (≥3 sources agreeing direction — see MULTI-SOURCE CONFLUENCE above; ≥3 = treat as one tier upgraded)
+  4. fresh-5min flag (institutional opens beat 3:55 PM muppet flow)
+  5. DTE (shorter wins for flow)
+  6. Kronos confidence (HIGH AGREE > MED AGREE > LOW AGREE > NEUTRAL; CONFLICTS = veto)
+  7. sweep>block>split
+  8. A/AA bid-ask
+  9. Vol/OI ratio
 
 # DUAL PROTOCOL — JazzyHazzy picks under whichever protocol fits each candidate
 
@@ -1088,6 +1197,18 @@ Set protocol="swing" in pick. Override TP/SL: profit_target_pct=100, stop_loss_p
   ]
 }}
 
+
+# ADDITIONAL REQUIRED FIELDS PER PICK (INDEPENDENT_THESIS_BLOCK_INSERTED)
+For each pick in the picks array, you MUST include:
+  - "institutional_thesis": A 1-2 sentence answer to "Why would an institution put this much money on this specific contract right now?"
+        Examples that are useful: "Hedge fund rotating from semis into defensives ahead of CPI"; "Earnings play on NVDA pre-report — implied vol cheap relative to history"; "Block hedger covering long-stock exposure after Powell speech"; "Activist pre-positioning ahead of board meeting next Tuesday".
+        Avoid: tautologies ("they think it goes up") or restating the flow data ("$7M flow on the strike").
+  - "convergence_rationale": REQUIRED ONLY IF you are picking a contract the peer agent already took today.
+        Default policy is to pick DIFFERENT contracts. If you converge, explain the DISTINCT edge — e.g., "I size larger because Kronos HIGH-confidence agreement is new since their pick" or "Same contract but different protocol — they took flow, I'm taking earnings".
+        If you are picking a contract NOT on the peer's list, OMIT this field.
+
+These two fields will be logged to the journal and reviewed by the daily grader — they are not optional.
+
 Respond with ONLY the JSON. No preamble, no markdown fences.
 """
     return prompt
@@ -1114,7 +1235,7 @@ def call_boba(prompt):
             json={
                 "model": JAZZY_MODEL,
                 "max_tokens": 2000,
-                "messages": [{"role": "user", "content": (_load_lessons() + prompt)}],
+                "messages": [{"role": "user", "content": (_load_lessons() + _load_active_position_rules() + _mc_kb_recall() + prompt)}],
             },
             timeout=90,
         )
@@ -1881,13 +2002,56 @@ def main():
     except Exception as _e:
         print(f"[budget] log failed: {_e}", flush=True)
     cycle_picks = cycle_result.get("picks", [])
-    # Cap at min(per-cycle limit, remaining daily budget)
+
+    # === PDT guard: under-$25K accounts only get 4 daytrades / 5 days ===
+    if apply_pdt_guard and cycle_picks:
+        cycle_picks, _pdt_notes = apply_pdt_guard(cycle_picks, account, agent="jazzy")
+        for _n in _pdt_notes:
+            print(_n, flush=True)
+
+
+    # 2-min research-and-confirm before order execution (env BOBA_VALIDATE_PICKS=0 to skip).
+    # Gathers live quote + recent flow + mc-kb recall, then asks Claude PROCEED/ABORT per pick.
+    # Fail-open: any error returns the original picks unchanged.
+    import os as _os
+    if _os.environ.get("JAZZY_VALIDATE_PICKS", "1") != "0" and cycle_picks:
+        try:
+            from pick_validator import validate_picks as _validate_picks
+            print(f"[pick-validator] validating {len(cycle_picks)} pick(s) with 2-min research pass", flush=True)
+            cycle_picks = _validate_picks(cycle_picks, account="jazzy", sleep_sec=120)
+            cycle_result["picks"] = cycle_picks  # keep cycle_result in sync for journaling
+        except Exception as _ve:
+            print(f"[pick-validator] failed, fail-open: {_ve!r}", flush=True)
+
+    # Cap at min(per-cycle limit, remaining daily budget) — with PLATINUM override.
+    # PLATINUM-band picks (confidence ≥ 90) can bypass the daily cap up to once per day.
     effective_cap = min(MAX_PICKS_PER_CYCLE, remaining_budget)
-    if effective_cap < len(cycle_picks):
-        print(f"[daily_budget] LLM returned {len(cycle_picks)} picks, executing first {effective_cap}", flush=True)
+    state = load_daily_picks_state()
+    _platinum_override_used = state.get("platinum_overrides_used", 0)
+    PLATINUM_OVERRIDES_PER_DAY = 1
+
+    _platinum_picks = [_p for _p in cycle_picks if _p.get("confidence", {}).get("band") == "PLATINUM"]
+    _nonplat_picks  = [_p for _p in cycle_picks if _p.get("confidence", {}).get("band") != "PLATINUM"]
+
+    _allow_platinum = min(
+        len(_platinum_picks),
+        max(0, PLATINUM_OVERRIDES_PER_DAY - _platinum_override_used),
+    ) if remaining_budget == 0 else len(_platinum_picks)
+
+    _allow_nonplat = max(0, effective_cap - 0)  # non-PLATINUM picks count against cap
+    _pick_queue = _platinum_picks[:_allow_platinum] + _nonplat_picks[:_allow_nonplat]
+    _pick_queue = _pick_queue[:max(_allow_platinum + effective_cap, _allow_platinum)]
+
+    if _allow_platinum and remaining_budget == 0:
+        print(f"[daily_budget] PLATINUM OVERRIDE: {_allow_platinum} pick(s) allowed despite budget=0 (override {_platinum_override_used + _allow_platinum}/{PLATINUM_OVERRIDES_PER_DAY} today)", flush=True)
+        state["platinum_overrides_used"] = _platinum_override_used + _allow_platinum
+        save_daily_picks_state(state)
+
+    if len(_pick_queue) < len(cycle_picks):
+        print(f"[daily_budget] LLM returned {len(cycle_picks)} picks, executing {len(_pick_queue)} (cap={effective_cap}, platinum_allowed={_allow_platinum})", flush=True)
     picks_executed = []
-    prior_picks_this_cycle = []  # Item 31: track for duplicate-contract guardrail
-    for pick in cycle_picks[:effective_cap]:
+    prior_picks_this_cycle = []  # tracking for any duplicate-contract guardrails
+    for pick in _pick_queue:
         # Item 31: hard guardrail validation BEFORE execute (mirrors Boba pattern)
         ok, skip_reason = validate_pick_against_guardrails(pick, account, prior_picks_this_cycle)
         if not ok:
@@ -2026,6 +2190,28 @@ def main():
 
     log_to_ops("jazzy_cycle", "INFO", f"Cycle complete — {n_picks} picks, {n_passed} passed")
     print(f"Cycle done: {n_picks} picks executed, {n_passed} passed on")
+
+    # mc-kb: log this cycle to the daemon's /hive page (graceful-fail if tunnel down)
+    try:
+        import mc_kb_client
+        _tickers = [pk.get("ticker", "?") for pk in cycle_result.get("picks", [])][:8]
+        _passed_tickers = [pk.get("ticker", "?") for pk in cycle_result.get("passed_on", [])][:8]
+        _cycle_summary = (cycle_result.get("cycle_summary") or "").strip()[:300]
+        _hive_summary = (
+            f"{n_picks} pick(s) committed, {n_passed} passed. "
+            + (f"Tickers: {', '.join(_tickers)}. " if _tickers else "")
+            + _cycle_summary
+        )
+        mc_kb_client.log_event(
+            agent_id="jazzy",
+            action="decision_cycle",
+            summary=_hive_summary,
+            artifacts={"picks": _tickers, "passed_on": _passed_tickers},
+            chat_id="trading",
+        )
+    except Exception as _e:
+        print(f"[mc-kb] log_event failed: {_e!r}", flush=True)
+
     return 0
 
 
