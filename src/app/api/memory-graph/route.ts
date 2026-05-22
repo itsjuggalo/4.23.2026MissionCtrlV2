@@ -1,14 +1,89 @@
 import { NextResponse } from 'next/server';
 import { promises as fs } from 'fs';
 import path from 'path';
+import Database from 'better-sqlite3';
 import { proxyToServeftp } from "../../../lib/proxyToServeftp";
 
 const WORKSPACE = '/home/itsju/.openclaw/workspace';
-const MEMORY_FILE = '/home/itsju/mission-control-restored/memory/memories.json';
+const MEMORY_DB = '/home/itsju/claudeclaw-os/store/claudeclaw.db';
+const MANUAL_FILE = '/home/itsju/.openclaw/data/manual_memories.json';
 
-// Hard cap — the workspace can hold thousands of files. Scanning all of them
-// and running the O(n^2) edge match below would freeze (and OOM) the server.
 const MAX_FILES = 300;
+const MAX_MEMORIES = 500;
+
+type ImpBucket = 'low' | 'medium' | 'high' | 'critical';
+
+function bucketImportance(v: number): ImpBucket {
+  if (v >= 0.8) return 'critical';
+  if (v >= 0.6) return 'high';
+  if (v >= 0.4) return 'medium';
+  return 'low';
+}
+
+function safeJsonArray(s: string): string[] {
+  try {
+    const parsed = JSON.parse(s);
+    return Array.isArray(parsed) ? parsed.map(String) : [];
+  } catch { return []; }
+}
+
+function loadMemoriesFromDb(): { rows: any[]; total: number } {
+  let db: Database.Database | null = null;
+  try {
+    db = new Database(MEMORY_DB, { readonly: true, fileMustExist: true });
+    const totalRow = db.prepare(
+      'SELECT COUNT(*) AS n FROM memories WHERE superseded_by IS NULL'
+    ).get() as { n: number };
+    const total = totalRow?.n ?? 0;
+
+    const rows = db.prepare(
+      `SELECT id, chat_id, source, raw_text, summary, topics, importance,
+              salience, created_at, agent_id, pinned
+       FROM memories
+       WHERE superseded_by IS NULL
+       ORDER BY created_at DESC
+       LIMIT ?`
+    ).all(MAX_MEMORIES) as any[];
+
+    const mapped = rows.map(r => {
+      const tsMs = Number(r.created_at) > 1e12
+        ? Number(r.created_at)
+        : Number(r.created_at) * 1000;
+      const created = new Date(tsMs);
+      const title = (r.summary || r.raw_text || 'Memory')
+        .toString()
+        .split('\n')[0]
+        .slice(0, 120);
+      return {
+        id: String(r.id),
+        title,
+        content: String(r.raw_text || ''),
+        source: String(r.source || 'unknown'),
+        tags: safeJsonArray(r.topics || '[]'),
+        importance: bucketImportance(Number(r.importance ?? 0.5)),
+        timestamp: created.toISOString(),
+        date: created.toLocaleDateString('en-US', { month: 'short', day: 'numeric' }),
+        pinned: !!r.pinned,
+        agent_id: String(r.agent_id || 'main'),
+        chat_id: String(r.chat_id || ''),
+      };
+    });
+
+    return { rows: mapped, total };
+  } catch {
+    return { rows: [], total: 0 };
+  } finally {
+    try { db?.close(); } catch { /* ignore */ }
+  }
+}
+
+async function loadManualMemories(): Promise<any[]> {
+  try {
+    const data = await fs.readFile(MANUAL_FILE, 'utf-8');
+    const parsed = JSON.parse(data);
+    return Array.isArray(parsed) ? parsed : [];
+  } catch { return []; }
+}
 
 async function scanMarkdownFiles(dir: string, acc: any[], depth = 0): Promise<void> {
   if (depth > 3 || acc.length >= MAX_FILES) return;
@@ -63,11 +138,10 @@ export async function GET() {
       }
     }
 
-    let memories: any[] = [];
-    try {
-      const data = await fs.readFile(MEMORY_FILE, 'utf-8');
-      memories = JSON.parse(data);
-    } catch { memories = []; }
+    const { rows: dbMemories, total: dbTotal } = loadMemoriesFromDb();
+    const manualMemories = await loadManualMemories();
+    const memories = [...manualMemories, ...dbMemories].slice(0, MAX_MEMORIES);
+    const totalMemories = dbTotal + manualMemories.length;
 
     const sourceMap: Record<string, number> = {};
     for (const m of memories) {
@@ -80,17 +154,22 @@ export async function GET() {
     return NextResponse.json({
       success: true,
       workspace: WORKSPACE,
-      truncated: files.length >= MAX_FILES,
+      truncated: files.length >= MAX_FILES || memories.length < totalMemories,
       nodes,
       edges,
-      // Strip the bulky per-file content — nodes already carry the graph data
       files: files.map(({ content, ...rest }) => rest),
-      memories: memories.slice(0, 500),
-      stats: { total: memories.length + nodes.length, critical, high, bySource: sourceMap },
+      memories,
+      stats: {
+        total: totalMemories,
+        critical,
+        high,
+        bySource: sourceMap,
+        fileNodes: nodes.length,
+      },
       timestamp: new Date().toISOString(),
     }, { headers: { 'Cache-Control': 'no-store' } });
 
-  } catch (error) {
+  } catch {
     return NextResponse.json({
       success: false,
       workspace: '',
@@ -98,7 +177,7 @@ export async function GET() {
       edges: [],
       files: [],
       memories: [],
-      stats: { total: 0, critical: 0, high: 0, bySource: {} },
+      stats: { total: 0, critical: 0, high: 0, bySource: {}, fileNodes: 0 },
     }, { status: 500 });
   }
 }
@@ -107,13 +186,10 @@ export async function POST(req: Request) {
   const __proxied = await proxyToServeftp(req); if (__proxied) return __proxied;
   try {
     const body = await req.json();
-    let memories: any[] = [];
-    try {
-      memories = JSON.parse(await fs.readFile(MEMORY_FILE, 'utf-8'));
-    } catch { /* empty */ }
+    const memories = await loadManualMemories();
 
     const newMem = {
-      id: Math.random().toString(36).slice(2, 14),
+      id: 'manual-' + Math.random().toString(36).slice(2, 14),
       title: body.title || 'Manual note',
       content: body.content || '',
       source: 'manual',
@@ -124,11 +200,11 @@ export async function POST(req: Request) {
     };
 
     memories.unshift(newMem);
-    await fs.mkdir(path.dirname(MEMORY_FILE), { recursive: true });
-    await fs.writeFile(MEMORY_FILE, JSON.stringify(memories, null, 2));
+    await fs.mkdir(path.dirname(MANUAL_FILE), { recursive: true });
+    await fs.writeFile(MANUAL_FILE, JSON.stringify(memories, null, 2));
 
     return NextResponse.json({ success: true, memory: newMem });
-  } catch (error) {
+  } catch {
     return NextResponse.json({ success: false }, { status: 500 });
   }
 }
