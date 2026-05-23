@@ -28,6 +28,7 @@ import { SignalsPage } from '../pages/SignalsPage';
 import { TelegramSignalsPage } from '../pages/TelegramSignalsPage';
 import { MemoryGraphPage } from '../pages/MemoryGraphPage';
 import { OfficePage } from '../pages/OfficePage';
+import { DeskPage } from '../pages/DeskPage';
 import { ChartPage } from '../pages/ChartPage';
 import { PowerTraderPage } from '../pages/PowerTraderPage';
 import { CommandCenterPage } from '../pages/CommandCenterPage';
@@ -36,6 +37,7 @@ import { RegimePage } from '../pages/RegimePage';
 import UsagePage from '../pages/UsagePage';
 import { CongressPage } from '../pages/CongressPage';
 import { FlowHistoryPage } from '../pages/FlowHistoryPage';
+import { FlowDatabasePage } from '../pages/FlowDatabasePage';
 import { LLMPortfolioPage } from '../pages/LLMPortfolioPage';
 import { SkillsPage } from "../pages/SkillsPage";
 import { TelegramPage } from '@/components/pages/TelegramPage';
@@ -55,6 +57,7 @@ type PageName =
   | 'Options'
   | 'OptionsWatcher'
   | 'Flow History'
+  | 'Flow Database'
   | 'Agents'
   | 'Approvals'
   | 'Calendar'
@@ -62,6 +65,7 @@ type PageName =
   | 'Memory'
   | 'Memory Graph'
   | 'Office'
+  | 'Desk'
   | 'Alerts'
   | 'Docs'
   | 'Wallets'
@@ -86,8 +90,9 @@ type PageName =
 const VALID_PAGES: PageName[] = [
   'Dashboard', 'Signals', 'Telegram', 'Scanner', 'Tasks', 'Sessions', 'Options', 'OptionsWatcher', 'Agents',
   'Approvals', 'Calendar', 'Projects', 'Memory', 'Memory Graph',
-  'Office', 'Docs', 'Wallets', 'Trades', 'Journal', 'Activity', 'Risk', 'TV Chart', 'PowerTrader',
+  'Office', 'Desk', 'Docs', 'Wallets', 'Trades', 'Journal', 'Activity', 'Risk', 'TV Chart', 'PowerTrader',
   'Command Center', 'Performance', 'Regime', 'Usage', 'Landing', 'Congress', 'LLM Portfolio', 'Skills',
+  'Flow History', 'Flow Database',
 ];
 
 function resolvePageFromParam(page: string | null): PageName {
@@ -164,6 +169,8 @@ export function AppShellClient() {
         return <MemoryGraphPage />;
       case 'Office':
         return <OfficePage />;
+      case 'Desk':
+        return <DeskPage />;
       case 'Alerts':
         return <AlertsPage />;
       case 'Docs':
@@ -194,6 +201,8 @@ export function AppShellClient() {
         return <CongressPage />;
       case 'Flow History':
         return <FlowHistoryPage />;
+      case 'Flow Database':
+        return <FlowDatabasePage />;
       case 'LLM Portfolio':
         return <LLMPortfolioPage />;
       case "Skills":

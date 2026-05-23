@@ -5,7 +5,7 @@ import { Bell, Settings, ChevronLeft, ChevronRight,
   ShieldAlert, Building2, MessageSquare, ClipboardCheck, Calendar, FolderKanban,
   ListTodo, FileText, BookOpen, Wallet, LineChart, Home, Search, Zap, Target,
   Eye, Send, Network, History, BookMarked, Database, Users, AlertTriangle, Rocket,
-  Monitor, Smartphone,
+  Monitor, Smartphone, Workflow,
 } from "lucide-react";
 import BestOptionsWidget from '@/components/widgets/BestOptionsWidget';
 import { useViewMode } from '@/lib/useViewMode';
@@ -16,7 +16,7 @@ export type PageName =
   | "GoTrader" | "Wallets" | "Agents" | "Risk" | "Office" | "Memory"
   | "Memory Graph" | "Telegram" | "Approvals" | "Calendar" | "Tasks"
   | "Projects" | "Alerts" | "Usage" | "Congress" | "LLM Portfolio"
-  | "Journal" | "Docs" | "Skills" | "Dashboard" | "Scanner" | "Sessions" | "Options" | "OptionsWatcher";
+  | "Journal" | "Docs" | "Skills" | "Dashboard" | "Scanner" | "Sessions" | "Options" | "OptionsWatcher" | "Flow Database" | "Desk";
 
 interface SidebarProps {
   activePage: PageName;
@@ -44,6 +44,7 @@ export function Sidebar({ activePage, onNavigate, isCollapsed, onToggle, newSign
       { name: "Signals", icon: Radar, badge: newSignalsCount },
       { name: "Scanner", icon: Search },
       { name: "Flow History", icon: History },
+      { name: "Flow Database", icon: Database },
     ]},
     { label: "EXECUTION", items: [
       { name: "PowerTrader", icon: Rocket },
@@ -58,6 +59,7 @@ export function Sidebar({ activePage, onNavigate, isCollapsed, onToggle, newSign
       { name: "Agents", icon: Bot },
       { name: "Risk", icon: ShieldAlert },
       { name: "Office", icon: Building2 },
+      { name: "Desk", icon: Workflow },
       { name: "Telegram", icon: Send },
     ]},
     { label: "KNOWLEDGE", items: [
