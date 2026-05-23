@@ -157,6 +157,7 @@ export function DeskPage() {
   const [data, setData] = useState<DeskState | null>(null);
   const [err, setErr] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
+  const [selectedDossierIdx, setSelectedDossierIdx] = useState(0);
 
   const fetchData = useCallback(async () => {
     try {
@@ -183,7 +184,8 @@ export function DeskPage() {
   if (err)     return <PageWrap><div style={{ color: "#fca5a5" }}>desk-cycle error: {err}</div></PageWrap>;
   if (!data)   return <PageWrap><div style={{ color: "#94a3b8" }}>No data.</div></PageWrap>;
 
-  const topDossier = data.floor4[0];
+  const safeIdx = Math.min(Math.max(0, selectedDossierIdx), Math.max(0, data.floor4.length - 1));
+  const topDossier = data.floor4[safeIdx];
   const candByLane = Object.fromEntries(data.floor1.candidates_by_lane.map(r => [r.lane, r.n]));
   const candBySrc  = Object.fromEntries(data.floor1.candidates_by_source.map(r => [r.source_agent, r.n]));
   const lanesByName = Object.fromEntries(data.floor3.map(l => [l.lane, l]));
@@ -312,13 +314,40 @@ export function DeskPage() {
             </div>
           </FloorCard>
 
-          {/* Floor 4 — featured dossier */}
+          {/* Floor 4 — featured dossier (with carousel) */}
           {topDossier && (
             <FloorCard
               label="FLOOR 4"
-              title={`Per-Candidate Chain · top dossier #${topDossier.id}`}
+              title={`Per-Candidate Chain · dossier ${safeIdx + 1}/${data.floor4.length} (#${topDossier.id})`}
               sub={`${topDossier.ticker} ${topDossier.contract?.side ?? ""} $${topDossier.contract?.strike ?? ""} ${topDossier.contract?.expiry ?? ""}`}
             >
+              {/* Carousel tabs — one per dossier in this cycle */}
+              {data.floor4.length > 1 && (
+                <div style={{ display: "flex", gap: 4, marginBottom: 12, flexWrap: "wrap" }}>
+                  {data.floor4.map((d, i) => {
+                    const isActive = i === safeIdx;
+                    const bandColor = BAND_COLORS[d.band ?? "BRONZE"];
+                    return (
+                      <button
+                        key={d.id}
+                        onClick={() => setSelectedDossierIdx(i)}
+                        style={{
+                          padding: "4px 10px",
+                          fontSize: 11,
+                          borderRadius: 4,
+                          background: isActive ? bandColor + "33" : "#0f172a",
+                          border: `1px solid ${isActive ? bandColor : "#1e293b"}`,
+                          color: isActive ? bandColor : "#94a3b8",
+                          cursor: "pointer",
+                          fontWeight: isActive ? 600 : 400,
+                        }}
+                      >
+                        {d.ticker} {d.band ?? "—"}/{d.confidence ?? "?"}
+                      </button>
+                    );
+                  })}
+                </div>
+              )}
               <div style={{ display: "flex", gap: 14 }}>
                 <div style={{ flex: 1 }}>
                   <div style={dossierHeader}>
