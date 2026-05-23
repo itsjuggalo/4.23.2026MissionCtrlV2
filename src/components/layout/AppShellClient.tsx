@@ -45,6 +45,9 @@ import { OptionsPage } from '@/components/pages/OptionsPage';
 import { OptionsWatcherPage } from '@/components/pages/OptionsWatcherPage';
 import { OptionsPageMobile } from '@/components/pages/OptionsPageMobile';
 import { SessionViewerPage } from '@/components/pages/SessionViewerPage';
+import { ITBPage } from '../pages/ITBPage';
+import { FreqtradePage } from '../pages/FreqtradePage';
+import { LiveStrategyPage } from '../pages/LiveStrategyPage';
 import { PsychChatWidget } from '../ui/PsychChatWidget';
 
 type PageName =
@@ -83,6 +86,9 @@ type PageName =
   | 'Usage'
   | 'Skills'
   | 'Skills'
+  | 'ITB'
+  | 'Freqtrade'
+  | 'Live Strategy'
   | 'Landing';
 
 // Centralized list of valid pages — referenced by both the initial-state
@@ -92,7 +98,7 @@ const VALID_PAGES: PageName[] = [
   'Approvals', 'Calendar', 'Projects', 'Memory', 'Memory Graph',
   'Office', 'Desk', 'Docs', 'Wallets', 'Trades', 'Journal', 'Activity', 'Risk', 'TV Chart', 'PowerTrader',
   'Command Center', 'Performance', 'Regime', 'Usage', 'Landing', 'Congress', 'LLM Portfolio', 'Skills',
-  'Flow History', 'Flow Database',
+  'Flow History', 'Flow Database', 'ITB', 'Freqtrade', 'Live Strategy',
 ];
 
 function resolvePageFromParam(page: string | null): PageName {
@@ -100,6 +106,8 @@ function resolvePageFromParam(page: string | null): PageName {
   // OptionsWatcher is the only multi-cap page id — handle it explicitly so
   // the lowercased URL form ('optionswatcher') resolves correctly.
   if (page.toLowerCase() === 'optionswatcher') return 'OptionsWatcher';
+  if (page.toLowerCase() === 'itb') return 'ITB';
+  if (page.toLowerCase() === 'live-strategy') return 'Live Strategy';
   const pn = (page.charAt(0).toUpperCase() + page.slice(1).toLowerCase()) as PageName;
   return VALID_PAGES.includes(pn) ? pn : 'Command Center';
 }
@@ -207,6 +215,12 @@ export function AppShellClient() {
         return <LLMPortfolioPage />;
       case "Skills":
         return <SkillsPage />;
+      case 'ITB':
+        return <ITBPage />;
+      case 'Freqtrade':
+        return <FreqtradePage />;
+      case 'Live Strategy':
+        return <LiveStrategyPage />;
       default:
         return <DashboardPage />;
     }

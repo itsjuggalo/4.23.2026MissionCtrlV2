@@ -1,0 +1,326 @@
+{
+  "date": "2026-05-23",
+  "generated_at": "2026-05-23T22:11:59.231Z",
+  "accounts": [
+    {
+      "account": "boba",
+      "signals_submitted": 0,
+      "alpaca_orders_total": 32,
+      "matched": 0,
+      "ghost_signals": [],
+      "orphan_orders": [
+        {
+          "id": "354f1381-76ea-4d71-b078-cafcc2906d82",
+          "client_order_id": "d218fb80-46e5-49cb-abd9-dd9560774e9e",
+          "symbol": "HOOD",
+          "side": "buy",
+          "status": "canceled"
+        },
+        {
+          "id": "f057f012-b2c1-4c92-9b06-e6514f211f45",
+          "client_order_id": "c16979a1-fe9b-4ea0-8391-8835f379e860",
+          "symbol": "HOOD",
+          "side": "buy",
+          "status": "canceled"
+        },
+        {
+          "id": "5c63f6ca-0099-4677-84e1-afeb3fe9aa1f",
+          "client_order_id": "32788af1-e1a7-4489-b3ec-58d96cb98f1a",
+          "symbol": "HOOD",
+          "side": "buy",
+          "status": "canceled"
+        },
+        {
+          "id": "cb373cc2-783c-4198-ba8c-543427c65db7",
+          "client_order_id": "c19b141e-776c-4a7b-b207-9818c85b74f7",
+          "symbol": "HOOD",
+          "side": "buy",
+          "status": "canceled"
+        },
+        {
+          "id": "1aff04dd-1597-4fba-a2f7-a46c10ecc445",
+          "client_order_id": "dbfdd292-cea3-4114-b628-8bc84b5087ff",
+          "symbol": "HOOD",
+          "side": "buy",
+          "status": "canceled"
+        },
+        {
+          "id": "de4256be-25d1-417a-b4ca-904861da7b20",
+          "client_order_id": "048e6f9a-a678-40c7-997c-639afe085e45",
+          "symbol": "HOOD",
+          "side": "buy",
+          "status": "canceled"
+        },
+        {
+          "id": "f709c508-e89b-4c40-abd9-1d9cd9015d87",
+          "client_order_id": "a67abe87-4576-4d4a-8b1a-35a29ea403e5",
+          "symbol": "HOOD",
+          "side": "buy",
+          "status": "canceled"
+        },
+        {
+          "id": "af217f9a-6e0e-4215-a5c3-8285d0fc72d4",
+          "client_order_id": "431032d6-4d53-4876-9c48-65691755a98c",
+          "symbol": "HOOD",
+          "side": "buy",
+          "status": "canceled"
+        },
+        {
+          "id": "cff87239-98e4-4371-9ef6-342ec0686382",
+          "client_order_id": "9a0d4556-5318-4a3e-9d88-13bea61b3d9e",
+          "symbol": "HOOD",
+          "side": "buy",
+          "status": "canceled"
+        },
+        {
+          "id": "3b04e62c-0515-416e-a864-7e7268ede243",
+          "client_order_id": "f2f1554a-3414-498d-8be1-4e2b23219006",
+          "symbol": "HOOD",
+          "side": "buy",
+          "status": "canceled"
+        },
+        {
+          "id": "94c53a8d-eef2-4a02-9b1b-e4766e984d3e",
+          "client_order_id": "a95c399d-abf9-4a6b-a963-4bd280669a83",
+          "symbol": "HOOD",
+          "side": "buy",
+          "status": "canceled"
+        },
+        {
+          "id": "c989beee-7f7d-42a3-8e95-b5bc00247564",
+          "client_order_id": "4772b641-8433-4448-9c1d-7e0c58ff89fd",
+          "symbol": "HOOD",
+          "side": "buy",
+          "status": "canceled"
+        },
+        {
+          "id": "1d15904e-dbcd-4928-afe7-a86134030fa3",
+          "client_order_id": "822f73a2-9430-4cf5-a273-e69adfee2564",
+          "symbol": "HOOD",
+          "side": "buy",
+          "status": "canceled"
+        },
+        {
+          "id": "a8065bbd-aaaf-4ed0-99bc-cbbfb2958192",
+          "client_order_id": "b3046749-1954-42ac-85e8-c33048df9f74",
+          "symbol": "HOOD",
+          "side": "buy",
+          "status": "canceled"
+        },
+        {
+          "id": "e33c0ee6-99e4-4f8e-aa0a-d2408707781a",
+          "client_order_id": "caceaeb2-0923-4a8b-b157-80f6e575dcbd",
+          "symbol": "HOOD",
+          "side": "buy",
+          "status": "canceled"
+        },
+        {
+          "id": "d920889c-5135-4ddc-8eea-618a5f90159c",
+          "client_order_id": "e70233e6-6067-4952-88fd-06a6cbcf923a",
+          "symbol": "HOOD",
+          "side": "buy",
+          "status": "canceled"
+        },
+        {
+          "id": "40ebd510-7002-43f5-8e5d-a2b41961df15",
+          "client_order_id": "327d0c8b-ed21-4519-9df2-4902b856c363",
+          "symbol": "HOOD",
+          "side": "buy",
+          "status": "canceled"
+        },
+        {
+          "id": "cfeaf242-1008-44bf-99fc-e4b5b36ea329",
+          "client_order_id": "1cb4f8a0-8e2a-42bc-b1f3-2476a5485c69",
+          "symbol": "HOOD",
+          "side": "buy",
+          "status": "canceled"
+        },
+        {
+          "id": "114b4f16-d3dd-455e-9c94-3aee905df400",
+          "client_order_id": "2c6a011f-a8eb-41e9-a141-0792198f2646",
+          "symbol": "HOOD",
+          "side": "buy",
+          "status": "canceled"
+        },
+        {
+          "id": "91d7bf1c-0374-454f-85f4-76fa83df1de9",
+          "client_order_id": "ab862baa-a0a5-4727-961e-31b081ca2709",
+          "symbol": "HOOD",
+          "side": "buy",
+          "status": "canceled"
+        },
+        {
+          "id": "d26f7d0b-aeb3-4243-90b3-6556282b8337",
+          "client_order_id": "9a1c5a2d-94ff-4d1c-9b2c-382c5de52551",
+          "symbol": "HOOD",
+          "side": "buy",
+          "status": "canceled"
+        },
+        {
+          "id": "1d91808b-501f-4621-bd14-2bdf3017a97f",
+          "client_order_id": "5a64c25d-87fd-4787-95f2-451c86a713aa",
+          "symbol": "HOOD",
+          "side": "buy",
+          "status": "canceled"
+        },
+        {
+          "id": "773ab14b-cb09-4064-976d-27d3466be5db",
+          "client_order_id": "13495c92-ea63-4765-bc58-f7a7e76126de",
+          "symbol": "HOOD",
+          "side": "buy",
+          "status": "canceled"
+        },
+        {
+          "id": "9013c7cb-a045-4420-9138-570f81c034c9",
+          "client_order_id": "b33312b2-7a85-41a1-b82b-8fe059a06633",
+          "symbol": "HOOD",
+          "side": "buy",
+          "status": "canceled"
+        },
+        {
+          "id": "260498fe-f999-47a7-a2d5-cb0aad1cd696",
+          "client_order_id": "a9dc4d8e-6849-4532-8e58-b42394682da0",
+          "symbol": "HOOD",
+          "side": "buy",
+          "status": "canceled"
+        },
+        {
+          "id": "7a427382-911f-4628-8f83-04aaf12d76b0",
+          "client_order_id": "f4588bcc-c730-4543-b4ae-3fee2bdc3bd6",
+          "symbol": "HOOD",
+          "side": "buy",
+          "status": "canceled"
+        },
+        {
+          "id": "546190c1-5d1e-4d79-8dc3-ee60fd46877c",
+          "client_order_id": "a31c3cc5-22a7-42ec-bed1-7c0f52a0c04d",
+          "symbol": "HOOD",
+          "side": "buy",
+          "status": "canceled"
+        },
+        {
+          "id": "3a101272-5e37-4c8c-a0b9-849138bdffd3",
+          "client_order_id": "13b9c2e0-6ed7-42b8-937e-a4ddfdc7b119",
+          "symbol": "HOOD",
+          "side": "buy",
+          "status": "canceled"
+        },
+        {
+          "id": "c46ed244-66b1-4641-b779-7033fa732979",
+          "client_order_id": "d1255e3f-e4d1-4007-b6e8-96bc400747a6",
+          "symbol": "HOOD",
+          "side": "buy",
+          "status": "canceled"
+        },
+        {
+          "id": "522c4c17-1ba3-4afb-98ec-86ec830594b7",
+          "client_order_id": "278e295e-67c5-47cc-bbed-3e664036b962",
+          "symbol": "HOOD",
+          "side": "buy",
+          "status": "canceled"
+        },
+        {
+          "id": "12077971-20da-4afe-822f-0be7775b97e2",
+          "client_order_id": "21636d55-558c-4549-898c-17d726dd5aa0",
+          "symbol": "HOOD",
+          "side": "buy",
+          "status": "canceled"
+        },
+        {
+          "id": "2d9ff93c-b864-445a-aa39-6fb399ed3685",
+          "client_order_id": "cfb9cab5-9661-47d2-a313-6da46b18cdd7",
+          "symbol": "HOOD",
+          "side": "buy",
+          "status": "canceled"
+        }
+      ],
+      "match_rate": 1,
+      "notes": [
+        "32 orphan order(s) — Alpaca activity outside the webhook (other bots/manual)"
+      ]
+    },
+    {
+      "account": "jazzy",
+      "signals_submitted": 6,
+      "alpaca_orders_total": 16,
+      "matched": 6,
+      "ghost_signals": [],
+      "orphan_orders": [
+        {
+          "id": "488f69a2-1592-40e5-a5a9-5ac40d22e7a7",
+          "client_order_id": "ec002872-8d51-41bc-9d6d-f7eba29c5078",
+          "symbol": "SMH260529P00530000",
+          "side": "sell",
+          "status": "accepted"
+        },
+        {
+          "id": "15baec70-a992-4e42-a9d9-7360a92bd185",
+          "client_order_id": "bd3040ed-43cd-44c6-bcf9-5489ee527a1d",
+          "symbol": "HOOD",
+          "side": "buy",
+          "status": "accepted"
+        },
+        {
+          "id": "671662e1-e925-492b-99b0-c63f8cc50f2a",
+          "client_order_id": "b844c59b-2194-45bd-851d-62840e977a8f",
+          "symbol": "BTC/USD",
+          "side": "sell",
+          "status": "filled"
+        },
+        {
+          "id": "d0d8fbbd-a571-4358-9ab2-0e236b5a39eb",
+          "client_order_id": "6952e191-d65d-4d52-8e2d-6f5b4c37dc67",
+          "symbol": "BTC/USD",
+          "side": "sell",
+          "status": "filled"
+        },
+        {
+          "id": "51f35327-9246-43ed-aeca-96b48d586dde",
+          "client_order_id": "e80a8d5d-38ac-40c1-9efc-63e291c2cc27",
+          "symbol": "BTC/USD",
+          "side": "sell",
+          "status": "filled"
+        },
+        {
+          "id": "7e661be2-43cc-4de2-a6ad-eb9d072dc511",
+          "client_order_id": "48b35151-6c18-4781-a1e8-935cfd2d62a1",
+          "symbol": "BTC/USD",
+          "side": "sell",
+          "status": "filled"
+        },
+        {
+          "id": "d70d58ee-882e-4e0c-90b0-7f31ea4c3f02",
+          "client_order_id": "0b56f97d291e424d5f6b3168a7a9-tp",
+          "symbol": "BTC/USD",
+          "side": "sell",
+          "status": "canceled"
+        },
+        {
+          "id": "4878def0-1a7b-4624-b37e-3fad24d773c4",
+          "client_order_id": "5b937a76-bb04-43a6-a855-4b822a65eff4",
+          "symbol": "BTC/USD",
+          "side": "sell",
+          "status": "filled"
+        },
+        {
+          "id": "6899e044-7b4c-4a64-8694-6fd3d52022ef",
+          "client_order_id": "1467e6b43ad70c03016317385ee4-sl",
+          "symbol": "BTC/USD",
+          "side": "sell",
+          "status": "canceled"
+        },
+        {
+          "id": "8718d101-0041-4519-b4ca-f2c00d943443",
+          "client_order_id": "3e2bebe1-3f6a-4039-903d-989cb03a2557",
+          "symbol": "BTC/USD",
+          "side": "sell",
+          "status": "filled"
+        }
+      ],
+      "match_rate": 1,
+      "notes": [
+        "10 orphan order(s) — Alpaca activity outside the webhook (other bots/manual)"
+      ]
+    }
+  ]
+}

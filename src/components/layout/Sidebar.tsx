@@ -5,7 +5,7 @@ import { Bell, Settings, ChevronLeft, ChevronRight,
   ShieldAlert, Building2, MessageSquare, ClipboardCheck, Calendar, FolderKanban,
   ListTodo, FileText, BookOpen, Wallet, LineChart, Home, Search, Zap, Target,
   Eye, Send, Network, History, BookMarked, Database, Users, AlertTriangle, Rocket,
-  Monitor, Smartphone, Workflow,
+  Monitor, Smartphone, Workflow, Cpu, BotMessageSquare, Webhook,
 } from "lucide-react";
 import BestOptionsWidget from '@/components/widgets/BestOptionsWidget';
 import { useViewMode } from '@/lib/useViewMode';
@@ -16,7 +16,7 @@ export type PageName =
   | "GoTrader" | "Wallets" | "Agents" | "Risk" | "Office" | "Memory"
   | "Memory Graph" | "Telegram" | "Approvals" | "Calendar" | "Tasks"
   | "Projects" | "Alerts" | "Usage" | "Congress" | "LLM Portfolio"
-  | "Journal" | "Docs" | "Skills" | "Dashboard" | "Scanner" | "Sessions" | "Options" | "OptionsWatcher" | "Flow Database" | "Desk";
+  | "Journal" | "Docs" | "Skills" | "Dashboard" | "Scanner" | "Sessions" | "Options" | "OptionsWatcher" | "Flow Database" | "Desk" | "ITB" | "Freqtrade" | "Live Strategy";
 
 interface SidebarProps {
   activePage: PageName;
@@ -54,6 +54,9 @@ export function Sidebar({ activePage, onNavigate, isCollapsed, onToggle, newSign
       { name: "Wallets", icon: Wallet },
       { name: "Options", icon: Target },
       { name: "OptionsWatcher", icon: Eye },
+      { name: "ITB", icon: Cpu },
+      { name: "Freqtrade", icon: BotMessageSquare },
+      { name: "Live Strategy", icon: Webhook },
     ]},
     { label: "AGENTS", items: [
       { name: "Agents", icon: Bot },
