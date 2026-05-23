@@ -216,7 +216,11 @@ def seed_if_first_run(conn):
 
 
 def process_active(conn):
-    """For each signal in active files: place BUY on both accounts if not yet placed."""
+    """For each signal in active files: place BUY on both accounts if not yet placed.
+
+    Refactored 2026-05-23: writes a 'pending' dedup row BEFORE place_market_order
+    so any future exception in record()/rationale path cannot re-fire the order.
+    """
     cur = conn.cursor()
     buys = 0
     for filename, source_label, category in ACTIVE_FILES:
@@ -224,20 +228,39 @@ def process_active(conn):
             for account in ACCOUNTS:
                 if already_handled(cur, signal_id, account, "BUY"):
                     continue
+                # 1. Write speculative 'pending' dedup row FIRST
+                try:
+                    record(cur, signal_id, account, ticker, "BUY", 1, None, "pending", None, "pre-order placeholder")
+                    conn.commit()
+                except Exception as pe:
+                    log.warning(f"[{account}] BUY {ticker} pending-record failed ({signal_id}): {pe}")
+                    continue  # If we can't even write pending, don't fire the order
+                # 2. Fire the order
                 order_id, err = place_market_order(account, ticker, 1, "buy")
                 status = "submitted" if order_id else "failed"
-                record(cur, signal_id, account, ticker, "BUY", 1, order_id, status, err, build_rationale("BUY", source_label, category, raw))
+                # 3. Update dedup row with final status. If THIS throws, pending row still blocks re-fire.
+                try:
+                    rationale = build_rationale("BUY", source_label, category, raw)
+                except Exception as be:
+                    rationale = f"rationale-build error: {be}"
+                try:
+                    record(cur, signal_id, account, ticker, "BUY", 1, order_id, status, err, rationale)
+                    conn.commit()
+                except Exception as ue:
+                    log.warning(f"[{account}] BUY {ticker} status-update failed ({signal_id}): {ue} (pending row blocks re-fire)")
                 if err:
                     log.warning(f"[{account}] BUY {ticker} 1sh FAILED ({signal_id}): {err}")
                 else:
                     log.info(f"[{account}] BUY {ticker} 1sh order={order_id} (signal={signal_id})")
                     buys += 1
-                conn.commit()
     return buys
 
 
 def process_closed(conn):
-    """For each signal in closed files: place SELL on both accounts if we hold a position."""
+    """For each signal in closed files: place SELL on both accounts if we hold a position.
+
+    Refactored 2026-05-23: writes a 'pending' dedup row BEFORE place_market_order.
+    """
     cur = conn.cursor()
     sells = 0
     for filename, source_label, category in CLOSED_FILES:
@@ -248,19 +271,37 @@ def process_closed(conn):
                 # Only sell if we actually have an open position
                 qty = get_open_position(account, ticker)
                 if qty <= 0:
-                    record(cur, signal_id, account, ticker, "SELL", 0, None,
-                           "skipped", "no_position")
-                    conn.commit()
+                    try:
+                        record(cur, signal_id, account, ticker, "SELL", 0, None, "skipped", "no_position", "no open position to sell")
+                        conn.commit()
+                    except Exception as e:
+                        log.warning(f"[{account}] SELL {ticker} skip-record failed ({signal_id}): {e}")
                     continue
+                # 1. Write 'pending' first
+                try:
+                    record(cur, signal_id, account, ticker, "SELL", qty, None, "pending", None, "pre-order placeholder")
+                    conn.commit()
+                except Exception as pe:
+                    log.warning(f"[{account}] SELL {ticker} pending-record failed ({signal_id}): {pe}")
+                    continue
+                # 2. Fire
                 order_id, err = place_market_order(account, ticker, qty, "sell")
                 status = "submitted" if order_id else "failed"
-                record(cur, signal_id, account, ticker, "SELL", qty, order_id, status, err, build_rationale("SELL", source_label, category, raw))
+                # 3. Update with final status
+                try:
+                    rationale = build_rationale("SELL", source_label, category, raw)
+                except Exception as be:
+                    rationale = f"rationale-build error: {be}"
+                try:
+                    record(cur, signal_id, account, ticker, "SELL", qty, order_id, status, err, rationale)
+                    conn.commit()
+                except Exception as ue:
+                    log.warning(f"[{account}] SELL {ticker} status-update failed ({signal_id}): {ue} (pending row blocks re-fire)")
                 if err:
                     log.warning(f"[{account}] SELL {ticker} {qty}sh FAILED ({signal_id}): {err}")
                 else:
                     log.info(f"[{account}] SELL {ticker} {qty}sh order={order_id} (signal={signal_id})")
                     sells += 1
-                conn.commit()
     return sells
 
 
