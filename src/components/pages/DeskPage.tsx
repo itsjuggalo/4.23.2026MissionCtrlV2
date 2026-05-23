@@ -86,9 +86,11 @@ interface DeskState {
 
 // ─── Constants ─────────────────────────────────────────────────────────────
 const ALL_LANES = [
-  "semis", "megatech", "ai-themes", "biotech", "energy", "financials",
-  "consumer", "industrials", "healthcare", "REIT", "materials", "utilities",
-  "crypto-tier1", "crypto-defi", "small-cap-catalyst",
+  "semis", "megatech", "software-cloud", "ai-themes", "comm-services",
+  "biotech", "energy", "financials", "insurance", "consumer-disc",
+  "consumer-staples", "industrials", "defense", "cybersecurity", "healthcare",
+  "REIT", "materials", "utilities", "crypto-tier1", "crypto-defi",
+  "small-cap-catalyst",
 ];
 const ALL_SCOUTS = [
   "bluestacks-scout", "firebase-name-scout", "firebase-name2-scout",
