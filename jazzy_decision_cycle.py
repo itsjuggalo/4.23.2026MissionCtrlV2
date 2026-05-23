@@ -67,8 +67,9 @@ def _load_premium_dossier(top_n: int = 5):
     try:
         con = _sql.connect(str(db))
         rows = con.execute(
-            "SELECT rank, dossier_json, band, score, published_at "
+            "SELECT rank, dossier_json, band, score, published_at, COALESCE(target_account, 'both') AS target_account "
             "FROM premium_shortlist_published "
+            "WHERE COALESCE(target_account, 'both') IN ('jazzy', 'both') "
             "ORDER BY published_at DESC, rank ASC LIMIT ?",
             (top_n,),
         ).fetchall()
