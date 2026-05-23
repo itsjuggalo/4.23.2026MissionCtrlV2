@@ -158,6 +158,7 @@ export function DeskPage() {
   const [err, setErr] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [selectedDossierIdx, setSelectedDossierIdx] = useState(0);
+  const [assetClassFilter, setAssetClassFilter] = useState<"all" | "stocks" | "options-flow" | "crypto">("all");
 
   const fetchData = useCallback(async () => {
     try {
@@ -184,8 +185,12 @@ export function DeskPage() {
   if (err)     return <PageWrap><div style={{ color: "#fca5a5" }}>desk-cycle error: {err}</div></PageWrap>;
   if (!data)   return <PageWrap><div style={{ color: "#94a3b8" }}>No data.</div></PageWrap>;
 
-  const safeIdx = Math.min(Math.max(0, selectedDossierIdx), Math.max(0, data.floor4.length - 1));
-  const topDossier = data.floor4[safeIdx];
+  // Asset-class filter (post-Weekend-1 split). API may not return asset_class on older dossiers — treat undefined as 'stocks'.
+  const filteredFloor4 = assetClassFilter === "all"
+    ? data.floor4
+    : data.floor4.filter((d: any) => (d.asset_class ?? "stocks") === assetClassFilter);
+  const safeIdx = Math.min(Math.max(0, selectedDossierIdx), Math.max(0, filteredFloor4.length - 1));
+  const topDossier = filteredFloor4[safeIdx];
   const candByLane = Object.fromEntries(data.floor1.candidates_by_lane.map(r => [r.lane, r.n]));
   const candBySrc  = Object.fromEntries(data.floor1.candidates_by_source.map(r => [r.source_agent, r.n]));
   const lanesByName = Object.fromEntries(data.floor3.map(l => [l.lane, l]));
@@ -212,6 +217,36 @@ export function DeskPage() {
             updated {timeAgo(data.generated_at)}
           </div>
         </div>
+      </div>
+
+      {/* Asset-class filter chips (post-Weekend-1 mini-pipelines) */}
+      <div style={{ display: "flex", gap: 6, marginBottom: 12 }}>
+        {(["all", "stocks", "options-flow", "crypto"] as const).map(cls => {
+          const isActive = assetClassFilter === cls;
+          const count = cls === "all"
+            ? data.floor4.length
+            : data.floor4.filter((d: any) => (d.asset_class ?? "stocks") === cls).length;
+          return (
+            <button
+              key={cls}
+              onClick={() => { setAssetClassFilter(cls); setSelectedDossierIdx(0); }}
+              style={{
+                padding: "5px 12px",
+                fontSize: 11,
+                borderRadius: 4,
+                background: isActive ? "#1e40af33" : "#0f172a",
+                border: `1px solid ${isActive ? "#3b82f6" : "#1e293b"}`,
+                color: isActive ? "#93c5fd" : "#94a3b8",
+                cursor: "pointer",
+                fontWeight: isActive ? 600 : 400,
+                textTransform: "uppercase",
+                letterSpacing: 0.5,
+              }}
+            >
+              {cls} ({count})
+            </button>
+          );
+        })}
       </div>
 
       <div style={{ display: "grid", gap: 14, gridTemplateColumns: "minmax(0,3fr) minmax(0,2fr)" }}>
@@ -318,13 +353,13 @@ export function DeskPage() {
           {topDossier && (
             <FloorCard
               label="FLOOR 4"
-              title={`Per-Candidate Chain · dossier ${safeIdx + 1}/${data.floor4.length} (#${topDossier.id})`}
+              title={`Per-Candidate Chain · dossier ${safeIdx + 1}/${filteredFloor4.length} (#${topDossier.id})${assetClassFilter !== "all" ? ` · ${assetClassFilter}` : ""}`}
               sub={`${topDossier.ticker} ${topDossier.contract?.side ?? ""} $${topDossier.contract?.strike ?? ""} ${topDossier.contract?.expiry ?? ""}`}
             >
               {/* Carousel tabs — one per dossier in this cycle */}
-              {data.floor4.length > 1 && (
+              {filteredFloor4.length > 1 && (
                 <div style={{ display: "flex", gap: 4, marginBottom: 12, flexWrap: "wrap" }}>
-                  {data.floor4.map((d, i) => {
+                  {filteredFloor4.map((d, i) => {
                     const isActive = i === safeIdx;
                     const bandColor = BAND_COLORS[d.band ?? "BRONZE"];
                     return (
