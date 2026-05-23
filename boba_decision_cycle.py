@@ -52,6 +52,69 @@ def _load_active_position_rules():
     return "\n\n# ACTIVE POSITION EXIT RULES (apply BEFORE picking new contracts)\n" + txt + "\n\n"
 
 
+def _load_premium_dossier(top_n: int = 5):
+    """Load top-N premium dossiers from the laptop pipeline's Floor 5 publish.
+
+    Reads premium_shortlist_published in the local Trade SQL DB. Returns a
+    formatted prompt block, or empty string if no rows or DB unreachable.
+
+    Each dossier carries Floor 1-4 chain output (signal-filter -> fundamentals ->
+    TA -> insider -> risk-gate). Boba/Jazzy should weigh PLATINUM/GOLD picks
+    heavily and honor any risk-gate conditional vetoes embedded in the dossier."""
+    import json as _json
+    import sqlite3 as _sql
+    from pathlib import Path as _Path
+    db = _Path("/home/ubuntu/mission-control-restored/data/options_flow.sqlite")
+    if not db.exists():
+        return ""
+    try:
+        con = _sql.connect(str(db))
+        rows = con.execute(
+            "SELECT rank, dossier_json, band, score, published_at "
+            "FROM premium_shortlist_published "
+            "ORDER BY published_at DESC, rank ASC LIMIT ?",
+            (top_n,),
+        ).fetchall()
+        con.close()
+    except Exception:
+        return ""
+    if not rows:
+        return ""
+    seen = set()
+    blocks = []
+    for rank, dj, band, score, published in rows:
+        try:
+            d = _json.loads(dj)
+        except Exception:
+            continue
+        contract = d.get("contract", {})
+        key = (d.get("ticker"), contract.get("side"), contract.get("strike"), contract.get("expiry"))
+        if key in seen:
+            continue
+        seen.add(key)
+        ticker = d.get("ticker", "?")
+        side = contract.get("side", "")
+        strike = contract.get("strike", "")
+        expiry = contract.get("expiry", "")
+        thesis = (d.get("thesis") or "")[:300]
+        stages_present = list(d.get("stages", {}).keys())
+        blocks.append(
+            "### #" + str(rank) + " - " + str(ticker) + " " + str(side) + " $" + str(strike) + " " + str(expiry) +
+            " [" + str(band) + "/" + str(score) + "]\n" +
+            "  Stages: " + ", ".join(stages_present) + "\n" +
+            "  Thesis: " + thesis
+        )
+    if not blocks:
+        return ""
+    header = (
+        "\n\n# PREMIUM DESK DOSSIER (from laptop six-floor pipeline)\n"
+        "Top-ranked candidates from this cycle's Floor 1-4 chain. PLATINUM/GOLD entries\n"
+        "have passed fundamentals + TA + insider + risk-gate. Treat as your prioritized\n"
+        "shortlist - read these FIRST before the raw flow alerts below.\n\n"
+    )
+    return header + "\n\n".join(blocks) + "\n\n"
+
+
 import json
 import os
 import subprocess
@@ -886,7 +949,7 @@ def build_boba_prompt(account, positions, shortlist_with_kronos, remaining_budge
                 shortlist_text += f"  → Kronos CONFLICTS with option thesis ❌\n"
 
     firebase_signals_text = firebase_signals.format_for_prompt(firebase_signals.load_signals(), max_show=20)
-    firebase_notifications_text = firebase_signals.format_notifications_for_prompt(firebase_signals.load_notifications(), max_show=15)
+    firebase_notifications_text = firebase_signals.format_notifications_for_prompt(firebase_signals.load_notifications(), max_show=3)  # parser already consumed these; this is transparency tail
     firebase_flow_alerts_text = firebase_signals.format_flow_alerts_for_prompt(firebase_signals.load_flow_alerts(), max_show=15)
     best_options_text = load_best_options(max_show=15, min_premium=1_000_000) or ""
     ticker_rollup_text = load_ticker_rollup(min_total=10_000_000, max_show=10) or ""
@@ -1236,7 +1299,13 @@ def _mc_kb_recall():
 def call_boba(prompt):
     """Call Claude Sonnet via CLI subprocess (Max plan, no API credits)."""
     CLAUDE_BIN = "/home/ubuntu/.local/bin/claude"
-    full_prompt = _load_lessons() + _load_active_position_rules() + _mc_kb_recall() + prompt
+    full_prompt = (
+        _load_premium_dossier()  # NEW: top-of-prompt six-floor desk output
+        + _load_lessons()
+        + _load_active_position_rules()
+        + _mc_kb_recall()
+        + prompt
+    )
 
     _t0 = _time_tracker.time()
     try:
