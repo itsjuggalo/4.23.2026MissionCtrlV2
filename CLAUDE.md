@@ -1,3 +1,5 @@
+<!-- Shape source: ~/templates/context-quartet/claude.md (Kashef Context Engineering). -->
+
 @AGENTS.md
 
 # MissionCtrlV2 — Active Local Dashboard (port 3000)
