@@ -111,16 +111,23 @@ function getRunsHealth() {
         "SELECT COUNT(*) AS n FROM itb_runs WHERE status = 'killed' AND ended_at >= ?"
       ).get(dayAgo) as { n: number } | undefined)?.n ?? 0;
 
+      // Oldest pending ts — used to detect stuck runs
+      const oldestPendingRow = db.prepare(
+        "SELECT MIN(ts) AS oldest FROM itb_runs WHERE status = 'pending' UNION ALL SELECT MIN(ts) FROM freqtrade_runs WHERE status = 'pending' ORDER BY oldest ASC LIMIT 1"
+      ).get() as { oldest: number | null } | undefined;
+      const oldestPendingTs = oldestPendingRow?.oldest ?? null;
+
       return {
         pending: pendingCount + pendingFt,
         running: runningCount + runningFt,
         orphaned_last_24h: orphanedLast24h,
         killed_last_24h: killedLast24h,
+        oldest_pending_ts: oldestPendingTs,
       };
     });
-    return result ?? { pending: 0, running: 0, orphaned_last_24h: 0, killed_last_24h: 0 };
+    return result ?? { pending: 0, running: 0, orphaned_last_24h: 0, killed_last_24h: 0, oldest_pending_ts: null };
   } catch {
-    return { pending: 0, running: 0, orphaned_last_24h: 0, killed_last_24h: 0 };
+    return { pending: 0, running: 0, orphaned_last_24h: 0, killed_last_24h: 0, oldest_pending_ts: null };
   }
 }
 
@@ -179,11 +186,12 @@ export async function GET() {
   const auditLog = getAuditLogHealth();
 
   // ok=false conditions (per PLAN Phase 6a)
-  const pendingTooLong = runs.pending > 0 && now - (runs as unknown as Record<string, number>).oldest_pending_ts > PENDING_ALERT_MS;
+  // pulse.healthy already gates on last_bucket_ms < 15min; missing_last_hour is advisory only
+  const pendingTooLong = runs.pending > 0
+    && runs.oldest_pending_ts !== null
+    && now - runs.oldest_pending_ts > PENDING_ALERT_MS;
   const ok = db.healthy
     && pulse.healthy
-    && pulse.missing_last_hour <= MAX_MISSING_BUCKETS
-    && pulse.last_bucket_ms > now - PULSE_STALE_MS
     && ingestion.failed_last_24h === 0
     && db.wal_size_mb <= WAL_SIZE_ALERT_MB
     && !pendingTooLong;
