@@ -45,7 +45,7 @@ export function isV2Page(name: string): boolean {
   return v2Pages.includes(name);
 }
 
-export function middleware(req: NextRequest) {
+export function proxy(req: NextRequest) {
   const pathname = new URL(req.url).pathname;
   const authMode = process.env.MISSIONCTRL_AUTH_MODE ?? 'warn';
 
@@ -66,7 +66,7 @@ export function middleware(req: NextRequest) {
         );
       }
       // warn mode: log and pass through
-      console.warn(`[middleware] Unauthenticated request to sensitive route: ${pathname}`);
+      console.warn(`[proxy] Unauthenticated request to sensitive route: ${pathname}`);
       return NextResponse.next();
     }
 
