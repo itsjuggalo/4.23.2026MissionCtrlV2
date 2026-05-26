@@ -1,6 +1,10 @@
 "use client";
 
 import { useEffect, useState, useCallback } from "react";
+import { GradientHeader } from "@/components/ui/GradientHeader";
+import { Badge } from "@/components/ui/Badge";
+import { Heatmap } from "@/components/ui/Heatmap";
+import { Sparkline } from "@/components/ui/Sparkline";
 
 // ─── Types matching /api/desk-cycle ───────────────────────────────────────
 interface Macro {
@@ -68,6 +72,14 @@ interface RDOutput {
   acted_on: boolean;
   created_at: string;
 }
+interface CycleHistoryEntry {
+  cycle_id: string;
+  ran_at: string;
+  n_candidates: number;
+  n_dossiers: number;
+  n_shortlist: number;
+  duration_s?: number;
+}
 interface DeskState {
   generated_at: string;
   stats: Record<string, number>;
@@ -82,6 +94,8 @@ interface DeskState {
   floor5: Shortlist[];
   floor6: RDOutput[];
   agent_calls: AgentCall[];
+  cycle_history?: CycleHistoryEntry[];
+  lane_stage_matrix?: { lane: string; stages: Record<string, 'pass' | 'fail' | 'pending' | 'na'> }[];
 }
 
 // ─── Constants ─────────────────────────────────────────────────────────────
@@ -129,14 +143,6 @@ const BAND_COLORS: Record<string, string> = {
   BRONZE:   "#a16207",
   TRASH:    "#dc2626",
 };
-const VERDICT_COLORS: Record<string, string> = {
-  STRONG_BULL: "#22c55e",
-  BULL:        "#86efac",
-  NEUTRAL:     "#64748b",
-  BEAR:        "#fca5a5",
-  STRONG_BEAR: "#dc2626",
-};
-
 
 // ─── Small helpers ─────────────────────────────────────────────────────────
 function timeAgo(iso: string): string {
@@ -151,6 +157,19 @@ function timeAgo(iso: string): string {
   return `${Math.floor(h / 24)}d ago`;
 }
 
+function verdictColor(verdict: string | null): string {
+  if (!verdict) return "var(--color-mc-text-dim)";
+  if (verdict === "STRONG_BULL" || verdict === "BULL") return "var(--color-mc-green)";
+  if (verdict === "STRONG_BEAR" || verdict === "BEAR") return "var(--color-mc-red)";
+  return "var(--color-mc-text-dim)";
+}
+
+function stageStateToSeverity(state: string | undefined): 'green' | 'amber' | 'red' | 'neutral' {
+  if (state === 'pass') return 'green';
+  if (state === 'fail') return 'red';
+  if (state === 'pending') return 'amber';
+  return 'neutral';
+}
 
 // ─── Page component ────────────────────────────────────────────────────────
 export function DeskPage() {
@@ -159,6 +178,7 @@ export function DeskPage() {
   const [loading, setLoading] = useState(true);
   const [selectedDossierIdx, setSelectedDossierIdx] = useState(0);
   const [assetClassFilter, setAssetClassFilter] = useState<"all" | "stocks" | "options-flow" | "crypto">("all");
+  const [selectedCycleIdx, setSelectedCycleIdx] = useState<number | null>(null);
 
   const fetchData = useCallback(async () => {
     try {
@@ -181,11 +201,10 @@ export function DeskPage() {
     return () => clearInterval(t);
   }, [fetchData]);
 
-  if (loading) return <PageWrap><div style={{ color: "#94a3b8" }}>Loading desk state…</div></PageWrap>;
-  if (err)     return <PageWrap><div style={{ color: "#fca5a5" }}>desk-cycle error: {err}</div></PageWrap>;
-  if (!data)   return <PageWrap><div style={{ color: "#94a3b8" }}>No data.</div></PageWrap>;
+  if (loading) return <PageWrap><div style={{ color: "var(--color-mc-text-muted)" }}>Loading desk state…</div></PageWrap>;
+  if (err)     return <PageWrap><div style={{ color: "var(--color-mc-red)" }}>desk-cycle error: {err}</div></PageWrap>;
+  if (!data)   return <PageWrap><div style={{ color: "var(--color-mc-text-muted)" }}>No data.</div></PageWrap>;
 
-  // Asset-class filter (post-Weekend-1 split). API may not return asset_class on older dossiers — treat undefined as 'stocks'.
   const filteredFloor4 = assetClassFilter === "all"
     ? data.floor4
     : data.floor4.filter((d: any) => (d.asset_class ?? "stocks") === assetClassFilter);
@@ -195,31 +214,104 @@ export function DeskPage() {
   const candBySrc  = Object.fromEntries(data.floor1.candidates_by_source.map(r => [r.source_agent, r.n]));
   const lanesByName = Object.fromEntries(data.floor3.map(l => [l.lane, l]));
 
+  const cycleHistory = data.cycle_history ?? [];
+  const maxDossiers = Math.max(...cycleHistory.map(c => c.n_dossiers), 1);
+  const selectedCycle = selectedCycleIdx !== null ? cycleHistory[selectedCycleIdx] ?? null : null;
+  const laneStageMatrix = data.lane_stage_matrix ?? null;
+
+  function laneStageValue(rowIdx: number, colIdx: number) {
+    const lane = ALL_LANES[rowIdx];
+    const stage = CHAIN_STAGES[colIdx];
+    if (laneStageMatrix) {
+      const laneRow = laneStageMatrix.find(r => r.lane === lane);
+      const state = laneRow?.stages[stage.slot];
+      const sev = stageStateToSeverity(state);
+      return { score: sev === 'green' ? 1 : sev === 'amber' ? 0.5 : sev === 'red' ? 0 : -1, label: state ? state.slice(0, 4) : '—', severity: sev as any };
+    }
+    const dossier = (data?.floor4 ?? []).find((d: any) => (d.lane ?? null) === lane);
+    const stageVal = dossier?.stages?.[stage.slot];
+    if (stageVal !== undefined) {
+      const hasVeto = !!stageVal?.veto;
+      return { score: hasVeto ? 0 : 1, label: hasVeto ? 'VETO' : 'pass', severity: (hasVeto ? 'red' : 'green') as any };
+    }
+    const laneData = lanesByName[lane];
+    if (laneData) return { score: 0.5, label: '—', severity: 'neutral' as any };
+    return { score: -1, label: '—', severity: 'neutral' as any };
+  }
+
   return (
     <PageWrap>
-      {/* Top bar */}
-      <div style={topBarStyle}>
-        <div>
-          <div style={{ fontSize: 11, color: "#64748b", textTransform: "uppercase", letterSpacing: 1.5 }}>
-            Six-Floor Sovereign Wealth Desk
-          </div>
-          <h1 style={{ fontSize: 20, margin: "4px 0 0", color: "#e6edf3" }}>
-            Live pipeline state · refreshed every 30s
-          </h1>
+      {/* Top bar with GradientHeader */}
+      <GradientHeader
+        title="Six-Floor Sovereign Wealth Desk"
+        subtitle="Live pipeline state · refreshed every 30s"
+      >
+        <StatBadge label="Candidates" v={data.stats.total_candidates} />
+        <StatBadge label="Lanes" v={data.stats.total_lane_findings} />
+        <StatBadge label="Dossiers" v={data.stats.total_dossiers} />
+        <StatBadge label="Shortlist" v={data.stats.total_shortlist} />
+        <StatBadge label="Agents" v={data.stats.total_agent_calls} />
+        <div style={{ fontSize: 11, color: "var(--color-mc-text-dim)", fontFamily: "var(--font-mc-mono)" }}>
+          {timeAgo(data.generated_at)}
         </div>
-        <div style={{ display: "flex", gap: 18, alignItems: "center" }}>
-          <Stat label="Candidates" v={data.stats.total_candidates} />
-          <Stat label="Lanes" v={data.stats.total_lane_findings} />
-          <Stat label="Dossiers" v={data.stats.total_dossiers} />
-          <Stat label="Shortlist" v={data.stats.total_shortlist} />
-          <Stat label="Agent calls" v={data.stats.total_agent_calls} />
-          <div style={{ fontSize: 11, color: "#475569" }}>
-            updated {timeAgo(data.generated_at)}
-          </div>
-        </div>
-      </div>
+      </GradientHeader>
 
-      {/* Asset-class filter chips (post-Weekend-1 mini-pipelines) */}
+      {/* Cycle history mini-timeline */}
+      {cycleHistory.length > 0 && (
+        <div style={{ marginBottom: 14 }}>
+          <div style={{ fontSize: 10, color: "var(--color-mc-text-muted)", fontFamily: "var(--font-mc-mono)", marginBottom: 6, letterSpacing: 1 }}>
+            CYCLE HISTORY (last {cycleHistory.length}) — click bar for summary
+          </div>
+          <div style={{ display: "flex", gap: 3, alignItems: "flex-end", height: 40 }}>
+            {cycleHistory.map((c, i) => {
+              const barH = Math.max(4, Math.round((c.n_dossiers / maxDossiers) * 36));
+              const isSelected = selectedCycleIdx === i;
+              const isLatest = i === cycleHistory.length - 1;
+              return (
+                <button
+                  key={c.cycle_id}
+                  onClick={() => setSelectedCycleIdx(isSelected ? null : i)}
+                  title={`${c.ran_at ? new Date(c.ran_at).toLocaleString() : '—'} · ${c.n_dossiers} dossiers · ${c.n_shortlist} shortlist · summary only — full replay coming in v2`}
+                  style={{
+                    width: 10, height: barH, borderRadius: 2,
+                    background: isSelected
+                      ? "var(--color-mc-accent)"
+                      : isLatest
+                      ? "color-mix(in srgb, var(--color-mc-accent) 60%, transparent)"
+                      : "var(--color-mc-bg-surface)",
+                    border: `1px solid ${isSelected ? "var(--color-mc-accent)" : "var(--color-mc-border)"}`,
+                    cursor: "pointer", flexShrink: 0, transition: "background 0.15s",
+                  }}
+                  aria-label={`Cycle ${i + 1}: ${c.n_dossiers} dossiers, ran ${timeAgo(c.ran_at)}`}
+                />
+              );
+            })}
+          </div>
+          {selectedCycle && (
+            <div style={{
+              marginTop: 8, padding: 12,
+              background: "var(--color-mc-bg-card)", border: "1px solid var(--color-mc-accent)",
+              borderRadius: 6, fontSize: 11, fontFamily: "var(--font-mc-mono)", color: "var(--color-mc-text)",
+            }}>
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 6 }}>
+                <span style={{ color: "var(--color-mc-accent)", fontWeight: 600 }}>
+                  Cycle summary — full per-cycle replay coming in v2
+                </span>
+                <button onClick={() => setSelectedCycleIdx(null)} style={{ background: "transparent", border: "none", color: "var(--color-mc-text-muted)", cursor: "pointer", fontSize: 12 }}>✕</button>
+              </div>
+              <div style={{ display: "flex", gap: 20 }}>
+                <Kv label="ran_at" value={selectedCycle.ran_at ? new Date(selectedCycle.ran_at).toLocaleString() : '—'} />
+                <Kv label="candidates" value={String(selectedCycle.n_candidates)} />
+                <Kv label="dossiers" value={String(selectedCycle.n_dossiers)} />
+                <Kv label="shortlist" value={String(selectedCycle.n_shortlist)} />
+                {selectedCycle.duration_s !== undefined && <Kv label="duration" value={`${selectedCycle.duration_s.toFixed(1)}s`} />}
+              </div>
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* Asset-class filter chips with Badge */}
       <div style={{ display: "flex", gap: 6, marginBottom: 12 }}>
         {(["all", "stocks", "options-flow", "crypto"] as const).map(cls => {
           const isActive = assetClassFilter === cls;
@@ -231,16 +323,12 @@ export function DeskPage() {
               key={cls}
               onClick={() => { setAssetClassFilter(cls); setSelectedDossierIdx(0); }}
               style={{
-                padding: "5px 12px",
-                fontSize: 11,
-                borderRadius: 4,
-                background: isActive ? "#1e40af33" : "#0f172a",
-                border: `1px solid ${isActive ? "#3b82f6" : "#1e293b"}`,
-                color: isActive ? "#93c5fd" : "#94a3b8",
-                cursor: "pointer",
-                fontWeight: isActive ? 600 : 400,
-                textTransform: "uppercase",
-                letterSpacing: 0.5,
+                padding: "5px 12px", fontSize: 11, borderRadius: 4,
+                background: isActive ? "color-mix(in srgb, var(--color-mc-accent) 20%, transparent)" : "var(--color-mc-bg-card)",
+                border: `1px solid ${isActive ? "var(--color-mc-accent)" : "var(--color-mc-border)"}`,
+                color: isActive ? "var(--color-mc-accent)" : "var(--color-mc-text-muted)",
+                cursor: "pointer", fontWeight: isActive ? 600 : 400,
+                textTransform: "uppercase", letterSpacing: 0.5, fontFamily: "var(--font-mc-mono)",
               }}
             >
               {cls} ({count})
@@ -250,56 +338,63 @@ export function DeskPage() {
       </div>
 
       <div style={{ display: "grid", gap: 14, gridTemplateColumns: "minmax(0,3fr) minmax(0,2fr)" }}>
-        {/* LEFT column — Floors 1 / 2 / 3 */}
+        {/* LEFT column */}
         <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
-          {/* Floor 1 */}
+
+          {/* Floor 1 — Scout Tower */}
           <FloorCard label="FLOOR 1" title="Scout Tower" sub="12 scouts ingest live signal streams in parallel">
-            <div style={scoutGridStyle}>
+            <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 6 }}>
               {ALL_SCOUTS.map(s => {
                 const n = candBySrc[s] ?? 0;
+                // cycle_history doesn't yet carry per-scout timeseries; sparkline data will populate once backend delivers it
+                const sparkData: number[] = [];
                 return (
-                  <div key={s} style={{ ...agentChipStyle, opacity: n > 0 ? 1 : 0.45 }}>
-                    <div style={{ fontSize: 11, color: "#cbd5e1", fontWeight: 500 }}>
-                      {s.replace("-scout","")}
+                  <div key={s} style={{
+                    background: "var(--color-mc-bg-surface)", border: "1px solid var(--color-mc-border)",
+                    borderRadius: 6, padding: "6px 10px", opacity: n > 0 ? 1 : 0.45,
+                  }}>
+                    <div style={{ fontSize: 11, color: "var(--color-mc-text)", fontWeight: 500 }}>
+                      {s.replace("-scout", "")}
                     </div>
-                    <div style={{ fontSize: 14, color: n > 0 ? "#22c55e" : "#475569", fontFamily: "ui-monospace" }}>
+                    <div style={{ fontSize: 14, color: n > 0 ? "var(--color-mc-green)" : "var(--color-mc-text-dim)", fontFamily: "var(--font-mc-mono)" }}>
                       {n} cand
                     </div>
+                    {sparkData.length > 0 && <Sparkline data={sparkData} height={20} />}
                   </div>
                 );
               })}
             </div>
           </FloorCard>
 
-          {/* Floor 2 */}
+          {/* Floor 2 — Macro Room */}
           <FloorCard label="FLOOR 2" title="Macro Room" sub="7 macro agents · cached 30 min · shared across cycle">
             <div style={{ display: "flex", gap: 12 }}>
               <div style={{ flex: 1 }}>
-                <div style={macroBlock}>
-                  <div style={{ fontSize: 11, color: "#64748b" }}>REGIME</div>
-                  <div style={{ fontSize: 28, color: data.floor2?.regime === "RISK_ON" ? "#22c55e" : "#f59e0b", fontWeight: 600 }}>
+                <div style={{ background: "var(--color-mc-bg-surface)", border: "1px solid var(--color-mc-border)", borderRadius: 6, padding: 12, height: "100%" }}>
+                  <div style={{ fontSize: 11, color: "var(--color-mc-text-dim)", fontFamily: "var(--font-mc-mono)" }}>REGIME</div>
+                  <div style={{ fontSize: 28, color: data.floor2?.regime === "RISK_ON" ? "var(--color-mc-green)" : "var(--color-mc-amber)", fontWeight: 600 }}>
                     {data.floor2?.regime ?? "—"}
                   </div>
-                  <div style={{ fontSize: 11, color: "#64748b", marginTop: 8 }}>FED POSTURE</div>
-                  <div style={{ fontSize: 14, color: "#cbd5e1" }}>{data.floor2?.fed_posture ?? "—"}</div>
-                  <div style={{ fontSize: 11, color: "#64748b", marginTop: 8 }}>VIX</div>
-                  <div style={{ fontSize: 14, color: "#cbd5e1" }}>
-                    {data.floor2?.vix ?? "—"} {data.floor2?.vix_pct != null && <span style={{ color: "#64748b" }}>({data.floor2.vix_pct}th pct)</span>}
+                  <div style={{ fontSize: 11, color: "var(--color-mc-text-dim)", marginTop: 8, fontFamily: "var(--font-mc-mono)" }}>FED POSTURE</div>
+                  <div style={{ fontSize: 14, color: "var(--color-mc-text)" }}>{data.floor2?.fed_posture ?? "—"}</div>
+                  <div style={{ fontSize: 11, color: "var(--color-mc-text-dim)", marginTop: 8, fontFamily: "var(--font-mc-mono)" }}>VIX</div>
+                  <div style={{ fontSize: 14, color: "var(--color-mc-text)" }}>
+                    {data.floor2?.vix ?? "—"} {data.floor2?.vix_pct != null && <span style={{ color: "var(--color-mc-text-dim)" }}>({data.floor2.vix_pct}th pct)</span>}
                   </div>
                 </div>
               </div>
               <div style={{ flex: 2 }}>
-                <div style={macroBlock}>
-                  <div style={{ fontSize: 11, color: "#64748b" }}>SECTOR TAILWINDS</div>
-                  <div style={{ fontSize: 13, color: "#86efac", margin: "4px 0" }}>
+                <div style={{ background: "var(--color-mc-bg-surface)", border: "1px solid var(--color-mc-border)", borderRadius: 6, padding: 12, height: "100%" }}>
+                  <div style={{ fontSize: 11, color: "var(--color-mc-text-dim)", fontFamily: "var(--font-mc-mono)" }}>SECTOR TAILWINDS</div>
+                  <div style={{ fontSize: 13, color: "var(--color-mc-green)", margin: "4px 0" }}>
                     {data.floor2?.sector_tailwinds?.tailwinds?.join("  ·  ") || "—"}
                   </div>
-                  <div style={{ fontSize: 11, color: "#64748b", marginTop: 6 }}>SECTOR HEADWINDS</div>
-                  <div style={{ fontSize: 13, color: "#fca5a5", margin: "4px 0" }}>
+                  <div style={{ fontSize: 11, color: "var(--color-mc-text-dim)", marginTop: 6, fontFamily: "var(--font-mc-mono)" }}>SECTOR HEADWINDS</div>
+                  <div style={{ fontSize: 13, color: "var(--color-mc-red)", margin: "4px 0" }}>
                     {data.floor2?.sector_tailwinds?.headwinds?.join("  ·  ") || "—"}
                   </div>
                   {data.floor2?.sector_tailwinds?.theme && (
-                    <div style={{ fontSize: 12, color: "#94a3b8", marginTop: 8, lineHeight: 1.5 }}>
+                    <div style={{ fontSize: 12, color: "var(--color-mc-text-muted)", marginTop: 8, lineHeight: 1.5 }}>
                       "{data.floor2.sector_tailwinds.theme}"
                     </div>
                   )}
@@ -308,9 +403,9 @@ export function DeskPage() {
               <div style={{ flex: 1 }}>
                 <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 6 }}>
                   {ALL_MACRO_AGENTS.map(a => (
-                    <div key={a.id} style={agentChipMini}>
-                      <div style={{ fontSize: 10, color: "#94a3b8" }}>{a.short}</div>
-                      <div style={{ fontSize: 9, color: "#475569" }}>{a.dna}</div>
+                    <div key={a.id} style={{ background: "var(--color-mc-bg-surface)", border: "1px solid var(--color-mc-border)", borderRadius: 4, padding: "4px 6px" }}>
+                      <div style={{ fontSize: 10, color: "var(--color-mc-text-muted)", fontFamily: "var(--font-mc-mono)" }}>{a.short}</div>
+                      <div style={{ fontSize: 9, color: "var(--color-mc-text-dim)", fontFamily: "var(--font-mc-mono)" }}>{a.dna}</div>
                     </div>
                   ))}
                 </div>
@@ -318,65 +413,71 @@ export function DeskPage() {
             </div>
           </FloorCard>
 
-          {/* Floor 3 */}
-          <FloorCard label="FLOOR 3" title="Lane Research" sub="15 sector specialists ingest macro context + candidates">
-            <div style={laneGridStyle}>
-              {ALL_LANES.map(l => {
-                const lane = lanesByName[l];
-                const candCount = candByLane[l] ?? 0;
-                const verdict = lane?.verdict ?? null;
-                return (
-                  <div key={l} style={{
-                    ...laneCardStyle,
-                    borderColor: verdict ? VERDICT_COLORS[verdict] ?? "#334155" : "#1e293b",
-                    opacity: candCount > 0 || verdict ? 1 : 0.55,
-                  }}>
-                    <div style={{ fontSize: 11, fontWeight: 600, color: "#e2e8f0", marginBottom: 2 }}>{l}</div>
-                    <div style={{ fontSize: 13, color: verdict ? VERDICT_COLORS[verdict] : "#475569", fontWeight: 600 }}>
-                      {verdict ?? "—"}
+          {/* Floor 3 — Heatmap OR card grid */}
+          <FloorCard label="FLOOR 3" title="Lane Research" sub="15 sector specialists — lane × stage heatmap">
+            {(laneStageMatrix || data.floor3.length > 0) ? (
+              <div style={{ overflowX: "auto" }}>
+                <Heatmap
+                  rows={ALL_LANES}
+                  cols={CHAIN_STAGES.map(s => s.slot.slice(0, 6))}
+                  value={laneStageValue}
+                  onCellClick={(ri, ci) => {
+                    const lane = ALL_LANES[ri];
+                    const stage = CHAIN_STAGES[ci];
+                    const laneData = lanesByName[lane];
+                    if (laneData) {
+                      const obs = laneData.key_observations?.slice(0, 3).join('; ') ?? '—';
+                      window.alert(`${lane} × ${stage.label}\nVerdict: ${laneData.verdict ?? '—'}\n${obs}`);
+                    }
+                  }}
+                />
+              </div>
+            ) : (
+              <div style={{ display: "grid", gridTemplateColumns: "repeat(5, 1fr)", gap: 6 }}>
+                {ALL_LANES.map(l => {
+                  const lane = lanesByName[l];
+                  const candCount = candByLane[l] ?? 0;
+                  const verdict = lane?.verdict ?? null;
+                  return (
+                    <div key={l} style={{
+                      background: "var(--color-mc-bg-surface)",
+                      border: `1px solid ${verdict ? verdictColor(verdict) : "var(--color-mc-border)"}`,
+                      borderRadius: 6, padding: "8px 10px",
+                      opacity: candCount > 0 || verdict ? 1 : 0.55,
+                    }}>
+                      <div style={{ fontSize: 11, fontWeight: 600, color: "var(--color-mc-text)", marginBottom: 2 }}>{l}</div>
+                      <div style={{ fontSize: 13, color: verdictColor(verdict), fontWeight: 600 }}>{verdict ?? "—"}</div>
+                      {lane && lane.top_tickers.length > 0 && (
+                        <div style={{ fontSize: 10, color: "var(--color-mc-text-muted)", marginTop: 4 }}>{lane.top_tickers.slice(0, 3).join(" · ")}</div>
+                      )}
+                      <div style={{ fontSize: 10, color: "var(--color-mc-text-dim)", marginTop: 4 }}>{candCount} cand</div>
                     </div>
-                    {lane && lane.top_tickers.length > 0 && (
-                      <div style={{ fontSize: 10, color: "#94a3b8", marginTop: 4 }}>
-                        {lane.top_tickers.slice(0,3).join(" · ")}
-                      </div>
-                    )}
-                    <div style={{ fontSize: 10, color: "#475569", marginTop: 4 }}>
-                      {candCount} cand
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
+                  );
+                })}
+              </div>
+            )}
           </FloorCard>
 
-          {/* Floor 4 — featured dossier (with carousel) */}
+          {/* Floor 4 */}
           {topDossier && (
             <FloorCard
               label="FLOOR 4"
               title={`Per-Candidate Chain · dossier ${safeIdx + 1}/${filteredFloor4.length} (#${topDossier.id})${assetClassFilter !== "all" ? ` · ${assetClassFilter}` : ""}`}
               sub={`${topDossier.ticker} ${topDossier.contract?.side ?? ""} $${topDossier.contract?.strike ?? ""} ${topDossier.contract?.expiry ?? ""}`}
             >
-              {/* Carousel tabs — one per dossier in this cycle */}
               {filteredFloor4.length > 1 && (
                 <div style={{ display: "flex", gap: 4, marginBottom: 12, flexWrap: "wrap" }}>
                   {filteredFloor4.map((d, i) => {
                     const isActive = i === safeIdx;
                     const bandColor = BAND_COLORS[d.band ?? "BRONZE"];
                     return (
-                      <button
-                        key={d.id}
-                        onClick={() => setSelectedDossierIdx(i)}
-                        style={{
-                          padding: "4px 10px",
-                          fontSize: 11,
-                          borderRadius: 4,
-                          background: isActive ? bandColor + "33" : "#0f172a",
-                          border: `1px solid ${isActive ? bandColor : "#1e293b"}`,
-                          color: isActive ? bandColor : "#94a3b8",
-                          cursor: "pointer",
-                          fontWeight: isActive ? 600 : 400,
-                        }}
-                      >
+                      <button key={d.id} onClick={() => setSelectedDossierIdx(i)} style={{
+                        padding: "4px 10px", fontSize: 11, borderRadius: 4,
+                        background: isActive ? bandColor + "33" : "var(--color-mc-bg-card)",
+                        border: `1px solid ${isActive ? bandColor : "var(--color-mc-border)"}`,
+                        color: isActive ? bandColor : "var(--color-mc-text-muted)",
+                        cursor: "pointer", fontWeight: isActive ? 600 : 400, fontFamily: "var(--font-mc-mono)",
+                      }}>
                         {d.ticker} {d.band ?? "—"}/{d.confidence ?? "?"}
                       </button>
                     );
@@ -385,56 +486,46 @@ export function DeskPage() {
               )}
               <div style={{ display: "flex", gap: 14 }}>
                 <div style={{ flex: 1 }}>
-                  <div style={dossierHeader}>
+                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
                     <span style={{
-                      ...bandPill,
+                      fontSize: 12, fontWeight: 700, padding: "3px 10px", borderRadius: 4,
+                      border: "1px solid", fontFamily: "var(--font-mc-mono)", letterSpacing: 1,
                       background: BAND_COLORS[topDossier.band ?? "BRONZE"] + "26",
                       color: BAND_COLORS[topDossier.band ?? "BRONZE"],
                       borderColor: BAND_COLORS[topDossier.band ?? "BRONZE"],
                     }}>
                       {topDossier.band ?? "—"} · {topDossier.confidence ?? "?"}
                     </span>
-                    <span style={{ fontSize: 11, color: "#64748b" }}>
-                      {topDossier.slot_count} stages filled
-                    </span>
+                    <span style={{ fontSize: 11, color: "var(--color-mc-text-dim)", fontFamily: "var(--font-mc-mono)" }}>{topDossier.slot_count} stages filled</span>
                   </div>
                   <div style={{ marginTop: 14 }}>
                     {CHAIN_STAGES.map(st => {
                       const filled = topDossier.stages?.[st.slot];
                       const veto = !!(filled?.veto);
                       return (
-                        <div key={st.slot} style={{
-                          ...stageRowStyle,
-                          color: filled ? "#cbd5e1" : "#475569",
-                        }}>
-                          <span style={{ width: 16, color: filled ? "#22c55e" : "#334155" }}>
-                            {filled ? "✓" : "·"}
-                          </span>
+                        <div key={st.slot} style={{ display: "flex", gap: 8, padding: "3px 0", alignItems: "center", color: filled ? "var(--color-mc-text)" : "var(--color-mc-text-dim)" }}>
+                          <span style={{ width: 16, color: filled ? "var(--color-mc-green)" : "var(--color-mc-border)" }}>{filled ? "✓" : "·"}</span>
                           <span style={{ flex: 1, fontSize: 12 }}>{st.label}</span>
-                          <span style={{ fontSize: 10, color: "#475569" }}>{st.owner}</span>
-                          {veto && <span style={{ fontSize: 10, color: "#dc2626", marginLeft: 6 }}>VETO</span>}
+                          <span style={{ fontSize: 10, color: "var(--color-mc-text-dim)", fontFamily: "var(--font-mc-mono)" }}>{st.owner}</span>
+                          {veto && <span style={{ fontSize: 10, color: "var(--color-mc-red)", marginLeft: 6, fontFamily: "var(--font-mc-mono)" }}>VETO</span>}
                         </div>
                       );
                     })}
                   </div>
                 </div>
                 <div style={{ flex: 1 }}>
-                  <div style={{ fontSize: 11, color: "#64748b", textTransform: "uppercase", letterSpacing: 1, marginBottom: 6 }}>
-                    Curator Thesis
+                  <div style={{ fontSize: 11, color: "var(--color-mc-text-dim)", textTransform: "uppercase", letterSpacing: 1, marginBottom: 6, fontFamily: "var(--font-mc-mono)" }}>Curator Thesis</div>
+                  <div style={{ background: "var(--color-mc-bg-surface)", border: "1px solid var(--color-mc-border)", borderRadius: 6, padding: 10, fontSize: 12, color: "var(--color-mc-text)", lineHeight: 1.5 }}>
+                    {topDossier.thesis ?? "(no thesis)"}
                   </div>
-                  <div style={thesisBlock}>{topDossier.thesis ?? "(no thesis)"}</div>
-
                   {topDossier.stages?.execution?.recommended_structure && (
                     <>
-                      <div style={{ fontSize: 11, color: "#64748b", textTransform: "uppercase", letterSpacing: 1, margin: "12px 0 6px" }}>
-                        Execution recommendation
-                      </div>
-                      <div style={execBlock}>
+                      <div style={{ fontSize: 11, color: "var(--color-mc-text-dim)", textTransform: "uppercase", letterSpacing: 1, margin: "12px 0 6px", fontFamily: "var(--font-mc-mono)" }}>Execution recommendation</div>
+                      <div style={{ background: "var(--color-mc-bg-surface)", border: "1px solid var(--color-mc-border)", borderRadius: 6, padding: 10, fontSize: 12, color: "var(--color-mc-text)" }}>
                         <div>{topDossier.stages.execution.recommended_structure?.type ?? "—"}</div>
                         {topDossier.stages.execution.recommended_structure?.debit_mid_estimate && (
-                          <div style={{ color: "#94a3b8", marginTop: 4 }}>
-                            debit ~${topDossier.stages.execution.recommended_structure.debit_mid_estimate} ·
-                            R/R {topDossier.stages.execution.recommended_structure?.risk_reward_at_mid?.toFixed?.(1) ?? topDossier.stages.execution.recommended_structure?.risk_reward_at_mid ?? "—"}x
+                          <div style={{ color: "var(--color-mc-text-muted)", marginTop: 4 }}>
+                            debit ~${topDossier.stages.execution.recommended_structure.debit_mid_estimate} · R/R {topDossier.stages.execution.recommended_structure?.risk_reward_at_mid?.toFixed?.(1) ?? topDossier.stages.execution.recommended_structure?.risk_reward_at_mid ?? "—"}x
                           </div>
                         )}
                       </div>
@@ -446,37 +537,27 @@ export function DeskPage() {
           )}
         </div>
 
-        {/* RIGHT column — Floor 5 / 6 + activity feed */}
+        {/* RIGHT column */}
         <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
-          {/* Floor 5 — premium shortlist */}
+          {/* Floor 5 */}
           <FloorCard label="FLOOR 5" title="Publish · Premium Shortlist" sub="Ranked dossiers pushed to Oracle for Boba/Jazzy">
             {data.floor5.length === 0 ? (
-              <div style={{ fontSize: 12, color: "#64748b" }}>No shortlist entries yet.</div>
+              <div style={{ fontSize: 12, color: "var(--color-mc-text-dim)", fontFamily: "var(--font-mc-mono)" }}>No shortlist entries yet.</div>
             ) : (
               <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
                 {data.floor5.map(s => {
                   const dossier = data.floor4.find(d => d.id === s.dossier_id);
                   return (
-                    <div key={`${s.cycle_id}-${s.rank}`} style={shortlistRow}>
-                      <span style={{ ...rankPill, color: "#94a3b8" }}>#{s.rank}</span>
-                      <span style={{ fontSize: 13, color: "#e6edf3", flex: 1 }}>
+                    <div key={`${s.cycle_id}-${s.rank}`} style={{ display: "flex", alignItems: "center", gap: 10, padding: "8px 10px", background: "var(--color-mc-bg-surface)", border: "1px solid var(--color-mc-border)", borderRadius: 6 }}>
+                      <span style={{ fontSize: 11, fontFamily: "var(--font-mc-mono)", width: 24, color: "var(--color-mc-text-muted)" }}>#{s.rank}</span>
+                      <span style={{ fontSize: 13, color: "var(--color-mc-text)", flex: 1 }}>
                         {dossier?.ticker ?? `dossier ${s.dossier_id}`}
-                        {dossier?.contract?.side && (
-                          <span style={{ color: "#64748b", marginLeft: 6 }}>
-                            {dossier.contract.side} ${dossier.contract.strike}
-                          </span>
-                        )}
+                        {dossier?.contract?.side && <span style={{ color: "var(--color-mc-text-dim)", marginLeft: 6, fontFamily: "var(--font-mc-mono)" }}>{dossier.contract.side} ${dossier.contract.strike}</span>}
                       </span>
-                      <span style={{
-                        ...bandPillSm,
-                        background: BAND_COLORS[s.confidence_band] + "26",
-                        color: BAND_COLORS[s.confidence_band],
-                      }}>
+                      <span style={{ fontSize: 10, fontWeight: 600, padding: "2px 7px", borderRadius: 3, fontFamily: "var(--font-mc-mono)", background: BAND_COLORS[s.confidence_band] + "26", color: BAND_COLORS[s.confidence_band] }}>
                         {s.confidence_band} · {s.confidence_score}
                       </span>
-                      <span style={{ fontSize: 10, color: "#475569", width: 56, textAlign: "right" }}>
-                        {timeAgo(s.generated_at)}
-                      </span>
+                      <span style={{ fontSize: 10, color: "var(--color-mc-text-dim)", width: 56, textAlign: "right", fontFamily: "var(--font-mc-mono)" }}>{timeAgo(s.generated_at)}</span>
                     </div>
                   );
                 })}
@@ -484,26 +565,20 @@ export function DeskPage() {
             )}
           </FloorCard>
 
-          {/* Floor 6 — R&D + Reporting */}
+          {/* Floor 6 */}
           <FloorCard label="FLOOR 6" title="R&D + Reporting" sub="Daily reports → Discord · thesis decay · R&D">
             {data.floor6.length === 0 ? (
-              <div style={{ fontSize: 12, color: "#64748b" }}>No R&D outputs yet.</div>
+              <div style={{ fontSize: 12, color: "var(--color-mc-text-dim)", fontFamily: "var(--font-mc-mono)" }}>No R&D outputs yet.</div>
             ) : (
               <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
                 {data.floor6.map(r => (
-                  <div key={r.id} style={rdRow}>
+                  <div key={r.id} style={{ background: "var(--color-mc-bg-surface)", border: "1px solid var(--color-mc-border)", borderRadius: 6, padding: 10 }}>
                     <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                      <span style={{ fontSize: 12, fontWeight: 500, color: "#e2e8f0" }}>{r.agent_name}</span>
-                      <span style={{ fontSize: 10, color: "#475569" }}>{timeAgo(r.created_at)}</span>
+                      <span style={{ fontSize: 12, fontWeight: 500, color: "var(--color-mc-text)" }}>{r.agent_name}</span>
+                      <span style={{ fontSize: 10, color: "var(--color-mc-text-dim)", fontFamily: "var(--font-mc-mono)" }}>{timeAgo(r.created_at)}</span>
                     </div>
-                    {r.payload?.headline && (
-                      <div style={{ fontSize: 11, color: "#94a3b8", marginTop: 4, lineHeight: 1.45 }}>
-                        {r.payload.headline}
-                      </div>
-                    )}
-                    <div style={{ fontSize: 10, color: "#475569", marginTop: 4 }}>
-                      type: {r.output_type} {r.acted_on && <span style={{ color: "#22c55e", marginLeft: 6 }}>· acted</span>}
-                    </div>
+                    {r.payload?.headline && <div style={{ fontSize: 11, color: "var(--color-mc-text-muted)", marginTop: 4, lineHeight: 1.45 }}>{r.payload.headline}</div>}
+                    <div style={{ fontSize: 10, color: "var(--color-mc-text-dim)", marginTop: 4, fontFamily: "var(--font-mc-mono)" }}>type: {r.output_type} {r.acted_on && <span style={{ color: "var(--color-mc-green)", marginLeft: 6 }}>· acted</span>}</div>
                   </div>
                 ))}
               </div>
@@ -513,19 +588,15 @@ export function DeskPage() {
           {/* Activity feed */}
           <FloorCard label="ACTIVITY" title="External LLM Agent Calls" sub="Live token usage + model dispatch trail">
             {data.agent_calls.length === 0 ? (
-              <div style={{ fontSize: 12, color: "#64748b" }}>No agent calls yet.</div>
+              <div style={{ fontSize: 12, color: "var(--color-mc-text-dim)", fontFamily: "var(--font-mc-mono)" }}>No agent calls yet.</div>
             ) : (
               <div style={{ display: "flex", flexDirection: "column", gap: 4, maxHeight: 320, overflowY: "auto" }}>
                 {data.agent_calls.map(c => (
-                  <div key={c.id} style={callRow}>
-                    <span style={{ width: 52, fontSize: 10, color: "#64748b" }}>{timeAgo(c.completed_at)}</span>
-                    <span style={{ flex: 1, fontSize: 11, color: c.error ? "#fca5a5" : "#cbd5e1" }}>
-                      {c.agent_name}
-                    </span>
-                    <span style={{ width: 110, fontSize: 10, color: "#64748b" }}>{c.model}</span>
-                    <span style={{ width: 60, fontSize: 10, color: "#475569", textAlign: "right" }}>
-                      {c.input_tokens}/{c.output_tokens}
-                    </span>
+                  <div key={c.id} style={{ display: "flex", alignItems: "center", gap: 8, padding: "5px 8px", background: "var(--color-mc-bg-surface)", border: "1px solid var(--color-mc-border)", borderRadius: 4 }}>
+                    <span style={{ width: 52, fontSize: 10, color: "var(--color-mc-text-dim)", fontFamily: "var(--font-mc-mono)" }}>{timeAgo(c.completed_at)}</span>
+                    <span style={{ flex: 1, fontSize: 11, color: c.error ? "var(--color-mc-red)" : "var(--color-mc-text)" }}>{c.agent_name}</span>
+                    <span style={{ width: 110, fontSize: 10, color: "var(--color-mc-text-dim)", fontFamily: "var(--font-mc-mono)" }}>{c.model}</span>
+                    <span style={{ width: 60, fontSize: 10, color: "var(--color-mc-text-dim)", textAlign: "right", fontFamily: "var(--font-mc-mono)" }}>{c.input_tokens}/{c.output_tokens}</span>
                   </div>
                 ))}
               </div>
@@ -541,94 +612,38 @@ export function DeskPage() {
 // ─── Layout helpers ────────────────────────────────────────────────────────
 function PageWrap({ children }: { children: React.ReactNode }) {
   return (
-    <div style={{
-      background: "#0d1117", minHeight: "100vh", padding: "20px 24px",
-      fontFamily: "system-ui, -apple-system, sans-serif",
-    }}>
+    <div style={{ background: "var(--color-mc-bg)", minHeight: "100vh", padding: "20px 24px", fontFamily: "var(--font-mc-sans)" }}>
       {children}
     </div>
   );
 }
 function FloorCard({ label, title, sub, children }: { label: string; title: string; sub?: string; children: React.ReactNode }) {
   return (
-    <div style={floorCardStyle}>
+    <div style={{ background: "var(--color-mc-bg-card)", border: "1px solid var(--color-mc-border)", borderRadius: 10, padding: 16 }}>
       <div style={{ display: "flex", alignItems: "baseline", gap: 12, marginBottom: 12 }}>
-        <span style={{ fontSize: 10, color: "#475569", fontWeight: 700, letterSpacing: 2 }}>{label}</span>
-        <span style={{ fontSize: 14, color: "#e6edf3", fontWeight: 600 }}>{title}</span>
-        {sub && <span style={{ fontSize: 11, color: "#64748b", marginLeft: "auto" }}>{sub}</span>}
+        <span style={{ fontSize: 10, color: "var(--color-mc-text-dim)", fontWeight: 700, letterSpacing: 2, fontFamily: "var(--font-mc-mono)" }}>{label}</span>
+        <span style={{ fontSize: 14, color: "var(--color-mc-text)", fontWeight: 600 }}>{title}</span>
+        {sub && <span style={{ fontSize: 11, color: "var(--color-mc-text-dim)", marginLeft: "auto", fontFamily: "var(--font-mc-mono)" }}>{sub}</span>}
       </div>
       {children}
     </div>
   );
 }
-function Stat({ label, v }: { label: string; v: number }) {
+function StatBadge({ label, v }: { label: string; v: number }) {
   return (
     <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-end" }}>
-      <div style={{ fontSize: 18, color: "#e6edf3", fontWeight: 600, fontFamily: "ui-monospace" }}>{v}</div>
-      <div style={{ fontSize: 9, color: "#475569", textTransform: "uppercase", letterSpacing: 1.5 }}>{label}</div>
+      <div style={{ fontSize: 18, color: "var(--color-mc-text)", fontWeight: 600, fontFamily: "var(--font-mc-mono)" }}>{v}</div>
+      <div style={{ fontSize: 9, color: "var(--color-mc-text-dim)", textTransform: "uppercase", letterSpacing: 1.5, fontFamily: "var(--font-mc-mono)" }}>{label}</div>
+    </div>
+  );
+}
+function Kv({ label, value }: { label: string; value: string }) {
+  return (
+    <div>
+      <div style={{ fontSize: 9, color: "var(--color-mc-text-dim)", textTransform: "uppercase", fontFamily: "var(--font-mc-mono)" }}>{label}</div>
+      <div style={{ fontSize: 12, color: "var(--color-mc-text)", fontFamily: "var(--font-mc-mono)" }}>{value}</div>
     </div>
   );
 }
 
-// ─── Inline styles ────────────────────────────────────────────────────────
-const topBarStyle: React.CSSProperties = {
-  display: "flex", justifyContent: "space-between", alignItems: "center",
-  paddingBottom: 14, marginBottom: 14, borderBottom: "1px solid #1e293b",
-};
-const floorCardStyle: React.CSSProperties = {
-  background: "#0f172a", border: "1px solid #1e293b", borderRadius: 10, padding: 16,
-};
-const scoutGridStyle: React.CSSProperties = {
-  display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 6,
-};
-const agentChipStyle: React.CSSProperties = {
-  background: "#0b1220", border: "1px solid #1e293b", borderRadius: 6, padding: "6px 10px",
-};
-const agentChipMini: React.CSSProperties = {
-  background: "#0b1220", border: "1px solid #1e293b", borderRadius: 4, padding: "4px 6px",
-};
-const macroBlock: React.CSSProperties = {
-  background: "#0b1220", border: "1px solid #1e293b", borderRadius: 6, padding: 12, height: "100%",
-};
-const laneGridStyle: React.CSSProperties = {
-  display: "grid", gridTemplateColumns: "repeat(5, 1fr)", gap: 6,
-};
-const laneCardStyle: React.CSSProperties = {
-  background: "#0b1220", border: "1px solid #1e293b", borderRadius: 6, padding: "8px 10px", transition: "opacity 0.2s",
-};
-const dossierHeader: React.CSSProperties = {
-  display: "flex", justifyContent: "space-between", alignItems: "center",
-};
-const bandPill: React.CSSProperties = {
-  fontSize: 12, fontWeight: 700, padding: "3px 10px", borderRadius: 4,
-  border: "1px solid", fontFamily: "ui-monospace", letterSpacing: 1,
-};
-const bandPillSm: React.CSSProperties = {
-  fontSize: 10, fontWeight: 600, padding: "2px 7px", borderRadius: 3,
-  fontFamily: "ui-monospace",
-};
-const rankPill: React.CSSProperties = {
-  fontSize: 11, fontFamily: "ui-monospace", width: 24,
-};
-const stageRowStyle: React.CSSProperties = {
-  display: "flex", gap: 8, padding: "3px 0", alignItems: "center",
-};
-const thesisBlock: React.CSSProperties = {
-  background: "#0b1220", border: "1px solid #1e293b", borderRadius: 6, padding: 10,
-  fontSize: 12, color: "#cbd5e1", lineHeight: 1.5,
-};
-const execBlock: React.CSSProperties = {
-  background: "#0b1220", border: "1px solid #1e293b", borderRadius: 6, padding: 10,
-  fontSize: 12, color: "#e6edf3",
-};
-const shortlistRow: React.CSSProperties = {
-  display: "flex", alignItems: "center", gap: 10, padding: "8px 10px",
-  background: "#0b1220", border: "1px solid #1e293b", borderRadius: 6,
-};
-const rdRow: React.CSSProperties = {
-  background: "#0b1220", border: "1px solid #1e293b", borderRadius: 6, padding: 10,
-};
-const callRow: React.CSSProperties = {
-  display: "flex", alignItems: "center", gap: 8, padding: "5px 8px",
-  background: "#0b1220", border: "1px solid #1e293b", borderRadius: 4,
-};
+export default DeskPage;

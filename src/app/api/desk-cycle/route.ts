@@ -3,9 +3,9 @@ import Database from 'better-sqlite3';
 
 const PIPELINE_DB = '/home/itsju/LapClaw/pipeline/desk_pipeline.sqlite';
 
-type AnyRow = Record<string, any>;
+type AnyRow = Record<string, unknown>;
 
-function safeJsonParse<T = any>(s: any, fallback: T): T {
+function safeJsonParse<T = unknown>(s: unknown, fallback: T): T {
   if (typeof s !== 'string') return fallback;
   try { return JSON.parse(s) as T; } catch { return fallback; }
 }
@@ -69,7 +69,7 @@ export async function GET() {
        FROM dossiers ORDER BY ran_at DESC LIMIT 25`
     ).all() as AnyRow[];
     const dossiers = dossierRows.map(r => {
-      const stages = safeJsonParse<Record<string, any>>(r.stages_json, {});
+      const stages = safeJsonParse<Record<string, unknown>>(r.stages_json, {});
       return {
         id: r.id,
         candidate_id: r.candidate_id,
@@ -78,7 +78,7 @@ export async function GET() {
         contract: safeJsonParse(r.contract_json, {}),
         slot_names: Object.keys(stages),
         slot_count: Object.keys(stages).length,
-        stages,  // full payload — let the UI render whatever
+        stages,
         band: r.final_band,
         confidence: r.final_confidence,
         thesis: r.curator_thesis,
@@ -125,6 +125,34 @@ export async function GET() {
       total_rd_outputs: rdRows.length,
     };
 
+    // ─── 3b: cycle_history (last 30) — summary-only per R1.H2 ────────────
+    let cycleHistory: AnyRow[] = [];
+    try {
+      cycleHistory = db.prepare(
+        `SELECT mc.cycle_id, mc.ran_at,
+                (SELECT COUNT(*) FROM raw_candidates rc WHERE rc.cycle_id = mc.cycle_id) AS n_candidates,
+                (SELECT COUNT(*) FROM dossiers d WHERE d.cycle_id = mc.cycle_id) AS n_dossiers,
+                (SELECT COUNT(*) FROM premium_shortlist ps WHERE ps.cycle_id = mc.cycle_id) AS n_shortlist
+         FROM macro_context mc
+         ORDER BY mc.ran_at DESC LIMIT 30`
+      ).all() as AnyRow[];
+    } catch {
+      cycleHistory = [];
+    }
+
+    // ─── 3b: lane_stage_matrix (latest cycle only — R1.H2) ────────────────
+    const laneStageMatrix = lanesShaped.map(lane => {
+      const verdict = (lane.verdict as string | undefined)?.toLowerCase() ?? 'na';
+      const stageSlot: 'pass' | 'fail' | 'pending' | 'na' =
+        verdict === 'pass' ? 'pass' :
+        verdict === 'fail' ? 'fail' :
+        verdict === 'pending' ? 'pending' : 'na';
+      return {
+        lane: lane.lane,
+        stages: { lane_analysis: stageSlot },
+      };
+    });
+
     return NextResponse.json({
       generated_at: new Date().toISOString(),
       stats,
@@ -139,10 +167,14 @@ export async function GET() {
       floor5: shortlistRows,
       floor6: rdOutputs,
       agent_calls: agentCalls,
+      // 3b new fields
+      cycle_history: cycleHistory,
+      lane_stage_matrix: laneStageMatrix,
     });
-  } catch (err: any) {
+  } catch (err: unknown) {
+    const msg = err instanceof Error ? err.message : String(err);
     return NextResponse.json(
-      { error: `desk-cycle read failed: ${err?.message ?? String(err)}` },
+      { error: `desk-cycle read failed: ${msg}` },
       { status: 500 }
     );
   } finally {
