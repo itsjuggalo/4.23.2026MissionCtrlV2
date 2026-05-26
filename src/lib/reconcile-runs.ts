@@ -6,7 +6,7 @@
  * against the row's pid_start_time (R3.M4).
  */
 
-import { dbCriticalWrite, dbTelemetryWrite, dbRead, getPidStartTime } from './dashboard-db';
+import { dbCriticalWrite, dbTelemetryWrite, dbRead, getPidStartTime } from './dashboard-db.ts';
 
 // Per-subcommand stale thresholds (configurable via env)
 function staleThresholdMs(subcommand: string): number {

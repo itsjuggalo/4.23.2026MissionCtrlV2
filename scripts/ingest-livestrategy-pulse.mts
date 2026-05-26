@@ -12,9 +12,9 @@
  * 4. reconcileRuns() sweep
  */
 
-import { collectPulse } from '../src/lib/live-strategy-pulse-source.js';
-import { dbTelemetryWrite, dbRead } from '../src/lib/dashboard-db.js';
-import { reconcileRuns } from '../src/lib/reconcile-runs.js';
+import { collectPulse } from '../src/lib/live-strategy-pulse-source.ts';
+import { dbTelemetryWrite, dbRead } from '../src/lib/dashboard-db.ts';
+import { reconcileRuns } from '../src/lib/reconcile-runs.ts';
 import { spawn } from 'child_process';
 import fs from 'fs';
 import path from 'path';
