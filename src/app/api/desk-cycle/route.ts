@@ -115,6 +115,26 @@ export async function GET() {
       created_at: r.created_at,
     }));
 
+    // ─── Attribution health ───────────────────────────────────────────────
+    const totalDossiersAllTime = (db.prepare('SELECT COUNT(*) AS n FROM dossiers').get() as AnyRow).n as number;
+    const scoredDossiers = (db.prepare(
+      'SELECT COUNT(*) AS n FROM dossiers WHERE outcome_pnl_pct IS NOT NULL'
+    ).get() as AnyRow).n as number;
+    const unscoredStale = (db.prepare(
+      "SELECT COUNT(*) AS n FROM dossiers WHERE outcome_pnl_pct IS NULL AND ran_at < datetime('now', '-2 days')"
+    ).get() as AnyRow).n as number;
+    const lastAttributionRun = (db.prepare(
+      "SELECT payload, created_at FROM rd_outputs WHERE output_type = 'attribution_health' ORDER BY created_at DESC LIMIT 1"
+    ).get() as AnyRow | undefined);
+
+    // ─── Oracle push health (last 10 cycles) ─────────────────────────────
+    const oraclePushHealth = db.prepare(
+      `SELECT cycle_id, status, oracle_push_status, completed_at
+       FROM cycle_metadata
+       WHERE oracle_push_status IS NOT NULL
+       ORDER BY completed_at DESC LIMIT 10`
+    ).all() as AnyRow[];
+
     // ─── Aggregate stats ──────────────────────────────────────────────────
     const stats = {
       total_candidates: (db.prepare('SELECT COUNT(*) AS n FROM raw_candidates').get() as AnyRow).n,
@@ -123,6 +143,16 @@ export async function GET() {
       total_shortlist: shortlistRows.length,
       total_agent_calls: agentCalls.length,
       total_rd_outputs: rdRows.length,
+      attribution_health: {
+        total_dossiers: totalDossiersAllTime,
+        scored: scoredDossiers,
+        unscored_stale: unscoredStale,
+        score_rate_pct: totalDossiersAllTime > 0
+          ? Math.round((scoredDossiers / (totalDossiersAllTime as number)) * 100)
+          : 0,
+        last_run_at: lastAttributionRun?.created_at ?? null,
+        last_run_summary: safeJsonParse(lastAttributionRun?.payload, null),
+      },
     };
 
     // ─── 3b: cycle_history (last 30) — summary-only per R1.H2 ────────────
@@ -170,6 +200,7 @@ export async function GET() {
       // 3b new fields
       cycle_history: cycleHistory,
       lane_stage_matrix: laneStageMatrix,
+      oracle_push_health: oraclePushHealth,
     });
   } catch (err: unknown) {
     const msg = err instanceof Error ? err.message : String(err);
