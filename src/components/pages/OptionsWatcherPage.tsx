@@ -1,6 +1,4 @@
 'use client';
-// MC_WATCHER_GUARD
-if (typeof window !== 'undefined') { window.addEventListener('unhandledrejection', (e) => { console.warn('[OptionsWatcher]', e.reason); e.preventDefault(); }); }
 import { useState, useEffect, useRef, useMemo } from 'react';
 import { StockDetailDrawer } from '@/components/drawers/StockDetailDrawer';
 

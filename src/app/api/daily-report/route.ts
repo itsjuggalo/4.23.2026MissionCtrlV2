@@ -44,7 +44,7 @@ export async function GET(req: NextRequest) {
       return NextResponse.json(cal || { month: ym, days: {} });
     }
 
-    return NextResponse.json({ error: 'Unknown type. Use: today, history, calendar' });
+    return NextResponse.json({ error: 'Unknown type. Use: today, history, calendar' }, { status: 400 });
   } catch (e: any) {
     return NextResponse.json({ error: e.message }, { status: 500 });
   }

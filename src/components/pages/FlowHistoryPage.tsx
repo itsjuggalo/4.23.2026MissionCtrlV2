@@ -1,6 +1,4 @@
 "use client";
-// MC_FLOW_GUARD
-if (typeof window !== "undefined") { window.addEventListener("unhandledrejection", (e) => { console.warn("[FlowHistory]", e.reason); e.preventDefault(); }); }
 
 import { useState, useEffect, useCallback, useMemo } from "react";
 import { StockDetailDrawer } from "@/components/drawers/StockDetailDrawer";

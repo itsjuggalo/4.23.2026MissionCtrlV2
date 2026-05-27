@@ -9,7 +9,7 @@ export async function GET(req: Request) {
   const __proxied = await proxyToServeftp(req); if (__proxied) return __proxied;
   try {
     if (!existsSync(TASKS_FILE)) {
-      return NextResponse.json({ error: 'tasks file missing', agents: {} });
+      return NextResponse.json({ error: 'tasks file missing', agents: {} }, { status: 503 });
     }
     const raw = readFileSync(TASKS_FILE, 'utf-8');
     const data = JSON.parse(raw);
