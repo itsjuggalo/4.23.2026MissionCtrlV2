@@ -70,7 +70,10 @@ async function alpacaCached(account: string) {
     _cache[account] = { value: result, ts: Date.now() };
     return result;
   }
-  // Return stale cache rather than an error if we have a recent enough value
+  // Auth failures and missing creds must surface — permanent config failures, not transient errors
+  const err = (result as any).error;
+  if (err === "auth_failed" || err === "no creds") return result;
+  // For other transient errors (timeout, network) serve stale rather than breaking the UI
   const cached = _cache[account];
   if (cached && Date.now() - cached.ts < CACHE_TTL) {
     return { ...(cached.value as object), stale: true };
