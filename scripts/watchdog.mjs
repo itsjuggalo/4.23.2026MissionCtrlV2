@@ -28,7 +28,7 @@ function diskUsagePct(mountPath) {
   } catch { return 0; }
 }
 
-let state = { lastOk: true, unreachableCount: 0, failingSubsystem: null, lastRestartTs: 0 };
+let state = { lastOk: true, unreachableCount: 0, failingSubsystem: null, lastRestartTs: 0, lastPulseRestartTs: 0 };
 try { state = JSON.parse(fs.readFileSync(STATE_FILE, 'utf-8')); } catch {}
 
 async function postWebhook(message) {
@@ -82,10 +82,12 @@ state.lastOk = nowOk;
 state.failingSubsystem = failingSub;
 
 // ── Upstream scraper watchdog ────────────────────────────────────────────────
-// If live_strategy_pulse is stale, restart the timer that feeds it
+// If live_strategy_pulse is stale, restart the timer that feeds it (10-min cooldown)
 const pulse = health.subsystems?.live_strategy_pulse;
-if (pulse && pulse.healthy === false) {
+const pulseRestartCooldown = 10 * 60 * 1000;
+if (pulse && pulse.healthy === false && Date.now() - (state.lastPulseRestartTs || 0) > pulseRestartCooldown) {
   const ok = tryRestartUnit('mc-livestrategy-pulse.service');
+  state.lastPulseRestartTs = Date.now();
   await postWebhook(`[mc-watchdog] live_strategy_pulse stale — ${ok ? '✅ restarted mc-livestrategy-pulse.service' : '❌ restart failed'}`);
 }
 
@@ -94,7 +96,7 @@ const walMb = health.subsystems?.db?.wal_size_mb ?? 0;
 if (walMb > WAL_WARN_MB) {
   try {
     const { default: Database } = await import('better-sqlite3');
-    const dbPath = path.join(__dirname, '../data/dashboard.db');
+    const dbPath = path.join(__dirname, '../data/dashboard_history.sqlite');
     if (fs.existsSync(dbPath)) {
       const db = new Database(dbPath);
       db.pragma('wal_checkpoint(TRUNCATE)');

@@ -19,29 +19,27 @@ const YAHOO_HOSTS = ["query1.finance.yahoo.com", "query2.finance.yahoo.com"];
 
 async function fetchYahooQuote(symbol: string) {
   for (const host of YAHOO_HOSTS) {
-    for (let attempt = 0; attempt < 2; attempt++) {
-      try {
-        const r = await fetch(
-          `https://${host}/v8/finance/chart/${encodeURIComponent(symbol)}?interval=1d&range=5d`,
-          { cache: "no-store", headers: { "User-Agent": "Mozilla/5.0" }, signal: AbortSignal.timeout(6000) }
-        );
-        if (!r.ok) break;
-        const d = await r.json();
-        const result = d?.chart?.result?.[0];
-        if (!result) break;
-        const last = result.meta?.regularMarketPrice;
-        const prev = result.meta?.previousClose || result.meta?.chartPreviousClose;
-        if (!last || !prev) break;
-        return { value: last, chg: ((last - prev) / prev) * 100 };
-      } catch { /* try next host */ break; }
-    }
+    try {
+      const r = await fetch(
+        `https://${host}/v8/finance/chart/${encodeURIComponent(symbol)}?interval=1d&range=5d`,
+        { cache: "no-store", headers: { "User-Agent": "Mozilla/5.0" }, signal: AbortSignal.timeout(6000) }
+      );
+      if (!r.ok) continue;
+      const d = await r.json();
+      const result = d?.chart?.result?.[0];
+      if (!result) continue;
+      const last = result.meta?.regularMarketPrice;
+      const prev = result.meta?.previousClose || result.meta?.chartPreviousClose;
+      if (!last || !prev) continue;
+      return { value: last, chg: ((last - prev) / prev) * 100 };
+    } catch { continue; }
   }
   return null;
 }
 async function fetchAlpacaQuote(symbol: string, key: string, sec: string) {
   if (!key || !sec) return null;
   try {
-    const r = await fetch(`https://data.alpaca.markets/v2/stocks/${symbol}/snapshots`, {
+    const r = await fetch(`https://data.alpaca.markets/v2/stocks/${symbol}/snapshot`, {
       headers: { "APCA-API-KEY-ID": key, "APCA-API-SECRET-KEY": sec },
       cache: "no-store",
       signal: AbortSignal.timeout(6000),
@@ -67,7 +65,7 @@ async function fetchQuote(symbol: string, key: string, sec: string) {
 
 async function fetchBTC() {
   try {
-    const r = await fetch("https://api.coinpaprika.com/v1/tickers/btc-bitcoin", { cache: "no-store" });
+    const r = await fetch("https://api.coinpaprika.com/v1/tickers/btc-bitcoin", { cache: "no-store", signal: AbortSignal.timeout(6000) });
     if (!r.ok) return null;
     const d = await r.json();
     return { value: d.quotes?.USD?.price || 0, chg: d.quotes?.USD?.percent_change_24h || 0 };

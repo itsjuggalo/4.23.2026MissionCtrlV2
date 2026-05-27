@@ -26,16 +26,18 @@ async function alpaca(account: string) {
   try {
     const today = new Date();
     const todayET = new Date(today.toLocaleString("en-US", { timeZone: "America/New_York" }));
-    const since = `${todayET.getFullYear()}-${String(todayET.getMonth()+1).padStart(2,"0")}-${String(todayET.getDate()).padStart(2,"0")}T00:00:00-05:00`;
+    const etTzAbbr = new Intl.DateTimeFormat("en-US", { timeZone: "America/New_York", timeZoneName: "short" })
+      .formatToParts(today).find(p => p.type === "timeZoneName")?.value ?? "EST";
+    const etOffset = etTzAbbr === "EDT" ? "-04:00" : "-05:00";
+    const since = `${todayET.getFullYear()}-${String(todayET.getMonth()+1).padStart(2,"0")}-${String(todayET.getDate()).padStart(2,"0")}T00:00:00${etOffset}`;
     const [acctRes, posRes, ordersRes] = await Promise.all([
       fetch(`${base}/v2/account`, { headers: h, signal: sig() }),
       fetch(`${base}/v2/positions`, { headers: h, signal: sig() }),
       fetch(`${base}/v2/orders?status=all&limit=20&direction=desc&after=${since}`, { headers: h, signal: sig() }),
     ]);
     // Surface auth failures distinctly so auto-heal can skip Claude repair
-    if (acctRes.status === 401 || acctRes.status === 403) {
-      return { error: "auth_failed", code: acctRes.status };
-    }
+    const authFail = [acctRes, posRes, ordersRes].find(r => r.status === 401 || r.status === 403);
+    if (authFail) return { error: "auth_failed", code: authFail.status };
     const [acct, pos, orders] = await Promise.all([acctRes.json(), posRes.json(), ordersRes.json()]);
     if (acct && (acct.message || acct.code)) {
       return { error: `alpaca: ${acct.message || acct.code}` };
