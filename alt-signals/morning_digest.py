@@ -139,7 +139,8 @@ def post_to_morning_brief(markdown: str) -> bool:
         payload = json.dumps({"content": chunk}).encode("utf-8")
         req = urllib.request.Request(
             url, data=payload,
-            headers={"Content-Type": "application/json"},
+            headers={"Content-Type": "application/json",
+                     "User-Agent": "DiscordBot (https://github.com/itsjuggalo/mc, 1.0)"},
             method="POST",
         )
         try:
