@@ -41,7 +41,7 @@ function insertItbRun(db: Database.Database, row: Record<string, unknown>) {
   db.prepare(`
     INSERT INTO itb_runs (run_uuid, idempotency_key, principal, ts, script, config, args_json, status)
     VALUES (@run_uuid, @idempotency_key, @principal, @ts, @script, @config, @args_json, @status)
-  `).run(row as Record<string, Database.BindingData>);
+  `).run(row as any);
 }
 
 function insertFtRun(db: Database.Database, overrides: Record<string, unknown> = {}) {
@@ -58,7 +58,7 @@ function insertFtRun(db: Database.Database, overrides: Record<string, unknown> =
   db.prepare(`
     INSERT INTO freqtrade_runs (run_uuid, idempotency_key, principal, ts, subcommand, args_json, status)
     VALUES (@run_uuid, @idempotency_key, @principal, @ts, @subcommand, @args_json, @status)
-  `).run(row as Record<string, Database.BindingData>);
+  `).run(row as any);
 }
 
 // ── Scenario 1 ──────────────────────────────────────────────────────────────
