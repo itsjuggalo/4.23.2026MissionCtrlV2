@@ -19,10 +19,45 @@ GMAIL = os.path.expanduser('~/.config/gmail/gmail.py')
 GCAL  = os.path.expanduser('~/.config/calendar/gcal.py')
 
 BILL_KW   = ['bill','invoice','payment due','statement','amount due','overdue','past due',
-             'utility','electric','gas bill','water bill','rent','subscription','renewal',
-             'your receipt','charge','autopay','balance due','minimum payment']
-COUPON_KW = ['coupon','promo code','discount','% off','save ','deal','offer',
-             'free shipping','exclusive','limited time','flash sale','code:','get $','off your']
+             'utility','electric','gas bill','water bill','rent','renewal',
+             'autopay','balance due','minimum payment','final notice','past due']
+COUPON_KW = ['coupon','promo code','discount','% off','save ','flash sale','code:','get $']
+
+# Senders whose emails are always noise — filtered before any keyword check
+SKIP_SENDERS = [
+    'beehiiv.com','therumers.com','warriortrading.com','optionsautotrader.com',
+    'whitebeardstrategies.com','stocktwits.com','temuemail.com',
+    'underarmour.com','seaworldparks.com','poshmark.com','email.bestbuy.com',
+    'fiscal.ai','mail.perplexity.ai','ancestry.com','dignitymemorial.com',
+    'e-offers.dominos.com','dcsg.com','e.ncl.com','email.livenation.com',
+    'stockx.com','reply.ebay.com','e.harborfreight.com','e.lowes.com',
+    'email-advanceautoparts.com','nedm.asus.com','news@sophos.com',
+    'e.questdiagnostics.com','takeprofittrader.com','e.allegiant.com',
+    'eg.expedia.com','synchronyfinancial.com','support@ninjatrader.com',
+    'team.public.com','eml.muvfl.com','mtmarketing@continued.com',
+    'updates@okx.com','em.linkedin.com','messages-noreply@linkedin.com',
+    'e.godaddy.com','news.temuemail.com',
+]
+
+# Senders that are always important — surface regardless of keywords
+IMPORTANT_SENDERS = [
+    'commerce.fl.gov','floridajobs.org','speedpay.com',
+    'informeddelivery.usps.com','is.email.nextdoor.com','ss.email.nextdoor.com',
+    'e.chase.com','mcmap.chase.com','mailer.alpaca.markets',
+    'bankofamerica.com','wellsfargo.com',
+]
+
+# Keywords in subject/snippet that flag an email as important
+IMPORTANT_KW = [
+    'reemployment','unemployment','benefit','claim',
+    'duke energy','payment confirmation','payment received',
+    'eviction','court notice','legal notice','judgment',
+    'irs','tax refund','final notice','collections',
+    'premium due','coverage lapsed','policy cancelled',
+    'service shut','account suspended','account closed',
+    'informed delivery','beware','safety alert','urgent',
+    'dmv','vehicle registration','car payment',
+]
 
 # ── Helpers ──────────────────────────────────────────────────────────────────
 def secret(name):
@@ -105,16 +140,32 @@ def run(cmd, timeout=15):
         return ''
 
 # ── Data sources ─────────────────────────────────────────────────────────────
+def _is_skip(email):
+    frm = email.get('from', '').lower()
+    return any(s in frm for s in SKIP_SENDERS)
+
 def get_gmail(account='', hours=168):
     flag = f'--account {account}' if account else ''
     raw = run(f'CLAUDECLAW_DIR={CLAUDECLAW_DIR} {PYTHON} {GMAIL} {flag} list --hours {hours}', timeout=25)
     try:
         emails = json.loads(raw)
     except:
-        return [], []
-    bills   = [e for e in emails if any(k.lower() in (e.get('subject','') + e.get('from','')).lower()   for k in BILL_KW)]
-    coupons = [e for e in emails if any(k.lower() in (e.get('subject','') + e.get('snippet','')).lower() for k in COUPON_KW)]
-    return bills[:5], coupons[:5]
+        return [], [], []
+    important, bills, coupons = [], [], []
+    for e in emails:
+        if _is_skip(e):
+            continue
+        frm  = e.get('from', '').lower()
+        subj = e.get('subject', '').lower()
+        snip = e.get('snippet', '').lower()
+        if any(s in frm for s in IMPORTANT_SENDERS) or \
+           any(k in subj + ' ' + snip for k in IMPORTANT_KW):
+            important.append(e)
+        elif any(k in subj + ' ' + frm for k in BILL_KW):
+            bills.append(e)
+        elif any(k in subj + ' ' + snip for k in COUPON_KW):
+            coupons.append(e)
+    return important[:8], bills[:5], coupons[:3]
 
 def get_calendar(account='', days=2):
     flag = f'--account {account}' if account else ''
@@ -176,13 +227,28 @@ def morning_brief(now):
             cal_events.append(e)
     cal_lines = '\n'.join(fmt_event(e) for e in cal_events[:6]) or '  No events today'
 
-    # Gmail (both accounts)
-    b1, c1 = get_gmail('',         hours=168)
-    b2, c2 = get_gmail('personal', hours=168)
-    all_bills   = b1 + b2
-    all_coupons = c1 + c2
-    bill_lines   = '\n'.join(f"  └ {esc(b['from'][:35])} · {esc(b['subject'][:45])}" for b in all_bills[:3])   or '  none'
-    coupon_lines = '\n'.join(f"  └ {esc(c['from'][:35])} · {esc(c['subject'][:45])}" for c in all_coupons[:3]) or '  none'
+    # Gmail (both accounts) — 3 buckets each
+    i1, b1, c1 = get_gmail('',         hours=168)
+    i2, b2, c2 = get_gmail('personal', hours=168)
+    all_important = i1 + i2
+    all_bills     = b1 + b2
+    all_coupons   = c1 + c2
+
+    inbox_sections = ''
+    if all_important:
+        alert_lines = '\n'.join(
+            f"  └ {esc(e['from'][:35])} · {esc(e['subject'][:45])}" for e in all_important[:4])
+        inbox_sections += f"  🚨 Alerts ({len(all_important)}):\n{alert_lines}\n"
+    if all_bills:
+        bill_lines = '\n'.join(
+            f"  └ {esc(b['from'][:35])} · {esc(b['subject'][:45])}" for b in all_bills[:3])
+        inbox_sections += f"  💸 Bills ({len(all_bills)}):\n{bill_lines}\n"
+    if all_coupons:
+        coupon_lines = '\n'.join(
+            f"  └ {esc(c['from'][:35])} · {esc(c['subject'][:45])}" for c in all_coupons[:3])
+        inbox_sections += f"  🎟 Deals ({len(all_coupons)}):\n{coupon_lines}\n"
+    if not inbox_sections:
+        inbox_sections = '  Inbox clear'
 
     # Trading
     boba  = get_alpaca('alpaca-boba-key-id',  'alpaca-boba-secret',  'Boba R2')
@@ -196,10 +262,7 @@ def morning_brief(now):
 {cal_lines}
 
 📧 <b>INBOX</b> (both accounts, 7d)
-  Bills ({len(all_bills)}):
-{bill_lines}
-  Coupons ({len(all_coupons)}):
-{coupon_lines}
+{inbox_sections.rstrip()}
 
 📈 <b>TRADING</b> (paper)
   {boba}
@@ -212,10 +275,10 @@ def midday_brief(now):
     time_str = now.strftime('%H:%M ET')
     boba  = get_alpaca('alpaca-boba-key-id',  'alpaca-boba-secret',  'Boba R2')
     jazzy = get_alpaca('alpaca-jazzy-key-id', 'alpaca-jazzy-secret', 'Jazzy')
-    b1, _ = get_gmail('',         hours=6)
-    b2, _ = get_gmail('personal', hours=6)
-    urgent = b1 + b2
-    inbox_line = f"  {len(urgent)} new since morning" if urgent else '  Inbox clear'
+    i1, _, _ = get_gmail('',         hours=6)
+    i2, _, _ = get_gmail('personal', hours=6)
+    alerts = i1 + i2
+    inbox_line = f"  ⚡ {len(alerts)} alert{'s' if len(alerts)!=1 else ''} in inbox" if alerts else '  Inbox clear'
     events = get_calendar('', 1)
     next_evt = ''
     for e in events:
@@ -251,12 +314,26 @@ def eod_brief(now):
 
 def nightly_brief(now):
     date_str = now.strftime('%a %b %-d')
-    b1, c1 = get_gmail('',         hours=168)
-    b2, c2 = get_gmail('personal', hours=168)
-    all_bills   = b1 + b2
-    all_coupons = c1 + c2
-    bill_lines   = '\n'.join(f"  └ {b['subject'][:50]}" for b in all_bills[:4])   or '  none'
-    coupon_lines = '\n'.join(f"  └ {c['subject'][:50]}" for c in all_coupons[:3]) or '  none'
+    i1, b1, c1 = get_gmail('',         hours=168)
+    i2, b2, c2 = get_gmail('personal', hours=168)
+    all_important = i1 + i2
+    all_bills     = b1 + b2
+    all_coupons   = c1 + c2
+
+    inbox_sections = ''
+    if all_important:
+        alert_lines = '\n'.join(
+            f"  └ {esc(e['from'][:35])} · {esc(e['subject'][:45])}" for e in all_important[:4])
+        inbox_sections += f"  🚨 Alerts ({len(all_important)}):\n{alert_lines}\n"
+    if all_bills:
+        bill_lines = '\n'.join(f"  └ {esc(b['subject'][:50])}" for b in all_bills[:3])
+        inbox_sections += f"  💸 Bills ({len(all_bills)}):\n{bill_lines}\n"
+    if all_coupons:
+        coupon_lines = '\n'.join(f"  └ {esc(c['subject'][:50])}" for c in all_coupons[:3])
+        inbox_sections += f"  🎟 Deals ({len(all_coupons)}):\n{coupon_lines}\n"
+    if not inbox_sections:
+        inbox_sections = '  Inbox clear'
+
     events = get_calendar('', 2) + get_calendar('personal', 2)
     seen, tomorrow = set(), []
     for e in sorted(events, key=lambda x: x['start']):
@@ -266,10 +343,8 @@ def nightly_brief(now):
             tomorrow.append(e)
     tmrw_lines = '\n'.join(fmt_event(e) for e in tomorrow[:4]) or '  Nothing scheduled'
     return f"""🌙 <b>NIGHTLY</b> | {date_str}
-  Bills ({len(all_bills)}):
-{bill_lines}
-  Coupons ({len(all_coupons)}):
-{coupon_lines}
+📧 <b>INBOX</b>
+{inbox_sections.rstrip()}
 
 📅 <b>Tomorrow</b>
 {tmrw_lines}"""
