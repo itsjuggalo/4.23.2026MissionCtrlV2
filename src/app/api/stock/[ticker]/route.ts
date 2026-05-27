@@ -11,7 +11,7 @@ const CACHE_MS = 60_000;
 async function finnhub(path: string, params: Record<string, string> = {}): Promise<any> {
   const qs = new URLSearchParams({ ...params, token: FINNHUB_KEY }).toString();
   try {
-    const res = await fetch(`${FINNHUB}${path}?${qs}`);
+    const res = await fetch(`${FINNHUB}${path}?${qs}`, { signal: AbortSignal.timeout(8000) });
     if (!res.ok) return null;
     return await res.json();
   } catch {

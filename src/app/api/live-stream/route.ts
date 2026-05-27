@@ -11,6 +11,7 @@ async function getPortfolioData() {
     const secret = readFileSync(join(SECRETS, 'alpaca-secret'), 'utf-8').trim();
     const res = await fetch('https://paper-api.alpaca.markets/v2/account', {
       headers: { 'APCA-API-KEY-ID': key, 'APCA-API-SECRET-KEY': secret },
+      signal: AbortSignal.timeout(8000),
     });
     if (res.ok) {
       const acct = await res.json();
@@ -22,9 +23,9 @@ async function getPortfolioData() {
 
 async function getCryptoPrices() {
   try {
-    const res = await fetch('https://api.coinbase.com/v2/prices/BTC-USD/spot');
-    const ethRes = await fetch('https://api.coinbase.com/v2/prices/ETH-USD/spot');
-    const solRes = await fetch('https://api.coinbase.com/v2/prices/SOL-USD/spot');
+    const res = await fetch('https://api.coinbase.com/v2/prices/BTC-USD/spot', { signal: AbortSignal.timeout(5000) });
+    const ethRes = await fetch('https://api.coinbase.com/v2/prices/ETH-USD/spot', { signal: AbortSignal.timeout(5000) });
+    const solRes = await fetch('https://api.coinbase.com/v2/prices/SOL-USD/spot', { signal: AbortSignal.timeout(5000) });
     const btc = res.ok ? parseFloat((await res.json()).data.amount) : 0;
     const eth = ethRes.ok ? parseFloat((await ethRes.json()).data.amount) : 0;
     const sol = solRes.ok ? parseFloat((await solRes.json()).data.amount) : 0;

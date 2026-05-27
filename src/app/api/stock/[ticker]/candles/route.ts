@@ -85,7 +85,7 @@ export async function GET(
     let points: { t: number; c: number }[] = [];
 
     try {
-      const r = await fetch(`${FINNHUB}/stock/candle?${qs.toString()}`);
+      const r = await fetch(`${FINNHUB}/stock/candle?${qs.toString()}`, { signal: AbortSignal.timeout(8000) });
       if (r.ok) {
         const j = await r.json();
         if (j?.s === 'ok' && Array.isArray(j.t) && Array.isArray(j.c)) {

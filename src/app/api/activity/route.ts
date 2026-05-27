@@ -61,7 +61,7 @@ function getFromPm2Logs(limit: number): Activity[] {
 export async function GET(req: Request) {
   const __proxied = await proxyToServeftp(req); if (__proxied) return __proxied;
   const url = new URL(req.url);
-  const limit = parseInt(url.searchParams.get('limit') || '50');
+  const limit = Math.max(1, Math.min(500, parseInt(url.searchParams.get('limit') || '50') || 50));
 
   // Try SQLite first
   try {
@@ -72,7 +72,7 @@ export async function GET(req: Request) {
         { encoding: 'utf-8', timeout: 5000 }
       );
       if (result.trim()) {
-        const rows = result.trim().split('\n').map(row => {
+        const rows = result.trim().split('\n').map((row: string) => {
           const [time, agent, action, detail, type] = row.split('|');
           return { time, agent, action, detail: detail || action, type: type || 'system' };
         });

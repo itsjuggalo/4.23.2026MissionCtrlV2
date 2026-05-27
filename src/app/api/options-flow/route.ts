@@ -26,7 +26,7 @@ async function flowsForDate(date: string): Promise<any[]> {
   try {
     const r = await fetch(
       `${FLOW_API}/flow_tape?date=${encodeURIComponent(date)}&limit=500`,
-      { cache: 'no-store' },
+      { cache: 'no-store', signal: AbortSignal.timeout(8000) },
     );
     if (!r.ok) return [];
     const rows = await r.json();
@@ -64,11 +64,13 @@ export async function GET(req: Request) {
   try {
     // Flow Alerts are always "today", live from Firebase.
     // availableDates: ET days that actually have flow.db data (for the picker).
-    const [alerts1Res, alerts2Res, availableDates] = await Promise.all([
-      fetch(`${DB}/FlowGreeks/Alerts/today.json`).then(r => r.json()).catch(() => null),
-      fetch(`${DB}/FlowGreeks2/Alerts/today.json`).then(r => r.json()).catch(() => null),
-      fetch(`${FLOW_API}/flow_dates`, { cache: 'no-store' })
+    const [alerts1Res, alerts2Res, availableDates, liveFlowRes] = await Promise.all([
+      fetch(`${DB}/FlowGreeks/Alerts/today.json`, { signal: AbortSignal.timeout(6000) }).then(r => r.json()).catch(() => null),
+      fetch(`${DB}/FlowGreeks2/Alerts/today.json`, { signal: AbortSignal.timeout(6000) }).then(r => r.json()).catch(() => null),
+      fetch(`${FLOW_API}/flow_dates`, { cache: 'no-store', signal: AbortSignal.timeout(5000) })
         .then(r => r.ok ? r.json() : []).catch(() => []),
+      fetch(`${DB}/FlowGreeks/LiveFlowLast100.json`, { signal: AbortSignal.timeout(6000) })
+        .then(r => r.json()).catch(() => null),
     ]);
 
     // Option Flow tape: flow.db when a week or date is requested, otherwise
@@ -89,10 +91,8 @@ export async function GET(req: Request) {
     } else if (date) {
       flows = await flowsForDate(date);
     } else {
-      const flowRes = await fetch(`${DB}/FlowGreeks/LiveFlowLast100.json`)
-        .then(r => r.json()).catch(() => null);
-      const rawFlows = flowRes
-        ? (Array.isArray(flowRes) ? flowRes : Object.values(flowRes))
+      const rawFlows = liveFlowRes
+        ? (Array.isArray(liveFlowRes) ? liveFlowRes : Object.values(liveFlowRes))
         : [];
       flows = rawFlows
         .filter((f: any) => f?.Symbol)
