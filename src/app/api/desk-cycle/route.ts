@@ -1,6 +1,9 @@
 import { NextResponse } from 'next/server';
 import Database from 'better-sqlite3';
 
+export const dynamic = 'force-dynamic';
+export const revalidate = 0;
+
 const PIPELINE_DB = '/home/itsju/LapClaw/pipeline/desk_pipeline.sqlite';
 
 type AnyRow = Record<string, unknown>;

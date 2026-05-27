@@ -3,6 +3,9 @@ import { readFile } from 'fs/promises';
 import path from 'path';
 import { proxyToServeftp } from "../../../lib/proxyToServeftp";
 
+export const dynamic = 'force-dynamic';
+export const revalidate = 0;
+
 const STATE_FILE = path.join(
   process.env.HOME || '/home/itsju',
   '.openclaw/workspace/state/squeeze_scanner_state.json'

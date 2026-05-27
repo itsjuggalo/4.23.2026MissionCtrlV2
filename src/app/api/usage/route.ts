@@ -4,6 +4,9 @@ import { readFileSync, existsSync } from 'fs';
 import { join } from 'path';
 import { proxyToServeftp } from "../../../lib/proxyToServeftp";
 
+export const dynamic = 'force-dynamic';
+export const revalidate = 0;
+
 const DATA_DIR = join(process.env.HOME || '/home/itsju', '.mission-control');
 const USAGE_FILE = join(DATA_DIR, 'api_usage.json');
 

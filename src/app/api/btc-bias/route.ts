@@ -3,6 +3,9 @@ import { readFile } from 'fs/promises';
 import path from 'path';
 import { proxyToServeftp } from "../../../lib/proxyToServeftp";
 
+export const dynamic = 'force-dynamic';
+export const revalidate = 0;
+
 const BIAS_FILE = path.join(
   process.env.HOME || '/home/itsju',
   'mission-control/btc-bias/btc-bias.json'

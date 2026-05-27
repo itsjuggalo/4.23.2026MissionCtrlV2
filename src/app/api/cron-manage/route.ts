@@ -1,5 +1,11 @@
 import { NextResponse } from 'next/server';
 import { execSync } from 'child_process';
+import { writeFileSync, unlinkSync } from 'fs';
+import { tmpdir } from 'os';
+import { join } from 'path';
+
+export const dynamic = 'force-dynamic';
+export const revalidate = 0;
 
 export async function GET() {
   try {
@@ -41,7 +47,14 @@ export async function POST(req: Request) {
         }
         return line;
       });
-      execSync(`echo "${newLines.join('\n')}" | crontab -`, { encoding: 'utf-8' });
+      // Write to a temp file instead of shell-interpolating crontab content
+      const tmp = join(tmpdir(), `mc-cron-${Date.now()}.txt`);
+      try {
+        writeFileSync(tmp, newLines.join('\n') + '\n', 'utf-8');
+        execSync(`crontab ${tmp}`, { encoding: 'utf-8' });
+      } finally {
+        try { unlinkSync(tmp); } catch {}
+      }
       return NextResponse.json({ success: true });
     }
 
@@ -50,6 +63,9 @@ export async function POST(req: Request) {
       const lines = crontab.split('\n').filter(l => l.trim() && !l.startsWith('#'));
       if (cronId >= 0 && cronId < lines.length) {
         const parts = lines[cronId].trim().split(/\s+/);
+        // Intentional: executes the operator's own crontab command verbatim via shell.
+        // Crontab entries are shell commands by definition — there's no way to sanitize
+        // them without breaking the feature. Endpoint is localhost-only.
         const command = parts.slice(5).join(' ');
         try {
           const output = execSync(command, { timeout: 30000, encoding: 'utf-8' });

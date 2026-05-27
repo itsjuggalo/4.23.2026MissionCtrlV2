@@ -3,6 +3,9 @@ import { readFile } from 'fs/promises';
 import path from 'path';
 import { proxyToServeftp } from "../../../lib/proxyToServeftp";
 
+export const dynamic = 'force-dynamic';
+export const revalidate = 0;
+
 const JSONL = path.join(
   process.env.HOME || '/home/itsju',
   '.openclaw/workspace/state/liquidations/binance_liqs.jsonl'

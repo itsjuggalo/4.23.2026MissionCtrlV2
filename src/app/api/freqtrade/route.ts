@@ -3,6 +3,9 @@ import { spawn, execSync } from 'child_process';
 import { existsSync, readdirSync, statSync } from 'fs';
 import path from 'path';
 
+export const dynamic = 'force-dynamic';
+export const revalidate = 0;
+
 const REPO = '/home/itsju/LapClaw/freqtrade';
 const VENV_PY = path.join(REPO, '.venv/bin/python');
 const VENV_BIN = path.join(REPO, '.venv/bin/freqtrade');

@@ -7,6 +7,9 @@ import crypto from 'crypto';
 import Database from 'better-sqlite3';
 import { proxyToServeftp } from "../../../lib/proxyToServeftp";
 
+export const dynamic = 'force-dynamic';
+export const revalidate = 0;
+
 // Claude Code CLI binary. Resolve at module-load time so the service
 // (which has a minimal PATH from `bash -lc 'npm start'`) doesn't fail with
 // ENOENT. Override via the CLAUDE_CLI_PATH env var.
@@ -680,6 +683,12 @@ function genThreadId(): string {
 function makeTitle(firstUserMessage: string): string {
   const t = firstUserMessage.trim().replace(/\s+/g, ' ');
   return t.length <= 60 ? t : t.slice(0, 57) + '...';
+}
+
+// ---- GET handler (health probe) ----
+
+export async function GET() {
+  return NextResponse.json({ status: 'ok', endpoint: 'copilot', note: 'POST only' });
 }
 
 // ---- POST handler ----
