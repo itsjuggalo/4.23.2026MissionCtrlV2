@@ -7,8 +7,11 @@
  */
 import { NextResponse } from 'next/server';
 import fs from 'fs';
-import path from 'path';
 import os from 'os';
+import path from 'path';
+
+export const dynamic = 'force-dynamic';
+export const revalidate = 0;
 
 const STORE_PATH = path.join(os.homedir(), '.openclaw', 'data', 'copilot_watchlist.json');
 const MAX_PINS = 12;

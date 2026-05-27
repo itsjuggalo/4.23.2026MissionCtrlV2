@@ -3,6 +3,9 @@ import { readdirSync, statSync, readFileSync } from 'fs';
 import { join, relative, extname, basename } from 'path';
 import { proxyToServeftp } from "../../../lib/proxyToServeftp";
 
+export const dynamic = 'force-dynamic';
+export const revalidate = 0;
+
 const WORKSPACE = join(process.env.HOME || '/home/itsju', '.openclaw/workspace');
 
 const SCAN_DIRS = [

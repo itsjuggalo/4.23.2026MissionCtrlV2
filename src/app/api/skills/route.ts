@@ -5,6 +5,9 @@ import { exec } from 'child_process';
 import { promisify } from 'util';
 import { proxyToServeftp } from "../../../lib/proxyToServeftp";
 
+export const dynamic = 'force-dynamic';
+export const revalidate = 0;
+
 const execAsync = promisify(exec);
 
 const SKILLS_DIR = '/home/itsju/.openclaw/workspace/skills';
