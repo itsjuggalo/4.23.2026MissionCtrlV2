@@ -3,6 +3,10 @@ import { spawn } from 'child_process';
 
 export const dynamic = 'force-dynamic';
 
+export async function GET() {
+  return NextResponse.json({ status: 'ok', endpoint: 'kronos-generate', note: 'POST only — use POST with {ticker}' });
+}
+
 export async function POST(req: NextRequest) {
   const body = await req.json().catch(() => ({}));
   const ticker = (body.ticker || '').toUpperCase().trim();
@@ -23,6 +27,7 @@ export async function POST(req: NextRequest) {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ ticker, model: body.model || 'small', source: 'vercel' }),
       cache: 'no-store',
+      signal: AbortSignal.timeout(10000),
     });
     if (proxyR.ok) {
       const data = await proxyR.json();

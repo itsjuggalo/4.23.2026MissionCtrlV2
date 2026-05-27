@@ -35,7 +35,8 @@ async function loadTickerMap(): Promise<Record<string, string>> {
   if (cached) { TICKER_CIK_MAP = cached; return cached; }
   try {
     const res = await fetch('https://www.sec.gov/files/company_tickers.json', {
-      headers: { 'User-Agent': SEC_UA }
+      headers: { 'User-Agent': SEC_UA },
+      signal: AbortSignal.timeout(12000),
     });
     if (!res.ok) return {};
     const j = await res.json();
@@ -62,7 +63,8 @@ async function fetchSecForm4(ticker: string): Promise<any> {
     const cik = map[ticker.toUpperCase()];
     if (!cik) return { transactions: [], net90d: 0, count90d: 0, source: 'sec_no_cik' };
     const subRes = await fetch(`https://data.sec.gov/submissions/CIK${cik}.json`, {
-      headers: { 'User-Agent': SEC_UA }
+      headers: { 'User-Agent': SEC_UA },
+      signal: AbortSignal.timeout(12000),
     });
     if (!subRes.ok) return { transactions: [], net90d: 0, count90d: 0, source: 'sec_sub_fail' };
     const subs = await subRes.json();
@@ -88,18 +90,19 @@ async function fetchSecForm4(ticker: string): Promise<any> {
         // First try direct, fall back to looking up via index.json
         const dataDir = `https://www.sec.gov/Archives/edgar/data/${parseInt(cik, 10)}/${accClean}`;
         let xmlText = '';
-        const directRes = await fetch(`${dataDir}/form4.xml`, { headers: { 'User-Agent': SEC_UA } });
+        const secSig = () => AbortSignal.timeout(8000);
+        const directRes = await fetch(`${dataDir}/form4.xml`, { headers: { 'User-Agent': SEC_UA }, signal: secSig() });
         if (directRes.ok) {
           xmlText = await directRes.text();
         } else {
           // fallback: look up via index
-          const idxRes = await fetch(`${dataDir}/index.json`, { headers: { 'User-Agent': SEC_UA } });
+          const idxRes = await fetch(`${dataDir}/index.json`, { headers: { 'User-Agent': SEC_UA }, signal: secSig() });
           if (!idxRes.ok) continue;
           const idxJ = await idxRes.json();
           const items = idxJ?.directory?.item || [];
           const xmlItem = items.find((x: any) => x.name?.endsWith('.xml'));
           if (!xmlItem?.name) continue;
-          const fallbackRes = await fetch(`${dataDir}/${xmlItem.name}`, { headers: { 'User-Agent': SEC_UA } });
+          const fallbackRes = await fetch(`${dataDir}/${xmlItem.name}`, { headers: { 'User-Agent': SEC_UA }, signal: secSig() });
           if (!fallbackRes.ok) continue;
           xmlText = await fallbackRes.text();
         }
@@ -173,6 +176,7 @@ async function loadCongressBulk(): Promise<any[]> {
   try {
     const res = await fetch('https://api.quiverquant.com/beta/live/congresstrading', {
       headers: { 'Accept': 'application/json', 'User-Agent': 'Mozilla/5.0' },
+      signal: AbortSignal.timeout(10000),
     });
     if (!res.ok) return [];
     const arr = await res.json();

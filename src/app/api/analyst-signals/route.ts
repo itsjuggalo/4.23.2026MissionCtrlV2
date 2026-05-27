@@ -159,7 +159,7 @@ export async function GET(request: Request) {
       raw = fs.readFileSync(MERGED_PATH, 'utf-8');
     } else {
       const remoteUrl = process.env.MERGED_SIGNALS_URL || 'https://missionctrl.serveftp.com/raw/analyst-signals-merged';
-      const resp = await fetch(remoteUrl, { cache: 'no-store' });
+      const resp = await fetch(remoteUrl, { cache: 'no-store', signal: AbortSignal.timeout(10000) });
       if (!resp.ok) {
         return NextResponse.json({
           error: 'Remote signals fetch failed: ' + resp.status,

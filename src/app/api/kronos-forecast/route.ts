@@ -18,7 +18,7 @@ export async function GET(req: NextRequest) {
   if (symbol) {
     try {
       const url = `${SIDECAR}?symbol=${encodeURIComponent(symbol)}&model=${encodeURIComponent(model)}`;
-      const r = await fetch(url, { cache: 'no-store' });
+      const r = await fetch(url, { cache: 'no-store', signal: AbortSignal.timeout(10000) });
       if (r.ok) {
         const data = await r.json();
         return NextResponse.json({ ...data, _via: 'sidecar', _model: model || data.model, _symbol: symbol });
@@ -48,6 +48,7 @@ export async function POST(req: NextRequest) {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ ticker, model, source: 'vercel' }),
       cache: 'no-store',
+      signal: AbortSignal.timeout(10000),
     });
     if (r.ok) {
       const data = await r.json();

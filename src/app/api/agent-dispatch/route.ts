@@ -10,6 +10,7 @@ async function sendDiscordMessage(webhookUrl: string, content: string) {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ content }),
+    signal: AbortSignal.timeout(8000),
   });
   return res.ok;
 }

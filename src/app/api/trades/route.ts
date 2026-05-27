@@ -50,7 +50,7 @@ async function fetchLivePrices(rawSymbols: string[]): Promise<Record<string, num
       return;
     }
     try {
-      const res = await fetch(`${COINBASE_BASE}/${pair}/spot`, { cache: 'no-store' });
+      const res = await fetch(`${COINBASE_BASE}/${pair}/spot`, { cache: 'no-store', signal: AbortSignal.timeout(5000) });
       if (!res.ok) throw new Error(`Coinbase HTTP ${res.status}`);
       const data = await res.json();
       const price = parseFloat(data?.data?.amount);
@@ -73,9 +73,7 @@ export async function GET() {
       const walletData = await fs.readFile(path.join(tweakDir, 'wallet.json'), 'utf-8');
       const wallet = JSON.parse(walletData);
       base_wallet_balance = wallet.balance_usd || 0;
-    } catch {
-      console.log('[trades] wallet.json not found');
-    }
+    } catch { /* file absent — leave balance at 0 */ }
 
     // ── Read positions ───────────────────────────────────────────────────────
     let rawPositions: any[] = [];
@@ -83,9 +81,7 @@ export async function GET() {
       const posData = await fs.readFile(path.join(tweakDir, 'positions.json'), 'utf-8');
       const all = JSON.parse(posData);
       rawPositions = Array.isArray(all) ? all.filter((p: any) => p.status === 'open') : [];
-    } catch {
-      console.log('[trades] positions.json not found');
-    }
+    } catch { /* file absent — leave positions empty */ }
 
     // ── Read trades ──────────────────────────────────────────────────────────
     let trades: any[] = [];
@@ -98,9 +94,7 @@ export async function GET() {
           new Date(a.timestamp || a.closed_at || 0).getTime()
         );
       }
-    } catch {
-      console.log('[trades] trades.json not found');
-    }
+    } catch { /* file absent — leave trades empty */ }
 
     // ── Fetch live prices from Coinbase ──────────────────────────────────────
     const uniqueSymbols = [...new Set(rawPositions.map((p: any) => p.symbol as string))];
