@@ -119,6 +119,7 @@ export function TelegramPage() {
     async function fetchSignals() {
       try {
         const res = await fetch('/api/telegram-signals');
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
         const data = await res.json();
         const entries = Array.isArray(data) ? data : data.signals || [];
         const cleaned = entries.filter((s: any) => {

@@ -563,9 +563,10 @@ export function OptionsPage() {
     const pull = async () => {
       try {
         const r = await fetch('/api/notifications');
+        if (!r.ok) throw new Error(`HTTP ${r.status}`);
         const d = await r.json();
         if (!cancelled) setNotificationsData(d);
-      } catch {}
+      } catch { if (!cancelled) setError(true); }
     };
     pull();
     const id = setInterval(pull, 15000);

@@ -124,6 +124,7 @@ export function ITBPage() {
         headers: { 'content-type': 'application/json' },
         body: JSON.stringify({ action: 'run', script, config }),
       });
+      if (!r.ok) throw new Error(`HTTP ${r.status}`);
       const data: RunResult = await r.json();
       setResult(data);
     } catch (e) {

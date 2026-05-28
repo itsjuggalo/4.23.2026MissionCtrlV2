@@ -119,6 +119,7 @@ export function ChartPage() {
   const fetchPositions = useCallback(async () => {
     try {
       const res  = await fetch('/api/trades', { cache: 'no-store' });
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
       const data = await res.json();
       if (data.success) {
         const open = (data.positions || []).filter((p: Position) => p.current_price && p.current_price > 0);

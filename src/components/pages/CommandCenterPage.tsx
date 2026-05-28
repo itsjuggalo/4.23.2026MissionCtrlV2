@@ -768,7 +768,7 @@ export function CommandCenterPage() {
           <div style={{ display: 'grid', gridTemplateColumns: '36px 1fr 56px', gap: '6px', alignItems: 'center', fontSize: '10px', fontFamily: 'var(--font-mc-mono)', padding: '2px 0' }}>
             <span style={{ color: '#607d8b' }}>Bias</span>
             <span style={{ display: 'flex', gap: '4px' }}>
-              {mtfRows.map((r, i) => <span key={i} style={{ color: dirColor(r.direction), fontSize: '10px', fontWeight: 600 }}>{r.tf}{dirArrow(r.direction)}</span>)}
+              {mtfRows.map((r) => <span key={r.tf} style={{ color: dirColor(r.direction), fontSize: '10px', fontWeight: 600 }}>{r.tf}{dirArrow(r.direction)}</span>)}
             </span>
             <span style={{ color: '#90a4ae', textAlign: 'right' }}>{aligned ? 'ALIGN' : partial ? 'PART' : 'MIX'}</span>
           </div>

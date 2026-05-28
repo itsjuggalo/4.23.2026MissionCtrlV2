@@ -257,7 +257,7 @@ export function OptionsWatcherPage() {
         setPutCallRatio(data.putCallRatio || 'N/A');
         setChainStats({ totalCallOI: data.totalCallOI, totalPutOI: data.totalPutOI, totalCallVol: data.totalCallVol, totalPutVol: data.totalPutVol });
         if (data.quote) setQuote(data.quote);
-      } catch {}
+      } catch (e: unknown) { setError(e instanceof Error ? e.message : 'Failed to load chain'); }
       finally { setLoading(false); }
     }
     loadChain();
@@ -276,7 +276,7 @@ export function OptionsWatcherPage() {
         // Filter to current ticker if available, else show all
         const tickerFlows = allFlows.filter((f: FlowEntry) => f.Symbol === ticker);
         setFlows(tickerFlows.length > 0 ? tickerFlows : allFlows.slice(0, 30));
-      } catch {}
+      } catch (e: unknown) { setError(e instanceof Error ? e.message : 'Flow load failed'); }
     }
     loadFlows();
     const iv = setInterval(loadFlows, 20000);
