@@ -162,12 +162,12 @@ export function ITBPage() {
     if (lastRun) {
       const sev = runStatusSeverity(lastRun.status);
       const label = lastRun.status === 'ok' ? 'ok' : lastRun.status.slice(0, 4);
-      return { score: sev === 'green' ? 1 : sev === 'red' ? 0 : 0.5, label, severity: sev as any };
+      return { score: sev === 'green' ? 1 : sev === 'red' ? 0 : 0.5, label, severity: sev };
     }
     if (health?.last_ok_ts) {
-      return { score: 1, label: 'ok', severity: 'green' as any };
+      return { score: 1, label: 'ok', severity: 'green' as const };
     }
-    return { score: -1, label: '—', severity: 'neutral' as any };
+    return { score: -1, label: '—', severity: 'neutral' as const };
   }
 
   return (

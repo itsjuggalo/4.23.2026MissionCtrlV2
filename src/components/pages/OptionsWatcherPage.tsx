@@ -524,11 +524,11 @@ export function OptionsWatcherPage() {
                       </tr>
                       <tr style={{ background: '#0d1117' }}>
                         {['Delta', 'IV', 'OI', 'Vol', 'Chg', 'Last', 'Ask', 'Bid'].map(h => (
-                          <th key={'c' + h} style={headerCol(h) as any}>{h}</th>
+                          <th key={'c' + h} style={headerCol(h)}>{h}</th>
                         ))}
-                        <th style={{ ...headerCol('Strike') as any, textAlign: 'center', borderLeft: '2px solid #1a3a4a', borderRight: '2px solid #1a3a4a' }}>Strike</th>
+                        <th style={{ ...headerCol('Strike'), textAlign: 'center', borderLeft: '2px solid #1a3a4a', borderRight: '2px solid #1a3a4a' }}>Strike</th>
                         {['Bid', 'Ask', 'Last', 'Chg', 'Vol', 'OI', 'IV', 'Delta'].map(h => (
-                          <th key={'p' + h} style={headerCol(h) as any}>{h}</th>
+                          <th key={'p' + h} style={headerCol(h)}>{h}</th>
                         ))}
                       </tr>
                     </thead>

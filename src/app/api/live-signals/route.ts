@@ -3,6 +3,8 @@ import { readFileSync, existsSync } from 'fs';
 import Database from 'better-sqlite3';
 import { proxyToServeftp } from "../../../lib/proxyToServeftp";
 
+export const dynamic = 'force-dynamic';
+
 const SIDECAR = '/home/itsju/mission-control/signal-receiver/data/scored_signals_recent.json';
 const JOURNAL = '/home/itsju/.openclaw/workspace/skill_outputs/boba_decisions_validated.json';
 const PIPELINE_DB = '/home/itsju/LapClaw/pipeline/desk_pipeline.sqlite';

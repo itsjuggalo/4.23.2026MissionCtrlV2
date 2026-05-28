@@ -12,6 +12,10 @@ export async function POST(req: Request) {
       );
     }
 
+    if (!password || typeof password !== 'string') {
+      return NextResponse.json({ success: false, error: 'Access denied' }, { status: 401 });
+    }
+
     if (password.toLowerCase() !== correct.toLowerCase()) {
       // Generic error — don't reveal if password exists or not
       return NextResponse.json(

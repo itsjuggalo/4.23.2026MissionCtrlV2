@@ -43,6 +43,6 @@ export async function POST(req: NextRequest) {
     child.unref();
     return NextResponse.json({ status: 'generating', ticker: scriptTicker, pid: child.pid });
   } catch (e: unknown) {
-    return NextResponse.json({ error: String(e) }, { status: 500 });
+    return NextResponse.json({ error: String(e).slice(0, 200) }, { status: 500 });
   }
 }

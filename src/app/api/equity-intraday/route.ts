@@ -38,6 +38,6 @@ export async function GET(req: Request) {
       .filter(b => b.eq !== null && b.eq !== undefined && !isNaN(b.eq));
     return NextResponse.json({ bars, base: d.base_value || 0, count: bars.length });
   } catch (e: unknown) {
-    return NextResponse.json({ error: String(e), bars: [] }, { status: 500 });
+    return NextResponse.json({ error: String(e).slice(0, 200), bars: [] }, { status: 500 });
   }
 }

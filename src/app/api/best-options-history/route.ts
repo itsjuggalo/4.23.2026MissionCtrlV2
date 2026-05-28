@@ -56,6 +56,6 @@ export async function GET(req: Request) {
         return NextResponse.json({ date, error: 'No data', available_dates: [], contracts: [] }, { status: 404 });
       } catch { return NextResponse.json({ date, error: 'No data dir', contracts: [] }, { status: 404 }); }
     }
-    return NextResponse.json({ date, error: String(e) }, { status: 500 });
+    return NextResponse.json({ date, error: String(e).slice(0, 200) }, { status: 500 });
   }
 }

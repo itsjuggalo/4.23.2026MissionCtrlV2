@@ -27,6 +27,10 @@ function parseOCC(sym: string): string {
 }
 
 // Types
+type FlowAlert = { AlertType?: string; totalFlowValue?: number; [key: string]: unknown };
+type FlowEntry = { Volume?: number; OI?: number; Time?: number; [key: string]: unknown };
+type UnusualFlowsArray = FlowEntry[] & { _allAlerts?: FlowAlert[]; _allFlows?: FlowEntry[] };
+
 type PortfolioData = {
   equity?: string | number;
   balance?: string | number;
@@ -101,7 +105,7 @@ export function CommandCenterPage() {
   const [dashData, setDashData] = useState<DashData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
-  const [unusualFlows, setUnusualFlows] = useState<Record<string, unknown>[]>([]);
+  const [unusualFlows, setUnusualFlows] = useState<UnusualFlowsArray>([]);
   const [kronosForecast, setKronosForecast] = useState<KronosForecast | null>(null);
   const [pipelineFeed, setPipelineFeed] = useState<Record<string, unknown>[]>([]);
   const [positionsExpanded, setPositionsExpanded] = useState(false);
@@ -152,9 +156,9 @@ export function CommandCenterPage() {
     fetch('/api/options-flow').then(r => r.ok ? r.json() : { flows: [], alerts: [] }).then(d => {
       const flows = d.flows || [];
       const alerts = d.alerts || [];
-      const unusual: any = flows.filter((f: any) => f.Volume > f.OI && f.OI >= 0).sort((a: any, b: any) => b.Time - a.Time).slice(0, 10);
-      unusual._allAlerts = alerts;
-      unusual._allFlows = flows;
+      const unusual: UnusualFlowsArray = (flows as FlowEntry[]).filter((f) => (f.Volume ?? 0) > (f.OI ?? 0) && (f.OI ?? 0) >= 0).sort((a, b) => (b.Time ?? 0) - (a.Time ?? 0)).slice(0, 10) as UnusualFlowsArray;
+      unusual._allAlerts = alerts as FlowAlert[];
+      unusual._allFlows = flows as FlowEntry[];
       setUnusualFlows(unusual);
     }).catch(() => {});
   };
@@ -193,7 +197,7 @@ export function CommandCenterPage() {
   // Fetch extended insider+congress data for each watchlist + position symbol
   useEffect(() => {
     const fetchExtendedIntel = async () => {
-      const portfolioPositions = (portfolio?.positions || []) as any[];
+      const portfolioPositions = portfolio?.positions || [];
       const allSyms = new Set<string>();
       watchlist.forEach(s => allSyms.add(s));
       portfolioPositions.forEach((p: any) => { const t = tickerOnly(p.symbol); if (t) allSyms.add(t); });
@@ -371,7 +375,7 @@ export function CommandCenterPage() {
     const tryInit = () => {
       if (cancelled || tvLoadedRef.current) return;
       const containerEl = document.getElementById('tv_btc_supertrend');
-      const TV = (window as any).TradingView;
+      const TV = (window as Window & { TradingView?: { widget: new (cfg: Record<string, unknown>) => void } }).TradingView;
       if (!containerEl || !TV || !TV.widget) {
         attempts++;
         if (attempts < 40) setTimeout(tryInit, 250); // up to 10s
@@ -399,7 +403,7 @@ export function CommandCenterPage() {
       } catch (e) { console.error('TV widget init failed', e); }
     };
     const ensureScript = () => {
-      if ((window as any).TradingView?.widget) { tryInit(); return; }
+      if ((window as Window & { TradingView?: { widget?: unknown } }).TradingView?.widget) { tryInit(); return; }
       const existing = document.querySelector('script[src="https://s3.tradingview.com/tv.js"]') as HTMLScriptElement | null;
       if (existing) { existing.addEventListener('load', tryInit); return; }
       const script = document.createElement('script');
@@ -424,7 +428,7 @@ export function CommandCenterPage() {
 
   // Huge Flow alerts (matches Options page categorizeAlert 'huge' logic, sorted by totalFlowValue DESC)
   const hugeAlerts = (() => {
-    const flowsArr = (unusualFlows as any)?._allAlerts || [];
+    const flowsArr = unusualFlows._allAlerts || [];
     return flowsArr.filter((a: any) => {
       const t = (a.AlertType || '').toLowerCase();
       if (t.includes('etf') || t.includes('weekly') || t.includes('repeat') || t.includes('unusual')) return false;
@@ -914,11 +918,11 @@ export function CommandCenterPage() {
         <div className="cc" style={{ padding: '16px' }}>
           <div className="lbl" style={{ marginBottom: '12px', display: 'flex', justifyContent: 'space-between' }}>
             <span><span style={{ display: 'flex', alignItems: 'center', gap: '4px' }}><span style={{ width: '8px', height: '8px', borderRadius: '50%', background: '#ef5350', animation: 'blink 1.4s infinite', display: 'inline-block' }} />FLOW ALERTS</span></span>
-            <span style={{ color: '#455a64' }}>{(((unusualFlows as any)?._allAlerts || []) as any[]).length} alerts</span>
+            <span style={{ color: '#455a64' }}>{(unusualFlows._allAlerts || []).length} alerts</span>
           </div>
           <div style={{ display: 'flex', flexDirection: 'column', gap: '2px', maxHeight: '380px', overflowY: 'auto' }}>
             {(() => {
-              const allAlerts = (((unusualFlows as any)?._allAlerts || []) as any[]);
+              const allAlerts = unusualFlows._allAlerts || [];
               if (allAlerts.length === 0) {
                 return <div style={{ color: '#455a64', fontSize: 'var(--mc-font-badge)', fontFamily: 'var(--font-mc-mono)', textAlign: 'center', padding: '40px' }}>No flow alerts</div>;
               }
@@ -1172,10 +1176,10 @@ export function CommandCenterPage() {
           <div className="lbl" style={{ marginBottom: '10px' }}>FLOW SUMMARY</div>
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px' }}>
             {[
-              { l: 'TOTAL FLOWS', v: (((unusualFlows as any)?._allFlows?.length) || unusualFlows.length || 0).toString(), c: '#4fc3f7' },
-              { l: 'UNUSUAL', v: ((((unusualFlows as any)?._allAlerts || []) as any[]).filter((a: any) => (a.AlertType || '').toLowerCase().includes('unusual')).length).toString(), c: '#ffd600' },
+              { l: 'TOTAL FLOWS', v: ((unusualFlows._allFlows?.length) || unusualFlows.length || 0).toString(), c: '#4fc3f7' },
+              { l: 'UNUSUAL', v: (unusualFlows._allAlerts || []).filter((a) => (a.AlertType || '').toLowerCase().includes('unusual')).length.toString(), c: '#ffd600' },
               { l: '$1M+ ALERTS', v: hugeAlerts.length.toString(), c: '#e040fb' },
-              { l: '$500K+ ALERTS', v: ((((unusualFlows as any)?._allAlerts || []) as any[]).filter((a: any) => (a.totalFlowValue || 0) >= 500000).length).toString(), c: '#ff9800' },
+              { l: '$500K+ ALERTS', v: (unusualFlows._allAlerts || []).filter((a) => (a.totalFlowValue || 0) >= 500000).length.toString(), c: '#ff9800' },
             ].map((m, i) => (
               <div key={i} style={{ background: '#0d1117', borderRadius: '6px', padding: '12px', textAlign: 'center' }}>
                 <div style={{ fontSize: 'var(--mc-font-label)', color: '#607d8b', fontFamily: 'var(--font-mc-mono)', marginBottom: '4px' }}>{m.l}</div>

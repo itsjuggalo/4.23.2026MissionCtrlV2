@@ -97,7 +97,7 @@ async function fetchAlpaca(account: string, pathSuffix: string): Promise<unknown
       signal: AbortSignal.timeout(8000),
     });
     return await r.json();
-  } catch (e) { return { error: String(e) }; }
+  } catch (e) { return { error: String(e).slice(0, 200) }; }
 }
 
 export async function GET() {

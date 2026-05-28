@@ -155,7 +155,7 @@ export async function GET() {
 
     return NextResponse.json({ ...base, runs, pipeline_health });
   } catch (e) {
-    return NextResponse.json({ error: String(e) }, { status: 500 });
+    return NextResponse.json({ error: String(e).slice(0, 200) }, { status: 500 });
   }
 }
 
@@ -331,7 +331,7 @@ export async function POST(req: NextRequest) {
 
     return NextResponse.json({ error: 'Unknown action' }, { status: 400 });
   } catch (e) {
-    return NextResponse.json({ error: String(e) }, { status: 500 });
+    return NextResponse.json({ error: String(e).slice(0, 200) }, { status: 500 });
   }
 }
 

@@ -21,7 +21,7 @@ export async function GET() {
     });
     return NextResponse.json({ crons, count: crons.length });
   } catch (e) {
-    return NextResponse.json({ crons: [], count: 0, error: String(e) }, { status: 500 });
+    return NextResponse.json({ crons: [], count: 0, error: String(e).slice(0, 200) }, { status: 500 });
   }
 }
 

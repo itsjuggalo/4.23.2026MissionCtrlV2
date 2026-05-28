@@ -112,14 +112,14 @@ export function AlertsPage() {
       if (regimeRes) {
         const regime = regimeRes.overall_regime || regimeRes.regime || '';
         const bias = regimeRes.direction_bias || regimeRes.bias || '';
-        const sev = regime.includes('TREND') ? 'info' : regime.includes('CHOPPY') ? 'warning' : 'info';
-        newAlerts.push({ id: `reg${id++}`, time: regimeRes.timestamp || now, severity: sev as any, category: 'Regime',
+        const sev: 'info' | 'warning' = regime.includes('CHOPPY') ? 'warning' : 'info';
+        newAlerts.push({ id: `reg${id++}`, time: regimeRes.timestamp || now, severity: sev, category: 'Regime',
           title: `Market Regime: ${regime}`, detail: `Bias: ${bias}`, value: regime });
 
         // RSI alerts from regime timeframes
-        const tfs = regimeRes.timeframes || {};
-        for (const [tf, data] of Object.entries(tfs) as any[]) {
-          if (data?.adx > 40) {
+        const tfs: Record<string, { adx?: number }> = regimeRes.timeframes || {};
+        for (const [tf, data] of Object.entries(tfs)) {
+          if ((data?.adx ?? 0) > 40) {
             newAlerts.push({ id: `rsi${id++}`, time: now, severity: 'info', category: 'Technical',
               title: `Strong Trend on ${tf}`, detail: `ADX: ${data.adx} — directional movement is strong`, value: `ADX ${data.adx}` });
           }
@@ -131,8 +131,8 @@ export function AlertsPage() {
       for (const a of activities.slice(0, 20)) {
         const action = (a.action || '').toLowerCase();
         if (action.includes('alert') || action.includes('warning') || action.includes('error') || action.includes('fail')) {
-          const sev = action.includes('error') || action.includes('fail') ? 'critical' : action.includes('warning') ? 'warning' : 'info';
-          newAlerts.push({ id: `act${id++}`, time: a.time, severity: sev as any, category: 'System',
+          const sev: 'critical' | 'warning' | 'info' = action.includes('error') || action.includes('fail') ? 'critical' : action.includes('warning') ? 'warning' : 'info';
+          newAlerts.push({ id: `act${id++}`, time: a.time, severity: sev, category: 'System',
             title: a.agent || 'System', detail: a.action });
         }
       }

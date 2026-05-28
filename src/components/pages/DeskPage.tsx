@@ -2,7 +2,6 @@
 
 import { useEffect, useState, useCallback } from "react";
 import { GradientHeader } from "@/components/ui/GradientHeader";
-import { Badge } from "@/components/ui/Badge";
 import { Heatmap } from "@/components/ui/Heatmap";
 import { Sparkline } from "@/components/ui/Sparkline";
 
@@ -225,17 +224,17 @@ export function DeskPage() {
       const laneRow = laneStageMatrix.find(r => r.lane === lane);
       const state = laneRow?.stages[stage.slot];
       const sev = stageStateToSeverity(state);
-      return { score: sev === 'green' ? 1 : sev === 'amber' ? 0.5 : sev === 'red' ? 0 : -1, label: state ? state.slice(0, 4) : '—', severity: sev as any };
+      return { score: sev === 'green' ? 1 : sev === 'amber' ? 0.5 : sev === 'red' ? 0 : -1, label: state ? state.slice(0, 4) : '—', severity: sev };
     }
     const dossier = (data?.floor4 ?? []).find((d: any) => (d.lane ?? null) === lane);
     const stageVal = dossier?.stages?.[stage.slot];
     if (stageVal !== undefined) {
       const hasVeto = !!stageVal?.veto;
-      return { score: hasVeto ? 0 : 1, label: hasVeto ? 'VETO' : 'pass', severity: (hasVeto ? 'red' : 'green') as any };
+      return { score: hasVeto ? 0 : 1, label: hasVeto ? 'VETO' : 'pass', severity: (hasVeto ? 'red' : 'green') as 'red' | 'green' };
     }
     const laneData = lanesByName[lane];
-    if (laneData) return { score: 0.5, label: '—', severity: 'neutral' as any };
-    return { score: -1, label: '—', severity: 'neutral' as any };
+    if (laneData) return { score: 0.5, label: '—', severity: 'neutral' as const };
+    return { score: -1, label: '—', severity: 'neutral' as const };
   }
 
   return (

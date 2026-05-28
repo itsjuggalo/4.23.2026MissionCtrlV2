@@ -76,7 +76,7 @@ export async function GET() {
   try {
     return NextResponse.json(status());
   } catch (e) {
-    return NextResponse.json({ error: String(e) }, { status: 500 });
+    return NextResponse.json({ error: String(e).slice(0, 200) }, { status: 500 });
   }
 }
 
@@ -99,7 +99,7 @@ export async function POST(req: Request) {
     }
     return await runProcess(VENV_BIN, args, REPO, 300_000);
   } catch (e) {
-    return NextResponse.json({ error: String(e) }, { status: 500 });
+    return NextResponse.json({ error: String(e).slice(0, 200) }, { status: 500 });
   }
 }
 
