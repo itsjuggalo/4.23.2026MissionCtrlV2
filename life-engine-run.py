@@ -58,6 +58,7 @@ SKIP_SENDERS = [
     'updates@okx.com','em.linkedin.com','messages-noreply@linkedin.com',
     'e.godaddy.com','news.temuemail.com',
     'nextdoor.com','email.nextdoor.com','ss.email.nextdoor.com','is.email.nextdoor.com',
+    'muvfl.com','eml.muvfl.com',
 ]
 
 # Senders that are always important — surface regardless of keywords
@@ -85,6 +86,14 @@ IMPORTANT_KW = [
     'out for delivery','package delivered','order shipped',
     'order confirmed','your order','tracking number',
     'your withdrawal','trade confirmation',
+    # eBay account activity only
+    'you sold','item sold','bid won','purchase confirmed',
+    'payment received','payment sent','your listing',
+    'case opened','refund','feedback left',
+    # Account security
+    'sign-in attempt','new device','unusual activity',
+    # Robinhood real events
+    'completed','your transfer','your deposit',
 ]
 
 # ── Helpers ──────────────────────────────────────────────────────────────────
@@ -295,8 +304,9 @@ def get_gmail(account='', hours=168):
         snip = e.get('snippet', '').lower()
         sender_match = any(s in frm for s in IMPORTANT_SENDERS)
         kw_match     = any(k in subj + ' ' + snip for k in IMPORTANT_KW)
-        # For broad domains (robinhood, ebay), require a keyword hit too
-        broad = any(s in frm for s in ('robinhood.com','ebay.com','amazon.com','walmart.com'))
+        # For commercial/broad domains, require a keyword hit — blocks ads but passes account activity
+        broad = any(s in frm for s in (
+            'robinhood.com','ebay.com','amazon.com','walmart.com','trulieve.com'))
         if (sender_match and not broad) or (broad and kw_match) or (not broad and kw_match):
             important.append(e)
         elif any(k in subj + ' ' + frm for k in BILL_KW):
