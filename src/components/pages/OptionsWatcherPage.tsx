@@ -227,25 +227,27 @@ export function OptionsWatcherPage() {
       setLoading(true); setError('');
       try {
         const res = await fetch(`/api/options-chain?symbol=${ticker}`);
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
         const data = await res.json();
         if (data.error) { setError(data.error); return; }
         setExpirations(data.expirations || []);
         if (data.quote) setQuote(data.quote);
         if (data.expirations?.length > 0) setSelectedExp(data.expirations[0]);
         if (data.quote?.last) setStratStrike(Math.round(data.quote.last));
-      } catch (e: any) { setError(e.message); }
+      } catch (e: unknown) { setError(e instanceof Error ? e.message : 'Failed to load'); }
       finally { setLoading(false); }
     }
     loadExpirations();
   }, [ticker]);
 
-  // Load chain on expiration change
+  // Load chain on expiration change, auto-refresh every 30s
   useEffect(() => {
     if (!selectedExp) return;
     async function loadChain() {
       setLoading(true);
       try {
         const res = await fetch(`/api/options-chain?symbol=${ticker}&expiration=${selectedExp}&greeks=true`);
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
         const data = await res.json();
         if (data.error) { setError(data.error); return; }
         setCalls(data.calls || []);
@@ -259,6 +261,8 @@ export function OptionsWatcherPage() {
       finally { setLoading(false); }
     }
     loadChain();
+    const iv = setInterval(loadChain, 30000);
+    return () => clearInterval(iv);
   }, [ticker, selectedExp]);
 
   // Load flows

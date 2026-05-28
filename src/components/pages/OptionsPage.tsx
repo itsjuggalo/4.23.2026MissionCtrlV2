@@ -512,6 +512,7 @@ export function OptionsPage() {
   const [flowWeek, setFlowWeek] = useState<string>(weekStartET(todayET()));
   const [notificationsData, setNotificationsData] = useState<NotificationsResponse | null>(null);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(false);
   const [drawerTicker, setDrawerTicker] = useState<string | null>(null);
 
   // Data fetching — analyst signals
@@ -520,9 +521,10 @@ export function OptionsPage() {
     const pull = async () => {
       try {
         const r = await fetch('/api/analyst-signals');
+        if (!r.ok) throw new Error('analyst-signals');
         const d = await r.json();
-        if (!cancelled) setAnalystData(d);
-      } catch {}
+        if (!cancelled) { setAnalystData(d); setError(false); }
+      } catch { if (!cancelled) setError(true); }
     };
     pull();
     const id = setInterval(pull, 15000);
@@ -535,12 +537,11 @@ export function OptionsPage() {
     const pull = async () => {
       try {
         const r = await fetch(`/api/options-flow?week=${flowWeek}`);
+        if (!r.ok) throw new Error('options-flow');
         const d = await r.json();
-        if (!cancelled) {
-          setFlowData(d);
-          setLoading(false);
-        }
-      } catch {}
+        if (!cancelled) { setFlowData(d); setError(false); }
+      } catch { if (!cancelled) setError(true); }
+      finally { if (!cancelled) setLoading(false); }
     };
     pull();
     const id = setInterval(pull, 10000);
@@ -726,6 +727,7 @@ export function OptionsPage() {
 
         {/* Content */}
         <div style={{ padding: '10px 14px 30px' }}>
+          {error && <div style={{ background: '#1a0000', border: '1px solid #ef535044', color: '#ef5350', padding: '10px 16px', borderRadius: '6px', marginBottom: '12px', fontSize: '13px' }}>⚠ API unavailable — data may be stale</div>}
           {loading && !analystData && !flowData && (
             <div style={{ color: '#607d8b', textAlign: 'center', padding: '40px 0', fontSize: '12px' }}>Loading...</div>
           )}
