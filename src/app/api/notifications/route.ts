@@ -66,9 +66,9 @@ export async function GET() {
       byTab,
       all: unique.slice(0, 100),
     });
-  } catch (err: any) {
+  } catch (err: unknown) {
     return NextResponse.json({
-      error: err?.message || 'unknown error',
+      error: (err instanceof Error ? err.message : String(err)).slice(0, 200),
       byTab: { scalps: [], swings: [], leaps: [] },
       all: [],
     }, { status: 500 });

@@ -217,9 +217,9 @@ export async function GET(request: Request) {
       openAll: openSignals,
       closedRecent: closedSignals.slice(0, 100),
     });
-  } catch (err: any) {
+  } catch (err: unknown) {
     return NextResponse.json({
-      error: err?.message || 'unknown error',
+      error: (err instanceof Error ? err.message : String(err)).slice(0, 200),
       open: [], closed: [], stats: null,
     }, { status: 500 });
   }
