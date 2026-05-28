@@ -191,6 +191,6 @@ export async function GET(req: Request) {
       },
     });
   } catch (e: unknown) {
-    return NextResponse.json({ error: e instanceof Error ? e.message : String(e), entries: [] }, { status: 500 });
+    return NextResponse.json({ error: (e instanceof Error ? e.message : String(e)).slice(0, 200), entries: [] }, { status: 500 });
   }
 }

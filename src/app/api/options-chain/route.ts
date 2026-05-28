@@ -52,7 +52,7 @@ export async function GET(req: Request) {
 
       return NextResponse.json({ symbol, expirations, quote, chain: null });
     } catch (e: unknown) {
-      return NextResponse.json({ error: e instanceof Error ? e.message : String(e) }, { status: 500 });
+      return NextResponse.json({ error: (e instanceof Error ? e.message : String(e)).slice(0, 200) }, { status: 500 });
     }
   }
 
@@ -151,6 +151,6 @@ export async function GET(req: Request) {
 
     return NextResponse.json(result);
   } catch (e: unknown) {
-    return NextResponse.json({ error: e instanceof Error ? e.message : String(e) }, { status: 500 });
+    return NextResponse.json({ error: (e instanceof Error ? e.message : String(e)).slice(0, 200) }, { status: 500 });
   }
 }

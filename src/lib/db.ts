@@ -2,6 +2,12 @@ import Database from 'better-sqlite3';
 import path from 'path';
 import fs from 'fs';
 
+interface CountRow { count: number }
+interface AvgRow { avg: number | null }
+interface SumRow { total: number | null }
+interface MaxRow { best: number | null }
+interface MinRow { worst: number | null }
+
 // ============================================================================
 // Mission Control SQLite Database
 // Persistent storage for trades, activities, alerts, agent metrics
@@ -211,19 +217,19 @@ export function getRecentTrades(limit = 50) {
 
 export function getTradeStats() {
   const db = getDb();
-  const total = db.prepare('SELECT COUNT(*) as count FROM trades WHERE status = ?').get('closed') as any;
-  const wins = db.prepare('SELECT COUNT(*) as count FROM trades WHERE status = ? AND pnl_pct > 0').get('closed') as any;
-  const avgWin = db.prepare('SELECT AVG(pnl_pct) as avg FROM trades WHERE status = ? AND pnl_pct > 0').get('closed') as any;
-  const avgLoss = db.prepare('SELECT AVG(pnl_pct) as avg FROM trades WHERE status = ? AND pnl_pct <= 0').get('closed') as any;
-  const totalPnl = db.prepare('SELECT SUM(pnl_dollars) as total FROM trades WHERE status = ?').get('closed') as any;
-  const best = db.prepare('SELECT MAX(pnl_pct) as best FROM trades WHERE status = ?').get('closed') as any;
-  const worst = db.prepare('SELECT MIN(pnl_pct) as worst FROM trades WHERE status = ?').get('closed') as any;
+  const total = db.prepare('SELECT COUNT(*) as count FROM trades WHERE status = ?').get('closed') as CountRow | undefined;
+  const wins = db.prepare('SELECT COUNT(*) as count FROM trades WHERE status = ? AND pnl_pct > 0').get('closed') as CountRow | undefined;
+  const avgWin = db.prepare('SELECT AVG(pnl_pct) as avg FROM trades WHERE status = ? AND pnl_pct > 0').get('closed') as AvgRow | undefined;
+  const avgLoss = db.prepare('SELECT AVG(pnl_pct) as avg FROM trades WHERE status = ? AND pnl_pct <= 0').get('closed') as AvgRow | undefined;
+  const totalPnl = db.prepare('SELECT SUM(pnl_dollars) as total FROM trades WHERE status = ?').get('closed') as SumRow | undefined;
+  const best = db.prepare('SELECT MAX(pnl_pct) as best FROM trades WHERE status = ?').get('closed') as MaxRow | undefined;
+  const worst = db.prepare('SELECT MIN(pnl_pct) as worst FROM trades WHERE status = ?').get('closed') as MinRow | undefined;
 
   return {
     total_trades: total?.count || 0,
     wins: wins?.count || 0,
     losses: (total?.count || 0) - (wins?.count || 0),
-    win_rate: total?.count > 0 ? ((wins?.count || 0) / total.count * 100) : 0,
+    win_rate: (total?.count ?? 0) > 0 ? ((wins?.count || 0) / total!.count * 100) : 0,
     avg_win: avgWin?.avg || 0,
     avg_loss: avgLoss?.avg || 0,
     total_pnl: totalPnl?.total || 0,
@@ -348,12 +354,12 @@ export function getWebhookHistory(limit = 50) {
 // Database stats
 export function getDbStats() {
   const db = getDb();
-  const trades = db.prepare('SELECT COUNT(*) as count FROM trades').get() as any;
-  const activities = db.prepare('SELECT COUNT(*) as count FROM activities').get() as any;
-  const alerts = db.prepare('SELECT COUNT(*) as count FROM alerts').get() as any;
-  const sessions = db.prepare('SELECT COUNT(*) as count FROM sessions').get() as any;
-  const snapshots = db.prepare('SELECT COUNT(*) as count FROM daily_snapshots').get() as any;
-  const webhooks = db.prepare('SELECT COUNT(*) as count FROM webhook_events').get() as any;
+  const trades = db.prepare('SELECT COUNT(*) as count FROM trades').get() as CountRow | undefined;
+  const activities = db.prepare('SELECT COUNT(*) as count FROM activities').get() as CountRow | undefined;
+  const alerts = db.prepare('SELECT COUNT(*) as count FROM alerts').get() as CountRow | undefined;
+  const sessions = db.prepare('SELECT COUNT(*) as count FROM sessions').get() as CountRow | undefined;
+  const snapshots = db.prepare('SELECT COUNT(*) as count FROM daily_snapshots').get() as CountRow | undefined;
+  const webhooks = db.prepare('SELECT COUNT(*) as count FROM webhook_events').get() as CountRow | undefined;
 
   return {
     trades: trades?.count || 0,

@@ -242,7 +242,7 @@ export function AppShellClient() {
   const handleNavigate = (page: PageName) => {
     if (page === 'Landing') { window.location.href = '/landing'; return; }
     if (page === 'GoTrader') { window.location.href = '/gotrader'; return; }
-    setActivePage(page as any);
+    setActivePage(page);
     window.history.replaceState(null, '', '/?page=' + (page as string).toLowerCase().replace(/\s+/g, '-'));
     setMobileOpen(false);
   };

@@ -66,19 +66,17 @@ function countdown(iso: string | null): string {
 }
 
 const SIGNAL_META: Record<string, { label: string; getValue: (s: SignalEntry) => string }> = {
-  fear_greed:      { label: 'Fear & Greed',      getValue: s => `${(s as any).value ?? 'N/A'} (${(s as any).index ?? '—'})` },
-  funding_rate:    { label: 'Funding Rate',       getValue: s => (s as any).value ?? 'N/A' },
+  fear_greed:      { label: 'Fear & Greed',      getValue: s => `${s['value'] as string ?? 'N/A'} (${s['index'] as number ?? '—'})` },
+  funding_rate:    { label: 'Funding Rate',       getValue: s => (s['value'] as string) ?? 'N/A' },
   moving_averages: { label: 'Moving Averages',    getValue: s => {
-    const ma = s as any;
-    if (!ma.price) return 'N/A';
-    return `$${Number(ma.price).toLocaleString()} | above ${ma.above_count ?? 0}/3 SMAs`;
+    if (!s['price']) return 'N/A';
+    return `$${Number(s['price']).toLocaleString()} | above ${(s['above_count'] as number) ?? 0}/3 SMAs`;
   }},
-  structure_4h:    { label: '4H Structure',       getValue: s => (s as any).trend ?? 'N/A' },
-  btc_dominance:   { label: 'BTC Dominance',      getValue: s => (s as any).value ?? 'N/A' },
-  volume_flow:     { label: 'Volume vs 30d Avg',  getValue: s => (s as any).vs_average ?? 'N/A' },
+  structure_4h:    { label: '4H Structure',       getValue: s => (s['trend'] as string) ?? 'N/A' },
+  btc_dominance:   { label: 'BTC Dominance',      getValue: s => (s['value'] as string) ?? 'N/A' },
+  volume_flow:     { label: 'Volume vs 30d Avg',  getValue: s => (s['vs_average'] as string) ?? 'N/A' },
   dxy:             { label: 'DXY (USD Index)',     getValue: s => {
-    const d = s as any;
-    return d.value != null ? `${d.value} (${d.trend ?? '—'})` : 'N/A';
+    return s['value'] != null ? `${s['value']} (${(s['trend'] as string) ?? '—'})` : 'N/A';
   }},
 };
 

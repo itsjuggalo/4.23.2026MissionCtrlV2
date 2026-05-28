@@ -70,7 +70,7 @@ async function alpacaCached(account: string) {
     return result;
   }
   // Auth failures and missing creds must surface — permanent config failures, not transient errors
-  const err = (result as any).error;
+  const err = (result as { error: string }).error;
   if (err === "auth_failed" || err === "no creds") return result;
   // For other transient errors (timeout, network) serve stale rather than breaking the UI
   const cached = _cache[account];

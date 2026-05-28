@@ -69,7 +69,7 @@ export default function Dashboard() {
               <tbody>
                 {allPositions.map((p, i) => (
                   <tr key={i} style={{ borderTop: "1px solid #1f2a36" }}>
-                    <Td><AcctTag a={(p as any).account} /></Td>
+                    <Td><AcctTag a={p.account} /></Td>
                     <Td bold>{p.symbol}</Td>
                     <Td right>{p.qty}</Td>
                     <Td right mono>${p.avg_entry?.toFixed(2)}</Td>
@@ -87,7 +87,7 @@ export default function Dashboard() {
             <div style={{ display: "flex", flexDirection: "column", gap: 4 }}>
               {allOrders.slice(0, 12).map((o, i) => (
                 <div key={i} style={{ display: "flex", alignItems: "center", gap: 8, padding: "4px 0", fontSize: 11, borderBottom: "1px solid #1f2a36" }}>
-                  <AcctTag a={(o as any).account} />
+                  <AcctTag a={o.account} />
                   <StatusPill status={o.status} />
                   <span style={{ color: o.side === "buy" ? "#5fff5f" : "#ff9b3f", fontWeight: 600 }}>{o.side?.toUpperCase()}</span>
                   <span style={{ fontWeight: 600 }}>{o.symbol}</span>

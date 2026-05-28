@@ -49,7 +49,8 @@ export async function GET(req: Request) {
         
         if (res.ok) {
           const data = await res.json();
-          for (const [sym, snap] of Object.entries(data) as any) {
+          type AlpacaSnap = { latestTrade?: { p?: number }; minuteBar?: { c?: number }; prevDailyBar?: { c?: number } };
+          for (const [sym, snap] of Object.entries(data as Record<string, AlpacaSnap>)) {
             const latest = snap?.latestTrade?.p || snap?.minuteBar?.c || 0;
             const prevClose = snap?.prevDailyBar?.c || latest;
             const change = latest - prevClose;

@@ -568,7 +568,7 @@ function fetchAltSignalsContext(): Record<string, unknown> {
       cot_latest_by_market: cot,
     };
   } catch (e) {
-    return { alt_signals_error: e instanceof Error ? e.message : String(e) };
+    return { alt_signals_error: (e instanceof Error ? e.message : String(e)).slice(0, 200) };
   } finally {
     db.close();
   }
@@ -924,7 +924,7 @@ Inventing a plausible-looking price like "$12" because the ticker is in the alt_
       });
     } catch (e) {
       return NextResponse.json({
-        error: `Claude CLI invocation failed: ${e instanceof Error ? e.message : String(e)}`,
+        error: `Claude CLI invocation failed: ${(e instanceof Error ? e.message : String(e)).slice(0, 200)}`,
       }, { status: 500 });
     }
 

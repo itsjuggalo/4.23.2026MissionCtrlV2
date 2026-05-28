@@ -2,6 +2,9 @@ import { NextResponse } from 'next/server';
 import { getDb } from '@/lib/db';
 import { proxyToServeftp } from "../../../lib/proxyToServeftp";
 
+interface CountRow { count: number }
+interface LastActiveRow { created_at: string }
+
 // Agent trust scoring — grades each agent on reliability, accuracy, speed
 export async function GET(request: Request) {
   const __proxied = await proxyToServeftp(request); if (__proxied) return __proxied;
@@ -17,23 +20,23 @@ export async function GET(request: Request) {
       const recent = db.prepare(`
         SELECT COUNT(*) as count FROM activities
         WHERE agent LIKE ? AND created_at >= datetime('now', '-1 day')
-      `).get(`%${agent}%`) as any;
+      `).get(`%${agent}%`) as CountRow | undefined;
 
       // Count errors
       const errors = db.prepare(`
         SELECT COUNT(*) as count FROM activities
         WHERE agent LIKE ? AND severity = 'error' AND created_at >= datetime('now', '-7 days')
-      `).get(`%${agent}%`) as any;
+      `).get(`%${agent}%`) as CountRow | undefined;
 
       // Count total all time
       const total = db.prepare(`
         SELECT COUNT(*) as count FROM activities WHERE agent LIKE ?
-      `).get(`%${agent}%`) as any;
+      `).get(`%${agent}%`) as CountRow | undefined;
 
       // Get last activity time
       const lastActive = db.prepare(`
         SELECT created_at FROM activities WHERE agent LIKE ? ORDER BY created_at DESC LIMIT 1
-      `).get(`%${agent}%`) as any;
+      `).get(`%${agent}%`) as LastActiveRow | undefined;
 
       // Get trust metrics if any
       const metrics = db.prepare(`
@@ -77,7 +80,7 @@ export async function GET(request: Request) {
     });
   } catch (error) {
     return NextResponse.json(
-      { error: String(error), agents: [] },
+      { error: String(error).slice(0, 200), agents: [] },
       { status: 500 }
     );
   }
@@ -101,6 +104,6 @@ export async function POST(request: Request) {
 
     return NextResponse.json({ success: true });
   } catch (error) {
-    return NextResponse.json({ success: false, error: String(error) }, { status: 500 });
+    return NextResponse.json({ success: false, error: String(error).slice(0, 200) }, { status: 500 });
   }
 }

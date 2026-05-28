@@ -44,6 +44,6 @@ export async function GET(req: NextRequest) {
 
     return NextResponse.json({ error: 'Unknown type. Use: today, history, calendar' }, { status: 400 });
   } catch (e: unknown) {
-    return NextResponse.json({ error: e instanceof Error ? e.message : String(e) }, { status: 500 });
+    return NextResponse.json({ error: (e instanceof Error ? e.message : String(e)).slice(0, 200) }, { status: 500 });
   }
 }

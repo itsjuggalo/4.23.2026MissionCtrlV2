@@ -30,6 +30,6 @@ export async function GET(req: NextRequest) {
     response.cookies.set('mc_csrf', mc_csrf, cookieOpts(false));
     return response;
   } catch (e: unknown) {
-    return NextResponse.json({ ok: false, error: e instanceof Error ? e.message : String(e) }, { status: 500 });
+    return NextResponse.json({ ok: false, error: (e instanceof Error ? e.message : String(e)).slice(0, 200) }, { status: 500 });
   }
 }

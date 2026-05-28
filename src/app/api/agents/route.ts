@@ -69,7 +69,7 @@ export async function GET(request: Request) {
       }
 
       const lastLog = status === 'online' ? await getLastLogLine(pm2Name) : '—';
-      const isCron = (def as any).isCron || false;
+      const isCron = 'isCron' in def ? (def as { isCron: boolean }).isCron : false;
 
       // Determine if status is "expected" for cron jobs
       const statusStr = (isCron && status === 'stopped') ? 'idle' : status;
