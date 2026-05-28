@@ -1,6 +1,8 @@
 'use client';
 import React, { useMemo } from 'react';
 
+declare global { interface Window { __mcAvatarSalt?: number } }
+
 /**
  * Rotating StarCraft character avatar - 48px by default.
  * Pool of 15 units across all 3 races. Different random pick per page load.
@@ -182,8 +184,8 @@ const Unit: React.FC<{ id: UnitId }> = ({ id }) => {
 export default function PageAvatar({ size = 48, seed }: Props) {
   const unit = useMemo<UnitId>(() => {
     // Combine page seed + a session-stable random so different page loads rotate
-    const sessionSalt = (typeof window !== 'undefined' && (window as any).__mcAvatarSalt) ||
-      (typeof window !== 'undefined' ? ((window as any).__mcAvatarSalt = Math.floor(Math.random() * 100000)) : 0);
+    const sessionSalt = (typeof window !== 'undefined' && window.__mcAvatarSalt) ||
+      (typeof window !== 'undefined' ? (window.__mcAvatarSalt = Math.floor(Math.random() * 100000)) : 0);
     const base = seed ? hashSeed(seed) : 0;
     const idx = (base + sessionSalt) % UNITS.length;
     return UNITS[idx];

@@ -8,6 +8,8 @@ import BattleReaverScarab from './BattleReaverScarab';
 
 type Battle = 'marine-zealot' | 'zergling-rush' | 'dt-ambush' | 'muta-flyby' | 'reaver-scarab';
 
+declare global { interface Window { __mcBattle?: string } }
+
 interface Props {
   height?: number;
   persistKey?: string; // localStorage key to remember selection
@@ -27,14 +29,14 @@ export default function LandingBanner({ height = 160, persistKey = 'mc-landing-b
 
   useEffect(() => {
     try {
-      const saved = typeof window !== 'undefined' ? (window as any).__mcBattle : null;
-      if (saved && BATTLES.find(b => b.id === saved)) setSelected(saved);
+      const saved = typeof window !== 'undefined' ? window.__mcBattle : null;
+      if (saved && BATTLES.find(b => b.id === saved)) setSelected(saved as Battle);
     } catch {}
   }, []);
 
   const pick = (id: Battle) => {
     setSelected(id);
-    try { (window as any).__mcBattle = id; } catch {}
+    try { window.__mcBattle = id; } catch {}
   };
 
   const renderBattle = () => {

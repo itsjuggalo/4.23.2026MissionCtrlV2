@@ -51,7 +51,7 @@ async function buildWallets(): Promise<any[]> {
 
   // === 1. ALPACA PAPER ===
   if (alpacaResult.status === 'fulfilled' && alpacaResult.value) {
-    const acct = alpacaResult.value as any;
+    const acct = alpacaResult.value;
     wallets.push({
       name: 'Alpaca Paper Trading',
       type: 'Brokerage (Paper)',
@@ -63,7 +63,7 @@ async function buildWallets(): Promise<any[]> {
       notes: 'Phase 1: $100K → $110K goal',
     });
   } else {
-    wallets.push({ name: 'Alpaca Paper', type: 'Brokerage (Paper)', badge: 'PAPER', balance: 0, cash: 0, buying_power: 0, status: 'error', notes: String((alpacaResult as any).reason || 'fetch failed').slice(0, 80) });
+    wallets.push({ name: 'Alpaca Paper', type: 'Brokerage (Paper)', badge: 'PAPER', balance: 0, cash: 0, buying_power: 0, status: 'error', notes: String((alpacaResult as PromiseRejectedResult).reason || 'fetch failed').slice(0, 80) });
   }
 
   // === 2. COINBASE (from saved CSV holdings) ===
@@ -93,7 +93,7 @@ async function buildWallets(): Promise<any[]> {
       wallets.push({ name: 'Coinbase', type: 'Exchange (CSV)', badge: 'CSV', balance: 0, cash: 0, buying_power: 0, status: 'error', notes: String(e).slice(0, 100) });
     }
   } else {
-    wallets.push({ name: 'Coinbase', type: 'Exchange (CSV)', badge: 'CSV', balance: 0, cash: 0, buying_power: 0, status: 'error', notes: String((cbResult as any).reason || 'script failed').slice(0, 100) });
+    wallets.push({ name: 'Coinbase', type: 'Exchange (CSV)', badge: 'CSV', balance: 0, cash: 0, buying_power: 0, status: 'error', notes: String((cbResult as PromiseRejectedResult).reason || 'script failed').slice(0, 100) });
   }
 
   // === 3. ROBINHOOD ===
@@ -132,14 +132,14 @@ async function buildWallets(): Promise<any[]> {
       wallets.push({ name: 'Robinhood', type: 'Brokerage (Live)', badge: 'LIVE', balance: 0, cash: 0, buying_power: 0, status: 'error', notes: String(e).slice(0, 80) });
     }
   } else {
-    wallets.push({ name: 'Robinhood', type: 'Brokerage (Live)', badge: 'LIVE', balance: 0, cash: 0, buying_power: 0, status: 'error', notes: String((rhResult as any).reason || 'script failed').slice(0, 80) });
+    wallets.push({ name: 'Robinhood', type: 'Brokerage (Live)', badge: 'LIVE', balance: 0, cash: 0, buying_power: 0, status: 'error', notes: String((rhResult as PromiseRejectedResult).reason || 'script failed').slice(0, 80) });
   }
 
   // === 4. HYPERLIQUID go-trader ===
   try {
     if (existsSync(HL_STATE)) {
       const state = JSON.parse(readFileSync(HL_STATE, 'utf-8'));
-      const strategies = state.strategies || {};
+      const strategies: Record<string, Record<string, unknown>> = state.strategies || {};
       const prices = cgResult.status === 'fulfilled' ? cgResult.value : null;
       const priceMap: Record<string, number> = {
         BTC: prices?.bitcoin?.usd || 0,
@@ -147,14 +147,14 @@ async function buildWallets(): Promise<any[]> {
         SOL: prices?.solana?.usd || 0,
       };
       let totalValue = 0, totalCash = 0, totalInitial = 0, activeStrategies = 0, openPositions = 0;
-      for (const [, strat] of Object.entries(strategies) as any[]) {
-        const cash = strat.cash || 0;
+      for (const [, strat] of Object.entries(strategies)) {
+        const cash = (strat['cash'] as number) || 0;
         totalCash += cash;
-        totalInitial += strat.initial_capital || 500;
-        const positions = strat.positions || {};
+        totalInitial += (strat['initial_capital'] as number) || 500;
+        const positions = (strat['positions'] as Record<string, Record<string, unknown>>) || {};
         let posValue = 0;
-        for (const [sym, pos] of Object.entries(positions) as any[]) {
-          const qty = pos.quantity || 0;
+        for (const [sym, pos] of Object.entries(positions)) {
+          const qty = (pos['quantity'] as number) || 0;
           posValue += qty * (priceMap[sym] || 0);
           if (qty > 0) openPositions++;
         }
@@ -180,7 +180,7 @@ async function buildWallets(): Promise<any[]> {
 
   // === 5. HYPERLIQUID PERSONAL WALLET ===
   if (hlPersonalResult.status === 'fulfilled' && hlPersonalResult.value) {
-    const hlData = hlPersonalResult.value as any;
+    const hlData = hlPersonalResult.value;
     const marginSummary = hlData.marginSummary || {};
     const accountValue = parseFloat(marginSummary.accountValue || '0');
     const totalMargin = parseFloat(marginSummary.totalMarginUsed || '0');
@@ -224,12 +224,12 @@ export async function GET(req: Request) {
 
   // Build already running → return stale or wait
   if (_building) {
-    if (_walletCache) return NextResponse.json(_walletCache.wallets);
+    const stale = _walletCache?.wallets ?? null;
+    if (stale) return NextResponse.json(stale);
     await new Promise<void>(resolve => {
       const iv = setInterval(() => { if (!_building) { clearInterval(iv); resolve(); } }, 300);
     });
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    return NextResponse.json((_walletCache as any)?.wallets ?? []);
+    return NextResponse.json(_walletCache?.wallets ?? []);
   }
 
   // Stale cache exists → refresh in background, return stale immediately

@@ -13,6 +13,12 @@ const MANUAL_FILE = '/home/itsju/.openclaw/data/manual_memories.json';
 const MAX_FILES = 300;
 const MAX_MEMORIES = 500;
 
+interface MemoryRow {
+  id: number; chat_id: string | null; source: string | null; raw_text: string | null;
+  summary: string | null; topics: string | null; importance: string | null;
+  salience: number | null; created_at: number | string; agent_id: string | null; pinned: number | null;
+}
+
 type ImpBucket = 'low' | 'medium' | 'high' | 'critical';
 
 function bucketImportance(v: number): ImpBucket {
@@ -45,7 +51,7 @@ function loadMemoriesFromDb(): { rows: any[]; total: number } {
        WHERE superseded_by IS NULL
        ORDER BY created_at DESC
        LIMIT ?`
-    ).all(MAX_MEMORIES) as any[];
+    ).all(MAX_MEMORIES) as MemoryRow[];
 
     const mapped = rows.map(r => {
       const tsMs = Number(r.created_at) > 1e12
