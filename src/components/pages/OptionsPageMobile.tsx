@@ -16,6 +16,8 @@ import {
   Menu, Search, Crosshair, TrendingUp, PiggyBank, Radio, MoreHorizontal,
   Bell, Filter, ChevronRight, Layers, X, Check, Bird, BarChart3, LineChart,
 } from 'lucide-react';
+import { AnalystSignal, AnalystResponse, FlowEntry, AlertEntry, FlowResponse } from '@/types/optionsTypes';
+import { fmtMoney, fmtCount } from '@/utils/optionsFormatting';
 
 // ──────────────────────────────────────────────────────────
 // Color tokens — match Option Signals app exactly
@@ -40,76 +42,8 @@ const OPT = {
 } as const;
 
 // ──────────────────────────────────────────────────────────
-// Types — match /api/analyst-signals + /api/options-flow shapes
+// Mobile-only types
 // ──────────────────────────────────────────────────────────
-interface AnalystSignal {
-  id: string;
-  source: string;
-  sourceGroup: 'name' | 'vivid';
-  tab: 'scalps' | 'swings' | 'leaps';
-  symbol: string;
-  shortName: string;
-  strike: string | number;
-  expiry: number | null;
-  isPut: boolean;
-  isWeekly: boolean;
-  isFree: boolean;
-  risk: string;
-  category: string;
-  buyTarget: number | null;
-  earlyTarget: number | null;
-  stopLoss: number | null;
-  reduceLoss: number | null;
-  sellTarget: number | null;
-  sellTarget2: number | null;
-  sellTarget3: number | null;
-  status: string;
-  exitTime: number | null;
-  isClosed: boolean;
-  ts: number;
-  logoUrl: string | null;
-  logoFallback: string;
-  expiryStr: string;
-  contractLabel: string;
-  ribbonType: 'open' | 'profit' | 'stopped' | 'riding';
-  ribbonLabel: string;
-}
-
-interface AnalystResponse {
-  generated_at: string;
-  stats: {
-    openTotal: number; closedTotal: number; recentClosed: number; winRate30d: number;
-    scalpsOpen: number; swingsOpen: number; leapsOpen: number;
-    sourceOpenCounts: { name: number; vivid: number };
-  };
-  byTab: {
-    scalps: { open: AnalystSignal[]; closed: AnalystSignal[] };
-    swings: { open: AnalystSignal[]; closed: AnalystSignal[] };
-    leaps:  { open: AnalystSignal[]; closed: AnalystSignal[] };
-  };
-}
-
-interface FlowEntry {
-  Symbol: string; OptionSymbol: string; Strike: number;
-  OptionType: 'Call' | 'Put'; ExpiryStr: string;
-  Price: number; Value: number; Volume: number; OI: number;
-  BidAskType: string; BlockType: 'SWEEP' | 'BLOCK' | string; Time: number;
-}
-
-interface AlertEntry {
-  AlertType: string; Symbol: string; OptionSymbol: string;
-  Strike: number; OptionType: 'Call' | 'Put'; ExpiryStr: string;
-  AlertPrice: number; totalFlowValue: number;
-  SWEEPS: number; BLOCKS: number; Volume: number; OI: number;
-  DTE: number; isBullish: boolean; Updated: number;
-  _history?: {
-    firstPrice: number; lastPrice: number; maxPrice: number;
-    gainPct: number; maxGainPct: number;
-    numUpdates: number; firstSeen: number; lastSeen: number;
-  };
-}
-
-interface FlowResponse { alerts: AlertEntry[]; flow: FlowEntry[]; }
 
 interface ChainContract {
   symbol: string; strike: number; option_type: string;
@@ -123,18 +57,8 @@ type SubTab = 'signals' | 'notifications';
 type AlertCategory = 'weekly' | 'repeaters' | 'unusual' | 'huge' | 'etf';
 
 // ──────────────────────────────────────────────────────────
-// Helpers
+// Mobile-only helpers
 // ──────────────────────────────────────────────────────────
-const fmtMoney = (n: number | null | undefined): string => {
-  if (n == null) return '—';
-  if (n >= 1_000_000) return `$${(n / 1_000_000).toFixed(1)}M`;
-  if (n >= 1_000) return `$${(n / 1_000).toFixed(0)}K`;
-  return `$${n.toFixed(2)}`;
-};
-const fmtCount = (n: number): string => {
-  if (n >= 1000) return `${(n / 1000).toFixed(1)}K`;
-  return String(n);
-};
 const fmtDate = (ts: number): string => {
   if (!ts) return '';
   const d = new Date(ts * 1000);
@@ -1008,7 +932,7 @@ export function OptionsPageMobile({ onMenuClick, initialTab = 'swings' }: Props)
             <div style={{ display: 'grid', gridTemplateColumns: '58px 50px 56px 44px 30px 70px 44px 60px', gap: 6, padding: '8px 10px', borderBottom: `1px solid ${OPT.borderDim}`, color: OPT.textMuted, fontSize: 9, fontWeight: 600, textTransform: 'uppercase', letterSpacing: 0.5 }}>
               <span>Time</span><span>Sym</span><span>Exp</span><span>Str</span><span>C/P</span><span>Price</span><span>Type</span><span style={{ textAlign: 'right' }}>Value</span>
             </div>
-            {(flowData?.flow || []).slice(0, 300).map((f, i) => <FlowTapeRow key={f.OptionSymbol + '_' + i} f={f} />)}
+            {(flowData?.flows || []).slice(0, 300).map((f, i) => <FlowTapeRow key={f.OptionSymbol + '_' + i} f={f} />)}
           </div>
         )}
         {activeTab === 'chain' && <ChainView />}

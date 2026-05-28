@@ -4,63 +4,12 @@ import React, { useEffect, useMemo, useState } from 'react';
 import { StockDetailDrawer } from '@/components/drawers/StockDetailDrawer';
 import { TickerLogo } from '@/components/ui/TickerLogo';
 import { FilterModal, FilterState, DEFAULT_FILTERS, loadFilters, matchesFilters, isFiltersDefault } from '@/components/modals/FilterModal';
+import { AnalystSignal, AnalystResponse, FlowEntry, AlertEntry, FlowResponse } from '@/types/optionsTypes';
+import { fmtMoney, fmtCount } from '@/utils/optionsFormatting';
 
 // ──────────────────────────────────────────────────────────
-// Types
+// Desktop-only types
 // ──────────────────────────────────────────────────────────
-
-interface AnalystSignal {
-  id: string;
-  source: string;
-  sourceGroup: 'name' | 'vivid';
-  tab: 'scalps' | 'swings' | 'leaps';
-  symbol: string;
-  shortName: string;
-  strike: string | number;
-  expiry: number | null;
-  isPut: boolean;
-  isWeekly: boolean;
-  isFree: boolean;
-  risk: string;
-  category: string;
-  buyTarget: number | null;
-  earlyTarget: number | null;
-  stopLoss: number | null;
-  reduceLoss: number | null;
-  sellTarget: number | null;
-  sellTarget2: number | null;
-  sellTarget3: number | null;
-  status: string;
-  exitTime: number | null;
-  isClosed: boolean;
-  ts: number;
-  logoUrl: string | null;
-  logoFallback: string;
-  expiryStr: string;
-  contractLabel: string;
-  ribbonType: 'open' | 'profit' | 'stopped' | 'riding';
-  ribbonLabel: string;
-}
-
-interface AnalystResponse {
-  generated_at: string;
-  stats: {
-    openTotal: number;
-    closedTotal: number;
-    recentClosed: number;
-    winRate30d: number;
-    scalpsOpen: number;
-    swingsOpen: number;
-    leapsOpen: number;
-    sourceOpenCounts: { name: number; vivid: number };
-  };
-  byTab: {
-    scalps: { open: AnalystSignal[]; closed: AnalystSignal[] };
-    swings: { open: AnalystSignal[]; closed: AnalystSignal[] };
-    leaps:  { open: AnalystSignal[]; closed: AnalystSignal[] };
-  };
-}
-
 
 interface NotificationItem {
   key: string;
@@ -85,76 +34,13 @@ interface NotificationsResponse {
   all: NotificationItem[];
 }
 
-interface FlowEntry {
-  Symbol: string;
-  OptionSymbol: string;
-  Strike: number;
-  OptionType: 'Call' | 'Put';
-  ExpiryStr: string;
-  Price: number;
-  Value: number;
-  Volume: number;
-  OI: number;
-  BidAskType: string;
-  BlockType: 'SWEEP' | 'BLOCK' | string;
-  Time: number;
-  logoUrl?: string | null;
-}
-
-interface AlertEntry {
-  AlertType: string;
-  Symbol: string;
-  OptionSymbol: string;
-  Strike: number;
-  OptionType: 'Call' | 'Put';
-  ExpiryStr: string;
-  AlertPrice: number;
-  totalFlowValue: number;
-  SWEEPS: number;
-  BLOCKS: number;
-  Volume: number;
-  OI: number;
-  DTE: number;
-  isBullish: boolean;
-  Updated: number;
-  logoUrl?: string | null;
-  _history?: {
-    firstPrice: number;
-    lastPrice: number;
-    maxPrice: number;
-    gainPct: number;
-    maxGainPct: number;
-    numUpdates: number;
-    firstSeen: number;
-    lastSeen: number;
-  };
-}
-
-interface FlowResponse {
-  alerts: AlertEntry[];
-  flows: FlowEntry[];
-  availableDates?: string[];
-}
-
 type PrimaryTab = 'scalps' | 'swings' | 'leaps' | 'flowAlerts' | 'optionFlow';
 type SourceFilter = 'all' | 'name' | 'vivid' | 'notifications';
 type AlertCategory = 'all' | 'unusual' | 'huge' | 'weekly' | 'repeaters' | 'etf';
 
 // ──────────────────────────────────────────────────────────
-// Helpers
+// Desktop-only helpers
 // ──────────────────────────────────────────────────────────
-
-const fmtMoney = (n: number | null | undefined): string => {
-  if (n == null) return '—';
-  if (n >= 1_000_000) return `$${(n / 1_000_000).toFixed(1)}M`;
-  if (n >= 1_000) return `$${(n / 1_000).toFixed(0)}K`;
-  return `$${n.toFixed(2)}`;
-};
-
-const fmtCount = (n: number): string => {
-  if (n >= 1000) return `${(n / 1000).toFixed(1)}K`;
-  return String(n);
-};
 
 const ago = (ts: number): string => {
   if (!ts || typeof ts !== 'number' || !isFinite(ts)) return '—';
