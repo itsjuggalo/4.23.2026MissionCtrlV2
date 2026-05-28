@@ -59,7 +59,7 @@ export function PerformancePage() {
   const [protocolFilter, setProtocolFilter] = useState<'all' | 'flow' | 'swing' | 'manual' | 'auto-btc'>(
     () => {
       if (typeof window === 'undefined') return 'all';
-      return (localStorage.getItem('perf_protocol_filter') as any) || 'all';
+      return (localStorage.getItem('perf_protocol_filter') as 'all' | 'flow' | 'swing' | 'manual' | 'auto-btc') || 'all';
     }
   );
 
@@ -191,7 +191,7 @@ export function PerformancePage() {
         <span style={{ color: '#607d8b', fontSize: 11, textTransform: 'uppercase', letterSpacing: 1 }}>Filter by Protocol:</span>
         <select
           value={protocolFilter}
-          onChange={(e) => setProtocolFilter(e.target.value as any)}
+          onChange={(e) => setProtocolFilter(e.target.value as 'all' | 'flow' | 'swing' | 'manual' | 'auto-btc')}
           style={{
             background: '#0a1320',
             color: '#66ccff',

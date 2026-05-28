@@ -15,7 +15,7 @@ export async function GET(req: Request) {
     const data = JSON.parse(raw);
     return NextResponse.json(data);
   } catch (e) {
-    return NextResponse.json({ error: String(e), agents: {} }, { status: 500 });
+    return NextResponse.json({ error: String(e).slice(0, 200), agents: {} }, { status: 500 });
   }
 }
 

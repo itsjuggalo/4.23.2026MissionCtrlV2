@@ -366,10 +366,10 @@ export function DashboardPage() {
           { sym: 'SOL', price: crypto?.solana?.usd || 0, chg: crypto?.solana?.usd_24h_change || 0 },
           { sym: '$1M+ FLOWS', price: topFlowsCount, chg: 0, isCount: true },
         ].map((c, i) => (
-          <div key={i} onClick={() => { if (!(c as any).isCount) setDrawerTicker(c.sym); }} style={{
+          <div key={i} onClick={() => { if (!('isCount' in c)) setDrawerTicker(c.sym); }} style={{
             background: '#0a1929', border: '1px solid #1a3a4a', borderRadius: '8px',
             padding: '12px 16px', display: 'flex', justifyContent: 'space-between', alignItems: 'center',
-            cursor: (c as any).isCount ? 'default' : 'pointer',
+            cursor: 'isCount' in c ? 'default' : 'pointer',
           }}>
             <div>
               <div style={{ fontSize: 'var(--mc-font-label)', color: '#4fc3f7', fontFamily: 'var(--font-mc-mono)', fontWeight: 600 }}>{c.sym}</div>

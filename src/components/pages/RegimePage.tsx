@@ -88,7 +88,7 @@ export function RegimePage() {
   const recommendation = regime?.overall_recommendation || '';
   const timeframes = regime?.timeframes || {};
   const btcSignal = signals?.BTCUSD || {};
-  const currentPrice = Object.values(timeframes)[0] as any;
+  const currentPrice: TimeframeData | undefined = Object.values(timeframes)[0];
   const price = currentPrice?.current_price || 0;
 
   const fmt = (n: number, d = 2) => n?.toFixed(d) || 'N/A';

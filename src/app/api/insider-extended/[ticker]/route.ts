@@ -152,7 +152,7 @@ async function fetchSecForm4(ticker: string): Promise<any> {
     await writeCache(`sec_${ticker}`, result);
     return result;
   } catch (e) {
-    return { transactions: [], net90d: 0, count90d: 0, source: 'sec_err', error: String(e) };
+    return { transactions: [], net90d: 0, count90d: 0, source: 'sec_err', error: String(e).slice(0, 200) };
   }
 }
 

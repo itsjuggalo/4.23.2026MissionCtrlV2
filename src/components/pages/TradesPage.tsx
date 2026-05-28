@@ -89,7 +89,7 @@ function getAssetType(pos: Position): 'crypto' | 'option' | 'stock' {
   if (pos.asset_type === 'option') return 'option';
 
   // Detect option: signal direction was CALL/PUT
-  const sig = pos.signal_data as any;
+  const sig = pos.signal_data as Record<string, unknown> | null | undefined;
   const dir = sig?.direction || '';
   if (dir === 'CALL' || dir === 'PUT') return 'option';
 

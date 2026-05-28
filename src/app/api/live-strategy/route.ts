@@ -96,6 +96,7 @@ async function fetchAlpaca(account: string, pathSuffix: string): Promise<unknown
       headers: { 'APCA-API-KEY-ID': creds.keyId, 'APCA-API-SECRET-KEY': creds.secret },
       signal: AbortSignal.timeout(8000),
     });
+    if (!r.ok) return { error: `HTTP ${r.status}` };
     return await r.json();
   } catch (e) { return { error: String(e).slice(0, 200) }; }
 }

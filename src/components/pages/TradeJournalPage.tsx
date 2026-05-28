@@ -51,7 +51,7 @@ interface Stats {
 
 const confColor = (c?: string) => ({
   high: '#66bb6a', medium: '#ffaa33', low: '#ef5350', unspecified: '#607d8b',
-} as any)[c || 'unspecified'] || '#607d8b';
+} as Record<string, string>)[c || 'unspecified'] || '#607d8b';
 
 const sideColor = (s: string) => {
   if (s.includes('put')) return '#ef5350';
