@@ -137,7 +137,7 @@ interface FlowResponse {
 }
 
 type PrimaryTab = 'scalps' | 'swings' | 'leaps' | 'flowAlerts' | 'optionFlow';
-type SourceFilter = 'all' | 'name' | 'vivid';
+type SourceFilter = 'all' | 'name' | 'vivid' | 'notifications';
 type AlertCategory = 'all' | 'unusual' | 'huge' | 'weekly' | 'repeaters' | 'etf';
 
 // ──────────────────────────────────────────────────────────
@@ -690,7 +690,7 @@ export function OptionsPage() {
     const tabData = analystData?.byTab?.[activeTab as 'scalps' | 'swings' | 'leaps'];
     if (!tabData) return { open: [], closed: [] };
     const filterFn = (s: AnalystSignal) =>
-      sourceFilter === 'all' ? true : s.sourceGroup === sourceFilter;
+      sourceFilter === 'all' || sourceFilter === 'notifications' ? true : s.sourceGroup === sourceFilter;
     const byTsDesc = (a: AnalystSignal, b: AnalystSignal) => (b.ts || 0) - (a.ts || 0);
     return {
       open: (tabData.open || []).filter(filterFn).sort(byTsDesc),

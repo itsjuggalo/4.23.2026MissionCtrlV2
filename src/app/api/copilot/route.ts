@@ -7,7 +7,6 @@ import crypto from 'crypto';
 import Database from 'better-sqlite3';
 import { proxyToServeftp } from "../../../lib/proxyToServeftp";
 
-export const dynamic = 'force-dynamic';
 export const revalidate = 0;
 
 // Claude Code CLI binary. Resolve at module-load time so the service

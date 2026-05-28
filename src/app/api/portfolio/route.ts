@@ -2,7 +2,6 @@ import { NextResponse } from 'next/server';
 import { readFile } from 'fs/promises';
 import { proxyToServeftp } from "../../../lib/proxyToServeftp";
 
-export const dynamic = 'force-dynamic';
 
 const SECRETS = '/home/itsju/.openclaw/secrets';
 
@@ -20,9 +19,11 @@ async function fetchAccount(keyId: string, secret: string, accountTag: string) {
     const [acctRes, posRes] = await Promise.all([
       fetch('https://paper-api.alpaca.markets/v2/account', {
         headers: { 'APCA-API-KEY-ID': keyId, 'APCA-API-SECRET-KEY': secret },
+        signal: AbortSignal.timeout(6000),
       }),
       fetch('https://paper-api.alpaca.markets/v2/positions', {
         headers: { 'APCA-API-KEY-ID': keyId, 'APCA-API-SECRET-KEY': secret },
+        signal: AbortSignal.timeout(6000),
       }),
     ]);
     if (!acctRes.ok) return null;
@@ -48,20 +49,22 @@ async function fetchAccount(keyId: string, secret: string, accountTag: string) {
 export async function GET(request: Request) {
   const __proxied = await proxyToServeftp(request); if (__proxied) return __proxied;
   try {
-    // R2 — primary active account
-    const r2KeyId = await readSecret('alpaca-key-id');
-    const r2Secret = await readSecret('alpaca-secret');
-    const r2 = await fetchAccount(r2KeyId, r2Secret, 'R2');
-
-    // R1 — on hold, optional (only fetches if keys exist on disk)
-    const r1KeyId = await readSecret('alpaca-r1-key-id');
-    const r1Secret = await readSecret('alpaca-r1-secret');
-    const r1 = await fetchAccount(r1KeyId, r1Secret, 'R1');
+    // Read all credentials in parallel, then fetch both accounts in parallel
+    const [r2KeyId, r2Secret, r1KeyId, r1Secret] = await Promise.all([
+      readSecret('alpaca-key-id'),
+      readSecret('alpaca-secret'),
+      readSecret('alpaca-r1-key-id'),
+      readSecret('alpaca-r1-secret'),
+    ]);
+    const [r2, r1] = await Promise.all([
+      fetchAccount(r2KeyId, r2Secret, 'R2'),
+      fetchAccount(r1KeyId, r1Secret, 'R1'),
+    ]);
 
     // Merge positions from both, with badge per row via .account field
     const allPositions = [...(r1?.positions || []), ...(r2?.positions || [])];
 
-    if (!r2 && !r1) return NextResponse.json({ balance: 0, error: 'No Alpaca credentials' });
+    if (!r2 && !r1) return NextResponse.json({ balance: 0, error: 'No Alpaca credentials' }, { status: 503 });
     const primary = r2 || r1;
     return NextResponse.json({
       ...primary,
@@ -70,6 +73,6 @@ export async function GET(request: Request) {
                   r2: r2 ? { balance: r2.balance, equity: r2.equity, positions: r2.positions.length } : null },
     });
   } catch (err: any) {
-    return NextResponse.json({ balance: 0, error: err.message });
+    return NextResponse.json({ balance: 0, error: err.message }, { status: 500 });
   }
 }

@@ -2,7 +2,6 @@ import { NextResponse } from 'next/server';
 import { readFile } from 'fs/promises';
 import { proxyToServeftp } from "../../../../lib/proxyToServeftp";
 
-export const dynamic = 'force-dynamic';
 
 const HISTORY_FILE = '/home/itsju/mission-control/signal-receiver/data/signals_history.jsonl';
 

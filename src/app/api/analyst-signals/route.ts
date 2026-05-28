@@ -4,7 +4,6 @@ import { tickerLogoUrl } from '@/lib/tickerDomains';
 import path from 'path';
 import { proxyToServeftp } from "../../../lib/proxyToServeftp";
 
-export const dynamic = 'force-dynamic';
 export const revalidate = 0;
 
 const MERGED_PATH = '/home/itsju/mission-control-restored/Option-Signals-Scraper/data/analyst_signals_merged.json';

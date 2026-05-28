@@ -391,7 +391,7 @@ const PriceChart: React.FC<{ candles: Candles | null; bullish: boolean; mode?: '
         </defs>
         {[0.2, 0.4, 0.6, 0.8].map((pct, i) => {
               const gy = 7 + pct * ((H - AXIS_H) - 14);
-              const priceAtGy = (typeof yMax === 'number' && typeof yMin === 'number') ? (yMax - pct * (yMax - yMin)) : null;
+              const priceAtGy = (typeof max === 'number' && typeof min === 'number') ? (max - pct * (max - min)) : null;
               return (
                 <g key={i}>
                   <line x1={PAD} x2={CHART_W - PAD} y1={gy} y2={gy} stroke="#2a3442" strokeWidth="0.6" strokeDasharray="2 4" opacity="0.7" />

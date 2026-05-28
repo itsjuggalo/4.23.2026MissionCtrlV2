@@ -14,8 +14,15 @@ interface VoxelAvatarProps {
   isError?: boolean;
 }
 
+type HatStyle = 'none' | 'beanie' | 'ushanka' | 'chef' | 'hood';
+type SkinConfig = {
+  skinColor: string; shirtColor: string; shirtAccent: string; pantsColor: string;
+  shoeColor: string; hatColor: string; hatBrim: string; hatStyle: HatStyle;
+  hairColor: string; isChubby: boolean;
+};
+
 // South Park character skins
-function getSkin(id: string) {
+function getSkin(id: string): SkinConfig {
   switch (id) {
     case 'boba': // Cartman
       return {

@@ -62,6 +62,7 @@ export function CommandCenterPage() {
   const [selectedItem, setSelectedItem] = useState<{ type: string; data: any } | null>(null);
   const [drawerTicker, setDrawerTicker] = useState<string | null>(null);
   const [extendedIntel, setExtendedIntel] = useState<Record<string, any>>({});
+  const [marketNews, setMarketNews] = useState<any[]>([]);
 
   const fetchData = async () => {
     try {
@@ -127,8 +128,14 @@ export function CommandCenterPage() {
     }).catch(() => {});
     fetch('/api/directives?file=dashboard_data.json').then(r => r.ok ? r.json() : null).then(d => { if (d) setDashData(d); }).catch(() => {});
     fetch('/api/pipeline-feed').then(r => r.ok ? r.json() : null).then(d => { if (d?.events) setPipelineFeed(d.events); }).catch(() => {});
+
+    const fetchMarketNews = () =>
+      fetch('/api/market-news').then(r => r.ok ? r.json() : null).then(d => { if (d?.news?.length) setMarketNews(d.news); }).catch(() => {});
+    fetchMarketNews();
+    const newsIv = setInterval(fetchMarketNews, 5 * 60 * 1000);
+
     const iv = setInterval(fetchData, 10000);
-    return () => clearInterval(iv);
+    return () => { clearInterval(iv); clearInterval(newsIv); };
   }, []);
 
   // Fetch extended insider+congress data for each watchlist + position symbol
@@ -155,41 +162,9 @@ export function CommandCenterPage() {
   // Arrow-key navigation for Market News ticker (when focused). On mobile the
   // user navigates by swipe (handled in the ticker JSX via onTouchStart/End)
   // or by tapping the chevron buttons; arrow keys remain as a desktop convenience.
-  useEffect(() => {
-    const onKey = (e: KeyboardEvent) => {
-      const ticker = newsTickerRef.current;
-      if (!ticker) return;
-      const focused = document.activeElement === ticker || ticker.contains(document.activeElement);
-      if (!focused) return;
-      const newsLen = (dashData?.news?.length || 0);
-      if (newsLen === 0) return;
-      if (e.key === 'ArrowRight') { e.preventDefault(); setNewsIdx(i => (i + 1) % newsLen); }
-      else if (e.key === 'ArrowLeft') { e.preventDefault(); setNewsIdx(i => (i - 1 + newsLen) % newsLen); }
-    };
-    window.addEventListener('keydown', onKey);
-    return () => window.removeEventListener('keydown', onKey);
-  }, [dashData]);
-
-  // Auto-cycle news every 8s. Pause-until is kept in a ref so the interval
-  // is NOT torn down on every hover/touch (which was making the timer
-  // perpetually restart). A separate display state drives the paused badge.
-  const newsPausedUntilRef = useRef(0);
-  const newsSwipedAtRef = useRef(0);
-  const newsTouchStartRef = useRef({ x: 0, y: 0 });
-  const [newsPausedDisplay, setNewsPausedDisplay] = useState(false);
-
-  const pauseNews = (ms = 20000) => {
-    newsPausedUntilRef.current = Date.now() + ms;
-    setNewsPausedDisplay(true);
-  };
-
-  // Derived news list. Mirrors the fallback used by the render block below:
-  // when the directives generator leaves `dashData.news` empty, aggregate per-
-  // ticker intel news so the ticker still has something to cycle through.
-  // The auto-cycle useEffect below depends on THIS length, not the raw
-  // dashData length — otherwise it sees 0 articles, early-returns, and the
-  // interval is never set up (which was the bug).
+  // Derived news list — must be declared before the useEffect that uses it in its dependency array.
   const news = useMemo(() => {
+    if (marketNews.length > 0) return marketNews;
     const top = dashData?.news || [];
     if (top.length > 0) return top;
     const intel = dashData?.intel || {};
@@ -204,7 +179,35 @@ export function CommandCenterPage() {
       }
     }
     return merged.sort((a, b) => String(b?.time || '').localeCompare(String(a?.time || '')));
-  }, [dashData]);
+  }, [marketNews, dashData]);
+
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      const ticker = newsTickerRef.current;
+      if (!ticker) return;
+      const focused = document.activeElement === ticker || ticker.contains(document.activeElement);
+      if (!focused) return;
+      const newsLen = news.length;
+      if (newsLen === 0) return;
+      if (e.key === 'ArrowRight') { e.preventDefault(); setNewsIdx(i => (i + 1) % newsLen); }
+      else if (e.key === 'ArrowLeft') { e.preventDefault(); setNewsIdx(i => (i - 1 + newsLen) % newsLen); }
+    };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, [news]);
+
+  // Auto-cycle news every 8s. Pause-until is kept in a ref so the interval
+  // is NOT torn down on every hover/touch (which was making the timer
+  // perpetually restart). A separate display state drives the paused badge.
+  const newsPausedUntilRef = useRef(0);
+  const newsSwipedAtRef = useRef(0);
+  const newsTouchStartRef = useRef({ x: 0, y: 0 });
+  const [newsPausedDisplay, setNewsPausedDisplay] = useState(false);
+
+  const pauseNews = (ms = 20000) => {
+    newsPausedUntilRef.current = Date.now() + ms;
+    setNewsPausedDisplay(true);
+  };
 
   useEffect(() => {
     const newsLen = news.length;

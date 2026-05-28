@@ -4,7 +4,6 @@ import path from 'path';
 import Database from 'better-sqlite3';
 import { proxyToServeftp } from "../../../lib/proxyToServeftp";
 
-export const dynamic = 'force-dynamic';
 export const revalidate = 0;
 
 const WORKSPACE = '/home/itsju/.openclaw/workspace';

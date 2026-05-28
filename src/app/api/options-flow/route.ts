@@ -147,6 +147,6 @@ export async function GET(req: Request) {
       timestamp: new Date().toISOString(),
     });
   } catch (e) {
-    return NextResponse.json({ flows: [], alerts: [], error: String(e).slice(0, 200) });
+    return NextResponse.json({ flows: [], alerts: [], error: String(e).slice(0, 200) }, { status: 500 });
   }
 }

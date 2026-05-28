@@ -94,6 +94,7 @@ async function fetchAlpaca(account: string, pathSuffix: string): Promise<unknown
   try {
     const r = await fetch(`${PAPER_BASE}${pathSuffix}`, {
       headers: { 'APCA-API-KEY-ID': creds.keyId, 'APCA-API-SECRET-KEY': creds.secret },
+      signal: AbortSignal.timeout(8000),
     });
     return await r.json();
   } catch (e) { return { error: String(e) }; }

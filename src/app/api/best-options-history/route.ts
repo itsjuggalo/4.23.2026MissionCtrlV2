@@ -3,7 +3,6 @@ import { promises as fs } from 'fs';
 import path from 'path';
 import { proxyToServeftp } from "../../../lib/proxyToServeftp";
 
-export const dynamic = 'force-dynamic';
 const DATA_DIR = '/home/itsju/.openclaw/data/best-options';
 
 function todayET(): string {

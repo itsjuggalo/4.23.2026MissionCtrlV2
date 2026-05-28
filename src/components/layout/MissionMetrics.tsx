@@ -1,5 +1,6 @@
 "use client";
 import { useEffect, useState } from "react";
+import { safeFixed } from "@/lib/fmt";
 
 // Market ticker strip shown above the header. The Alpaca account row that
 // used to sit here now lives on the header line itself (see Header.tsx).
@@ -40,8 +41,8 @@ function Tick({ label, v }: { label: string; v?: { value: number; chg: number } 
   return (
     <span style={{ flexShrink: 0, whiteSpace: "nowrap" }}>
       <span style={{ color: "#8a99a8", marginRight: 5 }}>{label}</span>
-      <span style={{ color: "#e8edf2", marginRight: 3 }}>{v.value.toFixed(2)}</span>
-      <span style={{ color }}>{v.chg >= 0 ? "+" : ""}{v.chg.toFixed(2)}%</span>
+      <span style={{ color: "#e8edf2", marginRight: 3 }}>{safeFixed(v.value, 2)}</span>
+      <span style={{ color }}>{v.chg >= 0 ? "+" : ""}{safeFixed(v.chg, 2)}%</span>
     </span>
   );
 }

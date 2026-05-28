@@ -13,7 +13,7 @@ import fs from 'fs';
 import path from 'path';
 import os from 'os';
 
-const HARVEST_PATH = path.join(os.homedir(), 'aime_share_dump', 'all.json');
+const HARVEST_PATH = path.join(os.homedir(), '04_RESEARCH', 'aime_share_dump', 'all.json');
 
 // Whitelist of categories worth surfacing as "starter prompts" — trading-actionable.
 const DEFAULT_CATEGORIES = ['analysis', 'screen', 'Prediction', 'charts', 'news', 'Crypto'];

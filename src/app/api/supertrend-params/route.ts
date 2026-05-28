@@ -2,7 +2,6 @@ import { NextRequest, NextResponse } from 'next/server';
 import { readFile } from 'fs/promises';
 import { proxyToServeftp } from "../../../lib/proxyToServeftp";
 
-export const dynamic = 'force-dynamic';
 
 const DATA_DIR = '/home/itsju/mission-control/signal-receiver/data';
 const DIRECTIVES = '/home/itsju/.openclaw/workspace/directives';

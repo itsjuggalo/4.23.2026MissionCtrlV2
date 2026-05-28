@@ -6,7 +6,7 @@ import { proxyToServeftp } from "../../../../lib/proxyToServeftp";
 const WORKSPACE = join(process.env.HOME || '/home/itsju', '.openclaw/workspace');
 
 export async function GET(request: Request) {
-  const __proxied = await proxyToServeftp(req); if (__proxied) return __proxied;
+  const __proxied = await proxyToServeftp(request); if (__proxied) return __proxied;
   try {
     const url = new URL(request.url);
     const filePath = url.searchParams.get('path');
@@ -21,7 +21,7 @@ export async function GET(request: Request) {
     const fullPath = join(WORKSPACE, filePath);
 
     // Security: prevent directory traversal
-    if (!fullPath.startsWith(WORKSPACE)) {
+    if (!fullPath.startsWith(WORKSPACE + '/')) {
       return NextResponse.json(
         { error: 'Access denied' },
         { status: 403 }

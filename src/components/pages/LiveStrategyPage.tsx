@@ -2,6 +2,7 @@
 
 import { useEffect, useState, useCallback } from 'react';
 import { RefreshCw, CheckCircle2, XCircle, Download } from 'lucide-react';
+import { safeFixed } from '@/lib/fmt';
 import { MetricCard } from '@/components/ui/MetricCard';
 import { Badge } from '@/components/ui/Badge';
 import { PulseDot } from '@/components/ui/PulseDot';
@@ -173,6 +174,14 @@ export function LiveStrategyPage() {
     );
   }
 
+  if (!data.config || !data.accounts_data || !data.signals || !data.webhook_log) {
+    return (
+      <div style={{ padding: 20, color: 'var(--color-mc-red)', fontFamily: 'var(--font-mc-mono)', fontSize: 13 }}>
+        API returned incomplete data — retrying in 15s…
+      </div>
+    );
+  }
+
   const frSeverity = calcSeverity(data.fill_rate, 0.95, 0.85, 0.50, true);
   const dsSeverity = calcSeverity(data.drift_score, 5, 7, 9, false);
   // Drift gauge: invert so higher drift_score = worse (red). We show 10-drift_score as "remaining headroom".
@@ -188,7 +197,7 @@ export function LiveStrategyPage() {
       <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', marginBottom: 18, flexWrap: 'wrap', gap: 12 }}>
         <div style={{ flex: 1, minWidth: 0 }}>
           <h1 style={{ fontSize: 22, fontWeight: 700, color: 'var(--color-mc-text)', margin: 0, marginBottom: 8 }}>
-            Live Strategy — {data.config.strategy}
+            Live Strategy — {data.config?.strategy ?? '—'}
           </h1>
           {/* Webhook status pill with PulseDot */}
           <div style={{ display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap', marginBottom: 6 }}>
@@ -206,7 +215,7 @@ export function LiveStrategyPage() {
               WEBHOOK {data.config.enabled ? 'LIVE — TRADES WILL EXECUTE' : 'OFF — fail-closed kill-switch'}
             </div>
             <div style={{ fontSize: 11, color: 'var(--color-mc-text-dim)' }}>
-              accounts: {data.config.accounts.join(', ')}
+              accounts: {(data.config?.accounts ?? []).join(', ')}
             </div>
           </div>
           <div style={{ fontSize: 11, color: 'var(--color-mc-text-dim)', wordBreak: 'break-all' }}>
@@ -223,21 +232,21 @@ export function LiveStrategyPage() {
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: 12, marginBottom: 18 }}>
         <MetricCard
           label="Total signals (30d)"
-          value={String(data.signal_total)}
-          subtitle={Object.entries(data.signal_counts).map(([k, v]) => `${k}: ${v}`).join(' · ')}
+          value={String(data.signal_total ?? 0)}
+          subtitle={Object.entries(data.signal_counts ?? {}).map(([k, v]) => `${k}: ${v}`).join(' · ')}
           severity="cyan"
           sparklineData={signalSparkline}
         />
         <MetricCard
           label="Fill rate"
-          value={`${(data.fill_rate * 100).toFixed(1)}%`}
+          value={`${safeFixed((data.fill_rate ?? 0) * 100, 1)}%`}
           severity={frSeverity}
           sparklineData={fillSparkline}
         />
         <MetricCard
           label="Frequency ratio"
-          value={`${data.frequency_ratio.toFixed(2)}×`}
-          subtitle={`vs ${data.baseline.sharpe}-Sharpe baseline`}
+          value={`${safeFixed(data.frequency_ratio, 2)}×`}
+          subtitle={`vs ${data.baseline?.sharpe ?? '—'}-Sharpe baseline`}
           severity="neutral"
         />
         {/* Drift card: RadialGauge + sparkline */}
@@ -346,12 +355,12 @@ export function LiveStrategyPage() {
                 <tr key={sym} style={{ borderTop: '1px solid var(--color-mc-border)' }}>
                   <td style={{ padding: '4px 6px', color: 'var(--color-mc-text)' }}>{sym}</td>
                   <td style={{ padding: '4px 6px', color: 'var(--color-mc-text-muted)' }}>{p.bar_time.slice(11, 16)}Z</td>
-                  <td style={{ padding: '4px 6px', color: 'var(--color-mc-text)' }}>${p.close.toFixed(2)}</td>
-                  <td style={{ padding: '4px 6px', color: 'var(--color-mc-text-muted)' }}>${p.ema20.toFixed(2)}</td>
+                  <td style={{ padding: '4px 6px', color: 'var(--color-mc-text)' }}>${safeFixed(p.close, 2)}</td>
+                  <td style={{ padding: '4px 6px', color: 'var(--color-mc-text-muted)' }}>${safeFixed(p.ema20, 2)}</td>
                   <td style={{ padding: '4px 6px', color: p.rsi_now > 70 ? 'var(--color-mc-red)' : p.rsi_now < 30 ? 'var(--color-mc-green)' : 'var(--color-mc-text)' }}>
-                    {p.rsi_prev.toFixed(1)}→{p.rsi_now.toFixed(1)}
+                    {safeFixed(p.rsi_prev, 1)}→{safeFixed(p.rsi_now, 1)}
                   </td>
-                  <td style={{ padding: '4px 6px', color: 'var(--color-mc-text-muted)' }}>{p.atr.toFixed(2)}</td>
+                  <td style={{ padding: '4px 6px', color: 'var(--color-mc-text-muted)' }}>{safeFixed(p.atr, 2)}</td>
                   <td style={{ padding: '4px 6px', color: p.htf_bullish ? 'var(--color-mc-green)' : 'var(--color-mc-red)' }}>{p.htf_bullish ? '✓' : '✗'}</td>
                   <td style={{ padding: '4px 6px', color: p.pullback_hit ? 'var(--color-mc-green)' : 'var(--color-mc-text-dim)' }}>{p.pullback_hit ? '✓' : '·'}</td>
                   <td style={{ padding: '4px 6px', color: p.rsi_cross ? 'var(--color-mc-green)' : 'var(--color-mc-text-dim)' }}>{p.rsi_cross ? '✓' : '·'}</td>

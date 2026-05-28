@@ -46,7 +46,7 @@ export async function GET(request: Request) {
       method: 'GET',
       headers: { Accept: 'application/json' },
       cache: 'no-store',
-      signal: AbortSignal.timeout(15000),
+      signal: AbortSignal.timeout(8000),
     });
     const text = await r.text();
     return new NextResponse(text, {

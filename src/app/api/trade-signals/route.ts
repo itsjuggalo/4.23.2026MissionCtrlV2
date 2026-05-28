@@ -1,10 +1,13 @@
 import { NextResponse } from 'next/server';
 
+export const dynamic = 'force-dynamic';
+export const revalidate = 0;
+
 const BASE = 'https://stock-signal-72772-default-rtdb.firebaseio.com';
 
 async function fetchJSON(path: string) {
   try {
-    const r = await fetch(`${BASE}/${path}`, { next: { revalidate: 30 } });
+    const r = await fetch(`${BASE}/${path}`, { cache: 'no-store', signal: AbortSignal.timeout(5000) });
     if (!r.ok) return null;
     return r.json();
   } catch { return null; }

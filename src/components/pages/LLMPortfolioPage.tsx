@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
+import { safeFixed } from "@/lib/fmt";
 import { StockDetailDrawer } from "@/components/drawers/StockDetailDrawer";
 
 interface LLMTrade {
@@ -111,7 +112,7 @@ export function LLMPortfolioPage() {
                   fontSize: 14, fontWeight: 600, fontFamily: "var(--font-mc-mono, monospace)",
                   color: kv.return_pct >= 0 ? "#66bb6a" : "#ef5350"
                 }}>
-                  {kv.return_pct >= 0 ? "+" : ""}{kv.return_pct.toFixed(2)}%
+                  {(kv.return_pct ?? 0) >= 0 ? "+" : ""}{safeFixed(kv.return_pct, 2)}%
                 </span>
               </div>
               <div style={{ display: "flex", gap: 16, marginTop: 10, fontSize: 11, fontFamily: "var(--font-mc-mono, monospace)" }}>
@@ -167,7 +168,7 @@ export function LLMPortfolioPage() {
                     <span style={{ color: "#e0e0e0", fontWeight: 600 }}>{t.symbol}</span>
                   </div>
                   <div style={{ textAlign: "right" }}>
-                    <div style={{ color: "#e0e0e0" }}>${t.price.toFixed(2)} x {t.quantity}</div>
+                    <div style={{ color: "#e0e0e0" }}>${safeFixed(t.price, 2)} x {t.quantity}</div>
                     <div style={{ color: "#455a64", fontSize: 10 }}>{t.date}</div>
                   </div>
                 </div>
@@ -209,9 +210,9 @@ export function LLMPortfolioPage() {
                         color: t.side === "buy" ? "#66bb6a" : "#ef5350", textTransform: "uppercase" }}>{t.side}</span>
                     </td>
                     <td style={{ padding: "8px 12px", color: "#e0e0e0", fontWeight: 600 }}>{t.symbol}</td>
-                    <td style={{ padding: "8px 12px", color: "#e0e0e0" }}>${t.price.toFixed(2)}</td>
+                    <td style={{ padding: "8px 12px", color: "#e0e0e0" }}>${safeFixed(t.price, 2)}</td>
                     <td style={{ padding: "8px 12px", color: "#607d8b" }}>{t.quantity}</td>
-                    <td style={{ padding: "8px 12px", color: "#ff9800" }}>${t.value.toFixed(2)}</td>
+                    <td style={{ padding: "8px 12px", color: "#ff9800" }}>${safeFixed(t.value, 2)}</td>
                     <td style={{ padding: "8px 12px", color: "#455a64" }}>{t.date}</td>
                   </tr>
                 ))}

@@ -2,7 +2,6 @@ import { NextResponse } from "next/server";
 import { readFileSync } from "fs";
 import { proxyToServeftp } from "../../../lib/proxyToServeftp";
 
-export const dynamic = "force-dynamic";
 export const revalidate = 0;
 
 // In-process cache: serves last good value if all fetches fail
@@ -18,23 +17,24 @@ function getSecret(name: string): string {
 const YAHOO_HOSTS = ["query1.finance.yahoo.com", "query2.finance.yahoo.com"];
 
 async function fetchYahooQuote(symbol: string) {
-  for (const host of YAHOO_HOSTS) {
+  const tryHost = async (host: string) => {
     try {
       const r = await fetch(
         `https://${host}/v8/finance/chart/${encodeURIComponent(symbol)}?interval=1d&range=5d`,
-        { cache: "no-store", headers: { "User-Agent": "Mozilla/5.0" }, signal: AbortSignal.timeout(6000) }
+        { cache: "no-store", headers: { "User-Agent": "Mozilla/5.0" }, signal: AbortSignal.timeout(4000) }
       );
-      if (!r.ok) continue;
+      if (!r.ok) return null;
       const d = await r.json();
       const result = d?.chart?.result?.[0];
-      if (!result) continue;
+      if (!result) return null;
       const last = result.meta?.regularMarketPrice;
       const prev = result.meta?.previousClose || result.meta?.chartPreviousClose;
-      if (!last || !prev) continue;
+      if (!last || !prev) return null;
       return { value: last, chg: ((last - prev) / prev) * 100 };
-    } catch { continue; }
-  }
-  return null;
+    } catch { return null; }
+  };
+  const results = await Promise.all(YAHOO_HOSTS.map(tryHost));
+  return results.find(r => r !== null) ?? null;
 }
 async function fetchAlpacaQuote(symbol: string, key: string, sec: string) {
   if (!key || !sec) return null;
@@ -42,7 +42,7 @@ async function fetchAlpacaQuote(symbol: string, key: string, sec: string) {
     const r = await fetch(`https://data.alpaca.markets/v2/stocks/${symbol}/snapshot`, {
       headers: { "APCA-API-KEY-ID": key, "APCA-API-SECRET-KEY": sec },
       cache: "no-store",
-      signal: AbortSignal.timeout(6000),
+      signal: AbortSignal.timeout(5000),
     });
     if (!r.ok) return null;
     const d = await r.json();
@@ -53,10 +53,10 @@ async function fetchAlpacaQuote(symbol: string, key: string, sec: string) {
   } catch { return null; }
 }
 async function fetchQuote(symbol: string, key: string, sec: string) {
-  const yh = await fetchYahooQuote(symbol);
-  if (yh) { _cache[symbol] = { ...yh, ts: Date.now() }; return yh; }
-  const alp = await fetchAlpacaQuote(symbol, key, sec);
-  if (alp) { _cache[symbol] = { ...alp, ts: Date.now() }; return alp; }
+  // Run Yahoo and Alpaca in parallel; prefer Yahoo result
+  const [yh, alp] = await Promise.all([fetchYahooQuote(symbol), fetchAlpacaQuote(symbol, key, sec)]);
+  const result = yh ?? alp;
+  if (result) { _cache[symbol] = { ...result, ts: Date.now() }; return result; }
   // Serve last good value (up to 4h stale) rather than null
   const cached = _cache[symbol];
   if (cached && Date.now() - cached.ts < 4 * 60 * 60 * 1000) return { value: cached.value, chg: cached.chg, stale: true };

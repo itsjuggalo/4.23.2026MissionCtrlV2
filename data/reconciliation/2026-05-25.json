@@ -1,0 +1,26 @@
+{
+  "date": "2026-05-25",
+  "generated_at": "2026-05-26T23:55:07.277Z",
+  "accounts": [
+    {
+      "account": "boba",
+      "signals_submitted": 0,
+      "alpaca_orders_total": 0,
+      "matched": 0,
+      "ghost_signals": [],
+      "orphan_orders": [],
+      "match_rate": 1,
+      "notes": []
+    },
+    {
+      "account": "jazzy",
+      "signals_submitted": 0,
+      "alpaca_orders_total": 0,
+      "matched": 0,
+      "ghost_signals": [],
+      "orphan_orders": [],
+      "match_rate": 1,
+      "notes": []
+    }
+  ]
+}

@@ -89,6 +89,7 @@ type PageName =
   | 'ITB'
   | 'Freqtrade'
   | 'Live Strategy'
+  | 'GoTrader'
   | 'Landing';
 
 // Centralized list of valid pages — referenced by both the initial-state
@@ -98,7 +99,7 @@ const VALID_PAGES: PageName[] = [
   'Approvals', 'Calendar', 'Projects', 'Memory', 'Memory Graph',
   'Office', 'Desk', 'Docs', 'Wallets', 'Trades', 'Journal', 'Activity', 'Risk', 'TV Chart', 'PowerTrader',
   'Command Center', 'Performance', 'Regime', 'Usage', 'Landing', 'Congress', 'LLM Portfolio', 'Skills',
-  'Flow History', 'Flow Database', 'ITB', 'Freqtrade', 'Live Strategy',
+  'Flow History', 'Flow Database', 'ITB', 'Freqtrade', 'Live Strategy', 'GoTrader',
 ];
 
 function resolvePageFromParam(page: string | null): PageName {
@@ -221,6 +222,8 @@ export function AppShellClient() {
         return <FreqtradePage />;
       case 'Live Strategy':
         return <LiveStrategyPage />;
+      case 'GoTrader':
+        return null;
       default:
         return <DashboardPage />;
     }
@@ -228,6 +231,7 @@ export function AppShellClient() {
 
   const handleNavigate = (page: PageName) => {
     if (page === 'Landing') { window.location.href = '/landing'; return; }
+    if (page === 'GoTrader') { window.location.href = '/gotrader'; return; }
     setActivePage(page as any);
     window.history.replaceState(null, '', '/?page=' + (page as string).toLowerCase().replace(/\s+/g, '-'));
     setMobileOpen(false);

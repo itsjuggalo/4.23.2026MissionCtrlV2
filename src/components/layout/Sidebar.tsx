@@ -115,7 +115,7 @@ export function Sidebar({ activePage, onNavigate, isCollapsed, onToggle, newSign
             )}
             {sec.items.map(it => {
               const active = activePage === it.name;
-              const Icon = it.icon;
+              const Icon = it.icon as React.ComponentType<{ size?: number; style?: React.CSSProperties }>;
               return (
                 <button key={it.name} onClick={() => onNavigate(it.name)} title={it.name} style={{
                   display: "flex", alignItems: "center", gap: 10,

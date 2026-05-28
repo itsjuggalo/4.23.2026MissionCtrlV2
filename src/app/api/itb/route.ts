@@ -12,7 +12,6 @@ import { validateItbParams } from '@/lib/validate-exec-params';
 import { redactTail, redactObject } from '@/lib/redact';
 
 export const runtime = 'nodejs';
-export const dynamic = 'force-dynamic';
 
 const REPO = '/home/itsju/LapClaw/intelligent-trading-bot';
 const VENV_PY = path.join(REPO, '.venv/bin/python');

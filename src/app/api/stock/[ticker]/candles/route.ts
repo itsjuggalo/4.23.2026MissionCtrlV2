@@ -2,7 +2,7 @@ import { NextResponse } from 'next/server';
 import { execSync } from 'child_process';
 import { proxyToServeftp } from '../../../../../lib/proxyToServeftp';
 
-const FINNHUB_KEY = process.env.FINNHUB_API_KEY || 'd70ov6hr01ql6rg044r0';
+const FINNHUB_KEY = process.env.FINNHUB_API_KEY || '';
 const FINNHUB = 'https://finnhub.io/api/v1';
 
 const cache: Record<string, { data: any; expires: number }> = {};
@@ -106,6 +106,6 @@ export async function GET(
     cache[cacheKey] = { data, expires: Date.now() + (CACHE_MS[tf] || 60_000) };
     return NextResponse.json(data);
   } catch (e) {
-    return NextResponse.json({ ticker, tf, points: [], error: String(e).slice(0, 200) });
+    return NextResponse.json({ ticker, tf, points: [], error: String(e).slice(0, 200) }, { status: 500 });
   }
 }

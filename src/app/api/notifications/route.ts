@@ -12,7 +12,7 @@ const DB = 'https://stock-signal-72772-default-rtdb.firebaseio.com';
 async function pullSource(sourceName: string, node: string, limit = 50) {
   try {
     const url = `${DB}/${sourceName}/${node}.json?orderBy=%22%24key%22&limitToLast=${limit}`;
-    const r = await fetch(url, { cache: 'no-store' });
+    const r = await fetch(url, { cache: 'no-store', signal: AbortSignal.timeout(6000) });
     if (!r.ok) return [];
     const data = await r.json();
     if (!data) return [];

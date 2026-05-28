@@ -20,6 +20,12 @@ export default class PageErrorBoundary extends Component<Props, State> {
     });
   }
 
+  componentDidUpdate(prevProps: Props) {
+    if (prevProps.pageName !== this.props.pageName && this.state.hasError) {
+      this.setState({ hasError: false, error: undefined });
+    }
+  }
+
   reset = () => this.setState({ hasError: false, error: undefined });
 
   render() {

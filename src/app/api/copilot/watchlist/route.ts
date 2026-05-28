@@ -10,7 +10,6 @@ import fs from 'fs';
 import os from 'os';
 import path from 'path';
 
-export const dynamic = 'force-dynamic';
 export const revalidate = 0;
 
 const STORE_PATH = path.join(os.homedir(), '.openclaw', 'data', 'copilot_watchlist.json');

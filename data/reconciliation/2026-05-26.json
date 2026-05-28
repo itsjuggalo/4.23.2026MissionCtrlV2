@@ -1,0 +1,277 @@
+{
+  "date": "2026-05-26",
+  "generated_at": "2026-05-27T23:55:22.514Z",
+  "accounts": [
+    {
+      "account": "boba",
+      "signals_submitted": 0,
+      "alpaca_orders_total": 13,
+      "matched": 0,
+      "ghost_signals": [],
+      "orphan_orders": [
+        {
+          "id": "c3d707f9-5bd8-487b-9816-0e16d83e9264",
+          "client_order_id": "4d2835c7-4acd-437f-be1b-1e7972cba788",
+          "symbol": "INTC",
+          "side": "buy",
+          "status": "filled"
+        },
+        {
+          "id": "d2f58a88-8d4f-4631-bfc2-b57c8ec07c61",
+          "client_order_id": "b1fd9e73-60a4-4b6b-92cc-4a7207c55bae",
+          "symbol": "INTC",
+          "side": "buy",
+          "status": "filled"
+        },
+        {
+          "id": "2a3b597a-2ac5-4665-9120-f6bb31ce54ea",
+          "client_order_id": "c795f259-cefb-491e-8d91-a2c7ed582e51",
+          "symbol": "TQQQ",
+          "side": "buy",
+          "status": "filled"
+        },
+        {
+          "id": "d516b95e-698a-4f12-af41-3b60cf212099",
+          "client_order_id": "a5fb7506-dd86-42de-b156-18875d1860e8",
+          "symbol": "NU",
+          "side": "buy",
+          "status": "filled"
+        },
+        {
+          "id": "3714d90d-4ff0-4d1a-ae5a-b000d7b50fd3",
+          "client_order_id": "d040e5c8-5770-412b-91ee-6056db8c47fe",
+          "symbol": "RIVN",
+          "side": "sell",
+          "status": "filled"
+        },
+        {
+          "id": "a00b4b7d-4bdc-4e88-846d-9b12835a2e09",
+          "client_order_id": "70830c02-e093-408e-a6cb-8b2055d531a3",
+          "symbol": "QCOM",
+          "side": "buy",
+          "status": "filled"
+        },
+        {
+          "id": "1ed8e9b0-0813-4f14-a742-a937ac151ed6",
+          "client_order_id": "d90e8f21-9c9e-43f1-9719-5610a312343a",
+          "symbol": "AXTI",
+          "side": "buy",
+          "status": "filled"
+        },
+        {
+          "id": "32cc1848-7c65-4c8f-8650-ff7a228388d6",
+          "client_order_id": "03f3df40-b5e2-4b0c-bae8-4d13aae878ac",
+          "symbol": "RKLB",
+          "side": "buy",
+          "status": "filled"
+        },
+        {
+          "id": "819df7e0-fbf3-403c-bac9-e7578e49a9ff",
+          "client_order_id": "3c8008ea-67ac-4e5d-84ee-ba423e0b1675",
+          "symbol": "CORZ",
+          "side": "buy",
+          "status": "filled"
+        },
+        {
+          "id": "d8ca6d29-a33e-4d35-ac5a-70d35fbed41f",
+          "client_order_id": "358b1033-92c5-4bd1-9b7a-22c4d331d78a",
+          "symbol": "IREN",
+          "side": "buy",
+          "status": "filled"
+        },
+        {
+          "id": "961cc61d-25d2-4d42-948d-0a3da753bc29",
+          "client_order_id": "c7be0852-a45c-443f-b0b0-62eb68b51210",
+          "symbol": "CRWV",
+          "side": "buy",
+          "status": "filled"
+        },
+        {
+          "id": "d2c5e4aa-dae1-4317-861d-cbfbd311dd15",
+          "client_order_id": "a67406b9-7e61-47a8-84c0-84b79aa452d2",
+          "symbol": "NVDA",
+          "side": "buy",
+          "status": "filled"
+        },
+        {
+          "id": "b204ea81-5499-4d68-8835-c76ddf5cc292",
+          "client_order_id": "fb7b09b8-1a54-4b1c-b68b-6cf1629da07f",
+          "symbol": "NVDL",
+          "side": "buy",
+          "status": "filled"
+        }
+      ],
+      "match_rate": 1,
+      "notes": [
+        "13 orphan order(s) — Alpaca activity outside the webhook (other bots/manual)"
+      ]
+    },
+    {
+      "account": "jazzy",
+      "signals_submitted": 2,
+      "alpaca_orders_total": 24,
+      "matched": 2,
+      "ghost_signals": [],
+      "orphan_orders": [
+        {
+          "id": "15baec70-a992-4e42-a9d9-7360a92bd185",
+          "client_order_id": "bd3040ed-43cd-44c6-bcf9-5489ee527a1d",
+          "symbol": "HOOD",
+          "side": "buy",
+          "status": "filled"
+        },
+        {
+          "id": "f2159a4c-4a84-4a28-b20d-97736c8ce82f",
+          "client_order_id": "7d11a21f8fe4dc440235494071e8-sl",
+          "symbol": "LINK/USD",
+          "side": "sell",
+          "status": "canceled"
+        },
+        {
+          "id": "488f69a2-1592-40e5-a5a9-5ac40d22e7a7",
+          "client_order_id": "ec002872-8d51-41bc-9d6d-f7eba29c5078",
+          "symbol": "SMH260529P00530000",
+          "side": "sell",
+          "status": "expired"
+        },
+        {
+          "id": "4d229d6a-c6a7-4295-b159-51c5d183e873",
+          "client_order_id": "def74cc6-f6f5-4f41-a1d5-fbf457765343",
+          "symbol": "INTC",
+          "side": "buy",
+          "status": "filled"
+        },
+        {
+          "id": "c27bb13b-6dd1-492b-baa8-350a0c8478bf",
+          "client_order_id": "e4f43f17-7690-45b2-a9b5-42a9c5f7e00b",
+          "symbol": "INTC",
+          "side": "buy",
+          "status": "filled"
+        },
+        {
+          "id": "cb821ee1-a098-4099-91e7-489735399153",
+          "client_order_id": "4650cb93-8ad5-43d8-9c3b-b0c6ace7c6d8",
+          "symbol": "TQQQ",
+          "side": "buy",
+          "status": "filled"
+        },
+        {
+          "id": "157b7422-70d2-497c-b0fb-db8903b46ab4",
+          "client_order_id": "e26087a5-e590-427a-8213-f746b8d32775",
+          "symbol": "NU",
+          "side": "buy",
+          "status": "filled"
+        },
+        {
+          "id": "b7c8e44a-a3ee-4f38-906b-6873f47d4b51",
+          "client_order_id": "4dc9fcc7-b42f-4fa8-aba7-b7efbe69e376",
+          "symbol": "RIVN",
+          "side": "sell",
+          "status": "filled"
+        },
+        {
+          "id": "46a01027-6e4e-475a-9aaf-0c4d3218153b",
+          "client_order_id": "fe8958a5-b4dc-4a66-8ef1-d34983b27b79",
+          "symbol": "QCOM",
+          "side": "buy",
+          "status": "filled"
+        },
+        {
+          "id": "590b7f59-369a-44a8-bd5f-6591a6c3b4cc",
+          "client_order_id": "2693f688-aa40-4864-b960-b2a12d091c7b",
+          "symbol": "AXTI",
+          "side": "buy",
+          "status": "filled"
+        },
+        {
+          "id": "79ca96ca-ec5e-4972-b326-752b31f93319",
+          "client_order_id": "6b0ad441-f636-4111-976c-bb6e23924cdf",
+          "symbol": "RKLB",
+          "side": "buy",
+          "status": "filled"
+        },
+        {
+          "id": "d9f19eec-bf4b-48aa-9572-a5863c60a5ed",
+          "client_order_id": "a970a617-ebcb-4f69-978d-9a34f55733d4",
+          "symbol": "CORZ",
+          "side": "buy",
+          "status": "filled"
+        },
+        {
+          "id": "7a246ff6-fb16-41ef-b316-f13147e8fb3f",
+          "client_order_id": "62735fd4-0cb0-42a9-959a-f75f1ba31552",
+          "symbol": "IREN",
+          "side": "buy",
+          "status": "filled"
+        },
+        {
+          "id": "9ef316d6-1fc8-4318-8557-ccff79ac57fc",
+          "client_order_id": "9888d1f8-3ef5-4549-a673-f4b42160b53f",
+          "symbol": "CRWV",
+          "side": "buy",
+          "status": "filled"
+        },
+        {
+          "id": "3c83c409-07ca-40cf-ad29-5d897b9d9ac3",
+          "client_order_id": "a6fe8ac8-b5f2-4d10-b1ae-6398062ea85c",
+          "symbol": "NVDA",
+          "side": "buy",
+          "status": "filled"
+        },
+        {
+          "id": "172781a5-79f2-4f17-94dc-f02d2944126f",
+          "client_order_id": "2cf35f68-76ae-4e39-8c28-7091cd333761",
+          "symbol": "NVDL",
+          "side": "buy",
+          "status": "filled"
+        },
+        {
+          "id": "64356170-3287-4110-b244-3f87886aa484",
+          "client_order_id": "ac407f7e-723c-4442-bd97-da0ac9bc3916",
+          "symbol": "SMH260529P00530000",
+          "side": "sell",
+          "status": "canceled"
+        },
+        {
+          "id": "aef4d58d-805e-4e87-bc3a-a5f68aa8e0b2",
+          "client_order_id": "79f968f2-1a13-4f90-8eb7-a0dfc6f132b0",
+          "symbol": "SMH260529P00530000",
+          "side": "sell",
+          "status": "canceled"
+        },
+        {
+          "id": "24f1317f-2f68-4f6f-8709-0ea3cfa0e764",
+          "client_order_id": "0085ad83-d59c-486f-a44f-01fe11d18416",
+          "symbol": "SMH260529P00530000",
+          "side": "sell",
+          "status": "canceled"
+        },
+        {
+          "id": "1c03437b-3c73-4759-8081-e3ca81417f3c",
+          "client_order_id": "4d63074d-2460-4850-b91a-ad2a7d2ea2de",
+          "symbol": "SMH260529P00530000",
+          "side": "sell",
+          "status": "canceled"
+        },
+        {
+          "id": "eee9458d-48a0-4ee4-9b5c-59a49ab267a9",
+          "client_order_id": "2c343538-9772-41c5-9b9b-f777f77440b9",
+          "symbol": "SMH260529P00530000",
+          "side": "sell",
+          "status": "canceled"
+        },
+        {
+          "id": "3f107d76-41d9-46d0-b7c1-d4f4806c3b51",
+          "client_order_id": "31f6886d-84ae-41d9-8f4a-8b0590ce8759",
+          "symbol": "SMH260529P00530000",
+          "side": "sell",
+          "status": "canceled"
+        }
+      ],
+      "match_rate": 1,
+      "notes": [
+        "22 orphan order(s) — Alpaca activity outside the webhook (other bots/manual)"
+      ]
+    }
+  ]
+}

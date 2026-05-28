@@ -4,7 +4,6 @@ import { writeFileSync, unlinkSync } from 'fs';
 import { tmpdir } from 'os';
 import { join } from 'path';
 
-export const dynamic = 'force-dynamic';
 export const revalidate = 0;
 
 export async function GET() {
@@ -22,7 +21,7 @@ export async function GET() {
     });
     return NextResponse.json({ crons, count: crons.length });
   } catch (e) {
-    return NextResponse.json({ crons: [], count: 0, error: String(e) });
+    return NextResponse.json({ crons: [], count: 0, error: String(e) }, { status: 500 });
   }
 }
 
@@ -71,7 +70,7 @@ export async function POST(req: Request) {
           const output = execSync(command, { timeout: 30000, encoding: 'utf-8' });
           return NextResponse.json({ success: true, output: output.slice(0, 500) });
         } catch (e) {
-          return NextResponse.json({ success: false, error: String(e).slice(0, 200) });
+          return NextResponse.json({ success: false, error: String(e).slice(0, 200) }, { status: 500 });
         }
       }
     }

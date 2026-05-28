@@ -3,7 +3,6 @@ import { spawn, execSync } from 'child_process';
 import { existsSync, readdirSync, statSync } from 'fs';
 import path from 'path';
 
-export const dynamic = 'force-dynamic';
 export const revalidate = 0;
 
 const REPO = '/home/itsju/LapClaw/freqtrade';

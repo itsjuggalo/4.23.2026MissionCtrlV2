@@ -2,6 +2,7 @@
 
 import { useEffect, useState, useCallback } from 'react';
 import { ExternalLink, RefreshCw, Play, Copy, CheckCircle2, XCircle, Loader2, FolderOpen, Package, ChevronDown, ChevronUp } from 'lucide-react';
+import { safeFixed } from '@/lib/fmt';
 import { MetricCard } from '@/components/ui/MetricCard';
 import { Badge } from '@/components/ui/Badge';
 import { PulseDot } from '@/components/ui/PulseDot';
@@ -348,7 +349,7 @@ export function FreqtradePage() {
                       <RadialGauge value={Math.round(bt.win_rate * 100)} max={100} severity={winRateSev} />
                       <div style={{ flex: 1 }}>
                         <div style={{ fontSize: 22, fontWeight: 700, color: bt.total_profit_pct >= 0 ? 'var(--color-mc-green)' : 'var(--color-mc-red)', fontFamily: 'var(--font-mc-mono)' }}>
-                          {bt.total_profit_pct >= 0 ? '+' : ''}{bt.total_profit_pct.toFixed(1)}%
+                          {(bt.total_profit_pct ?? 0) >= 0 ? '+' : ''}{safeFixed(bt.total_profit_pct, 1)}%
                         </div>
                         <div style={{ fontSize: 10, color: 'var(--color-mc-text-muted)', fontFamily: 'var(--font-mc-mono)' }}>
                           profit · sharpe {bt.sharpe?.toFixed(2) ?? '—'}
