@@ -6,7 +6,7 @@ export async function GET(request: Request) {
   const __proxied = await proxyToServeftp(request); if (__proxied) return __proxied;
   try {
     const url = new URL(request.url);
-    const days = parseInt(url.searchParams.get('days') || '30');
+    const days = parseInt(url.searchParams.get('days') || '30', 10) || 30;
     const summary = getCostSummary(days);
 
     // Also get daily totals for charting

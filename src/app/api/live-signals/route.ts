@@ -23,7 +23,7 @@ async function latestFirebaseFlowTime(): Promise<string | null> {
       : Object.entries(raw);
     let maxTime = 0;
     for (const [key, f] of entries) {
-      const t = parseInt(key) || f?.Time || 0;
+      const t = parseInt(key, 10) || f?.Time || 0;
       if (t > maxTime) maxTime = t;
     }
     return maxTime > 0 ? new Date(maxTime).toISOString() : null;

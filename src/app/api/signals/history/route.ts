@@ -9,7 +9,7 @@ export async function GET(req: Request) {
 
   const { searchParams } = new URL(req.url);
   const ticker = (searchParams.get('ticker') || '').toUpperCase();
-  const limit = parseInt(searchParams.get('limit') || '50', 10);
+  const limit = parseInt(searchParams.get('limit') || '50', 10) || 50;
 
   try {
     const raw = await readFile(HISTORY_FILE, 'utf-8');

@@ -1,4 +1,4 @@
-import {NextResponse, NextRequest } from 'next/server';
+import { NextResponse } from 'next/server';
 import { getWebhookHistory, logWebhookEvent } from '@/lib/db';
 import { proxyToServeftp } from "../../../lib/proxyToServeftp";
 
@@ -6,7 +6,7 @@ export async function GET(request: Request) {
   const __proxied = await proxyToServeftp(request); if (__proxied) return __proxied;
   try {
     const url = new URL(request.url);
-    const limit = parseInt(url.searchParams.get('limit') || '50');
+    const limit = parseInt(url.searchParams.get('limit') || '50', 10) || 50;
     const events = getWebhookHistory(limit);
 
     return NextResponse.json({

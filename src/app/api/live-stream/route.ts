@@ -15,7 +15,7 @@ async function getPortfolioData() {
     });
     if (res.ok) {
       const acct = await res.json();
-      return { equity: parseFloat(acct.equity), cash: parseFloat(acct.cash), buying_power: parseFloat(acct.buying_power) };
+      return { equity: parseFloat(acct.equity || '0') || 0, cash: parseFloat(acct.cash || '0') || 0, buying_power: parseFloat(acct.buying_power || '0') || 0 };
     }
   } catch {}
   return null;

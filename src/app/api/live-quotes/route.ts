@@ -1,4 +1,4 @@
-import {NextResponse, NextRequest } from 'next/server';
+import { NextResponse } from 'next/server';
 import { readFileSync } from 'fs';
 import { proxyToServeftp } from "../../../lib/proxyToServeftp";
 

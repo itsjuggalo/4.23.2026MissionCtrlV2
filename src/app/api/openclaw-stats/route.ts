@@ -24,8 +24,8 @@ export async function GET() {
       const inputMatches = raw.match(/input_tokens:(\d+)/g) || [];
       const outputMatches = raw.match(/output_tokens:(\d+)/g) || [];
       
-      const inputTotal = inputMatches.reduce((sum, m) => sum + parseInt(m.split(':')[1]), 0);
-      const outputTotal = outputMatches.reduce((sum, m) => sum + parseInt(m.split(':')[1]), 0);
+      const inputTotal = inputMatches.reduce((sum, m) => sum + (parseInt(m.split(':')[1], 10) || 0), 0);
+      const outputTotal = outputMatches.reduce((sum, m) => sum + (parseInt(m.split(':')[1], 10) || 0), 0);
       
       if (inputTotal > 0 || outputTotal > 0) {
         tokenData.inputTokens = inputTotal;

@@ -136,7 +136,7 @@ export function SignalsPage() {
   if (error && !data) return <div style={{ padding: '24px' }}><div style={{ padding: '10px 16px', background: '#ef535014', border: '1px solid #ef535033', borderRadius: '6px', color: '#ef5350', fontFamily: M, fontSize: 'var(--mc-font-badge)' }}>⚠ Signals API unavailable — retrying every 30s</div></div>;
 
   const toSignals = (arr: any[], source: string, type: 'option' | 'stock'): Signal[] =>
-    (arr || []).map((s: any) => ({ ...s, source, type, postedAt: s.id && /^\d{9,10}$/.test(s.id) ? parseInt(s.id) : undefined }))
+    (arr || []).map((s: any) => ({ ...s, source, type, postedAt: s.id && /^\d{9,10}$/.test(s.id) ? parseInt(s.id, 10) : undefined }))
     .filter((s: Signal) => { const dte = daysTo(s.expiry); return type === 'stock' || dte === null || dte > -2; });
 
   const nameOpts = toSignals(data?.name?.shortTerm || [], 'Name', 'option').concat(toSignals(data?.name?.longTerm || [], 'Name', 'option'));

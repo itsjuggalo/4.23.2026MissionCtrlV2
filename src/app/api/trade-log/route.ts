@@ -7,7 +7,7 @@ export async function GET(request: Request) {
   const __proxied = await proxyToServeftp(request); if (__proxied) return __proxied;
   try {
     const url = new URL(request.url);
-    const limit = parseInt(url.searchParams.get('limit') || '50');
+    const limit = parseInt(url.searchParams.get('limit') || '50', 10) || 50;
     const trades = getRecentTrades(limit);
     const stats = getTradeStats();
 
