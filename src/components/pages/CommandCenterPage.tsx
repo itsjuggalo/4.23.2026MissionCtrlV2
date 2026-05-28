@@ -91,23 +91,6 @@ export function CommandCenterPage() {
 
   useEffect(() => {
     fetchData();
-    fetch('/api/options-flow').then(r => r.ok ? r.json() : { flows: [], alerts: [] }).then(d => {
-      const flows = d.flows || [];
-      const alerts = d.alerts || [];
-      const unusual: any = flows.filter((f: any) => f.Volume > f.OI && f.OI >= 0).sort((a: any, b: any) => b.Time - a.Time).slice(0, 10);
-      unusual._allAlerts = alerts;
-      unusual._allFlows = flows;
-      setUnusualFlows(unusual);
-    }).catch(() => {});
-    fetch('/api/kronos-forecast?symbol=' + encodeURIComponent(kronosSymbol) + '&model=' + encodeURIComponent(kronosModel)).then(r => r.ok ? r.json() : null).then(d => { if (d) setKronosForecast(d); }).catch(() => {});
-    fetch('/api/options-flow').then(r => r.ok ? r.json() : { flows: [], alerts: [] }).then(d => {
-      const flows = d.flows || [];
-      const alerts = d.alerts || [];
-      const unusual: any = flows.filter((f: any) => f.Volume > f.OI && f.OI >= 0).sort((a: any, b: any) => b.Time - a.Time).slice(0, 10);
-      unusual._allAlerts = alerts;
-      unusual._allFlows = flows;
-      setUnusualFlows(unusual);
-    }).catch(() => {});
     fetch('/api/kronos-forecast?symbol=' + encodeURIComponent(kronosSymbol) + '&model=' + encodeURIComponent(kronosModel)).then(r => r.ok ? r.json() : null).then(d => { if (d) setKronosForecast(d); }).catch(() => {});
     fetch('/api/wallets').then(r => r.ok ? r.json() : []).then(wallets => {
       const tickers: any[] = []; let rhTotal = 0;
@@ -127,7 +110,6 @@ export function CommandCenterPage() {
       setAllWallets((wallets || []).map((w: any) => ({ name: w.name || 'Unknown', balance: w.balance || 0 })));
     }).catch(() => {});
     fetch('/api/directives?file=dashboard_data.json').then(r => r.ok ? r.json() : null).then(d => { if (d) setDashData(d); }).catch(() => {});
-    fetch('/api/pipeline-feed').then(r => r.ok ? r.json() : null).then(d => { if (d?.events) setPipelineFeed(d.events); }).catch(() => {});
 
     const fetchMarketNews = () =>
       fetch('/api/market-news').then(r => r.ok ? r.json() : null).then(d => { if (d?.news?.length) setMarketNews(d.news); }).catch(() => {});
