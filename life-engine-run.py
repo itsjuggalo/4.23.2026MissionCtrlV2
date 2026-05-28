@@ -50,21 +50,25 @@ SKIP_SENDERS = [
     'underarmour.com','seaworldparks.com','poshmark.com','email.bestbuy.com',
     'fiscal.ai','mail.perplexity.ai','ancestry.com','dignitymemorial.com',
     'e-offers.dominos.com','dcsg.com','e.ncl.com','email.livenation.com',
-    'stockx.com','reply.ebay.com','e.harborfreight.com','e.lowes.com',
+    'stockx.com','e.harborfreight.com','e.lowes.com',
     'email-advanceautoparts.com','nedm.asus.com','news@sophos.com',
     'e.questdiagnostics.com','takeprofittrader.com','e.allegiant.com',
     'eg.expedia.com','synchronyfinancial.com','support@ninjatrader.com',
-    'team.public.com','eml.muvfl.com','mtmarketing@continued.com',
+    'team.public.com','mtmarketing@continued.com',
     'updates@okx.com','em.linkedin.com','messages-noreply@linkedin.com',
     'e.godaddy.com','news.temuemail.com',
+    'nextdoor.com','email.nextdoor.com','ss.email.nextdoor.com','is.email.nextdoor.com',
 ]
 
 # Senders that are always important — surface regardless of keywords
 IMPORTANT_SENDERS = [
     'commerce.fl.gov','floridajobs.org','speedpay.com',
-    'informeddelivery.usps.com','is.email.nextdoor.com','ss.email.nextdoor.com',
+    'informeddelivery.usps.com',
     'e.chase.com','mcmap.chase.com','mailer.alpaca.markets',
     'bankofamerica.com','wellsfargo.com',
+    'trulieve.com','ups.com','fedex.com',
+    'walmart.com','ebay.com','siriusxm.com',
+    'robinhood.com','amazon.com',
 ]
 
 # Keywords in subject/snippet that flag an email as important
@@ -77,6 +81,10 @@ IMPORTANT_KW = [
     'service shut','account suspended','account closed',
     'informed delivery','beware','safety alert','urgent',
     'dmv','vehicle registration','car payment',
+    'michael englund',
+    'out for delivery','package delivered','order shipped',
+    'order confirmed','your order','tracking number',
+    'your withdrawal','trade confirmation',
 ]
 
 # ── Helpers ──────────────────────────────────────────────────────────────────
@@ -196,6 +204,15 @@ def _parse_bill(email):
     paid = any(k in text for k in _PAID_KW)
     return amount, due_date, paid
 
+def _dedup_by_sender(emails):
+    seen, out = set(), []
+    for e in emails:
+        name = _friendly_name(e)
+        if name not in seen:
+            seen.add(name)
+            out.append(e)
+    return out
+
 def _is_real_deal(email):
     text = email.get('subject', '') + ' ' + email.get('snippet', '')
     return bool(_REAL_DEAL.search(text))
@@ -276,14 +293,17 @@ def get_gmail(account='', hours=168):
         frm  = e.get('from', '').lower()
         subj = e.get('subject', '').lower()
         snip = e.get('snippet', '').lower()
-        if any(s in frm for s in IMPORTANT_SENDERS) or \
-           any(k in subj + ' ' + snip for k in IMPORTANT_KW):
+        sender_match = any(s in frm for s in IMPORTANT_SENDERS)
+        kw_match     = any(k in subj + ' ' + snip for k in IMPORTANT_KW)
+        # For broad domains (robinhood, ebay), require a keyword hit too
+        broad = any(s in frm for s in ('robinhood.com','ebay.com','amazon.com','walmart.com'))
+        if (sender_match and not broad) or (broad and kw_match) or (not broad and kw_match):
             important.append(e)
         elif any(k in subj + ' ' + frm for k in BILL_KW):
             bills.append(e)
         elif any(k in subj + ' ' + snip for k in COUPON_KW) and _is_real_deal(e):
             coupons.append(e)
-    return important[:8], bills[:5], coupons[:3]
+    return _dedup_by_sender(important)[:8], _dedup_by_sender(bills)[:5], _dedup_by_sender(coupons)[:3]
 
 def get_calendar(account='', days=2):
     flag = f'--account {account}' if account else ''
@@ -375,11 +395,11 @@ def morning_brief(now):
     if all_important:
         alert_lines = '\n'.join(
             f"  └ {esc(_friendly_name(e))} — {esc(e.get('subject','')[:50])}"
-            for e in all_important[:4])
+            for e in all_important)
         inbox_sections += f"  🚨 <b>Alerts</b> ({len(all_important)}):\n{alert_lines}\n"
     if all_bills:
         bill_parts = []
-        for b in all_bills[:4]:
+        for b in all_bills:
             amount, due_date, paid = _parse_bill(b)
             name = _friendly_name(b)
             detail = ''
@@ -389,7 +409,7 @@ def morning_brief(now):
             bill_parts.append(f"  └ {esc(name)}{esc(detail)}")
         inbox_sections += f"  💸 <b>Bills</b>:\n" + '\n'.join(bill_parts) + '\n'
     if all_coupons:
-        deal_parts = [f"  └ {esc(_deal_summary(c))}" for c in all_coupons[:3]]
+        deal_parts = [f"  └ {esc(_deal_summary(c))}" for c in all_coupons]
         inbox_sections += f"  🎟 <b>Deals</b>:\n" + '\n'.join(deal_parts) + '\n'
     if not inbox_sections:
         inbox_sections = '  Inbox clear'
@@ -485,11 +505,11 @@ def nightly_brief(now):
     if all_important:
         alert_lines = '\n'.join(
             f"  └ {esc(_friendly_name(e))} — {esc(e.get('subject','')[:50])}"
-            for e in all_important[:4])
+            for e in all_important)
         inbox_sections += f"  🚨 <b>Alerts</b> ({len(all_important)}):\n{alert_lines}\n"
     if all_bills:
         bill_parts = []
-        for b in all_bills[:4]:
+        for b in all_bills:
             amount, due_date, paid = _parse_bill(b)
             name = _friendly_name(b)
             detail = ''
@@ -499,7 +519,7 @@ def nightly_brief(now):
             bill_parts.append(f"  └ {esc(name)}{esc(detail)}")
         inbox_sections += f"  💸 <b>Bills</b>:\n" + '\n'.join(bill_parts) + '\n'
     if all_coupons:
-        deal_parts = [f"  └ {esc(_deal_summary(c))}" for c in all_coupons[:3]]
+        deal_parts = [f"  └ {esc(_deal_summary(c))}" for c in all_coupons]
         inbox_sections += f"  🎟 <b>Deals</b>:\n" + '\n'.join(deal_parts) + '\n'
     if not inbox_sections:
         inbox_sections = '  Inbox clear'
