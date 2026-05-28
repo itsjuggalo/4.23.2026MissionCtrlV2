@@ -1,4 +1,4 @@
-#!/usr/bin/env python3
+#!/home/itsju/02_DATA/mc-kb/.venv/bin/python
 """
 Kronos Multi-Asset Forecast Service v2 — Mission Control
 
@@ -7,9 +7,9 @@ CPU inference runs ~2-4 min per ticker. Designed to be called in the background
 by boba_decision_cycle.py (fire-and-forget), not blocking.
 
 Usage:
-    python3 kronos_forecast_v2.py --ticker NVDA
-    python3 kronos_forecast_v2.py --ticker BTC
-    python3 kronos_forecast_v2.py --ticker QQQ --option-context "648C 05/15/26"
+    kronos_forecast_v2.py --ticker NVDA
+    kronos_forecast_v2.py --ticker BTC
+    kronos_forecast_v2.py --ticker QQQ --option-context "648C 05/15/26"
 """
 import argparse
 import json
@@ -23,19 +23,22 @@ import pandas as pd
 import numpy as np
 import requests
 
-sys.path.insert(0, '/home/ubuntu/Kronos')
+sys.path.insert(0, '/home/itsju/04_RESEARCH/Kronos')
 
-LOOKBACK = 400
+# Tier config: tokenizer, max_context, sample_count, default candle lookback
+KRONOS_TIERS = {
+    "mini":  {"tokenizer": "NeoQuasar/Kronos-Tokenizer-2k",  "max_context": 2048, "sample_count": 1, "default_candles": 1024},
+    "small": {"tokenizer": "NeoQuasar/Kronos-Tokenizer-base", "max_context": 512,  "sample_count": 3, "default_candles": 400},
+    "base":  {"tokenizer": "NeoQuasar/Kronos-Tokenizer-base", "max_context": 512,  "sample_count": 3, "default_candles": 400},
+}
+
 PRED_LEN = 24
-SAMPLE_COUNT = 1  # ⚠ CRITICAL: reduced from 5 to 1 — 5 samples = 5x inference time
 import os as _os_kronos
-KRONOS_MODEL = _os_kronos.environ.get("KRONOS_MODEL", "small")
-OUTPUT_DIR = Path("/home/ubuntu/.openclaw/workspace/directives/kronos_forecasts")
+KRONOS_MODEL = _os_kronos.environ.get("KRONOS_MODEL", "mini")
+OUTPUT_DIR = Path("/home/itsju/.openclaw/workspace/directives/kronos_forecasts")
 OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
-SECRETS = Path("/home/ubuntu/.openclaw/secrets")
+SECRETS = Path("/home/itsju/.openclaw/secrets")
 DISCORD_WEBHOOK_FILE = SECRETS / "discord-webhook-kronos.txt"
-
-FINNHUB_KEY = "d70ov6hr01ql6rg044qgd70ov6hr01ql6rg044r0"
 
 # Crypto tickers route to Kraken. Everything else goes to Alpaca (stocks/ETFs/indices).
 CRYPTO_TICKERS = {"BTC", "BTCUSD", "BTCUSDT", "XBTUSD"}
@@ -55,10 +58,11 @@ def fetch_stock_bars_alpaca(ticker: str, limit: int = 400) -> pd.DataFrame:
     if not key or not sec:
         raise RuntimeError("No Alpaca credentials")
 
-    # 400 hourly bars ≈ 16 trading days at ~25 hours/day (extended hours)
-    # Conservative: fetch 90 calendar days to safely hit 400 bars even with holidays/weekends
+    # 1h bars: 400 bars ≈ 16 trading days, 1024 bars ≈ 41 days
+    # Fetch up to 180 calendar days to safely reach 1024 bars
     end = datetime.now(timezone.utc)
-    start = end - timedelta(days=90)
+    days_back = max(90, int(limit * 0.18))  # ~0.18 calendar days per bar (including weekends/nights)
+    start = end - timedelta(days=days_back)
 
     all_bars = []
     page_token = None
@@ -140,11 +144,16 @@ def run_kronos_inference(df: pd.DataFrame, ticker: str) -> tuple:
     """Load model + run inference. Returns (pred_df, y_timestamps, current_price)."""
     from model import Kronos, KronosTokenizer, KronosPredictor
 
-    print("[kronos] Loading model...")
+    tier = KRONOS_TIERS.get(KRONOS_MODEL, KRONOS_TIERS["mini"])
+    tokenizer_id = tier["tokenizer"]
+    max_ctx = tier["max_context"]
+    sample_count = tier["sample_count"]
+
+    print(f"[kronos] Loading {KRONOS_MODEL} (tokenizer={tokenizer_id}, ctx={max_ctx}, samples={sample_count})...")
     t0 = time.time()
-    tokenizer = KronosTokenizer.from_pretrained("NeoQuasar/Kronos-Tokenizer-base")
+    tokenizer = KronosTokenizer.from_pretrained(tokenizer_id)
     model = Kronos.from_pretrained(f"NeoQuasar/Kronos-{KRONOS_MODEL}")
-    predictor = KronosPredictor(model, tokenizer, device="cpu", max_context=512)
+    predictor = KronosPredictor(model, tokenizer, device="cpu", max_context=max_ctx)
     print(f"[kronos] Model loaded in {time.time()-t0:.1f}s")
 
     # Normalize timestamps to naive UTC
@@ -160,20 +169,20 @@ def run_kronos_inference(df: pd.DataFrame, ticker: str) -> tuple:
     last_ts = x_ts.iloc[-1]
     y_ts = pd.Series(pd.date_range(start=last_ts + pd.Timedelta(hours=1), periods=PRED_LEN, freq="1h"))
 
-    print(f"[kronos] Running inference: {len(x_df)} candles → {PRED_LEN}h, {SAMPLE_COUNT} path(s)")
+    print(f"[kronos] Running inference: {len(x_df)} candles → {PRED_LEN}h, {sample_count} path(s)")
     t1 = time.time()
     pred = predictor.predict(
         df=x_df, x_timestamp=x_ts, y_timestamp=y_ts,
-        pred_len=PRED_LEN, T=1.0, top_p=0.9, sample_count=SAMPLE_COUNT,
+        pred_len=PRED_LEN, T=1.0, top_p=0.9, sample_count=sample_count,
         verbose=False,
     )
     print(f"[kronos] Inference done in {time.time()-t1:.1f}s")
     current_price = float(df.iloc[-1]["close"])
-    return pred, y_ts, current_price
+    return pred, y_ts, current_price, sample_count
 
 
 def build_forecast_json(ticker: str, pred: pd.DataFrame, y_ts, current_price: float,
-                         option_context: str = "") -> dict:
+                         candles_used: int, sample_count: int, option_context: str = "") -> dict:
     pred_close = pred["close"].values
     final_price = float(pred_close[-1])
     change_pct = (final_price - current_price) / current_price * 100
@@ -200,7 +209,7 @@ def build_forecast_json(ticker: str, pred: pd.DataFrame, y_ts, current_price: fl
         "ticker": ticker,
         "generated_at": datetime.now(timezone.utc).isoformat(),
         "timeframe": "1h",
-        "candles_analyzed": LOOKBACK,  # input candles used for prediction
+        "candles_analyzed": candles_used,
         "current_price": current_price,
         "forecast_24h_direction": direction,
         "forecast_24h_target": final_price,
@@ -210,7 +219,7 @@ def build_forecast_json(ticker: str, pred: pd.DataFrame, y_ts, current_price: fl
         "forecast_24h_low": pred_low,
         "forecast_range_pct": round((pred_high - pred_low) / current_price * 100, 2),
         "model": f"Kronos-{KRONOS_MODEL}",
-        "sample_paths": SAMPLE_COUNT,
+        "sample_paths": sample_count,
         "hourly_predictions": [
             {
                 "hour": i + 1,
@@ -277,36 +286,38 @@ def post_to_discord(forecast: dict):
 def main():
     p = argparse.ArgumentParser()
     p.add_argument("--ticker", required=True, help="e.g. NVDA, QQQ, BTC")
-    p.add_argument("--model", default="small", choices=["mini","small","base","large"], help="Kronos model variant")
+    p.add_argument("--model", default="mini", choices=["mini","small","base"], help="Kronos model variant")
     p.add_argument("--no-disk", action="store_true", help="Skip writing forecast JSON to disk; only print to stdout")
     p.add_argument("--option-context", default="", help="e.g. '648C 05/15/26'")
-    p.add_argument("--candles", type=int, default=400)
+    p.add_argument("--candles", type=int, default=0, help="Override candle lookback (0 = use tier default)")
     p.add_argument("--no-discord", action="store_true")
     args = p.parse_args()
     _os_kronos.environ["KRONOS_MODEL"] = args.model
     global KRONOS_MODEL; KRONOS_MODEL = args.model
 
+    tier = KRONOS_TIERS.get(KRONOS_MODEL, KRONOS_TIERS["mini"])
+    candles = args.candles if args.candles > 0 else tier["default_candles"]
+
     ticker = args.ticker.upper()
-    print(f"{'='*60}\nKRONOS FORECAST: {ticker}\n{'='*60}")
+    print(f"{'='*60}\nKRONOS FORECAST: {ticker} | model={KRONOS_MODEL} | candles={candles}\n{'='*60}")
     t_total = time.time()
 
     try:
         if is_crypto(ticker):
-            df = fetch_btc_kraken(args.candles)
+            df = fetch_btc_kraken(candles)
             canonical_ticker = "BTC"
         else:
-            df = fetch_stock_bars_alpaca(ticker, args.candles)
+            df = fetch_stock_bars_alpaca(ticker, candles)
             canonical_ticker = ticker
     except Exception as e:
         err = {"ticker": ticker, "error": f"data fetch failed: {e}",
                "generated_at": datetime.now(timezone.utc).isoformat()}
         print(json.dumps(err, indent=2))
-        # Write error file too so cached_kronos_file doesn't return stale
         (OUTPUT_DIR / f"latest_{canonical_ticker if 'canonical_ticker' in dir() else ticker}.json").write_text(json.dumps(err, indent=2))
         return 1
 
     try:
-        pred, y_ts, current = run_kronos_inference(df, canonical_ticker)
+        pred, y_ts, current, sample_count = run_kronos_inference(df, canonical_ticker)
     except Exception as e:
         err = {"ticker": canonical_ticker, "error": f"kronos inference failed: {e}",
                "generated_at": datetime.now(timezone.utc).isoformat()}
@@ -314,7 +325,7 @@ def main():
         (OUTPUT_DIR / f"latest_{canonical_ticker}.json").write_text(json.dumps(err, indent=2))
         return 1
 
-    forecast = build_forecast_json(canonical_ticker, pred, y_ts, current, args.option_context)
+    forecast = build_forecast_json(canonical_ticker, pred, y_ts, current, len(df), sample_count, args.option_context)
 
     # Save to both timestamped + latest files
     ts = datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%S")
