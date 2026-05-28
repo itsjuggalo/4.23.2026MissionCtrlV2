@@ -36,6 +36,7 @@ export async function postDiscord(content: string, color: Color = 'grey', mentio
         embeds: [{ color: COLORS[color], description: content }],
         allowed_mentions: { parse: mention ? ['everyone'] : [] },
       }),
+      signal: AbortSignal.timeout(8000),
     });
   } catch {
     // best-effort, never throw to the request path
