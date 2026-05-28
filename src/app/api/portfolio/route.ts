@@ -71,7 +71,7 @@ export async function GET(request: Request) {
       accounts: { r1: r1 ? { balance: r1.balance, equity: r1.equity, positions: r1.positions.length } : null,
                   r2: r2 ? { balance: r2.balance, equity: r2.equity, positions: r2.positions.length } : null },
     });
-  } catch (err: any) {
-    return NextResponse.json({ balance: 0, error: err.message }, { status: 500 });
+  } catch (err: unknown) {
+    return NextResponse.json({ balance: 0, error: (err instanceof Error ? err.message : String(err)).slice(0, 200) }, { status: 500 });
   }
 }

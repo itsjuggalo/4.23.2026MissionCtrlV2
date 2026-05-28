@@ -215,7 +215,7 @@ export async function POST(req: NextRequest) {
       try {
         validated = validateItbParams(body);
       } catch (err) {
-        return NextResponse.json({ error: String(err) }, { status: 400 });
+        return NextResponse.json({ error: String(err).slice(0, 200) }, { status: 400 });
       }
 
       const { script, config } = validated;
@@ -265,7 +265,7 @@ export async function POST(req: NextRequest) {
           return (tx as unknown as Record<string, unknown>).__duplicate as { run_uuid: string; status: string } | undefined;
         });
       } catch (err) {
-        return NextResponse.json({ error: 'audit_unavailable', detail: String(err) }, { status: 500 });
+        return NextResponse.json({ error: 'audit_unavailable', detail: String(err).slice(0, 200) }, { status: 500 });
       }
 
       // Check for idempotent duplicate after the transaction

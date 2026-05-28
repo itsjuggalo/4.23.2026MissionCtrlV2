@@ -114,7 +114,7 @@ function runProcess(cmd: string, args: string[], cwd: string, timeoutMs: number)
     child.stderr.on('data', d => { stderr += d.toString(); });
     child.on('error', err => {
       clearTimeout(timer);
-      resolve(NextResponse.json({ success: false, error: String(err), cmd, args, elapsed_ms: Date.now() - started }, { status: 500 }));
+      resolve(NextResponse.json({ success: false, error: String(err).slice(0, 200), cmd, args, elapsed_ms: Date.now() - started }, { status: 500 }));
     });
     child.on('close', code => {
       clearTimeout(timer);

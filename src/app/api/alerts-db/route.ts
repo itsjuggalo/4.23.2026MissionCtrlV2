@@ -11,7 +11,7 @@ export async function GET(request: Request) {
 
     return NextResponse.json({ alerts, count: alerts.length });
   } catch (error) {
-    return NextResponse.json({ error: String(error), alerts: [] }, { status: 500 });
+    return NextResponse.json({ error: String(error).slice(0, 200), alerts: [] }, { status: 500 });
   }
 }
 
@@ -33,6 +33,6 @@ export async function POST(request: Request) {
     );
     return NextResponse.json({ success: true, action: 'created' });
   } catch (error) {
-    return NextResponse.json({ success: false, error: String(error) }, { status: 500 });
+    return NextResponse.json({ success: false, error: String(error).slice(0, 200) }, { status: 500 });
   }
 }

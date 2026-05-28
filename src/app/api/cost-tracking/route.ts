@@ -50,6 +50,6 @@ export async function POST(request: Request) {
     );
     return NextResponse.json({ success: true });
   } catch (error) {
-    return NextResponse.json({ success: false, error: String(error) }, { status: 500 });
+    return NextResponse.json({ success: false, error: String(error).slice(0, 200) }, { status: 500 });
   }
 }

@@ -953,6 +953,6 @@ Inventing a plausible-looking price like "$12" because the ticker is in the alt_
       tokens: { input: data.usage?.input_tokens || 0, output: data.usage?.output_tokens || 0 },
     });
   } catch (err) {
-    return NextResponse.json({ error: err instanceof Error ? err.message : String(err) }, { status: 500 });
+    return NextResponse.json({ error: (err instanceof Error ? err.message : String(err)).slice(0, 200) }, { status: 500 });
   }
 }

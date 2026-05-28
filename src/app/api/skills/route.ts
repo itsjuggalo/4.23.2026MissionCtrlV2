@@ -129,6 +129,6 @@ export async function GET() {
       total: skills.length,
     });
   } catch (error) {
-    return NextResponse.json({ skills: [], schedulerStatus: 'unknown', error: String(error) }, { status: 500 });
+    return NextResponse.json({ skills: [], schedulerStatus: 'unknown', error: String(error).slice(0, 200) }, { status: 500 });
   }
 }
