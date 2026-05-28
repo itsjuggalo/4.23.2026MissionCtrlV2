@@ -36,6 +36,7 @@ PRED_LEN = 24
 import os as _os_kronos
 KRONOS_MODEL = _os_kronos.environ.get("KRONOS_MODEL", "mini")
 OUTPUT_DIR = Path("/home/itsju/.openclaw/workspace/directives/kronos_forecasts")
+FINETUNED_DIR = Path("/home/itsju/04_RESEARCH/Kronos/finetune_csv/finetuned/us_stocks_1h")
 OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
 SECRETS = Path("/home/itsju/.openclaw/secrets")
 DISCORD_WEBHOOK_FILE = SECRETS / "discord-webhook-kronos.txt"
@@ -140,19 +141,29 @@ def fetch_btc_kraken(limit: int = 400) -> pd.DataFrame:
     return df
 
 
-def run_kronos_inference(df: pd.DataFrame, ticker: str) -> tuple:
-    """Load model + run inference. Returns (pred_df, y_timestamps, current_price)."""
+def run_kronos_inference(df: pd.DataFrame, ticker: str, finetuned: bool = False) -> tuple:
+    """Load model + run inference. Returns (pred_df, y_timestamps, current_price, sample_count)."""
     from model import Kronos, KronosTokenizer, KronosPredictor
 
-    tier = KRONOS_TIERS.get(KRONOS_MODEL, KRONOS_TIERS["mini"])
-    tokenizer_id = tier["tokenizer"]
+    if finetuned:
+        # Finetuned weights are based on Kronos-small — use small tier settings
+        tier = KRONOS_TIERS["small"]
+        tok_path = str(FINETUNED_DIR / "tokenizer" / "best_model")
+        model_path = str(FINETUNED_DIR / "basemodel" / "best_model")
+        label = f"Kronos-small (finetuned/us_stocks_1h)"
+    else:
+        tier = KRONOS_TIERS.get(KRONOS_MODEL, KRONOS_TIERS["mini"])
+        tok_path = tier["tokenizer"]
+        model_path = f"NeoQuasar/Kronos-{KRONOS_MODEL}"
+        label = f"Kronos-{KRONOS_MODEL}"
+
     max_ctx = tier["max_context"]
     sample_count = tier["sample_count"]
 
-    print(f"[kronos] Loading {KRONOS_MODEL} (tokenizer={tokenizer_id}, ctx={max_ctx}, samples={sample_count})...")
+    print(f"[kronos] Loading {label} (ctx={max_ctx}, samples={sample_count})...")
     t0 = time.time()
-    tokenizer = KronosTokenizer.from_pretrained(tokenizer_id)
-    model = Kronos.from_pretrained(f"NeoQuasar/Kronos-{KRONOS_MODEL}")
+    tokenizer = KronosTokenizer.from_pretrained(tok_path)
+    model = Kronos.from_pretrained(model_path)
     predictor = KronosPredictor(model, tokenizer, device="cpu", max_context=max_ctx)
     print(f"[kronos] Model loaded in {time.time()-t0:.1f}s")
 
@@ -178,11 +189,12 @@ def run_kronos_inference(df: pd.DataFrame, ticker: str) -> tuple:
     )
     print(f"[kronos] Inference done in {time.time()-t1:.1f}s")
     current_price = float(df.iloc[-1]["close"])
-    return pred, y_ts, current_price, sample_count
+    return pred, y_ts, current_price, sample_count, label
 
 
 def build_forecast_json(ticker: str, pred: pd.DataFrame, y_ts, current_price: float,
-                         candles_used: int, sample_count: int, option_context: str = "") -> dict:
+                         candles_used: int, sample_count: int, model_label: str,
+                         option_context: str = "") -> dict:
     pred_close = pred["close"].values
     final_price = float(pred_close[-1])
     change_pct = (final_price - current_price) / current_price * 100
@@ -218,7 +230,7 @@ def build_forecast_json(ticker: str, pred: pd.DataFrame, y_ts, current_price: fl
         "forecast_24h_high": pred_high,
         "forecast_24h_low": pred_low,
         "forecast_range_pct": round((pred_high - pred_low) / current_price * 100, 2),
-        "model": f"Kronos-{KRONOS_MODEL}",
+        "model": model_label,
         "sample_paths": sample_count,
         "hourly_predictions": [
             {
@@ -272,7 +284,7 @@ def post_to_discord(forecast: dict):
             "title": title,
             "description": "\n".join(desc),
             "color": color,
-            "footer": {"text": f"Kronos-{KRONOS_MODEL} • {forecast['candles_analyzed']} candles • {datetime.now(timezone.utc).strftime('%H:%M UTC')}"},
+            "footer": {"text": f"{forecast['model']} • {forecast['candles_analyzed']} candles • {datetime.now(timezone.utc).strftime('%H:%M UTC')}"},
         }]
     }
     try:
@@ -290,16 +302,18 @@ def main():
     p.add_argument("--no-disk", action="store_true", help="Skip writing forecast JSON to disk; only print to stdout")
     p.add_argument("--option-context", default="", help="e.g. '648C 05/15/26'")
     p.add_argument("--candles", type=int, default=0, help="Override candle lookback (0 = use tier default)")
+    p.add_argument("--finetuned", action="store_true", help="Use finetuned US-stocks weights from finetune_csv/finetuned/us_stocks_1h/")
     p.add_argument("--no-discord", action="store_true")
     args = p.parse_args()
     _os_kronos.environ["KRONOS_MODEL"] = args.model
     global KRONOS_MODEL; KRONOS_MODEL = args.model
 
-    tier = KRONOS_TIERS.get(KRONOS_MODEL, KRONOS_TIERS["mini"])
+    tier = KRONOS_TIERS["small"] if args.finetuned else KRONOS_TIERS.get(KRONOS_MODEL, KRONOS_TIERS["mini"])
     candles = args.candles if args.candles > 0 else tier["default_candles"]
 
     ticker = args.ticker.upper()
-    print(f"{'='*60}\nKRONOS FORECAST: {ticker} | model={KRONOS_MODEL} | candles={candles}\n{'='*60}")
+    ft_tag = " | finetuned=us_stocks_1h" if args.finetuned else ""
+    print(f"{'='*60}\nKRONOS FORECAST: {ticker} | model={KRONOS_MODEL} | candles={candles}{ft_tag}\n{'='*60}")
     t_total = time.time()
 
     try:
@@ -317,7 +331,7 @@ def main():
         return 1
 
     try:
-        pred, y_ts, current, sample_count = run_kronos_inference(df, canonical_ticker)
+        pred, y_ts, current, sample_count, model_label = run_kronos_inference(df, canonical_ticker, finetuned=args.finetuned)
     except Exception as e:
         err = {"ticker": canonical_ticker, "error": f"kronos inference failed: {e}",
                "generated_at": datetime.now(timezone.utc).isoformat()}
@@ -325,7 +339,7 @@ def main():
         (OUTPUT_DIR / f"latest_{canonical_ticker}.json").write_text(json.dumps(err, indent=2))
         return 1
 
-    forecast = build_forecast_json(canonical_ticker, pred, y_ts, current, len(df), sample_count, args.option_context)
+    forecast = build_forecast_json(canonical_ticker, pred, y_ts, current, len(df), sample_count, model_label, args.option_context)
 
     # Save to both timestamped + latest files
     ts = datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%S")
