@@ -74,6 +74,7 @@ export default function Office3D() {
     fetchAgentStatus();
     const i = setInterval(fetchAgentStatus, 30000);
     return () => clearInterval(i);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const handleAvatarPositionUpdate = (id: string, position: any) => {

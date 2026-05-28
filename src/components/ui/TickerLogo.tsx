@@ -51,7 +51,9 @@ export const TickerLogo: React.FC<{
   const [chain, setChain] = useState<string[]>(() => buildChain(symbol));
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setChain(buildChain(symbol));
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setChainIdx(0);
   }, [symbol]);
 

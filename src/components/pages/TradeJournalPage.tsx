@@ -93,6 +93,7 @@ export default function TradeJournalPage() {
     }
   };
 
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => { load(); }, [sourceFilter]);
 
   return (

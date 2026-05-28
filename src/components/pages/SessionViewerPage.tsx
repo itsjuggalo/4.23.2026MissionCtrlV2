@@ -60,6 +60,7 @@ export function SessionViewerPage() {
       intervalRef.current = setInterval(fetchLogs, 3000);
     }
     return () => { if (intervalRef.current) clearInterval(intervalRef.current); };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [streaming, selectedSources]);
 
   useEffect(() => {

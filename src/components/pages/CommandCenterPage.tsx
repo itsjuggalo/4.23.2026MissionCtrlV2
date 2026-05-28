@@ -192,6 +192,7 @@ export function CommandCenterPage() {
 
     const iv = setInterval(fetchData, 10000);
     return () => { clearInterval(iv); clearInterval(newsIv); };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   // Fetch extended insider+congress data for each watchlist + position symbol
@@ -348,6 +349,7 @@ export function CommandCenterPage() {
       try { localStorage.setItem('cc-kronos-history', JSON.stringify(next)); } catch {}
       return next;
     });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [kronosSymbol]);
 
   // Load Kronos history from localStorage

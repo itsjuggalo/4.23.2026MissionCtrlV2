@@ -17,11 +17,15 @@ function resolveClaudeBin(): string {
   // Prefer the Linux-native binary (bundled with the agent SDK) over the
   // Windows shim — Windows has a tight command-line length limit that the
   // copilot's full system prompt with alt_signals context overruns.
+  // Build paths at runtime so Turbopack static analysis does not trace them as module candidates.
+  const h = process.env.HOME || '';
+  const win = process.env.USERPROFILE || '';
+  const sdk = ['@anthropic-ai', 'claude-agent-sdk-linux-x64', 'claude'].join('/');
   const candidates = [
-    '/home/itsju/claudeclaw-os/node_modules/@anthropic-ai/claude-agent-sdk-linux-x64/claude',
-    '/home/itsju/AiData/claudeclaw-1/node_modules/@anthropic-ai/claude-agent-sdk-linux-x64/claude',
-    '/mnt/c/Users/itsju/AppData/Roaming/npm/claude',
-    '/home/itsju/.npm-global/bin/claude',
+    [h, 'claudeclaw-os', 'node_modules', sdk].join('/'),
+    [h, 'AiData', 'claudeclaw-1', 'node_modules', sdk].join('/'),
+    [win, 'AppData', 'Roaming', 'npm', 'claude'].join('/'),
+    [h, '.npm-global', 'bin', 'claude'].join('/'),
     '/usr/local/bin/claude',
   ];
   for (const p of candidates) {

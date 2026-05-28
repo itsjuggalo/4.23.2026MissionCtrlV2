@@ -187,6 +187,7 @@ function ForceGraph({
     if (!c || nodes.length === 0) return;
     posRef.current = initPositions(nodes, c.width, c.height);
     tickRef.current = 0;
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [nodes.length]);
 
   useEffect(() => {

@@ -9,7 +9,7 @@ async function fetchJSON(path: string) {
   try {
     const r = await fetch(`${BASE}/${path}`, { cache: 'no-store', signal: AbortSignal.timeout(5000) });
     if (!r.ok) return null;
-    return r.json();
+    return await r.json();
   } catch { return null; }
 }
 
