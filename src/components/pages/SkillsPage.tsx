@@ -84,6 +84,8 @@ export function SkillsPage() {
           setSkills(data.skills || []);
           setSchedulerStatus(data.schedulerStatus || 'unknown');
           setError(false);
+        } else {
+          setError(true);
         }
       } catch (e) {
         console.error('Failed to load skills', e);
