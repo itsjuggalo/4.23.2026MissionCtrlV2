@@ -48,6 +48,7 @@ import { SessionViewerPage } from '@/components/pages/SessionViewerPage';
 import { ITBPage } from '../pages/ITBPage';
 import { FreqtradePage } from '../pages/FreqtradePage';
 import { LiveStrategyPage } from '../pages/LiveStrategyPage';
+import { KronosLabPage } from '../pages/KronosLabPage';
 import { PsychChatWidget } from '../ui/PsychChatWidget';
 
 type PageName =
@@ -89,6 +90,7 @@ type PageName =
   | 'ITB'
   | 'Freqtrade'
   | 'Live Strategy'
+  | 'Kronos Lab'
   | 'GoTrader'
   | 'Landing';
 
@@ -99,7 +101,7 @@ const VALID_PAGES: PageName[] = [
   'Approvals', 'Calendar', 'Projects', 'Memory', 'Memory Graph',
   'Office', 'Desk', 'Docs', 'Wallets', 'Trades', 'Journal', 'Activity', 'Risk', 'TV Chart', 'PowerTrader',
   'Command Center', 'Performance', 'Regime', 'Usage', 'Landing', 'Congress', 'LLM Portfolio', 'Skills',
-  'Flow History', 'Flow Database', 'ITB', 'Freqtrade', 'Live Strategy', 'GoTrader',
+  'Flow History', 'Flow Database', 'ITB', 'Freqtrade', 'Live Strategy', 'Kronos Lab', 'GoTrader',
 ];
 
 function resolvePageFromParam(page: string | null): PageName {
@@ -109,6 +111,12 @@ function resolvePageFromParam(page: string | null): PageName {
   if (page.toLowerCase() === 'optionswatcher') return 'OptionsWatcher';
   if (page.toLowerCase() === 'itb') return 'ITB';
   if (page.toLowerCase() === 'live-strategy') return 'Live Strategy';
+  if (page.toLowerCase() === 'kronos-lab') return 'Kronos Lab';
+  if (page.toLowerCase() === 'flow-history') return 'Flow History';
+  if (page.toLowerCase() === 'flow-database') return 'Flow Database';
+  if (page.toLowerCase() === 'memory-graph') return 'Memory Graph';
+  if (page.toLowerCase() === 'llm-portfolio') return 'LLM Portfolio';
+  if (page.toLowerCase() === 'command-center') return 'Command Center';
   const pn = (page.charAt(0).toUpperCase() + page.slice(1).toLowerCase()) as PageName;
   return VALID_PAGES.includes(pn) ? pn : 'Command Center';
 }
@@ -222,6 +230,8 @@ export function AppShellClient() {
         return <FreqtradePage />;
       case 'Live Strategy':
         return <LiveStrategyPage />;
+      case 'Kronos Lab':
+        return <KronosLabPage />;
       case 'GoTrader':
         return null;
       default:

@@ -16,7 +16,7 @@ export type PageName =
   | "GoTrader" | "Wallets" | "Agents" | "Risk" | "Office" | "Memory"
   | "Memory Graph" | "Telegram" | "Approvals" | "Calendar" | "Tasks"
   | "Projects" | "Alerts" | "Usage" | "Congress" | "LLM Portfolio"
-  | "Journal" | "Docs" | "Skills" | "Dashboard" | "Scanner" | "Sessions" | "Options" | "OptionsWatcher" | "Flow Database" | "Desk" | "ITB" | "Freqtrade" | "Live Strategy";
+  | "Journal" | "Docs" | "Skills" | "Dashboard" | "Scanner" | "Sessions" | "Options" | "OptionsWatcher" | "Flow Database" | "Desk" | "ITB" | "Freqtrade" | "Live Strategy" | "Kronos Lab";
 
 interface SidebarProps {
   activePage: PageName;
@@ -57,6 +57,7 @@ export function Sidebar({ activePage, onNavigate, isCollapsed, onToggle, newSign
       { name: "ITB", icon: Cpu },
       { name: "Freqtrade", icon: BotMessageSquare },
       { name: "Live Strategy", icon: Webhook },
+      { name: "Kronos Lab", icon: Brain },
     ]},
     { label: "AGENTS", items: [
       { name: "Agents", icon: Bot },

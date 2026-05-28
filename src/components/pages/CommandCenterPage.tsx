@@ -1034,6 +1034,26 @@ export function CommandCenterPage() {
                 <span style={{ fontSize: 'var(--mc-font-label)', color: '#607d8b', fontFamily: 'var(--font-mc-mono)' }}>Change: <span style={{ color: kronosForecast.forecast_24h_change_pct >= 0 ? '#66bb6a' : '#ef5350', fontWeight: 700 }}>{kronosForecast.forecast_24h_change_pct >= 0 ? '+' : ''}{kronosForecast.forecast_24h_change_pct?.toFixed(2)}%</span></span>
                 <span style={{ fontSize: 'var(--mc-font-label)', color: '#607d8b', fontFamily: 'var(--font-mc-mono)' }}>Range: <span style={{ color: '#ff9800' }}>${kronosForecast.forecast_24h_low?.toLocaleString()} — ${kronosForecast.forecast_24h_high?.toLocaleString()}</span></span>
               </div>
+              {(() => {
+                const pts: number[] = (kronosForecast.hourly_predictions || []).map((p: any) => p.close).filter((v: any) => typeof v === 'number');
+                if (pts.length < 2) return null;
+                const min = Math.min(...pts), max = Math.max(...pts), range = max - min || 1;
+                const W = 260, H = 36, pad = 2;
+                const toX = (i: number) => pad + (i / (pts.length - 1)) * (W - pad * 2);
+                const toY = (v: number) => H - pad - ((v - min) / range) * (H - pad * 2);
+                const points = pts.map((v, i) => `${toX(i).toFixed(1)},${toY(v).toFixed(1)}`).join(' ');
+                const color = kronosForecast.forecast_24h_direction === 'bullish' ? '#66bb6a' : kronosForecast.forecast_24h_direction === 'bearish' ? '#ef5350' : '#78909c';
+                return (
+                  <div style={{ padding: '4px 4px 0', marginTop: 4 }}>
+                    <svg viewBox={`0 0 ${W} ${H}`} width="100%" height={H} style={{ display: 'block', overflow: 'visible' }}>
+                      <polyline points={points} fill="none" stroke={color} strokeWidth="1.5" strokeLinejoin="round" strokeLinecap="round" opacity={0.85} />
+                    </svg>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', fontFamily: 'var(--font-mc-mono)', fontSize: 9, color: '#455a64', marginTop: 1 }}>
+                      <span>NOW</span><span>+24H</span>
+                    </div>
+                  </div>
+                );
+              })()}
             </div>
           ) : <div style={{ color: '#455a64', fontSize: 'var(--mc-font-badge)', fontFamily: 'var(--font-mc-mono)', textAlign: 'center', padding: '30px' }}>Awaiting Kronos forecast...</div>}
         </div>
