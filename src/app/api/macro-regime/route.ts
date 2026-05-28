@@ -8,10 +8,17 @@ const TTL = 60_000;
 const HISTORY_PATH = '/tmp/mc_macro_history.json';
 const UA = 'Mozilla/5.0 (compatible; MissionControl/1.0)';
 
+function timeoutSignal(ms: number): AbortSignal {
+  const ctrl = new AbortController();
+  const id = setTimeout(() => ctrl.abort(), ms);
+  ctrl.signal.addEventListener('abort', () => clearTimeout(id), { once: true });
+  return ctrl.signal;
+}
+
 async function fetchYahooQuote(symbol: string): Promise<{ price: number; change: number; pct: number } | null> {
   try {
     const url = `https://query1.finance.yahoo.com/v8/finance/chart/${encodeURIComponent(symbol)}?interval=1d&range=5d`;
-    const res = await fetch(url, { headers: { 'User-Agent': UA, 'Accept': 'application/json' }, signal: AbortSignal.timeout(3500) });
+    const res = await fetch(url, { headers: { 'User-Agent': UA, 'Accept': 'application/json' }, cache: 'no-store', signal: timeoutSignal(2500) });
     if (!res.ok) return null;
     const j = await res.json();
     const result = j?.chart?.result?.[0];
@@ -30,7 +37,8 @@ async function fetchFearGreed(): Promise<any | null> {
   try {
     const res = await fetch('https://production.dataviz.cnn.io/index/fearandgreed/graphdata', {
       headers: { 'User-Agent': UA, 'Accept': 'application/json' },
-      signal: AbortSignal.timeout(3500),
+      cache: 'no-store',
+      signal: timeoutSignal(2500),
     });
     if (!res.ok) return null;
     const j = await res.json();
@@ -50,7 +58,7 @@ async function fetchFearGreed(): Promise<any | null> {
 async function fetchSectorReturn(symbol: string, name: string): Promise<any | null> {
   try {
     const url = `https://query1.finance.yahoo.com/v8/finance/chart/${symbol}?interval=1d&range=2mo`;
-    const res = await fetch(url, { headers: { 'User-Agent': UA, 'Accept': 'application/json' }, signal: AbortSignal.timeout(3500) });
+    const res = await fetch(url, { headers: { 'User-Agent': UA, 'Accept': 'application/json' }, cache: 'no-store', signal: timeoutSignal(2500) });
     if (!res.ok) return null;
     const j = await res.json();
     const result = j?.chart?.result?.[0];
@@ -263,12 +271,19 @@ export async function GET() {
       return NextResponse.json(CACHE.data);
     }
 
-    const [fg, vixQ, tnxQ, irxQ, sectors] = await Promise.all([
-      fetchFearGreed(),
-      fetchYahooQuote('^VIX'),
-      fetchYahooQuote('^TNX'),
-      fetchYahooQuote('^IRX'),
-      fetchSectorRotation(),
+    const hardDeadline = new Promise<never>((_, reject) =>
+      setTimeout(() => reject(new Error('macro-regime hard timeout')), 7000)
+    );
+
+    const [fg, vixQ, tnxQ, irxQ, sectors] = await Promise.race([
+      Promise.all([
+        fetchFearGreed(),
+        fetchYahooQuote('^VIX'),
+        fetchYahooQuote('^TNX'),
+        fetchYahooQuote('^IRX'),
+        fetchSectorRotation(),
+      ]),
+      hardDeadline,
     ]);
 
     const tenY = tnxQ ? Math.round(tnxQ.price * 100) / 100 : null;

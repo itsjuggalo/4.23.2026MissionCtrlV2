@@ -40,3 +40,5 @@ data/*.sqlite-shm
 memory/memories.json
 node_modules/
 secrets/
+# Example env files should be tracked even though .env.* is ignored
+!.env.local.example
