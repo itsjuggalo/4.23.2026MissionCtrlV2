@@ -245,6 +245,7 @@ export function DashboardPage() {
   const [report, setReport] = useState<ReportData | null>(null);
   const [params, setParams] = useState<SupertrendParams | null>(null);
   const [crypto, setCrypto] = useState<CryptoData | null>(null);
+  const [weather, setWeather] = useState<{ temp_f: number | null; feels_like_f: number | null; description: string; icon: string; humidity: number | null; wind_mph: number | null; wind_dir: string | null; rain_1h_mm: number; clouds_pct: number | null; city: string } | null>(null);
   const [topFlowsCount, setTopFlowsCount] = useState<number>(0);
   useEffect(() => {
     const fetchFlows = () => {
@@ -270,7 +271,7 @@ export function DashboardPage() {
 
   const fetchAll = async () => {
     try {
-      const [pRes, sRes, rRes, repRes, prRes, cRes, ehRes] = await Promise.all([
+      const [pRes, sRes, rRes, repRes, prRes, cRes, ehRes, wRes] = await Promise.all([
         fetch('/api/portfolio').then(r => r.ok ? r.json() : null).catch(() => null),
         fetch('/api/signals/latest').then(r => r.ok ? r.json() : null).catch(() => null),
         fetch('/api/regime').then(r => r.ok ? r.json() : null).catch(() => null),
@@ -278,10 +279,12 @@ export function DashboardPage() {
         fetch('/api/supertrend-params').then(r => r.ok ? r.json() : null).catch(() => null),
         fetch('/api/crypto').then(r => r.ok ? r.json() : null).catch(() => null),
         fetch('/api/equity-history?days=30').then(r => r.ok ? r.json() : null).catch(() => null),
+        fetch('/api/weather').then(r => r.ok ? r.json() : null).catch(() => null),
       ]);
       setPortfolio(pRes); setSignals(sRes);
       if (ehRes?.history) setEquityHist(ehRes.history); setRegime(rRes);
       setReport(repRes); setParams(prRes); setCrypto(cRes);
+      if (wRes && !wRes.error) setWeather(wRes);
       setError(false);
     } catch (e) { console.error(e); setError(true); }
     finally { setLoading(false); }
@@ -359,7 +362,7 @@ export function DashboardPage() {
       </div>
 
       {/* === MARKET PULSE BAR === */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '8px', marginBottom: '16px' }}>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(5, 1fr)', gap: '8px', marginBottom: '16px' }}>
         {[
           { sym: 'BTC', price: crypto?.bitcoin?.usd || 0, chg: crypto?.bitcoin?.usd_24h_change || 0 },
           { sym: 'ETH', price: crypto?.ethereum?.usd || 0, chg: crypto?.ethereum?.usd_24h_change || 0 },
@@ -387,6 +390,36 @@ export function DashboardPage() {
             </div>
           </div>
         ))}
+        {/* Weather card — OWM Current Weather 2.5 */}
+        <div style={{
+          background: '#0a1929', border: '1px solid #1a3a4a', borderRadius: '8px',
+          padding: '12px 16px', display: 'flex', justifyContent: 'space-between', alignItems: 'center',
+        }}>
+          <div>
+            <div style={{ fontSize: 'var(--mc-font-label)', color: '#4fc3f7', fontFamily: 'var(--font-mc-mono)', fontWeight: 600 }}>
+              {weather?.city ? `${weather.city} WX` : 'NYC WX'}
+            </div>
+            <div style={{ fontSize: 'var(--mc-font-xl)', fontWeight: 700, color: '#e0e0e0', fontFamily: 'var(--font-mc-mono)' }}>
+              {weather?.temp_f != null ? `${Math.round(weather.temp_f)}°F` : '---'}
+            </div>
+            <div style={{ fontSize: 'var(--mc-font-xs)', color: '#90a4ae', fontFamily: 'var(--font-mc-mono)', marginTop: '2px' }}>
+              feels {weather?.feels_like_f != null ? `${Math.round(weather.feels_like_f)}°F` : '--'}
+            </div>
+            <div style={{ fontSize: 'var(--mc-font-xs)', color: '#90a4ae', fontFamily: 'var(--font-mc-mono)', marginTop: '2px' }}>
+              💨 {weather?.wind_mph != null ? `${Math.round(weather.wind_mph)}mph` : '--'}{weather?.wind_dir ? ` ${weather.wind_dir}` : ''}
+              {(weather?.rain_1h_mm ?? 0) > 0 && <span style={{ color: '#4fc3f7', marginLeft: '4px' }}>🌧 {weather!.rain_1h_mm.toFixed(1)}mm</span>}
+            </div>
+          </div>
+          <div style={{ textAlign: 'right' }}>
+            <div style={{ fontSize: '26px' }}>{weather?.icon || '🌡️'}</div>
+            <div style={{ fontSize: 'var(--mc-font-xs)', color: '#607d8b', fontFamily: 'var(--font-mc-mono)', marginTop: '4px', maxWidth: '80px', textAlign: 'right', lineHeight: 1.2 }}>
+              {weather?.description || 'loading...'}
+            </div>
+            <div style={{ fontSize: 'var(--mc-font-xs)', color: '#607d8b', fontFamily: 'var(--font-mc-mono)', marginTop: '2px' }}>
+              💧{weather?.humidity ?? '--'}%
+            </div>
+          </div>
+        </div>
       </div>
 
       {/* === MAIN 3-COLUMN === */}
