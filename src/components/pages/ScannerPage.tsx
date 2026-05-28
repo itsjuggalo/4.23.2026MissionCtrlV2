@@ -20,22 +20,26 @@ export function ScannerPage() {
   const [squeeze, setSqueeze] = useState<any>({ candidates: [] });
   const [liq, setLiq] = useState<any>({ bias: 'NO_DATA', top_coins: [], largest: [] });
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(false);
   const [lastUpdate, setLastUpdate] = useState<Date | null>(null);
 
   useEffect(() => {
     async function fetchAll() {
-      const [cRes, rRes, sRes, tRes, qRes, lRes] = await Promise.all([
-        fetch('/api/crypto').then(r => r.json()).catch(() => ({})),
-        fetch('/api/regime').then(r => r.json()).catch(() => ({})),
-        fetch('/api/signals/latest').then(r => r.json()).catch(() => ({})),
-        fetch('/api/telegram-signals?limit=10').then(r => r.json()).catch(() => []),
-        fetch('/api/squeeze-alerts', { cache: 'no-store' }).then(r => r.json()).catch(() => ({ candidates: [] })),
-        fetch('/api/liquidations', { cache: 'no-store' }).then(r => r.json()).catch(() => ({ bias: 'NO_DATA', top_coins: [], largest: [] })),
-      ]);
-      setCrypto(cRes); setRegime(rRes); setSignals(sRes);
-      setTelegram(Array.isArray(tRes) ? tRes : tRes.signals || []);
-      setSqueeze(qRes); setLiq(lRes);
-      setLastUpdate(new Date());
+      try {
+        const [cRes, rRes, sRes, tRes, qRes, lRes] = await Promise.all([
+          fetch('/api/crypto').then(r => r.json()).catch(() => ({})),
+          fetch('/api/regime').then(r => r.json()).catch(() => ({})),
+          fetch('/api/signals/latest').then(r => r.json()).catch(() => ({})),
+          fetch('/api/telegram-signals?limit=10').then(r => r.json()).catch(() => []),
+          fetch('/api/squeeze-alerts', { cache: 'no-store' }).then(r => r.json()).catch(() => ({ candidates: [] })),
+          fetch('/api/liquidations', { cache: 'no-store' }).then(r => r.json()).catch(() => ({ bias: 'NO_DATA', top_coins: [], largest: [] })),
+        ]);
+        setCrypto(cRes); setRegime(rRes); setSignals(sRes);
+        setTelegram(Array.isArray(tRes) ? tRes : tRes.signals || []);
+        setSqueeze(qRes); setLiq(lRes);
+        setLastUpdate(new Date());
+        setError(false);
+      } catch { setError(true); }
       setLoading(false);
     }
     fetchAll();
@@ -65,11 +69,12 @@ export function ScannerPage() {
       SCANNING MARKETS...
     </div>
   );
+  const errBanner = error ? <div style={{ padding: '10px 16px', background: '#ef535014', border: '1px solid #ef535033', borderRadius: '6px', color: '#ef5350', fontFamily: 'var(--font-mc-mono)', fontSize: 'var(--mc-font-badge)', marginBottom: '12px' }}>⚠ One or more data sources unavailable — retrying every 15s</div> : null;
 
   return (
     <div style={{ padding: '24px', maxWidth: '1100px', margin: '0 auto' }}>
       <style>{`.scan-card { background: linear-gradient(180deg, #0a1929 0%, #0d1420 100%); border: 1px solid #1a3a4a; border-radius: 10px; }`}</style>
-
+      {errBanner}
       {/* Status bar */}
       <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '16px', padding: '8px 14px', background: '#66bb6a0d', border: '1px solid #66bb6a33', borderRadius: '6px' }}>
         <span style={{ width: '8px', height: '8px', borderRadius: '50%', background: '#66bb6a', boxShadow: '0 0 6px #66bb6a88', animation: 'pulse 2s infinite' }} />

@@ -7,6 +7,7 @@ export function RiskPage() {
   const [trades, setTrades] = useState<any[]>([]);
   const [equity, setEquity] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(false);
 
   useEffect(() => {
     async function load() {
@@ -19,6 +20,7 @@ export function RiskPage() {
       setPortfolio(p); setRegime(r);
       setTrades(t?.trades || t || []);
       setEquity(e?.history || e || []);
+      if (!p && !r) setError(true);
       setLoading(false);
     }
     load();
@@ -63,9 +65,11 @@ export function RiskPage() {
   const fmt = (n: number, d = 2) => n.toLocaleString(undefined, { minimumFractionDigits: d, maximumFractionDigits: d });
 
   if (loading) return <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '40vh', color: '#4fc3f7', fontFamily: 'var(--font-mc-mono)' }}>ANALYZING RISK...</div>;
+  const errBanner = error ? <div style={{ padding: '10px 16px', background: '#ef535014', border: '1px solid #ef535033', borderRadius: '6px', color: '#ef5350', fontFamily: 'var(--font-mc-mono)', fontSize: 'var(--mc-font-badge)', marginBottom: '16px' }}>⚠ Portfolio/regime API unavailable — metrics may show zeros</div> : null;
 
   return (
     <div style={{ padding: '24px', maxWidth: '1100px', margin: '0 auto' }}>
+      {errBanner}
       {/* === TOP: Risk Gauge + Key Metrics side by side === */}
       <div style={{ display: 'grid', gridTemplateColumns: '280px 1fr', gap: '16px', marginBottom: '20px' }}>
         {/* Gauge */}

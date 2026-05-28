@@ -97,6 +97,7 @@ function GridBox({ title, color, count, children }: { title: string; color: stri
 export function SignalsPage() {
   const [data, setData] = useState<any>(null);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(false);
   const [sourceFilter, setSourceFilter] = useState('all');
   const [categoryFilter, setCategoryFilter] = useState('all');
   const [ageFilter, setAgeFilter] = useState('30d');
@@ -116,14 +117,16 @@ export function SignalsPage() {
   const fetchData = useCallback(async () => {
     try {
       const r = await fetch('/api/trade-signals');
-      if (r.ok) setData(await r.json());
-    } catch {}
+      if (r.ok) { setData(await r.json()); setError(false); }
+      else setError(true);
+    } catch { setError(true); }
     setLoading(false);
   }, []);
 
   useEffect(() => { fetchData(); const i = setInterval(fetchData, 30000); return () => clearInterval(i); }, [fetchData]);
 
   if (loading) return <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '40vh', color: '#4fc3f7', fontFamily: M, fontSize: 'var(--mc-font-xl)' }}>LOADING SIGNALS...</div>;
+  if (error && !data) return <div style={{ padding: '24px' }}><div style={{ padding: '10px 16px', background: '#ef535014', border: '1px solid #ef535033', borderRadius: '6px', color: '#ef5350', fontFamily: M, fontSize: 'var(--mc-font-badge)' }}>⚠ Signals API unavailable — retrying every 30s</div></div>;
 
   const toSignals = (arr: any[], source: string, type: 'option' | 'stock'): Signal[] =>
     (arr || []).map((s: any) => ({ ...s, source, type, postedAt: s.id && /^\d{9,10}$/.test(s.id) ? parseInt(s.id) : undefined }))

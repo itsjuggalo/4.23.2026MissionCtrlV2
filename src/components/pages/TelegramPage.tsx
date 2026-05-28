@@ -110,6 +110,7 @@ function GridBox({ title, color, count, children }: { title: string; color: stri
 export function TelegramPage() {
   const [signals, setSignals] = useState<TelegramSignal[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(false);
   const [search, setSearch] = useState('');
   const [qualityFilter, setQualityFilter] = useState<string>('all');
   const [selected, setSelected] = useState<TelegramSignal | null>(null);
@@ -140,7 +141,8 @@ export function TelegramPage() {
           deduped.push(s);
         }
         setSignals(deduped);
-      } catch {}
+        setError(false);
+      } catch { setError(true); }
       setLoading(false);
     }
     fetchSignals();
@@ -154,6 +156,7 @@ export function TelegramPage() {
       <style>{'@keyframes tBlink { 0%,100% { opacity:1; } 50% { opacity:0.3; } }'}</style>
     </div>
   );
+  const errBanner = error ? <div style={{ padding: '10px 16px', background: '#ef535014', border: '1px solid #ef535033', borderRadius: '6px', color: '#ef5350', fontFamily: M, fontSize: 'var(--mc-font-badge)', marginBottom: '10px', flexShrink: 0 }}>⚠ Telegram signals API unavailable — retrying every 30s</div> : null;
 
   const actionableCount = signals.filter(s => assessQuality(s).grade === 'ACTIONABLE').length;
   const channels = [...new Set(signals.map(s => s.channel_name || 'Unknown'))].sort();
@@ -180,6 +183,7 @@ export function TelegramPage() {
 
   return (
     <div style={{ padding: '12px 16px', height: '100%', display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
+      {errBanner}
       {/* Top Bar */}
       <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '10px', flexWrap: 'wrap', flexShrink: 0 }}>
         <span style={{ width: '8px', height: '8px', borderRadius: '50%', background: '#66bb6a', boxShadow: '0 0 6px #66bb6a88' }} />
