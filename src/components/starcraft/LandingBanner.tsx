@@ -36,7 +36,6 @@ export default function LandingBanner({ height = 160, persistKey: _persistKey = 
 
   const pick = (id: Battle) => {
     setSelected(id);
-    // eslint-disable-next-line react-hooks/immutability
     try { window.__mcBattle = id; } catch {}
   };
 

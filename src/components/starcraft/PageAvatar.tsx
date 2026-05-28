@@ -185,7 +185,7 @@ export default function PageAvatar({ size = 48, seed }: Props) {
   const unit = useMemo<UnitId>(() => {
     // Combine page seed + a session-stable random so different page loads rotate
     const sessionSalt = (typeof window !== 'undefined' && window.__mcAvatarSalt) ||
-      (typeof window !== 'undefined' ? (window.__mcAvatarSalt = Math.floor(Math.random() * 100000)) : 0); // eslint-disable-line react-hooks/immutability, react-hooks/purity
+      (typeof window !== 'undefined' ? (window.__mcAvatarSalt = Math.floor(Math.random() * 100000)) : 0);
     const base = seed ? hashSeed(seed) : 0;
     const idx = (base + sessionSalt) % UNITS.length;
     return UNITS[idx];

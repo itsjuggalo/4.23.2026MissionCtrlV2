@@ -62,7 +62,6 @@ export const StockDetailDrawer: React.FC<{ ticker: string | null; onClose: () =>
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    // eslint-disable-next-line react-hooks/set-state-in-effect
     if (!ticker) { setData(null); setCandles(null); return; }
     setLoading(true);
     let cancelled = false;

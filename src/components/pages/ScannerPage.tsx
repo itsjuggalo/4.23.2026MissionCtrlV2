@@ -95,7 +95,6 @@ export function ScannerPage() {
       <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '16px', padding: '8px 14px', background: '#66bb6a0d', border: '1px solid #66bb6a33', borderRadius: '6px' }}>
         <span style={{ width: '8px', height: '8px', borderRadius: '50%', background: '#66bb6a', boxShadow: '0 0 6px #66bb6a88', animation: 'pulse 2s infinite' }} />
         <span style={{ fontSize: 'var(--mc-font-label)', fontWeight: 700, color: '#66bb6a', fontFamily: 'var(--font-mc-mono)' }}>LIVE SCANNING</span>
-        {/* eslint-disable-next-line react-hooks/purity */}
         {lastUpdate && <span style={{ fontSize: 'var(--mc-font-label)', color: '#607d8b', fontFamily: 'var(--font-mc-mono)' }}>Updated {Math.floor((Date.now() - lastUpdate.getTime()) / 1000)}s ago · 15s refresh</span>}
         <style>{`@keyframes pulse { 0%,100% { opacity:1; } 50% { opacity:0.4; } }`}</style>
       </div>

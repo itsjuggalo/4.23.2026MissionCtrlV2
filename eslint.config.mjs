@@ -22,6 +22,14 @@ const eslintConfig = defineConfig([
         destructuredArrayIgnorePattern: '^_',
       }],
       '@typescript-eslint/no-explicit-any': 'off',
+      // react-hooks@7.x changed set-state-in-effect to fire on any function
+      // call inside useEffect (not just direct setState), breaking the standard
+      // fetchData() pattern. The other three are new experimental rules in 7.x
+      // that are too strict for this codebase.
+      'react-hooks/set-state-in-effect': 'off',
+      'react-hooks/purity': 'off',
+      'react-hooks/static-components': 'off',
+      'react-hooks/immutability': 'off',
     },
   },
 ]);

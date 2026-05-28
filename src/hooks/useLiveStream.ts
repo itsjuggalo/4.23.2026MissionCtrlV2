@@ -52,7 +52,6 @@ export function useLiveStream(enabled: boolean = true): LiveData {
       setData(prev => ({ ...prev, connected: false }));
       es.close();
       // Retry in 5 seconds
-      // eslint-disable-next-line react-hooks/immutability
       retryRef.current = setTimeout(connect, 5000);
     };
   }, [enabled]);

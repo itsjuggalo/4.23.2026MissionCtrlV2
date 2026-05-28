@@ -51,7 +51,6 @@ export function useViewMode(): [ViewMode, (m: ViewMode) => void, boolean] {
         initial = 'mobile';
       }
     } catch { /* localStorage unavailable in some browsers */ }
-    // eslint-disable-next-line react-hooks/set-state-in-effect
     setMode(initial);
     applyBodyClass(initial);
     setHydrated(true);

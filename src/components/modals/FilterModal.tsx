@@ -80,7 +80,6 @@ export const FilterModal: React.FC<{
   const [draft, setDraft] = useState<FilterState>(initial);
 
   useEffect(() => {
-    // eslint-disable-next-line react-hooks/set-state-in-effect
     if (open) setDraft(initial);
   }, [open, initial]);
 
