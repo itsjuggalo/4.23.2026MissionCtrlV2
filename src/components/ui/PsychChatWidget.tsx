@@ -46,10 +46,11 @@ export function PsychChatWidget() {
       const apiMessages = [...messages, userMessage]
         .filter(m => m.role === 'user' || m.role === 'assistant')
         .map(m => ({ role: m.role, content: m.content }));
-      const response = await fetch('https://api.anthropic.com/v1/messages', {
+      const response = await fetch('/api/psych-chat', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ model: 'claude-sonnet-4-20250514', max_tokens: 1000, system: PSYCH_SYSTEM_PROMPT, messages: apiMessages }),
+        body: JSON.stringify({ messages: apiMessages }),
+        signal: AbortSignal.timeout(15000),
       });
       if (!response.ok) throw new Error(`HTTP ${response.status}`);
       const data = await response.json();
