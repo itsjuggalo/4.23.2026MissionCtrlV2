@@ -16,7 +16,7 @@ export default function Dashboard() {
 
   useEffect(() => {
     const r = async () => {
-      try { const x = await fetch("/api/status", { cache: "no-store" }).then(r => r.json()); setS(x); } catch {}
+      try { const x = await fetch("/api/status", { cache: "no-store" }).then(r => r.ok ? r.json() : Promise.reject()); setS(x); } catch {}
     };
     r();
     const i = setInterval(r, 15000);

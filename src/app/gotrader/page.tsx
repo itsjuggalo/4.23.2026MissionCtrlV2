@@ -5,7 +5,7 @@ export default function GoTraderPage() {
   const [data, setData] = useState<any>(null);
 
   useEffect(() => {
-    fetch('/api/gotrader').then(r => r.json()).then(setData);
+    fetch('/api/gotrader').then(r => r.ok ? r.json() : null).then(d => { if (d) setData(d); }).catch(() => {});
   }, []);
 
   if (!data) return <div style={{ padding: 24, color: '#888' }}>Loading...</div>;

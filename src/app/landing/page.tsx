@@ -199,13 +199,13 @@ export default function WelcomePage() {
 
   // Load initial pins + prompt catalog + most-recent thread on mount
   useEffect(() => {
-    fetch('/api/copilot/watchlist').then((r) => r.json()).then((d) => setPins(d.pins || [])).catch(() => {});
-    fetch('/api/copilot/prompts?per_category=5').then((r) => r.json()).then((d) => setPromptCatalog(d.prompts || {})).catch(() => {});
+    fetch('/api/copilot/watchlist').then((r) => r.ok ? r.json() : Promise.reject()).then((d) => setPins(d.pins || [])).catch(() => {});
+    fetch('/api/copilot/prompts?per_category=5').then((r) => r.ok ? r.json() : Promise.reject()).then((d) => setPromptCatalog(d.prompts || {})).catch(() => {});
 
     // Resume the most recent thread if it's very recent (last 18h) — gives the
     // "AIME was working overnight" feeling when the morning_digest seeded one.
     fetch('/api/copilot/threads?limit=1')
-      .then((r) => r.json())
+      .then((r) => r.ok ? r.json() : Promise.reject())
       .then(async (d) => {
         const t = d.threads?.[0];
         if (!t || !t.thread_id) return;
@@ -213,6 +213,7 @@ export default function WelcomePage() {
         const ageHours = (Date.now() - updatedAt) / 3_600_000;
         if (ageHours > 18) return; // too old, start fresh
         const r = await fetch(`/api/copilot/threads/${t.thread_id}`);
+        if (!r.ok) return;
         const full = await r.json();
         if (Array.isArray(full.messages) && full.messages.length > 0) {
           setMessages(full.messages);
@@ -230,6 +231,7 @@ export default function WelcomePage() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ symbol }),
       });
+      if (!r.ok) return;
       const d = await r.json();
       if (Array.isArray(d.pins)) setPins(d.pins);
     } catch { /* swallow */ }
@@ -242,6 +244,7 @@ export default function WelcomePage() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ text }),
       });
+      if (!r.ok) return;
       const d = await r.json();
       if (Array.isArray(d.pins)) setPins(d.pins);
     } catch { /* swallow */ }

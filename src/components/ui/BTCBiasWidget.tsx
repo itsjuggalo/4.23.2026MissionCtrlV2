@@ -93,6 +93,7 @@ export function BTCBiasWidget() {
   const fetch_ = useCallback(async () => {
     try {
       const res = await fetch('/api/btc-bias');
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
       const d = await res.json();
       setData(d);
     } catch { /* silent */ }

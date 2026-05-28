@@ -15,6 +15,7 @@ export default function Status() {
   const refresh = async () => {
     try {
       const r = await fetch("/api/status", { cache: "no-store" });
+      if (!r.ok) throw new Error(`HTTP ${r.status}`);
       const d = await r.json();
       setData(d);
       setUpdated(new Date().toLocaleTimeString("en-US", { timeZone: "America/New_York", hour12: true }));

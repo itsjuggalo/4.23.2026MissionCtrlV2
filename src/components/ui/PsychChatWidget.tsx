@@ -51,6 +51,7 @@ export function PsychChatWidget() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ model: 'claude-sonnet-4-20250514', max_tokens: 1000, system: PSYCH_SYSTEM_PROMPT, messages: apiMessages }),
       });
+      if (!response.ok) throw new Error(`HTTP ${response.status}`);
       const data = await response.json();
       const assistantText = data.content?.filter((item: any) => item.type === 'text').map((item: any) => item.text).join('\n') || 'Connection disrupted. Still monitoring — try again shortly.';
       setMessages(prev => [...prev, { role: 'assistant', content: assistantText }]);
