@@ -54,7 +54,6 @@ export function useViewMode(): [ViewMode, (m: ViewMode) => void, boolean] {
     // eslint-disable-next-line react-hooks/set-state-in-effect
     setMode(initial);
     applyBodyClass(initial);
-    // eslint-disable-next-line react-hooks/set-state-in-effect
     setHydrated(true);
 
     // Cross-component live sync within the same tab

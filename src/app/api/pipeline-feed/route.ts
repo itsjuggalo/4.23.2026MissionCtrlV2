@@ -1,4 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { readFileSync, existsSync } from 'fs';
+
+export const dynamic = 'force-dynamic';
+
+const SIDECAR = '/home/itsju/mission-control/signal-receiver/data/scored_signals_recent.json';
 
 interface PipelineEvent {
   ts: number;
@@ -10,7 +15,7 @@ interface PipelineEvent {
 
 export async function GET(req: NextRequest) {
   try {
-  const FETCH_OPTS = { cache: 'no-store' as const, signal: AbortSignal.timeout(4000) };
+  const FETCH_OPTS = { cache: 'no-store' as const, signal: AbortSignal.timeout(8000) };
   const base = req.nextUrl.origin;
   const events: PipelineEvent[] = [];
   const now = Date.now();
@@ -35,12 +40,29 @@ export async function GET(req: NextRequest) {
     }
   }
 
-  // WHALE from /api/live-signals
+  // WHALE from /api/live-signals (with direct sidecar fallback when self-fetch fails/times out)
   const liveD = liveRes.status === 'fulfilled' ? liveRes.value : null;
-  if (liveD) {
-    for (const w of (liveD?.topWatched || []).slice(0, 5)) {
-      events.push({ ts: now - 60000, source: 'WHALE', label: w.ticker || '?', message: `${w.latestTier || ''} ${w.latestValue || ''} \u00b7 ${w.flowCount || 0}x \u00b7 score ${w.maxScore || 0}`.trim(), color: '#ce93d8' });
-    }
+  let topWatched: any[] = liveD?.topWatched || [];
+  if (topWatched.length === 0 && existsSync(SIDECAR)) {
+    try {
+      const signals: any[] = JSON.parse(readFileSync(SIDECAR, 'utf-8'));
+      const scores: Record<string, any> = {};
+      for (const s of signals.slice(0, 40)) {
+        const t = s.ticker;
+        if (!t) continue;
+        if (!scores[t]) scores[t] = { ticker: t, maxScore: 0, latestTier: s.tier || '', latestValue: s.flow_value_raw || '', flowCount: 0 };
+        scores[t].flowCount += 1;
+        if ((s.score || 0) > scores[t].maxScore) {
+          scores[t].maxScore = s.score || 0;
+          scores[t].latestTier = s.tier || '';
+          scores[t].latestValue = s.flow_value_raw || '';
+        }
+      }
+      topWatched = Object.values(scores).sort((a: any, b: any) => b.maxScore - a.maxScore).slice(0, 3);
+    } catch {}
+  }
+  for (const w of topWatched.slice(0, 5)) {
+    events.push({ ts: now - 60000, source: 'WHALE', label: w.ticker || '?', message: `${w.latestTier || ''} ${w.latestValue || ''} \u00b7 ${w.flowCount || 0}x \u00b7 score ${w.maxScore || 0}`.trim(), color: '#ce93d8' });
   }
 
   // SIGNAL from /api/analyst-signals (last 30min open)

@@ -456,7 +456,6 @@ const ChainView: React.FC = () => {
   useEffect(() => {
     if (!ticker || !selectedExp) return;
     let cancelled = false;
-    // eslint-disable-next-line react-hooks/set-state-in-effect
     setLoading(true);
     (async () => {
       try {
