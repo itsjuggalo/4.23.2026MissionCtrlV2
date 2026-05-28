@@ -185,7 +185,8 @@ try:
     from tradier_client import fetch_option_quote as _tradier_quote
 except Exception:
     _tradier_quote = None
-KRONOS_CMD = "/home/ubuntu/mission-control/agent-team/kronos/kronos_on_demand.py"
+KRONOS_CMD = "/home/itsju/01_ACTIVE/mission-control/agent-team/kronos/kronos_on_demand.py"
+KRONOS_PYTHON = "/home/itsju/02_DATA/mc-kb/.venv/bin/python"
 
 MAX_PICKS_PER_CYCLE = 3
 MAX_NEW_PICKS_PER_DAY = 3   # Hard cap on NEW picks per trading day across all cycles
@@ -326,7 +327,7 @@ def fetch_kronos_for_ticker(ticker, option_context):
     """BLOCKING — waits for Kronos result. Only used when explicitly needed."""
     try:
         proc = subprocess.run(
-            ["python3", KRONOS_CMD, "--ticker", ticker, "--option-context", option_context, "--no-discord"],
+            [KRONOS_PYTHON, KRONOS_CMD, "--ticker", ticker, "--option-context", option_context, "--no-discord"],
             capture_output=True, timeout=180, text=True,
         )
         try:
@@ -349,7 +350,7 @@ def fire_kronos_background(ticker, option_context):
         # Detach fully from parent so Boba's cycle can exit without waiting
         import subprocess
         subprocess.Popen(
-            ["python3", KRONOS_CMD, "--ticker", ticker, "--option-context", option_context],
+            [KRONOS_PYTHON, KRONOS_CMD, "--ticker", ticker, "--option-context", option_context],
             stdout=subprocess.DEVNULL,
             stderr=subprocess.DEVNULL,
             stdin=subprocess.DEVNULL,
