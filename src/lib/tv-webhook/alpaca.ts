@@ -222,7 +222,7 @@ async function submitCryptoExit(
     }
     return { ok: false, status: res.status, body: parsed };
   } catch (e) {
-    return { ok: false, status: 0, body: null, network_error: String(e) };
+    return { ok: false, status: 0, body: null, network_error: String(e).slice(0, 200) };
   }
 }
 
@@ -294,6 +294,6 @@ export async function submitBracketOrAlt(account: string, alert: TvAlert, dedupe
     }
     return { ok: false, status: res.status, body: parsed };
   } catch (e) {
-    return { ok: false, status: 0, body: null, network_error: String(e) };
+    return { ok: false, status: 0, body: null, network_error: String(e).slice(0, 200) };
   }
 }

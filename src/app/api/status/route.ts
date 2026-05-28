@@ -47,10 +47,10 @@ async function alpaca(account: string) {
       buying_power: parseFloat(acct.buying_power || "0"),
       positions: Array.isArray(pos) ? pos.map((p: any) => ({
         symbol: p.symbol, qty: p.qty,
-        avg_entry: parseFloat(p.avg_entry_price),
-        current: parseFloat(p.current_price),
-        pnl: parseFloat(p.unrealized_pl),
-        pnl_pct: parseFloat(p.unrealized_plpc) * 100,
+        avg_entry: parseFloat(p.avg_entry_price || '0') || 0,
+        current: parseFloat(p.current_price || '0') || 0,
+        pnl: parseFloat(p.unrealized_pl || '0') || 0,
+        pnl_pct: (parseFloat(p.unrealized_plpc || '0') || 0) * 100,
       })) : [],
       orders_today: Array.isArray(orders) ? orders.length : 0,
       recent_orders: Array.isArray(orders) ? orders.slice(0, 8).map((o: any) => ({
@@ -59,7 +59,7 @@ async function alpaca(account: string) {
       })) : [],
     };
   } catch (e: unknown) {
-    return { error: e instanceof Error ? e.message : String(e) };
+    return { error: (e instanceof Error ? e.message : String(e)).slice(0, 200) };
   }
 }
 

@@ -206,7 +206,7 @@ export async function GET() {
       oracle_push_health: oraclePushHealth,
     });
   } catch (err: unknown) {
-    const msg = err instanceof Error ? err.message : String(err);
+    const msg = (err instanceof Error ? err.message : String(err)).slice(0, 200);
     return NextResponse.json(
       { error: `desk-cycle read failed: ${msg}` },
       { status: 500 }

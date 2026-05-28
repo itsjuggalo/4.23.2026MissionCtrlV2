@@ -15,7 +15,7 @@ export async function GET(request: Request) {
     });
   } catch (error) {
     return NextResponse.json(
-      { error: String(error), events: [] },
+      { error: String(error).slice(0, 200), events: [] },
       { status: 500 }
     );
   }
@@ -35,7 +35,7 @@ export async function POST(request: Request) {
     return NextResponse.json({ success: true });
   } catch (error) {
     return NextResponse.json(
-      { success: false, error: String(error) },
+      { success: false, error: String(error).slice(0, 200) },
       { status: 500 }
     );
   }

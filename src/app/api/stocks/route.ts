@@ -19,7 +19,7 @@ export async function GET(request: NextRequest) {
     res = await fetch(url, { signal: AbortSignal.timeout(6000) });
   } catch (err) {
     return Response.json(
-      { error: `Network error: ${err instanceof Error ? err.message : String(err)}` },
+      { error: `Network error: ${(err instanceof Error ? err.message : String(err)).slice(0, 200)}` },
       { status: 502 }
     );
   }

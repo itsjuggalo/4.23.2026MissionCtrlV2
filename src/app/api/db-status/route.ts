@@ -16,7 +16,7 @@ export async function GET(request: Request) {
     });
   } catch (error) {
     return NextResponse.json(
-      { status: 'error', error: String(error) },
+      { status: 'error', error: String(error).slice(0, 200) },
       { status: 500 }
     );
   }

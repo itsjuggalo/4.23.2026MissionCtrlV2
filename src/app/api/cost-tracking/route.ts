@@ -31,7 +31,7 @@ export async function GET(request: Request) {
     });
   } catch (error) {
     return NextResponse.json(
-      { error: String(error), summary: [], daily: [] },
+      { error: String(error).slice(0, 200), summary: [], daily: [] },
       { status: 500 }
     );
   }

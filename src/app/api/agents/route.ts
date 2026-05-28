@@ -103,7 +103,7 @@ export async function GET(request: Request) {
       timestamp: new Date().toISOString(),
     });
   } catch (err) {
-    const msg = err instanceof Error ? err.message : String(err);
+    const msg = (err instanceof Error ? err.message : String(err)).slice(0, 200);
     // pm2 isn't installed on every host (e.g. the local laptop). That's not a
     // server error — there are simply no pm2-managed agents to report.
     if (/not found|ENOENT|command not found/i.test(msg)) {

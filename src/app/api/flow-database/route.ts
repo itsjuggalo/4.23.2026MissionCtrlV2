@@ -58,7 +58,7 @@ export async function GET(request: Request) {
     });
   } catch (e: unknown) {
     return NextResponse.json(
-      { error: `bridge fetch failed: ${e instanceof Error ? e.message : String(e)}`, upstream },
+      { error: `bridge fetch failed: ${(e instanceof Error ? e.message : String(e)).slice(0, 200)}`, upstream },
       { status: 502 }
     );
   }

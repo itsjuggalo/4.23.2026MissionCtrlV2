@@ -349,7 +349,7 @@ function runProcess(cmd: string, args: string[], cwd: string, timeoutMs: number)
     child.on('error', err => {
       clearTimeout(timer);
       resolve(NextResponse.json({
-        success: false, error: String(err), cmd, args, elapsed_ms: Date.now() - started,
+        success: false, error: String(err).slice(0, 200), cmd, args, elapsed_ms: Date.now() - started,
       }, { status: 500 }));
     });
     child.on('close', code => {

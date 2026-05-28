@@ -141,7 +141,7 @@ export async function GET(req: Request) {
   try {
     const url = new URL(req.url);
     const sourceFilter = url.searchParams.get('source'); // 'boba-options' | 'auto-trader-btc' | null (all)
-    const limit = Number(url.searchParams.get('limit') || '100');
+    const limit = parseInt(url.searchParams.get('limit') || '100', 10) || 100;
 
     const [cycles, autoLog] = await Promise.all([
       loadBobaDecisions(),

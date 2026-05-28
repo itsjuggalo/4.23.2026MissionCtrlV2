@@ -46,6 +46,8 @@ interface NewsItem {
   ts: number;
 }
 
+type ClientNewsItem = Omit<NewsItem, 'ts'>;
+
 function parseRSS(xml: string, defaultSource: string): NewsItem[] {
   const items: NewsItem[] = [];
   const blocks = xml.match(/<item[\s>]([\s\S]*?)<\/item>/gi) || [];
@@ -76,7 +78,7 @@ function parseRSS(xml: string, defaultSource: string): NewsItem[] {
 }
 
 // In-process cache — survives across requests in the same worker lifetime
-let cache: { news: NewsItem[]; updated: string } | null = null;
+let cache: { news: ClientNewsItem[]; updated: string } | null = null;
 let cacheAt = 0;
 const CACHE_MS = 5 * 60 * 1000;
 
@@ -118,7 +120,7 @@ export async function GET(req: Request) {
     return true;
   });
 
-  const news = deduped.slice(0, 30).map(({ ts: _ts, ...n }) => n) as NewsItem[];
+  const news = deduped.slice(0, 30).map(({ ts: _ts, ...n }): ClientNewsItem => n);
   cache = { news, updated: new Date().toISOString() };
   cacheAt = Date.now();
 
