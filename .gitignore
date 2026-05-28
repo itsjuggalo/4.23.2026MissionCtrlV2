@@ -28,6 +28,15 @@
 Option-Signals-Scraper/sent_ids.json
 __pycache__/
 data/*.json
+data/**/*.json
+data/*.sqlite
+data/*.sqlite-wal
+data/*.sqlite-shm
+*.sqlite
+*.sqlite-wal
+*.sqlite-shm
+.claude/
+**/.claude/
 memory/memories.json
 node_modules/
 secrets/
