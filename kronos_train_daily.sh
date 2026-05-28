@@ -47,12 +47,11 @@ fi
 echo "[$(date -u +%FT%TZ)] Starting daily fine-tune (3 tokenizer + 2 basemodel epochs)..." | tee -a "$LOG"
 cd "$TRAIN_DIR"
 $PYTHON train_sequential.py --config "$CONFIG" >> "$LOG" 2>&1
+TRAIN_EXIT=$?
 
-ELAPSED=$(( $(date +%s) - $(date -d "$START_TS" +%s 2>/dev/null || date +%s) ))
-ELAPSED_MIN=$(( ELAPSED / 60 ))
-if [ $? -eq 0 ]; then
-    END_TS=$(date -u +%FT%TZ)
-    echo "[$END_TS] Daily fine-tune complete. Weights updated." | tee -a "$LOG"
+ELAPSED_MIN=$(( ($(date +%s) - $(date -d "${START_TS/T/ }" +%s 2>/dev/null || echo 0)) / 60 ))
+if [ $TRAIN_EXIT -eq 0 ]; then
+    echo "[$(date -u +%FT%TZ)] Daily fine-tune complete. Weights updated." | tee -a "$LOG"
     notify_discord "✅ Kronos Daily Retrain Done" "3 tokenizer + 2 basemodel epochs complete in ~${ELAPSED_MIN}min. Finetuned weights updated. 8 AM forecast refresh will use fresh model." 3066993
 else
     echo "[$(date -u +%FT%TZ)] Daily fine-tune exited non-zero — check log. Yesterday's weights still in place." | tee -a "$LOG"

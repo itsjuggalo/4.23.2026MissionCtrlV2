@@ -47,12 +47,11 @@ fi
 echo "[$(date -u +%FT%TZ)] Starting weekly full retrain..." | tee -a "$LOG"
 cd "$TRAIN_DIR"
 $PYTHON train_sequential.py --config "$CONFIG" >> "$LOG" 2>&1
+TRAIN_EXIT=$?
 
-ELAPSED=$(( $(date +%s) - $(date -d "$START_TS" +%s 2>/dev/null || date +%s) ))
-ELAPSED_MIN=$(( ELAPSED / 60 ))
-if [ $? -eq 0 ]; then
-    END_TS=$(date -u +%FT%TZ)
-    echo "[$END_TS] Weekly retrain complete. Weights updated." | tee -a "$LOG"
+ELAPSED_MIN=$(( ($(date +%s) - $(date -d "${START_TS/T/ }" +%s 2>/dev/null || echo 0)) / 60 ))
+if [ $TRAIN_EXIT -eq 0 ]; then
+    echo "[$(date -u +%FT%TZ)] Weekly retrain complete. Weights updated." | tee -a "$LOG"
     notify_discord "✅ Kronos Weekly Retrain Done" "Full cold-start retrain complete in ~${ELAPSED_MIN}min (10 tokenizer + 8 basemodel epochs). Fresh weights ready for Monday. Mon–Fri daily runs will warm-start from these." 3066993
 else
     echo "[$(date -u +%FT%TZ)] Weekly retrain exited non-zero — check log." | tee -a "$LOG"
