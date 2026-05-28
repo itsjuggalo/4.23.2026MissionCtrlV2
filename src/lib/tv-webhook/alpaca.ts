@@ -76,7 +76,7 @@ export async function emulateCryptoOcoChildren(
   while (Date.now() < deadline) {
     polls++;
     try {
-      const r = await fetch(`${baseUrl()}/v2/orders/${parentOrderId}`, { headers });
+      const r = await fetch(`${baseUrl()}/v2/orders/${parentOrderId}`, { headers, signal: AbortSignal.timeout(5000) });
       if (r.ok) {
         const o = await r.json() as { status?: string; filled_qty?: string };
         dbg(`poll ${polls}: status=${o.status} filled_qty=${o.filled_qty}`);
@@ -131,7 +131,7 @@ export async function emulateCryptoOcoChildren(
 
   const out: { sl_order_id?: string; note?: string } = {};
   try {
-    const r = await fetch(`${baseUrl()}/v2/orders`, { method: 'POST', headers, body: JSON.stringify(slBody) });
+    const r = await fetch(`${baseUrl()}/v2/orders`, { method: 'POST', headers, body: JSON.stringify(slBody), signal: AbortSignal.timeout(10000) });
     const s = await r.json();
     if (r.ok) {
       const slId = (s as { id?: string; status?: string }).id;
@@ -188,7 +188,7 @@ async function submitCryptoExit(
   // a residual SL stop_limit (Alpaca crypto reserves the position balance per
   // outstanding exit order).
   try {
-    const listR = await fetch(`${baseUrl()}/v2/orders?status=open&symbols=${encodeURIComponent(alert.symbol)}&limit=50`, { headers });
+    const listR = await fetch(`${baseUrl()}/v2/orders?status=open&symbols=${encodeURIComponent(alert.symbol)}&limit=50`, { headers, signal: AbortSignal.timeout(8000) });
     if (listR.ok) {
       const list = await listR.json() as Array<{ id: string; client_order_id?: string }>;
       await Promise.all(list.map(o =>
@@ -208,7 +208,7 @@ async function submitCryptoExit(
 
   try {
     const res = await fetch(`${baseUrl()}/v2/orders`, {
-      method: 'POST', headers, body: JSON.stringify(body),
+      method: 'POST', headers, body: JSON.stringify(body), signal: AbortSignal.timeout(10000),
     });
     const text = await res.text();
     let parsed: unknown;
@@ -276,6 +276,7 @@ export async function submitBracketOrAlt(account: string, alert: TvAlert, dedupe
       method: 'POST',
       headers,
       body: JSON.stringify(body),
+      signal: AbortSignal.timeout(10000),
     });
     let parsed: unknown;
     const text = await res.text();

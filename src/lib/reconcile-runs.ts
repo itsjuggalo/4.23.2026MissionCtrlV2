@@ -33,6 +33,7 @@ async function fireDiscordAlert(message: string): Promise<void> {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ content: message }),
+      signal: AbortSignal.timeout(8000),
     });
   } catch (err) {
     console.error('[reconcile-runs] Discord webhook failed:', err);

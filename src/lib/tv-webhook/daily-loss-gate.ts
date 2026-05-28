@@ -48,6 +48,7 @@ async function fetchEquity(account: string): Promise<number | null> {
   try {
     const r = await fetch(`${PAPER_BASE}/v2/account`, {
       headers: { 'APCA-API-KEY-ID': creds.keyId, 'APCA-API-SECRET-KEY': creds.secret },
+      signal: AbortSignal.timeout(8000),
     });
     if (!r.ok) return null;
     const j = await r.json() as { equity?: string; portfolio_value?: string };
