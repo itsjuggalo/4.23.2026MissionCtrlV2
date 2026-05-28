@@ -1,0 +1,9 @@
+[Unit]
+Description=Kronos Weekly Full Retrain Timer (Sunday 02:00 ET = 06:00 UTC)
+
+[Timer]
+OnCalendar=Sun 06:00 UTC
+Persistent=true
+
+[Install]
+WantedBy=timers.target

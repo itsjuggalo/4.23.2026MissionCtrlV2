@@ -1,0 +1,15 @@
+[Unit]
+Description=Kronos Fine-tune Training (one-shot, sentinel-guarded)
+After=network.target
+
+[Service]
+Type=simple
+ExecStart=/home/itsju/05_AUTOMATION/scripts/kronos_train_once.sh
+WorkingDirectory=/home/itsju/04_RESEARCH/Kronos/finetune_csv
+Environment=HOME=/home/itsju
+Restart=no
+StandardOutput=journal
+StandardError=journal
+
+[Install]
+WantedBy=default.target

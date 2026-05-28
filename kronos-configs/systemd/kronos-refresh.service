@@ -1,0 +1,10 @@
+[Unit]
+Description=Kronos Pre-Market Forecast Refresh
+After=network.target
+
+[Service]
+Type=oneshot
+ExecStart=/home/itsju/05_AUTOMATION/scripts/kronos_refresh_premarket.sh
+Environment=HOME=/home/itsju
+StandardOutput=journal
+StandardError=journal
