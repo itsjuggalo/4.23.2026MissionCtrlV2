@@ -1,3 +1,4 @@
+'use client';
 import { Badge } from '../ui/Badge';
 import type { Approval } from '@/lib/types';
 
