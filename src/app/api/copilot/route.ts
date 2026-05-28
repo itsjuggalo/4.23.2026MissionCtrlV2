@@ -693,8 +693,8 @@ export async function GET() {
 // ---- POST handler ----
 
 export async function POST(req: Request) {
-  const __proxied = await proxyToServeftp(req); if (__proxied) return __proxied;
   try {
+    const __proxied = await proxyToServeftp(req); if (__proxied) return __proxied;
     const url = new URL(req.url);
     const wantsStream =
       url.searchParams.get('stream') === '1' ||
