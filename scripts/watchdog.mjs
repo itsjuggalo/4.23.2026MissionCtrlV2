@@ -112,6 +112,24 @@ if (diskPct >= DISK_WARN_PCT) {
   await postWebhook(`[mc-watchdog] ⚠️ Disk ${diskPct}% full on /home — prune logs or free space.`);
 }
 
+// ── Audit log pruning ────────────────────────────────────────────────────────
+// Keep fix_log.txt ≤ 500 lines and fix_history.jsonl ≤ 500 entries
+const AUDIT_DIR = path.join(process.env.HOME, 'scripts/audit');
+try {
+  const fixLog = path.join(AUDIT_DIR, 'fix_log.txt');
+  if (fs.existsSync(fixLog)) {
+    const lines = fs.readFileSync(fixLog, 'utf-8').split('\n');
+    if (lines.length > 500) fs.writeFileSync(fixLog, lines.slice(-500).join('\n'));
+  }
+} catch {}
+try {
+  const fixHistory = path.join(AUDIT_DIR, 'fix_history.jsonl');
+  if (fs.existsSync(fixHistory)) {
+    const lines = fs.readFileSync(fixHistory, 'utf-8').split('\n').filter(Boolean);
+    if (lines.length > 500) fs.writeFileSync(fixHistory, lines.slice(-500).join('\n') + '\n');
+  }
+} catch {}
+
 fs.writeFileSync(STATE_FILE, JSON.stringify(state));
 
 // Write health metrics to dashboard_metrics (best-effort)
