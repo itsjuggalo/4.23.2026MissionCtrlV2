@@ -246,6 +246,10 @@ export function DashboardPage() {
   const [params, setParams] = useState<SupertrendParams | null>(null);
   const [crypto, setCrypto] = useState<CryptoData | null>(null);
   const [weather, setWeather] = useState<{ temp_f: number | null; feels_like_f: number | null; description: string; icon: string; humidity: number | null; wind_mph: number | null; wind_dir: string | null; rain_1h_mm: number; clouds_pct: number | null; city: string } | null>(null);
+  const [fx, setFx] = useState<{ EUR?: number; GBP?: number; JPY?: number; CAD?: number; AUD?: number; CHF?: number; CNY?: number; MXN?: number; date?: string } | null>(null);
+  const [cot, setCot] = useState<{ contracts?: Record<string, any> } | null>(null);
+  const [trends, setTrends] = useState<{ top?: [string, number][]; latest?: Record<string, number> } | null>(null);
+  const [pcr, setPcr] = useState<{ pcr?: number; sentiment?: string; put_oi?: number; call_oi?: number } | null>(null);
   const [topFlowsCount, setTopFlowsCount] = useState<number>(0);
   useEffect(() => {
     const fetchFlows = () => {
@@ -271,7 +275,7 @@ export function DashboardPage() {
 
   const fetchAll = async () => {
     try {
-      const [pRes, sRes, rRes, repRes, prRes, cRes, ehRes, wRes] = await Promise.all([
+      const [pRes, sRes, rRes, repRes, prRes, cRes, ehRes, wRes, fxRes, cotRes, trendsRes, pcrRes] = await Promise.all([
         fetch('/api/portfolio').then(r => r.ok ? r.json() : null).catch(() => null),
         fetch('/api/signals/latest').then(r => r.ok ? r.json() : null).catch(() => null),
         fetch('/api/regime').then(r => r.ok ? r.json() : null).catch(() => null),
@@ -280,11 +284,19 @@ export function DashboardPage() {
         fetch('/api/crypto').then(r => r.ok ? r.json() : null).catch(() => null),
         fetch('/api/equity-history?days=30').then(r => r.ok ? r.json() : null).catch(() => null),
         fetch('/api/weather').then(r => r.ok ? r.json() : null).catch(() => null),
+        fetch('/api/fx').then(r => r.ok ? r.json() : null).catch(() => null),
+        fetch('/api/cot').then(r => r.ok ? r.json() : null).catch(() => null),
+        fetch('/api/trends').then(r => r.ok ? r.json() : null).catch(() => null),
+        fetch('/api/pcr').then(r => r.ok ? r.json() : null).catch(() => null),
       ]);
       setPortfolio(pRes); setSignals(sRes);
       if (ehRes?.history) setEquityHist(ehRes.history); setRegime(rRes);
       setReport(repRes); setParams(prRes); setCrypto(cRes);
       if (wRes && !wRes.error) setWeather(wRes);
+      if (fxRes && !fxRes.error) setFx(fxRes);
+      if (cotRes && !cotRes.error) setCot(cotRes);
+      if (trendsRes && !trendsRes.error) setTrends(trendsRes);
+      if (pcrRes && !pcrRes.error) setPcr(pcrRes);
       setError(false);
     } catch (e) { console.error(e); setError(true); }
     finally { setLoading(false); }
@@ -420,6 +432,93 @@ export function DashboardPage() {
             </div>
           </div>
         </div>
+      </div>
+
+      {/* === MACRO ROW: FX | COT | TRENDS | PCR === */}
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '8px', marginBottom: '16px' }}>
+
+        {/* FX Rates */}
+        <div style={{ background: '#0a1929', border: '1px solid #1a3a4a', borderRadius: '8px', padding: '12px 16px' }}>
+          <div style={{ fontSize: 'var(--mc-font-label)', color: '#4fc3f7', fontFamily: 'var(--font-mc-mono)', fontWeight: 600, marginBottom: '6px' }}>FX — USD vs</div>
+          {fx ? (
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '2px 12px' }}>
+              {(['EUR','GBP','JPY','CAD','AUD','CHF'] as const).map(c => (
+                <div key={c} style={{ display: 'flex', justifyContent: 'space-between', fontSize: 'var(--mc-font-xs)', fontFamily: 'var(--font-mc-mono)', padding: '1px 0' }}>
+                  <span style={{ color: '#607d8b' }}>{c}</span>
+                  <span style={{ color: '#e0e0e0' }}>{fx[c]?.toFixed(c === 'JPY' ? 2 : 4)}</span>
+                </div>
+              ))}
+            </div>
+          ) : <div style={{ fontSize: 'var(--mc-font-xs)', color: '#607d8b', fontFamily: 'var(--font-mc-mono)' }}>loading...</div>}
+          {fx?.date && <div style={{ fontSize: '9px', color: '#37474f', fontFamily: 'var(--font-mc-mono)', marginTop: '4px' }}>ECB {fx.date}</div>}
+        </div>
+
+        {/* CFTC COT */}
+        <div style={{ background: '#0a1929', border: '1px solid #1a3a4a', borderRadius: '8px', padding: '12px 16px' }}>
+          <div style={{ fontSize: 'var(--mc-font-label)', color: '#4fc3f7', fontFamily: 'var(--font-mc-mono)', fontWeight: 600, marginBottom: '6px' }}>COT — Institutional</div>
+          {cot?.contracts ? (
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '3px' }}>
+              {(['ES','GC','CL','BTC'] as const).map(sym => {
+                const c = cot.contracts![sym];
+                if (!c || c.error) return null;
+                const net = c.asset_mgr?.net ?? 0;
+                const color = net > 0 ? '#66bb6a' : '#ef5350';
+                const arrow = net > 0 ? '▲' : '▼';
+                return (
+                  <div key={sym} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: 'var(--mc-font-xs)', fontFamily: 'var(--font-mc-mono)' }}>
+                    <span style={{ color: '#607d8b', minWidth: '28px' }}>{sym}</span>
+                    <span style={{ color, fontSize: '10px' }}>{arrow} {Math.abs(net).toLocaleString()}</span>
+                  </div>
+                );
+              })}
+            </div>
+          ) : <div style={{ fontSize: 'var(--mc-font-xs)', color: '#607d8b', fontFamily: 'var(--font-mc-mono)' }}>loading...</div>}
+          <div style={{ fontSize: '9px', color: '#37474f', fontFamily: 'var(--font-mc-mono)', marginTop: '4px' }}>Asset mgr net longs</div>
+        </div>
+
+        {/* Google Trends */}
+        <div style={{ background: '#0a1929', border: '1px solid #1a3a4a', borderRadius: '8px', padding: '12px 16px' }}>
+          <div style={{ fontSize: 'var(--mc-font-label)', color: '#4fc3f7', fontFamily: 'var(--font-mc-mono)', fontWeight: 600, marginBottom: '6px' }}>SEARCH HEAT</div>
+          {trends?.latest ? (
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+              {Object.entries(trends.latest).sort((a, b) => (b[1] as number) - (a[1] as number)).map(([sym, val]) => (
+                <div key={sym} style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                  <span style={{ fontSize: 'var(--mc-font-xs)', color: '#607d8b', fontFamily: 'var(--font-mc-mono)', minWidth: '36px' }}>{sym}</span>
+                  <div style={{ flex: 1, height: '4px', background: '#1a3a4a', borderRadius: '2px', overflow: 'hidden' }}>
+                    <div style={{ width: `${val}%`, height: '100%', background: val > 70 ? '#ff9800' : '#4fc3f7', borderRadius: '2px' }} />
+                  </div>
+                  <span style={{ fontSize: '9px', color: '#e0e0e0', fontFamily: 'var(--font-mc-mono)', minWidth: '22px', textAlign: 'right' }}>{val}</span>
+                </div>
+              ))}
+            </div>
+          ) : <div style={{ fontSize: 'var(--mc-font-xs)', color: '#607d8b', fontFamily: 'var(--font-mc-mono)' }}>loading...</div>}
+          <div style={{ fontSize: '9px', color: '#37474f', fontFamily: 'var(--font-mc-mono)', marginTop: '4px' }}>7-day interest (0-100)</div>
+        </div>
+
+        {/* SPY Put/Call Ratio */}
+        {(() => {
+          const sentColor = pcr?.sentiment === 'BULLISH' ? '#66bb6a' : pcr?.sentiment === 'BEARISH' ? '#ef5350' : '#ff9800';
+          return (
+            <div style={{ background: '#0a1929', border: `1px solid ${pcr?.sentiment ? sentColor + '44' : '#1a3a4a'}`, borderRadius: '8px', padding: '12px 16px' }}>
+              <div style={{ fontSize: 'var(--mc-font-label)', color: '#4fc3f7', fontFamily: 'var(--font-mc-mono)', fontWeight: 600, marginBottom: '6px' }}>SPY PUT/CALL</div>
+              {pcr?.pcr != null ? (
+                <>
+                  <div style={{ fontSize: '28px', fontWeight: 800, color: sentColor, fontFamily: 'var(--font-mc-mono)', lineHeight: 1 }}>{pcr.pcr.toFixed(2)}</div>
+                  <div style={{ fontSize: 'var(--mc-font-xs)', color: sentColor, fontFamily: 'var(--font-mc-mono)', marginTop: '4px', fontWeight: 700 }}>{pcr.sentiment}</div>
+                  <div style={{ display: 'flex', gap: '10px', marginTop: '6px' }}>
+                    <div style={{ fontSize: '9px', color: '#607d8b', fontFamily: 'var(--font-mc-mono)' }}>
+                      P {(pcr.put_oi! / 1000).toFixed(0)}k
+                    </div>
+                    <div style={{ fontSize: '9px', color: '#607d8b', fontFamily: 'var(--font-mc-mono)' }}>
+                      C {(pcr.call_oi! / 1000).toFixed(0)}k
+                    </div>
+                  </div>
+                  <div style={{ fontSize: '9px', color: '#37474f', fontFamily: 'var(--font-mc-mono)', marginTop: '2px' }}>&lt;0.7 bull · &gt;1.3 bear</div>
+                </>
+              ) : <div style={{ fontSize: 'var(--mc-font-xs)', color: '#607d8b', fontFamily: 'var(--font-mc-mono)' }}>loading...</div>}
+            </div>
+          );
+        })()}
       </div>
 
       {/* === MAIN 3-COLUMN === */}
