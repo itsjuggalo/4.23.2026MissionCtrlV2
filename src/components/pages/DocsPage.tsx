@@ -114,6 +114,7 @@ export function DocsPage() {
   const [loadingContent, setLoadingContent] = useState<string | null>(null);
   const [search, setSearch] = useState('');
   const [collapsedCategories, setCollapsedCategories] = useState<Set<string>>(new Set());
+  const [error, setError] = useState(false);
 
   const fetchDocs = async () => {
     setLoading(true);
@@ -122,8 +123,10 @@ export function DocsPage() {
       const data = await response.json();
       setDocs(data.docs || {});
       setTotal(data.total || 0);
-    } catch (error) {
-      console.error('Failed to fetch docs:', error);
+      setError(false);
+    } catch (e) {
+      console.error('Failed to fetch docs:', e);
+      setError(true);
     } finally {
       setLoading(false);
     }
@@ -200,6 +203,7 @@ export function DocsPage() {
 
   return (
     <div style={{ padding: '24px', maxWidth: '1100px', margin: '0 auto' }}>
+      {error && <div style={{ background: '#1a0000', border: '1px solid #ef535044', color: '#ef5350', padding: '10px 16px', borderRadius: '6px', marginBottom: '12px', fontSize: '13px' }}>⚠ API unavailable — data may be stale</div>}
       {/* Header */}
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '24px', flexWrap: 'wrap', gap: '16px' }}>
         <div>

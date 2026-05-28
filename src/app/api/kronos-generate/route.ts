@@ -42,7 +42,7 @@ export async function POST(req: NextRequest) {
     });
     child.unref();
     return NextResponse.json({ status: 'generating', ticker: scriptTicker, pid: child.pid });
-  } catch (e: any) {
+  } catch (e: unknown) {
     return NextResponse.json({ error: String(e) }, { status: 500 });
   }
 }

@@ -32,8 +32,8 @@ export async function GET(req: Request) {
       total_contracts: snap.total_contracts, tier_counts: snap.tier_counts,
       highest_premium: snap.highest_premium, contracts: list,
     });
-  } catch (e: any) {
-    if (e.code === 'ENOENT') {
+  } catch (e: unknown) {
+    if ((e as NodeJS.ErrnoException).code === 'ENOENT') {
       try {
         const files = await fs.readdir(DATA_DIR);
         const dates = files.filter(f => /^\d{4}-\d{2}-\d{2}\.json$/.test(f))

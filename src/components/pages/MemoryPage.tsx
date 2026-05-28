@@ -310,6 +310,7 @@ export function MemoryPage() {
   const [selected, setSelected] = useState<string | null>(null);
   const [filter,   setFilter]   = useState<string>('all');
   const [search,   setSearch]   = useState('');
+  const [error,    setError]    = useState(false);
 
   const fetchMemories = useCallback(async () => {
     try {
@@ -318,9 +319,11 @@ export function MemoryPage() {
       if (data.success) {
         setMemories(data.memories || []);
         setStats(data.stats || null);
+        setError(false);
       }
     } catch (e) {
       console.error('Memory fetch error:', e);
+      setError(true);
     } finally {
       setLoading(false);
     }
@@ -404,6 +407,7 @@ export function MemoryPage() {
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+      {error && <div style={{ background: '#1a0000', border: '1px solid #ef535044', color: '#ef5350', padding: '10px 16px', borderRadius: '6px', marginBottom: '12px', fontSize: '13px' }}>⚠ API unavailable — data may be stale</div>}
 
       {/* Tab switcher */}
       <div style={{ display: 'flex', gap: 8 }}>

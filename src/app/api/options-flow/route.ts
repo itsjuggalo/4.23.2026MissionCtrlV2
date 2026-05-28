@@ -65,8 +65,8 @@ export async function GET(req: Request) {
     // Flow Alerts are always "today", live from Firebase.
     // availableDates: ET days that actually have flow.db data (for the picker).
     const [alerts1Res, alerts2Res, availableDates, liveFlowRes] = await Promise.all([
-      fetch(`${DB}/FlowGreeks/Alerts/today.json`, { signal: AbortSignal.timeout(6000) }).then(r => r.json()).catch(() => null),
-      fetch(`${DB}/FlowGreeks2/Alerts/today.json`, { signal: AbortSignal.timeout(6000) }).then(r => r.json()).catch(() => null),
+      fetch(`${DB}/FlowGreeks/Alerts/today.json`, { signal: AbortSignal.timeout(6000) }).then(r => r.ok ? r.json() : null).catch(() => null),
+      fetch(`${DB}/FlowGreeks2/Alerts/today.json`, { signal: AbortSignal.timeout(6000) }).then(r => r.ok ? r.json() : null).catch(() => null),
       fetch(`${FLOW_API}/flow_dates`, { cache: 'no-store', signal: AbortSignal.timeout(5000) })
         .then(r => r.ok ? r.json() : []).catch(() => []),
       fetch(`${DB}/FlowGreeks/LiveFlowLast100.json`, { signal: AbortSignal.timeout(6000) })

@@ -45,6 +45,7 @@ function formatTime(iso: string) {
 export function ProjectsPage() {
   const [projects, setProjects] = useState<Project[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(false);
 
   useEffect(() => {
     async function fetchProjects() {
@@ -203,8 +204,10 @@ export function ProjectsPage() {
         });
 
         setProjects(projectList);
+        setError(false);
       } catch (e) {
         console.error('Projects fetch error:', e);
+        setError(true);
       }
       setLoading(false);
     }
@@ -220,6 +223,7 @@ export function ProjectsPage() {
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+      {error && <div style={{ background: '#1a0000', border: '1px solid #ef535044', color: '#ef5350', padding: '10px 16px', borderRadius: '6px', marginBottom: '12px', fontSize: '13px' }}>⚠ API unavailable — data may be stale</div>}
       {projects.map((project) => (
         <div
           key={project.id}

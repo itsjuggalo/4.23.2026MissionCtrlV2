@@ -446,7 +446,7 @@ export function OptionsWatcherPage() {
           <span style={{ fontSize: 'var(--mc-font-label)', color: '#607d8b', fontFamily: 'var(--font-mc-mono)' }}>{flows.length}</span>
         </div>
         <div style={{ flex: 1, overflow: 'auto' }}>
-          {flows.slice(0, 50).map((f, i) => <FlowRow key={i} f={f} onClick={() => setDrawerTicker(f.Symbol)} />)}
+          {flows.slice(0, 50).map((f, i) => <FlowRow key={`${f.Symbol}-${f.Strike}-${f.OptionType}-${f.Time}-${i}`} f={f} onClick={() => setDrawerTicker(f.Symbol)} />)}
           {flows.length === 0 && <div style={{ padding: '20px', textAlign: 'center', color: '#455a64', fontSize: 'var(--mc-font-label)', fontFamily: 'var(--font-mc-mono)' }}>No flow data for {ticker}</div>}
         </div>
       </div>

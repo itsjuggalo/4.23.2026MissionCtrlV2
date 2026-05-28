@@ -37,6 +37,7 @@ function timeAgo(ts: string): string {
 export function TasksPage() {
   const [data, setData] = useState<AgentsPayload>({ agents: {} });
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(false);
 
   useEffect(() => {
     async function fetchData() {
@@ -44,7 +45,8 @@ export function TasksPage() {
         const res = await fetch('/api/agent-tasks');
         const j = await res.json();
         setData(j);
-      } catch {}
+        setError(false);
+      } catch { setError(true); }
       setLoading(false);
     }
     fetchData();
@@ -64,6 +66,7 @@ export function TasksPage() {
 
   return (
     <div style={{ padding: '16px 20px', height: '100%', display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
+      {error && <div style={{ background: '#1a0000', border: '1px solid #ef535044', color: '#ef5350', padding: '10px 16px', borderRadius: '6px', marginBottom: '12px', fontSize: '13px' }}>⚠ API unavailable — data may be stale</div>}
       {/* Header */}
       <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '14px', flexWrap: 'wrap' }}>
         <span style={{ fontSize: 'var(--mc-font-xl)', fontWeight: 700, color: '#4fc3f7', fontFamily: 'var(--font-mc-mono)', letterSpacing: '2px' }}>AGENT OPERATIONS</span>

@@ -37,7 +37,7 @@ export async function GET(req: Request) {
     const bars = ts.map((t, i) => ({ t: t * 1000, eq: eq[i] }))
       .filter(b => b.eq !== null && b.eq !== undefined && !isNaN(b.eq));
     return NextResponse.json({ bars, base: d.base_value || 0, count: bars.length });
-  } catch (e: any) {
+  } catch (e: unknown) {
     return NextResponse.json({ error: String(e), bars: [] }, { status: 500 });
   }
 }

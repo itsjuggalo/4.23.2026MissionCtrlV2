@@ -29,7 +29,7 @@ export async function GET(req: NextRequest) {
     response.cookies.set('mc_sess', mc_sess, cookieOpts(true));
     response.cookies.set('mc_csrf', mc_csrf, cookieOpts(false));
     return response;
-  } catch (e: any) {
-    return NextResponse.json({ ok: false, error: e.message }, { status: 500 });
+  } catch (e: unknown) {
+    return NextResponse.json({ ok: false, error: e instanceof Error ? e.message : String(e) }, { status: 500 });
   }
 }

@@ -58,8 +58,8 @@ async function alpaca(account: string) {
         side: o.side, symbol: o.symbol, qty: o.qty, status: o.status,
       })) : [],
     };
-  } catch (e: any) {
-    return { error: e.message };
+  } catch (e: unknown) {
+    return { error: e instanceof Error ? e.message : String(e) };
   }
 }
 

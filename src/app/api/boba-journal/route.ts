@@ -190,7 +190,7 @@ export async function GET(req: Request) {
         confidence_breakdown: confStats,
       },
     });
-  } catch (e: any) {
-    return NextResponse.json({ error: e.message, entries: [] }, { status: 500 });
+  } catch (e: unknown) {
+    return NextResponse.json({ error: e instanceof Error ? e.message : String(e), entries: [] }, { status: 500 });
   }
 }

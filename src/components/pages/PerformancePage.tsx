@@ -55,6 +55,7 @@ export function PerformancePage() {
   const [tick, setTick] = useState(0);
   const [bobaJournal, setBobaJournal] = useState<any[]>([]);
   const [drawerTicker, setDrawerTicker] = useState<string | null>(null);
+  const [error, setError] = useState(false);
   const [protocolFilter, setProtocolFilter] = useState<'all' | 'flow' | 'swing' | 'manual' | 'auto-btc'>(
     () => {
       if (typeof window === 'undefined') return 'all';
@@ -85,7 +86,8 @@ export function PerformancePage() {
       if (tlRes) setTradeLog(tlRes);
       if (ehRes?.history) setEquityHist(ehRes.history);
       if (bjRes?.entries) setBobaJournal(bjRes.entries);
-    } catch (e) { console.error(e); }
+      setError(false);
+    } catch (e) { console.error(e); setError(true); }
     finally { setLoading(false); }
   };
 
@@ -217,6 +219,7 @@ export function PerformancePage() {
 
   return (
     <div style={{ padding: '20px', maxWidth: '1400px', margin: '0 auto' }}>
+      {error && <div style={{ background: '#1a0000', border: '1px solid #ef535044', color: '#ef5350', padding: '10px 16px', borderRadius: '6px', marginBottom: '12px', fontSize: '13px' }}>⚠ API unavailable — data may be stale</div>}
       <style>{`
         @keyframes perf-blink { 0%,100% { opacity: 1; } 50% { opacity: 0.3; } }
         @keyframes perf-fill { from { width: 0; } }

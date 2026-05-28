@@ -19,8 +19,8 @@ export default function Status() {
       setData(d);
       setUpdated(new Date().toLocaleTimeString("en-US", { timeZone: "America/New_York", hour12: true }));
       setErr("");
-    } catch (e: any) {
-      setErr(e.message);
+    } catch (e: unknown) {
+      setErr(e instanceof Error ? e.message : String(e));
     }
   };
 

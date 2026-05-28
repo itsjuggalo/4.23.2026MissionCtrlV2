@@ -51,8 +51,8 @@ export async function GET(req: Request) {
       }
 
       return NextResponse.json({ symbol, expirations, quote, chain: null });
-    } catch (e: any) {
-      return NextResponse.json({ error: e.message }, { status: 500 });
+    } catch (e: unknown) {
+      return NextResponse.json({ error: e instanceof Error ? e.message : String(e) }, { status: 500 });
     }
   }
 
@@ -150,7 +150,7 @@ export async function GET(req: Request) {
     chainCache = { key: cacheKey, data: result, ts: Date.now() };
 
     return NextResponse.json(result);
-  } catch (e: any) {
-    return NextResponse.json({ error: e.message }, { status: 500 });
+  } catch (e: unknown) {
+    return NextResponse.json({ error: e instanceof Error ? e.message : String(e) }, { status: 500 });
   }
 }

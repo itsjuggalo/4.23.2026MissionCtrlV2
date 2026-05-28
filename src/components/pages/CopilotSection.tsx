@@ -98,7 +98,7 @@ function KronosBlock() {
       if (r.ok) { const d = await r.json(); if (!d.error) { setResult(d); return true; } }
       setError('No forecast found');
       return false;
-    } catch (e: any) { setError(e.message); return false; }
+    } catch (e: unknown) { setError(e instanceof Error ? e.message : String(e)); return false; }
   };
 
   const runLive = async () => {
@@ -124,7 +124,7 @@ function KronosBlock() {
         await poll();
       };
       await poll();
-    } catch (e: any) { setError(e.message); setRunning(false); }
+    } catch (e: unknown) { setError(e instanceof Error ? e.message : String(e)); setRunning(false); }
   };
 
   const dirColor = result?.forecast_24h_direction === 'bullish' ? '#00d2a0' : result?.forecast_24h_direction === 'bearish' ? '#ef5350' : '#ffa502';

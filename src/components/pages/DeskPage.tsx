@@ -188,8 +188,8 @@ export function DeskPage() {
       if (j.error) throw new Error(j.error);
       setData(j);
       setErr(null);
-    } catch (e: any) {
-      setErr(e?.message ?? String(e));
+    } catch (e: unknown) {
+      setErr(e instanceof Error ? e.message : String(e));
     } finally {
       setLoading(false);
     }
@@ -202,8 +202,7 @@ export function DeskPage() {
   }, [fetchData]);
 
   if (loading) return <PageWrap><div style={{ color: "var(--color-mc-text-muted)" }}>Loading desk state…</div></PageWrap>;
-  if (err)     return <PageWrap><div style={{ color: "var(--color-mc-red)" }}>desk-cycle error: {err}</div></PageWrap>;
-  if (!data)   return <PageWrap><div style={{ color: "var(--color-mc-text-muted)" }}>No data.</div></PageWrap>;
+  if (!data)   return <PageWrap><div style={{ color: err ? "var(--color-mc-red)" : "var(--color-mc-text-muted)" }}>{err ? `desk-cycle error: ${err}` : "No data."}</div></PageWrap>;
 
   const filteredFloor4 = assetClassFilter === "all"
     ? data.floor4
@@ -241,6 +240,7 @@ export function DeskPage() {
 
   return (
     <PageWrap>
+      {err && <div style={{ background: '#1a0000', border: '1px solid #ef535044', color: '#ef5350', padding: '10px 16px', borderRadius: '6px', marginBottom: '12px', fontSize: '13px' }}>⚠ API unavailable — data may be stale</div>}
       {/* Top bar with GradientHeader */}
       <GradientHeader
         title="Six-Floor Sovereign Wealth Desk"

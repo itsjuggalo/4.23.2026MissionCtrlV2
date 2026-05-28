@@ -210,9 +210,9 @@ export function FlowDatabasePage() {
       const r = await fetch("/api/flow-database?table=stats");
       if (!r.ok) throw new Error(`stats ${r.status}`);
       setStats(await r.json());
-    } catch (e: any) {
+    } catch (e: unknown) {
       // Surface but don't block the page
-      console.warn("[FlowDatabase] stats fetch failed:", e?.message || e);
+      console.warn("[FlowDatabase] stats fetch failed:", e instanceof Error ? e.message : String(e));
     }
   }, []);
 
@@ -230,8 +230,8 @@ export function FlowDatabasePage() {
       }
       const j = await r.json();
       setRows(j.rows || []);
-    } catch (e: any) {
-      setError(String(e?.message || e));
+    } catch (e: unknown) {
+      setError(e instanceof Error ? e.message : String(e));
       setRows([]);
     } finally {
       setLoading(false);

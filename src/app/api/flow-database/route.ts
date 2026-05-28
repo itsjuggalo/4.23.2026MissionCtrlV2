@@ -56,9 +56,9 @@ export async function GET(request: Request) {
         'Cache-Control': 'no-store',
       },
     });
-  } catch (e: any) {
+  } catch (e: unknown) {
     return NextResponse.json(
-      { error: `bridge fetch failed: ${e?.message || e}`, upstream },
+      { error: `bridge fetch failed: ${e instanceof Error ? e.message : String(e)}`, upstream },
       { status: 502 }
     );
   }

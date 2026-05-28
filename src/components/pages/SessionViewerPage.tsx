@@ -38,6 +38,7 @@ export function SessionViewerPage() {
   const [autoScroll, setAutoScroll] = useState(true);
   const [loading, setLoading] = useState(true);
   const [streaming, setStreaming] = useState(false);
+  const [error, setError] = useState(false);
   const logEndRef = useRef<HTMLDivElement>(null);
   const intervalRef = useRef<NodeJS.Timeout | null>(null);
 
@@ -47,8 +48,9 @@ export function SessionViewerPage() {
       const res = await fetch(`/api/session-logs?sources=${sources}&limit=200`);
       const data = await res.json();
       setLogs(data.logs || []);
+      setError(false);
       setLoading(false);
-    } catch { setLoading(false); }
+    } catch { setError(true); setLoading(false); }
   };
 
   useEffect(() => {
@@ -87,6 +89,7 @@ export function SessionViewerPage() {
 
   return (
     <div style={{ padding: '24px', maxWidth: '1200px', margin: '0 auto', height: 'calc(100vh - 80px)', display: 'flex', flexDirection: 'column' }}>
+      {error && <div style={{ background: '#1a0000', border: '1px solid #ef535044', color: '#ef5350', padding: '10px 16px', borderRadius: '6px', marginBottom: '12px', fontSize: '13px' }}>⚠ API unavailable — data may be stale</div>}
       <style>{`
         .sv-btn { padding: 4px 10px; border-radius: 4px; border: 1px solid #1a3a4a; background: transparent; color: #607d8b; font-family: var(--font-mc-mono); font-size: 10px; cursor: pointer; font-weight: 600; transition: all 0.15s; }
         .sv-btn.active { background: #4fc3f722; border-color: #4fc3f7; color: #4fc3f7; }

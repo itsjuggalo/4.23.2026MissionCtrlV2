@@ -59,12 +59,14 @@ export function LLMPortfolioPage() {
   const [selectedModel, setSelectedModel] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [drawerTicker, setDrawerTicker] = useState<string | null>(null);
+  const [error, setError] = useState(false);
 
   const fetchData = useCallback(async () => {
     try {
       const res = await fetch("/api/llm-portfolio");
-      if (res.ok) setData(await res.json());
-    } catch (e) { console.error(e); }
+      if (res.ok) { setData(await res.json()); setError(false); }
+      else setError(true);
+    } catch (e) { console.error(e); setError(true); }
     finally { setLoading(false); }
   }, []);
 
@@ -76,6 +78,7 @@ export function LLMPortfolioPage() {
 
   return (
     <div style={{ padding: "24px 32px", maxWidth: 1400, margin: "0 auto" }}>
+      {error && <div style={{ background: '#1a0000', border: '1px solid #ef535044', color: '#ef5350', padding: '10px 16px', borderRadius: '6px', marginBottom: '12px', fontSize: '13px' }}>⚠ API unavailable — data may be stale</div>}
       <div style={{ marginBottom: 24 }}>
         <h1 style={{ fontSize: 22, fontWeight: 600, color: "#e0e0e0", margin: 0, fontFamily: "var(--font-mc-mono, monospace)" }}>LLM Portfolios</h1>
         <p style={{ fontSize: 13, color: "#607d8b", margin: "4px 0 0", fontFamily: "var(--font-mc-mono, monospace)" }}>
