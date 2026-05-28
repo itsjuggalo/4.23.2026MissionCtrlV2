@@ -2,7 +2,7 @@
 
 Status: DRAFT — awaiting operator sign-off
 Owner: Execution Specialist
-Target app: `MissionCtrlV2` (Next.js 16.2.1, App Router, port 3000)
+Target app: `MissionCtrlV2` (Next.js 16.2.6, App Router, port 3000)
 Last revised: 2026-05-22
 
 > Spec only. No route code is written until the operator approves this doc.

@@ -9,7 +9,7 @@ Durable facts about this dashboard. Operator memory lives at `~/.claude/projects
 ## Persistent state
 
 - **Port:** 3000 (dev). `npm run dev` from this dir.
-- **Framework:** Next.js 16.2.1, App Router. Tailwind. TypeScript.
+- **Framework:** Next.js 16.2.6, App Router. Tailwind. TypeScript.
 - **Env:** `.env.local` — must contain `BRIDGE_URL=https://bridge.serveftp.com` and `BRIDGE_TOKEN=<bearer>`.
 - **Routing:** `src/components/layout/Sidebar.tsx` (nav), `src/components/layout/AppShellClient.tsx` (page mux).
 
