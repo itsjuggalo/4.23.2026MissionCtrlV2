@@ -5,6 +5,10 @@ export const revalidate = 0;
 
 const DB = 'https://stock-signal-72772-default-rtdb.firebaseio.com';
 
+let _cache: { data: any; ts: number } | null = null;
+let _inflight: Promise<any> | null = null;
+const CACHE_TTL = 15_000;
+
 // Pull last N notifications from each Firebase mirror, merge, dedupe by key+title.
 // Schema per record: { category: 'SCALP'|'SWING'|'LONGTERM', message, symbol, title }
 // Key is unix timestamp.
@@ -34,39 +38,49 @@ async function pullSource(sourceName: string, node: string, limit = 50) {
   }
 }
 
-export async function GET() {
-  try {
-    const sources = ['Name', 'Name2', 'Vivid', 'Vivid2'];
-    const all = (await Promise.all(
-      sources.map(s => pullSource(s, 'OptionNotifications', 50))
-    )).flat();
+async function fetchNotifications() {
+  const sources = ['Name', 'Name2', 'Vivid', 'Vivid2'];
+  const all = (await Promise.all(
+    sources.map(s => pullSource(s, 'OptionNotifications', 50))
+  )).flat();
 
-    // Dedupe by ts+title (same notification mirrored across sources)
-    const seen = new Set<string>();
-    const unique = all.filter(n => {
-      const k = `${n.ts}|${n.title}`;
-      if (seen.has(k)) return false;
-      seen.add(k);
-      return true;
-    });
+  const seen = new Set<string>();
+  const unique = all.filter(n => {
+    const k = `${n.ts}|${n.title}`;
+    if (seen.has(k)) return false;
+    seen.add(k);
+    return true;
+  });
+  unique.sort((a, b) => b.ts - a.ts);
 
-    // Sort newest-first
-    unique.sort((a, b) => b.ts - a.ts);
-
-    // Bucket by tab (scalps/swings/leaps) using category field
-    const byTab = {
+  return {
+    generated_at: new Date().toISOString(),
+    total: unique.length,
+    byTab: {
       scalps: unique.filter(n => n.category === 'SCALP'),
       swings: unique.filter(n => n.category === 'SWING'),
       leaps:  unique.filter(n => n.category === 'LONGTERM' || n.category === 'LEAP'),
-    };
+    },
+    all: unique.slice(0, 100),
+  };
+}
 
-    return NextResponse.json({
-      generated_at: new Date().toISOString(),
-      total: unique.length,
-      byTab,
-      all: unique.slice(0, 100),
-    });
+export async function GET() {
+  try {
+    if (_cache && Date.now() - _cache.ts < CACHE_TTL) {
+      return NextResponse.json(_cache.data);
+    }
+
+    if (!_inflight) {
+      _inflight = fetchNotifications()
+        .then(data => { _cache = { data, ts: Date.now() }; return data; })
+        .finally(() => { _inflight = null; });
+    }
+
+    const data = await _inflight;
+    return NextResponse.json(data);
   } catch (err: unknown) {
+    if (_cache) return NextResponse.json({ ..._cache.data, stale: true });
     return NextResponse.json({
       error: (err instanceof Error ? err.message : String(err)).slice(0, 200),
       byTab: { scalps: [], swings: [], leaps: [] },

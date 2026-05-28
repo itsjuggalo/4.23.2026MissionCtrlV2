@@ -3,6 +3,10 @@ import { readFileSync, existsSync } from 'fs';
 
 export const dynamic = 'force-dynamic';
 
+let _cache: { data: any; ts: number } | null = null;
+let _inflight: Promise<any> | null = null;
+const CACHE_TTL = 15_000;
+
 const SIDECAR = '/home/itsju/mission-control/signal-receiver/data/scored_signals_recent.json';
 
 interface PipelineEvent {
@@ -13,9 +17,8 @@ interface PipelineEvent {
   color: string;
 }
 
-export async function GET(req: NextRequest) {
-  try {
-  const FETCH_OPTS = { cache: 'no-store' as const, signal: AbortSignal.timeout(8000) };
+async function fetchPipelineFeed(req: NextRequest) {
+  const FETCH_OPTS = { cache: 'no-store' as const, signal: AbortSignal.timeout(6000) };
   const base = req.nextUrl.origin;
   const events: PipelineEvent[] = [];
   const now = Date.now();
@@ -93,8 +96,25 @@ export async function GET(req: NextRequest) {
   }
 
   events.sort((a, b) => b.ts - a.ts);
-  return NextResponse.json({ events: events.slice(0, 30), count: events.length });
+  return { events: events.slice(0, 30), count: events.length };
+}
+
+export async function GET(req: NextRequest) {
+  try {
+    if (_cache && Date.now() - _cache.ts < CACHE_TTL) {
+      return NextResponse.json(_cache.data);
+    }
+
+    if (!_inflight) {
+      _inflight = fetchPipelineFeed(req)
+        .then(data => { _cache = { data, ts: Date.now() }; return data; })
+        .finally(() => { _inflight = null; });
+    }
+
+    const data = await _inflight;
+    return NextResponse.json(data);
   } catch (e) {
+    if (_cache) return NextResponse.json({ ..._cache.data, stale: true });
     return NextResponse.json({ events: [], count: 0, error: String(e).slice(0, 200) }, { status: 500 });
   }
 }

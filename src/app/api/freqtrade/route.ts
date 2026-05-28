@@ -3,6 +3,10 @@ import { spawn, execSync } from 'child_process';
 import { existsSync, readdirSync, statSync } from 'fs';
 import path from 'path';
 
+let _statusCache: { data: any; ts: number } | null = null;
+let _statusInflight: Promise<any> | null = null;
+const STATUS_TTL = 30_000;
+
 export const revalidate = 0;
 
 const REPO = '/home/itsju/LapClaw/freqtrade';
@@ -74,8 +78,21 @@ function status() {
 
 export async function GET() {
   try {
-    return NextResponse.json(status());
+    if (_statusCache && Date.now() - _statusCache.ts < STATUS_TTL) {
+      return NextResponse.json(_statusCache.data);
+    }
+
+    if (!_statusInflight) {
+      _statusInflight = Promise.resolve()
+        .then(() => status())
+        .then(data => { _statusCache = { data, ts: Date.now() }; return data; })
+        .finally(() => { _statusInflight = null; });
+    }
+
+    const data = await _statusInflight;
+    return NextResponse.json(data);
   } catch (e) {
+    if (_statusCache) return NextResponse.json({ ..._statusCache.data, stale: true });
     return NextResponse.json({ error: String(e).slice(0, 200) }, { status: 500 });
   }
 }

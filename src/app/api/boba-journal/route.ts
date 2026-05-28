@@ -4,6 +4,10 @@ import path from 'path';
 import os from 'os';
 import { proxyToServeftp } from "../../../lib/proxyToServeftp";
 
+let _cache: { data: any; ts: number } | null = null;
+let _inflight: Promise<any> | null = null;
+const CACHE_TTL = 30_000;
+
 /**
  * Boba Journal — aggregates Boba's existing decision log with live SQLite trade outcomes.
  *
@@ -136,61 +140,72 @@ function flattenAutoTrader(entries: any[]): JournalEntry[] {
   }));
 }
 
+async function buildJournal() {
+  const [cycles, autoLog] = await Promise.all([
+    loadBobaDecisions(),
+    loadAutoTraderLog(),
+  ]);
+
+  const bobaEntries = flattenBobaDecisions(cycles);
+  const autoEntries = flattenAutoTrader(autoLog);
+  const merged = [...bobaEntries, ...autoEntries];
+  merged.sort((a, b) => (b.timestamp || '').localeCompare(a.timestamp || ''));
+
+  const recentCycles = cycles.slice(-20).reverse().map(c => ({
+    cycle_time: c.cycle_time,
+    cycle_summary: c.cycle_summary,
+    picks_proposed: c.picks_proposed,
+    picks_executed_count: (c.picks_executed || []).filter(p => p.execution?.ok).length,
+    passed_on: c.passed_on || [],
+  }));
+
+  const confStats: Record<string, number> = {};
+  for (const e of bobaEntries) {
+    const c = e.confidence || 'unspecified';
+    confStats[c] = (confStats[c] || 0) + 1;
+  }
+
+  return {
+    _all: merged,
+    recentCycles,
+    stats: {
+      total_decisions: merged.length,
+      boba_options: bobaEntries.length,
+      boba_executed: bobaEntries.filter(e => e.executed).length,
+      boba_high_conviction: bobaEntries.filter(e => e.confidence === 'high').length,
+      auto_trader_btc: autoEntries.length,
+      confidence_breakdown: confStats,
+    },
+  };
+}
+
 export async function GET(req: Request) {
   const __proxied = await proxyToServeftp(req); if (__proxied) return __proxied;
   try {
     const url = new URL(req.url);
-    const sourceFilter = url.searchParams.get('source'); // 'boba-options' | 'auto-trader-btc' | null (all)
+    const sourceFilter = url.searchParams.get('source');
     const limit = parseInt(url.searchParams.get('limit') || '100', 10) || 100;
 
-    const [cycles, autoLog] = await Promise.all([
-      loadBobaDecisions(),
-      loadAutoTraderLog(),
-    ]);
-
-    const bobaEntries = flattenBobaDecisions(cycles);
-    const autoEntries = flattenAutoTrader(autoLog);
-
-    let merged = [...bobaEntries, ...autoEntries];
-    if (sourceFilter) merged = merged.filter(e => e.source === sourceFilter);
-    merged.sort((a, b) => (b.timestamp || '').localeCompare(a.timestamp || ''));
-    const limited = merged.slice(0, limit);
-
-    // Also surface cycle-level stats: picks passed on
-    const recentCycles = cycles.slice(-20).reverse().map(c => ({
-      cycle_time: c.cycle_time,
-      cycle_summary: c.cycle_summary,
-      picks_proposed: c.picks_proposed,
-      picks_executed_count: (c.picks_executed || []).filter(p => p.execution?.ok).length,
-      passed_on: c.passed_on || [],
-    }));
-
-    // Basic stats
-    const totalBoba = bobaEntries.length;
-    const executedBoba = bobaEntries.filter(e => e.executed).length;
-    const highConv = bobaEntries.filter(e => e.confidence === 'high').length;
-    const totalAuto = autoEntries.length;
-
-    // Confidence breakdown
-    const confStats: Record<string, number> = {};
-    for (const e of bobaEntries) {
-      const c = e.confidence || 'unspecified';
-      confStats[c] = (confStats[c] || 0) + 1;
+    if (!_cache || Date.now() - _cache.ts >= CACHE_TTL) {
+      if (!_inflight) {
+        _inflight = buildJournal()
+          .then(data => { _cache = { data, ts: Date.now() }; return data; })
+          .finally(() => { _inflight = null; });
+      }
+      await _inflight;
     }
 
-    return NextResponse.json({
-      entries: limited,
-      recentCycles,
-      stats: {
-        total_decisions: merged.length,
-        boba_options: totalBoba,
-        boba_executed: executedBoba,
-        boba_high_conviction: highConv,
-        auto_trader_btc: totalAuto,
-        confidence_breakdown: confStats,
-      },
-    });
+    const journal = _cache!.data;
+    let entries: JournalEntry[] = journal._all;
+    if (sourceFilter) entries = entries.filter((e: JournalEntry) => e.source === sourceFilter);
+    entries = entries.slice(0, limit);
+
+    return NextResponse.json({ entries, recentCycles: journal.recentCycles, stats: journal.stats });
   } catch (e: unknown) {
+    if (_cache) {
+      const journal = _cache.data;
+      return NextResponse.json({ entries: journal._all.slice(0, 100), recentCycles: journal.recentCycles, stats: journal.stats, stale: true });
+    }
     return NextResponse.json({ error: (e instanceof Error ? e.message : String(e)).slice(0, 200), entries: [] }, { status: 500 });
   }
 }

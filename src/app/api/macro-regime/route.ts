@@ -4,6 +4,7 @@ import { promises as fs } from 'fs';
 export const dynamic = 'force-dynamic';
 
 let CACHE: { ts: number; data: any } | null = null;
+let INFLIGHT: Promise<any> | null = null;
 const TTL = 60_000;
 const HISTORY_PATH = '/tmp/mc_macro_history.json';
 const UA = 'Mozilla/5.0 (compatible; MissionControl/1.0)';
@@ -251,7 +252,7 @@ async function loadHistory(): Promise<any[]> {
   } catch { return []; }
 }
 
-async function saveHistorySnapshot(snapshot: any): Promise<any[]> {
+async function _saveHistorySnapshot(snapshot: any): Promise<any[]> {
   try {
     const history = await loadHistory();
     const today = formatETDate(new Date());
@@ -265,17 +266,14 @@ async function saveHistorySnapshot(snapshot: any): Promise<any[]> {
   } catch { return []; }
 }
 
-export async function GET() {
-  try {
-    if (CACHE && Date.now() - CACHE.ts < TTL) {
-      return NextResponse.json(CACHE.data);
-    }
+async function computeMacroRegime() {
+  const hardDeadline = new Promise<never>((_, reject) =>
+    setTimeout(() => reject(new Error('macro-regime hard timeout')), 5000)
+  );
 
-    const hardDeadline = new Promise<never>((_, reject) =>
-      setTimeout(() => reject(new Error('macro-regime hard timeout')), 7000)
-    );
-
-    const [fg, vixQ, tnxQ, irxQ, sectors] = await Promise.race([
+  // Load history and external data in parallel
+  const [[fg, vixQ, tnxQ, irxQ, sectors], existingHistory] = await Promise.all([
+    Promise.race([
       Promise.all([
         fetchFearGreed(),
         fetchYahooQuote('^VIX'),
@@ -284,29 +282,47 @@ export async function GET() {
         fetchSectorRotation(),
       ]),
       hardDeadline,
-    ]);
+    ]),
+    loadHistory(),
+  ]);
 
-    const tenY = tnxQ ? Math.round(tnxQ.price * 100) / 100 : null;
-    const twoY = irxQ ? Math.round(irxQ.price * 100) / 100 : null;
-    const yieldSpread = tenY != null && twoY != null ? Math.round((tenY - twoY) * 100) / 100 : null;
+  const tenY = tnxQ ? Math.round(tnxQ.price * 100) / 100 : null;
+  const twoY = irxQ ? Math.round(irxQ.price * 100) / 100 : null;
+  const yieldSpread = tenY != null && twoY != null ? Math.round((tenY - twoY) * 100) / 100 : null;
 
-    const stance = computeRiskStance({ vix: vixQ?.price ?? null, fg: fg?.value ?? null, yieldSpread });
+  const stance = computeRiskStance({ vix: vixQ?.price ?? null, fg: fg?.value ?? null, yieldSpread });
 
-    const history = await saveHistorySnapshot({
-      score: stance.score, stance: stance.label, color: stance.color,
-      vix: vixQ?.price ?? null, fg: fg?.value ?? null, spread: yieldSpread,
-    });
+  // Update history in-memory and write to file in background
+  const today = formatETDate(new Date());
+  const newEntry = { date: today, score: stance.score, stance: stance.label, color: stance.color, vix: vixQ?.price ?? null, fg: fg?.value ?? null, spread: yieldSpread };
+  const idx = existingHistory.findIndex((h: any) => h.date === today);
+  if (idx >= 0) existingHistory[idx] = newEntry; else existingHistory.push(newEntry);
+  const history = existingHistory.slice(-30);
+  fs.writeFile(HISTORY_PATH, JSON.stringify(history)).catch(() => {});
 
-    const vix = vixQ ? { level: Math.round(vixQ.price * 100) / 100, change: Math.round(vixQ.change * 100) / 100, pct: Math.round(vixQ.pct * 100) / 100 } : null;
-    const yields = { tenY, twoY, spread: yieldSpread };
+  const vix = vixQ ? { level: Math.round(vixQ.price * 100) / 100, change: Math.round(vixQ.change * 100) / 100, pct: Math.round(vixQ.pct * 100) / 100 } : null;
+  const yields = { tenY, twoY, spread: yieldSpread };
+  const playbook = computePlaybook(stance, vixQ?.price ?? null, fg?.value ?? null);
+  const sizing = computeSizing(stance, vixQ?.price ?? null);
+  const verdict = generateVerdict({ stance, vix, fg, yields, sectors, history });
 
-    const playbook = computePlaybook(stance, vixQ?.price ?? null, fg?.value ?? null);
-    const sizing = computeSizing(stance, vixQ?.price ?? null);
-    const verdict = generateVerdict({ stance, vix, fg, yields, sectors, history });
+  return { ts: Date.now(), stance, vix, fearGreed: fg, yields, sectors, history, playbook, sizing, verdict };
+}
 
-    const out = { ts: Date.now(), stance, vix, fearGreed: fg, yields, sectors, history, playbook, sizing, verdict };
-    CACHE = { ts: Date.now(), data: out };
-    return NextResponse.json(out);
+export async function GET() {
+  try {
+    if (CACHE && Date.now() - CACHE.ts < TTL) {
+      return NextResponse.json(CACHE.data);
+    }
+
+    if (!INFLIGHT) {
+      INFLIGHT = computeMacroRegime()
+        .then(out => { CACHE = { ts: Date.now(), data: out }; return out; })
+        .finally(() => { INFLIGHT = null; });
+    }
+
+    const data = await INFLIGHT;
+    return NextResponse.json(data);
   } catch (e: unknown) {
     if (CACHE) return NextResponse.json({ ...CACHE.data, stale: true });
     return NextResponse.json({ error: (e instanceof Error ? e.message : String(e)).slice(0, 200) }, { status: 500 });

@@ -77,24 +77,16 @@ function parseRSS(xml: string, defaultSource: string): NewsItem[] {
   return items;
 }
 
-// In-process cache — survives across requests in the same worker lifetime
 let cache: { news: ClientNewsItem[]; updated: string } | null = null;
 let cacheAt = 0;
+let inflight: Promise<{ news: ClientNewsItem[]; updated: string }> | null = null;
 const CACHE_MS = 5 * 60 * 1000;
 
-export async function GET(req: Request) {
-  const proxied = await proxyToServeftp(req);
-  if (proxied) return proxied;
-
-  try {
-  if (cache && Date.now() - cacheAt < CACHE_MS) {
-    return NextResponse.json(cache, { headers: { 'Cache-Control': 'public, max-age=300' } });
-  }
-
+async function fetchAllFeeds(): Promise<{ news: ClientNewsItem[]; updated: string }> {
   const results = await Promise.allSettled(
     FEEDS.map(async ({ url, source }) => {
       const res = await fetch(url, {
-        signal: AbortSignal.timeout(8000),
+        signal: AbortSignal.timeout(3500),
         headers: { 'User-Agent': 'MissionControl/1.0 (market news aggregator)' },
         next: { revalidate: 0 },
       });
@@ -107,11 +99,10 @@ export async function GET(req: Request) {
   const all: NewsItem[] = [];
   for (const r of results) {
     if (r.status === 'fulfilled') all.push(...r.value);
-    else console.warn('[market-news]', r.reason?.message);
+    else console.warn('[market-news]', (r as PromiseRejectedResult).reason?.message);
   }
 
   all.sort((a, b) => b.ts - a.ts);
-  // Deduplicate by headline similarity (exact match)
   const seen = new Set<string>();
   const deduped = all.filter(n => {
     const key = n.headline.toLowerCase().slice(0, 60);
@@ -120,18 +111,31 @@ export async function GET(req: Request) {
     return true;
   });
 
-  // Strip the internal `ts` field before sending to client
   const news: ClientNewsItem[] = deduped.slice(0, 30).map(item => ({
-    time: item.time,
-    headline: item.headline,
-    source: item.source,
-    url: item.url,
+    time: item.time, headline: item.headline, source: item.source, url: item.url,
   }));
-  cache = { news, updated: new Date().toISOString() };
-  cacheAt = Date.now();
+  return { news, updated: new Date().toISOString() };
+}
 
-  return NextResponse.json(cache, { headers: { 'Cache-Control': 'public, max-age=300' } });
+export async function GET(req: Request) {
+  const proxied = await proxyToServeftp(req);
+  if (proxied) return proxied;
+
+  try {
+    if (cache && Date.now() - cacheAt < CACHE_MS) {
+      return NextResponse.json(cache, { headers: { 'Cache-Control': 'public, max-age=300' } });
+    }
+
+    if (!inflight) {
+      inflight = fetchAllFeeds()
+        .then(result => { cache = result; cacheAt = Date.now(); return result; })
+        .finally(() => { inflight = null; });
+    }
+
+    const result = await inflight;
+    return NextResponse.json(result, { headers: { 'Cache-Control': 'public, max-age=300' } });
   } catch (e) {
+    if (cache) return NextResponse.json({ ...cache, stale: true }, { headers: { 'Cache-Control': 'public, max-age=300' } });
     return NextResponse.json({ error: String(e).slice(0, 200) }, { status: 500 });
   }
 }

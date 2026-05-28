@@ -9,6 +9,10 @@ const execAsync = promisify(exec);
 
 const PM2_LOG_DIR = path.join(process.env.HOME || '/home/itsju', '.pm2/logs');
 
+let _cache: { data: any; ts: number } | null = null;
+let _inflight: Promise<any> | null = null;
+const CACHE_TTL = 5_000;
+
 // Agent definitions with tiers
 const AGENT_DEFINITIONS = {
   'telegram-listener': { name: 'Eric', tier: 1, role: 'Signal Filter', dna: 'Point72', emoji: '📡', specialty: 'Telegram signal detection' },
@@ -40,10 +44,9 @@ async function getLastLogLine(name: string): Promise<string> {
   }
 }
 
-export async function GET(request: Request) {
-  const __proxied = await proxyToServeftp(request); if (__proxied) return __proxied;
+async function fetchAgents() {
   try {
-    const { stdout } = await execAsync('pm2 jlist', { timeout: 10000 });
+  const { stdout } = await execAsync('pm2 jlist', { timeout: 8000 });
     const procs: Array<Record<string, unknown>> = JSON.parse(stdout);
 
     const agents = await Promise.all(procs.map(async (p) => {
@@ -97,29 +100,37 @@ export async function GET(request: Request) {
       };
     }));
 
-    return NextResponse.json({
-      success: true,
-      agents,
-      timestamp: new Date().toISOString(),
-    });
+    return { success: true, agents, timestamp: new Date().toISOString() };
   } catch (err) {
     const msg = (err instanceof Error ? err.message : String(err)).slice(0, 200);
-    // pm2 isn't installed on every host (e.g. the local laptop). That's not a
-    // server error — there are simply no pm2-managed agents to report.
     if (/not found|ENOENT|command not found/i.test(msg)) {
-      return NextResponse.json({
-        success: true,
-        agents: [],
-        note: 'pm2 not available on this host',
-        timestamp: new Date().toISOString(),
-      });
+      return { success: true, agents: [], note: 'pm2 not available on this host', timestamp: new Date().toISOString() };
     }
+    throw err;
+  }
+}
+
+export async function GET(request: Request) {
+  const __proxied = await proxyToServeftp(request); if (__proxied) return __proxied;
+  try {
+    if (_cache && Date.now() - _cache.ts < CACHE_TTL) {
+      return NextResponse.json(_cache.data);
+    }
+
+    if (!_inflight) {
+      _inflight = fetchAgents()
+        .then(data => { _cache = { data, ts: Date.now() }; return data; })
+        .finally(() => { _inflight = null; });
+    }
+
+    const data = await _inflight;
+    return NextResponse.json(data);
+  } catch (err) {
+    const msg = (err instanceof Error ? err.message : String(err)).slice(0, 200);
+    if (_cache) return NextResponse.json({ ..._cache.data, stale: true });
     console.error('Error in agents API:', err);
     return NextResponse.json({
-      success: false,
-      agents: [],
-      error: msg,
-      timestamp: new Date().toISOString(),
+      success: false, agents: [], error: msg, timestamp: new Date().toISOString(),
     }, { status: 500 });
   }
 }
