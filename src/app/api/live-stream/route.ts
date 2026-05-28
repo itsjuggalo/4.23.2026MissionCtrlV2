@@ -1,4 +1,4 @@
-import { NextRequest } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 import { readFileSync, existsSync } from 'fs';
 import { join } from 'path';
 import { proxyToServeftp } from "../../../lib/proxyToServeftp";
@@ -62,69 +62,73 @@ async function getRegime() {
 }
 
 export async function GET(req: NextRequest) {
-  const __proxied = await proxyToServeftp(req); if (__proxied) return __proxied;
-  const encoder = new TextEncoder();
-  let closed = false;
+  try {
+    const __proxied = await proxyToServeftp(req); if (__proxied) return __proxied;
+    const encoder = new TextEncoder();
+    let closed = false;
 
-  const stream = new ReadableStream({
-    async start(controller) {
-      const send = (event: string, data: any) => {
-        if (closed) return;
-        try {
-          controller.enqueue(encoder.encode(`event: ${event}\ndata: ${JSON.stringify(data)}\n\n`));
-        } catch {}
-      };
+    const stream = new ReadableStream({
+      async start(controller) {
+        const send = (event: string, data: any) => {
+          if (closed) return;
+          try {
+            controller.enqueue(encoder.encode(`event: ${event}\ndata: ${JSON.stringify(data)}\n\n`));
+          } catch {}
+        };
 
-      // Send initial heartbeat
-      send('connected', { ts: Date.now(), msg: 'Live stream connected' });
+        // Send initial heartbeat
+        send('connected', { ts: Date.now(), msg: 'Live stream connected' });
 
-      // Data push loop — every 10 seconds
-      const push = async () => {
-        if (closed) return;
-        try {
-          const [portfolio, crypto, signal, regime] = await Promise.all([
-            getPortfolioData(),
-            getCryptoPrices(),
-            getLatestSignal(),
-            getRegime(),
-          ]);
+        // Data push loop — every 10 seconds
+        const push = async () => {
+          if (closed) return;
+          try {
+            const [portfolio, crypto, signal, regime] = await Promise.all([
+              getPortfolioData(),
+              getCryptoPrices(),
+              getLatestSignal(),
+              getRegime(),
+            ]);
 
-          send('update', {
-            ts: Date.now(),
-            portfolio,
-            crypto,
-            signal,
-            regime,
-          });
-        } catch {}
-      };
+            send('update', {
+              ts: Date.now(),
+              portfolio,
+              crypto,
+              signal,
+              regime,
+            });
+          } catch {}
+        };
 
-      // Push immediately then every 10s
-      await push();
-      const interval = setInterval(push, 10000);
+        // Push immediately then every 10s
+        await push();
+        const interval = setInterval(push, 10000);
 
-      // Heartbeat every 30s
-      const heartbeat = setInterval(() => {
-        if (closed) return;
-        send('heartbeat', { ts: Date.now() });
-      }, 30000);
+        // Heartbeat every 30s
+        const heartbeat = setInterval(() => {
+          if (closed) return;
+          send('heartbeat', { ts: Date.now() });
+        }, 30000);
 
-      // Cleanup on close
-      req.signal.addEventListener('abort', () => {
-        closed = true;
-        clearInterval(interval);
-        clearInterval(heartbeat);
-        try { controller.close(); } catch {}
-      });
-    },
-  });
+        // Cleanup on close
+        req.signal.addEventListener('abort', () => {
+          closed = true;
+          clearInterval(interval);
+          clearInterval(heartbeat);
+          try { controller.close(); } catch {}
+        });
+      },
+    });
 
-  return new Response(stream, {
-    headers: {
-      'Content-Type': 'text/event-stream',
-      'Cache-Control': 'no-cache, no-transform',
-      'Connection': 'keep-alive',
-      'X-Accel-Buffering': 'no',
-    },
-  });
+    return new Response(stream, {
+      headers: {
+        'Content-Type': 'text/event-stream',
+        'Cache-Control': 'no-cache, no-transform',
+        'Connection': 'keep-alive',
+        'X-Accel-Buffering': 'no',
+      },
+    });
+  } catch (e: unknown) {
+    return NextResponse.json({ error: (e instanceof Error ? e.message : String(e)).slice(0, 200) }, { status: 500 });
+  }
 }
