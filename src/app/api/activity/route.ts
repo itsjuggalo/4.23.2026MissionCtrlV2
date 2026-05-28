@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { readFileSync, existsSync } from 'fs';
 import { join } from 'path';
+import Database from 'better-sqlite3';
 import { proxyToServeftp } from "../../../lib/proxyToServeftp";
 
 const DB_PATH = join(process.env.HOME || '/home/itsju', '.mission-control/mission-control.db');
@@ -66,20 +67,12 @@ export async function GET(req: Request) {
   // Try SQLite first
   try {
     if (existsSync(DB_PATH)) {
-      const { execSync } = require('child_process');
-      const result = execSync(
-        `sqlite3 "${DB_PATH}" "SELECT time, agent, action, detail, type FROM activities ORDER BY time DESC LIMIT ${limit};" 2>/dev/null`,
-        { encoding: 'utf-8', timeout: 5000 }
-      );
-      if (result.trim()) {
-        const rows = result.trim().split('\n').map((row: string) => {
-          const [time, agent, action, detail, type] = row.split('|');
-          return { time, agent, action, detail: detail || action, type: type || 'system' };
-        });
-        if (rows.length > 0) {
-          return NextResponse.json({ activities: rows });
-        }
-      }
+      const db = new Database(DB_PATH, { readonly: true });
+      const rows = db.prepare(
+        'SELECT time, agent, action, detail, type FROM activities ORDER BY time DESC LIMIT ?'
+      ).all(limit) as Activity[];
+      db.close();
+      if (rows.length > 0) return NextResponse.json({ activities: rows });
     }
   } catch {}
 
