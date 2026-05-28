@@ -79,50 +79,8 @@ export default function UsagePage() {
     async function fetchExtras() {
       try {
         const [costRes, dbRes] = await Promise.all([
-          fetch('/api/cost-tracking').then(r => r.json()).catch(() => null),
-          fetch('/api/db-status').then(r => r.json()).catch(() => null),
-        ]);
-        if (costRes) setCostData(costRes);
-        if (dbRes) setDbStats(dbRes);
-      } catch {}
-    }
-    fetchExtras();
-    const i = setInterval(fetchExtras, 60000);
-    return () => clearInterval(i);
-  }, []);
-
-  if (error && !data) {
-  
-  useEffect(() => {
-    async function fetchExtras() {
-      try {
-        const [costRes, dbRes] = await Promise.all([
-          fetch('/api/cost-tracking').then(r => r.json()).catch(() => null),
-          fetch('/api/db-status').then(r => r.json()).catch(() => null),
-        ]);
-        if (costRes) setCostData(costRes);
-        if (dbRes) setDbStats(dbRes);
-      } catch {}
-    }
-    fetchExtras();
-    const i = setInterval(fetchExtras, 60000);
-    return () => clearInterval(i);
-  }, []);
-
-  return (
-      <div style={{ padding: 32, color: "#ef5350", fontFamily: "var(--font-mc-mono, monospace)" }}>
-        {error}
-      </div>
-    );
-  }
-
-
-  useEffect(() => {
-    async function fetchExtras() {
-      try {
-        const [costRes, dbRes] = await Promise.all([
-          fetch('/api/cost-tracking').then(r => r.json()).catch(() => null),
-          fetch('/api/db-status').then(r => r.json()).catch(() => null),
+          fetch('/api/cost-tracking').then(r => r.ok ? r.json() : null).catch(() => null),
+          fetch('/api/db-status').then(r => r.ok ? r.json() : null).catch(() => null),
         ]);
         if (costRes) setCostData(costRes);
         if (dbRes) setDbStats(dbRes);
@@ -135,6 +93,8 @@ export default function UsagePage() {
 
   return (
     <div style={{ padding: "24px 32px", maxWidth: 1400, margin: "0 auto" }}>
+      {error && <div style={{ background: '#1a0000', border: '1px solid #ef535044', color: '#ef5350', padding: '10px 16px', borderRadius: '6px', marginBottom: '12px', fontSize: '13px' }}>⚠ {error}</div>}
+
       {/* Header */}
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 24 }}>
         <div>
@@ -173,24 +133,7 @@ export default function UsagePage() {
       <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 16, marginBottom: 28 }}>
         {Object.entries(PROVIDER_CONFIG).map(([key, cfg]) => {
           const info = data?.balances?.[key] || { budget: 0, spent: 0, remaining: 0, pct_used: 0 };
-        
-  useEffect(() => {
-    async function fetchExtras() {
-      try {
-        const [costRes, dbRes] = await Promise.all([
-          fetch('/api/cost-tracking').then(r => r.json()).catch(() => null),
-          fetch('/api/db-status').then(r => r.json()).catch(() => null),
-        ]);
-        if (costRes) setCostData(costRes);
-        if (dbRes) setDbStats(dbRes);
-      } catch {}
-    }
-    fetchExtras();
-    const i = setInterval(fetchExtras, 60000);
-    return () => clearInterval(i);
-  }, []);
-
-  return (
+          return (
             <div
               key={key}
               style={{
@@ -363,47 +306,13 @@ export default function UsagePage() {
             const chartData = view === "24h" ? data?.hourlyData : data?.dailyData;
             const xKey = view === "24h" ? "hour" : "day";
             if (!chartData || chartData.length === 0) {
-            
-  useEffect(() => {
-    async function fetchExtras() {
-      try {
-        const [costRes, dbRes] = await Promise.all([
-          fetch('/api/cost-tracking').then(r => r.json()).catch(() => null),
-          fetch('/api/db-status').then(r => r.json()).catch(() => null),
-        ]);
-        if (costRes) setCostData(costRes);
-        if (dbRes) setDbStats(dbRes);
-      } catch {}
-    }
-    fetchExtras();
-    const i = setInterval(fetchExtras, 60000);
-    return () => clearInterval(i);
-  }, []);
-
-  return (
+              return (
                 <div style={{ height: 220, display: "flex", alignItems: "center", justifyContent: "center", color: "#455a64", fontSize: 13, fontFamily: "var(--font-mc-mono, monospace)" }}>
                   No usage data yet
                 </div>
               );
             }
-          
-  useEffect(() => {
-    async function fetchExtras() {
-      try {
-        const [costRes, dbRes] = await Promise.all([
-          fetch('/api/cost-tracking').then(r => r.json()).catch(() => null),
-          fetch('/api/db-status').then(r => r.json()).catch(() => null),
-        ]);
-        if (costRes) setCostData(costRes);
-        if (dbRes) setDbStats(dbRes);
-      } catch {}
-    }
-    fetchExtras();
-    const i = setInterval(fetchExtras, 60000);
-    return () => clearInterval(i);
-  }, []);
-
-  return (
+            return (
               <ResponsiveContainer width="100%" height={220}>
                 <LineChart data={chartData} margin={{ left: 10, right: 10 }}>
                   <CartesianGrid strokeDasharray="3 3" stroke="#1a3a4a" />
@@ -469,24 +378,7 @@ export default function UsagePage() {
               <tbody>
                 {data.recent.map((r, i) => {
                   const provCfg = PROVIDER_CONFIG[r.provider];
-                
-  useEffect(() => {
-    async function fetchExtras() {
-      try {
-        const [costRes, dbRes] = await Promise.all([
-          fetch('/api/cost-tracking').then(r => r.json()).catch(() => null),
-          fetch('/api/db-status').then(r => r.json()).catch(() => null),
-        ]);
-        if (costRes) setCostData(costRes);
-        if (dbRes) setDbStats(dbRes);
-      } catch {}
-    }
-    fetchExtras();
-    const i = setInterval(fetchExtras, 60000);
-    return () => clearInterval(i);
-  }, []);
-
-  return (
+                  return (
                     <tr key={i} style={{ borderBottom: "1px solid rgba(26,58,74,0.5)" }}>
                       <td style={{ padding: "8px 12px", color: "#455a64" }}>
                         {new Date(r.timestamp).toLocaleTimeString()}

@@ -28,7 +28,11 @@ export async function GET() {
 export async function POST(req: Request) {
   try {
     const { action, cronId, raw } = await req.json();
-    
+
+    if ((action === 'toggle' || action === 'run_now') && !Number.isInteger(cronId)) {
+      return NextResponse.json({ error: 'Invalid cronId' }, { status: 400 });
+    }
+
     if (action === 'toggle') {
       const crontab = execSync('crontab -l 2>/dev/null || echo ""', { encoding: 'utf-8' });
       const lines = crontab.split('\n');
