@@ -128,7 +128,6 @@ export function CommandCenterPage() {
   const [kronosLoading, setKronosLoading] = useState(false);
   const [kronosError, setKronosError] = useState<string>('');
   const [showKronosHistory, setShowKronosHistory] = useState(false);
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const [selectedItem, setSelectedItem] = useState<{ type: string; data: any } | null>(null);
   const [drawerTicker, setDrawerTicker] = useState<string | null>(null);
   const [extendedIntel, setExtendedIntel] = useState<Record<string, {

@@ -58,7 +58,7 @@ function repoStatus() {
   let commit: string | null = null;
   if (repoExists) {
     try {
-      commit = execSync('git -C "' + REPO + '" log -1 --format="%h %ci %s"', { encoding: 'utf-8' }).trim();
+      commit = execSync('git -C "' + REPO + '" log -1 --format="%h %ci %s"', { encoding: 'utf-8', timeout: 5000 }).trim();
     } catch {}
   }
 

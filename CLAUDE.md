@@ -15,7 +15,7 @@ npm run dev    # port 3000
 
 ## Key facts
 
-- **Next.js 16.2.1** — App Router. See AGENTS.md and `node_modules/next/dist/docs/` for current API surface (do NOT assume training-data Next.js patterns work).
+- **Next.js 16.2.6** — App Router. See AGENTS.md and `node_modules/next/dist/docs/` for current API surface (do NOT assume training-data Next.js patterns work).
 - **Env**: `.env.local` holds `BRIDGE_URL=https://bridge.serveftp.com` and `BRIDGE_TOKEN=...` for the Flow Database API proxy.
 - **Flow Database page** (in `src/components/pages/FlowDatabasePage.tsx`) reads `/api/flow-database/*` which proxies to bridge.serveftp.com/db/* on Oracle.
 - **Sidebar nav** in `src/components/layout/Sidebar.tsx`; page routing in `src/components/layout/AppShellClient.tsx`.
