@@ -1300,7 +1300,7 @@ def _mc_kb_recall():
 
 def call_boba(prompt):
     """Call Claude Sonnet via CLI subprocess (Max plan, no API credits)."""
-    CLAUDE_BIN = "/home/ubuntu/.local/bin/claude"
+    CLAUDE_BIN = "/home/itsju/.nvm/versions/node/v22.22.3/bin/claude"
     full_prompt = (
         _load_premium_dossier()  # NEW: top-of-prompt six-floor desk output
         + _load_lessons()

@@ -1,5 +1,5 @@
 [Unit]
-Description=Kronos WebUI (Flask + Plotly on :5002)
+Description=Kronos WebUI (Flask + Plotly on :7070)
 After=network.target
 
 [Service]
