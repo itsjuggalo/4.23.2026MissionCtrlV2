@@ -251,6 +251,7 @@ function ForceGraph({
 export function MemoryGraphPage() {
   const [data,     setData]     = useState<GraphData | null>(null);
   const [loading,  setLoading]  = useState(true);
+  const [error,    setError]    = useState(false);
   const [selected, setSelected] = useState<string | null>(null);
   const [filter,   setFilter]   = useState<string>('all');
   const [search,   setSearch]   = useState('');
@@ -258,9 +259,9 @@ export function MemoryGraphPage() {
   const fetchData = useCallback(async () => {
     try {
       const r = await fetch('/api/memory-graph');
-      const d = await r.json();
-      setData(d);
-    } catch { /* silent */ }
+      if (r.ok) { setData(await r.json()); setError(false); }
+      else setError(true);
+    } catch { setError(true); }
     finally { setLoading(false); }
   }, []);
 
@@ -292,8 +293,11 @@ export function MemoryGraphPage() {
     return `${Math.floor(diff / 86400)}d ago`;
   };
 
+  const errBanner = error ? <div style={{ padding: '10px 16px', background: '#ef535014', border: '1px solid #ef535033', borderRadius: '6px', color: '#ef5350', fontFamily: FONTS.mono, fontSize: '12px', marginBottom: '8px' }}>⚠ Memory graph API unavailable — data may be stale</div> : null;
+
   return (
     <div style={{ fontFamily: FONTS.sans, color: COLORS.text, display: 'flex', flexDirection: 'column', gap: 20 }}>
+      {errBanner}
 
       {/* Header */}
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 12 }}>

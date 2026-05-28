@@ -51,18 +51,17 @@ const COINS = ['BTC', 'ETH', 'XRP', 'BNB', 'DOGE'];
 export function PowerTraderPage() {
   const [data, setData]       = useState<PowerTraderData | null>(null);
   const [loading, setLoading] = useState(true);
+  const [error, setError]     = useState(false);
   const [tab, setTab]         = useState<'overview' | 'trades' | 'holdings' | 'settings'>('overview');
   const [drawerTicker, setDrawerTicker] = useState<string | null>(null);
 
   const fetchData = useCallback(async () => {
     try {
       const res  = await fetch('/api/powertrader', { cache: 'no-store' });
-      const json = await res.json();
-      setData(json);
-      setLoading(false);
-    } catch {
-      setLoading(false);
-    }
+      if (res.ok) { setData(await res.json()); setError(false); }
+      else setError(true);
+    } catch { setError(true); }
+    finally { setLoading(false); }
   }, []);
 
   useEffect(() => {
@@ -95,9 +94,11 @@ export function PowerTraderPage() {
     </div>
   );
 
+  const errBanner = error ? <div style={{ padding: '10px 16px', background: '#ef535014', border: '1px solid #ef535033', borderRadius: '6px', color: '#ef5350', fontFamily: 'monospace', fontSize: '12px' }}>⚠ PowerTrader API unavailable — retrying every 5s</div> : null;
+
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
-
+      {errBanner}
       {/* Header */}
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
         <div>

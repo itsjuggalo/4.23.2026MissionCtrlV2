@@ -1,5 +1,3 @@
-export const dynamic = 'force-dynamic';
-
 export async function GET() {
   // Mock go-trader trades until service is running
   return new Response(JSON.stringify({
