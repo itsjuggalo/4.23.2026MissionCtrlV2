@@ -7,7 +7,7 @@ export const revalidate = 0;
 export async function GET() {
   try {
     // Try to read from OpenClaw logs for token usage
-    let tokenData = {
+    const tokenData = {
       inputTokens: 0,
       outputTokens: 0,
       totalCost: 0,

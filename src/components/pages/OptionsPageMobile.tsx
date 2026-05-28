@@ -11,7 +11,7 @@
 // ═══════════════════════════════════════════════════════════════
 'use client';
 
-import React, { useEffect, useMemo, useRef, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import {
   Menu, Search, Crosshair, TrendingUp, PiggyBank, Radio, MoreHorizontal,
   Bell, Filter, ChevronRight, Layers, X, Check, Bird, BarChart3, LineChart,
@@ -105,6 +105,7 @@ const TickerLogo: React.FC<{ symbol: string; logoUrl: string | null; size?: numb
     );
   }
   return (
+    // eslint-disable-next-line @next/next/no-img-element
     <img src={logoUrl} onError={() => setErrored(true)} alt={symbol}
       style={{ width: size, height: size, borderRadius: '50%', background: '#fff', objectFit: 'contain', flexShrink: 0 }} />
   );

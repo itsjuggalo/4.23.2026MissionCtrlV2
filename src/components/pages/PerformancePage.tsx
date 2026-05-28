@@ -51,8 +51,8 @@ export function PerformancePage() {
   const [params, setParams] = useState<SupertrendParams | null>(null);
   const [loading, setLoading] = useState(true);
   const [tradeLog, setTradeLog] = useState<TradeLogData | null>(null);
-  const [equityHist, setEquityHist] = useState<{ equity?: number; date?: string; daily_pnl_pct?: number }[]>([]);
-  const [tick, setTick] = useState(0);
+  const [_equityHist, setEquityHist] = useState<{ equity?: number; date?: string; daily_pnl_pct?: number }[]>([]);
+  const [, setTick] = useState(0);
   const [bobaJournal, setBobaJournal] = useState<any[]>([]);
   const [drawerTicker, setDrawerTicker] = useState<string | null>(null);
   const [error, setError] = useState(false);
@@ -162,11 +162,11 @@ export function PerformancePage() {
   const fmt = (n: number, d = 2) => n.toLocaleString(undefined, { minimumFractionDigits: d, maximumFractionDigits: d });
 
   // Win rate gauge percentage (capped)
-  const gaugeAngle = Math.min(winRate, 100) * 1.8; // 0-180 degrees
+  const _gaugeAngle = Math.min(winRate, 100) * 1.8; // 0-180 degrees
 
   // Use SQLite trade stats if available (more accurate than signal-based)
   const dbStats = tradeLog?.stats || {};
-  const dbTrades = tradeLog?.trades || [];
+  const _dbTrades = tradeLog?.trades || [];
   const useDb = (dbStats.total_trades as number ?? 0) > 0;
   const finalWinRate = useDb ? (dbStats.win_rate as number ?? 0) : winRate;
   const finalPF = useDb ? (dbStats.profit_factor as number ?? 0) : profitFactor;
@@ -175,8 +175,8 @@ export function PerformancePage() {
   const finalBest = useDb ? (dbStats.best_trade as number ?? 0) : bestTrade;
   const finalWorst = useDb ? (dbStats.worst_trade as number ?? 0) : worstTrade;
   const finalTotalTrades = useDb ? (dbStats.total_trades as number ?? 0) : totalTrades;
-  const finalWins = useDb ? (dbStats.wins as number ?? 0) : wins.length;
-  const finalLosses = useDb ? (dbStats.losses as number ?? 0) : losses.length;
+  const _finalWins = useDb ? (dbStats.wins as number ?? 0) : wins.length;
+  const _finalLosses = useDb ? (dbStats.losses as number ?? 0) : losses.length;
 
   if (loading) return (
     <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '60vh', color: '#4fc3f7', fontFamily: 'var(--font-mc-mono)' }}>

@@ -17,7 +17,7 @@ const OHLC_CACHE_DIR = path.join(process.cwd(), 'data/ohlc_cache');
 
 const WAL_SIZE_ALERT_MB = 100;
 const PULSE_STALE_MS = 15 * 60 * 1000; // 15 min
-const MAX_MISSING_BUCKETS = 3;
+const _MAX_MISSING_BUCKETS = 3;
 const PENDING_ALERT_MS = 10 * 60 * 1000; // 10 min
 
 function getFileSizeMb(filePath: string): number {

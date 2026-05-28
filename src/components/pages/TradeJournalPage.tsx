@@ -101,7 +101,7 @@ export default function TradeJournalPage() {
         <div>
           <div style={{ fontSize: 24, fontWeight: 800, color: '#e0e0e0', letterSpacing: '1.5px' }}>TRADE JOURNAL</div>
           <div style={{ fontSize: 11, color: '#607d8b', marginTop: 4, letterSpacing: '1px' }}>
-            BOBA'S DECISION LOG · Every trade with full reasoning from the decision cycle
+            BOBA&apos;S DECISION LOG · Every trade with full reasoning from the decision cycle
           </div>
         </div>
         <button onClick={load} style={{

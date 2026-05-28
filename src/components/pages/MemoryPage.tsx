@@ -294,7 +294,7 @@ export function MemoryPage() {
   // List state
   const [memories, setMemories] = useState<Memory[]>([]);
   const [stats,    setStats]    = useState<Stats | null>(null);
-  const [loading,  setLoading]  = useState(true);
+  const [, setLoading]  = useState(true);
   const [query,    setQuery]    = useState('');
   const [srcFilter,setSrcFilter]= useState<string>('all');
   const [impFilter,setImpFilter]= useState<string>('all');

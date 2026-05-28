@@ -1,6 +1,6 @@
 'use client';
 import { useState, useEffect, useMemo } from 'react';
-import { ChevronDown, ChevronRight, FileText, Folder, Calendar, RefreshCw, Search, X, BookOpen, Clock, Hash } from 'lucide-react';
+import { ChevronDown, ChevronRight, Folder, RefreshCw, Search, X, BookOpen, Clock } from 'lucide-react';
 
 interface DocFile {
   name: string;
@@ -285,7 +285,7 @@ export default function DocsPage() {
                     {files.map(doc => {
                       const isExpanded = expanded === doc.path;
                       const isLoadingThis = loadingContent === doc.path;
-                      const fileColor = getFileColor(doc.name);
+                      const _fileColor = getFileColor(doc.name);
 
                       return (
                         <div key={doc.path} style={{

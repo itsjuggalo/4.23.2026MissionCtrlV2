@@ -10,7 +10,6 @@ import AgentDesk from './AgentDesk';
 import Floor from './Floor';
 import Walls from './Walls';
 import Lights from './Lights';
-import AgentPanel from './AgentPanel';
 import CoffeeMachine from './CoffeeMachine';
 import PlantPot from './PlantPot';
 import WallClock from './WallClock';
@@ -20,7 +19,7 @@ import MovingAvatar from './MovingAvatar';
 
 export default function Office3D() {
   const [selectedAgent, setSelectedAgent] = useState<string | null>(null);
-  const [interactionModal, setInteractionModal] = useState<string | null>(null);
+  const [_interactionModal, setInteractionModal] = useState<string | null>(null);
   const [avatarPositions, setAvatarPositions] = useState<Map<string, any>>(new Map());
 
   // Fetch real agent status from our API

@@ -1,8 +1,6 @@
 import { NextResponse } from 'next/server';
 import { promises as fs } from 'fs';
 import path from 'path';
-import os from 'os';
-import { proxyToServeftp } from "../../../../lib/proxyToServeftp";
 
 const CACHE_DIR = '/tmp/mc_insider_cache';
 const CACHE_TTL_MS = 30 * 60 * 1000; // 30 min

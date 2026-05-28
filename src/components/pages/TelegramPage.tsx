@@ -171,7 +171,7 @@ export function TelegramPage() {
   const coinSonar = byGroup('COIN SONAR');
   const aiSignals = byGroup('AI SIGNALS');
   const structuredSignals = byGroup('STRUCTURED SIGNALS');
-  const whaleTracker = byGroup('WHALE TRACKER');
+  const _whaleTracker = byGroup('WHALE TRACKER');
   const binancePump = byGroup('BINANCE PUMP');
   const whaleLiqs = byGroup('WHALE LIQS');
   const xCrypto = byGroup('xCRYPTO');

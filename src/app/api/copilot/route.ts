@@ -492,7 +492,7 @@ function formatHistoryAsPrompt(messages: { role: string; content: string }[]): s
 
 // ---- secrets / file helpers ----
 
-function readSecret(name: string): string {
+function _readSecret(name: string): string {
   try {
     const p = path.join(os.homedir(), '.openclaw', 'secrets', name);
     if (fs.existsSync(p)) return fs.readFileSync(p, 'utf-8').trim();

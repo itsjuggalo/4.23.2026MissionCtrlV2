@@ -2,13 +2,12 @@ import { NextResponse } from 'next/server';
 import { execSync } from 'child_process';
 import { readFileSync, existsSync } from 'fs';
 import { join } from 'path';
-import { proxyToServeftp } from "../../../lib/proxyToServeftp";
 
 export const dynamic = 'force-dynamic';
 export const revalidate = 0;
 
 const DATA_DIR = join(process.env.HOME || '/home/itsju', '.mission-control');
-const USAGE_FILE = join(DATA_DIR, 'api_usage.json');
+const _USAGE_FILE = join(DATA_DIR, 'api_usage.json');
 
 export async function GET() {
   // Get real PM2 memory/cpu usage
@@ -24,7 +23,8 @@ export async function GET() {
   const uptimeHrs = pm2Data.length > 0 ? Math.round((Date.now() - Math.min(...pm2Data.map(p => p.pm2_env?.pm_uptime || Date.now()))) / 3600000) : 0;
 
   // Estimate API costs from log activity
-  let anthropicCalls = 0, openaiCalls = 0, geminiCalls = 0, deepseekCalls = 0, xaiCalls = 0;
+  let anthropicCalls = 0, geminiCalls = 0;
+  const openaiCalls = 0, deepseekCalls = 0, xaiCalls = 0;
   const logDir = join(process.env.HOME || '/home/itsju', '.pm2/logs');
   
   try {

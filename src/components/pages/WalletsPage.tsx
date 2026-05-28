@@ -408,7 +408,7 @@ function WalletCard({ w, live, collapsed, toggleCollapse, expanded, toggleExpand
   );
 }
 
-function PositionSection({ sectionKey, title, positions, expanded, setExpanded, onSymbolClick, symColor }: {
+function PositionSection({ sectionKey: _sectionKey, title, positions, expanded, setExpanded, onSymbolClick, symColor }: {
   sectionKey: string;
   title: string;
   positions: any[];

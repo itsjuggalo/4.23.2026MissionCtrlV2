@@ -42,7 +42,7 @@ const AI_AGENTS: Omit<AgentInfo, 'status' | 'trustGrade' | 'trustScore' | 'metri
   },
 ];
 
-function timeAgo(ms: number): string {
+function _timeAgo(ms: number): string {
   const mins = Math.floor(ms / 60000);
   if (mins < 60) return `${mins}m`;
   const hrs = Math.floor(mins / 60);
@@ -82,7 +82,7 @@ export function AgentsPage() {
     return { grade: t.grade, score: t.trust_score, metrics };
   };
 
-  const getPm2 = (name: string) => {
+  const _getPm2 = (name: string) => {
     const p = pm2Data.find((a: any) => a.name?.toLowerCase().includes(name.toLowerCase()));
     if (!p) return null;
     return {

@@ -13,7 +13,7 @@ import fs from 'fs';
 import path from 'path';
 
 const LIVE_DB_PATH = path.join(process.cwd(), 'data/live_trades.sqlite');
-const TV_DB_PATH = path.join(process.cwd(), 'data/tv_webhook_log.sqlite');
+const _TV_DB_PATH = path.join(process.cwd(), 'data/tv_webhook_log.sqlite');
 
 export interface PulseData {
   fill_rate: number;

@@ -1,7 +1,6 @@
 import { NextResponse } from 'next/server';
-import { readdirSync, statSync, readFileSync } from 'fs';
+import { readdirSync, statSync } from 'fs';
 import { join, relative, extname, basename } from 'path';
-import { proxyToServeftp } from "../../../lib/proxyToServeftp";
 
 export const dynamic = 'force-dynamic';
 export const revalidate = 0;
@@ -122,7 +121,7 @@ export async function GET() {
       total: unique.length,
       scanned_at: new Date().toISOString(),
     });
-  } catch (error) {
+  } catch {
     return NextResponse.json(
       { error: 'Failed to scan documents', docs: {} },
       { status: 500 }

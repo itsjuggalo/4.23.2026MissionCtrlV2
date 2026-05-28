@@ -1,13 +1,13 @@
 import { NextResponse } from 'next/server';
 import { readFileSync, existsSync } from 'fs';
 import Database from 'better-sqlite3';
-import { proxyToServeftp } from "../../../lib/proxyToServeftp";
 
 export const dynamic = 'force-dynamic';
 
 const SIDECAR = '/home/itsju/mission-control/signal-receiver/data/scored_signals_recent.json';
 const JOURNAL = '/home/itsju/.openclaw/workspace/skill_outputs/boba_decisions_validated.json';
 const PIPELINE_DB = '/home/itsju/LapClaw/pipeline/desk_pipeline.sqlite';
+const SCRAPER_STATUS = '/home/itsju/mission-control-restored/Option-Signals-Scraper/data/_scraper_status.json';
 const FIREBASE_FLOW = 'https://stock-signal-72772-default-rtdb.firebaseio.com/FlowGreeks/LiveFlowLast100.json';
 const STALE_MS = 8 * 60 * 60 * 1000;
 
@@ -64,11 +64,25 @@ export async function GET() {
         if (pipelineAge < journalAge) lastCycleTime = row.completed_at;
       }
     } catch {}
-    // Tertiary fallback: live Firebase flow feed
-    const currentAge = lastCycleTime ? Date.now() - new Date(lastCycleTime).getTime() : Infinity;
-    if (currentAge > STALE_MS) {
+    // Tertiary fallback: scraper status heartbeat (updated every ~5 min by active data scraper)
+    const age2 = lastCycleTime ? Date.now() - new Date(lastCycleTime).getTime() : Infinity;
+    if (age2 > STALE_MS && existsSync(SCRAPER_STATUS)) {
+      try {
+        const status = JSON.parse(readFileSync(SCRAPER_STATUS, 'utf-8'));
+        if (status?.updated_at) {
+          const scraperAge = Date.now() - new Date(status.updated_at).getTime();
+          if (scraperAge < age2) lastCycleTime = status.updated_at;
+        }
+      } catch {}
+    }
+    // Quaternary fallback: live Firebase flow feed (only apply if fresher than current best)
+    const age3 = lastCycleTime ? Date.now() - new Date(lastCycleTime).getTime() : Infinity;
+    if (age3 > STALE_MS) {
       const fbTime = await latestFirebaseFlowTime();
-      if (fbTime) lastCycleTime = fbTime;
+      if (fbTime) {
+        const fbAge = Date.now() - new Date(fbTime).getTime();
+        if (fbAge < age3) lastCycleTime = fbTime;
+      }
     }
   }
 

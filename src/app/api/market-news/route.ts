@@ -120,7 +120,13 @@ export async function GET(req: Request) {
     return true;
   });
 
-  const news = deduped.slice(0, 30).map(({ ts: _ts, ...n }): ClientNewsItem => n);
+  // Strip the internal `ts` field before sending to client
+  const news: ClientNewsItem[] = deduped.slice(0, 30).map(item => ({
+    time: item.time,
+    headline: item.headline,
+    source: item.source,
+    url: item.url,
+  }));
   cache = { news, updated: new Date().toISOString() };
   cacheAt = Date.now();
 

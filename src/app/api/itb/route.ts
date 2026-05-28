@@ -23,7 +23,6 @@ const PIPELINE_SCRIPTS = [
   'download', 'merge', 'features', 'labels',
   'train', 'predict', 'predict_rolling', 'signals', 'simulate', 'output',
 ] as const;
-type Script = typeof PIPELINE_SCRIPTS[number];
 
 let _depCache: { ts: number; checks: Record<string, boolean> } | null = null;
 let _depCheckInProgress = false;

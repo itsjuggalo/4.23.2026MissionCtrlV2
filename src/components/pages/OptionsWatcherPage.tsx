@@ -1,5 +1,5 @@
 'use client';
-import { useState, useEffect, useRef, useMemo } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { StockDetailDrawer } from '@/components/drawers/StockDetailDrawer';
 
 // ── TYPES ──
@@ -218,7 +218,7 @@ export function OptionsWatcherPage() {
   const [stratCategory, setStratCategory] = useState('Bullish');
   const [selectedStrategy, setSelectedStrategy] = useState('Long Call');
   const [stratStrike, setStratStrike] = useState(0);
-  const [stratExpIdx, setStratExpIdx] = useState(0);
+  const [_stratExpIdx, _setStratExpIdx] = useState(0);
   const [lotSize, setLotSize] = useState(100);
 
   // Load expirations on ticker change
@@ -377,7 +377,7 @@ export function OptionsWatcherPage() {
   }, [filteredStrikes, calls, puts]);
 
   const currentPrice = quote?.last || 0;
-  const priceChange = quote?.change || 0;
+  const _priceChange = quote?.change || 0;
   const pricePct = quote?.change_percentage || 0;
 
   const btnStyle = (active: boolean): React.CSSProperties => ({
@@ -392,7 +392,7 @@ export function OptionsWatcherPage() {
     background: 'transparent', color: active ? '#4fc3f7' : '#607d8b', letterSpacing: '0.5px',
   });
 
-  const headerCol = (label: string): React.CSSProperties => ({
+  const headerCol = (_label: string): React.CSSProperties => ({
     fontSize: '9px', fontWeight: 700, color: '#607d8b', fontFamily: 'var(--font-mc-mono)',
     letterSpacing: '0.5px', padding: '6px 6px', textAlign: 'right', whiteSpace: 'nowrap',
   });

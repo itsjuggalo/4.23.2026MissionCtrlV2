@@ -394,7 +394,7 @@ export function DeskPage() {
                   </div>
                   {data.floor2?.sector_tailwinds?.theme && (
                     <div style={{ fontSize: 12, color: "var(--color-mc-text-muted)", marginTop: 8, lineHeight: 1.5 }}>
-                      "{data.floor2.sector_tailwinds.theme}"
+                      &quot;{data.floor2.sector_tailwinds.theme}&quot;
                     </div>
                   )}
                 </div>

@@ -1,9 +1,8 @@
 "use client";
-import { useState } from "react";
 import { Bell, Settings, ChevronLeft, ChevronRight,
   LayoutDashboard, BarChart3, TrendingUp, Activity, Radar, Bot, Brain, Briefcase,
   ShieldAlert, Building2, MessageSquare, ClipboardCheck, Calendar, FolderKanban,
-  ListTodo, FileText, BookOpen, Wallet, LineChart, Home, Search, Zap, Target,
+  ListTodo, FileText, BookOpen, Wallet, LineChart, Search, Zap, Target,
   Eye, Send, Network, History, BookMarked, Database, Users, AlertTriangle, Rocket,
   Monitor, Smartphone, Workflow, Cpu, BotMessageSquare, Webhook,
 } from "lucide-react";

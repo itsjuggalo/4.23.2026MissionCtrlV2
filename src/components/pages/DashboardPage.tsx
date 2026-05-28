@@ -1,6 +1,5 @@
 'use client';
 import { useLiveStream } from '@/hooks/useLiveStream';
-import { LiveIndicator } from '@/components/ui/LiveIndicator';
 import { useEffect, useState } from 'react';
 import { CopilotSection } from './CopilotSection';
 import { BTCBiasWidget } from '../ui/BTCBiasWidget';
@@ -262,11 +261,11 @@ export function DashboardPage() {
     const iv = setInterval(fetchFlows, 30000);
     return () => clearInterval(iv);
   }, []);
-  const live = useLiveStream(true);
+  useLiveStream(true);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
   const [equityHist, setEquityHist] = useState<{ equity?: number; date?: string; daily_pnl_pct?: number }[]>([]);
-  const [tick, setTick] = useState(0);
+  const [, setTick] = useState(0);
   const [drawerTicker, setDrawerTicker] = useState<string | null>(null);
 
   const fetchAll = async () => {
@@ -566,7 +565,7 @@ export function DashboardPage() {
           {/* Today's Report */}
           {report && (
             <div className="db-card" style={{ padding: '16px' }}>
-              <div className="db-label" style={{ marginBottom: '12px' }}>TODAY'S REPORT</div>
+              <div className="db-label" style={{ marginBottom: '12px' }}>TODAY&apos;S REPORT</div>
               {report.summary ? (
                 <div style={{ fontSize: 'var(--mc-font-badge)', color: '#b0bec5', lineHeight: '1.6' }}>{report.summary}</div>
               ) : (

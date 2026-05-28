@@ -2,7 +2,7 @@
 
 import { useRef } from 'react';
 import { useFrame } from '@react-three/fiber';
-import { Box, Text } from '@react-three/drei';
+import { Box } from '@react-three/drei';
 import type { Group } from 'three';
 import type { AgentConfig } from './agentsConfig';
 

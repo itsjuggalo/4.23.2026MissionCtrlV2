@@ -165,7 +165,7 @@ export async function GET() {
       truncated: files.length >= MAX_FILES || memories.length < totalMemories,
       nodes,
       edges,
-      files: files.map(({ content, ...rest }) => rest),
+      files: files.map(({ content: _content, ...rest }) => rest),
       memories,
       stats: {
         total: totalMemories,

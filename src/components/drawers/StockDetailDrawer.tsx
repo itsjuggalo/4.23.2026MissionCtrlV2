@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 
 interface StockData {
   ticker: string;
@@ -525,7 +525,7 @@ const EarningsChart: React.FC<{ data: { date: string; est: number | null; act: n
   const yMin = min - pad, yMax = max + pad;
 
   const w = 408, h = 180;
-  const chartH = 150, labelH = 30;
+  const chartH = 150, _labelH = 30;
   const leftPad = 30, rightPad = 10;
   const chartW = w - leftPad - rightPad;
 
@@ -706,26 +706,26 @@ function TechnicalAnalysis({ candles, mode, regularPrice }: {
     if (price > stopLoss) {
       rr = (targetPrice - price) / (price - stopLoss);
     }
-    let bullCount = 0, bearCount = 0, totalChecks = 0;
+    let bullCount = 0, _bearCount = 0, totalChecks = 0;
     if (ma50 && ma200) {
       totalChecks++;
       if (price > ma50 && ma50 > ma200) bullCount++;
-      else if (price < ma50 && ma50 < ma200) bearCount++;
+      else if (price < ma50 && ma50 < ma200) _bearCount++;
     }
     if (rsi != null) {
       totalChecks++;
       if (rsi < 30) bullCount++;
-      else if (rsi > 70) bearCount++;
+      else if (rsi > 70) _bearCount++;
     }
     if (macdHist != null) {
       totalChecks++;
       if (macdHist > 0) bullCount++;
-      else bearCount++;
+      else _bearCount++;
     }
     if (bbPos === 'BELOW LOWER') { totalChecks++; bullCount++; }
-    else if (bbPos === 'ABOVE UPPER') { totalChecks++; bearCount++; }
+    else if (bbPos === 'ABOVE UPPER') { totalChecks++; _bearCount++; }
     if (pattern.includes('BULLISH')) { totalChecks++; bullCount++; }
-    else if (pattern.includes('BEARISH')) { totalChecks++; bearCount++; }
+    else if (pattern.includes('BEARISH')) { totalChecks++; _bearCount++; }
     score = totalChecks > 0 ? Math.round((bullCount / totalChecks) * 100) : 50;
     if (score >= 75) action = 'STRONG BUY';
     else if (score >= 55) action = 'BUY';

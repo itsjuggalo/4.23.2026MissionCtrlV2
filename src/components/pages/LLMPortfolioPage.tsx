@@ -203,7 +203,7 @@ export function LLMPortfolioPage() {
                 {modelKeys.flatMap(key => {
                   const m = models[key];
                   if (!m?.recent_trades) return [];
-                  return m.recent_trades.slice(0, 3).map((t, i) => ({...t, modelKey: key, modelColor: m.color}));
+                  return m.recent_trades.slice(0, 3).map((t) => ({...t, modelKey: key, modelColor: m.color}));
                 }).sort((a, b) => b.date.localeCompare(a.date)).slice(0, 20).map((t, i) => (
                   <tr key={i} onClick={() => setDrawerTicker(t.symbol)} style={{ borderBottom: "1px solid rgba(26,58,74,0.3)", cursor: "pointer" }}>
                     <td style={{ padding: "8px 12px", color: t.modelColor, fontWeight: 600 }}>{t.modelKey}</td>

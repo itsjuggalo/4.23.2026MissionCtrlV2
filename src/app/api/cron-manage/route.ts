@@ -27,7 +27,7 @@ export async function GET() {
 
 export async function POST(req: Request) {
   try {
-    const { action, cronId, raw } = await req.json();
+    const { action, cronId, raw: _raw } = await req.json();
 
     if ((action === 'toggle' || action === 'run_now') && !Number.isInteger(cronId)) {
       return NextResponse.json({ error: 'Invalid cronId' }, { status: 400 });

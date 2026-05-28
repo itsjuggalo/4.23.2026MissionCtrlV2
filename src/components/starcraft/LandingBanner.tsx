@@ -24,7 +24,7 @@ const BATTLES: { id: Battle; label: string; desc: string }[] = [
   { id: 'reaver-scarab', label: 'REAVER SCARAB', desc: 'Protoss siege' },
 ];
 
-export default function LandingBanner({ height = 160, persistKey = 'mc-landing-battle', showSelector = true }: Props) {
+export default function LandingBanner({ height = 160, persistKey: _persistKey = 'mc-landing-battle', showSelector = true }: Props) {
   const [selected, setSelected] = useState<Battle>('marine-zealot');
 
   useEffect(() => {
@@ -36,6 +36,7 @@ export default function LandingBanner({ height = 160, persistKey = 'mc-landing-b
 
   const pick = (id: Battle) => {
     setSelected(id);
+    // eslint-disable-next-line react-hooks/immutability
     try { window.__mcBattle = id; } catch {}
   };
 

@@ -39,6 +39,7 @@ export default function AvatarModel({ agent, position }: AvatarModelProps) {
   }
 
   // Load and display the GLB model
+  // eslint-disable-next-line react-hooks/rules-of-hooks
   const { scene } = useGLTF(modelPath);
   
   return (

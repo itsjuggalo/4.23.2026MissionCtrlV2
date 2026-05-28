@@ -83,7 +83,7 @@ function buildReasoning(
   ema200: number,
   price: number,
   boll: { upper: number; middle: number; lower: number },
-  trend: Signal['trend']
+  _trend: Signal['trend']
 ): string {
   const parts: string[] = [];
 

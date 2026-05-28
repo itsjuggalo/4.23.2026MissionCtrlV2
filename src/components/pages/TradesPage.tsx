@@ -175,7 +175,7 @@ export function TradesPage() {
   const stockPositions  = positions.filter(p => getAssetType(p) === 'stock');
   const optionPositions = positions.filter(p => getAssetType(p) === 'option');
 
-  const sourceCount = positions.reduce((acc, p) => {
+  const _sourceCount = positions.reduce((acc, p) => {
     const s = p.source || p.strategy || 'unknown';
     acc[s] = (acc[s] || 0) + 1;
     return acc;
@@ -327,7 +327,7 @@ export function TradesPage() {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-3xl font-bold text-white">Trades</h1>
-          <p className="text-gray-400 mt-1">Boba's automated trading activity</p>
+          <p className="text-gray-400 mt-1">Boba&apos;s automated trading activity</p>
         </div>
         <div className="flex items-center space-x-4">
           <div className="px-4 py-2 rounded-lg bg-blue-500/20 text-blue-400">

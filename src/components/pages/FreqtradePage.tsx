@@ -1,9 +1,8 @@
 'use client';
 
 import { useEffect, useState, useCallback } from 'react';
-import { ExternalLink, RefreshCw, Play, Copy, CheckCircle2, XCircle, Loader2, FolderOpen, Package, ChevronDown, ChevronUp } from 'lucide-react';
+import { ExternalLink, RefreshCw, Play, Copy, CheckCircle2, Loader2, FolderOpen, Package, ChevronDown, ChevronUp } from 'lucide-react';
 import { safeFixed } from '@/lib/fmt';
-import { MetricCard } from '@/components/ui/MetricCard';
 import { Badge } from '@/components/ui/Badge';
 import { PulseDot } from '@/components/ui/PulseDot';
 import { Sparkline } from '@/components/ui/Sparkline';
@@ -336,7 +335,7 @@ export function FreqtradePage() {
             {backtestHistory.map(bt => {
               const isExpanded = expandedBacktest === bt.run_uuid;
               const equitySpark = bt.equity_curve?.map(p => p.equity) ?? [];
-              const profitSev: 'green' | 'red' | 'neutral' = bt.total_profit_pct > 0 ? 'green' : bt.total_profit_pct < 0 ? 'red' : 'neutral';
+              const _profitSev: 'green' | 'red' | 'neutral' = bt.total_profit_pct > 0 ? 'green' : bt.total_profit_pct < 0 ? 'red' : 'neutral';
               const winRateSev: 'green' | 'amber' | 'red' = bt.win_rate >= 0.6 ? 'green' : bt.win_rate >= 0.45 ? 'amber' : 'red';
 
               return (
@@ -393,7 +392,7 @@ export function FreqtradePage() {
       <div style={{ background: 'var(--color-mc-bg-card)', border: '1px solid var(--color-mc-border)', borderRadius: 8, padding: 14, marginBottom: 18 }}>
         <div style={{ fontSize: 12, color: 'var(--color-mc-accent)', fontWeight: 600, marginBottom: 8, letterSpacing: 0.5, fontFamily: 'var(--font-mc-mono)' }}>LIVE TRADER (DRY-RUN BY DEFAULT)</div>
         <div style={{ fontSize: 12, color: 'var(--color-mc-text-muted)', marginBottom: 10 }}>
-          Don't launch from this dashboard — long-lived process. Run under PM2 or in a terminal. Then open FreqUI at <a href={freqUiUrl} target="_blank" rel="noopener" style={{ color: 'var(--color-mc-accent)' }}>localhost:8080</a> (user: freqtrader, pass: freqtrader).
+          Don&apos;t launch from this dashboard — long-lived process. Run under PM2 or in a terminal. Then open FreqUI at <a href={freqUiUrl} target="_blank" rel="noopener" style={{ color: 'var(--color-mc-accent)' }}>localhost:8080</a> (user: freqtrader, pass: freqtrader).
         </div>
         <div style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '8px 10px', background: 'var(--color-mc-bg-surface)', borderRadius: 4, border: '1px solid var(--color-mc-border)' }}>
           <code style={{ flex: 1, fontSize: 11, fontFamily: 'var(--font-mc-mono)', color: 'var(--color-mc-text)', wordBreak: 'break-all' }}>{tradeCmd}</code>

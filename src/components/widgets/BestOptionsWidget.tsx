@@ -24,7 +24,7 @@ function fmtExpiry(o: any): string {
       const yy = String(d.getFullYear()).slice(-2);
       return `${mm}/${dd}/${yy}`;
     }
-  } catch (_) {}
+  } catch {}
   return String(e).slice(0, 10);
 }
 
@@ -48,7 +48,7 @@ export default function BestOptionsWidget() {
           setBestCall(calls[0] || null);
           setBestPut(puts[0] || null);
         }
-      } catch (_) {}
+      } catch {}
     }
     load();
     const isOpen = (() => { const et = new Date(new Date().toLocaleString('en-US', { timeZone: 'America/New_York' })); const day = et.getDay(); if (day === 0 || day === 6) return false; const m = et.getHours() * 60 + et.getMinutes(); return m >= 570 && m < 960; })();

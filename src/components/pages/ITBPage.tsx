@@ -2,7 +2,6 @@
 
 import { useEffect, useState, useCallback } from 'react';
 import { ExternalLink, RefreshCw, Play, Copy, CheckCircle2, XCircle, Loader2, FolderOpen, Package } from 'lucide-react';
-import { MetricCard } from '@/components/ui/MetricCard';
 import { PulseDot } from '@/components/ui/PulseDot';
 import { Badge } from '@/components/ui/Badge';
 import { Heatmap } from '@/components/ui/Heatmap';
@@ -155,7 +154,7 @@ export function ITBPage() {
 
   // Heatmap: pipeline scripts × a single "last-run" column, colored by status
   const pipelineHealth = status?.pipeline_health ?? {};
-  function pipelineHeatmapValue(rowIdx: number, _colIdx: number) {
+  function pipelineHeatmapValue(rowIdx: number) {
     const script = PIPELINE_ORDER[rowIdx];
     const health = pipelineHealth[script];
     // Find the most recent run for this script
@@ -425,7 +424,7 @@ export function ITBPage() {
       <div style={{ background: 'var(--color-mc-bg-card)', border: '1px solid var(--color-mc-border)', borderRadius: 8, padding: 14, marginBottom: 18 }}>
         <div style={{ fontSize: 12, color: 'var(--color-mc-accent)', fontWeight: 600, marginBottom: 8, letterSpacing: 0.5, fontFamily: 'var(--font-mc-mono)' }}>ONLINE STREAMING SERVICE</div>
         <div style={{ fontSize: 12, color: 'var(--color-mc-text-muted)', marginBottom: 10 }}>
-          The bot's live mode runs as a long-lived process. Don't launch it from this dashboard — run it under PM2 or in a terminal:
+          The bot&apos;s live mode runs as a long-lived process. Don&apos;t launch it from this dashboard — run it under PM2 or in a terminal:
         </div>
         <div style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '8px 10px', background: 'var(--color-mc-bg-surface)', borderRadius: 4, border: '1px solid var(--color-mc-border)' }}>
           <code style={{ flex: 1, fontSize: 11, fontFamily: 'var(--font-mc-mono)', color: 'var(--color-mc-text)', wordBreak: 'break-all' }}>

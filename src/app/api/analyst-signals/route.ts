@@ -1,7 +1,6 @@
 import { NextResponse } from 'next/server';
 import fs from 'fs';
 import { tickerLogoUrl } from '@/lib/tickerDomains';
-import path from 'path';
 import { proxyToServeftp } from "../../../lib/proxyToServeftp";
 
 export const revalidate = 0;
@@ -50,7 +49,7 @@ interface EnrichedSignal extends RawSignal {
 
 // Clearbit logo lookup by ticker → domain heuristic.
 // For tickers we don't know the domain for, fall back to {ticker}.com which often works.
-const TICKER_DOMAINS: Record<string, string> = {
+const _TICKER_DOMAINS: Record<string, string> = {
   AAPL: 'apple.com', MSFT: 'microsoft.com', GOOG: 'google.com', GOOGL: 'google.com',
   AMZN: 'amazon.com', META: 'meta.com', TSLA: 'tesla.com', NVDA: 'nvidia.com',
   NFLX: 'netflix.com', AMD: 'amd.com', INTC: 'intel.com', ORCL: 'oracle.com',
@@ -69,13 +68,6 @@ const TICKER_DOMAINS: Record<string, string> = {
   CRWV: 'coreweave.com', TSLA_: 'tesla.com',
 };
 
-function getLogoUrl(symbol: string): string | null {
-  if (!symbol) return null;
-  const domain = TICKER_DOMAINS[symbol.toUpperCase()];
-  if (domain) return `https://logo.clearbit.com/${domain}`;
-  // Heuristic fallback for unknown tickers
-  return `https://logo.clearbit.com/${symbol.toLowerCase()}.com`;
-}
 
 function formatExpiry(ts: number | null): string {
   if (!ts) return '';

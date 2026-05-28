@@ -42,7 +42,7 @@ export async function GET(request: Request) {
       path: filePath,
       size: Buffer.byteLength(content, 'utf-8'),
     });
-  } catch (error) {
+  } catch {
     return NextResponse.json(
       { error: 'Failed to read file' },
       { status: 500 }

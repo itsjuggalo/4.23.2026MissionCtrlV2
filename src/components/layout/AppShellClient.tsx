@@ -25,7 +25,6 @@ import TradeJournalPage from '../pages/TradeJournalPage';
 import { ActivityPage } from '../pages/ActivityPage';
 import { RiskPage } from '../pages/RiskPage';
 import { SignalsPage } from '../pages/SignalsPage';
-import { TelegramSignalsPage } from '../pages/TelegramSignalsPage';
 import { MemoryGraphPage } from '../pages/MemoryGraphPage';
 import { OfficePage } from '../pages/OfficePage';
 import { DeskPage } from '../pages/DeskPage';

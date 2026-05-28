@@ -20,9 +20,9 @@ export function useAvatarModel(agentId: string) {
   let model = null;
   if (modelExists === true) {
     try {
-      const gltf = useGLTF(modelPath);
+      const gltf = useGLTF(modelPath); // eslint-disable-line react-hooks/rules-of-hooks
       model = gltf.scene;
-    } catch (error) {
+    } catch {
       // Failed to load, use fallback
       model = null;
     }

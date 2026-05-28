@@ -19,7 +19,7 @@ const AGENT_COLORS: Record<string, string> = {
   unknown: '#455a64',
 };
 
-const AGENT_LABELS: Record<string, string> = {
+const _AGENT_LABELS: Record<string, string> = {
   boba: 'BOBA · Claude Sonnet 4.6',
   jazzyhazzy: 'JAZZYHAZZY · GPT-4o-mini',
   orion: 'ORION · Gemini Flash',
@@ -27,7 +27,7 @@ const AGENT_LABELS: Record<string, string> = {
   reference: 'REFERENCE · Read-Only',
 };
 
-const CATEGORY_MAP: Record<string, string> = {
+const _CATEGORY_MAP: Record<string, string> = {
   'alpaca-trading': 'Trading',
   'auto-trading-strategy': 'Trading',
   'algo-builder': 'Trading',
@@ -53,7 +53,7 @@ const CATEGORY_MAP: Record<string, string> = {
   'Vanguard-2026-Economic-Outlook': 'Reference',
 };
 
-function classifyAgent(name: string): string {
+function _classifyAgent(name: string): string {
   const tradingSkills = ['alpaca-trading', 'auto-trading-strategy', 'algo-builder'];
   const researchSkills = ['catalyst-scanner', 'announcement-search', 'calendar-research', 'ai-readiness'];
   const scannerSkills = ['btc-analysis', 'stock-analysis', 'trading-analysis'];

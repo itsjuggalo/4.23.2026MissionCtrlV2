@@ -31,7 +31,7 @@ export async function POST(req: NextRequest) {
       const data = await proxyR.json();
       return NextResponse.json({ ...data, _via: 'proxy' });
     }
-  } catch (_) {}
+  } catch {}
 
   // Spawn in background, fire-and-forget
   try {

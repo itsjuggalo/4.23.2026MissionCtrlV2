@@ -6,7 +6,7 @@
  * against the row's pid_start_time (R3.M4).
  */
 
-import { dbCriticalWrite, dbTelemetryWrite, dbRead, getPidStartTime } from './dashboard-db.ts';
+import { dbTelemetryWrite, dbRead, getPidStartTime } from './dashboard-db.ts';
 
 // Per-subcommand stale thresholds (configurable via env)
 function staleThresholdMs(subcommand: string): number {
@@ -61,7 +61,7 @@ function isProcessAlive(row: RunRow): boolean {
   return currentStarttime === row.pid_start_time;
 }
 
-function buildStaleWhereClause(table: string, now: number): string {
+function _buildStaleWhereClause(table: string, now: number): string {
   // Returns rows that are stale (older than their subcommand's threshold)
   // We can't easily do per-row dynamic thresholds in SQL, so we use a conservative
   // minimum threshold and filter further in JS

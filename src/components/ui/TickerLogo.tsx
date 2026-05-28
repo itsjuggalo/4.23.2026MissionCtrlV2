@@ -72,6 +72,7 @@ export const TickerLogo: React.FC<{
   }
 
   return (
+    // eslint-disable-next-line @next/next/no-img-element
     <img
       key={url}
       src={url}

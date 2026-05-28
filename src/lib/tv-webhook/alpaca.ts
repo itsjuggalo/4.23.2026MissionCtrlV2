@@ -58,7 +58,7 @@ export async function emulateCryptoOcoChildren(
 ): Promise<{ tp_order_id?: string; sl_order_id?: string; note?: string }> {
   // Debug trace — prod stderr goes to a socket we can't tail
   const dbg = (msg: string) => {
-    try { require('fs').appendFileSync('/tmp/oco-debug.log', `[${new Date().toISOString()}] ${msg}\n`); } catch {}
+    try { fs.appendFileSync('/tmp/oco-debug.log', `[${new Date().toISOString()}] ${msg}\n`); } catch {}
   };
   dbg(`enter parent=${parentOrderId} account=${account} symbol=${alert.symbol} qty=${alert.quantity}`);
   const creds = loadCreds(account);

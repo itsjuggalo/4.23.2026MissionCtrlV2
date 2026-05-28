@@ -1,6 +1,5 @@
 import { NextResponse } from 'next/server';
 import { promises as fs } from 'fs';
-import { proxyToServeftp } from "../../../lib/proxyToServeftp";
 
 export const dynamic = 'force-dynamic';
 

@@ -22,7 +22,7 @@ export async function GET(req: NextRequest) {
         const data = await r.json();
         return NextResponse.json({ ...data, _via: 'sidecar', _model: model || data.model, _symbol: symbol });
       }
-    } catch (_) {}
+    } catch {}
   }
 
   try {

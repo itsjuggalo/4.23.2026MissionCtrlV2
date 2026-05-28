@@ -1,6 +1,7 @@
 'use client';
 
 export function LiveIndicator({ connected, lastUpdate }: { connected: boolean; lastUpdate: number | null }) {
+  // eslint-disable-next-line react-hooks/purity
   const ago = lastUpdate ? Math.floor((Date.now() - lastUpdate) / 1000) : null;
   return (
     <div style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '6px 14px', background: connected ? '#66bb6a11' : '#ef535011', border: `1px solid ${connected ? '#66bb6a33' : '#ef535033'}`, borderRadius: '6px' }}>

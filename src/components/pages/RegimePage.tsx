@@ -52,11 +52,11 @@ type MacroData = {
 export function RegimePage() {
   const [regime, setRegime] = useState<RegimeData | null>(null);
   const [signals, setSignals] = useState<SignalsData | null>(null);
-  const [params, setParams] = useState<SupertrendParams | null>(null);
+  const [_params, setParams] = useState<SupertrendParams | null>(null);
   const [macro, setMacro] = useState<MacroData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
-  const [tick, setTick] = useState(0);
+  const [, setTick] = useState(0);
   const [drawerTicker, setDrawerTicker] = useState<string | null>(null);
 
   const fetchAll = async () => {
@@ -126,7 +126,7 @@ export function RegimePage() {
         <>
           {/* VERDICT — plain English headline */}
           <div className="cc" style={{ padding: '16px', marginBottom: '12px', borderLeft: '4px solid ' + (macro.stance?.color || '#607d8b') }}>
-            <div className="lbl" style={{ marginBottom: '8px', letterSpacing: '2px', color: '#90a4ae' }}>TODAY'S READ</div>
+            <div className="lbl" style={{ marginBottom: '8px', letterSpacing: '2px', color: '#90a4ae' }}>TODAY&apos;S READ</div>
             <div style={{ fontSize: 'var(--mc-font-md)', color: '#e0e0e0', lineHeight: 1.6, fontFamily: 'var(--font-mc-sans)' }} dangerouslySetInnerHTML={{ __html: (macro.verdict || '').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/\*\*(.+?)\*\*/g, '<strong style="color:' + (macro.stance?.color || '#e0e0e0') + '">$1</strong>') }} />
           </div>
 

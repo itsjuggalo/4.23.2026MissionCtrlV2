@@ -23,7 +23,7 @@ export default function FirstPersonControls({ moveSpeed = 5 }: FirstPersonContro
   });
 
   const velocity = useRef(new THREE.Vector3());
-  const direction = useRef(new THREE.Vector3());
+  const _direction = useRef(new THREE.Vector3());
 
   useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {
@@ -122,7 +122,7 @@ export default function FirstPersonControls({ moveSpeed = 5 }: FirstPersonContro
     camera.position.add(movement);
 
     // Boundaries (keep camera inside office)
-    camera.position.x = Math.max(-9, Math.min(9, camera.position.x));
+    camera.position.x = Math.max(-9, Math.min(9, camera.position.x)); // eslint-disable-line react-hooks/immutability
     camera.position.y = Math.max(1, Math.min(8, camera.position.y));
     camera.position.z = Math.max(-8, Math.min(8, camera.position.z));
   });

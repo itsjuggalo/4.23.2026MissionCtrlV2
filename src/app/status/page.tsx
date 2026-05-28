@@ -55,7 +55,7 @@ export default function Status() {
               ))}</tbody>
             </table>
           )}
-          <h3 style={{marginTop:16, marginBottom:8, fontSize:14, color:"#aaa"}}>Today's orders ({a.orders_today})</h3>
+          <h3 style={{marginTop:16, marginBottom:8, fontSize:14, color:"#aaa"}}>Today&apos;s orders ({a.orders_today})</h3>
           {(a.recent_orders||[]).length === 0 ? <div style={{color:"#666", fontSize:13}}>none today</div> : (
             <div style={{fontFamily:"ui-monospace,monospace", fontSize:11, lineHeight:1.5}}>
               {(a.recent_orders||[]).map((o: any, i: number) => (

@@ -1,6 +1,4 @@
 'use client';
-import { useLiveStream } from '@/hooks/useLiveStream';
-import { LiveIndicator } from '@/components/ui/LiveIndicator';
 import { useViewMode } from '@/lib/useViewMode';
 import { useEffect, useState } from 'react';
 
@@ -51,7 +49,6 @@ function Pill({ label, value, color }: { label: string; value: string; color?: s
 
 export function Header({
  title, onMenuClick }: HeaderProps) {
-  const live = useLiveStream(true);
   const [viewMode] = useViewMode();
   const isMobile = viewMode === 'mobile';
   const [time, setTime] = useState('');
