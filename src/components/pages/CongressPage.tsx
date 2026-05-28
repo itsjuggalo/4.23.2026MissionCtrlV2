@@ -55,7 +55,7 @@ export function CongressPage() {
       if (filter !== "all") params.set("type", filter);
       if (partyFilter !== "all") params.set("party", partyFilter);
       const res = await fetch(`/api/congress?${params}`);
-      if (res.ok) { setData(await res.json()); setError(false); }
+      if (res.ok) { setData(await res.json()); setError(false); } else { setError(true); }
     } catch (e) { console.error(e); setError(true); }
     finally { setLoading(false); }
   }, [filter, partyFilter]);

@@ -90,6 +90,8 @@ export function CalendarPage() {
         if (json.grouped) {
           setExpandedDates(new Set(Object.keys(json.grouped)));
         }
+      } else {
+        setError(true);
       }
     } catch (e) {
       console.error("Calendar fetch error:", e);
