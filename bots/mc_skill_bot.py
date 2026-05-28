@@ -43,6 +43,7 @@ def get_secret(name):
 BOT_TOKEN   = get_secret("telegram_laptopclaude_bot_token") or get_secret("telegram_mc_skill_bot_token") or get_secret("telegram-bot-token")
 CHAT_ID_STR = get_secret("telegram-chat-id")
 VIBE_BIN    = "/home/itsju/02_DATA/mc-kb/.venv/bin/vibe-trading"
+VENV_PYTHON = "/home/itsju/mc-kb/.venv/bin/python"
 CLAUDE_BIN  = "claude"
 
 if not BOT_TOKEN:
@@ -265,6 +266,74 @@ def run_vibe(prompt: str, timeout: int = 120, history_prefix: str = "") -> str:
     finally:
         BOT_LOCK.unlink(missing_ok=True)
 
+# ── Chart generation ─────────────────────────────────────────────────────────
+import re as _re
+import tempfile as _tempfile
+
+_INDEX_MAP  = {"SPX": "^GSPC", "NDX": "^NDX", "VIX": "^VIX", "RUT": "^RUT", "DJI": "^DJI", "SPY": "SPY", "QQQ": "QQQ"}
+_SKIP_WORDS = {"CALL", "PUT", "EXP", "TARGET", "STOP", "THE", "FOR", "AND", "ALL", "TOP", "DAY",
+               "BEST", "NEW", "SET", "BUY", "MAY", "ARE", "HAS", "ITS", "OUR", "CAN"}
+
+def extract_ticker(text: str) -> str:
+    candidates = _re.findall(r'\b([A-Z]{1,5})\b', text)
+    for c in candidates:
+        if c not in _SKIP_WORDS and len(c) >= 2:
+            return _INDEX_MAP.get(c, c)
+    return ""
+
+_CHART_CODE = '''
+import sys, warnings
+warnings.filterwarnings("ignore")
+ticker, out_path = sys.argv[1], sys.argv[2]
+try:
+    import yfinance as yf, mplfinance as mpf, matplotlib
+    matplotlib.use("Agg")
+    df = yf.download(ticker, period="60d", interval="1d", progress=False, auto_adjust=True)
+    if df.empty: sys.exit(1)
+    if hasattr(df.columns, "levels"): df.columns = df.columns.get_level_values(0)
+    df["EMA20"] = df["Close"].ewm(span=20).mean()
+    df["EMA50"] = df["Close"].ewm(span=50).mean()
+    d = df["Close"].diff(); g = d.where(d>0,0).rolling(14).mean(); l = (-d.where(d<0,0)).rolling(14).mean()
+    df["RSI"] = 100-(100/(1+g/l.replace(0,1e-10)))
+    ap = [mpf.make_addplot(df["EMA20"],color="#2196F3",width=1.2),
+          mpf.make_addplot(df["EMA50"],color="#FF9800",width=1.2),
+          mpf.make_addplot(df["RSI"],panel=2,color="#9C27B0",width=1,ylabel="RSI")]
+    mc = mpf.make_marketcolors(up="#26a69a",down="#ef5350",inherit=True)
+    s  = mpf.make_mpf_style(marketcolors=mc,gridstyle="--",figcolor="#1a1a2e",facecolor="#1a1a2e",
+                             edgecolor="#333",gridcolor="#333",y_on_right=False,
+                             rc={"axes.labelcolor":"#ccc","xtick.color":"#ccc","ytick.color":"#ccc"})
+    mpf.plot(df,type="candle",style=s,addplot=ap,volume=True,panel_ratios=(3,1,1),
+             title=f"\\n{ticker} — 60D  |  EMA20/50 + RSI",figsize=(12,8),savefig=out_path)
+    print("ok")
+except Exception as e:
+    print(f"error: {e}", file=sys.stderr); sys.exit(1)
+'''
+
+def generate_chart(ticker: str) -> str | None:
+    safe = ticker.replace("^", "").replace("/", "_")
+    out  = Path(_tempfile.gettempdir()) / f"mc_chart_{safe}.png"
+    try:
+        r = subprocess.run([VENV_PYTHON, "-c", _CHART_CODE, ticker, str(out)],
+                           capture_output=True, text=True, timeout=30)
+        if r.returncode == 0 and out.exists():
+            return str(out)
+        print(f"[chart] {r.stderr.strip()[:200]}")
+    except Exception as e:
+        print(f"[chart] {e}")
+    return None
+
+def send_photo(chat_id: int, photo_path: str, caption: str = ""):
+    try:
+        with open(photo_path, "rb") as f:
+            requests.post(
+                f"https://api.telegram.org/bot{BOT_TOKEN}/sendPhoto",
+                data={"chat_id": chat_id, "caption": caption[:1000], "parse_mode": "Markdown"},
+                files={"photo": f},
+                timeout=30,
+            )
+    except Exception as e:
+        print(f"[photo] {e}")
+
 # ── Handlers ──────────────────────────────────────────────────────────────────
 def handle_image(chat_id, image_bytes, caption, msg_id):
     send_typing(chat_id)
@@ -350,8 +419,14 @@ def handle_text(chat_id, text, msg_id):
     else:
         send(chat_id, "🔬 Analyzing...", reply_to=msg_id)
         base_prompt = f"{live_ctx}\n\n{t}" if live_ctx else t
-        result = run_vibe(base_prompt, history_prefix=history_prefix)
+        result = run_vibe(base_prompt)
+        print(f"[vibe_raw] {repr(result[:200])}")
         send(chat_id, result, reply_to=msg_id)
+        ticker = extract_ticker(result)
+        if ticker:
+            chart_path = generate_chart(ticker)
+            if chart_path:
+                send_photo(chat_id, chart_path, caption=f"📊 *{ticker}* — 60D Technical Analysis\nEMA20 (blue) · EMA50 (orange) · RSI")
 
     add_to_history(chat_id, "user", t)
     add_to_history(chat_id, "assistant", result)
