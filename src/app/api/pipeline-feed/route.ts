@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
 
-
 interface PipelineEvent {
   ts: number;
   source: 'BOBA' | 'WHALE' | 'SIGNAL' | 'FLOW';

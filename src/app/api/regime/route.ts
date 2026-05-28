@@ -2,7 +2,6 @@ import { NextResponse } from 'next/server';
 import { readFile } from 'fs/promises';
 import { proxyToServeftp } from "../../../lib/proxyToServeftp";
 
-
 const DATA_DIR = '/home/itsju/mission-control/signal-receiver/data';
 
 export async function GET(request: Request) {

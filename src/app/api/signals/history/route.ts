@@ -2,7 +2,6 @@ import { NextResponse } from 'next/server';
 import { readFile } from 'fs/promises';
 import { proxyToServeftp } from "../../../../lib/proxyToServeftp";
 
-
 const HISTORY_FILE = '/home/itsju/mission-control/signal-receiver/data/signals_history.jsonl';
 
 export async function GET(req: Request) {

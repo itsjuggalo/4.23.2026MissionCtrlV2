@@ -4,7 +4,6 @@ import path from 'path';
 import os from 'os';
 import { proxyToServeftp } from "../../../../lib/proxyToServeftp";
 
-
 const CACHE_DIR = '/tmp/mc_insider_cache';
 const CACHE_TTL_MS = 30 * 60 * 1000; // 30 min
 const SEC_UA = 'MissionControl Trading Dashboard contact@itsjuggalo.com';
@@ -156,7 +155,6 @@ async function fetchSecForm4(ticker: string): Promise<any> {
     return { transactions: [], net90d: 0, count90d: 0, source: 'sec_err', error: String(e) };
   }
 }
-
 
 // ============ CONGRESS DATA via Quiver /beta/live/congresstrading (FREE, no auth) ============
 // Returns the full firehose (~1000 recent trades, ~430KB). We cache it server-side

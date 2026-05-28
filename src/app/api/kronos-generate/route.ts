@@ -1,7 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { spawn } from 'child_process';
 
-
 export async function GET() {
   return NextResponse.json({ status: 'ok', endpoint: 'kronos-generate', note: 'POST only — use POST with {ticker}' });
 }

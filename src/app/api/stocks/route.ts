@@ -1,11 +1,8 @@
 import type { NextRequest } from 'next/server';
 import fs from 'fs';
 
-export const dynamic = 'force-dynamic';
-export const revalidate = 0;
-
 const FINNHUB_KEY = (() => {
-  const env = process.env.FINNHUB_KEY || process.env.NEXT_PUBLIC_FINNHUB_KEY;
+  const env = process.env.FINNHUB_API_KEY || process.env.FINNHUB_KEY;
   if (env) return env;
   try { return fs.readFileSync('/home/itsju/.openclaw/secrets/finnhub.key', 'utf-8').trim(); }
   catch { return ''; }

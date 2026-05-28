@@ -2,7 +2,6 @@ import { NextResponse } from 'next/server';
 import { readFile } from 'fs/promises';
 import { proxyToServeftp } from "../../../lib/proxyToServeftp";
 
-
 const SECRETS = '/home/itsju/.openclaw/secrets';
 
 async function readSecret(name: string): Promise<string> {
