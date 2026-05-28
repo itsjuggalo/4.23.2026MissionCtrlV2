@@ -4,6 +4,7 @@ import { join } from 'path';
 import Database from 'better-sqlite3';
 import { proxyToServeftp } from "../../../lib/proxyToServeftp";
 
+export const dynamic = 'force-dynamic';
 const DB_PATH = join(process.env.HOME || '/home/itsju', '.mission-control/mission-control.db');
 const PM2_LOGS = join(process.env.HOME || '/home/itsju', '.pm2/logs');
 

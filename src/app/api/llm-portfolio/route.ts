@@ -4,6 +4,7 @@ import path from "path";
 import os from "os";
 import { proxyToServeftp } from "../../../lib/proxyToServeftp";
 
+export const dynamic = 'force-dynamic';
 const DATA_FILE = path.join(os.homedir(), "mission-control-restored", "data", "llm_portfolio.json");
 
 export async function GET(request: Request) {

@@ -4,6 +4,7 @@ import path from "path";
 import os from "os";
 import { proxyToServeftp } from "../../../lib/proxyToServeftp";
 
+export const dynamic = 'force-dynamic';
 const CALENDAR_FILE = path.join(os.homedir(), "mission-control-restored", "data", "calendar_events.json");
 
 interface CalendarEvent {

@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { readFile, readdir } from 'fs/promises';
 
+export const dynamic = 'force-dynamic';
 const DATA_DIR = '/home/itsju/mission-control/signal-receiver/data';
 const REPORTS_DIR = '/home/itsju/mission-control/daily-reports/reports';
 const CALENDAR_DIR = '/home/itsju/mission-control/daily-reports/calendar';

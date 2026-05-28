@@ -4,6 +4,7 @@ import path from "path";
 import os from "os";
 import { proxyToServeftp } from "../../../lib/proxyToServeftp";
 
+export const dynamic = 'force-dynamic';
 // NOTE: signal-receiver data lives under ~/mission-control/ (not mission-control-restored)
 const DATA_DIR = path.join(os.homedir(), "mission-control", "signal-receiver", "data");
 

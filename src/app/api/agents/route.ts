@@ -5,6 +5,7 @@ import { readFile } from 'fs/promises';
 import path from 'path';
 import { proxyToServeftp } from "../../../lib/proxyToServeftp";
 
+export const dynamic = 'force-dynamic';
 const execAsync = promisify(exec);
 
 const PM2_LOG_DIR = path.join(process.env.HOME || '/home/itsju', '.pm2/logs');

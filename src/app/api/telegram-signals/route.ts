@@ -3,6 +3,7 @@ import { readFile } from 'fs/promises';
 import path from 'path';
 import { proxyToServeftp } from "../../../lib/proxyToServeftp";
 
+export const dynamic = 'force-dynamic';
 const SIGNALS_FILE = path.join(
   process.env.HOME || '/home/itsju',
   'mission-control/telegram-listener/signals.json'

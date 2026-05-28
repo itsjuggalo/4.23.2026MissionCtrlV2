@@ -3,6 +3,7 @@ import { readFileSync, existsSync } from 'fs';
 import { join } from 'path';
 import { proxyToServeftp } from "../../../lib/proxyToServeftp";
 
+export const dynamic = 'force-dynamic';
 const TASKS_FILE = join(process.env.HOME || '/home/itsju', '.openclaw/data/agent-tasks.json');
 
 export async function GET(req: Request) {
