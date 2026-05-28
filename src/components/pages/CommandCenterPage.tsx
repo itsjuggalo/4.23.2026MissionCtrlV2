@@ -100,6 +100,7 @@ export function CommandCenterPage() {
   const [allWallets, setAllWallets] = useState<WalletSummary[]>([]);
   const [dashData, setDashData] = useState<DashData | null>(null);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(false);
   const [unusualFlows, setUnusualFlows] = useState<Record<string, unknown>[]>([]);
   const [kronosForecast, setKronosForecast] = useState<KronosForecast | null>(null);
   const [pipelineFeed, setPipelineFeed] = useState<Record<string, unknown>[]>([]);
@@ -143,7 +144,8 @@ export function CommandCenterPage() {
       setPortfolio(pRes); setSignals(sigRes); setRegime(rRes);
       const acts = Array.isArray(actRes) ? actRes : (actRes?.activities || actRes?.entries || []);
       setActivity(acts.slice(0, 10));
-    } catch (e) { console.error(e); }
+      setError(false);
+    } catch (e) { console.error(e); setError(true); }
     finally { setLoading(false); }
     fetch('/api/pipeline-feed').then(r => r.ok ? r.json() : null).then(d => { if (d?.events) setPipelineFeed(d.events); }).catch(() => {});
     // Options flow refresh (was only in mount, now in 10s loop)
@@ -479,6 +481,8 @@ export function CommandCenterPage() {
         .beat { color: #66bb6a; } .miss { color: #ef5350; } .neu { color: #ff9800; }
         .news-row:hover { background: #0d1929 !important; }
       `}</style>
+
+      {error && <div style={{ background: '#1a0000', border: '1px solid #ef535044', color: '#ef5350', padding: '10px 16px', borderRadius: '6px', marginBottom: '12px', fontSize: '13px' }}>⚠ API unavailable — data may be stale</div>}
 
       {/* HEADER */}
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px', padding: '10px 20px', background: '#0a1929', border: '1px solid #1a3a4a', borderRadius: '8px' }}>

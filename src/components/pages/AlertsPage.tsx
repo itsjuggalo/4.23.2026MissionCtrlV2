@@ -42,6 +42,7 @@ function fmtTime(dateStr: string): string {
 export function AlertsPage() {
   const [alerts, setAlerts] = useState<AlertItem[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(false);
   const [filter, setFilter] = useState<string>('all');
   const [lastUpdate, setLastUpdate] = useState(new Date());
   const [drawerTicker, setDrawerTicker] = useState<string | null>(null);
@@ -142,8 +143,10 @@ export function AlertsPage() {
 
       setAlerts(newAlerts);
       setLastUpdate(new Date());
+      setError(false);
     } catch (e) {
       console.error('Alerts fetch error:', e);
+      setError(true);
     } finally {
       setLoading(false);
     }
@@ -166,6 +169,7 @@ export function AlertsPage() {
 
   return (
     <div style={{ padding: '24px', maxWidth: '1100px', margin: '0 auto' }}>
+      {error && <div style={{ background: '#1a0000', border: '1px solid #ef535044', color: '#ef5350', padding: '10px 16px', borderRadius: '6px', marginBottom: '12px', fontSize: '13px' }}>⚠ API unavailable — data may be stale</div>}
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
         <div>
           <h1 style={{ fontSize: 'var(--mc-font-2xl)', fontWeight: 700, color: '#f0f0f0', margin: 0 }}>🚨 Alerts</h1>

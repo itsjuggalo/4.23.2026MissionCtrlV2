@@ -54,6 +54,7 @@ export function AgentsPage() {
   const [trustData, setTrustData] = useState<any[]>([]);
   const [pm2Data, setPm2Data] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(false);
 
   useEffect(() => {
     async function fetchData() {
@@ -64,7 +65,8 @@ export function AgentsPage() {
         ]);
         setTrustData(trustRes.agents || []);
         setPm2Data(agentsRes.agents || []);
-      } catch {}
+        setError(false);
+      } catch { setError(true); }
       setLoading(false);
     }
     fetchData();
@@ -117,6 +119,7 @@ export function AgentsPage() {
 
   return (
     <div style={{ padding: '24px', maxWidth: '1100px', margin: '0 auto' }}>
+      {error && <div style={{ background: '#1a0000', border: '1px solid #ef535044', color: '#ef5350', padding: '10px 16px', borderRadius: '6px', marginBottom: '12px', fontSize: '13px' }}>⚠ API unavailable — data may be stale</div>}
       <style>{`
         .ag-card { background: linear-gradient(180deg, #0a1929 0%, #0d1420 100%); border: 1px solid #1a3a4a; border-radius: 10px; transition: border-color 0.2s; }
         .ag-card:hover { border-color: #4fc3f744; }

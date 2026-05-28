@@ -108,6 +108,7 @@ export function TradesPage() {
   const [positions, setPositions] = useState<Position[]>([]);
   const [stats, setStats]         = useState<TweakStats | null>(null);
   const [loading, setLoading]     = useState(true);
+  const [error, setError]         = useState(false);
   const [filter, setFilter]       = useState<'all' | 'grid' | 'dca' | 'telegram' | 'ai_crypto' | 'firebase'>('all');
   const [cryptoPage, setCryptoPage] = useState(0);
   const [stockPage,  setStockPage]  = useState(0);
@@ -129,10 +130,12 @@ export function TradesPage() {
         setTrades(data.trades || []);
         setPositions(data.positions || []);
         setStats(data.stats || null);
+        setError(false);
       }
       setLoading(false);
     } catch (err) {
       console.error('Error fetching trades:', err);
+      setError(true);
       setLoading(false);
     }
   };
@@ -315,6 +318,8 @@ export function TradesPage() {
 
   return (
     <div className="p-6 space-y-6">
+
+      {error && <div style={{ background: '#1a0000', border: '1px solid #ef535044', color: '#ef5350', padding: '10px 16px', borderRadius: '6px', marginBottom: '12px', fontSize: '13px' }}>⚠ API unavailable — data may be stale</div>}
 
       {/* Header */}
       <div className="flex items-center justify-between">

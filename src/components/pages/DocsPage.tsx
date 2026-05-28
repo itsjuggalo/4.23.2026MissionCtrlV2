@@ -12,12 +12,19 @@ interface DocFile {
 
 /* ── simple markdown renderer ── */
 function renderMarkdown(text: string): string {
-  let html = text
-    // Code blocks (``` ... ```)
-    .replace(/```(\w*)\n([\s\S]*?)```/g, (_m, lang, code) =>
-      `<pre class="doc-codeblock"><code class="lang-${lang}">${code.replace(/</g, '&lt;').replace(/>/g, '&gt;')}</code></pre>`
-    )
-    // Inline code
+  // Extract code blocks (already escaped) so HTML escaping below doesn't touch them
+  const codeBlocks: string[] = [];
+  let html = text.replace(/```(\w*)\n([\s\S]*?)```/g, (_m, lang, code) => {
+    const idx = codeBlocks.length;
+    codeBlocks.push(`<pre class="doc-codeblock"><code class="lang-${lang}">${code.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')}</code></pre>`);
+    return `\x00CODE${idx}\x00`;
+  });
+
+  // Escape HTML in everything outside code blocks
+  html = html.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+
+  html = html
+    // Inline code (backtick content is already escaped above)
     .replace(/`([^`]+)`/g, '<code class="doc-inline-code">$1</code>')
     // Headers
     .replace(/^#### (.+)$/gm, '<h4 class="doc-h4">$1</h4>')
@@ -29,7 +36,7 @@ function renderMarkdown(text: string): string {
     .replace(/\*(.+?)\*/g, '<em>$1</em>')
     // Horizontal rules
     .replace(/^---+$/gm, '<hr class="doc-hr" />')
-    // Links
+    // Links (href is escaped since < > were replaced above)
     .replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2" class="doc-link" target="_blank" rel="noopener">$1</a>')
     // Unordered lists
     .replace(/^[\-\*] (.+)$/gm, '<li class="doc-li">$1</li>')
@@ -61,6 +68,9 @@ function renderMarkdown(text: string): string {
   html = html.replace(/<p class="doc-p">\s*<\/p>/g, '');
   html = html.replace(/<p class="doc-p">(\s*<(?:h[1-4]|pre|ul|ol|table|blockquote|hr))/g, '$1');
   html = html.replace(/(<\/(?:h[1-4]|pre|ul|ol|table|blockquote|hr)>)\s*<\/p>/g, '$1');
+
+  // Restore extracted code blocks
+  html = html.replace(/\x00CODE(\d+)\x00/g, (_, idx) => codeBlocks[Number(idx)]);
 
   return html;
 }

@@ -55,6 +55,7 @@ export function RegimePage() {
   const [params, setParams] = useState<SupertrendParams | null>(null);
   const [macro, setMacro] = useState<MacroData | null>(null);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(false);
   const [tick, setTick] = useState(0);
   const [drawerTicker, setDrawerTicker] = useState<string | null>(null);
 
@@ -70,7 +71,8 @@ export function RegimePage() {
       if (sRes) setSignals(sRes);
       if (pRes) setParams(pRes);
       if (mRes) setMacro(mRes);
-    } catch (e) { console.error(e); }
+      setError(false);
+    } catch (e) { console.error(e); setError(true); }
     finally { setLoading(false); }
   };
 
@@ -125,7 +127,7 @@ export function RegimePage() {
           {/* VERDICT — plain English headline */}
           <div className="cc" style={{ padding: '16px', marginBottom: '12px', borderLeft: '4px solid ' + (macro.stance?.color || '#607d8b') }}>
             <div className="lbl" style={{ marginBottom: '8px', letterSpacing: '2px', color: '#90a4ae' }}>TODAY'S READ</div>
-            <div style={{ fontSize: 'var(--mc-font-md)', color: '#e0e0e0', lineHeight: 1.6, fontFamily: 'var(--font-mc-sans)' }} dangerouslySetInnerHTML={{ __html: (macro.verdict || '').replace(/\*\*(.+?)\*\*/g, '<strong style="color:' + (macro.stance?.color || '#e0e0e0') + '">$1</strong>') }} />
+            <div style={{ fontSize: 'var(--mc-font-md)', color: '#e0e0e0', lineHeight: 1.6, fontFamily: 'var(--font-mc-sans)' }} dangerouslySetInnerHTML={{ __html: (macro.verdict || '').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/\*\*(.+?)\*\*/g, '<strong style="color:' + (macro.stance?.color || '#e0e0e0') + '">$1</strong>') }} />
           </div>
 
           {/* 4-TILE STANCE STRIP */}
@@ -169,7 +171,7 @@ export function RegimePage() {
               <div className="lbl" style={{ marginBottom: '12px', letterSpacing: '2px' }}>REGIME TRANSITIONS — LAST {macro.history.length} DAYS</div>
               <div style={{ display: 'flex', gap: '2px', height: '32px', borderRadius: '4px', overflow: 'hidden' }}>
                 {macro.history.map((h: any, i: number) => (
-                  <div key={i} title={`${h.date} — ${h.stance} (score ${h.score >= 0 ? '+' : ''}${h.score?.toFixed?.(2) || h.score})`} style={{ flex: 1, background: h.color || '#607d8b', cursor: 'help' }} />
+                  <div key={h.date || i} title={`${h.date} — ${h.stance} (score ${h.score >= 0 ? '+' : ''}${h.score?.toFixed?.(2) || h.score})`} style={{ flex: 1, background: h.color || '#607d8b', cursor: 'help' }} />
                 ))}
               </div>
               <div style={{ marginTop: '6px', display: 'flex', justifyContent: 'space-between', fontSize: 'var(--mc-font-badge)', color: '#607d8b', fontFamily: 'var(--font-mc-mono)' }}>
@@ -243,7 +245,7 @@ export function RegimePage() {
                 <div>SYM</div><div>SECTOR</div><div style={{ textAlign: 'right' }}>5D %</div><div style={{ textAlign: 'right' }}>20D %</div>
               </div>
               {macro.sectors.map((s: any, i: number) => (
-                <div key={i} onClick={() => setDrawerTicker(s.symbol)} style={{ display: 'grid', gridTemplateColumns: '60px 1fr 100px 100px', gap: '8px', alignItems: 'center', padding: '8px 10px', borderBottom: '1px solid #0d1117', fontSize: 'var(--mc-font-sm)', fontFamily: 'var(--font-mc-mono)', cursor: 'pointer' }}>
+                <div key={s.symbol || i} onClick={() => setDrawerTicker(s.symbol)} style={{ display: 'grid', gridTemplateColumns: '60px 1fr 100px 100px', gap: '8px', alignItems: 'center', padding: '8px 10px', borderBottom: '1px solid #0d1117', fontSize: 'var(--mc-font-sm)', fontFamily: 'var(--font-mc-mono)', cursor: 'pointer' }}>
                   <div style={{ fontWeight: 700, color: '#ffd600' }}>{s.symbol}</div>
                   <div style={{ color: '#e0e0e0' }}>{s.name}</div>
                   <div style={{ textAlign: 'right', fontWeight: 700, color: s.return5d >= 0 ? '#66bb6a' : '#ef5350' }}>{s.return5d >= 0 ? '+' : ''}{s.return5d?.toFixed(2)}%</div>
@@ -285,6 +287,8 @@ export function RegimePage() {
         .rg-card { background: linear-gradient(180deg, #0a1929 0%, #0d1420 100%); border: 1px solid #1a3a4a; border-radius: 10px; }
         .rg-label { font-size: 10px; color: #607d8b; text-transform: uppercase; letter-spacing: 1.5px; font-family: var(--font-mc-mono); }
       `}</style>
+
+      {error && <div style={{ background: '#1a0000', border: '1px solid #ef535044', color: '#ef5350', padding: '10px 16px', borderRadius: '6px', marginBottom: '12px', fontSize: '13px' }}>⚠ API unavailable — data may be stale</div>}
 
       {/* === REGIME HERO === */}
       <div className="rg-card" style={{

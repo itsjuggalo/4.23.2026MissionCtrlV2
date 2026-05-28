@@ -263,6 +263,7 @@ export function DashboardPage() {
   }, []);
   const live = useLiveStream(true);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(false);
   const [equityHist, setEquityHist] = useState<{ equity?: number; date?: string; daily_pnl_pct?: number }[]>([]);
   const [tick, setTick] = useState(0);
   const [drawerTicker, setDrawerTicker] = useState<string | null>(null);
@@ -281,7 +282,8 @@ export function DashboardPage() {
       setPortfolio(pRes); setSignals(sRes);
       if (ehRes?.history) setEquityHist(ehRes.history); setRegime(rRes);
       setReport(repRes); setParams(prRes); setCrypto(cRes);
-    } catch (e) { console.error(e); }
+      setError(false);
+    } catch (e) { console.error(e); setError(true); }
     finally { setLoading(false); }
   };
 
@@ -329,6 +331,8 @@ export function DashboardPage() {
         .db-label { font-size: 10px; color: #607d8b; text-transform: uppercase; letter-spacing: 1.5px; font-family: var(--font-mc-mono); }
         .db-glow-line { height: 2px; background: linear-gradient(90deg, transparent, #4fc3f7, transparent); border-radius: 1px; }
       `}</style>
+
+      {error && <div style={{ background: '#1a0000', border: '1px solid #ef535044', color: '#ef5350', padding: '10px 16px', borderRadius: '6px', marginBottom: '12px', fontSize: '13px' }}>⚠ API unavailable — data may be stale</div>}
 
       {/* === STANCE BANNER === */}
       <div style={{
