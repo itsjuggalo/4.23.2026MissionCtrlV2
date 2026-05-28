@@ -26,19 +26,83 @@ function parseOCC(sym: string): string {
   return `${tk} ${parseInt(mm,10)}/${parseInt(dd,10)}/${yy} $${strikeStr}${cp}`;
 }
 
+// Types
+type PortfolioData = {
+  equity?: string | number;
+  balance?: string | number;
+  last_equity?: string | number;
+  buying_power?: string | number;
+  cash?: string | number;
+  positions?: Record<string, unknown>[];
+  overall_recommendation?: string;
+};
+type RegimeData = {
+  overall_regime?: string;
+  regime?: string;
+  direction_bias?: string;
+  bias?: string;
+  overall_recommendation?: string;
+  timeframes?: Record<string, { direction?: string; adx?: number; choppiness?: number }>;
+};
+type SignalsData = {
+  BTCUSD?: {
+    direction?: string;
+    entry_price?: string | number;
+    signal_count?: number;
+    pnl_history?: { pnl_pct: number; direction?: string; entry?: number; exit?: number; closed_at?: string }[];
+    last_action?: string;
+  };
+  [key: string]: unknown;
+};
+type KronosForecast = {
+  forecast_24h_direction?: string;
+  forecast_24h_target?: number;
+  forecast_24h_change_pct?: number;
+  forecast_24h_confidence?: string;
+  current_price?: number;
+  forecast_range_pct?: number;
+  forecast_24h_low?: number;
+  forecast_24h_high?: number;
+  model?: string;
+  _model?: string;
+  candles_analyzed?: number;
+  sample_paths?: number;
+  _file_mtime?: string;
+  generated_at?: string;
+  ticker?: string;
+  symbol?: string;
+  hourly_predictions?: { close?: number }[];
+};
+type ActivityEntry = Record<string, unknown>;
+type WalletSummary = { name: string; balance: number };
+type RhPosition = { sym: string; val: string; chg: number; color: string };
+type IntelEntry = {
+  news?: { headline?: string; url?: string; time?: string; source?: string }[];
+  analyst?: { buyPct?: number; total?: number; sell?: number; strongSell?: number };
+  earnings?: { beat?: boolean; surprisePct?: number; period?: string };
+  insider?: { direction?: string; mspr?: number };
+};
+type QuoteEntry = { price?: number; change_p?: number };
+type DashData = {
+  quotes?: Record<string, QuoteEntry>;
+  intel?: Record<string, IntelEntry>;
+  news?: { headline?: string; url?: string; time?: string; source?: string }[];
+};
+type NewsItem = { headline?: string; url?: string; time?: string; source?: string };
+
 export function CommandCenterPage() {
-  const [portfolio, setPortfolio] = useState<any>(null);
-  const [signals, setSignals] = useState<any>(null);
-  const [regime, setRegime] = useState<any>(null);
-  const [activity, setActivity] = useState<any[]>([]);
-  const [rhPositions, setRhPositions] = useState<any[]>([]);
+  const [portfolio, setPortfolio] = useState<PortfolioData | null>(null);
+  const [signals, setSignals] = useState<SignalsData | null>(null);
+  const [regime, setRegime] = useState<RegimeData | null>(null);
+  const [activity, setActivity] = useState<ActivityEntry[]>([]);
+  const [rhPositions, setRhPositions] = useState<RhPosition[]>([]);
   const [rhBalance, setRhBalance] = useState(0);
-  const [allWallets, setAllWallets] = useState<any[]>([]);
-  const [dashData, setDashData] = useState<any>(null);
+  const [allWallets, setAllWallets] = useState<WalletSummary[]>([]);
+  const [dashData, setDashData] = useState<DashData | null>(null);
   const [loading, setLoading] = useState(true);
-  const [unusualFlows, setUnusualFlows] = useState<any[]>([]);
-  const [kronosForecast, setKronosForecast] = useState<any>(null);
-  const [pipelineFeed, setPipelineFeed] = useState<any[]>([]);
+  const [unusualFlows, setUnusualFlows] = useState<Record<string, unknown>[]>([]);
+  const [kronosForecast, setKronosForecast] = useState<KronosForecast | null>(null);
+  const [pipelineFeed, setPipelineFeed] = useState<Record<string, unknown>[]>([]);
   const [positionsExpanded, setPositionsExpanded] = useState(false);
   const [newsIdx, setNewsIdx] = useState(0);
   const newsTickerRef = useRef<HTMLDivElement>(null);
@@ -48,9 +112,9 @@ export function CommandCenterPage() {
   const [showAddInput, setShowAddInput] = useState(false);
   const [newSymInput, setNewSymInput] = useState('');
   const [draggedIdx, setDraggedIdx] = useState<number | null>(null);
-  const [equityHistory, setEquityHistory] = useState<any[]>([]);
-  const [equityIntraday, setEquityIntraday] = useState<any[]>([]);
-  const [liveQuotes, setLiveQuotes] = useState<Record<string, any>>({});
+  const [equityHistory, setEquityHistory] = useState<{ equity?: number; date?: string; daily_pnl_pct?: number }[]>([]);
+  const [equityIntraday, setEquityIntraday] = useState<{ eq?: number; t?: number }[]>([]);
+  const [liveQuotes, setLiveQuotes] = useState<Record<string, { price?: number; changePct?: number }>>({});
   const [kronosSymbol, setKronosSymbol] = useState<string>('BTCUSDT');
   const [kronosModel, setKronosModel] = useState<string>('small');
   const [showKronosInput, setShowKronosInput] = useState(false);
@@ -59,10 +123,14 @@ export function CommandCenterPage() {
   const [kronosLoading, setKronosLoading] = useState(false);
   const [kronosError, setKronosError] = useState<string>('');
   const [showKronosHistory, setShowKronosHistory] = useState(false);
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const [selectedItem, setSelectedItem] = useState<{ type: string; data: any } | null>(null);
   const [drawerTicker, setDrawerTicker] = useState<string | null>(null);
-  const [extendedIntel, setExtendedIntel] = useState<Record<string, any>>({});
-  const [marketNews, setMarketNews] = useState<any[]>([]);
+  const [extendedIntel, setExtendedIntel] = useState<Record<string, {
+    insider?: { net90d?: number; transactions?: { name?: string; type?: string; share?: number; price?: number }[] };
+    congress?: { count?: number; trades?: { type?: string; party?: string; name?: string; chamber?: string; amount?: string }[] };
+  }>>({});
+  const [marketNews, setMarketNews] = useState<NewsItem[]>([]);
 
   const fetchData = async () => {
     try {
@@ -342,8 +410,8 @@ export function CommandCenterPage() {
     return () => { cancelled = true; };
   }, []);
 
-  const equity = parseFloat(portfolio?.equity || portfolio?.balance || '0');
-  const lastEq = parseFloat(portfolio?.last_equity || '0');
+  const equity = parseFloat(String(portfolio?.equity ?? portfolio?.balance ?? '0'));
+  const lastEq = parseFloat(String(portfolio?.last_equity ?? '0'));
   const dailyPct = lastEq ? ((equity - lastEq) / lastEq * 100) : 0;
   const totalReturn = ((equity - 500000) / 500000 * 100);
   const positions = portfolio?.positions || [];
@@ -612,7 +680,7 @@ export function CommandCenterPage() {
               {(() => {
                 const hist = (equityHistory || []).slice().reverse();
                 if (hist.length < 2) return null;
-                const week = hist[0]?.equity ? ((equity - hist[Math.min(6, hist.length-1)].equity) / hist[Math.min(6, hist.length-1)].equity * 100) : 0;
+                const week = hist[0]?.equity ? ((equity - (hist[Math.min(6, hist.length-1)].equity ?? 0)) / (hist[Math.min(6, hist.length-1)].equity ?? 1) * 100) : 0;
                 return <div style={{ fontSize: 'var(--mc-font-label)', color: week >= 0 ? '#66bb6a' : '#ef5350', marginTop: '2px', fontFamily: 'var(--font-mc-mono)' }}>{week >= 0 ? '+' : ''}{fmt(week, 1)}% 7d</div>;
               })()}
             </div>
@@ -823,14 +891,14 @@ export function CommandCenterPage() {
                   {a && (
                     <div style={{ marginBottom: '6px' }}>
                       <div style={{ display: 'flex', height: '6px', borderRadius: '3px', overflow: 'hidden', background: '#1a3a4a' }}>
-                        <div style={{ width: a.buyPct + '%', background: '#66bb6a' }} />
-                        <div style={{ width: (100 - a.buyPct - ((a.sell + a.strongSell) / a.total * 100)) + '%', background: '#ff9800' }} />
-                        <div style={{ width: ((a.sell + a.strongSell) / a.total * 100) + '%', background: '#ef5350' }} />
+                        <div style={{ width: (a.buyPct ?? 0) + '%', background: '#66bb6a' }} />
+                        <div style={{ width: (100 - (a.buyPct ?? 0) - (((a.sell ?? 0) + (a.strongSell ?? 0)) / (a.total ?? 1) * 100)) + '%', background: '#ff9800' }} />
+                        <div style={{ width: (((a.sell ?? 0) + (a.strongSell ?? 0)) / (a.total ?? 1) * 100) + '%', background: '#ef5350' }} />
                       </div>
                       <div style={{ fontSize: 'var(--mc-font-label)', color: '#607d8b', marginTop: '3px', fontFamily: 'var(--font-mc-mono)' }}>{a.buyPct}% BUY ({a.total} analysts)</div>
                     </div>
                   )}
-                  {e && <div style={{ fontSize: 'var(--mc-font-label)', fontFamily: 'var(--font-mc-mono)', color: e.beat ? '#66bb6a' : '#ef5350' }}>{e.beat ? '\u2713 BEAT' : '\u2717 MISS'} {e.surprisePct > 0 ? '+' : ''}{e.surprisePct}% (Q{e.period?.slice(5,7)})</div>}
+                  {e && <div style={{ fontSize: 'var(--mc-font-label)', fontFamily: 'var(--font-mc-mono)', color: e.beat ? '#66bb6a' : '#ef5350' }}>{e.beat ? '\u2713 BEAT' : '\u2717 MISS'} {(e.surprisePct ?? 0) > 0 ? '+' : ''}{e.surprisePct}% (Q{e.period?.slice(5,7)})</div>}
                   {ins && <div style={{ fontSize: 'var(--mc-font-label)', fontFamily: 'var(--font-mc-mono)', color: ins.direction === 'BUYING' ? '#66bb6a' : '#ef5350', marginTop: '2px' }}>Insiders: {ins.direction} (MSPR {ins.mspr})</div>}
                 </div>
               );
@@ -1013,7 +1081,7 @@ export function CommandCenterPage() {
                 </div>
               </div>
               <div style={{ display: 'flex', justifyContent: 'space-between', padding: '8px 12px', background: '#0d1117', borderRadius: '6px' }}>
-                <span style={{ fontSize: 'var(--mc-font-label)', color: '#607d8b', fontFamily: 'var(--font-mc-mono)' }}>Change: <span style={{ color: kronosForecast.forecast_24h_change_pct >= 0 ? '#66bb6a' : '#ef5350', fontWeight: 700 }}>{kronosForecast.forecast_24h_change_pct >= 0 ? '+' : ''}{kronosForecast.forecast_24h_change_pct?.toFixed(2)}%</span></span>
+                <span style={{ fontSize: 'var(--mc-font-label)', color: '#607d8b', fontFamily: 'var(--font-mc-mono)' }}>Change: <span style={{ color: (kronosForecast.forecast_24h_change_pct ?? 0) >= 0 ? '#66bb6a' : '#ef5350', fontWeight: 700 }}>{(kronosForecast.forecast_24h_change_pct ?? 0) >= 0 ? '+' : ''}{kronosForecast.forecast_24h_change_pct?.toFixed(2)}%</span></span>
                 <span style={{ fontSize: 'var(--mc-font-label)', color: '#607d8b', fontFamily: 'var(--font-mc-mono)' }}>Range: <span style={{ color: '#ff9800' }}>${kronosForecast.forecast_24h_low?.toLocaleString()} — ${kronosForecast.forecast_24h_high?.toLocaleString()}</span></span>
               </div>
               {(() => {

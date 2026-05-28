@@ -62,8 +62,64 @@ function fmtDollarShort(n: number): string {
   return '$' + n.toFixed(0);
 }
 
+// Types
+type WhaleLiq = {
+  symbol: string;
+  amount: number;
+  direction: string;
+  spot: number;
+  total24h: number;
+  timestamp: string;
+  id: string | number;
+};
+type PortfolioData = {
+  equity?: string | number;
+  balance?: string | number;
+  last_equity?: string | number;
+  buying_power?: string | number;
+  cash?: string | number;
+  positions?: Record<string, unknown>[];
+};
+type RegimeData = {
+  overall_regime?: string;
+  direction_bias?: string;
+  timeframes?: Record<string, { direction?: string; adx?: number; choppiness?: number; trend_efficiency?: number; regime?: string; recommended_strategy?: string; current_price?: number }>;
+};
+type SignalsData = {
+  BTCUSD?: {
+    direction?: string;
+    entry_price?: string | number;
+    signal_count?: number;
+    pnl_history?: { pnl_pct: number; direction?: string; entry?: number; exit?: number; closed_at?: string }[];
+  };
+  pnl_history?: { pnl_pct: number; direction?: string; entry?: number; exit?: number; closed_at?: string }[];
+  [key: string]: unknown;
+};
+type ReportData = {
+  summary?: string;
+  signals?: { total?: number };
+  trades?: number;
+  pnl?: number | { BTCUSD?: { total_pnl_pct?: number }; total?: number; value?: number; amount?: number; daily?: number };
+  alerts?: number;
+};
+type SupertrendParams = {
+  recommended_atr_period?: number;
+  recommended_multiplier?: number;
+  backtest_return_pct?: number;
+  expected_win_rate?: number;
+  expected_profit_factor?: number;
+  timeframe?: string;
+  top_results?: Record<string, unknown>[];
+};
+type CryptoData = {
+  bitcoin?: { usd?: number; usd_24h_change?: number };
+  ethereum?: { usd?: number; usd_24h_change?: number };
+  solana?: { usd?: number; usd_24h_change?: number };
+  [key: string]: unknown;
+};
+
 function WhaleLiquidationsWidget() {
-  const [liqs, setLiqs] = useState<any[]>([]);
+  const [liqs, setLiqs] = useState<WhaleLiq[]>([]);
 
   useEffect(() => {
     const fetch_ = async () => {
@@ -183,12 +239,12 @@ function WhaleLiquidationsWidget() {
 
 
 export function DashboardPage() {
-  const [portfolio, setPortfolio] = useState<any>(null);
-  const [signals, setSignals] = useState<any>(null);
-  const [regime, setRegime] = useState<any>(null);
-  const [report, setReport] = useState<any>(null);
-  const [params, setParams] = useState<any>(null);
-  const [crypto, setCrypto] = useState<any>(null);
+  const [portfolio, setPortfolio] = useState<PortfolioData | null>(null);
+  const [signals, setSignals] = useState<SignalsData | null>(null);
+  const [regime, setRegime] = useState<RegimeData | null>(null);
+  const [report, setReport] = useState<ReportData | null>(null);
+  const [params, setParams] = useState<SupertrendParams | null>(null);
+  const [crypto, setCrypto] = useState<CryptoData | null>(null);
   const [topFlowsCount, setTopFlowsCount] = useState<number>(0);
   useEffect(() => {
     const fetchFlows = () => {
@@ -207,7 +263,7 @@ export function DashboardPage() {
   }, []);
   const live = useLiveStream(true);
   const [loading, setLoading] = useState(true);
-  const [equityHist, setEquityHist] = useState<any[]>([]);
+  const [equityHist, setEquityHist] = useState<{ equity?: number; date?: string; daily_pnl_pct?: number }[]>([]);
   const [tick, setTick] = useState(0);
   const [drawerTicker, setDrawerTicker] = useState<string | null>(null);
 
@@ -236,8 +292,8 @@ export function DashboardPage() {
     return () => { clearInterval(d); clearInterval(t); };
   }, []);
 
-  const equity = parseFloat(portfolio?.equity || portfolio?.balance || '0');
-  const lastEq = parseFloat(portfolio?.last_equity || '0');
+  const equity = parseFloat(String(portfolio?.equity ?? portfolio?.balance ?? '0'));
+  const lastEq = parseFloat(String(portfolio?.last_equity ?? '0'));
   const dailyPct = lastEq ? ((equity - lastEq) / lastEq * 100) : 0;
   const dailyChange = equity - lastEq;
   const totalReturn = ((equity - 500000) / 500000 * 100);
@@ -584,8 +640,8 @@ export function DashboardPage() {
           <div className="db-card" style={{ padding: '16px' }}>
             <div className="db-label" style={{ marginBottom: '10px' }}>ACCOUNT</div>
             {[
-              { l: 'BUYING POWER', v: `$${fmt(parseFloat(portfolio?.buying_power || '0'))}`, c: '#4fc3f7' },
-              { l: 'CASH', v: `$${fmt(parseFloat(portfolio?.cash || '0'))}`, c: '#607d8b' },
+              { l: 'BUYING POWER', v: `$${fmt(parseFloat(String(portfolio?.buying_power ?? '0')))}`, c: '#4fc3f7' },
+              { l: 'CASH', v: `$${fmt(parseFloat(String(portfolio?.cash ?? '0')))}`, c: '#607d8b' },
               { l: 'GOAL ($1M)', v: `${fmt(Math.min(Math.max(((equity - 500000) / 500000) * 100, 0), 100), 0)}%`, c: '#ff9800' },
             ].map((s, i) => (
               <div key={i} style={{ display: 'flex', justifyContent: 'space-between', padding: '6px 10px', background: '#0d1117', borderRadius: '4px', marginBottom: '4px', fontSize: 'var(--mc-font-label)', fontFamily: 'var(--font-mc-mono)' }}>

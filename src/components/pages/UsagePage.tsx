@@ -49,8 +49,8 @@ const SOURCE_COLORS = ["#4fc3f7", "#ff9800", "#66bb6a", "#ce93d8", "#ef5350", "#
 
 export default function UsagePage() {
   const [data, setData] = useState<UsageData | null>(null);
-  const [costData, setCostData] = useState<any>(null);
-  const [dbStats, setDbStats] = useState<any>(null);
+  const [costData, setCostData] = useState<Record<string, unknown> | null>(null);
+  const [dbStats, setDbStats] = useState<Record<string, unknown> | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [lastUpdate, setLastUpdate] = useState<string>("");
   const [view, setView] = useState<"24h" | "7d">("24h");

@@ -11,9 +11,42 @@ function fmtTimeAgo(iso: string) {
   return `${Math.floor(hrs / 24)}d ago`;
 }
 
+// Types
+type LiveSignalsData = {
+  lastCycleTime?: string;
+  topWatched?: { ticker: string; latestTier: string; flowCount: number; maxScore: number; latestValue: string }[];
+  picksExecuted?: unknown[];
+  passedOn?: { ticker: string; reason: string }[];
+  recentSignals?: { ticker: string; option_type?: string; strike?: string; flow_value_raw?: string; score?: number }[];
+};
+type KronosResult = {
+  forecast_24h_direction?: string;
+  forecast_24h_target?: number;
+  forecast_24h_change_pct?: number;
+  forecast_24h_confidence?: string;
+  current_price?: number;
+  forecast_range_pct?: number;
+  forecast_24h_low?: number;
+  forecast_24h_high?: number;
+  model?: string;
+  _model?: string;
+  candles_analyzed?: number;
+  sample_paths?: number;
+  _file_mtime?: string;
+  generated_at?: string;
+  error?: string;
+};
+type PreTradeData = {
+  flows: { option_type?: string; strike?: string; flow_value_raw?: string; score?: number }[];
+  kronos: KronosResult | null;
+  journal: Record<string, unknown> | null;
+  decision: { took: boolean; reason: string; when: string; full_symbol?: string } | null;
+};
+type WhyTakeHit = { took: boolean; reason: string; when: string; full_symbol?: string };
+
 // 1. RIGHT NOW
 function RightNowBlock() {
-  const [data, setData] = useState<any>(null);
+  const [data, setData] = useState<LiveSignalsData | null>(null);
   useEffect(() => {
     const fetch2 = () => fetch('/api/live-signals', { cache: 'no-store' }).then(r => r.json()).then(setData).catch(() => {});
     fetch2();
@@ -27,11 +60,11 @@ function RightNowBlock() {
     <div className="db-card" style={{ padding: 16, minHeight: 240 }}>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', marginBottom: 10 }}>
         <div className="db-label">RIGHT NOW — TOP 3 WATCHED</div>
-        <div style={{ fontSize: 10, color: '#607d8b' }}>Cycle: {fmtTimeAgo(data.lastCycleTime)}</div>
+        <div style={{ fontSize: 10, color: '#607d8b' }}>Cycle: {fmtTimeAgo(data.lastCycleTime ?? '')}</div>
       </div>
-      {data.topWatched?.length === 0 ? (
+      {(data.topWatched?.length ?? 0) === 0 ? (
         <div style={{ color: '#607d8b', fontSize: 12 }}>No whale signals yet</div>
-      ) : data.topWatched.map((t: any) => (
+      ) : data.topWatched?.map((t: any) => (
         <div key={t.ticker} style={{ padding: '10px 0', borderBottom: '1px solid #1a2a35', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
           <div>
             <div style={{ fontWeight: 700, fontSize: 14, color: '#e8e8ed', fontFamily: 'var(--font-mc-mono)' }}>{t.ticker}</div>
@@ -41,7 +74,7 @@ function RightNowBlock() {
         </div>
       ))}
       <div style={{ marginTop: 10, fontSize: 11, color: '#607d8b' }}>
-        {data.picksExecuted?.length > 0 ? `✓ Boba executed ${data.picksExecuted.length} last cycle · ${data.passedOn?.length} passed` : `${data.passedOn?.length || 0} passed last cycle`}
+        {(data.picksExecuted?.length ?? 0) > 0 ? `✓ Boba executed ${data.picksExecuted?.length} last cycle · ${data.passedOn?.length} passed` : `${data.passedOn?.length || 0} passed last cycle`}
       </div>
     </div>
   );
@@ -51,7 +84,7 @@ function RightNowBlock() {
 function KronosBlock() {
   const [ticker, setTicker] = useState('');
   const [model, setModel] = useState('small');
-  const [result, setResult] = useState<any>(null);
+  const [result, setResult] = useState<KronosResult | null>(null);
   const [running, setRunning] = useState(false);
   const [error, setError] = useState('');
   const [pollCount, setPollCount] = useState(0);
@@ -132,14 +165,14 @@ function KronosBlock() {
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '2px 12px' }}>
             <div><span style={{ color: '#607d8b' }}>Current:</span> ${result.current_price?.toFixed(2) ?? '---'}</div>
             <div><span style={{ color: '#607d8b' }}>24h target:</span> <span style={{ color: dirColor }}>${result.forecast_24h_target?.toFixed(2) ?? '---'}</span></div>
-            <div><span style={{ color: '#607d8b' }}>Change:</span> <span style={{ color: changePct >= 0 ? '#00d2a0' : '#ef5350' }}>{changePct >= 0 ? '+' : ''}{changePct?.toFixed(2) ?? '---'}%</span></div>
+            <div><span style={{ color: '#607d8b' }}>Change:</span> <span style={{ color: (changePct ?? 0) >= 0 ? '#00d2a0' : '#ef5350' }}>{(changePct ?? 0) >= 0 ? '+' : ''}{changePct?.toFixed(2) ?? '---'}%</span></div>
             <div><span style={{ color: '#607d8b' }}>Range:</span> {result.forecast_range_pct?.toFixed(1) ?? '---'}%</div>
             <div><span style={{ color: '#607d8b' }}>Low:</span> ${result.forecast_24h_low?.toFixed(2) ?? '---'}</div>
             <div><span style={{ color: '#607d8b' }}>High:</span> ${result.forecast_24h_high?.toFixed(2) ?? '---'}</div>
           </div>
           <div style={{ fontSize: 10, color: '#607d8b', marginTop: 6, display: 'flex', justifyContent: 'space-between' }}>
             <span>{result.model || result._model || '---'} | {result.candles_analyzed || '---'} candles | {result.sample_paths || 1} path(s)</span>
-            <span>{fmtTimeAgo(result._file_mtime || result.generated_at)}</span>
+            <span>{fmtTimeAgo(result._file_mtime || result.generated_at || '')}</span>
           </div>
         </div>
       )}
@@ -149,7 +182,7 @@ function KronosBlock() {
 
 // 3. PASSED ON
 function PassedOnBlock() {
-  const [data, setData] = useState<any>(null);
+  const [data, setData] = useState<LiveSignalsData | null>(null);
   useEffect(() => {
     const f = () => fetch('/api/live-signals', { cache: 'no-store' }).then(r => r.json()).then(setData).catch(() => {});
     f();
@@ -179,7 +212,7 @@ function PassedOnBlock() {
 // 4. PRE-TRADE CALCULATOR
 function PreTradeBlock() {
   const [ticker, setTicker] = useState('');
-  const [data, setData] = useState<any>(null);
+  const [data, setData] = useState<PreTradeData | null>(null);
   const [loading, setLoading] = useState(false);
 
   const lookup = async () => {
@@ -242,7 +275,7 @@ function PreTradeBlock() {
 // 5. WHY DID I (NOT) TAKE THIS?
 function WhyTakeBlock() {
   const [ticker, setTicker] = useState('');
-  const [hit, setHit] = useState<any>(null);
+  const [hit, setHit] = useState<WhyTakeHit | null>(null);
   const [checked, setChecked] = useState(false);
 
   const check = async () => {

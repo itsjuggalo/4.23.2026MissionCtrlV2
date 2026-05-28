@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import { NextRequest } from 'next/server';
-import { spawn, execSync } from 'child_process';
+import { spawn, execSync, exec } from 'child_process';
 import { existsSync, readdirSync, statSync, appendFileSync, chmodSync } from 'fs';
 import path from 'path';
 import { randomUUID } from 'crypto';
@@ -24,6 +24,33 @@ const PIPELINE_SCRIPTS = [
   'train', 'predict', 'predict_rolling', 'signals', 'simulate', 'output',
 ] as const;
 type Script = typeof PIPELINE_SCRIPTS[number];
+
+let _depCache: { ts: number; checks: Record<string, boolean> } | null = null;
+let _depCheckInProgress = false;
+const DEP_CACHE_TTL = 5 * 60 * 1000;
+const DEP_PROBES = ['numpy', 'pandas', 'sklearn', 'lightgbm', 'tensorflow', 'binance', 'talib'];
+
+function scheduleBgDepCheck(venvExists: boolean): void {
+  if (!venvExists || _depCheckInProgress) return;
+  if (_depCache && Date.now() - _depCache.ts < DEP_CACHE_TTL) return;
+  _depCheckInProgress = true;
+  const checks: Record<string, boolean> = {};
+  const promises = DEP_PROBES.map(pkg => new Promise<void>(resolve => {
+    exec(`"${VENV_PY}" -c "import ${pkg}"`, { timeout: 9000 }, (err) => {
+      checks[pkg] = !err;
+      resolve();
+    });
+  }));
+  Promise.all(promises).then(() => {
+    _depCache = { ts: Date.now(), checks };
+    _depCheckInProgress = false;
+  }).catch(() => { _depCheckInProgress = false; });
+}
+
+function checkDeps(venvExists: boolean): Record<string, boolean> {
+  scheduleBgDepCheck(venvExists);
+  return _depCache?.checks ?? {};
+}
 
 function repoStatus() {
   const repoExists = existsSync(REPO);
@@ -55,18 +82,7 @@ function repoStatus() {
     try { walk(OUTPUTS_DIR, ''); } catch {}
   }
 
-  const depChecks: Record<string, boolean> = {};
-  if (venvExists) {
-    const probes = ['numpy', 'pandas', 'sklearn', 'lightgbm', 'tensorflow', 'binance', 'talib'];
-    for (const pkg of probes) {
-      try {
-        execSync(`"${VENV_PY}" -c "import ${pkg}"`, { stdio: 'ignore', timeout: 8000 });
-        depChecks[pkg] = true;
-      } catch {
-        depChecks[pkg] = false;
-      }
-    }
-  }
+  const depChecks = checkDeps(venvExists);
 
   return {
     repo: REPO,

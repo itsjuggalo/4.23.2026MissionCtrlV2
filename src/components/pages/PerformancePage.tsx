@@ -16,13 +16,42 @@ function perfTickerOnly(sym: string): string {
 // Portfolio metrics, trade scorecards, optimizer results, P/L tracking
 // ============================================================================
 
+// Types
+type PortfolioData = {
+  equity?: string | number;
+  balance?: string | number;
+  last_equity?: string | number;
+  buying_power?: string | number;
+  cash?: string | number;
+  positions?: Record<string, unknown>[];
+};
+type TradeEntry = { pnl_pct: number; protocol?: string; direction?: string; entry?: number; exit?: number; closed_at?: string; symbol?: string; entry_criteria?: string[] };
+type SignalsData = {
+  BTCUSD?: { pnl_history?: TradeEntry[] };
+  pnl_history?: TradeEntry[];
+  [key: string]: unknown;
+};
+type SupertrendParams = {
+  recommended_atr_period?: number;
+  recommended_multiplier?: number;
+  backtest_return_pct?: number;
+  expected_win_rate?: number;
+  expected_profit_factor?: number;
+  timeframe?: string;
+  top_results?: { atr_period?: number; multiplier?: number; total_trades?: number; win_rate?: number; profit_factor?: number; total_return_pct?: number; max_drawdown_pct?: number; sharpe_approx?: string | number }[];
+};
+type TradeLogData = {
+  stats?: { total_trades?: number; win_rate?: number; profit_factor?: number; avg_win?: number; avg_loss?: number; best_trade?: number; worst_trade?: number; wins?: number; losses?: number };
+  trades?: Record<string, unknown>[];
+};
+
 export function PerformancePage() {
-  const [portfolio, setPortfolio] = useState<any>(null);
-  const [signals, setSignals] = useState<any>(null);
-  const [params, setParams] = useState<any>(null);
+  const [portfolio, setPortfolio] = useState<PortfolioData | null>(null);
+  const [signals, setSignals] = useState<SignalsData | null>(null);
+  const [params, setParams] = useState<SupertrendParams | null>(null);
   const [loading, setLoading] = useState(true);
-  const [tradeLog, setTradeLog] = useState<any>(null);
-  const [equityHist, setEquityHist] = useState<any[]>([]);
+  const [tradeLog, setTradeLog] = useState<TradeLogData | null>(null);
+  const [equityHist, setEquityHist] = useState<{ equity?: number; date?: string; daily_pnl_pct?: number }[]>([]);
   const [tick, setTick] = useState(0);
   const [bobaJournal, setBobaJournal] = useState<any[]>([]);
   const [drawerTicker, setDrawerTicker] = useState<string | null>(null);
@@ -67,10 +96,10 @@ export function PerformancePage() {
     return () => { clearInterval(d); clearInterval(t); };
   }, []);
 
-  const equity = parseFloat(portfolio?.equity || portfolio?.balance || '0');
-  const lastEq = parseFloat(portfolio?.last_equity || '0');
-  const cash = parseFloat(portfolio?.cash || '0');
-  const buyingPower = parseFloat(portfolio?.buying_power || '0');
+  const equity = parseFloat(String(portfolio?.equity ?? portfolio?.balance ?? '0'));
+  const lastEq = parseFloat(String(portfolio?.last_equity ?? '0'));
+  const cash = parseFloat(String(portfolio?.cash ?? '0'));
+  const buyingPower = parseFloat(String(portfolio?.buying_power ?? '0'));
   const startCap = 500000;
   const totalReturn = ((equity - startCap) / startCap) * 100;
   const dailyChange = equity - lastEq;
@@ -136,16 +165,16 @@ export function PerformancePage() {
   // Use SQLite trade stats if available (more accurate than signal-based)
   const dbStats = tradeLog?.stats || {};
   const dbTrades = tradeLog?.trades || [];
-  const useDb = dbStats.total_trades > 0;
-  const finalWinRate = useDb ? dbStats.win_rate : winRate;
-  const finalPF = useDb ? dbStats.profit_factor : profitFactor;
-  const finalAvgWin = useDb ? dbStats.avg_win : avgWin;
-  const finalAvgLoss = useDb ? dbStats.avg_loss : avgLoss;
-  const finalBest = useDb ? dbStats.best_trade : bestTrade;
-  const finalWorst = useDb ? dbStats.worst_trade : worstTrade;
-  const finalTotalTrades = useDb ? dbStats.total_trades : totalTrades;
-  const finalWins = useDb ? dbStats.wins : wins.length;
-  const finalLosses = useDb ? dbStats.losses : losses.length;
+  const useDb = (dbStats.total_trades as number ?? 0) > 0;
+  const finalWinRate = useDb ? (dbStats.win_rate as number ?? 0) : winRate;
+  const finalPF = useDb ? (dbStats.profit_factor as number ?? 0) : profitFactor;
+  const finalAvgWin = useDb ? (dbStats.avg_win as number ?? 0) : avgWin;
+  const finalAvgLoss = useDb ? (dbStats.avg_loss as number ?? 0) : avgLoss;
+  const finalBest = useDb ? (dbStats.best_trade as number ?? 0) : bestTrade;
+  const finalWorst = useDb ? (dbStats.worst_trade as number ?? 0) : worstTrade;
+  const finalTotalTrades = useDb ? (dbStats.total_trades as number ?? 0) : totalTrades;
+  const finalWins = useDb ? (dbStats.wins as number ?? 0) : wins.length;
+  const finalLosses = useDb ? (dbStats.losses as number ?? 0) : losses.length;
 
   if (loading) return (
     <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '60vh', color: '#4fc3f7', fontFamily: 'var(--font-mc-mono)' }}>

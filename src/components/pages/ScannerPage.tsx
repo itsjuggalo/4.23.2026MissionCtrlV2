@@ -11,14 +11,30 @@ function tickerOnly(sym: string): string {
   return firstWord.replace(/[^A-Z]/g, '') || s;
 }
 
+// Types
+type CryptoData = { BTC?: { price?: number }; ETH?: { price?: number }; SOL?: { price?: number }; DOGE?: { price?: number }; [key: string]: unknown };
+type RegimeData = { overall_regime?: string; regime?: string };
+type SignalsData = { BTCUSD?: { last_action?: string; direction?: string }; btcusd?: { last_action?: string; direction?: string }; [key: string]: unknown };
+type TelegramSignal = { score?: number; symbol?: string; direction?: string; entry?: string | number; channel_name?: string };
+type SqueezeData = { candidates: { ticker?: string; score?: number; si_pct?: number | null; dtc?: number | null; sweep?: boolean; price?: number | null; from_hi_pct?: number | null }[] };
+type LiqData = {
+  bias: string;
+  top_coins: { sym: string; total: number; long: number; short?: number }[];
+  largest: unknown[];
+  total?: number;
+  events_total?: number;
+  long_liq?: number;
+  short_liq?: number;
+};
+
 export function ScannerPage() {
   const [drawerTicker, setDrawerTicker] = useState<string | null>(null);
-  const [crypto, setCrypto] = useState<any>(null);
-  const [regime, setRegime] = useState<any>(null);
-  const [signals, setSignals] = useState<any>(null);
-  const [telegram, setTelegram] = useState<any[]>([]);
-  const [squeeze, setSqueeze] = useState<any>({ candidates: [] });
-  const [liq, setLiq] = useState<any>({ bias: 'NO_DATA', top_coins: [], largest: [] });
+  const [crypto, setCrypto] = useState<CryptoData | null>(null);
+  const [regime, setRegime] = useState<RegimeData | null>(null);
+  const [signals, setSignals] = useState<SignalsData | null>(null);
+  const [telegram, setTelegram] = useState<TelegramSignal[]>([]);
+  const [squeeze, setSqueeze] = useState<SqueezeData>({ candidates: [] });
+  const [liq, setLiq] = useState<LiqData>({ bias: 'NO_DATA', top_coins: [], largest: [] });
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
   const [lastUpdate, setLastUpdate] = useState<Date | null>(null);
@@ -62,7 +78,7 @@ export function ScannerPage() {
   const lastAction = sigState.last_action || sigState.direction || 'NONE';
 
   // Recent high-score telegram signals
-  const hotSignals = telegram.filter(s => s.score >= 50).slice(0, 6);
+  const hotSignals = telegram.filter(s => (s.score ?? 0) >= 50).slice(0, 6);
 
   if (loading) return (
     <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '40vh', color: '#4fc3f7', fontFamily: 'var(--font-mc-mono)' }}>
@@ -176,7 +192,7 @@ export function ScannerPage() {
       )}
 
       {/* Liquidation Bias */}
-      {liq?.total > 0 && (
+      {(liq?.total ?? 0) > 0 && (
         <>
           <div style={{ fontSize: 'var(--mc-font-badge)', fontWeight: 700, color: '#9c27b0', fontFamily: 'var(--font-mc-mono)', letterSpacing: '1.5px', marginBottom: '10px', paddingBottom: '4px', borderBottom: '2px solid #9c27b044' }}>
             CRYPTO LIQUIDATIONS · LAST 4H
@@ -188,13 +204,13 @@ export function ScannerPage() {
                 {liq.bias.replace('_', ' ')}
               </div>
               <div style={{ fontSize: 'var(--mc-font-label)', color: '#90a4ae', fontFamily: 'var(--font-mc-mono)', marginTop: '6px' }}>
-                Total: ${(liq.total / 1_000_000).toFixed(2)}M · {liq.events_total} events
+                Total: ${((liq.total ?? 0) / 1_000_000).toFixed(2)}M · {liq.events_total} events
               </div>
               <div style={{ fontSize: 'var(--mc-font-label)', color: '#ef5350', fontFamily: 'var(--font-mc-mono)', marginTop: '4px' }}>
-                🔴 Longs liq: ${(liq.long_liq / 1_000_000).toFixed(2)}M
+                🔴 Longs liq: ${((liq.long_liq ?? 0) / 1_000_000).toFixed(2)}M
               </div>
               <div style={{ fontSize: 'var(--mc-font-label)', color: '#66bb6a', fontFamily: 'var(--font-mc-mono)' }}>
-                🟢 Shorts liq: ${(liq.short_liq / 1_000_000).toFixed(2)}M
+                🟢 Shorts liq: ${((liq.short_liq ?? 0) / 1_000_000).toFixed(2)}M
               </div>
             </div>
             <div className="scan-card" style={{ padding: '14px 18px' }}>

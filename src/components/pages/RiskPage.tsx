@@ -1,11 +1,23 @@
 'use client';
 import { useState, useEffect } from 'react';
 
+// Types
+type PortfolioData = {
+  equity?: string | number;
+  buying_power?: string | number;
+  cash?: string | number;
+  day_pl?: number;
+  day_pl_pct?: number;
+};
+type RegimeData = { overall_regime?: string };
+type TradeEntry = { pl?: number; pnl?: number };
+type EquityPoint = { equity?: number; value?: number; date?: string };
+
 export function RiskPage() {
-  const [portfolio, setPortfolio] = useState<any>(null);
-  const [regime, setRegime] = useState<any>(null);
-  const [trades, setTrades] = useState<any[]>([]);
-  const [equity, setEquity] = useState<any[]>([]);
+  const [portfolio, setPortfolio] = useState<PortfolioData | null>(null);
+  const [regime, setRegime] = useState<RegimeData | null>(null);
+  const [trades, setTrades] = useState<TradeEntry[]>([]);
+  const [equity, setEquity] = useState<EquityPoint[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
 
@@ -26,7 +38,7 @@ export function RiskPage() {
     load();
   }, []);
 
-  const eq = portfolio?.equity || 0;
+  const eq = Number(portfolio?.equity ?? 0);
   const start = 500000;
   const pnl = eq - start;
   const pnlPct = start > 0 ? (pnl / start * 100) : 0;
@@ -83,7 +95,7 @@ export function RiskPage() {
             </svg>
           </div>
           <div style={{ fontSize: '32px', fontWeight: 900, color: riskColor, fontFamily: 'var(--font-mc-mono)', letterSpacing: '3px' }}>{riskLevel}</div>
-          <div style={{ fontSize: 'var(--mc-font-label)', color: '#607d8b', fontFamily: 'var(--font-mc-mono)', marginTop: '4px' }}>Max DD: {fmt(maxDrawdown, 1)}%</div>
+          <div style={{ fontSize: 'var(--mc-font-label)', color: '#607d8b', fontFamily: 'var(--font-mc-mono)', marginTop: '4px' }}>Max DD: {fmt(Number(maxDrawdown), 1)}%</div>
         </div>
 
         {/* Key Metrics — 2x3 grid */}

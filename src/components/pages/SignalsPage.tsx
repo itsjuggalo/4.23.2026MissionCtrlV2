@@ -94,8 +94,15 @@ function GridBox({ title, color, count, children }: { title: string; color: stri
   );
 }
 
+type SignalsApiData = {
+  name?: { shortTerm?: Record<string, unknown>[]; longTerm?: Record<string, unknown>[]; stocks?: Record<string, unknown>[]; recentClosed?: Record<string, unknown>[] };
+  name2?: { shortTerm?: Record<string, unknown>[]; longTerm?: Record<string, unknown>[] };
+  vivid?: { shortTerm?: Record<string, unknown>[] };
+  summary?: { totalActive?: number };
+};
+
 export function SignalsPage() {
-  const [data, setData] = useState<any>(null);
+  const [data, setData] = useState<SignalsApiData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
   const [sourceFilter, setSourceFilter] = useState('all');

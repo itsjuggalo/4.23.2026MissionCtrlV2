@@ -7,11 +7,53 @@ import { StockDetailDrawer } from '@/components/drawers/StockDetailDrawer';
 // Multi-timeframe regime detection, trend strength, strategy guidance
 // ============================================================================
 
+// Types
+type TimeframeData = {
+  direction?: string;
+  regime?: string;
+  adx?: number;
+  choppiness?: number;
+  trend_efficiency?: number;
+  bbw?: number;
+  plus_di?: number;
+  minus_di?: number;
+  current_price?: number;
+  recommended_strategy?: string;
+};
+type RegimeData = {
+  overall_regime?: string;
+  direction_bias?: string;
+  overall_recommendation?: string;
+  timeframes?: Record<string, TimeframeData>;
+};
+type SignalsData = {
+  BTCUSD?: { direction?: string; entry_price?: string | number; signal_count?: number };
+  [key: string]: unknown;
+};
+type SupertrendParams = {
+  recommended_atr_period?: number;
+  recommended_multiplier?: number;
+  backtest_return_pct?: number;
+  timeframe?: string;
+  top_results?: Record<string, unknown>[];
+};
+type MacroData = {
+  verdict?: string;
+  stance?: { label?: string; score?: number; color?: string };
+  vix?: { level?: number; pct?: number };
+  fearGreed?: { value?: number; label?: string; previousClose?: number; oneWeekAgo?: number; oneMonthAgo?: number; oneYearAgo?: number };
+  yields?: { spread?: number; tenY?: number; twoY?: number };
+  history?: { date?: string; stance?: string; score?: number; color?: string }[];
+  playbook?: { edges?: string[]; avoids?: string[]; notes?: string[] };
+  sizing?: { rPerTrade?: number; rBaseline?: number; maxConcurrent?: number; optionsPct?: number; reasoning?: string };
+  sectors?: { symbol?: string; name?: string; return5d?: number; return20d?: number }[];
+};
+
 export function RegimePage() {
-  const [regime, setRegime] = useState<any>(null);
-  const [signals, setSignals] = useState<any>(null);
-  const [params, setParams] = useState<any>(null);
-  const [macro, setMacro] = useState<any>(null);
+  const [regime, setRegime] = useState<RegimeData | null>(null);
+  const [signals, setSignals] = useState<SignalsData | null>(null);
+  const [params, setParams] = useState<SupertrendParams | null>(null);
+  const [macro, setMacro] = useState<MacroData | null>(null);
   const [loading, setLoading] = useState(true);
   const [tick, setTick] = useState(0);
   const [drawerTicker, setDrawerTicker] = useState<string | null>(null);
@@ -93,14 +135,14 @@ export function RegimePage() {
               <div style={{ background: '#0d1117', padding: '14px', borderRadius: '6px', borderLeft: '3px solid ' + (macro.stance?.color || '#607d8b') }}>
                 <div style={{ fontSize: 'var(--mc-font-label)', color: '#607d8b', fontFamily: 'var(--font-mc-mono)', marginBottom: '6px', letterSpacing: '1px' }}>OVERALL</div>
                 <div style={{ fontSize: 'var(--mc-font-xl)', fontWeight: 700, color: macro.stance?.color || '#607d8b', fontFamily: 'var(--font-mc-mono)' }}>{macro.stance?.label || '—'}</div>
-                <div style={{ fontSize: 'var(--mc-font-badge)', color: '#455a64', fontFamily: 'var(--font-mc-mono)', marginTop: '4px' }}>score {macro.stance?.score >= 0 ? '+' : ''}{macro.stance?.score?.toFixed(2) || '—'}</div>
+                <div style={{ fontSize: 'var(--mc-font-badge)', color: '#455a64', fontFamily: 'var(--font-mc-mono)', marginTop: '4px' }}>score {(macro.stance?.score ?? 0) >= 0 ? '+' : ''}{macro.stance?.score?.toFixed(2) || '—'}</div>
               </div>
-              <div style={{ background: '#0d1117', padding: '14px', borderRadius: '6px', borderLeft: '3px solid ' + (macro.vix?.level >= 25 ? '#ef5350' : macro.vix?.level >= 20 ? '#ff9800' : macro.vix?.level < 15 ? '#66bb6a' : '#4fc3f7') }}>
+              <div style={{ background: '#0d1117', padding: '14px', borderRadius: '6px', borderLeft: '3px solid ' + ((macro.vix?.level ?? 0) >= 25 ? '#ef5350' : (macro.vix?.level ?? 0) >= 20 ? '#ff9800' : (macro.vix?.level ?? 0) < 15 ? '#66bb6a' : '#4fc3f7') }}>
                 <div style={{ fontSize: 'var(--mc-font-label)', color: '#607d8b', fontFamily: 'var(--font-mc-mono)', marginBottom: '6px', letterSpacing: '1px' }}>VIX (vol)</div>
                 <div style={{ fontSize: 'var(--mc-font-xl)', fontWeight: 700, color: '#e0e0e0', fontFamily: 'var(--font-mc-mono)' }}>{macro.vix?.level?.toFixed(2) || '—'}</div>
                 <div style={{ fontSize: 'var(--mc-font-badge)', color: (macro.vix?.pct || 0) >= 0 ? '#ef5350' : '#66bb6a', fontFamily: 'var(--font-mc-mono)', marginTop: '4px' }}>{(macro.vix?.pct || 0) >= 0 ? '+' : ''}{macro.vix?.pct?.toFixed(2) || '0'}%</div>
               </div>
-              <div style={{ background: '#0d1117', padding: '14px', borderRadius: '6px', borderLeft: '3px solid ' + (macro.fearGreed?.value >= 75 ? '#66bb6a' : macro.fearGreed?.value >= 55 ? '#9ccc65' : macro.fearGreed?.value >= 45 ? '#607d8b' : macro.fearGreed?.value >= 25 ? '#ff9800' : '#ef5350') }}>
+              <div style={{ background: '#0d1117', padding: '14px', borderRadius: '6px', borderLeft: '3px solid ' + ((macro.fearGreed?.value ?? 0) >= 75 ? '#66bb6a' : (macro.fearGreed?.value ?? 0) >= 55 ? '#9ccc65' : (macro.fearGreed?.value ?? 0) >= 45 ? '#607d8b' : (macro.fearGreed?.value ?? 0) >= 25 ? '#ff9800' : '#ef5350') }}>
                 <div style={{ fontSize: 'var(--mc-font-label)', color: '#607d8b', fontFamily: 'var(--font-mc-mono)', marginBottom: '6px', letterSpacing: '1px' }}>FEAR & GREED</div>
                 <div style={{ fontSize: 'var(--mc-font-xl)', fontWeight: 700, color: '#e0e0e0', fontFamily: 'var(--font-mc-mono)' }}>{macro.fearGreed?.value ?? '—'}</div>
                 <div style={{ fontSize: 'var(--mc-font-badge)', color: '#90a4ae', fontFamily: 'var(--font-mc-mono)', marginTop: '4px' }}>{macro.fearGreed?.label || '—'}</div>
