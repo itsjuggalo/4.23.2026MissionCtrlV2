@@ -221,14 +221,18 @@ async function fetchCongressForTicker(ticker: string): Promise<any> {
 }
 
 export async function GET(_req: Request, { params }: { params: Promise<{ ticker: string }> }) {
-  const { ticker } = await params;
-  const tk = ticker.toUpperCase();
-  if (!/^[A-Z0-9.\-]{1,10}$/.test(tk)) {
-    return NextResponse.json({ error: 'Invalid ticker' }, { status: 400 });
+  try {
+    const { ticker } = await params;
+    const tk = ticker.toUpperCase();
+    if (!/^[A-Z0-9.\-]{1,10}$/.test(tk)) {
+      return NextResponse.json({ error: 'Invalid ticker' }, { status: 400 });
+    }
+    const [insider, congress] = await Promise.all([
+      fetchSecForm4(tk),
+      fetchCongressForTicker(tk),
+    ]);
+    return NextResponse.json({ ticker: tk, insider, congress });
+  } catch (e: unknown) {
+    return NextResponse.json({ error: (e instanceof Error ? e.message : String(e)).slice(0, 200) }, { status: 500 });
   }
-  const [insider, congress] = await Promise.all([
-    fetchSecForm4(tk),
-    fetchCongressForTicker(tk),
-  ]);
-  return NextResponse.json({ ticker: tk, insider, congress });
 }

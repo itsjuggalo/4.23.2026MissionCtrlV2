@@ -258,37 +258,41 @@ async function saveHistorySnapshot(snapshot: any): Promise<any[]> {
 }
 
 export async function GET() {
-  if (CACHE && Date.now() - CACHE.ts < TTL) {
-    return NextResponse.json(CACHE.data);
+  try {
+    if (CACHE && Date.now() - CACHE.ts < TTL) {
+      return NextResponse.json(CACHE.data);
+    }
+
+    const [fg, vixQ, tnxQ, irxQ, sectors] = await Promise.all([
+      fetchFearGreed(),
+      fetchYahooQuote('^VIX'),
+      fetchYahooQuote('^TNX'),
+      fetchYahooQuote('^IRX'),
+      fetchSectorRotation(),
+    ]);
+
+    const tenY = tnxQ ? Math.round(tnxQ.price * 100) / 100 : null;
+    const twoY = irxQ ? Math.round(irxQ.price * 100) / 100 : null;
+    const yieldSpread = tenY != null && twoY != null ? Math.round((tenY - twoY) * 100) / 100 : null;
+
+    const stance = computeRiskStance({ vix: vixQ?.price ?? null, fg: fg?.value ?? null, yieldSpread });
+
+    const history = await saveHistorySnapshot({
+      score: stance.score, stance: stance.label, color: stance.color,
+      vix: vixQ?.price ?? null, fg: fg?.value ?? null, spread: yieldSpread,
+    });
+
+    const vix = vixQ ? { level: Math.round(vixQ.price * 100) / 100, change: Math.round(vixQ.change * 100) / 100, pct: Math.round(vixQ.pct * 100) / 100 } : null;
+    const yields = { tenY, twoY, spread: yieldSpread };
+
+    const playbook = computePlaybook(stance, vixQ?.price ?? null, fg?.value ?? null);
+    const sizing = computeSizing(stance, vixQ?.price ?? null);
+    const verdict = generateVerdict({ stance, vix, fg, yields, sectors, history });
+
+    const out = { ts: Date.now(), stance, vix, fearGreed: fg, yields, sectors, history, playbook, sizing, verdict };
+    CACHE = { ts: Date.now(), data: out };
+    return NextResponse.json(out);
+  } catch (e: unknown) {
+    return NextResponse.json({ error: (e instanceof Error ? e.message : String(e)).slice(0, 200) }, { status: 500 });
   }
-
-  const [fg, vixQ, tnxQ, irxQ, sectors] = await Promise.all([
-    fetchFearGreed(),
-    fetchYahooQuote('^VIX'),
-    fetchYahooQuote('^TNX'),
-    fetchYahooQuote('^IRX'),
-    fetchSectorRotation(),
-  ]);
-
-  const tenY = tnxQ ? Math.round(tnxQ.price * 100) / 100 : null;
-  const twoY = irxQ ? Math.round(irxQ.price * 100) / 100 : null;
-  const yieldSpread = tenY != null && twoY != null ? Math.round((tenY - twoY) * 100) / 100 : null;
-
-  const stance = computeRiskStance({ vix: vixQ?.price ?? null, fg: fg?.value ?? null, yieldSpread });
-
-  const history = await saveHistorySnapshot({
-    score: stance.score, stance: stance.label, color: stance.color,
-    vix: vixQ?.price ?? null, fg: fg?.value ?? null, spread: yieldSpread,
-  });
-
-  const vix = vixQ ? { level: Math.round(vixQ.price * 100) / 100, change: Math.round(vixQ.change * 100) / 100, pct: Math.round(vixQ.pct * 100) / 100 } : null;
-  const yields = { tenY, twoY, spread: yieldSpread };
-
-  const playbook = computePlaybook(stance, vixQ?.price ?? null, fg?.value ?? null);
-  const sizing = computeSizing(stance, vixQ?.price ?? null);
-  const verdict = generateVerdict({ stance, vix, fg, yields, sectors, history });
-
-  const out = { ts: Date.now(), stance, vix, fearGreed: fg, yields, sectors, history, playbook, sizing, verdict };
-  CACHE = { ts: Date.now(), data: out };
-  return NextResponse.json(out);
 }

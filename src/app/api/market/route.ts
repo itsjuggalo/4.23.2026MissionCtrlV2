@@ -81,20 +81,24 @@ function isMarketOpen() {
 }
 
 export async function GET(request: Request) {
-  const __proxied = await proxyToServeftp(request); if (__proxied) return __proxied;
-  const key = getSecret("alpaca-boba-key-id");
-  const sec = getSecret("alpaca-boba-secret");
-  const [spy, qqq, vix, dxy, tnx, btc] = await Promise.all([
-    fetchQuote("SPY", key, sec),
-    fetchQuote("QQQ", key, sec),
-    fetchQuote("^VIX", key, sec),
-    fetchQuote("DX-Y.NYB", key, sec),
-    fetchQuote("^TNX", key, sec),
-    fetchBTC(),
-  ]);
-  return NextResponse.json({
-    timestamp: new Date().toISOString(),
-    spy, qqq, vix, dxy, tnx, btc,
-    market_open: isMarketOpen(),
-  });
+  try {
+    const __proxied = await proxyToServeftp(request); if (__proxied) return __proxied;
+    const key = getSecret("alpaca-boba-key-id");
+    const sec = getSecret("alpaca-boba-secret");
+    const [spy, qqq, vix, dxy, tnx, btc] = await Promise.all([
+      fetchQuote("SPY", key, sec),
+      fetchQuote("QQQ", key, sec),
+      fetchQuote("^VIX", key, sec),
+      fetchQuote("DX-Y.NYB", key, sec),
+      fetchQuote("^TNX", key, sec),
+      fetchBTC(),
+    ]);
+    return NextResponse.json({
+      timestamp: new Date().toISOString(),
+      spy, qqq, vix, dxy, tnx, btc,
+      market_open: isMarketOpen(),
+    });
+  } catch (e: unknown) {
+    return NextResponse.json({ error: (e instanceof Error ? e.message : String(e)).slice(0, 200) }, { status: 500 });
+  }
 }

@@ -81,10 +81,14 @@ async function alpacaCached(account: string) {
 }
 
 export async function GET(request: Request) {
-  const __proxied = await proxyToServeftp(request); if (__proxied) return __proxied;
-  const [boba, jazzy] = await Promise.all([alpacaCached("boba"), alpacaCached("jazzy")]);
-  return NextResponse.json({
-    timestamp: new Date().toISOString(),
-    accounts: { boba, jazzy },
-  });
+  try {
+    const __proxied = await proxyToServeftp(request); if (__proxied) return __proxied;
+    const [boba, jazzy] = await Promise.all([alpacaCached("boba"), alpacaCached("jazzy")]);
+    return NextResponse.json({
+      timestamp: new Date().toISOString(),
+      accounts: { boba, jazzy },
+    });
+  } catch (e: unknown) {
+    return NextResponse.json({ error: (e instanceof Error ? e.message : String(e)).slice(0, 200) }, { status: 500 });
+  }
 }

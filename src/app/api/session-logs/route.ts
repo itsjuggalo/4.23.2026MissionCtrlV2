@@ -56,19 +56,23 @@ function readLogFile(filepath: string, source: string, level: 'info' | 'error', 
 }
 
 export async function GET(req: Request) {
-  const __proxied = await proxyToServeftp(req); if (__proxied) return __proxied;
-  const url = new URL(req.url);
-  const limit = Math.min(parseInt(url.searchParams.get('limit') || '200', 10) || 200, 500);
-  const perFile = Math.ceil(limit / (SOURCES.length * 2));
+  try {
+    const __proxied = await proxyToServeftp(req); if (__proxied) return __proxied;
+    const url = new URL(req.url);
+    const limit = Math.min(parseInt(url.searchParams.get('limit') || '200', 10) || 200, 500);
+    const perFile = Math.ceil(limit / (SOURCES.length * 2));
 
-  let logs: any[] = [];
-  for (const src of SOURCES) {
-    logs.push(...readLogFile(join(PM2_LOGS, src.out), src.name, 'info', perFile));
-    logs.push(...readLogFile(join(PM2_LOGS, src.err), src.name, 'error', perFile));
+    let logs: any[] = [];
+    for (const src of SOURCES) {
+      logs.push(...readLogFile(join(PM2_LOGS, src.out), src.name, 'info', perFile));
+      logs.push(...readLogFile(join(PM2_LOGS, src.err), src.name, 'error', perFile));
+    }
+
+    logs.sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime());
+    logs = logs.slice(0, limit);
+
+    return NextResponse.json({ logs, sources: SOURCES.map(s => s.name) });
+  } catch (e: unknown) {
+    return NextResponse.json({ error: (e instanceof Error ? e.message : String(e)).slice(0, 200) }, { status: 500 });
   }
-
-  logs.sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime());
-  logs = logs.slice(0, limit);
-
-  return NextResponse.json({ logs, sources: SOURCES.map(s => s.name) });
 }
