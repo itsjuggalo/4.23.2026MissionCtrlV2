@@ -60,8 +60,8 @@ export function AgentsPage() {
     async function fetchData() {
       try {
         const [trustRes, agentsRes] = await Promise.all([
-          fetch('/api/agent-trust').then(r => r.json()).catch(() => ({ agents: [] })),
-          fetch('/api/agents').then(r => r.json()).catch(() => ({ agents: [] })),
+          fetch('/api/agent-trust').then(r => r.ok ? r.json() : { agents: [] }).catch(() => ({ agents: [] })),
+          fetch('/api/agents').then(r => r.ok ? r.json() : { agents: [] }).catch(() => ({ agents: [] })),
         ]);
         setTrustData(trustRes.agents || []);
         setPm2Data(agentsRes.agents || []);

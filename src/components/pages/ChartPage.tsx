@@ -137,6 +137,7 @@ export function ChartPage() {
   const fetchParams = useCallback(async () => {
     try {
       const res  = await fetch('/api/supertrend-params', { cache: 'no-store' });
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
       const data = await res.json();
       if (data.success) setAllParams(data.params || {});
     } catch { /* params optional */ }
@@ -145,6 +146,7 @@ export function ChartPage() {
   const fetchChartSignals = useCallback(async () => {
     try {
       const res = await fetch('/api/chart-signals', { cache: 'no-store' });
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
       const data = await res.json();
       setChartSignals(data);
     } catch { /* optional */ }

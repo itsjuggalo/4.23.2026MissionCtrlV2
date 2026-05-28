@@ -120,6 +120,7 @@ export function DocsPage() {
     setLoading(true);
     try {
       const response = await fetch('/api/docs');
+      if (!response.ok) throw new Error(`HTTP ${response.status}`);
       const data = await response.json();
       setDocs(data.docs || {});
       setTotal(data.total || 0);
@@ -141,6 +142,7 @@ export function DocsPage() {
     setLoadingContent(path);
     try {
       const response = await fetch(`/api/docs/content?path=${encodeURIComponent(path)}`);
+      if (!response.ok) throw new Error(`HTTP ${response.status}`);
       const data = await response.json();
       setContent(prev => ({ ...prev, [path]: data.content }));
     } catch {

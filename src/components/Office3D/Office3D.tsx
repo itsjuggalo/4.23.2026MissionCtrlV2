@@ -35,7 +35,7 @@ export default function Office3D() {
   useEffect(() => {
     async function fetchAgentStatus() {
       try {
-        const trustRes = await fetch('/api/agent-trust').then(r => r.json()).catch(() => ({ agents: [] }));
+        const trustRes = await fetch('/api/agent-trust').then(r => r.ok ? r.json() : { agents: [] }).catch(() => ({ agents: [] }));
         const agents = trustRes.agents || [];
 
         const newStates: Record<string, AgentState> = { ...agentStates };

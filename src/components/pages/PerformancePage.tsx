@@ -73,12 +73,12 @@ export function PerformancePage() {
   const fetchAll = async () => {
     try {
       const [pRes, sRes, prRes, tlRes, ehRes, bjRes] = await Promise.all([
-        fetch('/api/portfolio').then(r => r.json()).catch(() => null),
-        fetch('/api/signals/history?ticker=BTCUSD&limit=100').then(r => r.json()).catch(() => null),
-        fetch('/api/supertrend-params').then(r => r.json()).catch(() => null),
-        fetch('/api/trade-log?limit=100').then(r => r.json()).catch(() => null),
-        fetch('/api/equity-history?days=90').then(r => r.json()).catch(() => null),
-        fetch('/api/boba-journal?limit=200').then(r => r.json()).catch(() => null),
+        fetch('/api/portfolio').then(r => r.ok ? r.json() : null).catch(() => null),
+        fetch('/api/signals/history?ticker=BTCUSD&limit=100').then(r => r.ok ? r.json() : null).catch(() => null),
+        fetch('/api/supertrend-params').then(r => r.ok ? r.json() : null).catch(() => null),
+        fetch('/api/trade-log?limit=100').then(r => r.ok ? r.json() : null).catch(() => null),
+        fetch('/api/equity-history?days=90').then(r => r.ok ? r.json() : null).catch(() => null),
+        fetch('/api/boba-journal?limit=200').then(r => r.ok ? r.json() : null).catch(() => null),
       ]);
       if (pRes) setPortfolio(pRes);
       if (sRes) setSignals(sRes);

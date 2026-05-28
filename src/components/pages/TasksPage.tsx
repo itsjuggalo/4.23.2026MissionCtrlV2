@@ -43,6 +43,7 @@ export function TasksPage() {
     async function fetchData() {
       try {
         const res = await fetch('/api/agent-tasks');
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
         const j = await res.json();
         setData(j);
         setError(false);

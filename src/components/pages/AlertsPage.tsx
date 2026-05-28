@@ -50,10 +50,10 @@ export function AlertsPage() {
   const fetchAlerts = useCallback(async () => {
     try {
       const [portfolioRes, signalsRes, regimeRes, activityRes] = await Promise.all([
-        fetch('/api/portfolio').then(r => r.json()).catch(() => null),
-        fetch('/api/signals/latest').then(r => r.json()).catch(() => null),
-        fetch('/api/regime').then(r => r.json()).catch(() => null),
-        fetch('/api/activity').then(r => r.json()).catch(() => []),
+        fetch('/api/portfolio').then(r => r.ok ? r.json() : null).catch(() => null),
+        fetch('/api/signals/latest').then(r => r.ok ? r.json() : null).catch(() => null),
+        fetch('/api/regime').then(r => r.ok ? r.json() : null).catch(() => null),
+        fetch('/api/activity').then(r => r.ok ? r.json() : []).catch(() => []),
       ]);
 
       const now = new Date().toISOString();

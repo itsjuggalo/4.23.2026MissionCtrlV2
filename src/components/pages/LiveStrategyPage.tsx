@@ -142,6 +142,7 @@ export function LiveStrategyPage() {
     setLoading(true);
     try {
       const r = await fetch('/api/live-strategy', { cache: 'no-store' });
+      if (!r.ok) throw new Error(`HTTP ${r.status}`);
       setData(await r.json());
       setError(false);
     } catch (e) { console.error(e); setError(true); }

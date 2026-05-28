@@ -202,6 +202,7 @@ export function TelegramSignalsPage() {
   const fetchSignals = useCallback(async () => {
     try {
       const res = await fetch('/api/telegram-signals?limit=200');
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
       const data = await res.json();
       setSignals(data);
       setError(false);

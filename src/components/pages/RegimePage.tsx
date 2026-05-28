@@ -62,10 +62,10 @@ export function RegimePage() {
   const fetchAll = async () => {
     try {
       const [rRes, sRes, pRes, mRes] = await Promise.all([
-        fetch('/api/regime').then(r => r.json()).catch(() => null),
-        fetch('/api/signals/latest').then(r => r.json()).catch(() => null),
-        fetch('/api/supertrend-params').then(r => r.json()).catch(() => null),
-        fetch('/api/macro-regime').then(r => r.json()).catch(() => null),
+        fetch('/api/regime').then(r => r.ok ? r.json() : null).catch(() => null),
+        fetch('/api/signals/latest').then(r => r.ok ? r.json() : null).catch(() => null),
+        fetch('/api/supertrend-params').then(r => r.ok ? r.json() : null).catch(() => null),
+        fetch('/api/macro-regime').then(r => r.ok ? r.json() : null).catch(() => null),
       ]);
       if (rRes) setRegime(rRes);
       if (sRes) setSignals(sRes);

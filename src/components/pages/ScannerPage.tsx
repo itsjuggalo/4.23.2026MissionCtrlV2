@@ -43,12 +43,12 @@ export function ScannerPage() {
     async function fetchAll() {
       try {
         const [cRes, rRes, sRes, tRes, qRes, lRes] = await Promise.all([
-          fetch('/api/crypto').then(r => r.json()).catch(() => ({})),
-          fetch('/api/regime').then(r => r.json()).catch(() => ({})),
-          fetch('/api/signals/latest').then(r => r.json()).catch(() => ({})),
-          fetch('/api/telegram-signals?limit=10').then(r => r.json()).catch(() => []),
-          fetch('/api/squeeze-alerts', { cache: 'no-store' }).then(r => r.json()).catch(() => ({ candidates: [] })),
-          fetch('/api/liquidations', { cache: 'no-store' }).then(r => r.json()).catch(() => ({ bias: 'NO_DATA', top_coins: [], largest: [] })),
+          fetch('/api/crypto').then(r => r.ok ? r.json() : {}).catch(() => ({})),
+          fetch('/api/regime').then(r => r.ok ? r.json() : {}).catch(() => ({})),
+          fetch('/api/signals/latest').then(r => r.ok ? r.json() : {}).catch(() => ({})),
+          fetch('/api/telegram-signals?limit=10').then(r => r.ok ? r.json() : []).catch(() => []),
+          fetch('/api/squeeze-alerts', { cache: 'no-store' }).then(r => r.ok ? r.json() : { candidates: [] }).catch(() => ({ candidates: [] })),
+          fetch('/api/liquidations', { cache: 'no-store' }).then(r => r.ok ? r.json() : { bias: 'NO_DATA', top_coins: [], largest: [] }).catch(() => ({ bias: 'NO_DATA', top_coins: [], largest: [] })),
         ]);
         setCrypto(cRes); setRegime(rRes); setSignals(sRes);
         setTelegram(Array.isArray(tRes) ? tRes : tRes.signals || []);

@@ -66,7 +66,7 @@ export const StockDetailDrawer: React.FC<{ ticker: string | null; onClose: () =>
     setLoading(true);
     let cancelled = false;
     fetch(`/api/stock/${ticker}`)
-      .then(r => r.json())
+      .then(r => r.ok ? r.json() : Promise.reject(new Error(`HTTP ${r.status}`)))
       .then(d => { if (!cancelled) { setData(d); setLoading(false); } })
       .catch(() => { if (!cancelled) setLoading(false); });
     return () => { cancelled = true; };
@@ -77,7 +77,7 @@ export const StockDetailDrawer: React.FC<{ ticker: string | null; onClose: () =>
     let cancelled = false;
     const load = () => {
       fetch(`/api/stock/${ticker}/candles?tf=${tf}`)
-        .then(r => r.json())
+        .then(r => r.ok ? r.json() : Promise.reject(new Error(`HTTP ${r.status}`)))
         .then(c => { if (!cancelled) setCandles(c); })
         .catch(() => {});
     };

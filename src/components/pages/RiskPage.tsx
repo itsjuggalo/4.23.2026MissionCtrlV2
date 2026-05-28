@@ -25,9 +25,9 @@ export function RiskPage() {
     async function load() {
       const [p, r, t, e] = await Promise.all([
         fetch('/api/portfolio').then(r => r.ok ? r.json() : null).catch(() => null),
-        fetch('/api/regime').then(r => r.json()).catch(() => null),
-        fetch('/api/trade-log?limit=100').then(r => r.json()).catch(() => null),
-        fetch('/api/equity-history').then(r => r.json()).catch(() => null),
+        fetch('/api/regime').then(r => r.ok ? r.json() : null).catch(() => null),
+        fetch('/api/trade-log?limit=100').then(r => r.ok ? r.json() : null).catch(() => null),
+        fetch('/api/equity-history').then(r => r.ok ? r.json() : null).catch(() => null),
       ]);
       setPortfolio(p); setRegime(r);
       setTrades(t?.trades || t || []);

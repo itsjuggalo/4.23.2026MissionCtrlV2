@@ -126,6 +126,7 @@ export function TradesPage() {
   const fetchData = async () => {
     try {
       const res  = await fetch('/api/trades', { cache: 'no-store' });
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
       const data = await res.json();
       if (data.success) {
         setTrades(data.trades || []);

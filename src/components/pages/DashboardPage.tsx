@@ -125,6 +125,7 @@ function WhaleLiquidationsWidget() {
     const fetch_ = async () => {
       try {
         const r = await fetch('/api/telegram-signals');
+        if (!r.ok) throw new Error(`HTTP ${r.status}`);
         const d = await r.json();
         const sigs = Array.isArray(d) ? d : (d.signals || []);
         const wl = sigs
@@ -271,13 +272,13 @@ export function DashboardPage() {
   const fetchAll = async () => {
     try {
       const [pRes, sRes, rRes, repRes, prRes, cRes, ehRes] = await Promise.all([
-        fetch('/api/portfolio').then(r => r.json()).catch(() => null),
-        fetch('/api/signals/latest').then(r => r.json()).catch(() => null),
-        fetch('/api/regime').then(r => r.json()).catch(() => null),
-        fetch('/api/daily-report').then(r => r.json()).catch(() => null),
-        fetch('/api/supertrend-params').then(r => r.json()).catch(() => null),
-        fetch('/api/crypto').then(r => r.json()).catch(() => null),
-        fetch('/api/equity-history?days=30').then(r => r.json()).catch(() => null),
+        fetch('/api/portfolio').then(r => r.ok ? r.json() : null).catch(() => null),
+        fetch('/api/signals/latest').then(r => r.ok ? r.json() : null).catch(() => null),
+        fetch('/api/regime').then(r => r.ok ? r.json() : null).catch(() => null),
+        fetch('/api/daily-report').then(r => r.ok ? r.json() : null).catch(() => null),
+        fetch('/api/supertrend-params').then(r => r.ok ? r.json() : null).catch(() => null),
+        fetch('/api/crypto').then(r => r.ok ? r.json() : null).catch(() => null),
+        fetch('/api/equity-history?days=30').then(r => r.ok ? r.json() : null).catch(() => null),
       ]);
       setPortfolio(pRes); setSignals(sRes);
       if (ehRes?.history) setEquityHist(ehRes.history); setRegime(rRes);

@@ -48,7 +48,7 @@ type WhyTakeHit = { took: boolean; reason: string; when: string; full_symbol?: s
 function RightNowBlock() {
   const [data, setData] = useState<LiveSignalsData | null>(null);
   useEffect(() => {
-    const fetch2 = () => fetch('/api/live-signals', { cache: 'no-store' }).then(r => r.json()).then(setData).catch(() => {});
+    const fetch2 = () => fetch('/api/live-signals', { cache: 'no-store' }).then(r => r.ok ? r.json() : Promise.reject()).then(setData).catch(() => {});
     fetch2();
     const t = setInterval(fetch2, 30000);
     return () => clearInterval(t);
@@ -184,7 +184,7 @@ function KronosBlock() {
 function PassedOnBlock() {
   const [data, setData] = useState<LiveSignalsData | null>(null);
   useEffect(() => {
-    const f = () => fetch('/api/live-signals', { cache: 'no-store' }).then(r => r.json()).then(setData).catch(() => {});
+    const f = () => fetch('/api/live-signals', { cache: 'no-store' }).then(r => r.ok ? r.json() : Promise.reject()).then(setData).catch(() => {});
     f();
     const t = setInterval(f, 120000);
     return () => clearInterval(t);
@@ -219,7 +219,7 @@ function PreTradeBlock() {
     if (!ticker) return;
     setLoading(true);
     const [ls, kn, jr] = await Promise.all([
-      fetch('/api/live-signals', { cache: 'no-store' }).then(r => r.json()).catch(() => null),
+      fetch('/api/live-signals', { cache: 'no-store' }).then(r => r.ok ? r.json() : null).catch(() => null),
       fetch(`/api/kronos-forecast?ticker=${ticker}`, { cache: 'no-store' }).then(r => r.ok ? r.json() : null).catch(() => null),
       fetch('/api/boba-journal', { cache: 'no-store' }).then(r => r.ok ? r.json() : null).catch(() => null),
     ]);
@@ -281,7 +281,7 @@ function WhyTakeBlock() {
   const check = async () => {
     if (!ticker) return;
     setChecked(false);
-    const j = await fetch('/api/boba-journal', { cache: 'no-store' }).then(r => r.json()).catch(() => null);
+    const j = await fetch('/api/boba-journal', { cache: 'no-store' }).then(r => r.ok ? r.json() : null).catch(() => null);
     const entries = j?.entries || [];
     // Walk entries newest-first. Each entry IS a single executed decision (entry.symbol/.executed/.reasoning)
     // PLUS each entry carries the cycle's passed_on[] array — search both.

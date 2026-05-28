@@ -46,6 +46,7 @@ export function SessionViewerPage() {
     try {
       const sources = Array.from(selectedSources).join(',');
       const res = await fetch(`/api/session-logs?sources=${sources}&limit=200`);
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
       const data = await res.json();
       setLogs(data.logs || []);
       setError(false);

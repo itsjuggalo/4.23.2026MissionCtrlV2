@@ -140,10 +140,10 @@ export function CommandCenterPage() {
   const fetchData = async () => {
     try {
       const [pRes, sigRes, rRes, actRes] = await Promise.all([
-        fetch('/api/portfolio').then(r => r.json()).catch(() => null),
-        fetch('/api/signals/latest').then(r => r.json()).catch(() => null),
-        fetch('/api/regime').then(r => r.json()).catch(() => null),
-        fetch('/api/activity').then(r => r.json()).catch(() => []),
+        fetch('/api/portfolio').then(r => r.ok ? r.json() : null).catch(() => null),
+        fetch('/api/signals/latest').then(r => r.ok ? r.json() : null).catch(() => null),
+        fetch('/api/regime').then(r => r.ok ? r.json() : null).catch(() => null),
+        fetch('/api/activity').then(r => r.ok ? r.json() : []).catch(() => []),
       ]);
       setPortfolio(pRes); setSignals(sigRes); setRegime(rRes);
       const acts = Array.isArray(actRes) ? actRes : (actRes?.activities || actRes?.entries || []);
@@ -1042,6 +1042,7 @@ export function CommandCenterPage() {
                 setKronosLoading(true); setKronosError('');
                 try {
                   const r = await fetch('/api/kronos-generate', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ ticker: kronosSymbol, model: kronosModel }) });
+                  if (!r.ok) throw new Error(`HTTP ${r.status}`);
                   const j = await r.json();
                   if (j.status === 'generating') {
                     setKronosError('Generating ' + kronosSymbol + '... checking every 20s (~3 min)');

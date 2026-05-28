@@ -51,10 +51,10 @@ export function ProjectsPage() {
     async function fetchProjects() {
       try {
         const [reportRes, regimeRes, signalsRes, paramsRes] = await Promise.all([
-          fetch('/api/daily-report').then(r => r.json()).catch(() => null),
-          fetch('/api/regime').then(r => r.json()).catch(() => null),
-          fetch('/api/signals/latest').then(r => r.json()).catch(() => ({})),
-          fetch('/api/supertrend-params').then(r => r.json()).catch(() => null),
+          fetch('/api/daily-report').then(r => r.ok ? r.json() : null).catch(() => null),
+          fetch('/api/regime').then(r => r.ok ? r.json() : null).catch(() => null),
+          fetch('/api/signals/latest').then(r => r.ok ? r.json() : {}).catch(() => ({})),
+          fetch('/api/supertrend-params').then(r => r.ok ? r.json() : null).catch(() => null),
         ]);
 
         const pm2 = reportRes?.infrastructure?.pm2 || {};

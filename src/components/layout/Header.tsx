@@ -69,7 +69,7 @@ export function Header({
   useEffect(() => {
     const refresh = async () => {
       try {
-        const s = await fetch('/api/status', { cache: 'no-store' }).then(r => r.json());
+        const s = await fetch('/api/status', { cache: 'no-store' }).then(r => r.ok ? r.json() : null);
         setStatus(s);
       } catch {}
     };

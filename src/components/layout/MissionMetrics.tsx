@@ -9,7 +9,7 @@ export default function MissionMetrics() {
   useEffect(() => {
     const refresh = async () => {
       try {
-        const m = await fetch("/api/market", { cache: "no-store" }).then(r => r.json());
+        const m = await fetch("/api/market", { cache: "no-store" }).then(r => r.ok ? r.json() : null);
         setMarket(m);
       } catch {}
     };

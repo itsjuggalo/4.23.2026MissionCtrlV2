@@ -315,6 +315,7 @@ export function MemoryPage() {
   const fetchMemories = useCallback(async () => {
     try {
       const res  = await fetch('/api/memory-graph', { cache: 'no-store' });
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
       const data = await res.json();
       if (data.success) {
         setMemories(data.memories || []);
@@ -332,6 +333,7 @@ export function MemoryPage() {
   const fetchGraphData = useCallback(async () => {
     try {
       const r = await fetch('/api/memory-graph');
+      if (!r.ok) throw new Error(`HTTP ${r.status}`);
       const d = await r.json();
       setGraphData(d);
     } catch { /* silent */ }

@@ -116,6 +116,7 @@ export function WalletsPage() {
       if (res.ok) {
         setAuthenticated(true);
         const wRes = await fetch('/api/wallets');
+        if (!wRes.ok) throw new Error(`HTTP ${wRes.status}`);
         const data = await wRes.json();
         setWallets(Array.isArray(data) ? data : data.wallets || []);
       } else { setError('Access denied'); }

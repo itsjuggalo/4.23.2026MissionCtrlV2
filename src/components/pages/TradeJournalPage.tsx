@@ -83,6 +83,7 @@ export default function TradeJournalPage() {
     try {
       const q = sourceFilter === 'all' ? '' : `?source=${sourceFilter}`;
       const r = await fetch(`/api/boba-journal${q}`);
+      if (!r.ok) throw new Error(`HTTP ${r.status}`);
       const j = await r.json();
       setEntries(j.entries || []);
       setCycles(j.recentCycles || []);

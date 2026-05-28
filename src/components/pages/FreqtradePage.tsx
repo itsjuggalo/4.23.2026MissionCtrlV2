@@ -125,6 +125,7 @@ export function FreqtradePage() {
     setLoading(true);
     try {
       const r = await fetch('/api/freqtrade');
+      if (!r.ok) throw new Error(`HTTP ${r.status}`);
       const data: Status = await r.json();
       setStatus(data);
       setError(false);
@@ -149,6 +150,7 @@ export function FreqtradePage() {
         headers: { 'content-type': 'application/json' },
         body: JSON.stringify({ action: 'run', subcommand: sub, args }),
       });
+      if (!r.ok) throw new Error(`HTTP ${r.status}`);
       const data: RunResult = await r.json();
       setResult(data);
     } catch (e) {

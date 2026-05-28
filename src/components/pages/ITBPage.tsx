@@ -101,6 +101,7 @@ export function ITBPage() {
     setLoading(true);
     try {
       const r = await fetch('/api/itb');
+      if (!r.ok) throw new Error(`HTTP ${r.status}`);
       const data: Status = await r.json();
       setStatus(data);
       if (data.configs?.length && !config) setConfig(data.configs[0]);

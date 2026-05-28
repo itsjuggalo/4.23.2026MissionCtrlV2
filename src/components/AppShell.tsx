@@ -11,8 +11,8 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
     const refresh = async () => {
       try {
         const [s, m] = await Promise.all([
-          fetch("/api/status", { cache: "no-store" }).then(r => r.json()),
-          fetch("/api/market", { cache: "no-store" }).then(r => r.json()),
+          fetch("/api/status", { cache: "no-store" }).then(r => r.ok ? r.json() : null),
+          fetch("/api/market", { cache: "no-store" }).then(r => r.ok ? r.json() : null),
         ]);
         setStatus(s); setMarket(m);
       } catch {}
