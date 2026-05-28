@@ -33,6 +33,7 @@ function timeAgo(ts: string): string {
 export function ActivityPage() {
   const [activities, setActivities] = useState<ActivityEntry[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(false);
   const [typeFilter, setTypeFilter] = useState<string>('all');
   const [agentFilter, setAgentFilter] = useState<string>('all');
   const [search, setSearch] = useState('');
@@ -43,7 +44,8 @@ export function ActivityPage() {
         const res = await fetch('/api/activity?limit=100');
         const data = await res.json();
         setActivities(data.activities || []);
-      } catch {}
+        setError(false);
+      } catch { setError(true); }
       setLoading(false);
     }
     fetchData();
@@ -90,6 +92,7 @@ export function ActivityPage() {
 
   return (
     <div style={{ padding: '16px 20px', height: '100%', display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
+      {error && <div style={{ background: '#1a0000', border: '1px solid #ef535044', color: '#ef5350', padding: '10px 16px', borderRadius: '6px', marginBottom: '12px', fontSize: '13px' }}>⚠ API unavailable — data may be stale</div>}
       {/* Top Bar — Status + Dropdown Filters */}
       <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '12px', flexWrap: 'wrap' }}>
         <span style={{ width: '8px', height: '8px', borderRadius: '50%', background: '#66bb6a', boxShadow: '0 0 6px #66bb6a88' }} />

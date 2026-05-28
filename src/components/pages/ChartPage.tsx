@@ -97,6 +97,7 @@ export function ChartPage() {
   const [tvSymbol,   setTvSymbol] = useState('BINANCE:BTCUSDT');
   const [interval,   setInterval_]= useState('60');
   const [loading,    setLoading]  = useState(true);
+  const [error,      setError]    = useState(false);
   const [showSettings, setShowSettings] = useState(false);
   const [showSignals,  setShowSignals]  = useState(false);
 
@@ -122,13 +123,14 @@ export function ChartPage() {
       if (data.success) {
         const open = (data.positions || []).filter((p: Position) => p.current_price && p.current_price > 0);
         setPositions(open);
+        setError(false);
         if (!selected && open.length > 0) {
           setSelected(open[0]);
           setTvSymbol(toTVSymbol(open[0].symbol));
         }
       }
       setLoading(false);
-    } catch { setLoading(false); }
+    } catch { setLoading(false); setError(true); }
   }, [selected]);
 
   const fetchParams = useCallback(async () => {
@@ -217,7 +219,9 @@ export function ChartPage() {
     : '';
 
   return (
-    <div className="flex h-screen overflow-hidden" style={{ background: '#0d1117' }}>
+    <div className="flex h-screen overflow-hidden" style={{ background: '#0d1117', flexDirection: 'column' }}>
+      {error && <div style={{ background: '#1a0000', border: '1px solid #ef535044', color: '#ef5350', padding: '10px 16px', borderRadius: '6px', marginBottom: '12px', fontSize: '13px', margin: '12px 12px 0' }}>⚠ API unavailable — data may be stale</div>}
+      <div className="flex flex-1 overflow-hidden">
 
       {/* ── Left: position list ── */}
       <div className="w-60 flex-shrink-0 border-r border-gray-800 flex flex-col overflow-hidden">
@@ -570,6 +574,7 @@ export function ChartPage() {
             </div>
           </div>
         )}
+      </div>
       </div>
     </div>
   );

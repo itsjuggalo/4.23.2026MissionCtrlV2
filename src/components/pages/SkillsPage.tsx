@@ -70,6 +70,7 @@ function classifyAgent(name: string): string {
 export function SkillsPage() {
   const [skills, setSkills] = useState<Skill[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(false);
   const [filter, setFilter] = useState<string>('all');
   const [search, setSearch] = useState('');
   const [schedulerStatus, setSchedulerStatus] = useState<'online' | 'stopped' | 'unknown'>('unknown');
@@ -82,9 +83,11 @@ export function SkillsPage() {
           const data = await res.json();
           setSkills(data.skills || []);
           setSchedulerStatus(data.schedulerStatus || 'unknown');
+          setError(false);
         }
       } catch (e) {
         console.error('Failed to load skills', e);
+        setError(true);
       }
       setLoading(false);
     }
@@ -109,6 +112,7 @@ export function SkillsPage() {
 
   return (
     <div style={{ padding: 24, fontFamily: "'Orbitron', 'Segoe UI', sans-serif", color: '#e0e0e0', minHeight: '100vh' }}>
+      {error && <div style={{ background: '#1a0000', border: '1px solid #ef535044', color: '#ef5350', padding: '10px 16px', borderRadius: '6px', marginBottom: '12px', fontSize: '13px' }}>⚠ API unavailable — data may be stale</div>}
       {/* Header */}
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 24 }}>
         <div>

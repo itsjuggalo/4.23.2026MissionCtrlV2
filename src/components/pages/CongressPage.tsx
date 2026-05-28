@@ -46,6 +46,7 @@ export function CongressPage() {
   const [filter, setFilter] = useState<"all" | "buy" | "sell">("all");
   const [partyFilter, setPartyFilter] = useState<string>("all");
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(false);
   const [drawerTicker, setDrawerTicker] = useState<string | null>(null);
 
   const fetchData = useCallback(async () => {
@@ -54,8 +55,8 @@ export function CongressPage() {
       if (filter !== "all") params.set("type", filter);
       if (partyFilter !== "all") params.set("party", partyFilter);
       const res = await fetch(`/api/congress?${params}`);
-      if (res.ok) setData(await res.json());
-    } catch (e) { console.error(e); }
+      if (res.ok) { setData(await res.json()); setError(false); }
+    } catch (e) { console.error(e); setError(true); }
     finally { setLoading(false); }
   }, [filter, partyFilter]);
 
@@ -63,6 +64,7 @@ export function CongressPage() {
 
   return (
     <div style={{ padding: "24px 32px", maxWidth: 1400, margin: "0 auto" }}>
+      {error && <div style={{ background: '#1a0000', border: '1px solid #ef535044', color: '#ef5350', padding: '10px 16px', borderRadius: '6px', marginBottom: '12px', fontSize: '13px' }}>⚠ API unavailable — data may be stale</div>}
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 24 }}>
         <div>
           <h1 style={{ fontSize: 22, fontWeight: 600, color: "#e0e0e0", margin: 0, fontFamily: "var(--font-mc-mono, monospace)" }}>Congress Trading</h1>

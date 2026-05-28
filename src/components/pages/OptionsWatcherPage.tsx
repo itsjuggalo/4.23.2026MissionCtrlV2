@@ -270,6 +270,7 @@ export function OptionsWatcherPage() {
     async function loadFlows() {
       try {
         const res = await fetch('/api/options-flow');
+        if (!res.ok) return;
         const data = await res.json();
         const allFlows = (data.flows || []).sort((a: FlowEntry, b: FlowEntry) => b.Time - a.Time);
         // Filter to current ticker if available, else show all

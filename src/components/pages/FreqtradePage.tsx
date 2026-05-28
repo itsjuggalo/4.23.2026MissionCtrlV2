@@ -113,6 +113,7 @@ function fileTypeSeverity(name: string): 'green' | 'cyan' | 'amber' | 'neutral' 
 export function FreqtradePage() {
   const [status, setStatus] = useState<Status | null>(null);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(false);
   const [running, setRunning] = useState<string | null>(null);
   const [result, setResult] = useState<RunResult | null>(null);
   const [resultSub, setResultSub] = useState<string | null>(null);
@@ -126,8 +127,10 @@ export function FreqtradePage() {
       const r = await fetch('/api/freqtrade');
       const data: Status = await r.json();
       setStatus(data);
+      setError(false);
     } catch (e) {
       console.error('freqtrade status failed', e);
+      setError(true);
     } finally {
       setLoading(false);
     }
@@ -173,6 +176,7 @@ export function FreqtradePage() {
 
   return (
     <div style={{ padding: 20, color: 'var(--color-mc-text)', fontFamily: 'var(--font-mc-sans)', maxWidth: 1400, margin: '0 auto' }}>
+      {error && <div style={{ background: '#1a0000', border: '1px solid #ef535044', color: '#ef5350', padding: '10px 16px', borderRadius: '6px', marginBottom: '12px', fontSize: '13px' }}>⚠ API unavailable — data may be stale</div>}
       {/* Header */}
       <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', marginBottom: 18, flexWrap: 'wrap', gap: 12 }}>
         <div>

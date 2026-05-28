@@ -190,6 +190,7 @@ function TabRow<T extends string>({
 export function TelegramSignalsPage() {
   const [signals,   setSignals]   = useState<TelegramSignal[]>([]);
   const [loading,   setLoading]   = useState(true);
+  const [error,     setError]     = useState(false);
   const [lastUpdated, setLastUpdated] = useState<Date | null>(null);
   const [assetTab,  setAssetTab]  = useState<AssetTab>('All');
   const [sourceTab, setSourceTab] = useState<SourceTab>('All Sources');
@@ -203,8 +204,9 @@ export function TelegramSignalsPage() {
       const res = await fetch('/api/telegram-signals?limit=200');
       const data = await res.json();
       setSignals(data);
+      setError(false);
       setLastUpdated(new Date());
-    } catch { /* silent */ }
+    } catch { setError(true); }
     finally { setLoading(false); }
   }, []);
 
@@ -233,6 +235,7 @@ export function TelegramSignalsPage() {
 
   return (
     <div style={{ fontFamily: "'Inter', -apple-system, sans-serif", color: '#e0e0e0' }}>
+      {error && <div style={{ background: '#1a0000', border: '1px solid #ef535044', color: '#ef5350', padding: '10px 16px', borderRadius: '6px', marginBottom: '12px', fontSize: '13px' }}>⚠ API unavailable — data may be stale</div>}
 
       {/* Status bar */}
       <div style={{

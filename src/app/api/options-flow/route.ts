@@ -70,7 +70,7 @@ export async function GET(req: Request) {
       fetch(`${FLOW_API}/flow_dates`, { cache: 'no-store', signal: AbortSignal.timeout(5000) })
         .then(r => r.ok ? r.json() : []).catch(() => []),
       fetch(`${DB}/FlowGreeks/LiveFlowLast100.json`, { signal: AbortSignal.timeout(6000) })
-        .then(r => r.json()).catch(() => null),
+        .then(r => r.ok ? r.json() : null).catch(() => null),
     ]);
 
     // Option Flow tape: flow.db when a week or date is requested, otherwise

@@ -5,8 +5,8 @@ export const dynamic = 'force-dynamic';
 async function fetchOne(symbol: string) {
   try {
     const [spot, stats] = await Promise.all([
-      fetch(`https://api.coinbase.com/v2/prices/${symbol}-USD/spot`, { signal: AbortSignal.timeout(6000) }).then(r => r.json()).catch(() => null),
-      fetch(`https://api.exchange.coinbase.com/products/${symbol}-USD/stats`, { signal: AbortSignal.timeout(6000) }).then(r => r.json()).catch(() => null),
+      fetch(`https://api.coinbase.com/v2/prices/${symbol}-USD/spot`, { signal: AbortSignal.timeout(6000) }).then(r => r.ok ? r.json() : null).catch(() => null),
+      fetch(`https://api.exchange.coinbase.com/products/${symbol}-USD/stats`, { signal: AbortSignal.timeout(6000) }).then(r => r.ok ? r.json() : null).catch(() => null),
     ]);
     const price = parseFloat(spot?.data?.amount || '0');
     const open = parseFloat(stats?.open || '0');

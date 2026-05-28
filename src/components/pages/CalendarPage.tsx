@@ -73,6 +73,7 @@ export function CalendarPage() {
   const [viewMode, setViewMode] = useState<"list" | "grid">("list");
   const [data, setData] = useState<CalendarData | null>(null);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(false);
   const [expandedDates, setExpandedDates] = useState<Set<string>>(new Set());
 
   const monthKey = getMonthKey(currentYear, currentMonth);
@@ -84,6 +85,7 @@ export function CalendarPage() {
       if (res.ok) {
         const json = await res.json();
         setData(json);
+        setError(false);
         // Auto-expand all dates
         if (json.grouped) {
           setExpandedDates(new Set(Object.keys(json.grouped)));
@@ -91,6 +93,7 @@ export function CalendarPage() {
       }
     } catch (e) {
       console.error("Calendar fetch error:", e);
+      setError(true);
     } finally {
       setLoading(false);
     }
@@ -154,6 +157,7 @@ export function CalendarPage() {
 
   return (
     <div style={{ padding: "24px 32px", maxWidth: 1400, margin: "0 auto" }}>
+      {error && <div style={{ background: '#1a0000', border: '1px solid #ef535044', color: '#ef5350', padding: '10px 16px', borderRadius: '6px', marginBottom: '12px', fontSize: '13px' }}>⚠ API unavailable — data may be stale</div>}
       {/* Header */}
       <h1 style={{
         fontSize: 22, fontWeight: 600, color: "#e0e0e0", margin: "0 0 24px",

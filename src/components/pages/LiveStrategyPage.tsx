@@ -135,6 +135,7 @@ function outcomeSeverity(o: string): 'green' | 'amber' | 'red' | 'cyan' | 'neutr
 export function LiveStrategyPage() {
   const [data, setData] = useState<ApiResp | null>(null);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(false);
   const [backfilling, setBackfilling] = useState(false);
 
   const load = useCallback(async () => {
@@ -142,7 +143,8 @@ export function LiveStrategyPage() {
     try {
       const r = await fetch('/api/live-strategy', { cache: 'no-store' });
       setData(await r.json());
-    } catch (e) { console.error(e); }
+      setError(false);
+    } catch (e) { console.error(e); setError(true); }
     finally { setLoading(false); }
   }, []);
 
@@ -193,6 +195,7 @@ export function LiveStrategyPage() {
 
   return (
     <div style={{ padding: 20, color: 'var(--color-mc-text)', fontFamily: 'var(--font-mc-sans)', maxWidth: 1500, margin: '0 auto' }}>
+      {error && <div style={{ background: '#1a0000', border: '1px solid #ef535044', color: '#ef5350', padding: '10px 16px', borderRadius: '6px', marginBottom: '12px', fontSize: '13px' }}>⚠ API unavailable — data may be stale</div>}
       {/* Header */}
       <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', marginBottom: 18, flexWrap: 'wrap', gap: 12 }}>
         <div style={{ flex: 1, minWidth: 0 }}>
