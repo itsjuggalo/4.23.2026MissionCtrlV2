@@ -2,6 +2,7 @@
 """Life Engine — standalone runner. Called by cron every 30 min."""
 import json
 import os
+import re
 import subprocess
 import sys
 import urllib.request
@@ -22,6 +23,25 @@ BILL_KW   = ['bill','invoice','payment due','statement','amount due','overdue','
              'utility','electric','gas bill','water bill','rent','renewal',
              'autopay','balance due','minimum payment','final notice','past due']
 COUPON_KW = ['coupon','promo code','discount','% off','save ','flash sale','code:','get $']
+
+# Friendly display names for known senders
+FRIENDLY_SENDERS = {
+    'speedpay.com':             'Duke Energy',
+    'duke-energy.com':          'Duke Energy',
+    'e.chase.com':              'Chase',
+    'mcmap.chase.com':          'Chase',
+    'bankofamerica.com':        'Bank of America',
+    'wellsfargo.com':           'Wells Fargo',
+    'e.siriusxm.com':           'SiriusXM',
+    'is.email.nextdoor.com':    'Nextdoor',
+    'ss.email.nextdoor.com':    'Nextdoor Safety',
+    'informeddelivery.usps.com':'USPS Mail',
+    'mailer.alpaca.markets':    'Alpaca',
+    'commerce.fl.gov':          'FL Reemployment',
+    'floridajobs.org':          'FL Jobs',
+    'robinhood.com':            'Robinhood',
+    'e.godaddy.com':            'GoDaddy',
+}
 
 # Senders whose emails are always noise — filtered before any keyword check
 SKIP_SENDERS = [
@@ -117,9 +137,9 @@ def load_state():
         return {}
 
 def save_state(state):
-    today = datetime.now(ET).strftime('%Y-%m-%d')
     cutoff = (datetime.now(ET).date() - timedelta(days=7)).strftime('%Y-%m-%d')
-    state = {k: v for k, v in state.items() if k >= cutoff}
+    # Prune dated keys but always preserve non-date keys (tracked_bills, etc.)
+    state = {k: v for k, v in state.items() if k >= cutoff or not k[:4].isdigit()}
     json.dump(state, open(STATE_FILE, 'w'), indent=2)
 
 def already_sent(brief_type):
@@ -138,6 +158,104 @@ def run(cmd, timeout=15):
         return r.stdout.strip()
     except:
         return ''
+
+# ── Email helpers ─────────────────────────────────────────────────────────────
+_REAL_DEAL = re.compile(
+    r'(\d+)\s*%\s*off|save\s+\$(\d+)|\$(\d+)\s+off|'
+    r'code[:\s]+([A-Z0-9]{4,})|promo\s*code[:\s]+([A-Z0-9]{4,})',
+    re.IGNORECASE
+)
+_AMOUNT_RE  = re.compile(r'\$\s*([\d,]+\.?\d*)')
+_DUE_RE     = re.compile(
+    r'due\s+(?:by\s+)?(?:on\s+)?'
+    r'((?:jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec)\w*\.?\s+\d+|\d+/\d+)',
+    re.IGNORECASE
+)
+_PAID_KW    = ['payment confirmation','payment received','thank you for your payment',
+               'payment processed','successfully paid','autopay processed']
+
+def _friendly_name(email):
+    frm = email.get('from', '').lower()
+    for domain, name in FRIENDLY_SENDERS.items():
+        if domain in frm:
+            return name
+    raw = email.get('from', '')
+    if '<' in raw:
+        return raw.split('<')[0].strip().strip('"\'')
+    return raw.split('@')[0] if '@' in raw else raw[:30]
+
+def _parse_bill(email):
+    text = (email.get('subject', '') + ' ' + email.get('snippet', '')).lower()
+    amount = due_date = None
+    m = _AMOUNT_RE.search(text)
+    if m:
+        amount = f"${m.group(1)}"
+    m = _DUE_RE.search(text)
+    if m:
+        due_date = m.group(1).strip()
+    paid = any(k in text for k in _PAID_KW)
+    return amount, due_date, paid
+
+def _is_real_deal(email):
+    text = email.get('subject', '') + ' ' + email.get('snippet', '')
+    return bool(_REAL_DEAL.search(text))
+
+def _deal_summary(email):
+    text = email.get('subject', '') + ' ' + email.get('snippet', '')
+    name = _friendly_name(email)
+    m = _REAL_DEAL.search(text)
+    if not m:
+        return f"{name} — deal"
+    pct, save_d, off_d, code1, code2 = m.groups()
+    if pct:   return f"{name} — {pct}% off"
+    if save_d: return f"{name} — save ${save_d}"
+    if off_d:  return f"{name} — ${off_d} off"
+    code = code1 or code2
+    return f"{name} — code {code}"
+
+def track_bills(emails):
+    """Upsert parsed bill info into state['tracked_bills']."""
+    state = load_state()
+    tracked = state.setdefault('tracked_bills', {})
+    today = datetime.now(ET).strftime('%Y-%m-%d')
+    for e in emails:
+        name = _friendly_name(e)
+        amount, due_date, paid = _parse_bill(e)
+        existing = tracked.get(name, {})
+        tracked[name] = {
+            'amount':    amount    or existing.get('amount'),
+            'due_date':  due_date  or existing.get('due_date'),
+            'status':    'paid' if paid else existing.get('status', 'pending'),
+            'added':     existing.get('added', today),
+            'last_seen': today,
+        }
+    state['tracked_bills'] = tracked
+    save_state(state)
+
+def get_bill_reminders():
+    """Bills from state due within 10 days or past due."""
+    state   = load_state()
+    tracked = state.get('tracked_bills', {})
+    today   = datetime.now(ET).date()
+    results = []
+    for name, info in tracked.items():
+        if info.get('status') == 'paid':
+            continue
+        due_str = info.get('due_date')
+        if not due_str:
+            continue
+        for fmt in ('%b %d', '%b. %d', '%m/%d'):
+            try:
+                due = datetime.strptime(due_str.strip(), fmt).replace(year=today.year).date()
+                if due < today:
+                    due = due.replace(year=today.year + 1)
+                days = (due - today).days
+                if days <= 10:
+                    results.append((name, info.get('amount'), due_str.strip(), days))
+                break
+            except ValueError:
+                continue
+    return sorted(results, key=lambda x: x[3])
 
 # ── Data sources ─────────────────────────────────────────────────────────────
 def _is_skip(email):
@@ -163,7 +281,7 @@ def get_gmail(account='', hours=168):
             important.append(e)
         elif any(k in subj + ' ' + frm for k in BILL_KW):
             bills.append(e)
-        elif any(k in subj + ' ' + snip for k in COUPON_KW):
+        elif any(k in subj + ' ' + snip for k in COUPON_KW) and _is_real_deal(e):
             coupons.append(e)
     return important[:8], bills[:5], coupons[:3]
 
@@ -234,19 +352,45 @@ def morning_brief(now):
     all_bills     = b1 + b2
     all_coupons   = c1 + c2
 
+    # Track bills for reminder system
+    track_bills(all_bills + all_important)
+
+    # Bill reminders (upcoming / past due)
+    reminders = get_bill_reminders()
+    remind_lines = ''
+    if reminders:
+        parts = []
+        for name, amount, due_str, days in reminders:
+            amt = f" · {amount}" if amount else ''
+            if days < 0:   flag = '🔴 PAST DUE'
+            elif days == 0: flag = '🔴 DUE TODAY'
+            elif days <= 3: flag = f'⚠️ due in {days}d'
+            else:           flag = f'due {due_str}'
+            parts.append(f"  └ {esc(name)}{esc(amt)} — {flag}")
+        remind_lines = '\n'.join(parts)
+
     inbox_sections = ''
+    if reminders:
+        inbox_sections += f"  📋 <b>Bills Due Soon</b>:\n{remind_lines}\n"
     if all_important:
         alert_lines = '\n'.join(
-            f"  └ {esc(e['from'][:35])} · {esc(e['subject'][:45])}" for e in all_important[:4])
-        inbox_sections += f"  🚨 Alerts ({len(all_important)}):\n{alert_lines}\n"
+            f"  └ {esc(_friendly_name(e))} — {esc(e.get('subject','')[:50])}"
+            for e in all_important[:4])
+        inbox_sections += f"  🚨 <b>Alerts</b> ({len(all_important)}):\n{alert_lines}\n"
     if all_bills:
-        bill_lines = '\n'.join(
-            f"  └ {esc(b['from'][:35])} · {esc(b['subject'][:45])}" for b in all_bills[:3])
-        inbox_sections += f"  💸 Bills ({len(all_bills)}):\n{bill_lines}\n"
+        bill_parts = []
+        for b in all_bills[:4]:
+            amount, due_date, paid = _parse_bill(b)
+            name = _friendly_name(b)
+            detail = ''
+            if paid:          detail = ' — ✓ paid'
+            elif due_date:    detail = f" — due {due_date}"
+            if amount:        detail += f" · {amount}"
+            bill_parts.append(f"  └ {esc(name)}{esc(detail)}")
+        inbox_sections += f"  💸 <b>Bills</b>:\n" + '\n'.join(bill_parts) + '\n'
     if all_coupons:
-        coupon_lines = '\n'.join(
-            f"  └ {esc(c['from'][:35])} · {esc(c['subject'][:45])}" for c in all_coupons[:3])
-        inbox_sections += f"  🎟 Deals ({len(all_coupons)}):\n{coupon_lines}\n"
+        deal_parts = [f"  └ {esc(_deal_summary(c))}" for c in all_coupons[:3]]
+        inbox_sections += f"  🎟 <b>Deals</b>:\n" + '\n'.join(deal_parts) + '\n'
     if not inbox_sections:
         inbox_sections = '  Inbox clear'
 
@@ -261,7 +405,7 @@ def morning_brief(now):
 📅 <b>CALENDAR</b>
 {cal_lines}
 
-📧 <b>INBOX</b> (both accounts, 7d)
+📧 <b>INBOX</b>
 {inbox_sections.rstrip()}
 
 📈 <b>TRADING</b> (paper)
@@ -320,17 +464,43 @@ def nightly_brief(now):
     all_bills     = b1 + b2
     all_coupons   = c1 + c2
 
+    track_bills(all_bills + all_important)
+
+    reminders = get_bill_reminders()
+    remind_lines = ''
+    if reminders:
+        parts = []
+        for name, amount, due_str, days in reminders:
+            amt = f" · {amount}" if amount else ''
+            if days < 0:    flag = '🔴 PAST DUE'
+            elif days == 0: flag = '🔴 DUE TODAY'
+            elif days <= 3: flag = f'⚠️ due in {days}d'
+            else:           flag = f'due {due_str}'
+            parts.append(f"  └ {esc(name)}{esc(amt)} — {flag}")
+        remind_lines = '\n'.join(parts)
+
     inbox_sections = ''
+    if reminders:
+        inbox_sections += f"  📋 <b>Bills Due Soon</b>:\n{remind_lines}\n"
     if all_important:
         alert_lines = '\n'.join(
-            f"  └ {esc(e['from'][:35])} · {esc(e['subject'][:45])}" for e in all_important[:4])
-        inbox_sections += f"  🚨 Alerts ({len(all_important)}):\n{alert_lines}\n"
+            f"  └ {esc(_friendly_name(e))} — {esc(e.get('subject','')[:50])}"
+            for e in all_important[:4])
+        inbox_sections += f"  🚨 <b>Alerts</b> ({len(all_important)}):\n{alert_lines}\n"
     if all_bills:
-        bill_lines = '\n'.join(f"  └ {esc(b['subject'][:50])}" for b in all_bills[:3])
-        inbox_sections += f"  💸 Bills ({len(all_bills)}):\n{bill_lines}\n"
+        bill_parts = []
+        for b in all_bills[:4]:
+            amount, due_date, paid = _parse_bill(b)
+            name = _friendly_name(b)
+            detail = ''
+            if paid:       detail = ' — ✓ paid'
+            elif due_date: detail = f" — due {due_date}"
+            if amount:     detail += f" · {amount}"
+            bill_parts.append(f"  └ {esc(name)}{esc(detail)}")
+        inbox_sections += f"  💸 <b>Bills</b>:\n" + '\n'.join(bill_parts) + '\n'
     if all_coupons:
-        coupon_lines = '\n'.join(f"  └ {esc(c['subject'][:50])}" for c in all_coupons[:3])
-        inbox_sections += f"  🎟 Deals ({len(all_coupons)}):\n{coupon_lines}\n"
+        deal_parts = [f"  └ {esc(_deal_summary(c))}" for c in all_coupons[:3]]
+        inbox_sections += f"  🎟 <b>Deals</b>:\n" + '\n'.join(deal_parts) + '\n'
     if not inbox_sections:
         inbox_sections = '  Inbox clear'
 
