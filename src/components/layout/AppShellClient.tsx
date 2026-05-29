@@ -48,6 +48,7 @@ import { ITBPage } from '../pages/ITBPage';
 import { FreqtradePage } from '../pages/FreqtradePage';
 import { LiveStrategyPage } from '../pages/LiveStrategyPage';
 import { KronosLabPage } from '../pages/KronosLabPage';
+import { LoopsPage } from '../pages/LoopsPage';
 import { PsychChatWidget } from '../ui/PsychChatWidget';
 
 type PageName =
@@ -91,6 +92,7 @@ type PageName =
   | 'Live Strategy'
   | 'Kronos Lab'
   | 'GoTrader'
+  | 'Loops'
   | 'Landing';
 
 // Centralized list of valid pages — referenced by both the initial-state
@@ -100,7 +102,7 @@ const VALID_PAGES: PageName[] = [
   'Approvals', 'Calendar', 'Projects', 'Memory', 'Memory Graph',
   'Office', 'Desk', 'Docs', 'Wallets', 'Trades', 'Journal', 'Activity', 'Risk', 'TV Chart', 'PowerTrader',
   'Command Center', 'Performance', 'Regime', 'Usage', 'Landing', 'Congress', 'LLM Portfolio', 'Skills',
-  'Flow History', 'Flow Database', 'ITB', 'Freqtrade', 'Live Strategy', 'Kronos Lab', 'GoTrader',
+  'Flow History', 'Flow Database', 'ITB', 'Freqtrade', 'Live Strategy', 'Kronos Lab', 'GoTrader', 'Loops',
 ];
 
 function resolvePageFromParam(page: string | null): PageName {
@@ -231,6 +233,8 @@ export function AppShellClient() {
         return <LiveStrategyPage />;
       case 'Kronos Lab':
         return <KronosLabPage />;
+      case 'Loops':
+        return <LoopsPage />;
       case 'GoTrader':
         return null;
       default:
