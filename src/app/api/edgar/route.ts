@@ -7,19 +7,35 @@ export const dynamic = 'force-dynamic';
 const EDGAR_UA = 'MissionControl/1.0 itsjuggalo@gmail.com';
 const EDGAR_HEADERS = { 'User-Agent': EDGAR_UA, Accept: 'application/json' };
 
-async function getCik(ticker: string): Promise<string | null> {
-  // EDGAR's ticker-to-CIK map
+// EDGAR's ticker-to-CIK map is ~1MB and only changes when tickers list/delist.
+// Cache it in-process for 24h so we don't refetch + linear-scan it on every request
+// (and don't needlessly hammer SEC's 10 req/sec limit).
+const CIK_MAP_TTL_MS = 24 * 60 * 60 * 1000;
+let cikMapCache: { byTicker: Map<string, string>; ts: number } | null = null;
+
+async function getCikMap(): Promise<Map<string, string> | null> {
+  if (cikMapCache && Date.now() - cikMapCache.ts < CIK_MAP_TTL_MS) {
+    return cikMapCache.byTicker;
+  }
   const res = await fetch('https://www.sec.gov/files/company_tickers.json', {
     headers: EDGAR_HEADERS,
     signal: AbortSignal.timeout(8000),
     cache: 'no-store',
   });
-  if (!res.ok) return null;
+  if (!res.ok) return cikMapCache?.byTicker ?? null; // serve stale on transient failure
   const map: Record<string, { cik_str: number; ticker: string; title: string }> = await res.json();
-  const upper = ticker.toUpperCase();
-  const entry = Object.values(map).find(e => e.ticker === upper);
-  if (!entry) return null;
-  return String(entry.cik_str).padStart(10, '0');
+  const byTicker = new Map<string, string>();
+  for (const e of Object.values(map)) {
+    byTicker.set(e.ticker.toUpperCase(), String(e.cik_str).padStart(10, '0'));
+  }
+  cikMapCache = { byTicker, ts: Date.now() };
+  return byTicker;
+}
+
+async function getCik(ticker: string): Promise<string | null> {
+  const byTicker = await getCikMap();
+  if (!byTicker) return null;
+  return byTicker.get(ticker.toUpperCase()) ?? null;
 }
 
 async function getFilings(cik: string, type: string, count: number) {

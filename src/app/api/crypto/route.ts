@@ -80,7 +80,12 @@ export async function GET() {
       source: cmc ? 'coinmarketcap' : 'coinbase',
       timestamp: new Date().toISOString(),
     });
-  } catch {
-    return NextResponse.json({ source: 'error' });
+  } catch (e) {
+    // Surface total upstream failure instead of masking it as a 200: log it so
+    // HEAL/monitoring can scrape it, and return 502 with an error field so the
+    // dashboard (and any health check) can tell "all sources down" apart from a
+    // successful response.
+    console.error('[crypto] all sources failed:', e instanceof Error ? e.message : e);
+    return NextResponse.json({ source: 'error', error: 'crypto fetch failed' }, { status: 502 });
   }
 }

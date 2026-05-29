@@ -71,18 +71,31 @@ export async function GET() {
         try {
           const d = await fetchContract(code, dataset);
           return [sym, { name, ...d }];
-        } catch {
-          return [sym, { name, error: 'fetch failed' }];
+        } catch (err) {
+          // Log the real cause so the digest can tell a CFTC 4xx/5xx, a timeout,
+          // and a schema change apart instead of a flat "fetch failed".
+          const reason = err instanceof Error ? err.message : String(err);
+          console.error(`[cot] ${sym} (${code}, ${dataset}) fetch failed: ${reason}`);
+          return [sym, { name, error: 'fetch failed', reason }];
         }
       })
     );
+    const contracts = Object.fromEntries(entries);
+    // A contract is degraded if its fetch threw (error set) or returned no row (no report_date).
+    const degraded = Object.values(contracts)
+      .filter((c: any) => c.error || !c.report_date)
+      .map((c: any) => c.name);
     const payload = {
-      contracts: Object.fromEntries(entries),
+      contracts,
       source: 'cftc-socrata',
       timestamp: new Date().toISOString(),
+      degraded: degraded.length ? degraded : false,
       cached: false,
     };
-    _cache = { data: payload, ts: Date.now() };
+    // Only cache a fully-healthy payload — otherwise a transient upstream blip would lock a
+    // dead contract in for the full TTL instead of retrying next request.
+    if (degraded.length) console.warn('[cot] degraded contracts:', degraded.join(', '));
+    else _cache = { data: payload, ts: Date.now() };
     return NextResponse.json(payload);
   } catch (e: any) {
     if (_cache) return NextResponse.json({ ..._cache.data, cached: true, stale: true });

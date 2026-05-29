@@ -169,8 +169,8 @@ function appendAuditLog(entry: Record<string, unknown>): void {
 }
 
 export async function POST(req: NextRequest) {
-  const execEnabled = process.env.MISSIONCTRL_EXEC_ENABLED !== 'false' &&
-    process.env.MISSIONCTRL_EXEC_ENABLED === 'true';
+  // Deny-by-default: execution only runs when explicitly opted in.
+  const execEnabled = process.env.MISSIONCTRL_EXEC_ENABLED === 'true';
 
   if (!execEnabled) {
     return NextResponse.json(
