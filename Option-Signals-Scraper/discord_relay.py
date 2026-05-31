@@ -83,12 +83,14 @@ try:
         flush_baseline_state as _v2_flush_baseline,
     )
     V2_ENABLED = True
-except ImportError as _v2_err:
+# Catch Exception (not just ImportError): a SyntaxError/TabError in the pipeline
+# package must NOT crash the core relay — it should only disable v2.
+except Exception as _v2_err:
     V2_ENABLED = False
     _v2_relay_shadow = None
     _v2_digest_tick = None
     _v2_flush_baseline = None
-    logging.warning(f"v2 pipeline not importable; shadow run disabled ({_v2_err})")
+    logging.warning(f"v2 pipeline not importable; shadow run disabled ({type(_v2_err).__name__}: {_v2_err})")
 
 FINNHUB_KEY = "d70ov6hr01ql6rg044qgd70ov6hr01ql6rg044r0"
 def get_flow_channel(alert_type):
