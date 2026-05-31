@@ -1,4 +1,6 @@
-"""Mirror trade outcomes (closures + peak-gain crossings) to #flow-v2-shadow.
+"""Mirror trade outcomes (closures + peak-gain crossings) to #flow-v2-shadow,
+and to the agent feed at ~/.openclaw/workspace/directives/options_outcomes_feed.json
+so boba and jazzy can include them in their next decision cycle.
 
 Sources (same JSON files the existing relay reads):
 - closed_options.json + closed_stocks.json -> closure embeds (win/loss)
@@ -12,6 +14,8 @@ from __future__ import annotations
 import re
 from datetime import datetime, timezone
 from typing import Any, Callable
+
+from .agent_feed import AgentFeed
 
 
 PEAK_THRESHOLDS = [25, 50, 100, 300, 500]
@@ -150,15 +154,63 @@ def build_peak_gain_embed(
     }
 
 
+def _closure_feed_entry(key: str, entry: dict, kind: str, embed: dict) -> dict:
+    pct_match = re.search(r"([-+]?\d+(?:\.\d+)?)%", embed.get("title", ""))
+    pct = float(pct_match.group(1)) if pct_match else None
+    return {
+        "id": key,
+        "type": "closure",
+        "source_file": key.split("|")[1] if "|" in key else "",
+        "kind": kind,
+        "symbol": entry.get("symbol"),
+        "strike": entry.get("strike") or None,
+        "opt_type": "P" if entry.get("isPut", 0) else ("C" if kind == "OPTION" else None),
+        "expiry_unix": entry.get("expiry") or None,
+        "outcome_pct": pct,
+        "is_win": pct is not None and pct > 0,
+        "buy_target": entry.get("buyTarget") or None,
+        "sell_target": entry.get("sellTarget") or None,
+        "category": entry.get("category") or None,
+        "short_name": entry.get("shortName") or None,
+        "raw_status": entry.get("status") or entry.get("message") or "",
+    }
+
+
+def _peak_feed_entry(
+    key: str, alert: dict, threshold: int, peak_pct: float, alert_price: float, day_high: float
+) -> dict:
+    return {
+        "id": key,
+        "type": "peak_gain",
+        "symbol": alert.get("Symbol"),
+        "strike": alert.get("Strike"),
+        "opt_type": (alert.get("OptionType") or "")[:1].upper() or None,
+        "expiry_unix": alert.get("Expiry"),
+        "threshold_pct": threshold,
+        "actual_peak_pct": round(peak_pct, 2),
+        "alert_price": alert_price,
+        "day_high": day_high,
+        "is_etf": (alert.get("UnderlyingType") or "").upper() == "ETF",
+        "alert_type": alert.get("AlertType"),
+        "is_bullish": bool(alert.get("isBullish", False)),
+    }
+
+
 def relay_v2_outcomes(
     state: dict,
     read_data: Callable[[str], dict | None],
     post_embed: Callable[[str, dict], bool],
     webhook_key: str = "flow_v2_shadow",
+    agent_feed: AgentFeed | None = None,
 ) -> dict:
-    """Read closure + peak-gain sources and mirror new outcomes to v2 shadow."""
+    """Read closure + peak-gain sources and mirror new outcomes to v2 shadow.
+
+    If `agent_feed` is provided, each new outcome is also appended to the
+    boba/jazzy-readable feed file.
+    """
     sent: set[str] = set(state.get("v2_outcomes_sent", []))
     new_sent: list[str] = []
+    feed = agent_feed if agent_feed is not None else AgentFeed()
 
     # --- Closures (option + stock) ---
     for fname, kind in [("closed_options", "OPTION"), ("closed_stocks", "STOCK")]:
@@ -176,6 +228,10 @@ def relay_v2_outcomes(
                 continue
             if post_embed(webhook_key, embed):
                 new_sent.append(key)
+                try:
+                    feed.record(_closure_feed_entry(key, entry, kind, embed))
+                except Exception:
+                    pass
 
     # --- Peak gain threshold crossings on previously-alerted flow ---
     flow = read_data("flow_alerts_today")
@@ -200,6 +256,12 @@ def relay_v2_outcomes(
                 embed = build_peak_gain_embed(alert, peak_pct, thresh, alert_price, day_high)
                 if post_embed(webhook_key, embed):
                     new_sent.append(key)
+                    try:
+                        feed.record(
+                            _peak_feed_entry(key, alert, thresh, peak_pct, alert_price, day_high)
+                        )
+                    except Exception:
+                        pass
                 break  # only highest threshold per contract per cycle
 
     if new_sent:
