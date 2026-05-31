@@ -1,0 +1,114 @@
+# Auto-deploy v2 pipeline + decision-cycle scripts to Oracle on push.
+#
+# What it deploys:
+#   - pipeline/                                  -> ~/mission-control-restored/Option-Signals-Scraper/pipeline/
+#   - Option-Signals-Scraper/discord_relay.py    -> ~/mission-control-restored/Option-Signals-Scraper/
+#   - scripts/{boba,jazzy}_decision_cycle.py     -> $SCRIPTS_DEST/   (only if SCRIPTS_DEST var is set)
+#
+# After rsync: pm2 restart option-signals-relay, then tail 20 lines and fail the
+# workflow if those logs contain "v2 pipeline not importable" or "Traceback".
+#
+# One-time setup needed before this works — see SETUP_DEPLOY.md.
+
+name: Deploy relay to Oracle
+
+on:
+  push:
+    branches:
+      - claude/pipeline-discord-messages-C5Wvw
+      - main
+    paths:
+      - 'pipeline/**'
+      - 'Option-Signals-Scraper/discord_relay.py'
+      - 'scripts/boba_decision_cycle.py'
+      - 'scripts/jazzy_decision_cycle.py'
+      - '.github/workflows/deploy-relay.yml'
+  workflow_dispatch:
+    inputs:
+      restart_relay:
+        description: 'Restart pm2 option-signals-relay after deploy'
+        required: false
+        default: 'true'
+        type: choice
+        options: ['true', 'false']
+
+concurrency:
+  group: deploy-relay
+  cancel-in-progress: false
+
+env:
+  ORACLE_HOST: 132.145.205.15
+  ORACLE_USER: ubuntu
+  ORACLE_BASE: /home/ubuntu/mission-control-restored/Option-Signals-Scraper
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Configure SSH
+        env:
+          DEPLOY_KEY: ${{ secrets.ORACLE_DEPLOY_KEY }}
+        run: |
+          if [ -z "$DEPLOY_KEY" ]; then
+            echo "::error::ORACLE_DEPLOY_KEY secret is not set. See SETUP_DEPLOY.md."
+            exit 1
+          fi
+          mkdir -p ~/.ssh
+          chmod 700 ~/.ssh
+          printf '%s\n' "$DEPLOY_KEY" > ~/.ssh/deploy_key
+          chmod 600 ~/.ssh/deploy_key
+          ssh-keyscan -H "$ORACLE_HOST" >> ~/.ssh/known_hosts 2>/dev/null
+
+      - name: Deploy pipeline package
+        run: |
+          rsync -av --delete \
+            --exclude '__pycache__' --exclude '*.pyc' \
+            -e "ssh -i ~/.ssh/deploy_key -o StrictHostKeyChecking=no" \
+            pipeline/ \
+            "${ORACLE_USER}@${ORACLE_HOST}:${ORACLE_BASE}/pipeline/"
+
+      - name: Deploy discord_relay.py
+        run: |
+          rsync -av \
+            -e "ssh -i ~/.ssh/deploy_key -o StrictHostKeyChecking=no" \
+            Option-Signals-Scraper/discord_relay.py \
+            "${ORACLE_USER}@${ORACLE_HOST}:${ORACLE_BASE}/"
+
+      - name: Deploy decision cycle scripts (if SCRIPTS_DEST var is set)
+        env:
+          SCRIPTS_DEST: ${{ vars.SCRIPTS_DEST }}
+        run: |
+          if [ -z "$SCRIPTS_DEST" ]; then
+            echo "SCRIPTS_DEST repo variable not set — skipping boba/jazzy script deploy."
+            echo "Set it in repo Settings -> Variables -> Actions to enable."
+            exit 0
+          fi
+          rsync -av \
+            -e "ssh -i ~/.ssh/deploy_key -o StrictHostKeyChecking=no" \
+            scripts/boba_decision_cycle.py scripts/jazzy_decision_cycle.py \
+            "${ORACLE_USER}@${ORACLE_HOST}:${SCRIPTS_DEST}/"
+
+      - name: Restart relay and smoke-test logs
+        if: ${{ github.event_name != 'workflow_dispatch' || inputs.restart_relay == 'true' }}
+        run: |
+          set -e
+          LOGS=$(ssh -i ~/.ssh/deploy_key -o StrictHostKeyChecking=no \
+            "${ORACLE_USER}@${ORACLE_HOST}" \
+            "source ~/.nvm/nvm.sh 2>/dev/null; source ~/.bashrc 2>/dev/null; \
+             pm2 restart option-signals-relay >/dev/null && \
+             sleep 3 && \
+             pm2 logs option-signals-relay --lines 20 --nostream 2>&1")
+          echo "$LOGS"
+          if echo "$LOGS" | grep -qi 'v2 pipeline not importable'; then
+            echo "::error::v2 pipeline failed to import on Oracle after restart."
+            exit 1
+          fi
+          if echo "$LOGS" | grep -q 'Traceback'; then
+            echo "::error::Relay logs contain a Traceback after restart."
+            exit 1
+          fi
+          echo "✅ Relay restarted cleanly, no import errors, no tracebacks."
