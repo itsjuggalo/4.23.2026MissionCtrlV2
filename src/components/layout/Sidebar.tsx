@@ -2,7 +2,7 @@
 import { Bell, Settings, ChevronLeft, ChevronRight,
   LayoutDashboard, BarChart3, TrendingUp, Activity, Radar, Bot, Brain, Briefcase,
   ShieldAlert, Building2, MessageSquare, ClipboardCheck, Calendar, FolderKanban,
-  ListTodo, FileText, BookOpen, Wallet, LineChart, Search, Zap, Target,
+  ListTodo, FileText, BookOpen, LineChart, Search, Zap, Target,
   Eye, Send, Network, History, BookMarked, Database, Users, AlertTriangle, Rocket,
   Monitor, Smartphone, Workflow, Cpu, BotMessageSquare, Webhook, Repeat,
 } from "lucide-react";
@@ -12,7 +12,7 @@ import { useViewMode } from '@/lib/useViewMode';
 export type PageName =
   "Landing" | "Command Center" | "Performance" | "Regime" | "Activity"
   | "Signals" | "Flow History" | "TV Chart" | "Trades" | "PowerTrader"
-  | "GoTrader" | "Wallets" | "Agents" | "Risk" | "Office" | "Memory"
+  | "GoTrader" | "Agents" | "Risk" | "Office" | "Memory"
   | "Memory Graph" | "Telegram" | "Approvals" | "Calendar" | "Tasks"
   | "Projects" | "Alerts" | "Usage" | "Congress" | "LLM Portfolio"
   | "Journal" | "Docs" | "Skills" | "Dashboard" | "Scanner" | "Sessions" | "Options" | "OptionsWatcher" | "Flow Database" | "Desk" | "ITB" | "Freqtrade" | "Live Strategy" | "Kronos Lab" | "Loops";
@@ -50,7 +50,6 @@ export function Sidebar({ activePage, onNavigate, isCollapsed, onToggle, newSign
       { name: "GoTrader", icon: Target },
       { name: "TV Chart", icon: LineChart },
       { name: "Trades", icon: Briefcase },
-      { name: "Wallets", icon: Wallet },
       { name: "Options", icon: Target },
       { name: "OptionsWatcher", icon: Eye },
       { name: "ITB", icon: Cpu },

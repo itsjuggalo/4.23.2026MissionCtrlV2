@@ -10,7 +10,6 @@ const SUBTITLES: Record<string, string> = {
   'Dashboard': 'Something For Nothing',
   'TV Chart': 'War Aint What It Used To Be',
   'Scanner': 'Breathe Deep',
-  'Wallets': 'Show Me The Money',
   'Trades': 'Whats Mine Is Mine',
   'Journal': 'Something For Nothing',
   'GoTrader': 'There Is No Cow Level',

@@ -19,7 +19,6 @@ import { ProjectsPage } from '../pages/ProjectsPage';
 import { MemoryPage } from '../pages/MemoryPage';
 import { AlertsPage } from '../pages/AlertsPage';
 import { DocsPage } from '../pages/DocsPage';
-import { WalletsPage } from '../pages/WalletsPage';
 import { TradesPage } from '../pages/TradesPage';
 import TradeJournalPage from '../pages/TradeJournalPage';
 import { ActivityPage } from '../pages/ActivityPage';
@@ -72,7 +71,6 @@ type PageName =
   | 'Desk'
   | 'Alerts'
   | 'Docs'
-  | 'Wallets'
   | 'Trades'
   | 'Journal'
   | 'Activity'
@@ -100,7 +98,7 @@ type PageName =
 const VALID_PAGES: PageName[] = [
   'Dashboard', 'Signals', 'Telegram', 'Scanner', 'Tasks', 'Sessions', 'Options', 'OptionsWatcher', 'Agents',
   'Approvals', 'Calendar', 'Projects', 'Memory', 'Memory Graph',
-  'Office', 'Desk', 'Docs', 'Wallets', 'Trades', 'Journal', 'Activity', 'Risk', 'TV Chart', 'PowerTrader',
+  'Office', 'Desk', 'Docs', 'Trades', 'Journal', 'Activity', 'Risk', 'TV Chart', 'PowerTrader',
   'Command Center', 'Performance', 'Regime', 'Usage', 'Landing', 'Congress', 'LLM Portfolio', 'Skills',
   'Flow History', 'Flow Database', 'ITB', 'Freqtrade', 'Live Strategy', 'Kronos Lab', 'GoTrader', 'Loops',
 ];
@@ -193,8 +191,6 @@ export function AppShellClient() {
         return <AlertsPage />;
       case 'Docs':
         return <DocsPage />;
-      case 'Wallets':
-        return <WalletsPage />;
       case 'Trades':
         return <TradesPage />;
       case 'Journal':

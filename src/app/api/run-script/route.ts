@@ -9,7 +9,10 @@ const ALLOWED_SCRIPTS: Record<string, { cmd: string; desc: string }> = {
   'security-audit': { cmd: 'python3 /home/itsju/scripts/security_audit.py', desc: 'Run security audit' },
   'whale-flow': { cmd: 'python3 /home/itsju/scripts/whale_flow_filter.py', desc: 'Filter whale flow signals' },
   'brief-premarket': { cmd: 'python3 /home/itsju/scripts/market_data_fetch.py && echo "Data fetched for brief"', desc: 'Trigger premarket data fetch' },
-  'rh-portfolio': { cmd: 'python3 /home/itsju/scripts/robinhood-full-portfolio.py 2>/dev/null | python3 -c "import sys,json;d=json.load(sys.stdin);print(f\\"Stocks: ${d.get(\"stock_total\",0):.0f} | Crypto: ${d.get(\"crypto_total\",0):.0f} | Total: ${d.get(\"total_equity\",0):.0f}\\")"', desc: 'Check Robinhood portfolio' },
+  // 'rh-portfolio' removed 2026-05-30: it returned LIVE Robinhood balances with no
+  // auth and was publicly reachable via the serveftp mirror. Wallet/balance data
+  // now lives only on the local-only claudeclaw dashboard (:3141). Was orphaned
+  // (no in-app caller) once the Wallets page moved.
 };
 
 export async function GET() {

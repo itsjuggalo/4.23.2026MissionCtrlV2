@@ -671,7 +671,6 @@ Mission Control is a Next.js trading dashboard running in WSL Ubuntu on his lapt
 - LLM Portfolio: AI model portfolio leaderboard (AIME, DeepSeek, Qwen, Claude, Gemini, GPT)
 - Calendar: earnings, economic events, dividends, IPOs
 - Risk: exposure and risk metrics
-- Wallets: crypto wallet balances
 
 Be warm, patient, and thorough. Explain things clearly. If you don't know something specific about the system, say so honestly.`;
 

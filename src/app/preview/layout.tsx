@@ -8,7 +8,7 @@ const initialApprovals: any[] = []; const signals: any[] = [];
 
 type PageName = 'Dashboard' | 'Signals' | 'Telegram' | 'Scanner' | 'Tasks' | 'Agents' |
   'Approvals' | 'Calendar' | 'Projects' | 'Memory' | 'Memory Graph' | 'Office' | 'Docs' |
-  'Wallets' | 'Trades' | 'Activity' | 'Risk' | 'TV Chart' | 'PowerTrader' | 'Command Center' |
+  'Trades' | 'Activity' | 'Risk' | 'TV Chart' | 'PowerTrader' | 'Command Center' |
   'Performance' | 'Regime';
 
 export default function PreviewLayout({ children }: { children: React.ReactNode }) {

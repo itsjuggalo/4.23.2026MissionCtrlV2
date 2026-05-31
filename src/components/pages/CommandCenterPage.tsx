@@ -78,8 +78,6 @@ type KronosForecast = {
   hourly_predictions?: { close?: number }[];
 };
 type ActivityEntry = Record<string, unknown>;
-type WalletSummary = { name: string; balance: number };
-type RhPosition = { sym: string; val: string; chg: number; color: string };
 type IntelEntry = {
   news?: { headline?: string; url?: string; time?: string; source?: string }[];
   analyst?: { buyPct?: number; total?: number; sell?: number; strongSell?: number };
@@ -99,9 +97,6 @@ export function CommandCenterPage() {
   const [signals, setSignals] = useState<SignalsData | null>(null);
   const [regime, setRegime] = useState<RegimeData | null>(null);
   const [_activity, setActivity] = useState<ActivityEntry[]>([]);
-  const [rhPositions, setRhPositions] = useState<RhPosition[]>([]);
-  const [_rhBalance, setRhBalance] = useState(0);
-  const [allWallets, setAllWallets] = useState<WalletSummary[]>([]);
   const [dashData, setDashData] = useState<DashData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
@@ -165,23 +160,6 @@ export function CommandCenterPage() {
   useEffect(() => {
     fetchData();
     fetch('/api/kronos-forecast?symbol=' + encodeURIComponent(kronosSymbol) + '&model=' + encodeURIComponent(kronosModel)).then(r => r.ok ? r.json() : null).then(d => { if (d) setKronosForecast(d); }).catch(() => {});
-    fetch('/api/wallets').then(r => r.ok ? r.json() : []).then(wallets => {
-      const tickers: any[] = []; let rhTotal = 0;
-      for (const w of wallets) {
-        if ((w.name || '').includes('Robinhood')) {
-          rhTotal += w.balance || 0;
-          if (w.positions) for (const p of w.positions) {
-            if (p.equity > 1) {
-              const pct = p.avg_cost > 0 ? ((p.price - p.avg_cost) / p.avg_cost * 100) : 0;
-              tickers.push({ sym: p.symbol, val: '$' + (p.price < 1 ? p.price.toFixed(4) : p.price.toFixed(2)), chg: pct, color: pct >= 0 ? '#66bb6a' : '#ef5350' });
-            }
-          }
-        }
-      }
-      setRhPositions(tickers); setRhBalance(rhTotal);
-      // Save all wallet summary for marquee
-      setAllWallets((wallets || []).map((w: any) => ({ name: w.name || 'Unknown', balance: w.balance || 0 })));
-    }).catch(() => {});
     fetch('/api/directives?file=dashboard_data.json').then(r => r.ok ? r.json() : null).then(d => { if (d) setDashData(d); }).catch(() => {});
 
     const fetchMarketNews = () =>
@@ -512,8 +490,6 @@ export function CommandCenterPage() {
           {[...Array(2)].flatMap(() => [
             { sym: 'ALPACA', val: '$' + fmt(equity), chg: dailyPct, color: dailyPct >= 0 ? '#66bb6a' : '#ef5350' },
             { sym: 'RETURN', val: (totalReturn >= 0 ? '+' : '') + fmt(totalReturn, 1) + '%', chg: totalReturn, color: totalReturn >= 0 ? '#66bb6a' : '#ef5350' },
-            ...((allWallets || []).map((w: any) => ({ sym: (w.name || '').toUpperCase().slice(0, 12), val: w.balance > 0 ? '$' + fmt(w.balance) : 'N/A', chg: 0, color: w.balance > 0 ? '#4fc3f7' : '#607d8b' }))),
-            ...(rhPositions || []),
           ]).map((item, i) => (
             <span key={i} style={{ fontSize: 'var(--mc-font-badge)', fontFamily: 'var(--font-mc-mono)', color: '#607d8b' }}>
               <span style={{ color: '#4fc3f7', marginRight: '6px' }}>{item.sym}</span>
