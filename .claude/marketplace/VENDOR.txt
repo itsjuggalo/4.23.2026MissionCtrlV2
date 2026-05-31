@@ -1,0 +1,5 @@
+Vendored from https://github.com/wshobson/agents
+Upstream commit: 0818067b4ecad18c234b2ae427cc44f2053792d4
+Vendored: 2026-05-31T05:56Z
+License: MIT (see LICENSE)
+Update: re-clone upstream, diff, and re-run the flatten step in .claude/agents/AGENTS.md

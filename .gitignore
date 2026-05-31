@@ -37,6 +37,11 @@ data/*.sqlite-shm
 *.sqlite-shm
 .claude/
 **/.claude/
+# Track the vendored sub-agent library, but keep local Claude settings ignored
+!.claude/
+.claude/*
+!.claude/agents/
+!.claude/marketplace/
 memory/memories.json
 node_modules/
 secrets/

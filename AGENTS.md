@@ -10,7 +10,7 @@ This version has breaking changes — APIs, conventions, and file structure may 
 
 # AGENTS — MissionCtrlV2 (active local dashboard)
 
-This is the **canonical local-host dashboard** on port 3000. Replaces missionctrl.serveftp.com (Oracle), which is stale. No sub-agents — invoked directly by the operator + visited by browser.
+This is the **canonical local-host dashboard** on port 3000. Replaces missionctrl.serveftp.com (Oracle), which is stale. Invoked directly by the operator, visited by browser, and backed by a vendored sub-agent library (see **Sub-agents** below).
 
 ## Surfaces
 
@@ -25,6 +25,22 @@ This is the **canonical local-host dashboard** on port 3000. Replaces missionctr
 - Any sub-agent for code changes here MUST load: `CLAUDE.md` (this dir) + the **Next.js BREAKING CHANGES** rule above + `node_modules/next/dist/docs/` for the API surface.
 - For tasks touching `src/components/pages/FlowDatabasePage.tsx`, also load `~/.claude/projects/-home-itsju/memory/reference-desk-pipeline-data-layer.md`.
 - For tasks touching `src/components/layout/Sidebar.tsx` or `AppShellClient.tsx`, scope to navigation — page routing changes ripple through every page component.
+
+## Sub-agents
+
+191 specialist sub-agents vendored from [wshobson/agents](https://github.com/wshobson/agents) (MIT).
+
+- **`.claude/agents/*.md`** — flat, auto-discovered set (one file per agent, unique frontmatter `name`). Invoke by name, e.g. `python-pro`, `comprehensive-review-code-reviewer`, `data-engineering-data-engineer`.
+- **`.claude/marketplace/`** — full faithful copy (plugins + 155 skills + 102 commands) for `/plugin install` and upstream re-syncs. See `.claude/agents/AGENTS.md` for the catalog, stack-relevant picks, and the update procedure.
+
+## Data-acquisition policy (applies to every agent)
+
+Gather aggressively, but don't get our keys or IPs banned — a blocked source is a net loss to team knowledge.
+
+1. **Official APIs / MCP feeds first** (Alpaca, the `bridge.serveftp.com/db/*` proxy, configured MCP servers).
+2. **Respect `robots.txt` and rate limits**; cache and back off rather than hammer.
+3. **Scrape public data where permitted.** When a source's terms are the blocker, **escalate to the operator** — do not silently bypass TOS or auth. Leave a `TODO(owner)` if a hard call is needed.
+4. Never commit credentials or scraped private data into the repo.
 
 ## Authority limits
 
