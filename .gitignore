@@ -41,6 +41,8 @@ data/*.sqlite-shm
 !.claude/
 .claude/*
 !.claude/agents/
+!.claude/skills/
+!.claude/commands/
 !.claude/marketplace/
 memory/memories.json
 node_modules/
