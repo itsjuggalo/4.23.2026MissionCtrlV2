@@ -27,6 +27,7 @@ from .baseline import OnlineEWMABaselineProvider
 from .coalescer import Coalescer
 from .digest import DigestBuffer
 from .embed_builder import build_digest_embed, build_instant_embed
+from .outcomes_mirror import relay_v2_outcomes as _relay_v2_outcomes_impl
 from .router import Route, route, webhook_key
 from .scoring import score
 
@@ -110,3 +111,12 @@ def flush_baseline_state() -> None:
     """Call periodically (or on shutdown) to persist EWMA state."""
     if _baseline is not None:
         _baseline.flush()
+
+
+def relay_v2_outcomes(state, read_data, post_embed):
+    """Mirror closures + peak-gain crossings to flow_v2_shadow.
+
+    Call once per cycle from discord_relay.run(). Has its own dedup state
+    keyed under state["v2_outcomes_sent"] so it can't double-post.
+    """
+    return _relay_v2_outcomes_impl(state, read_data, post_embed)

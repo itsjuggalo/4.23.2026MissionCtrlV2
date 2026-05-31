@@ -81,6 +81,7 @@ try:
         relay_v2_shadow as _v2_relay_shadow,
         digest_tick as _v2_digest_tick,
         flush_baseline_state as _v2_flush_baseline,
+        relay_v2_outcomes as _v2_relay_outcomes,
     )
     V2_ENABLED = True
 # Catch Exception (not just ImportError): a SyntaxError/TabError in the pipeline
@@ -90,6 +91,7 @@ except Exception as _v2_err:
     _v2_relay_shadow = None
     _v2_digest_tick = None
     _v2_flush_baseline = None
+    _v2_relay_outcomes = None
     logging.warning(f"v2 pipeline not importable; shadow run disabled ({type(_v2_err).__name__}: {_v2_err})")
 
 FINNHUB_KEY = "d70ov6hr01ql6rg044qgd70ov6hr01ql6rg044r0"
@@ -1806,6 +1808,11 @@ def run():
                     _v2_digest_tick(post_embed)
                 except Exception as _v2e:
                     logging.warning(f"[v2 digest] {_v2e}")
+                # v2 outcomes mirror — closures + peak-gain crossings to shadow.
+                try:
+                    state = _v2_relay_outcomes(state, read_data, post_embed)
+                except Exception as _v2e:
+                    logging.warning(f"[v2 outcomes] {_v2e}")
                 # Persist baseline EWMA state every ~10 cycles (~5 min).
                 if cycle % 10 == 0:
                     try:
