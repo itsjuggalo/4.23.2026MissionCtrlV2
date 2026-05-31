@@ -64,7 +64,31 @@ WEBHOOKS = {
     "flow_messages":   "https://discordapp.com/api/webhooks/1497628988938649684/3IrKREiuukaqLb73fW-ugSVazebeER92tCi2Ys9RE8LEEetwXnTnSvFXssbH0ufPjiAv",
     "flow_trade_results": "https://discordapp.com/api/webhooks/1497661681126609008/tlS_qnTSq4Uef8AUVpllp2vwC3sJ7u0BHt2_WcoJz5y75dnh3cgHpkhOn59zGlkWmyPk",
     "flow_etf":         "https://discordapp.com/api/webhooks/1495499274828517498/-NhSohclpP8hBxlekP_BNSnLF7ZeDb-Zdb39QhyyXUp43xhxppN8PeQwz1CSn0It_xNY",
+    "flow_v2_shadow":   "https://discord.com/api/webhooks/1510524159812304947/kKSKyF5-MP9TsKCMNVsY1qTR2-XqXgERldOCjMOTf9iWvGyS6O0-nVn3FKzNyYxu0RUV",
+    "flow_digest":      "https://discord.com/api/webhooks/1510524276204245144/Xe0yT1wQu9inNutK4qEdn0ysUEpleRSc0jnAKOUJWCQeYpTnQfrcpzcG_Jh3Wqy_FbkT",
 }
+
+# ─── V2 PIPELINE (shadow run; additive — never modifies existing post paths) ──
+# Looks for `pipeline/discord/` next to this file (Oracle deploy) or one dir up
+# (this repo's layout). Failure here just disables v2; existing relay unaffected.
+import sys as _v2_sys
+_v2_here = os.path.dirname(os.path.abspath(__file__))
+for _v2_root in (_v2_here, os.path.dirname(_v2_here)):
+    if _v2_root not in _v2_sys.path:
+        _v2_sys.path.insert(0, _v2_root)
+try:
+    from pipeline.discord.integration_example import (
+        relay_v2_shadow as _v2_relay_shadow,
+        digest_tick as _v2_digest_tick,
+        flush_baseline_state as _v2_flush_baseline,
+    )
+    V2_ENABLED = True
+except ImportError as _v2_err:
+    V2_ENABLED = False
+    _v2_relay_shadow = None
+    _v2_digest_tick = None
+    _v2_flush_baseline = None
+    logging.warning(f"v2 pipeline not importable; shadow run disabled ({_v2_err})")
 
 FINNHUB_KEY = "d70ov6hr01ql6rg044qgd70ov6hr01ql6rg044r0"
 def get_flow_channel(alert_type):
@@ -261,6 +285,14 @@ def relay_flow_alerts(state):
             "fields": fields,
             "footer": {"text": f"Option Signals Flow | {format_timestamp(alert.get('Time', 0))}"}
         }
+
+        # v2 pipeline (shadow run) — score and route via the new logic.
+        # Purely additive: failures here MUST NOT affect the existing relay.
+        if V2_ENABLED:
+            try:
+                _v2_relay_shadow(key, alert, quote, post_embed)
+            except Exception as _v2e:
+                logging.warning(f"[v2 shadow] {key}: {_v2e}")
 
         channel = get_flow_channel(alert.get("AlertType", ""))
         posted = post_embed(channel, embed)
@@ -1764,6 +1796,21 @@ def run():
             state = relay_fg1_sentiment(state)
             state = relay_fg2_sentiment(state)
             state = relay_flow2_live(state)
+
+            # v2 digest tick — flushes top-K every DIGEST_INTERVAL_SEC (10min).
+            # No-op if shadow webhook + digest webhook both absent.
+            if V2_ENABLED:
+                try:
+                    _v2_digest_tick(post_embed)
+                except Exception as _v2e:
+                    logging.warning(f"[v2 digest] {_v2e}")
+                # Persist baseline EWMA state every ~10 cycles (~5 min).
+                if cycle % 10 == 0:
+                    try:
+                        _v2_flush_baseline()
+                    except Exception as _v2e:
+                        logging.warning(f"[v2 baseline flush] {_v2e}")
+
             save_state(state)
 
             if cycle % 10 == 0:
