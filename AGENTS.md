@@ -35,12 +35,12 @@ This is the **canonical local-host dashboard** on port 3000. Replaces missionctr
 
 ## Data-acquisition policy (applies to every agent)
 
-Gather aggressively, but don't get our keys or IPs banned — a blocked source is a net loss to team knowledge.
+Gather aggressively for the team's knowledge base. The one hard constraint is operational: don't get our API keys or IPs banned — a blocked source is a net loss.
 
-1. **Official APIs / MCP feeds first** (Alpaca, the `bridge.serveftp.com/db/*` proxy, configured MCP servers).
-2. **Respect `robots.txt` and rate limits**; cache and back off rather than hammer.
-3. **Scrape public data where permitted.** When a source's terms are the blocker, **escalate to the operator** — do not silently bypass TOS or auth. Leave a `TODO(owner)` if a hard call is needed.
-4. Never commit credentials or scraped private data into the repo.
+1. **Official APIs / MCP feeds first** (Alpaca, the `bridge.serveftp.com/db/*` proxy, configured MCP servers) — best data, highest reliability.
+2. **Rate-limit and back off** so sources don't block us; cache rather than re-hammer the same endpoint.
+3. **Scrape public data freely.** If a source hard-blocks or sits behind paid/auth access, flag it to the operator (`TODO(owner)`) rather than burning an account or IP on it.
+4. Never commit credentials or private data into the repo.
 
 ## Authority limits
 
