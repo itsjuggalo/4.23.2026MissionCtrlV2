@@ -65,6 +65,18 @@ except Exception as _e:
     def post_to_debate(*_args, **_kwargs): pass  # no-op stub
     print(f"[jazzy] multi-agent debate disabled: {_e}", flush=True)
 
+# v2 outcomes feed reader (closures + peak-gain crossings — pattern learning)
+# Lives next to the live discord_relay on Oracle; imported lazily so a missing
+# deploy doesn't break the agent.
+sys.path.insert(0, "/home/ubuntu/mission-control-restored/Option-Signals-Scraper")
+try:
+    from pipeline.discord.agent_feed_reader import summarize_for_prompt as _summarize_outcomes
+    _OUTCOMES_READER_OK = True
+except Exception as _outc_e:
+    _OUTCOMES_READER_OK = False
+    def _summarize_outcomes(**_kwargs): return ""
+    print(f"[jazzy] outcomes feed reader unavailable: {_outc_e}", flush=True)
+
 SECRETS = Path("/home/ubuntu/.openclaw/secrets")
 STATE_DIR = Path("/home/ubuntu/.openclaw/workspace/state")
 STATE_DIR.mkdir(parents=True, exist_ok=True)
@@ -878,6 +890,7 @@ def build_boba_prompt(account, positions, shortlist_with_kronos, remaining_budge
     grok_brief_text = load_grok_brief() or ""
     orion_skills_text = load_orion_skills() or ""
     multi_agent_context = market_briefing_text + grok_brief_text + orion_skills_text
+    outcomes_text = _summarize_outcomes(since_minutes=1440, limit=30) or ""
 
     # Skill injection - load relevant SKILL.md content based on decision context
     try:
@@ -937,6 +950,10 @@ These are curated buy/sell calls from human-run provider services. Use them as I
 {multi_day_repeaters_text}
 {best_options_text}
 {ticker_rollup_text}
+
+# Recent outcomes — learn from this account's own patterns
+These are closures + peak-gain crossings the relay has seen in the last 24h. If a similar setup just stopped out, downweight. If a similar setup just printed +85% or higher, strengthen confidence in that pattern. Do NOT chase blindly — use as one input among many.
+{outcomes_text}
 
 # Your task — TWO parts every cycle
 
