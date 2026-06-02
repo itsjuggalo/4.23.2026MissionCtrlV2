@@ -23,8 +23,8 @@ AIME_HDRS = {
 
 TG_MAX = 4096
 
-def tg(method, **kwargs):
-    r = requests.post(f"{TG_BASE}/{method}", json=kwargs, timeout=30)
+def tg(method, req_timeout=10, **kwargs):
+    r = requests.post(f"{TG_BASE}/{method}", json=kwargs, timeout=req_timeout)
     return r.json()
 
 def ask_aime(question: str) -> str:
@@ -77,7 +77,7 @@ def main():
     offset = 0
     while True:
         try:
-            data = tg("getUpdates", offset=offset, timeout=30,
+            data = tg("getUpdates", req_timeout=35, offset=offset, timeout=25,
                       allowed_updates=["message"])
             if not data.get("ok"):
                 print(f"getUpdates not ok: {data}", flush=True)
