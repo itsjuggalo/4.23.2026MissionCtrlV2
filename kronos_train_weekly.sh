@@ -26,6 +26,14 @@ mkdir -p "$(dirname "$LOG")"
 START_TS=$(date -u +%FT%TZ)
 echo "[$START_TS] ===== kronos_train_weekly starting =====" | tee -a "$LOG"
 
+# Disk pre-flight — abort if < 50GB free or HF_HOME is on DrvFs
+source /home/itsju/scripts/hf_guard.sh
+if ! hf_check_space >> "$LOG" 2>&1; then
+    notify_discord "🛑 Kronos Weekly BLOCKED" "Disk pre-flight failed — see disk_watchdog logs. Run disk-clean1 or disk-clean2 first." 16711680
+    echo "[$START_TS] ABORT: disk pre-flight failed" | tee -a "$LOG"
+    exit 1
+fi
+
 # Don't run if another training job is already in progress
 if systemctl --user is-active --quiet kronos-training.service || \
    systemctl --user is-active --quiet kronos-train-daily.service; then

@@ -1,0 +1,88 @@
+#!/usr/bin/env bash
+# disk_watchdog.sh — tiered disk alerts + auto-cleanup for WSL
+# Cron: */15 * * * * bash ~/scripts/disk_watchdog.sh >> ~/logs/disk_watchdog.log 2>&1
+set -uo pipefail
+
+SECRETS="$HOME/.openclaw/secrets"
+DISCORD_WEBHOOK_FILE="$SECRETS/discord_pipeline_alerts_webhook"
+PING_SCRIPT="$HOME/scripts/ping_mike.py"
+CLEANUP_SCRIPT="$HOME/scripts/disk_cleanup.sh"
+STATE_FILE="$HOME/.cache/disk_watchdog_state"
+
+mkdir -p "$(dirname "$STATE_FILE")" "$HOME/logs"
+
+# --- Read thresholds ---
+WARN_PCT=75
+HIGH_PCT=85
+CRIT_PCT=90
+HF_WARN_GB=10   # alert if HF cache alone exceeds this
+
+# --- Current state ---
+DISK_PCT=$(df / | awk 'NR==2 {gsub(/%/,""); print $5}')
+AVAIL_GB=$(df -BG / | awk 'NR==2 {gsub(/G/,""); print $4}')
+HF_MB=$(du -sm "$HOME/.cache/huggingface/hub" 2>/dev/null | cut -f1 || echo 0)
+HF_GB=$(( HF_MB / 1024 ))
+
+TIMESTAMP=$(TZ=America/New_York date '+%Y-%m-%d %H:%M ET')
+
+echo "[$TIMESTAMP] disk=${DISK_PCT}% avail=${AVAIL_GB}G HF_hub=${HF_MB}MB"
+
+# --- Send Discord alert ---
+discord_alert() {
+    local msg="$1"
+    [[ -f "$DISCORD_WEBHOOK_FILE" ]] || return
+    local webhook; webhook=$(cat "$DISCORD_WEBHOOK_FILE")
+    local payload; payload=$(printf '{"content": "%s", "username": "DiskWatchdog"}' "$msg")
+    curl -s -X POST "$webhook" \
+        -H "Content-Type: application/json" \
+        -H "User-Agent: DiskWatchdog/1.0" \
+        -d "$payload" >/dev/null 2>&1 || true
+}
+
+# --- Prevent alert spam: track last alert level sent ---
+last_level=0
+[[ -f "$STATE_FILE" ]] && last_level=$(cat "$STATE_FILE" 2>/dev/null || echo 0)
+
+trigger_level=0
+[[ "$DISK_PCT" -ge "$WARN_PCT" ]] && trigger_level=1
+[[ "$DISK_PCT" -ge "$HIGH_PCT" ]] && trigger_level=2
+[[ "$DISK_PCT" -ge "$CRIT_PCT" ]] && trigger_level=3
+
+# Only re-alert if level escalated OR we've recovered (reset state on < WARN)
+if [[ "$trigger_level" -eq 0 ]]; then
+    [[ "$last_level" -gt 0 ]] && echo "0" > "$STATE_FILE"
+    # Check HF cache even when disk is fine
+    if [[ "$HF_GB" -ge "$HF_WARN_GB" ]]; then
+        discord_alert ":floppy_disk: **HF cache growing** — ${HF_MB}MB in ~/.cache/huggingface/hub (threshold: ${HF_WARN_GB}GB). Run: bash ~/scripts/disk_cleanup.sh 2"
+        echo "[$TIMESTAMP] HF cache alert: ${HF_MB}MB"
+    fi
+    exit 0
+fi
+
+[[ "$trigger_level" -le "$last_level" ]] && exit 0  # no escalation, skip
+
+echo "$trigger_level" > "$STATE_FILE"
+
+TOP_CACHES=$(du -sh "$HOME/.cache"/* 2>/dev/null | sort -rh | head -6 | tr '\n' ' ')
+
+case "$trigger_level" in
+    1)
+        echo "[$TIMESTAMP] WARN: disk at ${DISK_PCT}% — sending Discord alert"
+        discord_alert ":yellow_circle: **WSL Disk WARN** — ${DISK_PCT}% used, ${AVAIL_GB}G free. Top caches: ${TOP_CACHES}. No action taken yet."
+        ;;
+    2)
+        echo "[$TIMESTAMP] HIGH: disk at ${DISK_PCT}% — running level-1 cleanup"
+        discord_alert ":orange_circle: **WSL Disk HIGH** — ${DISK_PCT}% used, ${AVAIL_GB}G free. Auto-running level-1 cleanup (pip/uv)..."
+        bash "$CLEANUP_SCRIPT" 1 >> "$HOME/logs/disk_cleanup.log" 2>&1 || true
+        NEW_PCT=$(df / | awk 'NR==2 {gsub(/%/,""); print $5}')
+        discord_alert ":orange_circle: Level-1 cleanup done. Disk now at ${NEW_PCT}%. If still high run: bash ~/scripts/disk_cleanup.sh 2"
+        ;;
+    3)
+        echo "[$TIMESTAMP] CRIT: disk at ${DISK_PCT}% — running level-2 cleanup + Telegram ping"
+        discord_alert ":red_circle: **WSL Disk CRITICAL** — ${DISK_PCT}% used, ${AVAIL_GB}G free. Auto-running level-2 cleanup (HF/pip/uv/puppeteer)..."
+        bash "$CLEANUP_SCRIPT" 2 >> "$HOME/logs/disk_cleanup.log" 2>&1 || true
+        NEW_PCT=$(df / | awk 'NR==2 {gsub(/%/,""); print $5}')
+        discord_alert ":red_circle: Level-2 cleanup done. Disk now at ${NEW_PCT}%."
+        python3 "$PING_SCRIPT" "DISK CRITICAL — WSL at ${DISK_PCT}% (${AVAIL_GB}G free). Auto level-2 cleanup ran → now ${NEW_PCT}%. Manual review needed: bash ~/scripts/disk_cleanup.sh 3" 2>/dev/null || true
+        ;;
+esac
