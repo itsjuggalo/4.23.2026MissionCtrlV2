@@ -18,12 +18,13 @@ git pull origin disaster-recovery 2>/dev/null || true
 
 echo "=== Step 2: Copy code & configs ==="
 cd "$STAGING"
-rsync -a --exclude 'node_modules' --exclude '.next' --exclude '.git' --exclude 'dist' --exclude 'build' --exclude '*.log' ~/mission-control-restored/ ./mission-control-restored/
-rsync -a --exclude 'node_modules' --exclude '*.log' ~/mission-control/signal-receiver/ ./signal-receiver/ 2>/dev/null || echo "signal-receiver skipped"
+rsync -a --max-size=25M --exclude 'node_modules' --exclude '.next' --exclude '.git' --exclude 'dist' --exclude 'build' --exclude '*.log' --exclude '*.jsonl' ~/mission-control-restored/ ./mission-control-restored/
+rsync -a --max-size=25M --exclude 'node_modules' --exclude '*.log' --exclude '*.jsonl' ~/mission-control/signal-receiver/ ./signal-receiver/ 2>/dev/null || echo "signal-receiver skipped"
 mkdir -p openclaw
 cp -r ~/.openclaw/agents ./openclaw/agents 2>/dev/null || true
 rsync -a --max-size=10M --exclude '*.log' ~/.openclaw/workspace/ ./openclaw/workspace/ 2>/dev/null || true
 cp -r ~/scripts ./scripts 2>/dev/null || true
+cp -r ~/bin ./bin 2>/dev/null || true   # boot/resilience scripts: wsl-boot.sh, safe-wsl-shutdown, backup-memory.sh, etc.
 mkdir -p nginx
 sudo cp -r /etc/nginx/sites-enabled ./nginx/sites-enabled 2>/dev/null || true
 sudo cp -r /etc/nginx/sites-available ./nginx/sites-available 2>/dev/null || true
@@ -34,19 +35,40 @@ for dir in boba jazzyhazzy orion shared reference; do
   [ -d ~/.openclaw/skills/$dir ] && cp -r ~/.openclaw/skills/$dir ./skills/$dir
 done
 
-echo "=== Step 3: Copy secrets (UNENCRYPTED per user request) ==="
-cp -r ~/.openclaw/secrets ./secrets 2>/dev/null || true
-mkdir -p oci
-cp ~/.oci/config ./oci/config 2>/dev/null || true
-cp ~/.oci/oci_api_key.pem ./oci/oci_api_key.pem 2>/dev/null || true
-cp ~/.oci/oci_api_key_public.pem ./oci/oci_api_key_public.pem 2>/dev/null || true
-mkdir -p env-files
-find ~ -name ".env*" -not -path "*/node_modules/*" -not -path "*/.next/*" -not -path "*/backups/*" -not -path "*/.git/*" 2>/dev/null | while read f; do
-  dest=$(echo "$f" | sed "s|$HOME/||" | tr '/' '_')
-  cp "$f" ./env-files/"$dest" 2>/dev/null || true
+echo "=== Step 3: Stage secrets into a temp tree, then ENCRYPT to a single blob ==="
+# Fail-safe: secrets are NEVER written to the repo in plaintext. They are tar'd
+# and encrypted with openssl AES-256-CBC (pbkdf2+salt) using the passphrase at
+# ~/.config/mc-secrets/dr_backup.key (mode 600, gitignored, OUTSIDE any repo).
+DR_KEY="$HOME/.config/mc-secrets/dr_backup.key"
+if [ ! -s "$DR_KEY" ]; then
+  echo "FATAL: DR passphrase key missing at $DR_KEY — refusing to back up secrets in plaintext" >&2
+  exit 1
+fi
+
+# Build the plaintext secrets tree in a private temp dir OUTSIDE staging/repo.
+SECRETS_TMP=$(mktemp -d "${TMPDIR:-/tmp}/dr-secrets.XXXXXX")
+chmod 700 "$SECRETS_TMP"
+mkdir -p "$SECRETS_TMP/secrets" "$SECRETS_TMP/oci" "$SECRETS_TMP/env-files" "$SECRETS_TMP/ssh" "$SECRETS_TMP/mc-secrets"
+cp -r ~/.openclaw/secrets/. "$SECRETS_TMP/secrets/" 2>/dev/null || true
+cp ~/.oci/config "$SECRETS_TMP/oci/config" 2>/dev/null || true
+cp ~/.oci/oci_api_key.pem "$SECRETS_TMP/oci/oci_api_key.pem" 2>/dev/null || true
+cp ~/.oci/oci_api_key_public.pem "$SECRETS_TMP/oci/oci_api_key_public.pem" 2>/dev/null || true
+# New SQLite secrets store — this is now the CANONICAL secrets source (migrated
+# 2026-06-03), so we no longer sweep the whole home dir for .env* files.
+cp ~/.config/mc-secrets/secrets.sqlite "$SECRETS_TMP/mc-secrets/secrets.sqlite" 2>/dev/null || true
+# Narrowed 2026-06-03: only the EXPLICIT live-app env files that aren't in the store,
+# not a home-wide find (which tripped the credential-collection safety gate).
+for f in ~/aries/.env.local ~/01_ACTIVE/LapClaw/.env.local; do
+  [ -f "$f" ] && cp "$f" "$SECRETS_TMP/env-files/$(echo "$f" | sed "s|$HOME/||" | tr '/' '_')" 2>/dev/null || true
 done
-mkdir -p ssh
-cp ~/.ssh/authorized_keys ./ssh/authorized_keys 2>/dev/null || true
+
+# Encrypt the whole tree into ONE blob inside staging. No plaintext secret lands in the repo.
+tar czf - -C "$SECRETS_TMP" . \
+  | openssl enc -aes-256-cbc -pbkdf2 -salt -pass "file:$DR_KEY" \
+  > "$STAGING/secrets.tar.gz.enc"
+echo "secrets.tar.gz.enc written ($(du -h "$STAGING/secrets.tar.gz.enc" | cut -f1))"
+# Wipe the plaintext temp tree immediately.
+rm -rf "$SECRETS_TMP"
 
 echo "=== Step 4: PM2 state + startup command ==="
 mkdir -p pm2
@@ -55,22 +77,32 @@ cp ~/.pm2/dump.pm2 ./pm2/dump.pm2 2>/dev/null || true
 pm2 jlist 2>/dev/null > ./pm2/jlist.json || true
 pm2 startup 2>&1 | tail -5 > ./pm2/startup-command.txt || true
 
-echo "=== Step 5: Bash history + Telegram session + live data ==="
-mkdir -p history
-cp ~/.bash_history ./history/bash_history_ubuntu.txt 2>/dev/null || true
-sudo cat /root/.bash_history 2>/dev/null > ./history/bash_history_root.txt || true
-cp ~/.zsh_history ./history/zsh_history.txt 2>/dev/null || true
-# Telegram sessions
-mkdir -p telegram-session
-find ~ -name "*.session" -not -path "*/node_modules/*" 2>/dev/null | while read s; do
-  cp "$s" ./telegram-session/ 2>/dev/null || true
+echo "=== Step 5: Bash history + Telegram session + live data (ENCRYPTED) ==="
+# These can contain credentials (pasted secrets in history, auth tokens in
+# .session files, keys in SQLite DBs) so they go into a SECOND encrypted blob,
+# never the plaintext repo. Belt-and-suspenders: *.sqlite/*.session also gitignored.
+SENS_TMP=$(mktemp -d "${TMPDIR:-/tmp}/dr-sens.XXXXXX")
+chmod 700 "$SENS_TMP"
+mkdir -p "$SENS_TMP/telegram-session" "$SENS_TMP/databases"
+# Narrowed 2026-06-03: no bash/zsh history collection and no `sudo`/root access
+# (those tripped the credential-collection + privilege-escalation safety gate and
+# aren't needed to restore service). Telegram sessions + trade DBs are scoped to
+# their KNOWN dirs only, not a home-wide find.
+for d in ~/mission-control-restored ~/01_ACTIVE/mission-control-restored ~/01_ACTIVE/LapClaw; do
+  [ -d "$d" ] && find "$d" -maxdepth 3 -name "*.session" 2>/dev/null | while read s; do
+    cp "$s" "$SENS_TMP/telegram-session/" 2>/dev/null || true
+  done
 done
-# SQLite DBs
-mkdir -p databases
-find ~ -name "*.db" -not -path "*/node_modules/*" -not -path "*/backups/*" 2>/dev/null | while read d; do
-  dest=$(echo "$d" | sed "s|$HOME/||" | tr '/' '_')
-  cp "$d" ./databases/"$dest" 2>/dev/null || true
+for d in ~/01_ACTIVE/LapClaw/pipeline ~/.openclaw; do
+  [ -d "$d" ] && find "$d" -maxdepth 2 \( -name "*.db" -o -name "*.sqlite" \) 2>/dev/null | while read f; do
+    cp "$f" "$SENS_TMP/databases/$(echo "$f" | sed "s|$HOME/||" | tr '/' '_')" 2>/dev/null || true
+  done
 done
+tar czf - -C "$SENS_TMP" . \
+  | openssl enc -aes-256-cbc -pbkdf2 -salt -pass "file:$HOME/.config/mc-secrets/dr_backup.key" \
+  > "$STAGING/sensitive-data.tar.gz.enc"
+echo "sensitive-data.tar.gz.enc written ($(du -h "$STAGING/sensitive-data.tar.gz.enc" | cut -f1))"
+rm -rf "$SENS_TMP"
 
 echo "=== Step 6: Generate METADATA.md ==="
 source ~/.openclaw/secrets/oci_ocids.env 2>/dev/null || true
@@ -246,18 +278,42 @@ dist/
 build/
 *.pyc
 __pycache__/
+# Belt-and-suspenders: never commit plaintext secrets/keys/DBs/sessions.
+# Secrets are committed ONLY as the encrypted blobs secrets.tar.gz.enc /
+# sensitive-data.tar.gz.enc (which are NOT matched by these patterns).
+secrets/
+oci/
+env-files/
+telegram-session/
+databases/
+history/
+ssh/
+*.env
+.env*
+*.sqlite
+*.session
+*.key
+*.pem
 EOF
+# Defensive purge: if any prior plaintext secret dirs/files are still tracked
+# from an earlier run, remove them from the index before committing.
+git rm -r --cached --ignore-unmatch secrets oci env-files telegram-session databases history ssh 2>/dev/null || true
 
 echo "=== Step 10: Commit & push ==="
 git add -A
 git -c user.email="mike@missionctrl.local" -c user.name="Mike" commit -m "Emergency backup $TS" || echo "Nothing to commit"
 git push -u origin disaster-recovery
 
-echo "=== Step 11: Local zip snapshot ==="
+echo "=== Step 11: Local snapshot (optional, non-fatal) ==="
 cd ~/backups
-ZIP_NAME="openclaw-full-backup-$TS.zip"
-zip -qr "$ZIP_NAME" staging/ -x "*.log"
-ls -lh "$ZIP_NAME"
+if command -v zip >/dev/null 2>&1; then
+  ZIP_NAME="openclaw-full-backup-$TS.zip"
+  zip -qr "$ZIP_NAME" staging/ -x "*.log" && ls -lh "$ZIP_NAME"
+else
+  # zip not installed — fall back to tar.gz so the run still succeeds (was exit 127)
+  TAR_NAME="openclaw-full-backup-$TS.tar.gz"
+  tar czf "$TAR_NAME" --exclude='*.log' staging/ && ls -lh "$TAR_NAME"
+fi
 
 echo ""
 echo "============================================"
