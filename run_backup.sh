@@ -9,7 +9,9 @@ REPO=~/backups/repo
 TS=$(date -u +%Y%m%d-%H%M)
 
 echo "=== Step 1: Clean staging and clone repo ==="
-rm -rf "$STAGING" "$REPO"
+# sudo: prior runs stage root-owned files (e.g. /etc/nginx configs), which a plain rm can't
+# remove → dirty staging → blobs never built. This was why the backup silently failed.
+sudo rm -rf "$STAGING" "$REPO" 2>/dev/null || rm -rf "$STAGING" "$REPO"
 mkdir -p "$STAGING"
 git clone "$REPO_URL" "$REPO"
 cd "$REPO"
@@ -22,13 +24,13 @@ rsync -a --max-size=25M --exclude 'node_modules' --exclude '.next' --exclude '.g
 rsync -a --max-size=25M --exclude 'node_modules' --exclude '*.log' --exclude '*.jsonl' ~/mission-control/signal-receiver/ ./signal-receiver/ 2>/dev/null || echo "signal-receiver skipped"
 mkdir -p openclaw
 cp -r ~/.openclaw/agents ./openclaw/agents 2>/dev/null || true
-rsync -a --max-size=10M --exclude '*.log' ~/.openclaw/workspace/ ./openclaw/workspace/ 2>/dev/null || true
+rsync -a --max-size=10M --exclude '*.log' --exclude '.git' ~/.openclaw/workspace/ ./openclaw/workspace/ 2>/dev/null || true
 cp -r ~/scripts ./scripts 2>/dev/null || true
 cp -r ~/bin ./bin 2>/dev/null || true   # boot/resilience scripts: wsl-boot.sh, safe-wsl-shutdown, backup-memory.sh, etc.
 mkdir -p nginx
 sudo cp -r /etc/nginx/sites-enabled ./nginx/sites-enabled 2>/dev/null || true
 sudo cp -r /etc/nginx/sites-available ./nginx/sites-available 2>/dev/null || true
-sudo chown -R ubuntu:ubuntu ./nginx 2>/dev/null || true
+sudo chown -R "$(id -un):$(id -gn)" ./nginx 2>/dev/null || true   # portable: laptop=itsju, Oracle=ubuntu (was hardcoded ubuntu → left files root-owned on laptop)
 crontab -l > ./crontab.txt 2>/dev/null || echo "# no crontab" > ./crontab.txt
 mkdir -p skills
 for dir in boba jazzyhazzy orion shared reference; do
@@ -270,6 +272,10 @@ cd "$REPO"
 find . -mindepth 1 -not -path './.git*' -delete 2>/dev/null || true
 cp -r "$STAGING"/* .
 cp -r "$STAGING"/.[!.]* . 2>/dev/null || true
+# Strip embedded .git dirs from staged content (e.g. openclaw/workspace, go-trader,
+# mission-control). -mindepth 2 protects the repo's OWN ./.git (depth 1). Without this, git
+# treats them as broken submodules → "fatal: bad object HEAD" and the push step fails.
+find . -mindepth 2 -name .git -prune -exec rm -rf {} + 2>/dev/null || true
 cat > .gitignore <<EOF
 node_modules/
 *.log
