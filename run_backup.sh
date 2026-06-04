@@ -23,13 +23,20 @@ git pull origin disaster-recovery 2>/dev/null || true
 
 echo "=== Step 2: Copy code & configs ==="
 cd "$STAGING"
-rsync -a --max-size=25M --exclude 'node_modules' --exclude '.next' --exclude '.git' --exclude 'dist' --exclude 'build' --exclude '*.log' --exclude '*.jsonl' ~/mission-control-restored/ ./mission-control-restored/
+# --exclude 'decompiled': the jadx/apktool output (2.4G / 208k files) is REGENERABLE from the
+# original .apk artifacts — backing it up bloated the DR repo to 209k files and made every
+# clone take minutes. The original APKs are the real artifacts (see APK-backup note below).
+rsync -a --max-size=25M --exclude 'node_modules' --exclude '.next' --exclude '.git' --exclude 'dist' --exclude 'build' --exclude '*.log' --exclude '*.jsonl' --exclude 'decompiled' ~/mission-control-restored/ ./mission-control-restored/
 rsync -a --max-size=25M --exclude 'node_modules' --exclude '*.log' --exclude '*.jsonl' ~/mission-control/signal-receiver/ ./signal-receiver/ 2>/dev/null || echo "signal-receiver skipped"
 mkdir -p openclaw
-cp -r ~/.openclaw/agents ./openclaw/agents 2>/dev/null || true
+# rsync (not cp): cap size + drop large regenerable agent session trajectories.
+rsync -aL --max-size=5M --exclude '*.trajectory.jsonl' --exclude 'sessions' ~/.openclaw/agents/ ./openclaw/agents/ 2>/dev/null || true
 rsync -a --max-size=10M --exclude '*.log' --exclude '.git' ~/.openclaw/workspace/ ./openclaw/workspace/ 2>/dev/null || true
-cp -r ~/scripts ./scripts 2>/dev/null || true
-cp -r ~/bin ./bin 2>/dev/null || true   # boot/resilience scripts: wsl-boot.sh, safe-wsl-shutdown, backup-memory.sh, etc.
+# -L deref: ~/scripts and ~/bin are SYMLINKS (→ ~/05_AUTOMATION/{scripts,bin}). Plain `cp -r`
+# stored them as dangling symlinks, so the resilience scripts (wsl-boot.sh, safe-wsl-shutdown,
+# run_backup.sh itself, all DR tooling) were NEVER actually in the backup. -L copies real files.
+cp -rL ~/scripts ./scripts 2>/dev/null || true
+cp -rL ~/bin ./bin 2>/dev/null || true   # boot/resilience scripts: wsl-boot.sh, safe-wsl-shutdown, dr-restore-verify.sh, etc.
 mkdir -p nginx
 sudo cp -r /etc/nginx/sites-enabled ./nginx/sites-enabled 2>/dev/null || true
 sudo cp -r /etc/nginx/sites-available ./nginx/sites-available 2>/dev/null || true
@@ -282,11 +289,14 @@ find . -mindepth 2 -name .git -prune -exec rm -rf {} + 2>/dev/null || true
 cat > .gitignore <<EOF
 node_modules/
 *.log
+*.jsonl
 .next/
 dist/
 build/
 *.pyc
 __pycache__/
+decompiled/
+*.trajectory.jsonl
 # Belt-and-suspenders: never commit plaintext secrets/keys/DBs/sessions.
 # Secrets are committed ONLY as the encrypted blobs secrets.tar.gz.enc /
 # sensitive-data.tar.gz.enc (which are NOT matched by these patterns).
