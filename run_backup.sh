@@ -9,6 +9,9 @@ REPO=~/backups/repo
 TS=$(date -u +%Y%m%d-%H%M)
 
 echo "=== Step 1: Clean staging and clone repo ==="
+# Guard: never let an empty var turn this into `sudo rm -rf /` if these are ever refactored.
+[[ -n "${STAGING:-}" && -n "${REPO:-}" && "$STAGING" == "$HOME"/* && "$REPO" == "$HOME"/* ]] \
+  || { echo "FATAL: STAGING/REPO unset or outside \$HOME — refusing to rm"; exit 1; }
 # sudo: prior runs stage root-owned files (e.g. /etc/nginx configs), which a plain rm can't
 # remove → dirty staging → blobs never built. This was why the backup silently failed.
 sudo rm -rf "$STAGING" "$REPO" 2>/dev/null || rm -rf "$STAGING" "$REPO"
@@ -305,27 +308,32 @@ EOF
 # from an earlier run, remove them from the index before committing.
 git rm -r --cached --ignore-unmatch secrets oci env-files telegram-session databases history ssh 2>/dev/null || true
 
-echo "=== Step 10: Commit & push ==="
+echo "=== Step 10: Commit ==="
 git add -A
 git -c user.email="mike@missionctrl.local" -c user.name="Mike" commit -m "Emergency backup $TS" || echo "Nothing to commit"
-git push -u origin disaster-recovery
 
-echo "=== Step 11: Local snapshot (optional, non-fatal) ==="
+# Step 11 runs BEFORE the push so a local snapshot always exists even if the push fails
+# (network outage). ARTIFACT is set in BOTH branches so the success banner never prints empty.
+echo "=== Step 11: Local snapshot (always, pre-push) ==="
 cd ~/backups
 if command -v zip >/dev/null 2>&1; then
-  ZIP_NAME="openclaw-full-backup-$TS.zip"
-  zip -qr "$ZIP_NAME" staging/ -x "*.log" && ls -lh "$ZIP_NAME"
+  ARTIFACT="openclaw-full-backup-$TS.zip"
+  zip -qr "$ARTIFACT" staging/ -x "*.log" && ls -lh "$ARTIFACT"
 else
   # zip not installed — fall back to tar.gz so the run still succeeds (was exit 127)
-  TAR_NAME="openclaw-full-backup-$TS.tar.gz"
-  tar czf "$TAR_NAME" --exclude='*.log' staging/ && ls -lh "$TAR_NAME"
+  ARTIFACT="openclaw-full-backup-$TS.tar.gz"
+  tar czf "$ARTIFACT" --exclude='*.log' staging/ && ls -lh "$ARTIFACT"
 fi
+
+echo "=== Step 12: Push to GitHub (gates overall success) ==="
+cd "$REPO"
+git push -u origin disaster-recovery
 
 echo ""
 echo "============================================"
 echo "✅ BACKUP v2 COMPLETE"
 echo "============================================"
 echo "GitHub: https://github.com/itsjuggalo/MissionCtrl-Data/tree/disaster-recovery"
-echo "Local zip: ~/backups/$ZIP_NAME"
+echo "Local snapshot: ~/backups/$ARTIFACT"
 echo "Includes: code, configs, secrets, PM2 state, bash history, Telegram session, SQLite DBs, runbooks"
 echo "============================================"
