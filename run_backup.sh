@@ -325,6 +325,11 @@ else
   tar czf "$ARTIFACT" --exclude='*.log' staging/ && ls -lh "$ARTIFACT"
 fi
 
+# Retention: each snapshot is ~567M. Unbounded, they grow the ext4 vhdx → feed the very
+# C:-fill crash class this backup defends against. Keep only the 3 newest.
+ls -1t ~/backups/openclaw-full-backup-*.{tar.gz,zip} 2>/dev/null | tail -n +4 | xargs -r rm -f
+echo "snapshot retention: kept newest 3"
+
 echo "=== Step 12: Push to GitHub (gates overall success) ==="
 cd "$REPO"
 git push -u origin disaster-recovery
