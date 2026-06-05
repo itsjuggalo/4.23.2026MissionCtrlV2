@@ -1,8 +1,0 @@
-package com.dexterous.flutterlocalnotifications.models;
-
-/* JADX INFO: loaded from: classes.dex */
-public enum BitmapSource {
-    DrawableResource,
-    FilePath,
-    ByteArray
-}
