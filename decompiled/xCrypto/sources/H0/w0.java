@@ -1,5 +1,0 @@
-package H0;
-
-/* JADX INFO: loaded from: classes.dex */
-public abstract /* synthetic */ class w0 {
-}

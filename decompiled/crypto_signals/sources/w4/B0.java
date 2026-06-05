@@ -1,6 +1,0 @@
-package w4;
-
-/* JADX INFO: loaded from: classes.dex */
-public interface B0 {
-    void a();
-}

@@ -1,6 +1,0 @@
-package com.yalantis.ucrop.callback;
-
-/* JADX INFO: loaded from: classes.dex */
-public interface CropBoundsChangeListener {
-    void onCropAspectRatioChanged(float f);
-}
