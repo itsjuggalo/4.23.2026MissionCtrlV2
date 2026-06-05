@@ -4,7 +4,7 @@ import { Bell, Settings, ChevronLeft, ChevronRight,
   ShieldAlert, Building2, MessageSquare, ClipboardCheck, Calendar, FolderKanban,
   ListTodo, FileText, BookOpen, LineChart, Search, Zap, Target,
   Eye, Send, Network, History, BookMarked, Database, Users, AlertTriangle, Rocket,
-  Monitor, Smartphone, Workflow, Cpu, BotMessageSquare, Webhook, Repeat,
+  Monitor, Smartphone, Workflow, Cpu, BotMessageSquare, Webhook, Repeat, HeartPulse,
 } from "lucide-react";
 import BestOptionsWidget from '@/components/widgets/BestOptionsWidget';
 import { useViewMode } from '@/lib/useViewMode';
@@ -15,7 +15,7 @@ export type PageName =
   | "GoTrader" | "Agents" | "Risk" | "Office" | "Memory"
   | "Memory Graph" | "Telegram" | "Approvals" | "Calendar" | "Tasks"
   | "Projects" | "Alerts" | "Usage" | "Congress" | "LLM Portfolio"
-  | "Journal" | "Docs" | "Skills" | "Dashboard" | "Scanner" | "Sessions" | "Options" | "OptionsWatcher" | "Flow Database" | "Desk" | "ITB" | "Freqtrade" | "Live Strategy" | "Kronos Lab" | "Loops";
+  | "Journal" | "Docs" | "Skills" | "Dashboard" | "Scanner" | "Sessions" | "Options" | "OptionsWatcher" | "Flow Database" | "Desk" | "ITB" | "Freqtrade" | "Live Strategy" | "Kronos Lab" | "Loops" | "ARIES";
 
 interface SidebarProps {
   activePage: PageName;
@@ -38,6 +38,7 @@ export function Sidebar({ activePage, onNavigate, isCollapsed, onToggle, newSign
       { name: "Performance", icon: BarChart3 },
       { name: "Regime", icon: TrendingUp },
       { name: "Activity", icon: Activity },
+      { name: "ARIES", icon: HeartPulse },
     ]},
     { label: "SIGNALS", items: [
       { name: "Signals", icon: Radar, badge: newSignalsCount },

@@ -48,6 +48,7 @@ import { FreqtradePage } from '../pages/FreqtradePage';
 import { LiveStrategyPage } from '../pages/LiveStrategyPage';
 import { KronosLabPage } from '../pages/KronosLabPage';
 import { LoopsPage } from '../pages/LoopsPage';
+import { AriesPage } from '../pages/AriesPage';
 import { PsychChatWidget } from '../ui/PsychChatWidget';
 
 type PageName =
@@ -91,6 +92,7 @@ type PageName =
   | 'Kronos Lab'
   | 'GoTrader'
   | 'Loops'
+  | 'ARIES'
   | 'Landing';
 
 // Centralized list of valid pages — referenced by both the initial-state
@@ -100,7 +102,7 @@ const VALID_PAGES: PageName[] = [
   'Approvals', 'Calendar', 'Projects', 'Memory', 'Memory Graph',
   'Office', 'Desk', 'Docs', 'Trades', 'Journal', 'Activity', 'Risk', 'TV Chart', 'PowerTrader',
   'Command Center', 'Performance', 'Regime', 'Usage', 'Landing', 'Congress', 'LLM Portfolio', 'Skills',
-  'Flow History', 'Flow Database', 'ITB', 'Freqtrade', 'Live Strategy', 'Kronos Lab', 'GoTrader', 'Loops',
+  'Flow History', 'Flow Database', 'ITB', 'Freqtrade', 'Live Strategy', 'Kronos Lab', 'GoTrader', 'Loops', 'ARIES',
 ];
 
 function resolvePageFromParam(page: string | null): PageName {
@@ -116,6 +118,7 @@ function resolvePageFromParam(page: string | null): PageName {
   if (page.toLowerCase() === 'memory-graph') return 'Memory Graph';
   if (page.toLowerCase() === 'llm-portfolio') return 'LLM Portfolio';
   if (page.toLowerCase() === 'command-center') return 'Command Center';
+  if (page.toLowerCase() === 'aries') return 'ARIES';
   const pn = (page.charAt(0).toUpperCase() + page.slice(1).toLowerCase()) as PageName;
   return VALID_PAGES.includes(pn) ? pn : 'Command Center';
 }
@@ -231,6 +234,8 @@ export function AppShellClient() {
         return <KronosLabPage />;
       case 'Loops':
         return <LoopsPage />;
+      case 'ARIES':
+        return <AriesPage />;
       case 'GoTrader':
         return null;
       default:
