@@ -255,7 +255,9 @@ def post_discord_alert(report):
         req = urllib.request.Request(
             webhook,
             data=json.dumps(payload).encode(),
-            headers={"Content-Type": "application/json"},
+            # Discord/Cloudflare 403s the default Python-urllib UA
+            headers={"Content-Type": "application/json",
+                     "User-Agent": "precycle-health/1.0"},
             method="POST",
         )
         urllib.request.urlopen(req, timeout=10)

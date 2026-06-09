@@ -113,7 +113,9 @@ def post_discord(content: str) -> bool:
         return False
     try:
         body = json.dumps({"content": content[:1900]}).encode("utf-8")
-        req = urllib.request.Request(url, data=body, headers={"Content-Type": "application/json"})
+        # Discord/Cloudflare 403s the default Python-urllib UA
+        req = urllib.request.Request(url, data=body, headers={"Content-Type": "application/json",
+                                                              "User-Agent": "daemon-health/1.0"})
         with urllib.request.urlopen(req, timeout=8) as r:
             return 200 <= r.status < 300
     except Exception:
