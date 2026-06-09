@@ -170,7 +170,11 @@ def check_relay() -> dict:
     try:
         last = datetime.fromisoformat(s["last_poll_at"])
         age_min = (now() - last).total_seconds() / 60
-        if age_min > 5:
+        # Relay writes its status file per SIGNAL, not per fixed poll — after-hours
+        # flow is sparse and gaps >5min are normal (2026-06-09: flapped Oracle's
+        # consecutive_failures counter all evening). Staleness only alerts while the
+        # market is open — same gate check_scored_freshness already uses.
+        if is_market_hours() and age_min > 5:
             return {"healthy": False, "reason": f"last poll {round(age_min,1)} min ago"}
     except Exception:
         return {"healthy": False, "reason": "can't parse last_poll_at"}
