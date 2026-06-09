@@ -35,6 +35,8 @@ JOBS = [
     ("equity-snapshot",  HOME / "scripts/audit/equity-snapshot.log",   None, False, True),
     ("sector-rotation",  HOME / "LapClaw/pipeline/logs/sector_rotation.log",  None, False, True),
     ("catalyst-scanner", HOME / "LapClaw/pipeline/logs/catalyst_scanner.log", None, False, True),
+    # watches the watcher: freshness_watchdog fires q15min market hours (6,21,36,51)
+    ("freshness-watchdog", HOME / "LapClaw/pipeline/logs/freshness_watchdog.log", 25, True, True),
 ]
 
 
