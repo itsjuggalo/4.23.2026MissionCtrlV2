@@ -1,0 +1,183 @@
+#!/usr/bin/env bash
+# wsl-recover.sh — full WSL state recovery after a restart or crash
+#
+# Run this any time WSL has been restarted (wsl --shutdown, Windows reboot,
+# DrvFs crash, etc.). Covers the four failure modes exposed by the
+# HuggingFace crash of 2026-05-31:
+#   1. PM2 services dead (no systemd in WSL, no auto-restart)
+#   2. tailscaled not running (wsl.conf boot path fixed but race possible)
+#   3. External DNS broken (Tailscale MagicDNS fails without a connection)
+#   4. ClaudeClaw stuck on DNS error from startup before Tailscale was ready
+#
+# Usage:
+#   ~/scripts/wsl-recover.sh          # full recovery
+#   ~/scripts/wsl-recover.sh --check  # health check only, no changes
+# ---------------------------------------------------------------------------
+set -euo pipefail
+
+CHECK_ONLY=false
+[[ "${1:-}" == "--check" ]] && CHECK_ONLY=true
+
+LOG="$HOME/logs/wsl-recover.log"
+mkdir -p "$HOME/logs"
+TS=$(date -Is)
+
+log() { echo "[$TS] $*" | tee -a "$LOG"; }
+ok()  { echo "  ✅ $*"; }
+warn(){ echo "  ⚠️  $*"; }
+fail(){ echo "  ❌ $*"; }
+
+echo ""
+echo "════════════════════════════════════════"
+echo "  WSL Recovery — $(date '+%Y-%m-%d %H:%M ET')"
+echo "════════════════════════════════════════"
+log "wsl-recover.sh started (check_only=$CHECK_ONLY)"
+
+# ---------------------------------------------------------------------------
+# 1. tailscaled
+# ---------------------------------------------------------------------------
+echo ""
+echo "── 1. Tailscale ──────────────────────────────"
+if pgrep -x tailscaled > /dev/null 2>&1; then
+    ok "tailscaled already running (PID $(pgrep -x tailscaled))"
+else
+    warn "tailscaled not running"
+    if ! $CHECK_ONLY; then
+        log "starting tailscaled"
+        nohup sudo /usr/sbin/tailscaled \
+            --state=/var/lib/tailscale/tailscaled.state \
+            --socket=/run/tailscale/tailscaled.sock \
+            > /tmp/tailscaled.log 2>&1 &
+        sleep 6
+        if pgrep -x tailscaled > /dev/null 2>&1; then
+            ok "tailscaled started"
+        else
+            fail "tailscaled failed to start — check /tmp/tailscaled.log"
+        fi
+    fi
+fi
+
+if tailscale status > /dev/null 2>&1; then
+    NODE=$(tailscale status 2>/dev/null | head -1 | awk '{print $2}')
+    ok "Tailscale connected ($NODE)"
+else
+    warn "Tailscale not connected — running tailscale up"
+    if ! $CHECK_ONLY; then
+        tailscale up --accept-dns=false --hostname=g59-wsl 2>&1 | head -3 || true
+        sleep 3
+        tailscale status 2>/dev/null | head -3 || warn "still not connected"
+    fi
+fi
+
+# ---------------------------------------------------------------------------
+# 2. DNS
+# ---------------------------------------------------------------------------
+echo ""
+echo "── 2. DNS ────────────────────────────────────"
+if curl -s --max-time 5 https://api.telegram.org/ > /dev/null 2>&1; then
+    ok "External DNS resolving (api.telegram.org reachable)"
+else
+    fail "External DNS broken"
+    if ! $CHECK_ONLY; then
+        log "resolv.conf check"
+        if grep -q '8.8.8.8' /etc/resolv.conf 2>/dev/null; then
+            warn "8.8.8.8 already in resolv.conf — may need tailscaled restart"
+        else
+            warn "resolv.conf missing public DNS — fixing"
+            sudo chattr -i /etc/resolv.conf 2>/dev/null || true
+            sudo bash -c 'cat > /etc/resolv.conf << EOF
+# Static DNS — Tailscale DNS disabled, using public resolvers
+nameserver 8.8.8.8
+nameserver 1.1.1.1
+nameserver 8.8.4.4
+search taile1328b.ts.net
+EOF'
+            sudo chattr +i /etc/resolv.conf
+            ok "resolv.conf restored and re-locked"
+        fi
+    fi
+fi
+
+# ---------------------------------------------------------------------------
+# 3. PM2
+# ---------------------------------------------------------------------------
+echo ""
+echo "── 3. PM2 ────────────────────────────────────"
+PM2_COUNT=$(pm2 jlist 2>/dev/null | python3 -c "import json,sys; d=json.load(sys.stdin); print(len([p for p in d if p['pm2_env']['status']=='online']))" 2>/dev/null || echo 0)
+
+if [[ "$PM2_COUNT" -ge 14 ]]; then
+    ok "$PM2_COUNT processes online"
+else
+    warn "Only $PM2_COUNT PM2 processes online — resurrecting"
+    if ! $CHECK_ONLY; then
+        log "pm2 resurrect"
+        pm2 resurrect 2>&1 | tail -3
+        sleep 5
+        PM2_COUNT=$(pm2 jlist 2>/dev/null | python3 -c "import json,sys; d=json.load(sys.stdin); print(len([p for p in d if p['pm2_env']['status']=='online']))" 2>/dev/null || echo 0)
+        ok "$PM2_COUNT processes online after resurrect"
+    fi
+fi
+
+STOPPED=$(pm2 jlist 2>/dev/null | python3 -c "
+import json,sys
+d=json.load(sys.stdin)
+s=[p['name'] for p in d if p['pm2_env']['status']!='online' and p['pm2_env'].get('autorestart',True)]
+print(', '.join(s) if s else 'none')
+" 2>/dev/null || echo "unknown")
+[[ "$STOPPED" == "none" ]] && ok "No unexpected stopped processes" || warn "Stopped (non-cron): $STOPPED"
+
+# ---------------------------------------------------------------------------
+# 4. ClaudeClaw
+# ---------------------------------------------------------------------------
+echo ""
+echo "── 4. ClaudeClaw ─────────────────────────────"
+CC_STATUS=$(pm2 jlist 2>/dev/null | python3 -c "
+import json,sys
+d=json.load(sys.stdin)
+for p in d:
+    if p['name']=='claudeclaw': print(p['pm2_env']['status'])
+" 2>/dev/null || echo "unknown")
+
+if [[ "$CC_STATUS" == "online" ]]; then
+    # Check if it actually connected to Telegram (not just started)
+    if pm2 logs claudeclaw --lines 30 --nostream 2>/dev/null | grep -q 'ClaudeClaw is running'; then
+        ok "ClaudeClaw online and Telegram connected"
+    else
+        warn "ClaudeClaw online but Telegram may not be connected — restarting"
+        if ! $CHECK_ONLY; then
+            pm2 restart claudeclaw 2>&1 | tail -2
+            sleep 10
+            pm2 logs claudeclaw --lines 10 --nostream 2>/dev/null | grep -E 'running|ERROR|EAI' | head -5
+        fi
+    fi
+else
+    fail "ClaudeClaw status: $CC_STATUS"
+    if ! $CHECK_ONLY; then
+        pm2 restart claudeclaw 2>&1 | tail -2
+        sleep 10
+        ok "ClaudeClaw restarted"
+    fi
+fi
+
+# ---------------------------------------------------------------------------
+# 5. /mnt/c/ bridge
+# ---------------------------------------------------------------------------
+echo ""
+echo "── 5. Windows bridge (/mnt/c/) ───────────────"
+if ls /mnt/c/Users/ > /dev/null 2>&1; then
+    ok "/mnt/c/ bridge healthy"
+else
+    fail "/mnt/c/ bridge unavailable (DrvFs drop) — skills sync will be skipped by claude-skills-sync.sh until bridge recovers"
+fi
+
+# ---------------------------------------------------------------------------
+# Summary
+# ---------------------------------------------------------------------------
+echo ""
+echo "════════════════════════════════════════"
+log "wsl-recover.sh complete"
+echo "  Log: $LOG"
+if $CHECK_ONLY; then
+    echo "  (check-only mode — no changes made)"
+fi
+echo ""

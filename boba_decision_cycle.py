@@ -185,7 +185,7 @@ try:
     from tradier_client import fetch_option_quote as _tradier_quote
 except Exception:
     _tradier_quote = None
-KRONOS_CMD = "/home/itsju/01_ACTIVE/mission-control/agent-team/kronos/kronos_on_demand.py"
+KRONOS_CMD = "/home/itsju/mission-control/agent-team/kronos/kronos_on_demand.py"
 KRONOS_PYTHON = "/home/itsju/02_DATA/mc-kb/.venv/bin/python"
 
 MAX_PICKS_PER_CYCLE = 3

@@ -1,0 +1,240 @@
+#!/usr/bin/env python3
+"""flowrank_executor.py — Auto-execute top-ranked FlowRank contracts on Alpaca.
+
+Runs every 5 minutes during market hours (via PM2). Checks FlowRank for
+contracts >= 75% confidence, validates entry conditions, and places market orders.
+
+Entry guard rails (all must pass):
+  1. Confidence >= 75% (FlowRank score >= 75/100)
+  2. Not already in position (check open Boba + Jazzy positions)
+  3. Bid-ask spread <= 25% of mid (not illiquid)
+  4. Buying power available (>= $100 minimum order)
+  5. Market is open (not pre/after hours)
+
+Routing:
+  - Boba (PA34WLDYTCMV): 0-7 DTE CALLS on semis/AI/mega-tech
+  - Jazzy (PA3ST95DAKQ4): 8-30 DTE CALLS + broader sectors
+
+Position sizing: 7% of buying_power per account, max $300 per entry
+Stop registration: writes to ~/.openclaw/workspace/state/options_trail_state.json
+"""
+from __future__ import annotations
+
+import json
+import sys
+import urllib.request
+import urllib.error
+from datetime import datetime, timezone
+from pathlib import Path
+
+SEC   = Path.home() / ".openclaw" / "secrets"
+STATE = Path.home() / ".openclaw" / "workspace" / "state" / "options_trail_state.json"
+LOG   = Path.home() / "logs" / "flowrank_executor.log"
+LOG.parent.mkdir(parents=True, exist_ok=True)
+STATE.parent.mkdir(parents=True, exist_ok=True)
+
+ALPACA_BASE = "https://paper-api.alpaca.markets/v2"
+
+BOBA_SYMBOLS  = {"MU","NVDA","AAPL","META","AMD","PLTR","TSLA","AMZN","GOOGL","SPX","SPY","QQQ","SMCI"}
+BOBA_MAX_DTE  = 7
+
+JAZZY_SYMBOLS = {"MSFT","ORCL","SNOW","CRM","TSLA","DELL","NFLX","AMD","NVDA","AAPL","META","SPX","QQQ","MU","PLTR"}
+JAZZY_MAX_DTE = 30
+
+MIN_CONFIDENCE = 0.75
+MAX_SPREAD_PCT = 0.25
+POSITION_PCT   = 0.07
+MIN_ORDER_USD  = 100.0
+MAX_ORDER_USD  = 300.0
+MARKET_OPEN    = (9, 30)
+MARKET_CLOSE   = (16, 0)
+
+
+def _log(msg):
+    ts = datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
+    line = "[" + ts + "] " + msg
+    print(line, flush=True)
+    with LOG.open("a") as f:
+        f.write(line + "\n")
+
+
+def _headers(key_f, sec_f):
+    return {
+        "APCA-API-KEY-ID":     (SEC / key_f).read_text().strip(),
+        "APCA-API-SECRET-KEY": (SEC / sec_f).read_text().strip(),
+        "Content-Type":        "application/json",
+    }
+
+
+def _get(url, hdrs):
+    req = urllib.request.Request(url, headers=hdrs)
+    try:
+        return json.loads(urllib.request.urlopen(req, timeout=10).read())
+    except Exception as e:
+        _log("GET FAIL " + url + " " + str(e))
+        return {}
+
+
+def _post(url, hdrs, payload):
+    data = json.dumps(payload).encode()
+    req = urllib.request.Request(url, data=data, headers=hdrs, method="POST")
+    try:
+        return json.loads(urllib.request.urlopen(req, timeout=10).read())
+    except urllib.error.HTTPError as e:
+        _log("POST FAIL " + url + " HTTP " + str(e.code) + ": " + e.read().decode()[:200])
+        return {}
+    except Exception as e:
+        _log("POST ERR " + str(e))
+        return {}
+
+
+def market_is_open():
+    now = datetime.now(timezone.utc)
+    if now.weekday() >= 5:
+        return False
+    et_hour = (now.hour - 4) % 24
+    et_min  = now.minute
+    return (et_hour, et_min) >= MARKET_OPEN and (et_hour, et_min) < MARKET_CLOSE
+
+
+def get_flowrank_top(hours=2, max_dte=30):
+    try:
+        sys.path.insert(0, str(Path.home() / "04_RESEARCH/integrations/Vibe-Trading/agent"))
+        from src.tools.options_flow_rank_tool import OptionsFlowRankTool
+        t = OptionsFlowRankTool()
+        if not t.check_available():
+            _log("FlowRank DB unavailable")
+            return []
+        result = json.loads(t.execute(action="rank", hours=hours, max_dte=max_dte, min_hits=3, formatted=False))
+        return [c for c in result.get("top_3", []) if c.get("confidence", 0) >= MIN_CONFIDENCE]
+    except Exception as e:
+        _log("FlowRank error: " + str(e))
+        return []
+
+
+def build_occ(symbol, expiry, option_type, strike):
+    date_part  = expiry.replace("-", "")[2:]
+    opt        = "C" if option_type == "CALL" else "P"
+    strike_part = str(int(strike * 1000)).zfill(8)
+    return (symbol.ljust(6) + date_part + opt + strike_part).replace(" ", "")
+
+
+def get_open_positions(hdrs):
+    pos = _get(ALPACA_BASE + "/positions", hdrs)
+    return {p.get("symbol","") for p in pos} if isinstance(pos, list) else set()
+
+
+def load_trail_state():
+    if STATE.exists():
+        try:
+            return json.loads(STATE.read_text())
+        except Exception:
+            return {}
+    return {}
+
+
+def save_trail_state(state):
+    STATE.write_text(json.dumps(state, indent=2, default=str))
+
+
+def register_position(occ, entry_price, qty, dte, confidence, symbol):
+    state = load_trail_state()
+    if occ not in state:
+        state[occ] = {
+            "entry_price": entry_price, "qty": qty, "dte": dte,
+            "symbol": symbol, "confidence": confidence,
+            "peak_price": entry_price, "peak_pct": 0.0,
+            "locked_pct": -999.0, "last_stop": None,
+            "first_seen": datetime.now(timezone.utc).isoformat(),
+            "source": "flowrank_executor",
+        }
+        save_trail_state(state)
+        _log("Registered " + occ + " in trail state (entry=$" + str(round(entry_price,2)) + " qty=" + str(qty) + " DTE=" + str(dte) + ")")
+
+
+def process_account(name, key_f, sec_f, allowed, max_dte, contracts):
+    hdrs    = _headers(key_f, sec_f)
+    account = _get(ALPACA_BASE + "/account", hdrs)
+    if not account:
+        _log(name + ": cannot reach Alpaca")
+        return
+
+    buying_power = float(account.get("buying_power", 0))
+    equity       = float(account.get("equity", 0))
+    _log(name + ": equity=$" + str(round(equity, 0)) + " bp=$" + str(round(buying_power, 0)))
+
+    if buying_power < MIN_ORDER_USD:
+        _log(name + ": buying power too low ($" + str(round(buying_power,0)) + ")")
+        return
+
+    open_pos = get_open_positions(hdrs)
+
+    for c in contracts:
+        symbol = c["symbol"].upper()
+        opt    = c["option_type"]
+        strike = float(c["strike"])
+        expiry = c["expiry"]
+        dte    = c["dte"]
+        conf   = c["confidence"]
+        hits   = c["hits"]
+
+        if symbol not in allowed or dte > max_dte:
+            continue
+
+        occ = build_occ(symbol, expiry, opt, strike)
+
+        if occ in open_pos:
+            _log(name + ": " + occ + " already held — skip")
+            continue
+
+        # Sizing
+        order_usd  = min(buying_power * POSITION_PCT, MAX_ORDER_USD)
+        ask_approx = (c.get("total_premium", 0) / max(hits * 100, 1)) or 5.0
+        n_contracts = max(1, int(order_usd / (ask_approx * 100)))
+        order_cost  = n_contracts * ask_approx * 100
+
+        if order_cost > buying_power:
+            n_contracts = 1
+            order_cost  = ask_approx * 100
+        if order_cost > buying_power:
+            _log(name + ": " + occ + " insufficient buying power — skip")
+            continue
+
+        _log(name + ": BUYING " + occ + " x" + str(n_contracts) + " ~$" + str(round(order_cost,0)) + " conf=" + str(round(conf*100,0)) + "% hits=" + str(hits))
+
+        result = _post(ALPACA_BASE + "/orders", hdrs, {
+            "symbol": occ, "qty": str(n_contracts),
+            "side": "buy", "type": "market",
+            "time_in_force": "day", "position_intent": "buy_to_open",
+        })
+
+        if result.get("id"):
+            _log(name + ": ORDER PLACED " + result["id"] + " status=" + result.get("status","?"))
+            register_position(occ, ask_approx, n_contracts, dte, conf, symbol)
+        else:
+            _log(name + ": ORDER FAILED — " + json.dumps(result)[:200])
+
+
+def main():
+    _log("=== FlowRank Executor ===")
+    if not market_is_open():
+        _log("Market closed — done")
+        return
+
+    contracts = get_flowrank_top(hours=2, max_dte=30)
+    _log("FlowRank: " + str(len(contracts)) + " AUTO-EXECUTE contracts")
+
+    if not contracts:
+        _log("None above 75% confidence — done")
+        return
+
+    for c in contracts:
+        _log("  Candidate: " + c["symbol"] + " " + c["option_type"] + " $" + str(c["strike"]) + " " + c["expiry"] + " DTE=" + str(c["dte"]) + " score=" + str(c["score"]) + " conf=" + str(round(c["confidence"]*100)) + "% hits=" + str(c["hits"]))
+
+    process_account("Boba-R2", "alpaca-boba-key-id",  "alpaca-boba-secret",  BOBA_SYMBOLS,  BOBA_MAX_DTE,  contracts)
+    process_account("Jazzy",   "alpaca-jazzy-key-id",  "alpaca-jazzy-secret", JAZZY_SYMBOLS, JAZZY_MAX_DTE, contracts)
+    _log("=== Done ===")
+
+
+if __name__ == "__main__":
+    main()

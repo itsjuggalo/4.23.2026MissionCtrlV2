@@ -1,0 +1,5596 @@
+[2026-05-28T12:02:17Z] kronos_refresh_premarket starting (model=mini, tickers=BTC SPY QQQ NVDA TSLA)
+[2026-05-28T12:02:17Z] Generating BTC...
+      "high": 74668.8515625,
+      "low": 74442.8515625
+    }
+  ]
+}
+[2026-05-28T12:02:28Z] Generating SPY...
+      "high": 746.4019775390625,
+      "low": 743.9559936523438
+    }
+  ]
+}
+[2026-05-28T12:02:41Z] Generating QQQ...
+      "high": 716.3831787109375,
+      "low": 713.105224609375
+    }
+  ]
+}
+[2026-05-28T12:02:54Z] Generating NVDA...
+      "high": 212.0448455810547,
+      "low": 210.2183380126953
+    }
+  ]
+}
+[2026-05-28T12:03:06Z] Generating TSLA...
+      "high": 449.2484130859375,
+      "low": 444.45965576171875
+    }
+  ]
+}
+[2026-05-28T12:03:19Z] kronos_refresh_premarket done
+[2026-05-29T12:00:17Z] kronos_refresh_premarket starting (tickers=SPY QQQ NVDA TSLA AAPL MSFT AMD SMCI META MU AMZN GOOGL COIN BTC)
+[2026-05-29T12:00:17Z] Generating SPY...
+    }
+  ]
+}
+[2026-05-29T12:00:49Z] Generating QQQ...
+    }
+  ]
+}
+[2026-05-29T12:01:10Z] Generating NVDA...
+    }
+  ]
+}
+[2026-05-29T12:01:30Z] Generating TSLA...
+    }
+  ]
+}
+[2026-05-29T12:01:49Z] Generating AAPL...
+    }
+  ]
+}
+[2026-05-29T12:02:09Z] Generating MSFT...
+    }
+  ]
+}
+[2026-05-29T12:02:29Z] Generating AMD...
+    }
+  ]
+}
+[2026-05-29T12:02:49Z] Generating SMCI...
+    }
+  ]
+}
+[2026-05-29T12:03:08Z] Generating META...
+    }
+  ]
+}
+[2026-05-29T12:03:27Z] Generating MU...
+    }
+  ]
+}
+[2026-05-29T12:03:47Z] Generating AMZN...
+    }
+  ]
+}
+[2026-05-29T12:04:07Z] Generating GOOGL...
+    }
+  ]
+}
+[2026-05-29T12:04:26Z] Generating COIN...
+    }
+  ]
+}
+[2026-05-29T12:04:47Z] Generating BTC...
+    }
+  ]
+}
+[2026-05-29T12:05:07Z] kronos_refresh_premarket done
+[2026-06-02T02:01:25Z] kronos_refresh_premarket starting (tickers=SPY QQQ NVDA TSLA AAPL MSFT AMD SMCI META MU AMZN GOOGL COIN BTC)
+[2026-06-02T02:01:25Z] Generating SPY...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-02T02:01:30Z] Generating QQQ...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-02T02:01:35Z] Generating NVDA...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-02T02:01:40Z] Generating TSLA...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-02T02:01:45Z] Generating AAPL...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-02T02:01:50Z] Generating MSFT...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-02T02:01:55Z] Generating AMD...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-02T02:02:00Z] Generating SMCI...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-02T02:02:05Z] Generating META...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-02T02:02:11Z] Generating MU...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-02T02:02:16Z] Generating AMZN...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-02T02:02:21Z] Generating GOOGL...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-02T02:02:26Z] Generating COIN...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-02T02:02:31Z] Generating BTC...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-02T02:02:36Z] kronos_refresh_premarket done
+[2026-06-02T02:30:11Z] kronos_refresh_premarket starting (tickers=SPY QQQ NVDA TSLA AAPL MSFT AMD SMCI META MU AMZN GOOGL COIN BTC)
+[2026-06-02T02:30:11Z] Generating SPY...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-02T02:30:16Z] Generating QQQ...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-02T02:30:21Z] Generating NVDA...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-02T02:30:26Z] Generating TSLA...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-02T02:30:31Z] Generating AAPL...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-02T02:30:36Z] Generating MSFT...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-02T02:30:41Z] Generating AMD...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-02T02:30:46Z] Generating SMCI...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-02T02:30:51Z] Generating META...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-02T02:30:57Z] Generating MU...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-02T02:31:02Z] Generating AMZN...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-02T02:31:07Z] Generating GOOGL...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-02T02:31:12Z] Generating COIN...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-02T02:31:17Z] Generating BTC...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-02T02:31:22Z] kronos_refresh_premarket done
+[2026-06-02T03:00:08Z] kronos_refresh_premarket starting (tickers=SPY QQQ NVDA TSLA AAPL MSFT AMD SMCI META MU AMZN GOOGL COIN BTC)
+[2026-06-02T03:00:08Z] Generating SPY...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-02T03:00:13Z] Generating QQQ...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-02T03:00:18Z] Generating NVDA...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-02T03:00:23Z] Generating TSLA...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-02T03:00:29Z] Generating AAPL...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-02T03:00:34Z] Generating MSFT...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-02T03:00:39Z] Generating AMD...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-02T03:00:44Z] Generating SMCI...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-02T03:00:49Z] Generating META...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-02T03:00:54Z] Generating MU...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-02T03:00:59Z] Generating AMZN...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-02T03:01:04Z] Generating GOOGL...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-02T03:01:09Z] Generating COIN...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-02T03:01:14Z] Generating BTC...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-02T03:01:20Z] kronos_refresh_premarket done
+[2026-06-02T04:00:12Z] kronos_refresh_premarket starting (tickers=SPY QQQ NVDA TSLA AAPL MSFT AMD SMCI META MU AMZN GOOGL COIN BTC)
+[2026-06-02T04:00:12Z] Generating SPY...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-02T04:00:17Z] Generating QQQ...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-02T04:00:22Z] Generating NVDA...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-02T04:00:28Z] Generating TSLA...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-02T04:00:33Z] Generating AAPL...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-02T04:00:38Z] Generating MSFT...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-02T04:00:43Z] Generating AMD...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-02T04:00:48Z] Generating SMCI...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-02T04:00:53Z] Generating META...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-02T04:00:58Z] Generating MU...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-02T04:01:03Z] Generating AMZN...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-02T04:01:08Z] Generating GOOGL...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-02T04:01:14Z] Generating COIN...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-02T04:01:19Z] Generating BTC...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-02T04:01:24Z] kronos_refresh_premarket done
+[2026-06-02T04:45:09Z] kronos_refresh_premarket starting (tickers=SPY QQQ NVDA TSLA AAPL MSFT AMD SMCI META MU AMZN GOOGL COIN BTC)
+[2026-06-02T04:45:09Z] Generating SPY...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-02T04:45:14Z] Generating QQQ...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-02T04:45:19Z] Generating NVDA...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-02T04:45:24Z] Generating TSLA...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-02T04:45:29Z] Generating AAPL...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-02T04:45:34Z] Generating MSFT...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-02T04:45:40Z] Generating AMD...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-02T04:45:45Z] Generating SMCI...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-02T04:45:50Z] Generating META...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-02T04:45:55Z] Generating MU...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-02T04:46:00Z] Generating AMZN...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-02T04:46:05Z] Generating GOOGL...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-02T04:46:10Z] Generating COIN...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-02T04:46:15Z] Generating BTC...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-02T04:46:21Z] kronos_refresh_premarket done
+[2026-06-02T06:00:13Z] kronos_refresh_premarket starting (tickers=SPY QQQ NVDA TSLA AAPL MSFT AMD SMCI META MU AMZN GOOGL COIN BTC)
+[2026-06-02T06:00:13Z] Generating SPY...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-02T06:00:19Z] Generating QQQ...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-02T06:00:25Z] Generating NVDA...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-02T06:00:31Z] Generating TSLA...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-02T06:00:36Z] Generating AAPL...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-02T06:00:42Z] Generating MSFT...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-02T06:00:47Z] Generating AMD...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-02T06:00:52Z] Generating SMCI...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-02T06:00:58Z] Generating META...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-02T06:01:04Z] Generating MU...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-02T06:01:09Z] Generating AMZN...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-02T06:01:15Z] Generating GOOGL...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-02T06:01:20Z] Generating COIN...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-02T06:01:26Z] Generating BTC...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-02T06:01:31Z] kronos_refresh_premarket done
+[2026-06-02T06:31:51Z] kronos_refresh_premarket starting (tickers=SPY QQQ NVDA TSLA AAPL MSFT AMD SMCI META MU AMZN GOOGL COIN BTC)
+[2026-06-02T06:31:51Z] Generating SPY...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-02T06:31:56Z] Generating QQQ...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-02T06:32:01Z] Generating NVDA...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-02T06:32:06Z] Generating TSLA...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-02T06:32:11Z] Generating AAPL...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-02T06:32:17Z] Generating MSFT...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-02T06:32:22Z] Generating AMD...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-02T06:32:27Z] Generating SMCI...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-02T06:32:32Z] Generating META...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-02T06:32:37Z] Generating MU...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-02T06:32:42Z] Generating AMZN...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-02T06:32:48Z] Generating GOOGL...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-02T06:32:53Z] Generating COIN...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-02T06:32:58Z] Generating BTC...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-02T06:33:03Z] kronos_refresh_premarket done
+[2026-06-02T07:15:12Z] kronos_refresh_premarket starting (tickers=SPY QQQ NVDA TSLA AAPL MSFT AMD SMCI META MU AMZN GOOGL COIN BTC)
+[2026-06-02T07:15:12Z] Generating SPY...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-02T07:15:18Z] Generating QQQ...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-02T07:15:23Z] Generating NVDA...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-02T07:15:28Z] Generating TSLA...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-02T07:15:33Z] Generating AAPL...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-02T07:15:38Z] Generating MSFT...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-02T07:15:44Z] Generating AMD...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-02T07:15:49Z] Generating SMCI...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-02T07:15:54Z] Generating META...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-02T07:16:00Z] Generating MU...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-02T07:16:05Z] Generating AMZN...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-02T07:16:10Z] Generating GOOGL...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-02T07:16:15Z] Generating COIN...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-02T07:16:20Z] Generating BTC...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-02T07:16:25Z] kronos_refresh_premarket done
+[2026-06-02T07:29:57Z] kronos_refresh_premarket starting (tickers=SPY QQQ NVDA TSLA AAPL MSFT AMD SMCI META MU AMZN GOOGL COIN BTC)
+OK: HF_HOME='/home/itsju/.cache/huggingface' | disk 881GB free | checks passed
+[2026-06-02T07:29:57Z] Generating SPY...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-02T07:30:02Z] Generating QQQ...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-02T07:30:07Z] Generating NVDA...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-02T07:30:13Z] Generating TSLA...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-02T07:30:18Z] Generating AAPL...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-02T07:30:23Z] Generating MSFT...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-02T07:30:28Z] Generating AMD...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-02T07:30:33Z] Generating SMCI...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-02T07:30:38Z] Generating META...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-02T07:30:43Z] Generating MU...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-02T07:30:48Z] Generating AMZN...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-02T07:30:53Z] Generating GOOGL...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-02T07:30:59Z] Generating COIN...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-02T07:31:04Z] Generating BTC...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-02T07:31:09Z] kronos_refresh_premarket done
+[2026-06-02T07:45:10Z] kronos_refresh_premarket starting (tickers=SPY QQQ NVDA TSLA AAPL MSFT AMD SMCI META MU AMZN GOOGL COIN BTC)
+OK: HF_HOME='/home/itsju/.cache/huggingface' | disk 881GB free | checks passed
+[2026-06-02T07:45:10Z] Generating SPY...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-02T07:45:16Z] Generating QQQ...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-02T07:45:21Z] Generating NVDA...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-02T07:45:26Z] Generating TSLA...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-02T07:45:31Z] Generating AAPL...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-02T07:45:36Z] Generating MSFT...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-02T07:45:41Z] Generating AMD...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-02T07:45:47Z] Generating SMCI...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-02T07:45:52Z] Generating META...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-02T07:45:57Z] Generating MU...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-02T07:46:02Z] Generating AMZN...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-02T07:46:07Z] Generating GOOGL...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-02T07:46:12Z] Generating COIN...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-02T07:46:17Z] Generating BTC...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-02T07:46:22Z] kronos_refresh_premarket done
+[2026-06-02T09:15:09Z] kronos_refresh_premarket starting (tickers=SPY QQQ NVDA TSLA AAPL MSFT AMD SMCI META MU AMZN GOOGL COIN BTC)
+OK: HF_HOME='/home/itsju/.cache/huggingface' | disk 870GB free | checks passed
+[2026-06-02T09:15:09Z] Generating SPY...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-02T09:15:14Z] Generating QQQ...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-02T09:15:19Z] Generating NVDA...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-02T09:15:24Z] Generating TSLA...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-02T09:15:30Z] Generating AAPL...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-02T09:15:35Z] Generating MSFT...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-02T09:15:40Z] Generating AMD...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-02T09:15:45Z] Generating SMCI...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-02T09:15:50Z] Generating META...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-02T09:15:55Z] Generating MU...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-02T09:16:00Z] Generating AMZN...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-02T09:16:05Z] Generating GOOGL...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-02T09:16:11Z] Generating COIN...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-02T09:16:16Z] Generating BTC...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-02T09:16:21Z] kronos_refresh_premarket done
+[2026-06-02T16:00:11Z] kronos_refresh_premarket starting (tickers=SPY QQQ NVDA TSLA AAPL MSFT AMD SMCI META MU AMZN GOOGL COIN BTC)
+OK: HF_HOME='/home/itsju/.cache/huggingface' | disk 853GB free | checks passed
+[2026-06-02T16:00:11Z] Generating SPY...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-02T16:00:17Z] Generating QQQ...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-02T16:00:22Z] Generating NVDA...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-02T16:00:28Z] Generating TSLA...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-02T16:00:33Z] Generating AAPL...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-02T16:00:38Z] Generating MSFT...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-02T16:00:44Z] Generating AMD...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-02T16:00:49Z] Generating SMCI...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-02T16:00:54Z] Generating META...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-02T16:00:59Z] Generating MU...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-02T16:01:05Z] Generating AMZN...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-02T16:01:10Z] Generating GOOGL...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-02T16:01:15Z] Generating COIN...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-02T16:01:20Z] Generating BTC...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-02T16:01:26Z] kronos_refresh_premarket done
+[2026-06-02T16:15:39Z] kronos_refresh_premarket starting (tickers=SPY QQQ NVDA TSLA AAPL MSFT AMD SMCI META MU AMZN GOOGL COIN BTC)
+OK: HF_HOME='/home/itsju/.cache/huggingface' | disk 849GB free | checks passed
+[2026-06-02T16:15:40Z] Generating SPY...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-02T16:15:46Z] Generating QQQ...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-02T16:15:53Z] Generating NVDA...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-02T16:15:59Z] Generating TSLA...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-02T16:16:06Z] Generating AAPL...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-02T16:16:13Z] Generating MSFT...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-02T16:16:19Z] Generating AMD...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-02T16:16:26Z] Generating SMCI...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-02T16:16:33Z] Generating META...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-02T16:16:40Z] Generating MU...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-02T16:16:47Z] Generating AMZN...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-02T16:16:54Z] Generating GOOGL...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-02T16:17:01Z] Generating COIN...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-02T16:17:07Z] Generating BTC...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-02T16:17:14Z] kronos_refresh_premarket done
+[2026-06-02T16:30:14Z] kronos_refresh_premarket starting (tickers=SPY QQQ NVDA TSLA AAPL MSFT AMD SMCI META MU AMZN GOOGL COIN BTC)
+OK: HF_HOME='/home/itsju/.cache/huggingface' | disk 849GB free | checks passed
+[2026-06-02T16:30:14Z] Generating SPY...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-02T16:30:19Z] Generating QQQ...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-02T16:30:26Z] Generating NVDA...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-02T16:30:33Z] Generating TSLA...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-02T16:30:40Z] Generating AAPL...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-02T16:30:46Z] Generating MSFT...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-02T16:30:53Z] Generating AMD...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-02T16:30:59Z] Generating SMCI...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-02T16:31:06Z] Generating META...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-02T16:31:13Z] Generating MU...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-02T16:31:19Z] Generating AMZN...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-02T16:31:26Z] Generating GOOGL...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-02T16:31:33Z] Generating COIN...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-02T16:31:39Z] Generating BTC...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-02T16:31:46Z] kronos_refresh_premarket done
+[2026-06-02T16:46:13Z] kronos_refresh_premarket starting (tickers=SPY QQQ NVDA TSLA AAPL MSFT AMD SMCI META MU AMZN GOOGL COIN BTC)
+OK: HF_HOME='/home/itsju/.cache/huggingface' | disk 849GB free | checks passed
+[2026-06-02T16:46:13Z] Generating SPY...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-02T16:46:31Z] Generating QQQ...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-02T16:46:38Z] Generating NVDA...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-02T16:46:44Z] Generating TSLA...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-02T16:46:52Z] Generating AAPL...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-02T16:47:10Z] Generating MSFT...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-02T16:47:20Z] Generating AMD...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-02T16:47:38Z] Generating SMCI...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-02T16:47:51Z] Generating META...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-02T16:48:02Z] Generating MU...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-02T16:48:25Z] Generating AMZN...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-02T16:48:44Z] Generating GOOGL...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-02T16:48:58Z] Generating COIN...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-02T16:49:21Z] Generating BTC...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-02T16:49:34Z] kronos_refresh_premarket done
+[2026-06-02T16:51:07Z] kronos_refresh_premarket starting (tickers=SPY QQQ NVDA TSLA AAPL MSFT AMD SMCI META MU AMZN GOOGL COIN BTC)
+OK: HF_HOME='/home/itsju/.cache/huggingface' | disk 849GB free | checks passed
+[2026-06-02T16:51:07Z] Generating SPY...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-02T16:51:13Z] Generating QQQ...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-02T16:51:18Z] Generating NVDA...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-02T16:51:23Z] Generating TSLA...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-02T16:51:29Z] Generating AAPL...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-02T16:51:34Z] Generating MSFT...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-02T16:51:39Z] Generating AMD...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-02T16:51:45Z] Generating SMCI...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-02T16:51:50Z] Generating META...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-02T16:51:55Z] Generating MU...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-02T16:52:00Z] Generating AMZN...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-02T16:52:05Z] Generating GOOGL...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-02T16:52:11Z] Generating COIN...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-02T16:52:16Z] Generating BTC...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-02T16:52:22Z] kronos_refresh_premarket done
+[2026-06-02T17:00:01Z] kronos_refresh_premarket starting (tickers=SPY QQQ NVDA TSLA AAPL MSFT AMD SMCI META MU AMZN GOOGL COIN BTC)
+[2026-06-02T17:00:01Z] kronos_refresh_premarket starting (tickers=SPY QQQ NVDA TSLA AAPL MSFT AMD SMCI META MU AMZN GOOGL COIN BTC)
+OK: HF_HOME='/home/itsju/.cache/huggingface' | disk 849GB free | checks passed
+[2026-06-02T17:00:01Z] Generating SPY...
+[2026-06-02T17:00:01Z] Generating SPY...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-02T17:00:06Z] Generating QQQ...
+[2026-06-02T17:00:06Z] Generating QQQ...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-02T17:00:11Z] Generating NVDA...
+[2026-06-02T17:00:11Z] Generating NVDA...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-02T17:00:16Z] Generating TSLA...
+[2026-06-02T17:00:16Z] Generating TSLA...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-02T17:00:22Z] Generating AAPL...
+[2026-06-02T17:00:22Z] Generating AAPL...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-02T17:00:27Z] Generating MSFT...
+[2026-06-02T17:00:27Z] Generating MSFT...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-02T17:00:32Z] Generating AMD...
+[2026-06-02T17:00:32Z] Generating AMD...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-02T17:00:37Z] Generating SMCI...
+[2026-06-02T17:00:37Z] Generating SMCI...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-02T17:00:42Z] Generating META...
+[2026-06-02T17:00:42Z] Generating META...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-02T17:00:47Z] Generating MU...
+[2026-06-02T17:00:47Z] Generating MU...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-02T17:00:53Z] Generating AMZN...
+[2026-06-02T17:00:53Z] Generating AMZN...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-02T17:00:58Z] Generating GOOGL...
+[2026-06-02T17:00:58Z] Generating GOOGL...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-02T17:01:03Z] Generating COIN...
+[2026-06-02T17:01:03Z] Generating COIN...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-02T17:01:08Z] Generating BTC...
+[2026-06-02T17:01:08Z] Generating BTC...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-02T17:01:13Z] kronos_refresh_premarket done
+[2026-06-02T17:01:13Z] kronos_refresh_premarket done
+[2026-06-02T17:15:09Z] kronos_refresh_premarket starting (tickers=SPY QQQ NVDA TSLA AAPL MSFT AMD SMCI META MU AMZN GOOGL COIN BTC)
+OK: HF_HOME='/home/itsju/.cache/huggingface' | disk 849GB free | checks passed
+[2026-06-02T17:15:09Z] Generating SPY...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-02T17:15:14Z] Generating QQQ...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-02T17:15:20Z] Generating NVDA...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-02T17:15:25Z] Generating TSLA...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-02T17:15:30Z] Generating AAPL...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-02T17:15:35Z] Generating MSFT...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-02T17:15:40Z] Generating AMD...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-02T17:15:45Z] Generating SMCI...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-02T17:15:51Z] Generating META...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-02T17:15:56Z] Generating MU...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-02T17:16:01Z] Generating AMZN...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-02T17:16:06Z] Generating GOOGL...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-02T17:16:12Z] Generating COIN...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-02T17:16:17Z] Generating BTC...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-02T17:16:22Z] kronos_refresh_premarket done
+[2026-06-02T18:30:12Z] kronos_refresh_premarket starting (tickers=SPY QQQ NVDA TSLA AAPL MSFT AMD SMCI META MU AMZN GOOGL COIN BTC)
+OK: HF_HOME='/home/itsju/.cache/huggingface' | disk 846GB free | checks passed
+[2026-06-02T18:30:12Z] Generating SPY...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-02T18:30:18Z] Generating QQQ...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-02T18:30:23Z] Generating NVDA...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-02T18:30:29Z] Generating TSLA...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-02T18:30:34Z] Generating AAPL...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-02T18:30:39Z] Generating MSFT...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-02T18:30:44Z] Generating AMD...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-02T18:30:50Z] Generating SMCI...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-02T18:30:55Z] Generating META...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-02T18:31:00Z] Generating MU...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-02T18:31:05Z] Generating AMZN...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-02T18:31:10Z] Generating GOOGL...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-02T18:31:16Z] Generating COIN...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-02T18:31:21Z] Generating BTC...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-02T18:31:26Z] kronos_refresh_premarket done
+[2026-06-02T18:45:08Z] kronos_refresh_premarket starting (tickers=SPY QQQ NVDA TSLA AAPL MSFT AMD SMCI META MU AMZN GOOGL COIN BTC)
+OK: HF_HOME='/home/itsju/.cache/huggingface' | disk 846GB free | checks passed
+[2026-06-02T18:45:08Z] Generating SPY...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-02T18:45:13Z] Generating QQQ...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-02T18:45:18Z] Generating NVDA...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-02T18:45:24Z] Generating TSLA...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-02T18:45:29Z] Generating AAPL...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-02T18:45:34Z] Generating MSFT...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-02T18:45:39Z] Generating AMD...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-02T18:45:44Z] Generating SMCI...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-02T18:45:49Z] Generating META...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-02T18:45:54Z] Generating MU...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-02T18:46:00Z] Generating AMZN...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-02T18:46:05Z] Generating GOOGL...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-02T18:46:10Z] Generating COIN...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-02T18:46:15Z] Generating BTC...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-02T18:46:20Z] kronos_refresh_premarket done
+[2026-06-02T19:30:12Z] kronos_refresh_premarket starting (tickers=SPY QQQ NVDA TSLA AAPL MSFT AMD SMCI META MU AMZN GOOGL COIN BTC)
+OK: HF_HOME='/home/itsju/.cache/huggingface' | disk 846GB free | checks passed
+[2026-06-02T19:30:12Z] Generating SPY...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-02T19:30:17Z] Generating QQQ...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-02T19:30:23Z] Generating NVDA...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-02T19:30:28Z] Generating TSLA...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-02T19:30:33Z] Generating AAPL...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-02T19:30:39Z] Generating MSFT...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-02T19:30:44Z] Generating AMD...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-02T19:30:49Z] Generating SMCI...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-02T19:30:55Z] Generating META...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-02T19:31:00Z] Generating MU...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-02T19:31:05Z] Generating AMZN...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-02T19:31:10Z] Generating GOOGL...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-02T19:31:16Z] Generating COIN...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-02T19:31:21Z] Generating BTC...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-02T19:31:26Z] kronos_refresh_premarket done
+[2026-06-02T19:45:12Z] kronos_refresh_premarket starting (tickers=SPY QQQ NVDA TSLA AAPL MSFT AMD SMCI META MU AMZN GOOGL COIN BTC)
+OK: HF_HOME='/home/itsju/.cache/huggingface' | disk 846GB free | checks passed
+[2026-06-02T19:45:13Z] Generating SPY...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-02T19:45:18Z] Generating QQQ...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-02T19:45:23Z] Generating NVDA...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-02T19:45:28Z] Generating TSLA...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-02T19:45:34Z] Generating AAPL...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-02T19:45:39Z] Generating MSFT...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-02T19:45:44Z] Generating AMD...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-02T19:45:50Z] Generating SMCI...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-02T19:45:55Z] Generating META...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-02T19:46:00Z] Generating MU...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-02T19:46:06Z] Generating AMZN...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-02T19:46:11Z] Generating GOOGL...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-02T19:46:16Z] Generating COIN...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-02T19:46:21Z] Generating BTC...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-02T19:46:27Z] kronos_refresh_premarket done
+[2026-06-02T20:00:22Z] kronos_refresh_premarket starting (tickers=SPY QQQ NVDA TSLA AAPL MSFT AMD SMCI META MU AMZN GOOGL COIN BTC)
+OK: HF_HOME='/home/itsju/.cache/huggingface' | disk 846GB free | checks passed
+[2026-06-02T20:00:22Z] Generating SPY...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-02T20:00:29Z] Generating QQQ...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-02T20:00:36Z] Generating NVDA...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-02T20:00:42Z] Generating TSLA...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-02T20:00:49Z] Generating AAPL...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-02T20:00:56Z] Generating MSFT...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-02T20:01:02Z] Generating AMD...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-02T20:01:09Z] Generating SMCI...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-02T20:01:15Z] Generating META...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-02T20:01:22Z] Generating MU...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-02T20:01:28Z] Generating AMZN...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-02T20:01:36Z] Generating GOOGL...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-02T20:01:42Z] Generating COIN...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-02T20:01:49Z] Generating BTC...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-02T20:01:55Z] kronos_refresh_premarket done
+[2026-06-02T20:15:51Z] kronos_refresh_premarket starting (tickers=SPY QQQ NVDA TSLA AAPL MSFT AMD SMCI META MU AMZN GOOGL COIN BTC)
+OK: HF_HOME='/home/itsju/.cache/huggingface' | disk 846GB free | checks passed
+[2026-06-02T20:15:51Z] Generating SPY...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-02T20:15:56Z] Generating QQQ...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-02T20:16:01Z] Generating NVDA...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-02T20:16:06Z] Generating TSLA...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-02T20:16:11Z] Generating AAPL...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-02T20:16:17Z] Generating MSFT...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-02T20:16:22Z] Generating AMD...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-02T20:16:27Z] Generating SMCI...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-02T20:16:32Z] Generating META...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-02T20:16:38Z] Generating MU...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-02T20:16:43Z] Generating AMZN...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-02T20:16:48Z] Generating GOOGL...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-02T20:16:53Z] Generating COIN...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-02T20:16:58Z] Generating BTC...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-02T20:17:03Z] kronos_refresh_premarket done
+[2026-06-02T20:30:50Z] kronos_refresh_premarket starting (tickers=SPY QQQ NVDA TSLA AAPL MSFT AMD SMCI META MU AMZN GOOGL COIN BTC)
+OK: HF_HOME='/home/itsju/.cache/huggingface' | disk 846GB free | checks passed
+[2026-06-02T20:30:50Z] Generating SPY...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-02T20:30:55Z] Generating QQQ...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-02T20:31:00Z] Generating NVDA...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-02T20:31:05Z] Generating TSLA...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-02T20:31:11Z] Generating AAPL...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-02T20:31:16Z] Generating MSFT...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-02T20:31:21Z] Generating AMD...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-02T20:31:26Z] Generating SMCI...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-02T20:31:31Z] Generating META...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-02T20:31:36Z] Generating MU...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-02T20:31:41Z] Generating AMZN...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-02T20:31:47Z] Generating GOOGL...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-02T20:31:52Z] Generating COIN...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-02T20:31:57Z] Generating BTC...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-02T20:32:02Z] kronos_refresh_premarket done
+[2026-06-02T20:45:18Z] kronos_refresh_premarket starting (tickers=SPY QQQ NVDA TSLA AAPL MSFT AMD SMCI META MU AMZN GOOGL COIN BTC)
+OK: HF_HOME='/home/itsju/.cache/huggingface' | disk 846GB free | checks passed
+[2026-06-02T20:45:18Z] Generating SPY...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-02T20:45:24Z] Generating QQQ...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-02T20:45:29Z] Generating NVDA...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-02T20:45:35Z] Generating TSLA...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-02T20:45:40Z] Generating AAPL...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-02T20:45:46Z] Generating MSFT...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-02T20:45:51Z] Generating AMD...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-02T20:45:57Z] Generating SMCI...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-02T20:46:02Z] Generating META...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-02T20:46:07Z] Generating MU...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-02T20:46:12Z] Generating AMZN...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-02T20:46:17Z] Generating GOOGL...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-02T20:46:22Z] Generating COIN...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-02T20:46:28Z] Generating BTC...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-02T20:46:33Z] kronos_refresh_premarket done
+[2026-06-02T21:15:09Z] kronos_refresh_premarket starting (tickers=SPY QQQ NVDA TSLA AAPL MSFT AMD SMCI META MU AMZN GOOGL COIN BTC)
+OK: HF_HOME='/home/itsju/.cache/huggingface' | disk 846GB free | checks passed
+[2026-06-02T21:15:09Z] Generating SPY...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-02T21:15:14Z] Generating QQQ...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-02T21:15:19Z] Generating NVDA...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-02T21:15:24Z] Generating TSLA...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-02T21:15:29Z] Generating AAPL...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-02T21:15:34Z] Generating MSFT...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-02T21:15:39Z] Generating AMD...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-02T21:15:44Z] Generating SMCI...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-02T21:15:49Z] Generating META...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-02T21:15:54Z] Generating MU...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-02T21:16:00Z] Generating AMZN...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-02T21:16:05Z] Generating GOOGL...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-02T21:16:10Z] Generating COIN...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-02T21:16:15Z] Generating BTC...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-02T21:16:20Z] kronos_refresh_premarket done
+[2026-06-02T21:45:12Z] kronos_refresh_premarket starting (tickers=SPY QQQ NVDA TSLA AAPL MSFT AMD SMCI META MU AMZN GOOGL COIN BTC)
+OK: HF_HOME='/home/itsju/.cache/huggingface' | disk 845GB free | checks passed
+[2026-06-02T21:45:12Z] Generating SPY...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-02T21:45:17Z] Generating QQQ...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-02T21:45:22Z] Generating NVDA...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-02T21:45:27Z] Generating TSLA...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-02T21:45:32Z] Generating AAPL...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-02T21:45:37Z] Generating MSFT...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-02T21:45:42Z] Generating AMD...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-02T21:45:48Z] Generating SMCI...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-02T21:45:53Z] Generating META...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-02T21:45:58Z] Generating MU...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-02T21:46:03Z] Generating AMZN...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-02T21:46:08Z] Generating GOOGL...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-02T21:46:13Z] Generating COIN...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-02T21:46:18Z] Generating BTC...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-02T21:46:23Z] kronos_refresh_premarket done
+[2026-06-02T22:00:10Z] kronos_refresh_premarket starting (tickers=SPY QQQ NVDA TSLA AAPL MSFT AMD SMCI META MU AMZN GOOGL COIN BTC)
+OK: HF_HOME='/home/itsju/.cache/huggingface' | disk 845GB free | checks passed
+[2026-06-02T22:00:10Z] Generating SPY...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-02T22:00:16Z] Generating QQQ...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-02T22:00:21Z] Generating NVDA...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-02T22:00:26Z] Generating TSLA...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-02T22:00:31Z] Generating AAPL...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-02T22:00:36Z] Generating MSFT...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-02T22:00:41Z] Generating AMD...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-02T22:00:46Z] Generating SMCI...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-02T22:00:51Z] Generating META...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-02T22:00:56Z] Generating MU...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-02T22:01:02Z] Generating AMZN...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-02T22:01:07Z] Generating GOOGL...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-02T22:01:12Z] Generating COIN...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-02T22:01:17Z] Generating BTC...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-02T22:01:22Z] kronos_refresh_premarket done
+[2026-06-02T22:45:10Z] kronos_refresh_premarket starting (tickers=SPY QQQ NVDA TSLA AAPL MSFT AMD SMCI META MU AMZN GOOGL COIN BTC)
+OK: HF_HOME='/home/itsju/.cache/huggingface' | disk 845GB free | checks passed
+[2026-06-02T22:45:10Z] Generating SPY...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-02T22:45:15Z] Generating QQQ...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-02T22:45:20Z] Generating NVDA...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-02T22:45:25Z] Generating TSLA...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-02T22:45:30Z] Generating AAPL...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-02T22:45:35Z] Generating MSFT...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-02T22:45:40Z] Generating AMD...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-02T22:45:46Z] Generating SMCI...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-02T22:45:51Z] Generating META...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-02T22:45:56Z] Generating MU...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-02T22:46:01Z] Generating AMZN...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-02T22:46:06Z] Generating GOOGL...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-02T22:46:11Z] Generating COIN...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-02T22:46:16Z] Generating BTC...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-02T22:46:21Z] kronos_refresh_premarket done
+[2026-06-02T23:00:09Z] kronos_refresh_premarket starting (tickers=SPY QQQ NVDA TSLA AAPL MSFT AMD SMCI META MU AMZN GOOGL COIN BTC)
+OK: HF_HOME='/home/itsju/.cache/huggingface' | disk 845GB free | checks passed
+[2026-06-02T23:00:09Z] Generating SPY...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-02T23:00:14Z] Generating QQQ...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-02T23:00:19Z] Generating NVDA...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-02T23:00:24Z] Generating TSLA...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-02T23:00:29Z] Generating AAPL...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-02T23:00:34Z] Generating MSFT...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-02T23:00:39Z] Generating AMD...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-02T23:00:44Z] Generating SMCI...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-02T23:00:49Z] Generating META...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-02T23:00:54Z] Generating MU...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-02T23:00:59Z] Generating AMZN...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-02T23:01:05Z] Generating GOOGL...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-02T23:01:10Z] Generating COIN...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-02T23:01:15Z] Generating BTC...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-02T23:01:20Z] kronos_refresh_premarket done
+[2026-06-02T23:31:06Z] kronos_refresh_premarket starting (tickers=SPY QQQ NVDA TSLA AAPL MSFT AMD SMCI META MU AMZN GOOGL COIN BTC)
+OK: HF_HOME='/home/itsju/.cache/huggingface' | disk 844GB free | checks passed
+[2026-06-02T23:31:06Z] Generating SPY...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-02T23:31:11Z] Generating QQQ...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-02T23:31:16Z] Generating NVDA...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-02T23:31:21Z] Generating TSLA...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-02T23:31:27Z] Generating AAPL...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-02T23:31:32Z] Generating MSFT...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-02T23:31:37Z] Generating AMD...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-02T23:31:42Z] Generating SMCI...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-02T23:31:47Z] Generating META...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-02T23:31:52Z] Generating MU...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-02T23:31:57Z] Generating AMZN...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-02T23:32:02Z] Generating GOOGL...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-02T23:32:07Z] Generating COIN...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-02T23:32:13Z] Generating BTC...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-02T23:32:18Z] kronos_refresh_premarket done
+[2026-06-03T00:00:10Z] kronos_refresh_premarket starting (tickers=SPY QQQ NVDA TSLA AAPL MSFT AMD SMCI META MU AMZN GOOGL COIN BTC)
+OK: HF_HOME='/home/itsju/.cache/huggingface' | disk 844GB free | checks passed
+[2026-06-03T00:00:10Z] Generating SPY...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-03T00:00:15Z] Generating QQQ...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-03T00:00:20Z] Generating NVDA...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-03T00:00:26Z] Generating TSLA...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-03T00:00:31Z] Generating AAPL...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-03T00:00:36Z] Generating MSFT...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-03T00:00:41Z] Generating AMD...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-03T00:00:46Z] Generating SMCI...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-03T00:00:51Z] Generating META...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-03T00:00:56Z] Generating MU...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-03T00:01:01Z] Generating AMZN...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-03T00:01:06Z] Generating GOOGL...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-03T00:01:12Z] Generating COIN...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-03T00:01:17Z] Generating BTC...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-03T00:01:22Z] kronos_refresh_premarket done
+[2026-06-03T00:15:09Z] kronos_refresh_premarket starting (tickers=SPY QQQ NVDA TSLA AAPL MSFT AMD SMCI META MU AMZN GOOGL COIN BTC)
+OK: HF_HOME='/home/itsju/.cache/huggingface' | disk 844GB free | checks passed
+[2026-06-03T00:15:09Z] Generating SPY...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-03T00:15:14Z] Generating QQQ...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-03T00:15:19Z] Generating NVDA...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-03T00:15:24Z] Generating TSLA...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-03T00:15:29Z] Generating AAPL...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-03T00:15:34Z] Generating MSFT...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-03T00:15:39Z] Generating AMD...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-03T00:15:44Z] Generating SMCI...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-03T00:15:50Z] Generating META...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-03T00:15:55Z] Generating MU...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-03T00:16:00Z] Generating AMZN...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-03T00:16:05Z] Generating GOOGL...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-03T00:16:10Z] Generating COIN...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-03T00:16:15Z] Generating BTC...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-03T00:16:20Z] kronos_refresh_premarket done
+[2026-06-03T00:30:10Z] kronos_refresh_premarket starting (tickers=SPY QQQ NVDA TSLA AAPL MSFT AMD SMCI META MU AMZN GOOGL COIN BTC)
+OK: HF_HOME='/home/itsju/.cache/huggingface' | disk 844GB free | checks passed
+[2026-06-03T00:30:10Z] Generating SPY...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-03T00:30:15Z] Generating QQQ...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-03T00:30:20Z] Generating NVDA...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-03T00:30:26Z] Generating TSLA...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-03T00:30:31Z] Generating AAPL...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-03T00:30:36Z] Generating MSFT...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-03T00:30:41Z] Generating AMD...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-03T00:30:46Z] Generating SMCI...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-03T00:30:51Z] Generating META...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-03T00:30:57Z] Generating MU...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-03T00:31:02Z] Generating AMZN...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-03T00:31:07Z] Generating GOOGL...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-03T00:31:12Z] Generating COIN...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-03T00:31:17Z] Generating BTC...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-03T00:31:22Z] kronos_refresh_premarket done
+[2026-06-03T01:00:10Z] kronos_refresh_premarket starting (tickers=SPY QQQ NVDA TSLA AAPL MSFT AMD SMCI META MU AMZN GOOGL COIN BTC)
+OK: HF_HOME='/home/itsju/.cache/huggingface' | disk 844GB free | checks passed
+[2026-06-03T01:00:10Z] Generating SPY...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-03T01:00:15Z] Generating QQQ...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-03T01:00:20Z] Generating NVDA...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-03T01:00:25Z] Generating TSLA...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-03T01:00:31Z] Generating AAPL...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-03T01:00:36Z] Generating MSFT...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-03T01:00:41Z] Generating AMD...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-03T01:00:46Z] Generating SMCI...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-03T01:00:51Z] Generating META...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-03T01:00:56Z] Generating MU...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-03T01:01:02Z] Generating AMZN...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-03T01:01:07Z] Generating GOOGL...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-03T01:01:12Z] Generating COIN...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-03T01:01:17Z] Generating BTC...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-03T01:01:23Z] kronos_refresh_premarket done
+[2026-06-03T02:30:10Z] kronos_refresh_premarket starting (tickers=SPY QQQ NVDA TSLA AAPL MSFT AMD SMCI META MU AMZN GOOGL COIN BTC)
+OK: HF_HOME='/home/itsju/.cache/huggingface' | disk 844GB free | checks passed
+[2026-06-03T02:30:10Z] Generating SPY...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-03T02:30:16Z] Generating QQQ...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-03T02:30:21Z] Generating NVDA...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-03T02:30:26Z] Generating TSLA...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-03T02:30:31Z] Generating AAPL...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-03T02:30:36Z] Generating MSFT...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-03T02:30:41Z] Generating AMD...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-03T02:30:46Z] Generating SMCI...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-03T02:30:52Z] Generating META...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-03T02:30:57Z] Generating MU...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-03T02:31:02Z] Generating AMZN...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-03T02:31:07Z] Generating GOOGL...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-03T02:31:12Z] Generating COIN...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-03T02:31:17Z] Generating BTC...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-03T02:31:22Z] kronos_refresh_premarket done
+[2026-06-03T03:30:15Z] kronos_refresh_premarket starting (tickers=SPY QQQ NVDA TSLA AAPL MSFT AMD SMCI META MU AMZN GOOGL COIN BTC)
+OK: HF_HOME='/home/itsju/.cache/huggingface' | disk 827GB free | checks passed
+[2026-06-03T03:30:15Z] Generating SPY...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-03T03:30:20Z] Generating QQQ...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-03T03:30:26Z] Generating NVDA...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-03T03:30:33Z] Generating TSLA...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-03T03:30:39Z] Generating AAPL...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-03T03:30:46Z] Generating MSFT...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-03T03:30:52Z] Generating AMD...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-03T03:30:59Z] Generating SMCI...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-03T03:31:11Z] Generating META...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-03T03:31:17Z] Generating MU...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-03T03:31:24Z] Generating AMZN...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-03T03:31:30Z] Generating GOOGL...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-03T03:31:37Z] Generating COIN...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-03T03:31:44Z] Generating BTC...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-03T03:31:56Z] kronos_refresh_premarket done
+[2026-06-03T03:45:26Z] kronos_refresh_premarket starting (tickers=SPY QQQ NVDA TSLA AAPL MSFT AMD SMCI META MU AMZN GOOGL COIN BTC)
+OK: HF_HOME='/home/itsju/.cache/huggingface' | disk 827GB free | checks passed
+[2026-06-03T03:45:26Z] Generating SPY...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-03T03:45:32Z] Generating QQQ...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-03T03:45:39Z] Generating NVDA...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-03T03:45:45Z] Generating TSLA...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-03T03:45:52Z] Generating AAPL...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-03T03:45:59Z] Generating MSFT...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-03T03:46:06Z] Generating AMD...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-03T03:46:12Z] Generating SMCI...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-03T03:46:19Z] Generating META...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-03T03:46:26Z] Generating MU...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-03T03:46:32Z] Generating AMZN...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-03T03:46:39Z] Generating GOOGL...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-03T03:46:46Z] Generating COIN...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-03T03:46:52Z] Generating BTC...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-03T03:46:59Z] kronos_refresh_premarket done
+[2026-06-03T03:55:07Z] kronos_refresh_premarket starting (tickers=SPY QQQ NVDA TSLA AAPL MSFT AMD SMCI META MU AMZN GOOGL COIN BTC)
+OK: HF_HOME='/home/itsju/.cache/huggingface' | disk 827GB free | checks passed
+[2026-06-03T03:55:07Z] Generating SPY...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-03T03:55:13Z] Generating QQQ...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-03T03:55:18Z] Generating NVDA...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-03T03:55:24Z] Generating TSLA...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-03T03:55:29Z] Generating AAPL...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-03T03:55:34Z] Generating MSFT...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-03T03:55:40Z] Generating AMD...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-03T03:55:45Z] Generating SMCI...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-03T03:55:50Z] Generating META...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-03T03:55:55Z] Generating MU...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-03T03:56:00Z] Generating AMZN...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-03T03:56:05Z] Generating GOOGL...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-03T03:56:10Z] Generating COIN...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-03T03:56:16Z] Generating BTC...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-03T03:56:21Z] kronos_refresh_premarket done
+[2026-06-03T04:00:46Z] kronos_refresh_premarket starting (tickers=SPY QQQ NVDA TSLA AAPL MSFT AMD SMCI META MU AMZN GOOGL COIN BTC)
+OK: HF_HOME='/home/itsju/.cache/huggingface' | disk 827GB free | checks passed
+[2026-06-03T04:00:47Z] Generating SPY...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-03T04:00:52Z] Generating QQQ...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-03T04:00:57Z] Generating NVDA...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-03T04:01:02Z] Generating TSLA...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-03T04:01:07Z] Generating AAPL...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-03T04:01:12Z] Generating MSFT...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-03T04:01:17Z] Generating AMD...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-03T04:01:22Z] Generating SMCI...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-03T04:01:28Z] Generating META...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-03T04:01:33Z] Generating MU...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-03T04:01:38Z] Generating AMZN...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-03T04:01:43Z] Generating GOOGL...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-03T04:01:48Z] Generating COIN...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-03T04:01:53Z] Generating BTC...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-03T04:01:58Z] kronos_refresh_premarket done
+[2026-06-03T04:15:53Z] kronos_refresh_premarket starting (tickers=SPY QQQ NVDA TSLA AAPL MSFT AMD SMCI META MU AMZN GOOGL COIN BTC)
+OK: HF_HOME='/home/itsju/.cache/huggingface' | disk 827GB free | checks passed
+[2026-06-03T04:15:53Z] Generating SPY...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-03T04:15:58Z] Generating QQQ...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-03T04:16:03Z] Generating NVDA...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-03T04:16:08Z] Generating TSLA...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-03T04:16:14Z] Generating AAPL...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-03T04:16:19Z] Generating MSFT...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-03T04:16:24Z] Generating AMD...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-03T04:16:29Z] Generating SMCI...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-03T04:16:34Z] Generating META...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-03T04:16:39Z] Generating MU...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-03T04:16:44Z] Generating AMZN...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-03T04:16:49Z] Generating GOOGL...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-03T04:16:55Z] Generating COIN...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-03T04:17:00Z] Generating BTC...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-03T04:17:05Z] kronos_refresh_premarket done
+[2026-06-03T04:30:53Z] kronos_refresh_premarket starting (tickers=SPY QQQ NVDA TSLA AAPL MSFT AMD SMCI META MU AMZN GOOGL COIN BTC)
+OK: HF_HOME='/home/itsju/.cache/huggingface' | disk 827GB free | checks passed
+[2026-06-03T04:30:53Z] Generating SPY...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-03T04:30:58Z] Generating QQQ...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-03T04:31:03Z] Generating NVDA...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-03T04:31:08Z] Generating TSLA...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-03T04:31:13Z] Generating AAPL...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-03T04:31:18Z] Generating MSFT...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-03T04:31:24Z] Generating AMD...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-03T04:31:29Z] Generating SMCI...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-03T04:31:34Z] Generating META...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-03T04:31:39Z] Generating MU...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-03T04:31:44Z] Generating AMZN...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-03T04:31:49Z] Generating GOOGL...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-03T04:31:54Z] Generating COIN...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-03T04:31:59Z] Generating BTC...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-03T04:32:05Z] kronos_refresh_premarket done
+[2026-06-03T04:45:53Z] kronos_refresh_premarket starting (tickers=SPY QQQ NVDA TSLA AAPL MSFT AMD SMCI META MU AMZN GOOGL COIN BTC)
+OK: HF_HOME='/home/itsju/.cache/huggingface' | disk 827GB free | checks passed
+[2026-06-03T04:45:53Z] Generating SPY...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-03T04:45:58Z] Generating QQQ...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-03T04:46:03Z] Generating NVDA...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-03T04:46:08Z] Generating TSLA...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-03T04:46:13Z] Generating AAPL...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-03T04:46:19Z] Generating MSFT...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-03T04:46:24Z] Generating AMD...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-03T04:46:29Z] Generating SMCI...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-03T04:46:34Z] Generating META...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-03T04:46:39Z] Generating MU...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-03T04:46:45Z] Generating AMZN...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-03T04:46:50Z] Generating GOOGL...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-03T04:46:55Z] Generating COIN...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-03T04:47:00Z] Generating BTC...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-03T04:47:05Z] kronos_refresh_premarket done
+[2026-06-03T05:00:52Z] kronos_refresh_premarket starting (tickers=SPY QQQ NVDA TSLA AAPL MSFT AMD SMCI META MU AMZN GOOGL COIN BTC)
+OK: HF_HOME='/home/itsju/.cache/huggingface' | disk 827GB free | checks passed
+[2026-06-03T05:00:52Z] Generating SPY...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-03T05:00:57Z] Generating QQQ...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-03T05:01:03Z] Generating NVDA...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-03T05:01:08Z] Generating TSLA...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-03T05:01:13Z] Generating AAPL...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-03T05:01:18Z] Generating MSFT...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-03T05:01:23Z] Generating AMD...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-03T05:01:28Z] Generating SMCI...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-03T05:01:34Z] Generating META...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-03T05:01:39Z] Generating MU...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-03T05:01:44Z] Generating AMZN...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-03T05:01:49Z] Generating GOOGL...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-03T05:01:54Z] Generating COIN...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-03T05:01:59Z] Generating BTC...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-03T05:02:04Z] kronos_refresh_premarket done
+[2026-06-03T05:15:55Z] kronos_refresh_premarket starting (tickers=SPY QQQ NVDA TSLA AAPL MSFT AMD SMCI META MU AMZN GOOGL COIN BTC)
+OK: HF_HOME='/home/itsju/.cache/huggingface' | disk 827GB free | checks passed
+[2026-06-03T05:15:55Z] Generating SPY...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-03T05:16:01Z] Generating QQQ...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-03T05:16:06Z] Generating NVDA...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-03T05:16:11Z] Generating TSLA...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-03T05:16:17Z] Generating AAPL...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-03T05:16:23Z] Generating MSFT...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-03T05:16:28Z] Generating AMD...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-03T05:16:33Z] Generating SMCI...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-03T05:16:38Z] Generating META...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-03T05:16:44Z] Generating MU...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-03T05:16:49Z] Generating AMZN...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-03T05:16:54Z] Generating GOOGL...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-03T05:16:59Z] Generating COIN...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-03T05:17:04Z] Generating BTC...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-03T05:17:10Z] kronos_refresh_premarket done
+[2026-06-03T06:45:21Z] kronos_refresh_premarket starting (tickers=SPY QQQ NVDA TSLA AAPL MSFT AMD SMCI META MU AMZN GOOGL COIN BTC)
+OK: HF_HOME='/home/itsju/.cache/huggingface' | disk 830GB free | checks passed
+[2026-06-03T06:45:21Z] Generating SPY...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-03T06:45:27Z] Generating QQQ...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-03T06:45:34Z] Generating NVDA...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-03T06:45:40Z] Generating TSLA...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-03T06:45:46Z] Generating AAPL...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-03T06:45:53Z] Generating MSFT...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-03T06:45:59Z] Generating AMD...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-03T06:46:05Z] Generating SMCI...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-03T06:46:11Z] Generating META...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-03T06:46:17Z] Generating MU...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-03T06:46:23Z] Generating AMZN...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-03T06:46:29Z] Generating GOOGL...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-03T06:46:35Z] Generating COIN...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-03T06:46:41Z] Generating BTC...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-03T06:46:46Z] kronos_refresh_premarket done
+[2026-06-03T07:00:12Z] kronos_refresh_premarket starting (tickers=SPY QQQ NVDA TSLA AAPL MSFT AMD SMCI META MU AMZN GOOGL COIN BTC)
+OK: HF_HOME='/home/itsju/.cache/huggingface' | disk 825GB free | checks passed
+[2026-06-03T07:00:12Z] Generating SPY...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-03T07:00:17Z] Generating QQQ...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-03T07:00:23Z] Generating NVDA...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-03T07:00:28Z] Generating TSLA...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-03T07:00:33Z] Generating AAPL...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-03T07:00:39Z] Generating MSFT...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-03T07:00:44Z] Generating AMD...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-03T07:00:49Z] Generating SMCI...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-03T07:00:55Z] Generating META...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-03T07:01:00Z] Generating MU...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-03T07:01:06Z] Generating AMZN...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-03T07:01:11Z] Generating GOOGL...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-03T07:01:16Z] Generating COIN...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-03T07:01:22Z] Generating BTC...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-03T07:01:27Z] kronos_refresh_premarket done
+[2026-06-03T07:45:13Z] kronos_refresh_premarket starting (tickers=SPY QQQ NVDA TSLA AAPL MSFT AMD SMCI META MU AMZN GOOGL COIN BTC)
+OK: HF_HOME='/home/itsju/.cache/huggingface' | disk 824GB free | checks passed
+[2026-06-03T07:45:13Z] Generating SPY...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-03T07:45:19Z] Generating QQQ...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-03T07:45:24Z] Generating NVDA...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-03T07:45:30Z] Generating TSLA...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-03T07:45:36Z] Generating AAPL...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-03T07:45:41Z] Generating MSFT...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-03T07:45:47Z] Generating AMD...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-03T07:45:53Z] Generating SMCI...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-03T07:45:58Z] Generating META...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-03T07:46:04Z] Generating MU...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-03T07:46:10Z] Generating AMZN...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-03T07:46:15Z] Generating GOOGL...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-03T07:46:22Z] Generating COIN...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-03T07:46:27Z] Generating BTC...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-03T07:46:33Z] kronos_refresh_premarket done
+[2026-06-03T08:00:08Z] kronos_refresh_premarket starting (tickers=SPY QQQ NVDA TSLA AAPL MSFT AMD SMCI META MU AMZN GOOGL COIN BTC)
+OK: HF_HOME='/home/itsju/.cache/huggingface' | disk 824GB free | checks passed
+[2026-06-03T08:00:08Z] Generating SPY...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-03T08:00:14Z] Generating QQQ...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-03T08:00:20Z] Generating NVDA...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-03T08:00:25Z] Generating TSLA...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-03T08:00:31Z] Generating AAPL...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-03T08:00:36Z] Generating MSFT...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-03T08:00:41Z] Generating AMD...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-03T08:00:47Z] Generating SMCI...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-03T08:00:52Z] Generating META...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-03T08:00:57Z] Generating MU...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-03T08:01:03Z] Generating AMZN...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-03T08:01:08Z] Generating GOOGL...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-03T08:01:14Z] Generating COIN...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-03T08:01:19Z] Generating BTC...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-03T08:01:25Z] kronos_refresh_premarket done
+[2026-06-03T08:30:08Z] kronos_refresh_premarket starting (tickers=SPY QQQ NVDA TSLA AAPL MSFT AMD SMCI META MU AMZN GOOGL COIN BTC)
+OK: HF_HOME='/home/itsju/.cache/huggingface' | disk 818GB free | checks passed
+[2026-06-03T08:30:08Z] Generating SPY...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-03T08:30:13Z] Generating QQQ...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-03T08:30:18Z] Generating NVDA...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-03T08:30:24Z] Generating TSLA...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-03T08:30:29Z] Generating AAPL...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-03T08:30:35Z] Generating MSFT...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-03T08:30:40Z] Generating AMD...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-03T08:30:45Z] Generating SMCI...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-03T08:30:50Z] Generating META...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-03T08:30:56Z] Generating MU...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-03T08:31:01Z] Generating AMZN...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-03T08:31:06Z] Generating GOOGL...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-03T08:31:12Z] Generating COIN...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-03T08:31:17Z] Generating BTC...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-03T08:31:22Z] kronos_refresh_premarket done
+[2026-06-03T08:45:14Z] kronos_refresh_premarket starting (tickers=SPY QQQ NVDA TSLA AAPL MSFT AMD SMCI META MU AMZN GOOGL COIN BTC)
+OK: HF_HOME='/home/itsju/.cache/huggingface' | disk 818GB free | checks passed
+[2026-06-03T08:45:14Z] Generating SPY...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-03T08:45:20Z] Generating QQQ...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-03T08:45:26Z] Generating NVDA...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-03T08:45:31Z] Generating TSLA...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-03T08:45:37Z] Generating AAPL...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-03T08:45:42Z] Generating MSFT...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-03T08:45:48Z] Generating AMD...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-03T08:45:53Z] Generating SMCI...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-03T08:45:58Z] Generating META...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-03T08:46:04Z] Generating MU...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-03T08:46:09Z] Generating AMZN...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-03T08:46:14Z] Generating GOOGL...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-03T08:46:20Z] Generating COIN...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-03T08:46:26Z] Generating BTC...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-03T08:46:31Z] kronos_refresh_premarket done
+[2026-06-03T09:45:08Z] kronos_refresh_premarket starting (tickers=SPY QQQ NVDA TSLA AAPL MSFT AMD SMCI META MU AMZN GOOGL COIN BTC)
+OK: HF_HOME='/home/itsju/.cache/huggingface' | disk 809GB free | checks passed
+[2026-06-03T09:45:08Z] Generating SPY...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-03T09:45:13Z] Generating QQQ...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-03T09:45:18Z] Generating NVDA...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-03T09:45:23Z] Generating TSLA...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-03T09:45:28Z] Generating AAPL...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-03T09:45:34Z] Generating MSFT...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-03T09:45:39Z] Generating AMD...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-03T09:45:44Z] Generating SMCI...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-03T09:45:49Z] Generating META...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-03T09:45:54Z] Generating MU...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-03T09:45:59Z] Generating AMZN...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-03T09:46:04Z] Generating GOOGL...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-03T09:46:10Z] Generating COIN...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-03T09:46:15Z] Generating BTC...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-03T09:46:20Z] kronos_refresh_premarket done
+[2026-06-03T10:00:00Z] kronos_refresh_premarket starting (tickers=SPY QQQ NVDA TSLA AAPL MSFT AMD SMCI META MU AMZN GOOGL COIN BTC)
+OK: HF_HOME='/home/itsju/.cache/huggingface' | disk 811GB free | checks passed
+[2026-06-03T10:00:00Z] Generating SPY...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-03T10:00:06Z] Generating QQQ...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-03T10:00:11Z] Generating NVDA...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-03T10:00:16Z] Generating TSLA...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-03T10:00:21Z] Generating AAPL...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-03T10:00:26Z] Generating MSFT...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-03T10:00:31Z] Generating AMD...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-03T10:00:36Z] Generating SMCI...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-03T10:00:41Z] Generating META...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-03T10:00:47Z] Generating MU...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-03T10:00:52Z] Generating AMZN...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-03T10:00:57Z] Generating GOOGL...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-03T10:01:02Z] Generating COIN...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-03T10:01:07Z] Generating BTC...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-03T10:01:12Z] kronos_refresh_premarket done
+[2026-06-03T10:15:02Z] kronos_refresh_premarket starting (tickers=SPY QQQ NVDA TSLA AAPL MSFT AMD SMCI META MU AMZN GOOGL COIN BTC)
+OK: HF_HOME='/home/itsju/.cache/huggingface' | disk 816GB free | checks passed
+[2026-06-03T10:15:02Z] Generating SPY...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-03T10:15:07Z] Generating QQQ...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-03T10:15:12Z] Generating NVDA...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-03T10:15:17Z] Generating TSLA...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-03T10:15:23Z] Generating AAPL...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-03T10:15:28Z] Generating MSFT...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-03T10:15:34Z] Generating AMD...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-03T10:15:39Z] Generating SMCI...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-03T10:15:44Z] Generating META...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-03T10:15:50Z] Generating MU...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-03T10:15:55Z] Generating AMZN...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-03T10:16:00Z] Generating GOOGL...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-03T10:16:05Z] Generating COIN...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-03T10:16:10Z] Generating BTC...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-03T10:16:16Z] kronos_refresh_premarket done
+[2026-06-03T10:30:01Z] kronos_refresh_premarket starting (tickers=SPY QQQ NVDA TSLA AAPL MSFT AMD SMCI META MU AMZN GOOGL COIN BTC)
+OK: HF_HOME='/home/itsju/.cache/huggingface' | disk 816GB free | checks passed
+[2026-06-03T10:30:01Z] Generating SPY...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-03T10:30:06Z] Generating QQQ...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-03T10:30:11Z] Generating NVDA...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-03T10:30:16Z] Generating TSLA...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-03T10:30:21Z] Generating AAPL...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-03T10:30:26Z] Generating MSFT...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-03T10:30:32Z] Generating AMD...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-03T10:30:37Z] Generating SMCI...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-03T10:30:42Z] Generating META...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-03T10:30:47Z] Generating MU...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-03T10:30:52Z] Generating AMZN...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-03T10:30:57Z] Generating GOOGL...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-03T10:31:02Z] Generating COIN...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-03T10:31:08Z] Generating BTC...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-03T10:31:13Z] kronos_refresh_premarket done
+[2026-06-03T10:45:03Z] kronos_refresh_premarket starting (tickers=SPY QQQ NVDA TSLA AAPL MSFT AMD SMCI META MU AMZN GOOGL COIN BTC)
+OK: HF_HOME='/home/itsju/.cache/huggingface' | disk 816GB free | checks passed
+[2026-06-03T10:45:03Z] Generating SPY...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-03T10:45:08Z] Generating QQQ...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-03T10:45:13Z] Generating NVDA...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-03T10:45:18Z] Generating TSLA...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-03T10:45:23Z] Generating AAPL...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-03T10:45:28Z] Generating MSFT...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-03T10:45:33Z] Generating AMD...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-03T10:45:38Z] Generating SMCI...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-03T10:45:44Z] Generating META...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-03T10:45:49Z] Generating MU...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-03T10:45:54Z] Generating AMZN...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-03T10:45:59Z] Generating GOOGL...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-03T10:46:04Z] Generating COIN...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-03T10:46:09Z] Generating BTC...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-03T10:46:14Z] kronos_refresh_premarket done
+[2026-06-03T11:00:01Z] kronos_refresh_premarket starting (tickers=SPY QQQ NVDA TSLA AAPL MSFT AMD SMCI META MU AMZN GOOGL COIN BTC)
+OK: HF_HOME='/home/itsju/.cache/huggingface' | disk 816GB free | checks passed
+[2026-06-03T11:00:01Z] Generating SPY...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-03T11:00:06Z] Generating QQQ...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-03T11:00:11Z] Generating NVDA...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-03T11:00:16Z] Generating TSLA...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-03T11:00:21Z] Generating AAPL...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-03T11:00:26Z] Generating MSFT...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-03T11:00:31Z] Generating AMD...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-03T11:00:37Z] Generating SMCI...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-03T11:00:42Z] Generating META...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-03T11:00:47Z] Generating MU...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-03T11:00:52Z] Generating AMZN...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-03T11:00:57Z] Generating GOOGL...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-03T11:01:02Z] Generating COIN...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-03T11:01:07Z] Generating BTC...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-03T11:01:12Z] kronos_refresh_premarket done
+[2026-06-03T13:30:06Z] kronos_refresh_premarket starting (tickers=SPY QQQ NVDA TSLA AAPL MSFT AMD SMCI META MU AMZN GOOGL COIN BTC)
+OK: HF_HOME='/home/itsju/.cache/huggingface' | disk 817GB free | checks passed
+[2026-06-03T13:30:06Z] Generating SPY...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-03T13:30:12Z] Generating QQQ...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-03T13:30:17Z] Generating NVDA...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-03T13:30:22Z] Generating TSLA...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-03T13:30:27Z] Generating AAPL...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-03T13:30:32Z] Generating MSFT...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-03T13:30:37Z] Generating AMD...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-03T13:30:42Z] Generating SMCI...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-03T13:30:47Z] Generating META...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-03T13:30:53Z] Generating MU...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-03T13:30:58Z] Generating AMZN...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-03T13:31:03Z] Generating GOOGL...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-03T13:31:08Z] Generating COIN...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-03T13:31:13Z] Generating BTC...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-03T13:31:18Z] kronos_refresh_premarket done
+[2026-06-03T13:45:11Z] kronos_refresh_premarket starting (tickers=SPY QQQ NVDA TSLA AAPL MSFT AMD SMCI META MU AMZN GOOGL COIN BTC)
+OK: HF_HOME='/home/itsju/.cache/huggingface' | disk 817GB free | checks passed
+[2026-06-03T13:45:11Z] Generating SPY...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-03T13:45:16Z] Generating QQQ...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-03T13:45:21Z] Generating NVDA...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-03T13:45:27Z] Generating TSLA...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-03T13:45:32Z] Generating AAPL...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-03T13:45:37Z] Generating MSFT...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-03T13:45:42Z] Generating AMD...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-03T13:45:47Z] Generating SMCI...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-03T13:45:52Z] Generating META...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-03T13:45:58Z] Generating MU...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-03T13:46:03Z] Generating AMZN...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-03T13:46:08Z] Generating GOOGL...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-03T13:46:13Z] Generating COIN...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-03T13:46:18Z] Generating BTC...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-03T13:46:23Z] kronos_refresh_premarket done
+[2026-06-03T14:00:13Z] kronos_refresh_premarket starting (tickers=SPY QQQ NVDA TSLA AAPL MSFT AMD SMCI META MU AMZN GOOGL COIN BTC)
+OK: HF_HOME='/home/itsju/.cache/huggingface' | disk 817GB free | checks passed
+[2026-06-03T14:00:13Z] Generating SPY...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-03T14:00:18Z] Generating QQQ...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-03T14:00:23Z] Generating NVDA...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-03T14:00:28Z] Generating TSLA...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-03T14:00:33Z] Generating AAPL...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-03T14:00:39Z] Generating MSFT...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-03T14:00:44Z] Generating AMD...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-03T14:00:49Z] Generating SMCI...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-03T14:00:54Z] Generating META...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-03T14:00:59Z] Generating MU...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-03T14:01:04Z] Generating AMZN...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-03T14:01:09Z] Generating GOOGL...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-03T14:01:14Z] Generating COIN...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-03T14:01:19Z] Generating BTC...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-03T14:01:25Z] kronos_refresh_premarket done
+[2026-06-03T14:15:07Z] kronos_refresh_premarket starting (tickers=SPY QQQ NVDA TSLA AAPL MSFT AMD SMCI META MU AMZN GOOGL COIN BTC)
+OK: HF_HOME='/home/itsju/.cache/huggingface' | disk 817GB free | checks passed
+[2026-06-03T14:15:07Z] Generating SPY...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-03T14:15:12Z] Generating QQQ...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-03T14:15:17Z] Generating NVDA...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-03T14:15:22Z] Generating TSLA...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-03T14:15:28Z] Generating AAPL...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-03T14:15:33Z] Generating MSFT...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-03T14:15:38Z] Generating AMD...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-03T14:15:43Z] Generating SMCI...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-03T14:15:48Z] Generating META...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-03T14:15:53Z] Generating MU...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-03T14:15:58Z] Generating AMZN...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-03T14:16:03Z] Generating GOOGL...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-03T14:16:09Z] Generating COIN...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-03T14:16:14Z] Generating BTC...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-03T14:16:19Z] kronos_refresh_premarket done
+[2026-06-03T16:30:11Z] kronos_refresh_premarket starting (tickers=SPY QQQ NVDA TSLA AAPL MSFT AMD SMCI META MU AMZN GOOGL COIN BTC)
+OK: HF_HOME='/home/itsju/.cache/huggingface' | disk 816GB free | checks passed
+[2026-06-03T16:30:11Z] Generating SPY...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-03T16:30:17Z] Generating QQQ...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-03T16:30:22Z] Generating NVDA...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-03T16:30:27Z] Generating TSLA...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-03T16:30:32Z] Generating AAPL...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-03T16:30:38Z] Generating MSFT...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-03T16:30:43Z] Generating AMD...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-03T16:30:48Z] Generating SMCI...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-03T16:30:53Z] Generating META...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-03T16:30:58Z] Generating MU...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-03T16:31:04Z] Generating AMZN...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-03T16:31:09Z] Generating GOOGL...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-03T16:31:14Z] Generating COIN...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-03T16:31:19Z] Generating BTC...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-03T16:31:24Z] kronos_refresh_premarket done
+[2026-06-03T16:35:08Z] kronos_refresh_premarket starting (tickers=SPY QQQ NVDA TSLA AAPL MSFT AMD SMCI META MU AMZN GOOGL COIN BTC)
+OK: HF_HOME='/home/itsju/.cache/huggingface' | disk 816GB free | checks passed
+[2026-06-03T16:35:08Z] Generating SPY...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-03T16:35:13Z] Generating QQQ...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-03T16:35:18Z] Generating NVDA...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-03T16:35:24Z] Generating TSLA...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-03T16:35:29Z] Generating AAPL...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-03T16:35:34Z] Generating MSFT...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-03T16:35:39Z] Generating AMD...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-03T16:35:45Z] Generating SMCI...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-03T16:35:50Z] Generating META...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-03T16:35:55Z] Generating MU...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-03T16:36:00Z] Generating AMZN...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-03T16:36:05Z] Generating GOOGL...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-03T16:36:10Z] Generating COIN...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-03T16:36:15Z] Generating BTC...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-03T16:36:21Z] kronos_refresh_premarket done
+[2026-06-03T17:00:01Z] kronos_refresh_premarket starting (tickers=SPY QQQ NVDA TSLA AAPL MSFT AMD SMCI META MU AMZN GOOGL COIN BTC)
+[2026-06-03T17:00:01Z] kronos_refresh_premarket starting (tickers=SPY QQQ NVDA TSLA AAPL MSFT AMD SMCI META MU AMZN GOOGL COIN BTC)
+OK: HF_HOME='/home/itsju/.cache/huggingface' | disk 812GB free | checks passed
+[2026-06-03T17:00:01Z] Generating SPY...
+[2026-06-03T17:00:01Z] Generating SPY...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-03T17:00:07Z] Generating QQQ...
+[2026-06-03T17:00:07Z] Generating QQQ...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-03T17:00:12Z] Generating NVDA...
+[2026-06-03T17:00:12Z] Generating NVDA...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-03T17:00:17Z] Generating TSLA...
+[2026-06-03T17:00:17Z] Generating TSLA...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-03T17:00:22Z] Generating AAPL...
+[2026-06-03T17:00:22Z] Generating AAPL...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-03T17:00:27Z] Generating MSFT...
+[2026-06-03T17:00:27Z] Generating MSFT...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-03T17:00:33Z] Generating AMD...
+[2026-06-03T17:00:33Z] Generating AMD...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-03T17:00:38Z] Generating SMCI...
+[2026-06-03T17:00:38Z] Generating SMCI...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-03T17:00:43Z] Generating META...
+[2026-06-03T17:00:43Z] Generating META...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-03T17:00:48Z] Generating MU...
+[2026-06-03T17:00:48Z] Generating MU...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-03T17:00:53Z] Generating AMZN...
+[2026-06-03T17:00:53Z] Generating AMZN...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-03T17:00:58Z] Generating GOOGL...
+[2026-06-03T17:00:58Z] Generating GOOGL...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-03T17:01:03Z] Generating COIN...
+[2026-06-03T17:01:03Z] Generating COIN...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-03T17:01:08Z] Generating BTC...
+[2026-06-03T17:01:08Z] Generating BTC...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-03T17:01:13Z] kronos_refresh_premarket done
+[2026-06-03T17:01:13Z] kronos_refresh_premarket done
+[2026-06-03T17:35:20Z] kronos_refresh_premarket starting (tickers=SPY QQQ NVDA TSLA AAPL MSFT AMD SMCI META MU AMZN GOOGL COIN BTC)
+OK: HF_HOME='/home/itsju/.cache/huggingface' | disk 796GB free | checks passed
+[2026-06-03T17:35:20Z] Generating SPY...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-03T17:35:26Z] Generating QQQ...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-03T17:35:32Z] Generating NVDA...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-03T17:35:37Z] Generating TSLA...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-03T17:35:43Z] Generating AAPL...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-03T17:35:49Z] Generating MSFT...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-03T17:35:54Z] Generating AMD...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-03T17:36:00Z] Generating SMCI...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-03T17:36:05Z] Generating META...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-03T17:36:10Z] Generating MU...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-03T17:36:16Z] Generating AMZN...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-03T17:36:22Z] Generating GOOGL...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-03T17:36:27Z] Generating COIN...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-03T17:36:32Z] Generating BTC...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-03T17:36:37Z] kronos_refresh_premarket done
+[2026-06-03T20:20:12Z] kronos_refresh_premarket starting (tickers=SPY QQQ NVDA TSLA AAPL MSFT AMD SMCI META MU AMZN GOOGL COIN BTC)
+OK: HF_HOME='/home/itsju/.cache/huggingface' | disk 796GB free | checks passed
+[2026-06-03T20:20:12Z] Generating SPY...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-03T20:20:18Z] Generating QQQ...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-03T20:20:23Z] Generating NVDA...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-03T20:20:28Z] Generating TSLA...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-03T20:20:33Z] Generating AAPL...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-03T20:20:38Z] Generating MSFT...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-03T20:20:43Z] Generating AMD...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-03T20:20:48Z] Generating SMCI...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-03T20:20:54Z] Generating META...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-03T20:20:59Z] Generating MU...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-03T20:21:04Z] Generating AMZN...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-03T20:21:09Z] Generating GOOGL...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-03T20:21:14Z] Generating COIN...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-03T20:21:19Z] Generating BTC...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-03T20:21:24Z] kronos_refresh_premarket done
+[2026-06-03T22:20:19Z] kronos_refresh_premarket starting (tickers=SPY QQQ NVDA TSLA AAPL MSFT AMD SMCI META MU AMZN GOOGL COIN BTC)
+OK: HF_HOME='/home/itsju/.cache/huggingface' | disk 764GB free | checks passed
+[2026-06-03T22:20:19Z] Generating SPY...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-03T22:20:26Z] Generating QQQ...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-03T22:20:32Z] Generating NVDA...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-03T22:20:37Z] Generating TSLA...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-03T22:20:42Z] Generating AAPL...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-03T22:20:48Z] Generating MSFT...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-03T22:20:53Z] Generating AMD...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-03T22:20:58Z] Generating SMCI...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-03T22:21:03Z] Generating META...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-03T22:21:09Z] Generating MU...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-03T22:21:15Z] Generating AMZN...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-03T22:21:20Z] Generating GOOGL...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-03T22:21:26Z] Generating COIN...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-03T22:21:31Z] Generating BTC...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-03T22:21:36Z] kronos_refresh_premarket done
+[2026-06-04T01:50:29Z] kronos_refresh_premarket starting (tickers=SPY QQQ NVDA TSLA AAPL MSFT AMD SMCI META MU AMZN GOOGL COIN BTC)
+OK: HF_HOME='/home/itsju/.cache/huggingface' | disk 793GB free | checks passed
+[2026-06-04T01:50:29Z] Generating SPY...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-04T01:50:34Z] Generating QQQ...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-04T01:50:40Z] Generating NVDA...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-04T01:50:46Z] Generating TSLA...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-04T01:50:52Z] Generating AAPL...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-04T01:50:59Z] Generating MSFT...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-04T01:51:05Z] Generating AMD...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-04T01:51:10Z] Generating SMCI...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-04T01:51:15Z] Generating META...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-04T01:51:21Z] Generating MU...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-04T01:51:26Z] Generating AMZN...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-04T01:51:32Z] Generating GOOGL...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-04T01:51:37Z] Generating COIN...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-04T01:51:42Z] Generating BTC...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-04T01:51:48Z] kronos_refresh_premarket done
+[2026-06-04T02:05:23Z] kronos_refresh_premarket starting (tickers=SPY QQQ NVDA TSLA AAPL MSFT AMD SMCI META MU AMZN GOOGL COIN BTC)
+OK: HF_HOME='/home/itsju/.cache/huggingface' | disk 782GB free | checks passed
+[2026-06-04T02:05:23Z] Generating SPY...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-04T02:05:29Z] Generating QQQ...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-04T02:05:35Z] Generating NVDA...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-04T02:05:40Z] Generating TSLA...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-04T02:05:46Z] Generating AAPL...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-04T02:05:51Z] Generating MSFT...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-04T02:05:57Z] Generating AMD...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-04T02:06:02Z] Generating SMCI...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-04T02:06:07Z] Generating META...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-04T02:06:13Z] Generating MU...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-04T02:06:19Z] Generating AMZN...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-04T02:06:24Z] Generating GOOGL...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-04T02:06:30Z] Generating COIN...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-04T02:06:35Z] Generating BTC...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-04T02:06:41Z] kronos_refresh_premarket done
+[2026-06-04T02:35:20Z] kronos_refresh_premarket starting (tickers=SPY QQQ NVDA TSLA AAPL MSFT AMD SMCI META MU AMZN GOOGL COIN BTC)
+OK: HF_HOME='/home/itsju/.cache/huggingface' | disk 776GB free | checks passed
+[2026-06-04T02:35:21Z] Generating SPY...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-04T02:35:31Z] Generating QQQ...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-04T02:35:38Z] Generating NVDA...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-04T02:35:46Z] Generating TSLA...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-04T02:35:53Z] Generating AAPL...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-04T02:36:01Z] Generating MSFT...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-04T02:36:08Z] Generating AMD...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-04T02:36:14Z] Generating SMCI...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-04T02:36:19Z] Generating META...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-04T02:36:25Z] Generating MU...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-04T02:36:31Z] Generating AMZN...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-04T02:36:37Z] Generating GOOGL...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-04T02:36:42Z] Generating COIN...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-04T02:36:48Z] Generating BTC...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-04T02:36:53Z] kronos_refresh_premarket done
+[2026-06-04T04:05:28Z] kronos_refresh_premarket starting (tickers=SPY QQQ NVDA TSLA AAPL MSFT AMD SMCI META MU AMZN GOOGL COIN BTC)
+OK: HF_HOME='/home/itsju/.cache/huggingface' | disk 774GB free | checks passed
+[2026-06-04T04:05:28Z] Generating SPY...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-04T04:05:33Z] Generating QQQ...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-04T04:05:38Z] Generating NVDA...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-04T04:05:43Z] Generating TSLA...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-04T04:05:49Z] Generating AAPL...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-04T04:05:54Z] Generating MSFT...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-04T04:06:00Z] Generating AMD...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-04T04:06:05Z] Generating SMCI...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-04T04:06:10Z] Generating META...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-04T04:06:15Z] Generating MU...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-04T04:06:20Z] Generating AMZN...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-04T04:06:25Z] Generating GOOGL...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-04T04:06:31Z] Generating COIN...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-04T04:06:36Z] Generating BTC...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-04T04:06:41Z] kronos_refresh_premarket done
+[2026-06-04T05:05:19Z] kronos_refresh_premarket starting (tickers=SPY QQQ NVDA TSLA AAPL MSFT AMD SMCI META MU AMZN GOOGL COIN BTC)
+OK: HF_HOME='/home/itsju/.cache/huggingface' | disk 779GB free | checks passed
+[2026-06-04T05:05:19Z] Generating SPY...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-04T05:05:25Z] Generating QQQ...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-04T05:05:31Z] Generating NVDA...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-04T05:05:37Z] Generating TSLA...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-04T05:05:42Z] Generating AAPL...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-04T05:05:48Z] Generating MSFT...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-04T05:05:53Z] Generating AMD...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-04T05:05:58Z] Generating SMCI...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-04T05:06:03Z] Generating META...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-04T05:06:09Z] Generating MU...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-04T05:06:14Z] Generating AMZN...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-04T05:06:19Z] Generating GOOGL...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-04T05:06:25Z] Generating COIN...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-04T05:06:30Z] Generating BTC...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-04T05:06:35Z] kronos_refresh_premarket done
+[2026-06-04T05:20:27Z] kronos_refresh_premarket starting (tickers=SPY QQQ NVDA TSLA AAPL MSFT AMD SMCI META MU AMZN GOOGL COIN BTC)
+OK: HF_HOME='/home/itsju/.cache/huggingface' | disk 777GB free | checks passed
+[2026-06-04T05:20:27Z] Generating SPY...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-04T05:20:32Z] Generating QQQ...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-04T05:20:37Z] Generating NVDA...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-04T05:20:43Z] Generating TSLA...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-04T05:20:48Z] Generating AAPL...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-04T05:20:53Z] Generating MSFT...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-04T05:20:59Z] Generating AMD...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-04T05:21:04Z] Generating SMCI...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-04T05:21:09Z] Generating META...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-04T05:21:15Z] Generating MU...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-04T05:21:20Z] Generating AMZN...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-04T05:21:25Z] Generating GOOGL...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-04T05:21:31Z] Generating COIN...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-04T05:21:36Z] Generating BTC...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-04T05:21:42Z] kronos_refresh_premarket done
+[2026-06-04T15:35:27Z] kronos_refresh_premarket starting (tickers=SPY QQQ NVDA TSLA AAPL MSFT AMD SMCI META MU AMZN GOOGL COIN BTC)
+OK: HF_HOME='/home/itsju/.cache/huggingface' | disk 777GB free | checks passed
+[2026-06-04T15:35:27Z] Generating SPY...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-04T15:35:33Z] Generating QQQ...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-04T15:35:38Z] Generating NVDA...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-04T15:35:44Z] Generating TSLA...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-04T15:35:50Z] Generating AAPL...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-04T15:35:55Z] Generating MSFT...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-04T15:36:01Z] Generating AMD...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-04T15:36:06Z] Generating SMCI...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-04T15:36:11Z] Generating META...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-04T15:36:17Z] Generating MU...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-04T15:36:22Z] Generating AMZN...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-04T15:36:27Z] Generating GOOGL...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-04T15:36:32Z] Generating COIN...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-04T15:36:38Z] Generating BTC...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-04T15:36:43Z] kronos_refresh_premarket done
+[2026-06-04T15:50:34Z] kronos_refresh_premarket starting (tickers=SPY QQQ NVDA TSLA AAPL MSFT AMD SMCI META MU AMZN GOOGL COIN BTC)
+OK: HF_HOME='/home/itsju/.cache/huggingface' | disk 776GB free | checks passed
+[2026-06-04T15:50:34Z] Generating SPY...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-04T15:50:39Z] Generating QQQ...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-04T15:50:45Z] Generating NVDA...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-04T15:50:50Z] Generating TSLA...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-04T15:50:55Z] Generating AAPL...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-04T15:51:01Z] Generating MSFT...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-04T15:51:06Z] Generating AMD...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-04T15:51:12Z] Generating SMCI...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-04T15:51:17Z] Generating META...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-04T15:51:25Z] Generating MU...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-04T15:51:32Z] Generating AMZN...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-04T15:51:40Z] Generating GOOGL...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-04T15:51:46Z] Generating COIN...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-04T15:51:51Z] Generating BTC...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-04T15:51:57Z] kronos_refresh_premarket done
+[2026-06-04T16:05:29Z] kronos_refresh_premarket starting (tickers=SPY QQQ NVDA TSLA AAPL MSFT AMD SMCI META MU AMZN GOOGL COIN BTC)
+OK: HF_HOME='/home/itsju/.cache/huggingface' | disk 775GB free | checks passed
+[2026-06-04T16:05:29Z] Generating SPY...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-04T16:05:34Z] Generating QQQ...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-04T16:05:40Z] Generating NVDA...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-04T16:05:45Z] Generating TSLA...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-04T16:05:51Z] Generating AAPL...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-04T16:05:56Z] Generating MSFT...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-04T16:06:03Z] Generating AMD...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-04T16:06:09Z] Generating SMCI...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-04T16:06:15Z] Generating META...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-04T16:06:20Z] Generating MU...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-04T16:06:26Z] Generating AMZN...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-04T16:06:32Z] Generating GOOGL...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-04T16:06:37Z] Generating COIN...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-04T16:06:43Z] Generating BTC...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-04T16:06:48Z] kronos_refresh_premarket done
+[2026-06-04T17:00:01Z] kronos_refresh_premarket starting (tickers=SPY QQQ NVDA TSLA AAPL MSFT AMD SMCI META MU AMZN GOOGL COIN BTC)
+[2026-06-04T17:00:01Z] kronos_refresh_premarket starting (tickers=SPY QQQ NVDA TSLA AAPL MSFT AMD SMCI META MU AMZN GOOGL COIN BTC)
+OK: HF_HOME='/home/itsju/.cache/huggingface' | disk 778GB free | checks passed
+[2026-06-04T17:00:01Z] Generating SPY...
+[2026-06-04T17:00:01Z] Generating SPY...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-04T17:00:06Z] Generating QQQ...
+[2026-06-04T17:00:06Z] Generating QQQ...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-04T17:00:12Z] Generating NVDA...
+[2026-06-04T17:00:12Z] Generating NVDA...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-04T17:00:17Z] Generating TSLA...
+[2026-06-04T17:00:17Z] Generating TSLA...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-04T17:00:22Z] Generating AAPL...
+[2026-06-04T17:00:22Z] Generating AAPL...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-04T17:00:27Z] Generating MSFT...
+[2026-06-04T17:00:27Z] Generating MSFT...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-04T17:00:33Z] Generating AMD...
+[2026-06-04T17:00:33Z] Generating AMD...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-04T17:00:38Z] Generating SMCI...
+[2026-06-04T17:00:38Z] Generating SMCI...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-04T17:00:43Z] Generating META...
+[2026-06-04T17:00:43Z] Generating META...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-04T17:00:48Z] Generating MU...
+[2026-06-04T17:00:48Z] Generating MU...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-04T17:00:53Z] Generating AMZN...
+[2026-06-04T17:00:53Z] Generating AMZN...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-04T17:00:59Z] Generating GOOGL...
+[2026-06-04T17:00:59Z] Generating GOOGL...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-04T17:01:04Z] Generating COIN...
+[2026-06-04T17:01:04Z] Generating COIN...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-04T17:01:09Z] Generating BTC...
+[2026-06-04T17:01:09Z] Generating BTC...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-04T17:01:15Z] kronos_refresh_premarket done
+[2026-06-04T17:01:15Z] kronos_refresh_premarket done
+[2026-06-04T18:20:19Z] kronos_refresh_premarket starting (tickers=SPY QQQ NVDA TSLA AAPL MSFT AMD SMCI META MU AMZN GOOGL COIN BTC)
+OK: HF_HOME='/home/itsju/.cache/huggingface' | disk 778GB free | checks passed
+[2026-06-04T18:20:19Z] Generating SPY...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-04T18:20:34Z] Generating QQQ...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-04T18:20:49Z] Generating NVDA...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-04T18:21:05Z] Generating TSLA...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-04T18:21:21Z] Generating AAPL...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-04T18:21:38Z] Generating MSFT...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-04T18:21:54Z] Generating AMD...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-04T18:22:10Z] Generating SMCI...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-04T18:22:27Z] Generating META...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-04T18:22:42Z] Generating MU...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-04T18:22:57Z] Generating AMZN...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-04T18:23:10Z] Generating GOOGL...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-04T18:23:25Z] Generating COIN...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-04T18:23:38Z] Generating BTC...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-04T18:23:50Z] kronos_refresh_premarket done
+[2026-06-04T18:35:11Z] kronos_refresh_premarket starting (tickers=SPY QQQ NVDA TSLA AAPL MSFT AMD SMCI META MU AMZN GOOGL COIN BTC)
+OK: HF_HOME='/home/itsju/.cache/huggingface' | disk 778GB free | checks passed
+[2026-06-04T18:35:11Z] Generating SPY...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-04T18:35:25Z] Generating QQQ...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-04T18:35:37Z] Generating NVDA...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-04T18:35:48Z] Generating TSLA...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-04T18:36:01Z] Generating AAPL...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-04T18:36:14Z] Generating MSFT...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-04T18:36:25Z] Generating AMD...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-04T18:36:36Z] Generating SMCI...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-04T18:36:50Z] Generating META...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-04T18:37:05Z] Generating MU...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-04T18:37:18Z] Generating AMZN...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-04T18:37:31Z] Generating GOOGL...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-04T18:37:47Z] Generating COIN...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-04T18:37:57Z] Generating BTC...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-04T18:38:09Z] kronos_refresh_premarket done
+[2026-06-04T19:42:34Z] kronos_refresh_premarket starting (tickers=SPY QQQ NVDA TSLA AAPL MSFT AMD SMCI META MU AMZN GOOGL COIN BTC)
+OK: HF_HOME='/home/itsju/.cache/huggingface' | disk 772GB free | checks passed
+[2026-06-04T19:42:34Z] Generating SPY...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-04T19:42:50Z] Generating QQQ...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-04T19:43:07Z] Generating NVDA...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-04T19:43:19Z] Generating TSLA...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-04T19:43:30Z] Generating AAPL...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-04T19:43:39Z] Generating MSFT...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-04T19:43:49Z] Generating AMD...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-04T19:44:00Z] Generating SMCI...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-04T21:05:18Z] kronos_refresh_premarket starting (tickers=SPY QQQ NVDA TSLA AAPL MSFT AMD SMCI META MU AMZN GOOGL COIN BTC)
+OK: HF_HOME='/home/itsju/.cache/huggingface' | disk 772GB free | checks passed
+[2026-06-04T21:05:18Z] Generating SPY...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-04T21:05:42Z] Generating QQQ...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-04T21:06:45Z] Generating NVDA...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-04T21:07:48Z] Generating TSLA...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-04T21:07:57Z] Generating AAPL...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-04T21:08:07Z] Generating MSFT...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-04T21:08:16Z] Generating AMD...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-04T21:09:18Z] Generating SMCI...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-04T21:10:20Z] Generating META...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-04T21:11:22Z] Generating MU...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-04T21:12:24Z] Generating AMZN...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-04T21:13:26Z] Generating GOOGL...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-04T21:14:28Z] Generating COIN...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-04T21:15:30Z] Generating BTC...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-04T21:16:32Z] kronos_refresh_premarket done
+[2026-06-04T21:20:28Z] kronos_refresh_premarket starting (tickers=SPY QQQ NVDA TSLA AAPL MSFT AMD SMCI META MU AMZN GOOGL COIN BTC)
+OK: HF_HOME='/home/itsju/.cache/huggingface' | disk 771GB free | checks passed
+[2026-06-04T21:20:28Z] Generating SPY...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-04T21:20:43Z] Generating QQQ...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-04T21:20:56Z] Generating NVDA...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-04T21:21:08Z] Generating TSLA...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-04T21:21:19Z] Generating AAPL...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-04T21:21:30Z] Generating MSFT...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-04T21:21:42Z] Generating AMD...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-04T21:21:52Z] Generating SMCI...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-04T21:22:05Z] Generating META...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-04T21:22:15Z] Generating MU...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-04T21:22:25Z] Generating AMZN...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-04T21:22:36Z] Generating GOOGL...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-04T21:22:47Z] Generating COIN...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-04T21:22:58Z] Generating BTC...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-04T21:23:08Z] kronos_refresh_premarket done
+[2026-06-05T17:00:01Z] kronos_refresh_premarket starting (tickers=SPY QQQ NVDA TSLA AAPL MSFT AMD SMCI META MU AMZN GOOGL COIN BTC)
+[2026-06-05T17:00:01Z] kronos_refresh_premarket starting (tickers=SPY QQQ NVDA TSLA AAPL MSFT AMD SMCI META MU AMZN GOOGL COIN BTC)
+OK: HF_HOME='/home/itsju/.cache/huggingface' | disk 765GB free | checks passed
+[2026-06-05T17:00:01Z] Generating SPY...
+[2026-06-05T17:00:01Z] Generating SPY...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-05T17:00:19Z] Generating QQQ...
+[2026-06-05T17:00:19Z] Generating QQQ...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-05T17:00:38Z] Generating NVDA...
+[2026-06-05T17:00:38Z] Generating NVDA...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-05T17:01:07Z] Generating TSLA...
+[2026-06-05T17:01:07Z] Generating TSLA...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-05T17:01:32Z] Generating AAPL...
+[2026-06-05T17:01:32Z] Generating AAPL...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-05T17:01:55Z] Generating MSFT...
+[2026-06-05T17:01:55Z] Generating MSFT...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-05T17:02:10Z] Generating AMD...
+[2026-06-05T17:02:10Z] Generating AMD...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-05T17:02:46Z] Generating SMCI...
+[2026-06-05T17:02:46Z] Generating SMCI...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-05T17:03:09Z] Generating META...
+[2026-06-05T17:03:09Z] Generating META...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-05T17:03:49Z] Generating MU...
+[2026-06-05T17:03:49Z] Generating MU...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-05T17:04:11Z] Generating AMZN...
+[2026-06-05T17:04:11Z] Generating AMZN...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-05T17:04:26Z] Generating GOOGL...
+[2026-06-05T17:04:26Z] Generating GOOGL...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-05T17:04:41Z] Generating COIN...
+[2026-06-05T17:04:41Z] Generating COIN...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-05T17:04:55Z] Generating BTC...
+[2026-06-05T17:04:55Z] Generating BTC...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-05T17:05:14Z] kronos_refresh_premarket done
+[2026-06-05T17:05:14Z] kronos_refresh_premarket done
+[2026-06-08T17:00:01Z] kronos_refresh_premarket starting (tickers=SPY QQQ NVDA TSLA AAPL MSFT AMD SMCI META MU AMZN GOOGL COIN BTC)
+[2026-06-08T17:00:01Z] kronos_refresh_premarket starting (tickers=SPY QQQ NVDA TSLA AAPL MSFT AMD SMCI META MU AMZN GOOGL COIN BTC)
+OK: HF_HOME='/home/itsju/.cache/huggingface' | disk 787GB free | checks passed
+[2026-06-08T17:00:01Z] Generating SPY...
+[2026-06-08T17:00:01Z] Generating SPY...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-08T17:00:12Z] Generating QQQ...
+[2026-06-08T17:00:12Z] Generating QQQ...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-08T17:00:22Z] Generating NVDA...
+[2026-06-08T17:00:22Z] Generating NVDA...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-08T17:00:32Z] Generating TSLA...
+[2026-06-08T17:00:32Z] Generating TSLA...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-08T17:00:41Z] Generating AAPL...
+[2026-06-08T17:00:41Z] Generating AAPL...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-08T17:00:50Z] Generating MSFT...
+[2026-06-08T17:00:50Z] Generating MSFT...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-08T17:01:00Z] Generating AMD...
+[2026-06-08T17:01:00Z] Generating AMD...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-08T17:01:10Z] Generating SMCI...
+[2026-06-08T17:01:10Z] Generating SMCI...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-08T17:01:20Z] Generating META...
+[2026-06-08T17:01:20Z] Generating META...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-08T17:01:29Z] Generating MU...
+[2026-06-08T17:01:29Z] Generating MU...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-08T17:01:39Z] Generating AMZN...
+[2026-06-08T17:01:39Z] Generating AMZN...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-08T17:01:47Z] Generating GOOGL...
+[2026-06-08T17:01:47Z] Generating GOOGL...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-08T17:01:56Z] Generating COIN...
+[2026-06-08T17:01:56Z] Generating COIN...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-08T17:02:04Z] Generating BTC...
+[2026-06-08T17:02:04Z] Generating BTC...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-08T17:02:12Z] kronos_refresh_premarket done
+[2026-06-08T17:02:12Z] kronos_refresh_premarket done
+[2026-06-09T17:00:01Z] kronos_refresh_premarket starting (tickers=SPY QQQ NVDA TSLA AAPL MSFT AMD SMCI META MU AMZN GOOGL COIN BTC)
+[2026-06-09T17:00:01Z] kronos_refresh_premarket starting (tickers=SPY QQQ NVDA TSLA AAPL MSFT AMD SMCI META MU AMZN GOOGL COIN BTC)
+OK: HF_HOME='/home/itsju/.cache/huggingface' | disk 783GB free | checks passed
+[2026-06-09T17:00:01Z] Generating SPY...
+[2026-06-09T17:00:01Z] Generating SPY...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-09T17:00:09Z] Generating QQQ...
+[2026-06-09T17:00:09Z] Generating QQQ...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-09T17:00:17Z] Generating NVDA...
+[2026-06-09T17:00:17Z] Generating NVDA...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-09T17:00:28Z] Generating TSLA...
+[2026-06-09T17:00:28Z] Generating TSLA...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-09T17:00:37Z] Generating AAPL...
+[2026-06-09T17:00:37Z] Generating AAPL...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-09T17:00:47Z] Generating MSFT...
+[2026-06-09T17:00:47Z] Generating MSFT...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-09T17:00:57Z] Generating AMD...
+[2026-06-09T17:00:57Z] Generating AMD...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-09T17:01:06Z] Generating SMCI...
+[2026-06-09T17:01:06Z] Generating SMCI...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-09T17:01:14Z] Generating META...
+[2026-06-09T17:01:14Z] Generating META...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-09T17:01:22Z] Generating MU...
+[2026-06-09T17:01:22Z] Generating MU...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-09T17:01:31Z] Generating AMZN...
+[2026-06-09T17:01:31Z] Generating AMZN...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-09T17:01:39Z] Generating GOOGL...
+[2026-06-09T17:01:39Z] Generating GOOGL...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-09T17:01:48Z] Generating COIN...
+[2026-06-09T17:01:48Z] Generating COIN...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-09T17:01:56Z] Generating BTC...
+[2026-06-09T17:01:56Z] Generating BTC...
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+  "timeframe": "1h",
+  "candles_analyzed": 400
+}
+[2026-06-09T17:02:03Z] kronos_refresh_premarket done
+[2026-06-09T17:02:03Z] kronos_refresh_premarket done
+[2026-06-10T12:00:01Z] kronos_refresh_premarket starting (tickers=SPY QQQ NVDA TSLA AAPL MSFT AMD SMCI META MU AMZN GOOGL COIN BTC)
+[2026-06-10T12:00:01Z] kronos_refresh_premarket starting (tickers=SPY QQQ NVDA TSLA AAPL MSFT AMD SMCI META MU AMZN GOOGL COIN BTC)
+OK: HF_HOME='/home/itsju/.cache/huggingface' | disk 779GB free | checks passed
+[2026-06-10T12:00:01Z] Generating SPY...
+[2026-06-10T12:00:01Z] Generating SPY...
+    }
+  ]
+}
+    }
+  ]
+}
+[2026-06-10T12:00:55Z] Generating QQQ...
+[2026-06-10T12:00:55Z] Generating QQQ...
+    }
+  ]
+}
+    }
+  ]
+}
+[2026-06-10T12:01:31Z] Generating NVDA...
+[2026-06-10T12:01:31Z] Generating NVDA...
+    }
+  ]
+}
+    }
+  ]
+}
+[2026-06-10T12:02:00Z] Generating TSLA...
+[2026-06-10T12:02:00Z] Generating TSLA...
+    }
+  ]
+}
+    }
+  ]
+}
+[2026-06-10T12:02:31Z] Generating AAPL...
+[2026-06-10T12:02:31Z] Generating AAPL...
+    }
+  ]
+}
+    }
+  ]
+}
+[2026-06-10T12:03:01Z] Generating MSFT...
+[2026-06-10T12:03:01Z] Generating MSFT...
+    }
+  ]
+}
+    }
+  ]
+}
+[2026-06-10T12:03:34Z] Generating AMD...
+[2026-06-10T12:03:34Z] Generating AMD...
+    }
+  ]
+}
+    }
+  ]
+}
+[2026-06-10T12:04:08Z] Generating SMCI...
+[2026-06-10T12:04:08Z] Generating SMCI...
+    }
+  ]
+}
+    }
+  ]
+}
+[2026-06-10T12:04:43Z] Generating META...
+[2026-06-10T12:04:43Z] Generating META...
+    }
+  ]
+}
+    }
+  ]
+}
+[2026-06-10T12:05:16Z] Generating MU...
+[2026-06-10T12:05:16Z] Generating MU...
+    }
+  ]
+}
+    }
+  ]
+}
+[2026-06-10T12:05:54Z] Generating AMZN...
+[2026-06-10T12:05:54Z] Generating AMZN...
+    }
+  ]
+}
+    }
+  ]
+}
+[2026-06-10T12:06:33Z] Generating GOOGL...
+[2026-06-10T12:06:33Z] Generating GOOGL...
+    }
+  ]
+}
+    }
+  ]
+}
+[2026-06-10T12:07:38Z] Generating COIN...
+[2026-06-10T12:07:38Z] Generating COIN...
+    }
+  ]
+}
+    }
+  ]
+}
+[2026-06-10T12:08:36Z] Generating BTC...
+[2026-06-10T12:08:36Z] Generating BTC...
+    }
+  ]
+}
+    }
+  ]
+}
+[2026-06-10T12:09:19Z] kronos_refresh_premarket done
+[2026-06-10T12:09:19Z] kronos_refresh_premarket done

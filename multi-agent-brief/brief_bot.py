@@ -59,7 +59,7 @@ def orion_tech():
 
 def live_flow():
     try:
-        r = requests.get("http://localhost:3033/api/live-signals", timeout=10)
+        r = requests.get("http://localhost:3000/api/live-signals", timeout=10)
         if r.status_code == 200:
             d = r.json()
             return {"topWatched": d.get("topWatched",[])[:5],
@@ -71,7 +71,7 @@ def live_flow():
 
 def journal(n=5):
     try:
-        r = requests.get("http://localhost:3033/api/boba-journal", timeout=10)
+        r = requests.get("http://localhost:3000/api/boba-journal", timeout=10)
         if r.status_code == 200:
             return [{"ticker":e.get("symbol"), "executed":e.get("executed"), "side":e.get("side"),
                      "reasoning":(e.get("reasoning") or "")[:300], "when":e.get("timestamp")}

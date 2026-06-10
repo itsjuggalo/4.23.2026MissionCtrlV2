@@ -36,7 +36,7 @@ done
 
 echo ""
 echo "=== LIVE FLOW ==="
-curl -sf "http://localhost:3033/api/live-signals" 2>/dev/null \
+curl -sf "http://localhost:3000/api/live-signals" 2>/dev/null \
   | python3 -c "
 import sys, json
 d = json.load(sys.stdin)
@@ -52,7 +52,7 @@ if pa: print('Passed On:', json.dumps(pa, indent=2)[:400])
 
 echo ""
 echo "=== RECENT JOURNAL ENTRIES ==="
-curl -sf "http://localhost:3033/api/boba-journal" 2>/dev/null \
+curl -sf "http://localhost:3000/api/boba-journal" 2>/dev/null \
   | python3 -c "
 import sys, json
 entries = json.load(sys.stdin).get('entries',[])[:5]

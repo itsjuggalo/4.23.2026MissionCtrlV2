@@ -12,8 +12,9 @@ import time
 import logging
 import urllib.request
 from datetime import datetime, timezone, timedelta
+from zoneinfo import ZoneInfo
 
-ET = timezone(timedelta(hours=-4))  # EDT; flip to -5 in winter
+ET = ZoneInfo("America/New_York")  # DST-correct (was hardcoded EDT)
 
 DB = "https://stock-signal-72772-default-rtdb.firebaseio.com"
 PATHS = [
@@ -33,13 +34,46 @@ logging.basicConfig(
 log = logging.getLogger()
 
 
-def load_webhook():
-    try:
-        with open(WEBHOOK_FILE) as f:
-            return f.read().strip()
-    except Exception as e:
-        log.error(f"webhook missing: {e}")
-        return ""
+_CATEGORY_FILES = {
+    "unusual_high_flow": "discord-webhook-flow-unusual.txt",
+    "high_flow":         "discord-webhook-flow-huge.txt",
+    "repeat_flow":       "discord-webhook-flow-repeaters.txt",
+    "weekly_flow":       "discord-webhook-flow-weekly.txt",
+}
+_WEBHOOK_CACHE = {}
+
+
+def load_webhook(alert_type=None):
+    """Default webhook, or per-category routing when a routing file exists.
+    ETF variants (*_etf) route to the etf channel. Falls back to default.
+    Fixes the prior bug: call site passed alert_type to a no-arg function,
+    raising TypeError every cycle so nothing posted."""
+    at = (alert_type or "").lower()
+    fname = None
+    if at.endswith("_etf"):
+        fname = "discord-webhook-flow-etf.txt"
+    elif at in _CATEGORY_FILES:
+        fname = _CATEGORY_FILES[at]
+    cache_key = fname or "_default"
+    if cache_key in _WEBHOOK_CACHE:
+        return _WEBHOOK_CACHE[cache_key]
+    candidates = []
+    if fname:
+        candidates.append(os.path.join(os.path.dirname(WEBHOOK_FILE), fname))
+    candidates.append(WEBHOOK_FILE)
+    url = ""
+    for path in candidates:
+        try:
+            with open(path) as f:
+                url = f.read().strip()
+            if url:
+                break
+        except Exception:
+            continue
+    if not url:
+        log.error("webhook missing (category + default both unreadable)")
+    _WEBHOOK_CACHE[cache_key] = url
+    return url
 
 
 def load_seen():

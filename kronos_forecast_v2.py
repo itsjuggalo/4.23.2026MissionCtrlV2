@@ -1,4 +1,4 @@
-#!/home/itsju/02_DATA/mc-kb/.venv/bin/python
+#!/home/itsju/04_RESEARCH/Kronos/kronos-env/bin/python
 """
 Kronos Multi-Asset Forecast Service v2 — Mission Control
 
@@ -327,7 +327,8 @@ def main():
         err = {"ticker": ticker, "error": f"data fetch failed: {e}",
                "generated_at": datetime.now(timezone.utc).isoformat()}
         print(json.dumps(err, indent=2))
-        (OUTPUT_DIR / f"latest_{canonical_ticker if 'canonical_ticker' in dir() else ticker}.json").write_text(json.dumps(err, indent=2))
+        # Errors go to a sidecar file — never clobber the last good latest_<T>.json
+        (OUTPUT_DIR / f"latest_{ticker}.error.json").write_text(json.dumps(err, indent=2))
         return 1
 
     try:
@@ -336,7 +337,8 @@ def main():
         err = {"ticker": canonical_ticker, "error": f"kronos inference failed: {e}",
                "generated_at": datetime.now(timezone.utc).isoformat()}
         print(json.dumps(err, indent=2))
-        (OUTPUT_DIR / f"latest_{canonical_ticker}.json").write_text(json.dumps(err, indent=2))
+        # Errors go to a sidecar file — never clobber the last good latest_<T>.json
+        (OUTPUT_DIR / f"latest_{canonical_ticker}.error.json").write_text(json.dumps(err, indent=2))
         return 1
 
     forecast = build_forecast_json(canonical_ticker, pred, y_ts, current, len(df), sample_count, model_label, args.option_context)

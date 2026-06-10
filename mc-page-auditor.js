@@ -520,49 +520,90 @@ const ENDPOINTS = [
   },
 ];
 
+const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
+
+// A transient/connection-level failure means the server is briefly unreachable
+// (e.g. the dashboard is mid-restart). These must NOT be reported as endpoint
+// errors — missionctrl is on a PM2 cron restart that aligns with this sweep's
+// schedule, so a single dead-window would otherwise flag all 50 endpoints down.
+// HTTP 5xx / bad-JSON are real route failures and are never retried here.
+function isTransientNetworkError(err) {
+  if (!err) return false;
+  if (err.name === 'TimeoutError') return true;
+  const msg = String(err.message || '').toLowerCase();
+  const cause = String((err.cause && err.cause.code) || '').toUpperCase();
+  return (
+    msg.includes('fetch failed') ||
+    msg.includes('econnrefused') ||
+    msg.includes('econnreset') ||
+    msg.includes('socket hang up') ||
+    cause === 'ECONNREFUSED' ||
+    cause === 'ECONNRESET' ||
+    cause === 'UND_ERR_SOCKET'
+  );
+}
+
 async function checkEndpoint(endpoint) {
   const url = `${BASE_URL}${endpoint.path}`;
   const result = { endpoint: endpoint.path, status: 'ok', issue: null };
   const timeout = endpoint.timeout || 10000;
 
-  try {
-    const res = await fetch(url, { signal: AbortSignal.timeout(timeout) });
-    result.httpCode = res.status;
+  // Retry only transient/connection-level failures, to ride out a brief
+  // server restart window (~2s). A genuinely-down server still fails after all
+  // attempts; a real route bug (5xx / bad JSON) short-circuits on attempt 1.
+  const MAX_ATTEMPTS = 3;
+  const RETRY_DELAY_MS = 2500;
+  let lastErr = null;
 
-    if (res.status >= 500) {
-      result.status = 'error';
-      result.issue = `HTTP ${res.status}`;
-      return result;
-    }
-
-    const text = await res.text();
-    let data;
+  for (let attempt = 1; attempt <= MAX_ATTEMPTS; attempt++) {
     try {
-      data = JSON.parse(text);
-    } catch {
+      const res = await fetch(url, { signal: AbortSignal.timeout(timeout) });
+      result.httpCode = res.status;
+
+      if (res.status >= 500) {
+        result.status = 'error';
+        result.issue = `HTTP ${res.status}`;
+        return result;
+      }
+
+      const text = await res.text();
+      let data;
+      try {
+        data = JSON.parse(text);
+      } catch {
+        result.status = 'error';
+        result.issue = 'invalid JSON response';
+        return result;
+      }
+
+      // Check for empty response
+      if (data === null || (typeof data === 'object' && !Array.isArray(data) && Object.keys(data).length === 0)) {
+        result.status = 'warning';
+        result.issue = 'empty response {}';
+        return result;
+      }
+
+      // Run custom check
+      const customIssue = endpoint.check(data);
+      if (customIssue) {
+        result.status = 'stale';
+        result.issue = customIssue;
+      }
+      return result;
+    } catch (err) {
+      lastErr = err;
+      if (isTransientNetworkError(err) && attempt < MAX_ATTEMPTS) {
+        await sleep(RETRY_DELAY_MS);
+        continue;
+      }
       result.status = 'error';
-      result.issue = 'invalid JSON response';
+      result.issue = err.name === 'TimeoutError' ? `timeout (${timeout / 1000}s)` : err.message;
       return result;
     }
-
-    // Check for empty response
-    if (data === null || (typeof data === 'object' && !Array.isArray(data) && Object.keys(data).length === 0)) {
-      result.status = 'warning';
-      result.issue = 'empty response {}';
-      return result;
-    }
-
-    // Run custom check
-    const customIssue = endpoint.check(data);
-    if (customIssue) {
-      result.status = 'stale';
-      result.issue = customIssue;
-    }
-  } catch (err) {
-    result.status = 'error';
-    result.issue = err.name === 'TimeoutError' ? 'timeout (10s)' : err.message;
   }
 
+  result.status = 'error';
+  result.issue = lastErr ? lastErr.message : 'unknown error';
   return result;
 }
 

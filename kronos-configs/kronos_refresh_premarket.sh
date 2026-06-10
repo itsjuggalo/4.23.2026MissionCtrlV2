@@ -5,7 +5,7 @@
 set -uo pipefail
 
 PYTHON=/home/itsju/02_DATA/mc-kb/.venv/bin/python
-ON_DEMAND=/home/itsju/01_ACTIVE/mission-control/agent-team/kronos/kronos_on_demand.py
+ON_DEMAND=/home/itsju/mission-control/agent-team/kronos/kronos_on_demand.py
 TICKERS=(SPY QQQ NVDA TSLA AAPL MSFT AMD SMCI META MU AMZN GOOGL COIN BTC)
 LOG=/home/itsju/05_AUTOMATION/scripts/logs/kronos_refresh.log
 

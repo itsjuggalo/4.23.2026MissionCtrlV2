@@ -1,11 +1,11 @@
 #!/bin/bash
 # Kronos pre-market refresh — runs daily Mon-Fri before market open
-# Called by kronos-refresh.timer (12:00 UTC = 8:00 AM ET)
+# Cron fires 8:00 AM ET (system TZ is America/New_York).
 # Routes through kronos_on_demand.py so finetuned weights are auto-selected.
 set -uo pipefail
 
-PYTHON=/home/itsju/02_DATA/mc-kb/.venv/bin/python
-ON_DEMAND=/home/itsju/01_ACTIVE/mission-control/agent-team/kronos/kronos_on_demand.py
+PYTHON="${KRONOS_PYTHON:-/home/itsju/04_RESEARCH/Kronos/kronos-env/bin/python}"
+ON_DEMAND=/home/itsju/mission-control/agent-team/kronos/kronos_on_demand.py
 TICKERS=(SPY QQQ NVDA TSLA AAPL MSFT AMD SMCI META MU AMZN GOOGL COIN BTC)
 LOG=/home/itsju/05_AUTOMATION/scripts/logs/kronos_refresh.log
 

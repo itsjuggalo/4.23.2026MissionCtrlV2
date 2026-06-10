@@ -37,6 +37,42 @@ STOPWORDS = {
     'skill', 'category', 'name', 'description', 'purpose', 'overview',
 }
 
+# Phase 5 (2026-06-09): cycle-type relevance. A decision cycle declares what it
+# is doing (flow scoring / options analysis / risk / regime read) and the loader
+# expands that into matching keywords, replacing per-script hardcoded keyword
+# subsets. Skills whose name/description never overlapped the old hardcoded
+# list were unreachable; cycle types make the whole pool addressable.
+CYCLE_TYPE_KEYWORDS = {
+    'flow': [
+        'flow', 'sweep', 'block', 'unusual', 'whale', 'premium', 'volume',
+        'open-interest', 'oi', 'institutional', 'signal', 'alert', 'dark-pool',
+        'order-flow', 'tape',
+    ],
+    'options': [
+        'options', 'option', 'call', 'put', 'strike', 'expiry', 'expiration',
+        'dte', 'iv', 'implied', 'greeks', 'delta', 'theta', 'gamma', 'vega',
+        'spread', 'volatility', 'skew', 'contract', 'payoff', 'black-scholes',
+    ],
+    'risk': [
+        'risk', 'sizing', 'position', 'stop', 'stop-loss', 'drawdown',
+        'exposure', 'portfolio', 'hedge', 'var', 'kelly', 'diversification',
+        'allocation', 'rebalance', 'correlation', 'concentration',
+    ],
+    'regime': [
+        'regime', 'macro', 'fed', 'rates', 'inflation', 'rotation', 'sector',
+        'trend', 'breadth', 'sentiment', 'catalyst', 'earnings', 'news',
+        'event-driven', 'cycle', 'bull', 'bear', 'forecast',
+    ],
+}
+
+
+def cycle_type_tokens(cycle_types):
+    """Expand cycle-type names into their keyword token lists."""
+    toks = []
+    for ct in (cycle_types or []):
+        toks.extend(CYCLE_TYPE_KEYWORDS.get(ct, []))
+    return toks
+
 
 def parse_skill_md(path):
     """Parse a SKILL.md file, return dict with name, description, body, path.
@@ -122,11 +158,15 @@ def estimate_tokens(text):
     return len(text) // 4
 
 
-def list_skills_for_agent(agent):
-    """Return list of parsed skills for an agent, including 'shared' as fallback."""
+def list_skills_for_agent(agent, extra_folders=()):
+    """Return list of parsed skills for an agent, including 'shared' as fallback.
+
+    extra_folders: additional pool folders under SKILLS_ROOT to draw from
+    (e.g. ('reference', 'orion')). Agent + shared always win name collisions.
+    """
     skills = []
     seen = set()
-    for folder in (agent, 'shared'):
+    for folder in (agent, 'shared') + tuple(extra_folders or ()):
         d = SKILLS_ROOT / folder
         if not d.is_dir():
             continue
@@ -139,7 +179,8 @@ def list_skills_for_agent(agent):
 
 
 def load_relevant_skills(agent, context_text, max_skills=5, max_tokens=4000,
-                         min_score=1, include_body=True):
+                         min_score=1, include_body=True, cycle_types=None,
+                         extra_folders=()):
     """Pick top skills by relevance, return formatted markdown block.
 
     Args:
@@ -151,16 +192,46 @@ def load_relevant_skills(agent, context_text, max_skills=5, max_tokens=4000,
         min_score: skills below this relevance score are skipped
         include_body: if True, include full SKILL.md body. If False, just
             name + description (much shorter, useful for first-pass loaders).
+        cycle_types: optional list from CYCLE_TYPE_KEYWORDS keys
+            ('flow', 'options', 'risk', 'regime') describing what the calling
+            cycle is doing; expands into relevance keywords.
+        extra_folders: additional pool folders under SKILLS_ROOT
+            (e.g. ('reference', 'orion')).
 
     Returns:
         Markdown string ready to inject. Empty string if no skills match.
     """
-    skills = list_skills_for_agent(agent)
+    block, _meta = load_relevant_skills_with_meta(
+        agent, context_text, max_skills=max_skills, max_tokens=max_tokens,
+        min_score=min_score, include_body=include_body,
+        cycle_types=cycle_types, extra_folders=extra_folders)
+    return block
+
+
+def load_relevant_skills_with_meta(agent, context_text, max_skills=5,
+                                   max_tokens=4000, min_score=1,
+                                   include_body=True, cycle_types=None,
+                                   extra_folders=()):
+    """Same as load_relevant_skills but returns (block, meta).
+
+    meta = {
+        'skills_loaded': [names in injection order],
+        'scores': {name: relevance score},
+        'pool_size': total skills considered,
+        'prompt_chars': len(block),
+        'cycle_types': cycle types used,
+    }
+    Always returns a 2-tuple; block is '' when nothing matches.
+    """
+    meta = {'skills_loaded': [], 'scores': {}, 'pool_size': 0,
+            'prompt_chars': 0, 'cycle_types': list(cycle_types or [])}
+    skills = list_skills_for_agent(agent, extra_folders=extra_folders)
+    meta['pool_size'] = len(skills)
     if not skills:
-        return ''
-    context_tokens = tokenize(context_text)
+        return '', meta
+    context_tokens = tokenize(context_text) + cycle_type_tokens(cycle_types)
     if not context_tokens:
-        return ''
+        return '', meta
 
     # Score and rank
     scored = []
@@ -170,13 +241,15 @@ def load_relevant_skills(agent, context_text, max_skills=5, max_tokens=4000,
             scored.append((sc, s))
     scored.sort(key=lambda x: -x[0])
     if not scored:
-        return ''
+        return '', meta
 
     # Token-budgeted selection
     chosen = []
     used_tokens = 0
     header_overhead = 50  # tokens for the wrapper text
     for sc, s in scored[:max_skills * 2]:  # check up to 2x in case some overflow
+        if len(chosen) >= max_skills:
+            break  # cap applies to description-only fallbacks too (Phase 5 fix)
         content = s['body'] if include_body else s.get('description', '')
         cost = estimate_tokens(content) + 30  # 30 token overhead per skill block
         if used_tokens + cost + header_overhead > max_tokens:
@@ -194,7 +267,7 @@ def load_relevant_skills(agent, context_text, max_skills=5, max_tokens=4000,
             break
 
     if not chosen:
-        return ''
+        return '', meta
 
     # Format output
     lines = []
@@ -213,7 +286,11 @@ def load_relevant_skills(agent, context_text, max_skills=5, max_tokens=4000,
         else:
             lines.append(content[:8000])  # hard char cap per skill
         lines.append('')
-    return '\n'.join(lines)
+        meta['skills_loaded'].append(skill['name'])
+        meta['scores'][skill['name']] = score
+    block = '\n'.join(lines)
+    meta['prompt_chars'] = len(block)
+    return block, meta
 
 
 def __selftest():

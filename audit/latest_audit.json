@@ -1,0 +1,319 @@
+{
+  "ts": 1780608026752,
+  "iso": "2026-06-04T21:20:26.752Z",
+  "healthy": false,
+  "market_hours": false,
+  "checked": 50,
+  "issues": [
+    {
+      "endpoint": "/api/status",
+      "type": "error",
+      "detail": "timeout (10s)"
+    },
+    {
+      "endpoint": "/api/options-flow",
+      "type": "error",
+      "detail": "timeout (10s)"
+    }
+  ],
+  "all_results": [
+    {
+      "endpoint": "/api/health",
+      "status": "ok",
+      "issue": null,
+      "httpCode": 200
+    },
+    {
+      "endpoint": "/api/status",
+      "status": "error",
+      "issue": "timeout (10s)"
+    },
+    {
+      "endpoint": "/api/market",
+      "status": "ok",
+      "issue": null,
+      "httpCode": 200
+    },
+    {
+      "endpoint": "/api/live-signals",
+      "status": "ok",
+      "issue": null,
+      "httpCode": 200
+    },
+    {
+      "endpoint": "/api/pipeline-feed",
+      "status": "ok",
+      "issue": null,
+      "httpCode": 200
+    },
+    {
+      "endpoint": "/api/agents",
+      "status": "ok",
+      "issue": null,
+      "httpCode": 200
+    },
+    {
+      "endpoint": "/api/signals/latest",
+      "status": "ok",
+      "issue": null,
+      "httpCode": 200
+    },
+    {
+      "endpoint": "/api/signals/history",
+      "status": "ok",
+      "issue": null,
+      "httpCode": 200
+    },
+    {
+      "endpoint": "/api/flow-database",
+      "status": "ok",
+      "issue": null,
+      "httpCode": 200
+    },
+    {
+      "endpoint": "/api/options-flow",
+      "status": "error",
+      "issue": "timeout (10s)"
+    },
+    {
+      "endpoint": "/api/portfolio",
+      "status": "ok",
+      "issue": null,
+      "httpCode": 200
+    },
+    {
+      "endpoint": "/api/trades",
+      "status": "ok",
+      "issue": null,
+      "httpCode": 200
+    },
+    {
+      "endpoint": "/api/alerts-db",
+      "status": "ok",
+      "issue": null,
+      "httpCode": 200
+    },
+    {
+      "endpoint": "/api/regime",
+      "status": "ok",
+      "issue": null,
+      "httpCode": 200
+    },
+    {
+      "endpoint": "/api/macro-regime",
+      "status": "ok",
+      "issue": null,
+      "httpCode": 200
+    },
+    {
+      "endpoint": "/api/calendar",
+      "status": "ok",
+      "issue": null,
+      "httpCode": 200
+    },
+    {
+      "endpoint": "/api/activity",
+      "status": "ok",
+      "issue": null,
+      "httpCode": 200
+    },
+    {
+      "endpoint": "/api/analyst-signals",
+      "status": "ok",
+      "issue": null,
+      "httpCode": 200
+    },
+    {
+      "endpoint": "/api/telegram-signals",
+      "status": "ok",
+      "issue": null,
+      "httpCode": 200
+    },
+    {
+      "endpoint": "/api/market-news",
+      "status": "ok",
+      "issue": null,
+      "httpCode": 200
+    },
+    {
+      "endpoint": "/api/live-strategy",
+      "status": "ok",
+      "issue": null,
+      "httpCode": 200
+    },
+    {
+      "endpoint": "/api/db-status",
+      "status": "ok",
+      "issue": null,
+      "httpCode": 200
+    },
+    {
+      "endpoint": "/api/desk-cycle",
+      "status": "ok",
+      "issue": null,
+      "httpCode": 200
+    },
+    {
+      "endpoint": "/api/daily-report",
+      "status": "ok",
+      "issue": null,
+      "httpCode": 200
+    },
+    {
+      "endpoint": "/api/supertrend-params",
+      "status": "ok",
+      "issue": null,
+      "httpCode": 200
+    },
+    {
+      "endpoint": "/api/equity-history",
+      "status": "ok",
+      "issue": null,
+      "httpCode": 200
+    },
+    {
+      "endpoint": "/api/equity-intraday",
+      "status": "ok",
+      "issue": null,
+      "httpCode": 200
+    },
+    {
+      "endpoint": "/api/trade-signals",
+      "status": "ok",
+      "issue": null,
+      "httpCode": 200
+    },
+    {
+      "endpoint": "/api/crypto",
+      "status": "ok",
+      "issue": null,
+      "httpCode": 200
+    },
+    {
+      "endpoint": "/api/btc-bias",
+      "status": "ok",
+      "issue": null,
+      "httpCode": 200
+    },
+    {
+      "endpoint": "/api/wallets",
+      "status": "ok",
+      "issue": null,
+      "httpCode": 200
+    },
+    {
+      "endpoint": "/api/squeeze-alerts",
+      "status": "ok",
+      "issue": null,
+      "httpCode": 200
+    },
+    {
+      "endpoint": "/api/best-options-history",
+      "status": "ok",
+      "issue": null,
+      "httpCode": 200
+    },
+    {
+      "endpoint": "/api/congress",
+      "status": "ok",
+      "issue": null,
+      "httpCode": 200
+    },
+    {
+      "endpoint": "/api/session-logs",
+      "status": "ok",
+      "issue": null,
+      "httpCode": 200
+    },
+    {
+      "endpoint": "/api/llm-portfolio",
+      "status": "ok",
+      "issue": null,
+      "httpCode": 200
+    },
+    {
+      "endpoint": "/api/usage",
+      "status": "ok",
+      "issue": null,
+      "httpCode": 200
+    },
+    {
+      "endpoint": "/api/chart-signals",
+      "status": "ok",
+      "issue": null,
+      "httpCode": 200
+    },
+    {
+      "endpoint": "/api/trade-log",
+      "status": "ok",
+      "issue": null,
+      "httpCode": 200
+    },
+    {
+      "endpoint": "/api/gotrader",
+      "status": "ok",
+      "issue": null,
+      "httpCode": 200
+    },
+    {
+      "endpoint": "/api/freqtrade",
+      "status": "ok",
+      "issue": null,
+      "httpCode": 200
+    },
+    {
+      "endpoint": "/api/itb",
+      "status": "ok",
+      "issue": null,
+      "httpCode": 200
+    },
+    {
+      "endpoint": "/api/copilot",
+      "status": "ok",
+      "issue": null,
+      "httpCode": 200
+    },
+    {
+      "endpoint": "/api/kronos-forecast",
+      "status": "ok",
+      "issue": null,
+      "httpCode": 200
+    },
+    {
+      "endpoint": "/api/kronos-generate",
+      "status": "ok",
+      "issue": null,
+      "httpCode": 200
+    },
+    {
+      "endpoint": "/api/stocks",
+      "status": "ok",
+      "issue": null,
+      "httpCode": 200
+    },
+    {
+      "endpoint": "/api/live-quotes",
+      "status": "ok",
+      "issue": null,
+      "httpCode": 200
+    },
+    {
+      "endpoint": "/api/boba-journal",
+      "status": "ok",
+      "issue": null,
+      "httpCode": 200
+    },
+    {
+      "endpoint": "/api/notifications",
+      "status": "ok",
+      "issue": null,
+      "httpCode": 200
+    },
+    {
+      "endpoint": "/api/cost-tracking",
+      "status": "ok",
+      "issue": null,
+      "httpCode": 200
+    }
+  ]
+}

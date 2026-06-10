@@ -67,8 +67,11 @@ def main() -> int:
         all_posts.extend(fetch_sub(sub))
 
     if not all_posts:
+        # An empty scan is NOT a unit failure (was poisoning `systemctl --failed`).
+        # NOTE 2026-05-30: Reddit is currently IP-blocking this box (HTTP 403), so
+        # WSB produces nothing — needs an authed Reddit API or proxy to revive.
         print("[wsb] no posts", file=sys.stderr)
-        return 1
+        return 0
 
     today_counts = count_mentions(all_posts)
     today_iso = datetime.now(timezone.utc).date().isoformat()

@@ -77,6 +77,10 @@ if [[ "$LEVEL" -ge 2 ]]; then
         fi
     fi
 
+    # HF datasets/downloads — safe to delete (re-downloaded on demand per HF docs)
+    HF_HOME_EFF="${HF_HOME:-$HOME/.cache/huggingface}"
+    rm_if "${HF_HOME_EFF}/datasets/downloads"
+
     rm_if "$HOME/.cache/puppeteer"
     rm_if "$HOME/.cache/ms-playwright"
     # node-gyp can be rebuilt on demand

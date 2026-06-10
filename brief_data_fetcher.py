@@ -100,7 +100,7 @@ def fetch_kronos():
 
 def fetch_flows():
     try:
-        r = requests.get('http://localhost:3033/api/options-flow', timeout=10).json()
+        r = requests.get('http://localhost:3000/api/options-flow', timeout=10).json()
         flows = r.get('flows',[])
         unusual = sorted([f for f in flows if f.get('Volume',0)>f.get('OI',0)], key=lambda x:x.get('Value',0), reverse=True)[:5]
         return [{'symbol':f.get('Symbol'),'type':f.get('OptionType'),'strike':f.get('Strike'),'value':f.get('Value'),
