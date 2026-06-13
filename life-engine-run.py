@@ -235,7 +235,11 @@ _REAL_DEAL = re.compile(
     re.IGNORECASE
 )
 _PAID_KW    = ['payment confirmation','payment received','thank you for your payment',
-               'payment processed','successfully paid','autopay processed']
+               'payment processed','successfully paid','autopay processed',
+               'you sent','receipt for your payment','sent a payment','payment to']
+# Payment processors — a receipt from these naming the merchant counts as paid.
+_PROCESSOR_DOMAINS = ['paypal.com', 'intuit.com', 'venmo.com',
+                      'chase.com', 'bankofamerica.com', 'wellsfargo.com']
 
 def _friendly_name(email):
     frm = email.get('from', '').lower()
@@ -312,16 +316,24 @@ def get_bills(now, emails, persist):
     cycle  = now.strftime('%Y-%m')          # monthly cycle id
     state  = load_state()
     paid   = state.get('bills_paid', {})
-    # Flip paid status when a payment-confirmation from the payee domain is seen.
+    # Flip paid status when a payment-confirmation is seen. Two ways:
+    #   1. direct  — email FROM the payee domain with a paid keyword
+    #   2. processor — email FROM a processor (PayPal/card) that NAMES the
+    #      merchant (bill name or a paid_alias). PayPal receipts come from
+    #      paypal.com, never the merchant's domain, so #1 alone never fired
+    #      for PayPal-paid bills (e.g. Duke Energy). See bills.json notes.
     flipped = False
     for b in bills:
         dom = (b.get('payee_domain') or '').lower()
-        if not dom:
-            continue
+        names = [b['name'].lower()] + [a.lower() for a in (b.get('paid_aliases') or [])]
         for e in emails:
             frm = e.get('from', '').lower()
             txt = (e.get('subject', '') + ' ' + e.get('snippet', '')).lower()
-            if dom in frm and any(k in txt for k in _PAID_KW):
+            has_paid_kw = any(k in txt for k in _PAID_KW)
+            direct = dom and dom in frm and has_paid_kw
+            processor = (any(p in frm for p in _PROCESSOR_DOMAINS)
+                         and any(n in txt for n in names))
+            if direct or processor:
                 if paid.get(b['name']) != cycle:
                     paid[b['name']] = cycle
                     flipped = True
@@ -350,10 +362,13 @@ def _bill_line(b):
     ordn = _ordinal(b['due_day'])
     if b['is_paid']:
         return f"{b['name']} — {'autopay' if b['autopay'] else 'due'} {ordn}{amt} ✓ paid"
+    if b['autopay']:
+        # autopay is never "past due" — it charges itself on/after the due day
+        if b['days'] < 0:
+            return f"{b['name']} — autopay {ordn}{amt} ✓ auto-charged"
+        return f"{b['name']} — autopay {ordn}{amt}"
     if b['days'] < 0:
         return f"🔴 {b['name']} — PAST DUE (was {ordn}){amt}"
-    if b['autopay']:
-        return f"{b['name']} — autopay {ordn}{amt}"
     flag = ' ⚠️' if b['days'] <= 3 else ''
     return f"{b['name']} — due {ordn}{amt} · NOT autopay{flag}"
 
