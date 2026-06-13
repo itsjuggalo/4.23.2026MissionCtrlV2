@@ -737,7 +737,10 @@ def render_focus_line(brief_type, ctx, cfg):
         "Write ONE line (max 140 characters, plain text, no markdown, no emoji, no quotes) "
         "naming the single most important thing Mike should act on right now. "
         "Use ONLY facts in the JSON — never invent names, numbers, or events. "
-        "If nothing is urgent, state the most noteworthy thing in one line."
+        "This is a LIFE briefing: NEVER mention trading, stocks, options, P&L, portfolio, "
+        "Boba, Jazzy, Alpaca, markets, or system/PM2 health — those live elsewhere. "
+        "If nothing life-relevant is urgent, say so plainly in one line (e.g. 'Nothing "
+        "pressing — calendar clear, no unpaid bills due soon.')."
     )
     try:
         r = subprocess.run(
