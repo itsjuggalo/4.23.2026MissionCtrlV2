@@ -13,6 +13,7 @@ import glob
 import json
 import os
 import re
+import shlex
 import subprocess
 import sys
 import time
@@ -35,6 +36,13 @@ CONFIG_FILE  = os.path.join(LIFECLAW_DIR, 'config.json')
 BILLS_FILE   = os.path.join(LIFECLAW_DIR, 'bills.json')
 ARCHIVE_FILE = os.path.join(LIFECLAW_DIR, 'sent_briefs.jsonl')
 CLAUDE_BIN   = os.path.expanduser('~/.local/bin/claude')
+WELLNESS_FILE = os.path.join(LIFECLAW_DIR, 'wellness.json')
+
+# brief_type -> wellness slot + card glyph (sun for daytime, moon for night)
+WELLNESS_SLOT = {'morning_brief': 'morning', 'midday_checkin': 'midday',
+                 'evening_summary': 'evening', 'nightly_wrap': 'nightly'}
+CARD_GLYPH = {'morning_brief': 'sun', 'midday_checkin': 'sun',
+              'evening_summary': 'moon', 'nightly_wrap': 'moon'}
 
 DEFAULT_CONFIG = {
     'location': {'lat': None, 'lon': None, 'label': ''},
@@ -85,6 +93,9 @@ SKIP_SENDERS = [
     'team.public.com','mtmarketing@continued.com',
     'updates@okx.com','em.linkedin.com','messages-noreply@linkedin.com',
     'e.godaddy.com','news.temuemail.com',
+    # Trading lives on the pipeline/Boba/Jazzy bots — keep ALL of it off LifeClaw
+    'mailer.alpaca.markets','alpaca.markets','robinhood.com','coinbase.com',
+    'public.com','webull.com','tdameritrade.com','schwab.com',
     'nextdoor.com','email.nextdoor.com','ss.email.nextdoor.com','is.email.nextdoor.com',
     'muvfl.com','eml.muvfl.com',
 ]
@@ -93,11 +104,11 @@ SKIP_SENDERS = [
 IMPORTANT_SENDERS = [
     'commerce.fl.gov','floridajobs.org','speedpay.com',
     'informeddelivery.usps.com',
-    'e.chase.com','mcmap.chase.com','mailer.alpaca.markets',
+    'e.chase.com','mcmap.chase.com',
     'bankofamerica.com','wellsfargo.com',
     'trulieve.com','ups.com','fedex.com',
     'walmart.com','ebay.com','siriusxm.com',
-    'robinhood.com','amazon.com',
+    'amazon.com',
 ]
 
 # Keywords in subject/snippet that flag an email as important
@@ -113,15 +124,12 @@ IMPORTANT_KW = [
     'michael englund',
     'out for delivery','package delivered','order shipped',
     'order confirmed','your order','tracking number',
-    'your withdrawal','trade confirmation',
     # eBay account activity only
     'you sold','item sold','bid won','purchase confirmed',
     'payment received','payment sent','your listing',
     'case opened','refund','feedback left',
     # Account security
     'sign-in attempt','new device','unusual activity',
-    # Robinhood real events
-    'completed','your transfer','your deposit',
 ]
 
 # ── Helpers ──────────────────────────────────────────────────────────────────
@@ -473,7 +481,7 @@ def get_gmail(account='', hours=168):
         kw_match     = any(k in subj + ' ' + snip for k in IMPORTANT_KW)
         # For commercial/broad domains, require a keyword hit — blocks ads but passes account activity
         broad = any(s in frm for s in (
-            'robinhood.com','ebay.com','amazon.com','walmart.com','trulieve.com'))
+            'ebay.com','amazon.com','walmart.com','trulieve.com'))
         if (sender_match and not broad) or (broad and kw_match) or (not broad and kw_match):
             important.append(e)
         elif any(k in subj + ' ' + frm for k in BILL_KW):
@@ -546,6 +554,66 @@ def cal_smarts(events, now):
 def fmt_event(e):
     start = e['start'][11:16] if 'T' in e['start'] else e['start']
     return f"  {start}  {esc(e['summary'])}"
+
+# ── Wellness (ADD-friendly body/mind nudges — additive, never blocks) ─────────
+# Hardcoded fallback so a missing/broken wellness.json never kills the brief.
+_WELLNESS_FALLBACK = {
+    'quotes': {'morning': ['Progress over perfection.'],
+               'midday': ['Pause. Breathe. Reset. You’re doing fine.'],
+               'evening': ['What got done today is enough.'],
+               'nightly': ['Sleep is the best recovery there is.']},
+    'hydration': ['Drink a full glass of water.'],
+    'sun': ['Get a few minutes of sunlight on your face.'],
+    'body': {'morning': ['Neck rolls + shoulder drops to wake up.'],
+             'midday': ['Posture reset: shoulders down and back, chin level.'],
+             'evening': ['Gentle stretch — let the shoulders come down.'],
+             'nightly': ['Long slow exhales to downshift for sleep.']},
+    'adhd': {'morning': ['Pick ONE anchor task for today. Just one.'],
+             'midday': ['Name the ONE thing that matters most right now.'],
+             'evening': ['Brain-dump tomorrow’s to-dos so they stop renting space.'],
+             'nightly': ['Phone on the charger across the room.']},
+}
+
+def load_wellness():
+    try:
+        data = json.load(open(WELLNESS_FILE))
+        return data if isinstance(data, dict) else _WELLNESS_FALLBACK
+    except Exception:
+        return _WELLNESS_FALLBACK
+
+def _pick(lst, idx):
+    return lst[idx % len(lst)] if lst else None
+
+def _pick_slot(d, slot, idx):
+    """d may be {slot: [...]} or a flat list."""
+    lst = d.get(slot, []) if isinstance(d, dict) else d
+    return _pick(lst, idx)
+
+def select_wellness(brief_type, now):
+    """Deterministic per-day pick (rotates by day-of-year, reproducible)."""
+    w = load_wellness()
+    slot = WELLNESS_SLOT.get(brief_type, 'morning')
+    base = now.timetuple().tm_yday          # day of year → daily rotation
+    quote = _pick_slot(w.get('quotes', {}), slot, base)
+    body  = _pick_slot(w.get('body', {}),   slot, base + 1)
+    adhd  = _pick_slot(w.get('adhd', {}),   slot, base + 2)
+    hydration = _pick(w.get('hydration', []), base)
+    sun       = _pick(w.get('sun', []),       base + 1)
+    # Compose the nudge list by time of day.
+    if slot == 'morning':
+        nudges = [hydration, sun, body, adhd]
+    elif slot == 'midday':
+        nudges = [body, hydration, adhd]
+    elif slot == 'evening':
+        nudges = [body, adhd]
+    else:  # nightly
+        nudges = [body, adhd]
+    return {
+        'quote': quote,
+        'nudges': [n for n in nudges if n],
+        'glyph': CARD_GLYPH.get(brief_type, 'leaf'),
+        'slot': slot,
+    }
 
 # ── Context object (Step 2) ───────────────────────────────────────────────────
 def gather_context(brief_type, now, persist):
