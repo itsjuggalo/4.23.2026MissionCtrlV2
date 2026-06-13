@@ -36,9 +36,13 @@ KEY_DIRS = [os.path.expanduser("~/.openclaw/secrets"),
 
 
 def load_token() -> str:
+    # Prefer a bot that actually has Manage Channels / Admin in the guild.
+    # Scan (2026-06-13): BobaUpgraded=ADMIN; jazzyhazzy/ReminderBot/Orion2=ManageChannels;
+    # SynthControl has neither (it's the poster bot, not an admin).
     for d in KEY_DIRS:
-        for fname in ("discord_synthcontrol_token", "discord_bot_token",
-                      "discord_ops_bot_token", "discord_status_bot_token"):
+        for fname in ("discord_boba_token", "discord_ops_bot_token",
+                      "discord_orion_token", "discord_jazzyhazzy_token",
+                      "discord_synthcontrol_token"):
             try:
                 t = open(os.path.join(d, fname)).read().strip()
                 if t:
@@ -131,9 +135,13 @@ def _scan_dead():
     return dead, cats
 
 
-def delete_dead(execute: bool):
+def delete_dead(execute: bool, empty_only: bool = False):
     dead, cats = _scan_dead()
-    print(f"\n=== DEAD/EMPTY CHANNELS (non-flow, idle ≥{DEAD_DAYS}d) ===")
+    if empty_only:
+        dead = [d for d in dead if d[3] == "empty"]
+        print("\n=== EMPTY CHANNELS ONLY (non-flow, zero messages) ===")
+    else:
+        print(f"\n=== DEAD/EMPTY CHANNELS (non-flow, idle ≥{DEAD_DAYS}d) ===")
     for cid, name, cat, why in dead:
         print(f"  {cat[:24]:24} {name:26} {why}")
     print(f"\n{len(dead)} channels qualify.")
@@ -249,6 +257,8 @@ def main():
                     help="delete non-flow channels idle ≥21d or empty (preview unless --yes)")
     ap.add_argument("--setup-sniper", action="store_true",
                     help="create 🎯 SNIPER category + channels, write IDs to sniper_config.json")
+    ap.add_argument("--empty-only", action="store_true",
+                    help="with --delete-dead: only delete zero-message channels")
     ap.add_argument("--yes", action="store_true", help="actually execute deletes")
     args = ap.parse_args()
 
@@ -259,7 +269,7 @@ def main():
                  "Roles -> the bot's role -> Manage Channels), then re-run.")
 
     if args.delete_dead:
-        delete_dead(execute=args.yes)
+        delete_dead(execute=args.yes, empty_only=args.empty_only)
     elif args.setup_sniper:
         setup_sniper()
     elif args.audit_activity:
