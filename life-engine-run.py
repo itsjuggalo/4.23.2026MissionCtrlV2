@@ -1,10 +1,12 @@
 #!/home/itsju/.venv/bin/python3
 """Life Engine — standalone runner. Called by cron every 30 min.
 
-Fully-loaded build: deterministic template (always sends) + optional AI
-focus line (augment-on-top, never blocks) + bills.json + weather + todos +
-yesterday-memory + cross-day dedup + reliability/recovery + archive.
-All trading/PM2 blocks are byte-identical to the original.
+LIFE-ONLY build (2026-06-13): deterministic template (always sends) + optional
+AI focus line (augment-on-top, never blocks) + calendar + Gmail bills/coupons/
+important + weather + todos + yesterday-memory + cross-day dedup + archive.
+NO trading: P&L / Oracle-PM2 / flow-signal blocks were removed — Mike gets all
+trading via the AInvest copilot + flow digests + breakout scanner on the
+trading bots. LifeClaw stays the life lane, no overlap, no redundancy.
 """
 import calendar as _calmod
 import glob
@@ -541,33 +543,6 @@ def cal_smarts(events, now):
         next_prep = f"{e['summary']} in {when}"
     return conflicts, next_prep
 
-def get_alpaca(key_file, secret_file, name):
-    try:
-        key    = secret(key_file)
-        sec    = secret(secret_file)
-        req    = urllib.request.Request(
-            'https://paper-api.alpaca.markets/v2/account',
-            headers={'APCA-API-KEY-ID': key, 'APCA-API-SECRET-KEY': sec})
-        d      = json.loads(urllib.request.urlopen(req, timeout=8).read())
-        pv     = float(d['portfolio_value'])
-        pnl    = float(d['equity']) - float(d['last_equity'])
-        cash   = float(d['cash'])
-        return f'{name}: PV ${pv:,.2f} | Cash ${cash:,.2f} | P&amp;L <b>{pnl:+,.2f}</b>'
-    except Exception as e:
-        return f'{name}: unavailable'
-
-def get_pm2():
-    out = run(
-        "ssh -o ConnectTimeout=6 -o StrictHostKeyChecking=no openclaw "
-        "'/home/ubuntu/.npm-global/lib/node_modules/pm2/bin/pm2 jlist 2>/dev/null | "
-        "python3 -c \""
-        "import sys,json; p=json.load(sys.stdin); "
-        "on=[x[\\\"name\\\"] for x in p if x[\\\"pm2_env\\\"][\\\"status\\\"]==\\\"online\\\"]; "
-        "dn=[x[\\\"name\\\"] for x in p if x[\\\"pm2_env\\\"][\\\"status\\\"]!=\\\"online\\\"]; "
-        "print(str(len(on))+\\\" online\\\"+(\\\" | STOPPED: \\\"+str(dn) if dn else \\\" | all healthy\\\"))\"'",
-        timeout=12)
-    return out or 'Oracle: unreachable'
-
 def fmt_event(e):
     start = e['start'][11:16] if 'T' in e['start'] else e['start']
     return f"  {start}  {esc(e['summary'])}"
@@ -578,11 +553,13 @@ def gather_context(brief_type, now, persist):
     ctx = {
         'brief_type': brief_type, 'now': now, '_cfg': cfg,
         'calendar': [], 'cal_conflicts': set(), 'cal_prep': None,
-        'alerts': [], 'deals': [], 'bills': [],
-        'trading': {}, 'pm2': None, 'weather': None,
+        'alerts': [], 'deals': [], 'bills': [], 'weather': None,
         'todos': [], 'yesterday': {'title': None, 'raw': ''}, 'commitments': [],
     }
 
+    # LIFE-ONLY (2026-06-13): trading P&L / Oracle PM2 / flow signals removed from
+    # every brief — Mike gets all trading via the AInvest copilot + flow digests +
+    # breakout scanner on the trading bots. LifeClaw = life lane only, no overlap.
     if brief_type == 'morning_brief':
         ctx['calendar'] = _calendar_merged(2)
         ctx['cal_conflicts'], ctx['cal_prep'] = cal_smarts(ctx['calendar'], now)
@@ -595,17 +572,8 @@ def gather_context(brief_type, now, persist):
         ctx['weather'] = get_weather(cfg)
         ctx['todos']  = get_todos(cfg)
         ctx['yesterday'], ctx['commitments'] = get_yesterday(cfg, now)
-        ctx['trading'] = {
-            'boba':  get_alpaca('alpaca-boba-key-id',  'alpaca-boba-secret',  'Boba R2'),
-            'jazzy': get_alpaca('alpaca-jazzy-key-id', 'alpaca-jazzy-secret', 'Jazzy'),
-        }
-        ctx['pm2'] = get_pm2()
 
     elif brief_type == 'midday_checkin':
-        ctx['trading'] = {
-            'boba':  get_alpaca('alpaca-boba-key-id',  'alpaca-boba-secret',  'Boba R2'),
-            'jazzy': get_alpaca('alpaca-jazzy-key-id', 'alpaca-jazzy-secret', 'Jazzy'),
-        }
         i1, _, _ = get_gmail('',         hours=6)
         i2, _, _ = get_gmail('personal', hours=6)
         ctx['alerts'] = filter_new(i1 + i2, 'email', now, persist, _email_key)
@@ -613,12 +581,14 @@ def gather_context(brief_type, now, persist):
         ctx['cal_conflicts'], ctx['cal_prep'] = cal_smarts(ctx['calendar'], now)
 
     elif brief_type == 'evening_summary':
-        ctx['trading'] = {
-            'boba':  get_alpaca('alpaca-boba-key-id',  'alpaca-boba-secret',  'Boba R2'),
-            'jazzy': get_alpaca('alpaca-jazzy-key-id', 'alpaca-jazzy-secret', 'Jazzy'),
-        }
-        ctx['pm2'] = get_pm2()
+        # forward-looking: tomorrow's plan + anything needing action tonight
         ctx['calendar'] = _calendar_merged(2)
+        ctx['cal_conflicts'], ctx['cal_prep'] = cal_smarts(ctx['calendar'], now)
+        i1, _, _ = get_gmail('',         hours=12)
+        i2, _, _ = get_gmail('personal', hours=12)
+        important = i1 + i2
+        ctx['alerts'] = filter_new(important, 'email', now, persist, _email_key)
+        ctx['bills']  = get_bills(now, important, persist)
 
     else:  # nightly_wrap
         i1, _, c1 = get_gmail('',         hours=168)
@@ -699,13 +669,7 @@ def render_template(brief_type, ctx):
 
 📧 <b>INBOX</b>
 {_render_inbox(ctx)}
-{_render_life(ctx)}
-📈 <b>TRADING</b> (paper)
-  {ctx['trading']['boba']}
-  {ctx['trading']['jazzy']}
-
-🤖 Oracle PM2: {esc(ctx['pm2'])}
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━"""
+{_render_life(ctx)}━━━━━━━━━━━━━━━━━━━━━━━━━━━━"""
 
     if brief_type == 'midday_checkin':
         time_str = now.strftime('%H:%M ET')
@@ -713,18 +677,16 @@ def render_template(brief_type, ctx):
         inbox_line = (f"  ⚡ {len(alerts)} new alert{'s' if len(alerts)!=1 else ''} in inbox"
                       if alerts else '  Inbox clear')
         next_evt = f"\n  ⏰ Upcoming: {esc(ctx['cal_prep'])}" if ctx['cal_prep'] else ''
-        return (f"☀️ <b>MIDDAY</b> | {time_str}\n  {ctx['trading']['boba']}\n  "
-                f"{ctx['trading']['jazzy']}\n{inbox_line}{next_evt}")
+        return f"☀️ <b>MIDDAY</b> | {time_str}\n{inbox_line}{next_evt}"
 
     if brief_type == 'evening_summary':
         date_str = now.strftime('%a %b %-d')
         tmrw = _tomorrow_events(ctx, now, 3)
         tmrw_lines = '\n'.join(fmt_event(e) for e in tmrw) or '  Nothing scheduled'
-        return f"""📊 <b>EOD WRAP</b> | {date_str}
-  {ctx['trading']['boba']}
-  {ctx['trading']['jazzy']}
-  PM2: {esc(ctx['pm2'])}
-
+        inbox = _render_inbox(ctx)
+        inbox_block = f"\n📧 <b>NEEDS ACTION</b>\n{inbox}\n" if inbox != '  Inbox clear' else ''
+        return f"""📊 <b>EVENING — plan tomorrow</b> | {date_str}
+{inbox_block}
 📅 <b>Tomorrow</b>
 {tmrw_lines}"""
 
@@ -761,8 +723,6 @@ def _ctx_for_llm(ctx):
         'todos': ctx['todos'],
         'yesterday_title': ctx['yesterday'].get('title'),
         'commitments': ctx['commitments'],
-        'trading': {k: strip(v) for k, v in ctx['trading'].items()},
-        'oracle_pm2': strip(ctx['pm2']) if ctx['pm2'] else None,
         'weather': ctx['weather'],
     }
 
