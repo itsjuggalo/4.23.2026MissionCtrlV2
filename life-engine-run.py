@@ -185,6 +185,25 @@ def send_telegram(message: str) -> bool:
     # Last resort: maybe HTML was rejected — send plain text once.
     return _telegram_post(message, parse_mode=False)
 
+def send_telegram_photo(path: str, caption: str = '') -> bool:
+    """Send a photo to the LifeClaw bot. Plain-text caption. Best-effort."""
+    token   = secret('lifeclaw_telegram_bot_token')
+    chat_id = secret('lifeclaw_telegram_chat_id')
+    if not token or not chat_id or not path or not os.path.exists(path):
+        return False
+    cap = re.sub(r'<[^>]+>', '', caption)[:1000]
+    url = f'https://api.telegram.org/bot{token}/sendPhoto'
+    cmd = ('curl -s '
+           f'-F {shlex.quote("chat_id=" + str(chat_id))} '
+           f'-F {shlex.quote("photo=@" + path)} '
+           f'-F {shlex.quote("caption=" + cap)} '
+           f'{shlex.quote(url)}')
+    out = run(cmd, timeout=30)
+    try:
+        return json.loads(out).get('ok', False)
+    except Exception:
+        return False
+
 def send_discord(brief_type: str, message: str):
     hook_file = DISCORD_HOOKS.get(brief_type)
     if not hook_file:
@@ -670,6 +689,8 @@ def gather_context(brief_type, now, persist):
         ctx['todos']  = get_todos(cfg)
         ctx['yesterday'], ctx['commitments'] = get_yesterday(cfg, now)
 
+    # Body & Mind nudges — runs for every brief type (additive, never blocks).
+    ctx['wellness'] = select_wellness(brief_type, now)
     return ctx
 
 def _tomorrow_events(ctx, now, limit):
@@ -724,6 +745,17 @@ def _render_life(ctx):
             out += f"  ↻ {esc(c)}\n"
     return out
 
+def _render_body_mind(ctx):
+    """Quote + body/mind nudges block (shared by all briefs)."""
+    w = ctx.get('wellness') or {}
+    out = ''
+    if w.get('quote'):
+        out += f"\n💬 <i>{esc(w['quote'])}</i>\n"
+    if w.get('nudges'):
+        nl = '\n'.join(f"  • {esc(n)}" for n in w['nudges'])
+        out += f"\n🌿 <b>BODY &amp; MIND</b>\n{nl}\n"
+    return out
+
 def render_template(brief_type, ctx):
     now = ctx['now']
     if brief_type == 'morning_brief':
@@ -737,7 +769,7 @@ def render_template(brief_type, ctx):
 
 📧 <b>INBOX</b>
 {_render_inbox(ctx)}
-{_render_life(ctx)}━━━━━━━━━━━━━━━━━━━━━━━━━━━━"""
+{_render_life(ctx)}{_render_body_mind(ctx)}━━━━━━━━━━━━━━━━━━━━━━━━━━━━"""
 
     if brief_type == 'midday_checkin':
         time_str = now.strftime('%H:%M ET')
@@ -745,7 +777,7 @@ def render_template(brief_type, ctx):
         inbox_line = (f"  ⚡ {len(alerts)} new alert{'s' if len(alerts)!=1 else ''} in inbox"
                       if alerts else '  Inbox clear')
         next_evt = f"\n  ⏰ Upcoming: {esc(ctx['cal_prep'])}" if ctx['cal_prep'] else ''
-        return f"☀️ <b>MIDDAY</b> | {time_str}\n{inbox_line}{next_evt}"
+        return f"☀️ <b>MIDDAY</b> | {time_str}\n{inbox_line}{next_evt}\n{_render_body_mind(ctx)}"
 
     if brief_type == 'evening_summary':
         date_str = now.strftime('%a %b %-d')
@@ -756,7 +788,8 @@ def render_template(brief_type, ctx):
         return f"""📊 <b>EVENING — plan tomorrow</b> | {date_str}
 {inbox_block}
 📅 <b>Tomorrow</b>
-{tmrw_lines}"""
+{tmrw_lines}
+{_render_body_mind(ctx)}"""
 
     # nightly_wrap
     date_str = now.strftime('%a %b %-d')
@@ -768,7 +801,8 @@ def render_template(brief_type, ctx):
 {_render_inbox(ctx)}
 {_render_life(ctx)}
 📅 <b>Tomorrow</b>
-{tmrw_lines}"""
+{tmrw_lines}
+{_render_body_mind(ctx)}"""
 
 # ── LLM focus line (Step F — augment-on-top, never blocks) ────────────────────
 def _ctx_for_llm(ctx):
@@ -827,6 +861,71 @@ def render_focus_line(brief_type, ctx, cfg):
     line = re.sub(r'<[^>]+>', '', line).strip().strip('"').strip()
     return line[:200] or None
 
+# ── Visual card (warm spa/wellness dark PNG — additive, never blocks) ─────────
+_CARD_TITLES = {'morning_brief': 'Good Morning, Mike', 'midday_checkin': 'Midday Reset',
+                'evening_summary': 'Wind Down', 'nightly_wrap': 'Good Night, Mike'}
+_CARD_BODY_LABEL = {'morning': 'Body & Mind', 'midday': 'Body Reset',
+                    'evening': 'Let The Body Settle', 'nightly': 'Before Sleep'}
+_CARD_CTX_LABEL = {'morning_brief': 'Today', 'midday_checkin': 'Coming Up',
+                   'evening_summary': 'Set Up Tomorrow', 'nightly_wrap': 'Tomorrow'}
+_CARD_FOOTER = {'morning': 'LifeClaw · your daily corner', 'midday': 'LifeClaw · keep it smooth',
+                'evening': 'LifeClaw · soft landing', 'nightly': 'LifeClaw · rest well'}
+
+def _card_context_items(brief_type, ctx):
+    """1–3 short plain-text life lines (events, bills) for the card."""
+    items, now = [], ctx['now']
+    cal = ctx.get('calendar') or []
+    if brief_type in ('evening_summary', 'nightly_wrap'):
+        for e in _tomorrow_events(ctx, now, 2):
+            start = e['start'][11:16] if 'T' in e['start'] else 'all day'
+            items.append(f"{start}  {e['summary']}")
+    else:
+        today = now.strftime('%Y-%m-%d')
+        for e in sorted(cal, key=lambda x: x['start']):
+            if e['start'][:10] == today and 'T' in e['start']:
+                items.append(f"{e['start'][11:16]}  {e['summary']}")
+            if len(items) >= 2:
+                break
+    for b in (ctx.get('bills') or []):
+        if not b['is_paid'] and not b['autopay'] and 0 <= b['days'] <= 5:
+            items.append(f"{b['name']} — due in {b['days']}d")
+            break
+    out = [re.sub(r'<[^>]+>', '', str(i)).strip() for i in items if i]
+    return out[:3]
+
+def _card_spec(brief_type, ctx):
+    w = ctx.get('wellness') or {}
+    slot = w.get('slot', 'morning')
+    sections = []
+    if w.get('nudges'):
+        sections.append({'label': _CARD_BODY_LABEL.get(slot, 'Body & Mind'),
+                         'items': w['nudges']})
+    ctx_items = _card_context_items(brief_type, ctx)
+    if ctx_items:
+        sections.append({'label': _CARD_CTX_LABEL.get(brief_type, 'Today'),
+                         'items': ctx_items})
+    return {
+        'glyph': w.get('glyph', 'leaf'),
+        'title': _CARD_TITLES.get(brief_type, 'LifeClaw'),
+        'date': ctx['now'].strftime('%A, %B %-d · %-I:%M %p ET'),
+        'quote': w.get('quote'),
+        'sections': sections,
+        'footer': _CARD_FOOTER.get(slot, 'LifeClaw · your daily corner'),
+    }
+
+def make_card(brief_type, ctx, now):
+    """Render the brief's PNG card. Returns path or None (never raises)."""
+    try:
+        if LIFECLAW_DIR not in sys.path:
+            sys.path.insert(0, LIFECLAW_DIR)
+        import render_card
+        out = os.path.join(LIFECLAW_DIR, 'cards',
+                           f'{brief_type}-{now.strftime("%Y-%m-%d")}.png')
+        return render_card.render_card(_card_spec(brief_type, ctx), out)
+    except Exception as e:
+        print(f'card build error: {e}', file=sys.stderr)
+        return None
+
 # ── Compose (template + optional focus line) ──────────────────────────────────
 def compose(brief_type, now, preview):
     ctx = gather_context(brief_type, now, persist=not preview)
@@ -839,7 +938,7 @@ def compose(brief_type, now, preview):
     else:
         msg = body
         source = 'template'
-    return msg, source
+    return msg, source, ctx
 
 def archive(brief_type, source, text, now):
     try:
@@ -851,8 +950,24 @@ def archive(brief_type, source, text, now):
         print(f'Archive error: {e}', file=sys.stderr)
 
 def deliver(brief_type, now):
-    """Compose + send live. Returns True on Telegram success."""
-    msg, source = compose(brief_type, now, preview=False)
+    """Compose + send live. Returns True on Telegram success.
+
+    Visual card (if cards_enabled) leads the brief; it is best-effort and
+    NEVER blocks the text — if the card fails the text brief still sends.
+    """
+    msg, source, ctx = compose(brief_type, now, preview=False)
+    cfg = ctx['_cfg']
+    if cfg.get('cards_enabled'):
+        card = make_card(brief_type, ctx, now)
+        if card and send_telegram_photo(card, _CARD_TITLES.get(brief_type, 'LifeClaw')):
+            print(f'[{now.strftime("%H:%M")}] {brief_type} card sent ✓')
+            source += '+card'
+        elif card:
+            print(f'[{now.strftime("%H:%M")}] {brief_type} card render OK, send failed',
+                  file=sys.stderr)
+        else:
+            print(f'[{now.strftime("%H:%M")}] {brief_type} card unavailable — text only',
+                  file=sys.stderr)
     ok = send_telegram(msg)
     if ok:
         mark_sent(brief_type)
@@ -887,7 +1002,7 @@ def recover_missed(now, current):
             continue
         if hour >= end and hour < grace_end and not already_sent(bt):
             print(f'[{now.strftime("%H:%M")}] recovering missed {bt} (delayed)')
-            msg, source = compose(bt, now, preview=False)
+            msg, source, _ = compose(bt, now, preview=False)
             msg = msg.replace('</b>', '</b> (delayed)', 1) if '</b>' in msg else f'(delayed)\n{msg}'
             if send_telegram(msg):
                 mark_sent(bt)
@@ -912,7 +1027,7 @@ def main():
     # ── Preview: full compose path, print only, never mutates state ──
     if args.preview is not None:
         bt = args.preview if args.preview != '__auto__' else (window_brief(hour) or 'morning_brief')
-        msg, source = compose(bt, now, preview=True)
+        msg, source, _ = compose(bt, now, preview=True)
         print(msg)
         print(f'\n----- [preview {bt}] source={source} — NO SEND, NO STATE CHANGE -----',
               file=sys.stderr)
