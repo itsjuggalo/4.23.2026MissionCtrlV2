@@ -71,30 +71,19 @@ def api(method: str, path: str, body=None):
             return e.code, {"raw": raw.decode()[:200]}
 
 
-# Archive channels (id -> name) from all_channels.txt
-ARCHIVES = {
-    "1486136515045101717": "archive-eric",
-    "1486136525144981565": "archive-analyst",
-    "1486136531440636146": "archive-risk",
-    "1486136544602624163": "archive-executions",
-    "1486136549815877683": "archive-portfolio",
-    "1486136556317184150": "archive-broadcaster",
-    "1486136562327748630": "archive-sniper",
-    "1486136569218863186": "archive-counter-intel",
-    "1486136576583925840": "archive-auditor",
-    "1486136582854410331": "archive-macro",
-    "1486136588407930980": "archive-psych",
-}
+# --- Live-discovery config (guild was restructured 2026-06; never trust old IDs) ---
+DEAD_DAYS = 21        # no message in this many days = dead
+SNIPER_CONFIG = os.path.expanduser("~/trading/daemons/sniper_config.json")
+SNIPER_CHANNELS = ["sniper-entries", "sniper-dips", "sniper-exits",
+                   "sniper-watchlist", "sniper-skips"]
+SNIPER_CATEGORY = "🎯 SNIPER"
 
-# Sniper channel renames (id -> new name).  category renamed separately.
-SNIPER_RENAMES = {
-    "1486045642915844126": "sniper-entries",    # was sniper-launches
-    "1486045643926671390": "sniper-dips",       # was sniper-analysis
-    "1486045647345025264": "sniper-exits",      # was sniper-executions
-    "1486045648070512851": "sniper-watchlist",  # unchanged
-    "1486045648900853910": "sniper-skips",      # was sniper-blacklist
-}
-SNIPER_CATEGORY_HINT = "CRYPTO SNIPER"  # category to rename -> "SNIPER"
+# Categories NEVER touched by --delete-dead (flow/options/signals/briefs are live trading data)
+PROTECTED_CATEGORY_HINTS = ("SIGNALS", "WHALE", "FLOW", "BRIEF", "TRADING",
+                            "RISK", "PORTFOLIO", "VOICE")
+# Channel names never deleted even if quiet (safety allowlist)
+PROTECTED_NAMES = {"general", "system-logs", "announcements", "mission-control",
+                   "agent-comms", "synth-control", "boba-cmd", "tg-bridge", "verify"}
 
 
 def check_perms():
@@ -112,72 +101,106 @@ def check_perms():
     return manage
 
 
-def audit_archives():
-    print("\n=== ARCHIVE AUDIT (read-only) ===")
-    print(f"{'channel':24} {'msgs':>5}  {'last (UTC)':20} verdict")
-    print("-" * 70)
-    empties = []
-    for cid, name in ARCHIVES.items():
-        st, msgs = api("GET", f"/channels/{cid}/messages?limit=5")
-        time.sleep(0.4)
-        if st != 200:
-            print(f"{name:24} {'?':>5}  {'-':20} ERROR HTTP {st} {str(msgs)[:50]}")
+def _scan_dead():
+    """Live discovery: return (dead_list, cats) where dead = channels with no
+    message in DEAD_DAYS, NOT in a protected category, NOT a protected name."""
+    import datetime as dt
+    st, chans = api("GET", f"/guilds/{GUILD}/channels")
+    if st != 200:
+        sys.exit(f"cannot list channels: HTTP {st}")
+    cats = {c["id"]: c["name"] for c in chans if c["type"] == 4}
+    now = dt.datetime.now(dt.timezone.utc)
+    dead = []
+    for c in [c for c in chans if c["type"] in (0, 5)]:
+        cat = cats.get(c.get("parent_id"), "")
+        if any(h in cat.upper() for h in PROTECTED_CATEGORY_HINTS):
             continue
-        n = len(msgs)
-        last = msgs[0]["timestamp"][:19] if n else "-"
-        verdict = "EMPTY -> delete" if n == 0 else "has messages -> KEEP"
-        if n == 0:
-            empties.append((cid, name))
-        print(f"{name:24} {n:>5}  {last:20} {verdict}")
-    print(f"\n{len(empties)} empty / {len(ARCHIVES)} total. "
-          f"Empty: {', '.join(n for _, n in empties) or 'none'}")
-    return empties
+        if c["name"] in PROTECTED_NAMES:
+            continue
+        st, msgs = api("GET", f"/channels/{c['id']}/messages?limit=1")
+        time.sleep(0.35)
+        if st != 200:
+            continue
+        if not msgs:
+            dead.append((c["id"], c["name"], cat, "empty"))
+            continue
+        last = dt.datetime.fromisoformat(msgs[0]["timestamp"].replace("Z", "+00:00"))
+        age = (now - last).days
+        if age >= DEAD_DAYS:
+            dead.append((c["id"], c["name"], cat, f"{age}d idle"))
+    return dead, cats
 
 
-def delete_empty_archives():
-    empties = audit_archives()
-    if not empties:
-        print("\nNothing empty to delete.")
+def delete_dead(execute: bool):
+    dead, cats = _scan_dead()
+    print(f"\n=== DEAD/EMPTY CHANNELS (non-flow, idle ≥{DEAD_DAYS}d) ===")
+    for cid, name, cat, why in dead:
+        print(f"  {cat[:24]:24} {name:26} {why}")
+    print(f"\n{len(dead)} channels qualify.")
+    if not dead:
         return
-    print(f"\nDeleting {len(empties)} empty archive channels...")
-    for cid, name in empties:
+    if not execute:
+        print("Preview only. Re-run with --delete-dead --yes to delete these.")
+        return
+    print("Deleting...")
+    for cid, name, cat, why in dead:
         st, _ = api("DELETE", f"/channels/{cid}")
         print(f"  {'OK ' if st in (200, 204) else 'FAIL'} delete {name} (HTTP {st})")
         time.sleep(0.5)
-    # If ALL archives gone, offer to remove the category too
+    # remove any now-empty categories we just emptied
     st, chans = api("GET", f"/guilds/{GUILD}/channels")
     if st == 200:
-        cat = next((c for c in chans if c["type"] == 4 and "ARCHIVE" in c["name"].upper()), None)
-        children = [c for c in chans if c.get("parent_id") == (cat or {}).get("id")]
-        if cat and not children:
-            st, _ = api("DELETE", f"/channels/{cat['id']}")
-            print(f"  {'OK ' if st in (200,204) else 'FAIL'} delete empty category '{cat['name']}' (HTTP {st})")
+        live_parents = {c.get("parent_id") for c in chans if c["type"] in (0, 5)}
+        for c in [c for c in chans if c["type"] == 4 and c["id"] not in live_parents]:
+            if any(h in c["name"].upper() for h in PROTECTED_CATEGORY_HINTS):
+                continue
+            st, _ = api("DELETE", f"/channels/{c['id']}")
+            print(f"  {'OK ' if st in (200,204) else 'FAIL'} delete empty category '{c['name']}' (HTTP {st})")
 
 
-def rename_sniper():
-    print("\n=== RENAME SNIPER CHANNELS ===")
-    for cid, newname in SNIPER_RENAMES.items():
-        st, cur = api("GET", f"/channels/{cid}")
-        old = cur.get("name", "?") if st == 200 else "?"
-        if old == newname:
-            print(f"  skip {newname} (already named)")
+def setup_sniper():
+    """Create the 🎯 SNIPER category + channels, write their IDs to sniper_config.json."""
+    print("\n=== SETUP SNIPER CHANNELS ===")
+    st, chans = api("GET", f"/guilds/{GUILD}/channels")
+    if st != 200:
+        sys.exit(f"cannot list channels: HTTP {st}")
+    existing = {c["name"]: c["id"] for c in chans if c["type"] in (0, 5)}
+    cat = next((c for c in chans if c["type"] == 4 and "SNIPER" in c["name"].upper()), None)
+    if cat:
+        cat_id = cat["id"]
+        print(f"  category exists: {cat['name']}")
+    else:
+        st, cat = api("POST", f"/guilds/{GUILD}/channels", {"name": SNIPER_CATEGORY, "type": 4})
+        cat_id = cat.get("id")
+        print(f"  {'OK ' if st in (200,201) else 'FAIL'} create category {SNIPER_CATEGORY} (HTTP {st})")
+    ids = {}
+    for name in SNIPER_CHANNELS:
+        key = name.replace("sniper-", "")
+        if name in existing:
+            ids[key] = existing[name]
+            print(f"  exists: {name}")
             continue
-        st, _ = api("PATCH", f"/channels/{cid}", {"name": newname})
-        print(f"  {'OK ' if st == 200 else 'FAIL'} {old} -> {newname} (HTTP {st})")
+        st, ch = api("POST", f"/guilds/{GUILD}/channels",
+                     {"name": name, "type": 0, "parent_id": cat_id})
+        if st in (200, 201):
+            ids[key] = ch["id"]
+            print(f"  OK  create {name} -> {ch['id']}")
+        else:
+            print(f"  FAIL create {name} (HTTP {st} {str(ch)[:80]})")
         time.sleep(0.5)
-    # rename the category
-    st, chans = api("GET", f"/guilds/{GUILD}/channels")
-    if st == 200:
-        cat = next((c for c in chans if c["type"] == 4
-                    and SNIPER_CATEGORY_HINT in c["name"].upper()), None)
-        if cat:
-            st, _ = api("PATCH", f"/channels/{cat['id']}", {"name": "🎯 SNIPER"})
-            print(f"  {'OK ' if st == 200 else 'FAIL'} category '{cat['name']}' -> '🎯 SNIPER' (HTTP {st})")
+    # write IDs into sniper_config.json
+    try:
+        cfg = json.load(open(SNIPER_CONFIG))
+    except Exception:  # noqa: BLE001
+        cfg = {}
+    cfg.setdefault("channels", {}).update(ids)
+    json.dump(cfg, open(SNIPER_CONFIG, "w"), indent=2)
+    print(f"\nWrote channel IDs to {SNIPER_CONFIG}: {ids}")
+    print("Now flip the sniper daemon live (drop SNIPER_DRYRUN=1).")
 
 
 # Categories to leave alone in the bloat audit (Mike: don't touch flow/options)
-LEAVE_HINTS = ("FLOWGREEKS", "ULTIMATE FLOW", "STOCK SIGNALS", "TRADE SIGNALS",
-               "TRADINGVIEW", "DAILY BRIEFS")
+LEAVE_HINTS = ("SIGNALS", "WHALE", "FLOW", "BRIEF", "TRADING", "RISK", "PORTFOLIO")
 
 
 def audit_activity():
@@ -220,26 +243,32 @@ def audit_activity():
 
 def main():
     ap = argparse.ArgumentParser()
-    ap.add_argument("--delete-empty-archives", action="store_true")
-    ap.add_argument("--rename-sniper", action="store_true")
     ap.add_argument("--audit-activity", action="store_true",
                     help="read-only bloat/dead-channel report across the whole guild")
+    ap.add_argument("--delete-dead", action="store_true",
+                    help="delete non-flow channels idle ≥21d or empty (preview unless --yes)")
+    ap.add_argument("--setup-sniper", action="store_true",
+                    help="create 🎯 SNIPER category + channels, write IDs to sniper_config.json")
+    ap.add_argument("--yes", action="store_true", help="actually execute deletes")
     args = ap.parse_args()
 
-    if not check_perms() and (args.delete_empty_archives or args.rename_sniper):
+    # preview (--delete-dead without --yes) is read-only; only real mutations need perms
+    needs_manage = (args.delete_dead and args.yes) or args.setup_sniper
+    if needs_manage and not check_perms():
         sys.exit("Bot lacks Manage Channels — grant it in Discord (Server Settings -> "
                  "Roles -> the bot's role -> Manage Channels), then re-run.")
 
-    if args.delete_empty_archives:
-        delete_empty_archives()
-    elif args.rename_sniper:
-        rename_sniper()
+    if args.delete_dead:
+        delete_dead(execute=args.yes)
+    elif args.setup_sniper:
+        setup_sniper()
     elif args.audit_activity:
         audit_activity()
     else:
-        audit_archives()
-        print("\n(audit only. Flags: --audit-activity (whole-guild bloat report), "
-              "--delete-empty-archives, --rename-sniper.)")
+        check_perms()
+        print("\nFlags: --audit-activity (read-only bloat report) · "
+              "--delete-dead [--yes] (purge dead non-flow channels) · "
+              "--setup-sniper (create sniper channels).")
 
 
 if __name__ == "__main__":

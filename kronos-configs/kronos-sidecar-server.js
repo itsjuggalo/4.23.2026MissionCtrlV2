@@ -80,9 +80,39 @@ function findFileByModel(symbol, model) {
   return null;
 }
 
+// Anti-bloat gate: only post Kronos forecasts worth a notification.
+// Kills the ~50/day spam of low-confidence, conflicting, off-hours, duplicate
+// forecasts that made #kronos noise. Set KRONOS_POST_ALL=1 to bypass.
+const _lastKronosPost = new Map(); // ticker -> epoch ms of last posted
+function _shouldPostKronos(f) {
+  if (process.env.KRONOS_POST_ALL === '1') return true;
+  const conf = String(f.forecast_24h_confidence || '').toLowerCase();
+  const dir = String(f.forecast_24h_direction || '').toLowerCase();
+  // 1) only HIGH-confidence, directional calls (drop low/medium + neutral noise)
+  if (conf !== 'high') return false;
+  if (dir !== 'bullish' && dir !== 'bearish') return false;
+  // 2) drop self-negating forecasts that conflict with the option context
+  if (f.option_in_forecast_direction === false) return false;
+  // 3) market hours only (ET 9:30–16:00, Mon–Fri) — no overnight spam
+  const now = new Date();
+  const et = new Date(now.toLocaleString('en-US', { timeZone: 'America/New_York' }));
+  const mins = et.getHours() * 60 + et.getMinutes();
+  if (et.getDay() === 0 || et.getDay() === 6 || mins < 570 || mins > 960) return false;
+  // 4) dedupe: at most one post per ticker per 2h
+  const t = String(f.ticker || '?');
+  const last = _lastKronosPost.get(t) || 0;
+  if (Date.now() - last < 2 * 60 * 60 * 1000) return false;
+  _lastKronosPost.set(t, Date.now());
+  return true;
+}
+
 function postToDiscord(forecast, source) {
   const webhook = getDiscordWebhook();
   if (!webhook) return;
+  if (!_shouldPostKronos(forecast)) {
+    console.log(`[kronos] skip Discord post for ${forecast.ticker} (low-signal/off-hours/dup)`);
+    return;
+  }
   const direction = forecast.forecast_24h_direction || '?';
   const color = { bullish: 0x00FF00, bearish: 0xFF4757, neutral: 0x808080 }[direction] || 0x808080;
   const arrow = { bullish: '\u{1F4C8}', bearish: '\u{1F4C9}', neutral: '\u27A1\uFE0F' }[direction] || '\u2753';
