@@ -128,18 +128,19 @@ def build() -> str:
 
 
 def _mirror_telegram(text: str) -> None:
-    """Best-effort mirror via the Telegram fleet's daily_briefs route. Never fails the run;
-    the fleet router is a parallel session's work and may not have its token yet."""
-    for cmd in (["/home/itsju/bin/tg-send-msg", "--function", "daily_briefs", text],
-                ["/home/itsju/bin/tg-send-msg", "daily_briefs", text]):
-        try:
-            r = subprocess.run(cmd, capture_output=True, text=True, timeout=30)
-            if r.returncode == 0:
-                print("[morning] telegram mirror ok", flush=True)
-                return
-        except Exception:
-            continue
-    print("[morning] telegram mirror skipped (daily_briefs route not ready)", flush=True)
+    """Best-effort mirror via the Telegram fleet's daily_briefs bot. Routes through tg_fleet
+    DIRECTLY (not ~/bin/tg-send-msg, whose default falls back to the trading bot) so a missing
+    token is a clean skip — never brief-spam on the trading chat. No-ops on any error; the
+    token is Mike's to paste (`tg_fleet.py set daily_briefs <TOKEN>`)."""
+    cmd = ["/home/itsju/.venv/bin/python", "/home/itsju/scripts/tg_fleet.py", "send", "daily_briefs", text]
+    try:
+        r = subprocess.run(cmd, capture_output=True, text=True, timeout=30)
+        if r.returncode == 0 and "sent" in (r.stdout or ""):
+            print("[morning] telegram mirror ok (daily_briefs)", flush=True)
+            return
+    except Exception:
+        pass
+    print("[morning] telegram mirror skipped (daily_briefs token not set yet)", flush=True)
 
 
 def main():
