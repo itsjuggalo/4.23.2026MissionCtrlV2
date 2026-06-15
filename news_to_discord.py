@@ -24,6 +24,7 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 from lib.discord_post import post_discord  # noqa: E402
+from lib.portfolio import top_tickers  # noqa: E402
 
 SEC = Path.home() / ".openclaw" / "secrets"
 STATE = Path.home() / ".openclaw" / "state" / "news_to_discord_seen.json"
@@ -53,13 +54,15 @@ def _alpaca_keys():
     return None, None
 
 
-def fetch_alpaca_news():
+def fetch_alpaca_news(symbols: str = ""):
     k, s = _alpaca_keys()
     if not k or not s:
         print("[news] no alpaca keys on disk", flush=True)
         return []
-    url = "https://data.alpaca.markets/v1beta1/news?" + urllib.parse.urlencode(
-        {"limit": NEWS_LIMIT, "sort": "desc", "include_content": "false"})
+    params = {"limit": NEWS_LIMIT, "sort": "desc", "include_content": "false"}
+    if symbols:
+        params["symbols"] = symbols
+    url = "https://data.alpaca.markets/v1beta1/news?" + urllib.parse.urlencode(params)
     req = urllib.request.Request(url, headers={
         "APCA-API-KEY-ID": k, "APCA-API-SECRET-KEY": s,
         "User-Agent": "mc-news/1.0"})
@@ -87,36 +90,46 @@ def save_seen(seen):
     os.replace(tmp, STATE)
 
 
-def fmt(item) -> str:
+def fmt(item, held: bool = False) -> str:
     head = item.get("headline", "(no headline)")
     src = item.get("source", "news")
     syms = ", ".join(item.get("symbols", [])[:6])
     url = item.get("url", "")
     ts = item.get("created_at", "")[:16].replace("T", " ")
     tag = f" · {syms}" if syms else ""
-    return f"📰 **{head}**\n{src} · {ts} ET{tag}\n{url}".strip()
+    icon = "⭐ HOLDING" if held else "📰"
+    return f"{icon} **{head}**\n{src} · {ts} ET{tag}\n{url}".strip()
 
 
 def main():
-    items = fetch_alpaca_news()
+    # Portfolio-first: pull news for YOUR top holdings, then general market as fill.
+    holdings = top_tickers(8)
+    hset = set(holdings)
+    by_id: dict[str, dict] = {}
+    for it in fetch_alpaca_news(",".join(holdings)) + fetch_alpaca_news():
+        by_id.setdefault(str(it.get("id")), it)   # holdings batch wins on dup
+    items = list(by_id.values())
     if not items:
         print("[news] nothing fetched", flush=True)
         return
+
+    def is_held(it):
+        return bool(hset & set(it.get("symbols", [])))
+
     seen = load_seen()
     fresh = [it for it in items if str(it.get("id")) not in seen]
-    # newest first; Alpaca already sorts desc, but be safe
-    fresh.sort(key=lambda it: it.get("created_at", ""), reverse=True)
+    fresh.sort(key=lambda it: it.get("created_at", ""), reverse=True)  # newest first
+    fresh.sort(key=lambda it: 0 if is_held(it) else 1)                 # stable: holdings first
     posted = 0
     for it in fresh[:MAX_PER_RUN]:
-        if post_discord(fmt(it), webhook_name=WEBHOOK, username="Market News"):
+        if post_discord(fmt(it, is_held(it)), webhook_name=WEBHOOK, username="Market News"):
             seen.add(str(it.get("id")))
             posted += 1
-    # mark the rest of this batch seen too, so a backlog doesn't dump next run
-    for it in fresh[MAX_PER_RUN:]:
+    for it in fresh[MAX_PER_RUN:]:   # mark the rest seen so a backlog doesn't dump next run
         seen.add(str(it.get("id")))
     save_seen(seen)
-    print(f"[news] {datetime.now(timezone.utc).isoformat()} fetched={len(items)} "
-          f"fresh={len(fresh)} posted={posted}", flush=True)
+    print(f"[news] {datetime.now(timezone.utc).isoformat()} holdings={','.join(holdings)} "
+          f"fetched={len(items)} fresh={len(fresh)} posted={posted}", flush=True)
 
 
 if __name__ == "__main__":

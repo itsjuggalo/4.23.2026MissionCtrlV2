@@ -21,9 +21,11 @@ from pathlib import Path
 from typing import Optional
 
 sys.path.insert(0, str(Path.home() / "scripts"))
+sys.path.insert(0, str(Path.home() / "05_AUTOMATION" / "scripts"))
 import aime_client as aime  # noqa: E402
 import discord  # noqa: E402
 from discord import app_commands  # noqa: E402
+from lib.portfolio import portfolio_summary  # noqa: E402
 
 SEC = Path.home() / ".openclaw" / "secrets"
 TOKEN_FILE = os.environ.get("DISCORD_AIME_TOKEN_FILE", "discord_ops_bot_token")
@@ -208,6 +210,13 @@ async def flowpicks_cmd(interaction: discord.Interaction):
     prompt = ("/ainvest rank the most significant options flow today by risk-adjusted setup "
               "quality — top 5 with ticker, contract, why it stands out, and entry logic.")
     await _send_chunks(interaction, await _answer_skill(prompt, timeout=420))
+
+
+@tree.command(name="portfolio", description="Live positions + P&L across Boba + Jazzy")
+async def portfolio_cmd(interaction: discord.Interaction):
+    await interaction.response.defer(thinking=True)
+    # deterministic Alpaca read (no LLM) — fast
+    await _send_chunks(interaction, await asyncio.to_thread(portfolio_summary))
 
 
 @client.event

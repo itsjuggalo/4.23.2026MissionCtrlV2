@@ -16,12 +16,16 @@ import argparse
 import json
 import os
 import subprocess
+import sys
 import time
 import urllib.request
 import urllib.error
 from datetime import datetime
 from zoneinfo import ZoneInfo
 from pathlib import Path
+
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+from lib.portfolio import top_tickers_str  # noqa: E402
 
 SEC = Path.home() / ".openclaw" / "secrets"
 GUILD = "1486025777970548908"
@@ -94,9 +98,14 @@ def main() -> None:
     ap.add_argument("--header", default="", help="optional banner line")
     ap.add_argument("--model", default="sonnet")
     ap.add_argument("--timeout", type=int, default=420)
+    ap.add_argument("--tickers", type=int, default=0,
+                    help="substitute {TICKERS} in --skill with the top-N portfolio holdings")
     a = ap.parse_args()
+    skill = a.skill
+    if a.tickers and "{TICKERS}" in skill:
+        skill = skill.replace("{TICKERS}", top_tickers_str(a.tickers))
     cid = resolve_channel(a.channel)
-    out = run_skill(a.skill, a.model, a.timeout)
+    out = run_skill(skill, a.model, a.timeout)
     stamp = datetime.now(ET).strftime("%a %b %-d %-I:%M %p ET")
     header = (a.header + f"  ·  {stamp}") if a.header else ""
     msg = (header + "\n" + out) if header else out

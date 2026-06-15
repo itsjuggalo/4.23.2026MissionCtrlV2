@@ -105,8 +105,10 @@ def main():
         except Exception as e:
             return f"[{name} error] {e}"
 
-    help_txt = (f"🤖 {name} — text me like you text Claude Code. I can use read-only "
-                f"tools to look things up. /help for this message.")
+    help_txt = (f"🤖 {name} — text me like you text Claude Code.\n"
+                f"📈 /pick — the #1 contract to buy now (verified + sized)\n"
+                f"📈 /picks — top 3 · /book — positions · /grade — paper→real readiness\n"
+                f"Or ask anything / run any /skill. /help = this.")
 
     print(f"{name} responder started ({cfg['token']})", flush=True)
     tg("deleteWebhook")
@@ -131,6 +133,22 @@ def main():
                     print(f"ignored non-owner {chat_id}", flush=True); continue
                 if text.startswith(("/help", "/start")):
                     tg("sendMessage", chat_id=chat_id, text=help_txt); continue
+                # Quantum pipeline picks — instant, deterministic, zero-bloat (no LLM).
+                cmd0 = text.split()[0].lower()
+                if cmd0 in ("/pick", "/picks", "/book", "/grade"):
+                    try:
+                        import quantum_tg
+                        msg = (quantum_tg.pick(1) if cmd0 == "/pick"
+                               else quantum_tg.pick(3) if cmd0 == "/picks"
+                               else quantum_tg.grade() if cmd0 == "/grade"
+                               else quantum_tg.book())
+                    except Exception as e:
+                        msg = f"[pick error] {e}"
+                    if not tg("sendMessage", chat_id=chat_id, text=msg,
+                              parse_mode="Markdown").get("ok"):
+                        tg("sendMessage", chat_id=chat_id, text=msg)  # plain fallback
+                    print(f"[{name}] {cmd0}", flush=True)
+                    continue
                 # Any other /command is passed VERBATIM to `claude -p`, so every Claude
                 # slash-skill (e.g. /flow-desk SPY, /options-desk, /ticker-research NVDA)
                 # is a Telegram command automatically — whatever skills get added.
