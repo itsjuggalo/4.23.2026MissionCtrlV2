@@ -87,8 +87,40 @@ IDENTITY = {
 }
 
 
+# Bots whose token lives in ~/.openclaw/vault.db (not a file) → key in the secrets table.
+VAULT = os.path.expanduser("~/.openclaw/vault.db")
+VAULT_IDENTITY = {
+    "telegram_boba2_bot_token": dict(
+        name="Flow Digest", avatar="hydralisk",
+        short="The Swarm's daily flow brief — 3x a day best-of options flow.",
+        desc=("Flow digest (push). The 3x/day best-of options-flow brief: verdict-first picks "
+              "from the scraper. Pull more with /winners /sweeps from the Trading Command bot. "
+              "The Swarm feeds.")),
+    "telegram_hermes_bot_token": dict(
+        name="Hermes Relay", avatar="dragoon",
+        short="Hermes LLM router — message bus on the subscription wallet.",
+        desc=("Hermes relay. Routes LLM traffic for the agent fleet on the subscription wallet. "
+              "Infra relay — not a chat target. en taro Adun.")),
+    "telegram_openclaw_bot_token": dict(
+        name="OpenClaw Grok", avatar="ghost",
+        short="OpenClaw's Grok/X relay — X-native intel from the Oracle box.",
+        desc=("OpenClaw Grok relay. Grok / X-native intel from the openclaw (Oracle) box. "
+              "Infra relay. We move unseen.")),
+}
+
+
 def _tok(f):
     return open(os.path.join(SEC, f)).read().strip()
+
+
+def _vault_tok(key):
+    import sqlite3
+    con = sqlite3.connect(VAULT)
+    try:
+        row = con.execute("SELECT value FROM secrets WHERE key=?", (key,)).fetchone()
+        return row[0].strip() if row else None
+    finally:
+        con.close()
 
 
 def _ok(j):
@@ -111,8 +143,7 @@ def _photo(tok, path):
     return r.json()
 
 
-def rebrand(tokfile, idn):
-    tok = _tok(tokfile)
+def rebrand_tok(tok, idn):
     res = {}
     res["name"] = _ok(_call(tok, "setMyName", name=idn["name"]));            time.sleep(0.4)
     res["short"] = _ok(_call(tok, "setMyShortDescription", short_description=idn["short"])); time.sleep(0.4)
@@ -122,6 +153,17 @@ def rebrand(tokfile, idn):
     if not res["photo"]:
         res["photo_err"] = pj.get("description")
     return res
+
+
+def rebrand(tokfile, idn):
+    return rebrand_tok(_tok(tokfile), idn)
+
+
+def rebrand_vault(key, idn):
+    tok = _vault_tok(key)
+    if not tok:
+        return {"error": "no vault token"}
+    return rebrand_tok(tok, idn)
 
 
 if __name__ == "__main__":
@@ -137,4 +179,12 @@ if __name__ == "__main__":
             print(f"{'✓' if ok else '✗'} {idn['name']:16} {r}")
         except Exception as e:
             print(f"✗ {idn.get('name')}: {e}")
+        time.sleep(1)
+    for key, idn in VAULT_IDENTITY.items():    # vault-stored bots
+        try:
+            r = rebrand_vault(key, idn)
+            ok = all(r.get(k) for k in ("name", "short", "desc", "photo"))
+            print(f"{'✓' if ok else '✗'} {idn['name']:16} (vault) {r}")
+        except Exception as e:
+            print(f"✗ {idn.get('name')} (vault): {e}")
         time.sleep(1)

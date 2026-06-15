@@ -1273,50 +1273,12 @@ Respond with ONLY the JSON. No preamble, no markdown fences.
 
 
 def call_boba(prompt):
-    """Call Claude Sonnet with the prompt."""
-    try:
-        import requests
-    except ImportError:
-        return {"error": "requests not installed"}
-
-    api_key = get_openai_key()
-    if not api_key:
-        return {"error": "no openai key"}
-
-    try:
-        r = requests.post(
-            "https://api.openai.com/v1/chat/completions",
-            headers={
-                "Authorization": f"Bearer {api_key}",
-                "content-type": "application/json",
-            },
-            json={
-                "model": JAZZY_MODEL,
-                "max_tokens": 2000,
-                "messages": [{"role": "user", "content": (_load_premium_dossier() + _load_lessons() + _load_active_position_rules() + _mc_kb_recall() + prompt)}],
-            },
-            timeout=90,
-        )
-        if r.status_code != 200:
-            return {"error": f"API {r.status_code}: {r.text[:500]}"}
-        data = r.json()
-        # OpenAI response shape (was incorrectly using Anthropic shape)
-        try:
-            text = data["choices"][0]["message"]["content"] or ""
-        except (KeyError, IndexError, TypeError) as _e:
-            return {"error": f"OpenAI response missing choices: {str(data)[:300]}"}
-        # Parse JSON from response
-        text = text.strip()
-        if text.startswith("```"):
-            text = text.split("```")[1]
-            if text.startswith("json"):
-                text = text[4:]
-        try:
-            return {"ok": True, "response": json.loads(text.strip()), "usage": data.get("usage", {})}
-        except Exception as e:
-            return {"error": f"JSON parse failed: {e}", "raw": text[:2000]}
-    except Exception as e:
-        return {"error": f"API call failed: {e}"}
+    """Jazzy picks via Grok on the OAuth SUBSCRIPTION (primary) → DeepSeek (cheap secondary
+    backup). Subscription/OAuth-first per Mike's rule — no pay-per-token OpenAI/Gemini billing.
+    Delegates to lib.llm."""
+    from lib.llm import call_llm
+    full = (_load_premium_dossier() + _load_lessons() + _load_active_position_rules() + _mc_kb_recall() + prompt)
+    return call_llm(full, ["grok_oauth", "deepseek"])
 
 
 def convert_spx_to_spy(pick):

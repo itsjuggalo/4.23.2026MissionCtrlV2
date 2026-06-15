@@ -1299,66 +1299,23 @@ def _mc_kb_recall():
 
 
 def call_boba(prompt):
-    """Call Claude Sonnet via CLI subprocess (Max plan, no API credits)."""
-    CLAUDE_BIN = "/home/itsju/.nvm/versions/node/v22.22.3/bin/claude"
+    """Boba picks via the claude.ai subscription CLI (free, no API credits), with the
+    six-floor desk dossier + lessons + rules + KB recall prepended. Delegates to lib.llm
+    (robust binary path + ANTHROPIC_API_KEY stripped + JSON extraction)."""
+    from lib.llm import call_llm
     full_prompt = (
-        _load_premium_dossier()  # NEW: top-of-prompt six-floor desk output
+        _load_premium_dossier()  # top-of-prompt six-floor desk output
         + _load_lessons()
         + _load_active_position_rules()
         + _mc_kb_recall()
         + prompt
     )
-
     _t0 = _time_tracker.time()
-    try:
-        result = subprocess.run(
-            [CLAUDE_BIN, "-p", "--model", "sonnet", "--output-format", "text",
-             "--no-session-persistence", "--tools", ""],
-            input=full_prompt,
-            capture_output=True,
-            text=True,
-            timeout=240,
-        )
-        _dur_ms = int((_time_tracker.time() - _t0) * 1000)
-
-        print(f"[boba-debug] returncode={result.returncode} stdout_len={len(result.stdout)} stderr_len={len(result.stderr)}", flush=True)
-        if result.stdout:
-            print(f"[boba-debug] stdout_head: {repr(result.stdout[:300])}", flush=True)
-        if result.stderr:
-            print(f"[boba-debug] stderr_head: {repr(result.stderr[:300])}", flush=True)
-        if result.returncode != 0:
-            _log_anthropic_call("boba_decision_cycle", BOBA_MODEL, None, _dur_ms,
-                                success=False, error=f"CLI exit {result.returncode}")
-            return {"error": f"CLI exit {result.returncode}: {result.stderr[:500]}"}
-
-        _log_anthropic_call("boba_decision_cycle", BOBA_MODEL, None, _dur_ms, success=True)
-
-        text = result.stdout.strip()
-        # Strip leading markdown fence if present (```json ... ``` or ``` ... ```)
-        if text.startswith("```"):
-            text = text.split("\n", 1)[1] if "\n" in text else text[3:]
-            text = text.strip()
-        # Trim to first { so leading prose is dropped
-        brace_idx = text.find("{")
-        if brace_idx > 0:
-            text = text[brace_idx:]
-        print(f"[boba-debug] post-clean text_len={len(text)}", flush=True)
-        print(f"[boba-debug] text_head: {repr(text[:300])}", flush=True)
-        try:
-            parsed, _end = json.JSONDecoder().raw_decode(text)
-            print(f"[boba-debug] JSON parse OK, picks={len(parsed.get('picks',[]))}", flush=True)
-            return {"ok": True, "response": parsed, "usage": {}}
-        except Exception as e:
-            print(f"[boba-debug] JSON parse FAILED: {e}", flush=True)
-            return {"error": f"JSON parse failed: {e}", "raw": text[:2000]}
-
-    except subprocess.TimeoutExpired:
-        _dur_ms = int((_time_tracker.time() - _t0) * 1000)
-        _log_anthropic_call("boba_decision_cycle", BOBA_MODEL, None, _dur_ms,
-                            success=False, error="timeout 240s")
-        return {"error": "CLI timeout (240s)"}
-    except Exception as e:
-        return {"error": f"CLI call failed: {e}"}
+    r = call_llm(full_prompt, ["claude_cli", "deepseek"])   # sub-CLI primary, DeepSeek secondary backup
+    _dur_ms = int((_time_tracker.time() - _t0) * 1000)
+    _log_anthropic_call("boba_decision_cycle", BOBA_MODEL, None, _dur_ms,
+                        success=("ok" in r), error=(None if "ok" in r else str(r.get("error", ""))[:200]))
+    return r
 
 def convert_spx_to_spy(pick):
     """
