@@ -4,7 +4,6 @@ import sys, json, logging, argparse
 from pathlib import Path
 from datetime import datetime, timezone, timedelta
 import requests
-from anthropic import Anthropic
 
 SECRETS = Path("/home/ubuntu/.openclaw/secrets")
 LOG_DIR = Path("/home/ubuntu/.openclaw/workspace/logs"); LOG_DIR.mkdir(parents=True, exist_ok=True)
@@ -80,9 +79,6 @@ def journal(n=5):
     return []
 
 def synth(btype, ctx):
-    key = secret("anthropic_api_key")
-    if not key: return "NO ANTHROPIC KEY"
-    client = Anthropic(api_key=key)
     prompt = f"""You are Boba, lead AI trader. {PROMPTS[btype]}
 
 CONTEXT:
@@ -104,9 +100,22 @@ OUTPUT — Discord embed-friendly:
 - 3-4 labeled bullet sections
 - End: TODAY'S TOP TRADE IDEA — ticker, direction, conviction (or "no setup")
 - Max 1500 chars total. All numbers when possible. No fluff."""
-    msg = client.messages.create(model="claude-haiku-4-5-20251001", max_tokens=2000,
-                                  messages=[{"role":"user","content":prompt}])
-    return msg.content[0].text
+    # Subscription-first (Mike's rule): the OAuth claude wallet via lib/llm.py, NEVER the
+    # dead console anthropic_api_key. Briefs are prose (not JSON), so call the providers
+    # directly and fall back to deepseek. Returns None if all fail → main() skips the post
+    # (never publishes a "NO ANTHROPIC KEY" garbage embed again).
+    import sys as _sys
+    if "/home/itsju/05_AUTOMATION/scripts" not in _sys.path:
+        _sys.path.insert(0, "/home/itsju/05_AUTOMATION/scripts")
+    from lib.llm import _claude_oauth, _deepseek
+    for _fn in (_claude_oauth, _deepseek):
+        try:
+            text, _usage = _fn(prompt)
+            if text and text.strip():
+                return text.strip()
+        except Exception as e:
+            log.warning(f"synth {_fn.__name__} failed: {e}")
+    return None
 
 def post(chan_id, btype, content):
     token = secret("spacer_bot_token.txt")
@@ -130,6 +139,9 @@ def main():
     ctx = {"grok": grok_sentiment(), "orion": orion_tech(), "flow": live_flow(), "journal": journal()}
     log.info(f"ctx: grok={len(ctx['grok'])}c, orion={len(ctx['orion'])}k, flow keys={list(ctx['flow'].keys())}, journal={len(ctx['journal'])}e")
     content = synth(args.btype, ctx)
+    if not content:
+        log.error("synth returned nothing (all LLM providers failed) — skipping post")
+        sys.exit(1)
     log.info(f"synth {len(content)}c")
     ok = post(CHANS[args.btype], args.btype, content)
     log.info(f"=== done ok={ok} ===")

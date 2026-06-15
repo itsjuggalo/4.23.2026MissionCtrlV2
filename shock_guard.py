@@ -328,8 +328,11 @@ def main() -> int:
     if headlines and st["level"] == "CALM" and not crisis_now:
         st["level"] = "WATCH"
         st["watch_armed_at"] = time.time()
-        telegram("👀 <b>Headline watch armed</b> (no action taken — price must "
-                 "confirm):\n• " + "\n• ".join(headlines), loud=False)
+        # ADD de-bloat (2026-06-15): WATCH is internal-only — no Telegram ping.
+        # "Headline watch armed, no action taken" fired ~15×/day on keyword hits
+        # (trump/china/fed/halt/war) = pure noise for an ADD trader. Price must
+        # CONFIRM (escalate to CRISIS below) before Mike hears anything. Event is
+        # still logged for the scoreboard auditor; CRISIS is the only shock that pings.
         log_event("watch_armed", {"headlines": headlines, "vix": vix, "z": z})
 
     if crisis_now and st["level"] != "CRISIS":
