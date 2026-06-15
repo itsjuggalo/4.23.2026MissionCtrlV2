@@ -618,6 +618,9 @@ def select_wellness(brief_type, now):
     adhd  = _pick_slot(w.get('adhd', {}),   slot, base + 2)
     hydration = _pick(w.get('hydration', []), base)
     sun       = _pick(w.get('sun', []),       base + 1)
+    # George Carlin "comms intercept" — different line per slot, rotates daily.
+    _slot_off = {'morning': 0, 'midday': 1, 'evening': 2, 'nightly': 3}.get(slot, 0)
+    carlin = _pick(w.get('carlin', []), base + _slot_off)
     # Compose the nudge list by time of day.
     if slot == 'morning':
         nudges = [hydration, sun, body, adhd]
@@ -629,6 +632,7 @@ def select_wellness(brief_type, now):
         nudges = [body, adhd]
     return {
         'quote': quote,
+        'carlin': carlin,
         'nudges': [n for n in nudges if n],
         'glyph': CARD_GLYPH.get(brief_type, 'leaf'),
         'slot': slot,
@@ -754,6 +758,8 @@ def _render_body_mind(ctx):
     if w.get('nudges'):
         nl = '\n'.join(f"  • {esc(n)}" for n in w['nudges'])
         out += f"\n🌿 <b>BODY &amp; MIND</b>\n{nl}\n"
+    if w.get('carlin'):
+        out += f"\n📡 <b>COMMS INTERCEPT // CARLIN</b>\n  <i>“{esc(w['carlin'])}”</i>\n"
     return out
 
 def render_template(brief_type, ctx):
@@ -909,6 +915,12 @@ def _card_spec(brief_type, ctx):
         'title': _CARD_TITLES.get(brief_type, 'LifeClaw'),
         'date': ctx['now'].strftime('%A, %B %-d · %-I:%M %p ET'),
         'quote': w.get('quote'),
+        'carlin': w.get('carlin'),
+        'weather': ctx.get('weather'),
+        'brief_type': brief_type,
+        'slot': slot,
+        'day_seed': ctx['now'].timetuple().tm_yday,   # daily faction rotation
+        'card_style': (load_config().get('card_style', 'hybrid')),
         'sections': sections,
         'footer': _CARD_FOOTER.get(slot, 'LifeClaw · your daily corner'),
     }
