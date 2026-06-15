@@ -175,3 +175,4 @@
 [watchdog] still running (0.0h / 6.0h): claytrader-gpu-transcribe
 discord post failed: HTTPSConnectionPool(host='discord.com', port=443): Max retries exceeded with url: /api/webhooks/1507817931059364021/jhRr9kUvrZdH8cA_DngPU4Q_hpn4C0bJgLtq-41jAh_6Z6rOUWXcRCPTf1bidRTnxr5- (Caused by ConnectTimeoutError(<HTTPSConnection(host='discord.com', port=443) at 0x75e938333cb0>, 'Connection to discord.com timed out. (connect timeout=10)'))
 [watchdog] COMPLETE: ltx-video-download
+Terminated

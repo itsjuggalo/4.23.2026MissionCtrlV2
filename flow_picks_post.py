@@ -59,18 +59,14 @@ def _log_picks(picks):
         except Exception:
             pass
     PICKLOG_DIR.mkdir(parents=True, exist_ok=True)
-    spot_cache = {}
     with open(path, "a") as f:
-        for a, fv, voi, dte, dirn, tag in picks:
+        for a, fv, voi, dte, tag, spot, otm in picks:
             osym = a.get("OptionSymbol")
             if osym in seen:        # only log a contract's first appearance
                 continue
-            tk = a.get("Symbol")
-            if tk not in spot_cache:
-                spot_cache[tk] = _spot(tk)
-            rec = {"ts": datetime.now(ET).isoformat(), "symbol": tk, "optionSymbol": osym,
+            rec = {"ts": datetime.now(ET).isoformat(), "symbol": a.get("Symbol"), "optionSymbol": osym,
                    "strike": a.get("Strike"), "type": str(a.get("OptionType", ""))[:1],
-                   "exp": int(a.get("Expiry", 0) or 0), "dte": dte, "spot": spot_cache[tk],
+                   "exp": int(a.get("Expiry", 0) or 0), "dte": dte, "spot": spot,
                    "flowValue": fv, "isBullish": bool(a.get("isBullish"))}
             f.write(json.dumps(rec) + "\n")
 
@@ -135,22 +131,120 @@ def _tape() -> str:
         return ""
 
 
+MAX_MNY = 0.15   # |moneyness| beyond this = hedge/LEAP/stock-replacement, not a swing pick
+DTE_MIN, DTE_MAX = 7, 120   # swing window — excludes 0DTE lotto and long-dated LEAPs
+RISK_CAP = 250   # Mike's per-trade risk cap (premium-at-risk model)
+
+
+def _mid(row):
+    bid, ask, last = float(row["bid"] or 0), float(row["ask"] or 0), float(row["lastPrice"] or 0)
+    return (bid + ask) / 2 if (bid and ask) else last
+
+
+ALT_MAX_MNY = 0.20   # an affordable alternative must still be within 20% of spot (no lotto)
+
+
+def _sizing_line(a, is_call, spot=None):
+    """Premium-based sizing for Mike's $150–250 risk. If the flagged contract is above his
+    cap, scan the SAME-expiry chain for an affordable, still-near-money same-direction strike."""
+    try:
+        import yfinance as yf
+        exp = datetime.fromtimestamp(int(a.get("Expiry", 0)), tz=timezone.utc).astimezone(ET).strftime("%Y-%m-%d")
+        t = yf.Ticker(a.get("Symbol"))
+        if exp not in (t.options or ()):
+            return ""
+        df = (t.option_chain(exp).calls if is_call else t.option_chain(exp).puts)
+        strike = float(a.get("Strike", 0) or 0)
+        row = df[df["strike"] == strike]
+        mid = _mid(row.iloc[0]) if len(row) else None
+    except Exception:
+        return ""
+    if not mid:
+        return ""
+    cost = mid * 100
+    n = int(RISK_CAP // cost)
+    if n >= 1:
+        return (f"   💵 ~${mid:.2f}/ct (${cost:,.0f} ea) → **{n} ct** ≈ ${n*cost:,.0f} max risk "
+                f"(${n*cost*0.5:,.0f} at a 50% stop)")
+    # too rich → find the richest affordable same-direction strike (best delta you can buy)
+    alt = None
+    try:
+        for _, r in df.iterrows():
+            m = _mid(r)
+            if not m or m * 100 > RISK_CAP or m < 0.30:
+                continue
+            k = float(r["strike"])
+            # bullish call wants strikes ≥ pick (cheaper OTM); bearish put wants strikes ≤ pick
+            ok = (k >= strike) if is_call else (k <= strike)
+            if spot and abs(k - spot) / spot > ALT_MAX_MNY:    # reject deep-OTM lotto
+                continue
+            if ok and (alt is None or m > alt[1]):     # richest affordable = closest to money
+                alt = (k, m)
+    except Exception:
+        alt = None
+    base = (f"   💵 flagged contract ~${mid:.2f}/ct (${cost:,.0f}) = above your $250 cap")
+    if alt:
+        ac = alt[1] * 100
+        an = int(RISK_CAP // ac)
+        cp = "C" if is_call else "P"
+        base += (f"\n   ✅ **affordable play: {a.get('Symbol')} ${alt[0]:g}{cp} {exp[5:].replace('-','/')}** "
+                 f"~${alt[1]:.2f}/ct → **{an} ct** ≈ ${an*ac:,.0f} (${an*ac*0.5:,.0f} at a 50% stop)")
+    else:
+        base += " — no near-money strike fits $250 (this name's options are too rich for your account)"
+    return base
+
+
+def _moneyness(a: dict, spot: float):
+    """(% OTM, ITM?) for the contract vs spot. Positive % = out of the money."""
+    strike = float(a.get("Strike", 0) or 0)
+    if not spot:
+        return None, False
+    is_call = str(a.get("OptionType", "")).upper().startswith("C")
+    otm = (strike - spot) / spot if is_call else (spot - strike) / spot
+    return otm, (otm < 0)
+
+
 def build() -> str | None:
     merged = _load()
     if not merged:
         return None
     names = {s.upper() for s in personal_tickers()} | {s.upper() for s in personal_crypto()}
     scored = sorted(((_score(a), a) for a in merged.values()), key=lambda x: -x[0][0])
-    conf, picks = [], []
+
+    spot_cache: dict[str, float | None] = {}
+
+    def getspot(tk):
+        if tk not in spot_cache:
+            spot_cache[tk] = _spot(tk)
+        return spot_cache[tk]
+
+    conf, bulls, bears, hedges = [], [], [], []
+    used = set()        # dedupe by underlying — one contract per ticker
     for (s, fv, voi, dte), a in scored:
-        tag = " 🎯YOUR NAME" if str(a.get("Symbol", "")).upper() in names else ""
+        sym = str(a.get("Symbol", "")).upper()
+        tag = " 🎯YOUR NAME" if sym in names else ""
         if dte <= 1 and a.get("isBullish") and len(conf) < 2:
             conf.append(f"• **{_fmt(a)}** — ${fv:,.0f}, {int(a.get('SWEEPS',0))} sweeps, V/OI {voi:.1f}{tag}")
-        elif dte >= 7 and len(picks) < 3:
-            dirn = "🟢" if a.get("isBullish") else "🔴"
-            picks.append((a, fv, voi, dte, dirn, tag))
+        elif DTE_MIN <= dte <= DTE_MAX:
+            sp = getspot(a.get("Symbol"))
+            if not sp:
+                continue
+            otm, _ = _moneyness(a, sp)
+            if otm is None or abs(otm) > MAX_MNY:
+                if otm and otm > MAX_MNY and fv > 3_000_000 and len(hedges) < 2 and sym not in used:
+                    hedges.append((a, fv, otm, tag)); used.add(sym)
+                continue
+            if sym in used:                  # one pick per underlying
+                continue
+            is_call = str(a.get("OptionType", "")).upper().startswith("C")
+            rec = (a, fv, voi, dte, tag, sp, otm)
+            # actionable = BOUGHT calls (bullish long) / BOUGHT puts (bearish); skip sold-side
+            if a.get("isBullish") and is_call and len(bulls) < 3:
+                bulls.append(rec); used.add(sym)
+            elif not a.get("isBullish") and not is_call and len(bears) < 2:
+                bears.append(rec); used.add(sym)
 
-    _log_picks(picks)   # record for the EOD scorecard
+    _log_picks(bulls + bears)   # record for the EOD scorecard (direction from isBullish)
     stamp = datetime.now(ET).strftime("%a %b %-d %-I:%M %p ET")
     tape = _tape()
     lines = [f"🎯 **FLOW PICKS — live contracts** · {stamp}"]
@@ -159,14 +253,31 @@ def build() -> str | None:
     if conf:
         lines.append("\n**🟢 TAPE CONFIRMATION (0DTE — direction, not swing buys):**")
         lines += conf
-    if picks:
-        lines.append("\n**⭐ BEST SWING-ABLE PICKS (real DTE + fresh positioning):**")
-        for i, (a, fv, voi, dte, dirn, tag) in enumerate(picks, 1):
-            vol = int(a.get("Volume", 0) or 0)
-            oi = int(a.get("OI", 0) or 0)
-            why = ("fresh opening flow (vol >> OI)" if voi >= 2 else
-                   "repeat institutional positioning" if voi < 1 else "building position")
-            lines.append(f"**{i}. {_fmt(a)}** ({dte} DTE) {dirn}{tag} · ${fv:,.0f} · V/OI {voi:.1f} ({vol:,}/{oi:,})\n   *{why}*")
+
+    def _pickline(idx, rec):
+        a, fv, voi, dte, tag, sp, otm = rec
+        vol = int(a.get("Volume", 0) or 0)
+        oi = int(a.get("OI", 0) or 0)
+        why = ("fresh opening flow (vol >> OI)" if voi >= 2 else
+               "repeat institutional positioning" if voi < 1 else "building position")
+        mny = f" · spot ${sp:,.2f} ({abs(otm)*100:.0f}% {'OTM' if otm >= 0 else 'ITM'})" if sp else ""
+        is_call = str(a.get("OptionType", "")).upper().startswith("C")
+        sizing = _sizing_line(a, is_call)
+        line = f"**{idx}. {_fmt(a)}** ({dte} DTE) · ${fv:,.0f} · V/OI {voi:.1f} ({vol:,}/{oi:,}){mny}{tag}\n   *{why}*"
+        return line + ("\n" + sizing if sizing else "")
+
+    if bulls:
+        lines.append("\n**⭐ BULLISH SWING PICKS (near-money, fresh, actionable longs):**")
+        for i, rec in enumerate(bulls, 1):
+            lines.append(_pickline(i, rec))
+    if bears:
+        lines.append("\n**🔴 BEARISH FLOW TO RESPECT (contra / hedge your longs):**")
+        for i, rec in enumerate(bears, 1):
+            lines.append(_pickline(i, rec))
+    if hedges:
+        lines.append("\n**🛡️ Notable big-money positioning (deep OTM — likely hedges, not buys):**")
+        for a, fv, otm, tag in hedges:
+            lines.append(f"• {_fmt(a)} — ${fv:,.0f} ({abs(otm)*100:.0f}% OTM){tag}")
     # your-name caution: largest flow on a held name that reads bearish
     for (s, fv, voi, dte), a in scored:
         if str(a.get("Symbol", "")).upper() in names and not a.get("isBullish") and fv > 2_000_000:

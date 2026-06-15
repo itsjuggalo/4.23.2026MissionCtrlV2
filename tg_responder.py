@@ -51,6 +51,77 @@ BOTS = {
             "plain-text answers for Telegram."
         ),
     },
+    # ── repurposed specialist bots (each a distinct trading front-door) ───────
+    "xsentiment": {
+        "token": "telegram_grok_bot_token",               # @MoneyFlowz_Bot → X-Sentiment
+        "owner": "telegram-chat-id.txt",
+        "name":  "X-Sentiment",
+        "tools": "Bash,Read,Grep,Glob,WebFetch,WebSearch",
+        "default_x": True,   # bare (non-slash) input → native Grok x_search
+        "persona": (
+            "You are X-Sentiment — Mike's live X/Twitter trader-sentiment scout. For any "
+            "ticker/topic, summarize the last 24h of trader-relevant X chatter: bullish vs "
+            "bearish lean + any catalyst. 4 lines max, plain text, Eastern Time. Mike has ADD "
+            "— be tight."
+        ),
+    },
+    "jazzy": {
+        "token": "telegram_jazzyhazzy_bot_token",         # @JazzyHazzyClaw_Bot → Jazzy Desk
+        "owner": "telegram-chat-id.txt",
+        "name":  "Jazzy Desk",
+        "tools": "Bash,Read,Grep,Glob,WebFetch",
+        "persona": (
+            "You are Jazzy Desk — Mike's Jazzy paper-account command (Alpaca PAPER account "
+            "'jazzy', keys in ~/.openclaw/secrets/alpaca-jazzy-*). Report positions, P&L, and "
+            "size trades as a fraction of CURRENT jazzy equity ($100-250 risk cap). READ-ONLY — "
+            "never place trades. Eastern Time, short plain-text."
+        ),
+    },
+    "risk": {
+        "token": "antidote_telegram_bot_token",           # @AntiDoht_Bot → Risk & Hedge
+        "owner": "telegram-chat-id.txt",
+        "name":  "Risk & Hedge",
+        "tools": "Bash,Read,Grep,Glob,WebFetch",
+        "persona": (
+            "You are Risk & Hedge — Mike's risk manager (Bridgewater DNA). For any trade or "
+            "position, assess: max loss, size vs CURRENT live equity (cap risk $100-250 per "
+            "trade), correlation/concentration, drawdown, and hedges. Be the voice that protects "
+            "capital. Never place trades. Eastern Time, short plain-text."
+        ),
+    },
+    "research": {
+        "token": "telegram_orion_bot_token",              # @ResearchDaMoney_Bot → Research Desk
+        "owner": "telegram-chat-id.txt",
+        "name":  "Research Desk",
+        "tools": "Bash,Read,Grep,Glob,WebFetch,WebSearch",
+        "persona": (
+            "You are Research Desk — deep fundamental research on any ticker: business model, "
+            "financials, catalysts, valuation, the bull vs bear case, key risks. Thorough but "
+            "skimmable; end with a one-line take. Eastern Time, plain-text."
+        ),
+    },
+    "screener": {
+        "token": "telegram_deepseek_bot_token",           # @TrndRsrch_Bot → Screener
+        "owner": "telegram-chat-id.txt",
+        "name":  "Screener",
+        "tools": "Bash,Read,Grep,Glob,WebFetch,WebSearch",
+        "persona": (
+            "You are Screener — find and rank tickers on demand: top movers, oversold "
+            "large-caps, unusual options volume, momentum, insider buying. Return a tight ranked "
+            "list (ticker — one-line why), 5-8 names. Eastern Time, plain-text."
+        ),
+    },
+    "macro": {
+        "token": "telegram_mc_skill_bot_token",           # @MMCTRL727_Bot → Macro & Regime
+        "owner": "telegram-chat-id.txt",
+        "name":  "Macro & Regime",
+        "tools": "Bash,Read,Grep,Glob,WebFetch,WebSearch",
+        "persona": (
+            "You are Macro & Regime — top-down market read: risk-on/off regime, Fed/rates, key "
+            "SPY/QQQ levels, sector rotation, and how today's politics/news hits Mike's book. "
+            "Lead with the regime verdict. Eastern Time, short plain-text."
+        ),
+    },
 }
 
 
@@ -218,6 +289,21 @@ def main():
                     tg("sendChatAction", chat_id=chat_id, action="typing")
                     send_reply(chat_id, quantum_tg.tidy(ask_local(quantum_tg.news_prompt()), 11))
                     print(f"[{name}] /news", flush=True)
+                    continue
+                # X-Sentiment bot: a bare (non-slash) message → native Grok x_search first.
+                if cfg.get("default_x") and not text.startswith("/"):
+                    tg("sendChatAction", chat_id=chat_id, action="typing")
+                    out = None
+                    try:
+                        sys.path.insert(0, "/home/itsju/05_AUTOMATION/scripts")
+                        from lib import x_search
+                        out = x_search.x_sentiment(text.strip())
+                    except Exception as e:
+                        print(f"[{name}] default_x err {e}", flush=True)
+                    if not out:
+                        out = ask_local(text)
+                    send_reply(chat_id, f"𝕏 *{text.strip().upper()}*\n{out}")
+                    print(f"[{name}] x:{text[:40]}", flush=True)
                     continue
                 # Any other /command is passed VERBATIM to `claude -p`, so every Claude
                 # slash-skill (e.g. /flow-desk SPY, /options-desk, /ticker-research NVDA)
