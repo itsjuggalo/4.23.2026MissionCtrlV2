@@ -1478,9 +1478,15 @@ def validate_pick_against_guardrails(pick, account, prior_picks_this_cycle):
             pass
         if live_quote and live_quote.get("mid"):
             est_cost = float(live_quote["mid"]) * contracts * 100
-            max_allowed = bp * MAX_BUYING_POWER_PCT_PER_PICK
+            # cap risk at the SMALLER of BP% and Mike's $800 hard cap; resize to fit, don't drop
+            max_allowed = min(bp * MAX_BUYING_POWER_PCT_PER_PICK, RISK_CAP_USD)
             if est_cost > max_allowed:
-                return False, f"GUARDRAIL_VIOLATION: pick cost ${est_cost:,.0f} exceeds {int(MAX_BUYING_POWER_PCT_PER_PICK*100)}% of buying power (${max_allowed:,.0f})"
+                per = float(live_quote["mid"]) * 100
+                fit = int(max_allowed // per)
+                if fit < 1:
+                    return False, f"GUARDRAIL_VIOLATION: 1 contract (${per:,.0f}) exceeds risk cap ${max_allowed:,.0f}"
+                pick["contracts"] = fit
+                pick["_resized"] = f"capped {contracts}->{fit} ct to fit ${max_allowed:,.0f} risk"
     if False and kronos_verdict == "CONFLICTS":  # DISABLED — Kronos unreliable
         import re as _re
         score_match = _re.search(r"(?:flow\s*score|score)\s*[:=]?\s*(\d{1,3})", reasoning, _re.IGNORECASE)
