@@ -30,6 +30,7 @@ import os
 import re
 import sqlite3
 import subprocess
+import sys
 import time
 import urllib.request
 from datetime import datetime, timezone
@@ -210,6 +211,79 @@ def check_locks() -> list[str]:
     return findings
 
 
+# ── Visual card (StarCraft ops card) — optional, falls back to full text ─────
+# Reuses ~/05_AUTOMATION/scripts/lib/ops_card.py (which reuses the LifeClaw
+# renderer primitives). A card bug NEVER drops the alert: _post_card returns
+# False and main() posts the original text body instead.
+sys.path.insert(0, str(HOME / "05_AUTOMATION/scripts/lib"))
+
+
+def _storm_count(findings) -> int:
+    for f in findings:
+        m = re.search(r"LOCK STORM: (\d+)", f)
+        if m:
+            return int(m.group(1))
+    return 0
+
+
+def _card_spec(findings):
+    import ops_card
+    storm = _storm_count(findings)
+    wedged = [f for f in findings if f.startswith("WEDGED")]
+    wal = [f for f in findings if f.startswith("WAL REVERTED")]
+    errs = [f for f in findings if "ERROR" in f]
+    rows = []
+    if storm:
+        rows.append({"label": "Lock-storm lines (35m)", "value": str(storm),
+                     "state": "crit" if storm > 50 else "warn"})
+    if wedged:
+        rows.append({"label": "Wedged cron cycles", "value": str(len(wedged)), "state": "crit"})
+    if wal:
+        rows.append({"label": "WAL reverted", "value": str(len(wal)), "state": "warn"})
+    if errs:
+        rows.append({"label": "Check errors", "value": str(len(errs)), "state": "warn"})
+    rows.append({"label": "Total findings", "value": str(len(findings)),
+                 "state": "crit" if (wedged or storm > 50) else "warn"})
+    sample = [f.split("\n")[0][:90] for f in findings]
+    return {
+        "bot": "SPIDEY", "title": "DB CONTENTION", "glyph": "reticle",
+        "status": "crit" if (wedged or storm > 50) else "warn",
+        "status_text": "WEDGED" if wedged else ("LOCK STORM" if storm else "DEGRADED"),
+        "rows": rows,
+        "sections": [{"label": "Findings", "items": sample[:4]}] if sample else [],
+        "subtitle": ops_card.now_et(),
+        "footer": "db contention monitor · */30m",
+    }
+
+
+def _card_summary(findings) -> str:
+    storm = _storm_count(findings)
+    wedged = sum(1 for f in findings if f.startswith("WEDGED"))
+    bits = []
+    if storm:
+        bits.append(f"{storm} lock lines/35m")
+    if wedged:
+        bits.append(f"{wedged} wedged cycle{'s' if wedged != 1 else ''}")
+    bits.append(f"{len(findings)} finding{'s' if len(findings) != 1 else ''}")
+    return ":lock: **DB contention** — " + " · ".join(bits)
+
+
+def _post_card(findings) -> bool:
+    try:
+        import ops_card
+    except Exception:
+        return False
+    url = webhook_url()
+    if not url:
+        return False
+    try:
+        out = f"/tmp/ops_card_dbcontention_{int(time.time())}.png"
+        png = ops_card.render_ops_card(_card_spec(findings), out)
+        return bool(png and ops_card.post_image(url, png, content=_card_summary(findings)))
+    except Exception:
+        return False
+
+
 def main() -> None:
     findings = check_wal() + check_logs() + check_locks()
     ts = datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
@@ -218,6 +292,10 @@ def main() -> None:
             f"- {f}" for f in findings
         )
         print(body)
+        # Visual card first; on ANY card/post failure, post the full text body.
+        if "--card" in sys.argv or "--no-card" not in sys.argv:
+            if _post_card(findings):
+                return
         # Discord hard-caps content at 2000 chars; keep headroom.
         post_discord(body[:1900] + ("\n…(truncated)" if len(body) > 1900 else ""))
     else:

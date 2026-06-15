@@ -31,6 +31,51 @@ ET = ZoneInfo("America/New_York")
 DATA = Path.home() / "trading" / "signals" / "option-scraper" / "data"
 FILES = ["flow_alerts_today.json", "flow2_alerts_today.json"]
 PICKLOG_DIR = Path.home() / ".openclaw" / "state"
+IV_FORECAST = Path("/AIWorkWSL/labs/quantum/out/iv_forecast.json")  # quantum desk IV grader
+
+
+def _load_iv_map() -> dict:
+    """ticker → the desk's IV-forecast read (rich/cheap vs realized, tier, crush),
+    so the FLOW PICKS surface carries the SAME 'researched & verified' stamp as the
+    Telegram best-3. Empty on any failure → picks just post without the tag."""
+    try:
+        d = json.loads(IV_FORECAST.read_text())
+        m: dict = {}
+        for p in d.get("picks", []):
+            t = str(p.get("ticker", "")).upper()
+            if t and t not in m:  # first (highest-ranked) grade per name wins
+                m[t] = p
+        return m
+    except Exception:
+        return {}
+
+
+def _iv_tag(a: dict, iv_map: dict) -> str:
+    """Compact 'Desk IV' line for a flow pick when its NAME was graded by the desk.
+    Rich/cheap is a symbol-level vol-regime read (honest at ticker level); the crush
+    warning fires ONLY when the event date lands inside THIS contract's expiry — so
+    it's precise per pick, not a blanket scare. Returns '' when the name isn't graded."""
+    p = iv_map.get(str(a.get("Symbol", "")).upper())
+    if not p:
+        return ""
+    bits = []
+    r = p.get("ivVsHv")
+    if r is not None:
+        regime = "RICH" if r >= 1.15 else "CHEAP" if r <= 0.9 else "FAIR"
+        tier = p.get("tier", "")
+        mark = "✅" if (tier == "VERIFIED" and regime != "RICH") else ("⚠️" if (tier == "FLAG" or regime == "RICH") else "•")
+        bits.append(f"{mark} Desk IV {regime} ({r:.2f}× realized)")
+    crush = p.get("crush")
+    if crush and crush.get("date"):
+        try:
+            cd = datetime.strptime(crush["date"], "%Y-%m-%d").date()
+            exp = datetime.fromtimestamp(int(a.get("Expiry", 0)), tz=timezone.utc).astimezone(ET).date()
+            if cd <= exp:  # event inside the contract's life → crush risk is real here
+                drop = int((crush.get("expectedDropPct") or 0) * 100)
+                bits.append(f"⚠️ {crush.get('event', 'event')} {cd.strftime('%-m/%-d')} in-window (~{drop}% IV crush — prefer a spread)")
+        except Exception:
+            pass
+    return ("\n   📊 " + " · ".join(bits)) if bits else ""
 
 
 def _spot(ticker: str):
@@ -211,6 +256,7 @@ def build() -> str | None:
     if not merged:
         return None
     names = {s.upper() for s in personal_tickers()} | {s.upper() for s in personal_crypto()}
+    iv_map = _load_iv_map()
     scored = sorted(((_score(a), a) for a in merged.values()), key=lambda x: -x[0][0])
 
     spot_cache: dict[str, float | None] = {}
@@ -266,7 +312,9 @@ def build() -> str | None:
         is_call = str(a.get("OptionType", "")).upper().startswith("C")
         sizing = _sizing_line(a, is_call, sp)
         line = f"**{idx}. {_fmt(a)}** ({dte} DTE) · ${fv:,.0f} · V/OI {voi:.1f} ({vol:,}/{oi:,}){mny}{tag}\n   *{why}*"
-        return line + ("\n" + sizing if sizing else "")
+        line += ("\n" + sizing if sizing else "")
+        line += _iv_tag(a, iv_map)   # researched-&-verified stamp when the name was graded
+        return line
 
     if bulls:
         lines.append("\n**⭐ BULLISH SWING PICKS (near-money, fresh, actionable longs):**")
