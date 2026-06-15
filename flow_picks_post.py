@@ -134,7 +134,7 @@ def _tape() -> str:
 
 MAX_MNY = 0.15   # |moneyness| beyond this = hedge/LEAP/stock-replacement, not a swing pick
 DTE_MIN, DTE_MAX = 7, 120   # swing window — excludes 0DTE lotto and long-dated LEAPs
-RISK_CAP = 250   # Mike's per-trade risk cap (premium-at-risk model)
+RISK_CAP = 800   # Mike's per-trade risk cap (premium-at-risk model) — raised 250→800 2026-06-15
 
 
 def _mid(row):
@@ -183,7 +183,7 @@ def _sizing_line(a, is_call, spot=None):
                 alt = (k, m)
     except Exception:
         alt = None
-    base = (f"   💵 flagged contract ~${mid:.2f}/ct (${cost:,.0f}) = above your $250 cap")
+    base = (f"   💵 flagged contract ~${mid:.2f}/ct (${cost:,.0f}) = above your $800 cap")
     if alt:
         ac = alt[1] * 100
         an = int(RISK_CAP // ac)
@@ -285,7 +285,7 @@ def build() -> str | None:
             lines.append(f"\n⚠️ **YOUR NAME — {a['Symbol']}:** big flow ({_fmt(a)}, ${fv:,.0f}) reads "
                          f"**bearish** (V/OI {voi:.1f}). Don't mistake size for a green light.")
             break
-    lines.append("\n_0DTE = confirmation not entry · size $100–250 risk (fraction of equity) · auto-posted intraday._")
+    lines.append("\n_0DTE = confirmation not entry · size up to $800 risk (fraction of equity) · auto-posted intraday._")
     return "\n".join(lines)
 
 

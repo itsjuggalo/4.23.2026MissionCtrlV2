@@ -362,7 +362,7 @@ HELP_TEXT = (
     "`/ticker <sym>` 2-min vet · `/decide <q>` buy/sell/hold · `/crypto <coin>` crypto read\n"
     "`/news <q>` catalysts · `/regime` market regime · `/recall <q>` knowledge base\n\n"
     "**💼 Portfolio, trades & planning**\n"
-    "`/portfolio` live P&L · `/journal` today's recap · `/week` weekly review · `/trades` fills today\n"
+    "`/portfolio` live P&L · `/scorecard` EOD book + pick grades · `/journal` recap · `/week` weekly · `/trades` fills\n"
     "`/levels <t>` S/R + entry/stop · `/size <t> <entry> <stop>` position size · `/pick <t>` action card\n"
     "`/flowpicks` ranked flow · `/signals` source liveness\n\n"
     "**👁️ Watchlist** (feeds your scheduled intel)\n"
@@ -383,14 +383,14 @@ async def help_cmd(interaction: discord.Interaction):
     await interaction.response.send_message(HELP_TEXT)
 
 
-@tree.command(name="size", description="Position size for a trade per your risk rules (equity fraction, $100-250 cap)")
+@tree.command(name="size", description="Position size for a trade per your risk rules (equity fraction, $800 cap)")
 @app_commands.describe(ticker="ticker", entry="entry price", stop="stop price",
-                       risk="$ to risk (default 150, capped at 250)")
+                       risk="$ to risk (default 150, capped at 800)")
 async def size_cmd(interaction: discord.Interaction, ticker: str, entry: float,
                    stop: float, risk: Optional[float] = None):
     await interaction.response.defer(thinking=True)
     eq = await asyncio.to_thread(total_equity)
-    risk_amt = min(risk if risk else 150.0, 250.0)   # Mike's $100-250 cap
+    risk_amt = min(risk if risk else 150.0, 800.0)   # Mike's risk cap (raised 250→800 2026-06-15)
     psr = abs(entry - stop)
     if psr <= 0:
         await interaction.followup.send("⚠️ Entry and stop can't be equal.")
@@ -425,6 +425,20 @@ async def journal_cmd(interaction: discord.Interaction):
 async def week_cmd(interaction: discord.Interaction):
     await interaction.response.defer(thinking=True)
     await _send_chunks(interaction, await asyncio.to_thread(weekly_review))
+
+
+@tree.command(name="scorecard", description="EOD scorecard on demand — book P&L + today's flow-pick grades")
+async def scorecard_cmd(interaction: discord.Interaction):
+    await interaction.response.defer(thinking=True)
+
+    def _run():
+        r = subprocess.run(
+            ["/home/itsju/.venv/bin/python",
+             "/home/itsju/05_AUTOMATION/scripts/eod_scorecard.py", "--print"],
+            capture_output=True, text=True, timeout=150)
+        return (r.stdout or r.stderr or "[no output]").strip()
+
+    await _send_chunks(interaction, await asyncio.to_thread(_run))
 
 
 @tree.command(name="levels", description="Key support/resistance + a suggested entry & stop (plug into /size)")

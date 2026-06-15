@@ -194,6 +194,7 @@ MAX_TOTAL_RISK_USD = 1000
 
 # Item 31: post-LLM hard guardrails (enforced by validate_pick_against_guardrails)
 MAX_BUYING_POWER_PCT_PER_PICK = 1.0   # SMALL-ACCOUNT TEST MODE: full BP allowed on max conviction (was 0.15, mismatched prompt)
+RISK_CAP_USD = 800   # Mike's hard per-pick risk cap (premium-at-risk); picks are RESIZED to fit, 2026-06-15
 KRONOS_CONFLICTS_OVERRIDE_SCORE = 90  # Flow score required to override Kronos CONFLICTS veto
 KRONOS_UNAVAILABLE_OVERRIDE_SCORE = 85  # Flow score required when Kronos unavailable
 
@@ -1555,9 +1556,15 @@ def validate_pick_against_guardrails(pick, account, prior_picks_this_cycle):
             pass
         if live_quote and live_quote.get("mid"):
             est_cost = float(live_quote["mid"]) * contracts * 100
-            max_allowed = bp * MAX_BUYING_POWER_PCT_PER_PICK
+            # cap risk at the SMALLER of BP% and Mike's $800 hard cap; resize to fit, don't drop
+            max_allowed = min(bp * MAX_BUYING_POWER_PCT_PER_PICK, RISK_CAP_USD)
             if est_cost > max_allowed:
-                return False, f"GUARDRAIL_VIOLATION: pick cost ${est_cost:,.0f} exceeds {int(MAX_BUYING_POWER_PCT_PER_PICK*100)}% of buying power (${max_allowed:,.0f})"
+                per = float(live_quote["mid"]) * 100
+                fit = int(max_allowed // per)
+                if fit < 1:
+                    return False, f"GUARDRAIL_VIOLATION: 1 contract (${per:,.0f}) exceeds risk cap ${max_allowed:,.0f}"
+                pick["contracts"] = fit
+                pick["_resized"] = f"capped {contracts}->{fit} ct to fit ${max_allowed:,.0f} risk"
 
     # Rule 4: Kronos CONFLICTS requires flow score >= 90
     # Score lives in entry_criteria as e.g. "T1_1.75M" - if T0/T1 mega flow we can infer

@@ -129,7 +129,11 @@ def main():
     if took or skip:
         lines.append(f"\n**Your calls:** ✅ took {', '.join(took) or '—'} · ❌ skipped {', '.join(skip) or '—'}")
 
-    sd.post(sd.resolve_channel("flow-picks"), "\n".join(lines))
+    msg = "\n".join(lines)
+    if "--print" in sys.argv:        # on-demand (/scorecard) — return text, don't post
+        print(msg)
+        return
+    sd.post(sd.resolve_channel("flow-picks"), msg)
     beat("eod_scorecard")
     print(f"[eod-scorecard] posted; book ${total_val:,.0f} day ${total_pl:+,.0f} picks={len(graded)}", flush=True)
 

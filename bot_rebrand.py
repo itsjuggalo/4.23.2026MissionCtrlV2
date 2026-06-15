@@ -64,7 +64,7 @@ IDENTITY = {
         name="Risk & Hedge", avatar="aldaris",
         short="Judicator of risk — drawdown, position size, correlation, hedges.",
         desc=("Risk & hedge desk. Judges every trade: max loss, size vs current equity "
-              "($100-250 risk cap), correlation, drawdown, hedges. Ask 'how much should I size "
+              "($800 risk cap), correlation, drawdown, hedges. Ask 'how much should I size "
               "NVDA?', 'am I over-exposed?'. The Conclave is watching.")),
     "telegram_orion_bot_token": dict(
         name="Research Desk", avatar="high_templar",
