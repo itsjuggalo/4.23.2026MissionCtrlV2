@@ -148,7 +148,8 @@ def chase_verdict(a, snap, eq):
             late += 1
             reasons.append(f"stock already {chg:+.1f}% today — chasing the move")
         elif (is_call and chg <= -2) or ((not is_call) and chg >= 2):
-            reasons.append(f"stock {chg:+.1f}% today — moving AGAINST this contract")
+            late += 1
+            reasons.append(f"stock {chg:+.1f}% today — moving AGAINST this contract (fighting the tape)")
         else:
             reasons.append(f"stock {chg:+.1f}% today")
 

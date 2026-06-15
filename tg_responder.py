@@ -108,6 +108,7 @@ def main():
     help_txt = (f"🤖 {name} — text me like you text Claude Code.\n"
                 f"📈 /pick — the #1 contract to buy now (verified + sized)\n"
                 f"📈 /picks · /flow · 🔪 /sweeps — live whale flow · ⚡ /odte\n"
+                f"🔔 /winners — app-pushed flow + chase/skip verdict · /chase [TKR]\n"
                 f"₿ /crypto — BTC desk (24/7)\n"
                 f"📐 /greeks [TKR] · /book · /eod · 🎓 /grade · 📰 /news\n"
                 f"📖 /explain — what Greeks/IV/volume mean (plain English)\n"
@@ -151,6 +152,20 @@ def main():
                                   parse_mode="Markdown").get("ok"):
                             tg("sendMessage", chat_id=chat_id, text=quantum_tg.greeks())
                     print(f"[{name}] /greeks {arg}", flush=True)
+                    continue
+                # /winners (app-pushed flow + chase verdict) · /chase <TKR> (full read)
+                if cmd0 in ("/winners", "/chase", "/flowwin"):
+                    import flow_chase
+                    tg("sendChatAction", chat_id=chat_id, action="typing")
+                    arg = text.split(maxsplit=1)[1].strip() if " " in text else ""
+                    try:
+                        msg = flow_chase.chase(arg) if (cmd0 == "/chase" or arg) else flow_chase.winners()
+                    except Exception as e:
+                        msg = f"[flow-chase error] {e}"
+                    if not tg("sendMessage", chat_id=chat_id, text=msg,
+                              parse_mode="Markdown").get("ok"):
+                        tg("sendMessage", chat_id=chat_id, text=msg)
+                    print(f"[{name}] {cmd0} {arg}", flush=True)
                     continue
                 if cmd0 in ("/pick", "/picks", "/book", "/grade", "/eod", "/flow",
                             "/crypto", "/explain", "/sweeps", "/odte"):
