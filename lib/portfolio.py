@@ -91,6 +91,33 @@ def top_tickers_str(n: int = 6) -> str:
     return ", ".join(top_tickers(n))
 
 
+def _held_symbols() -> list[str]:
+    mv: dict[str, float] = defaultdict(float)
+    for kid, ksec in _ACCTS:
+        k, s = _rd(kid), _rd(ksec)
+        if not k or not s:
+            continue
+        req = urllib.request.Request(
+            "https://paper-api.alpaca.markets/v2/positions",
+            headers={"APCA-API-KEY-ID": k, "APCA-API-SECRET-KEY": s, "User-Agent": "mc-portfolio/1.0"})
+        try:
+            with urllib.request.urlopen(req, timeout=15) as r:
+                for p in json.loads(r.read()):
+                    mv[p["symbol"]] += abs(float(p.get("market_value", 0) or 0))
+        except Exception:
+            continue
+    return [s for s, _ in sorted(mv.items(), key=lambda x: -x[1])]
+
+
+def personal_tickers() -> list[str]:
+    """Holdings (capital-ranked) + watchlist only — NO index padding. For 'your names' filters."""
+    syms = _held_symbols()
+    for w in get_watchlist():
+        if w not in syms:
+            syms.append(w)
+    return syms
+
+
 def daily_journal_recap() -> str:
     """EOD recap: day P&L + today's fills (from the synced trade_journal) + open book."""
     import sqlite3
