@@ -7,14 +7,46 @@ is thin/empty/unreachable, so a scheduled post is never empty.
 from __future__ import annotations
 
 import json
+import os
 import urllib.request
 from collections import defaultdict
 from pathlib import Path
 
 SEC = Path.home() / ".openclaw" / "secrets"
+WATCHLIST_FILE = Path.home() / ".openclaw" / "data" / "watchlist.json"
 DEFAULTS = ["SPY", "QQQ", "NVDA"]
 _ACCTS = [("alpaca-boba-key-id", "alpaca-boba-secret"),
           ("alpaca-jazzy-key-id", "alpaca-jazzy-secret")]
+
+
+def get_watchlist() -> list[str]:
+    try:
+        return [t.upper() for t in json.loads(WATCHLIST_FILE.read_text())]
+    except Exception:
+        return []
+
+
+def _save_watchlist(items):
+    WATCHLIST_FILE.parent.mkdir(parents=True, exist_ok=True)
+    tmp = WATCHLIST_FILE.with_suffix(".tmp")
+    tmp.write_text(json.dumps(items))
+    os.replace(tmp, WATCHLIST_FILE)
+
+
+def add_watch(ticker: str) -> list[str]:
+    t = ticker.upper().strip()
+    wl = get_watchlist()
+    if t and t not in wl:
+        wl.append(t)
+        _save_watchlist(wl)
+    return wl
+
+
+def remove_watch(ticker: str) -> list[str]:
+    t = ticker.upper().strip()
+    wl = [x for x in get_watchlist() if x != t]
+    _save_watchlist(wl)
+    return wl
 
 
 def _rd(*names):
@@ -45,10 +77,11 @@ def top_tickers(n: int = 6) -> list[str]:
                     mv[p["symbol"]] += abs(float(p.get("market_value", 0) or 0))
         except Exception:
             continue
-    syms = [s for s, _ in sorted(mv.items(), key=lambda x: -x[1])][:n]
-    for d in DEFAULTS:                       # pad for context only if under N
-        if len(syms) >= n:
-            break
+    syms = [s for s, _ in sorted(mv.items(), key=lambda x: -x[1])]   # holdings, capital-ranked
+    for w in get_watchlist():               # then names you're watching
+        if w not in syms:
+            syms.append(w)
+    for d in DEFAULTS:                       # then index padding for context
         if d not in syms:
             syms.append(d)
     return syms[:n] if syms else DEFAULTS[:n]

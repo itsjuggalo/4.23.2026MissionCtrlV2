@@ -107,7 +107,8 @@ def main():
 
     help_txt = (f"🤖 {name} — text me like you text Claude Code.\n"
                 f"📈 /pick — the #1 contract to buy now (verified + sized)\n"
-                f"📈 /picks — top 3 · /book — positions · /grade — paper→real readiness\n"
+                f"📈 /picks — top 3 · /book — positions · /eod — day wrap\n"
+                f"🎓 /grade — paper→real readiness · 📰 /news — politics→your book\n"
                 f"Or ask anything / run any /skill. /help = this.")
 
     print(f"{name} responder started ({cfg['token']})", flush=True)
@@ -135,12 +136,13 @@ def main():
                     tg("sendMessage", chat_id=chat_id, text=help_txt); continue
                 # Quantum pipeline picks — instant, deterministic, zero-bloat (no LLM).
                 cmd0 = text.split()[0].lower()
-                if cmd0 in ("/pick", "/picks", "/book", "/grade"):
+                if cmd0 in ("/pick", "/picks", "/book", "/grade", "/eod"):
                     try:
                         import quantum_tg
                         msg = (quantum_tg.pick(1) if cmd0 == "/pick"
                                else quantum_tg.pick(3) if cmd0 == "/picks"
                                else quantum_tg.grade() if cmd0 == "/grade"
+                               else quantum_tg.eod() if cmd0 == "/eod"
                                else quantum_tg.book())
                     except Exception as e:
                         msg = f"[pick error] {e}"
@@ -148,6 +150,13 @@ def main():
                               parse_mode="Markdown").get("ok"):
                         tg("sendMessage", chat_id=chat_id, text=msg)  # plain fallback
                     print(f"[{name}] {cmd0}", flush=True)
+                    continue
+                # /news — portfolio-aware politics/macro read (LLM, uses news-search + web).
+                if cmd0 == "/news":
+                    import quantum_tg
+                    tg("sendChatAction", chat_id=chat_id, action="typing")
+                    send_reply(chat_id, quantum_tg.tidy(ask_local(quantum_tg.news_prompt()), 11))
+                    print(f"[{name}] /news", flush=True)
                     continue
                 # Any other /command is passed VERBATIM to `claude -p`, so every Claude
                 # slash-skill (e.g. /flow-desk SPY, /options-desk, /ticker-research NVDA)

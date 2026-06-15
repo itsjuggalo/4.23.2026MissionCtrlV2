@@ -14,9 +14,11 @@ from __future__ import annotations
 import asyncio
 import json
 import os
+import re
 import subprocess
 import sys
 import tempfile
+from datetime import datetime, timezone
 from pathlib import Path
 from typing import Optional
 
@@ -25,7 +27,7 @@ sys.path.insert(0, str(Path.home() / "05_AUTOMATION" / "scripts"))
 import aime_client as aime  # noqa: E402
 import discord  # noqa: E402
 from discord import app_commands  # noqa: E402
-from lib.portfolio import portfolio_summary  # noqa: E402
+from lib.portfolio import portfolio_summary, add_watch, remove_watch, get_watchlist  # noqa: E402
 
 SEC = Path.home() / ".openclaw" / "secrets"
 TOKEN_FILE = os.environ.get("DISCORD_AIME_TOKEN_FILE", "discord_ops_bot_token")
@@ -81,6 +83,56 @@ async def _send_chunks(interaction: discord.Interaction, text: str) -> None:
     await interaction.followup.send(parts[0])
     for p in parts[1:]:
         await interaction.followup.send(p)
+
+
+# ─── INTERACTIVE PICK CARDS (persistent buttons) ──────────────────────────────
+# A persistent View (timeout=None, static custom_ids) registered in on_ready so
+# clicks keep working across bot restarts. The ticker is read back from the card
+# text, so no per-message state is needed.
+JOURNAL = Path.home() / ".openclaw" / "data" / "trade_journal.jsonl"
+
+
+def _journal(ticker: str, action: str, user: str) -> None:
+    try:
+        JOURNAL.parent.mkdir(parents=True, exist_ok=True)
+        rec = {"ts": datetime.now(timezone.utc).isoformat(), "ticker": ticker,
+               "action": action, "user": user}
+        with open(JOURNAL, "a") as f:
+            f.write(json.dumps(rec) + "\n")
+    except Exception as e:  # noqa: BLE001
+        print(f"[pick] journal err: {e}", flush=True)
+
+
+def _ticker_from_msg(msg) -> str:
+    m = re.search(r"TRADE IDEA — ([A-Z.]{1,6})", (msg.content if msg else "") or "")
+    return m.group(1) if m else "?"
+
+
+class PickView(discord.ui.View):
+    def __init__(self):
+        super().__init__(timeout=None)
+
+    @discord.ui.button(label="Took it", emoji="✅",
+                       style=discord.ButtonStyle.success, custom_id="pk:took")
+    async def b_took(self, interaction: discord.Interaction, button: discord.ui.Button):
+        t = _ticker_from_msg(interaction.message)
+        _journal(t, "took", interaction.user.display_name)
+        await interaction.response.send_message(
+            f"✅ Logged **{t}** as TAKEN by {interaction.user.display_name}.")
+
+    @discord.ui.button(label="Skip", emoji="❌",
+                       style=discord.ButtonStyle.danger, custom_id="pk:skip")
+    async def b_skip(self, interaction: discord.Interaction, button: discord.ui.Button):
+        t = _ticker_from_msg(interaction.message)
+        _journal(t, "skip", interaction.user.display_name)
+        await interaction.response.send_message(f"❌ **{t}** skipped.", ephemeral=True)
+
+    @discord.ui.button(label="Analyze", emoji="📊",
+                       style=discord.ButtonStyle.primary, custom_id="pk:analyze")
+    async def b_analyze(self, interaction: discord.Interaction, button: discord.ui.Button):
+        t = _ticker_from_msg(interaction.message)
+        await interaction.response.defer(thinking=True)
+        await _send_chunks(interaction, await _answer_skill(f"/ticker-research {t}"))
 
 
 intents = discord.Intents.default()
@@ -219,8 +271,49 @@ async def portfolio_cmd(interaction: discord.Interaction):
     await _send_chunks(interaction, await asyncio.to_thread(portfolio_summary))
 
 
+@tree.command(name="pick", description="Post an actionable trade-idea card with Took-it / Skip / Analyze buttons")
+@app_commands.describe(ticker="ticker", note="optional thesis / contract / note")
+async def pick_cmd(interaction: discord.Interaction, ticker: str, note: Optional[str] = None):
+    ticker = ticker.upper().strip()
+    body = f"🎯 **TRADE IDEA — {ticker}**"
+    if note:
+        body += f"\n{note}"
+    body += "\n*Tap a button — log it, skip, or pull a full vet.*"
+    await interaction.response.send_message(body, view=PickView())
+
+
+@tree.command(name="watch", description="Add a ticker to your watchlist (feeds the scheduled intel)")
+@app_commands.describe(ticker="ticker to watch")
+async def watch_cmd(interaction: discord.Interaction, ticker: str):
+    wl = await asyncio.to_thread(add_watch, ticker)
+    await interaction.response.send_message(
+        f"👁️ Watching **{ticker.upper().strip()}** — it'll show up in your X-sentiment, "
+        f"opening read, and news feeds.\nWatchlist: {', '.join(wl) or '(empty)'}")
+
+
+@tree.command(name="unwatch", description="Remove a ticker from your watchlist")
+@app_commands.describe(ticker="ticker to remove")
+async def unwatch_cmd(interaction: discord.Interaction, ticker: str):
+    wl = await asyncio.to_thread(remove_watch, ticker)
+    await interaction.response.send_message(
+        f"✖️ Unwatched **{ticker.upper().strip()}**.\nWatchlist: {', '.join(wl) or '(empty)'}")
+
+
+@tree.command(name="watchlist", description="Show your watchlist")
+async def watchlist_cmd(interaction: discord.Interaction):
+    wl = await asyncio.to_thread(get_watchlist)
+    await interaction.response.send_message(f"👁️ Watchlist: {', '.join(wl) or '(empty)'}")
+
+
+_VIEWS_ADDED = False
+
+
 @client.event
 async def on_ready():
+    global _VIEWS_ADDED
+    if not _VIEWS_ADDED:
+        client.add_view(PickView())   # persistent — buttons survive restarts
+        _VIEWS_ADDED = True
     try:
         gid = os.environ.get("AIME_GUILD_ID")
         if gid:

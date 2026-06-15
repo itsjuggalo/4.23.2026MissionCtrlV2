@@ -25,7 +25,7 @@ from zoneinfo import ZoneInfo
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
-from lib.portfolio import top_tickers_str  # noqa: E402
+from lib.portfolio import top_tickers_str, portfolio_summary  # noqa: E402
 
 SEC = Path.home() / ".openclaw" / "secrets"
 GUILD = "1486025777970548908"
@@ -100,10 +100,14 @@ def main() -> None:
     ap.add_argument("--timeout", type=int, default=420)
     ap.add_argument("--tickers", type=int, default=0,
                     help="substitute {TICKERS} in --skill with the top-N portfolio holdings")
+    ap.add_argument("--portfolio", action="store_true",
+                    help="substitute {PORTFOLIO} in --skill with the live positions+P&L summary")
     a = ap.parse_args()
     skill = a.skill
     if a.tickers and "{TICKERS}" in skill:
         skill = skill.replace("{TICKERS}", top_tickers_str(a.tickers))
+    if a.portfolio and "{PORTFOLIO}" in skill:
+        skill = skill.replace("{PORTFOLIO}", portfolio_summary())
     cid = resolve_channel(a.channel)
     out = run_skill(skill, a.model, a.timeout)
     stamp = datetime.now(ET).strftime("%a %b %-d %-I:%M %p ET")

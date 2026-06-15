@@ -23,7 +23,37 @@ import quantum_tg as Q  # shared read-only formatters
 ET    = ZoneInfo("America/New_York")
 STATE = os.path.expanduser("~/.openclaw/quantum_sniper_state.json")
 HALT  = os.path.expanduser("~/.openclaw/quantum_HALT")
+GRAD  = os.path.expanduser("~/.openclaw/quantum_graduated.flag")  # lifetime one-time
 TG    = os.path.expanduser("~/bin/tg-send-msg")
+
+
+def _send(msg):
+    subprocess.run([TG, msg], timeout=20)
+
+
+def _graduation_check(dry):
+    """One-time lifetime buzz when paper performance clears the go-live gate."""
+    if os.path.exists(GRAD) and not dry:
+        return
+    if not Q.graduation_ready():
+        if dry:
+            print("graduation: not ready (gate not cleared) → silent")
+        return
+    sb = Q._load("scoreboard.json") or {}
+    o = sb.get("overall") or {}
+    msg = ("🎓 *READY TO GRADUATE*\n"
+           f"Paper edge proven: {o.get('graded')} trades · "
+           f"{(o.get('win_rate') or 0)*100:.0f}% win · exp {o.get('expectancy_pct',0):+.1f}%\n"
+           "You cleared the gate (50+ trades & positive expectancy).\n"
+           "Consider a SMALL real-money sleeve — start tiny, same rules. /grade for details")
+    if dry:
+        print("WOULD BUZZ (graduation):\n" + msg)
+        return
+    try:
+        _send(msg)
+        open(GRAD, "w").write(datetime.now(ET).isoformat())
+    except Exception as e:
+        print(f"[sniper] graduation send failed: {e}", file=sys.stderr)
 
 
 def _is_greenlight(p):
@@ -45,7 +75,10 @@ def _load_state():
         s = {}
     today = datetime.now(ET).strftime("%Y-%m-%d")
     if s.get("date") != today:
-        s = {"date": today, "alerted": []}
+        s = {"date": today}
+    s.setdefault("alerted", [])          # green-light occ's buzzed today
+    s.setdefault("exits_alerted", [])    # "SYM:VERDICT" buzzed today
+    s.setdefault("shock_alerted", False) # risk-off buzzed today
     return s
 
 
@@ -73,38 +106,108 @@ def _buzz_text(p, d):
             f"acct {Q._money(d.get('equity'))} · stop −50% prem · /pick for more")
 
 
-def main():
-    dry = "--dry-run" in sys.argv
-    if os.path.exists(HALT) and not dry:
-        return  # killswitch — stay silent
+def _shock_guard(dry, state):
+    """Buzz ONCE/day if the market flips risk-off — stop adding, play defense."""
+    s = Q._load("shock_flag.json")
+    if not s or not s.get("risk_off"):
+        if dry: print("shock: clear → silent")
+        return False
+    if state.get("shock_alerted") and not dry:
+        return False
+    movers = []
+    for m in (s.get("movers") or [])[:3]:
+        if isinstance(m, dict):
+            pct = m.get("pct")
+            movers.append(f"{m.get('ticker','?')}{(' %+.0f%%'%(pct*100)) if isinstance(pct,(int,float)) else ''}")
+        else:
+            movers.append(str(m))
+    msg = (f"🛑 *RISK-OFF* (sev {float(s.get('severity',0)):.0%})\n"
+           f"{s.get('reason','market shock')}"
+           + (f"\nmovers: {', '.join(movers)}" if movers else "")
+           + "\n→ stop adding, tighten stops, play defense. /book")
+    if dry:
+        print("WOULD BUZZ (shock):\n" + msg); return False
+    _send(msg); state["shock_alerted"] = True
+    return True
+
+
+def _exit_guard(dry, state):
+    """Buzz when a HELD position flips to EXIT/TRIM — lock winners, cut losers.
+    The biggest capital-grower; deduped per SYM:VERDICT/day, one combined message."""
+    d = Q._load("portfolio_manage.json")
+    if not d:
+        if dry: print("exit: no book");
+        return False
+    moves = d.get("moves") or {}
+    flagged = []
+    for verdict in ("EXIT", "TRIM", "REDUCE"):
+        for it in (moves.get(verdict) or []):
+            sym = it.get("symbol") or it.get("ticker")
+            key = f"{sym}:{verdict}"
+            if key in state["exits_alerted"] and not dry:
+                continue
+            reasons = it.get("reasons")
+            reason = reasons[0] if isinstance(reasons, list) and reasons else (reasons or "")
+            ep = it.get("exit_plan") or {}
+            at = ep.get("mark") or ep.get("stop")
+            flagged.append((verdict, sym, reason, at, key))
+    if not flagged:
+        if dry: print("exit: all HOLD → silent")
+        return False
+    emoji = {"EXIT": "🔴", "TRIM": "🟠", "REDUCE": "🟠"}
+    lines = ["⚠️ *POSITION ALERTS*"]
+    for verdict, sym, reason, at, _ in flagged:
+        ats = f" → ~${at:g}" if isinstance(at, (int, float)) else ""
+        lines.append(f"{emoji.get(verdict,'⚠️')} {sym} — {verdict} ({reason}){ats}")
+    lines.append("/book for details")
+    msg = "\n".join(lines)
+    if dry:
+        print("WOULD BUZZ (exit):\n" + msg); return False
+    _send(msg)
+    state["exits_alerted"].extend(k for *_, k in flagged)
+    return True
+
+
+def _green_light(dry, state):
+    """The rare clean-BUY buzz (ACT + cheap/fair). One per run max."""
     d = Q._load("best_contracts.json")
     if not d:
         if dry: print("no best_contracts.json")
-        return
+        return False
     if not dry and not _fresh_today(d.get("as_of")):
-        return  # stale (e.g. weekend) — never buzz old data
+        return False  # stale (weekend) — never buzz old data
     greens = [p for p in (d.get("picks") or []) if _is_greenlight(p)]
     if not greens:
-        if dry: print(f"no green-light (picks: {len(d.get('picks') or [])}, all rich/event-risk → silent)")
-        return
-    state = _load_state()
-    sent = 0
+        if dry: print(f"green-light: none (picks {len(d.get('picks') or [])}, all rich/event-risk → silent)")
+        return False
     for p in greens:
         occ = _occ(p)
         if occ in state["alerted"] and not dry:
             continue
         msg = _buzz_text(p, d)
         if dry:
-            print("WOULD BUZZ:\n" + msg + "\n")
-        else:
-            try:
-                subprocess.run([TG, msg], timeout=20)
-                state["alerted"].append(occ)
-                sent += 1
-            except Exception as e:
-                print(f"[sniper] send failed: {e}", file=sys.stderr)
+            print("WOULD BUZZ (green):\n" + msg); return False
+        try:
+            _send(msg); state["alerted"].append(occ); return True
+        except Exception as e:
+            print(f"[sniper] send failed: {e}", file=sys.stderr)
         break  # ONE buzz per run max — the single best clean pick (anti-bloat)
-    if not dry and sent:
+    return False
+
+
+def main():
+    """Market-hours guardian (one cron): graduation + shock + exits + green-light,
+    each gated/deduped so it only buzzes when it changes Mike's next move."""
+    dry = "--dry-run" in sys.argv
+    if os.path.exists(HALT) and not dry:
+        return  # killswitch — stay silent
+    state = _load_state()
+    _graduation_check(dry)               # own lifetime flag, scoreboard-based
+    changed = False
+    changed |= _shock_guard(dry, state)  # defense first
+    changed |= _exit_guard(dry, state)   # then manage the book
+    changed |= _green_light(dry, state)  # then new entries
+    if not dry and changed:
         _save_state(state)
 
 
