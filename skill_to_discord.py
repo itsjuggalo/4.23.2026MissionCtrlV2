@@ -26,6 +26,7 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 from lib.portfolio import top_tickers_str, crypto_tickers_str, portfolio_summary  # noqa: E402
+from lib import x_search  # noqa: E402  — native Grok x_search (OAuth) w/ web fallback
 
 SEC = Path.home() / ".openclaw" / "secrets"
 GUILD = "1486025777970548908"
@@ -104,6 +105,8 @@ def main() -> None:
                     help="substitute {PORTFOLIO} in --skill with the live positions+P&L summary")
     ap.add_argument("--crypto", type=int, default=0,
                     help="substitute {CRYPTO} in --skill with your top-N real-money crypto holdings")
+    ap.add_argument("--xnative", action="store_true",
+                    help="X-sentiment: use native Grok x_search if an OAuth token exists, else the skill")
     a = ap.parse_args()
     skill = a.skill
     if a.tickers and "{TICKERS}" in skill:
@@ -113,7 +116,12 @@ def main() -> None:
     if a.portfolio and "{PORTFOLIO}" in skill:
         skill = skill.replace("{PORTFOLIO}", portfolio_summary())
     cid = resolve_channel(a.channel)
-    out = run_skill(skill, a.model, a.timeout)
+    out = None
+    if a.xnative and x_search.oauth_token():   # native Grok firehose when subscription token is live
+        names = top_tickers_str(a.tickers or 6)
+        out = x_search.x_sentiment(f"my holdings ({names}) and the overall market", timeout=min(a.timeout, 60))
+    if not out:                                # no token / native failed → web-search skill
+        out = run_skill(skill, a.model, a.timeout)
     stamp = datetime.now(ET).strftime("%a %b %-d %-I:%M %p ET")
     header = (a.header + f"  ·  {stamp}") if a.header else ""
     msg = (header + "\n" + out) if header else out

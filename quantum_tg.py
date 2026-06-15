@@ -600,8 +600,16 @@ def graduation_ready():
 if __name__ == "__main__":
     import sys
     cmd = sys.argv[1] if len(sys.argv) > 1 else "pick"
-    print(pick(1) if cmd == "pick" else pick(3) if cmd == "picks"
-          else grade() if cmd == "grade" else eod() if cmd == "eod"
-          else greeks() if cmd == "greeks" else flow() if cmd == "flow"
-          else crypto() if cmd == "crypto" else explain() if cmd == "explain"
-          else sweeps() if cmd == "sweeps" else odte() if cmd == "odte" else book())
+    arg = sys.argv[2] if len(sys.argv) > 2 else ""
+    if cmd == "winners":
+        import flow_chase
+        print(flow_chase.winners())
+    elif cmd == "chase":
+        import flow_chase
+        print(flow_chase.chase(arg or "SPY"))
+    else:
+        print(pick(1) if cmd == "pick" else pick(3) if cmd == "picks"
+              else grade() if cmd == "grade" else eod() if cmd == "eod"
+              else greeks() if cmd == "greeks" else flow() if cmd == "flow"
+              else crypto() if cmd == "crypto" else explain() if cmd == "explain"
+              else sweeps() if cmd == "sweeps" else odte() if cmd == "odte" else book())

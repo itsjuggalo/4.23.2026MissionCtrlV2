@@ -29,6 +29,7 @@ import discord  # noqa: E402
 from discord import app_commands  # noqa: E402
 from lib.portfolio import (portfolio_summary, add_watch, remove_watch,  # noqa: E402
                            get_watchlist, total_equity, daily_journal_recap, weekly_review)
+from lib import x_search  # noqa: E402  — native Grok x_search w/ web fallback
 
 SEC = Path.home() / ".openclaw" / "secrets"
 TOKEN_FILE = os.environ.get("DISCORD_AIME_TOKEN_FILE", "discord_ops_bot_token")
@@ -293,6 +294,12 @@ async def summarize_cmd(interaction: discord.Interaction,
 @app_commands.describe(query="ticker or topic")
 async def x_cmd(interaction: discord.Interaction, query: str):
     await interaction.response.defer(thinking=True)
+    # Prefer native Grok x_search on the OAuth subscription (real X firehose); fall
+    # back to the web/Tavily bridge until Mike mints the token via ~/bin/grok-sub-login.
+    native = await asyncio.to_thread(x_search.x_sentiment, query)
+    if native:
+        await _send_chunks(interaction, f"🐦 **X SENTIMENT — {query}** _(native Grok)_\n{native}")
+        return
     prompt = (f"Search X.com / Twitter for the most important trader-relevant posts about {query} "
               f"in the last 24h (use web search). Summarize the prevailing sentiment (bullish/"
               f"bearish), any notable accounts/posts, and catalysts. Keep it tight.")

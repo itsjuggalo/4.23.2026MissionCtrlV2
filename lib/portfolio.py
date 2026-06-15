@@ -24,6 +24,8 @@ _ACCTS = [("alpaca-boba-key-id", "alpaca-boba-secret"),
 # it over localhost so we reuse the cached/de-duped adapters instead of re-signing.
 ARIES_BASE = os.environ.get("ARIES_BASE", "http://localhost:1337")
 _PRICE_CACHE: dict[str, float] = {}
+_PRICE_TS = [0.0]          # last fetch epoch; TTL keeps the long-running bot fresh
+_PRICE_TTL = 300           # seconds
 
 
 def get_watchlist() -> list[str]:
@@ -127,8 +129,10 @@ def personal_tickers() -> list[str]:
 
 # ─── REAL-MONEY CRYPTO (Robinhood + Coinbase via ARIES operator mode) ──────────
 def _crypto_prices() -> dict[str, float]:
-    """USD spot for every crypto, one free Coinbase call (no key). Cached per-process."""
-    if _PRICE_CACHE:
+    """USD spot for every crypto, one free Coinbase call (no key). Cached with a 5-min
+    TTL so the long-running bot stays fresh (permanent cache would freeze prices)."""
+    import time
+    if _PRICE_CACHE and (time.time() - _PRICE_TS[0]) < _PRICE_TTL:
         return _PRICE_CACHE
     try:
         req = urllib.request.Request(
@@ -136,13 +140,18 @@ def _crypto_prices() -> dict[str, float]:
             headers={"User-Agent": "mc-portfolio/1.0"})
         with urllib.request.urlopen(req, timeout=12) as r:
             rates = json.loads(r.read())["data"]["rates"]
+        fresh = {}
         for sym, rate in rates.items():
             try:
                 rate = float(rate)
                 if rate > 0:
-                    _PRICE_CACHE[sym.upper()] = 1.0 / rate
+                    fresh[sym.upper()] = 1.0 / rate
             except (TypeError, ValueError):
                 continue
+        if fresh:
+            _PRICE_CACHE.clear()
+            _PRICE_CACHE.update(fresh)
+            _PRICE_TS[0] = time.time()
     except Exception:
         pass
     return _PRICE_CACHE
