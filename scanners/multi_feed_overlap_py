@@ -117,15 +117,39 @@ def post_summary(overlap):
 
     if len(lines) <= 3: return
     msg = '\n'.join(lines)
-    try:
-        r = requests.post(WEBHOOK, json={'content': msg[:1900]}, timeout=10)
-        if r.status_code in (200, 204):
-            state['last_post'] = now
-            state['last_top5'] = top5_now
-            STATE.write_text(json.dumps(state))
-            logging.info(f'posted confluence summary, {len([o for o in overlap if o["feed_count"]>=3])} 3+ feed symbols')
-    except Exception as e:
-        logging.warning(f'post err: {e}')
+    strong = [o for o in overlap if o['feed_count'] >= 3]
+
+    def _card():
+        try:
+            import sys, os
+            sys.path.insert(0, os.path.expanduser('~/05_AUTOMATION/scripts/lib'))
+            import ops_card
+        except Exception:
+            return False
+        rows = [{'label': o['symbol'], 'value': f'{o["feed_count"]} feeds · {o["total_alerts"]} alerts',
+                 'state': 'good' if o['feed_count'] >= 4 else 'warn'} for o in strong[:7]]
+        spec = {'bot': 'CONFLUENCE', 'theme': 0, 'title': 'MULTI-FEED CONFLUENCE', 'glyph': 'signal',
+                'subtitle': f'symbols in 3+ feeds last {CUTOFF_HOURS}h · {ops_card.now_et()}',
+                'status': 'warn', 'status_text': f'{len(strong)} CONFLUENT', 'rows': rows,
+                'footer': 'multi-feed overlap · 30m'}
+        summary = '🎯 **Multi-Feed Confluence** — ' + ', '.join(f'{o["symbol"]} ({o["feed_count"]}f)' for o in strong[:5])
+        try:
+            return ops_card.render_and_post(spec, WEBHOOK, summary).startswith('card:')
+        except Exception:
+            return False
+
+    ok = _card()
+    if not ok:
+        try:
+            r = requests.post(WEBHOOK, json={'content': msg[:1900]}, timeout=10)
+            ok = r.status_code in (200, 204)
+        except Exception as e:
+            logging.warning(f'post err: {e}'); ok = False
+    if ok:
+        state['last_post'] = now
+        state['last_top5'] = top5_now
+        STATE.write_text(json.dumps(state))
+        logging.info(f'posted confluence summary, {len(strong)} 3+ feed symbols')
 
 def main():
     logging.info('multi_feed_overlap starting')

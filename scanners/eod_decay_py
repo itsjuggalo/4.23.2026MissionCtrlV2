@@ -137,13 +137,41 @@ def post_summary(candidates):
         lines.append(f'**{c["symbol"]}** ${c["strike"]:g}{cp}: IV {c["iv"]*100:.0f}%, theta {c["theta"]:.2f}, bid ${c["bid"]:.2f}')
 
     msg = '\n'.join(lines)
-    try:
-        r = requests.post(WEBHOOK, json={'content': msg[:1900]}, timeout=10)
-        if r.status_code in (200, 204):
-            state['last_post_date'] = today
-            STATE.write_text(json.dumps(state))
-            logging.info('posted eod decay summary')
-    except Exception as e: logging.warning(f'post err: {e}')
+
+    def _card():
+        try:
+            import sys, os
+            sys.path.insert(0, os.path.expanduser('~/05_AUTOMATION/scripts/lib'))
+            import ops_card
+        except Exception:
+            return False
+        rows = []
+        for c in candidates[:7]:
+            cp = c.get('option_type', '?')[0].upper() if c.get('option_type') else '?'
+            rows.append({'label': f'{c["symbol"]} ${c["strike"]:g}{cp}',
+                         'value': f'IV {c["iv"]*100:.0f}% · θ{c["theta"]:.2f} · ${c["bid"]:.2f}',
+                         'state': 'warn'})
+        spec = {'bot': 'DECAY', 'theme': 4, 'title': 'EOD DECAY', 'glyph': 'moon',
+                'subtitle': f'high IV · no whale flow · this Fri · {ops_card.now_et()}',
+                'status': 'warn', 'status_text': 'SELL PREMIUM', 'rows': rows,
+                'footer': 'eod decay · sell, not buy'}
+        summary = '🌙 **EOD Decay** (sell premium) — ' + ', '.join(c['symbol'] for c in candidates[:6])
+        try:
+            return ops_card.render_and_post(spec, WEBHOOK, summary).startswith('card:')
+        except Exception:
+            return False
+
+    ok = _card()
+    if not ok:
+        try:
+            r = requests.post(WEBHOOK, json={'content': msg[:1900]}, timeout=10)
+            ok = r.status_code in (200, 204)
+        except Exception as e:
+            logging.warning(f'post err: {e}'); ok = False
+    if ok:
+        state['last_post_date'] = today
+        STATE.write_text(json.dumps(state))
+        logging.info('posted eod decay summary')
 
 def main():
     logging.info('eod_decay starting')

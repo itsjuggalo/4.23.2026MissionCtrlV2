@@ -118,13 +118,39 @@ def post_summary(gaps):
         lines.append(f'{arrow} **{g["symbol"]}** {g["gap_pct"]:+.1f}%  ${g["prev_close"]:.2f} \u2192 ${g["premarket"]:.2f}')
 
     msg = '\n'.join(lines)
-    try:
-        r = requests.post(WEBHOOK, json={'content': msg[:1900]}, timeout=10)
-        if r.status_code in (200, 204):
-            state['last_post'] = now
-            STATE.write_text(json.dumps(state))
-            logging.info('posted premarket gap summary')
-    except Exception as e: logging.warning(f'post err: {e}')
+
+    def _card():
+        try:
+            import sys, os
+            sys.path.insert(0, os.path.expanduser('~/05_AUTOMATION/scripts/lib'))
+            import ops_card
+        except Exception:
+            return False
+        rows = [{'label': g['symbol'],
+                 'value': f'{g["gap_pct"]:+.1f}% · ${g["prev_close"]:.2f}→${g["premarket"]:.2f}',
+                 'state': 'good' if g['gap_pct'] > 0 else 'crit'} for g in gaps[:8]]
+        ups = sum(1 for g in gaps if g['gap_pct'] > 0)
+        spec = {'bot': 'GAP', 'theme': 5, 'title': 'PREMARKET GAP', 'glyph': 'chevron',
+                'subtitle': f'with active flow 24h · {ops_card.now_et()}',
+                'status': 'good' if ups >= len(gaps) - ups else 'crit',
+                'status_text': f'{len(gaps)} GAPS', 'rows': rows, 'footer': 'premarket gaps · 4-9:30 ET'}
+        summary = '📈 **Premarket Gaps** — ' + ', '.join(f'{g["symbol"]} {g["gap_pct"]:+.1f}%' for g in gaps[:6])
+        try:
+            return ops_card.render_and_post(spec, WEBHOOK, summary).startswith('card:')
+        except Exception:
+            return False
+
+    ok = _card()
+    if not ok:
+        try:
+            r = requests.post(WEBHOOK, json={'content': msg[:1900]}, timeout=10)
+            ok = r.status_code in (200, 204)
+        except Exception as e:
+            logging.warning(f'post err: {e}'); ok = False
+    if ok:
+        state['last_post'] = now
+        STATE.write_text(json.dumps(state))
+        logging.info('posted premarket gap summary')
 
 def main():
     logging.info('premarket_gap starting')
