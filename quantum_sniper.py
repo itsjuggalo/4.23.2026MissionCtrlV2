@@ -180,11 +180,17 @@ def _green_light(dry, state):
     if not greens:
         if dry: print(f"green-light: none (picks {len(d.get('picks') or [])}, all rich/event-risk → silent)")
         return False
+    # Prefer a green-light the option-signals flow ALSO backs (both engines agree).
+    flowdir = Q._flow_directions()
+    greens.sort(key=lambda p: 0 if (Q._confluence(p, flowdir) or "").startswith("⭐") else 1)
     for p in greens:
         occ = _occ(p)
         if occ in state["alerted"] and not dry:
             continue
         msg = _buzz_text(p, d)
+        conf = Q._confluence(p, flowdir)
+        if conf:
+            msg += f"\n{conf}"
         if dry:
             print("WOULD BUZZ (green):\n" + msg); return False
         try:

@@ -27,7 +27,8 @@ sys.path.insert(0, str(Path.home() / "05_AUTOMATION" / "scripts"))
 import aime_client as aime  # noqa: E402
 import discord  # noqa: E402
 from discord import app_commands  # noqa: E402
-from lib.portfolio import portfolio_summary, add_watch, remove_watch, get_watchlist  # noqa: E402
+from lib.portfolio import (portfolio_summary, add_watch, remove_watch,  # noqa: E402
+                           get_watchlist, total_equity, daily_journal_recap)
 
 SEC = Path.home() / ".openclaw" / "secrets"
 TOKEN_FILE = os.environ.get("DISCORD_AIME_TOKEN_FILE", "discord_ops_bot_token")
@@ -303,6 +304,68 @@ async def unwatch_cmd(interaction: discord.Interaction, ticker: str):
 async def watchlist_cmd(interaction: discord.Interaction):
     wl = await asyncio.to_thread(get_watchlist)
     await interaction.response.send_message(f"👁️ Watchlist: {', '.join(wl) or '(empty)'}")
+
+
+HELP_TEXT = (
+    "⚡ **MISSION CONTROL — COMMAND DECK**\n\n"
+    "**📊 Analysis (ask anytime)**\n"
+    "`/ainvest <q>` read on anything · `/options <ticker>` options verdict (+screenshot)\n"
+    "`/ticker <sym>` 2-min vet · `/decide <q>` buy/sell/hold · `/crypto <coin>` crypto read\n"
+    "`/news <q>` catalysts · `/regime` market regime · `/recall <q>` knowledge base\n\n"
+    "**💼 Portfolio & trades**\n"
+    "`/portfolio` live P&L · `/trades` what fired today · `/pick <ticker>` action card w/ buttons\n"
+    "`/flowpicks` ranked flow · `/signals` source liveness\n\n"
+    "**👁️ Watchlist** (feeds your scheduled intel)\n"
+    "`/watch <t>` · `/unwatch <t>` · `/watchlist`\n\n"
+    "**🐦 Intel & briefs**\n"
+    "`/x <ticker>` social sentiment · `/desk-eod` EOD wrap · `/morning` morning note · `/aime <q>`\n\n"
+    "**🛰️ Runs automatically:** morning briefing + events (8:05/8:15) · opening read (9:35) · "
+    "regime/news/flow/X-sentiment intraday · position-mgmt (11:30/2:00) · power hour (2:55) · "
+    "portfolio snapshots (9:35/4:05) · risk/exit/shock alerts (every 20-30m)."
+)
+
+
+@tree.command(name="help", description="Show the full command deck + what runs automatically")
+async def help_cmd(interaction: discord.Interaction):
+    await interaction.response.send_message(HELP_TEXT)
+
+
+@tree.command(name="size", description="Position size for a trade per your risk rules (equity fraction, $100-250 cap)")
+@app_commands.describe(ticker="ticker", entry="entry price", stop="stop price",
+                       risk="$ to risk (default 150, capped at 250)")
+async def size_cmd(interaction: discord.Interaction, ticker: str, entry: float,
+                   stop: float, risk: Optional[float] = None):
+    await interaction.response.defer(thinking=True)
+    eq = await asyncio.to_thread(total_equity)
+    risk_amt = min(risk if risk else 150.0, 250.0)   # Mike's $100-250 cap
+    psr = abs(entry - stop)
+    if psr <= 0:
+        await interaction.followup.send("⚠️ Entry and stop can't be equal.")
+        return
+    shares = int(risk_amt // psr)
+    cost = shares * entry
+    lines = [f"📐 **SIZE — {ticker.upper().strip()}**"]
+    if eq:
+        lines.append(f"Equity ${eq:,.0f} · risking ${risk_amt:,.0f} ({risk_amt/eq*100:.1f}% of equity)")
+    else:
+        lines.append(f"Risking ${risk_amt:,.0f}")
+    lines.append(f"Entry ${entry:.2f} → stop ${stop:.2f} = ${psr:.2f}/share risk")
+    cost_tag = f" ({cost/eq*100:.0f}% of equity)" if eq else ""
+    lines.append(f"➡️ **{shares} shares** (~${cost:,.0f}{cost_tag})")
+    lines.append(f"Max loss if stopped: **${shares*psr:,.0f}**")
+    if shares == 0:
+        lines.append("⚠️ Stop too wide for the risk budget — tighten the stop or raise risk.")
+    elif eq and cost > eq:
+        lines.append("⚠️ Cost exceeds account equity — reduce size.")
+    elif eq and cost > eq * 0.5:
+        lines.append("⚠️ >50% of equity in one name — concentration risk.")
+    await interaction.followup.send("\n".join(lines))
+
+
+@tree.command(name="journal", description="Today's trade recap — day P&L, fills, open book")
+async def journal_cmd(interaction: discord.Interaction):
+    await interaction.response.defer(thinking=True)
+    await _send_chunks(interaction, await asyncio.to_thread(daily_journal_recap))
 
 
 _VIEWS_ADDED = False

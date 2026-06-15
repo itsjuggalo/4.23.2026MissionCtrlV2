@@ -91,6 +91,55 @@ def top_tickers_str(n: int = 6) -> str:
     return ", ".join(top_tickers(n))
 
 
+def daily_journal_recap() -> str:
+    """EOD recap: day P&L + today's fills (from the synced trade_journal) + open book."""
+    import sqlite3
+    from datetime import datetime
+    from zoneinfo import ZoneInfo
+    et = ZoneInfo("America/New_York")
+    now = datetime.now(et)
+    since = int(now.replace(hour=0, minute=0, second=0, microsecond=0).timestamp() * 1000)
+    # day P&L + open count from Alpaca
+    eq_total, day_total, open_ct = 0.0, 0.0, 0
+    for kid, ksec in _ACCTS:
+        k, s = _rd(kid), _rd(ksec)
+        if not k or not s:
+            continue
+        try:
+            acct, pos = _acct_data(k, s)
+            eq = float(acct.get("equity", 0) or 0)
+            day_total += eq - float(acct.get("last_equity", eq) or eq)
+            eq_total += eq
+            open_ct += len(pos)
+        except Exception:
+            continue
+    # today's fills from the synced journal
+    fills = []
+    db = Path.home() / "web" / "missionctrl" / "data" / "dashboard_history.sqlite"
+    try:
+        con = sqlite3.connect(str(db), timeout=10)
+        con.execute("PRAGMA busy_timeout=5000")
+        fills = con.execute(
+            "SELECT account, side, qty, symbol, ref_price FROM trade_journal "
+            "WHERE ts >= ? AND principal='alpaca-sync' ORDER BY ts", (since,)).fetchall()
+        con.close()
+    except Exception:
+        pass
+    arrow = "🟢" if day_total >= 0 else "🔴"
+    out = [f"📓 **TRADE JOURNAL — {now:%a %b %-d}**",
+           f"Day P&L {arrow} **{day_total:+,.0f}** · equity ${eq_total:,.0f} · {open_ct} open"]
+    if not fills:
+        out.append("No fills today.")
+    else:
+        out.append(f"\n**{len(fills)} fills today:**")
+        for acct, side, qty, sym, px in fills[:15]:
+            ic = "🟩" if side == "buy" else "🟥"
+            out.append(f"  {ic} {str(side).upper()} {qty} {sym} @ ${px:.2f} ({acct})")
+        if len(fills) > 15:
+            out.append(f"  …+{len(fills) - 15} more")
+    return "\n".join(out)
+
+
 def _acct_data(k: str, s: str):
     base = "https://paper-api.alpaca.markets"
     hdr = {"APCA-API-KEY-ID": k, "APCA-API-SECRET-KEY": s, "User-Agent": "mc-portfolio/1.0"}
@@ -100,6 +149,21 @@ def _acct_data(k: str, s: str):
         with urllib.request.urlopen(req, timeout=15) as r:
             return json.loads(r.read())
     return get("/v2/account"), get("/v2/positions")
+
+
+def total_equity() -> float:
+    """Combined Boba+Jazzy account equity (live)."""
+    tot = 0.0
+    for kid, ksec in _ACCTS:
+        k, s = _rd(kid), _rd(ksec)
+        if not k or not s:
+            continue
+        try:
+            acct, _ = _acct_data(k, s)
+            tot += float(acct.get("equity", 0) or 0)
+        except Exception:
+            continue
+    return tot
 
 
 def portfolio_summary() -> str:

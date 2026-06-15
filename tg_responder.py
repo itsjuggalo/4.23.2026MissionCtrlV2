@@ -107,8 +107,8 @@ def main():
 
     help_txt = (f"🤖 {name} — text me like you text Claude Code.\n"
                 f"📈 /pick — the #1 contract to buy now (verified + sized)\n"
-                f"📈 /picks — top 3 · /book — positions · /eod — day wrap\n"
-                f"🎓 /grade — paper→real readiness · 📰 /news — politics→your book\n"
+                f"📈 /picks · /flow — option-signals alerts · /book · /eod\n"
+                f"📐 /greeks [TKR] · 🎓 /grade · 📰 /news — politics→your book\n"
                 f"Or ask anything / run any /skill. /help = this.")
 
     print(f"{name} responder started ({cfg['token']})", flush=True)
@@ -136,13 +136,28 @@ def main():
                     tg("sendMessage", chat_id=chat_id, text=help_txt); continue
                 # Quantum pipeline picks — instant, deterministic, zero-bloat (no LLM).
                 cmd0 = text.split()[0].lower()
-                if cmd0 in ("/pick", "/picks", "/book", "/grade", "/eod"):
+                # /greeks <TKR> → live lookup (LLM, any contract incl. flow); bare → quantum picks
+                if cmd0 == "/greeks":
+                    import quantum_tg
+                    arg = text.split(maxsplit=1)[1].strip() if " " in text else ""
+                    if arg:
+                        tg("sendChatAction", chat_id=chat_id, action="typing")
+                        send_reply(chat_id, quantum_tg.tidy(
+                            ask_local(quantum_tg.greeks_prompt(arg)), 9))
+                    else:
+                        if not tg("sendMessage", chat_id=chat_id, text=quantum_tg.greeks(),
+                                  parse_mode="Markdown").get("ok"):
+                            tg("sendMessage", chat_id=chat_id, text=quantum_tg.greeks())
+                    print(f"[{name}] /greeks {arg}", flush=True)
+                    continue
+                if cmd0 in ("/pick", "/picks", "/book", "/grade", "/eod", "/flow"):
                     try:
                         import quantum_tg
                         msg = (quantum_tg.pick(1) if cmd0 == "/pick"
                                else quantum_tg.pick(3) if cmd0 == "/picks"
                                else quantum_tg.grade() if cmd0 == "/grade"
                                else quantum_tg.eod() if cmd0 == "/eod"
+                               else quantum_tg.flow() if cmd0 == "/flow"
                                else quantum_tg.book())
                     except Exception as e:
                         msg = f"[pick error] {e}"
