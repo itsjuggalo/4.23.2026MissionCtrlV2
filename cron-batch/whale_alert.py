@@ -39,6 +39,10 @@ THRESHOLD_USD = 10_000_000  # $10M
 COOLDOWN_MIN  = 60
 ALERTS_PER_RUN_MAX = 5  # cap so a noisy run doesn't spam
 
+# Per-asset emoji for alert embeds. Was referenced in post_alert() but never
+# defined → NameError on every $10M+ transfer, so this lane never sent an alert.
+EMOJI = {"ETH": "💎", "BTC": "₿", "SOL": "◎", "USDT": "💵", "USDC": "💵"}
+
 
 def load_state():
     if not STATE_FILE.exists(): return {"seen": {}}
