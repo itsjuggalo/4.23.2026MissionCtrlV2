@@ -49,7 +49,8 @@ def main():
     # paper decision cycles (boba/jazzy) — 9:45/11/12:30/2/3:30 weekdays, ~90m max gap
     check_freq("boba_cycle", 115, 10, 16, wd_only=True)
     check_freq("jazzy_cycle", 115, 10, 16, wd_only=True)
-    # once-daily EOD
+    # once-daily briefs
+    check_daily("morning_command", 8)    # pre-open brief, due ~8:15 ET weekdays
     check_daily("crypto_eod", 16)
     check_daily("eod_scorecard", 16)
 

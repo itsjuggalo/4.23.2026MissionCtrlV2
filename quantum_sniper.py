@@ -94,9 +94,28 @@ def _occ(p):
     return p.get("occ") or f"{p.get('ticker')}{p.get('expiry')}{p.get('type')}{p.get('strike')}"
 
 
+def _actionable(p, risk_cap):
+    """A buzz must be sizeable: either the naked contract fits (qty>=1) or the
+    pipeline's debit spread fits the risk cap. If neither, stay silent — pinging
+    Mike to 'buy' something he can't size is exactly the bloat we're killing."""
+    if (p.get("qty") or 0) >= 1:
+        return True
+    return Q._afford_spread(p, risk_cap) is not None
+
+
 def _buzz_text(p, d):
     typ = (p.get("type") or "").upper()
     tag = "STRONG " if str(p.get("confidence", "")).upper() == "A" else ""
+    spread = Q._afford_spread(p, d.get("risk_cap")) if (p.get("qty") or 0) < 1 else None
+    if spread:   # naked is over cap → buzz the cap-fitting spread the pipeline built
+        return (f"🟢 *{tag}GREEN LIGHT* — buy now (spread fits your cap)\n"
+                f"*{p.get('ticker')} ${spread.get('long'):g}/${spread.get('short'):g} {typ} SPREAD* · "
+                f"{Q._fmt_exp(p.get('expiry'))} ({p.get('days')}d)\n"
+                f"{Q._money(spread.get('cost_per'))} cost · max +{Q._money(spread.get('max_profit'))} / "
+                f"−{Q._money(spread.get('max_loss'))} · {p.get('confidence')}-conf · {p.get('value')}\n"
+                f"_why: {(p.get('action_why') or 'clean setup')[:110]}_\n"
+                f"📝 {spread.get('place_order')}\n"
+                f"acct {Q._money(d.get('equity'))} · /pick for more")
     return (f"🟢 *{tag}GREEN LIGHT* — buy now\n"
             f"*{p.get('ticker')} ${p.get('strike'):g} {typ}* · {Q._fmt_exp(p.get('expiry'))} "
             f"({p.get('days')}d)\n"
@@ -226,9 +245,10 @@ def _green_light(dry, state):
         return False
     if not dry and not _fresh_today(d.get("as_of")):
         return False  # stale (weekend) — never buzz old data
-    greens = [p for p in (d.get("picks") or []) if _is_greenlight(p)]
+    greens = [p for p in (d.get("picks") or [])
+              if _is_greenlight(p) and _actionable(p, d.get("risk_cap"))]
     if not greens:
-        if dry: print(f"green-light: none (picks {len(d.get('picks') or [])}, all rich/event-risk → silent)")
+        if dry: print(f"green-light: none (picks {len(d.get('picks') or [])}, all rich/event-risk/over-cap → silent)")
         return False
     # Prefer a green-light the option-signals flow ALSO backs (both engines agree).
     flowdir = Q._flow_directions()

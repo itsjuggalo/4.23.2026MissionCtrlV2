@@ -143,7 +143,34 @@ def _money(x):
         return str(x)
 
 
-def _verdict(p, heat=None):
+def _afford_spread(p, risk_cap):
+    """The pipeline's OWN debit spread for this pick, IF it fits the risk cap.
+    Lets us surface an actionable, cap-fitting trade instead of SKIP when the naked
+    contract is too dear — the pipeline already did the structuring; we just read it."""
+    s = p.get("spread")
+    if not isinstance(s, dict):
+        return None
+    cost = s.get("cost_per")
+    try:
+        if risk_cap and cost is not None and float(cost) <= float(risk_cap):
+            return s
+    except Exception:
+        pass
+    return None
+
+
+def _spread_pick_line(p, s):
+    """Headline line for a debit-spread play (cap-fitting alternative to the naked call)."""
+    typ = (p.get("type") or "").upper()
+    rr = s.get("rr")
+    rr_s = f" · R:R {rr:.2f}" if isinstance(rr, (int, float)) else ""
+    return (f"*{p.get('ticker')} ${s.get('long'):g}/${s.get('short'):g} {typ} SPREAD* · "
+            f"{_fmt_exp(p.get('expiry'))} ({p.get('days')}d)\n"
+            f"{_money(s.get('cost_per'))} cost · max +{_money(s.get('max_profit'))} / "
+            f"-{_money(s.get('max_loss'))}{rr_s} · {p.get('confidence')}-conf · {p.get('value')}")
+
+
+def _verdict(p, heat=None, risk_cap=None):
     """Honest verdict from action + value, then an ACCOUNT overlay (heat + free cash).
     The overlay can only make it MORE conservative — never talks you into more risk."""
     act = (p.get("action") or "").upper()
@@ -158,7 +185,11 @@ def _verdict(p, heat=None):
         base = "⏳ WAIT — let the setup confirm"
     else:
         base = "🟡 SMALL"
-    if (p.get("qty") or 0) < 1:   # most binding: can't size even 1 within risk cap
+    if (p.get("qty") or 0) < 1:   # naked contract can't be sized within the risk cap
+        s = _afford_spread(p, risk_cap)
+        if s:   # pipeline's debit spread fits the cap → an actual play, not a SKIP
+            return (f"🟢 BUY SPREAD — naked {_money(p.get('per_contract'))} is over cap; "
+                    f"the {_money(s.get('cost_per'))} debit spread fits")
         return f"⏳ SKIP — 1 contract ({_money(p.get('per_contract'))}) exceeds your risk cap"
     if heat:
         hp = heat.get("heat_pct") or 0
@@ -331,27 +362,34 @@ def pick(top=1):
                 f"{nd} (too pricey/illiquid/risky). Capital preserved — sit tight.\n"
                 f"{_acct_line(d)}")
     heat = d.get("portfolio_heat")
+    risk_cap = d.get("risk_cap")
     flowdir = _flow_directions()
     if top == 1:
         p = picks[0]
+        spread = _afford_spread(p, risk_cap) if (p.get("qty") or 0) < 1 else None
         conf = _confluence(p, flowdir)
         conf_line = f"{conf}\n" if conf else ""
         trap = _iv_trap(p)
         trap_line = f"{trap}\n" if trap else ""
+        head = _spread_pick_line(p, spread) if spread else _pick_line(p)
+        order_line = f"📝 {spread['place_order']}\n" if spread and spread.get("place_order") else ""
         return (f"🎯 *TOP PICK* · {fresh}\n"
                 f"{_stale_warning(d.get('as_of'))}"
-                f"{_pick_line(p)}\n"
-                f"{_verdict(p, heat)}\n"
+                f"{head}\n"
+                f"{_verdict(p, heat, risk_cap)}\n"
                 f"{conf_line}{trap_line}"
                 f"_why: {(p.get('action_why') or '')[:120]}_\n"
+                f"{order_line}"
                 f"{_acct_line(d)}")
     lines = [f"🎯 *TOP {min(top,len(picks))} PICKS* · {fresh}"]
     for i, p in enumerate(picks[:top], 1):
         typ = (p.get("type") or "").upper()
         star = " ⭐" if (_confluence(p, flowdir) or "").startswith("⭐") else ""
-        lines.append(f"{i}.{star} {_verdict(p, heat).split(' — ')[0]}  *{p.get('ticker')} "
+        sp = _afford_spread(p, risk_cap) if (p.get("qty") or 0) < 1 else None
+        price = f"{_money(sp.get('cost_per'))} sprd" if sp else _money(p.get("per_contract"))
+        lines.append(f"{i}.{star} {_verdict(p, heat, risk_cap).split(' — ')[0]}  *{p.get('ticker')} "
                      f"${p.get('strike'):g}{typ[0]}* {_fmt_exp(p.get('expiry'))} · "
-                     f"{_money(p.get('per_contract'))} · {p.get('confidence')} · {p.get('value')}")
+                     f"{price} · {p.get('confidence')} · {p.get('value')}")
     lines.append(_acct_line(d))
     return "\n".join(lines)
 
