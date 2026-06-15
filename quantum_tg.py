@@ -88,6 +88,21 @@ def flow():
     return "\n".join(lines)
 
 
+def explain():
+    """Plain-English cheat sheet — what the numbers mean + why they matter. Pulled
+    on demand so the alerts themselves stay tight (no inline clutter)."""
+    return (
+        "📖 *WHAT THE NUMBERS MEAN*\n"
+        "Δ delta — moves per $1 in the stock (0.50 ≈ 50¢). Higher = more punch + more cost.\n"
+        "θ theta — $ lost to time each day. Your rent for holding. Big θ = clock vs you.\n"
+        "IV — how pricey the option is. High = expensive (rich), crushes after earnings; low = cheap.\n"
+        "value — our IV read: buy *cheap/fair*, skip *rich*.\n"
+        "vol/OI — contracts traded / open. High = liquid (easy in-out, tight spread); low = avoid.\n"
+        "src — independent feeds confirming it. More = stronger.\n"
+        "⭐ confluence — quantum pick + flow agree = top conviction.\n"
+        "✅ cleanest buy = cheap/fair IV + Δ0.40-0.60 + liquid + ⭐.")
+
+
 def _market_open(now=None):
     now = now or datetime.now(ET)
     if now.weekday() >= 5:
@@ -278,6 +293,47 @@ def book():
     return "\n".join(out)
 
 
+def _px(x):
+    try:
+        x = float(x)
+    except Exception:
+        return str(x)
+    return f"${x:,.0f}" if abs(x) >= 100 else f"${x:.2f}"
+
+
+def crypto():
+    """BTC desk (24/7) — the live source when equities are closed. Alert-only.
+    Alpaca crypto is spot/long-only, so a SHORT read = sit out / no clean long."""
+    d = _load("btc_desk.json")
+    if not d:
+        return "no crypto desk output yet."
+    fresh = _freshness(d.get("as_of_et") or d.get("as_of"))
+    arrow = {"LONG": "🟢↗", "SHORT": "🔴↘"}
+    picks = d.get("picks") or []
+    lines = [f"₿ *CRYPTO DESK* · {fresh}"]
+    dirs = []
+    for p in picks:
+        coin = p.get("coin")
+        dirn = (p.get("direction") or "").upper()
+        dirs.append(dirn)
+        a = arrow.get(dirn, "⚪")
+        pu = p.get("prob_up")
+        pup = f"{pu*100:.0f}%up" if isinstance(pu, (int, float)) else ""
+        crowd = (p.get("magnets") or {}).get("crowd_note", "")
+        warn = " ⚠️crowded" if "crowded" in str(crowd) else ""
+        lines.append(f"{coin} {_px(p.get('spot'))} {a}{dirn[:5]} {pup} · "
+                     f"{_px(p.get('entry'))}→{_px(p.get('target'))} "
+                     f"(stp {_px(p.get('stop'))}){warn}")
+    if picks and all(x == "SHORT" for x in dirs):
+        lines.append("→ all SHORT — no clean long; SIT OUT crypto (Alpaca is long-only)")
+    elif any(x == "LONG" for x in dirs):
+        longs = ", ".join(p.get("coin") for p in picks if (p.get("direction") or "").upper() == "LONG")
+        lines.append(f"→ long setup: {longs}")
+    macro = d.get("macro") or {}
+    lines.append(f"_alert-only · {d.get('horizon_days')}d horizon · {macro.get('geopol_tone','')}_")
+    return "\n".join(lines)
+
+
 def _ivp(iv):
     return f"{iv*100:.0f}%" if isinstance(iv, (int, float)) else "?"
 
@@ -451,4 +507,5 @@ if __name__ == "__main__":
     cmd = sys.argv[1] if len(sys.argv) > 1 else "pick"
     print(pick(1) if cmd == "pick" else pick(3) if cmd == "picks"
           else grade() if cmd == "grade" else eod() if cmd == "eod"
-          else greeks() if cmd == "greeks" else flow() if cmd == "flow" else book())
+          else greeks() if cmd == "greeks" else flow() if cmd == "flow"
+          else crypto() if cmd == "crypto" else explain() if cmd == "explain" else book())

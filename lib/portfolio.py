@@ -137,6 +137,77 @@ def daily_journal_recap() -> str:
             out.append(f"  {ic} {str(side).upper()} {qty} {sym} @ ${px:.2f} ({acct})")
         if len(fills) > 15:
             out.append(f"  …+{len(fills) - 15} more")
+    # idea decisions logged today via /pick buttons (took/skip)
+    took, skipped = [], []
+    jpath = Path.home() / ".openclaw" / "data" / "trade_journal.jsonl"
+    try:
+        for line in jpath.read_text().splitlines():
+            r = json.loads(line)
+            dt = datetime.fromisoformat(r.get("ts", "")).astimezone(et)
+            if dt.date() == now.date():
+                if r.get("action") == "took":
+                    took.append(r.get("ticker", "?"))
+                elif r.get("action") == "skip":
+                    skipped.append(r.get("ticker", "?"))
+    except Exception:
+        pass
+    if took or skipped:
+        out.append("\n**Ideas logged:**")
+        if took:
+            out.append(f"  ✅ took: {', '.join(took)}")
+        if skipped:
+            out.append(f"  ❌ skipped: {', '.join(skipped)}")
+    return "\n".join(out)
+
+
+def weekly_review() -> str:
+    """Friday recap: week P&L (Alpaca portfolio history) + the week's fills from the journal."""
+    import sqlite3
+    from datetime import datetime, timedelta
+    from zoneinfo import ZoneInfo
+    et = ZoneInfo("America/New_York")
+    now = datetime.now(et)
+    monday = now - timedelta(days=now.weekday())
+    week_start_ms = int(monday.replace(hour=0, minute=0, second=0, microsecond=0).timestamp() * 1000)
+    week_pl, eq_total = 0.0, 0.0
+    for kid, ksec in _ACCTS:
+        k, s = _rd(kid), _rd(ksec)
+        if not k or not s:
+            continue
+        try:
+            acct, _ = _acct_data(k, s)
+            eq_total += float(acct.get("equity", 0) or 0)
+            req = urllib.request.Request(
+                "https://paper-api.alpaca.markets/v2/account/portfolio/history?period=1W&timeframe=1D",
+                headers={"APCA-API-KEY-ID": k, "APCA-API-SECRET-KEY": s, "User-Agent": "mc-week/1.0"})
+            with urllib.request.urlopen(req, timeout=15) as r:
+                h = json.loads(r.read())
+            eqs = [e for e in (h.get("equity") or []) if e]
+            if len(eqs) >= 2:
+                week_pl += eqs[-1] - eqs[0]
+        except Exception:
+            continue
+    fills = []
+    db = Path.home() / "web" / "missionctrl" / "data" / "dashboard_history.sqlite"
+    try:
+        con = sqlite3.connect(str(db), timeout=10)
+        con.execute("PRAGMA busy_timeout=5000")
+        fills = con.execute(
+            "SELECT symbol, side, COUNT(*) FROM trade_journal "
+            "WHERE ts >= ? AND principal='alpaca-sync' GROUP BY symbol, side ORDER BY COUNT(*) DESC",
+            (week_start_ms,)).fetchall()
+        con.close()
+    except Exception:
+        pass
+    total_fills = sum(c for _, _, c in fills)
+    syms = sorted({s for s, _, _ in fills})
+    arrow = "🟢" if week_pl >= 0 else "🔴"
+    out = [f"📅 **WEEKLY REVIEW — week of {monday:%b %-d}**",
+           f"Week P&L {arrow} **{week_pl:+,.0f}** · equity now ${eq_total:,.0f}",
+           f"Trades: **{total_fills} fills** across {len(syms)} names" if total_fills else "No trades this week."]
+    if syms:
+        out.append("Most active: " + ", ".join(syms[:10]))
+    out.append("_Review your #trade-reviews log: what worked, what to cut next week._")
     return "\n".join(out)
 
 

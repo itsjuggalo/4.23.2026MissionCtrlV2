@@ -28,7 +28,7 @@ import aime_client as aime  # noqa: E402
 import discord  # noqa: E402
 from discord import app_commands  # noqa: E402
 from lib.portfolio import (portfolio_summary, add_watch, remove_watch,  # noqa: E402
-                           get_watchlist, total_equity, daily_journal_recap)
+                           get_watchlist, total_equity, daily_journal_recap, weekly_review)
 
 SEC = Path.home() / ".openclaw" / "secrets"
 TOKEN_FILE = os.environ.get("DISCORD_AIME_TOKEN_FILE", "discord_ops_bot_token")
@@ -312,8 +312,9 @@ HELP_TEXT = (
     "`/ainvest <q>` read on anything · `/options <ticker>` options verdict (+screenshot)\n"
     "`/ticker <sym>` 2-min vet · `/decide <q>` buy/sell/hold · `/crypto <coin>` crypto read\n"
     "`/news <q>` catalysts · `/regime` market regime · `/recall <q>` knowledge base\n\n"
-    "**💼 Portfolio & trades**\n"
-    "`/portfolio` live P&L · `/trades` what fired today · `/pick <ticker>` action card w/ buttons\n"
+    "**💼 Portfolio, trades & planning**\n"
+    "`/portfolio` live P&L · `/journal` today's recap · `/week` weekly review · `/trades` fills today\n"
+    "`/levels <t>` S/R + entry/stop · `/size <t> <entry> <stop>` position size · `/pick <t>` action card\n"
     "`/flowpicks` ranked flow · `/signals` source liveness\n\n"
     "**👁️ Watchlist** (feeds your scheduled intel)\n"
     "`/watch <t>` · `/unwatch <t>` · `/watchlist`\n\n"
@@ -366,6 +367,24 @@ async def size_cmd(interaction: discord.Interaction, ticker: str, entry: float,
 async def journal_cmd(interaction: discord.Interaction):
     await interaction.response.defer(thinking=True)
     await _send_chunks(interaction, await asyncio.to_thread(daily_journal_recap))
+
+
+@tree.command(name="week", description="This week's performance review (P&L, trades, most active)")
+async def week_cmd(interaction: discord.Interaction):
+    await interaction.response.defer(thinking=True)
+    await _send_chunks(interaction, await asyncio.to_thread(weekly_review))
+
+
+@tree.command(name="levels", description="Key support/resistance + a suggested entry & stop (plug into /size)")
+@app_commands.describe(ticker="ticker")
+async def levels_cmd(interaction: discord.Interaction, ticker: str):
+    await interaction.response.defer(thinking=True)
+    t = ticker.upper().strip()
+    prompt = (f"For {t}: list the key intraday and swing SUPPORT and RESISTANCE levels with the "
+              f"current price, then give a concrete suggested ENTRY and STOP for a long (say clearly "
+              f"if it's a no-trade / wait setup). Format tight, and put 'Entry X / Stop Y' on its own "
+              f"line so it plugs into /size. End with a one-line bias. Use web search for live levels.")
+    await _send_chunks(interaction, await _answer_skill(prompt, timeout=300))
 
 
 _VIEWS_ADDED = False

@@ -107,8 +107,9 @@ def main():
 
     help_txt = (f"🤖 {name} — text me like you text Claude Code.\n"
                 f"📈 /pick — the #1 contract to buy now (verified + sized)\n"
-                f"📈 /picks · /flow — option-signals alerts · /book · /eod\n"
-                f"📐 /greeks [TKR] · 🎓 /grade · 📰 /news — politics→your book\n"
+                f"📈 /picks · /flow — flow alerts · ₿ /crypto — BTC desk (24/7)\n"
+                f"📐 /greeks [TKR] · /book · /eod · 🎓 /grade · 📰 /news\n"
+                f"📖 /explain — what Greeks/IV/volume mean (plain English)\n"
                 f"Or ask anything / run any /skill. /help = this.")
 
     print(f"{name} responder started ({cfg['token']})", flush=True)
@@ -150,7 +151,8 @@ def main():
                             tg("sendMessage", chat_id=chat_id, text=quantum_tg.greeks())
                     print(f"[{name}] /greeks {arg}", flush=True)
                     continue
-                if cmd0 in ("/pick", "/picks", "/book", "/grade", "/eod", "/flow"):
+                if cmd0 in ("/pick", "/picks", "/book", "/grade", "/eod", "/flow",
+                            "/crypto", "/explain"):
                     try:
                         import quantum_tg
                         msg = (quantum_tg.pick(1) if cmd0 == "/pick"
@@ -158,6 +160,8 @@ def main():
                                else quantum_tg.grade() if cmd0 == "/grade"
                                else quantum_tg.eod() if cmd0 == "/eod"
                                else quantum_tg.flow() if cmd0 == "/flow"
+                               else quantum_tg.crypto() if cmd0 == "/crypto"
+                               else quantum_tg.explain() if cmd0 == "/explain"
                                else quantum_tg.book())
                     except Exception as e:
                         msg = f"[pick error] {e}"

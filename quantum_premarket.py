@@ -7,7 +7,7 @@ via the subscription `claude` CLI (news-search + web), API key stripped. Anti-bl
 ≤8 lines. Honors the shared killswitch. Cron: 55 8 * * 1-5.
 Test: quantum_premarket.py --dry-run
 """
-import json, os, subprocess, sys
+import json, os, subprocess, sys, glob
 from datetime import datetime
 from zoneinfo import ZoneInfo
 
@@ -25,6 +25,10 @@ def main():
     if os.path.exists(HALT) and not dry:
         return
     env = {k: v for k, v in os.environ.items() if k != "ANTHROPIC_API_KEY"}
+    # Bulletproof PATH for cron's minimal env (claude may shell to node/git/bash).
+    nb = sorted(glob.glob(os.path.expanduser("~/.nvm/versions/node/*/bin")))
+    extra = ([nb[-1]] if nb else []) + [os.path.expanduser("~/.local/bin")]
+    env["PATH"] = ":".join(extra) + ":" + env.get("PATH", "/usr/bin:/bin")
     try:
         r = subprocess.run(
             [CLAUDE, "-p", Q.premarket_prompt(), "--model", "sonnet",
