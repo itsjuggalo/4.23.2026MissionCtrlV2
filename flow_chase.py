@@ -57,8 +57,15 @@ def _get(url, timeout=6):
         return None
 
 
+def _clean_occ(s):
+    # flow2 alert keys can carry a "_<time><hash>" suffix on repeat alerts; the real
+    # OCC symbol is the head before the first underscore.
+    return (s or "").split("_")[0]
+
+
 def option_snapshot(occ):
     """Live mid / IV / delta / day-range for one OCC option symbol."""
+    occ = _clean_occ(occ)
     d = _get(f"{ALPACA}/v1beta1/options/snapshots?symbols={occ}")
     node = ((d or {}).get("snapshots") or {}).get(occ, {})
     lq = node.get("latestQuote") or {}
@@ -89,6 +96,7 @@ def equity_snapshot(tkr):
 def chase_verdict(a, snap, eq):
     """JUMP-IN / STAY-OUT for a flow alert, with explainable reasons."""
     ap = a.get("AlertPrice")
+    ap = round(ap, 2) if isinstance(ap, (int, float)) else ap
     mid = snap.get("mid")
     dte = a.get("DTE")
     vol = a.get("Volume") or 0
@@ -170,7 +178,7 @@ def chase_verdict(a, snap, eq):
 
 # ── formatting ───────────────────────────────────────────────────────────────
 def _exp(a):
-    m = re.search(r"(\d{6})[CP]\d{8}$", a.get("OptionSymbol") or "")
+    m = re.search(r"(\d{6})[CP]\d{8}", _clean_occ(a.get("OptionSymbol")))
     if m:
         y = m.group(1)
         return f"{int(y[2:4])}/{int(y[4:6])}"
@@ -224,8 +232,11 @@ def _fresh_min(a):
 
 
 def _feed():
+    # the live relay rewrites this file continuously; a mid-write read can yield
+    # "" / a list / partial JSON — always hand back a dict so callers never crash.
     try:
-        return json.load(open(FLOW2))
+        d = json.load(open(FLOW2))
+        return d if isinstance(d, dict) else {}
     except Exception:
         return {}
 
@@ -254,7 +265,7 @@ def scan_pushed(min_value=SIGNIF_USD, fresh_min=8, require_open=True):
             continue
         snap = option_snapshot(occ)
         eq = equity_snapshot(a.get("Symbol", ""))
-        out.append((occ, a, chase_verdict(a, snap, eq)))
+        out.append((_clean_occ(occ), a, chase_verdict(a, snap, eq)))  # clean OCC = stable dedup key
     return out
 
 

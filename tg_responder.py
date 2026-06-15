@@ -111,6 +111,7 @@ def main():
                 f"🔔 /winners — app-pushed flow + chase/skip verdict · /chase [TKR]\n"
                 f"₿ /crypto — BTC desk (24/7)\n"
                 f"📐 /greeks [TKR] · /book · /eod · 🎓 /grade · 📰 /news\n"
+                f"𝕏 /x [TKR] — live X/Twitter trader sentiment (Grok)\n"
                 f"📖 /explain — what Greeks/IV/volume mean (plain English)\n"
                 f"Or ask anything / run any /skill. /help = this.")
 
@@ -187,6 +188,29 @@ def main():
                               parse_mode="Markdown").get("ok"):
                         tg("sendMessage", chat_id=chat_id, text=msg)  # plain fallback
                     print(f"[{name}] {cmd0}", flush=True)
+                    continue
+                # /x <ticker/query> — live X/Twitter trader sentiment via Grok on your
+                # SUBSCRIPTION (native x_search OAuth, web fallback). Pull-only, anti-bloat.
+                if cmd0 == "/x":
+                    arg = text.split(maxsplit=1)[1].strip() if " " in text else ""
+                    if not arg:
+                        tg("sendMessage", chat_id=chat_id,
+                           text="usage: /x NVDA — live X/Twitter trader sentiment (Grok on your sub)")
+                        continue
+                    tg("sendChatAction", chat_id=chat_id, action="typing")
+                    out = None
+                    try:
+                        sys.path.insert(0, "/home/itsju/05_AUTOMATION/scripts")
+                        from lib import x_search
+                        out = x_search.x_sentiment(arg)
+                    except Exception as e:
+                        print(f"[{name}] /x x_search err {e}", flush=True)
+                    if not out:  # token missing/expired → web fallback via the CLI
+                        out = ask_local(f"Summarize trader-relevant X/Twitter chatter on {arg} "
+                                        f"in the last 24h: bullish/bearish lean + any catalyst. "
+                                        f"4 lines max, I have ADD.")
+                    send_reply(chat_id, f"𝕏 *{arg.upper()}*\n{out}")
+                    print(f"[{name}] /x {arg}", flush=True)
                     continue
                 # /news — portfolio-aware politics/macro read (LLM, uses news-search + web).
                 if cmd0 == "/news":

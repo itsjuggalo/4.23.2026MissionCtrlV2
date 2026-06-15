@@ -66,6 +66,8 @@ def main():
     hits = FC.scan_pushed(require_open=not dry, fresh_min=(1e9 if dry else 8))
     sent = 0
     for occ, a, v in hits:
+        if v.get("tier") == "WAIT":
+            continue  # no live quote → not an actionable chase signal, don't push it
         if occ in s["sent"] and not dry:
             continue
         msg = FC.format_alert(a, v)
