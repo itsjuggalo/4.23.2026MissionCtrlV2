@@ -204,6 +204,71 @@ def build_embed(acct, spy_7d, spy_30d):
     color = 0x00C853 if (acct.get('today_pnl_pct', 0) or 0) >= 0 else 0xD32F2F
     return {"title": title, "description": desc[:4000], "color": color}
 
+def _account_card_spec(acct, spy_7d, spy_30d, idx, ops_card):
+    if "error" in acct:
+        return {"bot": "ALPACA", "username": "Alpaca Snapshot", "title": acct["label"][:24].upper(),
+                "status": "crit", "status_text": "ERROR", "glyph": "reticle",
+                "rows": [{"label": "Error", "value": str(acct["error"])[:40], "state": "crit"}],
+                "footer": "alpaca paper snapshot"}
+    pnl = acct.get("today_pnl_pct", 0) or 0
+    status = "good" if pnl >= 0 else "crit"
+    vs7 = (acct.get("perf_7d") or 0) - (spy_7d or 0) if acct.get("perf_7d") is not None else None
+    vs30 = (acct.get("perf_30d") or 0) - (spy_30d or 0) if acct.get("perf_30d") is not None else None
+    rows = [
+        {"label": "Equity", "value": fmt_money(acct.get("equity")), "state": None},
+        {"label": "Today P&L", "value": f"{fmt_pct(pnl)} ({fmt_money(acct.get('today_pnl'))})", "state": status},
+        {"label": "Cash · BP", "value": f"{fmt_money(acct.get('cash'))} · {fmt_money(acct.get('bp'))}", "state": None},
+        {"label": "7d (vs SPY)", "value": f"{fmt_pct(acct.get('perf_7d'))} ({fmt_pct(vs7)})",
+         "state": "good" if (acct.get('perf_7d') or 0) >= 0 else "crit"},
+        {"label": "30d (vs SPY)", "value": f"{fmt_pct(acct.get('perf_30d'))} ({fmt_pct(vs30)})",
+         "state": "good" if (acct.get('perf_30d') or 0) >= 0 else "crit"},
+        {"label": "Open orders · day trades",
+         "value": f"{acct.get('open_orders', 0)} · {acct.get('day_trades', 0)}",
+         "state": "warn" if acct.get('pdt') else None},
+    ]
+    positions = acct.get("positions", [])
+    sections = []
+    if positions:
+        items = []
+        for p in sorted(positions, key=lambda x: -abs(x.get("upl", 0)))[:6]:
+            sym = decode_occ_symbol(p["symbol"])[:24]
+            items.append(f"{sym} x{int(float(p['qty']))} = {fmt_money(p['mv'])} ({fmt_pct(p['upl_pct'])})")
+        if len(positions) > 6:
+            items.append(f"...and {len(positions) - 6} more")
+        sections.append({"label": f"Positions ({len(positions)})", "items": items})
+    themes = [0, 2, 4]  # distinct faction per account (R1 / R2 / Jazzy)
+    return {"bot": "ALPACA", "username": "Alpaca Snapshot", "theme": themes[idx % len(themes)],
+            "title": acct["label"][:24].upper(),
+            "subtitle": f"{acct.get('account_id', '?')} · {ops_card.now_et()}",
+            "glyph": "signal", "status": status, "status_text": f"{fmt_pct(pnl)} TODAY",
+            "rows": rows, "sections": sections, "footer": "alpaca paper snapshot"}
+
+
+def _snapshot_cards(accounts_data, spy_7d, spy_30d, header, webhook):
+    """Render one card per account, post all in ONE message. True on success."""
+    try:
+        import os
+        import sys
+        import time as _t
+        sys.path.insert(0, os.path.expanduser("~/05_AUTOMATION/scripts/lib"))
+        import ops_card
+    except Exception:
+        return False
+    pngs = []
+    for i, acct in enumerate(accounts_data):
+        spec = _account_card_spec(acct, spy_7d, spy_30d, i, ops_card)
+        out = f"/tmp/ops_card_alpaca_{i}_{int(_t.time())}.png"
+        png = ops_card.render_ops_card(spec, out)
+        if png:
+            pngs.append(png)
+    if not pngs:
+        return False
+    try:
+        return ops_card.post_images(webhook, pngs, content=header, username="Alpaca Snapshot")
+    except Exception:
+        return False
+
+
 def post_to_discord(webhook_url, content, embeds):
     payload = {"username": "Alpaca Snapshot", "content": content, "embeds": embeds}
     data = json.dumps(payload).encode()
@@ -232,11 +297,15 @@ def main():
     now_et = now_utc + timedelta(hours=et_offset)
     header = f"📊 **Account Snapshot** — {now_et.strftime('%a %b %d, %I:%M %p ET')}"
 
-    embeds = []
-    for acct_cfg in ACCOUNTS:
-        data = fetch_account_data(acct_cfg)
-        embeds.append(build_embed(data, spy_7d, spy_30d))
+    accounts_data = [fetch_account_data(c) for c in ACCOUNTS]
 
+    # Visual cards first (one per account, one message); fall back to embeds.
+    if _snapshot_cards(accounts_data, spy_7d, spy_30d, header, webhook):
+        print("[snapshot] posted cards to discord")
+        print(f"[snapshot] SPY 7d={spy_7d} | 30d={spy_30d}")
+        return
+
+    embeds = [build_embed(d, spy_7d, spy_30d) for d in accounts_data]
     status = post_to_discord(webhook, header, embeds)
     print(f"[snapshot] posted to discord — status={status}")
     print(f"[snapshot] SPY 7d={spy_7d} | 30d={spy_30d}")

@@ -191,6 +191,44 @@ def cycle():
     logging.info(f'congress catalysts: {len(candidates)}, top: {[c["symbol"] for c in candidates[:5]]}')
     return candidates
 
+def _post_card(candidates):
+    """Render + post a StarCraft Congress-Catalyst card. True on success."""
+    try:
+        import sys, os
+        sys.path.insert(0, os.path.expanduser('~/05_AUTOMATION/scripts/lib'))
+        import ops_card
+    except Exception:
+        return False
+    hits = [c for c in candidates[:8] if c['score'] >= 10]
+    if not hits:
+        return False
+    rows = []
+    for c in hits[:7]:
+        st = 'good' if c['direction'] == 'BULLISH' else ('crit' if c['direction'] == 'BEARISH' else 'warn')
+        arrow = '↑' if c['direction'] == 'BULLISH' else ('↓' if c['direction'] == 'BEARISH' else '↔')
+        rows.append({'label': f'{c["symbol"]} {arrow}',
+                     'value': f'sc {c["score"]:.0f} · {c["unique_representatives"]}r · {c["buy_count"]}B/{c["sale_count"]}S',
+                     'state': st})
+    top = hits[0]
+    spec = {
+        'bot': 'CONGRESS', 'theme': 6, 'title': 'CONGRESS CATALYST', 'glyph': 'reticle',
+        'subtitle': f'reps buying + active flow {LOOKBACK_DAYS_FLOW}d · {ops_card.now_et()}',
+        'status': 'good' if top['direction'] == 'BULLISH' else ('crit' if top['direction'] == 'BEARISH' else 'warn'),
+        'status_text': f'{len(hits)} HITS', 'rows': rows,
+        'sections': [{'label': 'Latest filing',
+                      'items': [f'{top["symbol"]}: {top["trades"][0]["representative"]} on {top["trades"][0]["date"]} '
+                                f'(${top["total_purchase_low_usd"]:,}-${top["total_purchase_high_usd"]:,})']}],
+        'footer': 'congress catalyst · 4h',
+    }
+    summary = ('🏛️ **Congress Catalyst** — ' +
+               ', '.join(f'{c["symbol"]} {"↑" if c["direction"]=="BULLISH" else "↓" if c["direction"]=="BEARISH" else "↔"}'
+                         for c in hits[:5]))
+    try:
+        return ops_card.render_and_post(spec, WEBHOOK, summary).startswith('card:')
+    except Exception:
+        return False
+
+
 def post_summary(candidates):
     if not candidates: return
     state = json.loads(STATE.read_text()) if STATE.exists() else {'last_post': 0, 'last_top': []}
@@ -210,14 +248,20 @@ def post_summary(candidates):
 
     if len(lines) <= 3: return
     msg = '\n'.join(lines)
-    try:
-        r = requests.post(WEBHOOK, json={'content': msg[:1900]}, timeout=10)
-        if r.status_code in (200, 204):
-            state['last_post'] = now
-            state['last_top'] = top_keys
-            STATE.write_text(json.dumps(state))
-            logging.info('posted congress summary')
-    except Exception as e: logging.warning(f'post err: {e}')
+    # Visual card first; fall back to the text post on failure.
+    posted = _post_card(candidates)
+    if not posted:
+        try:
+            r = requests.post(WEBHOOK, json={'content': msg[:1900]}, timeout=10)
+            posted = r.status_code in (200, 204)
+        except Exception as e:
+            logging.warning(f'post err: {e}')
+            posted = False
+    if posted:
+        state['last_post'] = now
+        state['last_top'] = top_keys
+        STATE.write_text(json.dumps(state))
+        logging.info('posted congress summary')
 
 def main():
     logging.info('congress_catalyst starting')

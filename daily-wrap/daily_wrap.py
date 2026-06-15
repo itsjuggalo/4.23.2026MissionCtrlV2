@@ -222,6 +222,51 @@ def build_embed():
     }
 
 
+def _post_card(flow, crypto, sigs, spy):
+    """Render + post the EOD wrap as a StarCraft card. True on success."""
+    try:
+        sys.path.insert(0, "/home/itsju/05_AUTOMATION/scripts/lib")
+        import ops_card
+    except Exception:
+        return False
+    strip = lambda s: s.replace("`", "").strip()
+    overall = flow["overall_pct"]
+    status = "good" if overall >= 60 else "crit" if overall <= 40 else "warn"
+    rows = []
+    if spy:
+        sign = "+" if spy["pct"] >= 0 else ""
+        rows.append({"label": "SPY benchmark",
+                     "value": f"{sign}{spy['pct']:.2f}% · ${spy['close']:,.2f}",
+                     "state": "good" if spy["pct"] >= 0 else "crit"})
+    rows.append({"label": "Flow bias",
+                 "value": f"{overall:.0f}% bull · {fmt_prem(flow['total_bull'])}/{fmt_prem(flow['total_bear'])}",
+                 "state": status})
+    rows.append({"label": "Tickers active", "value": str(flow["n_tickers"]), "state": None})
+    sections = []
+    if flow["rows"]:
+        sections.append({"label": "Top flow by premium", "items": [strip(r) for r in flow["rows"][:5]]})
+    if crypto:
+        sections.append({"label": "Crypto 24h", "items": [strip(r) for r in crypto[:5]]})
+    if sigs:
+        sl = [f"{k}: {v}" for k, v in sorted(sigs.items(), key=lambda x: -x[1])[:6] if v > 0]
+        if sl:
+            sections.append({"label": "Signals fired", "items": sl})
+    spec = {
+        "bot": "MISSION CONTROL", "theme": 6, "title": "DAILY WRAP", "glyph": "moon",
+        "subtitle": datetime.now().strftime("%A, %B %-d"),
+        "status": status, "status_text": f"{overall:.0f}% BULL", "rows": rows,
+        "bars": [{"label": "Flow bias (bullish)", "pct": overall, "state": status,
+                  "note": f"{overall:.0f}% bull"}],
+        "sections": sections, "footer": "Mission Control · EOD",
+    }
+    summary = (f":crescent_moon: **Daily Wrap** — {overall:.0f}% bullish flow"
+               + (f" · SPY {'+' if spy['pct'] >= 0 else ''}{spy['pct']:.2f}%" if spy else ""))
+    try:
+        return ops_card.render_and_post(spec, WEBHOOK, summary).startswith("card:")
+    except Exception:
+        return False
+
+
 def post_to_discord(embed):
     try:
         r = requests.post(WEBHOOK, json={"embeds": [embed]}, timeout=15)
@@ -236,6 +281,14 @@ def post_to_discord(embed):
 
 
 if __name__ == "__main__":
+    # Visual card first; fall back to the multi-field embed on any failure.
+    flow = stock_flow_summary()
+    crypto = crypto_summary()
+    sigs = signal_counts()
+    spy = spy_today_pct()
+    if _post_card(flow, crypto, sigs, spy):
+        print("daily wrap card posted: True")
+        sys.exit(0)
     embed = build_embed()
     success = post_to_discord(embed)
     print(f"daily wrap posted: {success}")

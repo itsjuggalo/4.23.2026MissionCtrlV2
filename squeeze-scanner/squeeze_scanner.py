@@ -146,7 +146,60 @@ def score(yf_data, has_sweep, iv_data):
     elif from_hi > 0: s += 5; reasons.append("at new high")
     return min(s, 100), reasons
 
+def _squeeze_card(yf_data, score_val, reasons, iv_data):
+    """Render + post a StarCraft squeeze card AS the Spacer bot. True on success."""
+    try:
+        import os
+        sys.path.insert(0, os.path.expanduser("~/05_AUTOMATION/scripts/lib"))
+        import ops_card
+    except Exception:
+        return False
+    token = secret("spacer_bot_token.txt")
+    if not token:
+        return False
+    st_si = lambda v: "crit" if v > 30 else "warn" if v > 20 else None
+    st_dtc = lambda v: "crit" if v > 7 else "warn" if v > 5 else None
+    rows = [
+        {"label": "Short interest",
+         "value": f"{yf_data['si_pct_float']:.1f}% float · {yf_data['si']/1e6:.1f}M sh",
+         "state": st_si(yf_data['si_pct_float'])},
+        {"label": "Days to cover", "value": f"{yf_data['dtc']:.1f}d", "state": st_dtc(yf_data['dtc'])},
+        {"label": "Price",
+         "value": f"${yf_data['price']} ({yf_data['from_hi_pct']:+.1f}% vs 52w hi)",
+         "state": "good" if yf_data['from_hi_pct'] > -5 else None},
+        {"label": "Float · Avg vol",
+         "value": f"{yf_data['float']/1e6:.1f}M · {yf_data['avg_vol_20d']/1e6:.2f}M/d", "state": None},
+        {"label": "SI Δ vs prior mo", "value": f"{yf_data['si_change_pct']:+.1f}%",
+         "state": "warn" if yf_data['si_change_pct'] > 0 else None},
+    ]
+    if iv_data:
+        rows.append({"label": "ATM call IV",
+                     "value": f"±{iv_data.get('implied_move_pct', 0):.1f}% by {iv_data['exp']}",
+                     "state": "warn"})
+    status = "crit" if score_val >= 75 else "warn"
+    spec = {
+        "bot": "SPACER", "title": f"SQUEEZE WATCH · {yf_data['ticker']}",
+        "subtitle": yf_data.get("name") or ops_card.now_et(),
+        "glyph": "signal", "status": status, "status_text": f"SCORE {score_val}",
+        "rows": rows,
+        "bars": [{"label": "Squeeze score", "pct": score_val, "state": status,
+                  "note": f"{score_val} / 100"}],
+        "sections": [{"label": "Why", "items": reasons[:5]}] if reasons else [],
+        "footer": "yfinance + Tradier + whale-flow",
+    }
+    summary = (f"⚡ **SQUEEZE WATCH — {yf_data['ticker']}** score {score_val} · "
+               f"SI {yf_data['si_pct_float']:.0f}% · DTC {yf_data['dtc']:.1f}")
+    try:
+        return ops_card.render_and_post(spec, {"channel": CHANNEL_ID, "token": token},
+                                        summary).startswith("card:")
+    except Exception:
+        return False
+
+
 def post(yf_data, score_val, reasons, iv_data):
+    # Visual card first (as Spacer bot); fall back to the text embed on failure.
+    if _squeeze_card(yf_data, score_val, reasons, iv_data):
+        return True
     color = 0xef5350 if score_val >= 75 else 0xffa502 if score_val >= 60 else 0x4dabf7
     fields = [
         {"name": "Short Interest", "value": f"{yf_data['si_pct_float']:.1f}% of float\n{yf_data['si']/1e6:.1f}M sh", "inline": True},

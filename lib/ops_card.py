@@ -415,28 +415,29 @@ def _send(url, data, headers, retries, attempt_sleep=1.5):
     return False
 
 
-def post_text(webhook_url: str, content: str, retries: int = 4):
-    """Plain-text post with 429 backoff (stdlib)."""
+def post_text(webhook_url: str, content: str, retries: int = 4, username: str = None):
+    """Plain-text webhook post with 429 backoff (stdlib)."""
     url = resolve_webhook(webhook_url)
     if not url or not content:
         return False
-    data = json.dumps({'content': content[:1990]}).encode()
+    pd = {'content': content[:1990]}
+    if username:
+        pd['username'] = username
+    data = json.dumps(pd).encode()
     return _send(url, data, {'Content-Type': 'application/json', 'User-Agent': _UA}, retries)
 
 
-def post_image(webhook_url: str, png_path: str, content: str = None, retries: int = 4):
-    """Upload a PNG to a Discord webhook (multipart/form-data) with `content` as
-    the line above it. 429-aware, stdlib only. Returns True on success."""
-    url = resolve_webhook(webhook_url)
-    if not url or not png_path or not os.path.isfile(png_path):
-        return False
-    try:
-        with open(png_path, 'rb') as fh:
-            img = fh.read()
-    except Exception:
-        return False
+def _multipart_image(png_path, content, extra_payload=None):
+    """Build a Discord multipart/form-data body (payload_json + files[0])."""
+    with open(png_path, 'rb') as fh:
+        img = fh.read()
     boundary = '----OpsCardBoundary' + str(int(time.time() * 1000))
-    payload = json.dumps({'content': (content or '')[:1990]}) if content else '{}'
+    pd = {}
+    if content:
+        pd['content'] = content[:1990]
+    if extra_payload:
+        pd.update(extra_payload)
+    payload = json.dumps(pd)
     pre = (
         f'--{boundary}\r\n'
         f'Content-Disposition: form-data; name="payload_json"\r\n'
@@ -447,22 +448,129 @@ def post_image(webhook_url: str, png_path: str, content: str = None, retries: in
         f'Content-Type: image/png\r\n\r\n'
     ).encode()
     body = pre + img + f'\r\n--{boundary}--\r\n'.encode()
+    return boundary, body
+
+
+def _multipart_images(png_paths, content, extra_payload=None):
+    """Multipart body with several files[i] (one Discord message, N images)."""
+    boundary = '----OpsCardBoundary' + str(int(time.time() * 1000))
+    pd = {}
+    if content:
+        pd['content'] = content[:1990]
+    if extra_payload:
+        pd.update(extra_payload)
+    body = (f'--{boundary}\r\n'
+            f'Content-Disposition: form-data; name="payload_json"\r\n'
+            f'Content-Type: application/json\r\n\r\n{json.dumps(pd)}\r\n').encode()
+    for i, p in enumerate(png_paths):
+        with open(p, 'rb') as fh:
+            img = fh.read()
+        body += (f'--{boundary}\r\n'
+                 f'Content-Disposition: form-data; name="files[{i}]"; '
+                 f'filename="{os.path.basename(p)}"\r\n'
+                 f'Content-Type: image/png\r\n\r\n').encode() + img + b'\r\n'
+    body += f'--{boundary}--\r\n'.encode()
+    return boundary, body
+
+
+def post_images(webhook_url: str, png_paths, content: str = None, retries: int = 4,
+                username: str = None):
+    """Post several PNGs in ONE webhook message. Returns True/False."""
+    url = resolve_webhook(webhook_url)
+    paths = [p for p in (png_paths or []) if p and os.path.isfile(p)]
+    if not url or not paths:
+        return False
+    try:
+        extra = {'username': username} if username else None
+        boundary, body = _multipart_images(paths, content, extra)
+    except Exception:
+        return False
     headers = {'Content-Type': f'multipart/form-data; boundary={boundary}', 'User-Agent': _UA}
     return _send(url, body, headers, retries)
 
 
-def render_and_post(spec: dict, webhook_url: str, summary_line: str, out_path: str = None):
+def post_image(webhook_url: str, png_path: str, content: str = None, retries: int = 4,
+               username: str = None):
+    """Upload a PNG to a Discord WEBHOOK with `content` above it. Optional
+    `username` overrides the webhook's display name. Returns True/False."""
+    url = resolve_webhook(webhook_url)
+    if not url or not png_path or not os.path.isfile(png_path):
+        return False
+    try:
+        extra = {'username': username} if username else None
+        boundary, body = _multipart_image(png_path, content, extra)
+    except Exception:
+        return False
+    headers = {'Content-Type': f'multipart/form-data; boundary={boundary}', 'User-Agent': _UA}
+    return _send(url, body, headers, retries)
+
+
+# ── bot-token posting (preserves the named-bot identity + avatar) ─────────────
+def _bot_channel_url(channel_id):
+    return f'https://discord.com/api/v10/channels/{channel_id}/messages'
+
+
+def post_text_bot(channel_id: str, token: str, content: str, retries: int = 4):
+    """Plain-text post AS a bot (channels/{id}/messages). 429-aware, stdlib."""
+    if not channel_id or not token or not content:
+        return False
+    data = json.dumps({'content': content[:1990]}).encode()
+    headers = {'Authorization': f'Bot {token}', 'Content-Type': 'application/json', 'User-Agent': _UA}
+    return _send(_bot_channel_url(channel_id), data, headers, retries)
+
+
+def post_image_bot(channel_id: str, token: str, png_path: str, content: str = None, retries: int = 4):
+    """Upload a PNG AS a bot (channels/{id}/messages multipart). Returns True/False."""
+    if not channel_id or not token or not png_path or not os.path.isfile(png_path):
+        return False
+    try:
+        boundary, body = _multipart_image(png_path, content)
+    except Exception:
+        return False
+    headers = {'Authorization': f'Bot {token}',
+               'Content-Type': f'multipart/form-data; boundary={boundary}', 'User-Agent': _UA}
+    return _send(_bot_channel_url(channel_id), body, headers, retries)
+
+
+def _as_bot(target):
+    """Return (channel_id, token) if target is a bot dest, else (None, None)."""
+    if isinstance(target, dict) and target.get('channel') and target.get('token'):
+        return str(target['channel']), str(target['token'])
+    if isinstance(target, (tuple, list)) and len(target) == 2:
+        return str(target[0]), str(target[1])
+    return None, None
+
+
+def _post_image_any(target, png_path, content, username=None):
+    ch, tok = _as_bot(target)
+    if ch:
+        return post_image_bot(ch, tok, png_path, content)
+    return post_image(target, png_path, content, username=username)
+
+
+def _post_text_any(target, content, username=None):
+    ch, tok = _as_bot(target)
+    if ch:
+        return post_text_bot(ch, tok, content)
+    return post_text(target, content, username=username)
+
+
+def render_and_post(spec: dict, target, summary_line: str, out_path: str = None):
     """Render the card and post it with `summary_line` above. On ANY failure,
     fall back to posting `summary_line` as plain text so the alert never drops.
-    Returns a status string."""
+
+    `target` is either a webhook URL / secrets-name (str), or a bot destination
+    {'channel': id, 'token': tok} / (channel_id, token) to post AS that bot.
+    Returns a status string ('card:...', 'text-fallback', or 'FAILED')."""
     if out_path is None:
         safe = ''.join(c if c.isalnum() else '_' for c in (spec.get('title') or 'card'))[:32]
         out_path = f'/tmp/ops_card_{safe}_{int(time.time())}.png'
     png = render_ops_card(spec, out_path)
-    if png and post_image(webhook_url, png, content=summary_line):
+    un = spec.get('username')
+    if png and _post_image_any(target, png, summary_line, username=un):
         return f'card:{png}'
     # fallback — never drop the alert
-    if post_text(webhook_url, summary_line or (spec.get('title') or '')):
+    if _post_text_any(target, summary_line or (spec.get('title') or ''), username=un):
         return 'text-fallback'
     return 'FAILED'
 

@@ -25,6 +25,9 @@ for f in "$CACHE_DIR"/latest_*.json; do
   fi
 done
 if [ "$STALE_COUNT" -gt 0 ]; then
-  curl -s -X POST -H "Content-Type: application/json" "$WEBHOOK" -d "{\"username\":\"Hermes\",\"embeds\":[{\"title\":\"⚠️ Kronos cache stale\",\"description\":\"$STALE_COUNT stale, $FRESH_COUNT fresh\\nStale:$STALE_LIST\",\"color\":15105570}]}" >/dev/null
+  # Visual card first (as Hermes); fall back to the text embed on any failure.
+  if ! /home/itsju/.venv/bin/python3 /home/itsju/05_AUTOMATION/scripts/hermes/kronos_stale_card.py; then
+    curl -s -X POST -H "Content-Type: application/json" "$WEBHOOK" -d "{\"username\":\"Hermes\",\"embeds\":[{\"title\":\"⚠️ Kronos cache stale\",\"description\":\"$STALE_COUNT stale, $FRESH_COUNT fresh\\nStale:$STALE_LIST\",\"color\":15105570}]}" >/dev/null
+  fi
 fi
 echo "[$(TZ=America/New_York date '+%H:%M ET')] hermes: $FRESH_COUNT fresh, $STALE_COUNT stale" >> /tmp/hermes.log
