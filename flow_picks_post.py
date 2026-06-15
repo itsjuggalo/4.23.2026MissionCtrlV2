@@ -28,6 +28,51 @@ from lib.portfolio import personal_tickers, personal_crypto  # noqa: E402
 ET = ZoneInfo("America/New_York")
 DATA = Path.home() / "trading" / "signals" / "option-scraper" / "data"
 FILES = ["flow_alerts_today.json", "flow2_alerts_today.json"]
+PICKLOG_DIR = Path.home() / ".openclaw" / "state"
+
+
+def _spot(ticker: str):
+    """Underlying last price (yfinance) for grading later. None on failure."""
+    try:
+        import yfinance as yf
+        i = yf.Ticker(ticker).history(period="1d", interval="5m")
+        if len(i):
+            return float(i["Close"].iloc[-1])
+        h = yf.Ticker(ticker).history(period="1d")
+        return float(h["Close"].iloc[-1]) if len(h) else None
+    except Exception:
+        return None
+
+
+def _log_picks(picks):
+    """Append swing picks to today's log so the EOD scorecard can grade them.
+    Records the underlying spot at first pick-time (earliest reference per contract)."""
+    if not picks:
+        return
+    date = datetime.now(ET).strftime("%Y-%m-%d")
+    path = PICKLOG_DIR / f"flow_picks_log_{date}.jsonl"
+    seen = set()
+    if path.exists():
+        try:
+            for ln in path.read_text().splitlines():
+                seen.add(json.loads(ln).get("optionSymbol"))
+        except Exception:
+            pass
+    PICKLOG_DIR.mkdir(parents=True, exist_ok=True)
+    spot_cache = {}
+    with open(path, "a") as f:
+        for a, fv, voi, dte, dirn, tag in picks:
+            osym = a.get("OptionSymbol")
+            if osym in seen:        # only log a contract's first appearance
+                continue
+            tk = a.get("Symbol")
+            if tk not in spot_cache:
+                spot_cache[tk] = _spot(tk)
+            rec = {"ts": datetime.now(ET).isoformat(), "symbol": tk, "optionSymbol": osym,
+                   "strike": a.get("Strike"), "type": str(a.get("OptionType", ""))[:1],
+                   "exp": int(a.get("Expiry", 0) or 0), "dte": dte, "spot": spot_cache[tk],
+                   "flowValue": fv, "isBullish": bool(a.get("isBullish"))}
+            f.write(json.dumps(rec) + "\n")
 
 
 def _load() -> dict:
@@ -105,6 +150,7 @@ def build() -> str | None:
             dirn = "🟢" if a.get("isBullish") else "🔴"
             picks.append((a, fv, voi, dte, dirn, tag))
 
+    _log_picks(picks)   # record for the EOD scorecard
     stamp = datetime.now(ET).strftime("%a %b %-d %-I:%M %p ET")
     tape = _tape()
     lines = [f"🎯 **FLOW PICKS — live contracts** · {stamp}"]

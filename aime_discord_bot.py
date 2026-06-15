@@ -371,8 +371,10 @@ HELP_TEXT = (
     "`/x <ticker>` social sentiment · `/summarize [#chan]` channel TL;DR · `/desk-eod` EOD wrap · "
     "`/morning` morning note · `/aime <q>`\n\n"
     "**🛰️ Runs automatically:** morning briefing + events (8:05/8:15) · opening read (9:35) · "
-    "regime/news/flow/X-sentiment intraday · position-mgmt (11:30/2:00) · power hour (2:55) · "
-    "portfolio snapshots (9:35/4:05) · risk/exit/shock alerts (every 20-30m)."
+    "**flow picks → #flow-picks (9:50/11/12:30/2/3:20)** · regime/news/X-sentiment (native Grok) · "
+    "position-mgmt (11:30/2:00) · power hour (2:55) · portfolio snapshots (9:35/4:05) · "
+    "**your-crypto alerts → #daily-crypto-pumps (24h ≥5% /30m + 15-min spike ≥3% /5m)** · "
+    "risk/exit/shock alerts."
 )
 
 

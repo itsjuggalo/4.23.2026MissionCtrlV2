@@ -346,6 +346,24 @@ def _acct_data(k: str, s: str):
     return get("/v2/account"), get("/v2/positions")
 
 
+def equity_day_pnl() -> tuple[float, float]:
+    """(combined equity, combined day P&L) across Boba+Jazzy paper accounts."""
+    eq_total, day_total = 0.0, 0.0
+    for kid, ksec in _ACCTS:
+        k, s = _rd(kid), _rd(ksec)
+        if not k or not s:
+            continue
+        try:
+            acct, _ = _acct_data(k, s)
+            eq = float(acct.get("equity", 0) or 0)
+            le = float(acct.get("last_equity", eq) or eq)
+            eq_total += eq
+            day_total += eq - le
+        except Exception:
+            continue
+    return eq_total, day_total
+
+
 def total_equity() -> float:
     """Combined Boba+Jazzy account equity (live)."""
     tot = 0.0
