@@ -53,10 +53,34 @@ TIER_REVIEW = {
     "1502921272961794098": "market-pulse      (📰 BRIEFS, 35d idle)",
 }
 
+# 🗄️ ARCHIVE — stale leftover history (47–78d idle). Mike asked to reduce these.
+# KEEPS the 2 still-live ones (broadcast-log, signals-old). Run with --include-archives.
+TIER_ARCHIVE = {
+    "1486136525144981565": "archive-analyst          (🗄️ ARCHIVE, 66d)",
+    "1486148116670578793": "archive-codex-expert     (🗄️ ARCHIVE, 71d)",
+    "1486136515045101717": "archive-eric             (🗄️ ARCHIVE, 48d)",
+    "1486045638675267716": "archive-psych-chat       (🗄️ ARCHIVE, 78d)",
+    "1486045637387620564": "archive-psych-insights   (🗄️ ARCHIVE, 73d)",
+    "1486136562327748630": "archive-sniper           (🗄️ ARCHIVE, 71d)",
+    "1486045643926671390": "archive-sniper-analysis  (🗄️ ARCHIVE, 71d)",
+    "1486045654378872902": "ci-intelligence-report   (🗄️ ARCHIVE, 67d)",
+    "1486045651740659753": "ci-ml-evolution          (🗄️ ARCHIVE, 66d)",
+    "1486045651115446292": "ci-obfuscation-log       (🗄️ ARCHIVE, 66d)",
+    "1491237210756878538": "coupon                   (🗄️ ARCHIVE, 60d)",
+    "1491237848823631892": "coupon-logs              (🗄️ ARCHIVE, 59d)",
+    "1491237778791465092": "coupon-request           (🗄️ ARCHIVE, 59d)",
+    "1491237939483770920": "coupon-watchlist         (🗄️ ARCHIVE, 68d)",
+    "1486045594605719764": "eric-rejected            (🗄️ ARCHIVE, 48d)",
+    "1489773321129037854": "hyperliquid              (🗄️ ARCHIVE, 66d)",
+    "1498183281173332049": "mbm-messages             (🗄️ ARCHIVE, 47d)",
+    "1489773284060041256": "spot                     (🗄️ ARCHIVE, 66d)",
+    "1486526749029175437": "tweaktrades              (🗄️ ARCHIVE, 78d)",
+}
+
 # NEVER deleted by this script (documented for clarity — not used as input):
 #   • 🎯 SNIPER sniper-dips/exits/watchlist/skips  — empty, await daemon go-live
 #   • mission-control / announcements / verify / agent-comms / boba-cmd — system
-#   • 🗄️ ARCHIVE/*  — intentional history (broadcast-log + signals-old are LIVE)
+#   • 🗄️ ARCHIVE broadcast-log + signals-old — still LIVE (posted today)
 
 
 def load_token():
@@ -86,16 +110,20 @@ def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--yes", action="store_true", help="actually delete (default: dry-run)")
     ap.add_argument("--include-review", action="store_true", help="also act on TIER_REVIEW")
+    ap.add_argument("--include-archives", action="store_true", help="also act on TIER_ARCHIVE (19 stale archives)")
     args = ap.parse_args()
     tok = load_token()
     targets = dict(TIER_SAFE)
     if args.include_review:
         targets.update(TIER_REVIEW)
+    if args.include_archives:
+        targets.update(TIER_ARCHIVE)
     print(f"\n{'DELETING' if args.yes else 'DRY-RUN — would delete'} {len(targets)} channels:")
     for cid, label in targets.items():
         print(f"  {label}")
     if not args.yes:
-        print("\nRe-run with --yes to delete. Add --include-review for the protected-category set.")
+        print("\nRe-run with --yes to delete. Flags: --include-review (live-category set) · "
+              "--include-archives (19 stale archives, keeps the 2 live ones).")
         return
     print()
     for cid, label in targets.items():
