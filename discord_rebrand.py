@@ -40,6 +40,10 @@ IDENTITY = {
     "discord_tgbridge_token":     ("TG Bridge",        "wraith",     "Telegram<->Discord relay. Cloaked and routing."),
     "discord_verify_token":       ("Verify",           "aldaris",    "The Judicator. Access judged."),
     "lifeclaw_discord_bot_token": ("LifeClaw",         "arbiter",    "Your life compass. My life for Aiur."),
+    # NOTE: these 3 LOOK like dead telegram tokens (getMe→404) but are LIVE DISCORD bots:
+    "betabot-token":              ("Beta Bot",         "firebat",    "Experimental sandbox bot. Burn it down, rebuild."),
+    "spacer_bot_token.txt":       ("Spacer",           "scv",        "Channel spacer / daily utility. Keeping the lines clean."),
+    "watchlist_editor_bot_token.txt": ("Watchlist Editor","goliath",  "Edits your watchlists. The Conclave records all."),
 }
 
 

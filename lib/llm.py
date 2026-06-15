@@ -89,6 +89,24 @@ def _gemini(prompt, timeout=90):
     return d["candidates"][0]["content"]["parts"][0]["text"], {}
 
 
+def _claude_oauth(prompt, timeout=60):
+    """Claude on the claude.ai subscription via its OAuth token, called DIRECTLY against
+    the Anthropic API (no Node CLI cold-start = much faster). Bills the sub, not API credits.
+    Note: shares the subscription rate-limit with interactive Claude Code use → may 429 under
+    load, in which case the caller's next provider (deepseek) takes over instantly."""
+    d = json.loads((Path.home() / ".claude" / ".credentials.json").read_text())
+    tok = (d.get("claudeAiOauth") or {}).get("accessToken")
+    if not tok:
+        raise RuntimeError("no claude oauth token")
+    r = _post("https://api.anthropic.com/v1/messages",
+              {"Authorization": "Bearer " + tok, "anthropic-version": "2023-06-01",
+               "anthropic-beta": "oauth-2025-04-20", "content-type": "application/json"},
+              {"model": "claude-sonnet-4-5", "max_tokens": 2000,
+               "system": "You are Claude Code, Anthropic's official CLI for Claude.",
+               "messages": [{"role": "user", "content": prompt}]}, timeout)
+    return r["content"][0]["text"], r.get("usage", {})
+
+
 def _grok_oauth(prompt, timeout=90):
     """Grok on the SuperGrok/X-Premium+ OAuth subscription (bills the sub, not API credits).
     Token read live from Hermes (auto-refreshed) via lib.x_search."""
@@ -114,7 +132,7 @@ def _deepseek(prompt, timeout=120):
     return d["choices"][0]["message"]["content"], d.get("usage", {})
 
 
-_PROVIDERS = {"claude_cli": _claude_cli, "grok_oauth": _grok_oauth,
+_PROVIDERS = {"claude_oauth": _claude_oauth, "claude_cli": _claude_cli, "grok_oauth": _grok_oauth,
               "openai": _openai, "gemini": _gemini, "deepseek": _deepseek}
 
 

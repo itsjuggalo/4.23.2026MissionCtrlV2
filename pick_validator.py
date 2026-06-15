@@ -195,91 +195,33 @@ def _format_validation_prompt(picks: list[dict], t0_snaps: list[dict], t2_snaps:
 
 
 def _call_claude(prompt: str, timeout: int = 60) -> dict | None:
-    """One-shot claude CLI call. Returns parsed JSON or None on failure."""
-    if not os.path.exists(CLAUDE_BIN):
-        return None
+    """Primary verdict — Claude on the claude.ai SUBSCRIPTION via direct OAuth API (fast,
+    no Node cold-start), CLI fallback. Returns parsed JSON or None on failure."""
     try:
-        r = subprocess.run(
-            [CLAUDE_BIN, "-p", "--model", "sonnet", "--output-format", "text",
-             "--no-session-persistence", "--tools", ""],
-            input=prompt,
-            capture_output=True,
-            text=True,
-            timeout=timeout,
-        )
-        if r.returncode != 0:
-            return None
-        text = r.stdout.strip()
-        if text.startswith("```"):
-            text = text.split("\n", 1)[1] if "\n" in text else text[3:]
-            text = text.strip()
-        idx = text.find("{")
-        if idx >= 0:
-            text = text[idx:]
-        try:
-            parsed, _end = json.JSONDecoder().raw_decode(text)
-            return parsed
-        except Exception as _je:
-            print(f"[pick-validator] claude json parse failed: {_je}", flush=True)
-            return None
+        import sys as _sys
+        from pathlib import Path as _P
+        _sys.path.insert(0, str(_P(__file__).resolve().parent))
+        from lib.llm import call_llm
+        r = call_llm(prompt, ["claude_oauth", "claude_cli"])
+        return r.get("response") if "ok" in r else None
     except Exception as _e:
         print(f"[pick-validator] claude call failed: {_e}", flush=True)
         return None
 
 
 def _call_gemini(prompt: str, timeout: int = 30) -> dict | None:
-    """Second-opinion call to Gemini 2.5 Flash via REST. Returns parsed JSON or None.
-
-    Matches the call pattern used by orion_telegram.py — no SDK dependency,
-    just urllib + the API key from secrets/gemini.key.
-    """
-    key = ""
-    for fname in ("gemini.key", "google-api-key.txt"):
-        p = SECRETS / fname
-        if p.exists():
-            try:
-                key = p.read_text().strip()
-                if key:
-                    break
-            except Exception:
-                pass
-    if not key:
-        return None
-
-    url = (f"https://generativelanguage.googleapis.com/v1beta/models/"
-           f"gemini-2.5-flash:generateContent?key={key}")
-    body = {
-        "contents": [{"role": "user", "parts": [{"text": prompt}]}],
-        "generationConfig": {"temperature": 0.1, "responseMimeType": "application/json"},
-    }
+    """Independent SECOND opinion — Grok on the SuperGrok/X-Premium+ OAuth SUBSCRIPTION
+    (replaces the old pay-per-token Gemini API; function name kept for the caller). DeepSeek
+    is the cheap secondary backup. Returns parsed JSON or None."""
     try:
-        req = urllib.request.Request(
-            url,
-            data=json.dumps(body).encode("utf-8"),
-            headers={"Content-Type": "application/json"},
-            method="POST",
-        )
-        with urllib.request.urlopen(req, timeout=timeout) as r:
-            data = json.loads(r.read().decode())
-        # Gemini returns: {"candidates": [{"content": {"parts": [{"text": "..."}]}}]}
-        text = (data.get("candidates") or [{}])[0].get("content", {}).get("parts", [{}])[0].get("text", "")
-        if not text:
-            print("[pick-validator] gemini returned no text", flush=True)
-            return None
-        if text.startswith("```"):
-            text = text.split("\n", 1)[1] if "\n" in text else text[3:]
-            text = text.strip()
-        idx = text.find("{")
-        if idx >= 0:
-            text = text[idx:]
-        try:
-            parsed, _end = json.JSONDecoder().raw_decode(text)
-            return parsed
-        except Exception as _je:
-            print(f"[pick-validator] gemini json parse failed: {_je}", flush=True)
-            return None
+        import sys as _sys
+        from pathlib import Path as _P
+        _sys.path.insert(0, str(_P(__file__).resolve().parent))
+        from lib.llm import call_llm
+        r = call_llm(prompt, ["grok_oauth", "deepseek"])
+        return r.get("response") if "ok" in r else None
     except Exception as _e:
-        print(f"[pick-validator] gemini call failed: {_e}", flush=True)
+        print(f"[pick-validator] second-opinion call failed: {_e}", flush=True)
         return None
 
 

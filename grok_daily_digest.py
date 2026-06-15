@@ -26,6 +26,23 @@ XAI_KEY = read_secret("xai_api_key")
 TG_TOKEN = read_secret("lifeclaw_telegram_bot_token")
 TG_CHAT_ID = read_secret("lifeclaw_telegram_chat_id")
 
+
+def xai_oauth_token() -> str:
+    """Grok token on the SuperGrok/X-Premium+ OAuth SUBSCRIPTION (Hermes, auto-refreshed).
+    Preferred over the pay-per-token API key (which is credit-dead)."""
+    import os
+    try:
+        a = json.loads((Path(os.path.expanduser("~/.hermes/auth.json"))).read_text())
+        for c in (a.get("credential_pool", {}) or {}).get("xai-oauth", []):
+            if c.get("access_token"):
+                return c["access_token"].strip()
+    except Exception:
+        pass
+    return ""
+
+
+XAI_TOKEN = xai_oauth_token() or XAI_KEY   # subscription first, API key fallback
+
 def et_now() -> datetime:
     return datetime.now(timezone.utc).astimezone(timezone(timedelta(hours=-4)))
 
@@ -46,7 +63,7 @@ def grok_search(query: str, summary_prompt: str) -> str:
         "https://api.x.ai/v1/responses",
         data=data,
         headers={
-            "Authorization": f"Bearer {XAI_KEY}",
+            "Authorization": f"Bearer {XAI_TOKEN}",
             "Content-Type": "application/json",
         },
     )
@@ -81,8 +98,8 @@ def send_telegram(text: str) -> bool:
         return False
 
 def main():
-    if not XAI_KEY:
-        print("ERROR: xai_api_key not found", file=sys.stderr)
+    if not XAI_TOKEN:
+        print("ERROR: no xai OAuth token or api key found", file=sys.stderr)
         sys.exit(1)
     if not TG_TOKEN or not TG_CHAT_ID:
         print("ERROR: Telegram credentials missing", file=sys.stderr)

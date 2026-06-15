@@ -46,6 +46,9 @@ def main():
     check_freq("flow_picks", 110, 10, 16, wd_only=True)   # 9:50/11/12:30/2/3:20
     check_freq("crypto_holdings", 45, 8, 22)              # every 30m
     check_freq("crypto_spike", 18, 8, 22)                 # every 5m
+    # paper decision cycles (boba/jazzy) — 9:45/11/12:30/2/3:30 weekdays, ~90m max gap
+    check_freq("boba_cycle", 115, 10, 16, wd_only=True)
+    check_freq("jazzy_cycle", 115, 10, 16, wd_only=True)
     # once-daily EOD
     check_daily("crypto_eod", 16)
     check_daily("eod_scorecard", 16)
