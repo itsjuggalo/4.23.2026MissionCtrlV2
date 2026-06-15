@@ -1,0 +1,12 @@
+[2026-06-15 07:00 ET] [kronos-preflight] ===== Kronos pre-flight starting =====
+[2026-06-15 07:00 ET] [kronos-preflight] HF_HOME OK: /home/itsju/.cache/huggingface
+[2026-06-15 07:00 ET] [kronos-preflight] C: drive OK: 22GB free (98% used)
+[2026-06-15 07:00 ET] [kronos-preflight] WSL ext4 OK: 695GB free
+[2026-06-15 07:00 ET] [kronos-preflight] HF cache: hub=88MB datasets=0MB total=88MB
+[2026-06-15 07:00 ET] [kronos-preflight] nvidia-smi not available — skipping VRAM check
+[2026-06-15 07:00 ET] [kronos-preflight] ===== Pre-flight PASSED — Kronos training authorized =====
+[2026-06-15T11:00:01Z] ===== kronos_train_daily starting =====
+[2026-06-15T11:00:01Z] ===== kronos_train_daily starting =====
+[2026-06-15T11:00:01Z] Fetching fresh Alpaca bars...
+[2026-06-15T11:00:01Z] Fetching fresh Alpaca bars...
+  Fetching NVDA (730d hourly)...
