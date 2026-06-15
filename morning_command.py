@@ -21,7 +21,6 @@ Subscription/OAuth-billed. Never touches the signal stream. Run with ~/.venv/bin
 from __future__ import annotations
 
 import argparse
-import subprocess
 import sys
 from datetime import datetime
 from zoneinfo import ZoneInfo
@@ -33,6 +32,7 @@ from lib.portfolio import portfolio_summary, top_tickers_str  # noqa: E402
 from lib import x_search  # noqa: E402
 from lib.llm import call_llm  # noqa: E402
 from lib.heartbeat import beat  # noqa: E402
+from lib.notify import tg_brief  # noqa: E402
 from flow_picks_post import (  # noqa: E402  (read-only helpers — these do NOT log picks)
     _load, _score, _spot, _moneyness, _fmt, MAX_MNY, DTE_MIN, DTE_MAX, RISK_CAP, _tape,
 )
@@ -128,19 +128,11 @@ def build() -> str:
 
 
 def _mirror_telegram(text: str) -> None:
-    """Best-effort mirror via the Telegram fleet's daily_briefs bot. Routes through tg_fleet
-    DIRECTLY (not ~/bin/tg-send-msg, whose default falls back to the trading bot) so a missing
-    token is a clean skip — never brief-spam on the trading chat. No-ops on any error; the
-    token is Mike's to paste (`tg_fleet.py set daily_briefs <TOKEN>`)."""
-    cmd = ["/home/itsju/.venv/bin/python", "/home/itsju/scripts/tg_fleet.py", "send", "daily_briefs", text]
-    try:
-        r = subprocess.run(cmd, capture_output=True, text=True, timeout=30)
-        if r.returncode == 0 and "sent" in (r.stdout or ""):
-            print("[morning] telegram mirror ok (daily_briefs)", flush=True)
-            return
-    except Exception:
-        pass
-    print("[morning] telegram mirror skipped (daily_briefs token not set yet)", flush=True)
+    """Mirror to Mike's phone via lib.notify (daily_briefs → flow_digest fallback).
+    Best-effort; auto-upgrades to a dedicated briefs bot once its token is set."""
+    used = tg_brief(text)
+    print(f"[morning] telegram mirror -> {used}" if used
+          else "[morning] telegram mirror skipped (no live briefs bot)", flush=True)
 
 
 def main():

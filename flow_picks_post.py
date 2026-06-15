@@ -25,6 +25,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parent))
 from skill_to_discord import post, resolve_channel  # noqa: E402  (resilient bot poster)
 from lib.portfolio import personal_tickers, personal_crypto  # noqa: E402
 from lib.heartbeat import beat  # noqa: E402
+from lib.notify import tg_brief  # noqa: E402
 
 ET = ZoneInfo("America/New_York")
 DATA = Path.home() / "trading" / "signals" / "option-scraper" / "data"
@@ -303,7 +304,8 @@ def main():
         return
     post(resolve_channel(a.channel), msg)
     beat("flow_picks")
-    print(f"[flow-picks] posted ({len(msg)} chars)", flush=True)
+    used = tg_brief(msg)
+    print(f"[flow-picks] posted ({len(msg)} chars) · tg→{used or 'skip'}", flush=True)
 
 
 if __name__ == "__main__":

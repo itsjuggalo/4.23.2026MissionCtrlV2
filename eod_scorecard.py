@@ -18,6 +18,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parent))
 import skill_to_discord as sd  # noqa: E402
 from lib.portfolio import real_money_holdings, equity_day_pnl  # noqa: E402
 from lib.heartbeat import beat  # noqa: E402
+from lib.notify import tg_brief  # noqa: E402
 
 ET = ZoneInfo("America/New_York")
 STATE = Path.home() / ".openclaw" / "state"
@@ -135,7 +136,8 @@ def main():
         return
     sd.post(sd.resolve_channel("flow-picks"), msg)
     beat("eod_scorecard")
-    print(f"[eod-scorecard] posted; book ${total_val:,.0f} day ${total_pl:+,.0f} picks={len(graded)}", flush=True)
+    used = tg_brief(msg)
+    print(f"[eod-scorecard] posted; book ${total_val:,.0f} day ${total_pl:+,.0f} picks={len(graded)} · tg→{used or 'skip'}", flush=True)
 
 
 if __name__ == "__main__":
