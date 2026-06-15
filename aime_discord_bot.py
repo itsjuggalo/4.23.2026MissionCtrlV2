@@ -12,9 +12,13 @@ cookie, never a browser. Bot token from ~/.openclaw/secrets/<DISCORD_AIME_TOKEN_
 from __future__ import annotations
 
 import asyncio
+import json
 import os
+import subprocess
 import sys
+import tempfile
 from pathlib import Path
+from typing import Optional
 
 sys.path.insert(0, str(Path.home() / "scripts"))
 import aime_client as aime  # noqa: E402
@@ -39,6 +43,44 @@ async def _answer(question: str) -> str:
     return await asyncio.to_thread(aime.ask_aime, question)
 
 
+# ─── HEADLESS SKILL BRIDGE ────────────────────────────────────────────────────
+# Run any Claude skill via `claude -p`, billed to the claude.ai SUBSCRIPTION (the
+# ANTHROPIC_API_KEY is stripped). Same proven pattern as antigravity_aime_bot.ask_local
+# and flow_digest_cron.sh — cwd=$HOME + --allowedTools are mandatory or it's
+# permission-blocked at runtime; use ~/.local/bin/claude (the sub CLI, not ~/bin wrapper).
+CLAUDE_BIN = str(Path.home() / ".local/bin/claude")
+CLAUDE_CWD = str(Path.home())
+CLAUDE_TOOLS = "Bash,Read,Grep,Glob,WebFetch,WebSearch,Skill,Agent,TodoWrite"
+
+
+def _run_skill(prompt: str, model: str = "sonnet", timeout: int = 300) -> str:
+    env = {k: v for k, v in os.environ.items() if k != "ANTHROPIC_API_KEY"}
+    try:
+        r = subprocess.run(
+            [CLAUDE_BIN, "-p", prompt, "--model", model, "--output-format", "json",
+             "--allowedTools", CLAUDE_TOOLS],
+            capture_output=True, text=True, timeout=timeout, env=env, cwd=CLAUDE_CWD)
+        if r.returncode != 0:
+            return f"[skill error rc={r.returncode}] {r.stderr.strip()[:300]}"
+        out = json.loads(r.stdout)
+        return (out.get("result") or "").strip() or "[skill returned empty]"
+    except subprocess.TimeoutExpired:
+        return f"[skill timed out after {timeout}s]"
+    except Exception as e:  # noqa: BLE001
+        return f"[skill error] {e}"
+
+
+async def _answer_skill(prompt: str, timeout: int = 300) -> str:
+    return await asyncio.to_thread(_run_skill, prompt, "sonnet", timeout)
+
+
+async def _send_chunks(interaction: discord.Interaction, text: str) -> None:
+    parts = list(_chunks(text))
+    await interaction.followup.send(parts[0])
+    for p in parts[1:]:
+        await interaction.followup.send(p)
+
+
 intents = discord.Intents.default()
 # Only request the privileged message-content intent if a channel listener is configured.
 if CHANNEL_ID:
@@ -57,6 +99,115 @@ async def aime_cmd(interaction: discord.Interaction, question: str):
     await interaction.followup.send(parts[0])
     for p in parts[1:]:
         await interaction.followup.send(p)
+
+
+# ─── TRADING SLASH COMMANDS (each shells to a Claude skill on the subscription) ──
+# Wave 1 — the daily-driver eight.
+@tree.command(name="ainvest", description="AInvest copilot read on a ticker or question")
+@app_commands.describe(query="ticker or question")
+async def ainvest_cmd(interaction: discord.Interaction, query: str):
+    await interaction.response.defer(thinking=True)
+    await _send_chunks(interaction, await _answer_skill(f"/ainvest {query}"))
+
+
+@tree.command(name="options", description="Options-desk verdict (optionally attach a chain/position screenshot)")
+@app_commands.describe(ticker="ticker or options question", screenshot="optional chain/position screenshot")
+async def options_cmd(interaction: discord.Interaction, ticker: str,
+                      screenshot: Optional[discord.Attachment] = None):
+    await interaction.response.defer(thinking=True)
+    prompt = f"/options-desk {ticker}"
+    if screenshot is not None:
+        path = os.path.join(tempfile.gettempdir(), f"opt_{interaction.id}_{screenshot.filename}")
+        await screenshot.save(path)
+        prompt = f"/options-desk {ticker} — read the attached screenshot at {path} for the chain/position."
+    await _send_chunks(interaction, await _answer_skill(prompt, timeout=420))
+
+
+@tree.command(name="ticker", description="2-minute vet of the name behind a signal")
+@app_commands.describe(symbol="ticker symbol")
+async def ticker_cmd(interaction: discord.Interaction, symbol: str):
+    await interaction.response.defer(thinking=True)
+    await _send_chunks(interaction, await _answer_skill(f"/ticker-research {symbol}"))
+
+
+@tree.command(name="regime", description="Market regime / macro lens (optional ticker)")
+@app_commands.describe(symbol="optional ticker for context")
+async def regime_cmd(interaction: discord.Interaction, symbol: Optional[str] = None):
+    await interaction.response.defer(thinking=True)
+    await _send_chunks(interaction, await _answer_skill(f"/market-context {symbol or ''}".strip()))
+
+
+@tree.command(name="news", description="Market / company news + catalysts")
+@app_commands.describe(query="ticker or topic")
+async def news_cmd(interaction: discord.Interaction, query: str):
+    await interaction.response.defer(thinking=True)
+    await _send_chunks(interaction, await _answer_skill(f"/news-search {query}"))
+
+
+@tree.command(name="trades", description="What fired today — flow alerts / auto-trader / top tickers")
+@app_commands.describe(query="optional filter (e.g. 'NVDA' or 'top tickers')")
+async def trades_cmd(interaction: discord.Interaction, query: Optional[str] = None):
+    await interaction.response.defer(thinking=True)
+    await _send_chunks(interaction, await _answer_skill(f"/mc-trades {query or 'what fired today'}"))
+
+
+@tree.command(name="decide", description="Combined SQL+RAG buy/sell/hold decision packet")
+@app_commands.describe(query="the trade question")
+async def decide_cmd(interaction: discord.Interaction, query: str):
+    await interaction.response.defer(thinking=True)
+    await _send_chunks(interaction, await _answer_skill(f"/mc-decide {query}", timeout=540))
+
+
+@tree.command(name="signals", description="Signal-source liveness sweep (is anything dead?)")
+async def signals_cmd(interaction: discord.Interaction):
+    await interaction.response.defer(thinking=True)
+    await _send_chunks(interaction, await _answer_skill("/signal-liveness"))
+
+
+# Wave 2 — heavier / scheduled skills, now also manually triggerable.
+@tree.command(name="desk-eod", description="End-of-day desk wrap (P&L + hit-rate across pipelines)")
+async def desk_eod_cmd(interaction: discord.Interaction):
+    await interaction.response.defer(thinking=True)
+    await _send_chunks(interaction, await _answer_skill("/desk-eod", timeout=540))
+
+
+@tree.command(name="morning", description="Morning note — overnight SPY/QQQ/BTC + Fed + headlines")
+async def morning_cmd(interaction: discord.Interaction):
+    await interaction.response.defer(thinking=True)
+    await _send_chunks(interaction, await _answer_skill("/morning-note", timeout=420))
+
+
+@tree.command(name="crypto", description="Crypto desk read on a coin")
+@app_commands.describe(coin="coin symbol (BTC, ETH, SOL...)")
+async def crypto_cmd(interaction: discord.Interaction, coin: str):
+    await interaction.response.defer(thinking=True)
+    await _send_chunks(interaction, await _answer_skill(f"/crypto-desk {coin}"))
+
+
+@tree.command(name="recall", description="Search the Mission Control knowledge base (docs/memory/bible)")
+@app_commands.describe(query="what to look up")
+async def recall_cmd(interaction: discord.Interaction, query: str):
+    await interaction.response.defer(thinking=True)
+    await _send_chunks(interaction, await _answer_skill(f"/mc-recall {query}", timeout=420))
+
+
+# ─── X / SOCIAL LANE (Tavily/WebSearch bridge until native Grok-on-subscription is wired) ──
+@tree.command(name="x", description="What's X/Twitter saying about a ticker (social sentiment)")
+@app_commands.describe(query="ticker or topic")
+async def x_cmd(interaction: discord.Interaction, query: str):
+    await interaction.response.defer(thinking=True)
+    prompt = (f"Search X.com / Twitter for the most important trader-relevant posts about {query} "
+              f"in the last 24h (use web search). Summarize the prevailing sentiment (bullish/"
+              f"bearish), any notable accounts/posts, and catalysts. Keep it tight.")
+    await _send_chunks(interaction, await _answer_skill(prompt, timeout=300))
+
+
+@tree.command(name="flowpicks", description="Rank today's biggest options flow by risk-adjusted setup quality")
+async def flowpicks_cmd(interaction: discord.Interaction):
+    await interaction.response.defer(thinking=True)
+    prompt = ("/ainvest rank the most significant options flow today by risk-adjusted setup "
+              "quality — top 5 with ticker, contract, why it stands out, and entry logic.")
+    await _send_chunks(interaction, await _answer_skill(prompt, timeout=420))
 
 
 @client.event

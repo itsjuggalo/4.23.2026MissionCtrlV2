@@ -162,11 +162,8 @@ def main():
                     arg = text.split(maxsplit=1)[1] if " " in text else ""
                     tg("sendMessage", chat_id=chat_id, text=run_brief(arg))
                     continue
-                if text.startswith("/"):
-                    tg("sendMessage", chat_id=chat_id,
-                       text="unknown command — /help for what I can do")
-                    continue
-
+                # Any other /command passes VERBATIM to `claude -p` → it runs as a
+                # Claude slash-skill (e.g. /life-engine, /gmail, /google-calendar).
                 print(f"[{chat_id}] Q: {text[:120]}", flush=True)
                 tg("sendChatAction", chat_id=chat_id, action="typing")
                 try:

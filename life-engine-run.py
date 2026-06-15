@@ -925,15 +925,45 @@ def _card_spec(brief_type, ctx):
         'footer': _CARD_FOOTER.get(slot, 'LifeClaw · your daily corner'),
     }
 
+def _avail_mb():
+    try:
+        for line in open('/proc/meminfo'):
+            if line.startswith('MemAvailable:'):
+                return int(line.split()[1]) // 1024
+    except Exception:
+        return None
+    return None
+
+def _maybe_bg(spec, style):
+    """Optional AI (ComfyUI) StarCraft background; None → procedural fallback.
+    Never raises, never blocks the brief. 'hybrid' only attempts when RAM is roomy."""
+    try:
+        avail = _avail_mb()
+        if style == 'hybrid' and avail is not None and avail < 11000:
+            return None  # too tight — fall back to procedural HUD
+        if LIFECLAW_DIR not in sys.path:
+            sys.path.insert(0, LIFECLAW_DIR)
+        import gen_bg
+        return gen_bg.generate(spec.get('day_seed', 0), spec.get('slot', 'morning'))
+    except Exception as e:
+        print(f'bg gen skipped: {e}', file=sys.stderr)
+        return None
+
 def make_card(brief_type, ctx, now):
     """Render the brief's PNG card. Returns path or None (never raises)."""
     try:
         if LIFECLAW_DIR not in sys.path:
             sys.path.insert(0, LIFECLAW_DIR)
         import render_card
+        spec = _card_spec(brief_type, ctx)
+        style = spec.get('card_style', 'procedural')
+        if style in ('ai', 'hybrid'):
+            bg = _maybe_bg(spec, style)
+            if bg:
+                spec['bg_image'] = bg
         out = os.path.join(LIFECLAW_DIR, 'cards',
                            f'{brief_type}-{now.strftime("%Y-%m-%d")}.png')
-        return render_card.render_card(_card_spec(brief_type, ctx), out)
+        return render_card.render_card(spec, out)
     except Exception as e:
         print(f'card build error: {e}', file=sys.stderr)
         return None
