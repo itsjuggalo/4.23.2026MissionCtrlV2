@@ -246,6 +246,48 @@ async def recall_cmd(interaction: discord.Interaction, query: str):
     await _send_chunks(interaction, await _answer_skill(f"/mc-recall {query}", timeout=420))
 
 
+@tree.command(name="summarize", description="TL;DR of recent activity in a channel (trader-relevant)")
+@app_commands.describe(channel="channel to summarize (default: here)",
+                       limit="how many recent messages (default 50, max 200)")
+async def summarize_cmd(interaction: discord.Interaction,
+                        channel: Optional[discord.TextChannel] = None,
+                        limit: Optional[int] = None):
+    await interaction.response.defer(thinking=True)
+    ch = channel or interaction.channel
+    chname = getattr(ch, "name", "channel")
+    n = max(10, min(limit or 50, 200))
+    try:
+        # REST history returns message content WITHOUT the privileged intent
+        msgs = [m async for m in ch.history(limit=n)]
+    except discord.Forbidden:
+        await interaction.followup.send(
+            f"⚠️ I can't read #{chname} — missing View Channel / Read Message History permission there.")
+        return
+    except Exception as e:  # noqa: BLE001
+        await interaction.followup.send(f"⚠️ Couldn't read #{chname}: {e}")
+        return
+    lines = []
+    for m in reversed(msgs):  # oldest → newest
+        content = (m.content or "").strip()
+        if not content and m.embeds:
+            e = m.embeds[0]
+            content = " ".join(x for x in (e.title, e.description) if x).strip()
+        if not content:
+            continue
+        author = getattr(m.author, "display_name", None) or m.author.name
+        lines.append(f"[{author}] {content}")
+    if not lines:
+        await interaction.followup.send(f"Nothing readable in #{chname} (last {n} messages).")
+        return
+    transcript = "\n".join(lines)[-6000:]
+    prompt = (f"Summarize this Discord trading channel (#{chname}) for a day trader. Tight TL;DR: "
+              f"the key signals/alerts, tickers + setups mentioned, notable decisions or errors, and "
+              f"the single most actionable takeaway. Bullet points, no fluff.\n\n"
+              f"--- transcript (oldest→newest) ---\n{transcript}")
+    summary = await _answer_skill(prompt, timeout=300)
+    await _send_chunks(interaction, f"📋 **SUMMARY — #{chname}** (last {len(lines)} msgs)\n\n{summary}")
+
+
 # ─── X / SOCIAL LANE (Tavily/WebSearch bridge until native Grok-on-subscription is wired) ──
 @tree.command(name="x", description="What's X/Twitter saying about a ticker (social sentiment)")
 @app_commands.describe(query="ticker or topic")
@@ -319,7 +361,8 @@ HELP_TEXT = (
     "**👁️ Watchlist** (feeds your scheduled intel)\n"
     "`/watch <t>` · `/unwatch <t>` · `/watchlist`\n\n"
     "**🐦 Intel & briefs**\n"
-    "`/x <ticker>` social sentiment · `/desk-eod` EOD wrap · `/morning` morning note · `/aime <q>`\n\n"
+    "`/x <ticker>` social sentiment · `/summarize [#chan]` channel TL;DR · `/desk-eod` EOD wrap · "
+    "`/morning` morning note · `/aime <q>`\n\n"
     "**🛰️ Runs automatically:** morning briefing + events (8:05/8:15) · opening read (9:35) · "
     "regime/news/flow/X-sentiment intraday · position-mgmt (11:30/2:00) · power hour (2:55) · "
     "portfolio snapshots (9:35/4:05) · risk/exit/shock alerts (every 20-30m)."

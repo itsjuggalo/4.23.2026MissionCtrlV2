@@ -158,6 +158,8 @@ def _verdict(p, heat=None):
         base = "⏳ WAIT — let the setup confirm"
     else:
         base = "🟡 SMALL"
+    if (p.get("qty") or 0) < 1:   # most binding: can't size even 1 within risk cap
+        return f"⏳ SKIP — 1 contract ({_money(p.get('per_contract'))}) exceeds your risk cap"
     if heat:
         hp = heat.get("heat_pct") or 0
         if heat.get("over_allocated") or hp >= 55:
@@ -170,10 +172,12 @@ def _verdict(p, heat=None):
 
 def _pick_line(p):
     typ = (p.get("type") or "").upper()
+    qty, pct = p.get("qty") or 0, p.get("pct_of_equity")
+    size = (f"buy {qty} = {pct}% of acct" if qty and pct is not None
+            else f"1 ct {_money(p.get('per_contract'))} — over your risk cap")
     return (f"*{p.get('ticker')} ${p.get('strike'):g} {typ}* · {_fmt_exp(p.get('expiry'))} "
             f"({p.get('days')}d)\n"
-            f"{_money(p.get('per_contract'))}/ct · buy {p.get('qty',1)} = "
-            f"{p.get('pct_of_equity')}% of acct · {p.get('confidence')}-conf · "
+            f"{_money(p.get('per_contract'))}/ct · {size} · {p.get('confidence')}-conf · "
             f"{p.get('sources')} src · {p.get('value')}")
 
 
@@ -188,6 +192,86 @@ def _acct_line(d):
     h = d.get("portfolio_heat") or {}
     return (f"acct: {_money(d.get('equity'))} · {h.get('heat_pct','?')}% heat · "
             f"{_money(h.get('cash'))} free")
+
+
+def _sweeps_raw():
+    """Normalized live option sweeps from the scraper feed (flow2_alerts_today.json)."""
+    d = _load_scraper("flow2_alerts_today.json")
+    vals = d.values() if isinstance(d, dict) else (d if isinstance(d, list) else [])
+    out = []
+    for v in vals:
+        a = v.get("alert") if isinstance(v, dict) and "alert" in v else v
+        if isinstance(a, dict) and a.get("Symbol"):
+            out.append(a)
+    return out
+
+
+def _sweep_tags(a):
+    tags = []
+    dte = a.get("DTE")
+    oi, vol = a.get("OI") or 0, a.get("Volume") or 0
+    if isinstance(dte, (int, float)) and dte <= 1:
+        tags.append("⚡0DTE")
+    if oi and vol / oi >= 2:
+        tags.append(f"📈vol {vol/oi:.0f}×OI")   # new positioning piling in
+    swp = a.get("SWEEPS") or 0
+    if swp >= 10:
+        tags.append(f"{swp}× sweep")
+    return tags
+
+
+def _sweep_line(a, with_tags=True):
+    t = (a.get("OptionType") or "")[:1]
+    bull = "🟢BULL" if a.get("isBullish") else "🔴BEAR"
+    line = (f"🔪 {a.get('Symbol')} ${a.get('Strike'):g}{t} {a.get('DTE')}d · "
+            f"{_human(a.get('totalFlowValue'))} · {bull} · OI {a.get('OI') or 0}/vol {a.get('Volume') or 0}")
+    if with_tags:
+        tg = _sweep_tags(a)
+        if tg:
+            line += "\n   " + " · ".join(tg)
+    return line
+
+
+def sweeps(top=5, min_prem=500_000):
+    """Live institutional sweeps right now — the whales' footprints. /sweeps."""
+    raw = [a for a in _sweeps_raw() if (a.get("totalFlowValue") or 0) >= min_prem]
+    raw.sort(key=lambda a: a.get("totalFlowValue") or 0, reverse=True)
+    if not raw:
+        return "no big sweeps in the feed right now."
+    lines = ["🔪 *LIVE SWEEPS* (big money positioning)"]
+    seen = set()
+    for a in raw:
+        k = a.get("OptionSymbol")
+        if k in seen:
+            continue
+        seen.add(k)
+        lines.append(_sweep_line(a))
+        if len(seen) >= top:
+            break
+    lines.append("_ride the flow · /greeks <TKR> for greeks · /explain_")
+    return "\n".join(lines)
+
+
+def odte(top=6):
+    """0DTE / short-DTE (≤2) sweeps — the fast-money game. /odte."""
+    raw = [a for a in _sweeps_raw()
+           if isinstance(a.get("DTE"), (int, float)) and a["DTE"] <= 2
+           and (a.get("totalFlowValue") or 0) >= 300_000]
+    raw.sort(key=lambda a: a.get("totalFlowValue") or 0, reverse=True)
+    if not raw:
+        return "no 0-2 DTE sweeps right now (none, or market closed)."
+    lines = ["⚡ *0DTE / SHORT-DTE FLOW*"]
+    seen = set()
+    for a in raw:
+        k = a.get("OptionSymbol")
+        if k in seen:
+            continue
+        seen.add(k)
+        lines.append(_sweep_line(a, with_tags=False))
+        if len(seen) >= top:
+            break
+    lines.append("_fast + risky — defined risk only, take profits quick_")
+    return "\n".join(lines)
 
 
 def _flow_directions():
@@ -224,6 +308,15 @@ def _confluence(p, flowdir):
     return f"⚠️ flow DISAGREES (flow is {str(fs).lower()}) — extra caution"
 
 
+def _iv_trap(p):
+    """Surface the binary IV-crush trap (earnings inside the contract's life) — the
+    quiet killer of option trades. Rich IV alone is already in the verdict."""
+    why = (p.get("action_why") or "").lower()
+    if "earnings" in why or "crush" in why:
+        return "⚠️ IV-TRAP — earnings before expiry (IV can crush the premium)"
+    return None
+
+
 def pick(top=1):
     """The single best (top=1) or top-N actionable picks. Verdict-first."""
     d = _load("best_contracts.json")
@@ -243,11 +336,13 @@ def pick(top=1):
         p = picks[0]
         conf = _confluence(p, flowdir)
         conf_line = f"{conf}\n" if conf else ""
+        trap = _iv_trap(p)
+        trap_line = f"{trap}\n" if trap else ""
         return (f"🎯 *TOP PICK* · {fresh}\n"
                 f"{_stale_warning(d.get('as_of'))}"
                 f"{_pick_line(p)}\n"
                 f"{_verdict(p, heat)}\n"
-                f"{conf_line}"
+                f"{conf_line}{trap_line}"
                 f"_why: {(p.get('action_why') or '')[:120]}_\n"
                 f"{_acct_line(d)}")
     lines = [f"🎯 *TOP {min(top,len(picks))} PICKS* · {fresh}"]
@@ -508,4 +603,5 @@ if __name__ == "__main__":
     print(pick(1) if cmd == "pick" else pick(3) if cmd == "picks"
           else grade() if cmd == "grade" else eod() if cmd == "eod"
           else greeks() if cmd == "greeks" else flow() if cmd == "flow"
-          else crypto() if cmd == "crypto" else explain() if cmd == "explain" else book())
+          else crypto() if cmd == "crypto" else explain() if cmd == "explain"
+          else sweeps() if cmd == "sweeps" else odte() if cmd == "odte" else book())

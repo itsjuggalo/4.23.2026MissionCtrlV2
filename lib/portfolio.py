@@ -15,8 +15,15 @@ from pathlib import Path
 SEC = Path.home() / ".openclaw" / "secrets"
 WATCHLIST_FILE = Path.home() / ".openclaw" / "data" / "watchlist.json"
 DEFAULTS = ["SPY", "QQQ", "NVDA"]
+CRYPTO_DEFAULTS = ["BTC", "ETH", "SOL"]
+STABLES = {"USD", "USDC", "USDT", "DAI", "USDD", "PYUSD", "GUSD"}
 _ACCTS = [("alpaca-boba-key-id", "alpaca-boba-secret"),
           ("alpaca-jazzy-key-id", "alpaca-jazzy-secret")]
+# ARIES (operator mode) is the proven read path for REAL-MONEY Robinhood + Coinbase
+# crypto holdings (~/.openclaw/secrets Ed25519/ES256 keys, IP-allowlisted). We read
+# it over localhost so we reuse the cached/de-duped adapters instead of re-signing.
+ARIES_BASE = os.environ.get("ARIES_BASE", "http://localhost:1337")
+_PRICE_CACHE: dict[str, float] = {}
 
 
 def get_watchlist() -> list[str]:
@@ -116,6 +123,87 @@ def personal_tickers() -> list[str]:
         if w not in syms:
             syms.append(w)
     return syms
+
+
+# ─── REAL-MONEY CRYPTO (Robinhood + Coinbase via ARIES operator mode) ──────────
+def _crypto_prices() -> dict[str, float]:
+    """USD spot for every crypto, one free Coinbase call (no key). Cached per-process."""
+    if _PRICE_CACHE:
+        return _PRICE_CACHE
+    try:
+        req = urllib.request.Request(
+            "https://api.coinbase.com/v2/exchange-rates?currency=USD",
+            headers={"User-Agent": "mc-portfolio/1.0"})
+        with urllib.request.urlopen(req, timeout=12) as r:
+            rates = json.loads(r.read())["data"]["rates"]
+        for sym, rate in rates.items():
+            try:
+                rate = float(rate)
+                if rate > 0:
+                    _PRICE_CACHE[sym.upper()] = 1.0 / rate
+            except (TypeError, ValueError):
+                continue
+    except Exception:
+        pass
+    return _PRICE_CACHE
+
+
+def _aries_broker(name: str) -> list[tuple[str, float]]:
+    """(asset, qty) holdings from a connected ARIES broker (real money). [] on any error."""
+    try:
+        req = urllib.request.Request(
+            f"{ARIES_BASE}/api/brokers/{name}",
+            headers={"x-operator": "1", "User-Agent": "mc-portfolio/1.0"})
+        with urllib.request.urlopen(req, timeout=20) as r:
+            d = json.loads(r.read())
+        if not d.get("connected"):
+            return []
+        out = []
+        for b in d.get("balances", []):
+            sym = str(b.get("asset", "")).upper().strip()
+            qty = float(b.get("total", 0) or 0)
+            if sym and qty > 0:
+                out.append((sym, qty))
+        return out
+    except Exception:
+        return []
+
+
+def real_money_holdings() -> dict[str, float]:
+    """{SYMBOL: usd_value} of LIVE Robinhood + Coinbase crypto, merged & priced.
+    Stablecoins and sub-$1 dust excluded. {} if ARIES/prices unreachable."""
+    prices = _crypto_prices()
+    if not prices:
+        return {}
+    val: dict[str, float] = defaultdict(float)
+    for broker in ("robinhood", "coinbase"):
+        for sym, qty in _aries_broker(broker):
+            if sym in STABLES:
+                continue
+            px = prices.get(sym)
+            if px:
+                val[sym] += qty * px
+    return {s: v for s, v in val.items() if v >= 1.0}
+
+
+def crypto_tickers(n: int = 6) -> list[str]:
+    """Real-money crypto names ranked by USD value, padded with BTC/ETH/SOL for context."""
+    held = real_money_holdings()
+    syms = [s for s, _ in sorted(held.items(), key=lambda x: -x[1])]
+    for d in CRYPTO_DEFAULTS:
+        if d not in syms:
+            syms.append(d)
+    return syms[:n] if syms else CRYPTO_DEFAULTS[:n]
+
+
+def crypto_tickers_str(n: int = 6) -> str:
+    return ", ".join(crypto_tickers(n))
+
+
+def personal_crypto() -> list[str]:
+    """Real-money crypto names (capital-ranked, NO defaults). For crypto 'your names' filters."""
+    held = real_money_holdings()
+    return [s for s, _ in sorted(held.items(), key=lambda x: -x[1])]
 
 
 def daily_journal_recap() -> str:
@@ -294,8 +382,19 @@ def portfolio_summary() -> str:
             a = "🟢" if pl >= 0 else "🔴"
             lines.append(f"   {p['symbol']:<6} ${mv:,.0f}  {a} {pl:+,.0f} ({plpc:+.1f}%)")
         blocks.append("\n".join(lines))
+    # real-money crypto (Robinhood + Coinbase) — capital-ranked, live-priced
+    crypto = real_money_holdings()
+    crypto_total = sum(crypto.values())
+    if crypto:
+        clines = [f"**REAL MONEY (crypto)** — ${crypto_total:,.0f}"]
+        for sym, v in sorted(crypto.items(), key=lambda x: -x[1])[:8]:
+            clines.append(f"   {sym:<6} ${v:,.0f}")
+        blocks.append("\n".join(clines))
     if not blocks:
         return "No portfolio data (Alpaca keys missing?)"
     ta = "🟢" if total_day >= 0 else "🔴"
-    header = f"💼 **PORTFOLIO** — total ${total_eq:,.0f}  {ta} day {total_day:+,.0f}"
+    grand = total_eq + crypto_total
+    header = f"💼 **PORTFOLIO** — total ${grand:,.0f}  {ta} day {total_day:+,.0f}"
+    if crypto_total:
+        header += f"\n   (paper ${total_eq:,.0f} + real-money crypto ${crypto_total:,.0f})"
     return header + "\n\n" + "\n\n".join(blocks)

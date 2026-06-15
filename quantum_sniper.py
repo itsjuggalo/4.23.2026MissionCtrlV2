@@ -79,6 +79,7 @@ def _load_state():
     s.setdefault("alerted", [])          # green-light occ's buzzed today
     s.setdefault("exits_alerted", [])    # "SYM:VERDICT" buzzed today
     s.setdefault("shock_alerted", False) # risk-off buzzed today
+    s.setdefault("sweeps_alerted", [])   # OptionSymbols buzzed today (capped)
     return s
 
 
@@ -168,6 +169,55 @@ def _exit_guard(dry, state):
     return True
 
 
+SWEEP_MIN_PREM = 3_000_000   # screamer-only push; /sweeps pull shows the rest
+SWEEP_MAX_DAY = 6            # hard daily cap (anti-bloat)
+SWEEP_FRESH_MIN = 25        # guardian runs ~every 20m
+
+
+def _sweep_age_min(a):
+    import datetime as _dt
+    t = a.get("Updated") or a.get("Time")
+    if not t:
+        return 1e9
+    try:
+        return (_dt.datetime.now(_dt.timezone.utc).timestamp() * 1000 - float(t)) / 60000
+    except Exception:
+        return 1e9
+
+
+def _sweep_alert(dry, state):
+    """Buzz ONE rare screamer sweep (≥$3M + new positioning + fresh), capped/day."""
+    if len(state.get("sweeps_alerted", [])) >= SWEEP_MAX_DAY and not dry:
+        if dry: print("sweeps: daily cap reached")
+        return False
+    raw = Q._sweeps_raw()
+    q = []
+    for a in raw:
+        if (a.get("totalFlowValue") or 0) < SWEEP_MIN_PREM:
+            continue
+        if not dry and _sweep_age_min(a) > SWEEP_FRESH_MIN:
+            continue
+        oi, vol, swp = a.get("OI") or 0, a.get("Volume") or 0, a.get("SWEEPS") or 0
+        new_pos = (oi and vol / oi >= 2) or swp >= 15  # brand-new positioning
+        if new_pos:
+            q.append(a)
+    q.sort(key=lambda a: a.get("totalFlowValue") or 0, reverse=True)
+    for a in q:
+        k = a.get("OptionSymbol")
+        if k in state["sweeps_alerted"] and not dry:
+            continue
+        msg = "🔪 *BIG SWEEP — whales positioning*\n" + Q._sweep_line(a)
+        if dry:
+            print("WOULD BUZZ (sweep):\n" + msg); return False
+        try:
+            _send(msg); state["sweeps_alerted"].append(k); return True
+        except Exception as e:
+            print(f"[sniper] sweep send failed: {e}", file=sys.stderr)
+        break
+    if dry: print("sweeps: none qualify (need ≥$3M + new positioning + fresh)")
+    return False
+
+
 def _green_light(dry, state):
     """The rare clean-BUY buzz (ACT + cheap/fair). One per run max."""
     d = Q._load("best_contracts.json")
@@ -213,6 +263,7 @@ def main():
     changed |= _shock_guard(dry, state)  # defense first
     changed |= _exit_guard(dry, state)   # then manage the book
     changed |= _green_light(dry, state)  # then new entries
+    changed |= _sweep_alert(dry, state)  # rare whale-sweep screamer
     if not dry and changed:
         _save_state(state)
 
