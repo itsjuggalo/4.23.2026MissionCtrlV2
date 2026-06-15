@@ -14,6 +14,7 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 import skill_to_discord as sd  # noqa: E402
 from lib.portfolio import real_money_holdings  # noqa: E402
+from lib.heartbeat import beat  # noqa: E402
 
 ET = ZoneInfo("America/New_York")
 
@@ -68,6 +69,7 @@ def main():
         lines.append(f"   {s:<6} ${v:,.0f}  {ic} {c:+.1f}%")
     lines.append("_Real-money RH + Coinbase. 24h = Coinbase rolling open→last._")
     sd.post(sd.resolve_channel("daily-crypto-pumps"), "\n".join(lines))
+    beat("crypto_eod")
     print(f"[crypto-eod] posted; book ${total_val:,.0f} pl ${total_pl:+,.0f}", flush=True)
 
 

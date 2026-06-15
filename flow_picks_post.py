@@ -24,6 +24,7 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 from skill_to_discord import post, resolve_channel  # noqa: E402  (resilient bot poster)
 from lib.portfolio import personal_tickers, personal_crypto  # noqa: E402
+from lib.heartbeat import beat  # noqa: E402
 
 ET = ZoneInfo("America/New_York")
 DATA = Path.home() / "trading" / "signals" / "option-scraper" / "data"
@@ -262,7 +263,7 @@ def build() -> str | None:
                "repeat institutional positioning" if voi < 1 else "building position")
         mny = f" · spot ${sp:,.2f} ({abs(otm)*100:.0f}% {'OTM' if otm >= 0 else 'ITM'})" if sp else ""
         is_call = str(a.get("OptionType", "")).upper().startswith("C")
-        sizing = _sizing_line(a, is_call)
+        sizing = _sizing_line(a, is_call, sp)
         line = f"**{idx}. {_fmt(a)}** ({dte} DTE) · ${fv:,.0f} · V/OI {voi:.1f} ({vol:,}/{oi:,}){mny}{tag}\n   *{why}*"
         return line + ("\n" + sizing if sizing else "")
 
@@ -301,6 +302,7 @@ def main():
         print(msg)
         return
     post(resolve_channel(a.channel), msg)
+    beat("flow_picks")
     print(f"[flow-picks] posted ({len(msg)} chars)", flush=True)
 
 

@@ -19,6 +19,7 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 import skill_to_discord as sd  # noqa: E402
 from lib.portfolio import real_money_holdings  # noqa: E402
+from lib.heartbeat import beat  # noqa: E402
 
 ET = ZoneInfo("America/New_York")
 STATE = Path.home() / ".openclaw" / "state" / "crypto_holdings_seen.json"
@@ -87,6 +88,7 @@ def main():
         print(f"[crypto-alert] {len(moves)} elevated, none fresh; no post", flush=True)
     # prune seen to current holdings to keep it tidy
     _save({k: v for k, v in seen.items() if k in held})
+    beat("crypto_holdings")
 
 
 if __name__ == "__main__":

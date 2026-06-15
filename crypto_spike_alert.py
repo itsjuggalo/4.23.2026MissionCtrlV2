@@ -19,6 +19,7 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 import skill_to_discord as sd  # noqa: E402
 from lib.portfolio import real_money_holdings  # noqa: E402
+from lib.heartbeat import beat  # noqa: E402
 
 ET = ZoneInfo("America/New_York")
 STATE = Path.home() / ".openclaw" / "state" / "crypto_spike_seen.json"
@@ -90,6 +91,7 @@ def main():
     else:
         print("[crypto-spike] no fresh spikes", flush=True)
     _save({k: v for k, v in last.items() if k in held})
+    beat("crypto_spike")
 
 
 if __name__ == "__main__":
