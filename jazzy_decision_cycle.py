@@ -1107,8 +1107,18 @@ def build_boba_prompt(account, positions, shortlist_with_kronos, remaining_budge
                 shortlist_text += f"  → Kronos CONFLICTS with option thesis ❌\n"
 
     firebase_signals_text = firebase_signals.format_for_prompt(firebase_signals.load_signals(), max_show=20)
-    firebase_notifications_text = firebase_signals.format_notifications_for_prompt(firebase_signals.load_notifications(), max_show=3)  # parser already consumed; transparency tail
-    firebase_flow_alerts_text = firebase_signals.format_flow_alerts_for_prompt(firebase_signals.load_flow_alerts(), max_show=15)
+    # The notifications + flow-alerts formatters were dropped when firebase_signals was
+    # slimmed in the 06-07 restructure (only format_for_prompt/load_signals remain). These
+    # calls were dead until the cycle was revived 06-16; guard so a missing helper degrades
+    # to "" (transparency tail only — live flow is already in the shortlist) instead of crashing.
+    try:
+        firebase_notifications_text = firebase_signals.format_notifications_for_prompt(firebase_signals.load_notifications(), max_show=3)
+    except AttributeError:
+        firebase_notifications_text = ""
+    try:
+        firebase_flow_alerts_text = firebase_signals.format_flow_alerts_for_prompt(firebase_signals.load_flow_alerts(), max_show=15)
+    except AttributeError:
+        firebase_flow_alerts_text = ""
     best_options_text = load_best_options(max_show=15, min_premium=1_000_000) or ""
     ticker_rollup_text = load_ticker_rollup(min_total=10_000_000, max_show=10) or ""
     platinum_flow_text = load_platinum_flow(max_show=5) or ""

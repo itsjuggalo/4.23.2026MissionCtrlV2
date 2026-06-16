@@ -180,12 +180,22 @@ def _secret(name):
     return (SECRETS / name).read_text().strip()
 
 
+def _fleet_token(fn):
+    """Resolve a bot token from the tg_fleet vault (telegram.<fn>) via its CLI."""
+    r = subprocess.run([sys.executable, str(Path.home() / "scripts/tg_fleet.py"), "token", fn],
+                       capture_output=True, text=True, timeout=15)
+    tok = (r.stdout or "").strip()
+    if not tok:
+        raise RuntimeError(f"no vault token for fleet fn '{fn}': {r.stderr.strip()[:120]}")
+    return tok
+
+
 def main():
     if len(sys.argv) < 2 or sys.argv[1] not in BOTS:
         print(f"usage: tg_responder.py <{'|'.join(BOTS)}>", flush=True)
         sys.exit(1)
     cfg   = BOTS[sys.argv[1]]
-    token = _secret(cfg["token"])
+    token = _fleet_token(cfg["fleet_fn"]) if cfg.get("fleet_fn") else _secret(cfg["token"])
     base  = f"https://api.telegram.org/bot{token}"
     # Owner set: the bot's own chat-id file + the universal one (private chat.id ==
     # Mike's Telegram user id, same across all his bots) — robust to file mismatch.
@@ -197,7 +207,7 @@ def main():
             pass
     sys_prompt = (cfg["persona"] +
                   " If you can't find or do something, say so briefly.")
-    tools = cfg["tools"]
+    tools = cfg.get("tools", "Bash,Read,Grep,Glob,WebFetch,WebSearch")
     name  = cfg["name"]
 
     def tg(method, req_timeout=10, **kw):
@@ -227,6 +237,23 @@ def main():
         except Exception as e:
             return f"[{name} error] {e}"
 
+    def ask_persona(question):
+        """Free-text brain. claude-CLI bots (providers=None) keep the claude path unchanged;
+        reserve bots route through their own LLM (Codex/Gemini/Grok/DeepSeek) via call_llm_text."""
+        providers = cfg.get("providers")
+        if not providers:
+            return ask_local(question)
+        prompt = (sys_prompt + "\n\nUser message: " + question +
+                  "\n\nReply now in plain text for Telegram (no markdown headers or tables), "
+                  "under 8 lines, Eastern Time.")
+        try:
+            sys.path.insert(0, "/home/itsju/05_AUTOMATION/scripts")
+            from lib import llm
+            out = llm.call_llm_text(prompt, providers)
+            return out or f"[{name}: all backends busy — try again shortly]"
+        except Exception as e:
+            return f"[{name} backend error] {e}"
+
     help_txt = (f"🤖 {name} — text me like you text Claude Code.\n"
                 f"📈 /pick — the #1 contract to buy now (verified + sized)\n"
                 f"📈 /picks · /flow · 🔪 /sweeps — live whale flow · ⚡ /odte\n"
@@ -237,7 +264,7 @@ def main():
                 f"📖 /explain — what Greeks/IV/volume mean (plain English)\n"
                 f"Or ask anything / run any /skill. /help = this.")
 
-    print(f"{name} responder started ({cfg['token']})", flush=True)
+    print(f"{name} responder started ({cfg.get('token') or cfg.get('fleet_fn')})", flush=True)
     tg("deleteWebhook")
     offset = 0
     boot = tg("getUpdates", req_timeout=15, timeout=0)
@@ -352,7 +379,7 @@ def main():
                     except Exception as e:
                         print(f"[{name}] default_x err {e}", flush=True)
                     if not out:
-                        out = ask_local(text)
+                        out = ask_persona(text)
                     send_reply(chat_id, f"𝕏 *{text.strip().upper()}*\n{out}")
                     print(f"[{name}] x:{text[:40]}", flush=True)
                     continue
@@ -362,7 +389,7 @@ def main():
                 print(f"[{name}] Q: {text[:120]}", flush=True)
                 tg("sendChatAction", chat_id=chat_id, action="typing")
                 try:
-                    a = ask_local(text); send_reply(chat_id, a)
+                    a = ask_persona(text); send_reply(chat_id, a)
                     print(f"[{name}] A: {len(a)} chars", flush=True)
                 except Exception as e:
                     tg("sendMessage", chat_id=chat_id, text=f"⚠️ {name} error: {e}")

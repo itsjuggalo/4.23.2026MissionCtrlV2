@@ -271,9 +271,36 @@ def _market_open(kid, ksec) -> bool:
         return False
 
 
+def _poll_fill(order_id, kid, ksec, tries=20, delay=0.5):
+    """Poll an Alpaca order toward a terminal state. Returns (status, filled_qty,
+    filled_avg_price). Same shape as the boba/jazzy decision-cycle fill loop."""
+    import time
+    import urllib.request
+    status, fqty, favg = "accepted", 0, 0.0
+    for _ in range(tries):
+        time.sleep(delay)
+        try:
+            req = urllib.request.Request(
+                f"https://paper-api.alpaca.markets/v2/orders/{order_id}",
+                headers={"APCA-API-KEY-ID": kid, "APCA-API-SECRET-KEY": ksec})
+            with urllib.request.urlopen(req, timeout=5) as r:
+                o = json.loads(r.read())
+            status = o.get("status", status)
+            fqty = int(float(o.get("filled_qty") or 0))
+            favg = float(o.get("filled_avg_price") or 0)
+            if status in ("filled", "canceled", "rejected", "expired"):
+                break
+        except Exception:  # noqa: BLE001  — transient poll error, keep trying
+            pass
+    return status, fqty, favg
+
+
 def _submit_paper_buy(acct, ticker, shares):
     """ARMED paper-order submit — Alpaca PAPER only. Reached ONLY when
-    _ARM_PAPER_BUY is True (Mike's explicit go)."""
+    _ARM_PAPER_BUY is True (Mike's explicit go) AND the user taps ✅ Confirm.
+    Idempotent: client_order_id is keyed to a 5-min bucket so a duplicate within
+    that window is 422-rejected by Alpaca (the server-side double-tap backstop).
+    Polls for the fill so the user sees a real FILLED price, not just 'submitted'."""
     if shares < 1:
         return "↳ nothing submitted (size < 1 share)."
     if _killswitch_on(acct):
@@ -284,21 +311,46 @@ def _submit_paper_buy(acct, ticker, shares):
     if not _market_open(kid, ksec):
         return ("🕒 Market is CLOSED — a market order would queue and fill at the next open. "
                 "NOT submitted. Use 🔔 Set Alert, or tap Paper Buy during market hours.")
+    import urllib.error
+    import urllib.request
+    bucket = int(datetime.now(timezone.utc).timestamp()) // 300   # 5-min idempotency window
+    coid = f"pb-{acct}-{ticker}-{shares}-{bucket}"
+    body = json.dumps({"symbol": ticker, "qty": str(shares), "side": "buy",
+                       "type": "market", "time_in_force": "day",
+                       "client_order_id": coid}).encode()
+    req = urllib.request.Request("https://paper-api.alpaca.markets/v2/orders", data=body,
+        headers={"APCA-API-KEY-ID": kid, "APCA-API-SECRET-KEY": ksec,
+                 "Content-Type": "application/json"})
     try:
-        import urllib.request
-        body = json.dumps({"symbol": ticker, "qty": str(shares), "side": "buy",
-                           "type": "market", "time_in_force": "day"}).encode()
-        req = urllib.request.Request("https://paper-api.alpaca.markets/v2/orders", data=body,
-            headers={"APCA-API-KEY-ID": kid, "APCA-API-SECRET-KEY": ksec,
-                     "Content-Type": "application/json"})
         with urllib.request.urlopen(req, timeout=15) as r:
             o = json.loads(r.read())
-        return f"✅ submitted PAPER order {str(o.get('id',''))[:8]} — BUY {shares} {ticker} ({acct})"
+    except urllib.error.HTTPError as e:
+        if e.code == 422:
+            return (f"⚠️ **{ticker} ({acct})** was already submitted in the last 5 min — "
+                    "not sent again. Check your Alpaca orders/positions.")
+        try:
+            detail = e.read().decode()[:200]
+        except Exception:  # noqa: BLE001
+            detail = str(e)
+        return f"↳ submit rejected ({e.code}): {detail}"
     except Exception as e:  # noqa: BLE001
         return f"↳ submit error: {e}"
+    oid = str(o.get("id", ""))
+    status, fqty, favg = _poll_fill(oid, kid, ksec)
+    if status == "filled" and favg:
+        return f"✅ **FILLED** — BUY {fqty} {ticker} @ ${favg:,.2f} ({acct}) · order {oid[:8]}"
+    if status in ("rejected", "canceled", "expired"):
+        return f"⚠️ order {oid[:8]} {status} ({ticker} · {acct}) — nothing is held."
+    return (f"✅ Submitted PAPER order {oid[:8]} — BUY {shares} {ticker} ({acct})\n"
+            f"⏳ not filled within 10s ({status}); it should fill on the next tick — "
+            "📊 Grade or #main-portfolios will confirm.")
 
 
-def _paper_buy_preview(ticker, account, deploy_str, user) -> str:
+def _paper_buy_preview(ticker, account, deploy_str, user):
+    """PREVIEW ONLY — sizes the trade against the caps, logs the intent, and returns
+    (preview_text, params). params is None when there's nothing to confirm (sub-1-share,
+    no live price, or disarmed); otherwise it's the dict ConfirmBuyView needs to place
+    the order. The order is NEVER submitted here — only on an explicit ✅ Confirm tap."""
     t = ticker.upper().strip()
     acct = "jazzy" if str(account).lower().startswith("j") else "boba"
     try:
@@ -308,7 +360,7 @@ def _paper_buy_preview(ticker, account, deploy_str, user) -> str:
     price = _last_price(t)
     eq = total_equity()
     if not price:
-        return f"⚠️ Couldn't fetch a live price for {t}; preview aborted."
+        return f"⚠️ Couldn't fetch a live price for {t}; preview aborted.", None
     cap = 800.0                                   # Mike's hard $800/trade cap
     if eq:
         cap = min(cap, 0.5 * eq)                  # never >50% of equity in one paper name
@@ -322,18 +374,18 @@ def _paper_buy_preview(ticker, account, deploy_str, user) -> str:
              + (f"  _(capped from ${want:,.0f})_" if capped else "")]
     if shares < 1:
         lines.append(f"➡️ ${deploy:,.0f} buys <1 share at ${price:,.2f} — raise the amount or pick a cheaper name.")
-    else:
-        lines.append(f"➡️ would submit **BUY {shares} {t}** (~${cost:,.0f}"
-                     + (f", {cost/eq*100:.0f}% of equity" if eq else "") + ")")
-        if eq and cost > eq * 0.5:
-            lines.append("⚠️ >50% of equity in one name — concentration risk.")
+        _log_paper_intent(t, acct, shares, price, cost, user)
+        return "\n".join(lines), None
+    lines.append(f"➡️ will submit **BUY {shares} {t}** (~${cost:,.0f}"
+                 + (f", {cost/eq*100:.0f}% of equity" if eq else "") + ")")
+    if eq and cost > eq * 0.5:
+        lines.append("⚠️ >50% of equity in one name — concentration risk.")
     _log_paper_intent(t, acct, shares, price, cost, user)
-    if _ARM_PAPER_BUY and shares >= 1:
-        lines.append(_submit_paper_buy(acct, t, shares))
-    else:
-        lines.append("🔒 **PREVIEW ONLY — paper-buy submit is NOT armed.** Logged as an intent. "
-                     "Mike arms it before any order is placed.")
-    return "\n".join(lines)
+    if not _ARM_PAPER_BUY:
+        lines.append("🔒 **Paper-buy submit is NOT armed** — logged as an intent only, no order placed.")
+        return "\n".join(lines), None
+    lines.append("\n**Tap ✅ Confirm to place this PAPER order — or ✖ Cancel.**")
+    return "\n".join(lines), {"acct": acct, "ticker": t, "shares": shares, "price": price}
 
 
 class BuyModal(discord.ui.Modal):
@@ -349,9 +401,16 @@ class BuyModal(discord.ui.Modal):
 
     async def on_submit(self, interaction: discord.Interaction):
         await interaction.response.defer(thinking=True, ephemeral=True)
-        msg = await asyncio.to_thread(_paper_buy_preview, self.ticker, str(self.account),
-                                      str(self.deploy), interaction.user.display_name)
-        await interaction.followup.send(msg, ephemeral=True)
+        text, params = await asyncio.to_thread(_paper_buy_preview, self.ticker, str(self.account),
+                                               str(self.deploy), interaction.user.display_name)
+        if not params:
+            await interaction.followup.send(text, ephemeral=True)
+            return
+        bucket = int(datetime.now(timezone.utc).timestamp()) // 300
+        token = (f"cb:{params['acct']}|{params['ticker']}|{params['shares']}"
+                 f"|{params['price']:.2f}|{bucket}")
+        # ephemeral preview + Confirm/Cancel; order params ride in the content token
+        await interaction.followup.send(f"{text}\n`{token}`", view=ConfirmBuyView(), ephemeral=True)
 
 
 class AlertModal(discord.ui.Modal):
@@ -465,6 +524,50 @@ class PayoffView(discord.ui.View):
     @discord.ui.button(label="Flip C/P", emoji="🔁", style=discord.ButtonStyle.primary, custom_id=PAY_FLIP)
     async def b_flip(self, interaction: discord.Interaction, button: discord.ui.Button):
         await self._adjust(interaction, flip=True)
+
+
+CB_CONFIRM, CB_CANCEL = "cb:confirm", "cb:cancel"
+
+
+def _parse_buy_token(text):
+    """Read the order params off a Paper Buy preview's `cb:acct|TICKER|shares|price|bucket` token."""
+    m = re.search(r"cb:(boba|jazzy)\|([A-Z.]{1,6})\|(\d+)\|([\d.]+)\|(\d+)", text or "")
+    if not m:
+        return None
+    return {"acct": m.group(1), "ticker": m.group(2), "shares": int(m.group(3)),
+            "price": float(m.group(4)), "bucket": int(m.group(5))}
+
+
+class ConfirmBuyView(discord.ui.View):
+    """Two-step paper-buy gate: the order is placed ONLY when ✅ Confirm is tapped,
+    and both buttons disable on the first tap so a second click is a no-op. The 5-min
+    client_order_id in _submit_paper_buy is the server-side duplicate backstop."""
+    def __init__(self):
+        super().__init__(timeout=None)
+
+    async def _disable(self, interaction, note):
+        for c in self.children:
+            c.disabled = True
+        try:
+            await interaction.response.edit_message(content=note, view=self)
+        except Exception:  # noqa: BLE001  — already edited / expired; non-fatal
+            pass
+
+    @discord.ui.button(label="Confirm", emoji="✅",
+                       style=discord.ButtonStyle.success, custom_id=CB_CONFIRM)
+    async def b_confirm(self, interaction: discord.Interaction, button: discord.ui.Button):
+        p = _parse_buy_token(interaction.message.content if interaction.message else "")
+        if not p:
+            await self._disable(interaction, "↳ couldn't read the order — tap 🧾 Paper Buy again.")
+            return
+        await self._disable(interaction, f"⏳ Placing **BUY {p['shares']} {p['ticker']}** ({p['acct']})…")
+        res = await asyncio.to_thread(_submit_paper_buy, p["acct"], p["ticker"], p["shares"])
+        await interaction.followup.send(res, ephemeral=True)
+
+    @discord.ui.button(label="Cancel", emoji="✖",
+                       style=discord.ButtonStyle.secondary, custom_id=CB_CANCEL)
+    async def b_cancel(self, interaction: discord.Interaction, button: discord.ui.Button):
+        await self._disable(interaction, "✖ Cancelled — no order placed.")
 
 
 class ActionView(discord.ui.View):
@@ -1041,6 +1144,7 @@ async def on_ready():
         client.add_view(PickView())     # persistent — buttons survive restarts
         client.add_view(ActionView())   # Paper Buy / Set Alert / Explain / Grade / Mute / Payoff
         client.add_view(PayoffView())   # interactive payoff (−/+ contracts, flip C/P)
+        client.add_view(ConfirmBuyView())  # two-step paper-buy ✅ Confirm / ✖ Cancel
         _VIEWS_ADDED = True
         if not presence_loop.is_running():
             presence_loop.start()
