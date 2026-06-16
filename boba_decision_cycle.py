@@ -234,7 +234,79 @@ def save_seen(seen):
     SEEN_FILE.write_text(json.dumps(list(seen)))
 
 
+_FLOW_STREAMS = [
+    Path("/AIWorkWSL/trading/signals/option-scraper/data/flow_alerts_today.json"),
+    Path("/AIWorkWSL/trading/signals/option-scraper/data/flow2_alerts_today.json"),
+]
+
+
+def _live_flow_signals():
+    """Transform the LIVE merged option-flow stream into the scored-signal schema the
+    cycle expects. Repointed 2026-06-16 (Mike's go) off the dead scored_signals_recent.json
+    (frozen May 18 — the signal-receiver didn't survive the 06-07 restructure, so the cycle
+    saw 'No fresh signals' every run). Returns [] on any failure → load_sidecar falls back
+    to the legacy file. Read-only; never touches the flow stream."""
+    out, best = [], {}
+    for fp in _FLOW_STREAMS:
+        if not fp.exists():
+            continue
+        try:
+            data = json.loads(fp.read_text())
+        except Exception:
+            continue
+        for rec in (data.values() if isinstance(data, dict) else data):
+            a = rec.get("alert", rec) if isinstance(rec, dict) else {}
+            sym = a.get("Symbol")
+            fv = float(a.get("totalFlowValue") or 0)
+            if not sym or fv <= 0:
+                continue
+            occ = a.get("OptionSymbol") or f"{sym}|{a.get('Strike')}|{a.get('OptionType')}|{a.get('Expiry')}"
+            if occ in best and fv <= best[occ]:
+                continue
+            best[occ] = fv
+            tms = a.get("Updated") or a.get("Time") or 0
+            try:
+                ts = (datetime.fromtimestamp(tms / 1000.0, timezone.utc).isoformat()
+                      if tms else datetime.now(timezone.utc).isoformat())
+            except Exception:
+                ts = datetime.now(timezone.utc).isoformat()
+            try:
+                expiry = (datetime.fromtimestamp(float(a.get("Expiry") or 0), timezone.utc).strftime("%Y-%m-%d")
+                          if a.get("Expiry") else "")
+            except Exception:
+                expiry = ""
+            sweeps = int(a.get("SWEEPS") or 0)
+            blocks = int(a.get("BLOCKS") or 0)
+            vol = float(a.get("Volume") or 0)
+            oi = float(a.get("OI") or 0)
+            sig = {
+                "ticker": sym,
+                "option_type": (a.get("OptionType") or "").upper(),
+                "strike": a.get("Strike"),
+                "expiry": expiry,
+                "timestamp": ts,
+                "flow_value": fv,
+                "flow_value_raw": fv,
+                "score": fv * (1.0 + 0.05 * sweeps + 0.10 * blocks),
+                "sweeps": sweeps,
+                "blocks": blocks,
+                "vol_oi_ratio": round(vol / oi, 2) if oi else None,
+                "spot": a.get("Spot"),
+                "dte": a.get("DTE"),
+                "current_price": a.get("AlertPrice"),
+                "contract": occ,
+                "tier": "T1" if fv >= 1_000_000 else "T2",
+                "is_bullish": bool(a.get("isBullish")),
+            }
+            out.append(sig)
+    return out
+
+
 def load_sidecar():
+    # LIVE flow first; the legacy scored_signals_recent.json is a stale fallback only.
+    live = _live_flow_signals()
+    if live:
+        return live
     if not SIDECAR.exists():
         return []
     try:
