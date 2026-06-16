@@ -19,8 +19,10 @@ import skill_to_discord as sd  # noqa: E402
 from lib.portfolio import real_money_holdings, equity_day_pnl  # noqa: E402
 from lib.heartbeat import beat  # noqa: E402
 from lib.notify import tg_brief  # noqa: E402
+from lib.discord_threading import make_pick_key, post_to_pick_thread_bot  # noqa: E402
 
 ET = ZoneInfo("America/New_York")
+SYNTH_TOKEN_FILE = Path.home() / ".openclaw" / "secrets" / "discord_synthcontrol_token"
 STATE = Path.home() / ".openclaw" / "state"
 JOURNAL = Path.home() / ".openclaw" / "data" / "trade_journal.jsonl"
 
@@ -88,6 +90,30 @@ def _grade_picks():
     return out
 
 
+def _post_grade_threads(graded) -> None:
+    """Post each pick's EOD grade into its per-pick thread (same key flow_picks_post
+    opened on entry), so entry → grade live together. Token-only, never raises."""
+    if not graded:
+        return
+    try:
+        tok = SYNTH_TOKEN_FILE.read_text().strip()
+        parent = sd.resolve_channel("flow-picks")
+        for r, g in graded:
+            key = make_pick_key(r.get("symbol"), r.get("strike"),
+                                str(r.get("type", ""))[:1], r.get("exp"))
+            label = f"{r['symbol']} ${r['strike']:g}{r['type']}"
+            if not g:
+                msg = f"🏁 **EOD GRADE — {label}** — no data."
+            else:
+                move, fav, entry, now = g
+                ic = "✅" if fav > 0.3 else ("❌" if fav < -0.3 else "➖")
+                msg = (f"🏁 **EOD GRADE — {label}**\nUnderlying {entry:.2f}→{now:.2f} "
+                       f"(**{move:+.1f}%**) · {ic} {fav:+.1f}% in the pick's direction")
+            post_to_pick_thread_bot(key, msg, label, tok, parent)
+    except Exception as e:  # noqa: BLE001
+        print(f"[eod-scorecard] grade-thread err: {e}", flush=True)
+
+
 def main():
     eq_val, eq_pl = equity_day_pnl()
     cr_val, cr_pl = _crypto_pnl()
@@ -135,6 +161,7 @@ def main():
         print(msg)
         return
     sd.post(sd.resolve_channel("flow-picks"), msg)
+    _post_grade_threads(graded)      # land each grade in its per-pick thread (closes the loop)
     beat("eod_scorecard")
     used = tg_brief(msg)
     print(f"[eod-scorecard] posted; book ${total_val:,.0f} day ${total_pl:+,.0f} picks={len(graded)} · tg→{used or 'skip'}", flush=True)

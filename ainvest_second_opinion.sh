@@ -67,7 +67,9 @@ TEXT="$(printf '%s' "$RESULT_JSON" | python3 -c 'import json,sys; print((json.lo
 echo "$TEXT"
 
 if [[ "$PUSH_TG" == 1 ]]; then
-  TOKEN="$(cat "$SECRETS/telegram_antigravity_bot_token" 2>/dev/null)"
+  # vault-first token (single source of truth); falls back to the flat secret file
+  TOKEN="$(/home/itsju/.venv/bin/python /home/itsju/scripts/tg_fleet.py token aime_research 2>/dev/null)"
+  TOKEN="${TOKEN:-$(cat "$SECRETS/telegram_antigravity_bot_token" 2>/dev/null)}"
   CHAT="$(cat "$SECRETS/telegram-chat-id.txt" 2>/dev/null)"
   if [[ -n "$TOKEN" && -n "$CHAT" ]]; then
     MSG="🧭 *2nd opinion — $LABEL* ($(TZ='America/New_York' date '+%-I:%M %p ET'))"$'\n\n'"$TEXT"

@@ -60,6 +60,16 @@ def resolve_chat() -> int:
 
 
 def ping(text: str) -> int:
+    # vault-backed fleet route (system_health = @Pingpong727_Bot); inline below = fallback
+    try:
+        sys.path.insert(0, "/home/itsju/scripts")
+        from lib.notify import tg_push
+        if tg_push(text, "system_health", loud=True, html=False,
+                   fallback_token_file="telegram-ping-bot-token"):
+            print("ping delivered")
+            return 0
+    except Exception as e:
+        print(f"[ping] fleet route failed: {e}", file=sys.stderr)
     token, chat = _read(TOKEN_FILE), _read(CHAT_FILE)
     if not (token and chat):
         print("PING NOT DELIVERED — ping bot not configured (token/chat_id missing). "

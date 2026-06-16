@@ -144,6 +144,38 @@ def post_to_pick_thread(pick_key, message, thread_name, webhook_url,
     return {"ok": ok, "thread_id": thread_id, "created": created, "error": err}
 
 
+def post_to_pick_thread_bot(pick_key, message, thread_name, token, parent_channel_id):
+    """Token-only variant of post_to_pick_thread — no webhook needed. Creates the
+    per-pick thread on first call (cached by pick_key), then posts the message into
+    it via the bot token (threads are channels). Lets a gateway-app token (e.g.
+    SynthControl) own the whole entry→exit→grade thread. Returns
+    {ok, thread_id, created, error}. Never raises."""
+    if not pick_key or not message:
+        return {"ok": False, "thread_id": None, "created": False, "error": "missing pick_key/message"}
+    if not token or not parent_channel_id:
+        return {"ok": False, "thread_id": None, "created": False, "error": "missing token/parent"}
+    try:
+        from lib import ops_card as oc
+    except ImportError:
+        import os, sys as _sys
+        _sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+        from lib import ops_card as oc
+    state = _load_state()
+    entry = state.get(pick_key)
+    thread_id = entry.get("thread_id") if isinstance(entry, dict) else None
+    created = False
+    if not thread_id:
+        thread_id = _create_thread(token, parent_channel_id, thread_name)
+        if not thread_id:
+            return {"ok": False, "thread_id": None, "created": False, "error": "thread create failed"}
+        state[pick_key] = {"thread_id": thread_id, "created_at": time.time()}
+        _save_state(state)
+        created = True
+    ok = oc.post_message_bot(thread_id, token, content=message)
+    return {"ok": bool(ok), "thread_id": thread_id, "created": created,
+            "error": None if ok else "post failed"}
+
+
 def make_pick_key(ticker, strike, option_type, expiry):
     """Stable key for a pick. Used by all callers to look up the thread."""
     t = str(ticker or "").upper()

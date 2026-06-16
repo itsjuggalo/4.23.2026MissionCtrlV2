@@ -14,6 +14,7 @@ bot has exactly ONE function. This module:
   tg_fleet.py status
   tg_fleet.py harvest [--write]
   tg_fleet.py send <function> "<message>"
+  tg_fleet.py token <function>            # print the vault-first resolved token (for senders)
   tg_fleet.py set <function> <TOKEN>      # fold in a cloud-only bot (Gamma/CHANGE NOW/BobaClaw)
 """
 import json
@@ -234,6 +235,12 @@ if __name__ == "__main__":
         harvest(write="--write" in a)
     elif cmd == "set" and len(a) >= 3:
         set_token(a[1], a[2])
+    elif cmd == "token" and len(a) >= 2:
+        # print the vault-first resolved token for a function (for senders to centralize on)
+        t = token(a[1])
+        if t:
+            print(t)
+        sys.exit(0 if t else 1)
     elif cmd == "send" and len(a) >= 3:
         sys.exit(send(a[1], " ".join(a[2:])))
     elif cmd == "sendfile" and len(a) >= 3:

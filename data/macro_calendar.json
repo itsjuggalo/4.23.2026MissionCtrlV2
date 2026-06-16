@@ -1,0 +1,18 @@
+{
+  "_note": "Hardcoded macro/OPEX calendar for the Discord scheduled-events task. OPEX/quad-witching are deterministic (3rd Friday). FOMC decision dates are the Fed's published 2-day-meeting second day; confidence 'high'=imminent/widely-known, 'med'=best-known, refresh from federalreserve.gov when stale. CPI omitted on purpose (exact release dates drift) — add with confidence when confirmed. Times are ET. Refreshed 2026-06-15.",
+  "tz": "America/New_York",
+  "events": [
+    {"date": "2026-06-17", "time": "14:00", "title": "FOMC Rate Decision", "kind": "fomc", "confidence": "high", "note": "Statement + Powell presser; biggest scheduled vol event"},
+    {"date": "2026-06-19", "time": "16:00", "title": "Quad Witching (June OPEX)", "kind": "opex", "confidence": "high", "note": "Quarterly triple/quad witching — options + futures expiry"},
+    {"date": "2026-07-17", "time": "16:00", "title": "Monthly OPEX (July)", "kind": "opex", "confidence": "high"},
+    {"date": "2026-07-29", "time": "14:00", "title": "FOMC Rate Decision", "kind": "fomc", "confidence": "med"},
+    {"date": "2026-08-21", "time": "16:00", "title": "Monthly OPEX (August)", "kind": "opex", "confidence": "high"},
+    {"date": "2026-09-16", "time": "14:00", "title": "FOMC Rate Decision", "kind": "fomc", "confidence": "med"},
+    {"date": "2026-09-18", "time": "16:00", "title": "Quad Witching (September OPEX)", "kind": "opex", "confidence": "high"},
+    {"date": "2026-10-16", "time": "16:00", "title": "Monthly OPEX (October)", "kind": "opex", "confidence": "high"},
+    {"date": "2026-10-28", "time": "14:00", "title": "FOMC Rate Decision", "kind": "fomc", "confidence": "med"},
+    {"date": "2026-11-20", "time": "16:00", "title": "Monthly OPEX (November)", "kind": "opex", "confidence": "high"},
+    {"date": "2026-12-16", "time": "14:00", "title": "FOMC Rate Decision", "kind": "fomc", "confidence": "med"},
+    {"date": "2026-12-18", "time": "16:00", "title": "Quad Witching (December OPEX)", "kind": "opex", "confidence": "high"}
+  ]
+}

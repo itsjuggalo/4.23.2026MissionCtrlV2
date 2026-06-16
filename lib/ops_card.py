@@ -388,15 +388,27 @@ def resolve_webhook(name_or_url: str):
 _UA = 'MissionControl-OpsCard/1.0 (+https://missionctrl.serveftp.com)'
 
 
-def _send(url, data, headers, retries, attempt_sleep=1.5):
-    """POST with Discord 429 backoff. Returns True on 2xx."""
+def _send(url, data, headers, retries, attempt_sleep=1.5, method='POST', return_json=False):
+    """HTTP call with Discord 429 backoff. Returns True on 2xx (default), or the
+    parsed JSON response dict when return_json=True (None on failure). `method`
+    lets callers PATCH/PUT/GET (edit / pin / lookup) — defaults to POST so every
+    existing caller is unaffected."""
     import urllib.error
     import urllib.request
+    fail = None if return_json else False
     for attempt in range(retries):
         try:
-            req = urllib.request.Request(url, data=data, headers=headers)
+            req = urllib.request.Request(url, data=data, headers=headers, method=method)
             with urllib.request.urlopen(req, timeout=45) as r:
-                return 200 <= r.status < 300
+                ok = 200 <= r.status < 300
+                if not return_json:
+                    return ok
+                if not ok:
+                    return None
+                try:
+                    return json.loads(r.read().decode() or '{}')
+                except Exception:
+                    return {}
         except urllib.error.HTTPError as e:
             if e.code == 429:
                 wait = 1.0
@@ -407,12 +419,12 @@ def _send(url, data, headers, retries, attempt_sleep=1.5):
                     pass
                 time.sleep(min(8.0, wait + 0.25))
                 continue
-            print(f'ops_card _send HTTP {e.code}', file=sys.stderr)
-            return False
+            print(f'ops_card _send HTTP {e.code} ({method})', file=sys.stderr)
+            return fail
         except Exception as e:
             print(f'ops_card _send error: {e}', file=sys.stderr)
             time.sleep(attempt_sleep * (attempt + 1))
-    return False
+    return fail
 
 
 def post_text(webhook_url: str, content: str, retries: int = 4, username: str = None):
@@ -519,17 +531,147 @@ def post_text_bot(channel_id: str, token: str, content: str, retries: int = 4):
     return _send(_bot_channel_url(channel_id), data, headers, retries)
 
 
-def post_image_bot(channel_id: str, token: str, png_path: str, content: str = None, retries: int = 4):
-    """Upload a PNG AS a bot (channels/{id}/messages multipart). Returns True/False."""
+def post_image_bot(channel_id: str, token: str, png_path: str, content: str = None,
+                   retries: int = 4, components=None, return_msg: bool = False):
+    """Upload a PNG AS a bot (channels/{id}/messages multipart). Optional `components`
+    attaches an action row (buttons) — the message is then owned by this app, so the
+    gateway bot's persistent Views handle the clicks by custom_id. Returns True/False,
+    or the posted message dict (with 'id') when return_msg=True."""
     if not channel_id or not token or not png_path or not os.path.isfile(png_path):
-        return False
+        return None if return_msg else False
     try:
-        boundary, body = _multipart_image(png_path, content)
+        extra = {'components': components} if components is not None else None
+        boundary, body = _multipart_image(png_path, content, extra)
     except Exception:
-        return False
+        return None if return_msg else False
     headers = {'Authorization': f'Bot {token}',
                'Content-Type': f'multipart/form-data; boundary={boundary}', 'User-Agent': _UA}
-    return _send(_bot_channel_url(channel_id), body, headers, retries)
+    return _send(_bot_channel_url(channel_id), body, headers, retries, return_json=return_msg)
+
+
+# ── interactive components (Discord action rows / buttons) ────────────────────
+# Button styles: 1 primary(blurple) · 2 secondary(grey) · 3 success(green) ·
+# 4 danger(red) · 5 link(url). Persistent buttons need a stable custom_id and a
+# View registered (add_view) on the running gateway bot of the SAME app/token.
+BTN_PRIMARY, BTN_SECONDARY, BTN_SUCCESS, BTN_DANGER, BTN_LINK = 1, 2, 3, 4, 5
+
+
+def button(label, custom_id=None, style=BTN_SECONDARY, emoji=None, url=None, disabled=False):
+    """Build one Discord button component dict."""
+    b = {'type': 2, 'label': str(label)[:80]}
+    if url:
+        b['style'] = BTN_LINK
+        b['url'] = url
+    else:
+        b['style'] = style
+        b['custom_id'] = custom_id
+    if emoji:
+        b['emoji'] = {'name': emoji} if isinstance(emoji, str) else emoji
+    if disabled:
+        b['disabled'] = True
+    return b
+
+
+def action_row(buttons):
+    """Wrap up to 5 button dicts in a single action row."""
+    return {'type': 1, 'components': list(buttons)[:5]}
+
+
+def post_message_bot(channel_id: str, token: str, content: str = None, embeds=None,
+                     components=None, retries: int = 4, return_msg: bool = False,
+                     thread_id: str = None):
+    """Post a JSON message (content / embeds / components) AS a bot. Returns
+    True/False, or the message dict when return_msg=True."""
+    if not channel_id or not token:
+        return None if return_msg else False
+    pd = {}
+    if content:
+        pd['content'] = content[:1990]
+    if embeds is not None:
+        pd['embeds'] = embeds
+    if components is not None:
+        pd['components'] = components
+    if not pd:
+        return None if return_msg else False
+    url = _bot_channel_url(channel_id) + (f'?thread_id={thread_id}' if thread_id else '')
+    data = json.dumps(pd).encode()
+    headers = {'Authorization': f'Bot {token}', 'Content-Type': 'application/json', 'User-Agent': _UA}
+    return _send(url, data, headers, retries, return_json=return_msg)
+
+
+def edit_message_bot(channel_id: str, token: str, message_id: str, content: str = None,
+                     embeds=None, components=None, retries: int = 4, return_msg: bool = False):
+    """Edit a message in place (PATCH). Pass only the fields to change. Returns
+    True/False, or the message dict when return_msg=True. This is the cheap
+    edit-in-place primitive behind the live command-center."""
+    if not (channel_id and token and message_id):
+        return None if return_msg else False
+    pd = {}
+    if content is not None:
+        pd['content'] = content[:1990]
+    if embeds is not None:
+        pd['embeds'] = embeds
+    if components is not None:
+        pd['components'] = components
+    url = f'{_bot_channel_url(channel_id)}/{message_id}'
+    data = json.dumps(pd).encode()
+    headers = {'Authorization': f'Bot {token}', 'Content-Type': 'application/json', 'User-Agent': _UA}
+    return _send(url, data, headers, retries, method='PATCH', return_json=return_msg)
+
+
+def pin_message_bot(channel_id: str, token: str, message_id: str, retries: int = 3):
+    """Pin a message (PUT). Returns True/False."""
+    if not (channel_id and token and message_id):
+        return False
+    url = f'https://discord.com/api/v10/channels/{channel_id}/pins/{message_id}'
+    headers = {'Authorization': f'Bot {token}', 'User-Agent': _UA}
+    return _send(url, b'', headers, retries, method='PUT')
+
+
+def discord_get(path: str, token: str, retries: int = 3):
+    """GET https://discord.com/api/v10<path> as a bot. Parsed JSON or None."""
+    url = 'https://discord.com/api/v10' + path
+    headers = {'Authorization': f'Bot {token}', 'User-Agent': _UA}
+    return _send(url, None, headers, retries, method='GET', return_json=True)
+
+
+def resolve_channel(guild_id: str, token: str, name: str):
+    """Channel id for a channel NAME in a guild (or the id passed straight
+    through). None if not found. Uses the given bot token."""
+    if not name:
+        return None
+    if str(name).isdigit():
+        return str(name)
+    for c in (discord_get(f'/guilds/{guild_id}/channels', token) or []):
+        if c.get('name') == name:
+            return str(c.get('id'))
+    return None
+
+
+def create_text_channel(guild_id: str, token: str, name: str, topic: str = None):
+    """Create a GUILD_TEXT channel, or return the id if it already exists.
+    Returns channel id or None."""
+    existing = resolve_channel(guild_id, token, name)
+    if existing:
+        return existing
+    pd = {'name': name, 'type': 0}
+    if topic:
+        pd['topic'] = topic[:1024]
+    headers = {'Authorization': f'Bot {token}', 'Content-Type': 'application/json', 'User-Agent': _UA}
+    r = _send(f'https://discord.com/api/v10/guilds/{guild_id}/channels',
+              json.dumps(pd).encode(), headers, 3, return_json=True)
+    return str(r.get('id')) if r else None
+
+
+def create_webhook(channel_id: str, token: str, name: str = 'MC'):
+    """Create a webhook on a channel and return its full URL. None on failure.
+    (Idempotency is the caller's job — check secrets before creating.)"""
+    headers = {'Authorization': f'Bot {token}', 'Content-Type': 'application/json', 'User-Agent': _UA}
+    r = _send(f'https://discord.com/api/v10/channels/{channel_id}/webhooks',
+              json.dumps({'name': name[:80]}).encode(), headers, 3, return_json=True)
+    if not r or not r.get('id') or not r.get('token'):
+        return None
+    return f"https://discord.com/api/webhooks/{r['id']}/{r['token']}"
 
 
 def _as_bot(target):

@@ -175,12 +175,23 @@ def check_news(state: dict) -> list[str]:
 # Actions
 # --------------------------------------------------------------------------- #
 def telegram(text: str, loud: bool) -> None:
+    if DRY:
+        print(f"DRY telegram (loud={loud}):\n{text}\n")
+        return
+    # Prefer the vault-backed fleet route (flow_signals = @PipelineSignals_Bot, where Mike
+    # already watches). tg_push itself falls back to telegram-bot-token.txt; the inline send
+    # below is a last-ditch for the narrow case where lib.notify can't even be imported.
+    try:
+        sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+        from lib.notify import tg_push
+        if tg_push(text, "flow_signals", loud=loud,
+                   fallback_token_file="telegram-bot-token.txt"):
+            return
+    except Exception as e:  # noqa: BLE001
+        print(f"[guard] fleet route failed: {e}", file=sys.stderr)
     token, chat = _secret("telegram-bot-token.txt"), _secret("telegram-chat-id.txt")
     if not token or not chat:
         print("[guard] no telegram creds", file=sys.stderr)
-        return
-    if DRY:
-        print(f"DRY telegram (loud={loud}):\n{text}\n")
         return
     data = urllib.parse.urlencode({
         "chat_id": chat, "parse_mode": "HTML",

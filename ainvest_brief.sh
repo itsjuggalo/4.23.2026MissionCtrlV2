@@ -77,8 +77,10 @@ if [[ -z "$TEXT" ]]; then
 fi
 log "brief generated (${#TEXT} chars, \$${COST})"
 
-# --- 2. send to Telegram DM (antigravity bot) ---------------------------------
-TOKEN="$(cat "$SECRETS/telegram_antigravity_bot_token" 2>/dev/null)"
+# --- 2. send to Telegram DM (aime_research bot) -------------------------------
+# vault-first token (single source of truth); falls back to the flat secret file
+TOKEN="$(/home/itsju/.venv/bin/python /home/itsju/scripts/tg_fleet.py token aime_research 2>/dev/null)"
+TOKEN="${TOKEN:-$(cat "$SECRETS/telegram_antigravity_bot_token" 2>/dev/null)}"
 CHAT="$(cat "$SECRETS/telegram-chat-id.txt" 2>/dev/null)"
 HEADER="$([[ "$MODE" == morning ]] && echo '🌅 *AInvest morning brief*' || echo '🌇 *AInvest EOD wrap*') — $(TZ='America/New_York' date '+%a %b %-d, %-I:%M %p ET')"
 if [[ -n "$TOKEN" && -n "$CHAT" ]]; then

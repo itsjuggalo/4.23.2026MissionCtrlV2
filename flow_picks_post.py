@@ -22,10 +22,17 @@ from zoneinfo import ZoneInfo
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
-from skill_to_discord import post, resolve_channel  # noqa: E402  (resilient bot poster)
+from skill_to_discord import post, resolve_channel, GUILD  # noqa: E402  (resilient bot poster)
 from lib.portfolio import personal_tickers, personal_crypto  # noqa: E402
 from lib.heartbeat import beat  # noqa: E402
 from lib.notify import tg_brief  # noqa: E402
+from lib import card_mute  # noqa: E402  — operator-muted names get skipped
+from lib.discord_threading import (make_pick_key,  # noqa: E402  — per-pick lifecycle threads
+                                   post_to_pick_thread_bot, _load_state as _thread_state)
+
+SYNTH_TOKEN_FILE = Path.home() / ".openclaw" / "secrets" / "discord_synthcontrol_token"
+TOP_ACTION_PICK = None     # build() stashes the #1 actionable pick for the action card
+ACTIONABLE_PICKS = []      # build() stashes all swing picks for per-pick threads
 
 ET = ZoneInfo("America/New_York")
 DATA = Path.home() / "trading" / "signals" / "option-scraper" / "data"
@@ -270,6 +277,8 @@ def build() -> str | None:
     used = set()        # dedupe by underlying — one contract per ticker
     for (s, fv, voi, dte), a in scored:
         sym = str(a.get("Symbol", "")).upper()
+        if card_mute.is_muted(sym):     # operator silenced this name from a card's 🔇 button
+            continue
         tag = " 🎯YOUR NAME" if sym in names else ""
         if dte <= 1 and a.get("isBullish") and len(conf) < 2:
             conf.append(f"• **{_fmt(a)}** — ${fv:,.0f}, {int(a.get('SWEEPS',0))} sweeps, V/OI {voi:.1f}{tag}")
@@ -335,7 +344,77 @@ def build() -> str | None:
                          f"**bearish** (V/OI {voi:.1f}). Don't mistake size for a green light.")
             break
     lines.append("\n_0DTE = confirmation not entry · size up to $800 risk (fraction of equity) · auto-posted intraday._")
+    global TOP_ACTION_PICK, ACTIONABLE_PICKS
+    TOP_ACTION_PICK = bulls[0] if bulls else (bears[0] if bears else None)
+    ACTIONABLE_PICKS = list(bulls) + list(bears)
     return "\n".join(lines)
+
+
+def _post_pick_threads(actionable) -> None:
+    """Open a per-pick thread for each swing pick (entry message) the FIRST time the
+    contract is seen — the EOD grader posts the grade into the same thread, so a
+    trade's lifecycle lives in one place. Reuses lib/discord_threading (token-only).
+    Threads hang off #flow-picks and auto-archive in 24h. Never raises."""
+    if not actionable:
+        return
+    try:
+        tok = SYNTH_TOKEN_FILE.read_text().strip()
+        parent = resolve_channel("flow-picks")
+        existing = _thread_state()
+        for a, fv, voi, dte, tag, sp, otm in actionable:
+            sym = str(a.get("Symbol", "")).upper()
+            key = make_pick_key(sym, a.get("Strike"), str(a.get("OptionType", ""))[:1], a.get("Expiry"))
+            if key in existing:        # thread already started → entry already posted
+                continue
+            is_call = str(a.get("OptionType", "")).upper().startswith("C")
+            msg = (f"🎯 **ENTRY — {_fmt(a)}** ({dte} DTE)\n"
+                   f"${fv:,.0f} flow · V/OI {voi:.1f}" + (f" · spot ${sp:,.2f}" if sp else "")
+                   + f"\n{'🟢 bullish call' if is_call else '🔴 bearish put'}{tag}")
+            r = post_to_pick_thread_bot(key, msg, f"{_fmt(a)} · {datetime.now(ET):%b %-d}", tok, parent)
+            print(f"[flow-picks] thread {sym}: created={r.get('created')} ok={r.get('ok')}", flush=True)
+    except Exception as e:  # noqa: BLE001
+        print(f"[flow-picks] thread err: {e}", flush=True)
+
+
+def _post_action_card(rec) -> None:
+    """Post a compact, button-bearing ACTION card for the #1 pick — AS SynthControl
+    (the aime-discord bot's own app), so the Paper Buy / Set Alert / Explain / Grade /
+    Mute buttons route to that gateway bot's persistent ActionView. Additive: the rich
+    text digest already posted via the Boba bot. Never raises."""
+    if not rec:
+        return
+    try:
+        from lib import ops_card as oc
+        a, fv, voi, dte, tag, sp, otm = rec
+        sym = str(a.get("Symbol", "")).upper()
+        tok = SYNTH_TOKEN_FILE.read_text().strip()
+        cid = oc.resolve_channel(GUILD, tok, "flow-picks")
+        if not (tok and cid):
+            return
+        is_call = str(a.get("OptionType", "")).upper().startswith("C")
+        mny = f"${sp:,.2f} ({abs(otm)*100:.0f}% {'OTM' if otm >= 0 else 'ITM'})" if sp else "—"
+        embed = {
+            "title": f"⚡ ACTION · {sym}",
+            "color": 0x2ECC71 if is_call else 0xE74C3C,
+            "description": f"**{_fmt(a)}** · {dte} DTE · ${fv:,.0f} flow · V/OI {voi:.1f}",
+            "fields": [
+                {"name": "Spot", "value": mny, "inline": True},
+                {"name": "Direction", "value": ("🟢 bullish call" if is_call else "🔴 bearish put"),
+                 "inline": True},
+            ],
+            "footer": {"text": f"tk:{sym} · tap a button to act · {tag.strip() or 'flow pick'}"},
+        }
+        row = oc.action_row([
+            oc.button("Paper Buy", "act:buy", oc.BTN_SUCCESS, "🧾"),
+            oc.button("Set Alert", "act:alert", oc.BTN_SECONDARY, "🔔"),
+            oc.button("Explain", "act:explain", oc.BTN_PRIMARY, "📖"),
+            oc.button("Grade", "act:grade", oc.BTN_SECONDARY, "📊"),
+            oc.button("Mute", "act:mute", oc.BTN_DANGER, "🔇"),
+        ])
+        ok = oc.post_message_bot(cid, tok, embeds=[embed], components=[row])
+        print(f"[flow-picks] action card → {sym}: {'ok' if ok else 'FAILED'}", flush=True)
+    except Exception as e:  # noqa: BLE001
+        print(f"[flow-picks] action card err: {e}", flush=True)
 
 
 def main():
@@ -351,6 +430,8 @@ def main():
         print(msg)
         return
     post(resolve_channel(a.channel), msg)
+    _post_action_card(TOP_ACTION_PICK)   # button-bearing card for the #1 pick (SynthControl)
+    _post_pick_threads(ACTIONABLE_PICKS)  # per-pick lifecycle threads (entry; grade follows at EOD)
     beat("flow_picks")
     used = tg_brief(msg)
     print(f"[flow-picks] posted ({len(msg)} chars) · tg→{used or 'skip'}", flush=True)

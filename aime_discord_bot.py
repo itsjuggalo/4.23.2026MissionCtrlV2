@@ -18,18 +18,25 @@ import re
 import subprocess
 import sys
 import tempfile
-from datetime import datetime, timezone
+from datetime import datetime, timezone, timedelta
 from pathlib import Path
 from typing import Optional
+from zoneinfo import ZoneInfo
 
 sys.path.insert(0, str(Path.home() / "scripts"))
 sys.path.insert(0, str(Path.home() / "05_AUTOMATION" / "scripts"))
 import aime_client as aime  # noqa: E402
 import discord  # noqa: E402
 from discord import app_commands  # noqa: E402
+from discord.ext import tasks  # noqa: E402
 from lib.portfolio import (portfolio_summary, add_watch, remove_watch,  # noqa: E402
                            get_watchlist, total_equity, daily_journal_recap, weekly_review)
 from lib import x_search  # noqa: E402  — native Grok x_search w/ web fallback
+from lib import alerts as price_alerts  # noqa: E402  — user-set price alerts (Set Alert btn)
+from lib import card_mute  # noqa: E402  — per-ticker mute (Mute btn)
+from lib import regime as regime_lib  # noqa: E402  — VIX+SPY+BTC regime read (presence/events)
+
+ET = ZoneInfo("America/New_York")
 
 SEC = Path.home() / ".openclaw" / "secrets"
 TOKEN_FILE = os.environ.get("DISCORD_AIME_TOKEN_FILE", "discord_ops_bot_token")
@@ -135,6 +142,249 @@ class PickView(discord.ui.View):
         t = _ticker_from_msg(interaction.message)
         await interaction.response.defer(thinking=True)
         await _send_chunks(interaction, await _answer_skill(f"/ticker-research {t}"))
+
+
+# ─── ACTION CARDS (Paper Buy / Set Alert / Explain / Grade / Mute) ────────────
+# A second persistent View whose buttons carry the heavier actions. Static
+# custom_ids so a card posted by cron (via the SAME SynthControl app token, with
+# a raw components action-row) routes its clicks to this registered View. The
+# ticker is read back from the card so no per-message state is needed.
+ACT_BUY, ACT_ALERT, ACT_EXPLAIN, ACT_GRADE, ACT_MUTE = (
+    "act:buy", "act:alert", "act:explain", "act:grade", "act:mute")
+
+# SAFETY (Mike's tiered doctrine): paper-buy SUBMIT is OFF. The button only ever
+# PREVIEWS the order + logs an intent. Mike flips this to True to arm it — paper
+# accounts only, $800 cap enforced. Until then no order is ever placed.
+_ARM_PAPER_BUY = False
+PAPER_INTENTS = Path.home() / ".openclaw" / "state" / "paper_buy_intents.jsonl"
+
+
+def _card_ticker(msg) -> str:
+    """Read the ticker off an action/pick card (embed footer token first, then
+    title, then content). Returns '?' if none found."""
+    if not msg:
+        return "?"
+    try:
+        for e in (msg.embeds or []):
+            foot = (e.footer.text if e.footer else "") or ""
+            m = re.search(r"tk:([A-Z.]{1,6})", foot)
+            if m:
+                return m.group(1)
+            m = re.search(r"\b([A-Z]{2,5})\b", e.title or "")
+            if m and m.group(1) not in ("ACTION", "TRADE", "IDEA"):
+                return m.group(1)
+    except Exception:
+        pass
+    c = msg.content or ""
+    for pat in (r"TRADE IDEA — ([A-Z.]{1,6})", r"ACTION[^A-Za-z]+([A-Z.]{1,6})",
+                r"\$([A-Z]{1,5})\b"):
+        m = re.search(pat, c)
+        if m:
+            return m.group(1)
+    return "?"
+
+
+def _last_price(ticker: str):
+    """Live underlying price (yfinance). None on failure."""
+    try:
+        import yfinance as yf
+        i = yf.Ticker(ticker).history(period="1d", interval="5m")
+        if len(i):
+            return float(i["Close"].iloc[-1])
+        h = yf.Ticker(ticker).history(period="1d")
+        return float(h["Close"].iloc[-1]) if len(h) else None
+    except Exception:
+        return None
+
+
+def _grade_ticker(ticker: str) -> str:
+    """Grade a name vs today's logged flow-pick entry (underlying move in the
+    pick's direction). Falls back to a plain live read when not in the log."""
+    t = ticker.upper().strip()
+    date = datetime.now(ET).strftime("%Y-%m-%d")
+    log = Path.home() / ".openclaw" / "state" / f"flow_picks_log_{date}.jsonl"
+    entry, rec = None, None
+    if log.exists():
+        try:
+            for ln in log.read_text().splitlines():
+                r = json.loads(ln)
+                if str(r.get("symbol", "")).upper() == t and r.get("spot"):
+                    entry, rec = float(r["spot"]), r
+                    break
+        except Exception:
+            pass
+    now = _last_price(t)
+    if not now:
+        return f"📊 {t}: couldn't fetch a live price right now."
+    if entry and rec:
+        move = (now - entry) / entry * 100
+        is_call = str(rec.get("type", "C")).upper().startswith("C")
+        fav = move if is_call else -move
+        arrow = "🟢" if fav >= 0 else "🔴"
+        return (f"📊 **GRADE — {t}**\nPicked at ${entry:,.2f} → now ${now:,.2f} = "
+                f"**{move:+.1f}%** underlying\n{arrow} {'favorable' if fav >= 0 else 'against'} the "
+                f"{'bullish' if is_call else 'bearish'} pick (**{fav:+.1f}%** in your direction)")
+    return (f"📊 **{t}** ${now:,.2f} — not in today's pick log, no entry to grade against. "
+            f"Use `/ticker {t}` for a fresh read.")
+
+
+def _paper_keys(acct: str):
+    sec = Path.home() / ".openclaw" / "secrets"
+    pairs = {"boba": ("alpaca-r1-key-id", "alpaca-r1-secret"),
+             "jazzy": ("alpaca-jazzy-key-id", "alpaca-jazzy-secret")}
+    a, b = pairs.get(acct, pairs["boba"])
+    try:
+        return (sec / a).read_text().strip(), (sec / b).read_text().strip()
+    except Exception:
+        return None, None
+
+
+def _log_paper_intent(ticker, acct, shares, price, cost, user):
+    try:
+        PAPER_INTENTS.parent.mkdir(parents=True, exist_ok=True)
+        with open(PAPER_INTENTS, "a") as f:
+            f.write(json.dumps({"ts": datetime.now(timezone.utc).isoformat(), "ticker": ticker,
+                                "acct": acct, "shares": shares, "price": price, "cost": cost,
+                                "user": user, "armed": _ARM_PAPER_BUY}) + "\n")
+    except Exception as e:  # noqa: BLE001
+        print(f"[paper-intent] {e}", flush=True)
+    _journal(ticker, f"paper-buy-intent:{acct}:{shares}", user)
+
+
+def _submit_paper_buy(acct, ticker, shares):
+    """ARMED paper-order submit — Alpaca PAPER only. Reached ONLY when
+    _ARM_PAPER_BUY is True (Mike's explicit go)."""
+    if shares < 1:
+        return "↳ nothing submitted (size < 1 share)."
+    try:
+        import urllib.request
+        kid, ksec = _paper_keys(acct)
+        if not kid:
+            return f"↳ no paper keys for '{acct}' — not submitted."
+        body = json.dumps({"symbol": ticker, "qty": str(shares), "side": "buy",
+                           "type": "market", "time_in_force": "day"}).encode()
+        req = urllib.request.Request("https://paper-api.alpaca.markets/v2/orders", data=body,
+            headers={"APCA-API-KEY-ID": kid, "APCA-API-SECRET-KEY": ksec,
+                     "Content-Type": "application/json"})
+        with urllib.request.urlopen(req, timeout=15) as r:
+            o = json.loads(r.read())
+        return f"✅ submitted PAPER order {str(o.get('id',''))[:8]} — BUY {shares} {ticker} ({acct})"
+    except Exception as e:  # noqa: BLE001
+        return f"↳ submit error: {e}"
+
+
+def _paper_buy_preview(ticker, account, deploy_str, user) -> str:
+    t = ticker.upper().strip()
+    acct = "jazzy" if str(account).lower().startswith("j") else "boba"
+    try:
+        deploy = float(str(deploy_str).replace("$", "").replace(",", ""))
+    except ValueError:
+        deploy = 150.0
+    deploy = min(max(deploy, 0.0), 800.0)        # Mike's $800/trade cap
+    price = _last_price(t)
+    eq = total_equity()
+    if not price:
+        return f"⚠️ Couldn't fetch a live price for {t}; preview aborted."
+    shares = int(deploy // price)
+    cost = shares * price
+    lines = [f"🧾 **PAPER BUY PREVIEW — {t}** · acct `{acct}`",
+             f"Live ~${price:,.2f} · deploy ${deploy:,.0f}"
+             + (f" ({deploy/eq*100:.1f}% of ${eq:,.0f} equity)" if eq else "")]
+    if shares < 1:
+        lines.append(f"➡️ ${deploy:,.0f} buys <1 share at ${price:,.2f} — raise the amount or pick a cheaper name.")
+    else:
+        lines.append(f"➡️ would submit **BUY {shares} {t}** (~${cost:,.0f}"
+                     + (f", {cost/eq*100:.0f}% of equity" if eq else "") + ")")
+        if eq and cost > eq * 0.5:
+            lines.append("⚠️ >50% of equity in one name — concentration risk.")
+    _log_paper_intent(t, acct, shares, price, cost, user)
+    if _ARM_PAPER_BUY and shares >= 1:
+        lines.append(_submit_paper_buy(acct, t, shares))
+    else:
+        lines.append("🔒 **PREVIEW ONLY — paper-buy submit is NOT armed.** Logged as an intent. "
+                     "Mike arms it before any order is placed.")
+    return "\n".join(lines)
+
+
+class BuyModal(discord.ui.Modal):
+    def __init__(self, ticker: str):
+        super().__init__(title=f"Paper Buy — {ticker}"[:45])
+        self.ticker = ticker
+        self.account = discord.ui.TextInput(label="Account (boba / jazzy)", default="boba",
+                                            required=True, max_length=10)
+        self.deploy = discord.ui.TextInput(label="$ to deploy (max 800)", default="150",
+                                           required=True, max_length=6)
+        self.add_item(self.account)
+        self.add_item(self.deploy)
+
+    async def on_submit(self, interaction: discord.Interaction):
+        await interaction.response.defer(thinking=True, ephemeral=True)
+        msg = await asyncio.to_thread(_paper_buy_preview, self.ticker, str(self.account),
+                                      str(self.deploy), interaction.user.display_name)
+        await interaction.followup.send(msg, ephemeral=True)
+
+
+class AlertModal(discord.ui.Modal):
+    def __init__(self, ticker: str):
+        super().__init__(title=f"Set Alert — {ticker}"[:45])
+        self.ticker = ticker
+        self.price = discord.ui.TextInput(label="Trigger price", required=True, max_length=12)
+        self.direction = discord.ui.TextInput(label="Direction: above / below", default="above",
+                                              required=True, max_length=6)
+        self.note = discord.ui.TextInput(label="Note (optional)", required=False,
+                                         style=discord.TextStyle.paragraph, max_length=120)
+        for it in (self.price, self.direction, self.note):
+            self.add_item(it)
+
+    async def on_submit(self, interaction: discord.Interaction):
+        try:
+            p = float(str(self.price).replace("$", "").replace(",", ""))
+        except ValueError:
+            await interaction.response.send_message("⚠️ Couldn't read that price.", ephemeral=True)
+            return
+        d = "below" if str(self.direction).lower().startswith("b") else "above"
+        await asyncio.to_thread(price_alerts.add_alert, self.ticker, p, d,
+                                str(self.note), interaction.user.display_name)
+        await interaction.response.send_message(
+            f"🔔 Alert set: **{self.ticker}** {d} **${p:,.2f}**. I'll ping you when it crosses.",
+            ephemeral=True)
+
+
+class ActionView(discord.ui.View):
+    def __init__(self):
+        super().__init__(timeout=None)
+
+    @discord.ui.button(label="Paper Buy", emoji="🧾",
+                       style=discord.ButtonStyle.success, custom_id=ACT_BUY)
+    async def b_buy(self, interaction: discord.Interaction, button: discord.ui.Button):
+        await interaction.response.send_modal(BuyModal(_card_ticker(interaction.message)))
+
+    @discord.ui.button(label="Set Alert", emoji="🔔",
+                       style=discord.ButtonStyle.secondary, custom_id=ACT_ALERT)
+    async def b_alert(self, interaction: discord.Interaction, button: discord.ui.Button):
+        await interaction.response.send_modal(AlertModal(_card_ticker(interaction.message)))
+
+    @discord.ui.button(label="Explain", emoji="📖",
+                       style=discord.ButtonStyle.primary, custom_id=ACT_EXPLAIN)
+    async def b_explain(self, interaction: discord.Interaction, button: discord.ui.Button):
+        t = _card_ticker(interaction.message)
+        await interaction.response.defer(thinking=True)
+        await _send_chunks(interaction, await _answer_skill(f"/options-desk {t}", timeout=300))
+
+    @discord.ui.button(label="Grade", emoji="📊",
+                       style=discord.ButtonStyle.secondary, custom_id=ACT_GRADE)
+    async def b_grade(self, interaction: discord.Interaction, button: discord.ui.Button):
+        t = _card_ticker(interaction.message)
+        await interaction.response.defer(thinking=True)
+        await interaction.followup.send(await asyncio.to_thread(_grade_ticker, t))
+
+    @discord.ui.button(label="Mute", emoji="🔇",
+                       style=discord.ButtonStyle.danger, custom_id=ACT_MUTE)
+    async def b_mute(self, interaction: discord.Interaction, button: discord.ui.Button):
+        t = _card_ticker(interaction.message)
+        await asyncio.to_thread(card_mute.mute, t, 6)
+        await interaction.response.send_message(
+            f"🔇 Muted **{t}** for ~6h — posters will skip it.", ephemeral=True)
 
 
 intents = discord.Intents.default()
@@ -332,6 +582,17 @@ async def pick_cmd(interaction: discord.Interaction, ticker: str, note: Optional
     await interaction.response.send_message(body, view=PickView())
 
 
+@tree.command(name="deck", description="Action card for a ticker — Paper Buy / Set Alert / Explain / Grade / Mute")
+@app_commands.describe(ticker="ticker", note="optional context / contract")
+async def deck_cmd(interaction: discord.Interaction, ticker: str, note: Optional[str] = None):
+    t = ticker.upper().strip()
+    body = f"⚡ **ACTION — {t}**"
+    if note:
+        body += f"\n{note}"
+    body += "\n*Tap to act — paper-buy preview · price alert · explain · grade · mute.*"
+    await interaction.response.send_message(body, view=ActionView())
+
+
 @tree.command(name="watch", description="Add a ticker to your watchlist (feeds the scheduled intel)")
 @app_commands.describe(ticker="ticker to watch")
 async def watch_cmd(interaction: discord.Interaction, ticker: str):
@@ -453,6 +714,151 @@ async def levels_cmd(interaction: discord.Interaction, ticker: str):
     await _send_chunks(interaction, await _answer_skill(prompt, timeout=300))
 
 
+# ─── POLISH: ticker autocomplete + right-click context menus (Phase 5) ────────
+_AC_DEFAULTS = ["SPY", "QQQ", "NVDA", "TSLA", "AAPL", "AMD", "MSFT", "META",
+                "AMZN", "GOOGL", "SOFI", "PLTR", "COIN", "MSTR"]
+
+
+async def _ac_ticker(interaction: discord.Interaction, current: str):
+    """Autocomplete tickers from the watchlist + common names."""
+    cur = (current or "").upper()
+    try:
+        wl = await asyncio.to_thread(get_watchlist)
+    except Exception:
+        wl = []
+    pool = list(dict.fromkeys([w.upper() for w in wl] + _AC_DEFAULTS))
+    hits = [t for t in pool if cur in t][:25]
+    return [app_commands.Choice(name=t, value=t) for t in hits]
+
+
+# attach to every ticker-arg command (param names differ per command)
+for _cmd, _param in ((ticker_cmd, "symbol"), (options_cmd, "ticker"), (levels_cmd, "ticker"),
+                     (deck_cmd, "ticker"), (watch_cmd, "ticker"), (unwatch_cmd, "ticker")):
+    try:
+        _cmd.autocomplete(_param)(_ac_ticker)
+    except Exception as _e:  # noqa: BLE001
+        print(f"[autocomplete] {_param}: {_e}", flush=True)
+
+
+async def _ctx_explain(interaction: discord.Interaction, message: discord.Message):
+    t = _card_ticker(message)
+    if t == "?":
+        await interaction.response.send_message("Couldn't find a ticker in that message.", ephemeral=True)
+        return
+    await interaction.response.defer(thinking=True)
+    await _send_chunks(interaction, await _answer_skill(f"/options-desk {t}", timeout=300))
+
+
+async def _ctx_grade(interaction: discord.Interaction, message: discord.Message):
+    t = _card_ticker(message)
+    if t == "?":
+        await interaction.response.send_message("Couldn't find a ticker in that message.", ephemeral=True)
+        return
+    await interaction.response.defer(thinking=True)
+    await interaction.followup.send(await asyncio.to_thread(_grade_ticker, t))
+
+
+tree.add_command(app_commands.ContextMenu(name="Explain this", callback=_ctx_explain))
+tree.add_command(app_commands.ContextMenu(name="Grade this", callback=_ctx_grade))
+
+
+# ─── SCHEDULED EVENTS + SIDEBAR PRESENCE (Phase 4) ────────────────────────────
+MACRO_CAL = Path.home() / "05_AUTOMATION" / "scripts" / "data" / "macro_calendar.json"
+EVENTS_STATE = Path.home() / ".openclaw" / "state" / "discord_events.json"
+
+
+def _macro_events() -> list[dict]:
+    """Dated macro/OPEX events from the hardcoded calendar → [{key,title,start,note}]."""
+    try:
+        d = json.loads(MACRO_CAL.read_text())
+    except Exception:
+        return []
+    out = []
+    for e in d.get("events", []):
+        try:
+            dt = datetime.strptime(f"{e['date']} {e.get('time', '09:30')}",
+                                   "%Y-%m-%d %H:%M").replace(tzinfo=ET)
+        except Exception:
+            continue
+        out.append({"key": f"{e['date']}:{e.get('kind', '')}:{e['title']}",
+                    "title": e["title"], "start": dt,
+                    "note": (e.get("note") or e.get("kind") or "Macro").strip()})
+    return out
+
+
+def _load_events_state() -> dict:
+    try:
+        return json.loads(EVENTS_STATE.read_text())
+    except Exception:
+        return {}
+
+
+def _save_events_state(d: dict) -> None:
+    try:
+        EVENTS_STATE.parent.mkdir(parents=True, exist_ok=True)
+        EVENTS_STATE.write_text(json.dumps(d, indent=2))
+    except Exception:
+        pass
+
+
+@tasks.loop(minutes=3)
+async def presence_loop():
+    """Sidebar ticker = live regime line (RISK-ON · SPY .. · VIX .. · BTC ..)."""
+    try:
+        r = await asyncio.to_thread(regime_lib.regime)
+        txt = (r.get("line") or "")[:120]
+        if txt:
+            await client.change_presence(activity=discord.CustomActivity(name=txt))
+    except Exception as e:  # noqa: BLE001
+        print(f"[presence] {e}", flush=True)
+
+
+@presence_loop.before_loop
+async def _before_presence():
+    await client.wait_until_ready()
+
+
+@tasks.loop(hours=12)
+async def events_loop():
+    """Create Discord scheduled events for upcoming macro/OPEX dates (deduped)."""
+    gid = os.environ.get("AIME_GUILD_ID")
+    if not gid:
+        return
+    guild = client.get_guild(int(gid))
+    if not guild:
+        return
+    created = _load_events_state()
+    now = datetime.now(ET)
+    horizon = now + timedelta(days=21)         # only create within ~3 weeks out
+    changed = False
+    for ev in _macro_events():
+        if ev["key"] in created:
+            continue
+        start = ev["start"]
+        if start <= now or start > horizon:
+            continue
+        try:
+            await guild.create_scheduled_event(
+                name=ev["title"][:100],
+                start_time=start, end_time=start + timedelta(hours=1),
+                entity_type=discord.EntityType.external,
+                privacy_level=discord.PrivacyLevel.guild_only,
+                location=(ev["note"] or "Macro calendar")[:100],
+                description="Auto-scheduled from the Mission Control macro calendar.")
+            created[ev["key"]] = now.isoformat()
+            changed = True
+            print(f"[events] created '{ev['title']}' @ {start:%b %-d %-I:%M%p ET}", flush=True)
+        except Exception as e:  # noqa: BLE001
+            print(f"[events] create err {ev['title']}: {e}", flush=True)
+    if changed:
+        _save_events_state(created)
+
+
+@events_loop.before_loop
+async def _before_events():
+    await client.wait_until_ready()
+
+
 _VIEWS_ADDED = False
 
 
@@ -460,8 +866,13 @@ _VIEWS_ADDED = False
 async def on_ready():
     global _VIEWS_ADDED
     if not _VIEWS_ADDED:
-        client.add_view(PickView())   # persistent — buttons survive restarts
+        client.add_view(PickView())     # persistent — buttons survive restarts
+        client.add_view(ActionView())   # Paper Buy / Set Alert / Explain / Grade / Mute
         _VIEWS_ADDED = True
+        if not presence_loop.is_running():
+            presence_loop.start()
+        if not events_loop.is_running():
+            events_loop.start()
     try:
         gid = os.environ.get("AIME_GUILD_ID")
         if gid:

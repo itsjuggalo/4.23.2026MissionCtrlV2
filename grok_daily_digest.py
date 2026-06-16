@@ -79,6 +79,15 @@ def grok_search(query: str, summary_prompt: str) -> str:
         return f"[fetch error: {e}]"
 
 def send_telegram(text: str) -> bool:
+    # vault-backed fleet route (life_wellness = @LifeClaw727_Bot); inline below = fallback
+    try:
+        sys.path.insert(0, "/home/itsju/scripts")
+        from lib.notify import tg_push
+        if tg_push(text, "life_wellness", loud=True, html=False,
+                   fallback_token_file="lifeclaw_telegram_bot_token"):
+            return True
+    except Exception as e:
+        print(f"[grok-digest] fleet route failed: {e}", file=sys.stderr)
     payload = json.dumps({"chat_id": TG_CHAT_ID, "text": text}).encode()
     req = urllib.request.Request(
         f"https://api.telegram.org/bot{TG_TOKEN}/sendMessage",
