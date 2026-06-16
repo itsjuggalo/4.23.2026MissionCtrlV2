@@ -244,7 +244,9 @@ def confluence_block(shortlist_tickers: list[str], window_hours: int = 4) -> str
                 if (it.get("ticker") or "").upper() != ticker.upper():
                     continue
                 ts = _item_ts(it)
-                if ts and ts < cutoff_iso:
+                # Exclude items with a missing/corrupt timestamp (empty string) too —
+                # otherwise `ts and ...` short-circuits and counts them as in-window.
+                if not ts or ts < cutoff_iso:
                     continue
                 d = _is_bull(it)
                 if d is True:
