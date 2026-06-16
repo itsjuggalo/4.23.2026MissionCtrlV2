@@ -122,6 +122,42 @@ def _grok_oauth(prompt, timeout=90):
     return d["choices"][0]["message"]["content"], d.get("usage", {})
 
 
+def _codex_bin():
+    import shutil, glob
+    b = shutil.which("codex")
+    if b:
+        return b
+    for g in sorted(glob.glob(str(Path.home() / ".nvm/versions/node/*/bin/codex"))):
+        return g
+    return "codex"
+
+
+def _codex_cli(prompt, timeout=150):
+    """OpenAI GPT on the ChatGPT subscription via the Codex CLI (OAuth in ~/.codex/auth.json,
+    NO API key → bills the sub, not API credits — the OpenAI peer of _claude_cli). Cold-start
+    is slow (~30s). Reads only the final assistant message via `-o`."""
+    import tempfile
+    env = {k: v for k, v in os.environ.items()
+           if k not in ("OPENAI_API_KEY", "ANTHROPIC_API_KEY")}
+    fd, out_path = tempfile.mkstemp(suffix=".txt")
+    os.close(fd)
+    try:
+        r = subprocess.run(
+            [_codex_bin(), "exec", "--skip-git-repo-check", "-s", "read-only",
+             "-o", out_path, prompt],
+            capture_output=True, text=True, timeout=timeout, env=env,
+            stdin=subprocess.DEVNULL, cwd=str(Path.home()))
+        msg = Path(out_path).read_text().strip()
+        if not msg:
+            raise RuntimeError(f"codex empty (exit {r.returncode}): {r.stderr.strip()[:200]}")
+        return msg, {}
+    finally:
+        try:
+            os.unlink(out_path)
+        except OSError:
+            pass
+
+
 def _deepseek(prompt, timeout=120):
     key = _read("deepseek_api_key", "deepseek.key")
     if not key:
@@ -134,7 +170,26 @@ def _deepseek(prompt, timeout=120):
 
 
 _PROVIDERS = {"claude_oauth": _claude_oauth, "claude_cli": _claude_cli, "grok_oauth": _grok_oauth,
-              "openai": _openai, "gemini": _gemini, "deepseek": _deepseek}
+              "codex_cli": _codex_cli, "openai": _openai, "gemini": _gemini, "deepseek": _deepseek}
+
+
+def call_llm_text(prompt: str, providers):
+    """Like call_llm but returns RAW assistant text (no JSON extraction) for conversational
+    personas. Returns the first provider's non-empty text, or None if every provider fails."""
+    errors = []
+    for name in providers:
+        fn = _PROVIDERS.get(name)
+        if not fn:
+            errors.append(f"{name}: unknown provider")
+            continue
+        try:
+            text, _usage = fn(prompt)
+            if text and text.strip():
+                return text.strip()
+        except Exception as e:  # noqa: BLE001
+            errors.append(f"{name}: {str(e)[:140]}")
+            continue
+    return None
 
 
 def call_llm(prompt: str, providers):

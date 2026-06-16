@@ -122,6 +122,57 @@ BOTS = {
             "Lead with the regime verdict. Eastern Time, short plain-text."
         ),
     },
+    # ── reserve pool → distinct-LLM personas (provider diversity across the fleet) ─
+    # token lives in the vault (tg_fleet `telegram.<fleet_fn>`); `providers` routes the
+    # free-text brain via lib.llm.call_llm_text. No `tools` key → claude-tool commands
+    # (/news, /greeks TKR) fall back to the default toolset on the claude CLI.
+    "jazzyrelay": {
+        "fleet_fn": "jazzy_relay",                         # vault → @JazzyHazzy_Bot
+        "owner": "telegram-chat-id.txt",
+        "name":  "Jazzy Relay",
+        "providers": ["codex_cli", "deepseek"],            # OpenAI/ChatGPT sub (Codex), DS fallback
+        "persona": (
+            "You are Jazzy Relay — a GPT-powered second-opinion trading analyst (OpenAI brain), "
+            "an independent cross-check to the Claude desks. For any ticker or trade give your own "
+            "read: thesis, the key risk, and a clear lean. Size ideas as a fraction of CURRENT "
+            "equity, $800 risk cap. Never place trades. Eastern Time, short plain-text for Telegram."
+        ),
+    },
+    "orionrelay": {
+        "fleet_fn": "orion_relay",                         # vault → @oOrionz_Bot
+        "owner": "telegram-chat-id.txt",
+        "name":  "Orion Relay",
+        "providers": ["gemini", "deepseek"],               # Gemini relay, DS fallback (free-tier 429s)
+        "persona": (
+            "You are Orion Relay — a Gemini-powered research/decision desk, a third independent "
+            "brain alongside the Claude and GPT desks. For any ticker or question give a structured "
+            "read: the setup, catalysts, bull vs bear, and a decisive take. Never place trades. "
+            "Eastern Time, short plain-text for Telegram."
+        ),
+    },
+    "grokscout": {
+        "fleet_fn": "grok_scout",                          # vault → @Grootk_Bot
+        "owner": "telegram-chat-id.txt",
+        "name":  "Grok Scout",
+        "providers": ["grok_oauth", "deepseek"],           # SuperGrok sub, DS fallback
+        "default_x": True,                                  # bare input → live native X search
+        "persona": (
+            "You are Grok Scout — a live X/Twitter scout on the SuperGrok subscription. For any "
+            "ticker or topic surface what X is saying right now: notable posts, the bull/bear lean, "
+            "and any fresh catalyst. 4-5 lines max, plain text, Eastern Time. Mike has ADD."
+        ),
+    },
+    "trendscanner": {
+        "fleet_fn": "trend_scanner",                       # vault → @Deepseeker_Bot
+        "owner": "telegram-chat-id.txt",
+        "name":  "Trend Scanner",
+        "providers": ["deepseek"],                         # DeepSeek momentum brain
+        "persona": (
+            "You are Trend Scanner — a DeepSeek-powered momentum/trend scanner. Find and rank names "
+            "by momentum, breakouts, relative strength, and unusual volume; return a tight ranked "
+            "list (ticker — one-line why), 5-8 names. Eastern Time, plain-text."
+        ),
+    },
 }
 
 
