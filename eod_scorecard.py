@@ -114,6 +114,42 @@ def _post_grade_threads(graded) -> None:
         print(f"[eod-scorecard] grade-thread err: {e}", flush=True)
 
 
+def _post_grade_action_cards(graded) -> None:
+    """Action cards for the day's BEST + WORST graded pick — tap to re-up the winner
+    or cut the loser. Posted AS SynthControl so the buttons route. Never raises."""
+    g2 = [(r, g) for r, g in (graded or []) if g]
+    if not g2:
+        return
+    try:
+        from lib import ops_card as oc
+        tok = SYNTH_TOKEN_FILE.read_text().strip()
+        cid = sd.resolve_channel("flow-picks")
+        best = max(g2, key=lambda x: x[1][1])
+        worst = min(g2, key=lambda x: x[1][1])
+        seen = set()
+        for tag, (r, g) in (("BEST", best), ("WORST", worst)):
+            sym = str(r.get("symbol", "")).upper()
+            if sym in seen:        # best == worst (only one graded) → one card
+                continue
+            seen.add(sym)
+            move, fav, entry, now = g
+            embed = {
+                "title": f"{'🏆' if tag == 'BEST' else '🩹'} {tag} PICK · {sym}",
+                "color": 0x2ECC71 if fav >= 0 else 0xE74C3C,
+                "description": f"**{sym} ${r['strike']:g}{r['type']}** · underlying {entry:.2f}→{now:.2f} (**{move:+.1f}%**)",
+                "fields": [
+                    {"name": "In pick's direction", "value": f"{fav:+.1f}%", "inline": True},
+                    {"name": "Read", "value": ("let it run / re-up" if tag == "BEST" else "cut / reassess"),
+                     "inline": True},
+                ],
+                "footer": {"text": f"tk:{sym} · EOD grade · tap to act"},
+            }
+            oc.post_message_bot(cid, tok, embeds=[embed], components=[oc.pick_action_row()])
+        print(f"[eod-scorecard] action cards: best {best[0]['symbol']} / worst {worst[0]['symbol']}", flush=True)
+    except Exception as e:  # noqa: BLE001
+        print(f"[eod-scorecard] action-card err: {e}", flush=True)
+
+
 def main():
     eq_val, eq_pl = equity_day_pnl()
     cr_val, cr_pl = _crypto_pnl()
@@ -161,7 +197,8 @@ def main():
         print(msg)
         return
     sd.post(sd.resolve_channel("flow-picks"), msg)
-    _post_grade_threads(graded)      # land each grade in its per-pick thread (closes the loop)
+    _post_grade_threads(graded)        # land each grade in its per-pick thread (closes the loop)
+    _post_grade_action_cards(graded)   # best + worst pick → tap-to-act cards
     beat("eod_scorecard")
     used = tg_brief(msg)
     print(f"[eod-scorecard] posted; book ${total_val:,.0f} day ${total_pl:+,.0f} picks={len(graded)} · tg→{used or 'skip'}", flush=True)

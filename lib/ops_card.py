@@ -577,6 +577,19 @@ def action_row(buttons):
     return {'type': 1, 'components': list(buttons)[:5]}
 
 
+def pick_action_row():
+    """The standard 5-button action row — custom_ids MUST match
+    aime_discord_bot.ActionView so the running gateway bot handles the clicks.
+    Reused by every actionable card (flow picks, EOD grades, ...)."""
+    return action_row([
+        button('Paper Buy', 'act:buy', BTN_SUCCESS, '🧾'),
+        button('Set Alert', 'act:alert', BTN_SECONDARY, '🔔'),
+        button('Explain', 'act:explain', BTN_PRIMARY, '📖'),
+        button('Grade', 'act:grade', BTN_SECONDARY, '📊'),
+        button('Mute', 'act:mute', BTN_DANGER, '🔇'),
+    ])
+
+
 def post_message_bot(channel_id: str, token: str, content: str = None, embeds=None,
                      components=None, retries: int = 4, return_msg: bool = False,
                      thread_id: str = None):

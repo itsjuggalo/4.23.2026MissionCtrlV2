@@ -106,6 +106,22 @@ VAULT_IDENTITY = {
         short="OpenClaw's Grok/X relay — X-native intel from the Oracle box.",
         desc=("OpenClaw Grok relay. Grok / X-native intel from the openclaw (Oracle) box. "
               "Infra relay. We move unseen.")),
+    # ── cloud bots folded into the fleet (new tg_fleet keys: telegram.<function>) ──────
+    "telegram.daily_briefs": dict(
+        name="Daily Briefs", avatar="ghost",
+        short="Pre-open + EOD market briefs — the daily desk read.",
+        desc=("Daily briefs (push). Pre-open + EOD desk read: regime, FOMC, best contracts, "
+              "crypto, portfolio. Recon before the drop.")),
+    "telegram.media_gens": dict(
+        name="Media & Gens", avatar="fenix",
+        short="AI image & video generations — off the trade chats.",
+        desc=("Media & gens (push). AI image/video generations, kept off the trading chats. "
+              "En taro Adun — creative output only.")),
+    "telegram.spare_backup": dict(
+        name="Spare Backup", avatar="tassadar",
+        short="Spare relay — reserved capacity for the fleet.",
+        desc=("Spare backup (push). Reserved fleet relay held for overflow / failover routing. "
+              "Standing by.")),
 }
 
 

@@ -152,10 +152,12 @@ class PickView(discord.ui.View):
 ACT_BUY, ACT_ALERT, ACT_EXPLAIN, ACT_GRADE, ACT_MUTE = (
     "act:buy", "act:alert", "act:explain", "act:grade", "act:mute")
 
-# SAFETY (Mike's tiered doctrine): paper-buy SUBMIT is OFF. The button only ever
-# PREVIEWS the order + logs an intent. Mike flips this to True to arm it — paper
-# accounts only, $800 cap enforced. Until then no order is ever placed.
-_ARM_PAPER_BUY = False
+# ARMED 2026-06-15 on Mike's explicit "arm paper buy" go. PAPER accounts ONLY, hard
+# $800 AND ≤50%-of-equity cap, killswitch-guarded (~/.openclaw/workspace/state/
+# {acct}_killswitch), and market-hours guarded (_market_open — Alpaca QUEUES off-hours
+# market orders rather than rejecting, so we refuse when closed to avoid surprise fills).
+# The confirm Modal (account + $ entry) is the deliberate gate. Set False to disarm.
+_ARM_PAPER_BUY = True
 PAPER_INTENTS = Path.home() / ".openclaw" / "state" / "paper_buy_intents.jsonl"
 
 
@@ -229,14 +231,19 @@ def _grade_ticker(ticker: str) -> str:
 
 
 def _paper_keys(acct: str):
+    # current paper keys post-2026-06-04 reset (alpaca-r1-* was deleted May 3)
     sec = Path.home() / ".openclaw" / "secrets"
-    pairs = {"boba": ("alpaca-r1-key-id", "alpaca-r1-secret"),
+    pairs = {"boba": ("alpaca-boba-key-id", "alpaca-boba-secret"),
              "jazzy": ("alpaca-jazzy-key-id", "alpaca-jazzy-secret")}
     a, b = pairs.get(acct, pairs["boba"])
     try:
         return (sec / a).read_text().strip(), (sec / b).read_text().strip()
     except Exception:
         return None, None
+
+
+def _killswitch_on(acct: str) -> bool:
+    return (Path.home() / ".openclaw" / "workspace" / "state" / f"{acct}_killswitch").exists()
 
 
 def _log_paper_intent(ticker, acct, shares, price, cost, user):
@@ -251,16 +258,33 @@ def _log_paper_intent(ticker, acct, shares, price, cost, user):
     _journal(ticker, f"paper-buy-intent:{acct}:{shares}", user)
 
 
+def _market_open(kid, ksec) -> bool:
+    """Alpaca market clock. Fail-safe: if we can't confirm OPEN, treat as closed."""
+    try:
+        import urllib.request
+        req = urllib.request.Request("https://paper-api.alpaca.markets/v2/clock",
+            headers={"APCA-API-KEY-ID": kid, "APCA-API-SECRET-KEY": ksec})
+        with urllib.request.urlopen(req, timeout=8) as r:
+            return bool(json.loads(r.read()).get("is_open"))
+    except Exception:
+        return False
+
+
 def _submit_paper_buy(acct, ticker, shares):
     """ARMED paper-order submit — Alpaca PAPER only. Reached ONLY when
     _ARM_PAPER_BUY is True (Mike's explicit go)."""
     if shares < 1:
         return "↳ nothing submitted (size < 1 share)."
+    if _killswitch_on(acct):
+        return f"🛑 {acct} killswitch is ON — order NOT submitted."
+    kid, ksec = _paper_keys(acct)
+    if not kid:
+        return f"↳ no paper keys for '{acct}' — not submitted."
+    if not _market_open(kid, ksec):
+        return ("🕒 Market is CLOSED — a market order would queue and fill at the next open. "
+                "NOT submitted. Use 🔔 Set Alert, or tap Paper Buy during market hours.")
     try:
         import urllib.request
-        kid, ksec = _paper_keys(acct)
-        if not kid:
-            return f"↳ no paper keys for '{acct}' — not submitted."
         body = json.dumps({"symbol": ticker, "qty": str(shares), "side": "buy",
                            "type": "market", "time_in_force": "day"}).encode()
         req = urllib.request.Request("https://paper-api.alpaca.markets/v2/orders", data=body,
@@ -277,19 +301,24 @@ def _paper_buy_preview(ticker, account, deploy_str, user) -> str:
     t = ticker.upper().strip()
     acct = "jazzy" if str(account).lower().startswith("j") else "boba"
     try:
-        deploy = float(str(deploy_str).replace("$", "").replace(",", ""))
+        want = float(str(deploy_str).replace("$", "").replace(",", ""))
     except ValueError:
-        deploy = 150.0
-    deploy = min(max(deploy, 0.0), 800.0)        # Mike's $800/trade cap
+        want = 150.0
     price = _last_price(t)
     eq = total_equity()
     if not price:
         return f"⚠️ Couldn't fetch a live price for {t}; preview aborted."
+    cap = 800.0                                   # Mike's hard $800/trade cap
+    if eq:
+        cap = min(cap, 0.5 * eq)                  # never >50% of equity in one paper name
+    deploy = min(max(want, 0.0), cap)
+    capped = deploy < want
     shares = int(deploy // price)
     cost = shares * price
     lines = [f"🧾 **PAPER BUY PREVIEW — {t}** · acct `{acct}`",
              f"Live ~${price:,.2f} · deploy ${deploy:,.0f}"
-             + (f" ({deploy/eq*100:.1f}% of ${eq:,.0f} equity)" if eq else "")]
+             + (f" ({deploy/eq*100:.1f}% of ${eq:,.0f} equity)" if eq else "")
+             + (f"  _(capped from ${want:,.0f})_" if capped else "")]
     if shares < 1:
         lines.append(f"➡️ ${deploy:,.0f} buys <1 share at ${price:,.2f} — raise the amount or pick a cheaper name.")
     else:

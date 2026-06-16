@@ -49,7 +49,7 @@ FLEET = {
     # ── push (they alert you) ───────────────────────────────────────────────
     "flow_signals":    dict(user="PipelineSignals_Bot",     avatar="queen_of_blades", role="push",        src=("file", "telegram-bot-token.txt")),
     "flow_digest":     dict(user="Boba2Telegram_Bot",       avatar="hydralisk",       role="push",        src=("vault", "telegram_boba2_bot_token")),
-    "daily_briefs":    dict(user="(CHANGE NOW)",            avatar="ghost",           role="push",        src=("cloud", None)),
+    "daily_briefs":    dict(user="SpaceCoast_Claude_Bot",   avatar="ghost",           role="push",        src=("cloud", None)),
     # ── media (off the trade chats) ─────────────────────────────────────────
     "media_gens":      dict(user="(Gamma Trader Assistant)",avatar="fenix",           role="push",        src=("cloud", None)),
     # ── infra (not chat targets) ────────────────────────────────────────────

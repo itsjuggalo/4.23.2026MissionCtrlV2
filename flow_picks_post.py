@@ -404,17 +404,16 @@ def _post_action_card(rec) -> None:
             ],
             "footer": {"text": f"tk:{sym} · tap a button to act · {tag.strip() or 'flow pick'}"},
         }
-        row = oc.action_row([
-            oc.button("Paper Buy", "act:buy", oc.BTN_SUCCESS, "🧾"),
-            oc.button("Set Alert", "act:alert", oc.BTN_SECONDARY, "🔔"),
-            oc.button("Explain", "act:explain", oc.BTN_PRIMARY, "📖"),
-            oc.button("Grade", "act:grade", oc.BTN_SECONDARY, "📊"),
-            oc.button("Mute", "act:mute", oc.BTN_DANGER, "🔇"),
-        ])
-        ok = oc.post_message_bot(cid, tok, embeds=[embed], components=[row])
+        ok = oc.post_message_bot(cid, tok, embeds=[embed], components=[oc.pick_action_row()])
         print(f"[flow-picks] action card → {sym}: {'ok' if ok else 'FAILED'}", flush=True)
     except Exception as e:  # noqa: BLE001
         print(f"[flow-picks] action card err: {e}", flush=True)
+
+
+def _post_action_cards(picks) -> None:
+    """Action card for the top few picks (not just #1) — tap-to-act on each."""
+    for rec in (picks or [])[:3]:
+        _post_action_card(rec)
 
 
 def main():
@@ -430,7 +429,7 @@ def main():
         print(msg)
         return
     post(resolve_channel(a.channel), msg)
-    _post_action_card(TOP_ACTION_PICK)   # button-bearing card for the #1 pick (SynthControl)
+    _post_action_cards(ACTIONABLE_PICKS)  # button-bearing cards for the top 3 picks (SynthControl)
     _post_pick_threads(ACTIONABLE_PICKS)  # per-pick lifecycle threads (entry; grade follows at EOD)
     beat("flow_picks")
     used = tg_brief(msg)
