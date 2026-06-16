@@ -208,24 +208,38 @@ def _mc_kb_recall():
         from datetime import datetime as _dt, timezone as _tz
         from pathlib import Path as _P
 
-        # 1) Top-5 flow tickers (by flow value, last 24h)
+        # 1) Top-5 flow tickers (by flow value) from the LIVE merged flow JSON.
+        #    Repointed 2026-06-16 off the dead /home/ubuntu/mission-control-restored/
+        #    data/options_flow.sqlite (0-byte, frozen May 26) to the live scraper
+        #    streams so the cycle no longer runs blind. Source: option-signals scraper.
         flow_block = ""
         top_tickers = []
         try:
-            con = _s.connect("/home/ubuntu/mission-control-restored/data/options_flow.sqlite")
-            cur = con.cursor()
-            rows = cur.execute(
-                """SELECT ticker, COUNT(*), COALESCE(SUM(flow_value),0)
-                   FROM flow_alerts
-                   WHERE captured_at > datetime('now','-24 hours') AND ticker IS NOT NULL
-                   GROUP BY ticker
-                   ORDER BY 3 DESC, 2 DESC
-                   LIMIT 5"""
-            ).fetchall()
-            con.close()
+            flow_paths = [
+                "/AIWorkWSL/trading/signals/option-scraper/data/flow_alerts_today.json",
+                "/AIWorkWSL/trading/signals/option-scraper/data/flow2_alerts_today.json",
+            ]
+            agg = {}  # symbol -> [alert_count, total_flow_value]
+            for fp in flow_paths:
+                p = _P(fp)
+                if not p.exists():
+                    continue
+                data = _j.loads(p.read_text())
+                recs = data.values() if isinstance(data, dict) else data
+                for rec in recs:
+                    a = rec.get("alert", rec) if isinstance(rec, dict) else {}
+                    sym = a.get("Symbol")
+                    if not sym:
+                        continue
+                    val = a.get("totalFlowValue") or 0
+                    e = agg.setdefault(sym, [0, 0])
+                    e[0] += 1
+                    e[1] += val
+            rows = sorted(((s, c, v) for s, (c, v) in agg.items()),
+                          key=lambda r: (r[2], r[1]), reverse=True)[:5]
             if rows:
                 top_tickers = [r[0] for r in rows]
-                flow_block = "## Top flow tickers (last 24h, premium-weighted)\n\n"
+                flow_block = "## Top flow tickers (today, premium-weighted)\n\n"
                 for t, n, p in rows:
                     flow_block += f"- **{t}**: {n} alerts, ${int(p):,} premium\n"
                 flow_block += "\n"

@@ -51,7 +51,7 @@ FLEET = {
     "flow_digest":     dict(user="Boba2Telegram_Bot",       avatar="hydralisk",       role="push",        src=("vault", "telegram_boba2_bot_token")),
     "daily_briefs":    dict(user="SpaceCoast_Claude_Bot",   avatar="ghost",           role="push",        src=("cloud", None)),
     # ── media (off the trade chats) ─────────────────────────────────────────
-    "media_gens":      dict(user="(Gamma Trader Assistant)",avatar="fenix",           role="push",        src=("cloud", None)),
+    "media_gens":      dict(user="JazzyHazzyTelegram_Bot",  avatar="fenix",           role="push",        src=("cloud", None)),
     # ── infra (not chat targets) ────────────────────────────────────────────
     "hermes_relay":    dict(user="Gumroadie_bot",           avatar="dragoon",         role="infra",       src=("vault", "telegram_hermes_bot_token")),
     "openclaw_grok":   dict(user="OpenclawGrok727_Bot",     avatar="ghost",           role="infra",       src=("vault", "telegram_openclaw_bot_token")),
