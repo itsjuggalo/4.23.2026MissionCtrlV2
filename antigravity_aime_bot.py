@@ -79,6 +79,48 @@ def ask_local(question: str, agent: str | None = None) -> str:
     except Exception as e:
         return f"[copilot error] {e}"
 
+def download_photo(file_id: str) -> str | None:
+    """Telegram getFile -> download the largest photo to /tmp. Returns local path or None."""
+    try:
+        info = tg("getFile", file_id=file_id)
+        if not info.get("ok"):
+            return None
+        fp  = info["result"]["file_path"]
+        url = f"https://api.telegram.org/file/bot{BOT_TOKEN}/{fp}"
+        r = requests.get(url, timeout=30)
+        if r.status_code != 200:
+            return None
+        suffix = Path(fp).suffix or ".jpg"
+        dest = Path("/tmp") / f"optionshot_{int(time.time())}{suffix}"
+        dest.write_bytes(r.content)
+        return str(dest)
+    except Exception as e:
+        print(f"download_photo err: {e}", flush=True)
+        return None
+
+def ask_local_image(img_path: str, caption: str = "") -> str:
+    """Decipher an option-chain screenshot via the full skill stack (headless claude)."""
+    ctx = f"\nMike's caption/context (WEIGHT HEAVILY): {caption}" if caption else ""
+    prompt = (
+        f"/decipher-option-shot {img_path}{ctx}\n"
+        "This is a Robinhood option screenshot Mike just sent. Read it, run the full stack "
+        "(options-desk + ainvest verticals + market-context + live flow + QUANTUM QAE/IV gate) "
+        "and reply with the single best contract pick, verdict-first and Telegram-ready.")
+    env = {k: v for k, v in os.environ.items() if k != "ANTHROPIC_API_KEY"}
+    try:
+        r = subprocess.run(
+            [CLAUDE_BIN, "-p", prompt, "--model", "sonnet", "--output-format", "json",
+             "--allowedTools", CLAUDE_TOOLS],
+            capture_output=True, text=True, timeout=600, env=env, cwd=CLAUDE_CWD)
+        if r.returncode != 0:
+            return f"[decipher error rc={r.returncode}] {r.stderr.strip()[:300]}"
+        out = json.loads(r.stdout)
+        return (out.get("result") or "").strip() or "[decipher returned empty]"
+    except subprocess.TimeoutExpired:
+        return "[decipher timeout after 600s — try a tighter crop of just the chain]"
+    except Exception as e:
+        return f"[decipher error] {e}"
+
 def tg(method, req_timeout=10, **kwargs):
     r = requests.post(f"{TG_BASE}/{method}", json=kwargs, timeout=req_timeout)
     return r.json()
@@ -145,6 +187,29 @@ def main():
                 msg     = upd.get("message", {})
                 chat_id = msg.get("chat", {}).get("id")
                 text    = (msg.get("text") or "").strip()
+                photo   = msg.get("photo")  # list of PhotoSize, largest last
+                caption = (msg.get("caption") or "").strip()
+
+                # --- option-chain SCREENSHOT decipher (owner DM only) ---------
+                if chat_id and photo:
+                    if str(chat_id) not in OWNER_CHATS:
+                        continue  # screenshot analysis = Mike's DM only
+                    tg("sendChatAction", chat_id=chat_id, action="typing")
+                    img = download_photo(photo[-1]["file_id"])
+                    if not img:
+                        tg("sendMessage", chat_id=chat_id, text="⚠️ couldn't fetch that image — resend?")
+                        continue
+                    print(f"[{chat_id}] PHOTO -> decipher-option-shot ({img}) cap={caption[:60]!r}", flush=True)
+                    tg("sendMessage", chat_id=chat_id,
+                       text="🔬 deciphering the chain — options-desk + ainvest + flow + quantum… (~1-3 min)")
+                    try:
+                        answer = ask_local_image(img, caption)
+                        send_reply(chat_id, answer)
+                        print(f"[{chat_id}] A(decipher): {len(answer)} chars", flush=True)
+                    except Exception as e:
+                        tg("sendMessage", chat_id=chat_id, text=f"⚠️ decipher error: {e}")
+                        print(f"[{chat_id}] decipher ERR: {e}", flush=True)
+                    continue
 
                 if not chat_id or not text:
                     continue

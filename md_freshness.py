@@ -41,7 +41,8 @@ TG_SEND = HOME / "bin" / "tg-send-msg"
 DRY = "--dry-run" in sys.argv
 NO_TG = "--no-tg" in sys.argv or DRY
 
-MEMORY_CAP = 24 * 1024  # ~24KB soft cap on memory index files
+MEMORY_CAP = 26 * 1024  # soft cap on memory index files; realistic for a ~115-entry index
+                        # (durable shrink = retire SHIPPED/RESOLVED entries, not shorter lines)
 STALE_DAYS = 21         # living docs older than this get flagged
 
 # Curated registry: the docs that describe "current" projects/trading/ops.
@@ -56,6 +57,7 @@ REGISTRY = [
     HOME / "restructure" / "PROGRESS.md",
     HOME / ".claude" / "projects" / "-home-itsju-restructure" / "memory" / "MEMORY.md",
     HOME / ".claude" / "projects" / "-home-itsju" / "memory" / "MEMORY.md",
+    HOME / "restructure" / "OPEN-ITEMS.md",
 ]
 MEMORY_FILES = {
     HOME / ".claude" / "projects" / "-home-itsju-restructure" / "memory" / "MEMORY.md",
@@ -317,6 +319,15 @@ def main():
                f"full report: ~/restructure/DOCS-FRESHNESS.md")
     if not NO_TG and TG_SEND.exists():
         sh([str(TG_SEND), summary], timeout=30)
+    # Best-effort Discord post to #system-logs (ops channel). Reuses lib/discord_post.py
+    # which already handles the urllib UA-403 gotcha; never raises.
+    if not NO_TG:
+        try:
+            sys.path.insert(0, str(Path(__file__).resolve().parent))
+            from lib.discord_post import post_discord
+            post_discord(summary, webhook_name="discord_ops_webhook", username="Docs Freshness")
+        except Exception:
+            pass
     print(f"wrote {REPORT} · SYSTEM-MAP {sm_status} · canon {len(canon)} · other {len(other)} · reg_flags {reg_flags}")
 
 
