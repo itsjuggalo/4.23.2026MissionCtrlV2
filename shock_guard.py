@@ -331,6 +331,7 @@ def main() -> int:
     if triggers:
         st["trigger_runs"] = st.get("trigger_runs", 0) + 1
         st["calm_since"] = None
+        st["calm_notes"] = 0   # a fresh trigger re-arms the stand-down notice
     else:
         st["trigger_runs"] = 0
 
@@ -371,11 +372,25 @@ def main() -> int:
         # crisis condition gone — start/continue the calm clock
         if st.get("calm_since") is None:
             st["calm_since"] = time.time()
-        elif time.time() - st["calm_since"] >= 1800:
-            telegram(f"✅ Shock guard: conditions calm 30+ min (VIX {vix or '?'}). "
-                     f"HALT still ON — reply <b>RESUME</b> to clear it.", loud=False)
-            st["calm_since"] = time.time()  # re-note every 30 min, never auto-clear
-            log_event("calm_notice", {"vix": vix})
+            st["calm_notes"] = 0
+        else:
+            elapsed = time.time() - st["calm_since"]
+            notes = st.get("calm_notes", 0)
+            # De-spam (2026-06-15): the stand-down used to re-ping every 30 min for the
+            # whole session (~10×/day on 06-13) because calm_since reset each fire. Now it
+            # sends ONCE at 30 min, then at most ONE quiet backstop ~4h later, then goes
+            # silent. HALT stays ON until Mike replies RESUME (dm_responder clears it);
+            # we just stop nagging. Any fresh trigger re-arms the whole clock above.
+            due = (notes == 0 and elapsed >= 1800) or (notes == 1 and elapsed >= 4 * 3600)
+            if due:
+                tail = ("HALT still ON — reply <b>RESUME</b> to clear it."
+                        if notes == 0 else
+                        "HALT is STILL ON (no RESUME seen) — reply <b>RESUME</b> when ready. "
+                        "This is the last reminder.")
+                telegram(f"✅ Shock guard: conditions calm (VIX {vix or '?'}). {tail}",
+                         loud=False)
+                st["calm_notes"] = notes + 1
+                log_event("calm_notice", {"vix": vix, "note": notes + 1})
     elif st["level"] == "WATCH" and time.time() - st.get("watch_armed_at", 0) > 1800 \
             and not triggers:
         st["level"] = "CALM"  # watch expires after 30 quiet minutes
