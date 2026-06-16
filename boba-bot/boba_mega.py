@@ -41,7 +41,8 @@ CHAN = {
 
 
 RELAY_DATA = Path.home() / "mission-control-restored" / "Option-Signals-Scraper" / "data"
-ANTHROPIC_KEY = (SECRETS / "anthropic_api_key").read_text().strip()
+_ak = SECRETS / "anthropic_api_key"
+ANTHROPIC_KEY = _ak.read_text().strip() if _ak.exists() else ""  # vestigial: LLM goes via the claude CLI (OAuth/subscription), not this key — optional so the laptop (no API key, OAuth-first) doesn't crash at import
 GROK_KEY_FILE = SECRETS / "xai_api_key"
 GROK_KEY = GROK_KEY_FILE.read_text().strip() if GROK_KEY_FILE.exists() else None
 ANTHROPIC_MODEL = "claude-haiku-4-5-20251001"
@@ -222,7 +223,7 @@ def _load_best_options_archive(min_age_min=0, max_age_min=240, max_show=10, min_
 
 def _ask_anthropic(question, context_blob=""):
     """Send question to Claude Haiku via CLI subprocess. Returns text response."""
-    CLAUDE_BIN = "/home/ubuntu/.npm-global/bin/claude"
+    CLAUDE_BIN = "/home/itsju/bin/claude"  # laptop claude CLI (was Oracle's /home/ubuntu/.npm-global path)
     system = (
         "You are Boba, the AI orchestrator for Mike's Mission Control trading system. "
         "Mike runs an algorithmic trading operation with multi-agent intelligence "

@@ -43,7 +43,7 @@ IDENTITY = {
               "Ask 'what's the read on NVDA', 'screen oversold large caps', 'earnings outlook'. "
               "I have seen the future — and I will not let it come to pass.")),
     "telegram-bot-token.txt": dict(
-        name="Flow Signals", avatar="queen_of_blades",
+        name="Flow Signals", avatar="raynor",
         short="The Swarm hunts the flow — live whale sweeps, exits & shock warnings.",
         desc=("Flow signals (push). The meanest options flow: big sweeps, position exits, market "
               "shocks — straight to your phone. Pull the board with /winners /sweeps from the "
@@ -113,7 +113,7 @@ VAULT_IDENTITY = {
         desc=("Daily briefs (push). Pre-open + EOD desk read: regime, FOMC, best contracts, "
               "crypto, portfolio. Ghost reporting — recon before the drop.")),
     "telegram.media_gens": dict(
-        name="Media & Gens", avatar="fenix",
+        name="Media & Gens", avatar="mengsk",
         short="AI image & video generations — off the trade chats.",
         desc=("Media & gens (push). AI image/video generations, kept off the trading chats. "
               "En taro Adun — creative output only.")),

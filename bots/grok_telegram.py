@@ -6,7 +6,6 @@ import sys
 import threading
 import time
 import requests
-from flask import Flask, request, abort
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).parent))
@@ -34,7 +33,6 @@ MAX_HISTORY = 8   # last 8 messages (4 user+assistant pairs)
 EDIT_INTERVAL = 1.0  # seconds between progressive Telegram message edits
 
 conversations = {}
-app = Flask(__name__)
 
 
 def log_usage(input_tokens, output_tokens):
@@ -188,39 +186,39 @@ def handle_message(msg):
     print(f"  [grok] replied ({len(response)} chars)", flush=True)
 
 
-def make_app(token):
-    """Register the webhook route dynamically after token is known."""
-    @app.route(f"/tg-grok/{token}", methods=["POST"])
-    def webhook():
-        data = request.get_json(silent=True)
-        if not data:
-            abort(400)
-        msg = data.get("message") or data.get("channel_post")
-        if msg:
-            # Return 200 immediately; Telegram retries if we take > ~60s
-            threading.Thread(target=handle_message, args=(msg,), daemon=True).start()
-        # Log when bot is added to a new group
-        mcm = data.get("my_chat_member")
-        if mcm:
-            chat = mcm.get("chat", {})
-            new_status = mcm.get("new_chat_member", {}).get("status")
-            print(f"[grok] chat_member update: chat_id={chat.get('id')} title={chat.get('title')!r} status={new_status}", flush=True)
-            if new_status == "member":
-                cid = chat.get("id")
-                if cid:
-                    send_message(cid, "👋 Grok online — I see live flow + analyst signals. Ask me anything.")
-        return "OK", 200
-
-    @app.route("/health", methods=["GET"])
-    def health():
-        return "OK", 200
-
-    return app
+def poll_loop():
+    """Long-poll getUpdates. Laptop migration 2026-06-16: was a Flask webhook on
+    :8444; converted to polling so grok-bot needs no public endpoint. deleteWebhook
+    switches Telegram push→poll; only ONE poller may hold this token (Oracle's
+    grok-bot is stopped at cutover)."""
+    base = f"https://api.telegram.org/bot{BOT_TOKEN}"
+    try:
+        requests.post(f"{base}/deleteWebhook", json={"drop_pending_updates": False}, timeout=10)
+    except Exception as e:
+        print(f"[grok] deleteWebhook warn: {e}", flush=True)
+    print(f"[grok] polling getUpdates — model {MODEL}", flush=True)
+    offset = 0
+    while True:
+        try:
+            r = requests.get(f"{base}/getUpdates",
+                             params={"offset": offset, "timeout": 50}, timeout=60).json()
+            for upd in r.get("result", []):
+                offset = upd["update_id"] + 1
+                msg = upd.get("message") or upd.get("channel_post")
+                if msg:
+                    threading.Thread(target=handle_message, args=(msg,), daemon=True).start()
+                mcm = upd.get("my_chat_member")
+                if mcm:
+                    chat = mcm.get("chat", {})
+                    new_status = mcm.get("new_chat_member", {}).get("status")
+                    print(f"[grok] chat_member update: chat_id={chat.get('id')} title={chat.get('title')!r} status={new_status}", flush=True)
+                    if new_status == "member" and chat.get("id"):
+                        send_message(chat.get("id"), "👋 Grok online — I see live flow + analyst signals. Ask me anything.")
+        except Exception as e:
+            print(f"[grok] poll error: {e}", flush=True)
+            time.sleep(3)
 
 
 if __name__ == "__main__":
-    flask_app = make_app(BOT_TOKEN)
-    print(f"[grok] Webhook server starting on :8444", flush=True)
-    print(f"[grok] Model: {MODEL}", flush=True)
-    print(f"[grok] Path: /tg-grok/***", flush=True)
-    flask_app.run(host="0.0.0.0", port=8444, debug=False)
+    print("[grok] Grok Telegram bot starting (polling mode)", flush=True)
+    poll_loop()
