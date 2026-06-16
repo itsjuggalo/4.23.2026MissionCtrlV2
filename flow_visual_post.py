@@ -53,7 +53,7 @@ def standouts(top: int = 3) -> list[dict]:
 
 def main() -> None:
     ap = argparse.ArgumentParser()
-    ap.add_argument("--channel", default="flow-cards")
+    ap.add_argument("--channel", default="flow-picks")  # 2026-06-16: consolidated onto the single de-noised flow surface (#flow-cards retired)
     ap.add_argument("--top", type=int, default=3)
     ap.add_argument("--print", action="store_true", dest="print_only")
     args = ap.parse_args()
