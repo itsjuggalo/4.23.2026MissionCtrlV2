@@ -292,12 +292,14 @@ def main() -> None:
             f"- {f}" for f in findings
         )
         print(body)
-        # Visual card first; on ANY card/post failure, post the full text body.
-        if "--card" in sys.argv or "--no-card" not in sys.argv:
-            if _post_card(findings):
-                return
-        # Discord hard-caps content at 2000 chars; keep headroom.
-        post_discord(body[:1900] + ("\n…(truncated)" if len(body) > 1900 else ""))
+        # Discord posting DISABLED 2026-06-16 (Mike): DB-contention is infra
+        # noise, not trading/politics. The monitor + WAL self-heal (check_wal)
+        # still run every 30m and log findings here; we just no longer spam
+        # Discord with them. Re-enable by restoring the _post_card/post_discord
+        # calls below if an ops channel is ever wanted again.
+        if "--discord" in sys.argv:  # opt-in only; cron does NOT pass it
+            if not _post_card(findings):
+                post_discord(body[:1900] + ("\n…(truncated)" if len(body) > 1900 else ""))
     else:
         print(f"{ts} db-contention-monitor: clean (WAL ok, no lock storms, no wedged cycles)")
 
