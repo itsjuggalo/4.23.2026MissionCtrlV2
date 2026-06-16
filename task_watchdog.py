@@ -29,11 +29,10 @@ NOW = datetime.now(timezone.utc)
 
 
 def webhook_url() -> str | None:
-    try:
-        url = WEBHOOK.read_text().strip()
-        return url if url.startswith("http") else None
-    except Exception:
-        return None
+    # Discord disabled 2026-06-16 (Mike: ops/monitoring off Discord). The Telegram
+    # alert (post_telegram) still fires, so task-ghost breakage is still surfaced —
+    # just not in Discord. Re-enable by restoring the secret read below.
+    return None
 
 
 def post_discord(msg: str) -> None:

@@ -47,6 +47,11 @@ def main():
     if not stale:
         return 0  # nothing to alert (hermes only posts when stale)
 
+    # Discord disabled 2026-06-16 (Mike: ops/dev noise off Discord). Kronos-stale is
+    # dev-infra, not trading/politics. Return 0 (success) so hermes.sh ALSO skips its
+    # text-embed fallback. Detection still runs; nothing is posted to Discord.
+    return 0
+
     sys.path.insert(0, os.path.expanduser("~/05_AUTOMATION/scripts/lib"))
     try:
         import ops_card

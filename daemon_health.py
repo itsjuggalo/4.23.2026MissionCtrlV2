@@ -95,15 +95,11 @@ def _read_json(path: Path, default=None):
 
 
 def discord_webhook_url() -> str:
-    # Tries in order: dedicated ops → risk-alerts → portfolio-status → first match.
-    for name in (
-        "discord-webhook-ops.txt",
-        "discord-webhook-risk-alerts.txt",
-        "discord-webhook-portfolio-status.txt",
-    ):
-        url = _read(SECRETS / name)
-        if url:
-            return url
+    # Discord disabled 2026-06-16 (Mike: ops/monitoring off Discord). Health checks +
+    # recovery actions still run and log; post_discord() no-ops on an empty url. NOTE
+    # the old fallback chain reached risk-alerts/portfolio-status (TRADING channels),
+    # which is why this is silenced here rather than by blanking a secret file.
+    # Re-enable by restoring the secret-chain lookup below.
     return ""
 
 

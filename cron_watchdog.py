@@ -86,8 +86,18 @@ def main():
                               f"— crons may not be firing")
                 seen.add(key)
     if alerts:
-        sd.post(sd.resolve_channel("system-logs"),
-                f"🛰️ WATCHDOG · {now:%-I:%M %p ET}\n" + "\n".join(alerts))
+        # Discord disabled 2026-06-16 (Mike: ops off Discord). These watch the LIVE
+        # flow relay / trade cycles, so the alert is genuinely important — route it to
+        # Telegram (system_health) instead of dropping it.
+        _msg = f"🛰️ CRON WATCHDOG · {now:%-I:%M %p ET}\n" + "\n".join(alerts)
+        try:
+            import sys as _sys
+            _sys.path.insert(0, "/home/itsju/scripts")
+            from lib.notify import tg_push
+            tg_push("⚠️ " + _msg, "system_health", loud=False, html=False,
+                    fallback_token_file="telegram-ping-bot-token")
+        except Exception as _e:
+            print(f"[cron-watchdog] telegram alert failed: {_e}", flush=True)
     save(seen, today)
     print(f"[cron-watchdog] {now:%H:%M} procs={ {p: (st or {}).get(p) for p in WATCH_PROCS} } "
           f"alerts={len(alerts)}", flush=True)
