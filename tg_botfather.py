@@ -211,6 +211,60 @@ async def cmd_login():
     await client.disconnect()
 
 
+def _print_qr(url: str):
+    """Render a login URL as an ASCII QR in the terminal (scannable from the phone app)."""
+    import qrcode
+    qr = qrcode.QRCode(border=2)
+    qr.add_data(url)
+    qr.make(fit=True)
+    qr.print_ascii(invert=True)
+
+
+async def cmd_login_qr(password: str | None = None):
+    """QR login — no codes to type. Scan the printed QR from Telegram →
+    Settings → Devices → Link Desktop Device. Auto-recreates the QR as it
+    expires; pass your 2FA password as the arg if you have one set."""
+    import asyncio
+    from telethon.errors import SessionPasswordNeededError
+    api_id, api_hash, _ = _creds()
+    if not api_id:
+        sys.exit("set-creds first.")
+    client = _client(new_session=True)
+    await client.connect()
+    if await client.is_user_authorized():
+        me = await client.get_me()
+        print(f"✓ already logged in as {me.first_name} (@{me.username}).")
+        await client.disconnect()
+        return
+    qr = await client.qr_login()
+    authed = False
+    for attempt in range(1, 11):  # ~10 × 30s ≈ 5 min of scan window
+        print(f"\n── Scan this QR from your phone (attempt {attempt}/10) ──")
+        print("   Telegram → Settings → Devices → Link Desktop Device\n")
+        _print_qr(qr.url)
+        try:
+            authed = await qr.wait(timeout=30)
+            break
+        except asyncio.TimeoutError:
+            await qr.recreate()
+            continue
+        except SessionPasswordNeededError:
+            if not password:
+                await client.disconnect()
+                sys.exit("2FA is on — re-run: tg_botfather.py login-qr <YOUR_2FA_PASSWORD>")
+            await client.sign_in(password=password)
+            authed = True
+            break
+    if not authed:
+        await client.disconnect()
+        sys.exit("QR went unscanned after several tries — re-run login-qr.")
+    _uput("telegram_user.session", client.session.save(),
+          "MTProto user session — password-grade")
+    me = await client.get_me()
+    print(f"\n✓ logged in as {me.first_name} (@{me.username}); session saved to vault.")
+    await client.disconnect()
+
+
 async def cmd_login_phone(phone: str):
     """Paste-based step 1: request the SMS/app code (no interactive prompt)."""
     from telethon import TelegramClient
@@ -370,6 +424,9 @@ def main():
     sub = ap.add_subparsers(dest="cmd", required=True)
     sc = sub.add_parser("set-creds"); sc.add_argument("api_id"); sc.add_argument("api_hash")
     sub.add_parser("login")
+    lq = sub.add_parser("login-qr"); lq.add_argument("password", nargs="?")
+    lp = sub.add_parser("login-phone"); lp.add_argument("phone")
+    lc = sub.add_parser("login-code"); lc.add_argument("code"); lc.add_argument("password", nargs="?")
     sub.add_parser("list")
     tk = sub.add_parser("tokens"); tk.add_argument("--missing", action="store_true")
     tk.add_argument("--all", action="store_true")
@@ -382,6 +439,12 @@ def main():
         cmd_setcreds(a.api_id, a.api_hash)
     elif a.cmd == "login":
         asyncio.run(cmd_login())
+    elif a.cmd == "login-qr":
+        asyncio.run(cmd_login_qr(a.password))
+    elif a.cmd == "login-phone":
+        asyncio.run(cmd_login_phone(a.phone))
+    elif a.cmd == "login-code":
+        asyncio.run(cmd_login_code(a.code, a.password))
     elif a.cmd == "list":
         asyncio.run(cmd_list())
     elif a.cmd == "tokens":
