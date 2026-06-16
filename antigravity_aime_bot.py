@@ -6,7 +6,7 @@ Pin-mode (AIME-style @): /agent <name> pins a local Claude agent for the chat �
 all messages then run headless `claude -p "/ainvest ..."` on the laptop
 (offline-first copilot, subscription billing). /exit unpins. /ainvest <q> = one-shot.
 """
-import json, os, subprocess, time, secrets, sys
+import json, os, subprocess, time, secrets, sys, queue, threading
 from pathlib import Path
 import requests
 
@@ -111,15 +111,36 @@ def ask_local_image(img_path: str, caption: str = "") -> str:
         r = subprocess.run(
             [CLAUDE_BIN, "-p", prompt, "--model", "sonnet", "--output-format", "json",
              "--allowedTools", CLAUDE_TOOLS],
-            capture_output=True, text=True, timeout=600, env=env, cwd=CLAUDE_CWD)
+            capture_output=True, text=True, timeout=900, env=env, cwd=CLAUDE_CWD)
         if r.returncode != 0:
             return f"[decipher error rc={r.returncode}] {r.stderr.strip()[:300]}"
         out = json.loads(r.stdout)
         return (out.get("result") or "").strip() or "[decipher returned empty]"
     except subprocess.TimeoutExpired:
-        return "[decipher timeout after 600s — try a tighter crop of just the chain]"
+        return "[decipher timeout after 900s — try a tighter crop of just the chain]"
     except Exception as e:
         return f"[decipher error] {e}"
+
+# Serial background worker: decipher runs ~5-10 min; queue keeps the poll loop
+# responsive and runs ONE claude subprocess at a time (RAM-safe on this box).
+PHOTO_Q: "queue.Queue" = queue.Queue()
+
+def _photo_worker():
+    while True:
+        chat_id, img, caption = PHOTO_Q.get()
+        try:
+            answer = ask_local_image(img, caption)
+            send_reply(chat_id, answer)
+            print(f"[{chat_id}] A(decipher): {len(answer)} chars", flush=True)
+        except Exception as e:
+            tg("sendMessage", chat_id=chat_id, text=f"⚠️ decipher error: {e}")
+            print(f"[{chat_id}] decipher ERR: {e}", flush=True)
+        finally:
+            try:
+                os.remove(img)
+            except OSError:
+                pass
+            PHOTO_Q.task_done()
 
 def tg(method, req_timeout=10, **kwargs):
     r = requests.post(f"{TG_BASE}/{method}", json=kwargs, timeout=req_timeout)
@@ -172,6 +193,7 @@ def send_reply(chat_id: int, text: str):
 
 def main():
     print("AntiGravityG59Laptop AIME bot started", flush=True)
+    threading.Thread(target=_photo_worker, daemon=True).start()
     offset = 0
     while True:
         try:
@@ -200,15 +222,11 @@ def main():
                         tg("sendMessage", chat_id=chat_id, text="⚠️ couldn't fetch that image — resend?")
                         continue
                     print(f"[{chat_id}] PHOTO -> decipher-option-shot ({img}) cap={caption[:60]!r}", flush=True)
+                    qn = PHOTO_Q.qsize()
+                    note = f" (you're #{qn+1} in line)" if qn else ""
                     tg("sendMessage", chat_id=chat_id,
-                       text="🔬 deciphering the chain — options-desk + ainvest + flow + quantum… (~1-3 min)")
-                    try:
-                        answer = ask_local_image(img, caption)
-                        send_reply(chat_id, answer)
-                        print(f"[{chat_id}] A(decipher): {len(answer)} chars", flush=True)
-                    except Exception as e:
-                        tg("sendMessage", chat_id=chat_id, text=f"⚠️ decipher error: {e}")
-                        print(f"[{chat_id}] decipher ERR: {e}", flush=True)
+                       text=f"🔬 deciphering the chain — options-desk + ainvest + flow + quantum… (~5-8 min){note}")
+                    PHOTO_Q.put((chat_id, img, caption))
                     continue
 
                 if not chat_id or not text:
