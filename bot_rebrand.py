@@ -108,7 +108,7 @@ VAULT_IDENTITY = {
               "Infra relay. We move unseen.")),
     # ── cloud bots folded into the fleet (new tg_fleet keys: telegram.<function>) ──────
     "telegram.daily_briefs": dict(
-        name="Daily Briefs", avatar="ghost",
+        name="Daily Briefs", avatar="duke",
         short="Pre-open + EOD market briefs — the daily desk read.",
         desc=("Daily briefs (push). Pre-open + EOD desk read: regime, FOMC, best contracts, "
               "crypto, portfolio. Ghost reporting — recon before the drop.")),
