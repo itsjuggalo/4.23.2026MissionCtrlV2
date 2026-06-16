@@ -211,6 +211,58 @@ async def cmd_login():
     await client.disconnect()
 
 
+async def cmd_login_phone(phone: str):
+    """Paste-based step 1: request the SMS/app code (no interactive prompt)."""
+    from telethon import TelegramClient
+    from telethon.sessions import StringSession
+    api_id, api_hash, _ = _creds()
+    if not api_id:
+        sys.exit("set-creds first.")
+    client = TelegramClient(StringSession(), int(api_id), api_hash)
+    await client.connect()
+    sent = await client.send_code_request(phone)
+    _uput("telegram_user.session_pending", client.session.save(), "login in progress")
+    _uput("telegram_user.login_phone", phone, "login in progress")
+    _uput("telegram_user.code_hash", sent.phone_code_hash, "login in progress")
+    await client.disconnect()
+    print(f"✓ code sent to {phone}. Check Telegram, then run:")
+    print("  botfather login-code <CODE>            (or: ...login-code <CODE> <2FA_PASSWORD>)")
+
+
+async def cmd_login_code(code: str, password: str | None = None):
+    """Paste-based step 2: sign in with the code (+ 2FA password if set)."""
+    from telethon import TelegramClient
+    from telethon.sessions import StringSession
+    from telethon.errors import SessionPasswordNeededError
+    api_id, api_hash, _ = _creds()
+    sess = _uget("telegram_user.session_pending")
+    phone = _uget("telegram_user.login_phone")
+    code_hash = _uget("telegram_user.code_hash")
+    if not (sess and phone and code_hash):
+        sys.exit("run 'botfather login-phone <PHONE>' first.")
+    client = TelegramClient(StringSession(sess), int(api_id), api_hash)
+    await client.connect()
+    try:
+        await client.sign_in(phone, code=str(code).strip(), phone_code_hash=code_hash)
+    except SessionPasswordNeededError:
+        if not password:
+            await client.disconnect()
+            sys.exit("2FA is on — run: botfather login-code <CODE> <YOUR_PASSWORD>")
+        await client.sign_in(password=password)
+    me = await client.get_me()
+    _uput("telegram_user.session", client.session.save(),
+          "MTProto user session — password-grade")
+    con = F._vault()
+    try:
+        for k in ("session_pending", "login_phone", "code_hash"):
+            con.execute("DELETE FROM secrets WHERE key=?", (f"telegram_user.{k}",))
+        con.commit()
+    finally:
+        con.close()
+    print(f"✓ logged in as {me.first_name} (@{me.username}). Session saved — tell Claude 'done'.")
+    await client.disconnect()
+
+
 async def _ensure_auth(client):
     await client.connect()
     if not await client.is_user_authorized():
