@@ -73,6 +73,79 @@ def send_reply(chat_id, text: str):
         tg("sendMessage", chat_id=chat_id, text=text[i:i + TG_MAX])
 
 
+# ── Interactivity: brief quick-action buttons + bodywork-quiz grading ────────
+BODYWORK_STATE = Path.home() / ".lifeclaw/bodywork_quiz_state.json"
+INTERACTIONS   = Path.home() / ".lifeclaw/wellness_interactions.jsonl"
+LW_ACTIONS = {  # toast for a tapped brief button (callback_data "lw:<action>")
+    "done": "✓ Logged — nice.", "checkin": "✓ Checked in.",
+    "hydrate": "💧 Hydration logged — drink up.", "outside": "🌞 Go catch some sun.",
+    "break": "⏰ Break logged — step away 20.", "plan": "✓ Tomorrow noted.",
+    "mood": "📝 Text me your mood and I'll log it.", "bedtime": "🔔 Wind-down time.",
+    "goodnight": "😴 Goodnight, Mike.", "alarm": "🔔 Set your alarm — rest well.",
+}
+
+
+def _log_interaction(rec: dict):
+    try:
+        INTERACTIONS.parent.mkdir(parents=True, exist_ok=True)
+        rec["ts"] = datetime.now(ET).isoformat(timespec="seconds")
+        with open(INTERACTIONS, "a") as f:
+            f.write(json.dumps(rec) + "\n")
+    except Exception:
+        pass
+
+
+def _grade_bodywork(letter: str, qid):
+    """Grade a tapped A/B/C against the decoupled bodywork quiz state. (text, correct|None)."""
+    try:
+        st = json.loads(BODYWORK_STATE.read_text())
+    except Exception:
+        st = {}
+    q = st.get("current")
+    if not q or (qid and q.get("qid") and q.get("qid") != qid):
+        return "🧠 That quiz already closed — the next one's on its way.", None
+    right = letter == q.get("correct")
+    sc = st.setdefault("score", {"right": 0, "wrong": 0, "streak": 0})
+    if right:
+        sc["right"] += 1; sc["streak"] = sc.get("streak", 0) + 1
+    else:
+        sc["wrong"] += 1; sc["streak"] = 0
+    st["current"] = None   # close it so it can't be re-answered
+    try:
+        BODYWORK_STATE.write_text(json.dumps(st, indent=1))
+    except Exception:
+        pass
+    head = ("✅ <b>Correct!</b>" if right else
+            f"❌ Not quite — it was <b>{q.get('correct')}) {q.get('answer_text', '')}</b>.")
+    return f"{head}\n\n{q.get('explain', '')}\n\nScore: {sc['right']}-{sc['wrong']} · streak {sc['streak']}", right
+
+
+def handle_callback(cq: dict):
+    data = (cq.get("data") or "").strip()
+    cq_id = cq.get("id")
+    chat_id = (cq.get("message") or {}).get("chat", {}).get("id")
+    frm = str((cq.get("from") or {}).get("id", ""))
+    if OWNER_CHAT and frm != OWNER_CHAT and str(chat_id) != OWNER_CHAT:   # owner-gate
+        tg("answerCallbackQuery", callback_query_id=cq_id); return
+    parts = data.split(":")
+    kind = parts[0] if parts else ""
+    if kind == "quiz":
+        letter = (parts[1] if len(parts) > 1 else "").upper()[:1]
+        qid = parts[2] if len(parts) > 2 else None
+        msg, right = _grade_bodywork(letter, qid)
+        toast = "✅ Correct!" if right else ("❌ Not quite" if right is False else "closed")
+        tg("answerCallbackQuery", callback_query_id=cq_id, text=toast)
+        if chat_id:
+            tg("sendMessage", chat_id=chat_id, text=msg, parse_mode="HTML")
+        _log_interaction({"kind": "quiz", "answer": letter, "qid": qid, "correct": right})
+    elif kind == "lw":
+        action = parts[1] if len(parts) > 1 else ""
+        tg("answerCallbackQuery", callback_query_id=cq_id, text=LW_ACTIONS.get(action, "✓"))
+        _log_interaction({"kind": "lw", "action": action})
+    else:
+        tg("answerCallbackQuery", callback_query_id=cq_id)
+
+
 def ask_local(question: str) -> str:
     """Headless laptop copilot via `claude -p` on the subscription wallet."""
     env = {k: v for k, v in os.environ.items() if k != "ANTHROPIC_API_KEY"}
@@ -219,13 +292,19 @@ def main():
     while True:
         try:
             data = tg("getUpdates", req_timeout=35, offset=offset, timeout=25,
-                      allowed_updates=["message"])
+                      allowed_updates=["message", "callback_query"])
             if not data.get("ok"):
                 print(f"getUpdates not ok: {data}", flush=True)
                 time.sleep(5)
                 continue
             for upd in data.get("result", []):
                 offset = upd["update_id"] + 1
+                if upd.get("callback_query"):           # tapped brief button / quiz answer
+                    try:
+                        handle_callback(upd["callback_query"])
+                    except Exception as e:
+                        print(f"callback error: {e}", flush=True)
+                    continue
                 msg     = upd.get("message", {})
                 chat_id = msg.get("chat", {}).get("id")
                 text    = (msg.get("text") or "").strip()

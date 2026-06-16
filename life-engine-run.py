@@ -947,8 +947,11 @@ def _card_spec(brief_type, ctx):
         'weather': ctx.get('weather'),
         'brief_type': brief_type,
         'slot': slot,
-        'day_seed': ctx['now'].timetuple().tm_yday,   # daily faction rotation
-        'card_style': (load_config().get('card_style', 'hybrid')),
+        'day_seed': ctx['now'].timetuple().tm_yday,   # (kept for rail/bracket variation)
+        'theme': 'WARM SLATE',                        # PIN: daylight-readable, no dark-faction rotation
+        # Solid warm-slate panels (procedural) read in any light; dark AI art backgrounds undercut
+        # that, so L&W opts out of 'hybrid'. Flip to load_config card_style to bring the art back.
+        'card_style': 'procedural',
         'sections': sections,
         'footer': _CARD_FOOTER.get(slot, 'LifeClaw · your daily corner'),
     }
@@ -1019,6 +1022,23 @@ def archive(brief_type, source, text, now):
     except Exception as e:
         print(f'Archive error: {e}', file=sys.stderr)
 
+# Per-slot quick-action buttons under each brief card. callback_data "lw:<action>" is
+# acked + logged by lifeclaw_bot.py (the life_wellness poller) to wellness_interactions.jsonl.
+LW_BRIEF_BUTTONS = {
+    'morning_brief':   [[{"text": "✓ Done", "callback_data": "lw:done:morning"},
+                         {"text": "💧 Hydrate", "callback_data": "lw:hydrate"}],
+                        [{"text": "🌞 Step outside", "callback_data": "lw:outside"}]],
+    'midday_checkin':  [[{"text": "✓ Check in", "callback_data": "lw:checkin"},
+                         {"text": "💧 Hydrate", "callback_data": "lw:hydrate"}],
+                        [{"text": "⏰ 20-min break", "callback_data": "lw:break"}]],
+    'evening_summary': [[{"text": "✓ Plan tomorrow", "callback_data": "lw:plan"},
+                         {"text": "📝 Log mood", "callback_data": "lw:mood"}],
+                        [{"text": "🔔 Bedtime", "callback_data": "lw:bedtime"}]],
+    'nightly_wrap':    [[{"text": "😴 Goodnight", "callback_data": "lw:goodnight"},
+                         {"text": "🔔 Set alarm", "callback_data": "lw:alarm"}]],
+}
+
+
 def deliver(brief_type, now):
     """Compose + send live. Returns True on Telegram success.
 
@@ -1029,7 +1049,19 @@ def deliver(brief_type, now):
     cfg = ctx['_cfg']
     if cfg.get('cards_enabled'):
         card = make_card(brief_type, ctx, now)
-        if card and send_telegram_photo(card, _CARD_TITLES.get(brief_type, 'LifeClaw')):
+        sent_card = False
+        if card:
+            try:   # photo + tappable quick-action buttons (vault-backed life_wellness)
+                sys.path.insert(0, '/home/itsju/05_AUTOMATION/scripts')
+                from lib.tg_wellness_card import send_card_with_buttons
+                sent_card = send_card_with_buttons(
+                    card, _CARD_TITLES.get(brief_type, 'LifeClaw'),
+                    LW_BRIEF_BUTTONS.get(brief_type))
+            except Exception as e:
+                print(f'card+buttons send error: {e}', file=sys.stderr)
+            if not sent_card:   # fallback: plain photo, no buttons
+                sent_card = send_telegram_photo(card, _CARD_TITLES.get(brief_type, 'LifeClaw'))
+        if sent_card:
             print(f'[{now.strftime("%H:%M")}] {brief_type} card sent ✓')
             source += '+card'
         elif card:

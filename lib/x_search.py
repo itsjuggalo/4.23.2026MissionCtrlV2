@@ -86,6 +86,25 @@ def x_sentiment(query: str, model: str = "grok-3", timeout: int = 45) -> str | N
         return None
 
 
+def x_search_summary(prompt: str, model: str = "grok-3", timeout: int = 60) -> str | None:
+    """General native Grok x_search with a CALLER-SUPPLIED instruction prompt — same proven
+    OAuth + /v1/responses + grok-3 path as x_sentiment, but the prompt is yours (for digests,
+    topic sweeps, etc.). Returns text, or None on no-token / any error (caller should fall back)."""
+    tok = oauth_token()
+    if not tok:
+        return None
+    body = {"model": model, "input": prompt, "tools": [{"type": "x_search"}]}
+    req = urllib.request.Request(
+        "https://api.x.ai/v1/responses", data=json.dumps(body).encode(), method="POST",
+        headers={"Authorization": "Bearer " + tok, "Content-Type": "application/json",
+                 "User-Agent": "mc/1.0"})
+    try:
+        with urllib.request.urlopen(req, timeout=timeout) as r:
+            return _extract(json.loads(r.read()))
+    except Exception:
+        return None
+
+
 def status() -> str:
     tok = oauth_token()
     if not tok:

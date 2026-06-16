@@ -54,17 +54,14 @@ def _save_state(d: dict):
 
 
 def alert(msg: str):
-    # Telegram (lifeclaw bot)
-    tok = _read("lifeclaw_telegram_bot_token")
-    chat = _read("lifeclaw_telegram_chat_id")
-    if tok and chat:
-        try:
-            import urllib.parse
-            data = urllib.parse.urlencode({"chat_id": chat, "text": "⚠️ " + msg}).encode()
-            urllib.request.urlopen(
-                f"https://api.telegram.org/bot{tok}/sendMessage", data=data, timeout=15)
-        except Exception as e:  # noqa: BLE001
-            print(f"[selfheal] telegram alert failed: {e}", file=sys.stderr)
+    # Telegram → System Health bot (infra alerts belong OFF the Life & Wellness bot)
+    try:
+        sys.path.insert(0, "/home/itsju/scripts")
+        from lib.notify import tg_push
+        tg_push("⚠️ " + msg, "system_health", loud=False, html=False,
+                fallback_token_file="telegram-ping-bot-token")
+    except Exception as e:  # noqa: BLE001
+        print(f"[selfheal] telegram alert failed: {e}", file=sys.stderr)
     # Discord webhook
     hook = _read("discord_new_stuff_webhook") or _read("discord_tv_signals_webhook")
     if hook:

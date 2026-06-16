@@ -23,7 +23,9 @@ from collections import defaultdict
 import urllib.request
 
 SECRETS = Path.home() / ".openclaw" / "secrets"
-WEBHOOK_FILE = SECRETS / "discord_synthcontrol_webhook"
+# Default target is #synth-control; the laptop cron overrides to #cycle-logs via
+# DIGEST_WEBHOOK_SECRET=discord_ops_webhook so diagnostics stay off the dashboard.
+WEBHOOK_FILE = SECRETS / os.environ.get("DIGEST_WEBHOOK_SECRET", "discord_synthcontrol_webhook")
 STATE = Path.home() / ".openclaw" / "state" / "synth_control_digests"
 STATE.mkdir(parents=True, exist_ok=True)
 
@@ -71,7 +73,10 @@ def digest_consensus():
             if not isinstance(cycle, dict):
                 continue
             for pick_list_key in ("picks_executed", "picks_proposed", "passed_on"):
-                for pick in cycle.get(pick_list_key, []) or []:
+                pick_list = cycle.get(pick_list_key, [])
+                if not isinstance(pick_list, list):   # some cycles store these as int counts
+                    continue
+                for pick in pick_list:
                     if not isinstance(pick, dict):
                         continue
                     t = pick.get("ticker") or pick.get("symbol")

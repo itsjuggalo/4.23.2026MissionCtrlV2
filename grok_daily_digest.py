@@ -6,8 +6,9 @@ Queries:
   1. Claude Code / Anthropic AI dev updates from X
   2. Top stock & crypto market chatter from X
 
-Sends a combined digest to Mike via JazzyHazzy bot.
-Cron: 7:00 AM ET daily (Oracle cron or local systemd timer)
+Sends a combined digest to Mike via the Daily Briefs bot (@SpaceCoast / fleet `daily_briefs`)
+— this is TRADING/X content, so it must NOT land on the Life & Wellness bot.
+Cron: 7:00 AM ET daily (laptop cron).
 """
 import json
 import sys
@@ -23,8 +24,10 @@ def read_secret(name: str) -> str:
     return p.read_text().strip() if p.exists() else ""
 
 XAI_KEY = read_secret("xai_api_key")
-TG_TOKEN = read_secret("lifeclaw_telegram_bot_token")
-TG_CHAT_ID = read_secret("lifeclaw_telegram_chat_id")
+# Last-ditch inline send only (primary route is the vault-backed fleet `daily_briefs`).
+# Use a TRADE-bot flat token so a failure can NEVER resurface this content on Life & Wellness.
+TG_TOKEN = read_secret("telegram-bot-token.txt")          # flow_signals flat (trade)
+TG_CHAT_ID = read_secret("telegram-chat-id.txt")          # Mike's universal chat id
 
 
 def xai_oauth_token() -> str:
@@ -47,44 +50,32 @@ def et_now() -> datetime:
     return datetime.now(timezone.utc).astimezone(timezone(timedelta(hours=-4)))
 
 def grok_search(query: str, summary_prompt: str) -> str:
-    """Call xAI Grok Responses API with the built-in x_search tool, return summary text."""
+    """Native Grok x_search summary via the PROVEN lib/x_search path (grok-3 on the OAuth
+    subscription — the credit-dead API key + grok-4-fast model were what 403'd). On any
+    failure, return a clean unavailable note instead of leaking a raw 403 into the digest."""
     instruction = (
         "You are a concise trading/tech news digest bot. "
         "Return a tight 5-8 bullet summary of the most important real posts you find. "
         "No filler, no meta-commentary. Just the news.\n\n"
     )
-    payload = {
-        "model": "grok-4-fast-non-reasoning",
-        "input": instruction + summary_prompt,
-        "tools": [{"type": "x_search"}],
-    }
-    data = json.dumps(payload).encode()
-    req = urllib.request.Request(
-        "https://api.x.ai/v1/responses",
-        data=data,
-        headers={
-            "Authorization": f"Bearer {XAI_TOKEN}",
-            "Content-Type": "application/json",
-        },
-    )
     try:
-        with urllib.request.urlopen(req, timeout=120) as r:
-            resp = json.loads(r.read())
-        for block in resp.get("output", []):
-            for c in (block.get("content") or []):
-                if c.get("type") == "output_text":
-                    return c.get("text", "").strip()
-        return "[no posts found]"
+        sys.path.insert(0, "/home/itsju/scripts")
+        from lib.x_search import x_search_summary
+        out = x_search_summary(instruction + summary_prompt, model="grok-3", timeout=90)
+        if out and out.strip():
+            return out.strip()
     except Exception as e:
-        return f"[fetch error: {e}]"
+        print(f"[grok-digest] x_search failed: {e}", file=sys.stderr)
+    return "_(live X search temporarily unavailable — token/quota; will retry next run)_"
 
 def send_telegram(text: str) -> bool:
-    # vault-backed fleet route (life_wellness = @LifeClaw727_Bot); inline below = fallback
+    # vault-backed fleet route → Daily Briefs (@SpaceCoast). NO lifeclaw fallback, so a vault
+    # miss can never put trade content back on Life & Wellness; inline below = trade-bot last-ditch.
     try:
         sys.path.insert(0, "/home/itsju/scripts")
         from lib.notify import tg_push
-        if tg_push(text, "life_wellness", loud=True, html=False,
-                   fallback_token_file="lifeclaw_telegram_bot_token"):
+        if tg_push(text, "daily_briefs", loud=True, html=False,
+                   fallback_token_file=None):
             return True
     except Exception as e:
         print(f"[grok-digest] fleet route failed: {e}", file=sys.stderr)
