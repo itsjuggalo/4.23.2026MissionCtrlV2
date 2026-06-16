@@ -57,6 +57,11 @@ FLEET = {
     "openclaw_grok":   dict(user="OpenclawGrok727_Bot",     avatar="ghost",           role="infra",       src=("vault", "telegram_openclaw_bot_token")),
     # ── spare ───────────────────────────────────────────────────────────────
     "spare_backup":    dict(user="(BobaClaw)",              avatar="tassadar",        role="spare",       src=("cloud", None)),
+    # ── reserve pool (Mike's spare bots, folded in 2026-06-16 — named + rebranded, persona-ready) ──
+    "jazzy_relay":     dict(user="JazzyHazzy_Bot",          avatar="zealot",          role="spare",       src=("cloud", None)),
+    "orion_relay":     dict(user="oOrionz_Bot",             avatar="kerrigan",        role="spare",       src=("cloud", None)),
+    "grok_scout":      dict(user="Grootk_Bot",              avatar="goliath",         role="spare",       src=("cloud", None)),
+    "trend_scanner":   dict(user="Deepseeker_Bot",          avatar="firebat",         role="spare",       src=("cloud", None)),
 }
 
 VKEY = "telegram.{}".format  # vault key for a function

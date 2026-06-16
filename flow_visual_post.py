@@ -83,7 +83,7 @@ def main() -> None:
         png = cr.pick_card(spec)
         cap = f"🎯 **{spec['contract']}** · {spec['tier']} · conviction {spec['conviction']}/10"
         ok = png and oc.post_image_bot(cid, SYNTH_TOKEN, png, content=cap,
-                                       components=[oc.pick_action_row()])
+                                       components=oc.pick_action_rows())
         posted += 1 if ok else 0
         print(f"[flow-visual] {spec['contract']}: {'ok' if ok else 'FAILED'}", flush=True)
     print(f"[flow-visual] posted {posted}/{len(picks)} cards → #{args.channel}", flush=True)

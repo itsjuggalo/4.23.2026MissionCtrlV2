@@ -83,7 +83,8 @@ def _gemini(prompt, timeout=90):
     key = _read("gemini.key", "gemini_api_key", "gemini-api-key.txt")
     if not key:
         raise RuntimeError("no gemini key")
-    d = _post(f"https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key={key}",
+    # gemini-2.5-flash: the free tier on this key has limit:0 for 2.0-flash; 2.5-flash works.
+    d = _post(f"https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key={key}",
               {"content-type": "application/json"},
               {"contents": [{"parts": [{"text": prompt}]}]}, timeout)
     return d["candidates"][0]["content"]["parts"][0]["text"], {}

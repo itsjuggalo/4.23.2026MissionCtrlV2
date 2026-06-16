@@ -151,6 +151,7 @@ class PickView(discord.ui.View):
 # ticker is read back from the card so no per-message state is needed.
 ACT_BUY, ACT_ALERT, ACT_EXPLAIN, ACT_GRADE, ACT_MUTE = (
     "act:buy", "act:alert", "act:explain", "act:grade", "act:mute")
+ACT_PAYOFF = "act:payoff"
 
 # ARMED 2026-06-15 on Mike's explicit "arm paper buy" go. PAPER accounts ONLY, hard
 # $800 AND ≤50%-of-equity cap, killswitch-guarded (~/.openclaw/workspace/state/
@@ -379,6 +380,93 @@ class AlertModal(discord.ui.Modal):
             ephemeral=True)
 
 
+# ─── OPTIONS PAYOFF (autofilled + interactive) ────────────────────────────────
+def _card_contract(msg) -> dict:
+    """Parse (ticker, strike, opt_type, expiry) off a card; missing fields → autofill defaults."""
+    t = _card_ticker(msg)
+    text = msg.content or ""
+    if not text and getattr(msg, "embeds", None):
+        e = msg.embeds[0]
+        text = " ".join(x for x in (e.title, e.description,
+                        (e.footer.text if e.footer else "")) if x)
+    strike = opt_type = expiry = None
+    m = re.search(r"\$([\d.]+)\s*([CP])\b", text)
+    if m:
+        strike = float(m.group(1)); opt_type = "call" if m.group(2) == "C" else "put"
+    m2 = re.search(r"\b(\d{1,2})/(\d{1,2})\b", text)
+    if m2:
+        try:
+            expiry = f"{datetime.now(ET).year}-{int(m2.group(1)):02d}-{int(m2.group(2)):02d}"
+        except Exception:
+            expiry = None
+    return {"ticker": t, "strike": strike, "opt_type": opt_type, "expiry": expiry}
+
+
+def _build_payoff(ticker, strike=None, opt_type=None, expiry=None, contracts=1):
+    from lib import options
+    return options.autofill(ticker, strike, opt_type, expiry, contracts)
+
+
+def _payoff_token(spec) -> str:
+    return f"pf:{spec['symbol']}|{spec['strike']:g}|{spec['opt_type']}|{spec['expiry']}|{spec['contracts']}"
+
+
+def _parse_payoff_token(text):
+    m = re.search(r"pf:([A-Z.]{1,6})\|([\d.]+)\|(call|put)\|([\d-]+)\|(\d+)", text or "")
+    if not m:
+        return None
+    return {"symbol": m.group(1), "strike": float(m.group(2)), "opt_type": m.group(3),
+            "expiry": m.group(4), "contracts": int(m.group(5))}
+
+
+def _payoff_png_caption(spec):
+    from lib import chart_renderer as cr
+    png = cr.payoff_card(spec)
+    cp = "C" if spec["opt_type"] == "call" else "P"
+    cap = (f"📈 **{spec['symbol']} ${spec['strike']:g}{cp} {spec['expiry']}** · {spec['contracts']}x "
+           f"· B/E ${spec['breakeven']} · Δ{spec['delta']} · θ{spec['theta']}\n`{_payoff_token(spec)}`")
+    return png, cap
+
+
+PAY_DEC, PAY_INC, PAY_FLIP = "pf:dec", "pf:inc", "pf:flip"
+
+
+class PayoffView(discord.ui.View):
+    """Interactive payoff — tweak contracts / flip C/P; the diagram re-renders in place."""
+    def __init__(self):
+        super().__init__(timeout=None)
+
+    async def _adjust(self, interaction, dcontracts=0, flip=False):
+        await interaction.response.defer()
+        cur = _parse_payoff_token(interaction.message.content)
+        if not cur:
+            await interaction.followup.send("Can't read this payoff's parameters.", ephemeral=True)
+            return
+        ot = ("put" if cur["opt_type"] == "call" else "call") if flip else cur["opt_type"]
+        ct = max(1, cur["contracts"] + dcontracts)
+        spec = await asyncio.to_thread(_build_payoff, cur["symbol"], cur["strike"], ot, cur["expiry"], ct)
+        if not spec:
+            await interaction.followup.send("Couldn't rebuild the payoff.", ephemeral=True)
+            return
+        png, cap = _payoff_png_caption(spec)
+        if png:
+            from lib import ops_card as oc
+            await asyncio.to_thread(oc.edit_message_image_bot, str(interaction.channel_id),
+                                    TOKEN, str(interaction.message.id), png, cap)
+
+    @discord.ui.button(label="−1", style=discord.ButtonStyle.secondary, custom_id=PAY_DEC)
+    async def b_dec(self, interaction: discord.Interaction, button: discord.ui.Button):
+        await self._adjust(interaction, dcontracts=-1)
+
+    @discord.ui.button(label="+1", style=discord.ButtonStyle.secondary, custom_id=PAY_INC)
+    async def b_inc(self, interaction: discord.Interaction, button: discord.ui.Button):
+        await self._adjust(interaction, dcontracts=+1)
+
+    @discord.ui.button(label="Flip C/P", emoji="🔁", style=discord.ButtonStyle.primary, custom_id=PAY_FLIP)
+    async def b_flip(self, interaction: discord.Interaction, button: discord.ui.Button):
+        await self._adjust(interaction, flip=True)
+
+
 class ActionView(discord.ui.View):
     def __init__(self):
         super().__init__(timeout=None)
@@ -414,6 +502,22 @@ class ActionView(discord.ui.View):
         await asyncio.to_thread(card_mute.mute, t, 6)
         await interaction.response.send_message(
             f"🔇 Muted **{t}** for ~6h — posters will skip it.", ephemeral=True)
+
+    @discord.ui.button(label="Payoff", emoji="📈", row=1,
+                       style=discord.ButtonStyle.primary, custom_id=ACT_PAYOFF)
+    async def b_payoff(self, interaction: discord.Interaction, button: discord.ui.Button):
+        await interaction.response.defer(thinking=True)
+        c = _card_contract(interaction.message)
+        spec = await asyncio.to_thread(_build_payoff, c["ticker"], c.get("strike"),
+                                       c.get("opt_type"), c.get("expiry"), 1)
+        if not spec:
+            await interaction.followup.send(f"Couldn't build a payoff for {c['ticker']}.")
+            return
+        png, cap = _payoff_png_caption(spec)
+        if not png:
+            await interaction.followup.send("Payoff render failed.")
+            return
+        await interaction.followup.send(content=cap, file=discord.File(png), view=PayoffView())
 
 
 intents = discord.Intents.default()
@@ -618,8 +722,46 @@ async def deck_cmd(interaction: discord.Interaction, ticker: str, note: Optional
     body = f"⚡ **ACTION — {t}**"
     if note:
         body += f"\n{note}"
-    body += "\n*Tap to act — paper-buy preview · price alert · explain · grade · mute.*"
+    body += "\n*Tap to act — paper-buy preview · price alert · explain · grade · mute · payoff.*"
     await interaction.response.send_message(body, view=ActionView())
+
+
+@tree.command(name="payoff", description="Options payoff diagram — autofilled from the live chain (just give a ticker)")
+@app_commands.describe(ticker="ticker", strike="optional strike (default ATM)",
+                       option_type="call or put (default call)", contracts="contracts (default 1)")
+async def payoff_cmd(interaction: discord.Interaction, ticker: str, strike: Optional[float] = None,
+                     option_type: Optional[str] = None, contracts: Optional[int] = 1):
+    await interaction.response.defer(thinking=True)
+    spec = await asyncio.to_thread(_build_payoff, ticker, strike, option_type, None, contracts or 1)
+    if not spec:
+        await interaction.followup.send(f"Couldn't build a payoff for {ticker.upper().strip()} "
+                                        f"(no option chain / price).")
+        return
+    png, cap = _payoff_png_caption(spec)
+    if not png:
+        await interaction.followup.send("Payoff render failed.")
+        return
+    await interaction.followup.send(content=cap, file=discord.File(png), view=PayoffView())
+
+
+@tree.command(name="positions", description="Real-money holdings review (Robinhood + Coinbase) — allocation card")
+async def positions_cmd(interaction: discord.Interaction):
+    await interaction.response.defer(thinking=True)
+
+    def _run():
+        import positions_review as pr
+        from lib import chart_renderer as cr
+        r = pr.review()
+        if not r:
+            return None, "No real-money holdings right now (ARIES broker reads unreachable?)."
+        spec, holdings, total, flags = r
+        return cr.holdings_card(spec), pr.text_read(holdings, total, flags)
+
+    png, txt = await asyncio.to_thread(_run)
+    if png:
+        await interaction.followup.send(content=txt[:1900], file=discord.File(png))
+    else:
+        await interaction.followup.send(txt)
 
 
 @tree.command(name="watch", description="Add a ticker to your watchlist (feeds the scheduled intel)")
@@ -762,7 +904,8 @@ async def _ac_ticker(interaction: discord.Interaction, current: str):
 
 # attach to every ticker-arg command (param names differ per command)
 for _cmd, _param in ((ticker_cmd, "symbol"), (options_cmd, "ticker"), (levels_cmd, "ticker"),
-                     (deck_cmd, "ticker"), (watch_cmd, "ticker"), (unwatch_cmd, "ticker")):
+                     (deck_cmd, "ticker"), (payoff_cmd, "ticker"), (watch_cmd, "ticker"),
+                     (unwatch_cmd, "ticker")):
     try:
         _cmd.autocomplete(_param)(_ac_ticker)
     except Exception as _e:  # noqa: BLE001
@@ -896,7 +1039,8 @@ async def on_ready():
     global _VIEWS_ADDED
     if not _VIEWS_ADDED:
         client.add_view(PickView())     # persistent — buttons survive restarts
-        client.add_view(ActionView())   # Paper Buy / Set Alert / Explain / Grade / Mute
+        client.add_view(ActionView())   # Paper Buy / Set Alert / Explain / Grade / Mute / Payoff
+        client.add_view(PayoffView())   # interactive payoff (−/+ contracts, flip C/P)
         _VIEWS_ADDED = True
         if not presence_loop.is_running():
             presence_loop.start()

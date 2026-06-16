@@ -111,7 +111,7 @@ VAULT_IDENTITY = {
         name="Daily Briefs", avatar="ghost",
         short="Pre-open + EOD market briefs — the daily desk read.",
         desc=("Daily briefs (push). Pre-open + EOD desk read: regime, FOMC, best contracts, "
-              "crypto, portfolio. Recon before the drop.")),
+              "crypto, portfolio. Ghost reporting — recon before the drop.")),
     "telegram.media_gens": dict(
         name="Media & Gens", avatar="fenix",
         short="AI image & video generations — off the trade chats.",
@@ -121,7 +121,27 @@ VAULT_IDENTITY = {
         name="Spare Backup", avatar="tassadar",
         short="Spare relay — reserved capacity for the fleet.",
         desc=("Spare backup (push). Reserved fleet relay held for overflow / failover routing. "
-              "Standing by.")),
+              "I stand ready.")),
+    # ── reserve pool (folded in 2026-06-16; names already Mike-set, add SC avatar + bio) ──
+    "telegram.jazzy_relay": dict(
+        name="Jazzy Relay", avatar="zealot",
+        short="Jazzy desk relay — reserve persona, SuperGrok wallet.",
+        desc=("Jazzy Relay (reserve). Spare relay for the Jazzy desk; persona-ready. My life for Aiur.")),
+    "telegram.orion_relay": dict(
+        name="Orion Relay", avatar="kerrigan",
+        short="Orion research relay — reserve autoresearch persona.",
+        desc=("Orion Relay (reserve). Spare relay for Orion autoresearch / decisions; persona-ready. "
+              "We will rule this sector — or see it burned to ash.")),
+    "telegram.grok_scout": dict(
+        name="Grok Scout", avatar="goliath",
+        short="Grok / X scout — reserve X-native intel persona.",
+        desc=("Grok Scout (reserve). Spare relay for Grok / X-native scouting; persona-ready. "
+              "Goliath online.")),
+    "telegram.trend_scanner": dict(
+        name="Trend Scanner", avatar="firebat",
+        short="Trend & movers scanner — reserve screening persona.",
+        desc=("Trend Scanner (reserve). Spare relay for trend & movers screening; persona-ready. "
+              "Fire it up.")),
 }
 
 

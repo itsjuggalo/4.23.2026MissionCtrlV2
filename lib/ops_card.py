@@ -590,6 +590,14 @@ def pick_action_row():
     ])
 
 
+def pick_action_rows():
+    """Full components list for a pick card: the 5 actions + a 2nd row with 📈 Payoff
+    (autofilled payoff diagram). Pass straight to components= (already a list of rows)."""
+    return [pick_action_row(), action_row([
+        button('Payoff', 'act:payoff', BTN_PRIMARY, '📈'),
+    ])]
+
+
 def post_message_bot(channel_id: str, token: str, content: str = None, embeds=None,
                      components=None, retries: int = 4, return_msg: bool = False,
                      thread_id: str = None):

@@ -397,7 +397,7 @@ def _post_action_card(rec) -> None:
         cap = (f"🎯 **{spec['contract']}** · {spec['tier']} · conviction {spec['conviction']}/10"
                f"{('  ·' + tag) if tag.strip() else ''}")
         png = cr.pick_card(spec)
-        if png and oc.post_image_bot(cid, tok, png, content=cap, components=[oc.pick_action_row()]):
+        if png and oc.post_image_bot(cid, tok, png, content=cap, components=oc.pick_action_rows()):
             print(f"[flow-picks] image card → {sym}: ok", flush=True)
             return
         # fallback — render/upload failed: post the compact embed (still button-bearing)
@@ -414,7 +414,7 @@ def _post_action_card(rec) -> None:
             ],
             "footer": {"text": f"tk:{sym} · tap a button to act · {tag.strip() or 'flow pick'}"},
         }
-        oc.post_message_bot(cid, tok, embeds=[embed], components=[oc.pick_action_row()])
+        oc.post_message_bot(cid, tok, embeds=[embed], components=oc.pick_action_rows())
         print(f"[flow-picks] embed-fallback card → {sym}", flush=True)
     except Exception as e:  # noqa: BLE001
         print(f"[flow-picks] action card err: {e}", flush=True)

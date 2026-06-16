@@ -357,6 +357,42 @@ def scorecard_card(spec: dict):
         return None
 
 
+def holdings_card(spec: dict):
+    """Real-money allocation. spec: title, total, holdings=[(sym,value,pct)], flags=[str].
+    Horizontal value bars (overweight names amber), total, concentration/dust flags."""
+    try:
+        H = (spec.get("holdings") or [])[:9]
+        if not H:
+            return None
+        total = spec.get("total") or sum(v for _, v, _ in H) or 1
+        fig = plt.figure(figsize=(11, 5.8))
+        gs = fig.add_gridspec(2, 1, height_ratios=[0.5, 4.0], hspace=0.22)
+        axt = fig.add_subplot(gs[0]); axt.axis("off")
+        axt.text(0.0, 0.5, spec.get("title", "REAL-MONEY HOLDINGS"), transform=axt.transAxes,
+                 va="center", fontsize=18, fontweight="bold", color=PAL["text"])
+        axt.text(1.0, 0.5, f"${total:,.0f}", transform=axt.transAxes, va="center", ha="right",
+                 fontsize=17, fontweight="bold", color=PAL["accent"])
+        ax = fig.add_subplot(gs[1]); ax.set_facecolor(PAL["panel2"])
+        for s in ax.spines.values():
+            s.set_visible(False)
+        labels = [h[0] for h in H][::-1]; vals = [h[1] for h in H][::-1]; pcts = [h[2] for h in H][::-1]
+        y = np.arange(len(labels))
+        cols = [PAL["accent"] if p >= 25 else PAL["ema2"] for p in pcts]
+        ax.barh(y, vals, color=cols, height=0.62, zorder=2)
+        ax.set_yticks(y); ax.set_yticklabels(labels, fontsize=11.5, color=PAL["text"])
+        ax.set_xticks([]); ax.grid(False)
+        ax.set_xlim(0, max(vals) * 1.28)
+        for yi, v, p in zip(y, vals, pcts):
+            ax.text(v, yi, f"  ${v:,.0f} · {p:.0f}%", va="center", fontsize=10.5, color=PAL["text"])
+        flags = spec.get("flags") or []
+        if flags:
+            ax.set_title("   ".join("• " + f for f in flags), fontsize=9.5, color=PAL["muted"], loc="left")
+        return _save(fig, "holdings")
+    except Exception:
+        print("chart_renderer.holdings_card error:\n" + traceback.format_exc())
+        return None
+
+
 def payoff_card(spec: dict):
     """Option payoff-at-expiry diagram. spec from lib/options.autofill: symbol, opt_type,
     strike, premium, spot, contracts, expiry, breakeven, iv, delta, theta. Profit zone

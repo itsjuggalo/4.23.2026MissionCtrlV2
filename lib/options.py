@@ -96,10 +96,9 @@ def autofill(ticker, strike=None, opt_type=None, expiry=None, contracts=1, targe
         if not spot:
             return None
         opt_type = "put" if str(opt_type or "").lower().startswith("p") else "call"
-        if expiry:
-            dte = _dte(expiry)
-        else:
-            ne = _nearest_expiry(t, target_dte)
+        dte = _dte(expiry) if expiry else None
+        if not expiry or dte is None or dte < 2 or expiry not in (t.options or ()):
+            ne = _nearest_expiry(t, target_dte)   # given expiry missing/stale/unlisted → nearest
             if not ne:
                 return None
             expiry, dte = ne

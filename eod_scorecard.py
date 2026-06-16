@@ -144,7 +144,7 @@ def _post_grade_action_cards(graded) -> None:
                 ],
                 "footer": {"text": f"tk:{sym} · EOD grade · tap to act"},
             }
-            oc.post_message_bot(cid, tok, embeds=[embed], components=[oc.pick_action_row()])
+            oc.post_message_bot(cid, tok, embeds=[embed], components=oc.pick_action_rows())
         print(f"[eod-scorecard] action cards: best {best[0]['symbol']} / worst {worst[0]['symbol']}", flush=True)
     except Exception as e:  # noqa: BLE001
         print(f"[eod-scorecard] action-card err: {e}", flush=True)

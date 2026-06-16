@@ -146,17 +146,9 @@ def score(yf_data, has_sweep, iv_data):
     elif from_hi > 0: s += 5; reasons.append("at new high")
     return min(s, 100), reasons
 
-def _squeeze_card(yf_data, score_val, reasons, iv_data):
-    """Render + post a StarCraft squeeze card AS the Spacer bot. True on success."""
-    try:
-        import os
-        sys.path.insert(0, os.path.expanduser("~/05_AUTOMATION/scripts/lib"))
-        import ops_card
-    except Exception:
-        return False
-    token = secret("spacer_bot_token.txt")
-    if not token:
-        return False
+def _squeeze_spec(yf_data, score_val, reasons, iv_data):
+    """Build the ops_card spec + summary line for a squeeze alert (shared Discord + Telegram)."""
+    import ops_card
     st_si = lambda v: "crit" if v > 30 else "warn" if v > 20 else None
     st_dtc = lambda v: "crit" if v > 7 else "warn" if v > 5 else None
     rows = [
@@ -189,6 +181,21 @@ def _squeeze_card(yf_data, score_val, reasons, iv_data):
     }
     summary = (f"⚡ **SQUEEZE WATCH — {yf_data['ticker']}** score {score_val} · "
                f"SI {yf_data['si_pct_float']:.0f}% · DTC {yf_data['dtc']:.1f}")
+    return spec, summary
+
+
+def _squeeze_card(yf_data, score_val, reasons, iv_data):
+    """Render + post a StarCraft squeeze card AS the Spacer bot. True on success."""
+    try:
+        import os
+        sys.path.insert(0, os.path.expanduser("~/05_AUTOMATION/scripts/lib"))
+        import ops_card  # noqa: F401
+    except Exception:
+        return False
+    token = secret("spacer_bot_token.txt")
+    if not token:
+        return False
+    spec, summary = _squeeze_spec(yf_data, score_val, reasons, iv_data)
     try:
         return ops_card.render_and_post(spec, {"channel": CHANNEL_ID, "token": token},
                                         summary).startswith("card:")
@@ -196,7 +203,40 @@ def _squeeze_card(yf_data, score_val, reasons, iv_data):
         return False
 
 
+def _squeeze_telegram(yf_data, score_val, reasons, iv_data):
+    """Mirror the squeeze read to the screener Telegram bot — same StarCraft card image, with a
+    text fallback that carries the IV / implied-move read. Best-effort; never blocks Discord."""
+    try:
+        import os, subprocess, tempfile
+        sys.path.insert(0, os.path.expanduser("~/05_AUTOMATION/scripts/lib"))
+        import ops_card
+        spec, summary = _squeeze_spec(yf_data, score_val, reasons, iv_data)
+        png = os.path.join(tempfile.gettempdir(), f"squeeze_tg_{yf_data['ticker']}.png")
+        out = ops_card.render_ops_card(spec, png)
+        if out and os.path.exists(out):
+            r = subprocess.run(["/home/itsju/bin/tg-send-media", out, summary.replace("**", "")],
+                               env={**os.environ, "TG_FN": "screener"},
+                               capture_output=True, text=True, timeout=90)
+            if r.returncode == 0:
+                return True
+    except Exception:
+        pass
+    try:  # text fallback → screener (IV/implied-move read travels with it)
+        sys.path.insert(0, "/home/itsju/scripts")
+        from lib.notify import tg_push
+        iv_line = (f" · ATM IV ±{iv_data.get('implied_move_pct', 0):.1f}% by {iv_data['exp']}"
+                   if iv_data else "")
+        txt = (f"⚡ SQUEEZE WATCH — {yf_data['ticker']} · score {score_val}\n"
+               f"SI {yf_data['si_pct_float']:.1f}% float · DTC {yf_data['dtc']:.1f}{iv_line}\n"
+               + " · ".join(reasons[:4]))
+        return bool(tg_push(txt, "screener", loud=False, html=False))
+    except Exception:
+        return False
+
+
 def post(yf_data, score_val, reasons, iv_data):
+    # Mirror the read to the screener Telegram bot (best-effort, never blocks the Discord post).
+    _squeeze_telegram(yf_data, score_val, reasons, iv_data)
     # Visual card first (as Spacer bot); fall back to the text embed on failure.
     if _squeeze_card(yf_data, score_val, reasons, iv_data):
         return True
