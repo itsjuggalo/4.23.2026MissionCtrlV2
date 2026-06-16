@@ -246,6 +246,26 @@ def _mc_kb_recall():
         except Exception as _e:
             flow_block = f"_(flow_value query failed: {_e})_\n\n"
 
+        # 1b) IV gate overlay on those flow names (rich vol = crush risk for a long
+        #     buyer → don't chase naked; cheap = edge). Read-only; degrades silently.
+        try:
+            _ivf = _j.loads(_P("/AIWorkWSL/labs/quantum/out/iv_forecast.json").read_text())
+            _ivmap = {p["ticker"]: p for p in _ivf.get("picks", []) if p.get("ticker")}
+            _iv_lines = []
+            for _t in top_tickers:
+                _iv = _ivmap.get(_t)
+                if not _iv:
+                    continue
+                _v = str(_iv.get("verdict") or "").split(" ")[0]
+                _ratio = _iv.get("ivVsHv")
+                _crush = " ⚠️CRUSH" if _iv.get("crush") else ""
+                _iv_lines.append(f"- **{_t}**: IV {_v}" + (f" {_ratio}×HV" if _ratio else "") + _crush)
+            if _iv_lines:
+                flow_block += ("## IV gate on these names (rich = crush risk for long premium)\n\n"
+                               + "\n".join(_iv_lines) + "\n\n")
+        except Exception:
+            pass
+
         # 2) Today's signal tickers
         sig_tickers = []
         try:

@@ -384,13 +384,23 @@ def _post_action_card(rec) -> None:
     if not rec:
         return
     try:
-        from lib import ops_card as oc
+        from lib import ops_card as oc, chart_renderer as cr, explain
         a, fv, voi, dte, tag, sp, otm = rec
         sym = str(a.get("Symbol", "")).upper()
         tok = SYNTH_TOKEN_FILE.read_text().strip()
         cid = oc.resolve_channel(GUILD, tok, "flow-picks")
         if not (tok and cid):
             return
+        if not a.get("Spot") and sp:        # alert Spot is often 0 — backfill for the chart mark
+            a = {**a, "Spot": sp}
+        spec = explain.card_spec(a)
+        cap = (f"🎯 **{spec['contract']}** · {spec['tier']} · conviction {spec['conviction']}/10"
+               f"{('  ·' + tag) if tag.strip() else ''}")
+        png = cr.pick_card(spec)
+        if png and oc.post_image_bot(cid, tok, png, content=cap, components=[oc.pick_action_row()]):
+            print(f"[flow-picks] image card → {sym}: ok", flush=True)
+            return
+        # fallback — render/upload failed: post the compact embed (still button-bearing)
         is_call = str(a.get("OptionType", "")).upper().startswith("C")
         mny = f"${sp:,.2f} ({abs(otm)*100:.0f}% {'OTM' if otm >= 0 else 'ITM'})" if sp else "—"
         embed = {
@@ -404,8 +414,8 @@ def _post_action_card(rec) -> None:
             ],
             "footer": {"text": f"tk:{sym} · tap a button to act · {tag.strip() or 'flow pick'}"},
         }
-        ok = oc.post_message_bot(cid, tok, embeds=[embed], components=[oc.pick_action_row()])
-        print(f"[flow-picks] action card → {sym}: {'ok' if ok else 'FAILED'}", flush=True)
+        oc.post_message_bot(cid, tok, embeds=[embed], components=[oc.pick_action_row()])
+        print(f"[flow-picks] embed-fallback card → {sym}", flush=True)
     except Exception as e:  # noqa: BLE001
         print(f"[flow-picks] action card err: {e}", flush=True)
 

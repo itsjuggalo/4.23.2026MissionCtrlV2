@@ -16,6 +16,7 @@ from __future__ import annotations
 import argparse
 import json
 import sys
+import time
 from datetime import datetime
 from zoneinfo import ZoneInfo
 from pathlib import Path
@@ -73,6 +74,51 @@ def build_embed() -> dict:
     }
 
 
+def _market_spec() -> dict:
+    """Tiles (SPY/QQQ/VIX) + regime dial for the live market dashboard image."""
+    from lib import chart_renderer as cr
+    r = regime_lib.regime()
+    tiles = []
+    for sym, lbl in (("SPY", "SPY"), ("QQQ", "QQQ"), ("^VIX", "VIX")):
+        df = cr.ohlc(sym, days=15, interval="1d")
+        if df is None or len(df) < 2:
+            continue
+        price = float(df["Close"].iloc[-1]); prev = float(df["Close"].iloc[-2])
+        tiles.append({"ticker": lbl, "price": price,
+                      "chg": (price - prev) / prev * 100 if prev else 0.0,
+                      "series": list(df["Close"].values[-20:])})
+    score = {"RISK-ON": 8, "NEUTRAL": 5, "RISK-OFF": 2}.get(r.get("state"), 5)
+    color = {"RISK-ON": cr.PAL["up"], "RISK-OFF": cr.PAL["down"]}.get(r.get("state"), cr.PAL["neutral"])
+    return {"title": "MISSION CONTROL — MARKET", "tiles": tiles,
+            "regime": {"label": r.get("label", ""), "score": score, "color": color}}
+
+
+def _refresh_market_image(cid: str, state: dict) -> None:
+    """Maintain a live market-dashboard IMAGE in the channel, edited in place.
+    Throttled to ~5 min (image render + re-upload is heavier than the text embed)."""
+    try:
+        from lib import chart_renderer as cr
+        mid = state.get(f"img::{cid}")
+        if mid and (time.time() - state.get(f"imgts::{cid}", 0) < 300):
+            return                                  # within throttle window — leave existing image
+        png = cr.market_card(_market_spec())
+        if not png:
+            return
+        if mid and oc.edit_message_image_bot(cid, SYNTH_TOKEN, mid, png, content="🛰️ live market dashboard"):
+            pass
+        else:
+            m = oc.post_image_bot(cid, SYNTH_TOKEN, png, content="🛰️ live market dashboard", return_msg=True)
+            if not m:
+                return
+            state[f"img::{cid}"] = m["id"]
+            oc.pin_message_bot(cid, SYNTH_TOKEN, m["id"])
+        state[f"imgts::{cid}"] = time.time()
+        _save_state(state)
+        print("[command-center] market image refreshed", flush=True)
+    except Exception as e:  # noqa: BLE001
+        print(f"[command-center] image err: {e}", flush=True)
+
+
 def refresh(channel_name: str, print_only: bool = False) -> None:
     embed = build_embed()
     if print_only:
@@ -90,20 +136,21 @@ def refresh(channel_name: str, print_only: bool = False) -> None:
         _save_state(state)
 
     mid = state.get(f"msg::{cid}")
-    if mid:
-        if oc.edit_message_bot(cid, SYNTH_TOKEN, mid, embeds=[embed]):
-            print(f"[command-center] edited {mid} in #{channel_name}", flush=True)
+    if mid and oc.edit_message_bot(cid, SYNTH_TOKEN, mid, embeds=[embed]):
+        print(f"[command-center] edited {mid} in #{channel_name}", flush=True)
+    else:
+        if mid:
+            print("[command-center] edit failed (message gone?) — recreating", flush=True)
+        msg = oc.post_message_bot(cid, SYNTH_TOKEN, embeds=[embed], return_msg=True)
+        if not msg:
+            print("[command-center] post failed", flush=True)
             return
-        print("[command-center] edit failed (message gone?) — recreating", flush=True)
+        state[f"msg::{cid}"] = msg["id"]
+        _save_state(state)
+        pinned = oc.pin_message_bot(cid, SYNTH_TOKEN, msg["id"])
+        print(f"[command-center] created {msg['id']} in #{channel_name} (pinned={pinned})", flush=True)
 
-    msg = oc.post_message_bot(cid, SYNTH_TOKEN, embeds=[embed], return_msg=True)
-    if not msg:
-        print("[command-center] post failed", flush=True)
-        return
-    state[f"msg::{cid}"] = msg["id"]
-    _save_state(state)
-    pinned = oc.pin_message_bot(cid, SYNTH_TOKEN, msg["id"])
-    print(f"[command-center] created {msg['id']} in #{channel_name} (pinned={pinned})", flush=True)
+    _refresh_market_image(cid, state)               # live market dashboard image (throttled)
 
 
 def main() -> None:

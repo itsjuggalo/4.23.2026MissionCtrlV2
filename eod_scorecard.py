@@ -150,6 +150,30 @@ def _post_grade_action_cards(graded) -> None:
         print(f"[eod-scorecard] action-card err: {e}", flush=True)
 
 
+def _post_scorecard_card(graded, total_val, total_pl) -> None:
+    """Post the visual EOD scorecard card (book P&L + best/worst mini-charts + grades)."""
+    try:
+        from lib import chart_renderer as cr, ops_card as oc
+        tok = SYNTH_TOKEN_FILE.read_text().strip()
+        cid = sd.resolve_channel("flow-picks")
+        g2 = [(r, g) for r, g in (graded or []) if g]
+        spec = {"book": {"val": total_val, "day_pl": total_pl}, "rows": []}
+        for r, g in g2[:6]:
+            spec["rows"].append((f"{r['symbol']} ${r['strike']:g}{r['type']}", g[0], g[1] > 0.3))
+        if g2:
+            best = max(g2, key=lambda x: x[1][1])
+            worst = min(g2, key=lambda x: x[1][1])
+            for key, (r, g) in (("best", best), ("worst", worst)):
+                df = cr.ohlc(str(r["symbol"]), days=12, interval="1d")
+                spec[key] = {"sym": r["symbol"], "move": g[0],
+                             "series": list(df["Close"].values[-15:]) if df is not None else None}
+        png = cr.scorecard_card(spec)
+        ok = png and oc.post_image_bot(cid, tok, png, content="📊 **EOD Scorecard**")
+        print(f"[eod-scorecard] scorecard card: {'ok' if ok else 'FAILED'}", flush=True)
+    except Exception as e:  # noqa: BLE001
+        print(f"[eod-scorecard] scorecard-card err: {e}", flush=True)
+
+
 def main():
     eq_val, eq_pl = equity_day_pnl()
     cr_val, cr_pl = _crypto_pnl()
@@ -198,6 +222,7 @@ def main():
         return
     sd.post(sd.resolve_channel("flow-picks"), msg)
     _post_grade_threads(graded)        # land each grade in its per-pick thread (closes the loop)
+    _post_scorecard_card(graded, total_val, total_pl)   # visual scorecard card
     _post_grade_action_cards(graded)   # best + worst pick → tap-to-act cards
     beat("eod_scorecard")
     used = tg_brief(msg)

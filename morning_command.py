@@ -146,10 +146,43 @@ def main():
         print(msg)
         return
     post(resolve_channel(a.channel), msg)
+    _post_market_dashboard(a.channel)
     if a.telegram:
         _mirror_telegram(msg)
     beat("morning_command")
     print(f"[morning] posted ({len(msg)} chars)", flush=True)
+
+
+def _post_market_dashboard(channel_name: str) -> None:
+    """Attach the visual market dashboard image (tiles + regime dial) above the brief.
+    Posted AS SynthControl; never raises."""
+    try:
+        import sys as _s
+        from pathlib import Path as _P
+        _s.path.insert(0, str(_P(__file__).resolve().parent))
+        from lib import ops_card as oc, chart_renderer as cr, regime as rl
+        tok = (_P.home() / ".openclaw" / "secrets" / "discord_synthcontrol_token").read_text().strip()
+        cid = oc.resolve_channel("1486025777970548908", tok, channel_name)
+        if not cid:
+            return
+        r = rl.regime()
+        tiles = []
+        for sym, lbl in (("SPY", "SPY"), ("QQQ", "QQQ"), ("^VIX", "VIX")):
+            df = cr.ohlc(sym, days=15, interval="1d")
+            if df is None or len(df) < 2:
+                continue
+            price = float(df["Close"].iloc[-1]); prev = float(df["Close"].iloc[-2])
+            tiles.append({"ticker": lbl, "price": price,
+                          "chg": (price - prev) / prev * 100 if prev else 0.0,
+                          "series": list(df["Close"].values[-20:])})
+        score = {"RISK-ON": 8, "NEUTRAL": 5, "RISK-OFF": 2}.get(r.get("state"), 5)
+        color = {"RISK-ON": cr.PAL["up"], "RISK-OFF": cr.PAL["down"]}.get(r.get("state"), cr.PAL["neutral"])
+        png = cr.market_card({"title": "PRE-MARKET DASHBOARD", "tiles": tiles,
+                              "regime": {"label": r.get("label", ""), "score": score, "color": color}})
+        if png and oc.post_image_bot(cid, tok, png, content="🛰️ pre-market dashboard"):
+            print("[morning] market dashboard posted", flush=True)
+    except Exception as e:  # noqa: BLE001
+        print(f"[morning] dashboard err: {e}", flush=True)
 
 
 if __name__ == "__main__":

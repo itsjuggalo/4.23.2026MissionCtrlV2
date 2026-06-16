@@ -632,6 +632,26 @@ def edit_message_bot(channel_id: str, token: str, message_id: str, content: str 
     return _send(url, data, headers, retries, method='PATCH', return_json=return_msg)
 
 
+def edit_message_image_bot(channel_id: str, token: str, message_id: str, png_path: str,
+                           content: str = None, retries: int = 4, return_msg: bool = False):
+    """Edit a message IN PLACE replacing its attached image (PATCH multipart). Lets the
+    command-center refresh a chart/dashboard image without re-posting. Returns True/False
+    (or msg dict). `attachments:[{id:0}]` tells Discord to swap in the new file."""
+    if not (channel_id and token and message_id and png_path and os.path.isfile(png_path)):
+        return None if return_msg else False
+    extra = {'attachments': [{'id': 0}]}
+    if content is not None:
+        extra['content'] = content[:1990]
+    try:
+        boundary, body = _multipart_image(png_path, None, extra)
+    except Exception:
+        return None if return_msg else False
+    url = f'{_bot_channel_url(channel_id)}/{message_id}'
+    headers = {'Authorization': f'Bot {token}',
+               'Content-Type': f'multipart/form-data; boundary={boundary}', 'User-Agent': _UA}
+    return _send(url, body, headers, retries, method='PATCH', return_json=return_msg)
+
+
 def pin_message_bot(channel_id: str, token: str, message_id: str, retries: int = 3):
     """Pin a message (PUT). Returns True/False."""
     if not (channel_id and token and message_id):
@@ -722,11 +742,15 @@ def render_and_post(spec: dict, target, summary_line: str, out_path: str = None)
         out_path = f'/tmp/ops_card_{safe}_{int(time.time())}.png'
     png = render_ops_card(spec, out_path)
     un = spec.get('username')
+    title = (spec.get('title') or '')[:40]
     if png and _post_image_any(target, png, summary_line, username=un):
+        print(f"ops_card: CARD ok '{title}' ({png})", file=sys.stderr)
         return f'card:{png}'
-    # fallback — never drop the alert
+    # fallback — never drop the alert (and SAY SO, so silent text-fallback is visible)
     if _post_text_any(target, summary_line or (spec.get('title') or ''), username=un):
+        print(f"ops_card: TEXT-FALLBACK '{title}' (render={'ok' if png else 'FAILED'})", file=sys.stderr)
         return 'text-fallback'
+    print(f"ops_card: FAILED '{title}'", file=sys.stderr)
     return 'FAILED'
 
 
