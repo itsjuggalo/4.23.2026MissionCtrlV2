@@ -834,22 +834,55 @@ def _ctx_for_llm(ctx):
         'weather': ctx['weather'],
     }
 
+def _clean_focus_line(text):
+    """One plain-text line: first non-empty line, tags/quotes stripped, ≤200 chars."""
+    line = next((l.strip() for l in (text or '').splitlines() if l.strip()), '')
+    line = re.sub(r'<[^>]+>', '', line).strip().strip('"').strip()
+    return line[:200] or None
+
+
 def render_focus_line(brief_type, ctx, cfg):
-    """Return one plain-text focus line, or None on any failure/timeout."""
+    """Return one plain-text focus line, or None on any failure/timeout.
+
+    Fast path (2026-06-15): the same subscription/OAuth chain the trading briefs use —
+    lib.llm.call_llm(["claude_oauth","deepseek"]) talks DIRECTLY to api.anthropic.com
+    (~2s) instead of cold-starting the Node `claude` CLI, which was timing out at the
+    60s cron limit (see life-engine.log "LLM focus error … timed out after 60 seconds").
+    Bills the claude.ai sub, not API credits. The CLI stays as a last-ditch fallback so an
+    OAuth/network hiccup can't regress us below the previous behaviour. Never blocks the
+    brief — any failure just drops the focus line (the deterministic template still sends)."""
     persona = cfg.get('persona', DEFAULT_CONFIG['persona'])
     blob = json.dumps(_ctx_for_llm(ctx), ensure_ascii=False, default=str)
-    prompt = (
-        f"{persona}\n\n"
-        f"This is the {brief_type.replace('_',' ')}. Everything you know right now (JSON):\n"
-        f"{blob}\n\n"
-        "Write ONE line (max 140 characters, plain text, no markdown, no emoji, no quotes) "
-        "naming the single most important thing Mike should act on right now. "
+    rules = (
+        "Name the single most important thing Mike should act on right now in ONE line "
+        "(max 140 characters, plain text, no markdown, no emoji, no quotes). "
         "Use ONLY facts in the JSON — never invent names, numbers, or events. "
         "This is a LIFE briefing: NEVER mention trading, stocks, options, P&L, portfolio, "
         "Boba, Jazzy, Alpaca, markets, or system/PM2 health — those live elsewhere. "
-        "If nothing life-relevant is urgent, say so plainly in one line (e.g. 'Nothing "
-        "pressing — calendar clear, no unpaid bills due soon.')."
+        "If nothing life-relevant is urgent, say so plainly (e.g. 'Nothing pressing — "
+        "calendar clear, no unpaid bills due soon.')."
     )
+    head = (f"{persona}\n\n"
+            f"This is the {brief_type.replace('_',' ')}. Everything you know right now (JSON):\n"
+            f"{blob}\n\n")
+
+    # Fast subscription/OAuth path — ask for strict JSON so lib.llm can parse it.
+    try:
+        sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+        from lib.llm import call_llm
+        jprompt = head + rules + '\n\nReturn STRICT JSON only: {"focus": "<the one line>"}'
+        res = call_llm(jprompt, ['claude_oauth', 'deepseek'])
+        if res.get('ok'):
+            line = _clean_focus_line(str((res['response'] or {}).get('focus', '')))
+            if line:
+                return line
+        else:
+            print(f"LLM focus chain failed: {res.get('error','')[:160]}", file=sys.stderr)
+    except Exception as e:  # noqa: BLE001
+        print(f'LLM focus fast-path error: {e}', file=sys.stderr)
+
+    # Last-ditch fallback: the original plain-text CLI call (slow, but never worse than before).
+    prompt = head + rules
     try:
         r = subprocess.run(
             ['env', '-u', 'ANTHROPIC_API_KEY', CLAUDE_BIN, '-p', prompt],
@@ -860,12 +893,7 @@ def render_focus_line(brief_type, ctx, cfg):
     if r.returncode != 0:
         print(f'LLM focus rc={r.returncode}: {r.stderr[:200]}', file=sys.stderr)
         return None
-    text = (r.stdout or '').strip()
-    if not text:
-        return None
-    line = next((l.strip() for l in text.splitlines() if l.strip()), '')
-    line = re.sub(r'<[^>]+>', '', line).strip().strip('"').strip()
-    return line[:200] or None
+    return _clean_focus_line(r.stdout)
 
 # ── Visual card (warm spa/wellness dark PNG — additive, never blocks) ─────────
 _CARD_TITLES = {'morning_brief': 'Good Morning, Mike', 'midday_checkin': 'Midday Reset',
