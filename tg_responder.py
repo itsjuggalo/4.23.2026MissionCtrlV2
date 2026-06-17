@@ -222,6 +222,31 @@ def main():
         for i in range(0, len(text), TG_MAX):
             tg("sendMessage", chat_id=chat_id, text=text[i:i + TG_MAX])
 
+    def handle_cb(cq):
+        """Inline-button taps. Owner-gated. Extensible by callback_data prefix.
+        `oq:<LETTER>:<qid>` = Options Academy rep → graded by options_quiz_grade."""
+        cq_id = cq.get("id")
+        frm = str((cq.get("from") or {}).get("id", ""))
+        ccid = (cq.get("message") or {}).get("chat", {}).get("id")
+        if frm not in owners and str(ccid) not in owners:
+            tg("answerCallbackQuery", callback_query_id=cq_id); return
+        parts = (cq.get("data") or "").split(":")
+        if parts and parts[0] == "oq":
+            try:
+                sys.path.insert(0, "/home/itsju/05_AUTOMATION/scripts")
+                import options_quiz_grade
+                cmsg, right = options_quiz_grade.grade(parts[1] if len(parts) > 1 else "",
+                                                       parts[2] if len(parts) > 2 else None)
+            except Exception as e:
+                cmsg, right = f"[grade error] {e}", None
+            tg("answerCallbackQuery", callback_query_id=cq_id,
+               text=("✅ Correct!" if right else ("❌ Not quite" if right is False else "closed")))
+            if ccid:
+                tg("sendMessage", chat_id=ccid, text=cmsg, parse_mode="HTML")
+            print(f"[{name}] oq tap right={right}", flush=True)
+        else:
+            tg("answerCallbackQuery", callback_query_id=cq_id)
+
     def ask_local(question):
         env = {k: v for k, v in os.environ.items() if k != "ANTHROPIC_API_KEY"}
         # Ensure the Skill tool is available so /ainvest, /options-desk, /flow-desk, etc.
@@ -278,11 +303,17 @@ def main():
     while True:
         try:
             data = tg("getUpdates", req_timeout=35, offset=offset, timeout=25,
-                      allowed_updates=["message"])
+                      allowed_updates=["message", "callback_query"])
             if not data.get("ok"):
                 time.sleep(5); continue
             for upd in data.get("result", []):
                 offset = upd["update_id"] + 1
+                if upd.get("callback_query"):           # tapped inline button (e.g. options rep)
+                    try:
+                        handle_cb(upd["callback_query"])
+                    except Exception as e:
+                        print(f"callback error: {e}", flush=True)
+                    continue
                 msg     = upd.get("message", {})
                 chat_id = msg.get("chat", {}).get("id")
                 text    = (msg.get("text") or "").strip()
