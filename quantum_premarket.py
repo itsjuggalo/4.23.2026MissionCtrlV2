@@ -31,7 +31,7 @@ def main():
     env["PATH"] = ":".join(extra) + ":" + env.get("PATH", "/usr/bin:/bin")
     try:
         r = subprocess.run(
-            [CLAUDE, "-p", Q.premarket_prompt(), "--model", "sonnet",
+            [CLAUDE, "-p", Q.premarket_prompt(), "--model", "sonnet", "--effort", "high",
              "--output-format", "json",
              "--allowedTools", "Bash,Read,WebSearch,WebFetch,Skill"],
             capture_output=True, text=True, timeout=300, env=env,

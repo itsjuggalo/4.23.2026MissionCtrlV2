@@ -153,7 +153,7 @@ def ask_local(question: str) -> str:
         r = subprocess.run(
             [CLAUDE_BIN, "-p", question,
              "--append-system-prompt", SYSTEM_PROMPT,
-             "--model", "sonnet", "--output-format", "json",
+             "--model", "sonnet", "--effort", "high", "--output-format", "json",
              "--allowedTools", CLAUDE_TOOLS],
             capture_output=True, text=True, timeout=300, env=env, cwd=CLAUDE_CWD)
         if r.returncode != 0:
@@ -316,6 +316,12 @@ def main():
 
                 if text.startswith(("/help", "/start")):
                     tg("sendMessage", chat_id=chat_id, text=HELP, parse_mode="Markdown")
+                    continue
+                # /guest [duration] [name] — give someone temp dashboard access. Same
+                # handler on every bot (owner-gated above) so it works whichever Mike opens.
+                if text.startswith("/guest"):
+                    import mc_guest
+                    send_reply(chat_id, mc_guest.mint(text))
                     continue
                 if text.startswith("/brief"):
                     arg = text.split(maxsplit=1)[1] if " " in text else ""

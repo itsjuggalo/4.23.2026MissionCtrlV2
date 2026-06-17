@@ -132,14 +132,14 @@ def run_claude(prompt: str) -> str:
     # Absolute path: cron's PATH lacks ~/bin, so a bare "claude" raised
     # FileNotFoundError every market-hours tick. "-p" is already non-interactive
     # (the old "--no-interactive" flag is invalid and errored out).
-    claude_bin = os.path.expanduser("~/bin/claude")
+    claude_bin = os.path.expanduser("~/.local/bin/claude")
     if not os.path.exists(claude_bin):
         claude_bin = "claude"  # fall back to PATH for interactive shells
     result = subprocess.run(
-        [claude_bin, "-p", prompt],
+        [claude_bin, "-p", prompt, "--model", "sonnet", "--effort", "high"],
         capture_output=True, text=True, timeout=60,
         cwd=os.path.expanduser("~"),  # headless claude expects to run from $HOME
-        env={**os.environ, "TERM": "dumb"},
+        env={**{k: v for k, v in os.environ.items() if k != "ANTHROPIC_API_KEY"}, "TERM": "dumb"},
     )
     if result.returncode != 0:
         raise RuntimeError(f"claude exited {result.returncode}: {result.stderr[:200]}")

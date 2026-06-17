@@ -224,10 +224,14 @@ def main():
 
     def ask_local(question):
         env = {k: v for k, v in os.environ.items() if k != "ANTHROPIC_API_KEY"}
+        # Ensure the Skill tool is available so /ainvest, /options-desk, /flow-desk, etc.
+        # actually run as skills (not just chat) on every bot, incl. the reserve ones.
+        tool_set = tools if "Skill" in tools else tools + ",Skill"
         try:
             r = subprocess.run(
                 [CLAUDE_BIN, "-p", question, "--append-system-prompt", sys_prompt,
-                 "--model", "sonnet", "--output-format", "json", "--allowedTools", tools],
+                 "--model", "sonnet", "--effort", "high", "--output-format", "json",
+                 "--allowedTools", tool_set],
                 capture_output=True, text=True, timeout=300, env=env, cwd=CLAUDE_CWD)
             if r.returncode != 0:
                 return f"[{name} error rc={r.returncode}] {r.stderr.strip()[:300]}"
@@ -369,9 +373,6 @@ def main():
                     send_reply(chat_id, quantum_tg.tidy(ask_local(quantum_tg.news_prompt()), 11))
                     print(f"[{name}] /news", flush=True)
                     continue
-                # /guest [duration] [name] — mint a temp dashboard access link (laptopclaude
-                # only; owner-gated above). Default 24h. One tap-link logs the guest into ALL
-                # three dashboards (host-scoped mc_access cookie = SSO) until it auto-expires.
                 # /guest [duration] [name] — give someone temp dashboard access. Works on
                 # EVERY bot (owner-gated above); shared logic lives in mc_guest.py.
                 if cmd0 == "/guest":
@@ -394,13 +395,19 @@ def main():
                     send_reply(chat_id, f"𝕏 *{text.strip().upper()}*\n{out}")
                     print(f"[{name}] x:{text[:40]}", flush=True)
                     continue
-                # Any other /command is passed VERBATIM to `claude -p`, so every Claude
-                # slash-skill (e.g. /flow-desk SPY, /options-desk, /ticker-research NVDA)
-                # is a Telegram command automatically — whatever skills get added.
+                # Routing for everything else:
+                #  • a /slash command = a Claude SKILL (/ainvest, /options-desk, /flow-desk,
+                #    /ticker-research, /market-context …) → always run via the claude CLI so
+                #    skills work on EVERY bot, even reserve bots whose chat brain is another LLM.
+                #  • plain text → the persona's own brain (claude, or Codex/Gemini/Grok/DeepSeek
+                #    for the reserve bots) — provider diversity preserved.
+                # Each call is a FRESH `claude -p` (stateless): no context carries between
+                # messages, so there's nothing to clear (no /newchat) and briefs are untouched.
                 print(f"[{name}] Q: {text[:120]}", flush=True)
                 tg("sendChatAction", chat_id=chat_id, action="typing")
                 try:
-                    a = ask_persona(text); send_reply(chat_id, a)
+                    a = ask_local(text) if text.startswith("/") else ask_persona(text)
+                    send_reply(chat_id, a)
                     print(f"[{name}] A: {len(a)} chars", flush=True)
                 except Exception as e:
                     tg("sendMessage", chat_id=chat_id, text=f"⚠️ {name} error: {e}")

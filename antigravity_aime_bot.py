@@ -67,8 +67,8 @@ def ask_local(question: str, agent: str | None = None) -> str:
     env = {k: v for k, v in os.environ.items() if k != "ANTHROPIC_API_KEY"}
     try:
         r = subprocess.run(
-            [CLAUDE_BIN, "-p", prompt, "--model", "sonnet", "--output-format", "json",
-             "--allowedTools", CLAUDE_TOOLS],
+            [CLAUDE_BIN, "-p", prompt, "--model", "sonnet", "--effort", "high",
+             "--output-format", "json", "--allowedTools", CLAUDE_TOOLS],
             capture_output=True, text=True, timeout=300, env=env, cwd=CLAUDE_CWD)
         if r.returncode != 0:
             return f"[copilot error rc={r.returncode}] {r.stderr.strip()[:300]}"
@@ -109,8 +109,8 @@ def ask_local_image(img_path: str, caption: str = "") -> str:
     env = {k: v for k, v in os.environ.items() if k != "ANTHROPIC_API_KEY"}
     try:
         r = subprocess.run(
-            [CLAUDE_BIN, "-p", prompt, "--model", "sonnet", "--output-format", "json",
-             "--allowedTools", CLAUDE_TOOLS],
+            [CLAUDE_BIN, "-p", prompt, "--model", "sonnet", "--effort", "high",
+             "--output-format", "json", "--allowedTools", CLAUDE_TOOLS],
             capture_output=True, text=True, timeout=900, env=env, cwd=CLAUDE_CWD)
         if r.returncode != 0:
             return f"[decipher error rc={r.returncode}] {r.stderr.strip()[:300]}"
@@ -235,6 +235,15 @@ def main():
                 pins = load_pins()
                 key  = str(chat_id)
                 is_owner = key in OWNER_CHATS
+
+                # /guest [duration] [name] — give someone temp dashboard access (owner only).
+                # Same handler on every bot so it works whichever one Mike opens.
+                if text.startswith("/guest"):
+                    if not is_owner:
+                        continue
+                    import mc_guest
+                    send_reply(chat_id, mc_guest.mint(text))
+                    continue
 
                 # --- pin-mode commands (AIME @-agent equivalent, owner-only) ---
                 if text.startswith(("/agent", "/exit", "/ainvest")) and not is_owner:

@@ -41,8 +41,8 @@ def run_skill(prompt: str, model: str = "sonnet", timeout: int = 420) -> str:
     env = {k: v for k, v in os.environ.items() if k != "ANTHROPIC_API_KEY"}
     try:
         r = subprocess.run(
-            [CLAUDE_BIN, "-p", prompt, "--model", model, "--output-format", "json",
-             "--allowedTools", CLAUDE_TOOLS],
+            [CLAUDE_BIN, "-p", prompt, "--model", model, "--effort", "high",
+             "--output-format", "json", "--allowedTools", CLAUDE_TOOLS],
             capture_output=True, text=True, timeout=timeout, env=env, cwd=CLAUDE_CWD)
         if r.returncode != 0:
             return f"[skill error rc={r.returncode}] {r.stderr.strip()[:300]}"

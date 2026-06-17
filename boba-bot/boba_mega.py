@@ -223,7 +223,7 @@ def _load_best_options_archive(min_age_min=0, max_age_min=240, max_show=10, min_
 
 def _ask_anthropic(question, context_blob=""):
     """Send question to Claude Haiku via CLI subprocess. Returns text response."""
-    CLAUDE_BIN = "/home/itsju/bin/claude"  # laptop claude CLI (was Oracle's /home/ubuntu/.npm-global path)
+    CLAUDE_BIN = "/home/itsju/.local/bin/claude"  # subscription CLI (sub-billed; was ~/bin wrapper)
     system = (
         "You are Boba, the AI orchestrator for Mike's Mission Control trading system. "
         "Mike runs an algorithmic trading operation with multi-agent intelligence "
@@ -240,13 +240,15 @@ def _ask_anthropic(question, context_blob=""):
     _t0 = time.time()
     try:
         result = subprocess.run(
-            [CLAUDE_BIN, "-p", "--model", "haiku", "--output-format", "text",
+            [CLAUDE_BIN, "-p", "--model", "sonnet", "--effort", "high",
+             "--output-format", "text",
              "--no-session-persistence", "--tools", "",
              "--system-prompt", system],
             input=question,
             capture_output=True,
             text=True,
             timeout=60,
+            env={k: v for k, v in os.environ.items() if k != "ANTHROPIC_API_KEY"},
         )
         _dur_ms = int((time.time() - _t0) * 1000)
 
