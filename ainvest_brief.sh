@@ -48,6 +48,23 @@ else
 fi
 log "=== $MODE brief start (watchlist: $WATCH) ==="
 
+# --- live headlines: inject REAL news as ground-truth so the LLM triages actual
+#     events instead of guessing from training data (lib/news.py: Alpaca→Finnhub→
+#     Tavily→Yahoo, best-effort, never fails the brief) --------------------------
+NEWS="$(SYMS="$WATCH" python3 - <<'PY' 2>>"$LOG"
+import os, sys
+sys.path.insert(0, "/home/itsju/05_AUTOMATION/scripts")
+try:
+    from lib.news import headlines_block
+    print(headlines_block(
+        os.environ.get("SYMS", "").split(),
+        title="REAL headlines from the last 24h (triage and cite THESE; do NOT invent news):",
+        max_items=10, hours=24))
+except Exception:
+    pass
+PY
+)"
+
 # --- build the mode-specific prompt -------------------------------------------
 if [[ "$MODE" == "morning" ]]; then
   ASK="/ainvest Morning premarket brief for my watchlist: $WATCH. \
@@ -62,6 +79,12 @@ What actually moved today and why (catalyst vs noise), what changed in the setup
 and the ONE thing to watch at tomorrow's open per name that warrants it. \
 Lead with the day's biggest signal. Skip quiet names. Verdict-first, <= 25 lines. \
 Do not use mcp__ainvest tools — local sources only."
+fi
+
+# inject the live headlines (if any) as ground-truth context for the LLM
+if [[ -n "$NEWS" ]]; then
+  ASK="$ASK"$'\n\n'"$NEWS"
+  log "injected $(grep -c '^•' <<<"$NEWS") live headlines into prompt"
 fi
 
 # --- 1. interpret via Claude Code subscription CLI ----------------------------

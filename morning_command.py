@@ -33,6 +33,7 @@ from lib import x_search  # noqa: E402
 from lib.llm import call_llm  # noqa: E402
 from lib.heartbeat import beat  # noqa: E402
 from lib.notify import tg_brief  # noqa: E402
+from lib.news import headlines_block  # noqa: E402
 from flow_picks_post import (  # noqa: E402  (read-only helpers — these do NOT log picks)
     _load, _score, _spot, _moneyness, _fmt, MAX_MNY, DTE_MIN, DTE_MAX, RISK_CAP, _tape,
 )
@@ -122,6 +123,14 @@ def build() -> str:
     cat, orders = _catalysts_and_orders(names, tape)
     lines.append(f"\n📅 **TODAY:** {cat}")
     lines.append(f"📋 **ORDERS:** {orders}")
+
+    # real overnight/pre-open headlines on your names (best-effort; "" if none)
+    try:
+        news = headlines_block(names, title="📰 **HEADLINES (last 24h):**", max_items=4)
+        if news:
+            lines.append("\n" + news)
+    except Exception:
+        pass
 
     lines.append(f"\n_One overview · specifics land in #flow-picks · risk cap ${RISK_CAP}/trade · auto-posted 8:15 ET._")
     return "\n".join(lines)
