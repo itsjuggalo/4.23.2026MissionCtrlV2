@@ -62,10 +62,14 @@ def _load_premium_dossier(top_n: int = 5):
     import sqlite3 as _sql
     from pathlib import Path as _Path
     db = _Path("/home/ubuntu/mission-control-restored/data/options_flow.sqlite")
-    if not db.exists():
+    # Skip the dead 0-byte file (Floor-5 publish isn't running on the laptop) instead
+    # of opening it every cycle; busy_timeout is defensive for if it's ever revived
+    # with a concurrent writer. Context-only block — never affects sizing/gates/orders.
+    if not db.exists() or db.stat().st_size == 0:
         return ""
     try:
-        con = _sql.connect(str(db))
+        con = _sql.connect(str(db), timeout=10)
+        con.execute("PRAGMA busy_timeout=8000")
         rows = con.execute(
             "SELECT rank, dossier_json, band, score, published_at, COALESCE(target_account, 'both') AS target_account "
             "FROM premium_shortlist_published "

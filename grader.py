@@ -43,7 +43,7 @@ GRADES_DIR.mkdir(parents=True, exist_ok=True)
 LOG_FILE = Path("/home/ubuntu/.openclaw/data/logs/grader.jsonl")
 LOG_FILE.parent.mkdir(parents=True, exist_ok=True)
 
-CLAUDE_BIN = "/home/ubuntu/.local/bin/claude"
+CLAUDE_BIN = os.path.expanduser("~/.local/bin/claude")
 MC_KB_ENDPOINT = "http://127.0.0.1:8091/journal/write"
 ALPACA_BASE = "https://paper-api.alpaca.markets/v2"
 DATA_BASE = "https://data.alpaca.markets"
@@ -225,12 +225,13 @@ def call_claude(prompt: str, timeout: int = 120) -> str:
         return ""
     try:
         r = subprocess.run(
-            [CLAUDE_BIN, "-p", "--model", "sonnet", "--output-format", "text",
+            [CLAUDE_BIN, "-p", "--model", "sonnet", "--effort", "high", "--output-format", "text",
              "--no-session-persistence", "--tools", ""],
             input=prompt,
             capture_output=True,
             text=True,
             timeout=timeout,
+            env={k: v for k, v in os.environ.items() if k != "ANTHROPIC_API_KEY"},
         )
         if r.returncode != 0:
             return ""

@@ -16,6 +16,7 @@ for a marker line with today's ISO date).
 """
 from __future__ import annotations
 import json
+import os
 import subprocess
 import sys
 import urllib.error
@@ -26,7 +27,7 @@ from pathlib import Path
 SECRETS = Path("/home/ubuntu/.openclaw/secrets")
 WORKSPACE_MEMORY = Path("/home/ubuntu/.openclaw/workspace/memory")
 WORKSPACE_MEMORY.mkdir(parents=True, exist_ok=True)
-CLAUDE_BIN = "/home/ubuntu/.local/bin/claude"
+CLAUDE_BIN = os.path.expanduser("~/.local/bin/claude")
 
 DECISIONS_PATH = {
     "boba": Path("/home/ubuntu/.openclaw/workspace/skill_outputs/boba_decisions_validated.json"),
@@ -185,12 +186,13 @@ def call_claude(prompt: str) -> list[str] | None:
     """Ask Claude Sonnet to extract lessons. Returns list of strings or None."""
     try:
         r = subprocess.run(
-            [CLAUDE_BIN, "-p", "--model", "sonnet",
+            [CLAUDE_BIN, "-p", "--model", "sonnet", "--effort", "high",
              "--output-format", "text", "--no-session-persistence", "--tools", ""],
             input=prompt,
             capture_output=True,
             text=True,
             timeout=180,
+            env={k: v for k, v in os.environ.items() if k != "ANTHROPIC_API_KEY"},
         )
         if r.returncode != 0:
             print(f"[lesson-extractor] claude exit {r.returncode}: {r.stderr[:300]}", file=sys.stderr)

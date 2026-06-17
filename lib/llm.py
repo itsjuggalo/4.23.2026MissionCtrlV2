@@ -55,7 +55,7 @@ def _extract_json(text: str) -> dict:
 def _claude_cli(prompt: str, timeout: int = 240):
     env = {k: v for k, v in os.environ.items() if k != "ANTHROPIC_API_KEY"}
     r = subprocess.run(
-        [CLAUDE_BIN, "-p", prompt, "--model", "sonnet", "--output-format", "json"],
+        [CLAUDE_BIN, "-p", prompt, "--model", "sonnet", "--effort", "high", "--output-format", "json"],
         capture_output=True, text=True, timeout=timeout, env=env, cwd=str(Path.home()))
     if r.returncode != 0:
         raise RuntimeError(f"claude cli exit {r.returncode}: {r.stderr.strip()[:200]}")
