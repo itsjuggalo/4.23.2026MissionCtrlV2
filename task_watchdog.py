@@ -110,7 +110,7 @@ def check_sql(target: str, pattern: str) -> bool:
 
 def run_check(task: dict) -> bool:
     ct = task["check_type"]
-    if ct == "log_tail":
+    if ct in ("log_tail", "log"):  # 'log' = alias some /track registrations use
         return check_log_tail(task["check_target"], task["check_pattern"] or "")
     if ct == "process":
         return check_process(task["check_pattern"] or task["check_target"])
@@ -124,6 +124,8 @@ def run_check(task: dict) -> bool:
 def hours_running(started_at: str) -> float:
     try:
         started = datetime.fromisoformat(started_at.replace("Z", "+00:00"))
+        if started.tzinfo is None:  # /track writes some rows tz-naive -> assume UTC
+            started = started.replace(tzinfo=timezone.utc)
         return (NOW - started).total_seconds() / 3600
     except Exception:
         return 0.0

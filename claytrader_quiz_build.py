@@ -131,11 +131,10 @@ def main() -> int:
         topic = _topic(title, course, prose)
         done += 1
         print(f"[{done}] {vid} [{topic}] — {title[:44]}", flush=True)
-        # write lesson topic back into frames.json + _index
+        # stamp the coarse lesson topic onto every frame (for grouping/fallback)
         for f in d.get("frames", []):
             f["topic"] = topic
         if not args.dry:
-            Path(fj).write_text(json.dumps(d, indent=1))
             index[vid] = {"title": title, "course": course, "topic": topic, "n_frames": d.get("n_frames", 0)}
         keptN = 0
         for f in d.get("frames", []):
@@ -148,17 +147,27 @@ def main() -> int:
             time.sleep(1.0)
             if not v or not v.get("keep"):
                 continue
+            concept = (v.get("concept") or topic).strip()
+            caption = (v.get("caption") or "").strip()
+            difficulty = (v.get("difficulty") or "medium").strip()
             entry = {"still": str(still), "topic": topic,
-                     "concept": (v.get("concept") or topic).strip(),
-                     "caption": (v.get("caption") or "").strip(),
-                     "difficulty": (v.get("difficulty") or "medium").strip(),
+                     "concept": concept, "caption": caption, "difficulty": difficulty,
                      "lesson": title, "course": course, "vimeo_id": vid, "t": f.get("t")}
             if any(e.get("still") == entry["still"] for e in bank):
                 continue
+            # stamp the kept-chart marker onto THIS frame so the page shows only
+            # vision-curated charts with their precise concept (claytrader_stamp_keep.py
+            # does the same join for already-built lessons).
+            f["keep"] = True
+            f["concept"] = concept
+            f["caption"] = caption
+            f["difficulty"] = difficulty
             bank.append(entry); keptN += 1; kept += 1
             BANK.write_text(json.dumps(bank, indent=1))
             print(f"  KEEP: {entry['concept']} (bank={len(bank)})")
+        # write frames.json once, AFTER the vision loop, so topic + keep stamps both land
         if not args.dry:
+            Path(fj).write_text(json.dumps(d, indent=1))
             processed.add(vid)
             PROCESSED.write_text(json.dumps(sorted(processed)))
             INDEX.write_text(json.dumps(index, indent=1))
