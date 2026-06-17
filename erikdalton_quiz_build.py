@@ -91,12 +91,17 @@ def _vision_classify(still_path: Path, title: str, region: str, transcript: str)
 
 
 # ───────────────────────── clip extraction ──────────────────────────────────
-def _cut_clip(src: str, t_start: float, out: Path) -> bool:
-    """Silent mp4, metadata stripped (no timestamp leak), small + autoplay-friendly."""
-    t0 = max(0.0, float(t_start) - 0.5)
+def _cut_clip(src: str, t_center: float, out: Path) -> bool:
+    """5s mp4 CENTERED on the curated still moment, WITH Erik's voice (mono AAC), metadata
+    stripped (no timestamp leak), small + autoplay-friendly. Centering keeps the still ==
+    the clip's middle frame, so the screenshot and the motion show the SAME instant
+    (fixes the old t_start-vs-t_mid drift). If the source has no audio it degrades to silent."""
+    half = CLIP_SECONDS / 2.0
+    t0 = max(0.0, float(t_center) - half)
     cmd = ["ffmpeg", "-y", "-ss", f"{t0:.2f}", "-t", str(CLIP_SECONDS), "-i", src,
-           "-an", "-vf", f"fps={CLIP_FPS},scale={CLIP_W}:-2", "-c:v", "libx264",
-           "-pix_fmt", "yuv420p", "-movflags", "+faststart", "-map_metadata", "-1",
+           "-vf", f"fps={CLIP_FPS},scale={CLIP_W}:-2", "-c:v", "libx264",
+           "-pix_fmt", "yuv420p", "-c:a", "aac", "-b:a", "96k", "-ac", "1",
+           "-movflags", "+faststart", "-map_metadata", "-1",
            "-loglevel", "error", str(out)]
     try:
         r = subprocess.run(cmd, capture_output=True, text=True, timeout=120)
@@ -104,6 +109,76 @@ def _cut_clip(src: str, t_start: float, out: Path) -> bool:
     except Exception as e:
         print(f"  ffmpeg error: {str(e)[:160]}", file=sys.stderr)
         return False
+
+
+def _probe_dur(p: Path) -> float | None:
+    try:
+        r = subprocess.run(["ffprobe", "-v", "error", "-show_entries", "format=duration",
+                            "-of", "default=nw=1:nk=1", str(p)],
+                           capture_output=True, text=True, timeout=30)
+        return float(r.stdout.strip())
+    except Exception:
+        return None
+
+
+def _frame_meta_for(entry: dict) -> tuple | None:
+    """Resolve (source_video, t_mid) for an existing bank entry via its lesson frames.json."""
+    still = Path(entry.get("still", ""))
+    if not still.name:
+        return None
+    vid = still.parent.name
+    try:
+        d = json.load(open(ANAT / "frames" / vid / "frames.json"))
+    except Exception:
+        return None
+    src = d.get("source_video")
+    if not src or not os.path.exists(src):
+        return None
+    fr = next((f for f in d.get("frames", []) if Path(f.get("file", "")).name == still.name), None)
+    if not fr:
+        return None
+    t_mid = fr.get("t_mid", fr.get("t_start"))
+    return (src, float(t_mid)) if t_mid is not None else None
+
+
+def _recut_bank() -> int:
+    """Re-cut every existing bank clip CENTERED on its still (+ Erik's voice), overwriting in
+    place, then assert still == clip-center (±0.6s) and duration ~CLIP_SECONDS. Idempotent."""
+    bank = json.loads(BANK.read_text()) if BANK.exists() else []
+    ok = bad = skip = 0
+    rows = []
+    for i, e in enumerate(bank):
+        meta = _frame_meta_for(e)
+        out = Path(e["clip"])
+        if not meta:
+            skip += 1
+            rows.append((e.get("technique", "?")[:40], "SKIP", "no src/meta"))
+            print(f"  [{i+1}/{len(bank)}] SKIP {e.get('technique','?')[:40]}", flush=True)
+            continue
+        src, t_mid = meta
+        center = max(0.0, t_mid - CLIP_SECONDS / 2.0) + CLIP_SECONDS / 2.0
+        delta = abs(center - t_mid)
+        if not _cut_clip(src, t_mid, out):
+            bad += 1
+            rows.append((e.get("technique", "?")[:40], "CUT-FAIL", f"d={delta:.2f}"))
+            print(f"  [{i+1}/{len(bank)}] CUT-FAIL {e.get('technique','?')[:40]}", flush=True)
+            continue
+        dur = _probe_dur(out)
+        good = delta <= 0.6 and dur is not None and abs(dur - CLIP_SECONDS) < 0.8
+        status = "OK" if good else "CHECK"
+        if good:
+            ok += 1
+        else:
+            bad += 1
+        rows.append((e.get("technique", "?")[:40], status,
+                     f"d={delta:.2f} dur={dur:.1f}" if dur else f"d={delta:.2f} dur=?"))
+        print(f"  [{i+1}/{len(bank)}] {status} {e.get('technique','?')[:40]}", flush=True)
+    print("\n── re-cut alignment report ──────────────────────────────────")
+    print(f"{'technique':42} {'status':9} detail")
+    for t, s, det in rows:
+        print(f"{t:42} {s:9} {det}")
+    print(f"\nOK={ok}  CHECK/FAIL={bad}  SKIP={skip}  total={len(bank)}")
+    return 0 if bad == 0 else 1
 
 
 def _best_frames(d: dict, k: int) -> list:
@@ -121,7 +196,12 @@ def main() -> int:
     ap.add_argument("--limit", type=int, default=60, help="max lessons to process this run")
     ap.add_argument("--max-per-video", type=int, default=1)
     ap.add_argument("--dry", action="store_true")
+    ap.add_argument("--recut", action="store_true",
+                    help="re-cut existing bank clips centered-on-still + Erik's voice, then QA-assert alignment")
     args = ap.parse_args()
+
+    if args.recut:
+        return _recut_bank()
 
     CLIPS.mkdir(parents=True, exist_ok=True)
     bank = json.loads(BANK.read_text()) if BANK.exists() else []
@@ -161,7 +241,7 @@ def main() -> int:
             out = CLIPS / f"{vid}-seg{int(fr.get('seg', 0)):03d}.mp4"
             if any(e.get("clip") == str(out) for e in bank):
                 continue  # already in bank (resume-safe, no dup)
-            if not out.exists() and not _cut_clip(src, fr.get("t_start", fr.get("t_mid", 0)), out):
+            if not out.exists() and not _cut_clip(src, fr.get("t_mid", fr.get("t_start", 0)), out):
                 print("  clip cut failed"); continue
             bank.append({
                 "clip": str(out), "still": str(still),
