@@ -28,9 +28,10 @@ mkdir -p "$BRIEF_DIR" "$(dirname "$LOG")"
 NVM_BIN="$(ls -d "$HOME"/.nvm/versions/node/*/bin 2>/dev/null | sort -V | tail -1)"
 export PATH="$NVM_BIN:$HOME/.local/bin:/usr/local/bin:/usr/bin:/bin:$PATH"
 CLAUDE_BIN="$HOME/.local/bin/claude"
-MODEL="${AINVEST_BRIEF_MODEL:-sonnet}"
-# read-only analysis surface (same allowlist the antigravity bot uses)
-TOOLS="Bash,Read,Grep,Glob,WebFetch,WebSearch,Skill,Agent,TodoWrite"
+MODEL="${AINVEST_BRIEF_MODEL:-sonnet}"   # NOT sonnet[1m] — 1M context needs paid usage credits (not on the flat sub)
+# LEAN: headlines are pre-injected as ground-truth, so NO skill/agent fan-out (that was
+# re-fetching ~110k tokens/run for a paragraph). Just enough to optionally check a price.
+TOOLS="Bash,Read"
 
 log() { echo "[$(TZ='America/New_York' date '+%Y-%m-%d %H:%M:%S ET')] $*" | tee -a "$LOG"; }
 
@@ -67,18 +68,19 @@ PY
 
 # --- build the mode-specific prompt -------------------------------------------
 if [[ "$MODE" == "morning" ]]; then
-  ASK="/ainvest Morning premarket brief for my watchlist: $WATCH. \
-For each name flag only what's ACTIONABLE today: earnings/dividends inside 2 days, \
-analyst rating changes, overnight catalysts/news, and any premarket gap. \
-Lead with the single most important thing across the whole list. \
-Skip names with nothing actionable. Verdict-first, ADHD-friendly, <= 25 lines, \
-no tables wider than a phone. Do not use mcp__ainvest tools — local sources only."
+  ASK="You are Mike's premarket trading copilot. Watchlist: $WATCH. \
+Using ONLY the REAL headlines provided below (plus your general market knowledge), write a \
+premarket brief. For each name flag only what's ACTIONABLE today: earnings/analyst moves, \
+catalysts/news, or an implied premarket gap. Lead with the single most important thing across \
+the whole list. Skip names with nothing actionable. Verdict-first, ADHD-friendly, <= 25 lines, \
+no tables wider than a phone. Do NOT claim any news that isn't in the headlines below."
 else
-  ASK="/ainvest End-of-day wrap for my watchlist: $WATCH. \
-What actually moved today and why (catalyst vs noise), what changed in the setup, \
-and the ONE thing to watch at tomorrow's open per name that warrants it. \
-Lead with the day's biggest signal. Skip quiet names. Verdict-first, <= 25 lines. \
-Do not use mcp__ainvest tools — local sources only."
+  ASK="You are Mike's trading copilot. Watchlist: $WATCH. \
+Using ONLY the REAL headlines provided below (plus your general market knowledge), write an \
+end-of-day wrap: what actually moved today and why (catalyst vs noise), what changed in the \
+setup, and the ONE thing to watch at tomorrow's open per name that warrants it. Lead with the \
+day's biggest signal. Skip quiet names. Verdict-first, <= 25 lines. Do NOT claim any news that \
+isn't in the headlines below."
 fi
 
 # inject the live headlines (if any) as ground-truth context for the LLM
@@ -88,8 +90,8 @@ if [[ -n "$NEWS" ]]; then
 fi
 
 # --- 1. interpret via Claude Code subscription CLI ----------------------------
-RESULT_JSON="$(cd "$HOME" && "$CLAUDE_BIN" -p "$ASK" --model "$MODEL" \
-  --output-format json --allowedTools "$TOOLS" 2>>"$LOG")"
+RESULT_JSON="$(cd "$HOME" && env -u ANTHROPIC_API_KEY "$CLAUDE_BIN" -p "$ASK" --model "$MODEL" \
+  --effort high --output-format json --allowedTools "$TOOLS" 2>>"$LOG")"
 if [[ -z "$RESULT_JSON" ]]; then
   log "claude -p returned empty — abort (is the CLI logged in?)"; exit 1
 fi

@@ -263,6 +263,7 @@ def main():
                 f"𝕏 /x [TKR] — live X/Twitter trader sentiment (Grok)\n"
                 f"📖 /explain — what Greeks/IV/volume mean (plain English)\n"
                 f"Or ask anything / run any /skill. /help = this.")
+    help_txt += "\n🔑 /guest [24h] [name] — mint a temp link to give someone dashboard access"
 
     print(f"{name} responder started ({cfg.get('token') or cfg.get('fleet_fn')})", flush=True)
     tg("deleteWebhook")
@@ -367,6 +368,16 @@ def main():
                     tg("sendChatAction", chat_id=chat_id, action="typing")
                     send_reply(chat_id, quantum_tg.tidy(ask_local(quantum_tg.news_prompt()), 11))
                     print(f"[{name}] /news", flush=True)
+                    continue
+                # /guest [duration] [name] — mint a temp dashboard access link (laptopclaude
+                # only; owner-gated above). Default 24h. One tap-link logs the guest into ALL
+                # three dashboards (host-scoped mc_access cookie = SSO) until it auto-expires.
+                # /guest [duration] [name] — give someone temp dashboard access. Works on
+                # EVERY bot (owner-gated above); shared logic lives in mc_guest.py.
+                if cmd0 == "/guest":
+                    import mc_guest
+                    send_reply(chat_id, mc_guest.mint(text))
+                    print(f"[{name}] /guest", flush=True)
                     continue
                 # X-Sentiment bot: a bare (non-slash) message → native Grok x_search first.
                 if cfg.get("default_x") and not text.startswith("/"):
