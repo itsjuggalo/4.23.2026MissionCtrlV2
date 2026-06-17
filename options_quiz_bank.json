@@ -1,0 +1,651 @@
+{
+  "meta": {
+    "title": "Options Trading Academy",
+    "subtitle": "Mike's path from $6k to out-trading a pro",
+    "version": "1.0",
+    "modules": [
+      { "id": "foundations", "name": "Foundations", "blurb": "Calls, puts, strikes, premium, ITM/OTM, exercise & assignment." },
+      { "id": "greeks-iv", "name": "Greeks & IV", "blurb": "Delta, gamma, theta, vega, implied vol & IV crush." },
+      { "id": "strategy", "name": "Strategy Selection", "blurb": "Covered calls, CSPs, the wheel, spreads, defined vs undefined risk." },
+      { "id": "risk", "name": "Risk & Sizing", "blurb": "Sizing a $6k account, max loss, the don't-blow-up rules." },
+      { "id": "entry-exit", "name": "Entry / Exit / DTE", "blurb": "ITM vs OTM, picking expirations, profit-taking, IV-crush timing." },
+      { "id": "flow", "name": "Institutional Flow", "blurb": "Sweeps vs blocks, ask-side, OI vs volume, turning flow into YOUR trade." },
+      { "id": "robinhood", "name": "Robinhood Mechanics", "blurb": "PDT rule, assignment, auto-exercise, buying power, real $6k math." },
+      { "id": "pro-rigor", "name": "Pro / Series-7 Rigor", "blurb": "Breakeven & max-loss formulas, parity, the licensed-pro vocabulary." }
+    ],
+    "pro_benchmark": "A licensed equity pro (Series 7) typically nails Foundations, Greeks, Risk and Pro-Rigor (~90%). Your edge is Flow + Robinhood execution — modules a salaried manager rarely trades. Beat the pro THERE."
+  },
+  "questions": [
+    {
+      "id": "opt-001", "module": "foundations", "level": 1,
+      "question": "One standard U.S. equity options contract gives you control over how many shares?",
+      "options": ["1 share", "10 shares", "100 shares", "1,000 shares"],
+      "correct_index": 2,
+      "why": "One contract = 100 shares. So a quoted premium of $2.00 actually costs you $2.00 × 100 = $200. Forgetting the ×100 is the #1 beginner sizing mistake.",
+      "tags": ["contract", "multiplier"],
+      "rh_note": "On Robinhood a '$2.50' call really debits $250 from your $6k. Always multiply by 100 before you think about size."
+    },
+    {
+      "id": "opt-002", "module": "foundations", "level": 1,
+      "question": "Buying a CALL gives you the right to do what?",
+      "options": ["Sell 100 shares at the strike", "Buy 100 shares at the strike", "Collect a dividend", "Short the stock for free"],
+      "correct_index": 1,
+      "why": "A long call = the RIGHT (not obligation) to BUY 100 shares at the strike price up to expiration. You buy calls when you expect the stock to go UP.",
+      "tags": ["call", "rights"]
+    },
+    {
+      "id": "opt-003", "module": "foundations", "level": 1,
+      "question": "Buying a PUT gives you the right to do what?",
+      "options": ["Buy 100 shares at the strike", "Sell 100 shares at the strike", "Force a dividend", "Lock in margin interest"],
+      "correct_index": 1,
+      "why": "A long put = the RIGHT to SELL 100 shares at the strike. Puts gain value when the stock goes DOWN, so they're your bearish bet (or downside insurance).",
+      "tags": ["put", "rights"]
+    },
+    {
+      "id": "opt-004", "module": "foundations", "level": 1,
+      "question": "The price you pay to buy an option is called the…",
+      "options": ["Strike", "Premium", "Margin", "Spread"],
+      "correct_index": 1,
+      "why": "Premium is the option's price. As a BUYER you pay premium (it's your max loss). As a SELLER you collect premium (it's your max gain on that leg).",
+      "tags": ["premium"]
+    },
+    {
+      "id": "opt-005", "module": "foundations", "level": 1,
+      "question": "The 'strike price' of an option is…",
+      "options": ["Today's stock price", "The fixed price at which the option can be exercised", "The premium times 100", "The broker's fee"],
+      "correct_index": 1,
+      "why": "The strike is the locked-in price you'd buy (call) or sell (put) the 100 shares at if exercised. It never changes for that contract; the stock price moves around it.",
+      "tags": ["strike"]
+    },
+    {
+      "id": "opt-006", "module": "foundations", "level": 1,
+      "question": "A CALL is 'in the money' (ITM) when…",
+      "options": ["The stock is below the strike", "The stock is above the strike", "IV is high", "It's expiration day"],
+      "correct_index": 1,
+      "why": "A call is ITM when stock > strike (you could buy cheap and sell at market). A put is ITM when stock < strike. ITM options have real intrinsic value; OTM options are pure hope (time + IV).",
+      "tags": ["ITM", "moneyness"]
+    },
+    {
+      "id": "opt-007", "module": "foundations", "level": 2,
+      "question": "Intrinsic value of a call equals…",
+      "options": ["Premium − strike", "max(0, stock price − strike)", "Strike − stock price", "Premium × delta"],
+      "correct_index": 1,
+      "why": "Call intrinsic = max(0, spot − strike); it can't go negative. Everything in the premium ABOVE intrinsic is extrinsic (time + implied-vol) value, which decays to zero by expiration.",
+      "tags": ["intrinsic", "extrinsic"]
+    },
+    {
+      "id": "opt-008", "module": "foundations", "level": 1,
+      "question": "You buy a call. At expiration the stock closes BELOW your strike. What happens?",
+      "options": ["You profit anyway", "The option expires worthless and you lose the premium", "You're forced to buy 100 shares", "You collect a dividend"],
+      "correct_index": 1,
+      "why": "An OTM option at expiration is worthless — you lose 100% of the premium paid, no more, no less. This is exactly why far-OTM 'lottery' calls so often go to zero.",
+      "tags": ["expiration", "worthless"],
+      "rh_note": "This is the homelessness trap in miniature: never put money into a long option that you can't afford to lose entirely."
+    },
+    {
+      "id": "opt-009", "module": "foundations", "level": 1,
+      "question": "What is the maximum a BUYER of a single call or put can lose?",
+      "options": ["Unlimited", "The premium paid", "The strike price × 100", "Their whole account by law"],
+      "correct_index": 1,
+      "why": "A long option's max loss is the premium you paid — that's the whole point of defined risk. Your downside is capped; only SELLERS of naked options face large/unlimited loss.",
+      "tags": ["max-loss", "long"]
+    },
+    {
+      "id": "opt-010", "module": "foundations", "level": 2,
+      "question": "An OTM call has how much intrinsic value?",
+      "options": ["Zero — it's all time/IV value", "Always positive", "Equal to the premium", "Negative"],
+      "correct_index": 0,
+      "why": "OTM options have zero intrinsic value; 100% of their premium is extrinsic (time + implied volatility). That extrinsic value bleeds away every day (theta) and collapses if IV drops.",
+      "tags": ["OTM", "extrinsic"]
+    },
+    {
+      "id": "opt-011", "module": "greeks-iv", "level": 1,
+      "question": "Delta primarily measures…",
+      "options": ["Time decay per day", "How much the option price moves per $1 move in the stock", "Sensitivity to interest rates", "The bid-ask spread"],
+      "correct_index": 1,
+      "why": "Delta = change in option price per $1 move in the underlying. A 0.50 delta call gains ~$0.50/share ($50/contract) if the stock rises $1. Calls have +delta (0→1), puts have −delta (0→−1).",
+      "tags": ["delta"]
+    },
+    {
+      "id": "opt-012", "module": "greeks-iv", "level": 2,
+      "question": "Your call has a delta of 0.30. The stock rises $1. Roughly how much does the contract gain (ignoring other greeks)?",
+      "options": ["$0.30", "$3", "$30", "$300"],
+      "correct_index": 2,
+      "why": "0.30 delta × $1 × 100 shares = $30 per contract. Delta is per-share; always ×100 for the contract. Higher-delta (ITM) options track the stock more dollar-for-dollar.",
+      "tags": ["delta", "math"]
+    },
+    {
+      "id": "opt-013", "module": "greeks-iv", "level": 2,
+      "question": "Besides price sensitivity, a 0.30 delta is also a rough proxy for…",
+      "options": ["A 30% chance the option finishes in the money", "A 30% return", "30 days to expiration", "30% implied volatility"],
+      "correct_index": 0,
+      "why": "Delta loosely approximates the probability of finishing ITM — a 0.30 call has ~30% odds of expiring in the money. That's why low-delta OTM 'lotto' calls usually expire worthless.",
+      "tags": ["delta", "probability"]
+    },
+    {
+      "id": "opt-014", "module": "greeks-iv", "level": 1,
+      "question": "Theta represents…",
+      "options": ["Volatility risk", "Time decay — value lost per day", "Direction", "Dividend exposure"],
+      "correct_index": 1,
+      "why": "Theta is daily time decay. If you're LONG options, theta is negative — every day that passes without movement bleeds premium. Option sellers WANT theta working for them.",
+      "tags": ["theta", "decay"]
+    },
+    {
+      "id": "opt-015", "module": "greeks-iv", "level": 2,
+      "question": "Theta (time decay) is fastest…",
+      "options": ["Right after you buy", "Evenly across the option's life", "In the final ~30 days, especially for at-the-money options", "Only on expiration morning"],
+      "correct_index": 2,
+      "why": "Decay accelerates into expiration; the last few weeks erode an ATM option's extrinsic value the fastest. Holding short-dated OTM options overnight with no move is how accounts slowly bleed out.",
+      "tags": ["theta", "DTE"]
+    },
+    {
+      "id": "opt-016", "module": "greeks-iv", "level": 2,
+      "question": "Gamma measures…",
+      "options": ["Time decay", "How fast delta itself changes per $1 move", "IV sensitivity", "Assignment risk"],
+      "correct_index": 1,
+      "why": "Gamma = the rate of change of delta. It's highest for ATM options near expiration — that's why 0DTE moves so violently: tiny stock moves swing delta (and your P&L) hard in both directions.",
+      "tags": ["gamma"]
+    },
+    {
+      "id": "opt-017", "module": "greeks-iv", "level": 2,
+      "question": "Vega measures the option's sensitivity to…",
+      "options": ["A $1 move in the stock", "A 1-point change in implied volatility", "One day of time", "A 1% interest-rate change"],
+      "correct_index": 1,
+      "why": "Vega = price change per 1-point change in implied volatility. Long options have positive vega, so they gain when IV rises and lose when IV falls — the mechanism behind IV crush.",
+      "tags": ["vega", "IV"]
+    },
+    {
+      "id": "opt-018", "module": "greeks-iv", "level": 2,
+      "question": "'IV crush' is…",
+      "options": ["A stock gapping down", "A sharp drop in implied volatility (often right after earnings) that deflates premium", "A margin call", "A delta spike"],
+      "correct_index": 1,
+      "why": "Before earnings, IV (and premium) is pumped up to price the unknown. Once the news is out, IV collapses — your option can LOSE money even if the stock moves your direction, because vega works against you. This is the classic earnings trap.",
+      "tags": ["IV-crush", "earnings"],
+      "rh_note": "Buying single calls/puts right before earnings on RH feels exciting and usually loses to IV crush. Beginners get wrecked here constantly."
+    },
+    {
+      "id": "opt-019", "module": "greeks-iv", "level": 3,
+      "question": "IV Rank / IV Percentile tells you…",
+      "options": ["The stock's direction", "Where current implied vol sits vs its own past range (is option premium cheap or rich now)", "The delta", "The dividend yield"],
+      "correct_index": 1,
+      "why": "IV Rank/Percentile normalizes today's IV against the stock's own history. High IV rank = premium is expensive → favor SELLING premium (spreads/CSPs). Low IV rank = premium cheap → buying long options is less punished by vega.",
+      "tags": ["IV-rank", "vol"]
+    },
+    {
+      "id": "opt-020", "module": "greeks-iv", "level": 3,
+      "question": "You're bullish but IV is very high (expensive premium). A smarter structure than a naked long call is often…",
+      "options": ["A bigger naked long call", "A debit call spread (sell a higher-strike call to offset vega/cost)", "A 0DTE far-OTM call", "Doing nothing forever"],
+      "correct_index": 1,
+      "why": "Buying naked premium into high IV means you're overpaying and exposed to crush. A debit call spread sells some of that rich vega back, lowers your cost and breakeven, and defines risk — at the price of a capped gain.",
+      "tags": ["IV", "spread", "vega"]
+    },
+    {
+      "id": "opt-021", "module": "strategy", "level": 2,
+      "question": "A 'covered call' is…",
+      "options": ["Buying a call with no shares", "Owning 100 shares AND selling 1 call against them", "Two long calls", "A naked short call"],
+      "correct_index": 1,
+      "why": "Covered call = long 100 shares + short 1 call. You collect premium (income) in exchange for capping your upside at the strike. Lower risk than the stock alone — the premium cushions small drops.",
+      "tags": ["covered-call", "income"]
+    },
+    {
+      "id": "opt-022", "module": "strategy", "level": 2,
+      "question": "A 'cash-secured put' (CSP) is…",
+      "options": ["A naked put with no plan", "Selling a put while holding enough cash to buy 100 shares if assigned", "Buying a put for insurance", "A type of call spread"],
+      "correct_index": 1,
+      "why": "CSP = short put fully backed by cash to buy the shares at the strike. You get PAID to potentially buy a stock you already like at a lower price. If it's not assigned, you keep the premium as income.",
+      "tags": ["CSP", "income"],
+      "rh_note": "On $6k you can only secure a put where 100 shares (strike × 100) fits your buying power — e.g. a $15 strike needs $1,500 set aside."
+    },
+    {
+      "id": "opt-023", "module": "strategy", "level": 2,
+      "question": "'The wheel' strategy is…",
+      "options": ["Day-trading 0DTE in a loop", "Sell CSP → if assigned, own shares → sell covered calls → repeat", "Rolling losses forever", "Buying calls and puts together"],
+      "correct_index": 1,
+      "why": "The wheel cycles premium income: sell cash-secured puts to get paid (and maybe buy shares cheap), then sell covered calls on those shares to get paid again, repeating. A staple for steady, lower-variance income on stocks you'd be happy to own.",
+      "tags": ["wheel", "income"]
+    },
+    {
+      "id": "opt-024", "module": "strategy", "level": 2,
+      "question": "A debit (vertical) call spread is…",
+      "options": ["Buying a call and selling a higher-strike call, same expiration", "Buying two calls", "Selling a naked call", "Buying a call and a put"],
+      "correct_index": 0,
+      "why": "Buy a lower-strike call, sell a higher-strike call (same expiry). It's cheaper than the naked call, lowers your breakeven, and defines max loss = net debit — but caps your max gain at the spread width.",
+      "tags": ["debit-spread", "vertical"]
+    },
+    {
+      "id": "opt-025", "module": "strategy", "level": 2,
+      "question": "Which of these has UNDEFINED (potentially huge) risk?",
+      "options": ["Long call", "Debit call spread", "Naked (uncovered) short call", "Cash-secured put"],
+      "correct_index": 2,
+      "why": "A naked short call has theoretically unlimited loss — a stock can rise forever. Long calls, spreads, and CSPs all have defined or bounded risk. This is why brokers gate naked calls behind the highest approval level.",
+      "tags": ["risk", "naked-call"]
+    },
+    {
+      "id": "opt-026", "module": "strategy", "level": 2,
+      "question": "You're moderately bullish and want to cut both cost and IV exposure. Best fit?",
+      "options": ["Far-OTM 0DTE call", "Debit call spread", "Naked short put", "Buy 100 shares only"],
+      "correct_index": 1,
+      "why": "A debit call spread gives you defined-risk bullish exposure at a fraction of the naked-call cost and trims vega. You give up unlimited upside (capped at the short strike) in exchange for a cheaper, higher-probability position.",
+      "tags": ["strategy-match", "spread"]
+    },
+    {
+      "id": "opt-027", "module": "strategy", "level": 2,
+      "question": "You want to get PAID while waiting to buy a stock you like at a lower price. Use a…",
+      "options": ["Long call", "Cash-secured put", "Covered call", "Long straddle"],
+      "correct_index": 1,
+      "why": "Selling a cash-secured put pays you premium now; if the stock dips to your strike you buy it (at an effective discount = strike − premium), and if it doesn't, you simply keep the cash. Ideal income tool on names you'd own anyway.",
+      "tags": ["CSP", "strategy-match"]
+    },
+    {
+      "id": "opt-028", "module": "strategy", "level": 3,
+      "question": "A bull PUT spread (credit spread) makes money when…",
+      "options": ["The stock crashes", "The stock stays above your short strike, so you keep the net credit", "IV spikes", "You get assigned"],
+      "correct_index": 1,
+      "why": "Sell a higher-strike put, buy a lower-strike put for protection. You collect a credit and profit if the stock stays ABOVE the short strike at expiration. Defined risk = strike width − credit. A high-probability, theta-positive way to be mildly bullish.",
+      "tags": ["credit-spread", "bull-put"]
+    },
+    {
+      "id": "opt-029", "module": "strategy", "level": 2,
+      "question": "On a small $6k account, the SAFEST way to earn income on a stock you'd happily own is usually…",
+      "options": ["Naked short calls", "A defined-risk credit spread or a cash-secured put you can actually afford", "0DTE scalping", "Buying long-dated OTM calls"],
+      "correct_index": 1,
+      "why": "Defined-risk credit spreads and affordable CSPs cap your downside and pay you premium — exactly what a small account needs. Naked calls (unlimited risk) and 0DTE scalps (high variance) are account-killers on $6k.",
+      "tags": ["small-account", "income"]
+    },
+    {
+      "id": "opt-030", "module": "strategy", "level": 3,
+      "question": "A long straddle (buy a call AND a put at the same strike) profits when…",
+      "options": ["The stock barely moves", "The stock makes a BIG move either direction (more than the combined premium)", "IV collapses", "Time passes with no move"],
+      "correct_index": 1,
+      "why": "A straddle is a bet on volatility/magnitude, not direction — you need a move bigger than both premiums combined to profit. Its enemies are theta and IV crush, so it's a poor 'hold through earnings' play despite feeling clever.",
+      "tags": ["straddle", "volatility"]
+    },
+    {
+      "id": "opt-031", "module": "risk", "level": 2,
+      "question": "On a $6k account, roughly how much should ONE trade be allowed to lose at most (Mike's discipline)?",
+      "options": ["Whatever it takes", "About $100–250 (a small fraction of equity)", "$1,500", "Half the account"],
+      "correct_index": 1,
+      "why": "Sizing every trade as a small fraction of current equity (a hard cap around $100–250 on $6k) means no single loss can cripple you. Survival first — you can't compound an account you blew up.",
+      "tags": ["sizing", "risk-cap"],
+      "rh_note": "This is the core anti-homelessness rule: cap each trade's max loss, then you can be wrong many times and still be in the game."
+    },
+    {
+      "id": "opt-032", "module": "risk", "level": 1,
+      "question": "Putting $1,500 of a $6k account into a single same-day (0DTE) call is…",
+      "options": ["Smart leverage", "Wildly over-sized — 25% of the account at near-total-loss risk", "Fine if you feel confident", "Required to make money"],
+      "correct_index": 1,
+      "why": "That's 25% of your account on a position that can easily go to zero by the close. A couple of those wipes you out. Position size, not conviction, is what keeps you solvent.",
+      "tags": ["sizing", "0DTE"]
+    },
+    {
+      "id": "opt-033", "module": "risk", "level": 1,
+      "question": "The maximum you can lose on a long option position is…",
+      "options": ["Unlimited", "100% of the premium you paid", "The strike price", "Your whole account"],
+      "correct_index": 1,
+      "why": "Long options can lose 100% of premium and no more — so your position size literally equals 'money I'm willing to lose entirely.' Size each long-option trade as if it could go to zero, because it can.",
+      "tags": ["max-loss", "sizing"]
+    },
+    {
+      "id": "opt-034", "module": "risk", "level": 2,
+      "question": "Risking exactly 2% of a $6,000 account on a trade means a max loss of…",
+      "options": ["$12", "$60", "$120", "$600"],
+      "correct_index": 2,
+      "why": "2% × $6,000 = $120. Defining your dollar risk FIRST (then choosing a contract/size that fits it) is how pros size. Most blow-ups come from sizing by excitement instead of by a fixed risk budget.",
+      "tags": ["sizing", "math"]
+    },
+    {
+      "id": "opt-035", "module": "risk", "level": 2,
+      "question": "'Assignment risk' on a short option means…",
+      "options": ["Your broker closes you randomly", "You may be obligated to buy (short put) or deliver (short call) 100 shares", "Your delta resets", "You lose your premium"],
+      "correct_index": 1,
+      "why": "If you SELL an option and it's ITM, the buyer can exercise — you must buy 100 shares (short put) or sell/deliver 100 shares (short call). That's why CSPs need the cash and covered calls need the shares; uncovered, it can force a position you can't afford.",
+      "tags": ["assignment", "short"]
+    },
+    {
+      "id": "opt-036", "module": "risk", "level": 2,
+      "question": "Time decay (theta) hurts you MOST when you…",
+      "options": ["Sell options", "Hold long options that aren't moving, especially short-dated ones", "Own shares", "Hold a credit spread"],
+      "correct_index": 1,
+      "why": "Long options bleed theta daily; the closer to expiration and the more OTM, the faster the bleed. If your thesis needs 'a move soon' and the stock chops sideways, theta quietly eats the position.",
+      "tags": ["theta", "risk"]
+    },
+    {
+      "id": "opt-037", "module": "risk", "level": 1,
+      "question": "When a trade's thesis is clearly invalidated, the disciplined move is to…",
+      "options": ["Add more (average down) and hope", "Cut the loss and protect capital", "Hold to expiration no matter what", "Double the size"],
+      "correct_index": 1,
+      "why": "Capital preservation beats hope. Exiting a broken thesis keeps a small loss small; averaging down on a losing OPTION (with theta/IV decay) usually compounds the damage. Live to trade tomorrow.",
+      "tags": ["exit", "discipline"]
+    },
+    {
+      "id": "opt-038", "module": "risk", "level": 2,
+      "question": "Why do brokers like Robinhood block naked (uncovered) calls for most retail accounts?",
+      "options": ["It's illegal", "Unlimited loss potential — a stock can rise without bound", "They don't make fees", "It's too simple"],
+      "correct_index": 1,
+      "why": "A naked short call's loss is theoretically unlimited (no ceiling on a stock price), so it requires the highest options approval and serious margin. Retail tiers are restricted to defined-risk structures to stop catastrophic blow-ups.",
+      "tags": ["naked-call", "broker"]
+    },
+    {
+      "id": "opt-039", "module": "risk", "level": 3,
+      "question": "Spreading $6k thinly across ten tiny far-OTM 'lottery' calls vs sizing fewer defined-risk trades — the lottery approach mainly…",
+      "options": ["Guarantees a winner", "Maximizes theta/IV bleed and usually drips the account to zero", "Reduces risk to nothing", "Beats the market"],
+      "correct_index": 1,
+      "why": "Many cheap far-OTM calls each have low probability and high theta/IV decay — collectively they tend to bleed out. Concentrating on fewer, higher-probability, defined-risk setups (sized to a fixed risk budget) is far more survivable.",
+      "tags": ["sizing", "lottery"]
+    },
+    {
+      "id": "opt-040", "module": "risk", "level": 2,
+      "question": "The single habit that most protects a small options account from ruin is…",
+      "options": ["Picking the perfect entry", "Strict position sizing / defined risk on every trade", "Trading more often", "Using the most leverage"],
+      "correct_index": 1,
+      "why": "You will be wrong often — everyone is. Consistent small position sizing and defined risk mean being wrong costs you a survivable amount each time. That, not prediction, is what keeps you in the game long enough to win.",
+      "tags": ["sizing", "survival"]
+    },
+    {
+      "id": "opt-041", "module": "entry-exit", "level": 1,
+      "question": "'0DTE' refers to an option that…",
+      "options": ["Has zero delta", "Expires the same trading day", "Has zero theta", "Is zero-cost"],
+      "correct_index": 1,
+      "why": "0DTE = zero days to expiration (expires today). It's almost all gamma and theta: tiny stock moves swing it hard, and what's OTM at the close goes to zero. Thrilling, very high variance, easy to blow up on.",
+      "tags": ["0DTE", "DTE"]
+    },
+    {
+      "id": "opt-042", "module": "entry-exit", "level": 2,
+      "question": "For a directional SWING trade, a common DTE 'sweet spot' that balances cost and theta is…",
+      "options": ["0–1 days", "About 30–45 days", "1–2 years", "It never matters"],
+      "correct_index": 1,
+      "why": "~30–45 DTE gives your thesis time to play out without paying for excessive premium, and theta decay is still moderate (it accelerates hardest inside the final couple weeks). Buys you room to be right without bleeding out fast.",
+      "tags": ["DTE", "swing"]
+    },
+    {
+      "id": "opt-043", "module": "entry-exit", "level": 3,
+      "question": "Compared with an OTM call (delta ~0.30), an ITM call (delta ~0.70) generally…",
+      "options": ["Costs less and decays faster", "Costs more but tracks the stock more 1-for-1, with less theta/IV risk and higher win probability", "Has no intrinsic value", "Is always the wrong choice"],
+      "correct_index": 1,
+      "why": "Higher-delta ITM calls have intrinsic value, move closer to dollar-for-dollar with the stock, carry less extrinsic (so less theta/IV bleed), and have higher odds of finishing ITM. You pay more up front and get less raw leverage, but fewer ways to lose to time and vol.",
+      "tags": ["ITM", "OTM", "delta"]
+    },
+    {
+      "id": "opt-044", "module": "entry-exit", "level": 3,
+      "question": "If you want the HIGHEST probability of profit and the LEAST theta/IV risk on a directional bet, lean toward…",
+      "options": ["Far-OTM short-dated", "Slightly ITM, a bit more time", "ATM 0DTE", "Whatever's cheapest"],
+      "correct_index": 1,
+      "why": "Slightly-ITM with a little more DTE maximizes the share of intrinsic value (real, non-decaying) and minimizes the share you can lose to theta and IV crush. It's the 'I want to be right and survive being early' choice.",
+      "tags": ["ITM", "strike-selection"]
+    },
+    {
+      "id": "opt-045", "module": "entry-exit", "level": 2,
+      "question": "Buying single options right BEFORE an earnings release mainly exposes you to…",
+      "options": ["Lower premium", "IV crush after the announcement", "Guaranteed gains", "Zero risk"],
+      "correct_index": 1,
+      "why": "Pre-earnings IV is inflated; after the report IV collapses and premium deflates. You can be right on direction and still lose because vega worked against you. If you must play earnings, defined-risk spreads blunt the crush better than naked long options.",
+      "tags": ["earnings", "IV-crush"]
+    },
+    {
+      "id": "opt-046", "module": "entry-exit", "level": 2,
+      "question": "A sound profit-taking rule for LONG premium (bought calls/puts) is to…",
+      "options": ["Always hold to expiration", "Take profits at a preset target (e.g. +50–100%) rather than squeezing the last dollar", "Never sell winners", "Sell only at a loss"],
+      "correct_index": 1,
+      "why": "Theta and reversals erode unrealized gains fast. Booking profits at a planned target (and cutting losers at a planned stop) turns paper gains into real ones and removes emotion. 'Letting it ride' on a long option often gives it all back.",
+      "tags": ["exit", "profit-taking"]
+    },
+    {
+      "id": "opt-047", "module": "entry-exit", "level": 2,
+      "question": "Holding a still-OTM option into its final week to expiration exposes you mostly to…",
+      "options": ["Slow, gentle decay", "Rapid theta decay — it needs the move NOW or it's worth ~0", "Rising value automatically", "Lower risk"],
+      "correct_index": 1,
+      "why": "In the last week, an OTM option's extrinsic value evaporates quickly; without an immediate move it heads to zero. If you're not in profit and the catalyst hasn't hit, that final week is where most of the loss happens.",
+      "tags": ["theta", "expiration"]
+    },
+    {
+      "id": "opt-048", "module": "entry-exit", "level": 3,
+      "question": "The stock has ALREADY made most of its expected catalyst move. Buying short-dated OTM calls to chase is…",
+      "options": ["High edge", "Late and low-EV — the move is largely priced in and theta/IV now fight you", "Risk-free", "The pro move"],
+      "correct_index": 1,
+      "why": "Chasing after the spike means you buy inflated premium (IV often pumped) right as the easy move is done. You're now paying for a move that's mostly happened, with theta and a likely IV fade working against you. Best entries are BEFORE the crowd, not after.",
+      "tags": ["entry", "chasing"]
+    },
+    {
+      "id": "opt-049", "module": "entry-exit", "level": 2,
+      "question": "To stay directional while CUTTING theta and IV-crush risk, you'd generally…",
+      "options": ["Go shorter-dated and further OTM", "Go slightly ITM and a bit longer-dated", "Buy a straddle", "Sell a naked call"],
+      "correct_index": 1,
+      "why": "More intrinsic value (ITM) + more time (longer DTE) shrinks the fraction of your premium that's exposed to time decay and vega. You trade some leverage and cost for a far more forgiving, survivable directional position.",
+      "tags": ["strike-selection", "ITM"]
+    },
+    {
+      "id": "opt-050", "module": "entry-exit", "level": 2,
+      "question": "A reasonable hard stop discipline on a bought option is to…",
+      "options": ["Have no stop and hope", "Predefine a max loss (e.g. −50% of premium or thesis-break) and exit when hit", "Add more at every drop", "Only exit at zero"],
+      "correct_index": 1,
+      "why": "Deciding your exit BEFORE you enter removes the in-the-moment emotion that turns a small loss into a big one. A predefined stop (a % of premium or 'the thesis broke') keeps each loss inside your risk budget.",
+      "tags": ["stop", "discipline"]
+    },
+    {
+      "id": "opt-051", "module": "flow", "level": 2,
+      "question": "An options 'sweep' is…",
+      "options": ["A slow limit order", "An aggressive order split across multiple exchanges to fill immediately — signals urgency", "A dividend capture", "A closing trade only"],
+      "correct_index": 1,
+      "why": "A sweep takes whatever liquidity is available across exchanges to get filled fast, paying up for immediacy. That urgency is why sweeps are watched as potential 'smart money in a hurry' — though they can still be hedges.",
+      "tags": ["sweep", "flow"]
+    },
+    {
+      "id": "opt-052", "module": "flow", "level": 2,
+      "question": "A 'block' trade is…",
+      "options": ["A tiny retail order", "A single large, often privately negotiated order — sizeable but usually less urgent than a sweep", "An expired option", "A stock buyback"],
+      "correct_index": 1,
+      "why": "Blocks are big single prints, frequently institutional and negotiated. They show conviction by SIZE, but unlike sweeps they aren't screaming 'fill me now.' Reading WHICH kind it is helps you judge urgency.",
+      "tags": ["block", "flow"]
+    },
+    {
+      "id": "opt-053", "module": "flow", "level": 2,
+      "question": "An options trade printing AT or ABOVE the ask ('ask-side') generally suggests…",
+      "options": ["A seller in control", "A buyer-initiated, aggressive order (bullish if it's calls)", "A mistake", "An assignment"],
+      "correct_index": 1,
+      "why": "Paying the ask = the buyer wanted in badly enough to cross the spread, i.e. buyer-initiated aggression. Ask-side CALL buying leans bullish; bid-side selling leans the other way. (Always check it's an opening trade, not a hedge.)",
+      "tags": ["ask-side", "aggression"]
+    },
+    {
+      "id": "opt-054", "module": "flow", "level": 2,
+      "question": "A 'golden sweep' on a flow scanner usually flags…",
+      "options": ["A small odd lot", "An unusually large (often repeated) sweep tagged as high-conviction", "A guaranteed winner", "A closing-only order"],
+      "correct_index": 1,
+      "why": "Golden sweeps are the biggest, most aggressive sweeps — a high-premium urgent bet worth a closer look. High conviction by the prints' size/urgency, but 'high conviction' is not 'guaranteed' — it's a lead, not a signal to copy blindly.",
+      "tags": ["golden-sweep", "flow"]
+    },
+    {
+      "id": "opt-055", "module": "flow", "level": 3,
+      "question": "Open interest (OI) vs volume: which statement is right?",
+      "options": ["They're the same thing", "OI = total contracts outstanding; volume = contracts traded today. Volume >> OI hints at NEW positioning", "Volume is always larger", "OI resets daily"],
+      "correct_index": 1,
+      "why": "Volume is today's activity; OI is the running total of open contracts. When today's volume dwarfs the existing OI at a strike, it signals fresh positioning rather than traders closing — a stronger 'something's happening here' tell.",
+      "tags": ["OI", "volume"]
+    },
+    {
+      "id": "opt-056", "module": "flow", "level": 3,
+      "question": "Why might huge institutional CALL buying NOT actually be a bullish signal to copy?",
+      "options": ["Institutions are always wrong", "It could be a hedge (e.g. against a short stock position) or one leg of a spread — premium size alone doesn't reveal direction", "Calls can't be bullish", "It's fake data"],
+      "correct_index": 1,
+      "why": "A big call print can be a hedge, a spread leg, or a roll — not a naked directional bet. Without seeing the full structure (and the stock position behind it), 'big call buy = bullish' is a trap. Context and trade structure matter more than raw premium.",
+      "tags": ["hedge", "context"]
+    },
+    {
+      "id": "opt-057", "module": "flow", "level": 3,
+      "question": "You see a credible BULLISH flow alert. On a $6k account, the sensible way to follow it is…",
+      "options": ["Buy the exact same far-OTM lotto contract they did", "Take a smaller, defined-risk position — often slightly ITM or a spread, matching or shortening their DTE", "Go all-in", "Ignore your risk cap"],
+      "correct_index": 1,
+      "why": "Institutions have size, hedges, and time you don't. Translate the idea into YOUR account: a smaller, higher-probability, defined-risk expression (slightly ITM or a spread), sized to your risk cap. Copying their exact cheap far-OTM strike usually just donates theta.",
+      "tags": ["follow-flow", "sizing"],
+      "rh_note": "This is your real edge over a salaried equity manager: you can act on retail flow nimbly. Just size it to $100–250 risk and pick a strike that can actually survive being early."
+    },
+    {
+      "id": "opt-058", "module": "flow", "level": 2,
+      "question": "Repeated/persistent flow on the SAME strike across several days suggests…",
+      "options": ["A glitch", "Sustained conviction / accumulation — a stronger tell than a one-off print", "Someone must close immediately", "Nothing at all"],
+      "correct_index": 1,
+      "why": "A single print can be noise or a hedge; the same strike lighting up day after day points to ongoing accumulation or conviction. Persistence is one of the better filters for separating real positioning from one-off prints.",
+      "tags": ["repeat-flow", "conviction"]
+    },
+    {
+      "id": "opt-059", "module": "flow", "level": 2,
+      "question": "The most common mistake retail makes when copying 'unusual options activity' is…",
+      "options": ["Using too little leverage", "Buying cheap far-OTM short-dated calls (lottery tickets) that bleed theta and usually expire worthless", "Buying ITM options", "Selling spreads"],
+      "correct_index": 1,
+      "why": "Retail sees a big bullish print and grabs the cheapest far-OTM weekly to 'leverage' it — exactly the contract with the worst probability and the fastest theta/IV bleed. The pros' edge isn't the strike; it's size, structure, hedging and timing you can't replicate by buying lotto tickets.",
+      "tags": ["mistake", "lottery"]
+    },
+    {
+      "id": "opt-060", "module": "flow", "level": 3,
+      "question": "When deciding ITM vs OTM off a strong bullish flow signal, choosing more ITM (higher delta) mainly buys you…",
+      "options": ["More theta decay", "Higher probability and tighter tracking of the stock, at a higher cost and less raw leverage", "Guaranteed profit", "Lower cost"],
+      "correct_index": 1,
+      "why": "If the flow has real conviction and you want to be PAID for being right (not just gamble on a perfect strike), ITM gives higher odds and less time/vol risk. OTM only wins if the move is big and fast — great when right, but most of the time the ITM choice is the survivable one.",
+      "tags": ["ITM", "OTM", "flow"]
+    },
+    {
+      "id": "opt-061", "module": "robinhood", "level": 2,
+      "question": "The Pattern Day Trader (PDT) rule means an account UNDER $25k equity is limited to…",
+      "options": ["No options at all", "About 3 day trades per rolling 5 business days (a 4th flags PDT)", "Unlimited day trades", "1 trade per month"],
+      "correct_index": 1,
+      "why": "Under $25k, more than 3 day trades (open+close same day) in 5 business days triggers a PDT flag and restrictions. On a $6k account this caps how aggressively you can scalp 0DTE — plan swing trades that don't burn day-trade counts.",
+      "tags": ["PDT", "rules"],
+      "rh_note": "RH enforces PDT. Getting flagged can freeze your day-trading for 90 days — a real constraint on a $6k account."
+    },
+    {
+      "id": "opt-062", "module": "robinhood", "level": 2,
+      "question": "Your long call is ITM at expiration but you can't afford to exercise (buy 100 shares). On Robinhood, what typically happens?",
+      "options": ["Nothing — it just vanishes", "RH will generally try to SELL the ITM option for you before close to avoid an exercise you can't cover", "You're forced into margin debt automatically with no warning", "It converts to a put"],
+      "correct_index": 1,
+      "why": "ITM options are auto-exercised by the OCC at expiration if left open. Because exercise needs capital you may not have, RH usually auto-SELLS your ITM long option near the close instead. Don't rely on it though — close ITM options yourself before expiration to stay in control.",
+      "tags": ["expiration", "auto-exercise"]
+    },
+    {
+      "id": "opt-063", "module": "robinhood", "level": 1,
+      "question": "Robinhood's basic options level lets you…",
+      "options": ["Sell naked calls", "Buy calls/puts and run covered positions — but NOT naked calls", "Trade futures", "Use unlimited margin"],
+      "correct_index": 1,
+      "why": "Retail tiers allow long calls/puts, covered calls, and cash-secured puts, but uncovered (naked) calls are restricted because of their unlimited risk. Knowing what your approval level permits stops you from planning trades the platform won't let you place.",
+      "tags": ["levels", "permissions"]
+    },
+    {
+      "id": "opt-064", "module": "robinhood", "level": 2,
+      "question": "To sell a cash-secured put on Robinhood you need…",
+      "options": ["Nothing — it's free", "Enough cash/buying power to buy 100 shares at the strike if assigned", "100 shares already", "The highest margin tier"],
+      "correct_index": 1,
+      "why": "'Cash-secured' literally means RH sets aside strike × 100 in buying power to cover potential assignment. A $20 strike put ties up $2,000. On $6k that limits you to lower-priced underlyings — plan around your actual buying power.",
+      "tags": ["CSP", "buying-power"]
+    },
+    {
+      "id": "opt-065", "module": "robinhood", "level": 1,
+      "question": "A call quoted at $3.00 on Robinhood will debit your account…",
+      "options": ["$3", "$30", "$300", "$3,000"],
+      "correct_index": 2,
+      "why": "$3.00 premium × 100 shares = $300. Robinhood shows the per-share premium; the contract costs 100×. On a $6k account that single contract is already 5% of your capital at risk — size accordingly.",
+      "tags": ["premium", "math"]
+    },
+    {
+      "id": "opt-066", "module": "robinhood", "level": 3,
+      "question": "'Early assignment' on a short equity option can happen…",
+      "options": ["Only at expiration", "Any time before expiration — equity options are American-style (notably around ex-dividend for short calls, or when deep ITM)", "Never on Robinhood", "Only on index options"],
+      "correct_index": 1,
+      "why": "U.S. equity options are American-style, so a short option can be assigned ANY day it's ITM — especially short calls right before an ex-dividend date, or deep-ITM options. If you sell options, early assignment is a real risk you must be able to cover.",
+      "tags": ["early-assignment", "American"]
+    },
+    {
+      "id": "opt-067", "module": "robinhood", "level": 2,
+      "question": "If you sold an option and can't afford to be assigned 100 shares, the right move before expiration is to…",
+      "options": ["Ignore it and hope", "Buy the option back (close it) before it's assigned", "Turn off your phone", "Let it assign and sort it out later"],
+      "correct_index": 1,
+      "why": "Closing (buying back) a short option removes the assignment obligation entirely. Waiting and hoping risks being forced into a 100-share position your $6k can't cover, possibly triggering a margin call or forced liquidation.",
+      "tags": ["assignment", "close"]
+    },
+    {
+      "id": "opt-068", "module": "robinhood", "level": 2,
+      "question": "Aggressively day-trading options on a $6k Robinhood account risks TWO account-killers at once:",
+      "options": ["Taxes and fees", "Hitting the PDT day-trade limit AND blowing up through oversizing", "Dividends and splits", "Wash sales and audits"],
+      "correct_index": 1,
+      "why": "Frequent same-day options trades both burn your limited PDT day-trade count (under $25k) and tempt oversized, high-variance bets. Either can end the account — together they're why disciplined swing/defined-risk trading suits a small account far better.",
+      "tags": ["PDT", "sizing"]
+    },
+    {
+      "id": "opt-069", "module": "pro-rigor", "level": 2,
+      "question": "Breakeven at expiration for a LONG CALL is…",
+      "options": ["Strike − premium", "Strike + premium paid", "Premium × 100", "Strike only"],
+      "correct_index": 1,
+      "why": "A long call only nets a profit once the stock clears strike + premium. Example: $50 strike, $2 premium → breakeven $52. Knowing breakeven before you enter tells you how big a move you actually need.",
+      "tags": ["breakeven", "call"]
+    },
+    {
+      "id": "opt-070", "module": "pro-rigor", "level": 2,
+      "question": "Breakeven at expiration for a LONG PUT is…",
+      "options": ["Strike + premium", "Strike − premium paid", "Premium ÷ delta", "The stock price"],
+      "correct_index": 1,
+      "why": "A long put profits below strike − premium. Example: $50 strike, $2 premium → breakeven $48; the stock must fall past $48 for you to net a gain. Mirror image of the call breakeven.",
+      "tags": ["breakeven", "put"]
+    },
+    {
+      "id": "opt-071", "module": "pro-rigor", "level": 2,
+      "question": "Maximum loss on a NAKED (uncovered) short put is…",
+      "options": ["The premium received", "Roughly (strike − premium) × 100, if the stock goes to zero", "Unlimited", "Zero"],
+      "correct_index": 1,
+      "why": "A short put's worst case is the stock falling to $0: you're obligated to buy at the strike, losing (strike − premium) per share × 100. Large but finite (unlike a naked call's unlimited risk). This is the real exposure behind 'getting paid to buy.'",
+      "tags": ["max-loss", "short-put"]
+    },
+    {
+      "id": "opt-072", "module": "pro-rigor", "level": 3,
+      "question": "On a DEBIT call spread, maximum gain equals…",
+      "options": ["Unlimited", "(Strike width − net debit) × 100", "The net debit", "The premium of the long leg"],
+      "correct_index": 1,
+      "why": "Max gain = the distance between strikes minus what you paid, ×100; max loss = the net debit. Example: buy 50 / sell 55 for $2 → max gain (5 − 2)×100 = $300, max loss $200. Defined on both ends — that's the appeal.",
+      "tags": ["debit-spread", "max-gain"]
+    },
+    {
+      "id": "opt-073", "module": "pro-rigor", "level": 3,
+      "question": "Put-call parity describes the fixed relationship between…",
+      "options": ["Delta and theta", "A call, a put, the stock, and the strike (C − P = S − PV(K))", "IV and HV", "Volume and OI"],
+      "correct_index": 1,
+      "why": "Put-call parity (C − P = S − present value of strike) ties same-strike/expiry calls, puts and the stock together; arbitrage keeps them aligned. It's the backbone fact behind synthetic positions and why mispriced legs get arbed away fast.",
+      "tags": ["parity", "arbitrage"]
+    },
+    {
+      "id": "opt-074", "module": "pro-rigor", "level": 1,
+      "question": "An option's total premium is always made of…",
+      "options": ["Just intrinsic value", "Intrinsic value + extrinsic (time + IV) value", "Just time value", "Delta + gamma"],
+      "correct_index": 1,
+      "why": "Premium = intrinsic (real, exercise value) + extrinsic (time + implied-volatility value). At expiration extrinsic = 0, so only intrinsic remains. Understanding the split tells you how much of your price is 'real' vs 'decaying.'",
+      "tags": ["premium", "intrinsic-extrinsic"]
+    },
+    {
+      "id": "opt-075", "module": "pro-rigor", "level": 2,
+      "question": "U.S. single-stock equity options are generally ___-style, while many broad index options are ___-style.",
+      "options": ["European; American", "American; European", "American; American", "European; European"],
+      "correct_index": 1,
+      "why": "Equity options are American (exercisable any time before expiry → early-assignment risk). Many index options (e.g. SPX) are European (exercise only at expiration, cash-settled). The style changes your assignment and settlement risk.",
+      "tags": ["american", "european"]
+    },
+    {
+      "id": "opt-076", "module": "pro-rigor", "level": 3,
+      "question": "Maximum gain on a covered call (long 100 shares + short 1 call) is…",
+      "options": ["Unlimited", "(Strike − stock cost + premium) × 100 — upside capped above the strike", "Just the premium", "The stock price × 100"],
+      "correct_index": 1,
+      "why": "Selling the call caps your upside: best case the stock finishes at/above the strike and you make (strike − your cost + premium) ×100. You trade unlimited upside for premium income and a small downside cushion — the classic income tradeoff.",
+      "tags": ["covered-call", "max-gain"]
+    },
+    {
+      "id": "opt-077", "module": "pro-rigor", "level": 3,
+      "question": "On a covered call, your downside breakeven on the shares is…",
+      "options": ["The strike price", "Stock purchase price − premium received", "Strike + premium", "Zero"],
+      "correct_index": 1,
+      "why": "The premium you collected lowers your effective cost: breakeven = what you paid for the shares minus the call premium. Below that you're net losing on the position — the premium only cushions a limited drop, it doesn't fully protect you.",
+      "tags": ["covered-call", "breakeven"]
+    },
+    {
+      "id": "opt-078", "module": "pro-rigor", "level": 2,
+      "question": "Maximum gain on a long call vs maximum loss on a long call:",
+      "options": ["Both unlimited", "Max gain theoretically unlimited; max loss = premium paid", "Both equal the premium", "Max gain = strike; max loss = unlimited"],
+      "correct_index": 1,
+      "why": "A long call's upside is theoretically unlimited (no ceiling on the stock) while its downside is capped at the premium. That asymmetric payoff — small defined risk, large potential reward — is the core reason traders buy calls.",
+      "tags": ["max-gain", "max-loss", "call"]
+    }
+  ]
+}
