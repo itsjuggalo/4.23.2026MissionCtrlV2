@@ -82,6 +82,8 @@ def publish_article(
     source : str | None
         Provenance label, e.g. 'morning_brief' or 'flow_digest'.
     """
+    if isinstance(tickers, str):
+        tickers = [t.strip() for t in tickers.split(',') if t.strip()]
     tickers_json = json.dumps(tickers) if tickers else None
     created_at = datetime.now(tz=timezone.utc).strftime('%Y-%m-%d %H:%M:%S')
 
