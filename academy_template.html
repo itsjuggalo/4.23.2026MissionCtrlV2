@@ -94,6 +94,7 @@ h1 .n{color:var(--amber)}
 .chip.lv{background:var(--blue)} .chip.lv.l2{background:var(--amber)} .chip.lv.l3{background:var(--red)}
 .qcount{margin-left:auto; font-family:var(--mono); font-size:11px; color:var(--mut)}
 .qtext{font-family:var(--disp); font-size:20px; line-height:1.3; margin:0 0 14px}
+.svgwrap{margin:0 0 14px}
 .opts{display:flex; flex-direction:column; gap:8px}
 .opt{display:flex; gap:10px; align-items:flex-start; text-align:left; width:100%; cursor:pointer; color:var(--ink);
   border:1px solid var(--line2); border-radius:7px; padding:11px 12px; min-height:48px;
@@ -264,7 +265,8 @@ h1 .n{color:var(--amber)}
     var opts = '<div class="opts">'+ q.options.map(function(o,i){
       return '<button class="opt" data-i="'+i+'"><span class="k">'+LETTERS[i]+'</span><span class="tx">'+esc(o)+'</span><span class="mk"></span></button>';
     }).join('') +'</div>';
-    var card = el('<div class="qcard">'+head+'<p class="qtext">'+esc(q.question)+'</p>'+opts+'<div class="after"></div></div>');
+    var visual = q.svg ? '<div class="svgwrap">'+q.svg+'</div>' : '';   // trusted inline SVG from the bank
+    var card = el('<div class="qcard">'+head+'<p class="qtext">'+esc(q.question)+'</p>'+visual+opts+'<div class="after"></div></div>');
     app.innerHTML=''; app.appendChild(card);
     [].forEach.call(card.querySelectorAll('.opt'), function(b){
       b.onclick=function(){ answer(parseInt(b.getAttribute('data-i'),10)); };

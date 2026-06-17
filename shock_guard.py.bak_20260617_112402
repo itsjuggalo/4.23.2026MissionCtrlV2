@@ -62,11 +62,6 @@ EVENTS = Path.home() / "logs" / "shock_events.jsonl"
 VIX_STRESS, VIX_CRISIS, VIX_PANIC = 25.0, 30.0, 40.0
 VIX_CLEAR = 23.0                      # hysteresis for STRESS auto-clear
 Z_CRISIS, Z_EXTREME = -2.5, -3.5
-# Absolute 1-min move floor for the z-trigger. On an ultra-quiet tape the trailing
-# stdev collapses toward zero, so a trivial blip explodes the z-score (a -0.26% SPY
-# move read z -8.32 on 2026-06-17 and latched a false CRISIS). A genuine crash bar
-# moves materially; require |move| >= this before the z-score can count as a trigger.
-Z_MIN_MOVE_PCT = 0.40
 BTC_15M_PCT = -3.0
 NEWS_KEYWORDS = ("tariff", "trump", "truth social", "fed ", "federal reserve",
                  "rate hike", "emergency", "halt", "war ", "strike on", "nuclear",
@@ -312,7 +307,7 @@ def main() -> int:
     if vix is not None and vix >= VIX_CRISIS:
         triggers.append(f"VIX {vix:g} >= {VIX_CRISIS:g}")
         extreme = extreme or vix >= VIX_PANIC
-    if z is not None and z <= Z_CRISIS and abs(spy_d.get("last_ret_pct") or 0) >= Z_MIN_MOVE_PCT:
+    if z is not None and z <= Z_CRISIS:
         triggers.append(f"SPY 1-min z {z:g} (move {spy_d.get('last_ret_pct')}%)")
         extreme = extreme or z <= Z_EXTREME
     if vix is not None and vix >= VIX_STRESS and vix_d.get("backwardation"):
