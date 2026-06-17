@@ -198,16 +198,36 @@ def _mid(row):
 ALT_MAX_MNY = 0.20   # an affordable alternative must still be within 20% of spot (no lotto)
 
 
+def _yf_option_chain_df(ticker_sym, exp, is_call, retries=3):
+    """yfinance option_chain for one expiry, WITH retry. The single-expiry call can
+    transiently raise or return an empty/partial frame (yfinance is flaky); retry a
+    few times before giving up so sizing isn't silently skipped on a blip."""
+    import yfinance as yf
+    import time as _t
+    for attempt in range(retries):
+        try:
+            t = yf.Ticker(ticker_sym)
+            if exp not in (t.options or ()):
+                return None
+            oc = t.option_chain(exp)
+            df = oc.calls if is_call else oc.puts
+            if df is not None and len(df) > 0:
+                return df
+        except Exception:
+            pass
+        if attempt < retries - 1:
+            _t.sleep(1.0)
+    return None
+
+
 def _sizing_line(a, is_call, spot=None):
     """Premium-based sizing for Mike's $150–250 risk. If the flagged contract is above his
     cap, scan the SAME-expiry chain for an affordable, still-near-money same-direction strike."""
     try:
-        import yfinance as yf
         exp = datetime.fromtimestamp(int(a.get("Expiry", 0)), tz=timezone.utc).astimezone(ET).strftime("%Y-%m-%d")
-        t = yf.Ticker(a.get("Symbol"))
-        if exp not in (t.options or ()):
+        df = _yf_option_chain_df(a.get("Symbol"), exp, is_call)
+        if df is None:
             return ""
-        df = (t.option_chain(exp).calls if is_call else t.option_chain(exp).puts)
         strike = float(a.get("Strike", 0) or 0)
         row = df[df["strike"] == strike]
         mid = _mid(row.iloc[0]) if len(row) else None

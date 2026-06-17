@@ -13,6 +13,10 @@ from scipy.optimize import brentq
 import yfinance as yf
 from datetime import datetime, date
 
+# PARITY-GUARDED: this Black-Scholes/greeks impl must stay numerically identical to the
+# canonical erf-based engine ~/labs/quantum/src/theo.py (and the web/missionctrl copy of
+# this file). A weekly tripwire ~/05_AUTOMATION/scripts/tests/math_parity_guard.py fails
+# loud if they diverge. Edit all copies together or none.
 def black_scholes(S, K, T, r, sigma, option_type='call'):
     """Black-Scholes price"""
     if T <= 0 or sigma <= 0:
