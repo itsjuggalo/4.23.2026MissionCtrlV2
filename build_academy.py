@@ -16,6 +16,8 @@ HERE = Path(__file__).resolve().parent
 BANK = HERE / "options_quiz_bank.json"
 TEMPLATE = HERE / "academy_template.html"
 OUT = Path.home() / "restructure" / "options-academy" / "index.html"
+# Second emit: bundled into the ClaudeClaw dashboard (imported ?raw → iframe srcdoc).
+EMBED = Path.home() / "agents" / "claudeclaw" / "web" / "src" / "embed" / "options-academy.html"
 MARKER = "/*__BANK__*/"
 
 
@@ -34,10 +36,16 @@ def main() -> int:
         print("[build_academy] payload contains a script tag — aborting")
         return 1
     html = tpl.replace(MARKER, payload)
-    OUT.parent.mkdir(parents=True, exist_ok=True)
-    OUT.write_text(html)
+    wrote = []
+    for dest in (OUT, EMBED):
+        try:
+            dest.parent.mkdir(parents=True, exist_ok=True)
+            dest.write_text(html)
+            wrote.append(str(dest))
+        except Exception as e:
+            print(f"[build_academy] warn: could not write {dest}: {e}")
     kb = round(len(html) / 1024, 1)
-    print(f"[build_academy] wrote {OUT} ({n} questions, {kb} KB)")
+    print(f"[build_academy] {n} questions, {kb} KB → " + " + ".join(wrote))
     return 0
 
 

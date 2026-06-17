@@ -139,17 +139,30 @@ def _ticker_win_rate(symbol):
 
 
 def _grok_news(symbol, limit=4):
-    """Recent news via Grok x_search on the SuperGrok OAuth subscription (2026-06-17:
-    routed through lib.x_search — NO xai api_key; OAuth/CLI-only policy)."""
+    """Get recent news via Grok x_search if key available."""
+    if not GROK_KEY:
+        return None
     try:
-        import sys as _sys
-        _p = str(Path.home() / "scripts")
-        if _p not in _sys.path:
-            _sys.path.insert(0, _p)
-        from lib.x_search import x_search_summary
-        return x_search_summary(
-            f"Top {limit} most recent news headlines about ${symbol} stock from last 24 hours. "
-            "Just headlines, one per line, no commentary.")
+        r = requests.post(
+            "https://api.x.ai/v1/responses",
+            headers={"Authorization": f"Bearer {GROK_KEY}", "Content-Type": "application/json"},
+            json={
+                "model": "grok-4-fast-non-reasoning",
+                "input": f"Top {limit} most recent news headlines about ${symbol} stock from last 24 hours. Just headlines, one per line, no commentary.",
+                "tools": [{"type": "x_search"}],
+                "max_output_tokens": 400,
+            },
+            timeout=20,
+        )
+        if r.status_code != 200: return None
+        data = r.json()
+        # Extract output text
+        for item in data.get("output", []):
+            if item.get("type") == "message":
+                for c in item.get("content", []):
+                    if c.get("type") == "output_text":
+                        return c.get("text", "").strip()
+        return None
     except Exception as e:
         logging.error(f"grok news {symbol}: {e}")
         return None

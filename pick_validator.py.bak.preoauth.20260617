@@ -218,7 +218,7 @@ def _call_gemini(prompt: str, timeout: int = 30) -> dict | None:
         from pathlib import Path as _P
         _sys.path.insert(0, str(_P(__file__).resolve().parent))
         from lib.llm import call_llm
-        r = call_llm(prompt, ["grok_oauth", "claude_oauth", "claude_cli"])
+        r = call_llm(prompt, ["grok_oauth", "deepseek"])
         return r.get("response") if "ok" in r else None
     except Exception as _e:
         print(f"[pick-validator] second-opinion call failed: {_e}", flush=True)

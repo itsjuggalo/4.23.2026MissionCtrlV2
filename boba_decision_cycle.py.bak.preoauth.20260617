@@ -1434,7 +1434,7 @@ def call_boba(prompt):
     _t0 = _time_tracker.time()
     # claude_oauth = direct Anthropic API on the sub token (fast, no Node cold-start);
     # claude_cli = slow CLI fallback (still sub); deepseek = cheap secondary backup.
-    r = call_llm(full_prompt, ["claude_oauth", "claude_cli", "grok_oauth"])
+    r = call_llm(full_prompt, ["claude_oauth", "claude_cli", "deepseek"])
     _dur_ms = int((_time_tracker.time() - _t0) * 1000)
     _log_anthropic_call("boba_decision_cycle", BOBA_MODEL, None, _dur_ms,
                         success=("ok" in r), error=(None if "ok" in r else str(r.get("error", ""))[:200]))

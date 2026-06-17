@@ -170,7 +170,7 @@ def _deepseek(prompt, timeout=120):
 
 
 _PROVIDERS = {"claude_oauth": _claude_oauth, "claude_cli": _claude_cli, "grok_oauth": _grok_oauth,
-              "codex_cli": _codex_cli}  # OAuth/CLI-only policy 2026-06-17: api providers (openai/gemini/deepseek) unregistered
+              "codex_cli": _codex_cli, "openai": _openai, "gemini": _gemini, "deepseek": _deepseek}
 
 
 def call_llm_text(prompt: str, providers):

@@ -1399,7 +1399,7 @@ def call_boba(prompt):
     Delegates to lib.llm."""
     from lib.llm import call_llm
     full = (_load_premium_dossier() + _load_lessons() + _load_active_position_rules() + _mc_kb_recall() + prompt)
-    return call_llm(full, ["grok_oauth", "deepseek"])
+    return call_llm(full, ["grok_oauth", "claude_oauth", "claude_cli"])
 
 
 def convert_spx_to_spy(pick):

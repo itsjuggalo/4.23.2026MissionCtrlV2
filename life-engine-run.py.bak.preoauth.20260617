@@ -871,7 +871,7 @@ def render_focus_line(brief_type, ctx, cfg):
         sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
         from lib.llm import call_llm
         jprompt = head + rules + '\n\nReturn STRICT JSON only: {"focus": "<the one line>"}'
-        res = call_llm(jprompt, ['claude_oauth', 'claude_cli', 'grok_oauth'])
+        res = call_llm(jprompt, ['claude_oauth', 'deepseek'])
         if res.get('ok'):
             line = _clean_focus_line(str((res['response'] or {}).get('focus', '')))
             if line:

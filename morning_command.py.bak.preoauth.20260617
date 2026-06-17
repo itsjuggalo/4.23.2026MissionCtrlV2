@@ -87,7 +87,7 @@ def _catalysts_and_orders(names: str, tape: str) -> tuple[str, str]:
         "the day given the book. Position sizing is capped at $800 risk per trade (a fraction of "
         'equity), paper accounts. Be specific."}'
     )
-    res = call_llm(prompt, ["claude_oauth", "claude_cli", "grok_oauth"])
+    res = call_llm(prompt, ["claude_oauth", "deepseek"])
     if res.get("ok"):
         r = res["response"]
         cat = str(r.get("catalysts", "")).strip()
