@@ -33,6 +33,20 @@ if not HOLDINGS.exists():
 d = json.load(open(HOLDINGS))
 raw = d.get("holdings", [])
 
+# The live feed (coinbase-pp-cli accounts list, refreshed by refresh-holdings.sh)
+# writes the CDP shape {results:{accounts:[{currency, available_balance:{value},
+# hold:{value}}]}} rather than the legacy {holdings:[{symbol,quantity}]}. Adapt
+# it here so the page shows real balances instead of $0 on a format mismatch.
+if not raw:
+    accounts = (d.get("results") or {}).get("accounts") or []
+    for a in accounts:
+        cur = a.get("currency")
+        avail = float((a.get("available_balance") or {}).get("value") or 0)
+        held = float((a.get("hold") or {}).get("value") or 0)
+        qty = avail + held
+        if cur and qty > 0:
+            raw.append({"symbol": cur, "quantity": qty})
+
 yf_syms = [h["symbol"] + "-USD" for h in raw if h["symbol"] not in STABLES]
 
 prices = {}

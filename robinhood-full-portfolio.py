@@ -36,8 +36,17 @@ if not HOLDINGS.exists():
 d = json.load(open(HOLDINGS))
 raw = d.get("holdings", [])
 
+# robinhood_holdings.json is the EQUITIES file (positions of record from the
+# :3011 keeper). It can carry junk $0-basis crypto-symbol artifacts (e.g. a
+# phantom "BTC 0.4") that, if priced at crypto spot, balloon the book. The
+# authoritative RH crypto is the dedicated live snapshot below — so when that
+# snapshot exists we IGNORE crypto-symbol rows here (no phantom, no double-count)
+# and only mine equities. Fall back to CSV-derived crypto only if it's missing.
+crypto_snap = Path.home() / "portfolio" / "robinhood_crypto_holdings.json"
+have_live_crypto = crypto_snap.exists()
+
 stock_in = [h for h in raw if h["symbol"] not in CRYPTO]
-crypto_in = [h for h in raw if h["symbol"] in CRYPTO]
+crypto_in = [] if have_live_crypto else [h for h in raw if h["symbol"] in CRYPTO]
 all_yf = ([h["symbol"] for h in stock_in]
           + [h["symbol"] + "-USD" for h in crypto_in])
 
@@ -88,7 +97,7 @@ for h in crypto_in:
 
 # Robinhood Crypto holdings come from the live Robinhood Crypto API, snapshot
 # at ~/portfolio/robinhood_crypto_holdings.json (refreshed by robinhood-holdings.py).
-crypto_snap = Path.home() / "portfolio" / "robinhood_crypto_holdings.json"
+# This is the authoritative crypto source (see have_live_crypto note above).
 if crypto_snap.exists():
     try:
         cd = json.load(open(crypto_snap))
