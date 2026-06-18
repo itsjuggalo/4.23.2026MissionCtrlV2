@@ -98,6 +98,16 @@ for h in crypto_in:
 # Robinhood Crypto holdings come from the live Robinhood Crypto API, snapshot
 # at ~/portfolio/robinhood_crypto_holdings.json (refreshed by robinhood-holdings.py).
 # This is the authoritative crypto source (see have_live_crypto note above).
+# Cost basis (when available) is FIFO-derived from order history by
+# rh_crypto_basis.py → ~/portfolio/crypto_cost_basis.json. Stamp avg_cost so the
+# Wallets page can show crypto P&L + TLH (crypto has no wash-sale rule).
+cbasis = {}
+cbf = Path.home() / "portfolio" / "crypto_cost_basis.json"
+if cbf.exists():
+    try:
+        cbasis = {k.upper(): v for k, v in json.load(open(cbf)).items()}
+    except Exception:
+        cbasis = {}
 if crypto_snap.exists():
     try:
         cd = json.load(open(crypto_snap))
@@ -106,9 +116,13 @@ if crypto_snap.exists():
             if qty <= 0:
                 continue
             px = float(r.get("price_usd") or 0)
+            sym = r.get("asset_code", "?")
+            b = cbasis.get(f"ROBINHOOD:{sym}".upper()) or cbasis.get(sym.upper()) or {}
+            avg = (b.get("cost_basis") / qty) if (b.get("cost_basis") and qty) else 0.0
             crypto.append({
-                "symbol": r.get("asset_code", "?"),
+                "symbol": sym,
                 "quantity": round(qty, 8),
+                "avg_cost": round(avg, 6),
                 "price": round(px, 4),
                 "equity": round(float(r.get("value_usd") or 0), 2),
             })
