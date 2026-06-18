@@ -51,15 +51,49 @@ def _tg(method, **kwargs):
         return {"ok": False}
 
 
+def _module_mastery(bank: list, boxes: dict) -> dict:
+    """{module: pct of its questions in box>=3} — the weak-spot signal."""
+    by_mod = {}
+    for q in bank:
+        by_mod.setdefault(q["module"], []).append(q["id"])
+    return {m: (sum(1 for i in ids if boxes.get(i, 0) >= 3) / len(ids) * 100 if ids else 0)
+            for m, ids in by_mod.items()}
+
+
+def _unlocked(q: dict, bank: list, boxes: dict) -> bool:
+    """Difficulty ramp: a level-L question unlocks only once >=50% of its module's
+    LOWER-level questions are mastered (box>=3). Level 1 is always unlocked."""
+    lvl = q.get("level", 1)
+    if lvl <= 1:
+        return True
+    lower = [x for x in bank if x["module"] == q["module"] and x.get("level", 1) < lvl]
+    if not lower:
+        return True
+    mastered = sum(1 for x in lower if boxes.get(x["id"], 0) >= 3)
+    return mastered / len(lower) >= 0.5
+
+
 def pick(bank: list, st: dict) -> dict:
-    """Leitner-weighted pick: shaky (box 1-2) → new (in order) → refresh known."""
+    """Adaptive pick (Phase 2): resurface misses → introduce NEW from the WEAKEST module
+    (difficulty-gated by level) → refresh known. Shaky-first keeps spaced repetition;
+    weak-module weighting + level-gating makes it adapt to what Mike actually struggles with."""
     boxes = st.get("boxes", {})
     seen  = st.get("last_seen", {})
+    mastery = _module_mastery(bank, boxes)
+
+    # 1) review queue: shaky (box 1-2), weakest box then oldest-seen first
     review = sorted([q for q in bank if boxes.get(q["id"], 0) in (1, 2)],
-                    key=lambda q: seen.get(q["id"], 0))
-    new    = [q for q in bank if q["id"] not in boxes]          # curriculum order
-    known  = sorted([q for q in bank if boxes.get(q["id"], 0) >= 3],
-                    key=lambda q: seen.get(q["id"], 0))
+                    key=lambda q: (boxes.get(q["id"], 2), seen.get(q["id"], 0)))
+
+    # 2) new queue: unseen + level-unlocked, ordered by WEAKEST module first, then curriculum
+    new = [q for q in bank if q["id"] not in boxes and _unlocked(q, bank, boxes)]
+    new.sort(key=lambda q: (mastery.get(q["module"], 0), q.get("level", 1), q["id"]))
+
+    # 3) known refresh: longest-unseen mastered question
+    known = sorted([q for q in bank if boxes.get(q["id"], 0) >= 3],
+                   key=lambda q: seen.get(q["id"], 0))
+
+    # resurface misses ~half the time (always if nothing new is unlocked)
     if review and (random.random() < 0.5 or not new):
         return review[0]
     if new:

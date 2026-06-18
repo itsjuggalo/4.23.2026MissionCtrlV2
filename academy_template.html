@@ -117,6 +117,14 @@ h1 .n{color:var(--amber)}
   background:linear-gradient(180deg,rgba(255,176,32,.09),rgba(255,176,32,.02))}
 .rhnote .ct{font-family:var(--mono); font-size:10.5px; letter-spacing:.12em; color:var(--amber); margin-bottom:4px}
 .rhnote p{margin:0; font-size:13.5px; line-height:1.45; color:var(--amber2)}
+.debate{border:1px solid var(--purple,#a371f7); border-left:3px solid var(--purple,#a371f7); border-radius:8px; padding:10px 13px; margin-top:9px;
+  background:linear-gradient(180deg,rgba(163,113,247,.10),rgba(163,113,247,.02))}
+.debate .ct{font-family:var(--mono); font-size:10.5px; letter-spacing:.12em; color:var(--purple,#a371f7); margin-bottom:6px}
+.debate .lens{display:flex; gap:9px; padding:5px 0; border-top:1px solid rgba(163,113,247,.16); font-size:13px; line-height:1.4}
+.debate .lens:first-of-type{border-top:none}
+.debate .who{flex:0 0 92px; font-weight:700; color:var(--purple,#a371f7)}
+.debate .stance{flex:1; color:var(--ink)}
+@media(max-width:480px){ .debate .lens{flex-direction:column; gap:1px} .debate .who{flex:none} }
 
 /* controls */
 .controls{display:flex; gap:9px; margin-top:15px; flex-wrap:wrap}
@@ -140,6 +148,69 @@ h1 .n{color:var(--amber)}
 .bench p{margin:0; font-size:13.5px; line-height:1.5; color:var(--ink)}
 .empty{border:1px dashed var(--line2); border-radius:8px; padding:18px; text-align:center; color:var(--mut); margin-top:14px; font-size:14px}
 .foot{margin-top:30px; font-family:var(--mono); font-size:10.5px; color:var(--mut); text-align:center; letter-spacing:.06em; line-height:1.6}
+
+/* ---- REFERENCE / TEXTBOOK ---- */
+.ref-section{margin:28px 0 0}
+.ref-h{font-family:var(--disp); font-size:clamp(18px,5vw,26px); letter-spacing:.03em; text-transform:uppercase; color:var(--cyan); margin:0 0 10px}
+.ref-sub{font-family:var(--mono); font-size:10.5px; letter-spacing:.14em; color:var(--mut); text-transform:uppercase; margin:0 0 6px}
+.ref-card{border:1px solid var(--line2); border-left:3px solid var(--blue); border-radius:8px;
+  background:linear-gradient(160deg,var(--panel2),var(--panel) 70%); padding:13px 14px; margin-bottom:10px}
+.ref-card p{margin:0 0 8px; font-size:14px; line-height:1.55; color:var(--ink)}
+.ref-card p:last-child{margin-bottom:0}
+.ref-card .rt{font-family:var(--mono); font-size:10.5px; letter-spacing:.12em; color:var(--blue); margin-bottom:6px}
+.ref-rule{border:1px solid var(--amber); border-left:3px solid var(--amber); border-radius:8px;
+  background:linear-gradient(180deg,rgba(255,176,32,.08),rgba(255,176,32,.02)); padding:10px 13px; margin:10px 0}
+.ref-rule .rt{font-family:var(--mono); font-size:10.5px; letter-spacing:.12em; color:var(--amber); margin-bottom:5px}
+.ref-rule p{margin:0; font-size:13.5px; line-height:1.45; color:var(--amber2)}
+/* theta decay SVG card */
+.ref-svg-wrap{border:1px solid var(--line2); border-radius:8px; background:var(--panel2);
+  padding:12px 10px 8px; margin:10px 0; overflow:hidden}
+.ref-svg-wrap svg{display:block; width:100%; height:auto}
+/* IV/HV bar */
+.ivhv-wrap{border:1px solid var(--line2); border-radius:8px; background:var(--panel2); padding:14px; margin:10px 0}
+.ivhv-row{display:flex; align-items:center; gap:10px; margin-bottom:8px; font-size:13px}
+.ivhv-row:last-child{margin-bottom:0}
+.ivhv-label{flex:0 0 80px; font-family:var(--mono); font-size:11px; color:var(--mut); text-align:right}
+.ivhv-bar{flex:1; height:22px; border-radius:4px; position:relative; background:var(--steel); overflow:visible}
+.ivhv-fill{height:100%; border-radius:4px; display:flex; align-items:center; padding-left:6px;
+  font-family:var(--mono); font-size:11px; font-weight:700}
+.ivhv-tick{position:absolute; top:-4px; bottom:-4px; width:2px; background:var(--amber); border-radius:1px}
+.ivhv-tick-label{position:absolute; top:-18px; font-family:var(--mono); font-size:10px; color:var(--amber); white-space:nowrap; transform:translateX(-50%)}
+/* debate table (reference variant) */
+.ref-debate{width:100%; border-collapse:collapse; font-size:13px; margin:8px 0}
+.ref-debate th{font-family:var(--mono); font-size:10px; letter-spacing:.1em; text-transform:uppercase; color:var(--mut);
+  border-bottom:1px solid var(--line2); padding:5px 8px; text-align:left; white-space:nowrap}
+.ref-debate td{padding:7px 8px; border-bottom:1px solid rgba(39,50,63,.6); vertical-align:top; line-height:1.4}
+.ref-debate td:first-child{font-weight:700; color:var(--purple,#a371f7); white-space:nowrap}
+.ref-debate td:nth-child(3){font-family:var(--mono); font-size:11px; color:var(--cyan)}
+.ref-debate tr:last-child td{border-bottom:none}
+@media(max-width:520px){
+  .ref-debate thead{display:none}
+  .ref-debate td{display:block; padding:3px 8px}
+  .ref-debate td:first-child{padding-top:9px; font-size:14px}
+  .ref-debate tr{display:block; border-bottom:1px solid var(--line2); margin-bottom:4px; padding-bottom:4px}
+}
+/* straddle calculator */
+.calc-grid{display:grid; grid-template-columns:1fr 1fr; gap:9px; margin:10px 0}
+@media(max-width:420px){.calc-grid{grid-template-columns:1fr}}
+.calc-field{display:flex; flex-direction:column; gap:4px}
+.calc-field label{font-family:var(--mono); font-size:10px; letter-spacing:.1em; text-transform:uppercase; color:var(--mut)}
+.calc-field input{background:var(--steel); border:1px solid var(--line2); border-radius:5px; color:var(--ink);
+  font-family:var(--mono); font-size:15px; padding:8px 10px; width:100%; -moz-appearance:textfield}
+.calc-field input:focus{outline:none; border-color:var(--blue)}
+.calc-field input::-webkit-outer-spin-button,.calc-field input::-webkit-inner-spin-button{-webkit-appearance:none}
+.calc-out{border:1px solid var(--line2); border-radius:8px; background:var(--panel); padding:12px 14px; margin-top:8px}
+.calc-row{display:flex; justify-content:space-between; align-items:baseline; padding:5px 0;
+  border-bottom:1px solid rgba(39,50,63,.5); font-size:13px; gap:8px; flex-wrap:wrap}
+.calc-row:last-child{border-bottom:none}
+.calc-row .ck{color:var(--mut); font-family:var(--mono); font-size:11px; letter-spacing:.06em; text-transform:uppercase}
+.calc-row .cv{font-family:var(--disp); font-size:17px; color:var(--ink)}
+.verdict-chip{display:inline-block; font-family:var(--mono); font-size:11px; letter-spacing:.08em;
+  text-transform:uppercase; padding:3px 9px; border-radius:4px; margin-left:6px; vertical-align:middle}
+.verdict-chip.cheap{background:rgba(63,185,80,.2); color:var(--green); border:1px solid var(--green)}
+.verdict-chip.rich{background:rgba(248,81,73,.2); color:var(--red); border:1px solid var(--red)}
+.verdict-chip.fair{background:rgba(255,176,32,.15); color:var(--amber2); border:1px solid var(--amber)}
+.mode.ref{border-left-color:var(--purple,#a371f7)} .mode.ref .t{color:#c9a8ff}
 </style>
 </head>
 <body>
@@ -225,6 +296,7 @@ h1 .n{color:var(--amber)}
         '<button class="mode" data-mode="mixed"><span class="t">Mixed Quiz</span><span class="d">Random questions across every module.</span></button>'+
         '<button class="mode" data-mode="review"><span class="t">Review Misses</span><span class="d">Resurfaces what you got wrong — spaced repetition.</span></button>'+
         '<button class="mode exam" data-mode="exam" style="grid-column:1/-1"><span class="t">Final Exam — 50 Q, graded</span><span class="d">Sit the test. Get a grade + where a pro scores.</span></button>'+
+        '<button class="mode ref" data-mode="reference" style="grid-column:1/-1"><span class="t">&#x1F4D6; Reference — Vol, the Greeks &amp; how the pros disagree</span><span class="d">The textbook: expected move, IV crush, theta decay + a live straddle calculator.</span></button>'+
       '</div>';
     var reviewN = reviewQueue().length;
     var noteHtml = flag==='noreview'
@@ -246,7 +318,7 @@ h1 .n{color:var(--amber)}
         chips+
       '</div>'+ noteHtml + modes + modCards +
       '<div class="foot">OPTIONS TRADING ACADEMY · self-contained · progress saved on this device<br>Educational only — not financial advice. Size every trade to a loss you can survive.</div>';
-    [].forEach.call(app.querySelectorAll('.mode'), function(b){ b.onclick=function(){ startSession(b.getAttribute('data-mode')); }; });
+    [].forEach.call(app.querySelectorAll('.mode'), function(b){ b.onclick=function(){ var m=b.getAttribute('data-mode'); if(m==='reference'){renderReference();return;} startSession(m); }; });
     [].forEach.call(app.querySelectorAll('.modcard'), function(b){ b.onclick=function(){ startSession('module', b.getAttribute('data-mod')); }; });
   }
 
@@ -289,13 +361,16 @@ h1 .n{color:var(--amber)}
     // in the exam we still teach (show why), but keep it tight
     var after = app.querySelector('.after');
     var why = '<div class="why"><div class="ct">'+(correct?'✓ WHY YOU\'RE RIGHT':'✗ WHY THE ANSWER IS '+LETTERS[q.correct_index])+'</div><p>'+esc(q.why)+'</p></div>';
+    var debate = (q.debate && q.debate.length) ? '<div class="debate"><div class="ct">HOW THE PROS SEE IT</div>'+
+      q.debate.map(function(d){ return '<div class="lens"><span class="who">'+esc(d.author)+'</span><span class="stance">'+esc(d.stance)+'</span></div>'; }).join('')+
+      '</div>' : '';
     var rh = q.rh_note ? '<div class="rhnote"><div class="ct">YOUR $6K / ROBINHOOD</div><p>'+esc(q.rh_note)+'</p></div>' : '';
     var last = (s.idx>=s.queue.length-1);
     var controls = '<div class="controls">'+
       '<button class="btn ghost" id="quit">Home</button>'+
       '<button class="btn" id="next">'+(last?'See Results':'Next →')+'</button>'+
     '</div>';
-    after.innerHTML = why + rh + controls;
+    after.innerHTML = why + debate + rh + controls;
     document.getElementById('next').onclick = next;
     document.getElementById('quit').onclick = function(){ renderHome(); };
     after.scrollIntoView({behavior:'smooth', block:'nearest'});
@@ -341,6 +416,225 @@ h1 .n{color:var(--amber)}
     document.getElementById('home').onclick=function(){ renderHome(); };
     document.getElementById('again').onclick=function(){ startSession(s.mode, s.modId); };
     var rv=document.getElementById('rev'); if(rv) rv.onclick=function(){ startSession('review'); };
+  }
+
+  // ---- Reference / Textbook ----
+  function renderReference(){
+    session=null; setProgress(0);
+    var backBtn = '<button class="btn ghost" id="ref-back" style="margin-bottom:18px">&#8592; Home</button>';
+    var backBtnBot = '<button class="btn ghost" id="ref-back2" style="margin-top:24px">&#8592; Home</button>';
+
+    // A) VOLATILITY PRIMER cards
+    var primer =
+      '<div class="ref-section">'+
+        '<div class="lbl">Volatility Primer</div>'+
+        '<div class="ref-card">'+
+          '<div class="rt">THE STRADDLE IS THE MARKET\'S EXPECTED MOVE</div>'+
+          '<p>Buy an ATM call AND an ATM put with the same strike and expiry — that total cost <em>is</em> Wall Street\'s consensus on how far the stock will travel. Example: stock at $100, ATM straddle costs $4. The market expects roughly a ±$4 (±4%) move. Your breakevens are $104 up and $96 down. You profit only if the stock moves <em>more</em> than that.</p>'+
+        '</div>'+
+        '<div class="ref-card">'+
+          '<div class="rt">IV vs HV — CHEAP OR RICH?</div>'+
+          '<p><strong style="color:var(--cyan)">IV/HV &lt; ~0.85</strong> = vol is <strong>cheap</strong> — options are priced below recent realized moves. Buyer\'s edge. IV Rank &lt; 20–30 = same signal.</p>'+
+          '<p><strong style="color:var(--amber2)">IV/HV &gt; ~1.20</strong> = vol is <strong>rich</strong> — options are overpriced vs reality. Seller\'s edge. IV Rank &gt; 50–80 = same signal.</p>'+
+          '<p>Neither number alone is enough. You also need a catalyst — cheap vol with nothing happening is just slow theta bleed.</p>'+
+        '</div>'+
+        '<div class="ref-card">'+
+          '<div class="rt">IV CRUSH — THE BUYER\'S LANDMINE</div>'+
+          '<p>Before earnings or a Fed meeting, traders buy protection → IV inflates. The moment the event passes, IV collapses 30–60% in minutes, regardless of which way the stock moved. A long call can be correct on direction and still lose money because the option\'s "fear premium" evaporated.</p>'+
+          '<p><strong>Rule:</strong> never hold a naked long call or put through an earnings print on a large-cap. Use a calendar spread (buy a later-expiry, sell the earnings expiry) to harvest the crush instead of getting crushed by it.</p>'+
+        '</div>'+
+        '<div class="ref-card">'+
+          '<div class="rt">THETA IS BACK-LOADED</div>'+
+          '<p>A 30-day ATM option does NOT lose 1/30 of its time value per day. It loses time value slowly at first, then accelerates sharply as expiry nears — roughly 50% of remaining time value disappears in the last ~8 days of a 30-day option.</p>'+
+          '<p>Weekend + holiday theta: the calendar keeps moving even when markets are closed. A long option going into a 3-day weekend "ages" 3 days. Short positions collect that decay; long positions pay it silently.</p>'+
+        '</div>'+
+        '<div class="ref-rule">'+
+          '<div class="rt">THE CATALYST RULE</div>'+
+          '<p>Cheap vol alone is not a trade. Cheap vol + NO upcoming catalyst = you own an option that decays every day while you wait for something that may never arrive. You need cheap vol AND a specific driver (earnings, product launch, macro event, technical breakout) with a defined window. Without a catalyst, sell premium instead.</p>'+
+        '</div>'+
+      '</div>';
+
+    // B) THETA DECAY SVG
+    var thetaSvg =
+      '<div class="ref-section">'+
+        '<div class="lbl">Theta Decay Curve</div>'+
+        '<div class="ref-svg-wrap">'+
+          '<svg viewBox="0 0 320 180" xmlns="http://www.w3.org/2000/svg" aria-label="Theta decay: time value vs DTE">'+
+            // background grid lines
+            '<line x1="40" y1="20" x2="40" y2="150" stroke="rgba(39,50,63,.9)" stroke-width="1"/>'+
+            '<line x1="40" y1="150" x2="305" y2="150" stroke="rgba(39,50,63,.9)" stroke-width="1"/>'+
+            '<line x1="40" y1="50" x2="305" y2="50" stroke="rgba(39,50,63,.4)" stroke-width="1" stroke-dasharray="4,4"/>'+
+            '<line x1="40" y1="100" x2="305" y2="100" stroke="rgba(39,50,63,.4)" stroke-width="1" stroke-dasharray="4,4"/>'+
+            // axis labels
+            '<text x="14" y="154" font-family="Cascadia Code,Consolas,monospace" font-size="9" fill="#8593a1">0</text>'+
+            '<text x="7" y="53" font-family="Cascadia Code,Consolas,monospace" font-size="9" fill="#8593a1">75%</text>'+
+            '<text x="7" y="103" font-family="Cascadia Code,Consolas,monospace" font-size="9" fill="#8593a1">50%</text>'+
+            '<text x="25" y="170" font-family="Cascadia Code,Consolas,monospace" font-size="8" fill="#8593a1">0 DTE</text>'+
+            '<text x="268" y="170" font-family="Cascadia Code,Consolas,monospace" font-size="8" fill="#8593a1">30 DTE</text>'+
+            '<text x="125" y="172" font-family="Cascadia Code,Consolas,monospace" font-size="8" fill="#8593a1">&#8592; expiry approaches</text>'+
+            // Y-axis label
+            '<text x="3" y="95" font-family="Cascadia Code,Consolas,monospace" font-size="8" fill="#58a6ff" transform="rotate(-90,8,95)">Time Value</text>'+
+            // decay curve: starts top-right (30 DTE, high value), curves steeply to bottom-left (0 DTE, 0)
+            // control points chosen to give the classic convex back-loaded shape
+            '<path d="M305,28 C280,30 240,45 210,70 C180,95 160,105 130,120 C100,133 75,142 40,150" fill="none" stroke="#58a6ff" stroke-width="2.5" stroke-linejoin="round"/>'+
+            // 50% gone by day 8 marker (day 8 of 30 = 8/30 from expiry → x ≈ 40 + (8/30)*265 ≈ 111 from left = x≈111, y≈100)
+            '<circle cx="111" cy="100" r="4" fill="var(--amber)" opacity=".9"/>'+
+            '<line x1="111" y1="100" x2="111" y2="150" stroke="var(--amber)" stroke-width="1" stroke-dasharray="3,3"/>'+
+            '<text x="114" y="97" font-family="Cascadia Code,Consolas,monospace" font-size="8.5" fill="#ffd479">~50% gone</text>'+
+            '<text x="114" y="108" font-family="Cascadia Code,Consolas,monospace" font-size="8.5" fill="#ffd479">by day 8 of 30</text>'+
+            '<text x="268" y="141" font-family="Cascadia Code,Consolas,monospace" font-size="8" fill="#58a6ff">slow here</text>'+
+            '<text x="44" y="143" font-family="Cascadia Code,Consolas,monospace" font-size="8" fill="#f85149">&#8593; STEEP</text>'+
+          '</svg>'+
+        '</div>'+
+      '</div>';
+
+    // C) IV vs HV bar
+    var ivhvBar =
+      '<div class="ref-section">'+
+        '<div class="lbl">IV vs HV — Visual</div>'+
+        '<div class="ivhv-wrap">'+
+          '<div style="font-family:var(--mono);font-size:10px;color:var(--mut);letter-spacing:.1em;margin-bottom:10px;text-transform:uppercase">IV / HV ratio — where you land determines buyer vs seller edge</div>'+
+          // CHEAP row (IV/HV = 0.65 → ~54% of bar width out of normalized 1.5 scale)
+          '<div class="ivhv-row">'+
+            '<span class="ivhv-label">CHEAP (0.65)</span>'+
+            '<div class="ivhv-bar">'+
+              '<div class="ivhv-fill" style="width:43%;background:linear-gradient(90deg,rgba(63,185,80,.35),rgba(63,185,80,.15));color:var(--green)">IV=65 HV=100</div>'+
+              '<div class="ivhv-tick" style="left:56%"><span class="ivhv-tick-label" style="color:var(--mut)">0.85</span></div>'+
+              '<div class="ivhv-tick" style="left:80%;background:var(--red)"><span class="ivhv-tick-label" style="color:var(--red)">1.20</span></div>'+
+            '</div>'+
+            '<span style="font-family:var(--mono);font-size:11px;color:var(--green);flex-shrink:0">BUY ZONE</span>'+
+          '</div>'+
+          // FAIR row (IV/HV = 1.0 → 67% of bar)
+          '<div class="ivhv-row">'+
+            '<span class="ivhv-label">FAIR (1.00)</span>'+
+            '<div class="ivhv-bar">'+
+              '<div class="ivhv-fill" style="width:67%;background:linear-gradient(90deg,rgba(255,176,32,.25),rgba(255,176,32,.08));color:var(--amber2)">IV=HV</div>'+
+              '<div class="ivhv-tick" style="left:56%"><span class="ivhv-tick-label" style="color:var(--mut)">0.85</span></div>'+
+              '<div class="ivhv-tick" style="left:80%;background:var(--red)"><span class="ivhv-tick-label" style="color:var(--red)">1.20</span></div>'+
+            '</div>'+
+            '<span style="font-family:var(--mono);font-size:11px;color:var(--amber2);flex-shrink:0">NEUTRAL</span>'+
+          '</div>'+
+          // RICH row (IV/HV = 1.4 → 93%)
+          '<div class="ivhv-row">'+
+            '<span class="ivhv-label">RICH (1.40)</span>'+
+            '<div class="ivhv-bar">'+
+              '<div class="ivhv-fill" style="width:93%;background:linear-gradient(90deg,rgba(248,81,73,.3),rgba(248,81,73,.1));color:var(--red)">IV=140 HV=100</div>'+
+              '<div class="ivhv-tick" style="left:56%"><span class="ivhv-tick-label" style="color:var(--mut)">0.85</span></div>'+
+              '<div class="ivhv-tick" style="left:80%;background:var(--red)"><span class="ivhv-tick-label" style="color:var(--red)">1.20</span></div>'+
+            '</div>'+
+            '<span style="font-family:var(--mono);font-size:11px;color:var(--red);flex-shrink:0">SELL ZONE</span>'+
+          '</div>'+
+          '<div style="font-size:11px;color:var(--mut);margin-top:8px;font-family:var(--mono)">Thresholds: 0.85 = cheap edge / 1.20 = rich edge (tastytrade / SMB benchmarks)</div>'+
+        '</div>'+
+      '</div>';
+
+    // D) HOW THE PROS DISAGREE
+    var proTable =
+      '<div class="ref-section">'+
+        '<div class="lbl">How the Pros Disagree</div>'+
+        '<div class="debate" style="padding:12px 14px">'+
+          '<div class="ct">5 SCHOOLS — 1 UNDERLYING QUESTION</div>'+
+          '<table class="ref-debate">'+
+            '<thead><tr><th>Author</th><th>Core stance</th><th>Buy or sell?</th><th>Signature rule</th></tr></thead>'+
+            '<tbody>'+
+              '<tr><td>tastytrade</td><td>Long premium has no statistical edge (VRP almost always positive). The house wins.</td><td>SELL</td><td>45 DTE, manage winners at 50% profit, close losers at 2&times; credit.</td></tr>'+
+              '<tr><td>projectfinance (Butler)</td><td>Pure mechanics and greeks — no directional bias. Theta decay is the core engine.</td><td>Neutral</td><td>Theta is back-loaded: ~50% of ATM time value decays in the last 8 days of 30.</td></tr>'+
+              '<tr><td>SMB Capital</td><td>Price the straddle against the stock\'s HISTORICAL earnings moves, not the implied.</td><td>Situational</td><td>Implied move &lt; historical earnings move → buy; implied &gt; historical → sell premium.</td></tr>'+
+              '<tr><td>Option Alpha (Kirk)</td><td>Systematic, mechanical triggers. Only enter when IV rank is high enough to sell.</td><td>SELL (mechanical)</td><td>Adjust underperforming trades (convert to butterfly, roll the loser leg) — don\'t close at a loss.</td></tr>'+
+              '<tr><td>SteadyOptions</td><td>Harvest the pre-earnings IV ramp, exit BEFORE the crush. The move itself is irrelevant.</td><td>BUY (pre-event)</td><td>&ldquo;We need IV to rise, not the stock to move.&rdquo; Exit the day before earnings.</td></tr>'+
+            '</tbody>'+
+          '</table>'+
+          '<div style="margin-top:10px;padding-top:10px;border-top:1px solid rgba(163,113,247,.2);font-size:13px;color:var(--ink)">'+
+            '<strong style="color:var(--purple,#a371f7)">Synthesis:</strong> All five reduce to ONE question — is the implied move <em>cheap or rich</em> vs how this stock actually moves, and is there a catalyst to deliver it?'+
+          '</div>'+
+        '</div>'+
+      '</div>';
+
+    // E) LIVE STRADDLE CALCULATOR
+    var calc =
+      '<div class="ref-section">'+
+        '<div class="lbl">Live Straddle Calculator</div>'+
+        '<div class="ref-card" style="border-left-color:var(--cyan)">'+
+          '<div class="rt">ENTER NUMBERS FROM YOUR BROKER — VERDICT UPDATES LIVE</div>'+
+          '<div class="calc-grid">'+
+            '<div class="calc-field"><label>Spot price ($)</label><input type="number" id="ci-spot" min="0" step="0.01" value="100" placeholder="100"/></div>'+
+            '<div class="calc-field"><label>ATM straddle cost ($)</label><input type="number" id="ci-strad" min="0" step="0.01" value="4" placeholder="4"/></div>'+
+            '<div class="calc-field"><label>IV (%)</label><input type="number" id="ci-iv" min="0" step="0.1" value="30" placeholder="30"/></div>'+
+            '<div class="calc-field"><label>HV (%)</label><input type="number" id="ci-hv" min="0" step="0.1" value="25" placeholder="25"/></div>'+
+            '<div class="calc-field"><label>Debit paid ($)</label><input type="number" id="ci-debit" min="0" step="0.01" value="4" placeholder="same as straddle if buying at ask"/></div>'+
+            '<div class="calc-field"><label>Historical move % (opt)</label><input type="number" id="ci-hist" min="0" step="0.1" value="" placeholder="e.g. 6 for ±6%"/></div>'+
+          '</div>'+
+          '<div class="calc-out" id="calc-out">'+
+            '<!-- filled by JS -->'+
+          '</div>'+
+        '</div>'+
+      '</div>';
+
+    app.innerHTML =
+      backBtn+
+      '<div class="hero">'+
+        '<p class="crumb">REFERENCE · TEXTBOOK MODE</p>'+
+        '<h1 style="font-size:clamp(22px,7vw,38px)">Vol, Greeks<br>&amp; the Pros</h1>'+
+        '<p class="tagline">No quiz — just the concepts, visualized. Tap a calculator number to get a live read.</p>'+
+      '</div>'+
+      primer + thetaSvg + ivhvBar + proTable + calc +
+      backBtnBot +
+      '<div class="foot" style="margin-top:16px">REFERENCE SECTION · educational only · not financial advice</div>';
+
+    document.getElementById('ref-back').onclick = function(){ renderHome(); };
+    document.getElementById('ref-back2').onclick = function(){ renderHome(); };
+
+    // calculator logic
+    function calcUpdate(){
+      var spot  = parseFloat(document.getElementById('ci-spot').value);
+      var strad = parseFloat(document.getElementById('ci-strad').value);
+      var iv    = parseFloat(document.getElementById('ci-iv').value);
+      var hv    = parseFloat(document.getElementById('ci-hv').value);
+      var debit = parseFloat(document.getElementById('ci-debit').value);
+      var hist  = parseFloat(document.getElementById('ci-hist').value);
+      var out   = document.getElementById('calc-out');
+      if(!out) return;
+
+      function fmt(n, dec){ return isNaN(n)||!isFinite(n) ? '&mdash;' : n.toFixed(dec!=null?dec:2); }
+      function fmtPct(n){ return isNaN(n)||!isFinite(n) ? '&mdash;' : n.toFixed(1)+'%'; }
+      function fmtD(n){ return isNaN(n)||!isFinite(n) ? '&mdash;' : '$'+n.toFixed(2); }
+
+      var expMovePct = (spot>0 && strad>0) ? strad/spot*100 : NaN;
+      var upBe = (spot>0 && strad>0) ? spot+strad : NaN;
+      var dnBe = (spot>0 && strad>0) ? spot-strad : NaN;
+
+      var ivhvRatio = (iv>0 && hv>0) ? iv/hv : NaN;
+      var verdictHtml = '&mdash;';
+      if(!isNaN(ivhvRatio)){
+        if(ivhvRatio<=0.85) verdictHtml = fmt(ivhvRatio,2)+'<span class="verdict-chip cheap">CHEAP &mdash; buyer\'s edge</span>';
+        else if(ivhvRatio>=1.20) verdictHtml = fmt(ivhvRatio,2)+'<span class="verdict-chip rich">RICH &mdash; seller\'s edge</span>';
+        else verdictHtml = fmt(ivhvRatio,2)+'<span class="verdict-chip fair">FAIR</span>';
+      }
+
+      var edgeHtml = '&mdash;';
+      if(!isNaN(hist) && hist>0 && !isNaN(expMovePct) && expMovePct>0){
+        var edgeR = hist/expMovePct;
+        if(edgeR>1) edgeHtml = fmt(edgeR,2)+'<span class="verdict-chip cheap">MOVE IS CHEAP</span>';
+        else edgeHtml = fmt(edgeR,2)+'<span class="verdict-chip rich">OVERPRICED</span>';
+      }
+
+      var t1 = (debit>0) ? debit*1.5 : NaN;
+      var stop = (debit>0) ? debit*0.5 : NaN;
+
+      out.innerHTML =
+        '<div class="calc-row"><span class="ck">Expected move</span><span class="cv">'+fmtD(strad)+' / '+fmtPct(expMovePct)+'</span></div>'+
+        '<div class="calc-row"><span class="ck">UP breakeven</span><span class="cv">'+fmtD(upBe)+'</span></div>'+
+        '<div class="calc-row"><span class="ck">DOWN breakeven</span><span class="cv">'+fmtD(dnBe)+'</span></div>'+
+        '<div class="calc-row"><span class="ck">IV / HV ratio</span><span class="cv">'+verdictHtml+'</span></div>'+
+        '<div class="calc-row"><span class="ck">Historical edge ratio</span><span class="cv">'+edgeHtml+'</span></div>'+
+        '<div class="calc-row"><span class="ck">T1 exit (+50%) &mdash; sell half</span><span class="cv">'+fmtD(t1)+'</span></div>'+
+        '<div class="calc-row"><span class="ck">Stop (&minus;50%) &mdash; exit all</span><span class="cv">'+fmtD(stop)+'</span></div>';
+    }
+
+    [].forEach.call(app.querySelectorAll('.calc-field input'), function(inp){
+      inp.oninput = calcUpdate;
+    });
+    calcUpdate();
   }
 
   // keyboard: 1-4 answer, Enter/Space = next
