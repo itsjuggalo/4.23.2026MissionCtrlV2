@@ -762,6 +762,24 @@ def _render_body_mind(ctx):
         out += f"\n📡 <b>COMMS INTERCEPT // CARLIN</b>\n  <i>“{esc(w['carlin'])}”</i>\n"
     return out
 
+def _render_web(ctx):
+    """🌐 free web finds — live coupons for inbox brands + next calendar-event prep.
+    Additive + fully guarded (never breaks a brief); capped searches. Off-switch: LIFE_WEB=0."""
+    try:
+        from lib.life_web import web_finds_block
+        brands = [nm for c in (ctx.get('deals') or []) if (nm := _friendly_name(c))]
+        events = [e.get('summary', '') for e in (ctx.get('calendar') or [])[:2] if e.get('summary')]
+        cfg = ctx.get('_cfg') or {}
+        wx = cfg.get('weather') if isinstance(cfg.get('weather'), dict) else {}
+        city = (wx.get('location') or wx.get('city') or cfg.get('location') or '') if isinstance(wx, dict) else ''
+        block = web_finds_block(brands=brands, events=events, city=city)
+        if block:
+            body = '\n'.join(f"  {esc(l)}" for l in block.split('\n'))
+            return f"\n🌐 <b>WEB FINDS</b>\n{body}\n"
+    except Exception:
+        pass
+    return ''
+
 def render_template(brief_type, ctx):
     now = ctx['now']
     if brief_type == 'morning_brief':
@@ -775,7 +793,7 @@ def render_template(brief_type, ctx):
 
 📧 <b>INBOX</b>
 {_render_inbox(ctx)}
-{_render_life(ctx)}{_render_body_mind(ctx)}━━━━━━━━━━━━━━━━━━━━━━━━━━━━"""
+{_render_life(ctx)}{_render_web(ctx)}{_render_body_mind(ctx)}━━━━━━━━━━━━━━━━━━━━━━━━━━━━"""
 
     if brief_type == 'midday_checkin':
         time_str = now.strftime('%H:%M ET')
@@ -795,7 +813,7 @@ def render_template(brief_type, ctx):
 {inbox_block}
 📅 <b>Tomorrow</b>
 {tmrw_lines}
-{_render_body_mind(ctx)}"""
+{_render_web(ctx)}{_render_body_mind(ctx)}"""
 
     # nightly_wrap
     date_str = now.strftime('%a %b %-d')
@@ -808,7 +826,7 @@ def render_template(brief_type, ctx):
 {_render_life(ctx)}
 📅 <b>Tomorrow</b>
 {tmrw_lines}
-{_render_body_mind(ctx)}"""
+{_render_web(ctx)}{_render_body_mind(ctx)}"""
 
 # ── LLM focus line (Step F — augment-on-top, never blocks) ────────────────────
 def _ctx_for_llm(ctx):

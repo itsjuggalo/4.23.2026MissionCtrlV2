@@ -5,8 +5,9 @@ headlines instead of training-data guesses. Source chain (first non-empty wins):
 
   1. Alpaca news (Benzinga)  — real-time, ticker-tagged. Primary. (paper keys on disk)
   2. Finnhub company-news    — per-symbol headlines. Catalyst-grade fallback.
-  3. Tavily news search      — broad web news. (tvly key on disk)
-  4. Yahoo / yfinance        — last-resort, no key.
+  3. SearXNG (self-hosted)   — FREE local news search (categories=news). Cuts the Tavily bill.
+  4. Tavily news search      — broad web news. (tvly key on disk)
+  5. Yahoo / yfinance        — last-resort, no key.
 
 Stdlib-only core (urllib) so it imports under every brief's interpreter (system
 python3, ~/.venv, the digest PY). yfinance is an OPTIONAL import (try/except).
@@ -179,6 +180,25 @@ def _tavily(symbols: list[str], max_items: int) -> list[dict]:
     return out
 
 
+def _searxng(symbols: list[str], hours: int,
+             base: str = "http://127.0.0.1:8888") -> list[dict]:
+    """Free self-hosted SearXNG news search (categories=news → real publishedDate).
+    Fires before Tavily to cut the paid bill; only as good as the local engine is up."""
+    import os
+    base = (os.getenv("SEARXNG_URL", base) or base).rstrip("/")
+    out = []
+    syms = symbols[:5] if symbols else [""]
+    for sym in syms:
+        q = f"{sym} stock news" if sym else "stock market news today"
+        url = base + "/search?" + urllib.parse.urlencode(
+            {"q": q, "categories": "news", "format": "json"})
+        data = _get(url, {"Accept": "application/json"})
+        for it in (data or {}).get("results", [])[:8]:
+            out.append(_norm(sym, it.get("title"), it.get("engine") or "news",
+                             it.get("url"), _epoch(it.get("publishedDate"))))
+    return out
+
+
 def _yahoo(symbols: list[str]) -> list[dict]:
     try:
         import yfinance as yf
@@ -212,6 +232,7 @@ def recent_headlines(symbols=None, max_items: int = 6, hours: int = 24) -> list[
 
     for source in (lambda: _alpaca(symbols),
                    lambda: _finnhub(symbols, hours),
+                   lambda: _searxng(symbols, hours),
                    lambda: _tavily(symbols, max_items),
                    lambda: _yahoo(symbols)):
         try:
