@@ -211,6 +211,26 @@ h1 .n{color:var(--amber)}
 .verdict-chip.rich{background:rgba(248,81,73,.2); color:var(--red); border:1px solid var(--red)}
 .verdict-chip.fair{background:rgba(255,176,32,.15); color:var(--amber2); border:1px solid var(--amber)}
 .mode.ref{border-left-color:var(--purple,#a371f7)} .mode.ref .t{color:#c9a8ff}
+/* contract P/L grid (price x time heatmap) + multi-leg payoff */
+.grid-wrap{overflow-x:auto; margin-top:10px; -webkit-overflow-scrolling:touch}
+.plgrid{border-collapse:collapse; font-family:var(--mono); font-size:10px; margin:0 auto; min-width:100%}
+.plgrid th,.plgrid td{border:1px solid rgba(7,11,16,.6); padding:4px 5px; text-align:center; white-space:nowrap}
+.plgrid thead th{background:var(--panel2); color:var(--mut); font-size:9.5px; letter-spacing:.06em; position:sticky; top:0}
+.plgrid .rowhdr{background:var(--panel2); color:var(--ink); font-weight:700; text-align:right; padding-right:7px}
+.plgrid .rowhdr.spot{color:var(--cyan)} .plgrid .cell{color:#0a0e14; font-weight:600}
+.plgrid .cell.be{outline:2px dashed var(--amber); outline-offset:-2px}
+.plgrid .colcliff{box-shadow:inset 3px 0 0 var(--red), inset -3px 0 0 var(--red)}
+.gridlegend{display:flex; flex-wrap:wrap; gap:8px 16px; margin-top:9px; font-family:var(--mono); font-size:10.5px; color:var(--mut)}
+.gridlegend b{color:var(--ink)} .gridlegend .sw{display:inline-block; width:12px; height:12px; border-radius:2px; vertical-align:middle; margin-right:4px}
+.subtabs{display:flex; gap:6px; margin:0 0 10px; flex-wrap:wrap}
+.subtab{font-family:var(--mono); font-size:11px; letter-spacing:.06em; text-transform:uppercase; color:var(--mut);
+  background:var(--steel); border:1px solid var(--line2); border-radius:5px; padding:7px 11px; cursor:pointer; transition:.15s}
+.subtab.on{color:var(--cyan); border-color:var(--cyan); background:rgba(54,214,231,.08)}
+.pnl-pos{color:var(--green)} .pnl-neg{color:var(--red)}
+.ml-select{background:var(--steel); border:1px solid var(--line2); border-radius:5px; color:var(--ink);
+  font-family:var(--mono); font-size:13px; padding:9px 10px; width:100%}
+.payoff-wrap{border:1px solid var(--line2); border-radius:8px; background:var(--panel2); padding:10px; margin-top:10px}
+.payoff-wrap svg{display:block; width:100%; height:auto}
 </style>
 </head>
 <body>
@@ -570,6 +590,63 @@ h1 .n{color:var(--amber)}
         '</div>'+
       '</div>';
 
+    // F) CONTRACT P/L GRID (price × time heatmap — the OPC signature view) + POP/expected-move overlay
+    var grid =
+      '<div class="ref-section">'+
+        '<div class="lbl">Contract P/L Grid — Price &times; Time</div>'+
+        '<div class="ref-card" style="border-left-color:var(--amber)">'+
+          '<div class="rt">WHAT YOUR CONTRACT IS WORTH AT EVERY PRICE, EVERY DAY TO EXPIRY</div>'+
+          '<p style="font-size:13px">This is the view the pros read in seconds: green = profit, red = loss. Watch the right side (near expiry) bleed red faster — that\'s theta, back-loaded. The dashed gold cells are your breakeven; the red-edged column is the theta cliff (~21 DTE) where decay accelerates.</p>'+
+          '<div class="subtabs" id="g-type">'+
+            '<div class="subtab on" data-t="call">CALL</div>'+
+            '<div class="subtab" data-t="put">PUT</div>'+
+          '</div>'+
+          '<div class="calc-grid">'+
+            '<div class="calc-field"><label>Spot ($)</label><input type="number" id="gi-spot" min="0" step="0.01" value="100"/></div>'+
+            '<div class="calc-field"><label>Strike ($)</label><input type="number" id="gi-strike" min="0" step="0.01" value="100"/></div>'+
+            '<div class="calc-field"><label>Premium paid ($)</label><input type="number" id="gi-prem" min="0" step="0.01" value="3"/></div>'+
+            '<div class="calc-field"><label>IV (%)</label><input type="number" id="gi-iv" min="0" step="0.1" value="35"/></div>'+
+            '<div class="calc-field"><label>DTE (days)</label><input type="number" id="gi-dte" min="1" step="1" value="30"/></div>'+
+          '</div>'+
+          '<div class="grid-wrap"><div id="grid-table"></div></div>'+
+          '<div class="gridlegend">'+
+            '<span><span class="sw" style="background:#1b9e54"></span><b>profit</b></span>'+
+            '<span><span class="sw" style="background:#c0392b"></span><b>loss</b></span>'+
+            '<span><span class="sw" style="border:2px dashed var(--amber)"></span><b>breakeven</b></span>'+
+            '<span><span class="sw" style="box-shadow:inset 3px 0 var(--red),inset -3px 0 var(--red);background:#222"></span><b>theta cliff (21 DTE)</b></span>'+
+          '</div>'+
+          '<div class="calc-out" id="grid-out" style="margin-top:12px"></div>'+
+        '</div>'+
+      '</div>';
+
+    // G) MULTI-LEG PAYOFF builder (expiration P/L for spreads / straddles / condors)
+    var multileg =
+      '<div class="ref-section">'+
+        '<div class="lbl">Multi-Leg Payoff Builder</div>'+
+        '<div class="ref-card" style="border-left-color:var(--purple,#a371f7)">'+
+          '<div class="rt">EXPIRATION P/L FOR THE STRUCTURE — BREAKEVENS, MAX WIN, MAX LOSS</div>'+
+          '<p style="font-size:13px">Picture the trade before you place it. A spread caps both your cost and your upside; a condor pays you to bet on a range. The dashed lines are breakevens; the blue tick is the current price.</p>'+
+          '<select class="ml-select" id="ml-kind" style="margin-bottom:10px">'+
+            '<option value="long-call">Long Call</option>'+
+            '<option value="long-put">Long Put</option>'+
+            '<option value="bull-call">Bull Call (debit) Spread</option>'+
+            '<option value="bear-put">Bear Put (debit) Spread</option>'+
+            '<option value="straddle">Long Straddle</option>'+
+            '<option value="strangle">Long Strangle</option>'+
+            '<option value="iron-condor">Iron Condor (credit)</option>'+
+          '</select>'+
+          '<div class="calc-grid">'+
+            '<div class="calc-field"><label>Spot ($)</label><input type="number" id="ml-spot" min="0" step="0.01" value="100"/></div>'+
+            '<div class="calc-field" id="mlf-a"><label>Strike A (lower)</label><input type="number" id="ml-a" min="0" step="0.01" value="100"/></div>'+
+            '<div class="calc-field" id="mlf-b"><label>Strike B (upper)</label><input type="number" id="ml-b" min="0" step="0.01" value="110"/></div>'+
+            '<div class="calc-field" id="mlf-net"><label>Net debit(+)/credit(&minus;) $</label><input type="number" id="ml-net" step="0.01" value="3"/></div>'+
+            '<div class="calc-field" id="mlf-wing"><label>Wing width ($)</label><input type="number" id="ml-wing" min="0" step="0.5" value="5"/></div>'+
+          '</div>'+
+          '<div class="payoff-wrap"><div id="payoff-svg"></div></div>'+
+          '<div class="calc-out" id="ml-out" style="margin-top:10px"></div>'+
+        '</div>'+
+      '</div>';
+
     app.innerHTML =
       backBtn+
       '<div class="hero">'+
@@ -577,7 +654,7 @@ h1 .n{color:var(--amber)}
         '<h1 style="font-size:clamp(22px,7vw,38px)">Vol, Greeks<br>&amp; the Pros</h1>'+
         '<p class="tagline">No quiz — just the concepts, visualized. Tap a calculator number to get a live read.</p>'+
       '</div>'+
-      primer + thetaSvg + ivhvBar + proTable + calc +
+      primer + thetaSvg + ivhvBar + proTable + calc + grid + multileg +
       backBtnBot +
       '<div class="foot" style="margin-top:16px">REFERENCE SECTION · educational only · not financial advice</div>';
 
@@ -631,10 +708,177 @@ h1 .n{color:var(--amber)}
         '<div class="calc-row"><span class="ck">Stop (&minus;50%) &mdash; exit all</span><span class="cv">'+fmtD(stop)+'</span></div>';
     }
 
-    [].forEach.call(app.querySelectorAll('.calc-field input'), function(inp){
+    [].forEach.call(app.querySelectorAll('input[id^="ci-"]'), function(inp){
       inp.oninput = calcUpdate;
     });
     calcUpdate();
+
+    // ---- shared math: normal CDF (Abramowitz-Stegun) + Black-Scholes (r=0) ----
+    function ncdf(x){
+      var t=1/(1+0.2316419*Math.abs(x));
+      var d=0.3989422804014327*Math.exp(-x*x/2);
+      var p=d*t*(0.31938153+t*(-0.356563782+t*(1.781477937+t*(-1.821255978+t*1.330274429))));
+      return x>=0 ? 1-p : p;
+    }
+    function bsVal(S,K,T,sig,type){
+      var intr = Math.max(0, type==='call' ? S-K : K-S);
+      if(T<=0 || sig<=0 || S<=0 || K<=0) return intr;
+      var srt=sig*Math.sqrt(T);
+      var d1=(Math.log(S/K)+0.5*sig*sig*T)/srt, d2=d1-srt;
+      return type==='call' ? S*ncdf(d1)-K*ncdf(d2) : K*ncdf(-d2)-S*ncdf(-d1);
+    }
+    function plColor(plpc){ // plpc = P/L as fraction of premium
+      var x=Math.max(-1,Math.min(2,plpc));
+      if(x>=0){ var a=Math.min(1, x/1.5); return 'rgb('+Math.round(40-10*a)+','+Math.round(120+58*a)+','+Math.round(70+10*a)+')'; }
+      var b=Math.min(1, -x); return 'rgb('+Math.round(120+72*b)+','+Math.round(70-25*b)+','+Math.round(55-15*b)+')';
+    }
+
+    // ---- F) CONTRACT P/L GRID ----
+    var gType='call';
+    function gridUpdate(){
+      var spot=parseFloat(document.getElementById('gi-spot').value),
+          K=parseFloat(document.getElementById('gi-strike').value),
+          prem=parseFloat(document.getElementById('gi-prem').value),
+          ivp=parseFloat(document.getElementById('gi-iv').value),
+          dte=parseInt(document.getElementById('gi-dte').value,10);
+      var tbl=document.getElementById('grid-table'), out=document.getElementById('grid-out');
+      if(!tbl) return;
+      if(!(spot>0&&K>0&&prem>0&&ivp>0&&dte>0)){ tbl.innerHTML='<p style="color:var(--mut);font-family:var(--mono);font-size:12px;padding:8px">Enter spot, strike, premium, IV, DTE…</p>'; out.innerHTML=''; return; }
+      var sig=ivp/100, type=gType;
+      var move=spot*sig*Math.sqrt(dte/365)*2; if(!(move>0)) move=spot*0.15;
+      var rows=11, prices=[]; for(var r=0;r<rows;r++){ prices.push(spot+move*(1-2*r/(rows-1))); }
+      var ncol=Math.min(8,dte+1), days=[]; for(var c=0;c<ncol;c++){ days.push(Math.round(dte-dte*c/(ncol-1))); }
+      var be = type==='call' ? K+prem : K-prem;
+      var h='<table class="plgrid"><thead><tr><th>price \\ DTE</th>';
+      for(var c=0;c<ncol;c++){ var cliff=days[c]<=21&&days[c]>0; h+='<th class="'+(cliff?'colcliff':'')+'">'+days[c]+'d</th>'; }
+      h+='</tr></thead><tbody>';
+      var step=move/(rows-1);
+      for(var r=0;r<rows;r++){
+        var P=prices[r], nearSpot=Math.abs(P-spot)<step/2+1e-9;
+        h+='<tr><td class="rowhdr'+(nearSpot?' spot':'')+'">$'+P.toFixed(2)+(nearSpot?' ◀':'')+'</td>';
+        for(var c=0;c<ncol;c++){
+          var T=days[c]/365, val=bsVal(P,K,T,sig,type), pl=val-prem, plpc=pl/prem;
+          var beCell=(r<rows-1)&&((prices[r]-be)*(prices[r+1]-be)<=0);
+          h+='<td class="cell'+(beCell?' be':'')+'" style="background:'+plColor(plpc)+'" title="$'+pl.toFixed(2)+'/sh value $'+val.toFixed(2)+'">'+(pl>=0?'+':'')+(plpc*100).toFixed(0)+'%</td>';
+        }
+        h+='</tr>';
+      }
+      tbl.innerHTML=h+'</tbody></table>';
+      // POP + expected move + the 3 exit marks
+      var T0=dte/365, srt=sig*Math.sqrt(T0);
+      var pop = type==='call' ? ncdf((Math.log(spot/be)-0.5*sig*sig*T0)/srt)
+                              : ncdf((Math.log(be/spot)+0.5*sig*sig*T0)/srt);
+      var oneSig=spot*sig*Math.sqrt(T0);
+      var needPct=Math.abs(be-spot)/spot*100, sigPct=oneSig/spot*100;
+      var fav = needPct<=sigPct;
+      var t1=prem*1.5, stop=prem*0.5, cliffD=Math.min(21,dte);
+      out.innerHTML=
+        '<div class="calc-row"><span class="ck">Breakeven price</span><span class="cv">$'+be.toFixed(2)+'</span></div>'+
+        '<div class="calc-row"><span class="ck">Need to BE</span><span class="cv">'+(be>=spot?'+':'')+ (((be-spot)/spot)*100).toFixed(1)+'%</span></div>'+
+        '<div class="calc-row"><span class="ck">Expected 1σ move</span><span class="cv">±'+sigPct.toFixed(1)+'% (±$'+oneSig.toFixed(2)+')</span></div>'+
+        '<div class="calc-row"><span class="ck">Move vs priced-in</span><span class="cv">'+(fav?'<span class="verdict-chip cheap">FAVORABLE</span>':'<span class="verdict-chip rich">STIFF</span>')+'</span></div>'+
+        '<div class="calc-row"><span class="ck">POP (finish past BE)</span><span class="cv">'+(pop*100).toFixed(0)+'%</span></div>'+
+        '<div class="calc-row"><span class="ck">T1 — sell half at +50%</span><span class="cv">$'+t1.toFixed(2)+'</span></div>'+
+        '<div class="calc-row"><span class="ck">Stop — out at −50%</span><span class="cv">$'+stop.toFixed(2)+'</span></div>'+
+        '<div class="calc-row"><span class="ck">Theta cliff — exit by</span><span class="cv">'+cliffD+' DTE</span></div>'+
+        '<div style="font-size:11.5px;color:var(--mut);margin-top:8px;line-height:1.5">POP on a long option is usually under 50% — the edge is the <b style="color:var(--ink)">payoff</b> (winners run +50/+100%, losses capped at the stop), not the hit-rate. If POP is low AND the move is STIFF, the contract is a lottery ticket — move closer to the money or pass.</div>';
+    }
+    [].forEach.call(app.querySelectorAll('#g-type .subtab'), function(b){
+      b.onclick=function(){ gType=b.getAttribute('data-t');
+        [].forEach.call(app.querySelectorAll('#g-type .subtab'),function(x){x.classList.remove('on');});
+        b.classList.add('on'); gridUpdate(); };
+    });
+    [].forEach.call(app.querySelectorAll('input[id^="gi-"]'), function(inp){ inp.oninput=gridUpdate; });
+    gridUpdate();
+
+    // ---- G) MULTI-LEG PAYOFF ----
+    function mlLegs(kind,A,B,wing){
+      switch(kind){
+        case 'long-call': return [[1,'call',A]];
+        case 'long-put': return [[1,'put',A]];
+        case 'bull-call': return [[1,'call',A],[-1,'call',B]];
+        case 'bear-put': return [[1,'put',B],[-1,'put',A]];
+        case 'straddle': return [[1,'call',A],[1,'put',A]];
+        case 'strangle': return [[1,'put',A],[1,'call',B]];
+        case 'iron-condor': return [[-1,'put',A],[1,'put',A-wing],[-1,'call',B],[1,'call',B+wing]];
+      }
+      return [[1,'call',A]];
+    }
+    function mlPayoff(legs,net,P){
+      var sv=0; for(var i=0;i<legs.length;i++){ var L=legs[i], intr=L[1]==='call'?Math.max(0,P-L[2]):Math.max(0,L[2]-P); sv+=L[0]*intr; }
+      return sv-net; // net>0 = debit paid; net<0 = credit received
+    }
+    function mlSync(){
+      var kind=document.getElementById('ml-kind').value;
+      var showB = (kind==='bull-call'||kind==='bear-put'||kind==='strangle'||kind==='iron-condor');
+      var showWing = (kind==='iron-condor');
+      document.getElementById('mlf-b').style.display = showB?'':'none';
+      document.getElementById('mlf-wing').style.display = showWing?'':'none';
+      var lblA=document.querySelector('#mlf-a label'), lblNet=document.querySelector('#mlf-net label');
+      lblA.innerHTML = (kind==='iron-condor')?'Short put strike':(showB?'Strike A (lower)':'Strike');
+      lblNet.innerHTML = (kind==='iron-condor')?'Net credit (enter &minus;)':'Net debit(+)/credit(&minus;) $';
+    }
+    function mlUpdate(){
+      var kind=document.getElementById('ml-kind').value,
+          spot=parseFloat(document.getElementById('ml-spot').value),
+          A=parseFloat(document.getElementById('ml-a').value),
+          B=parseFloat(document.getElementById('ml-b').value),
+          net=parseFloat(document.getElementById('ml-net').value),
+          wing=parseFloat(document.getElementById('ml-wing').value);
+      var box=document.getElementById('payoff-svg'), out=document.getElementById('ml-out');
+      if(!box) return;
+      if(isNaN(A)||isNaN(net)||isNaN(spot)){ box.innerHTML=''; out.innerHTML='<p style="color:var(--mut);font-family:var(--mono);font-size:12px">Fill the inputs…</p>'; return; }
+      if(isNaN(B)) B=A; if(isNaN(wing)) wing=5;
+      var legs=mlLegs(kind,A,B,wing);
+      var strikes=legs.map(function(L){return L[2];});
+      var lo=Math.min.apply(null,strikes.concat([spot]))*0.78, hi=Math.max.apply(null,strikes.concat([spot]))*1.22;
+      if(!(hi>lo)){ lo=spot*0.8; hi=spot*1.2; }
+      var N=140, xs=[], ys=[], maxP=-1e9, minP=1e9;
+      for(var i=0;i<=N;i++){ var P=lo+(hi-lo)*i/N, y=mlPayoff(legs,net,P); xs.push(P); ys.push(y); if(y>maxP)maxP=y; if(y<minP)minP=y; }
+      // breakevens = zero crossings
+      var bes=[]; for(var i=0;i<N;i++){ if(ys[i]===0) bes.push(xs[i]); else if(ys[i]*ys[i+1]<0){ var t=ys[i]/(ys[i]-ys[i+1]); bes.push(xs[i]+(xs[i+1]-xs[i])*t); } }
+      // SVG geometry
+      var X0=44,X1=312,Y0=18,Y1=168;
+      var pad=(maxP-minP)*0.12||1; var yhi=maxP+pad, ylo=minP-pad;
+      function sx(P){ return X0+(P-lo)/(hi-lo)*(X1-X0); }
+      function sy(y){ return Y1-(y-ylo)/(yhi-ylo)*(Y1-Y0); }
+      var zeroY=sy(0);
+      var s='<svg viewBox="0 0 320 188" xmlns="http://www.w3.org/2000/svg" aria-label="payoff at expiration">';
+      s+='<line x1="'+X0+'" y1="'+Y0+'" x2="'+X0+'" y2="'+Y1+'" stroke="rgba(39,50,63,.9)"/>';
+      s+='<line x1="'+X0+'" y1="'+zeroY.toFixed(1)+'" x2="'+X1+'" y2="'+zeroY.toFixed(1)+'" stroke="#6b7785" stroke-dasharray="3,3"/>';
+      s+='<text x="2" y="'+(Y0+8)+'" font-family="monospace" font-size="8" fill="#3fb950">+$'+maxP.toFixed(2)+'</text>';
+      s+='<text x="2" y="'+(Y1)+'" font-family="monospace" font-size="8" fill="#f85149">'+ (minP<0?'-$'+Math.abs(minP).toFixed(2):'+$'+minP.toFixed(2))+'</text>';
+      s+='<text x="'+(X1-2)+'" y="'+(zeroY-3).toFixed(1)+'" text-anchor="end" font-family="monospace" font-size="8" fill="#6b7785">$0 P/L</text>';
+      // sign-split payoff line
+      for(var i=0;i<N;i++){
+        var ya=ys[i], yb=ys[i+1], xa=xs[i], xb=xs[i+1];
+        if(ya*yb<0){ var t=ya/(ya-yb), xc=xa+(xb-xa)*t;
+          s+='<line x1="'+sx(xa).toFixed(1)+'" y1="'+sy(ya).toFixed(1)+'" x2="'+sx(xc).toFixed(1)+'" y2="'+sy(0).toFixed(1)+'" stroke="'+(ya>=0?'#3fb950':'#f85149')+'" stroke-width="2"/>';
+          s+='<line x1="'+sx(xc).toFixed(1)+'" y1="'+sy(0).toFixed(1)+'" x2="'+sx(xb).toFixed(1)+'" y2="'+sy(yb).toFixed(1)+'" stroke="'+(yb>=0?'#3fb950':'#f85149')+'" stroke-width="2"/>';
+        } else {
+          s+='<line x1="'+sx(xa).toFixed(1)+'" y1="'+sy(ya).toFixed(1)+'" x2="'+sx(xb).toFixed(1)+'" y2="'+sy(yb).toFixed(1)+'" stroke="'+(ya>=0?'#3fb950':'#f85149')+'" stroke-width="2"/>';
+        }
+      }
+      // breakevens + spot
+      bes.forEach(function(be){ var x=sx(be); s+='<line x1="'+x.toFixed(1)+'" y1="'+Y0+'" x2="'+x.toFixed(1)+'" y2="'+Y1+'" stroke="var(--amber)" stroke-dasharray="2,3" opacity=".8"/>'+
+        '<text x="'+x.toFixed(1)+'" y="'+(Y1+9)+'" text-anchor="middle" font-family="monospace" font-size="7.5" fill="#ffb020">$'+be.toFixed(0)+'</text>'; });
+      var xspot=sx(spot); s+='<line x1="'+xspot.toFixed(1)+'" y1="'+Y0+'" x2="'+xspot.toFixed(1)+'" y2="'+Y1+'" stroke="var(--cyan)" stroke-width="1.2"/>'+
+        '<text x="'+xspot.toFixed(1)+'" y="'+(Y0-3>10?Y0+0:Y0)+'" font-family="monospace" font-size="0" fill="none"></text>'+
+        '<text x="'+Math.min(X1-20,xspot+2).toFixed(1)+'" y="'+(Y0+8)+'" font-family="monospace" font-size="8" fill="#36d6e7">spot $'+spot.toFixed(0)+'</text>';
+      s+='</svg>';
+      box.innerHTML=s;
+      var beTxt = bes.length? bes.map(function(b){return '$'+b.toFixed(2);}).join(' / ') : 'none in range';
+      var risk = net>0 ? '$'+(net*100).toFixed(0)+' debit' : '$'+(Math.abs(net)*100).toFixed(0)+' credit';
+      out.innerHTML=
+        '<div class="calc-row"><span class="ck">Cost basis</span><span class="cv">'+risk+'/contract</span></div>'+
+        '<div class="calc-row"><span class="ck">Max profit</span><span class="cv pnl-pos">+$'+(maxP*100).toFixed(0)+'</span></div>'+
+        '<div class="calc-row"><span class="ck">Max loss</span><span class="cv pnl-neg">'+(minP<0?'-$'+Math.abs(minP*100).toFixed(0):'+$'+(minP*100).toFixed(0))+'</span></div>'+
+        '<div class="calc-row"><span class="ck">Breakeven(s)</span><span class="cv">'+beTxt+'</span></div>'+
+        '<div class="calc-row"><span class="ck">Risk : reward</span><span class="cv">'+((maxP>0&&minP<0)?'1 : '+(maxP/Math.abs(minP)).toFixed(2):'—')+'</span></div>';
+    }
+    document.getElementById('ml-kind').onchange=function(){ mlSync(); mlUpdate(); };
+    [].forEach.call(app.querySelectorAll('input[id^="ml-"]'), function(inp){ inp.oninput=mlUpdate; });
+    mlSync(); mlUpdate();
   }
 
   // keyboard: 1-4 answer, Enter/Space = next
