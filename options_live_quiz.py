@@ -256,15 +256,26 @@ def main() -> int:
         print("[live-quiz] no question could be built (no positions + engine read failed)")
         return 0
 
+    import random
     ci = item["correct_index"]
-    body = "\n".join(f"{LETTERS[i]}) {o}" for i, o in enumerate(item["options"]))
+    # shuffle option order so position carries no signal (consistent with the static sender)
+    order = list(range(len(item["options"])))
+    random.shuffle(order)
+    shown = [item["options"][j] for j in order]
+    correct_letter = LETTERS[order.index(ci)]
+    body = "\n".join(f"{LETTERS[i]}) {o}" for i, o in enumerate(shown))
     caption = (f"🎓 <b>LIVE OPTIONS REP</b> — tap your answer 👇\n<i>{item['header']}</i>\n\n"
                f"{item['question']}\n\n{body}")
-    buttons = [[{"text": LETTERS[i], "callback_data": f"oq:{LETTERS[i]}:{item['qid']}"} for i in (0, 1)],
-               [{"text": LETTERS[i], "callback_data": f"oq:{LETTERS[i]}:{item['qid']}"} for i in (2, 3)]]
+    buttons, row = [], []
+    for i in range(len(shown)):
+        row.append({"text": LETTERS[i], "callback_data": f"oq:{LETTERS[i]}:{item['qid']}"})
+        if len(row) == 2:
+            buttons.append(row); row = []
+    if row:
+        buttons.append(row)
 
     if DRY:
-        print(f"DRY live rep [{item['module']}]:\n{caption}\n→ correct={LETTERS[ci]} ({item['options'][ci]})")
+        print(f"DRY live rep [{item['module']}]:\n{caption}\n→ correct={correct_letter} ({item['options'][ci]})")
         print(f"--- explain ---\n{item['why']}")
         return 0
 
@@ -273,7 +284,7 @@ def main() -> int:
             reply_markup={"inline_keyboard": buttons})
     if r is None:
         return 1
-    st["current"] = {"qid": item["qid"], "correct": LETTERS[ci], "answer_text": item["options"][ci],
+    st["current"] = {"qid": item["qid"], "correct": correct_letter, "answer_text": item["options"][ci],
                      "explain": item["why"], "module": item["module"], "asked_at": time.time()}
     st["asked_n"] = int(st.get("asked_n", 0)) + 1
     st.setdefault("score", {"right": 0, "wrong": 0, "streak": 0})

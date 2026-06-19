@@ -118,18 +118,29 @@ def main() -> int:
             print("[options-quiz] a recent rep is still open (<5h) — skipping")
             return 0
 
+    import random
     q = pick(bank, st)
     ci = q["correct_index"]
-    correct_letter = LETTERS[ci]
+    # shuffle option order so the correct answer isn't positionally predictable (the bank
+    # skews heavily to B). answer_text stays the correct option; correct letter = its new slot.
+    order = list(range(len(q["options"])))
+    random.shuffle(order)
+    shown = [q["options"][j] for j in order]
+    correct_letter = LETTERS[order.index(ci)]
     mod = next((m["name"] for m in data.get("meta", {}).get("modules", []) if m["id"] == q["module"]), q["module"])
     lv  = {1: "Beginner", 2: "Intermediate", 3: "Advanced"}.get(q.get("level"), "")
-    body = "\n".join(f"{LETTERS[i]}) {o}" for i, o in enumerate(q["options"]))
+    body = "\n".join(f"{LETTERS[i]}) {o}" for i, o in enumerate(shown))
     caption = (f"🎓 <b>OPTIONS REP</b> — tap your answer 👇\n"
                f"<i>{mod}" + (f" · {lv}" if lv else "") + "</i>\n\n"
                f"{q['question']}\n\n{body}")
     explain = q["why"] + (f"\n\n💵 <b>Your $6k/RH:</b> {q['rh_note']}" if q.get("rh_note") else "")
-    buttons = [[{"text": LETTERS[i], "callback_data": f"oq:{LETTERS[i]}:{q['id']}"} for i in (0, 1)],
-               [{"text": LETTERS[i], "callback_data": f"oq:{LETTERS[i]}:{q['id']}"} for i in (2, 3)]]
+    buttons, row = [], []
+    for i in range(len(shown)):
+        row.append({"text": LETTERS[i], "callback_data": f"oq:{LETTERS[i]}:{q['id']}"})
+        if len(row) == 2:
+            buttons.append(row); row = []
+    if row:
+        buttons.append(row)
 
     if DRY:
         print(f"DRY options rep:\n{caption}\n→ correct={correct_letter} ({q['options'][ci]})\nid={q['id']} box={st.get('boxes',{}).get(q['id'],0)}")
