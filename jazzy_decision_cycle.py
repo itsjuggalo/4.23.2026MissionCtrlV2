@@ -1147,6 +1147,18 @@ def build_boba_prompt(account, positions, shortlist_with_kronos, remaining_budge
     _peer_block = peer_picks_block("jazzy", window_hours=6) if peer_picks_block else ""
     multi_agent_context = market_briefing_text + grok_brief_text + orion_skills_text + _peer_block
 
+    # 🌐 free web search (INERT unless AGENT_WEB_SEARCH=1) — ADDITIVE soft context only; never gates/sizes/executes
+    try:
+        from lib.search import ticker_web_context as _tws
+        _ws_tickers = [s.get("ticker", "") for _, s, _ in (shortlist_with_kronos or [])
+                       if isinstance(s, dict) and s.get("ticker")]
+        _web_ctx = _tws(_ws_tickers, max_tickers=3, k=3)
+        if _web_ctx:
+            multi_agent_context += _web_ctx
+            print(f"[web-search] injected {_web_ctx.count('###')} ticker blocks into Jazzy prompt", flush=True)
+    except Exception as _ws_e:
+        print(f"[web-search] skipped: {_ws_e!r}", flush=True)
+
     # Skill injection - load relevant SKILL.md content based on decision context
     try:
         _skill_ctx_parts = []
