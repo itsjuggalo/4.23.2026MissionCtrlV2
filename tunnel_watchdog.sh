@@ -49,6 +49,10 @@ relaunch() { # relaunch <port>
           sleep 1
           autossh -M 0 -fN -o ServerAliveInterval=30 -o ServerAliveCountMax=3 \
                   -o ExitOnForwardFailure=yes -R 3300:localhost:3000 openclaw ;;
+    3303) pkill -f -- '-R 3303:localhost:3003' 2>/dev/null
+          sleep 1
+          autossh -M 0 -fN -o ServerAliveInterval=30 -o ServerAliveCountMax=3 \
+                  -o ExitOnForwardFailure=yes -R 3303:localhost:3003 openclaw ;;
     8091) pkill -f -- '-R 127.0.0.1:8091:127.0.0.1:8091' 2>/dev/null
           sleep 1
           autossh -M 0 -fN -o ServerAliveInterval=30 -o ServerAliveCountMax=3 \
@@ -58,9 +62,13 @@ relaunch() { # relaunch <port>
 
 probe() { # probe -> lines "port BINDSTATE httpcode"
   ssh -o BatchMode=yes -o ConnectTimeout=10 openclaw '
-    for p in 3300 8091; do
+    for p in 3300 3303 8091; do
       if ss -ltn 2>/dev/null | grep -q ":${p} "; then s=LISTEN; else s=DEAD; fi
-      if [ "$p" = 3300 ]; then u="http://127.0.0.1:3300/"; else u="http://127.0.0.1:8091/health"; fi
+      case "$p" in
+        3300) u="http://127.0.0.1:3300/" ;;
+        3303) u="http://127.0.0.1:3303/api/health" ;;
+        *)    u="http://127.0.0.1:8091/health" ;;
+      esac
       c=$(curl -s -o /dev/null -w "%{http_code}" -m 6 "$u" 2>/dev/null || echo ERR)
       echo "$p $s $c"
     done' 2>/dev/null
