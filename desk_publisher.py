@@ -57,6 +57,34 @@ def _now():
     return datetime.now(ET)
 
 
+def _analyst_line(sym):
+    """One-line Wall-St consensus for a ticker from /api/analyst-consensus
+    (yfinance primary + AInvest second-opinion/fallback). None if no coverage."""
+    d = _get(f'/api/analyst-consensus?symbol={sym}', timeout=22)
+    if not isinstance(d, dict):
+        return None
+    n = d.get('numAnalysts') or 0
+    recs = d.get('recs') or {}
+    tgt = d.get('targetMean')
+    rk = d.get('recommendationKey')
+    srcs = d.get('sources') or []
+    if not n and tgt in (None, 0) and not rk:
+        return None
+    buy = (recs.get('strongBuy') or 0) + (recs.get('buy') or 0)
+    hold = recs.get('hold') or 0
+    sell = (recs.get('sell') or 0) + (recs.get('strongSell') or 0)
+    parts = []
+    if buy or hold or sell:
+        parts.append(f"{buy}B/{hold}H/{sell}S")
+    if rk:
+        parts.append(str(rk).replace('_', ' '))
+    if isinstance(tgt, (int, float)) and tgt:
+        parts.append(f"tgt ${round(tgt, 2)}")
+    tag = (" *(yf+ainvest)*" if ('ainvest' in srcs and 'yfinance' in srcs)
+           else " *(ainvest)*" if 'ainvest' in srcs else "")
+    return f"- **{sym}**: " + " · ".join(parts) + (f" ({n} analysts)" if n else "") + tag
+
+
 # ── analyst builders: each returns (title, summary, body_md, tickers) or None ──
 
 def build_mengsk(slot):
@@ -139,6 +167,17 @@ def build_raynor(slot):
                 syms.append(s)
                 lines.append(f"- **{s}** — {v}" + (f" ({sc})" if sc is not None else ''))
         lines.append("")
+        # Wall-St consensus on the top conviction names (yfinance + AInvest cache).
+        alines = []
+        for s in dict.fromkeys(syms):
+            if len(alines) >= 3:
+                break
+            al = _analyst_line(s)
+            if al:
+                alines.append(al)
+        if alines:
+            lines += ["## Wall St. consensus", *alines,
+                      "_Analyst tape = context, not a trigger — confirm with the flow read._", ""]
     if brief:
         lines += ["## Desk brief", brief]
     if bullets:
