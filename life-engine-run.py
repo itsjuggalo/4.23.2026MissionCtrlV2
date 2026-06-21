@@ -742,10 +742,11 @@ def _render_debts(ctx):
         L.append(f"  └ Total: {m(rep['total_debt'])} ({esc(names)}){burn}")
         rh = rep.get('rh_buying_power') or {}
         if rh.get('needs_relogin'):
-            L.append("  └ RH cash avail: <i>relogin to refresh</i>")
+            L.append("  └ RH buying power: <i>relogin to refresh</i>")
         elif rh.get('value') is not None:
             tag = '' if rh.get('live') else f" (last {rh.get('as_of')})"
-            L.append(f"  └ RH cash avail: {m(rh['value'])}{tag}")
+            cashtag = f" · cash {m(rh['cash'])}" if rh.get('cash') is not None else ''
+            L.append(f"  └ RH buying power: {m(rh['value'])}{cashtag}{tag}")
         tr = rep.get('truist_checking') or {}
         if tr.get('value') is not None:
             L.append(f"  └ Truist checking: {m(tr['value'])}")
