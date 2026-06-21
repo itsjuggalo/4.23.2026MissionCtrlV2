@@ -663,7 +663,6 @@ def gather_context(brief_type, now, persist):
         ctx['weather'] = get_weather(cfg)
         ctx['todos']  = get_todos(cfg)
         ctx['yesterday'], ctx['commitments'] = get_yesterday(cfg, now)
-        ctx['debt_report'] = get_debt_report()
 
     elif brief_type == 'midday_checkin':
         i1, _, _ = get_gmail('',         hours=6)
@@ -681,7 +680,6 @@ def gather_context(brief_type, now, persist):
         important = i1 + i2
         ctx['alerts'] = filter_new(important, 'email', now, persist, _email_key)
         ctx['bills']  = get_bills(now, important, persist)
-        ctx['debt_report'] = get_debt_report()
 
     else:  # nightly_wrap
         i1, _, c1 = get_gmail('',         hours=168)
@@ -709,60 +707,6 @@ def _tomorrow_events(ctx, now, limit):
     return tomorrow[:limit]
 
 # ── Template renderers (deterministic fallback — Step 2) ──────────────────────
-def get_debt_report():
-    """Load the debt-payoff plan (debt_planner.build). Fully guarded — any failure
-    returns None so the brief never breaks. Off-switch: LIFE_DEBTS=0."""
-    try:
-        if os.environ.get('LIFE_DEBTS') == '0':
-            return None
-        import sys as _sys
-        if '/home/itsju/05_AUTOMATION' not in _sys.path:
-            _sys.path.insert(0, '/home/itsju/05_AUTOMATION')
-        import debt_planner
-        d = debt_planner.load()
-        if not [x for x in d.get('debts', []) if (x.get('balance') or 0) > 0]:
-            return None
-        return debt_planner.build(d)
-    except Exception:
-        return None
-
-
-def _render_debts(ctx):
-    """💳 DEBT PAYOFF — additive, fully guarded (never breaks a brief). RH buying
-    power shown as available CASH (life cash-flow), not a trading signal."""
-    rep = ctx.get('debt_report')
-    if not rep or not rep.get('debts'):
-        return ''
-    try:
-        def m(v):
-            return '—' if v in (None, '') else f"${v:,.0f}"
-        L = []
-        burn = f" · ~{m(rep['monthly_burn'])}/mo interest" if rep.get('monthly_burn') else ''
-        names = ', '.join(x['creditor'] for x in rep['debts'])
-        L.append(f"  └ Total: {m(rep['total_debt'])} ({esc(names)}){burn}")
-        rh = rep.get('rh_buying_power') or {}
-        if rh.get('needs_relogin'):
-            L.append("  └ RH cash avail: <i>relogin to refresh</i>")
-        elif rh.get('value') is not None:
-            tag = '' if rh.get('live') else f" (last {rh.get('as_of')})"
-            L.append(f"  └ RH cash avail: {m(rh['value'])}{tag}")
-        tr = rep.get('truist_checking') or {}
-        if tr.get('value') is not None:
-            L.append(f"  └ Truist checking: {m(tr['value'])}")
-        p = (rep.get('scenarios') or {}).get('planned') or {}
-        if p and not p.get('never') and p.get('months') is not None:
-            mo = p['months']
-            mos = f"{mo} mo" if mo < 24 else f"{mo // 12}y {mo % 12}m"
-            L.append(f"  └ Plan ({rep['strategy']} +{m(rep['monthly_extra'])}/mo): "
-                     f"debt-free ~{mos}, {m(p['total_interest'])} interest")
-        nd = rep.get('next_due')
-        if nd and nd.get('due_day'):
-            L.append(f"  └ Next: {esc(nd['creditor'])} min {m(nd['min_payment'])} due the {nd['due_day']}th")
-        return "\n💳 <b>DEBT PAYOFF</b>\n" + '\n'.join(L) + "\n"
-    except Exception:
-        return ''
-
-
 def _render_inbox(ctx):
     sections = ''
     if ctx['bills']:
@@ -849,7 +793,7 @@ def render_template(brief_type, ctx):
 
 📧 <b>INBOX</b>
 {_render_inbox(ctx)}
-{_render_debts(ctx)}{_render_life(ctx)}{_render_web(ctx)}{_render_body_mind(ctx)}━━━━━━━━━━━━━━━━━━━━━━━━━━━━"""
+{_render_life(ctx)}{_render_web(ctx)}{_render_body_mind(ctx)}━━━━━━━━━━━━━━━━━━━━━━━━━━━━"""
 
     if brief_type == 'midday_checkin':
         time_str = now.strftime('%H:%M ET')
@@ -866,7 +810,7 @@ def render_template(brief_type, ctx):
         inbox = _render_inbox(ctx)
         inbox_block = f"\n📧 <b>NEEDS ACTION</b>\n{inbox}\n" if inbox != '  Inbox clear' else ''
         return f"""📊 <b>EVENING — plan tomorrow</b> | {date_str}
-{inbox_block}{_render_debts(ctx)}
+{inbox_block}
 📅 <b>Tomorrow</b>
 {tmrw_lines}
 {_render_web(ctx)}{_render_body_mind(ctx)}"""

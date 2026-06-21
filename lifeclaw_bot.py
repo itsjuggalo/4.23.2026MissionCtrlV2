@@ -269,6 +269,51 @@ def today_view():
         return f"[today error] {e}"
 
 
+DEBT_CLI     = str(Path.home() / "bin" / "debt")
+DEBT_PLANNER = str(Path.home() / "05_AUTOMATION" / "debt_planner.py")
+
+
+def _planner(mode="--brief"):
+    try:
+        r = subprocess.run([ENGINE_PY, DEBT_PLANNER] + ([mode] if mode else []),
+                           capture_output=True, text=True, timeout=25)
+        return (r.stdout or "").strip() or "[no debt data — add one with /debt <creditor> <balance>]"
+    except Exception as e:
+        return f"[debt error] {e}"
+
+
+def debts_cmd(arg):
+    """/debts → compact plan. /debts full → full scenarios (monospace)."""
+    if arg.strip().lower() in ("full", "scenarios", "plan", "all"):
+        body = _planner("").replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;")
+        return "<pre>" + body + "</pre>"
+    return _planner("--brief") + "\n\nUpdate: /paid <creditor> <amt> · /debt <creditor> <bal> · /debts full"
+
+
+def debt_update_cmd(text):
+    """/paid <name> <amt>  ·  /debt <name> <bal>  ·  /debt truist <bal>"""
+    parts = text.split()
+    cmd = parts[0].lstrip("/").lower()
+    if len(parts) < 3:
+        return ("use:\n  /paid <creditor> <amount>   — log a payment\n"
+                "  /debt <creditor> <balance>  — set a balance\n"
+                "  /debt truist <balance>      — set Truist checking")
+    name, val = parts[1], parts[2]
+    try:
+        if cmd == "paid":
+            subprocess.run([ENGINE_PY, DEBT_CLI, "pay", name, val], capture_output=True, text=True, timeout=10)
+            verb = f"logged ${val} payment to {name}"
+        elif name.lower() in ("truist", "checking"):
+            subprocess.run([ENGINE_PY, DEBT_CLI, "truist", val], capture_output=True, text=True, timeout=10)
+            verb = f"set Truist checking to ${val}"
+        else:
+            subprocess.run([ENGINE_PY, DEBT_CLI, "set", name, val], capture_output=True, text=True, timeout=10)
+            verb = f"set {name} balance to ${val}"
+        return f"✅ {verb}\n\n" + _planner("--brief")
+    except Exception as e:
+        return f"[update error] {e}"
+
+
 HELP = (
     "🪖 *LifeClaw* — your life copilot. Just text me like you text Claude.\n\n"
     "I can check your calendar, inbox, bills, weather, todos, and the web. Ask me "
@@ -277,6 +322,8 @@ HELP = (
     "Commands:\n"
     "/today — weather + today's calendar + your todos\n"
     "/todo <thing> — capture it before you forget · /todo to list · /todo done <#>\n"
+    "/debts — your debt-payoff plan · /debts full for scenarios\n"
+    "/paid <creditor> <amt> — log a payment · /debt <creditor> <bal> — set a balance\n"
     "/brief [morning|midday|evening|nightly] — full brief now\n"
     "/help — this message\n\n"
     "Life-only — for trading, use your trading bots."
@@ -333,6 +380,17 @@ def main():
                 if text.startswith("/today"):
                     tg("sendChatAction", chat_id=chat_id, action="typing")
                     tg("sendMessage", chat_id=chat_id, text=today_view())
+                    continue
+                if text.startswith("/debts"):            # show plan (check BEFORE /debt)
+                    arg = text.split(maxsplit=1)[1] if " " in text else ""
+                    out = debts_cmd(arg)
+                    if out.startswith("<pre>"):
+                        tg("sendMessage", chat_id=chat_id, text=out, parse_mode="HTML")
+                    else:
+                        tg("sendMessage", chat_id=chat_id, text=out)
+                    continue
+                if text.startswith("/paid") or text.startswith("/debt"):   # update balances
+                    tg("sendMessage", chat_id=chat_id, text=debt_update_cmd(text))
                     continue
                 if text.startswith("/todo"):
                     arg = text.split(maxsplit=1)[1] if " " in text else ""
