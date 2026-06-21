@@ -55,6 +55,9 @@ FLEET = {
     # ── infra (not chat targets) ────────────────────────────────────────────
     "hermes_relay":    dict(user="Gumroadie_bot",           avatar="dragoon",         role="infra",       src=("vault", "telegram_hermes_bot_token")),
     "openclaw_grok":   dict(user="OpenclawGrok727_Bot",     avatar="ghost",           role="infra",       src=("vault", "telegram_openclaw_bot_token")),
+    # laptop_control = the Remote-Control phone gateway bot (tg-channel). Dedicated BotFather bot;
+    # token at ~/.openclaw/secrets/telegram_phone_channel_bot_token (no-token until Mike creates it).
+    "laptop_control":  dict(user="(pending BotFather)",     avatar="battlecruiser",   role="infra",       src=("file", "telegram_phone_channel_bot_token")),
     # ── spare ───────────────────────────────────────────────────────────────
     "spare_backup":    dict(user="(BobaClaw)",              avatar="tassadar",        role="spare",       src=("cloud", None)),
     # ── reserve pool (Mike's spare bots, folded in 2026-06-16 — named + rebranded, persona-ready) ──
