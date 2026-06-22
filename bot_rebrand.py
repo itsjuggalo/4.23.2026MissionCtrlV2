@@ -43,7 +43,7 @@ IDENTITY = {
               "Ask 'what's the read on NVDA', 'screen oversold large caps', 'earnings outlook'. "
               "I have seen the future — and I will not let it come to pass.")),
     "telegram-bot-token.txt": dict(
-        name="Flow Signals", avatar="raynor",
+        name="Flow Signals", avatar="queen_of_blades",
         short="The Swarm hunts the flow — live whale sweeps, exits & shock warnings.",
         desc=("Flow signals (push). The meanest options flow: big sweeps, position exits, market "
               "shocks — straight to your phone. Pull the board with /winners /sweeps from the "
