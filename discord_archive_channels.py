@@ -40,6 +40,22 @@ TIER_A = {
     "massage-bookings":   "1516907176281772194",
 }
 
+# Round 2 — full-audit LIVE dead/redundant (REMOVE + the macro MERGE). Reversible.
+ROUND2 = {
+    "macro-calendar":   "1486045618194481212",  # feed goes to Telegram, never here
+    "auto-trader":      "1494746026693759006",  # abandoned Firebase auto-trader (last Apr 27)
+    "sniper-watchlist": "1515359717591875835",  # orphaned — daemon never posts here
+    "coupon-logs":      "1518431848592834612",  # CouponClaw never wired — empty
+    "coupon-watchlist": "1518431851411144854",  # CouponClaw never wired — empty
+    "macro":            "1486045609025867882",  # MERGE → real feed already in macro-alerts
+}
+
+# select which set + rollback file via "--set round2" (default = Tier A)
+if "round2" in sys.argv:
+    MOVE, ROLLBACK = ROUND2, Path.home() / ".openclaw/secrets/.discord-archive-rollback-round2.json"
+else:
+    MOVE = TIER_A
+
 
 def _req(method, path, **kw):
     for _ in range(5):
@@ -70,8 +86,8 @@ def main():
     # read current parents for rollback
     chans = {c["id"]: c for c in _req("GET", f"/guilds/{GUILD}/channels")}
     rollback = {}
-    print(f"{'EXECUTE' if go else 'DRY RUN'} — move {len(TIER_A)} channels → 🗄️ ARCHIVE\n")
-    for name, cid in TIER_A.items():
+    print(f"{'EXECUTE' if go else 'DRY RUN'} — move {len(MOVE)} channels → 🗄️ ARCHIVE\n")
+    for name, cid in MOVE.items():
         cur = chans.get(cid)
         if not cur:
             print(f"  ?? #{name} ({cid}) not found — skip"); continue
