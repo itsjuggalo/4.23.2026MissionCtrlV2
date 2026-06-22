@@ -19,7 +19,7 @@ import requests
 SECRETS = Path.home() / ".openclaw/secrets"
 TOKEN = (SECRETS / "discord_ops_bot_token").read_text().strip()
 GUILD = "1486025777970548908"
-ARCHIVE_CAT = "1507444328681832479"   # 🗄️ ARCHIVE
+ARCHIVE_CAT = "1518432389850726412"   # 🗄️ ARCHIVE ② (🗄️ ARCHIVE is full at the 50-channel cap)
 ROLLBACK = Path.home() / ".openclaw/secrets/.discord-archive-rollback.json"
 API = "https://discord.com/api/v10"
 HDR = {"Authorization": f"Bot {TOKEN}",
