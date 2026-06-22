@@ -50,6 +50,15 @@ BOTS = {
             "logs). NEVER restart/kill/deploy/edit anything. Eastern Time. Short, "
             "plain-text answers for Telegram."
         ),
+        "help": (
+            "🩺 System Health — your laptop ops/health copilot.\n"
+            "Ask me in plain English:\n"
+            "• is everything healthy?   • pm2 status\n"
+            "• why is X down?           • disk / RAM / swap?\n"
+            "• tail the X log           • any cron stale?\n"
+            "Read-only diagnostics — I never restart/kill/deploy.\n"
+            "/help = this."
+        ),
     },
     # ── repurposed specialist bots (each a distinct trading front-door) ───────
     "xsentiment": {
@@ -194,6 +203,13 @@ def main():
     if len(sys.argv) < 2 or sys.argv[1] not in BOTS:
         print(f"usage: tg_responder.py <{'|'.join(BOTS)}>", flush=True)
         sys.exit(1)
+    # Tokens owned by a DIFFERENT dedicated poller — refuse to start here, else two
+    # getUpdates consumers fight over one token (Telegram delivers each update once).
+    OWNED_ELSEWHERE = {"xsentiment": "grok_telegram.py owns telegram_grok_bot_token (x_sentiment)"}
+    if sys.argv[1] in OWNED_ELSEWHERE:
+        print(f"REFUSING '{sys.argv[1]}': {OWNED_ELSEWHERE[sys.argv[1]]} — "
+              f"starting it would steal that poller's getUpdates.", flush=True)
+        sys.exit(2)
     cfg   = BOTS[sys.argv[1]]
     token = _fleet_token(cfg["fleet_fn"]) if cfg.get("fleet_fn") else _secret(cfg["token"])
     base  = f"https://api.telegram.org/bot{token}"
@@ -293,6 +309,10 @@ def main():
                 f"📖 /explain — what Greeks/IV/volume mean (plain English)\n"
                 f"Or ask anything / run any /skill. /help = this.")
     help_txt += "\n🔑 /guest [24h] [name] — mint a temp link to give someone dashboard access"
+    # Per-bot help override (keeps the /help text coherent with the bot's job — e.g. an
+    # ops bot shouldn't advertise trading commands). Falls back to the cockpit help above.
+    if cfg.get("help"):
+        help_txt = cfg["help"]
 
     print(f"{name} responder started ({cfg.get('token') or cfg.get('fleet_fn')})", flush=True)
     tg("deleteWebhook")

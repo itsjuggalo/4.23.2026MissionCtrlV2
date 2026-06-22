@@ -13,9 +13,8 @@ from pathlib import Path
 from collections import defaultdict
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))  # 05_AUTOMATION/scripts
-from lib import ops_card as oc            # noqa: E402
-from skill_to_discord import GUILD         # noqa: E402
 import chartlib                            # noqa: E402
+import deliver                             # noqa: E402
 
 SYNTH_TOKEN = (Path.home() / ".openclaw/secrets/discord_synthcontrol_token").read_text().strip()
 FLOW = Path.home() / "trading/signals/option-scraper/data/flow_alerts_today.json"
@@ -72,10 +71,6 @@ def main():
     flows = load_flows()
     top = rank(flows, args.top)
     print(f"[flow-ta] {len(flows)} stock flows → top {len(top)} tickers")
-    cid = None if args.dry else oc.resolve_channel(GUILD, SYNTH_TOKEN, args.channel)
-    if not args.dry and not cid:
-        sys.exit(f"[flow-ta] #{args.channel} not found — create it then re-run")
-
     posted = 0
     for prem, sym, fs in top:
         try:
@@ -83,11 +78,9 @@ def main():
         except Exception as e:
             print(f"  {sym}: render fail {e}"); continue
         cap = caption(sym, fs)
-        if args.dry:
-            print(f"  [dry] {sym}: {png}  ::  {cap}"); posted += 1; continue
-        ok = oc.post_image_bot(cid, SYNTH_TOKEN, png, content=cap)
-        print(f"  {'✓' if ok else '✗'} {sym}")
-        posted += bool(ok); time.sleep(1)
+        dok, tok = deliver.post_chart(args.channel, png, cap, dry=args.dry)
+        print(f"  {sym}: discord={'✓' if dok else '✗'} tg={'✓' if tok else '✗'}")
+        posted += bool(dok or tok); time.sleep(0 if args.dry else 1)
     print(f"[flow-ta] {posted}/{len(top)} cards → #{args.channel}")
 
 

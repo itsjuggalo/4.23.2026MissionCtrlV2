@@ -125,7 +125,7 @@ VAULT_IDENTITY = {
     # ── reserve pool (folded in 2026-06-16; names already Mike-set, add SC avatar + bio) ──
     "telegram.jazzy_relay": dict(
         name="Jazzy Relay", avatar="dugalle",
-        short="Jazzy desk relay — reserve persona, SuperGrok wallet.",
+        short="Jazzy desk relay — reserve persona, GPT/Codex brain.",
         desc=("Jazzy Relay (reserve). Spare relay for the Jazzy desk; persona-ready. "
               "For the glory of Earth — for the United Earth Directorate.")),
     "telegram.orion_relay": dict(
