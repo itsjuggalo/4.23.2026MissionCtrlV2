@@ -144,15 +144,17 @@ def day_signals(tickers):
             last, e20 = ind["last"], ind["ema20"]
             bull = ind["macd_hist"] > 0 and last >= e20
             direction = "LONG" if bull else "SHORT"
-            # confidence: blend of trend + ADX + MACD strength → 0-100
-            conf = 0
-            conf += 30 if (last >= e20) == bull else 0
-            conf += 25 if (ind["macd_hist"] > 0) == bull else 0
-            conf += min(25, ind["adx"]) if ind["adx"] else 0
             rsi = ind["rsi"]
-            conf += 20 if (bull and 45 <= rsi <= 80) or ((not bull) and 20 <= rsi <= 55) else 0
-            conf = int(min(100, conf))
-            if conf < 55:
+            # confidence: how many of 4 lenses align, scaled by trend strength (ADX).
+            # Continuous so it spreads ~45-95 instead of saturating at 100.
+            aligned = sum([
+                (last >= e20) == bull,
+                (ind["macd_hist"] > 0) == bull,
+                (ind["plus_di"] > ind["minus_di"]) == bull,
+                (bull and 45 <= rsi <= 80) or ((not bull) and 20 <= rsi <= 55),
+            ])
+            conf = int(min(97, round((aligned / 4) * 58 + min(38, ind["adx"]))))
+            if conf < 60:
                 continue
             # edge%: recent 15-min momentum magnitude
             recent = df["Close"].astype(float)
