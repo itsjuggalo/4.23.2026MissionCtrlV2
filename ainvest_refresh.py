@@ -144,9 +144,13 @@ def build_confluence():
         if act[t]["contracts"]<2 and t not in analyst and t not in ivmap:
             continue  # too thin + no other signal
         a=activity_score(t); s=sentiment_score(t); val=value_score(t)
-        parts=[(a,0.4)]+([(s,0.3)] if s is not None else [])+([(val,0.3)] if val is not None else [])
-        w=sum(p[1] for p in parts); comp=round(sum(p[0]*p[1] for p in parts)/w,1) if w else None
-        rows.append({"ticker":t,"value":val,"sentiment":s,"activity":a,"composite":comp,
+        present=[(a,0.4)]+([(s,0.3)] if s is not None else [])+([(val,0.3)] if val is not None else [])
+        cov=len(present)  # 1-3 signals present (activity always counts)
+        w=sum(p[1] for p in present)
+        raw=sum(p[0]*p[1] for p in present)/w if w else 0
+        cov_factor=0.8+0.2*(cov-1)/2  # 1 sig→0.8x, 2→0.9x, 3→1.0x: confluence outranks lone signals
+        comp=round(raw*cov_factor,1) if w else None
+        rows.append({"ticker":t,"value":val,"sentiment":s,"activity":a,"composite":comp,"coverage":cov,
                      "_contracts":act[t]["contracts"]})
     rows.sort(key=lambda r:(r["composite"] if r["composite"] is not None else -1),reverse=True)
     rows=rows[:60]
