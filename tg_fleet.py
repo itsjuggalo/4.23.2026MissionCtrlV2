@@ -55,11 +55,12 @@ FLEET = {
     # ── infra (not chat targets) ────────────────────────────────────────────
     "hermes_relay":    dict(user="Gumroadie_bot",           avatar="dragoon",         role="infra",       src=("vault", "telegram_hermes_bot_token")),
     "openclaw_grok":   dict(user="OpenclawGrok727_Bot",     avatar="ghost",           role="infra",       src=("vault", "telegram_openclaw_bot_token")),
-    # laptop_control = the Remote-Control phone gateway bot (tg-channel). Dedicated BotFather bot;
-    # token at ~/.openclaw/secrets/telegram_phone_channel_bot_token (no-token until Mike creates it).
-    "laptop_control":  dict(user="(pending BotFather)",     avatar="battlecruiser",   role="infra",       src=("file", "telegram_phone_channel_bot_token")),
-    # ── spare ───────────────────────────────────────────────────────────────
-    "spare_backup":    dict(user="(BobaClaw)",              avatar="tassadar",        role="spare",       src=("cloud", None)),
+    # laptop_control = RESERVED slot for a Telegram-channel gateway (tg-channel). Channel deferred
+    # 2026-06-21: Mike at the 20-bot BotFather cap + phone-hub (Remote Control) already covers phone
+    # control. Activate only if a bot slot frees: free a slot → BotFather /newbot → drop the token in
+    # ~/.openclaw/secrets/telegram_phone_channel_bot_token → tg-channel. See [[reference_phone_remote_control]].
+    "laptop_control":  dict(user="(reserved — no bot; cap reached)", avatar="battlecruiser", role="infra", src=("file", "telegram_phone_channel_bot_token")),
+    # (spare_backup / @BobaClaw removed 2026-06-21 — phantom: no real BotFather bot existed; all 20 slots are live.)
     # ── reserve pool (Mike's spare bots, folded in 2026-06-16 — named + rebranded, persona-ready) ──
     "jazzy_relay":     dict(user="JazzyHazzy_Bot",          avatar="zealot",          role="spare",       src=("cloud", None)),
     "orion_relay":     dict(user="oOrionz_Bot",             avatar="kerrigan",        role="spare",       src=("cloud", None)),
