@@ -91,14 +91,12 @@ def get_spot(symbol: str) -> float:
 def post_embed(today_iso: str, picks: list, bmo_count: int, amc_count: int, total: int):
     """Post one color-coded embed per pick to Discord webhook."""
     if not picks:
-        # Send a "no large-cap earnings today" embed
-        embed = {
-            "title": f"📊 Earnings Playbook — {today_iso}",
-            "description": f"**{total}** total earnings today\n• BMO: {bmo_count}\n• AMC: {amc_count}\n\nNo large-cap names with available options data.",
-            "color": 0x95A5A6,
-        }
-        r = requests.post(WEBHOOK, json={"embeds": [embed]}, timeout=15)
-        log.info(f"posted summary-only embed: {r.status_code}")
+        # Empty day: suppress the post entirely instead of spamming a
+        # "No large-cap names with available options data" embed.
+        log.info(
+            f"no real picks (BMO: {bmo_count}, AMC: {amc_count}, total: {total}) — "
+            "suppressing empty-day post"
+        )
         return
 
     # Header embed

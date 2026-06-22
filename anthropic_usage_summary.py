@@ -108,7 +108,10 @@ def post_discord(content):
 def main():
     entries = load_today()
     if not entries:
-        post_discord(f"📊 **Anthropic Usage — {et_now().strftime('%a %b %-d')}**\nNo API calls logged today.")
+        # Boba/Jazzy run on OAuth/subscription, so 0 console-API calls is the
+        # normal/expected state — don't spam #boba-trades with a daily no-op post.
+        # Skip the empty-day notification entirely.
+        print("No API calls logged today — skipping Discord post (OAuth, 0 usage is normal).")
         return
     total, by_caller, by_model = aggregate(entries)
     summary = format_summary(total, by_caller, by_model)

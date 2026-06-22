@@ -59,8 +59,12 @@ def main():
             params={
                 "api_key": key, "file_type": "json",
                 "realtime_start": today, "realtime_end": fortnight,
-                "include_release_dates_with_no_data": "false",
-                "limit": 100, "sort_order": "asc",
+                # MUST be true: future releases have no data yet, so "false"
+                # returns an empty list -> empty calendar embed (the bug).
+                "include_release_dates_with_no_data": "true",
+                # high limit: 100 (sorted asc) only covers the first few days
+                # of daily-release noise and silently drops later events.
+                "limit": 1000, "sort_order": "asc",
             },
             timeout=12,
         )
@@ -143,6 +147,12 @@ def main():
             "value": "\n".join(f"• {n}" for n in names)[:1024],
             "inline": False,
         })
+
+    # Empty-payload guard: never post a header-only embed (the bug). If the
+    # fields list ended up empty for any reason, skip the post and log why.
+    if not fields:
+        print("[fred] no calendar fields built (empty after grouping) — skipping post")
+        return
 
     payload = {
         "embeds": [{

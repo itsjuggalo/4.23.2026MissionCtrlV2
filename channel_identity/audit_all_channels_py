@@ -32,8 +32,8 @@ def find_webhook_files():
             out.append(n)
     return sorted(out)
 
-def post_to_discord(content, webhook_name='discord_pattern_alerts_webhook'):
-    """Post audit results to a known-good webhook channel."""
+def post_to_discord(content, webhook_name='discord_ops_webhook'):
+    """Post audit results to the OPS/diagnostics channel (not content channels)."""
     p = SECRETS / webhook_name
     if not p.exists():
         return

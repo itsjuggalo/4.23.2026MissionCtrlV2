@@ -36,19 +36,20 @@ LOG_FILE = Path("/home/ubuntu/.openclaw/data/logs/daemon_health.jsonl")
 LOG_FILE.parent.mkdir(parents=True, exist_ok=True)
 STATE_FILE = STATE_DIR / "daemon_health.json"
 
-PM2 = "/home/ubuntu/.npm-global/bin/pm2"
+PM2 = "/home/itsju/.nvm/versions/node/v22.22.3/bin/pm2"
 
 REQUIRED_DAEMONS = [
     "firebase-signal-relay",
-    "notification-bridge",
-    "option-signals-scraper",
-    "stock-auto-trader",
+    "option-signals",  # was "option-signals-scraper" (renamed on the laptop hub)
     "profit-lock-boba",
     "profit-lock-jazzy",
     "trail-daemon",
     "crypto-profit-lock-boba",
     "crypto-profit-lock-jazzy",
 ]
+# Removed retired entries that no longer run on the laptop hub (were spamming false
+# "PM2 missing" alerts): "notification-bridge" (decommissioned) and
+# "stock-auto-trader" (deliberately stopped in the Alpaca execution overhaul).
 # Boba/Jazzy decision cycles are cron-restart processes — they're "stopped" most of
 # the time between scheduled firings. We don't require them to be `online`.
 

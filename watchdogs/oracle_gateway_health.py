@@ -73,7 +73,27 @@ def check_pm2_mission_control() -> tuple[bool, str]:
     except Exception as e:
         return False, str(e)
 
+def on_oracle_vm() -> bool:
+    """True only when running ON the Oracle/OpenClaw VM this watchdog was built for.
+
+    Doctrine (2026-06): Oracle/OpenClaw is RETIRED — the laptop is the hub. This
+    watchdog probes Oracle-only infra (169.254.169.254 instance metadata + the
+    /home/ubuntu pm2 path), so on the laptop every probe fails and it spams 100%
+    failures every 15 min, burying the DNS-renewal reminders that share this
+    webhook. Guard: only run the checks when we're actually on the Oracle box.
+    Detected by the Oracle-specific pm2 binary path under /home/ubuntu, which does
+    not exist on the laptop. No-op (silent) everywhere else.
+    """
+    return Path("/home/ubuntu/.npm-global/bin/pm2").exists()
+
+
 def main():
+    # Retired-infra guard — see on_oracle_vm(). On any non-Oracle host (the laptop
+    # hub), do nothing so we never post failures for deliberately-off Oracle infra.
+    if not on_oracle_vm():
+        print("SKIP: not on Oracle VM (retired infra) — no-op")
+        return
+
     internet_ok, ip_or_err = check_outbound_internet()
     oracle_ok, oracle_info = check_oracle_metadata()
     pm2_ok, pm2_status = check_pm2_mission_control()

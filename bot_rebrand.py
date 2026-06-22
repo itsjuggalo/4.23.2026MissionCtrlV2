@@ -32,10 +32,10 @@ IDENTITY = {
               "generated images. Ask 'is everything healthy?', 'pm2 status', 'why is X down?'. "
               "Read-only diagnostics. Power overwhelming.")),
     "lifeclaw_telegram_bot_token": dict(
-        name="Life & Wellness", avatar="arbiter",
+        name="Life & Wellness", avatar="raszagal",
         short="Your life compass — calendar, inbox, todos, weather. Zero trading.",
         desc=("Life & wellness assistant. Calendar, inbox, to-dos, weather, gentle nudges. "
-              "/brief /today /todo. Talk to me like a friend, not a terminal. My life for Aiur.")),
+              "/brief /today /todo. Talk to me like a friend, not a terminal. We embrace the shadows.")),
     "telegram_antigravity_bot_token": dict(
         name="AIME Research", avatar="zeratul",
         short="Seer of markets — AIME intel + research copilot.",
@@ -49,11 +49,11 @@ IDENTITY = {
               "shocks — straight to your phone. Pull the board with /winners /sweeps from the "
               "Trading Command bot. Paper-safe, edge-first. We will consume them.")),
     "telegram_grok_bot_token": dict(
-        name="X-Sentiment", avatar="mutalisk",
-        short="Swarm scout of X/Twitter — live trader chatter on any ticker.",
+        name="X-Sentiment", avatar="nova",
+        short="Ghost recon on X/Twitter — live trader chatter on any ticker.",
         desc=("X-sentiment scout (Grok on your subscription). Text me a ticker → live "
               "bullish/bearish X/Twitter chatter + catalysts in the last 24h. e.g. 'NVDA'. "
-              "The Swarm sees all.")),
+              "Target acquired.")),
     "telegram_jazzyhazzy_bot_token": dict(
         name="Jazzy Desk", avatar="duke",
         short="General of the Jazzy account — positions, sizing, decisions (paper).",
@@ -67,17 +67,17 @@ IDENTITY = {
               "($800 risk cap), correlation, drawdown, hedges. Ask 'how much should I size "
               "NVDA?', 'am I over-exposed?'. The Conclave is watching.")),
     "telegram_orion_bot_token": dict(
-        name="Research Desk", avatar="high_templar",
+        name="Research Desk", avatar="tassadar",
         short="Psionic deep-dive — fundamental research on any name.",
         desc=("Research desk. Deep fundamental dives: business, financials, catalysts, valuation, "
               "the bull and bear case. Ask 'deep research on PLTR'. Slower, thorough. "
-              "My thoughts are clear.")),
+              "I have sacrificed too much to fail now.")),
     "telegram_deepseek_bot_token": dict(
-        name="Screener", avatar="wraith",
-        short="Recon flyer — finds & ranks names: movers, oversold, unusual volume.",
+        name="Screener", avatar="fenix_p",
+        short="Praetor's recon — finds & ranks names: movers, oversold, unusual volume.",
         desc=("Screener. Find and rank tickers on demand: top movers, oversold large-caps, "
               "unusual options volume, insider buying. Ask 'screen oversold large caps', "
-              "'top movers today'. Cloaked and scanning.")),
+              "'top movers today'. I fear no enemy — the Khala is my strength.")),
     "telegram_mc_skill_bot_token": dict(
         name="Macro & Regime", avatar="mengsk",
         short="The Emperor's view — Fed, rates, regime, SPY/QQQ levels, politics.",
@@ -97,15 +97,15 @@ VAULT_IDENTITY = {
               "from the scraper. Pull more with /winners /sweeps from the Trading Command bot. "
               "The Swarm feeds.")),
     "telegram_hermes_bot_token": dict(
-        name="Hermes Relay", avatar="dragoon",
+        name="Hermes Relay", avatar="stukov",
         short="Hermes LLM router — message bus on the subscription wallet.",
         desc=("Hermes relay. Routes LLM traffic for the agent fleet on the subscription wallet. "
-              "Infra relay — not a chat target. en taro Adun.")),
+              "Infra relay — not a chat target. I will not fail you.")),
     "telegram_openclaw_bot_token": dict(
-        name="OpenClaw Grok", avatar="ghost",
+        name="OpenClaw Grok", avatar="duran",
         short="OpenClaw's Grok/X relay — X-native intel from the Oracle box.",
         desc=("OpenClaw Grok relay. Grok / X-native intel from the openclaw (Oracle) box. "
-              "Infra relay. We move unseen.")),
+              "Infra relay. Trust me — I know what I'm doing.")),
     # ── cloud bots folded into the fleet (new tg_fleet keys: telegram.<function>) ──────
     "telegram.daily_briefs": dict(
         name="Daily Briefs", avatar="battlecruiser",
@@ -118,30 +118,31 @@ VAULT_IDENTITY = {
         desc=("Media & gens (push). AI image/video generations, kept off the trading chats. "
               "Rock and roll — creative output only.")),
     "telegram.spare_backup": dict(
-        name="Spare Backup", avatar="tassadar",
+        name="Spare Backup", avatar="sentinel",
         short="Spare relay — reserved capacity for the fleet.",
         desc=("Spare backup (push). Reserved fleet relay held for overflow / failover routing. "
               "I stand ready.")),
     # ── reserve pool (folded in 2026-06-16; names already Mike-set, add SC avatar + bio) ──
     "telegram.jazzy_relay": dict(
-        name="Jazzy Relay", avatar="zealot",
+        name="Jazzy Relay", avatar="dugalle",
         short="Jazzy desk relay — reserve persona, SuperGrok wallet.",
-        desc=("Jazzy Relay (reserve). Spare relay for the Jazzy desk; persona-ready. My life for Aiur.")),
+        desc=("Jazzy Relay (reserve). Spare relay for the Jazzy desk; persona-ready. "
+              "For the glory of Earth — for the United Earth Directorate.")),
     "telegram.orion_relay": dict(
-        name="Orion Relay", avatar="kerrigan",
+        name="Orion Relay", avatar="artanis",
         short="Orion research relay — reserve autoresearch persona.",
         desc=("Orion Relay (reserve). Spare relay for Orion autoresearch / decisions; persona-ready. "
-              "We will rule this sector — or see it burned to ash.")),
+              "En Taro Tassadar. There is much to learn.")),
     "telegram.grok_scout": dict(
-        name="Grok Scout", avatar="goliath",
+        name="Grok Scout", avatar="dark_archon",
         short="Grok / X scout — reserve X-native intel persona.",
         desc=("Grok Scout (reserve). Spare relay for Grok / X-native scouting; persona-ready. "
-              "Goliath online.")),
+              "Power overwhelming.")),
     "telegram.trend_scanner": dict(
-        name="Trend Scanner", avatar="firebat",
+        name="Trend Scanner", avatar="overmind",
         short="Trend & movers scanner — reserve screening persona.",
         desc=("Trend Scanner (reserve). Spare relay for trend & movers screening; persona-ready. "
-              "Fire it up.")),
+              "I am the Swarm.")),
 }
 
 
