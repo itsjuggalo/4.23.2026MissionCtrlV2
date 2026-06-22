@@ -322,6 +322,21 @@ def render(hist: dict, sources: dict, total: float, missing: list,
         pad = max((hi - lo) * 0.12, hi * 0.06, 200.0)
         ax.set_ylim(max(0.0, lo - pad), hi + pad)
 
+    # frame the x-axis: with few snapshots auto-range spans years of empty ticks —
+    # pin to a tidy window centered on the data instead.
+    if snaps:
+        d0, d1 = sdates[0], sdates[-1]
+        span_days = max((d1 - d0).days, 1)
+        if span_days < 14:
+            mid = d0 + (d1 - d0) / 2
+            ax.set_xlim(mid - dt.timedelta(days=7), mid + dt.timedelta(days=7))
+        else:
+            ax.set_xlim(d0 - dt.timedelta(days=1), d1 + dt.timedelta(days=1))
+        # adapt tick density to the visible span
+        lo_x, hi_x = ax.get_xlim()
+        vis = mdates.num2date(hi_x) - mdates.num2date(lo_x)
+        ax.xaxis.set_major_locator(mdates.DayLocator(interval=max(1, vis.days // 8)))
+
     ax.set_title(f"NET WORTH  —  ${total:,.0f}   ({dt.date.today():%b %d, %Y})",
                  color="#e6edf3", fontsize=15, fontweight="bold", pad=14)
     ax.grid(True, color=GRID, lw=0.6, alpha=0.8)
