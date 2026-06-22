@@ -21,7 +21,7 @@ REPO_DATA = Path("/AIWorkWSL/web/missionctrl/data")
 THEMES_OUT = REPO_DATA / "ainvest-themes.json"
 OPTIONS_OUT = REPO_DATA / "ainvest-options.json"
 SCRAPE_CACHE = Path.home() / "scrapes" / "ainvest.com" / "screener-baskets.json"
-TOP_N_CONSTITUENTS = 30
+TOP_N_CONSTITUENTS = 80
 
 CATEGORIES = [
  "thematic-sector-rotation","congress-trading","swing-trading","technical-patterns",
@@ -44,7 +44,9 @@ def ev(js, timeout=40):
         print(f"  eval err: {e}", file=sys.stderr); return None
 
 def opentab(url):
-    subprocess.run([OPENCLI,"browser",S,"tab","new",url],capture_output=True,text=True,timeout=50)
+    # navigate the SINGLE bound session tab in place (NOT `tab new` — that spawned
+    # one tab per basket, 80+ tabs). `open` reuses the existing tab.
+    subprocess.run([OPENCLI,"browser",S,"open",url],capture_output=True,text=True,timeout=50)
     time.sleep(4.5)
 
 def clean_tickers(syms, cap):
@@ -55,6 +57,20 @@ def clean_tickers(syms, cap):
         if s not in out:
             out.append(s)
     return out[:cap or 50]
+
+# pull constituent tickers from the real DOM ticker-cells (not innerText regex),
+# scrolling to load virtualized rows. Far cleaner than the old /\b[A-Z]{1,5}\b/ scan
+# (which swept up TTM/GTM/R&D noise). Selector verified live on ainvest screener baskets.
+_PULL = ("JSON.stringify([...new Set([...document.querySelectorAll('[class*=ticker],[class*=Ticker]')]"
+         ".map(e=>(e.innerText||'').trim()).filter(t=>/^[A-Z]{1,6}(\\.[A-Z])?$/.test(t)))])")
+def basket_tickers(url, cap):
+    opentab(url)
+    syms=set(ev(_PULL) or [])
+    for _ in range(3):                      # scroll to pull virtualized rows
+        ev("(()=>{window.scrollBy(0,1600);return 1})()", timeout=15)
+        time.sleep(1.4)
+        syms.update(ev(_PULL) or [])
+    return clean_tickers(sorted(syms), cap)
 
 # ── themes: harvest baskets via the logged-in bridge ───────────────────────
 def harvest_baskets():
@@ -79,9 +95,7 @@ def harvest_baskets():
     uniq={b["slug"]:b for b in baskets}; baskets=list(uniq.values())
     ranked=sorted([b for b in baskets if b["ret_3mo"] is not None],key=lambda b:abs(b["ret_3mo"]),reverse=True)[:TOP_N_CONSTITUENTS]
     for b in ranked:
-        opentab(b["url"])
-        syms=ev("JSON.stringify([...new Set((document.body.innerText.match(/\\b[A-Z]{1,5}\\b/g)||[]))])")
-        b["constituents"]=clean_tickers(syms,b.get("count"))
+        b["constituents"]=basket_tickers(b["url"], b.get("count"))
         print(f"[tickers] {b['slug']}: {len(b['constituents'])}")
     SCRAPE_CACHE.write_text(json.dumps({"source":"ainvest.com/screener","baskets":baskets},indent=1))
     return baskets
