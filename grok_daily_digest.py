@@ -97,6 +97,37 @@ def send_telegram(text: str) -> bool:
         print(f"Telegram send failed: {e}", file=sys.stderr)
         return False
 
+def _warm_oauth_token():
+    """Self-heal the xAI OAuth token. Hermes auto-refreshes it only when IT routes a call;
+    this digest hits api.x.ai directly, so a long-idle token goes 403 ('could not be
+    validated'). Probe it; if it's an auth failure, route one tiny call through Hermes —
+    that uses the refresh_token and persists a fresh access_token to ~/.hermes/auth.json,
+    which lib/x_search.oauth_token() then reads live. Idempotent; only acts when stale."""
+    import subprocess, urllib.error
+    tok = xai_oauth_token()
+    if tok:
+        try:
+            req = urllib.request.Request(
+                "https://api.x.ai/v1/responses", method="POST",
+                data=json.dumps({"model": "grok-3", "input": "hi"}).encode(),
+                headers={"Authorization": "Bearer " + tok, "Content-Type": "application/json"})
+            urllib.request.urlopen(req, timeout=20).read()
+            return  # token valid — nothing to do
+        except urllib.error.HTTPError as e:
+            if e.code not in (401, 403):
+                return  # not a credential problem
+        except Exception:
+            return  # network blip — let the real call handle it
+    try:
+        subprocess.run(
+            [str(Path.home() / ".venv/bin/hermes"), "-m", "grok-3", "--provider",
+             "xai-oauth", "--ignore-rules", "-t", "", "-z", "Reply with exactly: ok"],
+            capture_output=True, text=True, timeout=90)
+        print("[grok-digest] xai-oauth token was stale → refreshed via Hermes", file=sys.stderr)
+    except Exception as e:
+        print(f"[grok-digest] token warm failed (will try anyway): {e}", file=sys.stderr)
+
+
 def main():
     if not XAI_TOKEN:
         print("ERROR: no xai OAuth token or api key found", file=sys.stderr)
@@ -105,6 +136,7 @@ def main():
         print("ERROR: Telegram credentials missing", file=sys.stderr)
         sys.exit(1)
 
+    _warm_oauth_token()   # ensure the OAuth token is fresh before the direct x_search calls
     now = et_now()
     date_str = now.strftime("%a %b %d, %Y %I:%M %p ET")
 

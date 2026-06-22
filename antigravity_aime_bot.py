@@ -236,6 +236,24 @@ def main():
                 key  = str(chat_id)
                 is_owner = key in OWNER_CHATS
 
+                # /help · /start — menu (so the bot is never a dead-end on those).
+                # Must come BEFORE the `startswith("/") : continue` slash-drop below.
+                if text.split()[0].split("@")[0].lower() in ("/help", "/start"):
+                    base = ("🛰️ AIME Research — your AInvest/AIME research copilot.\n"
+                            "Just text me a ticker or a question and I'll answer:\n"
+                            "• what's the read on NVDA   • screen oversold large caps\n"
+                            "• earnings outlook AAPL     • news on TSLA\n"
+                            "📷 Send an option-chain screenshot → I decipher the best contract.")
+                    if is_owner:
+                        base += ("\n\n/ainvest <q> — one-shot local copilot\n"
+                                 "/agent <name> — pin a specialist ("
+                                 + ", ".join(sorted(set(PIN_AGENTS)))
+                                 + "); /exit to unpin\n"
+                                 "/guest [24h] [name] — temp dashboard access")
+                    base += "\n/help — this menu.  I have seen the future."
+                    send_reply(chat_id, base)
+                    continue
+
                 # /guest [duration] [name] — give someone temp dashboard access (owner only).
                 # Same handler on every bot so it works whichever one Mike opens.
                 if text.startswith("/guest"):
