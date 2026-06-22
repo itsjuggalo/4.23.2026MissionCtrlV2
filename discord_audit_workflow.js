@@ -4,8 +4,12 @@ export const meta = {
   phases: [{ title: 'Judge' }],
 }
 
-// args = the batch index: [{ batch, file, count, names:[...] }, ...]
-const batches = args
+// 12 deterministic batch files; each agent reads its own file (no args needed).
+const DIR = '/home/itsju/.openclaw/workspace/state/audit_batches'
+const batches = Array.from({ length: 12 }, (_, i) => ({
+  batch: i,
+  file: `${DIR}/batch_${String(i).padStart(2, '0')}.json`,
+}))
 
 const SCHEMA = {
   type: 'object',
@@ -39,13 +43,12 @@ Today's date is 2026-06-21 (ET). The trading week: last market day before today 
 
 STEP 1 — Read this self-contained data file (it has the last ~12 messages + feeder info per channel):
   ${b.file}
-It also lists pm2_online (which feeder daemons are running). Do NOT call the Discord API — all data is in the file.
+It also lists pm2_online (which feeder daemons are running). The file's "channels" array holds every
+channel you must judge in this batch (analyze ALL of them — typically 11). Do NOT call the Discord API.
 
 STEP 2 — For richer judgment you MAY grep/read the feeder scripts referenced under each channel's
 "feeder.id_refs" / "feeder.cron_lines" (e.g. in ~/scripts, ~/05_AUTOMATION/scripts, ~/firebase-signals)
 to see if the feed is healthy or erroring. Keep it light. Never edit anything.
-
-CHANNELS IN THIS BATCH: ${b.names.join(', ')}
 
 CLASSIFY each with this rubric:
 - CURRENT  — real (non-"Spacer") content within ~3 trading days AND a live feeder.

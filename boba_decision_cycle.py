@@ -2227,6 +2227,22 @@ def main():
         print("Killswitch active — aborting")
         return 1
 
+    # Circuit-breaker rail (quartet) — INERT unless env CIRCUIT_BREAKERS=1; fail-OPEN so a guard
+    # bug can never block a cycle. Adds max-turns/day + max-wall-hours/day on top of the killswitch
+    # stop-file above. Arm with: CIRCUIT_BREAKERS=1 in the cron line.
+    try:
+        sys.path.insert(0, "/home/itsju/scripts/lib")
+        from circuit_breaker import CircuitBreaker
+        _cb = CircuitBreaker("boba_cycle", max_turns=12, max_hours=14, stop_file=str(KILLSWITCH),
+                             enabled=(os.getenv("CIRCUIT_BREAKERS") == "1"))
+        _ok, _why = _cb.check(auto_turn=True)
+        if not _ok and not args.force:
+            log_to_ops("boba_cycle", "WARN", f"circuit-breaker halt: {_why}")
+            print(f"circuit-breaker halt: {_why}")
+            return 0
+    except Exception:
+        pass  # fail-open: breaker problems never stop the cycle
+
     log_to_ops("boba_cycle", "INFO", "Cycle start")
 
     # 1. Load today's fresh whale signals
