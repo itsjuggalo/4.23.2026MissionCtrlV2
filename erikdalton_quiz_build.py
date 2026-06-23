@@ -54,16 +54,23 @@ def _vision_classify(still_path: Path, title: str, region: str, transcript: str)
     try:
         import urllib.request
         b64 = base64.b64encode(still_path.read_bytes()).decode()
+        # Canonical region keys — the quiz answers/filters key off these EXACTLY.
+        regions = ("head/face, jaw/TMJ, neck, shoulder, arm, elbow, wrist/hand, thoracic/ribs, "
+                   "spine/general, core/abdomen, low back, pelvis/SI, hip/glutes, knee, foot/ankle")
         prompt = (
             "This is a still from an Erik Dalton manual-therapy (massage/bodywork) instructional "
             "DVD. Decide if it CLEARLY shows a hands-on technique being performed on a person "
             "(therapist's hands in contact, recognizable body region). Reject talking-head, title "
             "cards, slides, wide empty rooms, or ambiguous frames.\n"
             f"Lesson title (may include a chapter number — IGNORE the number): {title!r}\n"
-            f"Body region tag: {region!r}\n"
             f"Transcript near this moment: {transcript[:600]!r}\n\n"
+            "ALSO identify the BODY REGION actually being worked ON THE CLIENT — judge from the "
+            "IMAGE (where the hands contact / which joint moves), using the lesson title to "
+            f"disambiguate. A leg lifted to mobilize the hip = hip/glutes, not knee. The keyword "
+            f"tag {region!r} is only a weak hint — trust what you see. Pick ONE key VERBATIM from: {regions}.\n\n"
             "Reply with ONLY compact JSON: {\"keep\": true|false, \"technique\": \"<clean technique "
-            "name, NO leading number, <=6 words>\", \"caption\": \"<one short sentence on what's "
+            "name, NO leading number, <=6 words>\", \"region\": \"<one key from the list>\", "
+            "\"region_confidence\": <0.0-1.0>, \"caption\": \"<one short sentence on what's "
             "shown / the cue>\", \"difficulty\": \"easy|medium|hard\"}"
         )
         body = {
@@ -243,16 +250,28 @@ def main() -> int:
                 continue  # already in bank (resume-safe, no dup)
             if not out.exists() and not _cut_clip(src, fr.get("t_mid", fr.get("t_start", 0)), out):
                 print("  clip cut failed"); continue
+            # Region from VISION (the keyword tag was historically ~24% wrong); fall
+            # back to the keyword tag only if vision didn't return a valid key.
+            VALID_REGIONS = {"head/face","jaw/TMJ","neck","shoulder","arm","elbow","wrist/hand",
+                             "thoracic/ribs","spine/general","core/abdomen","low back","pelvis/SI",
+                             "hip/glutes","knee","foot/ankle"}
+            vregion = (verdict.get("region") or "").strip()
+            final_region = vregion if vregion in VALID_REGIONS else region
+            try:
+                rconf = round(float(verdict.get("region_confidence", 0.6)), 2)
+            except (TypeError, ValueError):
+                rconf = 0.6
             bank.append({
                 "clip": str(out), "still": str(still),
                 "technique": (verdict.get("technique") or title).strip(),
-                "region": region, "caption": (verdict.get("caption") or "").strip(),
+                "region": final_region, "regionConfidence": rconf,
+                "caption": (verdict.get("caption") or "").strip(),
                 "difficulty": (verdict.get("difficulty") or "medium").strip(),
                 "lesson": title, "course": d.get("course", ""),
             })
             kept += 1
             BANK.write_text(json.dumps(bank, indent=1))  # incremental save
-            print(f"  KEEP: {verdict.get('technique')} [{region}] (bank={len(bank)})")
+            print(f"  KEEP: {verdict.get('technique')} [{final_region} {rconf}] (bank={len(bank)})")
         if not args.dry:
             processed.add(vid)
             PROCESSED.write_text(json.dumps(sorted(processed)))

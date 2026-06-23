@@ -119,10 +119,14 @@ def main() -> int:
     total = len(bank)
     n_ok = total - len(fails)
     n_voice = sum(1 for r in rows if r[4] == "voice")
+    confs = [e.get("regionConfidence") for e in bank if isinstance(e.get("regionConfidence"), (int, float))]
     print("\n── Erik quiz QA ───────────────────────────────")
     print(f"entries:        {total}")
     print(f"OK:             {n_ok}")
     print(f"with voice:     {n_voice}/{total}")
+    if confs:
+        hi = sum(1 for c in confs if c >= 0.6)
+        print(f"regionConf:     {len(confs)}/{total} scored · {hi} ≥0.6 · avg {sum(confs)/len(confs):.2f} · min {min(confs):.2f}")
     print(f"failures:       {len(fails)}")
     if fails:
         print("\nfirst failures:")
