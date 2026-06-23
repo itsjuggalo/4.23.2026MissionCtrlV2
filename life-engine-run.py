@@ -509,6 +509,28 @@ def get_gmail(account='', hours=168):
             coupons.append(e)
     return _dedup_by_sender(important)[:8], _dedup_by_sender(bills)[:5], _dedup_by_sender(coupons)[:3]
 
+def _gmail_accounts():
+    """Account slots LifeClaw scans — from config 'gmail_accounts' (default: primary + personal).
+    '' = primary (token.json), 'personal' = token_personal.json. Add a 3rd slot:
+      1) gmail.py --account <name> auth   (interactive OAuth, mints token_<name>.json)
+      2) add '<name>' to ~/.lifeclaw/config.json -> gmail_accounts
+    No code edit needed — Gmail AND calendar then cover it everywhere."""
+    try:
+        accts = json.load(open(CONFIG_FILE)).get('gmail_accounts')
+        if isinstance(accts, list) and accts:
+            return accts
+    except Exception:
+        pass
+    return ['', 'personal']
+
+def get_gmail_all(hours):
+    """Aggregate important / bills / coupons across every configured Gmail account."""
+    imp, bills, coup = [], [], []
+    for acct in _gmail_accounts():
+        i, b, c = get_gmail(acct, hours=hours)
+        imp += i; bills += b; coup += c
+    return imp, bills, coup
+
 def get_calendar(account='', days=2):
     flag = f'--account {account}' if account else ''
     raw = run(f'CLAUDECLAW_DIR={CLAUDECLAW_DIR} {PYTHON} {GCAL} {flag} list --days {days}', timeout=20)
@@ -525,7 +547,9 @@ def get_calendar(account='', days=2):
         return []
 
 def _calendar_merged(days=2):
-    events = get_calendar('', days) + get_calendar('personal', days)
+    events = []
+    for acct in _gmail_accounts():
+        events += get_calendar(acct, days)
     seen, out = set(), []
     for e in sorted(events, key=lambda x: x['start']):
         key = (e['summary'], e['start'][:16])
@@ -654,11 +678,9 @@ def gather_context(brief_type, now, persist):
     if brief_type == 'morning_brief':
         ctx['calendar'] = _calendar_merged(2)
         ctx['cal_conflicts'], ctx['cal_prep'] = cal_smarts(ctx['calendar'], now)
-        i1, _, c1 = get_gmail('',         hours=168)
-        i2, _, c2 = get_gmail('personal', hours=168)
-        important = i1 + i2
+        important, _, coupons = get_gmail_all(168)
         ctx['alerts'] = filter_new(important, 'email', now, persist, _email_key)
-        ctx['deals']  = (c1 + c2)[:3]
+        ctx['deals']  = coupons[:3]
         ctx['bills']  = get_bills(now, important, persist)
         ctx['weather'] = get_weather(cfg)
         ctx['todos']  = get_todos(cfg)
@@ -666,9 +688,8 @@ def gather_context(brief_type, now, persist):
         ctx['debt_report'] = get_debt_report()
 
     elif brief_type == 'midday_checkin':
-        i1, _, _ = get_gmail('',         hours=6)
-        i2, _, _ = get_gmail('personal', hours=6)
-        ctx['alerts'] = filter_new(i1 + i2, 'email', now, persist, _email_key)
+        important, _, _ = get_gmail_all(6)
+        ctx['alerts'] = filter_new(important, 'email', now, persist, _email_key)
         ctx['calendar'] = get_calendar('', 1)
         ctx['cal_conflicts'], ctx['cal_prep'] = cal_smarts(ctx['calendar'], now)
 
@@ -676,19 +697,15 @@ def gather_context(brief_type, now, persist):
         # forward-looking: tomorrow's plan + anything needing action tonight
         ctx['calendar'] = _calendar_merged(2)
         ctx['cal_conflicts'], ctx['cal_prep'] = cal_smarts(ctx['calendar'], now)
-        i1, _, _ = get_gmail('',         hours=12)
-        i2, _, _ = get_gmail('personal', hours=12)
-        important = i1 + i2
+        important, _, _ = get_gmail_all(12)
         ctx['alerts'] = filter_new(important, 'email', now, persist, _email_key)
         ctx['bills']  = get_bills(now, important, persist)
         ctx['debt_report'] = get_debt_report()
 
     else:  # nightly_wrap
-        i1, _, c1 = get_gmail('',         hours=168)
-        i2, _, c2 = get_gmail('personal', hours=168)
-        important = i1 + i2
+        important, _, coupons = get_gmail_all(168)
         ctx['alerts'] = filter_new(important, 'email', now, persist, _email_key)
-        ctx['deals']  = (c1 + c2)[:3]
+        ctx['deals']  = coupons[:3]
         ctx['bills']  = get_bills(now, important, persist)
         ctx['calendar'] = _calendar_merged(2)
         ctx['weather'] = get_weather(cfg)
