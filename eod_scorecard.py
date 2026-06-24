@@ -225,7 +225,7 @@ def main():
     _post_scorecard_card(graded, total_val, total_pl)   # visual scorecard card
     _post_grade_action_cards(graded)   # best + worst pick → tap-to-act cards
     beat("eod_scorecard")
-    used = tg_brief(msg)
+    used = tg_brief(msg, chain=("flow_digest", "daily_briefs"))  # 2026-06-24: EOD Scorecard → flow_digest (fallback SpaceCoast)
     print(f"[eod-scorecard] posted; book ${total_val:,.0f} day ${total_pl:+,.0f} picks={len(graded)} · tg→{used or 'skip'}", flush=True)
 
 

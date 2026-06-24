@@ -73,6 +73,14 @@ BOTS = {
             "bearish lean + any catalyst. 4 lines max, plain text, Eastern Time. Mike has ADD "
             "— be tight."
         ),
+        "help": (
+            "𝕏 X-Sentiment — live X/Twitter trader mood (Grok).\n"
+            "Just type a ticker or topic → I scan the last 24h:\n"
+            "• NVDA          • spy 0dte today\n"
+            "→ bull vs bear lean + any catalyst, 4 lines.\n"
+            "Or /x [TKR] explicitly · ask anything / run any /skill.\n"
+            "/help = this."
+        ),
     },
     "jazzy": {
         "token": "telegram_jazzyhazzy_bot_token",         # @JazzyHazzyClaw_Bot → Jazzy Desk
@@ -84,6 +92,13 @@ BOTS = {
             "'jazzy', keys in ~/.openclaw/secrets/alpaca-jazzy-*). Report positions, P&L, and "
             "size trades as a fraction of CURRENT jazzy equity ($800 risk cap). READ-ONLY — "
             "never place trades. Eastern Time, short plain-text."
+        ),
+        "help": (
+            "🎷 Jazzy Desk — your Alpaca PAPER 'jazzy' account (read-only).\n"
+            "• positions / P&L      • /book — open positions\n"
+            "• size a trade vs CURRENT jazzy equity ($800 cap)\n"
+            "Never places trades. Ask anything / run any /skill.\n"
+            "/help = this."
         ),
     },
     "risk": {
@@ -97,6 +112,14 @@ BOTS = {
             "trade), correlation/concentration, drawdown, and hedges. Be the voice that protects "
             "capital. Never place trades. Eastern Time, short plain-text."
         ),
+        "help": (
+            "🛡️ Risk & Hedge — capital-protection desk (Bridgewater DNA).\n"
+            "For any trade or position I size up:\n"
+            "• max loss · size vs CURRENT equity ($800 cap)\n"
+            "• correlation / concentration · drawdown · hedges\n"
+            "Never places trades. Ask anything / run any /skill.\n"
+            "/help = this."
+        ),
     },
     "research": {
         "token": "telegram_orion_bot_token",              # @ResearchDaMoney_Bot → Research Desk
@@ -107,6 +130,14 @@ BOTS = {
             "You are Research Desk — deep fundamental research on any ticker: business model, "
             "financials, catalysts, valuation, the bull vs bear case, key risks. Thorough but "
             "skimmable; end with a one-line take. Eastern Time, plain-text."
+        ),
+        "help": (
+            "🔬 Research Desk — fundamentals + IV & structure.\n"
+            "• deep ticker research (bull/bear · catalysts · valuation)\n"
+            "• IV rich/cheap · straddle & structure reads\n"
+            "• /greeks [TKR] · /explain\n"
+            "📲 Auto-push: SPY Straddle Lab lands here each morning.\n"
+            "Ask anything / run any /skill. /help = this."
         ),
     },
     "screener": {
@@ -119,6 +150,13 @@ BOTS = {
             "large-caps, unusual options volume, momentum, insider buying. Return a tight ranked "
             "list (ticker — one-line why), 5-8 names. Eastern Time, plain-text."
         ),
+        "help": (
+            "📡 Screener — find & rank names on demand.\n"
+            "• top movers · oversold large-caps\n"
+            "• unusual options volume · momentum · insider buys\n"
+            "→ tight ranked list (ticker — why).\n"
+            "Ask anything / run any /skill. /help = this."
+        ),
     },
     "macro": {
         "token": "telegram_mc_skill_bot_token",           # @MMCTRL727_Bot → Macro & Regime
@@ -129,6 +167,13 @@ BOTS = {
             "You are Macro & Regime — top-down market read: risk-on/off regime, Fed/rates, key "
             "SPY/QQQ levels, sector rotation, and how today's politics/news hits Mike's book. "
             "Lead with the regime verdict. Eastern Time, short plain-text."
+        ),
+        "help": (
+            "🌐 Macro & Regime — top-down market read.\n"
+            "• risk-on/off regime verdict · VIX\n"
+            "• Fed / rates · key SPY/QQQ levels · sector rotation\n"
+            "📲 Auto-push: the daily Morning Brief lands here (~9am ET).\n"
+            "Ask anything / run any /skill. /help = this."
         ),
     },
     # ── reserve pool → distinct-LLM personas (provider diversity across the fleet) ─
@@ -146,6 +191,13 @@ BOTS = {
             "read: thesis, the key risk, and a clear lean. Size ideas as a fraction of CURRENT "
             "equity, $800 risk cap. Never place trades. Eastern Time, short plain-text for Telegram."
         ),
+        "help": (
+            "🤝 Jazzy Relay — GPT 2nd-opinion analyst (OpenAI brain).\n"
+            "An independent cross-check to the Claude desks:\n"
+            "• my own read on any ticker/trade: thesis · key risk · lean\n"
+            "Provider diversity. Never places trades.\n"
+            "Ask anything. /help = this."
+        ),
     },
     "orionrelay": {
         "fleet_fn": "orion_relay",                         # vault → @oOrionz_Bot
@@ -157,6 +209,13 @@ BOTS = {
             "reads alongside the GPT (Jazzy Relay) and Grok (Grok Scout) desks. For any ticker or "
             "question give a structured read: the setup, catalysts, bull vs bear, and a decisive take. "
             "Never place trades. Eastern Time, short plain-text for Telegram."
+        ),
+        "help": (
+            "🛰️ Orion Relay — structured research/decision desk (Claude brain).\n"
+            "For any ticker or question:\n"
+            "• the setup · catalysts · bull vs bear · decisive take\n"
+            "Runs alongside the GPT + Grok desks. Never places trades.\n"
+            "Ask anything. /help = this."
         ),
     },
     "grokscout": {
@@ -170,6 +229,12 @@ BOTS = {
             "ticker or topic surface what X is saying right now: notable posts, the bull/bear lean, "
             "and any fresh catalyst. 4-5 lines max, plain text, Eastern Time. Mike has ADD."
         ),
+        "help": (
+            "🛰️ Grok Scout — live X/Twitter scout (SuperGrok).\n"
+            "Type a ticker or topic → what X is saying right now:\n"
+            "• notable posts · bull/bear lean · fresh catalyst\n"
+            "Or /x [TKR]. Ask anything. /help = this."
+        ),
     },
     "trendscanner": {
         "fleet_fn": "trend_scanner",                       # vault → @Deepseeker_Bot
@@ -180,6 +245,12 @@ BOTS = {
             "You are Trend Scanner — a GPT-powered momentum/trend scanner. Find and rank names "
             "by momentum, breakouts, relative strength, and unusual volume; return a tight ranked "
             "list (ticker — one-line why), 5-8 names. Eastern Time, plain-text."
+        ),
+        "help": (
+            "📈 Trend Scanner — momentum/breakout scanner (GPT brain).\n"
+            "• rank names by momentum · breakouts · rel-strength · unusual vol\n"
+            "→ tight ranked list (ticker — why).\n"
+            "Ask anything. /help = this."
         ),
     },
 }

@@ -462,7 +462,7 @@ def main():
     _post_action_cards(ACTIONABLE_PICKS)  # button-bearing cards for the top 3 picks (SynthControl)
     _post_pick_threads(ACTIONABLE_PICKS)  # per-pick lifecycle threads (entry; grade follows at EOD)
     beat("flow_picks")
-    used = tg_brief(msg)
+    used = tg_brief(msg, chain=("flow_digest", "daily_briefs"))  # 2026-06-24: Flow Picks → flow_digest (fallback SpaceCoast so a vault hiccup never silences a pick)
     print(f"[flow-picks] posted ({len(msg)} chars) · tg→{used or 'skip'}", flush=True)
 
 

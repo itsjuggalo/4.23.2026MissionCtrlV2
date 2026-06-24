@@ -43,6 +43,40 @@ COCKPIT_LITE = C([
     ("news", "Macro/news read"),
     ("help", "Show the command menu"),
 ])
+# ── desk-specific menus (2026-06-24 fleet designation — each desk a distinct tap-list) ──
+MACRO_MENU = C([
+    ("news", "Macro/news read for your book"),
+    ("x", "Live X sentiment, e.g. /x SPY"),
+    ("greeks", "Greeks for a ticker"),
+    ("help", "What this desk does (regime · VIX · levels)"),
+])
+RESEARCH_MENU = C([
+    ("greeks", "Greeks for a ticker, e.g. /greeks NVDA"),
+    ("news", "Catalysts/news for a ticker"),
+    ("x", "Live X sentiment"),
+    ("explain", "Plain-English Greeks/IV"),
+    ("help", "What this desk does (research · IV · straddle)"),
+])
+SCREENER_MENU = C([
+    ("flow", "Live whale options flow"),
+    ("sweeps", "Aggressive ask-side sweeps"),
+    ("odte", "0DTE plays"),
+    ("news", "What's moving"),
+    ("help", "What this desk does (find & rank names)"),
+])
+RISK_MENU = C([
+    ("pick", "#1 contract — I size + risk it"),
+    ("greeks", "Greeks for a ticker"),
+    ("news", "Macro/news read"),
+    ("explain", "Plain-English Greeks/IV"),
+    ("help", "What this desk does (max-loss · sizing · hedges)"),
+])
+JAZZY_MENU = C([
+    ("book", "Open Jazzy positions"),
+    ("pick", "#1 contract (sized vs Jazzy equity)"),
+    ("greeks", "Greeks for a ticker"),
+    ("help", "What this desk does (Jazzy paper account)"),
+])
 LIFE = C([
     ("brief", "Your life brief (calendar, inbox, weather)"),
     ("today", "What's on today"),
@@ -72,11 +106,11 @@ FLEET = {
     "life_wellness":   ("lifeclaw_telegram_bot_token",     "f", LIFE),
     "aime_research":   ("telegram_antigravity_bot_token",  "f", AIME),
     "x_sentiment":     ("telegram_grok_bot_token",         "f", XBOT),
-    "jazzy_desk":      ("telegram_jazzyhazzy_bot_token",   "f", COCKPIT_LITE),
-    "risk_hedge":      ("antidote_telegram_bot_token",     "f", COCKPIT_LITE),
-    "research_desk":   ("telegram_orion_bot_token",        "f", COCKPIT_LITE),
-    "screener":        ("telegram_deepseek_bot_token",     "f", COCKPIT_LITE),
-    "macro_regime":    ("telegram_mc_skill_bot_token",     "f", COCKPIT_LITE),
+    "jazzy_desk":      ("telegram_jazzyhazzy_bot_token",   "f", JAZZY_MENU),
+    "risk_hedge":      ("antidote_telegram_bot_token",     "f", RISK_MENU),
+    "research_desk":   ("telegram_orion_bot_token",        "f", RESEARCH_MENU),
+    "screener":        ("telegram_deepseek_bot_token",     "f", SCREENER_MENU),
+    "macro_regime":    ("telegram_mc_skill_bot_token",     "f", MACRO_MENU),
     "flow_digest":     ("telegram_boba2_bot_token",        "v", CLEAR),
     "daily_briefs":    ("telegram.daily_briefs",           "v", CLEAR),
     "media_gens":      ("telegram.media_gens",             "v", CLEAR),
@@ -84,8 +118,8 @@ FLEET = {
     "openclaw_grok":   ("telegram_openclaw_bot_token",     "v", CLEAR),
     "jazzy_relay":     ("telegram.jazzy_relay",            "v", COCKPIT_LITE),
     "orion_relay":     ("telegram.orion_relay",            "v", COCKPIT_LITE),
-    "grok_scout":      ("telegram.grok_scout",             "v", COCKPIT_LITE),
-    "trend_scanner":   ("telegram.trend_scanner",          "v", COCKPIT_LITE),
+    "grok_scout":      ("telegram.grok_scout",             "v", XBOT),
+    "trend_scanner":   ("telegram.trend_scanner",          "v", SCREENER_MENU),
 }
 # NOTE: flow_signals (@PipelineSignals_Bot) intentionally untouched — live status DM bot.
 

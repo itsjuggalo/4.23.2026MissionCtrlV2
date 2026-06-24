@@ -19,6 +19,16 @@ BOT_TOKEN = (SECRETS / "telegram_grok_bot_token").read_text().strip()
 API_KEY = (SECRETS / "deepseek_api_key").read_text().strip()
 MODEL = "deepseek-chat"
 API_URL = "https://api.deepseek.com/chat/completions"
+OWNER = (SECRETS / "telegram-chat-id.txt").read_text().strip()  # private to Mike only (7888676328)
+
+X_HELP = (
+    "𝕏 X-Sentiment — Mike's live X/Twitter trader-sentiment + markets desk.\n"
+    "Type a ticker or topic → trader mood + any catalyst:\n"
+    "• NVDA          • spy 0dte today\n"
+    "• options flow / signals → full contract spec\n"
+    "/reset clears the thread · ask anything.\n"
+    "/help = this."
+)
 
 SYSTEM_PROMPT = (
     "You are Grok, a Mission Control trading agent. "
@@ -153,11 +163,19 @@ def handle_message(msg):
     if not text or not chat_id:
         return
 
+    if str(chat_id) != OWNER:                    # private to Mike only — drop everyone else
+        print(f"[grok] ignored non-owner {chat_id}", flush=True)
+        return
+
+    if text.startswith("/help"):
+        send_message(chat_id, X_HELP)
+        return
+
     if text.startswith("/start"):
         conversations[chat_id] = []
         send_message(
             chat_id,
-            "Hey! I'm Grok, connected to Mission Control. Ask me anything about trading, markets, or your portfolio.",
+            "𝕏 X-Sentiment online — live X/Twitter trader mood + markets. Type a ticker or topic, or /help.",
         )
         return
 
@@ -212,8 +230,8 @@ def poll_loop():
                     chat = mcm.get("chat", {})
                     new_status = mcm.get("new_chat_member", {}).get("status")
                     print(f"[grok] chat_member update: chat_id={chat.get('id')} title={chat.get('title')!r} status={new_status}", flush=True)
-                    if new_status == "member" and chat.get("id"):
-                        send_message(chat.get("id"), "👋 Grok online — I see live flow + analyst signals. Ask me anything.")
+                    if new_status == "member" and str(chat.get("id")) == OWNER:  # greet only Mike, never a stranger's group
+                        send_message(chat.get("id"), "𝕏 X-Sentiment online — type a ticker or topic, or /help.")
         except Exception as e:
             print(f"[grok] poll error: {e}", flush=True)
             time.sleep(3)
