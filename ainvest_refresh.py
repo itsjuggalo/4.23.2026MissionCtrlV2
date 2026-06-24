@@ -102,6 +102,11 @@ def harvest_baskets():
     return baskets
 
 def write_themes(baskets):
+    # EMPTY-GUARD: a failed/offline bridge harvest returns [] — never clobber the
+    # always-on curated file (ainvest_themes_local.py) with empties. Keep last-good.
+    if not baskets:
+        print("EMPTY-GUARD: harvest returned 0 baskets (bridge offline?) — keeping existing themes file.")
+        return
     cats=[]
     for b in baskets:
         if b["category"] not in cats: cats.append(b["category"])
