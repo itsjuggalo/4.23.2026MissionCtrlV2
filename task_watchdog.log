@@ -200,3 +200,5 @@ Terminated
 [watchdog] still running (0.0h / 3.0h): claytrader-backfill-build
 [watchdog] still running (0.0h / 3.0h): claytrader-backfill-build
 [watchdog] still running (0.1h / 4.0h): xrp-import-validate
+[watchdog] still running (0.3h / 4.0h): xrp-import-validate
+[watchdog] still running (0.6h / 4.0h): xrp-import-validate
