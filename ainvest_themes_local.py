@@ -41,8 +41,9 @@ THEMES = [
 ]
 
 
-def ret_3mo(sym):
-    """3-month % return from Yahoo public chart (close[-1]/close[0]-1). None on failure."""
+def returns(sym):
+    """{'r3','r1'} % returns from one Yahoo 3-mo fetch (1-mo = last ~21 sessions).
+    Returns {'r3':None,'r1':None} on failure."""
     url = f"https://query1.finance.yahoo.com/v8/finance/chart/{sym}?range=3mo&interval=1d"
     try:
         req = urllib.request.Request(url, headers={"User-Agent": UA})
@@ -51,10 +52,13 @@ def ret_3mo(sym):
         res = d["chart"]["result"][0]
         closes = [c for c in res["indicators"]["quote"][0]["close"] if c is not None]
         if len(closes) < 2:
-            return None
-        return round(100 * (closes[-1] / closes[0] - 1), 1)
+            return {"r3": None, "r1": None}
+        r3 = round(100 * (closes[-1] / closes[0] - 1), 1)
+        base1 = closes[-22] if len(closes) >= 22 else closes[0]
+        r1 = round(100 * (closes[-1] / base1 - 1), 1)
+        return {"r3": r3, "r1": r1}
     except Exception:
-        return None
+        return {"r3": None, "r1": None}
 
 
 def main():
@@ -62,18 +66,24 @@ def main():
     uniq = sorted({t for _, _, ts in THEMES for t in ts})
     rets = {}
     for i, t in enumerate(uniq):
-        rets[t] = ret_3mo(t)
+        rets[t] = returns(t)
         time.sleep(0.25)  # be polite to Yahoo
-    ok = sum(1 for v in rets.values() if v is not None)
+    ok = sum(1 for v in rets.values() if v.get("r3") is not None)
     print(f"fetched {ok}/{len(uniq)} ticker returns")
 
     baskets = []
     for slug, name, tickers in THEMES:
-        vals = [rets[t] for t in tickers if rets.get(t) is not None]
-        ret = round(sum(vals) / len(vals), 1) if vals else None
+        v3 = [rets[t]["r3"] for t in tickers if rets.get(t, {}).get("r3") is not None]
+        v1 = [rets[t]["r1"] for t in tickers if rets.get(t, {}).get("r1") is not None]
+        ret = round(sum(v3) / len(v3), 1) if v3 else None
+        ret1 = round(sum(v1) / len(v1), 1) if v1 else None
+        # leader = best 3-mo constituent (what's driving the basket)
+        scored = [(t, rets[t]["r3"]) for t in tickers if rets.get(t, {}).get("r3") is not None]
+        leader = max(scored, key=lambda x: x[1])[0] if scored else None
         baskets.append({
             "category": slug, "name": name, "slug": slug,
-            "count": len(tickers), "ret_3mo": ret, "tickers": tickers,
+            "count": len(tickers), "ret_3mo": ret, "ret_1mo": ret1,
+            "leader": leader, "tickers": tickers,
         })
 
     have_returns = sum(1 for b in baskets if b["ret_3mo"] is not None)
