@@ -98,6 +98,16 @@ def _catalysts_and_orders(names: str, tape: str) -> tuple[str, str]:
             f"Trade your plan; cap risk at ${RISK_CAP} per name (fraction of equity), paper-first.")
 
 
+def _polymarket_line() -> str:
+    """Optional macro crowd-odds one-liner for the top of the brief. Fully guarded —
+    a fetch failure or missing module degrades to '' so it can NEVER break the brief."""
+    try:
+        from polymarket_macro_odds import one_liner
+        return one_liner(3) or ""
+    except Exception:
+        return ""
+
+
 def build() -> str:
     stamp = datetime.now(ET).strftime("%a %b %-d %-I:%M %p ET")
     names = top_tickers_str(6)
@@ -105,6 +115,10 @@ def build() -> str:
     lines = [f"🌅 **MORNING COMMAND — pre-open brief** · {stamp}"]
     if tape:
         lines.append(f"_Tape: {tape}_")
+
+    pm = _polymarket_line()
+    if pm:
+        lines.append(f"🎰 **POLYMARKET (crowd odds):** {pm}")
 
     lines.append("\n" + portfolio_summary())
 
