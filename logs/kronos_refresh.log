@@ -6881,3 +6881,8 @@ OK: HF_HOME='/home/itsju/.cache/huggingface' | disk 732GB free | checks passed
 }
 [2026-06-25T12:06:30Z] kronos_refresh_premarket done
 [2026-06-25T12:06:30Z] kronos_refresh_premarket done
+[2026-06-26T12:00:02Z] kronos_refresh_premarket starting (tickers=SPY QQQ NVDA TSLA AAPL MSFT AMD SMCI META MU AMZN GOOGL COIN BTC)
+[2026-06-26T12:00:02Z] kronos_refresh_premarket starting (tickers=SPY QQQ NVDA TSLA AAPL MSFT AMD SMCI META MU AMZN GOOGL COIN BTC)
+OK: HF_HOME='/home/itsju/.cache/huggingface' | disk 731GB free | checks passed
+[2026-06-26T12:00:02Z] Generating SPY...
+[2026-06-26T12:00:02Z] Generating SPY...
