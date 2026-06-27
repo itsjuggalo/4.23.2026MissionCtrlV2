@@ -180,19 +180,19 @@ BOTS = {
     # token lives in the vault (tg_fleet `telegram.<fleet_fn>`); `providers` routes the
     # free-text brain via lib.llm.call_llm_text. No `tools` key → claude-tool commands
     # (/news, /greeks TKR) fall back to the default toolset on the claude CLI.
-    "jazzyrelay": {
+    "jazzycodexgpt": {
         "fleet_fn": "jazzy_relay",                         # vault → @JazzyHazzy_Bot
         "owner": "telegram-chat-id.txt",
-        "name":  "Jazzy Relay",
+        "name":  "JazzyCodexGPT",
         "providers": ["codex_cli", "grok_oauth"],          # OpenAI/ChatGPT sub (Codex) → Grok sub fallback (deepseek API unregistered 06-17)
         "persona": (
-            "You are Jazzy Relay — a GPT-powered second-opinion trading analyst (OpenAI brain), "
+            "You are JazzyCodexGPT — a GPT-powered second-opinion trading analyst (OpenAI brain), "
             "an independent cross-check to the Claude desks. For any ticker or trade give your own "
             "read: thesis, the key risk, and a clear lean. Size ideas as a fraction of CURRENT "
             "equity, $800 risk cap. Never place trades. Eastern Time, short plain-text for Telegram."
         ),
         "help": (
-            "🤝 Jazzy Relay — GPT 2nd-opinion analyst (OpenAI brain).\n"
+            "🤝 JazzyCodexGPT — GPT 2nd-opinion analyst (OpenAI brain).\n"
             "An independent cross-check to the Claude desks:\n"
             "• my own read on any ticker/trade: thesis · key risk · lean\n"
             "Provider diversity. Never places trades.\n"
@@ -206,7 +206,7 @@ BOTS = {
         "providers": ["claude_oauth", "codex_cli"],        # Claude sub → Codex sub (gemini/deepseek API unregistered 06-17)
         "persona": (
             "You are Orion Relay — a deep research/decision desk (Claude brain) running structured "
-            "reads alongside the GPT (Jazzy Relay) and Grok (Grok Scout) desks. For any ticker or "
+            "reads alongside the GPT (JazzyCodexGPT) and Grok (Grok Scout) desks. For any ticker or "
             "question give a structured read: the setup, catalysts, bull vs bear, and a decisive take. "
             "Never place trades. Eastern Time, short plain-text for Telegram."
         ),
@@ -254,6 +254,9 @@ BOTS = {
         ),
     },
 }
+
+# Backward-compatible process arg for the old PM2 name.
+BOTS["jazzyrelay"] = BOTS["jazzycodexgpt"]
 
 
 def _secret(name):
@@ -518,17 +521,19 @@ def main():
                     print(f"[{name}] x:{text[:40]}", flush=True)
                     continue
                 # Routing for everything else:
-                #  • a /slash command = a Claude SKILL (/ainvest, /options-desk, /flow-desk,
-                #    /ticker-research, /market-context …) → always run via the claude CLI so
-                #    skills work on EVERY bot, even reserve bots whose chat brain is another LLM.
-                #  • plain text → the persona's own brain (claude, or Codex/Gemini/Grok/DeepSeek
+                #  • a /slash command usually goes through Claude skills.
+                #  • Codex-primary reserve bots keep slash skills in their own OpenAI lane.
+                #    This lets JazzyCodexGPT use the Codex-installed AInvest/SkillHub skills
+                #    instead of bouncing /ainvest back through Claude.
+                #  • plain text → the persona's own brain (claude, or Codex/Grok/etc.
                 #    for the reserve bots) — provider diversity preserved.
                 # Each call is a FRESH `claude -p` (stateless): no context carries between
                 # messages, so there's nothing to clear (no /newchat) and briefs are untouched.
                 print(f"[{name}] Q: {text[:120]}", flush=True)
                 tg("sendChatAction", chat_id=chat_id, action="typing")
                 try:
-                    a = ask_local(text) if text.startswith("/") else ask_persona(text)
+                    codex_primary = (cfg.get("providers") or [None])[0] == "codex_cli"
+                    a = ask_persona(text) if (codex_primary or not text.startswith("/")) else ask_local(text)
                     send_reply(chat_id, a)
                     print(f"[{name}] A: {len(a)} chars", flush=True)
                 except Exception as e:
