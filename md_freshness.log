@@ -4,3 +4,9 @@ wrote /home/itsju/restructure/DOCS-FRESHNESS.md · SYSTEM-MAP updated · canon 0
   [PASS] BS parity theo vs options_engine[05A]: Δprice=0.00e+00 Δdelta=2.86e-05 Δvega=3.23e-05
   [PASS] OCC parity validate vs tradier: validate=('MSFT', '2026-05-15', 'P', 410.0) tradier=('MSFT', '2026-05-15', 'P', 410.0) expect=('MSFT', '2026-05-15', 'P', 410.0)
 All parities hold (0 drift).
+wrote /home/itsju/restructure/DOCS-FRESHNESS.md · SYSTEM-MAP updated · canon 10 · other 178 · reg_flags 1
+=== math/parser parity guard ===
+  [PASS] BS parity theo vs options_engine[web]: Δprice=0.00e+00 Δdelta=2.86e-05 Δvega=3.23e-05
+  [PASS] BS parity theo vs options_engine[05A]: Δprice=0.00e+00 Δdelta=2.86e-05 Δvega=3.23e-05
+  [PASS] OCC parity validate vs tradier: validate=('MSFT', '2026-05-15', 'P', 410.0) tradier=('MSFT', '2026-05-15', 'P', 410.0) expect=('MSFT', '2026-05-15', 'P', 410.0)
+All parities hold (0 drift).
