@@ -135,16 +135,56 @@ def run_claude(prompt: str) -> str:
     claude_bin = os.path.expanduser("~/.local/bin/claude")
     if not os.path.exists(claude_bin):
         claude_bin = "claude"  # fall back to PATH for interactive shells
+    path_parts = [
+        str(HOME / ".nvm/versions/node/v22.22.3/bin"),
+        str(HOME / ".local/bin"),
+        "/usr/local/bin",
+        "/usr/bin",
+        "/bin",
+    ]
     result = subprocess.run(
         [claude_bin, "-p", prompt, "--model", "sonnet", "--effort", "high"],
         capture_output=True, text=True, timeout=60,
         cwd=os.path.expanduser("~"),  # headless claude expects to run from $HOME
-        env={**{k: v for k, v in os.environ.items() if k != "ANTHROPIC_API_KEY"}, "TERM": "dumb"},
+        env={
+            **{k: v for k, v in os.environ.items() if k != "ANTHROPIC_API_KEY"},
+            "PATH": ":".join(p for p in path_parts if p),
+            "TERM": "dumb",
+        },
     )
     if result.returncode != 0:
-        raise RuntimeError(f"claude exited {result.returncode}: {result.stderr[:200]}")
+        detail = (result.stderr or result.stdout or "").strip()[:200]
+        raise RuntimeError(f"claude exited {result.returncode}: {detail}")
     return result.stdout.strip()
 
+
+def fallback_brief(rank, winners, momentum, macro, ledger, reason: str) -> str:
+    bullet = chr(8226)
+    bullets: list[str] = []
+
+    def line(text: str) -> str:
+        return f"{bullet} {text}"
+
+    clean_reason = reason.replace("\n", " ")[:90]
+    bullets.append(line(f"AI brief fallback active: {clean_reason}"))
+    if macro:
+        bullets.append(line(f"Macro: {macro.get('regime','?')} regime, VIX {macro.get('vix','?')}, Fed {macro.get('fed_posture','?')}."))
+    if rank:
+        picks = ", ".join(f"{r.get('ticker','?')} {r.get('final_band','?')}" for r in rank[:3])
+        bullets.append(line(f"Current shortlist: {picks}."))
+    if winners:
+        top = winners[0]
+        bullets.append(line(f"Top recent flow winner: {top.get('symbol','?')} {top.get('option_type','?')} peaked +{top.get('peak_pct','?')}%."))
+    if momentum:
+        up = [m["ticker"] for m in momentum if m.get("trend") == "UP" or (m.get("bull_streak") or 0) >= 3]
+        down = [m["ticker"] for m in momentum if m.get("trend") == "DOWN" or (m.get("bear_streak") or 0) >= 3]
+        if up or down:
+            bullets.append(line(f"Momentum: bullish {', '.join(up[:4]) or 'none'}; bearish {', '.join(down[:4]) or 'none'}."))
+    if ledger:
+        bullets.append(line(f"Paper ledger: {len(ledger)} recent execution rows available for review."))
+    while len(bullets) < 5:
+        bullets.append(line("No additional high-signal pipeline item available in fallback mode."))
+    return "\n".join(bullets[:5])
 
 def main():
     if not is_market_hours():
@@ -160,8 +200,16 @@ def main():
 
     prompt = build_prompt(rank, winners, momentum, macro, ledger)
 
-    print("[trade-brief] Calling claude CLI…", file=sys.stderr)
-    brief_text = run_claude(prompt)
+    print("[trade-brief] Calling claude CLI...", file=sys.stderr)
+    status = "ok"
+    error = None
+    try:
+        brief_text = run_claude(prompt)
+    except RuntimeError as e:
+        status = "fallback"
+        error = str(e)
+        print(f"[trade-brief] Claude unavailable; writing fallback brief: {error}", file=sys.stderr)
+        brief_text = fallback_brief(rank, winners, momentum, macro, ledger, error)
 
     # Parse bullets
     bullets = [line.strip() for line in brief_text.split("\n") if line.strip().startswith("•")]
@@ -170,7 +218,8 @@ def main():
         "brief": brief_text,
         "bullets": bullets,
         "generated_at": datetime.now(timezone.utc).isoformat(),
-        "status": "ok",
+        "status": status,
+        "error": error,
         "inputs": {
             "rank_picks": len(rank),
             "winners": len(winners),
