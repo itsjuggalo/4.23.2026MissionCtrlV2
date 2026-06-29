@@ -9,7 +9,9 @@ live Alpaca account == EXPECTED_ACCOUNT. Otherwise it logs "INERT" and places no
 Reuses verified rails: lib/discord_post.post_discord, tg_fleet.send, lib/circuit_breaker.
 """
 import json, os, sys, requests
+from datetime import datetime
 from pathlib import Path
+from zoneinfo import ZoneInfo
 sys.path.insert(0, "/home/itsju/scripts")
 sys.path.insert(0, "/home/itsju/scripts/lib")
 
@@ -20,10 +22,25 @@ ARM_FILE = STATE / "watchlist_exec_ARMED"
 EXPECTED_ACCOUNT = "PA3W2OF36UVX"      # verified live 2026-06-22 (Boba R2 paper)
 PAPER = "https://paper-api.alpaca.markets"
 RISK_PER_TRADE = 100.0                 # $ risked entry→stop per order (small, capytrade-style)
-NOW_ET = lambda: __import__("datetime").datetime.now(__import__("zoneinfo").ZoneInfo("America/New_York")).strftime("%H:%M")
+SIGNAL_MAX_AGE_MIN = int(os.getenv("WATCHLIST_SIGNAL_MAX_AGE_MIN", "90"))
+ET = ZoneInfo("America/New_York")
+NOW_ET = lambda: datetime.now(ET).strftime("%H:%M")
 
 
 def load(): return json.load(open(SIGNALS))
+
+
+def _signals_fresh():
+    if not SIGNALS.exists():
+        return False, f"signals file missing: {SIGNALS}"
+    mtime = datetime.fromtimestamp(SIGNALS.stat().st_mtime, ET)
+    now = datetime.now(ET)
+    age_min = (now - mtime).total_seconds() / 60
+    if mtime.date() != now.date():
+        return False, f"signals stale: mtime {mtime:%Y-%m-%d %H:%M ET}"
+    if age_min > SIGNAL_MAX_AGE_MIN:
+        return False, f"signals stale: {age_min:.0f} min old (max {SIGNAL_MAX_AGE_MIN})"
+    return True, f"signals fresh: {age_min:.0f} min old"
 
 
 def _discord(msg):
@@ -95,6 +112,10 @@ def exec_mode():
     if not armed():
         print(f"INERT — auto-exec OFF (WATCHLIST_EXEC={os.getenv('WATCHLIST_EXEC')}, "
               f"arm-file {'present' if ARM_FILE.exists() else 'absent'}). No orders placed.")
+        return
+    ok, why = _signals_fresh()
+    if not ok:
+        print(f"ABORT - {why}. No orders.")
         return
     if not _account_ok():
         print(f"ABORT — Alpaca account mismatch/unreachable (expected {EXPECTED_ACCOUNT}). No orders.")
