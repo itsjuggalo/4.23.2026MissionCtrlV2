@@ -12,7 +12,6 @@ Cron: 7:00 AM ET daily (laptop cron).
 """
 import json
 import sys
-import urllib.parse
 import urllib.request
 from datetime import datetime, timezone, timedelta
 from pathlib import Path
@@ -24,10 +23,6 @@ def read_secret(name: str) -> str:
     return p.read_text().strip() if p.exists() else ""
 
 XAI_KEY = read_secret("xai_api_key")
-# Last-ditch inline send only (primary route is the vault-backed fleet `daily_briefs`).
-# Use a TRADE-bot flat token so a failure can NEVER resurface this content on Life & Wellness.
-TG_TOKEN = read_secret("telegram-bot-token.txt")          # flow_signals flat (trade)
-TG_CHAT_ID = read_secret("telegram-chat-id.txt")          # Mike's universal chat id
 
 
 def xai_oauth_token() -> str:
@@ -69,8 +64,8 @@ def grok_search(query: str, summary_prompt: str) -> str:
     return "_(live X search temporarily unavailable — token/quota; will retry next run)_"
 
 def send_telegram(text: str) -> bool:
-    # vault-backed fleet route → Daily Briefs (@SpaceCoast). NO lifeclaw fallback, so a vault
-    # miss can never put trade content back on Life & Wellness; inline below = trade-bot last-ditch.
+    # Vault-backed fleet route → Daily Briefs (@SpaceCoast). No cross-lane fallback:
+    # if daily_briefs cannot send, fail visibly instead of spilling X content into flow_signals.
     try:
         sys.path.insert(0, "/home/itsju/scripts")
         from lib.notify import tg_push
@@ -79,23 +74,7 @@ def send_telegram(text: str) -> bool:
             return True
     except Exception as e:
         print(f"[grok-digest] fleet route failed: {e}", file=sys.stderr)
-    payload = json.dumps({"chat_id": TG_CHAT_ID, "text": text}).encode()
-    req = urllib.request.Request(
-        f"https://api.telegram.org/bot{TG_TOKEN}/sendMessage",
-        data=payload,
-        headers={"Content-Type": "application/json"},
-    )
-    try:
-        with urllib.request.urlopen(req, timeout=15) as r:
-            result = json.loads(r.read())
-            return result.get("ok", False)
-    except urllib.error.HTTPError as e:
-        body = e.read().decode()
-        print(f"Telegram HTTP {e.code}: {body}", file=sys.stderr)
-        return False
-    except Exception as e:
-        print(f"Telegram send failed: {e}", file=sys.stderr)
-        return False
+    return False
 
 def _warm_oauth_token():
     """Self-heal the xAI OAuth token. Hermes auto-refreshes it only when IT routes a call;
@@ -131,9 +110,6 @@ def _warm_oauth_token():
 def main():
     if not XAI_TOKEN:
         print("ERROR: no xai OAuth token or api key found", file=sys.stderr)
-        sys.exit(1)
-    if not TG_TOKEN or not TG_CHAT_ID:
-        print("ERROR: Telegram credentials missing", file=sys.stderr)
         sys.exit(1)
 
     _warm_oauth_token()   # ensure the OAuth token is fresh before the direct x_search calls

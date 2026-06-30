@@ -175,12 +175,10 @@ def send(fn, msg):
 
 
 def _resolve(fn):
-    """Return (token, label). media_gens falls back to system_health until its token is set."""
+    """Return (token, label) without crossing fleet lanes."""
     tok = token(fn)
     if tok:
         return tok, fn
-    if fn == "media_gens":
-        return token("system_health"), "system_health(fallback)"
     return None, fn
 
 
