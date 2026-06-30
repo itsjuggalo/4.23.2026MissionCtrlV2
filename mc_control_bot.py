@@ -97,10 +97,9 @@ def handle(text: str) -> str:
                    "\"SELECT substr(cycle_id,1,19) cycle,asset_class,status,candidates_total ct,"
                    "candidates_promoted cp FROM cycle_metadata ORDER BY started_at DESC LIMIT 8\"")
     if low == "/services":
+        # Oracle retired 2026-06-30 (laptop-only) — local PM2 + ports only
         return run("echo 'laptop ports:'; ss -ltn 2>/dev/null | grep -oE ':(3000|1337|3141|8080|3033)\\b' | sort -u; "
-                   "echo '--- oracle pm2 ---'; timeout 18 ssh -o BatchMode=yes -o ConnectTimeout=8 openclaw "
-                   "'/home/ubuntu/.npm-global/bin/pm2 list 2>/dev/null | grep -cE online' "
-                   "2>/dev/null | sed 's/^/online: /' || echo 'oracle unreachable'")
+                   "echo '--- laptop pm2 online ---'; pm2 list 2>/dev/null | grep -cE online | sed 's/^/online: /'")
     if low == "/time":
         return run("TZ=America/New_York date '+%A %Y-%m-%d %I:%M %p %Z'")
     if low.startswith("/recall"):

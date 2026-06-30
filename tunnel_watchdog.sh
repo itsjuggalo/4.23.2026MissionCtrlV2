@@ -62,7 +62,7 @@ relaunch() { # relaunch <port>
 
 probe() { # probe -> lines "port BINDSTATE httpcode"
   ssh -o BatchMode=yes -o ConnectTimeout=10 openclaw '
-    for p in 3300 3303 8091; do
+    for p in 3303; do   # 2026-06-30: massage-only — 3300 (dashboard mirror) + 8091 (hive-mind) retired in the laptop-only cutover
       if ss -ltn 2>/dev/null | grep -q ":${p} "; then s=LISTEN; else s=DEAD; fi
       case "$p" in
         3300) u="http://127.0.0.1:3300/" ;;
