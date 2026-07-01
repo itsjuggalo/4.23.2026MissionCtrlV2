@@ -47,6 +47,9 @@ from datetime import datetime
 from pathlib import Path
 from zoneinfo import ZoneInfo
 
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+from lib.http_retry import request as http_request, CAT_RATELIMIT  # noqa: E402
+
 ET = ZoneInfo("America/New_York")
 SEC = Path.home() / ".openclaw" / "secrets"
 OC = Path.home() / ".openclaw"
@@ -81,14 +84,21 @@ def _secret(name: str) -> str | None:
     return p.read_text(encoding="utf-8").strip() if p.exists() else None
 
 
-def _get(url: str, headers: dict | None = None, timeout: int = 15) -> dict | None:
-    try:
-        req = urllib.request.Request(url, headers={**UA, **(headers or {})})
-        with urllib.request.urlopen(req, timeout=timeout) as r:
-            return json.loads(r.read())
-    except Exception as e:  # noqa: BLE001
-        print(f"[guard] GET {url.split('?')[0]} failed: {e}", file=sys.stderr)
-        return None
+def _get(url: str, headers: dict | None = None, timeout: int = 15,
+         retries: int = 1) -> dict | None:
+    # Shared retry wrapper: one backoff retry on transient 429/5xx/timeout, then None.
+    # Contract UNCHANGED — a data miss returns None and never triggers a halt (the state
+    # machine only escalates on positive VIX/z/BTC signals), it just leaves the guard blind
+    # for this run. 429 is expected noise under the shared Alpaca data limit (~38 spam
+    # lines/day), so it is NOT logged as an error; genuine failures (DNS/5xx/timeout) still
+    # surface. The retry makes the guard LESS blind through transient rate-limit blips.
+    res = http_request(url, headers={**UA, **(headers or {})}, timeout=timeout, retries=retries)
+    if res.ok:
+        return res.json
+    if res.category != CAT_RATELIMIT:
+        print(f"[guard] GET {url.split('?')[0]} failed: {res.error or res.category}",
+              file=sys.stderr)
+    return None
 
 
 def now_et() -> datetime:
