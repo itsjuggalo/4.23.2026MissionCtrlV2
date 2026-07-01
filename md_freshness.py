@@ -100,6 +100,7 @@ EXCLUDE = [
     "conversation_backup", "/06_REPORTS/", "_backup", ".bak", "/episodic/",
     "/.remember/", "/.bible-rag/", "/04_RESEARCH/AiData/",  # historical corpora / bannered-abandoned tree
     "audit_log", "/bible/README.md",  # append-only write-logs / bible changelog corpus
+    "01_ACTIVE/sites/missioncontrol/",  # legacy MissionCtrlV2 tree — banner-marked STALE 2026-07-01, canonical = /AIWorkWSL/web/missionctrl
 ]
 # Files exempt from stale-term flagging (they intentionally name retired terms as examples).
 SELF_EXEMPT = {REPORT, HOME / "restructure" / "MIKE.md",
