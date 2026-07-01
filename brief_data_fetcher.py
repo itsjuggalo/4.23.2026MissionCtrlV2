@@ -9,6 +9,10 @@ except ImportError:
     subprocess.check_call([sys.executable, '-m', 'pip', 'install', 'requests', '--break-system-packages', '-q'])
     import requests
 
+sys.path.insert(0, os.path.expanduser('~/scripts'))
+from lib.http_retry import requests_session
+SESSION = requests_session()  # read-only fetcher: retries idempotent GETs (429/5xx/timeout)
+
 SECRETS = '/home/ubuntu/.openclaw/secrets'
 OUTPUT = '/home/ubuntu/.openclaw/workspace/directives/pre_brief_data.md'
 OUTPUT_JSON = '/home/ubuntu/.openclaw/workspace/directives/pre_brief_data.json'
@@ -44,8 +48,8 @@ def fetch_alpaca():
     if not key: return None
     try:
         hd = {'APCA-API-KEY-ID': key, 'APCA-API-SECRET-KEY': secret}
-        acct = requests.get('https://paper-api.alpaca.markets/v2/account', headers=hd, timeout=10).json()
-        pos = requests.get('https://paper-api.alpaca.markets/v2/positions', headers=hd, timeout=10).json()
+        acct = SESSION.get('https://paper-api.alpaca.markets/v2/account', headers=hd, timeout=10).json()
+        pos = SESSION.get('https://paper-api.alpaca.markets/v2/positions', headers=hd, timeout=10).json()
         return {'account': acct, 'positions': pos if isinstance(pos, list) else []}
     except Exception as e:
         return {'error': str(e)}
@@ -54,7 +58,7 @@ def fetch_crypto():
     prices = {}
     for sym, pair in {'BTC':'XBTUSD','ETH':'ETHUSD','SOL':'SOLUSD'}.items():
         try:
-            r = requests.get(f'https://api.kraken.com/0/public/Ticker?pair={pair}', timeout=8)
+            r = SESSION.get(f'https://api.kraken.com/0/public/Ticker?pair={pair}', timeout=8)
             d = r.json(); k = list(d.get('result',{}).keys())[0]
             if k:
                 info = d['result'][k]
@@ -67,11 +71,11 @@ def fetch_crypto():
 def fetch_extras():
     ex = {}
     try:
-        r = requests.get('https://api.alternative.me/fng/?limit=1', timeout=8).json()
+        r = SESSION.get('https://api.alternative.me/fng/?limit=1', timeout=8).json()
         if r.get('data'): ex['fear_greed'] = {'value':int(r['data'][0]['value']), 'label':r['data'][0]['value_classification']}
     except: ex['fear_greed'] = {'value':0,'label':'Unknown'}
     try:
-        r = requests.get('https://api.coingecko.com/api/v3/global', timeout=8).json()
+        r = SESSION.get('https://api.coingecko.com/api/v3/global', timeout=8).json()
         ex['btc_dominance'] = round(r.get('data',{}).get('market_cap_percentage',{}).get('btc',0),2)
     except: ex['btc_dominance'] = 0
     return ex
@@ -81,7 +85,7 @@ def fetch_stocks():
     if not key: return {}
     try:
         hd = {'APCA-API-KEY-ID': key, 'APCA-API-SECRET-KEY': secret}
-        r = requests.get('https://data.alpaca.markets/v2/stocks/snapshots?symbols=AAPL,NVDA,TSLA,MU,LLY,MSTR,SPY,QQQ', headers=hd, timeout=10)
+        r = SESSION.get('https://data.alpaca.markets/v2/stocks/snapshots?symbols=AAPL,NVDA,TSLA,MU,LLY,MSTR,SPY,QQQ', headers=hd, timeout=10)
         if not r.ok: return {}
         quotes = {}
         for sym, snap in r.json().items():
@@ -100,7 +104,7 @@ def fetch_kronos():
 
 def fetch_flows():
     try:
-        r = requests.get('http://localhost:3000/api/options-flow', timeout=10).json()
+        r = SESSION.get('http://localhost:3000/api/options-flow', timeout=10).json()
         flows = r.get('flows',[])
         unusual = sorted([f for f in flows if f.get('Volume',0)>f.get('OI',0)], key=lambda x:x.get('Value',0), reverse=True)[:5]
         return [{'symbol':f.get('Symbol'),'type':f.get('OptionType'),'strike':f.get('Strike'),'value':f.get('Value'),

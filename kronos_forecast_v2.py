@@ -23,6 +23,10 @@ import pandas as pd
 import numpy as np
 import requests
 
+sys.path.insert(0, str(Path.home() / "scripts"))
+from lib.http_retry import requests_session
+_SESSION = requests_session()  # retries idempotent GETs; POST (below) left untouched
+
 sys.path.insert(0, '/home/itsju/04_RESEARCH/Kronos')
 
 # Tier config: tokenizer, max_context, sample_count, default candle lookback
@@ -78,7 +82,7 @@ def fetch_stock_bars_alpaca(ticker: str, limit: int = 400) -> pd.DataFrame:
         }
         if page_token:
             params["page_token"] = page_token
-        r = requests.get(
+        r = _SESSION.get(
             f"https://data.alpaca.markets/v2/stocks/{ticker}/bars",
             headers={"APCA-API-KEY-ID": key, "APCA-API-SECRET-KEY": sec},
             params=params, timeout=15,
@@ -113,7 +117,7 @@ def fetch_stock_bars_alpaca(ticker: str, limit: int = 400) -> pd.DataFrame:
 def fetch_btc_kraken(limit: int = 400) -> pd.DataFrame:
     """Kraken BTC hourly OHLCV — free, no key."""
     print(f"[data] Kraken → BTC hourly bars")
-    r = requests.get(
+    r = _SESSION.get(
         "https://api.kraken.com/0/public/OHLC",
         params={"pair": "XBTUSD", "interval": 60, "since": 0},
         timeout=15,
