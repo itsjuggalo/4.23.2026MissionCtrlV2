@@ -27,5 +27,5 @@ Loose collection of Python + shell scripts spanning trading utilities, scrapers,
 
 - Python uses operator's system `python3` — most scripts have no venv. Check imports first.
 - Scripts hitting Alpaca always use **paper** keys. Live keys exist but never wired here.
-- Many scripts have an Oracle twin at `/home/ubuntu/scripts/` (deploy via scp).
+- Some scripts have HISTORICAL Oracle twins at `/home/ubuntu/scripts/` — laptop-only since the 2026-06-30 cutover; do NOT deploy to Oracle (its trading side is retired).
 - This dir is NOT auto-loaded by anything — invoke scripts individually.

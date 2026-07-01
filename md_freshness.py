@@ -75,6 +75,12 @@ STALE_TERMS = [
     ("oracle-as-trading-box", re.compile(r"oracle.{0,45}(failover|production|safety[- ]net)", re.I)),
     ("bobacattrades", re.compile(r"bobacattrades", re.I)),
     ("4.23 repo", re.compile(r"4\.23 repo", re.I)),
+    # 2026-06-30 laptop-only cutover relics (added 2026-07-01)
+    ("missionctrl.serveftp mirror", re.compile(r"missionctrl\.serveftp", re.I)),
+    ("3300 tunnel", re.compile(r"3300:localhost:3000|-R ?3300", re.I)),
+    ("8091 tunnel", re.compile(r"8091.{0,60}(reverse|tunnel)|(reverse|tunnel).{0,60}8091", re.I)),
+    ("massage-site python :3002", re.compile(r"massage-site|http\.server 3002", re.I)),
+    ("oracle options_flow db", re.compile(r"options_flow\.sqlite", re.I)),
 ]
 CONTEXT_OK = re.compile(
     r"(retired|legacy|NOT a|never a|stopped on purpose|comms[- ]?(relay|only)|tripwire|canary|"

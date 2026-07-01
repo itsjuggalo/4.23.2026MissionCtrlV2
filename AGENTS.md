@@ -9,11 +9,11 @@ No persistent sub-agents. This is Mike's flat script bag (~138 files). Loaded by
 
 ## Spawning rules
 
-- Any sub-agent invoked here MUST: confirm it's editing a laptop script (not a deployed Oracle twin) before writing. Many scripts have an Oracle counterpart at `/home/ubuntu/scripts/`.
+- Any sub-agent invoked here MUST: confirm it's editing a laptop script before writing. Some scripts have HISTORICAL Oracle counterparts at `/home/ubuntu/scripts/` (laptop-only since the 2026-06-30 cutover).
 - For tasks touching `alpaca_*.py`: paper keys only, never live. Account IDs in `~/LapClaw/MEMORY.md`.
 - For tasks touching `ainvest_*`: see `~/.claude/projects/-home-itsju/memory/reference-ainvest-api.md` first.
 
 ## Authority limits
 
-- Never deploy a script to Oracle without explicit operator confirm.
-- Don't reorganize the script layout — many are referenced by Oracle PM2 configs and cron entries by exact path.
+- Never deploy a script to Oracle (trading side retired 2026-06-30; comms bots there are Oracle-owned).
+- Don't reorganize the script layout — many are referenced by laptop cron entries (and legacy Oracle configs) by exact path.
