@@ -85,7 +85,7 @@ STALE_TERMS = [
 CONTEXT_OK = re.compile(
     r"(retired|legacy|NOT a|never a|stopped on purpose|comms[- ]?(relay|only)|tripwire|canary|"
     r"example|do ?n.t|stale|historical|deprecat|pre-consolidation|migrated|don't restart|"
-    r"old notes|RETIRED|disabled)",
+    r"old notes|RETIRED|disabled|cutover|repoint|leftover|was cut|feed was cut|\bdead\b)",
     re.I,
 )
 
