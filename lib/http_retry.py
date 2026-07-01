@@ -191,3 +191,31 @@ def post_once(url: str, data: bytes | None = None, headers: dict | None = None,
     """POST with NO retry — the only safe way to submit an order. One attempt, structured result."""
     return request(url, method="POST", data=data, headers=headers, timeout=timeout,
                    retries=0, **kw)
+
+
+def requests_session(total: int = 3, backoff: float = 0.5,
+                     status_forcelist=(429, 500, 502, 503, 504)):
+    """A `requests.Session` with a urllib3 Retry adapter for the daemons that use `requests`.
+
+    Retries ONLY idempotent verbs (GET/DELETE/HEAD/OPTIONS/PUT-is-excluded) — POST is NOT in
+    `allowed_methods`, so an order submit through `session.post(...)` is never auto-retried
+    (same double-submit guarantee as post_once). Returns requests.Response objects unchanged,
+    so callers keep using `.json()` / `.status_code` — a drop-in for the `requests` module.
+    """
+    import requests
+    from requests.adapters import HTTPAdapter
+    try:
+        from urllib3.util.retry import Retry
+    except ImportError:  # very old urllib3
+        from requests.packages.urllib3.util.retry import Retry
+    retry = Retry(
+        total=total, connect=total, read=total, status=total,
+        backoff_factor=backoff, status_forcelist=status_forcelist,
+        allowed_methods=frozenset({"GET", "DELETE", "HEAD", "OPTIONS"}),  # POST deliberately absent
+        raise_on_status=False, respect_retry_after_header=True,
+    )
+    s = requests.Session()
+    adapter = HTTPAdapter(max_retries=retry)
+    s.mount("https://", adapter)
+    s.mount("http://", adapter)
+    return s
