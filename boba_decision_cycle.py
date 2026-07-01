@@ -135,6 +135,13 @@ from post_helper import post_to_telegram
 from ops_log import log_to_ops
 import firebase_signals
 
+sys.path.insert(0, "/AIWorkWSL/web/missionctrl/pipeline")
+try:
+    from ledger_log import log_ledger  # Phase 3: best-effort exit logging; never raises
+except Exception:
+    def log_ledger(**_kw):
+        return None
+
 # Multi-agent debate posting (optional — gracefully degrades if lib missing)
 try:
     sys.path.insert(0, "/home/ubuntu/scripts/lib")
@@ -2013,6 +2020,11 @@ def execute_position_action(action_dict, positions):
                 sl_ok = sl_r.status_code in (200, 201)
                 tp_ok = tp_r.status_code in (200, 201)
                 details += f" + reissue SL{'OK' if sl_ok else 'FAIL'}/TP{'OK' if tp_ok else 'FAIL'} on {remaining}"
+            log_ledger(source_system="boba_decision_cycle", source_file=__file__, intent="exit",
+                       decision="submitted" if ok else "rejected", account="Boba",
+                       asset_class="option" if is_option else "equity", symbol=sym, side="sell",
+                       qty=close_qty, order_type="limit", limit_price=limit_p,
+                       reason_code=act.lower(), reason_detail=details)
             return {"ok": ok, "action": act, "symbol": sym, "details": details}
 
         elif act == "EXIT":
@@ -2025,6 +2037,11 @@ def execute_position_action(action_dict, positions):
             sr = requests.post(f"{BASE}/orders", headers=headers, json=sell_body, timeout=15)
             ok = sr.status_code in (200, 201)
             err = None if ok else f"HTTP {sr.status_code}: {sr.text[:200]}"
+            log_ledger(source_system="boba_decision_cycle", source_file=__file__, intent="exit",
+                       decision="submitted" if ok else "rejected", account="Boba",
+                       asset_class="option" if is_option else "equity", symbol=sym, side="sell",
+                       qty=qty, order_type="limit", limit_price=limit_p,
+                       reason_code="exit", reason_detail=f"full exit limit {qty} @ ${limit_p:.2f}")
             return {"ok": ok, "action": act, "symbol": sym, "details": f"sell limit {qty} @ ${limit_p:.2f}", "error": err}
 
         elif act == "TIGHTEN_STOP":
