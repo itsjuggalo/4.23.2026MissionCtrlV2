@@ -12,6 +12,11 @@ import os
 import sys
 import requests
 from datetime import datetime, timezone, timedelta
+
+sys.path.insert(0, os.path.expanduser("~/scripts"))
+from lib.http_retry import requests_session
+# Retries idempotent GET/DELETE (429/5xx/timeout); POST excluded -> order submits never auto-retried.
+SESSION = requests_session()
 # R1 safety guard - skip if buying power below threshold (paper-margin artifact)
 MIN_BUYING_POWER = 1000.0
 
@@ -88,7 +93,7 @@ def alpaca_headers():
 
 def alpaca_get(path):
     try:
-        r = requests.get(f"{ALPACA_BASE}{path}", headers=alpaca_headers(), timeout=10)
+        r = SESSION.get(f"{ALPACA_BASE}{path}", headers=alpaca_headers(), timeout=10)
         return r.json() if r.status_code == 200 else {}
     except:
         return {}
@@ -503,7 +508,7 @@ def main():
         p = signal.get("entry_price") or 0
         if not p or p <= 0:
             try:
-                r = requests.get("https://api.coingecko.com/api/v3/simple/price",
+                r = SESSION.get("https://api.coingecko.com/api/v3/simple/price",
                     params={"ids": "bitcoin", "vs_currencies": "usd"}, timeout=10)
                 p = r.json().get("bitcoin", {}).get("usd", 0)
                 print(f"  Fetched current BTC price: ${p:,.2f}")
@@ -517,7 +522,7 @@ def main():
             orders = alpaca_get("/v2/orders?status=open&symbols=BTC/USD")
             if isinstance(orders, list):
                 for o in orders:
-                    requests.delete(f"{ALPACA_BASE}/v2/orders/{o['id']}",
+                    SESSION.delete(f"{ALPACA_BASE}/v2/orders/{o['id']}",
                         headers=alpaca_headers(), timeout=10)
                     print(f"  Cancelled order {o['id']}")
         except:

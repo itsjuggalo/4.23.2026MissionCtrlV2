@@ -31,6 +31,11 @@ import time
 from datetime import datetime, timezone, timedelta
 from pathlib import Path
 
+sys.path.insert(0, os.path.expanduser("~/scripts"))
+from lib.http_retry import requests_session
+# Retries idempotent GET/DELETE (429/5xx/timeout); POST excluded -> order submits never auto-retried.
+SESSION = requests_session()
+
 sys.path.insert(0, "/home/ubuntu/scripts/lib")
 sys.path.insert(0, "/home/ubuntu/mission-control/agent-team")
 
@@ -85,7 +90,7 @@ def assert_correct_account():
     """Crash if this daemon is pointed at the wrong Alpaca account."""
     import requests
     try:
-        r = requests.get(f"{ALPACA_BASE}/v2/account", headers=alpaca_headers(), timeout=10)
+        r = SESSION.get(f"{ALPACA_BASE}/v2/account", headers=alpaca_headers(), timeout=10)
         if r.status_code != 200:
             print(f"[FATAL] Cannot reach Alpaca: HTTP {r.status_code}", flush=True)
             raise SystemExit(1)
@@ -117,7 +122,7 @@ def alpaca_headers() -> dict:
 def fetch_alpaca_positions() -> list:
     import requests
     try:
-        r = requests.get(f"{ALPACA_BASE}/v2/positions", headers=alpaca_headers(), timeout=10)
+        r = SESSION.get(f"{ALPACA_BASE}/v2/positions", headers=alpaca_headers(), timeout=10)
         return r.json() if r.status_code == 200 else []
     except Exception as e:
         log_to_ops("position_daemon", "ERROR", f"Fetch positions failed: {e}")
@@ -132,14 +137,14 @@ def cancel_open_sells_for_symbol(symbol: str) -> int:
     """
     import requests
     try:
-        r = requests.get(f"{ALPACA_BASE}/v2/orders?status=open&limit=100",
+        r = SESSION.get(f"{ALPACA_BASE}/v2/orders?status=open&limit=100",
                          headers=alpaca_headers(), timeout=10)
         if r.status_code != 200:
             return 0
         cancelled = 0
         for o in r.json():
             if o.get("symbol") == symbol and o.get("side") == "sell":
-                del_r = requests.delete(f"{ALPACA_BASE}/v2/orders/{o.get('id')}",
+                del_r = SESSION.delete(f"{ALPACA_BASE}/v2/orders/{o.get('id')}",
                                         headers=alpaca_headers(), timeout=5)
                 if del_r.status_code in (200, 204):
                     cancelled += 1

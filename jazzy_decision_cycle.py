@@ -196,6 +196,11 @@ from post_helper import post_to_telegram
 from ops_log import log_to_ops
 import firebase_signals
 
+sys.path.insert(0, os.path.expanduser("~/scripts"))
+from lib.http_retry import requests_session
+# Retries idempotent GET/DELETE (429/5xx/timeout); POST excluded -> order submits never auto-retried.
+SESSION = requests_session()
+
 def _mc_kb_recall():
     """Build a rich pre-prompt context block (ticker-aware).
 
@@ -658,7 +663,7 @@ def get_alpaca_account():
         import requests
         key = read_secret("alpaca-jazzy-key-id") or read_secret("alpaca-jazzy-key-id")
         sec = read_secret("alpaca-jazzy-secret") or read_secret("alpaca-jazzy-secret")
-        r = requests.get(
+        r = SESSION.get(
             "https://paper-api.alpaca.markets/v2/account",
             headers={"APCA-API-KEY-ID": key, "APCA-API-SECRET-KEY": sec},
             timeout=10,
@@ -675,7 +680,7 @@ def get_alpaca_positions():
         import requests
         key = read_secret("alpaca-jazzy-key-id") or read_secret("alpaca-jazzy-key-id")
         sec = read_secret("alpaca-jazzy-secret") or read_secret("alpaca-jazzy-secret")
-        r = requests.get(
+        r = SESSION.get(
             "https://paper-api.alpaca.markets/v2/positions",
             headers={"APCA-API-KEY-ID": key, "APCA-API-SECRET-KEY": sec},
             timeout=10,
@@ -1434,7 +1439,7 @@ def convert_spx_to_spy(pick):
         }
 
         # Get live SPY + SPX prices for ratio
-        r = _requests.get("https://data.alpaca.markets/v2/stocks/SPY/quotes/latest",
+        r = SESSION.get("https://data.alpaca.markets/v2/stocks/SPY/quotes/latest",
                           headers=H, timeout=10)
         if not r.ok:
             return pick, f"SPX→SPY conversion failed: Alpaca quote error {r.status_code}"
@@ -1468,7 +1473,7 @@ def convert_spx_to_spy(pick):
         option_type = pick.get("option_type", "PUT").upper()
         tradier_type = "put" if option_type.startswith("P") else "call"
 
-        r2 = _requests.get(
+        r2 = SESSION.get(
             "https://paper-api.alpaca.markets/v2/options/contracts",
             headers=H,
             params={
@@ -1548,7 +1553,7 @@ def convert_spx_to_spy(pick):
         opt_letter = "P" if option_type.startswith("P") else "C"
         strike_str = f"{int(round(final_spy_strike * 1000)):08d}"
         candidate_symbol = f"SPY{yymmdd}{opt_letter}{strike_str}"
-        v_check = _requests.get(
+        v_check = SESSION.get(
             f"https://paper-api.alpaca.markets/v2/options/contracts/{candidate_symbol}",
             headers=H, timeout=10
         )
@@ -1684,12 +1689,12 @@ def execute_pick_on_alpaca(pick):
 
         # 0. PRE-FLIGHT: cancel stale sell orders that could block the buy
         try:
-            existing = requests.get("https://paper-api.alpaca.markets/v2/orders?status=open&limit=100",
+            existing = SESSION.get("https://paper-api.alpaca.markets/v2/orders?status=open&limit=100",
                 headers=headers, timeout=10).json()
             stale = [o for o in existing if o.get("symbol") == occ_symbol and o.get("side") == "sell"]
             if stale:
                 for so in stale:
-                    requests.delete(f"https://paper-api.alpaca.markets/v2/orders/{so.get('id')}",
+                    SESSION.delete(f"https://paper-api.alpaca.markets/v2/orders/{so.get('id')}",
                         headers=headers, timeout=10)
                 _time.sleep(1)
                 _post_bobatrades(f"🧹 Pre-flight cleanup: cancelled {len(stale)} stale sell order(s) on {occ_symbol}")
@@ -1720,7 +1725,7 @@ def execute_pick_on_alpaca(pick):
         fill_price = None
         for _ in range(20):  # 20 * 500ms = 10s
             _time.sleep(0.5)
-            poll_r = requests.get(
+            poll_r = SESSION.get(
                 f"https://paper-api.alpaca.markets/v2/orders/{buy_id}",
                 headers=headers, timeout=5,
             )
@@ -1863,12 +1868,12 @@ def execute_position_action(action_dict, positions):
         BASE = "https://paper-api.alpaca.markets/v2"
 
         # 1. Cancel any open sell orders for this symbol (releases share reservation)
-        r = requests.get(f"{BASE}/orders?status=open&limit=100", headers=headers, timeout=10)
+        r = SESSION.get(f"{BASE}/orders?status=open&limit=100", headers=headers, timeout=10)
         cancelled = 0
         if r.status_code == 200:
             for o in r.json():
                 if o.get("symbol") == sym and o.get("side") == "sell":
-                    dr = requests.delete(f"{BASE}/orders/{o.get('id')}", headers=headers, timeout=5)
+                    dr = SESSION.delete(f"{BASE}/orders/{o.get('id')}", headers=headers, timeout=5)
                     if dr.status_code in (200, 204):
                         cancelled += 1
         if cancelled > 0:
@@ -1937,10 +1942,10 @@ def execute_position_action(action_dict, positions):
             stop_l = round(max(stop_t * 0.90, 0.01), 2)
             tp_p = round(max(avg_entry * (1 + tp_pct/100), 0.01), 2)
             try:
-                ex = requests.get(f"{BASE}/orders?status=open&limit=100", headers=headers, timeout=10).json()
+                ex = SESSION.get(f"{BASE}/orders?status=open&limit=100", headers=headers, timeout=10).json()
                 for eo in ex:
                     if eo.get("symbol") == sym and eo.get("side") == "sell":
-                        requests.delete(f"{BASE}/orders/{eo.get('id')}", headers=headers, timeout=10)
+                        SESSION.delete(f"{BASE}/orders/{eo.get('id')}", headers=headers, timeout=10)
                         _time.sleep(0.2)
             except Exception:
                 pass
