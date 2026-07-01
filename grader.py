@@ -34,6 +34,9 @@ from datetime import datetime, timezone, timedelta
 from pathlib import Path
 from typing import Any
 
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+from lib.http_retry import get_json as _http_get_json  # noqa: E402
+
 SECRETS = Path("/home/ubuntu/.openclaw/secrets")
 BOBA_LOG = Path("/home/ubuntu/.openclaw/workspace/skill_outputs/boba_decisions_validated.json")
 JAZZY_LOG = Path("/home/ubuntu/.openclaw/workspace/skill_outputs/jazzy_decisions_validated.json")
@@ -83,12 +86,9 @@ def _alpaca_headers(account: str) -> dict:
 
 
 def _http_get(url: str, headers: dict, timeout: float = 8) -> Any:
-    try:
-        req = urllib.request.Request(url, headers=headers)
-        with urllib.request.urlopen(req, timeout=timeout) as r:
-            return json.loads(r.read().decode())
-    except Exception:
-        return None
+    # Shared retry wrapper: backoff on transient 429/5xx/timeout, None on hard failure
+    # (callers already coalesce None -> {} / []). Read-only grading path.
+    return _http_get_json(url, headers=headers, timeout=timeout, retries=3)
 
 
 def fetch_account(account: str) -> dict:

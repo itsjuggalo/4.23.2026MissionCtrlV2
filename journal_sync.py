@@ -17,6 +17,7 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 from lib.portfolio import _rd  # noqa: E402
+from lib.http_retry import get_json as _http_get_json  # noqa: E402
 
 DB = Path.home() / "web" / "missionctrl" / "data" / "dashboard_history.sqlite"
 ACCTS = {"boba": ("alpaca-boba-key-id", "alpaca-boba-secret"),
@@ -31,10 +32,11 @@ INS = """INSERT INTO trade_journal
 
 def fills(k, s):
     url = "https://paper-api.alpaca.markets/v2/account/activities/FILL?page_size=100"
-    req = urllib.request.Request(url, headers={
-        "APCA-API-KEY-ID": k, "APCA-API-SECRET-KEY": s, "User-Agent": "mc-journal/1.0"})
-    with urllib.request.urlopen(req, timeout=20) as r:
-        return json.loads(r.read())
+    # Shared retry wrapper (429/5xx/timeout backoff). Returns [] on hard failure instead of
+    # raising — a transient miss skips this run and catches up next tick (dedupe by activity id).
+    return _http_get_json(url, headers={
+        "APCA-API-KEY-ID": k, "APCA-API-SECRET-KEY": s, "User-Agent": "mc-journal/1.0"},
+        timeout=20, retries=3) or []
 
 
 def main():
