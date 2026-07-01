@@ -70,6 +70,12 @@ Z_CRISIS, Z_EXTREME = -2.5, -3.5
 # move read z -8.32 on 2026-06-17 and latched a false CRISIS). A genuine crash bar
 # moves materially; require |move| >= this before the z-score can count as a trigger.
 Z_MIN_MOVE_PCT = 0.40
+# Closing-bell z-artifact guard (GATED, flag defaults OFF). The 15:59→16:00 closing-auction
+# 1-min bar prints an outsized return that, on an otherwise quiet tape, detonates the z-score
+# and can latch a false CRISIS right at the bell (see project-codex-sweep-phases: the Jun-26
+# trip). When SHOCK_EXCLUDE_CLOSING_BAR=1, drop any bar stamped 15:59 ET or later from the SPY
+# z-score window. Default OFF = today's behavior; Mike flips it to arm.
+EXCLUDE_CLOSING_BAR = os.environ.get("SHOCK_EXCLUDE_CLOSING_BAR", "0") == "1"
 BTC_15M_PCT = -3.0
 # News is slow-moving and only ARMS an advisory WATCH (price action drives CRISIS), so it does
 # not need the 2-min price cadence. Polling it every ~5 min cuts a third of shock_guard's Alpaca
@@ -138,6 +144,18 @@ def check_vix() -> dict:
             "ratio": round(ratio, 3) if ratio else None}
 
 
+def _is_closing_bar(ts_iso: str) -> bool:
+    """True if an Alpaca bar timestamp falls in the closing-auction window (>=15:59 ET).
+    Never raises — a bad/missing timestamp is treated as not-closing (keeps the bar)."""
+    if not ts_iso:
+        return False
+    try:
+        dt = datetime.fromisoformat(ts_iso.replace("Z", "+00:00")).astimezone(ET)
+    except Exception:
+        return False
+    return dt.hour >= 16 or (dt.hour == 15 and dt.minute >= 59)
+
+
 def check_spy_z() -> dict:
     """z-score of the latest 1-min SPY return vs the trailing 20 bars."""
     key, sec_ = _secret("alpaca-boba-key-id"), _secret("alpaca-boba-secret")
@@ -149,6 +167,8 @@ def check_spy_z() -> dict:
              f"?timeframe=1Min&limit=40&feed=iex&start={start_iso}",
              headers={"APCA-API-KEY-ID": key, "APCA-API-SECRET-KEY": sec_})
     bars = (d or {}).get("bars") or []
+    if EXCLUDE_CLOSING_BAR:
+        bars = [b for b in bars if not _is_closing_bar(b.get("t"))]
     closes = [b["c"] for b in bars if b.get("c")]
     if len(closes) < 15:
         return {"z": None}
