@@ -71,6 +71,10 @@ Z_CRISIS, Z_EXTREME = -2.5, -3.5
 # moves materially; require |move| >= this before the z-score can count as a trigger.
 Z_MIN_MOVE_PCT = 0.40
 BTC_15M_PCT = -3.0
+# News is slow-moving and only ARMS an advisory WATCH (price action drives CRISIS), so it does
+# not need the 2-min price cadence. Polling it every ~5 min cuts a third of shock_guard's Alpaca
+# data calls (the dominant 429 source) with no impact on shock latency.
+NEWS_POLL_SEC = 300
 NEWS_KEYWORDS = ("tariff", "trump", "truth social", "fed ", "federal reserve",
                  "rate hike", "emergency", "halt", "war ", "strike on", "nuclear",
                  "invasion", "default", "bank failure", "circuit breaker", "china")
@@ -312,7 +316,15 @@ def main() -> int:
     vix_d = check_vix()
     btc_d = check_btc()
     spy_d = check_spy_z() if full else {"z": None}
-    headlines = check_news(st)
+    # Throttle the news poll to NEWS_POLL_SEC; reuse the last headlines in between so a CRISIS
+    # confirmed on price mid-window still carries the headline context. FORCE_LEVEL/DRY always poll.
+    if os.environ.get("FORCE_LEVEL") or DRY or \
+            time.time() - st.get("last_news_poll", 0) >= NEWS_POLL_SEC:
+        headlines = check_news(st)
+        st["last_news_poll"] = time.time()
+        st["last_headlines"] = headlines
+    else:
+        headlines = st.get("last_headlines", [])
 
     vix = vix_d.get("vix")
     z = spy_d.get("z")
