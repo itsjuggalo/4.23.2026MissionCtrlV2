@@ -22,7 +22,7 @@ Usage:
 import argparse, json, math, os, sqlite3, sys, datetime
 from pathlib import Path
 
-DB  = Path(os.path.expanduser("~/LapClaw/pipeline/desk_pipeline.sqlite"))
+DB  = Path(os.path.expanduser("/AIWorkWSL/web/missionctrl/pipeline/desk_pipeline.sqlite"))
 LOG = Path(os.path.expanduser("~/.openclaw/workspace/memory/risk_gate_verdicts.jsonl"))
 
 DEMO = [

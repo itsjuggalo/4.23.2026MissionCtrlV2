@@ -6,7 +6,7 @@ Usage:
     --name "Kronos retraining" \\
     --desc "Fine-tuning on expanded telegram dataset" \\
     --check log_tail \\
-    --target ~/LapClaw/logs/kronos_train.log \\
+    --target /AIWorkWSL/web/missionctrl/logs/kronos_train.log \\
     --pattern "Training complete|Epoch 10" \\
     --timeout 6
 

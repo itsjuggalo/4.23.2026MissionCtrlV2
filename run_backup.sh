@@ -70,7 +70,7 @@ cp ~/.oci/oci_api_key_public.pem "$SECRETS_TMP/oci/oci_api_key_public.pem" 2>/de
 cp ~/.config/mc-secrets/secrets.sqlite "$SECRETS_TMP/mc-secrets/secrets.sqlite" 2>/dev/null || true
 # Narrowed 2026-06-03: only the EXPLICIT live-app env files that aren't in the store,
 # not a home-wide find (which tripped the credential-collection safety gate).
-for f in ~/aries/.env.local ~/LapClaw/.env.local; do
+for f in ~/aries/.env.local /AIWorkWSL/web/missionctrl/.env.local; do
   [ -f "$f" ] && cp "$f" "$SECRETS_TMP/env-files/$(echo "$f" | sed "s|$HOME/||" | tr '/' '_')" 2>/dev/null || true
 done
 
@@ -100,12 +100,12 @@ mkdir -p "$SENS_TMP/telegram-session" "$SENS_TMP/databases"
 # (those tripped the credential-collection + privilege-escalation safety gate and
 # aren't needed to restore service). Telegram sessions + trade DBs are scoped to
 # their KNOWN dirs only, not a home-wide find.
-for d in ~/mission-control-restored ~/01_ACTIVE/mission-control-restored ~/LapClaw; do
+for d in ~/mission-control-restored ~/01_ACTIVE/mission-control-restored /AIWorkWSL/web/missionctrl; do
   [ -d "$d" ] && find "$d" -maxdepth 3 -name "*.session" 2>/dev/null | while read s; do
     cp "$s" "$SENS_TMP/telegram-session/" 2>/dev/null || true
   done
 done
-for d in ~/LapClaw/pipeline ~/.openclaw; do
+for d in /AIWorkWSL/web/missionctrl/pipeline ~/.openclaw; do
   [ -d "$d" ] && find "$d" -maxdepth 2 \( -name "*.db" -o -name "*.sqlite" \) 2>/dev/null | while read f; do
     cp "$f" "$SENS_TMP/databases/$(echo "$f" | sed "s|$HOME/||" | tr '/' '_')" 2>/dev/null || true
   done

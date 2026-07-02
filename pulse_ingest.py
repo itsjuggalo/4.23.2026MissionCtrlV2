@@ -8,8 +8,8 @@ import sqlite3
 import time
 import os
 
-DASHBOARD_DB = '/home/itsju/LapClaw/data/dashboard_history.sqlite'
-LIVE_TRADES_DB = '/home/itsju/LapClaw/data/live_trades.sqlite'
+DASHBOARD_DB = '/AIWorkWSL/web/missionctrl/data/dashboard_history.sqlite'
+LIVE_TRADES_DB = '/AIWorkWSL/web/missionctrl/data/live_trades.sqlite'
 
 def get_signal_counts():
     if not os.path.exists(LIVE_TRADES_DB):
