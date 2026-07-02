@@ -53,6 +53,18 @@ relaunch() { # relaunch <port>
           sleep 1
           autossh -M 0 -fN -o ServerAliveInterval=30 -o ServerAliveCountMax=3 \
                   -o ExitOnForwardFailure=yes -R 3303:localhost:3003 openclaw ;;
+    13000) pkill -f -- '-R 13000:localhost:3000' 2>/dev/null
+          sleep 1
+          autossh -M 0 -fN -o ServerAliveInterval=30 -o ServerAliveCountMax=3 \
+                  -o ExitOnForwardFailure=yes -R 13000:localhost:3000 openclaw ;;
+    4711) pkill -f -- '-R 4711:localhost:4711' 2>/dev/null
+          sleep 1
+          autossh -M 0 -fN -o ServerAliveInterval=30 -o ServerAliveCountMax=3 \
+                  -o ExitOnForwardFailure=yes -R 4711:localhost:4711 openclaw ;;
+    1337) pkill -f -- '-R 1337:localhost:1337' 2>/dev/null
+          sleep 1
+          AUTOSSH_GATETIME=0 autossh -M 0 -fN -o ServerAliveInterval=30 -o ServerAliveCountMax=3 \
+                  -o ExitOnForwardFailure=yes -R 1337:localhost:1337 openclaw ;;
     8091) pkill -f -- '-R 127.0.0.1:8091:127.0.0.1:8091' 2>/dev/null
           sleep 1
           autossh -M 0 -fN -o ServerAliveInterval=30 -o ServerAliveCountMax=3 \
@@ -62,12 +74,15 @@ relaunch() { # relaunch <port>
 
 probe() { # probe -> lines "port BINDSTATE httpcode"
   ssh -o BatchMode=yes -o ConnectTimeout=10 openclaw '
-    for p in 3303; do   # 2026-06-30: massage-only — 3300 (dashboard mirror) + 8091 (hive-mind) retired in the laptop-only cutover
+    for p in 3300 3303 13000 4711 1337; do   # 2026-07-01: 3300 (mcv2 mirror + TV webhook) restored per Mike; +13000 (bridge /tv-webhook) +4711 (kronos /raw). 8091 (hive-mind) stays retired.
       if ss -ltn 2>/dev/null | grep -q ":${p} "; then s=LISTEN; else s=DEAD; fi
       case "$p" in
-        3300) u="http://127.0.0.1:3300/" ;;
-        3303) u="http://127.0.0.1:3303/api/health" ;;
-        *)    u="http://127.0.0.1:8091/health" ;;
+        3300)  u="http://127.0.0.1:3300/" ;;
+        3303)  u="http://127.0.0.1:3303/api/health" ;;
+        13000) u="http://127.0.0.1:13000/" ;;
+        4711)  u="http://127.0.0.1:4711/health" ;;
+        1337)  u="http://127.0.0.1:1337/" ;;
+        *)     u="http://127.0.0.1:8091/health" ;;
       esac
       c=$(curl -s -o /dev/null -w "%{http_code}" -m 6 "$u" 2>/dev/null || echo ERR)
       echo "$p $s $c"
