@@ -646,15 +646,6 @@ client = discord.Client(intents=intents)
 tree = app_commands.CommandTree(client)
 
 
-@tree.error
-async def _tree_error(interaction: discord.Interaction, error) -> None:
-    # Swallow the CheckFailure raised by the Mike-only gate below; re-raise the rest.
-    if isinstance(error, app_commands.CheckFailure):
-        return
-    raise error
-
-
-@tree.check
 async def _mike_only(interaction: discord.Interaction) -> bool:
     # Single chokepoint: every slash command + context menu is gated to Mike, so
     # no stranger can spend the subscription / AInvest via this bot.
@@ -666,6 +657,11 @@ async def _mike_only(interaction: discord.Interaction) -> bool:
             pass
         return False
     return True
+
+
+# CommandTree gates every app command through interaction_check (returning False
+# silently blocks it — no command body, no LLM/AInvest call runs).
+tree.interaction_check = _mike_only
 
 
 @tree.command(name="aime", description="Ask AInvest AIME (market/stock/options intelligence)")
