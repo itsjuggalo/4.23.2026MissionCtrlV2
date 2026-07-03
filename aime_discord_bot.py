@@ -42,6 +42,9 @@ SEC = Path.home() / ".openclaw" / "secrets"
 TOKEN_FILE = os.environ.get("DISCORD_AIME_TOKEN_FILE", "discord_ops_bot_token")
 TOKEN = (SEC / TOKEN_FILE).read_text(encoding="utf-8").strip()
 CHANNEL_ID = int(os.environ.get("AIME_CHANNEL_ID", "0") or 0)
+# Mike-only lock: this bot spends the claude.ai subscription + AInvest on every
+# slash command / free-text reply / card button, so ONLY Mike may drive it.
+MIKE_ID = int(os.environ.get("DISCORD_MIKE_ID", "733531188752285716"))
 DISCORD_MAX = 2000
 
 
@@ -117,7 +120,18 @@ def _ticker_from_msg(msg) -> str:
     return m.group(1) if m else "?"
 
 
-class PickView(discord.ui.View):
+class _MikeView(discord.ui.View):
+    """Base for every card view — only Mike may click the buttons (some place
+    paper orders / run skills)."""
+    async def interaction_check(self, interaction: discord.Interaction) -> bool:
+        if interaction.user.id != MIKE_ID:
+            await interaction.response.send_message(
+                "🔒 This deck is private to Mike.", ephemeral=True)
+            return False
+        return True
+
+
+class PickView(_MikeView):
     def __init__(self):
         super().__init__(timeout=None)
 
@@ -490,7 +504,7 @@ def _payoff_png_caption(spec):
 PAY_DEC, PAY_INC, PAY_FLIP = "pf:dec", "pf:inc", "pf:flip"
 
 
-class PayoffView(discord.ui.View):
+class PayoffView(_MikeView):
     """Interactive payoff — tweak contracts / flip C/P; the diagram re-renders in place."""
     def __init__(self):
         super().__init__(timeout=None)
@@ -538,7 +552,7 @@ def _parse_buy_token(text):
             "price": float(m.group(4)), "bucket": int(m.group(5))}
 
 
-class ConfirmBuyView(discord.ui.View):
+class ConfirmBuyView(_MikeView):
     """Two-step paper-buy gate: the order is placed ONLY when ✅ Confirm is tapped,
     and both buttons disable on the first tap so a second click is a no-op. The 5-min
     client_order_id in _submit_paper_buy is the server-side duplicate backstop."""
@@ -570,7 +584,7 @@ class ConfirmBuyView(discord.ui.View):
         await self._disable(interaction, "✖ Cancelled — no order placed.")
 
 
-class ActionView(discord.ui.View):
+class ActionView(_MikeView):
     def __init__(self):
         super().__init__(timeout=None)
 
@@ -630,6 +644,28 @@ if CHANNEL_ID:
 
 client = discord.Client(intents=intents)
 tree = app_commands.CommandTree(client)
+
+
+@tree.error
+async def _tree_error(interaction: discord.Interaction, error) -> None:
+    # Swallow the CheckFailure raised by the Mike-only gate below; re-raise the rest.
+    if isinstance(error, app_commands.CheckFailure):
+        return
+    raise error
+
+
+@tree.check
+async def _mike_only(interaction: discord.Interaction) -> bool:
+    # Single chokepoint: every slash command + context menu is gated to Mike, so
+    # no stranger can spend the subscription / AInvest via this bot.
+    if interaction.user.id != MIKE_ID:
+        try:
+            await interaction.response.send_message(
+                "🔒 This bot is private to Mike.", ephemeral=True)
+        except discord.InteractionResponded:
+            pass
+        return False
+    return True
 
 
 @tree.command(name="aime", description="Ask AInvest AIME (market/stock/options intelligence)")
@@ -1166,7 +1202,9 @@ async def on_ready():
 
 @client.event
 async def on_message(message: discord.Message):
-    if message.author.bot or not CHANNEL_ID or message.channel.id != CHANNEL_ID:
+    if message.author.bot or message.author.id != MIKE_ID:
+        return  # Mike-only: never spend AIME/subscription on anyone else
+    if not CHANNEL_ID or message.channel.id != CHANNEL_ID:
         return
     q = (message.content or "").strip()
     if not q or q.startswith("/"):
