@@ -19,11 +19,11 @@ CG_ID = {
     "XLM": "stellar", "ALGO": "algorand", "HBAR": "hedera-hashgraph", "JASMY": "jasmycoin",
     "CRO": "crypto-com-chain", "SHIB": "shiba-inu", "GRT": "the-graph", "UNI": "uniswap",
     "RNDR": "render-token", "COTI": "coti", "LRC": "loopring", "AMP": "amp-token",
-    "XCN": "onyxcoin", "AUCTION": "auction", "CLV": "clover-finance",
+    "XCN": "chain-2", "AUCTION": "auction", "CLV": "clover-finance",
 }
 
-# yfinance alias fixes (renames/quirks)
-YF_ALIAS = {"RNDR": "RENDER-USD"}
+# yfinance alias fixes (renames/quirks — Yahoo disambiguates dup tickers with numbers)
+YF_ALIAS = {"RNDR": "RENDER-USD", "UNI": "UNI7083-USD", "GRT": "GRT6719-USD"}
 
 CG_URL = "https://api.coingecko.com/api/v3/simple/price"
 

@@ -26,14 +26,18 @@ STATE = PORT / ".coach_state.json"
 VERDICTS = PORT / "coach_verdicts.json"
 
 DEFAULT_CONFIG = {
-    "buckets": {"core": ["BTC", "ETH", "QQQ", "IBIT"], "satellite": []},
+    # bucket entries may be bare ("BTC" = any asset class) or qualified ("crypto:BTC",
+    # "stock:QQQ") — qualified wins; RH lists a STOCK ticker "BTC" (Grayscale mini ETF)
+    # that must NOT inherit the coin's core status.
+    "buckets": {"core": ["crypto:BTC", "crypto:ETH", "stock:QQQ", "stock:IBIT"],
+                "satellite": []},
     "core_note": "UNCONFIRMED defaults — Mike edits this list (or answers the CORE question)",
     "default_bucket": "satellite",
     "dust_max_usd": 5.0,
     "rules": {
         "dead_bag_pnl_pct": -50, "trim_gain_pct": 75, "concentration_pct": 25,
         "core_trail_pct": 15, "satellite_trail_pct": 8, "trim_trail_pct": 5,
-        "satellite_hard_stop_pct": 10, "core_bear_factors_req": 2,
+        "satellite_hard_stop_pct": 10, "core_bear_factors_req": 3,
         "big_move_alert_pct": 8,
     },
 }
@@ -104,12 +108,13 @@ def positions(book: dict, crypto_only: bool = False) -> list[dict]:
 
 
 def bucket_of(symbol: str, asset_class: str, cfg: dict) -> str:
-    """core | satellite. Keys may be bare (BTC) or broker-qualified in future."""
+    """core | satellite. Entries may be bare (BTC) or asset-qualified (crypto:BTC)."""
     s = symbol.upper()
-    if s in {x.upper() for x in cfg["buckets"].get("core", [])}:
-        return "core"
-    if s in {x.upper() for x in cfg["buckets"].get("satellite", [])}:
-        return "satellite"
+    q = f"{asset_class}:{s}".upper()
+    for name in ("core", "satellite"):
+        entries = {x.upper() for x in cfg["buckets"].get(name, [])}
+        if q in entries or s in entries:
+            return name
     return cfg.get("default_bucket", "satellite")
 
 

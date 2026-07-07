@@ -140,9 +140,19 @@ def coach_card(r: dict) -> str | None:
         axb.add_patch(FancyBboxPatch((0.0, 0.0), 1.0, 1.0, transform=axb.transAxes,
                       boxstyle="round,pad=0.01", fc=cr.PAL["panel"], ec=cr.PAL["edge"],
                       lw=0.8, zorder=0))
-        why = " · ".join(r.get("reasons", [])[:2])[:220]
-        play = next((x for x in r.get("reasons", []) if "stop" in x.lower()
-                     or "trail" in x.lower() or "sell" in x.lower()), "")[:220]
+        # matplotlib mathtext eats $…$ pairs — escape every dollar sign
+        why = " · ".join(r.get("reasons", [])[:2])[:220].replace("$", r"\$")
+        verb = {"HOLD": "hold — keep the stop honest", "ADD": "add small, stop set FIRST",
+                "TRIM": "sell half, trail the rest", "EXIT_ON_BOUNCE": "sell the next pop",
+                "EXIT": "exit now"}.get(r["verdict"], "")
+        lvl = []
+        if r.get("target"):
+            lvl.append(f"target {r['target']:g}")
+        if r.get("trail_stop"):
+            lvl.append(f"trail {r['trail_stop']:g}")
+        if r.get("stop"):
+            lvl.append(f"hard line {r['stop']:g} (daily close below = out)")
+        play = (f"{verb} · " + " · ".join(lvl) if lvl else verb).replace("$", r"\$")[:220]
         axb.text(0.02, 0.72, "WHY", transform=axb.transAxes, fontsize=8.5,
                  color=cr.PAL["accent"], fontweight="bold")
         axb.text(0.02, 0.44, why, transform=axb.transAxes, fontsize=9.8,

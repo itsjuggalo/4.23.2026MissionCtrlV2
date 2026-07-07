@@ -80,7 +80,13 @@ def _factor_counts(ta: dict) -> tuple[list[str], list[str]]:
 def _fmt(x, nd=2):
     if x is None:
         return "?"
-    return f"{x:,.{nd}f}" if isinstance(x, (int, float)) else str(x)
+    if isinstance(x, (int, float)):
+        if abs(x) < 0.01:         # sub-cent alts (XCN): full precision
+            return f"{x:,.6f}"
+        if abs(x) < 1:            # sub-dollar (DOGE): real precision
+            return f"{x:,.4f}"
+        return f"{x:,.{nd}f}"
+    return str(x)
 
 
 def assess_position(p: dict, cfg: dict, state: dict, invested: float,
@@ -96,7 +102,7 @@ def assess_position(p: dict, cfg: dict, state: dict, invested: float,
     conc = (mv / invested * 100) if invested else 0.0
     bucket = bookmod.bucket_of(sym, ac, cfg)
     rules = cfg["rules"]
-    key = f"{p.get('broker','?')}:{sym}"
+    key = f"{p.get('broker','?')}:{ac}:{sym}"  # asset_class in key: RH stock BTC ≠ RH coin BTC
 
     rec = {"key": key, "symbol": sym, "broker": p.get("broker"), "asset_class": ac,
            "bucket": bucket, "mv": round(mv, 2), "qty": qty, "pnl_pct": pnl,
@@ -118,6 +124,10 @@ def assess_position(p: dict, cfg: dict, state: dict, invested: float,
     try:
         ta = analyze(tsym, side="long", asset_type=ac, period="1y")
         if ta.get("error"):
+            ta = None
+        # ta_engine rounds prices to 2dp — sub-nickel coins (XCN $0.004) come back as
+        # $0.00 garbage. Degrade them to price-only triage rather than fake TA on noise.
+        elif float(ta.get("current") or 0) < 0.05:
             ta = None
     except Exception:
         ta = None
@@ -164,6 +174,8 @@ def assess_position(p: dict, cfg: dict, state: dict, invested: float,
         ta_stop = max(cands)
     if atr:
         ta_stop = max(ta_stop or 0, cur - 1.5 * atr) if ta_stop else cur - 1.5 * atr
+    if ta_stop is not None and ta_stop <= 0:
+        ta_stop = None            # tiny alts: a ≤$0 stop is meaningless, drop it
     reasons = []
     fund_bits = []
     if with_fundamentals and ac == "stock":

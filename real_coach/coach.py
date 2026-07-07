@@ -50,7 +50,7 @@ def tg_send(msg: str) -> bool:
 
 def tg_photo(path: str, caption: str) -> bool:
     try:
-        out = subprocess.run([sys.executable, str(TG_FLEET), "send_upload", TG_FN, path, caption],
+        out = subprocess.run([sys.executable, str(TG_FLEET), "sendmedia", TG_FN, path, caption],
                              capture_output=True, text=True, timeout=60)
         ok = out.returncode == 0
         if not ok:
@@ -62,20 +62,30 @@ def tg_photo(path: str, caption: str) -> bool:
 
 
 def selftest() -> int:
-    """Advisory-only guard: no order-placement endpoints may exist in this package."""
-    banned = ("orders/", "submit_order", "place_order", "sendOrder", "create_order",
-              "POST", "market_buy", "market_sell")
+    """Advisory-only guard: no ORDER-PLACING code may exist anywhere in this package.
+
+    Reads are fine (the fills vault pages GET /orders/ history); what's banned is any
+    write verb or a request built with a POST body.
+    """
+    banned = ("submit_order", "place_order", "create_order", "sendOrder",  # banlist
+              "market_buy", "market_sell", 'method="POST"', "method='POST'",  # banlist
+              "orders create", ".post(")  # banlist
     bad = []
     pkg = Path(__file__).resolve().parent
-    for f in sorted(pkg.glob("*.py")):
-        text = f.read_text()
-        for b in banned:
-            if b in text and f.name != "coach.py":  # this file defines the banlist
-                bad.append(f"{f.name}: contains '{b}'")
+    files = sorted(pkg.rglob("*.py"))
+    for f in files:
+        for ln, line in enumerate(f.read_text().splitlines(), 1):
+            if "# banlist" in line or "Request(\" in line" in line:
+                continue  # the banlist / scanner itself
+            for b in banned:
+                if b in line:
+                    bad.append(f"{f.relative_to(pkg)}:{ln}: contains '{b}'")
+            if "Request(" in line and "data=" in line:
+                bad.append(f"{f.relative_to(pkg)}:{ln}: HTTP request with a body")
     if bad:
         print("SELFTEST FAIL (advisory-only violated):\n" + "\n".join(bad))
         return 1
-    print(f"selftest OK — {len(list(pkg.glob('*.py')))} files, zero order endpoints")
+    print(f"selftest OK — {len(files)} files (recursive), zero order-placing code")
     return 0
 
 
