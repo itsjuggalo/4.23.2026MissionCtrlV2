@@ -54,6 +54,13 @@ def _occ_expiry(occ: str | None) -> datetime | None:
 
 
 def rebuild(con) -> dict:
+    # preserve bias grades (fwd_ret_30d / max_drawdown_pct, written by bias_report.py)
+    # across the wipe — rebuild is derived-data hygiene, not grade amnesia
+    saved = {(r[0], r[1], r[2], str(r[3])[:19], str(r[4])[:19], round(r[5], 6)): (r[6], r[7])
+             for r in con.execute(
+                 "SELECT broker, asset_class, symbol, entry_at, exit_at, qty,"
+                 " fwd_ret_30d, max_drawdown_pct FROM round_trips "
+                 "WHERE fwd_ret_30d IS NOT NULL OR max_drawdown_pct IS NOT NULL")}
     con.execute("DELETE FROM lots")
     con.execute("DELETE FROM round_trips")
     fills = con.execute(
@@ -112,6 +119,18 @@ def rebuild(con) -> dict:
     con.executemany(
         "INSERT INTO round_trips(broker,asset_class,symbol,occ_symbol,qty,entry_px,exit_px,"
         "entry_at,exit_at,pnl_usd,pnl_pct,hold_days) VALUES(?,?,?,?,?,?,?,?,?,?,?,?)", trips)
+    if saved:
+        regraded = 0
+        for row in con.execute("SELECT id, broker, asset_class, symbol, entry_at, exit_at,"
+                               " qty FROM round_trips").fetchall():
+            key = (row[1], row[2], row[3], str(row[4])[:19], str(row[5])[:19],
+                   round(row[6], 6))
+            if key in saved:
+                fwd, mdd = saved[key]
+                con.execute("UPDATE round_trips SET fwd_ret_30d=?, max_drawdown_pct=? "
+                            "WHERE id=?", (fwd, mdd, row[0]))
+                regraded += 1
+        print(f"grades preserved on {regraded}/{len(saved)} trips")
     lot_rows = [(b, a, s, l[0], l[1], l[2], l[3])
                 for (b, a, s), dq in lots.items() for l in dq if l[0] > 1e-12]
     con.executemany(

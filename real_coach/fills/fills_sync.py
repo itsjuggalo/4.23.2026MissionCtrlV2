@@ -62,11 +62,23 @@ def main() -> int:
         except Exception:
             print(f"{name}: FAILED\n" + traceback.format_exc())
     if total_new:
-        # newest few for the after-trade hook (P2 wires the interview here)
+        new_lines = []
         for row in con.execute(
                 "SELECT broker, asset_class, symbol, side, qty, price, filled_at "
-                "FROM fills ORDER BY id DESC LIMIT ?", (min(total_new, 5),)):
-            print("NEW_FILL", "|".join(str(x) for x in row))
+                "FROM fills WHERE synthetic=0 ORDER BY id DESC LIMIT ?",
+                (min(total_new, 5),)):
+            line = "|".join(str(x) for x in row)
+            new_lines.append(line)
+            print("NEW_FILL", line)
+        # after-trade interview (P2): 3 quick TG buttons + a deep-dive capsule.
+        # Backfills don't interview (that's history, not a fresh decision).
+        if not full and new_lines:
+            try:
+                sys.path.insert(0, str(Path.home() / "05_AUTOMATION" / "profile"))
+                import after_trade
+                after_trade.run(new_lines)
+            except Exception:
+                print("after_trade hook failed:\n" + traceback.format_exc())
     stats(con)
     return 0
 

@@ -80,7 +80,8 @@ def selftest() -> int:
             for b in banned:
                 if b in line:
                     bad.append(f"{f.relative_to(pkg)}:{ln}: contains '{b}'")
-            if "Request(" in line and "data=" in line:
+            if ("Request(" in line and "data=" in line
+                    and "api.telegram.org" not in line):  # TG sends are fine; brokers aren't
                 bad.append(f"{f.relative_to(pkg)}:{ln}: HTTP request with a body")
     if bad:
         print("SELFTEST FAIL (advisory-only violated):\n" + "\n".join(bad))
@@ -119,6 +120,13 @@ def run_sweep(crypto_only=False, changes_only=False, one_symbol=None,
            "invested": invested, "n": len(results),
            "results": results, "flips": [r["key"] for r in flips]}
     bookmod.atomic_write(bookmod.VERDICTS, out)
+    # decision ledger (P3): record every TA verdict for outcome scoring
+    try:
+        from real_coach import ledger
+        out["decision_ids"] = ledger.insert_decisions(results, out["as_of"])
+    except Exception:
+        print("ledger insert failed:\n" + traceback.format_exc())
+        out["decision_ids"] = {}
     return out
 
 
@@ -200,6 +208,16 @@ def main() -> int:
                 png = cards.coach_card(r)
                 if png:
                     tg_photo(png, f"{r['symbol']} → {r['verdict']} · {r['reasons'][0][:120]}")
+            # FOLLOW/OVERRIDE buttons on the top actionables (PipelineSignals lane)
+            try:
+                from real_coach import ledger
+                dids = out.get("decision_ids") or {}
+                for r in actionable[:MAX_CARDS]:
+                    did = dids.get(r["key"])
+                    if did:
+                        ledger.send_decision_buttons(r, did)
+            except Exception:
+                print("decision buttons failed:\n" + traceback.format_exc())
     return 0
 
 

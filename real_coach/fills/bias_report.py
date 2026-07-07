@@ -80,9 +80,12 @@ def analyze(con, px) -> dict:
         "SELECT id, broker, asset_class, symbol, qty, price, amount_usd, filled_at,"
         " synthetic FROM fills WHERE side='buy' AND synthetic=0", con)
     for df, col in ((trips, "entry_at"), (trips, "exit_at"), (buys, "filled_at")):
-        # floor to seconds: yfinance indexes are datetime64[s]; microsecond stamps make
-        # searchsorted raise "Cannot losslessly convert units" and drop every RH row
-        df[col + "_d"] = (pd.to_datetime(df[col], errors="coerce", utc=True)
+        # format="ISO8601": the column mixes RH "-04:00" offsets, CB "Z", and micro
+        # stamps — default parsing infers ONE format and NaT-coerces the rest (882
+        # trips silently skipped). floor("s"): yfinance indexes are datetime64[s];
+        # microsecond scalars make searchsorted raise "Cannot losslessly convert".
+        df[col + "_d"] = (pd.to_datetime(df[col], errors="coerce", utc=True,
+                                         format="ISO8601")
                           .dt.tz_localize(None).dt.floor("s"))
 
     def series_for(sym, ac):
@@ -161,6 +164,13 @@ def build_report(d) -> tuple[str, str, dict]:
     import pandas as pd
     trips, buys, fwd, dd, fomo, opt = (d["trips"], d["buys"], d["fwd"], d["dd"],
                                        d["fomo"], d["opt"])
+    # reverse-split artifacts: broker raw prices across a split make pnl_pct explode
+    # (TNXP "+12385%"). Exclude |pnl|>500% trips from displays/stats, count honestly.
+    n_split = int((dd.pnl_pct.abs() > 500).sum()) if len(dd) else 0
+    if len(fwd):
+        fwd = fwd[fwd.pnl_pct.abs() <= 500]
+    if len(dd):
+        dd = dd[dd.pnl_pct.abs() <= 500]
     L = ["# YOUR TRADING REPORT CARD",
          f"*5 years of REAL fills (RH + Coinbase) · {len(buys)} buys · "
          f"{len(trips)} closed round-trips · generated {pd.Timestamp.now():%Y-%m-%d %H:%M} ET*",
@@ -208,6 +218,9 @@ def build_report(d) -> tuple[str, str, dict]:
             L.append(f"- **{r.symbol}** bottomed **{r.mdd:+.0f}%** mid-trip, closed {r.pnl_pct:+.0f}%"
                      f" after {r.hold_days:.0f}d")
         L.append("")
+        if n_split:
+            L.append(f"*({n_split} trip(s) excluded as reverse-split artifacts — raw broker "
+                     f"prices across a split aren't comparable.)*")
         L.append("*And that's only CLOSED trips — DOGE −65% / MSTY −88% / AMC −99% are "
                  "still open in the book right now.*\n")
 

@@ -11,7 +11,7 @@ Advisory only. Writes ~/.openclaw/workspace/directives/entry_radar.json
 (served by /api/directives?file=entry_radar.json). Cron: pre-market + hourly.
 """
 import json, os, sys, tempfile, urllib.request, urllib.parse
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 
 HOME = os.path.expanduser("~")
 OUT = os.path.join(HOME, ".openclaw/workspace/directives/entry_radar.json")
@@ -72,6 +72,36 @@ def fetch_bars(syms, key, sec):
     req = urllib.request.Request(url, headers={"APCA-API-KEY-ID": key, "APCA-API-SECRET-KEY": sec})
     with urllib.request.urlopen(req, timeout=30) as r:
         return json.load(r).get("bars", {})
+
+
+def fetch_yahoo_bars(ysym, rng="1y", interval="1d"):
+    """Futures/anything Alpaca can't serve (MNQ=F) via Yahoo's public chart JSON.
+    Returns bars in the same {h,l,c,t} shape as fetch_bars. Stdlib only."""
+    url = (f"https://query1.finance.yahoo.com/v8/finance/chart/{urllib.parse.quote(ysym)}"
+           f"?range={rng}&interval={interval}")
+    req = urllib.request.Request(url, headers={"User-Agent": "Mozilla/5.0 (entry-radar)"})
+    try:
+        with urllib.request.urlopen(req, timeout=25) as r:
+            d = json.load(r)
+        res = d["chart"]["result"][0]
+        q = res["indicators"]["quote"][0]
+        ts = res.get("timestamp") or []
+        bars = []
+        for i, t in enumerate(ts):
+            h, l, c = q["high"][i], q["low"][i], q["close"][i]
+            if None in (h, l, c):
+                continue
+            bars.append({"h": h, "l": l, "c": c,
+                         "t": datetime.fromtimestamp(t, tz=timezone.utc)
+                         .strftime("%Y-%m-%dT%H:%M:%SZ")})
+        return bars
+    except Exception:
+        return []
+
+
+# Yahoo-sourced symbols appended AFTER the Alpaca list (futures: Mike asked for MNQ
+# dip-entry timing 2026-07-07). display name -> yahoo symbol
+FUTURES = {"MNQ": "MNQ=F"}
 
 
 def ema(vals, n):
@@ -159,8 +189,30 @@ if __name__ == "__main__":
         row = analyze(s, bars.get(s, []), s in held)
         if row:
             rows.append(row)
+    for disp, ysym in FUTURES.items():                      # MNQ etc via Yahoo
+        row = analyze(disp, fetch_yahoo_bars(ysym), False)
+        if row:
+            row["source"] = "yahoo"
+            rows.append(row)
     if not rows:
         sys.exit("refusing to write: no bars returned")
+    # AT-ENTRY transition alerts (real_coach P4): ping ONLY when a symbol newly
+    # ENTERS the buy zone — the "when is the right TA entry after a dip" answer.
+    try:
+        prev = {r["sym"]: r.get("status") for r in json.load(open(OUT)).get("rows", [])}
+    except Exception:
+        prev = {}
+    import subprocess
+    for r in rows:
+        if r["status"] == "AT ENTRY" and prev.get(r["sym"]) not in (None, "AT ENTRY"):
+            msg = (f"🎯 {r['sym']} ENTERED the buy zone ${r['entryLo']}–${r['entryHi']} "
+                   f"(now ${r['price']}, RSI {r['rsi']}, was {prev.get(r['sym'])})\n"
+                   f"{r['note']}\nStop ref ${r['stopRef']} — plan the entry, don't chase.")
+            try:
+                subprocess.run([os.path.join(HOME, "bin", "tg-send-msg"), msg],
+                               timeout=20, check=False)
+            except Exception:
+                pass
     doc = {"updated": datetime.now().astimezone().isoformat(), "rows": rows}
     fd, tmp = tempfile.mkstemp(dir=os.path.dirname(OUT))
     with os.fdopen(fd, "w") as f:
