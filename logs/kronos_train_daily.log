@@ -10,3 +10,65 @@
 [2026-07-08T11:00:01Z] Fetching fresh Alpaca bars...
 [2026-07-08T11:00:01Z] Fetching fresh Alpaca bars...
   Fetching NVDA (730d hourly)...
+    Got 4131 bars. Range: 2024-07-08 12:00:00+00:00 → 2026-07-07 19:00:00+00:00
+  Saved → /home/itsju/04_RESEARCH/Kronos/finetune_csv/data/us_stocks_1h_NVDA.csv
+  Fetching TSLA (730d hourly)...
+    Got 3957 bars. Range: 2024-07-08 12:00:00+00:00 → 2026-07-07 20:00:00+00:00
+  Saved → /home/itsju/04_RESEARCH/Kronos/finetune_csv/data/us_stocks_1h_TSLA.csv
+  Fetching SPY (730d hourly)...
+    Got 4167 bars. Range: 2024-07-08 13:00:00+00:00 → 2026-07-07 20:00:00+00:00
+  Saved → /home/itsju/04_RESEARCH/Kronos/finetune_csv/data/us_stocks_1h_SPY.csv
+  Fetching QQQ (730d hourly)...
+    Got 4369 bars. Range: 2024-07-08 12:00:00+00:00 → 2026-07-07 20:00:00+00:00
+  Saved → /home/itsju/04_RESEARCH/Kronos/finetune_csv/data/us_stocks_1h_QQQ.csv
+  Fetching AAPL (730d hourly)...
+    Got 3726 bars. Range: 2024-07-08 13:00:00+00:00 → 2026-07-07 19:00:00+00:00
+  Saved → /home/itsju/04_RESEARCH/Kronos/finetune_csv/data/us_stocks_1h_AAPL.csv
+  Fetching MSFT (730d hourly)...
+    Got 3724 bars. Range: 2024-07-08 13:00:00+00:00 → 2026-07-07 20:00:00+00:00
+  Saved → /home/itsju/04_RESEARCH/Kronos/finetune_csv/data/us_stocks_1h_MSFT.csv
+  Fetching AMD (730d hourly)...
+    Got 3796 bars. Range: 2024-07-08 12:00:00+00:00 → 2026-07-07 20:00:00+00:00
+  Saved → /home/itsju/04_RESEARCH/Kronos/finetune_csv/data/us_stocks_1h_AMD.csv
+  Fetching SMCI (730d hourly)...
+    Got 3779 bars. Range: 2024-07-08 13:00:00+00:00 → 2026-07-07 19:00:00+00:00
+  Saved → /home/itsju/04_RESEARCH/Kronos/finetune_csv/data/us_stocks_1h_SMCI.csv
+  Fetching META (730d hourly)...
+    Got 3657 bars. Range: 2024-07-08 13:00:00+00:00 → 2026-07-07 19:00:00+00:00
+  Saved → /home/itsju/04_RESEARCH/Kronos/finetune_csv/data/us_stocks_1h_META.csv
+  Fetching MU (730d hourly)...
+    Got 3747 bars. Range: 2024-07-08 13:00:00+00:00 → 2026-07-07 20:00:00+00:00
+  Saved → /home/itsju/04_RESEARCH/Kronos/finetune_csv/data/us_stocks_1h_MU.csv
+  Fetching AMZN (730d hourly)...
+    Got 3612 bars. Range: 2024-07-08 13:00:00+00:00 → 2026-07-07 19:00:00+00:00
+  Saved → /home/itsju/04_RESEARCH/Kronos/finetune_csv/data/us_stocks_1h_AMZN.csv
+  Fetching GOOGL (730d hourly)...
+    Got 3773 bars. Range: 2024-07-08 13:00:00+00:00 → 2026-07-07 19:00:00+00:00
+  Saved → /home/itsju/04_RESEARCH/Kronos/finetune_csv/data/us_stocks_1h_GOOGL.csv
+  Fetching COIN (730d hourly)...
+    Got 3698 bars. Range: 2024-07-08 13:00:00+00:00 → 2026-07-07 19:00:00+00:00
+  Saved → /home/itsju/04_RESEARCH/Kronos/finetune_csv/data/us_stocks_1h_COIN.csv
+  Fetching BTCUSD crypto (730d hourly via Alpaca)...
+    Got 17518 bars. Range: 2024-07-08 12:00:00+00:00 → 2026-07-08 11:00:00+00:00
+  Saved → /home/itsju/04_RESEARCH/Kronos/finetune_csv/data/us_stocks_1h_BTCUSD.csv
+
+Combined dataset: 67654 rows → /home/itsju/04_RESEARCH/Kronos/finetune_csv/data/us_stocks_1h_all.csv
+
+Next steps:
+  1. Edit ~/04_RESEARCH/Kronos/finetune_csv/configs/config_us_stocks_1h.yaml
+  2. cd ~/04_RESEARCH/Kronos/finetune_csv
+  3. ~/02_DATA/mc-kb/.venv/bin/python train_sequential.py --config configs/config_us_stocks_1h.yaml
+[2026-07-08T11:02:43Z] Starting daily fine-tune (3 tokenizer + 2 basemodel epochs)...
+[2026-07-08T11:02:43Z] Starting daily fine-tune (3 tokenizer + 2 basemodel epochs)...
+Traceback (most recent call last):
+  File "/home/itsju/04_RESEARCH/Kronos/finetune_csv/train_sequential.py", line 11, in <module>
+    from model import Kronos, KronosTokenizer, KronosPredictor
+  File "/home/itsju/04_RESEARCH/Kronos/finetune_csv/../model/__init__.py", line 1, in <module>
+    from .kronos import KronosTokenizer, Kronos, KronosPredictor
+  File "/home/itsju/04_RESEARCH/Kronos/finetune_csv/../model/kronos.py", line 10, in <module>
+    from model.module import *
+  File "/home/itsju/04_RESEARCH/Kronos/finetune_csv/../model/module.py", line 3, in <module>
+    from einops import rearrange, reduce
+ModuleNotFoundError: No module named 'einops'
+[2026-07-08T11:02:45Z] Daily fine-tune exited non-zero — check log. Yesterday's weights still in place.
+[2026-07-08T11:02:45Z] Daily fine-tune exited non-zero — check log. Yesterday's weights still in place.
