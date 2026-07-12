@@ -4296,3 +4296,10 @@ Traceback (most recent call last):
 ModuleNotFoundError: No module named 'einops'
 [2026-07-05T11:02:35Z] Weekly retrain exited non-zero — check log.
 [2026-07-05T11:02:35Z] Weekly retrain exited non-zero — check log.
+[2026-07-12T11:00:01Z] ===== kronos_train_weekly starting =====
+[2026-07-12T11:00:01Z] ===== kronos_train_weekly starting =====
+OK: HF_HOME='/home/itsju/.cache/huggingface' | disk 716GB free | checks passed
+Failed to connect to user scope bus via local transport: $DBUS_SESSION_BUS_ADDRESS and $XDG_RUNTIME_DIR not defined (consider using --machine=<user>@.host --user to connect to bus of other user)
+Failed to connect to user scope bus via local transport: $DBUS_SESSION_BUS_ADDRESS and $XDG_RUNTIME_DIR not defined (consider using --machine=<user>@.host --user to connect to bus of other user)
+[2026-07-12T11:00:01Z] Fetching fresh Alpaca bars...
+[2026-07-12T11:00:01Z] Fetching fresh Alpaca bars...
