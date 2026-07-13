@@ -46,12 +46,32 @@ if not vals: print("SKIP"); raise SystemExit
 print("OK" if any(isinstance(v[0],dict) and "time" in v[0] for v in vals) else "FAIL")'
 }
 
+SKIPS="$HOME/.openclaw/state/noip_probe_skips.txt"
+MAX_SKIPS=6                       # ~30 min at the */5 cron cadence
+
 if [ -n "$LAST" ]; then           # first-ever push (no LAST) skips the probe
+  mkdir -p "$(dirname "$SKIPS")"
   V=$(probe443 "$IP")
   if [ "$V" = "FAIL" ]; then
     echo "$(LOG_TS)  WAN $IP does NOT serve :443 externally (hotspot/CGNAT or router down) — holding DNS on $LAST"
+    echo 0 > "$SKIPS"
     exit 0
   fi
+  if [ "$V" = "SKIP" ]; then
+    # Probe service unreachable => the candidate IP is UNVERIFIED. Fail CLOSED.
+    # is_global does NOT catch a hotspot egress (174.211.97.237 is a global IP),
+    # so probe443 is the only real guard — pushing on SKIP is what blackholed all
+    # 5 domains on 07-12. Holding costs a few minutes on a legit IP change; the
+    # escape hatch below stops a dead probe service stranding DNS on a stale IP.
+    n=$(( $(cat "$SKIPS" 2>/dev/null || echo 0) + 1 ))
+    echo "$n" > "$SKIPS"
+    if [ "$n" -lt "$MAX_SKIPS" ]; then
+      echo "$(LOG_TS)  probe unavailable (skip $n/$MAX_SKIPS) — cannot verify $IP serves :443, holding DNS on $LAST"
+      exit 0
+    fi
+    echo "$(LOG_TS)  probe unavailable $n consecutive ticks — pushing $IP UNVERIFIED (stale-DNS escape hatch)"
+  fi
+  echo 0 > "$SKIPS"
 fi
 # ---------------------------------------------------------------------------
 
