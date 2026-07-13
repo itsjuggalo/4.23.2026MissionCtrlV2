@@ -164,6 +164,45 @@ probe_crashloop(){ # pm2 procs whose restart count jumped >= CRASHLOOP_DELTA sin
 probe_disk(){ df --output=pcent / 2>/dev/null | tail -1 | tr -dc '0-9'; }
 probe_ram(){ awk '/MemAvailable/{print int($2/1024)}' /proc/meminfo 2>/dev/null; }
 
+# ---------- Tier B probes: trading-adjacent, DETECT-ONLY (live-trader protocol: ----------
+# ---------- NEVER touch daemons or the merged flow-signal files — capsule only) ----------
+FLOW_DIR="${SENTINEL_FLOW_DIR:-$HOME/trading/signals/option-scraper/data}"
+HB_DIR="${SENTINEL_HB_DIR:-$HOME/.openclaw/state/heartbeats}"
+
+et_minute_of_day(){ # minutes since ET midnight (overridable for simulated-failure tests)
+  [ -n "${SENTINEL_FAKE_NOWMIN:-}" ] && { echo "$SENTINEL_FAKE_NOWMIN"; return; }
+  echo $(( 10#$(TZ=America/New_York date +%H) * 60 + 10#$(TZ=America/New_York date +%M) ))
+}
+
+probe_flow_stale(){ # market hours Mon-Fri: newest *_alerts_today.json too old?
+  local dow nowmin open close newest age
+  dow=$(TZ=America/New_York date +%u); [ "$dow" -ge 6 ] && { echo OK; return; }
+  nowmin=$(et_minute_of_day)
+  open=${SENTINEL_MARKET_OPEN_MIN:-615}   # 10:15 ET (scrapers warmed up)
+  close=${SENTINEL_MARKET_CLOSE_MIN:-960} # 16:00 ET
+  { [ "$nowmin" -lt "$open" ] || [ "$nowmin" -gt "$close" ]; } && { echo OK; return; }
+  newest=$(stat -c %Y "$FLOW_DIR"/*_alerts_today.json 2>/dev/null | sort -n | tail -1)
+  [ -z "$newest" ] && { echo "no-flow-files"; return; }
+  age=$(( ( $(date +%s) - newest ) / 60 ))
+  [ "$age" -gt "${SENTINEL_FLOW_STALE_MIN:-90}" ] && echo "stale ${age}min" || echo OK
+}
+
+probe_cycles(){ # boba/jazzy heartbeat must be newer than the last due cycle (+20min grace)
+  local dow nowmin midnight agent times m last hb out=""
+  dow=$(TZ=America/New_York date +%u); [ "$dow" -ge 6 ] && return
+  nowmin=$(et_minute_of_day)
+  midnight=$(TZ=America/New_York date -d "$(TZ=America/New_York date +%F) 00:00" +%s)
+  for agent in boba jazzy; do
+    times="585 660 750 840 930"; [ "$agent" = "jazzy" ] && times="586 661 751 841 931"  # 9:45..15:30 ET, jazzy +1m
+    last=""
+    for m in $times; do [ "$nowmin" -ge $(( m + ${SENTINEL_CYCLE_GRACE_MIN:-20} )) ] && last=$m; done
+    [ -z "$last" ] && continue
+    hb=$(stat -c %Y "$HB_DIR/${agent}_cycle" 2>/dev/null || echo 0)
+    [ "$hb" -lt $(( midnight + last * 60 )) ] && out="$out ${agent}(due-$(printf '%02d%02d' $((last/60)) $((last%60)))ET)"
+  done
+  echo "$out"
+}
+
 probe_cert(){ # days left on the cert; echoes days or 999 on read failure
   local end
   end=$(sudo openssl x509 -enddate -noout -in /etc/letsencrypt/live/missionctrl.serveftp.com/fullchain.pem 2>/dev/null | cut -d= -f2)
@@ -335,6 +374,20 @@ if [ -n "$RAM" ] && [ "$RAM" -lt "$RAM_AVAIL_MIN_MB" ]; then
   log "RAM pressure: MemAvailable=${RAM}MB (floor ${RAM_AVAIL_MIN_MB}MB)"
   escalate_capsule ram "MemAvailable ${RAM}MB below ${RAM_AVAIL_MIN_MB}MB floor — check vmmem/ComfyUI/browser bloat (memory reference_vmmem_wsa_ram). NEVER kill live Claude sessions (feedback_no_interfere_working_chats)."
 else clear_issue ram; fi
+
+# 4e. Tier B: flow-signal staleness — DETECT-ONLY, one capsule per day (holiday-tolerant)
+FLOW=$(probe_flow_stale)
+if [ "$FLOW" != "OK" ]; then
+  log "FLOW-SIGNAL degraded: $FLOW"
+  escalate_capsule "flowstale-$(date +%m%d)" "merged flow-signal stream degraded during market hours ($FLOW) — newest $FLOW_DIR/*_alerts_today.json too old; scrapers may be down. READ-ONLY diagnosis (pm2 describe option-signals/option-relay + their logs); NEVER touch the merged stream files (Boba/Jazzy/best3 consume them). If today is a market holiday, drop this capsule."
+fi
+
+# 4f. Tier B: decision-cycle heartbeats — DETECT-ONLY (trade-changing layer = Mike's go)
+CYC=$(probe_cycles)
+if [ -n "${CYC// /}" ]; then
+  log "DECISION-CYCLE heartbeat missed:$CYC"
+  escalate_capsule "cycmiss-$(date +%m%d)" "decision cycle(s) missed their success-heartbeat:$CYC. Heartbeats: $HB_DIR/{boba,jazzy}_cycle (touched only on clean cron exit); logs ~/02_DATA/{boba,jazzy}_cycle.log. DETECT-ONLY per live-trader protocol — diagnose, then Mike decides any fix. If market holiday, drop this capsule."
+fi
 
 # 5. external reachability (the outage class that hid for 2 days)
 EXT=$(probe_external)
