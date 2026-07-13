@@ -57,3 +57,4 @@
 [trend_scanner] sent=trend_scanner
 [jazzy_relay] no LLM output
 [orion_relay] no LLM output
+[grok_scout] no live X result — skipping (won't fabricate)
