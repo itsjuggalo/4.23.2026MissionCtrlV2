@@ -31,7 +31,18 @@ FIXER_MAX_PER_DAY=4
 
 DOMAINS="missionctrl.serveftp.com massagebymike.serveftp.com bridge.serveftp.com bobacattrades.serveftp.com"
 # pm2 processes the sentinel may revive (NEVER trading daemons, NEVER claudeclaw)
-REVIVABLE="missionctrl aries massage-api"
+REVIVABLE="missionctrl aries massage-api bobacat-gallery mc-kb-server"
+
+# cron runs a bare shell with no nvm PATH — resolve pm2 explicitly (the 07-12 night
+# false-positive: bare `pm2` not found made probe_pm2 report everything down each cycle)
+PM2=$(command -v pm2 || ls -d "$HOME"/.nvm/versions/node/*/bin/pm2 2>/dev/null | tail -1)
+# pm2's shebang is `#!/usr/bin/env node` — node must be on PATH too under cron
+[ -n "$PM2" ] && export PATH="$(dirname "$PM2"):$PATH"
+
+# thresholds (env-overridable so simulated-failure tests can trip them)
+DISK_PCT_MAX=${SENTINEL_DISK_PCT_MAX:-90}      # % used on / before escalating
+RAM_AVAIL_MIN_MB=${SENTINEL_RAM_MIN_MB:-1024}  # MemAvailable floor
+CRASHLOOP_DELTA=${SENTINEL_CRASHLOOP_DELTA:-5} # pm2 restarts per 10-min cycle = looping
 
 mkdir -p "$STATE_DIR" "$(dirname "$LOGF")"
 log(){ echo "[sentinel] $(TZ=America/New_York date '+%F %I:%M:%S%p ET') $*" >> "$LOGF"; }
@@ -50,9 +61,12 @@ sset(){ local tmp; tmp=$(mktemp)
 wan_ip(){ curl -s -m 10 https://api.ipify.org 2>/dev/null; }
 
 probe_local(){ # local nginx serving each vhost? -> echoes failing domains
-  local d fails=""
+  local d p fails=""
   for d in $DOMAINS; do
-    c=$(curl -sk -o /dev/null -w '%{http_code}' -m 8 -H "Host: $d" https://127.0.0.1/ 2>/dev/null)
+    # bridge's / rebuilds a gallery page from the OneDrive mount (6-10s) — probe its
+    # cheap /health instead (added to bobacat_server.py 2026-07-13)
+    p="/"; [ "$d" = "bridge.serveftp.com" ] && p="/health"
+    c=$(curl -sk -o /dev/null -w '%{http_code}' -m 8 -H "Host: $d" "https://127.0.0.1$p" 2>/dev/null)
     case "$c" in 2*|3*) ;; *) fails="$fails $d($c)";; esac
   done
   echo "$fails"
@@ -86,15 +100,40 @@ print("OK" if any(v[0] and v[0][0]==1 for v in vals) else "FAIL")' 2>/dev/null)
   echo "${res:-SKIP}"
 }
 
-probe_pm2(){ # revivable pm2 procs not online -> echoes them
+probe_pm2(){ # revivable pm2 procs not online -> echoes them ("" also when pm2/jlist unavailable)
   local p fails="" js
-  js=$(pm2 jlist 2>/dev/null)
+  [ -x "$PM2" ] || { log "probe_pm2 SKIP: pm2 binary not found"; return; }
+  js=$("$PM2" jlist 2>/dev/null)
+  # empty/invalid jlist = pm2 daemon unreachable, NOT "everything down" — skip, don't false-fire
+  echo "$js" | jq -e 'type=="array" and length>0' >/dev/null 2>&1 || { log "probe_pm2 SKIP: pm2 jlist empty/invalid"; return; }
   for p in $REVIVABLE; do
     st=$(echo "$js" | jq -r --arg n "$p" '.[]|select(.name==$n)|.pm2_env.status' 2>/dev/null | head -1)
     [ "$st" = "online" ] || fails="$fails $p($st)"
   done
   echo "$fails"
 }
+
+probe_kb(){ # mc-kb hive-mind :8091 /health (pm2 can show online while HTTP hangs)
+  curl -s -o /dev/null -w '%{http_code}' -m 8 http://127.0.0.1:8091/health 2>/dev/null
+}
+
+probe_crashloop(){ # pm2 procs whose restart count jumped >= CRASHLOOP_DELTA since last cycle
+  local js out=""
+  [ -x "$PM2" ] || return
+  js=$("$PM2" jlist 2>/dev/null)
+  echo "$js" | jq -e 'type=="array" and length>0' >/dev/null 2>&1 || return
+  local pairs; pairs=$(echo "$js" | jq -r '.[]|"\(.name) \(.pm2_env.restart_time // 0)"' 2>/dev/null)
+  while read -r name count; do
+    [ -z "$name" ] && continue
+    prev=$(sget "restarts_$name")
+    sset "restarts_$name" "$count"
+    [ -n "$prev" ] && [ $((count - prev)) -ge "$CRASHLOOP_DELTA" ] && out="$out $name(+$((count-prev)))"
+  done <<< "$pairs"
+  echo "$out"
+}
+
+probe_disk(){ df --output=pcent / 2>/dev/null | tail -1 | tr -dc '0-9'; }
+probe_ram(){ awk '/MemAvailable/{print int($2/1024)}' /proc/meminfo 2>/dev/null; }
 
 probe_cert(){ # days left on the cert; echoes days or 999 on read failure
   local end
@@ -142,10 +181,10 @@ escalate_capsule(){ # <issue-key> <diag>  — Tier 3: surface at next session st
   [ -n "$(sget "capsule_$key")" ] && return 0   # only once per issue
   local f; f=$(mktemp)
   printf '%s\n' "@sentinel-$key-$(date +%m%d%H%M)" \
-    "do: infra_sentinel found '$key' broken and BOTH deterministic fixes and 2 headless fixer runs failed. Diagnose by hand: $diag. See ~/logs/infra-sentinel.log tail + memory project_noip_local_public_cutover.md. Likely out-of-headless-reach: UAC portproxy or Spectrum router forwards (spectrum.net creds in mc-secrets)." \
-    "in: public-ingress chain (nginx/portproxy/router/No-IP)" \
-    "why: silent self-heal exhausted; Mike wants no phone pings — this capsule IS the holler." \
-    "=: the failing probe passes from check-host.net and sentinel logs a clean cycle" > "$f"
+    "do: infra_sentinel flagged '$key' and automated healing could not (or must not) fix it. Diagnose by hand: $diag. See ~/logs/infra-sentinel.log tail + memory reference_infra_sentinel.md / project_noip_local_public_cutover.md. Ingress issues may be out-of-headless-reach (UAC portproxy, Spectrum router — spectrum.net creds in mc-secrets)." \
+    "in: laptop infra (ingress/pm2/kb/disk/ram)" \
+    "why: silent self-heal exhausted or action needs Mike's approval; no phone pings — this capsule IS the holler." \
+    "=: the failing sentinel probe passes and the log shows a clean cycle" > "$f"
   ~/bin/intent-queue add --source restructure --file "$f" >/dev/null 2>&1 && sset "capsule_$key" "1" \
     && log "ESCALATED '$key' -> intent capsule (next-session pickup)"
   rm -f "$f"
@@ -161,7 +200,7 @@ PM2_FAILS=$(probe_pm2)
 if [ -n "${PM2_FAILS// /}" ]; then
   log "pm2 down:$PM2_FAILS — reviving"
   for p in $REVIVABLE; do
-    echo "$PM2_FAILS" | grep -q "$p(" && pm2 restart "$p" >/dev/null 2>&1
+    echo "$PM2_FAILS" | grep -q "$p(" && "$PM2" restart "$p" >/dev/null 2>&1
   done
   sleep 5; PM2_FAILS=$(probe_pm2)
   [ -n "${PM2_FAILS// /}" ] && spawn_fixer pm2 "pm2 processes not online after restart:$PM2_FAILS"
@@ -186,7 +225,7 @@ if [ -n "$IP" ]; then
     rm -f "$HOME/.openclaw/state/noip_last_ip.txt"
     bash "$HOME/scripts/noip_duc.sh" >> "$HOME/logs/noip-duc.log" 2>&1
     sleep 90; DNS_FAILS=$(probe_dns "$IP")
-    [ -n "${DNS_FAILS// /}" ] && spawn_fixer dns "DNS still not matching WAN $IP after forced push:$DNS_FAILS" \
+    [ -n "${DNS_FAILS// /}" ] && spawn_fixer dns "DNS still not matching WAN $IP after forced push:$DNS_FAILS (NOTE: noip_duc.sh has a hotspot/CGNAT guard — it refuses to push an IP that doesn't serve :443 externally; check ~/logs/noip-duc.log before overriding)" \
       || log "DNS self-heal OK"
   fi
 fi
@@ -199,6 +238,55 @@ if [ "$DAYS" -lt 14 ]; then
   DAYS=$(probe_cert)
   [ "$DAYS" -lt 14 ] && spawn_fixer cert "cert still expiring in ${DAYS}d after certbot renew"
 fi
+
+# 4b. mc-kb hive-mind :8091 — pm2 "online" can mask a hung HTTP loop
+KB=$(probe_kb)
+case "$KB" in
+  2*) clear_issue kb;;
+  *)
+    log "mc-kb :8091 /health=$KB — restarting mc-kb-server"
+    [ -x "$PM2" ] && "$PM2" restart mc-kb-server >/dev/null 2>&1
+    sleep 8; KB=$(probe_kb)
+    case "$KB" in
+      2*) log "mc-kb self-heal OK";;
+      *) spawn_fixer kb "mc-kb :8091 /health still $KB after pm2 restart mc-kb-server" \
+           || escalate_capsule kb "mc-kb hive-mind :8091 unhealthy (/health=$KB) after restart + fixer attempts — Boba/Jazzy lose memory recall each cycle";;
+    esac;;
+esac
+
+# 4c. pm2 crash-loop detector — DETECT ONLY for non-revivables (trading daemons are
+# hands-off per the live-trader protocol); a looping proc burns CPU + spams logs silently
+LOOPING=$(probe_crashloop)
+if [ -n "${LOOPING// /}" ]; then
+  log "CRASH-LOOP detected:$LOOPING"
+  for name in $LOOPING; do
+    n=${name%%(*}
+    today=$(date +%F)
+    [ -n "$(sget "loopcap_${n}_$today")" ] && continue   # one capsule per proc per day
+    sset "loopcap_${n}_$today" 1
+    f=$(mktemp)
+    printf '%s\n' "@sentinel-crashloop-$n-$(date +%m%d)" \
+      "do: pm2 process '$n' is CRASH-LOOPING ($name restarts in one 10-min sentinel cycle). Diagnose via pm2 logs $n --lines 100 + pm2 describe $n. Sentinel does NOT auto-restart it (may be a trading daemon — live-trader protocol). Fix the root cause or stop it deliberately." \
+      "in: pm2 fleet (laptop)" \
+      "why: silent crash-loops burn CPU and mask real failures; Mike wants no phone pings — capsule is the holler." \
+      "=: pm2 shows '$n' stable (restart counter flat across 2+ sentinel cycles) or deliberately stopped" > "$f"
+    ~/bin/intent-queue add --source restructure --file "$f" >/dev/null 2>&1 && log "ESCALATED crash-loop '$n' -> intent capsule"
+    rm -f "$f"
+  done
+fi
+
+# 4d. disk / RAM pressure — detect + capsule only (no deletes, no session kills;
+# feedback_no_interfere_working_chats + never-delete-without-approval)
+DISK=$(probe_disk)
+if [ -n "$DISK" ] && [ "$DISK" -ge "$DISK_PCT_MAX" ]; then
+  log "DISK pressure: / at ${DISK}% (threshold ${DISK_PCT_MAX}%)"
+  escalate_capsule disk "root filesystem at ${DISK}% used — reclaim candidates: pm2 flush, ~/logs rotation, wsl vhdx compaction (memory reference_wsl_vhdx_compaction), chat archives. NO deletes without Mike."
+else clear_issue disk; fi
+RAM=$(probe_ram)
+if [ -n "$RAM" ] && [ "$RAM" -lt "$RAM_AVAIL_MIN_MB" ]; then
+  log "RAM pressure: MemAvailable=${RAM}MB (floor ${RAM_AVAIL_MIN_MB}MB)"
+  escalate_capsule ram "MemAvailable ${RAM}MB below ${RAM_AVAIL_MIN_MB}MB floor — check vmmem/ComfyUI/browser bloat (memory reference_vmmem_wsa_ram). NEVER kill live Claude sessions (feedback_no_interfere_working_chats)."
+else clear_issue ram; fi
 
 # 5. external reachability (the outage class that hid for 2 days)
 EXT=$(probe_external)
