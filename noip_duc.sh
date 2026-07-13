@@ -9,7 +9,7 @@
 # Cron: */5 * * * *  (No-IP TTL is 60s; a 5-min lag on an IP change is acceptable.)
 set -u
 
-HOSTS="missionctrl.serveftp.com bridge.serveftp.com massagebymike.serveftp.com bobacattrades.serveftp.com"
+HOSTS="missionctrl.serveftp.com bridge.serveftp.com massagebymike.serveftp.com bobacattrades.serveftp.com claudeclaw.serveftp.com"
 STATE="$HOME/.openclaw/state/noip_last_ip.txt"
 LOG_TS() { TZ=America/New_York date '+%Y-%m-%d %I:%M:%S %p ET'; }
 

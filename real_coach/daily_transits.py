@@ -92,6 +92,12 @@ def sign_deg(lon):
     return f"{int(lon % 30)}° {SIGNS[int(lon // 30)]}"
 
 
+def ordinal(n):
+    if 10 <= n % 100 <= 20:
+        return f"{n}th"
+    return f"{n}{ {1: 'st', 2: 'nd', 3: 'rd'}.get(n % 10, 'th') }"
+
+
 def main() -> int:
     ap = argparse.ArgumentParser()
     ap.add_argument("--send", action="store_true")
@@ -121,7 +127,7 @@ def main() -> int:
     moon = trans["Moon"]
     mh = whole_sign_house(moon["lon"], asc)
     lines = [f"🌌 DAILY TRANSITS — {now_et:%a %b %-d}",
-             f"☽ Moon in {SIGNS[int(moon['lon'] // 30)]}, your {mh + 1}th house "
+             f"☽ Moon in {SIGNS[int(moon['lon'] // 30)]}, your {ordinal(mh + 1)} house "
              f"({HOUSE_LIFE[mh]}) — where today's feelings live."]
 
     rx = [n for n, v in trans.items() if v["speed"] < 0 and n not in ("Sun", "Moon")]

@@ -29,7 +29,10 @@ FIX_TIMEOUT=900
 FIXER_COOLDOWN_S=3600          # >=1h between fixer runs per issue
 FIXER_MAX_PER_DAY=4
 
-DOMAINS="missionctrl.serveftp.com massagebymike.serveftp.com bridge.serveftp.com bobacattrades.serveftp.com"
+DOMAINS="missionctrl.serveftp.com massagebymike.serveftp.com bridge.serveftp.com bobacattrades.serveftp.com claudeclaw.serveftp.com"
+# extra DNS-tracked hostnames with no nginx vhost (none currently; env-overridable for tests)
+DNS_ONLY_DOMAINS="${SENTINEL_DNS_ONLY:-}"
+MASSAGE_PORT="${SENTINEL_MASSAGE_PORT:-3003}"   # overridable for simulated-failure tests
 # pm2 processes the sentinel may revive (NEVER trading daemons, NEVER claudeclaw)
 REVIVABLE="missionctrl aries massage-api bobacat-gallery mc-kb-server"
 
@@ -73,12 +76,38 @@ probe_local(){ # local nginx serving each vhost? -> echoes failing domains
 }
 
 probe_dns(){ # any domain not resolving to current WAN IP? -> echoes mismatches
-  local ip="$1" d fails=""
-  for d in $DOMAINS; do
+  # also tracks NXDOMAIN streaks per domain (free No-IP hostnames die if the 30-day
+  # confirmation email isn't clicked) — 3 consecutive cycles unresolvable -> capsule
+  local ip="$1" d r nx fails=""
+  for d in $DOMAINS $DNS_ONLY_DOMAINS; do
     r=$(python3 -c "import socket;print(socket.gethostbyname('$d'))" 2>/dev/null)
-    [ -n "$r" ] && [ "$r" != "$ip" ] && fails="$fails $d($r)"
+    if [ -z "$r" ]; then
+      nx=$(sget "nxdomain_$d"); nx=$(( ${nx:-0} + 1 )); sset "nxdomain_$d" "$nx"
+      if [ "$nx" -ge 3 ]; then
+        log "DNS NXDOMAIN x$nx for $d — likely expired No-IP hostname (30-day confirm missed)"
+        escalate_capsule "noipexpiry-${d%%.*}" "$d has not resolved for $nx sentinel cycles — the free No-IP hostname likely expired (monthly confirmation email not clicked). Log into noip.com (creds mc-secrets global/NOIP_*) and confirm/re-create the hostname, then rm ~/.openclaw/state/noip_last_ip.txt and run ~/scripts/noip_duc.sh."
+      fi
+      continue
+    fi
+    sset "nxdomain_$d" 0; clear_issue "noipexpiry-${d%%.*}"
+    [ "$r" != "$ip" ] && fails="$fails $d($r)"
   done
   echo "$fails"
+}
+
+probe_massage_flow(){ # deeper than the vhost 200: booking page + intake API must answer
+  local a b
+  a=$(curl -sL -o /dev/null -w '%{http_code}' -m 10 "http://127.0.0.1:$MASSAGE_PORT/booking" 2>/dev/null)
+  b=$(curl -s  -o /dev/null -w '%{http_code}' -m 10 "http://127.0.0.1:$MASSAGE_PORT/api/health" 2>/dev/null)
+  case "$a:$b" in 2*:2*) echo OK;; *) echo "booking=$a health=$b";; esac
+}
+
+TS_EXPECTED="$STATE_DIR/tailscale-serve.expected"
+probe_ts_drift(){ # Mike-private access map drift; detect-only (baseline = expected file)
+  command -v tailscale >/dev/null 2>&1 || { echo OK; return; }
+  local cur; cur=$(tailscale serve status 2>/dev/null | grep -E 'ts\.net|proxy' | tr -s ' ' | sort)
+  [ -s "$TS_EXPECTED" ] || { echo "$cur" > "$TS_EXPECTED"; echo OK; return; }  # first run = snapshot
+  [ "$cur" = "$(cat "$TS_EXPECTED")" ] && echo OK || echo DRIFT
 }
 
 probe_external(){ # one external HTTPS probe of missionctrl via check-host.net
@@ -236,7 +265,7 @@ if [ "$DAYS" -lt 14 ]; then
   log "cert expires in ${DAYS}d — renewing"
   sudo certbot renew -q --no-random-sleep-on-renew >/dev/null 2>&1 && sudo service nginx reload >/dev/null 2>&1
   DAYS=$(probe_cert)
-  [ "$DAYS" -lt 14 ] && spawn_fixer cert "cert still expiring in ${DAYS}d after certbot renew"
+  [ "$DAYS" -lt 14 ] && spawn_fixer cert "cert still expiring in ${DAYS}d after certbot renew; letsencrypt.log tail: $(sudo tail -5 /var/log/letsencrypt/letsencrypt.log 2>/dev/null | tr '\n' ' | ')"
 fi
 
 # 4b. mc-kb hive-mind :8091 — pm2 "online" can mask a hung HTTP loop
@@ -246,13 +275,32 @@ case "$KB" in
   *)
     log "mc-kb :8091 /health=$KB — restarting mc-kb-server"
     [ -x "$PM2" ] && "$PM2" restart mc-kb-server >/dev/null 2>&1
-    sleep 8; KB=$(probe_kb)
+    # mc-kb loads LanceDB embeddings at boot (~30-60s) — poll, don't one-shot
+    for i in 1 2 3 4 5 6; do sleep 10; KB=$(probe_kb); case "$KB" in 2*) break;; esac; done
     case "$KB" in
       2*) log "mc-kb self-heal OK";;
       *) spawn_fixer kb "mc-kb :8091 /health still $KB after pm2 restart mc-kb-server" \
            || escalate_capsule kb "mc-kb hive-mind :8091 unhealthy (/health=$KB) after restart + fixer attempts — Boba/Jazzy lose memory recall each cycle";;
     esac;;
 esac
+
+# 4b2. massage booking-flow deep probe (vhost 200 can hide a broken booking page/API)
+MF=$(probe_massage_flow)
+if [ "$MF" != "OK" ]; then
+  log "massage booking-flow degraded ($MF) — restarting massage-api"
+  [ -x "$PM2" ] && "$PM2" restart massage-api >/dev/null 2>&1
+  sleep 10; MF=$(probe_massage_flow)
+  if [ "$MF" = "OK" ]; then log "massage-flow self-heal OK"
+  else spawn_fixer massageflow "massage booking flow still degraded after pm2 restart massage-api: $MF (probe: GET :3003/booking + :3003/api/health)" \
+       || escalate_capsule massageflow "massage booking flow degraded ($MF) after restart + fixer attempts — clients can't book"; fi
+else clear_issue massageflow; fi
+
+# 4b3. Tailscale serve drift (Mike-private phone access) — detect-only
+TS=$(probe_ts_drift)
+if [ "$TS" = "DRIFT" ]; then
+  log "tailscale serve map DRIFTED from baseline"
+  escalate_capsule tsdrift "tailscale serve map differs from baseline $TS_EXPECTED — phone access routes may be broken. Compare: tailscale serve status vs the expected file. If the change was deliberate, refresh baseline: tailscale serve status | grep -E 'ts.net|proxy' | tr -s ' ' | sort > $TS_EXPECTED"
+else clear_issue tsdrift; fi
 
 # 4c. pm2 crash-loop detector — DETECT ONLY for non-revivables (trading daemons are
 # hands-off per the live-trader protocol); a looping proc burns CPU + spams logs silently
