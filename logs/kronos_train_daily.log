@@ -1,0 +1,4 @@
+[2026-07-13 07:00 ET] [kronos-preflight] ===== Kronos pre-flight starting =====
+[2026-07-13 07:00 ET] [kronos-preflight] HF_HOME OK: /home/itsju/.cache/huggingface
+[2026-07-13 07:00 ET] [kronos-preflight] ABORT: C: drive critical — 18GB free (99% used). Free space before training.
+ping delivered
