@@ -60,3 +60,4 @@
 [grok_scout] no live X result — skipping (won't fabricate)
 [trend_scanner] sent=trend_scanner
 [jazzy_relay] no LLM output
+[trend_scanner] sent=trend_scanner
