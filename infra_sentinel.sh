@@ -148,10 +148,12 @@ probe_external(){ # one external HTTPS probe of missionctrl via check-host.net
   # echoes OK / FAIL / SKIP (SKIP = check-host itself unreachable; not our outage)
   local id res
   id=$(curl -s -m 15 -H 'Accept: application/json' \
-    'https://check-host.net/check-http?host=https%3A%2F%2Fmissionctrl.serveftp.com%2F&max_nodes=2' \
+    'https://check-host.net/check-http?host=https%3A%2F%2Fmissionctrl.serveftp.com%2F&max_nodes=5' \
     | python3 -c 'import sys,json;print(json.load(sys.stdin).get("request_id",""))' 2>/dev/null)
   [ -z "$id" ] && { echo SKIP; return; }
-  sleep 15
+  # 1-2 nodes timing out is normal residential-Spectrum noise, so sample 5 and treat
+  # "any node served it" as reachable; a 2-node sample false-fired whenever both drew slow nodes.
+  sleep 20
   res=$(curl -s -m 10 -H 'Accept: application/json' "https://check-host.net/check-result/$id" 2>/dev/null \
     | python3 -c '
 import sys,json
