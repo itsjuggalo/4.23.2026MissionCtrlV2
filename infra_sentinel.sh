@@ -75,13 +75,47 @@ probe_local(){ # local nginx serving each vhost? -> echoes failing domains
   echo "$fails"
 }
 
+resolve_public(){ # $1=domain -> prints public A record; rc 0=resolved 1=unresolvable 2=inconclusive
+  # Resolves over DoH so the LOCAL resolver stack is bypassed entirely. See probe_dns.
+  python3 - "$1" <<'PY' 2>/dev/null
+import sys, json, urllib.request
+d = sys.argv[1]
+for url, hdrs in (
+    ("https://dns.google/resolve?name=%s&type=A" % d, {}),
+    ("https://cloudflare-dns.com/dns-query?name=%s&type=A" % d,
+     {"accept": "application/dns-json"}),
+):
+    try:
+        with urllib.request.urlopen(urllib.request.Request(url, headers=hdrs), timeout=8) as r:
+            j = json.load(r)
+    except Exception:
+        continue  # this resolver is unreachable — try the next one
+    ips = [a["data"] for a in (j.get("Answer") or []) if a.get("type") == 1]
+    if ips:
+        print(ips[0]); sys.exit(0)
+    sys.exit(1)   # NXDOMAIN / NOERROR-but-no-A: a real answer, and it says "not there"
+sys.exit(2)       # every resolver unreachable -> we simply don't know; not an expiry
+PY
+}
+
 probe_dns(){ # any domain not resolving to current WAN IP? -> echoes mismatches
   # also tracks NXDOMAIN streaks per domain (free No-IP hostnames die if the 30-day
   # confirmation email isn't clicked) — 3 consecutive cycles unresolvable -> capsule
-  local ip="$1" d r nx fails=""
+  #
+  # Resolve via PUBLIC DNS (resolve_public), never socket.gethostbyname()/getent: nsswitch
+  # is "files dns", and the 07-12 "local hairpin fix" pins all 5 domains to 127.0.0.1 in the
+  # Windows hosts file (mirrored into /etc/hosts) because Spectrum's router has no NAT
+  # loopback. The old local lookup therefore always saw 127.0.0.1 != WAN and reported a
+  # mismatch no DNS push could ever clear — a false positive that re-pushed No-IP every
+  # 10 min and spawned a fixer. The hairpin entries are intentional: do NOT remove them.
+  local ip="$1" d r rc nx fails=""
   for d in $DOMAINS $DNS_ONLY_DOMAINS; do
-    r=$(python3 -c "import socket;print(socket.gethostbyname('$d'))" 2>/dev/null)
-    if [ -z "$r" ]; then
+    r=$(resolve_public "$d"); rc=$?
+    if [ "$rc" -eq 2 ]; then
+      log "DNS probe inconclusive for $d (public resolvers unreachable) — not counting as NXDOMAIN"
+      continue
+    fi
+    if [ "$rc" -ne 0 ] || [ -z "$r" ]; then
       nx=$(sget "nxdomain_$d"); nx=$(( ${nx:-0} + 1 )); sset "nxdomain_$d" "$nx"
       if [ "$nx" -ge 3 ]; then
         log "DNS NXDOMAIN x$nx for $d — likely expired No-IP hostname (30-day confirm missed)"
