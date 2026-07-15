@@ -53,6 +53,21 @@ REQUIRED_DAEMONS = [
 # Boba/Jazzy decision cycles are cron-restart processes — they're "stopped" most of
 # the time between scheduled firings. We don't require them to be `online`.
 
+# Market-hours-windowed daemons (2026-07-15 PM2 efficiency trim): ~/bin/trading-fleet
+# stops these outside 9:00-16:40 ET weekdays on purpose. Only require them online
+# inside the window — otherwise a premarket morning digest cries wolf every day.
+WINDOWED_DAEMONS = {
+    "profit-lock-boba",
+    "profit-lock-jazzy",
+    "trail-daemon",
+}
+
+
+def _in_market_window() -> bool:
+    h, m = now_et_hhmm()
+    wd = (now() + timedelta(hours=-4)).weekday()  # same rough-EDT convention as now_et_hhmm
+    return wd <= 4 and (9, 0) <= (h, m) < (16, 40)
+
 REQUIRED_CRONS = ["firebase_to_scored.py", "journal_writer.py"]
 SCORED_PATH = Path("/home/ubuntu/mission-control/signal-receiver/data/scored_signals_recent.json")
 RELAY_STATUS = Path("/home/ubuntu/.openclaw/workspace/directives/firebase_signal_relay_status.json")
@@ -129,12 +144,15 @@ def check_pm2() -> dict:
     by_name = {p.get("name"): p for p in procs if isinstance(p, dict)}
     missing = []
     offline = []
+    in_window = _in_market_window()
     for d in REQUIRED_DAEMONS:
         if d not in by_name:
             missing.append(d)
         else:
             status = (by_name[d].get("pm2_env", {}).get("status") or "").lower()
             if status != "online":
+                if d in WINDOWED_DAEMONS and not in_window:
+                    continue  # deliberately stopped off-hours by trading-fleet
                 offline.append(f"{d}({status})")
     return {"missing": missing, "offline": offline}
 
