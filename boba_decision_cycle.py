@@ -205,14 +205,19 @@ MAX_TOTAL_RISK_USD = 1000
 
 # Item 31: post-LLM hard guardrails (enforced by validate_pick_against_guardrails)
 MAX_BUYING_POWER_PCT_PER_PICK = 1.0   # SMALL-ACCOUNT TEST MODE: full BP allowed on max conviction (was 0.15, mismatched prompt)
-RISK_CAP_USD = 800   # Mike's hard per-pick risk cap (premium-at-risk); picks are RESIZED to fit, 2026-06-15
+RISK_CAP_USD = 400   # 2026-07-15 P&L review: halved from 800 — entries now carry a WIDE -50%
+                     # disaster stop instead of the chop-magnet -15/-30% tier stops, so size
+                     # is halved to keep worst-case $ loss the same. (was 800, 2026-06-15)
+MAX_EQUITY_PCT_PER_PICK = 0.15  # 2026-07-15: never > 15% of CURRENT equity in one pick —
+                     # the $1,810 MRVL entry on a ~$2k account can never recur
 KRONOS_CONFLICTS_OVERRIDE_SCORE = 90  # Flow score required to override Kronos CONFLICTS veto
 KRONOS_UNAVAILABLE_OVERRIDE_SCORE = 85  # Flow score required when Kronos unavailable
 
 # Tickers Kronos cannot forecast (Alpaca has no bars for indices)
 # These get UNAVAILABLE verdict immediately without inference attempt
 KRONOS_SKIP_TICKERS = {"SPX", "NDX", "RUT", "VIX", "XSP", "OEX", "DJX", "XEO", "DJI"}
-MIN_DTE_DEFAULT = 1  # 0DTE picks require explicit catalyst language in reasoning
+MIN_DTE_DEFAULT = 14  # 2026-07-15 P&L review: HARD floor — the 2-7 DTE theta-lotto class
+                      # produced most of the -$3,769; median entry was 3-7 DTE. No exceptions.
 FORBIDDEN_TICKERS = set()  # populated as hallucinations are observed
 SHORTLIST_SIZE = 5
 DAILY_PICKS_FILE = Path("/home/ubuntu/.openclaw/workspace/state/boba_daily_picks.json")
@@ -753,7 +758,7 @@ def load_platinum_flow(max_show=5):
       1. premium >= 10M (T0 MEGA threshold)
       2. volume >= 5x OI (when OI > 0; OI=0 with vol>500 also counts as fresh institutional positioning)
       3. sweeps >= 80% of total transactions (sweeps + blocks)
-      4. low DTE (<=14 days) OR very high DTE (>=180 days) — extremes only, not middle-DTE filler
+      4. DTE >= 14 days (sub-14-DTE theta lottos are BANNED 2026-07-15; >=180d LEAPs also qualify)
     Returns prompt block of the rarest most-conviction trades. Boba should evaluate these BEFORE
     T0/T1/T2 since matching all 4 simultaneously is statistically rare and signals urgent institutional intent."""
     from pathlib import Path as _Path
@@ -786,7 +791,7 @@ def load_platinum_flow(max_show=5):
         # Sweep dominance check
         sweep_pct_ok = (sweeps / total_tx >= 0.80) if total_tx > 0 else False
         # DTE extremes (urgent or LEAP-style conviction)
-        dte_ok = dte <= 14 or dte >= 180
+        dte_ok = 14 <= dte or dte >= 180  # 2026-07-15: sub-14-DTE lotto class banned (was dte<=14 OR >=180)
         if vol_ratio_ok and sweep_pct_ok and dte_ok:
             c["_sweep_pct"] = int((sweeps / total_tx) * 100) if total_tx > 0 else 0
             c["_vol_ratio"] = round(vol / oi, 1) if oi > 0 else float("inf")
@@ -796,7 +801,7 @@ def load_platinum_flow(max_show=5):
     platinum.sort(key=lambda x: -x.get("premium", 0))
     platinum = platinum[:max_show]
     lines = ["\n# 💎 PLATINUM TIER — most unusual of unusual (rare 1-3% of flow)"]
-    lines.append("# All 4 conditions met: $10M+ premium, vol >= 5x OI, sweeps >= 80% of tx, DTE extreme (<=14d or >=180d)")
+    lines.append("# All 4 conditions met: $10M+ premium, vol >= 5x OI, sweeps >= 80% of tx, DTE >= 14d (sub-14 banned 2026-07-15)")
     lines.append("# Boba: EVALUATE THESE FIRST. Matching all 4 simultaneously signals urgent institutional intent.")
     for c in platinum:
         bull = "BULL" if c.get("is_bullish") else "BEAR"
@@ -1206,7 +1211,7 @@ For each pick, you MUST show due diligence. In the reasoning field, include thes
 4. EXPECTED RETURN — If Kronos forecast plays out, estimate the contract's value at that price move. E.g., "Kronos says −5% on QQQ → QQQ=612 → $645P worth ~$33 intrinsic = +220% return."
 5. MAX LOSS — premium × contracts × 100 (what you lose if contract expires worthless).
 6. RISK FLAGS — name at least one: earnings in expiry window? known catalyst (FOMC, CPI)? low open interest? wide bid/ask spread? IV elevated? If no flags apply, state "none identified."
-7. CONVICTION LEVEL — if 0-3 DTE: state the specific catalyst driving the short window. If no catalyst, explain why gamma risk is acceptable.
+7. CONVICTION LEVEL — minimum 14 DTE on every pick (hard guardrail; sub-14-DTE picks are auto-rejected as of 2026-07-15). Prefer 21-45 DTE so the thesis has time to work.
 8. BRIEF CONTEXT CITED — explicitly reference at least one of: Market Regime, Grok narrative, Orion technicals, Kronos forecast, Flow channel signals. Format: "Brief: <source>=<takeaway>". If you genuinely consulted no brief context, write "Brief: none used because <specific reason>" — never leave this blank.
 
 If you cannot answer items 3, 4, 5 with math, DO NOT PICK THAT CONTRACT — pick a different strike/expiry where you can, or pass entirely.
@@ -1683,27 +1688,33 @@ def validate_pick_against_guardrails(pick, account, prior_picks_this_cycle):
     if option_type not in ("CALL", "PUT"):
         return False, f"GUARDRAIL_VIOLATION: option_type must be CALL or PUT, got {option_type}"
 
-    # Rule 3: Per-pick buying power cap (estimate via mid price * contracts * 100)
-    # Use conservative estimate - if quote unavailable, skip this check rather than block
+    # Rule 3: HARD per-pick cost cap — FAIL-CLOSED (2026-07-15 P&L review).
+    # The old version SKIPPED this check when the quote fetch failed; that hole is
+    # exactly how a $1,810 single pick landed on a ~$2k account. No live quote = no trade.
     bp = float(account.get("buying_power", 0) or 0)
+    equity = float(account.get("equity", 0) or 0)
+    live_quote = None
+    try:
+        live_quote = fetch_live_option_quote(ticker, strike, option_type, expiry)
+    except Exception:
+        pass
+    if not (live_quote and live_quote.get("mid")):
+        return False, "GUARDRAIL_VIOLATION: no live quote — cost cap unverifiable, fail-closed (2026-07-15)"
+    est_cost = float(live_quote["mid"]) * contracts * 100
+    # cap at the SMALLEST of: BP%, the hard $ cap, and 15% of CURRENT equity
+    caps = [RISK_CAP_USD]
     if bp > 0:
-        # Try to get live mid price for accurate notional - fall back to skipping if unavailable
-        live_quote = None
-        try:
-            live_quote = fetch_live_option_quote(ticker, strike, option_type, expiry)
-        except Exception:
-            pass
-        if live_quote and live_quote.get("mid"):
-            est_cost = float(live_quote["mid"]) * contracts * 100
-            # cap risk at the SMALLER of BP% and Mike's $800 hard cap; resize to fit, don't drop
-            max_allowed = min(bp * MAX_BUYING_POWER_PCT_PER_PICK, RISK_CAP_USD)
-            if est_cost > max_allowed:
-                per = float(live_quote["mid"]) * 100
-                fit = int(max_allowed // per)
-                if fit < 1:
-                    return False, f"GUARDRAIL_VIOLATION: 1 contract (${per:,.0f}) exceeds risk cap ${max_allowed:,.0f}"
-                pick["contracts"] = fit
-                pick["_resized"] = f"capped {contracts}->{fit} ct to fit ${max_allowed:,.0f} risk"
+        caps.append(bp * MAX_BUYING_POWER_PCT_PER_PICK)
+    if equity > 0:
+        caps.append(equity * MAX_EQUITY_PCT_PER_PICK)
+    max_allowed = min(caps)
+    if est_cost > max_allowed:
+        per = float(live_quote["mid"]) * 100
+        fit = int(max_allowed // per)
+        if fit < 1:
+            return False, f"GUARDRAIL_VIOLATION: 1 contract (${per:,.0f}) exceeds risk cap ${max_allowed:,.0f}"
+        pick["contracts"] = fit
+        pick["_resized"] = f"capped {contracts}->{fit} ct to fit ${max_allowed:,.0f} risk"
 
     # Rule 4: Kronos CONFLICTS requires flow score >= 90
     # Score lives in entry_criteria as e.g. "T1_1.75M" - if T0/T1 mega flow we can infer
@@ -1728,9 +1739,9 @@ def validate_pick_against_guardrails(pick, account, prior_picks_this_cycle):
         dte = (exp_dt - today).days
         if dte < 0:
             return False, f"GUARDRAIL_VIOLATION: expiry {expiry} is in the past (DTE={dte})"
-        if dte == 0:
-            # 0DTE warning only - logged but not blocked. Aggressive mode allows 0DTE on flow alone.
-            print(f"[guardrail] 0DTE pick on {ticker} - aggressive mode permits, monitor closely", flush=True)
+        if dte < MIN_DTE_DEFAULT:
+            # 2026-07-15 P&L review: hard DTE floor. The 2-7 DTE lotto class drove the bleed.
+            return False, f"GUARDRAIL_VIOLATION: DTE {dte} < hard floor {MIN_DTE_DEFAULT} (theta-lotto ban, 2026-07-15)"
     except Exception as e:
         return False, f"GUARDRAIL_VIOLATION: cannot parse expiry {expiry}: {e}"
 
@@ -1845,7 +1856,12 @@ def execute_pick_on_alpaca(pick):
 
         # 3. Submit stop_limit SL — Alpaca rejects OCO on options (complex orders not supported).
         # TP is handled by daemon trailing SL up + Boba position_actions TRIM/EXIT.
-        stop_loss_pct = float(pick.get("stop_loss_pct", 30))
+        # 2026-07-15 P&L review: tier stops (-15/-30%) were chop magnets — 77 round-trips
+        # showed losers stopped at -30/-31/-32% same-day over and over (calibration finding:
+        # naive stops backfire on convex options). Initial stop is now a WIDE -50% DISASTER
+        # stop only (size already halved via RISK_CAP_USD); the REAL exits are the
+        # profit-lock ratchet + the new 7-day time-stop in profit_lock_daemon.
+        stop_loss_pct = max(float(pick.get("stop_loss_pct", 30)), 50.0)
         profit_target_pct = float(pick.get("profit_target_pct", 50))
         stop_trigger = round(max(fill_price * (1 - stop_loss_pct / 100), 0.01), 2)
         stop_limit = round(max(stop_trigger * 0.90, 0.01), 2)
