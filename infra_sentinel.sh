@@ -32,6 +32,13 @@ FIXER_MAX_PER_DAY=4
 DOMAINS="missionctrl.serveftp.com massagebymike.serveftp.com bridge.serveftp.com bobacattrades.serveftp.com claudeclaw.serveftp.com"
 # extra DNS-tracked hostnames with no nginx vhost (none currently; env-overridable for tests)
 DNS_ONLY_DOMAINS="${SENTINEL_DNS_ONLY:-}"
+# Vercel-fronted domains (2026-07-16 cutover): their public A record is Vercel's anycast
+# (76.76.21.21), NOT the home WAN IP — noip_duc.sh no longer pushes them. probe_dns must
+# expect VERCEL_IP for these or it false-fires a DNS mismatch every cycle (which then
+# force-pushes noip_duc for nothing and spawns a fixer). Keep in sync with HOSTS in
+# ~/scripts/noip_duc.sh: WAN-fronted = bridge + claudeclaw; Vercel-fronted = the three below.
+VERCEL_IP="${SENTINEL_VERCEL_IP:-76.76.21.21}"
+VERCEL_DOMAINS="${SENTINEL_VERCEL_DOMAINS:-missionctrl.serveftp.com massagebymike.serveftp.com bobacattrades.serveftp.com}"
 MASSAGE_PORT="${SENTINEL_MASSAGE_PORT:-3003}"   # overridable for simulated-failure tests
 # pm2 processes the sentinel may revive (NEVER trading daemons, NEVER claudeclaw)
 REVIVABLE="missionctrl aries massage-api bobacat-gallery mc-kb-server"
@@ -108,7 +115,7 @@ probe_dns(){ # any domain not resolving to current WAN IP? -> echoes mismatches
   # loopback. The old local lookup therefore always saw 127.0.0.1 != WAN and reported a
   # mismatch no DNS push could ever clear — a false positive that re-pushed No-IP every
   # 10 min and spawned a fixer. The hairpin entries are intentional: do NOT remove them.
-  local ip="$1" d r rc nx fails=""
+  local ip="$1" d r rc nx exp fails=""
   for d in $DOMAINS $DNS_ONLY_DOMAINS; do
     r=$(resolve_public "$d"); rc=$?
     if [ "$rc" -eq 2 ]; then
@@ -124,7 +131,9 @@ probe_dns(){ # any domain not resolving to current WAN IP? -> echoes mismatches
       continue
     fi
     sset "nxdomain_$d" 0; clear_issue "noipexpiry-${d%%.*}"
-    [ "$r" != "$ip" ] && fails="$fails $d($r)"
+    # expected front: Vercel anycast for cutover domains, home WAN IP for laptop-resident ones
+    exp="$ip"; case " $VERCEL_DOMAINS " in *" $d "*) exp="$VERCEL_IP";; esac
+    [ "$r" != "$exp" ] && fails="$fails $d($r want $exp)"
   done
   echo "$fails"
 }
