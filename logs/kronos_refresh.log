@@ -8407,3 +8407,115 @@ OK: HF_HOME='/home/itsju/.cache/huggingface' | disk 711GB free | checks passed
 OK: HF_HOME='/home/itsju/.cache/huggingface' | disk 706GB free | checks passed
 [2026-07-16T12:00:01Z] Generating SPY...
 [2026-07-16T12:00:01Z] Generating SPY...
+    }
+  ]
+}
+    }
+  ]
+}
+[2026-07-16T12:00:33Z] Generating QQQ...
+[2026-07-16T12:00:33Z] Generating QQQ...
+    }
+  ]
+}
+    }
+  ]
+}
+[2026-07-16T12:00:59Z] Generating NVDA...
+[2026-07-16T12:00:59Z] Generating NVDA...
+    }
+  ]
+}
+    }
+  ]
+}
+[2026-07-16T12:01:28Z] Generating TSLA...
+[2026-07-16T12:01:28Z] Generating TSLA...
+    }
+  ]
+}
+    }
+  ]
+}
+[2026-07-16T12:01:54Z] Generating AAPL...
+[2026-07-16T12:01:54Z] Generating AAPL...
+    }
+  ]
+}
+    }
+  ]
+}
+[2026-07-16T12:02:20Z] Generating MSFT...
+[2026-07-16T12:02:20Z] Generating MSFT...
+    }
+  ]
+}
+    }
+  ]
+}
+[2026-07-16T12:02:48Z] Generating AMD...
+[2026-07-16T12:02:48Z] Generating AMD...
+    }
+  ]
+}
+    }
+  ]
+}
+[2026-07-16T12:03:17Z] Generating SMCI...
+[2026-07-16T12:03:17Z] Generating SMCI...
+    }
+  ]
+}
+    }
+  ]
+}
+[2026-07-16T12:03:47Z] Generating META...
+[2026-07-16T12:03:47Z] Generating META...
+    }
+  ]
+}
+    }
+  ]
+}
+[2026-07-16T12:04:16Z] Generating MU...
+[2026-07-16T12:04:16Z] Generating MU...
+    }
+  ]
+}
+    }
+  ]
+}
+[2026-07-16T12:04:44Z] Generating AMZN...
+[2026-07-16T12:04:44Z] Generating AMZN...
+    }
+  ]
+}
+    }
+  ]
+}
+[2026-07-16T12:05:15Z] Generating GOOGL...
+[2026-07-16T12:05:15Z] Generating GOOGL...
+    }
+  ]
+}
+    }
+  ]
+}
+[2026-07-16T12:05:43Z] Generating COIN...
+[2026-07-16T12:05:43Z] Generating COIN...
+    }
+  ]
+}
+    }
+  ]
+}
+[2026-07-16T12:06:10Z] Generating BTC...
+[2026-07-16T12:06:10Z] Generating BTC...
+    }
+  ]
+}
+    }
+  ]
+}
+[2026-07-16T12:06:36Z] kronos_refresh_premarket done
+[2026-07-16T12:06:36Z] kronos_refresh_premarket done
