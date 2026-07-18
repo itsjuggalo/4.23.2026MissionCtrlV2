@@ -35,7 +35,6 @@ CRITICAL_PATHS = [
     "/home/ubuntu/.openclaw/workspace/directives/firebase_trade_signals.json",
     "/home/ubuntu/.openclaw/workspace/directives/grok_brief.json",
     "/home/ubuntu/.openclaw/workspace/directives/market_briefing.json",
-    "/home/ubuntu/.openclaw/workspace/directives/kronos_forecast.json",
     "/home/ubuntu/.openclaw/workspace/skill_outputs/boba_decisions_validated.json",
 ]
 

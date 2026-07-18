@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """Phase 1 — replay last week's Boba decisions through conservative variant.
-Conservative edit: no <14 DTE unless flow_score >= 90 + Kronos 2x breakeven + 65% acc.
+Conservative edit: no <14 DTE unless flow_score >= 90 + 65% acc.
 Otherwise substitute with 30 DTE equivalent."""
 import json, urllib.request, urllib.parse, math
 from datetime import datetime, timedelta, timezone
@@ -77,9 +77,9 @@ def conservative_check(pick, cycle_date):
     if dte >= 14:
         return ('keep', None)
 
-    # <14 DTE — would need flow score >=90, Kronos 2x breakeven, 65% accuracy
+    # <14 DTE — would need flow score >=90, 65% accuracy
     # We don't have those metadata fields available, so default to substitute
-    # (this matches the spirit: only KEEP if all 3 conditions verified)
+    # (this matches the spirit: only KEEP if all conditions verified)
     return ('substitute', None)
 
 def substitute_pick(pick):

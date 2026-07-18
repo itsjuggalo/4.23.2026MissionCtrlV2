@@ -456,24 +456,6 @@ const ENDPOINTS = [
     },
   },
 
-  // --- Kronos Forecast ---
-  {
-    path: '/api/kronos-forecast',
-    check(data) {
-      if (data?.error) return `kronos-forecast error: ${data.error}`;
-      return null;
-    },
-  },
-
-  // --- Kronos Generate ---
-  {
-    path: '/api/kronos-generate',
-    check(data) {
-      if (data?.error) return `kronos-generate error: ${data.error}`;
-      return null;
-    },
-  },
-
   // --- Stocks ---
   {
     path: '/api/stocks',

@@ -10,7 +10,6 @@ Subcommands:
     self-grade   - Item 15 Boba weekly self-grade tee
     sec-whales   - Item 27 SEC weekly whale digest
     fleet-mem    - Item 23 fleet_memory updates this week
-    kronos       - Kronos reliability stats
     mc-restarts  - Mission-control PM2 restart watcher
     edge-decay   - Item 22 edge-decay weekly roll-up
     blast        - Item 17 blast-radius weekly summary
@@ -224,49 +223,6 @@ def digest_fleet_mem():
     post("[23-fleet-mem]", "\n".join(lines))
 
 
-def digest_kronos():
-    """Kronos reliability from boba_cycle log."""
-    log_path = Path("/tmp/boba_cycle.log")
-    if not log_path.exists():
-        post("[kronos-reliability]", "boba_cycle.log missing")
-        return
-    timeouts = 0
-    ready = 0
-    cached = 0
-    waited_ok = 0
-    tickers = defaultdict(int)
-    try:
-        with open(log_path) as f:
-            for line in f.readlines()[-2000:]:
-                if "[kronos]" in line:
-                    if "timed out" in line:
-                        timeouts += 1
-                        for tok in line.split():
-                            if tok.isupper() and 1 < len(tok) <= 6:
-                                tickers[tok] += 1
-                                break
-                    elif "forecast ready" in line:
-                        ready += 1
-                        for tok in line.split():
-                            if tok.isupper() and 1 < len(tok) <= 6:
-                                tickers[tok] += 1
-                                break
-                    elif "cached" in line:
-                        for tok in line.split():
-                            if tok.isdigit():
-                                cached += int(tok)
-                                break
-    except Exception as e:
-        post("[kronos-reliability]", "ERROR: " + str(e))
-        return
-    total = timeouts + ready
-    rate = (ready / total * 100) if total else 0
-    top5 = sorted(tickers.items(), key=lambda x: -x[1])[:5]
-    body = "Last 2000 log lines: " + str(ready) + " ready, " + str(timeouts) + " timeouts (" + ("%.0f" % rate) + "% success)\n"
-    body += "Top 5 forecasted tickers: " + ", ".join([t + " " + str(c) for t,c in top5])
-    post("[kronos-reliability]", body)
-
-
 def digest_mc_restarts():
     """Mission-control PM2 restart watcher."""
     try:
@@ -337,7 +293,6 @@ DIGESTS = {
     "self-grade": digest_self_grade,
     "sec-whales": digest_sec_whales,
     "fleet-mem": digest_fleet_mem,
-    "kronos": digest_kronos,
     "mc-restarts": digest_mc_restarts,
     "edge-decay": digest_edge_decay,
     "blast": digest_blast,

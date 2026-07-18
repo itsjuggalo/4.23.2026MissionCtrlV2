@@ -45,7 +45,6 @@ const MONITORS = [
   // Strategy
   { name: 'MC Live Strategy', url: 'http://localhost:3000/api/live-strategy' },
   { name: 'MC Desk Cycle', url: 'http://localhost:3000/api/desk-cycle' },
-  { name: 'MC Kronos Forecast', url: 'http://localhost:3000/api/kronos-forecast' },
   { name: 'MC DB Status', url: 'http://localhost:3000/api/db-status' },
 
   // Next.js itself

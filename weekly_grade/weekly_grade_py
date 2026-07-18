@@ -156,7 +156,7 @@ def main():
         'decision_count': len(decisions),
         'sample_decisions': decisions[:10],
     }
-    prompt = f"""You are grading TWO trading agents head-to-head over the past 7 days. Both are multi-agent algorithmic options trading systems sharing the same whale flow signals and Kronos forecasts but using different models and risk profiles.\n\nAGENTS UNDER REVIEW:\n- Boba: Anthropic Claude Sonnet, R2 paper account ($503K, L3 margin), AGGRESSIVE — takes short-DTE plays.\n- JazzyHazzy: OpenAI GPT-4o-mini, R1 paper account ($10K, L3 4x margin), CONSERVATIVE — HARD GATE rejecting <14 DTE without 3-condition override (flow ≥90, Kronos 2x breakeven, named catalyst).\n\nR1 (PA3Y7UTNIQFZ) is a separate hold-only Boba account ($150K, L2) used as a passive baseline.
+    prompt = f"""You are grading TWO trading agents head-to-head over the past 7 days. Both are multi-agent algorithmic options trading systems sharing the same whale flow signals but using different models and risk profiles.\n\nAGENTS UNDER REVIEW:\n- Boba: Anthropic Claude Sonnet, R2 paper account ($503K, L3 margin), AGGRESSIVE — takes short-DTE plays.\n- JazzyHazzy: OpenAI GPT-4o-mini, R1 paper account ($10K, L3 4x margin), CONSERVATIVE — HARD GATE rejecting <14 DTE without 2-condition override (flow ≥90, named catalyst).\n\nR1 (PA3Y7UTNIQFZ) is a separate hold-only Boba account ($150K, L2) used as a passive baseline.
 
 PERFORMANCE DATA:
 {json.dumps(summary, indent=2, default=str)}
