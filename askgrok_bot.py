@@ -285,15 +285,14 @@ async def on_message(message):
             top = top[:12]  # cap at 12 for prompt size
 
             # Fetch live Tradier quotes for each
-            from boba_decision_cycle import fetch_live_option_quote, check_fresh_kronos_file
+            from boba_decision_cycle import fetch_live_option_quote
             enriched = []
             for s in top:
                 lq = fetch_live_option_quote(
                     s.get("ticker"), s.get("strike"),
                     s.get("option_type"), s.get("expiry")
                 )
-                kr = check_fresh_kronos_file(s.get("ticker"), max_age_minutes=240) or {}
-                enriched.append({"sig": s, "quote": lq, "kronos": kr})
+                enriched.append({"sig": s, "quote": lq})
 
             # Build context for Grok
             ctx_parts = []
@@ -307,7 +306,6 @@ async def on_message(message):
                 tlabel = tier_map.get(id(s), "  (other high-premium)")
                 ctx_parts.append(tlabel)
                 q = e["quote"] or {}
-                k = e["kronos"]
                 line = (
                     f"#{i} {s.get('ticker')} ${s.get('strike')} {s.get('option_type')} "
                     f"exp {s.get('expiry')} ({s.get('dte')} DTE) | "
@@ -321,11 +319,6 @@ async def on_message(message):
                     )
                 else:
                     line += "\n   LIVE: (Tradier unavailable)"
-                if k.get("forecast_24h_direction") and k.get("forecast_24h_direction") != "pending":
-                    line += (
-                        f"\n   KRONOS: {k.get('forecast_24h_direction')} target ${k.get('forecast_24h_target','?')}"
-                        f" (current ${k.get('current_price','?')}) | agree={k.get('option_in_forecast_direction')}"
-                    )
                 ctx_parts.append(line)
             context = "\n\n".join(ctx_parts)
 
@@ -338,12 +331,12 @@ async def on_message(message):
                 "1. THESIS - 1 sentence directional view\n"
                 "2. ENTRY - mid price as cost basis\n"
                 "3. BREAKEVEN at expiry (strike +/- premium)\n"
-                "4. TARGET MOVE needed (from Kronos forecast or Δ-implied)\n"
+                "4. TARGET MOVE needed (Δ-implied)\n"
                 "5. EXPECTED RETURN % if target hits (delta * underlying move - theta decay over DTE)\n"
                 "6. MAX LOSS = premium * 100 if expires worthless\n"
                 "7. R:R RATIO = expected_gain / max_loss\n"
-                "8. RISK FLAGS (wide spread >5%, low DTE, IV elevated, Kronos conflict)\n\n"
-                "Rank by R:R ratio descending. Be ruthless - skip any with R:R < 1.0 or Kronos conflict. "
+                "8. RISK FLAGS (wide spread >5%, low DTE, IV elevated)\n\n"
+                "Rank by R:R ratio descending. Be ruthless - skip any with R:R < 1.0. "
                 "If fewer than 3 qualify, say so. Be concise but show all the math."
             )
 
@@ -358,7 +351,7 @@ async def on_message(message):
             audit("flowpicks_failed", str(e))
         return
 
-    # !digest — full synthesis: whale flow + Firebase signals + Kronos + Boba's last call + Grok macro
+    # !digest — full synthesis: whale flow + Firebase signals + Boba's last call + Grok macro
     if content.startswith("!digest"):
         await message.channel.send("🧠 Loading all sources for full digest...")
         try:
@@ -406,27 +399,6 @@ async def on_message(message):
             except Exception as e:
                 ctx_blocks.append(f"FIREBASE: error ({e})")
 
-            # 3. Kronos forecasts — cached for major tickers
-            try:
-                kdir = Path("/home/ubuntu/.openclaw/workspace/directives/kronos_forecasts")
-                if kdir.exists():
-                    klines = []
-                    for f in sorted(kdir.glob("latest_*.json"))[:8]:
-                        try:
-                            k = _json.loads(f.read_text())
-                            tkr = f.stem.replace("latest_", "")
-                            d = k.get("forecast_24h_direction", "?")
-                            tgt = k.get("forecast_24h_target", "?")
-                            cur = k.get("current_price", "?")
-                            conf = k.get("forecast_24h_confidence", "?")
-                            klines.append(f"  - {tkr}: {d} (target ${tgt}, current ${cur}, conf {conf})")
-                        except Exception:
-                            continue
-                    if klines:
-                        ctx_blocks.append("KRONOS FORECASTS (cached):\n" + "\n".join(klines))
-            except Exception:
-                pass
-
             # 4. Boba's most recent decision
             try:
                 bd = Path("/home/ubuntu/.openclaw/workspace/skill_outputs/boba_decisions_validated.json")
@@ -463,7 +435,7 @@ async def on_message(message):
                 "You have all of Mike's intel sources above. Synthesize them into a single SHORT trade desk briefing:\n"
                 "1. ONE-LINE MARKET TAKE — overall vibe right now (2-3 sentences max)\n"
                 "2. TOP 3 OPPORTUNITIES — ranked across whale flow + Firebase signals + Boba's view, with which side (long/short) and why each is best risk-adjusted. Cite the source.\n"
-                "3. RISKS / CONFLICTS — where do sources disagree? Where is Kronos saying opposite of whale flow? Anything to AVOID?\n"
+                "3. RISKS / CONFLICTS — where do sources disagree? Anything to AVOID?\n"
                 "4. ACTION ITEMS — 1-3 specific things Mike should do/watch in next session.\n\n"
                 "Be ruthless and specific. Don't pad with disclaimers. If there's nothing to do, say 'sit on hands'."
             )

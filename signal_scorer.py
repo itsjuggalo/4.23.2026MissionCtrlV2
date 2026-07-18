@@ -5,7 +5,6 @@ Composes a 0-100 confidence score from multiple factors:
   - vol/OI ratio: up to 15 pts
   - sweep dominance: up to 12 pts
   - upstream score (firebase_to_scored / flow_scorer): up to 10 pts
-  - Kronos alignment + confidence: -20 to +12 pts
   - regime alignment: -10 to +5 pts
   - time-of-day for 0DTE entries: -12 to 0 pts
   - DTE band (gamma vs theta tradeoff): -5 to +3 pts
@@ -18,12 +17,12 @@ Output bands:
    0-39   TRASH      skip — soft-gated out before showing to agent
 
 Public API:
-    score_signal(signal: dict, *, kronos: dict|None=None, regime: str="",
+    score_signal(signal: dict, *, regime: str="",
                  et_hour: int|None=None) -> dict
         Returns {"score": int, "band": str, "breakdown": dict}
 
     annotate_shortlist(shortlist: list[tuple[str, dict]], *,
-                       kronos_by_ticker: dict|None=None, regime: str="",
+                       regime: str="",
                        drop_trash: bool=True) -> list[tuple[str, dict]]
         Adds 'confidence' dict to each signal, sorts by score DESC, drops TRASH band.
 """
@@ -68,25 +67,6 @@ def _sweep_points(sweeps: int, blocks: int) -> int:
     if pct >= 0.65: return 8
     if pct >= 0.40: return 4
     return 0
-
-
-def _kronos_points(direction: str, kronos: dict | None) -> int:
-    """Direction is "CALL" or "PUT". Kronos returns BULLISH/BEARISH/NEUTRAL."""
-    if not kronos:
-        return 0
-    k_dir = (kronos.get("forecast_24h_direction") or "").upper()
-    k_conf = (kronos.get("forecast_24h_confidence") or "").upper()
-    pick_is_bull = direction == "CALL"
-    if "BULL" in k_dir:
-        agreement = pick_is_bull
-    elif "BEAR" in k_dir:
-        agreement = not pick_is_bull
-    else:
-        return 0  # neutral / unknown
-    if agreement:
-        return {"HIGH": 12, "MEDIUM": 6, "MED": 6, "LOW": 2}.get(k_conf, 0)
-    else:
-        return {"HIGH": -20, "MEDIUM": -10, "MED": -10, "LOW": -3}.get(k_conf, 0)
 
 
 def _regime_points(direction: str, regime: str) -> int:
@@ -159,7 +139,7 @@ def _band(score: int) -> str:
     return "TRASH"
 
 
-def score_signal(signal: dict, *, kronos: dict | None = None, regime: str = "",
+def score_signal(signal: dict, *, regime: str = "",
                  et_hour: int | None = None) -> dict:
     flow_value = float(signal.get("flow_value") or 0)
     tier_name, tier_pts = _tier_from_flow(flow_value)
@@ -179,7 +159,6 @@ def score_signal(signal: dict, *, kronos: dict | None = None, regime: str = "",
         "vol_oi":         _vol_oi_points(volume, oi),
         "sweep":          _sweep_points(sweeps, blocks),
         "upstream":       _upstream_score_points(signal.get("score") or 0),
-        "kronos":         _kronos_points(direction, kronos),
         "regime":         _regime_points(direction, regime),
         "time_of_day":    _time_of_day_points(is_0dte, et_hour),
         "dte_band":       _dte_band_points(expiry),
@@ -196,16 +175,13 @@ def score_signal(signal: dict, *, kronos: dict | None = None, regime: str = "",
 
 
 def annotate_shortlist(shortlist: list[tuple[str, dict]], *,
-                        kronos_by_ticker: dict | None = None,
                         regime: str = "",
                         drop_trash: bool = True) -> list[tuple[str, dict]]:
     """In-place: add 'confidence' to each signal, sort DESC, optionally drop TRASH."""
     et_hour = datetime.now(timezone(timedelta(hours=-4))).hour
-    kronos_by_ticker = kronos_by_ticker or {}
     annotated = []
     for sid, s in shortlist:
-        kronos = kronos_by_ticker.get(s.get("ticker", "").upper())
-        conf = score_signal(s, kronos=kronos, regime=regime, et_hour=et_hour)
+        conf = score_signal(s, regime=regime, et_hour=et_hour)
         s["confidence"] = conf
         annotated.append((sid, s))
     annotated.sort(key=lambda x: -x[1]["confidence"]["score"])
