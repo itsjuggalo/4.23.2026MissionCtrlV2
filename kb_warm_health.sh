@@ -11,7 +11,7 @@
 set -uo pipefail
 
 URL="http://127.0.0.1:8095/health"
-APP="kb-warm-server"
+APP="kb-server"
 SECRETS="$HOME/.openclaw/secrets"
 WEBHOOK_FILE="$SECRETS/discord_pipeline_alerts_webhook"
 STATE="/tmp/kb_warm_health.state"   # holds "down" while in a known-bad streak
