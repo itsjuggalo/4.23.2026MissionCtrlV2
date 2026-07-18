@@ -245,7 +245,7 @@ async def on_message(message):
             "`!positions` — current open positions with formatted symbols\n"
             "`!budget` — daily pick budget (3/day cap)\n"
             "`!logs` — last 25 lines of raw cycle log\n\n"
-            "_For agent reasoning (Orion/Grok/DeepSeek/Kronos), see #agent-debate channel._"
+            "_For agent reasoning (Orion/Grok/DeepSeek), see #agent-debate channel._"
         )
 
 

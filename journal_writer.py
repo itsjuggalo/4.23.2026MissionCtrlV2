@@ -93,12 +93,11 @@ def render_agent_decisions(agent: str, log_path: Path, day: str) -> str:
             protocol = p.get("protocol", "?")
             criteria = ", ".join(p.get("entry_criteria") or [])
             brief = ", ".join(p.get("brief_context") or [])
-            kronos = p.get("kronos_verdict", "?")
             conf = p.get("confidence", "?")
             reasoning = (p.get("reasoning") or "").strip()
 
             parts.append(f"\n#### Pick {i}: {ticker} ${strike}{ot} {expiry} × {contracts}\n")
-            parts.append(f"- **Protocol:** {protocol}  ·  **TP/SL:** +{tp}%/-{sl}%  ·  **Confidence:** {conf}  ·  **Kronos:** {kronos}\n")
+            parts.append(f"- **Protocol:** {protocol}  ·  **TP/SL:** +{tp}%/-{sl}%  ·  **Confidence:** {conf}\n")
             if criteria:
                 parts.append(f"- **Entry criteria:** {criteria}\n")
             if brief:

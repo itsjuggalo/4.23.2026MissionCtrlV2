@@ -29,7 +29,6 @@ PLATTERS = [
         "files": [
             "/home/ubuntu/.openclaw/workspace/directives/market_briefing.json",
             "/home/ubuntu/.openclaw/workspace/directives/grok_brief.json",
-            "/home/ubuntu/.openclaw/workspace/directives/kronos_forecast.json",
             "/home/ubuntu/.openclaw/workspace/directives/market_regime_BTC.json",
         ],
     },

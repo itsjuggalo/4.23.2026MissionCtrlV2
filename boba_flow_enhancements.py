@@ -12,7 +12,7 @@ Helpers:
   - strike_cluster_block()     → 📊 tickers with 3+ distinct T1+T2 strikes today
   - sector_mix_warning()       → ⚠️ when 3+ picks fall in same sector
 
-Tier-ladder + tiebreaker tweaks (IV-adjusted stops, Kronos confidence) are
+Tier-ladder + tiebreaker tweaks (IV-adjusted stops) are
 applied via prompt-text edits in the patch script, not via this module.
 """
 from __future__ import annotations
@@ -179,7 +179,7 @@ def platinum_mandate_banner(has_platinum: bool) -> str:
         "\n"
         "**Hard rule (Bible 18.8):** Every NEW pick this cycle MUST come from the Platinum list, OR you must "
         "cite in `reasoning` the *specific* reason a non-Platinum candidate is superior (e.g. better R:R, "
-        "better Kronos alignment, multi-source confluence). Picking a non-Platinum without explicit "
+        "multi-source confluence). Picking a non-Platinum without explicit "
         "justification is treated as a violation of the unusual-flow priority rule.\n"
         "\n"
     )

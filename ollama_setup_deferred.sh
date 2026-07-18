@@ -1,5 +1,5 @@
 #!/bin/bash
-# Deferred: wait for Kronos training to finish, then install Ollama + wire local
+# Deferred: install Ollama + wire local
 # nomic-embed-text into claudeclaw consolidation ($0 embeddings). Pings Mike on
 # completion (success OR failure). Launched via systemd-run --user so it survives
 # /compact, /clear, and Claude exiting. Set up 2026-05-30 at Mike's request.
@@ -11,7 +11,7 @@ log(){ echo "[$(date '+%F %T')] $*" >> "$LOG"; }
 ping(){ /usr/bin/python3 "$PING" "$1" >/dev/null 2>&1 || true; }
 
 # Single-instance lock — a reboot-launched copy and the transient copy must not
-# race (both waiting for Kronos + both installing Ollama).
+# race (both installing Ollama).
 exec 9>"/home/itsju/cron/nightshift/logs/.ollama_setup.lock"
 if ! flock -n 9; then log "another instance holds the lock — exiting"; exit 0; fi
 
@@ -23,15 +23,8 @@ if grep -q "^OLLAMA_EMBED_URL=" "$ENVF" 2>/dev/null \
   exit 0
 fi
 
-log "=== deferred Ollama setup armed; waiting for Kronos (kronos-train-daily) to finish ==="
-
-# 1. Wait for Kronos training to go inactive (cap ~10h; proceeds immediately if already done)
-for i in $(seq 1 600); do
-  systemctl --user is-active kronos-train-daily.service >/dev/null 2>&1 || { log "Kronos finished (after ${i}min wait)"; break; }
-  sleep 60
-done
-sleep 10
-log "RAM after Kronos: $(free -h | awk '/Mem/{print $7" available"}')"
+log "=== deferred Ollama setup armed ==="
+log "RAM available: $(free -h | awk '/Mem/{print $7" available"}')"
 
 # 2. Install Ollama if absent (installer uses sudo; laptop has passwordless sudo)
 if ! command -v ollama >/dev/null 2>&1; then
@@ -78,5 +71,5 @@ systemctl --user restart claudeclaw.service
 log "claudeclaw restarted with OLLAMA_EMBED_URL=http://localhost:11434"
 
 # 7. Success ping
-ping "✅ Ollama set up (Kronos finished). Local nomic-embed-text (${EMB}-dim) now powers claudeclaw consolidation embeddings — FREE + local. Consolidation is now fully $0: insight=DeepSeek, vectors=local Ollama. Log: $LOG"
+ping "✅ Ollama set up. Local nomic-embed-text (${EMB}-dim) now powers claudeclaw consolidation embeddings — FREE + local. Consolidation is now fully $0: insight=DeepSeek, vectors=local Ollama. Log: $LOG"
 log "=== done — embeddings now local/free ==="

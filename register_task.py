@@ -3,10 +3,10 @@
 
 Usage:
   python3 register_task.py \\
-    --name "Kronos retraining" \\
+    --name "Model retraining" \\
     --desc "Fine-tuning on expanded telegram dataset" \\
     --check log_tail \\
-    --target /AIWorkWSL/web/missionctrl/logs/kronos_train.log \\
+    --target /AIWorkWSL/web/missionctrl/logs/train.log \\
     --pattern "Training complete|Epoch 10" \\
     --timeout 6
 

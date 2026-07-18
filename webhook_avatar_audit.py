@@ -10,7 +10,7 @@ SC_MAP = {
     'archive-analyst': 'Reaper', 'archive-auditor': 'Wraith',
     'archive-broadcaster': 'Battlecruiser', 'archive-ci': 'Wraith',
     'agent-debate': 'Hellion', 'spidey': 'Vulture',
-    'kronos': 'Oracle', 'boba': 'Marauder', 'jazzy': 'Sarah_Kerrigan',
+    'boba': 'Marauder', 'jazzy': 'Sarah_Kerrigan',
     'orion': 'Phoenix', 'deepsheet': 'Raven', 'today': 'Reaper',
     'grok': 'Sentry', 'reminder': 'Adjutant', 'bridge': 'Probe',
     'todo': 'Drone', 'status': 'Nexus', 'synth': 'Battlecruiser',

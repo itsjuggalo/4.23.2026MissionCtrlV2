@@ -96,12 +96,6 @@ def fetch_stocks():
         return quotes
     except: return {}
 
-def fetch_kronos():
-    try:
-        d = json.load(open('/home/ubuntu/.openclaw/workspace/directives/kronos_forecast.json'))
-        return d.get('summary',{})
-    except: return {}
-
 def fetch_flows():
     try:
         r = SESSION.get('http://localhost:3000/api/options-flow', timeout=10).json()
@@ -118,7 +112,6 @@ def build(brief_type):
     crypto = fetch_crypto()
     extras = fetch_extras()
     stocks = fetch_stocks()
-    kronos = fetch_kronos()
     flows = fetch_flows()
 
     equity = 0; daily_pct = 0; total_return = 0; pos_lines = []; buying_power = 0
@@ -155,9 +148,6 @@ Equity: ${equity:,.2f} | Daily: {daily_pct:+.2f}% | Return: {total_return:+.1f}%
     for sym, q in stocks.items():
         md += f"  {sym}: ${q['price']:.2f} ({q['change_pct']:+.2f}%)\n"
 
-    if kronos:
-        md += f"\n## KRONOS FORECAST\n  Dir: {kronos.get('direction','?')} | 24H: ${kronos.get('price_in_24h',0):,.2f} | Chg: {kronos.get('change_pct',0):+.2f}% | Range: ${kronos.get('predicted_low',0):,.2f}-${kronos.get('predicted_high',0):,.2f}\n"
-
     if flows:
         md += "\n## TOP UNUSUAL FLOW\n"
         for f in flows:
@@ -169,7 +159,7 @@ Equity: ${equity:,.2f} | Daily: {daily_pct:+.2f}% | Return: {total_return:+.1f}%
     os.makedirs(os.path.dirname(OUTPUT), exist_ok=True)
     open(OUTPUT,'w').write(md)
     json.dump({'generated':now.strftime('%Y-%m-%d %I:%M %p EDT'),'type':brief_type,'sessions':sess,'equity':equity,
-        'crypto':crypto,'extras':extras,'stocks':stocks,'kronos':kronos,'flows':flows}, open(OUTPUT_JSON,'w'), indent=2)
+        'crypto':crypto,'extras':extras,'stocks':stocks,'flows':flows}, open(OUTPUT_JSON,'w'), indent=2)
     print(f"[{now.strftime('%I:%M %p EDT')}] Brief data saved for {brief_type}")
     return md
 

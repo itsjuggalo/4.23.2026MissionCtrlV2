@@ -77,7 +77,6 @@ def peer_picks_block(agent: str, window_hours: int = 6) -> str:
                 "contracts": pick.get("contracts", 1),
                 "time": str(ts_str)[:19],
                 "thesis": thesis,
-                "kronos": pick.get("kronos_verdict", "?"),
             })
 
     if not recent_picks:
@@ -102,8 +101,7 @@ def peer_picks_block(agent: str, window_hours: int = 6) -> str:
         else:
             contract = "stock"
         out.append(
-            f"  - {p['time']} {peer}: {p['ticker']} {contract} {p['expiry']} × {p['contracts']}  "
-            f"(Kronos: {p['kronos']})"
+            f"  - {p['time']} {peer}: {p['ticker']} {contract} {p['expiry']} × {p['contracts']}"
         )
         if p['thesis']:
             out.append(f"      thesis: {p['thesis']}")

@@ -87,14 +87,6 @@ SOURCES = [
         "is_directory": True,
     },
     {
-        "id": "kronos_forecasts_dir",
-        "path": "/home/ubuntu/.openclaw/workspace/directives/kronos_forecasts",
-        "max_age_minutes": 240,
-        "weekday_only": False,
-        "required": False,
-        "is_directory": True,
-    },
-    {
         "id": "boba_lessons",
         "path": "/home/ubuntu/.openclaw/workspace/memory/boba_lessons.md",
         "max_age_minutes": 60 * 24 * 7,

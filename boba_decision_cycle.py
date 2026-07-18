@@ -7,13 +7,11 @@ Workflow:
 1. Read today's whale-tier sidecar signals
 2. Filter to "new since last run" + "unseen" (dedupe by signal id)
 3. Build a shortlist (top 5 by score, ensuring variety across tickers)
-4. For each shortlist candidate, trigger Kronos forecast
-5. Build a structured prompt for Boba with:
+4. Build a structured prompt for Boba with:
    - His mission (AGENT_IDENTITIES.md)
    - Current Alpaca account state (equity, buying power, open positions)
    - Today's whale signals with reasoning
-   - Kronos forecasts
-6. Call Claude Sonnet with the prompt
+5. Call Claude Sonnet with the prompt
 7. Parse Boba's response (expecting JSON: picks, reasoning, sizing)
 8. For each pick Boba commits to:
    - Execute on Alpaca (paper)
@@ -196,8 +194,6 @@ try:
     from tradier_client import fetch_option_quote as _tradier_quote
 except Exception:
     _tradier_quote = None
-KRONOS_CMD = "/home/itsju/mission-control/agent-team/kronos/kronos_on_demand.py"
-KRONOS_PYTHON = "/home/itsju/02_DATA/mc-kb/.venv/bin/python"
 
 MAX_PICKS_PER_CYCLE = 3
 MAX_NEW_PICKS_PER_DAY = 3   # Hard cap on NEW picks per trading day across all cycles
@@ -210,12 +206,6 @@ RISK_CAP_USD = 400   # 2026-07-15 P&L review: halved from 800 — entries now ca
                      # is halved to keep worst-case $ loss the same. (was 800, 2026-06-15)
 MAX_EQUITY_PCT_PER_PICK = 0.15  # 2026-07-15: never > 15% of CURRENT equity in one pick —
                      # the $1,810 MRVL entry on a ~$2k account can never recur
-KRONOS_CONFLICTS_OVERRIDE_SCORE = 90  # Flow score required to override Kronos CONFLICTS veto
-KRONOS_UNAVAILABLE_OVERRIDE_SCORE = 85  # Flow score required when Kronos unavailable
-
-# Tickers Kronos cannot forecast (Alpaca has no bars for indices)
-# These get UNAVAILABLE verdict immediately without inference attempt
-KRONOS_SKIP_TICKERS = {"SPX", "NDX", "RUT", "VIX", "XSP", "OEX", "DJX", "XEO", "DJI"}
 MIN_DTE_DEFAULT = 14  # 2026-07-15 P&L review: HARD floor — the 2-7 DTE theta-lotto class
                       # produced most of the -$3,769; median entry was 3-7 DTE. No exceptions.
 FORBIDDEN_TICKERS = set()  # populated as hallucinations are observed
@@ -410,92 +400,6 @@ def build_shortlist(fresh_signals):
         if len(out) >= SHORTLIST_SIZE:
             break
     return out
-
-
-def fetch_kronos_for_ticker(ticker, option_context):
-    """BLOCKING — waits for Kronos result. Only used when explicitly needed."""
-    try:
-        proc = subprocess.run(
-            [KRONOS_PYTHON, KRONOS_CMD, "--ticker", ticker, "--option-context", option_context, "--no-discord"],
-            capture_output=True, timeout=180, text=True,
-        )
-        try:
-            return json.loads(proc.stdout)
-        except Exception:
-            return {"error": "kronos output not parseable", "raw": proc.stdout[-500:]}
-    except subprocess.TimeoutExpired:
-        return {"error": "kronos timeout"}
-    except Exception as e:
-        return {"error": str(e)}
-
-
-def fire_kronos_background(ticker, option_context):
-    """
-    NON-BLOCKING fire-and-forget. Kicks off Kronos in a detached subprocess.
-    Posts to Discord when done (via kronos_on_demand.py's built-in Discord post).
-    Returns immediately — Boba does not wait.
-    """
-    try:
-        # Detach fully from parent so Boba's cycle can exit without waiting
-        import subprocess
-        subprocess.Popen(
-            [KRONOS_PYTHON, KRONOS_CMD, "--ticker", ticker, "--option-context", option_context],
-            stdout=subprocess.DEVNULL,
-            stderr=subprocess.DEVNULL,
-            stdin=subprocess.DEVNULL,
-            start_new_session=True,  # Fully detach from Boba's process group
-        )
-        return True
-    except Exception as e:
-        return False
-
-
-def check_fresh_kronos_file(ticker, max_age_minutes=60):
-    """
-    Peek at latest Kronos forecast file for this ticker.
-    Returns the forecast dict if fresh, None otherwise.
-    Used by Boba to take advantage of Kronos data IF it's already available,
-    without waiting.
-    """
-    from datetime import datetime, timezone, timedelta
-    latest = Path("/home/ubuntu/.openclaw/workspace/directives/kronos_forecasts") / f"latest_{ticker}.json"
-    if not latest.exists():
-        return None
-    try:
-        age_sec = time.time() - latest.stat().st_mtime
-        if age_sec > max_age_minutes * 60:
-            return None
-        return json.loads(latest.read_text())
-    except Exception:
-        return None
-
-
-
-def wait_for_kronos_result(ticker, timeout_sec=240, poll_interval=5):
-    """
-    After firing Kronos in background, poll latest_<ticker>.json
-    for up to timeout_sec seconds waiting for a FRESH result.
-    A result counts as fresh if file mtime advanced after we started waiting.
-    Returns the forecast dict if result arrives in time, None if timeout.
-    """
-    latest = Path("/home/ubuntu/.openclaw/workspace/directives/kronos_forecasts") / f"latest_{ticker}.json"
-    start_time = time.time()
-    initial_mtime = latest.stat().st_mtime if latest.exists() else 0
-    while time.time() - start_time < timeout_sec:
-        time.sleep(poll_interval)
-        if latest.exists():
-            current_mtime = latest.stat().st_mtime
-            if current_mtime > initial_mtime:
-                try:
-                    data = json.loads(latest.read_text())
-                    if "error" not in data and "forecast_24h_direction" in data:
-                        elapsed = int(time.time() - start_time)
-                        print(f"[kronos] {ticker} forecast ready after {elapsed}s", file=sys.stderr)
-                        return data
-                except Exception:
-                    continue
-    print(f"[kronos] {ticker} timed out after {timeout_sec}s", file=sys.stderr)
-    return None
 
 
 def get_alpaca_account():
@@ -880,7 +784,7 @@ def load_market_briefing():
 def compute_agent_consensus(window_hours=4):
     """Item 19: scan agent outputs in rolling window, return ticker -> set of agents that mentioned it.
     Sources today: orion (crypto), jazzyhazzy (multi-skill), grok (ct_alpha), boba (prior cycle).
-    Kronos and DeepSeek hooks reserved for when their writers come online."""
+    DeepSeek hook reserved for when its writer comes online."""
     import re as _re
     from datetime import datetime as _dt, timezone as _tz, timedelta as _td
     cutoff = _dt.now(_tz.utc) - _td(hours=window_hours)
@@ -956,13 +860,13 @@ def format_consensus_for_prompt(votes, threshold=3):
     high.sort(key=lambda x: (-len(x[1]), x[0]))
     out = '\n# AGENT CONSENSUS (Item 19) - symbols flagged by 3+ agents in last 4h\n'
     out += 'These are HIGH-CONVICTION tier candidates by virtue of multi-agent overlap.\n'
-    out += 'Treat consensus as an independent signal alongside whale flow tier and Kronos verdict.\n'
+    out += 'Treat consensus as an independent signal alongside whale flow tier.\n'
     for ticker, agents in high[:15]:
         agent_list = ', '.join(sorted(agents))
         out += f'  - {ticker}: {len(agents)} agents ({agent_list})\n'
     return out + '\n'
 
-def build_boba_prompt(account, positions, shortlist_with_kronos, remaining_budget=3):
+def build_boba_prompt(account, positions, shortlist_scored, remaining_budget=3):
     equity = float(account.get("equity", 0))
     buying_power = float(account.get("buying_power", 0))
     cash = float(account.get("cash", 0))
@@ -975,23 +879,23 @@ def build_boba_prompt(account, positions, shortlist_with_kronos, remaining_budge
     # === Signal scoring pre-pass: compute confidence + drop TRASH-band signals ===
     _scored_shortlist = []
     if score_signal:
-        for _sid, _s, _k in shortlist_with_kronos:
+        for _sid, _s in shortlist_scored:
             try:
-                _conf = score_signal(_s, kronos=_k)
+                _conf = score_signal(_s)
                 _s["confidence"] = _conf
                 if _conf["band"] == "TRASH":
                     print(f"[signal-scorer] DROP TRASH: {_s.get('ticker')} ${_s.get('strike')}{(_s.get('option_type','') or '')[:1]} {_s.get('expiry')} | {render_breakdown_line(_conf)}", flush=True)
                     continue
             except Exception as _se:
                 print(f"[signal-scorer] error scoring {_s.get('ticker')}: {_se}", flush=True)
-            _scored_shortlist.append((_sid, _s, _k))
+            _scored_shortlist.append((_sid, _s))
         # Sort survivors by confidence score DESC
         _scored_shortlist.sort(key=lambda _x: -(_x[1].get("confidence", {}).get("score", 0)))
     else:
-        _scored_shortlist = list(shortlist_with_kronos)
+        _scored_shortlist = list(shortlist_scored)
 
     shortlist_text = ""
-    for i, (sid, s, k) in enumerate(_scored_shortlist, 1):
+    for i, (sid, s) in enumerate(_scored_shortlist, 1):
         shortlist_text += f"\n\n--- CANDIDATE {i} ---\n"
         shortlist_text += f"Ticker: {s.get('ticker')}\n"
         shortlist_text += f"Contract: ${s.get('strike')} {s.get('option_type')} exp {s.get('expiry')} ({s.get('dte')} DTE)\n"
@@ -1016,28 +920,6 @@ def build_boba_prompt(account, positions, shortlist_with_kronos, remaining_budge
         shortlist_text += f"Whale reasoning:\n"
         for r in s.get("reasons", []):
             shortlist_text += f"  • {r}\n"
-        shortlist_text += f"\nKronos forecast:\n"
-        if k.get("forecast_24h_direction") == "pending":
-            shortlist_text += f"  ⏳ running in background (not available this cycle — you decide without it)\n"
-        elif "error" in k:
-            shortlist_text += f"  (unavailable: {k.get('error')})\n"
-        else:
-            age_note = ""
-            if k.get("generated_at"):
-                from datetime import datetime, timezone as _tz
-                try:
-                    gen = datetime.fromisoformat(k["generated_at"].replace("Z","+00:00"))
-                    age_min = int((datetime.now(_tz.utc) - gen).total_seconds() / 60)
-                    age_note = f" (cached, {age_min} min old)"
-                except Exception:
-                    pass
-            shortlist_text += f"  Direction: {k.get('forecast_24h_direction','?')} (confidence: {k.get('forecast_24h_confidence','?')}){age_note}\n"
-            shortlist_text += f"  Target: ${k.get('forecast_24h_target','?')} (current ${k.get('current_price','?')})\n"
-            agree = k.get("option_in_forecast_direction")
-            if agree is True:
-                shortlist_text += f"  → Kronos AGREES with option thesis ✅\n"
-            elif agree is False:
-                shortlist_text += f"  → Kronos CONFLICTS with option thesis ❌\n"
 
     firebase_signals_text = firebase_signals.format_for_prompt(firebase_signals.load_signals(), max_show=20)
     # The notifications + flow-alerts formatters were dropped when firebase_signals was
@@ -1062,7 +944,7 @@ def build_boba_prompt(account, positions, shortlist_with_kronos, remaining_budge
         import boba_flow_enhancements as _bfe
         _tickers = []
         try:
-            _tickers = [s.get("ticker", "") for _, s, _ in shortlist_with_kronos if s and s.get("ticker")]
+            _tickers = [s.get("ticker", "") for _, s in shortlist_scored if s and s.get("ticker")]
         except Exception:
             _tickers = []
         _platinum_n = platinum_flow_text.count("\n  💎 $") if platinum_flow_text else 0
@@ -1081,7 +963,7 @@ def build_boba_prompt(account, positions, shortlist_with_kronos, remaining_budge
     # 🌐 free web search (INERT unless AGENT_WEB_SEARCH=1) — ADDITIVE soft context only; never gates/sizes/executes
     try:
         from lib.search import ticker_web_context as _tws
-        _ws_tickers = [s.get("ticker", "") for _, s, _ in (shortlist_with_kronos or [])
+        _ws_tickers = [s.get("ticker", "") for _, s in (shortlist_scored or [])
                        if isinstance(s, dict) and s.get("ticker")]
         _web_ctx = _tws(_ws_tickers, max_tickers=3, k=3)
         if _web_ctx:
@@ -1097,7 +979,7 @@ def build_boba_prompt(account, positions, shortlist_with_kronos, remaining_budge
             _sym = _p.get('symbol', '')
             if _sym:
                 _skill_ctx_parts.append(_sym)
-        for _sid, _s, _k in (shortlist_with_kronos or []):
+        for _sid, _s in (shortlist_scored or []):
             _t = _s.get('ticker', '') if isinstance(_s, dict) else ''
             _ot = _s.get('option_type', '') if isinstance(_s, dict) else ''
             if _t:
@@ -1108,7 +990,7 @@ def build_boba_prompt(account, positions, shortlist_with_kronos, remaining_budge
             'options', 'call', 'put', 'strike', 'expiry', 'IV', 'greeks',
             'delta', 'theta', 'gamma', 'vega', 'flow', 'whale', 'unusual',
             'volume', 'open-interest', 'sweep', 'block', 'bullish', 'bearish',
-            'risk', 'sizing', 'position', 'portfolio', 'kronos', 'forecast',
+            'risk', 'sizing', 'position', 'portfolio', 'forecast',
         ])
         _skill_ctx = ' '.join(_skill_ctx_parts)
         skills_section = load_relevant_skills(
@@ -1145,13 +1027,13 @@ Hard rules:
 # - If a candidate's AlertPrice * 100 > available BP, REJECT and pick a cheaper strike on
 #   that ticker (further OTM same expiry usually has lower premium) OR skip the ticker
 - Up to 3 picks per day across all cycles. AGGRESSIVE MODE: If you see fresh $1M+ flow this morning with SWEEPS, TAKE IT. Don't wait for perfect confluence. Single-source institutional flow is enough. If only one is max conviction, take just that one and wait for next cron - a cheaper better setup may appear.
-- You may use the entire account on a single pick if (and only if) conviction is full: PLATINUM tier OR T0 mega flow PLUS Kronos AGREES PLUS multi-day repeater confirmation.
+- You may use the entire account on a single pick if (and only if) conviction is full: PLATINUM tier OR T0 mega flow PLUS multi-day repeater confirmation.
 - Stops handled by profit_lock_daemon (tier-based ratchet at +20/+50/+100/+200 with 8 percent peak-trail) AND trail_daemon as safety net. Boba does NOT manage stop_loss_pct manually beyond the initial OCO bracket value.
 - Take-profit stays fixed at the tier-ladder default in the OCO bracket.
 - One bad full-size pick wipes the account. Treat each pick as if it were the last one you'll ever make.
 
 # Mission
-Make positive-expected-value options trades using whale-tier T1+T2 options flow signals (T1: $1M+ SWEEP/A,AA, T2: $500K+ Vol>OI SWEEP/A,AA), Kronos is available as a consultant — you may consider its forecast when relevant, but flow strength alone justifies a pick. Target average R:R ≥ 1.5. You are NOT aiming for 80%+ win rate — you're aiming for edge × sizing × discipline.
+Make positive-expected-value options trades using whale-tier T1+T2 options flow signals (T1: $1M+ SWEEP/A,AA, T2: $500K+ Vol>OI SWEEP/A,AA). Target average R:R ≥ 1.5. You are NOT aiming for 80%+ win rate — you're aiming for edge × sizing × discipline.
 
 # Account state
 Equity: ${equity:,.2f}
@@ -1165,7 +1047,7 @@ Open positions:
 {shortlist_text}
 
 # Trade signals from providers (Name / Name2 / Vivid / Vivid2 — last 20)
-These are curated buy/sell calls from human-run provider services. Use them as INDEPENDENT confirmation: if a provider has called the same direction as a whale flow above, that's stronger alignment. Disagreement is also informative. Do NOT take a pick just because a provider called it — use these alongside whale flow + Kronos.
+These are curated buy/sell calls from human-run provider services. Use them as INDEPENDENT confirmation: if a provider has called the same direction as a whale flow above, that's stronger alignment. Disagreement is also informative. Do NOT take a pick just because a provider called it — use these alongside whale flow.
 {firebase_signals_text}
 
 # Provider push notifications (Vivid2 / Name / Name2 OptionNotifications + StockNotifications — last 15)
@@ -1208,11 +1090,11 @@ For each pick, you MUST show due diligence. In the reasoning field, include thes
 1. THESIS — One sentence on the directional/volatility view (e.g., "QQQ bearish next 10 days").
 2. CONTRACT SELECTION — Why THIS strike/expiry beats 2 alternatives you considered. Compare at least 2 other strikes OR expiries and state why this one wins on R:R.
 3. BREAKEVEN at expiry — calculate as (strike ± premium paid). For calls: strike + premium. For puts: strike − premium.
-4. EXPECTED RETURN — If Kronos forecast plays out, estimate the contract's value at that price move. E.g., "Kronos says −5% on QQQ → QQQ=612 → $645P worth ~$33 intrinsic = +220% return."
+4. EXPECTED RETURN — If your directional thesis plays out, estimate the contract's value at that price move. E.g., "−5% on QQQ → QQQ=612 → $645P worth ~$33 intrinsic = +220% return."
 5. MAX LOSS — premium × contracts × 100 (what you lose if contract expires worthless).
 6. RISK FLAGS — name at least one: earnings in expiry window? known catalyst (FOMC, CPI)? low open interest? wide bid/ask spread? IV elevated? If no flags apply, state "none identified."
 7. CONVICTION LEVEL — minimum 14 DTE on every pick (hard guardrail; sub-14-DTE picks are auto-rejected as of 2026-07-15). Prefer 21-45 DTE so the thesis has time to work.
-8. BRIEF CONTEXT CITED — explicitly reference at least one of: Market Regime, Grok narrative, Orion technicals, Kronos forecast, Flow channel signals. Format: "Brief: <source>=<takeaway>". If you genuinely consulted no brief context, write "Brief: none used because <specific reason>" — never leave this blank.
+8. BRIEF CONTEXT CITED — explicitly reference at least one of: Market Regime, Grok narrative, Orion technicals, Flow channel signals. Format: "Brief: <source>=<takeaway>". If you genuinely consulted no brief context, write "Brief: none used because <specific reason>" — never leave this blank.
 
 If you cannot answer items 3, 4, 5 with math, DO NOT PICK THAT CONTRACT — pick a different strike/expiry where you can, or pass entirely.
 
@@ -1236,10 +1118,9 @@ Hard limits:
   3. multi-source confluence (≥3 sources agreeing direction — see MULTI-SOURCE CONFLUENCE above; ≥3 = treat as one tier upgraded)
   4. fresh-5min flag (institutional opens beat 3:55 PM muppet flow)
   5. DTE (shorter wins for flow)
-  6. Kronos confidence (HIGH AGREE > MED AGREE > LOW AGREE > NEUTRAL; CONFLICTS = veto)
-  7. sweep>block>split
-  8. A/AA bid-ask
-  9. Vol/OI ratio
+  6. sweep>block>split
+  7. A/AA bid-ask
+  8. Vol/OI ratio
 
 # DUAL PROTOCOL — Boba picks under whichever protocol fits each candidate
 
@@ -1250,7 +1131,6 @@ Gates (all must pass):
 - Same-day NY 4AM-8PM ET activity
 - SWEEP, BLOCK, or repeater (3+ hits today on same contract)
 - BidAskType A or AA preferred
-- Kronos AGREES or NEUTRAL (CONFLICTS = veto)
 Set protocol="flow" in pick. Use T0-T4 TP/SL from ladder above.
 
 ## Protocol B — SWING (MU-pattern method, longer hold for trend trades)
@@ -1262,27 +1142,22 @@ Gates (ALL must pass — if any fail, reject as swing or fall back to Protocol A
 - OI >= 1000 before today (institutional pre-positioning, not just today's spike)
 - IV percentile < 60 at entry (room for IV expansion)
 - Earnings 30-60 days out from entry (catalyst runway, exit before print)
-- Kronos AGREES or NEUTRAL on multi-week direction
 Set protocol="swing" in pick. Override TP/SL: profit_target_pct=100, stop_loss_pct=25 (uncapped runner with cut loser — let winners breathe). When position hits +50%, you'll later get TIGHTEN_STOP signals from the trail daemon.
 
 ## How to choose between A and B for the same candidate
 - If candidate passes Protocol B gates AND tier is T0/T1, prefer SWING (longer hold = bigger multiple).
 - If candidate fails any Protocol B gate, evaluate as FLOW only.
 - Never log the same pick under both protocols. Pick one and commit.
-- entry_criteria field MUST list which gates fired (e.g. ["T1_5M+","sweep","repeater_5x","kronos_agrees"] for flow, or ["dte_77","delta_0.48","iv_pct_42","oi_7859","earnings_45d","kronos_agrees"] for swing).
+- entry_criteria field MUST list which gates fired (e.g. ["T1_5M+","sweep","repeater_5x"] for flow, or ["dte_77","delta_0.48","iv_pct_42","oi_7859","earnings_45d"] for swing).
 
-- Kronos is a CONSULTANT, not a hard gate. Use it as one input alongside flow strength, T0/T1/T2 tier, IV, and DTE.
-- Set `kronos_verdict` field to one of: AGREES | CONFLICTS | NEUTRAL | UNAVAILABLE based on the forecast block above.
-- If kronos_verdict is CONFLICTS: only proceed if flow score is ≥ 90 AND you state the exact score number in your reasoning. Otherwise pass on the pick.
-- If kronos_verdict is UNAVAILABLE (timeout, error, or skipped index): only proceed if flow score is ≥ 85 AND you state the score in your reasoning.
-- If kronos_verdict is AGREES or NEUTRAL: standard rules apply, no Kronos-specific gate.
+- Only take a pick if its flow score is ≥ 85 (state the exact score in your reasoning). Otherwise pass on the pick.
 
 # Response format (STRICT JSON, no prose outside the JSON)
 {{
   "cycle_summary": "1-2 sentence overview of the current setup today",
   "position_actions": [
     {{"symbol": "SOXX260501P00460000", "action": "HOLD", "reason": "Down -1.5%, thesis intact, 4 days to expiry but spot still above strike"}},
-    {{"symbol": "TSLA260515P00360000", "action": "EXIT", "reason": "Kronos now bullish TSLA, original bear thesis invalidated"}}
+    {{"symbol": "TSLA260515P00360000", "action": "EXIT", "reason": "Flow now bullish TSLA, original bear thesis invalidated"}}
   ],
   "picks": [
     {{
@@ -1291,13 +1166,12 @@ Set protocol="swing" in pick. Override TP/SL: profit_target_pct=100, stop_loss_p
       "option_type": "CALL",
       "expiry": "2026-05-17",
       "contracts": 5,
-      "reasoning": "THESIS: NVDA bullish over 26 days (whale + Kronos agrees). CONTRACT: $145C 05/17 beats $150C (lower delta, same expiry) and $145C 06/21 (extra theta cost, earnings already priced). BREAKEVEN: $145 + $4.50 = $149.50 at expiry. EXPECTED RETURN: Kronos +5% → NVDA=153 → $145C worth ~$8.50 intrinsic = +89%. MAX LOSS: $4.50 × 5 × 100 = $2,250 if NVDA closes ≤ $145. RISK: Earnings in 8 days — IV likely elevated, potential IV crush post-earnings. CONVICTION: 26 DTE, theta manageable, earnings catalyst drives upside.",
-      "kronos_verdict": "AGREES",
+      "reasoning": "THESIS: NVDA bullish over 26 days (whale flow, score 88). CONTRACT: $145C 05/17 beats $150C (lower delta, same expiry) and $145C 06/21 (extra theta cost, earnings already priced). BREAKEVEN: $145 + $4.50 = $149.50 at expiry. EXPECTED RETURN: +5% → NVDA=153 → $145C worth ~$8.50 intrinsic = +89%. MAX LOSS: $4.50 × 5 × 100 = $2,250 if NVDA closes ≤ $145. RISK: Earnings in 8 days — IV likely elevated, potential IV crush post-earnings. CONVICTION: 26 DTE, theta manageable, earnings catalyst drives upside.",
       "profit_target_pct": 50,
       "stop_loss_pct": 25,
       "confidence": "high",
       "protocol": "flow",
-      "entry_criteria": ["T2_1M+", "sweep", "AA", "repeater_3x", "kronos_agrees"]
+      "entry_criteria": ["T2_1M+", "sweep", "AA", "repeater_3x"]
     }},
     {{
       "ticker": "MU",
@@ -1305,17 +1179,16 @@ Set protocol="swing" in pick. Override TP/SL: profit_target_pct=100, stop_loss_p
       "option_type": "CALL",
       "expiry": "2026-06-18",
       "contracts": 1,
-      "reasoning": "THESIS: MU bullish multi-week, semis sector strength, pre-earnings IV runway. CONTRACT: $460C 06/18 (77 DTE, ATM delta 0.48) beats $440C (extra premium) and $460C 05/16 (theta starts biting at 30 DTE). BREAKEVEN: $460 + $18.58 = $478.58. EXPECTED RETURN: Kronos +6% over 30d → MU=550 → $460C worth ~$95 = +411%. MAX LOSS: $18.58 × 1 × 100 = $1,858. RISK: IV may compress post-earnings (45d out). CONVICTION: 77 DTE theta-safe, ATM delta lets us ride trend, OI 7,859 confirms institutional pre-positioning.",
-      "kronos_verdict": "AGREES",
+      "reasoning": "THESIS: MU bullish multi-week, semis sector strength, pre-earnings IV runway. CONTRACT: $460C 06/18 (77 DTE, ATM delta 0.48) beats $440C (extra premium) and $460C 05/16 (theta starts biting at 30 DTE). BREAKEVEN: $460 + $18.58 = $478.58. EXPECTED RETURN: +6% over 30d → MU=550 → $460C worth ~$95 = +411%. MAX LOSS: $18.58 × 1 × 100 = $1,858. RISK: IV may compress post-earnings (45d out). CONVICTION: 77 DTE theta-safe, ATM delta lets us ride trend, OI 7,859 confirms institutional pre-positioning.",
       "profit_target_pct": 100,
       "stop_loss_pct": 25,
       "confidence": "high",
       "protocol": "swing",
-      "entry_criteria": ["dte_77", "delta_0.48", "iv_pct_42", "oi_7859", "earnings_45d", "kronos_agrees"]
+      "entry_criteria": ["dte_77", "delta_0.48", "iv_pct_42", "oi_7859", "earnings_45d"]
     }}
   ],
   "passed_on": [
-    {{"ticker": "TSLA", "reason": "Kronos conflicts — forecast bearish but 250C is bullish thesis", "kronos_verdict": "CONFLICTS"}}
+    {{"ticker": "TSLA", "reason": "flow score 71 below the 85 threshold — passed"}}
   ]
 }}
 
@@ -1326,7 +1199,7 @@ For each pick in the picks array, you MUST include:
         Examples that are useful: "Hedge fund rotating from semis into defensives ahead of CPI"; "Earnings play on NVDA pre-report — implied vol cheap relative to history"; "Block hedger covering long-stock exposure after Powell speech"; "Activist pre-positioning ahead of board meeting next Tuesday".
         Avoid: tautologies ("they think it goes up") or restating the flow data ("$7M flow on the strike").
   - "convergence_rationale": REQUIRED ONLY IF you are picking a contract the peer agent already took today.
-        Default policy is to pick DIFFERENT contracts. If you converge, explain the DISTINCT edge — e.g., "I size larger because Kronos HIGH-confidence agreement is new since their pick" or "Same contract but different protocol — they took flow, I'm taking earnings".
+        Default policy is to pick DIFFERENT contracts. If you converge, explain the DISTINCT edge — e.g., "I size larger because fresh repeater flow is new since their pick" or "Same contract but different protocol — they took flow, I'm taking earnings".
         If you are picking a contract NOT on the peer's list, OMIT this field.
 
 These two fields will be logged to the journal and reviewed by the daily grader — they are not optional.
@@ -1672,7 +1545,6 @@ def validate_pick_against_guardrails(pick, account, prior_picks_this_cycle):
     contracts = int(pick.get("contracts", 0) or 0)
     option_type = str(pick.get("option_type", "")).upper()
     expiry = str(pick.get("expiry", ""))[:10]
-    kronos_verdict = str(pick.get("kronos_verdict", "")).upper()
     reasoning = str(pick.get("reasoning", ""))
     entry_criteria = pick.get("entry_criteria", []) or []
     if not isinstance(entry_criteria, list):
@@ -1715,21 +1587,6 @@ def validate_pick_against_guardrails(pick, account, prior_picks_this_cycle):
             return False, f"GUARDRAIL_VIOLATION: 1 contract (${per:,.0f}) exceeds risk cap ${max_allowed:,.0f}"
         pick["contracts"] = fit
         pick["_resized"] = f"capped {contracts}->{fit} ct to fit ${max_allowed:,.0f} risk"
-
-    # Rule 4: Kronos CONFLICTS requires flow score >= 90
-    # Score lives in entry_criteria as e.g. "T1_1.75M" - if T0/T1 mega flow we can infer
-    # high score, otherwise be strict
-    if kronos_verdict == "CONFLICTS":
-        # Check reasoning text for explicit flow score number
-        import re
-        score_match = re.search(r"(?:flow\s*score|score)\s*[:=]?\s*(\d{1,3})", reasoning, re.IGNORECASE)
-        flow_score = int(score_match.group(1)) if score_match else None
-        # Also accept T0 mega flow as override since T0 = $10M+ which is highest tier
-        is_t0 = any(c.upper().startswith("T0") for c in entry_criteria)
-        if flow_score is None and not is_t0:
-            return False, f"GUARDRAIL_VIOLATION: Kronos CONFLICTS but no flow score >= {KRONOS_CONFLICTS_OVERRIDE_SCORE} cited in reasoning and not T0"
-        if flow_score is not None and flow_score < KRONOS_CONFLICTS_OVERRIDE_SCORE:
-            return False, f"GUARDRAIL_VIOLATION: Kronos CONFLICTS but flow score {flow_score} < required {KRONOS_CONFLICTS_OVERRIDE_SCORE}"
 
     # Rule 5: 0 DTE requires explicit catalyst language in reasoning
     try:
@@ -2295,41 +2152,20 @@ def main():
     shortlist = build_shortlist(fresh)
     log_to_ops("boba_cycle", "DATA", f"Shortlist size: {len(shortlist)}")
 
-    # 3. KRONOS: fire-and-forget background runs for Discord visibility.
-    # Boba does NOT wait. Use cached forecasts (< 60 min old) if available;
-    # otherwise kick off a background Kronos run and move on.
-    shortlist_with_kronos = []
-    kronos_fired = []
-    kronos_cached = []
-    kronos_waited = []
-    kronos_timeout = []
-    # KRONOS RETIRED 2026-07-18 (Mike: "not useful at all"). The forecaster backend
-    # (PM2 kronos-sidecar/kronos-webui + training/refresh crons) has been removed, so no
-    # forecasts are generated anymore. Every candidate is marked UNAVAILABLE — the cycle
-    # then follows its existing flow-only path (proceed if flow score >= 85). This is the
-    # same behavior the cycle already used whenever Kronos was down; it just skips the now-
-    # dead backend calls (no more 240s timeout waits). Dormant Kronos helpers/constants are
-    # left in place for clean reversibility.
-    for sid, s in shortlist:
-        placeholder = {
-            "note": "Kronos retired 2026-07-18 — forecaster removed, permanently unavailable",
-            "forecast_24h_direction": "unavailable",
-            "forecast_24h_confidence": "unavailable",
-        }
-        shortlist_with_kronos.append((sid, s, placeholder))
-        kronos_timeout.append(s.get("ticker"))
+    # 3. Assemble the scored shortlist for the prompt (one tuple per candidate).
+    shortlist_scored = [(sid, s) for sid, s in shortlist]
 
     log_to_ops("boba_cycle", "DATA",
-               f"Kronos: {len(kronos_cached)} cached / {len(kronos_waited)} waited-ok / {len(kronos_timeout)} timeout",
-               metadata={"cached": kronos_cached, "waited": kronos_waited, "timeout": kronos_timeout, "fired": kronos_fired})
-    print(f"[kronos] {len(kronos_cached)} cached / {len(kronos_waited)} waited-ok / {len(kronos_timeout)} timeout", file=sys.stderr)
+               f"Shortlist: {len(shortlist_scored)} candidates",
+               metadata={"tickers": [s.get("ticker") for _, s in shortlist_scored]})
+    print(f"[shortlist] {len(shortlist_scored)} candidates", file=sys.stderr)
 
     # 4. Get account state
     account = get_alpaca_account()
     positions = get_alpaca_positions()
 
     # 5. Build prompt
-    prompt = build_boba_prompt(account, positions, shortlist_with_kronos, remaining_budget=remaining_picks_today())
+    prompt = build_boba_prompt(account, positions, shortlist_scored, remaining_budget=remaining_picks_today())
     if args.dry_run:
         print("=== DRY RUN — prompt that would be sent to Boba ===")
         print(prompt)

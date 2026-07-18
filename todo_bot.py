@@ -430,7 +430,7 @@ async def on_message(message):
     if content.startswith("!find"):
         q = content[5:].strip().lower()
         if not q:
-            await message.channel.send("Usage: `!find kronos`")
+            await message.channel.send("Usage: `!find signals`")
             return
         matches = [t for t in todos if q in t.get("text","").lower()]
         if not matches:
@@ -555,7 +555,6 @@ async def on_message(message):
             ("bot", "medium", 90, "Signal performance tracker bot"),
             ("bot", "deep", 180, "Free signal channel discovery (Discord+Telegram)"),
             ("personal", "deep", 240, "Massage site mikemassage.ddns.net"),
-            ("dev", "medium", 60, "Kronos 6th agent design"),
             ("dev", "deep", 180, "Boba brief upgrade"),
             ("dev", "deep", 240, "Duplicate file/dead code cleanup audit"),
         ]

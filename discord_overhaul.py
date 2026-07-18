@@ -52,7 +52,7 @@ BOT_PRIV_VIEW = [
     "1518337048627511488",  # MC Bots (admin)
     "1489403275626151949", "1497762598479855629", "1501993052074676300",  # Boba/BobaUpgraded/BobaToday
     "1489395509700333621", "1489401489783787524", "1489808339704615015",  # jazzy/Orion/Orion2
-    "1498804421176463424", "1497750786753564692",  # Kronos/SynthControl
+    "1497750786753564692",  # SynthControl
     "1497765446164942983", "1498862701638582317",  # TGBridge/MC Status
     "1493804134590185485", "1486135269722685574",  # scorer/ArchiveBot
 ]
@@ -125,7 +125,7 @@ TARGET = [
     ("🛡️ RISK & PORTFOLIO", "1502734864275734740", "private", [
         ("risk", None), ("portfolio", None)]),
     ("🤖 AGENTS & BOTS", "1502734870575579357", "private", [
-        ("agent-comms", None), ("bot-commands", None), ("kronos", None),
+        ("agent-comms", None), ("bot-commands", None),
         ("reminders", None), ("synthetic-analysis", None), ("tg-bridge", None),
         ("leftover-tasks", None)]),
     ("⚙️ SYSTEM", "1502375214623887372", "private", [

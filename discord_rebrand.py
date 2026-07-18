@@ -31,7 +31,6 @@ IDENTITY = {
     "discord_jazzyhazzy_token":   ("Jazzy Trader",     "kerrigan",   "The Queen's second account. We hunt the flow."),
     "discord_orion_token":        ("Orion Research",   "tassadar",   "Deep research desk. I have seen the future."),
     "discord_deepseek_token":     ("Deep Research",    "zealot",     "DeepSeek-model research & analysis."),  # "DeepSeek" name blocked by Discord (err 50277)
-    "discord_kronos_token":       ("Kronos Forecast",  "zeratul",    "The forecasting seer. Time bends."),
     "discord_synthcontrol_token": ("Synth Control",    "dragoon",    "Synthetic-control attribution engine."),
     "discord_askgrok_token":      ("Grok Intel",       "zergling",   "Fast X/Grok intel swarm."),
     "discord_status_bot_token":   ("System Status",    "adjutant",   "The Adjutant. System online, commander."),

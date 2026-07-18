@@ -115,7 +115,6 @@ def build_prompt(agent: str, decisions: list[dict], account: dict, positions: li
                     ),
                     "reasoning": (p.get("reasoning") or "")[:300],
                     "institutional_thesis": (p.get("institutional_thesis") or "")[:200],
-                    "kronos": p.get("kronos_verdict"),
                 } for p in picks_exec
             ],
             "passed_count": len(passed),
@@ -166,7 +165,7 @@ def build_prompt(agent: str, decisions: list[dict], account: dict, positions: li
 # Lesson format — output a JSON array. Each lesson is a string. Examples:
 
 [
-  "Bear thesis on 0DTE puts in a mixed-bullish regime needs Kronos HIGH-confidence agreement (not LOW), AND flow score ≥95 to override the regime bias",
+  "Bear thesis on 0DTE puts in a mixed-bullish regime needs flow score ≥95 to override the regime bias",
   "Doubling down on a losing 0DTE position with the SAME signal is a forbidden move — adds only if NEW confluence appears (new flow, regime shift, news)",
   "When peer agent has already taken the contract, default is to skip — only converge if your independent analysis adds something materially different"
 ]

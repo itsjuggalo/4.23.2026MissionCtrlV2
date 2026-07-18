@@ -5,7 +5,7 @@ Cross-agent debate channel poster.
 post_to_debate(agent_name, content, related_symbol=None, color=None)
 Sends embed to #agent-debate (channel 1498788205544214619) using each agent's own bot identity.
 
-Agents: boba, orion, grok, jazzyhazzy, deepseek, kronos
+Agents: boba, orion, grok, jazzyhazzy, deepseek
 """
 import requests
 from pathlib import Path
@@ -20,7 +20,6 @@ AGENT_TOKEN_MAP = {
     "grok":       "discord_askgrok_token",  # reuse AskGrok's token (existing bot)
     "jazzyhazzy": "discord_jazzyhazzy_token",
     "deepseek":   "discord_deepseek_token",
-    "kronos":     "discord_kronos_token",
 }
 
 # Color per agent for visual disambiguation in #agent-debate
@@ -30,7 +29,6 @@ AGENT_COLORS = {
     "grok":       0x9c27b0,  # purple
     "jazzyhazzy": 0xff69b4,  # pink
     "deepseek":   0x00d2a0,  # teal
-    "kronos":     0xffa502,  # gold
 }
 
 def post_to_debate(agent_name, content, related_symbol=None, color=None, embed_title=None):

@@ -1,7 +1,7 @@
 #!/home/itsju/.venv/bin/python3
 """Discord OPS visual-card layer — StarCraft command-console stat cards.
 
-Turns the wall-of-text cron posts (#pipeline health, #devops kronos-stale,
+Turns the wall-of-text cron posts (#pipeline health, #devops alerts,
 #squeeze-alerts, #macro session banners, #daily-wrap, night-shift digest) into
 glanceable PNG cards, and posts them to a Discord webhook with a 1-line text
 summary above the image.
@@ -789,16 +789,6 @@ if __name__ == '__main__':
                 {'label': 'Veto rate (last 4 cycles)', 'pct': 86, 'state': 'crit', 'note': '86% · 18/21'},
             ],
             'footer': 'auto-posted'},
-        'kronos': {
-            'bot': 'HERMES', 'title': 'KRONOS FRESHNESS', 'glyph': 'gauge',
-            'status': 'crit', 'status_text': '79% STALE',
-            'rows': [
-                {'label': 'Stale models', 'value': '73', 'state': 'crit'},
-                {'label': 'Fresh models', 'value': '20', 'state': 'good'},
-                {'label': 'Oldest', 'value': 'KORU 55d', 'state': 'warn'},
-            ],
-            'bars': [{'label': 'Cache freshness', 'pct': 21, 'state': 'crit', 'note': '20 / 93 fresh'}],
-            'footer': 'kronos cache monitor'},
         'squeeze': {
             'bot': 'SPACER', 'title': 'SQUEEZE WATCH · UPST', 'glyph': 'signal',
             'status': 'warn', 'status_text': 'SCORE 60',

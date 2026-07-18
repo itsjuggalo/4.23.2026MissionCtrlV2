@@ -5,12 +5,12 @@ TODAY=$(TZ=America/New_York date '+%Y-%m-%d')
 NOW=$(TZ=America/New_York date '+%H:%M ET')
 
 # Boba cycle log analysis
-BOBA_RUNS=$(grep -c "fresh signals\|kronos" /tmp/boba_cycle.log 2>/dev/null || echo 0)
+BOBA_RUNS=$(grep -c "fresh signals" /tmp/boba_cycle.log 2>/dev/null || echo 0)
 BOBA_NOSIG=$(grep -c "No fresh signals" /tmp/boba_cycle.log 2>/dev/null | tail -1)
 BOBA_PICKED=$(grep -c "ENTER_NOW\|submit_order" /tmp/boba_cycle.log 2>/dev/null || echo 0)
 
 # Jazzy cycle log analysis
-JAZZY_RUNS=$(grep -c "fresh signals\|kronos" /tmp/jazzy_cycle.log 2>/dev/null || echo 0)
+JAZZY_RUNS=$(grep -c "fresh signals" /tmp/jazzy_cycle.log 2>/dev/null || echo 0)
 JAZZY_PICKED=$(grep -c "ENTER_NOW\|submit_order" /tmp/jazzy_cycle.log 2>/dev/null || echo 0)
 
 # Today's actual orders on each account
