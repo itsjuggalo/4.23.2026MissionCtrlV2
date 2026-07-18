@@ -89,6 +89,19 @@ CONTEXT_OK = re.compile(
     re.I,
 )
 
+# Live Telegram FLEET false positives. "SpaceCoast" here is the LIVE @SpaceCoast_Claude_Bot
+# briefs-bus and "@Boba*" are LIVE bots (FLEET-MAP / telegram-inventory / TELEGRAM-FLEET-QUALITY-
+# AUDIT) — NOT the retired Hetzner 'spacecoast' box. A hit whose line carries a bot/fleet marker
+# (@handle, *_Bot, briefs/bus/desk/digest/scoreboard, chain=) is a live identity → acknowledge it.
+# Kept tight so a bare stale ref ("spacecoast = the BRAIN box", "ssh spacecoast") still flags.
+BOT_NAME_OK = re.compile(
+    r"(SpaceCoast|Boba)\w*_?Bot\b|@\s*(SpaceCoast|Boba)\w*|"
+    r"BobaCatTrades(Team|Bot|_?bot)\b|"  # live TG team/bot identity — NOT the bobacattrades.* domain
+    r"(SpaceCoast|Boba)\b.*(brief|bus|desk|digest|scoreboard|chain=|@Boba|_Bot)|"
+    r"(brief|bus|desk|digest|scoreboard|chain=).*(SpaceCoast|Boba)\b",
+    re.I,
+)
+
 # Directories/files to skip in the *.md sweep (substring match on the path). These are
 # immutable historical logs/dumps — by design they RECORD old terms, so flagging them is
 # pure noise. The point of the sweep is LIVING docs that steer sessions, not archives.
@@ -236,7 +249,7 @@ def sweep_stale():
             for label, rx in STALE_TERMS:
                 if rx.search(line):
                     rec = (label, p.replace(str(HOME), "~"), i, line.strip()[:120])
-                    if whole_ack or CONTEXT_OK.search(line):
+                    if whole_ack or CONTEXT_OK.search(line) or BOT_NAME_OK.search(line):
                         acknowledged.append(rec)
                     elif is_canonical(p):
                         canon.append(rec)
