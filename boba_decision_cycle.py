@@ -2303,76 +2303,21 @@ def main():
     kronos_cached = []
     kronos_waited = []
     kronos_timeout = []
+    # KRONOS RETIRED 2026-07-18 (Mike: "not useful at all"). The forecaster backend
+    # (PM2 kronos-sidecar/kronos-webui + training/refresh crons) has been removed, so no
+    # forecasts are generated anymore. Every candidate is marked UNAVAILABLE — the cycle
+    # then follows its existing flow-only path (proceed if flow score >= 85). This is the
+    # same behavior the cycle already used whenever Kronos was down; it just skips the now-
+    # dead backend calls (no more 240s timeout waits). Dormant Kronos helpers/constants are
+    # left in place for clean reversibility.
     for sid, s in shortlist:
-        ticker = s.get("ticker")
-        option_ctx = f"{s.get('strike')}{(s.get('option_type') or '?')[0]} {s.get('expiry','')[:10]}"
-
-        # Check for fresh cached forecast first
-        # 90 min window matches TRADER cron interval (10:30, 12:00, 13:30, 15:00 ET)
-        # Skip Kronos entirely for tickers it cannot forecast (indices, no Alpaca bars)
-        if ticker in KRONOS_SKIP_TICKERS:
-            placeholder = {
-                "ticker": ticker,
-                "error": f"kronos skipped - {ticker} not supported (index symbol)",
-                "option_context": option_ctx,
-                "option_in_forecast_direction": None,
-                "skipped": True,
-            }
-            shortlist_with_kronos.append((sid, s, placeholder))
-            kronos_timeout.append(ticker)
-            continue
-        cached = check_fresh_kronos_file(ticker, max_age_minutes=90)
-        if cached and "error" not in cached:
-            # We have a recent forecast — annotate it with option context if needed
-            if "option_in_forecast_direction" not in cached or cached.get("option_context") != option_ctx:
-                cached["option_context"] = option_ctx
-                # Null-safe: if forecast errored or has no direction, set None (UNAVAILABLE)
-                # rather than False which would falsely become CONFLICTS
-                if cached.get("error") or "forecast_24h_direction" not in cached:
-                    cached["option_in_forecast_direction"] = None
-                else:
-                    is_call = "C" in option_ctx.upper().split()[0]
-                    is_put = "P" in option_ctx.upper().split()[0]
-                    direction = cached.get("forecast_24h_direction", "neutral")
-                    if direction == "neutral":
-                        cached["option_in_forecast_direction"] = None
-                    elif is_call:
-                        cached["option_in_forecast_direction"] = (direction == "bullish")
-                    elif is_put:
-                        cached["option_in_forecast_direction"] = (direction == "bearish")
-            shortlist_with_kronos.append((sid, s, cached))
-            kronos_cached.append(ticker)
-            # Still fire a background refresh for NEXT cycle (so cache stays warm)
-            fire_kronos_background(ticker, option_ctx)
-        else:
-            # No fresh forecast — fire in background, then WAIT up to 75s for result.
-            # Kronos typically takes ~50s. If it doesn't finish, use placeholder.
-            fire_kronos_background(ticker, option_ctx)
-            kronos_fired.append(ticker)
-            # Item 11 mitigation: indices have huge option chains, allow extra time
-            kronos_timeout_sec = 240 if ticker in ("SPY", "QQQ", "IWM", "DIA") else 240
-            waited = wait_for_kronos_result(ticker, timeout_sec=kronos_timeout_sec, poll_interval=3)
-            if waited:
-                # Got real result — annotate with option context
-                waited["option_context"] = option_ctx
-                is_call = "C" in option_ctx.upper().split()[0]
-                is_put = "P" in option_ctx.upper().split()[0]
-                direction = waited.get("forecast_24h_direction", "neutral")
-                if is_call:
-                    waited["option_in_forecast_direction"] = (direction == "bullish")
-                elif is_put:
-                    waited["option_in_forecast_direction"] = (direction == "bearish")
-                shortlist_with_kronos.append((sid, s, waited))
-                kronos_waited.append(ticker)
-            else:
-                # Timeout — LLM sees it's unavailable
-                placeholder = {
-                    "note": f"Kronos forecast timed out after 75s — unavailable",
-                    "forecast_24h_direction": "unavailable",
-                    "forecast_24h_confidence": "unavailable",
-                }
-                shortlist_with_kronos.append((sid, s, placeholder))
-                kronos_timeout.append(ticker)
+        placeholder = {
+            "note": "Kronos retired 2026-07-18 — forecaster removed, permanently unavailable",
+            "forecast_24h_direction": "unavailable",
+            "forecast_24h_confidence": "unavailable",
+        }
+        shortlist_with_kronos.append((sid, s, placeholder))
+        kronos_timeout.append(s.get("ticker"))
 
     log_to_ops("boba_cycle", "DATA",
                f"Kronos: {len(kronos_cached)} cached / {len(kronos_waited)} waited-ok / {len(kronos_timeout)} timeout",
