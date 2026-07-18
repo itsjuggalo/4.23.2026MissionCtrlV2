@@ -41,7 +41,7 @@ VERCEL_IP="${SENTINEL_VERCEL_IP:-76.76.21.21}"
 VERCEL_DOMAINS="${SENTINEL_VERCEL_DOMAINS:-missionctrl.serveftp.com massagebymike.serveftp.com bobacattrades.serveftp.com}"
 MASSAGE_PORT="${SENTINEL_MASSAGE_PORT:-3003}"   # overridable for simulated-failure tests
 # pm2 processes the sentinel may revive (NEVER trading daemons, NEVER claudeclaw)
-REVIVABLE="missionctrl aries massage-api bobacat-gallery mc-kb-server"
+REVIVABLE="missionctrl aries massage-api bobacat-gallery kb-server"
 
 # cron runs a bare shell with no nvm PATH — resolve pm2 explicitly (the 07-12 night
 # false-positive: bare `pm2` not found made probe_pm2 report everything down each cycle)
@@ -357,13 +357,13 @@ KB=$(probe_kb)
 case "$KB" in
   2*) clear_issue kb;;
   *)
-    log "mc-kb :8091 /health=$KB — restarting mc-kb-server"
-    [ -x "$PM2" ] && "$PM2" restart mc-kb-server >/dev/null 2>&1
+    log "mc-kb :8091 /health=$KB — restarting kb-server"
+    [ -x "$PM2" ] && "$PM2" restart kb-server >/dev/null 2>&1
     # mc-kb loads LanceDB embeddings at boot (~30-60s) — poll, don't one-shot
     for i in 1 2 3 4 5 6; do sleep 10; KB=$(probe_kb); case "$KB" in 2*) break;; esac; done
     case "$KB" in
       2*) log "mc-kb self-heal OK";;
-      *) spawn_fixer kb "mc-kb :8091 /health still $KB after pm2 restart mc-kb-server" \
+      *) spawn_fixer kb "mc-kb :8091 /health still $KB after pm2 restart kb-server" \
            || escalate_capsule kb "mc-kb hive-mind :8091 unhealthy (/health=$KB) after restart + fixer attempts — Boba/Jazzy lose memory recall each cycle";;
     esac;;
 esac
