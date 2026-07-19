@@ -144,6 +144,9 @@ def precheck(symbol: str, asset_class: str, side: str = "buy",
     side = "sell" if str(side).lower() == "sell" else "buy"
     is_option = asset_class == "option"
     direction = direction or ("short" if side == "sell" and not is_option else "long")
+    # precheck governs pre-trade ENTRIES — a buy opens a long, a sell opens a short.
+    # BOTH must clear the stop gate; only a buy gets the fixed −50% option-premium stop.
+    is_entry = side in ("buy", "sell")
     bucket = bookmod.bucket_of(symbol, "stock" if is_option else asset_class, cfg)
 
     entry = float(entry) if entry not in (None, "") else None
@@ -156,10 +159,10 @@ def precheck(symbol: str, asset_class: str, side: str = "buy",
     stop_source = "manual" if manual_stop is not None else None
     resolved_stop = manual_stop
 
-    # ── STOP gate — the #1 rule, mechanical ──
-    if side == "buy":
-        if is_option:
-            # options: stop is a fixed −50% of premium — always defined once entry set.
+    # ── STOP gate — the #1 rule, mechanical (runs for every entry, long or short) ──
+    if is_entry:
+        if is_option and side == "buy":
+            # long option: stop is a fixed −50% of premium — always defined once entry set.
             if entry is not None:
                 resolved_stop = round(entry * (1 - OPTION_STOP_PCT / 100), 6)
                 stop_source = stop_source or f"option-{OPTION_STOP_PCT}pct"
@@ -167,11 +170,11 @@ def precheck(symbol: str, asset_class: str, side: str = "buy",
             computed_stop, csrc, _ = compute_stop(symbol, asset_class, entry, direction, cfg)
             if computed_stop is not None:
                 resolved_stop, stop_source = computed_stop, csrc
-        # hard-block: a satellite buy with NO stop and none computable → cannot log
+        # hard-block: an entry with NO stop and none computable → cannot log
         if resolved_stop is None:
             checks.append({
                 "name": "Hard stop", "level": "STOP",
-                "detail": (f"{bucket.upper()} {symbol} buy has no stop and none could be "
+                "detail": (f"{bucket.upper()} {symbol} {side} has no stop and none could be "
                            f"computed (give an entry price so a {cfg['rules'].get('satellite_hard_stop_pct',10)}% "
                            f"stop can be pinned, or type a stop). Rule #1: no entry without a stop.")})
         elif manual_stop is None:
@@ -194,7 +197,7 @@ def precheck(symbol: str, asset_class: str, side: str = "buy",
     # ── risk $, R:R, sizing (advisory warnings; the STOP block is what gates) ──
     risk_usd = None
     rr = None
-    if side == "buy" and entry and resolved_stop and entry > 0:
+    if is_entry and entry and resolved_stop and entry > 0:
         risk_per_unit = abs(entry - resolved_stop) / entry
         if is_option:
             risk_usd = round((size_usd or 0) * OPTION_STOP_PCT / 100, 2) if size_usd else None
