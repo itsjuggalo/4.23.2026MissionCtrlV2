@@ -112,6 +112,87 @@ def week_fills(con: sqlite3.Connection, days: int) -> list[dict]:
     return [dict(zip(cols, r)) for r in rows]
 
 
+def _fill_dt(f: dict) -> datetime:
+    s = f["filled_at"]
+    return datetime.fromisoformat(s.replace("Z", "+00:00")) if "T" in s \
+        else datetime.strptime(s, "%Y-%m-%d %H:%M:%S")
+
+
+def precheck_rows(con: sqlite3.Connection, days: int, now_et: datetime) -> list[dict]:
+    """The week's pre_trade_checks (planned entries the coach gate logged).
+    ts is 'YYYY-MM-DDThh:mm:ss ET' — filter on the sortable ISO prefix."""
+    cutoff = (now_et - timedelta(days=days)).strftime("%Y-%m-%dT%H:%M:%S")
+    cols = ("id", "ts", "source", "symbol", "asset_class", "bucket", "side",
+            "size_usd", "stop", "stop_source", "verdict", "blocked")
+    try:
+        rows = con.execute(
+            f"SELECT {','.join(cols)} FROM pre_trade_checks "
+            "WHERE substr(ts,1,19) >= ? ORDER BY ts", (cutoff,)).fetchall()
+    except sqlite3.OperationalError:
+        return []  # table not created yet
+    return [dict(zip(cols, r)) for r in rows]
+
+
+def match_precheck(pcs: list[dict], symbol: str, fill_dt: datetime,
+                   used: set) -> int | None:
+    """Id of the earliest UNUSED buy-side check for this symbol logged just before
+    the fill (−6h..+48h window), else None. Consuming (one check ⇒ at most one
+    fill) so the gate-run rate can't be inflated by repeat entries into the same
+    name reusing one logged check. pcs is ordered by ts ASC, so first match = earliest."""
+    for p in pcs:
+        pid = p.get("id")
+        if pid in used:
+            continue
+        if (p.get("symbol") or "").upper() != symbol or p.get("side") != "buy":
+            continue
+        try:
+            ts = datetime.strptime(p["ts"].replace(" ET", ""), "%Y-%m-%dT%H:%M:%S")
+        except Exception:
+            continue
+        delta = fill_dt.replace(tzinfo=None) - ts
+        if timedelta(hours=-6) <= delta <= timedelta(hours=48):
+            return pid
+    return None
+
+
+def precheck_section(pcs: list[dict], real_buys: list[dict]) -> list[str]:
+    """Grade the week's pre-trade discipline: what the gate logged + whether the
+    real buys ran the checklist first. Gives pre_trade_checks a consumer."""
+    if not pcs and not real_buys:
+        return []
+    lines = ["", "🎯 PRE-TRADE CHECKLIST — did the gate run before the fill?"]
+    if pcs:
+        n = len(pcs)
+        go = sum(1 for p in pcs if p.get("verdict") == "GO")
+        caut = sum(1 for p in pcs if p.get("verdict") == "CAUTION")
+        stp = sum(1 for p in pcs if p.get("verdict") == "STOP")
+        blocked = sum(1 for p in pcs if p.get("blocked"))
+        sat_no_stop = sum(1 for p in pcs if p.get("bucket") == "satellite"
+                          and p.get("side") == "buy" and not p.get("stop"))
+        lines.append(f"   {n} check{'s' if n != 1 else ''} logged · "
+                     f"{go}×GO {caut}×CAUTION {stp}×STOP · {blocked} hard-blocked")
+        if sat_no_stop:
+            lines.append(f"   🛑 {sat_no_stop} naked-satellite entr"
+                         f"{'ies' if sat_no_stop != 1 else 'y'} caught with no stop "
+                         "— rule #1 working, not willpower")
+    else:
+        lines.append("   No pre-trade checks logged this week.")
+    if real_buys:
+        used: set = set()
+        ran = 0
+        # chronological so the earlier fill claims the earlier check
+        for f in sorted(real_buys, key=_fill_dt):
+            pid = match_precheck(pcs, f["symbol"].upper(), _fill_dt(f), used)
+            if pid is not None:
+                used.add(pid)
+                ran += 1
+        rate = round(ran / len(real_buys) * 100)
+        badge = "🟢" if rate >= 80 else "🟡" if rate >= 40 else "🔴"
+        lines.append(f"   {badge} gate-run rate {ran}/{len(real_buys)} "
+                     f"buy{'s' if len(real_buys) != 1 else ''} ({rate}%) had a checklist logged first")
+    return lines
+
+
 def load_closes(pairs: set[tuple[str, str]]) -> dict[str, "object"]:
     """(sym, asset_class) -> yf close Series (1mo daily). Batched, fail-soft."""
     try:
@@ -233,10 +314,14 @@ def main() -> int:
     tix = tickets()
 
     now_et = datetime.now(timezone.utc) - timedelta(hours=4)
+    pcs = precheck_rows(con, args.days, now_et)
     header = f"📋 WEEKLY FILL REVIEW — {args.days}d ending {now_et:%a %b %-d}"
 
     if not fills:
         msg = f"{header}\n\nNo fills this week. Flat is a position — 0 rule breaks, GPA 4.0 by default. 🎯"
+        pc = precheck_section(pcs, [])
+        if pc:
+            msg += "\n" + "\n".join(pc)
         print(msg)
         if args.send:
             tg(msg)
@@ -250,6 +335,9 @@ def main() -> int:
     if not fills:
         msg = (f"{header}\n\nOnly {len(dust)} dust fills (<${DUST_MAX_USD:.0f}) this week — "
                "no real decisions to grade. GPA 4.0 by default. 🎯")
+        pc = precheck_section(pcs, [])
+        if pc:
+            msg += "\n" + "\n".join(pc)
         print(msg)
         if args.send:
             tg(msg)
@@ -272,6 +360,8 @@ def main() -> int:
         lines.append(line)
         for fl in flags:
             lines.append(f"      ↳ {fl}")
+
+    lines += precheck_section(pcs, [f for f in fills if f["side"] == "buy"])
 
     gpa = sum(GPA[g] for g in grades) / len(grades)
     n = len(grades)

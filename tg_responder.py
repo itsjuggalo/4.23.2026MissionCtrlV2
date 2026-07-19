@@ -140,8 +140,10 @@ BOTS = {
             "Ask anything / run any /skill. /help = this."
         ),
     },
-    "screener": {
-        "token": "telegram_deepseek_bot_token",           # @TrndRsrch_Bot → Screener
+    # RETIRED 2026-07-19: @TrndRsrch_Bot token repurposed as ClaudeClaw OS's own bot
+    # (grammy poller in /AIWorkWSL/agents/claudeclaw). Re-enabling this entry would 409 it.
+    "screener_RETIRED": {
+        "token": "telegram_deepseek_bot_token",           # @TrndRsrch_Bot → now ClaudeClaw OS
         "owner": "telegram-chat-id.txt",
         "name":  "Screener",
         "tools": "Bash,Read,Grep,Glob,WebFetch,WebSearch",

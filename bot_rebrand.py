@@ -72,12 +72,14 @@ IDENTITY = {
         desc=("Research desk. Deep fundamental dives: business, financials, catalysts, valuation, "
               "the bull and bear case. Ask 'deep research on PLTR'. Slower, thorough. "
               "I have sacrificed too much to fail now.")),
+    # 2026-07-19: ex-Screener token repurposed — now ClaudeClaw OS's own bot (grammy
+    # poller in /AIWorkWSL/agents/claudeclaw; tg_responder "screener" lane RETIRED).
     "telegram_deepseek_bot_token": dict(
-        name="Screener", avatar="fenix_p",
-        short="Praetor's recon — finds & ranks names: movers, oversold, unusual volume.",
-        desc=("Screener. Find and rank tickers on demand: top movers, oversold large-caps, "
-              "unusual options volume, insider buying. Ask 'screen oversold large caps', "
-              "'top movers today'. I fear no enemy — the Khala is my strength.")),
+        name="ClaudeClaw OS", avatar="zergling",
+        short="ClaudeClaw OS — agent dashboard, missions, /await + /gather orchestration.",
+        desc=("ClaudeClaw OS bot. Talk to the laptop's agent hub: missions, scheduler, memory, "
+              "skills, /delegate /await /gather orchestration, dashboard alerts. "
+              "/help for commands. The Swarm needs you, magnificent bastard.")),
     "telegram_mc_skill_bot_token": dict(
         name="Macro & Regime", avatar="mengsk",
         short="The Emperor's view — Fed, rates, regime, SPY/QQQ levels, politics.",
