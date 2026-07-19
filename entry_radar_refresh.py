@@ -213,6 +213,35 @@ if __name__ == "__main__":
                                timeout=20, check=False)
             except Exception:
                 pass
+    # Morning roster (7:40 ET run only): one digest of everything currently
+    # buyable, so the buyable list arrives without opening the page. The
+    # transition pings above fire all day and only on a NEW entry; this is the
+    # once-a-day "what's in the zone right now" snapshot. Stays silent when
+    # nothing qualifies — a daily "nothing today" trains you to ignore it.
+    # ET explicitly: the cron sets TZ=America/New_York, but a manual run without
+    # it would read UTC and fire this at 3am ET instead.
+    from zoneinfo import ZoneInfo
+    if datetime.now(ZoneInfo("America/New_York")).hour == 7:
+        buyable = [r for r in rows if r["status"] in ("AT ENTRY", "OVERSOLD")]
+        if buyable:
+            buyable.sort(key=lambda r: (r["status"] != "AT ENTRY", r["sym"]))
+            lines = ["🌅 ENTRY RADAR — buyable at the open", ""]
+            for r in buyable:
+                tag = "🎯 AT ENTRY" if r["status"] == "AT ENTRY" else "🩹 OVERSOLD"
+                lines.append(f"{tag} {r['sym']} ${r['price']} (RSI {r['rsi']})")
+                lines.append(f"   zone ${r['entryLo']}–${r['entryHi']} · stop ref ${r['stopRef']}")
+                lines.append(f"   {r['note']}")
+            lines.append("")
+            lines.append("Plan the entry, don't chase. Advisory only — size it yourself.")
+            try:
+                subprocess.run([os.path.join(HOME, "bin", "tg-send-msg"), "\n".join(lines)],
+                               timeout=20, check=False)
+                print(f"morning roster sent: {len(buyable)} buyable")
+            except Exception as e:
+                print(f"morning roster send failed: {e}")
+        else:
+            print("morning roster: nothing AT ENTRY/OVERSOLD — staying silent")
+
     doc = {"updated": datetime.now().astimezone().isoformat(), "rows": rows}
     fd, tmp = tempfile.mkstemp(dir=os.path.dirname(OUT))
     with os.fdopen(fd, "w") as f:
