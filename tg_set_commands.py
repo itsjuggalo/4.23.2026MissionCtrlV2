@@ -106,13 +106,18 @@ FLEET = {
     "life_wellness":   ("lifeclaw_telegram_bot_token",     "f", LIFE),
     "aime_research":   ("telegram_antigravity_bot_token",  "f", AIME),
     "x_sentiment":     ("telegram_grok_bot_token",         "f", XBOT),
-    "jazzy_desk":      ("telegram_jazzyhazzy_bot_token",   "f", JAZZY_MENU),
-    "risk_hedge":      ("antidote_telegram_bot_token",     "f", RISK_MENU),
-    "research_desk":   ("telegram_orion_bot_token",        "f", RESEARCH_MENU),
+    # PARKED 2026-07-19 (token free to repurpose):
+    #     "jazzy_desk":      ("telegram_jazzyhazzy_bot_token",   "f", JAZZY_MENU),
+    # PARKED 2026-07-19 (token free to repurpose):
+    #     "risk_hedge":      ("antidote_telegram_bot_token",     "f", RISK_MENU),
+    # PARKED 2026-07-19 (token free to repurpose):
+    #     "research_desk":   ("telegram_orion_bot_token",        "f", RESEARCH_MENU),
     # RETIRED 2026-07-19: token now ClaudeClaw OS's own bot — its grammy app registers
     # its own commands; running this entry would clobber them.
     # "screener":      ("telegram_deepseek_bot_token",     "f", SCREENER_MENU),
-    "macro_regime":    ("telegram_mc_skill_bot_token",     "f", MACRO_MENU),
+    # RETIRED 2026-07-19: token now the MasterMC agent's own bot — claudeclaw registers
+    # its own commands; running this entry would clobber them.
+    # "macro_regime":  ("telegram_mc_skill_bot_token",     "f", MACRO_MENU),
     "flow_digest":     ("telegram_boba2_bot_token",        "v", CLEAR),
     "daily_briefs":    ("telegram.daily_briefs",           "v", CLEAR),
     "media_gens":      ("telegram.media_gens",             "v", CLEAR),

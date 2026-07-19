@@ -7,14 +7,22 @@ to Mike, pipe each message into the local `claude` CLI on the subscription walle
 (ANTHROPIC_API_KEY stripped), text the reply back. Same proven pattern as
 antigravity_aime_bot.py / lifeclaw_bot.py.
 
-Usage:  tg_responder.py <botkey>      (botkey from BOTS registry below)
-Run one PM2 process per bot:  pm2 start tg_responder.py --name tg-<botkey> -- <botkey>
+Usage:  tg_responder.py <botkey>                  one lane (botkey from BOTS registry)
+        tg_responder.py --gateway [l1,l2|active]  ALL live lanes in ONE process (thread per
+                                                  lane; LLM_SEM caps concurrent CLI calls)
+
+Since 2026-07-19 the fleet runs as ONE PM2 process (the pm2-tg-bot-gateway collapse):
+  pm2 start tg_responder.py --name tg-gateway --interpreter ~/.venv/bin/python \
+      --max-memory-restart 300M -- --gateway active
+The old per-lane procs (tg-laptopclaude, tg-pingpong, tg-grokscout, tg-trendscanner,
+tg-jazzycodexgpt, tg-orionrelay) are STOPPED in PM2 as instant rollback — never run one
+of them while tg-gateway is up (getUpdates 409).
 
 IMPORTANT: only ONE getUpdates consumer may poll a given bot token. Do not point
 this at a token another poller already owns (e.g. PipelineSignals/telegram-bot-token.txt
 is owned by telegram_dm_responder.py).
 """
-import json, os, subprocess, time, sys
+import json, os, subprocess, threading, time, sys
 from pathlib import Path
 import requests
 
@@ -82,7 +90,8 @@ BOTS = {
             "/help = this."
         ),
     },
-    "jazzy": {
+    # PARKED 2026-07-19: responder stopped, bot renamed "PARKED (free)". Token free to repurpose.
+    "jazzy_PARKED": {
         "token": "telegram_jazzyhazzy_bot_token",         # @JazzyHazzyClaw_Bot → Jazzy Desk
         "owner": "telegram-chat-id.txt",
         "name":  "Jazzy Desk",
@@ -101,7 +110,8 @@ BOTS = {
             "/help = this."
         ),
     },
-    "risk": {
+    # PARKED 2026-07-19: responder stopped, bot renamed "PARKED (free)". Token free to repurpose.
+    "risk_PARKED": {
         "token": "antidote_telegram_bot_token",           # @AntiDoht_Bot → Risk & Hedge
         "owner": "telegram-chat-id.txt",
         "name":  "Risk & Hedge",
@@ -121,7 +131,8 @@ BOTS = {
             "/help = this."
         ),
     },
-    "research": {
+    # PARKED 2026-07-19: responder stopped, bot renamed "PARKED (free)". Token free to repurpose.
+    "research_PARKED": {
         "token": "telegram_orion_bot_token",              # @ResearchDaMoney_Bot → Research Desk
         "owner": "telegram-chat-id.txt",
         "name":  "Research Desk",
@@ -160,8 +171,10 @@ BOTS = {
             "Ask anything / run any /skill. /help = this."
         ),
     },
-    "macro": {
-        "token": "telegram_mc_skill_bot_token",           # @MMCTRL727_Bot → Macro & Regime
+    # RETIRED 2026-07-19: @MMCTRL727_Bot token is now the MasterMC agent's own bot
+    # (claudeclaw --agent mastermc). Re-enabling this entry would 409 it.
+    "macro_RETIRED": {
+        "token": "telegram_mc_skill_bot_token",           # @MMCTRL727_Bot → now MasterMC agent
         "owner": "telegram-chat-id.txt",
         "name":  "Macro & Regime",
         "tools": "Bash,Read,Grep,Glob,WebFetch,WebSearch",
@@ -275,18 +288,22 @@ def _fleet_token(fn):
     return tok
 
 
-def main():
-    if len(sys.argv) < 2 or sys.argv[1] not in BOTS:
-        print(f"usage: tg_responder.py <{'|'.join(BOTS)}>", flush=True)
-        sys.exit(1)
-    # Tokens owned by a DIFFERENT dedicated poller — refuse to start here, else two
-    # getUpdates consumers fight over one token (Telegram delivers each update once).
-    OWNED_ELSEWHERE = {"xsentiment": "grok_telegram.py owns telegram_grok_bot_token (x_sentiment)"}
-    if sys.argv[1] in OWNED_ELSEWHERE:
-        print(f"REFUSING '{sys.argv[1]}': {OWNED_ELSEWHERE[sys.argv[1]]} — "
-              f"starting it would steal that poller's getUpdates.", flush=True)
-        sys.exit(2)
-    cfg   = BOTS[sys.argv[1]]
+# Tokens owned by a DIFFERENT dedicated poller — refuse to start here, else two
+# getUpdates consumers fight over one token (Telegram delivers each update once).
+OWNED_ELSEWHERE = {"xsentiment": "grok_telegram.py owns telegram_grok_bot_token (x_sentiment)"}
+
+# Gateway default lane set = every live conversational lane (2026-07-19 collapse: one
+# process replaces the per-lane PM2 procs). Excludes *_PARKED/_RETIRED and OWNED_ELSEWHERE.
+GATEWAY_LANES = ["laptopclaude", "pingpong", "grokscout", "trendscanner",
+                 "jazzycodexgpt", "orionrelay"]
+
+# One claude/codex CLI can pull ~0.5GB; with 6 lanes in one process, cap concurrent
+# LLM subprocess calls so a burst of DMs can't stack six of them.
+LLM_SEM = threading.BoundedSemaphore(2)
+
+
+def run_bot(botkey):
+    cfg   = BOTS[botkey]
     token = _fleet_token(cfg["fleet_fn"]) if cfg.get("fleet_fn") else _secret(cfg["token"])
     base  = f"https://api.telegram.org/bot{token}"
     # Owner set: the bot's own chat-id file + the universal one (private chat.id ==
@@ -345,11 +362,12 @@ def main():
         # actually run as skills (not just chat) on every bot, incl. the reserve ones.
         tool_set = tools if "Skill" in tools else tools + ",Skill"
         try:
-            r = subprocess.run(
-                [CLAUDE_BIN, "-p", question, "--append-system-prompt", sys_prompt,
-                 "--model", "sonnet", "--effort", "high", "--output-format", "json",
-                 "--allowedTools", tool_set],
-                capture_output=True, text=True, timeout=300, env=env, cwd=CLAUDE_CWD)
+            with LLM_SEM:
+                r = subprocess.run(
+                    [CLAUDE_BIN, "-p", question, "--append-system-prompt", sys_prompt,
+                     "--model", "sonnet", "--effort", "high", "--output-format", "json",
+                     "--allowedTools", tool_set],
+                    capture_output=True, text=True, timeout=300, env=env, cwd=CLAUDE_CWD)
             if r.returncode != 0:
                 return f"[{name} error rc={r.returncode}] {r.stderr.strip()[:300]}"
             return (json.loads(r.stdout).get("result") or "").strip() or f"[{name} empty]"
@@ -370,7 +388,8 @@ def main():
         try:
             sys.path.insert(0, "/home/itsju/05_AUTOMATION/scripts")
             from lib import llm
-            out = llm.call_llm_text(prompt, providers)
+            with LLM_SEM:
+                out = llm.call_llm_text(prompt, providers)
             return out or f"[{name}: all backends busy — try again shortly]"
         except Exception as e:
             return f"[{name} backend error] {e}"
@@ -542,6 +561,51 @@ def main():
                     tg("sendMessage", chat_id=chat_id, text=f"⚠️ {name} error: {e}")
         except Exception as e:
             print(f"poll loop error: {e}", flush=True); time.sleep(5)
+
+
+def _lane_thread(botkey):
+    """Gateway wrapper: keep a lane alive forever; one bad lane never kills the process."""
+    backoff = 10
+    while True:
+        try:
+            run_bot(botkey)                      # only returns on crash
+        except Exception as e:
+            print(f"[gateway] lane '{botkey}' crashed: {e} — restart in {backoff}s", flush=True)
+        time.sleep(backoff)
+        backoff = min(backoff * 2, 300)
+
+
+def main():
+    args = sys.argv[1:]
+    if args and args[0] == "--gateway":
+        lanes = (args[1].split(",") if len(args) > 1 and args[1] != "active"
+                 else GATEWAY_LANES)
+        lanes = [ln for ln in lanes if ln in BOTS and ln not in OWNED_ELSEWHERE
+                 and not ln.endswith(("_PARKED", "_RETIRED"))]
+        if not lanes:
+            print("gateway: no valid lanes", flush=True); sys.exit(1)
+        print(f"tg-gateway starting {len(lanes)} lanes: {', '.join(lanes)}", flush=True)
+        threads = [threading.Thread(target=_lane_thread, args=(ln,), daemon=True, name=ln)
+                   for ln in lanes]
+        for t in threads:
+            t.start()
+            time.sleep(1)                        # stagger boots (vault CLI + deleteWebhook)
+        while True:                              # supervise: a dead lane thread should be
+            time.sleep(60)                       # impossible (_lane_thread never returns) —
+            dead = [t.name for t in threads if not t.is_alive()]
+            if dead:                             # if it happens anyway, exit non-zero so PM2
+                print(f"[gateway] DEAD lane threads: {dead} — exiting for PM2 restart", flush=True)
+                sys.exit(1)                      # restarts the whole gateway (self-heal).
+        return
+    if len(args) < 1 or args[0] not in BOTS:
+        print(f"usage: tg_responder.py <{'|'.join(BOTS)}> | --gateway [lane1,lane2|active]",
+              flush=True)
+        sys.exit(1)
+    if args[0] in OWNED_ELSEWHERE:
+        print(f"REFUSING '{args[0]}': {OWNED_ELSEWHERE[args[0]]} — "
+              f"starting it would steal that poller's getUpdates.", flush=True)
+        sys.exit(2)
+    run_bot(args[0])
 
 
 if __name__ == "__main__":

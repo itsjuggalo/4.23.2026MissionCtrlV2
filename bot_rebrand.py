@@ -54,24 +54,26 @@ IDENTITY = {
         desc=("X-sentiment scout (Grok on your subscription). Text me a ticker → live "
               "bullish/bearish X/Twitter chatter + catalysts in the last 24h. e.g. 'NVDA'. "
               "Target acquired.")),
+    # PARKED 2026-07-19 (zero consumers + zero DMs in 7d; responders stopped). Free tokens
+    # for the next bot need — reuse like the ClaudeClaw/MasterMC swaps, then rebrand here.
     "telegram_jazzyhazzy_bot_token": dict(
-        name="Jazzy Desk", avatar="duke",
-        short="General of the Jazzy account — positions, sizing, decisions (paper).",
-        desc=("Jazzy desk. Your Jazzy paper-account command: positions, P&L, sizing vs current "
-              "equity, decision reads. Read-only. Ask 'jazzy positions', 'size NVDA on jazzy'. "
-              "For the Confederacy.")),
+        name="PARKED (free) — ex Jazzy Desk", avatar="duke",
+        short="Parked token — unused, free to repurpose. Was: Jazzy Desk.",
+        desc=("PARKED since 2026-07-19. This bot token is unused and free to repurpose for the "
+              "next project (responder stopped; no senders). Formerly the Jazzy Desk lane. "
+              "To revive or reuse: bot_rebrand.py + tg_responder.py on the laptop.")),
     "antidote_telegram_bot_token": dict(
-        name="Risk & Hedge", avatar="aldaris",
-        short="Judicator of risk — drawdown, position size, correlation, hedges.",
-        desc=("Risk & hedge desk. Judges every trade: max loss, size vs current equity "
-              "($800 risk cap), correlation, drawdown, hedges. Ask 'how much should I size "
-              "NVDA?', 'am I over-exposed?'. The Conclave is watching.")),
+        name="PARKED (free) — ex Risk & Hedge", avatar="aldaris",
+        short="Parked token — unused, free to repurpose. Was: Risk & Hedge.",
+        desc=("PARKED since 2026-07-19. This bot token is unused and free to repurpose for the "
+              "next project (responder stopped; no senders). Formerly the Risk & Hedge lane. "
+              "To revive or reuse: bot_rebrand.py + tg_responder.py on the laptop.")),
     "telegram_orion_bot_token": dict(
-        name="Research Desk", avatar="tassadar",
-        short="Psionic deep-dive — fundamental research on any name.",
-        desc=("Research desk. Deep fundamental dives: business, financials, catalysts, valuation, "
-              "the bull and bear case. Ask 'deep research on PLTR'. Slower, thorough. "
-              "I have sacrificed too much to fail now.")),
+        name="PARKED (free) — ex Research Desk", avatar="tassadar",
+        short="Parked token — unused, free to repurpose. Was: Research Desk.",
+        desc=("PARKED since 2026-07-19. This bot token is unused and free to repurpose for the "
+              "next project (responder stopped; no senders). Formerly the Research Desk lane. "
+              "To revive or reuse: bot_rebrand.py + tg_responder.py on the laptop.")),
     # 2026-07-19: ex-Screener token repurposed — now ClaudeClaw OS's own bot (grammy
     # poller in /AIWorkWSL/agents/claudeclaw; tg_responder "screener" lane RETIRED).
     "telegram_deepseek_bot_token": dict(
@@ -80,12 +82,14 @@ IDENTITY = {
         desc=("ClaudeClaw OS bot. Talk to the laptop's agent hub: missions, scheduler, memory, "
               "skills, /delegate /await /gather orchestration, dashboard alerts. "
               "/help for commands. The Swarm needs you, magnificent bastard.")),
+    # 2026-07-19: ex-Macro token repurposed — now the MasterMC agent's own bot
+    # (claudeclaw --agent mastermc, MASTERMC_BOT_TOKEN; tg_responder "macro" lane RETIRED).
     "telegram_mc_skill_bot_token": dict(
-        name="Macro & Regime", avatar="mengsk",
-        short="The Emperor's view — Fed, rates, regime, SPY/QQQ levels, politics.",
-        desc=("Macro & regime. Top-down read: risk-on/off, Fed and rates, key SPY/QQQ levels, "
-              "sector rotation, and how politics/news hits your book. Ask 'regime today?', "
-              "'what does the Fed mean for me?'. The Dominion endures.")),
+        name="MasterMC", avatar="mengsk",
+        short="Master MissionCTRL — the orchestrator agent of the ClaudeClaw hub.",
+        desc=("MasterMC agent (ClaudeClaw OS sub-agent). Mission Control's orchestrator lane: "
+              "delegated missions, scheduler tasks, agent coordination. Managed from the "
+              "ClaudeClaw OS bot and dashboard :3141. The Dominion endures.")),
 }
 
 
