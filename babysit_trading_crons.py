@@ -40,13 +40,14 @@ DB = Path("/AIWorkWSL/web/missionctrl/pipeline/desk_pipeline.sqlite")
 # NOTE: run_desk_cycle.sh / run_desk_flow.sh redirect to /dev/null — they have NO log.
 # Their health is read from cycle_metadata in the DB instead (see check_desk_cycle).
 #
-# `window` = (first_hour, last_hour) ET from the job's OWN crontab entry, when that is
-# narrower than market hours. Without it a job whose first tick is 10:09 gets flagged
-# stale every morning from 9:30 — a daily false alarm, and a watchdog that cries wolf
-# on schedule is one Mike learns to swipe away. Verify against `crontab -l` before edits.
+# `window` = (first_run_HHMM, window_end_HHMM) ET, taken from the job's OWN crontab entry
+# when that is narrower than market hours. Without it a job whose first tick is 10:09 gets
+# flagged stale every morning from 9:30 — a daily false alarm, and a watchdog that cries
+# wolf on schedule is one Mike learns to swipe away. MUST be HHMM, not hour: an hour-level
+# window still false-alarms 10:00-10:09 (learned the hard way 07-20). Check `crontab -l`.
 JOBS = [
-    # cron: 9,39 10-15 → first tick 10:09, so it is legitimately quiet 9:30-10:09
-    ("flow-winner",     "/AIWorkWSL/web/missionctrl/firebase-signals/flow_winner_learner.log", 60, True, (10, 15)),
+    # cron: 9,39 10-15 → first tick 10:09, last 15:39; legitimately quiet before 10:09
+    ("flow-winner",     "/AIWorkWSL/web/missionctrl/firebase-signals/flow_winner_learner.log", 60, True, (1009, 1600)),
     ("trade-brief",     str(HOME / "02_DATA/trade-brief.log"),                          15,   True),   # cron: */5 9-16
     ("flowrank",        str(HOME / "logs/flowrank.log"),                                None, True),
     ("morning-note",    "/AIWorkWSL/web/missionctrl/pipeline/logs/morning_note.log",    None, True),
@@ -68,12 +69,13 @@ def market_open():
 def check_logs(mo):
     out = []
     now = time.time()
-    hour_et = datetime.now(ET).hour
+    _n = datetime.now(ET)
+    hhmm_et = _n.hour * 100 + _n.minute
     for job in JOBS:
         name, path, max_age, mh_only = job[:4]
         window = job[4] if len(job) > 4 else None
         # Outside the job's own cron window, staleness is the designed state, not a fault.
-        in_window = window is None or (window[0] <= hour_et <= window[1])
+        in_window = window is None or (window[0] <= hhmm_et <= window[1])
         p = Path(path)
         rec = {"job": name, "log": path, "problems": []}
         if not p.exists():

@@ -77,6 +77,11 @@ probe_local(){ # local nginx serving each vhost? -> echoes failing domains
     # cheap /health instead (added to bobacat_server.py 2026-07-13)
     p="/"; [ "$d" = "bridge.serveftp.com" ] && p="/health"
     c=$(curl -sk -o /dev/null -w '%{http_code}' -m 8 -H "Host: $d" "https://127.0.0.1$p" 2>/dev/null)
+    # 000 = connect/timeout, not an HTTP error. A concurrent `next build` (or any load
+    # spike — seen at load avg 34 on 12 cores) pushes :3000 past 8s and used to trigger a
+    # bogus nginx restart + fixer page. Retry once, slower, before calling it a failure.
+    # (2026-07-20)
+    [ "$c" = "000" ] && { sleep 3; c=$(curl -sk -o /dev/null -w '%{http_code}' -m 25 -H "Host: $d" "https://127.0.0.1$p" 2>/dev/null); }
     case "$c" in 2*|3*) ;; *) fails="$fails $d($c)";; esac
   done
   echo "$fails"
