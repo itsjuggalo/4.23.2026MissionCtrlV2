@@ -182,6 +182,9 @@ def check_pm2(mo):
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--json", action="store_true")
+    ap.add_argument("--fingerprint", action="store_true",
+                    help="stable hash of the PROBLEM SET only (ages/timestamps stripped) "
+                         "so a repeating loop can latch and avoid re-pinging the same issue")
     a = ap.parse_args()
     mo = market_open()
     report = {
@@ -199,6 +202,19 @@ def main():
     if report["pm2"].get("unexpected_down"):
         bad.append({"job": "pm2", "problems": report["pm2"]["unexpected_down"]})
     report["status"] = "PROBLEM" if bad else "GREEN"
+
+    if a.fingerprint:
+        import hashlib
+        probs = []
+        for r in report["logs"]:
+            probs += ["%s:%s" % (r["job"], p) for p in r["problems"]]
+        for k in ("desk_cycle", "output"):
+            probs += ["%s:%s" % (k, p) for p in report[k]["problems"]]
+        probs += ["pm2:%s" % n for n in report["pm2"].get("unexpected_down", [])]
+        # strip digits so "stale 41m" and "stale 47m" are the SAME incident
+        norm = sorted(re.sub(r"\d+", "#", p) for p in probs)
+        print("GREEN" if not norm else hashlib.md5("|".join(norm).encode()).hexdigest()[:8])
+        return 1 if norm else 0
 
     if a.json:
         print(json.dumps(report, indent=1))
