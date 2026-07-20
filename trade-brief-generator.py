@@ -106,7 +106,11 @@ def build_prompt(rank, winners, momentum, macro, ledger) -> str:
     if winners:
         lines.append("RECENT FLOW WINNERS (≥200% peak returns, last 3 days):")
         for w in winners:
-            lines.append(f"  {w['symbol']} {w['option_type']} ${w['strike']} {w['expiry']} → +{w['peak_pct']:.0f}% | ${w['flow_value']:,.0f} premium")
+            # flow_value is NULL for winners detected without a premium figure
+            # (17 of 92 rows, incl. every current in-window row). A bare :,.0f
+            # on None raises TypeError and kills the whole brief.
+            prem = f"${w['flow_value']:,.0f} premium" if w["flow_value"] is not None else "premium n/a"
+            lines.append(f"  {w['symbol']} {w['option_type']} ${w['strike']} {w['expiry']} → +{w['peak_pct']:.0f}% | {prem}")
         lines.append("")
 
     if momentum:
@@ -205,9 +209,12 @@ def main():
     error = None
     try:
         brief_text = run_claude(prompt)
-    except RuntimeError as e:
+    # TimeoutExpired/OSError are "claude unavailable" too — the whole point of
+    # fallback_brief. Catching only RuntimeError let a 60s timeout kill the run
+    # instead of degrading, which is how this crashed every market-hours tick.
+    except (RuntimeError, subprocess.TimeoutExpired, OSError) as e:
         status = "fallback"
-        error = str(e)
+        error = str(e)[:200]
         print(f"[trade-brief] Claude unavailable; writing fallback brief: {error}", file=sys.stderr)
         brief_text = fallback_brief(rank, winners, momentum, macro, ledger, error)
 

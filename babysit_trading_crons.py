@@ -27,6 +27,12 @@ ET = ZoneInfo("America/New_York")
 ERR = re.compile(r"Traceback|ModuleNotFoundError|ImportError|database is locked|"
                  r"OperationalError|NameError|No such file|name resolution|FAILED|"
                  r"insufficient|rejected|401|403|429", re.I)
+# Evidence that a LATER run finished without exploding. A log that keeps getting
+# benign appends (e.g. trade-brief printing "[skip] Outside market hours" every
+# minute) stays mtime-fresh forever, so the age<=180 guard never expires an old
+# traceback and the job alarms permanently — the exact way a watchdog gets ignored.
+# If one of these appears AFTER the last error line, the job has since recovered.
+HEALED = re.compile(r"\[skip\]|Written →|wrote |completed|^OK\b|✅", re.I)
 DB = Path("/AIWorkWSL/web/missionctrl/pipeline/desk_pipeline.sqlite")
 
 # name, log path, max age in MINUTES during its active window, market-hours-only
@@ -70,10 +76,14 @@ def check_logs(mo):
                     rec["problems"].append("stale %.0fm (expected <%dm)" % (age, max_age))
             if age <= 180:  # only scan recently-touched logs; old tracebacks are noise
                 try:
-                    tail = "\n".join(p.read_text(errors="ignore").splitlines()[-40:])
-                    m = ERR.search(tail)
-                    if m:
-                        rec["problems"].append("error in tail: %s" % m.group(0))
+                    tail = p.read_text(errors="ignore").splitlines()[-40:]
+                    last_err = max((i for i, ln in enumerate(tail) if ERR.search(ln)),
+                                   default=None)
+                    if last_err is not None:
+                        healed = any(HEALED.search(ln) for ln in tail[last_err + 1:])
+                        if not healed:
+                            rec["problems"].append(
+                                "error in tail: %s" % ERR.search(tail[last_err]).group(0))
                 except Exception as e:
                     rec["problems"].append("unreadable: %s" % e)
         out.append(rec)
