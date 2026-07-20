@@ -13,6 +13,7 @@ Exit:   0 = all green, 1 = at least one problem (so a caller can branch on it)
 """
 import argparse
 import json
+import os
 import re
 import sqlite3
 import subprocess
@@ -35,12 +36,18 @@ ERR = re.compile(r"Traceback|ModuleNotFoundError|ImportError|database is locked|
 HEALED = re.compile(r"\[skip\]|Written →|wrote |completed|^OK\b|✅", re.I)
 DB = Path("/AIWorkWSL/web/missionctrl/pipeline/desk_pipeline.sqlite")
 
-# name, log path, max age in MINUTES during its active window, market-hours-only
+# name, log path, max age in MINUTES during its active window, market-hours-only, [window]
 # NOTE: run_desk_cycle.sh / run_desk_flow.sh redirect to /dev/null — they have NO log.
 # Their health is read from cycle_metadata in the DB instead (see check_desk_cycle).
+#
+# `window` = (first_hour, last_hour) ET from the job's OWN crontab entry, when that is
+# narrower than market hours. Without it a job whose first tick is 10:09 gets flagged
+# stale every morning from 9:30 — a daily false alarm, and a watchdog that cries wolf
+# on schedule is one Mike learns to swipe away. Verify against `crontab -l` before edits.
 JOBS = [
-    ("flow-winner",     "/AIWorkWSL/web/missionctrl/firebase-signals/flow_winner_learner.log", 60, True),
-    ("trade-brief",     str(HOME / "02_DATA/trade-brief.log"),                          15,   True),
+    # cron: 9,39 10-15 → first tick 10:09, so it is legitimately quiet 9:30-10:09
+    ("flow-winner",     "/AIWorkWSL/web/missionctrl/firebase-signals/flow_winner_learner.log", 60, True, (10, 15)),
+    ("trade-brief",     str(HOME / "02_DATA/trade-brief.log"),                          15,   True),   # cron: */5 9-16
     ("flowrank",        str(HOME / "logs/flowrank.log"),                                None, True),
     ("morning-note",    "/AIWorkWSL/web/missionctrl/pipeline/logs/morning_note.log",    None, True),
     ("decipher-main",   str(HOME / "logs/decipher.log"),                                45,   True),
@@ -61,7 +68,12 @@ def market_open():
 def check_logs(mo):
     out = []
     now = time.time()
-    for name, path, max_age, mh_only in JOBS:
+    hour_et = datetime.now(ET).hour
+    for job in JOBS:
+        name, path, max_age, mh_only = job[:4]
+        window = job[4] if len(job) > 4 else None
+        # Outside the job's own cron window, staleness is the designed state, not a fault.
+        in_window = window is None or (window[0] <= hour_et <= window[1])
         p = Path(path)
         rec = {"job": name, "log": path, "problems": []}
         if not p.exists():
@@ -71,7 +83,7 @@ def check_logs(mo):
             age = (now - p.stat().st_mtime) / 60
             rec["age_min"] = round(age, 1)
             # Staleness only counts inside the window the job is supposed to run in.
-            if max_age is not None and not (mh_only and mo is not True):
+            if max_age is not None and not (mh_only and mo is not True) and in_window:
                 if age > max_age:
                     rec["problems"].append("stale %.0fm (expected <%dm)" % (age, max_age))
             if age <= 180:  # only scan recently-touched logs; old tracebacks are noise
@@ -169,13 +181,28 @@ CRITICAL_24_7 = {"alpaca-fill-listener", "option-signals", "option-relay",
                  "firebase-signal-relay", "boba-mega", "missionctrl", "kb-server",
                  "crypto-profit-lock-boba", "crypto-profit-lock-jazzy", "yf-holdings"}
 # Windowed to RTH — being down overnight is correct, not a fault.
+# MUST mirror the FLEET array in ~/bin/trading-fleet: these are the only processes
+# anything actually starts at 9:00 ET. Listing extras here manufactures a permanent
+# market-hours alarm for daemons no cron has ever brought up.
 WINDOWED = {"trail-daemon", "trail-daemon-jazzy", "profit-lock-boba", "profit-lock-jazzy",
-            "grid-daemon", "auto-bracket", "moomoo-quotes", "vibe-trading", "jesse-lab"}
+            "grid-daemon", "auto-bracket"}
+# In pm2's list but deliberately NOT auto-started — lab/experimental rigs Mike runs by
+# hand (moomoo-quotes awaits the OpenD setup capsule; jesse-lab + vibe-trading are labs).
+# Down is their normal state at every hour; never alarm on them.
+MANUAL_ONLY = {"moomoo-quotes", "vibe-trading", "jesse-lab"}
 
 
 def check_pm2(mo):
     try:
-        raw = subprocess.run(["pm2", "jlist"], capture_output=True, text=True, timeout=15).stdout
+        # pm2's shebang is `#!/usr/bin/env node`, so node must be on PATH too. This runs
+        # fine from an interactive Monitor, but resolving it here means the checker can
+        # never die the same silent death it exists to catch (cf. trading-fleet, 07-20).
+        env = {**os.environ}
+        node_bins = sorted((HOME / ".nvm/versions/node").glob("*/bin"))
+        if node_bins:
+            env["PATH"] = f"{node_bins[-1]}:{env.get('PATH','')}"
+        raw = subprocess.run(["pm2", "jlist"], capture_output=True, text=True,
+                             timeout=15, env=env).stdout
         procs = json.loads(raw)
         down = [p["name"] for p in procs
                 if p.get("pm2_env", {}).get("status") != "online"]
@@ -183,6 +210,8 @@ def check_pm2(mo):
         unexpected = [n for n in down if n in CRITICAL_24_7]
         if mo is True:
             unexpected += [n for n in down if n in WINDOWED]
+        # Belt-and-braces: a lab rig re-added to WINDOWED later can't resurrect the alarm.
+        unexpected = [n for n in unexpected if n not in MANUAL_ONLY]
         return {"online": len(procs) - len(down), "down_total": len(down),
                 "unexpected_down": unexpected}
     except Exception as e:

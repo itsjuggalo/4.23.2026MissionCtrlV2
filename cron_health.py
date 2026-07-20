@@ -9,6 +9,7 @@ auto-clears on recovery. Generalization of decipher_watchdog.py.
 Cron: */30 * * * *  /usr/bin/python3 ~/05_AUTOMATION/scripts/cron_health.py
 """
 import json
+import os
 import re
 import subprocess
 import time
@@ -58,6 +59,51 @@ def ping(msg):
         return False
 
 
+FLEET = ["trail-daemon", "trail-daemon-jazzy", "profit-lock-boba",
+         "profit-lock-jazzy", "auto-bracket", "grid-daemon"]
+
+
+def check_fleet(mo):
+    """The exit-protection daemons (trailing stops, profit locks, auto-bracket) are
+    windowed up 9:00-16:40 ET by ~/bin/trading-fleet. A silent no-op there leaves open
+    positions unmanaged while looking perfectly healthy — which is exactly what happened
+    2026-07-20: cron's PATH has no nvm, pm2's shebang is `#!/usr/bin/env node`, so the
+    9:00 start died on `pm2: command not found` and a `| grep '✓|error'` ate the message.
+    The log-age checks above are structurally blind to this: a daemon that never STARTS
+    never writes a log to go stale. Hence an explicit process check.
+    """
+    if mo is not True:
+        return                      # off-hours down is the designed state
+    # Same PATH trap as the bug being watched for — resolve node ourselves.
+    node_bins = sorted((HOME / ".nvm/versions/node").glob("*/bin"))
+    env = {**os.environ}
+    if node_bins:
+        env["PATH"] = f"{node_bins[-1]}:{env.get('PATH','')}"
+    try:
+        out = subprocess.run(["pm2", "jlist"], capture_output=True, text=True,
+                             timeout=30, env=env)
+        procs = json.loads(out.stdout or "[]")
+    except Exception as e:
+        _fleet_ping("fleet-check", f"cannot read pm2 ({type(e).__name__}) — fleet UNVERIFIED")
+        return
+    down = [p["name"] for p in procs
+            if p["name"] in FLEET and p["pm2_env"]["status"] != "online"]
+    missing = [n for n in FLEET if n not in {p["name"] for p in procs}]
+    if down or missing:
+        detail = ", ".join(down + [f"{m} (absent)" for m in missing])
+        _fleet_ping("trading-fleet", f"exit-protection DOWN during market hours: {detail}")
+    else:
+        (LATCH / "trading-fleet").unlink(missing_ok=True)
+        (LATCH / "fleet-check").unlink(missing_ok=True)
+
+
+def _fleet_ping(latch_name, msg):
+    latch = LATCH / latch_name
+    if not latch.exists():
+        if ping(f"🚨 CRON HEALTH — {msg}"):
+            latch.write_text(datetime.now(timezone.utc).isoformat())
+
+
 def main():
     LATCH.mkdir(parents=True, exist_ok=True)
     mo = market_open()
@@ -88,6 +134,7 @@ def main():
                     latch.write_text(datetime.now(timezone.utc).isoformat())
         else:
             latch.unlink(missing_ok=True)   # recovered → re-arm
+    check_fleet(mo)
 
 
 if __name__ == "__main__":
