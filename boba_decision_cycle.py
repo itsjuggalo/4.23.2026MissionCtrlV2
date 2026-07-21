@@ -1822,6 +1822,21 @@ def execute_position_action(action_dict, positions):
     if act == "HOLD":
         return {"ok": True, "action": act, "symbol": sym, "details": "no-op (HOLD)"}
 
+    # hold-through-print hard gate: a tagged catalyst position may not be exited,
+    # trimmed, or stop-tightened until its tag expires (the exit was decided at
+    # entry; defined-risk spread max loss = the debit). Fail-open on any error.
+    try:
+        import sys as _sys
+        if "/AIWorkWSL/trading/daemons" not in _sys.path:
+            _sys.path.insert(0, "/AIWorkWSL/trading/daemons")
+        from hold_through_print import is_held as _htp_held
+        _h, _why = _htp_held(sym)
+        if _h:
+            return {"ok": False, "action": act, "symbol": sym,
+                    "error": f"BLOCKED hold-through-print: {_why}"}
+    except Exception:
+        pass
+
     pos = next((p for p in positions if p.get("symbol") == sym), None)
     if not pos:
         return {"ok": False, "action": act, "symbol": sym, "error": f"position not found: {sym}"}

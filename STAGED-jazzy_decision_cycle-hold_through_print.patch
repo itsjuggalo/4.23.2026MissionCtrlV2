@@ -1,0 +1,20 @@
+--- jazzy_decision_cycle.py (LIVE, UNMODIFIED)
++++ jazzy_decision_cycle.py (STAGED, awaiting explicit go)
+@@ Line 1737 (approx) — decision exit logic @@
+
+ # Exit logic for short-DTE options
+ for position in open_positions:
+     dte_val = dte(position.get("expiry"))
+-    if 0 < dte_val <= 5 and position.get("unrealized_pnl", 0) < 0:
++    if 0 < dte_val <= 5 and position.get("unrealized_pnl", 0) < 0:
++        # Check hold-through-print tag (earnings/catalyst trades)
++        from lib.hold_through_print import should_hold_through_print
++        if should_hold_through_print(position.get("symbol")):
++            logger.info(f"HOLD_THROUGH_PRINT: {position['symbol']} held until {position.get('hold_until')}")
++            continue
+         logger.info(f"EXIT: {position['symbol']} DTE={dte_val} PnL={position['unrealized_pnl']}")
+         # ... exit logic ...
+
+CONTEXT: Jazzy's cycle runs at 09:45, 11:00, 12:30, 14:00, 15:30 ET. The hold-through-print tag overrides the 0-5 DTE automatic exit for marked positions.
+
+DEPLOYMENT: Apply this diff to ~/scripts/jazzy_decision_cycle.py (and the equivalent boba_decision_cycle.py) ONLY after Mike's explicit go.
