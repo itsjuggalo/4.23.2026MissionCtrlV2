@@ -93,6 +93,145 @@ def test_scanner_target_is_two_r():
     assert SS.RR_TARGET >= 1.5, "a target inside the risk makes the card a losing plan"
 
 
+# ── Bitcoin (added 2026-07-29) ──────────────────────────────────────────────
+def _btc(**over):
+    s = dict(sym="BTC", is_crypto=True, size=0.0, volx=161.5, ts_et="09:14", tag="ETF-IN",
+             dir="LONG", gap=2.4, last=64010.85, prev_high=64662.51, prev_low=63489.55,
+             prev_close=63846.55, headline="Bitcoin ETFs approach $1B in 7-session inflow run")
+    s.update(over)
+    return s
+
+
+def test_btc_card_is_priced_in_fractions_not_shares():
+    """A whole coin is $64k — integer sizing would floor to 0 and skip BTC forever."""
+    s = _btc()
+    out = SS.card(s, 285.0)
+    assert "BTC," in out and "shares" not in out
+    assert 0 < s["shares"] < 1, f"expected a fraction of a coin, got {s['shares']}"
+
+
+def test_btc_has_all_three_prices_correctly_ordered():
+    s = _btc()
+    out = SS.card(s, 285.0)
+    assert "1) BUY" in out and "2) SELL" in out and "3) SELL" in out
+    assert s["stop"] < s["trig"] < s["target"]
+
+
+def test_btc_uses_the_wider_stop():
+    """2% sits inside Bitcoin's ordinary daily range and gets hit for no reason."""
+    s = _btc()
+    SS.card(s, 285.0)
+    pct = 1 - s["stop"] / s["trig"]
+    assert abs(pct - SS.BTC_STOP_PCT) < 1e-6, f"BTC stop is {pct:.3%}, expected 3%"
+
+
+def test_btc_card_never_says_the_market_closes():
+    """Crypto trades 24/7 — 'out by 3:55pm' would make a beginner exit for no reason."""
+    out = SS.card(_btc(), 285.0)
+    assert "3:55" not in out
+    assert "never closes" in out
+
+
+def test_btc_short_is_refused_for_a_beginner():
+    out = SS.card(_btc(tag="ETF-OUT", dir="SHORT", gap=-2.4), 285.0)
+    assert "SKIP" in out and "1) BUY" not in out
+
+
+def test_btc_sms_fits_with_six_figure_prices():
+    """$64,662.51 is 4 chars longer than a stock price — the cap has to survive it."""
+    s = _btc()
+    out = SS.fit_sms("09:20 — here's one you can take.", SS.card(s, 285.0), 2)
+    assert len(out) <= SS.SMS_MAX
+    for tag in ("1) BUY", "2) SELL", "3) SELL"):
+        assert tag in out
+
+
+def test_crypto_classifier_does_not_invert_etf_flows():
+    """'snap inflow streak with $225M in outflows' scored BULLISH — it's an outflow."""
+    assert SS.classify_crypto("Bitcoin ETFs snap 7-day inflow streak with $225M in outflows")[1] == "ETF-OUT"
+    assert SS.classify_crypto("Bitcoin ETFs extend outflow streak as BTC fails to hold $65K")[1] == "ETF-OUT"
+    assert SS.classify_crypto("Bitcoin ETFs approach $1B in 7-session inflow run")[1] == "ETF-IN"
+    assert SS.classify_crypto("Bitcoin ETF outflows slow as buyers return")[1] is None
+
+
+def test_crypto_classifier_rejects_commentary():
+    """Explainers and digests carry every keyword and no event."""
+    for h in ("Crypto Long & Short: What this year's $972M crypto hacks tell us",
+              "3 reasons Wednesday's Fed meeting is pivotal for BTC",
+              "CLARITY hopes fade, BitMEX shuts as lawsuit looms: Hodler's Digest",
+              "Bitcoin, Ethereum Face Crucial Monthly Close: These Are the Levels to Watch"):
+        assert SS.classify_crypto(h)[1] is None, f"commentary classified as news: {h}"
+
+
+def test_crypto_classifier_reads_enforcement_ending_as_bullish():
+    assert SS.classify_crypto("SEC drops lawsuit against Bitcoin miner")[1] == "REG+"
+    assert SS.classify_crypto("SEC sues Bitcoin exchange over unregistered sales")[1] == "REG-"
+
+
+def test_every_crypto_tag_has_plain_english_and_a_bias():
+    """A tag with no CRYPTO_EN entry prints its raw code at Mike; one with no bias entry
+    silently defaults to direction-agnostic."""
+    tags = {t for _, _, t in SS.CRYPTO_CATALYSTS}
+    assert tags <= set(SS.CRYPTO_EN), f"no plain English for {tags - set(SS.CRYPTO_EN)}"
+    assert tags <= set(SS.CRYPTO_BIAS), f"no bias set for {tags - set(SS.CRYPTO_BIAS)}"
+
+
+def test_btc_skips_the_equity_chart_check():
+    """Yahoo's 'BTC' is the Grayscale Bitcoin Mini Trust ETF, not bitcoin."""
+    import inspect
+    src = inspect.getsource(SS.main)
+    assert 'is_crypto' in src and 'struct' in src, "crypto must bypass explosion_score"
+
+
+def test_crypto_only_scan_makes_no_equity_calls():
+    """The weekend cron must not touch the stock endpoints — with the market shut, Alpaca
+    still serves Friday's closing prints and scanning them manufactures stale setups."""
+    called = []
+    orig_news, orig_actives = SS.alpaca_news, SS.most_actives
+    orig_cand, orig_snap = SS.btc_candidate, SS.btc_snapshot
+    try:
+        SS.alpaca_news = lambda *a, **k: called.append("news") or []
+        SS.most_actives = lambda *a, **k: called.append("actives") or []
+        SS.btc_candidate = lambda now: None      # no catalyst → empty, but no equity calls
+        SS.btc_snapshot = lambda: {}
+        SS.scan(crypto_only=True)
+    finally:
+        SS.alpaca_news, SS.most_actives = orig_news, orig_actives
+        SS.btc_candidate, SS.btc_snapshot = orig_cand, orig_snap
+    assert called == [], f"crypto-only run hit the equity endpoints: {called}"
+
+
+def test_btc_survives_the_empty_equity_candidates_guard():
+    """`if not cands: return []` used to fire before BTC was injected, so a crypto-only
+    run could never produce a setup at all."""
+    orig_news, orig_actives = SS.alpaca_news, SS.most_actives
+    orig_cand, orig_snap = SS.btc_candidate, SS.btc_snapshot
+    try:
+        SS.alpaca_news = lambda *a, **k: []
+        SS.most_actives = lambda *a, **k: []
+        SS.btc_candidate = lambda now: dict(
+            sym="BTC", score=9.0, tag="ETF-IN", w=9, size=0.0, age_h=1.2,
+            headline="Bitcoin ETFs approach $1B in 7-session inflow run",
+            ts_et="09:14", is_crypto=True, source="Cointelegraph")
+        SS.btc_snapshot = lambda: {
+            "latestTrade": {"p": 65400.0}, "dailyBar": {"v": 3.0},
+            "prevDailyBar": {"c": 63846.55, "h": 64662.51, "l": 63489.55, "v": 1.16}}
+        out = SS.scan(crypto_only=True)
+    finally:
+        SS.alpaca_news, SS.most_actives = orig_news, orig_actives
+        SS.btc_candidate, SS.btc_snapshot = orig_cand, orig_snap
+    assert [s["sym"] for s in out] == ["BTC"], f"expected a BTC setup, got {out}"
+
+
+def test_a_fractional_btc_card_counts_as_takeable():
+    """The header test was `shares >= 1`, false for every BTC card by definition — a good
+    Bitcoin setup got 'nothing you can take right now' printed above its own buy order."""
+    s = _btc()
+    SS.card(s, 285.0)
+    assert str(s.get("rest", "")).startswith("buy-stop"), \
+        "card() must mark a takeable fractional setup the same way it marks a stock"
+
+
 # ── morning_command: the 8:15 brief ─────────────────────────────────────────
 def _plan(**over):
     p = {"ticker": "SOFI", "entry": 12.50, "stop": 12.00, "target": 13.50, "shares": 100,
