@@ -151,12 +151,134 @@ def build() -> str:
     return "\n".join(lines)
 
 
-def _mirror_telegram(text: str) -> None:
-    """Mirror to Mike's phone via lib.notify (daily_briefs → flow_digest fallback).
-    Best-effort; auto-upgrades to a dedicated briefs bot once its token is set."""
+# --------------------------------------------------------------------------- phone brief
+# 2026-07-29: Mike was getting FIVE pre-open briefs (7:00 X digest, 7:15 AInvest, 8:15 this
+# one, 9:00 MasterMC, 9:15 flow pre-market) carrying the same headlines and tape read, all
+# written in desk shorthand. They are now ONE message on Trading Command, and the phone copy
+# is written for a beginner: what happened, what he owns, the ONE thing to watch, and what
+# would actually make him act. The Discord post (build()) is unchanged — that's the desk copy.
+BEST_CONTRACTS = Path("/AIWorkWSL/labs/quantum/out/best_contracts.json")
+
+
+def _tape_read(tape: str) -> str:
+    """Translate the tape into one sentence a beginner can act on. VIX LEVEL alone lies —
+    a 19 VIX that just jumped 9% while SPY is down 1% is not a calm tape."""
+    try:
+        spy_chg = float(tape.split("SPY ")[1].split("(")[1].split("%")[0])
+        vix_part = tape.split("VIX ")[1]
+        vix = float(vix_part.split(" ")[0])
+        vix_chg = float(vix_part.split("(")[1].split("%")[0])
+    except Exception:
+        return ""
+    if vix >= 25 or vix_chg >= 15:
+        return "Fear is spiking — moves will be violent both ways. Smallest size or sit out."
+    if spy_chg <= -0.7 or vix_chg >= 5:
+        return "Selling pressure this morning. Wait for it to stop falling before buying dips."
+    if spy_chg >= 0.7:
+        return "Strong open. Chasing green candles is where beginners lose — wait for a pullback."
+    return "Quiet tape — nothing is forcing a trade today."
+
+
+def _book_line() -> str:
+    """'You own: $5,130 total · biggest position ETH $1,363'. Never raises."""
+    try:
+        from lib.portfolio import equity_day_pnl, real_money_holdings
+        paper, day = equity_day_pnl()
+        crypto = real_money_holdings()
+        total = paper + sum(crypto.values())
+        if not total:
+            return ""
+        line = f"💼 You own: ${total:,.0f}"
+        if day:
+            line += f" ({day:+,.0f} yesterday)"
+        if crypto:
+            sym, val = max(crypto.items(), key=lambda x: x[1])
+            line += f" · biggest is {sym} at ${val:,.0f}"
+        return line
+    except Exception:
+        return ""
+
+
+def _one_contract_line() -> str:
+    """The single best-graded option idea, in plain English with the dollar cost and the
+    stop — folded in from the retired 9:00 MasterMC brief. Silent if stale or nothing
+    cleared validation: no forced pick is better than a bad one."""
+    try:
+        import json
+        from datetime import timedelta
+        d = json.loads(BEST_CONTRACTS.read_text())
+        picks = [p for p in (d.get("picks") or []) if str(p.get("action", "")).startswith("ACT")]
+        if not picks:
+            return ""
+        as_of = datetime.fromisoformat(str(d.get("as_of", "")).replace("Z", "+00:00"))
+        if as_of.tzinfo:
+            as_of = as_of.astimezone(ET)
+        if datetime.now(ET) - as_of > timedelta(hours=24):
+            return ""                      # yesterday's price is not today's trade
+        p = picks[0]
+        if p.get("structure") == "spread":
+            return ""                      # spreads need their own explainer, not a one-liner
+        cost = int((p.get("per_contract") or 0) * (p.get("qty") or 0))
+        if not cost or cost > RISK_CAP:
+            return ""                      # can't afford it → it isn't an idea for this account
+        kind = "call (a bet it goes UP)" if str(p.get("type", "")).lower().startswith("c") \
+            else "put (a bet it goes DOWN)"
+        try:
+            days = (datetime.fromisoformat(p["expiry"]).date() - now_et().date()).days
+            window = f", you have {days} days" if days < 60 else f", it runs {days // 30} months"
+        except Exception:
+            window = ""
+        n = p.get("qty") or 1
+        return (f"📈 If you take one trade: {p['ticker']} ${p['strike']:g} {kind} "
+                f"expiring {p['expiry']}{window} — {n} contract{'s' if n != 1 else ''} = ${cost} "
+                f"total, and that ${cost} is the most you can lose. Cut it if it's down half. "
+                f"(priced at yesterday's close — check the real price before you buy)")
+    except Exception:
+        return ""
+
+
+def build_phone() -> str:
+    """The beginner-facing pre-open brief. First line is the answer, every number gets a
+    'so what', and it ends with an action or an explicit 'do nothing'."""
+    now = datetime.now(ET)
+    tape = _tape()
+    lines = [f"☀️ TODAY — {now:%a %b %-d}"]
+
+    if tape:
+        lines.append(f"📊 {tape}" + (f"\n   {_tape_read(tape)}" if _tape_read(tape) else ""))
+
+    book = _book_line()
+    if book:
+        lines.append(book)
+
+    cat, orders = _catalysts_and_orders(top_tickers_str(6), tape)
+    if cat:
+        lines.append(f"⚠️ The one thing today: {cat}")
+    if orders:
+        lines.append(f"👉 Plan: {orders}")
+
+    one = _one_contract_line()
+    if one:
+        lines.append(one)
+
+    lines.append(f"🛡️ Never risk more than ${RISK_CAP} on a single trade. "
+                 "If nothing here fits, doing nothing is a valid day.")
+    return "\n\n".join(lines)
+
+
+def _mirror_telegram(_discord_text: str) -> None:
+    """Send the BEGINNER copy to Trading Command — the 'what do I do right now' lane.
+    Falls back down the old chain if that bot is unreachable. Never raises."""
+    from lib.notify import tg_push
+    text = build_phone()
+    # html=False: the catalyst/orders lines come from an LLM and a stray '<' would make
+    # Telegram reject the whole message with a parse error (silent missed brief).
+    if tg_push(text, "trading_command", loud=True, html=False):
+        print("[morning] phone brief -> trading_command", flush=True)
+        return
     used = tg_brief(text)
-    print(f"[morning] telegram mirror -> {used}" if used
-          else "[morning] telegram mirror skipped (no live briefs bot)", flush=True)
+    print(f"[morning] phone brief -> {used}" if used
+          else "[morning] phone brief NOT sent (no live bot)", flush=True)
 
 
 def main():
