@@ -187,7 +187,25 @@ def _tape() -> str:
 
 MAX_MNY = 0.15   # |moneyness| beyond this = hedge/LEAP/stock-replacement, not a swing pick
 DTE_MIN, DTE_MAX = 7, 120   # swing window — excludes 0DTE lotto and long-dated LEAPs
-RISK_CAP = 800   # Mike's per-trade risk cap (premium-at-risk model) — raised 250→800 2026-06-15
+# Mike's per-trade risk cap (premium-at-risk model). 2026-07-15 P&L review HALVED the
+# doctrine cap 800→400 and made it fail-CLOSED — min($400, 15% of CURRENT equity) — after a
+# fail-open $800 let an $1,810 MRVL pick onto a ~$2k account. This module was still on the
+# retired 800 as of 2026-07-29, which is why the morning brief and the pick sizing lines kept
+# quoting contracts bigger than the whole book. Same constant as
+# option-scraper/pipeline/digest/best3_core.risk_cap_usd().
+RISK_CAP_USD = 400
+RISK_CAP_PCT = 0.15
+RISK_CAP = RISK_CAP_USD   # binding side of the cap for any account under ~$2.7k
+
+
+def risk_cap(equity=None):
+    """min($400, 15% of equity). $400 stands when equity isn't already in hand —
+    this runs in message-build paths that must never block on a live account call."""
+    try:
+        eq = float(equity or 0)
+    except (TypeError, ValueError):
+        eq = 0
+    return round(min(RISK_CAP_USD, RISK_CAP_PCT * eq), 2) if eq > 0 else float(RISK_CAP_USD)
 
 
 def _mid(row):
@@ -221,8 +239,9 @@ def _yf_option_chain_df(ticker_sym, exp, is_call, retries=3):
 
 
 def _sizing_line(a, is_call, spot=None):
-    """Premium-based sizing for Mike's $150–250 risk. If the flagged contract is above his
-    cap, scan the SAME-expiry chain for an affordable, still-near-money same-direction strike."""
+    """Premium-based sizing against Mike's hard per-trade cap (RISK_CAP). If the flagged
+    contract is above the cap, scan the SAME-expiry chain for an affordable, still-near-money
+    same-direction strike so the pick stays takeable instead of becoming a screenshot."""
     try:
         exp = datetime.fromtimestamp(int(a.get("Expiry", 0)), tz=timezone.utc).astimezone(ET).strftime("%Y-%m-%d")
         df = _yf_option_chain_df(a.get("Symbol"), exp, is_call)
@@ -256,7 +275,7 @@ def _sizing_line(a, is_call, spot=None):
                 alt = (k, m)
     except Exception:
         alt = None
-    base = (f"   💵 flagged contract ~${mid:.2f}/ct (${cost:,.0f}) = above your $800 cap")
+    base = (f"   💵 flagged contract ~${mid:.2f}/ct (${cost:,.0f}) = above your ${RISK_CAP:,.0f} cap")
     if alt:
         ac = alt[1] * 100
         an = int(RISK_CAP // ac)
@@ -264,7 +283,8 @@ def _sizing_line(a, is_call, spot=None):
         base += (f"\n   ✅ **affordable play: {a.get('Symbol')} ${alt[0]:g}{cp} {exp[5:].replace('-','/')}** "
                  f"~${alt[1]:.2f}/ct → **{an} ct** ≈ ${an*ac:,.0f} (${an*ac*0.5:,.0f} at a 50% stop)")
     else:
-        base += " — no near-money strike fits $250 (this name's options are too rich for your account)"
+        base += (f" — no near-money strike fits ${RISK_CAP:,.0f} "
+                 f"(this name's options are too rich for your account)")
     return base
 
 

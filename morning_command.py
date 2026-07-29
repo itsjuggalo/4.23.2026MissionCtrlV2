@@ -84,8 +84,9 @@ def _catalysts_and_orders(names: str, tape: str) -> tuple[str, str]:
         "confident about (FOMC/CPI/PPI/jobs/major single-name earnings). If you are not sure "
         'anything major is scheduled, say \\"No major scheduled macro catalysts today.\\"", '
         '"orders": "ONE concrete, actionable line: the single highest-conviction game plan for '
-        "the day given the book. Position sizing is capped at $800 risk per trade (a fraction of "
-        'equity), paper accounts. Be specific."}'
+        f"the day given the book. Position sizing is capped at ${RISK_CAP} risk per trade — this "
+        "is a HARD cap, never suggest a size above it, and if the named play cannot be expressed "
+        'under it, say so. Paper accounts. Be specific."}'
     )
     res = call_llm(prompt, ["claude_oauth", "claude_cli", "grok_oauth"])
     if res.get("ok"):
