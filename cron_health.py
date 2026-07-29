@@ -97,11 +97,35 @@ def check_fleet(mo):
         (LATCH / "fleet-check").unlink(missing_ok=True)
 
 
+def _gate_ok(key, fingerprint, hours=6):
+    """Shared change-gate (lib/alert_gate). Fails OPEN — a missing gate must never
+    swallow an infra alert."""
+    try:
+        import sys
+        sys.path.insert(0, str(HOME / "scripts"))
+        from lib.alert_gate import should_send
+        return should_send(key, fingerprint, repeat_after=hours * 3600)
+    except Exception:
+        return True, "gate unavailable"
+
+
+def _gate_mark(key, fingerprint):
+    try:
+        import sys
+        sys.path.insert(0, str(HOME / "scripts"))
+        from lib.alert_gate import mark_sent
+        mark_sent(key, fingerprint)
+    except Exception:
+        pass
+
+
 def _fleet_ping(latch_name, msg):
     latch = LATCH / latch_name
-    if not latch.exists():
+    ok, _ = _gate_ok(f"cron_health_{latch_name}", msg)
+    if ok and not latch.exists():
         if ping(f"🚨 CRON HEALTH — {msg}"):
             latch.write_text(datetime.now(timezone.utc).isoformat())
+            _gate_mark(f"cron_health_{latch_name}", msg)
 
 
 def main():
@@ -129,9 +153,18 @@ def main():
                 except Exception:
                     pass
         if problems:
-            if not latch.exists():   # one ping per incident
-                if ping(f"⚠️ CRON HEALTH — {name}: {'; '.join(problems)}"):
+            # The latch alone gives "one ping per incident" — but a FLAPPING job (stale →
+            # fresh → stale every half hour) clears the latch and re-pings each cycle. That
+            # was 96 CRON HEALTH messages in 7 days for a handful of jobs, none of which Mike
+            # can act on differently the 12th time. The shared gate adds the missing floor:
+            # the same problem text on the same job speaks at most once every 6 hours, while
+            # a genuinely DIFFERENT failure still gets through immediately.
+            desc = "; ".join(problems)
+            ok, _why = _gate_ok(f"cron_health_{name}", desc)
+            if ok and not latch.exists():
+                if ping(f"⚠️ CRON HEALTH — {name}: {desc}"):
                     latch.write_text(datetime.now(timezone.utc).isoformat())
+                    _gate_mark(f"cron_health_{name}", desc)
         else:
             latch.unlink(missing_ok=True)   # recovered → re-arm
     check_fleet(mo)

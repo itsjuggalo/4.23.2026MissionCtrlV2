@@ -160,6 +160,10 @@ def build() -> str:
 BEST_CONTRACTS = Path("/AIWorkWSL/labs/quantum/out/best_contracts.json")
 
 
+def now_et():
+    return datetime.now(ET)
+
+
 def _tape_read(tape: str) -> str:
     """Translate the tape into one sentence a beginner can act on. VIX LEVEL alone lies —
     a 19 VIX that just jumped 9% while SPY is down 1% is not a calm tape."""
@@ -170,13 +174,15 @@ def _tape_read(tape: str) -> str:
         vix_chg = float(vix_part.split("(")[1].split("%")[0])
     except Exception:
         return ""
+    # Describe the weather, don't give the order — the Plan line below is the single voice
+    # that tells Mike what to do. Two lines giving conflicting instructions is worse than one.
     if vix >= 25 or vix_chg >= 15:
-        return "Fear is spiking — moves will be violent both ways. Smallest size or sit out."
+        return "Fear is spiking — expect violent moves both ways today."
     if spy_chg <= -0.7 or vix_chg >= 5:
-        return "Selling pressure this morning. Wait for it to stop falling before buying dips."
+        return "Selling this morning — bigger swings than a normal day."
     if spy_chg >= 0.7:
-        return "Strong open. Chasing green candles is where beginners lose — wait for a pullback."
-    return "Quiet tape — nothing is forcing a trade today."
+        return "Strong open — the easy money was made before you woke up."
+    return "Quiet tape — a normal, boring session."
 
 
 def _book_line() -> str:
@@ -253,7 +259,9 @@ def build_phone() -> str:
 
     cat, orders = _catalysts_and_orders(top_tickers_str(6), tape)
     if cat:
-        lines.append(f"⚠️ The one thing today: {cat}")
+        # first sentence only — the model likes to pad, and padding is what makes a brief
+        # get skimmed instead of read
+        lines.append(f"⚠️ The one thing today: {cat.split('. ')[0].rstrip('.')}.")
     if orders:
         lines.append(f"👉 Plan: {orders}")
 

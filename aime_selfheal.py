@@ -28,7 +28,10 @@ import aime_client as a  # noqa: E402
 SEC = Path.home() / ".openclaw" / "secrets"
 STATE_DIR = Path.home() / ".openclaw" / "state"
 STATE = STATE_DIR / "aime_health.json"
-ALERT_COOLDOWN = 3 * 3600  # 3h between expiry alerts
+# 2026-07-29: 3h produced 52 identical "AIME is DOWN" pings in 7 days. The fix is a manual
+# cookie recapture only Mike can do — telling him 8 times a day doesn't make it happen sooner,
+# it just buries the alerts that ARE new. Once a day while it stays broken.
+ALERT_COOLDOWN = int(os.environ.get("AIME_ALERT_COOLDOWN", 24 * 3600))
 
 RECAPTURE = ("AIME cookie expired. Recapture: log into ainvest.com, DevTools -> Network -> "
              "copy the Cookie header -> overwrite ~/.openclaw/secrets/ainvest_cookie.txt "
