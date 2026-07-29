@@ -45,14 +45,32 @@ def _stop_for(mid, alert_px):
     $<alert price>", which is only true while the contract trades ABOVE the alert — on a
     contract that has fallen since, it printed a stop HIGHER than the entry (buy at $1.80,
     stop at $12.71). Use the alert price only when it's genuinely below the current price;
-    otherwise fall back to the −30% rule. (2026-07-29)"""
+    otherwise fall back to the −30% rule. (2026-07-29)
+
+    The alert price is also CLAMPED to a −15%…−30% band. A contract alerted at $2.80 now
+    trading at $3.00 produced a stop 6.7% below entry — narrower than the bid/ask spread on
+    most options, so it fires on noise and books a loss the idea never earned. Too tight is
+    as broken as above-entry was."""
     try:
         mid, alert_px = float(mid or 0), float(alert_px or 0)
     except (TypeError, ValueError):
         return 0
     if 0 < alert_px < mid:
-        return round(alert_px, 2)
+        return round(max(mid * 0.70, min(alert_px, mid * 0.85)), 2)
     return round(mid * 0.7, 2)
+
+
+def _target_for(mid, pct=0.50):
+    """Where you SELL THE WINNER. Every action line on this board named an entry and a stop
+    and then went quiet about the profitable case — so the only exit a beginner had written
+    down was the losing one, and the winning trades got managed on feel. Default +50% on the
+    premium against the −30% stop is roughly 1.7:1. (2026-07-29)"""
+    try:
+        return round(float(mid or 0) * (1 + pct), 2)
+    except (TypeError, ValueError):
+        return 0
+
+
 SECRETS = os.path.expanduser("~/.openclaw/secrets")
 DATA = os.path.expanduser("~/trading/signals/option-scraper/data")
 FLOW2 = os.path.join(DATA, "flow2_alerts_today.json")
@@ -211,15 +229,21 @@ def chase_verdict(a, snap, eq):
         action = (f"→ one contract is ${cost:,.0f} — over your ${RISK_CAP_USD:.0f} limit, so "
                   f"this one isn't for your account even though the setup is good."
                   if unaffordable else
-                  f"→ one contract costs ${cost:,.0f}. Buy near ${mid:g} and get out if it "
-                  f"drops under ${_stop_for(mid, ap):g}. Type /greeks {sym} for the live detail.")
+                  f"→ 1 contract, ${cost:,.0f}. BUY near ${mid:g} · SELL at "
+                  f"${_stop_for(mid, ap):g} if it drops (−${cost - _stop_for(mid, ap)*100:,.0f}) · "
+                  f"SELL at ${_target_for(mid):g} if it works (+${_target_for(mid)*100 - cost:,.0f}). "
+                  f"Set both sells right after you buy.")
     elif late <= 3:
         tier, emoji, head = "LATE", "🟡", "GETTING LATE — go small or skip it"
         action = (f"→ skip — ${cost:,.0f} a contract is over your ${RISK_CAP_USD:.0f} limit "
                   f"and the move is already underway."
                   if unaffordable else
-                  f"→ half the move is gone. If you take it at all, go small (${cost:,.0f} a "
-                  f"contract) and get out at −30%.")
+                  f"→ half the move is gone. If you take it at all: 1 contract ${cost:,.0f} · "
+                  f"BUY near ${mid:g} · SELL at ${_stop_for(mid, ap):g} if it drops "
+                  f"(−${cost - _stop_for(mid, ap)*100:,.0f}) · SELL at "
+                  f"${_target_for(mid, 0.30):g} if it works "
+                  f"(+${_target_for(mid, 0.30)*100 - cost:,.0f}) — take the smaller win, the "
+                  f"easy part already happened.")
     else:
         tier, emoji, head = "SKIP", "🔴", "TOO LATE — let this one go"
         action = ("→ don't chase it. The move already happened. Wait for a pullback, "
@@ -272,9 +296,13 @@ def _compact(occ, a, with_cost=False):
     # 2026-07-29 beginner pass: "$320P · +1% · LATE" assumed the reader knows P=put and that
     # the % is how far the contract has already run since the alert. Say both. And show ONE
     # reason, not two — the board is a scan; /chase <ticker> is where the full read lives.
-    mv = (f"already up {v['move']:+.0f}% since the alert" if (v.get("move") or 0) > 0
-          else f"down {abs(v['move']):.0f}% since the alert" if v.get("move") is not None
-          else "")
+    mvp = v.get("move")
+    # "already up +0% since the alert" is a rounding artefact that reads as nonsense — under
+    # a point of drift means the contract is simply still where it was alerted.
+    mv = ("" if mvp is None else
+          "still at the alert price" if abs(mvp) < 1 else
+          f"already up {mvp:+.0f}% since the alert" if mvp > 0 else
+          f"down {abs(mvp):.0f}% since the alert")
     head = {"EARLY": "still early", "LATE": "getting late",
             "SKIP": "too late", "WAIT": "wait"}[v["tier"]]
     kind = "CALL" if (a.get("OptionType") or "").upper().startswith("C") else "PUT"

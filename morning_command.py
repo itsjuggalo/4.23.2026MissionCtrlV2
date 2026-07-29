@@ -71,32 +71,93 @@ def _flow_setup(n: int = 2):
     return out
 
 
-def _catalysts_and_orders(names: str, tape: str) -> tuple[str, str]:
+def _catalysts_and_orders(names: str, tape: str) -> tuple[str, str, dict]:
     """ONE subscription-billed call for today's scheduled catalysts + a single game-plan
-    line. Conservative prompt (don't invent events). Degrades to deterministic text."""
+    line. Conservative prompt (don't invent events). Degrades to deterministic text.
+
+    Also asks for the plan as STRUCTURED NUMBERS (`plan`), because the prose version came
+    back as one run-on sentence — "Buy QQQ at 666-668 targeting 675-678 bounce, risk $350
+    (~15 shares, stop 664), thesis being…" — which buries the entry, the stop and the
+    target in a clause each. The desk copy still gets the sentence; the phone brief renders
+    the numbers as separate orders. (2026-07-29)
+    """
     today = datetime.now(ET).strftime("%A %B %-d, %Y")
     prompt = (
         f"You are a pre-open trading desk analyst. Today is {today} (US Eastern).\n"
         f"Operator's holdings: {names}\n"
         f"Premarket tape: {tape or 'n/a'}\n\n"
-        "Return STRICT JSON, no prose outside it:\n"
+        "The reader is a BEGINNER trader. Return STRICT JSON, no prose outside it:\n"
         '{"catalysts": "<=2 sentences on TODAY\'s scheduled US market catalysts you are '
         "confident about (FOMC/CPI/PPI/jobs/major single-name earnings). If you are not sure "
         'anything major is scheduled, say \\"No major scheduled macro catalysts today.\\"", '
         '"orders": "ONE concrete, actionable line: the single highest-conviction game plan for '
         f"the day given the book. Position sizing is capped at ${RISK_CAP} risk per trade — this "
         "is a HARD cap, never suggest a size above it, and if the named play cannot be expressed "
-        'under it, say so. Paper accounts. Be specific."}'
+        'under it, say so. Paper accounts. Be specific.", '
+        '"plan": {"ticker": "<symbol>", "direction": "BUY", "entry": <single number, not a '
+        'range>, "stop": <single number, below entry>, "target": <single number, above entry>, '
+        '"shares": <integer>, "why": "<one short clause>"}}\n'
+        "The `plan` object must describe the SAME trade as `orders`, with one exact price "
+        "per field — never a range, never a null when you named a trade. target must be at "
+        "least as far from entry as stop is, so the win is worth the risk. If today's honest "
+        "answer is to do nothing, set plan to null."
     )
     res = call_llm(prompt, ["claude_oauth", "claude_cli", "grok_oauth"])
     if res.get("ok"):
         r = res["response"]
         cat = str(r.get("catalysts", "")).strip()
         orders = str(r.get("orders", "")).strip()
+        plan = r.get("plan") if isinstance(r.get("plan"), dict) else {}
         if cat or orders:
-            return cat, orders
+            return cat, orders, plan
     return ("Catalyst read unavailable — check the economic calendar.",
-            f"Trade your plan; cap risk at ${RISK_CAP} per name (fraction of equity), paper-first.")
+            f"Trade your plan; cap risk at ${RISK_CAP} per name (fraction of equity), paper-first.",
+            {})
+
+
+def _buying_power() -> float:
+    """Most CASH one day-trade may tie up — half the book. 0 if equity is unreadable, which
+    makes the caller skip the size check rather than invent a ceiling."""
+    try:
+        from lib.portfolio import equity_day_pnl, real_money_holdings
+        paper, _ = equity_day_pnl()
+        total = paper + sum(real_money_holdings().values())
+        return 0.5 * total if total > 0 else 0.0
+    except Exception:
+        return 0.0
+
+
+def _plan_orders(plan: dict) -> str:
+    """Render the LLM's structured plan as the same three numbered orders every other card
+    in the fleet uses. Returns '' unless entry/stop/target are all present AND ordered
+    correctly — a half-plan is worse than the prose sentence, and a target below the entry
+    (or a stop above it) is a hallucinated plan that would cost real money."""
+    try:
+        tkr = str(plan.get("ticker") or "").strip().upper()
+        entry, stop, targ = (float(plan[k]) for k in ("entry", "stop", "target"))
+        sh = int(plan.get("shares") or 0)
+    except (TypeError, ValueError, KeyError, AttributeError):
+        return ""
+    if not tkr or sh < 1 or not (stop < entry < targ):
+        return ""
+    risk, reward = sh * (entry - stop), sh * (targ - entry)
+    if risk > RISK_CAP:                      # hard cap, fail-CLOSED — never print an over-cap size
+        return ""
+    # The $400 cap limits the LOSS, not the CAPITAL. A tight 0.5% stop satisfies it at 15
+    # QQQ = $10,005 — three times the whole book. Cut the share count to what half the
+    # account can actually fund, and drop the plan if that leaves under one share.
+    cap_cash = _buying_power()
+    if cap_cash and sh * entry > cap_cash:
+        sh = int(cap_cash / entry)
+        if sh < 1:
+            return ""
+        risk, reward = sh * (entry - stop), sh * (targ - entry)
+    why = str(plan.get("why") or "").strip().rstrip(".")
+    return (f"👉 Plan{f' — {why}' if why else ''}:\n"
+            f"   1) BUY {sh} {tkr} at ${entry:g} — ${sh * entry:,.0f}.\n"
+            f"   2) SELL at ${stop:g} if it drops — you lose ${risk:.0f}.\n"
+            f"   3) SELL at ${targ:g} if it works — you make ${reward:.0f}.\n"
+            f"   Put both sell orders in the moment you're filled.")
 
 
 def _polymarket_line() -> str:
@@ -135,7 +196,7 @@ def build() -> str:
     else:
         lines.append("• No fresh near-money flow yet — first live picks post 9:50 AM ET.")
 
-    cat, orders = _catalysts_and_orders(names, tape)
+    cat, orders, _plan = _catalysts_and_orders(names, tape)
     lines.append(f"\n📅 **TODAY:** {cat}")
     lines.append(f"📋 **ORDERS:** {orders}")
 
@@ -235,10 +296,22 @@ def _one_contract_line() -> str:
         except Exception:
             window = ""
         n = p.get("qty") or 1
+        # All three numbers or none. "Cut it if it's down half" gave the losing exit and left
+        # the winning one unwritten — so the only trades with a plan were the ones going
+        # wrong. Premium −50% / +50% off yesterday's close, stated as dollars. (2026-07-29)
+        # `per_contract` is DOLLARS (premium × 100); `mid` is the quoted price you actually
+        # type into the broker. Don't mix them — a "buy near $187" on a $1.87 contract is
+        # a hundredfold error in the one number he acts on.
+        px = float(p.get("mid") or 0) or round((p.get("per_contract") or 0) / 100.0, 2)
+        stop_px, targ_px = round(px * 0.50, 2), round(px * 1.50, 2)
         return (f"📈 If you take one trade: {p['ticker']} ${p['strike']:g} {kind} "
-                f"expiring {p['expiry']}{window} — {n} contract{'s' if n != 1 else ''} = ${cost} "
-                f"total, and that ${cost} is the most you can lose. Cut it if it's down half. "
-                f"(priced at yesterday's close — check the real price before you buy)")
+                f"expiring {p['expiry']}{window}.\n"
+                f"   1) BUY {n} contract{'s' if n != 1 else ''} near ${px:.2f} = ${cost} total.\n"
+                f"   2) SELL at ${stop_px:.2f} if it drops — you lose ${cost / 2:.0f}.\n"
+                f"   3) SELL at ${targ_px:.2f} if it works — you make ${cost / 2:.0f}.\n"
+                f"   Put both sell orders in as soon as you're filled, and never add to it.\n"
+                f"   (priced at yesterday's close — check the real price before you buy; if "
+                f"it opens far from ${px:.2f}, the whole plan moves with it)")
     except Exception:
         return ""
 
@@ -257,12 +330,15 @@ def build_phone() -> str:
     if book:
         lines.append(book)
 
-    cat, orders = _catalysts_and_orders(top_tickers_str(6), tape)
+    cat, orders, plan = _catalysts_and_orders(top_tickers_str(6), tape)
     if cat:
         # first sentence only — the model likes to pad, and padding is what makes a brief
         # get skimmed instead of read
         lines.append(f"⚠️ The one thing today: {cat.split('. ')[0].rstrip('.')}.")
-    if orders:
+    numbered = _plan_orders(plan)
+    if numbered:
+        lines.append(numbered)
+    elif orders:
         lines.append(f"👉 Plan: {orders}")
 
     one = _one_contract_line()
