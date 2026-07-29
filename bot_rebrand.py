@@ -62,12 +62,18 @@ IDENTITY = {
         desc=("PARKED since 2026-07-19. This bot token is unused and free to repurpose for the "
               "next project (responder stopped; no senders). Formerly the Jazzy Desk lane. "
               "To revive or reuse: bot_rebrand.py + tg_responder.py on the laptop.")),
+    # 2026-07-29 — un-parked and made the LEARNING lane. This is now fleet fn
+    # `research_desk`: IV Desk, SPY Straddle Lab, Pre-Trade Confluence, payoff + IV
+    # charts. Those five senders used to point at @ResearchDaMoney_Bot, which Mike
+    # repurposed as his massage business chat — this bot exists so teaching content
+    # has a quiet home that is neither a client chat nor the 57-msg/day cockpit.
     "antidote_telegram_bot_token": dict(
-        name="PARKED (free) — ex Risk & Hedge", avatar="aldaris",
-        short="Parked token — unused, free to repurpose. Was: Risk & Hedge.",
-        desc=("PARKED since 2026-07-19. This bot token is unused and free to repurpose for the "
-              "next project (responder stopped; no senders). Formerly the Risk & Hedge lane. "
-              "To revive or reuse: bot_rebrand.py + tg_responder.py on the laptop.")),
+        name="Trading Lab", avatar="aldaris",
+        short="Learn the mechanics — IV, straddles, payoff maths, confluence. No trade calls.",
+        desc=("Trading Lab — the teaching lane. IV Desk (rich vs cheap vol), SPY Straddle "
+              "Lab (ATM/OTM/ITM across daily/weekly/monthly), Pre-Trade Confluence, and "
+              "payoff/IV charts. This bot NEVER tells you to buy anything — entries live in "
+              "Trading Command and Flow Digest. Read this one to understand WHY a trade works.")),
     "telegram_orion_bot_token": dict(
         name="PARKED (free) — ex Research Desk", avatar="tassadar",
         short="Parked token — unused, free to repurpose. Was: Research Desk.",

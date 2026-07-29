@@ -42,8 +42,17 @@ FLEET = {
     "aime_research":   dict(user="AntiGravityg59laptop_Bot",avatar="zeratul",         role="interactive", src=("file", "telegram_antigravity_bot_token")),
     "x_sentiment":     dict(user="MoneyFlowz_Bot",          avatar="mutalisk",        role="interactive", src=("file", "telegram_grok_bot_token")),
     "jazzy_desk":      dict(user="JazzyHazzyClaw_Bot",      avatar="duke",            role="interactive", src=("file", "telegram_jazzyhazzy_bot_token")),
-    "risk_hedge":      dict(user="AntiDoht_Bot",            avatar="aldaris",         role="interactive", src=("file", "antidote_telegram_bot_token")),
-    "research_desk":   dict(user="ResearchDaMoney_Bot",     avatar="high_templar",    role="interactive", src=("file", "telegram_orion_bot_token")),
+    # 🚨 2026-07-29 — @ResearchDaMoney_Bot IS NOW MIKE'S MASSAGE BUSINESS CHAT
+    # ("Massage By Mike — Chat"). It used to be research_desk, so five quantum senders
+    # hardcoding TG_FN=research_desk were pushing IV Desk / Straddle Lab / Pre-Trade
+    # Confluence / payoff+IV charts straight into a client-facing chat (29 msgs in 7d).
+    # `research_desk` now points at the free @AntiDoht_Bot, rebranded "Trading Lab" —
+    # the learning lane. `telegram_orion_bot_token` is deliberately referenced by NO
+    # fleet function any more, so nothing can leak back into the massage chat.
+    # ⛔ DO NOT re-add a fleet entry pointing at telegram_orion_bot_token.
+    # (The old `risk_hedge` fn was the same @AntiDoht_Bot and was PARKED/unused — it is
+    # folded into research_desk rather than left as a duplicate token mapping.)
+    "research_desk":   dict(user="AntiDoht_Bot",            avatar="aldaris",         role="push",        src=("file", "antidote_telegram_bot_token")),
     "screener":        dict(user="TrndRsrch_Bot",           avatar="wraith",          role="interactive", src=("file", "telegram_deepseek_bot_token")),
     "macro_regime":    dict(user="MMCTRL727_Bot",           avatar="mengsk",          role="interactive", src=("file", "telegram_mc_skill_bot_token")),
     # ── push (they alert you) ───────────────────────────────────────────────
