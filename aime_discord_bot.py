@@ -168,7 +168,7 @@ ACT_BUY, ACT_ALERT, ACT_EXPLAIN, ACT_GRADE, ACT_MUTE = (
 ACT_PAYOFF = "act:payoff"
 
 # ARMED 2026-06-15 on Mike's explicit "arm paper buy" go. PAPER accounts ONLY, hard
-# $800 AND ≤50%-of-equity cap, killswitch-guarded (~/.openclaw/workspace/state/
+# min($400, 15%-of-equity) cap, killswitch-guarded (~/.openclaw/workspace/state/
 # {acct}_killswitch), and market-hours guarded (_market_open — Alpaca QUEUES off-hours
 # market orders rather than rejecting, so we refuse when closed to avoid surprise fills).
 # The confirm Modal (account + $ entry) is the deliberate gate. Set False to disarm.
@@ -375,7 +375,7 @@ def _paper_buy_preview(ticker, account, deploy_str, user):
     eq = total_equity()
     if not price:
         return f"⚠️ Couldn't fetch a live price for {t}; preview aborted.", None
-    cap = 800.0                                   # Mike's hard $800/trade cap
+    cap = 400.0                                   # Mike's hard cap: min($400, 15% equity) (2026-07-15)
     if eq:
         cap = min(cap, 0.5 * eq)                  # never >50% of equity in one paper name
     deploy = min(max(want, 0.0), cap)
@@ -950,14 +950,14 @@ async def help_cmd(interaction: discord.Interaction):
     await interaction.response.send_message(HELP_TEXT)
 
 
-@tree.command(name="size", description="Position size for a trade per your risk rules (equity fraction, $800 cap)")
+@tree.command(name="size", description="Position size for a trade per your risk rules (equity fraction, min($400, 15%) cap)")
 @app_commands.describe(ticker="ticker", entry="entry price", stop="stop price",
-                       risk="$ to risk (default 150, capped at 800)")
+                       risk="$ to risk (default 150, capped at 400)")
 async def size_cmd(interaction: discord.Interaction, ticker: str, entry: float,
                    stop: float, risk: Optional[float] = None):
     await interaction.response.defer(thinking=True)
     eq = await asyncio.to_thread(total_equity)
-    risk_amt = min(risk if risk else 150.0, 800.0)   # Mike's risk cap (raised 250→800 2026-06-15)
+    risk_amt = min(risk if risk else 150.0, 400.0)   # Mike's risk cap — HALVED 800→400 2026-07-15 (fail-closed)
     psr = abs(entry - stop)
     if psr <= 0:
         await interaction.followup.send("⚠️ Entry and stop can't be equal.")

@@ -10,7 +10,7 @@ modules we already have so it's grounded and cheap:
   • X read     — lib.x_search.x_sentiment() on your top holdings (native Grok sub)
   • Flow setup — top bullish near-money names from current flow (read-only, NO logging)
   • Today+orders — ONE short lib.llm.call_llm(..., ["claude_oauth","deepseek"]) for
-                   scheduled catalysts + a single game-plan line sized to the $800 cap
+                   scheduled catalysts + a single game-plan line sized to the min($400, 15%) cap
 
 Subscription/OAuth-billed. Never touches the signal stream. Run with ~/.venv/bin/python.
 

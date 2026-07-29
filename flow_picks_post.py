@@ -383,7 +383,7 @@ def build() -> str | None:
             lines.append(f"\n⚠️ **YOUR NAME — {a['Symbol']}:** big flow ({_fmt(a)}, ${fv:,.0f}) reads "
                          f"**bearish** (V/OI {voi:.1f}). Don't mistake size for a green light.")
             break
-    lines.append("\n_0DTE = confirmation not entry · size up to $800 risk (fraction of equity) · auto-posted intraday._")
+    lines.append("\n_0DTE = confirmation not entry · size up to $400 risk (min $400 / 15% of equity) · auto-posted intraday._")
     global TOP_ACTION_PICK, ACTIONABLE_PICKS
     TOP_ACTION_PICK = bulls[0] if bulls else (bears[0] if bears else None)
     ACTIONABLE_PICKS = list(bulls) + list(bears)

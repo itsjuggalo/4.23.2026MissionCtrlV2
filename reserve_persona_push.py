@@ -103,7 +103,7 @@ def jazzy_relay():
     out = llm.call_llm_text(
         f"Today's top options-flow pick is: {desc}. Give a GPT SECOND OPINION for a paper "
         f"trade: is the structure/DTE sound, the single biggest risk, and a clear take/pass — "
-        f"sized as a fraction of equity with a $800 max risk cap. 5 lines max, plain.",
+        f"sized as a fraction of equity with a HARD max risk cap of min($400, 15% of equity). 5 lines max, plain.",
         ["codex_cli", "deepseek"])
     if not out:
         print("[jazzy_relay] no LLM output"); return
