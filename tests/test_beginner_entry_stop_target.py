@@ -8,6 +8,7 @@ is a money-losing instruction, not a cosmetic bug.
 
 Covers: setup_scanner (SMS lane) · flow_chase (FLOW WINNERS board) · morning_command (8:15).
 """
+import contextlib
 import os
 import sys
 
@@ -132,9 +133,15 @@ def test_btc_card_never_says_the_market_closes():
     assert "never closes" in out
 
 
-def test_btc_short_is_refused_for_a_beginner():
+def test_btc_short_never_tells_a_beginner_to_short_spot():
+    """Superseded 2026-07-29 (Mike: "should we include moments where we should be buying an
+    inverse btc on robinhood?"). This used to assert a flat SKIP. A bearish BTC read is now
+    actionable via the inverse ETF — but it must STILL never imply shorting spot BTC, which
+    a normal Robinhood account cannot do."""
     out = SS.card(_btc(tag="ETF-OUT", dir="SHORT", gap=-2.4), 285.0)
-    assert "SKIP" in out and "1) BUY" not in out
+    assert "1) BUY BTC" not in out and "BTC," not in out, "must not size a spot BTC short"
+    assert ("SKIP" in out) or (SS.INVERSE_BTC in out), \
+        "a bearish read is either refused or routed to the inverse ETF — never left dangling"
 
 
 def test_btc_sms_fits_with_six_figure_prices():
@@ -223,6 +230,76 @@ def test_btc_survives_the_empty_equity_candidates_guard():
     assert [s["sym"] for s in out] == ["BTC"], f"expected a BTC setup, got {out}"
 
 
+def _short_btc():
+    return _btc(tag="ETF-OUT", dir="SHORT", gap=-2.4, last=62800.0,
+                headline="Bitcoin ETFs extend outflow streak as BTC fails to hold $65K")
+
+
+def test_bearish_btc_offers_the_inverse_etf_not_a_shrug():
+    """You can't short spot BTC on Robinhood, so a bearish read used to dead-end in
+    'sit it out'. It should name the instrument that DOES work there."""
+    s = _short_btc()
+    out = SS.card(s, 285.0)
+    if "SKIP" in out:                       # acceptable only when BITI can't be priced
+        return
+    assert SS.INVERSE_BTC in out
+    assert "1) BUY" in out and "2) SELL" in out and "3) SELL" in out
+    assert s.get("takeable"), "a priced inverse plan must count as takeable"
+
+
+def test_inverse_card_always_carries_the_time_stop():
+    """BITI resets daily: it tracks for ~a week then bleeds. Measured over 6 months it
+    returned +12.4% on a −27.7% BTC move. The time stop is what makes it valid at all."""
+    out = SS.card(_short_btc(), 285.0)
+    if "SKIP" in out:
+        return
+    assert "trading days" in out, "inverse plan shipped with no holding limit"
+    assert SS.INVERSE_MAX_DAYS <= 10, "a limit past ~a week reintroduces the decay"
+
+
+def test_inverse_plan_prices_are_ordered_and_capped():
+    s = _short_btc()
+    lines, rest = SS.inverse_btc_plan(62800.0, 285.0, 1500.0)
+    if lines is None:
+        return
+    import re
+    px = float(re.search(r"BUY BITI at \$([\d.]+)", "\n".join(lines)).group(1))
+    stop = float(re.search(r"2\) SELL at \$([\d.]+)", "\n".join(lines)).group(1))
+    targ = float(re.search(r"3\) SELL at \$([\d.]+)", "\n".join(lines)).group(1))
+    assert stop < px < targ, f"{stop} / {px} / {targ} out of order"
+    loss = float(re.search(r"you lose \$(\d+)", "\n".join(lines)).group(1))
+    assert loss <= 285.0, f"risk ${loss} exceeds the cap"
+
+
+def test_inverse_plan_degrades_when_unpriceable():
+    """No quote must mean 'sit it out', never a made-up entry."""
+    orig = SS.snapshots
+    try:
+        SS.snapshots = lambda syms: {}
+        lines, rest = SS.inverse_btc_plan(62800.0, 285.0, 1500.0)
+    finally:
+        SS.snapshots = orig
+    assert lines is None and rest is None
+
+
+def test_sms_never_cuts_a_line_in_half():
+    """A hard [:480] once ended the text mid-sentence, on the clause explaining why the
+    position has a deadline. Drop whole lines instead."""
+    head = "09:20 — here's one you can take."
+    card = ("BTC -2.4%\n"
+            "WHY: " + "w" * 120 + ".\n"
+            "1) BUY BITI at $25.38 or better — 58 shares, $1,472.\n"
+            "2) SELL at $24.62 if Bitcoin bounces — you lose $44.\n"
+            "3) SELL at $26.90 if it works — you make $88.\n"
+            "Sell within 5 trading days no matter what — " + "x" * 200 + ".")
+    out = SS.fit_sms(head, card, 2)
+    assert len(out) <= SS.SMS_MAX
+    for line in out.split("\n"):
+        assert not line.endswith("x"), "a line was truncated mid-word"
+    for t in ("1) BUY", "2) SELL", "3) SELL"):
+        assert t in out
+
+
 def test_a_fractional_btc_card_counts_as_takeable():
     """The header test was `shares >= 1`, false for every BTC card by definition — a good
     Bitcoin setup got 'nothing you can take right now' printed above its own buy order."""
@@ -240,8 +317,23 @@ def _plan(**over):
     return p
 
 
+@contextlib.contextmanager
+def _fixed_buying_power(usd):
+    """Pin buying power. These assertions are on exact dollar amounts, and the real
+    `_buying_power()` reads the LIVE account — so as equity drifts the expected share count
+    changes and the test fails for a reason that has nothing to do with the code. (Surfaced
+    2026-07-29 under pytest-randomly: passed alone, failed in the shuffled suite.)"""
+    orig = MC._buying_power
+    MC._buying_power = lambda: usd
+    try:
+        yield
+    finally:
+        MC._buying_power = orig
+
+
 def test_brief_plan_renders_three_orders():
-    out = MC._plan_orders(_plan())
+    with _fixed_buying_power(5000.0):       # comfortably above the $1,250 position
+        out = MC._plan_orders(_plan())
     assert "1) BUY" in out and "2) SELL" in out and "3) SELL" in out
     assert "you lose $50" in out and "you make $100" in out
 
@@ -259,10 +351,12 @@ def test_brief_plan_respects_the_risk_cap():
 
 
 def test_brief_plan_respects_buying_power():
-    """The $400 cap limits the LOSS, not the CAPITAL — a tight stop satisfies it at a
-    position size several times the account."""
-    out = MC._plan_orders(_plan(ticker="QQQ", entry=667, stop=664, target=676, shares=15))
-    if out:                                     # '' is also correct if equity is unreadable
-        import re
-        sh = int(re.search(r"BUY (\d+) QQQ", out).group(1))
-        assert sh * 667 <= MC._buying_power() + 667, "position exceeds half the book"
+    """The $400 cap limits the LOSS, not the CAPITAL — a tight 0.5% stop satisfies it at
+    15 QQQ = $10,005, several times the whole book."""
+    import re
+    with _fixed_buying_power(2500.0):
+        out = MC._plan_orders(_plan(ticker="QQQ", entry=667, stop=664, target=676, shares=15))
+    assert out, "a fundable QQQ plan should still render after the clamp"
+    sh = int(re.search(r"BUY (\d+) QQQ", out).group(1))
+    assert sh == 3, f"2500/667 = 3 shares, got {sh}"
+    assert sh * 667 <= 2500
