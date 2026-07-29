@@ -32,6 +32,27 @@ sys.path.insert(0, os.path.expanduser("~/scripts"))
 import quantum_tg as Q  # shared read-only formatters (_human, _market_open, etc.)
 
 ET = ZoneInfo("America/New_York")
+
+# Mike's per-trade risk cap — min($400, 15% of CURRENT equity), fail-CLOSED. $400 is the
+# standing ceiling used wherever equity isn't already in hand (message-build paths must never
+# block on a live account call). Same number as flow_picks_post.RISK_CAP_USD and the
+# flow-digest affordability gate — if the doctrine changes, change it in all of them.
+RISK_CAP_USD = 400.0
+
+
+def _stop_for(mid, alert_px):
+    """A stop must sit BELOW where you get in. The old text said "get out if it loses
+    $<alert price>", which is only true while the contract trades ABOVE the alert — on a
+    contract that has fallen since, it printed a stop HIGHER than the entry (buy at $1.80,
+    stop at $12.71). Use the alert price only when it's genuinely below the current price;
+    otherwise fall back to the −30% rule. (2026-07-29)"""
+    try:
+        mid, alert_px = float(mid or 0), float(alert_px or 0)
+    except (TypeError, ValueError):
+        return 0
+    if 0 < alert_px < mid:
+        return round(alert_px, 2)
+    return round(mid * 0.7, 2)
 SECRETS = os.path.expanduser("~/.openclaw/secrets")
 DATA = os.path.expanduser("~/trading/signals/option-scraper/data")
 FLOW2 = os.path.join(DATA, "flow2_alerts_today.json")
@@ -115,7 +136,17 @@ def chase_verdict(a, snap, eq):
     late = 0
 
     # 1) how far it's already run vs where the flow hit (the decisive 'too late' signal)
-    if move <= 12:
+    # 2026-07-29: a contract DOWN hard since the alert scored the same as one sitting at the
+    # alert price — so the board called a −86% MU call "still early". Down that much means the
+    # big buyer is underwater and the idea is failing, which is the opposite of early.
+    if move <= -40:
+        late += 2
+        reasons.append(f"collapsed {move:+.0f}% since the alert — whoever bought it is deep "
+                       f"underwater, the idea isn't working")
+    elif move <= -15:
+        late += 1
+        reasons.append(f"down {move:+.0f}% since the alert — it's going the wrong way so far")
+    elif move <= 12:
         reasons.append(f"near entry: {move:+.0f}% vs alert ${ap:g} (now ~${mid:g})")
     elif move <= 35:
         late += 1
@@ -125,29 +156,37 @@ def chase_verdict(a, snap, eq):
         reasons.append(f"ran {move:+.0f}% past alert ${ap:g} — you'd be late money")
 
     # 2) positioning freshness (volume vs open interest)
+    # 2026-07-29: these read "vol 0.3× OI — position already built" / "IV 85%" / "0DTE — theta
+    # brutal". Every one of those is a term Mike is still learning, and they're the WHY of the
+    # verdict — the part he most needs to understand. Same maths, said in English.
     if voi >= 1.5:
-        reasons.append(f"fresh: vol {voi:.1f}× OI — new positions opening")
+        reasons.append("today's buying is bigger than everything already open here — "
+                       "people are getting in NOW, not sitting on old positions")
     elif voi >= 0.7:
-        reasons.append(f"vol {voi:.1f}× OI — partly absorbed")
+        reasons.append("about as much bought today as was already open — some of the move "
+                       "is already spent")
     else:
         late += 1
-        reasons.append(f"vol {voi:.1f}× OI — position already built, little room")
+        reasons.append("almost no new buying today — this position was built earlier, "
+                       "so there's little room left")
 
     # 3) IV / crush risk
     if iv:
         ivp = iv * 100
         if ivp >= 90:
             late += 1
-            reasons.append(f"IV {ivp:.0f}% hot — crush risk if it stalls")
+            reasons.append("the option is priced for a big move already — if the stock just "
+                           "sits there you LOSE even when you picked the right direction")
         else:
-            reasons.append(f"IV {ivp:.0f}%")
+            reasons.append(f"option pricing is normal ({ivp:.0f}%)")
 
     # 4) theta wall
     if dte == 0:
         late += 1
-        reasons.append("0DTE — must move NOW, theta brutal into the close")
+        reasons.append("expires TODAY — it has to move within hours or it's worth zero")
     elif isinstance(dte, (int, float)) and dte <= 2:
-        reasons.append(f"{int(dte)}DTE — short runway")
+        reasons.append(f"only {int(dte)} day{'s' if dte != 1 else ''} left — very little time "
+                       f"to be right")
 
     # 5) underlying already gapped in the contract's favor (chasing the move) — or against it
     chg = eq.get("chg_pct")
@@ -162,15 +201,29 @@ def chase_verdict(a, snap, eq):
             reasons.append(f"stock {chg:+.1f}% today")
 
     sym = a.get("Symbol")
+    # Mike's hard per-trade cap: min($400, 15% of equity), fail-CLOSED. One contract = mid×100.
+    # Without this the board told him to "buy near $267.56" on an STX put — a $26,756 contract
+    # on a ~$2k book. An idea he cannot afford is not an idea; say so instead of pricing it.
+    cost = mid * 100 if mid else 0
+    unaffordable = cost > RISK_CAP_USD
     if late <= 1:
-        tier, emoji, head = "EARLY", "🟢", "STILL EARLY — OK to enter"
-        action = f"→ enter near ${mid:g}; stop if it loses ${ap:g}. /greeks {sym} for live Δ/IV"
+        tier, emoji, head = "EARLY", "🟢", "STILL EARLY — you can still get in"
+        action = (f"→ one contract is ${cost:,.0f} — over your ${RISK_CAP_USD:.0f} limit, so "
+                  f"this one isn't for your account even though the setup is good."
+                  if unaffordable else
+                  f"→ one contract costs ${cost:,.0f}. Buy near ${mid:g} and get out if it "
+                  f"drops under ${_stop_for(mid, ap):g}. Type /greeks {sym} for the live detail.")
     elif late <= 3:
-        tier, emoji, head = "LATE", "🟡", "GETTING LATE — small / spread only"
-        action = "→ ¼ size or a debit spread · hard stop −30% · skip if the spread is wide"
+        tier, emoji, head = "LATE", "🟡", "GETTING LATE — go small or skip it"
+        action = (f"→ skip — ${cost:,.0f} a contract is over your ${RISK_CAP_USD:.0f} limit "
+                  f"and the move is already underway."
+                  if unaffordable else
+                  f"→ half the move is gone. If you take it at all, go small (${cost:,.0f} a "
+                  f"contract) and get out at −30%.")
     else:
-        tier, emoji, head = "SKIP", "🔴", "TOO LATE — let it go"
-        action = "→ don't chase. Alert it; take the pullback or the next fresh flow"
+        tier, emoji, head = "SKIP", "🔴", "TOO LATE — let this one go"
+        action = ("→ don't chase it. The move already happened. Wait for a pullback, "
+                  "or wait for the next fresh one.")
 
     return {"tier": tier, "emoji": emoji, "head": head, "reasons": reasons,
             "move": move, "mid": mid, "action": action}
@@ -210,16 +263,29 @@ def format_alert(a, v):
     return "\n".join(lines)
 
 
-def _compact(occ, a):
+def _compact(occ, a, with_cost=False):
+    """Board line. `with_cost=True` also returns the per-contract dollar cost so the caller
+    can rank affordable ideas first."""
     snap = option_snapshot(occ)
     eq = equity_snapshot(a.get("Symbol", ""))
     v = chase_verdict(a, snap, eq)
-    mv = f"{v['move']:+.0f}%" if v.get("move") is not None else "—"
-    head = {"EARLY": "EARLY", "LATE": "LATE", "SKIP": "TOO LATE", "WAIT": "WAIT"}[v["tier"]]
-    t = (a.get("OptionType") or "")[:1]
-    l1 = f"{v['emoji']} *{a.get('Symbol')} ${a.get('Strike'):g}{t}* {_exp(a)} · {mv} · {head}"
-    extra = [r for r in v["reasons"][1:3]]
-    return l1 + ("\n   " + " · ".join(extra) if extra else "")
+    # 2026-07-29 beginner pass: "$320P · +1% · LATE" assumed the reader knows P=put and that
+    # the % is how far the contract has already run since the alert. Say both. And show ONE
+    # reason, not two — the board is a scan; /chase <ticker> is where the full read lives.
+    mv = (f"already up {v['move']:+.0f}% since the alert" if (v.get("move") or 0) > 0
+          else f"down {abs(v['move']):.0f}% since the alert" if v.get("move") is not None
+          else "")
+    head = {"EARLY": "still early", "LATE": "getting late",
+            "SKIP": "too late", "WAIT": "wait"}[v["tier"]]
+    kind = "CALL" if (a.get("OptionType") or "").upper().startswith("C") else "PUT"
+    l1 = (f"{v['emoji']} *{a.get('Symbol')} ${a.get('Strike'):g} {kind}* exp {_exp(a)} — "
+          f"{head}" + (f", {mv}" if mv else ""))
+    # Show the ACTION, not a reason. `reasons` is an unordered mix of positives and negatives
+    # scored together, so cherry-picking one could print "still early" above "little room left"
+    # — a beginner reading a contradiction learns nothing. The action always agrees with the
+    # verdict, and it's the part he can act on; /chase <ticker> carries the full why.
+    line = l1 + ("\n   " + v["action"] if v.get("action") else "")
+    return (line, (v.get("mid") or 0) * 100) if with_cost else line
 
 
 # ── scan / pull entry points ─────────────────────────────────────────────────
@@ -274,9 +340,33 @@ def winners(top=5, min_value=1_000_000):
     rows = _pushed_rows(min_value)
     if not rows:
         return "🔔 No big app-pushed flow yet today (waiting on the next FlowGreeks alert)."
+    # 2026-07-29: the board ranked purely by flow size, so 4 of 5 lines were routinely
+    # contracts costing thousands — Mike scrolled a list of things he cannot buy. Rank the
+    # ones that FIT his cap first (stable, so flow size still orders within each group) and
+    # count the rest instead of listing them.
+    priced, waiting, toobig = [], [], 0
+    for occ, a in rows:
+        line, cost = _compact(occ, a, with_cost=True)
+        if cost > RISK_CAP_USD:
+            toobig += 1
+        elif cost > 0:
+            priced.append(line)
+        else:
+            # no live quote yet — nothing to decide on. Keep it as backfill only, so a
+            # tradeable idea is never pushed off the board by a row that says "wait".
+            waiting.append(line)
+        if len(priced) >= top:
+            break
+    shown = (priced + waiting)[:top]
     out = ["🔔 *FLOW WINNERS — chase or skip*"]
-    for occ, a in rows[:top]:
-        out.append(_compact(occ, a))
+    if shown:
+        out += shown
+    else:
+        out.append("Nothing in today's big flow fits your "
+                   f"${RISK_CAP_USD:.0f} per-trade limit — that's a fine reason to sit out.")
+    if toobig:
+        out.append(f"_({toobig} other big-money contracts today cost more than "
+                   f"${RISK_CAP_USD:.0f} each — not for this account.)_")
     out.append("_tap /chase <ticker> for the full read_")
     return "\n".join(out)
 

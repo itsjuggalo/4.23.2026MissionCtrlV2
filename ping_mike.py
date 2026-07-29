@@ -59,14 +59,22 @@ def resolve_chat() -> int:
     return 0
 
 
-def ping(text: str) -> int:
-    # vault-backed fleet route (system_health = @Pingpong727_Bot); inline below = fallback
+def ping(text: str, lane: str = "system_health") -> int:
+    """Deliver `text` to a fleet lane. Default `system_health` — correct for the ~20 infra
+    callers (backups, disk, boot check, cron health, watchdogs).
+
+    2026-07-29: this is a SHARED pinger, so its default silently became the destination for
+    everything that called it — including `decipher_execute.py`'s live BUY fills and
+    `decipher_eod.py`'s P&L, which were landing on the infra lane wedged between disk-space
+    warnings. Callers whose content is TRADE news now pass `--lane trading_command`. The
+    fallback token file stays the ping bot either way, so a vault hiccup still delivers.
+    """
     try:
         sys.path.insert(0, "/home/itsju/scripts")
         from lib.notify import tg_push
-        if tg_push(text, "system_health", loud=True, html=False,
+        if tg_push(text, lane, loud=True, html=False,
                    fallback_token_file="telegram-ping-bot-token"):
-            print("ping delivered")
+            print(f"ping delivered ({lane})")
             return 0
     except Exception as e:
         print(f"[ping] fleet route failed: {e}", file=sys.stderr)
@@ -92,7 +100,16 @@ def ping(text: str) -> int:
 if __name__ == "__main__":
     if len(sys.argv) >= 2 and sys.argv[1] == "--resolve-chat":
         sys.exit(resolve_chat())
-    if len(sys.argv) < 2 or not sys.argv[1].strip():
-        print('usage: ping_mike.py "<message>" | --resolve-chat', file=sys.stderr)
+    # --lane <fleet_fn> anywhere in argv; everything else is the message. Parsed by hand so
+    # the 20+ existing `ping_mike.py "<msg>"` callers keep working untouched.
+    args, lane = [], "system_health"
+    i = 1
+    while i < len(sys.argv):
+        if sys.argv[i] == "--lane" and i + 1 < len(sys.argv):
+            lane = sys.argv[i + 1]; i += 2; continue
+        args.append(sys.argv[i]); i += 1
+    if not args or not args[0].strip():
+        print('usage: ping_mike.py [--lane <fleet_fn>] "<message>" | --resolve-chat',
+              file=sys.stderr)
         sys.exit(2)
-    sys.exit(ping(sys.argv[1]))
+    sys.exit(ping(args[0], lane))

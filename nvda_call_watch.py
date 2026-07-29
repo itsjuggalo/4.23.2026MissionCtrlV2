@@ -37,7 +37,9 @@ def get_opt_mid():
 def ping(msg):
     try:
         import subprocess
-        subprocess.run(["python3", str(Path.home()/"scripts/ping_mike.py"), msg], timeout=10)
+        # a price/contract watch is trade news → Trading Command, not the infra lane (07-29)
+        subprocess.run(["python3", str(Path.home()/"scripts/ping_mike.py"),
+                        "--lane", "trading_command", msg], timeout=10)
     except Exception as e:
         print("PING FAILED:", e)
 
