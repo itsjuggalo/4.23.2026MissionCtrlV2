@@ -6,9 +6,11 @@
 # script is cron-driven instead.
 #
 # LIVE today:  Robinhood CRYPTO via robinhood-holdings.py (API-key + Ed25519 + CoinGecko px).
+#              Coinbase via coinbase-pp-cli (CDP key — LIVE since at least 2026-07, see below).
 # PENDING creds (left on last CSV, age surfaced by portfolio_context.py):
-#   - Coinbase  : coinbase-pp-cli returns 401 (CDP key needs regen/permissions).
-#   - RH stocks : needs a brokerage session token (crypto API doesn't cover equities).
+#   - RH stocks : this script does NOT fetch equities. A brokerage session token now DOES
+#                 exist (rh-session-keeper writes ~/.openclaw/secrets/robinhood-brokerage-token.txt,
+#                 cron 05:45 ET) — wiring an equities pull here is open work, not a cred blocker.
 set -uo pipefail
 LOG="$HOME/portfolio/refresh.log"
 PF="$HOME/portfolio"
@@ -31,10 +33,12 @@ else
     exit 1
 fi
 
-# --- Coinbase (live-attempt; auto-activates the moment the CDP key is regenerated) ---
-# Env mapping is correct & the JWT signs (verified 2026-06-04); today's key 401s on
-# /api/v3/brokerage/accounts because it's revoked/under-permissioned. Regenerate at the
-# Coinbase Developer Platform with "View" perms and this block goes live with NO code change.
+# --- Coinbase (LIVE) ---
+# The old "key 401s / regenerate the CDP key" note here was STALE. Verified live 2026-07-31:
+# the existing key authenticates on BOTH APIs — /v2/accounts AND /api/v3/brokerage/accounts
+# (37 accounts) both return 200, with either coinbase-private.pem or -pkcs8.pem. refresh.log
+# has been recording "Coinbase LIVE — wrote coinbase_holdings.json" on every run.
+# Direct-JWT reference implementation (no Go CLI needed): ~/scripts/real_coach/fills/coinbase.py
 CB_CLI="$HOME/go/bin/coinbase-pp-cli"
 if [ -x "$CB_CLI" ] && [ -f "$HOME/.openclaw/secrets/coinbase-api-key.txt" ]; then
     export COINBASE_API_KEY_NAME="$(cat "$HOME/.openclaw/secrets/coinbase-api-key.txt" 2>/dev/null)"
@@ -46,11 +50,12 @@ if [ -x "$CB_CLI" ] && [ -f "$HOME/.openclaw/secrets/coinbase-api-key.txt" ]; th
         echo "[$(ts)] Coinbase LIVE — wrote coinbase_holdings.json" >> "$LOG"
     else
         rm -f "$cbtmp"
-        echo "[$(ts)] Coinbase still 401 (regen CDP key) — kept prior CSV" >> "$LOG"
+        echo "[$(ts)] Coinbase pull FAILED — kept prior file (key was live 2026-07-31; check errors above)" >> "$LOG"
     fi
 fi
 
-# --- RH stocks: CSV fallback (needs a brokerage session token; crypto API ≠ equities) ---
+# --- Age reporting only. NOTE: this script never fetches RH equities; robinhood_holdings.json
+#     is written elsewhere (wallets-refresh.sh). Age surfaced for portfolio_context.py. ---
 for f in coinbase_holdings.json robinhood_holdings.json; do
     if [ -f "$PF/$f" ]; then
         age=$(( ( $(date +%s) - $(stat -c %Y "$PF/$f") ) / 86400 ))
