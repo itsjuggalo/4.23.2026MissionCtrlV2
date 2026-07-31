@@ -88,6 +88,14 @@ def classify(text):
 
 def main():
     day = str(dt.date.today())
+    # idempotent per day: cron + manual runs must not double-append the ledger
+    try:
+        for line in GRADES.read_text().splitlines():
+            if json.loads(line).get("day") == day:
+                print(f"[grader] {day} already graded — skipping (delete the row to re-run)")
+                return
+    except FileNotFoundError:
+        pass
     texts = jl(SMS_LOG, day)
     if not texts:
         print(f"[grader] no SMS logged {day} — nothing to grade")
@@ -126,13 +134,51 @@ def main():
             # if skipped setups keep winning, the cap wording (not the cap) needs review
             lines.append(f"R1 sat out {so} oversized card(s) — outcomes above include them; watch whether skips keep 'winning'")
 
-    # 3: pre-bell playbook vs reality (gap fill check off open/close)
+    # 3: pre-bell playbook vs reality — a real RIGHT/WRONG verdict, not just drift
+    # (2026-07-31, Mike: "test the decisions that you give me at the morning to
+    # find out its accuracy by end of day"). Rules stated up front:
+    #   FADE call   RIGHT if SPY traded back to prior close (gap filled) intraday.
+    #   LET-DECIDE  graded by whether holding past 9:45 direction persisted to close.
+    #   NEWS GAP    RIGHT if gap direction held into the close (gap-and-go).
+    #   NO GAP      no directional call — not graded.
     pb = [t for t in texts if classify(t["text"]) == "prebell"]
     if pb and m1 is not None and len(m1):
         o, c = float(m1.iloc[0]["Open"]), float(m1.iloc[-1]["Close"])
+        hi, lo = float(m1["High"].max()), float(m1["Low"].min())
         drift = (c - o) / o * 100
-        lines.append(f"Pre-bell read vs reality: SPY drifted {drift:+.2f}% open→close")
-        verdicts.append({"ts": pb[0]["ts"], "kind": "prebell", "drift_pct": round(drift, 2)})
+        txt = pb[0]["text"]
+        call, result = "none", "ungraded"
+        try:
+            gapf = json.load(open("/AIWorkWSL/trading/signals/prebell/data/prebell_today.json"))
+            gp = gapf["gap"]
+            prior, gpct = float(gp["prior_close"]), float(gp["gap_pct"])
+        except Exception:
+            prior, gpct = None, None
+        if "FADE" in txt and prior is not None:
+            call = f"FADE (fill to {prior:.2f})"
+            filled = (lo <= prior) if gpct > 0 else (hi >= prior)
+            result = "RIGHT" if filled else "WRONG"
+        elif "NEWS GAP" in txt and gpct is not None:
+            call = "GO-WITH (news gap)"
+            result = "RIGHT" if (gpct > 0) == (c > o) else "WRONG"
+        elif "LET 9:30-9:45 DECIDE" in txt:
+            call = "LET-DECIDE"
+            try:
+                p945 = float(m1.between_time("09:45", "09:50")["Close"].iloc[0])
+                result = "RIGHT" if (p945 > o) == (c > o) else "WRONG"
+            except Exception:
+                result = "ungraded"
+        elif "NO GAP" in txt:
+            call = "NO-GAP (no directional call)"
+        lines.append(f"9:00 call: {call} → {result} · SPY drifted {drift:+.2f}% open→close")
+        verdicts.append({"ts": pb[0]["ts"], "kind": "prebell", "call": call,
+                         "result": result, "drift_pct": round(drift, 2)})
+
+    # headline accuracy: every graded call today, right vs wrong
+    right = sum(1 for v in verdicts if v.get("outcome") == "TP1" or v.get("result") == "RIGHT")
+    wrong = sum(1 for v in verdicts if v.get("outcome") == "SL" or v.get("result") == "WRONG")
+    if right + wrong:
+        lines.insert(1, f"DAY ACCURACY: {right}/{right+wrong} calls right ({right/(right+wrong)*100:.0f}%)")
 
     # ledger append (accumulates across days for the weekly improvement pass)
     try:
