@@ -133,8 +133,22 @@ def main():
                 w += oc == "TP1"
                 l += oc == "SL"
             verdicts.append({"ts": s["ts"], "kind": "signal", "direction": s["direction"],
-                             "outcome": oc, "muted": muted, "spy": s["spy"],
-                             "sl_u": s["sl_u"], "tp1_u": s["tp1_u"]})
+                             "setup": s.get("setup"), "regime": s.get("regime"),
+                             "chain": s.get("chain"), "outcome": oc, "muted": muted,
+                             "spy": s["spy"], "sl_u": s["sl_u"], "tp1_u": s["tp1_u"]})
+            # edge ledger: SMS rights are earned here — scalper texts a GO only
+            # when its fingerprint reaches n>=20 graded at >=60% wins
+            if oc in ("TP1", "SL"):
+                try:
+                    EDGE = HOME / "portfolio/sms_edge.json"
+                    edge = json.loads(EDGE.read_text()) if EDGE.exists() else {}
+                    k = f"{s.get('regime','?')}/{s['direction']}/{s.get('setup','?')}"
+                    st = edge.setdefault(k, {"n": 0, "w": 0})
+                    st["n"] += 1
+                    st["w"] += oc == "TP1"
+                    EDGE.write_text(json.dumps(edge, indent=1))
+                except Exception as e:
+                    print(f"[grader] edge ledger: {e}", file=sys.stderr)
         n_texted = sum(1 for s in sigs if not s.get("muted"))
         lines.append(f"Texted signals: {w} hit target / {l} stopped / {n_texted-w-l} timed out")
         if gate_saved + gate_cost:
