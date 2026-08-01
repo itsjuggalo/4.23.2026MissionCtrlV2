@@ -121,13 +121,25 @@ def main():
     # 1+2: GO / SIT-OUT graded off the signals ledger (source of truth for levels)
     if m1 is not None and len(m1) and sigs:
         w = l = 0
+        gate_saved = gate_cost = 0
         for s in sigs:
             oc = grade_signal(s, m1)
-            w += oc == "TP1"
-            l += oc == "SL"
+            muted = bool(s.get("muted"))
+            if muted:
+                # research-gate counterfactual: was muting the SMS the right call?
+                gate_saved += oc == "SL"
+                gate_cost += oc == "TP1"
+            else:
+                w += oc == "TP1"
+                l += oc == "SL"
             verdicts.append({"ts": s["ts"], "kind": "signal", "direction": s["direction"],
-                             "outcome": oc, "spy": s["spy"], "sl_u": s["sl_u"], "tp1_u": s["tp1_u"]})
-        lines.append(f"Signals: {w} hit target / {l} stopped / {len(sigs)-w-l} timed out")
+                             "outcome": oc, "muted": muted, "spy": s["spy"],
+                             "sl_u": s["sl_u"], "tp1_u": s["tp1_u"]})
+        n_texted = sum(1 for s in sigs if not s.get("muted"))
+        lines.append(f"Texted signals: {w} hit target / {l} stopped / {n_texted-w-l} timed out")
+        if gate_saved + gate_cost:
+            lines.append(f"Research gate: muted {gate_saved+gate_cost} card(s) — "
+                         f"{gate_saved} would have LOST (gate saved you), {gate_cost} would have won")
         so = counts.get("sitout", 0)
         if so:
             # counterfactual honesty: R1 skips graded like any other signal above —
