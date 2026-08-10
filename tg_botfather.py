@@ -60,7 +60,7 @@ DEFAULT_PROPOSAL = {
     "x_sentiment":     "MCXSentiment_Bot",
     "screener":        "MCScreener_Bot",
     "research_desk":   "MCResearchDesk_Bot",
-    "jazzy_desk":      "MCJazzyDesk_Bot",
+    "astrology":       "MCAstrology_Bot",
     "openclaw_grok":   "MCGrokRelay_Bot",
     # flow_signals (@PipelineSignals_Bot), system_health (@Pingpong727_Bot),
     # life_wellness (@LifeClaw727_Bot) already read clearly — left out by default.

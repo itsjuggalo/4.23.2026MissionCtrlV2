@@ -54,14 +54,16 @@ IDENTITY = {
         desc=("X-sentiment scout (Grok on your subscription). Text me a ticker → live "
               "bullish/bearish X/Twitter chatter + catalysts in the last 24h. e.g. 'NVDA'. "
               "Target acquired.")),
-    # PARKED 2026-07-19 (zero consumers + zero DMs in 7d; responders stopped). Free tokens
-    # for the next bot need — reuse like the ClaudeClaw/MasterMC swaps, then rebrand here.
+    # 2026-08-10 — un-parked as the ASTROLOGY-ONLY lane (fleet fn `astrology`). Natal chart,
+    # real Swiss-Ephemeris transits, and the readings suite. Zero trading surface by design.
     "telegram_jazzyhazzy_bot_token": dict(
-        name="PARKED (free) — ex Jazzy Desk", avatar="duke",
-        short="Parked token — unused, free to repurpose. Was: Jazzy Desk.",
-        desc=("PARKED since 2026-07-19. This bot token is unused and free to repurpose for the "
-              "next project (responder stopped; no senders). Formerly the Jazzy Desk lane. "
-              "To revive or reuse: bot_rebrand.py + tg_responder.py on the laptop.")),
+        name="Astrology", avatar="high_templar",
+        short="Your chart, and only your chart — natal, live transits, readings. No trading.",
+        desc=("Astrology — Mike's personal chart lane. /transits gives today's REAL sky "
+              "(Swiss Ephemeris) against the Nov 3 1992 natal chart; /chart is the placements "
+              "card; /readings lists the suite (natal, 2026 transits, career, future, "
+              "trading-chart, Feb-2026 reading). Ask anything about the chart in plain English. "
+              "No picks, no sizing, no market calls — that's Trading Command.")),
     # 2026-07-29 — un-parked and made the LEARNING lane. This is now fleet fn
     # `research_desk`: IV Desk, SPY Straddle Lab, Pre-Trade Confluence, payoff + IV
     # charts. Those five senders used to point at @ResearchDaMoney_Bot, which Mike

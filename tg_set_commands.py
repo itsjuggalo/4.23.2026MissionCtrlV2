@@ -97,6 +97,12 @@ XBOT = C([
     ("clear", "Clear our conversation"),
     ("reset", "Reset the chat"),
 ])
+ASTRO = C([   # astrology-only lane (@JazzyHazzyClaw_Bot) — no trading commands by design
+    ("transits", "Today's real transits vs your natal chart"),
+    ("chart", "Your natal placements at a glance"),
+    ("readings", "What's in your astrology suite"),
+    ("help", "What this bot does"),
+])
 CLEAR = []  # pure-push / infra bots: no responder → remove any (misleading) menu
 
 # bot -> (token key, kind file|vault, menu)
@@ -106,8 +112,7 @@ FLEET = {
     "life_wellness":   ("lifeclaw_telegram_bot_token",     "f", LIFE),
     "aime_research":   ("telegram_antigravity_bot_token",  "f", AIME),
     "x_sentiment":     ("telegram_grok_bot_token",         "f", XBOT),
-    # PARKED 2026-07-19 (token free to repurpose):
-    #     "jazzy_desk":      ("telegram_jazzyhazzy_bot_token",   "f", JAZZY_MENU),
+    "astrology":       ("telegram_jazzyhazzy_bot_token",  "f", ASTRO),
     # PARKED 2026-07-19 (token free to repurpose):
     #     "risk_hedge":      ("antidote_telegram_bot_token",     "f", RISK_MENU),
     # PARKED 2026-07-19 (token free to repurpose):

@@ -17,7 +17,7 @@ from pathlib import Path
 import swisseph as swe
 
 TG_FLEET = Path.home() / "scripts" / "tg_fleet.py"
-TG_FN = "trading_command"
+TG_FN = "astrology"      # 2026-08-10: moved off trading_command → the astrology-only lane
 
 SIGNS = ["Aries", "Taurus", "Gemini", "Cancer", "Leo", "Virgo", "Libra",
          "Scorpio", "Sagittarius", "Capricorn", "Aquarius", "Pisces"]

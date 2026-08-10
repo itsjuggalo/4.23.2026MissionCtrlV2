@@ -90,24 +90,40 @@ BOTS = {
             "/help = this."
         ),
     },
-    # PARKED 2026-07-19: responder stopped, bot renamed "PARKED (free)". Token free to repurpose.
-    "jazzy_PARKED": {
-        "token": "telegram_jazzyhazzy_bot_token",         # @JazzyHazzyClaw_Bot → Jazzy Desk
+    # 2026-08-10 — ex "Jazzy Desk" (PARKED 07-19) repurposed as the ASTROLOGY-ONLY lane.
+    # `astro_only` strips every trading command from this bot: no /pick /flow /greeks etc.
+    "astrology": {
+        "token": "telegram_jazzyhazzy_bot_token",         # @JazzyHazzyClaw_Bot → Astrology
         "owner": "telegram-chat-id.txt",
-        "name":  "Jazzy Desk",
-        "tools": "Bash,Read,Grep,Glob,WebFetch",
+        "name":  "Astrology",
+        "tools": "Bash,Read,Grep,Glob,WebFetch,WebSearch",
+        "astro_only": True,
         "persona": (
-            "You are Jazzy Desk — Mike's Jazzy paper-account command (Alpaca PAPER account "
-            "'jazzy', keys in ~/.openclaw/secrets/alpaca-jazzy-*). Report positions, P&L, and "
-            "size trades as a fraction of CURRENT jazzy equity (HARD risk cap min($400, 15% of equity) — never exceed it). READ-ONLY — "
-            "never place trades. Eastern Time, short plain-text."
+            "You are Astrology — Mike's personal astrologer, and ONLY that. You never give "
+            "trading picks, sizing, or market calls; if asked, say astrology only and point him "
+            "to Trading Command.\n"
+            "Mike's natal chart (Nov 3 1992, 10:46 PM EST, Dunedin FL): Sun 11-12° Scorpio 4H "
+            "(Pluto in Scorpio nearby), Moon 1° Pisces 8H, Cancer ASC 27° with Mars conjunct the "
+            "Ascendant, Mercury + Venus in Sagittarius 5H, Saturn in Aquarius 7H, Uranus + "
+            "Neptune in Capricorn 6H, Jupiter in Libra 3H, Chiron in Leo 2H, MC 19° Aries. "
+            "Whole-sign houses from the Cancer Ascendant.\n"
+            "REAL ephemeris, never guesswork: run `~/.venv/bin/python "
+            "~/scripts/real_coach/daily_transits.py` (no --send) for today's true transits, and "
+            "read his existing readings in ~/agents/claudeclaw/data/astrology/mike-*.html "
+            "(natal, 2026 transits, career, future, trading-chart, Feb-2026 reading + playbook) "
+            "before answering anything about his chart. For dates/aspects you cannot compute, "
+            "say so rather than inventing degrees.\n"
+            "Eastern Time. Short, warm, plain-text for Telegram — no markdown headers or tables. "
+            "Mike has ADD: lead with the read, then at most 5 tight lines."
         ),
         "help": (
-            "🎷 Jazzy Desk — your Alpaca PAPER 'jazzy' account (read-only).\n"
-            "• positions / P&L      • /book — open positions\n"
-            "• size a trade vs CURRENT jazzy equity (cap min($400, 15%))\n"
-            "Never places trades. Ask anything / run any /skill.\n"
-            "/help = this."
+            "🔮 Astrology — your chart, and only your chart.\n"
+            "• /transits — today's REAL transits vs your natal (Swiss Ephemeris)\n"
+            "• /chart — your natal placements at a glance\n"
+            "• /readings — what's in your astrology suite\n"
+            "Or just ask: 'what's Saturn doing to my 7th?', 'how's this week?',\n"
+            "'read my Venus return', 'what does Mercury rx mean for me?'\n"
+            "No trading here — that's Trading Command. /help = this."
         ),
     },
     # PARKED 2026-07-19: responder stopped, bot renamed "PARKED (free)". Token free to repurpose.
@@ -295,7 +311,25 @@ OWNED_ELSEWHERE = {"xsentiment": "grok_telegram.py owns telegram_grok_bot_token 
 # Gateway default lane set = every live conversational lane (2026-07-19 collapse: one
 # process replaces the per-lane PM2 procs). Excludes *_PARKED/_RETIRED and OWNED_ELSEWHERE.
 GATEWAY_LANES = ["laptopclaude", "pingpong", "grokscout", "trendscanner",
-                 "jazzycodexgpt", "orionrelay"]
+                 "jazzycodexgpt", "orionrelay", "astrology"]
+
+# Every trading command the cockpit exposes — refused outright on an `astro_only` lane so
+# the astrology bot stays astrology-ONLY (Mike, 2026-08-10).
+TRADING_CMDS = {"/pick", "/picks", "/book", "/grade", "/eod", "/flow", "/crypto", "/explain",
+                "/sweeps", "/odte", "/greeks", "/winners", "/chase", "/flowwin", "/x", "/news"}
+
+# Static natal card for the astrology lane's /chart (same data daily_transits.py computes from).
+NATAL_CARD = (
+    "🪐 MIKE'S NATAL CHART — Nov 3 1992, 10:46 PM EST, Dunedin FL\n"
+    "☉ Sun 11° Scorpio · 4th house (home base, intensity)\n"
+    "☽ Moon 1° Pisces · 8th house (the absorber)\n"
+    "ASC 27° Cancer with Mars conjunct the Ascendant (your engine)\n"
+    "☿ Mercury + ♀ Venus in Sagittarius · 5th (thinking, money style, speculation)\n"
+    "♄ Saturn in Aquarius · 7th (commitments) · ♃ Jupiter in Libra · 3rd (growth channel)\n"
+    "♅ Uranus + ♆ Neptune in Capricorn · 6th (inner engineer + mystic)\n"
+    "⚷ Chiron in Leo · 2nd (self-worth / money wound) · MC 19° Aries (career point)\n"
+    "Whole-sign houses from the Cancer ASC. /transits for today's live sky."
+)
 
 # One claude/codex CLI can pull ~0.5GB; with 6 lanes in one process, cap concurrent
 # LLM subprocess calls so a burst of DMs can't stack six of them.
@@ -440,6 +474,39 @@ def run_bot(botkey):
                     tg("sendMessage", chat_id=chat_id, text=help_txt); continue
                 # Quantum pipeline picks — instant, deterministic, zero-bloat (no LLM).
                 cmd0 = text.split()[0].lower()
+                # ── astrology-only lane: no trading surface at all ────────────
+                if cfg.get("astro_only"):
+                    if cmd0 in TRADING_CMDS:
+                        tg("sendMessage", chat_id=chat_id,
+                           text="🔮 Astrology lane only — trading lives on Trading Command "
+                                "(@oOLaptopClaude_Bot). Try /transits, /chart or /readings.")
+                        continue
+                    if cmd0 in ("/transits", "/today", "/daily"):
+                        tg("sendChatAction", chat_id=chat_id, action="typing")
+                        try:
+                            r = subprocess.run(
+                                [str(Path.home() / ".venv/bin/python"),
+                                 str(Path.home() / "scripts/real_coach/daily_transits.py")],
+                                capture_output=True, text=True, timeout=120)
+                            out = (r.stdout or "").strip() or f"[transits rc={r.returncode}] {r.stderr.strip()[:200]}"
+                        except Exception as e:
+                            out = f"[transits error] {e}"
+                        send_reply(chat_id, out)
+                        print(f"[{name}] /transits", flush=True)
+                        continue
+                    if cmd0 == "/chart":
+                        send_reply(chat_id, NATAL_CARD)
+                        print(f"[{name}] /chart", flush=True)
+                        continue
+                    if cmd0 == "/readings":
+                        d = Path.home() / "agents/claudeclaw/data/astrology"
+                        files = sorted(p.stem for p in d.glob("mike-*.html")) if d.is_dir() else []
+                        send_reply(chat_id, ("📚 Your astrology suite (claudeclaw /astrology):\n" +
+                                             "\n".join("• " + f for f in files) +
+                                             "\nAsk me about any of them by name.")
+                                   if files else "📚 No readings found in the suite yet.")
+                        print(f"[{name}] /readings", flush=True)
+                        continue
                 # /greeks <TKR> → live lookup (LLM, any contract incl. flow); bare → quantum picks
                 if cmd0 == "/greeks":
                     import quantum_tg

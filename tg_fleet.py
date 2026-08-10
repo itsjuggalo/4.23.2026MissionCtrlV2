@@ -41,7 +41,10 @@ FLEET = {
     "life_wellness":   dict(user="LifeClaw727_Bot",         avatar="arbiter",         role="interactive", src=("file", "lifeclaw_telegram_bot_token")),
     "aime_research":   dict(user="AntiGravityg59laptop_Bot",avatar="zeratul",         role="interactive", src=("file", "telegram_antigravity_bot_token")),
     "x_sentiment":     dict(user="MoneyFlowz_Bot",          avatar="mutalisk",        role="interactive", src=("file", "telegram_grok_bot_token")),
-    "jazzy_desk":      dict(user="JazzyHazzyClaw_Bot",      avatar="duke",            role="interactive", src=("file", "telegram_jazzyhazzy_bot_token")),
+    # 2026-08-10 — @JazzyHazzyClaw_Bot (PARKED since 07-19, ex Jazzy Desk) REPURPOSED as the
+    # ASTROLOGY-ONLY lane: natal / transits / readings, never trading. Old fn `jazzy_desk`
+    # retired; vault key is now telegram.astrology.
+    "astrology":       dict(user="JazzyHazzyClaw_Bot",      avatar="high_templar",    role="interactive", src=("file", "telegram_jazzyhazzy_bot_token")),
     # 🚨 2026-07-29 — @ResearchDaMoney_Bot IS NOW MIKE'S MASSAGE BUSINESS CHAT
     # ("Massage By Mike — Chat"). It used to be research_desk, so five quantum senders
     # hardcoding TG_FN=research_desk were pushing IV Desk / Straddle Lab / Pre-Trade
