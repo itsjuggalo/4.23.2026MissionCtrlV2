@@ -109,7 +109,11 @@ Group under '📈 BREAKOUTS' and '📉 BREAKDOWNS'. <= 20 lines total, no preamb
 Local data only, no mcp__ainvest tools.
 
 Data: $(cat "$FRESH_JSON")"
+  # --strict-mcp-config: load ZERO MCP servers. The prompt above already says
+  # "Local data only, no mcp__ainvest tools", so they were pure startup overhead.
+  # Do NOT use --bare: it skips keychain reads -> "Not logged in" on subscription auth.
   ENRICHED="$(cd "$HOME" && timeout 200 "$CLAUDE_BIN" -p "$ASK" --model sonnet \
+    --strict-mcp-config \
     --output-format json --allowedTools "Bash,Read,Grep,Glob,WebFetch,WebSearch,Skill,Agent,TodoWrite" 2>>"$LOG" \
     | python3 -c 'import json,sys;
 try: print((json.load(sys.stdin).get("result") or "").strip())

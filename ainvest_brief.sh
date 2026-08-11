@@ -90,8 +90,11 @@ if [[ -n "$NEWS" ]]; then
 fi
 
 # --- 1. interpret via Claude Code subscription CLI ----------------------------
+# --strict-mcp-config: load ZERO MCP servers. TOOLS is "Bash,Read" so no mcp__ tool
+# was ever callable — the servers spawned (~1.5GB) purely as startup overhead.
+# Do NOT use --bare: it skips keychain reads -> "Not logged in" on subscription auth.
 RESULT_JSON="$(cd "$HOME" && env -u ANTHROPIC_API_KEY "$CLAUDE_BIN" -p "$ASK" --model "$MODEL" \
-  --effort high --output-format json --allowedTools "$TOOLS" 2>>"$LOG")"
+  --effort high --strict-mcp-config --output-format json --allowedTools "$TOOLS" 2>>"$LOG")"
 if [[ -z "$RESULT_JSON" ]]; then
   log "claude -p returned empty — abort (is the CLI logged in?)"; exit 1
 fi
