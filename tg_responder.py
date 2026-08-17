@@ -22,7 +22,7 @@ IMPORTANT: only ONE getUpdates consumer may poll a given bot token. Do not point
 this at a token another poller already owns (e.g. PipelineSignals/telegram-bot-token.txt
 is owned by telegram_dm_responder.py).
 """
-import json, os, subprocess, threading, time, sys
+import collections, json, os, subprocess, threading, time, sys
 from pathlib import Path
 import requests
 
@@ -363,7 +363,9 @@ def run_bot(botkey):
     def send_reply(chat_id, text):
         text = text or "[empty]"
         for i in range(0, len(text), TG_MAX):
-            tg("sendMessage", chat_id=chat_id, text=text[i:i + TG_MAX])
+            r = tg("sendMessage", chat_id=chat_id, text=text[i:i + TG_MAX])
+            if not r.get("ok"):
+                print(f"send_reply FAILED chat={chat_id}: {str(r)[:200]}", flush=True)
 
     def handle_cb(cq):
         """Inline-button taps. Owner-gated. Extensible by callback_data prefix.
@@ -428,6 +430,36 @@ def run_bot(botkey):
         except Exception as e:
             return f"[{name} backend error] {e}"
 
+    # ── conversation memory (2026-08-17, Mike): each claude -p call is stateless, so
+    # follow-ups ("what does that mean then?") were answered with zero context. Keep the
+    # last 8 exchanges per lane on disk and prepend them to the free-text brain's prompt.
+    hist_path = Path.home() / ".openclaw/tg_history" / f"{botkey}.jsonl"
+    hist_path.parent.mkdir(parents=True, exist_ok=True)
+    history = collections.deque(maxlen=8)
+    try:
+        for ln in hist_path.read_text().splitlines()[-8:]:
+            q_, a_ = json.loads(ln)
+            history.append((q_, a_))
+    except Exception:
+        pass
+
+    def with_context(question):
+        if not history:
+            return question
+        ctx = "\n".join(f"Mike: {q_}\nYou: {a_}" for q_, a_ in history)
+        return ("Recent conversation (context only — answer the NEW message):\n" + ctx +
+                "\n\nNEW message from Mike: " + question)
+
+    def remember(q_, a_):
+        if a_.startswith("["):          # backend error strings aren't conversation
+            return
+        history.append((q_, a_[:700]))
+        try:
+            with hist_path.open("a") as f:
+                f.write(json.dumps([q_, a_[:700]]) + "\n")
+        except Exception:
+            pass
+
     help_txt = (f"🤖 {name} — text me like you text Claude Code.\n"
                 f"📈 /pick — the #1 contract to buy now (verified + sized)\n"
                 f"📈 /picks · /flow · 🔪 /sweeps — live whale flow · ⚡ /odte\n"
@@ -446,9 +478,12 @@ def run_bot(botkey):
     print(f"{name} responder started ({cfg.get('token') or cfg.get('fleet_fn')})", flush=True)
     tg("deleteWebhook")
     offset = 0
+    # Downtime catch-up (2026-08-17, Mike): do NOT skip messages queued while the bot
+    # was down — leave offset at 0 so the main loop answers every pending update.
+    # Telegram only keeps updates 24h, so worst case we answer a day-old question.
     boot = tg("getUpdates", req_timeout=15, timeout=0)
     if boot.get("ok") and boot.get("result"):
-        offset = boot["result"][-1]["update_id"]
+        print(f"[{name}] {len(boot['result'])} update(s) queued during downtime — answering all", flush=True)
     while True:
         try:
             data = tg("getUpdates", req_timeout=35, offset=offset, timeout=25,
@@ -621,8 +656,10 @@ def run_bot(botkey):
                 tg("sendChatAction", chat_id=chat_id, action="typing")
                 try:
                     codex_primary = (cfg.get("providers") or [None])[0] == "codex_cli"
-                    a = ask_persona(text) if (codex_primary or not text.startswith("/")) else ask_local(text)
+                    qq = with_context(text)
+                    a = ask_persona(qq) if (codex_primary or not text.startswith("/")) else ask_local(qq)
                     send_reply(chat_id, a)
+                    remember(text, a)
                     print(f"[{name}] A: {len(a)} chars", flush=True)
                 except Exception as e:
                     tg("sendMessage", chat_id=chat_id, text=f"⚠️ {name} error: {e}")
