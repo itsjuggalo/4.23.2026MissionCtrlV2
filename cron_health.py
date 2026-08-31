@@ -41,6 +41,9 @@ JOBS = [
     ("md-freshness",   HOME / "05_AUTOMATION/scripts/md_freshness.log", 11520, False, True),
     # watches the watcher: freshness_watchdog fires q15min market hours (6,21,36,51)
     ("freshness-watchdog", HOME / "LapClaw/pipeline/logs/freshness_watchdog.log", 25, True, True),
+    # relay sweep q3min (was q10, tightened 2026-08-31) — if ITS log goes stale, cron itself
+    # is dead inside WSL and 0x8007274c jams will stop self-healing. 30m = 10 missed runs.
+    ("wsl-relay-sweep", HOME / "logs/wsl-relay-sweep.log", 30, False, True),
 ]
 
 
