@@ -298,8 +298,10 @@ __pycache__/
 decompiled/
 *.trajectory.jsonl
 # Belt-and-suspenders: never commit plaintext secrets/keys/DBs/sessions.
-# Secrets are committed ONLY as the encrypted blobs secrets.tar.gz.enc /
-# sensitive-data.tar.gz.enc (which are NOT matched by these patterns).
+# Secrets are committed ONLY as the encrypted blob secrets.tar.gz.enc.
+# sensitive-data.tar.gz.enc (792M) exceeds GitHub's 100MB hard limit — it broke every
+# push since 2026-06-25, so it is LOCAL-ONLY (staging + tarball), never committed.
+sensitive-data.tar.gz.enc
 secrets/
 oci/
 env-files/
@@ -316,7 +318,7 @@ ssh/
 EOF
 # Defensive purge: if any prior plaintext secret dirs/files are still tracked
 # from an earlier run, remove them from the index before committing.
-git rm -r --cached --ignore-unmatch secrets oci env-files telegram-session databases history ssh 2>/dev/null || true
+git rm -r --cached --ignore-unmatch secrets oci env-files telegram-session databases history ssh sensitive-data.tar.gz.enc 2>/dev/null || true
 
 echo "=== Step 10: Commit ==="
 git add -A
@@ -343,6 +345,11 @@ echo "snapshot retention: kept newest 1"
 echo "=== Step 12: Push to GitHub (gates overall success) ==="
 cd "$REPO"
 git push -u origin disaster-recovery
+
+# Staging is wiped and rebuilt from scratch at the top of every run; keeping it between runs
+# just duplicates the snapshot on disk (~2.5G). Mike-approved cleanup 2026-08-31.
+sudo rm -rf "$STAGING" 2>/dev/null || rm -rf "$STAGING"
+echo "staging cleaned (regenerated next run)"
 
 echo ""
 echo "============================================"
