@@ -401,7 +401,7 @@ def run_bot(botkey):
             with LLM_SEM:
                 r = subprocess.run(
                     [CLAUDE_BIN, "-p", question, "--append-system-prompt", sys_prompt,
-                     "--model", "sonnet", "--effort", "high", "--output-format", "json",
+                     "--model", "sonnet", "--effort", "medium", "--output-format", "json",
                      "--allowedTools", tool_set],
                     capture_output=True, text=True, timeout=300, env=env, cwd=CLAUDE_CWD)
             if r.returncode != 0:

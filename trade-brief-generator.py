@@ -147,7 +147,7 @@ def run_claude(prompt: str) -> str:
         "/bin",
     ]
     result = subprocess.run(
-        [claude_bin, "-p", prompt, "--model", "sonnet", "--effort", "high"],
+        [claude_bin, "-p", prompt, "--model", "sonnet", "--effort", "medium"],
         capture_output=True, text=True, timeout=60,
         cwd=os.path.expanduser("~"),  # headless claude expects to run from $HOME
         env={
