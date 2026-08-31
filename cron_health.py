@@ -44,6 +44,8 @@ JOBS = [
     # relay sweep q3min (was q10, tightened 2026-08-31) — if ITS log goes stale, cron itself
     # is dead inside WSL and 0x8007274c jams will stop self-healing. 30m = 10 missed runs.
     ("wsl-relay-sweep", HOME / "logs/wsl-relay-sweep.log", 30, False, True),
+    # obsidian vault md sync q5min (crontab: obsidian-vault-sync.sh) — 30m = 6 missed runs
+    ("obsidian-vault-sync", HOME / "logs/obsidian-vault-sync.log", 30, False, True),
 ]
 
 
