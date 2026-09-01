@@ -11,7 +11,8 @@ mission-control-vercel/bots/ and mission-control-restored/bots/ are retired.
 """
 import json, time, requests, sys
 from pathlib import Path
-from datetime import datetime
+from datetime import datetime, timedelta, time as dtime
+from zoneinfo import ZoneInfo
 
 SECRETS = Path.home() / ".openclaw" / "secrets"
 STATE_DIR = Path.home() / ".openclaw" / "workspace" / "state"
@@ -89,6 +90,7 @@ def save_high_interest(new_signals):
             seen_ids.add(s.get("id"))
             deduped.append(s)
     deduped = list(reversed(deduped))[-HIGH_INTEREST_FEED_MAX:]
+    deduped = _filter_to_latest_trading_day(deduped)
     HIGH_INTEREST_FEED.write_text(json.dumps(deduped, indent=2))
     print(f"[signal-relay] Wrote {len(deduped)} high-interest signals ({len(hits)} new this poll)")
 
@@ -180,6 +182,36 @@ def post_to_discord(message, source=None):
         print(f"[signal-relay] Discord error: {e}")
 
 
+def latest_trading_day_start():
+    """Start-of-day (ET, naive — matches captured_at's datetime.now().isoformat())
+    for 'today's market day, or Friday's if it's the weekend' (Mike, 2026-09-01).
+    Weekday-only; doesn't know about market holidays — good enough to stop a feed
+    from quietly serving weeks-old signals, not a full trading calendar."""
+    now_et = datetime.now(ZoneInfo("America/New_York"))
+    day = now_et.date()
+    if day.weekday() == 5:      # Saturday -> Friday
+        day -= timedelta(days=1)
+    elif day.weekday() == 6:    # Sunday -> Friday
+        day -= timedelta(days=2)
+    return datetime.combine(day, dtime.min)
+
+
+def _filter_to_latest_trading_day(deduped):
+    """Keep only signals captured on the latest trading day; if that would empty
+    the feed (e.g. before today's first signal lands), fall back to whatever's
+    freshest rather than showing nothing."""
+    cutoff = latest_trading_day_start()
+    fresh = []
+    for s in deduped:
+        ts = s.get("captured_at")
+        try:
+            if ts and datetime.fromisoformat(ts) >= cutoff:
+                fresh.append(s)
+        except Exception:
+            pass
+    return fresh if fresh else deduped
+
+
 def save_for_boba(new_signals):
     """Append new signals to the Boba feed JSON, capping at BOBA_FEED_MAX."""
     if not new_signals:
@@ -201,6 +233,7 @@ def save_for_boba(new_signals):
             seen_ids.add(s.get("id"))
             deduped.append(s)
     deduped = list(reversed(deduped))[-BOBA_FEED_MAX:]
+    deduped = _filter_to_latest_trading_day(deduped)
     BOBA_FEED.write_text(json.dumps(deduped, indent=2))
     print(f"[signal-relay] Wrote {len(deduped)} signals to Boba feed")
 

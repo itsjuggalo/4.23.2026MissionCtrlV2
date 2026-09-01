@@ -31,7 +31,14 @@ BANK = ANAT / "quiz_bank.json"
 PROCESSED = ANAT / "quiz_build_processed.json"
 CRED = Path.home() / ".claude" / ".credentials.json"
 
-CLIP_SECONDS = 5
+# Asymmetric window around t_mid (the teaching moment, e.g. when Erik names/highlights the
+# technique): a short lead-in plus a longer tail so the clip shows the actual technique
+# executing (setup -> motion -> follow-through), not just a blip around one instant.
+# Grounded against real frames.json gaps (t_mid -> next segment's t_start runs ~11-15s across
+# sampled lessons), so 16s total lands right before the next teaching segment starts.
+CLIP_LEAD_SECONDS = 3.0
+CLIP_TAIL_SECONDS = 13.0
+CLIP_SECONDS = CLIP_LEAD_SECONDS + CLIP_TAIL_SECONDS  # 16.0 total
 CLIP_W = 480
 CLIP_FPS = 15
 
@@ -99,12 +106,12 @@ def _vision_classify(still_path: Path, title: str, region: str, transcript: str)
 
 # ───────────────────────── clip extraction ──────────────────────────────────
 def _cut_clip(src: str, t_center: float, out: Path) -> bool:
-    """5s mp4 CENTERED on the curated still moment, WITH Erik's voice (mono AAC), metadata
-    stripped (no timestamp leak), small + autoplay-friendly. Centering keeps the still ==
-    the clip's middle frame, so the screenshot and the motion show the SAME instant
-    (fixes the old t_start-vs-t_mid drift). If the source has no audio it degrades to silent."""
-    half = CLIP_SECONDS / 2.0
-    t0 = max(0.0, float(t_center) - half)
+    """~16s mp4 spanning the curated still moment, WITH Erik's voice (mono AAC), metadata
+    stripped (no timestamp leak), small + autoplay-friendly. Asymmetric window (3s lead-in,
+    13s tail) since t_center marks the teaching moment and the technique demo continues
+    after it — a symmetric blip cut off the actual motion. If the source has no audio it
+    degrades to silent."""
+    t0 = max(0.0, float(t_center) - CLIP_LEAD_SECONDS)
     cmd = ["ffmpeg", "-y", "-ss", f"{t0:.2f}", "-t", str(CLIP_SECONDS), "-i", src,
            "-vf", f"fps={CLIP_FPS},scale={CLIP_W}:-2", "-c:v", "libx264",
            "-pix_fmt", "yuv420p", "-c:a", "aac", "-b:a", "96k", "-ac", "1",
@@ -149,8 +156,10 @@ def _frame_meta_for(entry: dict) -> tuple | None:
 
 
 def _recut_bank() -> int:
-    """Re-cut every existing bank clip CENTERED on its still (+ Erik's voice), overwriting in
-    place, then assert still == clip-center (±0.6s) and duration ~CLIP_SECONDS. Idempotent."""
+    """Re-cut every existing bank clip with the LEAD/TAIL window around its still (+ Erik's
+    voice), overwriting in place, then assert the still lands at the expected lead-in offset
+    (±0.6s, or earlier if clamped by the video start) and duration is close to CLIP_SECONDS
+    (a short source tail near the end of a video can legitimately truncate it). Idempotent."""
     bank = json.loads(BANK.read_text()) if BANK.exists() else []
     ok = bad = skip = 0
     rows = []
@@ -163,22 +172,23 @@ def _recut_bank() -> int:
             print(f"  [{i+1}/{len(bank)}] SKIP {e.get('technique','?')[:40]}", flush=True)
             continue
         src, t_mid = meta
-        center = max(0.0, t_mid - CLIP_SECONDS / 2.0) + CLIP_SECONDS / 2.0
-        delta = abs(center - t_mid)
+        t0 = max(0.0, t_mid - CLIP_LEAD_SECONDS)
+        expected_offset = t_mid - t0  # where the still should land inside the clip
         if not _cut_clip(src, t_mid, out):
             bad += 1
-            rows.append((e.get("technique", "?")[:40], "CUT-FAIL", f"d={delta:.2f}"))
+            rows.append((e.get("technique", "?")[:40], "CUT-FAIL", f"off={expected_offset:.2f}"))
             print(f"  [{i+1}/{len(bank)}] CUT-FAIL {e.get('technique','?')[:40]}", flush=True)
             continue
         dur = _probe_dur(out)
-        good = delta <= 0.6 and dur is not None and abs(dur - CLIP_SECONDS) < 0.8
+        good = (dur is not None and dur > 4.0 and (CLIP_SECONDS - dur) < 3.0
+                and abs(expected_offset - min(CLIP_LEAD_SECONDS, t_mid)) < 0.6)
         status = "OK" if good else "CHECK"
         if good:
             ok += 1
         else:
             bad += 1
         rows.append((e.get("technique", "?")[:40], status,
-                     f"d={delta:.2f} dur={dur:.1f}" if dur else f"d={delta:.2f} dur=?"))
+                     f"off={expected_offset:.2f} dur={dur:.1f}" if dur else f"off={expected_offset:.2f} dur=?"))
         print(f"  [{i+1}/{len(bank)}] {status} {e.get('technique','?')[:40]}", flush=True)
     print("\n── re-cut alignment report ──────────────────────────────────")
     print(f"{'technique':42} {'status':9} detail")
