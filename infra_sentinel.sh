@@ -71,7 +71,15 @@ sset(){ local tmp; tmp=$(mktemp)
 wan_ip(){ curl -s -m 10 https://api.ipify.org 2>/dev/null; }
 
 probe_local(){ # local nginx serving each vhost? -> echoes failing domains
-  local d p fails=""
+  local d p fails="" cores load1 hot=0
+  # 000 under host thrash is a LIE about ingress. On 2026-09-01 a mc-kb --reindex plus
+  # 8 concurrent claude sessions drove load to 60 on 12 cores (234Mi free, 7.3G swap);
+  # :3000 blew past both curl deadlines, so the sentinel restarted a perfectly healthy
+  # nginx and burned a fixer run while all 5 domains were serving fine externally.
+  # Load >= 2x cores => treat a pure-000 result as INCONCLUSIVE, not a failure.
+  cores=$(nproc 2>/dev/null || echo 4)
+  load1=$(cut -d' ' -f1 /proc/loadavg 2>/dev/null || echo 0)
+  awk -v l="$load1" -v c="$cores" 'BEGIN{exit !(l >= 2*c)}' && hot=1
   for d in $DOMAINS; do
     # bridge's / rebuilds a gallery page from the OneDrive mount (6-10s) — probe its
     # cheap /health instead (added to bobacat_server.py 2026-07-13)
@@ -82,11 +90,16 @@ probe_local(){ # local nginx serving each vhost? -> echoes failing domains
     # bogus nginx restart + fixer page. Retry once, slower, before calling it a failure.
     # (2026-07-20)
     [ "$c" = "000" ] && { sleep 3; c=$(curl -sk -o /dev/null -w '%{http_code}' -m 25 -H "Host: $d" "https://127.0.0.1$p" 2>/dev/null); }
+    # third, very patient attempt only when the box is thrashing (2026-09-01)
+    [ "$c" = "000" ] && [ "$hot" = "1" ] && { sleep 5; c=$(curl -sk -o /dev/null -w '%{http_code}' -m 60 -H "Host: $d" "https://127.0.0.1$p" 2>/dev/null); }
+    if [ "$c" = "000" ] && [ "$hot" = "1" ]; then
+      log "local vhost $d 000 but load1=$load1 on $cores cores — inconclusive (host thrash), NOT restarting nginx"
+      continue
+    fi
     case "$c" in 2*|3*) ;; *) fails="$fails $d($c)";; esac
   done
   echo "$fails"
 }
-
 resolve_public(){ # $1=domain -> prints public A record; rc 0=resolved 1=unresolvable 2=inconclusive
   # Resolves over DoH so the LOCAL resolver stack is bypassed entirely. See probe_dns.
   python3 - "$1" <<'PY' 2>/dev/null
