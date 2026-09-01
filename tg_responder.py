@@ -18,6 +18,10 @@ The old per-lane procs (tg-laptopclaude, tg-pingpong, tg-grokscout, tg-trendscan
 tg-jazzycodexgpt, tg-orionrelay) are STOPPED in PM2 as instant rollback — never run one
 of them while tg-gateway is up (getUpdates 409).
 
+Since 2026-09-01 every lane EXCEPT `astrology` is commands-only: a bare non-slash message
+gets a one-line "commands-only" reply instead of an LLM call (see FREE_CHAT_LANES). Slash
+commands still work everywhere. Astrology stays fully conversational.
+
 IMPORTANT: only ONE getUpdates consumer may poll a given bot token. Do not point
 this at a token another poller already owns (e.g. PipelineSignals/telegram-bot-token.txt
 is owned by telegram_dm_responder.py).
@@ -313,6 +317,11 @@ OWNED_ELSEWHERE = {"xsentiment": "grok_telegram.py owns telegram_grok_bot_token 
 GATEWAY_LANES = ["laptopclaude", "pingpong", "grokscout", "trendscanner",
                  "jazzycodexgpt", "orionrelay", "astrology"]
 
+# Free-form chatter (a bare non-slash message) fires an LLM call on Mike's subscription and
+# eats his 5-hour window. Only the astrology lane keeps that fully-conversational mode
+# (Mike, 2026-09-01); every other lane stays reachable by explicit /command only.
+FREE_CHAT_LANES = {"astrology"}
+
 # Every trading command the cockpit exposes — refused outright on an `astro_only` lane so
 # the astrology bot stays astrology-ONLY (Mike, 2026-08-10).
 TRADING_CMDS = {"/pick", "/picks", "/book", "/grade", "/eod", "/flow", "/crypto", "/explain",
@@ -509,6 +518,13 @@ def run_bot(botkey):
                     tg("sendMessage", chat_id=chat_id, text=help_txt); continue
                 # Quantum pipeline picks — instant, deterministic, zero-bloat (no LLM).
                 cmd0 = text.split()[0].lower()
+                if not cmd0.startswith("/") and botkey not in FREE_CHAT_LANES:
+                    tg("sendMessage", chat_id=chat_id,
+                       text=f"💤 {name} is on commands-only mode — free chat is off to save "
+                            f"the Claude window. Send a /command (/help for the list). "
+                            f"Free chat lives on the Astrology bot.")
+                    print(f"[{name}] free-chat suppressed: {text[:60]}", flush=True)
+                    continue
                 # ── astrology-only lane: no trading surface at all ────────────
                 if cfg.get("astro_only"):
                     if cmd0 in TRADING_CMDS:
