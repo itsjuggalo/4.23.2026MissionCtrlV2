@@ -29,6 +29,69 @@ BOBA_FEED_MAX = 50  # keep last N trade signals
 STATUS_FILE = BOBA_FEED.with_name("firebase_signal_relay_status.json")
 FAIL_EXIT_THRESHOLD = 10  # consecutive all-fetch-failed polls -> exit non-zero for PM2
 
+# High-interest contract thresholds (Mike, 2026-08-31) — the raw RTDB signal
+# always carries a `quote` block (openInterest, totalVolume, lastPrice) that
+# was being silently dropped: only symbol/strike/targets were ever extracted.
+# Now pulled out + flagged so the relay surfaces "new high premium/high vol/
+# high OI contracts" instead of relaying blind. Tune here if too noisy/quiet.
+HIGH_PREMIUM_USD = 500      # lastPrice * 100 (per-contract premium)
+HIGH_VOLUME = 500           # quote.totalVolume
+HIGH_OPEN_INTEREST = 1000   # quote.openInterest
+HIGH_INTEREST_FEED = BOBA_FEED.with_name("firebase_high_interest_signals.json")
+HIGH_INTEREST_FEED_MAX = 100
+
+
+def extract_quote_metrics(sig):
+    """Pull premium/volume/OI out of the (previously discarded) quote block."""
+    q = sig.get("quote") or {}
+    last = q.get("lastPrice") or q.get("closePrice")
+    premium = round(float(last) * 100, 2) if last is not None else None
+    volume = q.get("totalVolume")
+    oi = q.get("openInterest")
+    flags = []
+    if premium is not None and premium >= HIGH_PREMIUM_USD:
+        flags.append("HIGH_PREMIUM")
+    if isinstance(volume, (int, float)) and volume >= HIGH_VOLUME:
+        flags.append("HIGH_VOLUME")
+    if isinstance(oi, (int, float)) and oi >= HIGH_OPEN_INTEREST:
+        flags.append("HIGH_OI")
+    return {
+        "premium": premium,
+        "volume": volume,
+        "open_interest": oi,
+        "bid": q.get("bidPrice"),
+        "ask": q.get("askPrice"),
+        "quote_ts": q.get("quoteTimeInLong"),
+        "high_interest_flags": flags,
+        "is_high_interest": len(flags) >= 2,  # 2-of-3 = worth surfacing
+    }
+
+
+def save_high_interest(new_signals):
+    """Rolling feed of ONLY signals that cleared 2+ high-interest thresholds —
+    what missionctrl's flow pages read for the 'constantly updating' high-
+    premium/high-vol/high-OI view, separate from the full unfiltered stream."""
+    hits = [s for s in new_signals if s.get("is_high_interest")]
+    if not hits:
+        return
+    existing = []
+    if HIGH_INTEREST_FEED.exists():
+        try:
+            existing = json.loads(HIGH_INTEREST_FEED.read_text())
+            if not isinstance(existing, list):
+                existing = []
+        except Exception:
+            existing = []
+    combined = existing + hits
+    seen_ids, deduped = set(), []
+    for s in reversed(combined):
+        if s.get("id") not in seen_ids:
+            seen_ids.add(s.get("id"))
+            deduped.append(s)
+    deduped = list(reversed(deduped))[-HIGH_INTEREST_FEED_MAX:]
+    HIGH_INTEREST_FEED.write_text(json.dumps(deduped, indent=2))
+    print(f"[signal-relay] Wrote {len(deduped)} high-interest signals ({len(hits)} new this poll)")
+
 
 def get_secret(name):
     p = SECRETS / name
@@ -89,11 +152,16 @@ def format_signal(sig, source):
     risk = sig.get("risk", "?")
     free = "FREE" if sig.get("free") else "PREMIUM"
 
+    m = extract_quote_metrics(sig)
+    tag = f"\n🔥 {'/'.join(m['high_interest_flags'])}" if m["is_high_interest"] else ""
+    stats = (f"\nPrem: ${m['premium']:.0f}/ctr | Vol: {m['volume']} | OI: {m['open_interest']}"
+             if m["premium"] is not None else "")
+
     return (
         f"{'🟢' if not sig.get('isPut') else '🔴'} **{source}** — {cat}\n"
         f"**{sym}** ${strike} {is_put} exp {exp_str}\n"
         f"Entry: ${buy} | Target: ${sell} | SL: ${sl}\n"
-        f"Risk: {risk} | {free}"
+        f"Risk: {risk} | {free}{stats}{tag}"
     )
 
 
@@ -163,6 +231,7 @@ def poll():
                     seen.add(full_id)
                     msg = format_signal(sig, f"{source}/{path}")
                     post_to_discord(msg, source=source)
+                    metrics = extract_quote_metrics(sig)
                     new_signals_buffer.append({
                         "id": full_id,
                         "source": source,
@@ -178,6 +247,7 @@ def poll():
                         "risk": sig.get("risk"),
                         "is_free": sig.get("free", False),
                         "captured_at": datetime.now().isoformat(),
+                        **metrics,
                     })
                     new_count += 1
                     time.sleep(1)
@@ -186,6 +256,7 @@ def poll():
     state["seen_ids"] = list(seen)[-500:]
     save_state(state)
     save_for_boba(new_signals_buffer)
+    save_high_interest(new_signals_buffer)
     return new_count, any_fetch_ok
 
 
