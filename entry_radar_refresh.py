@@ -10,7 +10,7 @@ the breakout trigger (20d high), and a one-line plain-English verdict
 Advisory only. Writes ~/.openclaw/workspace/directives/entry_radar.json
 (served by /api/directives?file=entry_radar.json). Cron: pre-market + hourly.
 """
-import json, os, sys, tempfile, urllib.request, urllib.parse
+import json, os, sys, tempfile, time, urllib.error, urllib.request, urllib.parse
 from datetime import datetime, timedelta, timezone
 
 HOME = os.path.expanduser("~")
@@ -62,7 +62,13 @@ def watchlist():
     return WATCH_DEFAULT
 
 
+RETRY_WAITS = (5, 15, 40)   # the Alpaca data key is shared with the scanners/decision
+                            # cycles, so a co-scheduled burst can 429 this one request
+
+
 def fetch_bars(syms, key, sec):
+    """Alpaca daily bars. Backs off on 429/5xx; returns {} rather than raising so a
+    rate-limited minute degrades to the Yahoo fallback instead of killing the run."""
     url = ("https://data.alpaca.markets/v2/stocks/bars?"
            + urllib.parse.urlencode({
                "symbols": ",".join(syms), "timeframe": "1Day", "limit": 3000,
@@ -70,8 +76,22 @@ def fetch_bars(syms, key, sec):
                "start": (datetime.utcnow() - timedelta(days=180)).strftime("%Y-%m-%dT00:00:00Z"),
            }))
     req = urllib.request.Request(url, headers={"APCA-API-KEY-ID": key, "APCA-API-SECRET-KEY": sec})
-    with urllib.request.urlopen(req, timeout=30) as r:
-        return json.load(r).get("bars", {})
+    for wait in RETRY_WAITS + (None,):
+        try:
+            with urllib.request.urlopen(req, timeout=30) as r:
+                return json.load(r).get("bars", {})
+        except urllib.error.HTTPError as e:
+            if e.code not in (429, 500, 502, 503, 504) or wait is None:
+                print(f"alpaca bars failed: HTTP {e.code} — falling back to Yahoo")
+                return {}
+            ra = (e.headers.get("Retry-After") if e.headers else None) or ""
+            delay = max(wait, min(int(ra), 60)) if ra.strip().isdigit() else wait
+            print(f"alpaca bars HTTP {e.code} — retrying in {delay}s")
+            time.sleep(delay)
+        except Exception as e:
+            print(f"alpaca bars error: {e} — falling back to Yahoo")
+            return {}
+    return {}
 
 
 def fetch_yahoo_bars(ysym, rng="1y", interval="1d"):
@@ -187,6 +207,10 @@ if __name__ == "__main__":
     rows = []
     for s in syms:
         row = analyze(s, bars.get(s, []), s in held)
+        if not row:                                         # Alpaca 429'd or skipped it
+            row = analyze(s, fetch_yahoo_bars(s.replace(".", "-")), s in held)
+            if row:
+                row["source"] = "yahoo"
         if row:
             rows.append(row)
     for disp, ysym in FUTURES.items():                      # MNQ etc via Yahoo
