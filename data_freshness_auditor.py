@@ -77,6 +77,7 @@ FILES = [
     ("daily_report",        f"{H}/mission-control/signal-receiver/data/daily_report.json", ALL, 30, "daily_report.py 23:55 daily"),
     ("spy_scalp_signal",    f"{H}/mission-control/signal-receiver/data/spy_scalp_signal.json", ALL, 4, "spy scalp feed — RTH ORB/VWAP engine + after-hours/weekend --prep mode (2026-09-12)"),
     ("desk2_weekend",       f"{H}/.openclaw/workspace/directives/desk2_weekend.json",        ALL, 60, "desk2 weekend review, Sat 11:00 + Sun 19:00 ET (2026-09-12)"),
+    ("desk2_nollm",         f"{H}/.openclaw/workspace/directives/desk2_nollm.json",          MH,  26, "desk2 NO-LLM shadow ranked table, every cycle 9:37-15:37 ET weekdays (2026-09-13)"),
     ("fmp_market",          "/AIWorkWSL/web/missionctrl/data/fmp_market.json",            ALL,  6, "FMP market snapshot, hourly"),
     ("markov_regime",       "/AIWorkWSL/web/missionctrl/data/markov_regime.json",         ALL, 10, "markov regime snapshot"),
     ("volume_radar",        "/AIWorkWSL/web/missionctrl/data/volume_radar.json",          ALL, 10, "volume radar snapshot — RTH pace scan + after-hours/weekend movers (2026-09-12)"),
