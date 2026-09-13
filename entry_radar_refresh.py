@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """entry_radar_refresh.py — compute entry-quality reads for SPY/QQQ + Mike's
-watchlist + his held stocks, from Alpaca daily bars (IEX feed, free).
+watchlist, from Alpaca daily bars (IEX feed, free).
 
 Replaces the Promotion Gate slot on the Command Center with something a trader
 can act on: for each symbol — trend, RSI, a pullback BUY ZONE (EMA21 ± 0.4*ATR),
@@ -8,48 +8,35 @@ the breakout trigger (20d high), and a one-line plain-English verdict
 ("at entry zone" / "extended — wait for $X" / "downtrend — no edge").
 
 Advisory only. Writes ~/.openclaw/workspace/directives/entry_radar.json
-(served by /api/directives?file=entry_radar.json). Cron: pre-market + hourly.
+(served by /api/directives?file=entry_radar.json). Cron: pre-market + hourly
+weekdays, plus after-hours/weekend refresh (adds `mode`/`nextSession`/
+`futuresLean` — see pipeline/lib/afterhours.py in the missionctrl repo).
+
+2026-09-12: the Robinhood-holdings input ("held" stocks from unified_book.json)
+was removed site-wide with the portfolio retirement — universe is SPY/QQQ +
+watchlist only now.
 """
 import json, os, sys, tempfile, time, urllib.error, urllib.request, urllib.parse
 from datetime import datetime, timedelta, timezone
 
 HOME = os.path.expanduser("~")
 OUT = os.path.join(HOME, ".openclaw/workspace/directives/entry_radar.json")
-BOOK = os.path.join(HOME, "portfolio/unified_book.json")
 WATCH_FILE = os.path.join(HOME, "portfolio/cc_watchlist.txt")
 SECRETS = os.path.join(HOME, ".openclaw/secrets")
 WATCH_DEFAULT = ["AAPL", "NVDA", "TSLA", "MU", "LLY"]
 CORE = ["SPY", "QQQ"]
-CRYPTO = {"BTC", "ETH", "DOGE", "XRP", "XLM", "CRO", "XCN", "LTC", "HBAR", "ALGO",
-          "UNI", "JASMY", "ETC", "SOL", "ADA", "USDC", "USD"}
 MAX_SYMS = 12
+
+# Shared after-hours/weekend helper lives in the missionctrl repo, not here —
+# this script runs from ~/05_AUTOMATION/scripts, so add its pipeline dir.
+MC_PIPELINE = "/AIWorkWSL/web/missionctrl/pipeline"
+if MC_PIPELINE not in sys.path:
+    sys.path.insert(0, MC_PIPELINE)
+from lib import afterhours as ah  # noqa: E402
 
 
 def secret(name):
     return open(os.path.join(SECRETS, name)).read().strip()
-
-
-def held_stocks():
-    """Top held STOCK tickers from the unified book (mkt value ≥ $50)."""
-    try:
-        book = json.load(open(BOOK))
-    except Exception:
-        return []
-    rows = []
-    for p in book.get("positions", []):
-        s = (p.get("symbol") or "").upper()
-        if not s or s in CRYPTO:
-            continue
-        if (p.get("asset_class") or "").lower() == "crypto":
-            continue
-        if (p.get("mkt_value") or 0) >= 50:
-            rows.append((p["mkt_value"], s))
-    rows.sort(reverse=True)
-    seen, out = set(), []
-    for _, s in rows:
-        if s not in seen:
-            seen.add(s); out.append(s)
-    return out
 
 
 def watchlist():
@@ -160,7 +147,7 @@ def atr(bars, n=14):
     return a
 
 
-def analyze(sym, bars, held):
+def analyze(sym, bars):
     if len(bars) < 30:
         return None
     closes = [b["c"] for b in bars]
@@ -186,7 +173,7 @@ def analyze(sym, bars, held):
     else:
         status, note = "NO EDGE", f"below the 21-day line — no long edge until it reclaims ${round(e21, 2)}"
     return {
-        "sym": sym, "held": held, "price": round(px, 2), "rsi": r,
+        "sym": sym, "price": round(px, 2), "rsi": r,
         "trend": "UP" if up else "DOWN", "ema21": round(e21, 2), "ema8": round(e8, 2),
         "entryLo": entry_lo, "entryHi": entry_hi, "breakout": breakout,
         "stopRef": stop_ref, "hi20": round(hi20, 2), "lo20": round(lo20, 2),
@@ -196,25 +183,28 @@ def analyze(sym, bars, held):
 
 
 if __name__ == "__main__":
+    from zoneinfo import ZoneInfo
+    now_et = datetime.now(ZoneInfo("America/New_York"))
+    mode = ah.session_state(now_et)
+
     key, sec = secret("alpaca-key-id"), secret("alpaca-secret")
-    held = held_stocks()
     syms, seen = [], set()
-    for s in CORE + watchlist() + held:
+    for s in CORE + watchlist():
         if s not in seen:
             seen.add(s); syms.append(s)
     syms = syms[:MAX_SYMS]
     bars = fetch_bars(syms, key, sec)
     rows = []
     for s in syms:
-        row = analyze(s, bars.get(s, []), s in held)
+        row = analyze(s, bars.get(s, []))
         if not row:                                         # Alpaca 429'd or skipped it
-            row = analyze(s, fetch_yahoo_bars(s.replace(".", "-")), s in held)
+            row = analyze(s, fetch_yahoo_bars(s.replace(".", "-")))
             if row:
                 row["source"] = "yahoo"
         if row:
             rows.append(row)
     for disp, ysym in FUTURES.items():                      # MNQ etc via Yahoo
-        row = analyze(disp, fetch_yahoo_bars(ysym), False)
+        row = analyze(disp, fetch_yahoo_bars(ysym))
         if row:
             row["source"] = "yahoo"
             rows.append(row)
@@ -244,8 +234,7 @@ if __name__ == "__main__":
     # nothing qualifies — a daily "nothing today" trains you to ignore it.
     # ET explicitly: the cron sets TZ=America/New_York, but a manual run without
     # it would read UTC and fire this at 3am ET instead.
-    from zoneinfo import ZoneInfo
-    if datetime.now(ZoneInfo("America/New_York")).hour == 7:
+    if now_et.hour == 7:
         buyable = [r for r in rows if r["status"] in ("AT ENTRY", "OVERSOLD")]
         if buyable:
             buyable.sort(key=lambda r: (r["status"] != "AT ENTRY", r["sym"]))
@@ -266,7 +255,28 @@ if __name__ == "__main__":
         else:
             print("morning roster: nothing AT ENTRY/OVERSOLD — staying silent")
 
-    doc = {"updated": datetime.now().astimezone().isoformat(), "rows": rows}
+    # After-hours/weekend context: how stretched are index futures since the
+    # last settle, so the zones below (computed off Friday's daily bar) come
+    # with a "what's the tape doing right now" gut check. rth runs omit it.
+    futures_lean = None
+    if mode != "rth":
+        fut = ah.futures(["ES=F", "NQ=F"])
+        futures_lean = {
+            sym.replace("=F", ""): {
+                "chgPct": v.get("chgPct"),
+                "direction": "up" if (v.get("chgPct") or 0) >= 0 else "down",
+            }
+            for sym, v in fut.items()
+        }
+
+    doc = {
+        "updated": now_et.isoformat(),
+        "rows": rows,
+        "mode": mode,
+        "asOf": now_et.isoformat(),
+        "nextSession": ah.next_session_label(now_et),
+        "futuresLean": futures_lean,
+    }
     fd, tmp = tempfile.mkstemp(dir=os.path.dirname(OUT))
     with os.fdopen(fd, "w") as f:
         json.dump(doc, f)

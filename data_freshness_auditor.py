@@ -70,22 +70,25 @@ H = str(Path.home())
 # (label, path, mode, max_age_h, note)
 FILES = [
     ("unified_contracts_high_interest", f"{H}/.openclaw/workspace/directives/unified_contracts_high_interest.json", MH, 30, "high-interest contract feed -> /api/unified-contracts"),
-    ("entry_radar",         f"{H}/.openclaw/workspace/directives/entry_radar.json",       MH,  26, "entry radar feed"),
+    ("entry_radar",         f"{H}/.openclaw/workspace/directives/entry_radar.json",       ALL,  14, "entry radar feed — RTH premarket/hourly + after-hours/weekend refresh (2026-09-12)"),
     ("dashboard_data",      f"{H}/.openclaw/workspace/directives/dashboard_data.json",    MH,  26, "dashboard rollup"),
     ("market_regime_BTC",   f"{H}/.openclaw/workspace/directives/market_regime_BTC.json", ALL, 10, "regime_detector.py every 4h"),
     ("market_regime",       f"{H}/mission-control/signal-receiver/data/market_regime.json", ALL, 10, "regime_detector.py every 4h"),
     ("daily_report",        f"{H}/mission-control/signal-receiver/data/daily_report.json", ALL, 30, "daily_report.py 23:55 daily"),
-    ("spy_scalp_signal",    f"{H}/mission-control/signal-receiver/data/spy_scalp_signal.json", MH, 26, "spy scalp feed"),
+    ("spy_scalp_signal",    f"{H}/mission-control/signal-receiver/data/spy_scalp_signal.json", ALL, 4, "spy scalp feed — RTH ORB/VWAP engine + after-hours/weekend --prep mode (2026-09-12)"),
+    ("desk2_weekend",       f"{H}/.openclaw/workspace/directives/desk2_weekend.json",        ALL, 60, "desk2 weekend review, Sat 11:00 + Sun 19:00 ET (2026-09-12)"),
     ("fmp_market",          "/AIWorkWSL/web/missionctrl/data/fmp_market.json",            ALL,  6, "FMP market snapshot, hourly"),
     ("markov_regime",       "/AIWorkWSL/web/missionctrl/data/markov_regime.json",         ALL, 10, "markov regime snapshot"),
-    ("volume_radar",        "/AIWorkWSL/web/missionctrl/data/volume_radar.json",          ALL, 10, "volume radar snapshot"),
+    ("volume_radar",        "/AIWorkWSL/web/missionctrl/data/volume_radar.json",          ALL, 10, "volume radar snapshot — RTH pace scan + after-hours/weekend movers (2026-09-12)"),
     ("ainvest_themes",      "/AIWorkWSL/web/missionctrl/data/ainvest-themes.json",        MH,  26, "ainvest theme scrape"),
     ("watchlist_signals",   "/AIWorkWSL/web/missionctrl/data/watchlist-signals.json",     MH,  26, "watchlist signal scan"),
     ("strategy_compare",    "/AIWorkWSL/web/missionctrl/data/strategy_compare.json",      MH,  26, "strategy comparison rollup"),
-    ("unified_book",        f"{H}/portfolio/unified_book.json",                           ALL,  6, "REAL MONEY book (RH + Coinbase) -> portfolio/risk pages"),
-    ("robinhood_holdings",  f"{H}/portfolio/robinhood_holdings.json",                     MH,  26, "REAL MONEY RH equity/options positions"),
-    ("coinbase_holdings",   f"{H}/portfolio/coinbase_holdings.json",                      ALL,  6, "REAL MONEY Coinbase positions"),
-    ("pullback_watchlist",  f"{H}/portfolio/pullback_watchlist.json",                     MH,  26, "pullback watchlist feed"),
+    # [portfolio-retired 2026-09-12] producer retired (refresh-holdings.sh/wallets-refresh.sh cron) — file will never update again
+    # ("unified_book",        f"{H}/portfolio/unified_book.json",                           ALL,  6, "REAL MONEY book (RH + Coinbase) -> portfolio/risk pages"),
+    # ("robinhood_holdings",  f"{H}/portfolio/robinhood_holdings.json",                     MH,  26, "REAL MONEY RH equity/options positions"),
+    # ("coinbase_holdings",   f"{H}/portfolio/coinbase_holdings.json",                      ALL,  6, "REAL MONEY Coinbase positions"),
+    # [portfolio-retired 2026-09-12] producer (pre_breakout_scan.py) cron retired — file will never update again
+    # ("pullback_watchlist",  f"{H}/portfolio/pullback_watchlist.json",                     MH,  26, "pullback watchlist feed"),
 ]
 
 
