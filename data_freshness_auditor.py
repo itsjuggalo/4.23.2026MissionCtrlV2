@@ -83,6 +83,7 @@ FILES = [
     ("ainvest_themes",      "/AIWorkWSL/web/missionctrl/data/ainvest-themes.json",        MH,  26, "ainvest theme scrape"),
     ("watchlist_signals",   "/AIWorkWSL/web/missionctrl/data/watchlist-signals.json",     MH,  26, "watchlist signal scan"),
     ("strategy_compare",    "/AIWorkWSL/web/missionctrl/data/strategy_compare.json",      MH,  26, "strategy comparison rollup"),
+    ("cc_verify",           f"{H}/.openclaw/data/cc-verify/latest.json",                  ALL,  14, "Command Center independent verifier (yfinance/signal8) — pre-open/post-open/post-close/weekend cron"),
     # [portfolio-retired 2026-09-12] producer retired (refresh-holdings.sh/wallets-refresh.sh cron) — file will never update again
     # ("unified_book",        f"{H}/portfolio/unified_book.json",                           ALL,  6, "REAL MONEY book (RH + Coinbase) -> portfolio/risk pages"),
     # ("robinhood_holdings",  f"{H}/portfolio/robinhood_holdings.json",                     MH,  26, "REAL MONEY RH equity/options positions"),
