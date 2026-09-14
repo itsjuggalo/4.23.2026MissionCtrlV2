@@ -89,9 +89,26 @@ FILES = [
     ("console_verify",      f"{H}/.openclaw/data/ovtlyr-console/verify/latest.json",     ALL,  16, "console per-page verifier (yfinance/finviz/signal8) — 07:45 daily, 17:15 weekdays, 12:00 weekends"),
     ("console_meta",        f"{H}/.openclaw/data/ovtlyr-console/latest/meta.json",       ALL,  50, "console nightly refresh (bars+compute) 16:30 weekdays + Sun 07:30 --full; Sat gap ≈39h"),
     ("console_mentions",    f"{H}/.openclaw/data/ovtlyr-console/latest/mentions.json",   ALL,  30, "StockTwits+Reddit mentions 16:12 daily (weekend lines added 2026-09-14)"),
+    # [decision-ta 2026-09-14] Decision Hub technical-analysis factor (pipeline/decision/factor_ta.py -> /api/decision/ta)
+    ("decision_ta",         f"{H}/.openclaw/data/decision/factors/ta.json",             ALL,  54, "TA decision factor: full run 17:05 M-F + 08:00 Sat, market-block-only refresh 10:35 M-F (touches mtime); Sat->Mon gap ~50.5h, no Sunday run"),
+    # [decision-fundamentals 2026-09-14] Decision Hub fundamental-analysis factor (pipeline/decision/factor_fundamentals.py -> /api/decision/fundamentals)
+    ("decision_fundamentals", f"{H}/.openclaw/data/decision/factors/fundamentals.json", ALL,  16, "fundamentals decision factor: rolling 1/7-universe refresh 05:30 daily + 18:30 M-F"),
     ("console_finviz_news", f"{H}/.openclaw/data/ovtlyr-console/latest/supplement/finviz_news.json", ALL, 16, "finviz news wire supplement written by verify_console.py"),
     ("console_finviz_sectors", f"{H}/.openclaw/data/ovtlyr-console/latest/supplement/finviz_sectors.json", ALL, 16, "finviz sector/industry perf supplement written by verify_console.py"),
     ("oi_flow_latest",      f"{H}/.openclaw/data/oi-flow/latest.json",                   MH,  30, "OI Flow Yahoo lists 10:05/12:35/15:50 weekdays (console-options-flow)"),
+    # [decision-factors 2026-09-14] pipeline/gex producers (CBOE delayed chains + yfinance vol family + calendar rules)
+    ("decision_gex",        f"{H}/.openclaw/data/decision/factors/gex.json",              MH,  30, "GEX + vol structure 08:45/10:05/12:05/15:35/16:20 weekdays (pipeline/gex/gex-cron.sh gex)"),
+    ("decision_events",     f"{H}/.openclaw/data/decision/factors/events.json",           ALL, 30, "event calendar (witching/OPEX/VIX exp/rebalances/FOMC) 06:00 daily (pipeline/gex/events.py)"),
+    ("decision_factor_crypto", f"{H}/.openclaw/data/decision/factors/crypto.json",       ALL,  2, "crypto decision factor (F&G/dominance/stablecoin/funding+OI) — crypto_context.py every 30min, all days"),
+    # [decision-hub 2026-09-14] combiner scorecard — every 30min 06:00-20:00 ET weekdays + 08:15/12:15/18:15 ET weekends
+    ("decision_scorecard",  f"{H}/.openclaw/data/decision/scorecard.json",              ALL,   2, "Decision Hub combiner (pipeline/decision/decision_score.py) — blends factors/*.json -> /api/decision"),
+    # [fed-watch 2026-09-14] macro_fed decision factor — 06:30 ET daily + 13:30/14:15 ET weekdays + every 30min on FOMC days
+    ("macro_fed_factor",    f"{H}/.openclaw/data/decision/factors/macro_fed.json",      ALL,  20, "Fed/macro watcher (pipeline/fed/fed_watch.py) -> /api/decision/macro_fed, advisory only; longest normal gap is 14:15->06:30 next day (~16h)"),
+    # [decision-news 2026-09-14] news/sentiment/catalyst decision factor — */30 06:00-20:00 ET weekdays, hourly 21:00-05:00 ET weekdays + all day weekends
+    ("decision_news_factor", f"{H}/.openclaw/data/decision/factors/news.json",           ALL, 1.5, "News/sentiment/catalyst factor (pipeline/decision/factor_news.py) -> /api/decision/news, advisory only; worst normal gap is the 05:00->06:00 ET weekday hourly->30min handoff (~1h)"),
+    # [market-hours 2026-09-14] weekend/pre-/after-hours session-price consistency (pipeline/market_hours/)
+    ("session_prices",      f"{H}/.openclaw/data/market-hours/session_prices.json",     ALL,  10, "canonical KPI/marquee/console price+session producer — */5min PRE(4-9:30)/AFTER(16-20) weekdays, hourly weekends; longest normal gap is weekday CLOSED overnight ~8h"),
+    ("session_consistency", f"{H}/.openclaw/data/market-hours/consistency.json",        ALL,  10, "session_prices.py vs /api/market, /api/crypto, mc-market-cache.json, console symbols.json — every 30min PRE/AFTER weekdays, hourly weekends"),
     # [portfolio-retired 2026-09-12] producer retired (refresh-holdings.sh/wallets-refresh.sh cron) — file will never update again
     # ("unified_book",        f"{H}/portfolio/unified_book.json",                           ALL,  6, "REAL MONEY book (RH + Coinbase) -> portfolio/risk pages"),
     # ("robinhood_holdings",  f"{H}/portfolio/robinhood_holdings.json",                     MH,  26, "REAL MONEY RH equity/options positions"),
