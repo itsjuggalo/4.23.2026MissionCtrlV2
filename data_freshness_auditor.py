@@ -85,6 +85,13 @@ FILES = [
     ("watchlist_signals",   "/AIWorkWSL/web/missionctrl/data/watchlist-signals.json",     MH,  26, "watchlist signal scan"),
     ("strategy_compare",    "/AIWorkWSL/web/missionctrl/data/strategy_compare.json",      MH,  26, "strategy comparison rollup"),
     ("cc_verify",           f"{H}/.openclaw/data/cc-verify/latest.json",                  ALL,  14, "Command Center independent verifier (yfinance/signal8) — pre-open/post-open/post-close/weekend cron"),
+    # [console-freshness 2026-09-14] CONSOLE pages: verifier + producers it repairs (pipeline/console/verify_console.py)
+    ("console_verify",      f"{H}/.openclaw/data/ovtlyr-console/verify/latest.json",     ALL,  16, "console per-page verifier (yfinance/finviz/signal8) — 07:45 daily, 17:15 weekdays, 12:00 weekends"),
+    ("console_meta",        f"{H}/.openclaw/data/ovtlyr-console/latest/meta.json",       ALL,  50, "console nightly refresh (bars+compute) 16:30 weekdays + Sun 07:30 --full; Sat gap ≈39h"),
+    ("console_mentions",    f"{H}/.openclaw/data/ovtlyr-console/latest/mentions.json",   ALL,  30, "StockTwits+Reddit mentions 16:12 daily (weekend lines added 2026-09-14)"),
+    ("console_finviz_news", f"{H}/.openclaw/data/ovtlyr-console/latest/supplement/finviz_news.json", ALL, 16, "finviz news wire supplement written by verify_console.py"),
+    ("console_finviz_sectors", f"{H}/.openclaw/data/ovtlyr-console/latest/supplement/finviz_sectors.json", ALL, 16, "finviz sector/industry perf supplement written by verify_console.py"),
+    ("oi_flow_latest",      f"{H}/.openclaw/data/oi-flow/latest.json",                   MH,  30, "OI Flow Yahoo lists 10:05/12:35/15:50 weekdays (console-options-flow)"),
     # [portfolio-retired 2026-09-12] producer retired (refresh-holdings.sh/wallets-refresh.sh cron) — file will never update again
     # ("unified_book",        f"{H}/portfolio/unified_book.json",                           ALL,  6, "REAL MONEY book (RH + Coinbase) -> portfolio/risk pages"),
     # ("robinhood_holdings",  f"{H}/portfolio/robinhood_holdings.json",                     MH,  26, "REAL MONEY RH equity/options positions"),
