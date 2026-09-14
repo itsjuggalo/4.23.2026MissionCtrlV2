@@ -109,6 +109,8 @@ FILES = [
     # [market-hours 2026-09-14] weekend/pre-/after-hours session-price consistency (pipeline/market_hours/)
     ("session_prices",      f"{H}/.openclaw/data/market-hours/session_prices.json",     ALL,  10, "canonical KPI/marquee/console price+session producer — */5min PRE(4-9:30)/AFTER(16-20) weekdays, hourly weekends; longest normal gap is weekday CLOSED overnight ~8h"),
     ("session_consistency", f"{H}/.openclaw/data/market-hours/consistency.json",        ALL,  10, "session_prices.py vs /api/market, /api/crypto, mc-market-cache.json, console symbols.json — every 30min PRE/AFTER weekdays, hourly weekends"),
+    # [autoheal 2026-09-14] data-health self-repair loop (pipeline/autoheal/autoheal.py -> /api/autoheal)
+    ("autoheal_latest",     f"{H}/.openclaw/data/autoheal/latest.json",                 ALL,   1, "autoheal cron */15min — re-runs the producer for any stale/dead /api/data-health row it has a registry.py entry for"),
     # [portfolio-retired 2026-09-12] producer retired (refresh-holdings.sh/wallets-refresh.sh cron) — file will never update again
     # ("unified_book",        f"{H}/portfolio/unified_book.json",                           ALL,  6, "REAL MONEY book (RH + Coinbase) -> portfolio/risk pages"),
     # ("robinhood_holdings",  f"{H}/portfolio/robinhood_holdings.json",                     MH,  26, "REAL MONEY RH equity/options positions"),
