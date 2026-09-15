@@ -6,11 +6,16 @@ channels) with a single command-hub overview, built mostly from the deterministi
 modules we already have so it's grounded and cheap:
 
   • Tape       — SPY/QQQ/VIX (flow_picks_post._tape, yfinance)
-  • Your book  — lib.portfolio.portfolio_summary() (paper + real-money crypto)
-  • X read     — lib.x_search.x_sentiment() on your top holdings (native Grok sub)
+  • X read     — lib.x_search.x_sentiment() on your watchlist + relay tickers (native Grok sub)
   • Flow setup — top bullish near-money names from current flow (read-only, NO logging)
   • Today+orders — ONE short lib.llm.call_llm(..., ["claude_oauth","deepseek"]) for
-                   scheduled catalysts + a single game-plan line sized to the min($400, 15%) cap
+                   scheduled catalysts + a single game-plan line, flat $400 cap
+
+2026-09-15: dropped the PORTFOLIO/book block (lib.portfolio.portfolio_summary(),
+Alpaca paper + RH/Coinbase real-money) — doctrine retirement (2026-08-11 Alpaca,
+2026-09-12 portfolio views). Ticker context now comes from the watchlist +
+Firebase relay signals, never Alpaca-held positions. See docs/audits/
+telegram-sweep-2026-09-15/trade-lanes.md Lane 1/2.
 
 Subscription/OAuth-billed. Never touches the signal stream. Run with ~/.venv/bin/python.
 
@@ -30,7 +35,7 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 from skill_to_discord import post, resolve_channel  # noqa: E402
-from lib.portfolio import portfolio_summary, top_tickers_str  # noqa: E402
+from lib.portfolio import get_watchlist  # noqa: E402
 from lib import x_search  # noqa: E402
 from lib.llm import call_llm  # noqa: E402
 from lib.heartbeat import beat  # noqa: E402
@@ -41,6 +46,35 @@ from flow_picks_post import (  # noqa: E402  (read-only helpers — these do NOT
 )
 
 ET = ZoneInfo("America/New_York")
+FIREBASE_RELAY_URL = os.environ.get("FIREBASE_RELAY_URL", "http://localhost:3000/api/firebase-relay")
+
+
+def _relay_tickers(n: int = 6) -> list[str]:
+    """Watchlist + live Firebase-relay signal tickers, padded with index defaults.
+    Replaces the retired Alpaca/RH-derived 'holdings' ticker list (2026-08-11 +
+    2026-09-12 doctrine) — this is names Mike is watching or the flow relay is
+    actively flagging, never a portfolio position. Best-effort: relay unreachable
+    degrades to watchlist + defaults only, never raises."""
+    import urllib.request
+    syms = list(get_watchlist())
+    try:
+        req = urllib.request.Request(FIREBASE_RELAY_URL, headers={"User-Agent": "mc-morning/1.0"})
+        with urllib.request.urlopen(req, timeout=8) as r:
+            data = json.loads(r.read())
+        for sig in (data.get("signals") or []):
+            t = str(sig.get("ticker", "")).upper().strip()
+            if t and t not in syms:
+                syms.append(t)
+    except Exception:
+        pass
+    for d in ("SPY", "QQQ", "NVDA"):
+        if d not in syms:
+            syms.append(d)
+    return syms[:n] if syms else ["SPY", "QQQ", "NVDA"][:n]
+
+
+def _relay_tickers_str(n: int = 6) -> str:
+    return ", ".join(_relay_tickers(n))
 
 
 def _flow_setup(n: int = 2):
@@ -86,16 +120,16 @@ def _catalysts_and_orders(names: str, tape: str) -> tuple[str, str, dict]:
     today = datetime.now(ET).strftime("%A %B %-d, %Y")
     prompt = (
         f"You are a pre-open trading desk analyst. Today is {today} (US Eastern).\n"
-        f"Operator's holdings: {names}\n"
+        f"Operator's watchlist: {names}\n"
         f"Premarket tape: {tape or 'n/a'}\n\n"
         "The reader is a BEGINNER trader. Return STRICT JSON, no prose outside it:\n"
         '{"catalysts": "<=2 sentences on TODAY\'s scheduled US market catalysts you are '
         "confident about (FOMC/CPI/PPI/jobs/major single-name earnings). If you are not sure "
         'anything major is scheduled, say \\"No major scheduled macro catalysts today.\\"", '
         '"orders": "ONE concrete, actionable line: the single highest-conviction game plan for '
-        f"the day given the book. Position sizing is capped at ${RISK_CAP} risk per trade — this "
+        f"the day. Position sizing is capped at ${RISK_CAP} risk per trade — this "
         "is a HARD cap, never suggest a size above it, and if the named play cannot be expressed "
-        'under it, say so. Paper accounts. Be specific.", '
+        'under it, say so. Real money (Robinhood/Coinbase). Be specific.", '
         '"plan": {"ticker": "<symbol>", "direction": "BUY", "entry": <single number, not a '
         'range>, "stop": <single number, below entry>, "target": <single number, above entry>, '
         '"shares": <integer>, "why": "<one short clause>"}}\n'
@@ -113,20 +147,8 @@ def _catalysts_and_orders(names: str, tape: str) -> tuple[str, str, dict]:
         if cat or orders:
             return cat, orders, plan
     return ("Catalyst read unavailable — check the economic calendar.",
-            f"Trade your plan; cap risk at ${RISK_CAP} per name (fraction of equity), paper-first.",
+            f"Trade your plan; cap risk at ${RISK_CAP} per name — flat $400 cap, Mike decides.",
             {})
-
-
-def _buying_power() -> float:
-    """Most CASH one day-trade may tie up — half the book. 0 if equity is unreadable, which
-    makes the caller skip the size check rather than invent a ceiling."""
-    try:
-        from lib.portfolio import equity_day_pnl, real_money_holdings
-        paper, _ = equity_day_pnl()
-        total = paper + sum(real_money_holdings().values())
-        return 0.5 * total if total > 0 else 0.0
-    except Exception:
-        return 0.0
 
 
 def _plan_orders(plan: dict) -> str:
@@ -145,15 +167,10 @@ def _plan_orders(plan: dict) -> str:
     risk, reward = sh * (entry - stop), sh * (targ - entry)
     if risk > RISK_CAP:                      # hard cap, fail-CLOSED — never print an over-cap size
         return ""
-    # The $400 cap limits the LOSS, not the CAPITAL. A tight 0.5% stop satisfies it at 15
-    # QQQ = $10,005 — three times the whole book. Cut the share count to what half the
-    # account can actually fund, and drop the plan if that leaves under one share.
-    cap_cash = _buying_power()
-    if cap_cash and sh * entry > cap_cash:
-        sh = int(cap_cash / entry)
-        if sh < 1:
-            return ""
-        risk, reward = sh * (entry - stop), sh * (targ - entry)
+    # 2026-09-15: the equity-derived "half the book" notional check was dropped with
+    # the portfolio-view retirement (2026-09-12) — no live holdings feed exists to
+    # gate against. The flat $400 RISK_CAP above (loss, not notional) is the only
+    # sizing rule now; Mike sizes/funds the trade himself.
     why = str(plan.get("why") or "").strip().rstrip(".")
     return (f"👉 Plan{f' — {why}' if why else ''}:\n"
             f"   1) BUY {sh} {tkr} at ${entry:g} — ${sh * entry:,.0f}.\n"
@@ -229,10 +246,9 @@ def _catalyst_source_note(data: dict, info: dict) -> str:
 
 
 def _catalyst_your_name_rows(data: dict):
-    """Mike's holdings + watchlist (no index padding) that the factor actually scored."""
+    """Mike's watchlist + relay tickers (no index padding) that the factor actually scored."""
     try:
-        from lib.portfolio import personal_tickers
-        mine = personal_tickers()
+        mine = get_watchlist()
     except Exception:
         mine = []
     symbols = data.get("symbols") or {}
@@ -414,9 +430,122 @@ def _macro_phone_line() -> str:
     return f"📅 {nxt.get('name')} {nxt.get('countdown')}. Last 3 times: {roll}. {dvf}".strip()
 
 
+# --------------------------------------------------------------------------- dark pool / relay / SNR
+# 2026-09-15 spec §3 (docs/superpowers/specs/2026-09-15-telegram-lane-charter-design.md):
+# three more deterministic, no-LLM read-throughs for the trading_command lane's 8:15
+# brief. Each fails SOFT — an unreachable/empty endpoint is skipped with one log line,
+# never a broken block. ADVISORY ONLY, never a sizing/gate input.
+DARKPOOL_URL = os.environ.get("DARKPOOL_URL", "http://localhost:3000/api/darkpool")
+DARKPOOL_RELAY_URL = os.environ.get("DARKPOOL_RELAY_URL", "http://localhost:3000/api/darkpool?view=relay")
+NEWS_SNR_URL = os.environ.get("NEWS_SNR_URL", "http://localhost:3000/api/news-snr?min=65")
+TELEGRAM_MAX_CHARS = 4096
+RELAY_DP_TAGS = {"corroborated": 0, "conflict": 1, "supportive": 2}   # render order: most decisive first
+
+
+def _get_json(url: str, timeout: int = 8) -> dict | None:
+    import urllib.request
+    try:
+        req = urllib.request.Request(url, headers={"User-Agent": "mc-morning/1.0"})
+        with urllib.request.urlopen(req, timeout=timeout) as r:
+            return json.loads(r.read())
+    except Exception as e:
+        print(f"[morning] fetch failed ({url}): {e}", flush=True)
+        return None
+
+
+def _fmt_usd_compact(v) -> str:
+    try:
+        v = float(v)
+    except (TypeError, ValueError):
+        return "$0"
+    for div, suf in ((1e9, "B"), (1e6, "M"), (1e3, "K")):
+        if abs(v) >= div:
+            return f"${v / div:.1f}{suf}"
+    return f"${v:,.0f}"
+
+
+def _darkpool_line() -> str:
+    """One-line dark-pool summary: score/label, prints today, top-3 hot sectors,
+    biggest print. Skips silently (one log line) if `dph` is null/missing."""
+    data = _get_json(DARKPOOL_URL)
+    dph = (data or {}).get("dph")
+    if not dph:
+        print("[morning] darkpool: dph missing/null — skipped", flush=True)
+        return ""
+    label = dph.get("label") or "n/a"
+    score = dph.get("score")
+    bits = [f"{label} {score:g}" if isinstance(score, (int, float)) else label]
+    prints = dph.get("printsToday")
+    if isinstance(prints, (int, float)):
+        bits.append(f"{int(prints)} prints")
+    line = "🕳 **DARK POOL:** " + " · ".join(bits)
+    hot = [h for h in (dph.get("hotSectors") or [])
+           if h.get("etf") and isinstance(h.get("ratio"), (int, float))][:3]
+    if hot:
+        line += " · hot: " + ", ".join(f"{h['etf']} {h['ratio']:.1f}x" for h in hot)
+    big = dph.get("largestPrint") or {}
+    if big.get("ticker") and big.get("value") is not None:
+        line += f" · biggest {big['ticker']} {_fmt_usd_compact(big['value'])}"
+    return line
+
+
+def _relay_dp_block(max_rows: int = 5) -> str:
+    """Up to N relay picks whose dark-pool confluence tag is corroborated/conflict/
+    supportive (neutral/absent skipped), joined against the LIVE firebase-relay feed
+    by signal id so a stale relayConfluence entry never outlives the relay itself.
+    One pick per ticker (most decisive tag first)."""
+    dp = _get_json(DARKPOOL_RELAY_URL)
+    dp_signals = ((dp or {}).get("relayConfluence") or {}).get("signals") or []
+    if not dp_signals:
+        print("[morning] relay x dark-pool: no relayConfluence signals — skipped", flush=True)
+        return ""
+    relay = _get_json(FIREBASE_RELAY_URL)
+    relay_ids = {str(s.get("id")) for s in (relay or {}).get("signals") or [] if s.get("id")}
+    if not relay_ids:
+        print("[morning] relay x dark-pool: firebase-relay unreachable/empty — skipped", flush=True)
+        return ""
+    joined = [s for s in dp_signals if str(s.get("id")) in relay_ids and s.get("tag") in RELAY_DP_TAGS]
+    if not joined:
+        return ""
+    joined.sort(key=lambda s: RELAY_DP_TAGS.get(s.get("tag"), 9))
+    picks, seen = [], set()
+    for s in joined:
+        tkr = str(s.get("ticker", "")).upper()
+        if not tkr or tkr in seen:
+            continue
+        seen.add(tkr)
+        side = "P" if s.get("isPut") else "C"
+        strike = s.get("strike")
+        label = f"{tkr} {side}{strike:g}" if isinstance(strike, (int, float)) else f"{tkr} {side}"
+        picks.append(f"• {label} · {s['tag']}")
+        if len(picks) >= max_rows:
+            break
+    if not picks:
+        return ""
+    return "📡 **RELAY × DARK POOL:**\n" + "\n".join(picks)
+
+
+def _snr_headlines_block(max_rows: int = 3) -> str:
+    """Top-N high-signal headlines (SNR >= 65), one line each. Skips silently if the
+    endpoint is down or nothing clears the threshold."""
+    data = _get_json(NEWS_SNR_URL)
+    arts = sorted((data or {}).get("articles") or [], key=lambda a: -(a.get("snr") or 0))[:max_rows]
+    if not arts:
+        print("[morning] news-snr: no high-SNR articles / endpoint down — skipped", flush=True)
+        return ""
+    lines = []
+    for a in arts:
+        tks = a.get("tickers") or []
+        tag = tks[0] if tks else "—"
+        title = str(a.get("title") or "").strip()
+        src = a.get("source") or ""
+        lines.append(f"📰 SIGNAL (SNR≥65): {tag} {int(a.get('snr') or 0)} — {title} ({src})")
+    return "\n".join(lines)
+
+
 def build() -> str:
     stamp = datetime.now(ET).strftime("%a %b %-d %-I:%M %p ET")
-    names = top_tickers_str(6)
+    names = _relay_tickers_str(6)
     tape = _tape()
     lines = [f"🌅 **MORNING COMMAND — pre-open brief** · {stamp}"]
     if tape:
@@ -426,10 +555,8 @@ def build() -> str:
     if pm:
         lines.append(f"🎰 **POLYMARKET (crowd odds):** {pm}")
 
-    lines.append("\n" + portfolio_summary())
-
     # native Grok X read on your names (sub-billed); silent-degrade if no token / fail
-    xs = x_search.x_sentiment(f"my holdings ({names}) and the broad market", timeout=40)
+    xs = x_search.x_sentiment(f"my watchlist ({names}) and the broad market", timeout=40)
     if xs:
         lines.append("\n📡 **X SENTIMENT (your names):**\n" + xs.strip())
 
@@ -498,26 +625,6 @@ def _tape_read(tape: str) -> str:
     return "Quiet tape — a normal, boring session."
 
 
-def _book_line() -> str:
-    """'You own: $5,130 total · biggest position ETH $1,363'. Never raises."""
-    try:
-        from lib.portfolio import equity_day_pnl, real_money_holdings
-        paper, day = equity_day_pnl()
-        crypto = real_money_holdings()
-        total = paper + sum(crypto.values())
-        if not total:
-            return ""
-        line = f"💼 You own: ${total:,.0f}"
-        if day:
-            line += f" ({day:+,.0f} yesterday)"
-        if crypto:
-            sym, val = max(crypto.items(), key=lambda x: x[1])
-            line += f" · biggest is {sym} at ${val:,.0f}"
-        return line
-    except Exception:
-        return ""
-
-
 def _one_contract_line() -> str:
     """The single best-graded option idea, in plain English with the dollar cost and the
     stop — folded in from the retired 9:00 MasterMC brief. Silent if stale or nothing
@@ -578,11 +685,7 @@ def build_phone() -> str:
     if tape:
         lines.append(f"📊 {tape}" + (f"\n   {_tape_read(tape)}" if _tape_read(tape) else ""))
 
-    book = _book_line()
-    if book:
-        lines.append(book)
-
-    cat, orders, plan = _catalysts_and_orders(top_tickers_str(6), tape)
+    cat, orders, plan = _catalysts_and_orders(_relay_tickers_str(6), tape)
     if cat:
         # first sentence only — the model likes to pad, and padding is what makes a brief
         # get skimmed instead of read
@@ -601,13 +704,42 @@ def build_phone() -> str:
         if line:
             lines.append(line)
 
+    dp_line = _darkpool_line()
+    if dp_line:
+        lines.append(dp_line)
+
+    relay_dp = _relay_dp_block(5)
+    if relay_dp:
+        lines.append(relay_dp)
+
+    snr_block = _snr_headlines_block(3)
+    if snr_block:
+        lines.append(snr_block)
+
     one = _one_contract_line()
     if one:
         lines.append(one)
 
     lines.append(f"🛡️ Never risk more than ${RISK_CAP} on a single trade. "
                  "If nothing here fits, doing nothing is a valid day.")
-    return "\n\n".join(lines)
+
+    text = "\n\n".join(lines)
+    # §3: Telegram's hard cap is 4096 chars. Trim order — drop block 3 (SNR headlines)
+    # first, then shrink block 2 (relay x dark-pool) to 3 picks. Everything else stays.
+    if len(text) > TELEGRAM_MAX_CHARS and snr_block and snr_block in lines:
+        lines.remove(snr_block)
+        text = "\n\n".join(lines)
+        print("[morning] phone brief over 4096 chars — dropped SNR headlines block", flush=True)
+    if len(text) > TELEGRAM_MAX_CHARS and relay_dp and relay_dp in lines:
+        idx = lines.index(relay_dp)
+        smaller = _relay_dp_block(3)
+        if smaller:
+            lines[idx] = smaller
+        else:
+            lines.pop(idx)
+        text = "\n\n".join(lines)
+        print("[morning] phone brief still over 4096 chars — trimmed relay x dark-pool to 3 picks", flush=True)
+    return text
 
 
 def _mirror_telegram(_discord_text: str) -> None:

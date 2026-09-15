@@ -319,20 +319,26 @@ def market_card(spec: dict):
 
 
 def scorecard_card(spec: dict):
-    """spec: book(val,day_pl), best={sym,move,series}, worst={...}, rows=[(label,move,ok)]."""
+    """spec: book(val,day_pl) [optional, retired 2026-09-15 — portfolio-view doctrine],
+    headline=str (used instead of book when book is absent), best={sym,move,series},
+    worst={...}, rows=[(label,move,ok)]."""
     try:
         fig = plt.figure(figsize=(11, 5.2))
         gs = fig.add_gridspec(2, 3, height_ratios=[1.0, 1.1], width_ratios=[1.2, 1, 1],
                               hspace=0.4, wspace=0.22)
-        book = spec.get("book", {})
+        book = spec.get("book") or {}
         axt = fig.add_subplot(gs[0, :]); axt.axis("off")
-        pl = float(book.get("day_pl", 0)); col = PAL["up"] if pl >= 0 else PAL["down"]
         axt.text(0.0, 0.7, "EOD SCORECARD", transform=axt.transAxes, fontsize=18,
                  fontweight="bold", color=PAL["text"])
-        axt.text(0.0, 0.25, f"Book ${book.get('val',0):,.0f}", transform=axt.transAxes,
-                 fontsize=13, color=PAL["muted"])
-        axt.text(0.30, 0.25, f"Day {pl:+,.0f}", transform=axt.transAxes, fontsize=14,
-                 fontweight="bold", color=col)
+        if book:
+            pl = float(book.get("day_pl", 0)); col = PAL["up"] if pl >= 0 else PAL["down"]
+            axt.text(0.0, 0.25, f"Book ${book.get('val',0):,.0f}", transform=axt.transAxes,
+                     fontsize=13, color=PAL["muted"])
+            axt.text(0.30, 0.25, f"Day {pl:+,.0f}", transform=axt.transAxes, fontsize=14,
+                     fontweight="bold", color=col)
+        elif spec.get("headline"):
+            axt.text(0.0, 0.25, str(spec["headline"]), transform=axt.transAxes,
+                     fontsize=13, color=PAL["muted"])
         for slot, key, lbl in ((gs[1, 0], "best", "▲ BEST"), (gs[1, 1], "worst", "▼ WORST")):
             d = spec.get(key)
             ax = fig.add_subplot(slot)

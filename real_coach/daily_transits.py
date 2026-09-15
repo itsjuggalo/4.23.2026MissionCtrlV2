@@ -223,6 +223,40 @@ def main() -> int:
     if trade:
         lines.append("\n📈 Desk note: " + "; ".join(trade) + ".")
 
+    # 2026-09-15 r7: sky quality · lunations/eclipses/stations/rx alerts · natal-pattern activation ·
+    # progressed lunation phase. Each layer is optional (try/except) so the send never dies.
+    try:
+        import astro_lookahead
+        q, why = astro_lookahead.score(now_et)
+        lines.append(f"\n🎚 Sky quality {q}/10 — " + ("; ".join(why[:3]) if why else "quiet sky") + " (life decisions, not trades)")
+    except Exception as e:
+        lines.append(f"\n🎚 (quality unavailable: {e})")
+    try:
+        import astro_sky
+        al = astro_sky.daily_alerts(now_et.date())
+        if al:
+            lines.append("\n🌒 Sky events (next 3 days):")
+            lines.extend(al[:5])
+    except Exception as e:
+        lines.append(f"\n🌒 (sky events unavailable: {e})")
+    try:
+        import astro_patterns
+        act = astro_patterns.pattern_activation({n: v["lon"] for n, v in trans.items()})
+        if act:
+            lines.append("\n🔺 Natal pattern lit today:")
+            lines.extend(act[:3] if isinstance(act, list) else [str(act)])
+    except Exception as e:
+        lines.append(f"\n🔺 (pattern check unavailable: {e})")
+    try:
+        import astro_returns
+        ph = astro_returns.progressed_phase(now_et.date())
+        if isinstance(ph, dict) and ph.get("phase"):
+            lines.append(f"\n🌗 Progressed lunation phase: {ph['phase'].replace('_', ' ')}"
+                         + (f" (since {ph['phase_start']}, next {ph['next_phase']} {ph['next_phase_start']})" if ph.get("phase_start") else "")
+                         + " · /phase for the meaning")
+    except Exception as e:
+        lines.append(f"\n🌗 (phase unavailable: {e})")
+
     # 2026-09-14: the Aug 2026 Svehla reading — active windows + what's next
     try:
         sv = svehla.daily_block(now_et.date())

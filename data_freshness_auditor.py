@@ -10,7 +10,13 @@ a dead table isn't an incident.
 Alert-only. Never writes to the pipeline DB, never touches trading behaviour.
 
 Cron: 06:45 ET daily (before the 09:30 open, so weekend carryover is caught early).
+
+Usage:
+    data_freshness_auditor.py [--dry-run]   # audit + report.json write happen either
+                                             # way; --dry-run only skips the Telegram
+                                             # send + alert_gate mark_sent
 """
+import argparse
 import json
 import sqlite3
 import subprocess
@@ -19,11 +25,15 @@ from datetime import datetime, time as dtime, timedelta, timezone
 from pathlib import Path
 from zoneinfo import ZoneInfo
 
+sys.path.insert(0, str(Path.home() / "05_AUTOMATION" / "scripts"))
+from lib.alert_gate import should_send, mark_sent  # noqa: E402
+
 ET = ZoneInfo("America/New_York")
 DB = Path.home() / "LapClaw" / "pipeline" / "desk_pipeline.sqlite"
 REPORT = Path.home() / ".openclaw" / "workspace" / "directives" / "freshness_audit_report.json"
 PING_MIKE = Path.home() / "scripts" / "ping_mike.py"
-ALERT_STATE = Path.home() / ".openclaw" / "state" / "freshness_audit_alerted.json"
+ALERT_GATE_KEY = "data_freshness"
+ALERT_REPEAT_AFTER = 24 * 3600   # 2026-09-15: same stale list no longer re-pings every run
 
 MH = "market_hours"   # age discounts weekend hours (producer only runs Mon-Fri)
 ALL = "calendar"      # producer runs every day; weekends count against it
@@ -253,34 +263,39 @@ def audit_files():
     return rows
 
 
-def alert(stale, today):
-    """Ping once per source per day so a multi-day outage doesn't spam."""
-    try:
-        seen = set(json.loads(ALERT_STATE.read_text()))
-    except Exception:
-        seen = set()
-    new = [s for s in stale if f"{s['source']}@{today}" not in seen]
-    if not new:
-        return False
+def alert(stale, today, dry_run=False):
+    """Ping via the shared alert_gate: fingerprint = sorted stale/error/missing source
+    ids, 24h cooldown — an UNCHANGED stale list reminds once per 24h instead of once
+    every cron run (the old per-day-only dedup re-pinged the identical list every
+    single day a multi-day outage ran). A CHANGED list (new source went stale, or one
+    recovered) always sends immediately, same as alert_gate's normal 'changed' rule."""
+    fp = "|".join(sorted(s["source"] for s in stale))
+    ok, why = should_send(ALERT_GATE_KEY, fp, repeat_after=ALERT_REPEAT_AFTER)
     lines = [f"• {s['source']} — {s.get('effective_age_hours', '?')}h old "
-             f"(limit {s['max_age_hours']}h)" for s in new[:12]]
-    more = f"\n…+{len(new) - 12} more" if len(new) > 12 else ""
+             f"(limit {s['max_age_hours']}h)" for s in stale[:12]]
+    more = f"\n…+{len(stale) - 12} more" if len(stale) > 12 else ""
     msg = ("⚠️ DATA FRESHNESS — %d stale source(s) on missionctrl:\n%s%s\n"
            "Full report: ~/.openclaw/workspace/directives/freshness_audit_report.json"
-           % (len(new), "\n".join(lines), more))
+           % (len(stale), "\n".join(lines), more))
+    if dry_run:
+        print(f"[freshness] --dry-run: gate says {'SEND' if ok else 'SUPPRESS'} ({why})\n{msg}", flush=True)
+        return False
+    if not ok:
+        return False
     try:
-        ok = subprocess.run(["python3", str(PING_MIKE), msg], timeout=30).returncode == 0
+        sent = subprocess.run(["python3", str(PING_MIKE), msg], timeout=30).returncode == 0
     except Exception:
-        ok = False
-    if ok:
-        seen |= {f"{s['source']}@{today}" for s in new}
-        ALERT_STATE.parent.mkdir(parents=True, exist_ok=True)
-        ALERT_STATE.write_text(json.dumps(
-            sorted(k for k in seen if k.endswith(today))))
-    return ok
+        sent = False
+    if sent:
+        mark_sent(ALERT_GATE_KEY, fp)
+    return sent
 
 
 def main():
+    ap = argparse.ArgumentParser()
+    ap.add_argument("--dry-run", action="store_true",
+                     help="audit + write report.json as normal, but print (don't send) the alert")
+    a = ap.parse_args()
     if not DB.exists():
         print(f"[freshness] DB missing: {DB}", file=sys.stderr)
         return 2
@@ -321,8 +336,8 @@ def main():
 
     stale = [r for r in rows if r["status"] in ("STALE", "MISSING", "ERROR")]
     if stale:
-        sent = alert(stale, now_et.date().isoformat())
-        print(f"alert: {'sent to Telegram' if sent else 'not sent (already pinged today or ping failed)'}")
+        sent = alert(stale, now_et.date().isoformat(), dry_run=a.dry_run)
+        print(f"alert: {'sent to Telegram' if sent else ('dry-run' if a.dry_run else 'not sent (gated/cooldown or ping failed)')}")
     return 0
 
 

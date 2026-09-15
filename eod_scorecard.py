@@ -1,7 +1,13 @@
 #!/usr/bin/env python3
-"""eod_scorecard.py — end-of-day SCORECARD to #flow-picks: combined book P&L
-(equity + real-money crypto) + grades of today's flow picks (did the underlying move
-the way the pick implied?) + any /pick took/skip outcomes. Read-only. Cron 4:10 ET.
+"""eod_scorecard.py — end-of-day SCORECARD to #flow-picks: grades of today's flow
+picks (did the underlying move the way the pick implied?) + a catalyst/SNR
+read-through + any /pick took/skip outcomes. Read-only. Cron 4:10 ET.
+
+2026-09-15: dropped the book-equity preamble (lib.portfolio.equity_day_pnl() +
+real_money_holdings() — Alpaca paper + RH/Coinbase real-money) — doctrine
+retirement (2026-08-11 Alpaca, 2026-09-12 portfolio views). The grading half
+(did the pick's direction pan out) was always fine and stays. See docs/audits/
+telegram-sweep-2026-09-15/trade-lanes.md Lane 2.
 
 Run with ~/.venv/bin/python (yfinance for underlying EOD prices).
 """
@@ -16,7 +22,6 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 import skill_to_discord as sd  # noqa: E402
-from lib.portfolio import real_money_holdings, equity_day_pnl  # noqa: E402
 from lib.heartbeat import beat  # noqa: E402
 from lib.notify import tg_brief  # noqa: E402
 from lib.discord_threading import make_pick_key, post_to_pick_thread_bot  # noqa: E402
@@ -25,25 +30,28 @@ ET = ZoneInfo("America/New_York")
 SYNTH_TOKEN_FILE = Path.home() / ".openclaw" / "secrets" / "discord_synthcontrol_token"
 STATE = Path.home() / ".openclaw" / "state"
 JOURNAL = Path.home() / ".openclaw" / "data" / "trade_journal.jsonl"
+NEWS_SNR_URL = "http://localhost:3000/api/news-snr?min=65"
 
 
-def _crypto_pnl():
-    held = real_money_holdings()
-    tot_val, tot_pl = 0.0, 0.0
-    for sym, val in held.items():
-        try:
-            r = urllib.request.Request(
-                f"https://api.exchange.coinbase.com/products/{sym}-USD/stats",
-                headers={"User-Agent": "mc/1.0"})
-            d = json.loads(urllib.request.urlopen(r, timeout=10).read())
-            o = float(d.get("open", 0) or 0)
-            last = float(d.get("last", 0) or 0)
-            chg = (last - o) / o * 100 if o else 0
-        except Exception:
-            chg = 0
-        tot_val += val
-        tot_pl += val * (chg / (100 + chg)) if (100 + chg) else 0
-    return tot_val, tot_pl
+def _snr_corroboration_line() -> str:
+    """One-line SNR corroboration: top 3 high-signal headlines (ticker + score).
+    Silently skipped if the endpoint doesn't respond — advisory only, never blocks
+    the scorecard."""
+    try:
+        req = urllib.request.Request(NEWS_SNR_URL, headers={"User-Agent": "mc-eod/1.0"})
+        with urllib.request.urlopen(req, timeout=8) as r:
+            data = json.loads(r.read())
+        arts = sorted(data.get("articles") or [], key=lambda a: -(a.get("snr") or 0))[:3]
+        if not arts:
+            return ""
+        parts = []
+        for a in arts:
+            tks = a.get("tickers") or []
+            tag = tks[0] if tks else "—"
+            parts.append(f"{tag} {int(a.get('snr') or 0)}")
+        return "\n📰 **SNR corroboration (≥65):** " + " · ".join(parts)
+    except Exception:
+        return ""
 
 
 def _last(ticker: str):
@@ -150,14 +158,16 @@ def _post_grade_action_cards(graded) -> None:
         print(f"[eod-scorecard] action-card err: {e}", flush=True)
 
 
-def _post_scorecard_card(graded, total_val, total_pl) -> None:
-    """Post the visual EOD scorecard card (book P&L + best/worst mini-charts + grades)."""
+def _post_scorecard_card(graded) -> None:
+    """Post the visual EOD scorecard card (best/worst mini-charts + grades). No book/
+    equity block — see module docstring."""
     try:
         from lib import chart_renderer as cr, ops_card as oc
         tok = SYNTH_TOKEN_FILE.read_text().strip()
         cid = sd.resolve_channel("flow-picks")
         g2 = [(r, g) for r, g in (graded or []) if g]
-        spec = {"book": {"val": total_val, "day_pl": total_pl}, "rows": []}
+        wins = sum(1 for _, g in g2 if g[1] > 0.3)
+        spec = {"headline": f"{wins}/{len(graded or [])} picks working today", "rows": []}
         for r, g in g2[:6]:
             spec["rows"].append((f"{r['symbol']} ${r['strike']:g}{r['type']}", g[0], g[1] > 0.3))
         if g2:
@@ -175,21 +185,13 @@ def _post_scorecard_card(graded, total_val, total_pl) -> None:
 
 
 def main():
-    eq_val, eq_pl = equity_day_pnl()
-    cr_val, cr_pl = _crypto_pnl()
-    total_val = eq_val + cr_val
-    total_pl = eq_pl + cr_pl
-    arrow = "🟢" if total_pl >= 0 else "🔴"
     date = datetime.now(ET).strftime("%a %b %-d")
-
-    lines = [f"📊 **EOD SCORECARD — {date}**",
-             f"Book **${total_val:,.0f}**  ·  day {arrow} **${total_pl:+,.0f}**",
-             f"   • Paper equity ${eq_val:,.0f} ({eq_pl:+,.0f})  • Crypto ${cr_val:,.0f} ({cr_pl:+,.0f})"]
+    lines = [f"📊 **EOD SCORECARD — {date}**"]
 
     graded = _grade_picks()
     if graded:
         wins = sum(1 for _, g in graded if g and g[1] > 0.3)
-        lines.append(f"\n**🎯 Today's flow picks — {wins}/{len(graded)} working:**")
+        lines.append(f"**🎯 Today's flow picks — {wins}/{len(graded)} working:**")
         for r, g in graded:
             label = f"{r['symbol']} ${r['strike']:g}{r['type']}"
             if not g:
@@ -200,7 +202,11 @@ def main():
             lines.append(f"   {ic} {label} — underlying {entry:.2f}→{now:.2f} ({move:+.1f}%)")
         lines.append("_Grade = did the underlying move the pick's direction since it posted._")
     else:
-        lines.append("\n_No flow picks logged today._")
+        lines.append("_No flow picks logged today._")
+
+    snr = _snr_corroboration_line()
+    if snr:
+        lines.append(snr)
 
     # /pick took/skip decisions today
     took, skip = [], []
@@ -217,16 +223,16 @@ def main():
         lines.append(f"\n**Your calls:** ✅ took {', '.join(took) or '—'} · ❌ skipped {', '.join(skip) or '—'}")
 
     msg = "\n".join(lines)
-    if "--print" in sys.argv:        # on-demand (/scorecard) — return text, don't post
+    if "--print" in sys.argv or "--dry-run" in sys.argv:   # on-demand (/scorecard) or verify — return text, don't post
         print(msg)
         return
     sd.post(sd.resolve_channel("flow-picks"), msg)
     _post_grade_threads(graded)        # land each grade in its per-pick thread (closes the loop)
-    _post_scorecard_card(graded, total_val, total_pl)   # visual scorecard card
+    _post_scorecard_card(graded)       # visual scorecard card
     _post_grade_action_cards(graded)   # best + worst pick → tap-to-act cards
     beat("eod_scorecard")
     used = tg_brief(msg, chain=("flow_digest", "daily_briefs"))  # 2026-06-24: EOD Scorecard → flow_digest (fallback SpaceCoast)
-    print(f"[eod-scorecard] posted; book ${total_val:,.0f} day ${total_pl:+,.0f} picks={len(graded)} · tg→{used or 'skip'}", flush=True)
+    print(f"[eod-scorecard] posted; picks={len(graded)} · tg→{used or 'skip'}", flush=True)
 
 
 if __name__ == "__main__":

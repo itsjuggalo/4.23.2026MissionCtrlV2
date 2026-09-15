@@ -468,7 +468,15 @@ def fit_for(tname: str, nname: str, d: date | None = None) -> str:
 
 
 def fit_for_exact(what: str, d: date | None = None) -> str:
-    """Same mapping for an exact-hit description string."""
+    """Same mapping for an exact-hit description string (researched combo translation first)."""
+    try:
+        import astro_lexicon as lex
+        key = what.replace("Transiting ", "").replace(" exactly", "").replace("natal ", "natal ")
+        c = lex.combo_translation(key)
+        if c:
+            return c.split(" (Esoteric:")[0]
+    except Exception:
+        pass
     for tname in T_BODY:
         if what.startswith(f"Transiting {tname} exactly"):
             nname = what.split("natal ")[-1]

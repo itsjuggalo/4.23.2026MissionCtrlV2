@@ -234,16 +234,80 @@ def check_outputs() -> list[str]:
     return fails
 
 
+def check_modules() -> list[str]:
+    """F — the r7 modules: returns, sky, patterns, lookahead, wheel. Skips (not fails) if a module is absent."""
+    fails = []
+    now = datetime.now(T.ET)
+    nat = T.natal()
+    try:
+        import astro_returns as R
+        sr = R.solar_return(now.year)
+        srlon = sr.get("sun_lon") or sr.get("planets", {}).get("Sun", {}).get("lon")
+        if srlon is not None and abs(T.angle(srlon, nat["Sun"]["lon"])) > 0.01:
+            fails.append(f"F solar return Sun {srlon:.4f} vs natal {nat['Sun']['lon']:.4f}")
+        ph = R.progressed_phase(now.date())
+        pr = T.progressed(now.date())
+        ang = (pr["Moon"]["lon"] - pr["Sun"]["lon"]) % 360
+        want = ["new", "crescent", "first_quarter", "gibbous", "full", "disseminating", "last_quarter", "balsamic"][int(ang // 45)]
+        if isinstance(ph, dict) and ph.get("phase") and ph["phase"] != want:
+            fails.append(f"F progressed phase '{ph['phase']}' vs angle {ang:.1f}° → {want}")
+    except ImportError:
+        fails.append("F astro_returns missing — skipped")
+    except Exception as e:
+        fails.append(f"F astro_returns crashed: {e}")
+    try:
+        import astro_sky as S
+        known = {"2026-08-12": "solar", "2026-08-28": "lunar", "2027-02-06": "solar", "2027-08-02": "solar"}
+        ecl = S.eclipses(date(2026, 8, 1), 400)
+        got = {str(e.get("date_et", ""))[:10]: e.get("kind") for e in ecl}
+        for d, k in known.items():
+            near = [g for g in got if abs((date.fromisoformat(g) - date.fromisoformat(d)).days) <= 1 and got[g] == k]
+            if not near:
+                fails.append(f"F eclipse {k} {d} not found by astro_sky (got {sorted(got)[:6]})")
+        lun = S.lunations(now.date(), 40)
+        for l in lun[:2]:
+            dt = l.get("date_et"); dt = datetime.fromisoformat(dt) if isinstance(dt, str) else dt
+            tr = T.transits(dt if dt.tzinfo else dt.replace(tzinfo=T.ET))
+            el = (tr["Moon"]["lon"] - tr["Sun"]["lon"]) % 360
+            want = 0 if l["kind"] == "new" else 180
+            if abs((el - want + 180) % 360 - 180) > 1.0:
+                fails.append(f"F lunation {l['kind']} {dt}: elongation {el:.2f}° ≠ {want}")
+    except ImportError:
+        fails.append("F astro_sky missing — skipped")
+    except Exception as e:
+        fails.append(f"F astro_sky crashed: {e}")
+    try:
+        import astro_patterns as P
+        txt = P.patterns_block()
+        if "MC" not in txt or "Mars" not in txt:
+            fails.append("F patterns_block lost the MC-apex t-square")
+        stars = P.fixed_stars_block()
+        if "Acrux" not in stars:
+            fails.append("F fixed stars: Acrux conjunct Sun missing (Svehla's Alpha Crucis)")
+    except ImportError:
+        fails.append("F astro_patterns missing — skipped")
+    except Exception as e:
+        fails.append(f"F astro_patterns crashed: {e}")
+    try:
+        import astro_lookahead as L
+        q, _ = L.score(now)
+        if not 1 <= q <= 10:
+            fails.append(f"F quality score out of range: {q}")
+    except Exception as e:
+        fails.append(f"F astro_lookahead crashed: {e}")
+    return fails
+
+
 def run_all(send_on_fail: bool = False) -> int:
     fails = []
-    for fn in (check_natal, check_texts, check_horizons, check_svehla, check_outputs):
+    for fn in (check_natal, check_texts, check_horizons, check_svehla, check_outputs, check_modules):
         try:
             fails += fn()
         except Exception as e:
             fails.append(f"{fn.__name__} crashed: {e}")
     hard = [f for f in fails if "skipped" not in f]
     status = {"ok": not hard, "when_et": datetime.now(T.ET).isoformat(timespec="minutes"),
-              "checks": ["natal", "texts", "horizons", "svehla", "outputs"], "failures": fails}
+              "checks": ["natal", "texts", "horizons", "svehla", "outputs", "modules"], "failures": fails}
     STATUS.parent.mkdir(parents=True, exist_ok=True)
     STATUS.write_text(json.dumps(status, indent=1))
     print(("✔ ALL CHECKS PASS" if not hard else "✖ FAILURES") + f" — {status['when_et']}")

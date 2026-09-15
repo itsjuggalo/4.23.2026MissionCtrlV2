@@ -205,9 +205,15 @@ def explain_hit(h: dict, t_lon: float, n_lon: float, asc_lon: float, full: bool 
         lines.append(f"Esoteric {t}: {tp['eso']}.")
         lines.append(f"Esoteric {n}: {np_['eso']}.")
         lines.append(f"Esoteric {a}: {asp['eso']}. {NH['mike']}.")
+        combo = combo_translation(f"{t} {a} natal {n}") or combo_translation(f"{t} {a} {n}") or combo_translation(f"{t} {a}")
+        if combo:
+            lines.append(f"Researched: {combo}")
+        elif kb_get("planets", t, "in_mikes_chart"):
+            lines.append(f"Researched ({t} for you): {kb_get('planets', t, 'in_mikes_chart')}")
         lines.append(f"How to work it: {asp['work']}.")
     else:
         lines.append(f"Esoterically: {tp['eso'].split(';')[0]}; {asp['eso'].split(';')[0]}. In your chart: {NH['mike']}.")
+    lines.append(translate_hit(h, t_lon, n_lon))
     return "\n".join(lines)
 
 
@@ -216,29 +222,115 @@ def lookup(kind: str, key: str) -> str:
     if kind in ("planet", "body"):
         key = {"Asc": "ASC", "Mc": "MC", "Dsc": "DSC"}.get(key, key)
         p = PLANETS.get(key)
-        return f"{key}: {p['is']}.\nEsoteric: {p['eso']}." if p else f"Unknown planet '{key}'. Try: {', '.join(PLANETS)}"
+        if not p:
+            return f"Unknown planet '{key}'. Try: {', '.join(PLANETS)}"
+        out = f"{key}: {p['is']}.\nEsoteric: {p['eso']}."
+        if kb_get("planets", key, "esoteric"):
+            out += f"\nResearched: {kb_get('planets', key, 'esoteric')}"
+        if kb_get("planets", key, "in_mikes_chart"):
+            out += f"\nIn your chart: {kb_get('planets', key, 'in_mikes_chart')}"
+        return out
     if kind == "sign":
         s = SIGNS.get(key)
         if not s:
             return f"Unknown sign '{key}'."
         hs = houses_for_sign(key)
         where = " and ".join(ORDINAL(h) for h in hs)
-        return (f"{key} ({s['mode']}, ruler {s['ruler']}, esoteric ruler {s['eso_ruler']}): {s['is']}.\n"
-                f"Esoteric keynote: {s['eso']}.\nIn your chart (Placidus): {key} falls in your {where} house — "
-                + " / ".join(HOUSES[h - 1]['mike'] for h in hs) + ".")
+        out = (f"{key} ({s['mode']}, ruler {s['ruler']}, esoteric ruler {s['eso_ruler']}): {s['is']}.\n"
+               f"Esoteric keynote: {s['eso']}.\nIn your chart (Placidus): {key} falls in your {where} house — "
+               + " / ".join(HOUSES[h - 1]['mike'] for h in hs) + ".")
+        if kb_get("signs", key, "esoteric"):
+            out += f"\nResearched: {kb_get('signs', key, 'esoteric')}"
+        if kb_get("signs", key, "in_mikes_chart"):
+            out += f"\nFor you: {kb_get('signs', key, 'in_mikes_chart')}"
+        return out
     if kind == "house":
         try:
             n = int(key); h = HOUSES[n - 1]
         except Exception:
             return "House must be 1-12."
-        return (f"{ORDINAL(n)} house (cusp in {HOUSE_SIGN[n - 1]} for you): {h['is']}.\nEsoteric: {h['eso']}.\nYours: {h['mike']}.")
+        out = f"{ORDINAL(n)} house (cusp in {HOUSE_SIGN[n - 1]} for you): {h['is']}.\nEsoteric: {h['eso']}.\nYours: {h['mike']}."
+        if kb_get("houses", str(n), "esoteric"):
+            out += f"\nResearched: {kb_get('houses', str(n), 'esoteric')}"
+        if kb_get("houses", str(n), "in_mikes_chart"):
+            out += f"\nFor you: {kb_get('houses', str(n), 'in_mikes_chart')}"
+        return out
     if kind == "aspect":
         key = {"Conjunction": "conjunct", "Opposition": "opposite", "Square": "square", "Trine": "trine",
                "Sextile": "sextile", "Conjunct": "conjunct", "Opposite": "opposite"}.get(key, key.lower())
         a = ASPECTS.get(key)
-        return (f"{key} ({a['geo']}): {a['is']}.\nEsoteric: {a['eso']}.\nHow to work it: {a['work']}."
-                if a else f"Unknown aspect. Try: {', '.join(ASPECTS)}")
-    return "Usage: /planet saturn · /sign scorpio · /house 10 · /aspect square"
+        if not a:
+            return f"Unknown aspect. Try: {', '.join(ASPECTS)}"
+        out = f"{key} ({a['geo']}): {a['is']}.\nEsoteric: {a['eso']}.\nHow to work it: {a['work']}."
+        if kb_get("aspects", key, "esoteric"):
+            out += f"\nResearched: {kb_get('aspects', key, 'esoteric')}"
+        return out
+    if kind in ("phase", "event", "combo"):
+        if kind == "combo":
+            return combo_translation(key) or f"No researched combo matching '{key}'."
+        sec = "lunation_phases" if kind == "phase" else "sky_events"
+        k = key.lower().replace(" ", "_")
+        e = KB.get(sec, {}).get(k)
+        return (f"{key}: {e.get('traditional', '')}\nEsoteric: {e.get('esoteric', '')}\nIn plain terms: {e.get('translation', '')}"
+                if e else f"Unknown {kind}. Try: {', '.join(KB.get(sec, {}))}")
+    return "Usage: /planet saturn · /sign scorpio · /house 10 · /aspect square · /phase balsamic · /event solar_eclipse · /combo Saturn conjunct MC"
+
+
+# ── plain-English translation layer + esoteric KB merge (2026-09-15) ─────────────
+import json as _json
+_KB_PATH = _P(__file__).with_name("astro_esoteric_kb.json")
+try:
+    KB = _json.loads(_KB_PATH.read_text())
+except Exception:
+    KB = {}
+
+
+def kb_get(section: str, key: str, field: str, default: str = "") -> str:
+    try:
+        return KB[section][key][field] or default
+    except Exception:
+        return default
+
+
+def plain(body: str) -> str:
+    """Short plain-English keyword for a body (KB 'plain' if researched, else our own)."""
+    fallback = {"Sun": "your core self", "Moon": "your feelings and habits", "Mercury": "your thinking and words",
+                "Venus": "money, love and what you value", "Mars": "your drive and temper", "Jupiter": "growth and luck",
+                "Saturn": "limits, duty and time", "Uranus": "sudden change", "Neptune": "fog and longing",
+                "Pluto": "deep change and power", "Chiron": "the old wound", "Ceres": "care and fair pay",
+                "Juno": "commitment and fairness", "Hades": "the buried past", "Apollon": "reach and multiplication",
+                "ASC": "how you show up", "MC": "your career and reputation", "DSC": "your partner"}
+    return kb_get("planets", body, "plain", fallback.get(body, body.lower()))
+
+
+ASPECT_PLAIN = {
+    "conjunct": "{A} and {B} fuse — they act as one thing now",
+    "sextile": "{A} opens an easy door for {B}, but only if you walk through it",
+    "square": "{A} and {B} pull against each other until you build something that holds both",
+    "trine": "{A} and {B} flow together — this is easy, so use it before it passes",
+    "opposite": "{A} and {B} face off across the chart — you'll meet it through another person or a choice",
+}
+
+
+def translate_hit(h: dict, t_lon: float, n_lon: float) -> str:
+    """'In plain terms:' one line a non-astrologer understands, for a transit→natal aspect."""
+    t, n, a = h["t"], h["n"], h["aspect"]
+    nh = house_of(n_lon)
+    tmpl = kb_get("aspects", a, "plain", ASPECT_PLAIN[a])
+    A = f"{t} ({plain(t)})" if t not in ("ASC", "MC", "DSC") else f"your {t} ({plain(t)})"
+    B = f"your {n} ({plain(n)})" if n not in ("ASC", "MC", "DSC") else f"your {n} ({plain(n)})"
+    core = tmpl.replace("{A}", A).replace("{B}", B)
+    where = kb_get("houses", str(nh), "plain", HOUSES[nh - 1]["is"])
+    return f"In plain terms: {core.rstrip('.')}. Where it lands in your life: {where} ({ORDINAL(nh)} house)."
+
+
+def combo_translation(name_fragment: str) -> str:
+    """Look up a researched natal/transit combo by name fragment (e.g. 'Saturn conjunct MC')."""
+    for sec in ("transit_combos", "natal_combos"):
+        for c in KB.get(sec, []):
+            if name_fragment.lower() in c.get("name", "").lower():
+                return f"{c['name']}: {c.get('translation', '')} (Esoteric: {c.get('esoteric', '')})"
+    return ""
 
 
 if __name__ == "__main__":

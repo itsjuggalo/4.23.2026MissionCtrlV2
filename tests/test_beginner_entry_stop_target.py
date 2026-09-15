@@ -8,7 +8,6 @@ is a money-losing instruction, not a cosmetic bug.
 
 Covers: setup_scanner (SMS lane) · flow_chase (FLOW WINNERS board) · morning_command (8:15).
 """
-import contextlib
 import os
 import sys
 
@@ -317,23 +316,8 @@ def _plan(**over):
     return p
 
 
-@contextlib.contextmanager
-def _fixed_buying_power(usd):
-    """Pin buying power. These assertions are on exact dollar amounts, and the real
-    `_buying_power()` reads the LIVE account — so as equity drifts the expected share count
-    changes and the test fails for a reason that has nothing to do with the code. (Surfaced
-    2026-07-29 under pytest-randomly: passed alone, failed in the shuffled suite.)"""
-    orig = MC._buying_power
-    MC._buying_power = lambda: usd
-    try:
-        yield
-    finally:
-        MC._buying_power = orig
-
-
 def test_brief_plan_renders_three_orders():
-    with _fixed_buying_power(5000.0):       # comfortably above the $1,250 position
-        out = MC._plan_orders(_plan())
+    out = MC._plan_orders(_plan())
     assert "1) BUY" in out and "2) SELL" in out and "3) SELL" in out
     assert "you lose $50" in out and "you make $100" in out
 
@@ -350,13 +334,14 @@ def test_brief_plan_respects_the_risk_cap():
     assert MC._plan_orders(_plan(stop=8.00, shares=1000)) == "", "over-cap risk must be dropped"
 
 
-def test_brief_plan_respects_buying_power():
-    """The $400 cap limits the LOSS, not the CAPITAL — a tight 0.5% stop satisfies it at
-    15 QQQ = $10,005, several times the whole book."""
+def test_brief_plan_no_longer_clamps_by_buying_power():
+    """2026-09-15: the equity-derived 'half the book' notional clamp was retired with
+    the portfolio-view doctrine (2026-09-12) — no live holdings feed exists to derive
+    a buying-power ceiling from. The flat $400 RISK cap (loss, not notional) is the
+    only sizing rule now, so a plan inside the risk cap keeps its full share count
+    even though the notional (15 QQQ = $10,005) is several times a small book."""
     import re
-    with _fixed_buying_power(2500.0):
-        out = MC._plan_orders(_plan(ticker="QQQ", entry=667, stop=664, target=676, shares=15))
-    assert out, "a fundable QQQ plan should still render after the clamp"
+    out = MC._plan_orders(_plan(ticker="QQQ", entry=667, stop=664, target=676, shares=15))
+    assert out, "a plan within the $400 risk cap should render"
     sh = int(re.search(r"BUY (\d+) QQQ", out).group(1))
-    assert sh == 3, f"2500/667 = 3 shares, got {sh}"
-    assert sh * 667 <= 2500
+    assert sh == 15, f"share count must not be clamped by a retired buying-power check, got {sh}"

@@ -1,0 +1,1174 @@
+{
+ "generated": "2026-09-15",
+ "range_start": "2026-09-15",
+ "range_end": "2027-10-20",
+ "lunations": [
+  {
+   "date_et": "2026-09-26T12:49-04:00",
+   "kind": "full",
+   "lon": 3.6181,
+   "sign": "Aries",
+   "deg": 3,
+   "house": 9,
+   "natal_hits": [
+    {
+     "natal": "Jupiter",
+     "aspect": "opposite",
+     "orb": 1.38
+    }
+   ]
+  },
+  {
+   "date_et": "2026-10-10T11:50-04:00",
+   "kind": "new",
+   "lon": 197.3581,
+   "sign": "Libra",
+   "deg": 17,
+   "house": 3,
+   "natal_hits": [
+    {
+     "natal": "Apollon",
+     "aspect": "conjunct",
+     "orb": 0.96
+    },
+    {
+     "natal": "MC",
+     "aspect": "opposite",
+     "orb": 1.47
+    },
+    {
+     "natal": "IC",
+     "aspect": "conjunct",
+     "orb": 1.47
+    }
+   ]
+  },
+  {
+   "date_et": "2026-10-26T00:12-04:00",
+   "kind": "full",
+   "lon": 32.7597,
+   "sign": "Taurus",
+   "deg": 2,
+   "house": 10,
+   "natal_hits": []
+  },
+  {
+   "date_et": "2026-11-09T02:02-05:00",
+   "kind": "new",
+   "lon": 226.8927,
+   "sign": "Scorpio",
+   "deg": 16,
+   "house": 4,
+   "natal_hits": []
+  },
+  {
+   "date_et": "2026-11-24T09:54-05:00",
+   "kind": "full",
+   "lon": 62.336,
+   "sign": "Gemini",
+   "deg": 2,
+   "house": 11,
+   "natal_hits": [
+    {
+     "natal": "Mercury",
+     "aspect": "opposite",
+     "orb": 2.85
+    }
+   ]
+  },
+  {
+   "date_et": "2026-12-08T19:52-05:00",
+   "kind": "new",
+   "lon": 256.947,
+   "sign": "Sagittarius",
+   "deg": 16,
+   "house": 5,
+   "natal_hits": [
+    {
+     "natal": "Venus",
+     "aspect": "conjunct",
+     "orb": 1.75
+    }
+   ]
+  },
+  {
+   "date_et": "2026-12-23T20:28-05:00",
+   "kind": "full",
+   "lon": 92.2353,
+   "sign": "Cancer",
+   "deg": 2,
+   "house": 12,
+   "natal_hits": []
+  },
+  {
+   "date_et": "2027-01-07T15:25-05:00",
+   "kind": "new",
+   "lon": 287.307,
+   "sign": "Capricorn",
+   "deg": 17,
+   "house": 6,
+   "natal_hits": [
+    {
+     "natal": "Neptune",
+     "aspect": "conjunct",
+     "orb": 0.74
+    },
+    {
+     "natal": "Uranus",
+     "aspect": "conjunct",
+     "orb": 2.52
+    }
+   ]
+  },
+  {
+   "date_et": "2027-01-22T07:17-05:00",
+   "kind": "full",
+   "lon": 122.2385,
+   "sign": "Leo",
+   "deg": 2,
+   "house": 1,
+   "natal_hits": [
+    {
+     "natal": "Ceres",
+     "aspect": "opposite",
+     "orb": 0.39
+    }
+   ]
+  },
+  {
+   "date_et": "2027-02-06T10:56-05:00",
+   "kind": "new",
+   "lon": 317.6272,
+   "sign": "Aquarius",
+   "deg": 17,
+   "house": 7,
+   "natal_hits": []
+  },
+  {
+   "date_et": "2027-02-20T18:23-05:00",
+   "kind": "full",
+   "lon": 152.0897,
+   "sign": "Virgo",
+   "deg": 2,
+   "house": 2,
+   "natal_hits": [
+    {
+     "natal": "Moon",
+     "aspect": "opposite",
+     "orb": 0.83
+    }
+   ]
+  },
+  {
+   "date_et": "2027-03-08T04:29-05:00",
+   "kind": "new",
+   "lon": 347.5795,
+   "sign": "Pisces",
+   "deg": 17,
+   "house": 9,
+   "natal_hits": []
+  },
+  {
+   "date_et": "2027-03-22T06:44-04:00",
+   "kind": "full",
+   "lon": 181.5866,
+   "sign": "Libra",
+   "deg": 1,
+   "house": 3,
+   "natal_hits": []
+  },
+  {
+   "date_et": "2027-04-06T19:51-04:00",
+   "kind": "new",
+   "lon": 16.9544,
+   "sign": "Aries",
+   "deg": 16,
+   "house": 9,
+   "natal_hits": [
+    {
+     "natal": "Apollon",
+     "aspect": "opposite",
+     "orb": 0.55
+    },
+    {
+     "natal": "MC",
+     "aspect": "conjunct",
+     "orb": 1.88
+    },
+    {
+     "natal": "IC",
+     "aspect": "opposite",
+     "orb": 1.88
+    }
+   ]
+  },
+  {
+   "date_et": "2027-04-20T18:27-04:00",
+   "kind": "full",
+   "lon": 210.6156,
+   "sign": "Scorpio",
+   "deg": 0,
+   "house": 4,
+   "natal_hits": []
+  },
+  {
+   "date_et": "2027-05-06T06:59-04:00",
+   "kind": "new",
+   "lon": 45.7096,
+   "sign": "Taurus",
+   "deg": 15,
+   "house": 10,
+   "natal_hits": []
+  },
+  {
+   "date_et": "2027-05-20T06:59-04:00",
+   "kind": "full",
+   "lon": 239.2227,
+   "sign": "Scorpio",
+   "deg": 29,
+   "house": 5,
+   "natal_hits": []
+  },
+  {
+   "date_et": "2027-06-04T15:40-04:00",
+   "kind": "new",
+   "lon": 73.9727,
+   "sign": "Gemini",
+   "deg": 13,
+   "house": 11,
+   "natal_hits": [
+    {
+     "natal": "Hades",
+     "aspect": "conjunct",
+     "orb": 2.03
+    }
+   ]
+  },
+  {
+   "date_et": "2027-06-18T20:44-04:00",
+   "kind": "full",
+   "lon": 267.5558,
+   "sign": "Sagittarius",
+   "deg": 27,
+   "house": 6,
+   "natal_hits": []
+  },
+  {
+   "date_et": "2027-07-03T23:02-04:00",
+   "kind": "new",
+   "lon": 101.9554,
+   "sign": "Cancer",
+   "deg": 11,
+   "house": 12,
+   "natal_hits": [
+    {
+     "natal": "Juno",
+     "aspect": "conjunct",
+     "orb": 0.05
+    },
+    {
+     "natal": "Uranus",
+     "aspect": "opposite",
+     "orb": 2.83
+    }
+   ]
+  },
+  {
+   "date_et": "2027-07-18T11:45-04:00",
+   "kind": "full",
+   "lon": 295.8122,
+   "sign": "Capricorn",
+   "deg": 25,
+   "house": 6,
+   "natal_hits": [
+    {
+     "natal": "ASC",
+     "aspect": "opposite",
+     "orb": 1.16
+    },
+    {
+     "natal": "DSC",
+     "aspect": "conjunct",
+     "orb": 1.16
+    },
+    {
+     "natal": "Mars",
+     "aspect": "opposite",
+     "orb": 1.94
+    }
+   ]
+  },
+  {
+   "date_et": "2027-08-02T06:05-04:00",
+   "kind": "new",
+   "lon": 129.9177,
+   "sign": "Leo",
+   "deg": 9,
+   "house": 1,
+   "natal_hits": [
+    {
+     "natal": "Saturn",
+     "aspect": "opposite",
+     "orb": 2.21
+    }
+   ]
+  },
+  {
+   "date_et": "2027-08-17T03:28-04:00",
+   "kind": "full",
+   "lon": 324.195,
+   "sign": "Aquarius",
+   "deg": 24,
+   "house": 8,
+   "natal_hits": [
+    {
+     "natal": "Chiron",
+     "aspect": "opposite",
+     "orb": 1.54
+    }
+   ]
+  },
+  {
+   "date_et": "2027-08-31T13:41-04:00",
+   "kind": "new",
+   "lon": 158.1012,
+   "sign": "Virgo",
+   "deg": 8,
+   "house": 2,
+   "natal_hits": []
+  },
+  {
+   "date_et": "2027-09-15T19:04-04:00",
+   "kind": "full",
+   "lon": 352.8836,
+   "sign": "Pisces",
+   "deg": 22,
+   "house": 9,
+   "natal_hits": []
+  },
+  {
+   "date_et": "2027-09-29T22:36-04:00",
+   "kind": "new",
+   "lon": 186.7229,
+   "sign": "Libra",
+   "deg": 6,
+   "house": 3,
+   "natal_hits": [
+    {
+     "natal": "Jupiter",
+     "aspect": "conjunct",
+     "orb": 1.72
+    }
+   ]
+  },
+  {
+   "date_et": "2027-10-15T09:47-04:00",
+   "kind": "full",
+   "lon": 21.9803,
+   "sign": "Aries",
+   "deg": 21,
+   "house": 10,
+   "natal_hits": []
+  }
+ ],
+ "eclipses": [
+  {
+   "date_et": "2027-02-06T11:00-05:00",
+   "kind": "solar",
+   "type": "annular",
+   "lon": 317.6296,
+   "sign": "Aquarius",
+   "deg": 17,
+   "house": 7,
+   "natal_hits": []
+  },
+  {
+   "date_et": "2027-02-20T18:13-05:00",
+   "kind": "lunar",
+   "type": "penumbral",
+   "lon": 151.9829,
+   "sign": "Virgo",
+   "deg": 1,
+   "house": 2,
+   "natal_hits": [
+    {
+     "natal": "Moon",
+     "aspect": "opposite",
+     "orb": 0.72
+    }
+   ]
+  },
+  {
+   "date_et": "2027-07-18T12:03-04:00",
+   "kind": "lunar",
+   "type": "penumbral",
+   "lon": 295.9609,
+   "sign": "Capricorn",
+   "deg": 25,
+   "house": 6,
+   "natal_hits": [
+    {
+     "natal": "ASC",
+     "aspect": "opposite",
+     "orb": 1.01
+    },
+    {
+     "natal": "DSC",
+     "aspect": "conjunct",
+     "orb": 1.01
+    },
+    {
+     "natal": "Mars",
+     "aspect": "opposite",
+     "orb": 2.09
+    }
+   ]
+  },
+  {
+   "date_et": "2027-08-02T06:07-04:00",
+   "kind": "solar",
+   "type": "total",
+   "lon": 129.9183,
+   "sign": "Leo",
+   "deg": 9,
+   "house": 1,
+   "natal_hits": [
+    {
+     "natal": "Saturn",
+     "aspect": "opposite",
+     "orb": 2.21
+    }
+   ]
+  },
+  {
+   "date_et": "2027-08-17T03:14-04:00",
+   "kind": "lunar",
+   "type": "penumbral",
+   "lon": 324.0745,
+   "sign": "Aquarius",
+   "deg": 24,
+   "house": 8,
+   "natal_hits": [
+    {
+     "natal": "Chiron",
+     "aspect": "opposite",
+     "orb": 1.42
+    }
+   ]
+  }
+ ],
+ "stations": [
+  {
+   "date_et": "2026-10-03T03:16-04:00",
+   "body": "Venus",
+   "kind": "retrograde",
+   "lon": 218.4912,
+   "sign": "Scorpio",
+   "deg": 8,
+   "house": 4
+  },
+  {
+   "date_et": "2026-10-15T22:40-04:00",
+   "body": "Pluto",
+   "kind": "direct",
+   "lon": 303.0686,
+   "sign": "Aquarius",
+   "deg": 3,
+   "house": 7
+  },
+  {
+   "date_et": "2026-10-24T03:13-04:00",
+   "body": "Mercury",
+   "kind": "retrograde",
+   "lon": 230.979,
+   "sign": "Scorpio",
+   "deg": 20,
+   "house": 4
+  },
+  {
+   "date_et": "2026-11-13T10:54-05:00",
+   "body": "Mercury",
+   "kind": "direct",
+   "lon": 215.0335,
+   "sign": "Scorpio",
+   "deg": 5,
+   "house": 4
+  },
+  {
+   "date_et": "2026-11-13T19:27-05:00",
+   "body": "Venus",
+   "kind": "direct",
+   "lon": 202.8637,
+   "sign": "Libra",
+   "deg": 22,
+   "house": 4
+  },
+  {
+   "date_et": "2026-12-10T18:31-05:00",
+   "body": "Saturn",
+   "kind": "direct",
+   "lon": 7.931,
+   "sign": "Aries",
+   "deg": 7,
+   "house": 9
+  },
+  {
+   "date_et": "2026-12-12T17:17-05:00",
+   "body": "Neptune",
+   "kind": "direct",
+   "lon": 1.6129,
+   "sign": "Aries",
+   "deg": 1,
+   "house": 9
+  },
+  {
+   "date_et": "2026-12-12T19:57-05:00",
+   "body": "Jupiter",
+   "kind": "retrograde",
+   "lon": 147.0246,
+   "sign": "Leo",
+   "deg": 27,
+   "house": 2
+  },
+  {
+   "date_et": "2027-01-06T06:01-05:00",
+   "body": "Chiron",
+   "kind": "direct",
+   "lon": 26.2645,
+   "sign": "Aries",
+   "deg": 26,
+   "house": 10
+  },
+  {
+   "date_et": "2027-01-10T07:59-05:00",
+   "body": "Mars",
+   "kind": "retrograde",
+   "lon": 160.429,
+   "sign": "Virgo",
+   "deg": 10,
+   "house": 2
+  },
+  {
+   "date_et": "2027-02-08T07:29-05:00",
+   "body": "Uranus",
+   "kind": "direct",
+   "lon": 61.6826,
+   "sign": "Gemini",
+   "deg": 1,
+   "house": 11
+  },
+  {
+   "date_et": "2027-02-09T12:36-05:00",
+   "body": "Mercury",
+   "kind": "retrograde",
+   "lon": 335.9813,
+   "sign": "Pisces",
+   "deg": 5,
+   "house": 8
+  },
+  {
+   "date_et": "2027-03-03T07:32-05:00",
+   "body": "Mercury",
+   "kind": "direct",
+   "lon": 320.9232,
+   "sign": "Aquarius",
+   "deg": 20,
+   "house": 8
+  },
+  {
+   "date_et": "2027-04-01T10:09-04:00",
+   "body": "Mars",
+   "kind": "direct",
+   "lon": 140.9266,
+   "sign": "Leo",
+   "deg": 20,
+   "house": 2
+  },
+  {
+   "date_et": "2027-04-12T22:11-04:00",
+   "body": "Jupiter",
+   "kind": "direct",
+   "lon": 136.9955,
+   "sign": "Leo",
+   "deg": 16,
+   "house": 1
+  },
+  {
+   "date_et": "2027-05-08T08:54-04:00",
+   "body": "Pluto",
+   "kind": "retrograde",
+   "lon": 307.1781,
+   "sign": "Aquarius",
+   "deg": 7,
+   "house": 7
+  },
+  {
+   "date_et": "2027-06-10T14:15-04:00",
+   "body": "Mercury",
+   "kind": "retrograde",
+   "lon": 96.3612,
+   "sign": "Cancer",
+   "deg": 6,
+   "house": 12
+  },
+  {
+   "date_et": "2027-07-04T15:40-04:00",
+   "body": "Mercury",
+   "kind": "direct",
+   "lon": 87.4692,
+   "sign": "Gemini",
+   "deg": 27,
+   "house": 12
+  },
+  {
+   "date_et": "2027-07-09T18:41-04:00",
+   "body": "Neptune",
+   "kind": "retrograde",
+   "lon": 6.6596,
+   "sign": "Aries",
+   "deg": 6,
+   "house": 9
+  },
+  {
+   "date_et": "2027-08-07T22:56-04:00",
+   "body": "Chiron",
+   "kind": "retrograde",
+   "lon": 34.6677,
+   "sign": "Taurus",
+   "deg": 4,
+   "house": 10
+  },
+  {
+   "date_et": "2027-08-09T14:06-04:00",
+   "body": "Saturn",
+   "kind": "retrograde",
+   "lon": 27.8804,
+   "sign": "Aries",
+   "deg": 27,
+   "house": 10
+  },
+  {
+   "date_et": "2027-09-15T05:09-04:00",
+   "body": "Uranus",
+   "kind": "retrograde",
+   "lon": 69.9557,
+   "sign": "Gemini",
+   "deg": 9,
+   "house": 11
+  },
+  {
+   "date_et": "2027-10-07T10:37-04:00",
+   "body": "Mercury",
+   "kind": "retrograde",
+   "lon": 214.9278,
+   "sign": "Scorpio",
+   "deg": 4,
+   "house": 4
+  },
+  {
+   "date_et": "2027-10-17T23:53-04:00",
+   "body": "Pluto",
+   "kind": "direct",
+   "lon": 304.7483,
+   "sign": "Aquarius",
+   "deg": 4,
+   "house": 7
+  }
+ ],
+ "ingresses": [
+  {
+   "date_et": "2026-09-17T21:50-04:00",
+   "body": "Chiron",
+   "lon": 30,
+   "sign": "Taurus",
+   "deg": 0,
+   "house": 10
+  },
+  {
+   "date_et": "2026-09-22T20:06-04:00",
+   "body": "Sun",
+   "lon": 180,
+   "sign": "Libra",
+   "deg": 0,
+   "house": 3
+  },
+  {
+   "date_et": "2026-09-27T22:49-04:00",
+   "body": "Mars",
+   "lon": 120,
+   "sign": "Leo",
+   "deg": 0,
+   "house": 1
+  },
+  {
+   "date_et": "2026-09-30T07:44-04:00",
+   "body": "Mercury",
+   "lon": 210,
+   "sign": "Scorpio",
+   "deg": 0,
+   "house": 4
+  },
+  {
+   "date_et": "2026-10-23T05:38-04:00",
+   "body": "Sun",
+   "lon": 210,
+   "sign": "Scorpio",
+   "deg": 0,
+   "house": 4
+  },
+  {
+   "date_et": "2026-10-25T05:10-04:00",
+   "body": "Venus",
+   "lon": 210,
+   "sign": "Scorpio",
+   "deg": 0,
+   "house": 4
+  },
+  {
+   "date_et": "2026-11-22T02:24-05:00",
+   "body": "Sun",
+   "lon": 240,
+   "sign": "Sagittarius",
+   "deg": 0,
+   "house": 5
+  },
+  {
+   "date_et": "2026-11-25T18:37-05:00",
+   "body": "Mars",
+   "lon": 150,
+   "sign": "Virgo",
+   "deg": 0,
+   "house": 2
+  },
+  {
+   "date_et": "2026-12-04T03:13-05:00",
+   "body": "Venus",
+   "lon": 210,
+   "sign": "Scorpio",
+   "deg": 0,
+   "house": 4
+  },
+  {
+   "date_et": "2026-12-06T03:33-05:00",
+   "body": "Mercury",
+   "lon": 240,
+   "sign": "Sagittarius",
+   "deg": 0,
+   "house": 5
+  },
+  {
+   "date_et": "2026-12-21T15:50-05:00",
+   "body": "Sun",
+   "lon": 270,
+   "sign": "Capricorn",
+   "deg": 0,
+   "house": 6
+  },
+  {
+   "date_et": "2026-12-25T13:22-05:00",
+   "body": "Mercury",
+   "lon": 270,
+   "sign": "Capricorn",
+   "deg": 0,
+   "house": 6
+  },
+  {
+   "date_et": "2027-01-07T03:54-05:00",
+   "body": "Venus",
+   "lon": 240,
+   "sign": "Sagittarius",
+   "deg": 0,
+   "house": 5
+  },
+  {
+   "date_et": "2027-01-13T01:06-05:00",
+   "body": "Mercury",
+   "lon": 300,
+   "sign": "Aquarius",
+   "deg": 0,
+   "house": 7
+  },
+  {
+   "date_et": "2027-01-20T02:30-05:00",
+   "body": "Sun",
+   "lon": 300,
+   "sign": "Aquarius",
+   "deg": 0,
+   "house": 7
+  },
+  {
+   "date_et": "2027-01-31T20:26-05:00",
+   "body": "Mercury",
+   "lon": 330,
+   "sign": "Pisces",
+   "deg": 0,
+   "house": 8
+  },
+  {
+   "date_et": "2027-02-03T09:30-05:00",
+   "body": "Venus",
+   "lon": 270,
+   "sign": "Capricorn",
+   "deg": 0,
+   "house": 6
+  },
+  {
+   "date_et": "2027-02-18T07:15-05:00",
+   "body": "Mercury",
+   "lon": 330,
+   "sign": "Pisces",
+   "deg": 0,
+   "house": 8
+  },
+  {
+   "date_et": "2027-02-18T16:34-05:00",
+   "body": "Sun",
+   "lon": 330,
+   "sign": "Pisces",
+   "deg": 0,
+   "house": 8
+  },
+  {
+   "date_et": "2027-02-21T09:13-05:00",
+   "body": "Mars",
+   "lon": 150,
+   "sign": "Virgo",
+   "deg": 0,
+   "house": 2
+  },
+  {
+   "date_et": "2027-03-01T01:32-05:00",
+   "body": "Venus",
+   "lon": 300,
+   "sign": "Aquarius",
+   "deg": 0,
+   "house": 7
+  },
+  {
+   "date_et": "2027-03-18T06:02-04:00",
+   "body": "Mercury",
+   "lon": 330,
+   "sign": "Pisces",
+   "deg": 0,
+   "house": 8
+  },
+  {
+   "date_et": "2027-03-20T16:25-04:00",
+   "body": "Sun",
+   "lon": 0,
+   "sign": "Aries",
+   "deg": 0,
+   "house": 9
+  },
+  {
+   "date_et": "2027-03-26T04:16-04:00",
+   "body": "Venus",
+   "lon": 330,
+   "sign": "Pisces",
+   "deg": 0,
+   "house": 8
+  },
+  {
+   "date_et": "2027-04-08T19:21-04:00",
+   "body": "Mercury",
+   "lon": 0,
+   "sign": "Aries",
+   "deg": 0,
+   "house": 9
+  },
+  {
+   "date_et": "2027-04-14T10:58-04:00",
+   "body": "Chiron",
+   "lon": 30,
+   "sign": "Taurus",
+   "deg": 0,
+   "house": 10
+  },
+  {
+   "date_et": "2027-04-19T23:57-04:00",
+   "body": "Venus",
+   "lon": 0,
+   "sign": "Aries",
+   "deg": 0,
+   "house": 9
+  },
+  {
+   "date_et": "2027-04-20T03:18-04:00",
+   "body": "Sun",
+   "lon": 30,
+   "sign": "Taurus",
+   "deg": 0,
+   "house": 10
+  },
+  {
+   "date_et": "2027-04-24T18:18-04:00",
+   "body": "Mercury",
+   "lon": 30,
+   "sign": "Taurus",
+   "deg": 0,
+   "house": 10
+  },
+  {
+   "date_et": "2027-05-08T21:58-04:00",
+   "body": "Mercury",
+   "lon": 60,
+   "sign": "Gemini",
+   "deg": 0,
+   "house": 11
+  },
+  {
+   "date_et": "2027-05-14T10:47-04:00",
+   "body": "Mars",
+   "lon": 150,
+   "sign": "Virgo",
+   "deg": 0,
+   "house": 2
+  },
+  {
+   "date_et": "2027-05-14T17:01-04:00",
+   "body": "Venus",
+   "lon": 30,
+   "sign": "Taurus",
+   "deg": 0,
+   "house": 10
+  },
+  {
+   "date_et": "2027-05-21T02:18-04:00",
+   "body": "Sun",
+   "lon": 60,
+   "sign": "Gemini",
+   "deg": 0,
+   "house": 11
+  },
+  {
+   "date_et": "2027-05-28T13:06-04:00",
+   "body": "Mercury",
+   "lon": 90,
+   "sign": "Cancer",
+   "deg": 0,
+   "house": 12
+  },
+  {
+   "date_et": "2027-06-08T08:32-04:00",
+   "body": "Venus",
+   "lon": 60,
+   "sign": "Gemini",
+   "deg": 0,
+   "house": 11
+  },
+  {
+   "date_et": "2027-06-21T10:11-04:00",
+   "body": "Sun",
+   "lon": 90,
+   "sign": "Cancer",
+   "deg": 0,
+   "house": 12
+  },
+  {
+   "date_et": "2027-06-26T03:19-04:00",
+   "body": "Mercury",
+   "lon": 90,
+   "sign": "Cancer",
+   "deg": 0,
+   "house": 12
+  },
+  {
+   "date_et": "2027-07-02T22:02-04:00",
+   "body": "Venus",
+   "lon": 90,
+   "sign": "Cancer",
+   "deg": 0,
+   "house": 12
+  },
+  {
+   "date_et": "2027-07-12T09:48-04:00",
+   "body": "Mercury",
+   "lon": 90,
+   "sign": "Cancer",
+   "deg": 0,
+   "house": 12
+  },
+  {
+   "date_et": "2027-07-15T01:40-04:00",
+   "body": "Mars",
+   "lon": 180,
+   "sign": "Libra",
+   "deg": 0,
+   "house": 3
+  },
+  {
+   "date_et": "2027-07-22T21:05-04:00",
+   "body": "Sun",
+   "lon": 120,
+   "sign": "Leo",
+   "deg": 0,
+   "house": 1
+  },
+  {
+   "date_et": "2027-07-26T00:49-04:00",
+   "body": "Jupiter",
+   "lon": 150,
+   "sign": "Virgo",
+   "deg": 0,
+   "house": 2
+  },
+  {
+   "date_et": "2027-07-27T08:31-04:00",
+   "body": "Venus",
+   "lon": 120,
+   "sign": "Leo",
+   "deg": 0,
+   "house": 1
+  },
+  {
+   "date_et": "2027-08-02T06:52-04:00",
+   "body": "Mercury",
+   "lon": 120,
+   "sign": "Leo",
+   "deg": 0,
+   "house": 1
+  },
+  {
+   "date_et": "2027-08-17T00:43-04:00",
+   "body": "Mercury",
+   "lon": 150,
+   "sign": "Virgo",
+   "deg": 0,
+   "house": 2
+  },
+  {
+   "date_et": "2027-08-20T15:43-04:00",
+   "body": "Venus",
+   "lon": 150,
+   "sign": "Virgo",
+   "deg": 0,
+   "house": 2
+  },
+  {
+   "date_et": "2027-08-23T04:14-04:00",
+   "body": "Sun",
+   "lon": 150,
+   "sign": "Virgo",
+   "deg": 0,
+   "house": 2
+  },
+  {
+   "date_et": "2027-09-01T21:52-04:00",
+   "body": "Mars",
+   "lon": 210,
+   "sign": "Scorpio",
+   "deg": 0,
+   "house": 4
+  },
+  {
+   "date_et": "2027-09-03T07:37-04:00",
+   "body": "Mercury",
+   "lon": 180,
+   "sign": "Libra",
+   "deg": 0,
+   "house": 3
+  },
+  {
+   "date_et": "2027-09-13T20:24-04:00",
+   "body": "Venus",
+   "lon": 180,
+   "sign": "Libra",
+   "deg": 0,
+   "house": 3
+  },
+  {
+   "date_et": "2027-09-23T02:02-04:00",
+   "body": "Sun",
+   "lon": 180,
+   "sign": "Libra",
+   "deg": 0,
+   "house": 3
+  },
+  {
+   "date_et": "2027-09-27T05:10-04:00",
+   "body": "Mercury",
+   "lon": 210,
+   "sign": "Scorpio",
+   "deg": 0,
+   "house": 4
+  },
+  {
+   "date_et": "2027-10-07T23:59-04:00",
+   "body": "Venus",
+   "lon": 210,
+   "sign": "Scorpio",
+   "deg": 0,
+   "house": 4
+  },
+  {
+   "date_et": "2027-10-15T19:14-04:00",
+   "body": "Mars",
+   "lon": 240,
+   "sign": "Sagittarius",
+   "deg": 0,
+   "house": 5
+  },
+  {
+   "date_et": "2027-10-16T03:36-04:00",
+   "body": "Mercury",
+   "lon": 210,
+   "sign": "Scorpio",
+   "deg": 0,
+   "house": 4
+  }
+ ],
+ "mercury_rx": [
+  {
+   "pre_shadow": "2026-10-04T05:09-04:00",
+   "rx_start": "2026-10-24T03:13-04:00",
+   "rx_end": "2026-11-13T10:54-05:00",
+   "post_shadow": "2026-11-30T01:16-05:00",
+   "from_deg": 20,
+   "from_sign": "Scorpio",
+   "to_deg": 5,
+   "to_sign": "Scorpio",
+   "houses": [
+    4
+   ]
+  },
+  {
+   "pre_shadow": "2027-01-25T13:58-05:00",
+   "rx_start": "2027-02-09T12:36-05:00",
+   "rx_end": "2027-03-03T07:32-05:00",
+   "post_shadow": "2027-03-23T10:58-04:00",
+   "from_deg": 5,
+   "from_sign": "Pisces",
+   "to_deg": 20,
+   "to_sign": "Aquarius",
+   "houses": [
+    8
+   ]
+  },
+  {
+   "pre_shadow": "2027-05-26T02:03-04:00",
+   "rx_start": "2027-06-10T14:15-04:00",
+   "rx_end": "2027-07-04T15:40-04:00",
+   "post_shadow": "2027-07-19T04:43-04:00",
+   "from_deg": 6,
+   "from_sign": "Cancer",
+   "to_deg": 27,
+   "to_sign": "Gemini",
+   "houses": [
+    12
+   ]
+  },
+  {
+   "pre_shadow": "2027-09-17T03:29-04:00",
+   "rx_start": "2027-10-07T10:37-04:00",
+   "rx_end": "2027-10-28T10:11-04:00",
+   "post_shadow": "2027-11-13T04:55-05:00",
+   "from_deg": 4,
+   "from_sign": "Scorpio",
+   "to_deg": 19,
+   "to_sign": "Libra",
+   "houses": [
+    4
+   ]
+  }
+ ]
+}

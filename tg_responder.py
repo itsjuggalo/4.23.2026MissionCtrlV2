@@ -140,6 +140,11 @@ BOTS = {
             "• /explain — today's transits, the full read: aspect geometry, which house it fires from\n"
             "   and lands in, both signs, esoteric meaning of each planet, how to work it\n"
             "• /planet <x> · /sign <x> · /house <1-12> · /aspect <x> — the lexicon, practical + esoteric\n"
+            "• /week · /month — the coming transits day by day, peak day marked · /quality — today 1-10\n"
+            "• /sky — lunations, eclipses, stations, ingresses, Mercury rx + shadow, in your houses · /voc\n"
+            "• /solarreturn · /lunarreturn · /phase (progressed lunation phase) · /solararc\n"
+            "• /natal (patterns: t-square etc.) · /natalaspects · /activation · /stars (fixed stars)\n"
+            "• /wheel — natal + today's transits as a chart image\n"
             "• /exact — next exact transit hits + progressed ingresses (pinged 3d before)\n"
             "• /note <text> — journal what happened (stamped with the active window)\n"
             "• /score <window> 1-5 · /scorecard — did his dates play out?\n"
@@ -364,6 +369,16 @@ def astro_factcheck(answer):
 # 2026-09-14 r3: astrology-lane task commands → ~/scripts/real_coach/astro_tasks.py <cmd> <args>
 ASTRO_TASK_CMDS = {"/exact", "/note", "/score", "/scorecard", "/ask", "/askdraft",
                    "/contingency", "/loose", "/income", "/juno"}
+# 2026-09-15 r7: sky / returns / patterns / lookahead modules → command → [script, *args]
+ASTRO_MODULE_CMDS = {
+    "/sky":         ("astro_sky.py", []),            "/voc":       ("astro_sky.py", ["voc"]),
+    "/solarreturn": ("astro_returns.py", ["solar"]), "/lunarreturn": ("astro_returns.py", ["lunar"]),
+    "/phase":       ("astro_returns.py", ["phase"]), "/solararc":  ("astro_returns.py", ["arc"]),
+    "/natal":       ("astro_patterns.py", ["patterns"]), "/natalaspects": ("astro_patterns.py", ["aspects"]),
+    "/activation":  ("astro_patterns.py", ["activation"]), "/stars": ("astro_patterns.py", ["stars"]),
+    "/week":        ("astro_lookahead.py", ["week"]), "/month":    ("astro_lookahead.py", ["month"]),
+    "/quality":     ("astro_lookahead.py", ["quality"]),
+}
 
 # Static natal card for the astrology lane's /chart (same data daily_transits.py computes from).
 NATAL_CARD = (
@@ -605,6 +620,37 @@ def run_bot(botkey):
                     if cmd0 == "/chart":
                         send_reply(chat_id, NATAL_CARD)
                         print(f"[{name}] /chart", flush=True)
+                        continue
+                    # 2026-09-15 r7: /wheel → render natal+transit PNG and send as a photo
+                    if cmd0 == "/wheel":
+                        try:
+                            tg("sendChatAction", chat_id=chat_id, action="upload_photo")
+                            r = subprocess.run([str(Path.home() / ".venv/bin/python"),
+                                                str(Path.home() / "scripts/real_coach/astro_wheel.py")],
+                                               capture_output=True, text=True, timeout=120)
+                            png = (r.stdout or "").strip().splitlines()[-1] if r.returncode == 0 else ""
+                            if png and Path(png).exists():
+                                subprocess.run([str(Path.home() / ".venv/bin/python"), str(Path.home() / "scripts/tg_fleet.py"),
+                                                "sendmedia", "astrology", png, "Natal (gold) + today's transits (teal) · Placidus"],
+                                               capture_output=True, timeout=60)
+                            else:
+                                send_reply(chat_id, f"[/wheel failed] {r.stderr.strip()[:200]}")
+                        except Exception as e:
+                            send_reply(chat_id, f"[/wheel error] {e}")
+                        print(f"[{name}] /wheel", flush=True)
+                        continue
+                    if cmd0 in ASTRO_MODULE_CMDS:
+                        script, margs = ASTRO_MODULE_CMDS[cmd0]
+                        extra = text.split()[1:]
+                        try:
+                            r = subprocess.run([str(Path.home() / ".venv/bin/python"),
+                                                str(Path.home() / "scripts/real_coach" / script), *margs, *extra],
+                                               capture_output=True, text=True, timeout=180)
+                            out = (r.stdout or "").strip() or f"[{cmd0} rc={r.returncode}] {r.stderr.strip()[:300]}"
+                        except Exception as e:
+                            out = f"[{cmd0} error] {e}"
+                        send_reply(chat_id, out)
+                        print(f"[{name}] {cmd0}", flush=True)
                         continue
                     # 2026-09-14 r3: accountability + evidence layer (astro_tasks.py)
                     if cmd0 in ASTRO_TASK_CMDS:
