@@ -58,6 +58,7 @@ CONTENTION_RE = re.compile(
 )
 LOG_WINDOW_S = 35 * 60      # only scan logs modified within this window
 LOG_TAIL_LINES = 400        # ...and only their tail (avoids re-counting old storms)
+SELF_LOG_NAME = "db_contention_monitor.log"  # never scan our own output (self-match feedback loop)
 
 # flock lockfiles dropped by the desk cron wrappers.
 LOCK_GLOB = "/tmp/desk_*.lock"
@@ -141,6 +142,8 @@ def check_logs() -> list[str]:
     samples = []
     for pattern in LOG_GLOBS:
         for path in glob.glob(pattern):
+            if os.path.basename(path) == SELF_LOG_NAME:
+                continue  # our own output matches our own glob — would self-perpetuate findings
             try:
                 if now - os.path.getmtime(path) > LOG_WINDOW_S:
                     continue
