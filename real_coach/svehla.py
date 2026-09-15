@@ -183,6 +183,12 @@ def daily_block(d: date | None = None) -> str:
         lines.append(f"{KIND_ICON.get(w['kind'], '•')} {w['title']} — {when}. {first}.")
     for w in nxt:
         lines.append(f"⏭ Next: {w['title']} — {w['_start']:%b %-d %Y} ({(w['_start'] - d).days}d).")
+    for h in exact_soon(d, 3):
+        when = "TODAY" if h["in"] == 0 else f"in {h['in']}d"
+        lines.append(f"⏰ Exact {when}: {h['what']}.")
+    ended = [w for w in load_windows() if w["_end"] == d - timedelta(days=1)]
+    for w in ended:
+        lines.append(f"🏁 Ended yesterday: {w['title']}. Did it play out? /score {w['id']} 1-5 [note]")
     return "\n".join(lines)
 
 
@@ -228,6 +234,13 @@ def weekly_block(d: date | None = None) -> str:
         for w in nxt:
             lines.append(f"⏭ {w['_start']:%b %-d %Y} ({(w['_start'] - d).days}d): {w['title']}")
         lines.append("")
+    try:
+        import astro_tasks
+        nag = astro_tasks.loose_nag(d)
+        if nag:
+            lines += [nag, ""]
+    except Exception:
+        pass
     p = progressed(d)
     lines.append(f"🔭 pMoon {sign_deg(p['Moon']['lon'])} · pVenus {sign_deg(p['Venus']['lon'])} · /progressed for the rest")
     out = "\n".join(lines)
@@ -259,6 +272,149 @@ def send_to_lane(msg: str) -> None:
                    capture_output=True, timeout=30)
 
 
+# ── exact hits (idea #1 + #2): real crossing dates, cached ────────────────────
+EXACT_FILE = HERE / "svehla_exact_hits.json"
+SCAN_START, SCAN_END = date(2026, 9, 1), date(2031, 12, 31)
+ASPECT_NAME = {0: "conjunct", 90: "square", 180: "opposite", 120: "trine", 60: "sextile"}
+# (transit body, natal point, aspect) — the pairs Svehla's reading turns on
+EXACT_PAIRS = [
+    ("Saturn", "MC", 0), ("Saturn", "Mars", 90), ("Saturn", "Apollon", 180),
+    ("Saturn", "Jupiter", 180), ("Saturn", "Juno", 90), ("Saturn", "Uranus", 90),
+    ("Uranus", "Hades", 0), ("Uranus", "Mercury", 180),
+    ("Chiron", "Sun", 180), ("Pluto", "Ceres", 0),
+    ("Jupiter", "Jupiter", 0), ("Juno", "DSC", 0),
+]
+T_BODY = {"Saturn": swe.SATURN, "Uranus": swe.URANUS, "Chiron": swe.CHIRON, "Pluto": swe.PLUTO,
+          "Jupiter": swe.JUPITER, "Juno": swe.JUNO, "Neptune": swe.NEPTUNE}
+N_BODY = {"Sun": swe.SUN, "Moon": swe.MOON, "Mercury": swe.MERCURY, "Venus": swe.VENUS,
+          "Mars": swe.MARS, "Jupiter": swe.JUPITER, "Saturn": swe.SATURN, "Uranus": swe.URANUS,
+          "Neptune": swe.NEPTUNE, "Pluto": swe.PLUTO, "Chiron": swe.CHIRON, "Ceres": swe.CERES,
+          "Juno": swe.JUNO, "Hades": swe.HADES, "Apollon": swe.APOLLON}
+
+
+def natal_lon(name: str) -> float:
+    if name in ("ASC", "MC", "DSC"):
+        h = swe.houses(NATAL_JD, LAT, LON)[1]
+        return {"ASC": h[0], "MC": h[1], "DSC": (h[0] + 180) % 360}[name]
+    return swe.calc_ut(NATAL_JD, N_BODY[name])[0][0] % 360
+
+
+def _signed_diff(t_lon: float, target: float) -> float:
+    """t_lon - target folded to (-180, 180]."""
+    d = (t_lon - target + 180) % 360 - 180
+    return d
+
+
+def _crossings(f, start: date, end: date) -> list[date]:
+    """Dates where f(jd) crosses zero (daily step, bisected to ~1h). f must be a signed
+    distance folded to (-180,180]; we ignore the wrap jump at ±180."""
+    out = []
+    d = start
+    prev = f(jd_of(d))
+    while d < end:
+        d2 = d + timedelta(days=1)
+        cur = f(jd_of(d2))
+        if prev == 0 or (prev < 0 < cur or cur < 0 < prev) and abs(cur - prev) < 90:
+            lo, hi = jd_of(d), jd_of(d2)
+            for _ in range(8):
+                mid = (lo + hi) / 2
+                if (f(lo) < 0) == (f(mid) < 0):
+                    lo = mid
+                else:
+                    hi = mid
+            y, m, dd, _h = swe.revjul((lo + hi) / 2)
+            out.append(date(y, m, dd))
+        prev, d = cur, d2
+    return out
+
+
+def compute_exact_hits() -> list[dict]:
+    hits = []
+    # transits → natal, every aspect pair, all passes (retrograde = multiple real hits)
+    for tname, nname, asp in EXACT_PAIRS:
+        tb, target = T_BODY[tname], natal_lon(nname)
+        for a in ({asp, (360 - asp) % 360} if asp not in (0, 180) else {asp}):
+            f = lambda jd, tb=tb, target=target, a=a: _signed_diff(swe.calc_ut(jd, tb)[0][0], (target + a) % 360)
+            for dt in _crossings(f, SCAN_START, SCAN_END):
+                hits.append({"date": dt.isoformat(), "kind": "transit",
+                             "what": f"Transiting {tname} exactly {ASPECT_NAME[asp]} natal {nname}"})
+    # transiting Juno / Jupiter sign ingresses Svehla dated
+    for tname, tb in (("Juno", swe.JUNO), ("Jupiter", swe.JUPITER)):
+        d, prev = SCAN_START, sign_of(swe.calc_ut(jd_of(SCAN_START), tb)[0][0])
+        while d < date(2029, 12, 31):
+            d += timedelta(days=1)
+            sgn = sign_of(swe.calc_ut(jd_of(d), tb)[0][0])
+            if sgn != prev:
+                hits.append({"date": d.isoformat(), "kind": "ingress", "what": f"Transiting {tname} enters {sgn}"})
+                prev = sgn
+    # progressed Moon: sign + Placidus house ingress; progressed Venus: sign ingress + natal Ceres
+    cusps = placidus_cusps()
+    for name in ("Moon", "Venus"):
+        body = dict(PROG_BODIES)[name]
+        d = SCAN_START
+        eod = lambda dd: NATAL_JD + (swe.julday(dd.year, dd.month, dd.day, 28.0) - NATAL_JD) / 365.25
+        lon0 = swe.calc_ut(eod(d), body)[0][0]
+        prev_sign, prev_house = sign_of(lon0), placidus_house(lon0, cusps)
+        while d < SCAN_END:
+            d += timedelta(days=1)
+            lon = swe.calc_ut(eod(d), body)[0][0]   # end-of-day ET, same rule as next_ingress()
+            sgn, hs = sign_of(lon), placidus_house(lon, cusps)
+            if sgn != prev_sign:
+                hits.append({"date": d.isoformat(), "kind": "progressed", "what": f"Progressed {name} enters {sgn}"})
+                prev_sign = sgn
+            if hs != prev_house:
+                hits.append({"date": d.isoformat(), "kind": "progressed",
+                             "what": f"Progressed {name} enters your {ordinal(hs)} house (Placidus)"})
+                prev_house = hs
+    ceres = natal_lon("Ceres")
+    fv = lambda jd: _signed_diff(swe.calc_ut(NATAL_JD + (jd - NATAL_JD) / 365.25, swe.VENUS)[0][0], ceres)
+    for dt in _crossings(fv, SCAN_START, SCAN_END):
+        hits.append({"date": dt.isoformat(), "kind": "progressed", "what": "Progressed Venus exactly conjunct natal Ceres"})
+    hits.sort(key=lambda h: h["date"])
+    return hits
+
+
+def exact_hits(refresh: bool = False) -> list[dict]:
+    if EXACT_FILE.exists() and not refresh:
+        try:
+            cached = json.loads(EXACT_FILE.read_text())
+            if cached.get("scan_end") == SCAN_END.isoformat():
+                return cached["hits"]
+        except Exception:
+            pass
+    hits = compute_exact_hits()
+    EXACT_FILE.write_text(json.dumps({"generated": today_et().isoformat(),
+                                      "scan_end": SCAN_END.isoformat(), "hits": hits}, indent=1))
+    return hits
+
+
+def exact_soon(d: date | None = None, days: int = 3) -> list[dict]:
+    d = d or today_et()
+    out = []
+    for h in exact_hits():
+        hd = date.fromisoformat(h["date"])
+        if 0 <= (hd - d).days <= days:
+            out.append({**h, "in": (hd - d).days})
+    return out
+
+
+def exact_block(d: date | None = None, n: int = 12) -> str:
+    d = d or today_et()
+    lines = [f"⏰ NEXT EXACT HITS — real ephemeris, from {d:%b %-d %Y}", ""]
+    shown = 0
+    for h in exact_hits():
+        hd = date.fromisoformat(h["date"])
+        if hd < d:
+            continue
+        lines.append(f"{hd:%b %-d %Y} ({(hd - d).days}d): {h['what']}")
+        shown += 1
+        if shown >= n:
+            break
+    lines.append("")
+    lines.append("Exact = 0° orb crossing; retrograde passes are separate real hits. Pinged 3 days before + day-of.")
+    return "\n".join(lines)
+
+
 def check_block() -> str:
     """Self-test: our ephemeris vs the dates Svehla wrote down."""
     rows = []
@@ -284,7 +440,8 @@ if __name__ == "__main__":
     cmd = args[0] if args else "windows"
     out = {"windows": dates_block, "dates": dates_block, "progressed": progressed_block,
            "daily": daily_block, "weekly": weekly_block, "context": context_block,
-           "check": check_block}[cmd]()
+           "exact": exact_block, "check": check_block,
+           "rebuild": lambda: f"{len(exact_hits(refresh=True))} exact hits cached"}[cmd]()
     print(out)
     if "--send" in sys.argv:
         send_to_lane(out)

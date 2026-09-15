@@ -103,6 +103,16 @@ ASTRO = C([   # astrology-only lane (@JazzyHazzyClaw_Bot) — no trading command
     ("readings", "What's in your astrology suite"),
     ("dates", "Aug 2026 reading timeline: active now + next"),
     ("progressed", "Your progressed Moon/Venus/Sun/Juno today"),
+    ("exact", "Next exact transit hits + progressed ingresses"),
+    ("note", "Journal what happened (stamped with the active window)"),
+    ("score", "Score a finished window 1-5: /score <id> <n>"),
+    ("scorecard", "How Svehla's dates have tracked so far"),
+    ("ask", "Queue a question for the next consult"),
+    ("askdraft", "Draft the email to Svehla from queued questions"),
+    ("contingency", "Spring 2027 housing + cash tracker"),
+    ("loose", "Saturn career loose ends: /loose add <x>"),
+    ("income", "Jupiter 2H income check-in log"),
+    ("juno", "The three Juno items before Oct 7"),
     ("help", "What this bot does"),
 ])
 CLEAR = []  # pure-push / infra bots: no responder → remove any (misleading) menu

@@ -119,7 +119,9 @@ BOTS = {
             "answering anything about his chart. Same script with `--dates` = Svehla's dated "
             "windows (active/next) and `--progressed` = his real secondary progressions "
             "(pMoon, pVenus, Placidus houses, ingress dates); the windows' why/do text is in "
-            "~/scripts/real_coach/svehla_windows.json. For dates/aspects you cannot compute, "
+            "~/scripts/real_coach/svehla_windows.json; Mike's journal/scores/loose-ends/contingency "
+            "live in ~/portfolio/astrology/*.json* (read them when he asks what he noted or how a "
+            "window scored). For dates/aspects you cannot compute, "
             "say so rather than inventing degrees.\n"
             "Eastern Time. Short, warm, plain-text for Telegram — no markdown headers or tables. "
             "Mike has ADD: lead with the read, then at most 5 tight lines."
@@ -131,6 +133,11 @@ BOTS = {
             "• /readings — what's in your astrology suite\n"
             "• /dates — your Aug 2026 reading's timeline, what's active now + what's next\n"
             "• /progressed — your progressed Moon/Venus/Sun/Juno today (real ephemeris)\n"
+            "• /exact — next exact transit hits + progressed ingresses (pinged 3d before)\n"
+            "• /note <text> — journal what happened (stamped with the active window)\n"
+            "• /score <window> 1-5 · /scorecard — did his dates play out?\n"
+            "• /ask <q> · /askdraft — queue questions for the next consult, draft the email\n"
+            "• /contingency · /loose · /income · /juno — his action items, tracked\n"
             "Or just ask: 'what's Saturn doing to my 7th?', 'how's this week?',\n"
             "'read my Venus return', 'what does Mercury rx mean for me?'\n"
             "No trading here — that's Trading Command. /help = this."
@@ -332,6 +339,10 @@ FREE_CHAT_LANES = {"astrology"}
 # the astrology bot stays astrology-ONLY (Mike, 2026-08-10).
 TRADING_CMDS = {"/pick", "/picks", "/book", "/grade", "/eod", "/flow", "/crypto", "/explain",
                 "/sweeps", "/odte", "/greeks", "/winners", "/chase", "/flowwin", "/x", "/news"}
+
+# 2026-09-14 r3: astrology-lane task commands → ~/scripts/real_coach/astro_tasks.py <cmd> <args>
+ASTRO_TASK_CMDS = {"/exact", "/note", "/score", "/scorecard", "/ask", "/askdraft",
+                   "/contingency", "/loose", "/income", "/juno"}
 
 # Static natal card for the astrology lane's /chart (same data daily_transits.py computes from).
 NATAL_CARD = (
@@ -573,6 +584,20 @@ def run_bot(botkey):
                     if cmd0 == "/chart":
                         send_reply(chat_id, NATAL_CARD)
                         print(f"[{name}] /chart", flush=True)
+                        continue
+                    # 2026-09-14 r3: accountability + evidence layer (astro_tasks.py)
+                    if cmd0 in ASTRO_TASK_CMDS:
+                        parts = text.split()
+                        try:
+                            r = subprocess.run(
+                                [str(Path.home() / ".venv/bin/python"),
+                                 str(Path.home() / "scripts/real_coach/astro_tasks.py"), cmd0[1:], *parts[1:]],
+                                capture_output=True, text=True, timeout=120)
+                            out = (r.stdout or "").strip() or f"[{cmd0} rc={r.returncode}] {r.stderr.strip()[:200]}"
+                        except Exception as e:
+                            out = f"[{cmd0} error] {e}"
+                        send_reply(chat_id, out)
+                        print(f"[{name}] {cmd0} {' '.join(parts[1:])[:60]}", flush=True)
                         continue
                     # 2026-09-14: Svehla Aug-2026 reading layer — dated windows + real progressions
                     if cmd0 in ("/dates", "/progressed"):
