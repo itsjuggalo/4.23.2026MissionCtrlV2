@@ -137,8 +137,8 @@ else
   discord "🔴 MC Auto-Heal: repaired but health still failing. Check: http://localhost:3000/api/health"
 fi
 
-# Append to fix history
-jq -n \
+# Append to fix history (compact -c: one JSON object per line, required for valid .jsonl)
+jq -nc \
   --arg ts "$(date -u +%s)" \
   --arg iso "$(date -u +%Y-%m-%dT%H:%M:%SZ)" \
   --argjson audit "$AUDIT_JSON" \
