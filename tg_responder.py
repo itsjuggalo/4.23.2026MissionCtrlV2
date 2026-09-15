@@ -107,10 +107,11 @@ BOTS = {
             "trading picks, sizing, or market calls; if asked, say astrology only and point him "
             "to Trading Command.\n"
             "Mike's natal chart (Nov 3 1992, 10:46 PM EST, Dunedin FL): Sun 11-12° Scorpio 4H "
-            "(Pluto in Scorpio nearby), Moon 1° Pisces 8H, Cancer ASC 27° with Mars conjunct the "
-            "Ascendant, Mercury + Venus in Sagittarius 5H, Saturn in Aquarius 7H, Uranus + "
-            "Neptune in Capricorn 6H, Jupiter in Libra 3H, Chiron in Leo 2H, MC 19° Aries. "
-            "Whole-sign houses from the Cancer Ascendant.\n"
+            "(Pluto in Scorpio nearby), Moon 1° Pisces 8H, Cancer ASC 27°, Mars 23° Cancer in the 12th "
+            "conjunct the Ascendant, Mercury + Venus in Sagittarius 5H, Saturn in Aquarius 7H, Uranus + "
+            "Neptune in Capricorn 6H, Jupiter in Libra 3H, Chiron in Leo 2H, Juno 11° Cancer 12H, MC 19° Aries. "
+            "PLACIDUS houses (Svehla's system). Every answer you give is fact-checked against the "
+            "ephemeris afterwards — never invent a degree, house or aspect.\n"
             "REAL ephemeris, never guesswork: run `~/.venv/bin/python "
             "~/scripts/real_coach/daily_transits.py` (no --send) for today's true transits, and "
             "read his existing readings in ~/agents/claudeclaw/data/astrology/mike-*.html "
@@ -346,6 +347,20 @@ FREE_CHAT_LANES = {"astrology"}
 TRADING_CMDS = {"/pick", "/picks", "/book", "/grade", "/eod", "/flow", "/crypto", "/explain",
                 "/sweeps", "/odte", "/greeks", "/winners", "/chase", "/flowwin", "/x", "/news"}
 
+def astro_factcheck(answer):
+    """Run the astrology lane's free-chat answer through astro_verify.py --check-text: every
+    sign/degree/house/aspect/retrograde claim is re-derived from the Swiss Ephemeris (Placidus).
+    Wrong claims get a ⚠️ correction footer; right ones a one-line ✔. Never blocks the reply."""
+    try:
+        r = subprocess.run([str(Path.home() / ".venv/bin/python"),
+                            str(Path.home() / "scripts/real_coach/astro_verify.py"), "--check-text"],
+                           input=answer, capture_output=True, text=True, timeout=90)
+        note = (r.stdout or "").strip()
+        return f"{answer}\n\n{note}" if note else answer
+    except Exception as e:
+        return f"{answer}\n\n(fact-check unavailable: {e})"
+
+
 # 2026-09-14 r3: astrology-lane task commands → ~/scripts/real_coach/astro_tasks.py <cmd> <args>
 ASTRO_TASK_CMDS = {"/exact", "/note", "/score", "/scorecard", "/ask", "/askdraft",
                    "/contingency", "/loose", "/income", "/juno"}
@@ -360,7 +375,7 @@ NATAL_CARD = (
     "♄ Saturn in Aquarius · 7th (commitments) · ♃ Jupiter in Libra · 3rd (growth channel)\n"
     "♅ Uranus + ♆ Neptune in Capricorn · 6th (inner engineer + mystic)\n"
     "⚷ Chiron in Leo · 2nd (self-worth / money wound) · MC 19° Aries (career point)\n"
-    "Whole-sign houses from the Cancer ASC. /transits for today's live sky."
+    "Placidus houses (Svehla's system). /transits for today's live sky."
 )
 
 # One claude/codex CLI can pull ~0.5GB; with 6 lanes in one process, cap concurrent
@@ -761,6 +776,8 @@ def run_bot(botkey):
                     codex_primary = (cfg.get("providers") or [None])[0] == "codex_cli"
                     qq = with_context(text)
                     a = ask_persona(qq) if (codex_primary or not text.startswith("/")) else ask_local(qq)
+                    if cfg.get("astro_only") and not a.startswith("["):
+                        a = astro_factcheck(a)          # 2026-09-15: every answer audited vs the ephemeris
                     send_reply(chat_id, a)
                     remember(text, a)
                     print(f"[{name}] A: {len(a)} chars", flush=True)

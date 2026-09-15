@@ -122,7 +122,7 @@ _SIGN_NAMES = ["Aries", "Taurus", "Gemini", "Cancer", "Leo", "Virgo", "Libra",
 HOUSE_SIGN = [_SIGN_NAMES[int(c // 30)] for c in CUSPS]     # sign on each cusp
 HOUSES = [
     {"is": "your body, identity and how you come across",          "eso": "the Soul's doorway — the dharma of this incarnation",
-     "mike": "Cancer rising with Mars on it: you lead with protection and heat at once"},
+     "mike": "Cancer rising with Mars 3° before it (12th side, conjunct ASC): you lead with protection and heat at once"},
     {"is": "money, possessions and self-worth",                     "eso": "the value you place on yourself before anyone pays you",
      "mike": "Leo 2nd with Chiron in it: the wound is in being valued — the account balance is a metric, not a verdict"},
     {"is": "communication, siblings, learning, short trips",        "eso": "the mind as a bridge — how thought becomes speech",
@@ -142,9 +142,9 @@ HOUSES = [
     {"is": "career, reputation, public standing, authority",        "eso": "spiritual ambition — where the Soul wants to be seen serving",
      "mike": "Aries MC ruled by Mars: entrepreneurship or a leadership role; Saturn is transiting here until 2030"},
     {"is": "friends, networks, groups, income from vocation",       "eso": "the group — Aquarius's house of world service and the future",
-     "mike": "Taurus 11th: your progressed Moon enters here Oct 30 2026 — income from vocation, per Svehla"},
+     "mike": "Taurus 11th with Hades (12° Gemini) inside it: your progressed Moon enters here Oct 30 2026 — income from vocation, per Svehla"},
     {"is": "solitude, the hidden, endings, self-undoing, retreat",  "eso": "the closed room before rebirth — the Soul's storehouse and its blind spot",
-     "mike": "Gemini 12th with Juno + Hades: loyalty and the buried past both live out of sight"},
+     "mike": "Gemini 12th with Juno (11° Cancer) and Mars (23° Cancer) inside it: loyalty and the engine both live just behind the Ascendant"},
 ]
 
 ASPECTS = {

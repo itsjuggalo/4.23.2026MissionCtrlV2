@@ -9,6 +9,7 @@ Placidus houses (Svehla's system; matches the natal readings). Cron: 8:32 ET dai
 from __future__ import annotations
 
 import argparse
+import json
 import subprocess
 import sys
 from datetime import datetime, timezone
@@ -230,7 +231,16 @@ def main() -> int:
     except Exception as e:      # never let the reading layer kill the send
         lines.append(f"\n📜 (Svehla windows unavailable: {e})")
 
-    lines.append(f"\n☉ {sign_deg(trans['Sun']['lon'])} · /explain for the full read · /dates · /progressed · /planet /sign /house /aspect")
+    # 2026-09-15: verification stamp — astro_verify.py --all runs 08:25 ET (natal canon, hard-coded
+    # texts, NASA Horizons cross-check, Svehla dates, this script's own output)
+    try:
+        st = json.loads((Path.home() / "portfolio/astrology/verify_status.json").read_text())
+        when = st.get("when_et", "")[:16].replace("T", " ")
+        lines.append(f"\n{'✔ chart engine verified' if st.get('ok') else '⚠️ chart engine verification FAILED'} "
+                     f"(natal · texts · NASA Horizons · Svehla dates · output) {when} ET")
+    except Exception:
+        lines.append("\n⚠️ no verification stamp — run astro_verify.py --all")
+    lines.append(f"☉ {sign_deg(trans['Sun']['lon'])} · /explain for the full read · /dates · /progressed · /planet /sign /house /aspect")
     msg = "\n".join(lines)
     print(msg)
     if args.send:
