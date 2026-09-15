@@ -140,6 +140,11 @@ FILES = [
     ("rebound_setup_latest", f"{H}/.openclaw/data/decision/rebound_setup.json",          ALL,  68, "structure-first rebound detector (pipeline/decision/rebound_setup.py) hourly market hours, advisory only"),
     # macro reaction 07:00 + 09:05 + 16:40 ET weekdays -> Fri 16:40 -> Mon 07:00 gap (~62.5h) + margin
     ("macro_reaction_latest", f"{H}/.openclaw/data/decision/macro_reaction.json",        ALL,  66, "macro expectations-vs-reaction tracker (pipeline/decision/macro_reaction.py) 3x/day weekdays, advisory only"),
+    # [decipher-repurpose 2026-09-15] ADVISORY layer that replaced the retired Alpaca paper executor (pipeline/decipher/)
+    ("decipher_rank",        f"{H}/.openclaw/data/decision/decipher_rank.json",          ALL,  66, "decipher ranked list (decipher_publish.py, run_decipher.sh step 5) 30-min RTH weekdays -> /api/decipher-rank; 66h rides the weekend gap"),
+    ("decipher_grades",      f"{H}/.openclaw/data/decision/decipher_grades.json",        ALL,  76, "decipher grader (decipher_grader.py) 16:40 ET weekdays -> decipher_outcomes + grades by composite decile; 76h rides the weekend gap"),
+    ("decipher_exits",       f"{H}/.openclaw/data/decision/decipher_exits.json",         ALL,  66, "decipher exit advisor (decipher_exit_advisor.py) */10 RTH weekdays -> exit LEVELS for journal fills; never places orders"),
+    ("decision_decipher",    f"{H}/.openclaw/data/decision/factors/decipher.json",       ALL,  66, "decision factor #9 decipher (pipeline/decision/factor_decipher.py) 30-min RTH weekdays -> /api/decision"),
     # [portfolio-retired 2026-09-12] producer retired (refresh-holdings.sh/wallets-refresh.sh cron) — file will never update again
     # ("unified_book",        f"{H}/portfolio/unified_book.json",                           ALL,  6, "REAL MONEY book (RH + Coinbase) -> portfolio/risk pages"),
     # ("robinhood_holdings",  f"{H}/portfolio/robinhood_holdings.json",                     MH,  26, "REAL MONEY RH equity/options positions"),
