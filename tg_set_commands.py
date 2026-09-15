@@ -101,6 +101,8 @@ ASTRO = C([   # astrology-only lane (@JazzyHazzyClaw_Bot) — no trading command
     ("transits", "Today's real transits vs your natal chart"),
     ("chart", "Your natal placements at a glance"),
     ("readings", "What's in your astrology suite"),
+    ("dates", "Aug 2026 reading timeline: active now + next"),
+    ("progressed", "Your progressed Moon/Venus/Sun/Juno today"),
     ("help", "What this bot does"),
 ])
 CLEAR = []  # pure-push / infra bots: no responder → remove any (misleading) menu

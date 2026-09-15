@@ -11,10 +11,17 @@ from __future__ import annotations
 import argparse
 import subprocess
 import sys
-from datetime import datetime, timedelta, timezone
+from datetime import datetime, timezone
 from pathlib import Path
+from zoneinfo import ZoneInfo
 
 import swisseph as swe
+
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+import svehla  # noqa: E402  — Aug 2026 reading windows + secondary progressions
+
+swe.set_ephe_path(str(Path.home() / ".local/share/swisseph"))  # free se1 files (asteroids)
+ET = ZoneInfo("America/New_York")
 
 TG_FLEET = Path.home() / "scripts" / "tg_fleet.py"
 TG_FN = "astrology"      # 2026-08-10: moved off trading_command → the astrology-only lane
@@ -24,7 +31,11 @@ SIGNS = ["Aries", "Taurus", "Gemini", "Cancer", "Leo", "Virgo", "Libra",
 PLANETS = [("Sun", swe.SUN), ("Moon", swe.MOON), ("Mercury", swe.MERCURY),
            ("Venus", swe.VENUS), ("Mars", swe.MARS), ("Jupiter", swe.JUPITER),
            ("Saturn", swe.SATURN), ("Uranus", swe.URANUS),
-           ("Neptune", swe.NEPTUNE), ("Pluto", swe.PLUTO)]
+           ("Neptune", swe.NEPTUNE), ("Pluto", swe.PLUTO),
+           # 2026-09-14: the bodies Mike's astrologer (Svehla) actually reads
+           ("Chiron", swe.CHIRON), ("Ceres", swe.CERES), ("Juno", swe.JUNO)]
+# Slow Uranian points — natal-only (as transits they'd sit in orb for years)
+NATAL_ONLY = [("Hades", swe.HADES), ("Apollon", swe.APOLLON)]
 
 # natal: 1992-11-03 22:46 EST → 1992-11-04 03:46 UT · Dunedin FL
 NATAL_JD = swe.julday(1992, 11, 4, 3 + 46 / 60)
@@ -34,7 +45,8 @@ ASPECTS = [(0, "conjunct", "☌", "fused"), (60, "sextile", "﹡", "easy"),
            (90, "square", "□", "hard"), (120, "trine", "△", "easy"),
            (180, "opposite", "☍", "hard")]
 ORB = {"Sun": 1.2, "Moon": 2.5, "Mercury": 1.0, "Venus": 1.0, "Mars": 1.0,
-       "Jupiter": 0.8, "Saturn": 0.7, "Uranus": 0.6, "Neptune": 0.6, "Pluto": 0.6}
+       "Jupiter": 0.8, "Saturn": 0.7, "Uranus": 0.6, "Neptune": 0.6, "Pluto": 0.6,
+       "Chiron": 0.7, "Ceres": 0.6, "Juno": 0.8}
 
 THEME = {  # transit planet → what it brings
     "Sun": "focus and visibility", "Moon": "the day's mood",
@@ -42,6 +54,8 @@ THEME = {  # transit planet → what it brings
     "Mars": "drive, friction, urgency", "Jupiter": "expansion and luck",
     "Saturn": "pressure, structure, tests", "Uranus": "surprises and rewiring",
     "Neptune": "fog, intuition, idealism", "Pluto": "deep pressure and power shifts",
+    "Chiron": "the old wound asking to be worked", "Ceres": "care, nourishment, fair pay",
+    "Juno": "loyalty, fairness, the partnership contract",
 }
 NATAL_PT = {  # natal point → what it touches in Mike
     "Sun": "your core self (Scorpio, 4th — home base, intensity)",
@@ -56,6 +70,12 @@ NATAL_PT = {  # natal point → what it touches in Mike
     "Pluto": "your transformer core (Scorpio)",
     "ASC": "your identity point (27° Cancer rising)",
     "MC": "your career point (19° Aries Midheaven)",
+    "DSC": "your partner point (27° Capricorn Descendant)",
+    "Chiron": "your self-worth / money wound (Leo, 2nd)",
+    "Ceres": "your self-care and fair-pay point (Aquarius)",
+    "Juno": "your loyalty contract (11° Cancer, 12th)",
+    "Hades": "your Hades point (12° Gemini — clearing the old, causality)",
+    "Apollon": "your Apollon point (16° Libra — expansion of reach)",
 }
 HOUSE_LIFE = ["identity", "money & self-worth", "communication & siblings",
               "home & foundations", "creativity, kids & speculation",
@@ -64,18 +84,22 @@ HOUSE_LIFE = ["identity", "money & self-worth", "communication & siblings",
               "friends & networks", "solitude & the hidden"]
 
 
-def positions(jd):
+def positions(jd, bodies=PLANETS):
     out = {}
-    for name, p in PLANETS:
-        r = swe.calc_ut(jd, p)
+    for name, p in bodies:
+        try:
+            r = swe.calc_ut(jd, p)
+        except swe.Error:      # asteroid file missing → skip that body, never crash the send
+            continue
         out[name] = {"lon": r[0][0], "speed": r[0][3]}
     return out
 
 
 def natal_points():
-    pts = {n: v["lon"] for n, v in positions(NATAL_JD).items()}
+    pts = {n: v["lon"] for n, v in positions(NATAL_JD, PLANETS + NATAL_ONLY).items()}
     h = swe.houses(NATAL_JD, LAT, LON)
     pts["ASC"], pts["MC"] = h[1][0], h[1][1]
+    pts["DSC"] = (h[1][0] + 180) % 360
     return pts
 
 
@@ -101,10 +125,16 @@ def ordinal(n):
 def main() -> int:
     ap = argparse.ArgumentParser()
     ap.add_argument("--send", action="store_true")
+    ap.add_argument("--dates", action="store_true", help="Svehla Aug-2026 windows, chronological")
+    ap.add_argument("--progressed", action="store_true", help="secondary progressions today")
     args = ap.parse_args()
+    if args.dates:
+        print(svehla.dates_block()); return 0
+    if args.progressed:
+        print(svehla.progressed_block()); return 0
 
     now_utc = datetime.now(timezone.utc)
-    now_et = now_utc - timedelta(hours=4)
+    now_et = now_utc.astimezone(ET)
     jd = swe.julday(now_utc.year, now_utc.month, now_utc.day,
                     now_utc.hour + now_utc.minute / 60)
     trans = positions(jd)
@@ -115,8 +145,10 @@ def main() -> int:
     hits = []
     for tname, t in trans.items():
         for nname, nlon in natal.items():
-            if tname == "Moon" and nname not in ("Sun", "Moon", "ASC", "MC"):
+            if tname == "Moon" and nname not in ("Sun", "Moon", "ASC", "MC", "DSC"):
                 continue
+            if nname == "DSC" and tname not in ("Juno", "Venus", "Saturn", "Mars"):
+                continue   # DSC only matters for the partnership bodies
             for adeg, aname, glyph, quality in ASPECTS:
                 orb = abs(angle(t["lon"], nlon) - adeg)
                 if orb <= ORB[tname]:
@@ -158,7 +190,15 @@ def main() -> int:
     if trade:
         lines.append("\n📈 Desk note: " + "; ".join(trade) + ".")
 
-    lines.append(f"\n☉ {sign_deg(trans['Sun']['lon'])} · full monthly map: your 2026 transit reading (Telegram, Jul 12)")
+    # 2026-09-14: the Aug 2026 Svehla reading — active windows + what's next
+    try:
+        sv = svehla.daily_block(now_et.date())
+        if sv:
+            lines.append("\n" + sv)
+    except Exception as e:      # never let the reading layer kill the send
+        lines.append(f"\n📜 (Svehla windows unavailable: {e})")
+
+    lines.append(f"\n☉ {sign_deg(trans['Sun']['lon'])} · /dates for the Aug 2026 reading timeline · /progressed for your progressed chart")
     msg = "\n".join(lines)
     print(msg)
     if args.send:

@@ -118,6 +118,11 @@ FILES = [
     ("session_consistency", f"{H}/.openclaw/data/market-hours/consistency.json",        ALL,  10, "session_prices.py vs /api/market, /api/crypto, mc-market-cache.json, console symbols.json — every 30min PRE/AFTER weekdays, hourly weekends"),
     # [autoheal 2026-09-14] data-health self-repair loop (pipeline/autoheal/autoheal.py -> /api/autoheal)
     ("autoheal_latest",     f"{H}/.openclaw/data/autoheal/latest.json",                 ALL,   1, "autoheal cron */15min — re-runs the producer for any stale/dead /api/data-health row it has a registry.py entry for"),
+    # [darkpool 2026-09-14] free off-exchange/dark-pool layer (pipeline/darkpool/*.py) — FINRA Reg
+    # SHO off-exchange share + SqueezeMetrics DIX 18:45/19:10 ET weekdays + 08:15 Sat catch-up,
+    # FINRA ATS weekly venue share 07:30 ET Tue. Advisory display only. 64h = Sat 08:15 catch-up
+    # -> Mon 18:45 gap (~58.5h) + margin.
+    ("darkpool_latest",      f"{H}/.openclaw/data/darkpool/latest.json",                 ALL,  64, "dark pool layer (pipeline/darkpool/darkpool-cron.sh) -> /api/darkpool, advisory only"),
     # [portfolio-retired 2026-09-12] producer retired (refresh-holdings.sh/wallets-refresh.sh cron) — file will never update again
     # ("unified_book",        f"{H}/portfolio/unified_book.json",                           ALL,  6, "REAL MONEY book (RH + Coinbase) -> portfolio/risk pages"),
     # ("robinhood_holdings",  f"{H}/portfolio/robinhood_holdings.json",                     MH,  26, "REAL MONEY RH equity/options positions"),

@@ -114,8 +114,12 @@ BOTS = {
             "REAL ephemeris, never guesswork: run `~/.venv/bin/python "
             "~/scripts/real_coach/daily_transits.py` (no --send) for today's true transits, and "
             "read his existing readings in ~/agents/claudeclaw/data/astrology/mike-*.html "
-            "(natal, 2026 transits, career, future, trading-chart, Feb-2026 reading + playbook) "
-            "before answering anything about his chart. For dates/aspects you cannot compute, "
+            "(natal, 2026 transits, career, future, trading-chart, Feb-2026 reading + playbook, "
+            "and the Aug-2026 Svehla reading + playbook — the CURRENT outside reading) before "
+            "answering anything about his chart. Same script with `--dates` = Svehla's dated "
+            "windows (active/next) and `--progressed` = his real secondary progressions "
+            "(pMoon, pVenus, Placidus houses, ingress dates); the windows' why/do text is in "
+            "~/scripts/real_coach/svehla_windows.json. For dates/aspects you cannot compute, "
             "say so rather than inventing degrees.\n"
             "Eastern Time. Short, warm, plain-text for Telegram — no markdown headers or tables. "
             "Mike has ADD: lead with the read, then at most 5 tight lines."
@@ -125,6 +129,8 @@ BOTS = {
             "• /transits — today's REAL transits vs your natal (Swiss Ephemeris)\n"
             "• /chart — your natal placements at a glance\n"
             "• /readings — what's in your astrology suite\n"
+            "• /dates — your Aug 2026 reading's timeline, what's active now + what's next\n"
+            "• /progressed — your progressed Moon/Venus/Sun/Juno today (real ephemeris)\n"
             "Or just ask: 'what's Saturn doing to my 7th?', 'how's this week?',\n"
             "'read my Venus return', 'what does Mercury rx mean for me?'\n"
             "No trading here — that's Trading Command. /help = this."
@@ -548,6 +554,20 @@ def run_bot(botkey):
                     if cmd0 == "/chart":
                         send_reply(chat_id, NATAL_CARD)
                         print(f"[{name}] /chart", flush=True)
+                        continue
+                    # 2026-09-14: Svehla Aug-2026 reading layer — dated windows + real progressions
+                    if cmd0 in ("/dates", "/progressed"):
+                        flag = "--dates" if cmd0 == "/dates" else "--progressed"
+                        try:
+                            r = subprocess.run(
+                                [str(Path.home() / ".venv/bin/python"),
+                                 str(Path.home() / "scripts/real_coach/daily_transits.py"), flag],
+                                capture_output=True, text=True, timeout=120)
+                            out = (r.stdout or "").strip() or f"[{cmd0} rc={r.returncode}] {r.stderr.strip()[:200]}"
+                        except Exception as e:
+                            out = f"[{cmd0} error] {e}"
+                        send_reply(chat_id, out)
+                        print(f"[{name}] {cmd0}", flush=True)
                         continue
                     if cmd0 == "/readings":
                         d = Path.home() / "agents/claudeclaw/data/astrology"
