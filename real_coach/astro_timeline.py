@@ -38,7 +38,7 @@ BODY_ASPECTS = {"Jupiter": ["conjunct", "square", "opposite", "trine"],
                 "Chiron": ["conjunct", "square", "opposite"],
                 "Ceres": ["conjunct"], "Juno": ["conjunct", "opposite"]}
 GLYPH = {"Jupiter": "♃", "Saturn": "♄", "Uranus": "♅", "Neptune": "♆", "Pluto": "♇", "Chiron": "⚷",
-         "Ceres": "⚳", "Juno": "⚵", "Moon": "☽", "eclipse": "🌑", "arc": "➡️", "progressed": "🌙"}
+         "Ceres": "⚳", "Juno": "⚵", "Moon": "☽", "eclipse": "🌑", "arc": "➡️", "progressed": "🌙", "sky": "🌐", "to_progressed": "🔁"}
 
 
 def _lon(jd: float, body: int) -> float:
@@ -111,6 +111,87 @@ def _progressed_moon() -> list[dict]:
     return out
 
 
+# ── progressed Moon → natal aspects, transits → progressed points, sky-to-sky ────────────
+PROG_TARGETS = ["Sun", "Moon", "Mercury", "Venus"]
+SKY_PAIRS_BODIES = ["Jupiter", "Saturn", "Uranus", "Neptune", "Pluto", "Chiron"]
+
+
+def _prog_table() -> dict[str, dict[int, float]]:
+    """Progressed longitudes per day-ordinal for the scan window (one ephemeris pass)."""
+    tbl: dict[str, dict[int, float]] = {k: {} for k in PROG_TARGETS}
+    d = START - timedelta(days=1)
+    while d <= END + timedelta(days=1):
+        pr = T.progressed(d)
+        for k in PROG_TARGETS:
+            tbl[k][d.toordinal()] = pr[k]["lon"]
+        d += timedelta(days=1)
+    return tbl
+
+
+def _prog_lon(tbl: dict[int, float], jd: float) -> float:
+    """Interpolated progressed longitude at a JD (progressed bodies move < 0.1°/day, linear is exact enough)."""
+    y, m, dd, h = swe.revjul(jd)
+    o = date(y, m, dd).toordinal()
+    a, b = tbl.get(o), tbl.get(o + 1)
+    if a is None:
+        return b if b is not None else 0.0
+    if b is None:
+        return a
+    return (a + ((b - a + 180) % 360 - 180) * (h / 24.0)) % 360
+
+
+def _progressed_moon_aspects(tbl: dict[str, dict[int, float]]) -> list[dict]:
+    out = []
+    pm = tbl["Moon"]
+    for npt in NATAL_POINTS:
+        target = natal_lon(npt)
+        for asp in ("conjunct", "square", "opposite", "trine"):
+            deg = ASPECTS[asp]
+            for a in ({deg} if deg in (0, 180) else {deg, 360 - deg}):
+                f = lambda jd, t=(target + a) % 360, pm=pm: _signed_diff(_prog_lon(pm, jd), t)
+                for d in _crossings(f, START, END):
+                    out.append({"date": d.isoformat(), "kind": "progressed", "body": "Moon", "natal": npt, "aspect": asp,
+                                "key": f"Progressed Moon {asp} natal {npt}",
+                                "what": f"Progressed Moon exactly {asp} your natal {npt}"})
+    return out
+
+
+def _transits_to_progressed(tbl: dict[str, dict[int, float]]) -> list[dict]:
+    out = []
+    for name in ("Jupiter", "Saturn", "Uranus", "Neptune", "Pluto", "Chiron"):
+        body = SLOW[name]
+        for pt in PROG_TARGETS:
+            pt_tbl = tbl[pt]
+            for asp in ("conjunct", "square", "opposite"):
+                deg = ASPECTS[asp]
+                for a in ({deg} if deg in (0, 180) else {deg, 360 - deg}):
+                    f = lambda jd, b=body, t=pt_tbl, a=a: _signed_diff(_lon(jd, b), (_prog_lon(t, jd) + a) % 360)
+                    for d in _crossings(f, START, END):
+                        out.append({"date": d.isoformat(), "kind": "to_progressed", "body": name, "natal": f"progressed {pt}", "aspect": asp,
+                                    "key": f"Transiting {name} {asp} progressed {pt}",
+                                    "what": f"{name} exactly {asp} your progressed {pt}"})
+    return out
+
+
+def _sky_aspects() -> list[dict]:
+    """Slow-body sky-to-sky aspects (mundane), with the house of the faster body for Mike."""
+    out = []
+    for i, a_name in enumerate(SKY_PAIRS_BODIES):
+        for b_name in SKY_PAIRS_BODIES[i + 1:]:
+            ab, bb = SLOW[a_name], SLOW[b_name]
+            for asp in ("conjunct", "square", "opposite", "trine"):
+                deg = ASPECTS[asp]
+                for a in ({deg} if deg in (0, 180) else {deg, 360 - deg}):
+                    f = lambda jd, ab=ab, bb=bb, a=a: _signed_diff(_lon(jd, ab), (_lon(jd, bb) + a) % 360)
+                    for d in _crossings(f, START, END):
+                        la, lb = _lon(jd_of(d) + 0.5, ab), _lon(jd_of(d) + 0.5, bb)
+                        da, db = T.describe(la), T.describe(lb)
+                        out.append({"date": d.isoformat(), "kind": "sky", "body": a_name, "other": b_name, "aspect": asp,
+                                    "key": f"{a_name} {asp} {b_name} (sky)",
+                                    "what": f"{a_name} {da['deg']}° {da['sign']} (your {T.ordinal(da['house'])}) {asp} {b_name} {db['deg']}° {db['sign']} (your {T.ordinal(db['house'])}) — sky aspect"})
+    return out
+
+
 def _eclipses() -> list[dict]:
     out = []
     try:
@@ -157,7 +238,8 @@ def build() -> list[dict]:
     ev = []
     for name, body in SLOW.items():
         ev += _sign_ingresses(name, body) + _house_ingresses(name, body) + _exact_aspects(name, body)
-    ev += _progressed_moon() + _eclipses() + _solar_arcs()
+    tbl = _prog_table()
+    ev += _progressed_moon() + _progressed_moon_aspects(tbl) + _transits_to_progressed(tbl) + _sky_aspects() + _eclipses() + _solar_arcs()
     ev = [e for e in ev if e["kind"] != "error"] + [e for e in ev if e["kind"] == "error"]
     ev.sort(key=lambda e: (e["date"], e["kind"], e["body"]))
     # pass numbering: same aspect key hitting again within 20 months = the retrograde triple pass
@@ -204,10 +286,49 @@ def _meaning(e: dict, full: bool = False) -> str:
                 s += f" Do: {ent['do']}"
         return s
     c = lex.combo_translation(e.get("key", "")) or lex.combo_translation(e.get("key", "").replace("Transiting ", "").replace("natal ", ""))
-    return c.split(" (Esoteric:")[0].split(": ", 1)[-1] if c else ""
+    if c:
+        return c.split(" (Esoteric:")[0].split(": ", 1)[-1]
+    return _generic(e)
+
+
+def _generic(e: dict) -> str:
+    """Composed from the lexicon (planets/signs/houses/aspects) when no researched entry exists."""
+    try:
+        if e["kind"] == "aspect":
+            nl = natal_lon(e["natal"])
+            return lex.translate_hit({"t": e["body"], "n": e["natal"], "aspect": e["aspect"]}, nl, nl).replace("In plain terms: ", "")
+        if e["kind"] == "house":
+            n = int("".join(ch for ch in e["key"].split(" the ")[-1] if ch.isdigit()))
+            return f"{e['body']} ({lex.plain(e['body'])}) now works through {lex.HOUSES[n - 1]['is']}. {lex.HOUSES[n - 1]['mike']}."
+        if e["kind"] == "sign":
+            sign = e["key"].split(" in ")[-1]
+            hs = lex.houses_for_sign(sign)
+            return f"{e['body']} ({lex.plain(e['body'])}) takes on {sign}: {lex.SIGNS[sign]['is']}. For you {sign} is your {'/'.join(lex.ORDINAL(h) for h in hs)} house."
+        if e["kind"] == "sky":
+            A, B, asp = e["body"], e["other"], e["aspect"]
+            return (f"A sky-wide aspect (everyone feels it): {lex.plain(A)} {lex.ASPECT_PLAIN[asp].split('{B}')[0].replace('{A}', '').strip() or asp} {lex.plain(B)}. "
+                    f"For you it lands where the two planets sit in your houses (see the line above).")
+        if e["kind"] == "to_progressed":
+            pt = e["natal"].replace("progressed ", "")
+            return (f"{e['body']} ({lex.plain(e['body'])}) meets your progressed {pt} — the {pt}-part of you as it has evolved by now, "
+                    f"not the birth position. {lex.ASPECTS[e['aspect']]['is']}.")
+        if e["kind"] == "progressed" and e.get("aspect"):
+            nl = natal_lon(e["natal"])
+            return lex.translate_hit({"t": "Moon", "n": e["natal"], "aspect": e["aspect"]}, nl, nl).replace("In plain terms: Moon (", "In plain terms: your progressed Moon (").replace("In plain terms: ", "")
+        if e["kind"] == "progressed":
+            tail = e["key"].split("Progressed Moon in ")[-1]
+            if tail.startswith("the "):
+                n = int("".join(ch for ch in tail if ch.isdigit()))
+                return f"Your emotional focus (progressed Moon, ~2.5 years per house) moves to {lex.HOUSES[n - 1]['is']}. {lex.HOUSES[n - 1]['mike']}."
+            return f"Your emotional style (progressed Moon, ~2.5 years per sign) takes on {tail}: {lex.SIGNS[tail]['is']}."
+    except Exception:
+        return ""
+    return ""
 
 
 def _glyph(e: dict) -> str:
+    if e["kind"] in ("sky", "to_progressed"):
+        return GLYPH[e["kind"]]
     return GLYPH.get(e["body"], GLYPH.get(e["kind"], "•"))
 
 
@@ -250,7 +371,8 @@ def year_block(d: date | None = None) -> str:
     d = d or datetime.now(T.ET).date()
     end = d + timedelta(days=365)
     ev = [e for e in load() if d.isoformat() <= e["date"] <= end.isoformat()
-          and (e["kind"] in ("sign", "house", "progressed", "eclipse") or e["body"] in ("Saturn", "Uranus", "Neptune", "Pluto", "Chiron")
+          and (e["kind"] in ("sign", "house", "eclipse", "sky", "to_progressed") or (e["kind"] == "progressed" and e.get("aspect") in (None, "conjunct", "opposite"))
+               or e["body"] in ("Saturn", "Uranus", "Neptune", "Pluto", "Chiron")
                or e.get("aspect") in ("conjunct", "opposite", "square"))]
     lines = [f"📆 THE YEAR AHEAD — {d.strftime('%b %-d %Y')} → {end.strftime('%b %-d %Y')}"]
     for e in ev:

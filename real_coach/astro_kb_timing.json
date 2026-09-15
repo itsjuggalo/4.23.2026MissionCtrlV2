@@ -14,7 +14,6 @@
    "https://cafeastrology.com/calculating-the-progressed-ascendant.html",
    "https://sirauysal.com/en/tools/solar-arc/",
    "https://www.forrestastrology.com/blogs/astrology/how-to-calculate-progressed-angles",
-   "https://en.wikipedia.org/wiki/List_of_Nakshatras",
    "https://astrofix.net/planetary-returns/",
    "https://www.hermetikon.com/astrology/returns/mars-return",
    "https://astrology.org.uk/mercury-venus-and-mars-returns/",
@@ -25,13 +24,12 @@
    "https://kerykeion.net/content/learn-astrology/predictive-nodal-return",
    "https://medium.com/@marmadukejaekel2783/nodal-return-your-18-year-cosmic-checkpoint-explained-2330d5cd466b"
   ],
-  "notes": "Annual profections and Firdaria are computed on WHOLE-SIGN houses counted from Mike's Cancer Ascendant, not the Placidus houses used for his main natal reading -- so a planet's 'profection house' number here can differ from the Placidus house given elsewhere (e.g. Mars/Juno are Placidus 12th but whole-sign 1st since they sit in the Ascendant's own sign, Cancer; Jupiter is Placidus 3rd but whole-sign 4th; Saturn/Ceres are Placidus 7th but whole-sign 8th; Uranus/Neptune are Placidus 6th but whole-sign 7th). This is standard practice for these two techniques, not an error. Svehla's Aug 2026 'Jupiter in natal 2nd' read is a TRANSIT note (transiting Jupiter moved into Leo -- Mike's whole-sign 2nd -- around mid-2026 for about a year), not his natal Jupiter's own placement (natal Jupiter is whole-sign 4th, Libra).",
+  "notes": "Annual profections and Firdaria are computed on WHOLE-SIGN houses counted from Mike's Cancer Ascendant, not the Placidus houses used for his main natal reading -- so a planet's 'profection house' number here can differ from the Placidus house given elsewhere (e.g. Mars/Juno are Placidus 12th but whole-sign 1st since they sit in the Ascendant's own sign, Cancer; Jupiter is Placidus 3rd but whole-sign 4th; Saturn/Ceres are Placidus 7th but whole-sign 8th; Uranus/Neptune are Placidus 6th but whole-sign 7th). This is standard practice for these two techniques, not an error. Svehla's Aug 2026 'Jupiter in natal 2nd' read is a TRANSIT note (transiting Jupiter moved into Leo -- Mike's whole-sign 2nd -- around mid-2026 for about a year), not his natal Jupiter's own placement (natal Jupiter is whole-sign 4th, Libra). | 2026-09-15: lunar-mansion entries removed per Mike — tropical Western only.",
   "computed": {
    "profection_2025_26": "Age 33 (Nov 2025-Nov 2026): profected 10th whole-sign house, Aries -- Mars is time-lord. Also his natal MC sign, so the year lands directly on his career angle.",
    "profection_2026_27": "Age 34 (Nov 2026-Nov 2027): profected 11th whole-sign house, Taurus -- Venus is time-lord. Same sign Svehla flags for the progressed Moon ('money nerve').",
    "profection_2027_28": "Age 35 (Nov 2027-Nov 2028): profected 12th whole-sign house, Gemini -- Mercury is time-lord. Natal point Hades (research/information) sits here.",
-   "firdaria_now": "Night-chart Firdaria: Mars major period age 32-39 (Nov 2024-Nov 2031), currently in the Sun sub-period, age 33-34 (Nov 2025-Nov 2026). Sequence: Moon 9y, Saturn 11y, Jupiter 12y, Mars 7y, Sun 10y, Venus 8y, Mercury 13y, then nodes.",
-   "natal_moon_nakshatra": "Shatabhisha -- natal Moon ~1 deg Pisces tropical converts to ~7 deg Aquarius sidereal under the Lahiri ayanamsa (~23.7 deg for 1992). Ruled by Rahu, deity Varuna, Rakshasa gana -- a solitary, healing, deep-research nature."
+   "firdaria_now": "Night-chart Firdaria: Mars major period age 32-39 (Nov 2024-Nov 2031), currently in the Sun sub-period, age 33-34 (Nov 2025-Nov 2026). Sequence: Moon 9y, Saturn 11y, Jupiter 12y, Mars 7y, Sun 10y, Venus 8y, Mercury 13y, then nodes."
   }
  },
  "algorithms": [
@@ -58,12 +56,6 @@
    "steps": "Secondary progressions use the day-for-a-year key: the chart cast for N days after birth describes age N; progressed planets move at their natural daily ephemeris speed compounded over age-in-days. Progressed angles (ASC/MC) need special handling since houses depend on geographic latitude and right ascension, not simple longitude. Two accepted methods, which diverge by roughly 2-6 degrees over a lifetime: (a) NAIBOD -- advance the natal ARMC by the Sun's MEAN daily motion (about 0.9856 deg/day) times age-in-years, then recompute ASC/MC from that new ARMC; (b) SOLAR ARC -- advance the MC by the Sun's ACTUAL longitude motion since birth (the 'solar arc'), then derive the new ASC from that MC's implied right ascension. Pick one method and stay consistent. TRANSIT-TO-MIDPOINT RULE: a transiting planet activates a natal midpoint (the exact mid-degree between two natal points, (pointA + pointB) / 2) the same way it activates an actual planet -- check the transiting longitude against the midpoint within a tight ~1 degree orb; a hit blends both points' themes at once.",
    "inputs": "Natal ARMC and Sun longitude; current transiting planet positions; the two natal points defining any midpoint being checked.",
    "output_format": "One Telegram line, e.g. 'Transiting Saturn is conjunct your progressed Moon -- expect a few weeks of emotional reckoning around [themed house].'"
-  },
-  {
-   "name": "lunar mansions (nakshatras)",
-   "steps": "Convert the Moon's TROPICAL longitude to SIDEREAL by subtracting the Lahiri ayanamsa value for the date in question (roughly 24 degrees in the current era, about 23.7 deg for 1992) -- do this for both the natal Moon and any daily transiting Moon position. Divide the 360-degree zodiac into 27 equal nakshatras of 13 deg 20' each, each further split into 4 padas of 3 deg 20'. Look up which of the 27 segments the sidereal longitude falls into to get the ruling planet (the fixed, repeating Vimshottari sequence: Ketu, Venus, Sun, Moon, Mars, Rahu, Jupiter, Saturn, Mercury -- repeated 3 times across the 27), presiding deity, and traditional nature/gana.",
-   "inputs": "Tropical Moon longitude (natal or transiting) and the correct Lahiri ayanamsa value for the date in question.",
-   "output_format": "One Telegram line, e.g. 'Moon is in Shatabhisha today -- good for solitary research/healing work, not for public launches.'"
   },
   {
    "name": "planetary returns",
@@ -207,7 +199,7 @@
    "key": "Profection lord Moon",
    "traditional": "When the Moon rules the profection year, the year runs on emotional needs, home, and instinctive security; transits to the natal Moon count double.",
    "esoteric": "The Lord of the Year is the classical time-lord technique's way of saying: this planet's story is the container the whole 12 months happens inside.",
-   "in_mikes_chart": "Mike's natal Moon (1 deg Pisces, whole-sign 9th, nakshatra Shatabhisha) ties emotional security to belief/philosophy and to solitary, private processing -- a Moon-lord year runs quietly intense rather than dramatic.",
+   "in_mikes_chart": "",
    "translation": "A Moon-ruled year makes Mike's mood the real instrument panel for the year -- track feelings as data, not distraction.",
    "do": "Watch transits to 1 deg Pisces closely; big mood shifts that year are signal, not noise.",
    "avoid": "Making major decisions purely off a Moon-lord year's emotional weather without checking it against the facts.",
@@ -267,7 +259,7 @@
    "key": "Firdaria Moon",
    "traditional": "As the first major Firdaria period for a night birth, the Moon rules early childhood -- emotional bonding, home environment, and the nervous system's baseline get built here. (Night-chart major period, age 0-9, Nov 1992-Nov 2001.)",
    "esoteric": "The soul's first task under the Moon period is to metabolize the family field it was born into -- the emotional 'operating system' installed here runs quietly for life.",
-   "in_mikes_chart": "Whatever emotional patterns from early childhood feel most automatic to Mike today were largely set during this window, filtered through his natal Moon in Pisces (9th house, Shatabhisha nakshatra).",
+   "in_mikes_chart": "",
    "translation": "The emotional wiring from ages 0-9 is Mike's real baseline -- worth knowing that's a Moon-period artifact, not a fixed personality trait.",
    "do": "When revisiting old emotional patterns in reflection, treat this window as the source material.",
    "avoid": "Blaming '90s-kid nostalgia for everything -- but also not dismissing how formative this literal period was.",
@@ -368,7 +360,7 @@
    "traditional": "The Sun's hour favors visibility, leadership, confidence, and anything meant to be seen or recognized.",
    "esoteric": "The Chaldean-order hour cycle is read as the day's own miniature 'time-lord' rotation -- each hour is a small window tuned to one planet's business.",
    "in_mikes_chart": "The Sun sits in Mike's natal 5th (Scorpio) -- private, intense creativity -- so a Sun hour is a good window to actually show a creative or personal project rather than keep it hidden.",
-   "translation": "An Sun hour is a good match for sun-flavored tasks specifically for Mike, given where Sun sits in his own chart.",
+   "translation": "A Sun hour is a good match for sun-flavored tasks specifically for Mike, given where Sun sits in his own chart.",
    "do": "Publish, present, or put a name on something Mike has been sitting on privately.",
    "avoid": "Seeking validation for its own sake rather than genuinely sharing the work.",
    "svehla_link": "N/A -- planetary hours are a daily timing layer, not part of Svehla's natal/transit reading."
@@ -442,276 +434,6 @@
    "do": "Do a monthly review of goals and feelings on/near this contact; it repeats roughly every month so it's a reliable rhythm.",
    "avoid": "Ignoring it as 'too frequent to matter' -- the monthly rhythm is exactly its value as a check-in tool.",
    "svehla_link": "N/A -- this is a general progressed-Moon timing rule, not one of Svehla's specific 2026 themes."
-  },
-  {
-   "key": "Moon in nakshatra Ashvini",
-   "traditional": "Ashvini spans 13 deg 20' of the sidereal zodiac, ruled by Ketu, presided over by Ashvins, Deva gana. Symbol: Horse's head. Core nature: swift healing, pioneering starts.",
-   "esoteric": "Each nakshatra is a lunar mansion the Moon 'lives in' for about a day -- its deity and gana color the emotional/intuitive tone of whatever the Moon touches while passing through.",
-   "in_mikes_chart": "N/A for Mike's own natal chart -- this entry describes what it means when the transiting (daily) Moon passes through this nakshatra, a short-term timing signal rather than a natal placement.",
-   "translation": "When the Moon is here for the day, the mood/energy leans toward swift healing, pioneering starts.",
-   "do": "start journeys, treatments, or ventures that need quick, decisive movement",
-   "avoid": "long, slow commitments that need patience -- Ashvini wants speed",
-   "svehla_link": "N/A -- not part of Svehla's current 2026 transit themes; this is a daily lunar-timing layer."
-  },
-  {
-   "key": "Moon in nakshatra Bharani",
-   "traditional": "Bharani spans 13 deg 20' of the sidereal zodiac, ruled by Venus, presided over by Yama/Dharma, Manushya gana. Symbol: Yoni. Core nature: restraint, bearing burdens, intense creativity.",
-   "esoteric": "Each nakshatra is a lunar mansion the Moon 'lives in' for about a day -- its deity and gana color the emotional/intuitive tone of whatever the Moon touches while passing through.",
-   "in_mikes_chart": "N/A for Mike's own natal chart -- this entry describes what it means when the transiting (daily) Moon passes through this nakshatra, a short-term timing signal rather than a natal placement.",
-   "translation": "When the Moon is here for the day, the mood/energy leans toward restraint, bearing burdens, intense creativity.",
-   "do": "disciplined hard work, cutting away what's outgrown",
-   "avoid": "starting pleasant, indulgent ventures -- Bharani rewards effort, not ease",
-   "svehla_link": "N/A -- not part of Svehla's current 2026 transit themes; this is a daily lunar-timing layer."
-  },
-  {
-   "key": "Moon in nakshatra Krittika",
-   "traditional": "Krittika spans 13 deg 20' of the sidereal zodiac, ruled by Sun, presided over by Agni, Rakshasa gana. Symbol: Knife/Spear. Core nature: cutting, purifying, sharp ambition.",
-   "esoteric": "Each nakshatra is a lunar mansion the Moon 'lives in' for about a day -- its deity and gana color the emotional/intuitive tone of whatever the Moon touches while passing through.",
-   "in_mikes_chart": "N/A for Mike's own natal chart -- this entry describes what it means when the transiting (daily) Moon passes through this nakshatra, a short-term timing signal rather than a natal placement.",
-   "translation": "When the Moon is here for the day, the mood/energy leans toward cutting, purifying, sharp ambition.",
-   "do": "decisive, purifying action, direct confrontation of a problem",
-   "avoid": "delicate diplomacy -- Krittika's edge cuts through nuance",
-   "svehla_link": "N/A -- not part of Svehla's current 2026 transit themes; this is a daily lunar-timing layer."
-  },
-  {
-   "key": "Moon in nakshatra Rohini",
-   "traditional": "Rohini spans 13 deg 20' of the sidereal zodiac, ruled by Moon, presided over by Brahma, Manushya gana. Symbol: Cart/Chariot. Core nature: growth, beauty, material abundance.",
-   "esoteric": "Each nakshatra is a lunar mansion the Moon 'lives in' for about a day -- its deity and gana color the emotional/intuitive tone of whatever the Moon touches while passing through.",
-   "in_mikes_chart": "N/A for Mike's own natal chart -- this entry describes what it means when the transiting (daily) Moon passes through this nakshatra, a short-term timing signal rather than a natal placement.",
-   "translation": "When the Moon is here for the day, the mood/energy leans toward growth, beauty, material abundance.",
-   "do": "financial, artistic, or relationship starts -- one of the most auspicious nakshatras",
-   "avoid": "over-indulgence -- Rohini's abundance can tip into excess",
-   "svehla_link": "N/A -- not part of Svehla's current 2026 transit themes; this is a daily lunar-timing layer."
-  },
-  {
-   "key": "Moon in nakshatra Mrigashira",
-   "traditional": "Mrigashira spans 13 deg 20' of the sidereal zodiac, ruled by Mars, presided over by Soma, Deva gana. Symbol: Deer's head. Core nature: searching, curious, gentle pursuit.",
-   "esoteric": "Each nakshatra is a lunar mansion the Moon 'lives in' for about a day -- its deity and gana color the emotional/intuitive tone of whatever the Moon touches while passing through.",
-   "in_mikes_chart": "N/A for Mike's own natal chart -- this entry describes what it means when the transiting (daily) Moon passes through this nakshatra, a short-term timing signal rather than a natal placement.",
-   "translation": "When the Moon is here for the day, the mood/energy leans toward searching, curious, gentle pursuit.",
-   "do": "research, travel, and open-ended seeking",
-   "avoid": "forcing a conclusion before the search is actually done",
-   "svehla_link": "N/A -- not part of Svehla's current 2026 transit themes; this is a daily lunar-timing layer."
-  },
-  {
-   "key": "Moon in nakshatra Ardra",
-   "traditional": "Ardra spans 13 deg 20' of the sidereal zodiac, ruled by Rahu, presided over by Rudra, Manushya gana. Symbol: Teardrop. Core nature: storm, destruction-then-renewal, intense emotion.",
-   "esoteric": "Each nakshatra is a lunar mansion the Moon 'lives in' for about a day -- its deity and gana color the emotional/intuitive tone of whatever the Moon touches while passing through.",
-   "in_mikes_chart": "N/A for Mike's own natal chart -- this entry describes what it means when the transiting (daily) Moon passes through this nakshatra, a short-term timing signal rather than a natal placement.",
-   "translation": "When the Moon is here for the day, the mood/energy leans toward storm, destruction-then-renewal, intense emotion.",
-   "do": "releasing or demolition work, emotional catharsis",
-   "avoid": "new beginnings or delicate matters -- Ardra's storm isn't gentle",
-   "svehla_link": "N/A -- not part of Svehla's current 2026 transit themes; this is a daily lunar-timing layer."
-  },
-  {
-   "key": "Moon in nakshatra Punarvasu",
-   "traditional": "Punarvasu spans 13 deg 20' of the sidereal zodiac, ruled by Jupiter, presided over by Aditi, Deva gana. Symbol: Bow/Quiver. Core nature: renewal, return, restoration, optimism.",
-   "esoteric": "Each nakshatra is a lunar mansion the Moon 'lives in' for about a day -- its deity and gana color the emotional/intuitive tone of whatever the Moon touches while passing through.",
-   "in_mikes_chart": "N/A for Mike's own natal chart -- this entry describes what it means when the transiting (daily) Moon passes through this nakshatra, a short-term timing signal rather than a natal placement.",
-   "translation": "When the Moon is here for the day, the mood/energy leans toward renewal, return, restoration, optimism.",
-   "do": "reconciliation, return-journeys, restarting a paused project",
-   "avoid": "little to avoid -- generally one of the more favorable nakshatras",
-   "svehla_link": "N/A -- not part of Svehla's current 2026 transit themes; this is a daily lunar-timing layer."
-  },
-  {
-   "key": "Moon in nakshatra Pushya",
-   "traditional": "Pushya spans 13 deg 20' of the sidereal zodiac, ruled by Saturn, presided over by Brihaspati, Deva gana. Symbol: Cow's udder. Core nature: nourishing, most auspicious, spiritual growth.",
-   "esoteric": "Each nakshatra is a lunar mansion the Moon 'lives in' for about a day -- its deity and gana color the emotional/intuitive tone of whatever the Moon touches while passing through.",
-   "in_mikes_chart": "N/A for Mike's own natal chart -- this entry describes what it means when the transiting (daily) Moon passes through this nakshatra, a short-term timing signal rather than a natal placement.",
-   "translation": "When the Moon is here for the day, the mood/energy leans toward nourishing, most auspicious, spiritual growth.",
-   "do": "spiritual practice, planting seeds (literal or figurative), the most important starts",
-   "avoid": "little to avoid -- Pushya is considered universally strong",
-   "svehla_link": "N/A -- not part of Svehla's current 2026 transit themes; this is a daily lunar-timing layer."
-  },
-  {
-   "key": "Moon in nakshatra Ashlesha",
-   "traditional": "Ashlesha spans 13 deg 20' of the sidereal zodiac, ruled by Mercury, presided over by Nagas, Rakshasa gana. Symbol: Serpent. Core nature: serpentine, hypnotic, penetrating, secretive.",
-   "esoteric": "Each nakshatra is a lunar mansion the Moon 'lives in' for about a day -- its deity and gana color the emotional/intuitive tone of whatever the Moon touches while passing through.",
-   "in_mikes_chart": "N/A for Mike's own natal chart -- this entry describes what it means when the transiting (daily) Moon passes through this nakshatra, a short-term timing signal rather than a natal placement.",
-   "translation": "When the Moon is here for the day, the mood/energy leans toward serpentine, hypnotic, penetrating, secretive.",
-   "do": "research into hidden matters, strategic or psychological work",
-   "avoid": "naive trust or full public transparency -- Ashlesha keeps a card back",
-   "svehla_link": "N/A -- not part of Svehla's current 2026 transit themes; this is a daily lunar-timing layer."
-  },
-  {
-   "key": "Moon in nakshatra Magha",
-   "traditional": "Magha spans 13 deg 20' of the sidereal zodiac, ruled by Ketu, presided over by Pitrs, Rakshasa gana. Symbol: Royal throne. Core nature: ancestral authority, legacy, power, pride.",
-   "esoteric": "Each nakshatra is a lunar mansion the Moon 'lives in' for about a day -- its deity and gana color the emotional/intuitive tone of whatever the Moon touches while passing through.",
-   "in_mikes_chart": "N/A for Mike's own natal chart -- this entry describes what it means when the transiting (daily) Moon passes through this nakshatra, a short-term timing signal rather than a natal placement.",
-   "translation": "When the Moon is here for the day, the mood/energy leans toward ancestral authority, legacy, power, pride.",
-   "do": "honoring tradition, claiming authority or inheritance",
-   "avoid": "humble, self-effacing tasks -- Magha wants the seat, not the sidelines",
-   "svehla_link": "N/A -- not part of Svehla's current 2026 transit themes; this is a daily lunar-timing layer."
-  },
-  {
-   "key": "Moon in nakshatra Purva Phalguni",
-   "traditional": "Purva Phalguni spans 13 deg 20' of the sidereal zodiac, ruled by Venus, presided over by Bhaga, Manushya gana. Symbol: Bed legs. Core nature: pleasure, relaxation, creativity, romance.",
-   "esoteric": "Each nakshatra is a lunar mansion the Moon 'lives in' for about a day -- its deity and gana color the emotional/intuitive tone of whatever the Moon touches while passing through.",
-   "in_mikes_chart": "N/A for Mike's own natal chart -- this entry describes what it means when the transiting (daily) Moon passes through this nakshatra, a short-term timing signal rather than a natal placement.",
-   "translation": "When the Moon is here for the day, the mood/energy leans toward pleasure, relaxation, creativity, romance.",
-   "do": "leisure, romance, celebration, art",
-   "avoid": "heavy labor or serious contracts -- the mood here is soft, not businesslike",
-   "svehla_link": "N/A -- not part of Svehla's current 2026 transit themes; this is a daily lunar-timing layer."
-  },
-  {
-   "key": "Moon in nakshatra Uttara Phalguni",
-   "traditional": "Uttara Phalguni spans 13 deg 20' of the sidereal zodiac, ruled by Sun, presided over by Aryaman, Manushya gana. Symbol: Bed legs. Core nature: partnership, patronage, generosity, contracts.",
-   "esoteric": "Each nakshatra is a lunar mansion the Moon 'lives in' for about a day -- its deity and gana color the emotional/intuitive tone of whatever the Moon touches while passing through.",
-   "in_mikes_chart": "N/A for Mike's own natal chart -- this entry describes what it means when the transiting (daily) Moon passes through this nakshatra, a short-term timing signal rather than a natal placement.",
-   "translation": "When the Moon is here for the day, the mood/energy leans toward partnership, patronage, generosity, contracts.",
-   "do": "marriage, partnership agreements, service to others",
-   "avoid": "solitary or selfish pursuits -- this star runs on mutual benefit",
-   "svehla_link": "N/A -- not part of Svehla's current 2026 transit themes; this is a daily lunar-timing layer."
-  },
-  {
-   "key": "Moon in nakshatra Hasta",
-   "traditional": "Hasta spans 13 deg 20' of the sidereal zodiac, ruled by Moon, presided over by Savitri, Deva gana. Symbol: Hand/Fist. Core nature: skillful hands, craft, dexterity.",
-   "esoteric": "Each nakshatra is a lunar mansion the Moon 'lives in' for about a day -- its deity and gana color the emotional/intuitive tone of whatever the Moon touches while passing through.",
-   "in_mikes_chart": "N/A for Mike's own natal chart -- this entry describes what it means when the transiting (daily) Moon passes through this nakshatra, a short-term timing signal rather than a natal placement.",
-   "translation": "When the Moon is here for the day, the mood/energy leans toward skillful hands, craft, dexterity.",
-   "do": "handcrafts, detailed skilled work, hands-on healing",
-   "avoid": "big-picture strategic planning that needs patience over detail",
-   "svehla_link": "N/A -- not part of Svehla's current 2026 transit themes; this is a daily lunar-timing layer."
-  },
-  {
-   "key": "Moon in nakshatra Chitra",
-   "traditional": "Chitra spans 13 deg 20' of the sidereal zodiac, ruled by Mars, presided over by Tvastar, Rakshasa gana. Symbol: Jewel/Pearl. Core nature: brilliance, design, glamour, craftsmanship.",
-   "esoteric": "Each nakshatra is a lunar mansion the Moon 'lives in' for about a day -- its deity and gana color the emotional/intuitive tone of whatever the Moon touches while passing through.",
-   "in_mikes_chart": "N/A for Mike's own natal chart -- this entry describes what it means when the transiting (daily) Moon passes through this nakshatra, a short-term timing signal rather than a natal placement.",
-   "translation": "When the Moon is here for the day, the mood/energy leans toward brilliance, design, glamour, craftsmanship.",
-   "do": "design or creative launches, anything meant to shine",
-   "avoid": "understated, humble tasks -- Chitra wants to be noticed",
-   "svehla_link": "N/A -- not part of Svehla's current 2026 transit themes; this is a daily lunar-timing layer."
-  },
-  {
-   "key": "Moon in nakshatra Swati",
-   "traditional": "Swati spans 13 deg 20' of the sidereal zodiac, ruled by Rahu, presided over by Vayu, Deva gana. Symbol: Plant shoot. Core nature: independence, movement, flexibility, trade.",
-   "esoteric": "Each nakshatra is a lunar mansion the Moon 'lives in' for about a day -- its deity and gana color the emotional/intuitive tone of whatever the Moon touches while passing through.",
-   "in_mikes_chart": "N/A for Mike's own natal chart -- this entry describes what it means when the transiting (daily) Moon passes through this nakshatra, a short-term timing signal rather than a natal placement.",
-   "translation": "When the Moon is here for the day, the mood/energy leans toward independence, movement, flexibility, trade.",
-   "do": "trading, negotiation, independent ventures, travel",
-   "avoid": "rigid, controlling commitments -- Swati needs room to move",
-   "svehla_link": "N/A -- not part of Svehla's current 2026 transit themes; this is a daily lunar-timing layer."
-  },
-  {
-   "key": "Moon in nakshatra Vishakha",
-   "traditional": "Vishakha spans 13 deg 20' of the sidereal zodiac, ruled by Jupiter, presided over by Indra-Agni, Rakshasa gana. Symbol: Arch. Core nature: determined goal pursuit, ambition, dual nature.",
-   "esoteric": "Each nakshatra is a lunar mansion the Moon 'lives in' for about a day -- its deity and gana color the emotional/intuitive tone of whatever the Moon touches while passing through.",
-   "in_mikes_chart": "N/A for Mike's own natal chart -- this entry describes what it means when the transiting (daily) Moon passes through this nakshatra, a short-term timing signal rather than a natal placement.",
-   "translation": "When the Moon is here for the day, the mood/energy leans toward determined goal pursuit, ambition, dual nature.",
-   "do": "goal-directed pushes, competitive pursuits",
-   "avoid": "passive waiting -- Vishakha's energy is meant to be aimed",
-   "svehla_link": "N/A -- not part of Svehla's current 2026 transit themes; this is a daily lunar-timing layer."
-  },
-  {
-   "key": "Moon in nakshatra Anuradha",
-   "traditional": "Anuradha spans 13 deg 20' of the sidereal zodiac, ruled by Saturn, presided over by Mitra, Deva gana. Symbol: Archway. Core nature: friendship, devotion, cooperation, balance.",
-   "esoteric": "Each nakshatra is a lunar mansion the Moon 'lives in' for about a day -- its deity and gana color the emotional/intuitive tone of whatever the Moon touches while passing through.",
-   "in_mikes_chart": "N/A for Mike's own natal chart -- this entry describes what it means when the transiting (daily) Moon passes through this nakshatra, a short-term timing signal rather than a natal placement.",
-   "translation": "When the Moon is here for the day, the mood/energy leans toward friendship, devotion, cooperation, balance.",
-   "do": "alliance-building, teamwork, diplomacy",
-   "avoid": "solo or competitive ventures -- Anuradha's strength is in the partnership",
-   "svehla_link": "N/A -- not part of Svehla's current 2026 transit themes; this is a daily lunar-timing layer."
-  },
-  {
-   "key": "Moon in nakshatra Jyeshtha",
-   "traditional": "Jyeshtha spans 13 deg 20' of the sidereal zodiac, ruled by Mercury, presided over by Indra, Rakshasa gana. Symbol: Amulet. Core nature: seniority, protection, responsibility, courage.",
-   "esoteric": "Each nakshatra is a lunar mansion the Moon 'lives in' for about a day -- its deity and gana color the emotional/intuitive tone of whatever the Moon touches while passing through.",
-   "in_mikes_chart": "N/A for Mike's own natal chart -- this entry describes what it means when the transiting (daily) Moon passes through this nakshatra, a short-term timing signal rather than a natal placement.",
-   "translation": "When the Moon is here for the day, the mood/energy leans toward seniority, protection, responsibility, courage.",
-   "do": "leadership, protecting others, taking charge",
-   "avoid": "subordinate roles -- Jyeshtha carries the senior position, not the junior one",
-   "svehla_link": "N/A -- not part of Svehla's current 2026 transit themes; this is a daily lunar-timing layer."
-  },
-  {
-   "key": "Moon in nakshatra Mula",
-   "traditional": "Mula spans 13 deg 20' of the sidereal zodiac, ruled by Ketu, presided over by Nirrti, Rakshasa gana. Symbol: Roots. Core nature: root investigation, destruction of illusion, uprooting.",
-   "esoteric": "Each nakshatra is a lunar mansion the Moon 'lives in' for about a day -- its deity and gana color the emotional/intuitive tone of whatever the Moon touches while passing through.",
-   "in_mikes_chart": "N/A for Mike's own natal chart -- this entry describes what it means when the transiting (daily) Moon passes through this nakshatra, a short-term timing signal rather than a natal placement.",
-   "translation": "When the Moon is here for the day, the mood/energy leans toward root investigation, destruction of illusion, uprooting.",
-   "do": "getting to the root cause, deep research, letting go",
-   "avoid": "new plantings or superficial starts -- Mula digs down, not out",
-   "svehla_link": "N/A -- not part of Svehla's current 2026 transit themes; this is a daily lunar-timing layer."
-  },
-  {
-   "key": "Moon in nakshatra Purva Ashadha",
-   "traditional": "Purva Ashadha spans 13 deg 20' of the sidereal zodiac, ruled by Venus, presided over by Apah, Manushya gana. Symbol: Elephant tusk. Core nature: invincibility, early victory, purification.",
-   "esoteric": "Each nakshatra is a lunar mansion the Moon 'lives in' for about a day -- its deity and gana color the emotional/intuitive tone of whatever the Moon touches while passing through.",
-   "in_mikes_chart": "N/A for Mike's own natal chart -- this entry describes what it means when the transiting (daily) Moon passes through this nakshatra, a short-term timing signal rather than a natal placement.",
-   "translation": "When the Moon is here for the day, the mood/energy leans toward invincibility, early victory, purification.",
-   "do": "declarations, early-stage pushes, purification rituals",
-   "avoid": "final or closing actions -- this star's strength is in the opening move",
-   "svehla_link": "N/A -- not part of Svehla's current 2026 transit themes; this is a daily lunar-timing layer."
-  },
-  {
-   "key": "Moon in nakshatra Uttara Ashadha",
-   "traditional": "Uttara Ashadha spans 13 deg 20' of the sidereal zodiac, ruled by Sun, presided over by Visvedevas, Manushya gana. Symbol: Elephant tusk. Core nature: lasting victory, universal principle, integrity.",
-   "esoteric": "Each nakshatra is a lunar mansion the Moon 'lives in' for about a day -- its deity and gana color the emotional/intuitive tone of whatever the Moon touches while passing through.",
-   "in_mikes_chart": "N/A for Mike's own natal chart -- this entry describes what it means when the transiting (daily) Moon passes through this nakshatra, a short-term timing signal rather than a natal placement.",
-   "translation": "When the Moon is here for the day, the mood/energy leans toward lasting victory, universal principle, integrity.",
-   "do": "long-term commitments, final agreements, ethical stands",
-   "avoid": "quick or temporary fixes -- Uttara Ashadha is built for permanence",
-   "svehla_link": "N/A -- not part of Svehla's current 2026 transit themes; this is a daily lunar-timing layer."
-  },
-  {
-   "key": "Moon in nakshatra Shravana",
-   "traditional": "Shravana spans 13 deg 20' of the sidereal zodiac, ruled by Moon, presided over by Vishnu, Deva gana. Symbol: Ear. Core nature: listening, learning, connection, fame through knowledge.",
-   "esoteric": "Each nakshatra is a lunar mansion the Moon 'lives in' for about a day -- its deity and gana color the emotional/intuitive tone of whatever the Moon touches while passing through.",
-   "in_mikes_chart": "N/A for Mike's own natal chart -- this entry describes what it means when the transiting (daily) Moon passes through this nakshatra, a short-term timing signal rather than a natal placement.",
-   "translation": "When the Moon is here for the day, the mood/energy leans toward listening, learning, connection, fame through knowledge.",
-   "do": "study, teaching, networking, listening-based work",
-   "avoid": "talking over others or hasty judgment -- Shravana's gift is the ear, not the mouth",
-   "svehla_link": "N/A -- not part of Svehla's current 2026 transit themes; this is a daily lunar-timing layer."
-  },
-  {
-   "key": "Moon in nakshatra Dhanishta",
-   "traditional": "Dhanishta spans 13 deg 20' of the sidereal zodiac, ruled by Mars, presided over by Eight Vasus, Rakshasa gana. Symbol: Drum/Flute. Core nature: wealth, music, rhythm, group achievement.",
-   "esoteric": "Each nakshatra is a lunar mansion the Moon 'lives in' for about a day -- its deity and gana color the emotional/intuitive tone of whatever the Moon touches while passing through.",
-   "in_mikes_chart": "N/A for Mike's own natal chart -- this entry describes what it means when the transiting (daily) Moon passes through this nakshatra, a short-term timing signal rather than a natal placement.",
-   "translation": "When the Moon is here for the day, the mood/energy leans toward wealth, music, rhythm, group achievement.",
-   "do": "group or team ventures, music/rhythm-based work, wealth-building",
-   "avoid": "solitary introspective work -- Dhanishta thrives in a group",
-   "svehla_link": "N/A -- not part of Svehla's current 2026 transit themes; this is a daily lunar-timing layer."
-  },
-  {
-   "key": "Moon in nakshatra Shatabhisha",
-   "traditional": "Shatabhisha spans 13 deg 20' of the sidereal zodiac, ruled by Rahu, presided over by Varuna, Rakshasa gana. Symbol: Empty circle. Core nature: healing, secrecy, isolation, deep research.",
-   "esoteric": "Each nakshatra is a lunar mansion the Moon 'lives in' for about a day -- its deity and gana color the emotional/intuitive tone of whatever the Moon touches while passing through.",
-   "in_mikes_chart": "This is Mike's own NATAL Moon nakshatra (1 deg Pisces tropical is ~7 deg Aquarius sidereal under Lahiri) -- his baseline emotional/intuitive nature runs on Shatabhisha's solitary, healing, deep-research theme for life, not just on days the transiting Moon passes through it.",
-   "translation": "When the Moon is here (which is Mike's own natal placement -- a recurring, lifelong theme, not just a passing day), the mood/energy leans toward healing, secrecy, isolation, deep research.",
-   "do": "solitary healing work, deep research, unconventional therapies -- MIKE'S OWN NATAL MOON SITS HERE",
-   "avoid": "crowded or public settings -- Shatabhisha's healing needs privacy",
-   "svehla_link": "Ties into Mike's core nature per Svehla's broader natal reading -- his natural pull toward solitary research and quiet healing work traces to this Moon placement."
-  },
-  {
-   "key": "Moon in nakshatra Purva Bhadrapada",
-   "traditional": "Purva Bhadrapada spans 13 deg 20' of the sidereal zodiac, ruled by Jupiter, presided over by Ajaikapada, Manushya gana. Symbol: Swords. Core nature: intensity, transformation through fire, spiritual fervor.",
-   "esoteric": "Each nakshatra is a lunar mansion the Moon 'lives in' for about a day -- its deity and gana color the emotional/intuitive tone of whatever the Moon touches while passing through.",
-   "in_mikes_chart": "N/A for Mike's own natal chart -- this entry describes what it means when the transiting (daily) Moon passes through this nakshatra, a short-term timing signal rather than a natal placement.",
-   "translation": "When the Moon is here for the day, the mood/energy leans toward intensity, transformation through fire, spiritual fervor.",
-   "do": "intense transformative work, spiritual discipline",
-   "avoid": "casual or superficial engagement -- this star doesn't do things halfway",
-   "svehla_link": "N/A -- not part of Svehla's current 2026 transit themes; this is a daily lunar-timing layer."
-  },
-  {
-   "key": "Moon in nakshatra Uttara Bhadrapada",
-   "traditional": "Uttara Bhadrapada spans 13 deg 20' of the sidereal zodiac, ruled by Saturn, presided over by Ahirbudhnya, Manushya gana. Symbol: Twins. Core nature: deep wisdom, hidden depths, steady support.",
-   "esoteric": "Each nakshatra is a lunar mansion the Moon 'lives in' for about a day -- its deity and gana color the emotional/intuitive tone of whatever the Moon touches while passing through.",
-   "in_mikes_chart": "N/A for Mike's own natal chart -- this entry describes what it means when the transiting (daily) Moon passes through this nakshatra, a short-term timing signal rather than a natal placement.",
-   "translation": "When the Moon is here for the day, the mood/energy leans toward deep wisdom, hidden depths, steady support.",
-   "do": "deep study, quiet steady support work",
-   "avoid": "showy or public display -- Uttara Bhadrapada's wisdom is meant to stay under the surface",
-   "svehla_link": "N/A -- not part of Svehla's current 2026 transit themes; this is a daily lunar-timing layer."
-  },
-  {
-   "key": "Moon in nakshatra Revati",
-   "traditional": "Revati spans 13 deg 20' of the sidereal zodiac, ruled by Mercury, presided over by Pushan, Deva gana. Symbol: Fish. Core nature: nourishing completion, guidance, gentle prosperity.",
-   "esoteric": "Each nakshatra is a lunar mansion the Moon 'lives in' for about a day -- its deity and gana color the emotional/intuitive tone of whatever the Moon touches while passing through.",
-   "in_mikes_chart": "N/A for Mike's own natal chart -- this entry describes what it means when the transiting (daily) Moon passes through this nakshatra, a short-term timing signal rather than a natal placement.",
-   "translation": "When the Moon is here for the day, the mood/energy leans toward nourishing completion, guidance, gentle prosperity.",
-   "do": "completions, journeys' end, guiding others gently",
-   "avoid": "starting brand-new ventures -- Revati is built for endings, not launches",
-   "svehla_link": "N/A -- not part of Svehla's current 2026 transit themes; this is a daily lunar-timing layer."
   },
   {
    "key": "Return Mars",

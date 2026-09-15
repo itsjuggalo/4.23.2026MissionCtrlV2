@@ -133,6 +133,7 @@ def main() -> int:
     ap.add_argument("--progressed", action="store_true", help="secondary progressions today")
     ap.add_argument("--explain", action="store_true", help="full 4-level read of every aspect today")
     ap.add_argument("--lookup", nargs="+", metavar="KIND KEY", help="planet|sign|house|aspect <key>")
+    ap.add_argument("--full", action="store_true", help="print the complete read (the 8:32 send is a one-message digest when long)")
     args = ap.parse_args()
     if args.dates:
         print(svehla.dates_block()); return 0
@@ -166,9 +167,14 @@ def main() -> int:
 
     moon = trans["Moon"]
     mh = whole_sign_house(moon["lon"], asc)
+    try:                                   # researched 'Moon through the Nth house' line (esoteric KB)
+        _mt = lex.combo_translation(f"Transiting Moon through the {ordinal(mh + 1)} house")
+        moon_note = " " + _mt.split(": ", 1)[-1].split(" (Esoteric:")[0] if _mt else " — where today's feelings live."
+    except Exception:
+        moon_note = " — where today's feelings live."
     lines = [f"🌌 DAILY TRANSITS — {now_et:%a %b %-d}",
              f"☽ Moon in {SIGNS[int(moon['lon'] // 30)]}, your {ordinal(mh + 1)} house "
-             f"({HOUSE_LIFE[mh]}) — where today's feelings live."]
+             f"({HOUSE_LIFE[mh]}).{moon_note}"]
 
     rx = [n for n, v in trans.items() if v["speed"] < 0 and n not in ("Sun", "Moon")]
     if rx:
@@ -270,12 +276,21 @@ def main() -> int:
     except Exception as e:
         lines.append(f"\n🌘 (moon phase unavailable: {e})")
 
-    # round 8: traditional timing layer — profection year/month, day+hour ruler, Moon's nakshatra
+    # round 8: traditional timing layer — profection year/month, day+hour ruler, firdaria
     try:
         import astro_timing
         lines.append("\n" + astro_timing.daily_line(now_et))
     except Exception as e:
         lines.append(f"\n⏳ (timing unavailable: {e})")
+
+    # round 8: Uranian layer (planetary pictures, 90° dial TNP hits, critical degrees, star transits) — only what is live
+    try:
+        import astro_uranian
+        ul = astro_uranian.daily_lines(now_et)
+        if ul:
+            lines.append("\n🜨 Uranian layer (Svehla's dial):\n" + ul)
+    except Exception as e:
+        lines.append(f"\n🜨 (uranian layer unavailable: {e})")
 
     # round 8: dated timeline — what goes exact / changes house within ±2 days, researched meaning attached
     try:
@@ -305,12 +320,49 @@ def main() -> int:
         lines.append("\n⚠️ no verification stamp — run astro_verify.py --all")
     lines.append(f"☉ {sign_deg(trans['Sun']['lon'])} · /explain for the full read · /dates · /progressed · /planet /sign /house /aspect")
     msg = "\n".join(lines)
-    print(msg)
+    out = msg if (args.full or len(msg) <= 3900) else digest(msg)
+    print(out)
     if args.send:
-        for chunk in chunk_message(msg):          # Telegram caps a message at 4096 chars
+        for chunk in chunk_message(out):          # Telegram caps a message at 4096 chars
             subprocess.run([sys.executable, str(TG_FLEET), "send", TG_FN, chunk],
                            capture_output=True, timeout=30)
     return 0
+
+
+DIGEST_KEEP = ("🌌", "🎚", "🌘", "⏳", "🗓", "📜", "✔", "⚠️", "☉")
+
+
+def digest(msg: str, max_hits: int = 3) -> str:
+    """One-message morning digest (Mike's short-and-direct rule): header + Moon, top hits with only their
+    plain-terms + Svehla lines, sky quality, Moon phase, timing, exact-this-week, Svehla windows, stamp.
+    Everything else stays behind /full."""
+    paras = msg.split("\n\n")
+    out = []
+    ASPECT_GLYPHS = ("☌", "□", "☍", "△", "﹡")
+    for i, para in enumerate(paras):
+        first = para.lstrip()[:2]
+        if i == 0 or para.lstrip().startswith(ASPECT_GLYPHS):   # header block, or the aspect block
+            head, kept, n = [], [], 0
+            for ln in para.split("\n"):
+                if not ln.startswith(" ") and not ln.startswith(ASPECT_GLYPHS):
+                    head.append(ln); continue
+                if not ln.startswith(" "):          # a new aspect line
+                    n += 1
+                    if n <= max_hits:
+                        kept.append(ln)
+                    continue
+                if n <= max_hits and ln.lstrip().startswith(("In plain terms:", "↳ Svehla:")):
+                    kept.append(ln)
+            more = n - max_hits
+            out.append("\n".join(head + kept + ([f"   … +{more} more hit{'s' if more > 1 else ''} in /full"] if more > 0 else [])))
+            continue
+        if any(first.startswith(k) for k in DIGEST_KEEP):
+            out.append(para)
+    out.append("📖 /full — the complete read (esoteric, sky events, patterns, Uranian dial)")
+    d = "\n\n".join(out)
+    if len(d) > 3900:                               # still long: drop the timing + moon-phase paragraphs
+        d = "\n\n".join(p for p in out if not p.lstrip().startswith(("⏳", "🌘")))
+    return d
 
 
 def chunk_message(msg: str, limit: int = 3900) -> list[str]:

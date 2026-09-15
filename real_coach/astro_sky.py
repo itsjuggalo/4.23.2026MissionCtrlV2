@@ -282,9 +282,9 @@ def ingresses(start: date, days: int) -> list[dict]:
 
 
 # ── 6. mercury retrograde cycles (incl. shadow) ─────────────────────────────
-def mercury_rx(start: date, days: int) -> list[dict]:
-    pad = 50
-    st = stations(start - timedelta(days=pad), days + 2 * pad, bodies={"Mercury": swe.MERCURY})
+def retro_cycles(start: date, days: int, name: str = "Mercury", body: int = swe.MERCURY) -> list[dict]:
+    pad = 50 if name == "Mercury" else 120
+    st = stations(start - timedelta(days=pad), days + 2 * pad, bodies={name: body})
     events = []
     i = 0
     while i < len(st) - 1:
@@ -296,16 +296,17 @@ def mercury_rx(start: date, days: int) -> list[dict]:
             rx_start_deg = rx_start["lon"]  # station-retrograde degree (higher)
 
             def g_pre(t):
-                return _signed_gap(_lon(t, swe.MERCURY), rx_end_deg)
-            pre_hits = _scan_crossings(g_pre, rx_start_jd - 45, rx_start_jd - 0.5, 0.5)
+                return _signed_gap(_lon(t, body), rx_end_deg)
+            pre_hits = _scan_crossings(g_pre, rx_start_jd - (45 if name == "Mercury" else 110), rx_start_jd - 0.5, 0.5)
             pre_shadow = pre_hits[-1] if pre_hits else None
 
             def g_post(t):
-                return _signed_gap(_lon(t, swe.MERCURY), rx_start_deg)
-            post_hits = _scan_crossings(g_post, rx_end_jd + 0.5, rx_end_jd + 45, 0.5)
+                return _signed_gap(_lon(t, body), rx_start_deg)
+            post_hits = _scan_crossings(g_post, rx_end_jd + 0.5, rx_end_jd + (45 if name == "Mercury" else 110), 0.5)
             post_shadow = post_hits[0] if post_hits else None
 
             events.append({
+                "body": name,
                 "pre_shadow": _iso(pre_shadow) if pre_shadow else None,
                 "rx_start": rx_start["date_et"], "rx_end": rx_end["date_et"],
                 "post_shadow": _iso(post_shadow) if post_shadow else None,
@@ -324,6 +325,16 @@ def mercury_rx(start: date, days: int) -> list[dict]:
 
 
 # ── cache ────────────────────────────────────────────────────────────────────
+
+def mercury_rx(start: date, days: int) -> list[dict]:
+    return retro_cycles(start, days, "Mercury", swe.MERCURY)
+
+
+def venus_mars_rx(start: date, days: int) -> list[dict]:
+    """Venus + Mars retrograde cycles with shadow (same method as Mercury)."""
+    return sorted(retro_cycles(start, days, "Venus", swe.VENUS) + retro_cycles(start, days, "Mars", swe.MARS),
+                  key=lambda e: e["rx_start"])
+
 def _today_et() -> date:
     return datetime.now(T.ET).date()
 
@@ -339,6 +350,7 @@ def _build_cache(start: date | None = None) -> dict:
         "stations": stations(start, CACHE_HORIZON_DAYS),
         "ingresses": ingresses(start, CACHE_HORIZON_DAYS),
         "mercury_rx": mercury_rx(start, CACHE_HORIZON_DAYS),
+        "venus_mars_rx": venus_mars_rx(start, CACHE_HORIZON_DAYS),
     }
     CACHE_FILE.write_text(json.dumps(data, indent=1))
     return data
@@ -363,6 +375,8 @@ def _events_in(d: date, days: int) -> dict:
     out = {}
     for key in ("lunations", "eclipses", "stations", "ingresses"):
         out[key] = [e for e in cache[key] if lo <= e["date_et"][:10] <= hi]
+    out["venus_mars_rx"] = [e for e in cache.get("venus_mars_rx", [])
+                            if any(e.get(k) and lo <= e[k][:10] <= hi for k in ("pre_shadow", "rx_start", "rx_end", "post_shadow"))]
     out["mercury_rx"] = [e for e in cache["mercury_rx"]
                           if lo <= e["rx_start"][:10] <= hi or lo <= e["rx_end"][:10] <= hi
                           or (e["pre_shadow"] and lo <= e["pre_shadow"][:10] <= hi)
@@ -433,8 +447,15 @@ def _fmt_mercury_rx(e: dict) -> str:
     rx = datetime.fromisoformat(e["rx_start"])
     end = datetime.fromisoformat(e["rx_end"])
     houses = " & ".join(f"your {T.ordinal(h)}" for h in e["houses"])
-    return (f"☿℞ Mercury retrograde {rx:%b %-d} → {end:%b %-d}, {e['from_sign']} {e['from_deg']}° "
-            f"back to {e['to_sign']} {e['to_deg']}° ({houses} house)")
+    body = e.get("body", "Mercury")
+    icon = {"Mercury": "☿", "Venus": "♀", "Mars": "♂"}.get(body, "•")
+    shadow = ""
+    if e.get("pre_shadow") or e.get("post_shadow"):
+        ps = datetime.fromisoformat(e["pre_shadow"]) if e.get("pre_shadow") else None
+        po = datetime.fromisoformat(e["post_shadow"]) if e.get("post_shadow") else None
+        shadow = " · shadow " + (f"{ps:%b %-d}" if ps else "?") + " → " + (f"{po:%b %-d}" if po else "?")
+    return (f"{icon}℞ {body} retrograde {rx:%b %-d} → {end:%b %-d}, {e['from_sign']} {e['from_deg']}° "
+            f"back to {e['to_sign']} {e['to_deg']}° ({houses} house){shadow}")
 
 
 def daily_alerts(d: date | None = None) -> list[str]:
@@ -484,6 +505,8 @@ def upcoming_block(d: date | None = None, days: int = 60) -> str:
     for e in events["ingresses"]:
         rows.append((e["date_et"], _fmt_ingress(e)))
     for e in events["mercury_rx"]:
+        rows.append((e["rx_start"], _fmt_mercury_rx(e)))
+    for e in events.get("venus_mars_rx", []):
         rows.append((e["rx_start"], _fmt_mercury_rx(e)))
     rows.sort(key=lambda r: r[0])
     lines = [f"🔭 SKY — {d:%a %b %-d %Y} to {d + timedelta(days=days):%b %-d %Y}", ""]

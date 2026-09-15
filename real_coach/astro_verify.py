@@ -216,6 +216,24 @@ def check_svehla() -> list[str]:
     return fails
 
 
+VEDIC = re.compile(r"(?i)\b(vedic|sidereal|nakshatra|jyotish|dasha|rahu|ketu|lahiri)\b")
+
+
+def check_no_vedic() -> list[str]:
+    """Mike 2026-09-15: tropical Western only — no Vedic/sidereal layer anywhere the bot reads from."""
+    fails = []
+    here = Path(__file__).parent
+    for fp in sorted(list(here.glob("astro_*.py")) + list(here.glob("astro_kb_*.json")) + [here / "astro_esoteric_kb.json",
+                     here / "daily_transits.py", here / "svehla.py", Path.home() / "scripts/tg_set_commands.py"]):
+        if not fp.exists() or fp.name == "astro_verify.py":
+            continue
+        txt = fp.read_text(errors="ignore")
+        hits = sorted(set(m.lower() for m in VEDIC.findall(txt)))
+        if hits:
+            fails.append(f"V vedic/sidereal term in {fp.name}: {hits}")
+    return fails
+
+
 def check_outputs() -> list[str]:
     fails = []
     py = str(Path.home() / ".venv/bin/python")
@@ -330,14 +348,14 @@ def check_modules() -> list[str]:
 
 def run_all(send_on_fail: bool = False) -> int:
     fails = []
-    for fn in (check_natal, check_texts, check_horizons, check_svehla, check_outputs, check_modules):
+    for fn in (check_natal, check_texts, check_horizons, check_svehla, check_outputs, check_modules, check_no_vedic):
         try:
             fails += fn()
         except Exception as e:
             fails.append(f"{fn.__name__} crashed: {e}")
     hard = [f for f in fails if "skipped" not in f]
     status = {"ok": not hard, "when_et": datetime.now(T.ET).isoformat(timespec="minutes"),
-              "checks": ["natal", "texts", "horizons", "svehla", "outputs", "modules"], "failures": fails}
+              "checks": ["natal", "texts", "horizons", "svehla", "outputs", "modules", "no-vedic"], "failures": fails}
     STATUS.parent.mkdir(parents=True, exist_ok=True)
     STATUS.write_text(json.dumps(status, indent=1))
     print(("✔ ALL CHECKS PASS" if not hard else "✖ FAILURES") + f" — {status['when_et']}")

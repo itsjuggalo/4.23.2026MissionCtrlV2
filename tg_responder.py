@@ -123,6 +123,7 @@ BOTS = {
             "~/scripts/real_coach/svehla_windows.json; Mike's journal/scores/loose-ends/contingency "
             "live in ~/portfolio/astrology/*.json* (read them when he asks what he noted or how a "
             "window scored). Interpretation lexicon (planets/signs/houses/aspects, practical + "
+            "TROPICAL WESTERN ONLY: never use Vedic/sidereal/jyotish techniques (nakshatras, dashas, Rahu/Ketu) — they do not match this chart's tropical Placidus houses. "
             "esoteric, Placidus houses) is ~/scripts/real_coach/astro_lexicon.py — use its wording "
             "so your answers match the daily send; `--explain` gives today's full read. "
             "For dates/aspects you cannot compute, "
@@ -141,7 +142,9 @@ BOTS = {
             "   and lands in, both signs, esoteric meaning of each planet, how to work it\n"
             "• /planet <x> · /sign <x> · /house <1-12> · /aspect <x> — the lexicon, practical + esoteric\n"
             "• /week · /month — the coming transits day by day, peak day marked · /quality — today 1-10\n"
-            "• /profection — your time-lord year and month · /hours — today's planetary hours (Dunedin) · /nakshatra — the Moon's lunar mansion right now\n"
+            "• /tnp — the 8 transneptunian points (Hades, Apollon…) natal + 90° dial hits · /midpoints — planetary pictures now · /critical — anything on a critical/anaretic degree · /startransits — planets on fixed stars today\n"
+            "• /profection — your time-lord year and month · /hours — today's planetary hours (Dunedin) · /firdaria — your Persian time-lord periods (tropical)\n"
+            "• /full — today's complete read (the 8:32 send is a one-message digest)\n"
             "• /timeline [days] [full] — every exact hit, house change, progression and eclipse ahead, dated from the real ephemeris · /year — 12 months in one screen\n"
             "• /sky — lunations, eclipses, stations, ingresses, Mercury rx + shadow, in your houses · /voc\n"
             "• /solarreturn · /lunarreturn · /phase (progressed lunation phase) · /solararc\n"
@@ -380,9 +383,12 @@ ASTRO_MODULE_CMDS = {
     "/activation":  ("astro_patterns.py", ["activation"]), "/stars": ("astro_patterns.py", ["stars"]),
     "/week":        ("astro_lookahead.py", ["week"]), "/month":    ("astro_lookahead.py", ["month"]),
     "/quality":     ("astro_lookahead.py", ["quality"]),
+    "/full":        ("daily_transits.py", ["--full"]),
     "/timeline":    ("astro_timeline.py", []),         "/year":      ("astro_timeline.py", ["year"]),
     "/profection":  ("astro_timing.py", ["profection"]), "/hours":   ("astro_timing.py", ["hours"]),
-    "/nakshatra":   ("astro_timing.py", ["nakshatra"]),
+    "/firdaria":    ("astro_timing.py", ["firdaria"]),
+    "/tnp":         ("astro_uranian.py", ["tnp"]),       "/midpoints": ("astro_uranian.py", ["midpoints"]),
+    "/critical":    ("astro_uranian.py", ["critical"]),  "/startransits": ("astro_uranian.py", ["stars"]),
 }
 
 # Static natal card for the astrology lane's /chart (same data daily_transits.py computes from).
@@ -519,12 +525,24 @@ def run_bot(botkey):
             return ""
         day = time.strftime("%Y-%m-%d")
         if day not in sky_cache:
-            try:
-                r = subprocess.run([sys.executable, str(Path.home() / "scripts/real_coach/svehla.py"),
-                                    "context"], capture_output=True, text=True, timeout=60)
-                sky_cache.clear(); sky_cache[day] = (r.stdout or "").strip()
-            except Exception as e:
-                sky_cache[day] = f"(live sky unavailable: {e})"
+            parts = []
+            rc = Path.home() / "scripts/real_coach"
+            py = str(Path.home() / ".venv/bin/python")
+            # round 9: ground free chat in the same material as the morning send —
+            # Svehla context, today's timeline, Uranian dial, timing layer, 14-day timeline
+            for label, argv in (("Svehla reading context", [sys.executable, str(rc / "svehla.py"), "context"]),
+                                ("Exact this week (timeline)", [py, str(rc / "astro_timeline.py"), "today"]),
+                                ("Next 14 days (timeline)", [py, str(rc / "astro_timeline.py"), "14"]),
+                                ("Uranian dial today", [py, str(rc / "astro_uranian.py"), "today"]),
+                                ("Timing layer", [py, str(rc / "astro_timing.py"), "today"])):
+                try:
+                    r = subprocess.run(argv, capture_output=True, text=True, timeout=90)
+                    txt = (r.stdout or "").strip()
+                    if txt:
+                        parts.append(f"[{label}]\n{txt[:1800]}")
+                except Exception as e:
+                    parts.append(f"[{label} unavailable: {e}]")
+            sky_cache.clear(); sky_cache[day] = "\n\n".join(parts)
         return sky_cache[day]
 
     def with_context(question):

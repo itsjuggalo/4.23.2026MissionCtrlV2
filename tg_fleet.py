@@ -210,11 +210,25 @@ CHARTER = {
         owns=["pullback-to-level watches (levels from /api/decision + /api/mtf-ta)"],
         never=["anything that is not a level watch"],
         cadence=":20,:50 9-16 ET Mon-Fri", cadence_min=30,
+        # Round 4 (team-lead, 2026-09-15): re-derived by reading the script. It GETs
+        # the board (not the POST it writes to), plus a per-symbol /api/decision level
+        # cross-check and mtf_rebound.py's /api/mtf-ta glyph (same shared helper
+        # setup_scanner/explosion_score use) — confirmed via `import mtf_rebound as mr`.
         reads=[
             "http://localhost:3000/api/pullback-watch?fresh=1",
             "http://localhost:3000/api/options-flow",
+            "http://localhost:3000/api/decision?symbol=SPY",
+            "http://localhost:3000/api/mtf-ta?symbol=SPY",
         ],
-        dry_run_cmd=None,  # not in this pass's D-fix list; no --dry-run flag exists
+        # pullback_autowatch.py now has --dry-run (argparse, confirmed). Cron runs bare
+        # `python3` from cwd /AIWorkWSL/trading/analysis with no PATH= override in the
+        # crontab — verified it resolves to /usr/bin/python3 (both `which python3` and
+        # `env -i which python3` agree; matches every other bare-python3 line in this
+        # same crontab, e.g. runner_radar.py/explosion_score.py). Verified live:
+        # `--dry-run` exits 0, prints "DRY RUN (not sent, N chars)", sends nothing
+        # (2026-09-15).
+        dry_run_cmd=["/usr/bin/python3", "/AIWorkWSL/trading/analysis/pullback_autowatch.py",
+                     "--dry-run"],
     ),
     "rebound": dict(
         fleet="trading_command",
@@ -329,10 +343,23 @@ CHARTER = {
         owns=["option contracts on the relay universe", "relay x DP confluence tag"],
         never=["Alpaca positions"],
         cadence="15:40 ET Mon-Fri", cadence_min=24 * 60,
+        # Round 4 (team-lead, 2026-09-15): re-derived from the live script. Alpaca
+        # /v2/positions is gone — the script's own comment says it "replaces the
+        # retired Alpaca /v2/positions." Confirmed via grep: RELAY_URL/DARKPOOL_URL
+        # are the only two HTTP sources it reads.
         reads=[
-            "https://paper-api.alpaca.markets/v2/positions",  # doctrine-flagged, fleet-a Lane 13
+            "http://localhost:3000/api/firebase-relay",
+            "http://localhost:3000/api/darkpool?view=relay",
         ],
-        dry_run_cmd=None,  # not in this pass's D-fix list; no --dry-run flag exists
+        # team-lead suggested `--dry-run`, but the script has NO argparse/flag parsing
+        # at all (verified by reading it) — its only gate is `DRY = os.environ.get("DRY")
+        # == "1"`, same pattern as shock_guard.py (round 2). Passing `--dry-run` as an
+        # argv would be silently ignored and the script would run LIVE. Verified live:
+        # `DRY=1 /home/itsju/.venv/bin/python .../options_position_scorecard.py` exits 0,
+        # prints contract cards, no OneDrive write, no Telegram send (2026-09-15).
+        dry_run_cmd=["/home/itsju/.venv/bin/python",
+                     "/home/itsju/05_AUTOMATION/scripts/options_position_scorecard.py"],
+        env={"DRY": "1"},
     ),
     "telegram_dm_responder": dict(
         fleet="flow_signals",

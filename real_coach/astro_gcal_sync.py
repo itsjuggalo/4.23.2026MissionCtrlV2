@@ -22,7 +22,7 @@ import svehla  # noqa: E402
 
 TOKEN = Path.home() / ".config/calendar/token.json"
 CAL_ID = "primary"
-COLOR_WINDOW, COLOR_EXACT = "3", "9"     # grape / blueberry in Google's palette
+COLOR_WINDOW, COLOR_EXACT, COLOR_TIMELINE = "3", "9", "7"     # grape / blueberry / peacock in Google's palette
 DRY = "--dry" in sys.argv
 
 
@@ -46,10 +46,53 @@ def wanted() -> dict[str, dict]:
             "end": {"date": (d + timedelta(days=1)).isoformat()},
             "colorId": COLOR_EXACT,
         }
+    # round 9: the dated timeline (real ephemeris) — outer-planet hard aspects, house/sign changes, eclipses,
+    # progressed-Moon changes, transits to progressed points, sky-to-sky. Skips fast-asteroid noise.
+    try:
+        import astro_timeline
+        for e in astro_timeline.load():
+            k = e["kind"]
+            keep = (k in ("eclipse", "sky", "to_progressed")
+                    or (k in ("sign", "house") and e["body"] in ("Jupiter", "Saturn", "Uranus", "Neptune", "Pluto", "Chiron"))
+                    or (k == "progressed" and (not e.get("aspect") or e["aspect"] in ("conjunct", "opposite", "square")))
+                    or (k == "aspect" and e["body"] in ("Saturn", "Uranus", "Neptune", "Pluto", "Chiron") and e.get("aspect") in ("conjunct", "square", "opposite"))
+                    or (k == "aspect" and e["body"] == "Jupiter" and e.get("aspect") == "conjunct"))
+            if not keep:
+                continue
+            d = date.fromisoformat(e["date"])
+            uid = "tl-" + e["date"] + "-" + "".join(c for c in e["key"] if c.isalnum())[:48]
+            if uid in out:
+                continue
+            meaning = astro_timeline._meaning(e, full=True)
+            out[uid] = {
+                "summary": f"🗓 {e['what']}",
+                "description": (meaning + "\n\n" if meaning else "") + "Timeline layer (Swiss Ephemeris, Placidus) · Telegram /timeline",
+                "start": {"date": d.isoformat()},
+                "end": {"date": (d + timedelta(days=1)).isoformat()},
+                "colorId": COLOR_TIMELINE,
+            }
+    except Exception as ex:
+        print(f"[timeline skipped: {ex}]", file=sys.stderr)
     for v in out.values():
         v["transparency"] = "transparent"
         v["reminders"] = {"useDefault": False, "overrides": [{"method": "popup", "minutes": 3 * 24 * 60}]}
     return out
+
+
+def _do(fn, tries: int = 6):
+    """Google Calendar write with pacing + exponential backoff on 403 rateLimitExceeded / 5xx."""
+    import time
+    from googleapiclient.errors import HttpError
+    for i in range(tries):
+        try:
+            r = fn()
+            time.sleep(0.35)                      # ~3 writes/s keeps us under the per-user quota
+            return r
+        except HttpError as e:
+            if e.resp.status in (403, 429, 500, 503) and i < tries - 1:
+                time.sleep(2 ** i)
+                continue
+            raise
 
 
 def main() -> int:
@@ -77,12 +120,12 @@ def main() -> int:
         if e is None:
             ins += 1
             if not DRY:
-                svc.events().insert(calendarId=CAL_ID, body=body).execute()
+                _do(lambda: svc.events().insert(calendarId=CAL_ID, body=body).execute())
         elif (e.get("summary") != body["summary"] or e["start"].get("date") != body["start"]["date"]
               or e["end"].get("date") != body["end"]["date"] or e.get("description") != body["description"]):
             upd += 1
             if not DRY:
-                svc.events().patch(calendarId=CAL_ID, eventId=e["id"], body=body).execute()
+                _do(lambda: svc.events().patch(calendarId=CAL_ID, eventId=e["id"], body=body).execute())
         else:
             same += 1
     print(f"gcal sync{' (dry)' if DRY else ''}: {ins} inserted, {upd} updated, {same} unchanged, {len(existing)} were already there")

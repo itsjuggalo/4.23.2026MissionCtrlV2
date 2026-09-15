@@ -301,7 +301,7 @@ def kb_get(section: str, key: str, field: str, default: str = "") -> str:
 
 # ── researched entry files (round 8): flat {key → entry} across astro_kb_*.json ───────────
 ENTRY_FILES = ["astro_kb_fast_transits.json", "astro_kb_slow_gaps.json", "astro_kb_cycles.json",
-               "astro_kb_timing.json", "astro_kb_method.json"]
+               "astro_kb_timing.json", "astro_kb_method.json", "astro_kb_gaps2.json"]
 ENTRIES: dict[str, dict] = {}
 
 

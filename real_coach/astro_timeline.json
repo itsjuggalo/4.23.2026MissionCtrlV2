@@ -1,5 +1,5 @@
 {
- "built": "2026-09-15T01:30-04:00",
+ "built": "2026-09-15T01:46-04:00",
  "start": "2026-09-01",
  "end": "2031-12-31",
  "events": [
@@ -83,6 +83,24 @@
    "what": "Juno crosses into your 7th house"
   },
   {
+   "date": "2026-10-07",
+   "kind": "progressed",
+   "body": "Moon",
+   "natal": "Pluto",
+   "aspect": "opposite",
+   "key": "Progressed Moon opposite natal Pluto",
+   "what": "Progressed Moon exactly opposite your natal Pluto"
+  },
+  {
+   "date": "2026-10-07",
+   "kind": "to_progressed",
+   "body": "Chiron",
+   "natal": "progressed Venus",
+   "aspect": "square",
+   "key": "Transiting Chiron square progressed Venus",
+   "what": "Chiron exactly square your progressed Venus"
+  },
+  {
    "date": "2026-10-09",
    "kind": "aspect",
    "body": "Neptune",
@@ -93,6 +111,15 @@
    "what": "Neptune exactly sextile your natal Ceres (pass 1 of 2, retrograde)",
    "pass": "1 of 2",
    "rx": true
+  },
+  {
+   "date": "2026-10-14",
+   "kind": "progressed",
+   "body": "Moon",
+   "natal": "Chiron",
+   "aspect": "square",
+   "key": "Progressed Moon square natal Chiron",
+   "what": "Progressed Moon exactly square your natal Chiron"
   },
   {
    "date": "2026-10-16",
@@ -129,6 +156,15 @@
    "what": "Jupiter exactly conjunct your natal Chiron (pass 1 of 3)",
    "pass": "1 of 3",
    "rx": false
+  },
+  {
+   "date": "2026-10-21",
+   "kind": "to_progressed",
+   "body": "Jupiter",
+   "natal": "progressed Moon",
+   "aspect": "square",
+   "key": "Transiting Jupiter square progressed Moon",
+   "what": "Jupiter exactly square your progressed Moon"
   },
   {
    "date": "2026-10-22",
@@ -181,6 +217,15 @@
    "what": "Juno exactly conjunct your natal Ceres"
   },
   {
+   "date": "2026-11-13",
+   "kind": "to_progressed",
+   "body": "Jupiter",
+   "natal": "progressed Mercury",
+   "aspect": "square",
+   "key": "Transiting Jupiter square progressed Mercury",
+   "what": "Jupiter exactly square your progressed Mercury"
+  },
+  {
    "date": "2026-11-17",
    "kind": "aspect",
    "body": "Ceres",
@@ -215,6 +260,24 @@
    "what": "Chiron exactly square your natal ASC (pass 1 of 2, retrograde)",
    "pass": "1 of 2",
    "rx": true
+  },
+  {
+   "date": "2026-11-29",
+   "kind": "sky",
+   "body": "Uranus",
+   "other": "Pluto",
+   "aspect": "trine",
+   "key": "Uranus trine Pluto (sky)",
+   "what": "Uranus 3\u00b0 Gemini (your 11th) trine Pluto 3\u00b0 Aquarius (your 7th) \u2014 sky aspect"
+  },
+  {
+   "date": "2026-12-02",
+   "kind": "sky",
+   "body": "Jupiter",
+   "other": "Chiron",
+   "aspect": "trine",
+   "key": "Jupiter trine Chiron (sky)",
+   "what": "Jupiter 26\u00b0 Leo (your 2nd) trine Chiron 26\u00b0 Aries (your 10th) \u2014 sky aspect"
   },
   {
    "date": "2026-12-03",
@@ -254,6 +317,33 @@
    "t_house": 8,
    "key": "Transiting Juno opposite natal Chiron",
    "what": "Juno exactly opposite your natal Chiron"
+  },
+  {
+   "date": "2027-01-03",
+   "kind": "sky",
+   "body": "Jupiter",
+   "other": "Chiron",
+   "aspect": "trine",
+   "key": "Jupiter trine Chiron (sky)",
+   "what": "Jupiter 26\u00b0 Leo (your 2nd) trine Chiron 26\u00b0 Aries (your 10th) \u2014 sky aspect"
+  },
+  {
+   "date": "2027-01-09",
+   "kind": "to_progressed",
+   "body": "Jupiter",
+   "natal": "progressed Moon",
+   "aspect": "square",
+   "key": "Transiting Jupiter square progressed Moon",
+   "what": "Jupiter exactly square your progressed Moon"
+  },
+  {
+   "date": "2027-01-09",
+   "kind": "to_progressed",
+   "body": "Jupiter",
+   "natal": "progressed Mercury",
+   "aspect": "square",
+   "key": "Transiting Jupiter square progressed Mercury",
+   "what": "Jupiter exactly square your progressed Mercury"
   },
   {
    "date": "2027-01-15",
@@ -500,6 +590,24 @@
    "what": "Saturn exactly square your natal Neptune"
   },
   {
+   "date": "2027-04-03",
+   "kind": "sky",
+   "body": "Jupiter",
+   "other": "Saturn",
+   "aspect": "trine",
+   "key": "Jupiter trine Saturn (sky)",
+   "what": "Jupiter 17\u00b0 Leo (your 1st) trine Saturn 17\u00b0 Aries (your 9th) \u2014 sky aspect"
+  },
+  {
+   "date": "2027-04-11",
+   "kind": "to_progressed",
+   "body": "Chiron",
+   "natal": "progressed Venus",
+   "aspect": "square",
+   "key": "Transiting Chiron square progressed Venus",
+   "what": "Chiron exactly square your progressed Venus"
+  },
+  {
    "date": "2027-04-14",
    "kind": "sign",
    "body": "Chiron",
@@ -736,6 +844,15 @@
    "what": "Jupiter crosses into your 2nd house"
   },
   {
+   "date": "2027-06-07",
+   "kind": "progressed",
+   "body": "Moon",
+   "natal": "Moon",
+   "aspect": "square",
+   "key": "Progressed Moon square natal Moon",
+   "what": "Progressed Moon exactly square your natal Moon"
+  },
+  {
    "date": "2027-06-15",
    "kind": "aspect",
    "body": "Jupiter",
@@ -746,6 +863,15 @@
    "what": "Jupiter exactly square your natal Pluto (pass 3 of 3)",
    "pass": "3 of 3",
    "rx": false
+  },
+  {
+   "date": "2027-06-15",
+   "kind": "sky",
+   "body": "Uranus",
+   "other": "Pluto",
+   "aspect": "trine",
+   "key": "Uranus trine Pluto (sky)",
+   "what": "Uranus 6\u00b0 Gemini (your 11th) trine Pluto 6\u00b0 Aquarius (your 7th) \u2014 sky aspect"
   },
   {
    "date": "2027-06-16",
@@ -784,6 +910,15 @@
    "what": "Juno enters Gemini (your 11th house)"
   },
   {
+   "date": "2027-07-07",
+   "kind": "to_progressed",
+   "body": "Jupiter",
+   "natal": "progressed Mercury",
+   "aspect": "square",
+   "key": "Transiting Jupiter square progressed Mercury",
+   "what": "Jupiter exactly square your progressed Mercury"
+  },
+  {
    "date": "2027-07-08",
    "kind": "aspect",
    "body": "Saturn",
@@ -811,6 +946,24 @@
    "t_house": 11,
    "key": "Transiting Juno opposite natal Mercury",
    "what": "Juno exactly opposite your natal Mercury"
+  },
+  {
+   "date": "2027-07-11",
+   "kind": "sky",
+   "body": "Jupiter",
+   "other": "Saturn",
+   "aspect": "trine",
+   "key": "Jupiter trine Saturn (sky)",
+   "what": "Jupiter 27\u00b0 Leo (your 2nd) trine Saturn 27\u00b0 Aries (your 10th) \u2014 sky aspect"
+  },
+  {
+   "date": "2027-07-14",
+   "kind": "progressed",
+   "body": "Moon",
+   "natal": "Ceres",
+   "aspect": "trine",
+   "key": "Progressed Moon trine natal Ceres",
+   "what": "Progressed Moon exactly trine your natal Ceres"
   },
   {
    "date": "2027-07-15",
@@ -899,12 +1052,30 @@
    "what": "Juno exactly opposite your natal Venus"
   },
   {
+   "date": "2027-08-12",
+   "kind": "to_progressed",
+   "body": "Jupiter",
+   "natal": "progressed Moon",
+   "aspect": "square",
+   "key": "Transiting Jupiter square progressed Moon",
+   "what": "Jupiter exactly square your progressed Moon"
+  },
+  {
    "date": "2027-08-17",
    "kind": "eclipse",
    "body": "lunar",
    "key": "Lunar eclipse opposite natal Chiron",
    "alt_key": "Lunar eclipse in the 8th house",
    "what": "Penumbral lunar eclipse at 24\u00b0 Aquarius (your 8th house) \u2014 opposite your natal Chiron (orb 1.4\u00b0)"
+  },
+  {
+   "date": "2027-08-17",
+   "kind": "sky",
+   "body": "Jupiter",
+   "other": "Chiron",
+   "aspect": "trine",
+   "key": "Jupiter trine Chiron (sky)",
+   "what": "Jupiter 4\u00b0 Virgo (your 2nd) trine Chiron 4\u00b0 Taurus (your 10th) \u2014 sky aspect"
   },
   {
    "date": "2027-08-19",
@@ -957,6 +1128,15 @@
    "what": "Ceres crosses into your 3rd house"
   },
   {
+   "date": "2027-09-10",
+   "kind": "sky",
+   "body": "Jupiter",
+   "other": "Uranus",
+   "aspect": "square",
+   "key": "Jupiter square Uranus (sky)",
+   "what": "Jupiter 9\u00b0 Virgo (your 2nd) square Uranus 9\u00b0 Gemini (your 11th) \u2014 sky aspect"
+  },
+  {
    "date": "2027-09-11",
    "kind": "aspect",
    "body": "Saturn",
@@ -981,6 +1161,15 @@
    "rx": true
   },
   {
+   "date": "2027-09-16",
+   "kind": "progressed",
+   "body": "Moon",
+   "natal": "Jupiter",
+   "aspect": "trine",
+   "key": "Progressed Moon trine natal Jupiter",
+   "what": "Progressed Moon exactly trine your natal Jupiter"
+  },
+  {
    "date": "2027-09-19",
    "kind": "aspect",
    "body": "Juno",
@@ -999,6 +1188,15 @@
    "t_house": 2,
    "key": "Transiting Jupiter square natal Hades",
    "what": "Jupiter exactly square your natal Hades"
+  },
+  {
+   "date": "2027-09-21",
+   "kind": "progressed",
+   "body": "Moon",
+   "natal": "Mercury",
+   "aspect": "opposite",
+   "key": "Progressed Moon opposite natal Mercury",
+   "what": "Progressed Moon exactly opposite your natal Mercury"
   },
   {
    "date": "2027-09-25",
@@ -1077,6 +1275,15 @@
    "body": "Jupiter",
    "key": "Transiting Jupiter in the 3rd house",
    "what": "Jupiter crosses into your 3rd house"
+  },
+  {
+   "date": "2027-10-15",
+   "kind": "to_progressed",
+   "body": "Jupiter",
+   "natal": "progressed Sun",
+   "aspect": "square",
+   "key": "Transiting Jupiter square progressed Sun",
+   "what": "Jupiter exactly square your progressed Sun"
   },
   {
    "date": "2027-10-16",
@@ -1228,6 +1435,24 @@
    "rx": false
   },
   {
+   "date": "2027-12-02",
+   "kind": "to_progressed",
+   "body": "Uranus",
+   "natal": "progressed Moon",
+   "aspect": "conjunct",
+   "key": "Transiting Uranus conjunct progressed Moon",
+   "what": "Uranus exactly conjunct your progressed Moon"
+  },
+  {
+   "date": "2027-12-06",
+   "kind": "to_progressed",
+   "body": "Chiron",
+   "natal": "progressed Venus",
+   "aspect": "square",
+   "key": "Transiting Chiron square progressed Venus",
+   "what": "Chiron exactly square your progressed Venus"
+  },
+  {
    "date": "2027-12-13",
    "kind": "sign",
    "body": "Ceres",
@@ -1279,6 +1504,15 @@
    "body": "Juno",
    "key": "Transiting Juno in the 12th house",
    "what": "Juno backs into your 12th house"
+  },
+  {
+   "date": "2028-01-13",
+   "kind": "sky",
+   "body": "Uranus",
+   "other": "Pluto",
+   "aspect": "trine",
+   "key": "Uranus trine Pluto (sky)",
+   "what": "Uranus 6\u00b0 Gemini (your 11th) trine Pluto 6\u00b0 Aquarius (your 7th) \u2014 sky aspect"
   },
   {
    "date": "2028-01-15",
@@ -1348,6 +1582,15 @@
    "rx": false
   },
   {
+   "date": "2028-02-21",
+   "kind": "to_progressed",
+   "body": "Chiron",
+   "natal": "progressed Venus",
+   "aspect": "square",
+   "key": "Transiting Chiron square progressed Venus",
+   "what": "Chiron exactly square your progressed Venus"
+  },
+  {
    "date": "2028-02-24",
    "kind": "aspect",
    "body": "Neptune",
@@ -1389,6 +1632,24 @@
    "what": "Saturn exactly square your natal ASC (pass 3 of 3)",
    "pass": "3 of 3",
    "rx": false
+  },
+  {
+   "date": "2028-03-21",
+   "kind": "progressed",
+   "body": "Moon",
+   "natal": "Hades",
+   "aspect": "conjunct",
+   "key": "Progressed Moon conjunct natal Hades",
+   "what": "Progressed Moon exactly conjunct your natal Hades"
+  },
+  {
+   "date": "2028-03-26",
+   "kind": "progressed",
+   "body": "Moon",
+   "natal": "Saturn",
+   "aspect": "trine",
+   "key": "Progressed Moon trine natal Saturn",
+   "what": "Progressed Moon exactly trine your natal Saturn"
   },
   {
    "date": "2028-03-28",
@@ -1472,11 +1733,29 @@
    "rx": true
   },
   {
+   "date": "2028-04-21",
+   "kind": "to_progressed",
+   "body": "Saturn",
+   "natal": "progressed Venus",
+   "aspect": "square",
+   "key": "Transiting Saturn square progressed Venus",
+   "what": "Saturn exactly square your progressed Venus"
+  },
+  {
    "date": "2028-04-22",
    "kind": "sign",
    "body": "Juno",
    "key": "Transiting Juno in Leo",
    "what": "Juno enters Leo (your 1st house)"
+  },
+  {
+   "date": "2028-04-30",
+   "kind": "to_progressed",
+   "body": "Jupiter",
+   "natal": "progressed Sun",
+   "aspect": "square",
+   "key": "Transiting Jupiter square progressed Sun",
+   "what": "Jupiter exactly square your progressed Sun"
   },
   {
    "date": "2028-05-01",
@@ -1501,6 +1780,15 @@
    "what": "Saturn exactly square your natal Ceres"
   },
   {
+   "date": "2028-05-10",
+   "kind": "sky",
+   "body": "Uranus",
+   "other": "Pluto",
+   "aspect": "trine",
+   "key": "Uranus trine Pluto (sky)",
+   "what": "Uranus 8\u00b0 Gemini (your 11th) trine Pluto 8\u00b0 Aquarius (your 7th) \u2014 sky aspect"
+  },
+  {
    "date": "2028-05-12",
    "kind": "arc",
    "body": "arc",
@@ -1518,6 +1806,15 @@
    "what": "Juno exactly opposite your natal Saturn"
   },
   {
+   "date": "2028-05-29",
+   "kind": "to_progressed",
+   "body": "Jupiter",
+   "natal": "progressed Sun",
+   "aspect": "square",
+   "key": "Transiting Jupiter square progressed Sun",
+   "what": "Jupiter exactly square your progressed Sun"
+  },
+  {
    "date": "2028-05-31",
    "kind": "aspect",
    "body": "Ceres",
@@ -1528,6 +1825,15 @@
    "what": "Ceres exactly conjunct your natal Sun (pass 2 of 3, retrograde)",
    "pass": "2 of 3",
    "rx": true
+  },
+  {
+   "date": "2028-06-08",
+   "kind": "sky",
+   "body": "Saturn",
+   "other": "Chiron",
+   "aspect": "conjunct",
+   "key": "Saturn conjunct Chiron (sky)",
+   "what": "Saturn 6\u00b0 Taurus (your 10th) conjunct Chiron 6\u00b0 Taurus (your 10th) \u2014 sky aspect"
   },
   {
    "date": "2028-06-10",
@@ -1547,6 +1853,15 @@
    "body": "Juno",
    "key": "Transiting Juno in the 2nd house",
    "what": "Juno crosses into your 2nd house"
+  },
+  {
+   "date": "2028-06-24",
+   "kind": "sky",
+   "body": "Saturn",
+   "other": "Pluto",
+   "aspect": "square",
+   "key": "Saturn square Pluto (sky)",
+   "what": "Saturn 8\u00b0 Taurus (your 10th) square Pluto 8\u00b0 Aquarius (your 7th) \u2014 sky aspect"
   },
   {
    "date": "2028-06-25",
@@ -1599,6 +1914,15 @@
    "rx": false
   },
   {
+   "date": "2028-07-09",
+   "kind": "sky",
+   "body": "Pluto",
+   "other": "Chiron",
+   "aspect": "square",
+   "key": "Pluto square Chiron (sky)",
+   "what": "Pluto 8\u00b0 Aquarius (your 7th) square Chiron 8\u00b0 Taurus (your 10th) \u2014 sky aspect"
+  },
+  {
    "date": "2028-07-10",
    "kind": "arc",
    "body": "arc",
@@ -1621,6 +1945,15 @@
    "t_house": 2,
    "key": "Transiting Juno opposite natal Moon",
    "what": "Juno exactly opposite your natal Moon"
+  },
+  {
+   "date": "2028-07-17",
+   "kind": "progressed",
+   "body": "Moon",
+   "natal": "Apollon",
+   "aspect": "trine",
+   "key": "Progressed Moon trine natal Apollon",
+   "what": "Progressed Moon exactly trine your natal Apollon"
   },
   {
    "date": "2028-07-19",
@@ -1709,6 +2042,15 @@
    "what": "Ceres crosses into your 5th house"
   },
   {
+   "date": "2028-09-16",
+   "kind": "progressed",
+   "body": "Moon",
+   "natal": "Venus",
+   "aspect": "opposite",
+   "key": "Progressed Moon opposite natal Venus",
+   "what": "Progressed Moon exactly opposite your natal Venus"
+  },
+  {
    "date": "2028-09-17",
    "kind": "aspect",
    "body": "Jupiter",
@@ -1717,6 +2059,15 @@
    "t_house": 3,
    "key": "Transiting Jupiter conjunct natal Jupiter",
    "what": "Jupiter exactly conjunct your natal Jupiter"
+  },
+  {
+   "date": "2028-09-24",
+   "kind": "sky",
+   "body": "Jupiter",
+   "other": "Pluto",
+   "aspect": "trine",
+   "key": "Jupiter trine Pluto (sky)",
+   "what": "Jupiter 6\u00b0 Libra (your 3rd) trine Pluto 6\u00b0 Aquarius (your 7th) \u2014 sky aspect"
   },
   {
    "date": "2028-09-26",
@@ -1738,6 +2089,15 @@
    "body": "arc",
    "key": "Solar-arc Apollon square natal Chiron",
    "what": "Solar-arc Apollon square natal Chiron"
+  },
+  {
+   "date": "2028-09-28",
+   "kind": "sky",
+   "body": "Jupiter",
+   "other": "Neptune",
+   "aspect": "opposite",
+   "key": "Jupiter opposite Neptune (sky)",
+   "what": "Jupiter 7\u00b0 Libra (your 3rd) opposite Neptune 7\u00b0 Aries (your 9th) \u2014 sky aspect"
   },
   {
    "date": "2028-10-10",
@@ -1790,6 +2150,24 @@
    "what": "Jupiter exactly trine your natal Saturn"
   },
   {
+   "date": "2028-10-24",
+   "kind": "sky",
+   "body": "Pluto",
+   "other": "Chiron",
+   "aspect": "square",
+   "key": "Pluto square Chiron (sky)",
+   "what": "Pluto 6\u00b0 Aquarius (your 7th) square Chiron 6\u00b0 Taurus (your 10th) \u2014 sky aspect"
+  },
+  {
+   "date": "2028-10-27",
+   "kind": "sky",
+   "body": "Jupiter",
+   "other": "Uranus",
+   "aspect": "trine",
+   "key": "Jupiter trine Uranus (sky)",
+   "what": "Jupiter 13\u00b0 Libra (your 3rd) trine Uranus 13\u00b0 Gemini (your 11th) \u2014 sky aspect"
+  },
+  {
    "date": "2028-11-01",
    "kind": "aspect",
    "body": "Jupiter",
@@ -1838,6 +2216,15 @@
    "t_house": 5,
    "key": "Transiting Ceres conjunct natal Venus",
    "what": "Ceres exactly conjunct your natal Venus"
+  },
+  {
+   "date": "2028-11-15",
+   "kind": "sky",
+   "body": "Saturn",
+   "other": "Pluto",
+   "aspect": "square",
+   "key": "Saturn square Pluto (sky)",
+   "what": "Saturn 6\u00b0 Taurus (your 10th) square Pluto 6\u00b0 Aquarius (your 7th) \u2014 sky aspect"
   },
   {
    "date": "2028-11-17",
@@ -2054,6 +2441,15 @@
    "what": "Solar-arc Mercury opposite natal Juno"
   },
   {
+   "date": "2029-03-29",
+   "kind": "sky",
+   "body": "Saturn",
+   "other": "Pluto",
+   "aspect": "square",
+   "key": "Saturn square Pluto (sky)",
+   "what": "Saturn 10\u00b0 Taurus (your 10th) square Pluto 10\u00b0 Aquarius (your 7th) \u2014 sky aspect"
+  },
+  {
    "date": "2029-04-01",
    "kind": "aspect",
    "body": "Jupiter",
@@ -2187,6 +2583,15 @@
    "t_house": 10,
    "key": "Transiting Saturn trine natal Neptune",
    "what": "Saturn exactly trine your natal Neptune"
+  },
+  {
+   "date": "2029-06-02",
+   "kind": "sky",
+   "body": "Pluto",
+   "other": "Chiron",
+   "aspect": "square",
+   "key": "Pluto square Chiron (sky)",
+   "what": "Pluto 10\u00b0 Aquarius (your 7th) square Chiron 10\u00b0 Taurus (your 10th) \u2014 sky aspect"
   },
   {
    "date": "2029-06-12",
@@ -2325,6 +2730,15 @@
    "what": "Juno enters Scorpio (your 4th house)"
   },
   {
+   "date": "2029-08-12",
+   "kind": "progressed",
+   "body": "Moon",
+   "natal": "Moon",
+   "aspect": "trine",
+   "key": "Progressed Moon trine natal Moon",
+   "what": "Progressed Moon exactly trine your natal Moon"
+  },
+  {
    "date": "2029-08-22",
    "kind": "aspect",
    "body": "Jupiter",
@@ -2422,6 +2836,15 @@
    "what": "Jupiter exactly square your natal Ceres"
   },
   {
+   "date": "2029-10-07",
+   "kind": "to_progressed",
+   "body": "Jupiter",
+   "natal": "progressed Venus",
+   "aspect": "square",
+   "key": "Transiting Jupiter square progressed Venus",
+   "what": "Jupiter exactly square your progressed Venus"
+  },
+  {
    "date": "2029-10-16",
    "kind": "aspect",
    "body": "Ceres",
@@ -2470,6 +2893,15 @@
    "rx": true
   },
   {
+   "date": "2029-11-01",
+   "kind": "sky",
+   "body": "Jupiter",
+   "other": "Pluto",
+   "aspect": "square",
+   "key": "Jupiter square Pluto (sky)",
+   "what": "Jupiter 8\u00b0 Scorpio (your 4th) square Pluto 8\u00b0 Aquarius (your 7th) \u2014 sky aspect"
+  },
+  {
    "date": "2029-11-02",
    "kind": "aspect",
    "body": "Saturn",
@@ -2480,6 +2912,15 @@
    "what": "Saturn exactly opposite your natal Pluto (pass 2 of 3, retrograde)",
    "pass": "2 of 3",
    "rx": true
+  },
+  {
+   "date": "2029-11-09",
+   "kind": "sky",
+   "body": "Jupiter",
+   "other": "Chiron",
+   "aspect": "opposite",
+   "key": "Jupiter opposite Chiron (sky)",
+   "what": "Jupiter 9\u00b0 Scorpio (your 4th) opposite Chiron 9\u00b0 Taurus (your 10th) \u2014 sky aspect"
   },
   {
    "date": "2029-11-12",
@@ -2494,6 +2935,15 @@
    "body": "Juno",
    "key": "Transiting Juno in Sagittarius",
    "what": "Juno enters Sagittarius (your 5th house)"
+  },
+  {
+   "date": "2029-11-17",
+   "kind": "progressed",
+   "body": "Moon",
+   "natal": "Jupiter",
+   "aspect": "square",
+   "key": "Progressed Moon square natal Jupiter",
+   "what": "Progressed Moon exactly square your natal Jupiter"
   },
   {
    "date": "2029-11-18",
@@ -2551,6 +3001,15 @@
    "what": "Partial solar eclipse at 13\u00b0 Sagittarius (your 5th house) \u2014 opposite your natal Hades (orb 1.8\u00b0)"
   },
   {
+   "date": "2029-12-09",
+   "kind": "sky",
+   "body": "Pluto",
+   "other": "Chiron",
+   "aspect": "square",
+   "key": "Pluto square Chiron (sky)",
+   "what": "Pluto 8\u00b0 Aquarius (your 7th) square Chiron 8\u00b0 Taurus (your 10th) \u2014 sky aspect"
+  },
+  {
    "date": "2029-12-11",
    "kind": "aspect",
    "body": "Uranus",
@@ -2578,6 +3037,15 @@
    "t_house": 5,
    "key": "Transiting Juno opposite natal Hades",
    "what": "Juno exactly opposite your natal Hades"
+  },
+  {
+   "date": "2029-12-22",
+   "kind": "sky",
+   "body": "Jupiter",
+   "other": "Saturn",
+   "aspect": "opposite",
+   "key": "Jupiter opposite Saturn (sky)",
+   "what": "Jupiter 18\u00b0 Scorpio (your 4th) opposite Saturn 18\u00b0 Taurus (your 10th) \u2014 sky aspect"
   },
   {
    "date": "2029-12-31",
@@ -2764,6 +3232,15 @@
    "rx": false
   },
   {
+   "date": "2030-04-24",
+   "kind": "sky",
+   "body": "Jupiter",
+   "other": "Saturn",
+   "aspect": "opposite",
+   "key": "Jupiter opposite Saturn (sky)",
+   "what": "Jupiter 25\u00b0 Scorpio (your 5th) opposite Saturn 25\u00b0 Taurus (your 11th) \u2014 sky aspect"
+  },
+  {
    "date": "2030-04-27",
    "kind": "aspect",
    "body": "Chiron",
@@ -2786,6 +3263,15 @@
    "what": "Juno exactly opposite your natal Juno (pass 1 of 3)",
    "pass": "1 of 3",
    "rx": false
+  },
+  {
+   "date": "2030-04-28",
+   "kind": "sky",
+   "body": "Pluto",
+   "other": "Chiron",
+   "aspect": "square",
+   "key": "Pluto square Chiron (sky)",
+   "what": "Pluto 12\u00b0 Aquarius (your 7th) square Chiron 12\u00b0 Taurus (your 10th) \u2014 sky aspect"
   },
   {
    "date": "2030-04-30",
@@ -2915,6 +3401,15 @@
    "rx": true
   },
   {
+   "date": "2030-05-14",
+   "kind": "progressed",
+   "body": "Moon",
+   "natal": "Juno",
+   "aspect": "conjunct",
+   "key": "Progressed Moon conjunct natal Juno",
+   "what": "Progressed Moon exactly conjunct your natal Juno"
+  },
+  {
    "date": "2030-05-16",
    "kind": "aspect",
    "body": "Jupiter",
@@ -2925,6 +3420,24 @@
    "what": "Jupiter exactly conjunct your natal Pluto (pass 2 of 3, retrograde)",
    "pass": "2 of 3",
    "rx": true
+  },
+  {
+   "date": "2030-05-16",
+   "kind": "progressed",
+   "body": "Moon",
+   "natal": "Sun",
+   "aspect": "trine",
+   "key": "Progressed Moon trine natal Sun",
+   "what": "Progressed Moon exactly trine your natal Sun"
+  },
+  {
+   "date": "2030-05-26",
+   "kind": "to_progressed",
+   "body": "Saturn",
+   "natal": "progressed Mercury",
+   "aspect": "opposite",
+   "key": "Transiting Saturn opposite progressed Mercury",
+   "what": "Saturn exactly opposite your progressed Mercury"
   },
   {
    "date": "2030-05-31",
@@ -3003,6 +3516,15 @@
    "what": "Uranus exactly sextile your natal MC"
   },
   {
+   "date": "2030-06-14",
+   "kind": "to_progressed",
+   "body": "Neptune",
+   "natal": "progressed Moon",
+   "aspect": "square",
+   "key": "Transiting Neptune square progressed Moon",
+   "what": "Neptune exactly square your progressed Moon"
+  },
+  {
    "date": "2030-06-15",
    "kind": "eclipse",
    "body": "lunar",
@@ -3020,6 +3542,15 @@
    "what": "Saturn exactly trine your natal Ceres (pass 1 of 3)",
    "pass": "1 of 3",
    "rx": false
+  },
+  {
+   "date": "2030-07-03",
+   "kind": "to_progressed",
+   "body": "Uranus",
+   "natal": "progressed Sun",
+   "aspect": "opposite",
+   "key": "Transiting Uranus opposite progressed Sun",
+   "what": "Uranus exactly opposite your progressed Sun"
   },
   {
    "date": "2030-07-13",
@@ -3051,6 +3582,15 @@
    "body": "Juno",
    "key": "Transiting Juno in Sagittarius",
    "what": "Juno backs into Sagittarius (your 6th house)"
+  },
+  {
+   "date": "2030-07-27",
+   "kind": "progressed",
+   "body": "Moon",
+   "natal": "Uranus",
+   "aspect": "opposite",
+   "key": "Progressed Moon opposite natal Uranus",
+   "what": "Progressed Moon exactly opposite your natal Uranus"
   },
   {
    "date": "2030-08-11",
@@ -3086,6 +3626,15 @@
    "rx": false
   },
   {
+   "date": "2030-09-07",
+   "kind": "progressed",
+   "body": "Moon",
+   "natal": "Apollon",
+   "aspect": "square",
+   "key": "Progressed Moon square natal Apollon",
+   "what": "Progressed Moon exactly square your natal Apollon"
+  },
+  {
    "date": "2030-09-11",
    "kind": "aspect",
    "body": "Jupiter",
@@ -3096,6 +3645,15 @@
    "what": "Jupiter exactly conjunct your natal Pluto (pass 3 of 3)",
    "pass": "3 of 3",
    "rx": false
+  },
+  {
+   "date": "2030-09-11",
+   "kind": "progressed",
+   "body": "Moon",
+   "natal": "Neptune",
+   "aspect": "opposite",
+   "key": "Progressed Moon opposite natal Neptune",
+   "what": "Progressed Moon exactly opposite your natal Neptune"
   },
   {
    "date": "2030-09-12",
@@ -3210,6 +3768,15 @@
    "rx": true
   },
   {
+   "date": "2030-10-21",
+   "kind": "to_progressed",
+   "body": "Jupiter",
+   "natal": "progressed Mercury",
+   "aspect": "conjunct",
+   "key": "Transiting Jupiter conjunct progressed Mercury",
+   "what": "Jupiter exactly conjunct your progressed Mercury"
+  },
+  {
    "date": "2030-10-22",
    "kind": "sign",
    "body": "Jupiter",
@@ -3225,6 +3792,15 @@
    "t_house": 5,
    "key": "Transiting Jupiter square natal Moon",
    "what": "Jupiter exactly square your natal Moon"
+  },
+  {
+   "date": "2030-11-08",
+   "kind": "progressed",
+   "body": "Moon",
+   "natal": "MC",
+   "aspect": "square",
+   "key": "Progressed Moon square natal MC",
+   "what": "Progressed Moon exactly square your natal MC"
   },
   {
    "date": "2030-11-10",
@@ -3257,6 +3833,15 @@
    "t_house": 6,
    "key": "Transiting Juno conjunct natal Uranus",
    "what": "Juno exactly conjunct your natal Uranus"
+  },
+  {
+   "date": "2030-11-20",
+   "kind": "sky",
+   "body": "Jupiter",
+   "other": "Saturn",
+   "aspect": "opposite",
+   "key": "Jupiter opposite Saturn (sky)",
+   "what": "Jupiter 6\u00b0 Sagittarius (your 5th) opposite Saturn 6\u00b0 Gemini (your 11th) \u2014 sky aspect"
   },
   {
    "date": "2030-11-24",
@@ -3309,6 +3894,15 @@
    "what": "Penumbral lunar eclipse at 17\u00b0 Gemini (your 11th house) \u2014 opposite your natal Venus (orb 0.9\u00b0)"
   },
   {
+   "date": "2030-12-10",
+   "kind": "sky",
+   "body": "Jupiter",
+   "other": "Neptune",
+   "aspect": "trine",
+   "key": "Jupiter trine Neptune (sky)",
+   "what": "Jupiter 10\u00b0 Sagittarius (your 5th) trine Neptune 10\u00b0 Aries (your 9th) \u2014 sky aspect"
+  },
+  {
    "date": "2030-12-13",
    "kind": "aspect",
    "body": "Juno",
@@ -3344,6 +3938,15 @@
    "body": "Juno",
    "key": "Transiting Juno in the 7th house",
    "what": "Juno crosses into your 7th house"
+  },
+  {
+   "date": "2030-12-21",
+   "kind": "to_progressed",
+   "body": "Uranus",
+   "natal": "progressed Sun",
+   "aspect": "opposite",
+   "key": "Transiting Uranus opposite progressed Sun",
+   "what": "Uranus exactly opposite your progressed Sun"
   },
   {
    "date": "2030-12-29",
@@ -3407,6 +4010,24 @@
    "what": "Jupiter exactly trine your natal MC"
   },
   {
+   "date": "2031-01-20",
+   "kind": "sky",
+   "body": "Jupiter",
+   "other": "Uranus",
+   "aspect": "opposite",
+   "key": "Jupiter opposite Uranus (sky)",
+   "what": "Jupiter 19\u00b0 Sagittarius (your 5th) opposite Uranus 19\u00b0 Gemini (your 11th) \u2014 sky aspect"
+  },
+  {
+   "date": "2031-01-26",
+   "kind": "to_progressed",
+   "body": "Jupiter",
+   "natal": "progressed Sun",
+   "aspect": "conjunct",
+   "key": "Transiting Jupiter conjunct progressed Sun",
+   "what": "Jupiter exactly conjunct your progressed Sun"
+  },
+  {
    "date": "2031-01-27",
    "kind": "aspect",
    "body": "Juno",
@@ -3439,6 +4060,15 @@
    "what": "Jupiter exactly trine your natal Chiron (pass 1 of 3)",
    "pass": "1 of 3",
    "rx": false
+  },
+  {
+   "date": "2031-02-08",
+   "kind": "progressed",
+   "body": "Moon",
+   "natal": "Pluto",
+   "aspect": "trine",
+   "key": "Progressed Moon trine natal Pluto",
+   "what": "Progressed Moon exactly trine your natal Pluto"
   },
   {
    "date": "2031-02-10",
@@ -3573,6 +4203,15 @@
    "what": "Ceres crosses into your 11th house"
   },
   {
+   "date": "2031-03-17",
+   "kind": "progressed",
+   "body": "Moon",
+   "natal": "Mars",
+   "aspect": "conjunct",
+   "key": "Progressed Moon conjunct natal Mars",
+   "what": "Progressed Moon exactly conjunct your natal Mars"
+  },
+  {
    "date": "2031-04-01",
    "kind": "aspect",
    "body": "Saturn",
@@ -3626,6 +4265,15 @@
    "body": "lunar",
    "key": "Lunar eclipse in the 4th house",
    "what": "Penumbral lunar eclipse at 16\u00b0 Scorpio (your 4th house)"
+  },
+  {
+   "date": "2031-05-07",
+   "kind": "to_progressed",
+   "body": "Uranus",
+   "natal": "progressed Sun",
+   "aspect": "opposite",
+   "key": "Transiting Uranus opposite progressed Sun",
+   "what": "Uranus exactly opposite your progressed Sun"
   },
   {
    "date": "2031-05-14",
@@ -3691,6 +4339,15 @@
    "what": "Saturn exactly trine your natal Saturn"
   },
   {
+   "date": "2031-06-04",
+   "kind": "progressed",
+   "body": "Moon",
+   "natal": "ASC",
+   "aspect": "conjunct",
+   "key": "Progressed Moon conjunct natal ASC",
+   "what": "Progressed Moon exactly conjunct your natal ASC"
+  },
+  {
    "date": "2031-06-05",
    "kind": "eclipse",
    "body": "lunar",
@@ -3725,11 +4382,29 @@
    "rx": false
   },
   {
+   "date": "2031-06-11",
+   "kind": "sky",
+   "body": "Saturn",
+   "other": "Pluto",
+   "aspect": "trine",
+   "key": "Saturn trine Pluto (sky)",
+   "what": "Saturn 13\u00b0 Gemini (your 11th) trine Pluto 13\u00b0 Aquarius (your 7th) \u2014 sky aspect"
+  },
+  {
    "date": "2031-06-14",
    "kind": "sign",
    "body": "Ceres",
    "key": "Transiting Ceres in Cancer",
    "what": "Ceres enters Cancer (your 12th house)"
+  },
+  {
+   "date": "2031-06-20",
+   "kind": "sky",
+   "body": "Jupiter",
+   "other": "Uranus",
+   "aspect": "opposite",
+   "key": "Jupiter opposite Uranus (sky)",
+   "what": "Jupiter 23\u00b0 Sagittarius (your 5th) opposite Uranus 23\u00b0 Gemini (your 11th) \u2014 sky aspect"
   },
   {
    "date": "2031-06-22",
@@ -3791,6 +4466,15 @@
    "what": "Ceres exactly conjunct your natal Juno"
   },
   {
+   "date": "2031-07-11",
+   "kind": "to_progressed",
+   "body": "Jupiter",
+   "natal": "progressed Sun",
+   "aspect": "conjunct",
+   "key": "Transiting Jupiter conjunct progressed Sun",
+   "what": "Jupiter exactly conjunct your progressed Sun"
+  },
+  {
    "date": "2031-07-24",
    "kind": "aspect",
    "body": "Saturn",
@@ -3808,6 +4492,15 @@
    "body": "Juno",
    "key": "Transiting Juno in Taurus",
    "what": "Juno enters Taurus (your 10th house)"
+  },
+  {
+   "date": "2031-08-01",
+   "kind": "sky",
+   "body": "Jupiter",
+   "other": "Saturn",
+   "aspect": "opposite",
+   "key": "Jupiter opposite Saturn (sky)",
+   "what": "Jupiter 19\u00b0 Sagittarius (your 5th) opposite Saturn 19\u00b0 Gemini (your 11th) \u2014 sky aspect"
   },
   {
    "date": "2031-08-08",
@@ -3847,6 +4540,15 @@
    "what": "Pluto exactly conjunct your natal Saturn (pass 2 of 3, retrograde)",
    "pass": "2 of 3",
    "rx": true
+  },
+  {
+   "date": "2031-08-20",
+   "kind": "to_progressed",
+   "body": "Saturn",
+   "natal": "progressed Sun",
+   "aspect": "opposite",
+   "key": "Transiting Saturn opposite progressed Sun",
+   "what": "Saturn exactly opposite your progressed Sun"
   },
   {
    "date": "2031-08-21",
@@ -3906,6 +4608,15 @@
    "rx": true
   },
   {
+   "date": "2031-09-22",
+   "kind": "to_progressed",
+   "body": "Jupiter",
+   "natal": "progressed Sun",
+   "aspect": "conjunct",
+   "key": "Transiting Jupiter conjunct progressed Sun",
+   "what": "Jupiter exactly conjunct your progressed Sun"
+  },
+  {
    "date": "2031-10-04",
    "kind": "aspect",
    "body": "Jupiter",
@@ -3916,6 +4627,15 @@
    "what": "Jupiter exactly trine your natal Chiron (pass 3 of 3)",
    "pass": "3 of 3",
    "rx": false
+  },
+  {
+   "date": "2031-10-06",
+   "kind": "sky",
+   "body": "Jupiter",
+   "other": "Saturn",
+   "aspect": "opposite",
+   "key": "Jupiter opposite Saturn (sky)",
+   "what": "Jupiter 22\u00b0 Sagittarius (your 5th) opposite Saturn 23\u00b0 Gemini (your 11th) \u2014 sky aspect"
   },
   {
    "date": "2031-10-11",
@@ -3935,6 +4655,15 @@
    "what": "Ceres exactly conjunct your natal Chiron"
   },
   {
+   "date": "2031-10-26",
+   "kind": "progressed",
+   "body": "Moon",
+   "natal": "Ceres",
+   "aspect": "opposite",
+   "key": "Progressed Moon opposite natal Ceres",
+   "what": "Progressed Moon exactly opposite your natal Ceres"
+  },
+  {
    "date": "2031-10-28",
    "kind": "house",
    "body": "Jupiter",
@@ -3947,6 +4676,15 @@
    "body": "lunar",
    "key": "Lunar eclipse in the 10th house",
    "what": "Penumbral lunar eclipse at 6\u00b0 Taurus (your 10th house)"
+  },
+  {
+   "date": "2031-10-30",
+   "kind": "sky",
+   "body": "Jupiter",
+   "other": "Uranus",
+   "aspect": "opposite",
+   "key": "Jupiter opposite Uranus (sky)",
+   "what": "Jupiter 26\u00b0 Sagittarius (your 6th) opposite Uranus 26\u00b0 Gemini (your 12th) \u2014 sky aspect"
   },
   {
    "date": "2031-11-07",
@@ -3983,6 +4721,15 @@
    "body": "Jupiter",
    "key": "Transiting Jupiter in Capricorn",
    "what": "Jupiter enters Capricorn (your 6th house)"
+  },
+  {
+   "date": "2031-11-17",
+   "kind": "to_progressed",
+   "body": "Saturn",
+   "natal": "progressed Sun",
+   "aspect": "opposite",
+   "key": "Transiting Saturn opposite progressed Sun",
+   "what": "Saturn exactly opposite your progressed Sun"
   },
   {
    "date": "2031-12-08",
@@ -4048,6 +4795,15 @@
    "what": "Pluto exactly conjunct your natal Saturn (pass 3 of 3)",
    "pass": "3 of 3",
    "rx": false
+  },
+  {
+   "date": "2031-12-30",
+   "kind": "progressed",
+   "body": "Moon",
+   "natal": "Mercury",
+   "aspect": "trine",
+   "key": "Progressed Moon trine natal Mercury",
+   "what": "Progressed Moon exactly trine your natal Mercury"
   },
   {
    "date": "2032-01-15",
