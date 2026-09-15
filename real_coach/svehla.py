@@ -245,6 +245,23 @@ def weekly_block(d: date | None = None) -> str:
     if d < date(2027, 3, 10):
         lines.append(f"🛡 {(date(2027, 3, 10) - d).days} days to the spring-2027 window he's most concerned about (housing + cash contingency).")
         lines.append("")
+    try:                                   # round 8: progressed-phase weekly practice (Rudhyar) + timing week
+        import astro_returns, astro_lexicon as lex, astro_timing
+        ph = astro_returns.progressed_phase(d)
+        ent = lex.kb_entry(f"Progressed phase {ph['phase'].replace('_', ' ')}")
+        if ent and ent.get("weekly_practice"):
+            lines += [f"🌗 Progressed {ph['phase'].replace('_', ' ')} phase — this week: {ent['weekly_practice']}", ""]
+        pf = astro_timing.profection(d)
+        lines += [f"⏳ {T_ordinal(pf['house'])}-house profection year, lord {pf['lord']} · this month {T_ordinal(pf['month_house'])} house (lord {pf['month_lord']}) — transits to {pf['lord']} count double.", ""]
+    except Exception as e:
+        lines += [f"🌗 (phase/timing unavailable: {e})", ""]
+    try:                                   # round 8: full dated timeline for the fortnight (all slow bodies, progressions, eclipses)
+        import astro_timeline
+        tl = astro_timeline.upcoming_block(d, days=14, limit=10)
+        if "Nothing exact" not in tl:
+            lines += tl.split("\n") + [""]
+    except Exception as e:
+        lines += [f"🗓 (timeline unavailable: {e})", ""]
     try:
         import astro_tasks
         nag = astro_tasks.loose_nag(d)
@@ -275,6 +292,10 @@ def context_block(d: date | None = None) -> str:
     if nxt:
         parts.append("Next: " + "; ".join(f"{w['title']} from {w['_start']:%b %-d %Y}" for w in nxt) + ".")
     return " ".join(parts)
+
+
+def T_ordinal(n: int) -> str:
+    return f"{n}{'th' if 11 <= n % 100 <= 13 else {1: 'st', 2: 'nd', 3: 'rd'}.get(n % 10, 'th')}"
 
 
 def send_to_lane(msg: str) -> None:

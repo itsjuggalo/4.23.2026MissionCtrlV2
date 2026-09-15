@@ -679,14 +679,16 @@
   {
    "date_et": "2026-09-17T21:50-04:00",
    "body": "Chiron",
-   "lon": 30,
-   "sign": "Taurus",
-   "deg": 0,
+   "retro": true,
+   "lon": 29.999,
+   "sign": "Aries",
+   "deg": 29,
    "house": 10
   },
   {
    "date_et": "2026-09-22T20:06-04:00",
    "body": "Sun",
+   "retro": false,
    "lon": 180,
    "sign": "Libra",
    "deg": 0,
@@ -695,6 +697,7 @@
   {
    "date_et": "2026-09-27T22:49-04:00",
    "body": "Mars",
+   "retro": false,
    "lon": 120,
    "sign": "Leo",
    "deg": 0,
@@ -703,6 +706,7 @@
   {
    "date_et": "2026-09-30T07:44-04:00",
    "body": "Mercury",
+   "retro": false,
    "lon": 210,
    "sign": "Scorpio",
    "deg": 0,
@@ -711,6 +715,7 @@
   {
    "date_et": "2026-10-23T05:38-04:00",
    "body": "Sun",
+   "retro": false,
    "lon": 210,
    "sign": "Scorpio",
    "deg": 0,
@@ -719,14 +724,16 @@
   {
    "date_et": "2026-10-25T05:10-04:00",
    "body": "Venus",
-   "lon": 210,
-   "sign": "Scorpio",
-   "deg": 0,
+   "retro": true,
+   "lon": 209.999,
+   "sign": "Libra",
+   "deg": 29,
    "house": 4
   },
   {
    "date_et": "2026-11-22T02:24-05:00",
    "body": "Sun",
+   "retro": false,
    "lon": 240,
    "sign": "Sagittarius",
    "deg": 0,
@@ -735,6 +742,7 @@
   {
    "date_et": "2026-11-25T18:37-05:00",
    "body": "Mars",
+   "retro": false,
    "lon": 150,
    "sign": "Virgo",
    "deg": 0,
@@ -743,6 +751,7 @@
   {
    "date_et": "2026-12-04T03:13-05:00",
    "body": "Venus",
+   "retro": false,
    "lon": 210,
    "sign": "Scorpio",
    "deg": 0,
@@ -751,6 +760,7 @@
   {
    "date_et": "2026-12-06T03:33-05:00",
    "body": "Mercury",
+   "retro": false,
    "lon": 240,
    "sign": "Sagittarius",
    "deg": 0,
@@ -759,6 +769,7 @@
   {
    "date_et": "2026-12-21T15:50-05:00",
    "body": "Sun",
+   "retro": false,
    "lon": 270,
    "sign": "Capricorn",
    "deg": 0,
@@ -767,6 +778,7 @@
   {
    "date_et": "2026-12-25T13:22-05:00",
    "body": "Mercury",
+   "retro": false,
    "lon": 270,
    "sign": "Capricorn",
    "deg": 0,
@@ -775,6 +787,7 @@
   {
    "date_et": "2027-01-07T03:54-05:00",
    "body": "Venus",
+   "retro": false,
    "lon": 240,
    "sign": "Sagittarius",
    "deg": 0,
@@ -783,6 +796,7 @@
   {
    "date_et": "2027-01-13T01:06-05:00",
    "body": "Mercury",
+   "retro": false,
    "lon": 300,
    "sign": "Aquarius",
    "deg": 0,
@@ -791,6 +805,7 @@
   {
    "date_et": "2027-01-20T02:30-05:00",
    "body": "Sun",
+   "retro": false,
    "lon": 300,
    "sign": "Aquarius",
    "deg": 0,
@@ -799,6 +814,7 @@
   {
    "date_et": "2027-01-31T20:26-05:00",
    "body": "Mercury",
+   "retro": false,
    "lon": 330,
    "sign": "Pisces",
    "deg": 0,
@@ -807,6 +823,7 @@
   {
    "date_et": "2027-02-03T09:30-05:00",
    "body": "Venus",
+   "retro": false,
    "lon": 270,
    "sign": "Capricorn",
    "deg": 0,
@@ -815,14 +832,16 @@
   {
    "date_et": "2027-02-18T07:15-05:00",
    "body": "Mercury",
-   "lon": 330,
-   "sign": "Pisces",
-   "deg": 0,
+   "retro": true,
+   "lon": 329.999,
+   "sign": "Aquarius",
+   "deg": 29,
    "house": 8
   },
   {
    "date_et": "2027-02-18T16:34-05:00",
    "body": "Sun",
+   "retro": false,
    "lon": 330,
    "sign": "Pisces",
    "deg": 0,
@@ -831,14 +850,16 @@
   {
    "date_et": "2027-02-21T09:13-05:00",
    "body": "Mars",
-   "lon": 150,
-   "sign": "Virgo",
-   "deg": 0,
+   "retro": true,
+   "lon": 149.999,
+   "sign": "Leo",
+   "deg": 29,
    "house": 2
   },
   {
    "date_et": "2027-03-01T01:32-05:00",
    "body": "Venus",
+   "retro": false,
    "lon": 300,
    "sign": "Aquarius",
    "deg": 0,
@@ -847,6 +868,7 @@
   {
    "date_et": "2027-03-18T06:02-04:00",
    "body": "Mercury",
+   "retro": false,
    "lon": 330,
    "sign": "Pisces",
    "deg": 0,
@@ -855,6 +877,7 @@
   {
    "date_et": "2027-03-20T16:25-04:00",
    "body": "Sun",
+   "retro": false,
    "lon": 0,
    "sign": "Aries",
    "deg": 0,
@@ -863,6 +886,7 @@
   {
    "date_et": "2027-03-26T04:16-04:00",
    "body": "Venus",
+   "retro": false,
    "lon": 330,
    "sign": "Pisces",
    "deg": 0,
@@ -871,6 +895,7 @@
   {
    "date_et": "2027-04-08T19:21-04:00",
    "body": "Mercury",
+   "retro": false,
    "lon": 0,
    "sign": "Aries",
    "deg": 0,
@@ -879,6 +904,7 @@
   {
    "date_et": "2027-04-14T10:58-04:00",
    "body": "Chiron",
+   "retro": false,
    "lon": 30,
    "sign": "Taurus",
    "deg": 0,
@@ -887,6 +913,7 @@
   {
    "date_et": "2027-04-19T23:57-04:00",
    "body": "Venus",
+   "retro": false,
    "lon": 0,
    "sign": "Aries",
    "deg": 0,
@@ -895,6 +922,7 @@
   {
    "date_et": "2027-04-20T03:18-04:00",
    "body": "Sun",
+   "retro": false,
    "lon": 30,
    "sign": "Taurus",
    "deg": 0,
@@ -903,6 +931,7 @@
   {
    "date_et": "2027-04-24T18:18-04:00",
    "body": "Mercury",
+   "retro": false,
    "lon": 30,
    "sign": "Taurus",
    "deg": 0,
@@ -911,6 +940,7 @@
   {
    "date_et": "2027-05-08T21:58-04:00",
    "body": "Mercury",
+   "retro": false,
    "lon": 60,
    "sign": "Gemini",
    "deg": 0,
@@ -919,6 +949,7 @@
   {
    "date_et": "2027-05-14T10:47-04:00",
    "body": "Mars",
+   "retro": false,
    "lon": 150,
    "sign": "Virgo",
    "deg": 0,
@@ -927,6 +958,7 @@
   {
    "date_et": "2027-05-14T17:01-04:00",
    "body": "Venus",
+   "retro": false,
    "lon": 30,
    "sign": "Taurus",
    "deg": 0,
@@ -935,6 +967,7 @@
   {
    "date_et": "2027-05-21T02:18-04:00",
    "body": "Sun",
+   "retro": false,
    "lon": 60,
    "sign": "Gemini",
    "deg": 0,
@@ -943,6 +976,7 @@
   {
    "date_et": "2027-05-28T13:06-04:00",
    "body": "Mercury",
+   "retro": false,
    "lon": 90,
    "sign": "Cancer",
    "deg": 0,
@@ -951,6 +985,7 @@
   {
    "date_et": "2027-06-08T08:32-04:00",
    "body": "Venus",
+   "retro": false,
    "lon": 60,
    "sign": "Gemini",
    "deg": 0,
@@ -959,6 +994,7 @@
   {
    "date_et": "2027-06-21T10:11-04:00",
    "body": "Sun",
+   "retro": false,
    "lon": 90,
    "sign": "Cancer",
    "deg": 0,
@@ -967,14 +1003,16 @@
   {
    "date_et": "2027-06-26T03:19-04:00",
    "body": "Mercury",
-   "lon": 90,
-   "sign": "Cancer",
-   "deg": 0,
+   "retro": true,
+   "lon": 89.999,
+   "sign": "Gemini",
+   "deg": 29,
    "house": 12
   },
   {
    "date_et": "2027-07-02T22:02-04:00",
    "body": "Venus",
+   "retro": false,
    "lon": 90,
    "sign": "Cancer",
    "deg": 0,
@@ -983,6 +1021,7 @@
   {
    "date_et": "2027-07-12T09:48-04:00",
    "body": "Mercury",
+   "retro": false,
    "lon": 90,
    "sign": "Cancer",
    "deg": 0,
@@ -991,6 +1030,7 @@
   {
    "date_et": "2027-07-15T01:40-04:00",
    "body": "Mars",
+   "retro": false,
    "lon": 180,
    "sign": "Libra",
    "deg": 0,
@@ -999,6 +1039,7 @@
   {
    "date_et": "2027-07-22T21:05-04:00",
    "body": "Sun",
+   "retro": false,
    "lon": 120,
    "sign": "Leo",
    "deg": 0,
@@ -1007,6 +1048,7 @@
   {
    "date_et": "2027-07-26T00:49-04:00",
    "body": "Jupiter",
+   "retro": false,
    "lon": 150,
    "sign": "Virgo",
    "deg": 0,
@@ -1015,6 +1057,7 @@
   {
    "date_et": "2027-07-27T08:31-04:00",
    "body": "Venus",
+   "retro": false,
    "lon": 120,
    "sign": "Leo",
    "deg": 0,
@@ -1023,6 +1066,7 @@
   {
    "date_et": "2027-08-02T06:52-04:00",
    "body": "Mercury",
+   "retro": false,
    "lon": 120,
    "sign": "Leo",
    "deg": 0,
@@ -1031,6 +1075,7 @@
   {
    "date_et": "2027-08-17T00:43-04:00",
    "body": "Mercury",
+   "retro": false,
    "lon": 150,
    "sign": "Virgo",
    "deg": 0,
@@ -1039,6 +1084,7 @@
   {
    "date_et": "2027-08-20T15:43-04:00",
    "body": "Venus",
+   "retro": false,
    "lon": 150,
    "sign": "Virgo",
    "deg": 0,
@@ -1047,6 +1093,7 @@
   {
    "date_et": "2027-08-23T04:14-04:00",
    "body": "Sun",
+   "retro": false,
    "lon": 150,
    "sign": "Virgo",
    "deg": 0,
@@ -1055,6 +1102,7 @@
   {
    "date_et": "2027-09-01T21:52-04:00",
    "body": "Mars",
+   "retro": false,
    "lon": 210,
    "sign": "Scorpio",
    "deg": 0,
@@ -1063,6 +1111,7 @@
   {
    "date_et": "2027-09-03T07:37-04:00",
    "body": "Mercury",
+   "retro": false,
    "lon": 180,
    "sign": "Libra",
    "deg": 0,
@@ -1071,6 +1120,7 @@
   {
    "date_et": "2027-09-13T20:24-04:00",
    "body": "Venus",
+   "retro": false,
    "lon": 180,
    "sign": "Libra",
    "deg": 0,
@@ -1079,6 +1129,7 @@
   {
    "date_et": "2027-09-23T02:02-04:00",
    "body": "Sun",
+   "retro": false,
    "lon": 180,
    "sign": "Libra",
    "deg": 0,
@@ -1087,6 +1138,7 @@
   {
    "date_et": "2027-09-27T05:10-04:00",
    "body": "Mercury",
+   "retro": false,
    "lon": 210,
    "sign": "Scorpio",
    "deg": 0,
@@ -1095,6 +1147,7 @@
   {
    "date_et": "2027-10-07T23:59-04:00",
    "body": "Venus",
+   "retro": false,
    "lon": 210,
    "sign": "Scorpio",
    "deg": 0,
@@ -1103,6 +1156,7 @@
   {
    "date_et": "2027-10-15T19:14-04:00",
    "body": "Mars",
+   "retro": false,
    "lon": 240,
    "sign": "Sagittarius",
    "deg": 0,
@@ -1111,9 +1165,10 @@
   {
    "date_et": "2027-10-16T03:36-04:00",
    "body": "Mercury",
-   "lon": 210,
-   "sign": "Scorpio",
-   "deg": 0,
+   "retro": true,
+   "lon": 209.999,
+   "sign": "Libra",
+   "deg": 29,
    "house": 4
   }
  ],

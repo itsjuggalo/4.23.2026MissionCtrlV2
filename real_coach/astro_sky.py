@@ -274,7 +274,8 @@ def ingresses(start: date, days: int) -> list[dict]:
                 def g(t, boundary=boundary):
                     return _signed_gap(_lon(t, body), boundary)
                 jd = _bisect_root(g, t0, t1, g(t0))
-                out.append({"date_et": _iso(jd), "body": name, **_point(boundary % 360)})
+                pt = _point(boundary % 360) if forward else _point((boundary - 0.001) % 360)
+                out.append({"date_et": _iso(jd), "body": name, "retro": not forward, **pt})
             t0, idx0 = t1, idx1
     out.sort(key=lambda e: e["date_et"])
     return out
@@ -386,15 +387,32 @@ def _fmt_lunation(e: dict) -> str:
     label = "New Moon" if e["kind"] == "new" else "Full Moon"
     dt = datetime.fromisoformat(e["date_et"])
     return (f"{icon} {label} {dt:%b %-d} at {e['deg']}° {e['sign']}, {_house_line(e['house'])}"
-            f"{_hit_str(e['natal_hits'])}")
+            f"{_hit_str(e['natal_hits'])}{_researched(label + ' in ' + e['sign'])}")
+
+
+def _researched(key: str) -> str:
+    """' — <plain translation>' from the researched KB, or ''."""
+    try:
+        import astro_lexicon as lex
+        ent = lex.kb_entry(key)
+        return f" — {ent['translation']}" if ent and ent.get("translation") else ""
+    except Exception:
+        return ""
 
 
 def _fmt_eclipse(e: dict) -> str:
     icon = "☀️" if e["kind"] == "solar" else "🌘"
     label = f"{e['type'].title()} {'Solar' if e['kind'] == 'solar' else 'Lunar'} Eclipse"
     dt = datetime.fromisoformat(e["date_et"])
+    kind = "Solar" if e["kind"] == "solar" else "Lunar"
+    hit = next((h for h in e.get("natal_hits", []) if h["aspect"] == "conjunct"), None)
+    key = f"{kind} eclipse conjunct natal {hit['natal']}" if hit else f"{kind} eclipse in the {_ord(e['house'])} house"
     return (f"{icon} {label} {dt:%b %-d} at {e['deg']}° {e['sign']}, {_house_line(e['house'])}"
-            f"{_hit_str(e['natal_hits'])}")
+            f"{_hit_str(e['natal_hits'])}{_researched(key)}")
+
+
+def _ord(n: int) -> str:
+    return T.ordinal(n)
 
 
 def _fmt_station(e: dict) -> str:
@@ -407,7 +425,8 @@ def _fmt_station(e: dict) -> str:
 def _fmt_ingress(e: dict) -> str:
     icon = BODY_ICON.get(e["body"], "☉" if e["body"] == "Sun" else "•")
     dt = datetime.fromisoformat(e["date_et"])
-    return f"{icon} {e['body']} enters {e['sign']} {dt:%b %-d}, {_house_line(e['house'])}"
+    verb = "backs into" if e.get("retro") else "enters"
+    return f"{icon} {e['body']} {verb} {e['sign']} {dt:%b %-d}, {_house_line(e['house'])}"
 
 
 def _fmt_mercury_rx(e: dict) -> str:

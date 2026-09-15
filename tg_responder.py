@@ -141,6 +141,8 @@ BOTS = {
             "   and lands in, both signs, esoteric meaning of each planet, how to work it\n"
             "• /planet <x> · /sign <x> · /house <1-12> · /aspect <x> — the lexicon, practical + esoteric\n"
             "• /week · /month — the coming transits day by day, peak day marked · /quality — today 1-10\n"
+            "• /profection — your time-lord year and month · /hours — today's planetary hours (Dunedin) · /nakshatra — the Moon's lunar mansion right now\n"
+            "• /timeline [days] [full] — every exact hit, house change, progression and eclipse ahead, dated from the real ephemeris · /year — 12 months in one screen\n"
             "• /sky — lunations, eclipses, stations, ingresses, Mercury rx + shadow, in your houses · /voc\n"
             "• /solarreturn · /lunarreturn · /phase (progressed lunation phase) · /solararc\n"
             "• /natal (patterns: t-square etc.) · /natalaspects · /activation · /stars (fixed stars)\n"
@@ -378,6 +380,9 @@ ASTRO_MODULE_CMDS = {
     "/activation":  ("astro_patterns.py", ["activation"]), "/stars": ("astro_patterns.py", ["stars"]),
     "/week":        ("astro_lookahead.py", ["week"]), "/month":    ("astro_lookahead.py", ["month"]),
     "/quality":     ("astro_lookahead.py", ["quality"]),
+    "/timeline":    ("astro_timeline.py", []),         "/year":      ("astro_timeline.py", ["year"]),
+    "/profection":  ("astro_timing.py", ["profection"]), "/hours":   ("astro_timing.py", ["hours"]),
+    "/nakshatra":   ("astro_timing.py", ["nakshatra"]),
 }
 
 # Static natal card for the astrology lane's /chart (same data daily_transits.py computes from).

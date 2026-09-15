@@ -1,0 +1,787 @@
+{
+ "meta": {
+  "built": "2026-09-15",
+  "sources": [
+   "https://theastrologypodcast.com/transcripts/ep-153-annual-profections-an-ancient-time-lord-technique/",
+   "https://bonniesorsby.com/annual-profections-astrology/",
+   "https://www.melpriestley.ca/discover-your-planetary-time-lord-with-annual-profections/",
+   "https://kerykeion.net/content/learn-astrology/branches-firdaria-sub-periods",
+   "https://traditional-astrology.com/firdaria-astrology.html",
+   "https://www.augurine.com/learn/firdaria",
+   "https://kerykeion.net/content/learn-astrology/traditional-planetary-hours-introduction",
+   "https://www.renaissanceastrology.com/planetaryhoursarticle.html",
+   "https://planetaryhours.org/blog/planetary-hours-and-their-meanings",
+   "https://cafeastrology.com/calculating-the-progressed-ascendant.html",
+   "https://sirauysal.com/en/tools/solar-arc/",
+   "https://www.forrestastrology.com/blogs/astrology/how-to-calculate-progressed-angles",
+   "https://en.wikipedia.org/wiki/List_of_Nakshatras",
+   "https://astrofix.net/planetary-returns/",
+   "https://www.hermetikon.com/astrology/returns/mars-return",
+   "https://astrology.org.uk/mercury-venus-and-mars-returns/",
+   "https://www.bigskyastrology.com/saturn-returns/",
+   "https://www.astro.com/astrology/iam_article190211_e.htm",
+   "https://theinnerwheel.com/chiron-milestones/",
+   "https://www.chani.com/astro-education/breakdown-or-breakthrough-the-astrology-behind-your-midlife-crisis",
+   "https://kerykeion.net/content/learn-astrology/predictive-nodal-return",
+   "https://medium.com/@marmadukejaekel2783/nodal-return-your-18-year-cosmic-checkpoint-explained-2330d5cd466b"
+  ],
+  "notes": "Annual profections and Firdaria are computed on WHOLE-SIGN houses counted from Mike's Cancer Ascendant, not the Placidus houses used for his main natal reading -- so a planet's 'profection house' number here can differ from the Placidus house given elsewhere (e.g. Mars/Juno are Placidus 12th but whole-sign 1st since they sit in the Ascendant's own sign, Cancer; Jupiter is Placidus 3rd but whole-sign 4th; Saturn/Ceres are Placidus 7th but whole-sign 8th; Uranus/Neptune are Placidus 6th but whole-sign 7th). This is standard practice for these two techniques, not an error. Svehla's Aug 2026 'Jupiter in natal 2nd' read is a TRANSIT note (transiting Jupiter moved into Leo -- Mike's whole-sign 2nd -- around mid-2026 for about a year), not his natal Jupiter's own placement (natal Jupiter is whole-sign 4th, Libra).",
+  "computed": {
+   "profection_2025_26": "Age 33 (Nov 2025-Nov 2026): profected 10th whole-sign house, Aries -- Mars is time-lord. Also his natal MC sign, so the year lands directly on his career angle.",
+   "profection_2026_27": "Age 34 (Nov 2026-Nov 2027): profected 11th whole-sign house, Taurus -- Venus is time-lord. Same sign Svehla flags for the progressed Moon ('money nerve').",
+   "profection_2027_28": "Age 35 (Nov 2027-Nov 2028): profected 12th whole-sign house, Gemini -- Mercury is time-lord. Natal point Hades (research/information) sits here.",
+   "firdaria_now": "Night-chart Firdaria: Mars major period age 32-39 (Nov 2024-Nov 2031), currently in the Sun sub-period, age 33-34 (Nov 2025-Nov 2026). Sequence: Moon 9y, Saturn 11y, Jupiter 12y, Mars 7y, Sun 10y, Venus 8y, Mercury 13y, then nodes.",
+   "natal_moon_nakshatra": "Shatabhisha -- natal Moon ~1 deg Pisces tropical converts to ~7 deg Aquarius sidereal under the Lahiri ayanamsa (~23.7 deg for 1992). Ruled by Rahu, deity Varuna, Rakshasa gana -- a solitary, healing, deep-research nature."
+  }
+ },
+ "algorithms": [
+  {
+   "name": "annual profection",
+   "steps": "Determine the native's age at the start of the year in question (age = whole years since birth). Compute profected house = (age mod 12) + 1, counting WHOLE-SIGN houses forward from the natal Ascendant's sign (house 1 = the ASC's own sign, regardless of the quadrant house system used for the main chart). The 'Lord of the Year' / time-lord is the TRADITIONAL ruler of that house's sign (Aries & Scorpio = Mars, Taurus & Libra = Venus, Gemini & Virgo = Mercury, Cancer = Moon, Leo = Sun, Sagittarius & Pisces = Jupiter, Capricorn & Aquarius = Saturn). Monthly profections advance one house per month starting from the year's house at the birth-month anniversary, cycling through the remaining 11 houses one per month, each with its own monthly sub-lord.",
+   "inputs": "Natal Ascendant sign (whole-sign reckoning, not the natal quadrant chart); current age or the specific year being profected; traditional (not modern) planetary rulerships.",
+   "output_format": "One Telegram line, e.g. 'Profection year: 10th house (Aries) -- Mars is your time-lord through Nov 2026.'"
+  },
+  {
+   "name": "firdaria",
+   "steps": "Determine day vs night birth from whether the natal Sun is above (day) or below (night) the ASC-DSC horizon line. For a NIGHT chart, the major periods run in this fixed order and length: Moon 9y, Saturn 11y, Jupiter 12y, Mars 7y, Sun 10y, Venus 8y, Mercury 13y, then North Node 3y, South Node 2y (75y total, then the whole cycle repeats). Sum the lengths cumulatively to find which major period the current age falls into. Within that major period, divide it into 7 equal sub-periods (major length / 7 years each); the major lord itself rules the first sub-period, then the sequence continues through the remaining six planets in Chaldean order (Saturn, Jupiter, Mars, Sun, Venus, Mercury, Moon) picking up wherever the major lord sits in that order.",
+   "inputs": "Natal Sun's position relative to the ASC/DSC axis (to confirm night birth); exact birth date for the cumulative age-in-years math.",
+   "output_format": "One Telegram line, e.g. 'Firdaria: Mars major period (age 32-39) / Sun sub-period (through Nov 2026).'"
+  },
+  {
+   "name": "planetary hours",
+   "steps": "Get sunrise and sunset for the exact location and date. Diurnal hour length = (sunset minus sunrise) / 12. Nocturnal hour length = (next sunrise minus sunset) / 12. Hour 1 of the day (starting at sunrise) is ruled by that weekday's ruling planet (Sun=Sunday, Moon=Monday, Mars=Tuesday, Mercury=Wednesday, Jupiter=Thursday, Venus=Friday, Saturn=Saturday). Every subsequent hour, day and night together (24 total per 24-hour cycle), advances one step through the Chaldean order -- Saturn, Jupiter, Mars, Sun, Venus, Mercury, Moon -- wrapping continuously across the sunset boundary into the (differently-sized) night hours.",
+   "inputs": "Sunrise/sunset times for the exact location and date (ephemeris or sunrise-sunset API); the calendar weekday.",
+   "output_format": "One Telegram line, e.g. 'Right now: Venus hour (until 3:42pm) -- good for money/relationship conversations.'"
+  },
+  {
+   "name": "progressions and transits to progressed points",
+   "steps": "Secondary progressions use the day-for-a-year key: the chart cast for N days after birth describes age N; progressed planets move at their natural daily ephemeris speed compounded over age-in-days. Progressed angles (ASC/MC) need special handling since houses depend on geographic latitude and right ascension, not simple longitude. Two accepted methods, which diverge by roughly 2-6 degrees over a lifetime: (a) NAIBOD -- advance the natal ARMC by the Sun's MEAN daily motion (about 0.9856 deg/day) times age-in-years, then recompute ASC/MC from that new ARMC; (b) SOLAR ARC -- advance the MC by the Sun's ACTUAL longitude motion since birth (the 'solar arc'), then derive the new ASC from that MC's implied right ascension. Pick one method and stay consistent. TRANSIT-TO-MIDPOINT RULE: a transiting planet activates a natal midpoint (the exact mid-degree between two natal points, (pointA + pointB) / 2) the same way it activates an actual planet -- check the transiting longitude against the midpoint within a tight ~1 degree orb; a hit blends both points' themes at once.",
+   "inputs": "Natal ARMC and Sun longitude; current transiting planet positions; the two natal points defining any midpoint being checked.",
+   "output_format": "One Telegram line, e.g. 'Transiting Saturn is conjunct your progressed Moon -- expect a few weeks of emotional reckoning around [themed house].'"
+  },
+  {
+   "name": "lunar mansions (nakshatras)",
+   "steps": "Convert the Moon's TROPICAL longitude to SIDEREAL by subtracting the Lahiri ayanamsa value for the date in question (roughly 24 degrees in the current era, about 23.7 deg for 1992) -- do this for both the natal Moon and any daily transiting Moon position. Divide the 360-degree zodiac into 27 equal nakshatras of 13 deg 20' each, each further split into 4 padas of 3 deg 20'. Look up which of the 27 segments the sidereal longitude falls into to get the ruling planet (the fixed, repeating Vimshottari sequence: Ketu, Venus, Sun, Moon, Mars, Rahu, Jupiter, Saturn, Mercury -- repeated 3 times across the 27), presiding deity, and traditional nature/gana.",
+   "inputs": "Tropical Moon longitude (natal or transiting) and the correct Lahiri ayanamsa value for the date in question.",
+   "output_format": "One Telegram line, e.g. 'Moon is in Shatabhisha today -- good for solitary research/healing work, not for public launches.'"
+  },
+  {
+   "name": "planetary returns",
+   "steps": "For any body, a 'return' is the moment its transiting longitude exactly matches its natal longitude again. Approximate cycle lengths: Moon ~27.3 days, Mercury/Venus ~1 year (count varies with retrograde loops), Mars ~2 years, Jupiter ~12 years, Saturn ~29.5 years, Chiron ~50 years (its eccentric orbit makes exact timing variable), Uranus ~84 years; the lunar NODES complete a full 360-degree retrograde cycle back to the natal position roughly every 18.6 years (called a 'nodal return' by the same convention even though the nodes move backward). Because none of these orbits are perfectly uniform, get the exact date from ephemeris lookup (e.g. pyswisseph) rather than simple division -- a body near a retrograde station can produce more than one exact hit per nominal cycle.",
+   "inputs": "Natal longitude of the body in question; an ephemeris capable of solving for the exact transiting-to-natal conjunction date(s).",
+   "output_format": "One Telegram line, e.g. 'Mars return: [date] -- new 2-year action cycle begins.'"
+  }
+ ],
+ "entries": [
+  {
+   "key": "Profection year 1st house",
+   "traditional": "The profection year of the body and self -- new starts, health, appearance, and how you show up in the world take center stage; it's a personal reset year. Profected sign: Cancer (whole-sign), traditional ruler Moon.",
+   "esoteric": "Spiritually, a first-house year cracks open a fresh incarnation cycle inside the life -- the soul re-enters its own vehicle and asks 'who am I now.'",
+   "in_mikes_chart": "Mars and Juno sit here natally (whole-sign 1st, Cancer), conjunct Mike's own Ascendant, so a 1st-house year hits an already-loaded placement -- assertive, fast-moving, and relationship-charged rather than quiet.",
+   "translation": "The whole year runs hot and personal for Mike. He becomes the plot, not a side character -- body, image, and gut instinct lead every decision.",
+   "do": "Start things under his own name, lead from the front, use the natural Mars drive instead of suppressing it.",
+   "avoid": "Picking fights just because the energy is available, or making irreversible moves purely on adrenaline.",
+   "svehla_link": "No direct 2026 Svehla theme sits on this house -- it's a personal-vitality year, not the current career/money focus."
+  },
+  {
+   "key": "Profection year 2nd house",
+   "traditional": "The profection year of money, income, and self-worth -- the classic year to focus on earning, spending habits, and what you actually value. Profected sign: Leo (whole-sign), traditional ruler Sun.",
+   "esoteric": "A second-house year grounds identity in tangible resources -- proving to the self that the inner light (Leo/Sun) can be turned into real value.",
+   "in_mikes_chart": "Natal Chiron sits here (whole-sign 2nd, Leo) -- a wound around money/self-worth, and it's exactly the sign transiting Jupiter moved into for 2026-27 per Svehla's 'controlled income growth' read.",
+   "translation": "A money year would ask Mike to face the old wound around what he's worth and turn it into steady income instead of drama.",
+   "do": "Track income concretely, negotiate pay/rates, build one durable income stream rather than chasing five.",
+   "avoid": "Tying self-worth to a number on a screen, or over-spending to numb the Chiron wound.",
+   "svehla_link": "Direct hit: Svehla flags transiting Jupiter moving into this exact house (Leo) for Aug 2026 onward, calling it 'controlled income growth.'"
+  },
+  {
+   "key": "Profection year 3rd house",
+   "traditional": "The profection year of communication, siblings, short trips, and the immediate community -- a mentally busy, detail-driven year. Profected sign: Virgo (whole-sign), traditional ruler Mercury.",
+   "esoteric": "Third-house years are about the soul learning to name things -- words, data, and daily information become the medium of growth.",
+   "in_mikes_chart": "No natal planets sit whole-sign in Virgo for Mike, so a 3rd-house year runs mostly through Mercury as the empty house's ruler -- filtered through his actual natal Mercury in Sagittarius (big-picture, not detail-first).",
+   "translation": "A talk-and-write year, but Mike's Mercury isn't naturally a details animal -- he'll need to slow down and let the year's business run in small pieces, not one big swing.",
+   "do": "Batch communication, write things down, use systems/automation (matches Sagittarius Mercury) instead of relying on memory.",
+   "avoid": "Overcommitting to side projects/errands that scatter focus without a bottom line.",
+   "svehla_link": "No current Svehla theme lands here."
+  },
+  {
+   "key": "Profection year 4th house",
+   "traditional": "The profection year of home, family, roots, and endings/foundations -- property, parents, and emotional home base. Profected sign: Libra (whole-sign), traditional ruler Venus.",
+   "esoteric": "Fourth-house years turn attention inward to the psychic foundation -- the private self behind the public role.",
+   "in_mikes_chart": "Natal Jupiter and the point Apollon both sit whole-sign in Libra (4th) for Mike -- an expansive, fair-dealing placement for home/roots; a 4th-house year activates his own natal Jupiter directly.",
+   "translation": "When this year comes around it should feel expansive at home -- moving, renovating, or a family situation that grows something rather than shrinks it.",
+   "do": "Invest in the home base, resolve family business while his own Jupiter is favorably activated.",
+   "avoid": "Overextending on real estate purely because it 'feels lucky' -- Jupiter still needs a Saturn-style plan.",
+   "svehla_link": "Sits on the 10th-4th axis opposite the current Saturn-on-MC career work -- a 4th-house year would be the private mirror to that public building through April 2027."
+  },
+  {
+   "key": "Profection year 5th house",
+   "traditional": "The profection year of children, creativity, romance, and speculation/risk-taking. Profected sign: Scorpio (whole-sign), traditional ruler Mars.",
+   "esoteric": "Fifth-house years are about the soul creating something from itself -- a child, an artwork, a bet -- and watching it take on its own life.",
+   "in_mikes_chart": "Natal Sun and Pluto both sit whole-sign in Scorpio (5th) for Mike -- his identity is quietly built around depth, intensity, and controlled risk; a 5th-house year lights up his own Sun/Pluto.",
+   "translation": "A creative-risk year that hits close to Mike's actual core identity, not a side hobby -- this is where his real nature gets to play.",
+   "do": "Take calculated creative or speculative swings, let a passion project be visible instead of hidden.",
+   "avoid": "Scorpio/Pluto intensity turning speculation into all-or-nothing gambling -- size it like a trade, not a crusade.",
+   "svehla_link": "No direct current Svehla theme, though Scorpio holding Sun+Pluto keeps this a naturally weighty house whenever it profects."
+  },
+  {
+   "key": "Profection year 6th house",
+   "traditional": "The profection year of health, daily work, routine, and service -- the 'maintenance' house. Profected sign: Sagittarius (whole-sign), traditional ruler Jupiter.",
+   "esoteric": "Sixth-house years refine the vessel -- body and habits are polished so the larger life (5th/7th) can function.",
+   "in_mikes_chart": "Natal Mercury and Venus both sit whole-sign in Sagittarius (6th) for Mike -- his work/health routines run through communication and relationship (client work, negotiating), not pure grind.",
+   "translation": "A routine year, but for Mike it's really a talk-and-relate job year -- client work, health tied to self-talk, daily systems.",
+   "do": "Build the boring daily system (sleep, screens, food) since Mercury/Venus there means good routines pay off in mood and money both.",
+   "avoid": "Letting 'just work' crowd out actual health maintenance -- Sagittarius over-does, under-rests.",
+   "svehla_link": "No direct current Svehla theme."
+  },
+  {
+   "key": "Profection year 7th house",
+   "traditional": "The profection year of marriage, partnership, contracts, and open dealings with others -- the classic relationship house. Profected sign: Capricorn (whole-sign), traditional ruler Saturn.",
+   "esoteric": "Seventh-house years are the soul's mirror work -- what shows up in a partner or rival reflects an unowned piece of the self.",
+   "in_mikes_chart": "Natal Uranus and Neptune sit whole-sign in Capricorn (7th) for Mike, and his Descendant itself is Capricorn -- partnerships run unconventional (Uranus) or idealized/blurry (Neptune); this is also exactly where transiting Juno's 2026 conjunction to his Descendant lands, per Svehla's loyalty theme.",
+   "translation": "A relationship year for Mike runs through commitment-versus-freedom tension -- Svehla's loyalty read (Juno on the Descendant) says this cycle pulls toward steadiness, not the usual Uranian exit.",
+   "do": "Put real commitments in writing, let a partnership be tested by contract/structure rather than vibes.",
+   "avoid": "Bailing at the first Uranian itch to bolt -- this cycle rewards staying through the boring part.",
+   "svehla_link": "Direct match to Svehla's 'Juno on DSC = loyalty' 2026 theme -- a 7th-house year would be its loudest expression."
+  },
+  {
+   "key": "Profection year 8th house",
+   "traditional": "The profection year of death/transformation, shared resources, debt, taxes, other people's money, and the occult. Profected sign: Aquarius (whole-sign), traditional ruler Saturn.",
+   "esoteric": "Eighth-house years dissolve an old structure so a deeper, jointly-held resource (financial, sexual, psychological) can be rebuilt.",
+   "in_mikes_chart": "Natal Saturn and Ceres both sit whole-sign in Aquarius (8th) for Mike -- a heavy, structural placement; this is also his own natal Saturn's house.",
+   "translation": "A shared-money or debt year, but because it's his own Saturn's house, working through it methodically actually builds something rather than just costing him.",
+   "do": "Deal with taxes, loans, and shared accounts head-on; negotiate structured payoff plans.",
+   "avoid": "Avoidance -- Aquarius/Saturn debt left unaddressed compounds quietly.",
+   "svehla_link": "Loosely tied to the broader Saturn-through-April-2027 foundation-building window, since Aquarius is Saturn's own sign for Mike."
+  },
+  {
+   "key": "Profection year 9th house",
+   "traditional": "The profection year of travel, higher education, philosophy, publishing, and foreign connections. Profected sign: Pisces (whole-sign), traditional ruler Jupiter.",
+   "esoteric": "Ninth-house years expand the worldview -- the soul seeks meaning beyond its home turf.",
+   "in_mikes_chart": "Natal Moon sits whole-sign in Pisces (9th) for Mike -- his emotional security is tied to belief, philosophy, or the bigger picture; a 9th-house year activates his own Moon.",
+   "translation": "A belief/travel year that runs on feeling, not logic, for Mike -- the right teacher, trip, or philosophy this cycle can genuinely reset his emotional baseline.",
+   "do": "Take the course, book the trip, let a bigger worldview in -- his Moon there means it lands emotionally, not just intellectually.",
+   "avoid": "Escapism dressed up as 'expanding horizons' -- Pisces/Moon can drift instead of grow.",
+   "svehla_link": "No direct current Svehla theme."
+  },
+  {
+   "key": "Profection year 10th house",
+   "traditional": "The profection year of career, public reputation, authority, and visible achievement -- the 'what will you be known for' house. Profected sign: Aries (whole-sign), traditional ruler Mars.",
+   "esoteric": "Tenth-house years are the soul stepping into public form -- private growth has to prove itself in the world now.",
+   "in_mikes_chart": "Mike's own Midheaven sits in Aries -- this house holds no natal planets but IS his career angle itself; a 10th-house year activates his MC directly, and Mars as time-lord matches the MC's own sign ruler exactly.",
+   "translation": "This is Mike's actual current year (age 33, Nov 2025-Nov 2026) -- his single most career-loaded profection, landing right as transiting Saturn sits on that same Midheaven through April 2027.",
+   "do": "Build the career foundation now -- visible moves, taking authority, laying infrastructure that outlasts the year (matches Svehla's Saturn-on-MC read exactly).",
+   "avoid": "Impatience -- Mars/Aries wants instant results but the Saturn overlay says this is foundation-laying, not harvest.",
+   "svehla_link": "Direct hit: this is the house under Svehla's headline 2026 theme -- Saturn transiting the Midheaven through April 2027 while Mike's own profection year is also the 10th, doubling the career-building signal."
+  },
+  {
+   "key": "Profection year 11th house",
+   "traditional": "The profection year of friends, groups, networks, hopes, and material gains from associations. Profected sign: Taurus (whole-sign), traditional ruler Venus.",
+   "esoteric": "Eleventh-house years test whether private ambition can be shared -- the wish only becomes real through a community.",
+   "in_mikes_chart": "No natal planets sit whole-sign in Taurus for Mike, but this is exactly where Svehla places his progressed Moon ('the money nerve') -- an 11th-house year (age 34, Nov 2026-Nov 2027) runs directly on top of that progressed placement, with Venus as time-lord.",
+   "translation": "Mike's next profection year turns money into a group/network story -- income tied to a community, platform, or audience rather than solo hustle, right when his progressed Moon is already sitting in the same sign.",
+   "do": "Build the audience/network side of income deliberately this year -- it's doubly activated (profection + progressed Moon).",
+   "avoid": "Confusing social capital with real capital -- Taurus/Venus still wants the deal actually closed and paid.",
+   "svehla_link": "Overlaps Svehla's 'progressed Moon in Taurus = money nerve' theme -- Mike's 2026-27 profection year and that progression sit in the same sign together."
+  },
+  {
+   "key": "Profection year 12th house",
+   "traditional": "The profection year of isolation, hidden matters, endings, institutions, and self-undoing -- the quiet, behind-the-scenes house. Profected sign: Gemini (whole-sign), traditional ruler Mercury.",
+   "esoteric": "Twelfth-house years dissolve what no longer serves before a new 12-year cycle (back to the 1st) can begin -- retreat, release, quiet research.",
+   "in_mikes_chart": "The point Hades sits whole-sign in Gemini (12th) for Mike -- a research/backstage energy around communication and information; a 12th-house year activates that Hades placement with Mercury as time-lord.",
+   "translation": "Mike's year after next (age 35, Nov 2027-Nov 2028) is a background-work, research-and-recovery year -- less visible than the two before it, and that's by design before a new profection cycle starts.",
+   "do": "Use it for deep research, quiet system-building, and rest -- not for launching anything that needs an audience.",
+   "avoid": "Mistaking the quiet for stagnation and forcing visibility the house doesn't want yet.",
+   "svehla_link": "Loosely brackets the end of Svehla's 'spring 2027 contingency window' -- this house year picks up right after that checkpoint passes."
+  },
+  {
+   "key": "Profection lord Sun",
+   "traditional": "When the Sun rules the profection year, the year runs on identity, visibility, vitality, and father/authority figures; transits to the natal Sun this year carry double weight.",
+   "esoteric": "The Lord of the Year is the classical time-lord technique's way of saying: this planet's story is the container the whole 12 months happens inside.",
+   "in_mikes_chart": "Mike's natal Sun (12 deg Scorpio, whole-sign 5th) is intense and private by nature, so a Sun-ruled year forces a usually-guarded identity into more visible territory than it likes.",
+   "translation": "Whatever hits his Sun this year (by transit or progression) isn't background noise -- it's the headline of the whole 12 months.",
+   "do": "Track transits to 12 deg Scorpio specifically all year; treat any hit there as the year's real story.",
+   "avoid": "Dismissing a Sun transit as 'just one aspect' during a Sun-lord year -- it's structurally amplified.",
+   "svehla_link": "See the matching 'Profection year Nth house' entry for the Svehla cross-reference on Mike's own upcoming lord years."
+  },
+  {
+   "key": "Profection lord Moon",
+   "traditional": "When the Moon rules the profection year, the year runs on emotional needs, home, and instinctive security; transits to the natal Moon count double.",
+   "esoteric": "The Lord of the Year is the classical time-lord technique's way of saying: this planet's story is the container the whole 12 months happens inside.",
+   "in_mikes_chart": "Mike's natal Moon (1 deg Pisces, whole-sign 9th, nakshatra Shatabhisha) ties emotional security to belief/philosophy and to solitary, private processing -- a Moon-lord year runs quietly intense rather than dramatic.",
+   "translation": "A Moon-ruled year makes Mike's mood the real instrument panel for the year -- track feelings as data, not distraction.",
+   "do": "Watch transits to 1 deg Pisces closely; big mood shifts that year are signal, not noise.",
+   "avoid": "Making major decisions purely off a Moon-lord year's emotional weather without checking it against the facts.",
+   "svehla_link": "See the matching 'Profection year Nth house' entry for the Svehla cross-reference on Mike's own upcoming lord years."
+  },
+  {
+   "key": "Profection lord Mercury",
+   "traditional": "When Mercury rules the profection year, the year runs on communication, contracts, learning, and information flow; transits to the natal Mercury count double.",
+   "esoteric": "The Lord of the Year is the classical time-lord technique's way of saying: this planet's story is the container the whole 12 months happens inside.",
+   "in_mikes_chart": "Mike's natal Mercury (3 deg Sagittarius, whole-sign 6th) is big-picture, blunt, and freedom-loving -- his 2027-28 Mercury-lord year will want to teach/broadcast an idea rather than just push paperwork.",
+   "translation": "His 2027-28 year (12th-house profection, Mercury lord) runs on words and information handled quietly -- writing, research, systems -- not public speaking.",
+   "do": "Track transits to 3 deg Sagittarius all through 2027-28; that's the year's real pressure point.",
+   "avoid": "Signing anything important without reading the fine print -- a Mercury year punishes sloppy contracts.",
+   "svehla_link": "See the matching 'Profection year Nth house' entry for the Svehla cross-reference on Mike's own upcoming lord years."
+  },
+  {
+   "key": "Profection lord Venus",
+   "traditional": "When Venus rules the profection year, the year runs on money, relationships, values, and pleasure; transits to the natal Venus count double.",
+   "esoteric": "The Lord of the Year is the classical time-lord technique's way of saying: this planet's story is the container the whole 12 months happens inside.",
+   "in_mikes_chart": "Mike's natal Venus (19 deg Sagittarius, whole-sign 6th) links money/relationship to work and freedom of movement -- his 2026-27 Venus-lord year (11th house) makes income-through-relationship/network the central theme.",
+   "translation": "His 2026-27 year is literally money-and-people-ruled twice over -- profection lord and profected house both point to income through the network.",
+   "do": "Track transits to 19 deg Sagittarius all through 2026-27 -- that degree is the year's pressure point.",
+   "avoid": "Letting the pleasant Venus energy turn into overspending on the relationships/network that are supposed to be paying him.",
+   "svehla_link": "See the matching 'Profection year Nth house' entry for the Svehla cross-reference on Mike's own upcoming lord years."
+  },
+  {
+   "key": "Profection lord Mars",
+   "traditional": "When Mars rules the profection year, the year runs on action, conflict, drive, and assertion; transits to the natal Mars count double.",
+   "esoteric": "The Lord of the Year is the classical time-lord technique's way of saying: this planet's story is the container the whole 12 months happens inside.",
+   "in_mikes_chart": "Mike's natal Mars (23 deg 52' Cancer, whole-sign 1st, conjunct his Ascendant) is already one of the strongest points in his chart -- his current 2025-26 Mars-lord year (10th house) doubles down on an already-loud placement.",
+   "translation": "This is Mike's current year -- action and career both point through Mars, and any transit crossing 23-24 deg Cancer this year is the loudest single signal available to him.",
+   "do": "Track transits to 23-24 deg Cancer through Nov 2026; use the natural drive instead of fighting it.",
+   "avoid": "Burnout -- Mars ruling an already-Mars-heavy chart for a year can run hot without a deliberate rest plan.",
+   "svehla_link": "See the matching 'Profection year Nth house' entry for the Svehla cross-reference on Mike's own upcoming lord years."
+  },
+  {
+   "key": "Profection lord Jupiter",
+   "traditional": "When Jupiter rules the profection year, the year runs on growth, luck, expansion, education, and opportunity; transits to the natal Jupiter count double.",
+   "esoteric": "The Lord of the Year is the classical time-lord technique's way of saying: this planet's story is the container the whole 12 months happens inside.",
+   "in_mikes_chart": "Mike's natal Jupiter (5 deg Libra, whole-sign 4th) is expansive around home/property and fair dealing -- a Jupiter-lord year tends to be his easiest, most opportunity-rich cycle.",
+   "translation": "When this comes around (his 6th-house year, Sagittarius), expect opportunities to show up more than usual -- the job is to actually take them.",
+   "do": "Track transits to 5 deg Libra; say yes to more than feels comfortable during a Jupiter-lord year.",
+   "avoid": "Jupiter's overconfidence -- verify the good opportunity before betting size on it.",
+   "svehla_link": "See the matching 'Profection year Nth house' entry for the Svehla cross-reference on Mike's own upcoming lord years."
+  },
+  {
+   "key": "Profection lord Saturn",
+   "traditional": "When Saturn rules the profection year, the year runs on responsibility, structure, limitation, and long-term building; transits to the natal Saturn count double.",
+   "esoteric": "The Lord of the Year is the classical time-lord technique's way of saying: this planet's story is the container the whole 12 months happens inside.",
+   "in_mikes_chart": "Mike's natal Saturn (12 deg Aquarius, whole-sign 8th) is a disciplined, structural placement around shared resources/debt -- his Saturn-lord year (8th house) is slow, serious, and foundation-laying rather than fun.",
+   "translation": "When this comes around, expect the year to feel heavier and slower -- that's the point; it's building something durable, not withholding for no reason.",
+   "do": "Track transits to 12 deg Aquarius; treat restrictions that year as scaffolding, not punishment.",
+   "avoid": "Fighting the slowdown -- a Saturn-lord year rewards patience and punishes forcing speed.",
+   "svehla_link": "See the matching 'Profection year Nth house' entry for the Svehla cross-reference on Mike's own upcoming lord years."
+  },
+  {
+   "key": "Firdaria Moon",
+   "traditional": "As the first major Firdaria period for a night birth, the Moon rules early childhood -- emotional bonding, home environment, and the nervous system's baseline get built here. (Night-chart major period, age 0-9, Nov 1992-Nov 2001.)",
+   "esoteric": "The soul's first task under the Moon period is to metabolize the family field it was born into -- the emotional 'operating system' installed here runs quietly for life.",
+   "in_mikes_chart": "Whatever emotional patterns from early childhood feel most automatic to Mike today were largely set during this window, filtered through his natal Moon in Pisces (9th house, Shatabhisha nakshatra).",
+   "translation": "The emotional wiring from ages 0-9 is Mike's real baseline -- worth knowing that's a Moon-period artifact, not a fixed personality trait.",
+   "do": "When revisiting old emotional patterns in reflection, treat this window as the source material.",
+   "avoid": "Blaming '90s-kid nostalgia for everything -- but also not dismissing how formative this literal period was.",
+   "svehla_link": "No current relevance; historical period only."
+  },
+  {
+   "key": "Firdaria Saturn",
+   "traditional": "Saturn's major period brings early structure, discipline, responsibility, and often hardship or loss that forces maturity ahead of schedule. (Night-chart major period, age 9-20, Nov 2001-Nov 2012.)",
+   "esoteric": "A Saturn period in youth is classically read as an old soul being made to grow up fast -- restriction becomes the teacher.",
+   "in_mikes_chart": "Mike's adolescence and transition to adulthood ran under Saturn discipline, coloring how 'being responsible' got defined for him, tied to his natal Saturn in Aquarius (8th, shared resources).",
+   "translation": "Whatever hard lessons about responsibility/money/independence got locked in during his teens into early twenties trace back to this Firdaria window.",
+   "do": "Recognize any rigid 'shoulds' from that era as period-specific conditioning, not universal truth.",
+   "avoid": "Assuming the harshness of that decade is how life has to keep working now that Saturn's major period is long over.",
+   "svehla_link": "No current relevance; historical period only."
+  },
+  {
+   "key": "Firdaria Jupiter",
+   "traditional": "Jupiter's major period is expansion -- growth, opportunity, education, and optimism after Saturn's discipline. (Night-chart major period, age 20-32, Nov 2012-Nov 2024.)",
+   "esoteric": "Jupiter follows Saturn in the sequence deliberately -- the structure built gets to expand once it's proven solid.",
+   "in_mikes_chart": "Mike's twenties into early thirties ran under this 12-year Jupiter window (just ended late 2024), the natural period for building out whatever the Saturn years disciplined, tied to his natal Jupiter in Libra (4th, home/fairness).",
+   "translation": "The growth and opportunities of his twenties were running under a 12-year window that just closed in late 2024 -- it's a finished chapter now.",
+   "do": "Take stock of what actually got built 2012-2024 as the harvest of that period before moving fully into the new Mars chapter.",
+   "avoid": "Expecting the easy expansion of the Jupiter years to keep happening automatically now that Mars has taken over.",
+   "svehla_link": "No current relevance; historical period, just closed."
+  },
+  {
+   "key": "Firdaria Mars",
+   "traditional": "Mars' major period brings action, conflict, ambition, and assertive drive -- a working, fighting, building period. (Night-chart major period, age 32-39, Nov 2024-Nov 2031 -- CURRENT MAJOR PERIOD.)",
+   "esoteric": "A Mars period tests whether the will can act without needing to destroy -- its lesson is disciplined force.",
+   "in_mikes_chart": "Mike is IN this period right now, and Mars is already one of his strongest natal placements (conjunct his Ascendant in Cancer, ruler of his profected 10th house for 2025-26), so this 7-year window is a major-key overlap, not background noise.",
+   "translation": "This whole 7-year stretch (into 2031) runs on drive and assertive building for Mike more than any other Firdaria period in his life -- the loudest possible match between the technique and his actual chart.",
+   "do": "Lean into ambitious, assertive moves during this window -- the technique and the natal chart are both saying 'act.'",
+   "avoid": "Letting Mars-on-Mars run into recklessness or unnecessary conflict -- the strength needs a target, not just an outlet.",
+   "svehla_link": "Directly overlaps Svehla's Saturn-on-MC career-building window (through April 2027) and Mike's own 10th/11th/12th profection years -- three independent timing systems all point at 2025-2028 as build-the-foundation years."
+  },
+  {
+   "key": "Firdaria Sun",
+   "traditional": "The Sun's major period is about identity, authority, and visibility taking center stage in midlife. (Night-chart major period, age 39-49, Nov 2031-Nov 2041.)",
+   "esoteric": "The Sun following Mars in a night chart's sequence means the will has to become identity -- action matures into a stated public self.",
+   "in_mikes_chart": "Mike's Sun period starts at age 39 -- a decade where his natal Sun in Scorpio (5th house, private/intense by nature) will be asked to become more visible and identity-defining than it naturally wants to be.",
+   "translation": "A future chapter -- expect a stronger pull toward being publicly known for something once the late-30s hit.",
+   "do": "Nothing actionable yet -- file for future planning.",
+   "avoid": "N/A -- period hasn't started.",
+   "svehla_link": "No current relevance; future period."
+  },
+  {
+   "key": "Firdaria Venus",
+   "traditional": "Venus' major period brings relationship, pleasure, aesthetics, and financial harmony to the fore in later midlife. (Night-chart major period, age 49-57, Nov 2041-Nov 2049.)",
+   "esoteric": "Venus after the Sun softens identity back into relationship and enjoyment -- a reward period after the assertive/visible decades.",
+   "in_mikes_chart": "Mike's Venus period starts at age 49 -- his natal Venus in Sagittarius (6th house, work/routine) suggests this later relationship period still runs partly through work and freedom of movement rather than settling down quietly.",
+   "translation": "A future chapter where relationships and money should feel easier and more enjoyable, tied to how he works, not separate from it.",
+   "do": "Nothing actionable yet -- file for future planning.",
+   "avoid": "N/A -- period hasn't started.",
+   "svehla_link": "No current relevance; future period."
+  },
+  {
+   "key": "Firdaria Mercury",
+   "traditional": "Mercury's major period, the longest single Firdaria at 13 years, brings communication, teaching, and intellectual legacy work into the final third of life. (Night-chart major period, age 57-70, Nov 2049-Nov 2062.)",
+   "esoteric": "Mercury closing out the planetary sequence (before the nodes) suggests the soul's final task is to communicate what it learned.",
+   "in_mikes_chart": "Mike's Mercury period starts at age 57 -- with his natal Mercury in Sagittarius (6th house, teaching/big-picture), this 13-year window is set up to be a mentoring, writing, or broadcasting chapter late in life.",
+   "translation": "A far-future chapter where passing on knowledge becomes the main work, not doing the work itself.",
+   "do": "Nothing actionable yet -- file for future planning.",
+   "avoid": "N/A -- period hasn't started.",
+   "svehla_link": "No current relevance; future period."
+  },
+  {
+   "key": "Planetary hour Saturn",
+   "traditional": "Saturn's hour favors discipline, structure, limitation, endings, and serious long-term work -- a slow, careful hour.",
+   "esoteric": "The Chaldean-order hour cycle is read as the day's own miniature 'time-lord' rotation -- each hour is a small window tuned to one planet's business.",
+   "in_mikes_chart": "Saturn rules Mike's natal 8th (Aquarius) -- his own shared-resource/debt house -- so a Saturn hour is a good window for handling taxes, loans, contracts, or structural cleanup.",
+   "translation": "An Saturn hour is a good match for saturn-flavored tasks specifically for Mike, given where Saturn sits in his own chart.",
+   "do": "Pay bills, review contracts, do the boring administrative task that needs discipline.",
+   "avoid": "Starting anything that needs charm or speed -- Saturn hours move slow and can feel heavy.",
+   "svehla_link": "N/A -- planetary hours are a daily timing layer, not part of Svehla's natal/transit reading."
+  },
+  {
+   "key": "Planetary hour Jupiter",
+   "traditional": "Jupiter's hour favors growth, opportunity, teaching, generosity, and expansive decisions.",
+   "esoteric": "The Chaldean-order hour cycle is read as the day's own miniature 'time-lord' rotation -- each hour is a small window tuned to one planet's business.",
+   "in_mikes_chart": "Jupiter rules Mike's natal 4th and 9th (Libra/Pisces) -- home, fairness, and belief -- so a Jupiter hour suits big-picture planning, negotiating a fair deal, or reaching out to a mentor.",
+   "translation": "An Jupiter hour is a good match for jupiter-flavored tasks specifically for Mike, given where Jupiter sits in his own chart.",
+   "do": "Make the ask that needs generosity from the other side, plan expansion, sign something that feels fair to both parties.",
+   "avoid": "Overcommitting resources just because the hour feels optimistic.",
+   "svehla_link": "N/A -- planetary hours are a daily timing layer, not part of Svehla's natal/transit reading."
+  },
+  {
+   "key": "Planetary hour Mars",
+   "traditional": "Mars' hour favors action, competition, physical exertion, and assertive starts.",
+   "esoteric": "The Chaldean-order hour cycle is read as the day's own miniature 'time-lord' rotation -- each hour is a small window tuned to one planet's business.",
+   "in_mikes_chart": "Mars conjuncts Mike's Ascendant and rules his profected 2025-26 year -- arguably his single most personally-charged planetary hour; using it deliberately (workouts, hard conversations, decisive trades) plays to natural strength.",
+   "translation": "An Mars hour is a good match for mars-flavored tasks specifically for Mike, given where Mars sits in his own chart.",
+   "do": "Take the assertive action he's been putting off, exercise, execute a decision already made.",
+   "avoid": "Starting Mars-hour arguments just because the energy is there to burn.",
+   "svehla_link": "N/A -- planetary hours are a daily timing layer, not part of Svehla's natal/transit reading."
+  },
+  {
+   "key": "Planetary hour Sun",
+   "traditional": "The Sun's hour favors visibility, leadership, confidence, and anything meant to be seen or recognized.",
+   "esoteric": "The Chaldean-order hour cycle is read as the day's own miniature 'time-lord' rotation -- each hour is a small window tuned to one planet's business.",
+   "in_mikes_chart": "The Sun sits in Mike's natal 5th (Scorpio) -- private, intense creativity -- so a Sun hour is a good window to actually show a creative or personal project rather than keep it hidden.",
+   "translation": "An Sun hour is a good match for sun-flavored tasks specifically for Mike, given where Sun sits in his own chart.",
+   "do": "Publish, present, or put a name on something Mike has been sitting on privately.",
+   "avoid": "Seeking validation for its own sake rather than genuinely sharing the work.",
+   "svehla_link": "N/A -- planetary hours are a daily timing layer, not part of Svehla's natal/transit reading."
+  },
+  {
+   "key": "Planetary hour Venus",
+   "traditional": "Venus' hour favors relationships, negotiation, money matters, and aesthetic/pleasure decisions.",
+   "esoteric": "The Chaldean-order hour cycle is read as the day's own miniature 'time-lord' rotation -- each hour is a small window tuned to one planet's business.",
+   "in_mikes_chart": "Venus sits in Mike's natal 6th (Sagittarius, work/routine) -- so a Venus hour is well-suited to client relationships, negotiating pay, or making the daily routine more pleasant.",
+   "translation": "An Venus hour is a good match for venus-flavored tasks specifically for Mike, given where Venus sits in his own chart.",
+   "do": "Have the relationship or money conversation, negotiate a rate, improve the workspace.",
+   "avoid": "Impulse spending -- Venus hours can loosen the wallet.",
+   "svehla_link": "N/A -- planetary hours are a daily timing layer, not part of Svehla's natal/transit reading."
+  },
+  {
+   "key": "Planetary hour Mercury",
+   "traditional": "Mercury's hour favors communication, contracts, learning, writing, and short-distance movement.",
+   "esoteric": "The Chaldean-order hour cycle is read as the day's own miniature 'time-lord' rotation -- each hour is a small window tuned to one planet's business.",
+   "in_mikes_chart": "Mercury sits in Mike's natal 6th (Sagittarius, work/routine) alongside Venus -- a Mercury hour is prime time for the actual trading/analysis work, emails, and any paperwork needing a clear head.",
+   "translation": "An Mercury hour is a good match for mercury-flavored tasks specifically for Mike, given where Mercury sits in his own chart.",
+   "do": "Write the email, review the trade thesis, do research, sign routine paperwork.",
+   "avoid": "Scheduling anything requiring deep emotional nuance -- Mercury hours run cognitive, not feeling-based.",
+   "svehla_link": "N/A -- planetary hours are a daily timing layer, not part of Svehla's natal/transit reading."
+  },
+  {
+   "key": "Planetary hour Moon",
+   "traditional": "The Moon's hour favors intuition, emotional processing, rest, and anything domestic or private.",
+   "esoteric": "The Chaldean-order hour cycle is read as the day's own miniature 'time-lord' rotation -- each hour is a small window tuned to one planet's business.",
+   "in_mikes_chart": "Mike's natal Moon sits in Pisces (9th, belief/bigger-picture) -- a Moon hour suits reflection, journaling, or letting a gut read about the market or a relationship surface without forcing logic onto it yet.",
+   "translation": "An Moon hour is a good match for moon-flavored tasks specifically for Mike, given where Moon sits in his own chart.",
+   "do": "Rest, journal, trust a gut read and log it to check later, handle home/family matters.",
+   "avoid": "Making a hard numbers decision purely on a Moon-hour feeling without validating it later.",
+   "svehla_link": "N/A -- planetary hours are a daily timing layer, not part of Svehla's natal/transit reading."
+  },
+  {
+   "key": "Transiting Saturn conjunct progressed Moon",
+   "traditional": "A transiting Saturn conjunction to the progressed Moon marks an emotional maturation checkpoint -- feelings get tested against reality and either solidify or have to be released.",
+   "esoteric": "Saturn meeting the progressed Moon is the psyche being asked to grow up around whatever it's been feeling -- no more avoiding the emotional homework.",
+   "in_mikes_chart": "Because Mike's natal Saturn already sits in Aquarius (8th, shared resources) inside a self-honest, structural house, this contact tends to show up as a hard-but-fair reckoning around debt, a joint resource, or an emotional commitment rather than random gloom.",
+   "translation": "When this hits, expect a few weeks of feeling low or heavy about something specific and real -- not free-floating depression -- and it's the moment to actually deal with that thing.",
+   "do": "Use the low mood as information -- name the specific issue and take one concrete structural step on it.",
+   "avoid": "Treating the heaviness as permanent -- it lifts once the transit separates, usually within a few weeks.",
+   "svehla_link": "N/A -- this is a general progressed-Moon timing rule, not one of Svehla's specific 2026 themes."
+  },
+  {
+   "key": "Transiting Jupiter conjunct progressed Moon",
+   "traditional": "A transiting Jupiter conjunction to the progressed Moon is one of the more reliably good-mood transits -- emotional expansion, optimism, and a sense that things are opening up.",
+   "esoteric": "Jupiter meeting the progressed Moon lets the feeling-nature stretch into more room than it's used to -- a taste of abundance the psyche can then hold onto.",
+   "in_mikes_chart": "With Mike's natal Jupiter in Libra (4th, home/fairness), this contact often shows up as genuine relief or good news around home, family, or a fair deal landing.",
+   "translation": "A noticeably lighter few weeks -- good news, better mood, easier relationships -- worth using actively rather than just enjoying passively.",
+   "do": "Say yes to the opportunity that shows up, make the ask, start the thing that needs optimism to get off the ground.",
+   "avoid": "Over-promising or over-spending on the strength of a temporary good mood.",
+   "svehla_link": "N/A -- this is a general progressed-Moon timing rule, not one of Svehla's specific 2026 themes."
+  },
+  {
+   "key": "Transiting Mars conjunct progressed Moon",
+   "traditional": "A transiting Mars conjunction to the progressed Moon stirs emotional agitation, irritability, and a strong urge to act on feelings immediately.",
+   "esoteric": "Mars meeting the progressed Moon forces feeling into action -- there's no sitting with it quietly during this contact.",
+   "in_mikes_chart": "Given Mike's natal Mars is already conjunct his Ascendant, this transit tends to land as visible, immediate reactivity rather than internal stewing -- what he feels, people around him will see.",
+   "translation": "Short, sharp emotional flare-ups for a few days around this contact -- real information, but not the moment for the biggest decision of the month.",
+   "do": "Use the energy for a workout or a direct, honest conversation rather than letting it leak out sideways.",
+   "avoid": "Sending the angry message or making the reactive trade in the 24-48 hours right at exact conjunction.",
+   "svehla_link": "N/A -- this is a general progressed-Moon timing rule, not one of Svehla's specific 2026 themes."
+  },
+  {
+   "key": "Transiting Sun conjunct progressed Moon",
+   "traditional": "A transiting Sun conjunction to the progressed Moon happens roughly monthly and marks a mini emotional 'new moon' -- a short reset point in feeling and identity alignment.",
+   "esoteric": "The Sun meeting the progressed Moon each month is the will and the feelings syncing up briefly -- a natural monthly checkpoint the ancients used for renewal.",
+   "in_mikes_chart": "Because Mike's natal Sun sits in Scorpio (5th, private creativity), this monthly contact is a good built-in prompt to check in on whatever personal/creative project is quietly running in the background.",
+   "translation": "A once-a-month day or two where mood and sense of self feel unusually aligned -- worth using as a monthly personal check-in point.",
+   "do": "Do a monthly review of goals and feelings on/near this contact; it repeats roughly every month so it's a reliable rhythm.",
+   "avoid": "Ignoring it as 'too frequent to matter' -- the monthly rhythm is exactly its value as a check-in tool.",
+   "svehla_link": "N/A -- this is a general progressed-Moon timing rule, not one of Svehla's specific 2026 themes."
+  },
+  {
+   "key": "Moon in nakshatra Ashvini",
+   "traditional": "Ashvini spans 13 deg 20' of the sidereal zodiac, ruled by Ketu, presided over by Ashvins, Deva gana. Symbol: Horse's head. Core nature: swift healing, pioneering starts.",
+   "esoteric": "Each nakshatra is a lunar mansion the Moon 'lives in' for about a day -- its deity and gana color the emotional/intuitive tone of whatever the Moon touches while passing through.",
+   "in_mikes_chart": "N/A for Mike's own natal chart -- this entry describes what it means when the transiting (daily) Moon passes through this nakshatra, a short-term timing signal rather than a natal placement.",
+   "translation": "When the Moon is here for the day, the mood/energy leans toward swift healing, pioneering starts.",
+   "do": "start journeys, treatments, or ventures that need quick, decisive movement",
+   "avoid": "long, slow commitments that need patience -- Ashvini wants speed",
+   "svehla_link": "N/A -- not part of Svehla's current 2026 transit themes; this is a daily lunar-timing layer."
+  },
+  {
+   "key": "Moon in nakshatra Bharani",
+   "traditional": "Bharani spans 13 deg 20' of the sidereal zodiac, ruled by Venus, presided over by Yama/Dharma, Manushya gana. Symbol: Yoni. Core nature: restraint, bearing burdens, intense creativity.",
+   "esoteric": "Each nakshatra is a lunar mansion the Moon 'lives in' for about a day -- its deity and gana color the emotional/intuitive tone of whatever the Moon touches while passing through.",
+   "in_mikes_chart": "N/A for Mike's own natal chart -- this entry describes what it means when the transiting (daily) Moon passes through this nakshatra, a short-term timing signal rather than a natal placement.",
+   "translation": "When the Moon is here for the day, the mood/energy leans toward restraint, bearing burdens, intense creativity.",
+   "do": "disciplined hard work, cutting away what's outgrown",
+   "avoid": "starting pleasant, indulgent ventures -- Bharani rewards effort, not ease",
+   "svehla_link": "N/A -- not part of Svehla's current 2026 transit themes; this is a daily lunar-timing layer."
+  },
+  {
+   "key": "Moon in nakshatra Krittika",
+   "traditional": "Krittika spans 13 deg 20' of the sidereal zodiac, ruled by Sun, presided over by Agni, Rakshasa gana. Symbol: Knife/Spear. Core nature: cutting, purifying, sharp ambition.",
+   "esoteric": "Each nakshatra is a lunar mansion the Moon 'lives in' for about a day -- its deity and gana color the emotional/intuitive tone of whatever the Moon touches while passing through.",
+   "in_mikes_chart": "N/A for Mike's own natal chart -- this entry describes what it means when the transiting (daily) Moon passes through this nakshatra, a short-term timing signal rather than a natal placement.",
+   "translation": "When the Moon is here for the day, the mood/energy leans toward cutting, purifying, sharp ambition.",
+   "do": "decisive, purifying action, direct confrontation of a problem",
+   "avoid": "delicate diplomacy -- Krittika's edge cuts through nuance",
+   "svehla_link": "N/A -- not part of Svehla's current 2026 transit themes; this is a daily lunar-timing layer."
+  },
+  {
+   "key": "Moon in nakshatra Rohini",
+   "traditional": "Rohini spans 13 deg 20' of the sidereal zodiac, ruled by Moon, presided over by Brahma, Manushya gana. Symbol: Cart/Chariot. Core nature: growth, beauty, material abundance.",
+   "esoteric": "Each nakshatra is a lunar mansion the Moon 'lives in' for about a day -- its deity and gana color the emotional/intuitive tone of whatever the Moon touches while passing through.",
+   "in_mikes_chart": "N/A for Mike's own natal chart -- this entry describes what it means when the transiting (daily) Moon passes through this nakshatra, a short-term timing signal rather than a natal placement.",
+   "translation": "When the Moon is here for the day, the mood/energy leans toward growth, beauty, material abundance.",
+   "do": "financial, artistic, or relationship starts -- one of the most auspicious nakshatras",
+   "avoid": "over-indulgence -- Rohini's abundance can tip into excess",
+   "svehla_link": "N/A -- not part of Svehla's current 2026 transit themes; this is a daily lunar-timing layer."
+  },
+  {
+   "key": "Moon in nakshatra Mrigashira",
+   "traditional": "Mrigashira spans 13 deg 20' of the sidereal zodiac, ruled by Mars, presided over by Soma, Deva gana. Symbol: Deer's head. Core nature: searching, curious, gentle pursuit.",
+   "esoteric": "Each nakshatra is a lunar mansion the Moon 'lives in' for about a day -- its deity and gana color the emotional/intuitive tone of whatever the Moon touches while passing through.",
+   "in_mikes_chart": "N/A for Mike's own natal chart -- this entry describes what it means when the transiting (daily) Moon passes through this nakshatra, a short-term timing signal rather than a natal placement.",
+   "translation": "When the Moon is here for the day, the mood/energy leans toward searching, curious, gentle pursuit.",
+   "do": "research, travel, and open-ended seeking",
+   "avoid": "forcing a conclusion before the search is actually done",
+   "svehla_link": "N/A -- not part of Svehla's current 2026 transit themes; this is a daily lunar-timing layer."
+  },
+  {
+   "key": "Moon in nakshatra Ardra",
+   "traditional": "Ardra spans 13 deg 20' of the sidereal zodiac, ruled by Rahu, presided over by Rudra, Manushya gana. Symbol: Teardrop. Core nature: storm, destruction-then-renewal, intense emotion.",
+   "esoteric": "Each nakshatra is a lunar mansion the Moon 'lives in' for about a day -- its deity and gana color the emotional/intuitive tone of whatever the Moon touches while passing through.",
+   "in_mikes_chart": "N/A for Mike's own natal chart -- this entry describes what it means when the transiting (daily) Moon passes through this nakshatra, a short-term timing signal rather than a natal placement.",
+   "translation": "When the Moon is here for the day, the mood/energy leans toward storm, destruction-then-renewal, intense emotion.",
+   "do": "releasing or demolition work, emotional catharsis",
+   "avoid": "new beginnings or delicate matters -- Ardra's storm isn't gentle",
+   "svehla_link": "N/A -- not part of Svehla's current 2026 transit themes; this is a daily lunar-timing layer."
+  },
+  {
+   "key": "Moon in nakshatra Punarvasu",
+   "traditional": "Punarvasu spans 13 deg 20' of the sidereal zodiac, ruled by Jupiter, presided over by Aditi, Deva gana. Symbol: Bow/Quiver. Core nature: renewal, return, restoration, optimism.",
+   "esoteric": "Each nakshatra is a lunar mansion the Moon 'lives in' for about a day -- its deity and gana color the emotional/intuitive tone of whatever the Moon touches while passing through.",
+   "in_mikes_chart": "N/A for Mike's own natal chart -- this entry describes what it means when the transiting (daily) Moon passes through this nakshatra, a short-term timing signal rather than a natal placement.",
+   "translation": "When the Moon is here for the day, the mood/energy leans toward renewal, return, restoration, optimism.",
+   "do": "reconciliation, return-journeys, restarting a paused project",
+   "avoid": "little to avoid -- generally one of the more favorable nakshatras",
+   "svehla_link": "N/A -- not part of Svehla's current 2026 transit themes; this is a daily lunar-timing layer."
+  },
+  {
+   "key": "Moon in nakshatra Pushya",
+   "traditional": "Pushya spans 13 deg 20' of the sidereal zodiac, ruled by Saturn, presided over by Brihaspati, Deva gana. Symbol: Cow's udder. Core nature: nourishing, most auspicious, spiritual growth.",
+   "esoteric": "Each nakshatra is a lunar mansion the Moon 'lives in' for about a day -- its deity and gana color the emotional/intuitive tone of whatever the Moon touches while passing through.",
+   "in_mikes_chart": "N/A for Mike's own natal chart -- this entry describes what it means when the transiting (daily) Moon passes through this nakshatra, a short-term timing signal rather than a natal placement.",
+   "translation": "When the Moon is here for the day, the mood/energy leans toward nourishing, most auspicious, spiritual growth.",
+   "do": "spiritual practice, planting seeds (literal or figurative), the most important starts",
+   "avoid": "little to avoid -- Pushya is considered universally strong",
+   "svehla_link": "N/A -- not part of Svehla's current 2026 transit themes; this is a daily lunar-timing layer."
+  },
+  {
+   "key": "Moon in nakshatra Ashlesha",
+   "traditional": "Ashlesha spans 13 deg 20' of the sidereal zodiac, ruled by Mercury, presided over by Nagas, Rakshasa gana. Symbol: Serpent. Core nature: serpentine, hypnotic, penetrating, secretive.",
+   "esoteric": "Each nakshatra is a lunar mansion the Moon 'lives in' for about a day -- its deity and gana color the emotional/intuitive tone of whatever the Moon touches while passing through.",
+   "in_mikes_chart": "N/A for Mike's own natal chart -- this entry describes what it means when the transiting (daily) Moon passes through this nakshatra, a short-term timing signal rather than a natal placement.",
+   "translation": "When the Moon is here for the day, the mood/energy leans toward serpentine, hypnotic, penetrating, secretive.",
+   "do": "research into hidden matters, strategic or psychological work",
+   "avoid": "naive trust or full public transparency -- Ashlesha keeps a card back",
+   "svehla_link": "N/A -- not part of Svehla's current 2026 transit themes; this is a daily lunar-timing layer."
+  },
+  {
+   "key": "Moon in nakshatra Magha",
+   "traditional": "Magha spans 13 deg 20' of the sidereal zodiac, ruled by Ketu, presided over by Pitrs, Rakshasa gana. Symbol: Royal throne. Core nature: ancestral authority, legacy, power, pride.",
+   "esoteric": "Each nakshatra is a lunar mansion the Moon 'lives in' for about a day -- its deity and gana color the emotional/intuitive tone of whatever the Moon touches while passing through.",
+   "in_mikes_chart": "N/A for Mike's own natal chart -- this entry describes what it means when the transiting (daily) Moon passes through this nakshatra, a short-term timing signal rather than a natal placement.",
+   "translation": "When the Moon is here for the day, the mood/energy leans toward ancestral authority, legacy, power, pride.",
+   "do": "honoring tradition, claiming authority or inheritance",
+   "avoid": "humble, self-effacing tasks -- Magha wants the seat, not the sidelines",
+   "svehla_link": "N/A -- not part of Svehla's current 2026 transit themes; this is a daily lunar-timing layer."
+  },
+  {
+   "key": "Moon in nakshatra Purva Phalguni",
+   "traditional": "Purva Phalguni spans 13 deg 20' of the sidereal zodiac, ruled by Venus, presided over by Bhaga, Manushya gana. Symbol: Bed legs. Core nature: pleasure, relaxation, creativity, romance.",
+   "esoteric": "Each nakshatra is a lunar mansion the Moon 'lives in' for about a day -- its deity and gana color the emotional/intuitive tone of whatever the Moon touches while passing through.",
+   "in_mikes_chart": "N/A for Mike's own natal chart -- this entry describes what it means when the transiting (daily) Moon passes through this nakshatra, a short-term timing signal rather than a natal placement.",
+   "translation": "When the Moon is here for the day, the mood/energy leans toward pleasure, relaxation, creativity, romance.",
+   "do": "leisure, romance, celebration, art",
+   "avoid": "heavy labor or serious contracts -- the mood here is soft, not businesslike",
+   "svehla_link": "N/A -- not part of Svehla's current 2026 transit themes; this is a daily lunar-timing layer."
+  },
+  {
+   "key": "Moon in nakshatra Uttara Phalguni",
+   "traditional": "Uttara Phalguni spans 13 deg 20' of the sidereal zodiac, ruled by Sun, presided over by Aryaman, Manushya gana. Symbol: Bed legs. Core nature: partnership, patronage, generosity, contracts.",
+   "esoteric": "Each nakshatra is a lunar mansion the Moon 'lives in' for about a day -- its deity and gana color the emotional/intuitive tone of whatever the Moon touches while passing through.",
+   "in_mikes_chart": "N/A for Mike's own natal chart -- this entry describes what it means when the transiting (daily) Moon passes through this nakshatra, a short-term timing signal rather than a natal placement.",
+   "translation": "When the Moon is here for the day, the mood/energy leans toward partnership, patronage, generosity, contracts.",
+   "do": "marriage, partnership agreements, service to others",
+   "avoid": "solitary or selfish pursuits -- this star runs on mutual benefit",
+   "svehla_link": "N/A -- not part of Svehla's current 2026 transit themes; this is a daily lunar-timing layer."
+  },
+  {
+   "key": "Moon in nakshatra Hasta",
+   "traditional": "Hasta spans 13 deg 20' of the sidereal zodiac, ruled by Moon, presided over by Savitri, Deva gana. Symbol: Hand/Fist. Core nature: skillful hands, craft, dexterity.",
+   "esoteric": "Each nakshatra is a lunar mansion the Moon 'lives in' for about a day -- its deity and gana color the emotional/intuitive tone of whatever the Moon touches while passing through.",
+   "in_mikes_chart": "N/A for Mike's own natal chart -- this entry describes what it means when the transiting (daily) Moon passes through this nakshatra, a short-term timing signal rather than a natal placement.",
+   "translation": "When the Moon is here for the day, the mood/energy leans toward skillful hands, craft, dexterity.",
+   "do": "handcrafts, detailed skilled work, hands-on healing",
+   "avoid": "big-picture strategic planning that needs patience over detail",
+   "svehla_link": "N/A -- not part of Svehla's current 2026 transit themes; this is a daily lunar-timing layer."
+  },
+  {
+   "key": "Moon in nakshatra Chitra",
+   "traditional": "Chitra spans 13 deg 20' of the sidereal zodiac, ruled by Mars, presided over by Tvastar, Rakshasa gana. Symbol: Jewel/Pearl. Core nature: brilliance, design, glamour, craftsmanship.",
+   "esoteric": "Each nakshatra is a lunar mansion the Moon 'lives in' for about a day -- its deity and gana color the emotional/intuitive tone of whatever the Moon touches while passing through.",
+   "in_mikes_chart": "N/A for Mike's own natal chart -- this entry describes what it means when the transiting (daily) Moon passes through this nakshatra, a short-term timing signal rather than a natal placement.",
+   "translation": "When the Moon is here for the day, the mood/energy leans toward brilliance, design, glamour, craftsmanship.",
+   "do": "design or creative launches, anything meant to shine",
+   "avoid": "understated, humble tasks -- Chitra wants to be noticed",
+   "svehla_link": "N/A -- not part of Svehla's current 2026 transit themes; this is a daily lunar-timing layer."
+  },
+  {
+   "key": "Moon in nakshatra Swati",
+   "traditional": "Swati spans 13 deg 20' of the sidereal zodiac, ruled by Rahu, presided over by Vayu, Deva gana. Symbol: Plant shoot. Core nature: independence, movement, flexibility, trade.",
+   "esoteric": "Each nakshatra is a lunar mansion the Moon 'lives in' for about a day -- its deity and gana color the emotional/intuitive tone of whatever the Moon touches while passing through.",
+   "in_mikes_chart": "N/A for Mike's own natal chart -- this entry describes what it means when the transiting (daily) Moon passes through this nakshatra, a short-term timing signal rather than a natal placement.",
+   "translation": "When the Moon is here for the day, the mood/energy leans toward independence, movement, flexibility, trade.",
+   "do": "trading, negotiation, independent ventures, travel",
+   "avoid": "rigid, controlling commitments -- Swati needs room to move",
+   "svehla_link": "N/A -- not part of Svehla's current 2026 transit themes; this is a daily lunar-timing layer."
+  },
+  {
+   "key": "Moon in nakshatra Vishakha",
+   "traditional": "Vishakha spans 13 deg 20' of the sidereal zodiac, ruled by Jupiter, presided over by Indra-Agni, Rakshasa gana. Symbol: Arch. Core nature: determined goal pursuit, ambition, dual nature.",
+   "esoteric": "Each nakshatra is a lunar mansion the Moon 'lives in' for about a day -- its deity and gana color the emotional/intuitive tone of whatever the Moon touches while passing through.",
+   "in_mikes_chart": "N/A for Mike's own natal chart -- this entry describes what it means when the transiting (daily) Moon passes through this nakshatra, a short-term timing signal rather than a natal placement.",
+   "translation": "When the Moon is here for the day, the mood/energy leans toward determined goal pursuit, ambition, dual nature.",
+   "do": "goal-directed pushes, competitive pursuits",
+   "avoid": "passive waiting -- Vishakha's energy is meant to be aimed",
+   "svehla_link": "N/A -- not part of Svehla's current 2026 transit themes; this is a daily lunar-timing layer."
+  },
+  {
+   "key": "Moon in nakshatra Anuradha",
+   "traditional": "Anuradha spans 13 deg 20' of the sidereal zodiac, ruled by Saturn, presided over by Mitra, Deva gana. Symbol: Archway. Core nature: friendship, devotion, cooperation, balance.",
+   "esoteric": "Each nakshatra is a lunar mansion the Moon 'lives in' for about a day -- its deity and gana color the emotional/intuitive tone of whatever the Moon touches while passing through.",
+   "in_mikes_chart": "N/A for Mike's own natal chart -- this entry describes what it means when the transiting (daily) Moon passes through this nakshatra, a short-term timing signal rather than a natal placement.",
+   "translation": "When the Moon is here for the day, the mood/energy leans toward friendship, devotion, cooperation, balance.",
+   "do": "alliance-building, teamwork, diplomacy",
+   "avoid": "solo or competitive ventures -- Anuradha's strength is in the partnership",
+   "svehla_link": "N/A -- not part of Svehla's current 2026 transit themes; this is a daily lunar-timing layer."
+  },
+  {
+   "key": "Moon in nakshatra Jyeshtha",
+   "traditional": "Jyeshtha spans 13 deg 20' of the sidereal zodiac, ruled by Mercury, presided over by Indra, Rakshasa gana. Symbol: Amulet. Core nature: seniority, protection, responsibility, courage.",
+   "esoteric": "Each nakshatra is a lunar mansion the Moon 'lives in' for about a day -- its deity and gana color the emotional/intuitive tone of whatever the Moon touches while passing through.",
+   "in_mikes_chart": "N/A for Mike's own natal chart -- this entry describes what it means when the transiting (daily) Moon passes through this nakshatra, a short-term timing signal rather than a natal placement.",
+   "translation": "When the Moon is here for the day, the mood/energy leans toward seniority, protection, responsibility, courage.",
+   "do": "leadership, protecting others, taking charge",
+   "avoid": "subordinate roles -- Jyeshtha carries the senior position, not the junior one",
+   "svehla_link": "N/A -- not part of Svehla's current 2026 transit themes; this is a daily lunar-timing layer."
+  },
+  {
+   "key": "Moon in nakshatra Mula",
+   "traditional": "Mula spans 13 deg 20' of the sidereal zodiac, ruled by Ketu, presided over by Nirrti, Rakshasa gana. Symbol: Roots. Core nature: root investigation, destruction of illusion, uprooting.",
+   "esoteric": "Each nakshatra is a lunar mansion the Moon 'lives in' for about a day -- its deity and gana color the emotional/intuitive tone of whatever the Moon touches while passing through.",
+   "in_mikes_chart": "N/A for Mike's own natal chart -- this entry describes what it means when the transiting (daily) Moon passes through this nakshatra, a short-term timing signal rather than a natal placement.",
+   "translation": "When the Moon is here for the day, the mood/energy leans toward root investigation, destruction of illusion, uprooting.",
+   "do": "getting to the root cause, deep research, letting go",
+   "avoid": "new plantings or superficial starts -- Mula digs down, not out",
+   "svehla_link": "N/A -- not part of Svehla's current 2026 transit themes; this is a daily lunar-timing layer."
+  },
+  {
+   "key": "Moon in nakshatra Purva Ashadha",
+   "traditional": "Purva Ashadha spans 13 deg 20' of the sidereal zodiac, ruled by Venus, presided over by Apah, Manushya gana. Symbol: Elephant tusk. Core nature: invincibility, early victory, purification.",
+   "esoteric": "Each nakshatra is a lunar mansion the Moon 'lives in' for about a day -- its deity and gana color the emotional/intuitive tone of whatever the Moon touches while passing through.",
+   "in_mikes_chart": "N/A for Mike's own natal chart -- this entry describes what it means when the transiting (daily) Moon passes through this nakshatra, a short-term timing signal rather than a natal placement.",
+   "translation": "When the Moon is here for the day, the mood/energy leans toward invincibility, early victory, purification.",
+   "do": "declarations, early-stage pushes, purification rituals",
+   "avoid": "final or closing actions -- this star's strength is in the opening move",
+   "svehla_link": "N/A -- not part of Svehla's current 2026 transit themes; this is a daily lunar-timing layer."
+  },
+  {
+   "key": "Moon in nakshatra Uttara Ashadha",
+   "traditional": "Uttara Ashadha spans 13 deg 20' of the sidereal zodiac, ruled by Sun, presided over by Visvedevas, Manushya gana. Symbol: Elephant tusk. Core nature: lasting victory, universal principle, integrity.",
+   "esoteric": "Each nakshatra is a lunar mansion the Moon 'lives in' for about a day -- its deity and gana color the emotional/intuitive tone of whatever the Moon touches while passing through.",
+   "in_mikes_chart": "N/A for Mike's own natal chart -- this entry describes what it means when the transiting (daily) Moon passes through this nakshatra, a short-term timing signal rather than a natal placement.",
+   "translation": "When the Moon is here for the day, the mood/energy leans toward lasting victory, universal principle, integrity.",
+   "do": "long-term commitments, final agreements, ethical stands",
+   "avoid": "quick or temporary fixes -- Uttara Ashadha is built for permanence",
+   "svehla_link": "N/A -- not part of Svehla's current 2026 transit themes; this is a daily lunar-timing layer."
+  },
+  {
+   "key": "Moon in nakshatra Shravana",
+   "traditional": "Shravana spans 13 deg 20' of the sidereal zodiac, ruled by Moon, presided over by Vishnu, Deva gana. Symbol: Ear. Core nature: listening, learning, connection, fame through knowledge.",
+   "esoteric": "Each nakshatra is a lunar mansion the Moon 'lives in' for about a day -- its deity and gana color the emotional/intuitive tone of whatever the Moon touches while passing through.",
+   "in_mikes_chart": "N/A for Mike's own natal chart -- this entry describes what it means when the transiting (daily) Moon passes through this nakshatra, a short-term timing signal rather than a natal placement.",
+   "translation": "When the Moon is here for the day, the mood/energy leans toward listening, learning, connection, fame through knowledge.",
+   "do": "study, teaching, networking, listening-based work",
+   "avoid": "talking over others or hasty judgment -- Shravana's gift is the ear, not the mouth",
+   "svehla_link": "N/A -- not part of Svehla's current 2026 transit themes; this is a daily lunar-timing layer."
+  },
+  {
+   "key": "Moon in nakshatra Dhanishta",
+   "traditional": "Dhanishta spans 13 deg 20' of the sidereal zodiac, ruled by Mars, presided over by Eight Vasus, Rakshasa gana. Symbol: Drum/Flute. Core nature: wealth, music, rhythm, group achievement.",
+   "esoteric": "Each nakshatra is a lunar mansion the Moon 'lives in' for about a day -- its deity and gana color the emotional/intuitive tone of whatever the Moon touches while passing through.",
+   "in_mikes_chart": "N/A for Mike's own natal chart -- this entry describes what it means when the transiting (daily) Moon passes through this nakshatra, a short-term timing signal rather than a natal placement.",
+   "translation": "When the Moon is here for the day, the mood/energy leans toward wealth, music, rhythm, group achievement.",
+   "do": "group or team ventures, music/rhythm-based work, wealth-building",
+   "avoid": "solitary introspective work -- Dhanishta thrives in a group",
+   "svehla_link": "N/A -- not part of Svehla's current 2026 transit themes; this is a daily lunar-timing layer."
+  },
+  {
+   "key": "Moon in nakshatra Shatabhisha",
+   "traditional": "Shatabhisha spans 13 deg 20' of the sidereal zodiac, ruled by Rahu, presided over by Varuna, Rakshasa gana. Symbol: Empty circle. Core nature: healing, secrecy, isolation, deep research.",
+   "esoteric": "Each nakshatra is a lunar mansion the Moon 'lives in' for about a day -- its deity and gana color the emotional/intuitive tone of whatever the Moon touches while passing through.",
+   "in_mikes_chart": "This is Mike's own NATAL Moon nakshatra (1 deg Pisces tropical is ~7 deg Aquarius sidereal under Lahiri) -- his baseline emotional/intuitive nature runs on Shatabhisha's solitary, healing, deep-research theme for life, not just on days the transiting Moon passes through it.",
+   "translation": "When the Moon is here (which is Mike's own natal placement -- a recurring, lifelong theme, not just a passing day), the mood/energy leans toward healing, secrecy, isolation, deep research.",
+   "do": "solitary healing work, deep research, unconventional therapies -- MIKE'S OWN NATAL MOON SITS HERE",
+   "avoid": "crowded or public settings -- Shatabhisha's healing needs privacy",
+   "svehla_link": "Ties into Mike's core nature per Svehla's broader natal reading -- his natural pull toward solitary research and quiet healing work traces to this Moon placement."
+  },
+  {
+   "key": "Moon in nakshatra Purva Bhadrapada",
+   "traditional": "Purva Bhadrapada spans 13 deg 20' of the sidereal zodiac, ruled by Jupiter, presided over by Ajaikapada, Manushya gana. Symbol: Swords. Core nature: intensity, transformation through fire, spiritual fervor.",
+   "esoteric": "Each nakshatra is a lunar mansion the Moon 'lives in' for about a day -- its deity and gana color the emotional/intuitive tone of whatever the Moon touches while passing through.",
+   "in_mikes_chart": "N/A for Mike's own natal chart -- this entry describes what it means when the transiting (daily) Moon passes through this nakshatra, a short-term timing signal rather than a natal placement.",
+   "translation": "When the Moon is here for the day, the mood/energy leans toward intensity, transformation through fire, spiritual fervor.",
+   "do": "intense transformative work, spiritual discipline",
+   "avoid": "casual or superficial engagement -- this star doesn't do things halfway",
+   "svehla_link": "N/A -- not part of Svehla's current 2026 transit themes; this is a daily lunar-timing layer."
+  },
+  {
+   "key": "Moon in nakshatra Uttara Bhadrapada",
+   "traditional": "Uttara Bhadrapada spans 13 deg 20' of the sidereal zodiac, ruled by Saturn, presided over by Ahirbudhnya, Manushya gana. Symbol: Twins. Core nature: deep wisdom, hidden depths, steady support.",
+   "esoteric": "Each nakshatra is a lunar mansion the Moon 'lives in' for about a day -- its deity and gana color the emotional/intuitive tone of whatever the Moon touches while passing through.",
+   "in_mikes_chart": "N/A for Mike's own natal chart -- this entry describes what it means when the transiting (daily) Moon passes through this nakshatra, a short-term timing signal rather than a natal placement.",
+   "translation": "When the Moon is here for the day, the mood/energy leans toward deep wisdom, hidden depths, steady support.",
+   "do": "deep study, quiet steady support work",
+   "avoid": "showy or public display -- Uttara Bhadrapada's wisdom is meant to stay under the surface",
+   "svehla_link": "N/A -- not part of Svehla's current 2026 transit themes; this is a daily lunar-timing layer."
+  },
+  {
+   "key": "Moon in nakshatra Revati",
+   "traditional": "Revati spans 13 deg 20' of the sidereal zodiac, ruled by Mercury, presided over by Pushan, Deva gana. Symbol: Fish. Core nature: nourishing completion, guidance, gentle prosperity.",
+   "esoteric": "Each nakshatra is a lunar mansion the Moon 'lives in' for about a day -- its deity and gana color the emotional/intuitive tone of whatever the Moon touches while passing through.",
+   "in_mikes_chart": "N/A for Mike's own natal chart -- this entry describes what it means when the transiting (daily) Moon passes through this nakshatra, a short-term timing signal rather than a natal placement.",
+   "translation": "When the Moon is here for the day, the mood/energy leans toward nourishing completion, guidance, gentle prosperity.",
+   "do": "completions, journeys' end, guiding others gently",
+   "avoid": "starting brand-new ventures -- Revati is built for endings, not launches",
+   "svehla_link": "N/A -- not part of Svehla's current 2026 transit themes; this is a daily lunar-timing layer."
+  },
+  {
+   "key": "Return Mars",
+   "traditional": "A Mars return (roughly every ~2 years) opens a fresh cycle of drive, ambition, and physical energy, refreshing what motivates action for the next two-year stretch.",
+   "esoteric": "Mars completing its orbit and meeting itself again is the will re-committing to a direction -- a chance to redirect raw drive before it calcifies.",
+   "in_mikes_chart": "Because Mike's natal Mars sits conjunct his Ascendant in Cancer, his Mars returns land close to his identity every time -- expect them to feel like personal restarts, not background events.",
+   "translation": "About every two years, Mike gets a natural 'what am I actually fighting for right now' checkpoint -- worth deliberately setting intentions right at the return rather than letting it pass unnoticed.",
+   "do": "Set explicit goals/workout or career pushes right around the return date each cycle.",
+   "avoid": "Wasting the reset on random irritability instead of aimed action.",
+   "svehla_link": "N/A -- roughly biennial personal cycle, not tied to a specific Svehla 2026 theme."
+  },
+  {
+   "key": "Return Venus",
+   "traditional": "A Venus return happens roughly once a year and refreshes themes of love, money, and values for the year ahead -- not tied to the birthday like the Sun.",
+   "esoteric": "Venus returning to her natal point re-tunes what a person actually finds valuable, ahead of the identity-reset of the solar return.",
+   "in_mikes_chart": "Mike's natal Venus sits in Sagittarius (6th, work/routine) -- his Venus returns tend to land as a yearly check-in on whether work still feels good, not just whether relationships do.",
+   "translation": "Roughly once a year, worth asking directly: does the current work/money/relationship setup still feel worth it, or has it gone stale?",
+   "do": "Use the Venus return to renegotiate pay, refresh a stale routine, or reassess a relationship's health.",
+   "avoid": "Ignoring it because it doesn't land on the birthday -- it's a real yearly checkpoint on its own schedule.",
+   "svehla_link": "N/A -- roughly annual personal cycle, not tied to a specific Svehla 2026 theme."
+  },
+  {
+   "key": "Return Mercury",
+   "traditional": "A Mercury return refreshes communication style and mental focus for its cycle -- roughly annual, though retrograde periods can complicate the exact count.",
+   "esoteric": "Mercury returning to itself is the mind briefly re-reading its own source code before running another year of thought patterns.",
+   "in_mikes_chart": "Mike's natal Mercury sits in Sagittarius (6th, work/routine) -- a big-picture, freedom-loving communicator; his Mercury return is a good annual point to check whether his current systems/scripts still match how he actually thinks.",
+   "translation": "A once-a-year point to audit whether the tools and routines he's using for thinking/trading still fit, or whether they've drifted from his natural big-picture style.",
+   "do": "Review and simplify systems/workflows around the Mercury return.",
+   "avoid": "Adding more complexity right at the return -- it's a pruning point, not a building one.",
+   "svehla_link": "N/A -- roughly annual personal cycle, not tied to a specific Svehla 2026 theme."
+  },
+  {
+   "key": "Return Jupiter",
+   "traditional": "A Jupiter return happens roughly every 12 years and marks a major growth-and-opportunity checkpoint, closing one expansion cycle and opening the next.",
+   "esoteric": "Jupiter completing its zodiac orbit is the soul's 12-year 'report card' on how much it actually grew and where the next expansion should aim.",
+   "in_mikes_chart": "Mike's third Jupiter return lands in 2028 (natal Jupiter 5 deg Libra, whole-sign 4th) -- following right on the heels of the transiting Jupiter-through-his-2nd-house income cycle Svehla flagged for 2026-27, this becomes the moment to consolidate that income growth into something structural at home/property.",
+   "translation": "2028 is a natural 'did the Jupiter years pay off' checkpoint for Mike -- the income growth from 2026-27 should be visible as something durable by then.",
+   "do": "Around 2028, take stock of what actually got built since the last return (2016) and set the next 12-year expansion target.",
+   "avoid": "Starting the review too late -- Jupiter returns reward looking back over the whole prior cycle, not just the recent year.",
+   "svehla_link": "Follows directly from Svehla's 2026-27 'Jupiter in natal 2nd = controlled income growth' -- the 2028 return is the natural checkpoint on whether that growth held."
+  },
+  {
+   "key": "Return Saturn",
+   "traditional": "The Saturn return (~every 29.5 years) is astrology's classic maturation checkpoint -- the first, around age 29, tests whether the adult structure built in the twenties is actually solid.",
+   "esoteric": "Saturn meeting itself is the cosmos handing back an exam on the first act of life -- what survives the return is what was real; what doesn't, wasn't built to last.",
+   "in_mikes_chart": "Mike's first Saturn return happened in 2021-22 (age ~29), on his natal Saturn in Aquarius (8th, shared resources/debt) -- the years since have been the 'aftermath' phase, proving or disproving whatever got restructured then, until the next Saturn hard aspect (opposition around age 44, next return around age 58-59).",
+   "translation": "Whatever financial/structural changes happened around 2021-22 for Mike are the actual foundation he's building on right now -- the current Saturn-on-MC 2025-27 career window is really phase two of that same Saturn story.",
+   "do": "Treat any 2021-22 structural decision (debt, work structure) as the base layer the current Saturn-on-MC building is meant to reinforce, not replace.",
+   "avoid": "Re-litigating the return-era decisions instead of building forward on top of them.",
+   "svehla_link": "Directly connects to Svehla's Saturn-on-MC theme through April 2027 -- that's this same Saturn continuing its work, now on the career angle rather than the 8th house."
+  },
+  {
+   "key": "Return Chiron",
+   "traditional": "Chiron's orbit takes roughly 50 years, so the meaningful midlife checkpoint before the actual return is the Chiron opposition -- the wound Chiron represents gets externalized and confronted rather than avoided.",
+   "esoteric": "The Chiron opposition is the wounded-healer archetype demanding the wound be worked with consciously, often through other people or a public role, rather than nursed privately.",
+   "in_mikes_chart": "Mike's natal Chiron sits in Leo (whole-sign 2nd, self-worth/money) -- his Chiron opposition lands around 2029-30 (age 37), meaning the self-worth wound Svehla's Aug 2026 Jupiter-in-2nd theme is trying to heal through income growth gets its real test a few years later, confronted through relationship/other people rather than solved quietly alone.",
+   "translation": "The self-worth work Mike starts in 2026-27 (Jupiter in his 2nd) isn't finished by 2028 -- expect the same core wound to resurface around 2029-30 in a more relational, public way, and that's the actual completion point.",
+   "do": "Treat the 2026-27 income growth as the first pass, not the final answer, on the Chiron-in-2nd wound.",
+   "avoid": "Assuming the wound is 'handled' once the 2026-27 Jupiter transit passes -- the opposition in 2029-30 is where it actually gets tested.",
+   "svehla_link": "Extends Svehla's 2nd-house/self-worth theme forward -- natal Chiron sits exactly in the house Jupiter is transiting in 2026-27, and its opposition three years later is that same story's next chapter."
+  },
+  {
+   "key": "Return Nodes",
+   "traditional": "The lunar nodes return to their natal positions roughly every 18.6 years, marking a recalibration of the life's developmental direction -- releasing an outgrown comfort zone (South Node) and recommitting to the growth edge (North Node).",
+   "esoteric": "A nodal return is the soul checking its compass -- has the last 18.6-year arc actually moved toward the North Node's growth, or drifted back to South Node comfort?",
+   "in_mikes_chart": "Mike's nodal return lands around 2029-30 (age 37) -- the same year as his Chiron opposition, making that period a compounded life-direction checkpoint rather than an ordinary year.",
+   "translation": "2029-30 isn't just one technique flagging change -- it's the nodal return and the Chiron opposition landing together, a genuinely rare convergence worth planning around years in advance.",
+   "do": "Start now (2026) building toward whatever Mike wants his life to look like by 2029-30, since multiple independent techniques agree that's a pivot point.",
+   "avoid": "Treating 2029-30 as just another year when it comes -- by then it's better to have already been steering toward it.",
+   "svehla_link": "Sits right after Svehla's 'spring 2027 contingency window,' making 2027-2030 read as one long build-then-pivot arc across Saturn-on-MC, Jupiter-in-2nd, the Chiron opposition, and the nodal return."
+  }
+ ]
+}

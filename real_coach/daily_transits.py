@@ -257,6 +257,35 @@ def main() -> int:
     except Exception as e:
         lines.append(f"\n🌗 (phase unavailable: {e})")
 
+    # round 8: the monthly lunar phase (Sun–Moon elongation / 45°) with researched do/avoid
+    try:
+        import astro_truth as _T
+        tr = _T.transits(now_et)
+        el = (tr["Moon"]["lon"] - tr["Sun"]["lon"]) % 360
+        pname = ["new", "crescent", "first quarter", "gibbous", "full", "disseminating", "last quarter", "balsamic"][int(((el + 22.5) % 360) // 45)]
+        ent = lex.kb_entry(f"Moon phase {pname}")
+        if ent:
+            lines.append(f"\n🌘 Moon phase: {pname} ({el:.0f}°) — {ent.get('translation', '')}"
+                         + (f" Do: {ent['do']}" if ent.get("do") else ""))
+    except Exception as e:
+        lines.append(f"\n🌘 (moon phase unavailable: {e})")
+
+    # round 8: traditional timing layer — profection year/month, day+hour ruler, Moon's nakshatra
+    try:
+        import astro_timing
+        lines.append("\n" + astro_timing.daily_line(now_et))
+    except Exception as e:
+        lines.append(f"\n⏳ (timing unavailable: {e})")
+
+    # round 8: dated timeline — what goes exact / changes house within ±2 days, researched meaning attached
+    try:
+        import astro_timeline
+        tb = astro_timeline.today_block(now_et.date())
+        if tb:
+            lines.append("\n" + tb)
+    except Exception as e:
+        lines.append(f"\n🗓 (timeline unavailable: {e})")
+
     # 2026-09-14: the Aug 2026 Svehla reading — active windows + what's next
     try:
         sv = svehla.daily_block(now_et.date())

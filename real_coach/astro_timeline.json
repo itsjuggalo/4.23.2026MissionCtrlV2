@@ -1,0 +1,4060 @@
+{
+ "built": "2026-09-15T01:30-04:00",
+ "start": "2026-09-01",
+ "end": "2031-12-31",
+ "events": [
+  {
+   "date": "2026-09-16",
+   "kind": "aspect",
+   "body": "Ceres",
+   "natal": "Juno",
+   "aspect": "conjunct",
+   "t_house": 12,
+   "key": "Transiting Ceres conjunct natal Juno",
+   "what": "Ceres exactly conjunct your natal Juno (pass 1 of 3)",
+   "pass": "1 of 3",
+   "rx": false
+  },
+  {
+   "date": "2026-09-18",
+   "kind": "sign",
+   "body": "Chiron",
+   "key": "Transiting Chiron in Aries",
+   "what": "Chiron backs into Aries (your 10th house)"
+  },
+  {
+   "date": "2026-09-26",
+   "kind": "aspect",
+   "body": "Jupiter",
+   "natal": "Venus",
+   "aspect": "trine",
+   "t_house": 1,
+   "key": "Transiting Jupiter trine natal Venus",
+   "what": "Jupiter exactly trine your natal Venus (pass 1 of 3)",
+   "pass": "1 of 3",
+   "rx": false
+  },
+  {
+   "date": "2026-09-26",
+   "kind": "aspect",
+   "body": "Jupiter",
+   "natal": "MC",
+   "aspect": "trine",
+   "t_house": 1,
+   "key": "Transiting Jupiter trine natal MC",
+   "what": "Jupiter exactly trine your natal MC (pass 1 of 3)",
+   "pass": "1 of 3",
+   "rx": false
+  },
+  {
+   "date": "2026-09-26",
+   "kind": "aspect",
+   "body": "Saturn",
+   "natal": "Juno",
+   "aspect": "square",
+   "t_house": 9,
+   "key": "Transiting Saturn square natal Juno",
+   "what": "Saturn exactly square your natal Juno (pass 1 of 2, retrograde)",
+   "pass": "1 of 2",
+   "rx": true
+  },
+  {
+   "date": "2026-10-05",
+   "kind": "house",
+   "body": "Jupiter",
+   "key": "Transiting Jupiter in the 2nd house",
+   "what": "Jupiter crosses into your 2nd house"
+  },
+  {
+   "date": "2026-10-06",
+   "kind": "aspect",
+   "body": "Juno",
+   "natal": "ASC",
+   "aspect": "opposite",
+   "t_house": 6,
+   "key": "Transiting Juno opposite natal ASC",
+   "what": "Juno exactly opposite your natal ASC"
+  },
+  {
+   "date": "2026-10-06",
+   "kind": "house",
+   "body": "Juno",
+   "key": "Transiting Juno in the 7th house",
+   "what": "Juno crosses into your 7th house"
+  },
+  {
+   "date": "2026-10-09",
+   "kind": "aspect",
+   "body": "Neptune",
+   "natal": "Ceres",
+   "aspect": "sextile",
+   "t_house": 9,
+   "key": "Transiting Neptune sextile natal Ceres",
+   "what": "Neptune exactly sextile your natal Ceres (pass 1 of 2, retrograde)",
+   "pass": "1 of 2",
+   "rx": true
+  },
+  {
+   "date": "2026-10-16",
+   "kind": "aspect",
+   "body": "Uranus",
+   "natal": "Mercury",
+   "aspect": "opposite",
+   "t_house": 11,
+   "key": "Transiting Uranus opposite natal Mercury",
+   "what": "Uranus exactly opposite your natal Mercury (pass 1 of 2, retrograde)",
+   "pass": "1 of 2",
+   "rx": true
+  },
+  {
+   "date": "2026-10-18",
+   "kind": "aspect",
+   "body": "Jupiter",
+   "natal": "Pluto",
+   "aspect": "square",
+   "t_house": 2,
+   "key": "Transiting Jupiter square natal Pluto",
+   "what": "Jupiter exactly square your natal Pluto (pass 1 of 3)",
+   "pass": "1 of 3",
+   "rx": false
+  },
+  {
+   "date": "2026-10-19",
+   "kind": "aspect",
+   "body": "Jupiter",
+   "natal": "Chiron",
+   "aspect": "conjunct",
+   "t_house": 2,
+   "key": "Transiting Jupiter conjunct natal Chiron",
+   "what": "Jupiter exactly conjunct your natal Chiron (pass 1 of 3)",
+   "pass": "1 of 3",
+   "rx": false
+  },
+  {
+   "date": "2026-10-22",
+   "kind": "aspect",
+   "body": "Uranus",
+   "natal": "Jupiter",
+   "aspect": "trine",
+   "t_house": 11,
+   "key": "Transiting Uranus trine natal Jupiter",
+   "what": "Uranus exactly trine your natal Jupiter (pass 1 of 2, retrograde)",
+   "pass": "1 of 2",
+   "rx": true
+  },
+  {
+   "date": "2026-10-24",
+   "kind": "arc",
+   "body": "arc",
+   "key": "Solar-arc ASC opposite natal Moon",
+   "what": "Solar-arc ASC opposite natal Moon"
+  },
+  {
+   "date": "2026-10-24",
+   "kind": "arc",
+   "body": "arc",
+   "key": "Solar-arc DSC conjunct natal Moon",
+   "what": "Solar-arc DSC conjunct natal Moon"
+  },
+  {
+   "date": "2026-10-24",
+   "kind": "sign",
+   "body": "Juno",
+   "key": "Transiting Juno in Aquarius",
+   "what": "Juno enters Aquarius (your 7th house)"
+  },
+  {
+   "date": "2026-10-30",
+   "kind": "progressed",
+   "body": "Moon",
+   "key": "Progressed Moon in the 11th house",
+   "what": "Progressed Moon enters your 11th house"
+  },
+  {
+   "date": "2026-11-03",
+   "kind": "aspect",
+   "body": "Juno",
+   "natal": "Ceres",
+   "aspect": "conjunct",
+   "t_house": 7,
+   "key": "Transiting Juno conjunct natal Ceres",
+   "what": "Juno exactly conjunct your natal Ceres"
+  },
+  {
+   "date": "2026-11-17",
+   "kind": "aspect",
+   "body": "Ceres",
+   "natal": "Mars",
+   "aspect": "conjunct",
+   "t_house": 12,
+   "key": "Transiting Ceres conjunct natal Mars",
+   "what": "Ceres exactly conjunct your natal Mars (pass 1 of 3)",
+   "pass": "1 of 3",
+   "rx": false
+  },
+  {
+   "date": "2026-11-26",
+   "kind": "aspect",
+   "body": "Ceres",
+   "natal": "Mars",
+   "aspect": "conjunct",
+   "t_house": 12,
+   "key": "Transiting Ceres conjunct natal Mars",
+   "what": "Ceres exactly conjunct your natal Mars (pass 2 of 3, retrograde)",
+   "pass": "2 of 3",
+   "rx": true
+  },
+  {
+   "date": "2026-11-28",
+   "kind": "aspect",
+   "body": "Chiron",
+   "natal": "ASC",
+   "aspect": "square",
+   "t_house": 10,
+   "key": "Transiting Chiron square natal ASC",
+   "what": "Chiron exactly square your natal ASC (pass 1 of 2, retrograde)",
+   "pass": "1 of 2",
+   "rx": true
+  },
+  {
+   "date": "2026-12-03",
+   "kind": "aspect",
+   "body": "Juno",
+   "natal": "Saturn",
+   "aspect": "conjunct",
+   "t_house": 7,
+   "key": "Transiting Juno conjunct natal Saturn",
+   "what": "Juno exactly conjunct your natal Saturn"
+  },
+  {
+   "date": "2026-12-22",
+   "kind": "aspect",
+   "body": "Uranus",
+   "natal": "Ceres",
+   "aspect": "trine",
+   "t_house": 11,
+   "key": "Transiting Uranus trine natal Ceres",
+   "what": "Uranus exactly trine your natal Ceres (pass 1 of 2, retrograde)",
+   "pass": "1 of 2",
+   "rx": true
+  },
+  {
+   "date": "2026-12-24",
+   "kind": "house",
+   "body": "Juno",
+   "key": "Transiting Juno in the 8th house",
+   "what": "Juno crosses into your 8th house"
+  },
+  {
+   "date": "2026-12-29",
+   "kind": "aspect",
+   "body": "Juno",
+   "natal": "Chiron",
+   "aspect": "opposite",
+   "t_house": 8,
+   "key": "Transiting Juno opposite natal Chiron",
+   "what": "Juno exactly opposite your natal Chiron"
+  },
+  {
+   "date": "2027-01-15",
+   "kind": "sign",
+   "body": "Juno",
+   "key": "Transiting Juno in Pisces",
+   "what": "Juno enters Pisces (your 8th house)"
+  },
+  {
+   "date": "2027-01-17",
+   "kind": "aspect",
+   "body": "Juno",
+   "natal": "Moon",
+   "aspect": "conjunct",
+   "t_house": 8,
+   "key": "Transiting Juno conjunct natal Moon",
+   "what": "Juno exactly conjunct your natal Moon"
+  },
+  {
+   "date": "2027-01-21",
+   "kind": "aspect",
+   "body": "Pluto",
+   "natal": "Jupiter",
+   "aspect": "trine",
+   "t_house": 7,
+   "key": "Transiting Pluto trine natal Jupiter",
+   "what": "Pluto exactly trine your natal Jupiter (pass 1 of 3)",
+   "pass": "1 of 3",
+   "rx": false
+  },
+  {
+   "date": "2027-01-27",
+   "kind": "aspect",
+   "body": "Pluto",
+   "natal": "Mercury",
+   "aspect": "sextile",
+   "t_house": 7,
+   "key": "Transiting Pluto sextile natal Mercury",
+   "what": "Pluto exactly sextile your natal Mercury (pass 1 of 3)",
+   "pass": "1 of 3",
+   "rx": false
+  },
+  {
+   "date": "2027-02-02",
+   "kind": "aspect",
+   "body": "Ceres",
+   "natal": "Juno",
+   "aspect": "conjunct",
+   "t_house": 12,
+   "key": "Transiting Ceres conjunct natal Juno",
+   "what": "Ceres exactly conjunct your natal Juno (pass 2 of 3, retrograde)",
+   "pass": "2 of 3",
+   "rx": true
+  },
+  {
+   "date": "2027-02-06",
+   "kind": "aspect",
+   "body": "Jupiter",
+   "natal": "Chiron",
+   "aspect": "conjunct",
+   "t_house": 2,
+   "key": "Transiting Jupiter conjunct natal Chiron",
+   "what": "Jupiter exactly conjunct your natal Chiron (pass 2 of 3, retrograde)",
+   "pass": "2 of 3",
+   "rx": true
+  },
+  {
+   "date": "2027-02-06",
+   "kind": "eclipse",
+   "body": "solar",
+   "key": "Solar eclipse in the 7th house",
+   "what": "Annular solar eclipse at 17\u00b0 Aquarius (your 7th house)"
+  },
+  {
+   "date": "2027-02-08",
+   "kind": "aspect",
+   "body": "Jupiter",
+   "natal": "Pluto",
+   "aspect": "square",
+   "t_house": 2,
+   "key": "Transiting Jupiter square natal Pluto",
+   "what": "Jupiter exactly square your natal Pluto (pass 2 of 3, retrograde)",
+   "pass": "2 of 3",
+   "rx": true
+  },
+  {
+   "date": "2027-02-12",
+   "kind": "aspect",
+   "body": "Neptune",
+   "natal": "Ceres",
+   "aspect": "sextile",
+   "t_house": 9,
+   "key": "Transiting Neptune sextile natal Ceres",
+   "what": "Neptune exactly sextile your natal Ceres (pass 2 of 2)",
+   "pass": "2 of 2",
+   "rx": false
+  },
+  {
+   "date": "2027-02-14",
+   "kind": "aspect",
+   "body": "Chiron",
+   "natal": "ASC",
+   "aspect": "square",
+   "t_house": 10,
+   "key": "Transiting Chiron square natal ASC",
+   "what": "Chiron exactly square your natal ASC (pass 2 of 2)",
+   "pass": "2 of 2",
+   "rx": false
+  },
+  {
+   "date": "2027-02-18",
+   "kind": "aspect",
+   "body": "Saturn",
+   "natal": "Juno",
+   "aspect": "square",
+   "t_house": 9,
+   "key": "Transiting Saturn square natal Juno",
+   "what": "Saturn exactly square your natal Juno (pass 2 of 2)",
+   "pass": "2 of 2",
+   "rx": false
+  },
+  {
+   "date": "2027-02-19",
+   "kind": "arc",
+   "body": "arc",
+   "key": "Solar-arc Hades opposite natal Neptune",
+   "what": "Solar-arc Hades opposite natal Neptune"
+  },
+  {
+   "date": "2027-02-19",
+   "kind": "house",
+   "body": "Juno",
+   "key": "Transiting Juno in the 9th house",
+   "what": "Juno crosses into your 9th house"
+  },
+  {
+   "date": "2027-02-20",
+   "kind": "eclipse",
+   "body": "lunar",
+   "key": "Lunar eclipse opposite natal Moon",
+   "alt_key": "Lunar eclipse in the 2nd house",
+   "what": "Penumbral lunar eclipse at 1\u00b0 Virgo (your 2nd house) \u2014 opposite your natal Moon (orb 0.7\u00b0)"
+  },
+  {
+   "date": "2027-02-24",
+   "kind": "house",
+   "body": "Jupiter",
+   "key": "Transiting Jupiter in the 1st house",
+   "what": "Jupiter backs into your 1st house"
+  },
+  {
+   "date": "2027-03-09",
+   "kind": "aspect",
+   "body": "Jupiter",
+   "natal": "MC",
+   "aspect": "trine",
+   "t_house": 1,
+   "key": "Transiting Jupiter trine natal MC",
+   "what": "Jupiter exactly trine your natal MC (pass 2 of 3, retrograde)",
+   "pass": "2 of 3",
+   "rx": true
+  },
+  {
+   "date": "2027-03-10",
+   "kind": "aspect",
+   "body": "Jupiter",
+   "natal": "Venus",
+   "aspect": "trine",
+   "t_house": 1,
+   "key": "Transiting Jupiter trine natal Venus",
+   "what": "Jupiter exactly trine your natal Venus (pass 2 of 3, retrograde)",
+   "pass": "2 of 3",
+   "rx": true
+  },
+  {
+   "date": "2027-03-15",
+   "kind": "aspect",
+   "body": "Saturn",
+   "natal": "Uranus",
+   "aspect": "square",
+   "t_house": 9,
+   "key": "Transiting Saturn square natal Uranus",
+   "what": "Saturn exactly square your natal Uranus"
+  },
+  {
+   "date": "2027-03-16",
+   "kind": "sign",
+   "body": "Juno",
+   "key": "Transiting Juno in Aries",
+   "what": "Juno enters Aries (your 9th house)"
+  },
+  {
+   "date": "2027-03-18",
+   "kind": "aspect",
+   "body": "Ceres",
+   "natal": "Juno",
+   "aspect": "conjunct",
+   "t_house": 12,
+   "key": "Transiting Ceres conjunct natal Juno",
+   "what": "Ceres exactly conjunct your natal Juno (pass 3 of 3)",
+   "pass": "3 of 3",
+   "rx": false
+  },
+  {
+   "date": "2027-03-25",
+   "kind": "aspect",
+   "body": "Juno",
+   "natal": "Jupiter",
+   "aspect": "opposite",
+   "t_house": 9,
+   "key": "Transiting Juno opposite natal Jupiter",
+   "what": "Juno exactly opposite your natal Jupiter"
+  },
+  {
+   "date": "2027-03-27",
+   "kind": "aspect",
+   "body": "Uranus",
+   "natal": "Ceres",
+   "aspect": "trine",
+   "t_house": 11,
+   "key": "Transiting Uranus trine natal Ceres",
+   "what": "Uranus exactly trine your natal Ceres (pass 2 of 2)",
+   "pass": "2 of 2",
+   "rx": false
+  },
+  {
+   "date": "2027-03-28",
+   "kind": "aspect",
+   "body": "Saturn",
+   "natal": "Apollon",
+   "aspect": "opposite",
+   "t_house": 9,
+   "key": "Transiting Saturn opposite natal Apollon",
+   "what": "Saturn exactly opposite your natal Apollon"
+  },
+  {
+   "date": "2027-03-29",
+   "kind": "aspect",
+   "body": "Saturn",
+   "natal": "Neptune",
+   "aspect": "square",
+   "t_house": 9,
+   "key": "Transiting Saturn square natal Neptune",
+   "what": "Saturn exactly square your natal Neptune"
+  },
+  {
+   "date": "2027-04-14",
+   "kind": "sign",
+   "body": "Chiron",
+   "key": "Transiting Chiron in Taurus",
+   "what": "Chiron enters Taurus (your 10th house)"
+  },
+  {
+   "date": "2027-04-15",
+   "kind": "aspect",
+   "body": "Juno",
+   "natal": "Apollon",
+   "aspect": "opposite",
+   "t_house": 9,
+   "key": "Transiting Juno opposite natal Apollon",
+   "what": "Juno exactly opposite your natal Apollon"
+  },
+  {
+   "date": "2027-04-15",
+   "kind": "aspect",
+   "body": "Saturn",
+   "natal": "Venus",
+   "aspect": "trine",
+   "t_house": 9,
+   "key": "Transiting Saturn trine natal Venus",
+   "what": "Saturn exactly trine your natal Venus"
+  },
+  {
+   "date": "2027-04-16",
+   "kind": "aspect",
+   "body": "Saturn",
+   "natal": "MC",
+   "aspect": "conjunct",
+   "t_house": 9,
+   "key": "Transiting Saturn conjunct natal MC",
+   "what": "Saturn exactly conjunct your natal MC"
+  },
+  {
+   "date": "2027-04-16",
+   "kind": "house",
+   "body": "Saturn",
+   "key": "Transiting Saturn in the 10th house",
+   "what": "Saturn crosses into your 10th house"
+  },
+  {
+   "date": "2027-04-18",
+   "kind": "aspect",
+   "body": "Neptune",
+   "natal": "Jupiter",
+   "aspect": "opposite",
+   "t_house": 9,
+   "key": "Transiting Neptune opposite natal Jupiter",
+   "what": "Neptune exactly opposite your natal Jupiter (pass 1 of 3)",
+   "pass": "1 of 3",
+   "rx": false
+  },
+  {
+   "date": "2027-04-19",
+   "kind": "aspect",
+   "body": "Juno",
+   "natal": "MC",
+   "aspect": "conjunct",
+   "t_house": 9,
+   "key": "Transiting Juno conjunct natal MC",
+   "what": "Juno exactly conjunct your natal MC"
+  },
+  {
+   "date": "2027-04-19",
+   "kind": "house",
+   "body": "Juno",
+   "key": "Transiting Juno in the 10th house",
+   "what": "Juno crosses into your 10th house"
+  },
+  {
+   "date": "2027-04-23",
+   "kind": "aspect",
+   "body": "Neptune",
+   "natal": "Mercury",
+   "aspect": "trine",
+   "t_house": 9,
+   "key": "Transiting Neptune trine natal Mercury",
+   "what": "Neptune exactly trine your natal Mercury (pass 1 of 3)",
+   "pass": "1 of 3",
+   "rx": false
+  },
+  {
+   "date": "2027-05-04",
+   "kind": "aspect",
+   "body": "Ceres",
+   "natal": "Mars",
+   "aspect": "conjunct",
+   "t_house": 12,
+   "key": "Transiting Ceres conjunct natal Mars",
+   "what": "Ceres exactly conjunct your natal Mars (pass 3 of 3)",
+   "pass": "3 of 3",
+   "rx": false
+  },
+  {
+   "date": "2027-05-04",
+   "kind": "progressed",
+   "body": "Moon",
+   "key": "Progressed Moon in Gemini",
+   "what": "Progressed Moon enters Gemini"
+  },
+  {
+   "date": "2027-05-10",
+   "kind": "sign",
+   "body": "Juno",
+   "key": "Transiting Juno in Taurus",
+   "what": "Juno enters Taurus (your 10th house)"
+  },
+  {
+   "date": "2027-05-13",
+   "kind": "aspect",
+   "body": "Ceres",
+   "natal": "ASC",
+   "aspect": "conjunct",
+   "t_house": 1,
+   "key": "Transiting Ceres conjunct natal ASC",
+   "what": "Ceres exactly conjunct your natal ASC"
+  },
+  {
+   "date": "2027-05-13",
+   "kind": "house",
+   "body": "Ceres",
+   "key": "Transiting Ceres in the 1st house",
+   "what": "Ceres crosses into your 1st house"
+  },
+  {
+   "date": "2027-05-14",
+   "kind": "aspect",
+   "body": "Uranus",
+   "natal": "Jupiter",
+   "aspect": "trine",
+   "t_house": 11,
+   "key": "Transiting Uranus trine natal Jupiter",
+   "what": "Uranus exactly trine your natal Jupiter (pass 2 of 2)",
+   "pass": "2 of 2",
+   "rx": false
+  },
+  {
+   "date": "2027-05-16",
+   "kind": "aspect",
+   "body": "Jupiter",
+   "natal": "Venus",
+   "aspect": "trine",
+   "t_house": 1,
+   "key": "Transiting Jupiter trine natal Venus",
+   "what": "Jupiter exactly trine your natal Venus (pass 3 of 3)",
+   "pass": "3 of 3",
+   "rx": false
+  },
+  {
+   "date": "2027-05-17",
+   "kind": "aspect",
+   "body": "Uranus",
+   "natal": "Mercury",
+   "aspect": "opposite",
+   "t_house": 11,
+   "key": "Transiting Uranus opposite natal Mercury",
+   "what": "Uranus exactly opposite your natal Mercury (pass 2 of 2)",
+   "pass": "2 of 2",
+   "rx": false
+  },
+  {
+   "date": "2027-05-18",
+   "kind": "aspect",
+   "body": "Jupiter",
+   "natal": "MC",
+   "aspect": "trine",
+   "t_house": 1,
+   "key": "Transiting Jupiter trine natal MC",
+   "what": "Jupiter exactly trine your natal MC (pass 3 of 3)",
+   "pass": "3 of 3",
+   "rx": false
+  },
+  {
+   "date": "2027-05-18",
+   "kind": "aspect",
+   "body": "Saturn",
+   "natal": "Chiron",
+   "aspect": "trine",
+   "t_house": 10,
+   "key": "Transiting Saturn trine natal Chiron",
+   "what": "Saturn exactly trine your natal Chiron (pass 1 of 3)",
+   "pass": "1 of 3",
+   "rx": false
+  },
+  {
+   "date": "2027-05-21",
+   "kind": "sign",
+   "body": "Ceres",
+   "key": "Transiting Ceres in Leo",
+   "what": "Ceres enters Leo (your 1st house)"
+  },
+  {
+   "date": "2027-05-29",
+   "kind": "aspect",
+   "body": "Chiron",
+   "natal": "Ceres",
+   "aspect": "square",
+   "t_house": 10,
+   "key": "Transiting Chiron square natal Ceres",
+   "what": "Chiron exactly square your natal Ceres (pass 1 of 3)",
+   "pass": "1 of 3",
+   "rx": false
+  },
+  {
+   "date": "2027-05-30",
+   "kind": "aspect",
+   "body": "Saturn",
+   "natal": "Mars",
+   "aspect": "square",
+   "t_house": 10,
+   "key": "Transiting Saturn square natal Mars",
+   "what": "Saturn exactly square your natal Mars (pass 1 of 3)",
+   "pass": "1 of 3",
+   "rx": false
+  },
+  {
+   "date": "2027-05-31",
+   "kind": "aspect",
+   "body": "Juno",
+   "natal": "Sun",
+   "aspect": "opposite",
+   "t_house": 10,
+   "key": "Transiting Juno opposite natal Sun",
+   "what": "Juno exactly opposite your natal Sun"
+  },
+  {
+   "date": "2027-05-31",
+   "kind": "house",
+   "body": "Jupiter",
+   "key": "Transiting Jupiter in the 2nd house",
+   "what": "Jupiter crosses into your 2nd house"
+  },
+  {
+   "date": "2027-06-15",
+   "kind": "aspect",
+   "body": "Jupiter",
+   "natal": "Pluto",
+   "aspect": "square",
+   "t_house": 2,
+   "key": "Transiting Jupiter square natal Pluto",
+   "what": "Jupiter exactly square your natal Pluto (pass 3 of 3)",
+   "pass": "3 of 3",
+   "rx": false
+  },
+  {
+   "date": "2027-06-16",
+   "kind": "aspect",
+   "body": "Jupiter",
+   "natal": "Chiron",
+   "aspect": "conjunct",
+   "t_house": 2,
+   "key": "Transiting Jupiter conjunct natal Chiron",
+   "what": "Jupiter exactly conjunct your natal Chiron (pass 3 of 3)",
+   "pass": "3 of 3",
+   "rx": false
+  },
+  {
+   "date": "2027-06-18",
+   "kind": "aspect",
+   "body": "Juno",
+   "natal": "Pluto",
+   "aspect": "opposite",
+   "t_house": 10,
+   "key": "Transiting Juno opposite natal Pluto",
+   "what": "Juno exactly opposite your natal Pluto"
+  },
+  {
+   "date": "2027-06-20",
+   "kind": "house",
+   "body": "Juno",
+   "key": "Transiting Juno in the 11th house",
+   "what": "Juno crosses into your 11th house"
+  },
+  {
+   "date": "2027-07-02",
+   "kind": "sign",
+   "body": "Juno",
+   "key": "Transiting Juno in Gemini",
+   "what": "Juno enters Gemini (your 11th house)"
+  },
+  {
+   "date": "2027-07-08",
+   "kind": "aspect",
+   "body": "Saturn",
+   "natal": "ASC",
+   "aspect": "square",
+   "t_house": 10,
+   "key": "Transiting Saturn square natal ASC",
+   "what": "Saturn exactly square your natal ASC (pass 1 of 3)",
+   "pass": "1 of 3",
+   "rx": false
+  },
+  {
+   "date": "2027-07-10",
+   "kind": "house",
+   "body": "Ceres",
+   "key": "Transiting Ceres in the 2nd house",
+   "what": "Ceres crosses into your 2nd house"
+  },
+  {
+   "date": "2027-07-11",
+   "kind": "aspect",
+   "body": "Juno",
+   "natal": "Mercury",
+   "aspect": "opposite",
+   "t_house": 11,
+   "key": "Transiting Juno opposite natal Mercury",
+   "what": "Juno exactly opposite your natal Mercury"
+  },
+  {
+   "date": "2027-07-15",
+   "kind": "aspect",
+   "body": "Ceres",
+   "natal": "Chiron",
+   "aspect": "conjunct",
+   "t_house": 2,
+   "key": "Transiting Ceres conjunct natal Chiron",
+   "what": "Ceres exactly conjunct your natal Chiron"
+  },
+  {
+   "date": "2027-07-18",
+   "kind": "eclipse",
+   "body": "lunar",
+   "key": "Lunar eclipse opposite natal ASC",
+   "alt_key": "Lunar eclipse in the 6th house",
+   "what": "Penumbral lunar eclipse at 25\u00b0 Capricorn (your 6th house) \u2014 opposite your natal ASC (orb 1.0\u00b0)"
+  },
+  {
+   "date": "2027-07-18",
+   "kind": "eclipse",
+   "body": "lunar",
+   "key": "Lunar eclipse conjunct natal DSC",
+   "alt_key": "Lunar eclipse in the 6th house",
+   "what": "Penumbral lunar eclipse at 25\u00b0 Capricorn (your 6th house) \u2014 conjunct your natal DSC (orb 1.0\u00b0)"
+  },
+  {
+   "date": "2027-07-18",
+   "kind": "eclipse",
+   "body": "lunar",
+   "key": "Lunar eclipse opposite natal Mars",
+   "alt_key": "Lunar eclipse in the 6th house",
+   "what": "Penumbral lunar eclipse at 25\u00b0 Capricorn (your 6th house) \u2014 opposite your natal Mars (orb 2.1\u00b0)"
+  },
+  {
+   "date": "2027-07-23",
+   "kind": "aspect",
+   "body": "Juno",
+   "natal": "Hades",
+   "aspect": "conjunct",
+   "t_house": 11,
+   "key": "Transiting Juno conjunct natal Hades",
+   "what": "Juno exactly conjunct your natal Hades"
+  },
+  {
+   "date": "2027-07-26",
+   "kind": "sign",
+   "body": "Jupiter",
+   "key": "Transiting Jupiter in Virgo",
+   "what": "Jupiter enters Virgo (your 2nd house)"
+  },
+  {
+   "date": "2027-08-01",
+   "kind": "aspect",
+   "body": "Jupiter",
+   "natal": "Moon",
+   "aspect": "opposite",
+   "t_house": 2,
+   "key": "Transiting Jupiter opposite natal Moon",
+   "what": "Jupiter exactly opposite your natal Moon"
+  },
+  {
+   "date": "2027-08-01",
+   "kind": "sign",
+   "body": "Ceres",
+   "key": "Transiting Ceres in Virgo",
+   "what": "Ceres enters Virgo (your 2nd house)"
+  },
+  {
+   "date": "2027-08-02",
+   "kind": "eclipse",
+   "body": "solar",
+   "key": "Solar eclipse opposite natal Saturn",
+   "alt_key": "Solar eclipse in the 1st house",
+   "what": "Total solar eclipse at 9\u00b0 Leo (your 1st house) \u2014 opposite your natal Saturn (orb 2.2\u00b0)"
+  },
+  {
+   "date": "2027-08-04",
+   "kind": "aspect",
+   "body": "Juno",
+   "natal": "Venus",
+   "aspect": "opposite",
+   "t_house": 11,
+   "key": "Transiting Juno opposite natal Venus",
+   "what": "Juno exactly opposite your natal Venus"
+  },
+  {
+   "date": "2027-08-17",
+   "kind": "eclipse",
+   "body": "lunar",
+   "key": "Lunar eclipse opposite natal Chiron",
+   "alt_key": "Lunar eclipse in the 8th house",
+   "what": "Penumbral lunar eclipse at 24\u00b0 Aquarius (your 8th house) \u2014 opposite your natal Chiron (orb 1.4\u00b0)"
+  },
+  {
+   "date": "2027-08-19",
+   "kind": "aspect",
+   "body": "Jupiter",
+   "natal": "Mercury",
+   "aspect": "square",
+   "t_house": 2,
+   "key": "Transiting Jupiter square natal Mercury",
+   "what": "Jupiter exactly square your natal Mercury"
+  },
+  {
+   "date": "2027-08-19",
+   "kind": "house",
+   "body": "Juno",
+   "key": "Transiting Juno in the 12th house",
+   "what": "Juno crosses into your 12th house"
+  },
+  {
+   "date": "2027-08-26",
+   "kind": "sign",
+   "body": "Juno",
+   "key": "Transiting Juno in Cancer",
+   "what": "Juno enters Cancer (your 12th house)"
+  },
+  {
+   "date": "2027-09-03",
+   "kind": "aspect",
+   "body": "Pluto",
+   "natal": "Mercury",
+   "aspect": "sextile",
+   "t_house": 7,
+   "key": "Transiting Pluto sextile natal Mercury",
+   "what": "Pluto exactly sextile your natal Mercury (pass 2 of 3, retrograde)",
+   "pass": "2 of 3",
+   "rx": true
+  },
+  {
+   "date": "2027-09-04",
+   "kind": "arc",
+   "body": "arc",
+   "key": "Solar-arc Venus opposite natal Mars",
+   "what": "Solar-arc Venus opposite natal Mars"
+  },
+  {
+   "date": "2027-09-07",
+   "kind": "house",
+   "body": "Ceres",
+   "key": "Transiting Ceres in the 3rd house",
+   "what": "Ceres crosses into your 3rd house"
+  },
+  {
+   "date": "2027-09-11",
+   "kind": "aspect",
+   "body": "Saturn",
+   "natal": "ASC",
+   "aspect": "square",
+   "t_house": 10,
+   "key": "Transiting Saturn square natal ASC",
+   "what": "Saturn exactly square your natal ASC (pass 2 of 3, retrograde)",
+   "pass": "2 of 3",
+   "rx": true
+  },
+  {
+   "date": "2027-09-14",
+   "kind": "aspect",
+   "body": "Pluto",
+   "natal": "Jupiter",
+   "aspect": "trine",
+   "t_house": 7,
+   "key": "Transiting Pluto trine natal Jupiter",
+   "what": "Pluto exactly trine your natal Jupiter (pass 2 of 3, retrograde)",
+   "pass": "2 of 3",
+   "rx": true
+  },
+  {
+   "date": "2027-09-19",
+   "kind": "aspect",
+   "body": "Juno",
+   "natal": "Juno",
+   "aspect": "conjunct",
+   "t_house": 12,
+   "key": "Transiting Juno conjunct natal Juno",
+   "what": "Juno exactly conjunct your natal Juno"
+  },
+  {
+   "date": "2027-09-19",
+   "kind": "aspect",
+   "body": "Jupiter",
+   "natal": "Hades",
+   "aspect": "square",
+   "t_house": 2,
+   "key": "Transiting Jupiter square natal Hades",
+   "what": "Jupiter exactly square your natal Hades"
+  },
+  {
+   "date": "2027-09-25",
+   "kind": "aspect",
+   "body": "Juno",
+   "natal": "Uranus",
+   "aspect": "opposite",
+   "t_house": 12,
+   "key": "Transiting Juno opposite natal Uranus",
+   "what": "Juno exactly opposite your natal Uranus"
+  },
+  {
+   "date": "2027-09-29",
+   "kind": "aspect",
+   "body": "Juno",
+   "natal": "Neptune",
+   "aspect": "opposite",
+   "t_house": 12,
+   "key": "Transiting Juno opposite natal Neptune",
+   "what": "Juno exactly opposite your natal Neptune"
+  },
+  {
+   "date": "2027-09-30",
+   "kind": "aspect",
+   "body": "Neptune",
+   "natal": "Mercury",
+   "aspect": "trine",
+   "t_house": 9,
+   "key": "Transiting Neptune trine natal Mercury",
+   "what": "Neptune exactly trine your natal Mercury (pass 2 of 3, retrograde)",
+   "pass": "2 of 3",
+   "rx": true
+  },
+  {
+   "date": "2027-10-03",
+   "kind": "aspect",
+   "body": "Jupiter",
+   "natal": "Uranus",
+   "aspect": "trine",
+   "t_house": 2,
+   "key": "Transiting Jupiter trine natal Uranus",
+   "what": "Jupiter exactly trine your natal Uranus"
+  },
+  {
+   "date": "2027-10-05",
+   "kind": "sign",
+   "body": "Ceres",
+   "key": "Transiting Ceres in Libra",
+   "what": "Ceres enters Libra (your 3rd house)"
+  },
+  {
+   "date": "2027-10-07",
+   "kind": "aspect",
+   "body": "Neptune",
+   "natal": "Jupiter",
+   "aspect": "opposite",
+   "t_house": 9,
+   "key": "Transiting Neptune opposite natal Jupiter",
+   "what": "Neptune exactly opposite your natal Jupiter (pass 2 of 3, retrograde)",
+   "pass": "2 of 3",
+   "rx": true
+  },
+  {
+   "date": "2027-10-12",
+   "kind": "aspect",
+   "body": "Jupiter",
+   "natal": "Neptune",
+   "aspect": "trine",
+   "t_house": 2,
+   "key": "Transiting Jupiter trine natal Neptune",
+   "what": "Jupiter exactly trine your natal Neptune"
+  },
+  {
+   "date": "2027-10-15",
+   "kind": "house",
+   "body": "Jupiter",
+   "key": "Transiting Jupiter in the 3rd house",
+   "what": "Jupiter crosses into your 3rd house"
+  },
+  {
+   "date": "2027-10-16",
+   "kind": "aspect",
+   "body": "Ceres",
+   "natal": "Jupiter",
+   "aspect": "conjunct",
+   "t_house": 3,
+   "key": "Transiting Ceres conjunct natal Jupiter",
+   "what": "Ceres exactly conjunct your natal Jupiter"
+  },
+  {
+   "date": "2027-10-18",
+   "kind": "aspect",
+   "body": "Juno",
+   "natal": "Mars",
+   "aspect": "conjunct",
+   "t_house": 12,
+   "key": "Transiting Juno conjunct natal Mars",
+   "what": "Juno exactly conjunct your natal Mars (pass 1 of 3)",
+   "pass": "1 of 3",
+   "rx": false
+  },
+  {
+   "date": "2027-10-19",
+   "kind": "aspect",
+   "body": "Chiron",
+   "natal": "Ceres",
+   "aspect": "square",
+   "t_house": 10,
+   "key": "Transiting Chiron square natal Ceres",
+   "what": "Chiron exactly square your natal Ceres (pass 2 of 3, retrograde)",
+   "pass": "2 of 3",
+   "rx": true
+  },
+  {
+   "date": "2027-10-23",
+   "kind": "aspect",
+   "body": "Jupiter",
+   "natal": "Venus",
+   "aspect": "square",
+   "t_house": 3,
+   "key": "Transiting Jupiter square natal Venus",
+   "what": "Jupiter exactly square your natal Venus (pass 1 of 3)",
+   "pass": "1 of 3",
+   "rx": false
+  },
+  {
+   "date": "2027-10-24",
+   "kind": "aspect",
+   "body": "Saturn",
+   "natal": "Mars",
+   "aspect": "square",
+   "t_house": 10,
+   "key": "Transiting Saturn square natal Mars",
+   "what": "Saturn exactly square your natal Mars (pass 2 of 3, retrograde)",
+   "pass": "2 of 3",
+   "rx": true
+  },
+  {
+   "date": "2027-10-27",
+   "kind": "aspect",
+   "body": "Juno",
+   "natal": "ASC",
+   "aspect": "conjunct",
+   "t_house": 1,
+   "key": "Transiting Juno conjunct natal ASC",
+   "what": "Juno exactly conjunct your natal ASC (pass 1 of 3)",
+   "pass": "1 of 3",
+   "rx": false
+  },
+  {
+   "date": "2027-10-27",
+   "kind": "house",
+   "body": "Juno",
+   "key": "Transiting Juno in the 1st house",
+   "what": "Juno crosses into your 1st house"
+  },
+  {
+   "date": "2027-11-07",
+   "kind": "sign",
+   "body": "Juno",
+   "key": "Transiting Juno in Leo",
+   "what": "Juno enters Leo (your 1st house)"
+  },
+  {
+   "date": "2027-11-10",
+   "kind": "aspect",
+   "body": "Saturn",
+   "natal": "Chiron",
+   "aspect": "trine",
+   "t_house": 10,
+   "key": "Transiting Saturn trine natal Chiron",
+   "what": "Saturn exactly trine your natal Chiron (pass 2 of 3, retrograde)",
+   "pass": "2 of 3",
+   "rx": true
+  },
+  {
+   "date": "2027-11-11",
+   "kind": "aspect",
+   "body": "Ceres",
+   "natal": "Apollon",
+   "aspect": "conjunct",
+   "t_house": 3,
+   "key": "Transiting Ceres conjunct natal Apollon",
+   "what": "Ceres exactly conjunct your natal Apollon"
+  },
+  {
+   "date": "2027-11-16",
+   "kind": "house",
+   "body": "Ceres",
+   "key": "Transiting Ceres in the 4th house",
+   "what": "Ceres crosses into your 4th house"
+  },
+  {
+   "date": "2027-11-19",
+   "kind": "aspect",
+   "body": "Pluto",
+   "natal": "Jupiter",
+   "aspect": "trine",
+   "t_house": 7,
+   "key": "Transiting Pluto trine natal Jupiter",
+   "what": "Pluto exactly trine your natal Jupiter (pass 3 of 3)",
+   "pass": "3 of 3",
+   "rx": false
+  },
+  {
+   "date": "2027-11-23",
+   "kind": "aspect",
+   "body": "Juno",
+   "natal": "Ceres",
+   "aspect": "opposite",
+   "t_house": 1,
+   "key": "Transiting Juno opposite natal Ceres",
+   "what": "Juno exactly opposite your natal Ceres (pass 1 of 3)",
+   "pass": "1 of 3",
+   "rx": false
+  },
+  {
+   "date": "2027-11-30",
+   "kind": "aspect",
+   "body": "Pluto",
+   "natal": "Mercury",
+   "aspect": "sextile",
+   "t_house": 7,
+   "key": "Transiting Pluto sextile natal Mercury",
+   "what": "Pluto exactly sextile your natal Mercury (pass 3 of 3)",
+   "pass": "3 of 3",
+   "rx": false
+  },
+  {
+   "date": "2027-12-13",
+   "kind": "sign",
+   "body": "Ceres",
+   "key": "Transiting Ceres in Scorpio",
+   "what": "Ceres enters Scorpio (your 4th house)"
+  },
+  {
+   "date": "2027-12-16",
+   "kind": "aspect",
+   "body": "Juno",
+   "natal": "Ceres",
+   "aspect": "opposite",
+   "t_house": 1,
+   "key": "Transiting Juno opposite natal Ceres",
+   "what": "Juno exactly opposite your natal Ceres (pass 2 of 3, retrograde)",
+   "pass": "2 of 3",
+   "rx": true
+  },
+  {
+   "date": "2028-01-01",
+   "kind": "sign",
+   "body": "Juno",
+   "key": "Transiting Juno in Cancer",
+   "what": "Juno backs into Cancer (your 1st house)"
+  },
+  {
+   "date": "2028-01-11",
+   "kind": "eclipse",
+   "body": "lunar",
+   "key": "Lunar eclipse conjunct natal Mars",
+   "alt_key": "Lunar eclipse in the 12th house",
+   "what": "Partial lunar eclipse at 21\u00b0 Cancer (your 12th house) \u2014 conjunct your natal Mars (orb 2.3\u00b0)"
+  },
+  {
+   "date": "2028-01-13",
+   "kind": "aspect",
+   "body": "Juno",
+   "natal": "ASC",
+   "aspect": "conjunct",
+   "t_house": 1,
+   "key": "Transiting Juno conjunct natal ASC",
+   "what": "Juno exactly conjunct your natal ASC (pass 2 of 3, retrograde)",
+   "pass": "2 of 3",
+   "rx": true
+  },
+  {
+   "date": "2028-01-13",
+   "kind": "house",
+   "body": "Juno",
+   "key": "Transiting Juno in the 12th house",
+   "what": "Juno backs into your 12th house"
+  },
+  {
+   "date": "2028-01-15",
+   "kind": "aspect",
+   "body": "Ceres",
+   "natal": "Sun",
+   "aspect": "conjunct",
+   "t_house": 4,
+   "key": "Transiting Ceres conjunct natal Sun",
+   "what": "Ceres exactly conjunct your natal Sun (pass 1 of 3)",
+   "pass": "1 of 3",
+   "rx": false
+  },
+  {
+   "date": "2028-01-26",
+   "kind": "aspect",
+   "body": "Juno",
+   "natal": "Mars",
+   "aspect": "conjunct",
+   "t_house": 12,
+   "key": "Transiting Juno conjunct natal Mars",
+   "what": "Juno exactly conjunct your natal Mars (pass 2 of 3, retrograde)",
+   "pass": "2 of 3",
+   "rx": true
+  },
+  {
+   "date": "2028-01-26",
+   "kind": "eclipse",
+   "body": "solar",
+   "key": "Solar eclipse in the 7th house",
+   "what": "Annular solar eclipse at 6\u00b0 Aquarius (your 7th house)"
+  },
+  {
+   "date": "2028-02-04",
+   "kind": "aspect",
+   "body": "Saturn",
+   "natal": "Chiron",
+   "aspect": "trine",
+   "t_house": 10,
+   "key": "Transiting Saturn trine natal Chiron",
+   "what": "Saturn exactly trine your natal Chiron (pass 3 of 3)",
+   "pass": "3 of 3",
+   "rx": false
+  },
+  {
+   "date": "2028-02-18",
+   "kind": "aspect",
+   "body": "Neptune",
+   "natal": "Jupiter",
+   "aspect": "opposite",
+   "t_house": 9,
+   "key": "Transiting Neptune opposite natal Jupiter",
+   "what": "Neptune exactly opposite your natal Jupiter (pass 3 of 3)",
+   "pass": "3 of 3",
+   "rx": false
+  },
+  {
+   "date": "2028-02-19",
+   "kind": "aspect",
+   "body": "Saturn",
+   "natal": "Mars",
+   "aspect": "square",
+   "t_house": 10,
+   "key": "Transiting Saturn square natal Mars",
+   "what": "Saturn exactly square your natal Mars (pass 3 of 3)",
+   "pass": "3 of 3",
+   "rx": false
+  },
+  {
+   "date": "2028-02-24",
+   "kind": "aspect",
+   "body": "Neptune",
+   "natal": "Mercury",
+   "aspect": "trine",
+   "t_house": 9,
+   "key": "Transiting Neptune trine natal Mercury",
+   "what": "Neptune exactly trine your natal Mercury (pass 3 of 3)",
+   "pass": "3 of 3",
+   "rx": false
+  },
+  {
+   "date": "2028-02-29",
+   "kind": "aspect",
+   "body": "Ceres",
+   "natal": "Pluto",
+   "aspect": "conjunct",
+   "t_house": 4,
+   "key": "Transiting Ceres conjunct natal Pluto",
+   "what": "Ceres exactly conjunct your natal Pluto (pass 1 of 3)",
+   "pass": "1 of 3",
+   "rx": false
+  },
+  {
+   "date": "2028-03-07",
+   "kind": "house",
+   "body": "Ceres",
+   "key": "Transiting Ceres in the 5th house",
+   "what": "Ceres crosses into your 5th house"
+  },
+  {
+   "date": "2028-03-19",
+   "kind": "aspect",
+   "body": "Saturn",
+   "natal": "ASC",
+   "aspect": "square",
+   "t_house": 10,
+   "key": "Transiting Saturn square natal ASC",
+   "what": "Saturn exactly square your natal ASC (pass 3 of 3)",
+   "pass": "3 of 3",
+   "rx": false
+  },
+  {
+   "date": "2028-03-28",
+   "kind": "aspect",
+   "body": "Chiron",
+   "natal": "Ceres",
+   "aspect": "square",
+   "t_house": 10,
+   "key": "Transiting Chiron square natal Ceres",
+   "what": "Chiron exactly square your natal Ceres (pass 3 of 3)",
+   "pass": "3 of 3",
+   "rx": false
+  },
+  {
+   "date": "2028-03-30",
+   "kind": "aspect",
+   "body": "Juno",
+   "natal": "Mars",
+   "aspect": "conjunct",
+   "t_house": 12,
+   "key": "Transiting Juno conjunct natal Mars",
+   "what": "Juno exactly conjunct your natal Mars (pass 3 of 3)",
+   "pass": "3 of 3",
+   "rx": false
+  },
+  {
+   "date": "2028-03-31",
+   "kind": "house",
+   "body": "Ceres",
+   "key": "Transiting Ceres in the 4th house",
+   "what": "Ceres backs into your 4th house"
+  },
+  {
+   "date": "2028-04-07",
+   "kind": "aspect",
+   "body": "Ceres",
+   "natal": "Pluto",
+   "aspect": "conjunct",
+   "t_house": 4,
+   "key": "Transiting Ceres conjunct natal Pluto",
+   "what": "Ceres exactly conjunct your natal Pluto (pass 2 of 3, retrograde)",
+   "pass": "2 of 3",
+   "rx": true
+  },
+  {
+   "date": "2028-04-12",
+   "kind": "aspect",
+   "body": "Juno",
+   "natal": "ASC",
+   "aspect": "conjunct",
+   "t_house": 1,
+   "key": "Transiting Juno conjunct natal ASC",
+   "what": "Juno exactly conjunct your natal ASC (pass 3 of 3)",
+   "pass": "3 of 3",
+   "rx": false
+  },
+  {
+   "date": "2028-04-12",
+   "kind": "house",
+   "body": "Juno",
+   "key": "Transiting Juno in the 1st house",
+   "what": "Juno crosses into your 1st house"
+  },
+  {
+   "date": "2028-04-13",
+   "kind": "sign",
+   "body": "Saturn",
+   "key": "Transiting Saturn in Taurus",
+   "what": "Saturn enters Taurus (your 10th house)"
+  },
+  {
+   "date": "2028-04-16",
+   "kind": "aspect",
+   "body": "Jupiter",
+   "natal": "Venus",
+   "aspect": "square",
+   "t_house": 3,
+   "key": "Transiting Jupiter square natal Venus",
+   "what": "Jupiter exactly square your natal Venus (pass 2 of 3, retrograde)",
+   "pass": "2 of 3",
+   "rx": true
+  },
+  {
+   "date": "2028-04-22",
+   "kind": "sign",
+   "body": "Juno",
+   "key": "Transiting Juno in Leo",
+   "what": "Juno enters Leo (your 1st house)"
+  },
+  {
+   "date": "2028-05-01",
+   "kind": "aspect",
+   "body": "Juno",
+   "natal": "Ceres",
+   "aspect": "opposite",
+   "t_house": 1,
+   "key": "Transiting Juno opposite natal Ceres",
+   "what": "Juno exactly opposite your natal Ceres (pass 3 of 3)",
+   "pass": "3 of 3",
+   "rx": false
+  },
+  {
+   "date": "2028-05-03",
+   "kind": "aspect",
+   "body": "Saturn",
+   "natal": "Ceres",
+   "aspect": "square",
+   "t_house": 10,
+   "key": "Transiting Saturn square natal Ceres",
+   "what": "Saturn exactly square your natal Ceres"
+  },
+  {
+   "date": "2028-05-12",
+   "kind": "arc",
+   "body": "arc",
+   "key": "Solar-arc Neptune square natal Pluto",
+   "what": "Solar-arc Neptune square natal Pluto"
+  },
+  {
+   "date": "2028-05-28",
+   "kind": "aspect",
+   "body": "Juno",
+   "natal": "Saturn",
+   "aspect": "opposite",
+   "t_house": 1,
+   "key": "Transiting Juno opposite natal Saturn",
+   "what": "Juno exactly opposite your natal Saturn"
+  },
+  {
+   "date": "2028-05-31",
+   "kind": "aspect",
+   "body": "Ceres",
+   "natal": "Sun",
+   "aspect": "conjunct",
+   "t_house": 4,
+   "key": "Transiting Ceres conjunct natal Sun",
+   "what": "Ceres exactly conjunct your natal Sun (pass 2 of 3, retrograde)",
+   "pass": "2 of 3",
+   "rx": true
+  },
+  {
+   "date": "2028-06-10",
+   "kind": "aspect",
+   "body": "Jupiter",
+   "natal": "Venus",
+   "aspect": "square",
+   "t_house": 3,
+   "key": "Transiting Jupiter square natal Venus",
+   "what": "Jupiter exactly square your natal Venus (pass 3 of 3)",
+   "pass": "3 of 3",
+   "rx": false
+  },
+  {
+   "date": "2028-06-19",
+   "kind": "house",
+   "body": "Juno",
+   "key": "Transiting Juno in the 2nd house",
+   "what": "Juno crosses into your 2nd house"
+  },
+  {
+   "date": "2028-06-25",
+   "kind": "aspect",
+   "body": "Juno",
+   "natal": "Chiron",
+   "aspect": "conjunct",
+   "t_house": 2,
+   "key": "Transiting Juno conjunct natal Chiron",
+   "what": "Juno exactly conjunct your natal Chiron"
+  },
+  {
+   "date": "2028-07-03",
+   "kind": "aspect",
+   "body": "Uranus",
+   "natal": "Hades",
+   "aspect": "conjunct",
+   "t_house": 11,
+   "key": "Transiting Uranus conjunct natal Hades",
+   "what": "Uranus exactly conjunct your natal Hades (pass 1 of 3)",
+   "pass": "1 of 3",
+   "rx": false
+  },
+  {
+   "date": "2028-07-06",
+   "kind": "eclipse",
+   "body": "lunar",
+   "key": "Lunar eclipse conjunct natal Uranus",
+   "alt_key": "Lunar eclipse in the 6th house",
+   "what": "Partial lunar eclipse at 15\u00b0 Capricorn (your 6th house) \u2014 conjunct your natal Uranus (orb 0.5\u00b0)"
+  },
+  {
+   "date": "2028-07-06",
+   "kind": "eclipse",
+   "body": "lunar",
+   "key": "Lunar eclipse conjunct natal Neptune",
+   "alt_key": "Lunar eclipse in the 6th house",
+   "what": "Partial lunar eclipse at 15\u00b0 Capricorn (your 6th house) \u2014 conjunct your natal Neptune (orb 1.3\u00b0)"
+  },
+  {
+   "date": "2028-07-07",
+   "kind": "aspect",
+   "body": "Uranus",
+   "natal": "Saturn",
+   "aspect": "trine",
+   "t_house": 11,
+   "key": "Transiting Uranus trine natal Saturn",
+   "what": "Uranus exactly trine your natal Saturn (pass 1 of 3)",
+   "pass": "1 of 3",
+   "rx": false
+  },
+  {
+   "date": "2028-07-10",
+   "kind": "arc",
+   "body": "arc",
+   "key": "Solar-arc Apollon conjunct natal Pluto",
+   "what": "Solar-arc Apollon conjunct natal Pluto"
+  },
+  {
+   "date": "2028-07-14",
+   "kind": "sign",
+   "body": "Juno",
+   "key": "Transiting Juno in Virgo",
+   "what": "Juno enters Virgo (your 2nd house)"
+  },
+  {
+   "date": "2028-07-17",
+   "kind": "aspect",
+   "body": "Juno",
+   "natal": "Moon",
+   "aspect": "opposite",
+   "t_house": 2,
+   "key": "Transiting Juno opposite natal Moon",
+   "what": "Juno exactly opposite your natal Moon"
+  },
+  {
+   "date": "2028-07-19",
+   "kind": "aspect",
+   "body": "Ceres",
+   "natal": "Sun",
+   "aspect": "conjunct",
+   "t_house": 4,
+   "key": "Transiting Ceres conjunct natal Sun",
+   "what": "Ceres exactly conjunct your natal Sun (pass 3 of 3)",
+   "pass": "3 of 3",
+   "rx": false
+  },
+  {
+   "date": "2028-07-21",
+   "kind": "eclipse",
+   "body": "solar",
+   "key": "Solar eclipse opposite natal Ceres",
+   "alt_key": "Solar eclipse in the 1st house",
+   "what": "Total solar eclipse at 29\u00b0 Cancer (your 1st house) \u2014 opposite your natal Ceres (orb 2.8\u00b0)"
+  },
+  {
+   "date": "2028-07-21",
+   "kind": "eclipse",
+   "body": "solar",
+   "key": "Solar eclipse conjunct natal ASC",
+   "alt_key": "Solar eclipse in the 1st house",
+   "what": "Total solar eclipse at 29\u00b0 Cancer (your 1st house) \u2014 conjunct your natal ASC (orb 2.9\u00b0)"
+  },
+  {
+   "date": "2028-07-21",
+   "kind": "eclipse",
+   "body": "solar",
+   "key": "Solar eclipse opposite natal DSC",
+   "alt_key": "Solar eclipse in the 1st house",
+   "what": "Total solar eclipse at 29\u00b0 Cancer (your 1st house) \u2014 opposite your natal DSC (orb 2.9\u00b0)"
+  },
+  {
+   "date": "2028-07-31",
+   "kind": "arc",
+   "body": "arc",
+   "key": "Solar-arc Neptune opposite natal Chiron",
+   "what": "Solar-arc Neptune opposite natal Chiron"
+  },
+  {
+   "date": "2028-08-24",
+   "kind": "sign",
+   "body": "Jupiter",
+   "key": "Transiting Jupiter in Libra",
+   "what": "Jupiter enters Libra (your 3rd house)"
+  },
+  {
+   "date": "2028-08-26",
+   "kind": "house",
+   "body": "Juno",
+   "key": "Transiting Juno in the 3rd house",
+   "what": "Juno crosses into your 3rd house"
+  },
+  {
+   "date": "2028-09-02",
+   "kind": "aspect",
+   "body": "Ceres",
+   "natal": "Pluto",
+   "aspect": "conjunct",
+   "t_house": 4,
+   "key": "Transiting Ceres conjunct natal Pluto",
+   "what": "Ceres exactly conjunct your natal Pluto (pass 3 of 3)",
+   "pass": "3 of 3",
+   "rx": false
+  },
+  {
+   "date": "2028-09-05",
+   "kind": "aspect",
+   "body": "Jupiter",
+   "natal": "Ceres",
+   "aspect": "trine",
+   "t_house": 3,
+   "key": "Transiting Jupiter trine natal Ceres",
+   "what": "Jupiter exactly trine your natal Ceres"
+  },
+  {
+   "date": "2028-09-05",
+   "kind": "house",
+   "body": "Ceres",
+   "key": "Transiting Ceres in the 5th house",
+   "what": "Ceres crosses into your 5th house"
+  },
+  {
+   "date": "2028-09-17",
+   "kind": "aspect",
+   "body": "Jupiter",
+   "natal": "Jupiter",
+   "aspect": "conjunct",
+   "t_house": 3,
+   "key": "Transiting Jupiter conjunct natal Jupiter",
+   "what": "Jupiter exactly conjunct your natal Jupiter"
+  },
+  {
+   "date": "2028-09-26",
+   "kind": "sign",
+   "body": "Ceres",
+   "key": "Transiting Ceres in Sagittarius",
+   "what": "Ceres enters Sagittarius (your 5th house)"
+  },
+  {
+   "date": "2028-09-27",
+   "kind": "sign",
+   "body": "Juno",
+   "key": "Transiting Juno in Libra",
+   "what": "Juno enters Libra (your 3rd house)"
+  },
+  {
+   "date": "2028-09-28",
+   "kind": "arc",
+   "body": "arc",
+   "key": "Solar-arc Apollon square natal Chiron",
+   "what": "Solar-arc Apollon square natal Chiron"
+  },
+  {
+   "date": "2028-10-10",
+   "kind": "aspect",
+   "body": "Ceres",
+   "natal": "Mercury",
+   "aspect": "conjunct",
+   "t_house": 5,
+   "key": "Transiting Ceres conjunct natal Mercury",
+   "what": "Ceres exactly conjunct your natal Mercury"
+  },
+  {
+   "date": "2028-10-10",
+   "kind": "aspect",
+   "body": "Juno",
+   "natal": "Jupiter",
+   "aspect": "conjunct",
+   "t_house": 3,
+   "key": "Transiting Juno conjunct natal Jupiter",
+   "what": "Juno exactly conjunct your natal Jupiter"
+  },
+  {
+   "date": "2028-10-19",
+   "kind": "aspect",
+   "body": "Jupiter",
+   "natal": "Juno",
+   "aspect": "square",
+   "t_house": 3,
+   "key": "Transiting Jupiter square natal Juno",
+   "what": "Jupiter exactly square your natal Juno"
+  },
+  {
+   "date": "2028-10-19",
+   "kind": "aspect",
+   "body": "Jupiter",
+   "natal": "Hades",
+   "aspect": "trine",
+   "t_house": 3,
+   "key": "Transiting Jupiter trine natal Hades",
+   "what": "Jupiter exactly trine your natal Hades"
+  },
+  {
+   "date": "2028-10-20",
+   "kind": "aspect",
+   "body": "Jupiter",
+   "natal": "Saturn",
+   "aspect": "trine",
+   "t_house": 3,
+   "key": "Transiting Jupiter trine natal Saturn",
+   "what": "Jupiter exactly trine your natal Saturn"
+  },
+  {
+   "date": "2028-11-01",
+   "kind": "aspect",
+   "body": "Jupiter",
+   "natal": "Uranus",
+   "aspect": "square",
+   "t_house": 3,
+   "key": "Transiting Jupiter square natal Uranus",
+   "what": "Jupiter exactly square your natal Uranus"
+  },
+  {
+   "date": "2028-11-09",
+   "kind": "aspect",
+   "body": "Jupiter",
+   "natal": "Apollon",
+   "aspect": "conjunct",
+   "t_house": 3,
+   "key": "Transiting Jupiter conjunct natal Apollon",
+   "what": "Jupiter exactly conjunct your natal Apollon"
+  },
+  {
+   "date": "2028-11-10",
+   "kind": "aspect",
+   "body": "Juno",
+   "natal": "Apollon",
+   "aspect": "conjunct",
+   "t_house": 3,
+   "key": "Transiting Juno conjunct natal Apollon",
+   "what": "Juno exactly conjunct your natal Apollon"
+  },
+  {
+   "date": "2028-11-10",
+   "kind": "aspect",
+   "body": "Jupiter",
+   "natal": "Neptune",
+   "aspect": "square",
+   "t_house": 3,
+   "key": "Transiting Jupiter square natal Neptune",
+   "what": "Jupiter exactly square your natal Neptune"
+  },
+  {
+   "date": "2028-11-14",
+   "kind": "aspect",
+   "body": "Ceres",
+   "natal": "Venus",
+   "aspect": "conjunct",
+   "t_house": 5,
+   "key": "Transiting Ceres conjunct natal Venus",
+   "what": "Ceres exactly conjunct your natal Venus"
+  },
+  {
+   "date": "2028-11-17",
+   "kind": "aspect",
+   "body": "Juno",
+   "natal": "MC",
+   "aspect": "opposite",
+   "t_house": 4,
+   "key": "Transiting Juno opposite natal MC",
+   "what": "Juno exactly opposite your natal MC"
+  },
+  {
+   "date": "2028-11-17",
+   "kind": "house",
+   "body": "Juno",
+   "key": "Transiting Juno in the 4th house",
+   "what": "Juno crosses into your 4th house"
+  },
+  {
+   "date": "2028-11-22",
+   "kind": "aspect",
+   "body": "Jupiter",
+   "natal": "MC",
+   "aspect": "opposite",
+   "t_house": 4,
+   "key": "Transiting Jupiter opposite natal MC",
+   "what": "Jupiter exactly opposite your natal MC (pass 1 of 3)",
+   "pass": "1 of 3",
+   "rx": false
+  },
+  {
+   "date": "2028-11-22",
+   "kind": "house",
+   "body": "Jupiter",
+   "key": "Transiting Jupiter in the 4th house",
+   "what": "Jupiter crosses into your 4th house"
+  },
+  {
+   "date": "2028-12-04",
+   "kind": "house",
+   "body": "Ceres",
+   "key": "Transiting Ceres in the 6th house",
+   "what": "Ceres crosses into your 6th house"
+  },
+  {
+   "date": "2028-12-05",
+   "kind": "aspect",
+   "body": "Uranus",
+   "natal": "Saturn",
+   "aspect": "trine",
+   "t_house": 11,
+   "key": "Transiting Uranus trine natal Saturn",
+   "what": "Uranus exactly trine your natal Saturn (pass 2 of 3, retrograde)",
+   "pass": "2 of 3",
+   "rx": true
+  },
+  {
+   "date": "2028-12-10",
+   "kind": "aspect",
+   "body": "Uranus",
+   "natal": "Hades",
+   "aspect": "conjunct",
+   "t_house": 11,
+   "key": "Transiting Uranus conjunct natal Hades",
+   "what": "Uranus exactly conjunct your natal Hades (pass 2 of 3, retrograde)",
+   "pass": "2 of 3",
+   "rx": true
+  },
+  {
+   "date": "2028-12-13",
+   "kind": "sign",
+   "body": "Ceres",
+   "key": "Transiting Ceres in Capricorn",
+   "what": "Ceres enters Capricorn (your 6th house)"
+  },
+  {
+   "date": "2028-12-23",
+   "kind": "aspect",
+   "body": "Jupiter",
+   "natal": "Mars",
+   "aspect": "square",
+   "t_house": 4,
+   "key": "Transiting Jupiter square natal Mars",
+   "what": "Jupiter exactly square your natal Mars (pass 1 of 3)",
+   "pass": "1 of 3",
+   "rx": false
+  },
+  {
+   "date": "2028-12-23",
+   "kind": "sign",
+   "body": "Juno",
+   "key": "Transiting Juno in Scorpio",
+   "what": "Juno enters Scorpio (your 4th house)"
+  },
+  {
+   "date": "2028-12-31",
+   "kind": "eclipse",
+   "body": "lunar",
+   "key": "Lunar eclipse conjunct natal Juno",
+   "alt_key": "Lunar eclipse in the 12th house",
+   "what": "Penumbral lunar eclipse at 10\u00b0 Cancer (your 12th house) \u2014 conjunct your natal Juno (orb 1.3\u00b0)"
+  },
+  {
+   "date": "2029-01-14",
+   "kind": "eclipse",
+   "body": "solar",
+   "key": "Solar eclipse opposite natal Mars",
+   "alt_key": "Solar eclipse in the 6th house",
+   "what": "Partial solar eclipse at 24\u00b0 Capricorn (your 6th house) \u2014 opposite your natal Mars (orb 1.0\u00b0)"
+  },
+  {
+   "date": "2029-01-14",
+   "kind": "eclipse",
+   "body": "solar",
+   "key": "Solar eclipse opposite natal ASC",
+   "alt_key": "Solar eclipse in the 6th house",
+   "what": "Partial solar eclipse at 24\u00b0 Capricorn (your 6th house) \u2014 opposite your natal ASC (orb 2.1\u00b0)"
+  },
+  {
+   "date": "2029-01-14",
+   "kind": "eclipse",
+   "body": "solar",
+   "key": "Solar eclipse conjunct natal DSC",
+   "alt_key": "Solar eclipse in the 6th house",
+   "what": "Partial solar eclipse at 24\u00b0 Capricorn (your 6th house) \u2014 conjunct your natal DSC (orb 2.1\u00b0)"
+  },
+  {
+   "date": "2029-01-18",
+   "kind": "arc",
+   "body": "arc",
+   "key": "Solar-arc Saturn square natal Venus",
+   "what": "Solar-arc Saturn square natal Venus"
+  },
+  {
+   "date": "2029-01-18",
+   "kind": "aspect",
+   "body": "Ceres",
+   "natal": "Uranus",
+   "aspect": "conjunct",
+   "t_house": 6,
+   "key": "Transiting Ceres conjunct natal Uranus",
+   "what": "Ceres exactly conjunct your natal Uranus"
+  },
+  {
+   "date": "2029-01-23",
+   "kind": "aspect",
+   "body": "Ceres",
+   "natal": "Neptune",
+   "aspect": "conjunct",
+   "t_house": 6,
+   "key": "Transiting Ceres conjunct natal Neptune",
+   "what": "Ceres exactly conjunct your natal Neptune"
+  },
+  {
+   "date": "2029-01-24",
+   "kind": "aspect",
+   "body": "Jupiter",
+   "natal": "ASC",
+   "aspect": "square",
+   "t_house": 4,
+   "key": "Transiting Jupiter square natal ASC",
+   "what": "Jupiter exactly square your natal ASC (pass 1 of 3)",
+   "pass": "1 of 3",
+   "rx": false
+  },
+  {
+   "date": "2029-02-19",
+   "kind": "house",
+   "body": "Ceres",
+   "key": "Transiting Ceres in the 7th house",
+   "what": "Ceres crosses into your 7th house"
+  },
+  {
+   "date": "2029-02-27",
+   "kind": "aspect",
+   "body": "Jupiter",
+   "natal": "ASC",
+   "aspect": "square",
+   "t_house": 4,
+   "key": "Transiting Jupiter square natal ASC",
+   "what": "Jupiter exactly square your natal ASC (pass 2 of 3, retrograde)",
+   "pass": "2 of 3",
+   "rx": true
+  },
+  {
+   "date": "2029-02-27",
+   "kind": "sign",
+   "body": "Ceres",
+   "key": "Transiting Ceres in Aquarius",
+   "what": "Ceres enters Aquarius (your 7th house)"
+  },
+  {
+   "date": "2029-03-06",
+   "kind": "aspect",
+   "body": "Ceres",
+   "natal": "Ceres",
+   "aspect": "conjunct",
+   "t_house": 7,
+   "key": "Transiting Ceres conjunct natal Ceres",
+   "what": "Ceres exactly conjunct your natal Ceres"
+  },
+  {
+   "date": "2029-03-11",
+   "kind": "arc",
+   "body": "arc",
+   "key": "Solar-arc Sun conjunct natal Venus",
+   "what": "Solar-arc Sun conjunct natal Venus"
+  },
+  {
+   "date": "2029-03-14",
+   "kind": "arc",
+   "body": "arc",
+   "key": "Solar-arc Mercury opposite natal Juno",
+   "what": "Solar-arc Mercury opposite natal Juno"
+  },
+  {
+   "date": "2029-04-01",
+   "kind": "aspect",
+   "body": "Jupiter",
+   "natal": "Mars",
+   "aspect": "square",
+   "t_house": 4,
+   "key": "Transiting Jupiter square natal Mars",
+   "what": "Jupiter exactly square your natal Mars (pass 2 of 3, retrograde)",
+   "pass": "2 of 3",
+   "rx": true
+  },
+  {
+   "date": "2029-04-04",
+   "kind": "aspect",
+   "body": "Ceres",
+   "natal": "Saturn",
+   "aspect": "conjunct",
+   "t_house": 7,
+   "key": "Transiting Ceres conjunct natal Saturn",
+   "what": "Ceres exactly conjunct your natal Saturn (pass 1 of 3)",
+   "pass": "1 of 3",
+   "rx": false
+  },
+  {
+   "date": "2029-04-12",
+   "kind": "progressed",
+   "body": "Moon",
+   "key": "Progressed Moon in the 12th house",
+   "what": "Progressed Moon enters your 12th house"
+  },
+  {
+   "date": "2029-04-14",
+   "kind": "aspect",
+   "body": "Saturn",
+   "natal": "Sun",
+   "aspect": "opposite",
+   "t_house": 10,
+   "key": "Transiting Saturn opposite natal Sun",
+   "what": "Saturn exactly opposite your natal Sun"
+  },
+  {
+   "date": "2029-04-16",
+   "kind": "aspect",
+   "body": "Saturn",
+   "natal": "Saturn",
+   "aspect": "square",
+   "t_house": 10,
+   "key": "Transiting Saturn square natal Saturn",
+   "what": "Saturn exactly square your natal Saturn"
+  },
+  {
+   "date": "2029-04-22",
+   "kind": "aspect",
+   "body": "Uranus",
+   "natal": "Hades",
+   "aspect": "conjunct",
+   "t_house": 11,
+   "key": "Transiting Uranus conjunct natal Hades",
+   "what": "Uranus exactly conjunct your natal Hades (pass 3 of 3)",
+   "pass": "3 of 3",
+   "rx": false
+  },
+  {
+   "date": "2029-04-26",
+   "kind": "aspect",
+   "body": "Uranus",
+   "natal": "Saturn",
+   "aspect": "trine",
+   "t_house": 11,
+   "key": "Transiting Uranus trine natal Saturn",
+   "what": "Uranus exactly trine your natal Saturn (pass 3 of 3)",
+   "pass": "3 of 3",
+   "rx": false
+  },
+  {
+   "date": "2029-04-30",
+   "kind": "sign",
+   "body": "Juno",
+   "key": "Transiting Juno in Libra",
+   "what": "Juno backs into Libra (your 4th house)"
+  },
+  {
+   "date": "2029-05-05",
+   "kind": "house",
+   "body": "Ceres",
+   "key": "Transiting Ceres in the 8th house",
+   "what": "Ceres crosses into your 8th house"
+  },
+  {
+   "date": "2029-05-06",
+   "kind": "aspect",
+   "body": "Saturn",
+   "natal": "Uranus",
+   "aspect": "trine",
+   "t_house": 10,
+   "key": "Transiting Saturn trine natal Uranus",
+   "what": "Saturn exactly trine your natal Uranus"
+  },
+  {
+   "date": "2029-05-14",
+   "kind": "arc",
+   "body": "arc",
+   "key": "Solar-arc Hades square natal MC",
+   "what": "Solar-arc Hades square natal MC"
+  },
+  {
+   "date": "2029-05-14",
+   "kind": "aspect",
+   "body": "Jupiter",
+   "natal": "MC",
+   "aspect": "opposite",
+   "t_house": 4,
+   "key": "Transiting Jupiter opposite natal MC",
+   "what": "Jupiter exactly opposite your natal MC (pass 2 of 3, retrograde)",
+   "pass": "2 of 3",
+   "rx": true
+  },
+  {
+   "date": "2029-05-14",
+   "kind": "house",
+   "body": "Jupiter",
+   "key": "Transiting Jupiter in the 3rd house",
+   "what": "Jupiter backs into your 3rd house"
+  },
+  {
+   "date": "2029-05-20",
+   "kind": "aspect",
+   "body": "Saturn",
+   "natal": "Neptune",
+   "aspect": "trine",
+   "t_house": 10,
+   "key": "Transiting Saturn trine natal Neptune",
+   "what": "Saturn exactly trine your natal Neptune"
+  },
+  {
+   "date": "2029-06-12",
+   "kind": "eclipse",
+   "body": "solar",
+   "key": "Solar eclipse opposite natal Venus",
+   "alt_key": "Solar eclipse in the 11th house",
+   "what": "Partial solar eclipse at 21\u00b0 Gemini (your 11th house) \u2014 opposite your natal Venus (orb 2.8\u00b0)"
+  },
+  {
+   "date": "2029-06-17",
+   "kind": "arc",
+   "body": "arc",
+   "key": "Solar-arc Jupiter conjunct natal Sun",
+   "what": "Solar-arc Jupiter conjunct natal Sun"
+  },
+  {
+   "date": "2029-06-25",
+   "kind": "eclipse",
+   "body": "lunar",
+   "key": "Lunar eclipse in the 6th house",
+   "what": "Total lunar eclipse at 4\u00b0 Capricorn (your 6th house)"
+  },
+  {
+   "date": "2029-07-08",
+   "kind": "aspect",
+   "body": "Chiron",
+   "natal": "Sun",
+   "aspect": "opposite",
+   "t_house": 10,
+   "key": "Transiting Chiron opposite natal Sun",
+   "what": "Chiron exactly opposite your natal Sun (pass 1 of 3)",
+   "pass": "1 of 3",
+   "rx": false
+  },
+  {
+   "date": "2029-07-11",
+   "kind": "aspect",
+   "body": "Uranus",
+   "natal": "Apollon",
+   "aspect": "trine",
+   "t_house": 11,
+   "key": "Transiting Uranus trine natal Apollon",
+   "what": "Uranus exactly trine your natal Apollon (pass 1 of 3)",
+   "pass": "1 of 3",
+   "rx": false
+  },
+  {
+   "date": "2029-07-11",
+   "kind": "eclipse",
+   "body": "solar",
+   "key": "Solar eclipse in the 12th house",
+   "what": "Partial solar eclipse at 19\u00b0 Cancer (your 12th house)"
+  },
+  {
+   "date": "2029-07-11",
+   "kind": "progressed",
+   "body": "Moon",
+   "key": "Progressed Moon in Cancer",
+   "what": "Progressed Moon enters Cancer"
+  },
+  {
+   "date": "2029-07-12",
+   "kind": "aspect",
+   "body": "Saturn",
+   "natal": "Pluto",
+   "aspect": "opposite",
+   "t_house": 10,
+   "key": "Transiting Saturn opposite natal Pluto",
+   "what": "Saturn exactly opposite your natal Pluto (pass 1 of 3)",
+   "pass": "1 of 3",
+   "rx": false
+  },
+  {
+   "date": "2029-07-13",
+   "kind": "aspect",
+   "body": "Chiron",
+   "natal": "Saturn",
+   "aspect": "square",
+   "t_house": 10,
+   "key": "Transiting Chiron square natal Saturn",
+   "what": "Chiron exactly square your natal Saturn (pass 1 of 5)",
+   "pass": "1 of 5",
+   "rx": false
+  },
+  {
+   "date": "2029-07-14",
+   "kind": "aspect",
+   "body": "Jupiter",
+   "natal": "MC",
+   "aspect": "opposite",
+   "t_house": 4,
+   "key": "Transiting Jupiter opposite natal MC",
+   "what": "Jupiter exactly opposite your natal MC (pass 3 of 3)",
+   "pass": "3 of 3",
+   "rx": false
+  },
+  {
+   "date": "2029-07-14",
+   "kind": "house",
+   "body": "Jupiter",
+   "key": "Transiting Jupiter in the 4th house",
+   "what": "Jupiter crosses into your 4th house"
+  },
+  {
+   "date": "2029-07-15",
+   "kind": "aspect",
+   "body": "Saturn",
+   "natal": "Chiron",
+   "aspect": "square",
+   "t_house": 10,
+   "key": "Transiting Saturn square natal Chiron",
+   "what": "Saturn exactly square your natal Chiron (pass 1 of 3)",
+   "pass": "1 of 3",
+   "rx": false
+  },
+  {
+   "date": "2029-07-22",
+   "kind": "house",
+   "body": "Saturn",
+   "key": "Transiting Saturn in the 11th house",
+   "what": "Saturn crosses into your 11th house"
+  },
+  {
+   "date": "2029-08-02",
+   "kind": "house",
+   "body": "Ceres",
+   "key": "Transiting Ceres in the 7th house",
+   "what": "Ceres backs into your 7th house"
+  },
+  {
+   "date": "2029-08-07",
+   "kind": "sign",
+   "body": "Juno",
+   "key": "Transiting Juno in Scorpio",
+   "what": "Juno enters Scorpio (your 4th house)"
+  },
+  {
+   "date": "2029-08-22",
+   "kind": "aspect",
+   "body": "Jupiter",
+   "natal": "Mars",
+   "aspect": "square",
+   "t_house": 4,
+   "key": "Transiting Jupiter square natal Mars",
+   "what": "Jupiter exactly square your natal Mars (pass 3 of 3)",
+   "pass": "3 of 3",
+   "rx": false
+  },
+  {
+   "date": "2029-09-08",
+   "kind": "aspect",
+   "body": "Jupiter",
+   "natal": "ASC",
+   "aspect": "square",
+   "t_house": 4,
+   "key": "Transiting Jupiter square natal ASC",
+   "what": "Jupiter exactly square your natal ASC (pass 3 of 3)",
+   "pass": "3 of 3",
+   "rx": false
+  },
+  {
+   "date": "2029-09-16",
+   "kind": "aspect",
+   "body": "Ceres",
+   "natal": "Saturn",
+   "aspect": "conjunct",
+   "t_house": 7,
+   "key": "Transiting Ceres conjunct natal Saturn",
+   "what": "Ceres exactly conjunct your natal Saturn (pass 2 of 3, retrograde)",
+   "pass": "2 of 3",
+   "rx": true
+  },
+  {
+   "date": "2029-09-19",
+   "kind": "aspect",
+   "body": "Chiron",
+   "natal": "Saturn",
+   "aspect": "square",
+   "t_house": 10,
+   "key": "Transiting Chiron square natal Saturn",
+   "what": "Chiron exactly square your natal Saturn (pass 2 of 5, retrograde)",
+   "pass": "2 of 5",
+   "rx": true
+  },
+  {
+   "date": "2029-09-22",
+   "kind": "aspect",
+   "body": "Juno",
+   "natal": "Sun",
+   "aspect": "conjunct",
+   "t_house": 4,
+   "key": "Transiting Juno conjunct natal Sun",
+   "what": "Juno exactly conjunct your natal Sun"
+  },
+  {
+   "date": "2029-09-23",
+   "kind": "aspect",
+   "body": "Chiron",
+   "natal": "Sun",
+   "aspect": "opposite",
+   "t_house": 10,
+   "key": "Transiting Chiron opposite natal Sun",
+   "what": "Chiron exactly opposite your natal Sun (pass 2 of 3, retrograde)",
+   "pass": "2 of 3",
+   "rx": true
+  },
+  {
+   "date": "2029-09-24",
+   "kind": "sign",
+   "body": "Jupiter",
+   "key": "Transiting Jupiter in Scorpio",
+   "what": "Jupiter enters Scorpio (your 4th house)"
+  },
+  {
+   "date": "2029-09-30",
+   "kind": "aspect",
+   "body": "Jupiter",
+   "natal": "Moon",
+   "aspect": "trine",
+   "t_house": 4,
+   "key": "Transiting Jupiter trine natal Moon",
+   "what": "Jupiter exactly trine your natal Moon"
+  },
+  {
+   "date": "2029-10-06",
+   "kind": "aspect",
+   "body": "Jupiter",
+   "natal": "Ceres",
+   "aspect": "square",
+   "t_house": 4,
+   "key": "Transiting Jupiter square natal Ceres",
+   "what": "Jupiter exactly square your natal Ceres"
+  },
+  {
+   "date": "2029-10-16",
+   "kind": "aspect",
+   "body": "Ceres",
+   "natal": "Saturn",
+   "aspect": "conjunct",
+   "t_house": 7,
+   "key": "Transiting Ceres conjunct natal Saturn",
+   "what": "Ceres exactly conjunct your natal Saturn (pass 3 of 3)",
+   "pass": "3 of 3",
+   "rx": false
+  },
+  {
+   "date": "2029-10-23",
+   "kind": "house",
+   "body": "Saturn",
+   "key": "Transiting Saturn in the 10th house",
+   "what": "Saturn backs into your 10th house"
+  },
+  {
+   "date": "2029-10-25",
+   "kind": "aspect",
+   "body": "Juno",
+   "natal": "Pluto",
+   "aspect": "conjunct",
+   "t_house": 4,
+   "key": "Transiting Juno conjunct natal Pluto",
+   "what": "Juno exactly conjunct your natal Pluto"
+  },
+  {
+   "date": "2029-10-27",
+   "kind": "house",
+   "body": "Juno",
+   "key": "Transiting Juno in the 5th house",
+   "what": "Juno crosses into your 5th house"
+  },
+  {
+   "date": "2029-10-30",
+   "kind": "aspect",
+   "body": "Saturn",
+   "natal": "Chiron",
+   "aspect": "square",
+   "t_house": 10,
+   "key": "Transiting Saturn square natal Chiron",
+   "what": "Saturn exactly square your natal Chiron (pass 2 of 3, retrograde)",
+   "pass": "2 of 3",
+   "rx": true
+  },
+  {
+   "date": "2029-11-02",
+   "kind": "aspect",
+   "body": "Saturn",
+   "natal": "Pluto",
+   "aspect": "opposite",
+   "t_house": 10,
+   "key": "Transiting Saturn opposite natal Pluto",
+   "what": "Saturn exactly opposite your natal Pluto (pass 2 of 3, retrograde)",
+   "pass": "2 of 3",
+   "rx": true
+  },
+  {
+   "date": "2029-11-12",
+   "kind": "arc",
+   "body": "arc",
+   "key": "Solar-arc Mars opposite natal Moon",
+   "what": "Solar-arc Mars opposite natal Moon"
+  },
+  {
+   "date": "2029-11-16",
+   "kind": "sign",
+   "body": "Juno",
+   "key": "Transiting Juno in Sagittarius",
+   "what": "Juno enters Sagittarius (your 5th house)"
+  },
+  {
+   "date": "2029-11-18",
+   "kind": "aspect",
+   "body": "Jupiter",
+   "natal": "Sun",
+   "aspect": "conjunct",
+   "t_house": 4,
+   "key": "Transiting Jupiter conjunct natal Sun",
+   "what": "Jupiter exactly conjunct your natal Sun"
+  },
+  {
+   "date": "2029-11-18",
+   "kind": "aspect",
+   "body": "Jupiter",
+   "natal": "Juno",
+   "aspect": "trine",
+   "t_house": 4,
+   "key": "Transiting Jupiter trine natal Juno",
+   "what": "Jupiter exactly trine your natal Juno"
+  },
+  {
+   "date": "2029-11-19",
+   "kind": "aspect",
+   "body": "Jupiter",
+   "natal": "Saturn",
+   "aspect": "square",
+   "t_house": 4,
+   "key": "Transiting Jupiter square natal Saturn",
+   "what": "Jupiter exactly square your natal Saturn"
+  },
+  {
+   "date": "2029-11-29",
+   "kind": "house",
+   "body": "Ceres",
+   "key": "Transiting Ceres in the 8th house",
+   "what": "Ceres crosses into your 8th house"
+  },
+  {
+   "date": "2029-12-01",
+   "kind": "aspect",
+   "body": "Juno",
+   "natal": "Mercury",
+   "aspect": "conjunct",
+   "t_house": 5,
+   "key": "Transiting Juno conjunct natal Mercury",
+   "what": "Juno exactly conjunct your natal Mercury"
+  },
+  {
+   "date": "2029-12-05",
+   "kind": "eclipse",
+   "body": "solar",
+   "key": "Solar eclipse opposite natal Hades",
+   "alt_key": "Solar eclipse in the 5th house",
+   "what": "Partial solar eclipse at 13\u00b0 Sagittarius (your 5th house) \u2014 opposite your natal Hades (orb 1.8\u00b0)"
+  },
+  {
+   "date": "2029-12-11",
+   "kind": "aspect",
+   "body": "Uranus",
+   "natal": "Apollon",
+   "aspect": "trine",
+   "t_house": 11,
+   "key": "Transiting Uranus trine natal Apollon",
+   "what": "Uranus exactly trine your natal Apollon (pass 2 of 3, retrograde)",
+   "pass": "2 of 3",
+   "rx": true
+  },
+  {
+   "date": "2029-12-20",
+   "kind": "eclipse",
+   "body": "lunar",
+   "key": "Lunar eclipse in the 12th house",
+   "what": "Total lunar eclipse at 29\u00b0 Gemini (your 12th house)"
+  },
+  {
+   "date": "2029-12-21",
+   "kind": "aspect",
+   "body": "Juno",
+   "natal": "Hades",
+   "aspect": "opposite",
+   "t_house": 5,
+   "key": "Transiting Juno opposite natal Hades",
+   "what": "Juno exactly opposite your natal Hades"
+  },
+  {
+   "date": "2029-12-31",
+   "kind": "sign",
+   "body": "Ceres",
+   "key": "Transiting Ceres in Pisces",
+   "what": "Ceres enters Pisces (your 8th house)"
+  },
+  {
+   "date": "2030-01-03",
+   "kind": "aspect",
+   "body": "Ceres",
+   "natal": "Moon",
+   "aspect": "conjunct",
+   "t_house": 8,
+   "key": "Transiting Ceres conjunct natal Moon",
+   "what": "Ceres exactly conjunct your natal Moon"
+  },
+  {
+   "date": "2030-01-10",
+   "kind": "aspect",
+   "body": "Juno",
+   "natal": "Venus",
+   "aspect": "conjunct",
+   "t_house": 5,
+   "key": "Transiting Juno conjunct natal Venus",
+   "what": "Juno exactly conjunct your natal Venus"
+  },
+  {
+   "date": "2030-01-12",
+   "kind": "aspect",
+   "body": "Jupiter",
+   "natal": "Pluto",
+   "aspect": "conjunct",
+   "t_house": 4,
+   "key": "Transiting Jupiter conjunct natal Pluto",
+   "what": "Jupiter exactly conjunct your natal Pluto (pass 1 of 3)",
+   "pass": "1 of 3",
+   "rx": false
+  },
+  {
+   "date": "2030-01-13",
+   "kind": "aspect",
+   "body": "Jupiter",
+   "natal": "Chiron",
+   "aspect": "square",
+   "t_house": 4,
+   "key": "Transiting Jupiter square natal Chiron",
+   "what": "Jupiter exactly square your natal Chiron (pass 1 of 3)",
+   "pass": "1 of 3",
+   "rx": false
+  },
+  {
+   "date": "2030-01-17",
+   "kind": "house",
+   "body": "Jupiter",
+   "key": "Transiting Jupiter in the 5th house",
+   "what": "Jupiter crosses into your 5th house"
+  },
+  {
+   "date": "2030-01-21",
+   "kind": "aspect",
+   "body": "Jupiter",
+   "natal": "Mars",
+   "aspect": "trine",
+   "t_house": 5,
+   "key": "Transiting Jupiter trine natal Mars",
+   "what": "Jupiter exactly trine your natal Mars (pass 1 of 3)",
+   "pass": "1 of 3",
+   "rx": false
+  },
+  {
+   "date": "2030-02-05",
+   "kind": "house",
+   "body": "Juno",
+   "key": "Transiting Juno in the 6th house",
+   "what": "Juno crosses into your 6th house"
+  },
+  {
+   "date": "2030-02-09",
+   "kind": "arc",
+   "body": "arc",
+   "key": "Solar-arc Uranus square natal Pluto",
+   "what": "Solar-arc Uranus square natal Pluto"
+  },
+  {
+   "date": "2030-02-16",
+   "kind": "house",
+   "body": "Ceres",
+   "key": "Transiting Ceres in the 9th house",
+   "what": "Ceres crosses into your 9th house"
+  },
+  {
+   "date": "2030-02-17",
+   "kind": "sign",
+   "body": "Juno",
+   "key": "Transiting Juno in Capricorn",
+   "what": "Juno enters Capricorn (your 6th house)"
+  },
+  {
+   "date": "2030-02-20",
+   "kind": "aspect",
+   "body": "Jupiter",
+   "natal": "ASC",
+   "aspect": "trine",
+   "t_house": 5,
+   "key": "Transiting Jupiter trine natal ASC",
+   "what": "Jupiter exactly trine your natal ASC (pass 1 of 3)",
+   "pass": "1 of 3",
+   "rx": false
+  },
+  {
+   "date": "2030-03-20",
+   "kind": "sign",
+   "body": "Ceres",
+   "key": "Transiting Ceres in Aries",
+   "what": "Ceres enters Aries (your 9th house)"
+  },
+  {
+   "date": "2030-04-01",
+   "kind": "aspect",
+   "body": "Saturn",
+   "natal": "Pluto",
+   "aspect": "opposite",
+   "t_house": 10,
+   "key": "Transiting Saturn opposite natal Pluto",
+   "what": "Saturn exactly opposite your natal Pluto (pass 3 of 3)",
+   "pass": "3 of 3",
+   "rx": false
+  },
+  {
+   "date": "2030-04-03",
+   "kind": "aspect",
+   "body": "Jupiter",
+   "natal": "ASC",
+   "aspect": "trine",
+   "t_house": 5,
+   "key": "Transiting Jupiter trine natal ASC",
+   "what": "Jupiter exactly trine your natal ASC (pass 2 of 3, retrograde)",
+   "pass": "2 of 3",
+   "rx": true
+  },
+  {
+   "date": "2030-04-03",
+   "kind": "aspect",
+   "body": "Saturn",
+   "natal": "Chiron",
+   "aspect": "square",
+   "t_house": 10,
+   "key": "Transiting Saturn square natal Chiron",
+   "what": "Saturn exactly square your natal Chiron (pass 3 of 3)",
+   "pass": "3 of 3",
+   "rx": false
+  },
+  {
+   "date": "2030-04-07",
+   "kind": "house",
+   "body": "Saturn",
+   "key": "Transiting Saturn in the 11th house",
+   "what": "Saturn crosses into your 11th house"
+  },
+  {
+   "date": "2030-04-20",
+   "kind": "aspect",
+   "body": "Pluto",
+   "natal": "Hades",
+   "aspect": "trine",
+   "t_house": 7,
+   "key": "Transiting Pluto trine natal Hades",
+   "what": "Pluto exactly trine your natal Hades (pass 1 of 5)",
+   "pass": "1 of 5",
+   "rx": false
+  },
+  {
+   "date": "2030-04-24",
+   "kind": "aspect",
+   "body": "Pluto",
+   "natal": "Sun",
+   "aspect": "square",
+   "t_house": 7,
+   "key": "Transiting Pluto square natal Sun",
+   "what": "Pluto exactly square your natal Sun (pass 1 of 5)",
+   "pass": "1 of 5",
+   "rx": false
+  },
+  {
+   "date": "2030-04-27",
+   "kind": "aspect",
+   "body": "Chiron",
+   "natal": "Sun",
+   "aspect": "opposite",
+   "t_house": 10,
+   "key": "Transiting Chiron opposite natal Sun",
+   "what": "Chiron exactly opposite your natal Sun (pass 3 of 3)",
+   "pass": "3 of 3",
+   "rx": false
+  },
+  {
+   "date": "2030-04-27",
+   "kind": "aspect",
+   "body": "Juno",
+   "natal": "Juno",
+   "aspect": "opposite",
+   "t_house": 6,
+   "key": "Transiting Juno opposite natal Juno",
+   "what": "Juno exactly opposite your natal Juno (pass 1 of 3)",
+   "pass": "1 of 3",
+   "rx": false
+  },
+  {
+   "date": "2030-04-30",
+   "kind": "aspect",
+   "body": "Chiron",
+   "natal": "Saturn",
+   "aspect": "square",
+   "t_house": 10,
+   "key": "Transiting Chiron square natal Saturn",
+   "what": "Chiron exactly square your natal Saturn (pass 3 of 5)",
+   "pass": "3 of 5",
+   "rx": false
+  },
+  {
+   "date": "2030-04-30",
+   "kind": "aspect",
+   "body": "Neptune",
+   "natal": "Juno",
+   "aspect": "square",
+   "t_house": 9,
+   "key": "Transiting Neptune square natal Juno",
+   "what": "Neptune exactly square your natal Juno (pass 1 of 3)",
+   "pass": "1 of 3",
+   "rx": false
+  },
+  {
+   "date": "2030-04-30",
+   "kind": "aspect",
+   "body": "Uranus",
+   "natal": "Apollon",
+   "aspect": "trine",
+   "t_house": 11,
+   "key": "Transiting Uranus trine natal Apollon",
+   "what": "Uranus exactly trine your natal Apollon (pass 3 of 3)",
+   "pass": "3 of 3",
+   "rx": false
+  },
+  {
+   "date": "2030-05-01",
+   "kind": "arc",
+   "body": "arc",
+   "key": "Solar-arc Uranus opposite natal Chiron",
+   "what": "Solar-arc Uranus opposite natal Chiron"
+  },
+  {
+   "date": "2030-05-01",
+   "kind": "aspect",
+   "body": "Neptune",
+   "natal": "Hades",
+   "aspect": "sextile",
+   "t_house": 9,
+   "key": "Transiting Neptune sextile natal Hades",
+   "what": "Neptune exactly sextile your natal Hades (pass 1 of 3)",
+   "pass": "1 of 3",
+   "rx": false
+  },
+  {
+   "date": "2030-05-04",
+   "kind": "aspect",
+   "body": "Jupiter",
+   "natal": "Mars",
+   "aspect": "trine",
+   "t_house": 5,
+   "key": "Transiting Jupiter trine natal Mars",
+   "what": "Jupiter exactly trine your natal Mars (pass 2 of 3, retrograde)",
+   "pass": "2 of 3",
+   "rx": true
+  },
+  {
+   "date": "2030-05-07",
+   "kind": "aspect",
+   "body": "Juno",
+   "natal": "Juno",
+   "aspect": "opposite",
+   "t_house": 6,
+   "key": "Transiting Juno opposite natal Juno",
+   "what": "Juno exactly opposite your natal Juno (pass 2 of 3, retrograde)",
+   "pass": "2 of 3",
+   "rx": true
+  },
+  {
+   "date": "2030-05-07",
+   "kind": "aspect",
+   "body": "Neptune",
+   "natal": "Saturn",
+   "aspect": "sextile",
+   "t_house": 9,
+   "key": "Transiting Neptune sextile natal Saturn",
+   "what": "Neptune exactly sextile your natal Saturn (pass 1 of 3)",
+   "pass": "1 of 3",
+   "rx": false
+  },
+  {
+   "date": "2030-05-08",
+   "kind": "aspect",
+   "body": "Ceres",
+   "natal": "MC",
+   "aspect": "conjunct",
+   "t_house": 10,
+   "key": "Transiting Ceres conjunct natal MC",
+   "what": "Ceres exactly conjunct your natal MC"
+  },
+  {
+   "date": "2030-05-08",
+   "kind": "house",
+   "body": "Ceres",
+   "key": "Transiting Ceres in the 10th house",
+   "what": "Ceres crosses into your 10th house"
+  },
+  {
+   "date": "2030-05-10",
+   "kind": "house",
+   "body": "Jupiter",
+   "key": "Transiting Jupiter in the 4th house",
+   "what": "Jupiter backs into your 4th house"
+  },
+  {
+   "date": "2030-05-14",
+   "kind": "aspect",
+   "body": "Jupiter",
+   "natal": "Chiron",
+   "aspect": "square",
+   "t_house": 4,
+   "key": "Transiting Jupiter square natal Chiron",
+   "what": "Jupiter exactly square your natal Chiron (pass 2 of 3, retrograde)",
+   "pass": "2 of 3",
+   "rx": true
+  },
+  {
+   "date": "2030-05-16",
+   "kind": "aspect",
+   "body": "Jupiter",
+   "natal": "Pluto",
+   "aspect": "conjunct",
+   "t_house": 4,
+   "key": "Transiting Jupiter conjunct natal Pluto",
+   "what": "Jupiter exactly conjunct your natal Pluto (pass 2 of 3, retrograde)",
+   "pass": "2 of 3",
+   "rx": true
+  },
+  {
+   "date": "2030-05-31",
+   "kind": "aspect",
+   "body": "Pluto",
+   "natal": "Sun",
+   "aspect": "square",
+   "t_house": 7,
+   "key": "Transiting Pluto square natal Sun",
+   "what": "Pluto exactly square your natal Sun (pass 2 of 5, retrograde)",
+   "pass": "2 of 5",
+   "rx": true
+  },
+  {
+   "date": "2030-06-01",
+   "kind": "eclipse",
+   "body": "solar",
+   "key": "Solar eclipse conjunct natal Hades",
+   "alt_key": "Solar eclipse in the 11th house",
+   "what": "Annular solar eclipse at 10\u00b0 Gemini (your 11th house) \u2014 conjunct your natal Hades (orb 1.1\u00b0)"
+  },
+  {
+   "date": "2030-06-01",
+   "kind": "sign",
+   "body": "Saturn",
+   "key": "Transiting Saturn in Gemini",
+   "what": "Saturn enters Gemini (your 11th house)"
+  },
+  {
+   "date": "2030-06-05",
+   "kind": "aspect",
+   "body": "Pluto",
+   "natal": "Hades",
+   "aspect": "trine",
+   "t_house": 7,
+   "key": "Transiting Pluto trine natal Hades",
+   "what": "Pluto exactly trine your natal Hades (pass 2 of 5, retrograde)",
+   "pass": "2 of 5",
+   "rx": true
+  },
+  {
+   "date": "2030-06-07",
+   "kind": "sign",
+   "body": "Ceres",
+   "key": "Transiting Ceres in Taurus",
+   "what": "Ceres enters Taurus (your 10th house)"
+  },
+  {
+   "date": "2030-06-10",
+   "kind": "aspect",
+   "body": "Uranus",
+   "natal": "Venus",
+   "aspect": "opposite",
+   "t_house": 11,
+   "key": "Transiting Uranus opposite natal Venus",
+   "what": "Uranus exactly opposite your natal Venus"
+  },
+  {
+   "date": "2030-06-11",
+   "kind": "aspect",
+   "body": "Saturn",
+   "natal": "Moon",
+   "aspect": "square",
+   "t_house": 11,
+   "key": "Transiting Saturn square natal Moon",
+   "what": "Saturn exactly square your natal Moon"
+  },
+  {
+   "date": "2030-06-12",
+   "kind": "aspect",
+   "body": "Uranus",
+   "natal": "MC",
+   "aspect": "sextile",
+   "t_house": 11,
+   "key": "Transiting Uranus sextile natal MC",
+   "what": "Uranus exactly sextile your natal MC"
+  },
+  {
+   "date": "2030-06-15",
+   "kind": "eclipse",
+   "body": "lunar",
+   "key": "Lunar eclipse in the 5th house",
+   "what": "Partial lunar eclipse at 24\u00b0 Sagittarius (your 5th house)"
+  },
+  {
+   "date": "2030-06-22",
+   "kind": "aspect",
+   "body": "Saturn",
+   "natal": "Ceres",
+   "aspect": "trine",
+   "t_house": 11,
+   "key": "Transiting Saturn trine natal Ceres",
+   "what": "Saturn exactly trine your natal Ceres (pass 1 of 3)",
+   "pass": "1 of 3",
+   "rx": false
+  },
+  {
+   "date": "2030-07-13",
+   "kind": "aspect",
+   "body": "Saturn",
+   "natal": "Jupiter",
+   "aspect": "trine",
+   "t_house": 11,
+   "key": "Transiting Saturn trine natal Jupiter",
+   "what": "Saturn exactly trine your natal Jupiter (pass 1 of 3)",
+   "pass": "1 of 3",
+   "rx": false
+  },
+  {
+   "date": "2030-07-15",
+   "kind": "aspect",
+   "body": "Saturn",
+   "natal": "Mercury",
+   "aspect": "opposite",
+   "t_house": 11,
+   "key": "Transiting Saturn opposite natal Mercury",
+   "what": "Saturn exactly opposite your natal Mercury (pass 1 of 3)",
+   "pass": "1 of 3",
+   "rx": false
+  },
+  {
+   "date": "2030-07-16",
+   "kind": "sign",
+   "body": "Juno",
+   "key": "Transiting Juno in Sagittarius",
+   "what": "Juno backs into Sagittarius (your 6th house)"
+  },
+  {
+   "date": "2030-08-11",
+   "kind": "house",
+   "body": "Juno",
+   "key": "Transiting Juno in the 5th house",
+   "what": "Juno backs into your 5th house"
+  },
+  {
+   "date": "2030-08-29",
+   "kind": "house",
+   "body": "Juno",
+   "key": "Transiting Juno in the 6th house",
+   "what": "Juno crosses into your 6th house"
+  },
+  {
+   "date": "2030-09-02",
+   "kind": "arc",
+   "body": "arc",
+   "key": "Solar-arc DSC square natal Mercury",
+   "what": "Solar-arc DSC square natal Mercury"
+  },
+  {
+   "date": "2030-09-04",
+   "kind": "aspect",
+   "body": "Uranus",
+   "natal": "Chiron",
+   "aspect": "sextile",
+   "t_house": 11,
+   "key": "Transiting Uranus sextile natal Chiron",
+   "what": "Uranus exactly sextile your natal Chiron (pass 1 of 3)",
+   "pass": "1 of 3",
+   "rx": false
+  },
+  {
+   "date": "2030-09-11",
+   "kind": "aspect",
+   "body": "Jupiter",
+   "natal": "Pluto",
+   "aspect": "conjunct",
+   "t_house": 4,
+   "key": "Transiting Jupiter conjunct natal Pluto",
+   "what": "Jupiter exactly conjunct your natal Pluto (pass 3 of 3)",
+   "pass": "3 of 3",
+   "rx": false
+  },
+  {
+   "date": "2030-09-12",
+   "kind": "aspect",
+   "body": "Jupiter",
+   "natal": "Chiron",
+   "aspect": "square",
+   "t_house": 4,
+   "key": "Transiting Jupiter square natal Chiron",
+   "what": "Jupiter exactly square your natal Chiron (pass 3 of 3)",
+   "pass": "3 of 3",
+   "rx": false
+  },
+  {
+   "date": "2030-09-16",
+   "kind": "house",
+   "body": "Jupiter",
+   "key": "Transiting Jupiter in the 5th house",
+   "what": "Jupiter crosses into your 5th house"
+  },
+  {
+   "date": "2030-09-20",
+   "kind": "aspect",
+   "body": "Jupiter",
+   "natal": "Mars",
+   "aspect": "trine",
+   "t_house": 5,
+   "key": "Transiting Jupiter trine natal Mars",
+   "what": "Jupiter exactly trine your natal Mars (pass 3 of 3)",
+   "pass": "3 of 3",
+   "rx": false
+  },
+  {
+   "date": "2030-09-23",
+   "kind": "arc",
+   "body": "arc",
+   "key": "Solar-arc Venus opposite natal ASC",
+   "what": "Solar-arc Venus opposite natal ASC"
+  },
+  {
+   "date": "2030-09-23",
+   "kind": "arc",
+   "body": "arc",
+   "key": "Solar-arc Venus conjunct natal DSC",
+   "what": "Solar-arc Venus conjunct natal DSC"
+  },
+  {
+   "date": "2030-09-26",
+   "kind": "sign",
+   "body": "Juno",
+   "key": "Transiting Juno in Capricorn",
+   "what": "Juno enters Capricorn (your 6th house)"
+  },
+  {
+   "date": "2030-09-29",
+   "kind": "aspect",
+   "body": "Neptune",
+   "natal": "Saturn",
+   "aspect": "sextile",
+   "t_house": 9,
+   "key": "Transiting Neptune sextile natal Saturn",
+   "what": "Neptune exactly sextile your natal Saturn (pass 2 of 3, retrograde)",
+   "pass": "2 of 3",
+   "rx": true
+  },
+  {
+   "date": "2030-10-05",
+   "kind": "aspect",
+   "body": "Neptune",
+   "natal": "Hades",
+   "aspect": "sextile",
+   "t_house": 9,
+   "key": "Transiting Neptune sextile natal Hades",
+   "what": "Neptune exactly sextile your natal Hades (pass 2 of 3, retrograde)",
+   "pass": "2 of 3",
+   "rx": true
+  },
+  {
+   "date": "2030-10-07",
+   "kind": "aspect",
+   "body": "Jupiter",
+   "natal": "ASC",
+   "aspect": "trine",
+   "t_house": 5,
+   "key": "Transiting Jupiter trine natal ASC",
+   "what": "Jupiter exactly trine your natal ASC (pass 3 of 3)",
+   "pass": "3 of 3",
+   "rx": false
+  },
+  {
+   "date": "2030-10-07",
+   "kind": "aspect",
+   "body": "Neptune",
+   "natal": "Juno",
+   "aspect": "square",
+   "t_house": 9,
+   "key": "Transiting Neptune square natal Juno",
+   "what": "Neptune exactly square your natal Juno (pass 2 of 3, retrograde)",
+   "pass": "2 of 3",
+   "rx": true
+  },
+  {
+   "date": "2030-10-21",
+   "kind": "aspect",
+   "body": "Uranus",
+   "natal": "Chiron",
+   "aspect": "sextile",
+   "t_house": 11,
+   "key": "Transiting Uranus sextile natal Chiron",
+   "what": "Uranus exactly sextile your natal Chiron (pass 2 of 3, retrograde)",
+   "pass": "2 of 3",
+   "rx": true
+  },
+  {
+   "date": "2030-10-22",
+   "kind": "sign",
+   "body": "Jupiter",
+   "key": "Transiting Jupiter in Sagittarius",
+   "what": "Jupiter enters Sagittarius (your 5th house)"
+  },
+  {
+   "date": "2030-10-29",
+   "kind": "aspect",
+   "body": "Jupiter",
+   "natal": "Moon",
+   "aspect": "square",
+   "t_house": 5,
+   "key": "Transiting Jupiter square natal Moon",
+   "what": "Jupiter exactly square your natal Moon"
+  },
+  {
+   "date": "2030-11-10",
+   "kind": "aspect",
+   "body": "Juno",
+   "natal": "Juno",
+   "aspect": "opposite",
+   "t_house": 6,
+   "key": "Transiting Juno opposite natal Juno",
+   "what": "Juno exactly opposite your natal Juno (pass 3 of 3)",
+   "pass": "3 of 3",
+   "rx": false
+  },
+  {
+   "date": "2030-11-16",
+   "kind": "aspect",
+   "body": "Jupiter",
+   "natal": "Mercury",
+   "aspect": "conjunct",
+   "t_house": 5,
+   "key": "Transiting Jupiter conjunct natal Mercury",
+   "what": "Jupiter exactly conjunct your natal Mercury"
+  },
+  {
+   "date": "2030-11-19",
+   "kind": "aspect",
+   "body": "Juno",
+   "natal": "Uranus",
+   "aspect": "conjunct",
+   "t_house": 6,
+   "key": "Transiting Juno conjunct natal Uranus",
+   "what": "Juno exactly conjunct your natal Uranus"
+  },
+  {
+   "date": "2030-11-24",
+   "kind": "aspect",
+   "body": "Juno",
+   "natal": "Neptune",
+   "aspect": "conjunct",
+   "t_house": 6,
+   "key": "Transiting Juno conjunct natal Neptune",
+   "what": "Juno exactly conjunct your natal Neptune"
+  },
+  {
+   "date": "2030-11-25",
+   "kind": "eclipse",
+   "body": "solar",
+   "key": "Solar eclipse conjunct natal Mercury",
+   "alt_key": "Solar eclipse in the 5th house",
+   "what": "Total solar eclipse at 3\u00b0 Sagittarius (your 5th house) \u2014 conjunct your natal Mercury (orb 2.1\u00b0)"
+  },
+  {
+   "date": "2030-11-30",
+   "kind": "aspect",
+   "body": "Saturn",
+   "natal": "Mercury",
+   "aspect": "opposite",
+   "t_house": 11,
+   "key": "Transiting Saturn opposite natal Mercury",
+   "what": "Saturn exactly opposite your natal Mercury (pass 2 of 3, retrograde)",
+   "pass": "2 of 3",
+   "rx": true
+  },
+  {
+   "date": "2030-12-03",
+   "kind": "aspect",
+   "body": "Saturn",
+   "natal": "Jupiter",
+   "aspect": "trine",
+   "t_house": 11,
+   "key": "Transiting Saturn trine natal Jupiter",
+   "what": "Saturn exactly trine your natal Jupiter (pass 2 of 3, retrograde)",
+   "pass": "2 of 3",
+   "rx": true
+  },
+  {
+   "date": "2030-12-09",
+   "kind": "eclipse",
+   "body": "lunar",
+   "key": "Lunar eclipse opposite natal Venus",
+   "alt_key": "Lunar eclipse in the 11th house",
+   "what": "Penumbral lunar eclipse at 17\u00b0 Gemini (your 11th house) \u2014 opposite your natal Venus (orb 0.9\u00b0)"
+  },
+  {
+   "date": "2030-12-13",
+   "kind": "aspect",
+   "body": "Juno",
+   "natal": "Mars",
+   "aspect": "opposite",
+   "t_house": 6,
+   "key": "Transiting Juno opposite natal Mars",
+   "what": "Juno exactly opposite your natal Mars"
+  },
+  {
+   "date": "2030-12-16",
+   "kind": "aspect",
+   "body": "Jupiter",
+   "natal": "Hades",
+   "aspect": "opposite",
+   "t_house": 5,
+   "key": "Transiting Jupiter opposite natal Hades",
+   "what": "Jupiter exactly opposite your natal Hades"
+  },
+  {
+   "date": "2030-12-21",
+   "kind": "aspect",
+   "body": "Juno",
+   "natal": "ASC",
+   "aspect": "opposite",
+   "t_house": 6,
+   "key": "Transiting Juno opposite natal ASC",
+   "what": "Juno exactly opposite your natal ASC"
+  },
+  {
+   "date": "2030-12-21",
+   "kind": "house",
+   "body": "Juno",
+   "key": "Transiting Juno in the 7th house",
+   "what": "Juno crosses into your 7th house"
+  },
+  {
+   "date": "2030-12-29",
+   "kind": "sign",
+   "body": "Juno",
+   "key": "Transiting Juno in Aquarius",
+   "what": "Juno enters Aquarius (your 7th house)"
+  },
+  {
+   "date": "2031-01-04",
+   "kind": "aspect",
+   "body": "Juno",
+   "natal": "Ceres",
+   "aspect": "conjunct",
+   "t_house": 7,
+   "key": "Transiting Juno conjunct natal Ceres",
+   "what": "Juno exactly conjunct your natal Ceres"
+  },
+  {
+   "date": "2031-01-06",
+   "kind": "aspect",
+   "body": "Saturn",
+   "natal": "Ceres",
+   "aspect": "trine",
+   "t_house": 11,
+   "key": "Transiting Saturn trine natal Ceres",
+   "what": "Saturn exactly trine your natal Ceres (pass 2 of 3, retrograde)",
+   "pass": "2 of 3",
+   "rx": true
+  },
+  {
+   "date": "2031-01-11",
+   "kind": "aspect",
+   "body": "Chiron",
+   "natal": "Saturn",
+   "aspect": "square",
+   "t_house": 10,
+   "key": "Transiting Chiron square natal Saturn",
+   "what": "Chiron exactly square your natal Saturn (pass 4 of 5, retrograde)",
+   "pass": "4 of 5",
+   "rx": true
+  },
+  {
+   "date": "2031-01-16",
+   "kind": "aspect",
+   "body": "Jupiter",
+   "natal": "Venus",
+   "aspect": "conjunct",
+   "t_house": 5,
+   "key": "Transiting Jupiter conjunct natal Venus",
+   "what": "Jupiter exactly conjunct your natal Venus"
+  },
+  {
+   "date": "2031-01-17",
+   "kind": "aspect",
+   "body": "Jupiter",
+   "natal": "MC",
+   "aspect": "trine",
+   "t_house": 5,
+   "key": "Transiting Jupiter trine natal MC",
+   "what": "Jupiter exactly trine your natal MC"
+  },
+  {
+   "date": "2031-01-27",
+   "kind": "aspect",
+   "body": "Juno",
+   "natal": "Saturn",
+   "aspect": "conjunct",
+   "t_house": 7,
+   "key": "Transiting Juno conjunct natal Saturn",
+   "what": "Juno exactly conjunct your natal Saturn"
+  },
+  {
+   "date": "2031-01-31",
+   "kind": "aspect",
+   "body": "Chiron",
+   "natal": "Saturn",
+   "aspect": "square",
+   "t_house": 10,
+   "key": "Transiting Chiron square natal Saturn",
+   "what": "Chiron exactly square your natal Saturn (pass 5 of 5)",
+   "pass": "5 of 5",
+   "rx": false
+  },
+  {
+   "date": "2031-02-07",
+   "kind": "aspect",
+   "body": "Jupiter",
+   "natal": "Chiron",
+   "aspect": "trine",
+   "t_house": 5,
+   "key": "Transiting Jupiter trine natal Chiron",
+   "what": "Jupiter exactly trine your natal Chiron (pass 1 of 3)",
+   "pass": "1 of 3",
+   "rx": false
+  },
+  {
+   "date": "2031-02-10",
+   "kind": "aspect",
+   "body": "Pluto",
+   "natal": "Hades",
+   "aspect": "trine",
+   "t_house": 7,
+   "key": "Transiting Pluto trine natal Hades",
+   "what": "Pluto exactly trine your natal Hades (pass 3 of 5)",
+   "pass": "3 of 5",
+   "rx": false
+  },
+  {
+   "date": "2031-02-11",
+   "kind": "aspect",
+   "body": "Pluto",
+   "natal": "Sun",
+   "aspect": "square",
+   "t_house": 7,
+   "key": "Transiting Pluto square natal Sun",
+   "what": "Pluto exactly square your natal Sun (pass 3 of 5)",
+   "pass": "3 of 5",
+   "rx": false
+  },
+  {
+   "date": "2031-02-15",
+   "kind": "house",
+   "body": "Juno",
+   "key": "Transiting Juno in the 8th house",
+   "what": "Juno crosses into your 8th house"
+  },
+  {
+   "date": "2031-02-16",
+   "kind": "aspect",
+   "body": "Pluto",
+   "natal": "Saturn",
+   "aspect": "conjunct",
+   "t_house": 7,
+   "key": "Transiting Pluto conjunct natal Saturn",
+   "what": "Pluto exactly conjunct your natal Saturn (pass 1 of 3)",
+   "pass": "1 of 3",
+   "rx": false
+  },
+  {
+   "date": "2031-02-20",
+   "kind": "aspect",
+   "body": "Juno",
+   "natal": "Chiron",
+   "aspect": "opposite",
+   "t_house": 8,
+   "key": "Transiting Juno opposite natal Chiron",
+   "what": "Juno exactly opposite your natal Chiron"
+  },
+  {
+   "date": "2031-02-28",
+   "kind": "aspect",
+   "body": "Saturn",
+   "natal": "Ceres",
+   "aspect": "trine",
+   "t_house": 11,
+   "key": "Transiting Saturn trine natal Ceres",
+   "what": "Saturn exactly trine your natal Ceres (pass 3 of 3)",
+   "pass": "3 of 3",
+   "rx": false
+  },
+  {
+   "date": "2031-03-02",
+   "kind": "aspect",
+   "body": "Neptune",
+   "natal": "Juno",
+   "aspect": "square",
+   "t_house": 9,
+   "key": "Transiting Neptune square natal Juno",
+   "what": "Neptune exactly square your natal Juno (pass 3 of 3)",
+   "pass": "3 of 3",
+   "rx": false
+  },
+  {
+   "date": "2031-03-03",
+   "kind": "aspect",
+   "body": "Neptune",
+   "natal": "Hades",
+   "aspect": "sextile",
+   "t_house": 9,
+   "key": "Transiting Neptune sextile natal Hades",
+   "what": "Neptune exactly sextile your natal Hades (pass 3 of 3)",
+   "pass": "3 of 3",
+   "rx": false
+  },
+  {
+   "date": "2031-03-06",
+   "kind": "house",
+   "body": "Jupiter",
+   "key": "Transiting Jupiter in the 6th house",
+   "what": "Jupiter crosses into your 6th house"
+  },
+  {
+   "date": "2031-03-08",
+   "kind": "sign",
+   "body": "Juno",
+   "key": "Transiting Juno in Pisces",
+   "what": "Juno enters Pisces (your 8th house)"
+  },
+  {
+   "date": "2031-03-09",
+   "kind": "aspect",
+   "body": "Neptune",
+   "natal": "Saturn",
+   "aspect": "sextile",
+   "t_house": 9,
+   "key": "Transiting Neptune sextile natal Saturn",
+   "what": "Neptune exactly sextile your natal Saturn (pass 3 of 3)",
+   "pass": "3 of 3",
+   "rx": false
+  },
+  {
+   "date": "2031-03-11",
+   "kind": "aspect",
+   "body": "Juno",
+   "natal": "Moon",
+   "aspect": "conjunct",
+   "t_house": 8,
+   "key": "Transiting Juno conjunct natal Moon",
+   "what": "Juno exactly conjunct your natal Moon"
+  },
+  {
+   "date": "2031-03-12",
+   "kind": "house",
+   "body": "Ceres",
+   "key": "Transiting Ceres in the 11th house",
+   "what": "Ceres crosses into your 11th house"
+  },
+  {
+   "date": "2031-04-01",
+   "kind": "aspect",
+   "body": "Saturn",
+   "natal": "Jupiter",
+   "aspect": "trine",
+   "t_house": 11,
+   "key": "Transiting Saturn trine natal Jupiter",
+   "what": "Saturn exactly trine your natal Jupiter (pass 3 of 3)",
+   "pass": "3 of 3",
+   "rx": false
+  },
+  {
+   "date": "2031-04-01",
+   "kind": "sign",
+   "body": "Ceres",
+   "key": "Transiting Ceres in Gemini",
+   "what": "Ceres enters Gemini (your 11th house)"
+  },
+  {
+   "date": "2031-04-03",
+   "kind": "aspect",
+   "body": "Saturn",
+   "natal": "Mercury",
+   "aspect": "opposite",
+   "t_house": 11,
+   "key": "Transiting Saturn opposite natal Mercury",
+   "what": "Saturn exactly opposite your natal Mercury (pass 3 of 3)",
+   "pass": "3 of 3",
+   "rx": false
+  },
+  {
+   "date": "2031-04-16",
+   "kind": "house",
+   "body": "Juno",
+   "key": "Transiting Juno in the 9th house",
+   "what": "Juno crosses into your 9th house"
+  },
+  {
+   "date": "2031-05-02",
+   "kind": "aspect",
+   "body": "Ceres",
+   "natal": "Hades",
+   "aspect": "conjunct",
+   "t_house": 11,
+   "key": "Transiting Ceres conjunct natal Hades",
+   "what": "Ceres exactly conjunct your natal Hades"
+  },
+  {
+   "date": "2031-05-06",
+   "kind": "eclipse",
+   "body": "lunar",
+   "key": "Lunar eclipse in the 4th house",
+   "what": "Penumbral lunar eclipse at 16\u00b0 Scorpio (your 4th house)"
+  },
+  {
+   "date": "2031-05-14",
+   "kind": "sign",
+   "body": "Juno",
+   "key": "Transiting Juno in Aries",
+   "what": "Juno enters Aries (your 9th house)"
+  },
+  {
+   "date": "2031-05-21",
+   "kind": "eclipse",
+   "body": "solar",
+   "key": "Solar eclipse in the 11th house",
+   "what": "Annular solar eclipse at 0\u00b0 Gemini (your 11th house)"
+  },
+  {
+   "date": "2031-05-23",
+   "kind": "aspect",
+   "body": "Neptune",
+   "natal": "Uranus",
+   "aspect": "square",
+   "t_house": 9,
+   "key": "Transiting Neptune square natal Uranus",
+   "what": "Neptune exactly square your natal Uranus (pass 1 of 2)",
+   "pass": "1 of 2",
+   "rx": false
+  },
+  {
+   "date": "2031-05-26",
+   "kind": "aspect",
+   "body": "Juno",
+   "natal": "Jupiter",
+   "aspect": "opposite",
+   "t_house": 9,
+   "key": "Transiting Juno opposite natal Jupiter",
+   "what": "Juno exactly opposite your natal Jupiter"
+  },
+  {
+   "date": "2031-05-26",
+   "kind": "house",
+   "body": "Jupiter",
+   "key": "Transiting Jupiter in the 5th house",
+   "what": "Jupiter backs into your 5th house"
+  },
+  {
+   "date": "2031-05-30",
+   "kind": "aspect",
+   "body": "Saturn",
+   "natal": "Hades",
+   "aspect": "conjunct",
+   "t_house": 11,
+   "key": "Transiting Saturn conjunct natal Hades",
+   "what": "Saturn exactly conjunct your natal Hades"
+  },
+  {
+   "date": "2031-06-01",
+   "kind": "aspect",
+   "body": "Saturn",
+   "natal": "Saturn",
+   "aspect": "trine",
+   "t_house": 11,
+   "key": "Transiting Saturn trine natal Saturn",
+   "what": "Saturn exactly trine your natal Saturn"
+  },
+  {
+   "date": "2031-06-05",
+   "kind": "eclipse",
+   "body": "lunar",
+   "key": "Lunar eclipse opposite natal Hades",
+   "alt_key": "Lunar eclipse in the 5th house",
+   "what": "Penumbral lunar eclipse at 14\u00b0 Sagittarius (your 5th house) \u2014 opposite your natal Hades (orb 2.6\u00b0)"
+  },
+  {
+   "date": "2031-06-05",
+   "kind": "progressed",
+   "body": "Moon",
+   "key": "Progressed Moon in the 1st house",
+   "what": "Progressed Moon enters your 1st house"
+  },
+  {
+   "date": "2031-06-06",
+   "kind": "house",
+   "body": "Ceres",
+   "key": "Transiting Ceres in the 12th house",
+   "what": "Ceres crosses into your 12th house"
+  },
+  {
+   "date": "2031-06-08",
+   "kind": "aspect",
+   "body": "Uranus",
+   "natal": "Chiron",
+   "aspect": "sextile",
+   "t_house": 11,
+   "key": "Transiting Uranus sextile natal Chiron",
+   "what": "Uranus exactly sextile your natal Chiron (pass 3 of 3)",
+   "pass": "3 of 3",
+   "rx": false
+  },
+  {
+   "date": "2031-06-14",
+   "kind": "sign",
+   "body": "Ceres",
+   "key": "Transiting Ceres in Cancer",
+   "what": "Ceres enters Cancer (your 12th house)"
+  },
+  {
+   "date": "2031-06-22",
+   "kind": "aspect",
+   "body": "Juno",
+   "natal": "Apollon",
+   "aspect": "opposite",
+   "t_house": 9,
+   "key": "Transiting Juno opposite natal Apollon",
+   "what": "Juno exactly opposite your natal Apollon"
+  },
+  {
+   "date": "2031-06-26",
+   "kind": "aspect",
+   "body": "Jupiter",
+   "natal": "Chiron",
+   "aspect": "trine",
+   "t_house": 5,
+   "key": "Transiting Jupiter trine natal Chiron",
+   "what": "Jupiter exactly trine your natal Chiron (pass 2 of 3, retrograde)",
+   "pass": "2 of 3",
+   "rx": true
+  },
+  {
+   "date": "2031-06-28",
+   "kind": "aspect",
+   "body": "Juno",
+   "natal": "MC",
+   "aspect": "conjunct",
+   "t_house": 10,
+   "key": "Transiting Juno conjunct natal MC",
+   "what": "Juno exactly conjunct your natal MC"
+  },
+  {
+   "date": "2031-06-28",
+   "kind": "house",
+   "body": "Juno",
+   "key": "Transiting Juno in the 10th house",
+   "what": "Juno crosses into your 10th house"
+  },
+  {
+   "date": "2031-07-04",
+   "kind": "aspect",
+   "body": "Saturn",
+   "natal": "Apollon",
+   "aspect": "trine",
+   "t_house": 11,
+   "key": "Transiting Saturn trine natal Apollon",
+   "what": "Saturn exactly trine your natal Apollon"
+  },
+  {
+   "date": "2031-07-11",
+   "kind": "aspect",
+   "body": "Ceres",
+   "natal": "Juno",
+   "aspect": "conjunct",
+   "t_house": 12,
+   "key": "Transiting Ceres conjunct natal Juno",
+   "what": "Ceres exactly conjunct your natal Juno"
+  },
+  {
+   "date": "2031-07-24",
+   "kind": "aspect",
+   "body": "Saturn",
+   "natal": "Venus",
+   "aspect": "opposite",
+   "t_house": 11,
+   "key": "Transiting Saturn opposite natal Venus",
+   "what": "Saturn exactly opposite your natal Venus (pass 1 of 2)",
+   "pass": "1 of 2",
+   "rx": false
+  },
+  {
+   "date": "2031-07-29",
+   "kind": "sign",
+   "body": "Juno",
+   "key": "Transiting Juno in Taurus",
+   "what": "Juno enters Taurus (your 10th house)"
+  },
+  {
+   "date": "2031-08-08",
+   "kind": "aspect",
+   "body": "Ceres",
+   "natal": "Mars",
+   "aspect": "conjunct",
+   "t_house": 12,
+   "key": "Transiting Ceres conjunct natal Mars",
+   "what": "Ceres exactly conjunct your natal Mars"
+  },
+  {
+   "date": "2031-08-15",
+   "kind": "aspect",
+   "body": "Ceres",
+   "natal": "ASC",
+   "aspect": "conjunct",
+   "t_house": 1,
+   "key": "Transiting Ceres conjunct natal ASC",
+   "what": "Ceres exactly conjunct your natal ASC"
+  },
+  {
+   "date": "2031-08-15",
+   "kind": "house",
+   "body": "Ceres",
+   "key": "Transiting Ceres in the 1st house",
+   "what": "Ceres crosses into your 1st house"
+  },
+  {
+   "date": "2031-08-19",
+   "kind": "aspect",
+   "body": "Pluto",
+   "natal": "Saturn",
+   "aspect": "conjunct",
+   "t_house": 7,
+   "key": "Transiting Pluto conjunct natal Saturn",
+   "what": "Pluto exactly conjunct your natal Saturn (pass 2 of 3, retrograde)",
+   "pass": "2 of 3",
+   "rx": true
+  },
+  {
+   "date": "2031-08-21",
+   "kind": "progressed",
+   "body": "Moon",
+   "key": "Progressed Moon in Leo",
+   "what": "Progressed Moon enters Leo"
+  },
+  {
+   "date": "2031-08-22",
+   "kind": "sign",
+   "body": "Ceres",
+   "key": "Transiting Ceres in Leo",
+   "what": "Ceres enters Leo (your 1st house)"
+  },
+  {
+   "date": "2031-08-23",
+   "kind": "house",
+   "body": "Uranus",
+   "key": "Transiting Uranus in the 12th house",
+   "what": "Uranus crosses into your 12th house"
+  },
+  {
+   "date": "2031-08-26",
+   "kind": "aspect",
+   "body": "Pluto",
+   "natal": "Sun",
+   "aspect": "square",
+   "t_house": 7,
+   "key": "Transiting Pluto square natal Sun",
+   "what": "Pluto exactly square your natal Sun (pass 4 of 5, retrograde)",
+   "pass": "4 of 5",
+   "rx": true
+  },
+  {
+   "date": "2031-08-28",
+   "kind": "aspect",
+   "body": "Pluto",
+   "natal": "Hades",
+   "aspect": "trine",
+   "t_house": 7,
+   "key": "Transiting Pluto trine natal Hades",
+   "what": "Pluto exactly trine your natal Hades (pass 4 of 5, retrograde)",
+   "pass": "4 of 5",
+   "rx": true
+  },
+  {
+   "date": "2031-09-16",
+   "kind": "aspect",
+   "body": "Neptune",
+   "natal": "Uranus",
+   "aspect": "square",
+   "t_house": 9,
+   "key": "Transiting Neptune square natal Uranus",
+   "what": "Neptune exactly square your natal Uranus (pass 2 of 2, retrograde)",
+   "pass": "2 of 2",
+   "rx": true
+  },
+  {
+   "date": "2031-10-04",
+   "kind": "aspect",
+   "body": "Jupiter",
+   "natal": "Chiron",
+   "aspect": "trine",
+   "t_house": 5,
+   "key": "Transiting Jupiter trine natal Chiron",
+   "what": "Jupiter exactly trine your natal Chiron (pass 3 of 3)",
+   "pass": "3 of 3",
+   "rx": false
+  },
+  {
+   "date": "2031-10-11",
+   "kind": "house",
+   "body": "Ceres",
+   "key": "Transiting Ceres in the 2nd house",
+   "what": "Ceres crosses into your 2nd house"
+  },
+  {
+   "date": "2031-10-17",
+   "kind": "aspect",
+   "body": "Ceres",
+   "natal": "Chiron",
+   "aspect": "conjunct",
+   "t_house": 2,
+   "key": "Transiting Ceres conjunct natal Chiron",
+   "what": "Ceres exactly conjunct your natal Chiron"
+  },
+  {
+   "date": "2031-10-28",
+   "kind": "house",
+   "body": "Jupiter",
+   "key": "Transiting Jupiter in the 6th house",
+   "what": "Jupiter crosses into your 6th house"
+  },
+  {
+   "date": "2031-10-30",
+   "kind": "eclipse",
+   "body": "lunar",
+   "key": "Lunar eclipse in the 10th house",
+   "what": "Penumbral lunar eclipse at 6\u00b0 Taurus (your 10th house)"
+  },
+  {
+   "date": "2031-11-07",
+   "kind": "sign",
+   "body": "Ceres",
+   "key": "Transiting Ceres in Virgo",
+   "what": "Ceres enters Virgo (your 2nd house)"
+  },
+  {
+   "date": "2031-11-13",
+   "kind": "house",
+   "body": "Uranus",
+   "key": "Transiting Uranus in the 11th house",
+   "what": "Uranus backs into your 11th house"
+  },
+  {
+   "date": "2031-11-14",
+   "kind": "eclipse",
+   "body": "solar",
+   "key": "Solar eclipse conjunct natal Pluto",
+   "alt_key": "Solar eclipse in the 4th house",
+   "what": "Hybrid solar eclipse at 22\u00b0 Scorpio (your 4th house) \u2014 conjunct your natal Pluto (orb 0.1\u00b0)"
+  },
+  {
+   "date": "2031-11-15",
+   "kind": "sign",
+   "body": "Juno",
+   "key": "Transiting Juno in Aries",
+   "what": "Juno backs into Aries (your 10th house)"
+  },
+  {
+   "date": "2031-11-15",
+   "kind": "sign",
+   "body": "Jupiter",
+   "key": "Transiting Jupiter in Capricorn",
+   "what": "Jupiter enters Capricorn (your 6th house)"
+  },
+  {
+   "date": "2031-12-08",
+   "kind": "aspect",
+   "body": "Jupiter",
+   "natal": "Jupiter",
+   "aspect": "square",
+   "t_house": 6,
+   "key": "Transiting Jupiter square natal Jupiter",
+   "what": "Jupiter exactly square your natal Jupiter"
+  },
+  {
+   "date": "2031-12-19",
+   "kind": "aspect",
+   "body": "Pluto",
+   "natal": "Hades",
+   "aspect": "trine",
+   "t_house": 7,
+   "key": "Transiting Pluto trine natal Hades",
+   "what": "Pluto exactly trine your natal Hades (pass 5 of 5)",
+   "pass": "5 of 5",
+   "rx": false
+  },
+  {
+   "date": "2031-12-20",
+   "kind": "aspect",
+   "body": "Pluto",
+   "natal": "Sun",
+   "aspect": "square",
+   "t_house": 7,
+   "key": "Transiting Pluto square natal Sun",
+   "what": "Pluto exactly square your natal Sun (pass 5 of 5)",
+   "pass": "5 of 5",
+   "rx": false
+  },
+  {
+   "date": "2031-12-21",
+   "kind": "aspect",
+   "body": "Saturn",
+   "natal": "Venus",
+   "aspect": "opposite",
+   "t_house": 11,
+   "key": "Transiting Saturn opposite natal Venus",
+   "what": "Saturn exactly opposite your natal Venus (pass 2 of 2, retrograde)",
+   "pass": "2 of 2",
+   "rx": true
+  },
+  {
+   "date": "2031-12-23",
+   "kind": "sign",
+   "body": "Juno",
+   "key": "Transiting Juno in Taurus",
+   "what": "Juno enters Taurus (your 10th house)"
+  },
+  {
+   "date": "2031-12-26",
+   "kind": "aspect",
+   "body": "Pluto",
+   "natal": "Saturn",
+   "aspect": "conjunct",
+   "t_house": 7,
+   "key": "Transiting Pluto conjunct natal Saturn",
+   "what": "Pluto exactly conjunct your natal Saturn (pass 3 of 3)",
+   "pass": "3 of 3",
+   "rx": false
+  },
+  {
+   "date": "2032-01-15",
+   "kind": "arc",
+   "body": "arc",
+   "key": "Solar-arc Mercury conjunct natal Uranus",
+   "what": "Solar-arc Mercury conjunct natal Uranus"
+  }
+ ]
+}

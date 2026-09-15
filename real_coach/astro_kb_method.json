@@ -1,0 +1,297 @@
+{
+  "meta": {
+    "built": "2026-09-15",
+    "sources": [
+      "https://www.triplewaterastrology.com/about.html",
+      "https://www.triplewaterastrology.com/",
+      "https://www.amazon.com/Dominions-Dispositors-Other-Astrological-Adventures/dp/197955790X",
+      "https://triplewaterastrology.wordpress.com/2015/03/18/triple-water-astrology-the-anaretic-degree-sun-in-aries-2015-newsletter/",
+      "https://www.astro.com/astrowiki/en/Uranian_Astrology",
+      "https://kerykeion.net/content/learn-astrology/branches-uranian-astrology",
+      "https://kerykeion.net/content/learn-astrology/uranian-90-degree-dial",
+      "https://planetwaves.net/the-eight-transneptunian-planets-of-the-uranian-system-by-arlene-kramer/",
+      "http://www.uranian-institute.org/bftnevolution.htm",
+      "https://cafeastrology.com/criticaldegrees.html",
+      "https://darkstarastrology.com/pleiades/",
+      "https://www.augurine.com/stars",
+      "https://ia801903.us.archive.org/35/items/astrology-book-collection/stars/Book_1899_Bernadette%20Brady_Brady's%20Book%20of%20Fixed%20Stars.pdf",
+      "https://astroppm.blogspot.com/2012/07/the-royal-stars-of-persia-part-one.html",
+      "https://www.aquariuspapers.com/astrology/2024/03/aspect-orbs-natal-and-progressed-forming-and-separating.html",
+      "https://www.judithhillastrology.com/what-planetary-orbs-should-i-use"
+    ],
+    "notes": "Two Svehla leads surfaced. (1) Richard Svehla, the historical Ohio astrologer who in the 1930s translated Alfred Witte's Hamburg School material and gave the whole system its English name, Uranian Astrology, at the 1936 All American Astrological Convention in Chicago. He is almost certainly not who gave Mike a live 2026 reading, but the reading's vocabulary (Hades, Apollon, transneptunian points) is literally the school Richard Svehla imported, so his name is the origin of the technique family. (2) Michael R. Svehla of Triple Water Astrology, Omaha NE, a currently practicing professional astrologer (studying since 2006, MA University of Iowa) who authored 'Dominions, Dispositors, and Other Astrological Adventures' (2017) and runs triplewaterastrology.com with a dedicated 'Why Transneptunians' nav page, a 'See the method in action' page built around the transneptunians, a stated example chapter topic of 'Hades chasing the Sun,' a 2015 newsletter centered on the anaretic (29th) degree, and site copy describing his method as synthesis-and-prediction ('astrology as a tool for awareness,' 'timing goals to favorable planetary motions') combining natal structure, secondary progressions, transits, and transneptunian points. This profile matches Mike's reading (Hades/Apollon, critical/anaretic degrees, prediction-oriented Uranian technique) closely enough on distinctive, non-generic markers that this is very likely the astrologer, but no direct public record ties him to Mike's specific Aug 29 2026 session was found, so treat the identification as high-confidence-but-unconfirmed rather than certain. Do not present it to Mike as a hard fact; present it as 'most likely Michael R. Svehla, Triple Water Astrology, Omaha' and let him confirm.",
+    "astrologer_identified": true,
+    "astrologer_profile": "Most likely Michael R. Svehla of Triple Water Astrology (Omaha, NE; triplewaterastrology.com), a professional astrologer practicing since 2006 and author of 'Dominions, Dispositors, and Other Astrological Adventures' (2017). His signature technique is the Hamburg School / Uranian transneptunian points (he has a dedicated site section on 'Why Transneptunians' and a book chapter built around 'Hades chasing the Sun'), read for chart synthesis and prediction rather than fatalism -- his own framing is 'astrology as a tool for awareness and perspective,' with predictions used to time goals to favorable planetary motions. He is comfortable naming the anaretic (29th) degree explicitly (a 2015 newsletter is built entirely around it), which matches Mike's reading calling out 'critical degrees' and the 29th degree by name. His method stacks: natal structure/synthesis (dispositor chains, per his book title) -> secondary progressions and transits as the timing layer -> transneptunian points and select asteroids as an extra symbolic layer laid on top, used selectively rather than in every reading (site copy gives 'Vesta and Midas' as one example custom pairing, showing he picks points to fit the client rather than reciting all eight TNPs every time). Bot voice takeaway: speak in short, plain-English synthesis lines that name the technique (progression, transit, TNP picture) before the meaning, favor timing/preparation language over fate language, and it is fair to name-drop the anaretic degree and 'planetary pictures' since those are his own vocabulary.",
+    "technique_family_confirmed_from_reading": "Regardless of exact identity, the reading itself is unambiguous evolutionary/Uranian-adjacent practice: Placidus houses, secondary progressions (progressed Moon, progressed Venus) watched for critical-degree and anaretic-degree contacts plus the fixed star Alcyone, natal asteroids Ceres and Juno, the Witte/Sieggrun transneptunian points Hades and Apollon (Hamburg School / Uranian astrology), transit-to-natal work (Saturn to the MC and to a natal t-square, Jupiter transiting houses), and Chiron returns/oppositions. All python_upgrades below are built to serve exactly that stack."
+  },
+  "tnp_points": [
+    {
+      "key": "Cupido",
+      "traditional": "Family, social groups, art, marriage, and anything that gathers separate things into one unit -- clans, corporations, ensembles, collections. Also artistic and social refinement.",
+      "esoteric": "The soul's drive to belong and to beautify: union not for merger but for mutual adornment, the archetype of the salon, the family tree, the gallery.",
+      "in_mikes_chart": "Compute natal Cupido (roughly Uranus-radius orbit, currently mid-late Cancer/Leo band). Given Mars/ASC in Cancer 12H and Venus in Sag 5H, a Cupido contact to either would read as 'your people/art/partnerships are where your identity gets displayed to the world.'",
+      "translation": "Where you build 'we' out of 'me' -- family, ensemble, brand, or collection."
+    },
+    {
+      "key": "Hades",
+      "traditional": "The unpleasant, worn-out, buried, or unrefined; illness, poverty, filth, decay, but also archaeology, ancestry, the working class, and anything ancient or foundational once unearthed.",
+      "esoteric": "The compost heap of the psyche: what looks like waste is raw material for the next cycle. Hades rules the shadow you have to metabolize before it becomes usable depth.",
+      "in_mikes_chart": "Natal Hades 11 Gemini 56, 11th house. In the house of networks, friendships, and long-range hopes, Hades points to a buried or under-examined pattern in how Mike relates to his broader social/professional network -- something old, unresolved, or under-resourced there (a past group, an old grudge, an outdated belief about allies) that becomes fertile once faced. Svehla's own example chapter is literally 'Hades chasing the Sun' -- Hades aspecting the Sun by transit/progression often marks a season of confronting something worn-down in identity/vitality before renewal.",
+      "translation": "The old, buried, or unglamorous thing in your network/hopes house that has to be dug up before it can be built on."
+    },
+    {
+      "key": "Zeus",
+      "traditional": "Fire, engines, controlled explosive power, leadership by force of will, executives, the military, machinery, and anything that concentrates energy to a point and directs it.",
+      "esoteric": "Directed will: not raw Mars aggression but power organized into an engine -- ignition under control, command that gets obeyed.",
+      "in_mikes_chart": "Compute natal Zeus (typically found in the Scorpio/Sagittarius band for a mid-1970s/80s-ish chart, verify with swisseph). With Sun 12 Scorpio 4H and Pluto 22 Scorpio 4H already concentrated there, a Zeus contact to that stellium would intensify the 'engine room at the foundation of the house' reading -- home/family as the place Mike generates and directs power.",
+      "translation": "Where you turn raw drive into a running engine other people can feel."
+    },
+    {
+      "key": "Kronos",
+      "traditional": "The highest authority, government, the law, the father, the boss, mastery, and legitimate rule; the opposite pole to Hades' decay is Kronos' order-from-the-top.",
+      "esoteric": "Rightful sovereignty: the part of the psyche that claims authority because it has earned mastery, not because it seized power.",
+      "in_mikes_chart": "Compute natal Kronos. Saturn 12 Aquarius 7H already carries a lot of 'authority/structure' weight in Mike's chart; a Kronos tie to Saturn or to the MC (18 50 Aries) would sharpen a theme of Mike being pulled toward being the authority/final word rather than working under one.",
+      "translation": "The seat of authority you are meant to occupy, not just answer to."
+    },
+    {
+      "key": "Apollon",
+      "traditional": "Expansion, multiplication, trade, science, widespread success or scattering; whatever it touches gets bigger -- more markets, more copies, more reach, but also more dilution if unfocused.",
+      "esoteric": "The multiplier archetype: growth through replication and distribution rather than depth. Apollon success is broad, not necessarily deep, and needs a container (a Kronos, a Saturn) to keep it from scattering.",
+      "in_mikes_chart": "Natal Apollon 16 Libra, 3H (communication, siblings, local networks, contracts, short-range trade). Trine-ish to Jupiter 5 Libra 3H in the same house doubles the 'multiply through communication/agreements' signature -- writing, deals, and short-range networking are the channel most likely to scale Mike's efforts wide rather than deep.",
+      "translation": "The channel (communication/deal-making) where your effort multiplies instead of staying one-to-one."
+    },
+    {
+      "key": "Admetos",
+      "traditional": "Depth, endings, mines, the deep earth, patience, delay, dead ends that force a total restart; also raw unrefined matter before it is worked.",
+      "esoteric": "The floor beneath the floor -- where you hit bedrock and must either dig through or stop entirely. The planet of stubborn, slow, structural finality.",
+      "in_mikes_chart": "Compute natal Admetos. Given Mars/ASC conjunct in Cancer 12H (a house already about hidden depths, endings, institutions), an Admetos tie there would flag a pattern of Mike's initiative (Mars) hitting long delays or dead-end structures before a real breakthrough -- patience as the actual lesson, not a lack of drive.",
+      "translation": "The wall that will not move until you stop pushing and start digging straight down."
+    },
+    {
+      "key": "Vulkanus",
+      "traditional": "Massive, overwhelming force; giants, monopolies, huge machines, colossal effort and colossal results -- everything oversized, whether achievement or excess.",
+      "esoteric": "Titanic capacity: the part of a person built for scale, for carrying loads most people cannot, sometimes at personal cost.",
+      "in_mikes_chart": "Compute natal Vulkanus. A tie to Jupiter 5 Libra 3H or to the Sun/Pluto 4H stellium would suggest Mike's real capacity is larger than his current frame -- a warning against thinking small, but also a caution about burnout from carrying oversized loads alone.",
+      "translation": "Your outsized carrying capacity -- use it deliberately or it will use you."
+    },
+    {
+      "key": "Poseidon",
+      "traditional": "Enlightenment, spirit, higher mind, wisdom made manifest, ideas that become teachings; the most 'evolved' of the eight, ruling insight and clear knowledge rather than mystical fog.",
+      "esoteric": "Illumination through form: unlike Neptune's dissolving mist, Poseidon is spirit that has taken clear, communicable shape -- the finished teaching, not the vision before it is written down.",
+      "in_mikes_chart": "Compute natal Poseidon. A contact to Mercury 3 Sag 5H or Jupiter 5 Libra 3H would point to a real gift for turning insight into teachable, shareable form -- writing, coaching, or building systems others can use.",
+      "translation": "Where raw insight becomes a teaching other people can actually use."
+    }
+  ],
+  "midpoints": [
+    {
+      "key": "Sun/Moon",
+      "traditional": "The single most-cited Uranian midpoint (Ebertin's 'life axis'); marriage, partnership, and the integration of identity with emotional need.",
+      "esoteric": "The wedding of will and feeling inside one person before it is ever projected onto a partner.",
+      "in_mikes_chart": "Sun 12 Scorpio 4H / Moon 1 Pisces 8H -> midpoint about 21-22 Capricorn (a fixed-adjacent critical band right at the Cap/Aquarius stretch where Saturn 12 Aquarius, Uranus 15 Cap, and Neptune 17 Cap all cluster). This midpoint sits directly under Mike's Capricorn stellium, meaning his core identity/emotion axis is expressed through structure, timing, and reinvention (Saturn/Uranus/Neptune) rather than direct display.",
+      "translation": "Your gut sense of who you are runs through the same territory as your career/structure planets -- identity and ambition are fused, not separate.",
+      "transit_trigger": "A transit or progression to this point (especially by Saturn, Uranus, or Jupiter) tends to coincide with defining life-direction or relationship turning points, since it is already conjunct three natal planets."
+    },
+    {
+      "key": "ASC/MC",
+      "traditional": "How the outward personality (ASC) and the public role/career (MC) integrate into one presented self.",
+      "esoteric": "The seam between who you are and what you are known for.",
+      "in_mikes_chart": "ASC 26 58 Cancer / MC 18 50 Aries -> midpoint about 12-13 Taurus (a cardinal critical-degree-adjacent point). Mars conjunct ASC already makes Mike's presented self assertive/action-first; the ASC/MC midpoint in early-mid Taurus suggests the integration point is steady, resource-building, tangible follow-through rather than flash.",
+      "translation": "The way you make your drive (Mars-ASC) legible as a public role is through building something concrete and lasting, not through spectacle.",
+      "transit_trigger": "Transits here (Saturn especially) mark points where public role and self-image have to be reconciled -- often a title change, a rebrand, or a reputation shift."
+    },
+    {
+      "key": "Mars/Saturn",
+      "traditional": "Friction between drive and restraint; discipline under pressure, or frustration and blocked action if unintegrated.",
+      "esoteric": "The forge: raw force (Mars) meeting the anvil (Saturn) -- painful in the moment, but it is literally how a blade gets shaped.",
+      "in_mikes_chart": "Mars 23 52 Cancer 12H (conjunct ASC) / Saturn 12 Aquarius 7H are natally square-ish (Cancer to Aquarius is a wide, out-of-sign square-adjacent angle) -- midpoint lands around 3 Sagittarius, close to Mercury (3 Sag 5H). This channels Mars/Saturn tension straight into Mike's communication/ideas house: discipline shows up as sharpened, structured speech/writing rather than blocked action.",
+      "translation": "Your drive-versus-restraint tension gets resolved through disciplined communication -- writing, teaching, or negotiating -- not through raw force.",
+      "transit_trigger": "A Saturn transit here (or to natal Mars-ASC/Saturn directly) usually means a season of being tested on follow-through; the payoff is durable skill, the risk is burnout or blocked initiative if the discipline is externally imposed rather than chosen."
+    },
+    {
+      "key": "Jupiter/Saturn",
+      "traditional": "The great social-cycle midpoint -- expansion versus contraction, growth balanced against realism; timing of career-building phases.",
+      "esoteric": "The breath of the business/career cycle itself: how far to expand, when to consolidate.",
+      "in_mikes_chart": "Jupiter 5 Libra 3H / Saturn 12 Aquarius 7H -> midpoint about 8-9 Sagittarius (a fixed-adjacent critical zone near Venus 19 Sag and Mercury 3 Sag, both 5H). This ties Mike's growth-vs-structure cycle to his 5H of creative output, speculation, and self-expression -- his career rhythm literally expands and contracts through what he creates and puts his name on.",
+      "translation": "Your growth-and-consolidate cycle runs through your creative/self-expression house -- when to launch big and when to tighten up shows up first in your own projects, not external conditions.",
+      "transit_trigger": "Transiting Jupiter or Saturn conjunct/opposing this point flags the start or end of a multi-year growth phase in whatever creative or speculative venture Mike is running at the time."
+    },
+    {
+      "key": "Venus/Mars",
+      "traditional": "The desire/attraction axis -- how affection and drive combine; romantic and creative magnetism.",
+      "esoteric": "The union of wanting and pursuing: what you love and how hard you go after it, fused into one signature.",
+      "in_mikes_chart": "Venus 19 Sag 5H / Mars 23 52 Cancer 12H (conjunct ASC) -> midpoint about 26-27 Libra, close to natal Apollon (16 Libra) by wide orb and squarely in the relationship sign. With Mars/ASC already so prominent, Venus/Mars midpoint activity tends to show up as visible charisma/attraction rather than a private undercurrent.",
+      "translation": "Attraction and drive are not separate for you -- what you want shows on your face and in your posture almost immediately.",
+      "transit_trigger": "Transits here (Venus, Mars, or the TNP Cupido) mark periods of heightened romantic or creative magnetism and are classic timing points for new relationships or creative collaborations."
+    },
+    {
+      "key": "Sun/Saturn",
+      "traditional": "Self versus limitation; the midpoint of ego and structure, often read as where discipline, delay, or authority issues with the father/self shape identity.",
+      "esoteric": "The place where the self learns its shape by pressing against a boundary -- structure as the sculptor, not the enemy, of identity.",
+      "in_mikes_chart": "Sun 12 Scorpio 4H / Saturn 12 Aquarius 7H -> midpoint about 27 Sagittarius/0 Capricorn, right at a cardinal critical degree (0 Cap) and near the Neptune/Uranus 6H cluster. This is a loaded point: identity (Sun) meets limitation (Saturn) meets transformation (Uranus/Neptune) all in one narrow band -- a recurring life theme of proving/rebuilding identity through structural change (career, health routines, daily-work reinvention, 6H).",
+      "translation": "You keep re-earning your sense of self by rebuilding your daily structure or work routine, not by external validation.",
+      "transit_trigger": "Saturn transits here (or the current Saturn-to-MC/t-square transit the reading names) are the classic 'prove it' windows -- identity gets tested against real-world structure and either hardens into mastery or forces a rebuild."
+    },
+    {
+      "key": "Moon/Saturn",
+      "traditional": "Emotional restraint, self-reliance learned early, sometimes read as emotional coolness or a hard-won emotional maturity.",
+      "esoteric": "The armor around the feeling body: protective at first, but eventually the source of real emotional endurance.",
+      "in_mikes_chart": "Moon 1 Pisces 8H / Saturn 12 Aquarius 7H -> midpoint about 6-7 Aquarius, tight to natal Saturn itself and in the partnership/shared-resources houses (7H/8H). This suggests emotional security for Mike has historically been tied to control over shared resources, contracts, or deep trust -- a Pisces Moon's need for merger tempered by Saturnian caution about who to merge with.",
+      "translation": "You protect your feelings by being careful about who you financially or emotionally merge with -- caution here is wisdom, not coldness.",
+      "transit_trigger": "Transits (especially Saturn or Pluto) here often coincide with renegotiating a joint-resource or deep-trust relationship -- shared finances, a business partnership, or a therapeutic/psychological reckoning."
+    },
+    {
+      "key": "Mars/Uranus",
+      "traditional": "Sudden, impulsive action; accidents if unintegrated, but also breakthrough initiative, invention, and independence of action.",
+      "esoteric": "The lightning strike of will: action that breaks a pattern rather than continuing one, for better or worse depending on how consciously it is used.",
+      "in_mikes_chart": "Mars 23 52 Cancer 12H (ASC) / Uranus 15 Cap 6H -> midpoint about 29-0 Libra/Scorpio, on the anaretic degree of Libra sliding into Scorpio -- an unusually potent, 'now or never' zone, and it echoes into the Sun/Pluto Scorpio stellium (4H). This is a strong signature for decisive, independence-driven action around home/foundation/identity matters -- when Mike moves, it tends to be sudden and hard to reverse.",
+      "translation": "When you finally act on a home, identity, or foundational decision, it happens fast and does not get walked back easily.",
+      "transit_trigger": "Uranus or Mars transits here mark windows of abrupt, freedom-seeking action -- a sudden move, a break from routine, or an impulsive but ultimately liberating decision; best used deliberately rather than reactively given the anaretic intensity."
+    }
+  ],
+  "critical_degrees": [
+    {
+      "key": "0/13/26 cardinal (Aries, Cancer, Libra, Capricorn)",
+      "meaning": "Degrees historically flagged (from the Arabic/medieval tradition, popularized by 20th-century astrologers) as points of unusual sensitivity in cardinal signs -- 0 degrees marks a fresh, urgent, still-unstable start; 13 and 26 mark later stress points in the sign's unfolding.",
+      "esoteric": "Cardinal critical degrees mark where initiating energy is tested before it is allowed to stabilize -- crisis-as-ignition.",
+      "translation": "A planet here (natally or by progression) tends to act suddenly and decisively rather than gradually -- cardinal critical degrees compress a slow process into a sharp event."
+    },
+    {
+      "key": "8-9 / 21-22 fixed (Taurus, Leo, Scorpio, Aquarius)",
+      "meaning": "Critical points in the fixed signs; 21-22 degrees in particular is the band the reading names for Mike's progressed Moon/Venus, and is classically tied to the Pleiades/Alcyone band in Taurus/Gemini.",
+      "esoteric": "Fixed critical degrees mark where accumulated, stubborn energy finally breaks or crystallizes -- the dam bursts, or the structure finally sets.",
+      "translation": "A progressed body crossing 21-22 fixed degrees is at the point where a long-building pattern (identity, values, resources depending on the sign) either locks into permanent form or cracks open for revision -- not a quiet transit, a decisive one."
+    },
+    {
+      "key": "4 / 17 mutable (Gemini, Virgo, Sagittarius, Pisces)",
+      "meaning": "Critical points in the mutable signs, generally read as less dramatic than cardinal/fixed critical degrees but still marking adjustment points -- shifts in direction, communication, or adaptability.",
+      "esoteric": "Mutable critical degrees mark a fork in the road rather than a crisis -- multiple options becoming visible at once, requiring a choice.",
+      "translation": "A body at a mutable critical degree is at a decision fork -- less 'everything changes now,' more 'pick a lane, because staying vague stops working here.'"
+    },
+    {
+      "key": "29th degree (anaretic)",
+      "meaning": "The final degree of any sign, the most emphasized critical degree across traditions; represents urgency, culmination, and the pressure of a deadline before the energy shifts into an entirely new sign.",
+      "esoteric": "The anaretic degree is the soul cramming for the exam: everything unresolved about that sign's lesson concentrates here before the planet graduates into new territory. Svehla's own writing centers a full newsletter on this degree, describing it via his Sun/Jupiter conjunction there as 'expansion of consciousness via the occult.'",
+      "translation": "A progressed planet at 29 degrees is in a use-it-or-lose-it window -- whatever that sign's theme has been building toward for years comes to a head now, right before the planet moves into a completely different mode in the next sign."
+    }
+  ],
+  "fixed_stars": [
+    {
+      "key": "Alcyone (Pleiades cluster)",
+      "position_2026": "Roughly 0 09-0 12 Gemini tropical in 2026 (Pleiades sit about 28 Taurus-1 Gemini; Alcyone entered Gemini around the year 2000 and precesses about 1 degree per 72 years).",
+      "nature": "Lunar/Martian in classical attribution; a bright cluster long associated with mourning, weeping, and 'the weeping sisters,' but also vision, prophecy, and gathering.",
+      "traditional": "Robson/older tradition: eye trouble, sorrow, disgrace, violence when tightly conjunct a personal point -- but also, in a softer modern reading, heightened sensitivity, grief that becomes wisdom, and a talent for seeing what others miss.",
+      "esoteric": "The Pleiades are the classic 'weeping and rejoicing' star group -- contact here means processing loss in a way that ultimately sharpens sight and intuition rather than just producing pain.",
+      "in_mikes_chart": "Not a natal point in the chart data given, but the reading names Alcyone specifically for Mike's progressed Moon/Venus reaching the 21-22 degree fixed-sign band near Taurus/Gemini -- meaning a progression is moving through emotionally intense, grief-and-vision territory right around this star.",
+      "translation": "When your progressed Moon or Venus reaches this degree band, expect an emotionally sharp period that ultimately upgrades your perception -- treat grief or disappointment here as data, not just pain."
+    },
+    {
+      "key": "Regulus (Royal Star, Watcher of the North)",
+      "position_2026": "About 0 06 Virgo tropical in 2026.",
+      "nature": "Martian/Jovian; the King Star, historically tied to Leo's heart and to sovereignty.",
+      "traditional": "Kingship, honor, and high position -- but the classical warning attached to Regulus is that success won here can be undone by later arrogance or revenge if not handled with humility ('revenge comes back on itself').",
+      "esoteric": "Regulus grants authority as a trust, not a possession -- the star's own myth (fallen from Leo's heart) says power must be exercised for others, not just for the self, or it curdles.",
+      "in_mikes_chart": "No natal contact given in the chart data; worth checking against Mike's MC (18 50 Aries) or Sun (12 Scorpio) only if a transit/progression brings a body to 0 Virgo.",
+      "translation": "If any planet or angle reaches 0 Virgo, treat it as a leadership-and-legacy checkpoint -- earned authority, held with humility, is the win condition."
+    },
+    {
+      "key": "Aldebaran (Royal Star, Watcher of the East)",
+      "position_2026": "About 9 51 Gemini tropical in 2026.",
+      "nature": "Martian; the Bull's Eye, tied to integrity and courage.",
+      "traditional": "Honors and integrity, but classically paired with a warning that success can carry a fall if integrity slips -- the Royal Stars all carry this 'watch your character at the top' caveat.",
+      "esoteric": "Aldebaran tests whether ambition is backed by honest effort; it rewards straightforward courage and punishes shortcuts.",
+      "in_mikes_chart": "No direct natal contact given; note it sits close to the Alcyone/critical-degree band already active for Mike's progressed Moon/Venus, reinforcing the 'integrity under pressure' theme of that progression.",
+      "translation": "The same progressed-Moon/Venus window that activates Alcyone is also near Aldebaran's integrity test -- the emotional intensity of this period doubles as a character check."
+    },
+    {
+      "key": "Antares (Royal Star, Watcher of the West)",
+      "position_2026": "About 9 58 Sagittarius tropical in 2026.",
+      "nature": "Martian/Jovian; the Scorpion's Heart, tied to intensity, obsession, and courage under danger.",
+      "traditional": "Great passion and courage in dangerous or high-stakes situations, with a classic warning against recklessness or self-destructive obsession.",
+      "esoteric": "Antares asks whether intensity is being aimed (transformation) or just burned (self-destruction) -- fitting given the Scorpio-heavy load in Mike's own chart (Sun and Pluto at 12/22 Scorpio).",
+      "in_mikes_chart": "Sits about 10 degrees from natal Venus (19 Sag) and Mercury (3 Sag) in the 5H -- a loose but notable tie, meaning Mike's self-expression/communication planets share a neighborhood with the Scorpion's Heart. Consistent with a personality that expresses itself with real intensity through words and creative output.",
+      "translation": "Your voice and creative output naturally carry high intensity -- the ongoing work is aiming that heat productively rather than letting it become obsession or burnout."
+    },
+    {
+      "key": "Fomalhaut (Royal Star, Watcher of the South)",
+      "position_2026": "About 4 21 Pisces tropical in 2026.",
+      "nature": "Venusian/Mercurial; the mystical Royal Star, tied to idealism, spirituality, and artistic/prophetic sensitivity.",
+      "traditional": "Fame achieved through idealistic, spiritual, or artistic paths rather than raw power; a warning against escapism or dissolving into illusion if unintegrated.",
+      "esoteric": "Fomalhaut is the Royal Star of transcendence -- success measured by how much beauty or truth you bring back from the inner world, not by conquest.",
+      "in_mikes_chart": "About 3 degrees from natal Moon (1 Pisces, 8H) -- a meaningful conjunction. This backs up the reading's emphasis on Mike's 8H Pisces Moon carrying real spiritual/psychic sensitivity and a capacity to bring back insight from deep, hidden, or shared-resource material (occult study, therapy, deep research) and translate it for others.",
+      "translation": "Your emotional depth (Pisces Moon, 8H) is not just personal -- it is the raw material for genuinely idealistic or spiritually informed work you can hand to other people."
+    }
+  ],
+  "orbs": [
+    {"body": "Sun", "transit_orb_applying": 1.5, "transit_orb_separating": 1.0, "notes": "Fast-moving; treat as a same-day-to-week event unless it is hitting a heavily aspected natal point."},
+    {"body": "Moon", "transit_orb_applying": 1.0, "transit_orb_separating": 0.5, "notes": "Hours-to-a-day window; useful for daily-vibe framing, not for major life-event timing."},
+    {"body": "Mercury", "transit_orb_applying": 1.5, "transit_orb_separating": 1.0, "notes": "Watch for retrograde stations, which extend effective contact time to 1-2 weeks around the station."},
+    {"body": "Venus", "transit_orb_applying": 1.5, "transit_orb_separating": 1.0, "notes": "Retrograde periods (roughly every 18 months) widen the effective window similarly to Mercury."},
+    {"body": "Mars", "transit_orb_applying": 2.0, "transit_orb_separating": 1.0, "notes": "Slower than the inner planets; a Mars transit can be 'live' for 1-2 weeks, longer if retrograde over the point."},
+    {"body": "Jupiter", "transit_orb_applying": 2.0, "transit_orb_separating": 1.0, "notes": "Multi-week to few-month influence; because Jupiter often stations 2-3 times over the same natal degree in a retrograde cycle, expect the theme to recur across a year."},
+    {"body": "Saturn", "transit_orb_applying": 2.0, "transit_orb_separating": 1.0, "notes": "The reading's Saturn-to-MC/t-square transit should be tracked from about 2 degrees applying through the full retrograde-station-direct cycle -- Saturn contacts commonly run 6-18 months start to finish across all three passes."},
+    {"body": "Uranus", "transit_orb_applying": 3.0, "transit_orb_separating": 1.5, "notes": "Slow outer planet; treat any pass within 3 degrees as 'live' for the surrounding season, with the exact hits (often 3 passes) as the sharpest moments."},
+    {"body": "Neptune", "transit_orb_applying": 3.0, "transit_orb_separating": 1.5, "notes": "Diffuse, long-running; effects often felt as mood/theme for a year or more rather than a single event."},
+    {"body": "Pluto", "transit_orb_applying": 3.0, "transit_orb_separating": 1.5, "notes": "Multi-year background pressure; exact hits (again often 3 passes given retrogradation) are the flashpoints within that longer arc."},
+    {"body": "Chiron", "transit_orb_applying": 2.0, "transit_orb_separating": 1.0, "notes": "For the return (~50-51 years) and oppositions (~25-26 years) named in the reading, widen the practical window to roughly 1 year either side of exact, since the whole-life healing theme activates well before and lingers after the precise degree match."},
+    {"body": "Secondary progressions (any body)", "transit_orb_applying": 1.0, "transit_orb_separating": 1.0, "notes": "A progressed aspect is 'in orb' for roughly as many years as the orb in degrees, since progressed bodies (other than the Moon) move about 1 degree per year -- a 1-degree orb is roughly a 2-year window centered on exact; progressed Moon at ~1 degree/month gives a roughly 2-month window per degree of orb."},
+    {"body": "Transneptunian points (TNP transits)", "transit_orb_applying": 1.0, "transit_orb_separating": 1.0, "notes": "Uranian convention keeps TNP and midpoint ('planetary picture') orbs tight, about 1 degree, tighter than classical transit orbs -- precision over breadth is the house style."}
+  ],
+  "python_upgrades": [
+    {
+      "name": "tnp_daily_scanner",
+      "algorithm": "Using pyswisseph with the standard Uranian ephemeris files (se_hades.se1 etc., or the fictitious-body extension), compute daily geocentric tropical longitude for all 8 TNPs plus natal TNP positions. For each day, check whether any transiting classical planet (Sun through Pluto) or transiting TNP forms a conjunction, opposition, or square (90-degree-dial equivalent) to a natal TNP or natal planet, within 1 degree orb.",
+      "inputs": "Natal chart data (already have TNP longitudes for Hades/Apollon; compute the remaining 6 with swisseph fictitious bodies), current date, swisseph ephemeris path.",
+      "output_format": "Telegram line: '[Transit] Saturn square natal Hades (11 Gem) -- old network/foundation issue up for review this week.'",
+      "why": "This is the core Uranian technique the reading uses (Hades, Apollon) -- automating it lets the bot flag TNP activations daily instead of only at reading time, matching Svehla's own predictive, timing-focused style."
+    },
+    {
+      "name": "planetary_picture_finder",
+      "algorithm": "Build the 90-degree dial: for every relevant pair of natal points (classical planets, angles, TNPs, Ceres/Juno/Chiron), compute the midpoint modulo 90 degrees. For a given transiting or progressed body, check whether it falls within 1 degree of any natal midpoint on the dial. Prioritize the 8 midpoints already documented above (Sun/Moon, ASC/MC, Mars/Saturn, Jupiter/Saturn, Venus/Mars, Sun/Saturn, Moon/Saturn, Mars/Uranus).",
+      "inputs": "Full natal longitude table, current transiting/progressed positions, a curated priority list of midpoint pairs (to avoid the classic Uranian over-generation problem of hundreds of trivial hits).",
+      "output_format": "Telegram line: 'Planetary picture: transiting Jupiter = Sun/Saturn midpoint (0 Cap) -- growth arrives by rebuilding your daily structure, not by waiting for permission.'",
+      "why": "Planetary pictures (A/B=C) are the signature Uranian output format and give Telegram-friendly one-liners that read like the reading itself, not a raw ephemeris dump."
+    },
+    {
+      "name": "critical_degree_watchlist",
+      "algorithm": "Maintain a lookup table of critical degree bands per modality (0/13/26 cardinal, 8-9/21-22 fixed, 4/17 mutable, plus 29 anaretic for all signs). Each day, check natal, progressed, and transiting positions of all bodies against this table within a 0.5-degree orb (tight, since these are point events not ranges), flagging progressed bodies with priority since those are the reading's actual technique.",
+      "inputs": "Progressed chart for current date (already being generated per the reading's method), natal chart, the critical-degree lookup table.",
+      "output_format": "Telegram line: 'Progressed Venus enters the anaretic 29th degree of Scorpio this month -- a Venus-in-Scorpio theme (loyalty, intensity, shared resources) is coming to a head before it shifts into Sagittarius.'",
+      "why": "Directly automates the technique the reading is built on (progressed Moon/Venus hitting 21-22 and 29-degree bands) so the bot can proactively surface these instead of waiting for the next paid reading."
+    },
+    {
+      "name": "fixed_star_conjunction_checker",
+      "algorithm": "Maintain a table of the ~15-20 astrologically significant fixed stars (Royal Stars plus Alcyone, Acrux, Alphecca, Rukbat, Vega, Pollux, Altair, and any others conjunct Mike's natal points) with their current precessed tropical longitude (recompute yearly, since stars precess about 1 degree per 72 years -- negligible day to day but worth an annual refresh). Check natal, progressed, and transiting bodies against this table within a 1-degree orb.",
+      "inputs": "Fixed star longitude table (refresh annually via swisseph fixstar functions, e.g. swe_fixstar2), natal/progressed/transiting positions.",
+      "output_format": "Telegram line: 'Transiting Mars conjunct Pollux (Gemini) -- a bold, decisive-but-risky window; act with skill, not just daring.'",
+      "why": "The reading explicitly leans on fixed stars (Alcyone) and Mike's chart has several natal star conjunctions (Acrux/Alphecca-Sun, Rukbat-Neptune, Vega-Uranus, Pollux-Mars, Altair-Ceres) that are currently undocumented in any automated output -- this closes that gap."
+    },
+    {
+      "name": "saturn_structural_transit_tracker",
+      "algorithm": "Specifically track transiting Saturn's angular relationship (conjunction/opposition/square, 2-degree applying / 1-degree separating orb) to natal MC (18 50 Aries) and to the natal t-square the reading names (need the t-square's exact points confirmed, likely involving Mars-ASC/Saturn/an opposing point -- flag for confirmation). Report which of the three passes (first, retrograde, final direct) is active.",
+      "inputs": "Natal MC and t-square point longitudes, transiting Saturn ephemeris, Saturn's station dates for the current cycle.",
+      "output_format": "Telegram line: 'Saturn transit to MC: pass 2 of 3 (retrograde), exact [date] -- career-structure test is mid-cycle, not resolved yet; expect a final reckoning around [date of pass 3].'",
+      "why": "Saturn-to-angle and Saturn-to-t-square transits are named directly in the reading as a live, multi-year theme; tracking all three passes (a detail casual astrology apps skip) matches professional Uranian/classical practice and avoids the bot declaring the theme 'done' after only the first exact hit."
+    },
+    {
+      "name": "jupiter_house_transit_narrator",
+      "algorithm": "Track which natal house transiting Jupiter currently occupies (using the natal Placidus house cusps) and detect house-ingress events (Jupiter changing houses, roughly annually).",
+      "inputs": "Natal Placidus house cusps, transiting Jupiter longitude, a per-house meaning table tuned to Mike's natal placements in that house.",
+      "output_format": "Telegram line: 'Jupiter enters your 6H (Uranus/Neptune territory) this month -- expansion through daily work/health routines and sudden but ultimately positive changes to your systems.'",
+      "why": "Jupiter-through-houses is named directly in the reading and is a natural once-a-year headline event well suited to a periodic (monthly/quarterly) Telegram digest rather than a daily one."
+    },
+    {
+      "name": "chiron_cycle_alert",
+      "algorithm": "Compute Mike's exact natal Chiron longitude (22 Leo) and track transiting Chiron's angular distance to it. Flag the approaching Chiron return (~ages 50-51) and Chiron oppositions (~ages 25-26 and again in the 75-76 range) with a long lead time (1-year advance flag, then monthly countdown in the final year).",
+      "inputs": "Natal Chiron longitude, transiting Chiron ephemeris, Mike's birth date to compute which cycle point is next.",
+      "output_format": "Telegram line: 'Chiron [return/opposition] window opens in [N] months -- this is a multi-year healing-and-reintegration arc around [natal house/sign theme], not a single event; expect it to move in phases.'",
+      "why": "The reading explicitly cites Chiron returns/oppositions as a technique; because these are rare, high-weight life events, a long lead-time alert (rather than a same-week notice) serves the 'plan ahead' spirit of daily/weekly updates far better than a same-day flag would."
+    },
+    {
+      "name": "ceres_juno_relational_resource_tracker",
+      "algorithm": "Track transits and progressions to natal Ceres (2 Aquarius, 7H) and natal Juno (11 54 Cancer, 12H) specifically for nurture/caretaking (Ceres) and committed-partnership/shadow-loyalty (Juno) themes, using the same orb conventions as the classical planets since these asteroids move at roughly Mars-like speeds.",
+      "inputs": "Natal Ceres/Juno longitudes, transiting/progressed positions of all bodies, house placements.",
+      "output_format": "Telegram line: 'Transiting Venus conjunct natal Ceres (Aquarius, 7H) -- a nurturing, unconventional gesture lands well in a partnership or contract this week.'",
+      "why": "The reading names Ceres and Juno specifically; most generic astrology bots skip asteroids entirely, so surfacing them keeps the bot's output matched to the actual technique used in Mike's paid reading rather than a generic ten-planet feed."
+    }
+  ]
+}

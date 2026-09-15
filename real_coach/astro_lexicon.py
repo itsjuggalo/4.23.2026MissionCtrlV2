@@ -205,8 +205,15 @@ def explain_hit(h: dict, t_lon: float, n_lon: float, asc_lon: float, full: bool 
         lines.append(f"Esoteric {t}: {tp['eso']}.")
         lines.append(f"Esoteric {n}: {np_['eso']}.")
         lines.append(f"Esoteric {a}: {asp['eso']}. {NH['mike']}.")
+        ent = kb_entry(f"Transiting {t} {a} natal {n}")
         combo = combo_translation(f"{t} {a} natal {n}") or combo_translation(f"{t} {a} {n}") or combo_translation(f"{t} {a}")
-        if combo:
+        if ent:
+            lines.append(f"Researched: {ent.get('traditional', '')} Esoteric: {ent.get('esoteric', '')}")
+            if ent.get("svehla_link"):
+                lines.append(f"Svehla fit: {ent['svehla_link']}")
+            if ent.get("do") or ent.get("avoid"):
+                lines.append(f"Do: {ent.get('do', '')} Avoid: {ent.get('avoid', '')}")
+        elif combo:
             lines.append(f"Researched: {combo}")
         elif kb_get("planets", t, "in_mikes_chart"):
             lines.append(f"Researched ({t} for you): {kb_get('planets', t, 'in_mikes_chart')}")
@@ -292,6 +299,57 @@ def kb_get(section: str, key: str, field: str, default: str = "") -> str:
         return default
 
 
+# ── researched entry files (round 8): flat {key → entry} across astro_kb_*.json ───────────
+ENTRY_FILES = ["astro_kb_fast_transits.json", "astro_kb_slow_gaps.json", "astro_kb_cycles.json",
+               "astro_kb_timing.json", "astro_kb_method.json"]
+ENTRIES: dict[str, dict] = {}
+
+
+def _load_entries() -> None:
+    import json as _json
+    from pathlib import Path as _P
+    here = _P(__file__).resolve().parent
+    for fn in ENTRY_FILES:
+        fp = here / fn
+        if not fp.exists():
+            continue
+        try:
+            data = _json.loads(fp.read_text())
+        except Exception:
+            continue
+        lists = [data.get("entries", [])]
+        for sec in ("tnp_points", "midpoints", "fixed_stars", "critical_degrees"):
+            lists.append(data.get(sec, []))
+        for lst in lists:
+            for e in lst or []:
+                k = str(e.get("key", "")).strip().lower()
+                if k and k not in ENTRIES:
+                    ENTRIES[k] = e
+
+
+_load_entries()
+
+
+def kb_entry(key: str) -> dict | None:
+    """Researched entry by exact key (case-insensitive), e.g. 'Transiting Mars in the 12th house'."""
+    if not key:
+        return None
+    return ENTRIES.get(key.strip().lower())
+
+
+def entry_lines(key: str, full: bool = False) -> list[str]:
+    e = kb_entry(key)
+    if not e:
+        return []
+    out = [f"In plain terms: {e.get('translation', '')}"] if e.get("translation") else []
+    if full:
+        for f, label in (("traditional", "Traditional"), ("esoteric", "Esoteric"), ("in_mikes_chart", "In your chart"),
+                         ("svehla_link", "Svehla"), ("do", "Do"), ("avoid", "Avoid"), ("weekly_practice", "This week")):
+            if e.get(f):
+                out.append(f"{label}: {e[f]}")
+    return out
+
+
 def plain(body: str) -> str:
     """Short plain-English keyword for a body (KB 'plain' if researched, else our own)."""
     fallback = {"Sun": "your core self", "Moon": "your feelings and habits", "Mercury": "your thinking and words",
@@ -316,6 +374,9 @@ def translate_hit(h: dict, t_lon: float, n_lon: float) -> str:
     """'In plain terms:' one line a non-astrologer understands, for a transit→natal aspect."""
     t, n, a = h["t"], h["n"], h["aspect"]
     nh = house_of(n_lon)
+    ent = kb_entry(f"Transiting {t} {a} natal {n}")
+    if ent and ent.get("translation"):
+        return f"In plain terms: {ent['translation'].rstrip('.')}. Where it lands in your life: {kb_get('houses', str(nh), 'plain', HOUSES[nh - 1]['is'])} ({ORDINAL(nh)} house)."
     tmpl = kb_get("aspects", a, "plain", ASPECT_PLAIN[a])
     A = f"{t} ({plain(t)})" if t not in ("ASC", "MC", "DSC") else f"your {t} ({plain(t)})"
     B = f"your {n} ({plain(n)})" if n not in ("ASC", "MC", "DSC") else f"your {n} ({plain(n)})"

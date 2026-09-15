@@ -1,0 +1,275 @@
+#!/usr/bin/env python3
+"""astro_timeline.py — dated calendar of what the sky does to Mike's chart, 2026→2031,
+computed from the real ephemeris (never from a reading), with researched meanings attached
+by key from the astro_kb_*.json files (via astro_lexicon.kb_entry).
+
+Events: slow-body sign ingresses, Placidus house ingresses, exact aspects to every natal
+point, progressed Moon sign/house ingresses, eclipses touching natal points, solar-arc hits.
+
+CLI: astro_timeline.py [next N]  → chronological list (default 30 days)
+     astro_timeline.py today      → what is exact / ingressing within ±2 days
+     astro_timeline.py year       → the next 12 months, one line each
+     astro_timeline.py rebuild    → recompute the cache (astro_timeline.json)
+     astro_timeline.py key "<key>"→ show the researched entry for a key
+"""
+from __future__ import annotations
+import json, sys
+from datetime import date, datetime, timedelta
+from pathlib import Path
+import swisseph as swe
+import astro_truth as T
+import astro_lexicon as lex
+from svehla import _signed_diff, _crossings, jd_of, natal_lon
+
+HERE = Path(__file__).resolve().parent
+CACHE = HERE / "astro_timeline.json"
+START, END = date(2026, 9, 1), date(2031, 12, 31)
+SLOW = {"Jupiter": swe.JUPITER, "Saturn": swe.SATURN, "Uranus": swe.URANUS, "Neptune": swe.NEPTUNE,
+        "Pluto": swe.PLUTO, "Chiron": swe.CHIRON, "Ceres": swe.CERES, "Juno": swe.JUNO}
+NATAL_POINTS = ["Sun", "Moon", "Mercury", "Venus", "Mars", "Jupiter", "Saturn", "Uranus", "Neptune",
+                "Pluto", "Chiron", "Ceres", "Juno", "Hades", "Apollon", "ASC", "MC"]
+ASPECTS = {"conjunct": 0, "square": 90, "opposite": 180, "trine": 120, "sextile": 60}
+# which aspects are worth a dated line per body (fast asteroids only on the hard ones)
+BODY_ASPECTS = {"Jupiter": ["conjunct", "square", "opposite", "trine"],
+                "Saturn": ["conjunct", "square", "opposite", "trine"],
+                "Uranus": ["conjunct", "square", "opposite", "trine", "sextile"],
+                "Neptune": ["conjunct", "square", "opposite", "trine", "sextile"],
+                "Pluto": ["conjunct", "square", "opposite", "trine", "sextile"],
+                "Chiron": ["conjunct", "square", "opposite"],
+                "Ceres": ["conjunct"], "Juno": ["conjunct", "opposite"]}
+GLYPH = {"Jupiter": "♃", "Saturn": "♄", "Uranus": "♅", "Neptune": "♆", "Pluto": "♇", "Chiron": "⚷",
+         "Ceres": "⚳", "Juno": "⚵", "Moon": "☽", "eclipse": "🌑", "arc": "➡️", "progressed": "🌙"}
+
+
+def _lon(jd: float, body: int) -> float:
+    return swe.calc_ut(jd, body)[0][0] % 360
+
+
+def _sign_ingresses(name: str, body: int) -> list[dict]:
+    out = []
+    for s in range(12):
+        f = lambda jd, b=body, s=s: _signed_diff(_lon(jd, b), s * 30.0)
+        for d in _crossings(f, START, END):
+            spd = swe.calc_ut(jd_of(d) + 0.5, body)[0][3]
+            back = spd < 0
+            sign = T.SIGNS[(s - 1) % 12] if back else T.SIGNS[s]
+            house = T.house_of((s * 30.0 - 0.01) % 360 if back else s * 30.0 + 0.01)
+            out.append({"date": d.isoformat(), "kind": "sign", "body": name,
+                        "key": f"Transiting {name} in {sign}",
+                        "what": f"{name} {'backs into' if back else 'enters'} {sign} (your {T.ordinal(house)} house)"})
+    return out
+
+
+def _house_ingresses(name: str, body: int) -> list[dict]:
+    out = []
+    for i, cusp in enumerate(T.CUSPS):
+        f = lambda jd, b=body, c=cusp: _signed_diff(_lon(jd, b), c)
+        for d in _crossings(f, START, END):
+            spd = swe.calc_ut(jd_of(d) + 0.5, body)[0][3]
+            back = spd < 0
+            house = i if back else i + 1          # cusp i (0-based) opens house i+1
+            house = 12 if house == 0 else house
+            out.append({"date": d.isoformat(), "kind": "house", "body": name,
+                        "key": f"Transiting {name} in the {T.ordinal(house)} house",
+                        "what": f"{name} {'backs into' if back else 'crosses into'} your {T.ordinal(house)} house"})
+    return out
+
+
+def _exact_aspects(name: str, body: int) -> list[dict]:
+    out = []
+    for npt in NATAL_POINTS:
+        target = natal_lon(npt)
+        for asp in BODY_ASPECTS[name]:
+            deg = ASPECTS[asp]
+            angles = {deg} if deg in (0, 180) else {deg, 360 - deg}
+            for a in angles:
+                f = lambda jd, b=body, t=(target + a) % 360: _signed_diff(_lon(jd, b), t)
+                for d in _crossings(f, START, END):
+                    lon = _lon(jd_of(d) + 0.5, body)
+                    out.append({"date": d.isoformat(), "kind": "aspect", "body": name, "natal": npt,
+                                "aspect": asp, "t_house": T.house_of(lon),
+                                "key": f"Transiting {name} {asp} natal {npt}",
+                                "what": f"{name} exactly {asp} your natal {npt}"})
+    return out
+
+
+def _progressed_moon() -> list[dict]:
+    out, d = [], START
+    prev = T.progressed(d)["Moon"]
+    while d < END:
+        d += timedelta(days=1)
+        cur = T.progressed(d)["Moon"]
+        if cur["sign"] != prev["sign"]:
+            out.append({"date": d.isoformat(), "kind": "progressed", "body": "Moon",
+                        "key": f"Progressed Moon in {cur['sign']}",
+                        "what": f"Progressed Moon enters {cur['sign']}"})
+        if cur["house"] != prev["house"]:
+            out.append({"date": d.isoformat(), "kind": "progressed", "body": "Moon",
+                        "key": f"Progressed Moon in the {T.ordinal(cur['house'])} house",
+                        "what": f"Progressed Moon enters your {T.ordinal(cur['house'])} house"})
+        prev = cur
+    return out
+
+
+def _eclipses() -> list[dict]:
+    out = []
+    try:
+        import astro_sky
+        for e in astro_sky.eclipses(START, (END - START).days):
+            d = e["date_et"][:10]
+            base = f"{e['type'].capitalize()} {e['kind']} eclipse at {e['deg']}° {e['sign']} (your {T.ordinal(e['house'])} house)"
+            if e.get("natal_hits"):
+                for h in e["natal_hits"]:
+                    out.append({"date": d, "kind": "eclipse", "body": e["kind"],
+                                "key": f"{e['kind'].capitalize()} eclipse {h['aspect']} natal {h['natal']}",
+                                "alt_key": f"{e['kind'].capitalize()} eclipse in the {T.ordinal(e['house'])} house",
+                                "what": f"{base} — {h['aspect']} your natal {h['natal']} (orb {h['orb']:.1f}°)"})
+            else:
+                out.append({"date": d, "kind": "eclipse", "body": e["kind"],
+                            "key": f"{e['kind'].capitalize()} eclipse in the {T.ordinal(e['house'])} house",
+                            "what": base})
+    except Exception as ex:
+        out.append({"date": START.isoformat(), "kind": "error", "body": "eclipse", "key": "", "what": f"eclipses unavailable: {ex}"})
+    return out
+
+
+def _solar_arcs() -> list[dict]:
+    out = []
+    try:
+        import astro_returns
+        for h in astro_returns.solar_arc_hits(START, years=6):
+            out.append({"date": h["date"], "kind": "arc", "body": "arc", "key": h["what"], "what": h["what"]})
+    except Exception as ex:
+        out.append({"date": START.isoformat(), "kind": "error", "body": "arc", "key": "", "what": f"solar arc unavailable: {ex}"})
+    return out
+
+
+def _stamp(run: list[dict]) -> None:
+    if len(run) > 1:
+        for i, e in enumerate(run, 1):
+            rx = swe.calc_ut(jd_of(date.fromisoformat(e["date"])) + 0.5, SLOW[e["body"]])[0][3] < 0
+            e["pass"] = f"{i} of {len(run)}"
+            e["rx"] = rx
+            e["what"] += f" (pass {i} of {len(run)}{', retrograde' if rx else ''})"
+
+
+def build() -> list[dict]:
+    ev = []
+    for name, body in SLOW.items():
+        ev += _sign_ingresses(name, body) + _house_ingresses(name, body) + _exact_aspects(name, body)
+    ev += _progressed_moon() + _eclipses() + _solar_arcs()
+    ev = [e for e in ev if e["kind"] != "error"] + [e for e in ev if e["kind"] == "error"]
+    ev.sort(key=lambda e: (e["date"], e["kind"], e["body"]))
+    # pass numbering: same aspect key hitting again within 20 months = the retrograde triple pass
+    groups: dict[str, list[dict]] = {}
+    for e in ev:
+        if e["kind"] == "aspect":
+            groups.setdefault(e["key"], []).append(e)
+    for key, lst in groups.items():
+        run: list[dict] = []
+        for e in lst:
+            if run and (date.fromisoformat(e["date"]) - date.fromisoformat(run[-1]["date"])).days > 600:
+                _stamp(run); run = []
+            run.append(e)
+        _stamp(run)
+    CACHE.write_text(json.dumps({"built": datetime.now(T.ET).isoformat(timespec="minutes"),
+                                 "start": START.isoformat(), "end": END.isoformat(), "events": ev}, indent=1))
+    return ev
+
+
+def load(max_age_days: int = 30) -> list[dict]:
+    if CACHE.exists():
+        try:
+            data = json.loads(CACHE.read_text())
+            built = datetime.fromisoformat(data["built"])
+            if (datetime.now(T.ET) - built).days <= max_age_days:
+                return data["events"]
+        except Exception:
+            pass
+    return build()
+
+
+# ── rendering ─────────────────────────────────────────────────────────────────
+def _meaning(e: dict, full: bool = False) -> str:
+    """Researched translation for the event key (or alt_key), else the lexicon combo, else ''."""
+    ent = lex.kb_entry(e.get("key", "")) or lex.kb_entry(e.get("alt_key", ""))
+    if ent:
+        s = ent.get("translation", "")
+        if full:
+            if ent.get("esoteric"):
+                s += f" Esoteric: {ent['esoteric']}"
+            if ent.get("svehla_link"):
+                s += f" Svehla: {ent['svehla_link']}"
+            if ent.get("do"):
+                s += f" Do: {ent['do']}"
+        return s
+    c = lex.combo_translation(e.get("key", "")) or lex.combo_translation(e.get("key", "").replace("Transiting ", "").replace("natal ", ""))
+    return c.split(" (Esoteric:")[0].split(": ", 1)[-1] if c else ""
+
+
+def _glyph(e: dict) -> str:
+    return GLYPH.get(e["body"], GLYPH.get(e["kind"], "•"))
+
+
+def _fmt_date(s: str) -> str:
+    d = date.fromisoformat(s)
+    return d.strftime("%b %-d %Y") if d.year != date.today().year else d.strftime("%b %-d")
+
+
+def upcoming_block(d: date | None = None, days: int = 30, full: bool = False, limit: int = 40) -> str:
+    d = d or datetime.now(T.ET).date()
+    end = d + timedelta(days=days)
+    ev = [e for e in load() if d.isoformat() <= e["date"] <= end.isoformat()]
+    lines = [f"🗓 TIMELINE — next {days} days from {d.strftime('%b %-d')} (real ephemeris, Placidus)"]
+    if not ev:
+        lines.append("Nothing exact in this window.")
+    for e in ev[:limit]:
+        m = _meaning(e, full)
+        lines.append(f"{_glyph(e)} {_fmt_date(e['date'])}: {e['what']}" + (f"\n   ↳ {m}" if m else ""))
+    if len(ev) > limit:
+        lines.append(f"… +{len(ev) - limit} more (/timeline {days} full)")
+    return "\n".join(lines)
+
+
+def today_block(d: date | None = None, window: int = 2) -> str:
+    """Events exact within ±window days — for the daily send."""
+    d = d or datetime.now(T.ET).date()
+    lo, hi = (d - timedelta(days=window)).isoformat(), (d + timedelta(days=window)).isoformat()
+    ev = [e for e in load() if lo <= e["date"] <= hi]
+    if not ev:
+        return ""
+    lines = ["🗓 Exact this week (timeline):"]
+    for e in ev[:6]:
+        when = "today" if e["date"] == d.isoformat() else _fmt_date(e["date"])
+        m = _meaning(e)
+        lines.append(f"{_glyph(e)} {when}: {e['what']}" + (f" — {m}" if m else ""))
+    return "\n".join(lines)
+
+
+def year_block(d: date | None = None) -> str:
+    d = d or datetime.now(T.ET).date()
+    end = d + timedelta(days=365)
+    ev = [e for e in load() if d.isoformat() <= e["date"] <= end.isoformat()
+          and (e["kind"] in ("sign", "house", "progressed", "eclipse") or e["body"] in ("Saturn", "Uranus", "Neptune", "Pluto", "Chiron")
+               or e.get("aspect") in ("conjunct", "opposite", "square"))]
+    lines = [f"📆 THE YEAR AHEAD — {d.strftime('%b %-d %Y')} → {end.strftime('%b %-d %Y')}"]
+    for e in ev:
+        lines.append(f"{_glyph(e)} {_fmt_date(e['date'])}: {e['what']}")
+    return "\n".join(lines)
+
+
+if __name__ == "__main__":
+    a = sys.argv[1:]
+    cmd = a[0] if a else "next"
+    if cmd == "rebuild":
+        ev = build(); print(f"rebuilt: {len(ev)} events {START} → {END}")
+    elif cmd == "today":
+        print(today_block() or "Nothing exact within ±2 days.")
+    elif cmd == "year":
+        print(year_block())
+    elif cmd == "key":
+        ent = lex.kb_entry(" ".join(a[1:]))
+        print(json.dumps(ent, indent=1) if ent else "no researched entry for that key")
+    else:
+        days = int(a[1]) if len(a) > 1 and a[1].isdigit() else (int(cmd) if cmd.isdigit() else 30)
+        print(upcoming_block(days=days, full="full" in a))

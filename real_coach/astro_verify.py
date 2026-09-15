@@ -295,6 +295,36 @@ def check_modules() -> list[str]:
             fails.append(f"F quality score out of range: {q}")
     except Exception as e:
         fails.append(f"F astro_lookahead crashed: {e}")
+    # round 8: timeline must agree with the sky module on ingress direction/date and with Svehla's exact hits
+    try:
+        import astro_timeline as TL, astro_sky as SK
+        ev = TL.load()
+        by = {}
+        for e in ev:
+            if e["kind"] == "sign":
+                by.setdefault((e["body"], e["key"].split(" in ")[-1]), []).append(date.fromisoformat(e["date"]))
+        checked = 0
+        for ing in SK.ingresses(now.date(), 400):
+            if ing["body"] not in TL.SLOW:
+                continue
+            d = date.fromisoformat(ing["date_et"][:10])
+            cands = by.get((ing["body"], ing["sign"]), [])
+            if not any(abs((c - d).days) <= 1 for c in cands):
+                fails.append(f"F timeline/sky disagree: {ing['body']} → {ing['sign']} {d} not in timeline {cands[:3]}")
+            checked += 1
+        if checked == 0:
+            fails.append("F timeline check: no slow-body ingresses to compare")
+        want = {("Saturn", "MC", "conjunct"): date(2027, 4, 16), ("Saturn", "Apollon", "opposite"): date(2027, 3, 28),
+                ("Uranus", "Hades", "conjunct"): date(2028, 7, 3)}
+        for (b, n, a), d in want.items():
+            ds = [date.fromisoformat(e["date"]) for e in ev if e["kind"] == "aspect" and e["body"] == b and e.get("natal") == n and e.get("aspect") == a]
+            if not any(abs((x - d).days) <= 1 for x in ds):
+                fails.append(f"F timeline missing {b} {a} {n} ≈ {d} (got {ds[:3]})")
+        pm = [e["date"] for e in ev if e["kind"] == "progressed" and e["key"] == "Progressed Moon in Gemini"]
+        if pm and abs((date.fromisoformat(pm[0]) - date(2027, 5, 3)).days) > 1:
+            fails.append(f"F timeline pMoon→Gemini {pm[0]} vs Svehla 2027-05-03")
+    except Exception as e:
+        fails.append(f"F astro_timeline crashed: {e}")
     return fails
 
 

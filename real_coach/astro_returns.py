@@ -164,6 +164,12 @@ def solar_return_block(year: int) -> str:
         lines.append(f"• {name} {int(p['deg_f'])}° {p['sign']}{rx} — SR {T.ordinal(p['sr_house'])} / natal {T.ordinal(p['natal_house'])}")
     lines.append("")
     lines.append("WHAT THE YEAR EMPHASIZES:")
+    try:
+        for k in (f"Solar return ASC in {T.SIGNS[int(sr['asc_lon'] // 30)]}", f"Solar return Sun in the {T.ordinal(sr['sr_sun_house'])} house"):
+            for ln in lex.entry_lines(k, full=True)[:4]:
+                lines.append(ln)
+    except Exception:
+        pass
     lines.append(_interp_line("SR", "Sun", sr["sr_sun_house"]))
     lines.append(_interp_line("SR", "Moon", sr["sr_moon_house"]))
     for name in ("Mercury", "Venus", "Mars", "Jupiter", "Saturn", "Uranus", "Neptune", "Pluto",
