@@ -2,10 +2,13 @@
 """command_center.py — ONE live, edit-in-place desk dashboard per channel.
 
 Instead of re-posting a fresh status every cycle (chat spam), this keeps a single
-pinned embed and PATCHes it each run: regime + tape + live portfolio P&L + muted
-names + an ET timestamp. Posts AS SynthControl (the aime-discord app — it can edit
-its own message) into #command-center, created + pinned on first run. Cron every
-~2 min in market hours. Edit-in-place = instant + cheap (no image render).
+pinned embed and PATCHes it each run: regime + tape + muted names + an ET timestamp.
+Posts AS SynthControl (the aime-discord app — it can edit its own message) into
+#command-center, created + pinned on first run. Cron every ~2 min in market hours.
+Edit-in-place = instant + cheap (no image render).
+
+Portfolio/P&L field retired 2026-09-15 (portfolio views retired site-wide 2026-09-12,
+no live holdings feed exists) — this card is regime/tape + muted names only now.
 
   command_center.py            # refresh (create+pin first run, edit thereafter)
   command_center.py --print    # print the embed payload only, don't post
@@ -25,7 +28,6 @@ sys.path.insert(0, str(Path(__file__).resolve().parent))
 from lib import ops_card as oc            # noqa: E402
 from lib import regime as regime_lib      # noqa: E402
 from lib import card_mute                 # noqa: E402
-from lib.portfolio import portfolio_summary  # noqa: E402
 
 ET = ZoneInfo("America/New_York")
 GUILD = "1486025777970548908"
@@ -50,15 +52,10 @@ def _save_state(d: dict) -> None:
 
 def build_embed() -> dict:
     r = regime_lib.regime()
-    try:
-        pf = portfolio_summary()
-    except Exception as e:  # noqa: BLE001
-        pf = f"(portfolio unavailable: {e})"
     muted = card_mute.active()
     now = datetime.now(ET)
     fields = [
         {"name": "📡 Regime / Tape", "value": (r.get("line") or "—")[:1024], "inline": False},
-        {"name": "💼 Book / P&L", "value": (pf or "—")[:1024], "inline": False},
     ]
     if muted:
         fields.append({"name": "🔇 Muted",

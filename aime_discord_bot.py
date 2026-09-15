@@ -29,7 +29,7 @@ import aime_client as aime  # noqa: E402
 import discord  # noqa: E402
 from discord import app_commands  # noqa: E402
 from discord.ext import tasks  # noqa: E402
-from lib.portfolio import (portfolio_summary, add_watch, remove_watch,  # noqa: E402
+from lib.portfolio import (add_watch, remove_watch,  # noqa: E402
                            get_watchlist, total_equity, daily_journal_recap, weekly_review)
 from lib import x_search  # noqa: E402  — native Grok x_search w/ web fallback
 from lib import alerts as price_alerts  # noqa: E402  — user-set price alerts (Set Alert btn)
@@ -832,13 +832,6 @@ async def flowpicks_cmd(interaction: discord.Interaction):
     await _send_chunks(interaction, await _answer_skill(prompt, timeout=420))
 
 
-@tree.command(name="portfolio", description="Live positions + P&L across Boba + Jazzy")
-async def portfolio_cmd(interaction: discord.Interaction):
-    await interaction.response.defer(thinking=True)
-    # deterministic Alpaca read (no LLM) — fast
-    await _send_chunks(interaction, await asyncio.to_thread(portfolio_summary))
-
-
 @tree.command(name="pick", description="Post an actionable trade-idea card with Took-it / Skip / Analyze buttons")
 @app_commands.describe(ticker="ticker", note="optional thesis / contract / note")
 async def pick_cmd(interaction: discord.Interaction, ticker: str, note: Optional[str] = None):
@@ -928,8 +921,8 @@ HELP_TEXT = (
     "`/ainvest <q>` read on anything · `/options <ticker>` options verdict (+screenshot)\n"
     "`/ticker <sym>` 2-min vet · `/decide <q>` buy/sell/hold · `/crypto <coin>` crypto read\n"
     "`/news <q>` catalysts · `/regime` market regime · `/recall <q>` knowledge base\n\n"
-    "**💼 Portfolio, trades & planning**\n"
-    "`/portfolio` live P&L · `/scorecard` EOD book + pick grades · `/journal` recap · `/week` weekly · `/trades` fills\n"
+    "**💼 Trades & planning**\n"
+    "`/scorecard` EOD book + pick grades · `/journal` recap · `/week` weekly · `/trades` fills\n"
     "`/levels <t>` S/R + entry/stop · `/size <t> <entry> <stop>` position size · `/pick <t>` action card\n"
     "`/flowpicks` ranked flow · `/signals` source liveness\n\n"
     "**👁️ Watchlist** (feeds your scheduled intel)\n"
@@ -939,8 +932,7 @@ HELP_TEXT = (
     "`/morning` morning note · `/aime <q>`\n\n"
     "**🛰️ Runs automatically:** morning briefing + events (8:05/8:15) · opening read (9:35) · "
     "**flow picks → #flow-picks (9:50/11/12:30/2/3:20)** · regime/news/X-sentiment (native Grok) · "
-    "position-mgmt (11:30/2:00) · power hour (2:55) · portfolio snapshots (9:35/4:05) · "
-    "**your-crypto alerts → #daily-crypto-pumps (24h ≥5% /30m + 15-min spike ≥3% /5m)** · "
+    "position-mgmt (11:30/2:00) · power hour (2:55) · "
     "risk/exit/shock alerts."
 )
 

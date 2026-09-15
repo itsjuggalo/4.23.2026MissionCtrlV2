@@ -34,7 +34,7 @@ FOMC_2026 = [
     "2026-07-29", "2026-09-16", "2026-10-28", "2026-12-16",
 ]
 # His current stock names (from the 2026-06-16 eval) — earnings filter seed, unioned
-# with whatever ARIES/Alpaca report live so it stays correct as the book changes.
+# with the watchlist + live flow-relay tickers in held_tickers() below.
 SEED_TICKERS = ["MU", "ORCL", "NFLX", "SMCI", "SOFI", "COIN", "NIO", "QQQ", "KLAR"]
 
 
@@ -110,19 +110,22 @@ def finnhub_econ(key: str, start: date, end: date) -> list[dict]:
 
 
 def held_tickers() -> set[str]:
-    """Best-effort union of held STOCK names (ARIES RH/Alpaca + seed)."""
-    tk = set(SEED_TICKERS)
+    """Earnings-filter ticker set: seed names + watchlist + live flow-relay tickers,
+    padded with a static index fallback. Was a live Alpaca/Robinhood holdings read
+    (top_tickers + ARIES /api/brokers/robinhood); retired 2026-09-15 — portfolio
+    views retired site-wide 2026-09-12, no live holdings feed exists to read."""
+    tk = set(SEED_TICKERS) | {"SPY", "QQQ", "IWM", "DIA"}
     try:
-        from lib.portfolio import top_tickers  # Alpaca paper names
-        tk |= {t.upper() for t in top_tickers(12)}
+        wl = json.loads((Path.home() / ".openclaw" / "data" / "watchlist.json").read_text())
+        tk |= {str(t).upper() for t in wl}
     except Exception:
         pass
-    j = _get_json("http://localhost:1337/api/brokers/robinhood", timeout=6)
+    j = _get_json("http://localhost:3000/api/firebase-relay", timeout=6)
     if isinstance(j, dict):
-        for row in (j.get("holdings") or j.get("positions") or []):
-            s = (row.get("asset") or row.get("symbol") or "").upper()
-            if s and s.isalpha() and len(s) <= 5:
-                tk.add(s)
+        for sig in j.get("signals", []) or []:
+            t = str((sig or {}).get("ticker", "")).upper()
+            if t:
+                tk.add(t)
     return tk
 
 

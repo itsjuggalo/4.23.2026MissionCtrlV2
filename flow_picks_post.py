@@ -4,8 +4,12 @@
 Reads the LIVE scraped option flow (read-only — never touches the signal stream),
 ranks the current contracts by conviction (flow $ + fresh vol/OI + sweep/repeat +
 DTE sanity), splits 0DTE tape-confirmation from swing-able picks, flags YOUR names
-(holdings + watchlist + real-money crypto), prepends a SPY/QQQ/VIX tape line, and
-posts to #flow-picks. Cron-driven intraday. Run with ~/.venv/bin/python (for yfinance).
+(watchlist), prepends a SPY/QQQ/VIX tape line, and posts to #flow-picks. Cron-driven
+intraday. Run with ~/.venv/bin/python (for yfinance).
+
+YOUR-NAME tag was watchlist+holdings+real-money-crypto; narrowed to watchlist-only
+2026-09-15 (portfolio views retired site-wide 2026-09-12, no live holdings feed to
+tag against).
 
   flow_picks_post.py            # post to #flow-picks
   flow_picks_post.py --print    # print only, don't post
@@ -23,7 +27,7 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 from skill_to_discord import post, resolve_channel, GUILD  # noqa: E402  (resilient bot poster)
-from lib.portfolio import personal_tickers, personal_crypto  # noqa: E402
+from lib.portfolio import get_watchlist  # noqa: E402
 from lib.heartbeat import beat  # noqa: E402
 from lib.notify import tg_brief  # noqa: E402
 from lib import card_mute  # noqa: E402  — operator-muted names get skipped
@@ -302,7 +306,7 @@ def build() -> str | None:
     merged = _load()
     if not merged:
         return None
-    names = {s.upper() for s in personal_tickers()} | {s.upper() for s in personal_crypto()}
+    names = {s.upper() for s in get_watchlist()}
     iv_map = _load_iv_map()
     scored = sorted(((_score(a), a) for a in merged.values()), key=lambda x: -x[0][0])
 
