@@ -25,7 +25,6 @@ from zoneinfo import ZoneInfo
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
-from lib.portfolio import top_tickers_str, crypto_tickers_str, portfolio_summary  # noqa: E402
 from lib import x_search  # noqa: E402  — native Grok x_search (OAuth) w/ web fallback
 
 SEC = Path.home() / ".openclaw" / "secrets"
@@ -35,6 +34,55 @@ CLAUDE_BIN = str(Path.home() / ".local/bin/claude")
 CLAUDE_CWD = str(Path.home())
 CLAUDE_TOOLS = "Bash,Read,Grep,Glob,WebFetch,WebSearch,Skill,Agent,TodoWrite"
 BOT_TOKEN = (SEC / "discord_boba_token").read_text().strip()
+CRYPTO_CONTEXT = ["BTC", "ETH", "SOL"]   # macro-context defaults (crypto-desk), not a holdings read
+
+
+def watch_tickers(n: int = 8) -> list[str]:
+    """Watchlist + live flow-relay tickers, padded with a static index fallback.
+    Was lib.portfolio.top_tickers_str/portfolio_summary (Alpaca paper holdings);
+    retired 2026-09-15 — portfolio views retired site-wide 2026-09-12, no live
+    holdings feed exists to substitute {TICKERS}/{PORTFOLIO} with."""
+    tk: list[str] = []
+    try:
+        wl = json.loads((Path.home() / ".openclaw" / "data" / "watchlist.json").read_text())
+        tk += [str(t).upper() for t in wl]
+    except Exception:
+        pass
+    try:
+        req = urllib.request.Request("http://localhost:3000/api/firebase-relay",
+                                     headers={"User-Agent": "mc-skillcron/1.0"})
+        with urllib.request.urlopen(req, timeout=6) as r:
+            j = json.loads(r.read())
+        for sig in (j or {}).get("signals", []) or []:
+            t = str((sig or {}).get("ticker", "")).upper()
+            if t and t not in tk:
+                tk.append(t)
+    except Exception:
+        pass
+    for d in ("SPY", "QQQ", "IWM", "DIA"):
+        if d not in tk:
+            tk.append(d)
+    return tk[:n]
+
+
+def watch_tickers_str(n: int = 8) -> str:
+    return ", ".join(watch_tickers(n))
+
+
+def crypto_context_str(n: int = 6) -> str:
+    """Static crypto macro-context list (BTC/ETH/SOL as risk-gauge names), padded
+    with the watchlist. Was lib.portfolio.crypto_tickers_str (real-money RH+Coinbase
+    holdings); retired 2026-09-15 — no live crypto holdings feed exists."""
+    tk = list(CRYPTO_CONTEXT)
+    try:
+        wl = json.loads((Path.home() / ".openclaw" / "data" / "watchlist.json").read_text())
+        for t in wl:
+            t = str(t).upper()
+            if t not in tk:
+                tk.append(t)
+    except Exception:
+        pass
+    return ", ".join(tk[:n])
 
 
 def run_skill(prompt: str, model: str = "sonnet", timeout: int = 420) -> str:
@@ -100,26 +148,29 @@ def main() -> None:
     ap.add_argument("--model", default="sonnet")
     ap.add_argument("--timeout", type=int, default=420)
     ap.add_argument("--tickers", type=int, default=0,
-                    help="substitute {TICKERS} in --skill with the top-N portfolio holdings")
+                    help="substitute {TICKERS} in --skill with your top-N watchlist/flow-relay tickers")
     ap.add_argument("--portfolio", action="store_true",
-                    help="substitute {PORTFOLIO} in --skill with the live positions+P&L summary")
+                    help="[retired] substitute {PORTFOLIO} with a watchlist+relay ticker line "
+                         "(was the live positions+P&L summary — portfolio views retired 2026-09-12)")
     ap.add_argument("--crypto", type=int, default=0,
-                    help="substitute {CRYPTO} in --skill with your top-N real-money crypto holdings")
+                    help="substitute {CRYPTO} in --skill with a BTC/ETH/SOL + watchlist crypto context list")
     ap.add_argument("--xnative", action="store_true",
                     help="X-sentiment: use native Grok x_search if an OAuth token exists, else the skill")
     a = ap.parse_args()
     skill = a.skill
     if a.tickers and "{TICKERS}" in skill:
-        skill = skill.replace("{TICKERS}", top_tickers_str(a.tickers))
+        skill = skill.replace("{TICKERS}", watch_tickers_str(a.tickers))
     if a.crypto and "{CRYPTO}" in skill:
-        skill = skill.replace("{CRYPTO}", crypto_tickers_str(a.crypto))
+        skill = skill.replace("{CRYPTO}", crypto_context_str(a.crypto))
     if a.portfolio and "{PORTFOLIO}" in skill:
-        skill = skill.replace("{PORTFOLIO}", portfolio_summary())
+        # Retired 2026-09-15: no live holdings feed exists (portfolio views retired
+        # site-wide 2026-09-12). Falls back to the watchlist+relay ticker line.
+        skill = skill.replace("{PORTFOLIO}", f"(no live portfolio feed — watchlist: {watch_tickers_str(8)})")
     cid = resolve_channel(a.channel)
     out = None
     if a.xnative and x_search.oauth_token():   # native Grok firehose when subscription token is live
-        names = top_tickers_str(a.tickers or 6)
-        out = x_search.x_sentiment(f"my holdings ({names}) and the overall market", timeout=min(a.timeout, 60))
+        names = watch_tickers_str(a.tickers or 6)
+        out = x_search.x_sentiment(f"my watchlist ({names}) and the overall market", timeout=min(a.timeout, 60))
     if not out:                                # no token / native failed → web-search skill
         out = run_skill(skill, a.model, a.timeout)
     stamp = datetime.now(ET).strftime("%a %b %-d %-I:%M %p ET")

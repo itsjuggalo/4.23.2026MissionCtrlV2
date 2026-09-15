@@ -18,6 +18,7 @@ import re
 import subprocess
 import sys
 import tempfile
+from collections import Counter
 from datetime import datetime, timezone, timedelta
 from pathlib import Path
 from typing import Optional
@@ -29,8 +30,7 @@ import aime_client as aime  # noqa: E402
 import discord  # noqa: E402
 from discord import app_commands  # noqa: E402
 from discord.ext import tasks  # noqa: E402
-from lib.portfolio import (add_watch, remove_watch,  # noqa: E402
-                           get_watchlist, total_equity, daily_journal_recap, weekly_review)
+from lib.portfolio import add_watch, remove_watch, get_watchlist  # noqa: E402
 from lib import x_search  # noqa: E402  — native Grok x_search w/ web fallback
 from lib import alerts as price_alerts  # noqa: E402  — user-set price alerts (Set Alert btn)
 from lib import card_mute  # noqa: E402  — per-ticker mute (Mute btn)
@@ -158,7 +158,7 @@ class PickView(_MikeView):
         await _send_chunks(interaction, await _answer_skill(f"/ticker-research {t}"))
 
 
-# ─── ACTION CARDS (Paper Buy / Set Alert / Explain / Grade / Mute) ────────────
+# ─── ACTION CARDS (Size It / Set Alert / Explain / Grade / Mute) ──────────────
 # A second persistent View whose buttons carry the heavier actions. Static
 # custom_ids so a card posted by cron (via the SAME SynthControl app token, with
 # a raw components action-row) routes its clicks to this registered View. The
@@ -167,13 +167,12 @@ ACT_BUY, ACT_ALERT, ACT_EXPLAIN, ACT_GRADE, ACT_MUTE = (
     "act:buy", "act:alert", "act:explain", "act:grade", "act:mute")
 ACT_PAYOFF = "act:payoff"
 
-# ARMED 2026-06-15 on Mike's explicit "arm paper buy" go. PAPER accounts ONLY, hard
-# min($400, 15%-of-equity) cap, killswitch-guarded (~/.openclaw/workspace/state/
-# {acct}_killswitch), and market-hours guarded (_market_open — Alpaca QUEUES off-hours
-# market orders rather than rejecting, so we refuse when closed to avoid surprise fills).
-# The confirm Modal (account + $ entry) is the deliberate gate. Set False to disarm.
-_ARM_PAPER_BUY = True
-PAPER_INTENTS = Path.home() / ".openclaw" / "state" / "paper_buy_intents.jsonl"
+# The old "Paper Buy" two-step (preview → ✅ Confirm → live Alpaca paper order) was
+# retired 2026-09-15: Alpaca is retired as a book (2026-08-11, Mike: "remove all
+# associations with alpaca") — no broker keys are read, no order is ever placed here
+# anymore. ACT_BUY / BuyModal now only compute an advisory flat-$400-cap size (see
+# _size_advisory below); it's a calculator, not an order path. Execute yourself in
+# Robinhood/Coinbase.
 
 
 def _card_ticker(msg) -> str:
@@ -245,186 +244,121 @@ def _grade_ticker(ticker: str) -> str:
             f"Use `/ticker {t}` for a fresh read.")
 
 
-def _paper_keys(acct: str):
-    # current paper keys post-2026-06-04 reset (alpaca-r1-* was deleted May 3)
-    sec = Path.home() / ".openclaw" / "secrets"
-    pairs = {"boba": ("alpaca-boba-key-id", "alpaca-boba-secret"),
-             "jazzy": ("alpaca-jazzy-key-id", "alpaca-jazzy-secret")}
-    a, b = pairs.get(acct, pairs["boba"])
+# ─── VIRTUAL JOURNAL (no broker — Alpaca retired as a book 2026-08-11) ────────
+# /journal and /week used to read Alpaca account equity + the trade_journal table
+# journal_sync.py synced from real Alpaca fills. Both the Alpaca account read and
+# journal_sync are retired (2026-09-15) — there is no broker to report on anymore.
+# These now read the local virtual-pick log instead: read-only, no account/order call.
+PAPER_TRADES_FILE = Path.home() / "trading" / "signals" / "option-scraper" / "data" / "paper_trades.json"
+
+
+def _virtual_trades() -> list[dict]:
+    """Read-only load of the virtual pick/paper-trade log. [] on any error."""
     try:
-        return (sec / a).read_text().strip(), (sec / b).read_text().strip()
+        d = json.loads(PAPER_TRADES_FILE.read_text())
+        if isinstance(d, dict):
+            return d.get("trades", []) or []
+        if isinstance(d, list):
+            return d
     except Exception:
-        return None, None
+        pass
+    return []
 
 
-def _killswitch_on(acct: str) -> bool:
-    return (Path.home() / ".openclaw" / "workspace" / "state" / f"{acct}_killswitch").exists()
+def virtual_journal_recap() -> str:
+    """Today's virtual picks — no broker fills, advisory only."""
+    trades = _virtual_trades()
+    today = datetime.now(ET).strftime("%Y-%m-%d")
+    todays = [t for t in trades if str(t.get("opened_at", "")).startswith(today)]
+    lines = [f"📓 **VIRTUAL JOURNAL (no broker) — {datetime.now(ET):%a %b %-d}**"]
+    if not todays:
+        last = max((str(t.get("opened_at", "")) for t in trades), default="")
+        lines.append("No virtual picks opened today." + (f" Last activity: {last[:10]}." if last else ""))
+        return "\n".join(lines)
+    wins = [t for t in todays if (t.get("pnl_pct") or 0) > 0]
+    lines.append(f"{len(todays)} virtual pick(s) today · {len(wins)} green")
+    for t in todays[:15]:
+        pnl = t.get("pnl_pct")
+        ic = "🟩" if (pnl or 0) >= 0 else "🟥"
+        pnl_s = f"{pnl:+.1f}%" if pnl is not None else t.get("status", "?")
+        lines.append(f"   {ic} {t.get('symbol', '?')} {t.get('type', '')} ${t.get('strike', '?')} · {pnl_s}")
+    lines.append("_Virtual/paper picks only — no broker connected, nothing was actually bought._")
+    return "\n".join(lines)
 
 
-def _log_paper_intent(ticker, acct, shares, price, cost, user):
-    try:
-        PAPER_INTENTS.parent.mkdir(parents=True, exist_ok=True)
-        with open(PAPER_INTENTS, "a") as f:
-            f.write(json.dumps({"ts": datetime.now(timezone.utc).isoformat(), "ticker": ticker,
-                                "acct": acct, "shares": shares, "price": price, "cost": cost,
-                                "user": user, "armed": _ARM_PAPER_BUY}) + "\n")
-    except Exception as e:  # noqa: BLE001
-        print(f"[paper-intent] {e}", flush=True)
-    _journal(ticker, f"paper-buy-intent:{acct}:{shares}", user)
+def virtual_weekly_review() -> str:
+    """This week's virtual-pick performance — no broker, advisory only."""
+    trades = _virtual_trades()
+    now = datetime.now(ET)
+    week_start = (now - timedelta(days=now.weekday())).strftime("%Y-%m-%d")
+    wk = [t for t in trades if str(t.get("opened_at", "")) >= week_start]
+    lines = [f"📅 **VIRTUAL WEEKLY REVIEW (no broker) — week of {week_start}**"]
+    if not wk:
+        last = max((str(t.get("opened_at", "")) for t in trades), default="")
+        lines.append("No virtual picks this week." + (f" Last activity: {last[:10]}." if last else ""))
+        return "\n".join(lines)
+    pnls = [t.get("pnl_pct") for t in wk if t.get("pnl_pct") is not None]
+    wins = [p for p in pnls if p > 0]
+    avg = (sum(pnls) / len(pnls)) if pnls else 0.0
+    most_active = Counter(t.get("symbol", "?") for t in wk).most_common(3)
+    if pnls:
+        lines.append(f"{len(wk)} picks · {len(wins)}/{len(pnls)} green "
+                     f"({len(wins)/len(pnls)*100:.0f}%) · avg {avg:+.1f}%")
+    else:
+        lines.append(f"{len(wk)} picks (still open, no P&L yet)")
+    if most_active:
+        lines.append("Most active: " + ", ".join(f"{s} ({n})" for s, n in most_active))
+    lines.append("_Virtual/paper picks only — no broker connected, this is not real P&L._")
+    return "\n".join(lines)
 
 
-def _market_open(kid, ksec) -> bool:
-    """Alpaca market clock. Fail-safe: if we can't confirm OPEN, treat as closed."""
-    try:
-        import urllib.request
-        req = urllib.request.Request("https://paper-api.alpaca.markets/v2/clock",
-            headers={"APCA-API-KEY-ID": kid, "APCA-API-SECRET-KEY": ksec})
-        with urllib.request.urlopen(req, timeout=8) as r:
-            return bool(json.loads(r.read()).get("is_open"))
-    except Exception:
-        return False
-
-
-def _poll_fill(order_id, kid, ksec, tries=20, delay=0.5):
-    """Poll an Alpaca order toward a terminal state. Returns (status, filled_qty,
-    filled_avg_price). Same shape as the boba/jazzy decision-cycle fill loop."""
-    import time
-    import urllib.request
-    status, fqty, favg = "accepted", 0, 0.0
-    for _ in range(tries):
-        time.sleep(delay)
-        try:
-            req = urllib.request.Request(
-                f"https://paper-api.alpaca.markets/v2/orders/{order_id}",
-                headers={"APCA-API-KEY-ID": kid, "APCA-API-SECRET-KEY": ksec})
-            with urllib.request.urlopen(req, timeout=5) as r:
-                o = json.loads(r.read())
-            status = o.get("status", status)
-            fqty = int(float(o.get("filled_qty") or 0))
-            favg = float(o.get("filled_avg_price") or 0)
-            if status in ("filled", "canceled", "rejected", "expired"):
-                break
-        except Exception:  # noqa: BLE001  — transient poll error, keep trying
-            pass
-    return status, fqty, favg
-
-
-def _submit_paper_buy(acct, ticker, shares):
-    """ARMED paper-order submit — Alpaca PAPER only. Reached ONLY when
-    _ARM_PAPER_BUY is True (Mike's explicit go) AND the user taps ✅ Confirm.
-    Idempotent: client_order_id is keyed to a 5-min bucket so a duplicate within
-    that window is 422-rejected by Alpaca (the server-side double-tap backstop).
-    Polls for the fill so the user sees a real FILLED price, not just 'submitted'."""
-    if shares < 1:
-        return "↳ nothing submitted (size < 1 share)."
-    if _killswitch_on(acct):
-        return f"🛑 {acct} killswitch is ON — order NOT submitted."
-    kid, ksec = _paper_keys(acct)
-    if not kid:
-        return f"↳ no paper keys for '{acct}' — not submitted."
-    if not _market_open(kid, ksec):
-        return ("🕒 Market is CLOSED — a market order would queue and fill at the next open. "
-                "NOT submitted. Use 🔔 Set Alert, or tap Paper Buy during market hours.")
-    import urllib.error
-    import urllib.request
-    bucket = int(datetime.now(timezone.utc).timestamp()) // 300   # 5-min idempotency window
-    coid = f"pb-{acct}-{ticker}-{shares}-{bucket}"
-    body = json.dumps({"symbol": ticker, "qty": str(shares), "side": "buy",
-                       "type": "market", "time_in_force": "day",
-                       "client_order_id": coid}).encode()
-    req = urllib.request.Request("https://paper-api.alpaca.markets/v2/orders", data=body,
-        headers={"APCA-API-KEY-ID": kid, "APCA-API-SECRET-KEY": ksec,
-                 "Content-Type": "application/json"})
-    try:
-        with urllib.request.urlopen(req, timeout=15) as r:
-            o = json.loads(r.read())
-    except urllib.error.HTTPError as e:
-        if e.code == 422:
-            return (f"⚠️ **{ticker} ({acct})** was already submitted in the last 5 min — "
-                    "not sent again. Check your Alpaca orders/positions.")
-        try:
-            detail = e.read().decode()[:200]
-        except Exception:  # noqa: BLE001
-            detail = str(e)
-        return f"↳ submit rejected ({e.code}): {detail}"
-    except Exception as e:  # noqa: BLE001
-        return f"↳ submit error: {e}"
-    oid = str(o.get("id", ""))
-    status, fqty, favg = _poll_fill(oid, kid, ksec)
-    if status == "filled" and favg:
-        return f"✅ **FILLED** — BUY {fqty} {ticker} @ ${favg:,.2f} ({acct}) · order {oid[:8]}"
-    if status in ("rejected", "canceled", "expired"):
-        return f"⚠️ order {oid[:8]} {status} ({ticker} · {acct}) — nothing is held."
-    return (f"✅ Submitted PAPER order {oid[:8]} — BUY {shares} {ticker} ({acct})\n"
-            f"⏳ not filled within 10s ({status}); it should fill on the next tick — "
-            "📊 Grade or #main-portfolios will confirm.")
-
-
-def _paper_buy_preview(ticker, account, deploy_str, user):
-    """PREVIEW ONLY — sizes the trade against the caps, logs the intent, and returns
-    (preview_text, params). params is None when there's nothing to confirm (sub-1-share,
-    no live price, or disarmed); otherwise it's the dict ConfirmBuyView needs to place
-    the order. The order is NEVER submitted here — only on an explicit ✅ Confirm tap."""
+def _size_advisory(ticker: str, deploy_str: str, user: str) -> str:
+    """Advisory-only sizing — flat $400 cap (Mike's doctrine, 2026-09-12), no equity
+    read, no broker call, no order placed. The old Alpaca paper-buy submit chain
+    (preview → ✅ Confirm → live order) is retired 2026-09-15 (Alpaca retired as a
+    book 2026-08-11, Mike: "remove all associations with alpaca") — this is a
+    calculator, not a trade."""
     t = ticker.upper().strip()
-    acct = "jazzy" if str(account).lower().startswith("j") else "boba"
     try:
         want = float(str(deploy_str).replace("$", "").replace(",", ""))
     except ValueError:
         want = 150.0
     price = _last_price(t)
-    eq = total_equity()
     if not price:
-        return f"⚠️ Couldn't fetch a live price for {t}; preview aborted.", None
-    cap = 400.0                                   # Mike's hard cap: min($400, 15% equity) (2026-07-15)
-    if eq:
-        cap = min(cap, 0.5 * eq)                  # never >50% of equity in one paper name
+        return f"⚠️ Couldn't fetch a live price for {t}; sizing aborted."
+    cap = 400.0                                   # Mike's flat hard cap (2026-09-12)
     deploy = min(max(want, 0.0), cap)
     capped = deploy < want
     shares = int(deploy // price)
     cost = shares * price
-    lines = [f"🧾 **PAPER BUY PREVIEW — {t}** · acct `{acct}`",
-             f"Live ~${price:,.2f} · deploy ${deploy:,.0f}"
-             + (f" ({deploy/eq*100:.1f}% of ${eq:,.0f} equity)" if eq else "")
-             + (f"  _(capped from ${want:,.0f})_" if capped else "")]
+    lines = [f"📐 **SIZE — {t}** (advisory only, no broker)",
+             f"Live ~${price:,.2f} · up to ${deploy:,.0f}"
+             + (f"  _(capped from ${want:,.0f} to the $400 hard cap)_" if capped else " (the $400 hard cap)")]
     if shares < 1:
-        lines.append(f"➡️ ${deploy:,.0f} buys <1 share at ${price:,.2f} — raise the amount or pick a cheaper name.")
-        _log_paper_intent(t, acct, shares, price, cost, user)
-        return "\n".join(lines), None
-    lines.append(f"➡️ will submit **BUY {shares} {t}** (~${cost:,.0f}"
-                 + (f", {cost/eq*100:.0f}% of equity" if eq else "") + ")")
-    if eq and cost > eq * 0.5:
-        lines.append("⚠️ >50% of equity in one name — concentration risk.")
-    _log_paper_intent(t, acct, shares, price, cost, user)
-    if not _ARM_PAPER_BUY:
-        lines.append("🔒 **Paper-buy submit is NOT armed** — logged as an intent only, no order placed.")
-        return "\n".join(lines), None
-    lines.append("\n**Tap ✅ Confirm to place this PAPER order — or ✖ Cancel.**")
-    return "\n".join(lines), {"acct": acct, "ticker": t, "shares": shares, "price": price}
+        lines.append(f"➡️ ${deploy:,.0f} buys <1 share at ${price:,.2f} — pick a cheaper name.")
+    else:
+        lines.append(f"➡️ **{shares} shares** (~${cost:,.0f}) fits the $400 cap")
+        lines.append(f"Max loss if it goes to zero: **${cost:,.0f}**")
+    lines.append("_Advisory only — no broker connected, no order placed. "
+                 "Execute yourself in Robinhood/Coinbase if you want it._")
+    _journal(t, f"size-advisory:{shares}", user)
+    return "\n".join(lines)
 
 
 class BuyModal(discord.ui.Modal):
+    """Advisory-only sizing modal (no broker) — see _size_advisory."""
     def __init__(self, ticker: str):
-        super().__init__(title=f"Paper Buy — {ticker}"[:45])
+        super().__init__(title=f"Size It — {ticker}"[:45])
         self.ticker = ticker
-        self.account = discord.ui.TextInput(label="Account (boba / jazzy)", default="boba",
-                                            required=True, max_length=10)
-        self.deploy = discord.ui.TextInput(label="$ to deploy (max 800)", default="150",
+        self.deploy = discord.ui.TextInput(label="$ to deploy (max 400)", default="150",
                                            required=True, max_length=6)
-        self.add_item(self.account)
         self.add_item(self.deploy)
 
     async def on_submit(self, interaction: discord.Interaction):
         await interaction.response.defer(thinking=True, ephemeral=True)
-        text, params = await asyncio.to_thread(_paper_buy_preview, self.ticker, str(self.account),
-                                               str(self.deploy), interaction.user.display_name)
-        if not params:
-            await interaction.followup.send(text, ephemeral=True)
-            return
-        bucket = int(datetime.now(timezone.utc).timestamp()) // 300
-        token = (f"cb:{params['acct']}|{params['ticker']}|{params['shares']}"
-                 f"|{params['price']:.2f}|{bucket}")
-        # ephemeral preview + Confirm/Cancel; order params ride in the content token
-        await interaction.followup.send(f"{text}\n`{token}`", view=ConfirmBuyView(), ephemeral=True)
+        text = await asyncio.to_thread(_size_advisory, self.ticker, str(self.deploy),
+                                       interaction.user.display_name)
+        await interaction.followup.send(text, ephemeral=True)
 
 
 class AlertModal(discord.ui.Modal):
@@ -540,55 +474,16 @@ class PayoffView(_MikeView):
         await self._adjust(interaction, flip=True)
 
 
-CB_CONFIRM, CB_CANCEL = "cb:confirm", "cb:cancel"
-
-
-def _parse_buy_token(text):
-    """Read the order params off a Paper Buy preview's `cb:acct|TICKER|shares|price|bucket` token."""
-    m = re.search(r"cb:(boba|jazzy)\|([A-Z.]{1,6})\|(\d+)\|([\d.]+)\|(\d+)", text or "")
-    if not m:
-        return None
-    return {"acct": m.group(1), "ticker": m.group(2), "shares": int(m.group(3)),
-            "price": float(m.group(4)), "bucket": int(m.group(5))}
-
-
-class ConfirmBuyView(_MikeView):
-    """Two-step paper-buy gate: the order is placed ONLY when ✅ Confirm is tapped,
-    and both buttons disable on the first tap so a second click is a no-op. The 5-min
-    client_order_id in _submit_paper_buy is the server-side duplicate backstop."""
-    def __init__(self):
-        super().__init__(timeout=None)
-
-    async def _disable(self, interaction, note):
-        for c in self.children:
-            c.disabled = True
-        try:
-            await interaction.response.edit_message(content=note, view=self)
-        except Exception:  # noqa: BLE001  — already edited / expired; non-fatal
-            pass
-
-    @discord.ui.button(label="Confirm", emoji="✅",
-                       style=discord.ButtonStyle.success, custom_id=CB_CONFIRM)
-    async def b_confirm(self, interaction: discord.Interaction, button: discord.ui.Button):
-        p = _parse_buy_token(interaction.message.content if interaction.message else "")
-        if not p:
-            await self._disable(interaction, "↳ couldn't read the order — tap 🧾 Paper Buy again.")
-            return
-        await self._disable(interaction, f"⏳ Placing **BUY {p['shares']} {p['ticker']}** ({p['acct']})…")
-        res = await asyncio.to_thread(_submit_paper_buy, p["acct"], p["ticker"], p["shares"])
-        await interaction.followup.send(res, ephemeral=True)
-
-    @discord.ui.button(label="Cancel", emoji="✖",
-                       style=discord.ButtonStyle.secondary, custom_id=CB_CANCEL)
-    async def b_cancel(self, interaction: discord.Interaction, button: discord.ui.Button):
-        await self._disable(interaction, "✖ Cancelled — no order placed.")
+# ConfirmBuyView (the two-step ✅ Confirm / ✖ Cancel gate that placed a live Alpaca
+# paper order) is retired 2026-09-15 — Alpaca is retired as a book. BuyModal now
+# returns an advisory size only, nothing left to confirm/submit.
 
 
 class ActionView(_MikeView):
     def __init__(self):
         super().__init__(timeout=None)
 
-    @discord.ui.button(label="Paper Buy", emoji="🧾",
+    @discord.ui.button(label="Size It", emoji="📐",
                        style=discord.ButtonStyle.success, custom_id=ACT_BUY)
     async def b_buy(self, interaction: discord.Interaction, button: discord.ui.Button):
         await interaction.response.send_modal(BuyModal(_card_ticker(interaction.message)))
@@ -843,14 +738,14 @@ async def pick_cmd(interaction: discord.Interaction, ticker: str, note: Optional
     await interaction.response.send_message(body, view=PickView())
 
 
-@tree.command(name="deck", description="Action card for a ticker — Paper Buy / Set Alert / Explain / Grade / Mute")
+@tree.command(name="deck", description="Action card for a ticker — Size It / Set Alert / Explain / Grade / Mute")
 @app_commands.describe(ticker="ticker", note="optional context / contract")
 async def deck_cmd(interaction: discord.Interaction, ticker: str, note: Optional[str] = None):
     t = ticker.upper().strip()
     body = f"⚡ **ACTION — {t}**"
     if note:
         body += f"\n{note}"
-    body += "\n*Tap to act — paper-buy preview · price alert · explain · grade · mute · payoff.*"
+    body += "\n*Tap to act — advisory size · price alert · explain · grade · mute · payoff.*"
     await interaction.response.send_message(body, view=ActionView())
 
 
@@ -872,24 +767,15 @@ async def payoff_cmd(interaction: discord.Interaction, ticker: str, strike: Opti
     await interaction.followup.send(content=cap, file=discord.File(png), view=PayoffView())
 
 
-@tree.command(name="positions", description="Real-money holdings review (Robinhood + Coinbase) — allocation card")
+@tree.command(name="positions", description="[retired] Real-money holdings review — portfolio views retired site-wide")
 async def positions_cmd(interaction: discord.Interaction):
-    await interaction.response.defer(thinking=True)
-
-    def _run():
-        import positions_review as pr
-        from lib import chart_renderer as cr
-        r = pr.review()
-        if not r:
-            return None, "No real-money holdings right now (ARIES broker reads unreachable?)."
-        spec, holdings, total, flags = r
-        return cr.holdings_card(spec), pr.text_read(holdings, total, flags)
-
-    png, txt = await asyncio.to_thread(_run)
-    if png:
-        await interaction.followup.send(content=txt[:1900], file=discord.File(png))
-    else:
-        await interaction.followup.send(txt)
+    # Was a live Robinhood+Coinbase holdings allocation card (positions_review.real_money_holdings).
+    # Retired 2026-09-15 alongside the rest of the holdings sweep — portfolio views are retired
+    # site-wide (2026-09-12), no live holdings feed exists to read. Command kept registered
+    # (avoids a Discord command-sync churn) but no longer imports positions_review.
+    await interaction.response.send_message(
+        "🚫 **Portfolio views are retired.** No live holdings feed exists to show — "
+        "check your book directly in Robinhood / Coinbase.")
 
 
 @tree.command(name="watch", description="Add a ticker to your watchlist (feeds the scheduled intel)")
@@ -942,48 +828,46 @@ async def help_cmd(interaction: discord.Interaction):
     await interaction.response.send_message(HELP_TEXT)
 
 
-@tree.command(name="size", description="Position size for a trade per your risk rules (equity fraction, min($400, 15%) cap)")
+@tree.command(name="size", description="Position size for a trade — flat $400 risk cap, no broker/equity read")
 @app_commands.describe(ticker="ticker", entry="entry price", stop="stop price",
                        risk="$ to risk (default 150, capped at 400)")
 async def size_cmd(interaction: discord.Interaction, ticker: str, entry: float,
                    stop: float, risk: Optional[float] = None):
     await interaction.response.defer(thinking=True)
-    eq = await asyncio.to_thread(total_equity)
-    risk_amt = min(risk if risk else 150.0, 400.0)   # Mike's risk cap — HALVED 800→400 2026-07-15 (fail-closed)
+    # No equity read (2026-09-15 — Alpaca retired as a book 2026-08-11): the cap is
+    # Mike's flat $400/trade, not a fraction of any account. For a plain "how many
+    # shares/contracts fit in a flat $400 buy" (no stop math), use /deck → 📐 Size It
+    # (_size_advisory: shares = floor(400/price)); options-contract sizing off a
+    # premium (floor(400/(premium*100))) is handled in the flow-picks affordability line.
+    risk_amt = min(risk if risk else 150.0, 400.0)   # Mike's flat hard cap (2026-09-12)
     psr = abs(entry - stop)
     if psr <= 0:
         await interaction.followup.send("⚠️ Entry and stop can't be equal.")
         return
     shares = int(risk_amt // psr)
     cost = shares * entry
-    lines = [f"📐 **SIZE — {ticker.upper().strip()}**"]
-    if eq:
-        lines.append(f"Equity ${eq:,.0f} · risking ${risk_amt:,.0f} ({risk_amt/eq*100:.1f}% of equity)")
-    else:
-        lines.append(f"Risking ${risk_amt:,.0f}")
-    lines.append(f"Entry ${entry:.2f} → stop ${stop:.2f} = ${psr:.2f}/share risk")
-    cost_tag = f" ({cost/eq*100:.0f}% of equity)" if eq else ""
-    lines.append(f"➡️ **{shares} shares** (~${cost:,.0f}{cost_tag})")
-    lines.append(f"Max loss if stopped: **${shares*psr:,.0f}**")
+    lines = [f"📐 **SIZE — {ticker.upper().strip()}**",
+             f"Risking ${risk_amt:,.0f}",
+             f"Entry ${entry:.2f} → stop ${stop:.2f} = ${psr:.2f}/share risk",
+             f"➡️ **{shares} shares** (~${cost:,.0f})",
+             f"Max loss if stopped: **${shares*psr:,.0f}**"]
     if shares == 0:
-        lines.append("⚠️ Stop too wide for the risk budget — tighten the stop or raise risk.")
-    elif eq and cost > eq:
-        lines.append("⚠️ Cost exceeds account equity — reduce size.")
-    elif eq and cost > eq * 0.5:
-        lines.append("⚠️ >50% of equity in one name — concentration risk.")
+        lines.append("⚠️ Stop too wide for the $400 risk cap — tighten the stop or raise risk.")
+    elif cost > 400.0:
+        lines.append("⚠️ Notional (~${:,.0f}) exceeds Mike's flat $400 cap — size down.".format(cost))
     await interaction.followup.send("\n".join(lines))
 
 
-@tree.command(name="journal", description="Today's trade recap — day P&L, fills, open book")
+@tree.command(name="journal", description="Today's virtual-pick recap (no broker — Alpaca retired as a book)")
 async def journal_cmd(interaction: discord.Interaction):
     await interaction.response.defer(thinking=True)
-    await _send_chunks(interaction, await asyncio.to_thread(daily_journal_recap))
+    await _send_chunks(interaction, await asyncio.to_thread(virtual_journal_recap))
 
 
-@tree.command(name="week", description="This week's performance review (P&L, trades, most active)")
+@tree.command(name="week", description="This week's virtual-pick review (no broker — Alpaca retired as a book)")
 async def week_cmd(interaction: discord.Interaction):
     await interaction.response.defer(thinking=True)
-    await _send_chunks(interaction, await asyncio.to_thread(weekly_review))
+    await _send_chunks(interaction, await asyncio.to_thread(virtual_weekly_review))
 
 
 @tree.command(name="scorecard", description="EOD scorecard on demand — book P&L + today's flow-pick grades")
@@ -1166,9 +1050,8 @@ async def on_ready():
     global _VIEWS_ADDED
     if not _VIEWS_ADDED:
         client.add_view(PickView())     # persistent — buttons survive restarts
-        client.add_view(ActionView())   # Paper Buy / Set Alert / Explain / Grade / Mute / Payoff
+        client.add_view(ActionView())   # Size It / Set Alert / Explain / Grade / Mute / Payoff
         client.add_view(PayoffView())   # interactive payoff (−/+ contracts, flip C/P)
-        client.add_view(ConfirmBuyView())  # two-step paper-buy ✅ Confirm / ✖ Cancel
         _VIEWS_ADDED = True
         if not presence_loop.is_running():
             presence_loop.start()
