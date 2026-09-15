@@ -155,18 +155,23 @@ CHARTER = {
         never=["regime narrative", "grades"],
         cadence="08:20/09:12/09:50 + :10,:30,:50 10-15 ET Mon-Fri + weekend --crypto",
         cadence_min=20,
+        # Round 2 (2026-09-15): D3 landed — setup_scanner.py no longer calls the dead
+        # /api/portfolio-rh route (imports risk_cap.py's flat $400 cap instead — a code
+        # import, not a freshness-checkable "read"). It now reads MTF/rebound state
+        # through the shared mtf_rebound.py helper, confirmed via `import mtf_rebound as
+        # mr` + its own /api/mtf-ta and /api/rebound-setup calls — using SPY as the probe
+        # symbol here since `reads` is a static per-lane list, not per-ticker.
         reads=[
-            f"{_H}/.openclaw/data/decision/rebound_setup.json",
-            f"{_H}/.openclaw/data/decision/mtf_ta.json",
-            # retired dead route (confirmed 404, fleet-a Lane 3/4) — D3 (spec §1) deletes this
-            # call and repoints sizing at lib/risk_cap.py; drop this line once that lands, it
-            # will otherwise correctly keep FAILing dead-upstream until the fix ships.
-            "http://localhost:3000/api/portfolio-rh",
             "http://localhost:3000/api/mtf-ta?symbol=SPY",
+            "http://localhost:3000/api/rebound-setup?symbol=SPY",
         ],
-        # setup_scanner.py has no --dry-run yet (Group B sibling adding it). Once it lands
-        # as `--dry-run`, this argv is correct as-is — no edit needed here.
-        dry_run_cmd=[f"{_H}/mc-kb/.venv/bin/python", "setup_scanner.py", "--dry-run"],
+        # setup_scanner.py's real flag is `--dry` (not `--dry-run` — verified by reading
+        # main(): `dry = "--dry" in args`). `--dry-run` alone would be silently ignored
+        # (it uses a bare sys.argv set-membership check, not argparse, so an unknown flag
+        # never errors) and the script would run LIVE, sending real SMS/Telegram — this
+        # was caught and fixed before ever being committed. Verified live: `setup_scanner.py
+        # --premarket --dry` exits 0, prints only, sends nothing (2026-09-15).
+        dry_run_cmd=[f"{_H}/mc-kb/.venv/bin/python", "setup_scanner.py", "--premarket", "--dry"],
         cwd="/AIWorkWSL/trading/analysis",
     ),
     "explosion_runner": dict(
@@ -175,15 +180,21 @@ CHARTER = {
         never=["setups already sent (cite trigger_id instead)"],
         cadence="09:50 + hourly 10-15 ET Mon-Fri (explosion_score); 08:35 + :20 10-15 ET (runner_radar)",
         cadence_min=60,
+        # Round 2: D3 landed here too (dead /api/portfolio-rh call deleted, risk_cap.py
+        # import instead). explosion_score.py also imports mtf_rebound as mr. No
+        # `data/explosion_score_floor.json` file exists (checked) — its score floor is
+        # computed at runtime from the signal_outcomes log and printed, not persisted to
+        # a path worth freshness-checking; dropped the runner_radar.log guess too (not
+        # actually read as an input by explosion_score.py — verified via grep).
         reads=[
-            f"{_H}/.openclaw/data/decision/mtf_ta.json",
-            # retired dead route (confirmed 404) — D3 (spec §1) deletes this call from
-            # explosion_score.py's cap_today() too; drop this line once that lands.
-            "http://localhost:3000/api/portfolio-rh",
-            "/AIWorkWSL/trading/analysis/logs/runner_radar.log",
+            "http://localhost:3000/api/mtf-ta?symbol=SPY",
+            "http://localhost:3000/api/rebound-setup?symbol=SPY",
         ],
-        # explosion_score.py has no --dry-run yet (Group B sibling adding it).
-        dry_run_cmd=["/usr/bin/python3", "explosion_score.py", "--dry-run"],
+        # explosion_score.py's real flag is also `--dry` (same bare-sys.argv pattern as
+        # setup_scanner.py, same wrong-flag-would-silently-run-live risk — fixed here
+        # too). Verified live: `explosion_score.py --dry` exits 0, prints only
+        # (2026-09-15).
+        dry_run_cmd=["/usr/bin/python3", "explosion_score.py", "--dry"],
         cwd="/AIWorkWSL/trading/analysis",
     ),
     "pullback_autowatch": dict(
@@ -204,7 +215,11 @@ CHARTER = {
         cadence="09:45 + 10:15 ET Mon-Fri", cadence_min=30,
         reads=[
             f"{_H}/.openclaw/data/decision/rebound_setup.json",
-            f"{_H}/05_AUTOMATION/state/rebound_ping_state.json",
+            # Round 2 fix: real path is ~/.openclaw/data/decision/rebound_ping_state.json
+            # (verified via rebound_trigger_ping.py's own STATE_FILE default), not
+            # ~/05_AUTOMATION/state/... — the v1 path was a guess, never actually read
+            # by the script, so it always WARNed "does not exist" regardless of truth.
+            f"{_H}/.openclaw/data/decision/rebound_ping_state.json",
         ],
         dry_run_cmd=[f"{_H}/.venv/bin/python",
                      f"{_H}/05_AUTOMATION/scripts/rebound_trigger_ping.py", "--dry-run"],
@@ -240,8 +255,19 @@ CHARTER = {
         cadence_min=20,
         reads=[
             "/AIWorkWSL/trading/signals/option-scraper/data/best3.log",
+            "/AIWorkWSL/trading/signals/option-scraper/data/best3_scoreboard.json",
         ],
-        dry_run_cmd=None,  # best3 family has no --dry-run script this pass
+        # Round 2: both scripts already had --eod --dry-run (argparse, confirmed via
+        # grep + a live run — best3_grader prints the scoreboard/calibration/floor
+        # buckets, scoreboard_auditor prints "no open virtual trades", both exit 0,
+        # neither sends). Two independent commands for one lane — lane_consistency.py's
+        # dry_run_cmd accepts a list of argv lists for exactly this case; it concatenates
+        # whichever renders succeed and never crashes if one of the two fails.
+        dry_run_cmd=[
+            ["/usr/bin/python3", "best3_grader.py", "--eod", "--dry-run"],
+            ["/usr/bin/python3", "scoreboard_auditor.py", "--eod", "--dry-run"],
+        ],
+        cwd="/AIWorkWSL/trading/signals/option-scraper/pipeline/digest",
     ),
     "shock_guard": dict(
         fleet="flow_signals",
@@ -256,8 +282,15 @@ CHARTER = {
         reads=[
             "http://localhost:3000/api/market-news",
         ],
-        # shock_guard.py has no --dry-run yet (Group B sibling adding it).
-        dry_run_cmd=["/usr/bin/python3", f"{_H}/scripts/shock_guard.py", "--dry-run"],
+        # Round 2 fix: shock_guard.py's dry-run is an ENV VAR (`DRY=os.environ.get("DRY")
+        # == "1"`), not a CLI flag — the v1 `--dry-run` argv did nothing (main() never
+        # inspects sys.argv at all) and would have run LIVE every 2 minutes on cron,
+        # capable of a real CRISIS/HALT send. Caught before commit; fixed to set DRY=1
+        # via `env`, which lane_consistency.py merges into the subprocess environment.
+        # Verified live: `DRY=1 python3 shock_guard.py` exits 0, prints the level/vix/
+        # spy/btc/headlines JSON, sends nothing (2026-09-15).
+        dry_run_cmd=["/usr/bin/python3", f"{_H}/scripts/shock_guard.py"],
+        env={"DRY": "1"},
     ),
     "quantum": dict(
         fleet="research_desk",
@@ -269,8 +302,13 @@ CHARTER = {
             "/AIWorkWSL/labs/quantum/out/premium_income.json",
             "http://localhost:3000/api/decision?symbol=SPY",
         ],
-        # iv_tg.py has no --dry-run yet (Group B sibling adding it).
-        dry_run_cmd=["./.venv/bin/python", "src/iv_tg.py", "--dry-run"],
+        # Round 2 fix: iv_tg.py is "Dry-run by default; --send pushes via Telegram" (its
+        # own docstring) — it only defines `--send` via strict argparse, so the v1
+        # `--dry-run` argv would have hit argparse's unrecognized-argument error (exit 2,
+        # correctly SKIPPED, not a live-send risk here — but still not functional).
+        # Fixed to no flags at all, which IS the dry-run path. Verified live: `iv_tg.py`
+        # (no args) exits 0, prints the DRY RUN preview, sends nothing (2026-09-15).
+        dry_run_cmd=["./.venv/bin/python", "src/iv_tg.py"],
         cwd="/AIWorkWSL/labs/quantum",
     ),
     "options_position_scorecard": dict(
@@ -288,11 +326,24 @@ CHARTER = {
         owns=["answers from /api/decision?symbol= summary", "/api/mtf-ta read", "/api/news-snr"],
         never=["retired journal"],
         cadence="every minute (long-poll)", cadence_min=5,
+        # Round 2 fix: /api/coach-gate is POST-only (route.ts defines no GET handler,
+        # it needs a ticker+size body to do anything) — the checker's dead-upstream
+        # probe is a plain GET, which correctly gets a 405 from a live, healthy route
+        # and would FAIL forever on a false alarm. Dropped; /api/decision is the
+        # meaningful GET-able freshness signal for this lane.
         reads=[
-            "http://127.0.0.1:3000/api/coach-gate",
             "http://localhost:3000/api/decision?symbol=SPY",
         ],
-        dry_run_cmd=None,  # not in this pass's D-fix list; no --dry-run flag exists
+        # Round 2: telegram_dm_responder.py now has `--dry-run` (sets DRY=1 internally,
+        # which gates every reply-send branch — verified by reading the script: every
+        # `_handle_*` reply path checks `os.environ.get("DRY") == "1"` and prints instead
+        # of calling the Telegram API). It still does one real (non-mutating) getUpdates
+        # long-poll with `timeout=0` to render anything — that's a read, not a send, and
+        # the script never prints its own token. Verified live: exits 0, sends nothing
+        # (2026-09-15).
+        dry_run_cmd=["/usr/bin/python3",
+                     "/AIWorkWSL/trading/signals/option-scraper/pipeline/digest/telegram_dm_responder.py",
+                     "--dry-run"],
     ),
     "system_health": dict(
         fleet="system_health",
