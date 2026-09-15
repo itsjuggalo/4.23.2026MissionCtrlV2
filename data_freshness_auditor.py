@@ -100,6 +100,11 @@ FILES = [
     ("decision_gex",        f"{H}/.openclaw/data/decision/factors/gex.json",              MH,  30, "GEX + vol structure 08:45/10:05/12:05/15:35/16:20 weekdays (pipeline/gex/gex-cron.sh gex)"),
     ("decision_events",     f"{H}/.openclaw/data/decision/factors/events.json",           ALL, 30, "event calendar (witching/OPEX/VIX exp/rebalances/FOMC) 06:00 daily (pipeline/gex/events.py)"),
     ("decision_factor_crypto", f"{H}/.openclaw/data/decision/factors/crypto.json",       ALL,  2, "crypto decision factor (F&G/dominance/stablecoin/funding+OI) — crypto_context.py every 30min, all days"),
+    # [cvd 2026-09-14] cumulative volume delta (Mike: "add cumulative volume delta to the command
+    # center") — pipeline/cvd/cvd.py, advisory display only. */5 04:00-20:00 ET weekdays
+    # (equities+crypto) + */15 all other hours incl. weekends (crypto-only); 1h = 4x the sparsest
+    # (15min) cadence.
+    ("cvd_latest",           f"{H}/.openclaw/data/cvd/latest.json",                      ALL,  1, "cumulative volume delta — pipeline/cvd/cvd.py every 5min market hours / 15min weekends"),
     # [decision-hub 2026-09-14] combiner scorecard — every 30min 06:00-20:00 ET weekdays + 08:15/12:15/18:15 ET weekends
     ("decision_scorecard",  f"{H}/.openclaw/data/decision/scorecard.json",              ALL,   2, "Decision Hub combiner (pipeline/decision/decision_score.py) — blends factors/*.json -> /api/decision"),
     # [fed-watch 2026-09-14] macro_fed decision factor — 06:30 ET daily + 13:30/14:15 ET weekdays + every 30min on FOMC days
