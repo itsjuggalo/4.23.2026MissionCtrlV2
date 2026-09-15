@@ -9,7 +9,8 @@ Two jobs, both $0 and both real astronomy:
                 house (his system), and the real ingress dates. Verified against every date
                 in his reading within 0.05° (2026-09-14).
 
-CLI:  svehla.py windows | progressed | check
+CLI:  svehla.py windows|dates | progressed | daily | weekly [--send] | context | check
+Cron: Monday 08:35 ET `svehla.py weekly --send` → astrology lane (astrology auto-posts are allowed).
 """
 from __future__ import annotations
 
@@ -170,7 +171,14 @@ def daily_block(d: date | None = None) -> str:
     lines = ["📜 From your Aug 2026 reading (Svehla):"]
     for w in act:
         left = (w["_end"] - d).days
-        when = "today" if left == 0 else f"{left}d left"
+        if w["_start"] == d and w["_end"] == d:
+            when = "TODAY"
+        elif w["_start"] == d:
+            when = f"starts TODAY, {left}d"
+        elif left == 0:
+            when = "ends TODAY"
+        else:
+            when = f"{left}d left"
         first = w["do"].split(". ")[0].rstrip(".")
         lines.append(f"{KIND_ICON.get(w['kind'], '•')} {w['title']} — {when}. {first}.")
     for w in nxt:
@@ -201,6 +209,56 @@ def dates_block(d: date | None = None) -> str:
     return "\n".join(lines)
 
 
+def weekly_block(d: date | None = None) -> str:
+    """Monday nudge: every active window in full (why + do), the next two, progressed snapshot."""
+    d = d or today_et()
+    lines = [f"📜 SVEHLA WEEK — {d:%a %b %-d %Y}", ""]
+    act = active(d)
+    if act:
+        lines.append("ACTIVE NOW")
+        for w in act:
+            left = (w["_end"] - d).days
+            lines.append(f"{KIND_ICON.get(w['kind'], '•')} {w['title']} ({'ends today' if left == 0 else f'{left}d left'})")
+            lines.append(f"   Why: {w['why']}")
+            lines.append(f"   Do: {w['do']}")
+            lines.append("")
+    nxt = upcoming(d, 2)
+    if nxt:
+        lines.append("COMING UP")
+        for w in nxt:
+            lines.append(f"⏭ {w['_start']:%b %-d %Y} ({(w['_start'] - d).days}d): {w['title']}")
+        lines.append("")
+    p = progressed(d)
+    lines.append(f"🔭 pMoon {sign_deg(p['Moon']['lon'])} · pVenus {sign_deg(p['Venus']['lon'])} · /progressed for the rest")
+    out = "\n".join(lines)
+    if len(out) > 3800:     # Telegram hard cap 4096 — drop the Why lines, keep the Do lines
+        out = "\n".join(ln for ln in lines if not ln.startswith("   Why: "))
+    return out
+
+
+def context_block(d: date | None = None) -> str:
+    """Compact live-sky context prepended to the astrology lane's free-chat prompt so the
+    bot always knows which Svehla window is active without a tool call."""
+    d = d or today_et()
+    p = progressed(d)
+    parts = [f"Today {d:%a %b %-d %Y} ET. Progressed Moon {sign_deg(p['Moon']['lon'])}, "
+             f"progressed Venus {sign_deg(p['Venus']['lon'])} (Placidus houses, Svehla's system)."]
+    act = active(d)
+    if act:
+        parts.append("Active windows from the Aug 29 2026 Svehla reading: " + "; ".join(
+            f"{w['title']} (until {w['_end']:%b %-d %Y})" for w in act) + ".")
+    nxt = upcoming(d, 2)
+    if nxt:
+        parts.append("Next: " + "; ".join(f"{w['title']} from {w['_start']:%b %-d %Y}" for w in nxt) + ".")
+    return " ".join(parts)
+
+
+def send_to_lane(msg: str) -> None:
+    import subprocess
+    subprocess.run([sys.executable, str(Path.home() / "scripts/tg_fleet.py"), "send", "astrology", msg],
+                   capture_output=True, timeout=30)
+
+
 def check_block() -> str:
     """Self-test: our ephemeris vs the dates Svehla wrote down."""
     rows = []
@@ -222,6 +280,11 @@ def check_block() -> str:
 
 
 if __name__ == "__main__":
-    cmd = sys.argv[1] if len(sys.argv) > 1 else "windows"
-    print({"windows": dates_block, "dates": dates_block, "progressed": progressed_block,
-           "daily": daily_block, "check": check_block}[cmd]())
+    args = [a for a in sys.argv[1:] if not a.startswith("--")]
+    cmd = args[0] if args else "windows"
+    out = {"windows": dates_block, "dates": dates_block, "progressed": progressed_block,
+           "daily": daily_block, "weekly": weekly_block, "context": context_block,
+           "check": check_block}[cmd]()
+    print(out)
+    if "--send" in sys.argv:
+        send_to_lane(out)

@@ -458,11 +458,30 @@ def run_bot(botkey):
     except Exception:
         pass
 
+    # 2026-09-14: astrology lane gets a live-sky preamble (active Svehla windows + progressed
+    # Moon/Venus) so free-chat answers are grounded without a tool call. Cached per ET day.
+    sky_cache = {}
+
+    def sky_context():
+        if not cfg.get("astro_only"):
+            return ""
+        day = time.strftime("%Y-%m-%d")
+        if day not in sky_cache:
+            try:
+                r = subprocess.run([sys.executable, str(Path.home() / "scripts/real_coach/svehla.py"),
+                                    "context"], capture_output=True, text=True, timeout=60)
+                sky_cache.clear(); sky_cache[day] = (r.stdout or "").strip()
+            except Exception as e:
+                sky_cache[day] = f"(live sky unavailable: {e})"
+        return sky_cache[day]
+
     def with_context(question):
+        sky = sky_context()
+        pre = f"Live sky (real ephemeris, computed today): {sky}\n\n" if sky else ""
         if not history:
-            return question
+            return pre + question
         ctx = "\n".join(f"Mike: {q_}\nYou: {a_}" for q_, a_ in history)
-        return ("Recent conversation (context only — answer the NEW message):\n" + ctx +
+        return (pre + "Recent conversation (context only — answer the NEW message):\n" + ctx +
                 "\n\nNEW message from Mike: " + question)
 
     def remember(q_, a_):

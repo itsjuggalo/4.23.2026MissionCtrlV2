@@ -123,6 +123,8 @@ FILES = [
     # FINRA ATS weekly venue share 07:30 ET Tue. Advisory display only. 64h = Sat 08:15 catch-up
     # -> Mon 18:45 gap (~58.5h) + margin.
     ("darkpool_latest",      f"{H}/.openclaw/data/darkpool/latest.json",                 ALL,  64, "dark pool layer (pipeline/darkpool/darkpool-cron.sh) -> /api/darkpool, advisory only"),
+    ("dph_latest",           f"{H}/.openclaw/data/darkpool/dph/latest.json",             ALL,  14, "darkpoolheatmap.com poll (pipeline/darkpool/dph_scrape.py) every 30min market hours, advisory only"),
+    ("mtf_ta_latest",        f"{H}/.openclaw/data/decision/mtf_ta.json",                 ALL,   2, "multi-timeframe TA for relay tickers (pipeline/decision/mtf_ta.py) hourly market hours, advisory only"),
     # [portfolio-retired 2026-09-12] producer retired (refresh-holdings.sh/wallets-refresh.sh cron) — file will never update again
     # ("unified_book",        f"{H}/portfolio/unified_book.json",                           ALL,  6, "REAL MONEY book (RH + Coinbase) -> portfolio/risk pages"),
     # ("robinhood_holdings",  f"{H}/portfolio/robinhood_holdings.json",                     MH,  26, "REAL MONEY RH equity/options positions"),
