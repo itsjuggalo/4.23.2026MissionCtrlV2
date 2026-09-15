@@ -68,17 +68,16 @@ FLEET = {
     # 2026-09-15 (D7, telegram lane charter spec) — WinMeals' chain_footprint.py --notify
     # was landing on tg-send-msg's trading_command DEFAULT (ops sweep finding: unrelated
     # WinMeals-accuracy content in the trading firehose). chain_footprint.py now passes
-    # TG_FN=winmeals explicitly. No bot token exists yet for this fn in EITHER secrets
-    # store (~/.openclaw/secrets/*, ~/.config/mc-secrets/secrets.sqlite) — src is left
-    # ("cloud", None) same as the other not-yet-provisioned rows below. Mike creates via
-    # BotFather (20-bot cap — see laptop_control note above) and pastes the token, OR
-    # repoints one of the already-tokened "spare" bots in the reserve pool below (their
-    # vault keys — telegram.jazzy_relay/orion_relay/grok_scout/trend_scanner — are live
-    # and unused) — Mike's call, not made here. Until a token exists, chain_footprint.py
-    # probes `tg_fleet.py token winmeals` before sending and logs-only on failure — it
-    # does NOT let tg-send-msg's trading_command fallback fire (that fallback is exactly
-    # the leak this lane exists to close).
-    "winmeals":        dict(user="(reserved — Mike creates via BotFather, or repoint a spare)", avatar="medic", role="push", src=("cloud", None)),
+    # TG_FN=winmeals explicitly. 2026-09-15 follow-up: rather than have Mike BotFather a
+    # new bot at the 20-bot cap, repointed at trend_scanner's already-tokened, confirmed-
+    # idle @Deepseeker_Bot — its crontab line is commented out and no live sender
+    # referenced it (grep across ~/scripts, ~/05_AUTOMATION/scripts, /AIWorkWSL/web,
+    # /AIWorkWSL/trading only turned up shared reserve/responder infra, not a dedicated
+    # sender). `src` below is the VAULT REFERENCE only (telegram.trend_scanner) — the
+    # secret value itself was never copied/duplicated; see the retired note on
+    # trend_scanner further down. Mike can rename the bot's display name via BotFather
+    # /setname whenever he likes — nothing here depends on the display name.
+    "winmeals":        dict(user="Deepseeker_Bot",           avatar="medic",           role="push",        src=("vault", "telegram.trend_scanner")),
     # ── infra (not chat targets) ────────────────────────────────────────────
     "hermes_relay":    dict(user="Gumroadie_bot",           avatar="dragoon",         role="infra",       src=("vault", "telegram_hermes_bot_token")),
     "openclaw_grok":   dict(user="OpenclawGrok727_Bot",     avatar="ghost",           role="infra",       src=("vault", "telegram_openclaw_bot_token")),
@@ -92,7 +91,237 @@ FLEET = {
     "jazzy_relay":     dict(user="JazzyHazzy_Bot",          avatar="zealot",          role="spare",       src=("cloud", None)),
     "orion_relay":     dict(user="oOrionz_Bot",             avatar="kerrigan",        role="spare",       src=("cloud", None)),
     "grok_scout":      dict(user="Grootk_Bot",              avatar="goliath",         role="spare",       src=("cloud", None)),
+    # retired→winmeals 2026-09-15: confirmed idle (crontab line commented out, no live
+    # sender referenced it) — its vault token (telegram.trend_scanner) is now also
+    # reachable as the "winmeals" fleet fn above (same underlying vault row, not
+    # duplicated). Left resolvable here too so nothing that still names "trend_scanner"
+    # (reserve_persona_push.py, bot_rebrand.py, tg_responder.py's DM menu) breaks — just
+    # don't route new content at it under this name.
     "trend_scanner":   dict(user="Deepseeker_Bot",          avatar="firebat",         role="spare",       src=("cloud", None)),
+}
+
+# ─────────────────────────────────────────────────────────────────────────────
+# CHARTER — lane charter registry (2026-09-15, spec: docs/superpowers/specs/
+# 2026-09-15-telegram-lane-charter-design.md §2). Mike: "the goal of having
+# different bots is so that the info doesn't get drowned by other messages.
+# Upgrade each bot so each telegram is specific to the information it
+# provides so it doesn't get lost." ADVISORY ONLY — nothing here feeds
+# sizing/gates/decision cycles.
+#
+# One entry per LANE (a lane is a distinct topic, not always 1:1 with a FLEET
+# bot — several lanes share one bot, e.g. trading_command carries the morning
+# brief + setups + rebound + catalyst-evening). Keys:
+#   fleet         — which FLEET function/bot this lane's messages land in
+#   owns / never  — the content contract from the spec table (§2)
+#   cadence       — human cron label (source of truth: crontab -l)
+#   cadence_min   — minutes between fires, used for the checker's "read older
+#                   than 2x cadence => dead upstream" math
+#   reads         — every file path / http://localhost:3000/api/... URL the
+#                   lane's script(s) consume, derived by reading the scripts
+#                   (NOT secrets — no tokens/chat ids ever go in this list)
+#   dry_run_cmd   — exact argv (list[str]) to render the lane with no send,
+#                   or None if the underlying script has no --dry-run yet.
+#                   D1-D9 (spec §1) task two sibling agents with adding
+#                   --dry-run to morning_command/eod_scorecard/rebound_
+#                   trigger_ping/data_freshness_auditor and setup_scanner/
+#                   explosion_score/shock_guard/iv_tg/chain_footprint — those
+#                   entries already point at the flag so lane_consistency.py
+#                   picks it up the moment it lands, with no further edit
+#                   here. Lanes with no --dry-run planned this pass are None.
+# ─────────────────────────────────────────────────────────────────────────────
+_H = os.path.expanduser("~")
+
+CHARTER = {
+    "trading_command": dict(
+        fleet="trading_command",
+        owns=["regime + macro reaction", "structure-vs-sentiment", "catalyst read-through",
+              "DPH dark-pool line", "relay x DP tags", "high-SNR headlines", "day plan"],
+        never=["holdings", "equity", "intraday triggers", "grades"],
+        cadence="08:15 ET Mon-Fri", cadence_min=24 * 60,
+        reads=[
+            f"{_H}/.openclaw/data/decision/factors/catalysts.json",
+            f"{_H}/.openclaw/data/decision/rebound_setup.json",
+            f"{_H}/.openclaw/data/decision/macro_reaction.json",
+            "/AIWorkWSL/labs/quantum/out/best_contracts.json",
+            "http://localhost:3000/api/decision?symbol=SPY",
+            "http://localhost:3000/api/macro-regime",
+        ],
+        dry_run_cmd=[f"{_H}/.venv/bin/python",
+                     f"{_H}/05_AUTOMATION/scripts/morning_command.py", "--dry-run"],
+    ),
+    "setup_sms": dict(
+        fleet="trading_command",
+        owns=["premarket/opening setups", "MTF glyph", "rebound state", "$400 flat-cap sizing"],
+        never=["regime narrative", "grades"],
+        cadence="08:20/09:12/09:50 + :10,:30,:50 10-15 ET Mon-Fri + weekend --crypto",
+        cadence_min=20,
+        reads=[
+            f"{_H}/.openclaw/data/decision/rebound_setup.json",
+            f"{_H}/.openclaw/data/decision/mtf_ta.json",
+            # retired dead route (confirmed 404, fleet-a Lane 3/4) — D3 (spec §1) deletes this
+            # call and repoints sizing at lib/risk_cap.py; drop this line once that lands, it
+            # will otherwise correctly keep FAILing dead-upstream until the fix ships.
+            "http://localhost:3000/api/portfolio-rh",
+            "http://localhost:3000/api/mtf-ta?symbol=SPY",
+        ],
+        # setup_scanner.py has no --dry-run yet (Group B sibling adding it). Once it lands
+        # as `--dry-run`, this argv is correct as-is — no edit needed here.
+        dry_run_cmd=[f"{_H}/mc-kb/.venv/bin/python", "setup_scanner.py", "--dry-run"],
+        cwd="/AIWorkWSL/trading/analysis",
+    ),
+    "explosion_runner": dict(
+        fleet="trading_command",
+        owns=["scored pre-explosion candidates (own grader floor)", "runner-watch list"],
+        never=["setups already sent (cite trigger_id instead)"],
+        cadence="09:50 + hourly 10-15 ET Mon-Fri (explosion_score); 08:35 + :20 10-15 ET (runner_radar)",
+        cadence_min=60,
+        reads=[
+            f"{_H}/.openclaw/data/decision/mtf_ta.json",
+            # retired dead route (confirmed 404) — D3 (spec §1) deletes this call from
+            # explosion_score.py's cap_today() too; drop this line once that lands.
+            "http://localhost:3000/api/portfolio-rh",
+            "/AIWorkWSL/trading/analysis/logs/runner_radar.log",
+        ],
+        # explosion_score.py has no --dry-run yet (Group B sibling adding it).
+        dry_run_cmd=["/usr/bin/python3", "explosion_score.py", "--dry-run"],
+        cwd="/AIWorkWSL/trading/analysis",
+    ),
+    "pullback_autowatch": dict(
+        fleet="trading_command",
+        owns=["pullback-to-level watches (levels from /api/decision + /api/mtf-ta)"],
+        never=["anything that is not a level watch"],
+        cadence=":20,:50 9-16 ET Mon-Fri", cadence_min=30,
+        reads=[
+            "http://localhost:3000/api/pullback-watch?fresh=1",
+            "http://localhost:3000/api/options-flow",
+        ],
+        dry_run_cmd=None,  # not in this pass's D-fix list; no --dry-run flag exists
+    ),
+    "rebound": dict(
+        fleet="trading_command",
+        owns=["TRIGGERED rebound setups", "pinned contract (symbol|triggeredAt state)"],
+        never=["HELD/watching states (that's morning_command's brief, not this ping)"],
+        cadence="09:45 + 10:15 ET Mon-Fri", cadence_min=30,
+        reads=[
+            f"{_H}/.openclaw/data/decision/rebound_setup.json",
+            f"{_H}/05_AUTOMATION/state/rebound_ping_state.json",
+        ],
+        dry_run_cmd=[f"{_H}/.venv/bin/python",
+                     f"{_H}/05_AUTOMATION/scripts/rebound_trigger_ping.py", "--dry-run"],
+    ),
+    "catalyst_evening": dict(
+        fleet="trading_command",
+        owns=["cluster/CEO-buy days", "SNR corroboration"],
+        never=["price commentary"],
+        cadence="22:25 ET Mon-Fri", cadence_min=24 * 60,
+        reads=[
+            "http://localhost:3000/api/news-snr",
+        ],
+        dry_run_cmd=[f"{_H}/.venv/bin/python",
+                     f"{_H}/05_AUTOMATION/scripts/catalyst_evening_ping.py", "--dry-run"],
+    ),
+    "flow_digest": dict(
+        fleet="flow_digest",
+        owns=["grades of today's flow picks", "best3 grader stats"],
+        never=["equity", "P&L", "book value"],
+        cadence="16:10 ET Mon-Fri", cadence_min=24 * 60,
+        reads=[
+            f"{_H}/.openclaw/data/trade_journal.jsonl",
+        ],
+        # eod_scorecard.py has no --dry-run yet (Group A sibling adding it).
+        dry_run_cmd=[f"{_H}/.venv/bin/python",
+                     f"{_H}/05_AUTOMATION/scripts/eod_scorecard.py", "--dry-run"],
+    ),
+    "best3": dict(
+        fleet="flow_digest",
+        owns=["top-3 flow picks above the calibrated score floor"],
+        never=["ungated/below-floor picks"],
+        cadence="10:05 card + :10,:30,:50 10-15 ET override + 16:20 grader Mon-Fri",
+        cadence_min=20,
+        reads=[
+            "/AIWorkWSL/trading/signals/option-scraper/data/best3.log",
+        ],
+        dry_run_cmd=None,  # best3 family has no --dry-run script this pass
+    ),
+    "shock_guard": dict(
+        fleet="flow_signals",
+        owns=["CRISIS/HALT only"],
+        never=["routine market notes"],
+        cadence="*/2 min always-on", cadence_min=2,
+        # Alpaca (data.alpaca.markets) deliberately excluded from `reads`: D4 (spec §1)
+        # demotes it to a fallback behind yfinance/api/market-news, and it needs auth
+        # headers this checker doesn't carry (an unauthenticated probe would always
+        # read 401/dead regardless of true health) — checking the free primary is the
+        # honest freshness signal for this lane.
+        reads=[
+            "http://localhost:3000/api/market-news",
+        ],
+        # shock_guard.py has no --dry-run yet (Group B sibling adding it).
+        dry_run_cmd=["/usr/bin/python3", f"{_H}/scripts/shock_guard.py", "--dry-run"],
+    ),
+    "quantum": dict(
+        fleet="research_desk",
+        owns=["crypto desk reads (btc_desk/exit_monitor/pretrade_confluence)", "IV desk reads"],
+        never=["equity"],
+        cadence="10:05 + 15:25 ET Mon-Fri (iv_tg/iv_chart)", cadence_min=24 * 60,
+        reads=[
+            "/AIWorkWSL/labs/quantum/out/iv_forecast.json",
+            "/AIWorkWSL/labs/quantum/out/premium_income.json",
+            "http://localhost:3000/api/decision?symbol=SPY",
+        ],
+        # iv_tg.py has no --dry-run yet (Group B sibling adding it).
+        dry_run_cmd=["./.venv/bin/python", "src/iv_tg.py", "--dry-run"],
+        cwd="/AIWorkWSL/labs/quantum",
+    ),
+    "options_position_scorecard": dict(
+        fleet="trading_command",
+        owns=["option contracts on the relay universe", "relay x DP confluence tag"],
+        never=["Alpaca positions"],
+        cadence="15:40 ET Mon-Fri", cadence_min=24 * 60,
+        reads=[
+            "https://paper-api.alpaca.markets/v2/positions",  # doctrine-flagged, fleet-a Lane 13
+        ],
+        dry_run_cmd=None,  # not in this pass's D-fix list; no --dry-run flag exists
+    ),
+    "telegram_dm_responder": dict(
+        fleet="flow_signals",
+        owns=["answers from /api/decision?symbol= summary", "/api/mtf-ta read", "/api/news-snr"],
+        never=["retired journal"],
+        cadence="every minute (long-poll)", cadence_min=5,
+        reads=[
+            "http://127.0.0.1:3000/api/coach-gate",
+            "http://localhost:3000/api/decision?symbol=SPY",
+        ],
+        dry_run_cmd=None,  # not in this pass's D-fix list; no --dry-run flag exists
+    ),
+    "system_health": dict(
+        fleet="system_health",
+        owns=["DEAD / heal-failed / cron-failure alerts (gated)"],
+        never=["routine OK pings"],
+        cadence="06:45 ET daily", cadence_min=24 * 60,
+        reads=[
+            f"{_H}/LapClaw/pipeline/desk_pipeline.sqlite",
+            f"{_H}/.openclaw/workspace/directives/freshness_audit_report.json",
+        ],
+        # data_freshness_auditor.py has no --dry-run yet (Group A sibling adding it).
+        dry_run_cmd=["/usr/bin/python3",
+                     f"{_H}/05_AUTOMATION/scripts/data_freshness_auditor.py", "--dry-run"],
+    ),
+    "app_notifiers": dict(
+        # D7 landed 2026-09-15: chain_footprint.py now passes TG_FN=winmeals explicitly
+        # instead of falling through to trading_command's default (tg_fleet.py FLEET gained
+        # a dedicated "winmeals" entry — no token provisioned yet, Mike's call).
+        fleet="winmeals",
+        owns=["their own app's events (e.g. WinMeals promo/chain-footprint accuracy)"],
+        never=["trading content"],
+        cadence="08:35 ET Mon (chain_footprint.py --audit --notify)", cadence_min=7 * 24 * 60,
+        reads=[
+            "/AIWorkWSL/web/winmeals/engine/data",
+        ],
+        # chain_footprint.py has no --dry-run yet (Group B sibling adding it).
+        dry_run_cmd=["./.venv/bin/python", "chain_footprint.py", "--audit", "--dry-run"],
+        cwd="/AIWorkWSL/web/winmeals/engine",
+    ),
 }
 
 VKEY = "telegram.{}".format  # vault key for a function
