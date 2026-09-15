@@ -19,6 +19,8 @@ import argparse
 import json
 import os
 import sys
+import urllib.parse
+import urllib.request
 from datetime import datetime
 from pathlib import Path
 from zoneinfo import ZoneInfo
@@ -27,6 +29,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parent))
 from lib.notify import tg_push  # noqa: E402
 
 ET = ZoneInfo("America/New_York")
+NEWS_SNR_URL = "http://localhost:3000/api/news-snr"
 EVENTS_DIR = Path(os.environ.get(
     "CATALYST_EVENTS_DIR",
     str(Path.home() / ".openclaw" / "data" / "decision" / "raw" / "catalysts" / "events")))
@@ -89,9 +92,36 @@ def _fmt_event(e: dict) -> str:
     return f"• {sym} {typ}{tail}"
 
 
+def _snr_line(symbol: str) -> str:
+    """One SNR corroboration line for `symbol` — top-scoring headline (score >=60)
+    from /api/news-snr, or 'no corroborating headline'. Fails soft: any network/parse
+    error reads the same as no corroboration, never raises past the caller."""
+    try:
+        url = f"{NEWS_SNR_URL}?{urllib.parse.urlencode({'symbol': symbol, 'min': 60})}"
+        req = urllib.request.Request(url, headers={"User-Agent": "Mozilla/5.0"})
+        with urllib.request.urlopen(req, timeout=6) as r:
+            d = json.loads(r.read())
+        arts = sorted(d.get("articles") or [], key=lambda a: -(a.get("snr") or 0))
+        if not arts:
+            return f"📰 {symbol}: no corroborating headline (SNR<60)"
+        top = arts[0]
+        title = str(top.get("title") or "")[:100]
+        return f"📰 {symbol}: SNR {top.get('snr')} ({top.get('source', '?')}) \"{title}\""
+    except Exception:
+        return f"📰 {symbol}: no corroborating headline (SNR check failed)"
+
+
 def build(qualifying: list[dict]) -> str:
     lines = ["🧭 CATALYST PING — cluster/insider buy filed today (Form 4 deadline 22:00 ET):"]
     lines += [_fmt_event(e) for e in qualifying]
+    # One SNR corroboration line per TICKER (not per event — a symbol with two
+    # qualifying filings today still gets one line), in order of first appearance.
+    seen: list[str] = []
+    for e in qualifying:
+        sym = str(e.get("symbol", "?")).upper()
+        if sym not in seen:
+            seen.append(sym)
+    lines += [_snr_line(sym) for sym in seen]
     lines.append("Full sector read-through in tomorrow's 08:15 ET brief.")
     return "\n".join(lines)
 
