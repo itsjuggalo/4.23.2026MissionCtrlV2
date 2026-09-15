@@ -64,6 +64,21 @@ FLEET = {
     "daily_briefs":    dict(user="SpaceCoast_Claude_Bot",   avatar="ghost",           role="push",        src=("cloud", None)),
     # ── media (off the trade chats) ─────────────────────────────────────────
     "media_gens":      dict(user="JazzyHazzyTelegram_Bot",  avatar="fenix",           role="push",        src=("cloud", None)),
+    # ── app notifiers (off the trade chats — their own app's events only) ───
+    # 2026-09-15 (D7, telegram lane charter spec) — WinMeals' chain_footprint.py --notify
+    # was landing on tg-send-msg's trading_command DEFAULT (ops sweep finding: unrelated
+    # WinMeals-accuracy content in the trading firehose). chain_footprint.py now passes
+    # TG_FN=winmeals explicitly. No bot token exists yet for this fn in EITHER secrets
+    # store (~/.openclaw/secrets/*, ~/.config/mc-secrets/secrets.sqlite) — src is left
+    # ("cloud", None) same as the other not-yet-provisioned rows below. Mike creates via
+    # BotFather (20-bot cap — see laptop_control note above) and pastes the token, OR
+    # repoints one of the already-tokened "spare" bots in the reserve pool below (their
+    # vault keys — telegram.jazzy_relay/orion_relay/grok_scout/trend_scanner — are live
+    # and unused) — Mike's call, not made here. Until a token exists, chain_footprint.py
+    # probes `tg_fleet.py token winmeals` before sending and logs-only on failure — it
+    # does NOT let tg-send-msg's trading_command fallback fire (that fallback is exactly
+    # the leak this lane exists to close).
+    "winmeals":        dict(user="(reserved — Mike creates via BotFather, or repoint a spare)", avatar="medic", role="push", src=("cloud", None)),
     # ── infra (not chat targets) ────────────────────────────────────────────
     "hermes_relay":    dict(user="Gumroadie_bot",           avatar="dragoon",         role="infra",       src=("vault", "telegram_hermes_bot_token")),
     "openclaw_grok":   dict(user="OpenclawGrok727_Bot",     avatar="ghost",           role="infra",       src=("vault", "telegram_openclaw_bot_token")),
