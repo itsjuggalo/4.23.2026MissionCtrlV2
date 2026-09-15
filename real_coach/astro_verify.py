@@ -234,6 +234,34 @@ def check_no_vedic() -> list[str]:
     return fails
 
 
+def check_commands() -> list[str]:
+    """C — every bot module command (ASTRO_MODULE_CMDS in tg_responder.py) runs, exits 0, prints something, no traceback."""
+    import ast
+    fails = []
+    src = (Path.home() / "scripts/tg_responder.py").read_text()
+    i = src.find("ASTRO_MODULE_CMDS = {")
+    j = src.find("\n}\n", i)
+    try:
+        cmds = ast.literal_eval(src[i + len("ASTRO_MODULE_CMDS = "):j + 2])
+    except Exception as e:
+        return [f"C cannot parse ASTRO_MODULE_CMDS: {e}"]
+    py = str(Path.home() / ".venv/bin/python")
+    rc = Path.home() / "scripts/real_coach"
+    for cmd, (script, margs) in sorted(cmds.items()):
+        try:
+            r = subprocess.run([py, str(rc / script), *margs], capture_output=True, text=True, timeout=180)
+            out = (r.stdout or "").strip()
+            if r.returncode != 0 or "Traceback" in (r.stderr or "") or "Traceback" in out:
+                fails.append(f"C {cmd} → {script} {' '.join(margs)} crashed: {(r.stderr or out)[-200:].strip()}")
+            elif len(out) < 20:
+                fails.append(f"C {cmd} → {script} printed nothing useful: {out[:80]!r}")
+            elif "unavailable" in out:
+                fails.append(f"C {cmd} degraded: " + next(l for l in out.splitlines() if "unavailable" in l)[:160])
+        except Exception as e:
+            fails.append(f"C {cmd} failed to run: {e}")
+    return fails
+
+
 def check_outputs() -> list[str]:
     fails = []
     py = str(Path.home() / ".venv/bin/python")
@@ -348,14 +376,14 @@ def check_modules() -> list[str]:
 
 def run_all(send_on_fail: bool = False) -> int:
     fails = []
-    for fn in (check_natal, check_texts, check_horizons, check_svehla, check_outputs, check_modules, check_no_vedic):
+    for fn in (check_natal, check_texts, check_horizons, check_svehla, check_outputs, check_modules, check_no_vedic, check_commands):
         try:
             fails += fn()
         except Exception as e:
             fails.append(f"{fn.__name__} crashed: {e}")
     hard = [f for f in fails if "skipped" not in f]
     status = {"ok": not hard, "when_et": datetime.now(T.ET).isoformat(timespec="minutes"),
-              "checks": ["natal", "texts", "horizons", "svehla", "outputs", "modules", "no-vedic"], "failures": fails}
+              "checks": ["natal", "texts", "horizons", "svehla", "outputs", "modules", "no-vedic", "commands"], "failures": fails}
     STATUS.parent.mkdir(parents=True, exist_ok=True)
     STATUS.write_text(json.dumps(status, indent=1))
     print(("✔ ALL CHECKS PASS" if not hard else "✖ FAILURES") + f" — {status['when_et']}")

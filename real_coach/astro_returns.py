@@ -441,8 +441,16 @@ def solar_arc_block(d: date | None = None) -> str:
 
 # ═══════════════════════════════════════════════════════════════════════════
 if __name__ == "__main__":
-    args = [a for a in sys.argv[1:] if a != "--send"]
+    args = [a for a in sys.argv[1:] if a not in ("--send", "--send-if-today")]
     send = "--send" in sys.argv
+    if "--send-if-today" in sys.argv:            # monthly lunar-return brief, cron'd daily: send only on the return day
+        today = datetime.now(T.ET).date()
+        lr = lunar_return(today)
+        nxt = lr.get("next") or {}
+        when = str(nxt.get("when_et", ""))[:10]
+        if when != today.isoformat():
+            sys.exit(0)
+        send = True
     cmd = args[0] if args else "phase"
     today = datetime.now(T.ET).date()
     if cmd == "solar":

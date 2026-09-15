@@ -144,7 +144,8 @@ BOTS = {
             "• /week · /month — the coming transits day by day, peak day marked · /quality — today 1-10\n"
             "• /tnp — the 8 transneptunian points (Hades, Apollon…) natal + 90° dial hits · /midpoints — planetary pictures now · /critical — anything on a critical/anaretic degree · /startransits — planets on fixed stars today\n"
             "• /profection — your time-lord year and month · /hours — today's planetary hours (Dunedin) · /firdaria — your Persian time-lord periods (tropical)\n"
-            "• /full — today's complete read (the 8:32 send is a one-message digest)\n"
+            "• /full — today's complete read (the 8:32 send is a one-message digest) · /alerts — what goes exact in the next 24h (hourly pushes run 8am–10pm) · /evidence — your notes and scores vs the sky\n"
+            "• Live page: http://127.0.0.1:3141/astrology/mike-today-live.html (regenerated 08:40 ET)\n"
             "• /timeline [days] [full] — every exact hit, house change, progression and eclipse ahead, dated from the real ephemeris · /year — 12 months in one screen\n"
             "• /sky — lunations, eclipses, stations, ingresses, Mercury rx + shadow, in your houses · /voc\n"
             "• /solarreturn · /lunarreturn · /phase (progressed lunation phase) · /solararc\n"
@@ -383,7 +384,8 @@ ASTRO_MODULE_CMDS = {
     "/activation":  ("astro_patterns.py", ["activation"]), "/stars": ("astro_patterns.py", ["stars"]),
     "/week":        ("astro_lookahead.py", ["week"]), "/month":    ("astro_lookahead.py", ["month"]),
     "/quality":     ("astro_lookahead.py", ["quality"]),
-    "/full":        ("daily_transits.py", ["--full"]),
+    "/full":        ("daily_transits.py", ["--full"]),   "/evidence": ("astro_evidence.py", []),
+    "/alerts":      ("astro_alerts.py", ["--dry", "--window", "1440"]),
     "/timeline":    ("astro_timeline.py", []),         "/year":      ("astro_timeline.py", ["year"]),
     "/profection":  ("astro_timing.py", ["profection"]), "/hours":   ("astro_timing.py", ["hours"]),
     "/firdaria":    ("astro_timing.py", ["firdaria"]),

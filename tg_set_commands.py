@@ -108,6 +108,8 @@ ASTRO = C([   # astrology-only lane (@JazzyHazzyClaw_Bot) — no trading command
     ("month", "Coming 30 days of transits"),
     ("quality", "Today's sky quality 1-10 (life decisions)"),
     ("full", "Today's complete read (digest → full)"),
+    ("alerts", "What goes exact in the next 24h"),
+    ("evidence", "Your notes & scores vs the sky"),
     ("timeline", "Dated hits ahead: /timeline 60 full"),
     ("year", "The next 12 months, one line each"),
     ("profection", "Time-lord year + month (annual profection)"),

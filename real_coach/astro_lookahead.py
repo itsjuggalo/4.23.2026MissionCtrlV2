@@ -89,4 +89,18 @@ def lookahead_block(days: int, d: datetime | None = None) -> str:
 
 if __name__ == "__main__":
     cmd = sys.argv[1] if len(sys.argv) > 1 else "week"
+    if "--send" in sys.argv:
+        import io, contextlib
+        buf = io.StringIO()
+        with contextlib.redirect_stdout(buf):
+            sys.argv = [a for a in sys.argv if a != "--send"]
+            import importlib, runpy
+            fn = {"week": lambda: print(lookahead_block(7)), "month": lambda: print(lookahead_block(30)), "quality": lambda: print(quality_block())}.get(cmd)
+            fn() if fn else print(__doc__)
+        from svehla import send_to_lane
+        out = buf.getvalue()
+        print(out)
+        for chunk in (out[i:i + 3900] for i in range(0, len(out), 3900)):
+            send_to_lane(chunk)
+        sys.exit(0)
     print({"week": lambda: lookahead_block(7), "month": lambda: lookahead_block(30), "quality": quality_block}[cmd]())
