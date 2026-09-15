@@ -293,6 +293,127 @@ def _catalyst_phone_line() -> str:
     return f"🧭 {sentence}. {tail}"
 
 
+# --------------------------------------------------------------------------- structure vs sentiment
+# 2026-09-15 (Mike, trader statement: "we focused on price structure and market reaction ...
+# the market reflects expectations and capital flows, not just the data itself"). Two
+# DETERMINISTIC blocks read straight off the pipeline JSON — no LLM, no network, never a
+# sizing/gate input. Producers: pipeline/decision/rebound_setup.py (hourly market hours)
+# and pipeline/decision/macro_reaction.py (07:00 / 09:05 / 16:40 ET).
+REBOUND_JSON = Path(os.environ.get(
+    "REBOUND_JSON", str(Path.home() / ".openclaw" / "data" / "decision" / "rebound_setup.json")))
+MACRO_REACTION_JSON = Path(os.environ.get(
+    "MACRO_REACTION_JSON", str(Path.home() / ".openclaw" / "data" / "decision" / "macro_reaction.json")))
+REBOUND_MAX_AGE_H = 20           # last write is 16:48 the prior session; 8:15 brief is ~15.5h later
+MACRO_MAX_AGE_H = 20             # 16:40 prior session -> 07:00 run should have refreshed; 20h = cron broken
+REBOUND_MAX_ROWS = 4
+_STATE_ORDER = {"triggered": 0, "momentum-on": 1, "held": 2, "level-tested": 3, "watching": 4, "expired": 5}
+
+
+def _load_fresh_json(path: Path, max_age_h: float) -> dict | None:
+    """Read a producer file; None if missing, unparseable, or older than max_age_h (a stale
+    file means the cron is broken — printing it would be lying about 'today')."""
+    try:
+        data = json.loads(path.read_text())
+        as_of = data.get("asOf")
+        ts = float(as_of) / 1000.0 if isinstance(as_of, (int, float)) else datetime.fromisoformat(str(as_of)).timestamp()
+        if (datetime.now(ET).timestamp() - ts) / 3600.0 > max_age_h:
+            return None
+        return data
+    except Exception:
+        return None
+
+
+def _rebound_rows(data: dict, n: int = REBOUND_MAX_ROWS) -> list[dict]:
+    """Best n setups: triggered first, then momentum-on / held, by score. Pure 'watching'
+    names are skipped — a line that says nothing is happening is noise on a phone."""
+    rows = [r for r in (data.get("symbols") or {}).values()
+            if isinstance(r, dict) and r.get("state") not in (None, "watching", "expired")]
+    rows.sort(key=lambda r: (_STATE_ORDER.get(r.get("state"), 9), -float(r.get("score") or 0)))
+    return rows[:n]
+
+
+def _structure_block() -> str:
+    """Desk-copy block: one line per setup, straight from rebound_setup.json `read`."""
+    data = _load_fresh_json(REBOUND_JSON, REBOUND_MAX_AGE_H)
+    if data is None:
+        return ""
+    lines = ["\n🏗 **STRUCTURE VS SENTIMENT** (key level held + momentum, into negative sentiment):"]
+    rows = _rebound_rows(data)
+    if not rows:
+        fg = (data.get("inputs") or {}).get("fearGreedLabel")
+        lines.append(f"• No level-hold setups in play (F&G {fg or 'n/a'}). Watching {len(data.get('symbols') or {})} names.")
+    else:
+        for r in rows:
+            lines.append(f"• {r.get('read')} · score {r.get('score')}/100")
+    counts = data.get("counts") or {}
+    if counts:
+        lines.append(f"• States: {counts.get('triggered', 0)} triggered · {counts.get('momentum-on', 0)} momentum-on · "
+                     f"{counts.get('held', 0)} held · {counts.get('level-tested', 0)} tested · {counts.get('watching', 0)} watching"
+                     " · advisory, $400 cap, Mike decides")
+    return "\n".join(lines)
+
+
+def _structure_phone_line() -> str:
+    data = _load_fresh_json(REBOUND_JSON, REBOUND_MAX_AGE_H)
+    if data is None:
+        return ""
+    rows = _rebound_rows(data, n=2)
+    trig = [r for r in rows if r.get("state") == "triggered"]
+    if not trig:
+        best = rows[0] if rows else None
+        if best is None:
+            return "🏗 No name has held a key level with momentum turning yet — sentiment is loud, structure is quiet."
+        return (f"🏗 Closest structure setup: {best.get('symbol')} is {best.get('state')} (score {best.get('score')}/100)"
+                " — not a buy until momentum confirms.")
+    parts = []
+    for r in trig:
+        opt = (r.get("option") or {}).get("label")
+        parts.append(f"{r.get('symbol')} held its level and momentum turned" + (f" — {opt}" if opt else ""))
+    return "🏗 Structure says: " + "; ".join(parts) + ". Advisory only — stop = level break."
+
+
+def _macro_block() -> str:
+    """Desk-copy block: next release + countdown + last-3 reaction lines + the data-vs-flows read."""
+    data = _load_fresh_json(MACRO_REACTION_JSON, MACRO_MAX_AGE_H)
+    if data is None:
+        return ""
+    nxt = data.get("next") or {}
+    lines = ["\n📅 **MACRO REACTION** (expectations vs what the tape actually did):"]
+    if nxt:
+        fc = nxt.get("forecast")
+        also = nxt.get("alsoThatDay") or []
+        head = f"• Next: {nxt.get('name')} {nxt.get('countdown')} ({str(nxt.get('at') or '')[:16].replace('T', ' ')} ET)"
+        if fc is not None:
+            head += f" · consensus {fc:+g}" if isinstance(fc, (int, float)) else f" · consensus {fc}"
+        if also:
+            head += f" · same day: {', '.join(also)}"
+        lines.append(head)
+        for ln in nxt.get("last3") or []:
+            lines.append(f"  ↳ {ln}")
+        roll = (nxt.get("rolling") or {}).get("read")
+        if roll:
+            lines.append(f"  ↳ {nxt.get('name')} pattern: {roll}")
+    y = data.get("yields") or {}
+    if y.get("dgs2") is not None and y.get("dgs10") is not None:
+        lines.append(f"• 2y {y['dgs2']:.2f}% · 10y {y['dgs10']:.2f}% · curve {y['dgs10'] - y['dgs2']:+.2f} (FRED {y.get('asOf')})")
+    dvf = (data.get("dataVsFlows") or {}).get("read")
+    if dvf:
+        lines.append(f"• Read: {dvf}")
+    return "\n".join(lines)
+
+
+def _macro_phone_line() -> str:
+    data = _load_fresh_json(MACRO_REACTION_JSON, MACRO_MAX_AGE_H)
+    if data is None:
+        return ""
+    nxt = data.get("next") or {}
+    dvf = (data.get("dataVsFlows") or {}).get("read") or ""
+    if not nxt:
+        return f"📅 {dvf}" if dvf else ""
+    roll = (nxt.get("rolling") or {}).get("read") or ""
+    return f"📅 {nxt.get('name')} {nxt.get('countdown')}. Last 3 times: {roll}. {dvf}".strip()
+
+
 def build() -> str:
     stamp = datetime.now(ET).strftime("%a %b %-d %-I:%M %p ET")
     names = top_tickers_str(6)
@@ -334,6 +455,10 @@ def build() -> str:
     cat_block = _catalyst_block()
     if cat_block:
         lines.append(cat_block)
+
+    for block in (_structure_block(), _macro_block()):
+        if block:
+            lines.append(block)
 
     lines.append(f"\n_One overview · specifics land in #flow-picks · risk cap ${RISK_CAP}/trade · auto-posted 8:15 ET._")
     return "\n".join(lines)
@@ -471,6 +596,10 @@ def build_phone() -> str:
     cat_line = _catalyst_phone_line()
     if cat_line:
         lines.append(cat_line)
+
+    for line in (_structure_phone_line(), _macro_phone_line()):
+        if line:
+            lines.append(line)
 
     one = _one_contract_line()
     if one:

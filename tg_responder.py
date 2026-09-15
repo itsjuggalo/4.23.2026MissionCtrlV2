@@ -121,7 +121,10 @@ BOTS = {
             "(pMoon, pVenus, Placidus houses, ingress dates); the windows' why/do text is in "
             "~/scripts/real_coach/svehla_windows.json; Mike's journal/scores/loose-ends/contingency "
             "live in ~/portfolio/astrology/*.json* (read them when he asks what he noted or how a "
-            "window scored). For dates/aspects you cannot compute, "
+            "window scored). Interpretation lexicon (planets/signs/houses/aspects, practical + "
+            "esoteric, Placidus houses) is ~/scripts/real_coach/astro_lexicon.py — use its wording "
+            "so your answers match the daily send; `--explain` gives today's full read. "
+            "For dates/aspects you cannot compute, "
             "say so rather than inventing degrees.\n"
             "Eastern Time. Short, warm, plain-text for Telegram — no markdown headers or tables. "
             "Mike has ADD: lead with the read, then at most 5 tight lines."
@@ -133,6 +136,9 @@ BOTS = {
             "• /readings — what's in your astrology suite\n"
             "• /dates — your Aug 2026 reading's timeline, what's active now + what's next\n"
             "• /progressed — your progressed Moon/Venus/Sun/Juno today (real ephemeris)\n"
+            "• /explain — today's transits, the full read: aspect geometry, which house it fires from\n"
+            "   and lands in, both signs, esoteric meaning of each planet, how to work it\n"
+            "• /planet <x> · /sign <x> · /house <1-12> · /aspect <x> — the lexicon, practical + esoteric\n"
             "• /exact — next exact transit hits + progressed ingresses (pinged 3d before)\n"
             "• /note <text> — journal what happened (stamped with the active window)\n"
             "• /score <window> 1-5 · /scorecard — did his dates play out?\n"
@@ -599,9 +605,26 @@ def run_bot(botkey):
                         send_reply(chat_id, out)
                         print(f"[{name}] {cmd0} {' '.join(parts[1:])[:60]}", flush=True)
                         continue
+                    # 2026-09-15: lexicon — /planet /sign /house /aspect <key> → daily_transits --lookup
+                    if cmd0 in ("/planet", "/sign", "/house", "/aspect"):
+                        key = text.split(maxsplit=1)[1].strip() if " " in text else ""
+                        if not key:
+                            send_reply(chat_id, f"Usage: {cmd0} <name>  e.g. /planet saturn · /sign scorpio · /house 10 · /aspect square")
+                            continue
+                        try:
+                            r = subprocess.run(
+                                [str(Path.home() / ".venv/bin/python"),
+                                 str(Path.home() / "scripts/real_coach/daily_transits.py"), "--lookup", cmd0[1:], key],
+                                capture_output=True, text=True, timeout=60)
+                            out = (r.stdout or "").strip() or f"[{cmd0} rc={r.returncode}] {r.stderr.strip()[:200]}"
+                        except Exception as e:
+                            out = f"[{cmd0} error] {e}"
+                        send_reply(chat_id, out)
+                        print(f"[{name}] {cmd0} {key}", flush=True)
+                        continue
                     # 2026-09-14: Svehla Aug-2026 reading layer — dated windows + real progressions
-                    if cmd0 in ("/dates", "/progressed"):
-                        flag = "--dates" if cmd0 == "/dates" else "--progressed"
+                    if cmd0 in ("/dates", "/progressed", "/explain"):
+                        flag = {"/dates": "--dates", "/progressed": "--progressed", "/explain": "--explain"}[cmd0]
                         try:
                             r = subprocess.run(
                                 [str(Path.home() / ".venv/bin/python"),

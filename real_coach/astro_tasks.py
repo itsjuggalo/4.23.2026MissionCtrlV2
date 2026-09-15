@@ -8,11 +8,9 @@ State lives in ~/portfolio/astrology/ (JSON, human-readable):
   tasks.json       /contingency /loose /juno — status trackers
   income.jsonl     /income — weekly Jupiter-2H check-ins
 
-Scheduled (all send only when there is something to say):
-  daily   08:34 ET — Uranus-Hades guardrail cross-post to Trading Command (window start + Mondays)
-  monthly 1st 08:40 ET — contingency nudge (spring 2027), Juno check-in while active
-  friday  17:00 ET — income check-in during Jupiter-2H windows
-Weekly loose-ends nag rides inside svehla.py weekly (Monday 08:35).
+Scheduled: only `daily` (Uranus-Hades guardrail → Trading Command, 2028-29). `monthly` and
+`friday` exist but are NOT cron'd — Mike 2026-09-14: "less questions, more insight". The
+Monday weekly carries a one-line contingency countdown and the loose-ends list if he added any.
 """
 from __future__ import annotations
 

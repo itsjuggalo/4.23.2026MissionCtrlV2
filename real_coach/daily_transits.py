@@ -4,7 +4,7 @@
 REAL astronomy, $0: Swiss Ephemeris (pyswisseph) computes today's planet
 positions and aspects them against the natal chart (Nov 3 1992, 10:46 PM EST,
 Dunedin FL — verified: Sun 12° Sco, Moon 1° Pis, ASC 27° Can, MC 19° Ari).
-Whole-sign houses from the Cancer Ascendant. Cron: 8:32 ET daily.
+Placidus houses (Svehla's system; matches the natal readings). Cron: 8:32 ET daily.
 """
 from __future__ import annotations
 
@@ -19,6 +19,7 @@ import swisseph as swe
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 import svehla  # noqa: E402  — Aug 2026 reading windows + secondary progressions
+import astro_lexicon as lex  # noqa: E402  — planets/signs/houses/aspects, practical + esoteric
 
 swe.set_ephe_path(str(Path.home() / ".local/share/swisseph"))  # free se1 files (asteroids)
 ET = ZoneInfo("America/New_York")
@@ -108,8 +109,10 @@ def angle(a, b):
     return d if d <= 180 else 360 - d
 
 
-def whole_sign_house(lon, asc_lon):
-    return (int(lon // 30) - int(asc_lon // 30)) % 12  # 0-based
+def whole_sign_house(lon, asc_lon=None):
+    """0-based PLACIDUS house (name kept for call-site compat; switched 2026-09-15 so the daily
+    lines agree with Svehla and the natal readings — Sun 4th, Moon 8th, Juno 12th)."""
+    return lex.house_of(lon) - 1
 
 
 def sign_deg(lon):
@@ -127,11 +130,15 @@ def main() -> int:
     ap.add_argument("--send", action="store_true")
     ap.add_argument("--dates", action="store_true", help="Svehla Aug-2026 windows, chronological")
     ap.add_argument("--progressed", action="store_true", help="secondary progressions today")
+    ap.add_argument("--explain", action="store_true", help="full 4-level read of every aspect today")
+    ap.add_argument("--lookup", nargs="+", metavar="KIND KEY", help="planet|sign|house|aspect <key>")
     args = ap.parse_args()
     if args.dates:
         print(svehla.dates_block()); return 0
     if args.progressed:
         print(svehla.progressed_block()); return 0
+    if args.lookup:
+        print(lex.lookup(args.lookup[0], " ".join(args.lookup[1:]))); return 0
 
     now_utc = datetime.now(timezone.utc)
     now_et = now_utc.astimezone(ET)
@@ -167,13 +174,38 @@ def main() -> int:
         lines.append("↩ Retrograde: " + ", ".join(rx) +
                      (" — double-check orders/messages before sending." if "Mercury" in rx else ""))
 
+    if args.explain:
+        # /explain — the full four-level read (aspect · houses · signs · esoteric) of every hit
+        out = [f"🔍 TODAY'S TRANSITS EXPLAINED — {now_et:%a %b %-d}", ""]
+        for h in hits[:6]:
+            th = whole_sign_house(trans[h["t"]]["lon"], asc) + 1
+            out.append(f"{h['glyph']} {h['t']} ({sign_deg(trans[h['t']]['lon'])}, your {ordinal(th)}) "
+                       f"{h['aspect']} natal {h['n']} ({sign_deg(natal[h['n']])}) · orb {h['orb']:.1f}°")
+            out.append(lex.explain_hit(h, trans[h["t"]]["lon"], natal[h["n"]], asc, full=True))
+            fit = svehla.fit_for(h["t"], h["n"], now_et.date())
+            if fit:
+                out.append(f"Svehla's thread: {fit}.")
+            out.append("")
+        if not hits:
+            out.append("No tight aspects today. /planet /sign /house /aspect for the lexicon.")
+        print("\n".join(out)); return 0
+
     if hits:
         lines.append("")
-        for h in hits[:5]:
+        seen_fit = set()
+        for i, h in enumerate(hits[:5]):
             verb = {"easy": "supports", "hard": "pressures", "fused": "amplifies"}[h["quality"]]
-            lines.append(f"{h['glyph']} {h['t']} {h['aspect']} natal {h['n']} "
-                         f"(orb {h['orb']:.1f}°) — {THEME[h['t']].capitalize()} {verb} "
-                         f"{NATAL_PT[h['n']]}.")
+            th = whole_sign_house(trans[h["t"]]["lon"], asc) + 1
+            nh = whole_sign_house(natal[h["n"]], asc) + 1
+            lines.append(f"{h['glyph']} {h['t']} (in {SIGNS[int(trans[h['t']]['lon'] // 30)]}, your {ordinal(th)}) "
+                         f"{h['aspect']} natal {h['n']} (your {ordinal(nh)}) · orb {h['orb']:.1f}° — "
+                         f"{THEME[h['t']].capitalize()} {verb} {NATAL_PT[h['n']]}.")
+            if i < 3:   # the three tightest/slowest get the personal + esoteric read inline
+                lines.append("   " + lex.explain_hit(h, trans[h["t"]]["lon"], natal[h["n"]], asc).replace("\n", "\n   "))
+            fit = svehla.fit_for(h["t"], h["n"], now_et.date())
+            if fit and fit not in seen_fit:          # one line per thread, not per aspect
+                seen_fit.add(fit)
+                lines.append(f"   ↳ Svehla: {fit}.")
     else:
         lines.append("\nNo tight aspects today — a quiet sky. Trade the plan, not the stars.")
 
@@ -198,13 +230,30 @@ def main() -> int:
     except Exception as e:      # never let the reading layer kill the send
         lines.append(f"\n📜 (Svehla windows unavailable: {e})")
 
-    lines.append(f"\n☉ {sign_deg(trans['Sun']['lon'])} · /dates for the Aug 2026 reading timeline · /progressed for your progressed chart")
+    lines.append(f"\n☉ {sign_deg(trans['Sun']['lon'])} · /explain for the full read · /dates · /progressed · /planet /sign /house /aspect")
     msg = "\n".join(lines)
     print(msg)
     if args.send:
-        subprocess.run([sys.executable, str(TG_FLEET), "send", TG_FN, msg],
-                       capture_output=True, timeout=30)
+        for chunk in chunk_message(msg):          # Telegram caps a message at 4096 chars
+            subprocess.run([sys.executable, str(TG_FLEET), "send", TG_FN, chunk],
+                           capture_output=True, timeout=30)
     return 0
+
+
+def chunk_message(msg: str, limit: int = 3900) -> list[str]:
+    """Split on paragraph breaks so no Telegram send exceeds the cap."""
+    if len(msg) <= limit:
+        return [msg]
+    out, cur = [], ""
+    for para in msg.split("\n\n"):
+        cand = (cur + "\n\n" + para) if cur else para
+        if len(cand) > limit and cur:
+            out.append(cur); cur = para
+        else:
+            cur = cand
+    if cur:
+        out.append(cur)
+    return out
 
 
 if __name__ == "__main__":

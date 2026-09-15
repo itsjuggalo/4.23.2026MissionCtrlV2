@@ -126,12 +126,27 @@ FILES = [
     ("dph_latest",           f"{H}/.openclaw/data/darkpool/dph/latest.json",             ALL,  14, "darkpoolheatmap.com poll (pipeline/darkpool/dph_scrape.py) every 30min market hours, advisory only"),
     ("news_snr_latest", f"{H}/.openclaw/data/decision/news_snr.json", ALL, 2, "news signal-to-noise scorer (pipeline/decision/news_snr.py) hourly, advisory only"),
     ("mtf_ta_latest",        f"{H}/.openclaw/data/decision/mtf_ta.json",                 ALL,   2, "multi-timeframe TA for relay tickers (pipeline/decision/mtf_ta.py) hourly market hours, advisory only"),
+    # [structure-first 2026-09-15] rebound detector hourly 09:43-16:43 + 16:48 ET weekdays -> Fri 16:48 -> Mon 09:43 gap (~65h) + margin
+    ("rebound_setup_latest", f"{H}/.openclaw/data/decision/rebound_setup.json",          ALL,  68, "structure-first rebound detector (pipeline/decision/rebound_setup.py) hourly market hours, advisory only"),
+    # macro reaction 07:00 + 09:05 + 16:40 ET weekdays -> Fri 16:40 -> Mon 07:00 gap (~62.5h) + margin
+    ("macro_reaction_latest", f"{H}/.openclaw/data/decision/macro_reaction.json",        ALL,  66, "macro expectations-vs-reaction tracker (pipeline/decision/macro_reaction.py) 3x/day weekdays, advisory only"),
     # [portfolio-retired 2026-09-12] producer retired (refresh-holdings.sh/wallets-refresh.sh cron) — file will never update again
     # ("unified_book",        f"{H}/portfolio/unified_book.json",                           ALL,  6, "REAL MONEY book (RH + Coinbase) -> portfolio/risk pages"),
     # ("robinhood_holdings",  f"{H}/portfolio/robinhood_holdings.json",                     MH,  26, "REAL MONEY RH equity/options positions"),
     # ("coinbase_holdings",   f"{H}/portfolio/coinbase_holdings.json",                      ALL,  6, "REAL MONEY Coinbase positions"),
     # [portfolio-retired 2026-09-12] producer (pre_breakout_scan.py) cron retired — file will never update again
     # ("pullback_watchlist",  f"{H}/portfolio/pullback_watchlist.json",                     MH,  26, "pullback watchlist feed"),
+    # [gate-trend-psych-replay 2026-09-15] holdings-free rewrite — 4-page fix for
+    # GatePage/TrendBoardPage/PsychCardsPage/ReplayPage (unified_book.json dead,
+    # never re-read). psych_cards.json + replay_drills.json read ONLY mike.sqlite
+    # fills/round_trips (closed trade history, not holdings) + yfinance.
+    ("psych_cards",         f"{H}/portfolio/psych_cards.json",                            ALL,  26, "psych_cards_refresh.py daily -> live_stats block; deck's cards are static canon (not tracked here)"),
+    ("replay_drills",       f"{H}/portfolio/replay_drills.json",                          ALL,  26, "replay_drills_refresh.py daily, drives real_coach/replay_drills.py"),
+    # [sector-rotation 2026-09-15] SectorRotationPage/route had zero file/fetch backing on
+    # record (B5/N5) — sector_rotation_detector.py now also writes this file (route's live
+    # yfinance fetch kept as fallback). Cron 10:00/12:00/14:00 ET M-F only; longest normal
+    # gap is Fri 14:00 -> Mon 10:00 (~68h).
+    ("sector_rotation",     f"{H}/.openclaw/data/sector-rotation/latest.json",             MH,  6, "sector_rotation_detector.py 10:00/12:00/14:00 ET M-F -> /api/sector-rotation"),
 ]
 
 

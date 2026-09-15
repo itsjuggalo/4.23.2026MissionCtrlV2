@@ -179,16 +179,17 @@ def daily_block(d: date | None = None) -> str:
             when = "ends TODAY"
         else:
             when = f"{left}d left"
-        first = w["do"].split(". ")[0].rstrip(".")
+        # insight, not instruction (Mike 2026-09-14): lead with how he read it; the "do" lives in /dates + Monday
+        first = w["why"].split(". ")[0].rstrip(".")
         lines.append(f"{KIND_ICON.get(w['kind'], '•')} {w['title']} — {when}. {first}.")
     for w in nxt:
         lines.append(f"⏭ Next: {w['title']} — {w['_start']:%b %-d %Y} ({(w['_start'] - d).days}d).")
     for h in exact_soon(d, 3):
         when = "TODAY" if h["in"] == 0 else f"in {h['in']}d"
-        lines.append(f"⏰ Exact {when}: {h['what']}.")
-    ended = [w for w in load_windows() if w["_end"] == d - timedelta(days=1)]
-    for w in ended:
-        lines.append(f"🏁 Ended yesterday: {w['title']}. Did it play out? /score {w['id']} 1-5 [note]")
+        fit = fit_for_exact(h["what"], d)
+        lines.append(f"⏰ Exact {when}: {h['what']}." + (f" ↳ {fit}." if fit else ""))
+    for w in [w for w in load_windows() if w["_end"] == d - timedelta(days=1)]:
+        lines.append(retrospective(w, d))
     return "\n".join(lines)
 
 
@@ -211,7 +212,7 @@ def dates_block(d: date | None = None) -> str:
             mark = ""
         lines.append(f"{mark}{KIND_ICON.get(w['kind'], '•')} {span}: {w['title']}")
     lines.append("")
-    lines.append("Ask me about any window by name for the why + what to do.")
+    lines.append("Ask me about any window by name for the why + what to do (/dates is the only place the to-do list lives).")
     return "\n".join(lines)
 
 
@@ -233,6 +234,16 @@ def weekly_block(d: date | None = None) -> str:
         lines.append("COMING UP")
         for w in nxt:
             lines.append(f"⏭ {w['_start']:%b %-d %Y} ({(w['_start'] - d).days}d): {w['title']}")
+        lines.append("")
+    soon = [h for h in exact_hits() if 0 <= (date.fromisoformat(h["date"]) - d).days <= 14]
+    if soon:
+        lines.append("EXACT THIS FORTNIGHT")
+        for h in soon:
+            fit = fit_for_exact(h["what"], d)
+            lines.append(f"⏰ {date.fromisoformat(h['date']):%b %-d}: {h['what']}" + (f" — {fit}" if fit else ""))
+        lines.append("")
+    if d < date(2027, 3, 10):
+        lines.append(f"🛡 {(date(2027, 3, 10) - d).days} days to the spring-2027 window he's most concerned about (housing + cash contingency).")
         lines.append("")
     try:
         import astro_tasks
@@ -412,6 +423,87 @@ def exact_block(d: date | None = None, n: int = 12) -> str:
             break
     lines.append("")
     lines.append("Exact = 0° orb crossing; retrograde passes are separate real hits. Pinged 3 days before + day-of.")
+    return "\n".join(lines)
+
+
+# ── insight layer (Mike 2026-09-14: "less questions, more astrological insight") ──
+# Maps a transit/natal pairing to the thread of Svehla's reading it belongs to, so every
+# daily aspect and exact hit is explained in HIS terms, not left as a bare degree.
+FIT_RULES = [
+    # (transit bodies, natal points, window-id prefix, how Svehla framed it)
+    ({"Saturn"}, {"MC", "Mars", "Apollon", "Jupiter", "Uranus", "Neptune"}, "saturn-",
+     "Saturn on your Midheaven / the Mars t-square: the 'settle career loose ends, build the foundation' thread. Discipline beats swings here"),
+    ({"Saturn"}, {"Juno"}, "juno-",
+     "Saturn square natal Juno: work and authority stress leaking into the relationship — the thread behind the Juno-on-Descendant tension"),
+    ({"Juno"}, {"DSC", "ASC", "Mars", "Juno"}, "juno-",
+     "Juno on your Descendant: loyalty, fairness, the household contract. Boundaries and equal load are the fix he named"),
+    ({"Jupiter"}, {"Venus", "Sun", "Moon", "MC", "Apollon", "Jupiter", "Chiron"}, "jupiter-",
+     "Jupiter's 'controlled expansion': grow income while managing resources securely. Expansion favors what you already built"),
+    ({"Uranus"}, {"Hades"}, "uranus-hades",
+     "Uranus on natal Hades: no impulsive money moves; the clearing-and-fresh-start transit"),
+    ({"Uranus"}, {"Mercury", "Venus", "Sun"}, "saturn-",
+     "Uranus rewiring your Sagittarius 5th-house voice — the 'find your unique groove' Uranian undertone of the whole reading"),
+    ({"Chiron"}, {"Sun", "Moon", "Chiron"}, "chiron-",
+     "Chiron opposite your Sun: financial security and ego in how you relate — the gift in the wound"),
+    ({"Pluto", "Venus", "Ceres"}, {"Ceres"}, "venus-ceres",
+     "Ceres: self-care, seeking care from someone brilliant, and fair compensation for what you do"),
+    ({"Venus", "Ceres", "Moon"}, {"Venus", "Juno", "DSC", "Saturn"}, "pvenus-",
+     "The progressed-Venus thread: partner as friend, structure with freedom, partnerships that pay"),
+    ({"Mars", "Sun", "Mercury"}, {"MC", "Mars"}, "saturn-",
+     "Mars rules your Midheaven: 'take action' on career — the Square of Hercules wants a move, not a mood"),
+    ({"Moon", "Sun", "Mercury", "Venus", "Mars"}, {"Sun", "Pluto"}, "pmoon-",
+     "Your Scorpio 4th-house core: security and intensity — the same nerve the progressed Moon is pressing on money"),
+]
+
+
+def fit_for(tname: str, nname: str, d: date | None = None) -> str:
+    """One line tying a transit→natal pairing to Svehla's reading; empty if it doesn't map."""
+    d = d or today_et()
+    act = {w["id"] for w in active(d)}
+    for tb, npts, prefix, text in FIT_RULES:
+        if tname in tb and nname in npts:
+            live = any(a.startswith(prefix) for a in act)
+            return text + (" (active window)" if live else "")
+    return ""
+
+
+def fit_for_exact(what: str, d: date | None = None) -> str:
+    """Same mapping for an exact-hit description string."""
+    for tname in T_BODY:
+        if what.startswith(f"Transiting {tname} exactly"):
+            nname = what.split("natal ")[-1]
+            return fit_for(tname, nname, d)
+    if what.startswith("Progressed Moon enters"):
+        return "Progressed Moon changing sign/house: the emotional-security focus shifts — he read this as the material-security thread moving from evaluation into the 11th (income from vocation)"
+    if what.startswith("Progressed Venus enters Aquarius"):
+        return "The June 6 2027 Venus shift he flagged: relief in relationships, partner-as-friend, partnerships that pay"
+    if what.startswith("Progressed Venus exactly conjunct natal Ceres"):
+        return "Self-care and fair pay; ending a difficult cycle"
+    if what.startswith("Transiting Juno enters Aquarius"):
+        return "Juno stops opposing natal Mars — he expects the relationship to feel less heavy from here"
+    if what.startswith("Transiting Jupiter enters Libra"):
+        return "Your Jupiter return: a new 12-year growth cycle begins"
+    return ""
+
+
+def retrospective(w: dict, d: date | None = None) -> str:
+    """Auto-written window close-out: what the sky actually did, what he expected, what you noted."""
+    d = d or today_et()
+    hits = [h for h in exact_hits() if w["start"] <= h["date"] <= w["end"]]
+    lines = [f"🏁 Window closed: {w['title']} ({w['_start']:%b %-d} → {w['_end']:%b %-d %Y})."]
+    if hits:
+        lines.append("Sky during it: " + "; ".join(f"{date.fromisoformat(h['date']):%b %-d} {h['what'].replace('Transiting ', '').replace(' exactly', '')}" for h in hits[:4]) + ".")
+    lines.append(f"He read it as: {w['why'].split('. ')[0]}.")
+    try:
+        import astro_tasks
+        notes = [n for n in astro_tasks._lines(astro_tasks.JOURNAL) if w["id"] in n.get("windows", [])]
+        if notes:
+            lines.append("Your notes: " + " | ".join(n["text"][:80] for n in notes[-3:]))
+    except Exception:
+        pass
+    nxt = upcoming(d, 1)
+    if nxt:
+        lines.append(f"What carries forward: {nxt[0]['title']} from {nxt[0]['_start']:%b %-d %Y}.")
     return "\n".join(lines)
 
 
