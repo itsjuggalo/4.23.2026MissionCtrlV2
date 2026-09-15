@@ -239,11 +239,16 @@ CHARTER = {
         fleet="flow_digest",
         owns=["grades of today's flow picks", "best3 grader stats"],
         never=["equity", "P&L", "book value"],
-        cadence="16:10 ET Mon-Fri", cadence_min=24 * 60,
+        # Round 3 (2026-09-15, team-lead): eod_scorecard.py is final — repointed off
+        # the dead trade_journal.jsonl entirely. Cron moved 16:10 -> 16:35 ET.
+        cadence="16:35 ET Mon-Fri", cadence_min=24 * 60,
+        # Re-derived by reading eod_scorecard.py's own constants (SIGNAL_OUTCOMES_DB,
+        # REBOUND_PING_STATE, NEWS_SNR_URL) rather than trusting the old guess:
         reads=[
-            f"{_H}/.openclaw/data/trade_journal.jsonl",
+            "/AIWorkWSL/trading/analysis/signal_outcomes.sqlite",  # `alerts` table — setup_scanner + explosion_score sources
+            f"{_H}/.openclaw/data/decision/rebound_ping_state.json",  # same pinned-sketch file as the `rebound` lane (D5)
+            "http://localhost:3000/api/news-snr?min=65",
         ],
-        # eod_scorecard.py has no --dry-run yet (Group A sibling adding it).
         dry_run_cmd=[f"{_H}/.venv/bin/python",
                      f"{_H}/05_AUTOMATION/scripts/eod_scorecard.py", "--dry-run"],
     ),
