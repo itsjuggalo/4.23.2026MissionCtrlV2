@@ -106,6 +106,8 @@ FILES = [
     ("macro_fed_factor",    f"{H}/.openclaw/data/decision/factors/macro_fed.json",      ALL,  20, "Fed/macro watcher (pipeline/fed/fed_watch.py) -> /api/decision/macro_fed, advisory only; longest normal gap is 14:15->06:30 next day (~16h)"),
     # [decision-news 2026-09-14] news/sentiment/catalyst decision factor — */30 06:00-20:00 ET weekdays, hourly 21:00-05:00 ET weekdays + all day weekends
     ("decision_news_factor", f"{H}/.openclaw/data/decision/factors/news.json",           ALL, 1.5, "News/sentiment/catalyst factor (pipeline/decision/factor_news.py) -> /api/decision/news, advisory only; worst normal gap is the 05:00->06:00 ET weekday hourly->30min handoff (~1h)"),
+    # [decision-catalysts 2026-09-14] catalyst -> ticker -> industry/sector propagation factor (pipeline/decision/factor_catalysts.py -> /api/decision/catalysts) — ADVISORY, not in market blend until backtest fits it
+    ("decision_catalysts",  f"{H}/.openclaw/data/decision/factors/catalysts.json",        ALL,  26, "catalyst propagation factor: :20/:50 06-19 ET weekdays + 22:20 weekdays + 08:05 Sat/Sun; longest normal gap Sat 08:05 -> Sun 08:05 = 24h"),
     # [market-hours 2026-09-14] weekend/pre-/after-hours session-price consistency (pipeline/market_hours/)
     ("session_prices",      f"{H}/.openclaw/data/market-hours/session_prices.json",     ALL,  10, "canonical KPI/marquee/console price+session producer — */5min PRE(4-9:30)/AFTER(16-20) weekdays, hourly weekends; longest normal gap is weekday CLOSED overnight ~8h"),
     ("session_consistency", f"{H}/.openclaw/data/market-hours/consistency.json",        ALL,  10, "session_prices.py vs /api/market, /api/crypto, mc-market-cache.json, console symbols.json — every 30min PRE/AFTER weekdays, hourly weekends"),

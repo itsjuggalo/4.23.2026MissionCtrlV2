@@ -21,6 +21,8 @@ Subscription/OAuth-billed. Never touches the signal stream. Run with ~/.venv/bin
 from __future__ import annotations
 
 import argparse
+import json
+import os
 import sys
 from datetime import datetime
 from zoneinfo import ZoneInfo
@@ -170,6 +172,127 @@ def _polymarket_line() -> str:
         return ""
 
 
+# --------------------------------------------------------------------------- catalyst read-through
+# 2026-09-14: catalysts-core's factor_catalysts.py writes an advisory Form4/8-K/earnings/
+# analyst propagation read to factors/catalysts.json (industry + sector + symbol composites,
+# each carrying sources[] naming the driving ticker:event). Surfaced here read-only — never
+# wired to a live cycle/sizing/gate, and `catalysts` is NOT in weights.json's market blend.
+CATALYSTS_JSON = Path(os.environ.get(
+    "CATALYSTS_JSON", str(Path.home() / ".openclaw" / "data" / "decision" / "factors" / "catalysts.json")))
+CATALYST_MAX_AGE_H = 26          # producer runs every 1h; >26h means the cron is broken, not "no news"
+CATALYST_MIN_SCORE = 0.15        # spec §4: only industries clearing ±0.15
+CATALYST_MAX_ROWS = 3
+
+
+def _load_catalysts() -> dict | None:
+    """Read factors/catalysts.json (CATALYSTS_JSON env override, for tests/fixtures). Returns
+    None if the file is missing or stale (>26h) — callers print nothing rather than a broken
+    block, per spec §4."""
+    try:
+        data = json.loads(CATALYSTS_JSON.read_text())
+    except Exception:
+        return None
+    try:
+        as_of = datetime.fromisoformat(str(data.get("asOf", "")))
+        if as_of.tzinfo is None:
+            as_of = as_of.replace(tzinfo=ET)
+        age_h = (datetime.now(ET) - as_of.astimezone(ET)).total_seconds() / 3600
+        if age_h > CATALYST_MAX_AGE_H:
+            return None
+    except Exception:
+        return None
+    return data if isinstance(data, dict) else None
+
+
+def _catalyst_top_industries(data: dict, n: int = CATALYST_MAX_ROWS):
+    industries = data.get("industries") or {}
+    rows = [(name, info) for name, info in industries.items()
+            if isinstance(info, dict) and abs(float(info.get("score", 0) or 0)) >= CATALYST_MIN_SCORE]
+    rows.sort(key=lambda kv: -abs(float(kv[1].get("score", 0) or 0)))
+    return rows[:n]
+
+
+def _catalyst_source_note(data: dict, info: dict) -> str:
+    """Best driving-event note for an industry row. The industries block only carries
+    'TICKER:EVENT_ID' ids in sources[] — the human-readable note lives on the source
+    symbol's own signal entry in symbols{}."""
+    symbols = data.get("symbols") or {}
+    for src in (info.get("sources") or []):
+        tkr, _, ev = str(src).partition(":")
+        sym = symbols.get(tkr) or {}
+        for sig in (sym.get("signals") or []):
+            if sig.get("name") == ev and sig.get("note"):
+                return f"{tkr} {sig['note']}"
+        if ev:
+            return f"{tkr} {ev}"
+    return "read-through"
+
+
+def _catalyst_your_name_rows(data: dict):
+    """Mike's holdings + watchlist (no index padding) that the factor actually scored."""
+    try:
+        from lib.portfolio import personal_tickers
+        mine = personal_tickers()
+    except Exception:
+        mine = []
+    symbols = data.get("symbols") or {}
+    rows = []
+    for t in mine:
+        s = symbols.get(str(t).upper())
+        if not s:
+            continue
+        rows.append((str(t).upper(), float(s.get("score", 0) or 0), str(s.get("role", "peer"))))
+    return rows
+
+
+def _catalyst_block() -> str:
+    """Desk-copy block for build(): industries clearing ±0.15 (max 3) + Mike's scored names."""
+    data = _load_catalysts()
+    if data is None:
+        return ""
+    top = _catalyst_top_industries(data)
+    lines = ["\n🧭 **CATALYST READ-THROUGH** (Form 4 / 8-K / earnings / analysts, 45d decay):"]
+    if not top:
+        lines.append("• No sector read-through above ±0.15 today.")
+    else:
+        for name, info in top:
+            score = float(info.get("score", 0) or 0)
+            note = _catalyst_source_note(data, info)
+            members = info.get("members")
+            peers = (f" · {members} peers {'lifted' if score > 0 else 'pressured'}"
+                     if members else "")
+            lines.append(f"• {name} {score:+.2f} — {note}{peers}")
+    rows = _catalyst_your_name_rows(data)
+    if rows:
+        names_line = " · ".join(f"{t} {s:+.2f} ({r})" for t, s, r in rows)
+        lines.append(f"• Your names: {names_line}")
+    return "\n".join(lines)
+
+
+def _catalyst_phone_line() -> str:
+    """One plain-English sentence for build_phone()."""
+    data = _load_catalysts()
+    if data is None:
+        return ""
+    top = _catalyst_top_industries(data, n=2)
+    if not top:
+        return "🧭 No sector read-through above ±0.15 today."
+    parts = []
+    for name, info in top:
+        score = float(info.get("score", 0) or 0)
+        word = "looks strong" if score > 0 else "looks soft"
+        note = _catalyst_source_note(data, info)
+        parts.append(f"{name} {word} ({note})")
+    sentence = "; ".join(parts)
+    rows = _catalyst_your_name_rows(data)
+    actionable = [r for r in rows if abs(r[1]) >= CATALYST_MIN_SCORE]
+    if actionable:
+        tail = "Worth a look: " + ", ".join(f"{t} {s:+.2f}" for t, s, _ in actionable) + "."
+    else:
+        tail = "Nothing on your names needs action."
+    return f"🧭 {sentence}. {tail}"
+
+
 def build() -> str:
     stamp = datetime.now(ET).strftime("%a %b %-d %-I:%M %p ET")
     names = top_tickers_str(6)
@@ -207,6 +330,10 @@ def build() -> str:
             lines.append("\n" + news)
     except Exception:
         pass
+
+    cat_block = _catalyst_block()
+    if cat_block:
+        lines.append(cat_block)
 
     lines.append(f"\n_One overview · specifics land in #flow-picks · risk cap ${RISK_CAP}/trade · auto-posted 8:15 ET._")
     return "\n".join(lines)
@@ -341,6 +468,10 @@ def build_phone() -> str:
     elif orders:
         lines.append(f"👉 Plan: {orders}")
 
+    cat_line = _catalyst_phone_line()
+    if cat_line:
+        lines.append(cat_line)
+
     one = _one_contract_line()
     if one:
         lines.append(one)
@@ -369,8 +500,16 @@ def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--channel", default="mission-control")
     ap.add_argument("--print", action="store_true", dest="print_only")
+    ap.add_argument("--dry-run", action="store_true",
+                     help="print both desk (build) and phone (build_phone) copies, send nothing")
     ap.add_argument("--telegram", action="store_true", help="also mirror via fleet daily_briefs")
     a = ap.parse_args()
+    if a.dry_run:
+        print("=== DESK (build) ===")
+        print(build())
+        print("\n=== PHONE (build_phone) ===")
+        print(build_phone())
+        return
     msg = build()
     if a.print_only:
         print(msg)
