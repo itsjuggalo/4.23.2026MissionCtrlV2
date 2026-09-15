@@ -29,12 +29,14 @@ ET = ZoneInfo("America/New_York")
 
 # The lanes Mike actually reads. Deliberately NOT every entry in tg_fleet.FLEET — the relay
 # and one-shot bots would just get a ruler nobody sees.
+# system_health dropped 2026-09-15 (telegram lane charter): that lane is restricted to
+# DEAD/heal-failed/cron-failure/BLIND alerts only — a daily divider is routine furniture,
+# not a failure, so it doesn't belong there even silent. See tg_fleet.FLEET["system_health"].
 LANES = [
     "trading_command",   # what do I do right now
     "flow_signals",      # positions I'm already in
     "flow_digest",       # the 30-min digest + BEST-3
     "research_desk",     # Trading Lab (the learning lane)
-    "system_health",     # infra
     "life_wellness",     # life + important mail
 ]
 

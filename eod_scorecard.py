@@ -1,7 +1,9 @@
 #!/usr/bin/env python3
-"""eod_scorecard.py — end-of-day SCORECARD to #flow-picks: grades of today's flow
-picks (did the underlying move the way the pick implied?) + a catalyst/SNR
-read-through + any /pick took/skip outcomes. Read-only. Cron 4:10 ET.
+"""eod_scorecard.py — end-of-day SCORECARD to #flow-picks: grades of today's picks
+across THREE live, free sources (flow_picks_post's logged picks, setup_scanner +
+explosion_score's self-logged alerts, and today's structure-rebound triggers) + a
+catalyst/SNR read-through. Read-only. Cron 4:35 ET (moved from 4:10 2026-09-15 so
+best3_grader.py --eod, 4:20 ET, has already rebuilt the scoreboard first).
 
 2026-09-15: dropped the book-equity preamble (lib.portfolio.equity_day_pnl() +
 real_money_holdings() — Alpaca paper + RH/Coinbase real-money) — doctrine
@@ -9,11 +11,31 @@ retirement (2026-08-11 Alpaca, 2026-09-12 portfolio views). The grading half
 (did the pick's direction pan out) was always fine and stays. See docs/audits/
 telegram-sweep-2026-09-15/trade-lanes.md Lane 2.
 
+2026-09-15: broadened grading beyond flow_picks_post's cache (real but sometimes
+thin) with two more free, live sources so a quiet flow day doesn't read as "no
+picks" — setup_scanner/explosion_score alerts (signal_outcomes.sqlite `alerts`
+table, graded here against a free Yahoo close since the nightly 20:15 ET grading
+job runs AFTER this cron) and today's structure-rebound triggers (D5's pinned
+sketches in rebound_ping_state.json).
+
+2026-09-15: dropped the dead "/pick took/skip" block (`~/.openclaw/data/
+trade_journal.jsonl`, 0 bytes since 2026-06-15). Root cause is NOT journal_sync.py
+(that script writes a same-named but unrelated `trade_journal` TABLE in
+missionctrl's dashboard_history.sqlite, from Alpaca fills — never this JSONL file
+at all). The actual writer is aime_discord_bot.py's `_journal()`, called from the
+persistent "took"/"skip" button View on its interactive Discord pick cards; that
+bot (`aime-discord` PM2) is still online, so this reads as Mike having stopped
+using that specific Discord interaction (migrated to Telegram) rather than a
+pipeline failure — nothing here needs Alpaca/holdings to fix, and nothing to
+repoint to; the feature is simply retired until/unless someone wires an
+equivalent Telegram-side took/skip log.
+
 Run with ~/.venv/bin/python (yfinance for underlying EOD prices).
 """
 from __future__ import annotations
 
 import json
+import sqlite3
 import sys
 import urllib.request
 from datetime import datetime
@@ -29,8 +51,14 @@ from lib.discord_threading import make_pick_key, post_to_pick_thread_bot  # noqa
 ET = ZoneInfo("America/New_York")
 SYNTH_TOKEN_FILE = Path.home() / ".openclaw" / "secrets" / "discord_synthcontrol_token"
 STATE = Path.home() / ".openclaw" / "state"
-JOURNAL = Path.home() / ".openclaw" / "data" / "trade_journal.jsonl"
 NEWS_SNR_URL = "http://localhost:3000/api/news-snr?min=65"
+# 2026-09-15: setup_scanner + explosion_score self-log every alert here (free,
+# live, no Alpaca) — see signal_outcomes.py / setup_scanner.py's log_alert() calls.
+SIGNAL_OUTCOMES_DB = Path("/AIWorkWSL/trading/analysis/signal_outcomes.sqlite")
+SCANNER_SOURCES = ("setup_scanner", "explosion")
+# Shared with pipeline/decision/rebound_setup.py (D5, 2026-09-15) — the same file
+# that pins each triggered symbol's contract sketch.
+REBOUND_PING_STATE = Path.home() / ".openclaw" / "data" / "decision" / "rebound_ping_state.json"
 
 
 def _snr_corroboration_line() -> str:
@@ -66,6 +94,25 @@ def _last(ticker: str):
         return None
 
 
+CRYPTO_SYMS = {"BTC", "ETH", "SOL"}   # setup_scanner/explosion_score's --crypto universe
+
+
+def _last_any(symbol: str):
+    """Like _last(), but routes a known crypto ticker to a free Coinbase spot quote —
+    yfinance's bare 'BTC' resolves to the Grayscale Bitcoin Mini Trust ETF, not
+    bitcoin (same gotcha setup_scanner's own test suite guards against:
+    test_btc_skips_the_equity_chart_check). Grading a crypto alert against the ETF
+    price produced a nonsense -99.96% move before this fix."""
+    if symbol.upper() in CRYPTO_SYMS:
+        try:
+            from lib.portfolio import _crypto_prices   # market-data spot quote only — no holdings/account call
+            px = _crypto_prices().get(symbol.upper())
+            return float(px) if px else None
+        except Exception:
+            return None
+    return _last(symbol)
+
+
 def _grade_picks():
     date = datetime.now(ET).strftime("%Y-%m-%d")
     path = STATE / f"flow_picks_log_{date}.jsonl"
@@ -95,6 +142,71 @@ def _grade_picks():
         # call wants up, put wants down
         favorable = move if r.get("type", "C").upper() == "C" else -move
         out.append((r, (move, favorable, entry, now)))
+    return out
+
+
+def _grade_scanner_alerts():
+    """Today's setup_scanner + explosion_score alerts, self-logged (free, no Alpaca)
+    to signal_outcomes.sqlite's `alerts` table. Graded here against a free Yahoo
+    close — the nightly `signal_outcomes.py nightly` job (20:15 ET) that normally
+    fills in px_eod/reod runs AFTER this cron, so those columns aren't populated
+    yet at grading time. One row per symbol (earliest alert)."""
+    if not SIGNAL_OUTCOMES_DB.exists():
+        return []
+    date = datetime.now(ET).strftime("%Y-%m-%d")
+    try:
+        con = sqlite3.connect(f"file:{SIGNAL_OUTCOMES_DB}?mode=ro&immutable=0", uri=True, timeout=10)
+        placeholders = ",".join("?" * len(SCANNER_SOURCES))
+        rows = con.execute(
+            f"SELECT symbol, direction, grade, trigger, sent_ts FROM alerts "
+            f"WHERE day = ? AND source IN ({placeholders}) AND trigger IS NOT NULL "
+            f"ORDER BY sent_ts", (date, *SCANNER_SOURCES)).fetchall()
+        con.close()
+    except Exception as e:
+        print(f"[eod-scorecard] signal_outcomes read err: {e}", flush=True)
+        return []
+    out, seen, spot_cache = [], set(), {}
+    for symbol, direction, grade, trigger, _sent in rows:
+        if not symbol or symbol in seen or not trigger:
+            continue
+        seen.add(symbol)
+        if symbol not in spot_cache:
+            spot_cache[symbol] = _last_any(symbol)
+        now = spot_cache[symbol]
+        r = {"symbol": symbol, "direction": (direction or "LONG").upper(), "grade": grade}
+        if not now:
+            out.append((r, None))
+            continue
+        move = (now - trigger) / trigger * 100
+        favorable = move if r["direction"] != "SHORT" else -move
+        out.append((r, (move, favorable, trigger, now)))
+    return out
+
+
+def _grade_rebound_triggers():
+    """Structure-rebound setups that TRIGGERED today (D5's pinned contract sketches
+    in rebound_ping_state.json) — underlying move since the level it held. `stop`
+    (level minus the detector's tolerance) is the closest thing to an "entry" this
+    file has for a level-hold setup; a rebound call wants the underlying to move UP
+    off that level, so favorable == move."""
+    try:
+        state = json.loads(REBOUND_PING_STATE.read_text())
+    except Exception:
+        return []
+    today = datetime.now(ET).strftime("%Y-%m-%d")
+    out = []
+    for key, sketch in sorted((state.get("sketches") or {}).items()):
+        sym, _, trig_date = key.partition("|")
+        if trig_date != today or not sym or not isinstance(sketch, dict):
+            continue
+        level = sketch.get("stop")
+        now = _last(sym)
+        r = {"symbol": sym, "option": sketch.get("label")}
+        if not now or not level:
+            out.append((r, None))
+            continue
+        move = (now - level) / level * 100
+        out.append((r, (move, move, level, now)))
     return out
 
 
@@ -202,25 +314,36 @@ def main():
             lines.append(f"   {ic} {label} — underlying {entry:.2f}→{now:.2f} ({move:+.1f}%)")
         lines.append("_Grade = did the underlying move the pick's direction since it posted._")
     else:
-        lines.append("_No flow picks logged today._")
+        lines.append("_No flow-signal picks logged today._")
+
+    scanner_graded = _grade_scanner_alerts()
+    if scanner_graded:
+        wins = sum(1 for _, g in scanner_graded if g and g[1] > 0.3)
+        lines.append(f"\n**📡 Today's setup/explosion alerts — {wins}/{len(scanner_graded)} working:**")
+        for r, g in scanner_graded:
+            label = f"{r['symbol']} {r['direction']}"
+            if not g:
+                lines.append(f"   • {label} — no data")
+                continue
+            move, fav, entry, now = g
+            ic = "✅" if fav > 0.3 else ("❌" if fav < -0.3 else "➖")
+            lines.append(f"   {ic} {label} — {entry:.2f}→{now:.2f} ({move:+.1f}%)")
+
+    rebound_graded = _grade_rebound_triggers()
+    if rebound_graded:
+        lines.append(f"\n**🏗 Today's structure triggers ({len(rebound_graded)}):**")
+        for r, g in rebound_graded:
+            opt = f" · {r['option']}" if r.get("option") else ""
+            if not g:
+                lines.append(f"   • {r['symbol']}{opt} — no data")
+                continue
+            move, _fav, entry, now = g
+            ic = "✅" if move > 0.3 else ("❌" if move < -0.3 else "➖")
+            lines.append(f"   {ic} {r['symbol']}{opt} — held {entry:.2f}, now {now:.2f} ({move:+.1f}%)")
 
     snr = _snr_corroboration_line()
     if snr:
         lines.append(snr)
-
-    # /pick took/skip decisions today
-    took, skip = [], []
-    if JOURNAL.exists():
-        for ln in JOURNAL.read_text().splitlines():
-            try:
-                r = json.loads(ln)
-                dt = datetime.fromisoformat(r["ts"]).astimezone(ET)
-                if dt.date() == datetime.now(ET).date():
-                    (took if r.get("action") == "took" else skip if r.get("action") == "skip" else []).append(r.get("ticker"))
-            except Exception:
-                pass
-    if took or skip:
-        lines.append(f"\n**Your calls:** ✅ took {', '.join(took) or '—'} · ❌ skipped {', '.join(skip) or '—'}")
 
     msg = "\n".join(lines)
     if "--print" in sys.argv or "--dry-run" in sys.argv:   # on-demand (/scorecard) or verify — return text, don't post

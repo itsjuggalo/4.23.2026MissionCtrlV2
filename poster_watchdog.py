@@ -1,10 +1,15 @@
 #!/usr/bin/env python3
 """poster_watchdog.py — dead-man check for the auto-posters. If a poster's heartbeat
 goes stale inside its active window (cron silently failed: ARIES down, yfinance error,
-key issue), ping #system-logs. Read-only. Cron every 20 min.
+key issue), ping the system_health Telegram lane. Read-only. Cron every 20 min.
+
+Gated via lib/alert_gate.py (2026-09-15 telegram lane charter fix) — fingerprint is the
+sorted set of currently-stale poster names, cooldown 6h, so a standing failure reminds
+once per 6h instead of re-alerting every 20-minute cron tick.
 """
 from __future__ import annotations
 
+import argparse
 import sys
 from datetime import datetime
 from zoneinfo import ZoneInfo
@@ -13,11 +18,14 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 import skill_to_discord as sd  # noqa: E402
 from lib.heartbeat import age_min, beat_epoch  # noqa: E402
+from lib.alert_gate import should_send, mark_sent  # noqa: E402
 
 ET = ZoneInfo("America/New_York")
+ALERT_GATE_KEY = "poster_watchdog"
+ALERT_REPEAT_AFTER = 6 * 3600
 
 
-def main():
+def main(dry_run: bool = False):
     now = datetime.now(ET)
     h, weekday = now.hour, now.weekday() < 5
     stale = []
@@ -58,14 +66,23 @@ def main():
         stamp = now.strftime("%-I:%M %p ET")
         msg = "🔧 **CRON HEALTH — poster(s) stale** · " + stamp + "\n" + "\n".join("• " + s for s in stale) + \
               "\n_Check ~/02_DATA/skillcron.log. Likely ARIES down, yfinance/Coinbase error, or a key issue._"
+        fp = "|".join(sorted(s.split(" — ")[0].strip("*") for s in stale))
+        ok, why = should_send(ALERT_GATE_KEY, fp, repeat_after=ALERT_REPEAT_AFTER)
+        if dry_run:
+            print(f"[poster-watchdog] DRY-RUN would-send={ok} ({why}) fp={fp}\n{msg}", flush=True)
+            return
+        if not ok:
+            print(f"[poster-watchdog] SUPPRESS ({why}) fp={fp}", flush=True)
+            return
         # Discord disabled 2026-06-16 (Mike: ops off Discord). Watches the LIVE flow/
         # crypto/boba/jazzy posters → route to Telegram (system_health) instead.
         try:
             import sys as _sys
             _sys.path.insert(0, "/home/itsju/scripts")
             from lib.notify import tg_push
-            tg_push("⚠️ " + msg, "system_health", loud=False, html=False,
-                    fallback_token_file="telegram-ping-bot-token")
+            if tg_push("⚠️ " + msg, "system_health", loud=False, html=False,
+                       fallback_token_file="telegram-ping-bot-token"):
+                mark_sent(ALERT_GATE_KEY, fp)
         except Exception as _e:
             print(f"[poster-watchdog] telegram alert failed: {_e}", flush=True)
         print(f"[poster-watchdog] ALERT: {len(stale)} stale", flush=True)
@@ -74,4 +91,7 @@ def main():
 
 
 if __name__ == "__main__":
-    main()
+    ap = argparse.ArgumentParser()
+    ap.add_argument("--dry-run", action="store_true", help="print what would be sent, send nothing")
+    a = ap.parse_args()
+    main(dry_run=a.dry_run)
