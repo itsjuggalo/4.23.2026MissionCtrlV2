@@ -49,6 +49,7 @@ from zoneinfo import ZoneInfo
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from lib.http_retry import request as http_request, CAT_RATELIMIT  # noqa: E402
+from lib.alert_gate import should_send, mark_sent  # noqa: E402
 
 ET = ZoneInfo("America/New_York")
 SEC = Path.home() / ".openclaw" / "secrets"
@@ -85,6 +86,16 @@ NEWS_KEYWORDS = ("tariff", "trump", "truth social", "fed ", "federal reserve",
                  "rate hike", "emergency", "halt", "war ", "strike on", "nuclear",
                  "invasion", "default", "bank failure", "circuit breaker", "china")
 DRY = os.environ.get("DRY") == "1"
+
+# 2026-09-15 — free-first sourcing. Alpaca's SPY bars/news (data.alpaca.markets) have been
+# 504-timing-out under the shared free-tier load, leaving this detector blind while it kept
+# hitting the same dead endpoint every 2 min. Yahoo's chart endpoint (already used below for
+# VIX/BTC, no key, one request) is now PRIMARY for SPY bars; the missionctrl market-news API
+# (same free aggregator NewsPanel reads) is PRIMARY for headlines. Alpaca is fallback only —
+# it's still a fine free market-data feed per doctrine, just not the first call any more.
+LOCAL_NEWS_URL = "http://localhost:3000/api/market-news"
+BLIND_ALERT_KEY = "shock_guard_blind"
+BLIND_ALERT_REPEAT_SEC = 6 * 3600   # alert_gate cooldown for the SHOCK GUARD BLIND ping
 
 UA = {"User-Agent": "Mozilla/5.0 (MissionControl shock-guard)"}
 
@@ -156,29 +167,63 @@ def _is_closing_bar(ts_iso: str) -> bool:
     return dt.hour >= 16 or (dt.hour == 15 and dt.minute >= 59)
 
 
-def check_spy_z() -> dict:
-    """z-score of the latest 1-min SPY return vs the trailing 20 bars."""
+def _yahoo_spy_bars() -> list[dict]:
+    """SPY 1-min bars from Yahoo's free chart endpoint (no key, one request) — primary
+    source. Shaped like Alpaca's bars ({"t": iso_ts, "c": close}) so the z-score/
+    closing-bar logic below doesn't care which source fed it."""
+    d = _get("https://query1.finance.yahoo.com/v8/finance/chart/SPY"
+             "?interval=1m&range=1d&includePrePost=false")
+    try:
+        result = d["chart"]["result"][0]
+        ts = result["timestamp"]
+        closes = result["indicators"]["quote"][0]["close"]
+    except (TypeError, KeyError, IndexError):
+        return []
+    bars = []
+    for t, c in zip(ts, closes):
+        if c is None:
+            continue
+        iso = datetime.fromtimestamp(t, tz=ZoneInfo("UTC")).strftime("%Y-%m-%dT%H:%M:%SZ")
+        bars.append({"t": iso, "c": c})
+    return bars[-40:]
+
+
+def _alpaca_spy_bars() -> list[dict]:
+    """SPY 1-min bars from Alpaca — fallback only, when Yahoo above comes back empty."""
     key, sec_ = _secret("alpaca-boba-key-id"), _secret("alpaca-boba-secret")
     if not key or not sec_:
-        return {"z": None}
+        return []
     start = datetime.now(tz=ZoneInfo("UTC")).timestamp() - 40 * 60
     start_iso = datetime.fromtimestamp(start, tz=ZoneInfo("UTC")).strftime("%Y-%m-%dT%H:%M:%SZ")
     d = _get("https://data.alpaca.markets/v2/stocks/SPY/bars"
              f"?timeframe=1Min&limit=40&feed=iex&start={start_iso}",
              headers={"APCA-API-KEY-ID": key, "APCA-API-SECRET-KEY": sec_})
-    bars = (d or {}).get("bars") or []
+    return (d or {}).get("bars") or []
+
+
+def check_spy_z() -> dict:
+    """z-score of the latest 1-min SPY return vs the trailing 20 bars. Yahoo (free, no
+    key) is the primary source — one request/tick; Alpaca is only tried when Yahoo comes
+    back empty, so the guard survives Alpaca's 504 windows instead of going blind."""
+    bars = _yahoo_spy_bars()
+    source = "yahoo"
+    if not bars:
+        bars = _alpaca_spy_bars()
+        source = "alpaca"
+    blind = not bars   # both sources came back empty this tick — a real outage
     if EXCLUDE_CLOSING_BAR:
         bars = [b for b in bars if not _is_closing_bar(b.get("t"))]
     closes = [b["c"] for b in bars if b.get("c")]
     if len(closes) < 15:
-        return {"z": None}
+        return {"z": None, "source": source if bars else None, "blind": blind}
     rets = [(b - a) / a for a, b in zip(closes, closes[1:])]
     last, hist = rets[-1], rets[:-1]
     sd = statistics.pstdev(hist)
     if not sd:
-        return {"z": None}
+        return {"z": None, "source": source, "blind": blind}
     z = (last - statistics.fmean(hist)) / sd
-    return {"z": round(z, 2), "last_ret_pct": round(last * 100, 3)}
+    return {"z": round(z, 2), "last_ret_pct": round(last * 100, 3),
+            "source": source, "blind": blind}
 
 
 def check_btc() -> dict:
@@ -189,25 +234,66 @@ def check_btc() -> dict:
     return {"btc_15m_pct": round(pct, 2)}
 
 
-def check_news(state: dict) -> list[str]:
-    """Alpaca news since the last poll, keyword-filtered. Returns headlines."""
+def _local_news() -> list[dict] | None:
+    """missionctrl's free news aggregator — primary source. None on fetch failure
+    (distinct from an empty-but-successful [] response)."""
+    d = _get(LOCAL_NEWS_URL, timeout=8)
+    if d is None:
+        return None
+    return d.get("news") or []
+
+
+def _alpaca_news(state: dict) -> list[dict] | None:
+    """Alpaca news — fallback only, when the local feed above is unreachable."""
     key, sec_ = _secret("alpaca-boba-key-id"), _secret("alpaca-boba-secret")
     if not key or not sec_:
-        return []
+        return None
     params = {"limit": "25", "sort": "desc"}
-    if state.get("news_since"):
-        params["start"] = state["news_since"]
+    if state.get("news_since_alpaca"):
+        params["start"] = state["news_since_alpaca"]
     d = _get("https://data.alpaca.markets/v1beta1/news?" + urllib.parse.urlencode(params),
              headers={"APCA-API-KEY-ID": key, "APCA-API-SECRET-KEY": sec_})
-    items = (d or {}).get("news") or []
+    if d is None:
+        return None
+    items = d.get("news") or []
     if items:
-        state["news_since"] = items[0].get("created_at") or state.get("news_since")
-    hits = []
+        state["news_since_alpaca"] = items[0].get("created_at") or state.get("news_since_alpaca")
+    return items
+
+
+def check_news(state: dict) -> tuple[list[str], bool]:
+    """Keyword-filtered headlines since the last poll. Local `/api/market-news` (free,
+    no key) is primary; Alpaca news is the fallback only. Returns (headlines,
+    blind) — blind means BOTH sources failed to return data this tick (an outage),
+    not just 'nothing new/keyword-matching', which is the normal case almost every run."""
+    items = _local_news()
+    if items is None:
+        items = _alpaca_news(state)
+    blind = items is None
+    items = items or []
+
+    # De-dup against the newest publish time we've already seen. The local feed has no
+    # server-side "since" cursor (unlike Alpaca's old `start` param), so filtering happens
+    # here instead — same net effect: only headlines newer than last poll count as fresh.
+    seen = state.get("news_seen_at")
+    newest = seen
+    fresh = []
     for it in items:
+        ts = it.get("publishedAt") or it.get("created_at")
+        if seen and ts and ts <= seen:
+            continue
+        fresh.append(it)
+        if ts and (not newest or ts > newest):
+            newest = ts
+    if newest:
+        state["news_seen_at"] = newest
+
+    hits = []
+    for it in fresh:
         head = (it.get("headline") or "").lower()
         if any(k in head for k in NEWS_KEYWORDS):
             hits.append(it.get("headline", "")[:140])
-    return hits[:5]
+    return hits[:5], blind
 
 
 # --------------------------------------------------------------------------- #
@@ -241,6 +327,37 @@ def telegram(text: str, loud: bool) -> None:
             f"https://api.telegram.org/bot{token}/sendMessage", data=data), timeout=20)
     except Exception as e:  # noqa: BLE001
         print(f"[guard] telegram failed: {e}", file=sys.stderr)
+
+
+def alert_blind(reasons: list[str]) -> None:
+    """One gated 'SHOCK GUARD BLIND' ping to system_health when a detector's primary AND
+    fallback both failed on the same tick — replaces the old silent-empty-dict behavior
+    that let the CRISIS/HALT trigger run dark for a whole session with nothing surfaced
+    to Mike outside a `tail shock_guard.log`. Fingerprinted on the set of failed sources
+    (via lib.alert_gate) so a standing outage reminds once per BLIND_ALERT_REPEAT_SEC
+    instead of firing every 2 minutes."""
+    fp = "|".join(sorted(reasons))
+    ok, why = should_send(BLIND_ALERT_KEY, fp, repeat_after=BLIND_ALERT_REPEAT_SEC)
+    text = ("🩶 <b>SHOCK GUARD BLIND</b>\n" + "\n".join(f"• {r}" for r in reasons) +
+            "\n\nCRISIS/HALT detection is degraded until this clears — both the free "
+            "source and the Alpaca fallback failed on the same tick.")
+    if DRY:
+        print(f"DRY blind-alert (gate={ok}, {why}):\n{text}\n")
+        return
+    if not ok:
+        log_event("blind_gated", {"reasons": reasons, "why": why})
+        return
+    sent = None
+    try:
+        sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+        from lib.notify import tg_push
+        sent = tg_push(text, "system_health", loud=True,
+                       fallback_token_file="telegram-ping-bot-token")
+    except Exception as e:  # noqa: BLE001
+        print(f"[guard] blind-alert send failed: {e}", file=sys.stderr)
+    if sent:
+        mark_sent(BLIND_ALERT_KEY, fp)
+    log_event("blind_alert", {"reasons": reasons, "sent": bool(sent)})
 
 
 def log_event(kind: str, detail: dict) -> None:
@@ -336,15 +453,29 @@ def main() -> int:
     vix_d = check_vix()
     btc_d = check_btc()
     spy_d = check_spy_z() if full else {"z": None}
+    news_blind = False
     # Throttle the news poll to NEWS_POLL_SEC; reuse the last headlines in between so a CRISIS
     # confirmed on price mid-window still carries the headline context. FORCE_LEVEL/DRY always poll.
     if os.environ.get("FORCE_LEVEL") or DRY or \
             time.time() - st.get("last_news_poll", 0) >= NEWS_POLL_SEC:
-        headlines = check_news(st)
+        headlines, news_blind = check_news(st)
         st["last_news_poll"] = time.time()
         st["last_headlines"] = headlines
     else:
         headlines = st.get("last_headlines", [])
+
+    # Double-failure guard (2026-09-15): if BOTH the primary free source and the Alpaca
+    # fallback came back empty this tick, the detector isn't "quiet" — it's blind. Ping
+    # once (gated, 6h cooldown) instead of the old silent-empty-dict behavior, which let
+    # the CRISIS/HALT trigger run dark for a full session with nothing in the log Mike
+    # would ever see outside a tail of shock_guard.log.
+    blind_reasons = []
+    if full and spy_d.get("blind"):
+        blind_reasons.append("SPY bars (Yahoo + Alpaca both empty)")
+    if news_blind:
+        blind_reasons.append("news (localhost market-news + Alpaca both failed)")
+    if blind_reasons:
+        alert_blind(blind_reasons)
 
     vix = vix_d.get("vix")
     z = spy_d.get("z")
