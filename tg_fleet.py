@@ -179,16 +179,24 @@ CHARTER = {
         owns=["scored pre-explosion candidates (own grader floor)", "runner-watch list"],
         never=["setups already sent (cite trigger_id instead)"],
         cadence="09:50 + hourly 10-15 ET Mon-Fri (explosion_score); 08:35 + :20 10-15 ET (runner_radar)",
-        cadence_min=60,
+        # cadence_min is 24h here specifically for the floor-file staleness check below
+        # (it only gates FILE-type reads — the two API URLs above are checked by HTTP
+        # status only, unaffected by this value); team-lead verified live that's the
+        # realistic write cadence to gate on, not the hourly script-run cadence in the
+        # `cadence` label above.
+        cadence_min=24 * 60,
         # Round 2: D3 landed here too (dead /api/portfolio-rh call deleted, risk_cap.py
-        # import instead). explosion_score.py also imports mtf_rebound as mr. No
-        # `data/explosion_score_floor.json` file exists (checked) — its score floor is
-        # computed at runtime from the signal_outcomes log and printed, not persisted to
-        # a path worth freshness-checking; dropped the runner_radar.log guess too (not
-        # actually read as an input by explosion_score.py — verified via grep).
+        # import instead). explosion_score.py also imports mtf_rebound as mr.
+        # Round 3 correction (team-lead, 2026-09-15): explosion_score_floor.json DOES
+        # exist now (shipped by the sibling agent after round 2's check, confirmed live
+        # — score_floor(), FLOOR_OUT = data/explosion_score_floor.json) — it's an
+        # OUTPUT explosion_score.py writes from signal_outcomes.sqlite each run, not an
+        # input it reads back, but tracking its freshness is still a legitimate signal
+        # that the floor-computation half of the pipeline last succeeded. Re-added.
         reads=[
             "http://localhost:3000/api/mtf-ta?symbol=SPY",
             "http://localhost:3000/api/rebound-setup?symbol=SPY",
+            "/AIWorkWSL/trading/analysis/data/explosion_score_floor.json",
         ],
         # explosion_score.py's real flag is also `--dry` (same bare-sys.argv pattern as
         # setup_scanner.py, same wrong-flag-would-silently-run-live risk — fixed here
