@@ -183,11 +183,22 @@ def _afford_spread(p, risk_cap):
         return None
     cost = s.get("cost_per")
     try:
-        if risk_cap and cost is not None and float(cost) <= float(risk_cap):
+        # < $5 per spread contract = a stale/one-sided quote (e.g. the $1 CRCL $130/$135 seen
+        # 2026-09-16) — never headline that as a BUY; _verdict flags it instead.
+        if risk_cap and cost is not None and 5.0 <= float(cost) <= float(risk_cap):
             return s
     except Exception:
         pass
     return None
+
+
+def _spread_suspect(p):
+    """True when the pipeline's spread quote is too cheap to be real (< $5 per contract)."""
+    s = p.get("spread")
+    try:
+        return isinstance(s, dict) and s.get("cost_per") is not None and float(s["cost_per"]) < 5.0
+    except Exception:
+        return False
 
 
 def _spread_pick_line(p, s):
@@ -221,6 +232,9 @@ def _verdict(p, risk_cap=None):
         if s:   # pipeline's debit spread fits the cap → an actual play, not a SKIP
             return (f"🟢 BUY SPREAD — naked {_money(p.get('per_contract'))} is over cap; "
                     f"the {_money(s.get('cost_per'))} debit spread fits")
+        if _spread_suspect(p):
+            return (f"⏳ SKIP — naked {_money(p.get('per_contract'))} is over the $400 cap; "
+                    f"spread quote ({_money(p['spread'].get('cost_per'))}) looks stale — verify in RH")
         return f"⏳ SKIP — 1 contract ({_money(p.get('per_contract'))}) is over the $400 cap"
     return base
 
@@ -439,9 +453,9 @@ def book():
         opened = str(r.get("opened_at") or "")[:10]
         stop, t1 = r.get("stop"), r.get("t1")
         out.append(row(r.get("symbol"), head, _fmt_exp(r.get("expiry")),
-                       f"in {_money(r.get('entry'))}",
-                       f"stop {_money(stop)}" if isinstance(stop, (int, float)) else None,
-                       f"T1 {_money(t1)}" if isinstance(t1, (int, float)) else None,
+                       f"in {_px(r.get('entry'))}",
+                       f"stop {_px(stop)}" if isinstance(stop, (int, float)) else None,
+                       f"T1 {_px(t1)}" if isinstance(t1, (int, float)) else None,
                        f"since {opened}" if opened else None,
                        glyph="▸"))
     out.append(footer("exit levels ping on Trading Command (decipher exit advisor) · /pick for new ideas"))
