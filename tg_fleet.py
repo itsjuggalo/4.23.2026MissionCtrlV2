@@ -22,7 +22,7 @@ import os
 import sqlite3
 import sys
 import urllib.parse
-import urllib.request
+import urllib.request, urllib.error
 
 import requests
 
@@ -505,20 +505,42 @@ def set_token(fn, tok):
         con.close()
 
 
-def send(fn, msg):
+def _strip_html(msg):
+    """Plain-text fallback for an HTML-mode message Telegram refused to parse."""
+    import html as _html, re as _re
+    return _html.unescape(_re.sub(r"</?(b|i|u|s|code|pre|a)(\s[^>]*)?>", "", msg))
+
+
+def send(fn, msg, html=False):
+    """Post `msg` to Mike's chat as `fn`. html=True → parse_mode=HTML (callers must escape
+    dynamic text with tg_format.esc). If Telegram rejects the markup the message is re-sent
+    as plain text with the tags stripped so a formatting slip never drops a trading ping.
+    (2026-09-15 — Telegram message-format sweep.)"""
     tok = token(fn)
     if not tok:
         print(f"no token for {fn}"); return 1
     chat = open(CHAT_FILE).read().strip()
     import urllib.parse
-    data = urllib.parse.urlencode({"chat_id": chat, "text": msg,
-                                   "disable_web_page_preview": "true"}).encode()
-    try:
-        r = json.load(urllib.request.urlopen(f"https://api.telegram.org/bot{tok}/sendMessage", data=data, timeout=15))
-        print("sent" if r.get("ok") else f"fail: {r.get('description')}")
-        return 0 if r.get("ok") else 1
-    except Exception as e:
-        print(f"send error: {e}"); return 1
+    def _post(text, mode):
+        d = {"chat_id": chat, "text": text, "disable_web_page_preview": "true"}
+        if mode:
+            d["parse_mode"] = mode
+        data = urllib.parse.urlencode(d).encode()
+        try:
+            return json.load(urllib.request.urlopen(f"https://api.telegram.org/bot{tok}/sendMessage", data=data, timeout=15))
+        except urllib.error.HTTPError as e:  # Telegram returns 400 + JSON for parse errors
+            try:
+                return json.loads(e.read().decode())
+            except Exception:
+                return {"ok": False, "description": str(e)}
+        except Exception as e:
+            return {"ok": False, "description": str(e)}
+    r = _post(msg, "HTML" if html else None)
+    if not r.get("ok") and html and "parse" in str(r.get("description", "")).lower():
+        print(f"html rejected ({r.get('description')}) — resending plain")
+        r = _post(_strip_html(msg), None)
+    print("sent" if r.get("ok") else f"fail: {r.get('description')}")
+    return 0 if r.get("ok") else 1
 
 
 def _resolve(fn):
@@ -597,6 +619,8 @@ if __name__ == "__main__":
         sys.exit(0 if t else 1)
     elif cmd == "send" and len(a) >= 3:
         sys.exit(send(a[1], " ".join(a[2:])))
+    elif cmd == "sendhtml" and len(a) >= 3:          # HTML parse mode (tg_format.py output)
+        sys.exit(send(a[1], " ".join(a[2:]), html=True))
     elif cmd == "sendfile" and len(a) >= 3:
         sys.exit(send_upload(a[1], a[2], a[3] if len(a) > 3 else "", as_doc=True))
     elif cmd == "sendmedia" and len(a) >= 3:
