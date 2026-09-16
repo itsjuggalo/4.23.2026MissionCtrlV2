@@ -701,7 +701,7 @@ def run_bot(botkey):
                             ask_local(quantum_tg.greeks_prompt(arg)), 9))
                     else:
                         if not tg("sendMessage", chat_id=chat_id, text=quantum_tg.greeks(),
-                                  parse_mode="Markdown").get("ok"):
+                                  parse_mode="HTML").get("ok"):
                             tg("sendMessage", chat_id=chat_id, text=quantum_tg.greeks())
                     print(f"[{name}] /greeks {arg}", flush=True)
                     continue
@@ -736,7 +736,7 @@ def run_bot(botkey):
                     except Exception as e:
                         msg = f"[pick error] {e}"
                     if not tg("sendMessage", chat_id=chat_id, text=msg,
-                              parse_mode="Markdown").get("ok"):
+                              parse_mode="HTML").get("ok"):
                         tg("sendMessage", chat_id=chat_id, text=msg)  # plain fallback
                     print(f"[{name}] {cmd0}", flush=True)
                     continue

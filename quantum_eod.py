@@ -10,19 +10,19 @@ sys.path.insert(0, os.path.expanduser("~/scripts"))
 import quantum_tg as Q
 
 HALT = os.path.expanduser("~/.openclaw/quantum_HALT")
-TG   = os.path.expanduser("~/bin/tg-send-msg")
+TG_FLEET = os.path.expanduser("~/scripts/tg_fleet.py")
 
 
 def main():
     dry = "--dry-run" in sys.argv
     if os.path.exists(HALT) and not dry:
         return
-    msg = Q.eod()
+    msg = Q.eod()  # HTML (2026-09-15 format sweep — quantum_tg builders emit HTML now)
     if dry:
         print(msg)
         return
     try:
-        subprocess.run([TG, msg], timeout=20)
+        subprocess.run([sys.executable, TG_FLEET, "sendhtml", "trading_command", msg], timeout=20)
     except Exception as e:
         print(f"[eod] send failed: {e}", file=sys.stderr)
 

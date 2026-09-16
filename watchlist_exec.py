@@ -14,6 +14,7 @@ from pathlib import Path
 from zoneinfo import ZoneInfo
 sys.path.insert(0, "/home/itsju/scripts")
 sys.path.insert(0, "/home/itsju/scripts/lib")
+from tg_format import esc, b, hdr, section, row, footer, join
 
 SIGNALS = Path("/AIWorkWSL/web/missionctrl/data/watchlist-signals.json")
 SECRETS = Path.home() / ".openclaw" / "secrets"
@@ -51,31 +52,60 @@ def _discord(msg):
         print("discord err:", e); return False
 
 
-def _tg(msg):
+def _tg(msg, html=True):
     try:
         from tg_fleet import send as tg_send
-        tg_send("trading_command", msg); return True
+        tg_send("trading_command", msg, html=html); return True
     except Exception as e:
         print("tg err:", e); return False
 
 
-def fmt_swing(s):
-    star = "⭐ " if s.get("hiConv") else ""
+def fmt_swing(s, html=True):
     arrow = "⬆" if s["dir"] == "LONG" else "⬇"
-    return (f"{star}{arrow} SWING {s['dir']} · {s['symbol']} (score {s['score']}/10)\n"
-            f"   Entry {s['entry']} · Stop {s['stop']} · Target {s['target']} · {s['rTarget']}R")
+    glyph = "⭐" if s.get("hiConv") else "▸"
+    facts = (f"{s['dir']} {arrow}", f"score {s['score']}/10", f"entry {s['entry']}",
+             f"stop {s['stop']}", f"target {s['target']}", f"{s['rTarget']}R")
+    if html:
+        return row(s['symbol'], *facts, glyph=glyph)
+    return f"{glyph} **{s['symbol']}** · " + " · ".join(facts)  # Discord markdown
 
 
-def alert():
+def _swing_board(swing, auto, html):
+    """Shared structure for the Telegram (HTML) and Discord (plain/** markdown) renders —
+    same tickers/numbers, glyph-matched Hi-Conviction/Setups grouping either way."""
+    top = swing[:6]
+    stars = [s for s in top if s.get("hiConv")]
+    rest = [s for s in top if not s.get("hiConv")]
+    sub = f"swing drop {NOW_ET()} ET · {len(swing)} fired"
+    b_, foot = (b, footer) if html else (lambda x: f"**{x}**", lambda x: f"\n_{x}_")
+    lines = [hdr("📡", "Watchlist Signals", sub=sub) if html
+             else f"📡 {b_('WATCHLIST SIGNALS')} · {sub}"]
+    if stars:
+        lines.append(section("Hi-Conviction") if html else f"\n{b_('HI-CONVICTION')}")
+        lines += [fmt_swing(s, html) for s in stars]
+    if rest:
+        if stars:
+            lines.append(section("Setups") if html else f"\n{b_('SETUPS')}")
+        lines += [fmt_swing(s, html) for s in rest]
+    lines.append(foot("paper only · recommendation surface · auto-exec "
+                       + ("ARMED" if auto else "OFF")))
+    return join(*lines) if html else "\n".join(str(x) for x in lines if x)
+
+
+def alert(dry=False):
     d = load(); swing = d.get("swing", [])
     if not swing:
-        print("no swing signals to alert"); return
-    top = swing[:6]
-    body = (f"📡 Watchlist Signals · swing drop {NOW_ET()} ET · {len(swing)} fired\n\n"
-            + "\n\n".join(fmt_swing(s) for s in top)
-            + "\n\nPaper only · recommendation surface · auto-exec "
-            + ("ARMED" if d.get("mode", {}).get("autoExec") else "OFF"))
-    ok1, ok2 = _discord(body), _tg(body)
+        if dry:
+            print("no swing signals to alert")
+        return
+    auto = d.get("mode", {}).get("autoExec")
+    tg_body = _swing_board(swing, auto, html=True)
+    dc_body = _swing_board(swing, auto, html=False)
+    if dry:
+        print("WOULD SEND telegram:\n" + tg_body)
+        print("\nWOULD SEND discord:\n" + dc_body)
+        return
+    ok1, ok2 = _discord(dc_body), _tg(tg_body)
     print(f"alert sent — discord={ok1} tg={ok2}")
 
 
@@ -141,7 +171,7 @@ def exec_mode():
             cb.record_turn(1); cb.record_spend(qty * s["entry"])
         msg = (f"{'✅' if ok else '❌'} AUTO {s['dir']} {qty}× {s['symbol']} @~{s['entry']} "
                f"SL {s['stop']} TP {s['target']} — {'order '+str(resp.get('id'))[:8] if ok else resp.get('error')}")
-        _discord(msg); _tg(msg)
+        _discord(msg); _tg(msg, html=False)  # plain status line — not tg_format-built, may echo raw API errors
         placed.append({"ts": NOW_ET(), "symbol": s["symbol"], "action": "ENTRY", "mode": "swing-auto",
                        "detail": f"{qty}× {side} bracket", "pnlPct": None, "ok": ok})
     # append to execLog (front)
@@ -151,5 +181,12 @@ def exec_mode():
 
 
 if __name__ == "__main__":
-    mode = sys.argv[1] if len(sys.argv) > 1 else "alert"
-    {"alert": alert, "exec": exec_mode}.get(mode, alert)()
+    args = sys.argv[1:]
+    dry = "--dry-run" in args
+    mode = next((a for a in args if not a.startswith("--")), "alert")
+    if mode == "alert":
+        alert(dry=dry)
+    elif mode == "exec":
+        exec_mode()  # already INERT-by-default (armed() gate) — no separate dry path needed
+    else:
+        alert(dry=dry)

@@ -11,6 +11,7 @@ there's nothing clean (capital preservation > FOMO).
 import json, os, re
 from datetime import datetime
 from zoneinfo import ZoneInfo
+from tg_format import esc, b, hdr, section, row, footer, join
 
 OUT = os.path.expanduser("~/labs/quantum/out")
 SCRAPER = os.path.expanduser("~/trading/signals/option-scraper/data")
@@ -49,10 +50,10 @@ def flow():
     if not d:
         return "no flow data right now (option-signals digest empty)."
     when = str(d.get("generated_at_et", ""))[:16].replace("T", " ")
-    lines = [f"🌊 *FLOW ALERTS* · {when} ET"]
+    lines = [hdr("🌊", "Flow Alerts", sub=f"data {when} ET")]
     sw = _stale_warning(d.get("generated_at_et"), max_min=45).strip()
     if sw:
-        lines.append(sw)
+        lines.append(esc(sw))
     cands = []
     al = d.get("action_layer")
     if isinstance(al, dict):
@@ -70,37 +71,36 @@ def flow():
         t = (c.get("type") or "")[:1]
         sz = c.get("sizing") or {}
         e, t1, st = sz.get("suggested_entry"), sz.get("target_1"), sz.get("stop_price")
-        tail = (f" · entry ${e:g}→T1 ${t1:g} (stop ${st:g})"
-                if isinstance(e, (int, float)) and isinstance(t1, (int, float)) else "")
-        rows.append(f"{emo} {sym} ${c.get('strike'):g}{t} {c.get('expiry_dte')}d · "
-                    f"{sent[:4]} · rank {c.get('flowrank')} · {_human(c.get('premium_usd'))}{tail}")
-        if len(rows) >= 3:
-            break
-    lines += rows
+        tail = (f"entry ${e:g}→T1 ${t1:g} (stop ${st:g})"
+                if isinstance(e, (int, float)) and isinstance(t1, (int, float)) else None)
+        rows.append(row(sym, f"${c.get('strike'):g}{t} {c.get('expiry_dte')}d", sent[:4],
+                         f"rank {c.get('flowrank')}", _human(c.get('premium_usd')), tail, glyph=emo))
+    lines.append(section("Top Flow") if rows else "")
+    lines += rows[:3]
     for ap in (d.get("top_app_picks") or [])[:1]:
         if isinstance(ap, dict):
-            lines.append(f"app: {ap.get('symbol')} ${ap.get('strike')}"
-                         f"{(ap.get('type') or '')[:1]} · {ap.get('category')} · "
-                         f"buy {ap.get('buy_target')}→{ap.get('sell_target')}")
-    if len(lines) == 1:
+            lines.append(row(ap.get('symbol'), f"${ap.get('strike')}{(ap.get('type') or '')[:1]}",
+                              ap.get('category'), f"buy {ap.get('buy_target')}→{ap.get('sell_target')}",
+                              glyph="app:"))
+    if not rows:
         lines.append("quiet — no standout flow right now.")
-    lines.append("_big-money positioning. /greeks <TKR> for live greeks/IV_")
-    return "\n".join(lines)
+    lines.append(footer("big-money positioning. /greeks <TKR> for live greeks/IV"))
+    return join(*lines)
 
 
 def explain():
     """Plain-English cheat sheet — what the numbers mean + why they matter. Pulled
     on demand so the alerts themselves stay tight (no inline clutter)."""
-    return (
-        "📖 *WHAT THE NUMBERS MEAN*\n"
-        "Δ delta — moves per $1 in the stock (0.50 ≈ 50¢). Higher = more punch + more cost.\n"
-        "θ theta — $ lost to time each day. Your rent for holding. Big θ = clock vs you.\n"
-        "IV — how pricey the option is. High = expensive (rich), crushes after earnings; low = cheap.\n"
-        "value — our IV read: buy *cheap/fair*, skip *rich*.\n"
-        "vol/OI — contracts traded / open. High = liquid (easy in-out, tight spread); low = avoid.\n"
-        "src — independent feeds confirming it. More = stronger.\n"
-        "⭐ confluence — quantum pick + flow agree = top conviction.\n"
-        "✅ cleanest buy = cheap/fair IV + Δ0.40-0.60 + liquid + ⭐.")
+    return join(
+        hdr("📖", "What The Numbers Mean"),
+        "Δ delta — moves per $1 in the stock (0.50 ≈ 50¢). Higher = more punch + more cost.",
+        "θ theta — $ lost to time each day. Your rent for holding. Big θ = clock vs you.",
+        "IV — how pricey the option is. High = expensive (rich), crushes after earnings; low = cheap.",
+        f"value — our IV read: buy {b('cheap/fair')}, skip {b('rich')}.",
+        "vol/OI — contracts traded / open. High = liquid (easy in-out, tight spread); low = avoid.",
+        "src — independent feeds confirming it. More = stronger.",
+        "⭐ confluence — quantum pick + flow agree = top conviction.",
+        f"✅ cleanest buy = cheap/fair IV + Δ0.40-0.60 + liquid + ⭐.")
 
 
 def _market_open(now=None):
@@ -163,11 +163,12 @@ def _spread_pick_line(p, s):
     """Headline line for a debit-spread play (cap-fitting alternative to the naked call)."""
     typ = (p.get("type") or "").upper()
     rr = s.get("rr")
-    rr_s = f" · R:R {rr:.2f}" if isinstance(rr, (int, float)) else ""
-    return (f"*{p.get('ticker')} ${s.get('long'):g}/${s.get('short'):g} {typ} SPREAD* · "
-            f"{_fmt_exp(p.get('expiry'))} ({p.get('days')}d)\n"
-            f"{_money(s.get('cost_per'))} cost · max +{_money(s.get('max_profit'))} / "
-            f"-{_money(s.get('max_loss'))}{rr_s} · {p.get('confidence')}-conf · {p.get('value')}")
+    rr_s = f"R:R {rr:.2f}" if isinstance(rr, (int, float)) else None
+    head = b(f"{p.get('ticker')} ${s.get('long'):g}/${s.get('short'):g} {typ} SPREAD")
+    return (f"{head} · {esc(_fmt_exp(p.get('expiry')))} ({esc(p.get('days'))}d)\n"
+            + esc(f"{_money(s.get('cost_per'))} cost · max +{_money(s.get('max_profit'))} / "
+                  f"-{_money(s.get('max_loss'))}") + (f" · {esc(rr_s)}" if rr_s else "")
+            + esc(f" · {p.get('confidence')}-conf · {p.get('value')}"))
 
 
 def _verdict(p, heat=None, risk_cap=None):
@@ -203,13 +204,13 @@ def _verdict(p, heat=None, risk_cap=None):
 
 def _pick_line(p):
     typ = (p.get("type") or "").upper()
-    qty, pct = p.get("qty") or 0, p.get("pct_of_equity")
-    size = (f"buy {qty} = {pct}% of acct" if qty and pct is not None
+    qty, pctq = p.get("qty") or 0, p.get("pct_of_equity")
+    size = (f"buy {qty} = {pctq}% of acct" if qty and pctq is not None
             else f"1 ct {_money(p.get('per_contract'))} — over your risk cap")
-    return (f"*{p.get('ticker')} ${p.get('strike'):g} {typ}* · {_fmt_exp(p.get('expiry'))} "
-            f"({p.get('days')}d)\n"
-            f"{_money(p.get('per_contract'))}/ct · {size} · {p.get('confidence')}-conf · "
-            f"{p.get('sources')} src · {p.get('value')}")
+    head = b(f"{p.get('ticker')} ${p.get('strike'):g} {typ}")
+    return (f"{head} · {esc(_fmt_exp(p.get('expiry')))} ({esc(p.get('days'))}d)\n"
+            + esc(f"{_money(p.get('per_contract'))}/ct · {size} · {p.get('confidence')}-conf · "
+                  f"{p.get('sources')} src · {p.get('value')}"))
 
 
 def _fmt_exp(e):
@@ -221,8 +222,8 @@ def _fmt_exp(e):
 
 def _acct_line(d):
     h = d.get("portfolio_heat") or {}
-    return (f"acct: {_money(d.get('equity'))} · {h.get('heat_pct','?')}% heat · "
-            f"{_money(h.get('cash'))} free")
+    return esc(f"acct: {_money(d.get('equity'))} · {h.get('heat_pct','?')}% heat · "
+               f"{_money(h.get('cash'))} free")
 
 
 def _sweeps_raw():
@@ -254,12 +255,13 @@ def _sweep_tags(a):
 def _sweep_line(a, with_tags=True):
     t = (a.get("OptionType") or "")[:1]
     bull = "🟢BULL" if a.get("isBullish") else "🔴BEAR"
-    line = (f"🔪 {a.get('Symbol')} ${a.get('Strike'):g}{t} {a.get('DTE')}d · "
-            f"{_human(a.get('totalFlowValue'))} · {bull} · OI {a.get('OI') or 0}/vol {a.get('Volume') or 0}")
+    line = row(a.get('Symbol'), f"${a.get('Strike'):g}{t} {a.get('DTE')}d",
+               _human(a.get('totalFlowValue')), bull,
+               f"OI {a.get('OI') or 0}/vol {a.get('Volume') or 0}", glyph="🔪")
     if with_tags:
         tg = _sweep_tags(a)
         if tg:
-            line += "\n   " + " · ".join(tg)
+            line += "\n   " + esc(" · ".join(tg))
     return line
 
 
@@ -269,7 +271,7 @@ def sweeps(top=5, min_prem=500_000):
     raw.sort(key=lambda a: a.get("totalFlowValue") or 0, reverse=True)
     if not raw:
         return "no big sweeps in the feed right now."
-    lines = ["🔪 *LIVE SWEEPS* (big money positioning)"]
+    lines = [hdr("🔪", "Live Sweeps", sub="big money positioning")]
     seen = set()
     for a in raw:
         k = a.get("OptionSymbol")
@@ -279,8 +281,8 @@ def sweeps(top=5, min_prem=500_000):
         lines.append(_sweep_line(a))
         if len(seen) >= top:
             break
-    lines.append("_ride the flow · /greeks <TKR> for greeks · /explain_")
-    return "\n".join(lines)
+    lines.append(footer("ride the flow · /greeks <TKR> for greeks · /explain"))
+    return join(*lines)
 
 
 def odte(top=6):
@@ -291,7 +293,7 @@ def odte(top=6):
     raw.sort(key=lambda a: a.get("totalFlowValue") or 0, reverse=True)
     if not raw:
         return "no 0-2 DTE sweeps right now (none, or market closed)."
-    lines = ["⚡ *0DTE / SHORT-DTE FLOW*"]
+    lines = [hdr("⚡", "0DTE / Short-DTE Flow")]
     seen = set()
     for a in raw:
         k = a.get("OptionSymbol")
@@ -301,8 +303,8 @@ def odte(top=6):
         lines.append(_sweep_line(a, with_tags=False))
         if len(seen) >= top:
             break
-    lines.append("_fast + risky — defined risk only, take profits quick_")
-    return "\n".join(lines)
+    lines.append(footer("fast + risky — defined risk only, take profits quick"))
+    return join(*lines)
 
 
 def _flow_directions():
@@ -335,8 +337,8 @@ def _confluence(p, flowdir):
     want = "BULLISH" if (p.get("type") or "").lower() == "call" else "BEARISH"
     fs = flowdir[sym]
     if fs == want:
-        return "⭐ CONFLUENCE — option-signals flow agrees"
-    return f"⚠️ flow DISAGREES (flow is {str(fs).lower()}) — extra caution"
+        return f"⭐ {b('CONFLUENCE')} — option-signals flow agrees"
+    return esc(f"⚠️ flow DISAGREES (flow is {str(fs).lower()}) — extra caution")
 
 
 def _iv_trap(p):
@@ -357,10 +359,11 @@ def pick(top=1):
     fresh = _freshness(d.get("as_of"))
     if not picks:
         nd = d.get("n_dropped", 0)
-        return (f"🟦 No clean buy right now ({fresh}).\n"
-                f"Pipeline checked {d.get('n_considered','?')} and dropped all "
-                f"{nd} (too pricey/illiquid/risky). Capital preserved — sit tight.\n"
-                f"{_acct_line(d)}")
+        return join(
+            hdr("🟦", "No Clean Buy", sub=fresh),
+            esc(f"pipeline checked {d.get('n_considered','?')} and dropped all "
+                f"{nd} (too pricey/illiquid/risky). Capital preserved — sit tight."),
+            _acct_line(d))
     heat = d.get("portfolio_heat")
     risk_cap = d.get("risk_cap")
     flowdir = _flow_directions()
@@ -368,30 +371,43 @@ def pick(top=1):
         p = picks[0]
         spread = _afford_spread(p, risk_cap) if (p.get("qty") or 0) < 1 else None
         conf = _confluence(p, flowdir)
-        conf_line = f"{conf}\n" if conf else ""
         trap = _iv_trap(p)
-        trap_line = f"{trap}\n" if trap else ""
         head = _spread_pick_line(p, spread) if spread else _pick_line(p)
-        order_line = f"📝 {spread['place_order']}\n" if spread and spread.get("place_order") else ""
-        return (f"🎯 *TOP PICK* · {fresh}\n"
-                f"{_stale_warning(d.get('as_of'))}"
-                f"{head}\n"
-                f"{_verdict(p, heat, risk_cap)}\n"
-                f"{conf_line}{trap_line}"
-                f"_why: {(p.get('action_why') or '')[:120]}_\n"
-                f"{order_line}"
-                f"{_acct_line(d)}")
-    lines = [f"🎯 *TOP {min(top,len(picks))} PICKS* · {fresh}"]
+        order_line = f"📝 {esc(spread['place_order'])}" \
+            if spread and spread.get("place_order") else None
+        why = (p.get('action_why') or '')[:120]
+        return join(
+            hdr("🎯", "Top Pick", sub=fresh),
+            esc(_stale_warning(d.get('as_of')).strip()) or None,
+            head,
+            esc(_verdict(p, heat, risk_cap)),
+            conf, trap,
+            f"<i>why: {esc(why)}</i>" if why else None,
+            order_line,
+            _acct_line(d))
+    n = min(top, len(picks))
+    star_picks, rest = [], []
     for i, p in enumerate(picks[:top], 1):
+        (star_picks if (_confluence(p, flowdir) or "").startswith("⭐") else rest).append((i, p))
+    lines = [hdr("🎯", f"Top {n} Picks", sub=fresh)]
+
+    def _pick_row(i, p, star):
         typ = (p.get("type") or "").upper()
-        star = " ⭐" if (_confluence(p, flowdir) or "").startswith("⭐") else ""
         sp = _afford_spread(p, risk_cap) if (p.get("qty") or 0) < 1 else None
         price = f"{_money(sp.get('cost_per'))} sprd" if sp else _money(p.get("per_contract"))
-        lines.append(f"{i}.{star} {_verdict(p, heat, risk_cap).split(' — ')[0]}  *{p.get('ticker')} "
-                     f"${p.get('strike'):g}{typ[0]}* {_fmt_exp(p.get('expiry'))} · "
-                     f"{price} · {p.get('confidence')} · {p.get('value')}")
+        verdict = _verdict(p, heat, risk_cap).split(' — ')[0]
+        return row(f"{i}. {p.get('ticker')}", f"${p.get('strike'):g}{typ[0]}",
+                   _fmt_exp(p.get('expiry')), price, p.get('confidence'),
+                   p.get('value'), verdict, glyph=("⭐" if star else "▸"))
+    if star_picks:
+        lines.append(section("Confluence"))
+        lines += [_pick_row(i, p, True) for i, p in star_picks]
+    if rest:
+        if star_picks:
+            lines.append(section("Other Picks"))
+        lines += [_pick_row(i, p, False) for i, p in rest]
     lines.append(_acct_line(d))
-    return "\n".join(lines)
+    return join(*lines)
 
 
 def book():
@@ -399,8 +415,8 @@ def book():
     d = _load("portfolio_manage.json")
     if not d:
         return "no book snapshot yet."
-    out = [f"📒 *BOOK* · {_money(d.get('equity'))} · {d.get('heat_pct','?')}% heat · "
-           f"{_money(d.get('cash'))} free"]
+    out = [hdr("📒", "Book", sub=esc(f"{_money(d.get('equity'))} · "
+                                      f"{d.get('heat_pct','?')}% heat · {_money(d.get('cash'))} free"))]
     positions = d.get("positions") or []
     flagged = []
     # `moves` is keyed BY verdict → list of position dicts (e.g. {"HOLD":[...],"TRIM":[...]}).
@@ -411,19 +427,21 @@ def book():
                 continue
             for it in (items or []):
                 sym = it.get("symbol") if isinstance(it, dict) else it
-                flagged.append(f"  ⚠️ {sym}: {verdict}")
+                flagged.append(row(sym, verdict, glyph="⚠️"))
+    if positions:
+        out.append(section("Positions"))
     for pos in positions[:6]:
         if isinstance(pos, dict):
             sym = pos.get("symbol") or pos.get("ticker")
-            pct = pos.get("pnl_pct")
-            pct = f"{pct:+.1f}%" if isinstance(pct, (int, float)) else ""
-            out.append(f"  {sym}: {pct} {pos.get('verdict','')}".rstrip())
+            pnl = pos.get("pnl_pct")
+            pnl = f"{pnl:+.1f}%" if isinstance(pnl, (int, float)) else None
+            out.append(row(sym, pnl, pos.get('verdict') or None))
     if flagged:
-        out.append("action:")
+        out.append(section("Action"))
         out.extend(flagged)
     else:
-        out.append("all HOLD — nothing to do ✅")
-    return "\n".join(out)
+        out.append("✅ all HOLD — nothing to do")
+    return join(*out)
 
 
 def _px(x):
@@ -443,7 +461,7 @@ def crypto():
     fresh = _freshness(d.get("as_of_et") or d.get("as_of"))
     arrow = {"LONG": "🟢↗", "SHORT": "🔴↘"}
     picks = d.get("picks") or []
-    lines = [f"₿ *CRYPTO DESK* · {fresh}"]
+    lines = [hdr("₿", "Crypto Desk", sub=fresh)]
     dirs = []
     for p in picks:
         coin = p.get("coin")
@@ -451,20 +469,20 @@ def crypto():
         dirs.append(dirn)
         a = arrow.get(dirn, "⚪")
         pu = p.get("prob_up")
-        pup = f"{pu*100:.0f}%up" if isinstance(pu, (int, float)) else ""
+        pup = f"{pu*100:.0f}%up" if isinstance(pu, (int, float)) else None
         crowd = (p.get("magnets") or {}).get("crowd_note", "")
-        warn = " ⚠️crowded" if "crowded" in str(crowd) else ""
-        lines.append(f"{coin} {_px(p.get('spot'))} {a}{dirn[:5]} {pup} · "
-                     f"{_px(p.get('entry'))}→{_px(p.get('target'))} "
-                     f"(stp {_px(p.get('stop'))}){warn}")
+        warn = "⚠️crowded" if "crowded" in str(crowd) else None
+        lines.append(row(coin, f"{_px(p.get('spot'))} {a}{dirn[:5]}", pup,
+                          f"{_px(p.get('entry'))}→{_px(p.get('target'))} (stp {_px(p.get('stop'))})",
+                          warn))
     if picks and all(x == "SHORT" for x in dirs):
-        lines.append("→ all SHORT — no clean long; SIT OUT crypto (Alpaca is long-only)")
+        lines.append(esc("→ all SHORT — no clean long; SIT OUT crypto (Alpaca is long-only)"))
     elif any(x == "LONG" for x in dirs):
         longs = ", ".join(p.get("coin") for p in picks if (p.get("direction") or "").upper() == "LONG")
-        lines.append(f"→ long setup: {longs}")
+        lines.append(esc(f"→ long setup: {longs}"))
     macro = d.get("macro") or {}
-    lines.append(f"_alert-only · {d.get('horizon_days')}d horizon · {macro.get('geopol_tone','')}_")
-    return "\n".join(lines)
+    lines.append(footer(f"alert-only · {d.get('horizon_days')}d horizon · {macro.get('geopol_tone','')}"))
+    return join(*lines)
 
 
 def _ivp(iv):
@@ -476,24 +494,29 @@ def greeks():
     Helps decide WHICH contract: delta = directional punch, IV = cheap vs pricey."""
     bc = _load("best_contracts.json")
     pm = _load("portfolio_manage.json")
-    lines = ["📐 *GREEKS / IV*"]
+    lines = [hdr("📐", "Greeks / IV")]
     held = [p for p in (pm or {}).get("positions", []) or []
             if isinstance(p, dict) and p.get("is_option")]
+    if held:
+        lines.append(section("Held"))
     for p in held:
         d = p.get("delta"); th = p.get("theta")
-        ds = f"Δ{d:+.2f}" if isinstance(d, (int, float)) else ""
-        ts = f" θ{th:+.2f}" if isinstance(th, (int, float)) else ""
-        lines.append(f"held · {p.get('symbol')} · {ds}{ts} · IV {_ivp(p.get('iv'))}")
-    for p in (bc or {}).get("picks", []) or []:
+        ds = f"Δ{d:+.2f}" if isinstance(d, (int, float)) else None
+        ts = f"θ{th:+.2f}" if isinstance(th, (int, float)) else None
+        lines.append(row(p.get('symbol'), ds, ts, f"IV {_ivp(p.get('iv'))}"))
+    picks = (bc or {}).get("picks", []) or []
+    if picks:
+        lines.append(section("Watching"))
+    for p in picks:
         typ = (p.get("type") or "")[:1].upper()
         d = p.get("delta")
         ds = f"Δ{d:.2f}" if isinstance(d, (int, float)) else "Δ?"
-        lines.append(f"{p.get('ticker')} ${p.get('strike'):g}{typ} · {ds} · "
-                     f"IV {_ivp(p.get('iv'))} · {p.get('value')}")
-    if len(lines) == 1:
+        lines.append(row(p.get('ticker'), f"${p.get('strike'):g}{typ}", ds,
+                          f"IV {_ivp(p.get('iv'))}", p.get('value')))
+    if not held and not picks:
         lines.append("no live contracts right now — picks load at market open.")
-    lines.append("_high IV = pricey (rich) → better to sell premium; low IV = cheap to buy_")
-    return "\n".join(lines)
+    lines.append(footer("high IV = pricey (rich) → better to sell premium; low IV = cheap to buy"))
+    return join(*lines)
 
 
 def eod():
@@ -501,10 +524,10 @@ def eod():
     d = _load("portfolio_manage.json")
     sb = _load("scoreboard.json")
     today = datetime.now(ET).strftime("%Y-%m-%d")
-    lines = [f"🌙 *EOD* · {datetime.now(ET).strftime('%a %-m/%-d')}"]
+    lines = [hdr("🌙", "EOD", sub=datetime.now(ET).strftime('%a %-m/%-d'))]
     if d:
-        lines.append(f"acct {_money(d.get('equity'))} · {d.get('heat_pct','?')}% heat · "
-                     f"{_money(d.get('cash'))} free")
+        lines.append(esc(f"acct {_money(d.get('equity'))} · {d.get('heat_pct','?')}% heat · "
+                          f"{_money(d.get('cash'))} free"))
         ps = []
         for p in (d.get("positions") or [])[:5]:
             if isinstance(p, dict):
@@ -512,16 +535,16 @@ def eod():
                 pct = p.get("pnl_pct")
                 ps.append(f"{sym} {('%+.1f%%' % pct) if isinstance(pct,(int,float)) else ''}".strip())
         if ps:
-            lines.append("positions: " + " · ".join(ps))
+            lines.append(esc("positions: " + " · ".join(ps)))
     if sb:
         rec = [r for r in (sb.get("recent") or []) if str(r.get("date")) == today]
         if rec:
             w = sum(1 for r in rec if r.get("outcome") == "win")
-            lines.append(f"today graded: {len(rec)} ({w}W/{len(rec)-w}L)")
+            lines.append(esc(f"today graded: {len(rec)} ({w}W/{len(rec)-w}L)"))
     g = grade().splitlines()
     if g:
-        lines.append(g[-1])  # the 🔴/🟡/🟢 readiness line
-    return "\n".join(lines)
+        lines.append(g[-1])  # the 🔴/🟡/🟢 readiness line (already HTML-escaped by grade())
+    return join(*lines)
 
 
 GRAD_MIN_N = 50   # Mike's standing go-live gate: n>=50 graded + positive expectancy
@@ -540,17 +563,18 @@ def grade():
     exp = o.get("expectancy_pct")
     wrp = f"{wr*100:.0f}%" if isinstance(wr, (int, float)) else "?"
     expv = exp if isinstance(exp, (int, float)) else 0.0
-    head = f"🎓 *GRADUATION CHECK*\npaper: {n} graded · {wrp} win · exp {expv:+.1f}%"
-    gate = f"gate: {GRAD_MIN_N}+ trades & positive expectancy"
+    head = join(hdr("🎓", "Graduation Check"),
+                esc(f"paper: {n} graded · {wrp} win · exp {expv:+.1f}%"))
+    gate = esc(f"gate: {GRAD_MIN_N}+ trades & positive expectancy")
     if n < GRAD_MIN_N:
-        status = f"🔴 building proof — {n}/{GRAD_MIN_N} trades. Keep growing paper first."
+        status = esc(f"🔴 building proof — {n}/{GRAD_MIN_N} trades. Keep growing paper first.")
     elif expv <= 0:
-        status = f"🔴 {n} trades but no edge yet (exp {expv:+.1f}%). Stay on paper, refine."
+        status = esc(f"🔴 {n} trades but no edge yet (exp {expv:+.1f}%). Stay on paper, refine.")
     elif (wr or 0) < GRAD_MIN_WR:
-        status = f"🟡 positive expectancy, thin win-rate ({wrp}). One more stretch on paper."
+        status = esc(f"🟡 positive expectancy, thin win-rate ({wrp}). One more stretch on paper.")
     else:
         status = "🟢 READY — edge proven. Consider sizing up / a small real-money sleeve."
-    return f"{head}\n{gate}\n{status}"
+    return join(head, gate, status)
 
 
 def tidy(text, max_lines=10):

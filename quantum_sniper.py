@@ -19,16 +19,20 @@ from zoneinfo import ZoneInfo
 
 sys.path.insert(0, os.path.expanduser("~/scripts"))
 import quantum_tg as Q  # shared read-only formatters
+from tg_format import esc, b, hdr, section, row, footer, join
 
 ET    = ZoneInfo("America/New_York")
 STATE = os.path.expanduser("~/.openclaw/quantum_sniper_state.json")
 HALT  = os.path.expanduser("~/.openclaw/quantum_HALT")
 GRAD  = os.path.expanduser("~/.openclaw/quantum_graduated.flag")  # lifetime one-time
-TG    = os.path.expanduser("~/bin/tg-send-msg")
+TG_FLEET = os.path.expanduser("~/scripts/tg_fleet.py")
+TG_FN = "trading_command"
 
 
 def _send(msg):
-    subprocess.run([TG, msg], timeout=20)
+    """HTML-mode send via tg_fleet (2026-09-15 format sweep — was plain text via
+    tg-send-msg, which drops parse_mode and left messages rendering literal *asterisks*)."""
+    subprocess.run([sys.executable, TG_FLEET, "sendhtml", TG_FN, msg], timeout=20)
 
 
 def _graduation_check(dry):
@@ -41,11 +45,12 @@ def _graduation_check(dry):
         return
     sb = Q._load("scoreboard.json") or {}
     o = sb.get("overall") or {}
-    msg = ("🎓 *READY TO GRADUATE*\n"
-           f"Paper edge proven: {o.get('graded')} trades · "
-           f"{(o.get('win_rate') or 0)*100:.0f}% win · exp {o.get('expectancy_pct',0):+.1f}%\n"
-           "You cleared the gate (50+ trades & positive expectancy).\n"
-           "Consider a SMALL real-money sleeve — start tiny, same rules. /grade for details")
+    msg = join(
+        hdr("🎓", "Ready To Graduate"),
+        esc(f"paper edge proven: {o.get('graded')} trades · "
+            f"{(o.get('win_rate') or 0)*100:.0f}% win · exp {o.get('expectancy_pct',0):+.1f}%"),
+        esc("you cleared the gate (50+ trades & positive expectancy)."),
+        footer("consider a SMALL real-money sleeve — start tiny, same rules. /grade for details"))
     if dry:
         print("WOULD BUZZ (graduation):\n" + msg)
         return
@@ -106,24 +111,27 @@ def _actionable(p, risk_cap):
 def _buzz_text(p, d):
     typ = (p.get("type") or "").upper()
     tag = "STRONG " if str(p.get("confidence", "")).upper() == "A" else ""
+    why = (p.get('action_why') or 'clean setup')[:110]
     spread = Q._afford_spread(p, d.get("risk_cap")) if (p.get("qty") or 0) < 1 else None
     if spread:   # naked is over cap → buzz the cap-fitting spread the pipeline built
-        return (f"🟢 *{tag}GREEN LIGHT* — buy now (spread fits your cap)\n"
-                f"*{p.get('ticker')} ${spread.get('long'):g}/${spread.get('short'):g} {typ} SPREAD* · "
-                f"{Q._fmt_exp(p.get('expiry'))} ({p.get('days')}d)\n"
-                f"{Q._money(spread.get('cost_per'))} cost · max +{Q._money(spread.get('max_profit'))} / "
-                f"−{Q._money(spread.get('max_loss'))} · {p.get('confidence')}-conf · {p.get('value')}\n"
-                f"_why: {(p.get('action_why') or 'clean setup')[:110]}_\n"
-                f"📝 {spread.get('place_order')}\n"
-                f"acct {Q._money(d.get('equity'))} · /pick for more")
-    return (f"🟢 *{tag}GREEN LIGHT* — buy now\n"
-            f"*{p.get('ticker')} ${p.get('strike'):g} {typ}* · {Q._fmt_exp(p.get('expiry'))} "
-            f"({p.get('days')}d)\n"
-            f"{Q._money(p.get('per_contract'))}/ct · buy {p.get('qty',1)} = "
+        head = b(f"{p.get('ticker')} ${spread.get('long'):g}/${spread.get('short'):g} {typ} SPREAD")
+        return join(
+            hdr("🟢", f"{tag}Green Light", sub="buy now (spread fits your cap)"),
+            f"{head} · {esc(Q._fmt_exp(p.get('expiry')))} ({esc(p.get('days'))}d)",
+            esc(f"{Q._money(spread.get('cost_per'))} cost · max +{Q._money(spread.get('max_profit'))} / "
+                f"-{Q._money(spread.get('max_loss'))} · {p.get('confidence')}-conf · {p.get('value')}"),
+            f"<i>why: {esc(why)}</i>",
+            f"📝 {esc(spread.get('place_order'))}",
+            footer(f"acct {Q._money(d.get('equity'))} · /pick for more"))
+    head = b(f"{p.get('ticker')} ${p.get('strike'):g} {typ}")
+    return join(
+        hdr("🟢", f"{tag}Green Light", sub="buy now"),
+        f"{head} · {esc(Q._fmt_exp(p.get('expiry')))} ({esc(p.get('days'))}d)",
+        esc(f"{Q._money(p.get('per_contract'))}/ct · buy {p.get('qty',1)} = "
             f"{p.get('pct_of_equity')}% · {p.get('confidence')}-conf · "
-            f"{p.get('sources')} src · {p.get('value')}\n"
-            f"_why: {(p.get('action_why') or 'clean setup')[:110]}_\n"
-            f"acct {Q._money(d.get('equity'))} · stop −50% prem · /pick for more")
+            f"{p.get('sources')} src · {p.get('value')}"),
+        f"<i>why: {esc(why)}</i>",
+        footer(f"acct {Q._money(d.get('equity'))} · stop -50% prem · /pick for more"))
 
 
 def _shock_guard(dry, state):
@@ -141,10 +149,11 @@ def _shock_guard(dry, state):
             movers.append(f"{m.get('ticker','?')}{(' %+.0f%%'%(pct*100)) if isinstance(pct,(int,float)) else ''}")
         else:
             movers.append(str(m))
-    msg = (f"🛑 *RISK-OFF* (sev {float(s.get('severity',0)):.0%})\n"
-           f"{s.get('reason','market shock')}"
-           + (f"\nmovers: {', '.join(movers)}" if movers else "")
-           + "\n→ stop adding, tighten stops, play defense. /book")
+    msg = join(
+        hdr("🛑", "Risk-Off", sub=f"sev {float(s.get('severity',0)):.0%}"),
+        esc(s.get('reason', 'market shock')),
+        esc(f"movers: {', '.join(movers)}") if movers else None,
+        footer("stop adding, tighten stops, play defense. /book"))
     if dry:
         print("WOULD BUZZ (shock):\n" + msg); return False
     _send(msg); state["shock_alerted"] = True
@@ -175,12 +184,12 @@ def _exit_guard(dry, state):
         if dry: print("exit: all HOLD → silent")
         return False
     emoji = {"EXIT": "🔴", "TRIM": "🟠", "REDUCE": "🟠"}
-    lines = ["⚠️ *POSITION ALERTS*"]
+    lines = [hdr("⚠️", "Position Alerts")]
     for verdict, sym, reason, at, _ in flagged:
-        ats = f" → ~${at:g}" if isinstance(at, (int, float)) else ""
-        lines.append(f"{emoji.get(verdict,'⚠️')} {sym} — {verdict} ({reason}){ats}")
-    lines.append("/book for details")
-    msg = "\n".join(lines)
+        ats = f"~${at:g}" if isinstance(at, (int, float)) else None
+        lines.append(row(sym, verdict, reason, ats, glyph=emoji.get(verdict, "⚠️")))
+    lines.append(footer("/book for details"))
+    msg = join(*lines)
     if dry:
         print("WOULD BUZZ (exit):\n" + msg); return False
     _send(msg)
@@ -225,7 +234,7 @@ def _sweep_alert(dry, state):
         k = a.get("OptionSymbol")
         if k in state["sweeps_alerted"] and not dry:
             continue
-        msg = "🔪 *BIG SWEEP — whales positioning*\n" + Q._sweep_line(a)
+        msg = join(hdr("🔪", "Big Sweep", sub="whales positioning"), Q._sweep_line(a))
         if dry:
             print("WOULD BUZZ (sweep):\n" + msg); return False
         try:

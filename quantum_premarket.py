@@ -13,11 +13,12 @@ from zoneinfo import ZoneInfo
 
 sys.path.insert(0, os.path.expanduser("~/scripts"))
 import quantum_tg as Q
+from tg_format import esc, hdr
 
 ET     = ZoneInfo("America/New_York")
 HALT   = os.path.expanduser("~/.openclaw/quantum_HALT")
 CLAUDE = os.path.expanduser("~/.local/bin/claude")
-TG     = os.path.expanduser("~/bin/tg-send-msg")
+TG_FLEET = os.path.expanduser("~/scripts/tg_fleet.py")
 
 
 def main():
@@ -41,12 +42,14 @@ def main():
         body = f"(pre-market brief unavailable: {e})"
     if not body:
         return  # nothing useful → say nothing (anti-bloat)
-    msg = f"🌅 *PRE-MARKET* · {datetime.now(ET).strftime('%a %-m/%-d')}\n{body}"
+    # body is free-form LLM prose (not built via tg_format) — esc() it so a stray
+    # "<" / "&" from the LLM (e.g. "SPY < 660") can't break the HTML parse.
+    msg = hdr("🌅", "Pre-Market", sub=datetime.now(ET).strftime('%a %-m/%-d')) + "\n" + esc(body)
     if dry:
         print(msg)
         return
     try:
-        subprocess.run([TG, msg], timeout=20)
+        subprocess.run([sys.executable, TG_FLEET, "sendhtml", "trading_command", msg], timeout=20)
     except Exception as e:
         print(f"[premarket] send failed: {e}", file=sys.stderr)
 
