@@ -629,6 +629,32 @@ def _breadth_line() -> str:
     return "📈 " + b("BREADTH") + " " + esc(" · ".join(parts))
 
 
+def _scheduled_today() -> str:
+    """Deterministic high-impact events TODAY (embedded FOMC/NFP floor + finnhub econ when keyed)
+    via macro_calendar_alert — overrides the LLM's "no major catalysts" guess, which missed the
+    2026-09-16 FOMC decision. Empty string when nothing is scheduled."""
+    try:
+        import macro_calendar_alert as mca
+    except Exception:
+        return ""
+    today = datetime.now(ET).date()
+    try:
+        ev = mca.embedded_macro(today, today)
+        key = mca.finnhub_key()
+        if key:
+            ev += [e for e in mca.finnhub_econ(key, today, today) if e.get("impact") == "high"]
+    except Exception as e:
+        print(f"[morning] scheduled-today fetch failed: {e}", flush=True)
+        return ""
+    seen, parts = set(), []
+    for e in ev:
+        glyph = str(e.get("tag", "")).split(" ")[0]          # "🏛️ FOMC" → "🏛️" (event already names it)
+        txt = f"{glyph} {e.get('event', '')}".strip()
+        if txt and txt[:18].lower() not in seen:
+            seen.add(txt[:18].lower()); parts.append(txt)
+    return " · ".join(parts[:3])
+
+
 def _earnings_today_line() -> str:
     """Today's earnings on the brief's own relay/watchlist universe, via
     macro_calendar_alert.finnhub_earnings(). Skipped (no key / no rows) rather
@@ -836,7 +862,11 @@ def build_phone() -> str:
             lines.append(line)
 
     cat, orders, plan = _catalysts_and_orders(_relay_tickers_str(6), tape)
-    if cat:
+    sched = _scheduled_today()
+    if sched:
+        # the calendar floor (FOMC/NFP/high-impact econ) beats the model's recollection
+        lines.append(f"⚠️ {b('THE ONE THING TODAY')}: {esc(sched)}")
+    elif cat:
         # first sentence only — the model likes to pad, and padding is what makes a brief
         # get skimmed instead of read
         lines.append(f"⚠️ {b('THE ONE THING TODAY')}: {esc(cat.split('. ')[0].rstrip('.'))}.")
