@@ -41,6 +41,7 @@ from lib.llm import call_llm  # noqa: E402
 from lib.heartbeat import beat  # noqa: E402
 from lib.notify import tg_brief  # noqa: E402
 from lib.news import headlines_block  # noqa: E402
+from tg_format import hdr, section, row, esc, b, footer  # noqa: E402  (2026-09-15 format sweep, phone copy only)
 from flow_picks_post import (  # noqa: E402  (read-only helpers — these do NOT log picks)
     _load, _score, _spot, _moneyness, _fmt, MAX_MNY, DTE_MIN, DTE_MAX, RISK_CAP, _tape,
 )
@@ -172,11 +173,11 @@ def _plan_orders(plan: dict) -> str:
     # gate against. The flat $400 RISK_CAP above (loss, not notional) is the only
     # sizing rule now; Mike sizes/funds the trade himself.
     why = str(plan.get("why") or "").strip().rstrip(".")
-    return (f"👉 Plan{f' — {why}' if why else ''}:\n"
-            f"   1) BUY {sh} {tkr} at ${entry:g} — ${sh * entry:,.0f}.\n"
-            f"   2) SELL at ${stop:g} if it drops — you lose ${risk:.0f}.\n"
-            f"   3) SELL at ${targ:g} if it works — you make ${reward:.0f}.\n"
-            f"   Put both sell orders in the moment you're filled.")
+    return (f"👉 <b>PLAN</b>{f' — {esc(why)}' if why else ''}\n"
+            f"1) BUY {sh} {b(tkr)} at ${entry:g} — ${sh * entry:,.0f}.\n"
+            f"2) SELL at ${stop:g} if it drops — lose ${risk:.0f}.\n"
+            f"3) SELL at ${targ:g} if it works — make ${reward:.0f}.\n"
+            f"Both sell orders go in the moment you're filled.")
 
 
 def _polymarket_line() -> str:
@@ -298,12 +299,12 @@ def _catalyst_phone_line() -> str:
         score = float(info.get("score", 0) or 0)
         word = "looks strong" if score > 0 else "looks soft"
         note = _catalyst_source_note(data, info)
-        parts.append(f"{name} {word} ({note})")
+        parts.append(f"{esc(name)} {word} ({esc(note)})")
     sentence = "; ".join(parts)
     rows = _catalyst_your_name_rows(data)
     actionable = [r for r in rows if abs(r[1]) >= CATALYST_MIN_SCORE]
     if actionable:
-        tail = "Worth a look: " + ", ".join(f"{t} {s:+.2f}" for t, s, _ in actionable) + "."
+        tail = "Worth a look: " + ", ".join(f"{esc(t)} {s:+.2f}" for t, s, _ in actionable) + "."
     else:
         tail = "Nothing on your names needs action."
     return f"🧭 {sentence}. {tail}"
@@ -379,12 +380,12 @@ def _structure_phone_line() -> str:
         best = rows[0] if rows else None
         if best is None:
             return "🏗 No name has held a key level with momentum turning yet — sentiment is loud, structure is quiet."
-        return (f"🏗 Closest structure setup: {best.get('symbol')} is {best.get('state')} (score {best.get('score')}/100)"
-                " — not a buy until momentum confirms.")
+        return (f"🏗 Closest structure setup: {esc(best.get('symbol'))} is {esc(best.get('state'))} "
+                f"(score {best.get('score')}/100) — not a buy until momentum confirms.")
     parts = []
     for r in trig:
         opt = (r.get("option") or {}).get("label")
-        parts.append(f"{r.get('symbol')} held its level and momentum turned" + (f" — {opt}" if opt else ""))
+        parts.append(f"{esc(r.get('symbol'))} held its level and momentum turned" + (f" — {esc(opt)}" if opt else ""))
     return "🏗 Structure says: " + "; ".join(parts) + ". Advisory only — stop = level break."
 
 
@@ -423,11 +424,11 @@ def _macro_phone_line() -> str:
     if data is None:
         return ""
     nxt = data.get("next") or {}
-    dvf = (data.get("dataVsFlows") or {}).get("read") or ""
+    dvf = esc((data.get("dataVsFlows") or {}).get("read") or "")
     if not nxt:
         return f"📅 {dvf}" if dvf else ""
-    roll = (nxt.get("rolling") or {}).get("read") or ""
-    return f"📅 {nxt.get('name')} {nxt.get('countdown')}. Last 3 times: {roll}. {dvf}".strip()
+    roll = esc((nxt.get("rolling") or {}).get("read") or "")
+    return f"📅 {esc(nxt.get('name'))} {esc(nxt.get('countdown'))}. Last 3 times: {roll}. {dvf}".strip()
 
 
 # --------------------------------------------------------------------------- dark pool / relay / SNR
@@ -474,18 +475,18 @@ def _darkpool_line() -> str:
         return ""
     label = dph.get("label") or "n/a"
     score = dph.get("score")
-    bits = [f"{label} {score:g}" if isinstance(score, (int, float)) else label]
+    bits = [esc(f"{label} {score:g}" if isinstance(score, (int, float)) else label)]
     prints = dph.get("printsToday")
     if isinstance(prints, (int, float)):
         bits.append(f"{int(prints)} prints")
-    line = "🕳 **DARK POOL:** " + " · ".join(bits)
+    line = "🕳 " + b("DARK POOL") + " " + " · ".join(bits)
     hot = [h for h in (dph.get("hotSectors") or [])
            if h.get("etf") and isinstance(h.get("ratio"), (int, float))][:3]
     if hot:
-        line += " · hot: " + ", ".join(f"{h['etf']} {h['ratio']:.1f}x" for h in hot)
+        line += " · hot: " + ", ".join(f"{esc(h['etf'])} {h['ratio']:.1f}x" for h in hot)
     big = dph.get("largestPrint") or {}
     if big.get("ticker") and big.get("value") is not None:
-        line += f" · biggest {big['ticker']} {_fmt_usd_compact(big['value'])}"
+        line += f" · biggest {esc(big['ticker'])} {_fmt_usd_compact(big['value'])}"
     return line
 
 
@@ -516,13 +517,13 @@ def _relay_dp_block(max_rows: int = 5) -> str:
         seen.add(tkr)
         side = "P" if s.get("isPut") else "C"
         strike = s.get("strike")
-        label = f"{tkr} {side}{strike:g}" if isinstance(strike, (int, float)) else f"{tkr} {side}"
-        picks.append(f"• {label} · {s['tag']}")
+        opt = f"{side}{strike:g}" if isinstance(strike, (int, float)) else side
+        picks.append(row(tkr, opt, s["tag"]))
         if len(picks) >= max_rows:
             break
     if not picks:
         return ""
-    return "📡 **RELAY × DARK POOL:**\n" + "\n".join(picks)
+    return "📡 " + b("RELAY × DARK POOL") + "\n" + "\n".join(picks)
 
 
 def _snr_headlines_block(max_rows: int = 3) -> str:
@@ -533,13 +534,13 @@ def _snr_headlines_block(max_rows: int = 3) -> str:
     if not arts:
         print("[morning] news-snr: no high-SNR articles / endpoint down — skipped", flush=True)
         return ""
-    lines = []
+    lines = ["📰 " + b("SIGNAL") + " (SNR≥65)"]
     for a in arts:
         tks = a.get("tickers") or []
         tag = tks[0] if tks else "—"
         title = str(a.get("title") or "").strip()
         src = a.get("source") or ""
-        lines.append(f"📰 SIGNAL (SNR≥65): {tag} {int(a.get('snr') or 0)} — {title} ({src})")
+        lines.append(f"▸ {b(tag)} {int(a.get('snr') or 0)} — {esc(title)} ({esc(src)})")
     return "\n".join(lines)
 
 
@@ -663,14 +664,14 @@ def _one_contract_line() -> str:
         # a hundredfold error in the one number he acts on.
         px = float(p.get("mid") or 0) or round((p.get("per_contract") or 0) / 100.0, 2)
         stop_px, targ_px = round(px * 0.50, 2), round(px * 1.50, 2)
-        return (f"📈 If you take one trade: {p['ticker']} ${p['strike']:g} {kind} "
-                f"expiring {p['expiry']}{window}.\n"
-                f"   1) BUY {n} contract{'s' if n != 1 else ''} near ${px:.2f} = ${cost} total.\n"
-                f"   2) SELL at ${stop_px:.2f} if it drops — you lose ${cost / 2:.0f}.\n"
-                f"   3) SELL at ${targ_px:.2f} if it works — you make ${cost / 2:.0f}.\n"
-                f"   Put both sell orders in as soon as you're filled, and never add to it.\n"
-                f"   (priced at yesterday's close — check the real price before you buy; if "
-                f"it opens far from ${px:.2f}, the whole plan moves with it)")
+        return (f"📈 " + b("IF YOU TAKE ONE TRADE") + f": {b(p['ticker'])} ${p['strike']:g} {esc(kind)} "
+                f"expiring {esc(p['expiry'])}{esc(window)}.\n"
+                f"1) BUY {n} contract{'s' if n != 1 else ''} near ${px:.2f} = ${cost} total.\n"
+                f"2) SELL at ${stop_px:.2f} if it drops — lose ${cost / 2:.0f}.\n"
+                f"3) SELL at ${targ_px:.2f} if it works — make ${cost / 2:.0f}.\n"
+                f"Both sell orders go in as soon as you're filled — never add to it.\n"
+                f"<i>Priced at yesterday's close — check the real price before you buy; if "
+                f"it opens far from ${px:.2f}, the whole plan moves with it.</i>")
     except Exception:
         return ""
 
@@ -679,22 +680,22 @@ def build_phone() -> str:
     """The beginner-facing pre-open brief. First line is the answer, every number gets a
     'so what', and it ends with an action or an explicit 'do nothing'."""
     now = datetime.now(ET)
+    lines = [hdr("☀️", "Today", now)]
     tape = _tape()
-    lines = [f"☀️ TODAY — {now:%a %b %-d}"]
 
     if tape:
-        lines.append(f"📊 {tape}" + (f"\n   {_tape_read(tape)}" if _tape_read(tape) else ""))
+        lines.append(f"📊 {esc(tape)}" + (f"\n{esc(_tape_read(tape))}" if _tape_read(tape) else ""))
 
     cat, orders, plan = _catalysts_and_orders(_relay_tickers_str(6), tape)
     if cat:
         # first sentence only — the model likes to pad, and padding is what makes a brief
         # get skimmed instead of read
-        lines.append(f"⚠️ The one thing today: {cat.split('. ')[0].rstrip('.')}.")
+        lines.append(f"⚠️ {b('THE ONE THING TODAY')}: {esc(cat.split('. ')[0].rstrip('.'))}.")
     numbered = _plan_orders(plan)
     if numbered:
         lines.append(numbered)
     elif orders:
-        lines.append(f"👉 Plan: {orders}")
+        lines.append(f"👉 {b('PLAN')}: {esc(orders)}")
 
     cat_line = _catalyst_phone_line()
     if cat_line:
@@ -720,8 +721,8 @@ def build_phone() -> str:
     if one:
         lines.append(one)
 
-    lines.append(f"🛡️ Never risk more than ${RISK_CAP} on a single trade. "
-                 "If nothing here fits, doing nothing is a valid day.")
+    lines.append(footer(f"Never risk more than ${RISK_CAP} on a single trade. "
+                         "If nothing here fits, doing nothing is a valid day.").lstrip("\n"))
 
     text = "\n\n".join(lines)
     # §3: Telegram's hard cap is 4096 chars. Trim order — drop block 3 (SNR headlines)
@@ -747,9 +748,10 @@ def _mirror_telegram(_discord_text: str) -> None:
     Falls back down the old chain if that bot is unreachable. Never raises."""
     from lib.notify import tg_push
     text = build_phone()
-    # html=False: the catalyst/orders lines come from an LLM and a stray '<' would make
-    # Telegram reject the whole message with a parse error (silent missed brief).
-    if tg_push(text, "trading_command", loud=True, html=False):
+    # html=True (2026-09-15 format sweep): build_phone() now routes every dynamic
+    # string (LLM catalyst/orders text included) through tg_format.esc()/b(), so a
+    # stray '<' or '&' from the model or a headline can no longer break the parse.
+    if tg_push(text, "trading_command", loud=True, html=True):
         print("[morning] phone brief -> trading_command", flush=True)
         return
     used = tg_brief(text)

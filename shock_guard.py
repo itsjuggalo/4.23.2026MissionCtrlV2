@@ -50,6 +50,7 @@ from zoneinfo import ZoneInfo
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from lib.http_retry import request as http_request, CAT_RATELIMIT  # noqa: E402
 from lib.alert_gate import should_send, mark_sent  # noqa: E402
+import tg_format as tgf  # noqa: E402  (2026-09-15 Telegram format sweep)
 
 ET = ZoneInfo("America/New_York")
 SEC = Path.home() / ".openclaw" / "secrets"
@@ -338,9 +339,12 @@ def alert_blind(reasons: list[str]) -> None:
     instead of firing every 2 minutes."""
     fp = "|".join(sorted(reasons))
     ok, why = should_send(BLIND_ALERT_KEY, fp, repeat_after=BLIND_ALERT_REPEAT_SEC)
-    text = ("🩶 <b>SHOCK GUARD BLIND</b>\n" + "\n".join(f"• {r}" for r in reasons) +
-            "\n\nCRISIS/HALT detection is degraded until this clears — both the free "
-            "source and the Alpaca fallback failed on the same tick.")
+    text = tgf.join(
+        tgf.hdr("🩶", "Shock Guard — Blind"),
+        tgf.section("Failed sources"),
+        *(tgf.row(r) for r in reasons),
+        tgf.footer("CRISIS/HALT detection is degraded until this clears — both the "
+                   "free source and the Alpaca fallback failed on the same tick."))
     if DRY:
         print(f"DRY blind-alert (gate={ok}, {why}):\n{text}\n")
         return
@@ -411,21 +415,20 @@ def short_dte_positions(account: str) -> list[dict]:
 
 def crisis_close_l3(reason: str) -> str:
     """List (and optionally market-close, paper only) all DTE<=2 option positions."""
-    lines = []
+    rows = []
     for acct in ("boba", "jazzy"):
         for p in short_dte_positions(acct):
-            tag = f"{p['account']}: {p['symbol']} x{p['qty']} ({p['dte']} DTE)"
             if AUTOCLOSE_FLAG.exists() and not DRY:
                 r = alpaca_trade(f"/v2/positions/{p['symbol']}", acct, method="DELETE")
-                tag += " — CLOSED" if r is not None else " — CLOSE FAILED, do it manually"
+                note = "CLOSED" if r is not None else "CLOSE FAILED, do it manually"
             else:
-                tag += " — CLOSE THIS NOW (auto-close off)"
-            lines.append(tag)
+                note = "CLOSE THIS NOW (auto-close off)"
+            rows.append(tgf.row(p["symbol"], acct, f"x{p['qty']}", f"{p['dte']} DTE", note))
             log_event("l3_position", {"reason": reason, **p,
                                       "auto": AUTOCLOSE_FLAG.exists()})
-    if not lines:
+    if not rows:
         return "No 0-2 DTE options held on paper accounts."
-    return "0-2 DTE options (these die first in a crash):\n  " + "\n  ".join(lines)
+    return "\n".join(rows)
 
 
 # --------------------------------------------------------------------------- #
@@ -494,8 +497,11 @@ def main() -> int:
     if not full and btc is not None and btc <= BTC_15M_PCT:
         # off-hours proxy: warn loudly, arm WATCH, but never CRISIS on BTC alone
         if time.time() - st.get("last_btc_alert", 0) > 3600:
-            telegram(f"⚠️ <b>Off-hours risk proxy</b>: BTC {btc:+.1f}% in 15 min. "
-                     f"Possible gap risk at next open. VIX last {vix or '?'}.", loud=True)
+            telegram(tgf.join(
+                tgf.hdr("⚠️", "Shock Guard — Off-Hours Proxy"),
+                tgf.row("BTC 15m", tgf.pct(btc)),
+                tgf.row("VIX last", vix if vix is not None else "?"),
+                tgf.footer("Possible gap risk at next open.")), loud=True)
             st["last_btc_alert"] = time.time()
         st["level"] = max_level(st["level"], "WATCH")
         log_event("btc_proxy", {"btc_15m_pct": btc, "vix": vix})
@@ -535,15 +541,18 @@ def main() -> int:
                 "trail_giveback_mult": 0.6,
                 "size_mult": round(min(1.0, 15.0 / vix), 2) if vix else 0.5}))
         l3 = crisis_close_l3(reason)
-        telegram(
-            f"🚨 <b>SHOCK GUARD — CRISIS</b>\n{reason}\n"
-            f"{'• headlines: ' + ' | '.join(headlines) if headlines else ''}\n\n"
-            f"DONE automatically:\n"
-            f"1. New buys HALTED (decipher_HALT set)\n"
-            f"2. Trailing stops tightened, sizing cut (decipher_STRESS)\n\n"
-            f"{l3}\n\n"
-            f"Robinhood: close anything expiring this week yourself.\n"
-            f"Reply <b>RESUME</b> here when you want trading back on.", loud=True)
+        blocks = [tgf.hdr("🚨", "Shock Guard — Crisis"),
+                  tgf.section("Trigger"), tgf.esc(reason)]
+        if headlines:
+            blocks.append("headlines: " + tgf.esc(" | ".join(headlines)))
+        blocks += [tgf.section("Done automatically"),
+                   "1. New buys HALTED (decipher_HALT set)",
+                   "2. Trailing stops tightened, sizing cut (decipher_STRESS)",
+                   tgf.section("0-2 DTE options (these die first in a crash)"),
+                   l3,
+                   "\nRobinhood: close anything expiring this week yourself.\n"
+                   f"Reply {tgf.b('RESUME')} here when you want trading back on."]
+        telegram(tgf.join(*blocks), loud=True)
         log_event("crisis", {"reason": reason, "vix": vix, "z": z,
                              "headlines": headlines})
     elif st["level"] == "CRISIS" and not triggers:
@@ -565,8 +574,10 @@ def main() -> int:
                         if notes == 0 else
                         "HALT is STILL ON (no RESUME seen) — reply <b>RESUME</b> when ready. "
                         "This is the last reminder.")
-                telegram(f"✅ Shock guard: conditions calm (VIX {vix or '?'}). {tail}",
-                         loud=False)
+                telegram(tgf.join(
+                    tgf.hdr("✅", "Shock Guard — Calm"),
+                    tgf.row("VIX", vix if vix is not None else "?"), tail),
+                    loud=False)
                 st["calm_notes"] = notes + 1
                 log_event("calm_notice", {"vix": vix, "note": notes + 1})
     elif st["level"] == "WATCH" and time.time() - st.get("watch_armed_at", 0) > 1800 \
@@ -580,13 +591,17 @@ def main() -> int:
                 "set_at": n.isoformat(), "vix": vix, "reason": f"VIX {vix:g}",
                 "trail_giveback_mult": 0.6,
                 "size_mult": round(min(1.0, 15.0 / vix), 2)}))
-            telegram(f"🟠 VIX {vix:g} — stress mode: trails tightened, "
-                     f"new-position sizing scaled down. Auto-clears under {VIX_CLEAR:g}.",
-                     loud=False)
+            telegram(tgf.join(
+                tgf.hdr("🟠", "Shock Guard — Stress"),
+                tgf.row("VIX", f"{vix:g}"),
+                "Trails tightened, new-position sizing scaled down.",
+                tgf.footer(f"Auto-clears under VIX {VIX_CLEAR:g}.")), loud=False)
             log_event("stress_on", {"vix": vix})
         elif vix < VIX_CLEAR and STRESS_FILE.exists() and st["level"] != "CRISIS":
             STRESS_FILE.unlink(missing_ok=True)
-            telegram(f"🟢 VIX {vix:g} — stress mode cleared.", loud=False)
+            telegram(tgf.join(
+                tgf.hdr("🟢", "Shock Guard — Stress Cleared"),
+                tgf.row("VIX", f"{vix:g}")), loud=False)
             log_event("stress_off", {"vix": vix})
 
     if DRY:

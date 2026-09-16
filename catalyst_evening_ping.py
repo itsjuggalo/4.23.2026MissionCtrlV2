@@ -27,6 +27,7 @@ from zoneinfo import ZoneInfo
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 from lib.notify import tg_push  # noqa: E402
+from tg_format import hdr, row, esc, b, money, footer  # noqa: E402  (2026-09-15 format sweep)
 
 ET = ZoneInfo("America/New_York")
 NEWS_SNR_URL = "http://localhost:3000/api/news-snr"
@@ -86,10 +87,8 @@ def _fmt_event(e: dict) -> str:
         t = datetime.fromisoformat(at.replace("Z", "+00:00")).astimezone(ET).strftime("%-I:%M %p ET")
     except Exception:
         t = ""
-    val_s = f"${float(val):,.0f}" if isinstance(val, (int, float)) else ""
-    bits = [b for b in (val_s, note, t) if b]
-    tail = " — " + ", ".join(bits) if bits else ""
-    return f"• {sym} {typ}{tail}"
+    val_s = money(val, 0) if isinstance(val, (int, float)) else ""
+    return row(sym, typ, val_s, note, t)
 
 
 def _snr_line(symbol: str) -> str:
@@ -103,12 +102,12 @@ def _snr_line(symbol: str) -> str:
             d = json.loads(r.read())
         arts = sorted(d.get("articles") or [], key=lambda a: -(a.get("snr") or 0))
         if not arts:
-            return f"📰 {symbol}: no corroborating headline (SNR<60)"
+            return f"📰 {b(symbol)}: no corroborating headline (SNR&lt;60)"
         top = arts[0]
         title = str(top.get("title") or "")[:100]
-        return f"📰 {symbol}: SNR {top.get('snr')} ({top.get('source', '?')}) \"{title}\""
+        return f"📰 {b(symbol)}: SNR {top.get('snr')} ({esc(top.get('source', '?'))}) “{esc(title)}”"
     except Exception:
-        return f"📰 {symbol}: no corroborating headline (SNR check failed)"
+        return f"📰 {b(symbol)}: no corroborating headline (SNR check failed)"
 
 
 def build(qualifying: list[dict]) -> str:

@@ -23,6 +23,7 @@ from pathlib import Path
 from zoneinfo import ZoneInfo
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
+from tg_format import hdr, esc, footer  # noqa: E402  (2026-09-15 format sweep)
 
 ET = ZoneInfo("America/New_York")
 REBOUND_JSON = Path(os.environ.get(
@@ -77,14 +78,16 @@ def new_triggers(data: dict, state: dict) -> list[dict]:
 
 
 def format_message(rows: list[dict], ran_at: str | None) -> str:
-    lines = [f"🏗 STRUCTURE TRIGGER — {len(rows)} name{'s' if len(rows) != 1 else ''} held a key level + momentum turned"]
+    n = len(rows)
+    lines = [hdr("🏗", "Structure Trigger",
+                 sub=f"{n} name{'s' if n != 1 else ''} held a key level + momentum turned")]
     for r in rows:
         row = r["row"]
-        lines.append(f"• {row.get('read')} · score {row.get('score')}/100")
+        lines.append(f"▸ {esc(row.get('read'))} · score {row.get('score')}/100")
         opt = row.get("option") or {}
         if opt.get("stopRule"):
-            lines.append(f"  ↳ {opt['stopRule']}")
-    lines.append(f"Advisory only · flat $400 cap · as of {ran_at or 'n/a'} · /api/rebound-setup")
+            lines.append(f"  ↳ {esc(opt['stopRule'])}")
+    lines.append(footer(f"Advisory only · flat $400 cap · as of {ran_at or 'n/a'} · /api/rebound-setup").lstrip("\n"))
     return "\n".join(lines)
 
 
@@ -109,7 +112,9 @@ def main() -> int:
         print(msg)
         return 0
     from lib.notify import tg_push  # local import: keeps --dry-run network-free
-    used = tg_push(msg, a.lane, loud=True, html=False)
+    # html=True (2026-09-15 format sweep): format_message() now routes every dynamic
+    # field through tg_format.esc(), so switching on bold headers/HTML is safe.
+    used = tg_push(msg, a.lane, loud=True, html=True)
     if not used:
         print(f"[rebound-ping] send FAILED on lane {a.lane} — will retry next run", flush=True)
         return 1

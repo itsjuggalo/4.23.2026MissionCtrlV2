@@ -44,8 +44,8 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 import skill_to_discord as sd  # noqa: E402
+import tg_format as tgf  # noqa: E402  (2026-09-15 Telegram format sweep)
 from lib.heartbeat import beat  # noqa: E402
-from lib.notify import tg_brief  # noqa: E402
 from lib.discord_threading import make_pick_key, post_to_pick_thread_bot  # noqa: E402
 
 ET = ZoneInfo("America/New_York")
@@ -296,11 +296,15 @@ def _post_scorecard_card(graded) -> None:
         print(f"[eod-scorecard] scorecard-card err: {e}", flush=True)
 
 
-def main():
+def _grade_glyph(val: float) -> str:
+    return "✅" if val > 0.3 else ("❌" if val < -0.3 else "➖")
+
+
+def _build_discord_msg(graded, scanner_graded, rebound_graded, snr) -> str:
+    """Discord-markdown scorecard (posted to #flow-picks via sd.post — unchanged)."""
     date = datetime.now(ET).strftime("%a %b %-d")
     lines = [f"📊 **EOD SCORECARD — {date}**"]
 
-    graded = _grade_picks()
     if graded:
         wins = sum(1 for _, g in graded if g and g[1] > 0.3)
         lines.append(f"**🎯 Today's flow picks — {wins}/{len(graded)} working:**")
@@ -310,13 +314,11 @@ def main():
                 lines.append(f"   • {label} — no data")
                 continue
             move, fav, entry, now = g
-            ic = "✅" if fav > 0.3 else ("❌" if fav < -0.3 else "➖")
-            lines.append(f"   {ic} {label} — underlying {entry:.2f}→{now:.2f} ({move:+.1f}%)")
+            lines.append(f"   {_grade_glyph(fav)} {label} — underlying {entry:.2f}→{now:.2f} ({move:+.1f}%)")
         lines.append("_Grade = did the underlying move the pick's direction since it posted._")
     else:
         lines.append("_No flow-signal picks logged today._")
 
-    scanner_graded = _grade_scanner_alerts()
     if scanner_graded:
         wins = sum(1 for _, g in scanner_graded if g and g[1] > 0.3)
         lines.append(f"\n**📡 Today's setup/explosion alerts — {wins}/{len(scanner_graded)} working:**")
@@ -326,10 +328,8 @@ def main():
                 lines.append(f"   • {label} — no data")
                 continue
             move, fav, entry, now = g
-            ic = "✅" if fav > 0.3 else ("❌" if fav < -0.3 else "➖")
-            lines.append(f"   {ic} {label} — {entry:.2f}→{now:.2f} ({move:+.1f}%)")
+            lines.append(f"   {_grade_glyph(fav)} {label} — {entry:.2f}→{now:.2f} ({move:+.1f}%)")
 
-    rebound_graded = _grade_rebound_triggers()
     if rebound_graded:
         lines.append(f"\n**🏗 Today's structure triggers ({len(rebound_graded)}):**")
         for r, g in rebound_graded:
@@ -338,23 +338,107 @@ def main():
                 lines.append(f"   • {r['symbol']}{opt} — no data")
                 continue
             move, _fav, entry, now = g
-            ic = "✅" if move > 0.3 else ("❌" if move < -0.3 else "➖")
-            lines.append(f"   {ic} {r['symbol']}{opt} — held {entry:.2f}, now {now:.2f} ({move:+.1f}%)")
+            lines.append(f"   {_grade_glyph(move)} {r['symbol']}{opt} — held {entry:.2f}, now {now:.2f} ({move:+.1f}%)")
 
-    snr = _snr_corroboration_line()
     if snr:
         lines.append(snr)
 
-    msg = "\n".join(lines)
+    return "\n".join(lines)
+
+
+def _build_tg_msg(graded, scanner_graded, rebound_graded, snr) -> str:
+    """Telegram HTML scorecard — same data as the Discord post, tg_format.py layout
+    (2026-09-15 format sweep). Every data point above stays; layout only."""
+    blocks = [tgf.hdr("📊", "EOD Scorecard")]
+
+    if graded:
+        wins = sum(1 for _, g in graded if g and g[1] > 0.3)
+        blocks.append(tgf.section(f"Flow picks · {wins}/{len(graded)} working"))
+        for r, g in graded:
+            label = f"{r['symbol']} ${r['strike']:g}{r['type']}"
+            if not g:
+                blocks.append(tgf.row(label, "no data"))
+                continue
+            move, fav, entry, now = g
+            blocks.append(tgf.row(label, f"{entry:.2f}→{now:.2f}", tgf.pct(move),
+                                   glyph=_grade_glyph(fav)))
+    else:
+        blocks.append(tgf.section("Flow picks"))
+        blocks.append("No flow-signal picks logged today.")
+
+    if scanner_graded:
+        wins = sum(1 for _, g in scanner_graded if g and g[1] > 0.3)
+        blocks.append(tgf.section(f"Setup/explosion alerts · {wins}/{len(scanner_graded)} working"))
+        for r, g in scanner_graded:
+            label = f"{r['symbol']} {r['direction']}"
+            if not g:
+                blocks.append(tgf.row(label, "no data"))
+                continue
+            move, fav, entry, now = g
+            blocks.append(tgf.row(label, f"{entry:.2f}→{now:.2f}", tgf.pct(move),
+                                   glyph=_grade_glyph(fav)))
+
+    if rebound_graded:
+        blocks.append(tgf.section(f"Structure triggers ({len(rebound_graded)})"))
+        for r, g in rebound_graded:
+            opt = r.get("option") or None
+            if not g:
+                blocks.append(tgf.row(r["symbol"], opt, "no data"))
+                continue
+            move, _fav, entry, now = g
+            blocks.append(tgf.row(r["symbol"], opt, f"held {entry:.2f}→{now:.2f}", tgf.pct(move),
+                                   glyph=_grade_glyph(move)))
+
+    if snr:
+        # strip the Discord "📰 **…**" wrapper _snr_corroboration_line() built — reuse
+        # just the trailing "TICKER 76 · TICKER 70 …" payload as the footer body.
+        payload = snr.split(":**", 1)[-1].strip() if ":**" in snr else snr.lstrip("\n")
+        blocks.append(tgf.footer(f"SNR corroboration (≥65): {payload}"))
+    if graded:
+        blocks.append(tgf.footer("Grade = did the underlying move the pick's direction since it posted."))
+
+    return tgf.join(*blocks)
+
+
+def _tg_send_html(text: str, chain=("flow_digest", "daily_briefs")) -> str | None:
+    """Chain-fallback Telegram send with parse_mode=HTML. Mirrors lib.notify.tg_brief's
+    fallback logic but keeps the <b>/<i> tags live — tg_brief's plain-text `send` would
+    print the raw tags on the phone. Local to this script; never raises."""
+    import subprocess
+    PY = "/home/itsju/.venv/bin/python"
+    FLEET = "/home/itsju/scripts/tg_fleet.py"
+    body = text if len(text) <= 4000 else text[:3990] + "\n…(truncated)"
+    for fn in chain:
+        if not fn:
+            continue
+        try:
+            r = subprocess.run([PY, FLEET, "sendhtml", fn, body],
+                               capture_output=True, text=True, timeout=30)
+            if r.returncode == 0 and "sent" in (r.stdout or ""):
+                return fn
+        except Exception:
+            continue
+    return None
+
+
+def main():
+    graded = _grade_picks()
+    scanner_graded = _grade_scanner_alerts()
+    rebound_graded = _grade_rebound_triggers()
+    snr = _snr_corroboration_line()
+
+    msg = _build_discord_msg(graded, scanner_graded, rebound_graded, snr)
+    tg_msg = _build_tg_msg(graded, scanner_graded, rebound_graded, snr)
+
     if "--print" in sys.argv or "--dry-run" in sys.argv:   # on-demand (/scorecard) or verify — return text, don't post
-        print(msg)
+        print(tg_msg)
         return
     sd.post(sd.resolve_channel("flow-picks"), msg)
     _post_grade_threads(graded)        # land each grade in its per-pick thread (closes the loop)
     _post_scorecard_card(graded)       # visual scorecard card
     _post_grade_action_cards(graded)   # best + worst pick → tap-to-act cards
     beat("eod_scorecard")
-    used = tg_brief(msg, chain=("flow_digest", "daily_briefs"))  # 2026-06-24: EOD Scorecard → flow_digest (fallback SpaceCoast)
+    used = _tg_send_html(tg_msg, chain=("flow_digest", "daily_briefs"))  # 2026-06-24: EOD Scorecard → flow_digest (fallback SpaceCoast)
     print(f"[eod-scorecard] posted; picks={len(graded)} · tg→{used or 'skip'}", flush=True)
 
 
