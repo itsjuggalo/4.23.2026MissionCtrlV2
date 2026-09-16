@@ -65,11 +65,13 @@ def money(x, digits: int = 2) -> str:
         v = float(x)
     except (TypeError, ValueError):
         return esc(x)
-    if abs(v) >= 1_000_000:
-        return f"${v/1_000_000:.1f}M"
-    if abs(v) >= 10_000:
-        return f"${v/1_000:.0f}K"
-    return f"${v:,.{digits}f}"
+    sign = "-" if v < 0 else ""
+    v = abs(v)
+    if v >= 1_000_000:
+        return f"{sign}${v/1_000_000:.1f}M"
+    if v >= 10_000:
+        return f"{sign}${v/1_000:.0f}K"
+    return f"{sign}${v:,.{digits}f}"
 
 
 def pct(x, digits: int = 1, signed: bool = True) -> str:
