@@ -27,6 +27,8 @@ from zoneinfo import ZoneInfo
 
 sys.path.insert(0, "/AIWorkWSL/labs/quantum/src")
 import theo  # noqa: E402
+sys.path.insert(0, str(Path.home() / "scripts"))
+from tg_format import hdr, esc, footer  # noqa: E402  (2026-09-15 format sweep)
 
 SEC = Path.home() / ".openclaw" / "secrets"
 TOKEN_FILE = SEC / "telegram_laptopclaude_bot_token"
@@ -194,27 +196,27 @@ def scorecard(pos: dict):
 
 def fmt_card(cards) -> str:
     now = datetime.now(ET)
-    lines = [f"📟 <b>LIVE CONTRACT SCORECARD</b> — {now:%a %-m/%-d %-I:%M %p ET}",
+    lines = [hdr("📟", "Live Contract Scorecard", now),
              "<i>Current Firebase Relay high-interest contracts, read through the Academy grid.</i>", ""]
     for c in cards:
         p = c["pos"]
-        label = f"{p['root']} {p['strike']:g}{'C' if p['kind']=='call' else 'P'} {p['exp']:%-m/%-d}"
+        label = f"{esc(p['root'])} {p['strike']:g}{'C' if p['kind']=='call' else 'P'} {p['exp']:%-m/%-d}"
         d = f"{c['delta']:+.2f}" if c["delta"] is not None else "—"
         th = f"${abs(c['theta_day'])*100:.0f}/day" + (f" ({c['theta_pct']:.0f}%)" if c["theta_pct"] is not None else "") if c["theta_day"] is not None else "—"
         pop = f"{c['pop']*100:.0f}%" if c["pop"] is not None else "—"
-        flags = " ".join(p.get("flags") or [])
+        flags = esc(" ".join(p.get("flags") or []))
         lines.append(f"<b>{label}</b> · mid ${c['mark']} · {c['moneyness']} · {c['dte']}d" + (f" · {flags}" if flags else ""))
         lines.append(f"  spot ${c['spot']} · breakeven ${c['be']} · need {c['need_pct']:.1f}% vs 1σ ±{c['one_sig_pct']:.1f}%")
         lines.append(f"  Δ {d} · θ {th} · POP {pop}")
         lines.append(f"  exits → T1 ${c['t1']:.2f} · stop ${c['stop']:.2f} · cliff {c['cliff']} DTE")
         for vline in c["verdict"]:
-            lines.append(f"  {vline}")
+            lines.append(f"  {esc(vline)}")
         if p.get("dp_tag"):
-            lines.append(f"  DP: {p['dp_tag']} — {p.get('dp_note') or ''}".rstrip(" —"))
+            lines.append(f"  DP: {esc(p['dp_tag'])} — {esc(p.get('dp_note') or '')}".rstrip(" —"))
         lines.append("")
-    lines.append("<i>Read-only · relay universe, not a held position · educational, not advice. "
-                 "POP on a long option is usually &lt;50% — the edge is the payoff "
-                 "(winners run, losses capped), not hit-rate.</i>")
+    lines.append(footer("Read-only · relay universe, not a held position · educational, not advice. "
+                        "POP on a long option is usually <50% — the edge is the payoff "
+                        "(winners run, losses capped), not hit-rate.").lstrip("\n"))
     return "\n".join(lines)
 
 

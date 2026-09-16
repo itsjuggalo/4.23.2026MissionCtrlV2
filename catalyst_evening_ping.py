@@ -111,7 +111,7 @@ def _snr_line(symbol: str) -> str:
 
 
 def build(qualifying: list[dict]) -> str:
-    lines = ["🧭 CATALYST PING — cluster/insider buy filed today (Form 4 deadline 22:00 ET):"]
+    lines = [hdr("🧭", "Catalyst Ping", sub="cluster/insider buy filed today (Form 4 deadline 22:00 ET)")]
     lines += [_fmt_event(e) for e in qualifying]
     # One SNR corroboration line per TICKER (not per event — a symbol with two
     # qualifying filings today still gets one line), in order of first appearance.
@@ -121,7 +121,7 @@ def build(qualifying: list[dict]) -> str:
         if sym not in seen:
             seen.append(sym)
     lines += [_snr_line(sym) for sym in seen]
-    lines.append("Full sector read-through in tomorrow's 08:15 ET brief.")
+    lines.append(footer("Full sector read-through in tomorrow's 08:15 ET brief.").lstrip("\n"))
     return "\n".join(lines)
 
 
@@ -150,7 +150,9 @@ def main() -> None:
         return
 
     text = build(qualifying)
-    used = tg_push(text, "trading_command", loud=True, html=False)
+    # html=True (2026-09-15 format sweep): every dynamic field (note, headline title,
+    # source) now goes through tg_format.esc()/row(), so HTML send is safe.
+    used = tg_push(text, "trading_command", loud=True, html=True)
     if used:
         _mark_pinged()
         print(f"[catalyst-ping] sent via {used} ({len(qualifying)} qualifying event(s))", flush=True)
