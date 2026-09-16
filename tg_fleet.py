@@ -88,8 +88,7 @@ FLEET = {
     "laptop_control":  dict(user="(reserved — no bot; cap reached)", avatar="battlecruiser", role="infra", src=("file", "telegram_phone_channel_bot_token")),
     # (spare_backup / @BobaClaw removed 2026-06-21 — phantom: no real BotFather bot existed; all 20 slots are live.)
     # ── reserve pool (Mike's spare bots, folded in 2026-06-16 — named + rebranded, persona-ready) ──
-    "jazzy_relay":     dict(user="JazzyHazzy_Bot",          avatar="zealot",          role="spare",       src=("cloud", None)),
-    "orion_relay":     dict(user="oOrionz_Bot",             avatar="kerrigan",        role="spare",       src=("cloud", None)),
+    # (jazzy_relay @JazzyHazzy_Bot + orion_relay @oOrionz_Bot removed 2026-09-15 — Orion/Boba/Jazzy retired; bots stay parked in BotFather.)
     "grok_scout":      dict(user="Grootk_Bot",              avatar="goliath",         role="spare",       src=("cloud", None)),
     # retired→winmeals 2026-09-15: confirmed idle (crontab line commented out, no live
     # sender referenced it) — its vault token (telegram.trend_scanner) is now also

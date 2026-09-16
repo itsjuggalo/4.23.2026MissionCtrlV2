@@ -9,10 +9,8 @@ LLM only adds framing, clearly labeled.
 
   grok_scout    — pre-open live-X buzz (x_search, grok-3 OAuth)        cron 0 9  * * 1-5
   trend_scanner — post-open momentum movers (yfinance + deepseek)      cron 15 10 * * 1-5
-  jazzy_relay   — EOD GPT second-opinion on today's top flow pick      cron 15 16 * * 1-5
-  orion_relay   — weekly Gemini research read on the week's standout   cron 0 11 * * 0
 
-Run:  reserve_persona_push.py <grok_scout|trend_scanner|jazzy_relay|orion_relay>   (DRY=1 to print)
+Run:  reserve_persona_push.py <grok_scout|trend_scanner>   (DRY=1 to print)
 """
 from __future__ import annotations
 
@@ -89,51 +87,8 @@ def trend_scanner():
     _send("trend_scanner", msg)
 
 
-def jazzy_relay():
-    try:
-        d = json.loads(BEST.read_text())
-        pick = (d.get("picks") or [d])[0] if isinstance(d, dict) else d[0]
-    except Exception as e:
-        print(f"[jazzy_relay] no top pick: {e}"); return
-    if not pick.get("ticker"):
-        print("[jazzy_relay] empty pick"); return
-    desc = (f"{pick.get('ticker')} {str(pick.get('type','')).upper()} ${pick.get('strike')} "
-            f"exp {pick.get('expiry')} ({pick.get('days')} DTE), confidence "
-            f"{pick.get('confidence')}, quality {pick.get('quality')}")
-    out = llm.call_llm_text(
-        f"Today's top options-flow pick is: {desc}. Give a GPT SECOND OPINION for a paper "
-        f"trade: is the structure/DTE sound, the single biggest risk, and a clear take/pass — "
-        f"sized as a fraction of equity with a HARD max risk cap of min($400, 15% of equity). 5 lines max, plain.",
-        ["codex_cli", "deepseek"])
-    if not out:
-        print("[jazzy_relay] no LLM output"); return
-    _send("jazzy_relay", f"🧮 <b>Jazzy Relay</b> — GPT 2nd opinion on today's top pick\n"
-                         f"<i>{desc}</i>\n\n{out.strip()}\n\n<i>Paper-only · independent check</i>")
-
-
-def orion_relay():
-    try:
-        rows = _movers(20)
-    except Exception:
-        rows = []
-    # this week's standout = biggest absolute mover we have data for (real anchor)
-    tkr = rows[0][0] if rows else "NVDA"
-    move = (f" (currently ${rows[0][1]:,.2f}, moved {rows[0][2]:+.1f}% on the day)"
-            if rows else "")
-    out = llm.call_llm_text(
-        f"Write a concise weekly RESEARCH read on {tkr}{move}. IMPORTANT: use the current price "
-        f"I gave you — do NOT cite a different price from memory. Cover the setup, 2 bull points, "
-        f"2 bear points, key catalysts to watch, and a one-line take. Clearly a research thesis "
-        f"to investigate — not financial advice. 8 lines max.",
-        ["gemini", "deepseek"])
-    if not out:
-        print("[orion_relay] no LLM output"); return
-    _send("orion_relay", f"🔭 <b>Orion Relay</b> — weekly research read: <b>{tkr}</b>\n\n"
-                        f"{out.strip()}\n\n<i>Gemini's read — verify before trading</i>")
-
-
 HANDLERS = {"grok_scout": grok_scout, "trend_scanner": trend_scanner,
-            "jazzy_relay": jazzy_relay, "orion_relay": orion_relay}
+            }
 
 
 def main() -> int:

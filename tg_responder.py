@@ -15,7 +15,7 @@ Since 2026-07-19 the fleet runs as ONE PM2 process (the pm2-tg-bot-gateway colla
   pm2 start tg_responder.py --name tg-gateway --interpreter ~/.venv/bin/python \
       --max-memory-restart 300M -- --gateway active
 The old per-lane procs (tg-laptopclaude, tg-pingpong, tg-grokscout, tg-trendscanner,
-tg-jazzycodexgpt, tg-orionrelay) are STOPPED in PM2 as instant rollback — never run one
+(the per-lane PM2 procs were deleted 2026-09-15 with the Orion/Boba/Jazzy retirement) — never run one
 of them while tg-gateway is up (getUpdates 409).
 
 Since 2026-09-01 every lane EXCEPT `astrology` is commands-only: a bare non-slash message
@@ -246,44 +246,6 @@ BOTS = {
     # token lives in the vault (tg_fleet `telegram.<fleet_fn>`); `providers` routes the
     # free-text brain via lib.llm.call_llm_text. No `tools` key → claude-tool commands
     # (/news, /greeks TKR) fall back to the default toolset on the claude CLI.
-    "jazzycodexgpt": {
-        "fleet_fn": "jazzy_relay",                         # vault → @JazzyHazzy_Bot
-        "owner": "telegram-chat-id.txt",
-        "name":  "JazzyCodexGPT",
-        "providers": ["codex_cli", "grok_oauth"],          # OpenAI/ChatGPT sub (Codex) → Grok sub fallback (deepseek API unregistered 06-17)
-        "persona": (
-            "You are JazzyCodexGPT — a GPT-powered second-opinion trading analyst (OpenAI brain), "
-            "an independent cross-check to the Claude desks. For any ticker or trade give your own "
-            "read: thesis, the key risk, and a clear lean. Size ideas as a fraction of CURRENT "
-            "equity, HARD risk cap min($400, 15% of equity). Never place trades. Eastern Time, short plain-text for Telegram."
-        ),
-        "help": (
-            "🤝 JazzyCodexGPT — GPT 2nd-opinion analyst (OpenAI brain).\n"
-            "An independent cross-check to the Claude desks:\n"
-            "• my own read on any ticker/trade: thesis · key risk · lean\n"
-            "Provider diversity. Never places trades.\n"
-            "Ask anything. /help = this."
-        ),
-    },
-    "orionrelay": {
-        "fleet_fn": "orion_relay",                         # vault → @oOrionz_Bot
-        "owner": "telegram-chat-id.txt",
-        "name":  "Orion Relay",
-        "providers": ["claude_oauth", "codex_cli"],        # Claude sub → Codex sub (gemini/deepseek API unregistered 06-17)
-        "persona": (
-            "You are Orion Relay — a deep research/decision desk (Claude brain) running structured "
-            "reads alongside the GPT (JazzyCodexGPT) and Grok (Grok Scout) desks. For any ticker or "
-            "question give a structured read: the setup, catalysts, bull vs bear, and a decisive take. "
-            "Never place trades. Eastern Time, short plain-text for Telegram."
-        ),
-        "help": (
-            "🛰️ Orion Relay — structured research/decision desk (Claude brain).\n"
-            "For any ticker or question:\n"
-            "• the setup · catalysts · bull vs bear · decisive take\n"
-            "Runs alongside the GPT + Grok desks. Never places trades.\n"
-            "Ask anything. /help = this."
-        ),
-    },
     "grokscout": {
         "fleet_fn": "grok_scout",                          # vault → @Grootk_Bot
         "owner": "telegram-chat-id.txt",
@@ -321,8 +283,7 @@ BOTS = {
     },
 }
 
-# Backward-compatible process arg for the old PM2 name.
-BOTS["jazzyrelay"] = BOTS["jazzycodexgpt"]
+# (jazzyrelay / jazzycodexgpt / orionrelay personas removed 2026-09-15 — Mike: Orion/Boba/Jazzy retired.)
 
 
 def _secret(name):
@@ -345,8 +306,7 @@ OWNED_ELSEWHERE = {"xsentiment": "grok_telegram.py owns telegram_grok_bot_token 
 
 # Gateway default lane set = every live conversational lane (2026-07-19 collapse: one
 # process replaces the per-lane PM2 procs). Excludes *_PARKED/_RETIRED and OWNED_ELSEWHERE.
-GATEWAY_LANES = ["laptopclaude", "pingpong", "grokscout", "trendscanner",
-                 "jazzycodexgpt", "orionrelay", "astrology"]
+GATEWAY_LANES = ["laptopclaude", "pingpong", "grokscout", "trendscanner", "astrology"]
 
 # Free-form chatter (a bare non-slash message) fires an LLM call on Mike's subscription and
 # eats his 5-hour window. Only the astrology lane keeps that fully-conversational mode
@@ -835,7 +795,7 @@ def run_bot(botkey):
                 # Routing for everything else:
                 #  • a /slash command usually goes through Claude skills.
                 #  • Codex-primary reserve bots keep slash skills in their own OpenAI lane.
-                #    This lets JazzyCodexGPT use the Codex-installed AInvest/SkillHub skills
+                #    This lets the Codex-brain lanes use the Codex-installed AInvest/SkillHub skills
                 #    instead of bouncing /ainvest back through Claude.
                 #  • plain text → the persona's own brain (claude, or Codex/Grok/etc.
                 #    for the reserve bots) — provider diversity preserved.
