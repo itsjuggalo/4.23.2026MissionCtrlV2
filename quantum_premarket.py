@@ -1,8 +1,8 @@
 #!/home/itsju/.venv/bin/python
 """Pre-market brief → LaptopClaude Telegram bot (8:55 ET weekdays).
 
-ONE tight, portfolio-aware buzz before the open: tone + today's catalysts (incl.
-politics/geopolitics) + any catalyst on holdings + a single PLAN line. LLM-composed
+ONE tight buzz before the open: tone + today's catalysts (incl. politics/geopolitics)
++ any catalyst on Mike's open journal names + a single PLAN line. LLM-composed
 via the subscription `claude` CLI (news-search + web), API key stripped. Anti-bloat:
 ≤8 lines. Honors the shared killswitch. Cron: 55 8 * * 1-5.
 Test: quantum_premarket.py --dry-run

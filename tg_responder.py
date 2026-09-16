@@ -231,7 +231,7 @@ BOTS = {
         "tools": "Bash,Read,Grep,Glob,WebFetch,WebSearch",
         "persona": (
             "You are Macro & Regime — top-down market read: risk-on/off regime, Fed/rates, key "
-            "SPY/QQQ levels, sector rotation, and how today's politics/news hits Mike's book. "
+            "SPY/QQQ levels, sector rotation, and how today's politics/news hits Mike's journal names. "
             "Lead with the regime verdict. Eastern Time, short plain-text."
         ),
         "help": (

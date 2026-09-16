@@ -5,6 +5,10 @@ Reads the quantum pricing pipeline's END-RESULT artifacts (owned by another sess
 — we only READ them) and distills the single best actionable contract into a verdict-
 first, zero-bloat message. Powers /pick /picks /book on the Telegram responders.
 
+2026-09-16: Alpaca is a market-DATA source only. No account/equity/heat/positions read
+anywhere here — sizing is the flat $400 cap; /book reads Mike's own journal fills
+(option-scraper data/paper_trades.json), never a broker book.
+
 Anti-bloat doctrine: ONE clear action, ≤5 short lines, no data walls. Honest when
 there's nothing clean (capital preservation > FOMO).
 """
@@ -14,6 +18,9 @@ from zoneinfo import ZoneInfo
 from tg_format import esc, b, hdr, section, row, footer, join
 
 OUT = os.path.expanduser("~/labs/quantum/out")
+JOURNAL = "/AIWorkWSL/trading/signals/option-scraper/data/paper_trades.json"   # Mike's own fills (read-only)
+RISK_CAP = 400.0   # flat per-trade cap (doctrine 2026-09-12)
+MC = "http://localhost:3000"
 SCRAPER = os.path.expanduser("~/trading/signals/option-scraper/data")
 ET  = ZoneInfo("America/New_York")
 
@@ -21,6 +28,30 @@ ET  = ZoneInfo("America/New_York")
 def _load(name):
     try:
         return json.load(open(os.path.join(OUT, name)))
+    except Exception:
+        return None
+
+
+def _journal(status="open"):
+    """Mike's journal fills (took / virtual_pick) with the given status, newest first.
+    Read-only; the file is owned by the option-scraper decipher layer."""
+    try:
+        d = json.load(open(JOURNAL))
+    except Exception:
+        return []
+    rows = d.get("trades") if isinstance(d, dict) and isinstance(d.get("trades"), list) else \
+        (list(d.values()) if isinstance(d, dict) else (d or []))
+    rows = [r for r in rows if isinstance(r, dict) and r.get("status") == status
+            and r.get("source") in ("took", "virtual_pick")]
+    rows.sort(key=lambda r: str(r.get("closed_at") or r.get("opened_at") or ""), reverse=True)
+    return rows
+
+
+def _mc(path, timeout=6):
+    """GET a missionctrl route as JSON (None on any failure — every caller degrades)."""
+    try:
+        import urllib.request
+        return json.loads(urllib.request.urlopen(f"{MC}{path}", timeout=timeout).read())
     except Exception:
         return None
 
@@ -171,9 +202,8 @@ def _spread_pick_line(p, s):
             + esc(f" · {p.get('confidence')}-conf · {p.get('value')}"))
 
 
-def _verdict(p, heat=None, risk_cap=None):
-    """Honest verdict from action + value, then an ACCOUNT overlay (heat + free cash).
-    The overlay can only make it MORE conservative — never talks you into more risk."""
+def _verdict(p, risk_cap=None):
+    """Honest verdict from action + value, sized against the flat $400 cap only."""
     act = (p.get("action") or "").upper()
     val = (p.get("value") or "").lower()
     if act == "ACT" and val in ("cheap", "fair"):
@@ -191,22 +221,15 @@ def _verdict(p, heat=None, risk_cap=None):
         if s:   # pipeline's debit spread fits the cap → an actual play, not a SKIP
             return (f"🟢 BUY SPREAD — naked {_money(p.get('per_contract'))} is over cap; "
                     f"the {_money(s.get('cost_per'))} debit spread fits")
-        return f"⏳ SKIP — 1 contract ({_money(p.get('per_contract'))}) exceeds your risk cap"
-    if heat:
-        hp = heat.get("heat_pct") or 0
-        if heat.get("over_allocated") or hp >= 55:
-            return f"⏳ WAIT — book is hot ({hp:.0f}% heat); manage existing before adding"
-        cash, cost = heat.get("cash"), p.get("per_contract")
-        if isinstance(cash, (int, float)) and isinstance(cost, (int, float)) and cost > cash:
-            return f"⏳ WAIT — only {_money(cash)} free vs {_money(cost)} cost; raise cash first"
+        return f"⏳ SKIP — 1 contract ({_money(p.get('per_contract'))}) is over the $400 cap"
     return base
 
 
 def _pick_line(p):
     typ = (p.get("type") or "").upper()
-    qty, pctq = p.get("qty") or 0, p.get("pct_of_equity")
-    size = (f"buy {qty} = {pctq}% of acct" if qty and pctq is not None
-            else f"1 ct {_money(p.get('per_contract'))} — over your risk cap")
+    qty, per = p.get("qty") or 0, p.get("per_contract") or 0
+    size = (f"buy {qty} = {_money(qty * per)} of the $400 cap" if qty
+            else f"1 ct {_money(per)} — over the $400 cap")
     head = b(f"{p.get('ticker')} ${p.get('strike'):g} {typ}")
     return (f"{head} · {esc(_fmt_exp(p.get('expiry')))} ({esc(p.get('days'))}d)\n"
             + esc(f"{_money(p.get('per_contract'))}/ct · {size} · {p.get('confidence')}-conf · "
@@ -218,12 +241,6 @@ def _fmt_exp(e):
         return datetime.strptime(e, "%Y-%m-%d").strftime("%-m/%-d")
     except Exception:
         return e
-
-
-def _acct_line(d):
-    h = d.get("portfolio_heat") or {}
-    return esc(f"acct: {_money(d.get('equity'))} · {h.get('heat_pct','?')}% heat · "
-               f"{_money(h.get('cash'))} free")
 
 
 def _sweeps_raw():
@@ -362,10 +379,8 @@ def pick(top=1):
         return join(
             hdr("🟦", "No Clean Buy", sub=fresh),
             esc(f"pipeline checked {d.get('n_considered','?')} and dropped all "
-                f"{nd} (too pricey/illiquid/risky). Capital preserved — sit tight."),
-            _acct_line(d))
-    heat = d.get("portfolio_heat")
-    risk_cap = d.get("risk_cap")
+                f"{nd} (too pricey/illiquid/risky). Capital preserved — sit tight."))
+    risk_cap = min(float(d.get("risk_cap") or RISK_CAP), RISK_CAP)
     flowdir = _flow_directions()
     if top == 1:
         p = picks[0]
@@ -380,11 +395,11 @@ def pick(top=1):
             hdr("🎯", "Top Pick", sub=fresh),
             esc(_stale_warning(d.get('as_of')).strip()) or None,
             head,
-            esc(_verdict(p, heat, risk_cap)),
+            esc(_verdict(p, risk_cap)),
             conf, trap,
             f"<i>why: {esc(why)}</i>" if why else None,
             order_line,
-            _acct_line(d))
+            footer("flat $400 cap · advisory — you place every trade"))
     n = min(top, len(picks))
     star_picks, rest = [], []
     for i, p in enumerate(picks[:top], 1):
@@ -395,7 +410,7 @@ def pick(top=1):
         typ = (p.get("type") or "").upper()
         sp = _afford_spread(p, risk_cap) if (p.get("qty") or 0) < 1 else None
         price = f"{_money(sp.get('cost_per'))} sprd" if sp else _money(p.get("per_contract"))
-        verdict = _verdict(p, heat, risk_cap).split(' — ')[0]
+        verdict = _verdict(p, risk_cap).split(' — ')[0]
         return row(f"{i}. {p.get('ticker')}", f"${p.get('strike'):g}{typ[0]}",
                    _fmt_exp(p.get('expiry')), price, p.get('confidence'),
                    p.get('value'), verdict, glyph=("⭐" if star else "▸"))
@@ -406,41 +421,30 @@ def pick(top=1):
         if star_picks:
             lines.append(section("Other Picks"))
         lines += [_pick_row(i, p, False) for i, p in rest]
-    lines.append(_acct_line(d))
+    lines.append(footer("flat $400 cap · advisory — you place every trade"))
     return join(*lines)
 
 
 def book():
-    """Current paper book + HOLD/TRIM/EXIT verdicts, tight."""
-    d = _load("portfolio_manage.json")
-    if not d:
-        return "no book snapshot yet."
-    out = [hdr("📒", "Book", sub=esc(f"{_money(d.get('equity'))} · "
-                                      f"{d.get('heat_pct','?')}% heat · {_money(d.get('cash'))} free"))]
-    positions = d.get("positions") or []
-    flagged = []
-    # `moves` is keyed BY verdict → list of position dicts (e.g. {"HOLD":[...],"TRIM":[...]}).
-    moves = d.get("moves")
-    if isinstance(moves, dict):
-        for verdict, items in moves.items():
-            if str(verdict).upper() in ("HOLD", "KEEP"):
-                continue
-            for it in (items or []):
-                sym = it.get("symbol") if isinstance(it, dict) else it
-                flagged.append(row(sym, verdict, glyph="⚠️"))
-    if positions:
-        out.append(section("Positions"))
-    for pos in positions[:6]:
-        if isinstance(pos, dict):
-            sym = pos.get("symbol") or pos.get("ticker")
-            pnl = pos.get("pnl_pct")
-            pnl = f"{pnl:+.1f}%" if isinstance(pnl, (int, float)) else None
-            out.append(row(sym, pnl, pos.get('verdict') or None))
-    if flagged:
-        out.append(section("Action"))
-        out.extend(flagged)
-    else:
-        out.append("✅ all HOLD — nothing to do")
+    """Mike's OPEN journal fills (took / virtual_pick) with their plan levels. Never a
+    broker book — Alpaca is data only (2026-09-16)."""
+    rows = _journal("open")
+    if not rows:
+        return join(hdr("📒", "Journal"), "no open journal fills — log one from a pick to track it here.")
+    out = [hdr("📒", "Journal", sub=f"{len(rows)} open fill{'s' if len(rows) != 1 else ''} · flat $400 cap")]
+    for r in rows[:6]:
+        typ = (r.get("type") or r.get("side") or "")[:1].upper()
+        strike = r.get("strike")
+        head = f"${strike:g}{typ}" if isinstance(strike, (int, float)) else (r.get("contract") or "")
+        opened = str(r.get("opened_at") or "")[:10]
+        stop, t1 = r.get("stop"), r.get("t1")
+        out.append(row(r.get("symbol"), head, _fmt_exp(r.get("expiry")),
+                       f"in {_money(r.get('entry'))}",
+                       f"stop {_money(stop)}" if isinstance(stop, (int, float)) else None,
+                       f"T1 {_money(t1)}" if isinstance(t1, (int, float)) else None,
+                       f"since {opened}" if opened else None,
+                       glyph="▸"))
+    out.append(footer("exit levels ping on Trading Command (decipher exit advisor) · /pick for new ideas"))
     return join(*out)
 
 
@@ -493,17 +497,15 @@ def greeks():
     """Greeks + IV on the contracts we follow (held options + current picks).
     Helps decide WHICH contract: delta = directional punch, IV = cheap vs pricey."""
     bc = _load("best_contracts.json")
-    pm = _load("portfolio_manage.json")
     lines = [hdr("📐", "Greeks / IV")]
-    held = [p for p in (pm or {}).get("positions", []) or []
-            if isinstance(p, dict) and p.get("is_option")]
+    held = _journal("open")
     if held:
-        lines.append(section("Held"))
-    for p in held:
-        d = p.get("delta"); th = p.get("theta")
-        ds = f"Δ{d:+.2f}" if isinstance(d, (int, float)) else None
-        ts = f"θ{th:+.2f}" if isinstance(th, (int, float)) else None
-        lines.append(row(p.get('symbol'), ds, ts, f"IV {_ivp(p.get('iv'))}"))
+        lines.append(section("Journal"))
+    for r in held[:4]:
+        typ = (r.get("type") or r.get("side") or "")[:1].upper()
+        strike = r.get("strike")
+        lines.append(row(r.get('symbol'), f"${strike:g}{typ}" if isinstance(strike, (int, float)) else None,
+                          _fmt_exp(r.get('expiry')), f"in {_money(r.get('entry'))}"))
     picks = (bc or {}).get("picks", []) or []
     if picks:
         lines.append(section("Watching"))
@@ -519,31 +521,97 @@ def greeks():
     return join(*lines)
 
 
+def _close_tape():
+    """SPY/QQQ/IWM/VIX close + day % (yfinance daily). None on failure."""
+    try:
+        import yfinance as yf
+        df = yf.download(["SPY", "QQQ", "IWM", "^VIX"], period="5d", interval="1d",
+                         progress=False, auto_adjust=False, threads=False)["Close"]
+        df = df.dropna(how="all")
+        if len(df) < 2:
+            return None
+        out = []
+        for sym, label in (("SPY", "SPY"), ("QQQ", "QQQ"), ("IWM", "IWM"), ("^VIX", "VIX")):
+            c, pv = float(df[sym].iloc[-1]), float(df[sym].iloc[-2])
+            pct = (c / pv - 1) * 100 if pv else 0.0
+            out.append(f"{label} {c:,.0f} ({pct:+.1f}%)" if label != "VIX" else f"VIX {c:.1f} ({pct:+.1f}%)")
+        return " · ".join(out)
+    except Exception:
+        return None
+
+
+def _close_breadth():
+    """S&P breadth close from the console breadth route (share of members on a buy signal)."""
+    d = _mc("/api/console/breadth?scope=SPY")
+    try:
+        br = (d.get("current") or {}).get("breadth") or []
+        ema = ((d.get("series") or {}).get("ema20") or [])
+        now, prev = float(br[-1]), float(br[-2])
+        e20 = float(ema[-1]) if ema else None
+        tone = "expanding" if now > prev else "contracting"
+        return (f"{now:.0f}% of the S&P on a buy signal ({now - prev:+.1f} vs yesterday, {tone})"
+                + (f" · 20d avg {e20:.0f}%" if e20 is not None else ""))
+    except Exception:
+        return None
+
+
+def _close_sectors():
+    """Top-2 / bottom-2 sector ETFs on the day from /api/sector-rotation."""
+    d = _mc("/api/sector-rotation")
+    try:
+        secs = [x for x in d.get("sectors") or [] if isinstance(x.get("return1d"), (int, float))]
+        if len(secs) < 4:
+            return None
+        secs.sort(key=lambda x: x["return1d"], reverse=True)
+        f = lambda x: f"{x['symbol']} {x['return1d']:+.1f}%"
+        return f"led {f(secs[0])}, {f(secs[1])} · lagged {f(secs[-1])}, {f(secs[-2])}"
+    except Exception:
+        return None
+
+
+def _tomorrow_events():
+    """Tomorrow's scheduled macro/earnings events via macro_calendar_alert.build (no route)."""
+    try:
+        import macro_calendar_alert as mca
+        from datetime import timedelta
+        today, ev = mca.build(1)
+        tom = today + timedelta(days=1)
+        rows = [e for e in ev if e.get("date") == tom]
+        if not rows:
+            return "clear — no scheduled high-impact catalysts"
+        rows.sort(key=lambda e: e.get("impact") != "high")
+        return " · ".join(f"{e.get('tag','')} {e.get('event','')}".strip() for e in rows[:4])
+    except Exception:
+        return None
+
+
 def eod():
-    """End-of-day wrap — facts only (P&L + what graded + grade progress). Deterministic."""
-    d = _load("portfolio_manage.json")
+    """Market CLOSE wrap — tape, breadth, sectors, what graded today, tomorrow's calendar.
+    Deterministic, no LLM, no account data (Alpaca is data only, 2026-09-16)."""
     sb = _load("scoreboard.json")
     today = datetime.now(ET).strftime("%Y-%m-%d")
-    lines = [hdr("🌙", "EOD", sub=datetime.now(ET).strftime('%a %-m/%-d'))]
-    if d:
-        lines.append(esc(f"acct {_money(d.get('equity'))} · {d.get('heat_pct','?')}% heat · "
-                          f"{_money(d.get('cash'))} free"))
-        ps = []
-        for p in (d.get("positions") or [])[:5]:
-            if isinstance(p, dict):
-                sym = p.get("symbol") or p.get("ticker")
-                pct = p.get("pnl_pct")
-                ps.append(f"{sym} {('%+.1f%%' % pct) if isinstance(pct,(int,float)) else ''}".strip())
-        if ps:
-            lines.append(esc("positions: " + " · ".join(ps)))
+    lines = [hdr("🌙", "Close")]
+    tape = _close_tape()
+    if tape:
+        lines.append("📊 " + esc(tape))
+    br = _close_breadth()
+    if br:
+        lines.append("📈 " + b("BREADTH") + " " + esc(br))
+    sec = _close_sectors()
+    if sec:
+        lines.append("🧭 " + b("SECTORS") + " " + esc(sec))
     if sb:
         rec = [r for r in (sb.get("recent") or []) if str(r.get("date")) == today]
         if rec:
             w = sum(1 for r in rec if r.get("outcome") == "win")
-            lines.append(esc(f"today graded: {len(rec)} ({w}W/{len(rec)-w}L)"))
+            lines.append("🎓 " + esc(f"today graded: {len(rec)} ({w}W/{len(rec)-w}L)"))
     g = grade().splitlines()
     if g:
         lines.append(g[-1])  # the 🔴/🟡/🟢 readiness line (already HTML-escaped by grade())
+    tom = _tomorrow_events()
+    if tom:
+        lines.append("📆 " + b("TOMORROW") + " " + esc(tom))
+    lines.append(footer("flat $400 cap · advisory — you place every trade"))
     return join(*lines)
 
 
@@ -552,8 +620,8 @@ GRAD_MIN_WR = 0.40
 
 
 def grade():
-    """Honest paper→real readiness off the pipeline scoreboard. Protects against
-    going live too early — the whole point of growing paper first."""
+    """Honest readiness read off the pipeline scoreboard (graded picks). Protects against
+    sizing up too early — the whole point of building a graded track record first."""
     d = _load("scoreboard.json")
     if not d:
         return "no track record yet — picks get graded as they play out."
@@ -564,14 +632,14 @@ def grade():
     wrp = f"{wr*100:.0f}%" if isinstance(wr, (int, float)) else "?"
     expv = exp if isinstance(exp, (int, float)) else 0.0
     head = join(hdr("🎓", "Graduation Check"),
-                esc(f"paper: {n} graded · {wrp} win · exp {expv:+.1f}%"))
+                esc(f"track record: {n} graded · {wrp} win · exp {expv:+.1f}%"))
     gate = esc(f"gate: {GRAD_MIN_N}+ trades & positive expectancy")
     if n < GRAD_MIN_N:
-        status = esc(f"🔴 building proof — {n}/{GRAD_MIN_N} trades. Keep growing paper first.")
+        status = esc(f"🔴 building proof — {n}/{GRAD_MIN_N} trades. Keep grading picks first.")
     elif expv <= 0:
-        status = esc(f"🔴 {n} trades but no edge yet (exp {expv:+.1f}%). Stay on paper, refine.")
+        status = esc(f"🔴 {n} trades but no edge yet (exp {expv:+.1f}%). Stay small, refine.")
     elif (wr or 0) < GRAD_MIN_WR:
-        status = esc(f"🟡 positive expectancy, thin win-rate ({wrp}). One more stretch on paper.")
+        status = esc(f"🟡 positive expectancy, thin win-rate ({wrp}). One more stretch at minimum size.")
     else:
         status = "🟢 READY — edge proven. Consider sizing up / a small real-money sleeve."
     return join(head, gate, status)
@@ -600,26 +668,24 @@ def tidy(text, max_lines=10):
 
 
 def holdings():
-    """Tickers Mike currently holds (from the paper book) — for portfolio-aware news."""
-    d = _load("portfolio_manage.json")
+    """Tickers in Mike's OPEN journal fills — for journal-aware news. Never a broker read."""
     out = []
-    for p in (d or {}).get("positions", []) or []:
-        if isinstance(p, dict):
-            s = p.get("symbol") or p.get("ticker")
-            if s:
-                out.append(s)
+    for r in _journal("open"):
+        s = r.get("symbol")
+        if s and s not in out:
+            out.append(s)
     return out
 
 
 def news_prompt():
-    """Prompt for an LLM /news read — politics/macro headlines → impact on MY book."""
+    """Prompt for an LLM /news read — politics/macro headlines → impact on my journal names."""
     held = ", ".join(holdings()) or "my watchlist"
     return ("Pull the TOP 3-4 market-moving news / politics / macro headlines RIGHT NOW "
             "(use the news-search skill or a quick web search). I have ADD, so be TIGHT. "
             "For EACH headline give ONE line: the headline + likely market impact "
-            "(risk-on/off, which sectors) + whether it touches my holdings "
+            "(risk-on/off, which sectors) + whether it touches my journal names "
             f"({held}). Then ONE final line starting 'PREP:' with the single most useful "
-            "action to protect or position my paper portfolio today. No preamble, no markdown "
+            "action to protect or position my open journal fills today. No preamble, no markdown "
             "headers/tables, plain text, max 10 short lines. If nothing is actually moving "
             "markets, just say 'Quiet — no action needed.'")
 
@@ -633,9 +699,9 @@ def premarket_prompt():
             "Line 1: one-word tone (RISK-ON / RISK-OFF / NEUTRAL) + a 4-6 word why.\n"
             "Next: today's market-moving CATALYSTS only — FOMC/econ data, major earnings, "
             "politics/geopolitics — one line each, skip anything minor.\n"
-            f"Next: do any of my holdings ({held}) have a catalyst today? one line.\n"
+            f"Next: do any of my journal names ({held}) have a catalyst today? one line.\n"
             "Last line must start 'PLAN:' with the single most useful thing to do at/after "
-            "the open to grow my paper account SAFELY. Quiet day → say so, keep it to 3 lines.")
+            "the open, trading SMALL under a flat $400-per-trade cap. Quiet day → say so, keep it to 3 lines.")
 
 
 def greeks_prompt(ticker):

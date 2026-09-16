@@ -36,7 +36,7 @@ def _send(msg):
 
 
 def _graduation_check(dry):
-    """One-time lifetime buzz when paper performance clears the go-live gate."""
+    """One-time lifetime buzz when the graded track record clears the go-live gate."""
     if os.path.exists(GRAD) and not dry:
         return
     if not Q.graduation_ready():
@@ -47,7 +47,7 @@ def _graduation_check(dry):
     o = sb.get("overall") or {}
     msg = join(
         hdr("🎓", "Ready To Graduate"),
-        esc(f"paper edge proven: {o.get('graded')} trades · "
+        esc(f"graded edge proven: {o.get('graded')} trades · "
             f"{(o.get('win_rate') or 0)*100:.0f}% win · exp {o.get('expectancy_pct',0):+.1f}%"),
         esc("you cleared the gate (50+ trades & positive expectancy)."),
         footer("consider a SMALL real-money sleeve — start tiny, same rules. /grade for details"))
@@ -82,7 +82,6 @@ def _load_state():
     if s.get("date") != today:
         s = {"date": today}
     s.setdefault("alerted", [])          # green-light occ's buzzed today
-    s.setdefault("exits_alerted", [])    # "SYM:VERDICT" buzzed today
     s.setdefault("shock_alerted", False) # risk-off buzzed today
     s.setdefault("sweeps_alerted", [])   # OptionSymbols buzzed today (capped)
     return s
@@ -122,16 +121,16 @@ def _buzz_text(p, d):
                 f"-{Q._money(spread.get('max_loss'))} · {p.get('confidence')}-conf · {p.get('value')}"),
             f"<i>why: {esc(why)}</i>",
             f"📝 {esc(spread.get('place_order'))}",
-            footer(f"acct {Q._money(d.get('equity'))} · /pick for more"))
+            footer("flat $400 cap · /pick for more"))
     head = b(f"{p.get('ticker')} ${p.get('strike'):g} {typ}")
     return join(
         hdr("🟢", f"{tag}Green Light", sub="buy now"),
         f"{head} · {esc(Q._fmt_exp(p.get('expiry')))} ({esc(p.get('days'))}d)",
         esc(f"{Q._money(p.get('per_contract'))}/ct · buy {p.get('qty',1)} = "
-            f"{p.get('pct_of_equity')}% · {p.get('confidence')}-conf · "
-            f"{p.get('sources')} src · {p.get('value')}"),
+            f"{Q._money((p.get('qty') or 1) * (p.get('per_contract') or 0))} of the $400 cap · "
+            f"{p.get('confidence')}-conf · {p.get('sources')} src · {p.get('value')}"),
         f"<i>why: {esc(why)}</i>",
-        footer(f"acct {Q._money(d.get('equity'))} · stop -50% prem · /pick for more"))
+        footer("flat $400 cap · stop -50% prem · /pick for more"))
 
 
 def _shock_guard(dry, state):
@@ -160,41 +159,6 @@ def _shock_guard(dry, state):
     return True
 
 
-def _exit_guard(dry, state):
-    """Buzz when a HELD position flips to EXIT/TRIM — lock winners, cut losers.
-    The biggest capital-grower; deduped per SYM:VERDICT/day, one combined message."""
-    d = Q._load("portfolio_manage.json")
-    if not d:
-        if dry: print("exit: no book");
-        return False
-    moves = d.get("moves") or {}
-    flagged = []
-    for verdict in ("EXIT", "TRIM", "REDUCE"):
-        for it in (moves.get(verdict) or []):
-            sym = it.get("symbol") or it.get("ticker")
-            key = f"{sym}:{verdict}"
-            if key in state["exits_alerted"] and not dry:
-                continue
-            reasons = it.get("reasons")
-            reason = reasons[0] if isinstance(reasons, list) and reasons else (reasons or "")
-            ep = it.get("exit_plan") or {}
-            at = ep.get("mark") or ep.get("stop")
-            flagged.append((verdict, sym, reason, at, key))
-    if not flagged:
-        if dry: print("exit: all HOLD → silent")
-        return False
-    emoji = {"EXIT": "🔴", "TRIM": "🟠", "REDUCE": "🟠"}
-    lines = [hdr("⚠️", "Position Alerts")]
-    for verdict, sym, reason, at, _ in flagged:
-        ats = f"~${at:g}" if isinstance(at, (int, float)) else None
-        lines.append(row(sym, verdict, reason, ats, glyph=emoji.get(verdict, "⚠️")))
-    lines.append(footer("/book for details"))
-    msg = join(*lines)
-    if dry:
-        print("WOULD BUZZ (exit):\n" + msg); return False
-    _send(msg)
-    state["exits_alerted"].extend(k for *_, k in flagged)
-    return True
 
 
 SWEEP_MIN_PREM = 3_000_000   # screamer-only push; /sweeps pull shows the rest
@@ -281,7 +245,7 @@ def _green_light(dry, state):
 
 
 def main():
-    """Market-hours guardian (one cron): graduation + shock + exits + green-light,
+    """Market-hours guardian (one cron): graduation + shock + green-light,
     each gated/deduped so it only buzzes when it changes Mike's next move."""
     dry = "--dry-run" in sys.argv
     if os.path.exists(HALT) and not dry:
@@ -290,7 +254,6 @@ def main():
     _graduation_check(dry)               # own lifetime flag, scoreboard-based
     changed = False
     changed |= _shock_guard(dry, state)  # defense first
-    changed |= _exit_guard(dry, state)   # then manage the book
     changed |= _green_light(dry, state)  # then new entries
     changed |= _sweep_alert(dry, state)  # rare whale-sweep screamer
     if not dry and changed:

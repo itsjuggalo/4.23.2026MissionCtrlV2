@@ -550,7 +550,9 @@ def _resolve(fn):
     return None, fn
 
 
-def send_upload(fn, path, caption="", as_doc=False):
+def send_upload(fn, path, caption="", as_doc=False, html=False):
+    """html=True → caption parsed as Telegram HTML (tg_format output); falls back to a
+    stripped plain caption if Telegram rejects the markup (2026-09-16)."""
     if not os.path.exists(path):
         print(f"no such file: {path}"); return 1
     tok, label = _resolve(fn)
@@ -569,9 +571,16 @@ def send_upload(fn, path, caption="", as_doc=False):
     data = {"chat_id": chat}
     if caption:
         data["caption"] = caption
+        if html:
+            data["parse_mode"] = "HTML"
     with open(path, "rb") as fh:
         r = requests.post(f"https://api.telegram.org/bot{tok}/{method}",
                           data=data, files={field: fh}, timeout=90).json()
+    if not r.get("ok") and html and "parse" in str(r.get("description", "")).lower():
+        data.pop("parse_mode", None); data["caption"] = _strip_html(caption)
+        with open(path, "rb") as fh:
+            r = requests.post(f"https://api.telegram.org/bot{tok}/{method}",
+                              data=data, files={field: fh}, timeout=90).json()
     if r.get("ok"):
         print(f"sent {os.path.basename(path)} → {label}"); return 0
     if method == "sendVideo":  # codec fallback
@@ -624,6 +633,8 @@ if __name__ == "__main__":
         sys.exit(send_upload(a[1], a[2], a[3] if len(a) > 3 else "", as_doc=True))
     elif cmd == "sendmedia" and len(a) >= 3:
         sys.exit(send_upload(a[1], a[2], a[3] if len(a) > 3 else ""))
+    elif cmd == "sendmediahtml" and len(a) >= 3:     # HTML caption (tg_format.py output)
+        sys.exit(send_upload(a[1], a[2], a[3] if len(a) > 3 else "", html=True))
     elif cmd == "manifest":
         manifest()
     else:
