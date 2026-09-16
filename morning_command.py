@@ -526,6 +526,151 @@ def _relay_dp_block(max_rows: int = 5) -> str:
     return "📡 " + b("RELAY × DARK POOL") + "\n" + "\n".join(picks)
 
 
+# --------------------------------------------------------------------------- overnight / levels / breadth / earnings
+# 2026-09-16: four more deterministic, best-effort lines for the phone brief, added
+# right after the tape line. Each is fully independent and degrades to '' (line
+# omitted) on any missing data / unreachable endpoint / missing key — never breaks
+# the brief. yfinance runs on ~/.venv (confirmed import there); the other three
+# read local missionctrl APIs / macro_calendar_alert's Finnhub helper.
+MTF_TA_URL = os.environ.get("MTF_TA_URL", "http://localhost:3000/api/mtf-ta?symbol=SPY")
+BREADTH_URL = os.environ.get("BREADTH_URL", "http://localhost:3000/api/console/breadth?scope=SPY")
+OVERNIGHT_TICKERS = ["ES=F", "NQ=F", "^TNX", "DX-Y.NYB", "CL=F", "BTC-USD"]
+
+
+def _overnight_line() -> str:
+    """ES/NQ/10Y/DXY/Oil/BTC overnight read, ONE yf.download call. ES/NQ/BTC show
+    % change (latest available bar vs prior close); 10Y/DXY/Oil show the level."""
+    try:
+        import yfinance as yf
+    except Exception:
+        return ""
+    try:
+        data = yf.download(OVERNIGHT_TICKERS, period="5d", interval="1d", progress=False, threads=True)
+        closes = data["Close"]
+    except Exception as e:
+        print(f"[morning] overnight yfinance fetch failed: {e}", flush=True)
+        return ""
+
+    def last2(t):
+        try:
+            s = closes[t].dropna()
+            if len(s) < 2:
+                return None
+            return float(s.iloc[-1]), float(s.iloc[-2])
+        except Exception:
+            return None
+
+    es, nq, tny, dxy, oil, btc = (last2(t) for t in OVERNIGHT_TICKERS)
+    parts = []
+    if es and es[1]:
+        parts.append(f"ES {(es[0] - es[1]) / es[1] * 100:+.1f}%")
+    if nq and nq[1]:
+        parts.append(f"NQ {(nq[0] - nq[1]) / nq[1] * 100:+.1f}%")
+    if tny:
+        parts.append(f"10Y {tny[0]:.2f}%")
+    if dxy:
+        parts.append(f"DXY {dxy[0]:.1f}")
+    if oil:
+        parts.append(f"Oil ${oil[0]:.0f}")
+    if btc and btc[1]:
+        parts.append(f"BTC ${btc[0]:,.0f} ({(btc[0] - btc[1]) / btc[1] * 100:+.1f}%)")
+    if not parts:
+        return ""
+    return "🌍 " + b("OVERNIGHT") + " " + esc(" · ".join(parts))
+
+
+def _spy_levels_line() -> str:
+    """SPY support/resistance (mtf-ta `levels`) + a derived D/W/M trend-stack word +
+    the CHARTER's own MTF-alignment glyph (mtf_rebound.py convention: >=0.7 ▲,
+    >=0.4 △, <=-0.7 ▼, <=-0.4 ▽, else ─) — one fetch, both reads off it."""
+    data = _get_json(MTF_TA_URL)
+    if not data:
+        return ""
+    levels = data.get("levels") or {}
+    support, resistance = levels.get("support"), levels.get("resistance")
+    if support is None or resistance is None:
+        return ""
+    tf = data.get("timeframes") or {}
+    trends = [(tf.get(k) or {}).get("trend") for k in ("daily", "weekly", "monthly")]
+    if trends and all(t == "bull" for t in trends):
+        stack = "bull-stacked"
+    elif trends and all(t == "bear" for t in trends):
+        stack = "bear-stacked"
+    else:
+        stack = "mixed"
+    align = data.get("alignment")
+    glyph = "─"
+    if isinstance(align, (int, float)):
+        glyph = ("▲" if align >= 0.7 else "△" if align >= 0.4 else
+                 "▼" if align <= -0.7 else "▽" if align <= -0.4 else "─")
+    return ("📏 " + b("SPY LEVELS") +
+            f" S {esc(f'{support:.1f}')} / R {esc(f'{resistance:.1f}')} · EMA {esc(stack)} · MTF {esc(glyph)}")
+
+
+def _breadth_line() -> str:
+    """SPY breadth read off /api/console/breadth?scope=SPY `current`: the smoothed
+    breadthEma20/breadthEma50 curves + the day-over-day `delta` the API already
+    computes."""
+    data = _get_json(BREADTH_URL)
+    if not data:
+        return ""
+    cur = data.get("current") or {}
+    ema20, ema50, delta = cur.get("breadthEma20"), cur.get("breadthEma50"), cur.get("delta")
+    try:
+        p20 = float(ema20[-1]) if ema20 else None
+        p50 = float(ema50[-1]) if ema50 else None
+    except (TypeError, ValueError, IndexError):
+        p20 = p50 = None
+    if p20 is None or p50 is None:
+        return ""
+    parts = [f"{p20:.0f}% above EMA20", f"{p50:.0f}% above EMA50"]
+    if isinstance(delta, (int, float)):
+        parts.append(f"Δ {delta:+.1f}")
+    return "📈 " + b("BREADTH") + " " + esc(" · ".join(parts))
+
+
+def _earnings_today_line() -> str:
+    """Today's earnings on the brief's own relay/watchlist universe, via
+    macro_calendar_alert.finnhub_earnings(). Skipped (no key / no rows) rather
+    than printed empty."""
+    try:
+        import macro_calendar_alert as mca
+    except Exception:
+        return ""
+    key = mca.finnhub_key()
+    if not key:
+        return ""
+    today = datetime.now(ET).date()
+    tickers = {t.upper() for t in _relay_tickers(6)}
+    try:
+        rows = mca.finnhub_earnings(key, today, today, tickers)
+    except Exception as e:
+        print(f"[morning] earnings fetch failed: {e}", flush=True)
+        return ""
+    if not rows:
+        return ""
+    bmo, amc, other = [], [], []
+    for r in rows:
+        ev = str(r.get("event", ""))
+        sym = ev.split(" ")[0]
+        if "pre-mkt" in ev:
+            bmo.append(sym)
+        elif "after close" in ev:
+            amc.append(sym)
+        else:
+            other.append(sym)
+    parts = []
+    if bmo:
+        parts.append("BMO: " + ", ".join(bmo))
+    if amc:
+        parts.append("AMC: " + ", ".join(amc))
+    if other:
+        parts.append(", ".join(other))
+    if not parts:
+        return ""
+    return "📆 " + b("EARNINGS TODAY") + " " + esc(" · ".join(parts))
+
+
 def _snr_headlines_block(max_rows: int = 3) -> str:
     """Top-N high-signal headlines (SNR >= 65), one line each. Skips silently if the
     endpoint is down or nothing clears the threshold."""
@@ -685,6 +830,10 @@ def build_phone() -> str:
 
     if tape:
         lines.append(f"📊 {esc(tape)}" + (f"\n{esc(_tape_read(tape))}" if _tape_read(tape) else ""))
+
+    for line in (_overnight_line(), _spy_levels_line(), _breadth_line(), _earnings_today_line()):
+        if line:
+            lines.append(line)
 
     cat, orders, plan = _catalysts_and_orders(_relay_tickers_str(6), tape)
     if cat:

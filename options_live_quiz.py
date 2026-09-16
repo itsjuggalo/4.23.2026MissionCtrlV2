@@ -2,11 +2,13 @@
 """options_live_quiz.py — Options Mastery Phase 3: LIVE + his-own-trade reps.
 
 The static bank teaches concepts; THIS teaches off the live market and Mike's
-OWN open paper positions — the "un-limiting" win. Two generators:
+OWN open journal option positions — the "un-limiting" win. Two generators:
 
-  • POSITION mode — reads Boba's real Alpaca paper option positions, computes
-    live greeks (theo.bs_greeks) on the actual contract, and asks a grounded
-    question: "Your AMZN 250C (3d left, ~flat) — which greek is the daily rent?"
+  • POSITION mode — reads Mike's own open rows from the local paper-trade
+    journal, computes live greeks (theo.bs_greeks) on the actual contract
+    (mark priced off Alpaca's read-only options DATA feed, not an account),
+    and asks a grounded question: "Your AMZN 250C (3d left, ~flat) — which
+    greek is the daily rent?"
   • STRADDLE mode — calls straddle_engine.read('SPY') and asks a GO/WAIT/SELL
     question off the REAL IV/HV + implied-vs-realized numbers, graded to the
     engine's own verdict.
@@ -34,8 +36,8 @@ SEC = Path.home() / ".openclaw" / "secrets"
 STATE = Path.home() / ".openclaw" / "data" / "options_quiz_state.json"
 TOKEN_FILE = SEC / "telegram_laptopclaude_bot_token"
 CHAT_FILE = SEC / "telegram-chat-id.txt"
-PAPER = "https://paper-api.alpaca.markets"
-DATA = "https://data.alpaca.markets"
+JOURNAL = Path("/AIWorkWSL/trading/signals/option-scraper/data/paper_trades.json")
+DATA = "https://data.alpaca.markets"      # read-only market DATA (not an account) — options mark only
 ET = ZoneInfo("America/New_York")
 LETTERS = ["A", "B", "C", "D"]
 DRY = os.environ.get("DRY") == "1"
@@ -84,24 +86,68 @@ def parse_occ(sym: str):
             "strike": int(strike8) / 1000.0}
 
 
-def _open_option_positions():
+def _option_mark(occ_symbol: str) -> float | None:
+    """Latest option mark via Alpaca's DATA feed (read-only market data — not an
+    account/positions call). Mid of the latest quote, falling back to the latest
+    trade. Reuses the same `_get()` helper already used for underlying spot."""
     try:
-        rows = _get(f"{PAPER}/v2/positions")
+        d = _get(f"{DATA}/v1beta1/options/snapshots/{occ_symbol}?feed=indicative")
+        snap = (d.get("snapshots") or {}).get(occ_symbol) or {}
+        q = snap.get("latestQuote") or {}
+        bid, ask = q.get("bp"), q.get("ap")
+        if bid and ask:
+            return (float(bid) + float(ask)) / 2
+        t = snap.get("latestTrade") or {}
+        if t.get("p"):
+            return float(t["p"])
     except Exception:
+        pass
+    return None
+
+
+def _journal_open_rows():
+    try:
+        trades = json.loads(JOURNAL.read_text()).get("trades", [])
+    except Exception as e:
+        print(f"[live-quiz] journal read failed: {e}")
         return []
+    return [t for t in trades if t.get("status") == "open" and float(t.get("qty") or 0) > 0]
+
+
+def _open_option_positions():
+    """Mike's own open rows from the local paper-trade journal (replaces the retired
+    Alpaca paper ACCOUNT /v2/positions read — Alpaca is DATA-only doctrine)."""
     out = []
-    for p in rows:
-        info = parse_occ(p.get("symbol", ""))
-        if not info:
+    for t in _journal_open_rows():
+        sym = str(t.get("symbol", "")).upper()
+        strike = t.get("strike")
+        if not sym or strike is None:
             continue
-        info.update({
-            "symbol": p["symbol"], "qty": int(float(p.get("qty", 0))),
-            "avg": float(p.get("avg_entry_price", 0) or 0),
-            "mark": float(p.get("current_price", 0) or 0),
-            "upl": float(p.get("unrealized_pl", 0) or 0),
-            "uplpc": float(p.get("unrealized_plpc", 0) or 0) * 100,
-        })
-        out.append(info)
+        kind = "call" if str(t.get("type", "")).upper().startswith("C") else "put"
+        exp = None
+        exp_str = t.get("expiry")
+        if exp_str:
+            try:
+                exp = date.fromisoformat(exp_str)
+            except Exception:
+                exp = None
+        if exp is None:
+            info = parse_occ(str(t.get("contract", "")).split("_")[0])
+            if info:
+                exp = info["exp"]
+        if exp is None:
+            continue
+        strike = float(strike)
+        qty = int(float(t.get("qty") or 0))
+        entry = float(t.get("entry") or 0)
+        occ = f"{sym}{exp:%y%m%d}{'C' if kind == 'call' else 'P'}{int(round(strike * 1000)):08d}"
+        mark = _option_mark(occ)
+        if mark is None:
+            mark = float(t.get("last_mark") or 0) or entry
+        uplpc = ((mark - entry) / entry * 100.0) if entry else 0.0
+        out.append({"root": sym, "exp": exp, "kind": kind, "strike": strike,
+                    "symbol": occ, "qty": qty, "avg": entry, "mark": mark,
+                    "upl": (mark - entry) * qty * 100.0, "uplpc": uplpc})
     return out
 
 

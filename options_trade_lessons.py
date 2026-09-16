@@ -1,14 +1,15 @@
 #!/home/itsju/.venv/bin/python
 """options_trade_lessons.py — Options Mastery Phase 5: the trade→lesson→quiz flywheel.
 
-Every CLOSED option round-trip in Mike's Boba paper book becomes a teaching moment:
-pair the fills → realized P/L → a post-mortem CARD (what happened + the doctrine
-lesson) → and a personalized QUIZ off his OWN trade. Over weeks his reps become a
-mirror of his actual mistakes — the fastest way to get good.
+Every CLOSED option round-trip in Mike's own trade journal becomes a teaching moment:
+realized P/L → a post-mortem CARD (what happened + the doctrine lesson) → and a
+personalized QUIZ off his OWN trade. Over weeks his reps become a mirror of his
+actual mistakes — the fastest way to get good.
 
-Sources: Alpaca closed orders (filled buys/sells), paired FIFO per OCC symbol.
-Sends via the trading bot (same lane as the quiz). The optional quiz reuses the
-existing `oq:` grader path (no responder changes), guarded by the shared 5h rule.
+Sources: closed rows from the local paper-trade journal — each row already carries
+its own paired entry/exit + realized P/L, so no FIFO pairing is needed. Sends via
+the trading bot (same lane as the quiz). The optional quiz reuses the existing
+`oq:` grader path (no responder changes), guarded by the shared 5h rule.
 
 Run:  options_trade_lessons.py            (card for each NEW closed trade; +1 quiz)
       DRY=1 options_trade_lessons.py      (print, don't send / don't mark processed)
@@ -26,7 +27,7 @@ LSTATE = Path.home() / ".openclaw" / "data" / "options_lessons_state.json"  # pr
 LLOG = Path.home() / ".openclaw" / "data" / "options_lessons.jsonl"
 TOKEN_FILE = SEC / "telegram_laptopclaude_bot_token"
 CHAT_FILE = SEC / "telegram-chat-id.txt"
-PAPER = "https://paper-api.alpaca.markets"
+JOURNAL = Path("/AIWorkWSL/trading/signals/option-scraper/data/paper_trades.json")
 ET = ZoneInfo("America/New_York")
 LETTERS = ["A", "B", "C", "D"]
 DRY = os.environ.get("DRY") == "1"
@@ -34,17 +35,6 @@ DO_QUIZ = os.environ.get("QUIZ", "1") != "0"
 LOOKBACK_DAYS = int(os.environ.get("LOOKBACK_DAYS", "10"))
 MAX_CARDS = int(os.environ.get("MAX_CARDS", "3"))
 OCC = re.compile(r"^([A-Z]+)(\d{6})([CP])(\d{8})$")
-
-
-def _key():
-    return ((SEC / "alpaca-key-id").read_text().strip(),
-            (SEC / "alpaca-secret").read_text().strip())
-
-
-def _get(url: str):
-    k, s = _key()
-    req = urllib.request.Request(url, headers={"APCA-API-KEY-ID": k, "APCA-API-SECRET-KEY": s})
-    return json.loads(urllib.request.urlopen(req, timeout=25).read())
 
 
 def _tg(method, **kwargs):
@@ -68,64 +58,59 @@ def parse_occ(sym: str):
             "kind": "call" if cp == "C" else "put", "strike": int(strike8) / 1000.0}
 
 
-def _closed_option_fills():
-    """Filled option-symbol orders, oldest→newest, with the fields we need."""
+def _journal_trades():
     try:
-        rows = _get(f"{PAPER}/v2/orders?status=closed&limit=500&nested=true")
+        return json.loads(JOURNAL.read_text()).get("trades", [])
     except Exception as e:
-        print(f"[lessons] order fetch failed: {e}")
+        print(f"[lessons] journal read failed: {e}")
         return []
-    fills = []
-    for o in rows:
-        sym = o.get("symbol", "")
-        if not parse_occ(sym):
-            continue
-        qty = float(o.get("filled_qty", 0) or 0)
-        px = o.get("filled_avg_price")
-        if qty <= 0 or px in (None, "", "0"):
-            continue
-        fa = o.get("filled_at") or o.get("updated_at") or o.get("submitted_at")
-        fills.append({"id": o.get("id"), "symbol": sym, "side": o.get("side"),
-                      "qty": int(qty), "price": float(px), "at": fa})
-    fills.sort(key=lambda f: f["at"] or "")
-    return fills
 
 
 def round_trips():
-    """FIFO-pair buys→sells per OCC symbol into closed round-trips with realized P/L."""
-    fills = _closed_option_fills()
-    by_sym = {}
-    for f in fills:
-        by_sym.setdefault(f["symbol"], []).append(f)
+    """Closed rows from the local paper-trade journal (Mike's own virtual/flow-picked
+    fills) as round-trips. Each row already carries its own paired entry/exit + a
+    computed pnl_pct — no FIFO pairing needed like the retired Alpaca-orders path."""
     trips = []
-    for sym, fs in by_sym.items():
-        info = parse_occ(sym)
-        lots = []  # open buy lots: [qty, price, at]
-        for f in fs:
-            if f["side"] == "buy":
-                lots.append([f["qty"], f["price"], f["at"]])
-            elif f["side"] == "sell":
-                rem = f["qty"]
-                cost = 0.0; bought = 0; open_at = None
-                while rem > 0 and lots:
-                    lot = lots[0]
-                    take = min(rem, lot[0])
-                    cost += take * lot[1]; bought += take
-                    open_at = open_at or lot[2]
-                    lot[0] -= take; rem -= take
-                    if lot[0] == 0:
-                        lots.pop(0)
-                if bought == 0:
-                    continue
-                avg_buy = cost / bought
-                pl = (f["price"] - avg_buy) * bought * 100.0
-                plpc = (f["price"] - avg_buy) / avg_buy * 100.0 if avg_buy else 0.0
-                trips.append({
-                    "close_id": f["id"], "symbol": sym, **info,
-                    "qty": bought, "buy": round(avg_buy, 2), "sell": round(f["price"], 2),
-                    "pl": round(pl, 2), "plpc": round(plpc, 1),
-                    "open_at": open_at, "close_at": f["at"],
-                })
+    for t in _journal_trades():
+        if t.get("status") != "closed":
+            continue
+        qty = int(float(t.get("qty") or 0))
+        if qty <= 0:
+            continue
+        entry, exit_px = t.get("entry"), t.get("exit")
+        if entry in (None, "") or exit_px in (None, ""):
+            continue
+        sym = str(t.get("symbol", "")).upper()
+        strike = t.get("strike")
+        if not sym or strike is None:
+            continue
+        kind = "call" if str(t.get("type", "")).upper().startswith("C") else "put"
+        exp = None
+        exp_str = t.get("expiry")
+        if exp_str:
+            try:
+                exp = date.fromisoformat(exp_str)
+            except Exception:
+                exp = None
+        if exp is None:
+            info = parse_occ(str(t.get("contract", "")).split("_")[0])
+            if info:
+                exp = info["exp"]
+        if exp is None:
+            continue
+        entry, exit_px = float(entry), float(exit_px)
+        pl = round((exit_px - entry) * qty * 100.0, 2)
+        raw_plpc = t.get("pnl_pct")
+        plpc = round(float(raw_plpc), 1) if raw_plpc is not None else (
+            round((exit_px - entry) / entry * 100.0, 1) if entry else 0.0)
+        close_id = f"{t.get('contract') or sym}|{t.get('closed_at')}"
+        trips.append({
+            "close_id": close_id, "symbol": t.get("contract") or sym,
+            "root": sym, "exp": exp, "kind": kind, "strike": float(strike),
+            "qty": qty, "buy": round(entry, 2), "sell": round(exit_px, 2),
+            "pl": pl, "plpc": plpc,
+            "open_at": t.get("opened_at"), "close_at": t.get("closed_at"),
+        })
     return trips
 
 
@@ -230,7 +215,7 @@ def _send_quiz(quiz: dict) -> bool:
 def main() -> int:
     trips = round_trips()
     if not trips:
-        print("[lessons] no closed option round-trips found")
+        print("no closed journal fills")
         return 0
     led = _load(LSTATE, {"done": []})
     done = set(led.get("done", []))
