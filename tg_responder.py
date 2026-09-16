@@ -715,7 +715,7 @@ def run_bot(botkey):
                     except Exception as e:
                         msg = f"[flow-chase error] {e}"
                     if not tg("sendMessage", chat_id=chat_id, text=msg,
-                              parse_mode="Markdown").get("ok"):
+                              parse_mode="HTML").get("ok"):
                         tg("sendMessage", chat_id=chat_id, text=msg)
                     print(f"[{name}] {cmd0} {arg}", flush=True)
                     continue

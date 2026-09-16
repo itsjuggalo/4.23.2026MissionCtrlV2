@@ -30,6 +30,7 @@ from zoneinfo import ZoneInfo
 
 sys.path.insert(0, os.path.expanduser("~/scripts"))
 import quantum_tg as Q  # shared read-only formatters (_human, _market_open, etc.)
+from tg_format import esc, b, hdr, row, footer, join
 
 ET = ZoneInfo("America/New_York")
 
@@ -267,7 +268,8 @@ def _contract_line(a):
     arrow = "🟢▲" if t.startswith("C") else "🔴▼"   # call = bet UP, put = bet DOWN
     dte = a.get("DTE")
     dpart = f" ({int(dte)}d)" if isinstance(dte, (int, float)) else ""
-    return f"{arrow} *{a.get('Symbol')} ${a.get('Strike'):g} {t}* · {_exp(a)}{dpart}"
+    head = b(f"{a.get('Symbol')} ${a.get('Strike'):g} {t}")
+    return f"{arrow} {head} · {esc(_exp(a))}{esc(dpart)}"
 
 
 def format_alert(a, v):
@@ -279,11 +281,11 @@ def format_alert(a, v):
         bits.append(f"{swp} sweeps")
     if na >= 2:
         bits.append(f"repeat #{na}")
-    lines = [f"{v['emoji']} *{v['head']}*",
+    lines = [f"{v['emoji']} {b(v['head'])}",
              _contract_line(a),
-             "flow " + " · ".join(bits)]
-    lines += [f"• {r}" for r in v["reasons"][:4]]
-    lines.append(v["action"])
+             esc("flow " + " · ".join(bits))]
+    lines += [esc(f"• {r}") for r in v["reasons"][:4]]
+    lines.append(esc(v["action"]))
     return "\n".join(lines)
 
 
@@ -306,13 +308,13 @@ def _compact(occ, a, with_cost=False):
     head = {"EARLY": "still early", "LATE": "getting late",
             "SKIP": "too late", "WAIT": "wait"}[v["tier"]]
     kind = "CALL" if (a.get("OptionType") or "").upper().startswith("C") else "PUT"
-    l1 = (f"{v['emoji']} *{a.get('Symbol')} ${a.get('Strike'):g} {kind}* exp {_exp(a)} — "
-          f"{head}" + (f", {mv}" if mv else ""))
+    title = b(f"{a.get('Symbol')} ${a.get('Strike'):g} {kind}")
+    l1 = (f"{v['emoji']} {title} exp {esc(_exp(a))} — " + esc(head) + (esc(f", {mv}") if mv else ""))
     # Show the ACTION, not a reason. `reasons` is an unordered mix of positives and negatives
     # scored together, so cherry-picking one could print "still early" above "little room left"
     # — a beginner reading a contradiction learns nothing. The action always agrees with the
     # verdict, and it's the part he can act on; /chase <ticker> carries the full why.
-    line = l1 + ("\n   " + v["action"] if v.get("action") else "")
+    line = l1 + ("\n   " + esc(v["action"]) if v.get("action") else "")
     return (line, (v.get("mid") or 0) * 100) if with_cost else line
 
 
@@ -386,17 +388,18 @@ def winners(top=5, min_value=1_000_000):
         if len(priced) >= top:
             break
     shown = (priced + waiting)[:top]
-    out = ["🔔 *FLOW WINNERS — chase or skip*"]
+    out = [hdr("🔔", "Flow Winners", sub="chase or skip")]
     if shown:
         out += shown
     else:
-        out.append("Nothing in today's big flow fits your "
-                   f"${RISK_CAP_USD:.0f} per-trade limit — that's a fine reason to sit out.")
+        out.append(esc(f"Nothing in today's big flow fits your ${RISK_CAP_USD:.0f} per-trade "
+                       f"limit — that's a fine reason to sit out."))
     if toobig:
-        out.append(f"_({toobig} other big-money contracts today cost more than "
-                   f"${RISK_CAP_USD:.0f} each — not for this account.)_")
-    out.append("_tap /chase <ticker> for the full read_")
-    return "\n".join(out)
+        note = (f"({toobig} other big-money contracts today cost more than "
+                f"${RISK_CAP_USD:.0f} each — not for this account.)")
+        out.append(f"<i>{esc(note)}</i>")
+    out.append(footer("tap /chase <ticker> for the full read"))
+    return join(*out)
 
 
 def chase(symbol):

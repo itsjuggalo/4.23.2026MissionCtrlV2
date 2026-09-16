@@ -32,12 +32,20 @@ import quantum_tg as Q
 ET = ZoneInfo("America/New_York")
 STATE = os.path.expanduser("~/.openclaw/flow_winners_push_state.json")
 HALT = os.path.expanduser("~/.openclaw/quantum_HALT")
-TG = os.path.expanduser("~/bin/tg-send-msg")
+TG_FLEET = os.path.expanduser("~/scripts/tg_fleet.py")
+
+# 2026-09-15 format sweep: winners() now renders HTML via tg_format (row() wraps the
+# ticker in <b>...</b> and spells out CALL/PUT, not a Markdown *...*[CP] shorthand).
+# The OLD pattern (`\*([A-Z.]+ \$[0-9.]+[CP])\*`) never actually matched this board's
+# real "SYM $STRIKE CALL/PUT" text (verified: re.findall on a live board line returned
+# [] against the pre-sweep source too) — so `sig == last` was always [] == [] and this
+# push silently never detected a changed board. Fixed for real this time; test below.
+_SIG_RE = re.compile(r"([🟢🟡🔴⏸]) <b>([A-Z.]+ \$[0-9.]+ (?:CALL|PUT))</b>")
 
 
 def _sig(board):
-    """Signature = tier-emoji + ticker+strike per line (ignores the wiggling move%)."""
-    return re.findall(r"([🟢🟡🔴⏸]) \*([A-Z.]+ \$[0-9.]+[CP])\*", board)
+    """Signature = tier-emoji + ticker+strike+type per line (ignores the wiggling move%)."""
+    return _SIG_RE.findall(board)
 
 
 def main():
@@ -60,12 +68,12 @@ def main():
     if sig == last and not dry:
         return  # unchanged since last push — don't repeat the same board
     stamp = datetime.now(ET).strftime("%-I:%M%p ET").lower()
-    msg = board.replace("🔔 *FLOW WINNERS — chase or skip*", f"🔔 *FLOW WINNERS · {stamp}*")
+    msg = board  # winners()'s own hdr() already stamps the current ET time in the header
     if dry:
         print("WOULD PUSH:\n" + msg)
         return
     try:
-        subprocess.run([TG, msg], timeout=20)
+        subprocess.run([sys.executable, TG_FLEET, "sendhtml", "trading_command", msg], timeout=20)
         json.dump({"sig": sig, "at": stamp}, open(STATE, "w"))
     except Exception as e:
         print(f"[flow-winners] send failed: {e}", file=sys.stderr)
