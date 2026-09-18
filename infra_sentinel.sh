@@ -171,25 +171,40 @@ probe_ts_drift(){ # Mike-private access map drift; detect-only (baseline = expec
   [ "$cur" = "$(cat "$TS_EXPECTED")" ] && echo OK || echo DRIFT
 }
 
-probe_external(){ # one external HTTPS probe of missionctrl via check-host.net
-  # echoes OK / FAIL / SKIP (SKIP = check-host itself unreachable; not our outage)
-  local id res
+probe_external(){ # one external HTTPS probe via check-host.net; $1 = url-encoded target
+  # echoes OK / FAIL / SKIP (SKIP = check-host itself unreachable / inconclusive; not our outage)
+  local id res waited target
+  target="${1:-https%3A%2F%2Fmissionctrl.serveftp.com%2F}"
   id=$(curl -s -m 15 -H 'Accept: application/json' \
-    'https://check-host.net/check-http?host=https%3A%2F%2Fmissionctrl.serveftp.com%2F&max_nodes=5' \
+    "https://check-host.net/check-http?host=${target}&max_nodes=5" \
     | python3 -c 'import sys,json;print(json.load(sys.stdin).get("request_id",""))' 2>/dev/null)
   [ -z "$id" ] && { echo SKIP; return; }
-  # 1-2 nodes timing out is normal residential-Spectrum noise, so sample 5 and treat
-  # "any node served it" as reachable; a 2-node sample false-fired whenever both drew slow nodes.
-  sleep 20
-  res=$(curl -s -m 10 -H 'Accept: application/json' "https://check-host.net/check-result/$id" 2>/dev/null \
-    | python3 -c '
+  # 1-2 nodes timing out is normal noise, so sample 5 and treat "any node served it" as reachable.
+  # 2026-09-18: a fixed 20s wait false-fired. check-host nodes report asynchronously and its own
+  # per-node timeout is ~25s; fast-FAILING nodes (3s) land in the result while slow-SUCCEEDING nodes
+  # (missionctrl is Vercel-fronted; edges measured 14-25s) are still null. Dropping nulls then left a
+  # failures-only sample -> FAIL. Now: poll until every node has reported, and only call FAIL when the
+  # whole sample reported and none served it. Still pending at the deadline = SKIP, never FAIL.
+  waited=0
+  while [ "$waited" -lt 45 ]; do
+    sleep 5; waited=$((waited+5))
+    res=$(curl -s -m 10 -H 'Accept: application/json' "https://check-host.net/check-result/$id" 2>/dev/null \
+      | python3 -c '
 import sys,json
 try: d=json.load(sys.stdin)
 except Exception: print("SKIP"); raise SystemExit
+if not d: print("SKIP"); raise SystemExit
+if any(v is None for v in d.values()): print("PENDING"); raise SystemExit
 vals=[v for v in d.values() if v]
 if not vals: print("SKIP"); raise SystemExit
 print("OK" if any(v[0] and v[0][0]==1 for v in vals) else "FAIL")' 2>/dev/null)
-  echo "${res:-SKIP}"
+    case "$res" in
+      OK|FAIL) echo "$res"; return;;
+      SKIP) echo SKIP; return;;
+    esac
+  done
+  # deadline hit with nodes still pending -> inconclusive, not an outage
+  echo SKIP
 }
 
 probe_pm2(){ # revivable pm2 procs not online -> echoes them ("" also when pm2/jlist unavailable)
@@ -458,8 +473,26 @@ case "$EXT" in
   OK)   clear_issue external; log "cycle OK (ext=OK wan=$IP cert=${DAYS}d)";;
   SKIP) log "cycle done (external probe SKIP — check-host unreachable; local all green)";;
   FAIL)
-    log "EXTERNAL FAIL (local green, wan=$IP) — full chain break above the house or portproxy/router"
-    if ! spawn_fixer external "https://missionctrl.serveftp.com unreachable from check-host.net nodes while local vhosts + DNS are healthy (wan=$IP). Suspect Windows portproxy (netsh) or Spectrum router forwards or ISP."; then
+    # 2026-09-18: never fire the (expensive, headless-Claude) fixer on a single FAIL.
+    # Measured: 1-3 of every 5 check-host nodes fail routinely, so an all-bad 5-node draw
+    # is a live false-positive source. Confirm with a second independent probe first.
+    EXT2=$(probe_external)
+    if [ "$EXT2" != "FAIL" ]; then
+      log "cycle done (external FAIL not confirmed on retry: $EXT2 — check-host node noise, local all green)"
+      clear_issue external
+      exit 0
+    fi
+    # Both probes failed. missionctrl is VERCEL-fronted (2026-07-16 cutover, A 76.76.21.21) and does
+    # NOT traverse the house at all; bridge.serveftp.com is the laptop leg (No-IP -> WAN -> router ->
+    # portproxy -> nginx). Probe bridge to tell a Vercel-edge problem from a real house-chain break.
+    BRIDGE=$(probe_external 'https%3A%2F%2Fbridge.serveftp.com%2Fmc%2Fapi%2Fhealth')
+    if [ "$BRIDGE" = "OK" ]; then
+      log "EXTERNAL FAIL on missionctrl but bridge OK — laptop chain (portproxy/router/WAN) proven green; Vercel-side issue"
+      escalate_capsule external "missionctrl.serveftp.com (VERCEL-fronted since 2026-07-16, A 76.76.21.21) unreachable from check-host.net while bridge.serveftp.com — the laptop leg — serves fine externally. The house chain (No-IP/router/portproxy/nginx) is PROVEN healthy, so do NOT touch portproxy or router forwards. Investigate the Vercel project/domain for missionctrl instead."
+      exit 0
+    fi
+    log "EXTERNAL FAIL (local green, wan=$IP, bridge=$BRIDGE) — house chain break: portproxy/router/WAN/ISP"
+    if ! spawn_fixer external "bridge.serveftp.com (the LAPTOP leg: No-IP -> WAN -> Spectrum router 80/443 -> Windows portproxy -> WSL nginx) is unreachable from check-host.net nodes while local vhosts + DNS are healthy (wan=$IP). NOTE: missionctrl/massagebymike/bobacattrades are VERCEL-fronted (A 76.76.21.21) since 2026-07-16 and do NOT traverse the house — only bridge + claudeclaw do, so diagnose against bridge/claudeclaw. Suspect stale Windows portproxy target vs current WSL eth0 IP (netsh interface portproxy show v4tov4), Spectrum router forwards, or ISP."; then
       # fixer refused (cooldown/cap) — if we've already burned 2+ runs today, escalate
       today=$(date +%F); c=$(sget "fixer_count_external_$today")
       [ "${c:-0}" -ge 2 ] && escalate_capsule external "external HTTPS unreachable; local layers verified green"
