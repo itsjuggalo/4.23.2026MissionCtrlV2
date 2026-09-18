@@ -99,7 +99,7 @@ def build_mengsk(slot):
     title = f"Macro Read: Regime is {regime}{(' / ' + bias) if bias else ''}"
     summary = (f"Market regime reads {regime}{(' (' + bias + ')') if bias else ''}"
                f"{(', confidence ' + str(round(conf*100)) + '%') if isinstance(conf,(int,float)) else ''}. "
-               f"Here are the headlines that actually move the book.")
+               f"Here are the headlines that actually move the tape.")
     lines = [f"## The regime", f"- Overall: **{regime}** {bias}".rstrip(),
              (f"- Confidence: {round(conf*100)}%" if isinstance(conf,(int,float)) else None),
              "", "## Headlines that matter"]
