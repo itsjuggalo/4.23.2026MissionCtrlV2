@@ -231,8 +231,16 @@ def main():
     # instead of degrading, which is how this crashed every market-hours tick.
     except (RuntimeError, subprocess.TimeoutExpired, OSError) as e:
         status = "fallback"
-        error = str(e)[:200]
-        print(f"[trade-brief] Claude unavailable; writing fallback brief: {error}", file=sys.stderr)
+        # subprocess.TimeoutExpired's str() is "Command '[/home/itsju/.local/bin/claude',
+        # '-p', '<full prompt>', ...]' timed out after 60 seconds" — the raw argv
+        # (absolute paths, the whole prompt) leaked straight into the published
+        # /explore article as "AI brief fallback active: Command '[...]" (2026-09-18
+        # QA: dev internals in user copy, rule 10). Log the real exception, publish
+        # a clean human sentence.
+        error_full = str(e)[:400]
+        error = ("claude CLI timed out" if isinstance(e, subprocess.TimeoutExpired)
+                  else str(e)[:200])
+        print(f"[trade-brief] Claude unavailable; writing fallback brief: {error_full}", file=sys.stderr)
         brief_text = fallback_brief(rank, winners, momentum, macro, ledger, error)
 
     # Parse bullets
