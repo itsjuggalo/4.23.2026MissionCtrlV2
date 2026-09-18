@@ -82,10 +82,24 @@ def get_macro() -> dict | None:
 
 
 def get_recent_ledger() -> list[dict]:
+    # Freshness-gated (2026-09-17): the query used to be a bare "last 5 rows,
+    # whatever their age." executed_ledger's paper-trading writers (the Boba/
+    # Jazzy/Orion decision-cycle agents) were retired 2026-09-15, and the last
+    # row in this table is from 2026-06-10 — over 3 months old. An ungated
+    # LIMIT 5 kept handing the LLM prompt "RECENT EXECUTIONS" that were
+    # actually a 3-month-old jazzy/boba paper fill, which the model then wrote
+    # up verbatim ("Jazzy's SPY $730 PUT lost 4 straight...") into today's
+    # published /explore article — retired personas leaking into live copy via
+    # a "recent" label on genuinely stale, dead-account data. Cap at 3 days so
+    # a dead ledger degrades to no section (fallback_brief already omits
+    # "RECENT EXECUTIONS" when `ledger` is empty) instead of impersonating a
+    # live one.
+    from datetime import timedelta
+    since = (datetime.now(timezone.utc) - timedelta(days=3)).isoformat()
     return query_db(LEDGER_DB, """
         SELECT account, ticker, option_type, strike, expiry, fill_price, confidence, exec_ok, cycle_time
-        FROM executed_ledger ORDER BY cycle_time DESC LIMIT 5
-    """)
+        FROM executed_ledger WHERE cycle_time >= ? ORDER BY cycle_time DESC LIMIT 5
+    """, (since,))
 
 
 def build_prompt(rank, winners, momentum, macro, ledger) -> str:
@@ -185,7 +199,10 @@ def fallback_brief(rank, winners, momentum, macro, ledger, reason: str) -> str:
         if up or down:
             bullets.append(line(f"Momentum: bullish {', '.join(up[:4]) or 'none'}; bearish {', '.join(down[:4]) or 'none'}."))
     if ledger:
-        bullets.append(line(f"Paper ledger: {len(ledger)} recent execution rows available for review."))
+        # "Paper" is retired wording site-wide (2026-09-17 doctrine) — paper
+        # trading agents are retired, this table only exists as a historical
+        # execution log now.
+        bullets.append(line(f"Execution log: {len(ledger)} recent fill rows available for review."))
     while len(bullets) < 5:
         bullets.append(line("No additional high-signal pipeline item available in fallback mode."))
     return "\n".join(bullets[:5])

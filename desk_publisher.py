@@ -12,7 +12,7 @@ nothing is published without Mike's tap. Inert/additive — only writes draft ro
 
 Run:  python3 desk_publisher.py [--slot premarket|midday|close|evening]
 """
-import json, os, sys, urllib.request
+import json, os, re, sys, urllib.request
 from datetime import datetime, timezone, timedelta
 
 sys.path.insert(0, '/home/itsju/05_AUTOMATION/scripts/lib')
@@ -146,10 +146,27 @@ def build_zeratul(slot):
     return title, summary, "\n".join(lines), tickers
 
 
+# Retired-agent guard (2026-09-17): trade-brief-cache.json is LLM-written from
+# a live pipeline query and used to quote a 3-month-stale executed_ledger row
+# still labeled by a retired decision-cycle agent — the published article
+# "Jazzy's SPY $730 PUT lost 4 straight..." on /explore came straight from
+# this path. trade-brief-generator.py's get_recent_ledger() is now
+# freshness-gated at the source, but this is belt-and-suspenders: any line
+# that still names a retired agent gets dropped rather than published.
+_RETIRED_AGENTS = re.compile(r"\b(jazzy|boba|orion)\b['’]?s?", re.IGNORECASE)
+
+
+def _strip_retired_agents(text: str) -> str:
+    if not text:
+        return text
+    kept = [ln for ln in text.split('\n') if not _RETIRED_AGENTS.search(ln)]
+    return '\n'.join(kept)
+
+
 def build_raynor(slot):
     cache = _file('/home/itsju/02_DATA/trade-brief-cache.json') or {}
-    brief = (cache.get('brief') or '').strip()
-    bullets = cache.get('bullets') or []
+    brief = _strip_retired_agents((cache.get('brief') or '').strip())
+    bullets = [b for b in (cache.get('bullets') or []) if not _RETIRED_AGENTS.search(b)]
     vs = _get('/api/verdict-scan') or {}
     rows = vs.get('results') if isinstance(vs.get('results'), list) else (vs if isinstance(vs, list) else [])
     top = [r for r in (rows or []) if isinstance(r, dict)][:5]
@@ -182,12 +199,20 @@ def build_raynor(slot):
         lines += ["## Desk brief", brief]
     if bullets:
         lines += [""] + [f"- {b}" for b in bullets[:6]]
-    lines += ["", "_Verdict-first, paper-first. One screen, no walls._"]
+    lines += ["", "_Verdict-first, hand-trade Robinhood/Coinbase. One screen, no walls._"]
     summary = (brief[:180] + '…') if len(brief) > 180 else (brief or "The desk's read on the names and the tape going into the session.")
     tickers = ",".join(dict.fromkeys(syms))[:120] or None
     return title, summary, "\n".join(lines), tickers
 
 
+# build_aldaris is RETIRED (2026-09-17) — it read /api/portfolio for
+# "positions"/"equity"/"the book", which was deleted site-wide 2026-09-12
+# (portfolio views retired doctrine). The route no longer exists (`_get`
+# returns None on the 404, so this always short-circuited to "no content"
+# already), but the function is disabled below rather than left wired in, so
+# it can't start publishing "Risk Note: The Book Right Now" again if a
+# similarly-named route is ever added back. Left defined for history/Mike's
+# call; not in BUILDERS.
 def build_aldaris(slot):
     pf = _get('/api/portfolio') or {}
     positions = pf.get('positions') or []
@@ -211,7 +236,7 @@ BUILDERS = [
     ('mengsk', build_mengsk),
     ('zeratul', build_zeratul),
     ('raynor', build_raynor),
-    ('aldaris', build_aldaris),
+    # ('aldaris', build_aldaris),  # retired — see comment above build_aldaris
 ]
 
 
