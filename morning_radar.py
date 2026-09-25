@@ -17,7 +17,7 @@ Scoring (explainable, 0-20+):
   MACD hist rising 3d & near zero-cross    ->  +2                  (about to turn)
   tight coil yesterday (range < 0.6xATR)   ->  +2                  (spring loaded)
 
-Cron: 12 9 * * 1-5 -> --send (>= ~/portfolio/coach.log). Never raises.
+Cron: 12 9 * * 1-5 -> --send (>> ~/logs/missionctrl/coach.log). Never raises.
 """
 from __future__ import annotations
 

@@ -12,16 +12,19 @@ import json
 import os
 import re
 import subprocess
+import importlib.util
 import time
-import urllib.request
 from datetime import datetime, timezone
+from zoneinfo import ZoneInfo
 from pathlib import Path
 
 HOME = Path.home()
 SEC = HOME / ".openclaw" / "secrets"
 PING = HOME / "scripts" / "ping_mike.py"
 LATCH = HOME / ".openclaw" / "cron_health_latches"
-ALPACA = "https://paper-api.alpaca.markets/v2"
+ET = ZoneInfo("America/New_York")
+# NYSE holiday set is owned by missionctrl (src/lib/freshness.ts US_MARKET_HOLIDAYS, mirrored here).
+HOLIDAYS_SRC = Path("/AIWorkWSL/web/missionctrl/pipeline/gex/common.py")
 ERR = re.compile(r"Traceback|ModuleNotFoundError|ImportError|database is locked|"
                  r"OperationalError|NameError|No such file|name resolution|FAILED", re.I)
 ERRSCAN_FRESH_MIN = 360   # only error-scan logs touched in the last 6h (ignore ancient errors)
@@ -31,9 +34,10 @@ JOBS = [
     ("decipher-manage",  HOME / "logs/decipher_manage.log",            15,   True,  True),
     ("decipher-main",    HOME / "logs/decipher.log",                   45,   True,  True),
     ("flow-ingest",      HOME / "logs/flow-ingest.log",                30,   False, True),
-    ("refresh-holdings", HOME / "portfolio/refresh.log",               1500, False, True),
+    # plaid_sync 08:00 daily (LifeClaw debts). Was "refresh-holdings" on ~/portfolio/refresh.log — that job
+    # retired 2026-09-12 and plaid kept the shared log fresh (false green). Repointed overhaul T6 2026-09-25.
+    ("plaid-sync",       HOME / "logs/lifeclaw/plaid_sync.log",       1500, False, True),
     ("flow-outcomes",    HOME / "logs/flow-outcomes.log",              None, False, True),
-    ("equity-snapshot",  HOME / "scripts/audit/equity-snapshot.log",   None, False, True),
     ("sector-rotation",  HOME / "LapClaw/pipeline/logs/sector_rotation.log",  None, False, True),
     ("catalyst-scanner", HOME / "LapClaw/pipeline/logs/catalyst_scanner.log", None, False, True),
     # md_freshness runs weekly (Sun 05:30 UTC, crontab:424); laptop asleep = silent skip.
@@ -49,15 +53,26 @@ JOBS = [
 ]
 
 
-def market_open():
+def _holidays():
     try:
-        h = {"APCA-API-KEY-ID": (SEC / "alpaca-boba-key-id").read_text().strip(),
-             "APCA-API-SECRET-KEY": (SEC / "alpaca-boba-secret").read_text().strip()}
-        r = json.load(urllib.request.urlopen(
-            urllib.request.Request(f"{ALPACA}/clock", headers=h), timeout=10))
-        return bool(r.get("is_open"))
+        spec = importlib.util.spec_from_file_location("mc_gex_common", HOLIDAYS_SRC)
+        mod = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(mod)
+        return set(mod.US_MARKET_HOLIDAYS)
     except Exception:
-        return None   # unknown
+        return set()   # fail toward checking: a holiday then reads as open (stale alerts), never blind
+
+
+def market_open():
+    """Deterministic NYSE regular session: ET weekday, 09:30-16:00, not a full-day holiday.
+    Replaced the Alpaca paper-trading /v2/clock call (overhaul T6, 2026-09-25): Alpaca execution
+    is retired and its paper keys are slated for revocation, which would have left every
+    market-hours check below silently blind. Half-days read as open to 16:00 (harmless here)."""
+    now = datetime.now(ET)
+    if now.weekday() >= 5 or now.date() in _holidays():
+        return False
+    mins = now.hour * 60 + now.minute
+    return 9 * 60 + 30 <= mins < 16 * 60
 
 
 def ping(msg):
@@ -67,8 +82,10 @@ def ping(msg):
         return False
 
 
-FLEET = ["trail-daemon", "trail-daemon-jazzy", "profit-lock-boba",
-         "profit-lock-jazzy", "auto-bracket", "grid-daemon"]
+# Mirrors FLEET in ~/bin/trading-fleet. The trail/profit-lock/auto-bracket daemons were deleted
+# 2026-08-11 with the Alpaca book; watching them latched "absent" on 08-12 and muted this check
+# for six weeks (trimmed overhaul T6, 2026-09-25).
+FLEET = ["grid-daemon"]
 
 
 def check_fleet(mo):
@@ -99,7 +116,7 @@ def check_fleet(mo):
     missing = [n for n in FLEET if n not in {p["name"] for p in procs}]
     if down or missing:
         detail = ", ".join(down + [f"{m} (absent)" for m in missing])
-        _fleet_ping("trading-fleet", f"exit-protection DOWN during market hours: {detail}")
+        _fleet_ping("trading-fleet", f"trading-fleet DOWN during market hours: {detail}")
     else:
         (LATCH / "trading-fleet").unlink(missing_ok=True)
         (LATCH / "fleet-check").unlink(missing_ok=True)
