@@ -9,11 +9,12 @@ No persistent sub-agents. This is Mike's flat script bag (~138 files). Loaded by
 
 ## Spawning rules
 
-- Any sub-agent invoked here MUST: confirm it's editing a laptop script before writing. Some scripts have HISTORICAL Oracle counterparts at `/home/ubuntu/scripts/` (laptop-only since the 2026-06-30 cutover).
-- For tasks touching `alpaca_*.py`: paper keys only, never live. Account IDs in `~/LapClaw/MEMORY.md`.
+- Any sub-agent invoked here MUST confirm it's editing a laptop script before writing. Oracle is retired (dead since 2026-07-10).
+- `alpaca_*.py` are retired Alpaca-book helpers (the book was retired 2026-08-11). Don't revive them or wire order/account calls. Alpaca is market data only.
 - For tasks touching `ainvest_*`: see `~/.claude/projects/-home-itsju/memory/reference-ainvest-api.md` first.
 
 ## Authority limits
 
-- Never deploy a script to Oracle (trading side retired 2026-06-30; comms bots there are Oracle-owned).
-- Don't reorganize the script layout — many are referenced by laptop cron entries (and legacy Oracle configs) by exact path.
+- Never deploy a script to Oracle, which is retired.
+- Don't reorganize the script layout. Many scripts are referenced by exact path from laptop cron entries.
+- No agent places trades. Trade ideas become advisory tickets (`@executor`), and Mike executes them himself.

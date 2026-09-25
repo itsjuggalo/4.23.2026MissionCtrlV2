@@ -10,7 +10,7 @@ Loose collection of Python + shell scripts spanning trading utilities, scrapers,
 
 ## What lives here
 
-- `alpaca_*` — Alpaca paper account helpers (fill listener, archive, history writer)
+- `alpaca_*` — RETIRED Alpaca-book helpers (fill listener, archive, history writer); the Alpaca book was retired on 2026-08-11. Historical only, so don't revive them.
 - `ainvest_*` — AInvest scrapers + cookie probes
 - `askgrok_bot.py`, agent_health.py, activity_logger.py, audit_log_writer.py — utility daemons
 - `alt-signals/` — alternative signal source experiments
@@ -19,13 +19,12 @@ Loose collection of Python + shell scripts spanning trading utilities, scrapers,
 
 ## Knowledge lookups
 
-- `~/.claude/projects/-home-itsju/memory/reference-prod-deployment.md` — many scripts here mirror what runs on Oracle
 - `~/.claude/projects/-home-itsju/memory/reference-mission-control-paths.md`
 - `~/.claude/projects/-home-itsju/memory/reference-llm-api-keys.md` for key locations
 
 ## Defaults / conventions
 
 - Python uses operator's system `python3` — most scripts have no venv. Check imports first.
-- Scripts hitting Alpaca always use **paper** keys. Live keys exist but never wired here.
-- Some scripts have HISTORICAL Oracle twins at `/home/ubuntu/scripts/` — laptop-only since the 2026-06-30 cutover; do NOT deploy to Oracle (its trading side is retired).
+- Alpaca is a **market-data feed only**: bars, quotes and news. Never add Alpaca order, position or account calls, because Alpaca trading is retired. Mike trades on Robinhood and Coinbase himself.
+- Oracle is retired (dead since 2026-07-10). Never deploy to it or SSH to it. Everything runs on the laptop.
 - This dir is NOT auto-loaded by anything — invoke scripts individually.
