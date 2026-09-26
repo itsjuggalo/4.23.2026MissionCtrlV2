@@ -389,6 +389,25 @@ def _structure_phone_line() -> str:
     return "🏗 Structure says: " + "; ".join(parts) + ". Advisory only — stop = level break."
 
 
+def _rates_line() -> str:
+    """2y / 10y / 10y-2y from the canonical normalized facts (T7.1). These are the same
+    envelopes /api/intel/v1/rates serves to the dashboard, so Telegram and the UI can't
+    disagree. Each value shows its own FRED as_of, and a non-EOD status is stated."""
+    try:
+        sys.path.insert(0, "/AIWorkWSL/web/missionctrl/pipeline")
+        from decision.lib import intel_reader  # noqa: E402
+        f = {x["key"]: x for x in intel_reader.read_domain("rates")["facts"]}
+    except Exception:
+        return ""
+    t2, t10, sp = f.get("rates.us.t2y"), f.get("rates.us.t10y"), f.get("rates.us.spread_10y2y")
+    ok = lambda x: x and x.get("value") is not None and x.get("status") in ("LIVE", "DELAYED", "EOD")  # noqa: E731
+    if not (ok(t2) and ok(t10) and ok(sp)):
+        return "• rates: 2y/10y facts UNAVAILABLE or STALE (see /api/intel/v1/rates)"
+    flag = lambda x: "" if x["status"] == "EOD" else f" {x['status']}"  # noqa: E731
+    return (f"• 2y {t2['value']:.2f}%{flag(t2)} · 10y {t10['value']:.2f}%{flag(t10)} "
+            f"(FRED {t2['as_of']}) · 10y−2y {sp['value']:+.2f}{flag(sp)} (FRED {sp['as_of']})")
+
+
 def _macro_block() -> str:
     """Desk-copy block: next release + countdown + last-3 reaction lines + the data-vs-flows read."""
     data = _load_fresh_json(MACRO_REACTION_JSON, MACRO_MAX_AGE_H)
@@ -410,9 +429,9 @@ def _macro_block() -> str:
         roll = (nxt.get("rolling") or {}).get("read")
         if roll:
             lines.append(f"  ↳ {nxt.get('name')} pattern: {roll}")
-    y = data.get("yields") or {}
-    if y.get("dgs2") is not None and y.get("dgs10") is not None:
-        lines.append(f"• 2y {y['dgs2']:.2f}% · 10y {y['dgs10']:.2f}% · curve {y['dgs10'] - y['dgs2']:+.2f} (FRED {y.get('asOf')})")
+    rates_line = _rates_line()
+    if rates_line:
+        lines.append(rates_line)
     dvf = (data.get("dataVsFlows") or {}).get("read")
     if dvf:
         lines.append(f"• Read: {dvf}")
