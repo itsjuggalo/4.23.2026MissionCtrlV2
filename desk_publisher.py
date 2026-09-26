@@ -227,7 +227,7 @@ def build_aldaris(slot):
         if s:
             syms.append(s)
             lines.append(f"- **{s}**" + (f" — {round(float(pl)*100,1)}%" if isinstance(pl,(int,float,str)) and str(pl).replace('.','',1).replace('-','',1).isdigit() else ''))
-    lines += ["", "_Size as a fraction of current equity. Hard cap min($400, 15% of equity) per trade. Mind correlation._"]
+    lines += ["", "_Hard cap: flat $400 max risk per trade. Mind correlation._"]
     summary = f"{len(positions)} open positions on the book — concentration, P&L, and the risk read."
     return title, summary, "\n".join(lines), (",".join(dict.fromkeys(syms))[:120] or None)
 

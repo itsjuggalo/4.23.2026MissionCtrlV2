@@ -192,24 +192,16 @@ def _tape() -> str:
 MAX_MNY = 0.15   # |moneyness| beyond this = hedge/LEAP/stock-replacement, not a swing pick
 DTE_MIN, DTE_MAX = 7, 120   # swing window — excludes 0DTE lotto and long-dated LEAPs
 # Mike's per-trade risk cap (premium-at-risk model). 2026-07-15 P&L review HALVED the
-# doctrine cap 800→400 and made it fail-CLOSED — min($400, 15% of CURRENT equity) — after a
+# doctrine cap 800→400 and made it fail-CLOSED after a
 # fail-open $800 let an $1,810 MRVL pick onto a ~$2k account. This module was still on the
 # retired 800 as of 2026-07-29, which is why the morning brief and the pick sizing lines kept
 # quoting contracts bigger than the whole book. Same constant as
 # option-scraper/pipeline/digest/best3_core.risk_cap_usd().
+# Since 2026-09-12 the doctrine is a FLAT $400 (the equity feed and the "15% of equity"
+# leg were retired). The unused equity-based risk_cap() helper was removed in T7.1 (it had
+# no callers; every sizing line here already used RISK_CAP = $400).
 RISK_CAP_USD = 400
-RISK_CAP_PCT = 0.15
-RISK_CAP = RISK_CAP_USD   # binding side of the cap for any account under ~$2.7k
-
-
-def risk_cap(equity=None):
-    """min($400, 15% of equity). $400 stands when equity isn't already in hand —
-    this runs in message-build paths that must never block on a live account call."""
-    try:
-        eq = float(equity or 0)
-    except (TypeError, ValueError):
-        eq = 0
-    return round(min(RISK_CAP_USD, RISK_CAP_PCT * eq), 2) if eq > 0 else float(RISK_CAP_USD)
+RISK_CAP = RISK_CAP_USD
 
 
 def _mid(row):
@@ -387,7 +379,7 @@ def build() -> str | None:
             lines.append(f"\n⚠️ **YOUR NAME — {a['Symbol']}:** big flow ({_fmt(a)}, ${fv:,.0f}) reads "
                          f"**bearish** (V/OI {voi:.1f}). Don't mistake size for a green light.")
             break
-    lines.append("\n_0DTE = confirmation not entry · size up to $400 risk (min $400 / 15% of equity) · auto-posted intraday._")
+    lines.append("\n_0DTE = confirmation not entry · size up to $400 max risk (flat cap) · auto-posted intraday._")
     global TOP_ACTION_PICK, ACTIONABLE_PICKS
     TOP_ACTION_PICK = bulls[0] if bulls else (bears[0] if bears else None)
     ACTIONABLE_PICKS = list(bulls) + list(bears)

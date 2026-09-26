@@ -34,7 +34,7 @@ from tg_format import esc, b, hdr, row, footer, join
 
 ET = ZoneInfo("America/New_York")
 
-# Mike's per-trade risk cap — min($400, 15% of CURRENT equity), fail-CLOSED. $400 is the
+# Mike's per-trade risk cap — flat $400 max risk (doctrine since 2026-09-12), fail-CLOSED. $400 is the
 # standing ceiling used wherever equity isn't already in hand (message-build paths must never
 # block on a live account call). Same number as flow_picks_post.RISK_CAP_USD and the
 # flow-digest affordability gate — if the doctrine changes, change it in all of them.
@@ -220,7 +220,7 @@ def chase_verdict(a, snap, eq):
             reasons.append(f"stock {chg:+.1f}% today")
 
     sym = a.get("Symbol")
-    # Mike's hard per-trade cap: min($400, 15% of equity), fail-CLOSED. One contract = mid×100.
+    # Mike's hard per-trade cap: flat $400, fail-CLOSED. One contract = mid×100.
     # Without this the board told him to "buy near $267.56" on an STX put — a $26,756 contract
     # on a ~$2k book. An idea he cannot afford is not an idea; say so instead of pricing it.
     cost = mid * 100 if mid else 0
