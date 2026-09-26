@@ -393,12 +393,18 @@ def _rates_line() -> str:
     """2y / 10y / 10y-2y from the canonical normalized facts (T7.1). These are the same
     envelopes /api/intel/v1/rates serves to the dashboard, so Telegram and the UI can't
     disagree. Each value shows its own FRED as_of, and a non-EOD status is stated."""
+    pipe = "/AIWorkWSL/web/missionctrl/pipeline"
+    added = pipe not in sys.path
     try:
-        sys.path.insert(0, "/AIWorkWSL/web/missionctrl/pipeline")
+        if added:
+            sys.path.insert(0, pipe)  # temporary: pipeline/lib would shadow this script's own lib/
         from decision.lib import intel_reader  # noqa: E402
         f = {x["key"]: x for x in intel_reader.read_domain("rates")["facts"]}
     except Exception:
         return ""
+    finally:
+        if added and pipe in sys.path:
+            sys.path.remove(pipe)
     t2, t10, sp = f.get("rates.us.t2y"), f.get("rates.us.t10y"), f.get("rates.us.spread_10y2y")
     ok = lambda x: x and x.get("value") is not None and x.get("status") in ("LIVE", "DELAYED", "EOD")  # noqa: E731
     if not (ok(t2) and ok(t10) and ok(sp)):
