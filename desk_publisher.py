@@ -176,13 +176,14 @@ def build_raynor(slot):
     lines = []
     syms = []
     if top:
-        lines.append("## Top conviction names")
+        # D-4 (T8.1c): the scan's names only — its verdict/score is NOT republished here. The final
+        # BUY/HOLD/WAIT/… read is owned by the synthesized MissionCtrl analysis object, nowhere else.
+        lines.append("## Names on the scanner")
         for r in top:
             s = r.get('symbol') or r.get('ticker')
-            v = r.get('verdict'); sc = r.get('score')
             if s:
                 syms.append(s)
-                lines.append(f"- **{s}** — {v}" + (f" ({sc})" if sc is not None else ''))
+                lines.append(f"- **{s}**")
         lines.append("")
         # Wall-St consensus on the top conviction names (yfinance + AInvest cache).
         alines = []
@@ -199,7 +200,7 @@ def build_raynor(slot):
         lines += ["## Desk brief", brief]
     if bullets:
         lines += [""] + [f"- {b}" for b in bullets[:6]]
-    lines += ["", "_Verdict-first, hand-trade Robinhood/Coinbase. One screen, no walls._"]
+    lines += ["", "_Context only — the setup read lives in MissionCtrl; Mike decides and places every order (Robinhood/Coinbase)._"]
     summary = (brief[:180] + '…') if len(brief) > 180 else (brief or "The desk's read on the names and the tape going into the session.")
     tickers = ",".join(dict.fromkeys(syms))[:120] or None
     return title, summary, "\n".join(lines), tickers
