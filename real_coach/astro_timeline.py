@@ -24,6 +24,9 @@ from svehla import _signed_diff, _crossings, jd_of, natal_lon
 HERE = Path(__file__).resolve().parent
 CACHE = HERE / "astro_timeline.json"
 START, END = date(2026, 9, 1), date(2031, 12, 31)
+# aspect scans start this far back so a retrograde triple pass that began before START is
+# numbered correctly (Saturn□Juno: May 28 → Sep 27 → Feb 18 is "2 of 3", not "1 of 2")
+LOOKBACK = START - timedelta(days=1100)
 SLOW = {"Jupiter": swe.JUPITER, "Saturn": swe.SATURN, "Uranus": swe.URANUS, "Neptune": swe.NEPTUNE,
         "Pluto": swe.PLUTO, "Chiron": swe.CHIRON, "Ceres": swe.CERES, "Juno": swe.JUNO}
 NATAL_POINTS = ["Sun", "Moon", "Mercury", "Venus", "Mars", "Jupiter", "Saturn", "Uranus", "Neptune",
@@ -84,7 +87,7 @@ def _exact_aspects(name: str, body: int) -> list[dict]:
             angles = {deg} if deg in (0, 180) else {deg, 360 - deg}
             for a in angles:
                 f = lambda jd, b=body, t=(target + a) % 360: _signed_diff(_lon(jd, b), t)
-                for d in _crossings(f, START, END):
+                for d in _crossings(f, LOOKBACK, END):
                     lon = _lon(jd_of(d) + 0.5, body)
                     out.append({"date": d.isoformat(), "kind": "aspect", "body": name, "natal": npt,
                                 "aspect": asp, "t_house": T.house_of(lon),
@@ -254,6 +257,7 @@ def build() -> list[dict]:
                 _stamp(run); run = []
             run.append(e)
         _stamp(run)
+    ev = [e for e in ev if e["date"] >= START.isoformat()]   # lookback hits only served the numbering
     CACHE.write_text(json.dumps({"built": datetime.now(T.ET).isoformat(timespec="minutes"),
                                  "start": START.isoformat(), "end": END.isoformat(), "events": ev}, indent=1))
     return ev

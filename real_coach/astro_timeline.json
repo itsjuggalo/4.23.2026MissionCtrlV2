@@ -1,5 +1,5 @@
 {
- "built": "2026-09-15T01:46-04:00",
+ "built": "2026-09-27T16:45-04:00",
  "start": "2026-09-01",
  "end": "2031-12-31",
  "events": [
@@ -54,8 +54,8 @@
    "aspect": "square",
    "t_house": 9,
    "key": "Transiting Saturn square natal Juno",
-   "what": "Saturn exactly square your natal Juno (pass 1 of 2, retrograde)",
-   "pass": "1 of 2",
+   "what": "Saturn exactly square your natal Juno (pass 2 of 3, retrograde)",
+   "pass": "2 of 3",
    "rx": true
   },
   {
@@ -73,7 +73,9 @@
    "aspect": "opposite",
    "t_house": 6,
    "key": "Transiting Juno opposite natal ASC",
-   "what": "Juno exactly opposite your natal ASC"
+   "what": "Juno exactly opposite your natal ASC (pass 3 of 3)",
+   "pass": "3 of 3",
+   "rx": false
   },
   {
    "date": "2026-10-06",
@@ -108,8 +110,8 @@
    "aspect": "sextile",
    "t_house": 9,
    "key": "Transiting Neptune sextile natal Ceres",
-   "what": "Neptune exactly sextile your natal Ceres (pass 1 of 2, retrograde)",
-   "pass": "1 of 2",
+   "what": "Neptune exactly sextile your natal Ceres (pass 2 of 3, retrograde)",
+   "pass": "2 of 3",
    "rx": true
   },
   {
@@ -129,8 +131,8 @@
    "aspect": "opposite",
    "t_house": 11,
    "key": "Transiting Uranus opposite natal Mercury",
-   "what": "Uranus exactly opposite your natal Mercury (pass 1 of 2, retrograde)",
-   "pass": "1 of 2",
+   "what": "Uranus exactly opposite your natal Mercury (pass 2 of 3, retrograde)",
+   "pass": "2 of 3",
    "rx": true
   },
   {
@@ -174,8 +176,8 @@
    "aspect": "trine",
    "t_house": 11,
    "key": "Transiting Uranus trine natal Jupiter",
-   "what": "Uranus exactly trine your natal Jupiter (pass 1 of 2, retrograde)",
-   "pass": "1 of 2",
+   "what": "Uranus exactly trine your natal Jupiter (pass 2 of 3, retrograde)",
+   "pass": "2 of 3",
    "rx": true
   },
   {
@@ -214,7 +216,9 @@
    "aspect": "conjunct",
    "t_house": 7,
    "key": "Transiting Juno conjunct natal Ceres",
-   "what": "Juno exactly conjunct your natal Ceres"
+   "what": "Juno exactly conjunct your natal Ceres (pass 3 of 3)",
+   "pass": "3 of 3",
+   "rx": false
   },
   {
    "date": "2026-11-13",
@@ -257,8 +261,8 @@
    "aspect": "square",
    "t_house": 10,
    "key": "Transiting Chiron square natal ASC",
-   "what": "Chiron exactly square your natal ASC (pass 1 of 2, retrograde)",
-   "pass": "1 of 2",
+   "what": "Chiron exactly square your natal ASC (pass 4 of 5, retrograde)",
+   "pass": "4 of 5",
    "rx": true
   },
   {
@@ -297,8 +301,8 @@
    "aspect": "trine",
    "t_house": 11,
    "key": "Transiting Uranus trine natal Ceres",
-   "what": "Uranus exactly trine your natal Ceres (pass 1 of 2, retrograde)",
-   "pass": "1 of 2",
+   "what": "Uranus exactly trine your natal Ceres (pass 2 of 3, retrograde)",
+   "pass": "2 of 3",
    "rx": true
   },
   {
@@ -370,8 +374,8 @@
    "aspect": "trine",
    "t_house": 7,
    "key": "Transiting Pluto trine natal Jupiter",
-   "what": "Pluto exactly trine your natal Jupiter (pass 1 of 3)",
-   "pass": "1 of 3",
+   "what": "Pluto exactly trine your natal Jupiter (pass 3 of 5)",
+   "pass": "3 of 5",
    "rx": false
   },
   {
@@ -382,8 +386,8 @@
    "aspect": "sextile",
    "t_house": 7,
    "key": "Transiting Pluto sextile natal Mercury",
-   "what": "Pluto exactly sextile your natal Mercury (pass 1 of 3)",
-   "pass": "1 of 3",
+   "what": "Pluto exactly sextile your natal Mercury (pass 3 of 5)",
+   "pass": "3 of 5",
    "rx": false
   },
   {
@@ -437,8 +441,8 @@
    "aspect": "sextile",
    "t_house": 9,
    "key": "Transiting Neptune sextile natal Ceres",
-   "what": "Neptune exactly sextile your natal Ceres (pass 2 of 2)",
-   "pass": "2 of 2",
+   "what": "Neptune exactly sextile your natal Ceres (pass 3 of 3)",
+   "pass": "3 of 3",
    "rx": false
   },
   {
@@ -449,8 +453,8 @@
    "aspect": "square",
    "t_house": 10,
    "key": "Transiting Chiron square natal ASC",
-   "what": "Chiron exactly square your natal ASC (pass 2 of 2)",
-   "pass": "2 of 2",
+   "what": "Chiron exactly square your natal ASC (pass 5 of 5)",
+   "pass": "5 of 5",
    "rx": false
   },
   {
@@ -461,8 +465,8 @@
    "aspect": "square",
    "t_house": 9,
    "key": "Transiting Saturn square natal Juno",
-   "what": "Saturn exactly square your natal Juno (pass 2 of 2)",
-   "pass": "2 of 2",
+   "what": "Saturn exactly square your natal Juno (pass 3 of 3)",
+   "pass": "3 of 3",
    "rx": false
   },
   {
@@ -565,8 +569,8 @@
    "aspect": "trine",
    "t_house": 11,
    "key": "Transiting Uranus trine natal Ceres",
-   "what": "Uranus exactly trine your natal Ceres (pass 2 of 2)",
-   "pass": "2 of 2",
+   "what": "Uranus exactly trine your natal Ceres (pass 3 of 3)",
+   "pass": "3 of 3",
    "rx": false
   },
   {
@@ -743,8 +747,8 @@
    "aspect": "trine",
    "t_house": 11,
    "key": "Transiting Uranus trine natal Jupiter",
-   "what": "Uranus exactly trine your natal Jupiter (pass 2 of 2)",
-   "pass": "2 of 2",
+   "what": "Uranus exactly trine your natal Jupiter (pass 3 of 3)",
+   "pass": "3 of 3",
    "rx": false
   },
   {
@@ -767,8 +771,8 @@
    "aspect": "opposite",
    "t_house": 11,
    "key": "Transiting Uranus opposite natal Mercury",
-   "what": "Uranus exactly opposite your natal Mercury (pass 2 of 2)",
-   "pass": "2 of 2",
+   "what": "Uranus exactly opposite your natal Mercury (pass 3 of 3)",
+   "pass": "3 of 3",
    "rx": false
   },
   {
@@ -1109,8 +1113,8 @@
    "aspect": "sextile",
    "t_house": 7,
    "key": "Transiting Pluto sextile natal Mercury",
-   "what": "Pluto exactly sextile your natal Mercury (pass 2 of 3, retrograde)",
-   "pass": "2 of 3",
+   "what": "Pluto exactly sextile your natal Mercury (pass 4 of 5, retrograde)",
+   "pass": "4 of 5",
    "rx": true
   },
   {
@@ -1156,8 +1160,8 @@
    "aspect": "trine",
    "t_house": 7,
    "key": "Transiting Pluto trine natal Jupiter",
-   "what": "Pluto exactly trine your natal Jupiter (pass 2 of 3, retrograde)",
-   "pass": "2 of 3",
+   "what": "Pluto exactly trine your natal Jupiter (pass 4 of 5, retrograde)",
+   "pass": "4 of 5",
    "rx": true
   },
   {
@@ -1406,8 +1410,8 @@
    "aspect": "trine",
    "t_house": 7,
    "key": "Transiting Pluto trine natal Jupiter",
-   "what": "Pluto exactly trine your natal Jupiter (pass 3 of 3)",
-   "pass": "3 of 3",
+   "what": "Pluto exactly trine your natal Jupiter (pass 5 of 5)",
+   "pass": "5 of 5",
    "rx": false
   },
   {
@@ -1430,8 +1434,8 @@
    "aspect": "sextile",
    "t_house": 7,
    "key": "Transiting Pluto sextile natal Mercury",
-   "what": "Pluto exactly sextile your natal Mercury (pass 3 of 3)",
-   "pass": "3 of 3",
+   "what": "Pluto exactly sextile your natal Mercury (pass 5 of 5)",
+   "pass": "5 of 5",
    "rx": false
   },
   {

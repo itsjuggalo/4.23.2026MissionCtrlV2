@@ -12,6 +12,7 @@ Checks:
   C horizons   NASA JPL Horizons geocentric ecliptic longitudes vs Swiss Ephemeris (≤0.05°)
   D svehla     every dated event in the Aug 2026 reading reproduces within 1 day
   E outputs    today's daily_transits / --progressed output re-parsed and re-derived from truth
+  G passes     upcoming timeline "pass i of n" + retrograde flags recounted by an independent scan
 """
 from __future__ import annotations
 
@@ -64,8 +65,11 @@ def claims(text: str) -> list[dict]:
     for m in re.finditer(rf"\b(transiting|natal|progressed|p)?\s*{BODY_RX}\b{NB}{{0,30}}?\b{ASP_RX}\b{NB}{{0,25}}?\b(natal|your|progressed|transiting)?\s*{BODY_RX}\b", text, re.I):
         out.append({"kind": "aspect", "q1": (m.group(1) or "").lower(), "a": norm_body(m.group(2)),
                     "asp": ASP_NORM[m.group(3)[:4].lower()], "q2": (m.group(4) or "").lower(), "b": norm_body(m.group(5)), "text": m.group(0)})
-    # 4. "Body is retrograde" — nearest body before the keyword
-    for m in re.finditer(rf"\b(natal|progressed)?\s*{BODY_RX}\b{NB}{{0,20}}?\b(retrograde|℞|rx)\b", text, re.I):
+    # 4. "Body is retrograde" — nearest body before the keyword. Timeline pass stamps
+    #    "(pass 2 of 3, retrograde)" describe the TRANSITING body on the event date, not the
+    #    natal point just before them; check_pass_numbers() verifies those independently.
+    rx_text = re.sub(r"\(pass \d+ of \d+(?:, retrograde)?\)", "", text)
+    for m in re.finditer(rf"\b(natal|progressed)?\s*{BODY_RX}\b{NB}{{0,20}}?\b(retrograde|℞|rx)\b", rx_text, re.I):
         out.append({"kind": "rx", "q": (m.group(1) or "").lower(), "body": norm_body(m.group(2)), "text": m.group(0)})
     return out
 
@@ -374,16 +378,53 @@ def check_modules() -> list[str]:
     return fails
 
 
+def check_pass_numbers(days: int = 120) -> list[str]:
+    """G — every upcoming timeline aspect's "pass i of n" and retrograde flag, recounted by a
+    brute-force daily scan ±900 days that shares no code with astro_timeline."""
+    import swisseph as swe
+    import astro_timeline as TL
+    from svehla import natal_lon
+    fails, today = [], datetime.now(T.ET).date()
+    for e in TL.load():
+        if e["kind"] != "aspect" or not (today <= date.fromisoformat(e["date"]) <= today + timedelta(days=days)):
+            continue
+        body, d0 = TL.SLOW[e["body"]], date.fromisoformat(e["date"])
+        a, nl = TL.ASPECTS[e["aspect"]], natal_lon(e["natal"])
+        hits = []
+        for t in ({(nl + a) % 360} if a in (0, 180) else {(nl + a) % 360, (nl - a) % 360}):
+            d, prev = d0 - timedelta(days=900), None
+            while d < d0 + timedelta(days=900):
+                x = ((swe.calc_ut(swe.julday(d.year, d.month, d.day, 16), body)[0][0] - t + 180) % 360) - 180
+                if prev is not None and prev * x < 0 and abs(x - prev) < 90:
+                    hits.append(d)
+                prev, d = x, d + timedelta(days=1)
+        hits.sort()
+        if not hits:
+            fails.append(f"G pass recount found no {e['key']} near {d0}"); continue
+        i = min(range(len(hits)), key=lambda k: abs((hits[k] - d0).days))
+        lo = hi = i
+        while lo > 0 and (hits[lo] - hits[lo - 1]).days <= 600: lo -= 1
+        while hi < len(hits) - 1 and (hits[hi + 1] - hits[hi]).days <= 600: hi += 1
+        want = f"{i - lo + 1} of {hi - lo + 1}" if hi > lo else None
+        if e.get("pass") != want:
+            fails.append(f"G {e['date']} {e['key']}: timeline says pass {e.get('pass')} vs recount {want}")
+        if want:
+            rx = swe.calc_ut(swe.julday(d0.year, d0.month, d0.day, 16), body)[0][3] < 0
+            if bool(e.get("rx")) != rx:
+                fails.append(f"G {e['date']} {e['key']}: retrograde flag {e.get('rx')} vs ephemeris {rx}")
+    return fails
+
+
 def run_all(send_on_fail: bool = False) -> int:
     fails = []
-    for fn in (check_natal, check_texts, check_horizons, check_svehla, check_outputs, check_modules, check_no_vedic, check_commands):
+    for fn in (check_natal, check_texts, check_horizons, check_svehla, check_outputs, check_modules, check_pass_numbers, check_no_vedic, check_commands):
         try:
             fails += fn()
         except Exception as e:
             fails.append(f"{fn.__name__} crashed: {e}")
     hard = [f for f in fails if "skipped" not in f]
     status = {"ok": not hard, "when_et": datetime.now(T.ET).isoformat(timespec="minutes"),
-              "checks": ["natal", "texts", "horizons", "svehla", "outputs", "modules", "no-vedic", "commands"], "failures": fails}
+              "checks": ["natal", "texts", "horizons", "svehla", "outputs", "modules", "passes", "no-vedic", "commands"], "failures": fails}
     STATUS.parent.mkdir(parents=True, exist_ok=True)
     STATUS.write_text(json.dumps(status, indent=1))
     print(("✔ ALL CHECKS PASS" if not hard else "✖ FAILURES") + f" — {status['when_et']}")
