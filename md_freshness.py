@@ -343,7 +343,7 @@ def main():
                f"🔴 canonical stale-refs: {len(canon)} · other: {len(other)} · registry flags: {reg_flags}\n"
                f"full report: ~/restructure/DOCS-FRESHNESS.md")
     if not NO_TG and TG_SEND.exists():
-        sh([str(TG_SEND), summary], timeout=30)
+        sh(["env", "TG_FN=system_health", str(TG_SEND), summary], timeout=30)
     # Best-effort Discord post to #system-logs (ops channel). Reuses lib/discord_post.py
     # which already handles the urllib UA-403 gotcha; never raises.
     if not NO_TG:

@@ -29,7 +29,7 @@ alert() {
       -H 'User-Agent: kb-warm-health/1.0' \
       -d "{\"content\": $(printf '%s' "$msg" | python3 -c 'import json,sys; print(json.dumps(sys.stdin.read()))')}" >/dev/null 2>&1
   fi
-  "$HOME/bin/tg-send-msg" "$msg" >/dev/null 2>&1 || true
+  TG_FN=system_health "$HOME/bin/tg-send-msg" "$msg" >/dev/null 2>&1 || true
 }
 
 # probe: healthy iff HTTP 200 AND status=ok AND model_loaded=true
