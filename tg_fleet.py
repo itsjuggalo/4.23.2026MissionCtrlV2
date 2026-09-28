@@ -69,9 +69,9 @@ FLEET = {
     # @Boba2Telegram_Bot stays registered, parked, token kept.
     # 2026-09-28 (Mike: "use the bots that haven't messaged this month") — three idle bots
     # take the trading overflow so Trading Command carries act-now messages only:
-    "trading_digest":  dict(user="Boba2Telegram_Bot",       avatar="hydralisk",       role="push",        src=("vault", "telegram_boba2_bot_token")),   # compact FYI digest (lib/tg_digest.py)
-    "trading_recaps":  dict(user="MMCTRL727_Bot",           avatar="mengsk",          role="push",        src=("file", "telegram_mc_skill_bot_token")), # EOD / grades / scorecards / weekly report card
-    "crypto_desk":     dict(user="Grootk_Bot",              avatar="dark_archon",     role="push",        src=("vault", "telegram.grok_scout")),        # BTC/ETH moves + news, QuantEdge perps
+    "trading_digest":  dict(user="Boba2Telegram_Bot",       avatar="hydralisk",       role="interactive", src=("vault", "telegram_boba2_bot_token")),   # compact FYI digest (lib/tg_digest.py)
+    "trading_recaps":  dict(user="MMCTRL727_Bot",           avatar="mengsk",          role="interactive", src=("file", "telegram_mc_skill_bot_token")), # EOD / grades / scorecards / weekly report card
+    "crypto_desk":     dict(user="Grootk_Bot",              avatar="dark_archon",     role="interactive", src=("vault", "telegram.grok_scout")),        # BTC/ETH moves + news, QuantEdge perps
     "flow_digest":     dict(user="Boba2Telegram_Bot",       avatar="hydralisk",       role="push",        src=("vault", "telegram_boba2_bot_token")),
     "daily_briefs":    dict(user="SpaceCoast_Claude_Bot",   avatar="ghost",           role="push",        src=("cloud", None)),
     # ── media (off the trade chats) ─────────────────────────────────────────

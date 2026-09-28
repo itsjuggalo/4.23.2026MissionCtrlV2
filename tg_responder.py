@@ -325,11 +325,12 @@ def _fleet_token(fn):
 
 # Tokens owned by a DIFFERENT dedicated poller — refuse to start here, else two
 # getUpdates consumers fight over one token (Telegram delivers each update once).
-OWNED_ELSEWHERE = {"xsentiment": "grok_telegram.py owns telegram_grok_bot_token (x_sentiment)"}
+OWNED_ELSEWHERE = {"xsentiment": "quiz_bot.py owns telegram_grok_bot_token (quiz lane, 2026-09-28)",
+                   "grokscout":  "lane_bots.py owns @Grootk_Bot (crypto_desk lane, 2026-09-28)"}
 
 # Gateway default lane set = every live conversational lane (2026-07-19 collapse: one
 # process replaces the per-lane PM2 procs). Excludes *_PARKED/_RETIRED and OWNED_ELSEWHERE.
-GATEWAY_LANES = ["laptopclaude", "pingpong", "grokscout", "trendscanner", "astrology"]
+GATEWAY_LANES = ["laptopclaude", "pingpong", "trendscanner", "astrology"]   # grokscout → lane_bots.py (Crypto Desk) 2026-09-28
 
 # Free-form chatter (a bare non-slash message) fires an LLM call on Mike's subscription and
 # eats his 5-hour window. Only the astrology lane keeps that fully-conversational mode
