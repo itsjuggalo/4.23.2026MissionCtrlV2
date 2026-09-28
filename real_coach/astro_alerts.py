@@ -79,6 +79,11 @@ def main() -> int:
     if not items:
         print("nothing due"); return 0
     msg = "\n\n".join(t for _, t in items)
+    try:                                          # 📖 plain + esoteric meaning of each term mentioned
+        key = lex.esoteric_key(msg)
+        msg = msg + ("\n\n" + key if key else "")
+    except Exception:
+        pass
     print(msg)
     if not dry:
         from daily_transits import chunk_message

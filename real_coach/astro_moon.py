@@ -136,6 +136,7 @@ def sign_post(jd: float | None = None, sign: str | None = None) -> str:
     rv = T.natal()[ruler]
     lines = [f"{SIGN_ICON[s]} MOON IN {s.upper()} — {_hm(start, today)} → {_hm(end, today)} ET",
              f"Mood: {MOON_STYLE[s]}.",
+             f"✧ Esoterically: {lex._first_sentence(lex.kb_get('signs', s, 'esoteric') or lex.SIGNS[s]['eso'], 240)}",
              f"The Moon rules your chart (Cancer rising), so this sets the tone of your whole ~2.5 days."]
     segs = _houses_in_sign(idx)
     hl = []
@@ -147,7 +148,7 @@ def sign_post(jd: float | None = None, sign: str | None = None) -> str:
         what = what.replace("For about two and a half days, ", "").replace(" for a day or two", "")
         what = what[:1].upper() + what[1:]
         hl.append(f"🏠 {T.ordinal(h)} house" + (f" from {_hm(seg_start, today)}" if seg_start and seg_start > start + 0.01 else "")
-                  + f": {what}")
+                  + f": {what} ✧ {lex._first_sentence(lex.kb_get('houses', str(h), 'esoteric'), 150)}")
     lines += hl
     lines.append(f"♛ The ruler of {s}, {ruler}, sits in your natal {rv['sign']} {T.ordinal(rv['house'])} house "
                  f"({rv['dms']}) — the mood routes through that part of your life.")
@@ -177,10 +178,13 @@ def phase_post(jd: float | None = None) -> str:
     lon = _moon(start)[0]
     today = T.today_local()
     ent = lex.kb_entry(f"Moon phase {ph}") or {}
+    eso = lex.KB.get("lunation_phases", {}).get(ph.replace(" ", "_"), {})
     lines = [f"{PHASE_ICON[ph]} {ph.upper()} MOON — began {_hm(start, today)} ET at {T.dms(lon)}, your {T.ordinal(T.house_of(lon))} house"
              + (f" · next: {nxt[1]} {_hm(nxt[0], today)}" if nxt else "")]
-    if ent.get("traditional"):
-        lines.append(ent["traditional"])
+    if eso.get("traditional") or ent.get("traditional"):
+        lines.append(eso.get("traditional") or ent["traditional"])
+    if eso.get("esoteric"):
+        lines.append("✧ Esoterically: " + eso["esoteric"])
     if ent.get("translation"):
         lines.append("For you: " + ent["translation"])
     if ent.get("do"):
@@ -214,12 +218,15 @@ def guide() -> str:
         houses = " → ".join(T.ordinal(h) for h, _ in _houses_in_sign(i))
         placed = _natal_in_sign(i)
         out.append(f"{SIGN_ICON[s]} {s}: your {houses} house · {MOON_STYLE[s]}. Ruler {T.RULER[s]} in your "
-                   f"{T.ordinal(rv['house'])}." + (f" Lights up your {', '.join(k for k, _ in placed)}." if placed else ""))
+                   f"{T.ordinal(rv['house'])}." + (f" Lights up your {', '.join(k for k, _ in placed)}." if placed else "")
+                   + f"\n   ✧ {lex._first_sentence(lex.kb_get('signs', s, 'esoteric') or lex.SIGNS[s]['eso'], 200)}")
     out.append("")
     for ph in PHASES:
         ent = lex.kb_entry(f"Moon phase {ph}") or {}
+        eso = lex.KB.get("lunation_phases", {}).get(ph.replace(" ", "_"), {})
         out.append(f"{PHASE_ICON[ph]} {ph.title()}: {ent.get('translation') or ent.get('traditional', '')}"
-                   + (f" {ent['do']}" if ent.get("do") else ""))
+                   + (f" {ent['do']}" if ent.get("do") else "")
+                   + (f"\n   ✧ {eso['esoteric']}" if eso.get("esoteric") else ""))
     out.append("\nLive: /moon · posts arrive when the Moon changes sign or phase (8 AM–10 PM ET).")
     return "\n".join(out)
 

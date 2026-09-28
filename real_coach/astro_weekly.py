@@ -62,7 +62,7 @@ def weekly_block(start: datetime | date | None = None) -> str:
     exacts = _week_exacts(start)
 
     # 1 · themes of the week (mid-week live events + this week's exacts)
-    th = E.themes(live)
+    th = E.themes(live, d=mid.date())
     if th:
         lines.append("🧭 THEMES OF THE WEEK")
         for t in th[:3]:
@@ -182,6 +182,10 @@ def main() -> int:
     a = [x for x in sys.argv[1:] if not x.startswith("--")]
     start = datetime.fromisoformat(a[0]).replace(hour=8, tzinfo=T.ET) if a else None
     out = weekly_block(start)
+    if "--send" in sys.argv:
+        import astro_lexicon
+        key = astro_lexicon.esoteric_key(out)
+        out = out + ("\n\n" + key if key else "")
     print(out)
     if "--send" in sys.argv:
         import daily_transits as DT

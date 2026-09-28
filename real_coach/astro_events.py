@@ -241,10 +241,10 @@ def _svehla_fit(t: str, n: str, d: date) -> str:
         return ""
 
 
-def _profection() -> dict:
+def _profection(d: date | None = None) -> dict:
     try:
         import astro_timing
-        return astro_timing.profection(T.today_local())
+        return astro_timing.profection(d or T.today_local())
     except Exception:
         return {}
 
@@ -306,7 +306,7 @@ def current_transits(when: datetime | None = None, with_passes: bool = True) -> 
     when = when or T.now_local()
     jd = T.jd_for(when)
     today = when.astimezone(T.ET).date()
-    prof = _profection()
+    prof = _profection(today)
     events = []
     for t in TRANSIT_BODIES:
         lon, spd = T.lon_speed(jd, t)
@@ -370,7 +370,7 @@ def current_transits(when: datetime | None = None, with_passes: bool = True) -> 
     # the ASC–DSC axis is one point: drop "X opposite ASC" when "X conjunct DSC" is present
     dsc = {e["moving_body"] for e in events if e["target_body"] == "DSC" and e["aspect"] == "conjunct"}
     events = [e for e in events if not (e["target_body"] == "ASC" and e["aspect"] == "opposite" and e["moving_body"] in dsc)]
-    th = themes(events)
+    th = themes(events, d=today)
     corroborated = {ev for t_ in th for ev in t_["event_ids"] if len(t_["supporting_factors"]) + len(t_["conflicting_factors"]) >= 3}
     for e in events:
         e["theme_corroborated"] = e["event_id"] in corroborated
@@ -411,7 +411,8 @@ def _tone(e: dict) -> str:
     return "supportive"
 
 
-def themes(events: list[dict], extra_factors: list[dict] | None = None, include_context: bool = True) -> list[dict]:
+def themes(events: list[dict], extra_factors: list[dict] | None = None, include_context: bool = True,
+           d: date | None = None) -> list[dict]:
     """Group events that independently point at the same life domain. Each factor names WHY it maps
     (the natal house of the target, the target point itself, a Svehla window, profection, pMoon)."""
     buckets: dict[str, dict] = {}
@@ -441,7 +442,7 @@ def themes(events: list[dict], extra_factors: list[dict] | None = None, include_
             add(POINT_THEME[n], {**base, "why": f"natal {n} is a {POINT_THEME[n]} point"})
     ctx = list(extra_factors or [])
     if include_context:
-        ctx += context_factors()
+        ctx += context_factors(d)          # context for the SAME date as the events (not wall-clock today)
     for f in ctx:
         add(f["theme"], f)
     out = []
@@ -471,7 +472,7 @@ def context_factors(d: date | None = None) -> list[dict]:
     """Background (non-transit) factors: profection year, progressed Moon house, active Svehla windows."""
     d = d or T.today_local()
     out = []
-    pf = _profection()
+    pf = _profection(d)
     if pf.get("house"):
         out.append({"theme": HOUSE_THEME[pf["house"]], "label": f"{T.ordinal(pf['house'])}-house profection year",
                     "why": f"{T.ordinal(pf['house'])}-house profection year (lord {pf.get('lord')})", "tone": "neutral"})

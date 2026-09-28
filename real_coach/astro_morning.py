@@ -8,6 +8,8 @@
   + 30-day lookahead      1st of the month     (astro_lookahead.lookahead_block(30, compact=True))
   + evidence report       1st of the month     (astro_evidence.report(31)) — only once /note has entries
   + lunar return brief    lunar-return day     (astro_returns.lunar_return_block)
+  + 🜂 esoteric read      every day, own msg   (astro_esoteric.esoteric_post)
+  + 📖 key                every day, last msg  (astro_lexicon.esoteric_key — plain + esoteric per term)
 
 Sections are packed into as few Telegram messages as fit under 3900 chars (paragraph boundaries).
 The 08:34 astro_tasks guardrail (trading lane) and the Oct 27 solar return stay separate.
@@ -92,6 +94,20 @@ if __name__ == "__main__":
     if "--force" in sys.argv:
         force = set(sys.argv[sys.argv.index("--force") + 1].split(","))
     chunks = pack(build(force))
+    # 2026-09-28 (Mike): the esoteric read of the transits is its OWN post, then one 📖 key
+    # (plain + esoteric meaning of every sign/planet/house/phase mentioned) closes the morning.
+    try:
+        import astro_esoteric
+        chunks.append(astro_esoteric.esoteric_post())
+    except Exception as e:
+        chunks.append(f"🜂 (esoteric read unavailable: {e})")
+    try:
+        import astro_lexicon
+        key = astro_lexicon.esoteric_key("\n".join(chunks))
+        if key:
+            chunks += pack(key)
+    except Exception as e:
+        chunks.append(f"📖 (key unavailable: {e})")
     for i, c in enumerate(chunks, 1):
         print(f"── message {i}/{len(chunks)} ({len(c)} chars) ──\n{c}\n")
     if "--send" in sys.argv:

@@ -45,3 +45,24 @@ def test_due_emits_unique_uids():
     uids = [u for u, _ in items]
     assert len(uids) == len(set(uids)) and any(u.startswith("moon-sign:") for u in uids)
     assert any(u.startswith("moon-phase:") for u in uids)
+
+
+def test_esoteric_key_covers_every_term_kind():
+    import astro_lexicon as L
+    k = L.esoteric_key("Transiting Saturn (in Aries, your 9th) square natal Juno · full moon in Pisces, your 8th house")
+    for label in ("♄ Saturn", "⚵ Juno", "♈ Aries", "♓ Pisces", "9th house", "8th house", "Full Moon"):
+        assert label in k, label
+    assert all("✧" in ln for ln in k.splitlines()[1:])
+
+
+def test_esoteric_key_skips_terms_already_explained_inline():
+    import astro_lexicon as L
+    post = M.sign_post(sign="Taurus")
+    k = L.esoteric_key(post)
+    assert "♉ Taurus" not in k                     # the post already carries Taurus' ✧ line
+
+
+def test_moon_posts_carry_inline_esoteric():
+    assert "✧ Esoterically:" in M.sign_post(sign="Scorpio")
+    assert "✧ Esoterically:" in M.phase_post()
+    assert M.guide().count("✧") >= 20

@@ -107,6 +107,7 @@ ASTRO = C([   # astrology-only lane (@JazzyHazzyClaw_Bot) — final round 2026-0
     ("progsyn", "Progressed synastry: /progsyn <name>"),
     ("timeline", "Dated hits ahead: /timeline 60"),
     ("moon", "Moon sign + phase vs your placements"),
+    ("esoteric", "Soul-level (esoteric) read of your transits"),
     ("help", "Or just ask in plain words · /help all"),
 ])
 CLEAR = []  # pure-push / infra bots: no responder → remove any (misleading) menu

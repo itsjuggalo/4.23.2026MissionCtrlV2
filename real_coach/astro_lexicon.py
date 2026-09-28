@@ -396,6 +396,74 @@ def combo_translation(name_fragment: str) -> str:
     return ""
 
 
+# ── 📖 esoteric key (Mike 2026-09-28): every sign, planet, house and Moon phase a Telegram message
+# mentions, explained twice — plain, then esoteric — once per message, deduped, from the KB. ──────────
+_KEY_GLYPH = {"Sun": "☉", "Moon": "☽", "Mercury": "☿", "Venus": "♀", "Mars": "♂", "Jupiter": "♃", "Saturn": "♄",
+              "Uranus": "♅", "Neptune": "♆", "Pluto": "♇", "Chiron": "⚷", "Ceres": "⚳", "Juno": "⚵", "Hades": "♇h",
+              "Apollon": "☉a", "ASC": "AC", "MC": "MC", "DSC": "DC"}
+_SIGN_GLYPH = dict(zip(["Aries", "Taurus", "Gemini", "Cancer", "Leo", "Virgo", "Libra", "Scorpio", "Sagittarius",
+                        "Capricorn", "Aquarius", "Pisces"], "♈♉♊♋♌♍♎♏♐♑♒♓"))
+_PHASES = [("new", r"new moon"), ("crescent", r"crescent"), ("first_quarter", r"first quarter"),
+           ("gibbous", r"gibbous"), ("full", r"full moon"), ("disseminating", r"disseminating"),
+           ("last_quarter", r"last quarter"), ("balsamic", r"balsamic")]
+_PHASE_GLYPH = dict(zip([k for k, _ in _PHASES], "🌑🌒🌓🌔🌕🌖🌗🌘"))
+
+
+def _first_sentence(t: str, cap: int = 170) -> str:
+    t = (t or "").strip().replace("Esoterically, ", "").replace("Esoterically ", "")
+    t = t[:1].upper() + t[1:]
+    cut = t.find(". ")
+    t = t[:cut + 1] if 0 < cut < cap else t
+    return (t[:cap - 1].rsplit(" ", 1)[0] + "…") if len(t) > cap else t.rstrip(".") + "."
+
+
+def key_items(text: str) -> list[tuple[str, str, str, str]]:
+    """[(kind, label, plain, esoteric)] for every astrological term found in `text`, KB order."""
+    import re
+    out, t = [], text or ""
+    for n in _KEY_GLYPH:
+        if re.search(rf"\b{n}\b", t):
+            plain = kb_get("planets", n, "plain") or PLANETS.get(n, {}).get("is", "")
+            eso = kb_get("planets", n, "esoteric") or PLANETS.get(n, {}).get("eso", "")
+            out.append(("planet", f"{_KEY_GLYPH[n]} {n}", plain, eso))
+    for sg, gl in _SIGN_GLYPH.items():
+        if re.search(rf"\b{sg}\b", t):
+            plain = kb_get("signs", sg, "plain") or SIGNS.get(sg, {}).get("is", "")
+            eso = kb_get("signs", sg, "esoteric") or SIGNS.get(sg, {}).get("eso", "")
+            out.append(("sign", f"{gl} {sg}", plain, eso))
+    seen = set()
+    for m in re.finditer(r"\b(1[0-2]|[1-9])(?:st|nd|rd|th)\b(?:[- ]house|\)|,| ·| \(|$)", t, re.M):
+        h = int(m.group(1))
+        if h in seen:
+            continue
+        seen.add(h)
+    for h in sorted(seen):
+        plain = kb_get("houses", str(h), "plain") or HOUSES[h - 1]["is"]
+        eso = kb_get("houses", str(h), "esoteric") or HOUSES[h - 1].get("eso", "")
+        out.append(("house", f"🏠 {ORDINAL(h)} house", plain, eso))
+    for k, rx in _PHASES:
+        if re.search(rx, t, re.I):
+            e = KB.get("lunation_phases", {}).get(k, {})
+            out.append(("phase", f"{_PHASE_GLYPH[k]} {k.replace('_', ' ').title()} Moon",
+                        e.get("traditional", ""), e.get("esoteric", "")))
+    return out
+
+
+def esoteric_key(text: str) -> str:
+    """The 📖 block appended to (or sent right after) an astrology Telegram message."""
+    items = key_items(text)
+    if not items:
+        return ""
+    lines = ["📖 KEY — what each term means (plain · ✧ esoteric)"]
+    for kind, label, plain, eso in items:
+        if eso and _first_sentence(eso)[:50].rstrip("…") in text:
+            continue                              # already explained inline in this message
+        lines.append(f"{label}: {_first_sentence(plain, 120)} ✧ {_first_sentence(eso)}")
+    return "\n".join(lines) if len(lines) > 1 else ""
+
+
 if __name__ == "__main__":
     import sys
+    if sys.argv[1:2] == ["key"]:                 # stdin text → its 📖 key
+        print(esoteric_key(sys.stdin.read())); sys.exit(0)
     print(lookup(sys.argv[1], " ".join(sys.argv[2:])) if len(sys.argv) > 2 else "usage: astro_lexicon.py <planet|sign|house|aspect> <key>")

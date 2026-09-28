@@ -46,6 +46,15 @@ def main() -> int:
         section("Timing — profection & firdaria", run("astro_timing.py", "profection")),
         section("Moon guide — all 12 signs and 8 phases in your chart", run("astro_moon.py", "guide")),
     ]
+    parts.insert(2, section("Esoteric read — the soul-level view of your transits", run("astro_esoteric.py")))
+    try:
+        import astro_lexicon
+        parts.append(section("📖 Key — every sign, planet, house and phase (plain + esoteric)",
+                             astro_lexicon.esoteric_key(" ".join(astro_lexicon._SIGN_GLYPH) + " " + " ".join(astro_lexicon._KEY_GLYPH)
+                                                        + " " + " ".join(f"{h}th house" for h in range(1, 13))
+                                                        + " new moon crescent first quarter gibbous full moon disseminating last quarter balsamic")))
+    except Exception as e:
+        parts.append(section("📖 Key", f"(unavailable: {e})"))
     page = f"""<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Mike · Today's Sky (live)</title>
 <style>

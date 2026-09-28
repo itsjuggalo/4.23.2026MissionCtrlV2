@@ -145,6 +145,8 @@ BOTS = {
             "• /progressions — your progressed Moon/Venus + next changes\n"
             "• /synastry <name> · /progsyn <name> — charts compared (needs /profile add first)\n"
             "• /moon — the Moon's sign + phase vs your placements · /moonguide — all 12 signs + 8 phases\n"
+            "• /esoteric — the soul-level read of your transits (also its own post every morning)\n"
+            "Every reading ends with a 📖 key: plain + esoteric meaning of each sign, planet, house, phase.\n"
             "• /dates — your Aug 2026 reading · /chart — natal placements · /wheel — image\n"
             "• Live page: https://claudeclaw.serveftp.com/astrology/readings/mike-today-live.html\n"
             "Or just ask in plain words. /help all = every command (40+)."
@@ -155,6 +157,7 @@ BOTS = {
             "• /week — the weekly read · /lookahead — day-by-day transits for 7 days\n"
             "• /progressions — progressed Moon/Venus + next ingresses\n"
             "• /moon — Moon sign + phase against your placements (auto-posted at every change) · /moonguide\n"
+            "• /esoteric — esoteric read of today's transits · every reply ends with a 📖 plain + esoteric key\n"
             "• /profile add <name> <YYYY-MM-DD> <HH:MM|unknown> <place> · /profile list\n"
             "• /synastry <name> [name2] — synastry (identity-labelled, unknown time → no angles)\n"
             "• /progsyn <name> [name2] — progressed synastry, all four frames\n"
@@ -372,6 +375,7 @@ ASTRO_MODULE_CMDS = {
     "/week":        ("astro_weekly.py", []),      "/lookahead": ("astro_lookahead.py", ["week"]), "/month":    ("astro_lookahead.py", ["month"]),
     "/quality":     ("astro_lookahead.py", ["quality"]),
     "/moon":        ("astro_moon.py", ["now"]),       "/moonguide": ("astro_moon.py", ["guide"]),
+    "/esoteric":    ("astro_esoteric.py", []),
     "/full":        ("daily_transits.py", ["--full"]),   "/evidence": ("astro_evidence.py", []),
     "/alerts":      ("astro_alerts.py", ["--dry", "--window", "1440"]),
     "/timeline":    ("astro_timeline.py", []),         "/year":      ("astro_timeline.py", ["year"]),
@@ -433,6 +437,20 @@ def run_bot(botkey):
                 r = tg("sendMessage", chat_id=chat_id, text=body)
             if not r.get("ok"):
                 print(f"send_reply FAILED chat={chat_id}: {str(r)[:200]}", flush=True)
+
+    def astro_key(chat_id, text):
+        """Astrology lane (Mike 2026-09-28): after every reading, a 📖 key — the plain AND esoteric
+        meaning of each sign/planet/house/Moon phase the reply mentions (astro_lexicon.esoteric_key)."""
+        if not cfg.get("astro_only") or not text or text.startswith(("[", "⚠️", "UNAVAILABLE", "Usage")):
+            return
+        try:
+            r = subprocess.run([str(Path.home() / ".venv/bin/python"),
+                                str(Path.home() / "scripts/real_coach/astro_lexicon.py"), "key"],
+                               input=text, capture_output=True, text=True, timeout=30)
+            if (r.stdout or "").strip():
+                send_reply(chat_id, r.stdout.strip())
+        except Exception as e:
+            print(f"[{name}] astro_key error: {e}", flush=True)
 
     def send_html(chat_id, text):
         """HTML reply for the quantum/flow commands. Over TG_MAX, or markup Telegram rejects
@@ -650,6 +668,7 @@ def run_bot(botkey):
                         print(f"[{name}] astro_bot route error: {e}", flush=True)
                     if routed.get("reply"):
                         send_reply(chat_id, routed["reply"])
+                        astro_key(chat_id, routed["reply"])
                         if not text.startswith("/"):
                             remember(text, routed["reply"])
                         print(f"[{name}] routed {routed.get('intent')} rid={routed.get('request_id')}", flush=True)
@@ -666,6 +685,7 @@ def run_bot(botkey):
                         except Exception as e:
                             out = f"[transits error] {e}"
                         send_reply(chat_id, out)
+                        astro_key(chat_id, out)
                         print(f"[{name}] /transits", flush=True)
                         continue
                     # 2026-09-15 r7: /wheel → render natal+transit PNG and send as a photo
@@ -697,6 +717,8 @@ def run_bot(botkey):
                         except Exception as e:
                             out = f"[{cmd0} error] {e}"
                         send_reply(chat_id, out)
+                        if cmd0 not in ("/alerts", "/moonguide"):     # guide already carries every ✧ line
+                            astro_key(chat_id, out)
                         print(f"[{name}] {cmd0}", flush=True)
                         continue
                     # 2026-09-14 r3: accountability + evidence layer (astro_tasks.py)
@@ -742,6 +764,8 @@ def run_bot(botkey):
                         except Exception as e:
                             out = f"[{cmd0} error] {e}"
                         send_reply(chat_id, out)
+                        if cmd0 not in ("/alerts", "/moonguide"):     # guide already carries every ✧ line
+                            astro_key(chat_id, out)
                         print(f"[{name}] {cmd0}", flush=True)
                         continue
                     if cmd0 == "/readings":
@@ -867,6 +891,7 @@ def run_bot(botkey):
                     if cfg.get("astro_only") and not a.startswith("["):
                         a = astro_factcheck(a)          # 2026-09-15: every answer audited vs the ephemeris
                     send_reply(chat_id, a)
+                    astro_key(chat_id, a)
                     remember(text, a)
                     print(f"[{name}] A: {len(a)} chars", flush=True)
                 except Exception as e:
