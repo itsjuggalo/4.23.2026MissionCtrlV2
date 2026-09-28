@@ -18,6 +18,7 @@ Only ONE getUpdates consumer per token: PM2 `quiz-bot` owns telegram_grok_bot_to
 from __future__ import annotations
 
 import json
+import re
 import os
 import subprocess
 import sys
@@ -53,6 +54,7 @@ HELP = ("🎓 <b>OPTIONS QUIZ</b> — quizzes only, nothing else lands here.\n\n
         "▸ /live — quiz on a contract that's live right now\n"
         "▸ /learn greeks | ta | erik — learning quizzes\n"
         "▸ /score — belt, streaks, weakest topics\n\n"
+        "Or just type: <i>next · signal quiz · greeks · my score</i>, or answer with a letter.\n"
         "<i>Scheduled reps pause while one is unanswered, so they never pile up.</i>")
 
 TOKEN = ""
@@ -222,14 +224,46 @@ def on_callback(cq: dict) -> None:
             parts[1] if len(parts) > 1 else "opt", options_rep)()
 
 
+# Plain words work too (Mike, 2026-09-28: "they should work by keywords"). Checked in order.
+KEYWORDS = [
+    (r"\b(score|belt|stats?|progress|how am i doing|streak|weak)", "score"),
+    (r"\b(signal|flow|today'?s alerts?)\b", "signal"),
+    (r"\b(live|my position|contract)\b", "live"),
+    (r"\bgreeks?\b|\bdelta|\btheta|\bgamma|\bvega", "learn:greeks"),
+    (r"\b(chart|ta|technical|pattern)s?\b", "learn:ta"),
+    (r"\b(erik|bodywork|massage|anatomy)\b", "learn:erik"),
+    (r"\b(learn|teach|lesson)\b", "learn:random"),
+    (r"\b(next|another|again|more|quiz|question|rep|practice|test me|go|options?)\b", "quiz"),
+    (r"\b(help|menu|start|how does this work|what can you do)\b", "help"),
+]
+_ANSWER = re.compile(r"^(?:(?:my )?(?:answer|pick|choice|it'?s|its|i (?:say|pick|choose|think))\s*(?:is\s*)?)?\(?([abcd])\)?[.!]?$", re.I)
+
+
+def words_to_cmd(text: str) -> tuple[str, str]:
+    m = _ANSWER.match(text.strip())
+    if m:
+        return "answer", m.group(1).upper()
+    low = text.lower()
+    for pat, cmd in KEYWORDS:
+        if re.search(pat, low):
+            c, _, a = cmd.partition(":")
+            return c, a
+    return "", ""
+
+
 def on_message(m: dict) -> None:
     if str((m.get("chat") or {}).get("id", "")) != OWNER:
         return
     text = (m.get("text") or "").strip()
     if not text:
         return
-    cmd, _, arg = text.partition(" ")
-    cmd = cmd.lower().split("@")[0].lstrip("/")
+    if text.startswith("/"):
+        cmd, _, arg = text.partition(" ")
+        cmd = cmd.lower().split("@")[0].lstrip("/")
+        if len(cmd) == 1 and cmd.upper() in "ABCD":
+            cmd, arg = "answer", cmd.upper()
+    else:
+        cmd, arg = words_to_cmd(text)
     if cmd in ("start", "help", "menu"):
         send(HELP, NEXT_KB)
     elif cmd in ("quiz", "next", "rep", "options"):
@@ -242,13 +276,14 @@ def on_message(m: dict) -> None:
         learn_rep(arg.strip().lower() or (cmd if cmd != "learn" else "random"))
     elif cmd in ("score", "stats", "belt"):
         send(score(), NEXT_KB)
-    elif len(text) == 1 and text.upper() in "ABCD":
-        out, right = grade_signal(text.upper(), None)
+    elif cmd == "answer":
+        out, right = grade_signal(arg, None)
         if out is None and (_load(OPT_STATE).get("current")):
-            out, right = grade_options(text.upper(), None)
-        send(out or "🧠 No quiz open right now — /quiz for one.", NEXT_KB)
+            out, right = grade_options(arg, None)
+        send(out or "🧠 No quiz open right now — say <i>next</i> for one.", NEXT_KB)
     else:
-        send("🎓 Quizzes only here. Tap an answer, or /quiz · /signal · /score · /help.")
+        send("🎓 Quizzes only here. Tap an answer or just type it (<i>B</i>), or say "
+             "<i>next · signal quiz · greeks · my score</i>.", NEXT_KB)
 
 
 def main() -> int:

@@ -94,6 +94,7 @@ def pre(text: str) -> str:
 DIGEST_HELP = ("🧾 <b>TRADING DIGEST</b> — watchlists, radars, pulses and FYI flow, folded into a "
                "few silent digests a day (10:00 · 11:30 · 13:00 · 14:30 · 16:00 · 16:50 ET + 21:00).\n\n"
                "▸ /now — send what's queued right now\n▸ /queue — what's waiting, by source\n"
+               "Or just type: <i>send it · what's waiting</i>\n"
                "<i>Entries, exits and 🟢 TRADE never wait — they go to Trading Command.</i>")
 
 
@@ -120,7 +121,8 @@ RECAPS_HELP = ("📊 <b>TRADING RECAPS</b> — how the signals did. Scheduled re
                "▸ /scoreboard — open paper positions vs their plan\n"
                "▸ /grades — best-3 win rate + score-floor calibration\n"
                "▸ /contracts — live relay contracts through the Academy grid\n"
-               "▸ /week — 30-day report card per alert lane")
+               "▸ /week — 30-day report card per alert lane\n\n"
+               "Or just type: <i>how did today go · positions · win rate · weekly report</i>")
 
 
 def _dry_messages(out: str) -> str:
@@ -158,7 +160,8 @@ CRYPTO_HELP = ("🪙 <b>CRYPTO DESK</b> — BTC/ETH move alerts, crypto news and
                "land here. Pull any time:\n\n▸ /btc · /eth · /sol — price, 24h range + change\n"
                "▸ /price SYM — any Coinbase pair (e.g. /price XRP)\n"
                "▸ /signals — QuantEdge perp signals in play (entry / stop / targets)\n"
-               "▸ /x TOPIC — what crypto X is saying (Grok)\n"
+               "▸ /x TOPIC — what crypto X is saying (Grok)\n\n"
+               "Or just type: <i>bitcoin · how's eth · any signals · what's X saying about sol</i>\n"
                "<i>Advice only — you place Coinbase orders yourself.</i>")
 
 
@@ -239,14 +242,59 @@ LANES = {
 }
 
 
+# ── plain-words routing (Mike: "they should work by keywords", 2026-09-28) ────
+# Deterministic keyword → command, checked in order; slash commands still work as-is.
+COINS = {"bitcoin": "BTC", "btc": "BTC", "ethereum": "ETH", "ether": "ETH", "eth": "ETH",
+         "solana": "SOL", "sol": "SOL", "ripple": "XRP", "xrp": "XRP", "dogecoin": "DOGE",
+         "doge": "DOGE", "cardano": "ADA", "ada": "ADA", "litecoin": "LTC", "ltc": "LTC",
+         "chainlink": "LINK", "link": "LINK", "avalanche": "AVAX", "avax": "AVAX", "sui": "SUI"}
+KEYWORDS = {
+    "trading_digest": [(r"\b(send|now|flush|push|deliver|give me)\b|\bdigest\b", "now"),
+                       (r"\b(queue|queued|waiting|pending|status|anything new|what'?s new|how many)\b", "queue")],
+    "trading_recaps": [(r"score ?board|\bpositions?\b|\bpaper\b|\bopen trades?\b", "scoreboard"),
+                       (r"\bgrades?\b|best ?-?3|win ?rate|calibrat|\bfloor\b", "grades"),
+                       (r"\bcontracts?\b|\brelay\b|\bgrid\b|\bgreeks?\b", "contracts"),
+                       (r"\bweek(ly)?\b|report ?card|30 ?d|\blanes?\b|\bcut\b", "week"),
+                       (r"\beod\b|end of (the )?day|score ?card|\btoday\b|\bpicks?\b|how did", "eod")],
+    "crypto_desk": [(r"saying|sentiment|twitter|\bx\b|chatter|buzz|\bnews\b|\bwhy\b|narrative|hype", "x"),
+                    (r"\bsignals?\b|quant ?edge|\bperps?\b|in play|\bsetups?\b|\blong\b|\bshort\b", "signals"),
+                    (r"\bprice\b|how'?s|how is|\bquote\b|doing|\bat\b|\bup\b|\bdown\b|\bcheck\b", "price")],
+}
+
+
+def route_words(fn: str, text: str) -> tuple[str, str]:
+    """Plain text → (command, arg). Coins resolve to a price unless another intent wins."""
+    low = text.lower()
+    words = re.findall(r"[a-z0-9]+", low)
+    coin = next((COINS[w] for w in words if w in COINS), None)
+    if fn == "crypto_desk" and not coin:           # bare ticker like "PEPE" / "hbar"
+        t = re.fullmatch(r"\$?([A-Za-z]{2,6})", text.strip())
+        coin = t.group(1).upper() if t else None
+        if coin in {"HI", "HEY", "HELLO", "HELP", "MENU", "THANKS", "THX", "START", "OK", "YO", "SUP"}:
+            coin = None
+    for pat, cmd in KEYWORDS.get(fn, []):
+        if re.search(pat, low):
+            if fn == "crypto_desk" and cmd == "x":
+                return "x", text
+            if fn == "crypto_desk" and cmd == "price":
+                return "price", coin or "BTC"
+            return cmd, ""
+    if coin:
+        return "price", coin
+    return "help", ""
+
+
 def handle(bot: Bot, handler, m: dict) -> None:
     if str((m.get("chat") or {}).get("id", "")) != OWNER:
         return
     text = (m.get("text") or "").strip()
     if not text:
         return
-    cmd, _, arg = text.partition(" ")
-    cmd = cmd.lower().split("@")[0].lstrip("/")
+    if text.startswith("/"):
+        cmd, _, arg = text.partition(" ")
+        cmd = cmd.lower().split("@")[0].lstrip("/")
+    else:
+        cmd, arg = route_words(bot.fn, text)
     bot.api("sendChatAction", chat_id=OWNER, action="typing")
     handler(bot, cmd, arg.strip())
     print(f"[lane-bots:{bot.fn}] /{cmd}", flush=True)
