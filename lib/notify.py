@@ -74,8 +74,40 @@ def _send_message(tok: str, chat: str, text: str, *, loud: bool, html: bool) -> 
     req = urllib.request.Request(
         f"https://api.telegram.org/bot{tok}/sendMessage",
         data=urllib.parse.urlencode(data).encode())
-    with urllib.request.urlopen(req, timeout=20) as r:
-        return bool(json.load(r).get("ok"))
+    ok = False
+    try:
+        with urllib.request.urlopen(req, timeout=20) as r:
+            ok = bool(json.load(r).get("ok"))
+        return ok
+    finally:
+        try:   # passive send record (lib/tg_ledger.py), never affects the send (2026-09-28)
+            from lib.tg_ledger import record
+            record(_fn_of(tok), text, ok, html=html)
+        except Exception:
+            pass
+
+
+_FN_CACHE: dict = {}
+
+
+def _fn_of(tok: str) -> str:
+    """Fleet function for a token (for the ledger); cached, '?' if unknown."""
+    if tok not in _FN_CACHE:
+        name = "?"
+        try:
+            import sys as _s
+            _s.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+            import tg_fleet
+            for fn in tg_fleet.FLEET:
+                try:
+                    if tg_fleet.token(fn) == tok:
+                        name = fn; break
+                except Exception:
+                    continue
+        except Exception:
+            pass
+        _FN_CACHE[tok] = name
+    return _FN_CACHE[tok]
 
 
 def tg_push(text: str, fn: str, *, loud: bool = True, html: bool = True,

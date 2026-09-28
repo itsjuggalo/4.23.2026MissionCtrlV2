@@ -512,6 +512,16 @@ def _strip_html(msg):
     return _html.unescape(_re.sub(r"</?(b|i|u|s|code|pre|a)(\s[^>]*)?>", "", msg))
 
 
+def _ledger(fn, text, ok, html=False):
+    """Passive send record (lib/tg_ledger.py) — never affects the send. (2026-09-28)"""
+    try:
+        sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+        from lib.tg_ledger import record
+        record(fn, text, ok, html=html)
+    except Exception:
+        pass
+
+
 def send(fn, msg, html=False):
     """Post `msg` to Mike's chat as `fn`. html=True → parse_mode=HTML (callers must escape
     dynamic text with tg_format.esc). If Telegram rejects the markup the message is re-sent
@@ -541,6 +551,7 @@ def send(fn, msg, html=False):
         print(f"html rejected ({r.get('description')}) — resending plain")
         r = _post(_strip_html(msg), None)
     print("sent" if r.get("ok") else f"fail: {r.get('description')}")
+    _ledger(fn, msg, r.get("ok"), html)
     return 0 if r.get("ok") else 1
 
 
@@ -583,6 +594,7 @@ def send_upload(fn, path, caption="", as_doc=False, html=False):
         with open(path, "rb") as fh:
             r = requests.post(f"https://api.telegram.org/bot{tok}/{method}",
                               data=data, files={field: fh}, timeout=90).json()
+    _ledger(fn, f"[{method[4:].lower()} {os.path.basename(path)}] {caption}", r.get("ok"), html)
     if r.get("ok"):
         print(f"sent {os.path.basename(path)} → {label}"); return 0
     if method == "sendVideo":  # codec fallback

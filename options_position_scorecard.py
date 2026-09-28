@@ -252,6 +252,11 @@ def main() -> int:
 
     chat_id = CHAT_FILE.read_text().strip()
     r = _tg("sendMessage", chat_id=chat_id, text=card, parse_mode="HTML")
+    try:   # passive send record (lib/tg_ledger.py) — 2026-09-28
+        from lib.tg_ledger import record
+        record("trading_command", card, r is not None, html=True, src="options_position_scorecard.py")
+    except Exception:
+        pass
     if r is None:
         return 1
     print(f"[scorecard] sent {len(cards)} contract card(s) at {datetime.now(ET):%H:%M ET}")
