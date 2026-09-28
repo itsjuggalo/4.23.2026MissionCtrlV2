@@ -139,7 +139,7 @@ BOTS = {
             "• /week — the coming 7 days · /timeline — dated hits ahead\n"
             "• /dates — your Aug 2026 reading: what's active, what's next\n"
             "• /wheel — chart image · /note <text> — journal what happened\n"
-            "• Live page: https://claudeclaw.serveftp.com/astrology/mike-today-live.html\n"
+            "• Live page: https://claudeclaw.serveftp.com/astrology/readings/mike-today-live.html\n"
             "Or just ask in plain words. /help all = every command (40+)."
         ),
         "help_all": (
@@ -156,7 +156,7 @@ BOTS = {
             "• /tnp — the 8 transneptunian points (Hades, Apollon…) natal + 90° dial hits · /midpoints — planetary pictures now · /critical — anything on a critical/anaretic degree · /startransits — planets on fixed stars today\n"
             "• /profection — your time-lord year and month · /hours — today's planetary hours (Dunedin) · /firdaria — your Persian time-lord periods (tropical)\n"
             "• /full — today's complete read (the 8:32 send is a one-message digest) · /alerts — what goes exact in the next 24h (hourly pushes run 8am–10pm) · /evidence — your notes and scores vs the sky\n"
-            "• Live page: https://claudeclaw.serveftp.com/astrology/mike-today-live.html (log in once; regenerated 08:30 ET)\n"
+            "• Live page: https://claudeclaw.serveftp.com/astrology/readings/mike-today-live.html (log in once; regenerated 08:30 ET)\n"
             "• /timeline [days] [full] — every exact hit, house change, progression and eclipse ahead, dated from the real ephemeris · /year — 12 months in one screen\n"
             "• /sky — lunations, eclipses, stations, ingresses, Mercury rx + shadow, in your houses · /voc\n"
             "• /solarreturn · /lunarreturn · /phase (progressed lunation phase) · /solararc\n"

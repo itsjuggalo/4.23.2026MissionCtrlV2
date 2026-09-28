@@ -51,34 +51,37 @@ def _exact_time(e: dict, day: date) -> datetime | None:
     return None
 
 
-def due(now: datetime | None = None, window_min: int = 60) -> list[tuple[str, str]]:
-    """(uid, text) for everything that goes exact in [now, now+window)."""
+def due(now: datetime | None = None, window_min: int = 60, lookback_min: int = 0) -> list[tuple[str, str]]:
+    """(uid, text) for everything that goes exact in [now-lookback, now+window). The hourly run
+    looks back 65 min so an alert whose send failed last hour goes out now (state is only
+    written after a successful send)."""
     now = now or datetime.now(T.ET)
     end = now + timedelta(minutes=window_min)
+    start = now - timedelta(minutes=lookback_min)
     out = []
     today = now.date()
     for e in TL.load():
         if e["kind"] != "aspect" or e["date"] not in (today.isoformat(), (today + timedelta(days=1)).isoformat()):
             continue
         t = _exact_time(e, date.fromisoformat(e["date"]))
-        if t and now <= t < end:
-            m = TL._meaning(e)
-            out.append((f"tl:{e['date']}:{e['key']}", f"⏰ {t:%-I:%M %p} ET — {e['what']}" + (f"\n{m}" if m else "")))
+        if t and start <= t < end:
+            # one line: the meaning already went out in the 08:32 message (hits + 🗓 cover ±2 days)
+            out.append((f"tl:{e['date']}:{e['key']}", f"⏰ Exact at {t:%-I:%M %p} ET: {e['what']}"))
     try:
         import astro_sky as SK
         voc = SK.void_of_course(now)
         vs = datetime.fromisoformat(voc["voc_start_et"])
-        if now <= vs < end:
+        if start <= vs < end:
             ing = datetime.fromisoformat(voc["ingress_et"])
             out.append((f"voc:{vs.isoformat()}", f"🌙 Moon goes void-of-course at {vs:%-I:%M %p} until {ing:%a %-I:%M %p} ET — finish what's started, don't launch anything new."))
         ev = SK._events_in(today, 2)
         for st in ev.get("stations", []):
             t = datetime.fromisoformat(st["date_et"])
-            if now <= t < end:
+            if start <= t < end:
                 out.append((f"st:{st['date_et']}", f"⏸ {st['body']} stations {'retrograde' if st['kind'] == 'retrograde' else 'direct'} at {t:%-I:%M %p} ET, {st['deg']}° {st['sign']} (your {T.ordinal(st['house'])} house) — the turning point; plans made this hour tend to stick."))
         for ln in ev.get("lunations", []) + ev.get("eclipses", []):
             t = datetime.fromisoformat(ln["date_et"])
-            if now <= t < end:
+            if start <= t < end:
                 label = ("New Moon" if ln.get("kind") == "new" else "Full Moon") if "type" not in ln else f"{ln['type'].title()} {ln['kind']} eclipse"
                 key = f"{label} in {ln['sign']}" if "type" not in ln else f"{ln['kind'].capitalize()} eclipse in the {T.ordinal(ln['house'])} house"
                 ent = lex.kb_entry(key)
@@ -95,13 +98,14 @@ def main() -> int:
     if not dry and (now.hour >= QUIET[0] or now.hour < QUIET[1]):
         return 0
     sent = json.loads(STATE.read_text()) if STATE.exists() else {}
-    items = [(u, t) for u, t in due(now, win) if u not in sent and u != "err"]
+    items = [(u, t) for u, t in due(now, win, 0 if dry else 65) if u not in sent and u != "err"]
     if not items:
         print("nothing due"); return 0
     msg = "\n\n".join(t for _, t in items)
     print(msg)
     if not dry:
-        send_to_lane(msg[:3900])
+        if not send_to_lane(msg[:3900]):          # not marked sent → the next hourly run retries it
+            print("✖ alert send failed — will retry next run", file=sys.stderr); return 1
         for u, _ in items:
             sent[u] = now.isoformat(timespec="minutes")
         cutoff = (now - timedelta(days=14)).isoformat()

@@ -1,5 +1,5 @@
 {
- "generated": "2026-09-14",
+ "generated": "2026-09-27",
  "scan_end": "2031-12-31",
  "hits": [
   {
@@ -33,7 +33,7 @@
    "what": "Transiting Juno enters Pisces"
   },
   {
-   "date": "2027-02-18",
+   "date": "2027-02-17",
    "kind": "transit",
    "what": "Transiting Saturn exactly square natal Juno"
   },
@@ -138,7 +138,7 @@
    "what": "Transiting Jupiter enters Libra"
   },
   {
-   "date": "2028-09-17",
+   "date": "2028-09-16",
    "kind": "transit",
    "what": "Transiting Jupiter exactly conjunct natal Jupiter"
   },

@@ -13,6 +13,7 @@ Checks:
   D svehla     every dated event in the Aug 2026 reading reproduces within 1 day
   E outputs    today's daily_transits / --progressed output re-parsed and re-derived from truth
   G passes     upcoming timeline "pass i of n" + retrograde flags recounted by an independent scan
+  H page       the 08:32 link serves the live page; page + wheel rebuilt within 26h
 """
 from __future__ import annotations
 
@@ -416,16 +417,40 @@ def check_pass_numbers(days: int = 120) -> list[str]:
     return fails
 
 
+def check_page() -> list[str]:
+    """H — the live page the 08:32 send links to: the link path really serves it (the SPA answers
+    200 'Not found' for bad paths, so check the content), it was rebuilt within 26h, and its wheel
+    is fresh (a Sep 15 wheel sat there for 12 days behind an arg-parsing crash)."""
+    import time, urllib.request
+    fails = []
+    page = Path.home() / "agents/claudeclaw/data/astrology/mike-today-live.html"
+    wheel = Path.home() / "portfolio/astrology/wheel.png"
+    for f, label in ((page, "live page"), (wheel, "wheel PNG")):
+        if not f.exists():
+            fails.append(f"H {label} missing: {f}")
+        elif time.time() - f.stat().st_mtime > 26 * 3600:
+            fails.append(f"H {label} stale: last written {datetime.fromtimestamp(f.stat().st_mtime, T.ET):%b %-d %-I:%M %p} ET")
+    try:
+        import daily_transits as DT
+        path = DT.LIVE_LINE.split("serveftp.com", 1)[1]
+        body = urllib.request.urlopen(f"http://localhost:3141{path}", timeout=15).read(4000).decode("utf-8", "ignore")
+        if "Today's Sky" not in body:
+            fails.append(f"H morning link {path} does not serve the live page")
+    except Exception as e:
+        fails.append(f"H morning link check failed: {e}")
+    return fails
+
+
 def run_all(send_on_fail: bool = False) -> int:
     fails = []
-    for fn in (check_natal, check_texts, check_horizons, check_svehla, check_outputs, check_modules, check_pass_numbers, check_no_vedic, check_commands):
+    for fn in (check_natal, check_texts, check_horizons, check_svehla, check_outputs, check_modules, check_pass_numbers, check_page, check_no_vedic, check_commands):
         try:
             fails += fn()
         except Exception as e:
             fails.append(f"{fn.__name__} crashed: {e}")
     hard = [f for f in fails if "skipped" not in f]
     status = {"ok": not hard, "when_et": datetime.now(T.ET).isoformat(timespec="minutes"),
-              "checks": ["natal", "texts", "horizons", "svehla", "outputs", "modules", "passes", "no-vedic", "commands"], "failures": fails}
+              "checks": ["natal", "texts", "horizons", "svehla", "outputs", "modules", "passes", "page", "no-vedic", "commands"], "failures": fails}
     STATUS.parent.mkdir(parents=True, exist_ok=True)
     STATUS.write_text(json.dumps(status, indent=1))
     print(("✔ ALL CHECKS PASS" if not hard else "✖ FAILURES") + f" — {status['when_et']}")
@@ -433,7 +458,8 @@ def run_all(send_on_fail: bool = False) -> int:
         print("  " + f)
     if hard and send_on_fail:
         msg = "⚠️ Astrology engine verification FAILED — the 8:32 send may be wrong:\n" + "\n".join(hard[:8])
-        subprocess.run([sys.executable, str(Path.home() / "scripts/tg_fleet.py"), "send", "astrology", msg], capture_output=True, timeout=30)
+        import svehla
+        svehla.send_to_lane(msg)
     return 0 if not hard else 1
 
 

@@ -45,16 +45,13 @@ TABLES = [
     ("agent_weights",        "last_adjusted", ALL, 192, "weight_learning.py weekly Sun 04:00"),
     ("cycle_metadata",       "started_at",   MH,  26,  "desk-cycle */15 market hours"),
     ("decipher_audit",       "computed_at",  MH,  26,  "run_decipher.sh :00/:30 market hours"),
-    ("decipher_exits",       "closed_at",    MH,  336, "event-driven: only writes on a position close"),
     ("decipher_picks",       "created_at",   MH,  120, "run_decipher.sh; picks only when a candidate qualifies"),
     ("dossiers",             "ran_at",       MH,  26,  "desk-cycle floor 3/4"),
     ("fintwit_calls",        "ts",           MH,  168, "fintwit-scout 08:30 weekdays"),
-    ("historical_outcomes",  "captured_at",  MH,  120, "decipher outcome capture"),
     ("insider_transactions", "fetched_at",   MH,  26,  "insiders_fetch.py 08/12/16 weekdays"),
     ("institutional_holdings", "fetched_at", MH,  30,  "institutions_fetch.py 06:30 weekdays (13F content is quarterly by law — fetch cadence is what's graded)"),
     ("lane_findings",        "ran_at",       MH,  26,  "desk-cycle floor 3 lanes"),
     ("macro_context",        "ran_at",       MH,  26,  "desk-cycle macro floor"),
-    ("notification_log",     "sent_at",      MH,  168, "event-driven: only writes when an alert fires"),
     ("pipeline_metrics",     "collected_at", MH,  26,  "pipeline_metrics.py per desk cycle"),
     ("policy_events",        "fetched_at",   ALL, 26,  "policy_events_fetch.py 07:00/19:00 daily"),
     ("premium_shortlist",    "generated_at", MH,  26,  "desk-cycle promotion step"),
@@ -74,9 +71,18 @@ ORPHANED = {
     "miss_audit_missed_winner_report": "miss_audit.py exists but was never cronned; no page reads it",
     "position_state":                  "decipher position cache; empty, rebuilt on demand",
     "preseason_checklist":             "one-off manual checklist, not a feed",
+    # 2026-09-27: three producers died for good — they were STALE in the 06:45 ping every day.
+    "decipher_exits":                  "position-close rows from the Alpaca paper executor, retired 2026-08-11 (last row 08-07); advisory exits now live in decision/decipher_exits.json",
+    "historical_outcomes":             "decipher REALIZED P&L mirror (outcome_attribution.py) — needs executed fills; Alpaca execution retired 2026-08-11 (last row 08-07)",
+    "notification_log":                "floor5 top-3 push log — its notify_bus.py was pruned 2026-08-30 (last row 08-25); floor5 notify is now a silent no-op",
 }
 
 H = str(Path.home())
+# 2026-09-27 limit fixes (longest normal cron gap + margin; the 06:45 audit was flagging these
+# every day): volume_radar 10->13 (Sun 20:00->Mon 08:00=12h), decision_scorecard 2->15 (Sat 18:15->
+# Sun 08:15=14h), mtf_ta 2->18 (weekday 16:40->09:40=17h), sector_rotation 6->22 MH (14:00->10:00=20h),
+# decision_fundamentals 16->26 (weekend 05:30->05:30=24h), dph/psych_cards/replay_drills/markov_regime
+# ALL->MH (weekday-only crons).
 # (label, path, mode, max_age_h, note)
 FILES = [
     ("unified_contracts_high_interest", f"{H}/.openclaw/workspace/directives/unified_contracts_high_interest.json", MH, 30, "high-interest contract feed -> /api/unified-contracts"),
@@ -89,8 +95,8 @@ FILES = [
     ("desk2_weekend",       f"{H}/.openclaw/workspace/directives/desk2_weekend.json",        ALL, 60, "desk2 weekend review, Sat 11:00 + Sun 19:00 ET (2026-09-12)"),
     ("desk2_nollm",         f"{H}/.openclaw/workspace/directives/desk2_nollm.json",          MH,  26, "desk2 NO-LLM shadow ranked table, every cycle 9:37-15:37 ET weekdays (2026-09-13)"),
     ("fmp_market",          "/AIWorkWSL/web/missionctrl/data/fmp_market.json",            ALL,  6, "FMP market snapshot, hourly"),
-    ("markov_regime",       "/AIWorkWSL/web/missionctrl/data/markov_regime.json",         ALL, 10, "markov regime snapshot"),
-    ("volume_radar",        "/AIWorkWSL/web/missionctrl/data/volume_radar.json",          ALL, 10, "volume radar snapshot — RTH pace scan + after-hours/weekend movers (2026-09-12)"),
+    ("markov_regime",       "/AIWorkWSL/web/missionctrl/data/markov_regime.json",         MH,  26, "markov regime snapshot — 09:00 ET M-F only (2026-09-27: was ALL/10h -> STALE every weekend)"),
+    ("volume_radar",        "/AIWorkWSL/web/missionctrl/data/volume_radar.json",          ALL, 13, "volume radar snapshot — RTH pace scan + after-hours/weekend movers (2026-09-12)"),
     ("ainvest_themes",      "/AIWorkWSL/web/missionctrl/data/ainvest-themes.json",        MH,  26, "ainvest theme scrape"),
     ("watchlist_signals",   "/AIWorkWSL/web/missionctrl/data/watchlist-signals.json",     MH,  26, "watchlist signal scan"),
     ("strategy_compare",    "/AIWorkWSL/web/missionctrl/data/strategy_compare.json",      MH,  26, "strategy comparison rollup"),
@@ -102,7 +108,7 @@ FILES = [
     # [decision-ta 2026-09-14] Decision Hub technical-analysis factor (pipeline/decision/factor_ta.py -> /api/decision/ta)
     ("decision_ta",         f"{H}/.openclaw/data/decision/factors/ta.json",             ALL,  54, "TA decision factor: full run 17:05 M-F + 08:00 Sat, market-block-only refresh 10:35 M-F (touches mtime); Sat->Mon gap ~50.5h, no Sunday run"),
     # [decision-fundamentals 2026-09-14] Decision Hub fundamental-analysis factor (pipeline/decision/factor_fundamentals.py -> /api/decision/fundamentals)
-    ("decision_fundamentals", f"{H}/.openclaw/data/decision/factors/fundamentals.json", ALL,  16, "fundamentals decision factor: rolling 1/7-universe refresh 05:30 daily + 18:30 M-F"),
+    ("decision_fundamentals", f"{H}/.openclaw/data/decision/factors/fundamentals.json", ALL,  26, "fundamentals decision factor: rolling 1/7-universe refresh 05:30 daily + 18:30 M-F"),
     ("console_finviz_news", f"{H}/.openclaw/data/ovtlyr-console/latest/supplement/finviz_news.json", ALL, 16, "finviz news wire supplement written by verify_console.py"),
     ("console_finviz_sectors", f"{H}/.openclaw/data/ovtlyr-console/latest/supplement/finviz_sectors.json", ALL, 16, "finviz sector/industry perf supplement written by verify_console.py"),
     ("oi_flow_latest",      f"{H}/.openclaw/data/oi-flow/latest.json",                   MH,  30, "OI Flow Yahoo lists 10:05/12:35/15:50 weekdays (console-options-flow)"),
@@ -116,7 +122,7 @@ FILES = [
     # (15min) cadence.
     ("cvd_latest",           f"{H}/.openclaw/data/cvd/latest.json",                      ALL,  1, "cumulative volume delta — pipeline/cvd/cvd.py every 5min market hours / 15min weekends"),
     # [decision-hub 2026-09-14] combiner scorecard — every 30min 06:00-20:00 ET weekdays + 08:15/12:15/18:15 ET weekends
-    ("decision_scorecard",  f"{H}/.openclaw/data/decision/scorecard.json",              ALL,   2, "Decision Hub combiner (pipeline/decision/decision_score.py) — blends factors/*.json -> /api/decision"),
+    ("decision_scorecard",  f"{H}/.openclaw/data/decision/scorecard.json",              ALL,  15, "Decision Hub combiner (pipeline/decision/decision_score.py) — blends factors/*.json -> /api/decision"),
     # [fed-watch 2026-09-14] macro_fed decision factor — 06:30 ET daily + 13:30/14:15 ET weekdays + every 30min on FOMC days
     ("macro_fed_factor",    f"{H}/.openclaw/data/decision/factors/macro_fed.json",      ALL,  20, "Fed/macro watcher (pipeline/fed/fed_watch.py) -> /api/decision/macro_fed, advisory only; longest normal gap is 14:15->06:30 next day (~16h)"),
     # [decision-news 2026-09-14] news/sentiment/catalyst decision factor — */30 06:00-20:00 ET weekdays, hourly 21:00-05:00 ET weekdays + all day weekends
@@ -133,9 +139,9 @@ FILES = [
     # FINRA ATS weekly venue share 07:30 ET Tue. Advisory display only. 64h = Sat 08:15 catch-up
     # -> Mon 18:45 gap (~58.5h) + margin.
     ("darkpool_latest",      f"{H}/.openclaw/data/darkpool/latest.json",                 ALL,  64, "dark pool layer (pipeline/darkpool/darkpool-cron.sh) -> /api/darkpool, advisory only"),
-    ("dph_latest",           f"{H}/.openclaw/data/darkpool/dph/latest.json",             ALL,  14, "darkpoolheatmap.com poll (pipeline/darkpool/dph_scrape.py) every 30min market hours, advisory only"),
+    ("dph_latest",           f"{H}/.openclaw/data/darkpool/dph/latest.json",             MH,   14, "darkpoolheatmap.com poll (pipeline/darkpool/dph_scrape.py) every 30min market hours, advisory only"),
     ("news_snr_latest", f"{H}/.openclaw/data/decision/news_snr.json", ALL, 2, "news signal-to-noise scorer (pipeline/decision/news_snr.py) hourly, advisory only"),
-    ("mtf_ta_latest",        f"{H}/.openclaw/data/decision/mtf_ta.json",                 ALL,   2, "multi-timeframe TA for relay tickers (pipeline/decision/mtf_ta.py) hourly market hours, advisory only"),
+    ("mtf_ta_latest",        f"{H}/.openclaw/data/decision/mtf_ta.json",                 ALL,  18, "multi-timeframe TA for relay tickers (pipeline/decision/mtf_ta.py) hourly market hours, advisory only"),
     # [structure-first 2026-09-15] rebound detector hourly 09:43-16:43 + 16:48 ET weekdays -> Fri 16:48 -> Mon 09:43 gap (~65h) + margin
     ("rebound_setup_latest", f"{H}/.openclaw/data/decision/rebound_setup.json",          ALL,  68, "structure-first rebound detector (pipeline/decision/rebound_setup.py) hourly market hours, advisory only"),
     # macro reaction 07:00 + 09:05 + 16:40 ET weekdays -> Fri 16:40 -> Mon 07:00 gap (~62.5h) + margin
@@ -155,13 +161,13 @@ FILES = [
     # GatePage/TrendBoardPage/PsychCardsPage/ReplayPage (unified_book.json dead,
     # never re-read). psych_cards.json + replay_drills.json read ONLY mike.sqlite
     # fills/round_trips (closed trade history, not holdings) + yfinance.
-    ("psych_cards",         f"{H}/portfolio/psych_cards.json",                            ALL,  26, "psych_cards_refresh.py daily -> live_stats block; deck's cards are static canon (not tracked here)"),
-    ("replay_drills",       f"{H}/portfolio/replay_drills.json",                          ALL,  26, "replay_drills_refresh.py daily, drives real_coach/replay_drills.py"),
+    ("psych_cards",         f"{H}/portfolio/psych_cards.json",                            MH,   26, "psych_cards_refresh.py daily -> live_stats block; deck's cards are static canon (not tracked here)"),
+    ("replay_drills",       f"{H}/portfolio/replay_drills.json",                          MH,   26, "replay_drills_refresh.py daily, drives real_coach/replay_drills.py"),
     # [sector-rotation 2026-09-15] SectorRotationPage/route had zero file/fetch backing on
     # record (B5/N5) — sector_rotation_detector.py now also writes this file (route's live
     # yfinance fetch kept as fallback). Cron 10:00/12:00/14:00 ET M-F only; longest normal
     # gap is Fri 14:00 -> Mon 10:00 (~68h).
-    ("sector_rotation",     f"{H}/.openclaw/data/sector-rotation/latest.json",             MH,  6, "sector_rotation_detector.py 10:00/12:00/14:00 ET M-F -> /api/sector-rotation"),
+    ("sector_rotation",     f"{H}/.openclaw/data/sector-rotation/latest.json",             MH,  22, "sector_rotation_detector.py 10:00/12:00/14:00 ET M-F -> /api/sector-rotation"),
 ]
 
 

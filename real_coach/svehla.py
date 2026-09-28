@@ -300,10 +300,22 @@ def T_ordinal(n: int) -> str:
     return f"{n}{'th' if 11 <= n % 100 <= 13 else {1: 'st', 2: 'nd', 3: 'rd'}.get(n % 10, 'th')}"
 
 
-def send_to_lane(msg: str) -> None:
-    import subprocess
-    subprocess.run([sys.executable, str(Path.home() / "scripts/tg_fleet.py"), "send", "astrology", msg],
-                   capture_output=True, timeout=30)
+def send_to_lane(msg: str, tries: int = 4) -> bool:
+    """Post to the astrology lane. Retries with backoff (the laptop's Telegram link drops often —
+    'Connection reset by peer' in tg-gateway logs); returns False only if every try failed."""
+    import subprocess, time
+    for i in range(tries):
+        try:
+            r = subprocess.run([sys.executable, str(Path.home() / "scripts/tg_fleet.py"), "send", "astrology", msg],
+                               capture_output=True, text=True, timeout=45)
+            if r.returncode == 0:
+                return True
+            err = (r.stdout + r.stderr).strip()[-200:]
+        except Exception as e:
+            err = str(e)
+        print(f"[send_to_lane] try {i + 1}/{tries} failed: {err}", file=sys.stderr)
+        time.sleep(5 * 2 ** i)
+    return False
 
 
 # ── exact hits (idea #1 + #2): real crossing dates, cached ────────────────────
@@ -356,8 +368,11 @@ def _crossings(f, start: date, end: date) -> list[date]:
                     lo = mid
                 else:
                     hi = mid
-            y, m, dd, _h = swe.revjul((lo + hi) / 2)
-            out.append(date(y, m, dd))
+            # ET calendar date of the crossing (revjul gives the UT date — anything exact 8 PM–midnight
+            # EDT was landing on the NEXT day; 10 of 68 timeline hits in the next year, fixed 2026-09-27)
+            y, m, dd, h = swe.revjul((lo + hi) / 2)
+            ut = datetime(y, m, dd, tzinfo=ZoneInfo("UTC")) + timedelta(hours=h)
+            out.append(ut.astimezone(ET).date())
         prev, d = cur, d2
     return out
 

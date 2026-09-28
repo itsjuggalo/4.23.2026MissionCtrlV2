@@ -12,7 +12,7 @@ import argparse
 import json
 import subprocess
 import sys
-from datetime import datetime, timedelta, timezone
+from datetime import date, datetime, timedelta, timezone
 from pathlib import Path
 from zoneinfo import ZoneInfo
 
@@ -239,6 +239,18 @@ def main() -> int:
                 if e["kind"] == "aspect"}
     except Exception:
         near = {}
+    def _when(e):   # "today 3:40 PM" — ET clock time for hits within ±1 day (covers overnight quiet-hours hits);
+        t = None       # the day label comes from that ET time, not the UT-scanned event date
+        if abs((date.fromisoformat(e["date"]) - now_et.date()).days) <= 1:
+            try:
+                import astro_alerts
+                t = astro_alerts._exact_time(e, date.fromisoformat(e["date"]))
+            except Exception:
+                t = None
+        if t:
+            return f"{astro_timeline.rel_day(t.date().isoformat(), now_et.date())} {t:%-I:%M %p}"
+        return astro_timeline.rel_day(e["date"], now_et.date())
+
     if hits:
         lines.append("")
         seen_fit = set()
@@ -248,7 +260,7 @@ def main() -> int:
             nh = whole_sign_house(natal[h["n"]], asc) + 1
             lines.append(f"{h['glyph']} {h['t']} (in {SIGNS[int(trans[h['t']]['lon'] // 30)]}, your {ordinal(th)}) "
                          f"{h['aspect']} natal {h['n']} (your {ordinal(nh)}) · orb {h['orb']:.1f}°"
-                         + (lambda e: f" · exact {astro_timeline.rel_day(e['date'], now_et.date())}"
+                         + (lambda e: f" · exact {_when(e)}"
                             + (f", pass {e['pass']}{' ℞' if e.get('rx') else ''}" if e.get("pass") else "")
                             if e else "")(near.get((h["t"], h["aspect"], h["n"])) if i < 3 else None)
                          + " — "
@@ -378,7 +390,7 @@ def main() -> int:
     return 0
 
 
-LIVE_LINE = "📖 Full read + 30-day timeline: https://claudeclaw.serveftp.com/astrology/mike-today-live.html"
+LIVE_LINE = "📖 Full read + 30-day timeline: https://claudeclaw.serveftp.com/astrology/readings/mike-today-live.html"
 DIGEST_KEEP = ("🌌", "🎚", "🌘", "⏳", "🗓", "📜", "✔", "⚠️", "☉")
 
 

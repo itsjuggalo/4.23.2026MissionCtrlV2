@@ -95,6 +95,8 @@ if __name__ == "__main__":
     for i, c in enumerate(chunks, 1):
         print(f"── message {i}/{len(chunks)} ({len(c)} chars) ──\n{c}\n")
     if "--send" in sys.argv:
-        for c in chunks:
-            subprocess.run([sys.executable, str(Path.home() / "scripts/tg_fleet.py"), "send", "astrology", c],
-                           capture_output=True, timeout=30)
+        from svehla import send_to_lane           # retries with backoff
+        failed = [i for i, c in enumerate(chunks, 1) if not send_to_lane(c)]
+        if failed:
+            print(f"✖ morning send FAILED for message(s) {failed} of {len(chunks)}", file=sys.stderr)
+            sys.exit(1)

@@ -85,7 +85,11 @@ def draw(when: datetime, out: Path) -> Path:
 
 
 if __name__ == "__main__":
-    args = [a for a in sys.argv[1:] if not a.startswith("--")]
+    argv = sys.argv[1:]
+    if "--out" in argv:                      # drop the flag AND its value — the path was being parsed as
+        i = argv.index("--out")              # the date (ValueError), so the live page kept a Sep 15 wheel
+        argv = argv[:i] + argv[i + 2:]
+    args = [a for a in argv if not a.startswith("--")]
     when = datetime.now(T.ET) if not args else datetime.fromisoformat(args[0]).replace(hour=12, tzinfo=T.ET)
     out = Path(sys.argv[sys.argv.index("--out") + 1]) if "--out" in sys.argv else Path.home() / "portfolio/astrology/wheel.png"
     print(draw(when, out))
