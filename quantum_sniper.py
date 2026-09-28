@@ -1,5 +1,6 @@
 #!/home/itsju/.venv/bin/python
-"""Quantum green-light sniper — the rare, low-noise "BUY THIS NOW" buzz.
+"""Quantum green-light sniper — the rare, low-noise green-light evidence buzz
+(setup evidence, not a trade call — only the canonical synthesis issues calls).
 
 READ-ONLY on the quantum pipeline output (owned by another session). After each
 pipeline cycle this fires AT MOST one Telegram buzz, and only for a genuinely clean
@@ -115,22 +116,24 @@ def _buzz_text(p, d):
     if spread:   # naked is over cap → buzz the cap-fitting spread the pipeline built
         head = b(f"{p.get('ticker')} ${spread.get('long'):g}/${spread.get('short'):g} {typ} SPREAD")
         return join(
-            hdr("🟢", f"{tag}Green Light", sub="buy now (spread fits your cap)"),
+            hdr("🟢", f"{tag}Green Light", sub="green-light evidence (not a trade call) · spread fits the cap"),
             f"{head} · {esc(Q._fmt_exp(p.get('expiry')))} ({esc(p.get('days'))}d)",
             esc(f"{Q._money(spread.get('cost_per'))} cost · max +{Q._money(spread.get('max_profit'))} / "
                 f"-{Q._money(spread.get('max_loss'))} · {p.get('confidence')}-conf · {p.get('value')}"),
             f"<i>why: {esc(why)}</i>",
-            f"📝 {esc(spread.get('place_order'))}",
+            esc(f"legs ref: long ${spread.get('long'):g} / short ${spread.get('short'):g} {typ} "
+                f"@ net debit ref ${float(spread.get('net_debit') or 0):.2f}"
+                + (f" · BE ref ${spread.get('breakeven')}" if spread.get('breakeven') is not None else "")),
             footer("flat $400 cap · /pick for more"))
     head = b(f"{p.get('ticker')} ${p.get('strike'):g} {typ}")
     return join(
-        hdr("🟢", f"{tag}Green Light", sub="buy now"),
+        hdr("🟢", f"{tag}Green Light", sub="green-light evidence (not a trade call)"),
         f"{head} · {esc(Q._fmt_exp(p.get('expiry')))} ({esc(p.get('days'))}d)",
-        esc(f"{Q._money(p.get('per_contract'))}/ct · buy {p.get('qty',1)} = "
+        esc(f"{Q._money(p.get('per_contract'))}/ct · size ref {p.get('qty',1)} = "
             f"{Q._money((p.get('qty') or 1) * (p.get('per_contract') or 0))} of the $400 cap · "
             f"{p.get('confidence')}-conf · {p.get('sources')} src · {p.get('value')}"),
         f"<i>why: {esc(why)}</i>",
-        footer("flat $400 cap · stop -50% prem · /pick for more"))
+        footer("flat $400 cap · stop ref -50% prem · /pick for more"))
 
 
 def _shock_guard(dry, state):
@@ -152,7 +155,7 @@ def _shock_guard(dry, state):
         hdr("🛑", "Risk-Off", sub=f"sev {float(s.get('severity',0)):.0%}"),
         esc(s.get('reason', 'market shock')),
         esc(f"movers: {', '.join(movers)}") if movers else None,
-        footer("stop adding, tighten stops, play defense. /book"))
+        footer("risk state: risk-off shock flag active · /book"))
     if dry:
         print("WOULD BUZZ (shock):\n" + msg); return False
     _send(msg); state["shock_alerted"] = True
@@ -211,7 +214,7 @@ def _sweep_alert(dry, state):
 
 
 def _green_light(dry, state):
-    """The rare clean-BUY buzz (ACT + cheap/fair). One per run max."""
+    """The rare clean green-light evidence buzz (ACT + cheap/fair). One per run max."""
     d = Q._load("best_contracts.json")
     if not d:
         if dry: print("no best_contracts.json")

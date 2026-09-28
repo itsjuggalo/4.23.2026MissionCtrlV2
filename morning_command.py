@@ -127,10 +127,11 @@ def _catalysts_and_orders(names: str, tape: str) -> tuple[str, str, dict]:
         '{"catalysts": "<=2 sentences on TODAY\'s scheduled US market catalysts you are '
         "confident about (FOMC/CPI/PPI/jobs/major single-name earnings). If you are not sure "
         'anything major is scheduled, say \\"No major scheduled macro catalysts today.\\"", '
-        '"orders": "ONE concrete, actionable line: the single highest-conviction game plan for '
-        f"the day. Position sizing is capped at ${RISK_CAP} risk per trade — this "
-        "is a HARD cap, never suggest a size above it, and if the named play cannot be expressed "
-        'under it, say so. Real money (Robinhood/Coinbase). Be specific.", '
+        '"orders": "ONE concrete line: the single highest-conviction setup on the watchlist '
+        "today, stated as EVIDENCE with reference levels (entry ref / stop ref / target ref) — "
+        "never a buy/sell instruction; the operator's canonical desk makes the call. Risk "
+        f"reference is capped at ${RISK_CAP} per trade — this is a HARD cap, never cite a "
+        'size above it, and if the setup cannot be expressed under it, say so. Be specific.", '
         '"plan": {"ticker": "<symbol>", "direction": "BUY", "entry": <single number, not a '
         'range>, "stop": <single number, below entry>, "target": <single number, above entry>, '
         '"shares": <integer>, "why": "<one short clause>"}}\n'
@@ -148,13 +149,13 @@ def _catalysts_and_orders(names: str, tape: str) -> tuple[str, str, dict]:
         if cat or orders:
             return cat, orders, plan
     return ("Catalyst read unavailable — check the economic calendar.",
-            f"Trade your plan; cap risk at ${RISK_CAP} per name — flat $400 cap, Mike decides.",
+            f"No setup read available · risk cap ${RISK_CAP} per name (flat $400) — Mike decides.",
             {})
 
 
 def _plan_orders(plan: dict) -> str:
-    """Render the LLM's structured plan as the same three numbered orders every other card
-    in the fleet uses. Returns '' unless entry/stop/target are all present AND ordered
+    """Render the LLM's structured plan as reference levels (entry ref / stop ref / target
+    ref — setup evidence, not a trade call; T9 item 9). Returns '' unless entry/stop/target are all present AND ordered
     correctly — a half-plan is worse than the prose sentence, and a target below the entry
     (or a stop above it) is a hallucinated plan that would cost real money."""
     try:
@@ -173,11 +174,12 @@ def _plan_orders(plan: dict) -> str:
     # gate against. The flat $400 RISK_CAP above (loss, not notional) is the only
     # sizing rule now; Mike sizes/funds the trade himself.
     why = str(plan.get("why") or "").strip().rstrip(".")
-    return (f"👉 <b>PLAN</b>{f' — {esc(why)}' if why else ''}\n"
-            f"1) BUY {sh} {b(tkr)} at ${entry:g} — ${sh * entry:,.0f}.\n"
-            f"2) SELL at ${stop:g} if it drops — lose ${risk:.0f}.\n"
-            f"3) SELL at ${targ:g} if it works — make ${reward:.0f}.\n"
-            f"Both sell orders go in the moment you're filled.")
+    return (f"👉 <b>SETUP REF</b>{f' — {esc(why)}' if why else ''}\n"
+            f"{b(tkr)} · size ref {sh} sh (${sh * entry:,.0f})\n"
+            f"• entry ref ${entry:g}\n"
+            f"• stop ref ${stop:g} — risk ${risk:.0f}\n"
+            f"• target ref ${targ:g} — reward ${reward:.0f}\n"
+            f"<i>Reference levels — setup evidence, not a trade call.</i>")
 
 
 def _polymarket_line() -> str:
@@ -860,14 +862,13 @@ def _one_contract_line() -> str:
         # a hundredfold error in the one number he acts on.
         px = float(p.get("mid") or 0) or round((p.get("per_contract") or 0) / 100.0, 2)
         stop_px, targ_px = round(px * 0.50, 2), round(px * 1.50, 2)
-        return (f"📈 " + b("IF YOU TAKE ONE TRADE") + f": {b(p['ticker'])} ${p['strike']:g} {esc(kind)} "
+        return (f"📈 " + b("TOP DESK CONTRACT (reference)") + f": {b(p['ticker'])} ${p['strike']:g} {esc(kind)} "
                 f"expiring {esc(p['expiry'])}{esc(window)}.\n"
-                f"1) BUY {n} contract{'s' if n != 1 else ''} near ${px:.2f} = ${cost} total.\n"
-                f"2) SELL at ${stop_px:.2f} if it drops — lose ${cost / 2:.0f}.\n"
-                f"3) SELL at ${targ_px:.2f} if it works — make ${cost / 2:.0f}.\n"
-                f"Both sell orders go in as soon as you're filled — never add to it.\n"
-                f"<i>Priced at yesterday's close — check the real price before you buy; if "
-                f"it opens far from ${px:.2f}, the whole plan moves with it.</i>")
+                f"• entry ref ${px:.2f} × {n} contract{'s' if n != 1 else ''} = ${cost} total\n"
+                f"• stop ref ${stop_px:.2f} — risk ${cost / 2:.0f}\n"
+                f"• target ref ${targ_px:.2f} — reward ${cost / 2:.0f}\n"
+                f"<i>Reference levels priced at yesterday's close — setup evidence, not a trade "
+                f"call; if it opens far from ${px:.2f}, every level shifts with it.</i>")
     except Exception:
         return ""
 
@@ -899,7 +900,7 @@ def build_phone() -> str:
     if numbered:
         lines.append(numbered)
     elif orders:
-        lines.append(f"👉 {b('PLAN')}: {esc(orders)}")
+        lines.append(f"👉 {b('SETUP REF')}: {esc(orders)}")
 
     cat_line = _catalyst_phone_line()
     if cat_line:
@@ -926,7 +927,7 @@ def build_phone() -> str:
         lines.append(one)
 
     lines.append(footer(f"Never risk more than ${RISK_CAP} on a single trade. "
-                         "If nothing here fits, doing nothing is a valid day.").lstrip("\n"))
+                         "If nothing here fits, there is no setup today.").lstrip("\n"))
 
     text = "\n\n".join(lines)
     # §3: Telegram's hard cap is 4096 chars. Trim order — drop block 3 (SNR headlines)

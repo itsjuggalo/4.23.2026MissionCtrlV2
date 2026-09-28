@@ -54,7 +54,9 @@ def test_affordable_action_names_entry_stop_and_target():
          "DTE": 5, "OpenInterest": 5000, "Volume": 1000},
         {"mid": 3.00, "iv": 0.35}, {"chg_pct": 0.5})
     a = v["action"]
-    assert "BUY" in a and a.count("SELL") >= 2, f"action missing an exit: {a}"
+    # T9 item 9: levels are reference levels (evidence), never BUY/SELL commands.
+    assert "entry ref" in a and "stop ref" in a and "target ref" in a, f"action missing a level: {a}"
+    assert "BUY" not in a and "SELL" not in a, f"trade-call wording leaked: {a}"
 
 
 def test_unaffordable_contract_gets_no_order_plan():
@@ -316,10 +318,12 @@ def _plan(**over):
     return p
 
 
-def test_brief_plan_renders_three_orders():
+def test_brief_plan_renders_three_reference_levels():
+    # T9 item 9: entry/stop/target survive as reference levels, not numbered BUY/SELL orders.
     out = MC._plan_orders(_plan())
-    assert "1) BUY" in out and "2) SELL" in out and "3) SELL" in out
-    assert "you lose $50" in out and "you make $100" in out
+    assert "entry ref $12.5" in out and "stop ref $12" in out and "target ref $13.5" in out
+    assert "risk $50" in out and "reward $100" in out
+    assert "1) BUY" not in out and "SELL" not in out
 
 
 def test_brief_plan_rejects_a_hallucinated_ordering():
@@ -343,5 +347,5 @@ def test_brief_plan_no_longer_clamps_by_buying_power():
     import re
     out = MC._plan_orders(_plan(ticker="QQQ", entry=667, stop=664, target=676, shares=15))
     assert out, "a plan within the $400 risk cap should render"
-    sh = int(re.search(r"BUY (\d+) QQQ", out).group(1))
+    sh = int(re.search(r"size ref (\d+) sh", out).group(1))
     assert sh == 15, f"share count must not be clamped by a retired buying-power check, got {sh}"

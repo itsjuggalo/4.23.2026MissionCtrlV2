@@ -147,9 +147,9 @@ def chase_verdict(a, snap, eq):
     reasons = []
 
     if not mid or not ap:
-        return {"tier": "WAIT", "emoji": "⏸", "head": "WAIT FOR LIVE QUOTE", "move": None, "mid": mid,
+        return {"tier": "WAIT", "emoji": "⏸", "head": "NO LIVE QUOTE YET", "move": None, "mid": mid,
                 "reasons": ["no live option quote yet (pre/after-market) — re-check after ~9:45 ET open"],
-                "action": "→ set a mental alert; decide once it's actually trading"}
+                "action": "→ no live option quote — levels unavailable until it's trading"}
 
     move = (mid - ap) / ap * 100
     late = 0
@@ -225,30 +225,32 @@ def chase_verdict(a, snap, eq):
     # on a ~$2k book. An idea he cannot afford is not an idea; say so instead of pricing it.
     cost = mid * 100 if mid else 0
     unaffordable = cost > RISK_CAP_USD
+    # T9 item 9 (2026-09-27): levels are REFERENCE levels / setup evidence — only the
+    # canonical synthesis issues a trade call. Same numbers, no imperatives.
     if late <= 1:
-        tier, emoji, head = "EARLY", "🟢", "STILL EARLY — you can still get in"
+        tier, emoji, head = "EARLY", "🟢", "STILL EARLY — flow near the alert price (evidence)"
         action = (f"→ one contract is ${cost:,.0f} — over your ${RISK_CAP_USD:.0f} limit, so "
-                  f"this one isn't for your account even though the setup is good."
+                  f"this one is outside the risk cap even though the setup evidence is good."
                   if unaffordable else
-                  f"→ 1 contract, ${cost:,.0f}. BUY near ${mid:g} · SELL at "
-                  f"${_stop_for(mid, ap):g} if it drops (−${cost - _stop_for(mid, ap)*100:,.0f}) · "
-                  f"SELL at ${_target_for(mid):g} if it works (+${_target_for(mid)*100 - cost:,.0f}). "
-                  f"Set both sells right after you buy.")
+                  f"→ 1 contract ≈ ${cost:,.0f}. entry ref ${mid:g} · stop ref "
+                  f"${_stop_for(mid, ap):g} (−${cost - _stop_for(mid, ap)*100:,.0f}) · "
+                  f"target ref ${_target_for(mid):g} (+${_target_for(mid)*100 - cost:,.0f}). "
+                  f"Reference levels — setup evidence, not a trade call.")
     elif late <= 3:
-        tier, emoji, head = "LATE", "🟡", "GETTING LATE — go small or skip it"
-        action = (f"→ skip — ${cost:,.0f} a contract is over your ${RISK_CAP_USD:.0f} limit "
-                  f"and the move is already underway."
+        tier, emoji, head = "LATE", "🟡", "GETTING LATE — part of the move is spent (evidence)"
+        action = (f"→ ${cost:,.0f} a contract is over your ${RISK_CAP_USD:.0f} limit "
+                  f"and the move is already underway — outside the risk cap."
                   if unaffordable else
-                  f"→ half the move is gone. If you take it at all: 1 contract ${cost:,.0f} · "
-                  f"BUY near ${mid:g} · SELL at ${_stop_for(mid, ap):g} if it drops "
-                  f"(−${cost - _stop_for(mid, ap)*100:,.0f}) · SELL at "
-                  f"${_target_for(mid, 0.30):g} if it works "
-                  f"(+${_target_for(mid, 0.30)*100 - cost:,.0f}) — take the smaller win, the "
-                  f"easy part already happened.")
+                  f"→ half the move is gone. 1 contract ≈ ${cost:,.0f} · "
+                  f"entry ref ${mid:g} · stop ref ${_stop_for(mid, ap):g} "
+                  f"(−${cost - _stop_for(mid, ap)*100:,.0f}) · target ref "
+                  f"${_target_for(mid, 0.30):g} "
+                  f"(+${_target_for(mid, 0.30)*100 - cost:,.0f}, reduced target — the "
+                  f"easy part already happened). Reference levels — setup evidence, not a trade call.")
     else:
-        tier, emoji, head = "SKIP", "🔴", "TOO LATE — let this one go"
-        action = ("→ don't chase it. The move already happened. Wait for a pullback, "
-                  "or wait for the next fresh one.")
+        tier, emoji, head = "SKIP", "🔴", "TOO LATE — the move already happened (evidence)"
+        action = ("→ chase gate closed: the move already happened. A pullback or the next "
+                  "fresh alert would re-open it.")
 
     return {"tier": tier, "emoji": emoji, "head": head, "reasons": reasons,
             "move": move, "mid": mid, "action": action}
@@ -306,7 +308,7 @@ def _compact(occ, a, with_cost=False):
           f"already up {mvp:+.0f}% since the alert" if mvp > 0 else
           f"down {abs(mvp):.0f}% since the alert")
     head = {"EARLY": "still early", "LATE": "getting late",
-            "SKIP": "too late", "WAIT": "wait"}[v["tier"]]
+            "SKIP": "too late", "WAIT": "no live quote"}[v["tier"]]
     kind = "CALL" if (a.get("OptionType") or "").upper().startswith("C") else "PUT"
     title = b(f"{a.get('Symbol')} ${a.get('Strike'):g} {kind}")
     l1 = (f"{v['emoji']} {title} exp {esc(_exp(a))} — " + esc(head) + (esc(f", {mv}") if mv else ""))
@@ -388,12 +390,12 @@ def winners(top=5, min_value=1_000_000):
         if len(priced) >= top:
             break
     shown = (priced + waiting)[:top]
-    out = [hdr("🔔", "Flow Winners", sub="chase or skip")]
+    out = [hdr("🔔", "Flow Winners", sub="chase-timing evidence · not trade calls")]
     if shown:
         out += shown
     else:
         out.append(esc(f"Nothing in today's big flow fits your ${RISK_CAP_USD:.0f} per-trade "
-                       f"limit — that's a fine reason to sit out."))
+                       f"limit — no in-cap setup on the board."))
     if toobig:
         note = (f"({toobig} other big-money contracts today cost more than "
                 f"${RISK_CAP_USD:.0f} each — not for this account.)")

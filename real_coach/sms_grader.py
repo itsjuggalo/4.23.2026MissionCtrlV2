@@ -73,11 +73,13 @@ def grade_signal(s, m1):
 
 def classify(text):
     t = text.upper()
-    if "SIT OUT" in t or "SKIP FOR YOU" in t:
+    # T9 item 9 (2026-09-27): spy_scalper SMS now says OVER CAP / TRIGGER MET <dir> /
+    # SETUP INVALIDATED; the legacy tokens stay accepted for older logged texts.
+    if "SIT OUT" in t or "SKIP FOR YOU" in t or "OVER CAP" in t:
         return "sitout"
-    if "SPY SCALP" in t and ("GO CALLS" in t or "GO PUTS" in t):
+    if "SPY SCALP" in t and any(k in t for k in ("GO CALLS", "GO PUTS", "TRIGGER MET CALLS", "TRIGGER MET PUTS")):
         return "go"
-    if "SETUP DIED" in t:
+    if "SETUP DIED" in t or "SETUP INVALIDATED" in t:
         return "died"
     if "PRE-BELL" in t:
         return "prebell"

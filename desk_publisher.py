@@ -168,7 +168,11 @@ def build_raynor(slot):
     brief = _strip_retired_agents((cache.get('brief') or '').strip())
     bullets = [b for b in (cache.get('bullets') or []) if not _RETIRED_AGENTS.search(b)]
     vs = _get('/api/verdict-scan') or {}
-    rows = vs.get('results') if isinstance(vs.get('results'), list) else (vs if isinstance(vs, list) else [])
+    # /api/verdict-scan returns `rows` (current contract); `results` is the legacy key — accept both, `rows` first.
+    if isinstance(vs, dict):
+        rows = next((vs[k] for k in ('rows', 'results') if isinstance(vs.get(k), list)), [])
+    else:
+        rows = vs if isinstance(vs, list) else []
     top = [r for r in (rows or []) if isinstance(r, dict)][:5]
     if not brief and not top:
         return None

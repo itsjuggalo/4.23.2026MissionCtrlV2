@@ -12,18 +12,21 @@ import pytest
 
 MOD_PATH = os.environ.get("DESK_PUBLISHER_PATH", os.path.expanduser("~/05_AUTOMATION/scripts/desk_publisher.py"))
 
-SCAN = {"results": [
+SCAN_ROWS = [
     {"symbol": "NVDA", "verdict": "STRONG BUY", "score": 87},
     {"symbol": "SPY", "verdict": "AVOID", "score": 22},
     {"ticker": "AAPL", "verdict": "HOLD"},
-]}
+]
+# /api/verdict-scan's live contract is `rows`; `results` is the legacy key. Cover both.
+SCAN_SHAPES = {"rows": {"rows": SCAN_ROWS}, "results": {"results": SCAN_ROWS}}
 CACHE = {"brief": "Macro: NEUTRAL regime, VIX 14.85.", "bullets": ["Top recent flow winner: META CALL peaked +299.0%."]}
 CONSENSUS = {"numAnalysts": 40, "recs": {"strongBuy": 10, "buy": 20, "hold": 8, "sell": 2}, "targetMean": 200.5,
              "recommendationKey": "buy", "sources": ["yfinance"]}
 
 
-@pytest.fixture()
-def dp(monkeypatch):
+@pytest.fixture(params=sorted(SCAN_SHAPES))
+def dp(monkeypatch, request):
+    scan = SCAN_SHAPES[request.param]
     loader = importlib.machinery.SourceFileLoader("desk_publisher_under_test", MOD_PATH)
     spec = importlib.util.spec_from_loader(loader.name, loader)
     mod = importlib.util.module_from_spec(spec)
@@ -31,7 +34,7 @@ def dp(monkeypatch):
 
     def fake_get(path, timeout=None, **_):
         if path.startswith("/api/verdict-scan"):
-            return SCAN
+            return scan
         if path.startswith("/api/analyst-consensus"):
             return CONSENSUS
         return {}

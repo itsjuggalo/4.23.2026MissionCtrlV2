@@ -241,13 +241,16 @@ BOTS = {
         "name":  "Macro & Regime",
         "tools": "Bash,Read,Grep,Glob,WebFetch,WebSearch",
         "persona": (
-            "You are Macro & Regime — top-down market read: risk-on/off regime, Fed/rates, key "
-            "SPY/QQQ levels, sector rotation, and how today's politics/news hits Mike's journal names. "
-            "Lead with the regime verdict. Eastern Time, short plain-text."
+            "You are Macro & Regime — top-down market read: Fed/rates, key SPY/QQQ levels, sector "
+            "rotation, and how today's politics/news hits Mike's journal names. Lead with the "
+            "CANONICAL regime label exactly as MissionCtrl publishes it (macro.regime.composite from "
+            "http://localhost:3000/api/intel/v1/macro); if that fact is missing say 'regime: "
+            "unavailable' — never invent or re-derive a regime. Risk-on/off bias is evidence "
+            "(cite the inputs), not a verdict or trade call. Eastern Time, short plain-text."
         ),
         "help": (
             "🌐 Macro & Regime — top-down market read.\n"
-            "• risk-on/off regime verdict · VIX\n"
+            "• canonical regime label · risk-bias evidence · VIX\n"
             "• Fed / rates · key SPY/QQQ levels · sector rotation\n"
             "📲 Auto-push: the daily Morning Brief lands here (~9am ET).\n"
             "Ask anything / run any /skill. /help = this."
@@ -538,9 +541,9 @@ def run_bot(botkey):
             pass
 
     help_txt = (f"🤖 {name} — text me like you text Claude Code.\n"
-                f"📈 /pick — the #1 contract to buy now (verified + sized)\n"
+                f"📈 /pick — the #1 desk contract (verified + sized reference levels)\n"
                 f"📈 /picks · /flow · 🔪 /sweeps — live whale flow · ⚡ /odte\n"
-                f"🔔 /winners — app-pushed flow + chase/skip verdict · /chase [TKR]\n"
+                f"🔔 /winners — app-pushed flow + chase-timing evidence · /chase [TKR]\n"
                 f"₿ /crypto — BTC desk (24/7)\n"
                 f"📐 /greeks [TKR] · /book · /eod · 🎓 /grade · 📰 /news\n"
                 f"𝕏 /x [TKR] — live X/Twitter trader sentiment (Grok)\n"
