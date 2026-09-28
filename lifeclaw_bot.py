@@ -375,26 +375,28 @@ def main():
                     continue
                 if text.startswith("/brief"):
                     arg = text.split(maxsplit=1)[1] if " " in text else ""
-                    tg("sendMessage", chat_id=chat_id, text=run_brief(arg))
+                    send_reply(chat_id, run_brief(arg))
                     continue
                 if text.startswith("/today"):
                     tg("sendChatAction", chat_id=chat_id, action="typing")
-                    tg("sendMessage", chat_id=chat_id, text=today_view())
+                    send_reply(chat_id, today_view())
                     continue
-                if text.startswith("/debts"):            # show plan (check BEFORE /debt)
-                    arg = text.split(maxsplit=1)[1] if " " in text else ""
+                # /debts = plan. Bare /debt (old menu entry) shows the plan too instead of a
+                # usage error; /debt <creditor> <bal> still updates a balance. (2026-09-28)
+                if text.startswith("/debts") or text.split()[0].split("@")[0] == "/debt" and " " not in text:
+                    arg = text.split(maxsplit=1)[1] if (" " in text and text.startswith("/debts")) else ""
                     out = debts_cmd(arg)
-                    if out.startswith("<pre>"):
-                        tg("sendMessage", chat_id=chat_id, text=out, parse_mode="HTML")
-                    else:
-                        tg("sendMessage", chat_id=chat_id, text=out)
+                    if not (out.startswith("<pre>") and len(out) <= TG_MAX and
+                            tg("sendMessage", chat_id=chat_id, text=out, parse_mode="HTML").get("ok")):
+                        import html as _html
+                        send_reply(chat_id, _html.unescape(out.replace("<pre>", "").replace("</pre>", "")))
                     continue
                 if text.startswith("/paid") or text.startswith("/debt"):   # update balances
-                    tg("sendMessage", chat_id=chat_id, text=debt_update_cmd(text))
+                    send_reply(chat_id, debt_update_cmd(text))
                     continue
                 if text.startswith("/todo"):
                     arg = text.split(maxsplit=1)[1] if " " in text else ""
-                    tg("sendMessage", chat_id=chat_id, text=todo_cmd(arg))
+                    send_reply(chat_id, todo_cmd(arg))
                     continue
                 # Any other /command passes VERBATIM to `claude -p` → it runs as a
                 # Claude slash-skill (e.g. /life-engine, /gmail, /google-calendar).

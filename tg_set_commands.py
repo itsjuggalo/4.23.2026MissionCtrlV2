@@ -81,7 +81,7 @@ LIFE = C([
     ("brief", "Your life brief (calendar, inbox, weather)"),
     ("today", "What's on today"),
     ("todo", "Your to-do list"),
-    ("debt", "Debt payoff snapshot"),
+    ("debts", "Debt payoff plan (/debts full = scenarios)"),
     ("paid", "Mark a bill paid"),
     ("help", "Show the command menu"),
 ])
@@ -109,13 +109,30 @@ ASTRO = C([   # astrology-only lane (@JazzyHazzyClaw_Bot) — trimmed 2026-09-27
     ("help", "What this bot does (/help all = every command)"),
 ])
 CLEAR = []  # pure-push / infra bots: no responder → remove any (misleading) menu
+# @PipelineSignals_Bot — telegram_dm_responder.py (cron, every min). No-arg commands only:
+# a menu tap sends the bare word. RESUME (clears a shock-guard HALT) deliberately left off
+# the tap-list so it can't be hit by accident. (2026-09-28)
+PIPELINE_MENU = C([
+    ("help", "Flow Coach commands (GATE / EXPLAIN / PAPER need a ticker)"),
+    ("quiz", "Pop quiz from today's real signals"),
+    ("score", "Virtual journal: mark to market, win/loss"),
+    ("paper", "List open virtual journal entries"),
+    ("greeks", "Learn options greeks"),
+    ("ta", "Learn chart reading"),
+    ("learn", "Random learning quiz"),
+])
 
 # bot -> (token key, kind file|vault, menu)
 FLEET = {
     "trading_command": ("telegram_laptopclaude_bot_token", "f", COCKPIT_FULL),
     "system_health":   ("telegram-ping-bot-token",         "f", OPS),
     "life_wellness":   ("lifeclaw_telegram_bot_token",     "f", LIFE),
-    "aime_research":   ("telegram_antigravity_bot_token",  "f", AIME),
+    # 2026-09-28: responder antigravity-aime stopped since the 07-15 PM2 trim (push-only) —
+    # CLEAR so a tap never hits silence. Restore AIME if the responder comes back.
+    "aime_research":   ("telegram_antigravity_bot_token",  "f", CLEAR),
+    # Trading Lab (@AntiDoht_Bot) is push-only (quantum IV desk) — no poller, so no menu.
+    "research_desk":   ("antidote_telegram_bot_token",     "f", CLEAR),
+    "flow_signals":    ("telegram-bot-token.txt",          "f", PIPELINE_MENU),
     # RETIRED 2026-09-27 (@MoneyFlowz_Bot parked, no poller):
     # "x_sentiment":     ("telegram_grok_bot_token",         "f", XBOT),
     "astrology":       ("telegram_jazzyhazzy_bot_token",  "f", ASTRO),
@@ -132,14 +149,16 @@ FLEET = {
     "flow_digest":     ("telegram_boba2_bot_token",        "v", CLEAR),
     "daily_briefs":    ("telegram.daily_briefs",           "v", CLEAR),
     "media_gens":      ("telegram.media_gens",             "v", CLEAR),
-    "hermes_relay":    ("telegram_hermes_bot_token",       "v", CLEAR),
-    "openclaw_grok":   ("telegram_openclaw_bot_token",     "v", CLEAR),
-    "jazzy_relay":     ("telegram.jazzy_relay",            "v", COCKPIT_LITE),
-    "orion_relay":     ("telegram.orion_relay",            "v", COCKPIT_LITE),
+    # hermes_relay / openclaw_grok: menus are registered by their own live apps (PM2
+    # hermes-gateway / openclaw-gateway) — CLEARing them here would wipe working menus.
+    # "hermes_relay":    ("telegram_hermes_bot_token",       "v", CLEAR),
+    # "openclaw_grok":   ("telegram_openclaw_bot_token",     "v", CLEAR),
+    # jazzy_relay / orion_relay retired 2026-09-15 (removed from tg_fleet + tg_responder).
     "grok_scout":      ("telegram.grok_scout",             "v", XBOT),
     "trend_scanner":   ("telegram.trend_scanner",          "v", SCREENER_MENU),
 }
-# NOTE: flow_signals (@PipelineSignals_Bot) intentionally untouched — live status DM bot.
+# flow_signals (@PipelineSignals_Bot): its menu was a stale claudeclaw leftover (30+ dead
+# commands); now PIPELINE_MENU, matching telegram_dm_responder.route(). (2026-09-28)
 
 def set_cmds(tok, cmds):
     r = requests.post(f"https://api.telegram.org/bot{tok}/setMyCommands",

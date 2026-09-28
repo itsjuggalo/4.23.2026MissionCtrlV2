@@ -416,6 +416,17 @@ def run_bot(botkey):
             if not r.get("ok"):
                 print(f"send_reply FAILED chat={chat_id}: {str(r)[:200]}", flush=True)
 
+    def send_html(chat_id, text):
+        """HTML reply for the quantum/flow commands. Over TG_MAX, or markup Telegram rejects
+        → tag-stripped plain text, chunked by send_reply (a long reply used to fail twice and
+        send nothing). (2026-09-28)"""
+        text = text or "[empty]"
+        if len(text) <= TG_MAX and tg("sendMessage", chat_id=chat_id, text=text,
+                                       parse_mode="HTML").get("ok"):
+            return
+        import html as _html, re as _re
+        send_reply(chat_id, _html.unescape(_re.sub(r"</?(b|i|u|s|code|pre|a)(\s[^>]*)?>", "", text)))
+
     def handle_cb(cq):
         """Inline-button taps. Owner-gated. Extensible by callback_data prefix.
         `oq:<LETTER>:<qid>` = Options Academy rep → graded by options_quiz_grade."""
@@ -716,9 +727,7 @@ def run_bot(botkey):
                         send_reply(chat_id, quantum_tg.tidy(
                             ask_local(quantum_tg.greeks_prompt(arg)), 9))
                     else:
-                        if not tg("sendMessage", chat_id=chat_id, text=quantum_tg.greeks(),
-                                  parse_mode="HTML").get("ok"):
-                            tg("sendMessage", chat_id=chat_id, text=quantum_tg.greeks())
+                        send_html(chat_id, quantum_tg.greeks())
                     print(f"[{name}] /greeks {arg}", flush=True)
                     continue
                 # /winners (app-pushed flow + chase verdict) · /chase <TKR> (full read)
@@ -730,13 +739,12 @@ def run_bot(botkey):
                         msg = flow_chase.chase(arg) if (cmd0 == "/chase" or arg) else flow_chase.winners()
                     except Exception as e:
                         msg = f"[flow-chase error] {e}"
-                    if not tg("sendMessage", chat_id=chat_id, text=msg,
-                              parse_mode="HTML").get("ok"):
-                        tg("sendMessage", chat_id=chat_id, text=msg)
+                    send_html(chat_id, msg)
                     print(f"[{name}] {cmd0} {arg}", flush=True)
                     continue
                 if cmd0 in ("/pick", "/picks", "/book", "/grade", "/eod", "/flow",
                             "/crypto", "/explain", "/sweeps", "/odte"):
+                    tg("sendChatAction", chat_id=chat_id, action="typing")
                     try:
                         import quantum_tg
                         msg = (quantum_tg.pick(1) if cmd0 == "/pick"
@@ -751,9 +759,7 @@ def run_bot(botkey):
                                else quantum_tg.book())
                     except Exception as e:
                         msg = f"[pick error] {e}"
-                    if not tg("sendMessage", chat_id=chat_id, text=msg,
-                              parse_mode="HTML").get("ok"):
-                        tg("sendMessage", chat_id=chat_id, text=msg)  # plain fallback
+                    send_html(chat_id, msg)
                     print(f"[{name}] {cmd0}", flush=True)
                     continue
                 # /x <ticker/query> — live X/Twitter trader sentiment via Grok on your
