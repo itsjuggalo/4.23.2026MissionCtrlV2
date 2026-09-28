@@ -51,7 +51,10 @@ def source() -> str:
             pid = int(Path(f"/proc/{pid}/stat").read_text().rsplit(")", 1)[1].split()[1])
         except Exception:
             break
-    return os.path.basename(sys.argv[0] or "?")
+    try:   # no script in the chain (e.g. an interactive/agent shell) → name the parent process
+        return "via:" + Path(f"/proc/{os.getppid()}/comm").read_text().strip()
+    except Exception:
+        return os.path.basename(sys.argv[0] or "?")
 
 
 def record(fn: str, text: str, ok: bool, *, html: bool = False, src: str | None = None) -> None:
