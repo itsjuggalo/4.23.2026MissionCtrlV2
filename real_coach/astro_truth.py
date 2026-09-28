@@ -94,7 +94,8 @@ def jd_for(when: datetime) -> float:
 
 def jd_to_utc(jd: float) -> datetime:
     y, m, d, h = swe.revjul(jd)
-    return (datetime(y, m, d, tzinfo=UTC) + timedelta(hours=h)).replace(microsecond=0)
+    # round to the nearest second (float JD → 06:59:59.9999 must not truncate to :59)
+    return (datetime(y, m, d, tzinfo=UTC) + timedelta(hours=h) + timedelta(microseconds=500000)).replace(microsecond=0)
 
 
 def jd_to_local(jd: float, tz: ZoneInfo = ET) -> datetime:

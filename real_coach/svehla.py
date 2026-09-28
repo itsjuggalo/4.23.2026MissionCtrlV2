@@ -268,64 +268,10 @@ def dates_block(d: date | None = None) -> str:
 
 
 def weekly_block(d: date | None = None) -> str:
-    """Monday nudge: every active window in full (why + do), the next two, progressed snapshot."""
-    d = d or today_et()
-    lines = [f"📜 SVEHLA WEEK — {d:%a %b %-d %Y}", ""]
-    act = active(d)
-    if act:
-        lines.append("ACTIVE NOW")
-        for w in act:
-            left = (w["_end"] - d).days
-            lines.append(f"{KIND_ICON.get(w['kind'], '•')} {w['title']} ({'ends today' if left == 0 else f'{left}d left'})")
-            lines.append(f"   Why: {w['why']}")
-            lines.append(f"   Do: {w['do']}")
-            lines.append("")
-    nxt = upcoming(d, 2)
-    if nxt:
-        lines.append("COMING UP")
-        for w in nxt:
-            lines.append(f"⏭ {w['_start']:%b %-d %Y} ({(w['_start'] - d).days}d): {w['title']}")
-        lines.append("")
-    soon = [h for h in exact_hits() if 0 <= (date.fromisoformat(h["date"]) - d).days <= 14]
-    if soon:
-        lines.append("EXACT THIS FORTNIGHT")
-        for h in soon:
-            fit = fit_for_exact(h["what"], d)
-            lines.append(f"⏰ {date.fromisoformat(h['date']):%b %-d}: {h['what']}" + (f" — {fit}" if fit else ""))
-        lines.append("")
-    if d < date(2027, 3, 10):
-        lines.append(f"🛡 {(date(2027, 3, 10) - d).days} days to the spring-2027 window he's most concerned about (housing + cash contingency).")
-        lines.append("")
-    try:                                   # round 8: progressed-phase weekly practice (Rudhyar) + timing week
-        import astro_returns, astro_lexicon as lex, astro_timing
-        ph = astro_returns.progressed_phase(d)
-        ent = lex.kb_entry(f"Progressed phase {ph['phase'].replace('_', ' ')}")
-        if ent and ent.get("weekly_practice"):
-            lines += [f"🌗 Progressed {ph['phase'].replace('_', ' ')} phase — this week: {ent['weekly_practice']}", ""]
-        pf = astro_timing.profection(d)
-        lines += [f"⏳ {T_ordinal(pf['house'])}-house profection year, lord {pf['lord']} · this month {T_ordinal(pf['month_house'])} house (lord {pf['month_lord']}) — transits to {pf['lord']} count double.", ""]
-    except Exception as e:
-        lines += [f"🌗 (phase/timing unavailable: {e})", ""]
-    try:                                   # round 8: full dated timeline for the fortnight (all slow bodies, progressions, eclipses)
-        import astro_timeline
-        tl = astro_timeline.upcoming_block(d, days=14, limit=10)
-        if "Nothing exact" not in tl:
-            lines += tl.split("\n") + [""]
-    except Exception as e:
-        lines += [f"🗓 (timeline unavailable: {e})", ""]
-    try:
-        import astro_tasks
-        nag = astro_tasks.loose_nag(d)
-        if nag:
-            lines += [nag, ""]
-    except Exception:
-        pass
-    p = progressed(d)
-    lines.append(f"🔭 pMoon {sign_deg(p['Moon']['lon'])} · pVenus {sign_deg(p['Venus']['lon'])} · /progressed for the rest")
-    out = "\n".join(lines)
-    if len(out) > 3800:     # Telegram hard cap 4096 — drop the Why lines, keep the Do lines
-        out = "\n".join(ln for ln in lines if not ln.startswith("   Why: "))
-    return out
+    """RETIRED 2026-09-27 → the ONE weekly read is astro_weekly.weekly_block (themes, exacts in ET,
+    slow transits, progressions, these windows with Why/Do, practice). Kept as a delegate."""
+    import astro_weekly
+    return astro_weekly.weekly_block(d)
 
 
 def context_block(d: date | None = None) -> str:
