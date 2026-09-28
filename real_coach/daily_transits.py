@@ -151,20 +151,13 @@ def main() -> int:
     natal = natal_points()
     asc = natal["ASC"]
 
-    # aspects: transiting planets (skip Moon noise except to Sun/Moon/ASC/MC) vs natal points
-    hits = []
-    for tname, t in trans.items():
-        for nname, nlon in natal.items():
-            if tname == "Moon" and nname not in ("Sun", "Moon", "ASC", "MC", "DSC"):
-                continue
-            if nname == "DSC" and tname not in ("Juno", "Venus", "Saturn", "Mars"):
-                continue   # DSC only matters for the partnership bodies
-            for adeg, aname, glyph, quality in ASPECTS:
-                orb = abs(angle(t["lon"], nlon) - adeg)
-                if orb <= ORB[tname]:
-                    hits.append({"t": tname, "n": nname, "aspect": aname,
-                                 "glyph": glyph, "quality": quality, "orb": orb})
-    hits.sort(key=lambda h: (h["t"] == "Moon", h["orb"]))  # slow/tight first
+    # 2026-09-27 final round: hits are CANONICAL events (astro_events) — motion, exact time, pass
+    # series, window, lifecycle and an explained priority. Ranked by priority, never by orb alone.
+    import astro_events as AE
+    events = AE.current_transits(now_et)
+    hits = [{"t": e["moving_body"], "n": e["target_body"], "aspect": e["aspect"], "orb": e["orb"],
+             "glyph": AE.GLYPH[e["aspect"]], "quality": {"conjunct": "fused", "square": "hard", "opposite": "hard"}.get(e["aspect"], "easy"),
+             "event": e} for e in events]
 
     moon = trans["Moon"]
     mh = whole_sign_house(moon["lon"], asc)
@@ -220,9 +213,10 @@ def main() -> int:
         # /explain — the full four-level read (aspect · houses · signs · esoteric) of every hit
         out = [f"🔍 TODAY'S TRANSITS EXPLAINED — {now_et:%a %b %-d}", ""]
         for h in hits[:6]:
+            e = h["event"]
             th = whole_sign_house(trans[h["t"]]["lon"], asc) + 1
-            out.append(f"{h['glyph']} {h['t']} ({sign_deg(trans[h['t']]['lon'])}, your {ordinal(th)}) "
-                       f"{h['aspect']} natal {h['n']} ({sign_deg(natal[h['n']])}) · orb {h['orb']:.1f}°")
+            out.append(f"{h['glyph']} Transiting {h['t']} ({sign_deg(trans[h['t']]['lon'])}, your {ordinal(th)}) "
+                       f"{h['aspect']} natal {h['n']} ({sign_deg(natal[h['n']])}) · orb {h['orb']:.2f}° · {e['motion']}")
             out.append(lex.explain_hit(h, trans[h["t"]]["lon"], natal[h["n"]], asc, full=True))
             fit = svehla.fit_for(h["t"], h["n"], now_et.date())
             if fit:
@@ -232,67 +226,52 @@ def main() -> int:
             out.append("No tight aspects today. /planet /sign /house /aspect for the lexicon.")
         print("\n".join(out)); return 0
 
-    shown = {(h["t"], h["aspect"], h["n"]) for h in hits[:3]}    # the digest keeps these three
-    try:
-        import astro_timeline
-        near = {(e["body"], e.get("aspect"), e.get("natal")): e for e in astro_timeline.near_events(now_et.date())
-                if e["kind"] == "aspect"}
-    except Exception:
-        near = {}
-    def _when(e):   # "today 3:40 PM" — ET clock time for hits within ±1 day (covers overnight quiet-hours hits);
-        t = None       # the day label comes from that ET time, not the UT-scanned event date
-        if abs((date.fromisoformat(e["date"]) - now_et.date()).days) <= 1:
-            try:
-                import astro_alerts
-                t = astro_alerts._exact_time(e, date.fromisoformat(e["date"]))
-            except Exception:
-                t = None
-        if t:
-            return f"{astro_timeline.rel_day(t.date().isoformat(), now_et.date())} {t:%-I:%M %p}"
-        return astro_timeline.rel_day(e["date"], now_et.date())
-
+    # digest = top DIGEST_HITS by priority + (max 2) lower-ranked events that are NEW or EXACT today
+    top = hits if args.full else (hits[:DIGEST_HITS] + [h for h in hits[DIGEST_HITS:]
+                                  if h["event"]["lifecycle"] in ("NEW", "EXACT")][:2])
+    shown = {(h["t"], h["aspect"], h["n"]) for h in top}
+    changed = [f"{AE.GLYPH[h['aspect']]} {h['t']} {h['aspect']} {h['n']}: {_changed_text(h['event'])}"
+               for h in top if h["event"].get("changed")]
+    if changed:
+        lines.append("Δ Since yesterday: " + "; ".join(changed[:4]) + ".")
     if hits:
         lines.append("")
-        seen_fit = set()
-        for i, h in enumerate(hits[:5]):
-            verb = {"easy": "lends {} to", "hard": "puts {} on", "fused": "fuses {} with"}[h["quality"]].format(THEME[h["t"]])
-            th = whole_sign_house(trans[h["t"]]["lon"], asc) + 1
-            nh = whole_sign_house(natal[h["n"]], asc) + 1
-            lines.append(f"{h['glyph']} {h['t']} (in {SIGNS[int(trans[h['t']]['lon'] // 30)]}, your {ordinal(th)}) "
-                         f"{h['aspect']} natal {h['n']} (your {ordinal(nh)}) · orb {h['orb']:.1f}°"
-                         + (lambda e: f" · exact {_when(e)}"
-                            + (f", pass {e['pass']}{' ℞' if e.get('rx') else ''}" if e.get("pass") else "")
-                            if e else "")(near.get((h["t"], h["aspect"], h["n"])) if i < 3 else None)
-                         + " — "
-                         f"{verb.capitalize()} {NATAL_PT[h['n']]}.")
-            if i < 3:   # the three tightest/slowest get the personal + esoteric read inline
-                lines.append("   " + lex.explain_hit(h, trans[h["t"]]["lon"], natal[h["n"]], asc).replace("\n", "\n   "))
-            fit = svehla.fit_for(h["t"], h["n"], now_et.date())
-            if fit and fit not in seen_fit:          # one line per thread, not per aspect
-                seen_fit.add(fit)
-                lines.append(f"   ↳ Svehla: {fit}.")
+        lines.append("⚡ What's live, ranked (why: /full):" if not args.full else "⚡ What's live, ranked by importance:")
+        for h in top:
+            e = h["event"]
+            lines.append(hit_line(e, trans, natal, now_et))
+            detail = e["lifecycle"] in ("NEW", "EXACT") or (args.full and hits.index(h) < 3)
+            if detail:     # the long read only on entry / exact day (Mike: describe change, not reprint)
+                block = lex.explain_hit(h, trans[h["t"]]["lon"], natal[h["n"]], asc)
+                if not args.full:
+                    block = "\n".join(ln for ln in block.split("\n") if ln.startswith("In plain terms:"))
+                lines.append("   " + block.replace("\n", "\n   "))
+                fit = svehla.fit_for(h["t"], h["n"], now_et.date())
+                if fit:
+                    lines.append(f"   ↳ Svehla: {fit}.")
+            if args.full:
+                lines.append("   why it ranks: " + "; ".join(e["priority_reasons"]))
+        if len(hits) > len(top):
+            lines.append(f"   … +{len(hits) - len(top)} more in /full")
+        th = AE.themes(events)
+        if th:
+            lines.append("")
+            lines.append(AE.themes_line(th))
+            if args.full:
+                for t in th[:4]:
+                    lines.append(f"   {t['label']} ({t['tone']}): " + "; ".join(t["evidence"][:5])
+                                 + (f" · uncertain: {'; '.join(t['missing'])}" if t["missing"] else ""))
     else:
-        lines.append("\nNo tight aspects today — a quiet sky. Trade the plan, not the stars.")
-
-    # one trading-relevant line
-    trade = []
-    if "Mercury" in rx:
-        trade.append("Mercury rx: slow down on tickets, re-read before you tap")
-    hard_hits = [h for h in hits if h["quality"] == "hard" and h["t"] in ("Mars", "Saturn", "Pluto")]
-    if hard_hits:
-        trade.append("hard sky pressure — smaller size, wider patience")
-    easy_moon = mh in (1, 4, 9)  # money, speculation, career houses (0-based)
-    if easy_moon:
-        trade.append(f"Moon lights your {HOUSE_LIFE[mh]} house — feelings there aren't signals")
-    if trade:
-        lines.append("\n📈 Desk note: " + "; ".join(trade) + ".")
+        lines.append("\nNo tight aspects today — a quiet sky.")
 
     # 2026-09-15 r7: sky quality · lunations/eclipses/stations/rx alerts · natal-pattern activation ·
     # progressed lunation phase. Each layer is optional (try/except) so the send never dies.
     try:
         import astro_lookahead
         q, why = astro_lookahead.score(now_et)
-        lines.append(f"\n🎚 Sky quality {q}/10 — " + ("; ".join(why[:3]) if why else "quiet sky") + " (life decisions, not trades)")
+        pos_n, neg_n = sum(w.startswith("+") for w in why), sum(w.startswith("−") for w in why)
+        lines.append(f"\n🎚 Sky quality {q}/10 — {pos_n} supportive vs {neg_n} challenging; biggest: "
+                     + ("; ".join(why[:3]) if why else "quiet sky"))
     except Exception as e:
         lines.append(f"\n🎚 (quality unavailable: {e})")
     try:
@@ -355,7 +334,7 @@ def main() -> int:
     # round 8: dated timeline — what goes exact / changes house within ±2 days, researched meaning attached
     try:
         import astro_timeline
-        tb = astro_timeline.today_block(now_et.date(), skip=shown)
+        tb = astro_timeline.next_block(now_et, hours=48, skip=shown)
         if tb:
             lines.append("\n" + tb)
     except Exception as e:
@@ -379,7 +358,7 @@ def main() -> int:
     except Exception:
         lines.append("\n⚠️ no verification stamp — run astro_verify.py --all")
     msg = "\n".join(lines)
-    out = msg if (args.full or len(msg) <= 3900) else digest(msg)
+    out = msg if args.full else digest(msg)
     if not args.full:
         out += "\n\n" + LIVE_LINE
     print(out)
@@ -391,38 +370,60 @@ def main() -> int:
 
 
 LIVE_LINE = "📖 Full read + 30-day timeline: https://claudeclaw.serveftp.com/astrology/readings/mike-today-live.html"
-DIGEST_KEEP = ("🌌", "🎚", "🌘", "⏳", "🗓", "📜", "✔", "⚠️", "☉")
+DIGEST_HITS = 4
+DIGEST_KEEP = ("🌌", "☽", "↩", "Δ", "⚡", "🧭", "🎚", "🌑", "🌒", "🌓", "🌔", "🌕", "🌖", "🌗", "🌘", "⏳", "🗓", "📜", "✔", "⚠️")
+LIFE = {"EXACT": "EXACT TODAY", "NEW": "NEW", "BUILDING": "building", "SEPARATING": "separating", "ONGOING": "ongoing"}
 
 
-def digest(msg: str, max_hits: int = 3) -> str:
-    """One-message morning digest (Mike's short-and-direct rule): header + Moon, top hits with only their
-    plain-terms + Svehla lines, sky quality, Moon phase, timing, exact-this-week, Svehla windows, stamp.
-    Everything else stays behind /full."""
-    paras = msg.split("\n\n")
-    out = []
-    ASPECT_GLYPHS = ("☌", "□", "☍", "△", "﹡")
-    for i, para in enumerate(paras):
-        first = para.lstrip()[:2]
-        if i == 0 or para.lstrip().startswith(ASPECT_GLYPHS):   # header block, or the aspect block
-            head, kept, n = [], [], 0
-            for ln in para.split("\n"):
-                if not ln.startswith(" ") and not ln.startswith(ASPECT_GLYPHS):
-                    head.append(ln); continue
-                if not ln.startswith(" "):          # a new aspect line
-                    n += 1
-                    if n <= max_hits:
-                        kept.append(ln)
-                    continue
-                if n <= max_hits and ln.lstrip().startswith(("In plain terms:", "↳ Svehla:")):
-                    kept.append(ln)
-            more = n - max_hits
-            out.append("\n".join(head + kept + ([f"   … +{more} more hit{'s' if more > 1 else ''} in /full"] if more > 0 else [])))
-            continue
-        if any(first.startswith(k) for k in DIGEST_KEEP) or " Moon phase:" in para[:16]:
-            out.append(para)
+def _changed_text(e: dict) -> str:
+    c = e.get("changed", "")
+    if c.startswith("was ") and ", now " in c:
+        return "now " + c.split(", now ")[1]
+    return c
+
+
+def hit_line(e: dict, trans: dict, natal: dict, now_et) -> str:
+    """One line per live event: position, orb, lifecycle, exact time (from the localized instant),
+    pass context. Wording keeps 'Transiting X (in Sign, your Nth)' so astro_verify can re-derive it."""
+    import astro_events as AE
+    t, n, today = e["moving_body"], e["target_body"], now_et.date()
+    th, nh = lex.house_of(trans[t]["lon"]), lex.house_of(natal[n])
+    head = (f"{AE.GLYPH[e['aspect']]} Transiting {t} (in {SIGNS[int(trans[t]['lon'] // 30)]}, your {ordinal(th)}) "
+            f"{e['aspect']} natal {n} (your {ordinal(nh)}) · {e['orb']:.2f}° · {LIFE[e['lifecycle']]}")
+    bits = []
+    if e.get("exact_at_local"):
+        future = e["exact_at_local"] >= now_et.isoformat()
+        when = AE.when_label(e, today)
+        bits.append(f"exact {when}" if future else f"exact was {when.replace('tonight', 'today')}")
+    elif e.get("no_exact_this_window"):
+        bits.append("no exact in this stretch")
+    if (e.get("pass_total") or 1) > 1:
+        cur = e.get("pass_number")
+        bits.append(f"{(e.get('pass_label') or '').lower()} {cur} of {e['pass_total']}")
+        later = [p for p in e.get("passes", []) if p["pass_number"] > (cur or 0)]
+        if later:
+            nx = later[0]
+            bits.append(f"{'final' if nx['pass_number'] == e['pass_total'] else 'next'} "
+                        f"{AE.when_label(nx, today)}{' ℞' if nx['retrograde'] else ''}")
+    if e["lifecycle"] == "ONGOING" and e.get("window_start"):
+        bits.append(f"in orb {e['window_start'][5:]} → {e['window_end'][5:]}")
+    if e.get("changed") and e["lifecycle"] not in ("NEW", "EXACT"):
+        bits.append(_changed_text(e))
+    return head + (" — " + "; ".join(bits) if bits else "")
+
+
+def digest(msg: str) -> str:
+    """Morning digest: keep the paragraphs whose first glyph is in DIGEST_KEEP (the hit list is
+    already limited upstream); if still long, drop timing, then the Moon phase."""
+    paras = [p for p in msg.split("\n\n") if p.strip()]
+    out = [p for i, p in enumerate(paras) if i == 0 or p.lstrip().startswith(DIGEST_KEEP)]
     d = "\n\n".join(out)
-    if len(d) > 3900:                               # still long: drop the timing + moon-phase paragraphs
-        d = "\n\n".join(p for p in out if not (p.lstrip().startswith("⏳") or " Moon phase:" in p[:16]))
+    if len(d) > 3900:
+        out = [p for p in out if not p.lstrip().startswith("⏳")]
+        d = "\n\n".join(out)
+    if len(d) > 3900:
+        out = [p for p in out if " Moon phase:" not in p[:16]]
+        d = "\n\n".join(out)
     return d
 
 

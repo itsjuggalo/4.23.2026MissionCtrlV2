@@ -54,7 +54,7 @@ def quality_block(d: datetime | None = None) -> str:
     n, why = score(d)
     label = {1: "stay small", 2: "stay small", 3: "defensive", 4: "careful", 5: "neutral", 6: "neutral",
              7: "constructive", 8: "green light", 9: "green light", 10: "rare — use it"}[n]
-    return (f"🎚 SKY QUALITY {d:%a %b %-d}: {n}/10 — {label} (life decisions, not trades)\n" +
+    return (f"🎚 SKY QUALITY {d:%a %b %-d}: {n}/10 — {label} (life decisions)\n" +
             "\n".join(why[:6]))
 
 

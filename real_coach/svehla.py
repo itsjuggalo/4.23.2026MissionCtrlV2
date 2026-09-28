@@ -11,6 +11,8 @@ Two jobs, both $0 and both real astronomy:
 
 CLI:  svehla.py windows|dates | progressed | daily | weekly [--send] | context | check
 Cron: none since 2026-09-27 — the Monday weekly rides in astro_morning.py (08:32 ET) → astrology lane.
+Engine: all dates/crossings/progressions come from astro_truth + the astro_timeline canonical events
+(2026-09-27 final round: no private crossing search, no fixed-offset "end of day").
 """
 from __future__ import annotations
 
@@ -21,6 +23,9 @@ from pathlib import Path
 from zoneinfo import ZoneInfo
 
 import swisseph as swe
+
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+import astro_truth as T  # noqa: E402  — the ONE engine: time, crossings, progressions
 
 EPHE = Path.home() / ".local/share/swisseph"     # seas_18/sepl_18/semo_18/sefstars (free)
 swe.set_ephe_path(str(EPHE))
@@ -45,12 +50,9 @@ def today_et() -> date:
     return datetime.now(ET).date()
 
 
-NATAL_UT_HOUR = 3 + 46 / 60
-
-
 def jd_of(d: date) -> float:
-    """Civil date → JD at the natal birth-hour (so progressed 'birthdays' land on the day)."""
-    return swe.julday(d.year, d.month, d.day, NATAL_UT_HOUR)
+    """Civil date → JD of LOCAL NOON (ET, tz rules) — a date's representative instant."""
+    return T.jd_local(d, 12)
 
 
 def sign_deg(lon: float) -> str:
@@ -84,37 +86,30 @@ def placidus_house(lon: float, cusps: list[float]) -> int:
 
 # ── secondary progressions ───────────────────────────────────────────────────
 def prog_jd(d: date) -> float:
-    """Day-for-a-year: one ephemeris day after birth per tropical year lived."""
-    return NATAL_JD + (jd_of(d) - NATAL_JD) / 365.25
+    """Day-for-a-year for civil date d (local noon) — astro_truth.progressed_jd."""
+    return T.progressed_jd(jd_of(d))
 
 
 def progressed(d: date | None = None) -> dict:
     d = d or today_et()
-    pj = prog_jd(d)
-    out = {}
-    for name, body in PROG_BODIES:
-        r = swe.calc_ut(pj, body)[0]
-        out[name] = {"lon": r[0] % 360, "speed": r[3]}
-    return out
+    return {n: {"lon": v["lon"], "speed": v["speed"]} for n, v in T.progressed(d).items()}
 
 
 def next_ingress(body_name: str, start: date, horizon_days: int = 366 * 6) -> tuple[date, str] | None:
-    """First date after `start` when the progressed body changes sign (daily scan; a
-    progressed Moon moves ~1°/month so a day step is more than fine)."""
-    body = dict(PROG_BODIES)[body_name]
-
-    def sign_at_end_of(d: date) -> str:   # ~midnight ET at the close of civil day d
-        pj = NATAL_JD + (swe.julday(d.year, d.month, d.day, 28.0) - NATAL_JD) / 365.25
-        return sign_of(swe.calc_ut(pj, body)[0][0])
-
-    cur = sign_at_end_of(start)
-    d = start
-    for _ in range(horizon_days):
-        d += timedelta(days=1)
-        s = sign_at_end_of(d)
-        if s != cur:
-            return d, s
-    return None
+    """First progressed sign change after `start`, found by bisection on the real instant and dated
+    in ET from that instant (replaces an end-of-day sample hardcoded to UTC-4)."""
+    j0 = jd_of(start)
+    best = None
+    for s_ in range(12):
+        xs = T.find_crossings(lambda jd, b=s_ * 30.0: T.signed_diff(T.progressed_lon(jd, body_name), b),
+                              j0, j0 + horizon_days, step=2.0)
+        if xs and (best is None or xs[0] < best[0]):
+            best = (xs[0], s_)
+    if not best:
+        return None
+    x, s_ = best
+    back = T.lon_speed(T.progressed_jd(x), body_name)[1] < 0
+    return T.local_date(x), SIGNS[(s_ - 1) % 12] if back else SIGNS[s_]
 
 
 def progressed_block(d: date | None = None) -> str:
@@ -162,6 +157,60 @@ def upcoming(d: date | None = None, n: int = 3) -> list[dict]:
     return [w for w in load_windows() if w["_start"] > d][:n]
 
 
+# Svehla's windows are READING data (his dates, verbatim). Where the start/exact is an
+# engine-computable event, the canonical timeline instant is shown beside it — if the two disagree,
+# the computed local time is the truth (e.g. Juno→Aquarius Oct 23 10:40 PM ET vs his "Oct 24").
+WINDOW_EVENT = {       # window id → (event_id prefix, n-th match on/after window start − 45 d)
+    "jupiter-2h-a": ("ingress:transit:Jupiter:house_ingress", 0),
+    "jupiter-2h-b": ("ingress:transit:Jupiter:house_ingress", 0),
+    "juno-aquarius": ("ingress:transit:Juno:sign_ingress", 0),
+    "saturn-apollon": ("transit:transit:Saturn:opposite:natal.Apollon", 0),
+    "saturn-10h": ("transit:transit:Saturn:conjunct:natal.MC", 0),
+    "pvenus-aquarius": ("progression:progressed:Venus:sign_ingress", 0),
+    "uranus-hades-1": ("transit:transit:Uranus:conjunct:natal.Hades", 0),
+    "uranus-hades-2": ("transit:transit:Uranus:conjunct:natal.Hades", 0),
+    "uranus-hades-3": ("transit:transit:Uranus:conjunct:natal.Hades", 0),
+    "jupiter-return": ("ingress:transit:Jupiter:sign_ingress", 0),
+    "chiron-sun-1": ("transit:transit:Chiron:opposite:natal.Sun", 0),
+    "chiron-sun-2": ("transit:transit:Chiron:opposite:natal.Sun", 0),
+    "chiron-sun-3": ("transit:transit:Chiron:opposite:natal.Sun", 0),
+    "venus-ceres": ("progression:progressed:Venus:conjunct:natal.Ceres", 0),
+}
+
+
+def computed_exact(w: dict) -> dict | None:
+    """The canonical timeline event behind a window (None if it isn't engine-computable)."""
+    spec = WINDOW_EVENT.get(w.get("id"))
+    if not spec:
+        return None
+    import astro_timeline as TL
+    lo = (w["_start"] - timedelta(days=45)).isoformat()
+    hi = (w["_end"] + timedelta(days=45)).isoformat()
+    m = [e for e in TL.load() if e.get("event_id", "").startswith(spec[0]) and lo <= e["date"] <= hi]
+    if w.get("id") == "jupiter-2h-b":
+        m = [e for e in m if e.get("house") == 2 and not e.get("retrograde")]
+    elif w.get("id", "").startswith("jupiter-2h"):
+        m = [e for e in m if e.get("house") == 2]
+    elif w.get("id") == "juno-aquarius":
+        m = [e for e in m if e["key"].endswith("Aquarius")]
+    elif w.get("id") == "pvenus-aquarius":
+        m = [e for e in m if e["key"].endswith("Aquarius")]
+    elif w.get("id") == "jupiter-return":
+        m = [e for e in m if e["key"].endswith("Libra")]
+    m.sort(key=lambda e: abs((date.fromisoformat(e["date"]) - w["_start"]).days))
+    return m[spec[1]] if len(m) > spec[1] else None
+
+
+def computed_note(w: dict) -> str:
+    e = computed_exact(w)
+    if not e or not e.get("exact_at_local"):
+        return ""
+    import astro_events as E
+    t = T.round_minute(datetime.fromisoformat(e["exact_at_local"]))
+    label = t.strftime("%b %-d %Y") if e.get("moving_frame") == "progressed" else t.strftime("%b %-d %Y %-I:%M %p ET")
+    return f" [engine: exact {label}]"
+
+
 def daily_block(d: date | None = None, skip: set | None = None) -> str:
     """Compact block appended to the morning transit send."""
     d = d or today_et()
@@ -183,7 +232,7 @@ def daily_block(d: date | None = None, skip: set | None = None) -> str:
         first = w["why"].split(". ")[0].rstrip(".")
         lines.append(f"{KIND_ICON.get(w['kind'], '•')} {w['title']} — {when}. {first}.")
     for w in nxt:
-        lines.append(f"⏭ Next: {w['title']} — {w['_start']:%b %-d %Y} ({(w['_start'] - d).days}d).")
+        lines.append(f"⏭ Next: {w['title']} — {w['_start']:%b %-d %Y} ({(w['_start'] - d).days}d){computed_note(w)}.")
     for h in exact_soon(d, 3):
         if skip and h["what"] in skip:      # already a top hit in the same message
             continue
@@ -212,7 +261,7 @@ def dates_block(d: date | None = None) -> str:
             mark = "✓ "
         else:
             mark = ""
-        lines.append(f"{mark}{KIND_ICON.get(w['kind'], '•')} {span}: {w['title']}")
+        lines.append(f"{mark}{KIND_ICON.get(w['kind'], '•')} {span}: {w['title']}{computed_note(w)}")
     lines.append("")
     lines.append("Ask me about any window by name for the why + what to do (/dates is the only place the to-do list lives).")
     return "\n".join(lines)
@@ -319,8 +368,7 @@ def send_to_lane(msg: str, tries: int = 4) -> bool:
 
 
 # ── exact hits (idea #1 + #2): real crossing dates, cached ────────────────────
-EXACT_FILE = HERE / "svehla_exact_hits.json"
-SCAN_START, SCAN_END = date(2026, 9, 1), date(2031, 12, 31)
+SCAN_START, SCAN_END = date(2026, 9, 1), date(2031, 12, 31)      # = astro_timeline START/END
 ASPECT_NAME = {0: "conjunct", 90: "square", 180: "opposite", 120: "trine", 60: "sextile"}
 # (transit body, natal point, aspect) — the pairs Svehla's reading turns on
 EXACT_PAIRS = [
@@ -339,102 +387,61 @@ N_BODY = {"Sun": swe.SUN, "Moon": swe.MOON, "Mercury": swe.MERCURY, "Venus": swe
 
 
 def natal_lon(name: str) -> float:
-    if name in ("ASC", "MC", "DSC"):
-        h = swe.houses(NATAL_JD, LAT, LON)[1]
-        return {"ASC": h[0], "MC": h[1], "DSC": (h[0] + 180) % 360}[name]
-    return swe.calc_ut(NATAL_JD, N_BODY[name])[0][0] % 360
+    if name == "DSC":
+        return T.ANGLES["DSC"]
+    import astro_events as E
+    return E.natal_lon(name)
 
 
 def _signed_diff(t_lon: float, target: float) -> float:
-    """t_lon - target folded to (-180, 180]."""
-    d = (t_lon - target + 180) % 360 - 180
-    return d
+    """t_lon - target folded to (-180, 180] (astro_truth.signed_diff)."""
+    return T.signed_diff(t_lon, target)
 
 
 def _crossings(f, start: date, end: date) -> list[date]:
-    """Dates where f(jd) crosses zero (daily step, bisected to ~1h). f must be a signed
-    distance folded to (-180,180]; we ignore the wrap jump at ±180."""
-    out = []
-    d = start
-    prev = f(jd_of(d))
-    while d < end:
-        d2 = d + timedelta(days=1)
-        cur = f(jd_of(d2))
-        if prev == 0 or (prev < 0 < cur or cur < 0 < prev) and abs(cur - prev) < 90:
-            lo, hi = jd_of(d), jd_of(d2)
-            for _ in range(8):
-                mid = (lo + hi) / 2
-                if (f(lo) < 0) == (f(mid) < 0):
-                    lo = mid
-                else:
-                    hi = mid
-            # ET calendar date of the crossing (revjul gives the UT date — anything exact 8 PM–midnight
-            # EDT was landing on the NEXT day; 10 of 68 timeline hits in the next year, fixed 2026-09-27)
-            y, m, dd, h = swe.revjul((lo + hi) / 2)
-            ut = datetime(y, m, dd, tzinfo=ZoneInfo("UTC")) + timedelta(hours=h)
-            out.append(ut.astimezone(ET).date())
-        prev, d = cur, d2
-    return out
+    """ET calendar dates where f(jd) crosses zero — astro_truth.find_crossings, localized."""
+    return [T.local_date(x) for x in T.find_crossings(f, T.jd_local(start), T.jd_local(end))]
 
 
 def compute_exact_hits() -> list[dict]:
+    """The dated hits Svehla's reading turns on — a VIEW of the canonical timeline events (no
+    second crossing search). `what` keeps the historical wording other layers key on."""
+    import astro_timeline as TL
+    want = {(t, n, ASPECT_NAME[a]) for t, n, a in EXACT_PAIRS}
     hits = []
-    # transits → natal, every aspect pair, all passes (retrograde = multiple real hits)
-    for tname, nname, asp in EXACT_PAIRS:
-        tb, target = T_BODY[tname], natal_lon(nname)
-        for a in ({asp, (360 - asp) % 360} if asp not in (0, 180) else {asp}):
-            f = lambda jd, tb=tb, target=target, a=a: _signed_diff(swe.calc_ut(jd, tb)[0][0], (target + a) % 360)
-            for dt in _crossings(f, SCAN_START, SCAN_END):
-                hits.append({"date": dt.isoformat(), "kind": "transit",
-                             "what": f"Transiting {tname} exactly {ASPECT_NAME[asp]} natal {nname}"})
-    # transiting Juno / Jupiter sign ingresses Svehla dated
-    for tname, tb in (("Juno", swe.JUNO), ("Jupiter", swe.JUPITER)):
-        d, prev = SCAN_START, sign_of(swe.calc_ut(jd_of(SCAN_START), tb)[0][0])
-        while d < date(2029, 12, 31):
-            d += timedelta(days=1)
-            sgn = sign_of(swe.calc_ut(jd_of(d), tb)[0][0])
-            if sgn != prev:
-                hits.append({"date": d.isoformat(), "kind": "ingress", "what": f"Transiting {tname} enters {sgn}"})
-                prev = sgn
-    # progressed Moon: sign + Placidus house ingress; progressed Venus: sign ingress + natal Ceres
-    cusps = placidus_cusps()
-    for name in ("Moon", "Venus"):
-        body = dict(PROG_BODIES)[name]
-        d = SCAN_START
-        eod = lambda dd: NATAL_JD + (swe.julday(dd.year, dd.month, dd.day, 28.0) - NATAL_JD) / 365.25
-        lon0 = swe.calc_ut(eod(d), body)[0][0]
-        prev_sign, prev_house = sign_of(lon0), placidus_house(lon0, cusps)
-        while d < SCAN_END:
-            d += timedelta(days=1)
-            lon = swe.calc_ut(eod(d), body)[0][0]   # end-of-day ET, same rule as next_ingress()
-            sgn, hs = sign_of(lon), placidus_house(lon, cusps)
-            if sgn != prev_sign:
-                hits.append({"date": d.isoformat(), "kind": "progressed", "what": f"Progressed {name} enters {sgn}"})
-                prev_sign = sgn
-            if hs != prev_house:
-                hits.append({"date": d.isoformat(), "kind": "progressed",
-                             "what": f"Progressed {name} enters your {ordinal(hs)} house (Placidus)"})
-                prev_house = hs
-    ceres = natal_lon("Ceres")
-    fv = lambda jd: _signed_diff(swe.calc_ut(NATAL_JD + (jd - NATAL_JD) / 365.25, swe.VENUS)[0][0], ceres)
-    for dt in _crossings(fv, SCAN_START, SCAN_END):
-        hits.append({"date": dt.isoformat(), "kind": "progressed", "what": "Progressed Venus exactly conjunct natal Ceres"})
-    hits.sort(key=lambda h: h["date"])
+    for e in TL.load():
+        k = e.get("kind")
+        what = None
+        if k == "aspect":
+            t, n, asp = e["body"], e.get("natal"), e.get("aspect")
+            if (t, n, asp) == ("Juno", "ASC", "opposite"):
+                n, asp = "DSC", "conjunct"              # the ASC–DSC axis: Svehla names the DSC
+            if (t, n, asp) in want:
+                what = f"Transiting {t} exactly {asp} natal {n}"
+        elif k == "sign" and e["body"] in ("Juno", "Jupiter"):
+            sign = e["key"].split(" in ")[-1]
+            what = f"Transiting {e['body']} {'backs into' if e.get('retrograde') else 'enters'} {sign}"
+        elif k == "progressed" and e["body"] in ("Moon", "Venus") and e.get("subtype") == "sign_ingress":
+            what = f"Progressed {e['body']} enters {e['key'].split(' in ')[-1]}"
+        elif k == "progressed" and e["body"] in ("Moon", "Venus") and e.get("subtype") == "house_ingress":
+            what = f"Progressed {e['body']} enters your {T.ordinal(e['house'])} house (Placidus)"
+        elif k == "progressed" and e.get("subtype") == "aspect" and (e["body"], e.get("natal"), e.get("aspect")) == ("Venus", "Ceres", "conjunct"):
+            what = "Progressed Venus exactly conjunct natal Ceres"
+        if what:
+            hits.append({"date": e["date"], "kind": {"aspect": "transit", "sign": "ingress"}.get(k, "progressed"),
+                         "what": what, "exact_at_local": e.get("exact_at_local"), "event_id": e.get("event_id"),
+                         "pass": e.get("pass"), "rx": e.get("rx"), "pass_label": e.get("pass_label"),
+                         "moving_frame": e.get("moving_frame")})
+    hits.sort(key=lambda h: (h["date"], h.get("exact_at_local") or ""))
     return hits
 
 
 def exact_hits(refresh: bool = False) -> list[dict]:
-    if EXACT_FILE.exists() and not refresh:
-        try:
-            cached = json.loads(EXACT_FILE.read_text())
-            if cached.get("scan_end") == SCAN_END.isoformat():
-                return cached["hits"]
-        except Exception:
-            pass
-    hits = compute_exact_hits()
-    EXACT_FILE.write_text(json.dumps({"generated": today_et().isoformat(),
-                                      "scan_end": SCAN_END.isoformat(), "hits": hits}, indent=1))
-    return hits
+    """Derived from the timeline cache (which carries metadata + code-hash freshness); no own file."""
+    if refresh:
+        import astro_timeline as TL
+        TL.build()
+    return compute_exact_hits()
 
 
 def exact_soon(d: date | None = None, days: int = 3) -> list[dict]:

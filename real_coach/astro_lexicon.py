@@ -142,7 +142,7 @@ HOUSES = [
     {"is": "career, reputation, public standing, authority",        "eso": "spiritual ambition — where the Soul wants to be seen serving",
      "mike": "Aries MC ruled by Mars: entrepreneurship or a leadership role; Saturn is transiting here until 2030"},
     {"is": "friends, networks, groups, income from vocation",       "eso": "the group — Aquarius's house of world service and the future",
-     "mike": "Taurus 11th with Hades (12° Gemini) inside it: your progressed Moon enters here Oct 30 2026 — income from vocation, per Svehla"},
+     "mike": "Taurus 11th with Hades (12° Gemini) inside it: your progressed Moon enters here Oct 29 2026 — income from vocation, per Svehla"},
     {"is": "solitude, the hidden, endings, self-undoing, retreat",  "eso": "the closed room before rebirth — the Soul's storehouse and its blind spot",
      "mike": "Gemini 12th with Juno (11° Cancer) and Mars (23° Cancer) inside it: loyalty and the engine both live just behind the Ascendant"},
 ]
@@ -199,9 +199,9 @@ def explain_hit(h: dict, t_lon: float, n_lon: float, asc_lon: float, full: bool 
     lines = []
     lines.append(f"{asp['geo']} {a}: {asp['is']}.")
     lines.append(f"From your {ORDINAL(th)} house ({TH['is']}) into your {ORDINAL(nh)} house ({NH['is']}): "
-                 f"{t} {tp['verb']} {n} — {tp['is']} meets {np_['is']}.")
+                 f"Transiting {t} {tp['verb']} natal {n} — {tp['is']} meets {np_['is']}.")
     if full:
-        lines.append(f"{t} in {ts} ({SIGNS[ts]['mode']}): {SIGNS[ts]['is']}. Natal {n} in {ns}: {SIGNS[ns]['is']}.")
+        lines.append(f"Transiting {t} in {ts} ({SIGNS[ts]['mode']}): {SIGNS[ts]['is']}. Natal {n} in {ns}: {SIGNS[ns]['is']}.")
         lines.append(f"Esoteric {t}: {tp['eso']}.")
         lines.append(f"Esoteric {n}: {np_['eso']}.")
         lines.append(f"Esoteric {a}: {asp['eso']}. {NH['mike']}.")
@@ -378,8 +378,10 @@ def translate_hit(h: dict, t_lon: float, n_lon: float) -> str:
     if ent and ent.get("translation"):
         return f"In plain terms: {ent['translation'].rstrip('.')}. Where it lands in your life: {kb_get('houses', str(nh), 'plain', HOUSES[nh - 1]['is'])} ({ORDINAL(nh)} house)."
     tmpl = kb_get("aspects", a, "plain", ASPECT_PLAIN[a])
-    A = f"{t} ({plain(t)})" if t not in ("ASC", "MC", "DSC") else f"your {t} ({plain(t)})"
-    B = f"your {n} ({plain(n)})" if n not in ("ASC", "MC", "DSC") else f"your {n} ({plain(n)})"
+    # frame labels always explicit; same body on both sides → no repeated gloss
+    # ("Transiting Saturn (…) and your natal Saturn", never "Saturn (…) and your Saturn (…)")
+    A = f"Transiting {t} ({plain(t)})"
+    B = f"your natal {n}" + (f" ({plain(n)})" if n != t else "")
     core = tmpl.replace("{A}", A).replace("{B}", B)
     where = kb_get("houses", str(nh), "plain", HOUSES[nh - 1]["is"])
     return f"In plain terms: {core.rstrip('.')}. Where it lands in your life: {where} ({ORDINAL(nh)} house)."

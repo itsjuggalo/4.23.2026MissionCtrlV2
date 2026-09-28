@@ -1,23 +1,16 @@
 {
- "generated": "2026-09-22",
- "range_start": "2026-09-22",
- "range_end": "2027-10-27",
+ "meta": {
+  "schema_version": 2,
+  "generated_at": "2026-09-27T23:52:40-04:00",
+  "source": "astro_sky._build_cache (Swiss Ephemeris)",
+  "timezone": "America/New_York",
+  "code_hash": "830b417e1390",
+  "valid_until": "2026-10-04T23:52:40-04:00"
+ },
+ "generated": "2026-09-27",
+ "range_start": "2026-09-27",
+ "range_end": "2027-11-01",
  "lunations": [
-  {
-   "date_et": "2026-09-26T12:49-04:00",
-   "kind": "full",
-   "lon": 3.6181,
-   "sign": "Aries",
-   "deg": 3,
-   "house": 9,
-   "natal_hits": [
-    {
-     "natal": "Jupiter",
-     "aspect": "opposite",
-     "orb": 1.38
-    }
-   ]
-  },
   {
    "date_et": "2026-10-10T11:50-04:00",
    "kind": "new",
@@ -369,6 +362,15 @@
    "deg": 21,
    "house": 10,
    "natal_hits": []
+  },
+  {
+   "date_et": "2027-10-29T09:37-04:00",
+   "kind": "new",
+   "lon": 215.9069,
+   "sign": "Scorpio",
+   "deg": 5,
+   "house": 4,
+   "natal_hits": []
   }
  ],
  "eclipses": [
@@ -673,18 +675,18 @@
    "sign": "Aquarius",
    "deg": 4,
    "house": 7
+  },
+  {
+   "date_et": "2027-10-28T10:11-04:00",
+   "body": "Mercury",
+   "kind": "direct",
+   "lon": 199.3121,
+   "sign": "Libra",
+   "deg": 19,
+   "house": 4
   }
  ],
  "ingresses": [
-  {
-   "date_et": "2026-09-22T20:06-04:00",
-   "body": "Sun",
-   "retro": false,
-   "lon": 180,
-   "sign": "Libra",
-   "deg": 0,
-   "house": 3
-  },
   {
    "date_et": "2026-09-27T22:49-04:00",
    "body": "Mars",
@@ -722,7 +724,7 @@
    "house": 4
   },
   {
-   "date_et": "2026-11-22T02:24-05:00",
+   "date_et": "2026-11-22T02:23-05:00",
    "body": "Sun",
    "retro": false,
    "lon": 240,
@@ -776,7 +778,7 @@
    "house": 6
   },
   {
-   "date_et": "2027-01-07T03:54-05:00",
+   "date_et": "2027-01-07T03:53-05:00",
    "body": "Venus",
    "retro": false,
    "lon": 240,
@@ -812,7 +814,7 @@
    "house": 8
   },
   {
-   "date_et": "2027-02-03T09:30-05:00",
+   "date_et": "2027-02-03T09:31-05:00",
    "body": "Venus",
    "retro": false,
    "lon": 270,
@@ -821,7 +823,7 @@
    "house": 6
   },
   {
-   "date_et": "2027-02-18T07:15-05:00",
+   "date_et": "2027-02-18T07:16-05:00",
    "body": "Mercury",
    "retro": true,
    "lon": 329.999,
@@ -830,7 +832,7 @@
    "house": 8
   },
   {
-   "date_et": "2027-02-18T16:34-05:00",
+   "date_et": "2027-02-18T16:33-05:00",
    "body": "Sun",
    "retro": false,
    "lon": 330,
@@ -875,7 +877,7 @@
    "house": 9
   },
   {
-   "date_et": "2027-03-26T04:16-04:00",
+   "date_et": "2027-03-26T04:17-04:00",
    "body": "Venus",
    "retro": false,
    "lon": 330,
@@ -884,7 +886,7 @@
    "house": 8
   },
   {
-   "date_et": "2027-04-08T19:21-04:00",
+   "date_et": "2027-04-08T19:20-04:00",
    "body": "Mercury",
    "retro": false,
    "lon": 0,
@@ -965,7 +967,7 @@
    "house": 11
   },
   {
-   "date_et": "2027-05-28T13:06-04:00",
+   "date_et": "2027-05-28T13:07-04:00",
    "body": "Mercury",
    "retro": false,
    "lon": 90,
@@ -974,7 +976,7 @@
    "house": 12
   },
   {
-   "date_et": "2027-06-08T08:32-04:00",
+   "date_et": "2027-06-08T08:33-04:00",
    "body": "Venus",
    "retro": false,
    "lon": 60,
@@ -1109,7 +1111,7 @@
    "house": 3
   },
   {
-   "date_et": "2027-09-13T20:24-04:00",
+   "date_et": "2027-09-13T20:25-04:00",
    "body": "Venus",
    "retro": false,
    "lon": 180,
@@ -1170,6 +1172,15 @@
    "sign": "Scorpio",
    "deg": 0,
    "house": 4
+  },
+  {
+   "date_et": "2027-11-01T03:35-04:00",
+   "body": "Venus",
+   "retro": false,
+   "lon": 240,
+   "sign": "Sagittarius",
+   "deg": 0,
+   "house": 5
   }
  ],
  "mercury_rx": [

@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """astro_alerts.py — at-the-moment pushes (hourly cron, 08:00–22:00 ET):
-  • timeline hits going exact within the next hour (time bisected from the daily event)
+  • timeline hits going exact within the next hour (canonical exact_at_local from astro_timeline)
   • Moon void-of-course starting within the hour
   • stations, lunations, eclipses within the hour
 State in ~/portfolio/astrology/alerts_sent.json prevents repeats. `--dry` prints only; `--window N` minutes (default 60).
@@ -9,46 +9,13 @@ from __future__ import annotations
 import json, sys
 from datetime import date, datetime, timedelta
 from pathlib import Path
-import swisseph as swe
 import astro_truth as T
 import astro_lexicon as lex
 import astro_timeline as TL
-from svehla import _signed_diff, natal_lon, send_to_lane
+from svehla import send_to_lane
 
 STATE = Path.home() / "portfolio/astrology/alerts_sent.json"
 QUIET = (22, 8)                       # no pushes from 22:00 to 08:00 ET
-
-
-def _jd(dt: datetime) -> float:
-    return T.jd_for(dt)
-
-
-def _exact_time(e: dict, day: date) -> datetime | None:
-    """Bisect the exact instant of a timeline aspect event inside its day (ET)."""
-    try:
-        if e["kind"] == "aspect":
-            body, target = TL.SLOW[e["body"]], natal_lon(e["natal"])
-            deg = TL.ASPECTS[e["aspect"]]
-            angles = [deg] if deg in (0, 180) else [deg, 360 - deg]
-            lo = datetime(day.year, day.month, day.day, 0, 0, tzinfo=T.ET) - timedelta(hours=6)
-            hi = lo + timedelta(hours=36)
-            best = None
-            for a in angles:
-                f = lambda dt, a=a: _signed_diff(swe.calc_ut(_jd(dt), body)[0][0] % 360, (target + a) % 360)
-                l, h = lo, hi
-                if f(l) * f(h) > 0:
-                    continue
-                for _ in range(40):
-                    m = l + (h - l) / 2
-                    if f(l) * f(m) <= 0:
-                        h = m
-                    else:
-                        l = m
-                best = l
-            return best
-    except Exception:
-        return None
-    return None
 
 
 def due(now: datetime | None = None, window_min: int = 60, lookback_min: int = 0) -> list[tuple[str, str]]:
@@ -61,10 +28,12 @@ def due(now: datetime | None = None, window_min: int = 60, lookback_min: int = 0
     out = []
     today = now.date()
     for e in TL.load():
-        if e["kind"] != "aspect" or e["date"] not in (today.isoformat(), (today + timedelta(days=1)).isoformat()):
+        # the canonical localized instant from the timeline (same root finder as every other surface);
+        # transit-frame aspects only — progressed "times" are date-precision by nature
+        if e.get("kind") not in ("aspect", "to_progressed") or e.get("moving_frame") != "transit" or not e.get("exact_at_local"):
             continue
-        t = _exact_time(e, date.fromisoformat(e["date"]))
-        if t and start <= t < end:
+        t = T.round_minute(datetime.fromisoformat(e["exact_at_local"]))
+        if start <= t < end:
             # one line: the meaning already went out in the 08:32 message (hits + 🗓 cover ±2 days)
             out.append((f"tl:{e['date']}:{e['key']}", f"⏰ Exact at {t:%-I:%M %p} ET: {e['what']}"))
     try:

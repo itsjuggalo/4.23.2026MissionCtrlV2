@@ -10,7 +10,7 @@ from __future__ import annotations
 
 import json
 import sys
-from datetime import date, timedelta
+from datetime import date, datetime, timedelta
 from pathlib import Path
 
 from google.auth.transport.requests import Request
@@ -71,12 +71,22 @@ def _dedupe(out: dict[str, dict]) -> dict[str, dict]:
     return kept
 
 
+def _when_line(iso: str | None, frame: str | None) -> str:
+    """Exact local instant from the canonical event (all-day events carry the LOCAL date)."""
+    if not iso:
+        return ""
+    import astro_truth as T
+    t = T.round_minute(datetime.fromisoformat(iso))
+    return (f"Exact: {t:%a %b %-d %Y} (progressed — date precision)\n\n" if frame == "progressed"
+            else f"Exact: {t:%a %b %-d %Y, %-I:%M %p} ET\n\n")
+
+
 def wanted() -> dict[str, dict]:
     out = {}
     for w in svehla.load_windows():
         out[w["id"]] = {
             "summary": f"🔮 {w['title']}",
-            "description": f"WHY: {w['why']}\n\nDO: {w['do']}\n\nSvehla, Aug 29 2026 reading · Telegram /dates",
+            "description": f"WHY: {w['why']}\n\nDO: {w['do']}\n\nSvehla, Aug 29 2026 reading{svehla.computed_note(w)} · Telegram /dates",
             "start": {"date": w["_start"].isoformat()},
             "end": {"date": (w["_end"] + timedelta(days=1)).isoformat()},
             "colorId": COLOR_WINDOW,
@@ -86,7 +96,7 @@ def wanted() -> dict[str, dict]:
         uid = "exact-" + h["date"] + "-" + "".join(c for c in h["what"] if c.isalnum())[:40]
         out[uid] = {
             "summary": f"⏰ {h['what']}",
-            "description": "Exact hit (0° orb), Swiss Ephemeris. Aug 2026 Svehla reading layer · Telegram /exact",
+            "description": _when_line(h.get("exact_at_local"), h.get("moving_frame")) + "Exact hit (0° orb), Swiss Ephemeris. Aug 2026 Svehla reading layer · Telegram /exact",
             "start": {"date": d.isoformat()},
             "end": {"date": (d + timedelta(days=1)).isoformat()},
             "colorId": COLOR_EXACT,
@@ -111,7 +121,7 @@ def wanted() -> dict[str, dict]:
             meaning = astro_timeline._meaning(e, full=True)
             out[uid] = {
                 "summary": f"🗓 {e['what']}",
-                "description": (meaning + "\n\n" if meaning else "") + "Timeline layer (Swiss Ephemeris, Placidus) · Telegram /timeline",
+                "description": _when_line(e.get("exact_at_local"), e.get("moving_frame")) + (meaning + "\n\n" if meaning else "") + "Timeline layer (Swiss Ephemeris, Placidus) · Telegram /timeline",
                 "start": {"date": d.isoformat()},
                 "end": {"date": (d + timedelta(days=1)).isoformat()},
                 "colorId": COLOR_TIMELINE,

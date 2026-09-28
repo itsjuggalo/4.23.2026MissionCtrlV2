@@ -33,6 +33,7 @@ HERE = Path(__file__).resolve().parent
 CACHE_FILE = HERE / "astro_sky_cache.json"
 CACHE_HORIZON_DAYS = 400   # how far ahead a rebuilt cache covers
 CACHE_MAX_AGE_DAYS = 7
+SKY_FILES = ("astro_truth.py", "astro_sky.py")      # a change to either invalidates the cache
 
 # bodies used across stations/ingresses (Mercury..Pluto + Chiron; Sun/Moon never "station")
 OUTER_BODIES = {"Mercury": swe.MERCURY, "Venus": swe.VENUS, "Mars": swe.MARS,
@@ -72,15 +73,8 @@ def _jd_of_date(d: date, hour: float = 12.0) -> float:
 
 
 def _jd_to_dt(jd: float) -> datetime:
-    y, m, d, h = swe.revjul(jd)
-    hh = int(h)
-    mm = int(round((h - hh) * 60))
-    if mm == 60:
-        mm, hh = 0, hh + 1
-    if hh == 24:
-        hh = 0
-        d += 1  # good enough; revjul never actually returns 24 in practice
-    return datetime(y, m, d, hh, mm, tzinfo=timezone.utc).astimezone(T.ET)
+    """JD → ET wall time rounded to the minute (astro_truth's zoneinfo conversion)."""
+    return (T.jd_to_utc(jd) + timedelta(seconds=30)).replace(second=0).astimezone(T.ET)
 
 
 def _iso(jd: float) -> str:
@@ -123,35 +117,9 @@ def _point(lon: float) -> dict:
     return {"lon": info["lon"], "sign": info["sign"], "deg": info["deg"], "house": info["house"]}
 
 
-def _bisect_root(f, lo: float, hi: float, flo: float, tol_days: float = 1 / 1440) -> float:
-    for _ in range(60):
-        if hi - lo < tol_days:
-            break
-        mid = (lo + hi) / 2
-        fm = f(mid)
-        if (flo < 0) == (fm < 0):
-            lo, flo = mid, fm
-        else:
-            hi = mid
-    return (lo + hi) / 2
-
-
 def _scan_crossings(f, jd0: float, jd1: float, step_days: float, tol_days: float = 1 / 1440) -> list[float]:
-    """Coarse-scan f over [jd0,jd1] at step_days, bisect every sign change to tol_days."""
-    out: list[float] = []
-    t0, f0 = jd0, f(jd0)
-    if f0 == 0:
-        out.append(t0)
-    while t0 < jd1 - 1e-9:
-        t1 = min(t0 + step_days, jd1)
-        f1 = f(t1)
-        if f1 == 0:
-            out.append(t1)
-        elif (f0 < 0) != (f1 < 0) and abs(f1 - f0) < 180:
-            # real root, not a ±180° wraparound artifact of _signed_gap
-            out.append(_bisect_root(f, t0, t1, f0, tol_days))
-        t0, f0 = t1, f1
-    return out
+    """Coarse-scan f over [jd0,jd1] at step_days, bisect every sign change — astro_truth.find_crossings."""
+    return T.find_crossings(f, jd0, jd1, step_days, tol_days)
 
 
 # ── 1. lunations ─────────────────────────────────────────────────────────────
@@ -273,7 +241,7 @@ def ingresses(start: date, days: int) -> list[dict]:
 
                 def g(t, boundary=boundary):
                     return _signed_gap(_lon(t, body), boundary)
-                jd = _bisect_root(g, t0, t1, g(t0))
+                jd = (T.find_crossings(g, t0, t1, t1 - t0) or [t1])[0]
                 pt = _point(boundary % 360) if forward else _point((boundary - 0.001) % 360)
                 out.append({"date_et": _iso(jd), "body": name, "retro": not forward, **pt})
             t0, idx0 = t1, idx1
@@ -341,7 +309,9 @@ def _today_et() -> date:
 
 def _build_cache(start: date | None = None) -> dict:
     start = start or _today_et()
+    import astro_events as E
     data = {
+        "meta": E.cache_meta("astro_sky._build_cache (Swiss Ephemeris)", CACHE_MAX_AGE_DAYS, SKY_FILES),
         "generated": _today_et().isoformat(),
         "range_start": start.isoformat(),
         "range_end": (start + timedelta(days=CACHE_HORIZON_DAYS)).isoformat(),
@@ -359,10 +329,11 @@ def _build_cache(start: date | None = None) -> dict:
 def _get_cache(min_days_needed: int) -> dict:
     if CACHE_FILE.exists():
         try:
+            import astro_events as E
             data = json.loads(CACHE_FILE.read_text())
-            gen = date.fromisoformat(data["generated"])
+            ok, _why = E.cache_fresh(data.get("meta"), SKY_FILES)
             end = date.fromisoformat(data["range_end"])
-            if (_today_et() - gen).days < CACHE_MAX_AGE_DAYS and end >= _today_et() + timedelta(days=min_days_needed):
+            if ok and end >= _today_et() + timedelta(days=min_days_needed):
                 return data
         except Exception:
             pass

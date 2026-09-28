@@ -62,9 +62,9 @@ def _jd_to_et(jd: float) -> datetime:
 
 
 def _prog_lon(d: date, body: int) -> float:
-    """Secondary-progressed longitude of `body` for civil date d (day-for-a-year, birth-hour)."""
-    pj = T.NATAL_JD + (swe.julday(d.year, d.month, d.day, 3 + 46 / 60) - T.NATAL_JD) / 365.25
-    return swe.calc_ut(pj, body)[0][0] % 360
+    """Secondary-progressed longitude of `body` for civil date d — astro_truth's progression
+    calculator at LOCAL NOON on d (was a 03:46-UT sample = the evening before in ET)."""
+    return swe.calc_ut(T.progressed_jd(T.jd_local(d, 12)), body)[0][0] % 360
 
 
 def _interp_line(prefix: str, name: str, house: int) -> str:
