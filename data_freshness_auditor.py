@@ -2,10 +2,11 @@
 """data_freshness_auditor.py — daily "is every page's data actually fresh?" audit.
 
 Walks every desk_pipeline.sqlite table and every page-consumed JSON feed, computes a
-weekend-aware age, and grades each source OK / STALE / ORPHANED / EMPTY / MISSING.
+weekend-aware age, and grades each source OK / STALE / ORPHANED / UNIMPLEMENTED / EMPTY / MISSING.
 STALE (a live source with a live consumer that stopped updating) pings Telegram via
 ping_mike.py. ORPHANED (no cron, no page consumer) is reported but never alerts —
-a dead table isn't an incident.
+a dead table isn't an incident. UNIMPLEMENTED (schema exists, no producer was ever built)
+is likewise reported, never alerted.
 
 Alert-only. Never writes to the pipeline DB, never touches trading behaviour.
 
@@ -47,7 +48,6 @@ TABLES = [
     ("decipher_audit",       "computed_at",  MH,  26,  "run_decipher.sh :00/:30 market hours"),
     ("decipher_picks",       "created_at",   MH,  120, "run_decipher.sh; picks only when a candidate qualifies"),
     ("dossiers",             "ran_at",       MH,  26,  "desk-cycle floor 3/4"),
-    ("fintwit_calls",        "ts",           MH,  168, "fintwit-scout 08:30 weekdays"),
     ("insider_transactions", "fetched_at",   MH,  26,  "insiders_fetch.py 08/12/16 weekdays"),
     ("institutional_holdings", "fetched_at", MH,  30,  "institutions_fetch.py 06:30 weekdays (13F content is quarterly by law — fetch cadence is what's graded)"),
     ("lane_findings",        "ran_at",       MH,  26,  "desk-cycle floor 3 lanes"),
@@ -74,7 +74,13 @@ ORPHANED = {
     # 2026-09-27: three producers died for good — they were STALE in the 06:45 ping every day.
     "decipher_exits":                  "position-close rows from the Alpaca paper executor, retired 2026-08-11 (last row 08-07); advisory exits now live in decision/decipher_exits.json",
     "historical_outcomes":             "decipher REALIZED P&L mirror (outcome_attribution.py) — needs executed fills; Alpaca execution retired 2026-08-11 (last row 08-07)",
-    "notification_log":                "floor5 top-3 push log — its notify_bus.py was pruned 2026-08-30 (last row 08-25); floor5 notify is now a silent no-op",
+    "notification_log":                "floor5 top-3 push log — its notify_bus.py was pruned 2026-08-30 (last row 08-25); floor5 push retired 2026-09-27",
+}
+
+# Tables whose schema exists but whose producer was never implemented. Visible, never
+# stale, never alerted — building a producer is a feature decision, not a health fix.
+UNIMPLEMENTED = {
+    "fintwit_calls": "UNIMPLEMENTED / NOT EXPECTED — table created by fintwit_scout.py:251, but no code inserts rows",
 }
 
 H = str(Path.home())
@@ -254,6 +260,14 @@ def audit_tables(conn):
         except sqlite3.Error:
             rec["row_count"] = None
         rows.append(rec)
+
+    for name, why in UNIMPLEMENTED.items():
+        rec = {"source": name, "kind": "sqlite", "status": "UNIMPLEMENTED", "note": why}
+        try:
+            rec["row_count"] = conn.execute(f"SELECT COUNT(*) FROM {name}").fetchone()[0]
+        except sqlite3.Error:
+            rec["row_count"] = None
+        rows.append(rec)
     return rows
 
 
@@ -316,7 +330,7 @@ def main():
     finally:
         conn.close()
 
-    order = {"STALE": 0, "ERROR": 1, "MISSING": 2, "EMPTY": 3, "ORPHANED": 4, "OK": 5}
+    order = {"STALE": 0, "ERROR": 1, "MISSING": 2, "EMPTY": 3, "ORPHANED": 4, "UNIMPLEMENTED": 5, "OK": 6}
     rows.sort(key=lambda r: (order.get(r["status"], 9), r["source"]))
     counts = {}
     for r in rows:

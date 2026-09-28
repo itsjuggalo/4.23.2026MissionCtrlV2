@@ -40,7 +40,8 @@ FLEET = {
     "system_health":   dict(user="Pingpong727_Bot",         avatar="adjutant",        role="interactive", src=("file", "telegram-ping-bot-token")),
     "life_wellness":   dict(user="LifeClaw727_Bot",         avatar="arbiter",         role="interactive", src=("file", "lifeclaw_telegram_bot_token")),
     "aime_research":   dict(user="AntiGravityg59laptop_Bot",avatar="zeratul",         role="interactive", src=("file", "telegram_antigravity_bot_token")),
-    "x_sentiment":     dict(user="MoneyFlowz_Bot",          avatar="mutalisk",        role="interactive", src=("file", "telegram_grok_bot_token")),
+    # RETIRED 2026-09-27: x_sentiment (@MoneyFlowz_Bot) — its only poller, PM2 grok-bot, was dead
+    # since 09-02 and nothing sends TG_FN=x_sentiment. Bot stays parked in BotFather; token file kept.
     # 2026-08-10 — @JazzyHazzyClaw_Bot (PARKED since 07-19, ex Jazzy Desk) REPURPOSED as the
     # ASTROLOGY-ONLY lane: natal / transits / readings, never trading. Old fn `jazzy_desk`
     # retired; vault key is now telegram.astrology.
@@ -57,7 +58,8 @@ FLEET = {
     # folded into research_desk rather than left as a duplicate token mapping.)
     "research_desk":   dict(user="AntiDoht_Bot",            avatar="aldaris",         role="push",        src=("file", "antidote_telegram_bot_token")),
     "screener":        dict(user="TrndRsrch_Bot",           avatar="wraith",          role="interactive", src=("file", "telegram_deepseek_bot_token")),
-    "macro_regime":    dict(user="MMCTRL727_Bot",           avatar="mengsk",          role="interactive", src=("file", "telegram_mc_skill_bot_token")),
+    # RETIRED 2026-09-27: macro_regime (@MMCTRL727_Bot) — owner was the claudeclaw `mastermc` persona,
+    # deleted 2026-08-30 (no unique code). Bot stays parked in BotFather; token file kept.
     # ── push (they alert you) ───────────────────────────────────────────────
     "flow_signals":    dict(user="PipelineSignals_Bot",     avatar="queen_of_blades", role="push",        src=("file", "telegram-bot-token.txt")),
     "flow_digest":     dict(user="Boba2Telegram_Bot",       avatar="hydralisk",       role="push",        src=("vault", "telegram_boba2_bot_token")),

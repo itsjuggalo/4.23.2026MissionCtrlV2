@@ -116,7 +116,8 @@ FLEET = {
     "system_health":   ("telegram-ping-bot-token",         "f", OPS),
     "life_wellness":   ("lifeclaw_telegram_bot_token",     "f", LIFE),
     "aime_research":   ("telegram_antigravity_bot_token",  "f", AIME),
-    "x_sentiment":     ("telegram_grok_bot_token",         "f", XBOT),
+    # RETIRED 2026-09-27 (@MoneyFlowz_Bot parked, no poller):
+    # "x_sentiment":     ("telegram_grok_bot_token",         "f", XBOT),
     "astrology":       ("telegram_jazzyhazzy_bot_token",  "f", ASTRO),
     # PARKED 2026-07-19 (token free to repurpose):
     #     "risk_hedge":      ("antidote_telegram_bot_token",     "f", RISK_MENU),
