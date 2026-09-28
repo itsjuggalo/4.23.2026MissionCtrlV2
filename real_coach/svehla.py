@@ -10,7 +10,7 @@ Two jobs, both $0 and both real astronomy:
                 in his reading within 0.05° (2026-09-14).
 
 CLI:  svehla.py windows|dates | progressed | daily | weekly [--send] | context | check
-Cron: Monday 08:35 ET `svehla.py weekly --send` → astrology lane (astrology auto-posts are allowed).
+Cron: none since 2026-09-27 — the Monday weekly rides in astro_morning.py (08:32 ET) → astrology lane.
 """
 from __future__ import annotations
 
