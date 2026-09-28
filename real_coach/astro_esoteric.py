@@ -212,6 +212,58 @@ def esoteric_post(when: datetime | None = None) -> str:
     return "\n\n".join(p for p in parts if p).strip()
 
 
+
+# ── NATAL esoteric (Mike 2026-09-28: "natal esoteric as well in a different message — planet,
+# house, sign"). Positions/signs/houses are computed (astro_truth.natal); each placement gets the
+# esoteric meaning of the planet, the sign (with its esoteric ruler), the house, and — when the
+# researched KB entry matches the COMPUTED sign+house — the combined soul-reading. ─────────────────
+NATAL_ORDER = ["Sun", "Moon", "ASC", "Mercury", "Venus", "Mars", "Jupiter", "Saturn", "Uranus", "Neptune",
+               "Pluto", "Chiron", "Ceres", "Juno", "Hades", "Apollon", "MC", "DSC"]
+_ANGLE_NAME = {"ASC": "Ascendant", "MC": "Midheaven", "DSC": "Descendant"}
+_PATTERN_COMBOS = ("Mars conjunct the", "Sun conjunct Alpha Crucis", "The Saturn-Mars-Uranus/Neptune t-square")
+
+
+def _combo_for(name: str, sign: str, house: int | None) -> dict | None:
+    """Researched natal combo whose name matches the computed placement (never a mismatched one)."""
+    for c in lex.KB.get("natal_combos", []):
+        nm = c.get("name", "")
+        if name in _ANGLE_NAME:
+            if sign in nm and (name in nm or _ANGLE_NAME[name] in nm):
+                return c
+        elif nm.startswith(f"{name} in {sign}") and (house is None or f"the {T.ordinal(house)}" in nm):
+            return c
+    return None
+
+
+def natal_esoteric_post() -> str:
+    nat = T.natal()
+    out = ["🜃 YOUR NATAL CHART, ESOTERICALLY — planet · sign · house (tropical, Placidus; positions computed)",
+           f"Cancer rising → exoteric ruler Moon, esoteric ruler {lex.SIGNS['Cancer'].get('eso_ruler', 'Neptune')}.", ""]
+    for n in NATAL_ORDER:
+        v = nat[n]
+        sign, house = v["sign"], v.get("house")
+        glyph = lex._KEY_GLYPH.get(n, "•")
+        head = f"{glyph} {_ANGLE_NAME.get(n, n)} {v['dms']}" + (f" · {T.ordinal(house)} house" if house and n not in _ANGLE_NAME else "") + (" ℞" if v.get("rx") else "")
+        block = [head]
+        p_eso = lex.kb_get("planets", n, "esoteric") or lex.PLANETS.get(n, {}).get("eso", "")
+        if p_eso:
+            block.append(f"  ✧ {_ANGLE_NAME.get(n, n)}: {lex._first_sentence(p_eso, 220)}")
+        s_eso = lex.kb_get("signs", sign, "esoteric") or lex.SIGNS[sign].get("eso", "")
+        block.append(f"  ✧ {sign} (esoteric ruler {lex.SIGNS[sign].get('eso_ruler', '—')}): {lex._first_sentence(s_eso, 220)}")
+        if house and n not in _ANGLE_NAME:
+            h_eso = lex.kb_get("houses", str(house), "esoteric") or lex.HOUSES[house - 1].get("eso", "")
+            block.append(f"  ✧ {T.ordinal(house)} house: {lex._first_sentence(h_eso, 200)}")
+        c = _combo_for(n, sign, house if n not in _ANGLE_NAME else None)
+        if c and c.get("esoteric"):
+            block.append(f"  ⟡ Together: {c['esoteric'].rstrip('.')}." + (f" In plain words: {c['translation']}" if c.get("translation") else ""))
+        out.append("\n".join(block))
+    pats = [c for c in lex.KB.get("natal_combos", []) if c.get("name", "").startswith(_PATTERN_COMBOS)]
+    if pats:
+        out.append("🔺 PATTERNS")
+        for c in pats:
+            out.append(f"• {c['name']}: {c.get('esoteric', '').rstrip('.')}." + (f" {c['translation']}" if c.get("translation") else ""))
+    return "\n\n".join(out)
+
 if __name__ == "__main__":
     import argparse
 

@@ -119,6 +119,12 @@ def tg_push(text: str, fn: str, *, loud: bool = True, html: bool = True,
     chat = _chat_id(chat)
     if not chat:
         return None
+    try:   # FYI pushes fold into the next digest (lib/tg_digest.py) — 2026-09-28
+        from lib.tg_digest import intercept
+        if intercept(fn, text, html):
+            return fn
+    except Exception:
+        pass
     tok = _vault_token(fn)
     if tok:
         try:

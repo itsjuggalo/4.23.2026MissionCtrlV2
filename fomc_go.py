@@ -19,14 +19,15 @@ import argparse
 import json
 import sys
 import urllib.request
-from datetime import datetime, timedelta, timezone
+from datetime import datetime, timezone
 from pathlib import Path
+from zoneinfo import ZoneInfo
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 from macro_calendar_alert import FOMC_2026, et_today  # reuse embedded Fed calendar
 
 SEC = Path.home() / ".openclaw" / "secrets"
-ET = timezone(timedelta(hours=-4))
+ET = ZoneInfo("America/New_York")
 KID = (SEC / "alpaca-boba-key-id").read_text().strip()
 SECK = (SEC / "alpaca-boba-secret").read_text().strip()
 DATA = "https://data.alpaca.markets"
@@ -98,34 +99,15 @@ def classify(m: dict[str, float]) -> str:
 def build(send: bool):
     m = moves_since_2pm()
     verdict = classify(m)
-    p = px("NFLX,MRVL,QQQ,SPCX,MU")
-    def sh(usd, sym):
-        q = p.get(sym)
-        return f"{usd/q:.0f} sh @ ${q:,.0f}" if q else "(quote n/a)"
-    def eth(usd):
-        q = p.get("ETH")
-        return f"{usd/q:.2f} ETH @ ${q:,.0f}" if q else "(quote n/a)"
 
     tape = (f"SPY {m.get('SPY',0):+.1f}% · QQQ {m.get('QQQ',0):+.1f}% · "
             f"SMH {m.get('SMH',0):+.1f}% · TLT {m.get('TLT',0):+.1f}% (since 2:00)")
-    L = [f"🏛️ <b>FOMC REACTION — {verdict.upper()}</b>", tape, ""]
-    core = [f"• <b>ETH</b> ~$700 → {eth(700)} (stake, 8–12% APR)",
-            f"• <b>NFLX</b> ~$630 → {sh(630,'NFLX')} (strongest hold)"]
-    if verdict == "hawkish":
-        L += ["🔴 <b>Hawkish — buy the dip in quality:</b>"] + core
-        L += [f"• <b>MRVL</b> ~$586 → {sh(586,'MRVL')} (swept flow, on sale)",
-              f"• <b>MU</b> ~$300 add (optional, into 6/24 earnings)"]
-    elif verdict == "dovish":
-        L += ["🟢 <b>Dovish — add into strength (don't chase the open):</b>"] + core
-        L += [f"• <b>QQQ</b> 1 sh → {sh(p.get('QQQ',1),'QQQ')} (risk-on)",
-              f"• <b>SPCX</b> ~$216 → {sh(216,'SPCX')} (spec, optional small)"]
-    elif verdict == "muted":
-        L += ["🟡 <b>Muted reaction</b> — no clear branch. Half-size the core (ETH/NFLX) "
-              "or wait for tomorrow's follow-through.", *core]
-    else:
-        L += ["⚠️ Couldn't read the tape (data gap) — check SPY/QQQ manually before deploying."]
-    L += ["", "✅ <b>GO</b> — let the 2:00–2:30 whipsaw settle first, then deploy. "
-          "Keep ~$1k reserve for a second leg. Real money = your taps."]
+    L = [f"🏛️ <b>FOMC REACTION — {verdict.upper()}</b>",
+         f"FOMC TAPE (local SPY/QQQ/SMH/TLT move since 14:00 heuristic, not the canonical regime): "
+         f"{verdict}",
+         tape]
+    if verdict == "unknown" or not m:
+        L.append("⚠️ Data gap — tape unavailable.")
     return "\n".join(L), verdict
 
 

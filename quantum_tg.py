@@ -214,28 +214,30 @@ def _spread_pick_line(p, s):
 
 
 def _verdict(p, risk_cap=None):
-    """Honest verdict from action + value, sized against the flat $400 cap only."""
+    """Evidence read from action + value, sized against the flat $400 cap only.
+    Machine `action` stays ACT/ACT-SMALL/WAIT; the text a human reads is gate
+    state / setup evidence, never a trade call."""
     act = (p.get("action") or "").upper()
     val = (p.get("value") or "").lower()
     if act == "ACT" and val in ("cheap", "fair"):
-        base = "🟢 BUY — clean signal, fair price"
+        base = "🟢 GATE PASS — clean signal, fair price"
     elif act == "ACT" and val == "rich":
-        base = "🟡 SMALL — good signal, but IV is rich (pricey)"
+        base = "🟡 GATE CAUTION — good signal, but IV is rich (pricey)"
     elif act == "ACT-SMALL":
-        base = "🟡 SMALL — event risk; keep it light"
+        base = "🟡 GATE CAUTION — event risk"
     elif act == "WAIT":
-        base = "⏳ WAIT — let the setup confirm"
+        base = "⏳ GATE CAUTION — unconfirmed, let the setup confirm"
     else:
-        base = "🟡 SMALL"
+        base = "🟡 GATE CAUTION"
     if (p.get("qty") or 0) < 1:   # naked contract can't be sized within the risk cap
         s = _afford_spread(p, risk_cap)
-        if s:   # pipeline's debit spread fits the cap → an actual play, not a SKIP
-            return (f"🟢 BUY SPREAD — naked {_money(p.get('per_contract'))} is over cap; "
-                    f"the {_money(s.get('cost_per'))} debit spread fits")
+        if s:   # pipeline's debit spread fits the cap → an actual reference, not a SKIP
+            return (f"🟢 GATE PASS (spread ref) — naked {_money(p.get('per_contract'))} is over cap; "
+                    f"the {_money(s.get('cost_per'))} debit-spread ref fits the $400 cap; naked contract does not")
         if _spread_suspect(p):
-            return (f"⏳ SKIP — naked {_money(p.get('per_contract'))} is over the $400 cap; "
+            return (f"⏳ GATE BLOCKED — naked {_money(p.get('per_contract'))} is over the $400 cap; "
                     f"spread quote ({_money(p['spread'].get('cost_per'))}) looks stale — verify in RH")
-        return f"⏳ SKIP — 1 contract ({_money(p.get('per_contract'))}) is over the $400 cap"
+        return f"⏳ GATE BLOCKED — 1 contract ({_money(p.get('per_contract'))}) is over the $400 cap"
     return base
 
 
@@ -494,7 +496,7 @@ def crypto():
                           f"{_px(p.get('entry'))}→{_px(p.get('target'))} (stp {_px(p.get('stop'))})",
                           warn))
     if picks and all(x == "SHORT" for x in dirs):
-        lines.append(esc("→ all SHORT — no clean long; SIT OUT crypto (Alpaca is long-only)"))
+        lines.append(esc("→ all reads SHORT; no long-side setup (Alpaca is long-only)"))
     elif any(x == "LONG" for x in dirs):
         longs = ", ".join(p.get("coin") for p in picks if (p.get("direction") or "").upper() == "LONG")
         lines.append(esc(f"→ long setup: {longs}"))
@@ -645,8 +647,9 @@ def grade():
     exp = o.get("expectancy_pct")
     wrp = f"{wr*100:.0f}%" if isinstance(wr, (int, float)) else "?"
     expv = exp if isinstance(exp, (int, float)) else 0.0
+    as_of = (d.get("as_of") or "")[:10]
     head = join(hdr("🎓", "Graduation Check"),
-                esc(f"track record: {n} graded · {wrp} win · exp {expv:+.1f}%"))
+                esc(f"HISTORICAL (n={n} graded, through {as_of}): win {wrp}, exp {expv:+.1f}%"))
     gate = esc(f"gate: {GRAD_MIN_N}+ trades & positive expectancy")
     if n < GRAD_MIN_N:
         status = esc(f"🔴 building proof — {n}/{GRAD_MIN_N} trades. Keep grading picks first.")
@@ -655,7 +658,7 @@ def grade():
     elif (wr or 0) < GRAD_MIN_WR:
         status = esc(f"🟡 positive expectancy, thin win-rate ({wrp}). One more stretch at minimum size.")
     else:
-        status = "🟢 READY — edge proven. Consider sizing up / a small real-money sleeve."
+        status = "🟢 GATE PASS — edge proven (historical)."
     return join(head, gate, status)
 
 

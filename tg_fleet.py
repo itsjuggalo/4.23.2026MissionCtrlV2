@@ -545,6 +545,14 @@ def send(fn, msg, html=False):
     as plain text with the tags stripped so a formatting slip never drops a trading ping.
     (2026-09-15 — Telegram message-format sweep.)"""
     fn = route(fn)
+    try:   # FYI pushes fold into the next digest (lib/tg_digest.py) — 2026-09-28
+        sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+        from lib.tg_digest import intercept
+        if intercept(fn, msg, html):
+            print("sent (queued for digest)")
+            return 0
+    except Exception:
+        pass
     tok = token(fn)
     if not tok:
         print(f"no token for {fn}"); return 1
