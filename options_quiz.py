@@ -32,6 +32,7 @@ ET     = ZoneInfo("America/New_York")
 LETTERS = ["A", "B", "C", "D"]
 DRY    = os.environ.get("DRY") == "1"
 FORCE  = os.environ.get("FORCE") == "1"
+OPEN_HOLD_S = 48 * 3600   # unanswered rep blocks new reps this long
 
 
 def _load(p, default):
@@ -113,9 +114,10 @@ def main() -> int:
     st = _load(STATE, {})
     cur = st.get("current")
     if cur and not DRY and not FORCE:
-        # don't double-ask within ~5h; expire older open reps so they can't block forever
-        if (time.time() - cur.get("asked_at", 0)) < 5 * 3600:
-            print("[options-quiz] a recent rep is still open (<5h) — skipping")
+        # an UNANSWERED rep holds new ones for 48h (2026-09-28: 200 asked / 3 answered, the
+        # same question re-sent twice a day); it still expires so it can't block forever
+        if (time.time() - cur.get("asked_at", 0)) < OPEN_HOLD_S:
+            print("[options-quiz] last rep still unanswered (<48h) — skipping")
             return 0
 
     import random

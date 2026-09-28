@@ -287,8 +287,8 @@ def main() -> int:
     except Exception:
         st = {}
     cur = st.get("current")
-    if cur and not DRY and (time.time() - cur.get("asked_at", 0)) < 5 * 3600:
-        print("[live-quiz] a rep is still open (<5h) — skipping to avoid double-ask")
+    if cur and not DRY and (time.time() - cur.get("asked_at", 0)) < 48 * 3600:   # unanswered → hold 48h (2026-09-28)
+        print("[live-quiz] last rep still unanswered (<48h) — skipping to avoid a pile-up")
         return 0
 
     item = None
