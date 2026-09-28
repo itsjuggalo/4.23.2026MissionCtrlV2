@@ -138,7 +138,7 @@ def _catalysts_and_orders(names: str, tape: str) -> tuple[str, str, dict]:
         'size above it, and if the setup cannot be expressed under it, say so. Be specific.", '
         '"plan": {"ticker": "<symbol>", "entry": <single number, not a '
         'range>, "stop": <single number, below entry>, "target": <single number, above entry>, '
-        '"why": "<one short clause>"}}\n'
+        '"shares": <integer>, "why": "<one short clause>"}}\n'
         "The `plan` object must describe the SAME trade as `orders`, with one exact price "
         "per field — never a range, never a null when you named a trade. target must be at "
         "least as far from entry as stop is, so the win is worth the risk. If today's honest "
@@ -177,14 +177,12 @@ def _plan_orders(plan: dict) -> str:
     try:
         tkr = str(plan.get("ticker") or "").strip().upper()
         entry, stop, targ = (float(plan[k]) for k in ("entry", "stop", "target"))
+        sh = int(plan.get("shares") or 0)
     except (TypeError, ValueError, KeyError, AttributeError):
         return ""
-    if not tkr or not (stop < entry < targ):
-        return ""
-    # size ref is computed locally from the flat $400 cap — never trust an LLM-chosen
-    # share count (T10 E6): sh is the max whole-share size that still fits the cap.
-    sh = int(RISK_CAP // (entry - stop))
-    if sh < 1:
+    # T10 E6 (staged for Mike, not applied): computing sh locally from RISK_CAP instead of
+    # the LLM share count is a sizing change — kept as before until Mike's go.
+    if not tkr or sh < 1 or not (stop < entry < targ):
         return ""
     risk, reward = sh * (entry - stop), sh * (targ - entry)
     if risk > RISK_CAP:                      # hard cap, fail-CLOSED — never print an over-cap size
