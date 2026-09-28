@@ -267,11 +267,6 @@ def dates_block(d: date | None = None) -> str:
     return "\n".join(lines)
 
 
-def weekly_block(d: date | None = None) -> str:
-    """RETIRED 2026-09-27 → the ONE weekly read is astro_weekly.weekly_block (themes, exacts in ET,
-    slow transits, progressions, these windows with Why/Do, practice). Kept as a delegate."""
-    import astro_weekly
-    return astro_weekly.weekly_block(d)
 
 
 def context_block(d: date | None = None) -> str:
@@ -344,9 +339,6 @@ def _signed_diff(t_lon: float, target: float) -> float:
     return T.signed_diff(t_lon, target)
 
 
-def _crossings(f, start: date, end: date) -> list[date]:
-    """ET calendar dates where f(jd) crosses zero — astro_truth.find_crossings, localized."""
-    return [T.local_date(x) for x in T.find_crossings(f, T.jd_local(start), T.jd_local(end))]
 
 
 def compute_exact_hits() -> list[dict]:
@@ -530,7 +522,7 @@ if __name__ == "__main__":
     args = [a for a in sys.argv[1:] if not a.startswith("--")]
     cmd = args[0] if args else "windows"
     out = {"windows": dates_block, "dates": dates_block, "progressed": progressed_block,
-           "daily": daily_block, "weekly": weekly_block, "context": context_block,
+           "daily": daily_block, "context": context_block,
            "exact": exact_block, "check": check_block,
            "rebuild": lambda: f"{len(exact_hits(refresh=True))} exact hits cached"}[cmd]()
     print(out)

@@ -27,19 +27,28 @@ PLANETS = ["Sun", "Moon", "Mercury", "Venus", "Mars", "Jupiter", "Saturn", "Uran
 POINTS = PLANETS + ["ASC", "MC", "DSC", "IC"]
 ALIASES = {"ascendant": "ASC", "rising": "ASC", "midheaven": "MC", "descendant": "DSC", "mc": "MC",
            "asc": "ASC", "dsc": "DSC", "ic": "IC"}
-OTHER_CHART = r"\b(her|his|their|\w+'s)\s+(chart|sign|sun|moon|rising|ascendant|venus|mars|placements?|birth ?chart|transits?)\b"
+_NOT_PERSON = ("today|tonight|tomorrow|yesterday|mike|the|this|that|what|where|who|how|it|there|here|he|she|let|"
+               "sun|moon|mercury|venus|mars|jupiter|saturn|uranus|neptune|pluto|chiron|ceres|juno|week|month|year")
+# possessive + chart word = someone else's chart — but not "today's transits", "Saturn's transit", "Mike's chart"
+OTHER_CHART = (r"\b(her|his|their|(?!(?:" + _NOT_PERSON + r")'s)\w+'s)\s+"
+               r"(chart|sign|sun|moon|rising|ascendant|venus|mars|placements?|birth ?chart|transits?)\b")
 RELATION = r"\b(girlfriend|boyfriend|wife|husband|partner|fianc[eé]e?|mom|mother|dad|father|son|daughter|" \
            r"brother|sister|friend|boss|ex|her|his|their|she|he)\b"
 
 INTENTS = [   # (intent, regex) — first match wins; order = specificity
+    ("general", r"\b(good|bad|ok|okay|wise|safe|right) (day |time |moment )?(for|to)\b|\bshould i\b"),  # judgement → LLM + facts
     ("profile", r"\b(add|save|store|new)\b.*\bprofile\b|\bprofile\b.*\b(add|save)\b"),
+    ("chart", r"\b(my|mike's) (natal |birth )?chart\b|\bshow (me )?my (natal )?chart\b"),
     ("progressed_synastry", r"\bprogress\w*\b.*\b(synastry|compat\w*|relationship|us|together)\b|\b(synastry|compat\w*)\b.*\bprogress"),
     ("synastry", r"\b(synastry|compat\w*|our charts?|me and \w+|\w+ and me|match with)\b"),
-    ("moon", r"\b(moon (sign|phase|today|now|doing|this week)|what('s| is) the moon|lunar phase|full moon|new moon|moon void)\b"),
+    ("voc", r"\bvoid\b|\bv\.?o\.?c\b"),
+    ("moon", r"\b(moon (sign|phase|today|now|doing|this week)|what('s| is) the moon|lunar phase|full moon|new moon)\b"),
+    ("sky", r"\btransiting (sun|moon|mercury|venus|mars|jupiter|saturn|uranus|neptune|pluto|chiron)\b|\bretrograde\b|\b(is|are) \w+ (rx|retro)\b|\bwhat('s| is) in the sky\b"),
     ("strongest", r"\b(strongest|most important|biggest|main|top|key)\b.*\b(transit|aspect|influence|thing|energy)"),
     ("exact", r"\bwhen\b.*\b(exact|hit|hits|perfect|enter|enters|ingress|happen|peak|station)|\bwhat time\b"),
     ("placement", r"\b(where is|where's|what sign|what house|which sign|which house|what degree)\b|\bmy (natal |progressed )?\w+ (in|sign|house)\b"),
-    ("week", r"\b(this|next|coming) week\b|\bweek ahead\b|\bnext 7 days\b|\bweekly\b"),
+    ("week", r"\b(this|next|coming|my|the) week\b|\bweek ahead\b|\bnext 7 days\b|\bweekly\b"),
+    ("year", r"\b(this|next|coming|the) year\b|\byear ahead\b|\b12 months\b"),
     ("today", r"\b(today|tonight|right now|this morning|this afternoon|how's the sky|daily)\b"),
     ("progressions", r"\bprogress\w*\b"),
     ("timeline", r"\b(timeline|coming up|upcoming|next month|dates ahead|what's next|year ahead)\b"),
@@ -54,9 +63,58 @@ def detect(text: str) -> dict:
         k = ALIASES.get(w.lower()) or next((p for p in PLANETS if p.lower() == w.lower()), None)
         if k and k not in pts:
             pts.append(k)
-    frame = "progressed" if re.search(r"\bprogress", t) else "transit" if re.search(r"\btransit|\bnow\b|\bcurrent", t) else "natal"
+    # frame: "my Venus"/natal/birth → natal; progress → progressed; otherwise the live sky
+    # ("what sign is Mercury in" = where it is now, not Mike's natal Mercury)
+    frame = ("progressed" if re.search(r"\bprogress", t) else
+             "transit" if re.search(r"\btransit|\bnow\b|\bcurrent|\btoday\b", t) else
+             "natal" if re.search(r"\b(my|natal|birth|born)\b", t) else "transit")
     return {"intent": intent, "points": pts, "frame": frame, "other_person": bool(re.search(RELATION, t)),
             "other_chart": bool(re.search(OTHER_CHART, t)) and not re.search(r"\bmy\b\s+(chart|sign)", t)}
+
+
+def profiles_named(text: str) -> list[dict]:
+    """Stored birth profiles (not Mike) whose name or id appears in the text."""
+    try:
+        import astro_profiles as P
+        allp = P.all_profiles()
+    except Exception:
+        return []
+    t = text.lower()
+    return [p for p in allp if p["id"] != "mike" and
+            (re.search(rf"\b{re.escape(p['name'].lower())}\b", t) or re.search(rf"\b{re.escape(p['id'])}\b", t))]
+
+
+def _profile_chart(p: dict) -> dict:
+    import astro_synastry as S
+    return S.chart(p)
+
+
+def answer_profile(text: str, p: dict) -> str:
+    """A question about a stored person → THEIR computed chart, never Mike's."""
+    c = _profile_chart(p)
+    pts = [x for x in detect(text)["points"] if x in c["points"]] or \
+          [x for x in ["Sun", "Moon", "ASC", "Mercury", "Venus", "Mars", "Jupiter", "Saturn", "MC"] if x in c["points"]]
+    miss = [x for x in detect(text)["points"] if x not in c["points"]]
+    lines = [f"{p['name']}'s natal chart (stored profile · Swiss Ephemeris · tropical · Placidus):"]
+    for x in pts:
+        v = c["points"][x]
+        lines.append(f"{p['name']}'s {x}: {v['dms']}" + (f", {T.ordinal(v['house'])} house" if v.get("house") and x not in ("ASC", "MC") else "")
+                     + (" ℞" if v.get("rx") else ""))
+    for x in miss:
+        lines.append(f"{p['name']}'s {x}: UNAVAILABLE (birth time unknown → no angles/houses)")
+    if not c["time_known"]:
+        lines.append("Birth time unknown → no Ascendant, Midheaven or houses.")
+    return "\n".join(lines)
+
+
+def _sky_now() -> dict:
+    tr = T.transits()
+    return {n: {"pos": v["dms"], "in_mikes_house": v.get("house"), "rx": bool(v.get("rx"))} for n, v in tr.items()}
+
+
+def _voc() -> dict:
+    import astro_sky
+    return astro_sky.void_of_course(T.now_local())
 
 
 def _natal_line(n: str, v: dict) -> str:
@@ -83,6 +141,32 @@ def answer(text: str) -> str | None:
                 v = nat.get(p)
                 out.append(("N" + _natal_line(p, v)[1:]) if v else f"{p}: UNAVAILABLE")
         return "\n".join(out) + "\n(Swiss Ephemeris · tropical · Placidus)"
+    if it == "voc":
+        v = _voc()
+        fmt = lambda iso: T.round_minute(datetime.fromisoformat(iso)).strftime("%a %b %-d %-I:%M %p ET")
+        return ((f"The Moon is void-of-course now, until it changes sign {fmt(v['ingress_et'])}." if v["is_voc_now"] else
+                 f"Next void-of-course: {fmt(v['voc_start_et'])} → {fmt(v['ingress_et'])} (Moon changes sign)."
+                 if v["voc_start_et"] > T.now_local().isoformat() else
+                 f"Not void right now; the Moon changes sign {fmt(v['ingress_et'])}.")
+                + "\n(Void = no more major aspects before the sign change — start nothing important.)")
+    if it == "sky" and not d["other_person"]:
+        tr = T.transits()
+        live = E.current_transits()
+        pts = [x for x in pts if x in tr]
+        if not pts:     # "what's retrograde?" / "what's in the sky"
+            rx = [n for n, v in tr.items() if v.get("rx")]
+            return ("Retrograde right now: " + (", ".join(rx) if rx else "nothing") + ".\n" +
+                    "\n".join(f"{n}: {v['dms']} (your {T.ordinal(v['house'])} house)" + (" ℞" if v.get("rx") else "")
+                              for n, v in tr.items() if n in PLANETS[:10]))
+        out = []
+        for x in pts[:3]:
+            v = tr[x]
+            out.append(f"Transiting {x} now: {v['dms']}, in your {T.ordinal(v['house'])} house · "
+                       + ("retrograde" if v.get("rx") else "direct"))
+            for e in [e for e in live if e["moving_body"] == x][:4]:
+                ex = f", exact {E.when_label(e)}" if e.get("exact_at_local") else ""
+                out.append(f"  {E.GLYPH[e['aspect']]} {e['aspect']} your natal {e['target_body']} · {e['orb']:.2f}° {e['motion']}{ex}")
+        return "\n".join(out) + "\n(Swiss Ephemeris · tropical · Placidus · times ET)"
     if it == "strongest" and not d["other_person"]:
         ev = E.current_transits()[:3]
         if not ev:
@@ -136,6 +220,20 @@ def facts(text: str = "") -> dict:
         profiles = [p["name"] for p in P.all_profiles()]
     except Exception:
         profiles = ["Mike"]
+    named = {}
+    for p in profiles_named(text)[:2]:
+        c = _profile_chart(p)
+        named[p["name"]] = {"time_known": c["time_known"],
+                            "natal": {n: {"pos": v["dms"], "house": v.get("house"), "rx": bool(v.get("rx"))} for n, v in c["points"].items()}}
+    try:
+        voc = _voc()
+    except Exception:
+        voc = None
+    year = []
+    if re.search(r"\byear|\bmonths?\b|\blong.?term|\b20[23]\d\b|\bcareer\b", text.lower()):
+        end = (now + timedelta(days=365)).date().isoformat()
+        year = [{"when_et": e.get("exact_at_local") or e["date"], "what": e["what"]} for e in TL.load()
+                if now.date().isoformat() <= e["date"] <= end and e.get("event_type") != "ingress"][:40]
     return {
         "now_et": now.isoformat(timespec="minutes"), "zodiac": "tropical", "houses": "Placidus",
         "natal": {n: {"pos": v["dms"], "house": v["house"], "rx": v["rx"]} for n, v in nat.items()},
@@ -149,7 +247,11 @@ def facts(text: str = "") -> dict:
         "progressed": {n: {"pos": v["dms"], "house": v["house"]} for n, v in prog.items()},
         "next_exact": [{"when_et": e.get("exact_at_local") or e["date"], "what": e["what"]} for e in nxt],
         "svehla_active_windows": windows,
+        "sky_now": _sky_now(),
+        "moon_void_of_course": voc,
+        **({"next_12_months": year} if year else {}),
         "profiles_on_file": profiles,
+        **({"named_profile_charts": named} if named else {}),
     }
 
 

@@ -13,7 +13,7 @@ CLI: astro_timeline.py [next N]  → chronological list (default 30 days)
      astro_timeline.py key "<key>"→ show the researched entry for a key
 """
 from __future__ import annotations
-import json, re, sys
+import json, os, re, sys
 from datetime import date, datetime, timedelta
 from pathlib import Path
 import swisseph as swe
@@ -45,7 +45,10 @@ PROG_INGRESS_BODIES = ["Moon", "Venus"]
 PROG_ASPECT_BODIES = {"Moon": ["conjunct", "square", "opposite", "trine"], "Venus": ["conjunct", "square", "opposite", "trine"]}
 GLYPH = {"Jupiter": "♃", "Saturn": "♄", "Uranus": "♅", "Neptune": "♆", "Pluto": "♇", "Chiron": "⚷",
          "Ceres": "⚳", "Juno": "⚵", "Moon": "☽", "eclipse": "🌑", "arc": "➡️", "progressed": "🌙", "sky": "🌐", "to_progressed": "🔁"}
-J0, J1, JLB = T.jd_local(START), T.jd_local(END), T.jd_local(LOOKBACK)
+# J1 = the END of END's day (END inclusive); JLA = look-ahead that only serves pass numbering, like
+# LOOKBACK (review A5: a series straddling END was numbered 1/2 instead of 1/3)
+J0, J1, JLB = T.jd_local(START), T.jd_local(END + timedelta(days=1)), T.jd_local(LOOKBACK)
+JLA = T.jd_local(END + timedelta(days=1100))
 
 
 def natal_lon(point: str) -> float:          # re-exported for older callers
@@ -126,7 +129,7 @@ def _exact_aspects(name: str, body: int) -> list[dict]:
             for pt in E.target_points(target, asp):
                 f = lambda jd, b=body, t=pt: T.signed_diff(_lon(jd, b), t)
                 series = []
-                for x in T.find_crossings(f, JLB, J1):
+                for x in T.find_crossings(f, JLB, JLA):
                     lon = _lon(x, body)
                     w0, w1 = E._window(f, x, orb, 400, 1.0)
                     e = _ev("transit", "aspect", name, x, "aspect", f"Transiting {name} {asp} natal {npt}",
@@ -251,7 +254,7 @@ def _eclipses() -> list[dict]:
 
 
 def _solar_arcs() -> list[dict]:
-    """Solar-arc hits are dated to the day (monthly scan bisected by date) — no clock time."""
+    """Solar-arc hits: real instant from the root finder, dated in ET; shown to the day (no clock time)."""
     out = []
     try:
         import astro_returns
@@ -272,11 +275,14 @@ def build() -> list[dict]:
     ev += (_progressed_ingresses() + _progressed_aspects() + _transits_to_progressed() + _sky_aspects()
            + _eclipses() + _solar_arcs())
     ev = [e for e in ev if e["kind"] != "error"] + [e for e in ev if e["kind"] == "error"]
-    ev = [e for e in ev if e["date"] >= START.isoformat()]   # lookback hits only served the numbering
+    # lookback / look-ahead hits only served the numbering; solar arcs are capped at END too
+    ev = [e for e in ev if START.isoformat() <= e["date"] <= END.isoformat()]
     ev.sort(key=lambda e: (e["date"], e.get("exact_at_local") or "", e["kind"], e["body"]))
     meta = E.cache_meta("astro_timeline.build (Swiss Ephemeris, Placidus)", VALID_DAYS)
-    CACHE.write_text(json.dumps({"meta": meta, "built": meta["generated_at"], "start": START.isoformat(),
-                                 "end": END.isoformat(), "events": ev}, indent=1))
+    tmp = CACHE.with_suffix(f".{os.getpid()}.tmp")            # review B9: atomic replace
+    tmp.write_text(json.dumps({"meta": meta, "built": meta["generated_at"], "start": START.isoformat(),
+                               "end": END.isoformat(), "events": ev}, indent=1))
+    tmp.replace(CACHE)
     return ev
 
 
@@ -324,8 +330,12 @@ def _meaning_raw(e: dict, full: bool = False) -> str:
         return s
     c = lex.combo_translation(e.get("key", "")) or lex.combo_translation(e.get("key", "").replace("Transiting ", "").replace("natal ", ""))
     if c:
-        return c.split(" (Esoteric:")[0].split(": ", 1)[-1]
-    return _generic(e)
+        c = c.split(" (Esoteric:")[0].split(": ", 1)[-1]
+    else:
+        c = _generic(e)
+    if e.get("moving_frame") == "progressed" and e.get("body"):
+        c = c.replace(f"Transiting {e['body']} (", f"Your progressed {e['body']} (")
+    return c
 
 
 def _generic(e: dict) -> str:
@@ -350,8 +360,10 @@ def _generic(e: dict) -> str:
             return (f"{e['body']} ({lex.plain(e['body'])}) meets your progressed {pt} — the {pt}-part of you as it has evolved by now, "
                     f"not the birth position. {lex.ASPECTS[e['aspect']]['is']}.")
         if e["kind"] == "progressed" and e.get("aspect"):
-            nl = natal_lon(e["natal"])
-            return lex.translate_hit({"t": "Moon", "n": e["natal"], "aspect": e["aspect"]}, nl, nl).replace("In plain terms: Moon (", "In plain terms: your progressed Moon (").replace("In plain terms: ", "")
+            nl, b = natal_lon(e["natal"]), e["body"]     # review C7: the progressed body, never "Transiting"
+            return (lex.translate_hit({"t": b, "n": e["natal"], "aspect": e["aspect"]}, nl, nl)
+                    .replace(f"Transiting {b} (", f"Your progressed {b} (").replace(f"In plain terms: {b} (", f"Your progressed {b} (")
+                    .replace("In plain terms: ", ""))
         if e["kind"] == "progressed":
             tail = e["key"].split("Progressed Moon in ")[-1]
             if tail.startswith("the "):

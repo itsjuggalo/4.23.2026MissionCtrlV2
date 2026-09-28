@@ -169,8 +169,7 @@ def check_texts() -> list[str]:
     for label, p in srcs.items():
         src = p.read_text()
         if "tg_responder" in label:
-            m = re.search(r'"astrology": \{.*?"help"', src, re.S); src = (m.group(0) if m else "") + \
-                (re.search(r'NATAL_CARD = \((.*?)\n\)', src, re.S) or re.search("x", "x")).group(0)
+            m = re.search(r'"astrology": \{.*?"help"', src, re.S); src = m.group(0) if m else ""
         for r in verify_claims(src.replace('"', " ").replace("\\n", " "), datetime(1992, 11, 4, 12, tzinfo=T.ET)):
             if r["kind"] in ("sign", "house") and not r["ok"]:
                 fails.append(f"B {label}: '{r['text'].strip()}' vs {r['truth']}")
@@ -184,7 +183,6 @@ def check_horizons() -> list[str]:
         return []
     ids = {"Sun": "10", "Moon": "301", "Mars": "499", "Jupiter": "599", "Saturn": "699", "Uranus": "799"}
     now = datetime.now(T.ET).replace(second=0, microsecond=0)
-    u = now.astimezone(datetime.now().astimezone().tzinfo)  # local; convert to UTC string below
     from datetime import timezone as _tz
     u = now.astimezone(_tz.utc)
     tr = T.transits(now)

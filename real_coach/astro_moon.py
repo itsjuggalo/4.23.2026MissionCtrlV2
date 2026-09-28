@@ -55,7 +55,9 @@ def _elong(jd: float) -> float:
 
 
 def phase_at(jd: float) -> str:
-    return PHASES[int(((_elong(jd) + 22.5) % 360) // 45)]
+    """The phase that BEGAN at the latest 45° crossing — the same convention as phase_moments
+    (review A2/B3: a centred ±22.5° naming made /moon contradict itself ~45% of the time)."""
+    return PHASES[int(_elong(jd) // 45) % 8]
 
 
 def next_sign_ingress(jd: float) -> float:
@@ -157,12 +159,12 @@ def sign_post(jd: float | None = None, sign: str | None = None) -> str:
         lines.append("📍 Your placements in " + s + ": " + ", ".join(f"{k} {v['dms']}" for k, v in placed))
     asp = _stay_aspects(start, end)
     if asp:
-        lines.append("⏱ What it touches on the way through (exact ET; ✓ = already passed):")
+        lines.append("⏱ What it touches on the way through (exact ET; ✓ = already passed, → = still ahead):")
         now_jd = T.jd_for(T.now_local())
         for h in sorted(sorted(asp, key=lambda h: (h["rank"], h["jd"]))[:7], key=lambda h: h["jd"]):
             meaning = {"conjunct": "switches on", "opposite": "pulls against", "square": "pokes",
                        "trine": "eases", "sextile": "opens a door for"}[h["aspect"]]
-            lines.append(f"  {'✓' if h['jd'] < now_jd else E.GLYPH[h['aspect']]} {_hm(h['jd'], today)}: Moon {h['aspect']} your natal {h['target']} — "
+            lines.append(f"  {'✓' if h['jd'] < now_jd else '→'} {_hm(h['jd'], today)}: Moon {h['aspect']} your natal {h['target']} — "
                          f"{meaning} {lex.PLANETS[h['target']]['is'] if h['target'] in lex.PLANETS else 'that angle'}")
     if s == "Pisces":
         lines.append("↺ Lunar return this stay (Moon back to your natal 1°16′ Pisces) — a monthly emotional reset.")
@@ -193,7 +195,7 @@ def phase_post(jd: float | None = None) -> str:
         lines.append("Avoid: " + ent["avoid"])
     hits = []
     for n, v in T.natal().items():
-        if n in NATAL_SKIP:
+        if n in NATAL_SKIP or n == "DSC":       # review A4: the DSC hit is the ASC hit again
             continue
         for a, deg in E.ASPECT_DEG.items():
             orb = abs(T.angle(lon, v["lon"]) - deg)
@@ -250,6 +252,8 @@ def due(start: datetime, end: datetime) -> list[tuple[str, str]]:
 
 if __name__ == "__main__":
     a = sys.argv[1:]
+    if len(a) > 1 and a[0] == "now" and a[1].capitalize() in T.SIGNS:    # Telegram "/moon Scorpio"
+        a = ["sign", a[1]]
     cmd = a[0] if a else "now"
     if cmd == "now":
         print(now_post())

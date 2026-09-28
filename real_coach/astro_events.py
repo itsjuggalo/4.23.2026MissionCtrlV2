@@ -222,7 +222,10 @@ def when_label(e: dict, today: date | None = None, with_time: bool = True) -> st
     today = today or T.today_local()
     if not e.get("exact_at_local"):
         return e.get("local_date") or e.get("date") or ""
-    t = T.round_minute(datetime.fromisoformat(e["exact_at_local"]))
+    raw = datetime.fromisoformat(e["exact_at_local"])
+    t = T.round_minute(raw)
+    if t.date() != raw.date():          # review A10: 23:59:40 stays on its local_date (shown 11:59 PM)
+        t = raw.replace(second=0, microsecond=0)
     n = (t.date() - today).days
     day = {0: "today", -1: "yesterday", 1: "tomorrow"}.get(n)
     if day is None:
@@ -317,6 +320,8 @@ def current_transits(when: datetime | None = None, with_passes: bool = True) -> 
                 continue                              # DSC only matters for the partnership bodies
             nl = natal_lon(n)
             for asp in ASPECT_DEG:
+                if n == "DSC" and asp != "conjunct":
+                    continue                          # review A4: DSC square/trine/sextile/opp = the ASC hit
                 pts = target_points(nl, asp)
                 d, pt = min(((T.signed_diff(lon, p), p) for p in pts), key=lambda x: abs(x[0]))
                 orb_allowed = T.ORB.get(t, 1.0)
@@ -497,15 +502,22 @@ def context_factors(d: date | None = None) -> list[dict]:
 def themes_line(th: list[dict], n: int = 3) -> str:
     if not th:
         return ""
-    parts = []
-    for t in th[:n]:
-        sup, con = len(t["supporting_factors"]), len(t["conflicting_factors"])
-        parts.append(f"{t['label']} ({t['tone']}: {sup} for" + (f", {con} against)" if con else ")"))
-    return "🧭 Threads: " + " · ".join(parts)
+    return "🧭 Threads: " + " · ".join(theme_phrase(t) for t in th[:n])
+
+
+def theme_phrase(t: dict) -> str:
+    """'Relationships: mostly tense (5 hard, 2 easy)' — counts of hard vs easy contacts, in plain
+    words (review C5: '(supportive: 4 for, 2 against)' read as a contradiction next to the weekly)."""
+    fs = t["supporting_factors"] + t["conflicting_factors"]
+    hard = sum(f.get("tone") == "challenging" for f in fs)
+    easy = sum(f.get("tone") == "supportive" for f in fs)
+    word = {"challenging": "mostly tense", "supportive": "mostly easy", "mixed": "mixed"}.get(t["tone"], "background")
+    counts = ", ".join(x for x in (f"{hard} hard" if hard else "", f"{easy} easy" if easy else "") if x)
+    return f"{t['label']}: {word}" + (f" ({counts})" if counts else "")
 
 
 # ── cache metadata (every engine cache carries this) ──────────────────────────
-ENGINE_FILES = ("astro_truth.py", "astro_events.py", "astro_timeline.py")
+ENGINE_FILES = ("astro_truth.py", "astro_events.py", "astro_timeline.py", "astro_sky.py", "astro_returns.py")  # review B8
 
 
 def code_hash(files: tuple[str, ...] = ENGINE_FILES) -> str:

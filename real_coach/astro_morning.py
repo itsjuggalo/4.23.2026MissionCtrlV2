@@ -33,7 +33,10 @@ WEEKLY_COVERS = ("📜", "⏳", "🗓")          # daily paragraphs the Monday w
 
 
 def _daily() -> str:
-    r = subprocess.run([PY, str(HERE / "daily_transits.py")], capture_output=True, text=True, timeout=240)
+    try:
+        r = subprocess.run([PY, str(HERE / "daily_transits.py")], capture_output=True, text=True, timeout=240)
+    except subprocess.TimeoutExpired:          # B11: a slow daily degrades, never kills the packet
+        return "🌌 (daily transits timed out — /today in a minute)"
     return (r.stdout or "").strip() or f"🌌 (daily transits unavailable: rc={r.returncode} {r.stderr.strip()[:200]})"
 
 
@@ -54,7 +57,12 @@ def build(force: set[str] | None = None) -> str:
     parts = [daily]
     if monday:
         import astro_weekly
-        parts.append(_section("weekly", astro_weekly.weekly_block))
+        try:
+            import daily_transits
+            shown = daily_transits.digest_keys()
+        except Exception:
+            shown = set()
+        parts.append(_section("weekly", lambda: astro_weekly.weekly_block(exclude=shown)))
     if first:
         import astro_lookahead, astro_evidence
         parts.append(_section("month lookahead", lambda: astro_lookahead.lookahead_block(30, compact=True)))
@@ -98,7 +106,7 @@ if __name__ == "__main__":
     # (plain + esoteric meaning of every sign/planet/house/phase mentioned) closes the morning.
     try:
         import astro_esoteric
-        chunks.append(astro_esoteric.esoteric_post())
+        chunks += pack(astro_esoteric.esoteric_post())
     except Exception as e:
         chunks.append(f"🜂 (esoteric read unavailable: {e})")
     try:

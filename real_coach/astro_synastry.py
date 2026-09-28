@@ -150,8 +150,29 @@ def _line(x: dict) -> str:
     return f"{GLYPH[x['aspect']]} {x['a']} ({x['a_pos']}) {x['aspect']} {x['b']} ({x['b_pos']}) · {x['orb']:.2f}°"
 
 
+_GIST = {"emotional": "your feelings connect", "attraction": "attraction", "communication": "how you talk",
+         "stability": "staying power", "long-term": "a long-term bond", "friction": "friction to work through",
+         "other": "a background link"}
+_NICE = {"ASC": "Rising", "MC": "Midheaven", "DSC": "Descendant"}
+
+
+def _glance(s: dict, a: dict, b: dict) -> list[str]:
+    """C12: lead with a plain 3-line answer + easy/hard count before the raw contact list."""
+    asp = s["aspects"]
+    if not asp:
+        return ["No major contacts within orb — a low-key match on paper."]
+    easy = sum(x["aspect"] in ("trine", "sextile") for x in asp)
+    hard = sum(x["aspect"] in ("square", "opposite") for x in asp)
+    fused = sum(x["aspect"] == "conjunct" for x in asp)
+    out = [f"At a glance: {easy} easy · {hard} tense · {fused} fused contacts. Tightest:"]
+    for x in sorted(asp, key=lambda x: x["orb"])[:3]:
+        out.append(f"• {a['name']}'s {_NICE.get(x['a_point'], x['a_point'])} {GLYPH[x['aspect']]} "
+                   f"{b['name']}'s {_NICE.get(x['b_point'], x['b_point'])} ({x['orb']:.2f}°) — {_GIST[x['group']]}")
+    return out
+
+
 def render(s: dict, a: dict, b: dict) -> str:
-    lines = [f"💑 SYNASTRY — {a['name']} × {b['name']} (tropical, Placidus)"]
+    lines = [f"💑 SYNASTRY — {a['name']} × {b['name']} (tropical, Placidus)"] + _glance(s, a, b) + ["", "All contacts by theme:"]
     for who, miss in s["unavailable"].items():
         if miss:
             lines.append(f"⚠️ {who}: birth time unknown → ASC, MC and houses UNAVAILABLE (planets at local noon; "
@@ -172,9 +193,9 @@ def render(s: dict, a: dict, b: dict) -> str:
 
 
 def render_progressed(s: dict, a: dict, b: dict) -> str:
-    lines = [f"💑⏳ PROGRESSED SYNASTRY — {a['name']} × {b['name']} on {s['date']} (orb 1° for progressed contacts)"]
+    lines = [f"💑⏳ PROGRESSED SYNASTRY — {a['name']} × {b['name']} on {date.fromisoformat(s['date']):%b %-d %Y} (orb 1° for progressed contacts)"]
     for frame, asp in s["frames"].items():
-        lines.append(""); lines.append(f"[{frame}] — {len(asp)} contact(s)")
+        lines.append(""); lines.append(f"[{frame}] — {len(asp)} contact(s)" + (" · tightest 8 shown" if len(asp) > 8 else ""))
         lines += [_line(x) for x in asp[:8]] or ["(none within orb)"]
     for who, miss in s["unavailable"].items():
         if miss:

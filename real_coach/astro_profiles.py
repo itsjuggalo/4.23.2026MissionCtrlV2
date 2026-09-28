@@ -46,11 +46,15 @@ def slug(name: str) -> str:
 
 
 def _load() -> dict:
+    """Missing store → {}. A store that exists but can't be parsed RAISES (review B14) — returning {}
+    would let the next add() silently overwrite every saved profile."""
     p = store_path()
+    if not p.exists():
+        return {}
     try:
         return json.loads(p.read_text())
-    except Exception:
-        return {}
+    except Exception as e:
+        raise RuntimeError(f"profile store {p} is unreadable ({type(e).__name__}); fix or restore it — nothing overwritten") from e
 
 
 def _save(d: dict) -> None:
@@ -63,8 +67,24 @@ def _save(d: dict) -> None:
     os.chmod(p, 0o600)
 
 
+def local_time_status(birth_date: str, birth_time: str | None, tz: str) -> str:
+    """'ok' | 'gap' (wall time skipped by a DST jump — it never happened) | 'fold' (happened twice)."""
+    d = date.fromisoformat(birth_date)
+    hh, mm = (int(x) for x in (birth_time or "12:00").split(":"))
+    z = ZoneInfo(tz)
+    dt = datetime.combine(d, dtime(hh, mm), tzinfo=z)
+    back = dt.astimezone(ZoneInfo("UTC")).astimezone(z)
+    if (back.hour, back.minute) != (hh, mm):
+        return "gap"
+    return "fold" if dt.replace(fold=0).utcoffset() != dt.replace(fold=1).utcoffset() else "ok"
+
+
 def natal_jd(birth_date: str, birth_time: str | None, tz: str) -> float:
-    """UT Julian day of a LOCAL birth moment (unknown time → local noon, flagged by the caller)."""
+    """UT Julian day of a LOCAL birth moment (unknown time → local noon, flagged by the caller).
+    Review A11: a time inside a DST gap raises; an ambiguous (fold) time takes the first occurrence
+    (fold=0) and add() records it as ambiguous_time."""
+    if local_time_status(birth_date, birth_time, tz) == "gap":
+        raise ValueError(f"{birth_date} {birth_time} does not exist in {tz} (clocks jumped forward) — check the birth time")
     d = date.fromisoformat(birth_date)
     hh, mm = (int(x) for x in (birth_time or "12:00").split(":"))
     return T.jd_for(datetime.combine(d, dtime(hh, mm), tzinfo=ZoneInfo(tz)))
@@ -100,9 +120,13 @@ def add(name: str, birth_date: str, birth_time: str | None, place: str = "",
     if lat is None or lon is None or not tz:
         lat, lon, tz = geocode(place)
     ZoneInfo(tz)                                                 # validates
+    old = _load().get(pid)
+    if old and old["name"] != name.strip():
+        raise ValueError(f"'{name}' collides with stored profile '{old['name']}' — /profile delete {old['name']} first")
     prof = {"id": pid, "name": name.strip(), "birth_date": birth_date, "birth_time": birth_time,
             "time_known": birth_time is not None, "place": place, "lat": round(lat, 4), "lon": round(lon, 4),
             "tz": tz, "natal_jd": natal_jd(birth_date, birth_time, tz),
+            "ambiguous_time": bool(birth_time) and local_time_status(birth_date, birth_time, tz) == "fold",
             "created_at": T.now_local().isoformat(timespec="seconds")}
     d = _load(); d[pid] = prof; _save(d)
     return prof
@@ -128,7 +152,10 @@ def delete(name: str) -> bool:
 
 def summary(p: dict) -> str:
     t = p["birth_time"] if p.get("time_known") else "time unknown (no ASC/houses)"
-    return f"{p['name']} — {p['birth_date']} {t} · {p.get('place') or ''} ({p['tz']})"
+    if p.get("ambiguous_time"):
+        t += " (ambiguous — clocks fell back that hour; the first occurrence is used)"
+    where = p.get("place") or f"{p['lat']:.2f}, {p['lon']:.2f}"
+    return f"{p['name']} — {p['birth_date']} {t} · {where} ({p['tz']})"
 
 
 def main() -> int:

@@ -11,6 +11,7 @@ NEVER logged: message text, answers, names, birth dates/times/places, coordinate
 from __future__ import annotations
 
 import hashlib
+import os
 import json
 import sys
 import time
@@ -19,7 +20,7 @@ from datetime import datetime
 from pathlib import Path
 from zoneinfo import ZoneInfo
 
-TRACE = Path.home() / "logs/astrology/trace.jsonl"
+TRACE = Path(os.environ.get("ASTRO_TRACE") or Path.home() / "logs/astrology/trace.jsonl")
 ALLOWED = {"request_id", "ts", "chat", "intent", "calculator", "cache_hit", "event_count", "model",
            "duration_ms", "delivery", "error", "lane", "command"}
 

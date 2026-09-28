@@ -11,25 +11,29 @@ PROFILE (astro_profiles) → ENGINE (astro_truth: ephemeris, time, crossings, pr
      astro_moon · astro_synastry · astro_facts/astro_bot for free chat) → TELEGRAM (tg_responder) + PAGE
 ```
 
-The LLM never computes: positions, degrees, signs, houses, aspects, orbs, dates, times, applying/separating, retrograde, progressions, ingresses, synastry. It gets `astro_facts.llm_context()` (JSON of computed facts + rule "not listed → UNAVAILABLE"), and every answer is then fact-checked by `astro_verify.py --check-text`.
+The LLM never computes: positions, degrees, signs, houses, aspects, orbs, dates, times, applying/separating, retrograde, progressions, ingresses, synastry. It gets `astro_facts.llm_context()` (JSON of computed facts — natal, live transits, themes, progressions, next exacts, Svehla windows, `sky_now` positions + retrograde flags, `moon_void_of_course`, `next_12_months` when the question is long-range, `named_profile_charts` for stored people it names — plus the rule "not listed → UNAVAILABLE"). The astro lane's LLM runs with `Read,Grep,Glob` only (no Bash, web or Skill), and the gateway never calls it without that facts block: router failure → "calculation didn't run", unknown slash command → refused. Answers get an `astro_verify.py --check-text` footer, which re-derives **sign, house, aspect and retrograde claims** (not dates/times — those only ever come from the facts block).
 
 | Module | Role |
 |---|---|
-| `astro_truth.py` | THE engine. Natal chart, `jd_for`/`jd_to_local`/`local_date`/`round_minute`, `find_crossings` (the one root finder, 5 s bisection), `progressed_at` (the one progression calculator) |
+| `astro_truth.py` | THE engine. Natal chart, `jd_for`/`jd_to_local`/`local_date`/`round_minute`, `find_crossings` (the one root finder, 0.05 s bisection), `progressed_at` (the one progression calculator) |
 | `astro_events.py` | Canonical event model (`make_event`), motion, stationary, pass series, lifecycle, priority, themes, `fast_exacts` (Sun–Mars), cache metadata |
-| `astro_timeline.py` | 5-year event cache (`~/portfolio/astrology/timeline.json`): transits (slow bodies), ingresses, progressions, transits to progressed, sky, eclipses, solar arcs |
+| `astro_timeline.py` | 5-year event cache (`real_coach/astro_timeline.json`, git-tracked): transits (slow bodies), ingresses, progressions, transits to progressed, sky, eclipses, solar arcs |
 | `svehla.py` | Aug-2026 Svehla reading: windows (`svehla_windows.json`, his dates verbatim + `[engine: exact …]` beside computable ones); exact hits are a VIEW of the timeline |
 | `daily_transits.py` | Daily read (08:32 digest, `/today`, `/full`, `/explain`) |
 | `astro_weekly.py` | Weekly read (`/week`, Monday section of the 08:32 packet) |
-| `astro_moon.py` | Moon sign + phase posts against Mike's placements (`/moon`, `/moonguide`, auto-posts via alerts) |
+| `astro_moon.py` | Moon sign + phase posts against Mike's placements (`/moon`, `/moon <sign>`, `/moonguide`, auto-posts via alerts), inline ✧ esoteric lines |
+| `astro_esoteric.py` | 🜂 esoteric read of today's transits (`/esoteric`, own message every morning) · `--natal` = 🜃 natal chart esoterically, planet → sign → house → combined reading (`/esonatal`, page section) |
+| `astro_lexicon.py` + `astro_esoteric_kb.json` | Interpretation; `esoteric_key(text)` = the 📖 key (plain + esoteric meaning of every sign/planet/house/phase a message mentions) appended after every reading. KB text is second person; its hard-coded degrees are checked against the engine |
 | `astro_alerts.py` | Hourly 08–22 ET pushes: exacts (canonical `exact_at_local`), VoC, stations, lunations, Moon sign/phase changes |
 | `astro_profiles.py` · `astro_synastry.py` | Birth profiles (`~/portfolio/astrology/profiles.json`, 600) · synastry + progressed synastry |
-| `astro_facts.py` · `astro_bot.py` · `astro_trace.py` | Free-chat grounding · deterministic router called by the gateway · privacy-safe request trace |
+| `astro_facts.py` · `astro_bot.py` · `astro_trace.py` | Free-chat grounding · deterministic router called by the gateway · privacy-safe request trace (`$ASTRO_TRACE` overrides the path; tests use a temp file) |
 | `astro_verify.py` | 08:25 truth check (natal, texts, NASA Horizons, Svehla dates, outputs, passes, page, commands) + `--check-text` |
 
 ## Time policy
 - Every human-facing date/time = the real instant localized with `zoneinfo` America/New_York (DST from tzdb). Never `swe.revjul`'s UT date, never fixed offsets, never `hour=28`.
-- Display = nearest minute (`T.round_minute`); instants stored to the second (`exact_at_utc`, `exact_at_local`, `local_date`).
+- Display = nearest minute (`T.round_minute`), rounded once from the true instant; instants stored to the second (`exact_at_utc`, `exact_at_local`, `local_date`); `when_label` and `local_date` always agree on the day.
+- Degrees display to the arcminute, capped at 29°59′ so a position never shows the next sign.
+- Birth profiles: a local time inside a DST gap is rejected; an ambiguous fall-back time is saved with `ambiguous_time: true`.
 - Processes: `tg_responder.py` pins `TZ=America/New_York` + `tzset()` at import; tg-gateway's PM2 env TZ fixed 2026-09-27. (Fleet-wide PM2 TZ strings are still corrupted — see ledger; other apps untouched.)
 
 ## Progressions
@@ -41,6 +45,8 @@ Secondary, day-for-a-year, key 365.25 days from each person's own natal JD: `pro
 ## Orbs, motion, passes
 - Transit orbs: `astro_truth.ORB` (Sun 1.2, Moon 2.5, Mercury/Venus/Mars 1.0, Jupiter 0.8, Saturn/Chiron 0.7, outers 0.6, Juno 0.8, Ceres 0.6).
 - Motion = signed distance × instantaneous speed; stationary if speed flips within ±1 day; exact if ≤0.02° or within ±1 h of the instant.
+- One hit per ASC/DSC axis (DSC kept only for conjunctions) in live transits, eclipses, solar arcs and Moon-phase hits; `T.aspects(one_per_axis=True)` for anything that counts.
+- Pass numbering scans 1100 days past the cache end so a series cut by the window still reads e.g. 1 of 3.
 - Pass series = crossings of one target point grouped by gap (Sun/Moon 0, Mercury 60 d, Venus 100, Mars 200, others 600).
 - Synastry orbs: luminary/angle pairs 8/8/7/7/5 (conj/opp/sq/tri/sext), others 6/6/5/5/4; anything progressed 1°.
 
@@ -52,10 +58,17 @@ Integer points, each with a readable reason (shown in `/full`): exact today +3, 
 - Weekly = shape of 7 days: themes, every exact (ET, pass label, incl. Sun–Mars), slow transits in force, progressions, Svehla windows with Why/Do, practice/profection, best/hardest day, coming up. A test asserts no duplicated lines.
 
 ## Telegram flow
-Gateway (`tg_responder.py`, PM2 `tg-gateway`) → astro lane: trading commands refused → `astro_bot.py route` (subprocess): computed reply sent as-is, or COMPUTED FACTS → `claude -p` (sonnet) → `astro_verify --check-text` footer. Plain-text replies, split on line boundaries under 4096, one retry. Menu (9): today, week, transits, progressions, synastry, progsyn, timeline, moon, help. Unknown person → UNAVAILABLE + `/profile add` instructions.
+Gateway (`tg_responder.py`, PM2 `tg-gateway`) → astro lane: trading commands refused → `astro_bot.py route` (subprocess): computed reply sent as-is, or COMPUTED FACTS → `claude -p` (sonnet) → `astro_verify --check-text` footer. Plain-text replies, split on line boundaries under 4096, one retry, then the 📖 key as its own message. Menu (11): today, week, transits, progressions, synastry, progsyn, timeline (30 days), moon, esoteric, esonatal, help.
+Router intents (plain words): chart · placement (natal with "my", else the live sky) · sky (transiting X / retrograde) · voc · moon · exact · strongest · week · year · today · progressions · timeline · synastry · progressed synastry; judgement questions ("is today good for…", "should I…") go to the LLM with facts. A stored person named in the question is answered from **their** chart (never Mike's); an unstored person → UNAVAILABLE + `/profile add` usage. Gateway logs only intent/length for this lane; history file is 600.
+
+## Profiles
+`astro_profiles.py` store (600, atomic writes). An unreadable store raises instead of being treated as empty (no silent wipe); a name that collides with a different stored name is refused.
+
+## Morning packet (08:32)
+Daily digest (top 4 ranked hits + ≤2 NEW/EXACT, each with a plain gist; Moon line gives the sign change and Placidus house exit; void-of-course when it starts today) → Monday: the weekly, which skips meanings and slow-transit lines the digest already showed (`weekly_block(exclude=daily_transits.digest_keys())`) → 🜂 esoteric read → 📖 key. `/full` keeps the engine stamp, timing layer and ranking reasons.
 
 ## Caches
-Every cache carries `meta = {schema_version, generated_at, source, timezone, code_hash, valid_until}`; `E.cache_fresh()` rebuilds on code-hash change or expiry (timeline 7 d ≈ 90 s rebuild; sky cache). Gateway sky-context cache is keyed by the ET date.
+Every cache carries `meta = {schema_version, generated_at, source, timezone, code_hash, valid_until}`; `E.cache_fresh()` rebuilds on code-hash change or expiry (timeline 7 d ≈ 90 s rebuild; sky cache starts the day before so nothing between midnight and noon is missed). Engine files in the hash: astro_truth, astro_events, astro_timeline, astro_sky, astro_returns. Cache and alert-state writes are atomic (tmp + `os.replace`). Gateway sky-context cache is keyed by the ET date (the planetary hour is stripped from it).
 
 ## Schedules (crontab, all `TZ=America/New_York`)
 08:25 `astro_verify --all --send-on-fail` · 08:30 `astro_today_page` · 08:32 `astro_morning --send` · 08:34 `astro_tasks daily` (trading lane — separate, untouched) · `5 8-22` `astro_alerts` · Oct 27 solar return. Page: `~/agents/claudeclaw/data/astrology/mike-today-live.html` → https://claudeclaw.serveftp.com/astrology/readings/mike-today-live.html (login-gated).
@@ -67,4 +80,4 @@ Every cache carries `meta = {schema_version, generated_at, source, timezone, cod
 - Rebuild caches: `astro_timeline.py rebuild` · sky rebuilds itself.
 - Deploy code: files are read per run; only the gateway needs `pm2 restart tg-gateway` after `tg_responder.py` changes (never restart claudeclaw).
 - Traces: `~/logs/astrology/trace.jsonl` (no text, hashed chat id). Logs: `~/logs/astrology/astrology.log`.
-- Git: local repo at `~/05_AUTOMATION/scripts` (allowlist `.gitignore`, no remote).
+- Git: repo at `~/05_AUTOMATION/scripts` (allowlist `.gitignore`); commits are local, not pushed.

@@ -7,7 +7,7 @@
 State in ~/portfolio/astrology/alerts_sent.json prevents repeats. `--dry` prints only; `--window N` minutes (default 60).
 """
 from __future__ import annotations
-import json, sys
+import json, os, sys
 from datetime import date, datetime, timedelta
 from pathlib import Path
 import astro_truth as T
@@ -41,9 +41,13 @@ def due(now: datetime | None = None, window_min: int = 60, lookback_min: int = 0
         import astro_sky as SK
         voc = SK.void_of_course(now)
         vs = datetime.fromisoformat(voc["voc_start_et"])
-        if start <= vs < end:
-            ing = datetime.fromisoformat(voc["ingress_et"])
-            out.append((f"voc:{vs.isoformat()}", f"🌙 Moon goes void-of-course at {vs:%-I:%M %p} until {ing:%a %-I:%M %p} ET — finish what's started, don't launch anything new."))
+        ing = datetime.fromisoformat(voc["ingress_et"])
+        hm = lambda dt: f"{dt:%-I:%M %p}" if dt.date() == today else f"{dt:%a %-I:%M %p}"
+        # review C9: day on the start time; "now →" once it has begun (incl. a void that began in quiet hours)
+        if start <= vs < end or (voc.get("is_voc_now") and ing > now):
+            head = f"Moon is void-of-course now → {hm(ing)} ET" if vs <= now else \
+                   f"Moon goes void-of-course {hm(vs)} → {hm(ing)} ET"
+            out.append((f"voc:{vs.isoformat()}", f"🌙 {head} — finish what's started, don't launch anything new."))
         ev = SK._events_in(today, 2)
         for st in ev.get("stations", []):
             t = datetime.fromisoformat(st["date_et"])
@@ -74,7 +78,11 @@ def main() -> int:
     now = datetime.now(T.ET)
     if not dry and (now.hour >= QUIET[0] or now.hour < QUIET[1]):
         return 0
-    sent = json.loads(STATE.read_text()) if STATE.exists() else {}
+    try:                                          # review B9: a corrupt state file must not kill alerts
+        sent = json.loads(STATE.read_text()) if STATE.exists() else {}
+    except Exception as ex:
+        print(f"⚠ alerts state unreadable ({ex}) — starting empty", file=sys.stderr)
+        sent = {}
     items = [(u, t) for u, t in due(now, win, 0 if dry else 65) if u not in sent and u != "err"]
     if not items:
         print("nothing due"); return 0
@@ -87,14 +95,23 @@ def main() -> int:
     print(msg)
     if not dry:
         from daily_transits import chunk_message
-        for chunk in chunk_message(msg):          # never truncate: split under Telegram's cap
-            if not send_to_lane(chunk):           # not marked sent → the next hourly run retries it
-                print("✖ alert send failed — will retry next run", file=sys.stderr); return 1
+        rc = 0
+        for i, chunk in enumerate(chunk_message(msg)):     # never truncate: split under Telegram's cap
+            if not send_to_lane(chunk):
+                if i == 0:                        # nothing went out → not marked, next hourly run retries
+                    print("✖ alert send failed — will retry next run", file=sys.stderr); return 1
+                # review B12: part already delivered → mark sent anyway (no duplicate first chunk next hour)
+                print(f"✖ alert chunk {i + 1} failed — earlier chunks delivered, not retried", file=sys.stderr)
+                rc = 1
+                break
         for u, _ in items:
             sent[u] = now.isoformat(timespec="minutes")
         cutoff = (now - timedelta(days=14)).isoformat()
         sent = {k: v for k, v in sent.items() if v >= cutoff}
-        STATE.write_text(json.dumps(sent, indent=1))
+        tmp = STATE.with_suffix(f".{os.getpid()}.tmp")    # review B9: atomic replace
+        tmp.write_text(json.dumps(sent, indent=1))
+        tmp.replace(STATE)
+        return rc
     return 0
 
 

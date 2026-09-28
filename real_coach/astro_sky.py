@@ -19,6 +19,7 @@ CLI:  astro_sky.py [--days N] | astro_sky.py alerts | astro_sky.py voc
 from __future__ import annotations
 
 import json
+import os
 import sys
 from datetime import date, datetime, timedelta, timezone
 from pathlib import Path
@@ -73,8 +74,8 @@ def _jd_of_date(d: date, hour: float = 12.0) -> float:
 
 
 def _jd_to_dt(jd: float) -> datetime:
-    """JD → ET wall time rounded to the minute (astro_truth's zoneinfo conversion)."""
-    return (T.jd_to_utc(jd) + timedelta(seconds=30)).replace(second=0).astimezone(T.ET)
+    """JD → ET wall time rounded to the minute (astro_truth's zoneinfo conversion + display rounding)."""
+    return T.round_minute(T.jd_to_local(jd))
 
 
 def _iso(jd: float) -> str:
@@ -108,6 +109,11 @@ def natal_hits(lon: float, orb: float = 3.0) -> list[dict]:
             o = abs(sep - adeg)
             if o <= orb:
                 hits.append({"natal": name, "aspect": aname, "orb": round(o, 2)})
+    # one axis, one hit (review A4): "opposite ASC" == "conjunct DSC", "opposite MC" == "conjunct IC"
+    names = {(h["natal"], h["aspect"]) for h in hits}
+    mirror = {"ASC": "DSC", "DSC": "ASC", "MC": "IC", "IC": "MC"}
+    hits = [h for h in hits if not (h["aspect"] == "opposite" and h["natal"] in mirror
+                                    and (mirror[h["natal"]], "conjunct") in names)]
     hits.sort(key=lambda h: h["orb"])
     return hits
 
@@ -117,9 +123,10 @@ def _point(lon: float) -> dict:
     return {"lon": info["lon"], "sign": info["sign"], "deg": info["deg"], "house": info["house"]}
 
 
-def _scan_crossings(f, jd0: float, jd1: float, step_days: float, tol_days: float = 1 / 1440) -> list[float]:
+def _scan_crossings(f, jd0: float, jd1: float, step_days: float, tol_days: float | None = None) -> list[float]:
     """Coarse-scan f over [jd0,jd1] at step_days, bisect every sign change — astro_truth.find_crossings."""
-    return T.find_crossings(f, jd0, jd1, step_days, tol_days)
+    # review A7: the engine's default tolerance (was 1 min here → wrong displayed minute ~10%)
+    return T.find_crossings(f, jd0, jd1, step_days) if tol_days is None else T.find_crossings(f, jd0, jd1, step_days, tol_days)
 
 
 # ── 1. lunations ─────────────────────────────────────────────────────────────
@@ -160,8 +167,9 @@ def eclipses(start: date, days: int) -> list[dict]:
         if jdmax > jd1:
             break
         if jdmax >= jd0:
-            retflag, _attr = swe.lun_eclipse_how(jdmax, (0.0, 0.0, 0.0), swe.FLG_SWIEPH)
-            etype = "total" if retflag & swe.ECL_TOTAL else "partial" if retflag & swe.ECL_PARTIAL else "penumbral"
+            # review A1: the type is the global retflag of lun_eclipse_when (lun_eclipse_how at 0°N 0°E
+            # returns 0 whenever the Moon is below that horizon → a total eclipse read as "penumbral")
+            etype = "total" if _res & swe.ECL_TOTAL else "partial" if _res & swe.ECL_PARTIAL else "penumbral"
             lon = _lon(jdmax, swe.MOON)
             out.append({"date_et": _iso(jdmax), "kind": "lunar", "type": etype,
                         **_point(lon), "natal_hits": natal_hits(lon)})
@@ -308,7 +316,9 @@ def _today_et() -> date:
 
 
 def _build_cache(start: date | None = None) -> dict:
-    start = start or _today_et()
+    # review B7: scans start at local noon of `start`, so begin a day early — otherwise a lunation /
+    # station / ingress between 00:00 and 12:00 on a rebuild day is silently missing
+    start = start or (_today_et() - timedelta(days=1))
     import astro_events as E
     data = {
         "meta": E.cache_meta("astro_sky._build_cache (Swiss Ephemeris)", CACHE_MAX_AGE_DAYS, SKY_FILES),
@@ -322,7 +332,9 @@ def _build_cache(start: date | None = None) -> dict:
         "mercury_rx": mercury_rx(start, CACHE_HORIZON_DAYS),
         "venus_mars_rx": venus_mars_rx(start, CACHE_HORIZON_DAYS),
     }
-    CACHE_FILE.write_text(json.dumps(data, indent=1))
+    tmp = CACHE_FILE.with_suffix(f".{os.getpid()}.tmp")       # review B9: atomic replace
+    tmp.write_text(json.dumps(data, indent=1))
+    tmp.replace(CACHE_FILE)
     return data
 
 

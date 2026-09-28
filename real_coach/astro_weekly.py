@@ -48,7 +48,10 @@ def _pass_txt(e: dict) -> str:
     return f" ({(e.get('pass_label') or 'pass').lower()} {e.get('pass_number')} of {e['pass_total']})"
 
 
-def weekly_block(start: datetime | date | None = None) -> str:
+def weekly_block(start: datetime | date | None = None, exclude: set | None = None) -> str:
+    """exclude = (moving, aspect, target) already explained in the same morning's daily digest:
+    their exact still gets a date line here, but no meaning reprint and no slow-transit repeat (C4)."""
+    exclude = exclude or set()
     if start is None:
         start = T.now_local()
     elif isinstance(start, date) and not isinstance(start, datetime):
@@ -68,8 +71,8 @@ def weekly_block(start: datetime | date | None = None) -> str:
         for t in th[:3]:
             sup, con = len(t["supporting_factors"]), len(t["conflicting_factors"])
             ev = [f.split(" — ")[0] for f in t["evidence"] if " — " in f][:3]
-            lines.append(f"• {t['label']} — {t['tone']} ({sup} for" + (f", {con} against)" if con else ")")
-                         + (f": {'; '.join(ev)}" if ev else ""))
+            # C5: plain words, and say it's the MIDWEEK picture (the daily scores today)
+            lines.append(f"• {E.theme_phrase(t)} — midweek" + (f": {'; '.join(ev)}" if ev else ""))
             if t["missing"]:
                 lines.append(f"   uncertain: {'; '.join(t['missing'])}")
         lines.append("")
@@ -82,7 +85,8 @@ def weekly_block(start: datetime | date | None = None) -> str:
             when = T.round_minute(datetime.fromisoformat(e["exact_at_local"])).strftime("%a %b %-d %-I:%M %p") \
                 if e.get("exact_at_local") and e.get("moving_frame") != "progressed" else \
                 date.fromisoformat(e["date"]).strftime("%a %b %-d")
-            m = TL._meaning(e)
+            k = (e.get("moving_body") or e.get("body"), e.get("aspect"), e.get("target_body") or e.get("natal"))
+            m = None if k in exclude else TL._meaning(e)
             lines.append(f"{TL._glyph(e)} {when}: {e['what']}{_pass_txt(e) if '(pass' not in e['what'] else ''}"
                          + (f" — {m}" if m else ""))
     else:
@@ -90,7 +94,8 @@ def weekly_block(start: datetime | date | None = None) -> str:
     lines.append("")
 
     # 3 · slow transits in force (the backdrop), with pass context — no reprint of the daily paragraphs
-    slow = [e for e in live if e["moving_body"] in SLOW]
+    slow = [e for e in live if e["moving_body"] in SLOW
+            and (e["moving_body"], e["aspect"], e["target_body"]) not in exclude]
     if slow:
         lines.append("🐢 SLOW TRANSITS IN FORCE")
         for e in slow[:6]:
@@ -107,6 +112,7 @@ def weekly_block(start: datetime | date | None = None) -> str:
         lines.append("")
 
     # 4 · progressions (the slow inner clock)
+    listed_prog: set = set()
     try:
         p = T.progressed(today)
         pm, pv = p["Moon"], p["Venus"]
@@ -114,6 +120,7 @@ def weekly_block(start: datetime | date | None = None) -> str:
         lines.append(f"Progressed Moon {pm['dms']} in your {T.ordinal(pm['house'])} house · "
                      f"progressed Venus {pv['dms']} in your {T.ordinal(pv['house'])}")
         nxt = [e for e in TL.load() if e.get("moving_frame") == "progressed" and e["date"] >= today.isoformat()][:3]
+        listed_prog = {e["event_id"] for e in nxt}
         for e in nxt:
             lines.append(f"   next: {date.fromisoformat(e['date']):%b %-d %Y} — {e['what']}")
         lines.append("")
@@ -170,7 +177,8 @@ def weekly_block(start: datetime | date | None = None) -> str:
 
     # 7 · coming up after this week (next 3 slow / progressed / Svehla exacts within 45 days)
     later = [e for e in TL.load() if end.date().isoformat() <= e["date"] <= (end + timedelta(days=45)).date().isoformat()
-             and (e["body"] in SLOW or e.get("moving_frame") == "progressed" or e.get("kind") == "eclipse")][:4]
+             and (e["body"] in SLOW or e.get("moving_frame") == "progressed" or e.get("kind") == "eclipse")
+             and e["event_id"] not in listed_prog][:4]
     if later:
         lines.append("⏭ COMING UP")
         for e in later:

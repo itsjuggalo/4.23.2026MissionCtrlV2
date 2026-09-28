@@ -26,8 +26,10 @@ sys.path.insert(0, str(HERE))
 import astro_trace as TR  # noqa: E402
 
 PY = sys.executable
-PROFILE_HELP = ("Add a birth profile first:\n/profile add <name> <YYYY-MM-DD> <HH:MM|unknown> <birth place>\n"
-                "e.g. /profile add Sam 1994-06-12 14:30 Tampa, FL  (unknown time → no ASC/houses)")
+PROFILE_USAGE = ("/profile add <name> <YYYY-MM-DD> <HH:MM|unknown> <birth place>\n"
+                 "e.g. /profile add Sam 1994-06-12 14:30 Tampa, FL  (unknown time → no ASC/houses)\n"
+                 "/profile show <name> · /profile delete <name> · /profile list")
+PROFILE_HELP = "Add a birth profile first:\n" + PROFILE_USAGE
 
 
 def _run(script: str, *args: str, timeout: int = 180) -> str:
@@ -53,15 +55,8 @@ def chart_card() -> str:
 
 
 def _profiles_in(text: str) -> list[dict]:
-    import astro_profiles as P
-    t = text.lower()
-    found = []
-    for p in P.all_profiles():
-        if p["id"] == "mike":
-            continue
-        if re.search(rf"\b{re.escape(p['name'].lower())}\b", t) or re.search(rf"\b{re.escape(p['id'])}\b", t):
-            found.append(p)
-    return found
+    import astro_facts as F
+    return F.profiles_named(text)
 
 
 def _synastry(text: str, progressed: bool) -> tuple[str, str]:
@@ -69,7 +64,7 @@ def _synastry(text: str, progressed: bool) -> tuple[str, str]:
     others = _profiles_in(text)
     if not others:
         names = [p["name"] for p in P.all_profiles() if p["id"] != "mike"]
-        return ("UNAVAILABLE — I only compute charts from stored birth profiles, and none is named here"
+        return ("UNAVAILABLE — no stored birth profile matches that name, and I only compute charts from stored profiles"
                 + (f" (on file: {', '.join(names)})" if names else " (none on file yet)") + ".\n" + PROFILE_HELP,
                 "none")
     a, b = "mike", others[0]["id"]
@@ -81,15 +76,15 @@ def _synastry(text: str, progressed: bool) -> tuple[str, str]:
 
 def _profile_cmd(args: list[str]) -> str:
     if not args or args[0] == "list":
-        return _run("astro_profiles.py", "list")
+        return _run("astro_profiles.py", "list") + "\n\nUsage:\n" + PROFILE_USAGE
     if args[0] == "add":
         if len(args) < 5:
-            return PROFILE_HELP
+            return "Usage:\n" + PROFILE_USAGE
         out = _run("astro_profiles.py", *args, timeout=60)
         return out + ("\nNow try: /synastry " + args[1] if out.startswith("saved") else "")
     if args[0] in ("show", "delete") and len(args) > 1:
         return _run("astro_profiles.py", *args)
-    return PROFILE_HELP
+    return "Usage:\n" + PROFILE_USAGE
 
 
 def route(text: str, chat=None) -> dict:
@@ -121,13 +116,25 @@ def route(text: str, chat=None) -> dict:
             else:
                 d = F.detect(text)
                 it = d["intent"]
+                named = _profiles_in(text)
                 if it in ("synastry", "progressed_synastry"):
                     reply, calc = _synastry(text, it == "progressed_synastry")
-                elif d.get("other_chart") and not _profiles_in(text):
+                elif named and it in ("placement", "chart", "general", "sky", "moon") and \
+                        re.search(r"\b(chart|sign|rising|ascendant|placements?|house|natal|born|" +
+                                  "|".join(F.PLANETS).lower() + r")\b", text.lower()) and \
+                        not re.search(r"\b(general|tell me about|what does .* mean|interpret|read)\b", text.lower()):
+                    reply, calc = F.answer_profile(text, named[0]), "astro_facts.profile_chart"
+                elif named:            # interpretive question about a stored person → LLM with THEIR chart
+                    context, calc = F.llm_context(text), "astro_facts.llm_context+profile"
+                elif d.get("other_chart"):
                     reply, calc = ("UNAVAILABLE — I don't have that person's birth data, so I can't say anything "
                                    "about their chart. " + PROFILE_HELP), "none"
                 elif it == "profile":
                     reply, calc = PROFILE_HELP, "astro_profiles"
+                elif it == "chart":
+                    reply, calc = chart_card(), "astro_truth.natal"
+                elif it == "year":
+                    reply, calc = _run("astro_timeline.py", "year"), "astro_timeline.year"
                 elif it == "today":
                     reply, calc = _run("daily_transits.py"), "daily_transits"
                 elif it == "week":

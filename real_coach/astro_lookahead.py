@@ -20,12 +20,26 @@ WEIGHT = {"Sun": 1.0, "Mercury": 0.6, "Venus": 0.8, "Mars": 1.2, "Jupiter": 1.5,
 GLYPH = {"conjunct": "☌", "sextile": "﹡", "square": "□", "trine": "△", "opposite": "☍"}
 
 
+_CANON: dict[str, list[dict]] = {}
+
+
+def _canonical(d: datetime) -> list[dict]:
+    """The day's hits = the SAME canonical events the daily ranks (review B5/C6): one hit per axis,
+    Moon limited to luminaries + angles, priority order. Shaped {t, n, aspect, orb} for this module."""
+    k = d.isoformat()
+    if k not in _CANON:
+        import astro_events as E
+        _CANON[k] = [{"t": e["moving_body"], "n": e["target_body"], "aspect": e["aspect"], "orb": round(e["orb"], 2)}
+                     for e in E.current_transits(d, with_passes=False)]
+    return _CANON[k]
+
+
 def day_hits(d: datetime) -> list[dict]:
-    return [h for h in T.aspects(d) if h["t"] != "Moon"]
+    return [h for h in _canonical(d) if h["t"] != "Moon"]
 
 
 def score(d: datetime) -> tuple[int, list[str]]:
-    hits = T.aspects(d)
+    hits = _canonical(d)
     s, why = 6.0, []
     for h in hits:
         w = WEIGHT.get(h["t"], 1.0) * (1.0 - h["orb"] / 3.0)

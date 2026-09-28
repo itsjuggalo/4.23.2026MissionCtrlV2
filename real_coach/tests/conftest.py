@@ -56,3 +56,12 @@ def _isolated_profiles(tmp_path, monkeypatch):
     """Never touch the real profile store from tests."""
     monkeypatch.setenv("ASTRO_PROFILES", str(tmp_path / "profiles.json"))
     yield
+
+
+@pytest.fixture(autouse=True)
+def _isolated_trace(tmp_path, monkeypatch):
+    """Never write test requests into the production trace log (review B19)."""
+    import astro_trace as TR
+    monkeypatch.setenv("ASTRO_TRACE", str(tmp_path / "trace.jsonl"))
+    monkeypatch.setattr(TR, "TRACE", tmp_path / "trace.jsonl")
+    yield

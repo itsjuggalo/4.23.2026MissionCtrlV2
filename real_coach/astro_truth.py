@@ -79,8 +79,8 @@ def dms(lon: float) -> str:
     m = int(round((lon % 30) * 60))
     d, m = divmod(m, 60)
     sign = SIGNS[int(lon // 30)]
-    if d == 30:                                  # 29°59.99′ rounds up → next sign 0°00′
-        d, sign = 0, SIGNS[(int(lon // 30) + 1) % 12]
+    if d == 30:                                  # 29°59.5′+ never rounds into the next sign (review A9):
+        d, m = 29, 59                            # the label must agree with describe()["sign"]
     return f"{d}°{m:02d}′ {sign}"
 
 
@@ -94,8 +94,10 @@ def jd_for(when: datetime) -> float:
 
 def jd_to_utc(jd: float) -> datetime:
     y, m, d, h = swe.revjul(jd)
-    # round to the nearest second (float JD → 06:59:59.9999 must not truncate to :59)
-    return (datetime(y, m, d, tzinfo=UTC) + timedelta(hours=h) + timedelta(microseconds=500000)).replace(microsecond=0)
+    # Whole seconds, FLOORED after a 1 ms nudge (review A6). The nudge absorbs float-JD noise
+    # (06:59:59.99996 → 07:00:00); flooring (not rounding) keeps the stored second on the same side
+    # of :30 as the true instant, so round_minute(stored) == the true instant rounded to the minute.
+    return (datetime(y, m, d, tzinfo=UTC) + timedelta(hours=h) + timedelta(milliseconds=1)).replace(microsecond=0)
 
 
 def jd_to_local(jd: float, tz: ZoneInfo = ET) -> datetime:
@@ -130,10 +132,11 @@ def signed_diff(lon: float, target: float) -> float:
     return (lon - target + 180) % 360 - 180
 
 
-def find_crossings(f, jd0: float, jd1: float, step: float = 1.0, tol: float = 5 / 86400) -> list[float]:
+def find_crossings(f, jd0: float, jd1: float, step: float = 1.0, tol: float = 0.05 / 86400) -> list[float]:
     """Every JD in [jd0, jd1) where the signed distance f(jd) crosses zero — the ONE root finder.
     f must be continuous except for the ±180° wrap, whose jump is ignored. Bisection to `tol` days
-    (5 s, so two callers bracketing differently can never disagree on the displayed minute)."""
+    (0.05 s). Display minute = round_minute(jd_to_local(jd)); a root within ~0.05 s of hh:mm:30
+    can still differ by a minute between callers — that is the irreducible limit (review A6)."""
     out, j, prev = [], jd0, f(jd0)
     while j < jd1:
         j2 = min(j + step, jd1)
@@ -219,13 +222,15 @@ def angle(a: float, b: float) -> float:
     return d if d <= 180 else 360 - d
 
 
-def aspects(when: datetime | None = None, orb_mult: float = 1.0) -> list[dict]:
-    """Transit → natal aspects inside orb (orb_mult>1 widens, for verifying loose claims)."""
+def aspects(when: datetime | None = None, orb_mult: float = 1.0, one_per_axis: bool = False) -> list[dict]:
+    """Transit → natal aspects inside orb (orb_mult>1 widens, for verifying loose claims).
+    one_per_axis=True (review A4) drops DSC hits — the same geometry as the ASC hit — for any
+    COUNTING caller; the claim checker keeps both spellings so "square your DSC" still verifies."""
     t, n = transits(when), natal()
     hits = []
     for tn, tv in t.items():
         for nn, nv in n.items():
-            if nn == "IC":
+            if nn == "IC" or (one_per_axis and nn == "DSC"):
                 continue
             for an, adeg in ASPECTS.items():
                 orb = abs(angle(tv["lon"], nv["lon"]) - adeg)

@@ -13,7 +13,7 @@ is composed from the existing esoteric knowledge base:
   astro_returns.progressed_phase() — Rudhyar's progressed lunation phase (soul-cycle climate)
   astro_timing.profection()        — the year's time-lord (soul-cycle context)
 
-Tropical Western astrology ONLY (never Vedic/sidereal/nakshatras/Rahu-Ketu). Astrology only — never
+Tropical Western astrology ONLY (no other zodiac systems or Indian techniques). Astrology only — never
 trading, markets, stocks or positions.
 
 CLI: astro_esoteric.py [--date YYYY-MM-DD]   (computed for 08:30 ET on that date; default: now)
@@ -238,7 +238,7 @@ def _combo_for(name: str, sign: str, house: int | None) -> dict | None:
 def natal_esoteric_post() -> str:
     nat = T.natal()
     out = ["🜃 YOUR NATAL CHART, ESOTERICALLY — planet · sign · house (tropical, Placidus; positions computed)",
-           f"Cancer rising → exoteric ruler Moon, esoteric ruler {lex.SIGNS['Cancer'].get('eso_ruler', 'Neptune')}.", ""]
+           f"Cancer rising → exoteric ruler Moon, esoteric ruler {lex.SIGNS['Cancer'].get('eso_ruler', 'Neptune')}."]
     for n in NATAL_ORDER:
         v = nat[n]
         sign, house = v["sign"], v.get("house")
@@ -269,7 +269,11 @@ if __name__ == "__main__":
 
     ap = argparse.ArgumentParser(description="Esoteric read of Mike's current transits.")
     ap.add_argument("--date", help="YYYY-MM-DD (computed for 08:30 ET that date; default: now)")
+    ap.add_argument("--natal", action="store_true", help="natal chart esoterically: planet · sign · house")
     args = ap.parse_args()
+    if args.natal:
+        print(natal_esoteric_post())
+        raise SystemExit(0)
     if args.date:
         dd = date.fromisoformat(args.date)
         when_arg = datetime(dd.year, dd.month, dd.day, 8, 30, tzinfo=ET)

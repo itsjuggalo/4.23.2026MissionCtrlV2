@@ -55,10 +55,14 @@ def _jd_of(d: date, hour_et: float = 12.0) -> float:
 
 
 def _jd_to_et(jd: float) -> datetime:
-    y, m, d, _h = swe.revjul(jd)
-    frac = jd - swe.julday(y, m, d, 0.0)
-    dt_utc = datetime(y, m, d, tzinfo=timezone.utc) + timedelta(days=frac)
-    return dt_utc.astimezone(T.ET)
+    """Display instant: the engine's zoneinfo conversion rounded to the minute (review A8 — was
+    truncated, so 17:14:51 showed 5:14 PM)."""
+    return T.round_minute(T.jd_to_local(jd))
+
+
+def _raw_natal_lon(body: int) -> float:
+    """Unrounded natal longitude (T.natal() rounds to 4 dp → a 1–2 s bias in return instants)."""
+    return swe.calc_ut(T.NATAL_JD, body)[0][0] % 360
 
 
 def _prog_lon(d: date, body: int) -> float:
@@ -81,7 +85,7 @@ def solar_return(year: int, lat: float = T.LAT, lon: float = T.LON) -> dict:
     """Exact moment (bisected to the second) transiting Sun == natal Sun longitude in `year`,
     then the full Placidus chart for that moment at (lat, lon)."""
     natal = T.natal()
-    natal_sun = natal["Sun"]["lon"]
+    natal_sun = _raw_natal_lon(swe.SUN)
 
     def sun_lon(jd: float) -> float:
         return swe.calc_ut(jd, swe.SUN)[0][0] % 360
@@ -219,7 +223,7 @@ def _lunar_chart(lr_jd: float, lat: float = T.LAT, lon: float = T.LON) -> dict:
 def lunar_return(d: date | None = None) -> dict:
     """Most recent LR before `d` and the next one after, each as a full LR chart (Dunedin FL, Placidus)."""
     d = d or datetime.now(T.ET).date()
-    natal_moon = T.natal()["Moon"]["lon"]
+    natal_moon = _raw_natal_lon(swe.MOON)
 
     def moon_lon(jd: float) -> float:
         return swe.calc_ut(jd, swe.MOON)[0][0] % 360
@@ -307,22 +311,18 @@ def _phase_of(ang: float) -> str:
 
 
 def _find_angle_crossing(target_deg: float, d: date, direction: int, max_days: int) -> date | None:
-    """Daily scan from d in `direction` for the date the progressed lunation angle
-    (pMoon - pSun, mod 360) crosses target_deg (mod 360, monotonic increasing)."""
-    def g(dd: date) -> float:
-        return _signed_diff(_prog_angle(dd), target_deg)
+    """ET date of the real instant the progressed lunation angle (pMoon − pSun) crosses target_deg,
+    searching from local noon of d in `direction` — the engine's root finder (review A3: the old
+    daily scan returned the first noon AFTER the crossing, often a day late)."""
+    def g(jd: float) -> float:
+        return _signed_diff((T.progressed_lon(jd, "Moon") - T.progressed_lon(jd, "Sun")) % 360, target_deg)
 
-    dd = d
-    prev = g(dd)
-    for _ in range(max_days):
-        nd = dd + timedelta(days=direction)
-        cur = g(nd)
-        if prev == 0:
-            return dd
-        if (prev < 0) != (cur < 0) and abs(cur - prev) < 90:
-            return nd if direction > 0 else dd
-        dd, prev = nd, cur
-    return None
+    j = T.jd_local(d, 12)
+    lo, hi = (j, j + max_days) if direction > 0 else (j - max_days, j)
+    xs = T.find_crossings(g, lo, hi, step=10.0)
+    if not xs:
+        return None
+    return T.local_date(xs[0] if direction > 0 else xs[-1])
 
 
 def progressed_phase(d: date | None = None) -> dict:
@@ -384,45 +384,29 @@ def solar_arc(d: date | None = None) -> dict:
 
 
 def solar_arc_hits(start: date, years: int = 5) -> list[dict]:
-    """Dates a directed body is exactly conjunct/square/opposite a natal body or angle
-    (0deg orb crossing; monthly scan, bisected to the day)."""
-    natal = T.natal()
-    natal_sun = natal["Sun"]["lon"]
-    pts = {n: v["lon"] for n, v in natal.items() if n != "IC"}
+    """Directed body exactly conjunct/square/opposite a natal body or angle (0° orb). The real
+    instant comes from the engine's root finder on arc(jd) = progressed Sun − natal Sun and is dated
+    in ET (review A3: the old monthly scan stored the first local noon after the crossing). DSC and IC
+    are left out as movers and targets: they are the ASC/MC axis (review A4 — no double counting)."""
+    raw = {n: swe.calc_ut(T.NATAL_JD, b)[0][0] % 360 for n, b in T.BODIES.items()}
+    raw.update({"ASC": T.ANGLES["ASC"], "MC": T.ANGLES["MC"]})
+    natal_sun = raw["Sun"]
+    end = date(start.year + years, start.month, min(start.day, 28))
+    j0, j1 = T.jd_local(start, 12), T.jd_local(end, 12)
 
-    def arc_deg(d: date) -> float:
-        return (_prog_lon(d, swe.SUN) - natal_sun) % 360
-
-    end = date(start.year + years, start.month, start.day)
-    months: list[date] = []
-    d = start
-    while d <= end:
-        months.append(d)
-        y, m = d.year, d.month
-        m, y = (m + 1, y) if m < 12 else (1, y + 1)
-        d = date(y, m, min(start.day, 28))
-    arcs = [arc_deg(m) for m in months]
+    def arc(jd: float) -> float:
+        return (T.progressed_lon(jd, "Sun") - natal_sun) % 360
 
     hits = []
-    for xname, xlon0 in pts.items():
-        for yname, ylon0 in pts.items():
+    for xname, xlon0 in raw.items():
+        for yname, ylon0 in raw.items():
             for aname, adeg in ASPECT_SUBSET.items():
-                target = (ylon0 + adeg) % 360
-                series = [_signed_diff((xlon0 + a) % 360, target) for a in arcs]
-                for i in range(1, len(series)):
-                    prev, cur = series[i - 1], series[i]
-                    if prev == 0 or ((prev < 0) != (cur < 0) and abs(cur - prev) < 90):
-                        lo, hi = months[i - 1], months[i]
-                        while (hi - lo).days > 1:
-                            mid = lo + (hi - lo) // 2
-                            fm = _signed_diff((xlon0 + arc_deg(mid)) % 360, target)
-                            if (prev < 0) == (fm < 0):
-                                lo, prev = mid, fm
-                            else:
-                                hi = mid
-                        hits.append({"date": hi.isoformat(),
+                for target in sorted({(ylon0 + adeg) % 360, (ylon0 - adeg) % 360}):
+                    f = lambda jd, x=xlon0, t=target: _signed_diff((x + arc(jd)) % 360, t)
+                    for jx in T.find_crossings(f, j0, j1, step=30.0):
+                        hits.append({"date": T.local_date(jx).isoformat(), "jd": jx,
                                      "what": f"Solar-arc {xname} {aname} natal {yname}"})
-    hits.sort(key=lambda h: h["date"])
+    hits.sort(key=lambda h: h["jd"])
     return hits
 
 

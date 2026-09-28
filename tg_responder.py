@@ -26,7 +26,7 @@ IMPORTANT: only ONE getUpdates consumer may poll a given bot token. Do not point
 this at a token another poller already owns (e.g. PipelineSignals/telegram-bot-token.txt
 is owned by telegram_dm_responder.py).
 """
-import collections, json, os, subprocess, threading, time, sys
+import collections, json, os, re, subprocess, threading, time, sys
 from pathlib import Path
 import requests
 
@@ -106,7 +106,7 @@ BOTS = {
         "token": "telegram_jazzyhazzy_bot_token",         # @JazzyHazzyClaw_Bot → Astrology
         "owner": "telegram-chat-id.txt",
         "name":  "Astrology",
-        "tools": "Bash,Read,Grep,Glob,WebFetch,WebSearch",
+        "tools": "Read,Grep,Glob",     # 2026-09-28 review: facts come from astro_bot, never from tools
         "astro_only": True,
         "persona": (
             "You are Astrology — Mike's personal astrologer, and ONLY that. You never give "
@@ -117,22 +117,13 @@ BOTS = {
             "message — that block is the only source of chart facts; anything not in it is UNAVAILABLE "
             "(say which /command computes it). PLACIDUS houses (Svehla's system). Every answer is "
             "fact-checked against the ephemeris afterwards — never invent a degree, house or aspect.\n"
-            "REAL ephemeris, never guesswork: run `~/.venv/bin/python "
-            "~/scripts/real_coach/daily_transits.py` (no --send) for today's true transits, and "
-            "read his existing readings in ~/agents/claudeclaw/data/astrology/mike-*.html "
-            "(natal, 2026 transits, career, future, trading-chart, Feb-2026 reading + playbook, "
-            "and the Aug-2026 Svehla reading + playbook — the CURRENT outside reading) before "
-            "answering anything about his chart. Same script with `--dates` = Svehla's dated "
-            "windows (active/next) and `--progressed` = his real secondary progressions "
-            "(pMoon, pVenus, Placidus houses, ingress dates); the windows' why/do text is in "
-            "~/scripts/real_coach/svehla_windows.json; Mike's journal/scores/loose-ends/contingency "
-            "live in ~/portfolio/astrology/*.json* (read them when he asks what he noted or how a "
-            "window scored). Interpretation lexicon (planets/signs/houses/aspects, practical + "
-            "TROPICAL WESTERN ONLY: never use Vedic/sidereal/jyotish techniques (nakshatras, dashas, Rahu/Ketu) — they do not match this chart's tropical Placidus houses. "
-            "esoteric, Placidus houses) is ~/scripts/real_coach/astro_lexicon.py — use its wording "
-            "so your answers match the daily send; `--explain` gives today's full read. "
-            "For dates/aspects you cannot compute, "
-            "say so rather than inventing degrees.\n"
+            "Never run scripts or look anything up to get chart facts — the COMPUTED FACTS block is "
+            "complete for this question. You may Read ~/portfolio/astrology/*.json* (his journal, "
+            "scores, loose ends) and ~/scripts/real_coach/svehla_windows.json (Svehla's window "
+            "why/do text) when he asks what he noted or what a window means.\n"
+            "TROPICAL WESTERN ONLY: never use Vedic/sidereal/jyotish techniques (nakshatras, dashas, "
+            "Rahu/Ketu). Interpretation wording follows astro_lexicon (practical + esoteric, Placidus "
+            "houses) so answers match the daily send. Never mention trading, markets or money moves.\n"
             "Eastern Time. Short, warm, plain-text for Telegram — no markdown headers or tables. "
             "Mike has ADD: lead with the read, then at most 5 tight lines."
         ),
@@ -146,6 +137,7 @@ BOTS = {
             "• /synastry <name> · /progsyn <name> — charts compared (needs /profile add first)\n"
             "• /moon — the Moon's sign + phase vs your placements · /moonguide — all 12 signs + 8 phases\n"
             "• /esoteric — the soul-level read of your transits (also its own post every morning)\n"
+            "• /esonatal — your natal chart esoterically, planet by planet: sign · house · soul meaning\n"
             "Every reading ends with a 📖 key: plain + esoteric meaning of each sign, planet, house, phase.\n"
             "• /dates — your Aug 2026 reading · /chart — natal placements · /wheel — image\n"
             "• Live page: https://claudeclaw.serveftp.com/astrology/readings/mike-today-live.html\n"
@@ -158,17 +150,18 @@ BOTS = {
             "• /progressions — progressed Moon/Venus + next ingresses\n"
             "• /moon — Moon sign + phase against your placements (auto-posted at every change) · /moonguide\n"
             "• /esoteric — esoteric read of today's transits · every reply ends with a 📖 plain + esoteric key\n"
+            "• /esonatal — natal chart esoterically: each planet → sign → house, with its soul meaning\n"
             "• /profile add <name> <YYYY-MM-DD> <HH:MM|unknown> <place> · /profile list\n"
             "• /synastry <name> [name2] — synastry (identity-labelled, unknown time → no angles)\n"
             "• /progsyn <name> [name2] — progressed synastry, all four frames\n"
             "• /chart — your natal placements at a glance\n"
             "• /readings — what's in your astrology suite\n"
             "• /dates — your Aug 2026 reading's timeline, what's active now + what's next\n"
-            "• /progressed — your progressed Moon/Venus/Sun/Juno today (real ephemeris)\n"
+            "• /progressed — progressed Moon/Venus/Sun/Juno positions today (/progressions adds the next ingresses)\n"
             "• /explain — today's transits, the full read: aspect geometry, which house it fires from\n"
             "   and lands in, both signs, esoteric meaning of each planet, how to work it\n"
             "• /planet <x> · /sign <x> · /house <1-12> · /aspect <x> — the lexicon, practical + esoteric\n"
-            "• /week · /month — the coming transits day by day, peak day marked · /quality — today 1-10\n"
+            "• /lookahead · /month — the coming transits day by day, peak day marked · /quality — today 1-10\n"
             "• /tnp — the 8 transneptunian points (Hades, Apollon…) natal + 90° dial hits · /midpoints — planetary pictures now · /critical — anything on a critical/anaretic degree · /startransits — planets on fixed stars today\n"
             "• /profection — your time-lord year and month · /hours — today's planetary hours (Dunedin) · /firdaria — your Persian time-lord periods (tropical)\n"
             "• /full — today's complete read (the 8:32 send is a one-message digest) · /alerts — what goes exact in the next 24h (hourly pushes run 8am–10pm) · /evidence — your notes and scores vs the sky\n"
@@ -180,11 +173,11 @@ BOTS = {
             "• /wheel — natal + today's transits as a chart image\n"
             "• /exact — next exact transit hits + progressed ingresses (pinged 3d before)\n"
             "• /note <text> — journal what happened (stamped with the active window)\n"
-            "• /score <window> 1-5 · /scorecard — did his dates play out?\n"
+            "• /score <window> 1-5 · /scorecard — did Svehla's dates play out?\n"
             "• /ask <q> · /askdraft — queue questions for the next consult, draft the email\n"
-            "• /contingency · /loose · /income · /juno — his action items, tracked\n"
+            "• /contingency · /loose · /income · /juno — your action items, tracked\n"
             "Or just ask: 'what's Saturn doing to my 7th?', 'how's this week?',\n"
-            "'read my Venus return', 'what does Mercury rx mean for me?'\n"
+            "'is Mercury retrograde?', 'when does the Moon go void?', 'where is Sam's Venus?'\n"
             "No trading here — that's Trading Command. /help = this."
         ),
     },
@@ -375,10 +368,10 @@ ASTRO_MODULE_CMDS = {
     "/week":        ("astro_weekly.py", []),      "/lookahead": ("astro_lookahead.py", ["week"]), "/month":    ("astro_lookahead.py", ["month"]),
     "/quality":     ("astro_lookahead.py", ["quality"]),
     "/moon":        ("astro_moon.py", ["now"]),       "/moonguide": ("astro_moon.py", ["guide"]),
-    "/esoteric":    ("astro_esoteric.py", []),
+    "/esoteric":    ("astro_esoteric.py", []),   "/esonatal": ("astro_esoteric.py", ["--natal"]),
     "/full":        ("daily_transits.py", ["--full"]),   "/evidence": ("astro_evidence.py", []),
     "/alerts":      ("astro_alerts.py", ["--dry", "--window", "1440"]),
-    "/timeline":    ("astro_timeline.py", []),         "/year":      ("astro_timeline.py", ["year"]),
+    "/timeline":    ("astro_timeline.py", ["30"]),         "/year":      ("astro_timeline.py", ["year"]),
     "/profection":  ("astro_timing.py", ["profection"]), "/hours":   ("astro_timing.py", ["hours"]),
     "/firdaria":    ("astro_timing.py", ["firdaria"]),
     "/tnp":         ("astro_uranian.py", ["tnp"]),       "/midpoints": ("astro_uranian.py", ["midpoints"]),
@@ -492,7 +485,7 @@ def run_bot(botkey):
         env = {k: v for k, v in os.environ.items() if k != "ANTHROPIC_API_KEY"}
         # Ensure the Skill tool is available so /ainvest, /options-desk, /flow-desk, etc.
         # actually run as skills (not just chat) on every bot, incl. the reserve ones.
-        tool_set = tools if "Skill" in tools else tools + ",Skill"
+        tool_set = tools if ("Skill" in tools or cfg.get("astro_only")) else tools + ",Skill"
         try:
             with LLM_SEM:
                 r = subprocess.run(
@@ -560,6 +553,7 @@ def run_bot(botkey):
                 try:
                     r = subprocess.run(argv, capture_output=True, text=True, timeout=90)
                     txt = (r.stdout or "").strip()
+                    txt = re.sub(r",\s*hour \w+", "", txt)   # cached all day → drop the planetary hour
                     if txt:
                         parts.append(f"[{label}]\n{txt[:1800]}")
                 except Exception as e:
@@ -584,6 +578,7 @@ def run_bot(botkey):
         try:
             with hist_path.open("a") as f:
                 f.write(json.dumps([q_, a_[:700]]) + "\n")
+            os.chmod(hist_path, 0o600)
         except Exception:
             pass
 
@@ -681,7 +676,10 @@ def run_bot(botkey):
                                 [str(Path.home() / ".venv/bin/python"),
                                  str(Path.home() / "scripts/real_coach/daily_transits.py")],
                                 capture_output=True, text=True, timeout=120)
-                            out = (r.stdout or "").strip() or f"[transits rc={r.returncode}] {r.stderr.strip()[:200]}"
+                            out = (r.stdout or "").strip()
+                            if not out:
+                                print(f"[{name}] /transits rc={r.returncode} {r.stderr.strip()[-300:]}", flush=True)
+                                out = f"⚠️ /transits couldn't compute right now — nothing guessed. Try again in a minute."
                         except Exception as e:
                             out = f"[transits error] {e}"
                         send_reply(chat_id, out)
@@ -713,11 +711,14 @@ def run_bot(botkey):
                             r = subprocess.run([str(Path.home() / ".venv/bin/python"),
                                                 str(Path.home() / "scripts/real_coach" / script), *margs, *extra],
                                                capture_output=True, text=True, timeout=180)
-                            out = (r.stdout or "").strip() or f"[{cmd0} rc={r.returncode}] {r.stderr.strip()[:300]}"
+                            out = (r.stdout or "").strip()
+                            if not out:
+                                print(f"[{name}] {cmd0} rc={r.returncode} {r.stderr.strip()[-300:]}", flush=True)
+                                out = f"⚠️ {cmd0} couldn't compute right now — nothing guessed. Try again in a minute."
                         except Exception as e:
                             out = f"[{cmd0} error] {e}"
                         send_reply(chat_id, out)
-                        if cmd0 not in ("/alerts", "/moonguide"):     # guide already carries every ✧ line
+                        if cmd0 not in ("/alerts", "/moonguide", "/esonatal"):   # these carry every ✧ line inline
                             astro_key(chat_id, out)
                         print(f"[{name}] {cmd0}", flush=True)
                         continue
@@ -729,11 +730,14 @@ def run_bot(botkey):
                                 [str(Path.home() / ".venv/bin/python"),
                                  str(Path.home() / "scripts/real_coach/astro_tasks.py"), cmd0[1:], *parts[1:]],
                                 capture_output=True, text=True, timeout=120)
-                            out = (r.stdout or "").strip() or f"[{cmd0} rc={r.returncode}] {r.stderr.strip()[:200]}"
+                            out = (r.stdout or "").strip()
+                            if not out:
+                                print(f"[{name}] {cmd0} rc={r.returncode} {r.stderr.strip()[-300:]}", flush=True)
+                                out = f"⚠️ {cmd0} couldn't compute right now — nothing guessed. Try again in a minute."
                         except Exception as e:
                             out = f"[{cmd0} error] {e}"
                         send_reply(chat_id, out)
-                        print(f"[{name}] {cmd0} {' '.join(parts[1:])[:60]}", flush=True)
+                        print(f"[{name}] {cmd0} ({len(parts) - 1} args)", flush=True)
                         continue
                     # 2026-09-15: lexicon — /planet /sign /house /aspect <key> → daily_transits --lookup
                     if cmd0 in ("/planet", "/sign", "/house", "/aspect"):
@@ -746,7 +750,10 @@ def run_bot(botkey):
                                 [str(Path.home() / ".venv/bin/python"),
                                  str(Path.home() / "scripts/real_coach/daily_transits.py"), "--lookup", cmd0[1:], key],
                                 capture_output=True, text=True, timeout=60)
-                            out = (r.stdout or "").strip() or f"[{cmd0} rc={r.returncode}] {r.stderr.strip()[:200]}"
+                            out = (r.stdout or "").strip()
+                            if not out:
+                                print(f"[{name}] {cmd0} rc={r.returncode} {r.stderr.strip()[-300:]}", flush=True)
+                                out = f"⚠️ {cmd0} couldn't compute right now — nothing guessed. Try again in a minute."
                         except Exception as e:
                             out = f"[{cmd0} error] {e}"
                         send_reply(chat_id, out)
@@ -760,22 +767,35 @@ def run_bot(botkey):
                                 [str(Path.home() / ".venv/bin/python"),
                                  str(Path.home() / "scripts/real_coach/daily_transits.py"), flag],
                                 capture_output=True, text=True, timeout=120)
-                            out = (r.stdout or "").strip() or f"[{cmd0} rc={r.returncode}] {r.stderr.strip()[:200]}"
+                            out = (r.stdout or "").strip()
+                            if not out:
+                                print(f"[{name}] {cmd0} rc={r.returncode} {r.stderr.strip()[-300:]}", flush=True)
+                                out = f"⚠️ {cmd0} couldn't compute right now — nothing guessed. Try again in a minute."
                         except Exception as e:
                             out = f"[{cmd0} error] {e}"
                         send_reply(chat_id, out)
-                        if cmd0 not in ("/alerts", "/moonguide"):     # guide already carries every ✧ line
+                        if cmd0 not in ("/alerts", "/moonguide", "/esonatal"):   # these carry every ✧ line inline
                             astro_key(chat_id, out)
                         print(f"[{name}] {cmd0}", flush=True)
                         continue
                     if cmd0 == "/readings":
                         d = Path.home() / "agents/claudeclaw/data/astrology"
-                        files = sorted(p.stem for p in d.glob("mike-*.html")) if d.is_dir() else []
+                        files = sorted(p.stem for p in d.glob("mike-*.html") if "trading" not in p.stem) if d.is_dir() else []
                         send_reply(chat_id, ("📚 Your astrology suite (claudeclaw /astrology):\n" +
                                              "\n".join("• " + f for f in files) +
                                              "\nAsk me about any of them by name.")
                                    if files else "📚 No readings found in the suite yet.")
                         print(f"[{name}] /readings", flush=True)
+                        continue
+                    # 2026-09-28 review fence: nothing reaches the LLM on this lane without the
+                    # COMPUTED FACTS block, and no stray slash command reaches a skill.
+                    if text.startswith("/"):
+                        send_reply(chat_id, f"Unknown astrology command {cmd0} — /help lists them.")
+                        continue
+                    if not facts_ctx:
+                        send_reply(chat_id, "⚠️ The chart calculation didn't run, so I won't guess. "
+                                            "Try again in a minute, or /today.")
+                        print(f"[{name}] no facts → refused LLM", flush=True)
                         continue
                 # /greeks <TKR> → live lookup (LLM, any contract incl. flow); bare → quantum picks
                 if cmd0 == "/greeks":
@@ -882,7 +902,7 @@ def run_bot(botkey):
                 #    for the reserve bots) — provider diversity preserved.
                 # Each call is a FRESH `claude -p` (stateless): no context carries between
                 # messages, so there's nothing to clear (no /newchat) and briefs are untouched.
-                print(f"[{name}] Q: {text[:120]}", flush=True)
+                print(f"[{name}] Q: " + (f"{len(text)} chars" if cfg.get("astro_only") else text[:120]), flush=True)
                 tg("sendChatAction", chat_id=chat_id, action="typing")
                 try:
                     codex_primary = (cfg.get("providers") or [None])[0] == "codex_cli"

@@ -47,6 +47,7 @@ def main() -> int:
         section("Moon guide — all 12 signs and 8 phases in your chart", run("astro_moon.py", "guide")),
     ]
     parts.insert(2, section("Esoteric read — the soul-level view of your transits", run("astro_esoteric.py")))
+    parts.insert(3, section("Natal chart esoterically — planet · sign · house", run("astro_esoteric.py", "--natal")))
     try:
         import astro_lexicon
         parts.append(section("📖 Key — every sign, planet, house and phase (plain + esoteric)",

@@ -99,18 +99,14 @@ def firdaria_block(d: date | None = None) -> str:
 
 def _rise_set(d: date) -> tuple[datetime, datetime, datetime]:
     """Sunrise, sunset (that day) and next sunrise, as ET datetimes."""
-    jd0 = swe.julday(d.year, d.month, d.day, 4.0)             # 00:00 ET ≈ 04:00 UT (EDT) — search from local midnight
+    jd0 = T.jd_local(d, 0)                                    # local midnight via zoneinfo (EST or EDT)
     flags = swe.FLG_SWIEPH
     def _next(jd, what):
         return swe.rise_trans(jd, swe.SUN, what | swe.BIT_DISC_CENTER, (T.LON, T.LAT, 0), 1013.25, 15.0, flags)[1][0]
     rise = _next(jd0, swe.CALC_RISE)
     sset = _next(rise, swe.CALC_SET)
     rise2 = _next(sset, swe.CALC_RISE)
-    def _dt(jd):
-        y, m, dd, h = swe.revjul(jd)
-        from datetime import timezone
-        return datetime(y, m, dd, tzinfo=timezone.utc) + timedelta(hours=h)
-    return _dt(rise).astimezone(T.ET), _dt(sset).astimezone(T.ET), _dt(rise2).astimezone(T.ET)
+    return T.jd_to_local(rise), T.jd_to_local(sset), T.jd_to_local(rise2)
 
 
 def planetary_hours(d: date | None = None) -> list[dict]:

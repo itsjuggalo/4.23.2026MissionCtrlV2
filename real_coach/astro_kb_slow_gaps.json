@@ -1,763 +1,763 @@
 {
- "meta": {
-  "built": "2026-09-15",
-  "sources": [
-   "https://astrostyle.com/uranus-in-gemini-transit-astrology-horoscope/",
-   "https://astrobutterfly.com/2025/07/07/astrology-of-uranus-in-gemini-2025-2033-how-it-will-influence-you/",
-   "https://myastrodiaries.substack.com/p/neptune-in-aries-2025-2039-guide",
-   "https://www.lilithastrology.com/blog/neptune-in-aries-2025-2039-meaning-horoscopes",
-   "https://www.lilithastrology.com/blog/pluto-in-aquarius-2023-2044-meaning-themes-what-to-expect",
-   "https://www.chani.com/blogs/what-you-need-to-know-about-pluto-in-aquarius",
-   "https://theuranianastrologer.com/apollon-1",
-   "https://www.heavenschild.com.au/a-astrology/apollon-astrology.html",
-   "https://medium.com/@HermesAstrology/hades-in-astrology-7c447d8cfd8d",
-   "https://theuranianastrologer.com/hades-1/2015/2/3/astrological-hades-and-its-cultural-archetypes",
-   "https://starsignstyle.com/juno-in-the-houses/",
-   "https://www.thedarkpixieastrology.com/blog/transit-asteroid-juno-in-the-houses-and-aspects",
-   "https://www.ancientfuturevision.org/juno-transits-meaning-in-astrology/",
-   "https://cafeastrology.com/ceres.html",
-   "https://thalira.com/blogs/quantum-codex/ceres-astrology-guide",
-   "https://www.augurine.com/learn/ceres-asteroid",
-   "https://girlandhermoon.com/the-progressed-moon-through-the-houses-in-astrology/",
-   "https://kerykeion.net/content/learn-astrology/predictive-progressions-moon-first-house",
-   "https://kerykeion.net/content/learn-astrology/predictive-progressions-moon-twelfth-house",
-   "https://cafeastrology.com/jupiter_transits_houses.html",
-   "https://starsmoonandsun.com/2025/06/07/jupiter-transiting-the-natal-houses/",
-   "https://www.celesian.com/blog/chiron-in-the-houses-natal-chart",
-   "https://mysticryst.com/blogs/the-mystic-journal/chiron-in-astrology-the-wounded-healers-complete-guide"
-  ],
-  "notes": "This file covers the GAP entries requested to round out the real_coach astro knowledge base: slower-moving transiting planets (Saturn, Jupiter, Uranus, Neptune, Pluto, Chiron) through signs, Placidus houses, and aspects to Mike's natal chart not already covered by existing KB files, plus Juno through all 12 houses, Ceres aspects, and secondary progressions (Moon, Sun, Mercury, Mars). House cusps used follow Mike's natal Placidus wheel (1H Cancer 26.97 ASC, 2H Leo 20.32, 3H Virgo 17.25, 4H Libra 18.83, 7H Capricorn 26.97, 10H Aries 18.83 MC, 11H Taurus 23.20) with 2nd/8th, 3rd/9th, 5th/11th, 6th/12th cusps derived as exact opposites per standard quadrant-house geometry (5H Scorpio 23.20, 8H Aquarius 20.32, 9H Pisces 17.25). Esoteric framing follows Alice Bailey's sign rulers (Aries=Mercury, Taurus=Vulcan, Gemini=Venus, Cancer=Neptune, Leo=Sun, Virgo=Moon, Libra=Uranus, Scorpio=Mars, Sagittarius=Earth, Capricorn=Saturn, Aquarius=Jupiter, Pisces=Pluto). Uranian/Hamburg-school meanings used for Apollon (expansion, success, science, commerce) and Hades (decay, hidden/buried matters, karmic debt). Juno and Ceres follow Demetra George's asteroid-goddess framework (Juno=commitment/loyalty, Ceres=nurture/loss cycles). Dates and degree math (house crossings, conjunction timing) are derived/estimated from natal degrees and average transit speeds, not from a precision ephemeris run, and should be treated as approximate framing windows rather than exact dates."
- },
- "entries": [
-  {
-   "key": "Transiting Saturn opposite natal Apollon",
-   "traditional": "Saturn opposition tests the area of life it touches against reality, forcing a sober reckoning between ambition and structural limits.",
-   "esoteric": "Capricorn's esoteric ruler is Saturn itself, so this opposition is Saturn confronting its own point of discipline through the Uranian planet of expansion, success, and the big picture.",
-   "in_mikes_chart": "Natal Apollon sits at 16 degrees Libra in Mike's 3rd house of ideas, contracts, and networking; transiting Saturn reaches the opposition point near 16 degrees Aries as it closes in on his natal MC at 18 degrees 50 Aries.",
-   "translation": "Saturn puts a hard stop on any go-big idea that has not been structurally tested, right as career pressure peaks.",
-   "do": "Pressure-test the one expansion idea worth keeping before committing resources.",
-   "avoid": "Chasing broad, unproven opportunities purely on momentum.",
-   "svehla_link": "Falls inside Svehla's named spring 2027 contingency window, Saturn opposite Apollon March 28 2027, just before Saturn conjuncts MC April 16 2027."
-  },
-  {
-   "key": "Transiting Saturn square natal Uranus",
-   "traditional": "A Saturn-Uranus square strains the balance between stability and the need for sudden change, often forcing a structural decision under pressure.",
-   "esoteric": "Libra's esoteric ruler is Uranus and Capricorn's is Saturn, so this square is a direct esoteric-ruler clash between the sign of relationship-balance and the sign of form-building.",
-   "in_mikes_chart": "Natal Uranus at 15 degrees Capricorn sits in Mike's 6th house of work and routine; transiting Saturn squares it from mid-Aries as it approaches his MC, arriving shortly before the Saturn-conjunct-MC window.",
-   "translation": "Old work routines get pressure-tested against a sudden urge to break from them, right as the career foundation work ramps up.",
-   "do": "Rebuild routines deliberately rather than letting a sudden disruption force the change.",
-   "avoid": "Ignoring the itch for change until it erupts as a work crisis.",
-   "svehla_link": "Sits in the run-up to Saturn conjunct MC, the same Saturn-in-Aries pass Svehla frames as settling career loose ends."
-  },
-  {
-   "key": "Transiting Saturn square natal Neptune",
-   "traditional": "Saturn square Neptune forces illusions, hopes, or vague plans to meet concrete tests, often dissolving what was not real.",
-   "esoteric": "Capricorn's esoteric ruler Saturn squares the sign carrying Pisces' undercurrent through Neptune's exoteric rulership, a confrontation between structure and the dissolving, transformative tide.",
-   "in_mikes_chart": "Natal Neptune at 17 degrees Capricorn is also in Mike's 6th house, two degrees from Uranus; transiting Saturn squares it almost simultaneously with the Uranus square, compounding the work-routine pressure test.",
-   "translation": "Vague hopes about how work should just flow get a reality check at the same time old routines get shaken.",
-   "do": "Get specific and measurable about work goals instead of leaving them foggy.",
-   "avoid": "Drifting on wishful thinking about how the job will sort itself out.",
-   "svehla_link": "Doubles up with the Uranus square in the same Saturn-in-Aries run-up to Saturn conjunct MC."
-  },
-  {
-   "key": "Transiting Saturn in the 11th house",
-   "traditional": "Saturn in the 11th house matures friendships and group affiliations, often thinning the social circle down to the people and networks that actually last.",
-   "esoteric": "The 11th house esoterically resonates with Aquarius, whose esoteric ruler is Jupiter, so Saturn here disciplines the growth-and-networking impulse into something built to hold weight.",
-   "in_mikes_chart": "Mike's 11th house runs from 23 degrees Taurus into Gemini and holds Hades at 11 degrees 56 Gemini; Saturn crosses this house roughly 2028 into 2029-30, right where it will later conjunct Hades.",
-   "translation": "Your network gets tested for who is real, right before Saturn digs into old, buried financial or reputational material later in the same house.",
-   "do": "Audit which alliances and group ties are actually load-bearing.",
-   "avoid": "Overcommitting to a new group or platform without a track record.",
-   "svehla_link": "Precedes and sets up the Saturn-conjunct-Hades pass, sitting inside the era Svehla's 2028-29 Uranus-conjunct-Hades window flags as a money and technology guardrail."
-  },
-  {
-   "key": "Transiting Saturn in Taurus",
-   "traditional": "Saturn in Taurus, roughly 2028 to 2031, builds long-term financial and material security through discipline, patience, and realistic valuation, often after a period of overextension.",
-   "esoteric": "Taurus' esoteric ruler is Vulcan, the forge-planet of relentless, hammering refinement, so Saturn here is Vulcan's earthly enforcer, insisting value be earned through slow, exact work.",
-   "in_mikes_chart": "This transit crosses Mike's natal 11th-house cusp at 23 degrees 20 Taurus, landing right after Saturn conjuncts his MC, turning settle-career-loose-ends into now-prove-it-financially through the network.",
-   "translation": "After the career foundation work, Saturn asks you to build steady, provable value rather than chase quick wins.",
-   "do": "Convert career gains into durable, measurable financial structure.",
-   "avoid": "Treating this period as a victory lap instead of a build phase.",
-   "svehla_link": "Directly follows Svehla's Saturn-on-MC build-the-foundation window through April 2027, extending the same discipline into the money and network house."
-  },
-  {
-   "key": "Transiting Saturn conjunct natal Hades",
-   "traditional": "A Saturn conjunction brings the point it touches to a hard, undeniable maturity point, forcing accountability for whatever it has been quietly accumulating.",
-   "esoteric": "In the Hamburg or Uranian school Hades governs decay, hidden waste, and buried karmic debt; Saturn's conjunction is the formal audit of everything Hades has let rot unseen.",
-   "in_mikes_chart": "Natal Hades sits at 11 degrees 56 Gemini in Mike's 11th house; transiting Saturn reaches this exact degree around 2029-30 while moving through Gemini, the same window Svehla names for Uranus conjunct natal Hades.",
-   "translation": "Old, buried financial or technological loose ends inside your network come due for a real accounting.",
-   "do": "Do a clean-up pass on old debts, dormant accounts, or neglected group commitments before this hits.",
-   "avoid": "Letting neglected paperwork or half-finished obligations sit until Saturn forces the issue.",
-   "svehla_link": "Lands inside Svehla's named 2028-29 Uranus-conjunct-Hades money and technology guardrail window, adding a Saturn layer of hard accountability to the same degree."
-  },
-  {
-   "key": "Transiting Saturn opposite natal Mercury",
-   "traditional": "Saturn opposite Mercury sobers communication and thinking, often bringing serious conversations, contract review, or a need to slow down and get facts straight.",
-   "esoteric": "Gemini's esoteric ruler is Venus, so this opposition is Saturn's discipline meeting Venus' relational values through the lens of Mercury's exoteric rulership of information exchange.",
-   "in_mikes_chart": "Natal Mercury sits at 3 degrees Sagittarius in Mike's 5th house; transiting Saturn opposes it from 3 degrees Gemini as it moves through his 11th house, roughly 2029-31, near the Hades conjunction.",
-   "translation": "You have to get serious and precise in how you communicate with your network, right as old buried issues are surfacing.",
-   "do": "Put agreements and important claims in writing during this window.",
-   "avoid": "Loose talk or unverified claims in group or financial settings.",
-   "svehla_link": "Part of the same Saturn-in-Gemini pass through the 11th house that also delivers the Hades conjunction, 2029-31."
-  },
-  {
-   "key": "Transiting Saturn opposite natal Venus",
-   "traditional": "Saturn opposite Venus tests relationships and financial values for what is real versus convenient, sometimes ending arrangements that were not built to last.",
-   "esoteric": "Sagittarius' esoteric ruler is the Earth itself, a hidden sacred planet in Bailey's scheme, so this opposition grounds Venusian values in unglamorous, lived reality.",
-   "in_mikes_chart": "Natal Venus at 19 degrees Sagittarius sits in the same 5th house as Mercury; transiting Saturn opposes it from 19 degrees Gemini, later in the same Saturn-in-Gemini pass through the 11th house, 2030-31.",
-   "translation": "Financial and relational commitments made through your network get a hard value check late in this Saturn cycle.",
-   "do": "Reassess which partnerships and money arrangements are pulling their weight.",
-   "avoid": "Staying in an underperforming financial or creative partnership out of habit.",
-   "svehla_link": "Closes out the same 2029-31 Saturn-in-Gemini 11th-house sequence that opens with the Mercury opposition and Hades conjunction."
-  },
-  {
-   "key": "Transiting Jupiter in Virgo",
-   "traditional": "Jupiter in Virgo expands through refinement, skill-building, health routines, and being useful, growth that comes from getting better at the details rather than thinking bigger.",
-   "esoteric": "Virgo's esoteric ruler is the Moon, veiling a hidden sacred planet in Bailey's system, so Jupiter here is expansion filtered through nurture and the slow perfecting of form before it is born into the world.",
-   "in_mikes_chart": "This transit runs mostly through Mike's 2nd house of income and values, only crossing into his 3rd house of ideas and contracts near the sign's last degrees.",
-   "translation": "Growth this year comes from tightening up skills and habits that directly affect income, not from a big swing.",
-   "do": "Invest in a specific, useful skill or process improvement tied to earning.",
-   "avoid": "Perfectionism that stalls action instead of improving it.",
-   "svehla_link": "Sits before the controlled income-expansion window Svehla names for Jupiter in the natal 2nd house, October 2026 to February 2027 and June to October 2027, effectively priming it."
-  },
-  {
-   "key": "Transiting Jupiter in the 3rd house",
-   "traditional": "Jupiter in the 3rd house expands communication, learning, local networking, and short-distance opportunity, often bringing a broader audience for ideas already in motion.",
-   "esoteric": "The 3rd house esoterically echoes Gemini, whose ruler is Venus, so Jupiter here is growth through relational exchange of ideas rather than solitary study.",
-   "in_mikes_chart": "Mike's 3rd house runs from 17 degrees Virgo to 18 degrees Libra and holds natal Jupiter at 5 degrees Libra and natal Apollon at 16 degrees Libra, so this house transit directly overlaps the Jupiter-return and Jupiter-conjunct-Apollon passes.",
-   "translation": "Ideas, writing, and networking get real traction and reach a wider audience during this stretch.",
-   "do": "Publish, pitch, or network the idea that has been sitting half-finished.",
-   "avoid": "Scattering energy across too many small projects instead of one clear message.",
-   "svehla_link": "This house transit is the container for the Jupiter-return and Jupiter-conjunct-Apollon passes, both landing in the same house."
-  },
-  {
-   "key": "Transiting Jupiter in Libra",
-   "traditional": "Jupiter in Libra expands through partnership, diplomacy, and fair-dealing, often bringing beneficial alliances or legal and contractual growth.",
-   "esoteric": "Libra's esoteric ruler is Uranus, so Jupiter's expansion here has a Uranian undercurrent, growth through sudden, freeing realignments in how you relate and contract with others.",
-   "in_mikes_chart": "This transit runs mostly through Mike's 4th house of home and roots after opening in the tail of his 3rd house, where natal Jupiter and Apollon sit.",
-   "translation": "Once this Jupiter pass crosses into the second half of the sign, growth shifts from ideas and networking toward home, family, and personal foundation.",
-   "do": "Use fair, well-negotiated partnerships to strengthen home or family stability.",
-   "avoid": "One-sided deals that favor keeping the peace over getting fair terms.",
-   "svehla_link": "Bridges the Jupiter-in-3rd-house window into the Jupiter-in-4th-house window."
-  },
-  {
-   "key": "Transiting Jupiter conjunct natal Jupiter",
-   "traditional": "A Jupiter return, roughly every 12 years, opens a fresh growth chapter and is traditionally one of the most reliably fortunate windows in a life.",
-   "esoteric": "Esoterically Jupiter is the planet of love-wisdom and the exoteric ruler of Sagittarius while also being Aquarius' esoteric ruler, so a return doubles as a call to widen both personal faith and group vision.",
-   "in_mikes_chart": "Natal Jupiter sits at 5 degrees Libra in Mike's 3rd house; the next return lands around September 2028, renewing the growth cycle that began at his birth in the same house of ideas, contracts, and networking.",
-   "translation": "This is a genuine new-chapter marker, a good time to plant seeds for the next 12 years of growth.",
-   "do": "Set clear, specific goals right at the return rather than drifting into it.",
-   "avoid": "Overcommitting to every opportunity that shows up during the return's initial excitement.",
-   "svehla_link": "Falls shortly after the Saturn-in-Taurus foundation-building phase, giving your next growth cycle a disciplined base to expand from."
-  },
-  {
-   "key": "Transiting Jupiter conjunct natal Apollon",
-   "traditional": "Jupiter conjunct any point amplifies it, and paired with Apollon specifically it tends to bring recognition, successful expansion, or a genuine big-break flavor.",
-   "esoteric": "Apollon in the Uranian scheme already carries Jupiter-like expansion themes, its glyph is built from Jupiter's symbol, so this conjunction is Jupiter doubling down on its own broad-perspective, success-oriented signature.",
-   "in_mikes_chart": "Natal Apollon sits at 16 degrees Libra in Mike's 3rd house, 11 degrees from natal Jupiter; transiting Jupiter reaches it shortly after the 2028 return, in the same house of ideas and networking.",
-   "translation": "A real opportunity for recognition or successful expansion follows close on the heels of the Jupiter return.",
-   "do": "Move decisively on the clearest opportunity that surfaces in this window.",
-   "avoid": "Assuming this is a one-off stroke of luck rather than a moment to build from.",
-   "svehla_link": "Extends the Jupiter-return momentum inside the same 3rd house Svehla's broader 2026-27 Jupiter-in-2nd cycle is priming."
-  },
-  {
-   "key": "Transiting Jupiter in Scorpio",
-   "traditional": "Jupiter in Scorpio expands through depth, intensity, shared resources, and transformation, often bringing growth in finances tied to others or in psychological and research work.",
-   "esoteric": "Scorpio's esoteric ruler is Mars, so Jupiter's expansion here is willful and combative, growth that comes from confronting and mastering what was previously avoided.",
-   "in_mikes_chart": "This transit runs through Mike's 4th house of home and family roots, where natal Sun at 12 degrees Scorpio and natal Pluto at 22 degrees Scorpio both sit, a major activation of his home and foundation axis.",
-   "translation": "Big growth in family, home, or deep personal transformation, with real intensity attached.",
-   "do": "Lean into deep personal or family work that has been avoided.",
-   "avoid": "Letting intensity tip into power struggles at home.",
-   "svehla_link": "Shares the house that carries the Sun and Pluto conjunctions, so treat the whole Scorpio pass as one extended home and identity growth arc."
-  },
-  {
-   "key": "Transiting Jupiter in the 4th house",
-   "traditional": "Jupiter in the 4th house expands home, family, and inner foundation, often through a literal move, renovation, or a genuinely happier home life.",
-   "esoteric": "The 4th house esoterically echoes Cancer, whose ruler is Neptune, so growth here has a soul-deep, feeding-and-belonging quality rather than a purely material one.",
-   "in_mikes_chart": "Mike's 4th house spans Libra 18 degrees to Scorpio 23 degrees, holding natal Sun and Pluto; this house transit is the container for the Jupiter-in-Scorpio, Jupiter-conjunct-Sun, and Jupiter-conjunct-Pluto events.",
-   "translation": "Home and identity both get room to expand and deepen across this whole stretch.",
-   "do": "Invest in the literal home base or in reconnecting with family roots.",
-   "avoid": "Neglecting home life while chasing outward growth.",
-   "svehla_link": "Houses the Scorpio, Sun-conjunction, and Pluto-conjunction entries as one continuous foundation-deepening arc."
-  },
-  {
-   "key": "Transiting Jupiter conjunct natal Sun",
-   "traditional": "Jupiter conjunct the natal Sun is one of the classic good-luck transits, boosting vitality, confidence, recognition, and optimism.",
-   "esoteric": "Esoterically Leo's ruler is the Sun itself and Jupiter is the love-wisdom ray, so their conjunction blends raw solar identity with expansive wisdom, growth of self rather than just external luck.",
-   "in_mikes_chart": "Natal Sun sits at 12 degrees Scorpio in Mike's 4th house; transiting Jupiter reaches this degree partway through its Scorpio transit, boosting confidence at the core of his home and identity house.",
-   "translation": "A genuine confidence and visibility boost lands mid-way through the bigger home and family growth arc.",
-   "do": "Say yes to visibility or recognition that shows up in this window.",
-   "avoid": "Overconfidence that skips due diligence on a good-feeling opportunity.",
-   "svehla_link": "One beat inside the larger Jupiter-in-4th-house arc, a confidence checkpoint before the deeper Pluto conjunction follows."
-  },
-  {
-   "key": "Transiting Jupiter conjunct natal Pluto",
-   "traditional": "Jupiter conjunct Pluto amplifies personal power, can bring a genuine windfall or influence boost, but also a temptation to overreach.",
-   "esoteric": "Pisces' esoteric ruler is Pluto, and Jupiter exoterically rules Pisces, so this conjunction is unusually resonant, two layers of the same expansive, transformative current reinforcing each other.",
-   "in_mikes_chart": "Natal Pluto sits at 22 degrees Scorpio in Mike's 4th house, ten degrees past the Sun; transiting Jupiter reaches it near the end of its Scorpio run, closing out the home and identity growth arc with real intensity.",
-   "translation": "The home and family growth arc peaks with a chance at real influence or a resource windfall, but the stakes and temptation to overreach are both higher here than at the Sun conjunction.",
-   "do": "Use any resource windfall to build lasting structure, not just scale.",
-   "avoid": "Letting a taste of power or money justify skipping the guardrails.",
-   "svehla_link": "Closes the Jupiter-in-4th-house arc that opened with the Scorpio ingress and Sun conjunction."
-  },
-  {
-   "key": "Transiting Jupiter conjunct natal Chiron",
-   "traditional": "Jupiter conjunct Chiron can bring healing through growth and visibility, a chance to turn an old wound into something that helps others, often via teaching or mentoring.",
-   "esoteric": "Leo's esoteric ruler is the Sun itself, so this conjunction places Jupiter's wisdom directly on the sign's core identity wound, encouraging the wound to be owned publicly rather than hidden.",
-   "in_mikes_chart": "Natal Chiron sits at 22 degrees Leo in Mike's 2nd house of income and self-worth; transiting Jupiter reaches this degree in 2026, alongside the Svehla-flagged Jupiter-in-2nd income-expansion window.",
-   "translation": "An old wound around self-worth or money gets a genuine chance to heal and even become a source of income or teaching.",
-   "do": "Turn a past money-related wound into a story or service that helps others.",
-   "avoid": "Letting the old wound's shame keep the opportunity hidden.",
-   "svehla_link": "Lands inside Svehla's Jupiter-in-2nd controlled income-expansion window, giving that expansion a healing, self-worth dimension."
-  },
-  {
-   "key": "Transiting Jupiter in the 1st house",
-   "traditional": "Jupiter in the 1st house is one of the more visible personal-luck transits, boosting confidence, physical vitality, and how favorably others perceive you.",
-   "esoteric": "The 1st house esoterically resonates with Aries, whose ruler is Mercury, so growth here is mental and identity-forming as much as physical.",
-   "in_mikes_chart": "Mike's 1st house spans Cancer 27 degrees to Leo 20 degrees; this transit opens the larger Jupiter-in-Leo passage and precedes the Chiron conjunction once Jupiter crosses into the 2nd house.",
-   "translation": "Confidence and outward presence get a real lift right before the deeper self-worth healing work begins.",
-   "do": "Put yourself forward while the visibility is naturally favorable.",
-   "avoid": "Mistaking this lift for permanence and over-extending physically or financially.",
-   "svehla_link": "Sets up the Jupiter-in-Leo and Jupiter-conjunct-Chiron sequence that lands in Svehla's named income-expansion window."
-  },
-  {
-   "key": "Transiting Jupiter in Leo",
-   "traditional": "Jupiter in Leo expands confidence, creativity, romance, and personal visibility, a classically warm, generous, self-expressive transit.",
-   "esoteric": "Leo's esoteric ruler is the Sun, meaning Jupiter here is expansion in direct service of the soul's core identity rather than the ego's surface wants.",
-   "in_mikes_chart": "This sign transit opens in Mike's 1st house and crosses into his 2nd house of income and self-worth, where it conjuncts natal Chiron at 22 degrees, tying visibility directly to the income-expansion window Svehla names.",
-   "translation": "A confident, visible chapter that turns, by the sign's end, into real work on money and self-worth.",
-   "do": "Let genuine self-expression lead into the income conversation, not the other way around.",
-   "avoid": "Performing confidence instead of building the self-worth underneath it.",
-   "svehla_link": "Directly overlaps Svehla's October 2026 to February 2027 Jupiter-in-2nd income-expansion window in its second half."
-  },
-  {
-   "key": "Transiting Uranus in Gemini",
-   "traditional": "Uranus in Gemini, 2025 to 2033, revolutionizes communication, information, and the pace of thought, a mental-plane counterpart to its usual social and technological disruption.",
-   "esoteric": "Gemini's esoteric ruler is Venus, so Uranus here electrifies relationship and value-exchange through the medium of ideas and language, not just gadgets.",
-   "in_mikes_chart": "This transit crosses Mike's 11th house, home to natal Hades at 11 degrees 56 Gemini, meaning the sudden, disruptive Uranian current runs directly through his networks and any buried financial or technical material there.",
-   "translation": "How you think, talk, and network gets rewired fast, and it lands right on top of old buried business in your circle of contacts.",
-   "do": "Stay flexible about new communication tools and network structures rather than resisting them.",
-   "avoid": "Clinging to an outdated way of talking to or organizing a network.",
-   "svehla_link": "Sets the stage for the Uranus-conjunct-Hades pass Svehla names for 2028-29 as a money and technology guardrail."
-  },
-  {
-   "key": "Transiting Uranus in the 11th house",
-   "traditional": "Uranus in the 11th house shakes up friendships, group memberships, and long-term hopes, often bringing sudden new allies or a sudden break from an old group.",
-   "esoteric": "The 11th house esoterically echoes Aquarius, whose esoteric ruler is Jupiter, so this Uranus transit is disruption in service of larger growth and vision, not disruption for its own sake.",
-   "in_mikes_chart": "This house transit is the frame for the Uranus-in-Gemini and Uranus-conjunct-Hades events, since natal Hades sits inside Mike's 11th house at 11 degrees 56 Gemini.",
-   "translation": "Your whole network and long-term goal set gets shaken and rebuilt during this stretch, culminating in the Hades conjunction.",
-   "do": "Treat sudden network changes as redirection, not just disruption.",
-   "avoid": "Overinvesting in one group identity that Uranus is clearly pulling apart.",
-   "svehla_link": "Frames the entire 2028-29 Uranus-conjunct-Hades guardrail window Svehla names."
-  },
-  {
-   "key": "Transiting Uranus sextile natal Chiron",
-   "traditional": "A Uranus-Chiron sextile offers an easier, opportunity-flavored channel to break an old wound pattern through sudden insight rather than crisis.",
-   "esoteric": "Leo's esoteric ruler is the Sun, so this sextile lets Uranian breakthrough serve the core identity's healing directly, insight arriving almost like a gift rather than a shock.",
-   "in_mikes_chart": "Natal Chiron sits at 22 degrees Leo in Mike's 2nd house; transiting Uranus in Gemini sextiles it from around 22 degrees Gemini, inside the same Uranus-in-Gemini and 11th-house passage.",
-   "translation": "A sudden, freeing insight about an old money or self-worth wound arrives with less drama than usual.",
-   "do": "Act on the flash of insight quickly, before overthinking dulls it.",
-   "avoid": "Dismissing a sudden realization about self-worth as too easy to be real.",
-   "svehla_link": "A gentler companion beat inside the same Uranus-in-Gemini window that later delivers the harder Hades conjunction."
-  },
-  {
-   "key": "Transiting Uranus trine natal Ceres",
-   "traditional": "A Uranus-Ceres trine brings a freeing shift in how someone nourishes themselves or others, often a welcome break from an old caretaking pattern.",
-   "esoteric": "Aquarius' esoteric ruler is Jupiter, and Ceres in the goddess framework governs cycles of nurture and loss, so this trine is growth-flavored liberation from an outdated nurturing role.",
-   "in_mikes_chart": "Natal Ceres sits at 2 degrees Aquarius in Mike's 7th house of partnership; transiting Uranus in Gemini trines it from around 2 degrees Gemini, early in the Uranus-in-Gemini passage, before it reaches Hades.",
-   "translation": "An old pattern of over-caretaking in a partnership loosens up in a genuinely good way.",
-   "do": "Let a partner take more responsibility for their own needs.",
-   "avoid": "Feeling guilty about stepping back from an old caretaking role.",
-   "svehla_link": "Falls early in the Uranus-in-Gemini window, before the heavier Hades material surfaces later in the same transit."
-  },
-  {
-   "key": "Transiting Uranus square natal Moon",
-   "traditional": "A Uranus-Moon square unsettles emotional routines and security, often bringing a sudden need for more independence in how feelings are handled.",
-   "esoteric": "Pisces' esoteric ruler is Pluto, meaning this square, esoterically, is a transformative undercurrent below the surface emotional disruption, not just erratic feeling.",
-   "in_mikes_chart": "Natal Moon sits at 1 degree Pisces in Mike's 8th house of shared resources and psychological depth; transiting Uranus in early Gemini squares it around 1 degree Gemini, right at the start of the Uranus-in-Gemini passage.",
-   "translation": "Emotional routines around shared money or deep psychological material get jolted early in this multi-year Uranus passage.",
-   "do": "Build in more flexibility to emotional and financial routines shared with others.",
-   "avoid": "Reacting to sudden emotional unsettlement by shutting down or overcommitting to control.",
-   "svehla_link": "Opens the Uranus-in-Gemini sequence that later runs through the Ceres trine, Chiron sextile, and Hades conjunction."
-  },
-  {
-   "key": "Transiting Neptune in Aries",
-   "traditional": "Neptune in Aries, 2025 to 2039, dissolves old ideas about individual heroism and self-assertion, replacing rigid self-image with a more fluid, inspired, faith-driven sense of identity.",
-   "esoteric": "Aries' esoteric ruler is Mercury, so Neptune here dissolves and reweaves identity through mind and communication rather than pure willpower.",
-   "in_mikes_chart": "This transit crosses Mike's 9th and 10th houses, the same general degree range where transiting Saturn conjuncts his MC in 2027, meaning career-foundation work happens under a long Neptune backdrop of identity re-imagining.",
-   "translation": "Across more than a decade, your sense of personal mission gets less fixed and more inspired, unfolding underneath the more concrete Saturn career work.",
-   "do": "Let career direction stay open to inspired course-correction rather than locking in one rigid plan.",
-   "avoid": "Confusing vague inspiration with a finished plan; Neptune needs Saturn's structure to actually land.",
-   "svehla_link": "Provides the long backdrop under Svehla's Saturn-on-MC settle-career-loose-ends and build-the-foundation window through April 2027."
-  },
-  {
-   "key": "Transiting Neptune in the 9th house",
-   "traditional": "Neptune in the 9th house dissolves old beliefs, expands spiritual or philosophical horizons, and can bring idealized or confused views of travel, education, or higher law.",
-   "esoteric": "The 9th house esoterically echoes Sagittarius, whose esoteric ruler is Earth, so this Neptune transit grounds spiritual dissolving into very real, lived experience rather than abstract belief alone.",
-   "in_mikes_chart": "Mike's 9th house spans Pisces 17 degrees to Aries 18 degrees, so this Neptune passage opens in its own sign of rulership before crossing into Aries and eventually reaching his 10th house and MC.",
-   "translation": "Beliefs about purpose and higher meaning get genuinely fluid for years before crystallizing into the career-foundation work Saturn later demands.",
-   "do": "Stay open to a belief system evolving rather than defending an old one out of habit.",
-   "avoid": "Chasing every new spiritual or philosophical trend without integrating any of them.",
-   "svehla_link": "Precedes and underlies the Saturn-conjunct-MC career work, providing its philosophical raw material."
-  },
-  {
-   "key": "Transiting Neptune square natal Uranus",
-   "traditional": "A Neptune-Uranus square blends sudden disruption with confusion or idealism, often making it hard to tell a real breakthrough from wishful thinking.",
-   "esoteric": "Libra's esoteric ruler is Uranus, so this square is Neptune dissolving the very planet that governs Libra's higher balance-point, a genuine test of whether change is authentic or escapist.",
-   "in_mikes_chart": "Natal Uranus sits at 15 degrees Capricorn in Mike's 6th house of work routines; transiting Neptune reaches the square from 15 degrees Aries, an early-2030s pass following the Saturn-conjunct-MC period.",
-   "translation": "A big work-routine change shows up wrapped in confusion, so it needs real scrutiny before you trust it.",
-   "do": "Get a second, grounded opinion before acting on a dramatic work change during this window.",
-   "avoid": "Mistaking escapism for genuine liberation in a work decision.",
-   "svehla_link": "Arrives after the Saturn and MC and Saturn and Taurus foundation years, testing whether that foundation was real or just wished-for."
-  },
-  {
-   "key": "Transiting Neptune square natal Neptune",
-   "traditional": "This is an early pass of what eventually becomes the Neptune half-return square around age 40 to 42, a first test of the ideals and illusions carried since youth.",
-   "esoteric": "Capricorn's esoteric ruler is Saturn, so Neptune squaring its own natal Capricorn placement is dissolving meeting discipline directly, an early rehearsal for the bigger midlife square still years off.",
-   "in_mikes_chart": "Natal Neptune sits at 17 degrees Capricorn, two degrees from Uranus, also in the 6th house; transiting Neptune from 17 degrees Aries squares it within a year or two of the Uranus square, compounding the same work-routine test.",
-   "translation": "The same early-2030s window that questions a big work change also questions whether your original vision for your work was ever realistic.",
-   "do": "Revisit the original vision for the work and separate what was real inspiration from what was avoidance.",
-   "avoid": "Making a major work pivot purely to escape discomfort rather than to follow real clarity.",
-   "svehla_link": "Compounds with the Uranus square in the same early-2030s Neptune-in-Aries pass, well past the current Svehla-named windows."
-  },
-  {
-   "key": "Transiting Neptune sextile natal Ceres",
-   "traditional": "A Neptune-Ceres sextile softens and spiritualizes how someone nurtures others, often opening a compassionate, low-friction opportunity to help or be helped.",
-   "esoteric": "Aquarius' esoteric ruler is Jupiter, so this easy aspect lets Neptune's compassion serve Ceres' nurturing cycle in a growth-oriented, not draining, way.",
-   "in_mikes_chart": "Natal Ceres sits at 2 degrees Aquarius in Mike's 7th house of partnership; transiting Neptune in early Aries sextiles it from around 2 degrees Aries, early in the long Neptune-in-Aries passage, well before the harder squares.",
-   "translation": "A gentle, compassionate opening in a partnership around caretaking or shared support shows up early in this Neptune cycle.",
-   "do": "Accept help or support offered in a partnership without over-analyzing it.",
-   "avoid": "Overextending generosity to the point of losing your own boundaries.",
-   "svehla_link": "An early, easy beat inside the same long Neptune-in-Aries passage that later delivers the harder Uranus and Neptune squares."
-  },
-  {
-   "key": "Transiting Pluto in Aquarius",
-   "traditional": "Pluto in Aquarius, 2023 to 2044, transforms technology, collective ideology, and group power structures at a civilizational scale, personally often intensifying a relationship with technology, networks, or ideology.",
-   "esoteric": "Aquarius' esoteric ruler is Jupiter, so this generational Pluto transit is collective transformation in service of a larger growth and wisdom current, not just raw upheaval.",
-   "in_mikes_chart": "This transit crosses Mike's 7th house of partnership, home to natal Saturn at 12 degrees Aquarius and natal Ceres at 2 degrees Aquarius, meaning it eventually conjuncts his natal Saturn directly.",
-   "translation": "Partnerships and your relationship to technology and networks go through a deep, multi-year transformation that culminates in the Saturn conjunction.",
-   "do": "Let long-term partnerships be renegotiated on more honest, power-aware terms.",
-   "avoid": "Avoiding the deeper power dynamics in a key relationship until Pluto forces the issue.",
-   "svehla_link": "Sets up the Pluto-conjunct-natal-Saturn pass, roughly 2029-31."
-  },
-  {
-   "key": "Transiting Pluto in the 7th house",
-   "traditional": "Pluto in the 7th house transforms committed partnerships and open enemies alike, often through intense power struggles that ultimately deepen or end a key relationship.",
-   "esoteric": "The 7th house esoterically echoes Libra, whose ruler is Uranus, so this Pluto transit brings sudden, non-negotiable transformation to the balance of power in relationship, not a slow erosion.",
-   "in_mikes_chart": "Mike's 7th house spans Capricorn 27 degrees to Aquarius 20 degrees, holding both natal Saturn and Ceres, the same house that carries the Pluto-conjunct-Saturn event.",
-   "translation": "This multi-year house transit is the container for the deep, partnership-transforming Pluto-Saturn conjunction.",
-   "do": "Address power imbalances in key relationships directly rather than letting them fester.",
-   "avoid": "Staying in a partnership purely out of obligation once its terms have clearly shifted.",
-   "svehla_link": "Frames the Pluto-conjunct-natal-Saturn pass, which lands in the same house roughly 2029-31."
-  },
-  {
-   "key": "Transiting Pluto conjunct natal Saturn",
-   "traditional": "Pluto conjunct natal Saturn is one of the more intense structural transits, often marking the death and rebirth of a core life structure, career, authority relationship, or self-discipline.",
-   "esoteric": "Capricorn's esoteric ruler is Saturn itself, so this conjunction is Pluto transforming Saturn's own esoteric home sign directly, a full remaking of how discipline and authority function in your life.",
-   "in_mikes_chart": "Natal Saturn sits at 12 degrees Aquarius in Mike's 7th house; transiting Pluto reaches this degree roughly 2029-31, arriving right after the Saturn-Taurus foundation years and the Saturn-conjunct-Hades pass.",
-   "translation": "A core structure you've built, likely tied to career authority or a major partnership, gets torn down and rebuilt at the root.",
-   "do": "Treat any structure that collapses in this window as material for something stronger, not a final failure.",
-   "avoid": "Trying to preserve a structure Pluto has clearly outgrown.",
-   "svehla_link": "Arrives directly after the Saturn-in-Taurus and Saturn-conjunct-Hades sequence, making the late 2020s one long structural rebuilding arc."
-  },
-  {
-   "key": "Transiting Pluto square natal Sun",
-   "traditional": "Pluto square the natal Sun is a classic identity-crisis-and-rebirth transit, often bringing a power struggle that ultimately forces a more authentic sense of self.",
-   "esoteric": "Leo's esoteric ruler is the Sun itself, so Pluto squaring the natal Sun is a direct, unmediated confrontation between transformation and core identity.",
-   "in_mikes_chart": "Natal Sun sits at 12 degrees Scorpio in Mike's 4th house; transiting Pluto in Aquarius squares it around 2033, later than the other windows in this file but worth tracking as it approaches.",
-   "translation": "Around 2033, a deep identity-and-power test arrives that will likely feel like the decade's culminating challenge.",
-   "do": "Begin building genuine self-knowledge now so this transit refines rather than shatters identity.",
-   "avoid": "Waiting until the transit is exact to start doing the inner work it demands.",
-   "svehla_link": "Sits beyond Svehla's named 2026-31 windows but represents the next major marker after them, worth flagging for future reference."
-  },
-  {
-   "key": "Transiting Pluto opposite natal Chiron",
-   "traditional": "Pluto opposite Chiron confronts old wounds through a relationship or external power dynamic, forcing the wound into the open in a way that can be either destructive or deeply healing.",
-   "esoteric": "Leo's esoteric ruler is the Sun, so this opposition, like the Pluto-square-Sun transit, ultimately serves core identity transformation, channeled through the wound-and-healing axis.",
-   "in_mikes_chart": "Natal Chiron sits at 22 degrees Leo in Mike's 2nd house; transiting Pluto in Aquarius opposes it from around 22 degrees, likely in the early-to-mid 2030s, after the Pluto-Saturn conjunction has already reshaped the 7th house.",
-   "translation": "An old money or self-worth wound gets forced into the open through a partnership or power dynamic, well after the structural rebuilding of the late 2020s.",
-   "do": "Use whichever relationship triggers this to finally address the underlying wound, not just the surface conflict.",
-   "avoid": "Treating the external conflict as the whole story instead of the wound underneath it.",
-   "svehla_link": "Follows the Pluto-Saturn conjunction chronologically, extending the structural-rebuild arc into a personal healing arc."
-  },
-  {
-   "key": "Transiting Chiron in Taurus",
-   "traditional": "Chiron in Taurus works on wounds around self-worth, security, and the body's relationship to material resources, often through a period of financial or bodily vulnerability that ultimately teaches real self-sufficiency.",
-   "esoteric": "Taurus' esoteric ruler is Vulcan, the forge-planet, so Chiron here is a wound healed through slow, deliberate hammering rather than quick fixes, real value forged through repetition.",
-   "in_mikes_chart": "This transit crosses Mike's 10th and 11th houses, meaning the security wound plays out publicly, through career and network, rather than privately.",
-   "translation": "A wound about being secure enough surfaces through career and network exposure, and healing comes from patient, provable competence.",
-   "do": "Build tangible, demonstrable value rather than chasing reassurance from others.",
-   "avoid": "Overspending or oversharing insecurity to manage the anxiety instead of addressing its root.",
-   "svehla_link": "Runs parallel to the Saturn-in-Taurus foundation-building window, reinforcing the same earn-it-slowly theme from a healing angle."
-  },
-  {
-   "key": "Transiting Chiron in the 10th house",
-   "traditional": "Chiron in the 10th house often brings a public wound around authority, reputation, or career legitimacy, frequently activated by a visible setback that ultimately becomes a credibility asset.",
-   "esoteric": "The 10th house esoterically echoes Capricorn, whose ruler is Saturn, so this Chiron passage directly parallels Saturn's own career-foundation work on the MC, adding an emotional-wound layer to the structural one.",
-   "in_mikes_chart": "Mike's 10th house spans Aries 18 degrees to Taurus 23 degrees, containing his natal MC at 18 degrees 50 Aries, meaning this Chiron transit crosses the exact degree Saturn conjuncts in 2027.",
-   "translation": "The same career-foundation window Saturn is working on has an emotional undercurrent of whether you actually deserve this authority, and answering that honestly is the healing.",
-   "do": "Own past career setbacks openly as part of the credibility story, rather than hiding them.",
-   "avoid": "Letting impostor feelings block visible action during the Saturn-MC window.",
-   "svehla_link": "Directly overlaps Svehla's Saturn-conjunct-MC settle-career-loose-ends window through April 2027, adding a wound-and-credibility layer to it."
-  },
-  {
-   "key": "Transiting Chiron square natal Saturn",
-   "traditional": "Chiron square Saturn brings an old wound about not being good enough into direct conflict with present-day responsibility and structure, often surfacing as self-doubt right when discipline is most needed.",
-   "esoteric": "Aquarius' esoteric ruler is Jupiter, so this square, esoterically, is a call for the wound to be met with expansive perspective rather than more self-punishing discipline.",
-   "in_mikes_chart": "Natal Saturn sits at 12 degrees Aquarius in Mike's 7th house; transiting Chiron in Taurus squares it from around 12 degrees, inside the broader Chiron-in-Taurus and 10th-house passage, likely overlapping the Saturn-in-Taurus years.",
-   "translation": "Old self-doubt shows up right as you are doing serious structural work on career and finances, and the two need to be handled together, not separately.",
-   "do": "Pair every disciplined structural step with a small act of self-compassion.",
-   "avoid": "Using harsh self-criticism as the motivator for the Saturn-Taurus discipline work.",
-   "svehla_link": "Overlaps the Saturn-in-Taurus foundation years, adding an emotional-wound dimension to that structural work."
-  },
-  {
-   "key": "Transiting Chiron square natal Ceres",
-   "traditional": "Chiron square Ceres brings an old wound around being nurtured, or around how one nurtures others, into tension with a present relationship or caretaking role.",
-   "esoteric": "Aquarius' esoteric ruler is Jupiter, so this square, like the Saturn square, asks the nurturing wound to be met with growth-minded perspective rather than more self-sacrifice.",
-   "in_mikes_chart": "Natal Ceres sits at 2 degrees Aquarius in Mike's 7th house; transiting Chiron in Taurus squares it from around 2 degrees, early in the Chiron-in-Taurus passage, likely before the Saturn square.",
-   "translation": "An old wound about not being properly cared for surfaces early in this cycle, through a partnership.",
-   "do": "Ask directly for the kind of care that was missing, rather than expecting a partner to guess.",
-   "avoid": "Overgiving to a partner to compensate for an old, unmet nurturing need.",
-   "svehla_link": "Opens the Chiron-in-Taurus sequence that later runs through the Saturn square."
-  },
-  {
-   "key": "Transiting Chiron conjunct natal MC",
-   "traditional": "Chiron conjunct the MC is a classic wounded-healer-goes-public transit, often marking a career shift that turns a personal wound into professional purpose.",
-   "esoteric": "Capricorn is the esoteric parallel to the 10th house and its ruler is Saturn, so this conjunction esoterically insists the public wound be met with real structural discipline, not just exposure.",
-   "in_mikes_chart": "Natal MC sits at 18 degrees 50 Aries; Chiron made its most recent passes over this degree in 2025-26, just before Saturn's own conjunction with the same point in 2027, meaning the wound-to-purpose work happens first.",
-   "translation": "A recent 2025-26 pass already began turning a career wound into a public purpose, setting up Saturn's 2027 foundation-building to build on solid emotional ground.",
-   "do": "Name the professional wound publicly now, before Saturn asks for structural commitment to what follows.",
-   "avoid": "Skipping the honest reckoning with the wound and jumping straight to the Saturn-driven structure.",
-   "svehla_link": "Directly precedes Svehla's Saturn-conjunct-MC window, meaning the 2025-26 Chiron pass was the emotional preparation for it."
-  },
-  {
-   "key": "Transiting Chiron opposite natal Jupiter",
-   "traditional": "Chiron opposite Jupiter brings an old wound about being too much or not enough into direct tension with growth and opportunity, sometimes causing self-sabotage right when things are going well.",
-   "esoteric": "Libra's esoteric ruler is Uranus, so this opposition, esoterically, asks for a sudden, liberating reframe of the wound rather than the slow grind Taurus-Chiron demands.",
-   "in_mikes_chart": "Natal Jupiter sits at 5 degrees Libra in Mike's 3rd house; transiting Chiron in Taurus opposes it from around 5 degrees, early in the Chiron-in-Taurus passage, close in time to the previously documented Saturn-opposite-Jupiter transit.",
-   "translation": "Right as growth opportunities open up, an old wound about deserving them can quietly try to sabotage the momentum.",
-   "do": "Notice self-sabotage patterns the moment growth starts feeling uncomfortable, and keep going anyway.",
-   "avoid": "Turning down a real opportunity because it triggers old too-much or not-enough feelings.",
-   "svehla_link": "Lands close in time to the previously documented Saturn-opposite-Jupiter transit, compounding growth-versus-doubt tension in the same window."
-  },
-  {
-   "key": "Transiting Juno in the 1st house",
-   "traditional": "Juno transiting the 1st house entangles relationship needs with personal identity, often prompting either newly asserting one's needs in a partnership or attracting a partner drawn to a strong personal identity.",
-   "esoteric": "The 1st house esoterically echoes Aries, ruled by Mercury, so Juno here is about communicating partnership needs as part of self-definition.",
-   "in_mikes_chart": "Mike's 1st house is a mostly quiet stretch of Cancer-Leo bridging his Mars-ASC conjunction just inside the 12th and Chiron in the 2nd, so this passage is a relatively light identity-forming commitment check.",
-   "translation": "A stretch where how you show up as yourself in a relationship gets quietly renegotiated.",
-   "do": "State partnership needs plainly and early rather than assuming they are obvious.",
-   "avoid": "Merging identity so fully with a partner that personal needs go unspoken.",
-   "svehla_link": ""
-  },
-  {
-   "key": "Transiting Juno in the 2nd house",
-   "traditional": "Juno here ties commitment to shared resources and self-worth, often surfacing questions of financial fairness or loyalty tested through money.",
-   "esoteric": "The 2nd house esoterically parallels Taurus, ruled by Vulcan, so loyalty here gets forged and tested through slow, material proof rather than words.",
-   "in_mikes_chart": "This house holds natal Chiron at 22 degrees Leo, so transiting Juno crossing it directly touches Mike's self-worth wound, making any loyalty or fairness question in a partnership personal, not just practical.",
-   "translation": "A relationship's fairness around money or resources gets tested right where your self-worth wound already lives.",
-   "do": "Get explicit about financial fairness in a partnership rather than assuming goodwill covers it.",
-   "avoid": "Letting a money disagreement reopen the old self-worth wound unspoken.",
-   "svehla_link": ""
-  },
-  {
-   "key": "Transiting Juno in the 3rd house",
-   "traditional": "Juno in the 3rd house brings commitment themes into communication, siblings, or close networks, often through a partnership formed or tested via shared ideas or local community.",
-   "esoteric": "The 3rd house esoterically echoes Gemini, ruled by Venus, making this a naturally favorable placement for Juno, relational values expressed through everyday exchange.",
-   "in_mikes_chart": "This house holds natal Jupiter and Apollon, so Juno's passage overlaps the same territory as the Jupiter-return and Jupiter-Apollon growth window, adding a partnership-and-loyalty layer to that expansion.",
-   "translation": "A committed partnership may form, deepen, or get tested right alongside the networking and idea-driven growth of the Jupiter return.",
-   "do": "Loop a key partner into the growth opportunities surfacing in this window rather than pursuing them solo.",
-   "avoid": "Letting networking excitement crowd out communication with an existing partner.",
-   "svehla_link": "Overlaps the Jupiter-return and Jupiter-conjunct-Apollon window, adding a loyalty dimension to that growth."
-  },
-  {
-   "key": "Transiting Juno in the 4th house",
-   "traditional": "Juno in the 4th house roots commitment in home and family, often prompting decisions about moving in together, family loyalty, or making a relationship official at home.",
-   "esoteric": "The 4th house esoterically parallels Cancer, ruled by Neptune, so commitment here is soul-level and feeling-based rather than contractual.",
-   "in_mikes_chart": "This house holds natal Sun and Pluto, meaning Juno's passage lands right on Mike's core identity and transformation zone, making any commitment decision here unusually weighty.",
-   "translation": "A partnership decision tied to home or family carries real identity stakes, not just logistics.",
-   "do": "Make home and family commitment decisions deliberately, since they will shape identity, not just living arrangements.",
-   "avoid": "Rushing a move-in-together or family-loyalty decision to avoid deeper identity questions.",
-   "svehla_link": "Overlaps the Jupiter-in-Scorpio and 4th-house growth arc, adding a partnership-commitment layer to that identity work."
-  },
-  {
-   "key": "Transiting Juno in the 5th house",
-   "traditional": "Juno in the 5th house brings romance, creative partnership, or even children into the commitment conversation, often a genuinely joyful placement for Juno.",
-   "esoteric": "The 5th house esoterically echoes Leo, ruled by the Sun, so commitment here is an act of creative self-expression, loyalty as a form of authentic joy rather than duty.",
-   "in_mikes_chart": "This house holds natal Mercury and Venus, so Juno's passage activates both communication-in-love and pure Venusian affection themes at once.",
-   "translation": "A romantic or creative partnership gets a genuinely warm commitment boost.",
-   "do": "Express affection and creative ideas openly with a partner during this window.",
-   "avoid": "Treating a lighthearted romantic connection as less real than a serious one.",
-   "svehla_link": ""
-  },
-  {
-   "key": "Transiting Juno in the 6th house",
-   "traditional": "Juno in the 6th house ties commitment to daily routine and service, often testing a partnership through the unglamorous work of shared responsibilities and health.",
-   "esoteric": "The 6th house esoterically parallels Virgo, ruled by the Moon, so loyalty here is proven through quiet, ongoing care rather than grand gestures.",
-   "in_mikes_chart": "This house holds natal Uranus and Neptune, meaning Juno's passage can bring a sudden shift or idealized confusion into how commitment shows up in daily routine and work life.",
-   "translation": "A partnership gets tested through the daily grind, work schedules, chores, health habits, rather than through big romantic moments.",
-   "do": "Show commitment through reliable follow-through on small daily responsibilities.",
-   "avoid": "Assuming grand gestures can substitute for consistent daily support.",
-   "svehla_link": "Overlaps the Uranus and Neptune squares-to-Saturn territory in the same house, adding a relationship-loyalty layer to that work-routine disruption."
-  },
-  {
-   "key": "Transiting Juno in the 7th house",
-   "traditional": "Juno in the 7th house is its most at-home placement, directly activating marriage, formal partnership, and one-on-one commitment questions.",
-   "esoteric": "The 7th house esoterically echoes Libra, ruled by Uranus, so commitment decisions here can arrive with a sudden, clarifying jolt rather than a slow build.",
-   "in_mikes_chart": "This house holds natal Saturn and Ceres, meaning Juno's passage lands on Mike's own commitment-discipline planet, a natural time for formalizing or seriously testing a partnership's long-term structure.",
-   "translation": "This is the strongest window in Juno's whole cycle for a real, structural partnership decision, marriage, formal commitment, or a serious test of one already in place.",
-   "do": "Treat any partnership decision that arises here as one worth real deliberation, since the placement favors lasting structure.",
-   "avoid": "Making a snap commitment decision under the sudden-clarity pull of this house without checking it against reality.",
-   "svehla_link": "Lands on natal Saturn, echoing Svehla's Juno-on-DSC loyalty theme with a transiting reinforcement of the same commitment axis."
-  },
-  {
-   "key": "Transiting Juno in the 8th house",
-   "traditional": "Juno in the 8th house brings commitment into contact with shared resources, intimacy, and psychological depth, often surfacing trust issues around merging finances or vulnerability.",
-   "esoteric": "The 8th house esoterically parallels Scorpio, ruled by Mars, so loyalty here is proven through willingness to fight for the relationship through real intensity, not by avoiding conflict.",
-   "in_mikes_chart": "This house holds natal Moon, meaning Juno's passage touches Mike's emotional core directly, making trust and vulnerability questions in a partnership unusually deep during this window.",
-   "translation": "A partnership's depth of trust, especially around shared money or real emotional vulnerability, gets seriously tested.",
-   "do": "Have the harder conversation about merging resources or emotional vulnerability rather than avoiding it.",
-   "avoid": "Using conflict-avoidance to dodge real intimacy questions in this window.",
-   "svehla_link": ""
-  },
-  {
-   "key": "Transiting Juno in the 9th house",
-   "traditional": "Juno in the 9th house brings commitment into contact with belief systems, travel, or long-distance connection, sometimes a cross-cultural or long-distance partnership theme.",
-   "esoteric": "The 9th house esoterically echoes Sagittarius, ruled by the Earth, so commitment here needs to be grounded in lived, shared experience, not just shared philosophy.",
-   "in_mikes_chart": "This house is empty of natal points for Mike, sitting between the Moon in the 8th and his MC in the 10th, so this Juno passage is a relatively light, forward-looking stretch.",
-   "translation": "A quieter window where shared beliefs or long-term direction with a partner get discussed rather than tested hard.",
-   "do": "Talk openly with a partner about long-term values and direction.",
-   "avoid": "Assuming shared belief without actually confirming it out loud.",
-   "svehla_link": ""
-  },
-  {
-   "key": "Transiting Juno in the 10th house",
-   "traditional": "Juno in the 10th house brings partnership into public or career life, sometimes a business partnership, a public commitment, or a relationship that affects reputation and career standing.",
-   "esoteric": "The 10th house esoterically parallels Capricorn, ruled by Saturn, so commitment here becomes structural and public, a partnership meant to last and be seen.",
-   "in_mikes_chart": "This house holds Mike's natal MC at 18 degrees 50 Aries, meaning Juno's passage can coincide with the same window Saturn conjuncts the MC, potentially tying a partnership decision directly to the career-foundation work.",
-   "translation": "A partnership, business or personal, may become publicly tied to your career identity right around the same time career foundations are being built.",
-   "do": "Be deliberate about which partnerships get publicly tied to professional identity during this window.",
-   "avoid": "Entering a public or business partnership casually right when career reputation is being actively rebuilt.",
-   "svehla_link": "Can overlap Svehla's Saturn-conjunct-MC window, adding a public-partnership dimension to the career-foundation theme."
-  },
-  {
-   "key": "Transiting Juno in the 11th house",
-   "traditional": "Juno in the 11th house brings commitment questions into friendship and group settings, sometimes turning a friend into a partner or testing loyalty within a network.",
-   "esoteric": "The 11th house esoterically echoes Aquarius, ruled by Jupiter, so loyalty here is tested against the pull toward independence and the wider group, not against a single person.",
-   "in_mikes_chart": "This house holds natal Hades, meaning Juno's passage can surface old, buried loyalty questions or hidden resentments within Mike's network before they can be genuinely resolved.",
-   "translation": "An old, unspoken loyalty issue inside your circle of contacts surfaces and needs a real, honest conversation.",
-   "do": "Address a buried loyalty question in a friendship or network directly rather than letting it fester longer.",
-   "avoid": "Pretending an old resentment inside the network has resolved itself just because it went unspoken.",
-   "svehla_link": "Sits in the same house as the later Saturn-conjunct-Hades and Uranus-conjunct-Hades events, so an early, gentler loyalty reckoning can precede those heavier passes."
-  },
-  {
-   "key": "Transiting Juno in the 12th house",
-   "traditional": "Juno in the 12th house often brings commitment questions into private, hidden, or even spiritual territory, sometimes a secret relationship, a partnership with someone from the past, or working through a loyalty pattern in solitude before it becomes public.",
-   "esoteric": "The 12th house esoterically parallels Pisces, ruled by Pluto, so this Juno passage is a deep, transformative reckoning with loyalty patterns rather than a light one.",
-   "in_mikes_chart": "This is Juno's own natal house, natal Juno sits at 11 degrees 54 Cancer here alongside natal Mars, so a transiting Juno return through this house is the most personally resonant Juno placement in Mike's whole chart.",
-   "translation": "This is the deepest, most private reckoning with what loyalty and commitment actually mean to you personally, since it lands right where your own natal commitment planet lives.",
-   "do": "Use any quiet, private period during this transit to genuinely reflect on relationship patterns before the next Juno return.",
-   "avoid": "Keeping a real relationship pattern hidden past the point where it needs to be addressed openly.",
-   "svehla_link": "This is the house of the Juno return, making it the anchor point for your entire Juno cycle."
-  },
-  {
-   "key": "Transiting Juno conjunct natal Juno",
-   "traditional": "A Juno return, roughly every 4.4 years, closes one chapter of relationship-loyalty patterns and opens the next, similar in spirit to a mini relationship new year.",
-   "esoteric": "Since natal Juno sits in the 12th house, esoterically parallel to Pisces and ruled by Pluto, each return is less a public renewal and more a private, transformative one.",
-   "in_mikes_chart": "Natal Juno sits at 11 degrees 54 Cancer in Mike's 12th house; the return recurs roughly every 4.4 years, whenever transiting Juno cycles back through this same 12th-house degree.",
-   "translation": "Every few years, you get a private, internal reset on your patterns around loyalty and commitment, whether or not there is an active partnership at the time.",
-   "do": "Use each return as a quiet checkpoint on what the last relationship cycle actually taught about loyalty.",
-   "avoid": "Skipping the internal review and just repeating the same commitment pattern into the next cycle.",
-   "svehla_link": "Reinforces Svehla's Juno-on-DSC loyalty theme as a recurring, cyclical check-in rather than a one-time event."
-  },
-  {
-   "key": "Transiting Juno opposite natal Mars",
-   "traditional": "Juno opposite Mars brings partnership and personal assertion into direct tension, often a conflict between what a partner needs and what one wants to pursue independently.",
-   "esoteric": "Scorpio's esoteric ruler is Mars, so this opposition, esoterically, channels raw Martian will directly against the commitment axis, making it one of the more combustible Juno aspects.",
-   "in_mikes_chart": "Natal Mars sits at 23 degrees 52 Cancer conjunct Mike's ASC in the 12th house; transiting Juno opposes it from around 23-24 degrees Capricorn, in Mike's 6th house of work and routine.",
-   "translation": "A conflict between personal drive and a partner's needs shows up specifically through work or daily routine friction.",
-   "do": "Negotiate directly with a partner about how much personal drive and independence the relationship can hold.",
-   "avoid": "Letting frustration about a partner's needs come out sideways as irritability at work.",
-   "svehla_link": ""
-  },
-  {
-   "key": "Transiting Ceres conjunct natal Juno",
-   "traditional": "Ceres conjunct Juno brings nurturing and commitment together, often a period of caretaking within a committed partnership, or a partner stepping into a caregiving role.",
-   "esoteric": "Both goddesses in Demetra George's framework represent cycles of loss and return; their conjunction combines the nurture cycle with the loyalty cycle, care itself becoming the proof of commitment.",
-   "in_mikes_chart": "Natal Juno sits at 11 degrees 54 Cancer in the 12th house; transiting Ceres reaches this degree periodically as it cycles the chart roughly every 3.6 years, landing in the same private, reflective 12th-house territory.",
-   "translation": "A period where nurturing someone, or being nurtured, becomes the main way loyalty gets expressed.",
-   "do": "Let caretaking be a genuine expression of commitment rather than a chore during this window.",
-   "avoid": "Confusing over-caretaking with love; check the nurturing is wanted, not just given.",
-   "svehla_link": ""
-  },
-  {
-   "key": "Transiting Ceres conjunct natal Mars",
-   "traditional": "Ceres conjunct Mars brings nurturing into contact with drive and assertion, sometimes as a need to nurture one's own ambitions, or a conflict between caretaking and pursuing personal goals.",
-   "esoteric": "Scorpio's esoteric ruler is Mars, so this conjunction, esoterically, is nurture meeting will directly, learning to feed one's own drive rather than only tending to others.",
-   "in_mikes_chart": "Natal Mars sits at 23 degrees 52 Cancer conjunct Mike's ASC in the 12th house; transiting Ceres reaches this degree in its roughly 4.6-year cycle, landing right on his personal drive point.",
-   "translation": "A period highlighting whether you are nurturing your own ambitions and physical energy, or only tending to everyone else's needs.",
-   "do": "Deliberately feed personal drive and physical energy during this window, not just others' needs.",
-   "avoid": "Neglecting self-care while pushing hard on a personal goal.",
-   "svehla_link": ""
-  },
-  {
-   "key": "Transiting Ceres conjunct natal ASC",
-   "traditional": "Ceres conjunct the Ascendant often brings a nurturing, caretaking quality to how someone presents themselves, sometimes coinciding with taking on a caregiver role visibly, or attending to health and body needs.",
-   "esoteric": "The Ascendant esoterically parallels Aries, ruled by Mercury, so this conjunction blends nurture with communication, care that is expressed and spoken, not silent.",
-   "in_mikes_chart": "Mike's ASC sits at 26 degrees 58 Cancer, essentially the same degree region as natal Mars; transiting Ceres crossing this point directly touches his self-presentation and physical vitality.",
-   "translation": "A period where how you show up physically and how you care for yourself, or are seen caring for others, becomes noticeably more visible.",
-   "do": "Speak openly about care needs, personal or for someone else, rather than handling them silently.",
-   "avoid": "Letting a caretaking role quietly consume personal identity during this window.",
-   "svehla_link": ""
-  },
-  {
-   "key": "Transiting Ceres in the 12th house",
-   "traditional": "Ceres in the 12th house often brings private grief work, quiet caretaking, or processing an old loss that has not been fully grieved.",
-   "esoteric": "The 12th house esoterically parallels Pisces, ruled by Pluto, so Ceres here is nurture meeting deep transformation, grief that ultimately clears space for something new.",
-   "in_mikes_chart": "This is the same house that holds natal Mars and Juno, so a Ceres passage here directly touches Mike's core drive and commitment patterns through the lens of grief and quiet processing.",
-   "translation": "A private stretch for processing an old loss, one that has been affecting drive and commitment without being fully addressed.",
-   "do": "Give real private time to grieve or process an old loss rather than pushing through it.",
-   "avoid": "Staying so busy that the unprocessed grief just gets buried further.",
-   "svehla_link": ""
-  },
-  {
-   "key": "Transiting Ceres in the 1st house",
-   "traditional": "Ceres in the 1st house often brings a visible focus on self-nurturing, body, health habits, or literally becoming a caretaker in a way others can see.",
-   "esoteric": "The 1st house esoterically echoes Aries, ruled by Mercury, so self-nurture here gets talked about and defined out loud, an identity statement rather than a private habit.",
-   "in_mikes_chart": "Mike's 1st house is a relatively quiet stretch of his chart with no other natal points, so this Ceres transit stands out clearly as a dedicated self-care and health identity window.",
-   "translation": "A clean stretch to focus on physical self-care and health habits as part of how you define yourself.",
-   "do": "Start or recommit to a health or self-care routine during this window; it has clear runway.",
-   "avoid": "Letting the quiet nature of this house mean the self-care focus gets skipped for busier priorities.",
-   "svehla_link": ""
-  },
-  {
-   "key": "Progressed Moon in Gemini",
-   "traditional": "The progressed Moon in Gemini brings a mentally restless, curious, communicative emotional tone, often coinciding with new learning, varied social contact, and a need for mental stimulation to feel emotionally settled.",
-   "esoteric": "Gemini's esoteric ruler is Venus, so this progressed placement channels emotional needs into relational, values-based exchange even while the surface mood is quick and mentally scattered.",
-   "in_mikes_chart": "The progressed Moon enters Gemini around May 3 2027, right after finishing its critical and anaretic Taurus degrees on Alcyone (March-May 2027), moving through Mike's natal 11th house where it will eventually reach Hades.",
-   "translation": "Right after a heavy, fated-feeling stretch in Taurus, your emotional life gets lighter, faster, and more curious for about two years.",
-   "do": "Follow the curiosity, take the class, have the varied conversations, this is a genuinely good window for it.",
-   "avoid": "Mistaking restlessness for a sign something is wrong; some scatter is just this cycle's texture.",
-   "svehla_link": "Begins immediately after the pMoon-Taurus-critical-degrees and Alcyone window already documented, continuing the same progressed lunar arc into new territory."
-  },
-  {
-   "key": "Progressed Moon in Cancer",
-   "traditional": "The progressed Moon in Cancer, its own sign, brings an emotionally rich, home-and-family-focused, nurturing period, often one of the more emotionally comfortable lunar progressions.",
-   "esoteric": "Cancer's esoteric ruler is Neptune, so this progressed placement, though outwardly cozy, carries an undercurrent of soul-deep longing and sensitivity that can feel bigger than ordinary domestic contentment.",
-   "in_mikes_chart": "This follows the Gemini passage roughly two years after the May 2027 ingress, landing around 2029, and crosses into Mike's natal 12th house where his own Mars and Juno sit.",
-   "translation": "After a mentally busy Gemini stretch, emotional life turns inward toward home, family, and private feeling, with more depth than the Gemini period had.",
-   "do": "Prioritize home and family bonding time during this stretch; the Moon is genuinely supported here.",
-   "avoid": "Avoiding necessary vulnerability just because the private mood feels comfortable to stay in alone.",
-   "svehla_link": "Follows directly from the Gemini progression, continuing the arc that began after the 2027 Taurus and Alcyone window."
-  },
-  {
-   "key": "Progressed Moon in Leo",
-   "traditional": "The progressed Moon in Leo brings a warmer, more confident, expressive emotional tone, often a period of wanting to be seen and appreciated, sometimes coinciding with romance or creative visibility.",
-   "esoteric": "Leo's esoteric ruler is the Sun, so this progressed placement channels emotional needs directly through core identity expression, feelings become inseparable from being genuinely, visibly oneself.",
-   "in_mikes_chart": "This follows the Cancer passage roughly two years later, around 2031-32, moving from Mike's private 12th house into his 1st house, right where the natal chart is otherwise quiet.",
-   "translation": "After an inward, private Cancer stretch, emotional life becomes outward-facing and confident again, wanting recognition rather than retreat.",
-   "do": "Put feelings and creative expression out into the open during this window; the appetite for visibility is genuine.",
-   "avoid": "Overcorrecting from the private Cancer period into attention-seeking that outruns actual readiness.",
-   "svehla_link": "Continues the same 28-year progressed lunar arc, moving from the private Cancer stretch into a more visible identity phase."
-  },
-  {
-   "key": "Progressed Moon in the 12th house",
-   "traditional": "The progressed Moon in the 12th house closes out a full 25-30 year lunar cycle, typically a period of introspection, release, and quiet preparation before a new emotional chapter begins at the 1st house crossing.",
-   "esoteric": "The 12th house esoterically parallels Pisces, ruled by Pluto, so this closing phase is genuinely transformative, not just a rest period, old emotional patterns actually dissolve here.",
-   "in_mikes_chart": "This house transit overlaps the Cancer sign progression and holds natal Mars and Juno, meaning the closing-cycle introspection directly touches Mike's drive and commitment patterns before the next chapter opens.",
-   "translation": "A two to three year period of winding down and processing that sets up a genuinely new emotional chapter once it is complete.",
-   "do": "Let this be a genuinely quiet, reflective period rather than fighting the pull inward.",
-   "avoid": "Starting major new emotional commitments right as this closing phase begins; wait for the 1st-house crossing.",
-   "svehla_link": "Sets up the progressed-Moon-in-1st-house entry as the next major threshold."
-  },
-  {
-   "key": "Progressed Moon in the 1st house",
-   "traditional": "The progressed Moon crossing into the 1st house is one of the most significant thresholds in the 28-year lunar cycle, often felt as a genuine waking up, a shift from inward uncertainty to outward, visible action.",
-   "esoteric": "The 1st house esoterically echoes Aries, ruled by Mercury, so this threshold is as much a mental awakening as an emotional one, a new way of thinking about who you are becomes available.",
-   "in_mikes_chart": "This threshold follows directly from the 12th-house closing phase and overlaps the Leo sign progression, meaning Mike gets both the house-level waking up and the sign-level confidence boost at nearly the same time.",
-   "translation": "A genuinely new emotional era begins, one where you move from processing the past to acting visibly on your own behalf.",
-   "do": "Take the visible action that the closing 12th-house phase prepared; this is the moment to act on it.",
-   "avoid": "Staying in the old cycle's introspective mode past its natural end point.",
-   "svehla_link": "Marks the completion of the progressed-Moon arc traced through this file, from the 2027 Taurus and Alcyone window through Gemini, Cancer, the 12th house, and into this new chapter."
-  },
-  {
-   "key": "Progressed Moon conjunct natal Hades",
-   "traditional": "A progressed lunar conjunction to any point brings sustained, months-long emotional focus to that point, here activating whatever Hades governs.",
-   "esoteric": "In the Uranian scheme, Hades governs decay, buried matters, and hidden karmic debt, so this conjunction brings sustained emotional attention to old, unresolved material that has been sitting untouched.",
-   "in_mikes_chart": "Natal Hades sits at 11 degrees 56 Gemini in Mike's 11th house; the progressed Moon crosses this exact degree during its Gemini passage shortly after entering the sign around May 2027, before the Saturn and Uranus conjunctions to the same point.",
-   "translation": "An early, emotionally toned pass over old buried network or financial material arrives years before the heavier Saturn and Uranus hits on the same degree.",
-   "do": "Use this earlier, gentler pass to start noticing what old business needs cleaning up, before the harder transits force it.",
-   "avoid": "Dismissing an uneasy feeling about old network or financial matters as unimportant just because it is not urgent yet.",
-   "svehla_link": "Provides an early emotional preview of the same natal Hades point that Uranus (2028-29) and Saturn (2029-30) will later hit much harder."
-  },
-  {
-   "key": "Progressed Moon conjunct natal Mars",
-   "traditional": "A progressed lunar conjunction to natal Mars brings emotional life and personal drive into close alignment, often a period of feeling motivated, assertive, or more easily provoked than usual.",
-   "esoteric": "Scorpio's esoteric ruler is Mars, so this conjunction, esoterically, fuses feeling with will in an unusually direct, combustible way, emotions become action almost immediately.",
-   "in_mikes_chart": "Natal Mars sits at 23 degrees 52 Cancer conjunct Mike's ASC in the 12th house; the progressed Moon reaches this degree during its Cancer passage around 2029-30, in the middle of the private, introspective 12th-house window.",
-   "translation": "In the middle of an otherwise inward, reflective stretch, a burst of motivation or assertiveness breaks through.",
-   "do": "Act on the motivation when it surfaces, even if it interrupts the quieter mood of the period.",
-   "avoid": "Suppressing irritability that surfaces here until it becomes an outburst.",
-   "svehla_link": ""
-  },
-  {
-   "key": "Progressed Moon conjunct natal ASC",
-   "traditional": "A progressed lunar conjunction to the Ascendant is a strong, personally felt marker, often coinciding with a noticeable shift in mood, appearance, or how one presents to the world.",
-   "esoteric": "The Ascendant esoterically parallels Aries, ruled by Mercury, so this conjunction blends deep feeling with a need to actually voice and define the new self that is emerging.",
-   "in_mikes_chart": "Mike's ASC sits at 26 degrees 58 Cancer, just past natal Mars; the progressed Moon crosses this point shortly after the Mars conjunction, at the very end of the 12th-house passage, immediately preceding the 1st-house threshold.",
-   "translation": "This is the final beat of the old cycle, a strongly felt, visible shift in mood and presentation, right before the new emotional chapter formally begins.",
-   "do": "Pay attention to shifts in mood or self-presentation here; they are pointing directly at what the new cycle wants to look like.",
-   "avoid": "Dismissing a strong felt shift as random rather than as the closing note of a long cycle.",
-   "svehla_link": "Immediately precedes the progressed-Moon-in-1st-house threshold, the two events forming one continuous transition."
-  },
-  {
-   "key": "Progressed Sun in Sagittarius",
-   "traditional": "The progressed Sun changes sign roughly once every 30 years and marks a genuine identity evolution; in Sagittarius it typically brings more optimism, a hunger for meaning, travel, or philosophical growth, and a more expansive, less intense self-expression than the sign it is leaving.",
-   "esoteric": "Sagittarius' esoteric ruler is the Earth, so this progressed identity shift, unlike its usual Jupiter-ruled expansiveness, is esoterically about grounding big beliefs into lived, practical wisdom.",
-   "in_mikes_chart": "Natal Sun sits at 12 degrees Scorpio in the 4th house; the progressed Sun moves roughly one degree per year, so it reaches Sagittarius around Mike's late 40s, entering his natal 5th house where Mercury and Venus already sit.",
-   "translation": "Decades from now, your core identity shifts from Scorpio's intensity toward a lighter, more philosophical, meaning-seeking mode, landing in your house of creativity and romance.",
-   "do": "Note this as a long-range marker; nothing to act on now, but a genuine identity evolution to expect decades out.",
-   "avoid": "Assuming personality traits are fixed forever; the progressed Sun shows real, gradual change is normal and expected.",
-   "svehla_link": ""
-  },
-  {
-   "key": "Progressed Sun in the 5th house",
-   "traditional": "The progressed Sun in the 5th house brings identity into closer contact with creativity, romance, self-expression, and joy, often a genuinely lighter, more playful multi-year identity chapter.",
-   "esoteric": "The 5th house esoterically echoes Leo, ruled by the Sun itself, so this house transit is unusually resonant for the Sun, the truest possible expression of core identity through creative joy.",
-   "in_mikes_chart": "This house transit begins before the Sagittarius sign change, since the 4th-5th cusp sits at Scorpio 23 degrees, close to natal Sun's own 12-degree Scorpio position, and continues through it.",
-   "translation": "A long stretch, arriving well into the future, where core identity becomes more about creative joy and self-expression than intensity or transformation.",
-   "do": "Treat this as a green light, decades out, to prioritize creative projects and genuine enjoyment as identity, not indulgence.",
-   "avoid": "Nothing urgent now; just do not assume the current intense Scorpio-flavored identity is permanent.",
-   "svehla_link": ""
-  },
-  {
-   "key": "Progressed Sun in the 6th house",
-   "traditional": "The progressed Sun in the 6th house shifts identity toward service, health, and the details of daily work, often a humbler, more routine-focused chapter after a more expressive one.",
-   "esoteric": "The 6th house esoterically parallels Virgo, ruled by the Moon, so this identity chapter is about quiet, sustained care and refinement rather than visible achievement.",
-   "in_mikes_chart": "This house transit follows the 5th house and Sagittarius chapter and crosses through Mike's natal 6th house where Uranus and Neptune sit, meaning identity in this later chapter gets filtered through the same work-routine planets.",
-   "translation": "A later-life identity chapter centers on refining daily work and health habits rather than seeking visibility.",
-   "do": "Long-range only, expect a natural pull toward service and routine refinement as a later identity chapter, not a step backward.",
-   "avoid": "Nothing urgent now; this is decades-out context, not a current-day directive.",
-   "svehla_link": ""
-  },
-  {
-   "key": "Progressed Mercury in Capricorn",
-   "traditional": "The progressed Mercury changing sign shifts thinking style; into Capricorn it typically brings a more disciplined, practical, structured way of thinking and communicating, less speculative, more results-oriented.",
-   "esoteric": "Capricorn's esoteric ruler is Saturn, so this progressed shift is unusually resonant, the mind itself takes on Saturn's own disciplined, form-building quality directly.",
-   "in_mikes_chart": "Natal Mercury sits at 3 degrees Sagittarius in the 5th house; progressed Mercury moves quickly and irregularly, sometimes retrograde, but its eventual move into Capricorn lands in Mike's 6th house, right where natal Uranus and Neptune sit.",
-   "translation": "At some point, your thinking style becomes noticeably more disciplined and practical, arriving right in the house that otherwise runs on sudden change and idealism.",
-   "do": "Lean into the more structured thinking style when it arrives, it is a genuine asset for follow-through.",
-   "avoid": "Mistaking the new practicality for a loss of the earlier Sagittarian big-picture instinct; both can coexist.",
-   "svehla_link": ""
-  },
-  {
-   "key": "Progressed Mars in Leo",
-   "traditional": "Progressed Mars changing sign shifts the flavor of drive and assertion; into Leo it typically brings more confident, visible, creatively-charged action, less emotionally defensive than the sign it is leaving.",
-   "esoteric": "Leo's esoteric ruler is the Sun, so this progressed shift channels raw Martian will directly through core identity, action becomes an act of self-expression rather than self-protection.",
-   "in_mikes_chart": "Natal Mars sits at 23 degrees 52 Cancer conjunct the ASC in the 12th house; progressed Mars moves roughly one sign every couple of years, and its move into Leo lands in Mike's natal 2nd house where Chiron sits.",
-   "translation": "A period of noticeably more confident, visible action, arriving in the same territory as your self-worth wound, giving you a real chance to act your way into healing it.",
-   "do": "Use the more confident action style to directly challenge the old self-worth wound instead of avoiding situations that trigger it.",
-   "avoid": "Letting bold action become defensive overcompensation for the underlying wound.",
-   "svehla_link": ""
-  }
- ]
+  "meta": {
+    "built": "2026-09-15",
+    "sources": [
+      "https://astrostyle.com/uranus-in-gemini-transit-astrology-horoscope/",
+      "https://astrobutterfly.com/2025/07/07/astrology-of-uranus-in-gemini-2025-2033-how-it-will-influence-you/",
+      "https://myastrodiaries.substack.com/p/neptune-in-aries-2025-2039-guide",
+      "https://www.lilithastrology.com/blog/neptune-in-aries-2025-2039-meaning-horoscopes",
+      "https://www.lilithastrology.com/blog/pluto-in-aquarius-2023-2044-meaning-themes-what-to-expect",
+      "https://www.chani.com/blogs/what-you-need-to-know-about-pluto-in-aquarius",
+      "https://theuranianastrologer.com/apollon-1",
+      "https://www.heavenschild.com.au/a-astrology/apollon-astrology.html",
+      "https://medium.com/@HermesAstrology/hades-in-astrology-7c447d8cfd8d",
+      "https://theuranianastrologer.com/hades-1/2015/2/3/astrological-hades-and-its-cultural-archetypes",
+      "https://starsignstyle.com/juno-in-the-houses/",
+      "https://www.thedarkpixieastrology.com/blog/transit-asteroid-juno-in-the-houses-and-aspects",
+      "https://www.ancientfuturevision.org/juno-transits-meaning-in-astrology/",
+      "https://cafeastrology.com/ceres.html",
+      "https://thalira.com/blogs/quantum-codex/ceres-astrology-guide",
+      "https://www.augurine.com/learn/ceres-asteroid",
+      "https://girlandhermoon.com/the-progressed-moon-through-the-houses-in-astrology/",
+      "https://kerykeion.net/content/learn-astrology/predictive-progressions-moon-first-house",
+      "https://kerykeion.net/content/learn-astrology/predictive-progressions-moon-twelfth-house",
+      "https://cafeastrology.com/jupiter_transits_houses.html",
+      "https://starsmoonandsun.com/2025/06/07/jupiter-transiting-the-natal-houses/",
+      "https://www.celesian.com/blog/chiron-in-the-houses-natal-chart",
+      "https://mysticryst.com/blogs/the-mystic-journal/chiron-in-astrology-the-wounded-healers-complete-guide"
+    ],
+    "notes": "This file covers the GAP entries requested to round out the real_coach astro knowledge base: slower-moving transiting planets (Saturn, Jupiter, Uranus, Neptune, Pluto, Chiron) through signs, Placidus houses, and aspects to Mike's natal chart not already covered by existing KB files, plus Juno through all 12 houses, Ceres aspects, and secondary progressions (Moon, Sun, Mercury, Mars). House cusps used follow Mike's natal Placidus wheel (1H Cancer 26.97 ASC, 2H Leo 20.32, 3H Virgo 17.25, 4H Libra 18.83, 7H Capricorn 26.97, 10H Aries 18.83 MC, 11H Taurus 23.20) with 2nd/8th, 3rd/9th, 5th/11th, 6th/12th cusps derived as exact opposites per standard quadrant-house geometry (5H Scorpio 23.20, 8H Aquarius 20.32, 9H Pisces 17.25). Esoteric framing follows Alice Bailey's sign rulers (Aries=Mercury, Taurus=Vulcan, Gemini=Venus, Cancer=Neptune, Leo=Sun, Virgo=Moon, Libra=Uranus, Scorpio=Mars, Sagittarius=Earth, Capricorn=Saturn, Aquarius=Jupiter, Pisces=Pluto). Uranian/Hamburg-school meanings used for Apollon (expansion, success, science, commerce) and Hades (decay, hidden/buried matters, karmic debt). Juno and Ceres follow Demetra George's asteroid-goddess framework (Juno=commitment/loyalty, Ceres=nurture/loss cycles). Dates and degree math (house crossings, conjunction timing) are derived/estimated from natal degrees and average transit speeds, not from a precision ephemeris run, and should be treated as approximate framing windows rather than exact dates."
+  },
+  "entries": [
+    {
+      "key": "Transiting Saturn opposite natal Apollon",
+      "traditional": "Saturn opposition tests the area of life it touches against reality, forcing a sober reckoning between ambition and structural limits.",
+      "esoteric": "Capricorn's esoteric ruler is Saturn itself, so this opposition is Saturn confronting its own point of discipline through the Uranian planet of expansion, success, and the big picture.",
+      "in_mikes_chart": "Natal Apollon sits at 16 degrees Libra in your 3rd house of ideas, contracts, and networking; transiting Saturn reaches the opposition point near 16 degrees Aries as it closes in on your natal MC at 18 degrees 50 Aries.",
+      "translation": "Saturn puts a hard stop on any go-big idea that has not been structurally tested, right as career pressure peaks.",
+      "do": "Pressure-test the one expansion idea worth keeping before committing resources.",
+      "avoid": "Chasing broad, unproven opportunities purely on momentum.",
+      "svehla_link": "Falls inside Svehla's named spring 2027 contingency window, Saturn opposite Apollon March 28 2027, just before Saturn conjuncts MC April 16 2027."
+    },
+    {
+      "key": "Transiting Saturn square natal Uranus",
+      "traditional": "A Saturn-Uranus square strains the balance between stability and the need for sudden change, often forcing a structural decision under pressure.",
+      "esoteric": "Libra's esoteric ruler is Uranus and Capricorn's is Saturn, so this square is a direct esoteric-ruler clash between the sign of relationship-balance and the sign of form-building.",
+      "in_mikes_chart": "Natal Uranus at 15 degrees Capricorn sits in your 6th house of work and routine; transiting Saturn squares it from mid-Aries as it approaches your MC, arriving shortly before the Saturn-conjunct-MC window.",
+      "translation": "Old work routines get pressure-tested against a sudden urge to break from them, right as the career foundation work ramps up.",
+      "do": "Rebuild routines deliberately rather than letting a sudden disruption force the change.",
+      "avoid": "Ignoring the itch for change until it erupts as a work crisis.",
+      "svehla_link": "Sits in the run-up to Saturn conjunct MC, the same Saturn-in-Aries pass Svehla frames as settling career loose ends."
+    },
+    {
+      "key": "Transiting Saturn square natal Neptune",
+      "traditional": "Saturn square Neptune forces illusions, hopes, or vague plans to meet concrete tests, often dissolving what was not real.",
+      "esoteric": "Capricorn's esoteric ruler Saturn squares the sign carrying Pisces' undercurrent through Neptune's exoteric rulership, a confrontation between structure and the dissolving, transformative tide.",
+      "in_mikes_chart": "Natal Neptune at 17 degrees Capricorn is also in your 6th house, two degrees from Uranus; transiting Saturn squares it almost simultaneously with the Uranus square, compounding the work-routine pressure test.",
+      "translation": "Vague hopes about how work should just flow get a reality check at the same time old routines get shaken.",
+      "do": "Get specific and measurable about work goals instead of leaving them foggy.",
+      "avoid": "Drifting on wishful thinking about how the job will sort itself out.",
+      "svehla_link": "Doubles up with the Uranus square in the same Saturn-in-Aries run-up to Saturn conjunct MC."
+    },
+    {
+      "key": "Transiting Saturn in the 11th house",
+      "traditional": "Saturn in the 11th house matures friendships and group affiliations, often thinning the social circle down to the people and networks that actually last.",
+      "esoteric": "The 11th house esoterically resonates with Aquarius, whose esoteric ruler is Jupiter, so Saturn here disciplines the growth-and-networking impulse into something built to hold weight.",
+      "in_mikes_chart": "your 11th house runs from 23 degrees Taurus into Gemini and holds Hades at 11 degrees 56 Gemini; Saturn crosses this house roughly 2028 into 2029-30, right where it will later conjunct Hades.",
+      "translation": "Your network gets tested for who is real, right before Saturn digs into old, buried financial or reputational material later in the same house.",
+      "do": "Audit which alliances and group ties are actually load-bearing.",
+      "avoid": "Overcommitting to a new group or platform without a track record.",
+      "svehla_link": "Precedes and sets up the Saturn-conjunct-Hades pass, sitting inside the era Svehla's 2028-29 Uranus-conjunct-Hades window flags as a money and technology guardrail."
+    },
+    {
+      "key": "Transiting Saturn in Taurus",
+      "traditional": "Saturn in Taurus, roughly 2028 to 2031, builds long-term financial and material security through discipline, patience, and realistic valuation, often after a period of overextension.",
+      "esoteric": "Taurus' esoteric ruler is Vulcan, the forge-planet of relentless, hammering refinement, so Saturn here is Vulcan's earthly enforcer, insisting value be earned through slow, exact work.",
+      "in_mikes_chart": "This transit crosses your natal 11th-house cusp at 23 degrees 20 Taurus, landing right after Saturn conjuncts your MC, turning settle-career-loose-ends into now-prove-it-financially through the network.",
+      "translation": "After the career foundation work, Saturn asks you to build steady, provable value rather than chase quick wins.",
+      "do": "Convert career gains into durable, measurable financial structure.",
+      "avoid": "Treating this period as a victory lap instead of a build phase.",
+      "svehla_link": "Directly follows Svehla's Saturn-on-MC build-the-foundation window through April 2027, extending the same discipline into the money and network house."
+    },
+    {
+      "key": "Transiting Saturn conjunct natal Hades",
+      "traditional": "A Saturn conjunction brings the point it touches to a hard, undeniable maturity point, forcing accountability for whatever it has been quietly accumulating.",
+      "esoteric": "In the Hamburg or Uranian school Hades governs decay, hidden waste, and buried karmic debt; Saturn's conjunction is the formal audit of everything Hades has let rot unseen.",
+      "in_mikes_chart": "Natal Hades sits at 11 degrees 56 Gemini in your 11th house; transiting Saturn reaches this exact degree around 2029-30 while moving through Gemini, the same window Svehla names for Uranus conjunct natal Hades.",
+      "translation": "Old, buried financial or technological loose ends inside your network come due for a real accounting.",
+      "do": "Do a clean-up pass on old debts, dormant accounts, or neglected group commitments before this hits.",
+      "avoid": "Letting neglected paperwork or half-finished obligations sit until Saturn forces the issue.",
+      "svehla_link": "Lands inside Svehla's named 2028-29 Uranus-conjunct-Hades money and technology guardrail window, adding a Saturn layer of hard accountability to the same degree."
+    },
+    {
+      "key": "Transiting Saturn opposite natal Mercury",
+      "traditional": "Saturn opposite Mercury sobers communication and thinking, often bringing serious conversations, contract review, or a need to slow down and get facts straight.",
+      "esoteric": "Gemini's esoteric ruler is Venus, so this opposition is Saturn's discipline meeting Venus' relational values through the lens of Mercury's exoteric rulership of information exchange.",
+      "in_mikes_chart": "Natal Mercury sits at 3 degrees Sagittarius in your 5th house; transiting Saturn opposes it from 3 degrees Gemini as it moves through your 11th house, roughly 2029-31, near the Hades conjunction.",
+      "translation": "You have to get serious and precise in how you communicate with your network, right as old buried issues are surfacing.",
+      "do": "Put agreements and important claims in writing during this window.",
+      "avoid": "Loose talk or unverified claims in group or financial settings.",
+      "svehla_link": "Part of the same Saturn-in-Gemini pass through the 11th house that also delivers the Hades conjunction, 2029-31."
+    },
+    {
+      "key": "Transiting Saturn opposite natal Venus",
+      "traditional": "Saturn opposite Venus tests relationships and financial values for what is real versus convenient, sometimes ending arrangements that were not built to last.",
+      "esoteric": "Sagittarius' esoteric ruler is the Earth itself, a hidden sacred planet in Bailey's scheme, so this opposition grounds Venusian values in unglamorous, lived reality.",
+      "in_mikes_chart": "Natal Venus at 19 degrees Sagittarius sits in the same 5th house as Mercury; transiting Saturn opposes it from 19 degrees Gemini, later in the same Saturn-in-Gemini pass through the 11th house, 2030-31.",
+      "translation": "Financial and relational commitments made through your network get a hard value check late in this Saturn cycle.",
+      "do": "Reassess which partnerships and money arrangements are pulling their weight.",
+      "avoid": "Staying in an underperforming financial or creative partnership out of habit.",
+      "svehla_link": "Closes out the same 2029-31 Saturn-in-Gemini 11th-house sequence that opens with the Mercury opposition and Hades conjunction."
+    },
+    {
+      "key": "Transiting Jupiter in Virgo",
+      "traditional": "Jupiter in Virgo expands through refinement, skill-building, health routines, and being useful, growth that comes from getting better at the details rather than thinking bigger.",
+      "esoteric": "Virgo's esoteric ruler is the Moon, veiling a hidden sacred planet in Bailey's system, so Jupiter here is expansion filtered through nurture and the slow perfecting of form before it is born into the world.",
+      "in_mikes_chart": "This transit runs mostly through your 2nd house of income and values, only crossing into your 3rd house of ideas and contracts near the sign's last degrees.",
+      "translation": "Growth this year comes from tightening up skills and habits that directly affect income, not from a big swing.",
+      "do": "Invest in a specific, useful skill or process improvement tied to earning.",
+      "avoid": "Perfectionism that stalls action instead of improving it.",
+      "svehla_link": "Sits before the controlled income-expansion window Svehla names for Jupiter in the natal 2nd house, October 2026 to February 2027 and June to October 2027, effectively priming it."
+    },
+    {
+      "key": "Transiting Jupiter in the 3rd house",
+      "traditional": "Jupiter in the 3rd house expands communication, learning, local networking, and short-distance opportunity, often bringing a broader audience for ideas already in motion.",
+      "esoteric": "The 3rd house esoterically echoes Gemini, whose ruler is Venus, so Jupiter here is growth through relational exchange of ideas rather than solitary study.",
+      "in_mikes_chart": "your 3rd house runs from 17 degrees Virgo to 18 degrees Libra and holds natal Jupiter at 5 degrees Libra plus natal Apollon at 16 degrees Libra, so this house transit directly overlaps the Jupiter-return and Jupiter-conjunct-Apollon passes.",
+      "translation": "Ideas, writing, and networking get real traction and reach a wider audience during this stretch.",
+      "do": "Publish, pitch, or network the idea that has been sitting half-finished.",
+      "avoid": "Scattering energy across too many small projects instead of one clear message.",
+      "svehla_link": "This house transit is the container for the Jupiter-return and Jupiter-conjunct-Apollon passes, both landing in the same house."
+    },
+    {
+      "key": "Transiting Jupiter in Libra",
+      "traditional": "Jupiter in Libra expands through partnership, diplomacy, and fair-dealing, often bringing beneficial alliances or legal and contractual growth.",
+      "esoteric": "Libra's esoteric ruler is Uranus, so Jupiter's expansion here has a Uranian undercurrent, growth through sudden, freeing realignments in how you relate and contract with others.",
+      "in_mikes_chart": "This transit runs mostly through your 4th house of home and roots after opening in the tail of your 3rd house, where natal Jupiter and Apollon sit.",
+      "translation": "Once this Jupiter pass crosses into the second half of the sign, growth shifts from ideas and networking toward home, family, and personal foundation.",
+      "do": "Use fair, well-negotiated partnerships to strengthen home or family stability.",
+      "avoid": "One-sided deals that favor keeping the peace over getting fair terms.",
+      "svehla_link": "Bridges the Jupiter-in-3rd-house window into the Jupiter-in-4th-house window."
+    },
+    {
+      "key": "Transiting Jupiter conjunct natal Jupiter",
+      "traditional": "A Jupiter return, roughly every 12 years, opens a fresh growth chapter and is traditionally one of the most reliably fortunate windows in a life.",
+      "esoteric": "Esoterically Jupiter is the planet of love-wisdom and the exoteric ruler of Sagittarius while also being Aquarius' esoteric ruler, so a return doubles as a call to widen both personal faith and group vision.",
+      "in_mikes_chart": "Natal Jupiter sits at 5 degrees Libra in your 3rd house; the next return lands around September 2028, renewing the growth cycle that began at your birth in the same house of ideas, contracts, and networking.",
+      "translation": "This is a genuine new-chapter marker, a good time to plant seeds for the next 12 years of growth.",
+      "do": "Set clear, specific goals right at the return rather than drifting into it.",
+      "avoid": "Overcommitting to every opportunity that shows up during the return's initial excitement.",
+      "svehla_link": "Falls shortly after the Saturn-in-Taurus foundation-building phase, giving your next growth cycle a disciplined base to expand from."
+    },
+    {
+      "key": "Transiting Jupiter conjunct natal Apollon",
+      "traditional": "Jupiter conjunct any point amplifies it, and paired with Apollon specifically it tends to bring recognition, successful expansion, or a genuine big-break flavor.",
+      "esoteric": "Apollon in the Uranian scheme already carries Jupiter-like expansion themes, its glyph is built from Jupiter's symbol, so this conjunction is Jupiter doubling down on its own broad-perspective, success-oriented signature.",
+      "in_mikes_chart": "Natal Apollon sits at 16 degrees Libra in your 3rd house, 11 degrees from natal Jupiter; transiting Jupiter reaches it shortly after the 2028 return, in the same house of ideas and networking.",
+      "translation": "A real opportunity for recognition or successful expansion follows close on the heels of the Jupiter return.",
+      "do": "Move decisively on the clearest opportunity that surfaces in this window.",
+      "avoid": "Assuming this is a one-off stroke of luck rather than a moment to build from.",
+      "svehla_link": "Extends the Jupiter-return momentum inside the same 3rd house Svehla's broader 2026-27 Jupiter-in-2nd cycle is priming."
+    },
+    {
+      "key": "Transiting Jupiter in Scorpio",
+      "traditional": "Jupiter in Scorpio expands through depth, intensity, shared resources, and transformation, often bringing growth in finances tied to others or in psychological and research work.",
+      "esoteric": "Scorpio's esoteric ruler is Mars, so Jupiter's expansion here is willful and combative, growth that comes from confronting and mastering what was previously avoided.",
+      "in_mikes_chart": "This transit runs through your 4th house of home-family roots, where natal Sun at 12 degrees Scorpio and natal Pluto at 22 degrees Scorpio both sit, a major activation of your home and foundation axis.",
+      "translation": "Big growth in family, home, or deep personal transformation, with real intensity attached.",
+      "do": "Lean into deep personal or family work that has been avoided.",
+      "avoid": "Letting intensity tip into power struggles at home.",
+      "svehla_link": "Shares the house that carries the Sun and Pluto conjunctions, so treat the whole Scorpio pass as one extended home and identity growth arc."
+    },
+    {
+      "key": "Transiting Jupiter in the 4th house",
+      "traditional": "Jupiter in the 4th house expands home, family, and inner foundation, often through a literal move, renovation, or a genuinely happier home life.",
+      "esoteric": "The 4th house esoterically echoes Cancer, whose ruler is Neptune, so growth here has a soul-deep, feeding-and-belonging quality rather than a purely material one.",
+      "in_mikes_chart": "your 4th house spans Libra 18 degrees to Scorpio 23 degrees, holding natal Sun and Pluto; this house transit is the container for the Jupiter-in-Scorpio, Jupiter-conjunct-Sun, and Jupiter-conjunct-Pluto events.",
+      "translation": "Home and identity both get room to expand and deepen across this whole stretch.",
+      "do": "Invest in the literal home base or in reconnecting with family roots.",
+      "avoid": "Neglecting home life while chasing outward growth.",
+      "svehla_link": "Houses the Scorpio, Sun-conjunction, and Pluto-conjunction entries as one continuous foundation-deepening arc."
+    },
+    {
+      "key": "Transiting Jupiter conjunct natal Sun",
+      "traditional": "Jupiter conjunct the natal Sun is one of the classic good-luck transits, boosting vitality, confidence, recognition, and optimism.",
+      "esoteric": "Esoterically Leo's ruler is the Sun itself and Jupiter is the love-wisdom ray, so their conjunction blends raw solar identity with expansive wisdom, growth of self rather than just external luck.",
+      "in_mikes_chart": "Natal Sun sits at 12 degrees Scorpio in your 4th house; transiting Jupiter reaches this degree partway through its Scorpio transit, boosting confidence at the core of your home and identity house.",
+      "translation": "A genuine confidence and visibility boost lands mid-way through the bigger home and family growth arc.",
+      "do": "Say yes to visibility or recognition that shows up in this window.",
+      "avoid": "Overconfidence that skips due diligence on a good-feeling opportunity.",
+      "svehla_link": "One beat inside the larger Jupiter-in-4th-house arc, a confidence checkpoint before the deeper Pluto conjunction follows."
+    },
+    {
+      "key": "Transiting Jupiter conjunct natal Pluto",
+      "traditional": "Jupiter conjunct Pluto amplifies personal power, can bring a genuine windfall or influence boost, but also a temptation to overreach.",
+      "esoteric": "Pisces' esoteric ruler is Pluto, and Jupiter exoterically rules Pisces, so this conjunction is unusually resonant, two layers of the same expansive, transformative current reinforcing each other.",
+      "in_mikes_chart": "Natal Pluto sits at 22 degrees Scorpio in your 4th house, ten degrees past the Sun; transiting Jupiter reaches it near the end of its Scorpio run, closing out the home and identity growth arc with real intensity.",
+      "translation": "The home and family growth arc peaks with a chance at real influence or a resource windfall, but the stakes and temptation to overreach are both higher here than at the Sun conjunction.",
+      "do": "Use any resource windfall to build lasting structure, not just scale.",
+      "avoid": "Letting a taste of power or money justify skipping the guardrails.",
+      "svehla_link": "Closes the Jupiter-in-4th-house arc that opened with the Scorpio ingress and Sun conjunction."
+    },
+    {
+      "key": "Transiting Jupiter conjunct natal Chiron",
+      "traditional": "Jupiter conjunct Chiron can bring healing through growth and visibility, a chance to turn an old wound into something that helps others, often via teaching or mentoring.",
+      "esoteric": "Leo's esoteric ruler is the Sun itself, so this conjunction places Jupiter's wisdom directly on the sign's core identity wound, encouraging the wound to be owned publicly rather than hidden.",
+      "in_mikes_chart": "Natal Chiron sits at 22 degrees Leo in your 2nd house of income and self-worth; transiting Jupiter reaches this degree in 2026, alongside the Svehla-flagged Jupiter-in-2nd income-expansion window.",
+      "translation": "An old wound around self-worth or money gets a genuine chance to heal and even become a source of income or teaching.",
+      "do": "Turn a past money-related wound into a story or service that helps others.",
+      "avoid": "Letting the old wound's shame keep the opportunity hidden.",
+      "svehla_link": "Lands inside Svehla's Jupiter-in-2nd controlled income-expansion window, giving that expansion a healing, self-worth dimension."
+    },
+    {
+      "key": "Transiting Jupiter in the 1st house",
+      "traditional": "Jupiter in the 1st house is one of the more visible personal-luck transits, boosting confidence, physical vitality, and how favorably others perceive you.",
+      "esoteric": "The 1st house esoterically resonates with Aries, whose ruler is Mercury, so growth here is mental and identity-forming as much as physical.",
+      "in_mikes_chart": "your 1st house spans Cancer 27 degrees to Leo 20 degrees; this transit opens the larger Jupiter-in-Leo passage and precedes the Chiron conjunction once Jupiter crosses into the 2nd house.",
+      "translation": "Confidence and outward presence get a real lift right before the deeper self-worth healing work begins.",
+      "do": "Put yourself forward while the visibility is naturally favorable.",
+      "avoid": "Mistaking this lift for permanence and over-extending physically or financially.",
+      "svehla_link": "Sets up the Jupiter-in-Leo and Jupiter-conjunct-Chiron sequence that lands in Svehla's named income-expansion window."
+    },
+    {
+      "key": "Transiting Jupiter in Leo",
+      "traditional": "Jupiter in Leo expands confidence, creativity, romance, and personal visibility, a classically warm, generous, self-expressive transit.",
+      "esoteric": "Leo's esoteric ruler is the Sun, meaning Jupiter here is expansion in direct service of the soul's core identity rather than the ego's surface wants.",
+      "in_mikes_chart": "This sign transit opens in your 1st house and crosses into your 2nd house of income and self-worth, where it conjuncts natal Chiron at 22 degrees, tying visibility directly to the income-expansion window Svehla names.",
+      "translation": "A confident, visible chapter that turns, by the sign's end, into real work on money and self-worth.",
+      "do": "Let genuine self-expression lead into the income conversation, not the other way around.",
+      "avoid": "Performing confidence instead of building the self-worth underneath it.",
+      "svehla_link": "Directly overlaps Svehla's October 2026 to February 2027 Jupiter-in-2nd income-expansion window in its second half."
+    },
+    {
+      "key": "Transiting Uranus in Gemini",
+      "traditional": "Uranus in Gemini, 2025 to 2033, revolutionizes communication, information, and the pace of thought, a mental-plane counterpart to its usual social and technological disruption.",
+      "esoteric": "Gemini's esoteric ruler is Venus, so Uranus here electrifies relationship and value-exchange through the medium of ideas and language, not just gadgets.",
+      "in_mikes_chart": "This transit crosses your 11th house, home to natal Hades at 11 degrees 56 Gemini, meaning the sudden, disruptive Uranian current runs directly through your networks and any buried financial or technical material there.",
+      "translation": "How you think, talk, and network gets rewired fast, and it lands right on top of old buried business in your circle of contacts.",
+      "do": "Stay flexible about new communication tools and network structures rather than resisting them.",
+      "avoid": "Clinging to an outdated way of talking to or organizing a network.",
+      "svehla_link": "Sets the stage for the Uranus-conjunct-Hades pass Svehla names for 2028-29 as a money and technology guardrail."
+    },
+    {
+      "key": "Transiting Uranus in the 11th house",
+      "traditional": "Uranus in the 11th house shakes up friendships, group memberships, and long-term hopes, often bringing sudden new allies or a sudden break from an old group.",
+      "esoteric": "The 11th house esoterically echoes Aquarius, whose esoteric ruler is Jupiter, so this Uranus transit is disruption in service of larger growth and vision, not disruption for its own sake.",
+      "in_mikes_chart": "This house transit is the frame for the Uranus-in-Gemini and Uranus-conjunct-Hades events, since natal Hades sits inside your 11th house at 11 degrees 56 Gemini.",
+      "translation": "Your whole network and long-term goal set gets shaken and rebuilt during this stretch, culminating in the Hades conjunction.",
+      "do": "Treat sudden network changes as redirection, not just disruption.",
+      "avoid": "Overinvesting in one group identity that Uranus is clearly pulling apart.",
+      "svehla_link": "Frames the entire 2028-29 Uranus-conjunct-Hades guardrail window Svehla names."
+    },
+    {
+      "key": "Transiting Uranus sextile natal Chiron",
+      "traditional": "A Uranus-Chiron sextile offers an easier, opportunity-flavored channel to break an old wound pattern through sudden insight rather than crisis.",
+      "esoteric": "Leo's esoteric ruler is the Sun, so this sextile lets Uranian breakthrough serve the core identity's healing directly, insight arriving almost like a gift rather than a shock.",
+      "in_mikes_chart": "Natal Chiron sits at 22 degrees Leo in your 2nd house; transiting Uranus in Gemini sextiles it from around 22 degrees Gemini, inside the same Uranus-in-Gemini and 11th-house passage.",
+      "translation": "A sudden, freeing insight about an old money or self-worth wound arrives with less drama than usual.",
+      "do": "Act on the flash of insight quickly, before overthinking dulls it.",
+      "avoid": "Dismissing a sudden realization about self-worth as too easy to be real.",
+      "svehla_link": "A gentler companion beat inside the same Uranus-in-Gemini window that later delivers the harder Hades conjunction."
+    },
+    {
+      "key": "Transiting Uranus trine natal Ceres",
+      "traditional": "A Uranus-Ceres trine brings a freeing shift in how someone nourishes themselves or others, often a welcome break from an old caretaking pattern.",
+      "esoteric": "Aquarius' esoteric ruler is Jupiter, and Ceres in the goddess framework governs cycles of nurture and loss, so this trine is growth-flavored liberation from an outdated nurturing role.",
+      "in_mikes_chart": "Natal Ceres sits at 2 degrees Aquarius in your 7th house of partnership; transiting Uranus in Gemini trines it from around 2 degrees Gemini, early in the Uranus-in-Gemini passage, before it reaches Hades.",
+      "translation": "An old pattern of over-caretaking in a partnership loosens up in a genuinely good way.",
+      "do": "Let a partner take more responsibility for their own needs.",
+      "avoid": "Feeling guilty about stepping back from an old caretaking role.",
+      "svehla_link": "Falls early in the Uranus-in-Gemini window, before the heavier Hades material surfaces later in the same transit."
+    },
+    {
+      "key": "Transiting Uranus square natal Moon",
+      "traditional": "A Uranus-Moon square unsettles emotional routines and security, often bringing a sudden need for more independence in how feelings are handled.",
+      "esoteric": "Pisces' esoteric ruler is Pluto, meaning this square, esoterically, is a transformative undercurrent below the surface emotional disruption, not just erratic feeling.",
+      "in_mikes_chart": "Natal Moon sits at 1 degree Pisces in your 8th house of shared resources and psychological depth; transiting Uranus in early Gemini squares it around 1 degree Gemini, right at the start of the Uranus-in-Gemini passage.",
+      "translation": "Emotional routines around shared money or deep psychological material get jolted early in this multi-year Uranus passage.",
+      "do": "Build in more flexibility to emotional and financial routines shared with others.",
+      "avoid": "Reacting to sudden emotional unsettlement by shutting down or overcommitting to control.",
+      "svehla_link": "Opens the Uranus-in-Gemini sequence that later runs through the Ceres trine, Chiron sextile, and Hades conjunction."
+    },
+    {
+      "key": "Transiting Neptune in Aries",
+      "traditional": "Neptune in Aries, 2025 to 2039, dissolves old ideas about individual heroism and self-assertion, replacing rigid self-image with a more fluid, inspired, faith-driven sense of identity.",
+      "esoteric": "Aries' esoteric ruler is Mercury, so Neptune here dissolves and reweaves identity through mind and communication rather than pure willpower.",
+      "in_mikes_chart": "This transit crosses your 9th and 10th houses, the same general degree range where transiting Saturn conjuncts your MC in 2027, meaning career-foundation work happens under a long Neptune backdrop of identity re-imagining.",
+      "translation": "Across more than a decade, your sense of personal mission gets less fixed and more inspired, unfolding underneath the more concrete Saturn career work.",
+      "do": "Let career direction stay open to inspired course-correction rather than locking in one rigid plan.",
+      "avoid": "Confusing vague inspiration with a finished plan; Neptune needs Saturn's structure to actually land.",
+      "svehla_link": "Provides the long backdrop under Svehla's Saturn-on-MC settle-career-loose-ends and build-the-foundation window through April 2027."
+    },
+    {
+      "key": "Transiting Neptune in the 9th house",
+      "traditional": "Neptune in the 9th house dissolves old beliefs, expands spiritual or philosophical horizons, and can bring idealized or confused views of travel, education, or higher law.",
+      "esoteric": "The 9th house esoterically echoes Sagittarius, whose esoteric ruler is Earth, so this Neptune transit grounds spiritual dissolving into very real, lived experience rather than abstract belief alone.",
+      "in_mikes_chart": "your 9th house spans Pisces 17 degrees to Aries 18 degrees, so this Neptune passage opens in its own sign of rulership before crossing into Aries and eventually reaching your 10th house and MC.",
+      "translation": "Beliefs about purpose and higher meaning get genuinely fluid for years before crystallizing into the career-foundation work Saturn later demands.",
+      "do": "Stay open to a belief system evolving rather than defending an old one out of habit.",
+      "avoid": "Chasing every new spiritual or philosophical trend without integrating any of them.",
+      "svehla_link": "Precedes and underlies the Saturn-conjunct-MC career work, providing its philosophical raw material."
+    },
+    {
+      "key": "Transiting Neptune square natal Uranus",
+      "traditional": "A Neptune-Uranus square blends sudden disruption with confusion or idealism, often making it hard to tell a real breakthrough from wishful thinking.",
+      "esoteric": "Libra's esoteric ruler is Uranus, so this square is Neptune dissolving the very planet that governs Libra's higher balance-point, a genuine test of whether change is authentic or escapist.",
+      "in_mikes_chart": "Natal Uranus sits at 15 degrees Capricorn in your 6th house of work routines; transiting Neptune reaches the square from 15 degrees Aries, an early-2030s pass following the Saturn-conjunct-MC period.",
+      "translation": "A big work-routine change shows up wrapped in confusion, so it needs real scrutiny before you trust it.",
+      "do": "Get a second, grounded opinion before acting on a dramatic work change during this window.",
+      "avoid": "Mistaking escapism for genuine liberation in a work decision.",
+      "svehla_link": "Arrives after the Saturn-MC and Saturn-Taurus foundation years, testing whether that foundation was real or just wished-for."
+    },
+    {
+      "key": "Transiting Neptune square natal Neptune",
+      "traditional": "This is an early pass of what eventually becomes the Neptune half-return square around age 40 to 42, a first test of the ideals and illusions carried since youth.",
+      "esoteric": "Capricorn's esoteric ruler is Saturn, so Neptune squaring its own natal Capricorn placement is dissolving meeting discipline directly, an early rehearsal for the bigger midlife square still years off.",
+      "in_mikes_chart": "Natal Neptune sits at 17 degrees Capricorn, two degrees from Uranus, also in the 6th house; transiting Neptune from 17 degrees Aries squares it within a year or two of the Uranus square, compounding the same work-routine test.",
+      "translation": "The same early-2030s window that questions a big work change also questions whether your original vision for your work was ever realistic.",
+      "do": "Revisit the original vision for the work and separate what was real inspiration from what was avoidance.",
+      "avoid": "Making a major work pivot purely to escape discomfort rather than to follow real clarity.",
+      "svehla_link": "Compounds with the Uranus square in the same early-2030s Neptune-in-Aries pass, well past the current Svehla-named windows."
+    },
+    {
+      "key": "Transiting Neptune sextile natal Ceres",
+      "traditional": "A Neptune-Ceres sextile softens and spiritualizes how someone nurtures others, often opening a compassionate, low-friction opportunity to help or be helped.",
+      "esoteric": "Aquarius' esoteric ruler is Jupiter, so this easy aspect lets Neptune's compassion serve Ceres' nurturing cycle in a growth-oriented, not draining, way.",
+      "in_mikes_chart": "Natal Ceres sits at 2 degrees Aquarius in your 7th house of partnership; transiting Neptune in early Aries sextiles it from around 2 degrees Aries, early in the long Neptune-in-Aries passage, well before the harder squares.",
+      "translation": "A gentle, compassionate opening in a partnership around caretaking or shared support shows up early in this Neptune cycle.",
+      "do": "Accept help or support offered in a partnership without over-analyzing it.",
+      "avoid": "Overextending generosity to the point of losing your own boundaries.",
+      "svehla_link": "An early, easy beat inside the same long Neptune-in-Aries passage that later delivers the harder Uranus and Neptune squares."
+    },
+    {
+      "key": "Transiting Pluto in Aquarius",
+      "traditional": "Pluto in Aquarius, 2023 to 2044, transforms technology, collective ideology, and group power structures at a civilizational scale, personally often intensifying a relationship with technology, networks, or ideology.",
+      "esoteric": "Aquarius' esoteric ruler is Jupiter, so this generational Pluto transit is collective transformation in service of a larger growth and wisdom current, not just raw upheaval.",
+      "in_mikes_chart": "This transit crosses your 7th house of partnership, home to natal Saturn at 12 degrees Aquarius and natal Ceres at 2 degrees Aquarius, meaning it eventually conjuncts your natal Saturn directly.",
+      "translation": "Partnerships and your relationship to technology and networks go through a deep, multi-year transformation that culminates in the Saturn conjunction.",
+      "do": "Let long-term partnerships be renegotiated on more honest, power-aware terms.",
+      "avoid": "Avoiding the deeper power dynamics in a key relationship until Pluto forces the issue.",
+      "svehla_link": "Sets up the Pluto-conjunct-natal-Saturn pass, roughly 2029-31."
+    },
+    {
+      "key": "Transiting Pluto in the 7th house",
+      "traditional": "Pluto in the 7th house transforms committed partnerships and open enemies alike, often through intense power struggles that ultimately deepen or end a key relationship.",
+      "esoteric": "The 7th house esoterically echoes Libra, whose ruler is Uranus, so this Pluto transit brings sudden, non-negotiable transformation to the balance of power in relationship, not a slow erosion.",
+      "in_mikes_chart": "your 7th house spans Capricorn 27 degrees to Aquarius 20 degrees, holding both natal Saturn and Ceres, the same house that carries the Pluto-conjunct-Saturn event.",
+      "translation": "This multi-year house transit is the container for the deep, partnership-transforming Pluto-Saturn conjunction.",
+      "do": "Address power imbalances in key relationships directly rather than letting them fester.",
+      "avoid": "Staying in a partnership purely out of obligation once its terms have clearly shifted.",
+      "svehla_link": "Frames the Pluto-conjunct-natal-Saturn pass, which lands in the same house roughly 2029-31."
+    },
+    {
+      "key": "Transiting Pluto conjunct natal Saturn",
+      "traditional": "Pluto conjunct natal Saturn is one of the more intense structural transits, often marking the death and rebirth of a core life structure, career, authority relationship, or self-discipline.",
+      "esoteric": "Capricorn's esoteric ruler is Saturn itself, so this conjunction is Pluto transforming Saturn's own esoteric home sign directly, a full remaking of how discipline and authority function in your life.",
+      "in_mikes_chart": "Natal Saturn sits at 12 degrees Aquarius in your 7th house; transiting Pluto reaches this degree roughly 2029-31, arriving right after the Saturn-Taurus foundation years and the Saturn-conjunct-Hades pass.",
+      "translation": "A core structure you've built, likely tied to career authority or a major partnership, gets torn down and rebuilt at the root.",
+      "do": "Treat any structure that collapses in this window as material for something stronger, not a final failure.",
+      "avoid": "Trying to preserve a structure Pluto has clearly outgrown.",
+      "svehla_link": "Arrives directly after the Saturn-in-Taurus and Saturn-conjunct-Hades sequence, making the late 2020s one long structural rebuilding arc."
+    },
+    {
+      "key": "Transiting Pluto square natal Sun",
+      "traditional": "Pluto square the natal Sun is a classic identity-crisis-and-rebirth transit, often bringing a power struggle that ultimately forces a more authentic sense of self.",
+      "esoteric": "Leo's esoteric ruler is the Sun itself, so Pluto squaring the natal Sun is a direct, unmediated confrontation between transformation and core identity.",
+      "in_mikes_chart": "Natal Sun sits at 12 degrees Scorpio in your 4th house; transiting Pluto in Aquarius squares it around 2033, later than the other windows in this file but worth tracking as it approaches.",
+      "translation": "Around 2033, a deep identity-and-power test arrives that will likely feel like the decade's culminating challenge.",
+      "do": "Begin building genuine self-knowledge now so this transit refines rather than shatters identity.",
+      "avoid": "Waiting until the transit is exact to start doing the inner work it demands.",
+      "svehla_link": "Sits beyond Svehla's named 2026-31 windows but represents the next major marker after them, worth flagging for future reference."
+    },
+    {
+      "key": "Transiting Pluto opposite natal Chiron",
+      "traditional": "Pluto opposite Chiron confronts old wounds through a relationship or external power dynamic, forcing the wound into the open in a way that can be either destructive or deeply healing.",
+      "esoteric": "Leo's esoteric ruler is the Sun, so this opposition, like the Pluto-square-Sun transit, ultimately serves core identity transformation, channeled through the wound-and-healing axis.",
+      "in_mikes_chart": "Natal Chiron sits at 22 degrees Leo in your 2nd house; transiting Pluto in Aquarius opposes it from around 22 degrees, likely in the early-to-mid 2030s, after the Pluto-Saturn conjunction has already reshaped the 7th house.",
+      "translation": "An old money or self-worth wound gets forced into the open through a partnership or power dynamic, well after the structural rebuilding of the late 2020s.",
+      "do": "Use whichever relationship triggers this to finally address the underlying wound, not just the surface conflict.",
+      "avoid": "Treating the external conflict as the whole story instead of the wound underneath it.",
+      "svehla_link": "Follows the Pluto-Saturn conjunction chronologically, extending the structural-rebuild arc into a personal healing arc."
+    },
+    {
+      "key": "Transiting Chiron in Taurus",
+      "traditional": "Chiron in Taurus works on wounds around self-worth, security, and the body's relationship to material resources, often through a period of financial or bodily vulnerability that ultimately teaches real self-sufficiency.",
+      "esoteric": "Taurus' esoteric ruler is Vulcan, the forge-planet, so Chiron here is a wound healed through slow, deliberate hammering rather than quick fixes, real value forged through repetition.",
+      "in_mikes_chart": "This transit crosses your 10th and 11th houses, meaning the security wound plays out publicly, through career and network, rather than privately.",
+      "translation": "A wound about being secure enough surfaces through career and network exposure, and healing comes from patient, provable competence.",
+      "do": "Build tangible, demonstrable value rather than chasing reassurance from others.",
+      "avoid": "Overspending or oversharing insecurity to manage the anxiety instead of addressing its root.",
+      "svehla_link": "Runs parallel to the Saturn-in-Taurus foundation-building window, reinforcing the same earn-it-slowly theme from a healing angle."
+    },
+    {
+      "key": "Transiting Chiron in the 10th house",
+      "traditional": "Chiron in the 10th house often brings a public wound around authority, reputation, or career legitimacy, frequently activated by a visible setback that ultimately becomes a credibility asset.",
+      "esoteric": "The 10th house esoterically echoes Capricorn, whose ruler is Saturn, so this Chiron passage directly parallels Saturn's own career-foundation work on the MC, adding an emotional-wound layer to the structural one.",
+      "in_mikes_chart": "your 10th house spans Aries 18 degrees to Taurus 23 degrees, containing your natal MC at 18 degrees 50 Aries, meaning this Chiron transit crosses the exact degree Saturn conjuncts in 2027.",
+      "translation": "The same career-foundation window Saturn is working on has an emotional undercurrent of whether you actually deserve this authority, and answering that honestly is the healing.",
+      "do": "Own past career setbacks openly as part of the credibility story, rather than hiding them.",
+      "avoid": "Letting impostor feelings block visible action during the Saturn-MC window.",
+      "svehla_link": "Directly overlaps Svehla's Saturn-conjunct-MC settle-career-loose-ends window through April 2027, adding a wound-and-credibility layer to it."
+    },
+    {
+      "key": "Transiting Chiron square natal Saturn",
+      "traditional": "Chiron square Saturn brings an old wound about not being good enough into direct conflict with present-day responsibility and structure, often surfacing as self-doubt right when discipline is most needed.",
+      "esoteric": "Aquarius' esoteric ruler is Jupiter, so this square, esoterically, is a call for the wound to be met with expansive perspective rather than more self-punishing discipline.",
+      "in_mikes_chart": "Natal Saturn sits at 12 degrees Aquarius in your 7th house; transiting Chiron in Taurus squares it from around 12 degrees, inside the broader Chiron-in-Taurus and 10th-house passage, likely overlapping the Saturn-in-Taurus years.",
+      "translation": "Old self-doubt shows up right as you are doing serious structural work on career and finances, and the two need to be handled together, not separately.",
+      "do": "Pair every disciplined structural step with a small act of self-compassion.",
+      "avoid": "Using harsh self-criticism as the motivator for the Saturn-Taurus discipline work.",
+      "svehla_link": "Overlaps the Saturn-in-Taurus foundation years, adding an emotional-wound dimension to that structural work."
+    },
+    {
+      "key": "Transiting Chiron square natal Ceres",
+      "traditional": "Chiron square Ceres brings an old wound around being nurtured, or around how one nurtures others, into tension with a present relationship or caretaking role.",
+      "esoteric": "Aquarius' esoteric ruler is Jupiter, so this square, like the Saturn square, asks the nurturing wound to be met with growth-minded perspective rather than more self-sacrifice.",
+      "in_mikes_chart": "Natal Ceres sits at 2 degrees Aquarius in your 7th house; transiting Chiron in Taurus squares it from around 2 degrees, early in the Chiron-in-Taurus passage, likely before the Saturn square.",
+      "translation": "An old wound about not being properly cared for surfaces early in this cycle, through a partnership.",
+      "do": "Ask directly for the kind of care that was missing, rather than expecting a partner to guess.",
+      "avoid": "Overgiving to a partner to compensate for an old, unmet nurturing need.",
+      "svehla_link": "Opens the Chiron-in-Taurus sequence that later runs through the Saturn square."
+    },
+    {
+      "key": "Transiting Chiron conjunct natal MC",
+      "traditional": "Chiron conjunct the MC is a classic wounded-healer-goes-public transit, often marking a career shift that turns a personal wound into professional purpose.",
+      "esoteric": "Capricorn is the esoteric parallel to the 10th house and its ruler is Saturn, so this conjunction esoterically insists the public wound be met with real structural discipline, not just exposure.",
+      "in_mikes_chart": "Natal MC sits at 18 degrees 50 Aries; Chiron made its most recent passes over this degree in 2025-26, just before Saturn's own conjunction with the same point in 2027, meaning the wound-to-purpose work happens first.",
+      "translation": "A recent 2025-26 pass already began turning a career wound into a public purpose, setting up Saturn's 2027 foundation-building to build on solid emotional ground.",
+      "do": "Name the professional wound publicly now, before Saturn asks for structural commitment to what follows.",
+      "avoid": "Skipping the honest reckoning with the wound and jumping straight to the Saturn-driven structure.",
+      "svehla_link": "Directly precedes Svehla's Saturn-conjunct-MC window, meaning the 2025-26 Chiron pass was the emotional preparation for it."
+    },
+    {
+      "key": "Transiting Chiron opposite natal Jupiter",
+      "traditional": "Chiron opposite Jupiter brings an old wound about being too much or not enough into direct tension with growth and opportunity, sometimes causing self-sabotage right when things are going well.",
+      "esoteric": "Libra's esoteric ruler is Uranus, so this opposition, esoterically, asks for a sudden, liberating reframe of the wound rather than the slow grind Taurus-Chiron demands.",
+      "in_mikes_chart": "Natal Jupiter sits at 5 degrees Libra in your 3rd house; transiting Chiron in Taurus opposes it from around 5 degrees, early in the Chiron-in-Taurus passage, close in time to the previously documented Saturn-opposite-Jupiter transit.",
+      "translation": "Right as growth opportunities open up, an old wound about deserving them can quietly try to sabotage the momentum.",
+      "do": "Notice self-sabotage patterns the moment growth starts feeling uncomfortable, and keep going anyway.",
+      "avoid": "Turning down a real opportunity because it triggers old too-much or not-enough feelings.",
+      "svehla_link": "Lands close in time to the previously documented Saturn-opposite-Jupiter transit, compounding growth-versus-doubt tension in the same window."
+    },
+    {
+      "key": "Transiting Juno in the 1st house",
+      "traditional": "Juno transiting the 1st house entangles relationship needs with personal identity, often prompting either newly asserting one's needs in a partnership or attracting a partner drawn to a strong personal identity.",
+      "esoteric": "The 1st house esoterically echoes Aries, ruled by Mercury, so Juno here is about communicating partnership needs as part of self-definition.",
+      "in_mikes_chart": "your 1st house is a mostly quiet stretch of Cancer-Leo bridging your Mars-ASC conjunction just inside the 12th and Chiron in the 2nd, so this passage is a relatively light identity-forming commitment check.",
+      "translation": "A stretch where how you show up as yourself in a relationship gets quietly renegotiated.",
+      "do": "State partnership needs plainly and early rather than assuming they are obvious.",
+      "avoid": "Merging identity so fully with a partner that personal needs go unspoken.",
+      "svehla_link": ""
+    },
+    {
+      "key": "Transiting Juno in the 2nd house",
+      "traditional": "Juno here ties commitment to shared resources and self-worth, often surfacing questions of financial fairness or loyalty tested through money.",
+      "esoteric": "The 2nd house esoterically parallels Taurus, ruled by Vulcan, so loyalty here gets forged and tested through slow, material proof rather than words.",
+      "in_mikes_chart": "This house holds natal Chiron at 22 degrees Leo, so transiting Juno crossing it directly touches your self-worth wound, making any loyalty or fairness question in a partnership personal, not just practical.",
+      "translation": "A relationship's fairness around money or resources gets tested right where your self-worth wound already lives.",
+      "do": "Get explicit about financial fairness in a partnership rather than assuming goodwill covers it.",
+      "avoid": "Letting a money disagreement reopen the old self-worth wound unspoken.",
+      "svehla_link": ""
+    },
+    {
+      "key": "Transiting Juno in the 3rd house",
+      "traditional": "Juno in the 3rd house brings commitment themes into communication, siblings, or close networks, often through a partnership formed or tested via shared ideas or local community.",
+      "esoteric": "The 3rd house esoterically echoes Gemini, ruled by Venus, making this a naturally favorable placement for Juno, relational values expressed through everyday exchange.",
+      "in_mikes_chart": "This house holds natal Jupiter and Apollon, so Juno's passage overlaps the same territory as the Jupiter-return and Jupiter-Apollon growth window, adding a partnership-loyalty layer to that expansion.",
+      "translation": "A committed partnership may form, deepen, or get tested right alongside the networking and idea-driven growth of the Jupiter return.",
+      "do": "Loop a key partner into the growth opportunities surfacing in this window rather than pursuing them solo.",
+      "avoid": "Letting networking excitement crowd out communication with an existing partner.",
+      "svehla_link": "Overlaps the Jupiter-return and Jupiter-conjunct-Apollon window, adding a loyalty dimension to that growth."
+    },
+    {
+      "key": "Transiting Juno in the 4th house",
+      "traditional": "Juno in the 4th house roots commitment in home and family, often prompting decisions about moving in together, family loyalty, or making a relationship official at home.",
+      "esoteric": "The 4th house esoterically parallels Cancer, ruled by Neptune, so commitment here is soul-level and feeling-based rather than contractual.",
+      "in_mikes_chart": "This house holds natal Sun and Pluto, meaning Juno's passage lands right on your core identity and transformation zone, making any commitment decision here unusually weighty.",
+      "translation": "A partnership decision tied to home or family carries real identity stakes, not just logistics.",
+      "do": "Make home and family commitment decisions deliberately, since they will shape identity, not just living arrangements.",
+      "avoid": "Rushing a move-in-together or family-loyalty decision to avoid deeper identity questions.",
+      "svehla_link": "Overlaps the Jupiter-in-Scorpio and 4th-house growth arc, adding a partnership-commitment layer to that identity work."
+    },
+    {
+      "key": "Transiting Juno in the 5th house",
+      "traditional": "Juno in the 5th house brings romance, creative partnership, or even children into the commitment conversation, often a genuinely joyful placement for Juno.",
+      "esoteric": "The 5th house esoterically echoes Leo, ruled by the Sun, so commitment here is an act of creative self-expression, loyalty as a form of authentic joy rather than duty.",
+      "in_mikes_chart": "This house holds natal Mercury and Venus, so Juno's passage activates both communication-in-love and pure Venusian affection themes at once.",
+      "translation": "A romantic or creative partnership gets a genuinely warm commitment boost.",
+      "do": "Express affection and creative ideas openly with a partner during this window.",
+      "avoid": "Treating a lighthearted romantic connection as less real than a serious one.",
+      "svehla_link": ""
+    },
+    {
+      "key": "Transiting Juno in the 6th house",
+      "traditional": "Juno in the 6th house ties commitment to daily routine and service, often testing a partnership through the unglamorous work of shared responsibilities and health.",
+      "esoteric": "The 6th house esoterically parallels Virgo, ruled by the Moon, so loyalty here is proven through quiet, ongoing care rather than grand gestures.",
+      "in_mikes_chart": "This house holds natal Uranus and Neptune, meaning Juno's passage can bring a sudden shift or idealized confusion into how commitment shows up in daily routine and work life.",
+      "translation": "A partnership gets tested through the daily grind, work schedules, chores, health habits, rather than through big romantic moments.",
+      "do": "Show commitment through reliable follow-through on small daily responsibilities.",
+      "avoid": "Assuming grand gestures can substitute for consistent daily support.",
+      "svehla_link": "Overlaps the Uranus and Neptune squares-to-Saturn territory in the same house, adding a relationship-loyalty layer to that work-routine disruption."
+    },
+    {
+      "key": "Transiting Juno in the 7th house",
+      "traditional": "Juno in the 7th house is its most at-home placement, directly activating marriage, formal partnership, and one-on-one commitment questions.",
+      "esoteric": "The 7th house esoterically echoes Libra, ruled by Uranus, so commitment decisions here can arrive with a sudden, clarifying jolt rather than a slow build.",
+      "in_mikes_chart": "This house holds natal Saturn and Ceres, meaning Juno's passage lands on your own commitment-discipline planet, a natural time for formalizing or seriously testing a partnership's long-term structure.",
+      "translation": "This is the strongest window in Juno's whole cycle for a real, structural partnership decision, marriage, formal commitment, or a serious test of one already in place.",
+      "do": "Treat any partnership decision that arises here as one worth real deliberation, since the placement favors lasting structure.",
+      "avoid": "Making a snap commitment decision under the sudden-clarity pull of this house without checking it against reality.",
+      "svehla_link": "Lands on natal Saturn, echoing Svehla's Juno-on-DSC loyalty theme with a transiting reinforcement of the same commitment axis."
+    },
+    {
+      "key": "Transiting Juno in the 8th house",
+      "traditional": "Juno in the 8th house brings commitment into contact with shared resources, intimacy, and psychological depth, often surfacing trust issues around merging finances or vulnerability.",
+      "esoteric": "The 8th house esoterically parallels Scorpio, ruled by Mars, so loyalty here is proven through willingness to fight for the relationship through real intensity, not by avoiding conflict.",
+      "in_mikes_chart": "This house holds natal Moon, meaning Juno's passage touches your emotional core directly, making trust and vulnerability questions in a partnership unusually deep during this window.",
+      "translation": "A partnership's depth of trust, especially around shared money or real emotional vulnerability, gets seriously tested.",
+      "do": "Have the harder conversation about merging resources or emotional vulnerability rather than avoiding it.",
+      "avoid": "Using conflict-avoidance to dodge real intimacy questions in this window.",
+      "svehla_link": ""
+    },
+    {
+      "key": "Transiting Juno in the 9th house",
+      "traditional": "Juno in the 9th house brings commitment into contact with belief systems, travel, or long-distance connection, sometimes a cross-cultural or long-distance partnership theme.",
+      "esoteric": "The 9th house esoterically echoes Sagittarius, ruled by the Earth, so commitment here needs to be grounded in lived, shared experience, not just shared philosophy.",
+      "in_mikes_chart": "This house is empty of natal points for you, sitting between the Moon in the 8th and your MC in the 10th, so this Juno passage is a relatively light, forward-looking stretch.",
+      "translation": "A quieter window where shared beliefs or long-term direction with a partner get discussed rather than tested hard.",
+      "do": "Talk openly with a partner about long-term values and direction.",
+      "avoid": "Assuming shared belief without actually confirming it out loud.",
+      "svehla_link": ""
+    },
+    {
+      "key": "Transiting Juno in the 10th house",
+      "traditional": "Juno in the 10th house brings partnership into public or career life, sometimes a business partnership, a public commitment, or a relationship that affects reputation and career standing.",
+      "esoteric": "The 10th house esoterically parallels Capricorn, ruled by Saturn, so commitment here becomes structural and public, a partnership meant to last and be seen.",
+      "in_mikes_chart": "This house holds your natal MC at 18 degrees 50 Aries, meaning Juno's passage can coincide with the same window Saturn conjuncts the MC, potentially tying a partnership decision directly to the career-foundation work.",
+      "translation": "A partnership, business or personal, may become publicly tied to your career identity right around the same time career foundations are being built.",
+      "do": "Be deliberate about which partnerships get publicly tied to professional identity during this window.",
+      "avoid": "Entering a public or business partnership casually right when career reputation is being actively rebuilt.",
+      "svehla_link": "Can overlap Svehla's Saturn-conjunct-MC window, adding a public-partnership dimension to the career-foundation theme."
+    },
+    {
+      "key": "Transiting Juno in the 11th house",
+      "traditional": "Juno in the 11th house brings commitment questions into friendship and group settings, sometimes turning a friend into a partner or testing loyalty within a network.",
+      "esoteric": "The 11th house esoterically echoes Aquarius, ruled by Jupiter, so loyalty here is tested against the pull toward independence and the wider group, not against a single person.",
+      "in_mikes_chart": "This house holds natal Hades, meaning Juno's passage can surface old, buried loyalty questions or hidden resentments within your network before they can be genuinely resolved.",
+      "translation": "An old, unspoken loyalty issue inside your circle of contacts surfaces and needs a real, honest conversation.",
+      "do": "Address a buried loyalty question in a friendship or network directly rather than letting it fester longer.",
+      "avoid": "Pretending an old resentment inside the network has resolved itself just because it went unspoken.",
+      "svehla_link": "Sits in the same house as the later Saturn-conjunct-Hades and Uranus-conjunct-Hades events, so an early, gentler loyalty reckoning can precede those heavier passes."
+    },
+    {
+      "key": "Transiting Juno in the 12th house",
+      "traditional": "Juno in the 12th house often brings commitment questions into private, hidden, or even spiritual territory, sometimes a secret relationship, a partnership with someone from the past, or working through a loyalty pattern in solitude before it becomes public.",
+      "esoteric": "The 12th house esoterically parallels Pisces, ruled by Pluto, so this Juno passage is a deep, transformative reckoning with loyalty patterns rather than a light one.",
+      "in_mikes_chart": "This is Juno's own natal house, natal Juno sits at 11 degrees 54 Cancer here alongside natal Mars, so a transiting Juno return through this house is the most personally resonant Juno placement in your whole chart.",
+      "translation": "This is the deepest, most private reckoning with what loyalty and commitment actually mean to you personally, since it lands right where your own natal commitment planet lives.",
+      "do": "Use any quiet, private period during this transit to genuinely reflect on relationship patterns before the next Juno return.",
+      "avoid": "Keeping a real relationship pattern hidden past the point where it needs to be addressed openly.",
+      "svehla_link": "This is the house of the Juno return, making it the anchor point for your entire Juno cycle."
+    },
+    {
+      "key": "Transiting Juno conjunct natal Juno",
+      "traditional": "A Juno return, roughly every 4.4 years, closes one chapter of relationship-loyalty patterns and opens the next, similar in spirit to a mini relationship new year.",
+      "esoteric": "Since natal Juno sits in the 12th house, esoterically parallel to Pisces and ruled by Pluto, each return is less a public renewal and more a private, transformative one.",
+      "in_mikes_chart": "Natal Juno sits at 11 degrees 54 Cancer in your 12th house; the return recurs roughly every 4.4 years, whenever transiting Juno cycles back through this same 12th-house degree.",
+      "translation": "Every few years, you get a private, internal reset on your patterns around loyalty and commitment, whether or not there is an active partnership at the time.",
+      "do": "Use each return as a quiet checkpoint on what the last relationship cycle actually taught about loyalty.",
+      "avoid": "Skipping the internal review and just repeating the same commitment pattern into the next cycle.",
+      "svehla_link": "Reinforces Svehla's Juno-on-DSC loyalty theme as a recurring, cyclical check-in rather than a one-time event."
+    },
+    {
+      "key": "Transiting Juno opposite natal Mars",
+      "traditional": "Juno opposite Mars brings partnership and personal assertion into direct tension, often a conflict between what a partner needs and what one wants to pursue independently.",
+      "esoteric": "Scorpio's esoteric ruler is Mars, so this opposition, esoterically, channels raw Martian will directly against the commitment axis, making it one of the more combustible Juno aspects.",
+      "in_mikes_chart": "Natal Mars sits at 23 degrees 52 Cancer conjunct your ASC in the 12th house; transiting Juno opposes it from around 23-24 degrees Capricorn, in your 6th house of work and routine.",
+      "translation": "A conflict between personal drive and a partner's needs shows up specifically through work or daily routine friction.",
+      "do": "Negotiate directly with a partner about how much personal drive and independence the relationship can hold.",
+      "avoid": "Letting frustration about a partner's needs come out sideways as irritability at work.",
+      "svehla_link": ""
+    },
+    {
+      "key": "Transiting Ceres conjunct natal Juno",
+      "traditional": "Ceres conjunct Juno brings nurturing and commitment together, often a period of caretaking within a committed partnership, or a partner stepping into a caregiving role.",
+      "esoteric": "Both goddesses in Demetra George's framework represent cycles of loss and return; their conjunction combines the nurture cycle with the loyalty cycle, care itself becoming the proof of commitment.",
+      "in_mikes_chart": "Natal Juno sits at 11 degrees 54 Cancer in the 12th house; transiting Ceres reaches this degree periodically as it cycles the chart roughly every 3.6 years, landing in the same private, reflective 12th-house territory.",
+      "translation": "A period where nurturing someone, or being nurtured, becomes the main way loyalty gets expressed.",
+      "do": "Let caretaking be a genuine expression of commitment rather than a chore during this window.",
+      "avoid": "Confusing over-caretaking with love; check the nurturing is wanted, not just given.",
+      "svehla_link": ""
+    },
+    {
+      "key": "Transiting Ceres conjunct natal Mars",
+      "traditional": "Ceres conjunct Mars brings nurturing into contact with drive and assertion, sometimes as a need to nurture one's own ambitions, or a conflict between caretaking and pursuing personal goals.",
+      "esoteric": "Scorpio's esoteric ruler is Mars, so this conjunction, esoterically, is nurture meeting will directly, learning to feed one's own drive rather than only tending to others.",
+      "in_mikes_chart": "Natal Mars sits at 23 degrees 52 Cancer conjunct your ASC in the 12th house; transiting Ceres reaches this degree in its roughly 4.6-year cycle, landing right on your personal drive point.",
+      "translation": "A period highlighting whether you are nurturing your own ambitions and physical energy, or only tending to everyone else's needs.",
+      "do": "Deliberately feed personal drive and physical energy during this window, not just others' needs.",
+      "avoid": "Neglecting self-care while pushing hard on a personal goal.",
+      "svehla_link": ""
+    },
+    {
+      "key": "Transiting Ceres conjunct natal ASC",
+      "traditional": "Ceres conjunct the Ascendant often brings a nurturing, caretaking quality to how someone presents themselves, sometimes coinciding with taking on a caregiver role visibly, or attending to health and body needs.",
+      "esoteric": "The Ascendant esoterically parallels Aries, ruled by Mercury, so this conjunction blends nurture with communication, care that is expressed and spoken, not silent.",
+      "in_mikes_chart": "your ASC sits at 26 degrees 58 Cancer, essentially the same degree region as natal Mars; transiting Ceres crossing this point directly touches your self-presentation and physical vitality.",
+      "translation": "A period where how you show up physically and how you care for yourself, or are seen caring for others, becomes noticeably more visible.",
+      "do": "Speak openly about care needs, personal or for someone else, rather than handling them silently.",
+      "avoid": "Letting a caretaking role quietly consume personal identity during this window.",
+      "svehla_link": ""
+    },
+    {
+      "key": "Transiting Ceres in the 12th house",
+      "traditional": "Ceres in the 12th house often brings private grief work, quiet caretaking, or processing an old loss that has not been fully grieved.",
+      "esoteric": "The 12th house esoterically parallels Pisces, ruled by Pluto, so Ceres here is nurture meeting deep transformation, grief that ultimately clears space for something new.",
+      "in_mikes_chart": "This is the same house that holds natal Mars and Juno, so a Ceres passage here directly touches your core drive-commitment patterns through the lens of grief and quiet processing.",
+      "translation": "A private stretch for processing an old loss, one that has been affecting drive and commitment without being fully addressed.",
+      "do": "Give real private time to grieve or process an old loss rather than pushing through it.",
+      "avoid": "Staying so busy that the unprocessed grief just gets buried further.",
+      "svehla_link": ""
+    },
+    {
+      "key": "Transiting Ceres in the 1st house",
+      "traditional": "Ceres in the 1st house often brings a visible focus on self-nurturing, body, health habits, or literally becoming a caretaker in a way others can see.",
+      "esoteric": "The 1st house esoterically echoes Aries, ruled by Mercury, so self-nurture here gets talked about and defined out loud, an identity statement rather than a private habit.",
+      "in_mikes_chart": "your 1st house is a relatively quiet stretch of your chart with no other natal points, so this Ceres transit stands out clearly as a dedicated self-care and health identity window.",
+      "translation": "A clean stretch to focus on physical self-care and health habits as part of how you define yourself.",
+      "do": "Start or recommit to a health or self-care routine during this window; it has clear runway.",
+      "avoid": "Letting the quiet nature of this house mean the self-care focus gets skipped for busier priorities.",
+      "svehla_link": ""
+    },
+    {
+      "key": "Progressed Moon in Gemini",
+      "traditional": "The progressed Moon in Gemini brings a mentally restless, curious, communicative emotional tone, often coinciding with new learning, varied social contact, and a need for mental stimulation to feel emotionally settled.",
+      "esoteric": "Gemini's esoteric ruler is Venus, so this progressed placement channels emotional needs into relational, values-based exchange even while the surface mood is quick and mentally scattered.",
+      "in_mikes_chart": "The progressed Moon enters Gemini around May 3 2027, right after finishing its critical and anaretic Taurus degrees on Alcyone (March-May 2027), moving through your natal 11th house where it will eventually reach Hades.",
+      "translation": "Right after a heavy, fated-feeling stretch in Taurus, your emotional life gets lighter, faster, and more curious for about two years.",
+      "do": "Follow the curiosity, take the class, have the varied conversations, this is a genuinely good window for it.",
+      "avoid": "Mistaking restlessness for a sign something is wrong; some scatter is just this cycle's texture.",
+      "svehla_link": "Begins immediately after the pMoon-Taurus-critical-degrees and Alcyone window already documented, continuing the same progressed lunar arc into new territory."
+    },
+    {
+      "key": "Progressed Moon in Cancer",
+      "traditional": "The progressed Moon in Cancer, its own sign, brings an emotionally rich, home-and-family-focused, nurturing period, often one of the more emotionally comfortable lunar progressions.",
+      "esoteric": "Cancer's esoteric ruler is Neptune, so this progressed placement, though outwardly cozy, carries an undercurrent of soul-deep longing and sensitivity that can feel bigger than ordinary domestic contentment.",
+      "in_mikes_chart": "This follows the Gemini passage roughly two years after the May 2027 ingress, landing around 2029, and crosses into your natal 12th house where your own Mars and Juno sit.",
+      "translation": "After a mentally busy Gemini stretch, emotional life turns inward toward home, family, and private feeling, with more depth than the Gemini period had.",
+      "do": "Prioritize home and family bonding time during this stretch; the Moon is genuinely supported here.",
+      "avoid": "Avoiding necessary vulnerability just because the private mood feels comfortable to stay in alone.",
+      "svehla_link": "Follows directly from the Gemini progression, continuing the arc that began after the 2027 Taurus and Alcyone window."
+    },
+    {
+      "key": "Progressed Moon in Leo",
+      "traditional": "The progressed Moon in Leo brings a warmer, more confident, expressive emotional tone, often a period of wanting to be seen and appreciated, sometimes coinciding with romance or creative visibility.",
+      "esoteric": "Leo's esoteric ruler is the Sun, so this progressed placement channels emotional needs directly through core identity expression, feelings become inseparable from being genuinely, visibly oneself.",
+      "in_mikes_chart": "This follows the Cancer passage roughly two years later, around 2031-32, moving from your private 12th house into your 1st house, right where the natal chart is otherwise quiet.",
+      "translation": "After an inward, private Cancer stretch, emotional life becomes outward-facing and confident again, wanting recognition rather than retreat.",
+      "do": "Put feelings and creative expression out into the open during this window; the appetite for visibility is genuine.",
+      "avoid": "Overcorrecting from the private Cancer period into attention-seeking that outruns actual readiness.",
+      "svehla_link": "Continues the same 28-year progressed lunar arc, moving from the private Cancer stretch into a more visible identity phase."
+    },
+    {
+      "key": "Progressed Moon in the 12th house",
+      "traditional": "The progressed Moon in the 12th house closes out a full 25-30 year lunar cycle, typically a period of introspection, release, and quiet preparation before a new emotional chapter begins at the 1st house crossing.",
+      "esoteric": "The 12th house esoterically parallels Pisces, ruled by Pluto, so this closing phase is genuinely transformative, not just a rest period, old emotional patterns actually dissolve here.",
+      "in_mikes_chart": "This house transit overlaps the Cancer sign progression and holds natal Mars and Juno, meaning the closing-cycle introspection directly touches your drive-commitment patterns before the next chapter opens.",
+      "translation": "A two to three year period of winding down and processing that sets up a genuinely new emotional chapter once it is complete.",
+      "do": "Let this be a genuinely quiet, reflective period rather than fighting the pull inward.",
+      "avoid": "Starting major new emotional commitments right as this closing phase begins; wait for the 1st-house crossing.",
+      "svehla_link": "Sets up the progressed-Moon-in-1st-house entry as the next major threshold."
+    },
+    {
+      "key": "Progressed Moon in the 1st house",
+      "traditional": "The progressed Moon crossing into the 1st house is one of the most significant thresholds in the 28-year lunar cycle, often felt as a genuine waking up, a shift from inward uncertainty to outward, visible action.",
+      "esoteric": "The 1st house esoterically echoes Aries, ruled by Mercury, so this threshold is as much a mental awakening as an emotional one, a new way of thinking about who you are becomes available.",
+      "in_mikes_chart": "This threshold follows directly from the 12th-house closing phase and overlaps the Leo sign progression, meaning you get both the house-level waking up and the sign-level confidence boost at nearly the same time.",
+      "translation": "A genuinely new emotional era begins, one where you move from processing the past to acting visibly on your own behalf.",
+      "do": "Take the visible action that the closing 12th-house phase prepared; this is the moment to act on it.",
+      "avoid": "Staying in the old cycle's introspective mode past its natural end point.",
+      "svehla_link": "Marks the completion of the progressed-Moon arc traced through this file, from the 2027 Taurus and Alcyone window through Gemini, Cancer, the 12th house, and into this new chapter."
+    },
+    {
+      "key": "Progressed Moon conjunct natal Hades",
+      "traditional": "A progressed lunar conjunction to any point brings sustained, months-long emotional focus to that point, here activating whatever Hades governs.",
+      "esoteric": "In the Uranian scheme, Hades governs decay, buried matters, and hidden karmic debt, so this conjunction brings sustained emotional attention to old, unresolved material that has been sitting untouched.",
+      "in_mikes_chart": "Natal Hades sits at 11 degrees 56 Gemini in your 11th house; the progressed Moon crosses this exact degree during its Gemini passage shortly after entering the sign around May 2027, before the Saturn and Uranus conjunctions to the same point.",
+      "translation": "An early, emotionally toned pass over old buried network or financial material arrives years before the heavier Saturn and Uranus hits on the same degree.",
+      "do": "Use this earlier, gentler pass to start noticing what old business needs cleaning up, before the harder transits force it.",
+      "avoid": "Dismissing an uneasy feeling about old network or financial matters as unimportant just because it is not urgent yet.",
+      "svehla_link": "Provides an early emotional preview of the same natal Hades point that Uranus (2028-29) and Saturn (2029-30) will later hit much harder."
+    },
+    {
+      "key": "Progressed Moon conjunct natal Mars",
+      "traditional": "A progressed lunar conjunction to natal Mars brings emotional life and personal drive into close alignment, often a period of feeling motivated, assertive, or more easily provoked than usual.",
+      "esoteric": "Scorpio's esoteric ruler is Mars, so this conjunction, esoterically, fuses feeling with will in an unusually direct, combustible way, emotions become action almost immediately.",
+      "in_mikes_chart": "Natal Mars sits at 23 degrees 52 Cancer conjunct your ASC in the 12th house; the progressed Moon reaches this degree during its Cancer passage around 2029-30, in the middle of the private, introspective 12th-house window.",
+      "translation": "In the middle of an otherwise inward, reflective stretch, a burst of motivation or assertiveness breaks through.",
+      "do": "Act on the motivation when it surfaces, even if it interrupts the quieter mood of the period.",
+      "avoid": "Suppressing irritability that surfaces here until it becomes an outburst.",
+      "svehla_link": ""
+    },
+    {
+      "key": "Progressed Moon conjunct natal ASC",
+      "traditional": "A progressed lunar conjunction to the Ascendant is a strong, personally felt marker, often coinciding with a noticeable shift in mood, appearance, or how one presents to the world.",
+      "esoteric": "The Ascendant esoterically parallels Aries, ruled by Mercury, so this conjunction blends deep feeling with a need to actually voice and define the new self that is emerging.",
+      "in_mikes_chart": "your ASC sits at 26 degrees 58 Cancer, just past natal Mars; the progressed Moon crosses this point shortly after the Mars conjunction, at the very end of the 12th-house passage, immediately preceding the 1st-house threshold.",
+      "translation": "This is the final beat of the old cycle, a strongly felt, visible shift in mood and presentation, right before the new emotional chapter formally begins.",
+      "do": "Pay attention to shifts in mood or self-presentation here; they are pointing directly at what the new cycle wants to look like.",
+      "avoid": "Dismissing a strong felt shift as random rather than as the closing note of a long cycle.",
+      "svehla_link": "Immediately precedes the progressed-Moon-in-1st-house threshold, the two events forming one continuous transition."
+    },
+    {
+      "key": "Progressed Sun in Sagittarius",
+      "traditional": "The progressed Sun changes sign roughly once every 30 years and marks a genuine identity evolution; in Sagittarius it typically brings more optimism, a hunger for meaning, travel, or philosophical growth, and a more expansive, less intense self-expression than the sign it is leaving.",
+      "esoteric": "Sagittarius' esoteric ruler is the Earth, so this progressed identity shift, unlike its usual Jupiter-ruled expansiveness, is esoterically about grounding big beliefs into lived, practical wisdom.",
+      "in_mikes_chart": "Natal Sun sits at 12 degrees Scorpio in the 4th house; the progressed Sun moves roughly one degree per year, so it reaches Sagittarius around your late 40s, entering your natal 5th house where Mercury and Venus already sit.",
+      "translation": "Decades from now, your core identity shifts from Scorpio's intensity toward a lighter, more philosophical, meaning-seeking mode, landing in your house of creativity and romance.",
+      "do": "Note this as a long-range marker; nothing to act on now, but a genuine identity evolution to expect decades out.",
+      "avoid": "Assuming personality traits are fixed forever; the progressed Sun shows real, gradual change is normal and expected.",
+      "svehla_link": ""
+    },
+    {
+      "key": "Progressed Sun in the 5th house",
+      "traditional": "The progressed Sun in the 5th house brings identity into closer contact with creativity, romance, self-expression, and joy, often a genuinely lighter, more playful multi-year identity chapter.",
+      "esoteric": "The 5th house esoterically echoes Leo, ruled by the Sun itself, so this house transit is unusually resonant for the Sun, the truest possible expression of core identity through creative joy.",
+      "in_mikes_chart": "This house transit begins before the Sagittarius sign change, since the 4th-5th cusp sits at Scorpio 23 degrees, close to natal Sun's own 12-degree Scorpio position, and continues through it.",
+      "translation": "A long stretch, arriving well into the future, where core identity becomes more about creative joy and self-expression than intensity or transformation.",
+      "do": "Treat this as a green light, decades out, to prioritize creative projects and genuine enjoyment as identity, not indulgence.",
+      "avoid": "Nothing urgent now; just do not assume the current intense Scorpio-flavored identity is permanent.",
+      "svehla_link": ""
+    },
+    {
+      "key": "Progressed Sun in the 6th house",
+      "traditional": "The progressed Sun in the 6th house shifts identity toward service, health, and the details of daily work, often a humbler, more routine-focused chapter after a more expressive one.",
+      "esoteric": "The 6th house esoterically parallels Virgo, ruled by the Moon, so this identity chapter is about quiet, sustained care and refinement rather than visible achievement.",
+      "in_mikes_chart": "This house transit follows the 5th-house Sagittarius chapter and crosses into your natal 6th house where Uranus and Neptune sit, meaning identity in this later chapter gets filtered through the same work-routine planets.",
+      "translation": "A later-life identity chapter centers on refining daily work and health habits rather than seeking visibility.",
+      "do": "Long-range only, expect a natural pull toward service and routine refinement as a later identity chapter, not a step backward.",
+      "avoid": "Nothing urgent now; this is decades-out context, not a current-day directive.",
+      "svehla_link": ""
+    },
+    {
+      "key": "Progressed Mercury in Capricorn",
+      "traditional": "The progressed Mercury changing sign shifts thinking style; into Capricorn it typically brings a more disciplined, practical, structured way of thinking and communicating, less speculative, more results-oriented.",
+      "esoteric": "Capricorn's esoteric ruler is Saturn, so this progressed shift is unusually resonant, the mind itself takes on Saturn's own disciplined, form-building quality directly.",
+      "in_mikes_chart": "Natal Mercury sits at 3 degrees Sagittarius in the 5th house; progressed Mercury moves quickly and irregularly, sometimes retrograde, but its eventual move into Capricorn lands in your 6th house, right where natal Uranus and Neptune sit.",
+      "translation": "At some point, your thinking style becomes noticeably more disciplined and practical, arriving right in the house that otherwise runs on sudden change and idealism.",
+      "do": "Lean into the more structured thinking style when it arrives, it is a genuine asset for follow-through.",
+      "avoid": "Mistaking the new practicality for a loss of the earlier Sagittarian big-picture instinct; both can coexist.",
+      "svehla_link": ""
+    },
+    {
+      "key": "Progressed Mars in Leo",
+      "traditional": "Progressed Mars changing sign shifts the flavor of drive and assertion; into Leo it typically brings more confident, visible, creatively-charged action, less emotionally defensive than the sign it is leaving.",
+      "esoteric": "Leo's esoteric ruler is the Sun, so this progressed shift channels raw Martian will directly through core identity, action becomes an act of self-expression rather than self-protection.",
+      "in_mikes_chart": "Natal Mars sits at 23 degrees 52 Cancer conjunct the ASC in the 12th house; progressed Mars moves roughly one sign every couple of years, and its move into Leo lands in your natal 2nd house where Chiron sits.",
+      "translation": "A period of noticeably more confident, visible action, arriving in the same territory as your self-worth wound, giving you a real chance to act your way into healing it.",
+      "do": "Use the more confident action style to directly challenge the old self-worth wound instead of avoiding situations that trigger it.",
+      "avoid": "Letting bold action become defensive overcompensation for the underlying wound.",
+      "svehla_link": ""
+    }
+  ]
 }
