@@ -56,7 +56,8 @@ class DigestTest(unittest.TestCase):
         self.assertFalse(self.q("explosion_score.py", hdr("💥", "Explosion Setup", sub="NVDA 81/100")))
         self.assertFalse(self.q("flow_digest_send.py", "🟢 TRADE NVDA 250C", fn="flow_digest"))
         self.assertFalse(self.q("best3_digest.py", "BEST-3 card", fn="flow_digest"))
-        self.assertFalse(self.q("some_new_script.py", "anything"))           # unknown → instant
+        self.assertFalse(self.q("some_new_script.py", "anything"))
+        self.assertFalse(self.q("flow_picks_post.py", "🎯 **FLOW PICKS — live contracts**", fn="flow_digest"))           # unknown → instant
         self.assertFalse(self.q("pullback_autowatch.py", pullback(("NVDA", 1, 1, 2)), fn="system_health"))
 
     def test_fyi_messages_fold_into_one_compact_digest(self):
@@ -64,18 +65,26 @@ class DigestTest(unittest.TestCase):
                                                                  ("AVGO", "301.10", "290.00", "305.50"))))
         self.assertTrue(self.q("pullback_autowatch.py", pullback(("NVDA", "220.00", "214.61", "223.12"))))
         self.assertTrue(self.q("explosion_score.py", join(hdr("👀", "Explosion Watch"),
-                                                          row("SMCI", "62/100", "vol 3x"))))
+                                                          "▸ SMCI 62 — vol 3x; coil",
+                                                          "▸ PLTR 58 — base breakout")))
         self.assertTrue(self.q("flow_digest_send.py", "🟡 WATCH ONLY — META calls heavy but no entry", fn="flow_digest"))
         self.assertTrue(self.q("flow_pulse.py", join(hdr("💓", "Flow Pulse"), row("TSLA", "$2.1M", "calls"),
                                                      footer("awareness only")), fn="flow_digest"))
+        self.assertTrue(self.q("flow_digest_send.py", "🔁 REPEAT — META flow again", fn="flow_digest"))
+        self.assertTrue(self.q("eod_scorecard.py", join(hdr("📊", "EOD Scorecard"), row("FSLR", "-38%")),
+                               fn="flow_digest"))
         self.assertEqual(self.dg.flush(), 0)
         out = self.sent.read_text()
         self.assertEqual(out.count("====="), 1)                      # ONE message
+        self.assertIn("<b>FSLR</b> -38%", out)                         # sign kept
+        self.assertNotIn("REPEAT", out)                                # no-new-info hidden
+        self.assertNotIn("223.12,", out)
         self.assertIn("TRADING DIGEST", out)
         self.assertIn("<b>NVDA</b> $220.00 · buy zone $214.61–$223.12", out)   # newest NVDA wins
         self.assertEqual(out.count("<b>NVDA</b>"), 1)                  # deduped
         self.assertIn("<b>AVGO</b>", out)
-        self.assertIn("SMCI", out)
+        self.assertIn("<b>SMCI</b> 62 — vol 3x; coil", out)
+        self.assertIn("<b>PLTR</b>", out)
         self.assertIn("META calls heavy", out)
         self.assertIn("TSLA", out)
         self.assertNotIn("waiting beats chasing", out)                 # footers dropped

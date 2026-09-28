@@ -42,7 +42,7 @@ _SCHEMA = """CREATE TABLE IF NOT EXISTS digest_queue (
 # ── policy: which sources are FYI (digest) ────────────────────────────────────
 TITLES = {   # section name when a (chunked) message carries no tg_format header
     "pullback_autowatch.py": "Pullback watch", "runner_radar.py": "Runner radar",
-    "flow_pulse.py": "Flow pulse", "flow_picks_post.py": "Flow picks",
+    "flow_pulse.py": "Flow pulse",
     "best3_grader.py": "Best-3 grades", "eod_scorecard.py": "EOD scorecard",
     "flow_digest_send.py": "Flow digest", "explosion_score.py": "Explosion watch",
 }
@@ -57,7 +57,8 @@ def mode(source: str, text: str, html: bool = True) -> str:
     """'digest' or 'instant' for one message."""
     p = _plain(text, html).lstrip()
     if source in ("pullback_autowatch.py", "runner_radar.py", "flow_pulse.py",
-                  "flow_picks_post.py", "best3_grader.py", "eod_scorecard.py"):
+                  "best3_grader.py", "eod_scorecard.py"):
+        # flow_picks_post stays instant: 3 sized pick cards a day (09:50/12:30/15:00)
         return "digest"
     if source == "flow_digest_send.py":            # 🟢 TRADE buzzes; 🟡/🔴/🔁 are FYI
         return "instant" if p.startswith("🟢") else "digest"
@@ -104,12 +105,14 @@ def intercept(fn: str, text: str, html: bool = True) -> bool:
 # ── compaction ────────────────────────────────────────────────────────────────
 _HDR = re.compile(r"^\W{0,4}\s*<b>([^<]{2,40})</b>")
 _STAMP = re.compile(r"\s*·\s*(Mon|Tue|Wed|Thu|Fri|Sat|Sun)\s+\d\d-\d\d\s+\d\d:\d\d\s+ET.*$")
-_ROW = re.compile(r"^\s*(\S{1,3})\s*<b>([A-Z][A-Z0-9.\-/]{0,9})</b>(.*)$")
+_ROW = re.compile(r"^([^<A-Za-z0-9]{0,14})<b>\$?([A-Z][A-Z0-9.\-/]{0,9})</b>(.*)$")
+_PROW = re.compile(r"^\s*[▸•]\s*\$?([A-Z][A-Z0-9.\-]{0,9})\b(.*)$")   # plain "▸ SMCI 62 — why"
+_TIME = re.compile(r"\s*\d{1,2}:\d\d\s*(AM|PM)?\s*(ET)?", re.I)
 _PULL = re.compile(r"is \$([\d,.]+).*?from is \$([\d,.]+)\s*[–-]\s*\$([\d,.]+)")
 
 
 def _clip(s: str, n: int = 80) -> str:
-    s = re.sub(r"\s+", " ", s).strip(" ·—-")
+    s = re.sub(r"\s+", " ", s).strip().lstrip("·—").strip().rstrip(" ·—,")   # keep a leading "-38%"
     return s if len(s) <= n else s[: n - 1].rstrip() + "…"
 
 
@@ -125,17 +128,25 @@ def compact(source: str, text: str, html: bool) -> tuple[str, list[tuple[str, st
     if lines:
         m = _HDR.match(lines[0])
         if m and not _ROW.match(lines[0]):
-            title = _STAMP.sub("", _html.unescape(m.group(1))).strip().title()
+            title = _TIME.sub("", _STAMP.sub("", _html.unescape(m.group(1)))).strip(" ·—-").title()
     rows: list[tuple[str, str]] = []
     for ln in lines:
         m = _ROW.match(ln)
-        if not m:
+        if m:
+            glyph, tkr, rest = m.group(1).strip(), m.group(2), _plain(m.group(3), True)
+        elif (pm2 := _PROW.match(_plain(ln, True))):
+            glyph, tkr, rest = "", pm2.group(1), pm2.group(2)
+        else:
             continue
-        glyph, tkr, rest = m.group(1), m.group(2), _plain(m.group(3), True)
+        if not rest.strip() and not glyph:
+            continue                  # a bold section label ("<b>SETUPS</b>"), not a ticker
         if source == "pullback_autowatch.py" and (pm := _PULL.search(rest)):
-            rest = f"${pm.group(1)} · buy zone ${pm.group(2)}–${pm.group(3)}"
-        glyph = "" if glyph == "▸" else glyph + " "
+            g = [x.strip(",.") for x in pm.groups()]
+            rest = f"${g[0]} · buy zone ${g[1]}–${g[2]}"
+        glyph = "" if glyph in ("", "▸") else glyph + " "
         rows.append((tkr, f"{glyph}<b>{tkr}</b> {_esc(_clip(rest))}"))
+    if source == "flow_digest_send.py" and _plain(text, html).lstrip().startswith("🔁"):
+        return title, rows           # 🔁 REPEAT = "no new info": counted, not shown
     if not rows:     # no ticker rows (verdict notes, recaps): keep the first real line(s)
         body = [_plain(ln, True) for ln in lines
                 if not ln.lstrip().startswith("<i>") and not (_HDR.match(ln) and ln is lines[0])]
