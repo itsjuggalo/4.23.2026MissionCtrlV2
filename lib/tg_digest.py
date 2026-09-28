@@ -31,8 +31,15 @@ from pathlib import Path
 HOME = Path.home()
 DB = Path(os.environ.get("TG_LEDGER_DB", str(HOME / ".local/state/tg-ledger.sqlite")))
 OFF = HOME / ".config/tg-digest/OFF"
-LANES = {"trading_command", "flow_digest"}        # lanes whose chat receives the digest
-DELIVER_FN = "trading_command"
+LANES = {"trading_command", "flow_digest"}        # trading lanes this layer intercepts
+DELIVER_FN = "trading_digest"                      # @Boba2Telegram_Bot "Trading Digest" (idle bot, 2026-09-28)
+# Sources that get their OWN bot instead of Trading Command (2026-09-28 — idle bots put to
+# work so Trading Command carries act-now messages only). Sent immediately, not folded.
+RELANE = {
+    "eod_scorecard.py": "trading_recaps", "best3_grader.py": "trading_recaps",
+    "report_card.py": "trading_recaps", "signal_outcomes.py": "trading_recaps",
+    "btc_monitor.py": "crypto_desk", "btc_sentiment.py": "crypto_desk",
+}
 MAX_ROWS = 10                                      # per section, per digest
 TG_MAX = 3900
 _SCHEMA = """CREATE TABLE IF NOT EXISTS digest_queue (
@@ -43,7 +50,6 @@ _SCHEMA = """CREATE TABLE IF NOT EXISTS digest_queue (
 TITLES = {   # section name when a (chunked) message carries no tg_format header
     "pullback_autowatch.py": "Pullback watch", "runner_radar.py": "Runner radar",
     "flow_pulse.py": "Flow pulse",
-    "best3_grader.py": "Best-3 grades", "eod_scorecard.py": "EOD scorecard",
     "flow_digest_send.py": "Flow digest", "explosion_score.py": "Explosion watch",
 }
 
@@ -56,8 +62,7 @@ def _plain(text: str, html: bool) -> str:
 def mode(source: str, text: str, html: bool = True) -> str:
     """'digest' or 'instant' for one message."""
     p = _plain(text, html).lstrip()
-    if source in ("pullback_autowatch.py", "runner_radar.py", "flow_pulse.py",
-                  "best3_grader.py", "eod_scorecard.py"):
+    if source in ("pullback_autowatch.py", "runner_radar.py", "flow_pulse.py"):
         # flow_picks_post stays instant: 3 sized pick cards a day (09:50/12:30/15:00)
         return "digest"
     if source == "flow_digest_send.py":            # 🟢 TRADE buzzes; 🟡/🔴/🔁 are FYI
@@ -87,6 +92,8 @@ def intercept(fn: str, text: str, html: bool = True) -> bool:
         sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
         from lib.tg_ledger import source
         src = source()
+        if src in RELANE:
+            return _relane(RELANE[src], text, html)
         if mode(src, text, html) != "digest":
             return False
         con = _con()
@@ -100,6 +107,21 @@ def intercept(fn: str, text: str, html: bool = True) -> bool:
         return True
     except Exception:
         return False
+
+
+def _relane(fn: str, text: str, html: bool) -> bool:
+    """Deliver on the source's own bot. False (→ caller sends on the original lane) on failure."""
+    stub = os.environ.get("TG_DIGEST_SEND")
+    if stub:                                         # tests
+        import subprocess
+        return subprocess.run([stub, f"[{fn}] {text}"]).returncode == 0
+    import contextlib, io
+    sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
+    import tg_fleet
+    with contextlib.redirect_stdout(io.StringIO()):
+        ok = tg_fleet.send(fn, text, html=html) == 0
+    print(f"[tg-digest] {'sent' if ok else 'FAILED'} on {fn}", file=sys.stderr)
+    return ok
 
 
 # ── compaction ────────────────────────────────────────────────────────────────
@@ -171,7 +193,7 @@ def build(items: list[tuple], now: float | None = None) -> list[str]:
     hm = lambda t: time.strftime("%H:%M", time.localtime(t))
     head = (f"🧾 <b>TRADING DIGEST</b> · {time.strftime('%a %m-%d %H:%M ET', time.localtime(now))}\n"
             f"{len(items)} FYI updates folded since {hm(items[0][0])} — "
-            f"entries/exits/🟢 still arrive instantly")
+            f"entries/exits/🟢 arrive instantly in Trading Command")
     blocks = []
     for title, sec in sections.items():
         rows = list(sec["rows"].values())

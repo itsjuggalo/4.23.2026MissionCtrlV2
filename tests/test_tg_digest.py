@@ -71,8 +71,7 @@ class DigestTest(unittest.TestCase):
         self.assertTrue(self.q("flow_pulse.py", join(hdr("💓", "Flow Pulse"), row("TSLA", "$2.1M", "calls"),
                                                      footer("awareness only")), fn="flow_digest"))
         self.assertTrue(self.q("flow_digest_send.py", "🔁 REPEAT — META flow again", fn="flow_digest"))
-        self.assertTrue(self.q("eod_scorecard.py", join(hdr("📊", "EOD Scorecard"), row("FSLR", "-38%")),
-                               fn="flow_digest"))
+        self.assertTrue(self.q("runner_radar.py", join(hdr("📡", "Runner Radar"), row("FSLR", "-38%"))))
         self.assertEqual(self.dg.flush(), 0)
         out = self.sent.read_text()
         self.assertEqual(out.count("====="), 1)                      # ONE message
@@ -91,6 +90,18 @@ class DigestTest(unittest.TestCase):
         self.assertNotIn("awareness only", out)
         self.assertEqual(self.dg.flush(), 0)                           # nothing left
         self.assertEqual(out, self.sent.read_text())
+
+    def test_recap_and_crypto_sources_go_to_their_own_bot_immediately(self):
+        self.assertTrue(self.q("eod_scorecard.py", "📊 <b>EOD SCORECARD</b>", fn="flow_digest"))
+        self.assertTrue(self.q("btc_monitor.py", "🔴 BTC BREAKDOWN $58,000"))
+        self.assertTrue(self.q("report_card.py", "weekly report card"))
+        out = self.sent.read_text()
+        self.assertIn("[trading_recaps] 📊 <b>EOD SCORECARD</b>", out)
+        self.assertIn("[crypto_desk] 🔴 BTC BREAKDOWN", out)
+        self.assertIn("[trading_recaps] weekly report card", out)
+        self.assertEqual(self.dg.flush(), 0)                           # nothing was queued
+        self.assertEqual(out, self.sent.read_text())
+        self.assertFalse(self.q("btc_monitor.py", "x", fn="system_health"))   # only trading lanes re-lane
 
     def test_failed_send_keeps_items_queued(self):
         self.q("runner_radar.py", join(hdr("📡", "Runner Radar"), row("IONQ", "+18%", "$41.20")))

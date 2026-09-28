@@ -31,7 +31,7 @@ sys.path.insert(0, str(Path.home() / "scripts"))
 from tg_format import hdr, esc, footer  # noqa: E402  (2026-09-15 format sweep)
 
 SEC = Path.home() / ".openclaw" / "secrets"
-TOKEN_FILE = SEC / "telegram_laptopclaude_bot_token"
+TOKEN_FILE = SEC / "telegram_mc_skill_bot_token"   # @MMCTRL727_Bot "Trading Recaps" (2026-09-28)
 CHAT_FILE = SEC / "telegram-chat-id.txt"
 # NOTE: Alpaca PAPER/account endpoint is retired here (2026-09-15) — Alpaca survives
 # ONLY as a free market-DATA feed (see DATA / _spot below). Never re-add an
@@ -254,7 +254,7 @@ def main() -> int:
     r = _tg("sendMessage", chat_id=chat_id, text=card, parse_mode="HTML")
     try:   # passive send record (lib/tg_ledger.py) — 2026-09-28
         from lib.tg_ledger import record
-        record("trading_command", card, r is not None, html=True, src="options_position_scorecard.py")
+        record("trading_recaps", card, r is not None, html=True, src="options_position_scorecard.py")
     except Exception:
         pass
     if r is None:

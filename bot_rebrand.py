@@ -94,24 +94,25 @@ IDENTITY = {
               "/help for commands. The Swarm needs you, magnificent bastard.")),
     # 2026-07-19: ex-Macro token repurposed — now the MasterMC agent's own bot
     # (claudeclaw --agent mastermc, MASTERMC_BOT_TOKEN; tg_responder "macro" lane RETIRED).
+    # 2026-09-28: idle since mastermc was deleted (08-30) → "Trading Recaps" (fleet fn trading_recaps).
     "telegram_mc_skill_bot_token": dict(
-        name="MasterMC", avatar="mengsk",
-        short="Master MissionCTRL — the orchestrator agent of the ClaudeClaw hub.",
-        desc=("MasterMC agent (ClaudeClaw OS sub-agent). Mission Control's orchestrator lane: "
-              "delegated missions, scheduler tasks, agent coordination. Managed from the "
-              "ClaudeClaw OS bot and dashboard :3141. The Dominion endures.")),
+        name="Trading Recaps", avatar="mengsk",
+        short="End-of-day recaps: scorecards, grades, weekly report card.",
+        desc=("Trading recaps (push). EOD scorecard, best-3 grades, the options position "
+              "scorecard, scoreboard and the weekly report card — how the signals did, in one "
+              "place, off the live alert chats.")),
 }
 
 
 # Bots whose token lives in ~/.openclaw/vault.db (not a file) → key in the secrets table.
 VAULT = os.path.expanduser("~/.openclaw/vault.db")
 VAULT_IDENTITY = {
-    "telegram_boba2_bot_token": dict(
-        name="Flow Digest", avatar="hydralisk",
-        short="The Swarm's daily flow brief — 3x a day best-of options flow.",
-        desc=("Flow digest (push). The 3x/day best-of options-flow brief: verdict-first picks "
-              "from the scraper. Pull more with /winners /sweeps from the Trading Command bot. "
-              "The Swarm feeds.")),
+    "telegram_boba2_bot_token": dict(   # 2026-09-28: "Trading Digest" (fleet fn trading_digest)
+        name="Trading Digest", avatar="hydralisk",
+        short="Compact FYI digest — watchlists, radars, pulses, one line per ticker.",
+        desc=("Trading digest (push, silent). Pullback watch, runner radar, flow pulse, "
+              "explosion watch and FYI flow notes folded into a few compact digests a day. "
+              "Entries/exits/🟢 TRADE stay in Trading Command.")),
     "telegram_hermes_bot_token": dict(
         name="Hermes Relay", avatar="stukov",
         short="Hermes LLM router — message bus on the subscription wallet.",
@@ -149,11 +150,12 @@ VAULT_IDENTITY = {
         short="Orion research relay — reserve autoresearch persona.",
         desc=("Orion Relay (reserve). Spare relay for Orion autoresearch / decisions; persona-ready. "
               "En Taro Tassadar. There is much to learn.")),
-    "telegram.grok_scout": dict(
-        name="Grok Scout", avatar="dark_archon",
-        short="Grok / X scout — reserve X-native intel persona.",
-        desc=("Grok Scout (reserve). Spare relay for Grok / X-native scouting; persona-ready. "
-              "Power overwhelming.")),
+    "telegram.grok_scout": dict(        # 2026-09-28: "Crypto Desk" (fleet fn crypto_desk)
+        name="Crypto Desk", avatar="dark_archon",
+        short="BTC/ETH moves, crypto news and QuantEdge perp signals.",
+        desc=("Crypto desk (push). BTC/ETH move + level alerts, crypto news sentiment and "
+              "QuantEdge perp LONG/SHORT signals — all crypto, off the stock chats. Execute on "
+              "Coinbase yourself; bots advise only.")),
     "telegram.trend_scanner": dict(
         name="Trend Scanner", avatar="overmind",
         short="Trend & movers scanner — reserve screening persona.",
