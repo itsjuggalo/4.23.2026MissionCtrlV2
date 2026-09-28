@@ -428,11 +428,28 @@ def digest(msg: str) -> str:
 
 
 def chunk_message(msg: str, limit: int = 3900) -> list[str]:
-    """Split on paragraph breaks so no Telegram send exceeds the cap."""
+    """Split on paragraph breaks, then line breaks, then hard-wrap — no Telegram send exceeds the cap
+    (a single oversized paragraph used to go out whole and be rejected)."""
     if len(msg) <= limit:
         return [msg]
-    out, cur = [], ""
+    pieces = []
     for para in msg.split("\n\n"):
+        if len(para) <= limit:
+            pieces.append(para); continue
+        buf = ""
+        for ln in para.split("\n"):
+            while len(ln) > limit:
+                if buf:
+                    pieces.append(buf); buf = ""
+                pieces.append(ln[:limit]); ln = ln[limit:]
+            if buf and len(buf) + 1 + len(ln) > limit:
+                pieces.append(buf); buf = ln
+            else:
+                buf = f"{buf}\n{ln}" if buf else ln
+        if buf:
+            pieces.append(buf)
+    out, cur = [], ""
+    for para in pieces:
         cand = (cur + "\n\n" + para) if cur else para
         if len(cand) > limit and cur:
             out.append(cur); cur = para

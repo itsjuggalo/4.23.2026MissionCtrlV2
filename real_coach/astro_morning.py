@@ -3,7 +3,7 @@
 08:32–08:38 (Mike 2026-09-27: "merge the morning pile-up").
 
   daily digest            every day            (daily_transits.py)
-  + Svehla week           Mondays              (svehla.weekly_block) — the daily's 📜/⏳/🗓 sections are
+  + the weekly read       Mondays              (astro_weekly.weekly_block) — the daily's 📜/⏳/🗓 sections are
                                                 dropped that day because the weekly carries them in full
   + 30-day lookahead      1st of the month     (astro_lookahead.lookahead_block(30, compact=True))
   + evidence report       1st of the month     (astro_evidence.report(31)) — only once /note has entries
@@ -51,8 +51,8 @@ def build(force: set[str] | None = None) -> str:
         daily = "\n\n".join(p for p in daily.split("\n\n") if not p.lstrip().startswith(WEEKLY_COVERS))
     parts = [daily]
     if monday:
-        import svehla
-        parts.append(_section("Svehla week", svehla.weekly_block))
+        import astro_weekly
+        parts.append(_section("weekly", astro_weekly.weekly_block))
     if first:
         import astro_lookahead, astro_evidence
         parts.append(_section("month lookahead", lambda: astro_lookahead.lookahead_block(30, compact=True)))

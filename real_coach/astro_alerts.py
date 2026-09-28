@@ -3,6 +3,7 @@
   • timeline hits going exact within the next hour (canonical exact_at_local from astro_timeline)
   • Moon void-of-course starting within the hour
   • stations, lunations, eclipses within the hour
+  • every Moon sign ingress and phase change (astro_moon posts; 12 h catch-up after quiet hours)
 State in ~/portfolio/astrology/alerts_sent.json prevents repeats. `--dry` prints only; `--window N` minutes (default 60).
 """
 from __future__ import annotations
@@ -57,6 +58,13 @@ def due(now: datetime | None = None, window_min: int = 60, lookback_min: int = 0
                 out.append((f"lun:{ln['date_et']}", f"{'🌑' if 'New' in label or 'solar' in label else '🌕'} {label} exact at {t:%-I:%M %p} ET, {ln['deg']}° {ln['sign']} (your {T.ordinal(ln['house'])} house)" + (f" — {ent['translation']}" if ent else "")))
     except Exception as ex:
         out.append(("err", f"(sky alerts unavailable: {ex})"))
+    # 2026-09-28 (Mike): a post every time the Moon changes sign or phase, read against his chart.
+    # 12 h lookback so anything that happened during quiet hours goes out at the first 8 AM run.
+    try:
+        import astro_moon
+        out += astro_moon.due(now - timedelta(minutes=max(lookback_min, 720 if lookback_min else 0)), end)
+    except Exception as ex:
+        out.append(("err", f"(moon posts unavailable: {ex})"))
     return out
 
 
@@ -73,8 +81,10 @@ def main() -> int:
     msg = "\n\n".join(t for _, t in items)
     print(msg)
     if not dry:
-        if not send_to_lane(msg[:3900]):          # not marked sent → the next hourly run retries it
-            print("✖ alert send failed — will retry next run", file=sys.stderr); return 1
+        from daily_transits import chunk_message
+        for chunk in chunk_message(msg):          # never truncate: split under Telegram's cap
+            if not send_to_lane(chunk):           # not marked sent → the next hourly run retries it
+                print("✖ alert send failed — will retry next run", file=sys.stderr); return 1
         for u, _ in items:
             sent[u] = now.isoformat(timespec="minutes")
         cutoff = (now - timedelta(days=14)).isoformat()

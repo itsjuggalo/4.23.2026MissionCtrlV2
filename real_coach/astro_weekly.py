@@ -138,6 +138,26 @@ def weekly_block(start: datetime | date | None = None) -> str:
     except Exception as ex:
         lines += [f"📜 (Svehla windows unavailable: {ex})", ""]
 
+    # 5b · the week's practice (progressed phase, profection) + tracked loose ends (was svehla.weekly_block)
+    try:
+        import astro_returns, astro_lexicon as lex, astro_timing
+        ph = astro_returns.progressed_phase(today)
+        ent = lex.kb_entry(f"Progressed phase {ph['phase'].replace('_', ' ')}")
+        if ent and ent.get("weekly_practice"):
+            lines.append(f"🌗 Progressed {ph['phase'].replace('_', ' ')} phase — this week: {ent['weekly_practice']}")
+        pf = astro_timing.profection(today)
+        lines.append(f"⏳ {T.ordinal(pf['house'])}-house profection year, lord {pf['lord']} · this month "
+                     f"{T.ordinal(pf['month_house'])} house (lord {pf['month_lord']}) — transits to {pf['lord']} count double.")
+        if today < date(2027, 3, 10):
+            lines.append(f"🛡 {(date(2027, 3, 10) - today).days} days to the spring-2027 window (housing + cash contingency).")
+        import astro_tasks
+        nag = astro_tasks.loose_nag(today)
+        if nag:
+            lines.append(nag)
+        lines.append("")
+    except Exception as ex:
+        lines += [f"🌗 (practice/timing unavailable: {ex})", ""]
+
     # 6 · best / hardest days (the life-decision sky score, per day at noon)
     try:
         import astro_lookahead as LA

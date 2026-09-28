@@ -36,12 +36,15 @@ def main() -> int:
         section("Morning digest", "\n".join(ln for ln in run("daily_transits.py").splitlines()
                                              if not ln.startswith("📖 Full read")).rstrip(), True),
         section("Full read (esoteric, sky events, patterns, Uranian dial)", run("daily_transits.py", "--full")),
+        section("The Moon — sign & phase against your placements", run("astro_moon.py", "now")),
+        section("Your week — themes, exacts (ET), slow transits, progressions", run("astro_weekly.py")),
         section("Next 30 days — timeline (real ephemeris)", run("astro_timeline.py", "30")),
         section("Week ahead — day by day", run("astro_lookahead.py", "week")),
         section("Sky events — lunations, eclipses, stations, retrogrades", run("astro_sky.py", "--days", "60")),
         section("Uranian dial — midpoints & pictures", run("astro_uranian.py", "midpoints")),
         section("Svehla windows", run("svehla.py", "dates")),
         section("Timing — profection & firdaria", run("astro_timing.py", "profection")),
+        section("Moon guide — all 12 signs and 8 phases in your chart", run("astro_moon.py", "guide")),
     ]
     page = f"""<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Mike · Today's Sky (live)</title>
