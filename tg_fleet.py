@@ -62,6 +62,8 @@ FLEET = {
     # deleted 2026-08-30 (no unique code). Bot stays parked in BotFather; token file kept.
     # ── push (they alert you) ───────────────────────────────────────────────
     "flow_signals":    dict(user="PipelineSignals_Bot",     avatar="queen_of_blades", role="push",        src=("file", "telegram-bot-token.txt")),
+    # flow_digest content is delivered by trading_command since 2026-09-28 (see ALIAS below);
+    # @Boba2Telegram_Bot stays registered, parked, token kept.
     "flow_digest":     dict(user="Boba2Telegram_Bot",       avatar="hydralisk",       role="push",        src=("vault", "telegram_boba2_bot_token")),
     "daily_briefs":    dict(user="SpaceCoast_Claude_Bot",   avatar="ghost",           role="push",        src=("cloud", None)),
     # ── media (off the trade chats) ─────────────────────────────────────────
@@ -458,6 +460,21 @@ def _getme(tok):
         return None
 
 
+# Lanes whose messages now land in another bot's chat (2026-09-28, Mike: "move best to
+# trading command"). Applied on the SEND side only — send(), send_upload() and the `token`
+# CLI verb that senders (lib/notify.tg_push, scoreboard_auditor, best3_*) resolve through —
+# so registry/audit calls to token() still see each bot's own token. The alias bot stays
+# registered (parked, token kept) — delete the alias to move a lane back.
+ALIAS = {
+    "flow_digest": "trading_command",   # best3 / flow pulse / flow picks / EOD scorecard
+}
+
+
+def route(fn):
+    """The function whose bot actually delivers `fn`'s messages."""
+    return ALIAS.get(fn, fn)
+
+
 def token(fn):
     """The canonical token for a function — vault first, else its source (pre-migration)."""
     con = _vault()
@@ -527,6 +544,7 @@ def send(fn, msg, html=False):
     dynamic text with tg_format.esc). If Telegram rejects the markup the message is re-sent
     as plain text with the tags stripped so a formatting slip never drops a trading ping.
     (2026-09-15 — Telegram message-format sweep.)"""
+    fn = route(fn)
     tok = token(fn)
     if not tok:
         print(f"no token for {fn}"); return 1
@@ -568,6 +586,7 @@ def send_upload(fn, path, caption="", as_doc=False, html=False):
     stripped plain caption if Telegram rejects the markup (2026-09-16)."""
     if not os.path.exists(path):
         print(f"no such file: {path}"); return 1
+    fn = route(fn)
     tok, label = _resolve(fn)
     if not tok:
         print(f"no token for {fn}"); return 1
@@ -635,7 +654,7 @@ if __name__ == "__main__":
         set_token(a[1], a[2])
     elif cmd == "token" and len(a) >= 2:
         # print the vault-first resolved token for a function (for senders to centralize on)
-        t = token(a[1])
+        t = token(route(a[1]))   # senders resolve here → follow ALIAS
         if t:
             print(t)
         sys.exit(0 if t else 1)

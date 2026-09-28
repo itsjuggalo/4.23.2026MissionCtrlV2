@@ -35,7 +35,7 @@ ET = ZoneInfo("America/New_York")
 LANES = [
     "trading_command",   # what do I do right now
     "flow_signals",      # positions I'm already in
-    "flow_digest",       # the 30-min digest + BEST-3
+    # flow_digest dropped 2026-09-28: its messages now land in trading_command (tg_fleet ALIAS)
     "research_desk",     # Trading Lab (the learning lane)
     "life_wellness",     # life + important mail
 ]

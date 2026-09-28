@@ -63,9 +63,9 @@ def main() -> None:
                f"**${a['price']:,.2f}** (now ${p:,.2f}){note}")
         if cid:
             oc.post_message_bot(cid, SYNTH_TOKEN, content=msg)
-        try:
-            from lib.notify import tg_brief
-            tg_brief(msg)
+        try:   # trading lane (was tg_brief → SpaceCoast daily_briefs) — 2026-09-28
+            from lib.notify import tg_push
+            tg_push(msg.replace("**", ""), "trading_command", html=False)
         except Exception:
             pass
         price_alerts.mark_fired(a["id"])
