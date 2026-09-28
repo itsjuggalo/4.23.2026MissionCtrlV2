@@ -40,6 +40,9 @@ FLEET = {
     "system_health":   dict(user="Pingpong727_Bot",         avatar="adjutant",        role="interactive", src=("file", "telegram-ping-bot-token")),
     "life_wellness":   dict(user="LifeClaw727_Bot",         avatar="arbiter",         role="interactive", src=("file", "lifeclaw_telegram_bot_token")),
     "aime_research":   dict(user="AntiGravityg59laptop_Bot",avatar="zeratul",         role="interactive", src=("file", "telegram_antigravity_bot_token")),
+    # 2026-09-28: @MoneyFlowz_Bot (ex x_sentiment, retired 09-27) REPURPOSED as the QUIZ-ONLY
+    # lane — every trading quiz sends here; poller = quiz_bot.py (PM2 quiz-bot).
+    "quiz":            dict(user="MoneyFlowz_Bot",          avatar="nova",            role="interactive", src=("file", "telegram_grok_bot_token")),
     # RETIRED 2026-09-27: x_sentiment (@MoneyFlowz_Bot) — its only poller, PM2 grok-bot, was dead
     # since 09-02 and nothing sends TG_FN=x_sentiment. Bot stays parked in BotFather; token file kept.
     # 2026-08-10 — @JazzyHazzyClaw_Bot (PARKED since 07-19, ex Jazzy Desk) REPURPOSED as the

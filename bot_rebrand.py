@@ -48,12 +48,14 @@ IDENTITY = {
         desc=("Flow signals (push). The meanest options flow: big sweeps, position exits, market "
               "shocks — straight to your phone. Pull the board with /winners /sweeps from the "
               "Trading Command bot. Paper-safe, edge-first. We will consume them.")),
+    # 2026-09-28 — ex X-Sentiment (retired 09-27), now the QUIZ-ONLY lane (fleet fn `quiz`,
+    # poller quiz_bot.py). Every trading quiz lives here, off the signal/command chats.
     "telegram_grok_bot_token": dict(
-        name="X-Sentiment", avatar="nova",
-        short="Ghost recon on X/Twitter — live trader chatter on any ticker.",
-        desc=("X-sentiment scout (Grok on your subscription). Text me a ticker → live "
-              "bullish/bearish X/Twitter chatter + catalysts in the last 24h. e.g. 'NVDA'. "
-              "Target acquired.")),
+        name="Options Quiz", avatar="nova",
+        short="Options & flow quizzes only — tap A/B/C/D, /quiz for another.",
+        desc=("Quiz-only bot. Options Academy reps, live-position quizzes, signal quizzes from "
+              "today's real flow, and lessons from your closed trades. Tap an answer to get "
+              "graded; /quiz for another rep, /score for your belt and weak spots.")),
     # 2026-08-10 — un-parked as the ASTROLOGY-ONLY lane (fleet fn `astrology`). Natal chart,
     # real Swiss-Ephemeris transits, and the readings suite. Zero trading surface by design.
     "telegram_jazzyhazzy_bot_token": dict(

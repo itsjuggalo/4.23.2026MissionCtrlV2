@@ -26,7 +26,7 @@ HERE   = Path(__file__).resolve().parent
 BANK   = HERE / "options_quiz_bank.json"
 STATE  = Path.home() / ".openclaw" / "data" / "options_quiz_state.json"   # trading lane (not ~/.lifeclaw)
 SECRETS = Path.home() / ".openclaw" / "secrets"
-TOKEN_FILE = SECRETS / "telegram_laptopclaude_bot_token"   # @oOLaptopClaude_Bot (trading_command)
+TOKEN_FILE = SECRETS / "telegram_grok_bot_token"   # @MoneyFlowz_Bot = quiz-only lane (fleet fn `quiz`, 2026-09-28)
 CHAT_FILE  = SECRETS / "telegram-chat-id.txt"
 ET     = ZoneInfo("America/New_York")
 LETTERS = ["A", "B", "C", "D"]

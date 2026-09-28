@@ -34,7 +34,7 @@ import theo  # noqa: E402
 
 SEC = Path.home() / ".openclaw" / "secrets"
 STATE = Path.home() / ".openclaw" / "data" / "options_quiz_state.json"
-TOKEN_FILE = SEC / "telegram_laptopclaude_bot_token"
+TOKEN_FILE = SEC / "telegram_grok_bot_token"   # quiz-only lane @MoneyFlowz_Bot (2026-09-28)
 CHAT_FILE = SEC / "telegram-chat-id.txt"
 JOURNAL = Path("/AIWorkWSL/trading/signals/option-scraper/data/paper_trades.json")
 DATA = "https://data.alpaca.markets"      # read-only market DATA (not an account) — options mark only
@@ -287,7 +287,7 @@ def main() -> int:
     except Exception:
         st = {}
     cur = st.get("current")
-    if cur and not DRY and (time.time() - cur.get("asked_at", 0)) < 48 * 3600:   # unanswered → hold 48h (2026-09-28)
+    if cur and not DRY and os.environ.get("FORCE") != "1" and (time.time() - cur.get("asked_at", 0)) < 48 * 3600:   # unanswered → hold 48h (2026-09-28)
         print("[live-quiz] last rep still unanswered (<48h) — skipping to avoid a pile-up")
         return 0
 
