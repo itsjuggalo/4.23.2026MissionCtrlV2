@@ -58,7 +58,9 @@ def quality_block(d: datetime | None = None) -> str:
             "\n".join(why[:6]))
 
 
-def lookahead_block(days: int, d: datetime | None = None) -> str:
+def lookahead_block(days: int, d: datetime | None = None, compact: bool = False) -> str:
+    """compact=True (the 1st-of-month morning packet): each aspect only on the day it first comes
+    into orb, days with nothing new skipped, then the best and hardest days by sky quality."""
     d = (d or datetime.now(T.ET)).replace(hour=12, minute=0)
     try:
         import svehla
@@ -66,15 +68,29 @@ def lookahead_block(days: int, d: datetime | None = None) -> str:
     except Exception:
         fit = lambda *a, **k: ""  # noqa: E731
     lines = [f"📅 NEXT {days} DAYS — transits to your chart (slow bodies first)", ""]
-    seen, best_day, best_n = set(), None, -1
+    seen, best_day, best_n, qual = set(), None, -1, []
     for i in range(days):
         dd = d + timedelta(days=i)
         hits = day_hits(dd)
         if not hits:
             continue
         n, _ = score(dd)
+        qual.append((n, dd))
         if len(hits) > best_n:
             best_n, best_day = len(hits), dd
+        if compact:
+            new = [h for h in hits if (h["t"], h["n"], h["aspect"]) not in seen]
+            seen.update((h["t"], h["n"], h["aspect"]) for h in hits)
+            asc_t = {h["t"] for h in hits if h["n"] == "ASC"}
+            new = [h for h in new if not (h["n"] == "DSC" and h["t"] in asc_t)]   # DSC = the ASC axis
+            if not new:
+                continue
+            lines.append(f"{dd:%a %b %-d} · quality {n}/10")
+            for h in new[:3]:
+                name = f"{h['t']} {h['aspect']} natal {h['n']}"
+                lab = fit(h["t"], h["n"], dd.date()).split(":")[0]
+                lines.append(f"  {GLYPH[h['aspect']]} {name}" + (f" — {lab}" if lab and lab.lower() != name.lower() else ""))
+            continue
         lines.append(f"{dd:%a %b %-d} · quality {n}/10")
         for h in hits[:4]:
             key = (h["t"], h["n"], h["aspect"])
@@ -82,6 +98,13 @@ def lookahead_block(days: int, d: datetime | None = None) -> str:
             seen.add(key)
             f = fit(h["t"], h["n"], dd.date())
             lines.append(f"  {GLYPH[h['aspect']]} {h['t']} {h['aspect']} natal {h['n']} (orb {h['orb']}°){tag}" + (f" — {f.split(':')[0]}" if f else ""))
+    if compact and qual:
+        top = sorted(qual, key=lambda x: (-x[0], x[1]))[:3]
+        low = sorted(qual, key=lambda x: (x[0], x[1]))[:3]
+        lines.append("")
+        lines.append("✅ Best days: " + ", ".join(f"{dd:%a %b %-d} ({n})" for n, dd in sorted(top, key=lambda x: x[1])))
+        lines.append("🛑 Hardest days: " + ", ".join(f"{dd:%a %b %-d} ({n})" for n, dd in sorted(low, key=lambda x: x[1])))
+        return "\n".join(lines)
     if best_day:
         lines.append(""); lines.append(f"Peak day: {best_day:%a %b %-d} ({best_n} aspects in orb). /explain on the day for the full read.")
     return "\n".join(lines)

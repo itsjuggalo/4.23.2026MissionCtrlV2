@@ -162,7 +162,7 @@ def upcoming(d: date | None = None, n: int = 3) -> list[dict]:
     return [w for w in load_windows() if w["_start"] > d][:n]
 
 
-def daily_block(d: date | None = None) -> str:
+def daily_block(d: date | None = None, skip: set | None = None) -> str:
     """Compact block appended to the morning transit send."""
     d = d or today_et()
     act, nxt = active(d), upcoming(d, 1)
@@ -185,9 +185,11 @@ def daily_block(d: date | None = None) -> str:
     for w in nxt:
         lines.append(f"⏭ Next: {w['title']} — {w['_start']:%b %-d %Y} ({(w['_start'] - d).days}d).")
     for h in exact_soon(d, 3):
+        if skip and h["what"] in skip:      # already a top hit in the same message
+            continue
         when = "TODAY" if h["in"] == 0 else f"in {h['in']}d"
         fit = fit_for_exact(h["what"], d)
-        lines.append(f"⏰ Exact {when}: {h['what']}." + (f" ↳ {fit}." if fit else ""))
+        lines.append(f"⏰ Exact {when}: {h['what']}." + (f" ↳ {fit.rstrip('.')}." if fit else ""))
     for w in [w for w in load_windows() if w["_end"] == d - timedelta(days=1)]:
         lines.append(retrospective(w, d))
     return "\n".join(lines)

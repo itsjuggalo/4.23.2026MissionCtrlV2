@@ -12,7 +12,7 @@ import argparse
 import json
 import subprocess
 import sys
-from datetime import datetime, timezone
+from datetime import datetime, timedelta, timezone
 from pathlib import Path
 from zoneinfo import ZoneInfo
 
@@ -36,6 +36,7 @@ PLANETS = [("Sun", swe.SUN), ("Moon", swe.MOON), ("Mercury", swe.MERCURY),
            ("Neptune", swe.NEPTUNE), ("Pluto", swe.PLUTO),
            # 2026-09-14: the bodies Mike's astrologer (Svehla) actually reads
            ("Chiron", swe.CHIRON), ("Ceres", swe.CERES), ("Juno", swe.JUNO)]
+BODY_IDS = dict(PLANETS)
 # Slow Uranian points — natal-only (as transits they'd sit in orb for years)
 NATAL_ONLY = [("Hades", swe.HADES), ("Apollon", swe.APOLLON)]
 
@@ -172,14 +173,48 @@ def main() -> int:
         moon_note = " " + _mt.split(": ", 1)[-1].split(" (Esoteric:")[0] if _mt else " — where today's feelings live."
     except Exception:
         moon_note = " — where today's feelings live."
+    # the KB line opens "For about two and a half days" whatever day of the transit it is —
+    # swap in when the Moon actually leaves this house (10-min steps, bisected to the minute)
+    try:
+        step, j = 10 / 1440, jd
+        while whole_sign_house(swe.calc_ut(j + step, swe.MOON)[0][0], asc) == mh and j - jd < 4:
+            j += step
+        lo, hi = j, j + step
+        for _ in range(6):
+            mid = (lo + hi) / 2
+            lo, hi = (mid, hi) if whole_sign_house(swe.calc_ut(mid, swe.MOON)[0][0], asc) == mh else (lo, mid)
+        leave = now_et + timedelta(days=hi - jd)
+        until = (f"Until {leave:%-I:%M %p} today" if leave.date() == now_et.date()
+                 else f"Until {leave:%a %-I:%M %p} ET")
+        if "For about two and a half days, " in moon_note:
+            moon_note = moon_note.replace("For about two and a half days, ", until + ", ")
+            moon_note = moon_note.replace(" for a day or two", "")
+        else:
+            moon_note += f" ({until.lower()})"
+    except Exception:
+        pass
     lines = [f"🌌 DAILY TRANSITS — {now_et:%a %b %-d}",
              f"☽ Moon in {SIGNS[int(moon['lon'] // 30)]}, your {ordinal(mh + 1)} house "
              f"({HOUSE_LIFE[mh]}).{moon_note}"]
 
     rx = [n for n, v in trans.items() if v["speed"] < 0 and n not in ("Sun", "Moon")]
-    if rx:
-        lines.append("↩ Retrograde: " + ", ".join(rx) +
-                     (" — double-check orders/messages before sending." if "Mercury" in rx else ""))
+    # 2026-09-27 (Mike): the full retrograde list barely changes day to day — the morning send
+    # only names a STATION (a planet turning within ±1 day); /full keeps the whole list
+    stations = []
+    for n in trans:
+        if n in ("Sun", "Moon") or n not in BODY_IDS:
+            continue
+        try:
+            before, after = (swe.calc_ut(jd + k, BODY_IDS[n])[0][3] for k in (-1, 1))
+        except swe.Error:
+            continue
+        if (before < 0) != (after < 0):
+            stations.append(f"{n} turns {'retrograde' if after < 0 else 'direct'}")
+    if stations:
+        lines.append("↩ Station: " + "; ".join(stations) + " (within a day) — the planet's theme is loudest now." +
+                     (" Double-check messages before sending." if any(x.startswith("Mercury turns retro") for x in stations) else ""))
+    elif args.full and rx:
+        lines.append("↩ Retrograde: " + ", ".join(rx))
 
     if args.explain:
         # /explain — the full four-level read (aspect · houses · signs · esoteric) of every hit
@@ -197,16 +232,27 @@ def main() -> int:
             out.append("No tight aspects today. /planet /sign /house /aspect for the lexicon.")
         print("\n".join(out)); return 0
 
+    shown = {(h["t"], h["aspect"], h["n"]) for h in hits[:3]}    # the digest keeps these three
+    try:
+        import astro_timeline
+        near = {(e["body"], e.get("aspect"), e.get("natal")): e for e in astro_timeline.near_events(now_et.date())
+                if e["kind"] == "aspect"}
+    except Exception:
+        near = {}
     if hits:
         lines.append("")
         seen_fit = set()
         for i, h in enumerate(hits[:5]):
-            verb = {"easy": "supports", "hard": "pressures", "fused": "amplifies"}[h["quality"]]
+            verb = {"easy": "lends {} to", "hard": "puts {} on", "fused": "fuses {} with"}[h["quality"]].format(THEME[h["t"]])
             th = whole_sign_house(trans[h["t"]]["lon"], asc) + 1
             nh = whole_sign_house(natal[h["n"]], asc) + 1
             lines.append(f"{h['glyph']} {h['t']} (in {SIGNS[int(trans[h['t']]['lon'] // 30)]}, your {ordinal(th)}) "
-                         f"{h['aspect']} natal {h['n']} (your {ordinal(nh)}) · orb {h['orb']:.1f}° — "
-                         f"{THEME[h['t']].capitalize()} {verb} {NATAL_PT[h['n']]}.")
+                         f"{h['aspect']} natal {h['n']} (your {ordinal(nh)}) · orb {h['orb']:.1f}°"
+                         + (lambda e: f" · exact {astro_timeline.rel_day(e['date'], now_et.date())}"
+                            + (f", pass {e['pass']}{' ℞' if e.get('rx') else ''}" if e.get("pass") else "")
+                            if e else "")(near.get((h["t"], h["aspect"], h["n"])) if i < 3 else None)
+                         + " — "
+                         f"{verb.capitalize()} {NATAL_PT[h['n']]}.")
             if i < 3:   # the three tightest/slowest get the personal + esoteric read inline
                 lines.append("   " + lex.explain_hit(h, trans[h["t"]]["lon"], natal[h["n"]], asc).replace("\n", "\n   "))
             fit = svehla.fit_for(h["t"], h["n"], now_et.date())
@@ -271,8 +317,10 @@ def main() -> int:
         pname = ["new", "crescent", "first quarter", "gibbous", "full", "disseminating", "last quarter", "balsamic"][int(((el + 22.5) % 360) // 45)]
         ent = lex.kb_entry(f"Moon phase {pname}")
         if ent:
-            lines.append(f"\n🌘 Moon phase: {pname} ({el:.0f}°) — {ent.get('translation', '')}"
-                         + (f" Do: {ent['do']}" if ent.get("do") else ""))
+            icon = dict(zip(["new", "crescent", "first quarter", "gibbous", "full", "disseminating", "last quarter", "balsamic"],
+                            "🌑🌒🌓🌔🌕🌖🌗🌘"))[pname]
+            lines.append(f"\n{icon} Moon phase: {pname} ({el:.0f}°) — {ent.get('translation', '')}"
+                         + (f" → {ent['do']}" if ent.get("do") else ""))
     except Exception as e:
         lines.append(f"\n🌘 (moon phase unavailable: {e})")
 
@@ -295,7 +343,7 @@ def main() -> int:
     # round 8: dated timeline — what goes exact / changes house within ±2 days, researched meaning attached
     try:
         import astro_timeline
-        tb = astro_timeline.today_block(now_et.date())
+        tb = astro_timeline.today_block(now_et.date(), skip=shown)
         if tb:
             lines.append("\n" + tb)
     except Exception as e:
@@ -303,7 +351,7 @@ def main() -> int:
 
     # 2026-09-14: the Aug 2026 Svehla reading — active windows + what's next
     try:
-        sv = svehla.daily_block(now_et.date())
+        sv = svehla.daily_block(now_et.date(), skip={f"Transiting {t} exactly {a} natal {n}" for t, a, n in shown})
         if sv:
             lines.append("\n" + sv)
     except Exception as e:      # never let the reading layer kill the send
@@ -318,9 +366,10 @@ def main() -> int:
                      f"(natal · texts · NASA Horizons · Svehla dates · output) {when} ET")
     except Exception:
         lines.append("\n⚠️ no verification stamp — run astro_verify.py --all")
-    lines.append(f"☉ {sign_deg(trans['Sun']['lon'])} · /explain for the full read · /dates · /progressed · /planet /sign /house /aspect")
     msg = "\n".join(lines)
     out = msg if (args.full or len(msg) <= 3900) else digest(msg)
+    if not args.full:
+        out += "\n\n" + LIVE_LINE
     print(out)
     if args.send:
         for chunk in chunk_message(out):          # Telegram caps a message at 4096 chars
@@ -329,6 +378,7 @@ def main() -> int:
     return 0
 
 
+LIVE_LINE = "📖 Full read + 30-day timeline: https://claudeclaw.serveftp.com/astrology/mike-today-live.html"
 DIGEST_KEEP = ("🌌", "🎚", "🌘", "⏳", "🗓", "📜", "✔", "⚠️", "☉")
 
 
@@ -356,12 +406,11 @@ def digest(msg: str, max_hits: int = 3) -> str:
             more = n - max_hits
             out.append("\n".join(head + kept + ([f"   … +{more} more hit{'s' if more > 1 else ''} in /full"] if more > 0 else [])))
             continue
-        if any(first.startswith(k) for k in DIGEST_KEEP):
+        if any(first.startswith(k) for k in DIGEST_KEEP) or " Moon phase:" in para[:16]:
             out.append(para)
-    out.append("📖 /full — the complete read (esoteric, sky events, patterns, Uranian dial)")
     d = "\n\n".join(out)
     if len(d) > 3900:                               # still long: drop the timing + moon-phase paragraphs
-        d = "\n\n".join(p for p in out if not p.lstrip().startswith(("⏳", "🌘")))
+        d = "\n\n".join(p for p in out if not (p.lstrip().startswith("⏳") or " Moon phase:" in p[:16]))
     return d
 
 

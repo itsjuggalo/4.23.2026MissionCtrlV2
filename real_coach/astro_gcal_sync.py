@@ -24,6 +24,51 @@ TOKEN = Path.home() / ".config/calendar/token.json"
 CAL_ID = "primary"
 COLOR_WINDOW, COLOR_EXACT, COLOR_TIMELINE = "3", "9", "7"     # grape / blueberry / peacock in Google's palette
 DRY = "--dry" in sys.argv
+PARTIAL = False          # set when a layer failed to build — never prune on a partial wanted() set
+PRUNE_CAP = 40           # refuse to delete more than this in one run unless --force
+
+
+def _sig(summary: str) -> tuple | None:
+    """What an event is ABOUT, so the same sky event from two layers collapses to one calendar entry.
+    Returns (kind, *fields) — dates are matched separately (±1 day)."""
+    import re
+    t = summary[2:].strip()
+    m = re.match(r"(?:Transiting )?(\w+) exactly (conjunct|square|opposite|trine|sextile) (?:your )?natal (\w+)", t)
+    if m:
+        return ("asp",) + m.groups()
+    m = re.search(r"(?:Transiting |Progressed )?(\w+) (?:enters|backs into) (\w+)", t)
+    if m and m.group(2) in svehla_signs():
+        return ("ing",) + m.groups()
+    m = re.search(r"(?:Transiting )?(\w+) (?:crosses into|backs into|in) your (?:natal )?(\d+)(?:st|nd|rd|th) house", t)
+    if m:
+        return ("house",) + m.groups()
+    return None
+
+
+def svehla_signs() -> set:
+    return {"Aries", "Taurus", "Gemini", "Cancer", "Leo", "Virgo", "Libra", "Scorpio", "Sagittarius",
+            "Capricorn", "Aquarius", "Pisces"}
+
+
+def _dedupe(out: dict[str, dict]) -> dict[str, dict]:
+    """Keep one entry per sky event: 🔮 reading window > 🗓 timeline (carries pass + meaning) > ⏰ exact.
+    Also: an eclipse 'conjunct your natal DSC' is the same point as 'opposite your natal ASC'."""
+    rank = {"🔮": 0, "🗓": 1, "⏰": 2}
+    items = sorted(out.items(), key=lambda kv: rank.get(kv[1]["summary"][:1], 3))
+    kept: dict[str, dict] = {}
+    seen: list[tuple] = []
+    for uid, b in items:
+        d = date.fromisoformat(b["start"]["date"])
+        sig = _sig(b["summary"])
+        if sig and any(sig == s2 and abs((d - d2).days) <= 1 for s2, d2 in seen):
+            continue
+        if "natal DSC" in b["summary"] and "eclipse" in b["summary"].lower() and any(
+                k["start"]["date"] == b["start"]["date"] and "opposite your natal ASC" in k["summary"] for k in out.values()):
+            continue
+        if sig:
+            seen.append((sig, d))
+        kept[uid] = b
+    return kept
 
 
 def wanted() -> dict[str, dict]:
@@ -50,7 +95,7 @@ def wanted() -> dict[str, dict]:
     # progressed-Moon changes, transits to progressed points, sky-to-sky. Skips fast-asteroid noise.
     try:
         import astro_timeline
-        for e in astro_timeline.load():
+        for e in astro_timeline._merge_angles(astro_timeline.load()):
             k = e["kind"]
             keep = (k in ("eclipse", "sky", "to_progressed")
                     or (k in ("sign", "house") and e["body"] in ("Jupiter", "Saturn", "Uranus", "Neptune", "Pluto", "Chiron"))
@@ -72,7 +117,10 @@ def wanted() -> dict[str, dict]:
                 "colorId": COLOR_TIMELINE,
             }
     except Exception as ex:
+        global PARTIAL
+        PARTIAL = True
         print(f"[timeline skipped: {ex}]", file=sys.stderr)
+    out = _dedupe(out)
     for v in out.values():
         v["transparency"] = "transparent"
         v["reminders"] = {"useDefault": False, "overrides": [{"method": "popup", "minutes": 3 * 24 * 60}]}
@@ -114,7 +162,8 @@ def main() -> int:
         if not page:
             break
     ins = upd = same = 0
-    for uid, body in wanted().items():
+    want = wanted()
+    for uid, body in want.items():
         body["extendedProperties"] = {"private": {"svehla": "1", "svehla_uid": uid}}
         e = existing.get(uid)
         if e is None:
@@ -128,7 +177,20 @@ def main() -> int:
                 _do(lambda: svc.events().patch(calendarId=CAL_ID, eventId=e["id"], body=body).execute())
         else:
             same += 1
-    print(f"gcal sync{' (dry)' if DRY else ''}: {ins} inserted, {upd} updated, {same} unchanged, {len(existing)} were already there")
+    # prune: events THIS sync created (svehla=1 tag) that are no longer wanted — e.g. duplicates collapsed
+    stale = [e for uid, e in existing.items() if uid not in want]
+    pruned = 0
+    if stale and PARTIAL:
+        print(f"prune skipped: a layer failed to build ({len(stale)} would have been removed)")
+    elif len(stale) > PRUNE_CAP and "--force" not in sys.argv:
+        print(f"prune refused: {len(stale)} > cap {PRUNE_CAP} (re-run with --force after checking --dry)")
+    else:
+        for e in stale:
+            print(f"  prune {e['start'].get('date')} {e.get('summary', '')[:90]}")
+            if not DRY:
+                _do(lambda e=e: svc.events().delete(calendarId=CAL_ID, eventId=e["id"]).execute())
+            pruned += 1
+    print(f"gcal sync{' (dry)' if DRY else ''}: {ins} inserted, {upd} updated, {same} unchanged, {pruned} pruned, {len(existing)} were already there")
     return 0
 
 

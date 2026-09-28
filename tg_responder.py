@@ -131,7 +131,18 @@ BOTS = {
             "Eastern Time. Short, warm, plain-text for Telegram — no markdown headers or tables. "
             "Mike has ADD: lead with the read, then at most 5 tight lines."
         ),
+        # 2026-09-27 (Mike: trim the menu — 0 commands used since ≥09-20): short /help,
+        # the full list lives behind /help all. Every command still works when typed.
         "help": (
+            "🔮 Astrology — your chart, and only your chart. The 8:32 message comes to you daily.\n"
+            "• /transits — today's read · /full — the complete version\n"
+            "• /week — the coming 7 days · /timeline — dated hits ahead\n"
+            "• /dates — your Aug 2026 reading: what's active, what's next\n"
+            "• /wheel — chart image · /note <text> — journal what happened\n"
+            "• Live page: https://claudeclaw.serveftp.com/astrology/mike-today-live.html\n"
+            "Or just ask in plain words. /help all = every command (40+)."
+        ),
+        "help_all": (
             "🔮 Astrology — your chart, and only your chart.\n"
             "• /transits — today's REAL transits vs your natal (Swiss Ephemeris)\n"
             "• /chart — your natal placements at a glance\n"
@@ -145,7 +156,7 @@ BOTS = {
             "• /tnp — the 8 transneptunian points (Hades, Apollon…) natal + 90° dial hits · /midpoints — planetary pictures now · /critical — anything on a critical/anaretic degree · /startransits — planets on fixed stars today\n"
             "• /profection — your time-lord year and month · /hours — today's planetary hours (Dunedin) · /firdaria — your Persian time-lord periods (tropical)\n"
             "• /full — today's complete read (the 8:32 send is a one-message digest) · /alerts — what goes exact in the next 24h (hourly pushes run 8am–10pm) · /evidence — your notes and scores vs the sky\n"
-            "• Live page: http://127.0.0.1:3141/astrology/mike-today-live.html (regenerated 08:40 ET)\n"
+            "• Live page: https://claudeclaw.serveftp.com/astrology/mike-today-live.html (log in once; regenerated 08:30 ET)\n"
             "• /timeline [days] [full] — every exact hit, house change, progression and eclipse ahead, dated from the real ephemeris · /year — 12 months in one screen\n"
             "• /sky — lunations, eclipses, stations, ingresses, Mercury rx + shadow, in your houses · /voc\n"
             "• /solarreturn · /lunarreturn · /phase (progressed lunation phase) · /solararc\n"
@@ -572,6 +583,8 @@ def run_bot(botkey):
                 if str(chat_id) not in owners:
                     print(f"ignored non-owner {chat_id}", flush=True); continue
                 if text.startswith(("/help", "/start")):
+                    if cfg.get("help_all") and text.split()[1:2] == ["all"]:
+                        send_reply(chat_id, cfg["help_all"]); continue
                     tg("sendMessage", chat_id=chat_id, text=help_txt); continue
                 # Quantum pipeline picks — instant, deterministic, zero-bloat (no LLM).
                 cmd0 = text.split()[0].lower()

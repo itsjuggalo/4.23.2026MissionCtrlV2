@@ -69,6 +69,7 @@ def claims(text: str) -> list[dict]:
     #    "(pass 2 of 3, retrograde)" describe the TRANSITING body on the event date, not the
     #    natal point just before them; check_pass_numbers() verifies those independently.
     rx_text = re.sub(r"\(pass \d+ of \d+(?:, retrograde)?\)", "", text)
+    rx_text = re.sub(r"\bturns (retrograde|direct)\b", "stations", rx_text)   # a station line, not a state claim
     for m in re.finditer(rf"\b(natal|progressed)?\s*{BODY_RX}\b{NB}{{0,20}}?\b(retrograde|℞|rx)\b", rx_text, re.I):
         out.append({"kind": "rx", "q": (m.group(1) or "").lower(), "body": norm_body(m.group(2)), "text": m.group(0)})
     return out

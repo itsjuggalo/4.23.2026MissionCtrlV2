@@ -13,7 +13,7 @@ CLI: astro_timeline.py [next N]  → chronological list (default 30 days)
      astro_timeline.py key "<key>"→ show the researched entry for a key
 """
 from __future__ import annotations
-import json, sys
+import json, re, sys
 from datetime import date, datetime, timedelta
 from pathlib import Path
 import swisseph as swe
@@ -276,7 +276,15 @@ def load(max_age_days: int = 30) -> list[dict]:
 
 
 # ── rendering ─────────────────────────────────────────────────────────────────
+def _sentence_case(s: str) -> str:
+    return re.sub(r"(^|[.!?]\s+)([a-z])", lambda m: m.group(1) + m.group(2).upper(), s)
+
+
 def _meaning(e: dict, full: bool = False) -> str:
+    return _sentence_case(_meaning_raw(e, full))
+
+
+def _meaning_raw(e: dict, full: bool = False) -> str:
     """Researched translation for the event key (or alt_key), else the lexicon combo, else ''."""
     ent = lex.kb_entry(e.get("key", "")) or lex.kb_entry(e.get("alt_key", ""))
     if ent:
@@ -344,7 +352,7 @@ def _fmt_date(s: str) -> str:
 def upcoming_block(d: date | None = None, days: int = 30, full: bool = False, limit: int = 40) -> str:
     d = d or datetime.now(T.ET).date()
     end = d + timedelta(days=days)
-    ev = [e for e in load() if d.isoformat() <= e["date"] <= end.isoformat()]
+    ev = _merge_angles([e for e in load() if d.isoformat() <= e["date"] <= end.isoformat()])
     lines = [f"🗓 TIMELINE — next {days} days from {d.strftime('%b %-d')} (real ephemeris, Placidus)"]
     if not ev:
         lines.append("Nothing exact in this window.")
@@ -356,16 +364,45 @@ def upcoming_block(d: date | None = None, days: int = 30, full: bool = False, li
     return "\n".join(lines)
 
 
-def today_block(d: date | None = None, window: int = 2) -> str:
-    """Events exact within ±window days — for the daily send."""
-    d = d or datetime.now(T.ET).date()
+ANGLE_CUSP = {("ASC", "conjunct"): 1, ("ASC", "opposite"): 7, ("MC", "conjunct"): 10, ("MC", "opposite"): 4}
+
+
+def _merge_angles(ev: list[dict]) -> list[dict]:
+    house = {(e["date"], e["body"], e["key"].split(" the ")[-1].split()[0]): e for e in ev if e["kind"] == "house"}
+    out = []
+    for e in ev:
+        cusp = ANGLE_CUSP.get((e.get("natal"), e.get("aspect"))) if e["kind"] == "aspect" else None
+        h = house.get((e["date"], e["body"], T.ordinal(cusp))) if cusp else None
+        if h:
+            if e.get("pass") and "(pass" not in h["what"]:
+                h = {**h, "what": h["what"] + f" (pass {e['pass']}{', retrograde' if e.get('rx') else ''})"}
+                house[(e["date"], e["body"], T.ordinal(cusp))] = h
+            continue
+        out.append(e)
+    return [house.get((e["date"], e["body"], e["key"].split(" the ")[-1].split()[0]), e) if e["kind"] == "house" else e for e in out]
+
+
+def near_events(d: date, window: int = 2) -> list[dict]:
     lo, hi = (d - timedelta(days=window)).isoformat(), (d + timedelta(days=window)).isoformat()
-    ev = [e for e in load() if lo <= e["date"] <= hi]
+    return _merge_angles([e for e in load() if lo <= e["date"] <= hi])
+
+
+def rel_day(s: str, d: date) -> str:
+    n = (date.fromisoformat(s) - d).days
+    return {0: "today", -1: "yesterday", 1: "tomorrow"}.get(n, _fmt_date(s))
+
+
+def today_block(d: date | None = None, window: int = 2, skip: set | None = None) -> str:
+    """Events exact within ±window days — for the daily send. `skip` = {(body, aspect, natal)}
+    already shown as a top hit (their pass/date ride on that line instead of repeating here)."""
+    d = d or datetime.now(T.ET).date()
+    ev = [e for e in near_events(d, window)
+          if not (skip and (e["body"], e.get("aspect"), e.get("natal")) in skip)]
     if not ev:
         return ""
     lines = ["🗓 Exact this week (timeline):"]
     for e in ev[:6]:
-        when = "today" if e["date"] == d.isoformat() else _fmt_date(e["date"])
+        when = rel_day(e["date"], d)
         m = _meaning(e)
         lines.append(f"{_glyph(e)} {when}: {e['what']}" + (f" — {m}" if m else ""))
     return "\n".join(lines)
