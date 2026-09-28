@@ -3,7 +3,7 @@
 watchlist, from Alpaca daily bars (IEX feed, free).
 
 Replaces the Promotion Gate slot on the Command Center with something a trader
-can act on: for each symbol — trend, RSI, a pullback BUY ZONE (EMA21 ± 0.4*ATR),
+can act on: for each symbol — trend, RSI, a pullback ENTRY ZONE (EMA21 ± 0.4*ATR),
 the breakout trigger (20d high), and a one-line plain-English verdict
 ("at entry zone" / "extended — wait for $X" / "downtrend — no edge").
 
@@ -219,9 +219,10 @@ if __name__ == "__main__":
     import subprocess
     for r in rows:
         if r["status"] == "AT ENTRY" and prev.get(r["sym"]) not in (None, "AT ENTRY"):
-            msg = (f"🎯 {r['sym']} ENTERED the buy zone ${r['entryLo']}–${r['entryHi']} "
+            msg = (f"🎯 {r['sym']} ENTERED the entry zone ${r['entryLo']}–${r['entryHi']} "
                    f"(now ${r['price']}, RSI {r['rsi']}, was {prev.get(r['sym'])})\n"
-                   f"{r['note']}\nStop ref ${r['stopRef']} — plan the entry, don't chase.")
+                   f"{r['note']}\nStop ref ${r['stopRef']} — entry zone reached "
+                   f"(evidence, not a trade call).")
             try:
                 subprocess.run([os.path.join(HOME, "bin", "tg-send-msg"), msg],
                                timeout=20, check=False)

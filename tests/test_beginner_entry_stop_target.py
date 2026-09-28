@@ -115,7 +115,7 @@ def test_btc_card_is_priced_in_fractions_not_shares():
 def test_btc_has_all_three_prices_correctly_ordered():
     s = _btc()
     out = SS.card(s, 285.0)
-    assert "1) BUY" in out and "2) SELL" in out and "3) SELL" in out
+    assert "1) Entry ref" in out and "2) Stop ref" in out and "3) Target ref" in out
     assert s["stop"] < s["trig"] < s["target"]
 
 
@@ -140,7 +140,7 @@ def test_btc_short_never_tells_a_beginner_to_short_spot():
     actionable via the inverse ETF — but it must STILL never imply shorting spot BTC, which
     a normal Robinhood account cannot do."""
     out = SS.card(_btc(tag="ETF-OUT", dir="SHORT", gap=-2.4), 285.0)
-    assert "1) BUY BTC" not in out and "BTC," not in out, "must not size a spot BTC short"
+    assert "1) Entry ref BTC" not in out and "BTC," not in out, "must not size a spot BTC short"
     assert ("SKIP" in out) or (SS.INVERSE_BTC in out), \
         "a bearish read is either refused or routed to the inverse ETF — never left dangling"
 
@@ -150,7 +150,7 @@ def test_btc_sms_fits_with_six_figure_prices():
     s = _btc()
     out = SS.fit_sms("09:20 — here's one you can take.", SS.card(s, 285.0), 2)
     assert len(out) <= SS.SMS_MAX
-    for tag in ("1) BUY", "2) SELL", "3) SELL"):
+    for tag in ("1) Entry ref", "2) Stop ref", "3) Target ref"):
         assert tag in out
 
 
@@ -244,7 +244,7 @@ def test_bearish_btc_offers_the_inverse_etf_not_a_shrug():
     if "SKIP" in out:                       # acceptable only when BITI can't be priced
         return
     assert SS.INVERSE_BTC in out
-    assert "1) BUY" in out and "2) SELL" in out and "3) SELL" in out
+    assert "1) Entry ref" in out and "2) Stop ref" in out and "3) Target ref" in out
     assert s.get("takeable"), "a priced inverse plan must count as takeable"
 
 
@@ -264,11 +264,11 @@ def test_inverse_plan_prices_are_ordered_and_capped():
     if lines is None:
         return
     import re
-    px = float(re.search(r"BUY BITI at \$([\d.]+)", "\n".join(lines)).group(1))
-    stop = float(re.search(r"2\) SELL at \$([\d.]+)", "\n".join(lines)).group(1))
-    targ = float(re.search(r"3\) SELL at \$([\d.]+)", "\n".join(lines)).group(1))
+    px = float(re.search(r"Entry ref BITI \$([\d.]+)", "\n".join(lines)).group(1))
+    stop = float(re.search(r"2\) Stop ref \$([\d.]+)", "\n".join(lines)).group(1))
+    targ = float(re.search(r"3\) Target ref \$([\d.]+)", "\n".join(lines)).group(1))
     assert stop < px < targ, f"{stop} / {px} / {targ} out of order"
-    loss = float(re.search(r"you lose \$(\d+)", "\n".join(lines)).group(1))
+    loss = float(re.search(r"risk \$(\d+)", "\n".join(lines)).group(1))
     assert loss <= 285.0, f"risk ${loss} exceeds the cap"
 
 
