@@ -30,6 +30,12 @@ import collections, json, os, subprocess, threading, time, sys
 from pathlib import Path
 import requests
 
+# 2026-09-27: every local date/time in this process (and its subprocesses) is Eastern Time,
+# whatever PM2 injected (a corrupted TZ string made glibc fall back to UTC, so the astrology
+# "today" rolled over at 8 PM ET).
+os.environ["TZ"] = "America/New_York"
+time.tzset()
+
 SECRETS    = Path.home() / ".openclaw/secrets"
 CLAUDE_BIN = str(Path.home() / ".local/bin/claude")
 CLAUDE_CWD = str(Path.home())
@@ -106,12 +112,11 @@ BOTS = {
             "You are Astrology — Mike's personal astrologer, and ONLY that. You never give "
             "trading picks, sizing, or market calls; if asked, say astrology only and point him "
             "to Trading Command.\n"
-            "Mike's natal chart (Nov 3 1992, 10:46 PM EST, Dunedin FL): Sun 11-12° Scorpio 4H "
-            "(Pluto in Scorpio nearby), Moon 1° Pisces 8H, Cancer ASC 27°, Mars 23° Cancer in the 12th "
-            "conjunct the Ascendant, Mercury + Venus in Sagittarius 5H, Saturn in Aquarius 7H, Uranus + "
-            "Neptune in Capricorn 6H, Jupiter in Libra 3H, Chiron in Leo 2H, Juno 11° Cancer 12H, MC 19° Aries. "
-            "PLACIDUS houses (Svehla's system). Every answer you give is fact-checked against the "
-            "ephemeris afterwards — never invent a degree, house or aspect.\n"
+            "Mike's chart (Nov 3 1992, 10:46 PM EST, Dunedin FL) and every live position, aspect, "
+            "exact time, pass and progression arrive in the COMPUTED FACTS block at the top of each "
+            "message — that block is the only source of chart facts; anything not in it is UNAVAILABLE "
+            "(say which /command computes it). PLACIDUS houses (Svehla's system). Every answer is "
+            "fact-checked against the ephemeris afterwards — never invent a degree, house or aspect.\n"
             "REAL ephemeris, never guesswork: run `~/.venv/bin/python "
             "~/scripts/real_coach/daily_transits.py` (no --send) for today's true transits, and "
             "read his existing readings in ~/agents/claudeclaw/data/astrology/mike-*.html "
@@ -135,16 +140,24 @@ BOTS = {
         # the full list lives behind /help all. Every command still works when typed.
         "help": (
             "🔮 Astrology — your chart, and only your chart. The 8:32 message comes to you daily.\n"
-            "• /transits — today's read · /full — the complete version\n"
-            "• /week — the coming 7 days · /timeline — dated hits ahead\n"
-            "• /dates — your Aug 2026 reading: what's active, what's next\n"
-            "• /wheel — chart image · /note <text> — journal what happened\n"
+            "• /today — today's read · /full — every live transit + why it ranks\n"
+            "• /week — themes + every exact of the next 7 days · /timeline — dated hits ahead\n"
+            "• /progressions — your progressed Moon/Venus + next changes\n"
+            "• /synastry <name> · /progsyn <name> — charts compared (needs /profile add first)\n"
+            "• /moon — the Moon's sign + phase vs your placements · /moonguide — all 12 signs + 8 phases\n"
+            "• /dates — your Aug 2026 reading · /chart — natal placements · /wheel — image\n"
             "• Live page: https://claudeclaw.serveftp.com/astrology/readings/mike-today-live.html\n"
             "Or just ask in plain words. /help all = every command (40+)."
         ),
         "help_all": (
             "🔮 Astrology — your chart, and only your chart.\n"
-            "• /transits — today's REAL transits vs your natal (Swiss Ephemeris)\n"
+            "• /transits · /today — today's REAL transits vs your natal (Swiss Ephemeris)\n"
+            "• /week — the weekly read · /lookahead — day-by-day transits for 7 days\n"
+            "• /progressions — progressed Moon/Venus + next ingresses\n"
+            "• /moon — Moon sign + phase against your placements (auto-posted at every change) · /moonguide\n"
+            "• /profile add <name> <YYYY-MM-DD> <HH:MM|unknown> <place> · /profile list\n"
+            "• /synastry <name> [name2] — synastry (identity-labelled, unknown time → no angles)\n"
+            "• /progsyn <name> [name2] — progressed synastry, all four frames\n"
             "• /chart — your natal placements at a glance\n"
             "• /readings — what's in your astrology suite\n"
             "• /dates — your Aug 2026 reading's timeline, what's active now + what's next\n"
@@ -356,8 +369,9 @@ ASTRO_MODULE_CMDS = {
     "/phase":       ("astro_returns.py", ["phase"]), "/solararc":  ("astro_returns.py", ["arc"]),
     "/natal":       ("astro_patterns.py", ["patterns"]), "/natalaspects": ("astro_patterns.py", ["aspects"]),
     "/activation":  ("astro_patterns.py", ["activation"]), "/stars": ("astro_patterns.py", ["stars"]),
-    "/week":        ("astro_lookahead.py", ["week"]), "/month":    ("astro_lookahead.py", ["month"]),
+    "/week":        ("astro_weekly.py", []),      "/lookahead": ("astro_lookahead.py", ["week"]), "/month":    ("astro_lookahead.py", ["month"]),
     "/quality":     ("astro_lookahead.py", ["quality"]),
+    "/moon":        ("astro_moon.py", ["now"]),       "/moonguide": ("astro_moon.py", ["guide"]),
     "/full":        ("daily_transits.py", ["--full"]),   "/evidence": ("astro_evidence.py", []),
     "/alerts":      ("astro_alerts.py", ["--dry", "--window", "1440"]),
     "/timeline":    ("astro_timeline.py", []),         "/year":      ("astro_timeline.py", ["year"]),
@@ -366,19 +380,6 @@ ASTRO_MODULE_CMDS = {
     "/tnp":         ("astro_uranian.py", ["tnp"]),       "/midpoints": ("astro_uranian.py", ["midpoints"]),
     "/critical":    ("astro_uranian.py", ["critical"]),  "/startransits": ("astro_uranian.py", ["stars"]),
 }
-
-# Static natal card for the astrology lane's /chart (same data daily_transits.py computes from).
-NATAL_CARD = (
-    "🪐 MIKE'S NATAL CHART — Nov 3 1992, 10:46 PM EST, Dunedin FL\n"
-    "☉ Sun 11° Scorpio · 4th house (home base, intensity)\n"
-    "☽ Moon 1° Pisces · 8th house (the absorber)\n"
-    "ASC 27° Cancer with Mars conjunct the Ascendant (your engine)\n"
-    "☿ Mercury + ♀ Venus in Sagittarius · 5th (thinking, money style, speculation)\n"
-    "♄ Saturn in Aquarius · 7th (commitments) · ♃ Jupiter in Libra · 3rd (growth channel)\n"
-    "♅ Uranus + ♆ Neptune in Capricorn · 6th (inner engineer + mystic)\n"
-    "⚷ Chiron in Leo · 2nd (self-worth / money wound) · MC 19° Aries (career point)\n"
-    "Placidus houses (Svehla's system). /transits for today's live sky."
-)
 
 # One claude/codex CLI can pull ~0.5GB; with 6 lanes in one process, cap concurrent
 # LLM subprocess calls so a burst of DMs can't stack six of them.
@@ -410,9 +411,26 @@ def run_bot(botkey):
             return {"ok": False}
 
     def send_reply(chat_id, text):
+        """Plain text (always valid — no parse_mode), split on line boundaries under TG_MAX,
+        one retry per chunk on a transient failure."""
         text = text or "[empty]"
-        for i in range(0, len(text), TG_MAX):
-            r = tg("sendMessage", chat_id=chat_id, text=text[i:i + TG_MAX])
+        chunks, cur = [], ""
+        for ln in text.split("\n"):
+            while len(ln) > TG_MAX - 96:                     # a single monster line: hard wrap
+                chunks.append(cur) if cur else None; cur = ""
+                chunks.append(ln[:TG_MAX - 96]); ln = ln[TG_MAX - 96:]
+            if len(cur) + len(ln) + 1 > TG_MAX - 96:
+                chunks.append(cur); cur = ln
+            else:
+                cur = f"{cur}\n{ln}" if cur else ln
+        if cur:
+            chunks.append(cur)
+        for i, c in enumerate(chunks):
+            body = c if len(chunks) == 1 else f"{c}\n({i + 1}/{len(chunks)})"
+            r = tg("sendMessage", chat_id=chat_id, text=body)
+            if not r.get("ok"):
+                time.sleep(2)
+                r = tg("sendMessage", chat_id=chat_id, text=body)
             if not r.get("ok"):
                 print(f"send_reply FAILED chat={chat_id}: {str(r)[:200]}", flush=True)
 
@@ -510,17 +528,16 @@ def run_bot(botkey):
     def sky_context():
         if not cfg.get("astro_only"):
             return ""
-        day = time.strftime("%Y-%m-%d")
+        day = time.strftime("%Y-%m-%d")         # ET: TZ pinned at import
         if day not in sky_cache:
             parts = []
             rc = Path.home() / "scripts/real_coach"
             py = str(Path.home() / ".venv/bin/python")
             # round 9: ground free chat in the same material as the morning send —
             # Svehla context, today's timeline, Uranian dial, timing layer, 14-day timeline
-            for label, argv in (("Svehla reading context", [sys.executable, str(rc / "svehla.py"), "context"]),
-                                ("Exact this week (timeline)", [py, str(rc / "astro_timeline.py"), "today"]),
-                                ("Next 14 days (timeline)", [py, str(rc / "astro_timeline.py"), "14"]),
-                                ("Uranian dial today", [py, str(rc / "astro_uranian.py"), "today"]),
+            # numbers (positions, exacts, passes) come from the COMPUTED FACTS block now; this
+            # keeps only the interpretive reading context
+            for label, argv in (("Svehla reading context", [py, str(rc / "svehla.py"), "context"]),
                                 ("Timing layer", [py, str(rc / "astro_timing.py"), "today"])):
                 try:
                     r = subprocess.run(argv, capture_output=True, text=True, timeout=90)
@@ -532,9 +549,10 @@ def run_bot(botkey):
             sky_cache.clear(); sky_cache[day] = "\n\n".join(parts)
         return sky_cache[day]
 
-    def with_context(question):
+    def with_context(question, facts_ctx=None):
         sky = sky_context()
-        pre = f"Live sky (real ephemeris, computed today): {sky}\n\n" if sky else ""
+        pre = (f"{facts_ctx}\n\n" if facts_ctx else "") + \
+              (f"Reading context (Svehla narrative + timing, computed today): {sky}\n\n" if sky else "")
         if not history:
             return pre + question
         ctx = "\n".join(f"Mike: {q_}\nYou: {a_}" for q_, a_ in history)
@@ -602,6 +620,7 @@ def run_bot(botkey):
                     tg("sendMessage", chat_id=chat_id, text=help_txt); continue
                 # Quantum pipeline picks — instant, deterministic, zero-bloat (no LLM).
                 cmd0 = text.split()[0].lower()
+                facts_ctx = None                        # astrology: COMPUTED FACTS for the LLM path
                 if not cmd0.startswith("/") and botkey not in FREE_CHAT_LANES:
                     tg("sendMessage", chat_id=chat_id,
                        text=f"💤 {name} is on commands-only mode — free chat is off to save "
@@ -611,11 +630,31 @@ def run_bot(botkey):
                     continue
                 # ── astrology-only lane: no trading surface at all ────────────
                 if cfg.get("astro_only"):
-                    if cmd0 in TRADING_CMDS:
+                    if cmd0 in TRADING_CMDS and cmd0 != "/explain":
                         tg("sendMessage", chat_id=chat_id,
                            text="🔮 Astrology lane only — trading lives on Trading Command "
                                 "(@oOLaptopClaude_Bot). Try /transits, /chart or /readings.")
                         continue
+                    # 2026-09-27 final round: astro_bot routes commands it owns + every plain
+                    # message: a computed reply goes out as-is (no LLM); otherwise the COMPUTED
+                    # FACTS block becomes the LLM's grounding. Router failure → old path.
+                    try:
+                        tg("sendChatAction", chat_id=chat_id, action="typing")
+                        rr = subprocess.run([str(Path.home() / ".venv/bin/python"),
+                                             str(Path.home() / "scripts/real_coach/astro_bot.py"), "route"],
+                                            input=json.dumps({"text": text, "chat": chat_id}),
+                                            capture_output=True, text=True, timeout=240)
+                        routed = json.loads(rr.stdout or "{}")
+                    except Exception as e:
+                        routed = {}
+                        print(f"[{name}] astro_bot route error: {e}", flush=True)
+                    if routed.get("reply"):
+                        send_reply(chat_id, routed["reply"])
+                        if not text.startswith("/"):
+                            remember(text, routed["reply"])
+                        print(f"[{name}] routed {routed.get('intent')} rid={routed.get('request_id')}", flush=True)
+                        continue
+                    facts_ctx = routed.get("context")
                     if cmd0 in ("/transits", "/today", "/daily"):
                         tg("sendChatAction", chat_id=chat_id, action="typing")
                         try:
@@ -628,10 +667,6 @@ def run_bot(botkey):
                             out = f"[transits error] {e}"
                         send_reply(chat_id, out)
                         print(f"[{name}] /transits", flush=True)
-                        continue
-                    if cmd0 == "/chart":
-                        send_reply(chat_id, NATAL_CARD)
-                        print(f"[{name}] /chart", flush=True)
                         continue
                     # 2026-09-15 r7: /wheel → render natal+transit PNG and send as a photo
                     if cmd0 == "/wheel":
@@ -827,7 +862,7 @@ def run_bot(botkey):
                 tg("sendChatAction", chat_id=chat_id, action="typing")
                 try:
                     codex_primary = (cfg.get("providers") or [None])[0] == "codex_cli"
-                    qq = with_context(text)
+                    qq = with_context(text, facts_ctx)
                     a = ask_persona(qq) if (codex_primary or not text.startswith("/")) else ask_local(qq)
                     if cfg.get("astro_only") and not a.startswith("["):
                         a = astro_factcheck(a)          # 2026-09-15: every answer audited vs the ephemeris

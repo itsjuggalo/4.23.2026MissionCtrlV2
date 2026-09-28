@@ -97,16 +97,17 @@ XBOT = C([
     ("clear", "Clear our conversation"),
     ("reset", "Reset the chat"),
 ])
-ASTRO = C([   # astrology-only lane (@JazzyHazzyClaw_Bot) — trimmed 2026-09-27 from 41 to the 8 that
-    # matter (0 commands used in a week); every other command still works typed — /help all lists them
-    ("transits", "Today's read: real transits vs your natal chart"),
-    ("full", "Today's complete read"),
-    ("week", "The coming 7 days, peak day marked"),
+ASTRO = C([   # astrology-only lane (@JazzyHazzyClaw_Bot) — final round 2026-09-27: the 8 core flows
+    # (Today · Week · Transits · Progressions · Synastry · Progressed synastry · Timeline · Ask)
+    ("today", "Today's read: ranked live transits + exact times"),
+    ("week", "Themes + every exact of the next 7 days"),
+    ("transits", "Today's transits (same as /today) · /full = all + why"),
+    ("progressions", "Progressed Moon/Venus + next changes"),
+    ("synastry", "Compare charts: /synastry <name> (profile first)"),
+    ("progsyn", "Progressed synastry: /progsyn <name>"),
     ("timeline", "Dated hits ahead: /timeline 60"),
-    ("dates", "Aug 2026 reading: active now + next"),
-    ("wheel", "Chart image: natal + today's transits"),
-    ("note", "Journal what happened today"),
-    ("help", "What this bot does (/help all = every command)"),
+    ("moon", "Moon sign + phase vs your placements"),
+    ("help", "Or just ask in plain words · /help all"),
 ])
 CLEAR = []  # pure-push / infra bots: no responder → remove any (misleading) menu
 # @PipelineSignals_Bot — telegram_dm_responder.py (cron, every min). No-arg commands only:
