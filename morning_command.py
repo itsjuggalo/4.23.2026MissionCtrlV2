@@ -28,6 +28,7 @@ from __future__ import annotations
 import argparse
 import json
 import os
+import re
 import sys
 from datetime import datetime
 from zoneinfo import ZoneInfo
@@ -123,7 +124,10 @@ def _catalysts_and_orders(names: str, tape: str) -> tuple[str, str, dict]:
         f"You are a pre-open trading desk analyst. Today is {today} (US Eastern).\n"
         f"Operator's watchlist: {names}\n"
         f"Premarket tape: {tape or 'n/a'}\n\n"
-        "The reader is a BEGINNER trader. Return STRICT JSON, no prose outside it:\n"
+        "The reader is a BEGINNER trader. Never write BUY/SELL/HOLD/WAIT/TRIM/EXIT/AVOID or a "
+        "confidence %; use entry ref/stop ref/target ref and GATE PASS/CAUTION/BLOCKED state "
+        "instead — the operator's canonical desk makes the call, this is evidence only. "
+        "Return STRICT JSON, no prose outside it:\n"
         '{"catalysts": "<=2 sentences on TODAY\'s scheduled US market catalysts you are '
         "confident about (FOMC/CPI/PPI/jobs/major single-name earnings). If you are not sure "
         'anything major is scheduled, say \\"No major scheduled macro catalysts today.\\"", '
@@ -132,9 +136,9 @@ def _catalysts_and_orders(names: str, tape: str) -> tuple[str, str, dict]:
         "never a buy/sell instruction; the operator's canonical desk makes the call. Risk "
         f"reference is capped at ${RISK_CAP} per trade — this is a HARD cap, never cite a "
         'size above it, and if the setup cannot be expressed under it, say so. Be specific.", '
-        '"plan": {"ticker": "<symbol>", "direction": "BUY", "entry": <single number, not a '
+        '"plan": {"ticker": "<symbol>", "entry": <single number, not a '
         'range>, "stop": <single number, below entry>, "target": <single number, above entry>, '
-        '"shares": <integer>, "why": "<one short clause>"}}\n'
+        '"why": "<one short clause>"}}\n'
         "The `plan` object must describe the SAME trade as `orders`, with one exact price "
         "per field — never a range, never a null when you named a trade. target must be at "
         "least as far from entry as stop is, so the win is worth the risk. If today's honest "
@@ -153,6 +157,18 @@ def _catalysts_and_orders(names: str, tape: str) -> tuple[str, str, dict]:
             {})
 
 
+_ORDERS_INSTRUCTION_RE = re.compile(r"\b(buy|sell|short)\b", re.I)
+
+
+def _filter_orders(orders: str) -> str:
+    """Fail-closed backstop (T10 E6): the LLM prompt already forbids a buy/sell
+    instruction in `orders`, but free LLM prose has no other filter before it reaches
+    Telegram — withhold it rather than let a stray instruction through."""
+    if orders and _ORDERS_INSTRUCTION_RE.search(orders):
+        return "Setup evidence withheld — model text contained a trade instruction."
+    return orders
+
+
 def _plan_orders(plan: dict) -> str:
     """Render the LLM's structured plan as reference levels (entry ref / stop ref / target
     ref — setup evidence, not a trade call; T9 item 9). Returns '' unless entry/stop/target are all present AND ordered
@@ -161,10 +177,14 @@ def _plan_orders(plan: dict) -> str:
     try:
         tkr = str(plan.get("ticker") or "").strip().upper()
         entry, stop, targ = (float(plan[k]) for k in ("entry", "stop", "target"))
-        sh = int(plan.get("shares") or 0)
     except (TypeError, ValueError, KeyError, AttributeError):
         return ""
-    if not tkr or sh < 1 or not (stop < entry < targ):
+    if not tkr or not (stop < entry < targ):
+        return ""
+    # size ref is computed locally from the flat $400 cap — never trust an LLM-chosen
+    # share count (T10 E6): sh is the max whole-share size that still fits the cap.
+    sh = int(RISK_CAP // (entry - stop))
+    if sh < 1:
         return ""
     risk, reward = sh * (entry - stop), sh * (targ - entry)
     if risk > RISK_CAP:                      # hard cap, fail-CLOSED — never print an over-cap size
@@ -383,7 +403,7 @@ def _structure_phone_line() -> str:
         if best is None:
             return "🏗 No name has held a key level with momentum turning yet — sentiment is loud, structure is quiet."
         return (f"🏗 Closest structure setup: {esc(best.get('symbol'))} is {esc(best.get('state'))} "
-                f"(score {best.get('score')}/100) — not a buy until momentum confirms.")
+                f"(score {best.get('score')}/100) — momentum not confirmed yet.")
     parts = []
     for r in trig:
         opt = (r.get("option") or {}).get("label")
@@ -767,8 +787,9 @@ def build() -> str:
         lines.append("• No fresh near-money flow yet — first live picks post 9:50 AM ET.")
 
     cat, orders, _plan = _catalysts_and_orders(names, tape)
+    orders = _filter_orders(orders)
     lines.append(f"\n📅 **TODAY:** {cat}")
-    lines.append(f"📋 **ORDERS:** {orders}")
+    lines.append(f"📋 **SETUP REF:** {orders}")
 
     # real overnight/pre-open headlines on your names (best-effort; "" if none)
     try:
@@ -888,6 +909,7 @@ def build_phone() -> str:
             lines.append(line)
 
     cat, orders, plan = _catalysts_and_orders(_relay_tickers_str(6), tape)
+    orders = _filter_orders(orders)
     sched = _scheduled_today()
     if sched:
         # the calendar floor (FOMC/NFP/high-impact econ) beats the model's recollection

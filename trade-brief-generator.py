@@ -105,6 +105,9 @@ def get_recent_ledger() -> list[dict]:
 def build_prompt(rank, winners, momentum, macro, ledger) -> str:
     lines = ["You are a focused options trading analyst. Given the live pipeline data below, write a concise 5-bullet trading brief for a swing/day trader.\n"]
     lines.append("Rules: each bullet starts with •, max 25 words per bullet, be specific (include tickers/numbers), no fluff.\n")
+    lines.append("Never write BUY/SELL/HOLD/WAIT/TRIM/EXIT/AVOID or a confidence %; "
+                 "use entry ref/stop ref/target ref and GATE PASS/CAUTION/BLOCKED state instead — "
+                 "the operator's canonical desk makes the call, this is evidence only.\n")
 
     if macro:
         lines.append(f"MACRO: Regime={macro.get('regime','?')} | VIX={macro.get('vix','?')} ({macro.get('vix_pct','?')}%ile) | Fed={macro.get('fed_posture','?')}")

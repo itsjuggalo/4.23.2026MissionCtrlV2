@@ -99,7 +99,7 @@ def iv_board(top=18) -> str | None:
     for i, (r, _, c) in enumerate(rows): ax.text(r, i, f" {r}% (IV {c*100:.0f})", va="center", color="#c9d1d9", fontsize=8)
     ax.axvline(30, color="#3fb950", ls="--", lw=0.6); ax.axvline(60, color="#f85149", ls="--", lw=0.6)
     ax.set_xlim(0, 105)
-    ax.set_title("IV Rank — green <=30 cheap (buy vol) / red >=60 rich (sell premium)", color="#e6edf3", loc="left", fontsize=12)
+    ax.set_title("IV Rank — green <=30 low / red >=60 high", color="#e6edf3", loc="left", fontsize=12)
     p = str(OUT / "board_iv_rank.png"); fig.savefig(p, dpi=120, bbox_inches="tight", facecolor=BG); plt.close(fig)
     return p
 

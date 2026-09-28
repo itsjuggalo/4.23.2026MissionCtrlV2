@@ -9,8 +9,9 @@ For every ticker with earnings in the next ~N trading days:
     max abs close-to-close move in a small window around each anchor — robust when exact
     past earnings dates are unavailable, which they are here since lxml is missing so
     yfinance.get_earnings_dates() fails).
-Flags CHEAP (implied < historical → buy-straddle edge) vs RICH (implied > historical → sell).
-Grouped bar chart implied vs historical per ticker; caption highlights the CHEAP names.
+Flags IV CHEAP vs own history — long-vol evidence (implied < historical) vs IV RICH vs own
+history (implied > historical). Grouped bar chart implied vs historical per ticker; caption
+highlights the IV CHEAP names.
 
 Ticker universe = a fixed majors list + (with --from-flow) the top premium names in today's
 live options-flow stream (READ-ONLY). Earnings date comes from yfinance .calendar.
@@ -195,8 +196,8 @@ def render(rows: list[dict], window_days: int | None) -> str:
     cheap_n = sum(r["cheap"] for r in rows)
     win = f"next {window_days}d window" if window_days is not None else "all w/ known date"
     title = (f"Earnings Expected Move — Implied vs Historical   ({win})\n"
-             f"green ticker = CHEAP (implied < historical, buy-straddle edge)  ·  "
-             f"red = RICH (sell)   ·   {cheap_n}/{len(rows)} cheap")
+             f"green ticker = IV CHEAP vs own history — long-vol evidence  ·  "
+             f"red = IV RICH vs own history   ·   {cheap_n}/{len(rows)} cheap")
     ax.set_title(title, color="#e6edf3", fontsize=11, loc="left")
     leg = ax.legend(facecolor=BG, edgecolor="#30363d", labelcolor="#c9d1d9",
                     fontsize=9, loc="upper right")
@@ -219,12 +220,12 @@ def caption(rows: list[dict]) -> str:
     if cheap:
         cl = ", ".join(f"{r['ticker']} ({r['implied']*100:.1f}% vs {r['historical']*100:.1f}% hist, "
                        f"{r['earn'].strftime('%-m/%-d')})" for r in cheap)
-        body = f"\n🟩 **CHEAP — buy-straddle edge:** {cl}"
+        body = f"\n🟩 **IV CHEAP vs own history — long-vol evidence:** {cl}"
     else:
-        body = "\n🟩 CHEAP: none — all upcoming names price their move RICH (or fair)."
+        body = "\n🟩 IV CHEAP: none — all upcoming names price their move IV RICH (or fair) vs own history."
     if rich:
         rl = ", ".join(f"{r['ticker']} (+{(r['implied']-r['historical'])*100:.1f}pt)" for r in rich)
-        body += f"\n🟥 **RICH — sell-premium lean:** {rl}"
+        body += f"\n🟥 **IV RICH vs own history:** {rl}"
     return head + body + "\n_Implied = ATM straddle of the expiry just after earnings ÷ spot. " \
                          "Historical = mean abs 1-day reaction, last ~6 earnings._"
 
