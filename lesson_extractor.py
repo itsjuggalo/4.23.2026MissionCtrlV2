@@ -27,7 +27,7 @@ from pathlib import Path
 SECRETS = Path("/home/ubuntu/.openclaw/secrets")
 WORKSPACE_MEMORY = Path("/home/ubuntu/.openclaw/workspace/memory")
 WORKSPACE_MEMORY.mkdir(parents=True, exist_ok=True)
-CLAUDE_BIN = os.path.expanduser("~/.local/bin/claude")
+CLAUDE_BIN = os.path.expanduser("~/bin/llm-route")
 
 DECISIONS_PATH = {
     "boba": Path("/home/ubuntu/.openclaw/workspace/skill_outputs/boba_decisions_validated.json"),

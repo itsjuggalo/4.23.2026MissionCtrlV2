@@ -28,7 +28,7 @@ TG_BASE     = f"https://api.telegram.org/bot{BOT_TOKEN}"
 TG_MAX      = 4096
 ET          = ZoneInfo("America/New_York")
 
-CLAUDE_BIN  = str(Path.home() / ".local/bin/claude")   # subscription CLI, not API
+CLAUDE_BIN  = str(Path.home() / "bin/llm-route")   # subscription CLI, not API
 CLAUDE_CWD  = str(Path.home())                          # home = trusted allowlists
 CLAUDE_TOOLS = "Bash,Read,Grep,Glob,WebFetch,WebSearch,Skill,TodoWrite"
 ENGINE      = str(Path.home() / "scripts/life-engine-run.py")

@@ -35,7 +35,7 @@ LIFECLAW_DIR = os.path.expanduser('~/.lifeclaw')
 CONFIG_FILE  = os.path.join(LIFECLAW_DIR, 'config.json')
 BILLS_FILE   = os.path.join(LIFECLAW_DIR, 'bills.json')
 ARCHIVE_FILE = os.path.join(LIFECLAW_DIR, 'sent_briefs.jsonl')
-CLAUDE_BIN   = os.path.expanduser('~/.local/bin/claude')
+CLAUDE_BIN   = os.path.expanduser('~/bin/llm-route')
 WELLNESS_FILE = os.path.join(LIFECLAW_DIR, 'wellness.json')
 
 # brief_type -> wellness slot + card glyph (sun for daytime, moon for night)

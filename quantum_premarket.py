@@ -17,7 +17,7 @@ from tg_format import esc, hdr
 
 ET     = ZoneInfo("America/New_York")
 HALT   = os.path.expanduser("~/.openclaw/quantum_HALT")
-CLAUDE = os.path.expanduser("~/.local/bin/claude")
+CLAUDE = os.path.expanduser("~/bin/llm-route")
 TG_FLEET = os.path.expanduser("~/scripts/tg_fleet.py")
 
 

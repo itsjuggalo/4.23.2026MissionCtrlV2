@@ -22,7 +22,7 @@ LOG="$HOME/.openclaw/workspace/logs/ainvest_second_opinion.log"
 mkdir -p "$(dirname "$LOG")"
 NVM_BIN="$(ls -d "$HOME"/.nvm/versions/node/*/bin 2>/dev/null | sort -V | tail -1)"
 export PATH="$NVM_BIN:$HOME/.local/bin:/usr/local/bin:/usr/bin:/bin:$PATH"
-CLAUDE_BIN="$HOME/.local/bin/claude"
+CLAUDE_BIN="$HOME/bin/llm-route"   # 2026-09-28 Codex route (revert: touch ~/.config/llm-route/USE_CLAUDE)
 MODEL="${SECOND_OPINION_MODEL:-sonnet}"
 TOOLS="Bash,Read,Grep,Glob,WebFetch,WebSearch,Skill,Agent,TodoWrite"
 

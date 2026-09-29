@@ -20,7 +20,7 @@ import urllib.request
 from pathlib import Path
 
 SEC = Path.home() / ".openclaw" / "secrets"
-CLAUDE_BIN = str(Path.home() / ".local/bin/claude")   # stable symlink → current version
+CLAUDE_BIN = str(Path.home() / "bin/llm-route")   # stable symlink → current version
 
 
 def _read(*names):
@@ -169,7 +169,16 @@ def _deepseek(prompt, timeout=120):
     return d["choices"][0]["message"]["content"], d.get("usage", {})
 
 
-_PROVIDERS = {"claude_oauth": _claude_oauth, "claude_cli": _claude_cli, "grok_oauth": _grok_oauth,
+def _claude_oauth_routed(prompt, timeout=60):
+    """2026-09-28 (Mike moved to a lower Claude plan): "claude_oauth" no longer hits
+    api.anthropic.com — it goes through _claude_cli, whose CLAUDE_BIN is ~/bin/llm-route
+    (Codex). `touch ~/.config/llm-route/USE_CLAUDE` restores the direct Claude call."""
+    if (Path.home() / ".config/llm-route/USE_CLAUDE").exists():
+        return _claude_oauth(prompt, timeout)
+    return _claude_cli(prompt, max(timeout, 240))
+
+
+_PROVIDERS = {"claude_oauth": _claude_oauth_routed, "claude_cli": _claude_cli, "grok_oauth": _grok_oauth,
               "codex_cli": _codex_cli}  # OAuth/CLI-only policy 2026-06-17: api providers (openai/gemini/deepseek) unregistered
 
 

@@ -34,7 +34,7 @@ ALPACA_BASE = "https://paper-api.alpaca.markets/v2"
 ALPACA_DATA_BASE = "https://data.alpaca.markets"
 DB_PATH = Path("/home/ubuntu/mission-control-restored/data/options_flow.sqlite")
 MC_KB_BASE = "http://127.0.0.1:8091"
-CLAUDE_BIN = "/home/ubuntu/.local/bin/claude"
+CLAUDE_BIN = "/home/ubuntu/bin/llm-route"
 JOURNAL_LOG = Path("/home/ubuntu/.openclaw/data/logs/pick_validator.jsonl")
 JOURNAL_LOG.parent.mkdir(parents=True, exist_ok=True)
 

@@ -22,7 +22,7 @@ LOG="$HOME/.openclaw/workspace/logs/breakout_scan.log"
 mkdir -p "$(dirname "$STATE")" "$BRIEF_DIR" "$(dirname "$LOG")"
 NVM_BIN="$(ls -d "$HOME"/.nvm/versions/node/*/bin 2>/dev/null | sort -V | tail -1)"
 export PATH="$NVM_BIN:$HOME/.local/bin:/usr/local/bin:/usr/bin:/bin:$PATH"
-CLAUDE_BIN="$HOME/.local/bin/claude"
+CLAUDE_BIN="$HOME/bin/llm-route"   # 2026-09-28 Codex route (revert: touch ~/.config/llm-route/USE_CLAUDE)
 ENRICH="${BREAKOUT_ENRICH:-1}"    # 1 = add LLM action lines; 0 = deterministic only
 
 log() { echo "[$(TZ='America/New_York' date '+%Y-%m-%d %H:%M:%S ET')] $*" | tee -a "$LOG"; }

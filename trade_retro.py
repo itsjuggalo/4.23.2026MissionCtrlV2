@@ -23,7 +23,7 @@ from pathlib import Path
 
 DB    = Path(os.path.expanduser("/AIWorkWSL/web/missionctrl/pipeline/desk_pipeline.sqlite"))
 LOG   = Path(os.path.expanduser("~/.openclaw/workspace/memory/retro_log.md"))  # SEPARATE from boba_lessons.md
-CLAUDE = "/home/itsju/.local/bin/claude"
+CLAUDE = "/home/itsju/bin/llm-route"
 OAUTH  = Path(os.path.expanduser("~/.openclaw/secrets/claude_oauth_token"))
 
 RETRO_PROMPT = """You are running an action-gating retro on a trading desk's last closed trades.

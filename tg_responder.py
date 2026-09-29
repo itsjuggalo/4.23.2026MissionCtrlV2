@@ -37,7 +37,7 @@ os.environ["TZ"] = "America/New_York"
 time.tzset()
 
 SECRETS    = Path.home() / ".openclaw/secrets"
-CLAUDE_BIN = str(Path.home() / ".local/bin/claude")
+CLAUDE_BIN = str(Path.home() / "bin/llm-route")
 CLAUDE_CWD = str(Path.home())
 TG_MAX     = 4096
 

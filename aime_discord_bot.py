@@ -64,7 +64,7 @@ async def _answer(question: str) -> str:
 # ANTHROPIC_API_KEY is stripped). Same proven pattern as antigravity_aime_bot.ask_local
 # and flow_digest_cron.sh — cwd=$HOME + --allowedTools are mandatory or it's
 # permission-blocked at runtime; use ~/.local/bin/claude (the sub CLI, not ~/bin wrapper).
-CLAUDE_BIN = str(Path.home() / ".local/bin/claude")
+CLAUDE_BIN = str(Path.home() / "bin/llm-route")
 CLAUDE_CWD = str(Path.home())
 CLAUDE_TOOLS = "Bash,Read,Grep,Glob,WebFetch,WebSearch,Skill,Agent,TodoWrite"
 

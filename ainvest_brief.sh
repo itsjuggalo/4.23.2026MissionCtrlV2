@@ -27,7 +27,7 @@ mkdir -p "$BRIEF_DIR" "$(dirname "$LOG")"
 # --- harden PATH for cron's minimal env (claude lives under nvm) --------------
 NVM_BIN="$(ls -d "$HOME"/.nvm/versions/node/*/bin 2>/dev/null | sort -V | tail -1)"
 export PATH="$NVM_BIN:$HOME/.local/bin:/usr/local/bin:/usr/bin:/bin:$PATH"
-CLAUDE_BIN="$HOME/.local/bin/claude"
+CLAUDE_BIN="$HOME/bin/llm-route"   # 2026-09-28 Codex route (revert: touch ~/.config/llm-route/USE_CLAUDE)
 MODEL="${AINVEST_BRIEF_MODEL:-sonnet}"   # NOT sonnet[1m] — 1M context needs paid usage credits (not on the flat sub)
 # LEAN: headlines are pre-injected as ground-truth, so NO skill/agent fan-out (that was
 # re-fetching ~110k tokens/run for a paragraph). Just enough to optionally check a price.

@@ -28,7 +28,7 @@ TG_MAX = 4096
 
 # --- local copilot pin-mode (AIME @-agent equivalent) -------------------------
 PIN_FILE   = Path.home() / ".openclaw/data/antigravity_pins.json"
-CLAUDE_BIN = str(Path.home() / ".local/bin/claude")  # subscription CLI, not API wrapper
+CLAUDE_BIN = str(Path.home() / "bin/llm-route")  # subscription CLI, not API wrapper
 CLAUDE_CWD = str(Path.home())  # home project = trusted settings/allowlists
 # read-only analysis surface; local routes are owner-gated below anyway
 CLAUDE_TOOLS = "Bash,Read,Grep,Glob,WebFetch,WebSearch,Skill,Agent,TodoWrite"

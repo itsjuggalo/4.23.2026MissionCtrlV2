@@ -30,7 +30,7 @@ from lib import x_search  # noqa: E402  — native Grok x_search (OAuth) w/ web 
 SEC = Path.home() / ".openclaw" / "secrets"
 GUILD = "1486025777970548908"
 ET = ZoneInfo("America/New_York")
-CLAUDE_BIN = str(Path.home() / ".local/bin/claude")
+CLAUDE_BIN = str(Path.home() / "bin/llm-route")
 CLAUDE_CWD = str(Path.home())
 CLAUDE_TOOLS = "Bash,Read,Grep,Glob,WebFetch,WebSearch,Skill,Agent,TodoWrite"
 BOT_TOKEN = (SEC / "discord_boba_token").read_text().strip()

@@ -46,7 +46,7 @@ GRADES_DIR.mkdir(parents=True, exist_ok=True)
 LOG_FILE = Path("/home/ubuntu/.openclaw/data/logs/grader.jsonl")
 LOG_FILE.parent.mkdir(parents=True, exist_ok=True)
 
-CLAUDE_BIN = os.path.expanduser("~/.local/bin/claude")
+CLAUDE_BIN = os.path.expanduser("~/bin/llm-route")
 MC_KB_ENDPOINT = "http://127.0.0.1:8091/journal/write"
 ALPACA_BASE = "https://paper-api.alpaca.markets/v2"
 DATA_BASE = "https://data.alpaca.markets"

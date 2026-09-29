@@ -107,7 +107,7 @@ OUTPUT — Discord embed-friendly:
     import sys as _sys
     if "/home/itsju/05_AUTOMATION/scripts" not in _sys.path:
         _sys.path.insert(0, "/home/itsju/05_AUTOMATION/scripts")
-    from lib.llm import _claude_oauth, _deepseek
+    from lib.llm import _claude_oauth_routed as _claude_oauth, _deepseek  # 2026-09-28 Codex route
     for _fn in (_claude_oauth, _deepseek):
         try:
             text, _usage = _fn(prompt)
