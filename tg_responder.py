@@ -309,6 +309,12 @@ BOTS = {
 # (jazzyrelay / jazzycodexgpt / orionrelay personas removed 2026-09-15 — Mike: Orion/Boba/Jazzy retired.)
 
 
+
+def _redact(e) -> str:
+    """Exception text with any bot token masked — requests errors embed the full API URL,
+    which put live tokens into PM2 logs (2026-09-28)."""
+    return re.sub(r"bot\d+:[\w-]+", "bot<redacted>", str(e))
+
 def _secret(name):
     return (SECRETS / name).read_text().strip()
 
@@ -405,7 +411,7 @@ def run_bot(botkey):
         try:
             return requests.post(f"{base}/{method}", json=kw, timeout=req_timeout).json()
         except Exception as e:
-            print(f"tg {method} error: {e}", flush=True)
+            print(f"tg {method} error: {_redact(e)}", flush=True)
             return {"ok": False}
 
     def send_reply(chat_id, text):
@@ -918,7 +924,7 @@ def run_bot(botkey):
                 except Exception as e:
                     tg("sendMessage", chat_id=chat_id, text=f"⚠️ {name} error: {e}")
         except Exception as e:
-            print(f"poll loop error: {e}", flush=True); time.sleep(5)
+            print(f"poll loop error: {_redact(e)}", flush=True); time.sleep(5)
 
 
 def _lane_thread(botkey):

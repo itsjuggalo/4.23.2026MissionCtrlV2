@@ -13,7 +13,7 @@ todos / web), never trading. Owner-gated to Mike's chat_id.
 Commands:  /brief [morning|midday|evening|nightly]  ·  /help  ·  /start
 Run under PM2 `lifeclaw-bot` (see ecosystem.config.js).
 """
-import json, os, subprocess, time, sys, importlib.util
+import json, os, re, subprocess, time, sys, importlib.util
 from datetime import datetime
 from pathlib import Path
 from zoneinfo import ZoneInfo
@@ -42,6 +42,12 @@ DEFAULT_PERSONA = (
 )
 
 
+
+def _redact(e) -> str:
+    """Exception text with any bot token masked — requests errors embed the full API URL,
+    which put live tokens into PM2 logs (2026-09-28)."""
+    return re.sub(r"bot\d+:[\w-]+", "bot<redacted>", str(e))
+
 def persona() -> str:
     try:
         return json.loads(CONFIG.read_text()).get("persona", DEFAULT_PERSONA)
@@ -66,7 +72,7 @@ def tg(method, req_timeout=10, **kwargs):
     try:
         return requests.post(f"{TG_BASE}/{method}", json=kwargs, timeout=req_timeout).json()
     except Exception as e:
-        print(f"tg {method} error: {e}", flush=True)
+        print(f"tg {method} error: {_redact(e)}", flush=True)
         return {"ok": False}
 
 
@@ -410,7 +416,7 @@ def main():
                     tg("sendMessage", chat_id=chat_id, text=f"⚠️ LifeClaw error: {e}")
                     print(f"[{chat_id}] ERR: {e}", flush=True)
         except Exception as e:
-            print(f"Poll loop error: {e}", flush=True)
+            print(f"Poll loop error: {_redact(e)}", flush=True)
             time.sleep(5)
 
 

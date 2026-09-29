@@ -78,12 +78,13 @@ IDENTITY = {
               "Lab (ATM/OTM/ITM across daily/weekly/monthly), Pre-Trade Confluence, and "
               "payoff/IV charts. This bot NEVER tells you to buy anything — entries live in "
               "Trading Command and Flow Digest. Read this one to understand WHY a trade works.")),
+    # 2026-07-29: this token IS the Massage By Mike website-chat relay (PM2 massage-chat-bot,
+    # /AIWorkWSL/web/massage/server/chat-bot.js). Identity corrected 2026-09-28 (was still "PARKED").
     "telegram_orion_bot_token": dict(
-        name="PARKED (free) — ex Research Desk", avatar="tassadar",
-        short="Parked token — unused, free to repurpose. Was: Research Desk.",
-        desc=("PARKED since 2026-07-19. This bot token is unused and free to repurpose for the "
-              "next project (responder stopped; no senders). Formerly the Research Desk lane. "
-              "To revive or reuse: bot_rebrand.py + tg_responder.py on the laptop.")),
+        name="Massage By Mike — Chat", avatar="tassadar",
+        short="Massage By Mike — website chat relay.",
+        desc=("Massage By Mike — website chat. Messages from the booking-site chat widget are "
+              "relayed here so Mike can reply.")),
     # 2026-07-19: ex-Screener token repurposed — now ClaudeClaw OS's own bot (grammy
     # poller in /AIWorkWSL/agents/claudeclaw; tg_responder "screener" lane RETIRED).
     "telegram_deepseek_bot_token": dict(

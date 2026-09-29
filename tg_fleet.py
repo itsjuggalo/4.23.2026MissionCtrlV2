@@ -39,7 +39,7 @@ FLEET = {
     "trading_command": dict(user="oOLaptopClaude_Bot",      avatar="raynor",          role="interactive", src=("file", "telegram_laptopclaude_bot_token")),
     "system_health":   dict(user="Pingpong727_Bot",         avatar="adjutant",        role="interactive", src=("file", "telegram-ping-bot-token")),
     "life_wellness":   dict(user="LifeClaw727_Bot",         avatar="arbiter",         role="interactive", src=("file", "lifeclaw_telegram_bot_token")),
-    "aime_research":   dict(user="AntiGravityg59laptop_Bot",avatar="zeratul",         role="interactive", src=("file", "telegram_antigravity_bot_token")),
+    "aime_research":   dict(user="AntiGravityg59laptop_Bot",avatar="zeratul",         role="push",        src=("file", "telegram_antigravity_bot_token")),
     # 2026-09-28: @MoneyFlowz_Bot (ex x_sentiment, retired 09-27) REPURPOSED as the QUIZ-ONLY
     # lane — every trading quiz sends here; poller = quiz_bot.py (PM2 quiz-bot).
     "quiz":            dict(user="MoneyFlowz_Bot",          avatar="nova",            role="interactive", src=("file", "telegram_grok_bot_token")),
