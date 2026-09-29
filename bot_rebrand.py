@@ -37,22 +37,22 @@ IDENTITY = {
         desc=("Life & wellness assistant. Calendar, inbox, to-dos, weather, gentle nudges. "
               "/brief /today /todo. Talk to me like a friend, not a terminal. We embrace the shadows.")),
     "telegram_antigravity_bot_token": dict(
-        name="AIME Research", avatar="zeratul",
-        short="Seer of markets — AIME intel + research copilot.",
-        desc=("AIME research copilot. Live AInvest/AIME intel, charts, screens, forecasts, news. "
-              "Ask 'what's the read on NVDA', 'screen oversold large caps', 'earnings outlook'. "
+        name="AIME Briefs", avatar="zeratul",   # 2026-09-28: was "AIME Research" — push-only, no responder
+        short="AInvest/AIME EOD brief + breakout scans (push only).",
+        desc=("AIME briefs (push only — no chat). The AInvest/AIME end-of-day brief and the "
+              "12:30 / 3:50 breakout scans. For questions, ask Trading Command. "
               "I have seen the future — and I will not let it come to pass.")),
     "telegram-bot-token.txt": dict(
-        name="Flow Signals", avatar="queen_of_blades",
-        short="The Swarm hunts the flow — live whale sweeps, exits & shock warnings.",
-        desc=("Flow signals (push). The meanest options flow: big sweeps, position exits, market "
+        name="Flow Alerts & Exits", avatar="queen_of_blades",   # 2026-09-28: was "Flow Signals"
+        short="Mega whale-flow alerts, exit warnings on open contracts, shock guards.",
+        desc=("Flow alerts & exits (push). The meanest options flow: big sweeps, position exits, market "
               "shocks — straight to your phone. Pull the board with /winners /sweeps from the "
               "Trading Command bot. Paper-safe, edge-first. We will consume them.")),
     # 2026-09-28 — ex X-Sentiment (retired 09-27), now the QUIZ-ONLY lane (fleet fn `quiz`,
     # poller quiz_bot.py). Every trading quiz lives here, off the signal/command chats.
     "telegram_grok_bot_token": dict(
-        name="Options Quiz", avatar="nova",
-        short="Options & flow quizzes only — tap A/B/C/D, /quiz for another.",
+        name="Trading Quiz", avatar="nova",   # 2026-09-28: was "Options Quiz" — now carries every quiz
+        short="Every trading quiz — options, live positions, signals, your trades. Tap A/B/C/D.",
         desc=("Quiz-only bot. Options Academy reps, live-position quizzes, signal quizzes from "
               "today's real flow, and lessons from your closed trades. Tap an answer to get "
               "graded; /quiz for another rep, /score for your belt and weak spots.")),
@@ -115,26 +115,28 @@ VAULT_IDENTITY = {
               "explosion watch and FYI flow notes folded into a few compact digests a day. "
               "Entries/exits/🟢 TRADE stay in Trading Command.")),
     "telegram_hermes_bot_token": dict(
-        name="Hermes Relay", avatar="stukov",
-        short="Hermes LLM router — message bus on the subscription wallet.",
-        desc=("Hermes relay. Routes LLM traffic for the agent fleet on the subscription wallet. "
-              "Infra relay — not a chat target. I will not fail you.")),
+        name="Hermes Agent", avatar="stukov",   # 2026-09-28: was "Hermes Relay"
+        short="Chat with the Hermes agent (hermes-gateway on the laptop).",
+        desc=("Hermes agent. DM to talk to the Hermes agent running on the laptop "
+              "(PM2 hermes-gateway). No trading alerts land here. I will not fail you.")),
     "telegram_openclaw_bot_token": dict(
-        name="OpenClaw Grok", avatar="duran",
-        short="OpenClaw's Grok/X relay — X-native intel from the Oracle box.",
-        desc=("OpenClaw Grok relay. Grok / X-native intel from the openclaw (Oracle) box. "
-              "Infra relay. Trust me — I know what I'm doing.")),
+        name="OpenClaw Agent", avatar="duran",   # 2026-09-28: was "OpenClaw Grok" (Oracle box retired)
+        short="Chat with the OpenClaw agent (openclaw-gateway on the laptop).",
+        desc=("OpenClaw agent. DM to talk to the OpenClaw agent running on the laptop "
+              "(PM2 openclaw-gateway). No trading alerts land here. "
+              "Trust me — I know what I'm doing.")),
     # ── cloud bots folded into the fleet (new tg_fleet keys: telegram.<function>) ──────
     "telegram.daily_briefs": dict(
-        name="Daily Briefs", avatar="battlecruiser",
-        short="Pre-open + EOD market briefs — the daily desk read.",
-        desc=("Daily briefs (push). Pre-open + EOD desk read: regime, FOMC, best contracts, "
-              "crypto, portfolio. Battlecruiser operational — your desk read before the bell.")),
+        name="Backup Alerts", avatar="battlecruiser",   # 2026-09-28: was "Daily Briefs" — fallback only
+        short="Fallback only — gets a trading post only if Trading Digest can't send.",
+        desc=("Backup alerts (push). Fallback lane: the EOD scorecard / flow picks land here only "
+              "when the Trading Digest bot fails to send. The pre-open brief is in Trading Command. "
+              "Battlecruiser operational.")),
     "telegram.media_gens": dict(
-        name="Media & Gens", avatar="marine",
-        short="AI image & video generations — off the trade chats.",
-        desc=("Media & gens (push). AI image/video generations, kept off the trading chats. "
-              "Rock and roll — creative output only.")),
+        name="Spare — Media (unused)", avatar="marine",   # 2026-09-28: was "Media & Gens" — nothing sends here
+        short="Spare bot — reserved for media/gens; nothing sends here yet.",
+        desc=("Spare bot (unused). Reserved for AI image/video output; no sender is wired to it "
+              "today. Rock and roll.")),
     "telegram.spare_backup": dict(
         name="Spare Backup", avatar="sentinel",
         short="Spare relay — reserved capacity for the fleet.",
@@ -142,15 +144,15 @@ VAULT_IDENTITY = {
               "I stand ready.")),
     # ── reserve pool (folded in 2026-06-16; names already Mike-set, add SC avatar + bio) ──
     "telegram.jazzy_relay": dict(
-        name="Jazzy Relay", avatar="dugalle",
-        short="Jazzy desk relay — reserve persona, GPT/Codex brain.",
-        desc=("Jazzy Relay (reserve). Spare relay for the Jazzy desk; persona-ready. "
-              "For the glory of Earth — for the United Earth Directorate.")),
+        name="Spare — Parked 1", avatar="dugalle",   # 2026-09-28: was "Jazzy Relay" (retired 09-15, no poller)
+        short="Parked spare bot — not in use.",
+        desc=("Parked spare bot. Nothing sends here and nothing answers DMs; held for a future "
+              "lane. For the glory of Earth.")),
     "telegram.orion_relay": dict(
-        name="Orion Relay", avatar="artanis",
-        short="Orion research relay — reserve autoresearch persona.",
-        desc=("Orion Relay (reserve). Spare relay for Orion autoresearch / decisions; persona-ready. "
-              "En Taro Tassadar. There is much to learn.")),
+        name="Spare — Parked 2", avatar="artanis",   # 2026-09-28: was "Orion Relay" (retired 09-15, no poller)
+        short="Parked spare bot — not in use.",
+        desc=("Parked spare bot. Nothing sends here and nothing answers DMs; held for a future "
+              "lane. En Taro Tassadar.")),
     "telegram.grok_scout": dict(        # 2026-09-28: "Crypto Desk" (fleet fn crypto_desk)
         name="Crypto Desk", avatar="dark_archon",
         short="BTC/ETH moves, crypto news and QuantEdge perp signals.",
@@ -158,9 +160,10 @@ VAULT_IDENTITY = {
               "QuantEdge perp LONG/SHORT signals — all crypto, off the stock chats. Execute on "
               "Coinbase yourself; bots advise only.")),
     "telegram.trend_scanner": dict(
-        name="Trend Scanner", avatar="overmind",
-        short="Trend & movers scanner — reserve screening persona.",
-        desc=("Trend Scanner (reserve). Spare relay for trend & movers screening; persona-ready. "
+        name="WinMeals Alerts", avatar="overmind",   # 2026-09-28: was "Trend Scanner" — fleet fn winmeals
+        short="WinMeals app alerts — promo checks, deal discovery, chain footprint, monitors.",
+        desc=("WinMeals alerts (push). The WinMeals app's own events: promo verification and "
+              "freshness, deal discovery, chain footprint and site monitors. No trading here. "
               "I am the Swarm.")),
 }
 
