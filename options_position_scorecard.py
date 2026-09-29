@@ -251,7 +251,13 @@ def main() -> int:
         print(f"[scorecard] OneDrive warn: {e}")
 
     chat_id = CHAT_FILE.read_text().strip()
-    r = _tg("sendMessage", chat_id=chat_id, text=card, parse_mode="HTML")
+    from lib.tg_split import chunks, plain   # 9 cards ran 4.7k chars → Telegram 400 (2026-09-28)
+    r = True
+    for part in chunks(card):
+        sent = _tg("sendMessage", chat_id=chat_id, text=part, parse_mode="HTML") \
+            or _tg("sendMessage", chat_id=chat_id, text=plain(part))
+        r = r and sent is not None
+    r = r or None
     try:   # passive send record (lib/tg_ledger.py) — 2026-09-28
         from lib.tg_ledger import record
         record("trading_recaps", card, r is not None, html=True, src="options_position_scorecard.py")

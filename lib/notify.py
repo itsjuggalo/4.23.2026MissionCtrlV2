@@ -20,6 +20,7 @@ import json
 import os
 import subprocess
 import urllib.parse
+import urllib.error
 import urllib.request
 
 PY = "/home/itsju/.venv/bin/python"
@@ -65,8 +66,8 @@ def _chat_id(chat: str | None) -> str | None:
         return None
 
 
-def _send_message(tok: str, chat: str, text: str, *, loud: bool, html: bool) -> bool:
-    data = {"chat_id": chat, "text": text[:4096],
+def _post_one(tok: str, chat: str, text: str, *, loud: bool, html: bool) -> bool:
+    data = {"chat_id": chat, "text": text,
             "disable_web_page_preview": "true",
             "disable_notification": "false" if loud else "true"}
     if html:
@@ -74,10 +75,25 @@ def _send_message(tok: str, chat: str, text: str, *, loud: bool, html: bool) -> 
     req = urllib.request.Request(
         f"https://api.telegram.org/bot{tok}/sendMessage",
         data=urllib.parse.urlencode(data).encode())
-    ok = False
     try:
         with urllib.request.urlopen(req, timeout=20) as r:
-            ok = bool(json.load(r).get("ok"))
+            return bool(json.load(r).get("ok"))
+    except urllib.error.HTTPError:
+        return False
+
+
+def _send_message(tok: str, chat: str, text: str, *, loud: bool, html: bool) -> bool:
+    """Long text → parts (was cut at 4096 → 400); a part whose HTML Telegram rejects is
+    re-sent as plain text so a markup slip never drops an alert (2026-09-28)."""
+    from lib.tg_split import chunks, plain
+    ok = False
+    try:
+        ok = True
+        for part in chunks(text):
+            sent = _post_one(tok, chat, part, loud=loud, html=html)
+            if not sent and html:
+                sent = _post_one(tok, chat, plain(part), loud=loud, html=False)
+            ok = ok and sent
         return ok
     finally:
         try:   # passive send record (lib/tg_ledger.py), never affects the send (2026-09-28)

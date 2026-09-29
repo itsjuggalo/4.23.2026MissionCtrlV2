@@ -580,13 +580,19 @@ def send(fn, msg, html=False):
                 return {"ok": False, "description": str(e)}
         except Exception as e:
             return {"ok": False, "description": str(e)}
-    r = _post(msg, "HTML" if html else None)
-    if not r.get("ok") and html and "parse" in str(r.get("description", "")).lower():
-        print(f"html rejected ({r.get('description')}) — resending plain")
-        r = _post(_strip_html(msg), None)
-    print("sent" if r.get("ok") else f"fail: {r.get('description')}")
-    _ledger(fn, msg, r.get("ok"), html)
-    return 0 if r.get("ok") else 1
+    sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+    from lib.tg_split import chunks   # >4096 used to fail outright ("message is too long") — 2026-09-28
+    ok, why = True, ""
+    for part in chunks(msg):
+        r = _post(part, "HTML" if html else None)
+        if not r.get("ok") and html and "parse" in str(r.get("description", "")).lower():
+            print(f"html rejected ({r.get('description')}) — resending plain")
+            r = _post(_strip_html(part), None)
+        if not r.get("ok"):
+            ok, why = False, r.get("description")
+    print("sent" if ok else f"fail: {why}")
+    _ledger(fn, msg, ok, html)
+    return 0 if ok else 1
 
 
 def _resolve(fn):

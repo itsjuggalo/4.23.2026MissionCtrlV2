@@ -57,6 +57,28 @@ def source() -> str:
         return os.path.basename(sys.argv[0] or "?")
 
 
+def source_chain(depth: int = 5) -> list[str]:
+    """Every script in this process's ancestry, nearest first — e.g. [mc_sms.py,
+    btc_sentiment.py] when a shared helper sends for its caller (2026-09-28)."""
+    out = []
+    s = _script_of(sys.argv)
+    if s:
+        out.append(s)
+    pid = os.getppid()
+    for _ in range(depth):
+        try:
+            argv = Path(f"/proc/{pid}/cmdline").read_bytes().decode(errors="replace").split("\0")
+            s = _script_of(argv)
+            if s and s not in out:
+                out.append(s)
+            pid = int(Path(f"/proc/{pid}/stat").read_text().rsplit(")", 1)[1].split()[1])
+            if pid <= 1:
+                break
+        except Exception:
+            break
+    return out
+
+
 def record(fn: str, text: str, ok: bool, *, html: bool = False, src: str | None = None) -> None:
     try:
         text = text or ""

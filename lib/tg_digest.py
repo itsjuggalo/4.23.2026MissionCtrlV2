@@ -90,10 +90,11 @@ def intercept(fn: str, text: str, html: bool = True) -> bool:
         if not enabled() or fn not in LANES or not text:
             return False
         sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
-        from lib.tg_ledger import source
+        from lib.tg_ledger import source, source_chain
         src = source()
-        if src in RELANE:
-            return _relane(RELANE[src], text, html)
+        lane = next((RELANE[s] for s in [src, *source_chain()] if s in RELANE), None)
+        if lane:                                   # also catches shared helpers (mc_sms.py) sending for btc_*
+            return _relane(lane, text, html)
         if mode(src, text, html) != "digest":
             return False
         con = _con()
