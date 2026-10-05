@@ -153,13 +153,112 @@ def _telegram_ack(status, body, expected_chat):
             and chat["id"] == expected)
 
 
-def _qualified_parts(parts):
+def _html_units(text):
+    """Conservative raw UTF-16 budget, including markup and escaped entities."""
+    return sum(2 if ord(char) > 0xffff else 1 for char in text)
+
+
+def _scorecard_html_tokens(text):
+    """Validate the scorecard's narrow HTML dialect before splitting anything.
+
+    Text runs, including adjacent entities, stay indivisible: a price, strike or
+    date is never cut between messages. Unsupported/malformed markup fails closed.
+    """
+    if type(text) is not str or not text.strip():
+        return None
+    named = {"&amp;": "&", "&lt;": "<", "&gt;": ">", "&quot;": '"'}
+    tokens, stack, word = [], [], []
+    visible, index = False, 0
+
+    def flush_word():
+        if word:
+            tokens.append(("text", "".join(word), ""))
+            word.clear()
+
+    while index < len(text):
+        char = text[index]
+        if char == "<":
+            flush_word()
+            match = re.match(r"</?(b|i)>", text[index:index + 4])
+            if match is None:
+                return None
+            raw, tag = match.group(0), match.group(1)
+            if raw.startswith("</"):
+                if not stack or stack[-1] != tag:
+                    return None
+                stack.pop()
+                kind = "close"
+            else:
+                stack.append(tag)
+                kind = "open"
+            tokens.append((kind, raw, tag))
+            index += len(raw)
+            continue
+        if char == ">":
+            return None
+        raw, decoded = char, char
+        if char == "&":
+            end = text.find(";", index + 1)
+            if end == -1:
+                return None
+            raw = text[index:end + 1]
+            decoded = named.get(raw)
+            if decoded is None:
+                if re.fullmatch(r"&#[0-9]+;", raw):
+                    digits, base = raw[2:-1], 10
+                elif re.fullmatch(r"&#[xX][0-9a-fA-F]+;", raw):
+                    digits, base = raw[3:-1], 16
+                else:
+                    return None
+                try:
+                    value = int(digits, base)
+                except ValueError:
+                    return None
+                if not 0 < value <= 0x10ffff or 0xd800 <= value <= 0xdfff:
+                    return None
+                decoded = chr(value)
+        value = ord(decoded)
+        if 0xd800 <= value <= 0xdfff or (value < 32 and decoded not in "\t\n\r"):
+            return None
+        if decoded.isspace():
+            flush_word()
+            tokens.append(("text", raw, ""))
+        else:
+            visible = True
+            word.append(raw)
+        index += len(raw)
+    flush_word()
+    return tokens if visible and not stack else None
+
+
+def _qualified_parts(text):
+    """Split the original card into independently balanced, qualified HTML parts."""
     warning = "\n<i>MODEL ONLY · quote age/identity UNKNOWN · not an entry, fill or exit instruction.</i>"
-    if type(parts) is not list or not parts:
+    tokens = _scorecard_html_tokens(text)
+    if tokens is None:
         return []
-    if any(type(part) is not str or not part.strip() or len(part + warning) > 4096 for part in parts):
-        return []
-    return [part + warning for part in parts]
+    parts, stack, current = [], [], []
+    units, has_text = 0, False
+    warning_units = _html_units(warning)
+    for kind, raw, tag in tokens:
+        next_stack = stack + [tag] if kind == "open" else stack[:-1] if kind == "close" else stack
+        closing_units = sum(len(item) + 3 for item in next_stack)
+        raw_units = _html_units(raw)
+        if units + raw_units + closing_units + warning_units > 4096:
+            if not has_text:
+                return []
+            parts.append("".join(current) + "".join("</" + item + ">" for item in reversed(stack)) + warning)
+            prefix = "".join("<" + item + ">" for item in stack)
+            current, units, has_text = [prefix], _html_units(prefix), False
+            if units + raw_units + closing_units + warning_units > 4096:
+                return []
+        current.append(raw)
+        units += raw_units
+        stack = next_stack
+        has_text = has_text or kind == "text"
+    if has_text:
+        parts.append("".join(current) + warning)
+    return parts
 
 
 def _key():
@@ -411,8 +510,7 @@ def main() -> int:
     except Exception:
         _diagnostic("telegram_unverified")
         return 1
-    from lib.tg_split import chunks
-    parts = _qualified_parts(chunks(card))
+    parts = _qualified_parts(card)
     accepted = 0
     for part in parts:
         if _tg("sendMessage", chat_id=chat_id, text=part, parse_mode="HTML") is True:
