@@ -1,22 +1,15 @@
 #!/home/itsju/.venv/bin/python
-"""options_position_scorecard.py — Options Mastery: the live "take-this-contract"
-grid read applied to the CURRENT Firebase Relay contract universe.
+"""Protective staged copy of the Trading Recaps contract scorecard.
 
-The Academy's price×time grid + POP/expected-move math, run on the relay's own
-high-interest contracts (Name/Name2/Vivid feeds + Yahoo OI-flow, via /api/firebase-relay)
-and pushed to his phone (Telegram) + OneDrive. For each contract: delta, theta RENT
-(%/day of premium), POP (finish past breakeven), expected 1σ move vs the move it still
-NEEDS, and the three exit marks (T1/stop from the relay's own targets when set, else
-+50%/−50% off current mid, 21-DTE theta cliff) — plus a one-line disciplined verdict and
-the relay×dark-pool confluence tag. READ-ONLY: never places or cancels an order.
+Loaded relay contracts are model inputs, not confirmed holdings or executable
+recommendations. Source times, settlement, deliverables and identity are unverified
+here. The legacy calculations, thresholds, IV fallback and target/stop policy are
+retained; presentation discloses those assumptions rather than asserting LIVE,
+an empirical edge, or plan eligibility. Nothing places or cancels an order.
 
-2026-09-15: portfolio views retired site-wide — there is no live holdings feed, so this
-no longer reads Mike's own positions (Alpaca /v2/positions is retired here too, per
-Alpaca-as-data-feed-only doctrine). It reads the relay's flagged universe instead;
-current spot ("_spot") stays on Alpaca as a free market-DATA read only.
-
-Run:  options_position_scorecard.py        (send to TG + write OneDrive)
-      DRY=1 options_position_scorecard.py   (print the card, send nothing)
+Activation and installed-path receipts belong in the deployment register. Running
+this source performs the existing data reads, sends and OneDrive writes; DRY=1 is
+not an offline fixture. Tests must extract reviewed functions with explicit mocks.
 """
 from __future__ import annotations
 import json, os, re, sys
@@ -28,14 +21,12 @@ from zoneinfo import ZoneInfo
 sys.path.insert(0, "/AIWorkWSL/labs/quantum/src")
 import theo  # noqa: E402
 sys.path.insert(0, str(Path.home() / "scripts"))
-from tg_format import hdr, esc, footer  # noqa: E402  (2026-09-15 format sweep)
+from tg_format import hdr, esc, footer  # noqa: E402
 
 SEC = Path.home() / ".openclaw" / "secrets"
-TOKEN_FILE = SEC / "telegram_mc_skill_bot_token"   # @MMCTRL727_Bot "Trading Recaps" (2026-09-28)
+TOKEN_FILE = SEC / "telegram_mc_skill_bot_token"   # @MMCTRL727_Bot "Trading Recaps"
 CHAT_FILE = SEC / "telegram-chat-id.txt"
-# NOTE: Alpaca PAPER/account endpoint is retired here (2026-09-15) — Alpaca survives
-# ONLY as a free market-DATA feed (see DATA / _spot below). Never re-add an
-# account/positions/equity read.
+# Alpaca is market DATA only; never add account/positions/order reads.
 DATA = "https://data.alpaca.markets"
 RELAY_URL = "http://localhost:3000/api/firebase-relay"
 DARKPOOL_URL = "http://localhost:3000/api/darkpool?view=relay"
@@ -43,6 +34,132 @@ ET = ZoneInfo("America/New_York")
 DRY = os.environ.get("DRY") == "1"
 ONEDRIVE = Path("/mnt/c/Users/itsju/OneDrive/Desktop/From Claude To Mike")
 import urllib.request  # noqa: E402
+
+
+def _diagnostic(code):
+    """Static best-effort observability; no response, URL, input or exception echo."""
+    messages = {"relay_failed": "relay request unverified",
+                "relay_malformed": "relay response malformed",
+                "darkpool_failed": "dark-pool context unverified",
+                "darkpool_malformed": "dark-pool response malformed",
+                "model_failed": "model row unavailable",
+                "telegram_unverified": "Telegram acceptance unverified",
+                "copy_failed": "OneDrive copy unverified"}
+    try:
+        print("[scorecard] " + messages.get(code, "operation unverified"))
+    except Exception:
+        pass
+
+
+def _finite(value):
+    return type(value) in (int, float) and value == value and abs(value) != float("inf")
+
+
+def _body_state(body):
+    if type(body) is not dict:
+        return "MALFORMED"
+    ok, error = body.get("ok"), body.get("error")
+    if ("ok" in body and type(ok) is not bool) or (error is not None and type(error) is not str):
+        return "MALFORMED"
+    if ok is False or (error is not None and error.strip()):
+        return "FAILED"
+    return "LOADED"
+
+
+def _relay_response(body):
+    state = _body_state(body)
+    rows = body.get("signals") if type(body) is dict else None
+    if state != "LOADED" or type(rows) is not list:
+        return {"state": state if state != "LOADED" else "MALFORMED",
+                "rows": [], "input_count": None, "omitted": None}
+    return {"state": "LOADED", "rows": rows, "input_count": len(rows), "omitted": 0}
+
+
+def _coverage_text(coverage, shown, model_omitted, render_omitted=0):
+    count, omitted = coverage.get("input_count"), coverage.get("omitted")
+    if type(count) is not int or type(omitted) is not int:
+        return "Loaded-response coverage UNKNOWN; request state " + coverage.get("state", "UNKNOWN") + "."
+    return (f"Loaded-response coverage: {count} rows; {shown} model cards; "
+            f"{omitted} mapping omissions; {model_omitted} model/data omissions; "
+            f"{render_omitted} render omissions. "
+            "This is not all-market coverage.")
+
+
+def _presentation_evidence(card, now):
+    pos = card["pos"]
+    lines = ["MODEL ONLY — option quote / IEX trade source times and age UNKNOWN.",
+             "Contract identity, deliverable and settlement verification UNKNOWN."]
+    expiry = pos.get("exp")
+    if type(expiry) is date and expiry < now.date():
+        lines.append("PAST DISPLAYED EXPIRY — retained legacy model output, not current contract pricing.")
+    elif type(expiry) is date and expiry == now.date():
+        lines.append("SAME-DAY SETTLEMENT UNKNOWN — no execution eligibility established.")
+    else:
+        lines.append("Displayed expiry uses legacy ET conversion; source expiry semantics unverified.")
+    if not card.get("iv"):
+        lines.append("IV: assumed 30% fallback; Greeks/probability/move are assumption-based.")
+    elif _finite(card.get("iv")) and card["iv"] > 0:
+        lines.append("IV: inverted from supplied mid; source validity and calibration UNKNOWN.")
+    else:
+        lines.append("IV/model input invalid or nonfinite; legacy numeric output unverified.")
+    lines.append("Legacy horizon: calendar DTE with synthetic minimum 0.5 day; POP uses zero drift.")
+    lines.append("Model probability is not an empirical win rate or evidence of an edge.")
+    if not pos.get("_side_known", False):
+        lines.append("Source option side UNKNOWN; legacy model's side selection is unverified.")
+    if not pos.get("_quote_valid", False):
+        lines.append("Supplied two-sided quote validity UNKNOWN; model numbers are unverified.")
+    return lines
+
+
+def _renderable_card(card):
+    """Display-only validation; never repairs a number or changes the legacy model."""
+    if type(card) is not dict or type(card.get("pos")) is not dict:
+        return False
+    pos = card["pos"]
+    if type(pos.get("exp")) is not date or not _finite(pos.get("strike")):
+        return False
+    flags, verdict = pos.get("flags", []), card.get("verdict")
+    if type(flags) is not list or any(type(flag) is not str for flag in flags):
+        return False
+    if type(verdict) is not list or any(type(line) is not str for line in verdict):
+        return False
+    if any(not _finite(card.get(key)) for key in
+           ("spot", "mark", "be", "dte", "need_pct", "one_sig_pct", "t1", "stop", "cliff")):
+        return False
+    return all(card.get(key) is None or _finite(card[key]) for key in
+               ("delta", "theta_day", "theta_pct", "pop"))
+
+
+def _chat_number(value):
+    if type(value) is int:
+        return value
+    if type(value) is str and re.fullmatch(r"-?[0-9]+", value.strip()):
+        try:
+            return int(value.strip())
+        except ValueError:
+            return None
+    return None
+
+
+def _telegram_ack(status, body, expected_chat):
+    expected = _chat_number(expected_chat)
+    if type(status) is not int or not 200 <= status < 300 or type(body) is not dict or body.get("ok") is not True:
+        return False
+    result = body.get("result")
+    if type(result) is not dict or type(result.get("message_id")) is not int or result["message_id"] <= 0:
+        return False
+    chat = result.get("chat")
+    return (expected is not None and type(chat) is dict and type(chat.get("id")) is int
+            and chat["id"] == expected)
+
+
+def _qualified_parts(parts):
+    warning = "\n<i>MODEL ONLY · quote age/identity UNKNOWN · not an entry, fill or exit instruction.</i>"
+    if type(parts) is not list or not parts:
+        return []
+    if any(type(part) is not str or not part.strip() or len(part + warning) > 4096 for part in parts):
+        return []
+    return [part + warning for part in parts]
 
 
 def _key():
@@ -57,15 +174,31 @@ def _get(url: str):
 
 
 def _tg(method, **kwargs):
-    token = TOKEN_FILE.read_text().strip()
+    """One attempt only. Strict application ACK is acceptance, not recipient delivery."""
+    response = None
     try:
-        return urllib.request.urlopen(urllib.request.Request(
+        text = kwargs.get("text")
+        if method != "sendMessage" or type(text) is not str or not text.strip() or len(text) > 4096:
+            _diagnostic("telegram_unverified")
+            return False
+        token = TOKEN_FILE.read_text().strip()
+        response = urllib.request.urlopen(urllib.request.Request(
             f"https://api.telegram.org/bot{token}/{method}",
             data=json.dumps(kwargs).encode(), headers={"Content-Type": "application/json"}),
             timeout=15)
-    except Exception as e:
-        print(f"tg {method} error: {e}")
-        return None
+        accepted = _telegram_ack(response.status, json.loads(response.read()), kwargs.get("chat_id"))
+        if not accepted:
+            _diagnostic("telegram_unverified")
+        return accepted
+    except Exception:
+        _diagnostic("telegram_unverified")
+        return False
+    finally:
+        if response is not None:
+            try:
+                response.close()
+            except Exception:
+                pass
 
 
 def _spot(sym: str):
@@ -81,52 +214,62 @@ def ncdf(x: float) -> float:
 
 
 def _relay_universe():
-    """Current contract universe from the Firebase Signal Relay (Name/Name2/Vivid feeds
-    + Yahoo OI-flow), via /api/firebase-relay — replaces the retired Alpaca /v2/positions
-    read (2026-09-15: no live holdings feed exists anywhere in the stack). This is the
-    relay's own flagged universe, not anything confirmed as a position Mike holds.
-    Fails soft: any fetch/parse error returns an empty list, never raises."""
+    """Existing single relay read; explicit request and mapping coverage, not holdings."""
     try:
         req = urllib.request.Request(RELAY_URL, headers={"User-Agent": "Mozilla/5.0"})
         d = json.loads(urllib.request.urlopen(req, timeout=15).read())
-    except Exception as e:
-        print(f"relay universe error: {e}")
-        return []
+    except Exception:
+        _diagnostic("relay_failed")
+        return {"state": "FAILED", "rows": [], "input_count": None, "omitted": None}
+    envelope = _relay_response(d)
+    if envelope["state"] != "LOADED":
+        _diagnostic("relay_malformed" if envelope["state"] == "MALFORMED" else "relay_failed")
+        return envelope
     out = []
-    for s in d.get("signals") or []:
-        strike, expiry_ms = s.get("strike"), s.get("expiryMs")
-        if strike is None or not expiry_ms:
-            continue
+    for s in envelope["rows"]:
         try:
+            strike, expiry_ms = s.get("strike"), s.get("expiryMs")
+            if strike is None or not expiry_ms:
+                envelope["omitted"] += 1
+                continue
             exp = datetime.fromtimestamp(expiry_ms / 1000, tz=ET).date()
+            bid, ask = s.get("bid"), s.get("ask")
+            mid = (bid + ask) / 2 if (bid is not None and ask is not None) else None
+            out.append({"id": s.get("id"), "root": s.get("ticker"), "exp": exp,
+                        "kind": "put" if s.get("isPut") else "call", "strike": float(strike),
+                        "mid": mid, "buyTarget": s.get("buyTarget"), "sellTarget": s.get("sellTarget"),
+                        "stopLoss": s.get("stopLoss"), "flags": s.get("flags") or [],
+                        "_side_known": type(s.get("isPut")) is bool,
+                        "_quote_valid": _finite(bid) and _finite(ask) and 0 < bid <= ask})
         except Exception:
-            continue
-        bid, ask = s.get("bid"), s.get("ask")
-        mid = (bid + ask) / 2 if (bid is not None and ask is not None) else None
-        out.append({"id": s.get("id"), "root": s.get("ticker"), "exp": exp,
-                    "kind": "put" if s.get("isPut") else "call", "strike": float(strike),
-                    "mid": mid, "buyTarget": s.get("buyTarget"), "sellTarget": s.get("sellTarget"),
-                    "stopLoss": s.get("stopLoss"), "flags": s.get("flags") or []})
-    return out
+            envelope["omitted"] += 1
+    envelope["rows"] = out
+    return envelope
 
 
 def _darkpool_tags():
-    """relay x dark-pool confluence tags from /api/darkpool?view=relay, keyed both by
-    signal id (exact match) and by (ticker, strike) as a fallback since a relay signal's
-    id can change on reissue while ticker+strike stays stable. Advisory only — an
-    informational tag next to the grid read, never a filter. Fails soft."""
+    """Preserved legacy join; presentation calls association and source age unverified."""
     try:
         req = urllib.request.Request(DARKPOOL_URL, headers={"User-Agent": "Mozilla/5.0"})
         d = json.loads(urllib.request.urlopen(req, timeout=15).read())
-    except Exception as e:
-        print(f"darkpool tag fetch error: {e}")
-        return {}, {}
-    sigs = ((d.get("relayConfluence") or {}).get("signals")) or []
+        state = _body_state(d)
+        relay = d.get("relayConfluence") if type(d) is dict else None
+        sigs = relay.get("signals") if type(relay) is dict else None
+        if state != "LOADED" or type(sigs) is not list:
+            _diagnostic("darkpool_malformed" if state != "FAILED" else "darkpool_failed")
+            return {}, {}, state if state != "LOADED" else "MALFORMED"
+    except Exception:
+        _diagnostic("darkpool_failed")
+        return {}, {}, "FAILED"
     by_id, by_ts = {}, {}
+    state = "LOADED"
     for s in sigs:
-        by_id[s.get("id")] = s
-        by_ts.setdefault((s.get("ticker"), s.get("strike")), s)
-    return by_id, by_ts
+        try:
+            by_id[s.get("id")] = s
+            by_ts.setdefault((s.get("ticker"), s.get("strike")), s)
+        except Exception:
+            state = "PARTIAL"
+    return by_id, by_ts, state
 
 
 def _dp_tag_for(pos: dict, by_id: dict, by_ts: dict):
@@ -135,9 +278,7 @@ def _dp_tag_for(pos: dict, by_id: dict, by_ts: dict):
 
 
 def scorecard(pos: dict):
-    """Compute the grid-derived read for one relay contract. Returns a dict + a verdict
-    line. `pos` has no held-position fields (qty/avg cost/P&L) — this is a prospective
-    read on the relay's current mid, not Mike's own book."""
+    """Legacy numerical model retained; no held-position fields or eligibility claim."""
     spot = _spot(pos["root"])
     mark = pos["mid"]
     if not spot or not mark:
@@ -152,7 +293,6 @@ def scorecard(pos: dict):
     be = K + mark if kind == "call" else K - mark
     moneyness = "ITM" if ((kind == "call" and spot > K) or (kind == "put" and spot < K)) else "OTM"
 
-    # POP (finish past breakeven), expected 1σ vs needed move
     sig = iv or 0.30
     srt = sig * sqrt(T)
     pop = (ncdf((log(spot / be) - 0.5 * sig * sig * T) / srt) if kind == "call"
@@ -161,32 +301,25 @@ def scorecard(pos: dict):
     need_pct = abs((be - spot) / spot * 100)
     theta_pct = abs(theta_day) * 100 / mark if (theta_day and mark) else None
 
-    # exit marks — prefer the relay's own targets when it set them, else the grid's
-    # standard +50%/−50% off current mid
     t1 = pos.get("sellTarget") or mark * 1.5
     stop = pos.get("stopLoss") or mark * 0.5
     cliff = min(21, dte)
 
-    # one-line verdict (priority order) — signal-quality read, not a held-position P&L read
     v = []
     if pop is not None and pop >= 0.55:
-        v.append("🟢 POP above coin-flip — probability edge on top of the payoff")
+        v.append("Model probability at least 55% under legacy assumptions; no empirical edge established")
     elif pop is not None and pop < 0.30:
-        v.append("🟡 low POP — this is a payoff bet; the grid's edge is the asymmetry, size accordingly")
+        v.append("Model probability below 30% under legacy assumptions; no sizing recommendation")
     if dte <= 7 and moneyness == "OTM":
-        # NOTE: keep this DTE phrase from starting with a literal "<" — _plain()'s
-        # HTML-tag stripper below (and Telegram's own HTML parser on a live send)
-        # both treat a bare "<" as an unterminated tag and eat text up to the next
-        # ">", silently corrupting later lines. Pre-existing footgun, fixed in place.
-        v.append("⏳ under 7 DTE & OTM — theta cliff; needs a catalyst in days, not weeks")
+        v.append("Legacy model: at most 7 calendar DTE and OTM; no catalyst or entry eligibility established")
     elif dte <= 21:
-        v.append("⏳ ≤21 DTE — theta-cliff zone approaching")
+        v.append("Legacy model: at most 21 calendar DTE; synthetic horizon may apply")
     if delta is not None and abs(delta) >= 0.65:
-        v.append("ℹ️ deep ITM (~stock substitute) — little leverage left")
+        v.append("Model absolute delta at least 0.65; not proof of leverage or executable exposure")
     if theta_pct is not None and theta_pct >= 10:
-        v.append(f"🔥 ~{theta_pct:.0f}%/day rent at current mid — needs to move SOON or it bleeds")
+        v.append(f"Model theta ~{theta_pct:.0f}%/calendar day of supplied mid; not realized decay")
     if not v:
-        v.append("✅ in plan per the grid — respect the relay's T1/stop if set, else ±50% off mid")
+        v.append("Legacy model summary only; no plan, entry or exit eligibility established")
 
     return {"pos": pos, "spot": round(spot, 2), "mark": round(mark, 2), "dte": dte, "iv": iv,
             "delta": delta, "theta_day": theta_day, "theta_pct": theta_pct, "be": round(be, 2),
@@ -194,46 +327,70 @@ def scorecard(pos: dict):
             "need_pct": need_pct, "t1": t1, "stop": stop, "cliff": cliff, "verdict": v}
 
 
-def fmt_card(cards) -> str:
+def fmt_card(cards, coverage=None, model_omitted=0, darkpool_state="UNKNOWN", render_omitted=0) -> str:
     now = datetime.now(ET)
-    lines = [hdr("📟", "Live Contract Scorecard", now),
-             "<i>Current Firebase Relay high-interest contracts, read through the Academy grid.</i>", ""]
-    for c in cards:
+    display_cards = [card for card in cards if _renderable_card(card)]
+    render_omitted += len(cards) - len(display_cards)
+    lines = [hdr("📟", "Model Contract Scorecard", now),
+             "<i>Generated time, not source time. Loaded relay universe; quote age UNKNOWN.</i>",
+             esc(_coverage_text(coverage or {"state": "UNKNOWN"}, len(display_cards), model_omitted, render_omitted)),
+             esc("Dark-pool request state: " + darkpool_state + "; association/source age UNKNOWN."), ""]
+    for c in display_cards:
         p = c["pos"]
-        label = f"{esc(p['root'])} {p['strike']:g}{'C' if p['kind']=='call' else 'P'} {p['exp']:%-m/%-d}"
+        right = ("C" if p["kind"] == "call" else "P") if p.get("_side_known", False) else "? (side UNKNOWN)"
+        label = f"{esc(p['root'])} {esc(str(p['strike']))}{right} {p['exp']:%Y-%m-%d}"
         d = f"{c['delta']:+.2f}" if c["delta"] is not None else "—"
         th = f"${abs(c['theta_day'])*100:.0f}/day" + (f" ({c['theta_pct']:.0f}%)" if c["theta_pct"] is not None else "") if c["theta_day"] is not None else "—"
         pop = f"{c['pop']*100:.0f}%" if c["pop"] is not None else "—"
         flags = esc(" ".join(p.get("flags") or []))
-        lines.append(f"<b>{label}</b> · mid ${c['mark']} · {c['moneyness']} · {c['dte']}d" + (f" · {flags}" if flags else ""))
-        lines.append(f"  spot ${c['spot']} · breakeven ${c['be']} · need {c['need_pct']:.1f}% vs 1σ ±{c['one_sig_pct']:.1f}%")
-        lines.append(f"  Δ {d} · θ {th} · POP {pop}")
-        lines.append(f"  exits → T1 ${c['t1']:.2f} · stop ${c['stop']:.2f} · cliff {c['cliff']} DTE")
+        lines.append(f"<b>{label}</b> · supplied mid ${c['mark']} · model {c['moneyness']} · {c['dte']} calendar d" + (f" · source flags (unverified): {flags}" if flags else ""))
+        for evidence in _presentation_evidence(c, now):
+            lines.append("  " + esc(evidence))
+        lines.append(f"  supplied spot ${c['spot']} · model breakeven ${c['be']} · absolute BE distance {c['need_pct']:.1f}% vs model 1σ ±{c['one_sig_pct']:.1f}%")
+        lines.append(f"  model Δ {d} · θ {th} · model P(long profitable at expiry) {pop}")
+        lines.append(f"  legacy reference levels (not orders/fill guarantees) → T1 ${c['t1']:.2f} · stop ${c['stop']:.2f} · model cliff {c['cliff']} DTE")
+        lines.append("  Targets/stop: supplied relay values when truthy, otherwise +50%/−50% of supplied mid; unchanged policy.")
         for vline in c["verdict"]:
             lines.append(f"  {esc(vline)}")
         if p.get("dp_tag"):
-            lines.append(f"  DP: {esc(p['dp_tag'])} — {esc(p.get('dp_note') or '')}".rstrip(" —"))
+            lines.append(f"  Unverified DP association (legacy ID/ticker+strike join): {esc(p['dp_tag'])} — {esc(p.get('dp_note') or '')}".rstrip(" —"))
         lines.append("")
-    lines.append(footer("Read-only · relay universe, not a held position · educational, not advice. "
-                        "POP on a long option is usually <50% — the edge is the payoff "
-                        "(winners run, losses capped), not hit-rate.").lstrip("\n"))
+    lines.append(footer("Advisory · no broker orders · loaded relay universe, not held positions · MODEL ONLY. "
+                        "Identity/quote age/calibration UNKNOWN; no entry, sizing or exit recommendation. "
+                        "Stop references do not guarantee fills or maximum loss.").lstrip("\n"))
     return "\n".join(lines)
 
 
 def main() -> int:
-    universe = _relay_universe()
+    coverage = _relay_universe()
+    universe = coverage["rows"]
     if not universe:
-        print("[scorecard] no relay signals — nothing to send")
-        return 0
-    by_id, by_ts = _darkpool_tags()
+        print("[scorecard] " + _coverage_text(coverage, 0, 0))
+        return 0 if coverage["state"] == "LOADED" and coverage["input_count"] == 0 else 1
+    by_id, by_ts, darkpool_state = _darkpool_tags()
     for p in universe:
         p["dp_tag"], p["dp_note"] = _dp_tag_for(p, by_id, by_ts)
-    cards = [c for c in (scorecard(p) for p in
-             sorted(universe, key=lambda x: (x["exp"] - date.today()).days)) if c]
+    cards = []
+    model_omitted = 0
+    for p in sorted(universe, key=lambda x: (x["exp"] - date.today()).days):
+        try:
+            c = scorecard(p)
+        except Exception:
+            c = None
+            _diagnostic("model_failed")
+        if c:
+            cards.append(c)
+        else:
+            model_omitted += 1
     if not cards:
-        print("[scorecard] no spot/price data — skipping")
-        return 0
-    card = fmt_card(cards)
+        print("[scorecard] " + _coverage_text(coverage, 0, model_omitted))
+        return 1
+    display_cards = [c for c in cards if _renderable_card(c)]
+    render_omitted = len(cards) - len(display_cards)
+    if not display_cards:
+        print("[scorecard] " + _coverage_text(coverage, 0, model_omitted, render_omitted))
+        return 1
+    card = fmt_card(display_cards, coverage, model_omitted, darkpool_state, render_omitted)
 
     def _plain(s: str) -> str:
         s = re.sub(r"</?[^>]+>", "", s)
@@ -243,30 +400,32 @@ def main() -> int:
         print(_plain(card))
         return 0
 
-    # OneDrive copy (deliverable doctrine)
     try:
         ONEDRIVE.mkdir(parents=True, exist_ok=True)
         (ONEDRIVE / "options-position-scorecard.txt").write_text(_plain(card))
-    except Exception as e:
-        print(f"[scorecard] OneDrive warn: {e}")
+    except Exception:
+        _diagnostic("copy_failed")
 
-    chat_id = CHAT_FILE.read_text().strip()
-    from lib.tg_split import chunks, plain   # 9 cards ran 4.7k chars → Telegram 400 (2026-09-28)
-    r = True
-    for part in chunks(card):
-        sent = _tg("sendMessage", chat_id=chat_id, text=part, parse_mode="HTML") \
-            or _tg("sendMessage", chat_id=chat_id, text=plain(part))
-        r = r and sent is not None
-    r = r or None
-    try:   # passive send record (lib/tg_ledger.py) — 2026-09-28
+    try:
+        chat_id = CHAT_FILE.read_text().strip()
+    except Exception:
+        _diagnostic("telegram_unverified")
+        return 1
+    from lib.tg_split import chunks
+    parts = _qualified_parts(chunks(card))
+    accepted = 0
+    for part in parts:
+        if _tg("sendMessage", chat_id=chat_id, text=part, parse_mode="HTML") is True:
+            accepted += 1
+    complete = bool(parts) and accepted == len(parts)
+    try:
         from lib.tg_ledger import record
-        record("trading_recaps", card, r is not None, html=True, src="options_position_scorecard.py")
+        record("trading_recaps", card, complete, html=True, src="options_position_scorecard.py")
     except Exception:
         pass
-    if r is None:
-        return 1
-    print(f"[scorecard] sent {len(cards)} contract card(s) at {datetime.now(ET):%H:%M ET}")
-    return 0
+    print(f"[scorecard] Telegram acceptance {'ACK' if complete else 'UNVERIFIED/PARTIAL'}: "
+          f"{accepted}/{len(parts)} parts; {len(display_cards)} model card(s); not recipient-delivery proof")
+    return 0 if complete else 1
 
 
 if __name__ == "__main__":
