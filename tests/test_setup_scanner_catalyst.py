@@ -104,6 +104,14 @@ def test_agreed_target_and_acquirer():
     assert "BUYER" in t and "not the one being bought" in t
 
 
+def test_history_false_hits_fixed():
+    # found replaying 175 graded M&A alerts (07-22..10-06): "Exploration" read as speculation,
+    # "Shares Jump After Revised ... Merger Deal" read as a closed deal
+    assert SS.deal_role("SHEL", "BP Agrees To Sell 50% Stake In Tupinamba Exploration Block To Shell Offshore Brasil")["stage"] == "AGREED"
+    assert SS.deal_role("ON", "ON Semiconductor Shares Jump After Revised Synaptics Merger Deal")["stage"] != "CLOSED"
+    assert SS.deal_role("X", "Acme explores sale of its chemicals unit")["stage"] == "SPECULATION"
+
+
 def test_bare_ticker_is_case_sensitive():
     """'LW' must not match inside 'flow' — an accidental mention would invent a role."""
     assert SS._mentions(["LW"], "Cash flow merger with Acme") == []
