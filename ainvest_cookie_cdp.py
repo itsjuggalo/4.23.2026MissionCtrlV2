@@ -11,7 +11,7 @@ checks AIME actually answers with them, and only then replaces ~/.openclaw/secre
   ainvest_cookie_cdp.py --refresh  # self-renew: open the same profile headless (CDP :9347), capture, close
 Never prints cookie values. Exit 0 = cookie written and AIME healthy.
 """
-import os, re, subprocess, sys, time, urllib.request
+import os, re, subprocess, sys, time
 from pathlib import Path
 
 sys.path.insert(0, str(Path.home() / "scripts"))
@@ -20,60 +20,30 @@ import aime_client  # noqa: E402
 CHROME = "/mnt/c/Program Files/Google/Chrome/Application/chrome.exe"
 PROFILE_WIN = r"C:\Users\itsju\AppData\Local\ainvest-profile"
 COOKIE_FILE = Path.home() / ".openclaw/secrets/ainvest_cookie.txt"
-def _host():
-    """Windows Chrome's CDP is reached via the WSL default gateway (NAT networking), else localhost."""
-    try:
-        gw = subprocess.run(["ip", "route", "show", "default"], capture_output=True, text=True).stdout.split()[2]
-    except Exception:
-        gw = None
-    return [h for h in ("127.0.0.1", gw) if h]
+PS = "/mnt/c/Windows/System32/WindowsPowerShell/v1.0/powershell.exe"
+PS_SCRIPT = Path.home() / "scripts/ainvest_cdp_cookies.ps1"
 
 
-URLS = ["https://www.ainvest.com", "https://tech.ainvest.com", "https://ainvest.com"]
-
-
-def cdp_up(port, wait=0):
-    """Returns the reachable host, or None."""
-    for _ in range(max(1, wait)):
-        for h in _host():
-            try:
-                urllib.request.urlopen(f"http://{h}:{port}/json/version", timeout=3).read(); return h
-            except Exception:
-                pass
-        time.sleep(1)
-    return None
-
-
-def _ws(host, port):
-    """Chrome advertises ws://127.0.0.1:…; from WSL that must point at the reachable host."""
-    import json
-    v = json.load(urllib.request.urlopen(f"http://{host}:{port}/json/version", timeout=5))
-    return re.sub(r"^ws://[^/]+", f"ws://{host}:{port}", v["webSocketDebuggerUrl"])
-
-
-def capture(host, port):
-    """Raw CDP (browser target): optionally open AInvest so it re-issues the session, then Storage.getCookies."""
-    import json, websocket
-    ws = websocket.create_connection(_ws(host, port), timeout=30, suppress_origin=True)
-    n = [0]
-
-    def call(method, **params):
-        n[0] += 1; ws.send(json.dumps({"id": n[0], "method": method, "params": params}))
-        while True:
-            msg = json.loads(ws.recv())
-            if msg.get("id") == n[0]: return msg.get("result", {})
-    try:
-        if port != 9333:   # headless refresh: touch AInvest so the site refreshes its session cookies
-            tid = call("Target.createTarget", url="https://www.ainvest.com/")["targetId"]
-            time.sleep(8); call("Target.closeTarget", targetId=tid)
-        cookies = [c for c in call("Storage.getCookies").get("cookies", []) if c["domain"].lstrip(".").endswith("ainvest.com")]
-    finally:
-        ws.close()
-    seen, parts = set(), []
-    for c in sorted(cookies, key=lambda c: c["domain"].startswith(".")):   # host-specific first
-        if c["name"] not in seen:
-            seen.add(c["name"]); parts.append(f"{c['name']}={c['value']}")
-    return "; ".join(parts), seen
+def capture(port, touch, wait=30):
+    """Cookies via a Windows-side PowerShell CDP client on 127.0.0.1 (Chrome's debug port is never exposed).
+    Returns (Cookie header, names) or (None, error text)."""
+    win = subprocess.run(["wslpath", "-w", str(PS_SCRIPT)], capture_output=True, text=True).stdout.strip()
+    err = ""
+    for _ in range(max(1, wait // 3)):
+        r = subprocess.run([PS, "-NoProfile", "-ExecutionPolicy", "Bypass", "-File", win, "-Port", str(port)] + (["-Touch"] if touch else []),
+                           capture_output=True, text=True, timeout=90)
+        out = r.stdout.strip()
+        if r.returncode == 0 and out.startswith("["):
+            import json
+            cookies = json.loads(out)
+            seen, parts = set(), []
+            for c in sorted(cookies, key=lambda c: c["domain"].startswith(".")):   # host-specific first
+                if c["name"] not in seen:
+                    seen.add(c["name"]); parts.append(f"{c['name']}={c['value']}")
+            return "; ".join(parts), seen
+        err = (r.stderr.strip().splitlines() or ["no output"])[0][:120]
+        time.sleep(3)
+    return None, err
 
 
 def healthy_with(header):
@@ -98,15 +68,14 @@ def main():
                                  "--headless=new", "--no-first-run", "--no-default-browser-check", "about:blank"],
                                 stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
     try:
-        host = cdp_up(port, wait=30)
-        if not host:
-            print(f"CDP :{port} not reachable" + ("" if refresh else " — run ~/bin/ainvest-view-launch.sh first")); return 2
-        header, names = capture(host, port)
+        header, names = capture(port, touch=refresh)
     finally:
         if proc:
-            subprocess.run(["/mnt/c/Windows/System32/WindowsPowerShell/v1.0/powershell.exe", "-NoProfile", "-Command",
+            subprocess.run([PS, "-NoProfile", "-Command",
                             f"Get-CimInstance Win32_Process -Filter \"name='chrome.exe'\" | Where-Object {{ $_.CommandLine -like '*remote-debugging-port={port}*' }} | ForEach-Object {{ Stop-Process -Id $_.ProcessId -Force }}"],
                            stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL, timeout=30)
+    if header is None:
+        print(f"CDP :{port} not readable ({names})" + ("" if refresh else " — run ~/bin/ainvest-view-launch.sh first")); return 2
     ok, why = healthy_with(header)
     print(f"cookies {len(names)} (sess_tk={'sess_tk' in names}, userid={'userid' in names}) · AIME {'OK' if ok else 'REFUSED: ' + why}")
     if not ok: return 1
