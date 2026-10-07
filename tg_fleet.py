@@ -162,6 +162,12 @@ CHARTER = {
             "http://localhost:3000/api/decision?symbol=SPY",
             "http://localhost:3000/api/macro-regime",
         ],
+        # Producers deliberately silenced (crontab "silenced 2026-09-30"): the checker
+        # reports PAUSED (WARN), not a dead-upstream FAIL. Remove an entry on un-silence.
+        paused={
+            "/AIWorkWSL/labs/quantum/out/best_contracts.json": dict(since="2026-09-30",
+                reason="producer silenced by Mike"),
+        },
         dry_run_cmd=[f"{_H}/.venv/bin/python",
                      f"{_H}/05_AUTOMATION/scripts/morning_command.py", "--dry-run"],
     ),
@@ -294,12 +300,16 @@ CHARTER = {
         fleet="flow_digest",
         owns=["top-3 flow picks above the calibrated score floor"],
         never=["ungated/below-floor picks"],
-        cadence="10:05 card + :10,:30,:50 10-15 ET override + 16:20 grader Mon-Fri",
-        cadence_min=20,
+        cadence="10:05 card Mon-Fri (override :10,:30,:50 10-15 + 16:20 grader + quiz SILENCED 2026-09-30)",
+        cadence_min=24 * 60,  # only the daily 10:05 card remains; 20 was the silenced override cadence
         reads=[
             "/AIWorkWSL/trading/signals/option-scraper/data/best3.log",
             "/AIWorkWSL/trading/signals/option-scraper/data/best3_scoreboard.json",
         ],
+        paused={
+            "/AIWorkWSL/trading/signals/option-scraper/data/best3_scoreboard.json": dict(
+                since="2026-09-30", reason="producer silenced by Mike (grader)"),
+        },
         # Round 2: both scripts already had --eod --dry-run (argparse, confirmed via
         # grep + a live run — best3_grader prints the scoreboard/calibration/floor
         # buckets, scoreboard_auditor prints "no open virtual trades", both exit 0,
@@ -345,6 +355,12 @@ CHARTER = {
             "/AIWorkWSL/labs/quantum/out/premium_income.json",
             "http://localhost:3000/api/decision?symbol=SPY",
         ],
+        paused={
+            "/AIWorkWSL/labs/quantum/out/iv_forecast.json": dict(since="2026-09-30",
+                reason="producer silenced by Mike (supercomputer.sh/quantum_sniper)"),
+            "/AIWorkWSL/labs/quantum/out/premium_income.json": dict(since="2026-09-30",
+                reason="producer silenced by Mike (supercomputer.sh/quantum_sniper)"),
+        },
         # Round 2 fix: iv_tg.py is "Dry-run by default; --send pushes via Telegram" (its
         # own docstring) — it only defines `--send` via strict argparse, so the v1
         # `--dry-run` argv would have hit argparse's unrecognized-argument error (exit 2,
