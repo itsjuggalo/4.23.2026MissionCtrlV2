@@ -1,15 +1,20 @@
 # Brief Generation Instructions (shared across all brief types)
 
+You are writing Mike's MissionCtrl market brief. Advisory only: Mike makes every trading decision and places every order himself (Robinhood / Coinbase). Nothing here executes trades.
+
 ## Data Sources
-Run `bash /home/ubuntu/scripts/multi-agent-brief/gather_context.sh` to get:
-- Grok sentiment (Discord last 4h)
-- Orion technicals (market regime, optimal params, signal state)
-- Live option flow (top watched, signals, picks executed/passed)
-- Recent Boba journal entries (trade decisions + reasoning)
-- Alpaca R1 (Boba) portfolio: equity, cash, positions, P&L
-- Alpaca R2 (Jazzy) portfolio: equity, cash, positions, P&L
+Run `bash /home/ubuntu/scripts/multi-agent-brief/gather_context.sh <type>` (type = premarket | morning | midday | eod | afterhours) to get:
+- Grok sentiment (Discord #grok, read-only; labeled with its as-of)
+- MissionCtrl facts: shadow facts file (`boba.briefs`), macro regime, BTC regime, crypto desk, macro/Fed, option momentum (display only) — each block carries "source ... as of <ET>"
 - Insider trading data (OpenInsider + SEC EDGAR Form 4)
-- Market snapshot (crypto, sessions, Fear & Greed)
+
+## Truth Rules (override everything else)
+1. No portfolio / holdings section. Mike's real positions are not tracked here. Never present paper books, bot books or any account as his holdings.
+2. Every number carries its source + as-of (ET). Copy them from the gather_context block it came from.
+3. A block marked STALE or UNAVAILABLE stays labeled that way ("STALE since Tue 16:45 ET"). Never fill it in, infer it, or use it as current. If a whole topic is stale, say so in one line.
+4. Never turn a headline or sentiment post into a confirmed event. "Reported / posted" is not "happened".
+5. Flow with unknown intent stays unknown. Do not call it bullish/bearish/hedge unless the data says so.
+6. Prices, levels, Greeks and regime labels come from the data verbatim; never compute or invent them. Use "no setup" rather than forcing one. Any size/risk mention respects the flat $400 max risk per trade.
 
 ## Insider Trading Interpretation Rules
 When analyzing the insider data section, apply these rules:
@@ -20,17 +25,16 @@ When analyzing the insider data section, apply these rules:
 5. Ignore automatic/compensation trades - only flag open-market cash purchases
 6. If notable insider activity exists, mention it. If not, skip it - don't force it.
 
-## Portfolio Rules
-Always include a PORTFOLIO section showing:
-- R1 (Boba): equity, day P&L, open positions with unrealized P&L
-- R2 (Jazzy): equity, day P&L, open positions with unrealized P&L
-
 ## Format Rules
-- Lead with a 1-line take (bullish/bearish/chop/mixed)
-- 3-5 labeled bullet sections with actual numbers
-- Max 1800 chars total
-- No fluff, no filler. Numbers over words.
-- End with a specific actionable item per brief type
+Message order, always:
+1. What changed (lead with a 1-line take: bullish / bearish / chop / mixed, then the changes)
+2. Why it matters
+3. Key level / risk
+4. Source + as-of (one compact line per source used)
+5. What is unknown (stale/unavailable inputs, conflicts left unresolved)
+- 3-5 labeled bullet sections with actual numbers; no fluff, numbers over words.
+- Max 1800 chars total.
+- End with the brief-type closer given in the task prompt (a watch item or "no setup" — not an order).
 
 ## Discord Posting
 Write the brief to /tmp/brief_content.txt, then POST using python3:
@@ -41,7 +45,7 @@ python3 -c "
 import json, requests
 brief = open('/tmp/brief_content.txt').read()
 embed = {'title': 'BRIEF_TITLE', 'description': brief[:4000], 'color': COLOR_INT,
-         'footer': {'text': '$TIMESTAMP · ClaudeClaw multi-agent brief'}}
+         'footer': {'text': '$TIMESTAMP · MissionCtrl brief'}}
 r = requests.post('https://discord.com/api/v10/channels/CHANNEL_ID/messages',
     headers={'Authorization': f'Bot $TOKEN', 'Content-Type': 'application/json'},
     json={'embeds': [embed]}, timeout=15)
