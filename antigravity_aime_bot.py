@@ -146,6 +146,9 @@ def tg(method, req_timeout=10, **kwargs):
     r = requests.post(f"{TG_BASE}/{method}", json=kwargs, timeout=req_timeout)
     return r.json()
 
+AIME_DOWN = "[AIME unavailable: session refused (access/forbidden)]"
+
+
 def ask_aime(question: str) -> str:
     payload = {
         "question":    question,
@@ -177,6 +180,8 @@ def ask_aime(question: str) -> str:
                 try:
                     ev  = json.loads(line[5:])
                     sec = ev.get("section", {})
+                    if ev.get("answer_path") == "access/forbidden":
+                        return AIME_DOWN
                     if (ev.get("answer_path") == "other/openAnswer"
                             and sec.get("show_type") == "rich_text"):
                         answer += sec.get("text_answer", "")
@@ -297,8 +302,14 @@ def main():
                 try:
                     pinned = pins.get(key)
                     answer = ask_local(text, agent=pinned) if pinned else ask_aime(text)
+                    via = 'local:' + pinned if pinned else 'aime'
+                    # AIME refused/unreachable (cookie or account lost access, 2026-10-06): Mike's DM falls
+                    # back to the local copilot instead of a dead reply. Other chats keep the AIME-only relay.
+                    if not pinned and is_owner and (answer.startswith("[AIME") or answer.startswith("[No answer")):
+                        answer = "ℹ️ AIME is unavailable, so this answer is from the local copilot.\n\n" + ask_local(text)
+                        via = 'local:fallback'
                     send_reply(chat_id, answer)
-                    print(f"[{chat_id}] A({'local:'+pinned if pinned else 'aime'}): {len(answer)} chars", flush=True)
+                    print(f"[{chat_id}] A({via}): {len(answer)} chars", flush=True)
                 except Exception as e:
                     err = f"⚠️ bot error: {e}"
                     tg("sendMessage", chat_id=chat_id, text=err)
