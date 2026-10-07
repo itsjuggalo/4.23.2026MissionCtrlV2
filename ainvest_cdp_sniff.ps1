@@ -1,9 +1,9 @@
 # ainvest_cdp_sniff.ps1 - Windows-side CDP on 127.0.0.1 (nothing exposed). Watches every AInvest tab in the
 # ainvest-profile Chrome for the next AIME "stream-query" request (Mike types a question in AIME) and prints its
 # URL, non-secret request headers and JSON body as one JSON line. Cookie/Authorization headers are dropped.
-param([int]$Port = 9333, [int]$Minutes = 6)
+param([int]$Port = 9333, [string]$Addr = "127.0.0.1", [int]$Minutes = 6)
 $ErrorActionPreference = 'Stop'
-$v = Invoke-RestMethod -Uri "http://127.0.0.1:$Port/json/version" -TimeoutSec 10
+$v = Invoke-RestMethod -Uri "http://${Addr}:$Port/json/version" -TimeoutSec 10
 $ws = New-Object System.Net.WebSockets.ClientWebSocket
 $cts = New-Object System.Threading.CancellationTokenSource ($Minutes * 60000)
 $ws.ConnectAsync([Uri]$v.webSocketDebuggerUrl, $cts.Token).Wait()
@@ -25,7 +25,7 @@ function Recv() {
 # auto-attach to every page (existing and new) and enable Network in each
 Send 'Target.setDiscoverTargets' @{ discover = $true }
 Send 'Target.setAutoAttach' @{ autoAttach = $true; waitForDebuggerOnStart = $false; flatten = $true }
-$targets = (Invoke-RestMethod -Uri "http://127.0.0.1:$Port/json/list" -TimeoutSec 10) | Where-Object { $_.type -eq 'page' }
+$targets = (Invoke-RestMethod -Uri "http://${Addr}:$Port/json/list" -TimeoutSec 10) | Where-Object { $_.type -eq 'page' }
 foreach ($t in $targets) { Send 'Target.attachToTarget' @{ targetId = $t.id; flatten = $true } }
 $deadline = (Get-Date).AddMinutes($Minutes)
 while ((Get-Date) -lt $deadline) {

@@ -1,8 +1,8 @@
 # ainvest_cdp_eval.ps1 - Windows-side CDP (127.0.0.1 only): open -Url in the ainvest-profile Chrome, wait,
 # evaluate -Expr (async JS returning a string) in the page, print the result. Diagnostic helper for AIME.
-param([int]$Port = 9347, [string]$Url, [string]$Expr, [int]$Wait = 10)
+param([int]$Port = 9347, [string]$Addr = "127.0.0.1", [string]$Url, [string]$Expr, [int]$Wait = 10)
 $ErrorActionPreference = 'Stop'
-$v = Invoke-RestMethod -Uri "http://127.0.0.1:$Port/json/version" -TimeoutSec 10
+$v = Invoke-RestMethod -Uri "http://${Addr}:$Port/json/version" -TimeoutSec 10
 $ws = New-Object System.Net.WebSockets.ClientWebSocket
 $cts = New-Object System.Threading.CancellationTokenSource 120000
 $ws.ConnectAsync([Uri]$v.webSocketDebuggerUrl, $cts.Token).Wait()
