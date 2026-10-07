@@ -101,6 +101,11 @@ FLEET = {
     # (spare_backup / @BobaClaw removed 2026-06-21 — phantom: no real BotFather bot existed; all 20 slots are live.)
     # ── reserve pool (Mike's spare bots, folded in 2026-06-16 — named + rebranded, persona-ready) ──
     # (jazzy_relay @JazzyHazzy_Bot + orion_relay @oOrionz_Bot removed 2026-09-15 — Orion/Boba/Jazzy retired; bots stay parked in BotFather.)
+    # Repurposed 2026-10-06 (Mike: "rename them of their new purposes") — SEND-ONLY, no poller may ever getUpdates them:
+    #   flow_momentum      = Option Momentum Engine Best-3 alerts (pipeline/decision/option_momentum/alerts.py pins id 8699883048)
+    #   contract_forensics = why-it-moved case notes (pipeline/decision/option_momentum/explain.py --send contract_forensics)
+    "flow_momentum":      dict(user="JazzyHazzy_Bot",  avatar="arbiter",  role="push", src=("vault", "telegram.jazzy_relay")),
+    "contract_forensics": dict(user="oOrionz_Bot",     avatar="sentinel", role="push", src=("vault", "telegram.orion_relay")),
     "grok_scout":      dict(user="Grootk_Bot",              avatar="goliath",         role="spare",       src=("cloud", None)),
     # retired→winmeals 2026-09-15: confirmed idle (crontab line commented out, no live
     # sender referenced it) — its vault token (telegram.trend_scanner) is now also
