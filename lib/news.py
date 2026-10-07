@@ -20,6 +20,7 @@ NEVER raises — this is alert-only enrichment; a news outage must never break a
 from __future__ import annotations
 
 import json
+import re
 import urllib.parse
 import urllib.request
 from datetime import datetime, timezone
@@ -120,6 +121,49 @@ def _norm(ticker, headline, source, url, epoch) -> dict:
             "source": source or "news", "url": url or "", "epoch": float(epoch)}
 
 
+_NAMES: dict | None = None
+_GENERIC = {"THE", "FIRST", "AMERICAN", "UNITED", "GLOBAL", "INTERNATIONAL", "NATIONAL", "GENERAL", "NEW", "BANK",
+            "TRUST", "GROUP", "HOLDINGS", "CAPITAL", "ENERGY", "DIGITAL", "DATA", "TECHNOLOGIES", "TECHNOLOGY"}
+
+
+def _company_word(sym: str) -> str | None:
+    """First distinctive word of the SEC company name ("MARVELL TECHNOLOGY, INC." -> "MARVELL"), or None."""
+    global _NAMES
+    if _NAMES is None:
+        try:
+            _NAMES = json.loads((Path.home() / "LapClaw/pipeline/data/sec_company_tickers.json").read_text())
+        except Exception:
+            _NAMES = {}
+    title = (_NAMES.get(sym) or {}).get("title") or ""
+    for w in re.findall(r"[A-Za-z][A-Za-z&'-]{2,}", title):
+        if w.upper() not in _GENERIC:
+            return w.upper()
+    return None
+
+
+def names_ticker(sym: str, headline: str) -> bool:
+    """True when the headline itself names `sym` (the ticker or its company's first distinctive word)."""
+    if re.search(rf"(?<![A-Za-z]){re.escape(sym)}(?![A-Za-z])", headline or ""):
+        return True
+    w = _company_word(sym)
+    return bool(w and re.search(rf"(?<![A-Za-z]){re.escape(w)}", (headline or "").upper()))
+
+
+def _tag(syms: list[str], reqset: set, headline: str) -> str:
+    """Ticker tag for an article. Alpaca lists every ticker an article touches, so a roundup about Marvell carries
+    INTC/AMD/NVDA too (10-06 digest: "[INTC] Marvell Stock Rallies..."). Tag a requested ticker only when the
+    headline names it, or when the article lists at most 2 tickers; otherwise the first ticker the headline names;
+    otherwise none (market-wide)."""
+    named = [s for s in syms if s in reqset and names_ticker(s, headline)]
+    if named:
+        return named[0]
+    if len(syms) <= 2:
+        hit = next((s for s in syms if s in reqset), None)
+        if hit:
+            return hit
+    return next((s for s in syms if names_ticker(s, headline)), "")
+
+
 def _alpaca(symbols: list[str], limit: int = 50) -> list[dict]:
     k, s = _alpaca_keys()
     if not k or not s:
@@ -143,8 +187,7 @@ def _alpaca(symbols: list[str], limit: int = 50) -> list[dict]:
     out = []
     for it in by_id.values():
         syms = [s.upper() for s in (it.get("symbols") or [])]
-        match = next((s for s in syms if s in reqset), None)   # prefer a requested ticker tag
-        out.append(_norm(match or (syms[0] if syms else ""), it.get("headline"),
+        out.append(_norm(_tag(syms, reqset, it.get("headline") or ""), it.get("headline"),
                          it.get("source"), it.get("url"), _epoch(it.get("created_at"))))
     return out
 
@@ -258,7 +301,7 @@ def recent_headlines(symbols=None, max_items: int = 6, hours: int = 24) -> list[
 
 def headlines_block(symbols=None, title: str = "📰 HEADLINES",
                     max_items: int = 4, hours: int = 24, html: bool = False,
-                    links: bool = True, maxlen: int = 120) -> str:
+                    links: bool = True, maxlen: int = 120, only: bool = False) -> str:
     """Telegram-ready headlines block for `symbols`. Returns "" when nothing fresh
     (callers can append unconditionally — empty means no header, no noise).
 
@@ -266,7 +309,10 @@ def headlines_block(symbols=None, title: str = "📰 HEADLINES",
     links=False → drop the <a href> wrapper (still escaped) for a compact footer that
                   fits a tight char budget (e.g. the near-4096 BEST-3 digest).
     maxlen      → per-headline truncation (lower it for tighter footers)."""
-    items = recent_headlines(symbols, max_items=max_items, hours=hours)
+    items = recent_headlines(symbols, max_items=max_items * 4 if only else max_items, hours=hours)
+    if only:   # only headlines tagged to a requested ticker (no market-wide fill under a ticker title)
+        want = {s.upper() for s in ([symbols] if isinstance(symbols, str) else symbols or [])}
+        items = [it for it in items if it["ticker"] in want][:max_items]
     if not items:
         return ""
     lines = [title]
