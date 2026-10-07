@@ -126,6 +126,50 @@ class DigestTest(unittest.TestCase):
             self.assertLessEqual(len(chunk), 4096)
         self.assertIn("more — dashboard", self.sent.read_text())
 
+    # ── 2026-10-07 audit: ledger ids 2346/2377/2427 (real 10-06 queue rows) ────────────────
+    HEADLINES_MSG = ("🟡 WATCH ONLY — AVGO calls heavy\n\n📰 <b>HEADLINES</b>\n"
+                     "• [NBIS] Watching Nebius Group; Hearing Investor Business Daily Buys Stock — benzinga · 4m\n"
+                     "• [AVGO] Broadcom Pairs Custom TPU Chips with $60 Billion Debt Pack… — benzinga · 24m\n"
+                     "• [NBIS] 10 IT Stocks Whale Activity In Today’s Session — benzinga · 24m\n"
+                     "• [AMD] fourth headline is dropped — benzinga · 30m\n"
+                     "\n<i>💵 LLM cost today: $0.0000</i>")
+
+    def test_headlines_never_a_dangling_header(self):
+        self.q("flow_digest_send.py", self.HEADLINES_MSG, fn="flow_digest")
+        self.dg.flush()
+        out = self.sent.read_text()
+        self.assertNotIn("<b>HEADLINES</b>", out)                      # bare header gone
+        self.assertIn("📰 <b>NBIS</b> Watching Nebius", out)
+        self.assertEqual(out.count("📰"), 3)                           # up to 3 bullets
+        self.assertNotIn("fourth headline", out)
+
+    def test_section_with_no_rows_is_not_emitted(self):
+        self.q("flow_digest_send.py", "🔁 REPEAT — META flow again", fn="flow_digest")
+        self.q("runner_radar.py", join(hdr("📡", "Runner Radar"), row("IONQ", "+18%")))
+        self.dg.flush()
+        out = self.sent.read_text()
+        self.assertNotIn("FLOW DIGEST", out)                           # nothing under it → no header
+        self.assertIn("RUNNER RADAR", out)
+        self.assertIn("2 FYI updates folded", out)                     # but the count still includes it
+
+    def test_singular_update_grammar(self):
+        self.q("runner_radar.py", join(hdr("📡", "Runner Radar"), row("IONQ", "+18%")))
+        self.dg.flush()
+        self.assertIn("1 FYI update folded", self.sent.read_text())
+        self.assertNotIn("1 FYI updates", self.sent.read_text())
+
+    def test_trigger_ids_stripped_from_reader_text(self):
+        t = self.dg.strip_internal_ids
+        self.assertEqual(t("LITE 55 · LITE:WATCH:202610061436 — 30w rising"), "LITE 55 — 30w rising")
+        self.assertEqual(t("1. MU 1050P · comp 9.1\n   id MU:DECIPHER:202610061330"), "1. MU 1050P · comp 9.1")
+        self.assertEqual(t("WHY: bought out · UNP:SETUP:202610061330"), "WHY: bought out")
+        self.assertEqual(t("plain text, no ids at 13:30"), "plain text, no ids at 13:30")
+        self.q("explosion_score.py", "👀 <b>EXPLOSION WATCH</b>\n<b>LITE</b> 55 · LITE:WATCH:202610061436 — 30w rising; 1% off 52wH")
+        self.dg.flush()
+        out = self.sent.read_text()
+        self.assertIn("<b>LITE</b> 55 — 30w rising", out)
+        self.assertNotIn("202610061436", out)
+
 
 if __name__ == "__main__":
     unittest.main()

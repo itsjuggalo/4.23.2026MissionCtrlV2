@@ -431,6 +431,7 @@ def fmt_card(cards, coverage=None, model_omitted=0, darkpool_state="UNKNOWN", re
     display_cards = [card for card in cards if _renderable_card(card)]
     render_omitted += len(cards) - len(display_cards)
     lines = [hdr("📟", "Model Contract Scorecard", now),
+             "<b>MODEL-ONLY scorecard</b> — no fills, no realized P&amp;L; every number below is a model estimate.",
              "<i>Generated time, not source time. Loaded relay universe; quote age UNKNOWN.</i>",
              esc(_coverage_text(coverage or {"state": "UNKNOWN"}, len(display_cards), model_omitted, render_omitted)),
              esc("Dark-pool request state: " + darkpool_state + "; association/source age UNKNOWN."), ""]

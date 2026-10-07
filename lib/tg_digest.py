@@ -131,6 +131,10 @@ _STAMP = re.compile(r"\s*·\s*(Mon|Tue|Wed|Thu|Fri|Sat|Sun)\s+\d\d-\d\d\s+\d\d:\
 _ROW = re.compile(r"^([^<A-Za-z0-9]{0,14})<b>\$?([A-Z][A-Z0-9.\-/]{0,9})</b>(.*)$")
 _PROW = re.compile(r"^\s*[▸•]\s*\$?([A-Z][A-Z0-9.\-]{0,9})\b(.*)$")   # plain "▸ SMCI 62 — why"
 _TIME = re.compile(r"\s*\d{1,2}:\d\d\s*(AM|PM)?\s*(ET)?", re.I)
+# internal trigger ids ("AMD:WATCH:202610061136", "id MU:DECIPHER:...") are for logs/state, not readers
+_TRIG_ID = re.compile(r"(?:\s*[·—-]\s*|\s+id\s+|\s+)?\b[A-Z][A-Z0-9.\-]{0,9}:[A-Z_]{3,14}:\d{6,14}\b")
+_HEADLINE = re.compile(r"^\s*•\s*\[([A-Z][A-Z0-9.\-]{0,9})\]\s*(.+)$")        # "• [NBIS] headline — src · 4m"
+MAX_HEADLINES = 3
 _PULL = re.compile(r"is \$([\d,.]+).*?from is \$([\d,.]+)\s*[–-]\s*\$([\d,.]+)")
 
 
@@ -139,13 +143,18 @@ def _clip(s: str, n: int = 80) -> str:
     return s if len(s) <= n else s[: n - 1].rstrip() + "…"
 
 
+def strip_internal_ids(text: str) -> str:
+    """Drop reader-facing trigger ids; the originals stay in logs/state."""
+    return _TRIG_ID.sub("", text)
+
+
 def _esc(s: str) -> str:
     return _html.escape(s, quote=False)
 
 
 def compact(source: str, text: str, html: bool) -> tuple[str, list[tuple[str, str]]]:
     """(section title, [(key, one-line html row)]) for one queued message."""
-    src_html = text if html else _esc(text)
+    src_html = strip_internal_ids(text if html else _esc(text))
     lines = [ln for ln in src_html.split("\n") if ln.strip()]
     title = TITLES.get(source, source.rsplit(".", 1)[0].replace("_", " "))
     if lines:
@@ -153,7 +162,14 @@ def compact(source: str, text: str, html: bool) -> tuple[str, list[tuple[str, st
         if m and not _ROW.match(lines[0]):
             title = _TIME.sub("", _STAMP.sub("", _html.unescape(m.group(1)))).strip(" ·—-").title()
     rows: list[tuple[str, str]] = []
+    heads = 0
     for ln in lines:
+        hm_ = _HEADLINE.match(_plain(ln, True))
+        if hm_:                       # headline bullets: keep up to MAX_HEADLINES, never a bare header
+            if heads < MAX_HEADLINES:
+                heads += 1
+                rows.append((f"hl:{hm_.group(1)}:{heads}", f"📰 <b>{hm_.group(1)}</b> {_esc(_clip(hm_.group(2), 110))}"))
+            continue
         m = _ROW.match(ln)
         if m:
             glyph, tkr, rest = m.group(1).strip(), m.group(2), _plain(m.group(3), True)
@@ -161,8 +177,8 @@ def compact(source: str, text: str, html: bool) -> tuple[str, list[tuple[str, st
             glyph, tkr, rest = "", pm2.group(1), pm2.group(2)
         else:
             continue
-        if not rest.strip() and not glyph:
-            continue                  # a bold section label ("<b>SETUPS</b>"), not a ticker
+        if not rest.strip():
+            continue                  # a bold section label ("<b>SETUPS</b>", "📰 <b>HEADLINES</b>"), not a ticker
         if source == "pullback_autowatch.py" and (pm := _PULL.search(rest)):
             g = [x.strip(",.") for x in pm.groups()]
             rest = f"${g[0]} · buy zone ${g[1]}–${g[2]}"
@@ -192,12 +208,15 @@ def build(items: list[tuple], now: float | None = None) -> list[str]:
             sec["rows"].pop(key, None)
             sec["rows"][key] = line
     hm = lambda t: time.strftime("%H:%M", time.localtime(t))
+    n = len(items)
     head = (f"🧾 <b>TRADING DIGEST</b> · {time.strftime('%a %m-%d %H:%M ET', time.localtime(now))}\n"
-            f"{len(items)} FYI updates folded since {hm(items[0][0])} — "
+            f"{n} FYI update{'' if n == 1 else 's'} folded since {hm(items[0][0])} — "
             f"entries/exits/🟢 arrive instantly in Trading Command")
     blocks = []
     for title, sec in sections.items():
         rows = list(sec["rows"].values())
+        if not rows:
+            continue                  # never a section header with nothing under it
         more = len(rows) - MAX_ROWS
         body = "\n".join(rows[-MAX_ROWS:])
         extra = f"\n<i>+{more} more — dashboard</i>" if more > 0 else ""

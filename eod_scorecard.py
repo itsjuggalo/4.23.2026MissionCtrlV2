@@ -35,6 +35,7 @@ Run with ~/.venv/bin/python (yfinance for underlying EOD prices).
 from __future__ import annotations
 
 import json
+import re
 import sqlite3
 import sys
 import urllib.request
@@ -145,6 +146,28 @@ def _grade_picks():
     return out
 
 
+def _plan_triggered(symbol: str, direction: str, trigger: float, sent_ts: str, grade: str):
+    """Did the underlying trade through the plan's entry trigger after the alert went out?
+    True / False, or None when intraday bars are unavailable (never guessed). A TRIGGER-grade
+    alert fired at send, so it counts as triggered."""
+    if (grade or "").upper() == "TRIGGER":
+        return True
+    if symbol.upper() in CRYPTO_SYMS:
+        return None
+    try:
+        import yfinance as yf
+        h = yf.Ticker(symbol).history(period="1d", interval="5m", prepost=True)
+        if not len(h):
+            return None
+        sent = datetime.fromisoformat(sent_ts)
+        h = h[h.index >= sent.replace(second=0, microsecond=0)]
+        if not len(h):
+            return None
+        return bool(h["High"].max() >= trigger) if direction != "SHORT" else bool(h["Low"].min() <= trigger)
+    except Exception:
+        return None
+
+
 def _grade_scanner_alerts():
     """Today's setup_scanner + explosion_score alerts, self-logged (free, no Alpaca)
     to signal_outcomes.sqlite's `alerts` table. Graded here against a free Yahoo
@@ -166,7 +189,7 @@ def _grade_scanner_alerts():
         print(f"[eod-scorecard] signal_outcomes read err: {e}", flush=True)
         return []
     out, seen, spot_cache = [], set(), {}
-    for symbol, direction, grade, trigger, _sent in rows:
+    for symbol, direction, grade, trigger, sent_ts in rows:
         if not symbol or symbol in seen or not trigger:
             continue
         seen.add(symbol)
@@ -174,6 +197,7 @@ def _grade_scanner_alerts():
             spot_cache[symbol] = _last_any(symbol)
         now = spot_cache[symbol]
         r = {"symbol": symbol, "direction": (direction or "LONG").upper(), "grade": grade}
+        r["triggered"] = _plan_triggered(symbol, r["direction"], trigger, sent_ts, grade)
         if not now:
             out.append((r, None))
             continue
@@ -206,7 +230,8 @@ def _grade_rebound_triggers():
             out.append((r, None))
             continue
         move = (now - level) / level * 100
-        out.append((r, (move, move, level, now)))
+        put = bool(re.search(r"\d(?:\.\d+)?P\b", str(sketch.get("label") or "")))
+        out.append((r, (move, -move if put else move, level, now)))   # a put wants the underlying DOWN
     return out
 
 
@@ -223,7 +248,7 @@ def _post_grade_threads(graded) -> None:
                                 str(r.get("type", ""))[:1], r.get("exp"))
             label = f"{r['symbol']} ${r['strike']:g}{r['type']}"
             if not g:
-                msg = f"🏁 **EOD GRADE — {label}** — no data."
+                msg = f"🏁 **EOD GRADE — {label}** — no data: no live price from Yahoo at run time."
             else:
                 move, fav, entry, now = g
                 ic = "✅" if fav > 0.3 else ("❌" if fav < -0.3 else "➖")
@@ -320,10 +345,13 @@ def _build_discord_msg(graded, scanner_graded, rebound_graded, snr) -> str:
         lines.append("_No flow-signal picks logged today._")
 
     if scanner_graded:
-        wins = sum(1 for _, g in scanner_graded if g and g[1] > 0.3)
-        lines.append(f"\n**📡 Today's setup/explosion alerts — {wins}/{len(scanner_graded)} working:**")
+        wins, cnt = _tg_ratio(scanner_graded)
+        lines.append(f"\n**📡 Today's setup/explosion alerts (from entry trigger) — {wins}/{cnt} working:**")
         for r, g in scanner_graded:
             label = f"{r['symbol']} {r['direction']}"
+            if r.get("triggered") is False:
+                lines.append(f"   ⏸ {label} — plan never triggered, no trade")
+                continue
             if not g:
                 lines.append(f"   • {label} — no data")
                 continue
@@ -346,56 +374,89 @@ def _build_discord_msg(graded, scanner_graded, rebound_graded, snr) -> str:
     return "\n".join(lines)
 
 
-def _build_tg_msg(graded, scanner_graded, rebound_graded, snr) -> str:
-    """Telegram HTML scorecard — same data as the Discord post, tg_format.py layout
-    (2026-09-15 format sweep). Every data point above stays; layout only."""
-    blocks = [tgf.hdr("📊", "EOD Scorecard")]
+def _tg_ratio(rows, favorable_idx=1):
+    """(working, counted) over graded rows that actually triggered."""
+    live = [(r, g) for r, g in rows if g and r.get("triggered") is not False]
+    return sum(1 for _, g in live if g[favorable_idx] > 0.3), len(live)
+
+
+def _build_tg_msg(graded, scanner_graded, rebound_graded, snr, now=None) -> str:
+    """Telegram HTML scorecard — tg_format.py layout. Takeaway first; every section
+    states its basis; stock moves are never printed as option P&L (none is tracked)."""
+    now = now or datetime.now(ET)
+    clock = now.strftime("%H:%M ET")
+    blocks = [tgf.hdr("📊", "EOD Scorecard", now)]
+
+    # one-line takeaway
+    bits = []
+    if graded:
+        w, n = _tg_ratio(graded)
+        bits.append(f"flow picks {w}/{n} moved the right way")
+    if scanner_graded:
+        w, n = _tg_ratio(scanner_graded)
+        skipped = sum(1 for r, _ in scanner_graded if r.get("triggered") is False)
+        bits.append(f"setups {w}/{n} working" + (f" ({skipped} never triggered)" if skipped else ""))
+    if rebound_graded:
+        w, n = _tg_ratio(rebound_graded)
+        bits.append(f"structure {w}/{n} holding")
+    blocks.append("Takeaway: " + (" · ".join(bits) if bits else "no picks logged today")
+                  + ". Stock moves, not option P&L.")
 
     if graded:
-        wins = sum(1 for _, g in graded if g and g[1] > 0.3)
-        blocks.append(tgf.section(f"Flow picks · {wins}/{len(graded)} working"))
+        w, n = _tg_ratio(graded)
+        blocks.append(tgf.section(f"Flow picks · {w}/{n} working"))
+        blocks.append("<i>Basis: the stock's move since the pick posted, in the pick's direction.</i>")
         for r, g in graded:
-            label = f"{r['symbol']} ${r['strike']:g}{r['type']}"
+            pick = f"pick ${r['strike']:g}{r['type']}"
             if not g:
-                blocks.append(tgf.row(label, "no data"))
+                blocks.append(tgf.row(r["symbol"], "no data: no spot at post or no live price at "
+                                      + clock, pick))
                 continue
-            move, fav, entry, now = g
-            blocks.append(tgf.row(label, f"{entry:.2f}→{now:.2f}", tgf.pct(move),
+            move, fav, entry, now_px = g
+            blocks.append(tgf.row(r["symbol"], f"stock {entry:.2f}→{now_px:.2f}", tgf.pct(move), pick,
                                    glyph=_grade_glyph(fav)))
     else:
         blocks.append(tgf.section("Flow picks"))
         blocks.append("No flow-signal picks logged today.")
 
     if scanner_graded:
-        wins = sum(1 for _, g in scanner_graded if g and g[1] > 0.3)
-        blocks.append(tgf.section(f"Setup/explosion alerts · {wins}/{len(scanner_graded)} working"))
+        w, n = _tg_ratio(scanner_graded)
+        blocks.append(tgf.section(f"Setup/explosion alerts · {w}/{n} working"))
+        blocks.append("<i>Basis: from the entry trigger, not from the alert. Plans that never "
+                      "reached their trigger are not trades and are not counted.</i>")
         for r, g in scanner_graded:
             label = f"{r['symbol']} {r['direction']}"
-            if not g:
-                blocks.append(tgf.row(label, "no data"))
+            if r.get("triggered") is False:
+                blocks.append(tgf.row(label, "plan never triggered — no trade", glyph="⏸"))
                 continue
-            move, fav, entry, now = g
-            blocks.append(tgf.row(label, f"{entry:.2f}→{now:.2f}", tgf.pct(move),
+            if not g:
+                blocks.append(tgf.row(label, "no data: no live price from Yahoo at " + clock))
+                continue
+            move, fav, entry, now_px = g
+            blocks.append(tgf.row(label, f"stock from entry {entry:.2f}→{now_px:.2f}", tgf.pct(move),
                                    glyph=_grade_glyph(fav)))
 
     if rebound_graded:
-        blocks.append(tgf.section(f"Structure triggers ({len(rebound_graded)})"))
+        w, n = _tg_ratio(rebound_graded)
+        blocks.append(tgf.section(f"Structure triggers · {w}/{n} holding"))
+        blocks.append("<i>Basis: the stock's move since the level held, in the option's direction. "
+                      "Option cost is the plan's estimate, not a fill.</i>")
         for r, g in rebound_graded:
-            opt = r.get("option") or None
+            opt = f"plan {r['option']}" if r.get("option") else None
             if not g:
-                blocks.append(tgf.row(r["symbol"], opt, "no data"))
+                blocks.append(tgf.row(r["symbol"], "no data: no live price or level at " + clock, opt))
                 continue
-            move, _fav, entry, now = g
-            blocks.append(tgf.row(r["symbol"], opt, f"held {entry:.2f}→{now:.2f}", tgf.pct(move),
-                                   glyph=_grade_glyph(move)))
+            move, fav, entry, now_px = g
+            blocks.append(tgf.row(r["symbol"], f"stock held {entry:.2f}→{now_px:.2f}", tgf.pct(move), opt,
+                                   glyph=_grade_glyph(fav)))
 
     if snr:
         # strip the Discord "📰 **…**" wrapper _snr_corroboration_line() built — reuse
         # just the trailing "TICKER 76 · TICKER 70 …" payload as the footer body.
         payload = snr.split(":**", 1)[-1].strip() if ":**" in snr else snr.lstrip("\n")
         blocks.append(tgf.footer(f"SNR corroboration (≥65): {payload}"))
-    if graded:
-        blocks.append(tgf.footer("Grade = did the underlying move the pick's direction since it posted."))
+    blocks.append(tgf.footer(f"Source: Yahoo last price as of {clock}. Option P&L: not tracked (no fills). "
+                             "The nightly Signal Report Card grades since the alert, so the two can differ."))
 
     return tgf.join(*blocks)
 
