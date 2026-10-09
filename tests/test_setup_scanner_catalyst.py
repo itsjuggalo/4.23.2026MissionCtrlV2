@@ -204,3 +204,27 @@ def test_scores_and_direction_unchanged_vs_backup(monkeypatch):
     # same classification for every fixture headline
     for n in NEWS:
         assert SS.classify(n["headline"]) == orig.classify(n["headline"])
+
+
+# ---- 2026-10-08 Telegram audit (F1 / F6 / F19): display text only -------------------------
+def test_deal_size_two_decimals():
+    """PCRX headline said $1.65B; the card said $2B (audit F1)."""
+    h = "Pacira agreed to be acquired for $1.65B, $36.50/Share"
+    why = SS.deal_text("PCRX", h, 1.65e9)
+    assert "$1.65B" in why and "$2B" not in why
+    assert SS._bn(2e9) == "2" and SS._bn(1.5e9) == "1.5"
+
+
+def test_hack_wallet_move_label_only():
+    h = "U.S. government moves $1 billion in bitcoin from Bitfinex hack wallet, no sale indicated"
+    assert SS.crypto_why("HACK", h) == "a large wallet move (no sale indicated)"
+    # a real new theft keeps the original label
+    assert SS.crypto_why("HACK", "Exchange drained of $200M in hack, funds stolen") == SS.CRYPTO_EN["HACK"]
+    assert SS.crypto_why("HACK", "Hackers breach exchange") == SS.CRYPTO_EN["HACK"]
+    # other tags untouched
+    assert SS.crypto_why("WHALE", h) == SS.CRYPTO_EN["WHALE"]
+
+
+def test_internal_id_stripped_from_telegram_copy():
+    assert SS._no_id("skip: too pricey · id PCRX:SETUP:202610061230") == "skip: too pricey"
+    assert SS._no_id("id PCRX:SETUP:202610061230") == ""
