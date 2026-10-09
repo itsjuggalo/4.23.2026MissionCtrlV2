@@ -135,12 +135,25 @@ _TIME = re.compile(r"\s*\d{1,2}:\d\d\s*(AM|PM)?\s*(ET)?", re.I)
 _TRIG_ID = re.compile(r"(?:\s*[·—-]\s*|\s+id\s+|\s+)?\b[A-Z][A-Z0-9.\-]{0,9}:[A-Z_]{3,14}:\d{6,14}\b")
 _HEADLINE = re.compile(r"^\s*•\s*\[([A-Z][A-Z0-9.\-]{0,9})\]\s*(.+)$")        # "• [NBIS] headline — src · 4m"
 MAX_HEADLINES = 3
+_GATE = re.compile(r"GATE BLOCKED", re.I)
+_CAP = re.compile(r"\$400 cap|over (?:the |your )?cap|exceeds? (?:the |your )?(?:\$\d+ )?cap", re.I)
+_GSYM = re.compile(r"\bThe ([A-Z]{1,6}) (?:call|put)\b")
+_G = "\x00GATE\x00"        # sentinel row prefix: build() folds all of these into one line
+_AGE = re.compile(r"\s*·\s*\d+\s*[smhd]\s*$")
 _PULL = re.compile(r"is \$([\d,.]+).*?from is \$([\d,.]+)\s*[–-]\s*\$([\d,.]+)")
 
 
 def _clip(s: str, n: int = 80) -> str:
+    """Clip at a sentence end or word boundary (never mid-word / mid-sentence) + "…"."""
     s = re.sub(r"\s+", " ", s).strip().lstrip("·—").strip().rstrip(" ·—,")   # keep a leading "-38%"
-    return s if len(s) <= n else s[: n - 1].rstrip() + "…"
+    if len(s) <= n:
+        return s
+    cut = s[: n - 1]
+    end = max(cut.rfind(". "), cut.rfind("; "), cut.rfind(" — "))
+    if end >= n * 0.5:
+        return cut[: end + 1].rstrip(" —;") + "…"
+    sp = cut.rfind(" ")
+    return (cut[:sp] if sp >= n * 0.4 else cut).rstrip(" ,;:—-·(") + "…"
 
 
 def strip_internal_ids(text: str) -> str:
@@ -186,6 +199,14 @@ def compact(source: str, text: str, html: bool) -> tuple[str, list[tuple[str, st
         rows.append((tkr, f"{glyph}<b>{tkr}</b> {_esc(_clip(rest))}"))
     if source == "flow_digest_send.py" and _plain(text, html).lstrip().startswith("🔁"):
         return title, rows           # 🔁 REPEAT = "no new info": counted, not shown
+    if not rows and lines and _GATE.search(_plain(lines[0], True)):
+        gp = _plain(" ".join(lines), True)
+        kind = "cap" if _CAP.search(gp) else "other"
+        sym = _GSYM.search(gp)
+        tm = re.search(r"GATE BLOCKED\s*[—-]\s*(\d{1,2}:\d\d)", gp)
+        rows.append((f"gate:{tm.group(1) if tm else len(gp)}",
+                     f"{_G}{kind}\x00{sym.group(1) if sym else ''}"))
+        return title, rows
     if not rows:     # no ticker rows (verdict notes, recaps): keep the first real line(s)
         body = [_plain(ln, True) for ln in lines
                 if not ln.lstrip().startswith("<i>") and not (_HDR.match(ln) and ln is lines[0])]
@@ -195,23 +216,70 @@ def compact(source: str, text: str, html: bool) -> tuple[str, list[tuple[str, st
     return title, rows
 
 
-def build(items: list[tuple], now: float | None = None) -> list[str]:
-    """items: (ts, source, html, text) oldest→newest. Returns digest message chunks."""
+def _headline_key(line: str) -> str | None:
+    """Normalised text of a 📰 row (ticker + age dropped) so the same story isn't re-sent."""
+    if not line.startswith("📰"):
+        return None
+    t = _AGE.sub("", _plain(line, True)[1:].strip())
+    t = re.sub(r"^[A-Z][A-Z0-9.\-]{0,9}\s+", "", t.strip())
+    return re.sub(r"\W+", " ", t).strip().lower() or None
+
+
+def headline_keys(items: list[tuple]) -> set[str]:
+    """Headlines already present in earlier digests (items: (ts, source, html, text))."""
+    seen: set[str] = set()
+    for ts, src, html, text in items:
+        for _k, line in compact(src, text, bool(html))[1]:
+            k = _headline_key(line)
+            if k:
+                seen.add(k)
+    return seen
+
+
+def build(items: list[tuple], now: float | None = None, first_of_day: bool = True,
+          seen_headlines: set | None = None) -> list[str]:
+    """items: (ts, source, html, text) oldest→newest. Returns digest message chunks.
+    first_of_day: carry the one-time explainer line; seen_headlines: normalised headlines
+    already sent in an earlier digest today (dropped)."""
     now = now or time.time()
+    seen = set(seen_headlines or ())
     sections: dict[str, dict] = {}
+    gates: dict[str, tuple] = {}              # every GATE BLOCKED window → ONE line
     for ts, src, html, text in items:
         title, rows = compact(src, text, bool(html))
         sec = sections.setdefault(title, {"rows": {}, "msgs": 0, "last": ts})
         sec["msgs"] += 1
         sec["last"] = max(sec["last"], ts)
         for key, line in rows:                # newest wins, keeps first-seen order
+            if line.startswith(_G):
+                _, kind, sym = line.split("\x00")[1:]
+                gates[key] = (kind, sym)
+                continue
+            hk = _headline_key(line)
+            if hk:
+                if hk in seen:
+                    continue                  # already sent in an earlier digest today
+                seen.add(hk)
             sec["rows"].pop(key, None)
             sec["rows"][key] = line
-    hm = lambda t: time.strftime("%H:%M", time.localtime(t))
+    if gates:
+        n_g = len(gates)
+        cap = sum(1 for k, _ in gates.values() if k == "cap")
+        syms = sorted({sy for _, sy in gates.values() if sy})
+        why = ("over $400 cap" if cap == n_g else
+               (f"{cap} over $400 cap, {n_g - cap} no qualifying contract" if cap else "no qualifying contract"))
+        line = f"🔴 {n_g} blocked ({why})" + (f": {', '.join(syms)}" if syms else "")
+        gtitle = next(iter(sections), "Flow digest")
+        for t, sec in sections.items():
+            if t.lower().startswith("flow"):
+                gtitle = t
+        sections.setdefault(gtitle, {"rows": {}, "msgs": 0, "last": items[-1][0]})
+        sections[gtitle]["rows"] = {"gate": line, **sections[gtitle]["rows"]}
+    hm = lambda t: time.strftime("%-I:%M ET", time.localtime(t))
     n = len(items)
-    head = (f"🧾 <b>TRADING DIGEST</b> · {time.strftime('%a %m-%d %H:%M ET', time.localtime(now))}\n"
-            f"{n} FYI update{'' if n == 1 else 's'} folded since {hm(items[0][0])} — "
-            f"entries/exits/🟢 arrive instantly in Trading Command")
+    head = (f"🧾 <b>TRADING DIGEST</b> · {time.strftime('%a %m-%d', time.localtime(now))} {hm(now)}\n"
+            f"{n} FYI update{'' if n == 1 else 's'} folded since {hm(items[0][0])}"
+            + (" — entries/exits/🟢 arrive instantly in Trading Command" if first_of_day else ""))
     blocks = []
     for title, sec in sections.items():
         rows = list(sec["rows"].values())
@@ -269,7 +337,11 @@ def flush(dry: bool = False) -> int:
                            "WHERE flushed IS NULL ORDER BY ts").fetchall()
         if not rows:
             print("[tg-digest] nothing queued"); return 0
-        chunks = build([r[1:] for r in rows])
+        day0 = time.mktime(time.localtime()[:3] + (0, 0, 0, 0, 0, -1))
+        prior = con.execute("SELECT ts, source, html, text FROM digest_queue "
+                            "WHERE flushed IS NOT NULL AND flushed >= ? ORDER BY ts", (day0,)).fetchall()
+        chunks = build([r[1:] for r in rows], first_of_day=not prior,
+                       seen_headlines=headline_keys(prior))
         if dry:
             print("\n\n".join(chunks)); return 0
         if all(_send(c) for c in chunks):

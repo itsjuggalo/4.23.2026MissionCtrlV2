@@ -170,6 +170,42 @@ class DigestTest(unittest.TestCase):
         self.assertIn("<b>LITE</b> 55 — 30w rising", out)
         self.assertNotIn("202610061436", out)
 
+    # ── 2026-10-08 audit: GATE BLOCKED spam, mid-sentence clips, repeated headlines/header ──
+    GATES = ["🔴 GATE BLOCKED — 9:00 ET — Every contract in this window costs more than your $400 cap; needs one at $4.00 or less.",
+             "🔴 GATE BLOCKED — 10:00 ET — Every contract in this window costs more than your $400 cap. The NVDA call costs $491; a fitting contract needs a lower price.",
+             "🔴 GATE BLOCKED — 1:00 PM ET — The only setup costs $571 for one contract, above your $400 cap. Every contract in this window exceeds the cap."]
+
+    def test_gate_blocked_collapses_to_one_line(self):
+        for g in self.GATES:
+            self.q("flow_digest_send.py", g, fn="flow_digest")
+        self.dg.flush()
+        out = self.sent.read_text()
+        self.assertEqual(out.count("GATE BLOCKED"), 0)
+        self.assertIn("🔴 3 blocked (over $400 cap): NVDA", out)
+        self.assertEqual(out.count("blocked"), 1)
+
+    def test_clip_cuts_at_word_boundary(self):
+        c = self.dg._clip("Every contract in this window costs more than your cap and a fitting reference needs an option price of four dollars or less today", 60)
+        self.assertTrue(c.endswith("…"))
+        self.assertNotIn("ref…", c)
+        self.assertTrue(c[:-1].rstrip() in "Every contract in this window costs more than your cap and a fitting reference needs an option price of four dollars or less today")
+        self.assertEqual(self.dg._clip("short text", 60), "short text")
+
+    def test_headline_sent_earlier_today_is_dropped_and_header_once(self):
+        m1 = "🟡 WATCH ONLY — SPY\n\n📰 <b>HEADLINES</b>\n• [SPY] Fed Chairman Warsh To Speak On October 16 At IMF — benzinga · 3m\n"
+        m2 = "🟡 WATCH ONLY — SPY\n\n📰 <b>HEADLINES</b>\n• [SPY] Fed Chairman Warsh To Speak On October 16 At IMF — benzinga · 1h\n• [SPY] Other story — benzinga · 2m\n"
+        self.q("flow_digest_send.py", m1, fn="flow_digest")
+        self.dg.flush()
+        self.q("flow_digest_send.py", m2, fn="flow_digest")
+        self.dg.flush()
+        first, second = self.sent.read_text().split("\n=====\n")[:2]
+        self.assertIn("Warsh", first)
+        self.assertIn("arrive instantly in Trading Command", first)
+        self.assertNotIn("Warsh", second)
+        self.assertIn("Other story", second)
+        self.assertNotIn("arrive instantly", second)
+        self.assertRegex(second, r"since \d{1,2}:\d\d ET")
+
 
 if __name__ == "__main__":
     unittest.main()
