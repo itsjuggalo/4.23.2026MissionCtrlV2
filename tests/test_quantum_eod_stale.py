@@ -17,3 +17,8 @@ def test_eod_marks_stale(monkeypatch):
         monkeypatch.setattr(q, f, lambda: None)
     out = q.eod()
     assert "STALE" in out and "09-30" in out
+
+
+def test_tidy_strips_markdown_urls():
+    out = q.tidy("Chips up ([Reuters](https://www.marketscreener.com/x?a=1)) ok\nhttps://foo.com/bar")
+    assert "http" not in out and "Reuters" in out

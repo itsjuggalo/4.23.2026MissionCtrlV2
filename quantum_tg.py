@@ -689,6 +689,9 @@ def tidy(text, max_lines=10):
     if not text:
         return text
     out = []
+    # markdown links -> keep the outlet name, drop the URL; strip any leftover bare URL
+    text = re.sub(r"\[([^\]]+)\]\(https?://[^)\s]*\)", r"\1", text)
+    text = re.sub(r"\s*\(?<?https?://\S+>?\)?", "", text)
     for ln in text.splitlines():
         s = ln.strip()
         if re.match(r"(?i)^(sources?|citations?|references?|data sources?)\b\s*:?\s*$", s):
@@ -739,7 +742,9 @@ def premarket_prompt():
             "politics/geopolitics — one line each, skip anything minor.\n"
             f"Next: do any of my journal names ({held}) have a catalyst today? one line.\n"
             "Last line must start 'PLAN:' with the single most useful thing to do at/after "
-            "the open, trading SMALL under a flat $400-per-trade cap. Quiet day → say so, keep it to 3 lines.")
+            "the open, trading SMALL; state the limit as 'max risk $400 per trade' (never '$400 total'). "
+            "Do not repeat the date, include no links or URLs (name the outlet in words only), and "
+            "label the journal-names line 'Watchlist:'. Quiet day → say so, keep it to 3 lines.")
 
 
 def greeks_prompt(ticker):

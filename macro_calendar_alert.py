@@ -83,12 +83,16 @@ def embedded_macro(start: date, end: date) -> list[dict]:
     return out
 
 
+_FEED = {"econ_raw": None}   # raw Finnhub econ rows seen (None = call failed/blocked)
+
+
 def finnhub_econ(key: str, start: date, end: date) -> list[dict]:
     """Best-effort US economic calendar (CPI/PCE/retail/etc). [] if free-tier blocked."""
     url = (f"https://finnhub.io/api/v1/calendar/economic?from={start}&to={end}&token={key}")
     j = _get_json(url)
     if not j or "economicCalendar" not in j:
         return []
+    _FEED["econ_raw"] = len(j.get("economicCalendar") or [])
     out = []
     for e in j.get("economicCalendar", []):
         if (e.get("country") or "").upper() not in ("US", "USA", "UNITED STATES"):
@@ -187,7 +191,11 @@ def render(today: date, events: list[dict], t1: bool) -> tuple[str, bool]:
     if later:
         L += ["", f"🗓️ <b>Next {len(later)} ahead:</b>"] + [f"• {fmt(e)}" for e in later[:8]]
     if not events:
-        L += ["", "Clear runway — no scheduled high-impact catalysts in window."]
+        if _FEED["econ_raw"]:
+            L += ["", "Clear runway — no scheduled high-impact catalysts in window."]
+        else:
+            L += ["", "Calendar feed returned nothing — UNAVAILABLE (embedded FOMC/NFP only). "
+                      "Verify CPI/PPI/jobless dates manually."]
     L += ["", "<i>Heads-up only. Don't over-deploy into a high-impact event; size down spec names before it.</i>"]
     return "\n".join(L), high_soon
 
@@ -204,11 +212,25 @@ def main():
         print(msg.replace("<b>", "").replace("</b>", "").replace("<i>", "").replace("</i>", ""))
         print(f"\n[dry-run] would send={'LOUD' if high else 'quiet'} · {len(events)} events", flush=True)
         return
+    import hashlib
+    state_f = Path.home() / ".openclaw" / "state" / "macro_cal_last.json"
+    digest = hashlib.sha1(msg.encode()).hexdigest()
+    try:
+        last = json.loads(state_f.read_text())
+    except Exception:
+        last = {}
+    if last.get("date") == str(today) and last.get("hash") == digest:
+        print("[macro-cal] identical to earlier send today — skipped", flush=True)
+        return
     try:
         from lib.notify import tg_push
         fn = tg_push(msg, "trading_command", loud=high,
                      fallback_token_file="telegram_laptopclaude_bot_token")
         print(f"[macro-cal] sent via {fn} (loud={high}, {len(events)} events)", flush=True)
+        try:
+            state_f.write_text(json.dumps({"date": str(today), "hash": digest}))
+        except Exception:
+            pass
     except Exception as e:
         print(f"[macro-cal] send FAILED: {e}", flush=True)
 

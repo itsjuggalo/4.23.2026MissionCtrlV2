@@ -3,7 +3,7 @@
 
 Picks today's script (1-14, rotating; full kit: ~/restructure/TRADECOACH-CONTENT-KIT.md),
 pulls live Exit Board counts from the local TradeCoach app (:3002) for a concrete
-"today's footage" angle, and DMs Mike via tg_fleet trading_command (LaptopClaude bot).
+"today's footage" angle, and DMs Mike via tg_fleet life_wellness (LifeClaw bot; it is marketing, not trading).
 Fail-open: if the app is down, the nudge still sends without live stats.
 
 Usage: tradecoach_content_nudge.py [--dry-run]
@@ -80,7 +80,7 @@ def main():
         breached = counts.get("BREACHED", 0)
         near = counts.get("NEAR", 0)
         dead = counts.get("DEAD_BAG", 0)
-        lines.append(f"📟 Exit Board right now: {breached} breached · {near} near · {dead} dead bags — today's live footage.")
+        lines.append(f"📟 Exit Board right now: {breached} breached · {near} near · {dead} dead bags (sample CSV, not live holdings).")
     lines.append("📱 https://g59-wsl.taile1328b.ts.net:3002 · full kit: TRADECOACH-CONTENT-KIT.md")
     msg = "\n".join(lines)
 
@@ -89,7 +89,7 @@ def main():
         return 0
     import tg_fleet
 
-    tg_fleet.send("trading_command", msg)
+    tg_fleet.send("life_wellness", msg)  # SaaS marketing, not trading (moved 2026-10-08)
     print("sent:", msg.splitlines()[0])
     return 0
 

@@ -172,6 +172,43 @@ def one_liner(n=3):
     return " · ".join(r[0] for r in rows[:n]) if rows else None
 
 
+_STATE = os.path.expanduser("~/.openclaw/state/polymarket_last_send.json")
+MOVE_PTS = 3  # material-change rule: any market moved >= 3 pts, or a new market
+
+
+def _parse_rows(rows):
+    """'topic: scen 18%' -> {'topic: scen': 18}"""
+    out = {}
+    for r in rows:
+        key, _, pct = r.rpartition(" ")
+        if pct.endswith("%") and pct[:-1].isdigit():
+            out[key] = int(pct[:-1])
+    return out
+
+
+def material_change(rows):
+    """True if rows differ materially from the last SENT snapshot (or no snapshot)."""
+    try:
+        last = json.load(open(_STATE))
+    except Exception:
+        return True
+    cur = _parse_rows(rows)
+    if not cur:
+        return True
+    for k, v in cur.items():
+        if k not in last or abs(v - last[k]) >= MOVE_PTS:
+            return True
+    return False
+
+
+def _remember(rows):
+    try:
+        os.makedirs(os.path.dirname(_STATE), exist_ok=True)
+        json.dump(_parse_rows(rows), open(_STATE, "w"))
+    except Exception:
+        pass
+
+
 def send(text):
     """Send via the house vault-backed helper (trading_command = LaptopClaude bot),
     silent/informational. Returns the route used, or None."""
@@ -194,7 +231,13 @@ if __name__ == "__main__":
         print("(no relevant markets — nothing sent)")
         sys.exit(0)
     if a.send:
+        cur_rows = collect()[:7]
+        if not material_change(cur_rows):
+            print("(unchanged vs last send — nothing sent)")
+            sys.exit(0)
         route = send(txt)
+        if route:
+            _remember(cur_rows)
         print(f"sent via: {route}" if route else "SEND FAILED")
         sys.exit(0 if route else 1)
     print(txt)
