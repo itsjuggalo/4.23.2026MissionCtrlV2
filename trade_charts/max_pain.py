@@ -147,7 +147,8 @@ def render(r) -> str:
     note = "" if r["basis"] == "OI" else "   [VOL proxy - OI flat after-hours]"
     title = (f"{r['ticker']}  Max Pain  {r['expiry']} ({r['dte']}DTE)\n"
              f"max pain {r['mp']:g}  vs  spot {r['spot']:.2f}  "
-             f"(pin {pull} spot)  -  price magnet into OpEx{note}")
+             + (f"(pin {pull} spot)  -  price magnet into OpEx{note}" if _near(r)
+                else f"({abs((r['mp'] - r['spot']) / r['spot'] * 100):.1f}% {pull} spot - too far to act as a magnet){note}"))
     ax.set_title(title, color="#e6edf3", fontsize=11, loc="left")
     ax.set_xlabel("strike / settlement price", color="#8b949e", fontsize=9)
     ax.set_ylabel("total option-holder payout ($M)", color="#8b949e", fontsize=9)
@@ -162,14 +163,20 @@ def render(r) -> str:
     return path
 
 
+def _near(r) -> bool:
+    """'Magnet' wording only within 1% of spot (audit #22: shown at 3% away)."""
+    return abs((r["mp"] - r["spot"]) / r["spot"]) <= 0.01
+
+
 def caption(r) -> str:
     dist = (r["mp"] - r["spot"]) / r["spot"] * 100.0
     arrow = "🔻" if dist < -0.25 else ("🔺" if dist > 0.25 else "🎯")
     basis = "OI" if r["basis"] == "OI" else "VOL-proxy"
     return (f"🧲 **{r['ticker']}** max pain **{r['mp']:g}** vs spot **{r['spot']:.2f}** "
             f"({arrow} {dist:+.1f}%) — {r['expiry']} ({r['dte']}DTE)\n"
-            f"Price magnet into OpEx: dealers pin toward where the fewest options pay out. "
-            f"basis {basis} · call {r['call_oi']:,} / put {r['put_oi']:,}")
+            + ("Price magnet into OpEx: dealers pin toward where the fewest options pay out. " if _near(r)
+               else "More than 1% from spot — too far to treat as a magnet. ")
+            + f"basis {basis} · call {r['call_oi']:,} / put {r['put_oi']:,}")
 
 
 def flow_names(top: int) -> list[str]:

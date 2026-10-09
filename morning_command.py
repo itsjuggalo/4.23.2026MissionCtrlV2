@@ -152,9 +152,9 @@ def _catalysts_and_orders(names: str, tape: str) -> tuple[str, str, dict]:
         plan = r.get("plan") if isinstance(r.get("plan"), dict) else {}
         if cat or orders:
             return cat, orders, plan
-    return ("Catalyst read unavailable — check the economic calendar.",
-            f"No setup read available · risk cap ${RISK_CAP} per name (flat $400) — Mike decides.",
-            {})
+    # 2026-10-08: LLM-failure fallback lines are NOT content ("Catalyst read unavailable…",
+    # "No setup read available…") — return empties so callers omit the section.
+    return "", "", {}
 
 
 _ORDERS_INSTRUCTION_RE = re.compile(r"\b(buy|sell|short)\b", re.I)
@@ -302,7 +302,7 @@ def _catalyst_block() -> str:
     rows = _catalyst_your_name_rows(data)
     if rows:
         names_line = " · ".join(f"{t} {s:+.2f} ({r})" for t, s, r in rows)
-        lines.append(f"• Your names: {names_line}")
+        lines.append(f"• Watchlist: {names_line}")
     return "\n".join(lines)
 
 
@@ -317,8 +317,12 @@ def _catalyst_phone_line() -> str:
     parts = []
     for name, info in top:
         score = float(info.get("score", 0) or 0)
-        word = "looks strong" if score > 0 else "looks soft"
         note = _catalyst_source_note(data, info)
+        if re.search(r"\b(sale|sold|sells?|selling)\b", note, re.I):
+            # an insider SALE is not a strength signal (audit #20: VEEV EVP sale -> "looks strong")
+            parts.append(f"{esc(name)}: insider sale noted, not a strength signal ({esc(note)})")
+            continue
+        word = "looks strong" if score > 0 else "looks soft"
         parts.append(f"{esc(name)} {word} ({esc(note)})")
     sentence = "; ".join(parts)
     rows = _catalyst_your_name_rows(data)
@@ -326,7 +330,7 @@ def _catalyst_phone_line() -> str:
     if actionable:
         tail = "Worth a look: " + ", ".join(f"{esc(t)} {s:+.2f}" for t, s, _ in actionable) + "."
     else:
-        tail = "Nothing on your names needs action."
+        tail = "No watchlist name needs action."
     return f"🧭 {sentence}. {tail}"
 
 
@@ -775,7 +779,7 @@ def build() -> str:
     # native Grok X read on your names (sub-billed); silent-degrade if no token / fail
     xs = x_search.x_sentiment(f"my watchlist ({names}) and the broad market", timeout=40)
     if xs:
-        lines.append("\n📡 **X SENTIMENT (your names):**\n" + xs.strip())
+        lines.append("\n📡 **X SENTIMENT (watchlist):**\n" + xs.strip())
 
     flow = _flow_setup(2)
     lines.append("\n🎯 **FLOW SETUP:**")
@@ -786,8 +790,10 @@ def build() -> str:
 
     cat, orders, _plan = _catalysts_and_orders(names, tape)
     orders = _filter_orders(orders)
-    lines.append(f"\n📅 **TODAY:** {cat}")
-    lines.append(f"📋 **SETUP REF:** {orders}")
+    if cat:
+        lines.append(f"\n📅 **TODAY:** {cat}")
+    if orders:
+        lines.append(f"📋 **SETUP REF:** {orders}")
 
     # real overnight/pre-open headlines on your names (best-effort; "" if none)
     try:

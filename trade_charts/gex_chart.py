@@ -39,6 +39,9 @@ BG = chartlib.BG if hasattr(chartlib, "BG") else "#0d1117"
 SQRT_2PI = math.sqrt(2 * math.pi)
 
 
+NEUTRAL_BAND = 0.05   # |net GEX| in display units below this reads as zero
+
+
 def _scale(net_abs: float):
     """Pick a display unit/divisor so net GEX reads sensibly (Bn vs Mn vs K)."""
     if net_abs >= 1e8:
@@ -246,8 +249,11 @@ def render(g: dict) -> str:
                 va="center", ha="right", fontsize=9, fontweight="bold")
 
     net = g["net"] / div
-    regime = ("NEGATIVE GEX  ->  dealers amplify moves (momentum/trend)" if g["net"] < 0
-              else "POSITIVE GEX  ->  dealers suppress moves (mean-revert/pin)")
+    if abs(net) < NEUTRAL_BAND:   # prints as +/-0.0 -> not a regime call (audit #19)
+        regime = "NEUTRAL (≈0)  ->  no dealer-gamma edge either way"
+    else:
+        regime = ("NEGATIVE GEX  ->  dealers amplify moves (momentum/trend)" if g["net"] < 0
+                  else "POSITIVE GEX  ->  dealers suppress moves (mean-revert/pin)")
     thin_note = "   [THIN OI - off-hours/illiquid, read tentatively]" if g["thin"] else ""
     title = (f"{g['ticker']}  Dealer Gamma Exposure by strike   exp {g['expiry']} ({g['dte']}DTE)\n"
              f"Net GEX {net:+.2f} {unit}/1%   |   {regime}{thin_note}")
@@ -268,7 +274,10 @@ def render(g: dict) -> str:
 def caption(g: dict) -> str:
     net = g["net"] / g["div"]
     unit = g["unit"]
-    if g["net"] < 0:
+    if abs(net) < NEUTRAL_BAND:
+        sign = "⚪ **NEUTRAL GEX (≈0)**"
+        regime = "net dealer gamma ≈ 0 → no edge from GEX either way"
+    elif g["net"] < 0:
         sign = "🔴 **NEGATIVE GEX**"
         regime = "dealers *amplify* moves → momentum / trend-day (chase breakouts, wider stops)"
     else:

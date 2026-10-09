@@ -104,11 +104,12 @@ def render(s, ivr) -> str:
                           (s["breakdn"], rf"BE \${s['breakdn']:.2f}", "#f85149")]:
         ax.text(len(df)+s["dte"], sp, " "+lbl, color=col, va="center", fontsize=9)
     ivr_s = f"{ivr}%" if ivr is not None else "building…"
-    verdict = "RICH → favor selling premium" if (ivr or 0) >= 60 else \
-              ("CHEAP → straddle/long-vol favorable" if ivr is not None and ivr <= 30 else "mid")
+    # unknown IV rank -> no verdict (was `(ivr or 0)` -> "mid" for unknown, 2026-10-08 audit #17)
+    verdict = (None if ivr is None else "RICH → favor selling premium" if ivr >= 60 else
+               ("CHEAP → straddle/long-vol favorable" if ivr <= 30 else "mid"))
     title = (f"{s['ticker']}  ${s['spot']:.2f}   straddle ${s['straddle']:.2f}  "
              f"(±{s['em']*100:.1f}% by {s['expiry']}, {s['dte']}DTE)\n"
-             f"ATM IV {s['iv']*100:.0f}%  ·  IV rank {ivr_s} ({verdict})"
+             f"ATM IV {s['iv']*100:.0f}%  ·  IV rank {ivr_s}" + (f" ({verdict})" if verdict else "")
              + ("   🚨 EARNINGS "+s['earn']+" before expiry → IV-CRUSH RISK" if s["crush"] else ""))
     ax.set_title(title.replace("$", r"\$"), color="#e6edf3", fontsize=11, loc="left")
     ax.tick_params(colors="#8b949e"); [sp.set_color("#30363d") for sp in ax.spines.values()]
@@ -119,11 +120,11 @@ def render(s, ivr) -> str:
 
 
 def caption(s, ivr):
-    v = "🟥 RICH (sell premium)" if (ivr or 0) >= 60 else ("🟩 CHEAP (long vol ok)" if ivr is not None and ivr <= 30 else "🟨 mid")
+    v = ("" if ivr is None else "🟥 RICH (sell premium)" if ivr >= 60 else ("🟩 CHEAP (long vol ok)" if ivr <= 30 else "🟨 mid"))
     warn = "  🚨 **earnings before expiry — IV-crush risk on long straddle**" if s["crush"] else ""
     return (f"**{s['ticker']}** straddle ${s['straddle']:.2f} → expected ±{s['em']*100:.1f}% by {s['expiry']} "
             f"({s['dte']}DTE)\nBreakevens ${s['breakdn']:.2f} / ${s['breakup']:.2f} · "
-            f"ATM IV {s['iv']*100:.0f}% · IV rank {ivr if ivr is not None else '…'} {v}{warn}")
+            f"ATM IV {s['iv']*100:.0f}% · IV rank {ivr if ivr is not None else 'building'}{(' ' + v) if v else ''}{warn}")
 
 
 def flow_names(top):

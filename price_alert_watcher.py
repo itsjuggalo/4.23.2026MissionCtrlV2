@@ -59,6 +59,16 @@ def notify(text: str) -> bool:
 SCALP_STATE = os.path.join(HOME, ".openclaw/workspace/state/scalp_watch_state.json")
 
 
+def _monitor_exit_recent(r: dict, window_s: int = 300) -> bool:
+    """True if spy_scalp_monitor closed this contract (and texted the exit) within 5 min."""
+    try:
+        from datetime import datetime
+        t = datetime.fromisoformat(r.get("closed_at"))
+        return 0 <= (datetime.now(t.tzinfo) - t).total_seconds() <= window_s
+    except Exception:
+        return False
+
+
 def watch_scalp_transitions():
     """Auto-ping (no registration needed) when the SPY 0DTE scalp signal hits
     TARGET1 or closes — a scalper shouldn't have to stare at the panel."""
@@ -86,9 +96,14 @@ def watch_scalp_transitions():
             notify(f"🎯 SCALP T1 HIT: {cur['contract']} — half sold, stop to break-even (advisory)")
         if cur["log_len"] > prev.get("log_len", cur["log_len"]):
             r = log[-1]
+            if _monitor_exit_recent(r):   # spy_scalp_monitor already sent this exit (audit #8)
+                return
             notify(
                 f"🏁 SCALP CLOSED: SPY ${r.get('strike')}{'C' if r.get('direction')=='CALL' else 'P'} "
-                f"{r.get('result')} {r.get('pnl_pct', 0):+.0f}% ({r.get('fired_at_h')}→{r.get('closed_at_h')})"
+                f"{r.get('result')} {r.get('pnl_pct', 0):+.0f}% (option premium"
+                + (f" ${r['entry']:.2f}→${r['exit']:.2f}"
+                   if isinstance(r.get('entry'), (int, float)) and isinstance(r.get('exit'), (int, float)) else "")
+                + f", {r.get('fired_at_h')}→{r.get('closed_at_h')})"   # 2026-10-08 audit F18
             )
     finally:
         fd, tmp = tempfile.mkstemp(dir=os.path.dirname(SCALP_STATE), prefix=".scalp-")
