@@ -130,7 +130,29 @@ def render(stacked: list[dict], top: int) -> str | None:
     return path
 
 
-def caption(stacked: list[dict]) -> str:
+LEGEND_STATE = Path.home() / ".openclaw/repeat_flow_state.json"
+
+
+def _legend_due() -> bool:
+    """2026-10-08 audit F9: the legend went out (~250 chars) on every send — now once per day."""
+    import json
+    import datetime as _dt
+    try:
+        return json.loads(LEGEND_STATE.read_text()).get("legend_date") != _dt.date.today().isoformat()
+    except Exception:
+        return True
+
+
+def _legend_sent():
+    import json
+    import datetime as _dt
+    try:
+        LEGEND_STATE.write_text(json.dumps({"legend_date": _dt.date.today().isoformat()}))
+    except Exception:
+        pass
+
+
+def caption(stacked: list[dict], legend: bool = True) -> str:
     top3 = stacked[:3]
     parts = []
     for s in top3:
@@ -143,10 +165,11 @@ def caption(stacked: list[dict]) -> str:
         parts.append(f"{arrow} **{s['sym']}** {s['hits']}x stacked "
                      f"({_exp_str(s['exp'])} {'calls' if s['direction']=='bull' else 'puts'}, "
                      f"${s['prem']/1e6:.1f}M{agg})")
-    head = "📚 **Repeat / Stacking Flow** — the highest-quality flow signal\n" + "\n".join(parts)
-    body = ("\n\n_Stacking = the same name getting hit again and again in the SAME direction "
-            "on the SAME expiry. One sweep is a guess; 4+ repeat hits on one contract group is "
-            "an institution ACCUMULATING a position — follow the repeats, fade the one-offs._")
+    head = "📚 **Repeat / Stacking Flow** — repeat buys of the same contract\n" + "\n".join(parts)
+    if not legend:
+        return head
+    # intent is NOT known from flow alone (audit F9): no "institution accumulating" claim.
+    body = ("\n\n_Stacking = repeat buys of the same contract — intent unknown (could be hedges or spread legs)._")
     return head + body
 
 
@@ -168,8 +191,10 @@ def main():
     if not png:
         print("[repeat-flow] render produced no chart")
         return
-    cap = caption(stacked)
+    cap = caption(stacked, legend=_legend_due() or args.dry)
     dok, tok = deliver.post_chart(args.channel, png, cap, dry=args.dry)
+    if (dok or tok) and not args.dry:
+        _legend_sent()
     print(f"  discord={'✓' if dok else '✗'} tg={'✓' if tok else '✗'}  -> #{args.channel}")
     for s in stacked[:args.top]:
         print(f"    {_label(s):<26} {s['hits']}x ${s['prem']/1e6:.2f}M  score={s['score']/1e6:.1f}")
