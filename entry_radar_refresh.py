@@ -221,8 +221,8 @@ if __name__ == "__main__":
         if r["status"] == "AT ENTRY" and prev.get(r["sym"]) not in (None, "AT ENTRY"):
             msg = (f"🎯 {r['sym']} ENTERED the entry zone ${r['entryLo']}–${r['entryHi']} "
                    f"(now ${r['price']}, RSI {r['rsi']}, was {prev.get(r['sym'])})\n"
-                   f"{r['note']}\nStop ref ${r['stopRef']} — entry zone reached "
-                   f"(evidence, not a trade call).")
+                   f"uptrend pullback to the 21-day line · stop ref ${r['stopRef']} "
+                   f"(evidence, not a trade call).")   # 2026-10-08 audit F15: zone + stop were printed twice
             try:
                 subprocess.run([os.path.join(HOME, "bin", "tg-send-msg"), msg],
                                timeout=20, check=False)

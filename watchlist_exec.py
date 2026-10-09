@@ -55,7 +55,9 @@ def _swing_board(swing, auto, html):
     top = swing[:6]
     stars = [s for s in top if s.get("hiConv")]
     rest = [s for s in top if not s.get("hiConv")]
-    sub = f"swing drop {NOW_ET()} ET · {len(swing)} fired"
+    # 2026-10-08 audit F16: header said "10 fired" over 6 rows. Count what is shown.
+    sub = (f"swing drop {NOW_ET()} ET · {len(top)} shown"
+           + (f" (top of {len(swing)})" if len(swing) > len(top) else ""))
     b_, foot = (b, footer) if html else (lambda x: f"**{x}**", lambda x: f"\n_{x}_")
     lines = [hdr("📡", "Watchlist Signals", sub=sub) if html
              else f"📡 {b_('WATCHLIST SIGNALS')} · {sub}"]

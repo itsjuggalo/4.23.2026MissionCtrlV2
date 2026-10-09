@@ -250,10 +250,14 @@ def _sizing_line(a, is_call, spot=None):
         return ""
     if not mid:
         return ""
+    # 2026-10-08 audit F10: "$5.95/ct ($594)" — the dollars came from the unrounded mid. Round first so the
+    # per-contract price and the dollar cost always agree; label the quote's source + time.
+    mid = round(mid, 2)
     cost = mid * 100
     n = int(RISK_CAP // cost)
+    _src = f" [Yahoo mid, {datetime.now(ET).strftime('%-I:%M')} ET]"
     if n >= 1:
-        return (f"   💵 ~${mid:.2f}/ct (${cost:,.0f} ea) → **{n} ct** ≈ ${n*cost:,.0f} max risk "
+        return (f"   💵 ~${mid:.2f}/ct{_src} (${cost:,.0f} ea) → **{n} ct** ≈ ${n*cost:,.0f} max risk "
                 f"(${n*cost*0.5:,.0f} at a 50% stop)")
     # too rich → find the richest affordable same-direction strike (best delta you can buy)
     alt = None
@@ -268,16 +272,16 @@ def _sizing_line(a, is_call, spot=None):
             if spot and abs(k - spot) / spot > ALT_MAX_MNY:    # reject deep-OTM lotto
                 continue
             if ok and (alt is None or m > alt[1]):     # richest affordable = closest to money
-                alt = (k, m)
+                alt = (k, round(m, 2))
     except Exception:
         alt = None
-    base = (f"   💵 flagged contract ~${mid:.2f}/ct (${cost:,.0f}) = above your ${RISK_CAP:,.0f} cap")
+    base = (f"   💵 flagged contract ~${mid:.2f}/ct{_src} (${cost:,.0f}) = above your ${RISK_CAP:,.0f} cap")
     if alt:
         ac = alt[1] * 100
         an = int(RISK_CAP // ac)
         cp = "C" if is_call else "P"
         base += (f"\n   ✅ **affordable play: {a.get('Symbol')} ${alt[0]:g}{cp} {exp[5:].replace('-','/')}** "
-                 f"~${alt[1]:.2f}/ct → **{an} ct** ≈ ${an*ac:,.0f} (${an*ac*0.5:,.0f} at a 50% stop)")
+                 f"(cheaper, further OTM strike than the flagged ${strike:g}) ~${alt[1]:.2f}/ct → **{an} ct** ≈ ${an*ac:,.0f} (${an*ac*0.5:,.0f} at a 50% stop)")
     else:
         base += (f" — no near-money strike fits ${RISK_CAP:,.0f} "
                  f"(this name's options are too rich for your account)")
@@ -366,7 +370,7 @@ def build() -> str | None:
         for i, rec in enumerate(bulls, 1):
             lines.append(_pickline(i, rec))
     if bears:
-        lines.append("\n**🔴 BEARISH FLOW TO RESPECT (contra / hedge your longs):**")
+        lines.append("\n**🔴 BEARISH FLOW TO RESPECT (contra flow — evidence only):**")
         for i, rec in enumerate(bears, 1):
             lines.append(_pickline(i, rec))
     if hedges:
