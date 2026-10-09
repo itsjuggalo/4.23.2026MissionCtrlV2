@@ -8,7 +8,7 @@ this posts the consolidated board a few times a day so Mike sees the whole pictu
 Anti-bloat (Mike has ADD):
   • market-open only
   • skips an EMPTY board (nothing app-pushed yet → say nothing)
-  • skips if the board is UNCHANGED since the last push (same contracts + tiers)
+  • skips if the contract set is unchanged (re-shows a contract only on tier change or a ≥25-pt move)
   • honors the shared killswitch ~/.openclaw/quantum_HALT
 
 Cron (open-settle / midday / pre-close):
@@ -48,6 +48,22 @@ def _sig(board):
     return _SIG_RE.findall(board)
 
 
+def _changed(items, last):
+    """Re-show only when a contract is new, changed tier (emoji), or moved >=25 pts since it was
+    last shown (audit F4: 13 near-identical sends/day, same 4 contracts)."""
+    for k, it in items.items():
+        old = last.get(k)
+        if old is None or old.get("emoji") != it.get("emoji"):
+            return True
+        m0, m1 = old.get("move"), it.get("move")
+        if m0 is None or m1 is None:
+            if m0 != m1:
+                return True
+        elif abs(m1 - m0) >= 25:
+            return True
+    return False
+
+
 def main():
     dry = "--dry-run" in sys.argv
     if os.path.exists(HALT) and not dry:
@@ -55,18 +71,19 @@ def main():
     if not Q._market_open() and not dry:
         print("flow-winners: market closed → silent")
         return
-    board = FC.winners()
+    board, items = FC._winners_build()
     if board.startswith("🔔 No big"):
         if dry:
             print("flow-winners: empty board → silent")
         return
-    sig = _sig(board)
+    today = datetime.now(ET).strftime("%Y-%m-%d")
     try:
-        last = json.load(open(STATE)).get("sig", [])
+        st = json.load(open(STATE))
     except Exception:
-        last = []
-    if sig == last and not dry:
-        return  # unchanged since last push — don't repeat the same board
+        st = {}
+    last = st.get("shown", {}) if st.get("date") == today else {}
+    if not _changed(items, last) and not dry:
+        return  # same contracts, same tiers, no big move — don't repeat the board
     stamp = datetime.now(ET).strftime("%-I:%M%p ET").lower()
     msg = board  # winners()'s own hdr() already stamps the current ET time in the header
     if dry:
@@ -74,7 +91,9 @@ def main():
         return
     try:
         subprocess.run([sys.executable, TG_FLEET, "sendhtml", "trading_command", msg], timeout=20)
-        json.dump({"sig": sig, "at": stamp}, open(STATE, "w"))
+        merged = dict(last)
+        merged.update(items)   # baseline = what was last SHOWN, so drift accumulates
+        json.dump({"date": today, "shown": merged, "at": stamp}, open(STATE, "w"))
     except Exception as e:
         print(f"[flow-winners] send failed: {e}", file=sys.stderr)
 

@@ -61,6 +61,15 @@ def _stop_for(mid, alert_px):
     return round(mid * 0.7, 2)
 
 
+def _stop_pct(mid, alert_px):
+    """Say WHY the stop sits where it does (audit F17: -30% on one card, -15% on the next, unexplained)."""
+    try:
+        st, mid = _stop_for(mid, alert_px), float(mid)
+        return f"{(1 - st / mid) * 100:.0f}% below entry"
+    except Exception:
+        return "below entry"
+
+
 def _target_for(mid, pct=0.50):
     """Where you SELL THE WINNER. Every action line on this board named an entry and a stop
     and then went quiet about the profitable case — so the only exit a beginner had written
@@ -227,13 +236,20 @@ def chase_verdict(a, snap, eq):
     unaffordable = cost > RISK_CAP_USD
     # T9 item 9 (2026-09-27): levels are REFERENCE levels / setup evidence — only the
     # canonical synthesis issues a trade call. Same numbers, no imperatives.
+    # 2026-10-08 audit F17: a contract already down >=15% since the alert scored late=1 (EARLY tier,
+    # kept as-is so the guard fires exactly the same alerts) but was headed "🟢 STILL EARLY" over a
+    # body saying "going the wrong way". Header/emoji only; tier and gating are unchanged.
+    warn_down = move <= -15
     if late <= 1:
         tier, emoji, head = "EARLY", "🟢", "STILL EARLY — flow near the alert price (evidence)"
+        if warn_down:
+            emoji, head = "🟠", f"DOWN {abs(move):.0f}% SINCE THE ALERT — flow is not working yet (evidence)"
         action = (f"→ one contract is ${cost:,.0f} — over your ${RISK_CAP_USD:.0f} limit, so "
                   f"this one is outside the risk cap even though the setup evidence is good."
                   if unaffordable else
                   f"→ 1 contract ≈ ${cost:,.0f}. entry ref ${mid:g} · stop ref "
-                  f"${_stop_for(mid, ap):g} (−${cost - _stop_for(mid, ap)*100:,.0f}) · "
+                  f"${_stop_for(mid, ap):g} (−${cost - _stop_for(mid, ap)*100:,.0f}, "
+                  f"{_stop_pct(mid, ap)}) · "
                   f"target ref ${_target_for(mid):g} (+${_target_for(mid)*100 - cost:,.0f}). "
                   f"Reference levels — setup evidence, not a trade call.")
     elif late <= 3:
@@ -241,9 +257,9 @@ def chase_verdict(a, snap, eq):
         action = (f"→ ${cost:,.0f} a contract is over your ${RISK_CAP_USD:.0f} limit "
                   f"and the move is already underway — outside the risk cap."
                   if unaffordable else
-                  f"→ half the move is gone. 1 contract ≈ ${cost:,.0f} · "
+                  f"→ {move:+.0f}% vs the alert price. 1 contract ≈ ${cost:,.0f} · "
                   f"entry ref ${mid:g} · stop ref ${_stop_for(mid, ap):g} "
-                  f"(−${cost - _stop_for(mid, ap)*100:,.0f}) · target ref "
+                  f"(−${cost - _stop_for(mid, ap)*100:,.0f}, {_stop_pct(mid, ap)}) · target ref "
                   f"${_target_for(mid, 0.30):g} "
                   f"(+${_target_for(mid, 0.30)*100 - cost:,.0f}, reduced target — the "
                   f"easy part already happened). Reference levels — setup evidence, not a trade call.")
@@ -253,7 +269,7 @@ def chase_verdict(a, snap, eq):
                   "fresh alert would re-open it.")
 
     return {"tier": tier, "emoji": emoji, "head": head, "reasons": reasons,
-            "move": move, "mid": mid, "action": action}
+            "move": move, "mid": mid, "action": action, "warn_down": warn_down}
 
 
 # ── formatting ───────────────────────────────────────────────────────────────
@@ -291,7 +307,7 @@ def format_alert(a, v):
     return "\n".join(lines)
 
 
-def _compact(occ, a, with_cost=False):
+def _compact(occ, a, with_cost=False, meta=None):
     """Board line. `with_cost=True` also returns the per-contract dollar cost so the caller
     can rank affordable ideas first."""
     snap = option_snapshot(occ)
@@ -309,6 +325,10 @@ def _compact(occ, a, with_cost=False):
           f"down {abs(mvp):.0f}% since the alert")
     head = {"EARLY": "still early", "LATE": "getting late",
             "SKIP": "too late", "WAIT": "no live quote"}[v["tier"]]
+    if v.get("warn_down"):
+        head = "not working yet"     # F17: never "still early" on a contract down >=15%
+    if meta is not None:
+        meta.update(move=mvp, mid=v.get("mid"), emoji=v["emoji"])
     kind = "CALL" if (a.get("OptionType") or "").upper().startswith("C") else "PUT"
     title = b(f"{a.get('Symbol')} ${a.get('Strike'):g} {kind}")
     l1 = (f"{v['emoji']} {title} exp {esc(_exp(a))} — " + esc(head) + (esc(f", {mv}") if mv else ""))
@@ -367,41 +387,51 @@ def scan_pushed(min_value=SIGNIF_USD, fresh_min=8, require_open=True):
     return out
 
 
-def winners(top=5, min_value=1_000_000):
-    """Pull command: today's app-pushed flow alerts, each with a chase-or-skip verdict."""
+def _winners_build(top=5, min_value=1_000_000):
+    """(board_text, items). items = {occ: {"emoji", "move"}} for the contracts shown, so the
+    scheduled push can dedupe on the contract set instead of the wiggling text."""
     rows = _pushed_rows(min_value)
     if not rows:
-        return "🔔 No big app-pushed flow yet today (waiting on the next FlowGreeks alert)."
+        return "🔔 No big app-pushed flow yet today (waiting on the next FlowGreeks alert).", {}
     # 2026-07-29: the board ranked purely by flow size, so 4 of 5 lines were routinely
     # contracts costing thousands — Mike scrolled a list of things he cannot buy. Rank the
-    # ones that FIT his cap first (stable, so flow size still orders within each group) and
-    # count the rest instead of listing them.
-    priced, waiting, toobig = [], [], 0
+    # ones that FIT his cap first (stable, so flow size still orders within each group).
+    # 2026-10-08 audit F3/F4: rows down >=40% or under $0.10 are not "winners" (a -99% $0.01
+    # SPY call was headed FLOW WINNERS) — dropped from this DISPLAY board only; the verdict/tier
+    # logic the guard uses is untouched. The growing "N other big-money contracts" footer is gone.
+    priced, waiting, items = [], [], {}
     for occ, a in rows:
-        line, cost = _compact(occ, a, with_cost=True)
+        meta = {}
+        line, cost = _compact(occ, a, with_cost=True, meta=meta)
+        mvp, mid = meta.get("move"), meta.get("mid")
+        if (mvp is not None and mvp <= -40) or (mid is not None and mid < 0.10):
+            continue
         if cost > RISK_CAP_USD:
-            toobig += 1
+            pass
         elif cost > 0:
-            priced.append(line)
+            priced.append((_clean_occ(occ), line, meta))
         else:
-            # no live quote yet — nothing to decide on. Keep it as backfill only, so a
-            # tradeable idea is never pushed off the board by a row that says "wait".
-            waiting.append(line)
+            # no live quote yet — keep as backfill only, so a tradeable idea is never pushed
+            # off the board by a row that says "wait".
+            waiting.append((_clean_occ(occ), line, meta))
         if len(priced) >= top:
             break
     shown = (priced + waiting)[:top]
     out = [hdr("🔔", "Flow Winners", sub="chase-timing evidence · not trade calls")]
     if shown:
-        out += shown
+        out += [ln for _, ln, _ in shown]
     else:
         out.append(esc(f"Nothing in today's big flow fits your ${RISK_CAP_USD:.0f} per-trade "
                        f"limit — no in-cap setup on the board."))
-    if toobig:
-        note = (f"({toobig} other big-money contracts today cost more than "
-                f"${RISK_CAP_USD:.0f} each — not for this account.)")
-        out.append(f"<i>{esc(note)}</i>")
     out.append(footer("tap /chase <ticker> for the full read"))
-    return join(*out)
+    for k, _, m in shown:
+        items[k] = {"emoji": m.get("emoji"), "move": m.get("move")}
+    return join(*out), items
+
+
+def winners(top=5, min_value=1_000_000):
+    """Pull command: today's app-pushed flow alerts, each with a chase-or-skip verdict."""
+    return _winners_build(top, min_value)[0]
 
 
 def chase(symbol):
