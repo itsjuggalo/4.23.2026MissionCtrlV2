@@ -338,6 +338,8 @@ def _relay_universe():
                         "kind": "put" if s.get("isPut") else "call", "strike": float(strike),
                         "mid": mid, "buyTarget": s.get("buyTarget"), "sellTarget": s.get("sellTarget"),
                         "stopLoss": s.get("stopLoss"), "flags": s.get("flags") or [],
+                        "_captured_ms": s.get("capturedAtMs"), "_volume": s.get("volume"),
+                        "_oi": s.get("openInterest"),
                         "_side_known": type(s.get("isPut")) is bool,
                         "_quote_valid": _finite(bid) and _finite(ask) and 0 < bid <= ask})
         except Exception:
@@ -461,6 +463,61 @@ def fmt_card(cards, coverage=None, model_omitted=0, darkpool_state="UNKNOWN", re
     return "\n".join(lines)
 
 
+MAX_QUOTE_AGE_S = 15 * 60
+SHORT_ROWS = 5
+SHORT_MAX_CHARS = 1200
+FULL_LOG = Path.home() / ".lifeclaw" / "options_scorecard_full.txt"
+
+
+def _quote_age_s(pos, now):
+    """Seconds since the relay captured this quote; None when unknown/invalid/future."""
+    ms = pos.get("_captured_ms")
+    if not _finite(ms) or ms <= 0:
+        return None
+    age = now.timestamp() - ms / 1000.0
+    return age if age >= -10 else None
+
+
+def _short_candidates(cards, now):
+    """Unexpired contracts with a known two-sided quote no older than 15 min, most active first.
+    Returns (top rows, number that qualified). Display filter only - the model is untouched."""
+    ok = []
+    for c in cards:
+        p = c["pos"]
+        age = _quote_age_s(p, now)
+        if age is None or age > MAX_QUOTE_AGE_S or not p.get("_quote_valid", False):
+            continue
+        if type(p.get("exp")) is not date or p["exp"] < now.date():
+            continue
+        ok.append((c, age))
+    ok.sort(key=lambda t: (-(t[0]["pos"].get("_volume") or 0), -(t[0]["pos"].get("_oi") or 0)))
+    return ok[:SHORT_ROWS], len(ok)
+
+
+def fmt_short(cards, now, total) -> str | None:
+    """ONE Telegram message under 1,200 chars: one caveat line, top 5 fresh unexpired contracts
+    with quote as-of. Full detail goes to the log/OneDrive file (fmt_card)."""
+    top, n_ok = _short_candidates(cards, now)
+    if not top:
+        return None
+    lines = [hdr("📟", "Contract Scorecard", now),
+             "<i>Model-only, not your positions - estimates, no fills, no orders.</i>"]
+    for c, age in top:
+        p = c["pos"]
+        right = ("C" if p["kind"] == "call" else "P") if p.get("_side_known", False) else "?"
+        strike_txt = esc(f"{p['strike']:g}")
+        asof = datetime.fromtimestamp(p["_captured_ms"] / 1000.0, tz=ET).strftime("%-I:%M %p ET")
+        pop = f" · P(profit) {c['pop']*100:.0f}%" if c.get("pop") is not None else ""
+        lines.append(f"<b>{esc(p['root'])} {strike_txt}{right} {p['exp']:%m-%d}</b> · mid ${c['mark']:.2f} "
+                     f"(quote {asof}) · stock ${c['spot']} · breakeven ${c['be']}{pop}")
+    lines.append(f"<i>{len(top)} of {total} relay contracts shown (fresh quote, unexpired). Full detail in the log.</i>")
+    msg = "\n".join(lines)
+    while len(msg) > SHORT_MAX_CHARS and len(lines) > 4:
+        del lines[-2]
+        msg = "\n".join(lines)
+    return msg
+
+
 def main() -> int:
     coverage = _relay_universe()
     universe = coverage["rows"]
@@ -491,27 +548,32 @@ def main() -> int:
         print("[scorecard] " + _coverage_text(coverage, 0, model_omitted, render_omitted))
         return 1
     card = fmt_card(display_cards, coverage, model_omitted, darkpool_state, render_omitted)
+    short = fmt_short(display_cards, datetime.now(ET), coverage.get("input_count") or len(display_cards))
 
     def _plain(s: str) -> str:
         s = re.sub(r"</?[^>]+>", "", s)
         return s.replace("&lt;", "<").replace("&gt;", ">").replace("&amp;", "&")
 
-    if DRY:
-        print(_plain(card))
+    if DRY:   # never writes or sends: prints exactly what a live run would send
+        print(_plain(short) if short else "[scorecard] no contract has a quote under 15 min old - nothing would be sent")
         return 0
 
-    try:
-        ONEDRIVE.mkdir(parents=True, exist_ok=True)
-        (ONEDRIVE / "options-position-scorecard.txt").write_text(_plain(card))
-    except Exception:
-        _diagnostic("copy_failed")
+    for dest in (ONEDRIVE / "options-position-scorecard.txt", FULL_LOG):   # full detail stays on disk
+        try:
+            dest.parent.mkdir(parents=True, exist_ok=True)
+            dest.write_text(_plain(card))
+        except Exception:
+            _diagnostic("copy_failed")
+    if not short:
+        print("[scorecard] no contract has a quote under 15 min old - nothing sent")
+        return 0
 
     try:
         chat_id = CHAT_FILE.read_text().strip()
     except Exception:
         _diagnostic("telegram_unverified")
         return 1
-    parts = _qualified_parts(card)
+    parts = [short] if _scorecard_html_tokens(short) is not None else []
     accepted = 0
     for part in parts:
         if _tg("sendMessage", chat_id=chat_id, text=part, parse_mode="HTML") is True:
@@ -519,7 +581,7 @@ def main() -> int:
     complete = bool(parts) and accepted == len(parts)
     try:
         from lib.tg_ledger import record
-        record("trading_recaps", card, complete, html=True, src="options_position_scorecard.py")
+        record("trading_recaps", short, complete, html=True, src="options_position_scorecard.py")
     except Exception:
         pass
     print(f"[scorecard] Telegram acceptance {'ACK' if complete else 'UNVERIFIED/PARTIAL'}: "
