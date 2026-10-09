@@ -37,9 +37,9 @@ def main(dry_run: bool = False):
             return
         a = age_min(name)
         if a is None:
-            stale.append(f"**{name}** — never ran")
+            stale.append(f"{name} — never ran")
         elif a > max_age:
-            stale.append(f"**{name}** — last ran {a:.0f}m ago (expected <{max_age}m)")
+            stale.append(f"{name} — last ran {a:.0f}m ago (expected <{max_age}m)")
 
     def check_daily(name, sched_hour, wd_only=True):
         if wd_only and not weekday:
@@ -48,25 +48,22 @@ def main(dry_run: bool = False):
             return
         e = beat_epoch(name)
         if not e or datetime.fromtimestamp(e, ET).date() != now.date():
-            stale.append(f"**{name}** — no run today (due ~{sched_hour}:05 ET)")
+            stale.append(f"{name} — no run today (due ~{sched_hour}:05 ET)")
 
-    # frequent posters (silent failure most likely / most impactful)
-    check_freq("flow_picks", 110, 10, 16, wd_only=True)   # 9:50/11/12:30/2/3:20
-    check_freq("crypto_holdings", 45, 8, 22)              # every 30m
-    check_freq("crypto_spike", 18, 8, 22)                 # every 5m
-    # paper decision cycles (boba/jazzy) — 9:45/11/12:30/2/3:30 weekdays, ~90m max gap
-    check_freq("boba_cycle", 115, 10, 16, wd_only=True)
-    check_freq("jazzy_cycle", 115, 10, 16, wd_only=True)
+    # frequent posters. flow_picks cron = 9:50 / 12:30 / 15:00 (max gap 160m), so the
+    # threshold must clear that gap or the 12:00 / 14:40 ticks false-alarm.
+    # Retired 2026-10-08 (no cron/pm2, producers dead): crypto_holdings, crypto_spike,
+    # boba_cycle, jazzy_cycle, crypto_eod.
+    check_freq("flow_picks", 175, 10, 16, wd_only=True)
     # once-daily briefs
     check_daily("morning_command", 8)    # pre-open brief, due ~8:15 ET weekdays
-    check_daily("crypto_eod", 16)
     check_daily("eod_scorecard", 16)
 
     if stale:
         stamp = now.strftime("%-I:%M %p ET")
-        msg = "🔧 **CRON HEALTH — poster(s) stale** · " + stamp + "\n" + "\n".join("• " + s for s in stale) + \
-              "\n_Check ~/02_DATA/skillcron.log. Likely ARIES down, yfinance/Coinbase error, or a key issue._"
-        fp = "|".join(sorted(s.split(" — ")[0].strip("*") for s in stale))
+        msg = "🔧 CRON HEALTH — poster(s) stale · " + stamp + "\n" + "\n".join("• " + s for s in stale) + \
+              "\nCheck ~/02_DATA/skillcron.log (ARIES down, yfinance error, or key issue)."
+        fp = "|".join(sorted(s.split(" — ")[0].strip("* ") for s in stale))
         ok, why = should_send(ALERT_GATE_KEY, fp, repeat_after=ALERT_REPEAT_AFTER)
         if dry_run:
             print(f"[poster-watchdog] DRY-RUN would-send={ok} ({why}) fp={fp}\n{msg}", flush=True)

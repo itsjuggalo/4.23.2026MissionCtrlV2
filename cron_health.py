@@ -31,7 +31,6 @@ ERRSCAN_FRESH_MIN = 360   # only error-scan logs touched in the last 6h (ignore 
 
 # (name, log path, max_age_min | None, market_hours_only, error_scan)
 JOBS = [
-    ("decipher-manage",  HOME / "logs/decipher_manage.log",            15,   True,  True),
     ("decipher-main",    HOME / "logs/decipher.log",                   45,   True,  True),
     ("flow-ingest",      HOME / "logs/flow-ingest.log",                30,   False, True),
     # plaid_sync 08:00 daily (LifeClaw debts). Was "refresh-holdings" on ~/portfolio/refresh.log — that job
