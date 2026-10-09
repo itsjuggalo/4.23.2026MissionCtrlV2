@@ -582,6 +582,15 @@ def send(fn, msg, html=False):
             return 0
     except Exception:
         pass
+    try:   # pre-send review (lib/tg_lint.py): hold exact repeats + broken renders, strip internal ids.
+        from lib.tg_lint import review   # fail-open by design — 2026-10-08 TG audit
+        reviewed, notes = review(fn, msg)
+        if reviewed is None:
+            print(f"held by pre-send review: {'; '.join(notes)}")
+            return 0
+        msg = reviewed
+    except Exception:
+        pass
     tok = token(fn)
     if not tok:
         print(f"no token for {fn}"); return 1
