@@ -168,6 +168,38 @@ def _plan_triggered(symbol: str, direction: str, trigger: float, sent_ts: str, g
         return None
 
 
+def _alert_context(symbol: str, direction: str, trigger, sent_ts: str, grade: str, px_send=None):
+    """(price at alert time, triggered?) for one scanner alert (2026-10-08 audit F6).
+
+    Graded from the ALERT-time price, never the plan trigger: a pre-gap trigger (PCRX plan
+    $25.21, stock $36.38 when the alert went out) made a +0.05% day read +44.4%. px_send
+    (filled by the nightly grader) wins; otherwise the open of the 5m bar containing the
+    alert. triggered = the stock was already through the trigger at the alert, or crossed it
+    afterwards; None when bars are unavailable (never guessed)."""
+    px = float(px_send) if px_send else None
+    trig = None
+    if symbol.upper() not in CRYPTO_SYMS:
+        try:
+            import yfinance as yf
+            h = yf.Ticker(symbol).history(period="1d", interval="5m", prepost=True)
+            if len(h):
+                sent = datetime.fromisoformat(sent_ts)
+                at = h[h.index <= sent]
+                if px is None and len(at):
+                    px = float(at["Open"].iloc[-1])
+                after = h[h.index >= sent.replace(second=0, microsecond=0)]
+                if len(after):
+                    short = direction == "SHORT"
+                    through_now = px is not None and (px <= trigger if short else px >= trigger)
+                    crossed = (after["Low"].min() <= trigger) if short else (after["High"].max() >= trigger)
+                    trig = bool(through_now or crossed)
+        except Exception:
+            pass
+    if (grade or "").upper() == "TRIGGER":
+        trig = True
+    return px, trig
+
+
 def _grade_scanner_alerts():
     """Today's setup_scanner + explosion_score alerts, self-logged (free, no Alpaca)
     to signal_outcomes.sqlite's `alerts` table. Graded here against a free Yahoo
@@ -181,7 +213,7 @@ def _grade_scanner_alerts():
         con = sqlite3.connect(f"file:{SIGNAL_OUTCOMES_DB}?mode=ro&immutable=0", uri=True, timeout=10)
         placeholders = ",".join("?" * len(SCANNER_SOURCES))
         rows = con.execute(
-            f"SELECT symbol, direction, grade, trigger, sent_ts FROM alerts "
+            f"SELECT symbol, direction, grade, trigger, sent_ts, px_send FROM alerts "
             f"WHERE day = ? AND source IN ({placeholders}) AND trigger IS NOT NULL "
             f"ORDER BY sent_ts", (date, *SCANNER_SOURCES)).fetchall()
         con.close()
@@ -189,7 +221,7 @@ def _grade_scanner_alerts():
         print(f"[eod-scorecard] signal_outcomes read err: {e}", flush=True)
         return []
     out, seen, spot_cache = [], set(), {}
-    for symbol, direction, grade, trigger, sent_ts in rows:
+    for symbol, direction, grade, trigger, sent_ts, px_send in rows:
         if not symbol or symbol in seen or not trigger:
             continue
         seen.add(symbol)
@@ -197,13 +229,13 @@ def _grade_scanner_alerts():
             spot_cache[symbol] = _last_any(symbol)
         now = spot_cache[symbol]
         r = {"symbol": symbol, "direction": (direction or "LONG").upper(), "grade": grade}
-        r["triggered"] = _plan_triggered(symbol, r["direction"], trigger, sent_ts, grade)
-        if not now:
+        px_alert, r["triggered"] = _alert_context(symbol, r["direction"], trigger, sent_ts, grade, px_send)
+        if not now or not px_alert:
             out.append((r, None))
             continue
-        move = (now - trigger) / trigger * 100
+        move = (now - px_alert) / px_alert * 100
         favorable = move if r["direction"] != "SHORT" else -move
-        out.append((r, (move, favorable, trigger, now)))
+        out.append((r, (move, favorable, px_alert, now)))
     return out
 
 
@@ -346,7 +378,8 @@ def _build_discord_msg(graded, scanner_graded, rebound_graded, snr) -> str:
 
     if scanner_graded:
         wins, cnt = _tg_ratio(scanner_graded)
-        lines.append(f"\n**📡 Today's setup/explosion alerts (from entry trigger) — {wins}/{cnt} working:**")
+        lines.append(f"\n**📡 Today's setup/explosion alerts (since the alert price) — {wins}/{cnt} working:**")
+        lines.append("_Basis: stock move since the alert price, not option P&L._")
         for r, g in scanner_graded:
             label = f"{r['symbol']} {r['direction']}"
             if r.get("triggered") is False:
@@ -422,8 +455,9 @@ def _build_tg_msg(graded, scanner_graded, rebound_graded, snr, now=None) -> str:
     if scanner_graded:
         w, n = _tg_ratio(scanner_graded)
         blocks.append(tgf.section(f"Setup/explosion alerts · {w}/{n} working"))
-        blocks.append("<i>Basis: from the entry trigger, not from the alert. Plans that never "
-                      "reached their trigger are not trades and are not counted.</i>")
+        blocks.append("<i>Basis: the stock's move since the alert price, in the alert's direction "
+                      "(same basis as the Signal Report Card). Plans that never reached their "
+                      "trigger are not trades and are not counted.</i>")
         for r, g in scanner_graded:
             label = f"{r['symbol']} {r['direction']}"
             if r.get("triggered") is False:
@@ -433,7 +467,7 @@ def _build_tg_msg(graded, scanner_graded, rebound_graded, snr, now=None) -> str:
                 blocks.append(tgf.row(label, "no data: no live price from Yahoo at " + clock))
                 continue
             move, fav, entry, now_px = g
-            blocks.append(tgf.row(label, f"stock from entry {entry:.2f}→{now_px:.2f}", tgf.pct(move),
+            blocks.append(tgf.row(label, f"stock since alert {entry:.2f}→{now_px:.2f}", tgf.pct(move),
                                    glyph=_grade_glyph(fav)))
 
     if rebound_graded:
@@ -455,8 +489,7 @@ def _build_tg_msg(graded, scanner_graded, rebound_graded, snr, now=None) -> str:
         # just the trailing "TICKER 76 · TICKER 70 …" payload as the footer body.
         payload = snr.split(":**", 1)[-1].strip() if ":**" in snr else snr.lstrip("\n")
         blocks.append(tgf.footer(f"SNR corroboration (≥65): {payload}"))
-    blocks.append(tgf.footer(f"Source: Yahoo last price as of {clock}. Option P&L: not tracked (no fills). "
-                             "The nightly Signal Report Card grades since the alert, so the two can differ."))
+    blocks.append(tgf.footer(f"Source: Yahoo last price as of {clock}. Option P&L: not tracked (no fills)."))
 
     return tgf.join(*blocks)
 

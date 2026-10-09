@@ -24,7 +24,7 @@ class SignalOutcomesRender(unittest.TestCase):
         rs = [R("08:20", "rocket_watch", "MI", -64.5, ent=0), R("08:20", "rocket_watch", "XNDU", 3.5),
               R("08:20", "setup_scanner", "CEG", 2.8, g="SETUP", t1=1), R("09:16", "ma_radar", "JAGX", -12.8),
               R("09:50", "rocket_watch", "IPDN", -21.4, sh=1), R("10:37", "desk2-nollm", "MU", -1.5)]
-        rs += [R("18:05", "fvg_scan", f"S{i}", 0.0) for i in range(8)]
+        rs += [R(f"13:0{i}", "fvg_scan", f"S{i}", 0.0) for i in range(8)]
         rs += [R("11:50", "setup_scanner", "PSKY", None, ok=0, g="SETUP"), R("17:46", "ma_radar", "CLAR", None, ok=0)]
         return rs
 
@@ -62,7 +62,25 @@ class SignalOutcomesRender(unittest.TestCase):
         m = so.build_report("2026-10-06", self.rows())
         self.assertNotIn("grading tonight/tomorrow", m)
         self.assertIn("1 not graded yet — no price bars at grading time", m)
-        self.assertIn("1 not graded yet — after-hours alert, graded against the next session's close: CLAR", m)
+        self.assertIn("1 after-hours alert(s) — graded next session, not in today's totals: CLAR", m)
+
+    def test_short_shows_real_stock_move_and_honest_target_flag(self):
+        # SOS 10-08: short, stock ROSE 3.4% (0.2876->0.2974); best excursion +0.0%
+        sos = ("2026-10-08T10:05:24-04:00", "fvg_scan", "SOS", "SHORT", "WATCH", -0.3, -4.3, -3.41, 0.0, -4.31,
+               0, 1, None, None, 1, 1, 0.2876, 0.29, None)
+        line = so._alert_line(sos)
+        self.assertIn("stock +3.4% since alert", line)
+        self.assertIn("(short: unfavorable)", line)
+        self.assertNotIn("touched first target", line)
+        ok = ("2026-10-08T08:20:17-04:00", "setup_scanner", "ACN", "LONG", "SETUP", -1.0, 1.0, 4.75, 5.06, -2.9,
+              0, 1, None, None, 1, 1, 199.0, 205.0, None)
+        self.assertIn("touched first target", so._alert_line(ok))
+
+    def test_never_triggered_count_equals_names_listed(self):
+        rs = [R("08:20", "rocket_watch", "AAA", 0.0, ent=0), R("09:20", "rocket_watch", "AAA", 0.0, ent=0),
+              R("08:21", "rocket_watch", "BBB", 0.0, ent=0)]
+        m = so.build_report("2026-10-08", rs)
+        self.assertIn("2 plan(s) never triggered — no trade, not counted in wins/avg: AAA, BBB", m)
 
     def test_nothing_graded(self):
         m = so.build_report("2026-10-06", [R("08:20", "ma_radar", "X", None, ok=0)])
@@ -113,7 +131,7 @@ class EodRender(unittest.TestCase):
 
     def test_basis_and_pnl_labels(self):
         m = self.msg()
-        self.assertIn("Basis: from the entry trigger, not from the alert", m)
+        self.assertIn("Basis: the stock's move since the alert price", m)
         self.assertIn("since the pick posted", m)
         self.assertIn("Option P&amp;L: not tracked (no fills)", m)
 
