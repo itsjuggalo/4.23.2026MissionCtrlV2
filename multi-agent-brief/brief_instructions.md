@@ -36,19 +36,33 @@ Message order, always:
 - Max 1800 chars total.
 - End with the brief-type closer given in the task prompt (a watch item or "no setup" — not an order).
 
+## Work Rules (2026-10-08 audit)
+- Data comes ONLY from gather_context.sh. Do not call any other script, API, MCP or web source; if a focus item is not in the context, leave it out (one "Not covered: ..." line in the brief, never in the Telegram reply).
+- Work silently: write NO text before your final reply. No "I'll read...", "Trimming", "Now posting" — every word you write is sent to Mike's Telegram.
+- Fit 1800 chars on the first write (count with `wc -m /tmp/brief_content.txt`; trim once if over).
+
+## Telegram Reply (your final message — the ONLY text you write)
+Exactly this shape, max 3 lines, max 280 chars, no markdown headers, no offers ("I can retry..."), no greeting:
+```
+📰 <Type> brief → Discord ✅
+<one-line take: bias + the single key level/risk, numbers from the context>
+Gaps: <only STALE/UNAVAILABLE inputs that changed the read, comma list>   ← omit this line if none
+```
+If the Discord POST did not return 200/201: `⚠️ <Type> brief NOT posted — Discord <status>` and nothing else.
+
 ## Discord Posting
-Write the brief to /tmp/brief_content.txt, then POST using python3:
+Write the brief to /tmp/brief_content.txt, then POST with python3 (the token is read inside python — never put it in a shell variable or command line):
 ```bash
-TOKEN=$(cat /home/ubuntu/.openclaw/secrets/spacer_bot_token.txt)
-TIMESTAMP=$(date "+%a %b %d, %I:%M %p ET")
-python3 -c "
-import json, requests
+python3 - <<'POST'
+import json, requests, datetime, zoneinfo
+token = open('/home/ubuntu/.openclaw/secrets/spacer_bot_token.txt').read().strip()
+ts = datetime.datetime.now(zoneinfo.ZoneInfo('America/New_York')).strftime('%a %b %d, %I:%M %p ET')
 brief = open('/tmp/brief_content.txt').read()
 embed = {'title': 'BRIEF_TITLE', 'description': brief[:4000], 'color': COLOR_INT,
-         'footer': {'text': '$TIMESTAMP · MissionCtrl brief'}}
+         'footer': {'text': f'{ts} · MissionCtrl brief'}}
 r = requests.post('https://discord.com/api/v10/channels/CHANNEL_ID/messages',
-    headers={'Authorization': f'Bot $TOKEN', 'Content-Type': 'application/json'},
+    headers={'Authorization': f'Bot {token}', 'Content-Type': 'application/json'},
     json={'embeds': [embed]}, timeout=15)
 print(f'Discord: {r.status_code}')
-"
+POST
 ```

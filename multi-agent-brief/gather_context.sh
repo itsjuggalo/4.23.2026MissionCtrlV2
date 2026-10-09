@@ -115,7 +115,7 @@ else:
     st = d.get("stance", {}); v = d.get("vix", {}); fg = d.get("fearGreed", {}); y = d.get("yields", {})
     print(f"stance {st.get('label')} score {st.get('score')} | data status {d.get('dataStatus')} (degraded={d.get('degraded')})")
     print(f"VIX {v.get('level')} ({v.get('pct')}%) | Fear&Greed {fg.get('value')} {fg.get('label')} (1w ago {fg.get('oneWeekAgo')})")
-    print(f"10Y {y.get('tenY')} | 2Y {y.get('twoY')} ({y.get('twoYStatus')}, as of {y.get('twoYAsOf')}) | 10Y-13W {y.get('spread10y13w')} ({y.get('spreadStatus')}, as of {y.get('spreadAsOf')})")
+    print(f"10Y {y.get('tenY')} (intraday quote) | 2Y {y.get('twoY')} ({y.get('twoYStatus')}, as of {y.get('twoYAsOf')}) | 10Y-13W {y.get('spread10y13w')} ({y.get('spreadStatus')}, as of {y.get('spreadAsOf')})")
     secs = sorted([s for s in d.get("sectors", []) if s.get("return5d") is not None], key=lambda s: -s["return5d"])
     if secs:
         print("sectors 5d: leaders " + ", ".join(f"{s['symbol']} {s['return5d']:+.1f}%" for s in secs[:3]) + " | laggards " + ", ".join(f"{s['symbol']} {s['return5d']:+.1f}%" for s in secs[-3:]))
@@ -150,7 +150,7 @@ else:
     header("MACRO / FED", "/api/decision/macro_fed (FRED/yfinance/federalreserve.gov)", ran, 36)
     f = d.get("facts", {}); val = lambda k: (f.get(k) or {}).get("value")
     print(f"fed funds target {val('fed.policy.target_lower')}-{val('fed.policy.target_upper')}% | EFFR {val('fed.effr')} | next FOMC {val('fed.next_meeting.date')} | cut/hold/hike {val('fed.next_meeting.cut_prob')}/{val('fed.next_meeting.hold_prob')}/{val('fed.next_meeting.hike_prob')} (futures-implied)")
-    print(f"10Y {val('rates.us.t10y')} 2Y {val('rates.us.t2y')} 10Y-2Y {val('rates.us.spread_10y2y')} | MOVE {val('rates.us.move_index')}")
+    print(f"10Y {val('rates.us.t10y')} (FRED daily close) 2Y {val('rates.us.t2y')} 10Y-2Y {val('rates.us.spread_10y2y')} | MOVE {val('rates.us.move_index')}")
     print("note:", d.get("notes"))
     for e in (d.get("market", {}).get("events") or [])[:5]:
         print(f"  event {e.get('at')} {e.get('name')} [{e.get('impact')}]")
@@ -159,15 +159,26 @@ else:
 d = get("/api/option-momentum")
 if d is None: unavailable("OPTION MOMENTUM", "/api/option-momentum", "fetch failed")
 else:
-    built = [iso(c["built_at"]) for c in d.get("cases", []) if c.get("built_at")]
-    asof = max(built) if built else None
+    # API status is AVAILABLE when latest.json is <90s old (engine runs 09:30-16:00 ET only).
+    stamps = [t for c in d.get("cards", []) for t in (c.get("quote_as_of"), (c.get("alert") or {}).get("at")) if isinstance(t, (int, float))]
+    asof = datetime.fromtimestamp(max(stamps), ET) if stamps else None
     status = d.get("status")
-    header("OPTION MOMENTUM (display only; not a trade signal)", "/api/option-momentum", asof, 24 if status in ("OK", "LIVE", "FRESH", "CURRENT") else 0)
-    bad = status not in ("OK", "LIVE", "FRESH", "CURRENT")
-    print(f"mode {d.get('mode')} | API status {status}" + (f" -> STALE {fmt(asof) if asof else 'UNKNOWN'} per API; do not present as live flow" if bad else ""))
-    print(f"live cards: {len(d.get('cards', []))} | forensic cases (post-mortems, past contracts): {len(d.get('cases', []))}")
-    for c in d.get("cards", [])[:5]:
-        print("  card:", json.dumps(c)[:200])
+    if status == "AVAILABLE":
+        header("OPTION MOMENTUM (display only; not a trade signal)", "/api/option-momentum", asof, 0.05)
+    else:
+        print(f"\n--- OPTION MOMENTUM (display only; not a trade signal) --- source: /api/option-momentum | "
+              f"engine idle (runs 09:30-16:00 ET RTH) | last update {fmt(asof) if asof else 'UNKNOWN'}")
+    # What Mike actually received today = the Telegram send ledger (jazzy_relay lane), not card.alert (latest only).
+    try:
+        import sqlite3
+        con = sqlite3.connect(f"file:{os.path.expanduser('~/.local/state/tg-ledger.sqlite')}?mode=ro", uri=True)
+        rows = con.execute("select ts, text from sends where fn='jazzy_relay' and day=? and ok=1 order by ts", (today,)).fetchall()
+        print(f"alerts sent to Telegram today: {len(rows)}" + ("" if rows else " (none)"))
+        for ts, text in rows[-8:]:
+            lines = [l for l in (text or "").splitlines() if l.strip()]
+            print(f"  {datetime.fromtimestamp(ts, ET).strftime('%H:%M ET')} " + " | ".join(lines[:2])[:160])
+    except Exception as e:
+        print(f"alerts sent today: UNAVAILABLE (ledger read failed: {type(e).__name__})")
 PY
 
 echo ""
