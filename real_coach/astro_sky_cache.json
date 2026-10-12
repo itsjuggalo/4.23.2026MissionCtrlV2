@@ -1,36 +1,16 @@
 {
  "meta": {
   "schema_version": 2,
-  "generated_at": "2026-10-05T08:05:50-04:00",
+  "generated_at": "2026-10-12T08:25:54-04:00",
   "source": "astro_sky._build_cache (Swiss Ephemeris)",
   "timezone": "America/New_York",
   "code_hash": "fc8f83d18ad4",
-  "valid_until": "2026-10-12T08:05:50-04:00"
+  "valid_until": "2026-10-19T08:25:54-04:00"
  },
- "generated": "2026-10-05",
- "range_start": "2026-10-04",
- "range_end": "2027-11-08",
+ "generated": "2026-10-12",
+ "range_start": "2026-10-11",
+ "range_end": "2027-11-15",
  "lunations": [
-  {
-   "date_et": "2026-10-10T11:50-04:00",
-   "kind": "new",
-   "lon": 197.3607,
-   "sign": "Libra",
-   "deg": 17,
-   "house": 3,
-   "natal_hits": [
-    {
-     "natal": "Apollon",
-     "aspect": "conjunct",
-     "orb": 0.96
-    },
-    {
-     "natal": "IC",
-     "aspect": "conjunct",
-     "orb": 1.47
-    }
-   ]
-  },
   {
    "date_et": "2026-10-26T00:12-04:00",
    "kind": "full",
@@ -356,6 +336,21 @@
    "deg": 5,
    "house": 4,
    "natal_hits": []
+  },
+  {
+   "date_et": "2027-11-13T22:26-05:00",
+   "kind": "full",
+   "lon": 51.5214,
+   "sign": "Taurus",
+   "deg": 21,
+   "house": 10,
+   "natal_hits": [
+    {
+     "natal": "Pluto",
+     "aspect": "opposite",
+     "orb": 0.91
+    }
+   ]
   }
  ],
  "eclipses": [
@@ -1134,6 +1129,15 @@
    "sign": "Sagittarius",
    "deg": 0,
    "house": 5
+  },
+  {
+   "date_et": "2027-11-09T19:26-05:00",
+   "body": "Mercury",
+   "retro": false,
+   "lon": 210,
+   "sign": "Scorpio",
+   "deg": 0,
+   "house": 4
   }
  ],
  "mercury_rx": [
