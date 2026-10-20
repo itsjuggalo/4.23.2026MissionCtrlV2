@@ -17,8 +17,8 @@ from zoneinfo import ZoneInfo
 
 ET = ZoneInfo("America/New_York")
 
-QUOTE_CLIENT = os.environ.get(
-    "MC_QUOTE_CLIENT", "/AIWorkWSL/web/missionctrl/pipeline/decision/lib/quote_client.py")
+QUOTE_CLIENT = (os.environ.get("MC_QUOTE_CLIENT")
+                or "/AIWorkWSL/web/missionctrl/pipeline/decision/lib/quote_client.py")
 
 
 def _load():
