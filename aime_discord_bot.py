@@ -811,6 +811,10 @@ HELP_TEXT = (
     "`/scorecard` EOD book + pick grades · `/journal` recap · `/week` weekly · `/trades` fills\n"
     "`/levels <t>` S/R + entry/stop · `/size <t> <entry> <stop>` position size · `/pick <t>` action card\n"
     "`/flowpicks` ranked flow · `/signals` source liveness\n\n"
+    "**🐳 Flow intel (instant, no AI)**\n"
+    "`/contracts <ticker|company>` every contract seen across Firebase/flow/UW/scrapers/decipher · "
+    "`/intel <t>` one-screen · `/flow <t>` · `/tide` · `/hot` · `/gex <t>` · `/oi <t>` · `/iv <t>` · "
+    "`/darkpool <t>` · `/uw <t>`\n\n"
     "**👁️ Watchlist** (feeds your scheduled intel)\n"
     "`/watch <t>` · `/unwatch <t>` · `/watchlist`\n\n"
     "**🐦 Intel & briefs**\n"
@@ -896,6 +900,115 @@ async def levels_cmd(interaction: discord.Interaction, ticker: str):
     await _send_chunks(interaction, await _answer_skill(prompt, timeout=300))
 
 
+# ─── UW-STYLE INTEL (deterministic, no LLM / subscription spend) ──────────────
+# Thin wrappers over MissionCtrl's pipeline/intel/query.py CLI (flow.db, Firebase,
+# UW Discord reader, CBOE delayed chains, FINRA dark-pool layer). Read-only.
+INTEL_PY = "/home/itsju/.venv/bin/python"
+INTEL_CWD = "/AIWorkWSL/web/missionctrl"
+
+
+def _run_intel(args: list[str], timeout: int = 90) -> str:
+    try:
+        r = subprocess.run([INTEL_PY, "-m", "pipeline.intel.query", *args], capture_output=True, text=True,
+                           timeout=timeout, cwd=INTEL_CWD)
+        out = (r.stdout or "").strip()
+        if r.returncode != 0:
+            return f"⚠️ intel error rc={r.returncode}: {(r.stderr or out).strip()[-400:]}"
+        return out or "[intel returned nothing]"
+    except subprocess.TimeoutExpired:
+        return f"⚠️ intel timed out after {timeout}s"
+    except Exception as e:  # noqa: BLE001
+        return f"⚠️ intel error: {e}"
+
+
+async def _send_lines(interaction: discord.Interaction, text: str) -> None:
+    """Like _send_chunks but splits on line boundaries so bold/links never break mid-line."""
+    parts, cur = [], ""
+    for line in (text or "[empty]").splitlines():
+        line = line[:DISCORD_MAX]
+        if len(cur) + len(line) + 1 > DISCORD_MAX:
+            parts.append(cur)
+            cur = ""
+        cur += line + "\n"
+    if cur.strip():
+        parts.append(cur)
+    for p in parts:
+        await interaction.followup.send(p)
+
+
+async def _intel(interaction: discord.Interaction, *args: str) -> None:
+    await interaction.response.defer(thinking=True)
+    await _send_lines(interaction, await asyncio.to_thread(_run_intel, [a for a in args if a]))
+
+
+@tree.command(name="intel", description="One-screen intel on a ticker: flow, GEX, IV, dark pool")
+@app_commands.describe(ticker="ticker or company name")
+async def intel_cmd(interaction: discord.Interaction, ticker: str):
+    await _intel(interaction, "intel", ticker)
+
+
+@tree.command(name="contracts", description="Every contract seen for a ticker or company across Firebase, flow, UW, scrapers, decipher, OME")
+@app_commands.describe(query="ticker or company name (e.g. NVDA or nvidia)", type="calls or puts only",
+                       expiry="only this expiry, YYYY-MM-DD", days="look back N days (default 1 = latest session, max 14)")
+@app_commands.choices(type=[app_commands.Choice(name="calls", value="call"), app_commands.Choice(name="puts", value="put")])
+async def contracts_cmd(interaction: discord.Interaction, query: str, type: Optional[app_commands.Choice[str]] = None,
+                        expiry: Optional[str] = None, days: Optional[int] = None):
+    args = ["contracts", *query.split()]
+    if type:
+        args += ["--type", type.value]
+    if expiry:
+        args += ["--exp", expiry.strip()]
+    if days:
+        args += ["--days", str(days)]
+    await _intel(interaction, *args)
+
+
+@tree.command(name="flow", description="Session options flow for a ticker: premium, net premium, top prints")
+@app_commands.describe(ticker="ticker or company name")
+async def flow_cmd(interaction: discord.Interaction, ticker: str):
+    await _intel(interaction, "flow", ticker)
+
+
+@tree.command(name="tide", description="Market tide: net call vs net put premium through the session (proxy)")
+async def tide_cmd(interaction: discord.Interaction):
+    await _intel(interaction, "tide")
+
+
+@tree.command(name="hot", description="Top tickers by options premium this session")
+async def hot_cmd(interaction: discord.Interaction):
+    await _intel(interaction, "hot")
+
+
+@tree.command(name="gex", description="Gamma exposure for any ticker: flip, call/put walls, regime (CBOE delayed)")
+@app_commands.describe(ticker="ticker (SPX/NDX work too)")
+async def gex_cmd(interaction: discord.Interaction, ticker: str):
+    await _intel(interaction, "gex", ticker)
+
+
+@tree.command(name="oi", description="Unusual volume vs open interest + biggest OI changes")
+@app_commands.describe(ticker="ticker or company name")
+async def oi_cmd(interaction: discord.Interaction, ticker: str):
+    await _intel(interaction, "oi", ticker)
+
+
+@tree.command(name="iv", description="ATM IV30 + IV rank / percentile")
+@app_commands.describe(ticker="ticker or company name")
+async def iv_cmd(interaction: discord.Interaction, ticker: str):
+    await _intel(interaction, "iv", ticker)
+
+
+@tree.command(name="darkpool", description="Dark pool: off-exchange share, short volume, ATS venues (FINRA)")
+@app_commands.describe(ticker="ticker or company name")
+async def darkpool_cmd(interaction: discord.Interaction, ticker: str):
+    await _intel(interaction, "dp", ticker)
+
+
+@tree.command(name="uw", description="Unusual Whales Discord flow posts + news mentions for a ticker")
+@app_commands.describe(ticker="ticker or company name")
+async def uw_cmd(interaction: discord.Interaction, ticker: str):
+    await _intel(interaction, "uw", ticker)
+
+
 # ─── POLISH: ticker autocomplete + right-click context menus (Phase 5) ────────
 _AC_DEFAULTS = ["SPY", "QQQ", "NVDA", "TSLA", "AAPL", "AMD", "MSFT", "META",
                 "AMZN", "GOOGL", "SOFI", "PLTR", "COIN", "MSTR"]
@@ -916,7 +1029,9 @@ async def _ac_ticker(interaction: discord.Interaction, current: str):
 # attach to every ticker-arg command (param names differ per command)
 for _cmd, _param in ((ticker_cmd, "symbol"), (options_cmd, "ticker"), (levels_cmd, "ticker"),
                      (deck_cmd, "ticker"), (payoff_cmd, "ticker"), (watch_cmd, "ticker"),
-                     (unwatch_cmd, "ticker")):
+                     (unwatch_cmd, "ticker"), (intel_cmd, "ticker"), (contracts_cmd, "query"),
+                     (flow_cmd, "ticker"), (gex_cmd, "ticker"), (oi_cmd, "ticker"), (iv_cmd, "ticker"),
+                     (darkpool_cmd, "ticker"), (uw_cmd, "ticker")):
     try:
         _cmd.autocomplete(_param)(_ac_ticker)
     except Exception as _e:  # noqa: BLE001
