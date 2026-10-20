@@ -4,6 +4,10 @@
 
 @AGENTS.md
 
+<!-- Trading rules (level 1b): this tree sits outside /AIWorkWSL, so the parent .claude/rules do not auto-load here (verified 2026-10-20). -->
+@/AIWorkWSL/.claude/rules/market-data.md
+@/AIWorkWSL/.claude/rules/script-standards.md
+
 # scripts — Mike's operator script collection (~206 files)
 
 Loose collection of Python + shell scripts spanning trading utilities, scrapers, log writers, AInvest probes, alpaca helpers, agent-health checks, and dev tooling. Tracked under its own git remote (`itsjuggalo/4.23.2026MissionCtrlV2`).
