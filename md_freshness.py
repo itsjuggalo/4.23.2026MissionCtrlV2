@@ -158,9 +158,19 @@ def age_days(ts):
 
 
 # ---- 1. live snapshot ----------------------------------------------------------
+def _pm2_env():
+    """cron's PATH has no nvm node, so a bare `pm2` (a `#!/usr/bin/env node` script) is not found and the weekly
+    SYSTEM-MAP block read "0 online (pm2 jlist unreadable)" (remedial W3 2026-10-20). Prepend the newest nvm bin."""
+    env = dict(os.environ)
+    bins = sorted(Path.home().glob(".nvm/versions/node/*/bin"), key=lambda b: b.stat().st_mtime, reverse=True)
+    if bins:
+        env["PATH"] = f"{bins[0]}:{env.get('PATH', '/usr/bin:/bin')}"
+    return env
+
+
 def snap_pm2():
     try:
-        procs = json.loads(sh(["pm2", "jlist"]))
+        procs = json.loads(sh(["pm2", "jlist"], env=_pm2_env()))
     except Exception:
         return {"ok": False, "online": 0, "total": 0, "names": []}
     online = [p.get("name", "?") for p in procs
