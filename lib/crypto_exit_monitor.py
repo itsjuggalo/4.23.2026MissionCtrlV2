@@ -34,6 +34,7 @@ def run(account):
             if pnl_pct >= TP_PCT: reason = f"TP +{pnl_pct*100:.2f}%"
             elif pnl_pct <= -SL_PCT: reason = f"SL {pnl_pct*100:.2f}%"
             if not reason: continue
+            raise RuntimeError("order path retired 2026-10-20 (R4) — advisory only, no order sent")
             close = requests.delete(f"{base}/v2/positions/{sym.replace('/', '%2F')}",
                                      headers=h, timeout=15)
             ok = 200 <= close.status_code < 300

@@ -47,6 +47,7 @@ if new_stop > current:
     print(f"⚠ New stop ${new_stop} >= current ${current} — would trigger immediately. Aborting.")
     sys.exit(2)
 
+raise RuntimeError("order path retired 2026-10-20 (R4) — advisory only, no order sent")
 # Cancel existing sell orders on this symbol
 orders = requests.get(f"{BASE}/orders?status=open&symbols={SYMBOL}", headers=H, timeout=10).json()
 to_cancel = [o for o in orders if o["side"] == "sell"]

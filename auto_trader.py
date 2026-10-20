@@ -100,6 +100,7 @@ def alpaca_get(path):
 
 
 def alpaca_post(path, body):
+    raise RuntimeError("order path retired 2026-10-20 (R4) — advisory only, no order sent")
     try:
         r = requests.post(f"{ALPACA_BASE}{path}", headers=alpaca_headers(), json=body, timeout=10)
         return r.json(), r.status_code

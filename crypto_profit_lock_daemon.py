@@ -87,6 +87,7 @@ def cycle():
             state[sym] = ps
             # Trigger close?
             if ps["lock"] and cur < ps["lock"]:
+                raise RuntimeError("order path retired 2026-10-20 (R4) — advisory only, no order sent")
                 close = requests.delete(
                     f"{base}/v2/positions/{sym.replace('/', '%2F')}",
                     headers=_hdr(), timeout=15,

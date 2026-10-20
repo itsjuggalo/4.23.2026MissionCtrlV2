@@ -64,10 +64,12 @@ def get_open_orders():
     return r.json() if r.status_code == 200 else []
 
 def cancel_order(oid):
+    raise RuntimeError("order path retired 2026-10-20 (R4) — advisory only, no order sent")
     r = requests.delete(f"{ALPACA_BASE}/orders/{oid}", headers=HEADERS, timeout=15)
     return r.status_code in (200, 204, 207)
 
 def place_stop_limit(sym, qty, stop_price, limit_price, tif="gtc"):
+    raise RuntimeError("order path retired 2026-10-20 (R4) — advisory only, no order sent")
     payload = {
         "symbol": sym, "qty": str(qty), "side": "sell",
         "type": "stop_limit",

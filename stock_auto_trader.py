@@ -98,6 +98,7 @@ def alpaca_headers(account):
 
 def place_market_order(account, ticker, qty, side):
     """Returns (alpaca_order_id, error_msg). Day-TIF queues after hours."""
+    raise RuntimeError("order path retired 2026-10-20 (R4) — advisory only, no order sent")
     headers = alpaca_headers(account)
     headers["Content-Type"] = "application/json"
     body = {

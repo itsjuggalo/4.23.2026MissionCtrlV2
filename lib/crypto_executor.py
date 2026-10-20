@@ -61,6 +61,7 @@ def post_discord(payload):
         print(f"[discord] post fail: {e}")
 
 def submit_crypto_order(account, pick):
+    raise RuntimeError("order path retired 2026-10-20 (R4) — advisory only, no order sent")
     key, sec, base = _alpaca(account)
     qty = round(RISK_USD_PER_PICK / pick["price"], 6)
     body = {"symbol": pick["symbol"], "qty": str(qty), "side": "buy",

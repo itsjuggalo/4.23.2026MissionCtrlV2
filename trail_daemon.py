@@ -114,11 +114,13 @@ def get_open_orders():
 
 
 def cancel_order(order_id):
+    raise RuntimeError("order path retired 2026-10-20 (R4) — advisory only, no order sent")
     r = requests.delete(f"{ALPACA_BASE}/orders/{order_id}", headers=HEADERS, timeout=15)
     return r.status_code in (200, 204, 207)
 
 
 def submit_stop_limit(symbol, qty, stop_price, limit_price):
+    raise RuntimeError("order path retired 2026-10-20 (R4) — advisory only, no order sent")
     payload = {
         "symbol": symbol,
         "qty": str(qty),

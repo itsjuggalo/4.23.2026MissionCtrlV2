@@ -135,6 +135,7 @@ def cancel_open_sells_for_symbol(symbol: str) -> int:
     Needed because Boba's Layer 2 arms OCO brackets that would reject our Layer 1 sell
     with "insufficient balance" since shares are reserved. Returns count cancelled.
     """
+    raise RuntimeError("order path retired 2026-10-20 (R4) — advisory only, no order sent")
     import requests
     try:
         r = SESSION.get(f"{ALPACA_BASE}/v2/orders?status=open&limit=100",
@@ -160,6 +161,7 @@ def cancel_open_sells_for_symbol(symbol: str) -> int:
 def submit_sell_limit(symbol: str, qty: float, limit_price: float) -> dict:
     """Submit a sell LIMIT order. Returns {ok, order_id, error}.
     First cancels any open OCO/bracket legs for this symbol to release reserved shares."""
+    raise RuntimeError("order path retired 2026-10-20 (R4) — advisory only, no order sent")
     cancelled = cancel_open_sells_for_symbol(symbol)
     if cancelled > 0:
         print(f"  [daemon] cancelled {cancelled} open sell order(s) on {symbol} before new sell")
