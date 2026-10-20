@@ -1,9 +1,12 @@
 #!/usr/bin/env python3
 """
-Trade Desk — 5-minute AI brief generator (zero API token cost).
-Gathers data from pipeline SQLite DBs, calls the claude CLI,
-writes output to ~/02_DATA/trade-brief-cache.json.
-Only runs during US market hours (9:25 AM – 4:05 PM ET, Mon–Fri).
+Trade Desk brief (every 15 min in RTH) -> ~/02_DATA/trade-brief-cache.json.
+
+Token hotfix (2026-10-20): the brief is a python template over the pipeline facts, each line with its
+source and ET as_of (STALE when older than 26 h). An LLM adds at most a 2-3 line read, at most once per
+ET hour, through ~/bin/llm-route with no settings/MCP (prompt <= 6K chars); the read is reused within
+the hour and dropped if it carries a trade verb. Was: a full `claude -p` (whole Claude Code harness)
+every 15 minutes.
 """
 
 import json
@@ -20,7 +23,6 @@ ET = ZoneInfo("America/New_York")
 
 FLOW_DB     = HOME / "02_DATA/flow-data/flow.db"
 PIPELINE_DB = HOME / "LapClaw/pipeline/desk_pipeline.sqlite"
-LEDGER_DB   = HOME / "LapClaw/pipeline/trade_ledger.sqlite"
 BRIEF_CACHE = HOME / "02_DATA/trade-brief-cache.json"
 
 
@@ -50,7 +52,7 @@ def query_db(db_path: Path, sql: str, params=()) -> list[dict]:
 
 def get_flow_rank() -> list[dict]:
     return query_db(PIPELINE_DB, """
-        SELECT p.rank, d.ticker, d.final_band, d.final_confidence, d.curator_thesis, d.asset_class
+        SELECT p.rank, d.ticker, d.final_band, d.final_confidence, d.curator_thesis, d.asset_class, p.generated_at
         FROM premium_shortlist p
         JOIN dossiers d ON p.dossier_id = d.id
         WHERE p.cycle_id = (SELECT cycle_id FROM premium_shortlist ORDER BY generated_at DESC LIMIT 1)
@@ -62,7 +64,7 @@ def get_flow_winners(days=3) -> list[dict]:
     from datetime import timedelta
     since = (datetime.now(timezone.utc) - timedelta(days=days)).isoformat()
     return query_db(FLOW_DB, """
-        SELECT symbol, option_type, strike, expiry, peak_pct, flow_value, flow_count, why_summary
+        SELECT symbol, option_type, strike, expiry, peak_pct, flow_value, flow_count, why_summary, detected_at
         FROM flow_winners WHERE detected_at >= ? ORDER BY peak_pct DESC LIMIT 5
     """, (since,))
 
@@ -81,134 +83,70 @@ def get_macro() -> dict | None:
     return rows[0] if rows else None
 
 
-def get_recent_ledger() -> list[dict]:
-    # Freshness-gated (2026-09-17): the query used to be a bare "last 5 rows,
-    # whatever their age." executed_ledger's paper-trading writers (the Boba/
-    # Jazzy/Orion decision-cycle agents) were retired 2026-09-15, and the last
-    # row in this table is from 2026-06-10 — over 3 months old. An ungated
-    # LIMIT 5 kept handing the LLM prompt "RECENT EXECUTIONS" that were
-    # actually a 3-month-old jazzy/boba paper fill, which the model then wrote
-    # up verbatim ("Jazzy's SPY $730 PUT lost 4 straight...") into today's
-    # published /explore article — retired personas leaking into live copy via
-    # a "recent" label on genuinely stale, dead-account data. Cap at 3 days so
-    # a dead ledger degrades to no section (fallback_brief already omits
-    # "RECENT EXECUTIONS" when `ledger` is empty) instead of impersonating a
-    # live one.
-    from datetime import timedelta
-    since = (datetime.now(timezone.utc) - timedelta(days=3)).isoformat()
-    return query_db(LEDGER_DB, """
-        SELECT account, ticker, option_type, strike, expiry, fill_price, confidence, exec_ok, cycle_time
-        FROM executed_ledger WHERE cycle_time >= ? ORDER BY cycle_time DESC LIMIT 5
-    """, (since,))
+READ_MAX_CHARS = 6000
+STALE_H = 26
+LLM_ROUTE = HOME / "bin" / "llm-route"
+_TRADE_VERB = __import__("re").compile(r"\b(BUY|SELL|HOLD|WAIT|TRIM|EXIT|AVOID)\b")
 
 
-def build_prompt(rank, winners, momentum, macro, ledger) -> str:
-    lines = ["You are a focused options trading analyst. Given the live pipeline data below, write a concise 5-bullet trading brief for a swing/day trader.\n"]
-    lines.append("Rules: each bullet starts with •, max 25 words per bullet, be specific (include tickers/numbers), no fluff.\n")
-    lines.append("Never write BUY/SELL/HOLD/WAIT/TRIM/EXIT/AVOID or a confidence %; "
-                 "use entry ref/stop ref/target ref and GATE PASS/CAUTION/BLOCKED state instead — "
-                 "the operator's canonical desk makes the call, this is evidence only.\n")
+def _asof(ts) -> str:
+    """'MM-DD HH:MM ET', plus ' STALE' when older than STALE_H hours; 'as_of unknown' if unparseable."""
+    try:
+        d = datetime.fromisoformat(str(ts).replace("Z", "+00:00"))
+        d = d if d.tzinfo else d.replace(tzinfo=timezone.utc)
+    except (TypeError, ValueError):
+        return "as_of unknown"
+    stale = (datetime.now(timezone.utc) - d).total_seconds() > STALE_H * 3600
+    return d.astimezone(ET).strftime("%m-%d %H:%M ET") + (" STALE" if stale else "")
 
+
+def template_brief(rank, winners, momentum, macro) -> list[str]:
+    """Deterministic bullets from the pipeline facts — no LLM."""
+    b = []
     if macro:
-        lines.append(f"MACRO: Regime={macro.get('regime','?')} | VIX={macro.get('vix','?')} ({macro.get('vix_pct','?')}%ile) | Fed={macro.get('fed_posture','?')}")
-        lines.append(f"Rates: {str(macro.get('rates_summary',''))[:120]}\n")
-
+        pct = f" ({macro['vix_pct']}%ile)" if macro.get("vix_pct") is not None else ""
+        b.append(f"Macro: {macro.get('regime','?')} regime, VIX {macro.get('vix') if macro.get('vix') is not None else 'UNAVAILABLE'}{pct}, "
+                 f"Fed {macro.get('fed_posture','?')} — src macro_context, {_asof(macro.get('ran_at'))}.")
+    else:
+        b.append("Macro: UNAVAILABLE (no macro_context row).")
     if rank:
-        lines.append("FLOW RANK TOP PICKS (current cycle):")
-        for r in rank:
-            thesis = str(r.get("curator_thesis") or "").replace("\n", " ")[:80]
-            lines.append(f"  #{r['rank']} {r['ticker']} [{r['final_band']}] conf={r['final_confidence']}% | {thesis}")
-        lines.append("")
-
+        picks = ", ".join(f"#{r.get('rank')} {r.get('ticker','?')} {r.get('final_band','?')}" for r in rank[:5])
+        b.append(f"Shortlist: {picks} — src premium_shortlist, {_asof(rank[0].get('generated_at'))}.")
+    else:
+        b.append("Shortlist: UNAVAILABLE (no premium_shortlist cycle).")
     if winners:
-        lines.append("RECENT FLOW WINNERS (≥200% peak returns, last 3 days):")
-        for w in winners:
-            # flow_value is NULL for winners detected without a premium figure
-            # (17 of 92 rows, incl. every current in-window row). A bare :,.0f
-            # on None raises TypeError and kills the whole brief.
-            prem = f"${w['flow_value']:,.0f} premium" if w["flow_value"] is not None else "premium n/a"
-            lines.append(f"  {w['symbol']} {w['option_type']} ${w['strike']} {w['expiry']} → +{w['peak_pct']:.0f}% | {prem}")
-        lines.append("")
-
-    if momentum:
-        up = [m["ticker"] for m in momentum if m.get("trend") == "UP" or (m.get("bull_streak") or 0) >= 3]
-        down = [m["ticker"] for m in momentum if m.get("trend") == "DOWN" or (m.get("bear_streak") or 0) >= 3]
-        if up:   lines.append(f"BULLISH MOMENTUM: {', '.join(up)}")
-        if down: lines.append(f"BEARISH MOMENTUM: {', '.join(down)}")
-        lines.append("")
-
-    if ledger:
-        lines.append("RECENT EXECUTIONS (paper):")
-        for t in ledger:
-            ok = "✓" if str(t.get("exec_ok","")).lower() == "true" else "✗"
-            lines.append(f"  {ok} [{t['account']}] {t['ticker']} {t['option_type']} ${t['strike']} @ ${t['fill_price']} conf={t['confidence']}")
-        lines.append("")
-
-    lines.append("\nWrite your 5-bullet brief now:")
-    return "\n".join(lines)
-
-
-def run_claude(prompt: str) -> str:
-    # Use claude CLI (subscription — no API token cost).
-    # Absolute path: cron's PATH lacks ~/bin, so a bare "claude" raised
-    # FileNotFoundError every market-hours tick. "-p" is already non-interactive
-    # (the old "--no-interactive" flag is invalid and errored out).
-    claude_bin = os.path.expanduser("~/.local/bin/claude")
-    if not os.path.exists(claude_bin):
-        claude_bin = "claude"  # fall back to PATH for interactive shells
-    path_parts = [
-        str(HOME / ".nvm/versions/node/v22.22.3/bin"),
-        str(HOME / ".local/bin"),
-        "/usr/local/bin",
-        "/usr/bin",
-        "/bin",
-    ]
-    result = subprocess.run(
-        [claude_bin, "-p", prompt, "--model", "sonnet", "--effort", "medium"],
-        capture_output=True, text=True, timeout=60,
-        cwd=os.path.expanduser("~"),  # headless claude expects to run from $HOME
-        env={
-            **{k: v for k, v in os.environ.items() if k != "ANTHROPIC_API_KEY"},
-            "PATH": ":".join(p for p in path_parts if p),
-            "TERM": "dumb",
-        },
-    )
-    if result.returncode != 0:
-        detail = (result.stderr or result.stdout or "").strip()[:200]
-        raise RuntimeError(f"claude exited {result.returncode}: {detail}")
-    return result.stdout.strip()
-
-
-def fallback_brief(rank, winners, momentum, macro, ledger, reason: str) -> str:
-    bullet = chr(8226)
-    bullets: list[str] = []
-
-    def line(text: str) -> str:
-        return f"{bullet} {text}"
-
-    clean_reason = reason.replace("\n", " ")[:90]
-    bullets.append(line(f"AI brief fallback active: {clean_reason}"))
-    if macro:
-        bullets.append(line(f"Macro: {macro.get('regime','?')} regime, VIX {macro.get('vix','?')}, Fed {macro.get('fed_posture','?')}."))
-    if rank:
-        picks = ", ".join(f"{r.get('ticker','?')} {r.get('final_band','?')}" for r in rank[:3])
-        bullets.append(line(f"Current shortlist: {picks}."))
-    if winners:
-        top = winners[0]
-        bullets.append(line(f"Top recent flow winner: {top.get('symbol','?')} {top.get('option_type','?')} peaked +{top.get('peak_pct','?')}%."))
+        w = winners[0]
+        b.append(f"Top flow winner (3d): {w.get('symbol','?')} {w.get('option_type','?')} ${w.get('strike','?')} {w.get('expiry','?')} "
+                 f"peaked +{float(w.get('peak_pct') or 0):.0f}% — src flow_winners, {_asof(w.get('detected_at'))}.")
     if momentum:
         up = [m["ticker"] for m in momentum if m.get("trend") == "UP" or (m.get("bull_streak") or 0) >= 3]
         down = [m["ticker"] for m in momentum if m.get("trend") == "DOWN" or (m.get("bear_streak") or 0) >= 3]
         if up or down:
-            bullets.append(line(f"Momentum: bullish {', '.join(up[:4]) or 'none'}; bearish {', '.join(down[:4]) or 'none'}."))
-    if ledger:
-        # "Paper" is retired wording site-wide (2026-09-17 doctrine) — paper
-        # trading agents are retired, this table only exists as a historical
-        # execution log now.
-        bullets.append(line(f"Execution log: {len(ledger)} recent fill rows available for review."))
-    while len(bullets) < 5:
-        bullets.append(line("No additional high-signal pipeline item available in fallback mode."))
-    return "\n".join(bullets[:5])
+            b.append(f"Momentum: bullish {', '.join(up[:4]) or 'none'}; bearish {', '.join(down[:4]) or 'none'} — src ticker_momentum.")
+    return [f"{chr(8226)} {x}" for x in b]
+
+
+def llm_read(bullets: list[str], prev: dict) -> tuple[list[str], str, str | None]:
+    """(read lines, status, hour key). Reuses the previous read within the same ET hour."""
+    hour = datetime.now(ET).strftime("%Y-%m-%dT%H")
+    if prev.get("read_hour") == hour:
+        return prev.get("read") or [], prev.get("read_status") or "reused", hour
+    prompt = ("You read a trading desk's computed facts. Write 2-3 short lines (max 25 words each) on what "
+              "matters most and what to watch. Use only these facts; keep any STALE label. Never write "
+              "BUY/SELL/HOLD/WAIT/TRIM/EXIT/AVOID or a confidence %.\n\nFACTS:\n" + "\n".join(bullets))[:READ_MAX_CHARS]
+    try:
+        r = subprocess.run([str(LLM_ROUTE), "-p", prompt, "--model", "sonnet", "--strict-mcp-config",
+                            "--setting-sources", ""], capture_output=True, text=True, timeout=90,
+                           cwd=str(HOME), env={k: v for k, v in os.environ.items() if k != "ANTHROPIC_API_KEY"})
+    except (subprocess.TimeoutExpired, OSError) as e:
+        return [], f"unavailable ({type(e).__name__})", hour
+    if r.returncode != 0:
+        return [], "unavailable (" + ((r.stderr or r.stdout or "").strip().splitlines() or ["error"])[-1][:120] + ")", hour
+    lines = [x.strip().lstrip("•-* ").strip() for x in r.stdout.splitlines() if x.strip()][:3]
+    if any(_TRADE_VERB.search(x) for x in lines):
+        return [], "dropped (trade verb in LLM read)", hour
+    return [f"{chr(8226)} Read (LLM, interpretation only): {x}" for x in lines], "ok", hour
+
 
 def main():
     if not is_market_hours():
@@ -220,38 +158,22 @@ def main():
     winners = get_flow_winners(3)
     momentum = get_momentum()
     macro   = get_macro()
-    ledger  = get_recent_ledger()
 
-    prompt = build_prompt(rank, winners, momentum, macro, ledger)
-
-    print("[trade-brief] Calling claude CLI...", file=sys.stderr)
-    status = "ok"
-    error = None
+    bullets = template_brief(rank, winners, momentum, macro)
     try:
-        brief_text = run_claude(prompt)
-    # TimeoutExpired/OSError are "claude unavailable" too — the whole point of
-    # fallback_brief. Catching only RuntimeError let a 60s timeout kill the run
-    # instead of degrading, which is how this crashed every market-hours tick.
-    except (RuntimeError, subprocess.TimeoutExpired, OSError) as e:
-        status = "fallback"
-        # subprocess.TimeoutExpired's str() is "Command '[/home/itsju/.local/bin/claude',
-        # '-p', '<full prompt>', ...]' timed out after 60 seconds" — the raw argv
-        # (absolute paths, the whole prompt) leaked straight into the published
-        # /explore article as "AI brief fallback active: Command '[...]" (2026-09-18
-        # QA: dev internals in user copy, rule 10). Log the real exception, publish
-        # a clean human sentence.
-        error_full = str(e)[:400]
-        error = ("claude CLI timed out" if isinstance(e, subprocess.TimeoutExpired)
-                  else str(e)[:200])
-        print(f"[trade-brief] Claude unavailable; writing fallback brief: {error_full}", file=sys.stderr)
-        brief_text = fallback_brief(rank, winners, momentum, macro, ledger, error)
-
-    # Parse bullets
-    bullets = [line.strip() for line in brief_text.split("\n") if line.strip().startswith("•")]
+        prev = json.loads(BRIEF_CACHE.read_text())
+    except (OSError, ValueError):
+        prev = {}
+    read, read_status, read_hour = llm_read(bullets, prev)
+    print(f"[trade-brief] template {len(bullets)} lines; LLM read {read_status}", file=sys.stderr)
+    brief_text = "\n".join(bullets + read)
+    status, error = "ok", None
 
     output = {
         "brief": brief_text,
-        "bullets": bullets,
+        "bullets": bullets + read,
+        "engine": "python template + hourly LLM read",
+        "read": read, "read_status": read_status, "read_hour": read_hour,
         "generated_at": datetime.now(timezone.utc).isoformat(),
         "status": status,
         "error": error,
