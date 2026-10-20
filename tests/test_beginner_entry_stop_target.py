@@ -222,7 +222,9 @@ def test_btc_survives_the_empty_equity_candidates_guard():
             headline="Bitcoin ETFs approach $1B in 7-session inflow run",
             ts_et="09:14", is_crypto=True, source="Cointelegraph")
         SS.btc_snapshot = lambda: {
-            "latestTrade": {"p": 65400.0}, "dailyBar": {"v": 3.0},
+            # a fresh print: the W1 send-time guard (2026-10-20) holds an untimed price
+            "latestTrade": {"p": 65400.0, "t": __import__("datetime").datetime.now(
+                __import__("datetime").timezone.utc).isoformat()}, "dailyBar": {"v": 3.0},
             "prevDailyBar": {"c": 63846.55, "h": 64662.51, "l": 63489.55, "v": 1.16}}
         out = SS.scan(crypto_only=True)
     finally:

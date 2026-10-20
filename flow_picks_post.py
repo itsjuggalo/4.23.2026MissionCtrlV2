@@ -174,17 +174,29 @@ def _fmt(a: dict) -> str:
 
 
 def _tape() -> str:
+    """'SPY 766 (+0.4%) · QQQ … · VIX … (Yahoo 5m, 09:45 ET)'. Remedial W1 (2026-10-20): the
+    price must be TODAY's intraday bar and the % is vs the last close BEFORE today. It used
+    to fall back to the daily close and to iloc[-2], which before today's daily bar existed
+    was two sessions back — a stale 'TODAY' tape. A symbol without today's bar is dropped."""
     try:
         import yfinance as yf
-        out = []
+        today = datetime.now(ET).date()
+        out, stamp = [], None
         for t, lbl in (("SPY", "SPY"), ("QQQ", "QQQ"), ("^VIX", "VIX")):
-            h = yf.Ticker(t).history(period="2d", interval="1d")
+            h = yf.Ticker(t).history(period="5d", interval="1d")
             i = yf.Ticker(t).history(period="1d", interval="5m")
-            prev = float(h["Close"].iloc[-2])
-            now = float(i["Close"].iloc[-1]) if len(i) else float(h["Close"].iloc[-1])
+            if not len(i) or i.index[-1].astimezone(ET).date() != today:
+                continue
+            prior = [float(c) for d, c in zip(h.index, h["Close"]) if d.astimezone(ET).date() < today]
+            if not prior:
+                continue
+            prev, now = prior[-1], float(i["Close"].iloc[-1])
+            stamp = max(stamp or i.index[-1], i.index[-1])
             chg = (now - prev) / prev * 100
             out.append(f"{lbl} {now:,.0f} ({chg:+.1f}%)" if lbl != "VIX" else f"VIX {now:.1f} ({chg:+.1f}%)")
-        return " · ".join(out)
+        if not out:
+            return ""
+        return " · ".join(out) + f" (Yahoo 5m bar {stamp.astimezone(ET):%H:%M} ET)"
     except Exception:
         return ""
 
