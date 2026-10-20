@@ -31,6 +31,7 @@ from zoneinfo import ZoneInfo
 sys.path.insert(0, os.path.expanduser("~/scripts"))
 import quantum_tg as Q  # shared read-only formatters (_human, _market_open, etc.)
 from tg_format import esc, b, hdr, row, footer, join
+from price_guard import alpaca_last, alpaca_option_mid, alpaca_session_bars  # remedial W1 send-time guard
 
 ET = ZoneInfo("America/New_York")
 
@@ -121,8 +122,10 @@ def option_snapshot(occ):
     db = node.get("dailyBar") or {}
     g = node.get("greeks") or {}
     bp, ap = lq.get("bp"), lq.get("ap")
-    mid = round((bp + ap) / 2, 2) if (bp and ap) else (ap or bp or None)
-    return {"mid": mid, "bid": bp, "ask": ap,
+    # remedial W1 (2026-10-20): a quote older than the send_guard ceiling is no quote —
+    # the verdict falls to its existing NO LIVE QUOTE / WAIT branch instead of using it.
+    mid, chk = alpaca_option_mid(node)
+    return {"mid": mid, "bid": bp, "ask": ap, "quote_check": chk,
             "iv": node.get("impliedVolatility") or g.get("iv"),
             "delta": g.get("delta"), "day_high": db.get("h"), "day_low": db.get("l")}
 
@@ -134,11 +137,12 @@ def equity_snapshot(tkr):
     d = _get(f"{ALPACA}/v2/stocks/{tkr}/snapshot", timeout=5)
     if not d:
         return {}
-    last = (d.get("latestTrade") or {}).get("p")
-    prev = (d.get("prevDailyBar") or {}).get("c")
+    last, chk = alpaca_last(d)   # None unless today's print within the send_guard ceiling
+    prev_bar, today_bar = alpaca_session_bars(d)
+    prev = prev_bar.get("c")
     chg = round((last - prev) / prev * 100, 1) if (last and prev) else None
-    return {"spot": last, "prev_close": prev, "chg_pct": chg,
-            "day_high": (d.get("dailyBar") or {}).get("h")}
+    return {"spot": last, "prev_close": prev, "chg_pct": chg, "spot_check": chk,
+            "day_high": today_bar.get("h")}
 
 
 # ── the verdict ──────────────────────────────────────────────────────────────
@@ -157,7 +161,8 @@ def chase_verdict(a, snap, eq):
 
     if not mid or not ap:
         return {"tier": "WAIT", "emoji": "⏸", "head": "NO LIVE QUOTE YET", "move": None, "mid": mid,
-                "reasons": ["no live option quote yet (pre/after-market) — re-check after ~9:45 ET open"],
+                "reasons": [f"no usable option quote ({(snap.get('quote_check') or {}).get('reason') or 'none returned'})"
+                            " — re-check after ~9:45 ET open"],
                 "action": "→ no live option quote — levels unavailable until it's trading"}
 
     move = (mid - ap) / ap * 100
