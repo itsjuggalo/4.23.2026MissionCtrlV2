@@ -171,9 +171,9 @@ class DigestTest(unittest.TestCase):
         self.assertNotIn("202610061436", out)
 
     # ── 2026-10-08 audit: GATE BLOCKED spam, mid-sentence clips, repeated headlines/header ──
-    GATES = ["🔴 GATE BLOCKED — 9:00 ET — Every contract in this window costs more than your $400 cap; needs one at $4.00 or less.",
-             "🔴 GATE BLOCKED — 10:00 ET — Every contract in this window costs more than your $400 cap. The NVDA call costs $491; a fitting contract needs a lower price.",
-             "🔴 GATE BLOCKED — 1:00 PM ET — The only setup costs $571 for one contract, above your $400 cap. Every contract in this window exceeds the cap."]
+    GATES = ["🔴 GATE BLOCKED — 9:00 ET — No qualifying contract in this window.",
+             "🔴 GATE BLOCKED — 10:00 ET — No qualifying contract in this window. The NVDA call costs $491.",
+             "🔴 GATE BLOCKED — 1:00 PM ET — The only setup costs $571 for one contract, which fails the quality gate."]
 
     def test_gate_blocked_collapses_to_one_line(self):
         for g in self.GATES:
@@ -181,7 +181,7 @@ class DigestTest(unittest.TestCase):
         self.dg.flush()
         out = self.sent.read_text()
         self.assertEqual(out.count("GATE BLOCKED"), 0)
-        self.assertIn("🔴 3 blocked (over $400 cap): NVDA", out)
+        self.assertIn("🔴 3 blocked (no qualifying contract): NVDA", out)
         self.assertEqual(out.count("blocked"), 1)
 
     def test_clip_cuts_at_word_boundary(self):

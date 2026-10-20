@@ -136,7 +136,6 @@ _TRIG_ID = re.compile(r"(?:\s*[·—-]\s*|\s+id\s+|\s+)?\b[A-Z][A-Z0-9.\-]{0,9}:
 _HEADLINE = re.compile(r"^\s*•\s*\[([A-Z][A-Z0-9.\-]{0,9})\]\s*(.+)$")        # "• [NBIS] headline — src · 4m"
 MAX_HEADLINES = 3
 _GATE = re.compile(r"GATE BLOCKED", re.I)
-_CAP = re.compile(r"\$400 cap|over (?:the |your )?cap|exceeds? (?:the |your )?(?:\$\d+ )?cap", re.I)
 _GSYM = re.compile(r"\bThe ([A-Z]{1,6}) (?:call|put)\b")
 _G = "\x00GATE\x00"        # sentinel row prefix: build() folds all of these into one line
 _AGE = re.compile(r"\s*·\s*\d+\s*[smhd]\s*$")
@@ -201,11 +200,10 @@ def compact(source: str, text: str, html: bool) -> tuple[str, list[tuple[str, st
         return title, rows           # 🔁 REPEAT = "no new info": counted, not shown
     if not rows and lines and _GATE.search(_plain(lines[0], True)):
         gp = _plain(" ".join(lines), True)
-        kind = "cap" if _CAP.search(gp) else "other"
         sym = _GSYM.search(gp)
         tm = re.search(r"GATE BLOCKED\s*[—-]\s*(\d{1,2}:\d\d)", gp)
         rows.append((f"gate:{tm.group(1) if tm else len(gp)}",
-                     f"{_G}{kind}\x00{sym.group(1) if sym else ''}"))
+                     f"{_G}other\x00{sym.group(1) if sym else ''}"))
         return title, rows
     if not rows:     # no ticker rows (verdict notes, recaps): keep the first real line(s)
         body = [_plain(ln, True) for ln in lines
@@ -264,11 +262,8 @@ def build(items: list[tuple], now: float | None = None, first_of_day: bool = Tru
             sec["rows"][key] = line
     if gates:
         n_g = len(gates)
-        cap = sum(1 for k, _ in gates.values() if k == "cap")
         syms = sorted({sy for _, sy in gates.values() if sy})
-        why = ("over $400 cap" if cap == n_g else
-               (f"{cap} over $400 cap, {n_g - cap} no qualifying contract" if cap else "no qualifying contract"))
-        line = f"🔴 {n_g} blocked ({why})" + (f": {', '.join(syms)}" if syms else "")
+        line = f"🔴 {n_g} blocked (no qualifying contract)" + (f": {', '.join(syms)}" if syms else "")
         gtitle = next(iter(sections), "Flow digest")
         for t, sec in sections.items():
             if t.lower().startswith("flow"):

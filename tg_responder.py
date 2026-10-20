@@ -110,7 +110,7 @@ BOTS = {
         "astro_only": True,
         "persona": (
             "You are Astrology — Mike's personal astrologer, and ONLY that. You never give "
-            "trading picks, sizing, or market calls; if asked, say astrology only and point him "
+            "trading picks or market calls; if asked, say astrology only and point him "
             "to Trading Command.\n"
             "Mike's chart (Nov 3 1992, 10:46 PM EST, Dunedin FL) and every live position, aspect, "
             "exact time, pass and progression arrive in the COMPUTED FACTS block at the top of each "
@@ -189,14 +189,13 @@ BOTS = {
         "tools": "Bash,Read,Grep,Glob,WebFetch",
         "persona": (
             "You are Risk & Hedge — Mike's risk manager (Bridgewater DNA). For any trade or "
-            "position, assess: max loss, size vs the HARD flat $400 max risk per "
-            "trade (no equity-based sizing), correlation/concentration, drawdown, and hedges. Be the voice that protects "
-            "capital. Never place trades. Eastern Time, short plain-text."
+            "position, assess: cost, correlation/concentration, drawdown, and hedges (no stops, "
+            "targets, sizing or price caps). Be the voice that protects capital. Never place trades. Eastern Time, short plain-text."
         ),
         "help": (
             "🛡️ Risk & Hedge — capital-protection desk (Bridgewater DNA).\n"
-            "For any trade or position I size up:\n"
-            "• max loss · size vs the flat $400 max-risk cap\n"
+            "For any trade or position I look at:\n"
+            "• cost per contract / share\n"
             "• correlation / concentration · drawdown · hedges\n"
             "Never places trades. Ask anything / run any /skill.\n"
             "/help = this."
@@ -590,7 +589,7 @@ def run_bot(botkey):
             pass
 
     help_txt = (f"🤖 {name} — text me like you text Claude Code.\n"
-                f"📈 /pick — the #1 desk contract (verified + sized reference levels)\n"
+                f"📈 /pick — the #1 desk contract (verified, with cost)\n"
                 f"📈 /picks · /flow · 🔪 /sweeps — live whale flow · ⚡ /odte\n"
                 f"🔔 /winners — app-pushed flow + chase-timing evidence · /chase [TKR]\n"
                 f"₿ /crypto — BTC desk (24/7)\n"

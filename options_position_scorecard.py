@@ -3,8 +3,8 @@
 
 Loaded relay contracts are model inputs, not confirmed holdings or executable
 recommendations. Source times, settlement, deliverables and identity are unverified
-here. The legacy calculations, thresholds, IV fallback and target/stop policy are
-retained; presentation discloses those assumptions rather than asserting LIVE,
+here. The legacy calculations, thresholds, IV fallback are
+retained (no stops/targets, R5); presentation discloses those assumptions rather than asserting LIVE,
 an empirical edge, or plan eligibility. Nothing places or cancels an order.
 
 Activation and installed-path receipts belong in the deployment register. Running
@@ -124,7 +124,7 @@ def _renderable_card(card):
     if type(verdict) is not list or any(type(line) is not str for line in verdict):
         return False
     if any(not _finite(card.get(key)) for key in
-           ("spot", "mark", "be", "dte", "need_pct", "one_sig_pct", "t1", "stop", "cliff")):
+           ("spot", "mark", "be", "dte", "need_pct", "one_sig_pct", "cliff")):
         return False
     return all(card.get(key) is None or _finite(card[key]) for key in
                ("delta", "theta_day", "theta_pct", "pop"))
@@ -336,8 +336,7 @@ def _relay_universe():
             mid = (bid + ask) / 2 if (bid is not None and ask is not None) else None
             out.append({"id": s.get("id"), "root": s.get("ticker"), "exp": exp,
                         "kind": "put" if s.get("isPut") else "call", "strike": float(strike),
-                        "mid": mid, "buyTarget": s.get("buyTarget"), "sellTarget": s.get("sellTarget"),
-                        "stopLoss": s.get("stopLoss"), "flags": s.get("flags") or [],
+                        "mid": mid, "flags": s.get("flags") or [],
                         "_captured_ms": s.get("capturedAtMs"), "_volume": s.get("volume"),
                         "_oi": s.get("openInterest"),
                         "_side_known": type(s.get("isPut")) is bool,
@@ -402,15 +401,13 @@ def scorecard(pos: dict):
     need_pct = abs((be - spot) / spot * 100)
     theta_pct = abs(theta_day) * 100 / mark if (theta_day and mark) else None
 
-    t1 = pos.get("sellTarget") or mark * 1.5
-    stop = pos.get("stopLoss") or mark * 0.5
     cliff = min(21, dte)
 
     v = []
     if pop is not None and pop >= 0.55:
         v.append("Model probability at least 55% under legacy assumptions; no empirical edge established")
     elif pop is not None and pop < 0.30:
-        v.append("Model probability below 30% under legacy assumptions; no sizing recommendation")
+        v.append("Model probability below 30% under legacy assumptions; no recommendation")
     if dte <= 7 and moneyness == "OTM":
         v.append("Legacy model: at most 7 calendar DTE and OTM; no catalyst or entry eligibility established")
     elif dte <= 21:
@@ -425,7 +422,7 @@ def scorecard(pos: dict):
     return {"pos": pos, "spot": round(spot, 2), "mark": round(mark, 2), "dte": dte, "iv": iv,
             "delta": delta, "theta_day": theta_day, "theta_pct": theta_pct, "be": round(be, 2),
             "moneyness": moneyness, "pop": pop, "one_sig_pct": one_sig_pct,
-            "need_pct": need_pct, "t1": t1, "stop": stop, "cliff": cliff, "verdict": v}
+            "need_pct": need_pct, "cliff": cliff, "verdict": v}
 
 
 def fmt_card(cards, coverage=None, model_omitted=0, darkpool_state="UNKNOWN", render_omitted=0) -> str:
@@ -450,16 +447,14 @@ def fmt_card(cards, coverage=None, model_omitted=0, darkpool_state="UNKNOWN", re
             lines.append("  " + esc(evidence))
         lines.append(f"  supplied spot ${c['spot']} · model breakeven ${c['be']} · absolute BE distance {c['need_pct']:.1f}% vs model 1σ ±{c['one_sig_pct']:.1f}%")
         lines.append(f"  model Δ {d} · θ {th} · model P(long profitable at expiry) {pop}")
-        lines.append(f"  legacy reference levels (not orders/fill guarantees) → T1 ${c['t1']:.2f} · stop ${c['stop']:.2f} · model cliff {c['cliff']} DTE")
-        lines.append("  Targets/stop: supplied relay values when truthy, otherwise +50%/−50% of supplied mid; unchanged policy.")
+        lines.append(f"  model cliff {c['cliff']} DTE")
         for vline in c["verdict"]:
             lines.append(f"  {esc(vline)}")
         if p.get("dp_tag"):
             lines.append(f"  Unverified DP association (legacy ID/ticker+strike join): {esc(p['dp_tag'])} — {esc(p.get('dp_note') or '')}".rstrip(" —"))
         lines.append("")
     lines.append(footer("Advisory · no broker orders · loaded relay universe, not held positions · MODEL ONLY. "
-                        "Identity/quote age/calibration UNKNOWN; no entry, sizing or exit recommendation. "
-                        "Stop references do not guarantee fills or maximum loss.").lstrip("\n"))
+                        "Identity/quote age/calibration UNKNOWN; no entry, sizing or exit recommendation.").lstrip("\n"))
     return "\n".join(lines)
 
 

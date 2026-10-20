@@ -254,7 +254,7 @@ def card(rows: list[dict], nsyms: int, top: int) -> str:
         tag = {"holding": "📦 you own", "scan": "🌙 last-night pick", "core": "🏛 core"}[r["tag"]]
         lines.append(f"• *{r['sym']}* [{r['score']}] {tag} — " + " · ".join(r["why"]))
     if hot:
-        lines.append("Rules: flat $400 max risk per trade · stop set BEFORE entry · no chase >+15%/5d.")
+        lines.append("Rules: no chase >+15%/5d. Momentum observation only.")
     return "\n".join(lines)
 
 

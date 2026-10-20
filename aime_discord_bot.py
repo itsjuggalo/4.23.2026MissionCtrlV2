@@ -158,22 +158,14 @@ class PickView(_MikeView):
         await _send_chunks(interaction, await _answer_skill(f"/ticker-research {t}"))
 
 
-# ─── ACTION CARDS (Size It / Set Alert / Explain / Grade / Mute) ──────────────
+# ─── ACTION CARDS (Set Alert / Explain / Grade / Mute) ──────────────
 # A second persistent View whose buttons carry the heavier actions. Static
 # custom_ids so a card posted by cron (via the SAME SynthControl app token, with
 # a raw components action-row) routes its clicks to this registered View. The
 # ticker is read back from the card so no per-message state is needed.
-ACT_BUY, ACT_ALERT, ACT_EXPLAIN, ACT_GRADE, ACT_MUTE = (
-    "act:buy", "act:alert", "act:explain", "act:grade", "act:mute")
+ACT_ALERT, ACT_EXPLAIN, ACT_GRADE, ACT_MUTE = (
+    "act:alert", "act:explain", "act:grade", "act:mute")
 ACT_PAYOFF = "act:payoff"
-
-# The old "Paper Buy" two-step (preview → ✅ Confirm → live Alpaca paper order) was
-# retired 2026-09-15: Alpaca is retired as a book (2026-08-11, Mike: "remove all
-# associations with alpaca") — no broker keys are read, no order is ever placed here
-# anymore. ACT_BUY / BuyModal now only compute an advisory flat-$400-cap size (see
-# _size_advisory below); it's a calculator, not an order path. Execute yourself in
-# Robinhood/Coinbase.
-
 
 def _card_ticker(msg) -> str:
     """Read the ticker off an action/pick card (embed footer token first, then
@@ -312,55 +304,6 @@ def virtual_weekly_review() -> str:
     return "\n".join(lines)
 
 
-def _size_advisory(ticker: str, deploy_str: str, user: str) -> str:
-    """Advisory-only sizing — flat $400 cap (Mike's doctrine, 2026-09-12), no equity
-    read, no broker call, no order placed. The old Alpaca paper-buy submit chain
-    (preview → ✅ Confirm → live order) is retired 2026-09-15 (Alpaca retired as a
-    book 2026-08-11, Mike: "remove all associations with alpaca") — this is a
-    calculator, not a trade."""
-    t = ticker.upper().strip()
-    try:
-        want = float(str(deploy_str).replace("$", "").replace(",", ""))
-    except ValueError:
-        want = 150.0
-    price = _last_price(t)
-    if not price:
-        return f"⚠️ Couldn't fetch a live price for {t}; sizing aborted."
-    cap = 400.0                                   # Mike's flat hard cap (2026-09-12)
-    deploy = min(max(want, 0.0), cap)
-    capped = deploy < want
-    shares = int(deploy // price)
-    cost = shares * price
-    lines = [f"📐 **SIZE — {t}** (advisory only, no broker)",
-             f"Live ~${price:,.2f} · up to ${deploy:,.0f}"
-             + (f"  _(capped from ${want:,.0f} to the $400 hard cap)_" if capped else " (the $400 hard cap)")]
-    if shares < 1:
-        lines.append(f"➡️ ${deploy:,.0f} buys <1 share at ${price:,.2f} — pick a cheaper name.")
-    else:
-        lines.append(f"➡️ **{shares} shares** (~${cost:,.0f}) fits the $400 cap")
-        lines.append(f"Max loss if it goes to zero: **${cost:,.0f}**")
-    lines.append("_Advisory only — no broker connected, no order placed. "
-                 "Execute yourself in Robinhood/Coinbase if you want it._")
-    _journal(t, f"size-advisory:{shares}", user)
-    return "\n".join(lines)
-
-
-class BuyModal(discord.ui.Modal):
-    """Advisory-only sizing modal (no broker) — see _size_advisory."""
-    def __init__(self, ticker: str):
-        super().__init__(title=f"Size It — {ticker}"[:45])
-        self.ticker = ticker
-        self.deploy = discord.ui.TextInput(label="$ to deploy (max 400)", default="150",
-                                           required=True, max_length=6)
-        self.add_item(self.deploy)
-
-    async def on_submit(self, interaction: discord.Interaction):
-        await interaction.response.defer(thinking=True, ephemeral=True)
-        text = await asyncio.to_thread(_size_advisory, self.ticker, str(self.deploy),
-                                       interaction.user.display_name)
-        await interaction.followup.send(text, ephemeral=True)
-
-
 class AlertModal(discord.ui.Modal):
     def __init__(self, ticker: str):
         super().__init__(title=f"Set Alert — {ticker}"[:45])
@@ -474,19 +417,9 @@ class PayoffView(_MikeView):
         await self._adjust(interaction, flip=True)
 
 
-# ConfirmBuyView (the two-step ✅ Confirm / ✖ Cancel gate that placed a live Alpaca
-# paper order) is retired 2026-09-15 — Alpaca is retired as a book. BuyModal now
-# returns an advisory size only, nothing left to confirm/submit.
-
-
 class ActionView(_MikeView):
     def __init__(self):
         super().__init__(timeout=None)
-
-    @discord.ui.button(label="Size It", emoji="📐",
-                       style=discord.ButtonStyle.success, custom_id=ACT_BUY)
-    async def b_buy(self, interaction: discord.Interaction, button: discord.ui.Button):
-        await interaction.response.send_modal(BuyModal(_card_ticker(interaction.message)))
 
     @discord.ui.button(label="Set Alert", emoji="🔔",
                        style=discord.ButtonStyle.secondary, custom_id=ACT_ALERT)
@@ -738,7 +671,7 @@ async def pick_cmd(interaction: discord.Interaction, ticker: str, note: Optional
     await interaction.response.send_message(body, view=PickView())
 
 
-@tree.command(name="deck", description="Action card for a ticker — Size It / Set Alert / Explain / Grade / Mute")
+@tree.command(name="deck", description="Action card for a ticker — Set Alert / Explain / Grade / Mute")
 @app_commands.describe(ticker="ticker", note="optional context / contract")
 async def deck_cmd(interaction: discord.Interaction, ticker: str, note: Optional[str] = None):
     t = ticker.upper().strip()
@@ -809,7 +742,7 @@ HELP_TEXT = (
     "`/news <q>` catalysts · `/regime` market regime · `/recall <q>` knowledge base\n\n"
     "**💼 Trades & planning**\n"
     "`/scorecard` EOD book + pick grades · `/journal` recap · `/week` weekly · `/trades` fills\n"
-    "`/levels <t>` S/R + entry/stop · `/size <t> <entry> <stop>` position size · `/pick <t>` action card\n"
+    "`/levels <t>` support/resistance · `/pick <t>` action card\n"
     "`/flowpicks` ranked flow · `/signals` source liveness\n\n"
     "**🐳 Flow intel (instant, no AI)**\n"
     "`/contracts <ticker|company>` every contract seen across Firebase/flow/UW/scrapers/decipher · "
@@ -830,36 +763,6 @@ HELP_TEXT = (
 @tree.command(name="help", description="Show the full command deck + what runs automatically")
 async def help_cmd(interaction: discord.Interaction):
     await interaction.response.send_message(HELP_TEXT)
-
-
-@tree.command(name="size", description="Position size for a trade — flat $400 risk cap, no broker/equity read")
-@app_commands.describe(ticker="ticker", entry="entry price", stop="stop price",
-                       risk="$ to risk (default 150, capped at 400)")
-async def size_cmd(interaction: discord.Interaction, ticker: str, entry: float,
-                   stop: float, risk: Optional[float] = None):
-    await interaction.response.defer(thinking=True)
-    # No equity read (2026-09-15 — Alpaca retired as a book 2026-08-11): the cap is
-    # Mike's flat $400/trade, not a fraction of any account. For a plain "how many
-    # shares/contracts fit in a flat $400 buy" (no stop math), use /deck → 📐 Size It
-    # (_size_advisory: shares = floor(400/price)); options-contract sizing off a
-    # premium (floor(400/(premium*100))) is handled in the flow-picks affordability line.
-    risk_amt = min(risk if risk else 150.0, 400.0)   # Mike's flat hard cap (2026-09-12)
-    psr = abs(entry - stop)
-    if psr <= 0:
-        await interaction.followup.send("⚠️ Entry and stop can't be equal.")
-        return
-    shares = int(risk_amt // psr)
-    cost = shares * entry
-    lines = [f"📐 **SIZE — {ticker.upper().strip()}**",
-             f"Risking ${risk_amt:,.0f}",
-             f"Entry ${entry:.2f} → stop ${stop:.2f} = ${psr:.2f}/share risk",
-             f"➡️ **{shares} shares** (~${cost:,.0f})",
-             f"Max loss if stopped: **${shares*psr:,.0f}**"]
-    if shares == 0:
-        lines.append("⚠️ Stop too wide for the $400 risk cap — tighten the stop or raise risk.")
-    elif cost > 400.0:
-        lines.append("⚠️ Notional (~${:,.0f}) exceeds Mike's flat $400 cap — size down.".format(cost))
-    await interaction.followup.send("\n".join(lines))
 
 
 @tree.command(name="journal", description="Today's virtual-pick recap (no broker — Alpaca retired as a book)")
@@ -888,15 +791,14 @@ async def scorecard_cmd(interaction: discord.Interaction):
     await _send_chunks(interaction, await asyncio.to_thread(_run))
 
 
-@tree.command(name="levels", description="Key support/resistance + a suggested entry & stop (plug into /size)")
+@tree.command(name="levels", description="Key support/resistance levels + a one-line momentum bias")
 @app_commands.describe(ticker="ticker")
 async def levels_cmd(interaction: discord.Interaction, ticker: str):
     await interaction.response.defer(thinking=True)
     t = ticker.upper().strip()
     prompt = (f"For {t}: list the key intraday and swing SUPPORT and RESISTANCE levels with the "
-              f"current price, then give a concrete suggested ENTRY and STOP for a long (say clearly "
-              f"if it's a no-trade / wait setup). Format tight, and put 'Entry X / Stop Y' on its own "
-              f"line so it plugs into /size. End with a one-line bias. Use web search for live levels.")
+              f"current price. Do NOT give entries, stops, targets, sizing or risk figures. "
+              f"Format tight. End with a one-line momentum observation. Use web search for live levels.")
     await _send_chunks(interaction, await _answer_skill(prompt, timeout=300))
 
 
@@ -1165,7 +1067,7 @@ async def on_ready():
     global _VIEWS_ADDED
     if not _VIEWS_ADDED:
         client.add_view(PickView())     # persistent — buttons survive restarts
-        client.add_view(ActionView())   # Size It / Set Alert / Explain / Grade / Mute / Payoff
+        client.add_view(ActionView())   # Set Alert / Explain / Grade / Mute / Payoff
         client.add_view(PayoffView())   # interactive payoff (−/+ contracts, flip C/P)
         _VIEWS_ADDED = True
         if not presence_loop.is_running():

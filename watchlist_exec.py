@@ -42,8 +42,7 @@ def _tg(msg, html=True):
 def fmt_swing(s, html=True):
     arrow = "⬆" if s["dir"] == "LONG" else "⬇"
     glyph = "⭐" if s.get("hiConv") else "▸"
-    facts = (f"{s['dir']} {arrow}", f"score {s['score']}/10", f"entry {s['entry']}",
-             f"stop {s['stop']}", f"target {s['target']}", f"{s['rTarget']}R")
+    facts = (f"{s['dir']} {arrow}", f"score {s['score']}/10", f"last {s['entry']}")
     if html:
         return row(s['symbol'], *facts, glyph=glyph)
     return f"{glyph} **{s['symbol']}** · " + " · ".join(facts)  # Discord markdown

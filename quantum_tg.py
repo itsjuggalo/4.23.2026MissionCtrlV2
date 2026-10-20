@@ -6,7 +6,7 @@ Reads the quantum pricing pipeline's END-RESULT artifacts (owned by another sess
 first, zero-bloat message. Powers /pick /picks /book on the Telegram responders.
 
 2026-09-16: Alpaca is a market-DATA source only. No account/equity/heat/positions read
-anywhere here — sizing is the flat $400 cap; /book reads Mike's own journal fills
+anywhere here — each pick shows its cost per contract (price caps removed 2026-10-05); /book reads Mike's own journal fills
 (option-scraper data/paper_trades.json), never a broker book.
 
 Anti-bloat doctrine: ONE clear action, ≤5 short lines, no data walls. Honest when
@@ -19,7 +19,6 @@ from tg_format import esc, b, hdr, section, row, footer, join
 
 OUT = os.path.expanduser("~/labs/quantum/out")
 JOURNAL = "/AIWorkWSL/trading/signals/option-scraper/data/paper_trades.json"   # Mike's own fills (read-only)
-RISK_CAP = 400.0   # flat per-trade cap (doctrine 2026-09-12)
 MC = "http://localhost:3000"
 SCRAPER = os.path.expanduser("~/trading/signals/option-scraper/data")
 ET  = ZoneInfo("America/New_York")
@@ -100,19 +99,14 @@ def flow():
         sent = c.get("sentiment", "")
         emo = "🟢" if sent == "BULLISH" else "🔴" if sent == "BEARISH" else "⚪"
         t = (c.get("type") or "")[:1]
-        sz = c.get("sizing") or {}
-        e, t1, st = sz.get("suggested_entry"), sz.get("target_1"), sz.get("stop_price")
-        tail = (f"entry ${e:g}→T1 ${t1:g} (stop ${st:g})"
-                if isinstance(e, (int, float)) and isinstance(t1, (int, float)) else None)
         rows.append(row(sym, f"${c.get('strike'):g}{t} {c.get('expiry_dte')}d", sent[:4],
-                         f"rank {c.get('flowrank')}", _human(c.get('premium_usd')), tail, glyph=emo))
+                         f"rank {c.get('flowrank')}", _human(c.get('premium_usd')), glyph=emo))
     lines.append(section("Top Flow") if rows else "")
     lines += rows[:3]
     for ap in (d.get("top_app_picks") or [])[:1]:
         if isinstance(ap, dict):
             lines.append(row(ap.get('symbol'), f"${ap.get('strike')}{(ap.get('type') or '')[:1]}",
-                              ap.get('category'), f"buy {ap.get('buy_target')}→{ap.get('sell_target')}",
-                              glyph="app:"))
+                              ap.get('category'), glyph="app:"))
     if not rows:
         lines.append("quiet — no standout flow right now.")
     lines.append(footer("big-money positioning. /greeks <TKR> for live greeks/IV"))
@@ -174,47 +168,25 @@ def _money(x):
         return str(x)
 
 
-def _afford_spread(p, risk_cap):
-    """The pipeline's OWN debit spread for this pick, IF it fits the risk cap.
-    Lets us surface an actionable, cap-fitting trade instead of SKIP when the naked
-    contract is too dear — the pipeline already did the structuring; we just read it."""
+def _afford_spread(p):
+    """The pipeline's OWN debit spread for this pick, when its quote looks real (≥ $5 per
+    spread contract). No price cap is applied (R5)."""
     s = p.get("spread")
     if not isinstance(s, dict):
         return None
     cost = s.get("cost_per")
     try:
         # < $5 per spread contract = a stale/one-sided quote (e.g. the $1 CRCL $130/$135 seen
-        # 2026-09-16) — never headline that as a BUY; _verdict flags it instead.
-        if risk_cap and cost is not None and 5.0 <= float(cost) <= float(risk_cap):
+        # 2026-09-16) — never headline that.
+        if cost is not None and float(cost) >= 5.0:
             return s
     except Exception:
         pass
     return None
 
 
-def _spread_suspect(p):
-    """True when the pipeline's spread quote is too cheap to be real (< $5 per contract)."""
-    s = p.get("spread")
-    try:
-        return isinstance(s, dict) and s.get("cost_per") is not None and float(s["cost_per"]) < 5.0
-    except Exception:
-        return False
-
-
-def _spread_pick_line(p, s):
-    """Headline line for a debit-spread play (cap-fitting alternative to the naked call)."""
-    typ = (p.get("type") or "").upper()
-    rr = s.get("rr")
-    rr_s = f"R:R {rr:.2f}" if isinstance(rr, (int, float)) else None
-    head = b(f"{p.get('ticker')} ${s.get('long'):g}/${s.get('short'):g} {typ} SPREAD")
-    return (f"{head} · {esc(_fmt_exp(p.get('expiry')))} ({esc(p.get('days'))}d)\n"
-            + esc(f"{_money(s.get('cost_per'))} cost · max +{_money(s.get('max_profit'))} / "
-                  f"-{_money(s.get('max_loss'))}") + (f" · {esc(rr_s)}" if rr_s else "")
-            + esc(f" · {p.get('confidence')}-conf · {p.get('value')}"))
-
-
-def _verdict(p, risk_cap=None):
-    """Evidence read from action + value, sized against the flat $400 cap only.
+def _verdict(p):
+    """Evidence read from action + value only (price caps removed 2026-10-05).
     Machine `action` stays ACT/ACT-SMALL/WAIT; the text a human reads is gate
     state / setup evidence, never a trade call."""
     act = (p.get("action") or "").upper()
@@ -229,26 +201,16 @@ def _verdict(p, risk_cap=None):
         base = "⏳ GATE CAUTION — unconfirmed, let the setup confirm"
     else:
         base = "🟡 GATE CAUTION"
-    if (p.get("qty") or 0) < 1:   # naked contract can't be sized within the risk cap
-        s = _afford_spread(p, risk_cap)
-        if s:   # pipeline's debit spread fits the cap → an actual reference, not a SKIP
-            return (f"🟢 GATE PASS (spread ref) — naked {_money(p.get('per_contract'))} is over cap; "
-                    f"the {_money(s.get('cost_per'))} debit-spread ref fits the $400 cap; naked contract does not")
-        if _spread_suspect(p):
-            return (f"⏳ GATE BLOCKED — naked {_money(p.get('per_contract'))} is over the $400 cap; "
-                    f"spread quote ({_money(p['spread'].get('cost_per'))}) looks stale — verify in RH")
-        return f"⏳ GATE BLOCKED — 1 contract ({_money(p.get('per_contract'))}) is over the $400 cap"
     return base
 
 
 def _pick_line(p):
     typ = (p.get("type") or "").upper()
-    qty, per = p.get("qty") or 0, p.get("per_contract") or 0
-    size = (f"buy {qty} = {_money(qty * per)} of the $400 cap" if qty
-            else f"1 ct {_money(per)} — over the $400 cap")
+    per = p.get("per_contract")
+    cost = f"{_money(per)} per contract" if per else "cost UNAVAILABLE"
     head = b(f"{p.get('ticker')} ${p.get('strike'):g} {typ}")
     return (f"{head} · {esc(_fmt_exp(p.get('expiry')))} ({esc(p.get('days'))}d)\n"
-            + esc(f"{_money(p.get('per_contract'))}/ct · {size} · {p.get('confidence')}-conf · "
+            + esc(f"{cost} · {p.get('confidence')}-conf · "
                   f"{p.get('sources')} src · {p.get('value')}"))
 
 
@@ -336,7 +298,7 @@ def odte(top=6):
         lines.append(_sweep_line(a, with_tags=False))
         if len(seen) >= top:
             break
-    lines.append(footer("fast + risky — defined risk only, take profits quick"))
+    lines.append(footer("fast + risky — momentum observation only"))
     return join(*lines)
 
 
@@ -395,27 +357,22 @@ def pick(top=1):
         return join(
             hdr("🟦", "No Clean Buy", sub=fresh),
             esc(f"pipeline checked {d.get('n_considered','?')} and dropped all "
-                f"{nd} (too pricey/illiquid/risky). Capital preserved — sit tight."))
-    risk_cap = min(float(d.get("risk_cap") or RISK_CAP), RISK_CAP)
+                f"{nd} (unverifiable, illiquid or failed a quality gate). Capital preserved — sit tight."))
     flowdir = _flow_directions()
     if top == 1:
         p = picks[0]
-        spread = _afford_spread(p, risk_cap) if (p.get("qty") or 0) < 1 else None
         conf = _confluence(p, flowdir)
         trap = _iv_trap(p)
-        head = _spread_pick_line(p, spread) if spread else _pick_line(p)
-        order_line = f"📝 {esc(spread['place_order'])}" \
-            if spread and spread.get("place_order") else None
+        head = _pick_line(p)
         why = (p.get('action_why') or '')[:120]
         return join(
             hdr("🎯", "Top Pick", sub=fresh),
             esc(_stale_warning(d.get('as_of')).strip()) or None,
             head,
-            esc(_verdict(p, risk_cap)),
+            esc(_verdict(p)),
             conf, trap,
             f"<i>why: {esc(why)}</i>" if why else None,
-            order_line,
-            footer("flat $400 cap · advisory — you place every trade"))
+            footer("cost per contract · advisory — you place every trade"))
     n = min(top, len(picks))
     star_picks, rest = [], []
     for i, p in enumerate(picks[:top], 1):
@@ -424,9 +381,8 @@ def pick(top=1):
 
     def _pick_row(i, p, star):
         typ = (p.get("type") or "").upper()
-        sp = _afford_spread(p, risk_cap) if (p.get("qty") or 0) < 1 else None
-        price = f"{_money(sp.get('cost_per'))} sprd" if sp else _money(p.get("per_contract"))
-        verdict = _verdict(p, risk_cap).split(' — ')[0]
+        price = _money(p.get("per_contract")) if p.get("per_contract") else "UNAVAILABLE"
+        verdict = _verdict(p).split(' — ')[0]
         return row(f"{i}. {p.get('ticker')}", f"${p.get('strike'):g}{typ[0]}",
                    _fmt_exp(p.get('expiry')), price, p.get('confidence'),
                    p.get('value'), verdict, glyph=("⭐" if star else "▸"))
@@ -437,30 +393,27 @@ def pick(top=1):
         if star_picks:
             lines.append(section("Other Picks"))
         lines += [_pick_row(i, p, False) for i, p in rest]
-    lines.append(footer("flat $400 cap · advisory — you place every trade"))
+    lines.append(footer("cost per contract · advisory — you place every trade"))
     return join(*lines)
 
 
 def book():
-    """Mike's OPEN journal fills (took / virtual_pick) with their plan levels. Never a
+    """Mike's OPEN journal fills (took / virtual_pick) with entry price. Never a
     broker book — Alpaca is data only (2026-09-16)."""
     rows = _journal("open")
     if not rows:
         return join(hdr("📒", "Journal"), "no open journal fills — log one from a pick to track it here.")
-    out = [hdr("📒", "Journal", sub=f"{len(rows)} open fill{'s' if len(rows) != 1 else ''} · flat $400 cap")]
+    out = [hdr("📒", "Journal", sub=f"{len(rows)} open fill{'s' if len(rows) != 1 else ''}")]
     for r in rows[:6]:
         typ = (r.get("type") or r.get("side") or "")[:1].upper()
         strike = r.get("strike")
         head = f"${strike:g}{typ}" if isinstance(strike, (int, float)) else (r.get("contract") or "")
         opened = str(r.get("opened_at") or "")[:10]
-        stop, t1 = r.get("stop"), r.get("t1")
         out.append(row(r.get("symbol"), head, _fmt_exp(r.get("expiry")),
                        f"in {_px(r.get('entry'))}",
-                       f"stop {_px(stop)}" if isinstance(stop, (int, float)) else None,
-                       f"T1 {_px(t1)}" if isinstance(t1, (int, float)) else None,
                        f"since {opened}" if opened else None,
                        glyph="▸"))
-    out.append(footer("exit levels ping on Trading Command (decipher exit advisor) · /pick for new ideas"))
+    out.append(footer("/pick for new ideas"))
     return join(*out)
 
 
@@ -493,7 +446,7 @@ def crypto():
         crowd = (p.get("magnets") or {}).get("crowd_note", "")
         warn = "⚠️crowded" if "crowded" in str(crowd) else None
         lines.append(row(coin, f"{_px(p.get('spot'))} {a}{dirn[:5]}", pup,
-                          f"{_px(p.get('entry'))}→{_px(p.get('target'))} (stp {_px(p.get('stop'))})",
+                          f"ref {_px(p.get('entry'))}",
                           warn))
     if picks and all(x == "SHORT" for x in dirs):
         lines.append(esc("→ all reads SHORT; no long-side setup (Alpaca is long-only)"))
@@ -648,7 +601,7 @@ def eod():
     tom = _tomorrow_events()
     if tom:
         lines.append("📆 " + b("TOMORROW") + " " + esc(tom))
-    lines.append(footer("flat $400 cap · advisory — you place every trade"))
+    lines.append(footer("cost per contract · advisory — you place every trade"))
     return join(*lines)
 
 
@@ -657,8 +610,8 @@ GRAD_MIN_WR = 0.40
 
 
 def grade():
-    """Honest readiness read off the pipeline scoreboard (graded picks). Protects against
-    sizing up too early — the whole point of building a graded track record first."""
+    """Honest readiness read off the pipeline scoreboard (graded picks). The whole point of
+    building a graded track record first."""
     d = _load("scoreboard.json")
     if not d:
         return "no track record yet — picks get graded as they play out."
@@ -675,9 +628,9 @@ def grade():
     if n < GRAD_MIN_N:
         status = esc(f"🔴 building proof — {n}/{GRAD_MIN_N} trades. Keep grading picks first.")
     elif expv <= 0:
-        status = esc(f"🔴 {n} trades but no edge yet (exp {expv:+.1f}%). Stay small, refine.")
+        status = esc(f"🔴 {n} trades but no edge yet (exp {expv:+.1f}%). Refine.")
     elif (wr or 0) < GRAD_MIN_WR:
-        status = esc(f"🟡 positive expectancy, thin win-rate ({wrp}). One more stretch at minimum size.")
+        status = esc(f"🟡 positive expectancy, thin win-rate ({wrp}). Keep grading.")
     else:
         status = "🟢 GATE PASS — edge proven (historical)."
     return join(head, gate, status)
@@ -742,7 +695,7 @@ def premarket_prompt():
             "politics/geopolitics — one line each, skip anything minor.\n"
             f"Next: do any of my journal names ({held}) have a catalyst today? one line.\n"
             "Last line must start 'PLAN:' with the single most useful thing to do at/after "
-            "the open, trading SMALL; state the limit as 'max risk $400 per trade' (never '$400 total'). "
+            "the open, trading SMALL. "
             "Do not repeat the date, include no links or URLs (name the outlet in words only), and "
             "label the journal-names line 'Watchlist:'. Quiet day → say so, keep it to 3 lines.")
 

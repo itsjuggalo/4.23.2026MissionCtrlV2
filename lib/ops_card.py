@@ -578,11 +578,10 @@ def action_row(buttons):
 
 
 def pick_action_row():
-    """The standard 5-button action row — custom_ids MUST match
+    """The standard 4-button action row — custom_ids MUST match
     aime_discord_bot.ActionView so the running gateway bot handles the clicks.
     Reused by every actionable card (flow picks, EOD grades, ...)."""
     return action_row([
-        button('Paper Buy', 'act:buy', BTN_SUCCESS, '🧾'),
         button('Set Alert', 'act:alert', BTN_SECONDARY, '🔔'),
         button('Explain', 'act:explain', BTN_PRIMARY, '📖'),
         button('Grade', 'act:grade', BTN_SECONDARY, '📊'),
@@ -591,7 +590,7 @@ def pick_action_row():
 
 
 def pick_action_rows():
-    """Full components list for a pick card: the 5 actions + a 2nd row with 📈 Payoff
+    """Full components list for a pick card: the 4 actions + a 2nd row with 📈 Payoff
     (autofilled payoff diagram). Pass straight to components= (already a list of rows)."""
     return [pick_action_row(), action_row([
         button('Payoff', 'act:payoff', BTN_PRIMARY, '📈'),

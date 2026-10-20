@@ -3,7 +3,7 @@
 
 You bring the tickers (data/watchlist-tickers.json, editable from the page).
 The engine scores each across 6 indicators (EMA20/50, RSI14, MACD, ATR14, ADX14)
-into SWING signals (daily bars, ATR-based stop, R-target, ⭐ hi-conviction) and
+into SWING signals (daily bars, ⭐ hi-conviction; no stops/targets, R5) and
 DAY signals (1-min momentum, confidence + edge). Writes data/watchlist-signals.json
 which the MissionCtrl "Watchlist Signals" page reads.
 
@@ -21,8 +21,6 @@ OUT = REPO / "data" / "watchlist-signals.json"
 DEFAULT_WL = ["SPY", "QQQ", "NVDA", "TSLA", "AAPL", "AMD", "PLTR", "COIN", "MSTR", "META", "MSFT", "AMZN"]
 
 # capytrade spec
-ATR_STOP_MULT = 0.25      # stop distance = 0.25 x ATR
-R_STD, R_HICONV = 4.5, 5.5
 HICONV_SCORE = 8.0        # >= this (of 10) flags ⭐ hi-conviction (their "score >= 60")
 MAX_SWING = 25            # cap rows
 
@@ -116,15 +114,9 @@ def swing_signals(tickers):
             if score < 5.0:
                 continue  # only fire qualifying setups (capytrade: "math checks out")
             hiconv = score >= HICONV_SCORE
-            rtgt = R_HICONV if hiconv else R_STD
-            stop_dist = ATR_STOP_MULT * ind["atr"]
             entry = round(ind["last"], 2)
-            if direction == "LONG":
-                stop = round(entry - stop_dist, 2); target = round(entry + rtgt * stop_dist, 2)
-            else:
-                stop = round(entry + stop_dist, 2); target = round(entry - rtgt * stop_dist, 2)
             out.append({"symbol": t, "dir": direction, "score": score, "entry": entry,
-                        "stop": stop, "target": target, "rTarget": rtgt, "hiConv": hiconv})
+                        "hiConv": hiconv})
         except Exception as e:
             print(f"  swing {t}: {e}", file=sys.stderr)
     out.sort(key=lambda r: r["score"], reverse=True)
@@ -159,9 +151,8 @@ def day_signals(tickers):
             # edge%: recent 15-min momentum magnitude
             recent = df["Close"].astype(float)
             edge = abs(round((recent.iloc[-1] / recent.iloc[-15] - 1) * 100, 2)) if len(recent) >= 15 else 0.0
-            stop_pct = 0.45 if t in ("SPY", "QQQ", "DIA", "IWM") else 0.70
             out.append({"symbol": t, "dir": direction, "conf": conf, "edge": edge,
-                        "entry": round(last, 2), "stopPct": stop_pct, "status": "WATCHING"})
+                        "entry": round(last, 2), "status": "WATCHING"})
         except Exception as e:
             print(f"  day {t}: {e}", file=sys.stderr)
     out.sort(key=lambda r: r["conf"], reverse=True)

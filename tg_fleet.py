@@ -173,13 +173,13 @@ CHARTER = {
     ),
     "setup_sms": dict(
         fleet="trading_command",
-        owns=["premarket/opening setups", "MTF glyph", "rebound state", "$400 flat-cap sizing"],
+        owns=["premarket/opening setups", "MTF glyph", "rebound state"],
         never=["regime narrative", "grades"],
         cadence="08:20/09:12/09:50 + :10,:30,:50 10-15 ET Mon-Fri + weekend --crypto",
         cadence_min=20,
         # Round 2 (2026-09-15): D3 landed — setup_scanner.py no longer calls the dead
-        # /api/portfolio-rh route (imports risk_cap.py's flat $400 cap instead — a code
-        # import, not a freshness-checkable "read"). It now reads MTF/rebound state
+        # /api/portfolio-rh route (a code import, not a freshness-checkable "read";
+        # risk_cap.py itself is retired, R5 2026-10-20). It now reads MTF/rebound state
         # through the shared mtf_rebound.py helper, confirmed via `import mtf_rebound as
         # mr` + its own /api/mtf-ta and /api/rebound-setup calls — using SPY as the probe
         # symbol here since `reads` is a static per-lane list, not per-ticker.
@@ -207,8 +207,7 @@ CHARTER = {
         # realistic write cadence to gate on, not the hourly script-run cadence in the
         # `cadence` label above.
         cadence_min=24 * 60,
-        # Round 2: D3 landed here too (dead /api/portfolio-rh call deleted, risk_cap.py
-        # import instead). explosion_score.py also imports mtf_rebound as mr.
+        # Round 2: D3 landed here too (dead /api/portfolio-rh call deleted). explosion_score.py also imports mtf_rebound as mr.
         # Round 3 correction (team-lead, 2026-09-15): explosion_score_floor.json DOES
         # exist now (shipped by the sibling agent after round 2's check, confirmed live
         # — score_floor(), FLOOR_OUT = data/explosion_score_floor.json) — it's an

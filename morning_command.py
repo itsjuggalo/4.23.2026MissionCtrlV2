@@ -9,7 +9,7 @@ modules we already have so it's grounded and cheap:
   • X read     — lib.x_search.x_sentiment() on your watchlist + relay tickers (native Grok sub)
   • Flow setup — top bullish near-money names from current flow (read-only, NO logging)
   • Today+orders — ONE short lib.llm.call_llm(..., ["claude_oauth","deepseek"]) for
-                   scheduled catalysts + a single game-plan line, flat $400 cap
+                   scheduled catalysts + a single momentum-observation line
 
 2026-09-15: dropped the PORTFOLIO/book block (lib.portfolio.portfolio_summary(),
 Alpaca paper + RH/Coinbase real-money) — doctrine retirement (2026-08-11 Alpaca,
@@ -44,7 +44,7 @@ from lib.notify import tg_brief  # noqa: E402
 from lib.news import headlines_block  # noqa: E402
 from tg_format import hdr, section, row, esc, b, footer  # noqa: E402  (2026-09-15 format sweep, phone copy only)
 from flow_picks_post import (  # noqa: E402  (read-only helpers — these do NOT log picks)
-    _load, _score, _spot, _moneyness, _fmt, MAX_MNY, DTE_MIN, DTE_MAX, RISK_CAP, _tape,
+    _load, _score, _spot, _moneyness, _fmt, MAX_MNY, DTE_MIN, DTE_MAX, _tape,
 )
 
 ET = ZoneInfo("America/New_York")
@@ -109,52 +109,35 @@ def _flow_setup(n: int = 2):
     return out
 
 
-def _catalysts_and_orders(names: str, tape: str) -> tuple[str, str, dict]:
-    """ONE subscription-billed call for today's scheduled catalysts + a single game-plan
-    line. Conservative prompt (don't invent events). Degrades to deterministic text.
-
-    Also asks for the plan as STRUCTURED NUMBERS (`plan`), because the prose version came
-    back as one run-on sentence — "Buy QQQ at 666-668 targeting 675-678 bounce, risk $350
-    (~15 shares, stop 664), thesis being…" — which buries the entry, the stop and the
-    target in a clause each. The desk copy still gets the sentence; the phone brief renders
-    the numbers as separate orders. (2026-07-29)
-    """
+def _catalysts_and_orders(names: str, tape: str) -> tuple[str, str]:
+    """ONE subscription-billed call for today's scheduled catalysts + a single momentum
+    observation line. Conservative prompt (don't invent events). Returns ("", "") on failure.
+    R5 (Mike 2026-10-20): no stops, targets, sizing or risk caps — the desk observes momentum."""
     today = datetime.now(ET).strftime("%A %B %-d, %Y")
     prompt = (
         f"You are a pre-open trading desk analyst. Today is {today} (US Eastern).\n"
         f"Operator's watchlist: {names}\n"
         f"Premarket tape: {tape or 'n/a'}\n\n"
         "The reader is a BEGINNER trader. Never write BUY/SELL/HOLD/WAIT/TRIM/EXIT/AVOID or a "
-        "confidence %; use entry ref/stop ref/target ref and GATE PASS/CAUTION/BLOCKED state "
-        "instead — the operator's canonical desk makes the call, this is evidence only. "
+        "confidence %. Describe momentum only: no stops, no targets, no entry/exit levels, no "
+        "risk or reward figures, no position sizing, no dollar limits. "
         "Return STRICT JSON, no prose outside it:\n"
         '{"catalysts": "<=2 sentences on TODAY\'s scheduled US market catalysts you are '
         "confident about (FOMC/CPI/PPI/jobs/major single-name earnings). If you are not sure "
         'anything major is scheduled, say \\"No major scheduled macro catalysts today.\\"", '
-        '"orders": "ONE concrete line: the single highest-conviction setup on the watchlist '
-        "today, stated as EVIDENCE with reference levels (entry ref / stop ref / target ref) — "
-        "never a buy/sell instruction; the operator's canonical desk makes the call. Risk "
-        f"reference is capped at ${RISK_CAP} per trade — this is a HARD cap, never cite a "
-        'size above it, and if the setup cannot be expressed under it, say so. Be specific.", '
-        '"plan": {"ticker": "<symbol>", "entry": <single number, not a '
-        'range>, "stop": <single number, below entry>, "target": <single number, above entry>, '
-        '"shares": <integer>, "why": "<one short clause>"}}\n'
-        "The `plan` object must describe the SAME trade as `orders`, with one exact price "
-        "per field — never a range, never a null when you named a trade. target must be at "
-        "least as far from entry as stop is, so the win is worth the risk. If today's honest "
-        "answer is to do nothing, set plan to null."
+        '"orders": "ONE line: the single most notable momentum observation on the watchlist '
+        "today — what moved, by how much, and since when — from the tape given. Use only numbers "
+        'present in the tape; never invent one. No advice."}'
     )
     res = call_llm(prompt, ["claude_oauth", "claude_cli", "grok_oauth"])
     if res.get("ok"):
         r = res["response"]
         cat = str(r.get("catalysts", "")).strip()
         orders = str(r.get("orders", "")).strip()
-        plan = r.get("plan") if isinstance(r.get("plan"), dict) else {}
         if cat or orders:
-            return cat, orders, plan
-    # 2026-10-08: LLM-failure fallback lines are NOT content ("Catalyst read unavailable…",
-    # "No setup read available…") — return empties so callers omit the section.
-    return "", "", {}
+            return cat, orders
+    # 2026-10-08: LLM-failure fallback lines are NOT content — return empties so callers omit the section.
+    return "", ""
 
 
 _ORDERS_INSTRUCTION_RE = re.compile(r"\b(buy|sell|short)\b", re.I)
@@ -167,37 +150,6 @@ def _filter_orders(orders: str) -> str:
     if orders and _ORDERS_INSTRUCTION_RE.search(orders):
         return "Setup evidence withheld — model text contained a trade instruction."
     return orders
-
-
-def _plan_orders(plan: dict) -> str:
-    """Render the LLM's structured plan as reference levels (entry ref / stop ref / target
-    ref — setup evidence, not a trade call; T9 item 9). Returns '' unless entry/stop/target are all present AND ordered
-    correctly — a half-plan is worse than the prose sentence, and a target below the entry
-    (or a stop above it) is a hallucinated plan that would cost real money."""
-    try:
-        tkr = str(plan.get("ticker") or "").strip().upper()
-        entry, stop, targ = (float(plan[k]) for k in ("entry", "stop", "target"))
-        sh = int(plan.get("shares") or 0)
-    except (TypeError, ValueError, KeyError, AttributeError):
-        return ""
-    # T10 E6 (staged for Mike, not applied): computing sh locally from RISK_CAP instead of
-    # the LLM share count is a sizing change — kept as before until Mike's go.
-    if not tkr or sh < 1 or not (stop < entry < targ):
-        return ""
-    risk, reward = sh * (entry - stop), sh * (targ - entry)
-    if risk > RISK_CAP:                      # hard cap, fail-CLOSED — never print an over-cap size
-        return ""
-    # 2026-09-15: the equity-derived "half the book" notional check was dropped with
-    # the portfolio-view retirement (2026-09-12) — no live holdings feed exists to
-    # gate against. The flat $400 RISK_CAP above (loss, not notional) is the only
-    # sizing rule now; Mike sizes/funds the trade himself.
-    why = str(plan.get("why") or "").strip().rstrip(".")
-    return (f"👉 <b>SETUP REF</b>{f' — {esc(why)}' if why else ''}\n"
-            f"{b(tkr)} · size ref {sh} sh (${sh * entry:,.0f})\n"
-            f"• entry ref ${entry:g}\n"
-            f"• stop ref ${stop:g} — risk ${risk:.0f}\n"
-            f"• target ref ${targ:g} — reward ${reward:.0f}\n"
-            f"<i>Reference levels — setup evidence, not a trade call.</i>")
 
 
 def _polymarket_line() -> str:
@@ -390,7 +342,7 @@ def _structure_block() -> str:
     if counts:
         lines.append(f"• States: {counts.get('triggered', 0)} triggered · {counts.get('momentum-on', 0)} momentum-on · "
                      f"{counts.get('held', 0)} held · {counts.get('level-tested', 0)} tested · {counts.get('watching', 0)} watching"
-                     " · advisory, $400 cap, Mike decides")
+                     " · advisory, Mike decides")
     return "\n".join(lines)
 
 
@@ -410,7 +362,7 @@ def _structure_phone_line() -> str:
     for r in trig:
         opt = (r.get("option") or {}).get("label")
         parts.append(f"{esc(r.get('symbol'))} held its level and momentum turned" + (f" — {esc(opt)}" if opt else ""))
-    return "🏗 Structure says: " + "; ".join(parts) + ". Advisory only — stop = level break."
+    return "🏗 Structure says: " + "; ".join(parts) + ". Advisory only."
 
 
 def _rates_line() -> str:
@@ -788,12 +740,12 @@ def build() -> str:
     else:
         lines.append("• No fresh near-money flow yet — first live picks post 9:50 AM ET.")
 
-    cat, orders, _plan = _catalysts_and_orders(names, tape)
+    cat, orders = _catalysts_and_orders(names, tape)
     orders = _filter_orders(orders)
     if cat:
         lines.append(f"\n📅 **TODAY:** {cat}")
     if orders:
-        lines.append(f"📋 **SETUP REF:** {orders}")
+        lines.append(f"📋 **MOMENTUM NOTE:** {orders}")
 
     # real overnight/pre-open headlines on your names (best-effort; "" if none)
     try:
@@ -811,7 +763,7 @@ def build() -> str:
         if block:
             lines.append(block)
 
-    lines.append(f"\n_One overview · specifics land in #flow-picks · risk cap ${RISK_CAP}/trade · auto-posted 8:15 ET._")
+    lines.append("\n_One overview · specifics land in #flow-picks · auto-posted 8:15 ET._")
     return "\n".join(lines)
 
 
@@ -850,8 +802,8 @@ def _tape_read(tape: str) -> str:
 
 
 def _one_contract_line() -> str:
-    """The single best-graded option idea, in plain English with the dollar cost and the
-    stop — folded in from the retired 9:00 MasterMC brief. Silent if stale or nothing
+    """The single best-graded option idea, in plain English with the dollar cost —
+    folded in from the retired 9:00 MasterMC brief. Silent if stale or nothing
     cleared validation: no forced pick is better than a bad one."""
     try:
         import json
@@ -868,9 +820,9 @@ def _one_contract_line() -> str:
         p = picks[0]
         if p.get("structure") == "spread":
             return ""                      # spreads need their own explainer, not a one-liner
-        cost = int((p.get("per_contract") or 0) * (p.get("qty") or 0))
-        if not cost or cost > RISK_CAP:
-            return ""                      # can't afford it → it isn't an idea for this account
+        cost = int(p.get("per_contract") or 0)   # one contract (mid × 100); caps removed 2026-10-05
+        if not cost:
+            return ""                      # no price → no cost line (never invent one)
         kind = "call (a bet it goes UP)" if str(p.get("type", "")).lower().startswith("c") \
             else "put (a bet it goes DOWN)"
         try:
@@ -878,22 +830,13 @@ def _one_contract_line() -> str:
             window = f", you have {days} days" if days < 60 else f", it runs {days // 30} months"
         except Exception:
             window = ""
-        n = p.get("qty") or 1
-        # All three numbers or none. "Cut it if it's down half" gave the losing exit and left
-        # the winning one unwritten — so the only trades with a plan were the ones going
-        # wrong. Premium −50% / +50% off yesterday's close, stated as dollars. (2026-07-29)
-        # `per_contract` is DOLLARS (premium × 100); `mid` is the quoted price you actually
-        # type into the broker. Don't mix them — a "buy near $187" on a $1.87 contract is
-        # a hundredfold error in the one number he acts on.
+        # `per_contract` is DOLLARS (premium × 100); `mid` is the quoted price. Don't mix them.
         px = float(p.get("mid") or 0) or round((p.get("per_contract") or 0) / 100.0, 2)
-        stop_px, targ_px = round(px * 0.50, 2), round(px * 1.50, 2)
-        return (f"📈 " + b("TOP DESK CONTRACT (reference)") + f": {b(p['ticker'])} ${p['strike']:g} {esc(kind)} "
+        return (f"📈 " + b("TOP DESK CONTRACT (observation)") + f": {b(p['ticker'])} ${p['strike']:g} {esc(kind)} "
                 f"expiring {esc(p['expiry'])}{esc(window)}.\n"
-                f"• entry ref ${px:.2f} × {n} contract{'s' if n != 1 else ''} = ${cost} total\n"
-                f"• stop ref ${stop_px:.2f} — risk ${cost / 2:.0f}\n"
-                f"• target ref ${targ_px:.2f} — reward ${cost / 2:.0f}\n"
-                f"<i>Reference levels priced at yesterday's close — setup evidence, not a trade "
-                f"call; if it opens far from ${px:.2f}, every level shifts with it.</i>")
+                f"• mid ${px:.2f} → ${cost:,} per contract\n"
+                f"<i>Priced as of {as_of.strftime('%-m/%-d %-I:%M %p')} ET — "
+                f"if it opens far from ${px:.2f}, the cost shifts with it.</i>")
     except Exception:
         return ""
 
@@ -912,7 +855,7 @@ def build_phone() -> str:
         if line:
             lines.append(line)
 
-    cat, orders, plan = _catalysts_and_orders(_relay_tickers_str(6), tape)
+    cat, orders = _catalysts_and_orders(_relay_tickers_str(6), tape)
     orders = _filter_orders(orders)
     sched = _scheduled_today()
     if sched:
@@ -922,11 +865,8 @@ def build_phone() -> str:
         # first sentence only — the model likes to pad, and padding is what makes a brief
         # get skimmed instead of read
         lines.append(f"⚠️ {b('THE ONE THING TODAY')}: {esc(cat.split('. ')[0].rstrip('.'))}.")
-    numbered = _plan_orders(plan)
-    if numbered:
-        lines.append(numbered)
-    elif orders:
-        lines.append(f"👉 {b('SETUP REF')}: {esc(orders)}")
+    if orders:
+        lines.append(f"👉 {b('MOMENTUM NOTE')}: {esc(orders)}")
 
     cat_line = _catalyst_phone_line()
     if cat_line:
@@ -952,8 +892,8 @@ def build_phone() -> str:
     if one:
         lines.append(one)
 
-    lines.append(footer(f"Never risk more than ${RISK_CAP} on a single trade. "
-                         "If nothing here fits, there is no setup today.").lstrip("\n"))
+    lines.append(footer("Advisory only — you size and place every trade. "
+                         "If nothing here is a setup, there is no setup today.").lstrip("\n"))
 
     text = "\n\n".join(lines)
     # §3: Telegram's hard cap is 4096 chars. Trim order — drop block 3 (SNR headlines)

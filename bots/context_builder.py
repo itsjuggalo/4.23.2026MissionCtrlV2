@@ -57,7 +57,6 @@ def get_live_context(max_flow: int = 5, max_signals: int = 8) -> str:
                            if exp else "?")
                 lines.append(
                     f"  • {s.get('symbol')} {direction} ${s.get('strike')} exp {exp_str} "
-                    f"| tgt ${s.get('sellTarget', '?')} stop ${s.get('stopLoss', '?')} "
                     f"[{s.get('category', '?')}] src:{s.get('source', '?')}"
                 )
             parts.append(
