@@ -420,8 +420,9 @@ def crisis_close_l3(reason: str) -> str:
     for acct in ("boba", "jazzy"):
         for p in short_dte_positions(acct):
             if AUTOCLOSE_FLAG.exists() and not DRY:
-                r = alpaca_trade(f"/v2/positions/{p['symbol']}", acct, method="DELETE")
-                note = "CLOSED" if r is not None else "CLOSE FAILED, do it manually"
+                # Order path RETIRED (remedial W5 / DECISIONS R4, 2026-10-20): advisory only. The flag was
+                # moved to ~/.openclaw/shock_autoclose_paper.retired-20261020; recreating it must not close.
+                raise RuntimeError("shock auto-close order path retired 2026-10-20 (R4) — advisory only")
             else:
                 note = "CLOSE THIS NOW (auto-close off)"
             rows.append(tgf.row(p["symbol"], acct, f"x{p['qty']}", f"{p['dte']} DTE", note))
