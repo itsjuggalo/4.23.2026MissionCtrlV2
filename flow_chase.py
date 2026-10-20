@@ -31,7 +31,7 @@ from zoneinfo import ZoneInfo
 sys.path.insert(0, os.path.expanduser("~/scripts"))
 import quantum_tg as Q  # shared read-only formatters (_human, _market_open, etc.)
 from tg_format import esc, b, hdr, row, footer, join
-from price_guard import alpaca_last, alpaca_option_mid, alpaca_session_bars  # remedial W1 send-time guard
+from price_guard import alpaca_option_mid, fresh, option_mid, src_label  # remedial W1/W4 send-time guard (Robinhood first)
 
 ET = ZoneInfo("America/New_York")
 
@@ -114,8 +114,13 @@ def _clean_occ(s):
 
 
 def option_snapshot(occ):
-    """Live mid / IV / delta / day-range for one OCC option symbol."""
+    """Live mid / IV / delta / day-range for one OCC option symbol. Remedial W4 (Mike 10-09 #1): Robinhood first
+    (read-only marketdata/options); the Alpaca indicative snapshot only when Robinhood has no quote, labelled."""
     occ = _clean_occ(occ)
+    mid, chk, src, x = option_mid(occ)
+    if src is not None:
+        return {"mid": mid, "bid": x.get("bid"), "ask": x.get("ask"), "quote_check": chk, "src": src,
+                "iv": x.get("iv"), "delta": x.get("delta"), "day_high": x.get("high"), "day_low": x.get("low")}
     d = _get(f"{ALPACA}/v1beta1/options/snapshots?symbols={occ}")
     node = ((d or {}).get("snapshots") or {}).get(occ, {})
     lq = node.get("latestQuote") or {}
@@ -125,24 +130,26 @@ def option_snapshot(occ):
     # remedial W1 (2026-10-20): a quote older than the send_guard ceiling is no quote —
     # the verdict falls to its existing NO LIVE QUOTE / WAIT branch instead of using it.
     mid, chk = alpaca_option_mid(node)
-    return {"mid": mid, "bid": bp, "ask": ap, "quote_check": chk,
+    return {"mid": mid, "bid": bp, "ask": ap, "quote_check": chk, "src": src_label("Alpaca (not Robinhood)", lq.get("t")),
             "iv": node.get("impliedVolatility") or g.get("iv"),
             "delta": g.get("delta"), "day_high": db.get("h"), "day_low": db.get("l")}
 
 
 def equity_snapshot(tkr):
-    """Live underlying spot + % change vs prior close."""
+    """Live underlying spot + % change vs the prior regular close — remedial W4: quote_client.require_fresh
+    (Robinhood first; pre/after-hours = the extended print vs the last close). None unless it passes the send guard."""
     if not tkr:
         return {}
-    d = _get(f"{ALPACA}/v2/stocks/{tkr}/snapshot", timeout=5)
-    if not d:
-        return {}
-    last, chk = alpaca_last(d)   # None unless today's print within the send_guard ceiling
-    prev_bar, today_bar = alpaca_session_bars(d)
-    prev = prev_bar.get("c")
-    chg = round((last - prev) / prev * 100, 1) if (last and prev) else None
-    return {"spot": last, "prev_close": prev, "chg_pct": chg, "spot_check": chk,
-            "day_high": today_bar.get("h")}
+    r = fresh([tkr]).get(tkr.strip().upper()) or {}
+    ok = bool(r.get("ok"))
+    chg = r.get("change_pct") if ok else None
+    return {"spot": r.get("price") if ok else None, "chg_pct": round(chg, 1) if isinstance(chg, (int, float)) else None,
+            "spot_check": r, "src": r.get("src"), "window": r.get("window")}
+
+
+def _src(d):
+    """', src Robinhood 10:02 ET' — the provenance every printed price carries (market-data rule §2)."""
+    return f", {d['src']}" if d and d.get("src") else ""
 
 
 # ── the verdict ──────────────────────────────────────────────────────────────
@@ -180,10 +187,10 @@ def chase_verdict(a, snap, eq):
         late += 1
         reasons.append(f"down {move:+.0f}% since the alert — it's going the wrong way so far")
     elif move <= 12:
-        reasons.append(f"near entry: {move:+.0f}% vs alert ${ap:g} (now ~${mid:g})")
+        reasons.append(f"near entry: {move:+.0f}% vs alert ${ap:g} (now ~${mid:g}{_src(snap)})")
     elif move <= 35:
         late += 1
-        reasons.append(f"already {move:+.0f}% above alert ${ap:g} (now ~${mid:g})")
+        reasons.append(f"already {move:+.0f}% above alert ${ap:g} (now ~${mid:g}{_src(snap)})")
     else:
         late += 2
         reasons.append(f"ran {move:+.0f}% past alert ${ap:g} — you'd be late money")
@@ -223,15 +230,16 @@ def chase_verdict(a, snap, eq):
 
     # 5) underlying already gapped in the contract's favor (chasing the move) — or against it
     chg = eq.get("chg_pct")
+    when = "today" if eq.get("window") == "RTH" else "vs the last close"
     if chg is not None:
         if (is_call and chg >= 4) or ((not is_call) and chg <= -4):
             late += 1
-            reasons.append(f"stock already {chg:+.1f}% today — chasing the move")
+            reasons.append(f"stock already {chg:+.1f}% {when}{_src(eq)} — chasing the move")
         elif (is_call and chg <= -2) or ((not is_call) and chg >= 2):
             late += 1
-            reasons.append(f"stock {chg:+.1f}% today — moving AGAINST this contract (fighting the tape)")
+            reasons.append(f"stock {chg:+.1f}% {when}{_src(eq)} — moving AGAINST this contract (fighting the tape)")
         else:
-            reasons.append(f"stock {chg:+.1f}% today")
+            reasons.append(f"stock {chg:+.1f}% {when}{_src(eq)}")
 
     sym = a.get("Symbol")
     # Mike's hard per-trade cap: flat $400, fail-CLOSED. One contract = mid×100.

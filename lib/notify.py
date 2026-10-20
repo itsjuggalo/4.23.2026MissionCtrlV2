@@ -131,7 +131,7 @@ def tg_push(text: str, fn: str, *, loud: bool = True, html: bool = True,
     """Push a plain-text alert to Mike via the fleet function `fn` (vault-backed token),
     with HTML + loud/silent control. If the vault lookup or send fails, fall back to a raw
     token file (name under ~/.openclaw/secrets, or an absolute path) so a vault hiccup can
-    never silence a live trade alert. Returns 'fn', 'fallback', or None. Never raises."""
+    never silence a live trade alert. Returns 'fn', 'fallback', 'held' (tg_lint held it), or None. Never raises."""
     chat = _chat_id(chat)
     if not chat:
         return None
@@ -139,6 +139,15 @@ def tg_push(text: str, fn: str, *, loud: bool = True, html: bool = True,
         from lib.tg_digest import intercept
         if intercept(fn, text, html):
             return fn
+    except Exception:
+        pass
+    try:   # pre-send review (lib/tg_lint.py) — same gate as tg_fleet; fail-open by design (remedial W4 item 19)
+        from lib.tg_lint import review
+        reviewed, notes = review(fn, text)
+        if reviewed is None:
+            print(f"held by pre-send review: {'; '.join(notes)}")
+            return "held"
+        text = reviewed
     except Exception:
         pass
     tok = _vault_token(fn)

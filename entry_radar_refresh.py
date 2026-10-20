@@ -219,8 +219,17 @@ if __name__ == "__main__":
     import subprocess
     for r in rows:
         if r["status"] == "AT ENTRY" and prev.get(r["sym"]) not in (None, "AT ENTRY"):
+            # remedial W4 item 20: "now" is a send-guarded live price with its source + ET time; without one the
+            # card says it's the bar close (the zone itself is computed from daily bars).
+            try:
+                from price_guard import fresh
+                live = fresh([r["sym"]]).get(r["sym"].upper()) or {}
+            except Exception:
+                live = {}
+            now_s = (f"now ${live['price']:g} · {live['src']}" if live.get("ok") else
+                     f"last bar close ${r['price']} ({r.get('source', 'alpaca')} bars, no live price)")
             msg = (f"🎯 {r['sym']} ENTERED the entry zone ${r['entryLo']}–${r['entryHi']} "
-                   f"(now ${r['price']}, RSI {r['rsi']}, was {prev.get(r['sym'])})\n"
+                   f"({now_s}, RSI {r['rsi']}, was {prev.get(r['sym'])})\n"
                    f"uptrend pullback to the 21-day line · stop ref ${r['stopRef']} "
                    f"(evidence, not a trade call).")   # 2026-10-08 audit F15: zone + stop were printed twice
             try:

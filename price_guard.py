@@ -6,7 +6,7 @@ the regular session, 300 s pre/after-hours, today's print only — Mike's decisi
 This module only path-loads it, so the pipeline lib never lands on sys.path. If it
 can't be loaded, every check fails closed — a sender holds the card, it never guesses.
 
-    from price_guard import check, src_label, alpaca_last, alpaca_option_mid
+    from price_guard import check, src_label, fresh, option_mid, alpaca_last, alpaca_option_mid
 """
 from __future__ import annotations
 
@@ -39,6 +39,38 @@ def check(trade_ts, price, now: datetime | None = None, prev_bar_ts=None) -> dic
     if QC is None:
         return {"ok": False, "reason": "price guard unavailable", "age_s": None, "hhmm": None, "window": None}
     return QC.send_price_check(trade_ts, now=now, price=price, prev_bar_ts=prev_bar_ts)
+
+
+def fresh(symbols, now: datetime | None = None) -> dict:
+    """Remedial W4: quote_client.require_fresh — {SYM: {ok, price, provider, as_of, src, reason, window, cross,
+    change_pct}}. Robinhood first; pre/after-hours use the extended print. Fails closed when the lib is missing."""
+    syms = [s.strip().upper() for s in symbols if s and s.strip()]
+    if QC is None or not hasattr(QC, "require_fresh"):
+        return {s: {"ok": False, "price": None, "provider": None, "as_of": None, "src": None, "window": None,
+                    "reason": "price guard unavailable", "cross": "UNCHECKED", "change_pct": None} for s in syms}
+    return QC.require_fresh(syms, now=now)
+
+
+def option_mid(occ: str, now: datetime | None = None, alpaca_node: dict | None = None) -> tuple:
+    """Remedial W4 (Mike 10-09 #1): option mid from Robinhood first (lib/rh_quote, read-only), else the Alpaca
+    snapshot node (labelled "not Robinhood"). -> (mid | None, check, src, extras{iv, delta, high, low})."""
+    try:
+        from lib.rh_quote import rh_quotes
+        q = rh_quotes([occ]).get(occ)
+    except Exception:  # noqa: BLE001 — no RH = fall through to the labelled fallback
+        q = None
+    if q:
+        ts = datetime.fromtimestamp(q["as_of"], timezone.utc).isoformat()
+        chk = check(ts, q["mid"], now=now)
+        return ((q["mid"] if chk["ok"] else None), chk, src_label("Robinhood", ts),
+                {"iv": q.get("iv"), "delta": q.get("delta"), "high": q.get("high"), "low": q.get("low"),
+                 "bid": q["bid"], "ask": q["ask"]})
+    if alpaca_node:
+        mid, chk = alpaca_option_mid(alpaca_node, now=now)
+        lq = alpaca_node.get("latestQuote") or {}
+        return mid, chk, src_label("Alpaca (not Robinhood)", lq.get("t")), {"bid": lq.get("bp"), "ask": lq.get("ap")}
+    return None, {"ok": False, "reason": "no Robinhood or fallback option quote", "age_s": None, "hhmm": None,
+                  "window": None}, None, {}
 
 
 def src_label(source: str, ts) -> str:

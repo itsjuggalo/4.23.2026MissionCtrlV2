@@ -152,6 +152,8 @@ def compute_gex(ticker: str, strikes_window: int = 0):
     if hist.empty:
         raise ValueError("no spot")
     spot = float(hist.iloc[-1])
+    # remedial W4 item 21: the caption names the spot's source + bar date (Yahoo daily bar, not Robinhood)
+    spot_src = f"Yahoo daily bar {hist.index[-1].strftime('%m-%d')}, not Robinhood"
     exps = tk.options
     if not exps:
         raise ValueError("no options")
@@ -215,7 +217,7 @@ def compute_gex(ticker: str, strikes_window: int = 0):
     div, unit = _scale(max(mag, abs(net)))
     thin = len(ks) < 6           # off-hours / illiquid: OI too sparse to trust the read
 
-    return dict(ticker=ticker, spot=spot, expiry=expiry, dte=dte, strikes=ks,
+    return dict(ticker=ticker, spot=spot, spot_src=spot_src, expiry=expiry, dte=dte, strikes=ks,
                 gex=gex_by_k, call_gex=[call_gex[k] for k in ks],
                 put_gex=[-put_gex[k] for k in ks], net=net, flip=flip,
                 div=div, unit=unit, n_strikes=len(ks), thin=thin)
@@ -290,7 +292,7 @@ def caption(g: dict) -> str:
                  if g["spot"] >= g["flip"] else
                  "  · spot **below** flip (negative-gamma / accelerant zone)")
     thin = "\n⚠️ thin OI (off-hours/illiquid) — read tentatively" if g["thin"] else ""
-    return (f"**{g['ticker']}** GEX — exp {g['expiry']} ({g['dte']}DTE) · spot ${g['spot']:,.2f}\n"
+    return (f"**{g['ticker']}** GEX — exp {g['expiry']} ({g['dte']}DTE) · spot ${g['spot']:,.2f} ({g.get('spot_src', 'source n/a')})\n"
             f"{sign}  net {net:+.2f} {unit}/1% · gamma flip {flip}{above}\n"
             f"⚙️ {regime}{thin}")
 

@@ -141,6 +141,8 @@ def rh_quotes(occ_list, session=None) -> dict[str, dict]:
             out[targets[i]] = {
                 "bid": bid, "ask": ask, "mid": round((bid + ask) / 2, 2),
                 "last": _num(r.get("last_trade_price")), "as_of": at,
+                "iv": _num(r.get("implied_volatility")), "delta": _num(r.get("delta")),
+                "high": _num(r.get("high_price")), "low": _num(r.get("low_price")),
                 "as_of_et": datetime.fromtimestamp(at, ET).strftime("%Y-%m-%d %H:%M:%S ET"),
                 "source": "robinhood"}
     return out

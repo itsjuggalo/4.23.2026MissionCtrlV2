@@ -8,7 +8,10 @@ review(fn, text) -> (text | None, notes)
   None  = HOLD (not sent, logged to ~/.local/state/tg-lint.jsonl):
           - exact repeat of a message this lane already delivered in the last 30 min
           - unrendered template / placeholder / Python error text on a trading lane
+          - a price line marked STALE on a trading lane (remedial W4, Mike 10-09: "We shouldn't have stale prices")
   text  = possibly cleaned:
+          - a trading message with a stock/spot price claim but no source/time anywhere gets the UNVERIFIED footer
+            (shrinks as senders move to quote_client.require_fresh, remedial W4 item 20)
           - internal ids removed ("id MU:DECIPHER:2026…", "PCRX:SETUP:2026…")
           - runs of 3+ blank lines collapsed
 
@@ -33,6 +36,12 @@ _ID = re.compile(r"(?:\s*[·|]\s*)?\bid\s+[A-Z][A-Z0-9.]{0,9}:[A-Z_]{3,}:[\w.:-]
 _BROKEN = re.compile(r"<DATE>|<PRICE>|<SYM(?:BOL)?>|\{[a-z_]{2,}\}|\$nan\b|\bnan%|\$None\b|"
                      r"Traceback \(most recent call last\)")
 _BLANKS = re.compile(r"\n[ \t]*\n(?:[ \t]*\n)+")
+_PRICE = re.compile(r"\$\d[\d,]*(?:\.\d+)?")
+_STALE = re.compile(r"\bSTALE\b")
+# A stock/spot price claim ("Stock at $763.77", "now ~$35.3", "spot $777.58") — not premiums ($1.2M) or bare strikes.
+_SPOT = re.compile(r"(?i)\b(?:stock|spot|price|last|now|trading|underlying|shares?)\b[^\n$]{0,12}\$\d[\d,]*(?:\.\d+)?(?![\d.,]*\s?[MKB]\b)")
+_PROV = re.compile(r"\bsrc\b|\b\d{1,2}:\d{2}\s?(?:[AP]M\s?)?(?:ET|EDT|EST)\b|\bas[ _-]of\b", re.I)
+UNVERIFIED = "⚠ unverified price — no source/time on this card"
 
 
 def _recent_identical(fn: str, text: str) -> bool:
@@ -67,6 +76,11 @@ def review(fn: str, text: str) -> tuple[str | None, list[str]]:
                 notes.append(f"broken render: {m.group(0)!r}")
                 _log(fn, "hold", notes, text)
                 return None, notes
+            stale = next((ln for ln in out.splitlines() if _STALE.search(ln) and _PRICE.search(ln)), None)
+            if stale:
+                notes.append(f"stale price line: {stale.strip()[:80]!r}")
+                _log(fn, "hold", notes, text)
+                return None, notes
         cleaned = _ID.sub("", out)
         if cleaned != out:
             notes.append("internal id removed")
@@ -74,6 +88,9 @@ def review(fn: str, text: str) -> tuple[str | None, list[str]]:
         collapsed = _BLANKS.sub("\n\n", out)
         if collapsed != out:
             out = collapsed
+        if fn not in NON_TRADING and _SPOT.search(out) and not _PROV.search(out) and UNVERIFIED not in out:
+            out = out.rstrip() + "\n" + UNVERIFIED
+            notes.append("unverified-price footer")
         if _recent_identical(fn, out) or (out != text and _recent_identical(fn, text)):
             notes.append(f"exact repeat within {REPEAT_WINDOW_S // 60} min")
             _log(fn, "hold", notes, text)
