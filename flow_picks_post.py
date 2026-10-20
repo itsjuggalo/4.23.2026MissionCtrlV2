@@ -203,25 +203,13 @@ def _tape() -> str:
 
 MAX_MNY = 0.15   # |moneyness| beyond this = hedge/LEAP/stock-replacement, not a swing pick
 DTE_MIN, DTE_MAX = 7, 120   # swing window — excludes 0DTE lotto and long-dated LEAPs
-# Mike's per-trade risk cap (premium-at-risk model). 2026-07-15 P&L review HALVED the
-# doctrine cap 800→400 and made it fail-CLOSED after a
-# fail-open $800 let an $1,810 MRVL pick onto a ~$2k account. This module was still on the
-# retired 800 as of 2026-07-29, which is why the morning brief and the pick sizing lines kept
-# quoting contracts bigger than the whole book. Same constant as
-# option-scraper/pipeline/digest/best3_core.risk_cap_usd().
-# Since 2026-09-12 the doctrine is a FLAT $400 (the equity feed and the "15% of equity"
-# leg were retired). The unused equity-based risk_cap() helper was removed in T7.1 (it had
-# no callers; every sizing line here already used RISK_CAP = $400).
-RISK_CAP_USD = 400
-RISK_CAP = RISK_CAP_USD
+# Per-trade price caps removed 2026-10-05 (Mike's decision): each pick shows its cost
+# per contract (mid × 100) — no contract counts, no "affordable alternative" swaps.
 
 
 def _mid(row):
     bid, ask, last = float(row["bid"] or 0), float(row["ask"] or 0), float(row["lastPrice"] or 0)
     return (bid + ask) / 2 if (bid and ask) else last
-
-
-ALT_MAX_MNY = 0.20   # an affordable alternative must still be within 20% of spot (no lotto)
 
 
 def _yf_option_chain_df(ticker_sym, exp, is_call, retries=3):
@@ -246,10 +234,10 @@ def _yf_option_chain_df(ticker_sym, exp, is_call, retries=3):
     return None
 
 
-def _sizing_line(a, is_call, spot=None):
-    """Premium-based sizing against Mike's hard per-trade cap (RISK_CAP). If the flagged
-    contract is above the cap, scan the SAME-expiry chain for an affordable, still-near-money
-    same-direction strike so the pick stays takeable instead of becoming a screenshot."""
+def _cost_line(a, is_call, spot=None):
+    """Cost line for the flagged contract: mid and cost of ONE contract (mid × 100).
+    Price caps were removed 2026-10-05 — no contract count, no cap judgment.
+    `spot` is kept for call-site compatibility."""
     try:
         exp = datetime.fromtimestamp(int(a.get("Expiry", 0)), tz=timezone.utc).astimezone(ET).strftime("%Y-%m-%d")
         df = _yf_option_chain_df(a.get("Symbol"), exp, is_call)
@@ -261,43 +249,13 @@ def _sizing_line(a, is_call, spot=None):
     except Exception:
         return ""
     if not mid:
-        return ""
-    # 2026-10-08 audit F10: "$5.95/ct ($594)" — the dollars came from the unrounded mid. Round first so the
-    # per-contract price and the dollar cost always agree; label the quote's source + time.
+        return "   💵 cost per contract UNAVAILABLE (no live quote)"
+    # 2026-10-08 audit F10: round first so the per-contract price and the dollar cost always agree;
+    # label the quote's source + time.
     mid = round(mid, 2)
     cost = mid * 100
-    n = int(RISK_CAP // cost)
     _src = f" [Yahoo mid, {datetime.now(ET).strftime('%-I:%M')} ET]"
-    if n >= 1:
-        return (f"   💵 ~${mid:.2f}/ct{_src} (${cost:,.0f} ea) → **{n} ct** ≈ ${n*cost:,.0f} max risk "
-                f"(${n*cost*0.5:,.0f} at a 50% stop)")
-    # too rich → find the richest affordable same-direction strike (best delta you can buy)
-    alt = None
-    try:
-        for _, r in df.iterrows():
-            m = _mid(r)
-            if not m or m * 100 > RISK_CAP or m < 0.30:
-                continue
-            k = float(r["strike"])
-            # bullish call wants strikes ≥ pick (cheaper OTM); bearish put wants strikes ≤ pick
-            ok = (k >= strike) if is_call else (k <= strike)
-            if spot and abs(k - spot) / spot > ALT_MAX_MNY:    # reject deep-OTM lotto
-                continue
-            if ok and (alt is None or m > alt[1]):     # richest affordable = closest to money
-                alt = (k, round(m, 2))
-    except Exception:
-        alt = None
-    base = (f"   💵 flagged contract ~${mid:.2f}/ct{_src} (${cost:,.0f}) = above your ${RISK_CAP:,.0f} cap")
-    if alt:
-        ac = alt[1] * 100
-        an = int(RISK_CAP // ac)
-        cp = "C" if is_call else "P"
-        base += (f"\n   ✅ **affordable play: {a.get('Symbol')} ${alt[0]:g}{cp} {exp[5:].replace('-','/')}** "
-                 f"(cheaper, further OTM strike than the flagged ${strike:g}) ~${alt[1]:.2f}/ct → **{an} ct** ≈ ${an*ac:,.0f} (${an*ac*0.5:,.0f} at a 50% stop)")
-    else:
-        base += (f" — no near-money strike fits ${RISK_CAP:,.0f} "
-                 f"(this name's options are too rich for your account)")
-    return base
+    return f"   💵 ~${mid:.2f}/ct{_src} → ${cost:,.0f} per contract"
 
 
 def _moneyness(a: dict, spot: float):
@@ -371,7 +329,7 @@ def build() -> str | None:
                "repeat institutional positioning" if voi < 1 else "building position")
         mny = f" · spot ${sp:,.2f} ({abs(otm)*100:.0f}% {'OTM' if otm >= 0 else 'ITM'})" if sp else ""
         is_call = str(a.get("OptionType", "")).upper().startswith("C")
-        sizing = _sizing_line(a, is_call, sp)
+        sizing = _cost_line(a, is_call, sp)
         line = f"**{idx}. {_fmt(a)}** ({dte} DTE) · ${fv:,.0f} · V/OI {voi:.1f} ({vol:,}/{oi:,}){mny}{tag}\n   *{why}*"
         line += ("\n" + sizing if sizing else "")
         line += _iv_tag(a, iv_map)   # researched-&-verified stamp when the name was graded
@@ -395,7 +353,7 @@ def build() -> str | None:
             lines.append(f"\n⚠️ **YOUR NAME — {a['Symbol']}:** big flow ({_fmt(a)}, ${fv:,.0f}) reads "
                          f"**bearish** (V/OI {voi:.1f}). Don't mistake size for a green light.")
             break
-    lines.append("\n_0DTE = confirmation not entry · size up to $400 max risk (flat cap) · auto-posted intraday._")
+    lines.append("\n_0DTE = confirmation not entry · cost shown per contract · auto-posted intraday._")
     global TOP_ACTION_PICK, ACTIONABLE_PICKS
     TOP_ACTION_PICK = bulls[0] if bulls else (bears[0] if bears else None)
     ACTIONABLE_PICKS = list(bulls) + list(bears)

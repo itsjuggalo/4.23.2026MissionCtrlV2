@@ -268,9 +268,9 @@ NEW_QUESTIONS = [
      "options": ["Naked short strangle for max premium", "Prefer a DEFINED-RISK debit structure (or defined-risk credit spread) — undefined-risk selling can take a multiple of a small account on one bad move",
                  "All-in on one long straddle", "Sell naked puts on margin"],
      "correct_index": 1,
-     "why": "tastytrade's edge is real but they run big, diversified accounts that can absorb the tail of UNDEFINED-risk selling. On a $3k account, one naked short strangle gone wrong can blow a hole bigger than the account. The survival rule: keep risk DEFINED (debit spreads, iron condors, or sized long premium with a hard −50% stop) and size each trade ≤2–5% / ≤$250. Right strategy, wrong size = blown account.",
+     "why": "tastytrade's edge is real but they run big, diversified accounts that can absorb the tail of UNDEFINED-risk selling. On a $3k account, one naked short strangle gone wrong can blow a hole bigger than the account. The survival rule: keep risk DEFINED (debit spreads, iron condors, or sized long premium with a hard −50% stop) and size each trade small. Right strategy, wrong size = blown account.",
      "tags": ["debate", "risk", "account-size", "defined-risk"],
-     "rh_note": "On your $3k Boba book: defined-risk every time. The cap is ~$250/trade — one position should never be able to wreck the account."},
+     "rh_note": "On your $3k Boba book: defined-risk every time — one position should never be able to wreck the account."},
 
     {"id": "opt-135", "module": "debate", "level": 3,
      "question": "Bottom line across all five educators — what's the ONE question every straddle/strangle decision actually reduces to?",

@@ -99,41 +99,27 @@ def _occ(p):
     return p.get("occ") or f"{p.get('ticker')}{p.get('expiry')}{p.get('type')}{p.get('strike')}"
 
 
-def _actionable(p, risk_cap):
-    """A buzz must be sizeable: either the naked contract fits (qty>=1) or the
-    pipeline's debit spread fits the risk cap. If neither, stay silent — pinging
-    Mike to 'buy' something he can't size is exactly the bloat we're killing."""
-    if (p.get("qty") or 0) >= 1:
-        return True
-    return Q._afford_spread(p, risk_cap) is not None
+def _actionable(p):
+    """A buzz needs a real price: the naked contract has a per-contract cost. Price caps
+    were removed 2026-10-05 — an expensive contract still buzzes, with its cost shown."""
+    try:
+        return float(p.get("per_contract") or 0) > 0
+    except (TypeError, ValueError):
+        return False
 
 
 def _buzz_text(p, d):
     typ = (p.get("type") or "").upper()
     tag = "STRONG " if str(p.get("confidence", "")).upper() == "A" else ""
     why = (p.get('action_why') or 'clean setup')[:110]
-    spread = Q._afford_spread(p, d.get("risk_cap")) if (p.get("qty") or 0) < 1 else None
-    if spread:   # naked is over cap → buzz the cap-fitting spread the pipeline built
-        head = b(f"{p.get('ticker')} ${spread.get('long'):g}/${spread.get('short'):g} {typ} SPREAD")
-        return join(
-            hdr("🟢", f"{tag}Green Light", sub="green-light evidence (not a trade call) · spread fits the cap"),
-            f"{head} · {esc(Q._fmt_exp(p.get('expiry')))} ({esc(p.get('days'))}d)",
-            esc(f"{Q._money(spread.get('cost_per'))} cost · max +{Q._money(spread.get('max_profit'))} / "
-                f"-{Q._money(spread.get('max_loss'))} · {p.get('confidence')}-conf · {p.get('value')}"),
-            f"<i>why: {esc(why)}</i>",
-            esc(f"legs ref: long ${spread.get('long'):g} / short ${spread.get('short'):g} {typ} "
-                f"@ net debit ref ${float(spread.get('net_debit') or 0):.2f}"
-                + (f" · BE ref ${spread.get('breakeven')}" if spread.get('breakeven') is not None else "")),
-            footer("flat $400 cap · /pick for more"))
     head = b(f"{p.get('ticker')} ${p.get('strike'):g} {typ}")
     return join(
         hdr("🟢", f"{tag}Green Light", sub="green-light evidence (not a trade call)"),
         f"{head} · {esc(Q._fmt_exp(p.get('expiry')))} ({esc(p.get('days'))}d)",
-        esc(f"{Q._money(p.get('per_contract'))}/ct · size ref {p.get('qty',1)} = "
-            f"{Q._money((p.get('qty') or 1) * (p.get('per_contract') or 0))} of the $400 cap · "
+        esc(f"{Q._money(p.get('per_contract'))} per contract · "
             f"{p.get('confidence')}-conf · {p.get('sources')} src · {p.get('value')}"),
         f"<i>why: {esc(why)}</i>",
-        footer("flat $400 cap · stop ref -50% prem · /pick for more"))
+        footer("/pick for more"))
 
 
 def _shock_guard(dry, state):
@@ -222,9 +208,9 @@ def _green_light(dry, state):
     if not dry and not _fresh_today(d.get("as_of")):
         return False  # stale (weekend) — never buzz old data
     greens = [p for p in (d.get("picks") or [])
-              if _is_greenlight(p) and _actionable(p, d.get("risk_cap"))]
+              if _is_greenlight(p) and _actionable(p)]
     if not greens:
-        if dry: print(f"green-light: none (picks {len(d.get('picks') or [])}, all rich/event-risk/over-cap → silent)")
+        if dry: print(f"green-light: none (picks {len(d.get('picks') or [])}, all rich/event-risk/unpriced → silent)")
         return False
     # Prefer a green-light the option-signals flow ALSO backs (both engines agree).
     flowdir = Q._flow_directions()

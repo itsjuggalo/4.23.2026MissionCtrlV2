@@ -35,51 +35,8 @@ from price_guard import alpaca_option_mid, fresh, option_mid, src_label  # remed
 
 ET = ZoneInfo("America/New_York")
 
-# Mike's per-trade risk cap — flat $400 max risk (doctrine since 2026-09-12), fail-CLOSED. $400 is the
-# standing ceiling used wherever equity isn't already in hand (message-build paths must never
-# block on a live account call). Same number as flow_picks_post.RISK_CAP_USD and the
-# flow-digest affordability gate — if the doctrine changes, change it in all of them.
-RISK_CAP_USD = 400.0
-
-
-def _stop_for(mid, alert_px):
-    """A stop must sit BELOW where you get in. The old text said "get out if it loses
-    $<alert price>", which is only true while the contract trades ABOVE the alert — on a
-    contract that has fallen since, it printed a stop HIGHER than the entry (buy at $1.80,
-    stop at $12.71). Use the alert price only when it's genuinely below the current price;
-    otherwise fall back to the −30% rule. (2026-07-29)
-
-    The alert price is also CLAMPED to a −15%…−30% band. A contract alerted at $2.80 now
-    trading at $3.00 produced a stop 6.7% below entry — narrower than the bid/ask spread on
-    most options, so it fires on noise and books a loss the idea never earned. Too tight is
-    as broken as above-entry was."""
-    try:
-        mid, alert_px = float(mid or 0), float(alert_px or 0)
-    except (TypeError, ValueError):
-        return 0
-    if 0 < alert_px < mid:
-        return round(max(mid * 0.70, min(alert_px, mid * 0.85)), 2)
-    return round(mid * 0.7, 2)
-
-
-def _stop_pct(mid, alert_px):
-    """Say WHY the stop sits where it does (audit F17: -30% on one card, -15% on the next, unexplained)."""
-    try:
-        st, mid = _stop_for(mid, alert_px), float(mid)
-        return f"{(1 - st / mid) * 100:.0f}% below entry"
-    except Exception:
-        return "below entry"
-
-
-def _target_for(mid, pct=0.50):
-    """Where you SELL THE WINNER. Every action line on this board named an entry and a stop
-    and then went quiet about the profitable case — so the only exit a beginner had written
-    down was the losing one, and the winning trades got managed on feel. Default +50% on the
-    premium against the −30% stop is roughly 1.7:1. (2026-07-29)"""
-    try:
-        return round(float(mid or 0) * (1 + pct), 2)
-    except (TypeError, ValueError):
-        return 0
+# Per-trade price caps removed 2026-10-05 (Mike's decision): every contract shows its cost
+# (mid × 100) and nothing is hidden for being expensive.
 
 
 SECRETS = os.path.expanduser("~/.openclaw/secrets")
@@ -170,7 +127,7 @@ def chase_verdict(a, snap, eq):
         return {"tier": "WAIT", "emoji": "⏸", "head": "NO LIVE QUOTE YET", "move": None, "mid": mid,
                 "reasons": [f"no usable option quote ({(snap.get('quote_check') or {}).get('reason') or 'none returned'})"
                             " — re-check after ~9:45 ET open"],
-                "action": "→ no live option quote — levels unavailable until it's trading"}
+                "action": "→ no live option quote — cost UNAVAILABLE until it's trading"}
 
     move = (mid - ap) / ap * 100
     late = 0
@@ -242,13 +199,8 @@ def chase_verdict(a, snap, eq):
             reasons.append(f"stock {chg:+.1f}% {when}{_src(eq)}")
 
     sym = a.get("Symbol")
-    # Mike's hard per-trade cap: flat $400, fail-CLOSED. One contract = mid×100.
-    # Without this the board told him to "buy near $267.56" on an STX put — a $26,756 contract
-    # on a ~$2k book. An idea he cannot afford is not an idea; say so instead of pricing it.
+    # One contract = mid × 100 — always shown, never filtered (caps removed 2026-10-05).
     cost = mid * 100 if mid else 0
-    unaffordable = cost > RISK_CAP_USD
-    # T9 item 9 (2026-09-27): levels are REFERENCE levels / setup evidence — only the
-    # canonical synthesis issues a trade call. Same numbers, no imperatives.
     # 2026-10-08 audit F17: a contract already down >=15% since the alert scored late=1 (EARLY tier,
     # kept as-is so the guard fires exactly the same alerts) but was headed "🟢 STILL EARLY" over a
     # body saying "going the wrong way". Header/emoji only; tier and gating are unchanged.
@@ -257,25 +209,12 @@ def chase_verdict(a, snap, eq):
         tier, emoji, head = "EARLY", "🟢", "STILL EARLY — flow near the alert price (evidence)"
         if warn_down:
             emoji, head = "🟠", f"DOWN {abs(move):.0f}% SINCE THE ALERT — flow is not working yet (evidence)"
-        action = (f"→ one contract is ${cost:,.0f} — over your ${RISK_CAP_USD:.0f} limit, so "
-                  f"this one is outside the risk cap even though the setup evidence is good."
-                  if unaffordable else
-                  f"→ 1 contract ≈ ${cost:,.0f}. entry ref ${mid:g} · stop ref "
-                  f"${_stop_for(mid, ap):g} (−${cost - _stop_for(mid, ap)*100:,.0f}, "
-                  f"{_stop_pct(mid, ap)}) · "
-                  f"target ref ${_target_for(mid):g} (+${_target_for(mid)*100 - cost:,.0f}). "
-                  f"Reference levels — setup evidence, not a trade call.")
+        action = (f"→ {move:+.0f}% vs the alert price. 1 contract ≈ ${cost:,.0f} "
+                  f"(mid ${mid:g} × 100). Setup evidence, not a trade call.")
     elif late <= 3:
         tier, emoji, head = "LATE", "🟡", "GETTING LATE — part of the move is spent (evidence)"
-        action = (f"→ ${cost:,.0f} a contract is over your ${RISK_CAP_USD:.0f} limit "
-                  f"and the move is already underway — outside the risk cap."
-                  if unaffordable else
-                  f"→ {move:+.0f}% vs the alert price. 1 contract ≈ ${cost:,.0f} · "
-                  f"entry ref ${mid:g} · stop ref ${_stop_for(mid, ap):g} "
-                  f"(−${cost - _stop_for(mid, ap)*100:,.0f}, {_stop_pct(mid, ap)}) · target ref "
-                  f"${_target_for(mid, 0.30):g} "
-                  f"(+${_target_for(mid, 0.30)*100 - cost:,.0f}, reduced target — the "
-                  f"easy part already happened). Reference levels — setup evidence, not a trade call.")
+        action = (f"→ {move:+.0f}% vs the alert price — part of the move is already spent. "
+                  f"1 contract ≈ ${cost:,.0f} (mid ${mid:g} × 100). Setup evidence, not a trade call.")
     else:
         tier, emoji, head = "SKIP", "🔴", "TOO LATE — the move already happened (evidence)"
         action = ("→ chase gate closed: the move already happened. A pullback or the next "
@@ -322,7 +261,7 @@ def format_alert(a, v):
 
 def _compact(occ, a, with_cost=False, meta=None):
     """Board line. `with_cost=True` also returns the per-contract dollar cost so the caller
-    can rank affordable ideas first."""
+    can put cheaper contracts first when two rows tie on flow size."""
     snap = option_snapshot(occ)
     eq = equity_snapshot(a.get("Symbol", ""))
     v = chase_verdict(a, snap, eq)
@@ -406,12 +345,10 @@ def _winners_build(top=5, min_value=1_000_000):
     rows = _pushed_rows(min_value)
     if not rows:
         return "🔔 No big app-pushed flow yet today (waiting on the next FlowGreeks alert).", {}
-    # 2026-07-29: the board ranked purely by flow size, so 4 of 5 lines were routinely
-    # contracts costing thousands — Mike scrolled a list of things he cannot buy. Rank the
-    # ones that FIT his cap first (stable, so flow size still orders within each group).
+    # Ranked by flow size (biggest first); every priced contract is listed with its cost.
     # 2026-10-08 audit F3/F4: rows down >=40% or under $0.10 are not "winners" (a -99% $0.01
     # SPY call was headed FLOW WINNERS) — dropped from this DISPLAY board only; the verdict/tier
-    # logic the guard uses is untouched. The growing "N other big-money contracts" footer is gone.
+    # logic the guard uses is untouched.
     priced, waiting, items = [], [], {}
     for occ, a in rows:
         meta = {}
@@ -419,13 +356,10 @@ def _winners_build(top=5, min_value=1_000_000):
         mvp, mid = meta.get("move"), meta.get("mid")
         if (mvp is not None and mvp <= -40) or (mid is not None and mid < 0.10):
             continue
-        if cost > RISK_CAP_USD:
-            pass
-        elif cost > 0:
+        if cost > 0:
             priced.append((_clean_occ(occ), line, meta))
         else:
-            # no live quote yet — keep as backfill only, so a tradeable idea is never pushed
-            # off the board by a row that says "wait".
+            # no live quote yet — backfill only, so a priced row is never pushed off the board.
             waiting.append((_clean_occ(occ), line, meta))
         if len(priced) >= top:
             break
@@ -434,8 +368,7 @@ def _winners_build(top=5, min_value=1_000_000):
     if shown:
         out += [ln for _, ln, _ in shown]
     else:
-        out.append(esc(f"Nothing in today's big flow fits your ${RISK_CAP_USD:.0f} per-trade "
-                       f"limit — no in-cap setup on the board."))
+        out.append(esc("No priced flow on the board yet."))
     out.append(footer("tap /chase <ticker> for the full read"))
     for k, _, m in shown:
         items[k] = {"emoji": m.get("emoji"), "move": m.get("move")}

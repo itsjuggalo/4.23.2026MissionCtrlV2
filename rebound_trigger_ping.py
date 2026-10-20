@@ -87,7 +87,7 @@ def format_message(rows: list[dict], ran_at: str | None) -> str:
         opt = row.get("option") or {}
         if opt.get("stopRule"):
             lines.append(f"  ↳ {esc(opt['stopRule'])}")
-    lines.append(footer(f"Advisory only · flat $400 cap · as of {ran_at or 'n/a'} · /api/rebound-setup").lstrip("\n"))
+    lines.append(footer(f"Advisory only · as of {ran_at or 'n/a'} · /api/rebound-setup").lstrip("\n"))
     return "\n".join(lines)
 
 

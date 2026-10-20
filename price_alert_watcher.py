@@ -93,7 +93,7 @@ def watch_scalp_transitions():
             cur["status"] == "TARGET1"
             and (prev.get("status") != "TARGET1" or prev.get("contract") != cur["contract"])
         ):
-            notify(f"🎯 SCALP T1 HIT: {cur['contract']} — half sold, stop to break-even (advisory)")
+            notify(f"📈 SCALP UPDATE: {cur['contract']} reached its first level (observation)")
         if cur["log_len"] > prev.get("log_len", cur["log_len"]):
             r = log[-1]
             if _monitor_exit_recent(r):   # spy_scalp_monitor already sent this exit (audit #8)

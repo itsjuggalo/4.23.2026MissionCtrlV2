@@ -159,7 +159,7 @@ def recaps_cmd(bot: Bot, cmd: str, arg: str) -> None:
 CRYPTO_HELP = ("🪙 <b>CRYPTO DESK</b> — BTC/ETH move alerts, crypto news and QuantEdge perp signals "
                "land here. Pull any time:\n\n▸ /btc · /eth · /sol — price, 24h range + change\n"
                "▸ /price SYM — any Coinbase pair (e.g. /price XRP)\n"
-               "▸ /signals — QuantEdge perp signals in play (entry / stop / targets)\n"
+               "▸ /signals — QuantEdge perp signals in play (side / since)\n"
                "▸ /x TOPIC — what crypto X is saying (Grok)\n\n"
                "Or just type: <i>bitcoin · how's eth · any signals · what's X saying about sol</i>\n"
                "<i>Advice only — you place Coinbase orders yourself.</i>")
@@ -192,11 +192,10 @@ def signals() -> str:
         return "🪙 No QuantEdge perp signal in play right now."
     rows = ["🪙 <b>QUANTEDGE — IN PLAY</b>"]
     for s in st.values():
-        hit = " · T1 hit ✅" if s.get("tp1_hit") else ""
         rows.append(f"▸ <b>{html.escape(s.get('display', s.get('symbol', '?')))}</b> {s.get('side')} "
-                    f"from {s.get('entry')} · stop {s.get('stop')} · T1 {s.get('tp1')} · T2 {s.get('tp2')}{hit}"
+                    f"from {s.get('entry')}"
                     f"\n   <i>since {s.get('activated_at', '?')} ET</i>")
-    rows.append("<i>Perp signals — on Coinbase, trade spot or skip; size to the $400 max risk.</i>")
+    rows.append("<i>Perp signals — on Coinbase, trade spot or skip.</i>")
     return "\n".join(rows)
 
 

@@ -3,11 +3,9 @@
 
 Every fill from the last N days (default 7) is graded against the contract the
 coach enforces (PROFILE.md standing rules):
-  rule 4  sizing    — no buy >10x the (dust-filtered) median buy without a plan
   rule 5  chasing   — no buy after a +15%/5-day run
   rule 3  dead bags — never average into a −50% position
   rule 1  core      — core positions don't get sold without ≥3 bear factors
-  options — premium ticket ≤ $300 (one oversized loser ate all 14 wins)
   process — buys should have a Trade Ticket written BEFORE the fill
 
 Output: per-fill grades + a week GPA, Telegram'd to trading_command and written
@@ -41,7 +39,6 @@ TG_FN = "trading_command"
 DUST_MAX_USD = 5.0
 CHASE_RUNUP_PCT = 15.0
 DEAD_BAG_PCT = -50.0
-OPTION_MAX_TICKET = 300.0
 GPA = {"A": 4.0, "B": 3.0, "C": 2.0, "F": 0.0}
 
 
@@ -123,7 +120,7 @@ def precheck_rows(con: sqlite3.Connection, days: int, now_et: datetime) -> list[
     ts is 'YYYY-MM-DDThh:mm:ss ET' — filter on the sortable ISO prefix."""
     cutoff = (now_et - timedelta(days=days)).strftime("%Y-%m-%dT%H:%M:%S")
     cols = ("id", "ts", "source", "symbol", "asset_class", "bucket", "side",
-            "size_usd", "stop", "stop_source", "verdict", "blocked")
+            "verdict", "blocked")
     try:
         rows = con.execute(
             f"SELECT {','.join(cols)} FROM pre_trade_checks "
@@ -167,14 +164,8 @@ def precheck_section(pcs: list[dict], real_buys: list[dict]) -> list[str]:
         caut = sum(1 for p in pcs if p.get("verdict") == "CAUTION")
         stp = sum(1 for p in pcs if p.get("verdict") == "STOP")
         blocked = sum(1 for p in pcs if p.get("blocked"))
-        sat_no_stop = sum(1 for p in pcs if p.get("bucket") == "satellite"
-                          and p.get("side") == "buy" and not p.get("stop"))
         lines.append(f"   {n} check{'s' if n != 1 else ''} logged · "
                      f"{go}×GO {caut}×CAUTION {stp}×STOP · {blocked} hard-blocked")
-        if sat_no_stop:
-            lines.append(f"   🛑 {sat_no_stop} naked-satellite entr"
-                         f"{'ies' if sat_no_stop != 1 else 'y'} caught with no stop "
-                         "— rule #1 working, not willpower")
     else:
         lines.append("   No pre-trade checks logged this week.")
     if real_buys:
@@ -262,15 +253,6 @@ def grade_fill(f: dict, med: float, closes_map: dict, book: dict[str, dict],
     closes = closes_map.get(ysym)
 
     if is_buy:
-        # rule 4 — sizing
-        cap = med * 10
-        if usd > cap and usd >= DUST_MAX_USD:
-            fails += 1
-            flags.append(f"OVERSIZE ${usd:,.0f} > ${cap:,.0f} cap (10× ${med:.0f} median) — rule 4")
-        # options premium cap
-        if is_option and usd > OPTION_MAX_TICKET:
-            fails += 1
-            flags.append(f"OPTION ticket ${usd:,.0f} > ${OPTION_MAX_TICKET:.0f} cap")
         # rule 5 — chasing
         if closes is not None:
             r = runup_before(closes, fill_dt)
@@ -372,7 +354,7 @@ def main() -> int:
                (f" · {fail_count} rule break{'s' if fail_count != 1 else ''}" if fail_count else " · zero rule breaks 🎯"))
 
     msg = f"{header}\n{summary}\n\n" + "\n".join(lines)
-    msg += ("\n\nRules: 4=sizing 5=chase 3=dead-bag 1=core · sells graded for "
+    msg += ("\n\nRules: 5=chase 3=dead-bag 1=core · sells graded for "
             "early-exit once 30d of future exists · gate first: /?page=gate")
 
     print(msg)

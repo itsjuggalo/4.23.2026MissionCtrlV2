@@ -424,7 +424,7 @@ def crisis_close_l3(reason: str) -> str:
                 # moved to ~/.openclaw/shock_autoclose_paper.retired-20261020; recreating it must not close.
                 raise RuntimeError("shock auto-close order path retired 2026-10-20 (R4) — advisory only")
             else:
-                note = "CLOSE THIS NOW (auto-close off)"
+                note = "0-2 DTE held"
             rows.append(tgf.row(p["symbol"], acct, f"x{p['qty']}", f"{p['dte']} DTE", note))
             log_event("l3_position", {"reason": reason, **p,
                                       "auto": AUTOCLOSE_FLAG.exists()})
@@ -549,10 +549,10 @@ def main() -> int:
             blocks.append("headlines: " + tgf.esc(" | ".join(headlines)))
         blocks += [tgf.section("Done automatically"),
                    "1. New buys HALTED (decipher_HALT set)",
-                   "2. Trailing stops tightened, sizing cut (decipher_STRESS)",
+                   "2. Stress flag set (decipher_STRESS)",
                    tgf.section("0-2 DTE options (these die first in a crash)"),
                    l3,
-                   "\nRobinhood: close anything expiring this week yourself.\n"
+                   "\n"
                    f"Reply {tgf.b('RESUME')} here when you want trading back on."]
         telegram(tgf.join(*blocks), loud=True)
         log_event("crisis", {"reason": reason, "vix": vix, "z": z,
@@ -596,7 +596,7 @@ def main() -> int:
             telegram(tgf.join(
                 tgf.hdr("🟠", "Shock Guard — Stress"),
                 tgf.row("VIX", f"{vix:g}"),
-                "Trails tightened, new-position sizing scaled down.",
+                "Stress flag set (decipher_STRESS).",
                 tgf.footer(f"Auto-clears under VIX {VIX_CLEAR:g}.")), loud=False)
             log_event("stress_on", {"vix": vix})
         elif vix < VIX_CLEAR and STRESS_FILE.exists() and st["level"] != "CRISIS":

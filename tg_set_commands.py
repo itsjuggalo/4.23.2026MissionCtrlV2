@@ -69,7 +69,7 @@ RISK_MENU = C([
     ("greeks", "Greeks for a ticker"),
     ("news", "Macro/news read"),
     ("explain", "Plain-English Greeks/IV"),
-    ("help", "What this desk does (max-loss · sizing · hedges)"),
+    ("help", "What this desk does (cost · correlation · hedges)"),
 ])
 JAZZY_MENU = C([
     ("book", "Open Jazzy positions"),

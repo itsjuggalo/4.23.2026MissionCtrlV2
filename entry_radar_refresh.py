@@ -160,9 +160,8 @@ def analyze(sym, bars):
     up = px > e21
     entry_lo, entry_hi = round(e21 - 0.4 * a, 2), round(e21 + 0.4 * a, 2)
     breakout = round(hi20 + 0.1 * a, 2)
-    stop_ref = round(lo20, 2)
     if up and entry_lo <= px <= entry_hi:
-        status, note = "AT ENTRY", f"uptrend pullback to the 21-day line — decent entry zone ${entry_lo}–${entry_hi}, risk off ${stop_ref}"
+        status, note = "AT ENTRY", f"uptrend pullback to the 21-day line — decent entry zone ${entry_lo}–${entry_hi}"
     elif up and px > entry_hi:
         gap = (px - e21) / a if a else 0
         status = "EXTENDED" if gap > 1.2 else "TRENDING"
@@ -176,7 +175,7 @@ def analyze(sym, bars):
         "sym": sym, "price": round(px, 2), "rsi": r,
         "trend": "UP" if up else "DOWN", "ema21": round(e21, 2), "ema8": round(e8, 2),
         "entryLo": entry_lo, "entryHi": entry_hi, "breakout": breakout,
-        "stopRef": stop_ref, "hi20": round(hi20, 2), "lo20": round(lo20, 2),
+        "hi20": round(hi20, 2), "lo20": round(lo20, 2),
         "status": status, "note": note,
         "lastBar": bars[-1].get("t", ""),
     }
@@ -230,8 +229,8 @@ if __name__ == "__main__":
                      f"last bar close ${r['price']} ({r.get('source', 'alpaca')} bars, no live price)")
             msg = (f"🎯 {r['sym']} ENTERED the entry zone ${r['entryLo']}–${r['entryHi']} "
                    f"({now_s}, RSI {r['rsi']}, was {prev.get(r['sym'])})\n"
-                   f"uptrend pullback to the 21-day line · stop ref ${r['stopRef']} "
-                   f"(evidence, not a trade call).")   # 2026-10-08 audit F15: zone + stop were printed twice
+                   f"uptrend pullback to the 21-day line "
+                   f"(evidence, not a trade call).")   # 2026-10-08 audit F15: zone was printed twice
             try:
                 subprocess.run([os.path.join(HOME, "bin", "tg-send-msg"), msg],
                                timeout=20, check=False)
@@ -252,10 +251,10 @@ if __name__ == "__main__":
             for r in buyable:
                 tag = "🎯 AT ENTRY" if r["status"] == "AT ENTRY" else "🩹 OVERSOLD"
                 lines.append(f"{tag} {r['sym']} ${r['price']} (RSI {r['rsi']})")
-                lines.append(f"   zone ${r['entryLo']}–${r['entryHi']} · stop ref ${r['stopRef']}")
+                lines.append(f"   zone ${r['entryLo']}–${r['entryHi']}")
                 lines.append(f"   {r['note']}")
             lines.append("")
-            lines.append("Plan the entry, don't chase. Advisory only — size it yourself.")
+            lines.append("Don't chase. Advisory only.")
             try:
                 subprocess.run([os.path.join(HOME, "bin", "tg-send-msg"), "\n".join(lines)],
                                timeout=20, check=False)
