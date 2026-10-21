@@ -1,0 +1,8 @@
+{
+  "stale_days": 14,
+  "revive_days": 7,
+  "summary_channel_id": "1486045592005382226",
+  "exempt_categories": ["📌 START HERE"],
+  "exempt_names": ["general", "massage-bookings", "coupon-request", "agent-debate", "broadcast-log", "hot-contract-picks"],
+  "_notes": "Mike 2026-10-20: stale = no post in stale_days; moved to the bottom 🗄️ STALE — REVIEW category, never deleted. agent-debate/broadcast-log/hot-contract-picks are reused for the Claude-vs-Codex debates and the Firebase liveness report."
+}
