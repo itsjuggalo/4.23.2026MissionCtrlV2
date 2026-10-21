@@ -125,6 +125,8 @@ def main():
         w = l = 0
         gate_saved = gate_cost = 0
         for s in sigs:
+            if "sl_u" not in s:   # R5 (2026-10-20): cards carry no stop/target — nothing to grade here
+                continue
             oc = grade_signal(s, m1)
             muted = bool(s.get("muted"))
             if muted:
