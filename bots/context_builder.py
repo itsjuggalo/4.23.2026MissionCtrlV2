@@ -27,7 +27,7 @@ def get_live_context(max_flow: int = 5, max_signals: int = 8) -> str:
         con.row_factory = sqlite3.Row
         rows = con.execute(
             "SELECT symbol, option_type, strike, expiry, premium, block_type "
-            "FROM flow_events WHERE event_time >= ? "
+            "FROM flow_events_dedup WHERE event_time >= ? "
             "ORDER BY premium DESC LIMIT ?",
             (cutoff_ms, max_flow),
         ).fetchall()
