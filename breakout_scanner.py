@@ -96,27 +96,72 @@ def fetch_bars(symbols: list[str], key: str, sec: str) -> dict[str, list[dict]]:
     for i in range(1 if out else 0, len(symbols), CHUNK):
         fetch_recursive(symbols[i:i+CHUNK], feed)
         time.sleep(0.15)   # gentle on rate limit
+    FEED_USED[0] = feed
     return out
 
 
-def flow_tickers() -> set[str]:
-    """Tickers with options flow in the last 3 days (Mike's edge overlay)."""
+FEED_USED = ["iex"]
+FLOW_STATUS: dict = {"source": "desk_pipeline.sqlite flow_candidates", "newest": None, "stale": True}
+
+
+def flow_tickers() -> dict[str, set[str]]:
+    """Tickers with options flow in the last 3 days -> the flow directions seen (Mike's edge overlay).
+    W8 MC-AUD-013: the direction is kept so a bearish print on a breakout is never shown as green confluence,
+    and the overlay's own freshness is reported (FLOW_STATUS)."""
     if not FLOW_DB.exists():
-        return set()
+        return {}
     try:
         con = sqlite3.connect(f"file:{FLOW_DB}?mode=ro", uri=True)
         cutoff = (datetime.now(timezone.utc) - timedelta(days=3)).isoformat()
         rows = con.execute(
-            "SELECT DISTINCT UPPER(COALESCE(ticker,symbol)) FROM flow_candidates "
+            "SELECT UPPER(COALESCE(ticker,symbol)), UPPER(COALESCE(direction,'')) FROM flow_candidates "
             "WHERE created_at >= ?", (cutoff,)).fetchall()
+        newest = con.execute("SELECT MAX(created_at) FROM flow_candidates").fetchone()[0]
         con.close()
-        return {r[0] for r in rows if r[0]}
+        FLOW_STATUS.update(newest=newest, stale=not newest or str(newest) < cutoff[:19].replace("T", " "))
+        out: dict[str, set[str]] = {}
+        for sym, d in rows:
+            if sym:
+                out.setdefault(sym, set()).add(d or "UNKNOWN")
+        return out
     except Exception as e:
         print(f"[scanner] flow lookup skipped: {e}", file=sys.stderr)
-        return set()
+        return {}
 
 
-def analyze(sym: str, bars: list[dict], flows: set[str], mode: str) -> dict | None:
+def flow_tag(dirs: set[str] | None, mode: str) -> str:
+    """'aligned' only when every flow print points the move's way; mixed/adverse/unknown are labelled as such."""
+    if not dirs:
+        return ""
+    want = "BULLISH" if mode == "breakout" else "BEARISH"
+    if dirs == {want}:
+        return "aligned"
+    if want in dirs:
+        return "mixed"
+    return "adverse" if dirs & {"BULLISH", "BEARISH"} else "unknown"
+
+
+def bar_meta(bars: list[dict], feed: str, now: datetime | None = None) -> dict:
+    """W8 MC-AUD-013: what the last bar is — its own date, whether today's session is still open (partial volume
+    vs full-day averages) and whether it is an old EOD bar. Uses the MissionCtrl market clock."""
+    from zoneinfo import ZoneInfo
+    et = ZoneInfo("America/New_York")
+    now = (now or datetime.now(timezone.utc)).astimezone(et)
+    last = datetime.fromisoformat(str(bars[-1]["t"]).replace("Z", "+00:00")).astimezone(et).date()
+    try:
+        sys.path.insert(0, "/AIWorkWSL/web/missionctrl/pipeline")
+        from market_clock import clock as _clock
+        today_open = _clock.is_trading_day(now.date()) and now >= _clock.session_open(now.date())
+        expected = now.date() if today_open else _clock.previous_trading_day(now.date())
+        partial = today_open and now < _clock.session_close(now.date()) and last == now.date()
+    except Exception:  # noqa: BLE001 — calendar unavailable: say so rather than guess
+        return {"bar_date": last.isoformat(), "feed": feed, "session": "UNKNOWN (market clock unavailable)"}
+    session = ("PARTIAL (session open — volume so far vs full-day average)" if partial
+               else "COMPLETE" if last == expected else f"STALE (last bar {last.isoformat()}, expected {expected.isoformat()})")
+    return {"bar_date": last.isoformat(), "feed": feed, "session": session}
+
+
+def analyze(sym: str, bars: list[dict], flows, mode: str) -> dict | None:
     """mode: 'breakout' (up + rising vol + uptrend) or 'breakdown' (down + rising
     vol + downtrend). Both REQUIRE the volume surge — a move on no volume is noise."""
     if len(bars) < 55:
@@ -143,14 +188,15 @@ def analyze(sym: str, bars: list[dict], flows: set[str], mode: str) -> dict | No
         if not (last_c > high_20 and last_c > sma50):
             return None
         near_ath = last_c >= high_52 * 0.97
+        hi_label = "NEAR-52W-HIGH" if len(highs) >= 252 else f"NEAR-{len(highs)}D-HIGH"   # not an all-time high
         return {
             "symbol": sym, "direction": "breakout",
             "close": round(last_c, 2),
             "pct_vs_level": round((last_c / high_20 - 1) * 100, 1),   # above 20d high
             "rvol": round(rvol, 1),
-            "extreme_52w": near_ath, "extreme_label": "ATH" if near_ath else "",
+            "extreme_52w": near_ath, "extreme_label": hi_label if near_ath else "",
             "vs_50dma_pct": round((last_c / sma50 - 1) * 100, 1),
-            "has_flow": sym in flows,
+            "has_flow": sym in flows, "flow_dir": flow_tag(flows.get(sym), mode),
             "score": round(rvol * (1.25 if sym in flows else 1.0) * (1.15 if near_ath else 1.0), 2),
         }
     else:  # breakdown
@@ -163,9 +209,10 @@ def analyze(sym: str, bars: list[dict], flows: set[str], mode: str) -> dict | No
             "close": round(last_c, 2),
             "pct_vs_level": round((last_c / low_20 - 1) * 100, 1),     # below 20d low (neg)
             "rvol": round(rvol, 1),
-            "extreme_52w": near_low, "extreme_label": "52W-LOW" if near_low else "",
+            "extreme_52w": near_low,
+            "extreme_label": ("NEAR-52W-LOW" if len(lows) >= 252 else f"NEAR-{len(lows)}D-LOW") if near_low else "",
             "vs_50dma_pct": round((last_c / sma50 - 1) * 100, 1),
-            "has_flow": sym in flows,
+            "has_flow": sym in flows, "flow_dir": flow_tag(flows.get(sym), mode),
             "score": round(rvol * (1.25 if sym in flows else 1.0) * (1.15 if near_low else 1.0), 2),
         }
 
@@ -183,7 +230,13 @@ def main():
     bars = fetch_bars(universe, key, sec)
     mode = os.environ.get("SCAN_MODE", "breakout")     # breakout | breakdown | both
     modes = ["breakout", "breakdown"] if mode == "both" else [mode]
+    # W8 MC-AUD-013: provenance travels with the scan — bar date/session, feed, adjustment, flow-overlay freshness
+    lasts = sorted((str(b[-1]["t"]), s) for s, b in bars.items() if b)
+    meta = bar_meta(bars[lasts[-1][1]], FEED_USED[0]) if lasts else {"session": "UNAVAILABLE (no bars)"}
     result = {
+        "bars": {**meta, "adjustment": "split+dividend adjusted (adjustment=all)",
+                 "source": f"Alpaca {FEED_USED[0].upper()} daily bars — cross-check only, not Robinhood"},
+        "flow_overlay": dict(FLOW_STATUS),
         "generated_at": datetime.now(timezone.utc).isoformat(timespec="seconds"),
         "universe": UNIVERSE.name, "scanned": len(bars), "min_rvol": MIN_RVOL,
     }

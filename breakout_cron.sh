@@ -33,8 +33,17 @@ if [[ "${FORCE:-0}" != "1" ]]; then
   if (( 10#$HHMM < 930 || 10#$HHMM > 1600 )); then log "outside 09:30-16:00 ET — skip"; exit 0; fi
 fi
 
+# DRY_RUN=1 (tests): render the message only — temp state, no LLM, no Telegram, no hive-mind note.
+# BREAKOUT_SCAN_JSON_FILE replays a saved scan instead of fetching.
+if [[ "${DRY_RUN:-0}" == "1" ]]; then
+  STATE="$(mktemp)"; ENRICH=0; LOG=/dev/null
+fi
 log "=== breakout/breakdown scan start ==="
-SCAN_JSON="$(SCAN_MODE=both python3 "$HOME/scripts/breakout_scanner.py" 2>>"$LOG")"
+if [[ -n "${BREAKOUT_SCAN_JSON_FILE:-}" ]]; then
+  SCAN_JSON="$(cat "$BREAKOUT_SCAN_JSON_FILE")"
+else
+  SCAN_JSON="$(SCAN_MODE=both python3 "$HOME/scripts/breakout_scanner.py" 2>>"$LOG")"
+fi
 [[ -z "$SCAN_JSON" ]] && { log "scanner empty — abort"; exit 1; }
 
 # --- dedupe + deterministic body; also drop fresh-hit JSON for the enricher -----
@@ -75,13 +84,23 @@ if not ups and not dns:
 def line(h, up):
     tags = []
     if h["extreme_label"]: tags.append(h["extreme_label"])
-    if h["has_flow"]: tags.append("🟢FLOW")
+    # W8 MC-AUD-013: flow is green only when it points the move's way; otherwise say what it is
+    fd = h.get("flow_dir") or ("unknown" if h["has_flow"] else "")
+    if fd: tags.append({"aligned": "🟢FLOW", "mixed": "FLOW mixed", "adverse": "🔴FLOW against"}.get(fd, "FLOW (dir ?)"))
     t = ("  " + " ".join(tags)) if tags else ""
     if up:
         return f"• {h['symbol']}  ${h['close']}  +{h['pct_vs_level']}% over 20d-high  RVOL {h['rvol']}x{t}"
     return f"• {h['symbol']}  ${h['close']}  {h['pct_vs_level']}% under 20d-low  RVOL {h['rvol']}x{t}"
 
 out = []
+b = scan.get("bars") or {}
+if b:
+    out.append(f"Bars {b.get('bar_date', '?')} · {b.get('session', '?')} · {b.get('source', '?')} · {b.get('adjustment', '')}")
+fo = scan.get("flow_overlay") or {}
+if fo.get("stale"):
+    out.append(f"Flow overlay STALE (newest {fo.get('newest') or 'none'}) — no FLOW tags possible")
+out.append("52W = within 3% of the 52-week high/low, not an all-time high")
+out.append("")
 if ups:
     out.append(f"📈 BREAKOUTS ({len(ups)})")
     out += [line(h, True) for h in ups]
@@ -98,6 +117,7 @@ if [[ "$OUT" == "NOFRESH" || -z "$OUT" ]]; then
 fi
 DET_BODY="${OUT#MSG$'\t'}"
 BODY="$DET_BODY"
+PROV="${DET_BODY%%$'\n\n'*}"   # provenance lines (bars/session/source, flow overlay, 52W note) — kept on the enriched body too
 
 # --- enrich with one LLM pass (best-effort; deterministic fallback) ------------
 if [[ "$ENRICH" == "1" && -s "$FRESH_JSON" ]]; then
@@ -119,7 +139,7 @@ Data: $(cat "$FRESH_JSON")"
 try: print((json.load(sys.stdin).get("result") or "").strip())
 except Exception: print("")' 2>>"$LOG")"
   if [[ -n "$ENRICHED" && "${#ENRICHED}" -gt 40 ]]; then
-    BODY="$ENRICHED"; log "enriched via /ainvest (${#ENRICHED} chars)"
+    BODY="$PROV"$'\n\n'"$ENRICHED"; log "enriched via /ainvest (${#ENRICHED} chars)"
   else
     log "enrich empty/failed — using deterministic body"
   fi
@@ -127,6 +147,9 @@ fi
 rm -f "$FRESH_JSON"
 
 # --- send ONE Telegram message ------------------------------------------------
+if [[ "${DRY_RUN:-0}" == "1" ]]; then
+  echo "🚀 *Breakout scan* — S&P 500 · rising volume · DRY RUN"$'\n\n'"$BODY"; rm -f "$STATE"; exit 0
+fi
 TOKEN="$(cat "$SECRETS/telegram_antigravity_bot_token" 2>/dev/null)"
 CHAT="$(cat "$SECRETS/telegram-chat-id.txt" 2>/dev/null)"
 HEADER="🚀 *Breakout scan* — S&P 500 · rising volume · $(TZ='America/New_York' date '+%a %-I:%M %p ET')"
