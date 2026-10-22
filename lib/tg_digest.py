@@ -155,6 +155,29 @@ def _clip(s: str, n: int = 80) -> str:
     return (cut[:sp] if sp >= n * 0.4 else cut).rstrip(" ,;:—-·(") + "…"
 
 
+# Context a clip must never drop (MC-AUD-080): OCC contract ids, as-of stamps and missing/stale warnings.
+_KEEP = re.compile(r"\b[A-Z]{1,6}\d{6}[CP]\d{8}\b|\bas[_ ]of\s+[^·—;]{1,24}|\b(?:STALE|UNAVAILABLE|MISSING|"
+                   r"not Robinhood|UNKNOWN)\b[^·—;]{0,24}", re.I)
+
+
+def _clip_keep(s: str, n: int = 80) -> str:
+    """_clip, then re-append any must-keep context the clip cut off."""
+    out = _clip(s, n)
+    lost = [m.group(0).strip() for m in _KEEP.finditer(re.sub(r"\s+", " ", s)) if m.group(0).strip() not in out]
+    return out + (" · " + " · ".join(dict.fromkeys(lost)) if lost else "")
+
+
+# Direction is part of a row's identity: a PUT row must not overwrite the same ticker's CALL row.
+_SIDE = re.compile(r"\b(CALLS?|PUTS?|BULLISH|BEARISH|LONG|SHORT)\b", re.I)
+_SIDE_NORM = {"CALL": "call", "CALLS": "call", "BULLISH": "call", "LONG": "call",
+              "PUT": "put", "PUTS": "put", "BEARISH": "put", "SHORT": "put"}
+
+
+def _side(rest: str) -> str:
+    m = _SIDE.search(rest)
+    return _SIDE_NORM.get(m.group(1).upper(), "") if m else ""
+
+
 def strip_internal_ids(text: str) -> str:
     """Drop reader-facing trigger ids; the originals stay in logs/state."""
     return _TRIG_ID.sub("", text)
@@ -195,7 +218,8 @@ def compact(source: str, text: str, html: bool) -> tuple[str, list[tuple[str, st
             g = [x.strip(",.") for x in pm.groups()]
             rest = f"${g[0]} · buy zone ${g[1]}–${g[2]}"
         glyph = "" if glyph in ("", "▸") else glyph + " "
-        rows.append((tkr, f"{glyph}<b>{tkr}</b> {_esc(_clip(rest))}"))
+        side = _side(rest)
+        rows.append((f"{tkr}:{side}" if side else tkr, f"{glyph}<b>{tkr}</b> {_esc(_clip_keep(rest))}"))
     if source == "flow_digest_send.py" and _plain(text, html).lstrip().startswith("🔁"):
         return title, rows           # 🔁 REPEAT = "no new info": counted, not shown
     if not rows and lines and _GATE.search(_plain(lines[0], True)):
@@ -339,13 +363,30 @@ def flush(dry: bool = False) -> int:
                        seen_headlines=headline_keys(prior))
         if dry:
             print("\n\n".join(chunks)); return 0
-        if all(_send(c) for c in chunks):
+        # A chunk delivered by an earlier, partly failed flush is not sent again (MC-AUD-080): its hash is kept in
+        # digest_chunks until the whole digest lands.
+        import hashlib
+        con.execute("CREATE TABLE IF NOT EXISTS digest_chunks (hash TEXT PRIMARY KEY, ts REAL)")
+        done = {h for (h,) in con.execute("SELECT hash FROM digest_chunks")}
+        ok_all = True
+        for c in chunks:
+            h = hashlib.sha256(c.encode()).hexdigest()
+            if h in done:
+                continue
+            if _send(c):
+                con.execute("INSERT OR IGNORE INTO digest_chunks VALUES (?, ?)", (h, time.time()))
+                con.commit()
+            else:
+                ok_all = False
+                break
+        if ok_all:
             con.executemany("UPDATE digest_queue SET flushed=? WHERE id=?",
                             [(time.time(), r[0]) for r in rows])
+            con.execute("DELETE FROM digest_chunks")
             con.commit()
-            print(f"[tg-digest] sent {len(chunks)} message(s) folding {len(rows)} updates")
+            print(f"[tg-digest] delivered {len(chunks)} message(s) folding {len(rows)} updates")
             return 0
-        print("[tg-digest] send failed — items stay queued for the next slot")
+        print("[tg-digest] send failed — items stay queued; delivered chunks are not re-sent")
         return 1
     finally:
         con.close()

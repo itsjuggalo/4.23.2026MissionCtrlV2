@@ -111,6 +111,36 @@ class DigestTest(unittest.TestCase):
         self.assertEqual(self.dg.flush(), 0)
         self.assertIn("IONQ", self.sent.read_text())
 
+    # ── audit W5 MC-AUD-080 (2026-10-21) ─────────────────────────────────────────────────────
+    def test_partial_send_does_not_resend_delivered_chunks(self):
+        self.q("runner_radar.py", join(hdr("📡", "Runner Radar"), row("IONQ", "+18%")))
+        self.dg.build = lambda *a, **k: ["chunk one", "chunk two", "chunk three"]
+        d = Path(self.tmp.name)
+        flaky = d / "flaky"     # delivers the first chunk, fails the second
+        flaky.write_text(f"#!/bin/sh\nn=$(cat {d}/n 2>/dev/null || echo 0); n=$((n+1)); echo $n > {d}/n\n"
+                         f"[ $n -eq 2 ] && exit 1\nprintf '%s\\n=====\\n' \"$1\" >> {self.sent}\n")
+        flaky.chmod(flaky.stat().st_mode | stat.S_IEXEC)
+        os.environ["TG_DIGEST_SEND"] = str(flaky)
+        self.assertEqual(self.dg.flush(), 1)
+        self.assertEqual(self.dg.flush(), 0)
+        chunks = [c for c in self.sent.read_text().split("\n=====\n") if c.strip()]
+        self.assertEqual(chunks, ["chunk one", "chunk two", "chunk three"])   # each delivered exactly once
+
+    def test_clip_keeps_occ_asof_and_missing_warnings(self):
+        rest = ("calls heavy into the print with a very long explanation that keeps going past the clip point "
+                "SPY261120C00700000 · as_of 10:31 ET · IV STALE")
+        out = self.dg._clip_keep(rest)
+        for token in ("SPY261120C00700000", "as_of 10:31 ET", "STALE"):
+            self.assertIn(token, out)
+
+    def test_put_and_call_rows_for_one_ticker_both_survive(self):
+        self.q("runner_radar.py", join(hdr("📡", "Runner Radar"), row("NVDA", "CALLS $2.1M")))
+        self.q("runner_radar.py", join(hdr("📡", "Runner Radar"), row("NVDA", "PUTS $1.4M")))
+        self.assertEqual(self.dg.flush(), 0)
+        txt = self.sent.read_text()
+        self.assertIn("CALLS", txt)
+        self.assertIn("PUTS", txt)
+
     def test_kill_switch_sends_everything_instantly(self):
         os.environ["TG_DIGEST_OFF"] = "1"
         self.assertFalse(self.q("pullback_autowatch.py", pullback(("NVDA", 1, 1, 2))))

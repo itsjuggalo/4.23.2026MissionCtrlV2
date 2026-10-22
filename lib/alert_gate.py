@@ -64,15 +64,23 @@ def _save(d: dict) -> None:
         pass        # never let bookkeeping break an alert path
 
 
+SEEN_KEEP = 50                      # recent fingerprints remembered per key (recall=True)
+
+
 def should_send(key: str, fingerprint: str, *,
-                repeat_after: int = DEFAULT_REPEAT_AFTER) -> tuple[bool, str]:
-    """(send?, reason). `key` = the alert family; `fingerprint` = what makes it new."""
+                repeat_after: int = DEFAULT_REPEAT_AFTER, recall: bool = False) -> tuple[bool, str]:
+    """(send?, reason). `key` = the alert family; `fingerprint` = what makes it new.
+    recall=True also silences a fingerprint DELIVERED under this key within repeat_after even when
+    another one came in between (A→B→A does not re-alert A) — audit W5 MC-AUD-081, 2026-10-21."""
     if _off(key):
         return True, "gate off"
     prev = _load().get(key)
     if not prev:
         return True, "first alert of this kind"
     if prev.get("fp") != fingerprint:
+        seen_ts = (prev.get("seen") or {}).get(fingerprint) if recall else None
+        if seen_ts is not None and time.time() - float(seen_ts) < repeat_after:
+            return False, f"seen earlier ({int((time.time() - float(seen_ts)) // 60)}m ago)"
         return True, "changed"
     age = time.time() - float(prev.get("ts") or 0)
     if age >= repeat_after:
@@ -81,8 +89,13 @@ def should_send(key: str, fingerprint: str, *,
 
 
 def mark_sent(key: str, fingerprint: str) -> None:
+    """Call only after the send was acknowledged — a failed send must stay unmarked so it retries."""
     d = _load()
-    d[key] = {"fp": fingerprint, "ts": time.time()}
+    now = time.time()
+    seen = dict((d.get(key) or {}).get("seen") or {})
+    seen[fingerprint] = now
+    seen = dict(sorted(seen.items(), key=lambda kv: kv[1])[-SEEN_KEEP:])
+    d[key] = {"fp": fingerprint, "ts": now, "seen": seen}
     _save(d)
 
 

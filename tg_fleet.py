@@ -579,7 +579,7 @@ def send(fn, msg, html=False):
         sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
         from lib.tg_digest import intercept
         if intercept(fn, msg, html):
-            print("sent (queued for digest)")
+            print("queued for digest (accepted; delivered at the next digest slot)")
             return 0
     except Exception:
         pass

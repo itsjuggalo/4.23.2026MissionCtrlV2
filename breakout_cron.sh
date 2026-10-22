@@ -4,11 +4,14 @@
 # Pipeline:
 #   1. scan : breakout_scanner.py SCAN_MODE=both -> breakouts + breakdowns JSON
 #   2. dedupe: same-day cooldown (separate up:/dn: buckets); re-alert only if RVOL
-#             jumped +0.5 — keeps signal, not spam (ADD-friendly).
+#             jumped +0.5 — keeps signal, not spam (ADD-friendly). The cooldown is staged
+#             in $STATE.pending and committed only after tg_fleet acknowledges the send,
+#             so a failed send is retried next run (audit W5 MC-AUD-081, 2026-10-21).
 #   3. enrich: ONE claude -p "/ainvest" call adds an actionable line per fresh name
 #             (lean / entry trigger / stop / catalyst). Best-effort — on any failure
 #             falls back to the deterministic list so the alert never drops.
-#   4. send : ONE Telegram message (breakouts then breakdowns, capped). Not two pings.
+#   4. send : ONE Telegram message (breakouts then breakdowns, capped) via tg_fleet lane
+#             aime_research (same AntiGravity bot; ledger + lint; no token in argv).
 #   5. feed : append to ~/mc-kb/notes/briefs/ for Boba/Jazzy hive-mind.
 #
 # Caps (ADD): top 5 breakouts + top 3 breakdowns per message.
@@ -54,6 +57,7 @@ from datetime import datetime
 import zoneinfo
 scan = json.loads(os.environ["SCAN_JSON"])
 state_path, fresh_path = os.environ["STATE"], os.environ["FRESH_JSON"]
+pending_path = state_path + ".pending"
 today = datetime.now(zoneinfo.ZoneInfo("America/New_York")).strftime("%Y-%m-%d")
 try:
     st = json.load(open(state_path))
@@ -75,7 +79,7 @@ def take(hits, prefix, cap):
 ups = take(scan.get("breakouts", []), "up", 5)
 dns = take(scan.get("breakdowns", []), "dn", 3)
 st["sent"] = sent
-json.dump(st, open(state_path, "w"))
+json.dump(st, open(pending_path, "w"))   # committed by the shell only after an acknowledged send
 json.dump({"breakouts": ups, "breakdowns": dns}, open(fresh_path, "w"))
 
 if not ups and not dns:
@@ -113,7 +117,7 @@ PY
 
 OUT="$(SCAN_JSON="$SCAN_JSON" STATE="$STATE" FRESH_JSON="$FRESH_JSON" python3 -c "$PYCODE" 2>>"$LOG")"
 if [[ "$OUT" == "NOFRESH" || -z "$OUT" ]]; then
-  log "no fresh moves (all on cooldown) — nothing sent"; rm -f "$FRESH_JSON"; exit 0
+  log "no fresh moves (all on cooldown) — nothing sent"; rm -f "$FRESH_JSON" "$STATE.pending"; exit 0
 fi
 DET_BODY="${OUT#MSG$'\t'}"
 BODY="$DET_BODY"
@@ -148,22 +152,16 @@ rm -f "$FRESH_JSON"
 
 # --- send ONE Telegram message ------------------------------------------------
 if [[ "${DRY_RUN:-0}" == "1" ]]; then
-  echo "🚀 *Breakout scan* — S&P 500 · rising volume · DRY RUN"$'\n\n'"$BODY"; rm -f "$STATE"; exit 0
+  echo "🚀 *Breakout scan* — S&P 500 · rising volume · DRY RUN"$'\n\n'"$BODY"; rm -f "$STATE" "$STATE.pending"; exit 0
 fi
-TOKEN="$(cat "$SECRETS/telegram_antigravity_bot_token" 2>/dev/null)"
-CHAT="$(cat "$SECRETS/telegram-chat-id.txt" 2>/dev/null)"
 HEADER="🚀 *Breakout scan* — S&P 500 · rising volume · $(TZ='America/New_York' date '+%a %-I:%M %p ET')"
-if [[ -n "$TOKEN" && -n "$CHAT" ]]; then
-  python3 - "$TOKEN" "$CHAT" "$HEADER"$'\n\n'"$BODY" <<'PY' >>"$LOG" 2>&1
-import sys, requests
-token, chat, msg = sys.argv[1:4]
-for i in range(0, len(msg), 4000):
-    requests.post(f"https://api.telegram.org/bot{token}/sendMessage",
-                  json={"chat_id": chat, "text": msg[i:i+4000]}, timeout=15)
-PY
-  log "sent scan alert to $CHAT"
+if "$HOME/.venv/bin/python" "$HOME/scripts/tg_fleet.py" send aime_research "$HEADER"$'\n\n'"$BODY" >>"$LOG" 2>&1; then
+  mv -f "$STATE.pending" "$STATE"
+  log "sent scan alert (tg_fleet aime_research) — cooldown committed"
 else
-  log "WARN telegram creds missing — printed only"; echo "$HEADER"$'\n\n'"$BODY"
+  rm -f "$STATE.pending"
+  log "ERROR send not acknowledged — cooldown NOT advanced, retried next run"; echo "$HEADER"$'\n\n'"$BODY"
+  SEND_FAILED=1
 fi
 
 # --- hive-mind feed -----------------------------------------------------------
@@ -177,3 +175,5 @@ F="$BRIEF_DIR/breakouts-${DS}.md"
 } > "$F"
 log "hive-mind feed written: $F"
 log "=== scan done ==="
+[[ "${SEND_FAILED:-0}" == "1" ]] && exit 1
+exit 0
