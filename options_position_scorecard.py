@@ -22,6 +22,7 @@ sys.path.insert(0, "/AIWorkWSL/labs/quantum/src")
 import theo  # noqa: E402
 sys.path.insert(0, str(Path.home() / "scripts"))
 from tg_format import hdr, esc, footer  # noqa: E402
+import price_guard  # noqa: E402  Robinhood-first spot (W1 MC-AUD-026)
 
 SEC = Path.home() / ".openclaw" / "secrets"
 TOKEN_FILE = SEC / "telegram_mc_skill_bot_token"   # @MMCTRL727_Bot "Trading Recaps"
@@ -300,12 +301,16 @@ def _tg(method, **kwargs):
                 pass
 
 
+_SPOT_CACHE: dict = {}
+
+
 def _spot(sym: str):
-    try:
-        d = _get(f"{DATA}/v2/stocks/{sym}/trades/latest?feed=iex")
-        return float(d.get("trade", {}).get("p") or 0) or None
-    except Exception:
-        return None
+    """Underlying price from the Robinhood-first price guard (quote.v1; Yahoo only as a labelled fallback).
+    A held / stale / missing price returns None and the card is dropped — never an Alpaca or guessed price."""
+    if sym not in _SPOT_CACHE:
+        r = (price_guard.fresh([sym]) or {}).get(sym.upper()) or {}
+        _SPOT_CACHE[sym] = float(r["price"]) if r.get("ok") and _finite(r.get("price")) else None
+    return _SPOT_CACHE[sym]
 
 
 def ncdf(x: float) -> float:
@@ -373,7 +378,8 @@ def _darkpool_tags():
 
 
 def _dp_tag_for(pos: dict, by_id: dict, by_ts: dict):
-    s = by_id.get(pos.get("id")) or by_ts.get((pos["root"], pos["strike"]))
+    # exact relay id only: a ticker+strike match can be the other right or another expiry (MC-AUD-026)
+    s = by_id.get(pos.get("id"))
     return (s.get("tag"), s.get("note")) if s else (None, None)
 
 
@@ -398,7 +404,8 @@ def scorecard(pos: dict):
     pop = (ncdf((log(spot / be) - 0.5 * sig * sig * T) / srt) if kind == "call"
            else ncdf((log(be / spot) + 0.5 * sig * sig * T) / srt)) if (srt > 0 and be > 0) else None
     one_sig_pct = sig * sqrt(T) * 100
-    need_pct = abs((be - spot) / spot * 100)
+    # signed move the stock still needs to reach breakeven: + = up for a call / down for a put; <= 0 = already past it
+    need_pct = ((be - spot) if kind == "call" else (spot - be)) / spot * 100
     theta_pct = abs(theta_day) * 100 / mark if (theta_day and mark) else None
 
     cliff = min(21, dte)
@@ -445,7 +452,7 @@ def fmt_card(cards, coverage=None, model_omitted=0, darkpool_state="UNKNOWN", re
         lines.append(f"<b>{label}</b> · supplied mid ${c['mark']} · model {c['moneyness']} · {c['dte']} calendar d" + (f" · source flags (unverified): {flags}" if flags else ""))
         for evidence in _presentation_evidence(c, now):
             lines.append("  " + esc(evidence))
-        lines.append(f"  supplied spot ${c['spot']} · model breakeven ${c['be']} · absolute BE distance {c['need_pct']:.1f}% vs model 1σ ±{c['one_sig_pct']:.1f}%")
+        lines.append(f"  supplied spot ${c['spot']} · model breakeven ${c['be']} · " + (f"needs a {c['need_pct']:.1f}% {'rise' if p['kind'] == 'call' else 'drop'} to breakeven" if c['need_pct'] > 0 else "already past breakeven") + f" vs model 1σ ±{c['one_sig_pct']:.1f}%")
         lines.append(f"  model Δ {d} · θ {th} · model P(long profitable at expiry) {pop}")
         lines.append(f"  model cliff {c['cliff']} DTE")
         for vline in c["verdict"]:
