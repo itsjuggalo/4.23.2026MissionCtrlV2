@@ -117,7 +117,8 @@ def template_brief(rank, winners, momentum, macro) -> list[str]:
     if winners:
         w = winners[0]
         b.append(f"Top flow winner (3d): {w.get('symbol','?')} {w.get('option_type','?')} ${w.get('strike','?')} {w.get('expiry','?')} "
-                 f"peaked +{float(w.get('peak_pct') or 0):.0f}% — src flow_winners, {_asof(w.get('detected_at'))}.")
+                 f"hindsight peak +{float(w.get('peak_pct') or 0):.0f}% (first → highest print seen; winner-only list, "
+                 f"not a return or hit rate) — src flow_winners, {_asof(w.get('detected_at'))}.")
     if momentum:
         up = [m["ticker"] for m in momentum if m.get("trend") == "UP" or (m.get("bull_streak") or 0) >= 3]
         down = [m["ticker"] for m in momentum if m.get("trend") == "DOWN" or (m.get("bear_streak") or 0) >= 3]
