@@ -53,24 +53,33 @@ def fresh(symbols, now: datetime | None = None) -> dict:
 
 def option_mid(occ: str, now: datetime | None = None, alpaca_node: dict | None = None) -> tuple:
     """Remedial W4 (Mike 10-09 #1): option mid from Robinhood first (lib/rh_quote, read-only), else the Alpaca
-    snapshot node (labelled "not Robinhood"). -> (mid | None, check, src, extras{iv, delta, high, low})."""
+    snapshot node (labelled "not Robinhood"). -> (mid | None, check, src, extras{iv, delta, high, low, rh_reason}).
+    extras["rh_reason"] names why Robinhood was not used (None when it was), so a fallback is never silent.
+    A caller's `now` taken before this fetch (a run that started seconds earlier) is not allowed to make a
+    fresh Robinhood quote look like it is "from the future" (2026-10-22: the SPY 0DTE scalp cards fell back
+    to Alpaca all session for exactly that); the check then uses the fetch time."""
+    diag: dict = {}
     try:
-        from lib.rh_quote import rh_quotes
-        q = rh_quotes([occ]).get(occ)
-    except Exception:  # noqa: BLE001 — no RH = fall through to the labelled fallback
-        q = None
+        rq = _rh_quote_mod()
+        q = rq.rh_quotes([occ], diag=diag).get(occ)
+    except Exception as e:  # noqa: BLE001 — no RH = fall through to the labelled fallback
+        q, diag[occ] = None, f"Robinhood helper error ({type(e).__name__})"
     if q:
         ts = datetime.fromtimestamp(q["as_of"], timezone.utc).isoformat()
-        chk = check(ts, q["mid"], now=now)
-        return ((q["mid"] if chk["ok"] else None), chk, src_label("Robinhood", ts),
-                {"iv": q.get("iv"), "delta": q.get("delta"), "high": q.get("high"), "low": q.get("low"),
-                 "bid": q["bid"], "ask": q["ask"]})
+        fetched = datetime.now(timezone.utc)
+        ref = fetched if (now is not None and now.timestamp() < q["as_of"] <= fetched.timestamp() + 2) else now
+        chk = check(ts, q["mid"], now=ref)
+        extras = {"iv": q.get("iv"), "delta": q.get("delta"), "high": q.get("high"), "low": q.get("low"),
+                  "bid": q["bid"], "ask": q["ask"], "rh_reason": None if chk["ok"] else chk.get("reason")}
+        return (q["mid"] if chk["ok"] else None), chk, src_label("Robinhood", ts), extras
+    rh_reason = diag.get(occ) or "no Robinhood quote"
     if alpaca_node:
         mid, chk = alpaca_option_mid(alpaca_node, now=now)
         lq = alpaca_node.get("latestQuote") or {}
-        return mid, chk, src_label("Alpaca (not Robinhood)", lq.get("t")), {"bid": lq.get("bp"), "ask": lq.get("ap")}
-    return None, {"ok": False, "reason": "no Robinhood or fallback option quote", "age_s": None, "hhmm": None,
-                  "window": None}, None, {}
+        return mid, chk, src_label("Alpaca (not Robinhood)", lq.get("t")), {"bid": lq.get("bp"), "ask": lq.get("ap"),
+                                                                           "rh_reason": rh_reason}
+    return None, {"ok": False, "reason": f"no Robinhood quote: {rh_reason}", "age_s": None, "hhmm": None,
+                  "window": None}, None, {"rh_reason": rh_reason}
 
 
 def _rh_quote_mod():

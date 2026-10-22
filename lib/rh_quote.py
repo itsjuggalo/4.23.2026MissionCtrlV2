@@ -29,6 +29,7 @@ _UUID = re.compile(r"^[0-9a-fA-F-]{36}$")
 _HIST = re.compile(r"^marketdata/options/historicals/[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}/$")
 _SPANS = {"day": ("year", "month"), "5minute": ("day", "week")}
 _ID_CACHE: dict[str, dict] = {}
+_LAST_HTTP: dict[str, str] = {}   # path -> last failure ("HTTP 401", "Timeout"), for rh_quotes(diag=...)
 
 
 def _num(v):
@@ -70,10 +71,13 @@ def _get(session, token: str, path: str, params: dict) -> dict | None:
         r = session.get(BASE + path, params=params, timeout=10, allow_redirects=False,
                         headers={"Authorization": "Bearer " + token, "Accept": "application/json"})
         if r.status_code != 200:
+            _LAST_HTTP[path] = f"HTTP {r.status_code}"
             return None
         d = r.json()
-    except Exception:  # noqa: BLE001 — any transport/parse failure = no quote
+    except Exception as e:  # noqa: BLE001 — any transport/parse failure = no quote
+        _LAST_HTTP[path] = type(e).__name__
         return None
+    _LAST_HTTP.pop(path, None)
     return d if isinstance(d, dict) else None
 
 
@@ -108,10 +112,13 @@ def _epoch(ts) -> float | None:
         return None
 
 
-def rh_quotes(occ_list, session=None) -> dict[str, dict]:
-    """Read-only RH bid/ask per OCC symbol. Missing = could not price (never guessed)."""
+def rh_quotes(occ_list, session=None, diag: dict | None = None) -> dict[str, dict]:
+    """Read-only RH bid/ask per OCC symbol. Missing = could not price (never guessed).
+    diag (optional dict) gets {occ: why it is missing} — no token, instrument lookup, HTTP status, no bid/ask."""
+    diag = {} if diag is None else diag
     token = _token() if session is None else (_token() or "test-token")
     if not token:
+        diag.update({o: "no read-only Robinhood token in the secrets store" for o in occ_list or []})
         return {}
     if session is None:
         try:
@@ -124,10 +131,14 @@ def rh_quotes(occ_list, session=None) -> dict[str, dict]:
     for occ in dict.fromkeys(occ_list or []):
         c = parse_occ(occ)
         if not c:
+            diag[occ] = "not an OCC symbol"
             continue
         row = _resolve(session, token, c)
         if row:
             targets[row["id"]] = occ
+        else:
+            why = _LAST_HTTP.get("options/instruments/") or _LAST_HTTP.get("instruments/")
+            diag[occ] = "instrument lookup failed" + (f" ({why})" if why else " (no exact active contract)")
     ids = list(targets)
     for k in range(0, len(ids), 25):
         d = _get(session, token, "marketdata/options/", {"instruments": ",".join(
@@ -140,6 +151,7 @@ def rh_quotes(occ_list, session=None) -> dict[str, dict]:
             bid, ask = _num(r.get("bid_price")), _num(r.get("ask_price"))
             at = _epoch(r.get("quote_updated_at") or r.get("updated_at"))
             if bid is None or ask is None or bid < 0 or ask <= 0 or ask < bid or at is None:
+                diag[targets[i]] = f"no usable bid/ask (bid {bid}, ask {ask})"
                 continue
             out[targets[i]] = {
                 "bid": bid, "ask": ask, "mid": round((bid + ask) / 2, 2),
@@ -151,6 +163,10 @@ def rh_quotes(occ_list, session=None) -> dict[str, dict]:
                 "instrument_id": i,
                 "as_of_et": datetime.fromtimestamp(at, ET).strftime("%Y-%m-%d %H:%M:%S ET"),
                 "source": "robinhood"}
+    for occ in targets.values():
+        if occ not in out and occ not in diag:
+            diag[occ] = "no marketdata row" + (f" ({_LAST_HTTP['marketdata/options/']})"
+                                               if "marketdata/options/" in _LAST_HTTP else "")
     return out
 
 
