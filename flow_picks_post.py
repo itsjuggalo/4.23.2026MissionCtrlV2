@@ -152,6 +152,40 @@ def _load() -> dict:
     return merged
 
 
+_V2_NOTES: dict[str, list[str]] = {}   # OptionSymbol → staged-term notes (shown only while the flag is on)
+_V2_BUYS: dict[str, dict] = {}
+_V2_ON = False
+
+
+def _v2_delta(a: dict) -> float:
+    """STAGED pick terms (Mike 2026-10-21; missionctrl pipeline/intel/pick_features.py): accumulation (same contract
+    bought on several sessions, flow.db) + IV rank (tastytrade / CBOE index). Adds 0 unless the pick_features_v2 flag
+    file exists — trade-changing, so it waits for Mike's GO. A failure adds 0 and is noted on the pick."""
+    global _V2_ON
+    try:
+        if "/AIWorkWSL/web/missionctrl" not in sys.path:
+            sys.path.append("/AIWorkWSL/web/missionctrl")
+        from pipeline.intel import pick_features as PF
+    except Exception:  # noqa: BLE001 — module not reachable → production score unchanged
+        return 0.0
+    if not PF.enabled():
+        return 0.0
+    _V2_ON = True
+    osym = a.get("OptionSymbol")
+    try:
+        sym = str(a.get("Symbol", "")).upper()
+        if sym not in _V2_BUYS:
+            _V2_BUYS[sym] = PF.buys_by_symbol(sym, datetime.now(ET).date())
+        exp = datetime.fromtimestamp(int(a["Expiry"]), tz=timezone.utc).astimezone(ET).date().isoformat()
+        acc = PF.accumulation(_V2_BUYS[sym], str(a.get("OptionType", "")), float(a.get("Strike") or 0), exp)
+        d, parts = PF.score_delta(acc, PF.iv_rank(sym))
+        _V2_NOTES[osym] = parts + [f"score {d:+.2f}"]
+        return d
+    except Exception as e:  # noqa: BLE001
+        _V2_NOTES[osym] = [f"staged terms failed ({type(e).__name__}) — score unchanged"]
+        return 0.0
+
+
 def _score(a: dict) -> tuple:
     fv = float(a.get("totalFlowValue", 0) or 0)
     vol = float(a.get("Volume", 0) or 0)
@@ -164,6 +198,7 @@ def _score(a: dict) -> tuple:
     s += min(voi, 5) * 1.5
     s += 0.6 if 10 <= dte <= 180 else (-1.0 if dte < 7 else 0)
     s += min(sweeps + blocks, 15) * 0.15
+    s += _v2_delta(a)   # STAGED: 0 unless Mike's GO flag file exists
     return s, fv, voi, dte
 
 
@@ -333,6 +368,8 @@ def build() -> str | None:
         line = f"**{idx}. {_fmt(a)}** ({dte} DTE) · ${fv:,.0f} · V/OI {voi:.1f} ({vol:,}/{oi:,}){mny}{tag}\n   *{why}*"
         line += ("\n" + sizing if sizing else "")
         line += _iv_tag(a, iv_map)   # researched-&-verified stamp when the name was graded
+        if _V2_ON and _V2_NOTES.get(a.get("OptionSymbol")):
+            line += "\n   _v2 terms: " + "; ".join(_V2_NOTES[a.get("OptionSymbol")]) + "_"
         return line
 
     if bulls:
