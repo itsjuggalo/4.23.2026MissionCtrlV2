@@ -4,8 +4,8 @@ goes stale inside its active window (cron silently failed: ARIES down, yfinance 
 key issue), ping the system_health Telegram lane. Read-only. Cron every 20 min.
 
 Gated via lib/alert_gate.py (2026-09-15 telegram lane charter fix) — fingerprint is the
-sorted set of currently-stale poster names, cooldown 6h, so a standing failure reminds
-once per 6h instead of re-alerting every 20-minute cron tick.
+ET date + sorted set of currently-stale poster names, so a standing failure alerts once per
+episode per day (W6); exchange holidays are not weekdays (market clock).
 """
 from __future__ import annotations
 
@@ -21,13 +21,23 @@ from lib.heartbeat import age_min, beat_epoch  # noqa: E402
 from lib.alert_gate import should_send, mark_sent  # noqa: E402
 
 ET = ZoneInfo("America/New_York")
+
+
+def trading_day(d) -> bool:
+    """NYSE session day from the MissionCtrl market clock (holidays included, W6 MC-AUD-125); Mon-Fri if unavailable."""
+    try:
+        sys.path.insert(0, "/AIWorkWSL/web/missionctrl/pipeline")
+        from market_clock import clock
+        return clock.is_trading_day(d)
+    except Exception:
+        return d.weekday() < 5
 ALERT_GATE_KEY = "poster_watchdog"
-ALERT_REPEAT_AFTER = 6 * 3600
+ALERT_REPEAT_AFTER = 20 * 3600   # with the dated fingerprint: once per episode per day
 
 
 def main(dry_run: bool = False):
     now = datetime.now(ET)
-    h, weekday = now.hour, now.weekday() < 5
+    h, weekday = now.hour, trading_day(now.date())
     stale = []
 
     def check_freq(name, max_age, lo, hi, wd_only=False):
@@ -63,7 +73,8 @@ def main(dry_run: bool = False):
         stamp = now.strftime("%-I:%M %p ET")
         msg = "🔧 CRON HEALTH — poster(s) stale · " + stamp + "\n" + "\n".join("• " + s for s in stale) + \
               "\nCheck ~/02_DATA/skillcron.log (ARIES down, yfinance error, or key issue)."
-        fp = "|".join(sorted(s.split(" — ")[0].strip("* ") for s in stale))
+        # one alert per episode per ET day: same stale set → no 6h re-pings of an unchanged condition (W6 MC-AUD-125)
+        fp = now.strftime("%Y-%m-%d") + ":" + "|".join(sorted(s.split(" — ")[0].strip("* ") for s in stale))
         ok, why = should_send(ALERT_GATE_KEY, fp, repeat_after=ALERT_REPEAT_AFTER)
         if dry_run:
             print(f"[poster-watchdog] DRY-RUN would-send={ok} ({why}) fp={fp}\n{msg}", flush=True)

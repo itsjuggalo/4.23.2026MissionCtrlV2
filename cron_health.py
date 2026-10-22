@@ -68,6 +68,15 @@ def market_open():
     is retired and its paper keys are slated for revocation, which would have left every
     market-hours check below silently blind. Half-days read as open to 16:00 (harmless here)."""
     now = datetime.now(ET)
+    try:   # W6 MC-AUD-126: the MissionCtrl market clock (holidays AND early closes) is the one calendar
+        import sys
+        sys.path.insert(0, "/AIWorkWSL/web/missionctrl/pipeline")
+        from market_clock import clock
+        if not clock.is_trading_day(now.date()):
+            return False
+        return clock.session_open(now.date()) <= now < clock.session_close(now.date())
+    except Exception:
+        pass
     if now.weekday() >= 5 or now.date() in _holidays():
         return False
     mins = now.hour * 60 + now.minute
@@ -84,7 +93,9 @@ def ping(msg):
 # Mirrors FLEET in ~/bin/trading-fleet. The trail/profit-lock/auto-bracket daemons were deleted
 # 2026-08-11 with the Alpaca book; watching them latched "absent" on 08-12 and muted this check
 # for six weeks (trimmed overhaul T6, 2026-09-25).
-FLEET = ["grid-daemon"]
+# grid-daemon retired 2026-10-20 (remedial W5 / DECISIONS R4: its order path); its trading-fleet cron is commented
+# out, so watching it only latched "absent" forever (W6 MC-AUD-126). Nothing left to watch.
+FLEET: list[str] = []
 
 
 def check_fleet(mo):
@@ -96,8 +107,8 @@ def check_fleet(mo):
     The log-age checks above are structurally blind to this: a daemon that never STARTS
     never writes a log to go stale. Hence an explicit process check.
     """
-    if mo is not True:
-        return                      # off-hours down is the designed state
+    if mo is not True or not FLEET:
+        return                      # off-hours down is the designed state; empty fleet = nothing to watch
     # Same PATH trap as the bug being watched for — resolve node ourselves.
     node_bins = sorted((HOME / ".nvm/versions/node").glob("*/bin"))
     env = {**os.environ}
@@ -152,6 +163,21 @@ def _fleet_ping(latch_name, msg):
             _gate_mark(f"cron_health_{latch_name}", msg)
 
 
+def problem_kind(problems: list[str]) -> str:
+    """Problem text without its numbers: 'stale 47m (>45m)' and 'stale 77m (>45m)' are one episode."""
+    return "; ".join(re.sub(r"\d+", "N", p) for p in problems)
+
+
+def latched_kind(latch: Path):
+    """The latched problem kind; a legacy timestamp-only latch counts as 'same' (no re-ping on upgrade)."""
+    if not latch.exists():
+        return None
+    try:
+        return json.loads(latch.read_text()).get("kind")
+    except (ValueError, AttributeError):
+        return "__legacy__"
+
+
 def main():
     LATCH.mkdir(parents=True, exist_ok=True)
     mo = market_open()
@@ -184,11 +210,14 @@ def main():
             # the same problem text on the same job speaks at most once every 6 hours, while
             # a genuinely DIFFERENT failure still gets through immediately.
             desc = "; ".join(problems)
-            ok, _why = _gate_ok(f"cron_health_{name}", desc)
-            if ok and not latch.exists():
+            kind = problem_kind(problems)
+            ok, _why = _gate_ok(f"cron_health_{name}", kind)
+            # W6 MC-AUD-126: the latch holds the problem KIND, so a changed failure (stale → traceback) speaks
+            # again while the same one stays quiet; ages no longer make every run look new to the gate.
+            if ok and latched_kind(latch) not in (kind, "__legacy__"):
                 if ping(f"⚠️ CRON HEALTH — {name}: {desc}"):
-                    latch.write_text(datetime.now(timezone.utc).isoformat())
-                    _gate_mark(f"cron_health_{name}", desc)
+                    latch.write_text(json.dumps({"at": datetime.now(timezone.utc).isoformat(), "kind": kind}))
+                    _gate_mark(f"cron_health_{name}", kind)
         else:
             latch.unlink(missing_ok=True)   # recovered → re-arm
     check_fleet(mo)
