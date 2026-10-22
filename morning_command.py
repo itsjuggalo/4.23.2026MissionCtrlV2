@@ -848,7 +848,15 @@ def _tape_read(tape: str) -> str:
 def _one_contract_line() -> str:
     """The single best-graded option idea, in plain English with the dollar cost —
     folded in from the retired 9:00 MasterMC brief. Silent if stale or nothing
-    cleared validation: no forced pick is better than a bad one."""
+    cleared validation: no forced pick is better than a bad one. While Mike's pause of the
+    quantum pipeline stands (registry row "paused"), it says so instead of going silent."""
+    try:
+        from quantum_tg import paused_note
+        paused = paused_note()
+    except Exception:
+        paused = None
+    if paused:
+        return "⏸ " + b("TOP DESK CONTRACT") + ": " + esc(paused)
     try:
         import json
         from datetime import timedelta

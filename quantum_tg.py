@@ -32,6 +32,24 @@ def _load(name):
         return None
 
 
+# MissionCtrl's freshness registry row for the quantum pipeline (read-only). Mike paused it on 2026-09-30; while the row
+# says expectation "paused", consumers say so instead of going silent or showing 09-30 picks as current.
+REGISTRY = os.environ.get("MC_FRESHNESS_REGISTRY",
+                          "/AIWorkWSL/web/missionctrl/src/lib/freshness-registry/freshness_registry.json")
+
+
+def paused_note():
+    """"quantum pipeline paused since 09-30 (Mike) — no current pick" when the registry says paused, else None."""
+    try:
+        e = next(r for r in json.load(open(REGISTRY))["entries"] if r.get("id") == "quantum-lab")
+    except Exception:
+        return None
+    if e.get("expectation") != "paused":
+        return None
+    p = e.get("paused") or {}
+    return f"quantum pipeline paused since {str(p.get('since') or '?')[5:] or '?'} ({p.get('by') or '?'}) — no current pick"
+
+
 def _journal(status="open"):
     """Mike's journal fills (took / virtual_pick) with the given status, newest first.
     Read-only; the file is owned by the option-scraper decipher layer."""
@@ -390,6 +408,9 @@ def _iv_trap(p):
 
 def pick(top=1):
     """The single best (top=1) or top-N actionable picks. Verdict-first."""
+    paused = paused_note()
+    if paused:
+        return join(hdr("⏸", "Quantum Paused"), esc(paused))
     d = _load("best_contracts.json")
     if not d:
         return "no pipeline output yet — it runs market hours (Mon–Fri 9:30–4 ET)."
@@ -519,7 +540,10 @@ def greeks():
         strike = r.get("strike")
         lines.append(row(r.get('symbol'), f"${strike:g}{typ}" if isinstance(strike, (int, float)) else None,
                           _fmt_exp(r.get('expiry')), f"in {_money(r.get('entry'))}"))
-    picks = (bc or {}).get("picks", []) or []
+    paused = paused_note()
+    picks = [] if paused else (bc or {}).get("picks", []) or []
+    if paused:
+        lines.append(esc(paused))
     if picks:
         lines.append(section("Watching"))
     for p in picks:
@@ -528,7 +552,7 @@ def greeks():
         ds = f"Δ{d:.2f}" if isinstance(d, (int, float)) else "Δ?"
         lines.append(row(p.get('ticker'), f"${p.get('strike'):g}{typ}", ds,
                           f"IV {_ivp(p.get('iv'))}", p.get('value')))
-    if not held and not picks:
+    if not held and not picks and not paused:
         lines.append("no live contracts right now — picks load at market open.")
     lines.append(footer("high IV = pricey (rich) → better to sell premium; low IV = cheap to buy"))
     return join(*lines)

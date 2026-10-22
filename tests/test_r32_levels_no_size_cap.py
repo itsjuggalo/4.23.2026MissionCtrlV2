@@ -49,6 +49,12 @@ FAKE = ["Levels: Entry: 1–2 (Long) · TP1 3 · TP2 4 · Final TP 5 · SL 0.5",
 
 
 @pytest.fixture(autouse=True)
+def no_live_registry(monkeypatch, tmp_path):
+    """paused_note() reads MissionCtrl's freshness registry: tests never read the live one (not paused here)."""
+    monkeypatch.setattr(Q, "REGISTRY", str(tmp_path / "absent.json"))
+
+
+@pytest.fixture(autouse=True)
 def fake_levels(monkeypatch):
     """Every sender gets the same fake block — and the call is recorded, so a test can assert the args."""
     calls = []
@@ -183,3 +189,20 @@ def test_board_rows_stay_compact_without_levels(monkeypatch, fake_levels):
     monkeypatch.setattr(FC, "equity_snapshot", lambda s: {"chg_pct": 1.0, "window": "RTH"})
     _clean(FC._compact("NVDA261120C00200000", _alert()))
     assert fake_levels == []
+
+
+def test_paused_pipeline_says_so_instead_of_silence_or_old_picks(monkeypatch, tmp_path):
+    """Mike paused the quantum pipeline 2026-09-30: consumers say it, never go silent, never show 09-30 picks."""
+    reg = tmp_path / "reg.json"
+    reg.write_text(json.dumps({"entries": [{"id": "quantum-lab", "expectation": "paused",
+                                            "paused": {"since": "2026-09-30", "by": "Mike", "reason": "cron silenced"}}]}))
+    monkeypatch.setattr(Q, "REGISTRY", str(reg))
+    note = "quantum pipeline paused since 09-30 (Mike) — no current pick"
+    assert Q.paused_note() == note
+    monkeypatch.setattr(Q, "_load", lambda name: {"as_of": "2026-09-30T15:11:10-04:00", "picks": [{"ticker": "RIOT"}]})
+    monkeypatch.setattr(Q, "_journal", lambda status="open": [])          # never Mike's live journal
+    for out in (Q.pick(1), Q.pick(3), MC._one_contract_line(), Q.greeks()):
+        assert note in out and "RIOT" not in out
+        _clean(out)
+    reg.write_text(json.dumps({"entries": [{"id": "quantum-lab", "expectation": "required"}]}))
+    assert Q.paused_note() is None
