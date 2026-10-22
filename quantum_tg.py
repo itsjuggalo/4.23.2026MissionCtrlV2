@@ -247,9 +247,51 @@ def _sweep_tags(a):
     return tags
 
 
+FLOW_DB = os.path.expanduser("~/02_DATA/flow-data/flow.db")
+
+
+def _tape_side(a):
+    """Net execution side of this contract's prints in flow.db (FlowScraper ≥ $50K) up to the alert's update time:
+    ask-side premium vs bid-side premium. None when flow.db has no print for it. Read-only."""
+    import sqlite3
+    m = re.match(r"^([A-Z.]+?)(\d{2})(\d{2})(\d{2})([CP])(\d{8})$", a.get("OptionSymbol") or "")
+    if not m:
+        return None
+    exp, strike = f"20{m.group(2)}-{m.group(3)}-{m.group(4)}", int(m.group(6)) / 1000
+    upto = a.get("Updated") or a.get("Time") or 0
+    try:
+        con = sqlite3.connect(f"file:{FLOW_DB}?mode=ro", uri=True, timeout=3)
+        rows = con.execute("SELECT bid_ask, SUM(premium) FROM flow_events_dedup WHERE symbol=? AND expiry=? AND strike=? "
+                           "AND option_type LIKE ? AND event_time<=? GROUP BY bid_ask",
+                           (m.group(1), exp, strike, "C%" if m.group(5) == "C" else "P%", upto)).fetchall()
+        con.close()
+    except sqlite3.Error:
+        return None
+    ask = sum(p or 0 for s, p in rows if (s or "").upper() in ("A", "AA"))
+    bid = sum(p or 0 for s, p in rows if (s or "").upper() in ("B", "BB"))
+    if not ask and not bid:
+        return None
+    return "ask" if ask > bid else "bid" if bid > ask else "mixed"
+
+
+def direction_label(opt_type, vendor_bull, tape):
+    """The vendor feed's isBullish carries no execution side, so it is labelled as the vendor's read. When flow.db's
+    tape names the side, the label says what traded (bought/sold) and both reads are shown if they disagree."""
+    put = (opt_type or "").upper().startswith("P")
+    vend = "BULL" if vendor_bull else "BEAR"
+    if tape in ("ask", "bid"):
+        bought = tape == "ask"
+        tape_bull = bought != put                        # bought call / sold put = bullish
+        what = f"{'bought' if bought else 'sold'} {'put' if put else 'call'} · {'bullish' if tape_bull else 'bearish'}"
+        if tape_bull == bool(vendor_bull):
+            return f"{'🟢' if tape_bull else '🔴'}{what}"
+        return f"🟡 vendor {vend} · tape {what} (net {tape}-side)"
+    return f"{'🟢' if vendor_bull else '🔴'}{vend} (vendor; side not in feed)"
+
+
 def _sweep_line(a, with_tags=True):
     t = (a.get("OptionType") or "")[:1]
-    bull = "🟢BULL" if a.get("isBullish") else "🔴BEAR"
+    bull = direction_label(a.get("OptionType"), a.get("isBullish"), _tape_side(a))
     line = row(a.get('Symbol'), f"${a.get('Strike'):g}{t} {a.get('DTE')}d",
                _human(a.get('totalFlowValue')), bull,
                f"OI {a.get('OI') or 0}/vol {a.get('Volume') or 0}", glyph="🔪")
