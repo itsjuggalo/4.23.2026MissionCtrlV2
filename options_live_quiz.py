@@ -277,7 +277,7 @@ def straddle_question():
         2: ("Rich vol (IV/HV ≥ 1.20 or high IVR) = a SELLER's setup. You'd overpay for the move — "
             "tastytrade/SMB/Option Alpha all lean seller here; on a small account keep it defined-risk."),
     }[ci]
-    full_why = f"Engine verdict: {verdict} — {why}\n\n{lens}\n\nManage if you ever DO buy: take +50% / cut −50% of debit, bail by 21 DTE, close before any event (IV crush)."
+    full_why = f"Engine verdict: {verdict} — {why}\n\n{lens}\n\nExits are your call — the desk sets no stops or targets (R5). Engine read from the localhost options-chain proxy; model, not a recommendation."
     return {"qid": f"live-spy-{date.today():%Y%m%d}",
             "question": q, "options": opts, "correct_index": ci, "why": full_why,
             "module": "debate", "header": "🎲 LIVE STRADDLE DESK"}
