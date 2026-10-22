@@ -23,6 +23,9 @@ class Fake:
                                    "strike_price": "700.0000", "type": "call", "trade_value_multiplier": "100.0000"}]})
         if path == "marketdata/options/":
             return R({"results": [self.md]})
+        if path == f"marketdata/options/historicals/{IID}/":
+            self.params = params
+            return R({"previous_close_price": "3.45", "data_points": getattr(self, "points", [])})
         return R({}, 404)
 
 
@@ -49,6 +52,42 @@ class T(unittest.TestCase):
     def test_bad_occ_and_unknown_contract(self):
         self.assertEqual(rh_quote.rh_quotes(["junk"], session=Fake(md())), {})
         self.assertEqual(rh_quote.rh_quotes(["SPY261016C00999000"], session=Fake(md())), {})
+
+def pt(d, o, h, l, c, interp=False):
+    return {"begins_at": d, "open_price": o, "high_price": h, "low_price": l, "close_price": c, "volume": 0, "interpolated": interp}
+
+
+class Bars(unittest.TestCase):
+    def setUp(self): rh_quote._ID_CACHE.clear()
+
+    def test_daily_bars_drop_interpolated_and_stamp_session_close(self):
+        s = Fake(md()); s.points = [pt("2025-10-21T00:00:00Z", "0.01", "0.01", "0.01", "0.01", True),
+                                    pt("2026-10-15T00:00:00Z", "2.0", "3.9", "1.96", "3.45")]
+        b = rh_quote.rh_option_bars("SPY261016C00700000", "day", "year", session=s, now=2e9)
+        self.assertIsNone(b["error"]); self.assertEqual(len(b["bars"]), 1); self.assertEqual(b["interpolated_dropped"], 1)
+        self.assertEqual(b["bars"][0]["c"], 3.45); self.assertEqual(b["prev_close"], 3.45)
+        self.assertEqual(b["as_of_et"], "2026-10-15 16:00 ET")
+        self.assertEqual(s.params, {"interval": "day", "span": "year"})
+
+    def test_five_minute_as_of_is_bar_end_capped_at_now(self):
+        s = Fake(md()); s.points = [pt("2026-10-15T19:55:00Z", "4.18", "4.23", "4.18", "4.23")]
+        t0 = rh_quote._epoch("2026-10-15T19:55:00Z")
+        b = rh_quote.rh_option_bars("SPY261016C00700000", "5minute", "day", session=s, now=t0 + 120)
+        self.assertEqual(b["as_of"], t0 + 120)
+
+    def test_fails_closed(self):
+        s = Fake(md())
+        self.assertIn("unsupported", rh_quote.rh_option_bars("SPY261016C00700000", "day", "day", session=s)["error"])
+        self.assertIn("bad OCC", rh_quote.rh_option_bars("NOPE", session=s)["error"])
+        s.points = [pt("2025-10-21T00:00:00Z", "0.01", "0.01", "0.01", "0.01", True)]
+        b = rh_quote.rh_option_bars("SPY261016C00700000", session=s)
+        self.assertEqual(b["bars"], []); self.assertIn("no traded bars", b["error"])
+
+    def test_allowlist_rejects_other_paths(self):
+        with self.assertRaises(ValueError):
+            rh_quote._get(Fake(md()), "t", "marketdata/options/historicals/not-a-uuid/", {})
+        with self.assertRaises(ValueError):
+            rh_quote._get(Fake(md()), "t", "orders/", {})
 
 
 if __name__ == "__main__":

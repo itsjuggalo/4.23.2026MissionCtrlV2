@@ -25,6 +25,9 @@ BASE = "https://api.robinhood.com/"
 _ALLOWED = {"instruments/", "options/instruments/", "marketdata/options/"}
 _OCC = re.compile(r"^([A-Z]{1,6})(\d{6})([CP])(\d{8})$")
 _UUID = re.compile(r"^[0-9a-fA-F-]{36}$")
+# one contract's bars, by instrument UUID only (Mike 2026-10-21: "options do have daily bars")
+_HIST = re.compile(r"^marketdata/options/historicals/[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}/$")
+_SPANS = {"day": ("year", "month"), "5minute": ("day", "week")}
 _ID_CACHE: dict[str, dict] = {}
 
 
@@ -61,7 +64,7 @@ def parse_occ(occ: str) -> dict | None:
 
 
 def _get(session, token: str, path: str, params: dict) -> dict | None:
-    if path not in _ALLOWED:
+    if path not in _ALLOWED and not _HIST.match(path):
         raise ValueError("ENDPOINT_FORBIDDEN")
     try:
         r = session.get(BASE + path, params=params, timeout=10, allow_redirects=False,
@@ -145,6 +148,69 @@ def rh_quotes(occ_list, session=None) -> dict[str, dict]:
                 "high": _num(r.get("high_price")), "low": _num(r.get("low_price")),
                 "as_of_et": datetime.fromtimestamp(at, ET).strftime("%Y-%m-%d %H:%M:%S ET"),
                 "source": "robinhood"}
+    return out
+
+
+def _session_close_epoch(day: str) -> float:
+    """Close of that NYSE session (early closes honoured) via the MissionCtrl market clock; 16:00 ET otherwise."""
+    from datetime import date as _date, time as _time
+    d = _date.fromisoformat(day)
+    try:
+        sys.path.insert(0, "/AIWorkWSL/web/missionctrl/pipeline")
+        from market_clock import clock as _clock
+        return _clock.session_close(d).timestamp()
+    except Exception:  # noqa: BLE001 — outside the calendar table / not importable
+        return datetime.combine(d, _time(16, 0), ET).timestamp()
+
+
+def rh_option_bars(occ: str, interval: str = "day", span: str = "year", session=None, now: float | None = None) -> dict:
+    """One contract's OWN bars from Robinhood marketdata/options/historicals (read-only).
+
+    interval "day" (span year|month) or "5minute" (span day|week). Bars are {t (epoch s, bar open), o, h, l, c};
+    RH's flat "interpolated" filler (days without a trade, time before listing) is dropped and counted.
+    `as_of` = the newest real bar's data time (daily: that session's close; 5-min: bar end), capped at now.
+    Fails closed: any problem → no bars and the reason in `error` (never a filled or guessed series)."""
+    import time as _time_mod
+    now = _time_mod.time() if now is None else now
+    out = {"occ": occ, "interval": interval, "span": span, "bars": [], "interpolated_dropped": 0, "prev_close": None,
+           "as_of": None, "as_of_et": None, "source": "Robinhood marketdata/options/historicals", "error": None}
+    if span not in _SPANS.get(interval, ()):
+        return {**out, "error": f"unsupported interval/span {interval}/{span}"}
+    c = parse_occ(occ)
+    if not c:
+        return {**out, "error": f"bad OCC symbol {occ}"}
+    token = _token() if session is None else (_token() or "test-token")
+    if not token:
+        return {**out, "error": "robinhood: no read-only token in the secrets store"}
+    if session is None:
+        import requests
+        session = requests.Session()
+    row = _resolve(session, token, c)
+    if not row:
+        return {**out, "error": f"robinhood: no single active contract for {occ}"}
+    d = _get(session, token, f"marketdata/options/historicals/{row['id']}/", {"interval": interval, "span": span})
+    if d is None:
+        return {**out, "error": "robinhood: historicals request failed"}
+    for p in d.get("data_points") or []:
+        if not isinstance(p, dict):
+            continue
+        if p.get("interpolated") is True:
+            out["interpolated_dropped"] += 1
+            continue
+        t = _epoch(p.get("begins_at"))
+        o, h, lo, cl = (_num(p.get(k)) for k in ("open_price", "high_price", "low_price", "close_price"))
+        if t is None or None in (o, h, lo, cl) or h < lo or lo < 0:
+            continue
+        out["bars"].append({"t": t, "o": o, "h": h, "l": lo, "c": cl})
+    out["bars"].sort(key=lambda b: b["t"])
+    out["prev_close"] = _num(d.get("previous_close_price"))
+    if not out["bars"]:
+        return {**out, "error": "robinhood: no traded bars for this contract in the span"}
+    last = out["bars"][-1]["t"]
+    end = (_session_close_epoch(datetime.fromtimestamp(last, ZoneInfo("UTC")).date().isoformat())
+           if interval == "day" else last + 300)
+    out["as_of"] = min(end, now)
+    out["as_of_et"] = datetime.fromtimestamp(out["as_of"], ET).strftime("%Y-%m-%d %H:%M ET")
     return out
 
 
