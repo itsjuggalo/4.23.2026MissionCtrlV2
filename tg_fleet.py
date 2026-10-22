@@ -14,7 +14,8 @@ bot has exactly ONE function. This module:
   tg_fleet.py status
   tg_fleet.py harvest [--write]
   tg_fleet.py send <function> "<message>"
-  tg_fleet.py token <function>            # print the vault-first resolved token (for senders)
+  tg_fleet.py token <function>            # print the resolved token (for senders; pinned bot id only)
+  tg_fleet.py lanes                       # every bot + its lanes (ids only); exit 1 on a trading/non-trading mix
   tg_fleet.py set <function> <TOKEN>      # fold in a cloud-only bot (Gamma/CHANGE NOW/BobaClaw)
 """
 import json
@@ -60,7 +61,10 @@ FLEET = {
     # (The old `risk_hedge` fn was the same @AntiDoht_Bot and was PARKED/unused — it is
     # folded into research_desk rather than left as a duplicate token mapping.)
     "research_desk":   dict(user="AntiDoht_Bot",            avatar="aldaris",         role="push",        src=("file", "antidote_telegram_bot_token")),
-    "screener":        dict(user="TrndRsrch_Bot",           avatar="wraith",          role="interactive", src=("file", "telegram_deepseek_bot_token")),
+    # 2026-10-22 (MC-AUD-084, Mike GO): the TA-chart lane (quantum ta_chart.py, TG_FN=screener) moved OFF
+    # @TrndRsrch_Bot — that bot is ClaudeClaw OS's own chat (grammy poller), not a trading lane — onto the
+    # unused spare @JazzyHazzyTelegram_Bot (its vault row is telegram.media_gens; old bot in MOVED).
+    "screener":        dict(user="JazzyHazzyTelegram_Bot",  avatar="wraith",          role="push",        src=("vault", "telegram.media_gens")),
     # RETIRED 2026-09-27: macro_regime (@MMCTRL727_Bot) — owner was the claudeclaw `mastermc` persona,
     # deleted 2026-08-30 (no unique code). Bot stays parked in BotFather; token file kept.
     # ── push (they alert you) ───────────────────────────────────────────────
@@ -74,8 +78,8 @@ FLEET = {
     "crypto_desk":     dict(user="Grootk_Bot",              avatar="dark_archon",     role="interactive", src=("vault", "telegram.grok_scout")),        # BTC/ETH moves + news, QuantEdge perps
     "flow_digest":     dict(user="Boba2Telegram_Bot",       avatar="hydralisk",       role="push",        src=("vault", "telegram_boba2_bot_token")),
     "daily_briefs":    dict(user="SpaceCoast_Claude_Bot",   avatar="ghost",           role="push",        src=("cloud", None)),
-    # ── media (off the trade chats) ─────────────────────────────────────────
-    "media_gens":      dict(user="JazzyHazzyTelegram_Bot",  avatar="fenix",           role="push",        src=("cloud", None)),
+    # RETIRED 2026-10-22: media_gens (@JazzyHazzyTelegram_Bot "Spare — Media (unused)") — no sender ever
+    # used it; the bot now carries the `screener` TA-chart lane. Vault key telegram.media_gens kept.
     # ── app notifiers (off the trade chats — their own app's events only) ───
     # 2026-09-15 (D7, telegram lane charter spec) — WinMeals' chain_footprint.py --notify
     # was landing on tg-send-msg's trading_command DEFAULT (ops sweep finding: unrelated
@@ -89,6 +93,7 @@ FLEET = {
     # secret value itself was never copied/duplicated; see the retired note on
     # trend_scanner further down. Mike can rename the bot's display name via BotFather
     # /setname whenever he likes — nothing here depends on the display name.
+    # 2026-10-22 (MC-AUD-084): trend_scanner moved off this bot — WinMeals is now the only job on it.
     "winmeals":        dict(user="Deepseeker_Bot",           avatar="medic",           role="push",        src=("vault", "telegram.trend_scanner")),
     # ── infra (not chat targets) ────────────────────────────────────────────
     "hermes_relay":    dict(user="Gumroadie_bot",           avatar="dragoon",         role="infra",       src=("vault", "telegram_hermes_bot_token")),
@@ -113,7 +118,45 @@ FLEET = {
     # duplicated). Left resolvable here too so nothing that still names "trend_scanner"
     # (reserve_persona_push.py, bot_rebrand.py, tg_responder.py's DM menu) breaks — just
     # don't route new content at it under this name.
-    "trend_scanner":   dict(user="Deepseeker_Bot",          avatar="firebat",         role="spare",       src=("cloud", None)),
+    # 2026-10-22 (MC-AUD-084, Mike GO): tg-gateway still polled the trendscanner persona (a trading
+    # scanner) on the WinMeals bot, so trading replies shared a chat with WinMeals alerts. The persona
+    # moved to @SpaceCoast_Claude_Bot (trading backup-alerts bot, no sends to date; vault row
+    # telegram.daily_briefs). The vault row telegram.trend_scanner stays the WinMeals bot's token
+    # (winmeals' src) — an explicit vault src wins in token(). Old bot in MOVED below.
+    "trend_scanner":   dict(user="SpaceCoast_Claude_Bot",   avatar="firebat",         role="interactive", src=("vault", "telegram.daily_briefs")),
+}
+
+# ── Lane identity (MC-AUD-084/088, Mike GO 2026-10-22) ──────────────────────────────────────────
+# BOT_ID pins every function to its bot's NUMERIC id (the token prefix: public, not the secret).
+# send / send_upload / the `token` verb refuse a token whose id is not the pin, and set / harvest
+# refuse to store one, so a wrong token can never claim a lane (MC-AUD-078 E17.03).
+BOT_ID = {
+    "trading_command": 8846283782, "system_health": 8859951513, "life_wellness": 8625099101,
+    "aime_research": 8523091364, "quiz": 8619370934, "astrology": 8617274201,
+    "research_desk": 8873738822, "screener": 8520537147, "flow_signals": 8832281008,
+    "trading_digest": 8732615829, "trading_recaps": 8971365609, "crypto_desk": 8628283615,
+    "flow_digest": 8732615829, "daily_briefs": 8519775882, "winmeals": 8950043596,
+    "hermes_relay": 8637552667, "openclaw_grok": 8997890122, "flow_momentum": 8699883048,
+    "contract_forensics": 8812859752, "grok_scout": 8628283615, "trend_scanner": 8519775882,
+}
+# What each lane carries. One bot never mixes "trading" with another kind (`tg_fleet.py lanes`
+# lists every bot and exits 1 on a mix). Several trading lanes may share a trading bot.
+KIND = {
+    "trading_command": "trading", "aime_research": "trading", "quiz": "trading",
+    "research_desk": "trading", "screener": "trading", "flow_signals": "trading",
+    "trading_digest": "trading", "trading_recaps": "trading", "crypto_desk": "trading",
+    "flow_digest": "trading", "daily_briefs": "trading", "flow_momentum": "trading",
+    "contract_forensics": "trading", "grok_scout": "trading", "trend_scanner": "trading",
+    "system_health": "ops", "life_wellness": "personal", "astrology": "personal",
+    "winmeals": "app", "hermes_relay": "infra", "openclaw_grok": "infra", "laptop_control": "infra",
+}
+# A lane whose bot changed: the bot it used before and until when (ET), so its old output (in the
+# old chat) and new output stay traceable (MC-AUD-088). The tg ledger also stamps bot_id per send.
+MOVED = {
+    "screener": [dict(bot_id=8442367980, user="TrndRsrch_Bot", until="2026-10-22 ET",
+                      why="ClaudeClaw OS chat, not a trading lane")],
+    "trend_scanner": [dict(bot_id=8950043596, user="Deepseeker_Bot", until="2026-10-22 ET",
+                           why="WinMeals Alerts chat (app, non-trading)")],
 }
 
 # ─────────────────────────────────────────────────────────────────────────────
@@ -506,12 +549,59 @@ def route(fn):
 
 
 def token(fn):
-    """The canonical token for a function — vault first, else its source (pre-migration)."""
+    """The canonical token for a function. An explicit vault `src` wins (2026-10-22, MC-AUD-084: a lane
+    moves to another bot by editing FLEET only, no vault rows copied); else vault telegram.<fn>, else src."""
     con = _vault()
     try:
-        return _vget(con, VKEY(fn)) or _src_token(con, FLEET[fn]["src"])
+        src = FLEET[fn]["src"]
+        if src[0] == "vault":
+            return _vget(con, src[1])
+        return _vget(con, VKEY(fn)) or _src_token(con, src)
     finally:
         con.close()
+
+
+def _tok_id(tok):
+    head = tok.split(":", 1)[0] if tok and ":" in tok else ""
+    return int(head) if head.isdigit() else None
+
+
+def pinned_token(fn):
+    """token(fn) only when its numeric bot id is the lane's BOT_ID pin; else None and a stderr note
+    (no token text). Senders resolve through this, so a lane never posts as another bot."""
+    tok = token(fn)
+    if not tok:
+        return None
+    pin = BOT_ID.get(fn)
+    if pin is not None and _tok_id(tok) != pin:
+        print(f"{fn}: token is bot {_tok_id(tok)}, lane is pinned to {pin} — refused", file=sys.stderr)
+        return None
+    return tok
+
+
+def lanes(out=print):
+    """Every bot with the lanes on it (pinned id, kind, the id the token really carries). Returns
+    the problems: a bot mixing trading with another kind, or a token that is not its pin."""
+    bots, problems = {}, []
+    for fn, d in FLEET.items():
+        pin, real = BOT_ID.get(fn), _tok_id(token(fn))
+        bots.setdefault(pin, []).append(fn)
+        if pin is not None and real != pin:
+            problems.append(f"{fn}: token is bot {real}, pin {pin}")
+    for pin, fns in sorted(bots.items(), key=lambda kv: str(kv[0])):
+        kinds = sorted({KIND.get(f, "?") for f in fns})
+        users = sorted({FLEET[f]["user"] for f in fns})
+        out(f"{str(pin):11} @{'/'.join(users):26} {','.join(kinds):16} {', '.join(fns)}")
+        if "trading" in kinds and len(kinds) > 1:
+            problems.append(f"bot {pin} mixes {'+'.join(kinds)}: {', '.join(fns)}")
+    for fn, olds in MOVED.items():
+        for o in olds:
+            out(f"  moved: {fn} was on {o['bot_id']} @{o['user']} until {o['until']} ({o['why']})")
+    for p in problems:
+        out(f"PROBLEM {p}")
+    if not problems:
+        out("OK: every token matches its pin; no bot mixes trading with another kind")
+    return problems
 
 
 def harvest(write=False):
@@ -525,6 +615,9 @@ def harvest(write=False):
             tok = _src_token(con, m["src"])
             if not tok:
                 print(f"  … {fn:16} {'CLOUD — paste with: tg_fleet.py set '+fn+' <TOKEN>' if m['src'][0]=='cloud' else 'source missing: '+str(m['src'])}")
+                continue
+            if BOT_ID.get(fn) is not None and _tok_id(tok) != BOT_ID[fn]:
+                print(f"  ✗ {fn:16} source token is bot {_tok_id(tok)}, pin {BOT_ID[fn]} — skipped")
                 continue
             u = _getme(tok)
             if not u:
@@ -542,6 +635,8 @@ def harvest(write=False):
 def set_token(fn, tok):
     if fn not in FLEET:
         print(f"unknown function '{fn}'. known: {', '.join(FLEET)}"); return
+    if BOT_ID.get(fn) is not None and _tok_id(tok) != BOT_ID[fn]:
+        print(f"that token is bot {_tok_id(tok)}, but {fn} is pinned to {BOT_ID[fn]} — not stored."); return
     u = _getme(tok)
     if not u:
         print("that token is DEAD via getMe — not stored."); return
@@ -575,6 +670,8 @@ def send(fn, msg, html=False):
     as plain text with the tags stripped so a formatting slip never drops a trading ping.
     (2026-09-15 — Telegram message-format sweep.)"""
     fn = route(fn)
+    if os.environ.get("TG_DRY_RUN") == "1":   # render only (MC-AUD-084): nothing sent, queued or recorded
+        return _dry(fn, msg)
     try:   # FYI pushes fold into the next digest (lib/tg_digest.py) — 2026-09-28
         sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
         from lib.tg_digest import intercept
@@ -592,7 +689,7 @@ def send(fn, msg, html=False):
         msg = reviewed
     except Exception:
         pass
-    tok = token(fn)
+    tok = pinned_token(fn)
     if not tok:
         print(f"no token for {fn}"); return 1
     chat = open(CHAT_FILE).read().strip()
@@ -626,9 +723,17 @@ def send(fn, msg, html=False):
     return 0 if ok else 1
 
 
+def _dry(fn, msg):
+    """TG_DRY_RUN=1: print the lane, its pinned bot and the text instead of posting (no token text)."""
+    ok = bool(pinned_token(fn))
+    print(f"DRY {fn} → bot {BOT_ID.get(fn)} @{FLEET[fn]['user']} ({KIND.get(fn)})"
+          f"{'' if ok else ' — NO VALID TOKEN'}\n{msg}")
+    return 0 if ok else 1
+
+
 def _resolve(fn):
     """Return (token, label) without crossing fleet lanes."""
-    tok = token(fn)
+    tok = pinned_token(fn)
     if tok:
         return tok, fn
     return None, fn
@@ -640,6 +745,8 @@ def send_upload(fn, path, caption="", as_doc=False, html=False):
     if not os.path.exists(path):
         print(f"no such file: {path}"); return 1
     fn = route(fn)
+    if os.environ.get("TG_DRY_RUN") == "1":
+        return _dry(fn, f"[{os.path.basename(path)}] {caption}")
     tok, label = _resolve(fn)
     if not tok:
         print(f"no token for {fn}"); return 1
@@ -687,8 +794,9 @@ def _bot_id(fn: str) -> int | None:
 
 
 def manifest():
-    m = {fn: {"username": d["user"], "bot_id": _bot_id(fn), "vault_key": VKEY(fn), "avatar": d["avatar"],
-              "role": d["role"]} for fn, d in FLEET.items()}
+    m = {fn: {"username": d["user"], "bot_id": BOT_ID.get(fn), "token_bot_id": _bot_id(fn),
+              "vault_key": d["src"][1] if d["src"][0] == "vault" else VKEY(fn), "avatar": d["avatar"],
+              "role": d["role"], "kind": KIND.get(fn), "moved_from": MOVED.get(fn, [])} for fn, d in FLEET.items()}
     json.dump(m, open(MANIFEST, "w"), indent=2)
     print(f"wrote {MANIFEST} ({len(m)} bots)")
 
@@ -715,7 +823,7 @@ if __name__ == "__main__":
         set_token(a[1], a[2])
     elif cmd == "token" and len(a) >= 2:
         # print the vault-first resolved token for a function (for senders to centralize on)
-        t = token(route(a[1]))   # senders resolve here → follow ALIAS
+        t = pinned_token(route(a[1]))   # senders resolve here → follow ALIAS; pinned bot id only
         if t:
             print(t)
         sys.exit(0 if t else 1)
@@ -731,5 +839,7 @@ if __name__ == "__main__":
         sys.exit(send_upload(a[1], a[2], a[3] if len(a) > 3 else "", html=True))
     elif cmd == "manifest":
         manifest()
+    elif cmd == "lanes":                             # every bot + its lanes; exit 1 on a mix/mismatch
+        sys.exit(1 if lanes() else 0)
     else:
         status()

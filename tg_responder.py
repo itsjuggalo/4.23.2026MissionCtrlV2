@@ -287,7 +287,7 @@ BOTS = {
         ),
     },
     "trendscanner": {
-        "fleet_fn": "trend_scanner",                       # vault → @Deepseeker_Bot
+        "fleet_fn": "trend_scanner",                       # → @SpaceCoast_Claude_Bot since 2026-10-22 (MC-AUD-084; was the WinMeals bot)
         "owner": "telegram-chat-id.txt",
         "name":  "Trend Scanner",
         "providers": ["codex_cli", "claude_oauth"],        # Codex sub → Claude sub (deepseek API unregistered 06-17)

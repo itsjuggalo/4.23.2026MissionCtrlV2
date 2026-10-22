@@ -11,7 +11,9 @@ changes, delays or blocks a send, and never raises.
 
   python3 lib/tg_ledger.py [--day YYYY-MM-DD] [--fn trading_command]   # per-source summary
 
-DB: ~/.local/state/tg-ledger.sqlite  (table sends).
+DB: ~/.local/state/tg-ledger.sqlite  (table sends). Each row also carries the numeric bot_id that
+delivered it (from the tg_fleet manifest pin), so old and new output stay traceable when a lane
+moves to another bot (MC-AUD-088, 2026-10-22). Rows before that date have bot_id NULL.
 """
 from __future__ import annotations
 
@@ -24,7 +26,18 @@ from pathlib import Path
 DB = Path(os.environ.get("TG_LEDGER_DB", str(Path.home() / ".local/state/tg-ledger.sqlite")))
 _SCHEMA = """CREATE TABLE IF NOT EXISTS sends (
     id INTEGER PRIMARY KEY, ts REAL NOT NULL, day TEXT NOT NULL, fn TEXT, source TEXT,
-    ok INTEGER, html INTEGER, chars INTEGER, lines INTEGER, head TEXT, text TEXT)"""
+    ok INTEGER, html INTEGER, chars INTEGER, lines INTEGER, head TEXT, text TEXT, bot_id INTEGER)"""
+MANIFEST = Path(os.environ.get("TG_FLEET_MANIFEST", str(Path.home() / ".openclaw/telegram_fleet.json")))
+
+
+def bot_id_for(fn: str) -> int | None:
+    """The lane's pinned numeric bot id from the tg_fleet manifest (no token in it); None if unknown."""
+    try:
+        import json
+        v = (json.loads(MANIFEST.read_text()).get(fn) or {}).get("bot_id")
+        return int(v) if v is not None else None
+    except Exception:
+        return None
 
 
 def _script_of(argv: list[str]) -> str | None:
@@ -79,7 +92,8 @@ def source_chain(depth: int = 5) -> list[str]:
     return out
 
 
-def record(fn: str, text: str, ok: bool, *, html: bool = False, src: str | None = None) -> None:
+def record(fn: str, text: str, ok: bool, *, html: bool = False, src: str | None = None,
+           bot_id: int | None = None) -> None:
     try:
         text = text or ""
         now = time.time()
@@ -87,12 +101,15 @@ def record(fn: str, text: str, ok: bool, *, html: bool = False, src: str | None 
         con = sqlite3.connect(DB, timeout=3)
         try:
             con.execute(_SCHEMA)
+            if "bot_id" not in {r[1] for r in con.execute("PRAGMA table_info(sends)")}:
+                con.execute("ALTER TABLE sends ADD COLUMN bot_id INTEGER")   # pre-2026-10-22 ledgers
             con.execute(
-                "INSERT INTO sends (ts, day, fn, source, ok, html, chars, lines, head, text)"
-                " VALUES (?,?,?,?,?,?,?,?,?,?)",
+                "INSERT INTO sends (ts, day, fn, source, ok, html, chars, lines, head, text, bot_id)"
+                " VALUES (?,?,?,?,?,?,?,?,?,?,?)",
                 (now, time.strftime("%Y-%m-%d", time.localtime(now)), fn, src or source(),
                  int(bool(ok)), int(bool(html)), len(text), text.count("\n") + 1,
-                 text.strip().split("\n", 1)[0][:160], text))
+                 text.strip().split("\n", 1)[0][:160], text,
+                 bot_id if bot_id is not None else bot_id_for(fn)))
             con.commit()
         finally:
             con.close()

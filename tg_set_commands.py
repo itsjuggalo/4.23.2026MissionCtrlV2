@@ -150,15 +150,20 @@ FLEET = {
     # its own commands; running this entry would clobber them.
     # "macro_regime":  ("telegram_mc_skill_bot_token",     "f", MACRO_MENU),
     "flow_digest":     ("telegram_boba2_bot_token",        "v", CLEAR),
-    "daily_briefs":    ("telegram.daily_briefs",           "v", CLEAR),
-    "media_gens":      ("telegram.media_gens",             "v", CLEAR),
+    # 2026-10-22 (MC-AUD-084): @SpaceCoast_Claude_Bot (vault telegram.daily_briefs) now also answers the
+    # trendscanner persona → its menu is trend_scanner's below; daily_briefs (push-only) shares that bot.
+    # "daily_briefs":    ("telegram.daily_briefs",           "v", CLEAR),
+    # media_gens retired 2026-10-22 — its bot (vault telegram.media_gens) is the push-only `screener` lane.
+    "screener":        ("telegram.media_gens",             "v", CLEAR),
     # hermes_relay / openclaw_grok: menus are registered by their own live apps (PM2
     # hermes-gateway / openclaw-gateway) — CLEARing them here would wipe working menus.
     # "hermes_relay":    ("telegram_hermes_bot_token",       "v", CLEAR),
     # "openclaw_grok":   ("telegram_openclaw_bot_token",     "v", CLEAR),
     # jazzy_relay / orion_relay retired 2026-09-15 (removed from tg_fleet + tg_responder).
     "grok_scout":      ("telegram.grok_scout",             "v", XBOT),
-    "trend_scanner":   ("telegram.trend_scanner",          "v", SCREENER_MENU),
+    "trend_scanner":   ("telegram.daily_briefs",           "v", SCREENER_MENU),
+    # WinMeals Alerts (@Deepseeker_Bot, vault telegram.trend_scanner) is push-only since the persona moved off.
+    "winmeals":        ("telegram.trend_scanner",          "v", CLEAR),
 }
 # flow_signals (@PipelineSignals_Bot): its menu was a stale claudeclaw leftover (30+ dead
 # commands); now PIPELINE_MENU, matching telegram_dm_responder.route(). (2026-09-28)

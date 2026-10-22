@@ -127,16 +127,16 @@ VAULT_IDENTITY = {
               "Trust me — I know what I'm doing.")),
     # ── cloud bots folded into the fleet (new tg_fleet keys: telegram.<function>) ──────
     "telegram.daily_briefs": dict(
-        name="Backup Alerts", avatar="battlecruiser",   # 2026-09-28: was "Daily Briefs" — fallback only
-        short="Fallback only — gets a trading post only if Trading Digest can't send.",
-        desc=("Backup alerts (push). Fallback lane: the EOD scorecard / flow picks land here only "
-              "when the Trading Digest bot fails to send. The pre-open brief is in Trading Command. "
-              "Battlecruiser operational.")),
+        name="Trend Scanner · Backup Alerts", avatar="battlecruiser",   # 2026-10-22 (MC-AUD-084): + trendscanner persona
+        short="Trend scanner on demand (/help), plus backup trading alerts if Trading Digest can't send.",
+        desc=("Trading only. Ask the Trend Scanner for momentum / breakout / relative-strength names "
+              "(/help). Also the fallback lane: the EOD scorecard / flow picks land here only when the "
+              "Trading Digest bot fails to send. Bots advise; you decide. Battlecruiser operational.")),
     "telegram.media_gens": dict(
-        name="Spare — Media (unused)", avatar="marine",   # 2026-09-28: was "Media & Gens" — nothing sends here
-        short="Spare bot — reserved for media/gens; nothing sends here yet.",
-        desc=("Spare bot (unused). Reserved for AI image/video output; no sender is wired to it "
-              "today. Rock and roll.")),
+        name="TA Screener", avatar="marine",   # 2026-10-22 (MC-AUD-084): was "Spare — Media (unused)"
+        short="TA chart cards for the top pick: EMA stack, RSI, 52-week, volume. Push only.",
+        desc=("TA Screener (push). Technical chart cards from the quantum ta_chart job (10:06 ET, then on "
+              "change 11:00-15:30 ET). Advisory only — you decide and place every trade. Rock and roll.")),
     "telegram.spare_backup": dict(
         name="Spare Backup", avatar="sentinel",
         short="Spare relay — reserved capacity for the fleet.",
@@ -159,7 +159,7 @@ VAULT_IDENTITY = {
         desc=("Crypto desk (push). BTC/ETH move + level alerts, crypto news sentiment and "
               "QuantEdge perp LONG/SHORT signals — all crypto, off the stock chats. Execute on "
               "Coinbase yourself; bots advise only.")),
-    "telegram.trend_scanner": dict(
+    "telegram.trend_scanner": dict(   # vault key name is historical: it holds the WinMeals bot (fleet fn winmeals)
         name="WinMeals Alerts", avatar="overmind",   # 2026-09-28: was "Trend Scanner" — fleet fn winmeals
         short="WinMeals app alerts — promo checks, deal discovery, chain footprint, monitors.",
         desc=("WinMeals alerts (push). The WinMeals app's own events: promo verification and "

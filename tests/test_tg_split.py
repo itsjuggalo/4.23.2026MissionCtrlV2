@@ -75,7 +75,7 @@ class SendPointsTest(unittest.TestCase):
         import tg_fleet as f
         old_urlopen, old_tok = f.urllib.request.urlopen, f.token
         f.urllib.request.urlopen = lambda url, data=None, timeout=None: self.fake_urlopen(type("R", (), {"data": data})())
-        f.token = lambda fn: "t"
+        f.token = lambda fn: f"{f.BOT_ID[fn]}:t"   # pinned id prefix (MC-AUD-084)
         try:
             self.assertEqual(f.send("system_health", "row\n" * 5000), 0)
             self.assertGreaterEqual(len(self.calls), 5)

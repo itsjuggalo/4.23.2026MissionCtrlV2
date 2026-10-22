@@ -46,8 +46,9 @@ def _tg(text: str):
         return
     try:
         import subprocess
+        # personal Discord DMs → Life & Wellness, never tg-send-msg's trading default (MC-AUD-084, 2026-10-22)
         subprocess.run([str(Path.home() / "bin" / "tg-send-msg"), text],
-                       timeout=15, capture_output=True)
+                       timeout=15, capture_output=True, env={**os.environ, "TG_FN": "life_wellness"})
     except Exception:
         pass
 
