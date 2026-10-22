@@ -43,6 +43,9 @@ def _get(url: str):
         return None
 
 
+_AS_OF: dict[str, str] = {}   # symbol -> newest 1-min bar time used (the as_of of each % move)
+
+
 def moves_since_2pm() -> dict[str, float]:
     """% move from the 14:00 ET bar close to the latest, per symbol."""
     syms = "SPY,QQQ,SMH,TLT"
@@ -66,22 +69,7 @@ def moves_since_2pm() -> dict[str, float]:
         base = base if base is not None else bars[0]["c"]
         last = bars[-1]["c"]
         out[s] = (last / base - 1) * 100 if base else 0.0
-    return out
-
-
-def px(symbols: str) -> dict[str, float]:
-    j = _get(f"{DATA}/v2/stocks/snapshots?symbols={symbols}")
-    out = {}
-    if j:
-        for s, v in j.items():
-            p = (v.get("latestTrade") or {}).get("p")
-            if p:
-                out[s] = float(p)
-    cj = _get(f"{DATA}/v1beta3/crypto/us/snapshots?symbols=ETH/USD")
-    if cj:
-        e = (cj.get("snapshots", {}).get("ETH/USD", {}).get("latestTrade") or {}).get("p")
-        if e:
-            out["ETH"] = float(e)
+        _AS_OF[s] = bars[-1]["t"]
     return out
 
 
@@ -102,6 +90,12 @@ def build(send: bool):
 
     tape = (f"SPY {m.get('SPY',0):+.1f}% · QQQ {m.get('QQQ',0):+.1f}% · "
             f"SMH {m.get('SMH',0):+.1f}% · TLT {m.get('TLT',0):+.1f}% (since 2:00)")
+    # market-data §2: a sent number names its source + data time. These % moves are computed from Alpaca IEX 1-min
+    # bars (no free intraday Robinhood bar history here) — a labelled cross-check, never a price.
+    newest = max(_AS_OF.values()) if _AS_OF else None
+    when = (datetime.fromisoformat(newest.replace("Z", "+00:00")).astimezone(ET).strftime("%H:%M ET")
+            if newest else "time n/a")
+    tape += f" · src Alpaca IEX 1-min bars, not Robinhood, as of {when}"
     L = [f"🏛️ <b>FOMC REACTION — {verdict.upper()}</b>",
          f"FOMC TAPE (local SPY/QQQ/SMH/TLT move since 14:00 heuristic, not the canonical regime): "
          f"{verdict}",
