@@ -109,10 +109,59 @@ def _flow_setup(n: int = 2):
     return out
 
 
+FREE_CATALYSTS = Path(os.environ.get("FREE_CATALYSTS_JSON", str(Path.home() / "02_DATA/free-sources/catalysts.json")))
+MC_REPO_DIR = os.environ.get("MC_REPO", "/AIWorkWSL/web/missionctrl")
+
+
+def _calendar_catalysts(tickers: list[str]) -> str:
+    """Briefs v2 (W-HUB, 2026-10-22): today's catalysts from real calendars — never the model's memory (the LLM's
+    "catalysts" sentence missed the 2026-09-16 FOMC and could invent events). Parts, each naming its source:
+    macro = _scheduled_today() (FOMC/NFP floor + Finnhub high-impact econ); the brief's own names = the MissionCtrl
+    dossier calendar block (free-sources catalysts.json, Nasdaq earnings / ex-dividend); the busiest reporters today =
+    the same Nasdaq file ranked by analyst count. '' when nothing is scheduled (the section is then omitted)."""
+    today = datetime.now(ET).date().isoformat()
+    parts = []
+    sched = _scheduled_today()
+    if sched:
+        parts.append(f"{sched} (macro calendar)")
+    mine = []
+    try:
+        if MC_REPO_DIR not in sys.path:
+            sys.path.append(MC_REPO_DIR)
+        from pipeline.intel import dossier
+        now = datetime.now(ET)
+        for t in tickers:
+            blk = dossier.b_calendar(t.upper(), now)
+            ev = (blk.get("data") or {}).get("events") or {}
+            er, xd = ev.get("earnings") or {}, ev.get("ex_dividend") or {}
+            if er.get("date") == today:
+                mine.append(f"{t.upper()} earnings {er.get('time') or 'time n/a'}")
+            if xd.get("ex_date") == today:
+                mine.append(f"{t.upper()} ex-dividend ${xd.get('amount')}")
+    except Exception as e:  # noqa: BLE001 — the dossier unreachable → this part is skipped, said in the log
+        print(f"[morning] dossier calendar unavailable: {e}", flush=True)
+    if mine:
+        parts.append("your names: " + ", ".join(mine) + " (Nasdaq calendar via dossier)")
+    try:
+        cal = json.loads(FREE_CATALYSTS.read_text())
+        rows = [(s, v["earnings"]) for s, v in (cal.get("by_symbol") or {}).items()
+                if (v.get("earnings") or {}).get("date") == today]
+        rows.sort(key=lambda r: -(r[1].get("n_est") or 0))
+        if rows:
+            top = ", ".join(f"{s} ({'BMO' if r.get('time') == 'pre-market' else 'AMC' if r.get('time') == 'after-hours' else 'time n/a'})"
+                            for s, r in rows[:5])
+            as_of = str((cal.get("calendar") or {}).get("as_of") or "")[:16].replace("T", " ")
+            parts.append(f"{len(rows)} earnings today; most-covered: {top} (Nasdaq calendar, as of {as_of} ET)")
+    except (OSError, ValueError, KeyError) as e:
+        print(f"[morning] free-sources calendar unavailable: {e}", flush=True)
+    return " · ".join(parts)
+
+
 def _catalysts_and_orders(names: str, tape: str) -> tuple[str, str]:
-    """ONE subscription-billed call for today's scheduled catalysts + a single momentum
-    observation line. Conservative prompt (don't invent events). Returns ("", "") on failure.
+    """Briefs v2: catalysts come from _calendar_catalysts() (real calendars); the ONE subscription-billed call now only
+    writes the momentum observation from the tape given. Returns ("", "") parts on failure.
     R5 (Mike 2026-10-20): no stops, targets, sizing or risk caps — the desk observes momentum."""
+    cat = _calendar_catalysts([t.strip() for t in names.split(",") if t.strip()])
     today = datetime.now(ET).strftime("%A %B %-d, %Y")
     prompt = (
         f"You are a pre-open trading desk analyst. Today is {today} (US Eastern).\n"
@@ -120,24 +169,16 @@ def _catalysts_and_orders(names: str, tape: str) -> tuple[str, str]:
         f"Premarket tape: {tape or 'n/a'}\n\n"
         "The reader is a BEGINNER trader. Never write BUY/SELL/HOLD/WAIT/TRIM/EXIT/AVOID or a "
         "confidence %. Describe momentum only: no stops, no targets, no entry/exit levels, no "
-        "risk or reward figures, no position sizing, no dollar limits. "
+        "risk or reward figures, no position sizing, no dollar limits. Do not mention scheduled events. "
         "Return STRICT JSON, no prose outside it:\n"
-        '{"catalysts": "<=2 sentences on TODAY\'s scheduled US market catalysts you are '
-        "confident about (FOMC/CPI/PPI/jobs/major single-name earnings). If you are not sure "
-        'anything major is scheduled, say \\"No major scheduled macro catalysts today.\\"", '
-        '"orders": "ONE line: the single most notable momentum observation on the watchlist '
+        '{"orders": "ONE line: the single most notable momentum observation on the watchlist '
         "today — what moved, by how much, and since when — from the tape given. Use only numbers "
         'present in the tape; never invent one. No advice."}'
     )
     res = call_llm(prompt, ["claude_oauth", "claude_cli", "grok_oauth"])
-    if res.get("ok"):
-        r = res["response"]
-        cat = str(r.get("catalysts", "")).strip()
-        orders = str(r.get("orders", "")).strip()
-        if cat or orders:
-            return cat, orders
-    # 2026-10-08: LLM-failure fallback lines are NOT content — return empties so callers omit the section.
-    return "", ""
+    orders = str(res["response"].get("orders", "")).strip() if res.get("ok") and isinstance(res.get("response"), dict) else ""
+    # 2026-10-08: LLM-failure fallback lines are NOT content — an empty part is omitted by the callers.
+    return cat, orders
 
 
 _ORDERS_INSTRUCTION_RE = re.compile(r"\b(buy|sell|short)\b", re.I)
@@ -859,12 +900,11 @@ def build_phone() -> str:
     orders = _filter_orders(orders)
     sched = _scheduled_today()
     if sched:
-        # the calendar floor (FOMC/NFP/high-impact econ) beats the model's recollection
+        # the calendar floor (FOMC/NFP/high-impact econ) is the one thing when it exists
         lines.append(f"⚠️ {b('THE ONE THING TODAY')}: {esc(sched)}")
     elif cat:
-        # first sentence only — the model likes to pad, and padding is what makes a brief
-        # get skimmed instead of read
-        lines.append(f"⚠️ {b('THE ONE THING TODAY')}: {esc(cat.split('. ')[0].rstrip('.'))}.")
+        # briefs v2: cat is calendar-built (never model memory); its first part is the headline
+        lines.append(f"⚠️ {b('THE ONE THING TODAY')}: {esc(cat.split(' · ')[0])}")
     if orders:
         lines.append(f"👉 {b('MOMENTUM NOTE')}: {esc(orders)}")
 
