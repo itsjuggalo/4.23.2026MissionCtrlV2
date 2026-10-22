@@ -153,32 +153,11 @@ def fetch_btc_candles():
 
 
 def calc_rsi(closes, period=14):
-    """Calculate RSI from close prices (newest first)."""
-    if len(closes) < period + 1:
-        return None
-    # Reverse so oldest first for calculation
-    prices = list(reversed(closes[:period + 10]))
-    gains = []
-    losses = []
-    for i in range(1, len(prices)):
-        diff = prices[i] - prices[i-1]
-        gains.append(max(diff, 0))
-        losses.append(max(-diff, 0))
-    
-    if len(gains) < period:
-        return None
-    
-    avg_gain = sum(gains[:period]) / period
-    avg_loss = sum(losses[:period]) / period
-    
-    for i in range(period, len(gains)):
-        avg_gain = (avg_gain * (period - 1) + gains[i]) / period
-        avg_loss = (avg_loss * (period - 1) + losses[i]) / period
-    
-    if avg_loss == 0:
-        return 100
-    rs = avg_gain / avg_loss
-    return 100 - (100 / (1 + rs))
+    """RSI from close prices (newest first) — the canonical RSI over the whole series (missionctrl
+    lib/rsi_canonical = Robinhood's RSI); was Wilder over only the newest period + 10 closes."""
+    sys.path.insert(0, "/AIWorkWSL/web/missionctrl/pipeline/decision/lib")
+    from rsi_canonical import rsi_last
+    return rsi_last(list(reversed(closes)), period)
 
 
 def fetch_alpaca():

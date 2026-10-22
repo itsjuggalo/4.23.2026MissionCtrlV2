@@ -19,20 +19,12 @@ def safe(v, decimals=2):
         return None
 
 def rsi(closes, period=14):
-    if len(closes) < period + 1:
-        return None
-    deltas = np.diff(closes)
-    gains = np.where(deltas > 0, deltas, 0)
-    losses = np.where(deltas < 0, -deltas, 0)
-    avg_gain = np.mean(gains[:period])
-    avg_loss = np.mean(losses[:period])
-    for i in range(period, len(gains)):
-        avg_gain = (avg_gain * (period - 1) + gains[i]) / period
-        avg_loss = (avg_loss * (period - 1) + losses[i]) / period
-    if avg_loss == 0:
-        return 100.0
-    rs = avg_gain / avg_loss
-    return round(100 - (100 / (1 + rs)), 2)
+    """The canonical RSI (missionctrl lib/rsi_canonical = Robinhood's RSI; same math, a flat series now reads 50)."""
+    import sys
+    sys.path.insert(0, "/AIWorkWSL/web/missionctrl/pipeline/decision/lib")
+    from rsi_canonical import rsi_last
+    v = rsi_last(list(closes), period)
+    return None if v is None else round(v, 2)
 
 def ema(data, period):
     if len(data) < period:

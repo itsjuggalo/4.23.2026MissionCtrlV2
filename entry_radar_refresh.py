@@ -120,18 +120,11 @@ def ema(vals, n):
 
 
 def rsi(closes, n=14):
-    if len(closes) < n + 1:
-        return None
-    gains = losses = 0.0
-    for i in range(1, n + 1):
-        d = closes[i] - closes[i - 1]
-        gains += max(d, 0); losses += max(-d, 0)
-    ag, al = gains / n, losses / n
-    for i in range(n + 1, len(closes)):
-        d = closes[i] - closes[i - 1]
-        ag = (ag * (n - 1) + max(d, 0)) / n
-        al = (al * (n - 1) + max(-d, 0)) / n
-    return 100.0 if al == 0 else round(100 - 100 / (1 + ag / al), 1)
+    """The canonical RSI (missionctrl lib/rsi_canonical = Robinhood's RSI; same math, a flat series reads 50)."""
+    sys.path.insert(0, "/AIWorkWSL/web/missionctrl/pipeline/decision/lib")
+    from rsi_canonical import rsi_last
+    v = rsi_last(closes, n)
+    return None if v is None else round(v, 1)
 
 
 def atr(bars, n=14):

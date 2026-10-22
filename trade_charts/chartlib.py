@@ -38,11 +38,11 @@ def fetch(ticker: str, period="6mo", interval="1d") -> pd.DataFrame:
 
 
 def _rsi(close: pd.Series, n=14) -> pd.Series:
-    d = close.diff()
-    up = d.clip(lower=0).ewm(alpha=1/n, adjust=False).mean()
-    dn = (-d.clip(upper=0)).ewm(alpha=1/n, adjust=False).mean()
-    rs = up / dn.replace(0, np.nan)
-    return (100 - 100/(1+rs)).fillna(50)
+    """The canonical RSI (missionctrl lib/rsi_canonical = Robinhood's RSI: classic Wilder seed); warm-up reads 50."""
+    import sys
+    sys.path.insert(0, "/AIWorkWSL/web/missionctrl/pipeline/decision/lib")
+    from rsi_canonical import rsi_wilder
+    return pd.Series(rsi_wilder(close.astype(float).tolist(), n), index=close.index).fillna(50)
 
 
 def support_resistance(df: pd.DataFrame, lookback=60, k=3):

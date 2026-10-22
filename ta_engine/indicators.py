@@ -41,22 +41,12 @@ def sma(x, period):
 
 
 def rsi(closes, period=14):
-    """Wilder's RSI."""
-    c = _arr(closes)
-    if len(c) < period + 1:
-        return None
-    d = np.diff(c)
-    gains = np.where(d > 0, d, 0.0)
-    losses = np.where(d < 0, -d, 0.0)
-    ag = gains[:period].mean()
-    al = losses[:period].mean()
-    for i in range(period, len(d)):
-        ag = (ag * (period - 1) + gains[i]) / period
-        al = (al * (period - 1) + losses[i]) / period
-    if al == 0:
-        return 100.0
-    rs = ag / al
-    return round(100 - 100 / (1 + rs), 2)
+    """Wilder's RSI — the canonical RSI (missionctrl lib/rsi_canonical = Robinhood's RSI; a flat series reads 50)."""
+    import sys
+    sys.path.insert(0, "/AIWorkWSL/web/missionctrl/pipeline/decision/lib")
+    from rsi_canonical import rsi_last
+    v = rsi_last(_arr(closes).tolist(), period)
+    return None if v is None else round(v, 2)
 
 
 def macd(closes, fast=12, slow=26, signal=9):
