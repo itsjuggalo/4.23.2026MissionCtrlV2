@@ -132,6 +132,71 @@ def portfolio_facts() -> str:
     return "\n".join(L)[:MAX_FACTS]
 
 
+_CONTRACT_LINE = r"\*\*([A-Z][A-Z.]{0,5}) (\d\d)/(\d\d)/(\d\d) (\d+(?:\.\d+)?)([CP])\*\*"   # "**NVDA 10/30/26 220C**"
+FLOW_DB = Path.home() / "02_DATA/flow-data/flow.db"
+
+
+def _first_print(occ: dict) -> tuple[float, float | None] | None:
+    """(epoch s, fill price) of the contract's FIRST print in flow.db (deduped view, read-only); None if absent."""
+    import sqlite3
+    try:
+        con = sqlite3.connect(f"file:{FLOW_DB}?mode=ro", uri=True, timeout=5)
+        row = con.execute("SELECT event_time, price FROM flow_events_dedup WHERE symbol=? AND expiry=? AND strike=? "
+                          "AND upper(substr(option_type,1,1))=? ORDER BY event_time LIMIT 1",
+                          (occ["symbol"], occ["expiry"], occ["strike"], occ["kind"][0].upper())).fetchone()
+        con.close()
+    except Exception:  # noqa: BLE001 — store unreadable = no anchor (said so in the line)
+        return None
+    return (row[0] / 1000, row[1]) if row else None
+
+
+def contract_moves(text: str, top: int = 6) -> list[str]:
+    """Mike 2026-10-21: for each contract named in the contracts lists (top ~6), how far the CONTRACT moved since
+    its first flow print, from Robinhood's own option bars. Anchor = the 5-minute bar holding the first print
+    (within the last week) or that day's daily close; latest = the newest RH bar. Missing → said, never guessed."""
+    sys.path.insert(0, str(Path(__file__).resolve().parent))
+    from lib.rh_quote import rh_option_bars, parse_occ
+    seen, out = [], []
+    import re
+    for m in re.finditer(_CONTRACT_LINE, text):
+        sym, mm, dd, yy, k, cp = m.groups()
+        occ = f"{sym}{yy}{mm}{dd}{cp}{round(float(k) * 1000):08d}"
+        if occ not in seen and sum(o.startswith(sym) and o[len(sym)].isdigit() for o in seen) < 2:   # ≤2 per name
+            seen.append(occ)
+    fmt = lambda t: datetime.fromtimestamp(t, ET).strftime("%m/%d %H:%M ET")  # noqa: E731
+    for occ in seen[:top]:
+        c = parse_occ(occ)
+        label = f"{c['symbol']} {c['expiry'][5:7]}/{c['expiry'][8:10]}/{c['expiry'][2:4]} {c['strike']:g}{occ[len(c['symbol']) + 6]}" if c else occ
+        fp = _first_print(c) if c else None
+        if not fp:
+            out.append(f"- {label}: no first flow print in flow.db — move since first print UNAVAILABLE")
+            continue
+        t0, fill = fp
+        five = rh_option_bars(occ, "5minute", "week")
+        anchor = next((b for b in five["bars"] if b["t"] <= t0 < b["t"] + 300), None)
+        if anchor:
+            ref, how = anchor["o"], f"open of the 5-min bar at {fmt(anchor['t'])}"
+        else:
+            day = rh_option_bars(occ, "day", "year")
+            d0 = datetime.fromtimestamp(t0, ET).date().isoformat()
+            bar = next((b for b in day["bars"] if datetime.fromtimestamp(b["t"], ZoneInfo("UTC")).date().isoformat() == d0), None)
+            if not bar:
+                out.append(f"- {label}: first print {fmt(t0)}; no Robinhood bar for that time "
+                           f"({five['error'] or day['error'] or 'no traded bar'}) — move UNAVAILABLE")
+                continue
+            ref, how = bar["c"], f"close of {d0[5:]} (first-print day)"
+        latest_src = five if five["bars"] else rh_option_bars(occ, "day", "year")
+        if not latest_src["bars"] or not ref:
+            out.append(f"- {label}: no latest Robinhood bar ({latest_src['error']}) — move UNAVAILABLE")
+            continue
+        last = latest_src["bars"][-1]["c"]
+        pct = (last - ref) / ref * 100
+        fill_txt = f"; first print fill ${fill:g} (flow.db)" if fill else ""
+        out.append(f"- {label}: {pct:+.1f}% since first flow print {fmt(t0)} (RH bars: {ref:g} {how} → {last:g}, "
+                   f"as of {latest_src['as_of_et']}{fill_txt})")
+    return out
+
+
 def hot_facts() -> tuple[str, list[str]]:
     hot = intel("hot", limit=1500)
     names = []
@@ -142,8 +207,19 @@ def hot_facts() -> tuple[str, list[str]]:
                 names.append(t)
     names = names[:3]
     L = [f"HOT CONTRACTS FACTS · built {now_et():%a %m-%d %H:%M} ET", hot]
+    contract_text = []
     for t in names:
-        L += ["", intel("contracts", t, "--days", os.environ.get("DEBATE_DAYS", "1"), limit=1200), intel("intel", t, limit=1500)]
+        c = intel("contracts", t, "--days", os.environ.get("DEBATE_DAYS", "1"), limit=1200)
+        contract_text.append(c)
+        L += ["", c, intel("intel", t, limit=1500)]
+    try:
+        moves = contract_moves("\n".join(contract_text))
+    except Exception as e:  # noqa: BLE001 — the debate still runs; the gap is stated, never filled
+        moves = [f"- contract moves UNAVAILABLE ({type(e).__name__}: {str(e)[:80]})"]
+    if moves:
+        # first in the facts so the 9K trim never cuts it
+        L[1:1] = ["", "**Contract moves since first flow print** (Robinhood option bars; anchor = 5-min bar of the first print, "
+                       "else that day's close):", *moves]
     return "\n".join(L)[:MAX_FACTS], names
 
 
