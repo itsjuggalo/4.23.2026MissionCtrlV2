@@ -31,6 +31,8 @@ from zoneinfo import ZoneInfo
 
 sys.path.insert(0, "/AIWorkWSL/labs/quantum/src")
 import theo  # noqa: E402
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+import price_guard  # noqa: E402  Robinhood-first spot (W1 MC-AUD-035)
 
 SEC = Path.home() / ".openclaw" / "secrets"
 STATE = Path.home() / ".openclaw" / "data" / "options_quiz_state.json"
@@ -69,9 +71,10 @@ def _tg(method, **kwargs):
 
 
 def _spot(sym: str) -> float | None:
+    """Robinhood-first price guard (quote.v1); a held/stale/missing price → None (no question), never Alpaca."""
     try:
-        d = _get(f"{DATA}/v2/stocks/{sym}/trades/latest?feed=iex")
-        return float(d.get("trade", {}).get("p") or 0) or None
+        r = (price_guard.fresh([sym]) or {}).get(sym.upper()) or {}
+        return float(r["price"]) if r.get("ok") and r.get("price") else None
     except Exception:
         return None
 
@@ -190,7 +193,8 @@ def position_question():
     delta = g.get("delta"); theta_day = g.get("theta_day"); vega = g.get("vega")
     gtxt = ""
     if g:
-        gtxt = (f"\n\n📐 <b>Live greeks on YOUR contract:</b> delta {delta:+.2f} "
+        ivn = "" if gx["iv"] else " IV ASSUMED 30% (no usable mark) —"
+        gtxt = (f"\n\n📐 <b>Model greeks on this paper-journal contract:</b>{ivn} delta {delta:+.2f} "
                 f"(≈${abs(delta)*100:.0f} per $1 {pos['root']} move) · "
                 f"theta {theta_day:+.2f}/day (≈${abs(theta_day)*100:.0f} rent/day) · "
                 f"vega {vega:.2f} · breakeven ${gx['breakeven']:g} · {mny}, {dte}d left.")
@@ -200,20 +204,19 @@ def position_question():
     deep_itm = delta is not None and abs(delta) >= 0.62
 
     if big_winner:
-        q = (f"Your <b>{label}</b> is <b>{pos['uplpc']:+.0f}%</b> on the premium you paid. "
+        q = (f"The paper-journal <b>{label}</b> is <b>{pos['uplpc']:+.0f}%</b> on the premium paid. "
              f"What's the disciplined move right now?")
         opts = ["Hold the whole thing for a possible double",
-                "Sell HALF to bank the win, then move the stop on the rest to breakeven",
+                "Sell part to bank a real gain and decide the exit for the rest yourself",
                 "Add more contracts to press the winner",
                 "Set a target at +500% and walk away"]
         ci = 1
-        why = (f"At +{pos['uplpc']:.0f}% you scale: sell half to lock a real gain, then arm a "
-               f"breakeven stop on the runner so it can't go red. 'Scale winners, never give it "
-               f"all back' — exactly what the profit-lock daemon does in shadow mode. Holding the "
-               f"whole position invites theta and a reversal to round-trip your gain.{gtxt}")
+        why = (f"At +{pos['uplpc']:.0f}% scaling out banks a real gain; the exit for the rest is your own "
+               f"call (the desk sets no stops or targets — R5). Holding the whole position invites theta "
+               f"and a reversal to round-trip the gain.{gtxt}")
         mod = "management"
     elif deep_itm:
-        q = (f"Your <b>{label}</b> is now {mny} with a delta around {delta:+.2f}. "
+        q = (f"The paper-journal <b>{label}</b> is now {mny} with a delta around {delta:+.2f}. "
              f"Which greek explains that it now moves almost dollar-for-dollar with {pos['root']}?")
         opts = ["Theta", "Delta", "Vega", "Rho"]
         ci = 1
@@ -223,7 +226,7 @@ def position_question():
                f"the trade-off you accepted by being {mny}.{gtxt}")
         mod = "greeks-iv"
     else:
-        q = (f"You hold <b>{label}</b> — {mny}, {dte} day{'s' if dte!=1 else ''} to expiry — and "
+        q = (f"Your paper journal holds <b>{label}</b> — {mny}, {dte} day{'s' if dte!=1 else ''} to expiry — and "
              f"{pos['root']} sits roughly flat. Which greek is quietly charging you RENT every day "
              f"you hold, win or lose?")
         opts = ["Delta", "Theta", "Vega", "Gamma"]
@@ -237,7 +240,7 @@ def position_question():
 
     return {"qid": f"live-pos-{pos['symbol']}-{date.today():%Y%m%d}",
             "question": q, "options": opts, "correct_index": ci, "why": why,
-            "module": mod, "header": "📟 YOUR LIVE POSITION"}
+            "module": mod, "header": "📟 PAPER-JOURNAL EXAMPLE (hypothetical — not your Robinhood holdings)"}
 
 
 def straddle_question():
