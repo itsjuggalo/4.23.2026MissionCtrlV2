@@ -146,6 +146,9 @@ def rh_quotes(occ_list, session=None) -> dict[str, dict]:
                 "last": _num(r.get("last_trade_price")), "as_of": at,
                 "iv": _num(r.get("implied_volatility")), "delta": _num(r.get("delta")),
                 "high": _num(r.get("high_price")), "low": _num(r.get("low_price")),
+                "mark": _num(r.get("mark_price")), "volume": _num(r.get("volume")),
+                "prev_close": _num(r.get("previous_close_price")), "prev_close_date": r.get("previous_close_date"),
+                "instrument_id": i,
                 "as_of_et": datetime.fromtimestamp(at, ET).strftime("%Y-%m-%d %H:%M:%S ET"),
                 "source": "robinhood"}
     return out
