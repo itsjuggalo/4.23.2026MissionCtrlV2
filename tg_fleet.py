@@ -678,8 +678,16 @@ def send_upload(fn, path, caption="", as_doc=False, html=False):
     print(f"fail: {r.get('description')}"); return 1
 
 
+def _bot_id(fn: str) -> int | None:
+    """Numeric bot id = the part of the vault token before ':' (public id, not the secret; MC-AUD-078).
+    The token itself is never written or printed."""
+    tok = token(fn)
+    head = tok.split(":", 1)[0] if tok and ":" in tok else ""
+    return int(head) if head.isdigit() else None
+
+
 def manifest():
-    m = {fn: {"username": d["user"], "vault_key": VKEY(fn), "avatar": d["avatar"],
+    m = {fn: {"username": d["user"], "bot_id": _bot_id(fn), "vault_key": VKEY(fn), "avatar": d["avatar"],
               "role": d["role"]} for fn, d in FLEET.items()}
     json.dump(m, open(MANIFEST, "w"), indent=2)
     print(f"wrote {MANIFEST} ({len(m)} bots)")
