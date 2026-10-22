@@ -207,6 +207,10 @@ def hot_facts() -> tuple[str, list[str]]:
                 names.append(t)
     names = names[:3]
     L = [f"HOT CONTRACTS FACTS · built {now_et():%a %m-%d %H:%M} ET", hot]
+    # next-day OI check of the previous session's picks / debate contracts (missionctrl pipeline/intel/oi_confirm)
+    conf = intel("confirm", limit=900)
+    if conf.startswith("Next-day OI check"):
+        L += ["", conf]
     contract_text = []
     for t in names:
         c = intel("contracts", t, "--days", os.environ.get("DEBATE_DAYS", "1"), limit=1200)
