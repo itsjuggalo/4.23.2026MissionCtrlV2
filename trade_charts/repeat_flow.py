@@ -3,8 +3,8 @@
 repeat_flow.py — REPEAT / STACKING flow detector for #ta-charts.
 
 The highest-quality flow signal: when the SAME ticker keeps getting hit in the SAME
-direction on the SAME expiry, that's institutions ACCUMULATING — not a one-off lottery
-ticket. We group today's live options-flow by (Symbol, direction, Expiry), count repeat
+direction on the SAME expiry, the flow is repeating rather than a one-off print. Who is
+behind it and why (new position, hedge, spread leg, roll) is UNKNOWN from flow alone. We group today's live options-flow by (Symbol, direction, Expiry), count repeat
 hits, sum the premium (Volume * AlertPrice * 100), and rank only the groups with >= 2
 stacked same-direction hits.
 
@@ -122,7 +122,7 @@ def render(stacked: list[dict], top: int) -> str | None:
     ax.set_xlim(0, max(scores) * 1.22)
     ax.set_xlabel("stacking score  (repeat hits x premium, $M)", color=MUTE, fontsize=9)
     ax.set_title("Repeat / Stacking Flow  -  same ticker, same direction, same expiry "
-                 "(green=bullish accumulation / red=bearish)",
+                 "(green=call-side repeats / red=put-side; intent unknown)",
                  color="#e6edf3", loc="left", fontsize=12)
     path = str(OUT / "repeat_flow.png")
     fig.savefig(path, dpi=120, bbox_inches="tight", facecolor=BG)
@@ -165,11 +165,11 @@ def caption(stacked: list[dict], legend: bool = True) -> str:
         parts.append(f"{arrow} **{s['sym']}** {s['hits']}x stacked "
                      f"({_exp_str(s['exp'])} {'calls' if s['direction']=='bull' else 'puts'}, "
                      f"${s['prem']/1e6:.1f}M{agg})")
-    head = "📚 **Repeat / Stacking Flow** — repeat buys of the same contract\n" + "\n".join(parts)
+    head = "📚 **Repeat / Stacking Flow** — repeat prints of the same contract group\n" + "\n".join(parts)
     if not legend:
         return head
     # intent is NOT known from flow alone (audit F9): no "institution accumulating" claim.
-    body = ("\n\n_Stacking = repeat buys of the same contract — intent unknown (could be hedges or spread legs)._")
+    body = ("\n\n_Stacking = repeat prints in the same direction and expiry — buyer and intent unknown (could be hedges, spread legs or rolls)._")
     return head + body
 
 
