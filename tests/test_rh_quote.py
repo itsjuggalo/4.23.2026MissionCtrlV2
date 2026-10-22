@@ -53,6 +53,28 @@ class T(unittest.TestCase):
         self.assertEqual(rh_quote.rh_quotes(["junk"], session=Fake(md())), {})
         self.assertEqual(rh_quote.rh_quotes(["SPY261016C00999000"], session=Fake(md())), {})
 
+class Diag(unittest.TestCase):
+    """2026-10-22: a missing contract says why (the scalp card logs it instead of a silent Alpaca fallback)."""
+    def setUp(self): rh_quote._ID_CACHE.clear(); rh_quote._LAST_HTTP.clear()
+
+    def test_reasons(self):
+        d = {}
+        rh_quote.rh_quotes(["junk", "SPY261016C00999000"], session=Fake(md()), diag=d)
+        self.assertEqual(d["junk"], "not an OCC symbol")
+        self.assertTrue(d["SPY261016C00999000"].startswith("instrument lookup failed"))
+        d = {}
+        rh_quote.rh_quotes(["SPY261016C00700000"], session=Fake(md(ask_price=None)), diag=d)
+        self.assertIn("no usable bid/ask", d["SPY261016C00700000"])
+
+    def test_http_status_is_named(self):
+        class Unauth(Fake):
+            def get(self, url, params=None, **kw):
+                return R({}, 401)
+        d = {}
+        self.assertEqual(rh_quote.rh_quotes(["SPY261016C00700000"], session=Unauth(md()), diag=d), {})
+        self.assertEqual(d["SPY261016C00700000"], "instrument lookup failed (HTTP 401)")
+
+
 def pt(d, o, h, l, c, interp=False):
     return {"begins_at": d, "open_price": o, "high_price": h, "low_price": l, "close_price": c, "volume": 0, "interpolated": interp}
 

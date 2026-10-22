@@ -82,12 +82,20 @@ def option_mid(occ: str, now: datetime | None = None, alpaca_node: dict | None =
                   "window": None}, None, {"rh_reason": rh_reason}
 
 
+_RQ = None
+
+
 def _rh_quote_mod():
-    """lib/rh_quote loaded by file path: callers outside ~/scripts (MissionCtrl pipeline) have their own `lib`."""
+    """lib/rh_quote loaded by file path: callers outside ~/scripts (MissionCtrl pipeline) have their own `lib`.
+    Loaded once per process so its instrument-id cache survives between calls."""
+    global _RQ
+    if _RQ is not None:
+        return _RQ
     spec = importlib.util.spec_from_file_location("pg_rh_quote", os.path.join(os.path.dirname(os.path.abspath(__file__)),
                                                                            "lib", "rh_quote.py"))
     mod = importlib.util.module_from_spec(spec)
     spec.loader.exec_module(mod)
+    _RQ = mod
     return mod
 
 
