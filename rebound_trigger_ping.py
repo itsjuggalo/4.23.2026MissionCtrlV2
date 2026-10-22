@@ -24,6 +24,7 @@ from zoneinfo import ZoneInfo
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 from tg_format import hdr, esc, footer  # noqa: E402  (2026-09-15 format sweep)
+import levels_block as LB  # noqa: E402  (DECISIONS R32 2026-10-22 — computed levels.v1 levels on every alert)
 
 ET = ZoneInfo("America/New_York")
 REBOUND_JSON = Path(os.environ.get(
@@ -77,6 +78,12 @@ def new_triggers(data: dict, state: dict) -> list[dict]:
     return out
 
 
+def levels(sym: str) -> list[str]:
+    """levels.v1 block (R32) for a rebound: long (a held level + momentum turn), swing horizon (daily structure).
+    Method, source and as_of per level; a missing tier is UNAVAILABLE with its reason. No size, no cap."""
+    return LB.lines(sym, "long", "swing", footer=False)
+
+
 def format_message(rows: list[dict], ran_at: str | None) -> str:
     n = len(rows)
     lines = [hdr("🏗", "Structure Trigger",
@@ -84,7 +91,8 @@ def format_message(rows: list[dict], ran_at: str | None) -> str:
     for r in rows:
         row = r["row"]
         lines.append(f"▸ {esc(row.get('read'))} · score {row.get('score')}/100")
-        # no stop / exit rule line (DECISIONS R5, 2026-10-20: no stops, no targets)
+        lines += [f"   {esc(x)}" for x in levels(r["symbol"])]
+    lines.append(esc(LB.FOOTER))
     lines.append(footer(f"Advisory only · as of {ran_at or 'n/a'} · /api/rebound-setup").lstrip("\n"))
     return "\n".join(lines)
 
