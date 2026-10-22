@@ -7,9 +7,11 @@
 #             jumped +0.5 — keeps signal, not spam (ADD-friendly). The cooldown is staged
 #             in $STATE.pending and committed only after tg_fleet acknowledges the send,
 #             so a failed send is retried next run (audit W5 MC-AUD-081, 2026-10-21).
-#   3. enrich: ONE claude -p "/ainvest" call adds an actionable line per fresh name
-#             (lean / entry trigger / stop / catalyst). Best-effort — on any failure
-#             falls back to the deterministic list so the alert never drops.
+#   3. enrich: ONE claude -p "/ainvest" call adds a line per fresh name (lean / catalyst).
+#             No price levels from the model (DECISIONS R32: levels only when computed
+#             from data); any entry/stop/target clause it still writes is stripped by
+#             lib/llm_level_strip.py. Best-effort — on any failure falls back to the
+#             deterministic list so the alert never drops.
 #   4. send : ONE Telegram message (breakouts then breakdowns, capped) via tg_fleet lane
 #             aime_research (same AntiGravity bot; ledger + lint; no token in argv).
 #   5. feed : append to ~/mc-kb/notes/briefs/ for Boba/Jazzy hive-mind.
@@ -127,8 +129,8 @@ PROV="${DET_BODY%%$'\n\n'*}"   # provenance lines (bars/session/source, flow ove
 if [[ "$ENRICH" == "1" && -s "$FRESH_JSON" ]]; then
   ASK="/ainvest These are today's S&P 500 breakouts (close > 20-day high on rising volume) \
 and breakdowns (close < 20-day low on rising volume). For EACH name give ONE phone-friendly \
-line: ticker — lean (long / short / avoid), entry-or-trigger level, stop, and the catalyst in \
-<= 8 words if known. Lead with the single highest-conviction name across both lists. \
+line: ticker — lean (long / short / avoid) and the catalyst in <= 8 words if known. \
+Give NO price levels: no entry, trigger, stop, target or take-profit numbers. Lead with the single highest-conviction name across both lists. \
 Group under '📈 BREAKOUTS' and '📉 BREAKDOWNS'. <= 20 lines total, no preamble, no tables. \
 Local data only, no mcp__ainvest tools.
 
@@ -141,7 +143,8 @@ Data: $(cat "$FRESH_JSON")"
     --output-format json --allowedTools "Bash,Read,Grep,Glob,WebFetch,WebSearch,Skill,Agent,TodoWrite" 2>>"$LOG" \
     | python3 -c 'import json,sys;
 try: print((json.load(sys.stdin).get("result") or "").strip())
-except Exception: print("")' 2>>"$LOG")"
+except Exception: print("")' 2>>"$LOG" \
+    | python3 "$HOME/scripts/lib/llm_level_strip.py" 2>>"$LOG")"   # R32: no model-invented levels
   if [[ -n "$ENRICHED" && "${#ENRICHED}" -gt 40 ]]; then
     BODY="$PROV"$'\n\n'"$ENRICHED"; log "enriched via /ainvest (${#ENRICHED} chars)"
   else
