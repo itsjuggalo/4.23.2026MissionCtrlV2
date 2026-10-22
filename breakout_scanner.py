@@ -18,13 +18,16 @@ Env:
   BREAKOUT_UNIVERSE  path to symbol list (default ~/.openclaw/data/sp500.txt)
 """
 from __future__ import annotations
-import json, os, sys, time, urllib.request, urllib.error, sqlite3
+import json, os, re, sys, time, urllib.request, urllib.error, sqlite3
 from datetime import datetime, timezone, timedelta
 from pathlib import Path
 
 SEC = Path.home() / ".openclaw" / "secrets"
 UNIVERSE = Path(os.environ.get("BREAKOUT_UNIVERSE", str(Path.home()/".openclaw/data/sp500.txt")))
-FLOW_DB = Path.home() / "LapClaw/pipeline/desk_pipeline.sqlite"
+FLOW_DB = Path(os.environ.get("MC_SIGNAL_TRACKER_DB") or Path.home() / "02_DATA/signal-tracker/tracker.sqlite")
+# Raw vendor flow feeds in the signal tracker (relay = Firebase/FlowGreeks streams, scraper = option-scraper files,
+# uw_feed = Unusual Whales Discord). Our own picks/debates/momentum alerts are not flow and stay out.
+FLOW_FEEDS = ("relay:", "scraper:", "uw_feed:")
 MIN_RVOL = float(os.environ.get("BREAKOUT_RVOL", "1.5"))
 TOPN = int(os.environ.get("BREAKOUT_TOPN", "12"))
 DATA_BASE = "https://data.alpaca.markets/v2/stocks/bars"
@@ -101,28 +104,33 @@ def fetch_bars(symbols: list[str], key: str, sec: str) -> dict[str, list[dict]]:
 
 
 FEED_USED = ["iex"]
-FLOW_STATUS: dict = {"source": "desk_pipeline.sqlite flow_candidates", "newest": None, "stale": True}
+FLOW_STATUS: dict = {"source": "signal tracker (vendor flow alerts: UW, FlowGreeks, Firebase relay)", "newest": None, "stale": True}
 
 
 def flow_tickers() -> dict[str, set[str]]:
     """Tickers with options flow in the last 3 days -> the flow directions seen (Mike's edge overlay).
     W8 MC-AUD-013: the direction is kept so a bearish print on a breakout is never shown as green confluence,
-    and the overlay's own freshness is reported (FLOW_STATUS)."""
+    and the overlay's own freshness is reported (FLOW_STATUS). Source (2026-10-22): the signal tracker's vendor
+    flow alerts; the old desk_pipeline flow_candidates table stopped at 2026-06-09 (retired, DATA_SOURCES §7).
+    Direction = the contract side: call -> BULLISH, put -> BEARISH."""
     if not FLOW_DB.exists():
         return {}
     try:
         con = sqlite3.connect(f"file:{FLOW_DB}?mode=ro", uri=True)
-        cutoff = (datetime.now(timezone.utc) - timedelta(days=3)).isoformat()
-        rows = con.execute(
-            "SELECT UPPER(COALESCE(ticker,symbol)), UPPER(COALESCE(direction,'')) FROM flow_candidates "
-            "WHERE created_at >= ?", (cutoff,)).fetchall()
-        newest = con.execute("SELECT MAX(created_at) FROM flow_candidates").fetchone()[0]
+        cutoff = (datetime.now(timezone.utc) - timedelta(days=3)).timestamp()
+        feed_sql = " OR ".join("feed LIKE ?" for _ in FLOW_FEEDS)
+        feeds = [f + "%" for f in FLOW_FEEDS]
+        rows = con.execute(f"SELECT occ FROM signals WHERE alert_at >= ? AND ({feed_sql})", (cutoff, *feeds)).fetchall()
+        newest = con.execute(f"SELECT MAX(alert_at) FROM signals WHERE {feed_sql}", feeds).fetchone()[0]
         con.close()
-        FLOW_STATUS.update(newest=newest, stale=not newest or str(newest) < cutoff[:19].replace("T", " "))
+        from zoneinfo import ZoneInfo
+        FLOW_STATUS.update(newest=(datetime.fromtimestamp(newest, ZoneInfo("America/New_York")).strftime("%Y-%m-%d %H:%M ET")
+                                   if newest else None), stale=not newest or newest < cutoff)
         out: dict[str, set[str]] = {}
-        for sym, d in rows:
-            if sym:
-                out.setdefault(sym, set()).add(d or "UNKNOWN")
+        for (occ,) in rows:
+            m = re.match(r"^([A-Z.]+?)\d{6}([CP])\d{8}$", str(occ or "").upper())
+            if m:
+                out.setdefault(m.group(1), set()).add("BULLISH" if m.group(2) == "C" else "BEARISH")
         return out
     except Exception as e:
         print(f"[scanner] flow lookup skipped: {e}", file=sys.stderr)
