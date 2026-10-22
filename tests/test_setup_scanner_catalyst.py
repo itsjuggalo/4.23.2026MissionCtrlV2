@@ -128,7 +128,7 @@ def _setup(sym, headline, gap, last, size=0.0, ts="12:15"):
 @pytest.mark.parametrize("sym,headline,_s,_r,why", CASES)
 def test_card_renders_deal_text_and_moves_trigger_id(sym, headline, _s, _r, why):
     s = _setup(sym, headline, 1.0, 50.0, SS.dollar_size(headline))
-    out = SS.card(s, 400.0)
+    out = SS.card(s)
     why_line = next(ln for ln in out.splitlines() if ln.startswith("WHY:"))
     assert "being bought out" not in out
     assert why[0] in why_line
@@ -141,7 +141,7 @@ def test_sms_squeeze_keeps_the_caveat():
     trailing 'This is a RUMOUR' sentence was the first casualty."""
     s = _setup("CMG", SBUX_CMG, 1.1, 32.12)
     card = "\n".join(ln + " " + "y" * 200 if ln.startswith("WHY:") else ln
-                     for ln in SS.card(s, 400.0).splitlines())
+                     for ln in SS.card(s).splitlines())
     head = "12:30 — here's one you can take."
     assert len(SS.fit_sms(head, card, 1)) <= SS.SMS_MAX
     assert len("\n".join([head, card])) > SS.SMS_MAX, "fixture must force the squeeze"
@@ -153,7 +153,7 @@ def test_sms_squeeze_keeps_the_caveat():
 def test_non_ma_rumour_caveat_leads_the_line():
     s = _setup("AAA", "AAA Reportedly Wins $2B Contract", 2.0, 20.0)
     s["tag"] = "CONTRACT"
-    why_line = SS.card(s, 400.0).splitlines()[1]
+    why_line = SS.card(s).splitlines()[1]
     assert why_line.startswith("WHY: rumour, not confirmed — won a contract")
 
 
@@ -177,9 +177,11 @@ def _snaps(symbols):
     for s in symbols:
         if s in TAPE:
             last, gap = TAPE[s]
-            out[s] = {"latestTrade": {"p": last}, "dailyBar": {"v": 900_000},
+            # timestamps: the W1 send-time price guard (2026-10-20) holds any trade without a fresh one
+            out[s] = {"latestTrade": {"p": last, "t": "2026-10-06T17:30:50Z"},
+                      "dailyBar": {"v": 900_000, "t": "2026-10-06T04:00:00Z"},
                       "prevDailyBar": {"c": last / (1 + gap / 100), "h": last * 1.004,
-                                       "l": last * 0.97, "v": 1_000_000}}
+                                       "l": last * 0.97, "v": 1_000_000, "t": "2026-10-05T04:00:00Z"}}
     return out
 
 
@@ -194,6 +196,10 @@ def _run_scan(mod, monkeypatch):
 
 @pytest.mark.skipif(not BACKUP.exists(), reason="pre-change backup missing")
 def test_scores_and_direction_unchanged_vs_backup(monkeypatch):
+    # The pre-change backup imports risk_cap, retired 2026-10-21 (R5/W5c). A stub lets it load so the score/direction
+    # comparison still runs; caps never fed scan()'s scores.
+    import types
+    monkeypatch.setitem(sys.modules, "risk_cap", types.SimpleNamespace(RISK_CAP_USD=0.0, BUYING_POWER_CAP_USD=0.0))
     loader = importlib.machinery.SourceFileLoader("setup_scanner_orig", str(BACKUP))
     spec = importlib.util.spec_from_loader("setup_scanner_orig", loader)
     orig = importlib.util.module_from_spec(spec)
