@@ -8,9 +8,10 @@
 #             in $STATE.pending and committed only after tg_fleet acknowledges the send,
 #             so a failed send is retried next run (audit W5 MC-AUD-081, 2026-10-21).
 #   3. enrich: ONE claude -p "/ainvest" call adds a line per fresh name (lean / catalyst).
-#             No price levels from the model (DECISIONS R32: levels only when computed
-#             from data); any entry/stop/target clause it still writes is stripped by
-#             lib/llm_level_strip.py. Best-effort — on any failure falls back to the
+#             Levels (DECISIONS R32: only when computed from data): the prompt carries each
+#             name's levels.v1 LEVEL MENU and the model may only cite its ids; the levels.v1
+#             validator redacts any other price (lib/breakout_levels.py). No menu →
+#             "levels: pending levels.v1", no levels asked, any written are stripped. Best-effort — on any failure falls back to the
 #             deterministic list so the alert never drops.
 #   4. send : ONE Telegram message (breakouts then breakdowns, capped) via tg_fleet lane
 #             aime_research (same AntiGravity bot; ledger + lint; no token in argv).
@@ -127,12 +128,19 @@ PROV="${DET_BODY%%$'\n\n'*}"   # provenance lines (bars/session/source, flow ove
 
 # --- enrich with one LLM pass (best-effort; deterministic fallback) ------------
 if [[ "$ENRICH" == "1" && -s "$FRESH_JSON" ]]; then
+  LV_JSON="/tmp/breakout_levels.$$.json"
+  python3 "$HOME/scripts/lib/breakout_levels.py" menus "$FRESH_JSON" > "$LV_JSON" 2>>"$LOG" \
+    || echo '{"ok": false, "symbols": {}, "block": "levels: pending levels.v1 — give NO price levels."}' > "$LV_JSON"
+  LV_BLOCK="$(python3 -c 'import json,sys; print(json.load(open(sys.argv[1]))["block"])' "$LV_JSON" 2>>"$LOG")"
+  log "levels: $(python3 -c 'import json,sys; d=json.load(open(sys.argv[1])); print("levels.v1 menu for", sum(v.get("status")=="OK" for v in d["symbols"].values()), "names" if d["ok"] else "pending levels.v1")' "$LV_JSON" 2>>"$LOG")"
   ASK="/ainvest These are today's S&P 500 breakouts (close > 20-day high on rising volume) \
 and breakdowns (close < 20-day low on rising volume). For EACH name give ONE phone-friendly \
 line: ticker — lean (long / short / avoid) and the catalyst in <= 8 words if known. \
-Give NO price levels: no entry, trigger, stop, target or take-profit numbers. Lead with the single highest-conviction name across both lists. \
+Lead with the single highest-conviction name across both lists. \
 Group under '📈 BREAKOUTS' and '📉 BREAKDOWNS'. <= 20 lines total, no preamble, no tables. \
 Local data only, no mcp__ainvest tools.
+
+$LV_BLOCK
 
 Data: $(cat "$FRESH_JSON")"
   # --strict-mcp-config: load ZERO MCP servers. The prompt above already says
@@ -144,7 +152,8 @@ Data: $(cat "$FRESH_JSON")"
     | python3 -c 'import json,sys;
 try: print((json.load(sys.stdin).get("result") or "").strip())
 except Exception: print("")' 2>>"$LOG" \
-    | python3 "$HOME/scripts/lib/llm_level_strip.py" 2>>"$LOG")"   # R32: no model-invented levels
+    | python3 "$HOME/scripts/lib/breakout_levels.py" check "$LV_JSON" "$FRESH_JSON" 2>>"$LOG")"   # R32: menu ids only, validator-checked
+  rm -f "$LV_JSON"
   if [[ -n "$ENRICHED" && "${#ENRICHED}" -gt 40 ]]; then
     BODY="$PROV"$'\n\n'"$ENRICHED"; log "enriched via /ainvest (${#ENRICHED} chars)"
   else
