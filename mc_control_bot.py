@@ -7,11 +7,12 @@ is the listener that takes commands back IN.
 
   READ:    /status /queue /heal /pipeline /services /time /recall <q> /help
   CONTROL: /pause [reason] /resume /restart <unit> /merge <id> /reject <id> <reason> /drill <svc>
-  SHELL:   /sh <cmd>   — or just type any non-slash message — runs an arbitrary shell command
+  SHELL:   /sh <cmd> — OFF unless MC_CONTROL_SHELL=1 is set at start (audit MC-AUD-005); bare text never runs
 
-SECURITY MODEL: the bot acts ONLY on messages from the saved chat_id (telegram-ping-chat-id);
-every other sender is ignored + logged. It runs as Mike's user, so /sh has full laptop access —
-the chat_id allowlist is the ONLY gate. Every received command is logged to control_bot.log.
+SECURITY MODEL (MC-AUD-005, 2026-10-21): DORMANT — no cron/PM2 starts it. A message is acted on only if it is a
+new (not edited) message in the private chat whose id is the saved chat_id, sent by that same user id, and at most
+STALE_S seconds old. Everything else is ignored + logged. /restart takes only a unit from RESTART_UNITS.
+Every received command is logged to control_bot.log.
 Stdlib only (urllib); runs under /usr/bin/python3.
 """
 import json
@@ -31,6 +32,9 @@ PY = "/usr/bin/python3"
 DESK_DB = "/AIWorkWSL/web/missionctrl/pipeline/desk_pipeline.sqlite"
 LOG = Path(NS) / "logs" / "control_bot.log"
 SH_TIMEOUT = 120
+STALE_S = 120                                   # older updates (e.g. queued while the bot was down) are dropped
+SHELL_ON = __import__("os").environ.get("MC_CONTROL_SHELL") == "1"
+RESTART_UNITS = {"missionctrl", "aries", "claudeclaw"}
 TG_LIMIT = 3900
 
 
@@ -73,7 +77,7 @@ HELP = (
     "🛰️ MC control bot\n"
     "READ: /status /queue /heal /pipeline /services /time /recall <q>\n"
     "CONTROL: /pause [reason] /resume /restart <unit> /merge <id> /reject <id> <reason> /drill <svc>\n"
-    "SHELL: /sh <cmd> — or just type any command (full shell)."
+    + ("SHELL: /sh <cmd> (enabled for this run)." if SHELL_ON else "SHELL: off.")
 )
 
 
@@ -109,22 +113,36 @@ def handle(text: str) -> str:
     if low == "/resume":
         return run(f"bash {NS}/pause.sh off")
     if low.startswith("/restart"):
-        return run(f"systemctl --user restart {shlex.quote(arg)} && echo restarted {arg}") if arg else "usage: /restart <systemd-unit>"
+        if arg not in RESTART_UNITS:
+            return f"usage: /restart <{'|'.join(sorted(RESTART_UNITS))}>"
+        return run(f"pm2 restart {shlex.quote(arg)} && echo restarted {shlex.quote(arg)}")
     if low.startswith("/merge"):
         return run(f"{PY} {NS}/ns_review.py accept {shlex.quote(arg)}") if arg else "usage: /merge <id>"
     if low.startswith("/reject"):
         p = t.split(None, 2)
-        return run(f"{PY} {NS}/ns_review.py reject {p[1]} {shlex.quote(p[2] if len(p) > 2 else 'via telegram')}") if len(p) > 1 else "usage: /reject <id> <reason>"
+        return run(f"{PY} {NS}/ns_review.py reject {shlex.quote(p[1])} {shlex.quote(p[2] if len(p) > 2 else 'via telegram')}") if len(p) > 1 else "usage: /reject <id> <reason>"
     if low.startswith("/drill"):
         if not arg:
             return "usage: /drill <aries|missioncontrol|claudeclaw-os|--deadman>"
         subprocess.Popen(f"bash {NS}/chaos_drill.sh {shlex.quote(arg)} >> {NS}/logs/control_drill.log 2>&1", shell=True)
         return f"drill started for {arg} — check /status or control_drill.log"
     if low.startswith("/sh"):
+        if not SHELL_ON:
+            return "shell is off (start the bot with MC_CONTROL_SHELL=1 to enable it for that run)"
         return run(arg) if arg else "usage: /sh <command>"
-    if t.startswith("/"):
-        return f"unknown command.\n{HELP}"
-    return run(t)  # bare text = full shell
+    return f"unknown command.\n{HELP}"   # bare text never runs (MC-AUD-005)
+
+
+def reject_reason(msg: dict, now: float | None = None) -> str | None:
+    """None when the message may run: the owner's private chat, sent by the owner, fresh."""
+    chat = msg.get("chat") or {}
+    if str(chat.get("id", "")) != CHAT or chat.get("type") != "private":
+        return "not the owner's private chat"
+    if str((msg.get("from") or {}).get("id", "")) != CHAT:
+        return "sender is not the owner"
+    if (now or time.time()) - float(msg.get("date") or 0) > STALE_S:
+        return "stale"
+    return None
 
 
 def main() -> int:
@@ -142,13 +160,14 @@ def main() -> int:
             res = api("getUpdates", params, timeout=70)
             for u in res.get("result", []):
                 offset = u["update_id"] + 1
-                msg = u.get("message") or u.get("edited_message")
+                msg = u.get("message")                # edited messages are never commands
                 if not msg:
                     continue
                 cid = str(msg.get("chat", {}).get("id", ""))
                 txt = msg.get("text", "")
-                if cid != CHAT:                       # the ONLY security gate
-                    log(f"IGNORED unauthorized chat {cid}: {txt[:80]!r}")
+                why = reject_reason(msg)
+                if why:
+                    log(f"IGNORED ({why}) chat {cid}: {txt[:80]!r}")
                     continue
                 if not txt:
                     continue
