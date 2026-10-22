@@ -185,7 +185,14 @@ def _snaps(symbols):
     return out
 
 
+def _quotes(symbols, now=None):
+    # W4 RH migration (2026-10-22): the card price is the quote_client row; same TAPE last as the backup's Alpaca trade
+    return {s: {"ok": True, "price": TAPE[s][0], "provider": "robinhood", "as_of": "2026-10-06T17:30:50Z",
+                "src": "src Robinhood 13:30 ET"} for s in symbols if s in TAPE}
+
+
 def _run_scan(mod, monkeypatch):
+    monkeypatch.setattr(mod, "live_quotes", _quotes, raising=False)   # the pre-change backup has no live_quotes
     monkeypatch.setattr(mod, "alpaca_news", lambda *a, **k: copy.deepcopy(NEWS))
     monkeypatch.setattr(mod, "most_actives", lambda *a, **k: ["UNP"])
     monkeypatch.setattr(mod, "snapshots", _snaps)
