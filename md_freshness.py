@@ -212,9 +212,11 @@ def build_auto_block(pm2, cron, ports, ts):
     lines = [
         "<!-- AUTO:BEGIN — regenerated weekly by md_freshness.py; do not hand-edit between these markers -->",
         f"### Live state — auto-refreshed {ts}",
-        f"- **PM2:** {pm2['online']} online / {pm2['total']} total"
-        + ("" if pm2["ok"] else " (pm2 jlist unreadable)"),
-        f"- **Online procs:** {', '.join(pm2['names']) if pm2['names'] else '(none)'}",
+        # W6 MC-AUD-135: a failed probe is UNAVAILABLE, never "0 online"
+        (f"- **PM2:** {pm2['online']} online / {pm2['total']} total" if pm2["ok"] else
+         "- **PM2:** UNAVAILABLE — `pm2 jlist` unreadable at this run; NOT zero (check `pm2 list` live)"),
+        f"- **Online procs:** {', '.join(pm2['names']) if pm2['names'] else '(none)'}" if pm2["ok"] else
+        "- **Online procs:** unknown (probe failed)",
         f"- **Crontab:** {cron['lines']} lines ({cron['active']} active, {cron['reboot']} @reboot)",
         f"- **Listening ports:** {port_str}",
     ]
@@ -309,7 +311,8 @@ def main():
         f"{scanned} living `.md` scanned (archives/backups/conversation dumps skipped)._",
         "",
         "## Live state",
-        f"- PM2: **{pm2['online']} online / {pm2['total']} total**",
+        (f"- PM2: **{pm2['online']} online / {pm2['total']} total**" if pm2["ok"] else
+         "- PM2: **UNAVAILABLE** (pm2 jlist unreadable — not zero)"),
         f"- Crontab: **{cron['lines']} lines** ({cron['active']} active, {cron['reboot']} @reboot)",
         f"- Listening ports: {len(ports)} — {', '.join(ports) or '(none)'}",
         f"- SYSTEM-MAP auto-block: **{sm_status}**"
