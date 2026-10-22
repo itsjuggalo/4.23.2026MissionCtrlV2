@@ -20,6 +20,7 @@ from zoneinfo import ZoneInfo
 
 sys.path.insert(0, os.path.expanduser("~/scripts"))
 import quantum_tg as Q  # shared read-only formatters
+import levels_block as LB  # R32: computed levels.v1 block on the green-light buzz
 from tg_format import esc, b, hdr, section, row, footer, join
 
 ET    = ZoneInfo("America/New_York")
@@ -119,6 +120,7 @@ def _buzz_text(p, d):
         esc(f"{Q._money(p.get('per_contract'))} per contract · "
             f"{p.get('confidence')}-conf · {p.get('sources')} src · {p.get('value')}"),
         f"<i>why: {esc(why)}</i>",
+        "\n".join(esc(x) for x in LB.for_contract(p.get("ticker") or "", typ, p.get("days"), p.get("occ"))),
         footer("/pick for more"))
 
 

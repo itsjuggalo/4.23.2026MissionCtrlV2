@@ -16,6 +16,7 @@ import json, os, re
 from datetime import datetime
 from zoneinfo import ZoneInfo
 from tg_format import esc, b, hdr, section, row, footer, join
+import levels_block as LB  # R32 (Mike 2026-10-21): computed levels.v1 block on the top pick
 
 OUT = os.path.expanduser("~/labs/quantum/out")
 JOURNAL = "/AIWorkWSL/trading/signals/option-scraper/data/paper_trades.json"   # Mike's own fills (read-only)
@@ -170,7 +171,7 @@ def _money(x):
 
 def _afford_spread(p):
     """The pipeline's OWN debit spread for this pick, when its quote looks real (≥ $5 per
-    spread contract). No price cap is applied (R5)."""
+    spread contract). No price cap is applied (DECISIONS R32: no size, no cap)."""
     s = p.get("spread")
     if not isinstance(s, dict):
         return None
@@ -414,6 +415,7 @@ def pick(top=1):
             esc(_verdict(p)),
             conf, trap,
             f"<i>why: {esc(why)}</i>" if why else None,
+            "\n".join(esc(x) for x in LB.for_contract(p.get("ticker") or "", p.get("type") or "", p.get("days"), p.get("occ"))),
             footer("cost per contract · advisory — you place every trade"))
     n = min(top, len(picks))
     star_picks, rest = [], []

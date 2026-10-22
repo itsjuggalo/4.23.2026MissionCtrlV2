@@ -31,6 +31,7 @@ from zoneinfo import ZoneInfo
 sys.path.insert(0, os.path.expanduser("~/scripts"))
 import quantum_tg as Q  # shared read-only formatters (_human, _market_open, etc.)
 from tg_format import esc, b, hdr, row, footer, join
+import levels_block as LB  # R32 (Mike 2026-10-21): computed levels.v1 block on the single-contract card
 from price_guard import alpaca_option_mid, fresh, option_mid, src_label  # remedial W1/W4 send-time guard (Robinhood first)
 
 ET = ZoneInfo("America/New_York")
@@ -256,6 +257,9 @@ def format_alert(a, v):
              esc("flow " + " · ".join(bits))]
     lines += [esc(f"• {r}") for r in v["reasons"][:4]]
     lines.append(esc(v["action"]))
+    # R32: Entry / TP1 / TP2 / Final TP / SL from the levels.v1 engine only (methods, source, as_of; UNAVAILABLE named)
+    lines += [esc(x) for x in LB.for_contract(a.get("Symbol") or "", a.get("OptionType") or "", a.get("DTE"),
+                                              _clean_occ(a.get("OptionSymbol")) or None)]
     return "\n".join(lines)
 
 

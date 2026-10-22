@@ -58,3 +58,8 @@ def lines(symbol: str, side: str = "long", horizon: str = "swing", occ: str | No
     elif not any(x == FOOTER for x in got):
         got.append(FOOTER)     # an UNAVAILABLE block still says no size
     return got
+
+
+def for_contract(symbol: str, kind: str, dte=None, occ: str | None = None, *, footer: bool = True) -> list[str]:
+    """An option card's block: side from the contract type (call → long, put → short), horizon from its DTE."""
+    return lines(symbol, side_for(kind), horizon_for(dte), occ=occ or None, footer=footer)

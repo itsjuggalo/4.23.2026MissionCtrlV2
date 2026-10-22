@@ -43,6 +43,7 @@ from lib.heartbeat import beat  # noqa: E402
 from lib.notify import tg_brief  # noqa: E402
 from lib.news import headlines_block  # noqa: E402
 from tg_format import hdr, section, row, esc, b, footer  # noqa: E402  (2026-09-15 format sweep, phone copy only)
+import levels_block as LB  # noqa: E402  R32: computed levels.v1 block on the top desk contract
 from flow_picks_post import (  # noqa: E402  (read-only helpers — these do NOT log picks)
     _load, _score, _spot, _moneyness, _fmt, MAX_MNY, DTE_MIN, DTE_MAX, _tape,
 )
@@ -160,7 +161,8 @@ def _calendar_catalysts(tickers: list[str]) -> str:
 def _catalysts_and_orders(names: str, tape: str) -> tuple[str, str]:
     """Briefs v2: catalysts come from _calendar_catalysts() (real calendars); the ONE subscription-billed call now only
     writes the momentum observation from the tape given. Returns ("", "") parts on failure.
-    R5 (Mike 2026-10-20): no stops, targets, sizing or risk caps — the desk observes momentum."""
+    R32 (Mike 2026-10-21): levels only from the levels.v1 engine (the top desk contract carries its block); this LLM
+    line never states a level, a size or a cap — it observes momentum."""
     cat = _calendar_catalysts([t.strip() for t in names.split(",") if t.strip()])
     today = datetime.now(ET).strftime("%A %B %-d, %Y")
     prompt = (
@@ -168,8 +170,9 @@ def _catalysts_and_orders(names: str, tape: str) -> tuple[str, str]:
         f"Operator's watchlist: {names}\n"
         f"Premarket tape: {tape or 'n/a'}\n\n"
         "The reader is a BEGINNER trader. Never write BUY/SELL/HOLD/WAIT/TRIM/EXIT/AVOID or a "
-        "confidence %. Describe momentum only: no stops, no targets, no entry/exit levels, no "
-        "risk or reward figures, no position sizing, no dollar limits. Do not mention scheduled events. "
+        "confidence %. Describe momentum only. Never state a price level (entry, target, stop): levels come only "
+        "from the levels engine, never from you. No risk or reward figures, no position sizing, no dollar limits. "
+        "Do not mention scheduled events. "
         "Return STRICT JSON, no prose outside it:\n"
         '{"orders": "ONE line: the single most notable momentum observation on the watchlist '
         "today — what moved, by how much, and since when — from the tape given. Use only numbers "
@@ -877,7 +880,9 @@ def _one_contract_line() -> str:
                 f"expiring {esc(p['expiry'])}{esc(window)}.\n"
                 f"• mid ${px:.2f} → ${cost:,} per contract\n"
                 f"<i>Priced as of {as_of.strftime('%-m/%-d %-I:%M %p')} ET — "
-                f"if it opens far from ${px:.2f}, the cost shifts with it.</i>")
+                f"if it opens far from ${px:.2f}, the cost shifts with it.</i>\n"
+                + "\n".join(esc(x) for x in LB.for_contract(p["ticker"], str(p.get("type") or ""), p.get("days"),
+                                                             p.get("occ"))))
     except Exception:
         return ""
 
