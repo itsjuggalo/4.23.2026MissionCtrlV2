@@ -6,9 +6,16 @@ by keyword overlap between context text and skill description/name.
 
 Returns a formatted markdown block ready to inject into agent prompts.
 
-Token budget defaults conservatively to 4000 tokens (~16KB text) so it
-fits comfortably inside the 200k Sonnet context window without crowding
-out the existing prompt sections.
+MC-AUD-120 (W11, 2026-10-22): skills are REFERENCE TEXT ONLY — the block says so, and no script named inside a
+skill is invoked or implied to be available. Folders starting with "_" (_archive, _irrelevant, _downloaded…) are
+never in the pool. Each block is tagged with its source path and file date. A skill longer than the per-skill cap
+is marked "(truncated: first N of M chars)" — never presented as the full body — and unreadable/empty SKILL.md
+files are listed in meta['unreadable'] instead of vanishing. Live callers (2026-10-22): MissionCtrl
+pipeline/copilot/intent_router.py imports only tokenize/score_skill/parse_skill_md; load_relevant_skills has no
+live caller.
+
+Token budget defaults conservatively to 4000 tokens (~16KB text); each skill body is additionally capped at
+PER_SKILL_CHAR_CAP characters, and a capped body is labelled as truncated.
 
 Usage:
     from skill_loader_py import load_relevant_skills
@@ -22,10 +29,12 @@ Usage:
     # Inject `block` into prompt template
 """
 import re
+from datetime import datetime
 from pathlib import Path
 from collections import Counter
 
 SKILLS_ROOT = Path('/home/ubuntu/.openclaw/skills')
+PER_SKILL_CHAR_CAP = 8000
 
 # Stopwords to ignore when matching context to skill descriptions
 STOPWORDS = {
@@ -86,6 +95,10 @@ def parse_skill_md(path):
         return None
     if not text.strip():
         return None
+    try:
+        file_date = datetime.fromtimestamp(path.stat().st_mtime).strftime('%Y-%m-%d')
+    except Exception:
+        file_date = 'unknown'
 
     name = path.parent.name  # default to folder name
     description = ''
@@ -120,6 +133,7 @@ def parse_skill_md(path):
         'body': body.strip(),
         'path': str(path),
         'bytes': len(body),
+        'file_date': file_date,
     }
 
 
@@ -158,21 +172,31 @@ def estimate_tokens(text):
     return len(text) // 4
 
 
-def list_skills_for_agent(agent, extra_folders=()):
+def list_skills_for_agent(agent, extra_folders=(), unreadable=None):
     """Return list of parsed skills for an agent, including 'shared' as fallback.
 
     extra_folders: additional pool folders under SKILLS_ROOT to draw from
     (e.g. ('reference', 'orion')). Agent + shared always win name collisions.
+    Archived folders ("_" prefix, at either level) are never read. Paths that could not be parsed are appended
+    to `unreadable` when a list is passed.
     """
     skills = []
     seen = set()
     for folder in (agent, 'shared') + tuple(extra_folders or ()):
+        if str(folder).startswith('_'):
+            continue
         d = SKILLS_ROOT / folder
         if not d.is_dir():
             continue
         for skill_md in d.glob('*/SKILL.md'):
+            if skill_md.parent.name.startswith('_'):
+                continue
             parsed = parse_skill_md(skill_md)
-            if parsed and parsed['name'] not in seen:
+            if not parsed:
+                if unreadable is not None:
+                    unreadable.append(str(skill_md))
+                continue
+            if parsed['name'] not in seen:
                 skills.append(parsed)
                 seen.add(parsed['name'])
     return skills
@@ -224,8 +248,9 @@ def load_relevant_skills_with_meta(agent, context_text, max_skills=5,
     Always returns a 2-tuple; block is '' when nothing matches.
     """
     meta = {'skills_loaded': [], 'scores': {}, 'pool_size': 0,
-            'prompt_chars': 0, 'cycle_types': list(cycle_types or [])}
-    skills = list_skills_for_agent(agent, extra_folders=extra_folders)
+            'prompt_chars': 0, 'cycle_types': list(cycle_types or []),
+            'truncated': [], 'description_only': [], 'unreadable': []}
+    skills = list_skills_for_agent(agent, extra_folders=extra_folders, unreadable=meta['unreadable'])
     meta['pool_size'] = len(skills)
     if not skills:
         return '', meta
@@ -274,17 +299,24 @@ def load_relevant_skills_with_meta(agent, context_text, max_skills=5,
     lines.append('## Relevant Skills (for this decision context)')
     lines.append('')
     lines.append(f'_{len(chosen)} skill(s) selected from {len(skills)} available '
-                 f'for {agent}, ranked by context relevance:_')
+                 f'for {agent}, ranked by keyword overlap (not verified relevance). Reference methodology only: '
+                 f'no tool or script named below is available or was run._')
     lines.append('')
-    for i, (score, skill, content, truncated) in enumerate(chosen, 1):
+    for i, (score, skill, content, desc_only) in enumerate(chosen, 1):
         lines.append(f"### {i}. {skill['name']} (relevance={score})")
+        lines.append(f"_source: {skill.get('path')} · file date {skill.get('file_date', 'unknown')}_")
         if skill.get('description'):
             lines.append(f"_{skill['description']}_")
             lines.append('')
-        if truncated:
+        if desc_only:
             lines.append('(description only — full skill exceeded token budget)')
+            meta['description_only'].append(skill['name'])
+        elif len(content) > PER_SKILL_CHAR_CAP:
+            lines.append(content[:PER_SKILL_CHAR_CAP])
+            lines.append(f'(truncated: first {PER_SKILL_CHAR_CAP} of {len(content)} chars — not the full skill)')
+            meta['truncated'].append(skill['name'])
         else:
-            lines.append(content[:8000])  # hard char cap per skill
+            lines.append(content)
         lines.append('')
         meta['skills_loaded'].append(skill['name'])
         meta['scores'][skill['name']] = score
