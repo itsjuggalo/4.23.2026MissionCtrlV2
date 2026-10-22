@@ -14,11 +14,25 @@ RH = 53.17359499155181
 
 
 def _load(rel, name):
-    spec = importlib.util.spec_from_file_location(name, ROOT / rel)
-    m = importlib.util.module_from_spec(spec)
-    sys.path.insert(0, str((ROOT / rel).parent))
-    spec.loader.exec_module(m)
-    return m
+    """Load one script in isolation. Several scripts import a top-level `lib` package — ~/scripts/lib and missionctrl
+    pipeline/lib share that name — so whichever another test imported first used to win (order-dependent failure:
+    `cannot import name 'afterhours' from 'lib'`). Each load starts with no cached `lib*` modules and the original
+    sys.path, and both are restored afterwards."""
+    saved_path = list(sys.path)
+    saved_lib = {k: v for k, v in sys.modules.items() if k == "lib" or k.startswith("lib.")}
+    for k in saved_lib:
+        del sys.modules[k]
+    try:
+        spec = importlib.util.spec_from_file_location(name, ROOT / rel)
+        m = importlib.util.module_from_spec(spec)
+        sys.path.insert(0, str((ROOT / rel).parent))
+        spec.loader.exec_module(m)
+        return m
+    finally:
+        for k in [k for k in sys.modules if k == "lib" or k.startswith("lib.")]:
+            del sys.modules[k]
+        sys.modules.update(saved_lib)
+        sys.path[:] = saved_path
 
 
 def test_all_rsi_paths_equal_robinhood():
