@@ -37,3 +37,12 @@ def test_prompt_capped(monkeypatch):
     monkeypatch.setattr(subprocess, "run", fake)
     _, status, _ = tbg.llm_read(["• " + "x" * 9000], {})
     assert len(seen["p"]) == tbg.READ_MAX_CHARS and status.startswith("unavailable (llm-route: codex breaker open")
+
+
+def test_flow_winner_is_labelled_hindsight_peak():
+    """W7 MC-AUD-098: flow_winners is a winner-only, first→max-print label — never shown as a return."""
+    fresh = datetime.now(timezone.utc).isoformat()
+    b = tbg.template_brief([], [{"symbol": "MU", "option_type": "C", "strike": 900, "expiry": "2026-11-20",
+                                 "peak_pct": 1457, "detected_at": fresh}], [], None)
+    line = next(x for x in b if "flow winner" in x)
+    assert "hindsight peak +1457%" in line and "not a return" in line

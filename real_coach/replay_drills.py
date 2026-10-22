@@ -95,11 +95,22 @@ def build_series(sym, ac, entry_at, exit_at, pre_days=45, post_days=32):
     return {"dates": dates, "vals": [round(v / base * 100, 2) for v in vals], "entry_idx": ei}
 
 
-def first_idx_below(s, entry_idx, pct):
-    for i in range(entry_idx + 1, len(s["vals"])):
+def first_idx_below(s, entry_idx, pct, end_idx=None):
+    """First session after entry at/under `pct` (negative). W7 MC-AUD-095: the search stops at `end_idx` (the exit
+    session) — a crossing after Mike had already sold is not a decision he faced."""
+    last = len(s["vals"]) - 1 if end_idx is None else min(end_idx, len(s["vals"]) - 1)
+    for i in range(entry_idx + 1, last + 1):
         if s["vals"][i] <= 100 + pct:  # pct is negative
             return i
     return None
+
+
+def hold_decision_idx(s, exit_at, pct):
+    """Decision point inside the holding period: the first close at/under `pct` before the exit, else 5 sessions in
+    (never past the exit session)."""
+    xi = idx_of_date(s, exit_at) if exit_at else len(s["vals"]) - 1
+    di = first_idx_below(s, s["entry_idx"], pct, xi)
+    return di if di is not None else max(s["entry_idx"], min(s["entry_idx"] + 5, xi))
 
 
 def idx_of_date(s, date_str):
@@ -135,9 +146,7 @@ def main() -> int:
         s = build_series(r["symbol"], r["asset_class"], r["entry_at"], r["exit_at"])
         if not s:
             continue
-        di = first_idx_below(s, s["entry_idx"], -10)
-        if di is None:
-            di = min(s["entry_idx"] + 5, len(s["vals"]) - 5)
+        di = hold_decision_idx(s, r["exit_at"], -10)
         used.add(key)
         size = abs(r["qty"] * r["entry_px"])
         drills.append({
@@ -175,8 +184,9 @@ def main() -> int:
                          pre_days=30, post_days=40)
         if not s:
             continue
-        di = first_idx_below(s, s["entry_idx"], -50)
-        if di is None:
+        di = first_idx_below(s, s["entry_idx"], -50,
+                             idx_of_date(s, r["exit_at"]) if r["exit_at"] else None)
+        if di is None:   # never crossed −50% on a close while held
             continue
         used.add(key)
         size = abs(r["qty"] * r["entry_px"])
@@ -292,8 +302,7 @@ def main() -> int:
             s = build_series(r["symbol"], r["asset_class"], r["entry_at"], r["exit_at"])
             if not s:
                 continue
-            di = first_idx_below(s, s["entry_idx"], -10) or min(
-                s["entry_idx"] + 5, len(s["vals"]) - 5)
+            di = hold_decision_idx(s, r["exit_at"], -10)
             used.add(key)
             size = abs(r["qty"] * r["entry_px"])
             drills.append({
