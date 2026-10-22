@@ -742,12 +742,12 @@ HELP_TEXT = (
     "`/news <q>` catalysts · `/regime` market regime · `/recall <q>` knowledge base\n\n"
     "**💼 Trades & planning**\n"
     "`/scorecard` EOD book + pick grades · `/journal` recap · `/week` weekly · `/trades` fills\n"
-    "`/levels <t>` support/resistance · `/pick <t>` action card\n"
+    "`/levels <t>` computed levels + menu + hit rates (no AI) · `/dossier <t>` full dossier · `/pick <t>` action card\n"
     "`/flowpicks` ranked flow · `/signals` source liveness\n\n"
     "**🐳 Flow intel (instant, no AI)**\n"
     "`/contracts <ticker|company>` every contract seen across Firebase/flow/UW/scrapers/decipher · "
     "`/intel <t>` one-screen · `/flow <t>` · `/tide` · `/hot` · `/gex <t>` · `/oi <t>` · `/iv <t>` · "
-    "`/darkpool <t>` · `/uw <t>`\n\n"
+    "`/darkpool <t>` · `/uw <t>` · `/sweeps` · `/odte` · `/winners`\n\n"
     "**👁️ Watchlist** (feeds your scheduled intel)\n"
     "`/watch <t>` · `/unwatch <t>` · `/watchlist`\n\n"
     "**🐦 Intel & briefs**\n"
@@ -791,17 +791,6 @@ async def scorecard_cmd(interaction: discord.Interaction):
     await _send_chunks(interaction, await asyncio.to_thread(_run))
 
 
-@tree.command(name="levels", description="Key support/resistance levels + a one-line momentum bias")
-@app_commands.describe(ticker="ticker")
-async def levels_cmd(interaction: discord.Interaction, ticker: str):
-    await interaction.response.defer(thinking=True)
-    t = ticker.upper().strip()
-    prompt = (f"For {t}: list the key intraday and swing SUPPORT and RESISTANCE levels with the "
-              f"current price. Do NOT give entries, stops, targets, sizing or risk figures. "
-              f"Format tight. End with a one-line momentum observation. Use web search for live levels.")
-    await _send_chunks(interaction, await _answer_skill(prompt, timeout=300))
-
-
 # ─── UW-STYLE INTEL (deterministic, no LLM / subscription spend) ──────────────
 # Thin wrappers over MissionCtrl's pipeline/intel/query.py CLI (flow.db, Firebase,
 # UW Discord reader, CBOE delayed chains, FINRA dark-pool layer). Read-only.
@@ -841,6 +830,59 @@ async def _send_lines(interaction: discord.Interaction, text: str) -> None:
 async def _intel(interaction: discord.Interaction, *args: str) -> None:
     await interaction.response.defer(thinking=True)
     await _send_lines(interaction, await asyncio.to_thread(_run_intel, [a for a in args if a]))
+
+
+# R32 (Mike 2026-10-21): levels are computed from data, never written by an LLM or taken from a web search.
+@tree.command(name="levels", description="Computed levels (levels.v1): entry, TP1/TP2/Final, SL, the full menu + hit rates")
+@app_commands.describe(ticker="ticker or company name", side="long (default) or short")
+@app_commands.choices(side=[app_commands.Choice(name="long", value="long"), app_commands.Choice(name="short", value="short")])
+async def levels_cmd(interaction: discord.Interaction, ticker: str, side: Optional[app_commands.Choice[str]] = None):
+    await _intel(interaction, "levels", ticker, "--side", side.value if side else "long")
+
+
+@tree.command(name="dossier", description="One-ticker dossier: every intel block with its source + as_of")
+@app_commands.describe(ticker="ticker or company name")
+async def dossier_cmd(interaction: discord.Interaction, ticker: str):
+    await _intel(interaction, "dossier", ticker)
+
+
+# Same deterministic readers as Telegram's /sweeps /odte /winners (quantum_tg, flow_chase) — no LLM.
+_TAGS = (("<b>", "**"), ("</b>", "**"), ("<i>", "*"), ("</i>", "*"), ("<code>", "`"), ("</code>", "`"))
+
+
+def _html_to_md(text: str) -> str:
+    import html as _html
+    for a, b in _TAGS:
+        text = text.replace(a, b)
+    text = re.sub(r'<a href="([^"]+)">([^<]*)</a>', r"\2 (<\1>)", text)
+    return _html.unescape(re.sub(r"</?(u|s|pre)(\s[^>]*)?>", "", text))
+
+
+async def _deterministic(interaction: discord.Interaction, fn) -> None:
+    await interaction.response.defer(thinking=True)
+    try:
+        out = await asyncio.to_thread(fn)
+    except Exception as e:  # noqa: BLE001
+        out = f"⚠️ error: {e}"
+    await _send_lines(interaction, _html_to_md(out or "[empty]"))
+
+
+@tree.command(name="sweeps", description="Live whale sweeps — big-money positioning (same as Telegram /sweeps)")
+async def sweeps_cmd(interaction: discord.Interaction):
+    import quantum_tg
+    await _deterministic(interaction, quantum_tg.sweeps)
+
+
+@tree.command(name="odte", description="0DTE / short-DTE flow (same as Telegram /odte)")
+async def odte_cmd(interaction: discord.Interaction):
+    import quantum_tg
+    await _deterministic(interaction, quantum_tg.odte)
+
+
+@tree.command(name="winners", description="App-pushed flow + chase-timing evidence (same as Telegram /winners)")
+async def winners_cmd(interaction: discord.Interaction):
+    import flow_chase
+    await _deterministic(interaction, flow_chase.winners)
 
 
 @tree.command(name="intel", description="One-screen intel on a ticker: flow, GEX, IV, dark pool")
@@ -933,7 +975,7 @@ for _cmd, _param in ((ticker_cmd, "symbol"), (options_cmd, "ticker"), (levels_cm
                      (deck_cmd, "ticker"), (payoff_cmd, "ticker"), (watch_cmd, "ticker"),
                      (unwatch_cmd, "ticker"), (intel_cmd, "ticker"), (contracts_cmd, "query"),
                      (flow_cmd, "ticker"), (gex_cmd, "ticker"), (oi_cmd, "ticker"), (iv_cmd, "ticker"),
-                     (darkpool_cmd, "ticker"), (uw_cmd, "ticker")):
+                     (darkpool_cmd, "ticker"), (uw_cmd, "ticker"), (dossier_cmd, "ticker")):
     try:
         _cmd.autocomplete(_param)(_ac_ticker)
     except Exception as _e:  # noqa: BLE001

@@ -345,7 +345,26 @@ FREE_CHAT_LANES = {"astrology"}
 # Every trading command the cockpit exposes — refused outright on an `astro_only` lane so
 # the astrology bot stays astrology-ONLY (Mike, 2026-08-10).
 TRADING_CMDS = {"/pick", "/picks", "/book", "/grade", "/eod", "/flow", "/crypto", "/explain",
-                "/sweeps", "/odte", "/greeks", "/winners", "/chase", "/flowwin", "/x", "/news"}
+                "/sweeps", "/odte", "/greeks", "/winners", "/chase", "/flowwin", "/x", "/news",
+                "/levels", "/dossier", "/intel", "/gex", "/oi", "/iv"}
+
+# Deterministic MissionCtrl intel CLI (pipeline/intel/query.py) — same reader as the aime Discord bot; no LLM.
+# /levels is levels.v1 (R32: computed, never written by an LLM).
+INTEL_CMDS = {"/levels": "levels", "/dossier": "dossier", "/intel": "intel", "/gex": "gex", "/oi": "oi", "/iv": "iv"}
+
+
+def run_intel(args, timeout=120):
+    try:
+        r = subprocess.run(["/home/itsju/.venv/bin/python", "-m", "pipeline.intel.query", *args], capture_output=True,
+                           text=True, timeout=timeout, cwd="/AIWorkWSL/web/missionctrl")
+        out = (r.stdout or "").strip()
+        if r.returncode != 0:
+            return f"⚠️ intel error rc={r.returncode}: {(r.stderr or out).strip()[-400:]}"
+        return out or "[intel returned nothing]"
+    except subprocess.TimeoutExpired:
+        return f"⚠️ intel timed out after {timeout}s"
+    except Exception as e:  # noqa: BLE001
+        return f"⚠️ intel error: {e}"
 
 def astro_factcheck(answer):
     """Run the astrology lane's free-chat answer through astro_verify.py --check-text: every
@@ -592,6 +611,8 @@ def run_bot(botkey):
                 f"📈 /pick — the #1 desk contract (verified, with cost)\n"
                 f"📈 /picks · /flow · 🔪 /sweeps — live whale flow · ⚡ /odte\n"
                 f"🔔 /winners — app-pushed flow + chase-timing evidence · /chase [TKR]\n"
+                f"📏 /levels TKR [short] — computed levels + menu + hit rates · 🗂 /dossier TKR\n"
+                f"🐳 /intel · /gex · /oi · /iv TKR — instant flow intel (no AI)\n"
                 f"₿ /crypto — BTC desk (24/7)\n"
                 f"📐 /greeks [TKR] · /book · /eod · 🎓 /grade · 📰 /news\n"
                 f"𝕏 /x [TKR] — live X/Twitter trader sentiment (Grok)\n"
@@ -814,6 +835,19 @@ def run_bot(botkey):
                     else:
                         send_html(chat_id, quantum_tg.greeks())
                     print(f"[{name}] /greeks {arg}", flush=True)
+                    continue
+                # /levels /dossier /intel /gex /oi /iv <TKR> → intel CLI (deterministic, no LLM)
+                if cmd0 in INTEL_CMDS:
+                    arg = text.split(maxsplit=1)[1].strip() if " " in text else ""
+                    if not arg:
+                        send_reply(chat_id, f"usage: {cmd0} NVDA" + (" [short]" if cmd0 == "/levels" else ""))
+                        continue
+                    args = [INTEL_CMDS[cmd0], *arg.split()]
+                    if cmd0 == "/levels" and args[-1].lower() in ("short", "long"):
+                        args = args[:-1] + ["--side", args[-1].lower()]
+                    tg("sendChatAction", chat_id=chat_id, action="typing")
+                    send_reply(chat_id, run_intel(args))
+                    print(f"[{name}] {cmd0} {arg}", flush=True)
                     continue
                 # /winners (app-pushed flow + chase verdict) · /chase <TKR> (full read)
                 if cmd0 in ("/winners", "/chase", "/flowwin"):
