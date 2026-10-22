@@ -10,7 +10,9 @@ FINRA dark pool, UW crier, Firebase, scraper streams) with source + as_of on eve
 Two rounds: each side writes its read, then answers the other. Each side's prompt is capped at MAX_FACTS chars.
 Claude runs on the Claude plan (LLM_ROUTE=claude), Codex on the ChatGPT plan (llm-route → codex, circuit breaker).
 If a side fails, its slot is posted as "skipped" with the reason — the other side still posts.
-No stops, targets, sizes or caps (DECISIONS R5). Portfolio holdings are never written to disk (global rule).
+Levels (DECISIONS R32): each name's computed levels.v1 menu goes into the facts; the models cite menu ids, and a
+validator redacts any price number on neither the menu nor the facts. No sizes, no caps. Portfolio holdings are never
+written to disk (global rule) — the validator gets its input on stdin.
 """
 from __future__ import annotations
 
@@ -35,7 +37,7 @@ RULES = """You are {who}, one side of a daily debate with {other}. Mike (a retai
 Rules:
 - Advisory only. Mike makes every decision and places every order himself in Robinhood (stocks/options) or Coinbase (crypto).
 - Use ONLY the facts below. Every number you cite must appear in them, with its source/as-of. Never invent a price, level or date.
-- No stop-loss, no price target, no position size, no risk cap (Mike's rule R5). Talk about what the evidence says, momentum, catalysts, what would change the read.
+- Levels (Mike's rule R32): an entry zone, take-profit or stop may ONLY come from the LEVEL MENU in the facts, cited by id (e.g. "TP1 NVDA:L7 231.49"). Any price on neither the menu nor the facts is redacted. Never a position size or a risk cap. Talk about what the evidence says, momentum, catalysts, what would change the read.
 - If an input is missing or stale, say so plainly; do not fill it in.
 - Give both sides: the bull case and the bear case. Executable vehicles only (no naked shorts — puts or inverse ETFs).
 - Plain English, short bullets, max {limit} characters. No preamble.
@@ -52,6 +54,46 @@ def run(cmd: list[str], timeout=120, env=None, inp: str | None = None) -> tuple[
         return p.returncode, (p.stdout or "") + ("" if p.returncode == 0 else (p.stderr or "")[-400:])
     except subprocess.TimeoutExpired:
         return 124, f"timed out after {timeout}s"
+
+
+def levels(symbols: list[str]) -> dict:
+    """levels.v1 menus + Long/Short lines per symbol (missionctrl pipeline/decision/levels/prompt.py). On failure the
+    block says so and tells the models to give no levels; the debate still runs."""
+    if not symbols:
+        return {"symbols": {}, "block": ""}
+    rc, out = run([PY, "-m", "pipeline.decision.levels.prompt", "menus", ",".join(symbols)], timeout=300)
+    if rc == 0:
+        try:
+            return json.loads(out.strip().splitlines()[-1])
+        except (ValueError, IndexError):
+            pass
+    return {"symbols": {}, "block": f"LEVELS UNAVAILABLE (levels.v1 engine rc {rc}) — give no entry/TP/SL levels."}
+
+
+def check_levels(text: str, lv: dict, facts: str) -> str:
+    """Redact numbers on neither the level menu nor the facts (R32 validator); append what was rejected."""
+    rc, out = run([PY, "-m", "pipeline.decision.levels.prompt", "validate"], timeout=60,
+                  inp=json.dumps({"text": text, "symbols": lv.get("symbols", {}), "facts": facts}))
+    try:
+        v = json.loads(out.strip().splitlines()[-1])
+    except (ValueError, IndexError):
+        return text + f"\n_⚠️ levels validator unavailable (rc {rc}) — numbers above are unchecked._"
+    if v["ok"]:
+        return text
+    why = ", ".join([f"{n:g}" for n in v["unknown_numbers"]] + v["unknown_ids"])
+    return v["redacted"] + f"\n_⚠️ levels validator rejected (not on the level menu or in the facts): {why}_"
+
+
+def levels_chunk(lv: dict) -> str | None:
+    rows = []
+    for sym, v in (lv.get("symbols") or {}).items():
+        if v.get("status") == "OK":
+            rows += [f"**{sym}** {v['long']}", f"**{sym}** {v['short']}"]
+        else:
+            rows.append(f"**{sym}** levels UNAVAILABLE ({'; '.join(m['reason'] for m in v.get('missing', [])[:2])})")
+    if not rows:
+        return None
+    return "📐 **Computed levels** (levels.v1 · method + source + as_of on the dashboard · R32, no size)\n" + "\n".join(rows)
 
 
 def intel(*args: str, limit=1400) -> str:
@@ -80,7 +122,7 @@ def _crypto_trend(asset: str) -> str:
         return f" · trend UNAVAILABLE (Coinbase candles: {type(e).__name__})"
 
 
-def portfolio_facts() -> str:
+def portfolio_facts() -> tuple[str, dict]:
     from live_holdings import gather
     h = gather()
     L = [f"PORTFOLIO FACTS · read live {h['as_of_et']} ET · Robinhood + Coinbase, read-only"]
@@ -126,10 +168,13 @@ def portfolio_facts() -> str:
     if h["missing"]:
         L.append("MISSING: " + "; ".join(h["missing"]))
     unders = list(dict.fromkeys([s["symbol"] for s in h["stocks"]] + [o["underlying"] for o in h["options"]]))[:4]
+    lv = levels(unders)
+    if lv.get("block"):
+        L += ["", lv["block"]]
     for u in unders:
         L.append("")
         L.append(intel("intel", u, limit=1500))
-    return "\n".join(L)[:MAX_FACTS]
+    return "\n".join(L)[:MAX_FACTS], lv
 
 
 _CONTRACT_LINE = r"\*\*([A-Z][A-Z.]{0,5}) (\d\d)/(\d\d)/(\d\d) (\d+(?:\.\d+)?)([CP])\*\*"   # "**NVDA 10/30/26 220C**"
@@ -197,7 +242,7 @@ def contract_moves(text: str, top: int = 6) -> list[str]:
     return out
 
 
-def hot_facts() -> tuple[str, list[str]]:
+def hot_facts() -> tuple[str, list[str], dict]:
     hot = intel("hot", limit=1500)
     names = []
     for line in hot.splitlines():
@@ -224,7 +269,10 @@ def hot_facts() -> tuple[str, list[str]]:
         # first in the facts so the 9K trim never cuts it
         L[1:1] = ["", "**Contract moves since first flow print** (Robinhood option bars; anchor = 5-min bar of the first print, "
                        "else that day's close):", *moves]
-    return "\n".join(L)[:MAX_FACTS], names
+    lv = levels(names)
+    if lv.get("block"):
+        L[1:1] = ["", lv["block"]]       # also ahead of the trim: the models may only cite levels from this menu
+    return "\n".join(L)[:MAX_FACTS], names, lv
 
 
 # ---------- models ----------
@@ -308,14 +356,14 @@ def main():
     t0 = time.time()
     stamp = now_et().strftime("%a %m-%d %H:%M ET")
     if a.topic == "portfolio":
-        facts = portfolio_facts()
+        facts, lv = portfolio_facts()
         task = ("Review Mike's current holdings. For each position: what the evidence says now (momentum, flow, catalysts, "
                 "time decay for options) and whether the original thesis still holds. Flag the weakest and strongest position.")
         title = f"⚔️ **Claude vs Codex — portfolio debate** · {stamp}\n_Holdings read live (read-only) from Robinhood + Coinbase. Advisory only — you decide._"
         channel = CHANNELS["portfolio"]
         names = []
     else:
-        facts, names = hot_facts()
+        facts, names, lv = hot_facts()
         task = ("From today's hottest flow names, pick the 1–3 most interesting specific contracts (from the contracts lists) "
                 "and argue whether the flow is conviction or hedging/noise. Name the contract exactly as listed.")
         title = (f"🔥 **Claude vs Codex — hot contract picks** · {stamp}\n_Names: {', '.join(names) or 'none today'} · "
@@ -323,12 +371,14 @@ def main():
         channel = None if a.dry_run else hot_channel_id()
     res = debate(facts, task)
     r1, r2 = res["r1"], res["r2"]
-    chunks = [title, f"🟠 **Claude — read**\n{r1['Claude'][1]}", f"🟢 **Codex — read**\n{r1['Codex'][1]}"]
+    ck = lambda r, s: check_levels(r[s][1], lv, facts) if r[s][0] else r[s][1]
+    chunks = [title] + ([c] if (c := levels_chunk(lv)) else [])
+    chunks += [f"🟠 **Claude — read**\n{ck(r1, 'Claude')}", f"🟢 **Codex — read**\n{ck(r1, 'Codex')}"]
     if r2:
-        chunks += [f"🟠 **Claude — answers Codex**\n{r2['Claude'][1]}", f"🟢 **Codex — answers Claude**\n{r2['Codex'][1]}"]
+        chunks += [f"🟠 **Claude — answers Codex**\n{ck(r2, 'Claude')}", f"🟢 **Codex — answers Claude**\n{ck(r2, 'Codex')}"]
     else:
         chunks.append("_Round 2 skipped: one side did not answer round 1._")
-    chunks.append(f"_Facts {len(facts):,} chars per side · {time.time() - t0:.0f}s · no stops/targets/sizes by rule (R5)._")
+    chunks.append(f"_Facts {len(facts):,} chars per side · {time.time() - t0:.0f}s · levels from the levels.v1 menu only, validator-checked; no sizes (R32)._")
     post(channel, chunks, a.dry_run)
     LOG_DIR.mkdir(parents=True, exist_ok=True)
     meta = {"topic": a.topic, "at_et": now_et().isoformat(timespec="seconds"), "facts_chars": len(facts),
