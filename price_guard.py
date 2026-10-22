@@ -6,7 +6,7 @@ the regular session, 300 s pre/after-hours, today's print only — Mike's decisi
 This module only path-loads it, so the pipeline lib never lands on sys.path. If it
 can't be loaded, every check fails closed — a sender holds the card, it never guesses.
 
-    from price_guard import check, src_label, fresh, option_mid, alpaca_last, alpaca_option_mid
+    from price_guard import check, src_label, fresh, option_mid, option_quotes, alpaca_last, alpaca_option_mid
 """
 from __future__ import annotations
 
@@ -71,6 +71,63 @@ def option_mid(occ: str, now: datetime | None = None, alpaca_node: dict | None =
         return mid, chk, src_label("Alpaca (not Robinhood)", lq.get("t")), {"bid": lq.get("bp"), "ask": lq.get("ap")}
     return None, {"ok": False, "reason": "no Robinhood or fallback option quote", "age_s": None, "hhmm": None,
                   "window": None}, None, {}
+
+
+def _rh_quote_mod():
+    """lib/rh_quote loaded by file path: callers outside ~/scripts (MissionCtrl pipeline) have their own `lib`."""
+    spec = importlib.util.spec_from_file_location("pg_rh_quote", os.path.join(os.path.dirname(os.path.abspath(__file__)),
+                                                                           "lib", "rh_quote.py"))
+    mod = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(mod)
+    return mod
+
+
+def last_session_day(now: datetime | None = None):
+    """The most recent COMPLETED regular session (today after its close, else the previous trading day)."""
+    clk = getattr(QC, "_clock", None)
+    if clk is None:
+        return None
+    now = (now or datetime.now(timezone.utc)).astimezone(ET)
+    today = now.date()
+    if clk.is_trading_day(today) and now >= clk.session_close(today):
+        return today
+    return clk.previous_trading_day(today)
+
+
+def option_quotes(occs, now: datetime | None = None, mode: str = "live") -> dict:
+    """Batch Robinhood option quotes (one read-only lib/rh_quote call; Mike GO 2026-10-22 option marks → RH).
+
+    mode "live":  check() — today's quote within the send-guard age (gating at decision time).
+    mode "close": the quote must be from last_session_day() (a nightly closing mark).
+    -> {occ: {ok, mid, bid, ask, as_of (epoch), as_of_et, provider, src, reason}}. mid is None unless ok.
+    A contract Robinhood cannot price gets ok False, provider None — the caller's labelled fallback decides."""
+    occs = list(dict.fromkeys(o for o in (occs or []) if o))
+    try:
+        rq = _rh_quote_mod().rh_quotes(occs)
+    except Exception as e:  # noqa: BLE001 — no RH = every contract falls to the caller's fallback
+        rq, err = {}, f"Robinhood unavailable ({type(e).__name__})"
+    else:
+        err = "Robinhood could not price it"
+    day = last_session_day(now) if mode == "close" else None
+    out = {}
+    for occ in occs:
+        q = rq.get(occ)
+        if not q:
+            out[occ] = {"ok": False, "mid": None, "bid": None, "ask": None, "as_of": None, "as_of_et": None,
+                        "provider": None, "src": None, "reason": err}
+            continue
+        ts = datetime.fromtimestamp(q["as_of"], timezone.utc).isoformat()
+        if mode == "close":
+            qd = datetime.fromtimestamp(q["as_of"], ET).date()
+            ok = day is not None and qd == day
+            reason = None if ok else (f"quote from {qd} — last session {day}" if day else "market calendar unavailable")
+        else:
+            chk = check(ts, q["mid"], now=now)
+            ok, reason = chk["ok"], chk["reason"]
+        out[occ] = {"ok": ok, "mid": q["mid"] if ok else None, "bid": q["bid"], "ask": q["ask"], "as_of": q["as_of"],
+                    "as_of_et": q.get("as_of_et"), "provider": "robinhood", "src": src_label("Robinhood", ts),
+                    "reason": reason}
+    return out
 
 
 def src_label(source: str, ts) -> str:
