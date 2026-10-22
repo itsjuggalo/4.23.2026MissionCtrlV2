@@ -114,11 +114,12 @@ VAULT_IDENTITY = {
         desc=("Trading digest (push, silent). Pullback watch, runner radar, flow pulse, "
               "explosion watch and FYI flow notes folded into a few compact digests a day. "
               "Entries/exits/🟢 TRADE stay in Trading Command.")),
-    "telegram_hermes_bot_token": dict(
-        name="Hermes Agent", avatar="stukov",   # 2026-09-28: was "Hermes Relay"
-        short="Chat with the Hermes agent (hermes-gateway on the laptop).",
-        desc=("Hermes agent. DM to talk to the Hermes agent running on the laptop "
-              "(PM2 hermes-gateway). No trading alerts land here. I will not fail you.")),
+    "telegram_hermes_bot_token": dict(   # 2026-10-22: Boba's lane (was "Hermes Agent"; hermes-gateway stopped 09-30)
+        name="Boba", avatar="stukov",
+        short="Ask Boba about the market or a ticker — advisory only, you place every order.",
+        desc=("Boba, MissionCtrl's front door. Ask about a ticker or the market (e.g. 'NVDA: swing?', "
+              "'$BTC funding', 'SPY — market environment'). Every number carries its source and time; "
+              "missing data says UNAVAILABLE. Advisory only — you decide and place every order. /help /status")),
     "telegram_openclaw_bot_token": dict(
         name="OpenClaw Agent", avatar="duran",   # 2026-09-28: was "OpenClaw Grok" (Oracle box retired)
         short="Chat with the OpenClaw agent (openclaw-gateway on the laptop).",

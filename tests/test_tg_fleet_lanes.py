@@ -97,3 +97,11 @@ def test_ledger_stamps_the_pinned_bot_id(tmp_path, monkeypatch):
     G.record("unknown_lane", "x", True, src="t")
     rows = sqlite3.connect(db).execute("select fn, bot_id from sends order by id").fetchall()
     assert rows == [("screener", 8520537147), ("unknown_lane", None)]
+
+
+def test_boba_desk_has_its_own_unused_bot():
+    """Mike 2026-10-22: Boba's Q&A lane on a bot nothing else polls or sends through (not @Boba2: lane-bots polls it)."""
+    assert F.BOT_ID["boba_desk"] == 8637552667 and F.KIND["boba_desk"] == "trading"
+    assert F.FLEET["boba_desk"]["role"] == "interactive"
+    assert [f for f in F.FLEET if F.BOT_ID.get(f) == 8637552667] == ["boba_desk"]
+    assert "hermes_relay" not in F.FLEET and F.BOT_ID["boba_desk"] != F.BOT_ID["trading_digest"]

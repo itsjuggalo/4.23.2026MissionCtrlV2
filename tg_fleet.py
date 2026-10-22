@@ -96,7 +96,8 @@ FLEET = {
     # 2026-10-22 (MC-AUD-084): trend_scanner moved off this bot — WinMeals is now the only job on it.
     "winmeals":        dict(user="Deepseeker_Bot",           avatar="medic",           role="push",        src=("vault", "telegram.trend_scanner")),
     # ── infra (not chat targets) ────────────────────────────────────────────
-    "hermes_relay":    dict(user="Gumroadie_bot",           avatar="dragoon",         role="infra",       src=("vault", "telegram_hermes_bot_token")),
+    # RETIRED 2026-10-22: hermes_relay (@Gumroadie_bot "Hermes Agent") — hermes-gateway stopped since 2026-09-30;
+    # the bot now carries boba_desk (see MOVED). Vault key telegram_hermes_bot_token kept.
     "openclaw_grok":   dict(user="OpenclawGrok727_Bot",     avatar="ghost",           role="infra",       src=("vault", "telegram_openclaw_bot_token")),
     # laptop_control = RESERVED slot for a Telegram-channel gateway (tg-channel). Channel deferred
     # 2026-06-21: Mike at the 20-bot BotFather cap + phone-hub (Remote Control) already covers phone
@@ -114,6 +115,12 @@ FLEET = {
     # The senders above stay send-only (they never getUpdates), so they cannot collide with the lane's poller.
     "flow_momentum":      dict(user="JazzyHazzy_Bot",  avatar="arbiter",  role="interactive", src=("vault", "telegram.jazzy_relay")),
     "contract_forensics": dict(user="oOrionz_Bot",     avatar="sentinel", role="interactive", src=("vault", "telegram.orion_relay")),
+    # 2026-10-22 (Mike: "use one of the bots that isn't being used"): Boba's own Q&A lane, PM2 boba-lane-boba
+    # (telegram_lane.py boba). New fn (not in MOVED): the lane was pinned to @Boba2 but never went live there — lane-bots
+    # polls @Boba2 for trading_digest, so a second poller would 409.
+    # @Gumroadie_bot was the Hermes agent's chat: hermes-gateway stopped since 2026-09-30, 0 ledger sends.
+    # Restarting hermes-gateway on this token would fight the lane (409) — give Hermes another bot first.
+    "boba_desk":          dict(user="Gumroadie_bot",   avatar="dragoon",  role="interactive", src=("vault", "telegram_hermes_bot_token")),
     "grok_scout":      dict(user="Grootk_Bot",              avatar="goliath",         role="spare",       src=("cloud", None)),
     # retired→winmeals 2026-09-15: confirmed idle (crontab line commented out, no live
     # sender referenced it) — its vault token (telegram.trend_scanner) is now also
@@ -139,7 +146,7 @@ BOT_ID = {
     "research_desk": 8873738822, "screener": 8520537147, "flow_signals": 8832281008,
     "trading_digest": 8732615829, "trading_recaps": 8971365609, "crypto_desk": 8628283615,
     "flow_digest": 8732615829, "daily_briefs": 8519775882, "winmeals": 8950043596,
-    "hermes_relay": 8637552667, "openclaw_grok": 8997890122, "flow_momentum": 8699883048,
+    "boba_desk": 8637552667, "openclaw_grok": 8997890122, "flow_momentum": 8699883048,
     "contract_forensics": 8812859752, "grok_scout": 8628283615, "trend_scanner": 8519775882,
 }
 # What each lane carries. One bot never mixes "trading" with another kind (`tg_fleet.py lanes`
@@ -151,7 +158,8 @@ KIND = {
     "flow_digest": "trading", "daily_briefs": "trading", "flow_momentum": "trading",
     "contract_forensics": "trading", "grok_scout": "trading", "trend_scanner": "trading",
     "system_health": "ops", "life_wellness": "personal", "astrology": "personal",
-    "winmeals": "app", "hermes_relay": "infra", "openclaw_grok": "infra", "laptop_control": "infra",
+    "boba_desk": "trading",
+    "winmeals": "app", "openclaw_grok": "infra", "laptop_control": "infra",
 }
 # A lane whose bot changed: the bot it used before and until when (ET), so its old output (in the
 # old chat) and new output stay traceable (MC-AUD-088). The tg ledger also stamps bot_id per send.

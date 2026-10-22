@@ -125,6 +125,12 @@ PIPELINE_MENU = C([
     ("learn", "Random learning quiz"),
 ])
 
+# Boba's Q&A lane (MissionCtrl telegram_lane.py boba, PM2 boba-lane-boba): free-text questions; only /help and /status.
+BOBA = C([
+    ("help", "How to ask Boba (ticker, market, horizon)"),
+    ("status", "Service health — no analysis"),
+])
+
 # bot -> (token key, kind file|vault, menu)
 FLEET = {
     "trading_command": ("telegram_laptopclaude_bot_token", "f", COCKPIT_FULL),
@@ -155,9 +161,10 @@ FLEET = {
     # "daily_briefs":    ("telegram.daily_briefs",           "v", CLEAR),
     # media_gens retired 2026-10-22 — its bot (vault telegram.media_gens) is the push-only `screener` lane.
     "screener":        ("telegram.media_gens",             "v", CLEAR),
-    # hermes_relay / openclaw_grok: menus are registered by their own live apps (PM2
-    # hermes-gateway / openclaw-gateway) — CLEARing them here would wipe working menus.
-    # "hermes_relay":    ("telegram_hermes_bot_token",       "v", CLEAR),
+    # 2026-10-22: the Hermes bot (@Gumroadie_bot) is now Boba's lane (hermes-gateway stopped since 09-30).
+    "boba_desk":       ("telegram_hermes_bot_token",       "v", BOBA),
+    # openclaw_grok: its menu is registered by its own live app (PM2 openclaw-gateway) — CLEARing it here would
+    # wipe a working menu.
     # "openclaw_grok":   ("telegram_openclaw_bot_token",     "v", CLEAR),
     # jazzy_relay / orion_relay retired 2026-09-15 (removed from tg_fleet + tg_responder).
     "grok_scout":      ("telegram.grok_scout",             "v", XBOT),
