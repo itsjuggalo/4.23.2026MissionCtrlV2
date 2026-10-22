@@ -20,6 +20,8 @@ from __future__ import annotations
 import argparse
 import json
 import math
+import os
+import subprocess
 import sys
 from datetime import datetime, timezone
 from zoneinfo import ZoneInfo
@@ -42,7 +44,9 @@ ET = ZoneInfo("America/New_York")
 DATA = Path.home() / "trading" / "signals" / "option-scraper" / "data"
 FILES = ["flow_alerts_today.json", "flow2_alerts_today.json"]
 PICKLOG_DIR = Path.home() / ".openclaw" / "state"
-IV_FORECAST = Path("/AIWorkWSL/labs/quantum/out/iv_forecast.json")  # quantum desk IV grader
+IV_FORECAST = Path("/AIWorkWSL/labs/quantum/out/iv_forecast.json")
+MC_REPO = Path(os.environ.get("MC_REPO", "/AIWorkWSL/web/missionctrl"))
+MC_PY = os.environ.get("MC_PY", str(Path.home() / ".venv/bin/python"))  # quantum desk IV grader
 
 
 def _load_iv_map() -> dict:
@@ -356,6 +360,8 @@ def build() -> str | None:
         lines.append("\n**🟢 TAPE CONFIRMATION (0DTE — direction, not swing buys):**")
         lines += conf
 
+    ps = _pick_scores([r[0].get("OptionSymbol") for r in bulls + bears])
+
     def _pickline(idx, rec):
         a, fv, voi, dte, tag, sp, otm = rec
         vol = int(a.get("Volume", 0) or 0)
@@ -368,6 +374,8 @@ def build() -> str | None:
         line = f"**{idx}. {_fmt(a)}** ({dte} DTE) · ${fv:,.0f} · V/OI {voi:.1f} ({vol:,}/{oi:,}){mny}{tag}\n   *{why}*"
         line += ("\n" + sizing if sizing else "")
         line += _iv_tag(a, iv_map)   # researched-&-verified stamp when the name was graded
+        if ps.get(a.get("OptionSymbol")):
+            line += "\n   _" + ps[a.get("OptionSymbol")] + "_"
         if _V2_ON and _V2_NOTES.get(a.get("OptionSymbol")):
             line += "\n   _v2 terms: " + "; ".join(_V2_NOTES[a.get("OptionSymbol")]) + "_"
         return line
@@ -395,6 +403,23 @@ def build() -> str | None:
     TOP_ACTION_PICK = bulls[0] if bulls else (bears[0] if bears else None)
     ACTIONABLE_PICKS = list(bulls) + list(bears)
     return "\n".join(lines)
+
+
+def _pick_scores(occs: list[str], timeout: int = 240) -> dict:
+    """pick_score.v1 factor line per pick (missionctrl pipeline/decision/pick_score, DECISIONS R35) — display-only,
+    never re-ranks. Stores the full tables for /api/pick-score. A failure says so on the card."""
+    occs = [o for o in occs if o]
+    if not occs:
+        return {}
+    cmd = [MC_PY, "-m", "pipeline.decision.pick_score.score", "--lines", ",".join(occs), "--write"]
+    try:
+        r = subprocess.run(cmd, cwd=MC_REPO, capture_output=True, text=True, timeout=timeout)
+        if r.returncode == 0:
+            return json.loads(r.stdout.strip().splitlines()[-1])
+        why = f"rc {r.returncode}"
+    except (subprocess.TimeoutExpired, OSError, ValueError, IndexError) as e:
+        why = type(e).__name__
+    return {o: f"pick_score.v1 UNAVAILABLE ({why})" for o in occs}
 
 
 def _post_pick_threads(actionable) -> None:

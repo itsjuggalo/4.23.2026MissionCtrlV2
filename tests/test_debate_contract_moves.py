@@ -30,5 +30,24 @@ class Moves(unittest.TestCase):
         self.assertIn("no first flow print in flow.db — move since first print UNAVAILABLE", out[1])
 
 
+def test_pick_menu_lists_every_contract_and_names_failure(monkeypatch):
+    """pick_score.v1 factor menu (R35): one line per contract from the scorer; a failure is stated, never filled."""
+    import json as _json
+    import debate_daily as D
+    text = "**NVDA 11/20/26 200C** x\n**AMD 11/20/26 150P** y"
+    calls = {}
+
+    def ok(cmd, timeout=120, env=None, inp=None):
+        calls["cmd"] = cmd
+        occs = cmd[cmd.index("--lines") + 1].split(",")
+        return 0, _json.dumps({o: "pick_score.v1 +0.10 (9/12): flow +0.5" for o in occs})
+    monkeypatch.setattr(D, "run", ok)
+    m = D.pick_menu(text)
+    assert "NVDA261120C00200000: pick_score.v1 +0.10" in m and "AMD261120P00150000" in m and "weigh every factor" in m
+    monkeypatch.setattr(D, "run", lambda *a, **k: (1, "boom"))
+    assert D.pick_menu(text).startswith("FACTOR MENU UNAVAILABLE (pick_score.v1 rc 1)")
+    assert D.pick_menu("no contracts here") == ""
+
+
 if __name__ == "__main__":
     unittest.main()

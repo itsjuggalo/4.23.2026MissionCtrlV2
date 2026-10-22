@@ -38,6 +38,7 @@ Rules:
 - Advisory only. Mike makes every decision and places every order himself in Robinhood (stocks/options) or Coinbase (crypto).
 - Use ONLY the facts below. Every number you cite must appear in them, with its source/as-of. Never invent a price, level or date.
 - Levels (Mike's rule R32): an entry zone, take-profit or stop may ONLY come from the LEVEL MENU in the facts, cited by id (e.g. "TP1 NVDA:L7 231.49"). Any price on neither the menu nor the facts is redacted. Never a position size or a risk cap. Talk about what the evidence says, momentum, catalysts, what would change the read.
+- Contracts: when a FACTOR MENU (pick_score.v1) is in the facts, weigh every factor on it (flow, OI, IV rank, GEX, technicals, R:R, regime, fear & greed, catalysts, news, fundamentals), not one; name the factors that disagree. A "—" factor is missing: say so, never guess it.
 - If an input is missing or stale, say so plainly; do not fill it in.
 - Give both sides: the bull case and the bear case. Executable vehicles only (no naked shorts — puts or inverse ETFs).
 - Plain English, short bullets, max {limit} characters. No preamble.
@@ -195,19 +196,40 @@ def _first_print(occ: dict) -> tuple[float, float | None] | None:
     return (row[0] / 1000, row[1]) if row else None
 
 
+def _occs(text: str) -> list[str]:
+    """OCC symbols of the contracts named in the contracts lists, ≤2 per underlying, in order."""
+    import re
+    seen = []
+    for m in re.finditer(_CONTRACT_LINE, text):
+        sym, mm, dd, yy, k, cp = m.groups()
+        occ = f"{sym}{yy}{mm}{dd}{cp}{round(float(k) * 1000):08d}"
+        if occ not in seen and sum(o.startswith(sym) and o[len(sym)].isdigit() for o in seen) < 2:   # ≤2 per name
+            seen.append(occ)
+    return seen
+
+
+def pick_menu(text: str, top: int = 6) -> str:
+    """pick_score.v1 factor menu (missionctrl DECISIONS R35) for the contracts in the facts: every factor −1..+1,
+    signed for the contract's direction, missing ones shown as —. The models weigh ALL factors from this menu."""
+    occs = _occs(text)[:top]
+    if not occs:
+        return ""
+    rc, out = run([PY, "-m", "pipeline.decision.pick_score.score", "--lines", ",".join(occs), "--write"], timeout=300)
+    try:
+        lines = json.loads(out.strip().splitlines()[-1])
+    except (ValueError, IndexError):
+        return f"FACTOR MENU UNAVAILABLE (pick_score.v1 rc {rc}) — say so; do not invent factor readings."
+    return ("**Factor menu** (pick_score.v1 · each factor −1..+1 for the contract's direction · — = missing, never "
+            "fill it in · weigh every factor, not one):\n" + "\n".join(f"- {o}: {v}" for o, v in lines.items()))
+
+
 def contract_moves(text: str, top: int = 6) -> list[str]:
     """Mike 2026-10-21: for each contract named in the contracts lists (top ~6), how far the CONTRACT moved since
     its first flow print, from Robinhood's own option bars. Anchor = the 5-minute bar holding the first print
     (within the last week) or that day's daily close; latest = the newest RH bar. Missing → said, never guessed."""
     sys.path.insert(0, str(Path(__file__).resolve().parent))
     from lib.rh_quote import rh_option_bars, parse_occ
-    seen, out = [], []
-    import re
-    for m in re.finditer(_CONTRACT_LINE, text):
-        sym, mm, dd, yy, k, cp = m.groups()
-        occ = f"{sym}{yy}{mm}{dd}{cp}{round(float(k) * 1000):08d}"
-        if occ not in seen and sum(o.startswith(sym) and o[len(sym)].isdigit() for o in seen) < 2:   # ≤2 per name
-            seen.append(occ)
+    seen, out = _occs(text), []
     fmt = lambda t: datetime.fromtimestamp(t, ET).strftime("%m/%d %H:%M ET")  # noqa: E731
     for occ in seen[:top]:
         c = parse_occ(occ)
@@ -269,6 +291,12 @@ def hot_facts() -> tuple[str, list[str], dict]:
         # first in the facts so the 9K trim never cuts it
         L[1:1] = ["", "**Contract moves since first flow print** (Robinhood option bars; anchor = 5-min bar of the first print, "
                        "else that day's close):", *moves]
+    try:
+        pm = pick_menu("\n".join(contract_text))
+    except Exception as e:  # noqa: BLE001 — the debate still runs; the gap is stated
+        pm = f"FACTOR MENU UNAVAILABLE ({type(e).__name__})"
+    if pm:
+        L[1:1] = ["", pm]                # ahead of the trim, like the moves and the level menu
     lv = levels(names)
     if lv.get("block"):
         L[1:1] = ["", lv["block"]]       # also ahead of the trim: the models may only cite levels from this menu
