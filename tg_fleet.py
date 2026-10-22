@@ -418,7 +418,9 @@ CHARTER = {
     ),
     "system_health": dict(
         fleet="system_health",
-        owns=["DEAD / heal-failed / cron-failure alerts (gated)"],
+        owns=["DEAD / heal-failed / cron-failure alerts (gated)",
+              "MISSING DATA alerts: every free source of a required input failed (market-data §3; "
+              "missionctrl pipeline/decision/lib/missing_data.py, once per input per ET day)"],
         never=["routine OK pings"],
         cadence="06:45 ET daily", cadence_min=24 * 60,
         reads=[

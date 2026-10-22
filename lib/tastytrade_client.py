@@ -248,6 +248,52 @@ def _fetch_batch(pairs) -> list:
         raise TastytradeError(f"HTTP {r.status_code}: {_err_text(r)}")
 
 
+# ── market metrics: IV rank / IV percentile (R1a, Mike 2026-10-20) ────────────────────────────────────────────────
+# GET /market-metrics?symbols=A,B — tastytrade's own IV index, IV rank and IV percentile per underlying. The rank and
+# percentile arrive as 0-1 decimal strings and are returned on a 0-100 scale. Field names follow tastytrade's public
+# API docs; they were not yet confirmed against a live authenticated response (the refresh-token exchange failed with
+# "Client secret mismatch" on 2026-10-21), so a missing field is None, never a guess.
+METRICS_BATCH = 50
+
+
+def _pct(v):
+    d = _dec(v)
+    return float(d * 100) if d is not None else None
+
+
+def parse_metrics(item: dict) -> dict:
+    return {"symbol": item.get("symbol"),
+            "iv_index": float(d) if (d := _dec(item.get("implied-volatility-index"))) is not None else None,
+            "iv_rank": _pct(item.get("implied-volatility-index-rank")),
+            "iv_percentile": _pct(item.get("implied-volatility-percentile")),
+            "as_of": item.get("implied-volatility-updated-at"),
+            "source": "tastytrade /market-metrics"}
+
+
+def get_market_metrics(symbols) -> dict:
+    """{SYMBOL: parse_metrics(item)} for the symbols tastytrade answered. Raises TastytradeAuthError when the
+    credentials are missing or rejected (callers raise the loud not-configured alert; nothing is faked)."""
+    import requests
+    syms = sorted({s.strip().upper() for s in symbols if s and s.strip()})
+    out: dict = {}
+    for i in range(0, len(syms), METRICS_BATCH):
+        url = f"{base_url()}/market-metrics?symbols={','.join(quote(s) for s in syms[i:i + METRICS_BATCH])}"
+        r = requests.get(url, headers={"Authorization": f"Bearer {get_access_token()}", "User-Agent": USER_AGENT,
+                                       "Accept": "application/json"}, timeout=20)
+        if r.status_code == 401:
+            r = requests.get(url, headers={"Authorization": f"Bearer {get_access_token(force=True)}",
+                                           "User-Agent": USER_AGENT, "Accept": "application/json"}, timeout=20)
+        if r.status_code in (401, 403):
+            raise TastytradeAuthError(f"market-metrics HTTP {r.status_code}: {_err_text(r)}")
+        if r.status_code != 200:
+            raise TastytradeError(f"market-metrics HTTP {r.status_code}: {_err_text(r)}")
+        for it in ((r.json().get("data") or {}).get("items")) or []:
+            m = parse_metrics(it)
+            if m["symbol"]:
+                out[m["symbol"].upper()] = m
+    return out
+
+
 def get_quotes(by_type: dict) -> dict:
     """{'equity': ['AAPL'], 'index': ['SPX'], ...} -> {symbol: parsed quote dict}.
 
