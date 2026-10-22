@@ -112,10 +112,9 @@ def _epoch(ts) -> float | None:
         return None
 
 
-def rh_quotes(occ_list, session=None, diag: dict | None = None) -> dict[str, dict]:
-    """Read-only RH bid/ask per OCC symbol. Missing = could not price (never guessed).
-    diag (optional dict) gets {occ: why it is missing} — no token, instrument lookup, HTTP status, no bid/ask."""
-    diag = {} if diag is None else diag
+def _marketdata(occ_list, session, diag: dict) -> dict[str, dict]:
+    """occ -> raw RH marketdata/options row (read-only). Misses are named in diag (no token, instrument lookup +
+    HTTP status, no marketdata row)."""
     token = _token() if session is None else (_token() or "test-token")
     if not token:
         diag.update({o: "no read-only Robinhood token in the secrets store" for o in occ_list or []})
@@ -126,7 +125,7 @@ def rh_quotes(occ_list, session=None, diag: dict | None = None) -> dict[str, dic
         except ImportError:
             return {}
         session = requests.Session()
-    out: dict[str, dict] = {}
+    rows: dict[str, dict] = {}
     targets: dict[str, str] = {}  # instrument id -> occ
     for occ in dict.fromkeys(occ_list or []):
         c = parse_occ(occ)
@@ -146,27 +145,51 @@ def rh_quotes(occ_list, session=None, diag: dict | None = None) -> dict[str, dic
         for r in _results(d):
             i = next((x for x in ids if r.get("instrument") == BASE + "options/instruments/" + x + "/"
                       or r.get("instrument_id") == x), None)
-            if not i:
-                continue
-            bid, ask = _num(r.get("bid_price")), _num(r.get("ask_price"))
-            at = _epoch(r.get("quote_updated_at") or r.get("updated_at"))
-            if bid is None or ask is None or bid < 0 or ask <= 0 or ask < bid or at is None:
-                diag[targets[i]] = f"no usable bid/ask (bid {bid}, ask {ask})"
-                continue
-            out[targets[i]] = {
-                "bid": bid, "ask": ask, "mid": round((bid + ask) / 2, 2),
-                "last": _num(r.get("last_trade_price")), "as_of": at,
-                "iv": _num(r.get("implied_volatility")), "delta": _num(r.get("delta")),
-                "high": _num(r.get("high_price")), "low": _num(r.get("low_price")),
-                "mark": _num(r.get("mark_price")), "volume": _num(r.get("volume")),
-                "prev_close": _num(r.get("previous_close_price")), "prev_close_date": r.get("previous_close_date"),
-                "instrument_id": i,
-                "as_of_et": datetime.fromtimestamp(at, ET).strftime("%Y-%m-%d %H:%M:%S ET"),
-                "source": "robinhood"}
+            if i:
+                rows[targets[i]] = {**r, "_instrument_id": i}
     for occ in targets.values():
-        if occ not in out and occ not in diag:
+        if occ not in rows:
             diag[occ] = "no marketdata row" + (f" ({_LAST_HTTP['marketdata/options/']})"
                                                if "marketdata/options/" in _LAST_HTTP else "")
+    return rows
+
+
+def rh_quotes(occ_list, session=None, diag: dict | None = None) -> dict[str, dict]:
+    """Read-only RH bid/ask per OCC symbol. Missing = could not price (never guessed).
+    diag (optional dict) gets {occ: why it is missing} — no token, instrument lookup, HTTP status, no bid/ask."""
+    diag = {} if diag is None else diag
+    out: dict[str, dict] = {}
+    for occ, r in _marketdata(occ_list, session, diag).items():
+        bid, ask = _num(r.get("bid_price")), _num(r.get("ask_price"))
+        at = _epoch(r.get("quote_updated_at") or r.get("updated_at"))
+        if bid is None or ask is None or bid < 0 or ask <= 0 or ask < bid or at is None:
+            diag[occ] = f"no usable bid/ask (bid {bid}, ask {ask})"
+            continue
+        out[occ] = {
+            "bid": bid, "ask": ask, "mid": round((bid + ask) / 2, 2),
+            "last": _num(r.get("last_trade_price")), "as_of": at,
+            "iv": _num(r.get("implied_volatility")), "delta": _num(r.get("delta")),
+            "high": _num(r.get("high_price")), "low": _num(r.get("low_price")),
+            "mark": _num(r.get("mark_price")), "volume": _num(r.get("volume")),
+            "open_interest": _num(r.get("open_interest")),
+            "prev_close": _num(r.get("previous_close_price")), "prev_close_date": r.get("previous_close_date"),
+            "instrument_id": r["_instrument_id"],
+            "as_of_et": datetime.fromtimestamp(at, ET).strftime("%Y-%m-%d %H:%M:%S ET"),
+            "source": "robinhood"}
+    return out
+
+
+def rh_open_interest(occ_list, session=None, diag: dict | None = None) -> dict[str, dict]:
+    """Read-only RH open interest per OCC symbol: {occ: {oi, as_of_date, source}}. RH reports the OCC count as of
+    the prior session (previous_close_date). A contract without a bid/ask still has OI. Missing = not reported."""
+    diag = {} if diag is None else diag
+    out: dict[str, dict] = {}
+    for occ, r in _marketdata(occ_list, session, diag).items():
+        oi = _num(r.get("open_interest"))
+        if oi is None or oi < 0:
+            diag[occ] = "no open_interest in the marketdata row"
+            continue
+        out[occ] = {"oi": int(oi), "as_of_date": r.get("previous_close_date"), "source": "robinhood"}
     return out
 
 

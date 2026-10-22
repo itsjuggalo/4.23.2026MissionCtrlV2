@@ -53,6 +53,25 @@ class T(unittest.TestCase):
         self.assertEqual(rh_quote.rh_quotes(["junk"], session=Fake(md())), {})
         self.assertEqual(rh_quote.rh_quotes(["SPY261016C00999000"], session=Fake(md())), {})
 
+class OpenInterest(unittest.TestCase):
+    def setUp(self): rh_quote._ID_CACHE.clear()
+
+    def test_oi_without_bid_ask_and_dated(self):
+        s = Fake(md(bid_price=None, ask_price=None, open_interest=1234, previous_close_date="2026-10-21"))
+        self.assertEqual(rh_quote.rh_open_interest(["SPY261016C00700000"], session=s),
+                         {"SPY261016C00700000": {"oi": 1234, "as_of_date": "2026-10-21", "source": "robinhood"}})
+        self.assertTrue(set(s.urls) <= rh_quote._ALLOWED)
+
+    def test_missing_oi_is_named(self):
+        d = {}
+        self.assertEqual(rh_quote.rh_open_interest(["SPY261016C00700000"], session=Fake(md()), diag=d), {})
+        self.assertEqual(d, {"SPY261016C00700000": "no open_interest in the marketdata row"})
+
+    def test_quotes_carry_oi(self):
+        q = rh_quote.rh_quotes(["SPY261016C00700000"], session=Fake(md(open_interest="77")))["SPY261016C00700000"]
+        self.assertEqual(q["open_interest"], 77)
+
+
 class Diag(unittest.TestCase):
     """2026-10-22: a missing contract says why (the scalp card logs it instead of a silent Alpaca fallback)."""
     def setUp(self): rh_quote._ID_CACHE.clear(); rh_quote._LAST_HTTP.clear()
