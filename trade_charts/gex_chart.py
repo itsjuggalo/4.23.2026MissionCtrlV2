@@ -310,7 +310,7 @@ def caption(g: dict) -> str:
         regime = "net dealer gamma ≈ 0 → no edge from GEX either way"
     elif g["net"] < 0:
         sign = "🔴 **NEGATIVE GEX**"
-        regime = "dealers *amplify* moves → momentum / trend-day (chase breakouts, wider stops)"
+        regime = "dealers *amplify* moves → momentum / trend days more likely"
     else:
         sign = "🟢 **POSITIVE GEX**"
         regime = "dealers *suppress* moves → mean-revert / pin (fade extremes, expect chop)"
