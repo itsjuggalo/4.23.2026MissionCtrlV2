@@ -100,6 +100,21 @@ class Routed(unittest.TestCase):
         r, out = self.run_capture(n.tg_push, "x " * 3000, "trading_recaps", chat="123")
         self.assertIn("DRY trading_recaps", out)       # long text -> several parts, all rendered, none sent
 
+    def test_keeper_digest_and_debt_alert_dry_run(self):
+        stubs = {m: mock.Mock() for m in ("google", "google.oauth2", "google.oauth2.credentials",
+                                          "google.auth", "google.auth.transport", "google.auth.transport.requests")}
+        with mock.patch.dict(sys.modules, stubs):   # system python has no google libs; only tg_alert is under test
+            k = load("gtk", SCRIPTS / "google_token_keeper.py")
+        _, out = self.run_capture(k.tg_alert, "keeper test")
+        self.assertIn("DRY system_health", out)
+        d = load("tg_digest_mod", SCRIPTS / "lib" / "tg_digest.py")
+        with mock.patch.dict(os.environ, {"TG_DIGEST_SEND": ""}):
+            ok, out = self.run_capture(d._send, "<b>digest</b>")
+        self.assertTrue(ok)
+        self.assertIn("DRY trading_digest", out)
+        for p in (SCRIPTS / "google_token_keeper.py", SCRIPTS / "lib" / "tg_digest.py", HOME / "05_AUTOMATION" / "debt_due_alert.py"):
+            self.assertNotIn("api.telegram.org", p.read_text(), p.name)
+
     def test_no_raw_telegram_urls_left_except_getupdates(self):
         for p in (QE, SCRIPTS / "options_position_scorecard.py", DIGEST / "scoreboard_auditor.py"):
             self.assertNotIn("api.telegram.org", p.read_text(), p.name)

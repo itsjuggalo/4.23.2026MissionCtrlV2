@@ -326,26 +326,14 @@ def _send(text: str) -> bool:
         return subprocess.run([stub, text]).returncode == 0
     sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
     import tg_fleet
-    tok = tg_fleet.token(tg_fleet.route(DELIVER_FN))
     chat = open(tg_fleet.CHAT_FILE).read().strip()
-    def post(t, mode):
-        d = {"chat_id": chat, "text": t, "disable_web_page_preview": "true",
-             "disable_notification": "true"}           # digests never buzz
+    def post(t, mode):   # tg_fleet.call: pinned bot, ledger, TG_DRY_RUN (script-standard #6); digests never buzz
+        kw = {"chat_id": chat, "text": t, "disable_web_page_preview": "true",
+              "disable_notification": "true", "_review": False}
         if mode:
-            d["parse_mode"] = mode
-        try:
-            with urllib.request.urlopen(urllib.request.Request(
-                    f"https://api.telegram.org/bot{tok}/sendMessage",
-                    data=urllib.parse.urlencode(d).encode()), timeout=20) as r:
-                return bool(json.load(r).get("ok"))
-        except Exception:
-            return False
+            kw["parse_mode"] = mode
+        return bool(tg_fleet.call(DELIVER_FN, "sendMessage", **kw).get("ok"))
     ok = post(text, "HTML") or post(_plain(text, True), None)
-    try:
-        from lib.tg_ledger import record
-        record(DELIVER_FN, text, ok, html=True, src="tg_digest.py")
-    except Exception:
-        pass
     return ok
 
 
