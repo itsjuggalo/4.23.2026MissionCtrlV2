@@ -185,6 +185,8 @@ def main():
         call, result = "none", "ungraded"
         try:
             gapf = json.load(open("/AIWorkWSL/trading/signals/prebell/data/prebell_today.json"))
+            if str(gapf.get("asof", ""))[:10] != day:   # standard #4: only today's pre-bell gap grades today's call
+                raise ValueError(f"prebell_today.json as_of {gapf.get('asof')} is not {day}")
             gp = gapf["gap"]
             prior, gpct = float(gp["prior_close"]), float(gp["gap_pct"])
         except Exception:

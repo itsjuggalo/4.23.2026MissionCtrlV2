@@ -60,9 +60,14 @@ MISSING: dict = {} # input → [{source, ok, error}] for the loud missing-data a
 def _load_iv_map() -> dict:
     """ticker → the desk's IV-forecast read (rich/cheap vs realized, tier, crush),
     so the FLOW PICKS surface carries the SAME 'researched & verified' stamp as the
-    Telegram best-3. Empty on any failure → picks just post without the tag."""
+    Telegram best-3. Empty on any failure → picks just post without the tag.
+    2026-10-23 (standard #4): read only while its own as_of is current under fact_policies `ops_session_15m` — the
+    producer (supercomputer.sh) was retired, so a 09-30 file no longer stamps today's picks."""
     try:
-        d = json.loads(IV_FORECAST.read_text())
+        import state_guard as SG
+        d = SG.read_state(IV_FORECAST, "ops_session_15m", as_of="as_of").doc
+        if not d:
+            return {}
         m: dict = {}
         for p in d.get("picks", []):
             t = str(p.get("ticker", "")).upper()

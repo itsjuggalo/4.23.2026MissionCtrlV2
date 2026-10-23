@@ -57,8 +57,14 @@ def universe() -> dict[str, str]:
     uni: dict[str, str] = {}
     for s in CORE_STOCKS:
         uni[s] = "core"
+    # 2026-10-23 (standard #4): both inputs carry a max age (fact_policies factor_daily). coach_verdicts.json was last
+    # written 2026-09-12 (holdings views retired) and scan_history stopped 2026-09-11, so neither feeds the radar now.
     try:
-        d = json.loads(VERDICTS.read_text())
+        import state_guard as SG
+    except Exception:  # noqa: BLE001 — no age check = core list only (fail closed)
+        return dict(list(uni.items())[:MAX_UNIVERSE])
+    try:
+        d = SG.read_state(VERDICTS, "factor_daily").doc or {}
         for r in d.get("results", []):
             if r.get("asset_class") == "stock" and (r.get("mv") or 0) >= 50:
                 uni.setdefault(r["symbol"], "holding")
@@ -66,6 +72,8 @@ def universe() -> dict[str, str]:
         pass
     try:
         import sqlite3
+        if not SG.sqlite_status(DB, "SELECT MAX(scanned_at) FROM scan_history", "factor_daily").ok:
+            return dict(list(uni.items())[:MAX_UNIVERSE])
         con = sqlite3.connect(str(DB))
         rows = con.execute(
             "SELECT symbol FROM scan_history WHERE scanned_at = "
