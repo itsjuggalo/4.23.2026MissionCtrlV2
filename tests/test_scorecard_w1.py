@@ -25,8 +25,8 @@ def test_darkpool_join_needs_full_identity():
 
 
 def test_spot_comes_from_price_guard_not_alpaca():
-    with mock.patch.object(S, "_get", side_effect=AssertionError("Alpaca called")), \
-         mock.patch.object(S.price_guard, "fresh", return_value={"AAPL": {"ok": True, "price": 210.0, "provider": "robinhood"}}):
+    assert not hasattr(S, "_get")   # c56978c35 removed the Alpaca HTTP helper entirely
+    with mock.patch.object(S.price_guard, "fresh", return_value={"AAPL": {"ok": True, "price": 210.0, "provider": "robinhood"}}):
         S._SPOT_CACHE.clear()
         assert S._spot("AAPL") == 210.0
     with mock.patch.object(S.price_guard, "fresh", return_value={"AAPL": {"ok": False, "price": 209.0, "reason": "stale"}}):

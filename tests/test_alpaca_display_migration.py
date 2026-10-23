@@ -50,5 +50,20 @@ class QuizMark(unittest.TestCase):
                 self.assertIsNone(q._option_mark("O"))
 
 
+class QuizTelegram(unittest.TestCase):
+    def test_routed_through_fleet_dry_run(self):
+        import os, io, contextlib
+        self.assertNotIn("api.telegram.org", (ROOT / "options_live_quiz.py").read_text())
+        with mock.patch.dict(os.environ, {"TG_DRY_RUN": "1"}), contextlib.redirect_stdout(io.StringIO()) as out:
+            r = q._tg("sendMessage", chat_id="1", text="Q?", parse_mode="HTML",
+                      reply_markup={"inline_keyboard": [[{"text": "A", "callback_data": "a"}]]})
+        self.assertTrue(r and r.get("ok"))
+
+    def test_failure_returns_none(self):
+        import tg_fleet
+        with mock.patch.object(tg_fleet, "call", return_value={"ok": False, "description": "x"}):
+            self.assertIsNone(q._tg("sendMessage", chat_id="1", text="t"))
+
+
 if __name__ == "__main__":
     unittest.main()
