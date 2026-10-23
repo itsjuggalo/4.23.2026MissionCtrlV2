@@ -181,7 +181,11 @@ def _snaps(symbols):
             out[s] = {"latestTrade": {"p": last, "t": "2026-10-06T17:30:50Z"},
                       "dailyBar": {"v": 900_000, "t": "2026-10-06T04:00:00Z"},
                       "prevDailyBar": {"c": last / (1 + gap / 100), "h": last * 1.004,
-                                       "l": last * 0.97, "v": 1_000_000, "t": "2026-10-05T04:00:00Z"}}
+                                       "l": last * 0.97, "v": 1_000_000, "t": "2026-10-05T04:00:00Z"},
+                      # the get_bars-shaped node setup_scanner reads since 2026-10-23 (same numbers; the backup reads the Alpaca keys)
+                      "prior": {"c": last / (1 + gap / 100), "h": last * 1.004, "l": last * 0.97, "v": 1_000_000,
+                                "t": "2026-10-05T16:00:00Z"},
+                      "today": {"v": 900_000, "t": "2026-10-06T16:00:00Z"}}
     return out
 
 

@@ -126,8 +126,8 @@ class EodRender(unittest.TestCase):
     def test_missing_grades_state_reason(self):
         m = self.msg()
         self.assertNotIn("· no data<", m)
-        self.assertIn("no data: no spot at post or no live price at 16:35 ET", m)
-        self.assertIn("no data: no live price from Yahoo at 16:35 ET", m)
+        self.assertIn("no data: no spot logged at post at 16:35 ET", m)
+        self.assertIn("no data: no price from Robinhood or Yahoo at 16:35 ET", m)
 
     def test_basis_and_pnl_labels(self):
         m = self.msg()
