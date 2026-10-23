@@ -1,13 +1,12 @@
 #!/usr/bin/env python3
 """news_to_discord.py — market-news feed → Discord #research-feed.
 
-Pulls market/company headlines (Alpaca news = Benzinga, primary/live) and posts
+Pulls market/company headlines (Finnhub free news; migrated from Alpaca news 2026-10-22) and posts
 the new ones to #research-feed via the existing research webhook. Dedupes by news
 id (state file) and caps per run so it never floods. Cron one-shot (no always-on
 PM2 process — the laptop is RAM-marginal).
 
-Sources tonight: Alpaca news (HTTP 200 on the on-disk paper keys). Tavily/Finnhub
-are wired as optional fallbacks but Alpaca is the backbone.
+Source: Finnhub company-news (watched tickers) + general market news.
 
 Reuses the canonical poster lib/discord_post.py (fixes the urllib-403 UA footgun).
 Posts to an EXISTING channel via the EXISTING webhook — creates/edits no channels.
@@ -19,12 +18,14 @@ import os
 import sys
 import urllib.request
 import urllib.parse
-from datetime import datetime, timezone
+from datetime import datetime, timedelta, timezone
+from zoneinfo import ZoneInfo
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 from lib.discord_post import post_discord  # noqa: E402
 
+ET = ZoneInfo("America/New_York")
 SEC = Path.home() / ".openclaw" / "secrets"
 STATE = Path.home() / ".openclaw" / "state" / "news_to_discord_seen.json"
 WEBHOOK = "discord_webhook_research.txt"   # → #research-feed (verified 2026-06-14)
@@ -43,14 +44,8 @@ def _read(name: str) -> str:
     return ""
 
 
-def _alpaca_keys():
-    for kid, ksec in (("alpaca-boba-key-id", "alpaca-boba-secret"),
-                      ("alpaca_boba_key_id", "alpaca_boba_secret"),
-                      ("alpaca-key-id", "alpaca-secret")):
-        k, s = _read(kid), _read(ksec)
-        if k and s:
-            return k, s
-    return None, None
+def _finnhub_key() -> str:
+    return _read("finnhub.key") or _read("finnhub_api_key") or _read("finnhub-api-key") or _read("FINNHUB_API_KEY")
 
 
 def watch_tickers(n: int = 8) -> list[str]:
@@ -81,25 +76,39 @@ def watch_tickers(n: int = 8) -> list[str]:
     return tk[:n]
 
 
-def fetch_alpaca_news(symbols: str = ""):
-    k, s = _alpaca_keys()
-    if not k or not s:
-        print("[news] no alpaca keys on disk", flush=True)
+def _fh_get(path: str, **q):
+    k = _finnhub_key()
+    if not k:
+        print("[news] no finnhub key on disk", flush=True)
         return []
-    params = {"limit": NEWS_LIMIT, "sort": "desc", "include_content": "false"}
-    if symbols:
-        params["symbols"] = symbols
-    url = "https://data.alpaca.markets/v1beta1/news?" + urllib.parse.urlencode(params)
-    req = urllib.request.Request(url, headers={
-        "APCA-API-KEY-ID": k, "APCA-API-SECRET-KEY": s,
-        "User-Agent": "mc-news/1.0"})
+    url = "https://finnhub.io/api/v1/" + path + "?" + urllib.parse.urlencode({**q, "token": k})
     try:
-        with urllib.request.urlopen(req, timeout=20) as r:
-            data = json.loads(r.read())
-        return data.get("news", []) or []
+        with urllib.request.urlopen(urllib.request.Request(url, headers={"User-Agent": "mc-news/1.0"}), timeout=20) as r:
+            return json.loads(r.read()) or []
     except Exception as e:  # noqa: BLE001
-        print(f"[news] alpaca fetch failed: {e}", flush=True)
+        print(f"[news] finnhub {path} failed: {type(e).__name__}", flush=True)
         return []
+
+
+def _norm(it: dict, syms: list[str]) -> dict:
+    ts = datetime.fromtimestamp(int(it.get("datetime") or 0), ET)
+    return {"id": f"fh:{it.get('id')}", "headline": it.get("headline") or "(no headline)",
+            "source": it.get("source") or "news", "url": it.get("url") or "",
+            "created_at": ts.isoformat(timespec="minutes"), "symbols": syms}
+
+
+def fetch_news(symbols: list[str] | None = None):
+    """Finnhub (free): company-news per watched ticker, or the general market feed when none given.
+    Replaces Alpaca news (market-data rule: Alpaca is not a data source where a free replacement exists)."""
+    if not symbols:
+        return [_norm(it, [x for x in (it.get("related") or "").split(",") if x])
+                for it in _fh_get("news", category="general")][:NEWS_LIMIT]
+    today = datetime.now(ET).date()
+    frm = today - timedelta(days=1)
+    out = []
+    for sym in symbols[:8]:
+        out += [_norm(it, [sym]) for it in _fh_get("company-news", symbol=sym, **{"from": frm, "to": today})[:10]]
+    return out
 
 
 def load_seen():
@@ -138,7 +147,7 @@ def main():
     watched = watch_tickers(8)
     wset = set(watched)
     by_id: dict[str, dict] = {}
-    for it in fetch_alpaca_news(",".join(watched)) + fetch_alpaca_news():
+    for it in fetch_news(watched) + fetch_news():
         by_id.setdefault(str(it.get("id")), it)   # watched batch wins on dup
     items = list(by_id.values())
     if not items:

@@ -26,8 +26,20 @@ cd "$STAGING"
 # --exclude 'decompiled': the jadx/apktool output (2.4G / 208k files) is REGENERABLE from the
 # original .apk artifacts — backing it up bloated the DR repo to 209k files and made every
 # clone take minutes. The original APKs are the real artifacts (see APK-backup note below).
-rsync -a --max-size=25M --exclude 'node_modules' --exclude '.next' --exclude '.git' --exclude 'dist' --exclude 'build' --exclude '*.log' --exclude '*.jsonl' --exclude 'decompiled' ~/mission-control-restored/ ./mission-control-restored/
-rsync -a --max-size=25M --exclude 'node_modules' --exclude '*.log' --exclude '*.jsonl' ~/mission-control/signal-receiver/ ./signal-receiver/ 2>/dev/null || echo "signal-receiver skipped"
+# 2026-10-22: dashboard moved ~/mission-control-restored -> /AIWorkWSL/web/missionctrl (restructure). The old path
+# was a dangling symlink, so rsync exit 23 + `set -e` aborted every run from 2026-10-01. Code only: the big
+# regenerable data (pipeline DBs/backups, data/, worktrees, .venv, media, csv) stays out; DBs go in the LOCAL-ONLY
+# sensitive blob (Step 5). Source is also on origin; this copy carries uncommitted state. Result ~70 MB.
+MC=/AIWorkWSL/web/missionctrl
+[ -d "$MC" ] || { echo "FATAL: $MC missing - nothing to back up" >&2; exit 1; }
+rsync -a --max-size=5M --exclude 'node_modules' --exclude '.next' --exclude '.git' --exclude 'dist' --exclude 'build' \
+  --exclude '*.log' --exclude '*.jsonl' --exclude 'decompiled' --exclude '*.sqlite*' --exclude '*.db' --exclude '*.db-*' \
+  --exclude 'data/' --exclude '.playwright-mcp/' --exclude 'out/' --exclude '.venv' --exclude '.claude/worktrees/' \
+  --exclude 'pipeline/backups/' --exclude 'freqtrade/' --exclude 'project-archive/' --exclude 'rd_outputs/' \
+  --exclude '__pycache__' --exclude 'docs/audits/' --exclude '*.mp4' --exclude '*.png' --exclude '*.csv' \
+  --exclude '.env*' --exclude '*.pem' --exclude '*.key' --exclude '*.session' \
+  "$MC"/ ./missionctrl/
+[ -d ~/mission-control/signal-receiver ] && rsync -a --max-size=25M --exclude 'node_modules' --exclude '*.log' --exclude '*.jsonl' ~/mission-control/signal-receiver/ ./signal-receiver/ || echo "signal-receiver skipped"
 mkdir -p openclaw
 # rsync (not cp): cap size + drop large regenerable agent session trajectories.
 rsync -aL --max-size=5M --exclude '*.trajectory.jsonl' --exclude 'sessions' ~/.openclaw/agents/ ./openclaw/agents/ 2>/dev/null || true
@@ -36,7 +48,8 @@ rsync -a --max-size=10M --exclude '*.log' --exclude '.git' ~/.openclaw/workspace
 # stored them as dangling symlinks, so the resilience scripts (wsl-boot.sh, safe-wsl-shutdown,
 # run_backup.sh itself, all DR tooling) were NEVER actually in the backup. -L copies real files.
 cp -rL ~/scripts ./scripts 2>/dev/null || true
-cp -rL ~/bin ./bin 2>/dev/null || true   # boot/resilience scripts: wsl-boot.sh, safe-wsl-shutdown, dr-restore-verify.sh, etc.
+# --max-size=40M: skips regenerable vendor binaries (bun 93M, tailwindcss 43M) that sit near GitHub's 100MB file limit.
+rsync -aL --max-size=40M --exclude '.git' ~/bin/ ./bin/ 2>/dev/null || true   # boot/resilience scripts: wsl-boot.sh, safe-wsl-shutdown, dr-restore-verify.sh, etc.
 mkdir -p nginx
 sudo cp -r /etc/nginx/sites-enabled ./nginx/sites-enabled 2>/dev/null || true
 sudo cp -r /etc/nginx/sites-available ./nginx/sites-available 2>/dev/null || true
@@ -60,17 +73,15 @@ fi
 # Build the plaintext secrets tree in a private temp dir OUTSIDE staging/repo.
 SECRETS_TMP=$(mktemp -d "${TMPDIR:-/tmp}/dr-secrets.XXXXXX")
 chmod 700 "$SECRETS_TMP"
-mkdir -p "$SECRETS_TMP/secrets" "$SECRETS_TMP/oci" "$SECRETS_TMP/env-files" "$SECRETS_TMP/ssh" "$SECRETS_TMP/mc-secrets"
+mkdir -p "$SECRETS_TMP/secrets" "$SECRETS_TMP/env-files" "$SECRETS_TMP/ssh" "$SECRETS_TMP/mc-secrets"
 cp -r ~/.openclaw/secrets/. "$SECRETS_TMP/secrets/" 2>/dev/null || true
-cp ~/.oci/config "$SECRETS_TMP/oci/config" 2>/dev/null || true
-cp ~/.oci/oci_api_key.pem "$SECRETS_TMP/oci/oci_api_key.pem" 2>/dev/null || true
-cp ~/.oci/oci_api_key_public.pem "$SECRETS_TMP/oci/oci_api_key_public.pem" 2>/dev/null || true
+# (OCI keys dropped 2026-10-22: Oracle retired, ~/.oci gone.)
 # New SQLite secrets store — this is now the CANONICAL secrets source (migrated
 # 2026-06-03), so we no longer sweep the whole home dir for .env* files.
 cp ~/.config/mc-secrets/secrets.sqlite "$SECRETS_TMP/mc-secrets/secrets.sqlite" 2>/dev/null || true
 # Narrowed 2026-06-03: only the EXPLICIT live-app env files that aren't in the store,
 # not a home-wide find (which tripped the credential-collection safety gate).
-for f in ~/aries/.env.local /AIWorkWSL/web/missionctrl/.env.local; do
+for f in /AIWorkWSL/web/aries/.env.local /AIWorkWSL/web/missionctrl/.env.local; do
   [ -f "$f" ] && cp "$f" "$SECRETS_TMP/env-files/$(echo "$f" | sed "s|$HOME/||" | tr '/' '_')" 2>/dev/null || true
 done
 
@@ -100,13 +111,15 @@ mkdir -p "$SENS_TMP/telegram-session" "$SENS_TMP/databases"
 # (those tripped the credential-collection + privilege-escalation safety gate and
 # aren't needed to restore service). Telegram sessions + trade DBs are scoped to
 # their KNOWN dirs only, not a home-wide find.
-for d in ~/mission-control-restored ~/01_ACTIVE/mission-control-restored /AIWorkWSL/web/missionctrl; do
+for d in /AIWorkWSL/web/missionctrl; do
   [ -d "$d" ] && find "$d" -maxdepth 3 -name "*.session" 2>/dev/null | while read s; do
     cp "$s" "$SENS_TMP/telegram-session/" 2>/dev/null || true
   done
 done
 for d in /AIWorkWSL/web/missionctrl/pipeline ~/.openclaw; do
-  [ -d "$d" ] && find "$d" -maxdepth 2 \( -name "*.db" -o -name "*.sqlite" \) 2>/dev/null | while read f; do
+  # 2026-10-22: skip pipeline/backups (6G of old copies) and anything >=200M (contract_engine 3G is rebuildable);
+  # desk_pipeline.sqlite (the trade ledger) is always kept. Blob stays LOCAL-ONLY (over GitHub's 100MB limit).
+  [ -d "$d" ] && find "$d" -maxdepth 2 -not -path '*/backups/*' \( -name "*.db" -o -name "*.sqlite" \) \( -size -200M -o -name desk_pipeline.sqlite \) 2>/dev/null | while read f; do
     cp "$f" "$SENS_TMP/databases/$(echo "$f" | sed "s|$HOME/||" | tr '/' '_')" 2>/dev/null || true
   done
 done
@@ -117,19 +130,13 @@ echo "sensitive-data.tar.gz.enc written ($(du -h "$STAGING/sensitive-data.tar.gz
 rm -rf "$SENS_TMP"
 
 echo "=== Step 6: Generate METADATA.md ==="
-source ~/.openclaw/secrets/oci_ocids.env 2>/dev/null || true
 cat > METADATA.md <<EOF
 # Mission Control + OpenClaw Infrastructure Metadata
 Generated: $(date -u)
 Server: $(hostname) ($(curl -s ifconfig.me 2>/dev/null || echo unknown))
 
-## Oracle Cloud
-- Tenancy OCID: ${TENANCY_OCID:-see secrets/oci_ocids.env}
-- User OCID: ${USER_OCID:-see secrets/oci_ocids.env}
-- Region: ${REGION:-us-ashburn-1}
-- Current shape: VM.Standard.A2.Flex (PAID - plan migration to A1.Flex)
-- VCN: openclaw-vcn
-- Subnet: openclaw-subnet
+## Host
+- Laptop G59-Laptop (WSL2 Ubuntu). Oracle/OCI retired 2026-07-10; no remote infrastructure.
 
 ## Installed software versions at backup time
 - Node: $(node --version 2>/dev/null)
@@ -137,11 +144,6 @@ Server: $(hostname) ($(curl -s ifconfig.me 2>/dev/null || echo unknown))
 - Python: $(python3 --version 2>/dev/null)
 - PM2: $(pm2 --version 2>/dev/null)
 - nginx: $(nginx -v 2>&1)
-- OCI CLI: $(oci --version 2>/dev/null)
-
-## DNS
-- missionctrl.serveftp.com -> 132.145.205.15 (NoIP)
-- mikemassage.ddns.net -> planned second instance
 
 ## Discord
 - Guild: Trading Team HQ (ID: 1486025777970548908)
@@ -157,16 +159,13 @@ Server: $(hostname) ($(curl -s ifconfig.me 2>/dev/null || echo unknown))
 - Realtime DB: stock-signal-72772-default-rtdb.firebaseio.com (publicly readable)
 
 ## Ports
-- 3033: Mission Control dashboard (Next.js, PM2)
-- 8420: Signal receiver (Python, PM2)
-- 80: nginx reverse proxy
-- 22: SSH
+- 3000: MissionCtrl dashboard (Next.js, PM2 `missionctrl`); other ports: ~/SYSTEM-MAP.md
 
 ## Critical paths
-- Dashboard: ~/mission-control-restored/ (NOT ~/mission-control/)
-- Signal receiver: ~/mission-control/signal-receiver/
-- OpenClaw: ~/.openclaw/
-- Secrets: ~/.openclaw/secrets/
+- Dashboard + pipeline: /AIWorkWSL/web/missionctrl (backup folder: missionctrl/)
+- Signal receiver: ~/mission-control/signal-receiver (-> /AIWorkWSL/trading/regime-engine)
+- Scripts: ~/05_AUTOMATION/scripts (~/scripts is a symlink)
+- OpenClaw secrets/logs: ~/.openclaw/
 EOF
 
 echo "=== Step 7: Write runbooks ==="
@@ -185,27 +184,29 @@ git clone https://github.com/itsjuggalo/MissionCtrl-Data.git
 cd MissionCtrl-Data && git checkout disaster-recovery
 
 ## 3. Restore files
-cp -r mission-control-restored ~/mission-control-restored
-mkdir -p ~/mission-control && cp -r signal-receiver ~/mission-control/signal-receiver
+# Dashboard + pipeline (code only; DBs come from the local-only sensitive blob or are rebuilt by the crons)
+mkdir -p /AIWorkWSL/web && cp -r missionctrl /AIWorkWSL/web/missionctrl
+# Preferred: git clone the repo from origin and overlay this folder for uncommitted state
+[ -d signal-receiver ] && mkdir -p /AIWorkWSL/trading/regime-engine && cp -r signal-receiver /AIWorkWSL/trading/regime-engine/signal-receiver
+mkdir -p ~/05_AUTOMATION && cp -r scripts ~/05_AUTOMATION/scripts && ln -sfn ~/05_AUTOMATION/scripts ~/scripts
 mkdir -p ~/.openclaw && cp -r openclaw/* ~/.openclaw/ && cp -r secrets ~/.openclaw/secrets
 chmod 600 ~/.openclaw/secrets/*
 # Telegram session
-find telegram-session -name "*.session" -exec cp {} ~/mission-control-restored/telegram-listener/ \;
+# (Telegram session files are in the local-only sensitive blob, not this repo.)
 
 ## 4. Restore .env files (flattened names in env-files/)
 # underscores in filename = slashes in path
 # e.g. .openclaw_secrets_.env -> ~/.openclaw/secrets/.env — place manually
 
 ## 5. Install & start
-cd ~/mission-control-restored && npm install && npm run build
-cd ~/mission-control/signal-receiver && pip3 install -r requirements.txt
+cd /AIWorkWSL/web/missionctrl && npm install && npm run build
+[ -f /AIWorkWSL/trading/regime-engine/signal-receiver/requirements.txt ] && pip3 install -r /AIWorkWSL/trading/regime-engine/signal-receiver/requirements.txt
 # PM2 resurrect from dump
 mkdir -p ~/.pm2
 cp ~/MissionCtrl-Data/pm2/dump.pm2 ~/.pm2/dump.pm2
 pm2 resurrect
 # If resurrect fails, manually start:
-# cd ~/mission-control-restored && pm2 start npm --name mission-control -- start
-# cd ~/mission-control/signal-receiver && pm2 start signal_receiver.py --name signal-receiver --interpreter python3
+# cd /AIWorkWSL/web/missionctrl && pm2 start npm --name missionctrl -- start
 pm2 save
 # Run the startup command from pm2/startup-command.txt
 
@@ -218,7 +219,7 @@ sudo nginx -t && sudo systemctl reload nginx
 crontab crontab.txt
 
 ## 8. Update NoIP DNS -> new server IP
-## 9. Verify: curl localhost:3033 && curl localhost:8420/health && pm2 status
+## 9. Verify: curl localhost:3000 && pm2 status
 EOF
 
 cat > RUNBOOK_FULL_REBUILD.md <<'EOF'
@@ -226,8 +227,8 @@ cat > RUNBOOK_FULL_REBUILD.md <<'EOF'
 Goal: Restore ALL infrastructure (OpenClaw agents, skills, bots, cron) from scratch.
 
 ## 1. Provision new server
-- Oracle: aim for VM.Standard.A1.Flex (Always Free, 4 OCPU / 24 GB)
-- Security list ports: 22, 80, 443, 3033, 8420
+- Any Linux/WSL2 host (Oracle retired 2026-07-10)
+- Ports: see ~/SYSTEM-MAP.md (dashboard 3000)
 - SSH key: see ssh/authorized_keys in this backup
 
 ## 2. Run RUNBOOK_MISSIONCTRL.md first (get trading back online)
@@ -238,8 +239,7 @@ source ~/.bashrc
 
 ## 4. Restore OpenClaw state
 cp -r openclaw/agents ~/.openclaw/agents
-cp -r secrets ~/.openclaw/secrets
-chmod 600 ~/.openclaw/secrets/*
+# secrets: openssl enc -d -aes-256-cbc -pbkdf2 -pass file:<dr_backup.key> -in secrets.tar.gz.enc | tar xz
 
 ## 5. Re-register agents (direct JSON edits are ignored by OpenClaw)
 openclaw agents add boba
@@ -253,12 +253,7 @@ mkdir -p ~/.openclaw/skills && cp -r skills/* ~/.openclaw/skills/
 crontab crontab.txt
 cp pm2/dump.pm2 ~/.pm2/dump.pm2 && pm2 resurrect
 
-## 8. Install OCI CLI
-bash -c "$(curl -L https://raw.githubusercontent.com/oracle/oci-cli/master/scripts/install/install.sh)"
-mkdir -p ~/.oci && cp oci/* ~/.oci/ && chmod 600 ~/.oci/oci_api_key.pem ~/.oci/config
-
 ## Gotchas
-- VM.Standard.A2.Flex is PAID, A1.Flex is FREE — one letter difference
 - Gemini free tier: 20 req/day NOT 250 — disable high-freq Gemini cron
 - openclaw config set uses zero-indexed arrays for agents
 - Scan new skills for wallet addresses / exec / credential reads before running
@@ -267,7 +262,7 @@ mkdir -p ~/.oci && cp oci/* ~/.oci/ && chmod 600 ~/.oci/oci_api_key.pem ~/.oci/c
 ## External re-auth checklist
 - Anthropic API key (rotate if exposed)
 - OKX, Alpaca, Hyperliquid, Robinhood, Firebase, Discord bots, Telegram session
-- NoIP: point missionctrl.serveftp.com & mikemassage.ddns.net at new IP
+- Public ingress / DNS: see ~/SYSTEM-MAP.md
 EOF
 
 echo "=== Step 8: Sanity check sizes ==="

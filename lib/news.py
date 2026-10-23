@@ -42,16 +42,6 @@ def _read(*names: str) -> str | None:
     return None
 
 
-def _alpaca_keys() -> tuple[str | None, str | None]:
-    for kid, ksec in (("alpaca-boba-key-id", "alpaca-boba-secret"),
-                      ("alpaca_boba_key_id", "alpaca_boba_secret"),
-                      ("alpaca-key-id", "alpaca-secret")):
-        k, s = _read(kid), _read(ksec)
-        if k and s:
-            return k, s
-    return None, None
-
-
 def _finnhub_key() -> str | None:
     return _read("finnhub.key", "finnhub_api_key", "finnhub-api-key", "FINNHUB_API_KEY")
 
@@ -164,34 +154,6 @@ def _tag(syms: list[str], reqset: set, headline: str) -> str:
     return next((s for s in syms if names_ticker(s, headline)), "")
 
 
-def _alpaca(symbols: list[str], limit: int = 50) -> list[dict]:
-    k, s = _alpaca_keys()
-    if not k or not s:
-        return []
-    hdr = {"APCA-API-KEY-ID": k, "APCA-API-SECRET-KEY": s}
-    params = {"limit": limit, "sort": "desc", "include_content": "false"}
-    if symbols:
-        params["symbols"] = ",".join(symbols)
-    by_id: dict[str, dict] = {}
-    # symbol-tagged batch first, then a general fill (so a quiet book still gets market news)
-    for sy in ([",".join(symbols)] if symbols else []) + [""]:
-        p = dict(params)
-        if sy:
-            p["symbols"] = sy
-        else:
-            p.pop("symbols", None)
-        data = _get("https://data.alpaca.markets/v1beta1/news?" + urllib.parse.urlencode(p), hdr)
-        for it in (data or {}).get("news", []) or []:
-            by_id.setdefault(str(it.get("id")), it)
-    reqset = set(symbols)
-    out = []
-    for it in by_id.values():
-        syms = [s.upper() for s in (it.get("symbols") or [])]
-        out.append(_norm(_tag(syms, reqset, it.get("headline") or ""), it.get("headline"),
-                         it.get("source"), it.get("url"), _epoch(it.get("created_at"))))
-    return out
-
-
 def _finnhub(symbols: list[str], hours: int) -> list[dict]:
     key = _finnhub_key()
     if not key or not symbols:
@@ -266,15 +228,14 @@ def _yahoo(symbols: list[str]) -> list[dict]:
 # ─── public API ────────────────────────────────────────────────────────────
 def recent_headlines(symbols=None, max_items: int = 6, hours: int = 24) -> list[dict]:
     """Fresh, ticker-tagged headlines for `symbols` (str or list). First source with
-    in-window results wins (Alpaca → Finnhub → Tavily → Yahoo). Newest-first, deduped,
+    in-window results wins (Finnhub → SearXNG → Tavily → Yahoo; Alpaca news leg removed 2026-10-22). Newest-first, deduped,
     capped at `max_items`. Returns [] on total miss — never raises."""
     if isinstance(symbols, str):
         symbols = [s.strip().upper() for s in symbols.replace(",", " ").split() if s.strip()]
     symbols = [s.upper() for s in (symbols or [])]
     cutoff = _now() - hours * 3600
 
-    for source in (lambda: _alpaca(symbols),
-                   lambda: _finnhub(symbols, hours),
+    for source in (lambda: _finnhub(symbols, hours),
                    lambda: _searxng(symbols, hours),
                    lambda: _tavily(symbols, max_items),
                    lambda: _yahoo(symbols)):
