@@ -20,6 +20,7 @@ import importlib.util
 import json
 import os
 import sqlite3
+import sys
 from dataclasses import dataclass, field
 from datetime import datetime, timezone
 from pathlib import Path
@@ -37,6 +38,7 @@ _MD = None
 def _path_load(name: str, file: Path):
     spec = importlib.util.spec_from_file_location(name, file)
     mod = importlib.util.module_from_spec(spec)
+    sys.modules[name] = mod          # dataclasses (market_clock) resolve their module through sys.modules
     spec.loader.exec_module(mod)
     return mod
 
@@ -104,7 +106,8 @@ def _parse_as_of(v: Any) -> Optional[datetime]:
 
 
 # The relay's day files (read-only; never written here). flow_agg ages by REGULAR-SESSION minutes, so yesterday's
-# 16:00 file reads "0 min old" at 09:31: these files must also carry today's ET date in their own rows (2026-10-23).
+# 16:00 file reads "0 min old" at 09:31: from the open these files must also carry today's ET date in their own rows
+# (2026-10-23). Before the open the latest opened session is yesterday's, so its file is still judged as EOD.
 FLOW_DAY_FILES = ("flow_live_last100.json",)            # plus every *_today.json read under flow_agg
 
 
@@ -129,13 +132,33 @@ def day_check(p: Path, policy: str, doc: Any, now: Optional[datetime] = None) ->
     times = flow_doc_times(doc)
     if not times:
         return None                                         # an empty day file holds nothing stale
-    today = (now or datetime.now(ET)).astimezone(ET).date()
+    day = _current_session_day((now or datetime.now(ET)).astimezone(ET))
+    if day is None:
+        return "market calendar unavailable (day check fails closed)"
     newest, oldest = max(times).astimezone(ET), min(times).astimezone(ET)
-    if newest.date() != today:
-        return f"file's own newest row is {newest:%Y-%m-%d %H:%M} ET, not today"
-    if p.name.endswith("_today.json") and oldest.date() != today:
-        return f"file holds rows from {oldest:%Y-%m-%d} (not reset for today)"
+    if newest.date() != day:
+        return f"file's own newest row is {newest:%Y-%m-%d %H:%M} ET, not the {day} session"
+    if p.name.endswith("_today.json") and oldest.date() != day:
+        return f"file holds rows from {oldest:%Y-%m-%d} (not reset for the {day} session)"
     return None
+
+
+_CLOCK = None
+
+
+def _current_session_day(now: datetime):
+    """The latest session that has opened (ET): today from 09:30 on a trading day, else the previous trading day —
+    so a pre-open read of yesterday's file stays EOD and only the open demands today's rows. None = no calendar."""
+    global _CLOCK
+    try:
+        if _CLOCK is None:
+            _CLOCK = _path_load("sg_market_clock", MC_LIB.parents[1] / "market_clock" / "clock.py")
+        d = now.date()
+        if _CLOCK.is_trading_day(d) and now >= _CLOCK.session_open(d):
+            return d
+        return _CLOCK.previous_trading_day(d)
+    except Exception:  # noqa: BLE001 — no calendar = fail closed
+        return None
 
 
 def judge(as_of: Optional[datetime], policy: str, now: Optional[datetime] = None) -> str:

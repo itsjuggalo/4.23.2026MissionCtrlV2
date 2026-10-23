@@ -87,7 +87,7 @@ def test_flow_day_files_must_carry_todays_rows(tmp_path):
     old = _w(tmp_path / "flow_alerts_today.json", {"X": {"alert": {"Time": fri, "Updated": fri}}})
     os.utime(old, (mon_0931.timestamp() - 30, mon_0931.timestamp() - 30))   # mtime fresh: the age check alone passes
     r = sg.read_state(old, "flow_agg", now=mon_0931)
-    assert r.status == "STALE" and r.doc is None and "not today" in r.reason
+    assert r.status == "STALE" and r.doc is None and "not the 2026-10-26 session" in r.reason
     mixed = _w(tmp_path / "flow2_alerts_today.json", {"A": {"alert": {"Time": fri}}, "B": {"alert": {"Time": mon}}})
     os.utime(mixed, (mon_0931.timestamp() - 30,) * 2)
     r = sg.read_state(mixed, "flow_agg", now=mon_0931)
@@ -98,6 +98,11 @@ def test_flow_day_files_must_carry_todays_rows(tmp_path):
     today = _w(tmp_path / "flow_liveflows_today.json", {str(mon): {"Time": mon}})
     os.utime(today, (mon_0931.timestamp() - 30,) * 2)
     assert sg.read_state(today, "flow_agg", now=mon_0931).ok
+    mon_0900 = datetime(2026, 10, 26, 9, 0, tzinfo=ET)                     # pre-open: Friday's file is still EOD
+    os.utime(old, (mon_0900.timestamp() - 30,) * 2)
+    r = sg.read_state(old, "flow_agg", now=mon_0900)
+    assert r.ok and r.status == "EOD"
+    os.utime(old, (mon_0931.timestamp() - 30,) * 2)
     other = _w(tmp_path / "ctx_today.json", {"generated_at": "x"})       # no rows with times → no day verdict
     os.utime(other, (mon_0931.timestamp() - 30,) * 2)
     assert sg.read_state(other, "flow_agg", now=mon_0931).ok
