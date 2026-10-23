@@ -27,8 +27,7 @@ import price_guard  # noqa: E402  Robinhood-first spot (W1 MC-AUD-026)
 SEC = Path.home() / ".openclaw" / "secrets"
 TOKEN_FILE = SEC / "telegram_mc_skill_bot_token"   # @MMCTRL727_Bot "Trading Recaps"
 CHAT_FILE = SEC / "telegram-chat-id.txt"
-# Alpaca is market DATA only; never add account/positions/order reads.
-DATA = "https://data.alpaca.markets"
+# Prices come from Robinhood via price_guard; no Alpaca read remains here (2026-10-22).
 RELAY_URL = "http://localhost:3000/api/firebase-relay"
 DARKPOOL_URL = "http://localhost:3000/api/darkpool?view=relay"
 ET = ZoneInfo("America/New_York")
@@ -260,17 +259,6 @@ def _qualified_parts(text):
     if has_text:
         parts.append("".join(current) + warning)
     return parts
-
-
-def _key():
-    return ((SEC / "alpaca-key-id").read_text().strip(),
-            (SEC / "alpaca-secret").read_text().strip())
-
-
-def _get(url: str):
-    k, s = _key()
-    req = urllib.request.Request(url, headers={"APCA-API-KEY-ID": k, "APCA-API-SECRET-KEY": s})
-    return json.loads(urllib.request.urlopen(req, timeout=20).read())
 
 
 def _tg(method, **kwargs):

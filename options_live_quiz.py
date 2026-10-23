@@ -6,7 +6,7 @@ OWN open journal option positions — the "un-limiting" win. Two generators:
 
   • POSITION mode — reads Mike's own open rows from the local paper-trade
     journal, computes live greeks (theo.bs_greeks) on the actual contract
-    (mark priced off Alpaca's read-only options DATA feed, not an account),
+    (mark priced from Robinhood via price_guard.option_quotes),
     and asks a grounded question: "Your AMZN 250C (3d left, ~flat) — which
     greek is the daily rent?"
   • STRADDLE mode — calls straddle_engine.read('SPY') and asks a GO/WAIT/SELL
@@ -39,23 +39,11 @@ STATE = Path.home() / ".openclaw" / "data" / "options_quiz_state.json"
 TOKEN_FILE = SEC / "telegram_grok_bot_token"   # quiz-only lane @MoneyFlowz_Bot (2026-09-28)
 CHAT_FILE = SEC / "telegram-chat-id.txt"
 JOURNAL = Path("/AIWorkWSL/trading/signals/option-scraper/data/paper_trades.json")
-DATA = "https://data.alpaca.markets"      # read-only market DATA (not an account) — options mark only
 ET = ZoneInfo("America/New_York")
 LETTERS = ["A", "B", "C", "D"]
 DRY = os.environ.get("DRY") == "1"
 MODE = os.environ.get("MODE", "auto").lower()
 OCC = re.compile(r"^([A-Z]+)(\d{6})([CP])(\d{8})$")
-
-
-def _key():
-    return ((SEC / "alpaca-key-id").read_text().strip(),
-            (SEC / "alpaca-secret").read_text().strip())
-
-
-def _get(url: str):
-    k, s = _key()
-    req = urllib.request.Request(url, headers={"APCA-API-KEY-ID": k, "APCA-API-SECRET-KEY": s})
-    return json.loads(urllib.request.urlopen(req, timeout=20).read())
 
 
 def _tg(method, **kwargs):
@@ -90,22 +78,13 @@ def parse_occ(sym: str):
 
 
 def _option_mark(occ_symbol: str) -> float | None:
-    """Latest option mark via Alpaca's DATA feed (read-only market data — not an
-    account/positions call). Mid of the latest quote, falling back to the latest
-    trade. Reuses the same `_get()` helper already used for underlying spot."""
+    """Option mid from Robinhood (price_guard.option_quotes, read-only, live-age checked). A contract Robinhood
+    cannot price, or a stale quote, returns None - the question is skipped, never filled from Alpaca."""
     try:
-        d = _get(f"{DATA}/v1beta1/options/snapshots/{occ_symbol}?feed=indicative")
-        snap = (d.get("snapshots") or {}).get(occ_symbol) or {}
-        q = snap.get("latestQuote") or {}
-        bid, ask = q.get("bp"), q.get("ap")
-        if bid and ask:
-            return (float(bid) + float(ask)) / 2
-        t = snap.get("latestTrade") or {}
-        if t.get("p"):
-            return float(t["p"])
+        q = (price_guard.option_quotes([occ_symbol]) or {}).get(occ_symbol) or {}
+        return float(q["mid"]) if q.get("ok") and q.get("mid") else None
     except Exception:
-        pass
-    return None
+        return None
 
 
 def _journal_open_rows():
