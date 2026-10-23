@@ -48,7 +48,7 @@ FYI_CHARTS = {"market_boards.py", "max_pain.py", "gex_chart.py", "straddle_cards
 DAILY_CAP = 8                                      # trading_command messages per source per day
 CAP_OVERRIDES: dict[str, int] = {}                 # per-source cap, e.g. {"flow_winners_push.py": 6}
 CAP_EXEMPT = {"spy_scalp_monitor.py", "watchlist_exec.py", "vol_trigger.py", "spy_prebell.py", "prebell.py",
-              "tg_day_spacer.py"}                  # exits / targets / stops / the morning card always buzz
+              "tg_day_spacer.py", "spy_scalp_pickpush.py"}   # exits / stops / morning card / SPY 0DTE picks (Mike 10-22) always buzz
 MAX_ROWS = 10                                      # per section, per digest
 TG_MAX = 3900
 _SCHEMA = """CREATE TABLE IF NOT EXISTS digest_queue (
@@ -342,7 +342,7 @@ def build(items: list[tuple], now: float | None = None, first_of_day: bool = Tru
                 gtitle = t
         sections.setdefault(gtitle, {"rows": {}, "msgs": 0, "last": items[-1][0]})
         sections[gtitle]["rows"] = {"gate": line, **sections[gtitle]["rows"]}
-    hm = lambda t: time.strftime("%-I:%M ET", time.localtime(t))
+    hm = lambda t: time.strftime("%-I:%M %p ET", time.localtime(t))
     n = len(items)
     head = (f"🧾 <b>TRADING DIGEST</b> · {time.strftime('%a %m-%d', time.localtime(now))} {hm(now)}\n"
             f"{n} FYI update{'' if n == 1 else 's'} folded since {hm(items[0][0])}"

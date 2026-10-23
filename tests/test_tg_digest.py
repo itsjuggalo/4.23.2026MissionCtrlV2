@@ -234,7 +234,7 @@ class DigestTest(unittest.TestCase):
         self.assertNotIn("Warsh", second)
         self.assertIn("Other story", second)
         self.assertNotIn("arrive instantly", second)
-        self.assertRegex(second, r"since \d{1,2}:\d\d ET")
+        self.assertRegex(second, r"since \d{1,2}:\d\d [AP]M ET")
 
 
 if __name__ == "__main__":
