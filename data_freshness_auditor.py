@@ -72,8 +72,8 @@ ORPHANED = {
     "position_state":                  "decipher position cache; empty, rebuilt on demand",
     "preseason_checklist":             "one-off manual checklist, not a feed",
     # 2026-09-27: three producers died for good — they were STALE in the 06:45 ping every day.
-    "decipher_exits":                  "position-close rows from the Alpaca paper executor, retired 2026-08-11 (last row 08-07); advisory exits now live in decision/decipher_exits.json",
-    "historical_outcomes":             "decipher REALIZED P&L mirror (outcome_attribution.py) — needs executed fills; Alpaca execution retired 2026-08-11 (last row 08-07)",
+    "decipher_exits":                  "position-close rows from the retired paper executor (execution retired 2026-08-11, last row 08-07); advisory exits now live in decision/decipher_exits.json",
+    "historical_outcomes":             "decipher REALIZED P&L mirror (outcome_attribution.py) — needs executed fills; paper execution retired 2026-08-11 (last row 08-07)",
     "notification_log":                "floor5 top-3 push log — its notify_bus.py was pruned 2026-08-30 (last row 08-25); floor5 push retired 2026-09-27",
 }
 

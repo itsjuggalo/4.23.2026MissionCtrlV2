@@ -216,11 +216,11 @@ CHARTER = {
             "http://localhost:3000/api/decision?symbol=SPY",
             "http://localhost:3000/api/macro-regime",
         ],
-        # Producers deliberately silenced (crontab "silenced 2026-09-30"): the checker
-        # reports PAUSED (WARN), not a dead-upstream FAIL. Remove an entry on un-silence.
+        # Silenced 2026-09-30, then retired 2026-10-23 (Mike "Retire all"; quantum producers
+        # archived): status "retired" → the checker reports RETIRED (PASS), not PAUSED/stale.
         paused={
-            "/AIWorkWSL/labs/quantum/out/best_contracts.json": dict(since="2026-09-30",
-                reason="producer silenced by Mike"),
+            "/AIWorkWSL/labs/quantum/out/best_contracts.json": dict(since="2026-10-23",
+                reason="quantum producer retired by Mike", status="retired"),
         },
         dry_run_cmd=[f"{_H}/.venv/bin/python",
                      f"{_H}/05_AUTOMATION/scripts/morning_command.py", "--dry-run"],
@@ -318,6 +318,8 @@ CHARTER = {
             # by the script, so it always WARNed "does not exist" regardless of truth.
             f"{_H}/.openclaw/data/decision/rebound_ping_state.json",
         ],
+        # Written only when a rebound TRIGGERS: a quiet day leaves it old by design (2026-10-23).
+        trigger_only=[f"{_H}/.openclaw/data/decision/rebound_ping_state.json"],
         dry_run_cmd=[f"{_H}/.venv/bin/python",
                      f"{_H}/05_AUTOMATION/scripts/rebound_trigger_ping.py", "--dry-run"],
     ),
@@ -361,7 +363,7 @@ CHARTER = {
         ],
         paused={
             "/AIWorkWSL/trading/signals/option-scraper/data/best3_scoreboard.json": dict(
-                since="2026-09-30", reason="producer silenced by Mike (grader)"),
+                since="2026-10-23", reason="best3 grader retired by Mike", status="retired"),
         },
         # Round 2: both scripts already had --eod --dry-run (argparse, confirmed via
         # grep + a live run — best3_grader prints the scoreboard/calibration/floor
@@ -409,10 +411,10 @@ CHARTER = {
             "http://localhost:3000/api/decision?symbol=SPY",
         ],
         paused={
-            "/AIWorkWSL/labs/quantum/out/iv_forecast.json": dict(since="2026-09-30",
-                reason="producer retired by Mike 2026-10-23 (supercomputer.sh)"),
-            "/AIWorkWSL/labs/quantum/out/premium_income.json": dict(since="2026-09-30",
-                reason="producer retired by Mike 2026-10-23 (supercomputer.sh)"),
+            "/AIWorkWSL/labs/quantum/out/iv_forecast.json": dict(since="2026-10-23",
+                reason="supercomputer.sh retired by Mike", status="retired"),
+            "/AIWorkWSL/labs/quantum/out/premium_income.json": dict(since="2026-10-23",
+                reason="supercomputer.sh retired by Mike", status="retired"),
         },
         # Round 2 fix: iv_tg.py is "Dry-run by default; --send pushes via Telegram" (its
         # own docstring) — it only defines `--send` via strict argparse, so the v1
