@@ -83,16 +83,53 @@ def _snr_corroboration_line() -> str:
         return ""
 
 
+PX_SRC: dict[str, str] = {}   # ticker → the source that answered _last() (named in the footer)
+
+
+def _quote_v1(ticker: str, now: datetime | None = None):
+    """Today's regular-session price from quote.v1 (price_guard.QC: Robinhood first, Yahoo labelled), or None."""
+    try:
+        import price_guard
+        if price_guard.QC is None:
+            return None, None
+        q = (price_guard.QC.get_canonical_quotes([ticker]) or [None])[0] or {}
+        if q.get("price") is None or not q.get("as_of"):
+            return None, None
+        if datetime.fromisoformat(q["as_of"]).astimezone(ET).date() != (now or datetime.now(ET)).date():
+            return None, None                      # no print today → not today's price
+        prov = (q.get("source") or {}).get("provider") or "unknown"
+        return float(q["price"]), ("Robinhood" if prov == "robinhood" else f"{prov} (not Robinhood)")
+    except Exception:
+        return None, None
+
+
 def _last(ticker: str):
+    """Today's price for grading. Chain (market-data §1/§3, sweep 2026-10-23 — Yahoo-only missed 33 rows in a week):
+    quote.v1 (Robinhood → Yahoo) → yfinance 5m → yfinance 1d. The answering source lands in PX_SRC."""
+    px, src = _quote_v1(ticker)
+    if px is not None:
+        PX_SRC[ticker] = src
+        return px
     try:
         import yfinance as yf
         i = yf.Ticker(ticker).history(period="1d", interval="5m")
         if len(i):
+            PX_SRC[ticker] = "Yahoo 5m (not Robinhood)"
             return float(i["Close"].iloc[-1])
         h = yf.Ticker(ticker).history(period="1d")
-        return float(h["Close"].iloc[-1]) if len(h) else None
+        if len(h):
+            PX_SRC[ticker] = "Yahoo daily (not Robinhood)"
+            return float(h["Close"].iloc[-1])
+        return None
     except Exception:
         return None
+
+
+def _src_footer() -> str:
+    """'Robinhood ×9 · Yahoo 5m (not Robinhood) ×1' over the prices this run used."""
+    from collections import Counter
+    c = Counter(PX_SRC.values())
+    return " · ".join(f"{k} ×{n}" for k, n in c.most_common()) or "no price fetched"
 
 
 CRYPTO_SYMS = {"BTC", "ETH", "SOL"}   # setup_scanner/explosion_score's --crypto universe
@@ -108,6 +145,8 @@ def _last_any(symbol: str):
         try:
             from lib.portfolio import _crypto_prices   # market-data spot quote only — no holdings/account call
             px = _crypto_prices().get(symbol.upper())
+            if px:
+                PX_SRC[symbol.upper()] = "Coinbase spot"
             return float(px) if px else None
         except Exception:
             return None
@@ -239,6 +278,26 @@ def _grade_scanner_alerts():
     return out
 
 
+REBOUND_SETUP = Path.home() / ".openclaw" / "data" / "decision" / "rebound_setup.json"
+
+
+def _held_level(sym: str, sketch: dict, today: str | None = None):
+    """The key level the trigger held: the pinned sketch's heldLevel (rebound_setup, 2026-10-23+) → a legacy
+    pre-R5 `stop` → today's rebound_setup.json best held level for the symbol. None when none answers."""
+    for k in ("heldLevel", "stop"):
+        if sketch.get(k):
+            return float(sketch[k])
+    try:
+        doc = json.loads(REBOUND_SETUP.read_text())
+        row = (doc.get("symbols") or {}).get(sym) or {}
+        if row.get("lastBar") != (today or datetime.now(ET).strftime("%Y-%m-%d")):
+            return None
+        best = ((row.get("components") or {}).get("level") or {}).get("best") or {}
+        return float(best["price"]) if best.get("held") is not False and best.get("price") else None
+    except Exception:
+        return None
+
+
 def _grade_rebound_triggers():
     """Structure-rebound setups that TRIGGERED today (D5's pinned contract sketches
     in rebound_ping_state.json) — underlying move since the level it held. `stop`
@@ -255,10 +314,15 @@ def _grade_rebound_triggers():
         sym, _, trig_date = key.partition("|")
         if trig_date != today or not sym or not isinstance(sketch, dict):
             continue
-        level = sketch.get("stop")
+        level = _held_level(sym, sketch)
         now = _last(sym)
-        r = {"symbol": sym, "option": sketch.get("label")}
+        r = {"symbol": sym, "option": sketch.get("label"), "basis": "level"}
+        if not level and (state.get("pinged") or {}).get(key):
+            # no held level on file → the stock's price when the trigger ping went out (5m bar open), labelled
+            level, _ = _alert_context(sym, "LONG", float("inf"), state["pinged"][key], "")
+            r["basis"] = "alert"
         if not now or not level:
+            r["why"] = "no held level on file" if not level else "no price from Robinhood or Yahoo"
             out.append((r, None))
             continue
         move = (now - level) / level * 100
@@ -280,7 +344,8 @@ def _post_grade_threads(graded) -> None:
                                 str(r.get("type", ""))[:1], r.get("exp"))
             label = f"{r['symbol']} ${r['strike']:g}{r['type']}"
             if not g:
-                msg = f"🏁 **EOD GRADE — {label}** — no data: no live price from Yahoo at run time."
+                why = "no spot logged at post" if not r.get("spot") else "no price from Robinhood or Yahoo"
+                msg = f"🏁 **EOD GRADE — {label}** — no data: {why} at run time."
             else:
                 move, fav, entry, now = g
                 ic = "✅" if fav > 0.3 else ("❌" if fav < -0.3 else "➖")
@@ -399,7 +464,8 @@ def _build_discord_msg(graded, scanner_graded, rebound_graded, snr) -> str:
                 lines.append(f"   • {r['symbol']}{opt} — no data")
                 continue
             move, _fav, entry, now = g
-            lines.append(f"   {_grade_glyph(move)} {r['symbol']}{opt} — held {entry:.2f}, now {now:.2f} ({move:+.1f}%)")
+            what = "at ping" if r.get("basis") == "alert" else "held"
+            lines.append(f"   {_grade_glyph(move)} {r['symbol']}{opt} — {what} {entry:.2f}, now {now:.2f} ({move:+.1f}%)")
 
     if snr:
         lines.append(snr)
@@ -442,8 +508,8 @@ def _build_tg_msg(graded, scanner_graded, rebound_graded, snr, now=None) -> str:
         for r, g in graded:
             pick = f"pick ${r['strike']:g}{r['type']}"
             if not g:
-                blocks.append(tgf.row(r["symbol"], "no data: no spot at post or no live price at "
-                                      + clock, pick))
+                why = "no spot logged at post" if not r.get("spot") else "no price from Robinhood or Yahoo"
+                blocks.append(tgf.row(r["symbol"], f"no data: {why} at {clock}", pick))
                 continue
             move, fav, entry, now_px = g
             blocks.append(tgf.row(r["symbol"], f"stock {entry:.2f}→{now_px:.2f}", tgf.pct(move), pick,
@@ -464,7 +530,7 @@ def _build_tg_msg(graded, scanner_graded, rebound_graded, snr, now=None) -> str:
                 blocks.append(tgf.row(label, "plan never triggered — no trade", glyph="⏸"))
                 continue
             if not g:
-                blocks.append(tgf.row(label, "no data: no live price from Yahoo at " + clock))
+                blocks.append(tgf.row(label, "no data: no price from Robinhood or Yahoo at " + clock))
                 continue
             move, fav, entry, now_px = g
             blocks.append(tgf.row(label, f"stock since alert {entry:.2f}→{now_px:.2f}", tgf.pct(move),
@@ -473,15 +539,17 @@ def _build_tg_msg(graded, scanner_graded, rebound_graded, snr, now=None) -> str:
     if rebound_graded:
         w, n = _tg_ratio(rebound_graded)
         blocks.append(tgf.section(f"Structure triggers · {w}/{n} holding"))
-        blocks.append("<i>Basis: the stock's move since the level held, in the option's direction. "
+        blocks.append("<i>Basis: the stock's move since the level held (or, with no level on file, since the "
+                      "trigger ping), in the option's direction. "
                       "Option cost is the plan's estimate, not a fill.</i>")
         for r, g in rebound_graded:
             opt = f"plan {r['option']}" if r.get("option") else None
             if not g:
-                blocks.append(tgf.row(r["symbol"], "no data: no live price or level at " + clock, opt))
+                blocks.append(tgf.row(r["symbol"], f"no data: {r.get('why') or 'no price or level'} at {clock}", opt))
                 continue
             move, fav, entry, now_px = g
-            blocks.append(tgf.row(r["symbol"], f"stock held {entry:.2f}→{now_px:.2f}", tgf.pct(move), opt,
+            what = "stock since ping" if r.get("basis") == "alert" else "stock held"
+            blocks.append(tgf.row(r["symbol"], f"{what} {entry:.2f}→{now_px:.2f}", tgf.pct(move), opt,
                                    glyph=_grade_glyph(fav)))
 
     if snr:
@@ -489,7 +557,7 @@ def _build_tg_msg(graded, scanner_graded, rebound_graded, snr, now=None) -> str:
         # just the trailing "TICKER 76 · TICKER 70 …" payload as the footer body.
         payload = snr.split(":**", 1)[-1].strip() if ":**" in snr else snr.lstrip("\n")
         blocks.append(tgf.footer(f"SNR corroboration (≥65): {payload}"))
-    blocks.append(tgf.footer(f"Source: Yahoo last price as of {clock}. Option P&L: not tracked (no fills)."))
+    blocks.append(tgf.footer(f"Source: {_src_footer()} · prices as of {clock}. Option P&L: not tracked (no fills)."))
 
     return tgf.join(*blocks)
 
