@@ -43,10 +43,12 @@ def _load(p, default):
 
 
 def _tg(method, **kwargs):
-    token = TOKEN_FILE.read_text().strip()
+    """Through tg_fleet.call as lane quiz (@MoneyFlowz_Bot, pinned; ledgered; no tg_lint hold on a quiz card) —
+    script-standard #6, 2026-10-23 (was a raw api.telegram.org POST with the same bot's token)."""
     try:
-        return requests.post(f"https://api.telegram.org/bot{token}/{method}",
-                             json=kwargs, timeout=15).json()
+        sys.path.insert(0, str(Path.home() / "scripts"))
+        import tg_fleet
+        return tg_fleet.call("quiz", method, _review=False, **kwargs)
     except Exception as e:
         print(f"tg {method} error: {e}")
         return {"ok": False}

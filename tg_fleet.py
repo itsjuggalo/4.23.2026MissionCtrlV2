@@ -766,8 +766,10 @@ def call(fn, method, **params):
     if method in ("sendMessage", "sendPoll", "pinChatMessage", "editMessageText", "editMessageReplyMarkup") \
             and not params.get("chat_id"):
         params["chat_id"] = open(CHAT_FILE).read().strip()
-    try:
-        data = urllib.parse.urlencode(params).encode()
+    try:   # form-encode like the Bot API's JSON body would: objects (reply_markup) as JSON, booleans lower-case
+        data = urllib.parse.urlencode({k: json.dumps(v, ensure_ascii=False) if isinstance(v, (dict, list))
+                                       else ("true" if v else "false") if isinstance(v, bool) else v
+                                       for k, v in params.items()}).encode()
         r = json.load(urllib.request.urlopen(f"https://api.telegram.org/bot{tok}/{method}", data=data, timeout=20))
     except urllib.error.HTTPError as e:   # Telegram answers 400 + JSON for parse errors
         try:
@@ -797,9 +799,10 @@ def _resolve(fn):
     return None, fn
 
 
-def send_upload(fn, path, caption="", as_doc=False, html=False):
+def send_upload(fn, path, caption="", as_doc=False, html=False, extra=None):
     """html=True → caption parsed as Telegram HTML (tg_format output); falls back to a
-    stripped plain caption if Telegram rejects the markup (2026-09-16)."""
+    stripped plain caption if Telegram rejects the markup (2026-09-16). `extra` = more form fields
+    (reply_markup as a dict → JSON, disable_notification …) for senders that need them (2026-10-23)."""
     if not os.path.exists(path):
         print(f"no such file: {path}"); return 1
     fn = _upload_lane(route(fn), path)
@@ -819,6 +822,8 @@ def send_upload(fn, path, caption="", as_doc=False, html=False):
     else:
         method, field = "sendDocument", "document"
     data = {"chat_id": chat}
+    for k, v in (extra or {}).items():
+        data[k] = json.dumps(v, ensure_ascii=False) if isinstance(v, (dict, list)) else v
     if caption:
         data["caption"] = caption
         if html:

@@ -30,6 +30,9 @@ import collections, json, os, re, subprocess, threading, time, sys
 from pathlib import Path
 import requests
 
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+import tg_fleet  # noqa: E402  (sends: script-standard #6)
+
 # 2026-09-27: every local date/time in this process (and its subprocesses) is Eastern Time,
 # whatever PM2 injected (a corrupted TZ string made glibc fall back to UTC, so the astrology
 # "today" rolled over at 8 PM ET).
@@ -408,10 +411,37 @@ ASTRO_MODULE_CMDS = {
 LLM_SEM = threading.BoundedSemaphore(2)
 
 
+RECEIVE = ("getUpdates", "deleteWebhook", "getFile", "getMe", "getWebhookInfo")
+
+
+def _fleet_lane(token):
+    """The tg_fleet lane whose pinned bot id is this token's bot (None → unknown bot: sends stay direct)."""
+    try:
+        bid = tg_fleet._tok_id(token)
+        return next((fn for fn, pin in tg_fleet.BOT_ID.items() if pin == bid), None)
+    except Exception:
+        return None
+
+
+def _tg_for(base, lane):
+    """The lane's Bot API caller. Sends go through tg_fleet.call as this bot's own lane (same pinned bot; ledgered;
+    replies skip tg_lint so an answer is never held) — script-standard #6, 2026-10-23. Receiving polls directly."""
+    def tg(method, req_timeout=10, **kw):
+        try:
+            if lane and method not in RECEIVE:
+                return tg_fleet.call(lane, method, _review=False, **kw)
+            return requests.post(f"{base}/{method}", json=kw, timeout=req_timeout).json()
+        except Exception as e:
+            print(f"tg {method} error: {_redact(e)}", flush=True)
+            return {"ok": False}
+    return tg
+
+
 def run_bot(botkey):
     cfg   = BOTS[botkey]
     token = _fleet_token(cfg["fleet_fn"]) if cfg.get("fleet_fn") else _secret(cfg["token"])
-    base  = f"https://api.telegram.org/bot{token}"
+    base  = f"https://api.telegram.org/bot{token}"   # receiving only (getUpdates / deleteWebhook)
+    lane  = cfg.get("fleet_fn") or _fleet_lane(token)
     # Owner set: the bot's own chat-id file + the universal one (private chat.id ==
     # Mike's Telegram user id, same across all his bots) — robust to file mismatch.
     owners = set()
@@ -425,12 +455,7 @@ def run_bot(botkey):
     tools = cfg.get("tools", "Bash,Read,Grep,Glob,WebFetch,WebSearch")
     name  = cfg["name"]
 
-    def tg(method, req_timeout=10, **kw):
-        try:
-            return requests.post(f"{base}/{method}", json=kw, timeout=req_timeout).json()
-        except Exception as e:
-            print(f"tg {method} error: {_redact(e)}", flush=True)
-            return {"ok": False}
+    tg = _tg_for(base, lane)
 
     def send_reply(chat_id, text):
         """Plain text (always valid — no parse_mode), split on line boundaries under TG_MAX,

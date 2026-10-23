@@ -68,8 +68,18 @@ SYSTEM_PROMPT = (
 )
 
 
+RECEIVE = ("getUpdates", "deleteWebhook", "getFile", "getMe")   # receiving stays a direct poll; every send goes through tg_fleet
+
+
 def tg(method, req_timeout=10, **kwargs):
+    """Bot API call. Sends (replies, buttons, chat actions, callback answers) go through tg_fleet.call as lane
+    life_wellness (the same pinned bot; ledgered; replies skip tg_lint so an interactive answer is never held) —
+    script-standard #6, 2026-10-23. Receiving (getUpdates …) polls directly."""
     try:
+        if method not in RECEIVE:
+            sys.path.insert(0, str(Path.home() / "scripts"))
+            import tg_fleet
+            return tg_fleet.call("life_wellness", method, _review=False, **kwargs)
         return requests.post(f"{TG_BASE}/{method}", json=kwargs, timeout=req_timeout).json()
     except Exception as e:
         print(f"tg {method} error: {_redact(e)}", flush=True)

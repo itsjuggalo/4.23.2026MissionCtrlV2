@@ -142,7 +142,16 @@ def _photo_worker():
                 pass
             PHOTO_Q.task_done()
 
+RECEIVE = ("getUpdates", "deleteWebhook", "getFile", "getMe")   # receiving stays a direct poll; every send goes through tg_fleet
+
+
 def tg(method, req_timeout=10, **kwargs):
+    """Sends go through tg_fleet.call as lane aime_research (same pinned bot; ledgered; replies skip tg_lint so an
+    interactive answer is never held) — script-standard #6, 2026-10-23. Receiving (getUpdates, getFile) polls directly."""
+    if method not in RECEIVE:
+        sys.path.insert(0, str(Path.home() / "scripts"))
+        import tg_fleet
+        return tg_fleet.call("aime_research", method, _review=False, **kwargs)
     r = requests.post(f"{TG_BASE}/{method}", json=kwargs, timeout=req_timeout)
     return r.json()
 

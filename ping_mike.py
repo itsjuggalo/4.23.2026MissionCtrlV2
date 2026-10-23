@@ -51,10 +51,10 @@ def resolve_chat() -> int:
         return 3
     chat_id = str(chats[-1])
     CHAT_FILE.write_text(chat_id)
-    _api(token, "sendMessage", {
-        "chat_id": chat_id,
-        "text": "✅ Ping channel wired. ship-judge escalations land here — separate from briefs.",
-    })
+    sys.path.insert(0, "/home/itsju/scripts")
+    import tg_fleet   # the confirmation is a send: through the fleet as the ping bot's lane (script-standard #6)
+    tg_fleet.call("system_health", "sendMessage", chat_id=chat_id,
+                  text="✅ Ping channel wired. ship-judge escalations land here — separate from briefs.")
     print(f"chat_id saved: {chat_id}")
     return 0
 
@@ -68,33 +68,19 @@ def ping(text: str, lane: str = "system_health") -> int:
     `decipher_eod.py`'s P&L, which were landing on the infra lane wedged between disk-space
     warnings. Callers whose content is TRADE news now pass `--lane trading_command`. The
     fallback token file stays the ping bot either way, so a vault hiccup still delivers.
+    2026-10-23 (script-standard #6): the raw ping-bot fallback is gone — it posted every lane's ping as the ping bot.
+    tg_fleet already falls back to the lane's own token file; a failed send is reported, never silent.
     """
     try:
         sys.path.insert(0, "/home/itsju/scripts")
         from lib.notify import tg_push
-        if tg_push(text, lane, loud=True, html=False,
-                   fallback_token_file="telegram-ping-bot-token"):
+        if tg_push(text, lane, loud=True, html=False):
             print(f"ping delivered ({lane})")
             return 0
-    except Exception as e:
-        print(f"[ping] fleet route failed: {e}", file=sys.stderr)
-    token, chat = _read(TOKEN_FILE), _read(CHAT_FILE)
-    if not (token and chat):
-        print("PING NOT DELIVERED — ping bot not configured (token/chat_id missing). "
-              "Surface the ping inline instead.", file=sys.stderr)
-        return 1
-    try:
-        res = _api(token, "sendMessage", {
-            "chat_id": chat, "text": text, "disable_web_page_preview": "true",
-        })
-        if res.get("ok"):
-            print("ping delivered")
-            return 0
-        print(f"telegram error: {res} — surface inline.", file=sys.stderr)
-        return 1
-    except Exception as e:  # network/auth — never let a ping vanish silently
-        print(f"PING NOT DELIVERED — {e} — surface inline.", file=sys.stderr)
-        return 1
+        print(f"PING NOT DELIVERED — tg_fleet gave no ack for lane {lane} — surface inline.", file=sys.stderr)
+    except Exception as e:  # never let a ping vanish silently
+        print(f"PING NOT DELIVERED — fleet route failed: {e} — surface inline.", file=sys.stderr)
+    return 1
 
 
 if __name__ == "__main__":

@@ -13,7 +13,6 @@ import glob
 import json
 import os
 import re
-import shlex
 import subprocess
 import sys
 import time
@@ -157,20 +156,23 @@ DISCORD_HOOKS = {
 }
 
 def _telegram_post(message: str, parse_mode: bool) -> bool:
-    token   = secret('lifeclaw_telegram_bot_token')
+    """One sendMessage as lane life_wellness (the LifeClaw bot, pinned) through tg_fleet.call — ledgered, no tg_lint
+    hold, same text and chat as before (script-standard #6, 2026-10-23; was a raw api.telegram.org POST)."""
     chat_id = secret('lifeclaw_telegram_chat_id')
-    if not token or not chat_id:
+    if not chat_id:
         print('Telegram: missing token/chat_id', file=sys.stderr)
         return False
-    import urllib.parse
     payload = message if parse_mode else re.sub(r'<[^>]+>', '', message)
-    encoded = urllib.parse.quote(payload)
-    url = f'https://api.telegram.org/bot{token}/sendMessage'
-    mode = '&parse_mode=HTML' if parse_mode else ''
-    data = f'chat_id={chat_id}{mode}&text={encoded}'.encode()
     try:
-        resp = json.loads(urllib.request.urlopen(urllib.request.Request(url, data=data), timeout=10).read())
-        return resp.get('ok', False)
+        sys.path.insert(0, os.path.expanduser('~/scripts'))
+        import tg_fleet
+        params = {'chat_id': chat_id, 'text': payload, '_review': False}
+        if parse_mode:
+            params['parse_mode'] = 'HTML'
+        resp = tg_fleet.call('life_wellness', 'sendMessage', **params)
+        if not resp.get('ok'):
+            print(f"Telegram error: {resp.get('description')}", file=sys.stderr)
+        return bool(resp.get('ok', False)) and not resp.get('dry')
     except Exception as e:
         print(f'Telegram error: {e}', file=sys.stderr)
         return False
@@ -187,21 +189,15 @@ def send_telegram(message: str) -> bool:
 
 def send_telegram_photo(path: str, caption: str = '') -> bool:
     """Send a photo to the LifeClaw bot. Plain-text caption. Best-effort."""
-    token   = secret('lifeclaw_telegram_bot_token')
-    chat_id = secret('lifeclaw_telegram_chat_id')
-    if not token or not chat_id or not path or not os.path.exists(path):
+    if not path or not os.path.exists(path):
         return False
     cap = re.sub(r'<[^>]+>', '', caption)[:1000]
-    url = f'https://api.telegram.org/bot{token}/sendPhoto'
-    cmd = ('curl -s '
-           f'-F {shlex.quote("chat_id=" + str(chat_id))} '
-           f'-F {shlex.quote("photo=@" + path)} '
-           f'-F {shlex.quote("caption=" + cap)} '
-           f'{shlex.quote(url)}')
-    out = run(cmd, timeout=30)
-    try:
-        return json.loads(out).get('ok', False)
-    except Exception:
+    try:   # tg_fleet.send_upload as life_wellness (pinned bot, Mike's chat, ledgered) — script-standard #6, 2026-10-23
+        sys.path.insert(0, os.path.expanduser('~/scripts'))
+        import tg_fleet
+        return tg_fleet.send_upload('life_wellness', path, cap) == 0 and os.environ.get('TG_DRY_RUN') != '1'
+    except Exception as e:
+        print(f'Telegram photo error: {e}', file=sys.stderr)
         return False
 
 def send_discord(brief_type: str, message: str):

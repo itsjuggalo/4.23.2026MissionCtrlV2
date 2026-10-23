@@ -44,6 +44,12 @@ def log(msg: str) -> None:
 
 
 def api(method: str, params: dict, timeout: int = 60) -> dict:
+    """getUpdates polls directly; every send goes through tg_fleet.call as lane system_health (the same pinned ping
+    bot, ledgered, no tg_lint hold on a command reply) — script-standard #6, 2026-10-23."""
+    if method != "getUpdates":
+        sys.path.insert(0, str(Path.home() / "scripts"))
+        import tg_fleet
+        return tg_fleet.call("system_health", method, _review=False, **params)
     url = f"https://api.telegram.org/bot{TOKEN}/{method}"
     data = urllib.parse.urlencode(params).encode()
     with urllib.request.urlopen(urllib.request.Request(url, data=data), timeout=timeout) as r:

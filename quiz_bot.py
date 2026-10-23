@@ -65,7 +65,9 @@ def api(method: str, **kw):
     if DRY and method not in ("getUpdates", "getMe", "getWebhookInfo"):
         print(f"DRY {method}: {json.dumps(kw)[:300]}")
         return {"ok": True}
-    try:
+    try:   # sends through tg_fleet.call as lane quiz (pinned bot, ledgered, no tg_lint hold) — script-standard #6
+        if method not in ("getUpdates", "getMe", "getWebhookInfo", "deleteWebhook"):
+            return tg_fleet.call("quiz", method, _review=False, **kw)
         return requests.post(f"https://api.telegram.org/bot{TOKEN}/{method}", json=kw,
                              timeout=kw.get("timeout", 0) + 20).json()
     except Exception as e:  # noqa: BLE001
