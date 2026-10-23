@@ -1,6 +1,6 @@
 """Retired code is unreachable (2026-10-23, W5 / W5c): no cron or PM2 entrypoint imports — directly or through
 local modules — the archived Alpaca executors or the cap file, and the files are gone from their old homes.
-Archive + restore lines: /AIWorkWSL/archive/2026-10-23-retired/{alpaca-exec,caps}/README.md."""
+Archive + restore lines: /AIWorkWSL/archive/2026-10-23-retired/{alpaca-exec,caps,rules-bot}/README.md."""
 import ast
 import json
 import re
@@ -10,9 +10,10 @@ from pathlib import Path
 
 import pytest
 
-RETIRED = {"auto_trader", "equity_swing_daemon", "risk_gate"}
+RETIRED = {"auto_trader", "equity_swing_daemon", "risk_gate", "stock_auto_trader", "rules_bot"}
 OLD_HOMES = [Path.home() / "scripts/auto_trader.py", Path.home() / "scripts/lib/risk_gate.py",
-             Path("/AIWorkWSL/trading/daemons/equity_swing_daemon.py")]
+             Path("/AIWorkWSL/trading/daemons/equity_swing_daemon.py"), Path.home() / "scripts/stock_auto_trader.py",
+             Path("/AIWorkWSL/web/missionctrl/pipeline/lewis_tv/rules_bot.py")]
 PM2 = Path.home() / ".nvm/versions/node/v22.22.3/bin/pm2"
 
 
