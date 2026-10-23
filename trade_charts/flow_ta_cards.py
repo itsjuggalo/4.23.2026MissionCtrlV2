@@ -118,6 +118,7 @@ def main():
     top = rank(flows, args.top)
     print(f"[flow-ta] {len(flows)} stock flows → top {len(top)} tickers")
     posted = 0
+    cards = []
     state = _load_state()
     for prem, sym, fs in top:
         cap = caption(sym, fs, spotsrc.live_spot(sym))
@@ -129,15 +130,22 @@ def main():
             png = chartlib.render_ta(sym, flows=fs[:5])
         except Exception as e:
             print(f"  {sym}: render fail {e}"); continue
-        dok, tok = deliver.post_chart(args.channel, png, cap, dry=args.dry)
+        # Discord per card as before; Telegram gets one album for the whole run (alert-flood fix 2026-10-22)
+        dok, _ = deliver.post_chart(args.channel, png, cap, tg=False, dry=args.dry)
+        cards.append((sym, key, png, cap, dok))
+        print(f"  {sym}: discord={'✓' if dok else '✗'}")
+        time.sleep(0 if args.dry else 1)
+    tok = deliver.post_album_tg([(png, cap) for _, _, png, cap, _ in cards], dry=args.dry)
+    print(f"  telegram album ({len(cards)} cards): {'✓' if tok else '✗'}")
+    for sym, key, _, _, dok in cards:
         if (dok or tok) and not args.dry:
             state["last"][sym] = key
-            try:
-                STATE.write_text(json.dumps(state))
-            except Exception:
-                pass
-        print(f"  {sym}: discord={'✓' if dok else '✗'} tg={'✓' if tok else '✗'}")
-        posted += bool(dok or tok); time.sleep(0 if args.dry else 1)
+        posted += bool(dok or tok)
+    if not args.dry:
+        try:
+            STATE.write_text(json.dumps(state))
+        except Exception:
+            pass
     print(f"[flow-ta] {posted}/{len(top)} cards → #{args.channel}")
 
 
