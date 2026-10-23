@@ -4,7 +4,8 @@ rh_quotes(["SPY261016C00700000", ...]) -> {occ: {bid, ask, mid, last, as_of, as_
 
 Same fixed endpoint allowlist as the OME provider
 (web/missionctrl/pipeline/decision/option_momentum/providers.py): instruments/,
-options/instruments/, marketdata/options/ — nothing else; no account, position or order API.
+options/instruments/, marketdata/options/ — plus marketdata/quotes/ for equity bid/ask (rh_equity_quotes,
+2026-10-23); nothing else; no account, position or order API.
 Token = the rh-session-keeper file (never printed, never logged). A contract that cannot be
 priced (no exact instrument, no bid/ask, no quote timestamp, any HTTP error) is simply absent
 from the result — this helper never guesses. `as_of` is the quote's own observation time
@@ -22,7 +23,7 @@ from zoneinfo import ZoneInfo
 ET = ZoneInfo("America/New_York")
 RH_TOKEN_FILE = Path.home() / ".openclaw/secrets/robinhood-brokerage-token.txt"
 BASE = "https://api.robinhood.com/"
-_ALLOWED = {"instruments/", "options/instruments/", "marketdata/options/"}
+_ALLOWED = {"instruments/", "options/instruments/", "marketdata/options/", "marketdata/quotes/"}
 _OCC = re.compile(r"^([A-Z]{1,6})(\d{6})([CP])(\d{8})$")
 _UUID = re.compile(r"^[0-9a-fA-F-]{36}$")
 # one contract's bars, by instrument UUID only (Mike 2026-10-21: "options do have daily bars")
@@ -176,6 +177,49 @@ def rh_quotes(occ_list, session=None, diag: dict | None = None) -> dict[str, dic
             "instrument_id": r["_instrument_id"],
             "as_of_et": datetime.fromtimestamp(at, ET).strftime("%Y-%m-%d %H:%M:%S ET"),
             "source": "robinhood"}
+    return out
+
+
+def rh_equity_quotes(symbols, session=None, diag: dict | None = None) -> dict[str, dict]:
+    """Read-only RH equity bid/ask per symbol (marketdata/quotes/, 2026-10-23 for the Floor 4 pre-gate spread check):
+    {SYM: {bid, ask, mid, spread_pct, last, as_of, as_of_et, source}}. A symbol without a usable bid/ask or quote time is
+    absent (diag says why); nothing is guessed. as_of = the quote's own updated_at, never the fetch time."""
+    diag = {} if diag is None else diag
+    syms = [x.strip().upper() for x in dict.fromkeys(symbols or []) if x and x.strip()]
+    token = _token() if session is None else (_token() or "test-token")
+    if not token:
+        diag.update({x: "no read-only Robinhood token in the secrets store" for x in syms})
+        return {}
+    if session is None:
+        try:
+            import requests
+        except ImportError:
+            return {}
+        session = requests.Session()
+    out: dict[str, dict] = {}
+    for k in range(0, len(syms), 50):
+        d = _get(session, token, "marketdata/quotes/", {"symbols": ",".join(syms[k:k + 50])})
+        if d is None:
+            why = _LAST_HTTP.get("marketdata/quotes/", "no response")
+            diag.update({x: f"marketdata/quotes failed ({why})" for x in syms[k:k + 50]})
+            continue
+        for r in _results(d):
+            sym = str(r.get("symbol") or "").upper()
+            bid, ask = _num(r.get("bid_price")), _num(r.get("ask_price"))
+            at = _epoch(r.get("updated_at"))
+            if not sym:
+                continue
+            if bid is None or ask is None or bid <= 0 or ask <= 0 or ask < bid or at is None:
+                diag[sym] = f"no usable bid/ask (bid {bid}, ask {ask})"
+                continue
+            mid = (bid + ask) / 2
+            out[sym] = {"bid": bid, "ask": ask, "mid": round(mid, 4), "spread_pct": round((ask - bid) / mid, 6),
+                        "last": _num(r.get("last_trade_price")), "as_of": at,
+                        "as_of_et": datetime.fromtimestamp(at, ET).strftime("%Y-%m-%d %H:%M:%S ET"),
+                        "source": "Robinhood marketdata/quotes"}
+    for x in syms:
+        if x not in out and x not in diag:
+            diag[x] = "no marketdata/quotes row"
     return out
 
 

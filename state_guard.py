@@ -103,6 +103,41 @@ def _parse_as_of(v: Any) -> Optional[datetime]:
     return dt if dt.tzinfo else dt.replace(tzinfo=ET)
 
 
+# The relay's day files (read-only; never written here). flow_agg ages by REGULAR-SESSION minutes, so yesterday's
+# 16:00 file reads "0 min old" at 09:31: these files must also carry today's ET date in their own rows (2026-10-23).
+FLOW_DAY_FILES = ("flow_live_last100.json",)            # plus every *_today.json read under flow_agg
+
+
+def flow_doc_times(doc: Any) -> list[datetime]:
+    """Print/alert times inside a relay flow file: ms keys, `Time`, or `alert.Time` / `alert.Updated` (newest per row)."""
+    out = []
+    for k, v in (doc.items() if isinstance(doc, dict) else []):
+        a = v.get("alert", v) if isinstance(v, dict) else {}
+        ms = [x for x in (a.get("Updated"), a.get("Time")) if isinstance(x, (int, float)) and x > 1e11]
+        if not ms and str(k).isdigit() and int(k) > 1e11:
+            ms = [int(k)]
+        if ms:
+            out.append(datetime.fromtimestamp(max(ms) / 1000, tz=timezone.utc))
+    return out
+
+
+def day_check(p: Path, policy: str, doc: Any, now: Optional[datetime] = None) -> Optional[str]:
+    """None when the file's own rows are today's (ET), else the reason. Only relay day files under flow_agg:
+    *_today.json must hold no row before today; flow_live_last100.json (a rolling tail) must end today."""
+    if policy != "flow_agg" or not (p.name.endswith("_today.json") or p.name in FLOW_DAY_FILES):
+        return None
+    times = flow_doc_times(doc)
+    if not times:
+        return None                                         # an empty day file holds nothing stale
+    today = (now or datetime.now(ET)).astimezone(ET).date()
+    newest, oldest = max(times).astimezone(ET), min(times).astimezone(ET)
+    if newest.date() != today:
+        return f"file's own newest row is {newest:%Y-%m-%d %H:%M} ET, not today"
+    if p.name.endswith("_today.json") and oldest.date() != today:
+        return f"file holds rows from {oldest:%Y-%m-%d} (not reset for today)"
+    return None
+
+
 def judge(as_of: Optional[datetime], policy: str, now: Optional[datetime] = None) -> str:
     env = _envelope()
     if env is None:
@@ -142,10 +177,13 @@ def read_state(path: Union[str, Path], policy: str, *, name: Optional[str] = Non
             except OSError:
                 t, basis = None, "none"
         st = judge(t, policy, now)
+        stale_day = day_check(p, policy, doc, now) if st in USABLE else None
+        if stale_day:
+            st = "STALE"
         r = StateRead(str(p), policy, st, _et_iso(t) if t else None, basis, raw=doc,
                       doc=doc if st in USABLE else None,
-                      reason=None if st in USABLE else (f"{basis} {_et_iso(t)} is {st} under {policy}" if t
-                                                        else f"no data time ({basis})"))
+                      reason=None if st in USABLE else (stale_day or (f"{basis} {_et_iso(t)} is {st} under {policy}" if t
+                                                                      else f"no data time ({basis})")))
     if required and not r.ok:
         _alert_missing(label, [{"source": str(p), "ok": False, "error": r.reason or r.status}], dry)
     return r
