@@ -6,7 +6,7 @@ and nothing anywhere states a size, a contract count, a risk cap or a price cap.
 a fake levels block: nothing is sent, no network, no engine call.
 
 Covers: flow_chase (verdict + push card + FLOW WINNERS board) - morning_command (top contract line, momentum prompt) -
-quantum_sniper (green-light buzz) - quantum_tg (pick verdict + top pick) - real_coach.precheck (no stop / cap gate).
+quantum_tg (pick verdict + top pick) - real_coach.precheck (no stop / cap gate).
 Replaces tests/test_r5_no_stops_targets_caps.py.
 """
 import importlib
@@ -30,7 +30,6 @@ def _imp(name):
 _imp("tg_format"), _imp("price_guard")
 LB = _imp("levels_block")
 Q = _imp("quantum_tg")
-QS = _imp("quantum_sniper")
 PC = _imp("real_coach.precheck")
 FC = _imp("flow_chase")
 MC = _imp("morning_command")
@@ -148,15 +147,6 @@ def test_morning_prompt_and_helpers_have_no_plan_machinery():
     src = inspect.getsource(MC._catalysts_and_orders)
     assert '"stop"' not in src and '"target"' not in src
     assert "Never state a price level" in src and "never from you" in src   # an LLM never invents a level (R32)
-
-
-def test_sniper_buzz_has_cost_and_the_levels_block():
-    p = {"ticker": "AMD", "strike": 180, "type": "call", "expiry": "2099-01-15", "days": 20,
-         "per_contract": 320, "confidence": "A", "sources": 3, "value": "fair",
-         "action_why": "clean setup"}
-    out = QS._buzz_text(p, {})
-    assert "$320" in out and "per contract" in out
-    _clean(out, block=True)
 
 
 def test_pick_verdict_is_gate_state_only():

@@ -402,7 +402,7 @@ CHARTER = {
         fleet="research_desk",
         owns=["crypto desk reads (btc_desk/exit_monitor/pretrade_confluence)", "IV desk reads"],
         never=["equity"],
-        cadence="10:05 + 15:25 ET Mon-Fri (iv_tg/iv_chart)", cadence_min=24 * 60,
+        cadence="retired 2026-10-23 (iv_tg/iv_chart crons off with supercomputer.sh)", cadence_min=24 * 60,
         reads=[
             "/AIWorkWSL/labs/quantum/out/iv_forecast.json",
             "/AIWorkWSL/labs/quantum/out/premium_income.json",
@@ -410,9 +410,9 @@ CHARTER = {
         ],
         paused={
             "/AIWorkWSL/labs/quantum/out/iv_forecast.json": dict(since="2026-09-30",
-                reason="producer silenced by Mike (supercomputer.sh/quantum_sniper)"),
+                reason="producer retired by Mike 2026-10-23 (supercomputer.sh)"),
             "/AIWorkWSL/labs/quantum/out/premium_income.json": dict(since="2026-09-30",
-                reason="producer silenced by Mike (supercomputer.sh/quantum_sniper)"),
+                reason="producer retired by Mike 2026-10-23 (supercomputer.sh)"),
         },
         # Round 2 fix: iv_tg.py is "Dry-run by default; --send pushes via Telegram" (its
         # own docstring) — it only defines `--send` via strict argparse, so the v1

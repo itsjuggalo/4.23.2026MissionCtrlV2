@@ -44,6 +44,9 @@ def paused_note():
         e = next(r for r in json.load(open(REGISTRY))["entries"] if r.get("id") == "quantum-lab")
     except Exception:
         return None
+    if e.get("expectation") == "retired":
+        r = e.get("retired") or {}
+        return f"quantum pipeline retired {str(r.get('date') or '?')[5:] or '?'} (Mike) — no current pick"
     if e.get("expectation") != "paused":
         return None
     p = e.get("paused") or {}
@@ -625,26 +628,10 @@ def _tomorrow_events():
         return None
 
 
-def _sessions_old(as_of: str, today: str):
-    """Weekdays between as_of and today (None if unparseable)."""
-    try:
-        from datetime import date, timedelta
-        a, t = date.fromisoformat(as_of), date.fromisoformat(today)
-    except Exception:
-        return None
-    n, d = 0, a
-    while d < t:
-        d += timedelta(days=1)
-        if d.weekday() < 5:
-            n += 1
-    return n
-
-
 def eod():
-    """Market CLOSE wrap — tape, breadth, sectors, what graded today, tomorrow's calendar.
-    Deterministic, no LLM, no account data (Alpaca is data only, 2026-09-16)."""
-    sb = _load("scoreboard.json")
-    today = datetime.now(ET).strftime("%Y-%m-%d")
+    """Market CLOSE wrap — tape, breadth, sectors, tomorrow's calendar.
+    Deterministic, no LLM, no account data (Alpaca is data only, 2026-09-16). The "graded today" and track-record
+    lines read supercomputer.sh's scoreboard.json and were removed when Mike retired it (2026-10-23)."""
     lines = [hdr("🌙", "Close")]
     tape = _close_tape()
     if tape:
@@ -655,20 +642,6 @@ def eod():
     sec = _close_sectors()
     if sec:
         lines.append("🧭 " + b("SECTORS") + " " + esc(sec))
-    if sb:
-        rec = [r for r in (sb.get("recent") or []) if str(r.get("date")) == today]
-        if rec:
-            w = sum(1 for r in rec if r.get("outcome") == "win")
-            lines.append("🎓 " + esc(f"today graded: {len(rec)} ({w}W/{len(rec)-w}L)"))
-    g = grade().splitlines()
-    if g:
-        as_of = str((sb or {}).get("as_of") or "")[:10]
-        stale_days = _sessions_old(as_of, today)
-        if stale_days is not None and stale_days > 1:
-            lines.append("🎓 " + esc(f"Track record STALE — last graded {as_of[5:]} "
-                                      f"({stale_days} sessions old; producer paused since 09-30), not today's"))
-        else:
-            lines.append(g[-1])  # the 🔴/🟡/🟢 readiness line (already HTML-escaped by grade())
     tom = _tomorrow_events()
     if tom:
         lines.append("📆 " + b("TOMORROW") + " " + esc(tom))

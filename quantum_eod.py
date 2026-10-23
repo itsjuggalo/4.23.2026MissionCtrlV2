@@ -1,8 +1,8 @@
 #!/home/itsju/.venv/bin/python
 """Market CLOSE wrap → Trading Command bot (16:08 ET weekdays).
 
-ONE deterministic end-of-day buzz: tape (SPY/QQQ/IWM/VIX) + breadth + sectors + what
-graded today + readiness + tomorrow's calendar. Facts only, no LLM, no bloat, no account
+ONE deterministic end-of-day buzz: tape (SPY/QQQ/IWM/VIX) + breadth + sectors + tomorrow's
+calendar (the graded-today / track-record lines were retired with supercomputer.sh, 2026-10-23). Facts only, no LLM, no bloat, no account
 data (Alpaca is data only, 2026-09-16). Honors the shared killswitch.
 Cron: 8 16 * * 1-5.  Test: quantum_eod.py --dry-run
 """
