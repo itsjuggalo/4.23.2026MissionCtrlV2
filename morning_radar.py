@@ -6,8 +6,9 @@ The evening pre_breakout_scan (17:30) finds coiled springs for TOMORROW; this an
 a big day (premarket volume anomaly + gap) filtered by posture (EMA20/50 + MACD
 histogram inflection — confirmation, not triggers, per Mike's coaching doctrine).
 
-Universe = real holdings (coach_verdicts.json, mv>=$50 stocks) + latest evening scan
-picks (scan_history) + CORE stocks. Stocks only (premarket is a stock concept; crypto
+Universe = latest evening scan picks (scan_history) + CORE stocks. The holdings leg
+(coach_verdicts.json) was removed 2026-10-23: holdings views were retired 2026-09-12 (archive + restore line:
+/AIWorkWSL/archive/2026-10-23-retired/holdings-legs/README.md). Stocks only (premarket is a stock concept; crypto
 is covered 24/7 by btc_desk + coach alerts).
 
 Scoring (explainable, 0-20+):
@@ -32,7 +33,6 @@ from zoneinfo import ZoneInfo
 
 ET = ZoneInfo("America/New_York")
 HOME = Path.home()
-VERDICTS = HOME / "portfolio" / "coach_verdicts.json"
 DB = HOME / "portfolio" / "mike.sqlite"
 TG_FLEET = HOME / "scripts" / "tg_fleet.py"
 TG_FN = "trading_command"
@@ -53,23 +53,16 @@ def now_et() -> datetime:
 
 
 def universe() -> dict[str, str]:
-    """symbol -> tag (holding|scan|core). Stocks only."""
+    """symbol -> tag (scan|core). Stocks only."""
     uni: dict[str, str] = {}
     for s in CORE_STOCKS:
         uni[s] = "core"
-    # 2026-10-23 (standard #4): both inputs carry a max age (fact_policies factor_daily). coach_verdicts.json was last
-    # written 2026-09-12 (holdings views retired) and scan_history stopped 2026-09-11, so neither feeds the radar now.
+    # 2026-10-23 (standard #4): scan_history carries a max age (fact_policies factor_daily); it stopped 2026-09-11, so
+    # it does not feed the radar now. The holdings leg is gone (retired data; see the module docstring).
     try:
         import state_guard as SG
     except Exception:  # noqa: BLE001 — no age check = core list only (fail closed)
         return dict(list(uni.items())[:MAX_UNIVERSE])
-    try:
-        d = SG.read_state(VERDICTS, "factor_daily").doc or {}
-        for r in d.get("results", []):
-            if r.get("asset_class") == "stock" and (r.get("mv") or 0) >= 50:
-                uni.setdefault(r["symbol"], "holding")
-    except Exception:
-        pass
     try:
         import sqlite3
         if not SG.sqlite_status(DB, "SELECT MAX(scanned_at) FROM scan_history", "factor_daily").ok:
@@ -259,7 +252,7 @@ def card(rows: list[dict], nsyms: int, top: int) -> str:
         lines.append("😴 quiet morning — no name shows unusual premarket volume/gap. "
                      "Don't force a trade today.")
     for r in hot:
-        tag = {"holding": "📦 you own", "scan": "🌙 last-night pick", "core": "🏛 core"}[r["tag"]]
+        tag = {"scan": "🌙 last-night pick", "core": "🏛 core"}[r["tag"]]
         lines.append(f"• *{r['sym']}* [{r['score']}] {tag} — " + " · ".join(r["why"]))
     if hot:
         lines.append("Rules: no chase >+15%/5d. Momentum observation only.")
