@@ -146,6 +146,29 @@ def _pick_monthly(tk, exps, today, min_dte=20, max_dte=45, min_oi=200):
     return parsed[0]
 
 
+GEX_FACTOR = Path.home() / ".openclaw/data/decision/factors/gex.json"
+GEX_FACTOR_MAX_AGE_H = 30          # the owner runs 08:45–16:20 weekdays; yesterday's close covers a 10:05 run
+
+
+def owner_flip(ticker: str, now: dt.datetime | None = None, path: Path = GEX_FACTOR):
+    """Gamma flip from the GEX owner (pipeline/gex, CBOE chain → factors/gex.json), used when this chart's own
+    cumulative-OI sweep finds no zero cross (2026-10-23 sweep: 'gamma flip n/a' on 14 cards in 7 days).
+    -> (flip, label) or (None, reason). Older than GEX_FACTOR_MAX_AGE_H = not used."""
+    try:
+        d = json.loads(path.read_text())
+        row = (d.get("symbols") or {}).get(ticker.upper()) or {}
+        flip, as_of = row.get("flip"), row.get("asOf") or d.get("asOf")
+        if flip is None or not as_of:
+            return None, "GEX owner has no flip for this symbol"
+        t = dt.datetime.fromisoformat(as_of)
+        now = now or dt.datetime.now(t.tzinfo)
+        if (now - t).total_seconds() > GEX_FACTOR_MAX_AGE_H * 3600:
+            return None, f"GEX owner flip is stale (as of {t:%m-%d %H:%M} ET)"
+        return float(flip), f"pipeline/gex CBOE chain, as of {t:%m-%d %H:%M} ET"
+    except (OSError, ValueError, TypeError) as e:
+        return None, f"GEX owner unreadable ({type(e).__name__})"
+
+
 def compute_gex(ticker: str, strikes_window: int = 0):
     tk = yf.Ticker(ticker)
     hist = tk.history(period="5d")["Close"].dropna()
@@ -211,6 +234,12 @@ def compute_gex(ticker: str, strikes_window: int = 0):
             flip = x0 + (x1 - x0) * (0 - y0) / (y1 - y0) if (y1 - y0) else x0
             break
 
+    flip_src = "cumulative OI GEX on this Yahoo chain" if flip is not None else None
+    if flip is None:
+        flip, flip_src = owner_flip(ticker)
+        if flip is None:
+            flip_src = f"no zero cross in this chain; {flip_src}"
+
     # scale by the largest single-strike magnitude so a near-zero net (cancellation)
     # still renders with readable bar units
     mag = max((abs(v) for v in gex_by_k), default=0.0)
@@ -219,7 +248,7 @@ def compute_gex(ticker: str, strikes_window: int = 0):
 
     return dict(ticker=ticker, spot=spot, spot_src=spot_src, expiry=expiry, dte=dte, strikes=ks,
                 gex=gex_by_k, call_gex=[call_gex[k] for k in ks],
-                put_gex=[-put_gex[k] for k in ks], net=net, flip=flip,
+                put_gex=[-put_gex[k] for k in ks], net=net, flip=flip, flip_src=flip_src,
                 div=div, unit=unit, n_strikes=len(ks), thin=thin)
 
 
@@ -285,7 +314,8 @@ def caption(g: dict) -> str:
     else:
         sign = "🟢 **POSITIVE GEX**"
         regime = "dealers *suppress* moves → mean-revert / pin (fade extremes, expect chop)"
-    flip = f"${g['flip']:,.2f}" if g["flip"] is not None else "n/a"
+    flip = (f"${g['flip']:,.2f} ({g.get('flip_src') or 'source n/a'})" if g["flip"] is not None
+            else f"UNAVAILABLE ({g.get('flip_src') or 'no zero cross'})")
     above = ""
     if g["flip"] is not None:
         above = ("  · spot **above** flip (positive-gamma / stabilizing zone)"
