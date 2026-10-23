@@ -304,9 +304,8 @@ def telegram(text: str, loud: bool) -> None:
     if DRY:
         print(f"DRY telegram (loud={loud}):\n{text}\n")
         return
-    # Prefer the vault-backed fleet route (flow_signals = @PipelineSignals_Bot, where Mike
-    # already watches). tg_push itself falls back to telegram-bot-token.txt; the inline send
-    # below is a last-ditch for the narrow case where lib.notify can't even be imported.
+    # Vault-backed fleet route (flow_signals = @PipelineSignals_Bot, where Mike already watches).
+    # tg_push itself falls back to telegram-bot-token.txt.
     try:
         sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
         from lib.notify import tg_push
@@ -315,19 +314,9 @@ def telegram(text: str, loud: bool) -> None:
             return
     except Exception as e:  # noqa: BLE001
         print(f"[guard] fleet route failed: {e}", file=sys.stderr)
-    token, chat = _secret("telegram-bot-token.txt"), _secret("telegram-chat-id.txt")
-    if not token or not chat:
-        print("[guard] no telegram creds", file=sys.stderr)
-        return
-    data = urllib.parse.urlencode({
-        "chat_id": chat, "parse_mode": "HTML",
-        "disable_notification": "false" if loud else "true",
-        "text": text[:4096]}).encode()
-    try:
-        urllib.request.urlopen(urllib.request.Request(
-            f"https://api.telegram.org/bot{token}/sendMessage", data=data), timeout=20)
-    except Exception as e:  # noqa: BLE001
-        print(f"[guard] telegram failed: {e}", file=sys.stderr)
+    # No raw Bot API call here (script-standard #6): tg_push already tries the fleet lane, then the token file.
+    print("[guard] TELEGRAM SEND FAILED — fleet route and token-file fallback both down; alert not delivered",
+          file=sys.stderr)
 
 
 def alert_blind(reasons: list[str]) -> None:

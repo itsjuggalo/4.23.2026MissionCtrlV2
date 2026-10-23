@@ -274,31 +274,22 @@ def _get(url: str):
 
 
 def _tg(method, **kwargs):
-    """One attempt only. Strict application ACK is acceptance, not recipient delivery."""
-    response = None
+    """One attempt only, as the trading_recaps lane via tg_fleet.call (pinned bot, tg_lint, ledger; no raw Bot API call).
+    Strict application ACK is acceptance, not recipient delivery."""
     try:
         text = kwargs.get("text")
         if method != "sendMessage" or type(text) is not str or not text.strip() or len(text) > 4096:
             _diagnostic("telegram_unverified")
             return False
-        token = TOKEN_FILE.read_text().strip()
-        response = urllib.request.urlopen(urllib.request.Request(
-            f"https://api.telegram.org/bot{token}/{method}",
-            data=json.dumps(kwargs).encode(), headers={"Content-Type": "application/json"}),
-            timeout=15)
-        accepted = _telegram_ack(response.status, json.loads(response.read()), kwargs.get("chat_id"))
+        import tg_fleet
+        body = tg_fleet.call("trading_recaps", method, **kwargs)
+        accepted = _telegram_ack(200 if body.get("ok") else 0, body, kwargs.get("chat_id"))
         if not accepted:
             _diagnostic("telegram_unverified")
         return accepted
     except Exception:
         _diagnostic("telegram_unverified")
         return False
-    finally:
-        if response is not None:
-            try:
-                response.close()
-            except Exception:
-                pass
 
 
 _SPOT_CACHE: dict = {}
@@ -581,11 +572,6 @@ def main() -> int:
         if _tg("sendMessage", chat_id=chat_id, text=part, parse_mode="HTML") is True:
             accepted += 1
     complete = bool(parts) and accepted == len(parts)
-    try:
-        from lib.tg_ledger import record
-        record("trading_recaps", short, complete, html=True, src="options_position_scorecard.py")
-    except Exception:
-        pass
     print(f"[scorecard] Telegram acceptance {'ACK' if complete else 'UNVERIFIED/PARTIAL'}: "
           f"{accepted}/{len(parts)} parts; {len(display_cards)} model card(s); not recipient-delivery proof")
     return 0 if complete else 1

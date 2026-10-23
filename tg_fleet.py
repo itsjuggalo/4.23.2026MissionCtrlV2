@@ -736,6 +736,48 @@ def send(fn, msg, html=False):
     return 0 if ok else 1
 
 
+def call(fn, method, **params):
+    """Bot API `method` as lane `fn` through the fleet (pinned token, chat default, tg_lint + ledger for sendMessage).
+    For what send() cannot express: message_id back (pin), reply_markup, polls, edits, callback answers, silent pushes.
+    Returns Telegram's JSON dict ({"ok": False, "description": ...} on failure); never raises. TG_DRY_RUN=1 renders
+    the call and returns a fake ok. Receiving (getUpdates) is the caller's business, not a send. (script-standard #6)"""
+    fn = route(fn)
+    if os.environ.get("TG_DRY_RUN") == "1":
+        _dry(fn, f"{method} {json.dumps(params, default=str, ensure_ascii=False)[:6000]}")
+        return {"ok": True, "result": {"message_id": 0}, "dry": True}
+    text = params.get("text") if method == "sendMessage" else None
+    if isinstance(text, str):
+        try:   # same pre-send review as send(); fail-open by design
+            sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+            from lib.tg_lint import review
+            reviewed, notes = review(fn, text)
+            if reviewed is None:
+                print(f"held by pre-send review: {'; '.join(notes)}")
+                return {"ok": True, "result": {"message_id": 0}, "held": True}
+            params["text"] = text = reviewed
+        except Exception:
+            pass
+    tok = pinned_token(fn)
+    if not tok:
+        return {"ok": False, "description": f"no token for {fn}"}
+    if method in ("sendMessage", "sendPoll", "pinChatMessage", "editMessageText", "editMessageReplyMarkup") \
+            and not params.get("chat_id"):
+        params["chat_id"] = open(CHAT_FILE).read().strip()
+    try:
+        data = urllib.parse.urlencode(params).encode()
+        r = json.load(urllib.request.urlopen(f"https://api.telegram.org/bot{tok}/{method}", data=data, timeout=20))
+    except urllib.error.HTTPError as e:   # Telegram answers 400 + JSON for parse errors
+        try:
+            r = json.loads(e.read().decode())
+        except Exception:
+            r = {"ok": False, "description": str(e)}
+    except Exception as e:
+        r = {"ok": False, "description": str(e)}
+    if isinstance(text, str):
+        _ledger(fn, text, bool(r.get("ok")), params.get("parse_mode") == "HTML")
+    return r
+
+
 def _dry(fn, msg):
     """TG_DRY_RUN=1: print the lane, its pinned bot and the text instead of posting (no token text)."""
     ok = bool(pinned_token(fn))
