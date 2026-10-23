@@ -14,6 +14,7 @@ from zoneinfo import ZoneInfo
 sys.path.insert(0, os.path.expanduser("~/scripts"))
 import quantum_tg as Q
 from tg_format import esc, hdr
+from lib.r32_text import scrub, note  # R32: the LLM may not size, advise stops or invent levels
 
 ET     = ZoneInfo("America/New_York")
 HALT   = os.path.expanduser("~/.openclaw/quantum_HALT")
@@ -42,6 +43,10 @@ def main():
         body = f"(pre-market brief unavailable: {e})"
     if not body:
         return  # nothing useful → say nothing (anti-bloat)
+    body, removed = scrub(body)
+    if removed:   # audit P1 2026-10-22: "trade small … use a stop" reached Mike — never again, and say it was cut
+        body += "\n" + note(removed)
+        print(f"[premarket] R32 removed {len(removed)}: " + " | ".join(r["text"][:80] for r in removed), file=sys.stderr)
     # body is free-form LLM prose (not built via tg_format) — esc() it so a stray
     # "<" / "&" from the LLM (e.g. "SPY < 660") can't break the HTML parse.
     msg = hdr("🌅", "Pre-Market", sub=datetime.now(ET).strftime('%a %-m/%-d')) + "\n" + esc(body)
