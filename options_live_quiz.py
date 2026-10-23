@@ -36,7 +36,6 @@ import price_guard  # noqa: E402  Robinhood-first spot (W1 MC-AUD-035)
 
 SEC = Path.home() / ".openclaw" / "secrets"
 STATE = Path.home() / ".openclaw" / "data" / "options_quiz_state.json"
-TOKEN_FILE = SEC / "telegram_grok_bot_token"   # quiz-only lane @MoneyFlowz_Bot (2026-09-28)
 CHAT_FILE = SEC / "telegram-chat-id.txt"
 JOURNAL = Path("/AIWorkWSL/trading/signals/option-scraper/data/paper_trades.json")
 ET = ZoneInfo("America/New_York")
@@ -47,15 +46,14 @@ OCC = re.compile(r"^([A-Z]+)(\d{6})([CP])(\d{8})$")
 
 
 def _tg(method, **kwargs):
-    token = TOKEN_FILE.read_text().strip()
-    try:
-        return urllib.request.urlopen(urllib.request.Request(
-            f"https://api.telegram.org/bot{token}/{method}",
-            data=json.dumps(kwargs).encode(), headers={"Content-Type": "application/json"}),
-            timeout=15)
-    except Exception as e:
-        print(f"tg {method} error: {e}")
+    """Quiz lane (@MoneyFlowz_Bot) through tg_fleet.call: pinned bot id, tg_lint, ledger, TG_DRY_RUN=1 render
+    (script standard #6). Returns Telegram's JSON dict on success, None on failure."""
+    import tg_fleet
+    r = tg_fleet.call("quiz", method, **kwargs)
+    if not r.get("ok"):
+        print(f"tg {method} error: {r.get('description')}")
         return None
+    return r
 
 
 def _spot(sym: str) -> float | None:
