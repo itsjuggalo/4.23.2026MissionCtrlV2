@@ -131,3 +131,17 @@ def test_yahoo_without_yfinance_asks_the_venv(monkeypatch):
         raise ImportError("no yfinance")
     monkeypatch.setattr(of, "_yahoo_via_venv", lambda occ: ({"mid": 9.0}, None))
     assert of.yahoo_quote(OCC, _fetch=no_yf) == ({"mid": 9.0}, None)
+
+
+def test_index_roots_map_to_cboe_and_yahoo_index_symbols():
+    # VIX options live at CBOE _VIX.json / Yahoo ^VIX; plain VIX.json is 403 (the 2026-10-23 "VIX has no chain" miss)
+    assert of.cboe_symbol("VIX") == "_VIX" and of.cboe_symbol("VIXW") == "_VIX" and of.cboe_symbol("SPXW") == "_SPX"
+    assert of.cboe_symbol("SPY") == "SPY" and of.yahoo_symbol("VIX") == "^VIX" and of.yahoo_symbol("AAPL") == "AAPL"
+
+
+def test_vix_contract_priced_from_cboe_index_chain():
+    seen = []
+    d = {"data": {"last_trade_time": "2026-10-22T16:15:01",
+                  "options": [{"option": "VIX261118P00085000", "bid": 65.3, "ask": 65.8, "last_trade_price": 65.4}]}}
+    q, why = of.cboe_quote("VIX261118P00085000", _fetch=lambda root: seen.append(root) or d)
+    assert q["mid"] == 65.55 and q["provider"] == "cboe" and seen == ["VIX"]

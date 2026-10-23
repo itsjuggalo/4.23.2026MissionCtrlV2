@@ -38,6 +38,19 @@ def _num(v):
     return f if f == f else None
 
 
+# Index options: CBOE serves them as _VIX / _SPX ... and Yahoo as ^VIX / ^SPX; weekly/PM roots share the base index.
+_INDEX_BASE = {"VIX": "VIX", "VIXW": "VIX", "SPX": "SPX", "SPXW": "SPX", "NDX": "NDX", "NDXP": "NDX", "RUT": "RUT",
+               "RUTW": "RUT", "XSP": "XSP", "DJX": "DJX", "XND": "XND"}
+
+
+def cboe_symbol(root: str) -> str:
+    return "_" + _INDEX_BASE[root] if root in _INDEX_BASE else root
+
+
+def yahoo_symbol(root: str) -> str:
+    return "^" + _INDEX_BASE[root] if root in _INDEX_BASE else root
+
+
 def _parse(occ: str):
     m = _OCC.match(occ or "")
     if not m:
@@ -67,7 +80,7 @@ def _yf_chain(root: str, expiry: str):
     if hit and time.time() - hit[0] < _CBOE_TTL_S:
         return hit[1]
     import yfinance as yf   # lazy: the system python3 has no yfinance; the caller reports that as the reason
-    ch = yf.Ticker(root).option_chain(expiry)
+    ch = yf.Ticker(yahoo_symbol(root)).option_chain(expiry)
     _YF_CACHE[(root, expiry)] = (time.time(), ch)
     return ch
 
@@ -116,7 +129,7 @@ def _cboe_get(root: str) -> dict:
     hit = _CBOE_CACHE.get(root)
     if hit and time.time() - hit[0] < _CBOE_TTL_S:
         return hit[1]
-    req = urllib.request.Request(f"https://cdn.cboe.com/api/global/delayed_quotes/options/{root}.json",
+    req = urllib.request.Request(f"https://cdn.cboe.com/api/global/delayed_quotes/options/{cboe_symbol(root)}.json",
                                  headers={"User-Agent": "Mozilla/5.0"})
     with urllib.request.urlopen(req, timeout=20) as r:
         d = json.load(r)
