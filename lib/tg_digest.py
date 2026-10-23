@@ -40,6 +40,15 @@ RELANE = {
     "report_card.py": "trading_recaps", "signal_outcomes.py": "trading_recaps",
     "btc_monitor.py": "crypto_desk", "btc_sentiment.py": "crypto_desk",
 }
+# Alert-flood fix (Mike GO 2026-10-22, staged): trading_command carried 694 messages in 7 days, 9 of them in the
+# 09:50 minute. FYI charts post on the digest bot instead (instantly, as photos: a chart cannot fold into a text
+# digest), and every other source gets a daily cap on trading_command; past it, the message folds into the next
+# digest instead of buzzing. Nothing is dropped. Exits, stops and trade management are exempt.
+FYI_CHARTS = {"market_boards.py", "max_pain.py", "gex_chart.py", "straddle_cards.py"}
+DAILY_CAP = 8                                      # trading_command messages per source per day
+CAP_OVERRIDES: dict[str, int] = {}                 # per-source cap, e.g. {"flow_winners_push.py": 6}
+CAP_EXEMPT = {"spy_scalp_monitor.py", "watchlist_exec.py", "vol_trigger.py", "spy_prebell.py", "prebell.py",
+              "tg_day_spacer.py"}                  # exits / targets / stops / the morning card always buzz
 MAX_ROWS = 10                                      # per section, per digest
 TG_MAX = 3900
 _SCHEMA = """CREATE TABLE IF NOT EXISTS digest_queue (
@@ -62,7 +71,7 @@ def _plain(text: str, html: bool) -> str:
 def mode(source: str, text: str, html: bool = True) -> str:
     """'digest' or 'instant' for one message."""
     p = _plain(text, html).lstrip()
-    if source in ("pullback_autowatch.py", "runner_radar.py", "flow_pulse.py"):
+    if source in ("pullback_autowatch.py", "runner_radar.py", "flow_pulse.py", "polymarket_macro_odds.py"):
         # flow_picks_post stays instant: 3 sized pick cards a day (09:50/12:30/15:00)
         return "digest"
     if source == "flow_digest_send.py":            # 🟢 TRADE buzzes; 🟡/🔴/🔁 are FYI
@@ -70,6 +79,45 @@ def mode(source: str, text: str, html: bool = True) -> str:
     if source == "explosion_score.py":             # SETUP card instant, WATCH list FYI
         return "digest" if "EXPLOSION WATCH" in p.upper() else "instant"
     return "instant"
+
+
+def sent_today(fn: str, source: str) -> int:
+    """Messages `source` already put on lane `fn` today (local = ET day, as tg_ledger writes it)."""
+    con = sqlite3.connect(f"file:{DB}?mode=ro", uri=True, timeout=3)
+    try:
+        return con.execute("SELECT COUNT(*) FROM sends WHERE day=? AND fn=? AND source=? AND ok=1",
+                           (time.strftime("%Y-%m-%d"), fn, source)).fetchone()[0]
+    finally:
+        con.close()
+
+
+def over_cap(fn: str, source: str) -> bool:
+    """True when `source` has used its daily trading_command cap. Unknown/exempt sources and any read error
+    are never capped (fail open: a ledger problem must not hide an alert)."""
+    if fn != "trading_command" or not source or source in CAP_EXEMPT:
+        return False
+    try:
+        return sent_today(fn, source) >= CAP_OVERRIDES.get(source, DAILY_CAP)
+    except Exception:
+        return False
+
+
+def upload_lane(fn: str, path: str = "") -> str:
+    """Lane for a photo/file upload: FYI charts and over-cap sources leave trading_command for the digest bot.
+    Never raises; returns `fn` unchanged when the digest layer is off or anything fails."""
+    try:
+        if not enabled() or fn != "trading_command":
+            return fn
+        sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
+        from lib.tg_ledger import source as _source
+        src = _source()
+        if src in FYI_CHARTS or over_cap(fn, src):
+            print(f"[tg-digest] {src}: {'FYI chart' if src in FYI_CHARTS else 'daily cap reached'} → {DELIVER_FN}",
+                  file=sys.stderr)
+            return DELIVER_FN
+    except Exception:
+        pass
+    return fn
 
 
 def enabled() -> bool:
@@ -95,7 +143,7 @@ def intercept(fn: str, text: str, html: bool = True) -> bool:
         lane = next((RELANE[s] for s in [src, *source_chain()] if s in RELANE), None)
         if lane:                                   # also catches shared helpers (mc_sms.py) sending for btc_*
             return _relane(lane, text, html)
-        if mode(src, text, html) != "digest":
+        if mode(src, text, html) != "digest" and not over_cap(fn, src):
             return False
         con = _con()
         try:

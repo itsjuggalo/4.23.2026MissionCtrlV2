@@ -800,7 +800,7 @@ def send_upload(fn, path, caption="", as_doc=False, html=False):
     stripped plain caption if Telegram rejects the markup (2026-09-16)."""
     if not os.path.exists(path):
         print(f"no such file: {path}"); return 1
-    fn = route(fn)
+    fn = _upload_lane(route(fn), path)
     if os.environ.get("TG_DRY_RUN") == "1":
         return _dry(fn, f"[{os.path.basename(path)}] {caption}")
     tok, label = _resolve(fn)
@@ -839,6 +839,59 @@ def send_upload(fn, path, caption="", as_doc=False, html=False):
         if r.get("ok"):
             print(f"sent {os.path.basename(path)} → {label} (as document)"); return 0
     print(f"fail: {r.get('description')}"); return 1
+
+
+def _upload_lane(fn, path=""):
+    """FYI charts / over-cap sources → the digest bot (lib/tg_digest.upload_lane). Fail-open: the lane is unchanged."""
+    try:
+        sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+        from lib.tg_digest import upload_lane
+        return route(upload_lane(fn, path))
+    except Exception:
+        return fn
+
+
+def send_album(fn, paths, caption="", html=False):
+    """Up to 10 photos as ONE Telegram album (sendMediaGroup); `caption` sits on the first photo (Telegram limit
+    1024 chars). Alert-flood fix 2026-10-22: the 09:50 flow TA run was 6 separate photo posts. If Telegram refuses
+    the album, each photo is sent on its own, so nothing is lost. Returns 0 on success."""
+    paths = [x for x in paths if os.path.exists(x)][:10]
+    if not paths:
+        print("no files for album"); return 1
+    if len(paths) == 1:
+        return send_upload(fn, paths[0], caption, html=html)
+    fn = _upload_lane(route(fn))
+    caption = caption if len(caption) <= 1024 else caption[:1020].rsplit("\n", 1)[0] + "\n…"
+    names = ", ".join(os.path.basename(x) for x in paths)
+    if os.environ.get("TG_DRY_RUN") == "1":
+        return _dry(fn, f"[album {len(paths)}: {names}] {caption}")
+    tok, label = _resolve(fn)
+    if not tok:
+        print(f"no token for {fn}"); return 1
+    chat = open(CHAT_FILE).read().strip()
+    media = []
+    for i, x in enumerate(paths):
+        m = {"type": "photo", "media": f"attach://p{i}"}
+        if i == 0 and caption:
+            m["caption"] = caption
+            if html:
+                m["parse_mode"] = "HTML"
+        media.append(m)
+    fhs = {f"p{i}": open(x, "rb") for i, x in enumerate(paths)}
+    try:
+        r = requests.post(f"https://api.telegram.org/bot{tok}/sendMediaGroup",
+                          data={"chat_id": chat, "media": json.dumps(media)}, files=fhs, timeout=120).json()
+    except Exception as e:
+        r = {"ok": False, "description": str(e)}
+    finally:
+        for fh in fhs.values():
+            fh.close()
+    _ledger(fn, f"[album {len(paths)}: {names}] {caption}", r.get("ok"), html)
+    if r.get("ok"):
+        print(f"sent album of {len(paths)} → {label}"); return 0
+    print(f"album refused ({r.get('description')}) — sending the photos one by one")
+    rc = [send_upload(fn, x, caption if i == 0 else "", html=html) for i, x in enumerate(paths)]
+    return 0 if all(c == 0 for c in rc) else 1
 
 
 def _bot_id(fn: str) -> int | None:
