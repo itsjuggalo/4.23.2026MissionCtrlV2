@@ -293,7 +293,12 @@ def _compact(occ, a, with_cost=False, meta=None):
     # — a beginner reading a contradiction learns nothing. The action always agrees with the
     # verdict, and it's the part he can act on; /chase <ticker> carries the full why.
     line = l1 + ("\n   " + esc(v["action"]) if v.get("action") else "")
-    return (line, (v.get("mid") or 0) * 100) if with_cost else line
+    # audit 2026-10-22: the move % comes from this mark — show it with its source + data time (or say why none)
+    mid = v.get("mid")
+    line += "\n   " + esc(f"mark ${mid:.2f} · {snap.get('src') or 'src unknown'}" if mid is not None
+                         else f"no live mark — {((snap.get('quote_check') or {}).get('reason')) or 'no quote'} "
+                              f"({snap.get('src') or 'no source answered'})")
+    return (line, (mid or 0) * 100) if with_cost else line
 
 
 # ── scan / pull entry points ─────────────────────────────────────────────────

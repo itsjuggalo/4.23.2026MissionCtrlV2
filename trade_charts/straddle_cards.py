@@ -20,6 +20,7 @@ import yfinance as yf
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 import chartlib                              # noqa: E402
 import deliver                               # noqa: E402
+import spotsrc                               # noqa: E402
 
 SYNTH_TOKEN = (Path.home() / ".openclaw/secrets/discord_synthcontrol_token").read_text().strip()
 IVHIST = Path.home() / ".openclaw/workspace/charts/iv_history.json"
@@ -32,8 +33,11 @@ def _mid(row):
 
 
 def straddle(ticker: str):
+    # audit 2026-10-22: spot via price_guard (Robinhood first) with source + data time; none → no card (fail closed)
+    spot, spot_src = spotsrc.live_spot(ticker)
+    if spot is None:
+        raise ValueError(spot_src)
     tk = yf.Ticker(ticker)
-    spot = tk.history(period="1d")["Close"].iloc[-1]
     exps = tk.options
     if not exps:
         raise ValueError("no options")
@@ -66,7 +70,14 @@ def straddle(ticker: str):
     except Exception:
         pass
     crush = bool(edate and today <= edate <= dt.date.fromisoformat(pick))
-    return dict(ticker=ticker, spot=float(spot), expiry=pick, dte=dte, straddle=float(strad),
+    try:   # the straddle mids' data time = the newer of the two legs' last trades (Yahoo chain, delayed)
+        leg_asof = spotsrc.et_hm(max(c["lastTradeDate"], p["lastTradeDate"]))
+    except Exception:  # noqa: BLE001
+        leg_asof = "time n/a"
+    return dict(ticker=ticker, spot=float(spot), spot_src=spot_src, leg_asof=leg_asof,
+                leg_src="Yahoo option chain (not Robinhood, delayed) bid/ask mid" if (c.get("bid") and c.get("ask")) else
+                        "Yahoo option chain (not Robinhood, delayed) last trade",
+                expiry=pick, dte=dte, straddle=float(strad),
                 em=float(em), iv=iv, breakup=float(spot+strad), breakdn=float(spot-strad),
                 strike=float(c["strike"]), earn=str(edate) if edate else None, crush=crush)
 
@@ -124,7 +135,8 @@ def caption(s, ivr):
     warn = "  🚨 **earnings before expiry — IV-crush risk on long straddle**" if s["crush"] else ""
     return (f"**{s['ticker']}** straddle ${s['straddle']:.2f} → expected ±{s['em']*100:.1f}% by {s['expiry']} "
             f"({s['dte']}DTE)\nBreakevens ${s['breakdn']:.2f} / ${s['breakup']:.2f} · "
-            f"ATM IV {s['iv']*100:.0f}% · IV rank {ivr if ivr is not None else 'building'}{(' ' + v) if v else ''}{warn}")
+            f"ATM IV {s['iv']*100:.0f}% · IV rank {ivr if ivr is not None else 'building'}{(' ' + v) if v else ''}{warn}\n"
+            f"spot ${s['spot']:.2f} {s['spot_src']} · straddle {s['leg_src']}, last leg trade {s['leg_asof']}")
 
 
 def flow_names(top):

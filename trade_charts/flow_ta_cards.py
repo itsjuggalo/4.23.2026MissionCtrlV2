@@ -15,6 +15,7 @@ from collections import defaultdict
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))  # 05_AUTOMATION/scripts
 import chartlib                            # noqa: E402
 import deliver                             # noqa: E402
+import spotsrc                             # noqa: E402
 
 SYNTH_TOKEN = (Path.home() / ".openclaw/secrets/discord_synthcontrol_token").read_text().strip()
 FLOW = Path.home() / "trading/signals/option-scraper/data/flow_alerts_today.json"
@@ -33,6 +34,7 @@ def load_flows():
             "Symbol": a["Symbol"], "Strike": a.get("Strike"), "OptionType": a.get("OptionType"),
             "Expiry": a.get("Expiry"), "OptionSymbol": a.get("OptionSymbol"), "DTE": a.get("DTE"), "SWEEPS": a.get("SWEEPS", 0),
             "BLOCKS": a.get("BLOCKS", 0), "isBullish": a.get("isBullish"), "prem": prem,
+            "t": a.get("Updated") or a.get("Time"),
         })
     return out
 
@@ -69,7 +71,14 @@ def _expiry_txt(ts):
     return d.strftime("%-m/%-d") + ("" if d.year == dt.datetime.now().year else d.strftime("/%y"))
 
 
-def caption(sym, fs):
+def _latest_alert(fs) -> str:
+    """Data time of the flow numbers = the newest alert in the stream for this ticker (ms epoch → ET)."""
+    ts = [float(f["t"]) for f in fs if isinstance(f.get("t"), (int, float)) or str(f.get("t") or "").replace(".", "").isdigit()]
+    return spotsrc.et_hm(max(ts) / 1000) if ts else "time n/a"
+
+
+def caption(sym, fs, spot=None):
+    """spot = live_spot(sym) result; the flow numbers carry the stream's newest alert time (audit 2026-10-22)."""
     prem = sum(f["prem"] for f in fs)
     bull = sum(1 for f in fs if f.get("isBullish"))
     bear = len(fs) - bull
@@ -78,7 +87,10 @@ def caption(sym, fs):
     kind = "SWEEP" if big.get("SWEEPS") else ("BLOCK" if big.get("BLOCKS") else "flow")
     arrow = "🟢" if bull >= bear else "🔴"
     return (f"{arrow} **{sym}** — {len(fs)} flow hit{'' if len(fs) == 1 else 's'} (${prem/1e6:.1f}M), "
-            f"{bull}🟢/{bear}🔴 · biggest: {_strike_txt(big) or 'strike n/a '}{big['OptionType'][0]} {exp} ({kind})")
+            f"{bull}🟢/{bear}🔴 · biggest: {_strike_txt(big) or 'strike n/a '}{big['OptionType'][0]} {exp} ({kind})\n"
+            f"flow: option-scraper stream, latest alert {_latest_alert(fs)}"
+            + ("" if spot is None else (f" · spot ${spot[0]:.2f} {spot[1]}" if spot[0] is not None else f" · {spot[1]}"))
+            + " · chart: Yahoo bars (not Robinhood)")
 
 
 STATE = Path.home() / ".openclaw/flow_ta_cards_state.json"
@@ -108,8 +120,9 @@ def main():
     posted = 0
     state = _load_state()
     for prem, sym, fs in top:
-        cap = caption(sym, fs)
-        if state["last"].get(sym) == cap and not args.dry:
+        cap = caption(sym, fs, spotsrc.live_spot(sym))
+        key = cap.split("\n")[0]   # dedupe on the flow line only — the spot/as_of line changes every run
+        if state["last"].get(sym) == key and not args.dry:
             print(f"  {sym}: identical to the last card sent today — skipped")   # audit F7: PLTR 12:30 == 15:45
             continue
         try:
@@ -118,7 +131,7 @@ def main():
             print(f"  {sym}: render fail {e}"); continue
         dok, tok = deliver.post_chart(args.channel, png, cap, dry=args.dry)
         if (dok or tok) and not args.dry:
-            state["last"][sym] = cap
+            state["last"][sym] = key
             try:
                 STATE.write_text(json.dumps(state))
             except Exception:

@@ -36,6 +36,7 @@ import yfinance as yf
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 import chartlib                              # noqa: E402
 import deliver                               # noqa: E402
+import spotsrc                               # noqa: E402
 
 FLOW = Path.home() / "trading/signals/option-scraper/data/flow_alerts_today.json"
 BG = getattr(chartlib, "BG", "#0d1117")          # dark facecolor (chartlib may not export it)
@@ -58,9 +59,22 @@ def pick_expiry(exps: list[str], today: dt.date) -> tuple[str, int]:
     return exps[-1], (dt.date.fromisoformat(exps[-1]) - today).days
 
 
+def _chain_asof(calls, puts) -> str:
+    """Data time of the Yahoo chain = its newest contract trade (lastTradeDate), in ET."""
+    try:
+        ts = max(x for x in list(calls["lastTradeDate"]) + list(puts["lastTradeDate"]) if x is not None)
+        return spotsrc.et_hm(ts)
+    except Exception:  # noqa: BLE001
+        return "time n/a"
+
+
 def compute(ticker: str):
+    # audit 2026-10-22: the spot shown comes from price_guard (Robinhood first) with its source + data time;
+    # no fresh spot → no card (fail closed). The chain stays Yahoo, labelled with its own data time.
+    spot, spot_src = spotsrc.live_spot(ticker)
+    if spot is None:
+        raise ValueError(spot_src)
     tk = yf.Ticker(ticker)
-    spot = float(tk.history(period="1d")["Close"].iloc[-1])
     exps = tk.options
     if not exps:
         raise ValueError("no options")
@@ -108,7 +122,8 @@ def compute(ticker: str):
         pain[K] = total
 
     mp_strike = min(pain, key=pain.get)           # min total payout = max pain
-    return dict(ticker=ticker, spot=spot, expiry=expiry, dte=dte, basis=basis,
+    return dict(ticker=ticker, spot=spot, spot_src=spot_src, chain_asof=_chain_asof(calls, puts),
+                expiry=expiry, dte=dte, basis=basis,
                 strikes=grid, pain=pain, mp=mp_strike,
                 coi=coi, poi=poi,
                 call_oi=int(sum(coi.values())), put_oi=int(sum(poi.values())))
@@ -176,7 +191,9 @@ def caption(r) -> str:
             f"({arrow} {dist:+.1f}%) — {r['expiry']} ({r['dte']}DTE)\n"
             + ("Price magnet into OpEx: dealers pin toward where the fewest options pay out. " if _near(r)
                else "More than 1% from spot — too far to treat as a magnet. ")
-            + f"basis {basis} · call {r['call_oi']:,} / put {r['put_oi']:,}")
+            + f"basis {basis} · call {r['call_oi']:,} / put {r['put_oi']:,}\n"
+            + f"spot {r['spot_src']} · {basis} from the Yahoo option chain (not Robinhood; OI = prior-day count), "
+              f"last chain trade {r['chain_asof']}")
 
 
 def flow_names(top: int) -> list[str]:

@@ -17,7 +17,7 @@ TG_SEND = str(Path.home() / "bin/tg-send-media")
 def post_chart(channel: str, png: str, caption: str, tg: bool = True, dry: bool = False) -> tuple[bool, bool]:
     """Returns (discord_ok, telegram_ok)."""
     if dry:
-        print(f"  [dry] {channel}: {png} :: {caption[:80]}")
+        print(f"  [dry] {channel}: {png}\n{caption}")   # full caption: the dry run IS the render check
         return True, True
     # Discord
     dok = False

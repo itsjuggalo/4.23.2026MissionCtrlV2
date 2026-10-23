@@ -572,7 +572,10 @@ def _close_tape():
             c, pv = float(df[sym].iloc[-1]), float(df[sym].iloc[-2])
             pct = (c / pv - 1) * 100 if pv else 0.0
             out.append(f"{label} {c:,.0f} ({pct:+.1f}%)" if label != "VIX" else f"VIX {c:.1f} ({pct:+.1f}%)")
-        return " · ".join(out)
+        # audit 2026-10-22: name the source and the data time (the session the daily close belongs to)
+        sess = df.index[-1]
+        sess = sess.strftime("%m-%d") if hasattr(sess, "strftime") else str(sess)[5:10]
+        return " · ".join(out) + f" · Yahoo daily close (not Robinhood), session {sess} 16:00 ET"
     except Exception:
         return None
 
@@ -762,8 +765,9 @@ def premarket_prompt():
             "Next: today's market-moving CATALYSTS only — FOMC/econ data, major earnings, "
             "politics/geopolitics — one line each, skip anything minor.\n"
             f"Next: do any of my journal names ({held}) have a catalyst today? one line.\n"
-            "Last line must start 'PLAN:' with the single most useful thing to do at/after "
-            "the open, trading SMALL. "
+            "Last line must start 'PLAN:' with the single most useful thing to watch at/after "
+            "the open. Never give a position size, a stop, a target or a price level (no 'trade small', "
+            "no 'use a stop', no 'support at X') — levels come only from Mike's computed levels engine. "
             "Do not repeat the date, include no links or URLs (name the outlet in words only), and "
             "label the journal-names line 'Watchlist:'. Quiet day → say so, keep it to 3 lines.")
 

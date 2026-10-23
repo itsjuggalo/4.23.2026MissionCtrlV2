@@ -39,10 +39,28 @@ def _tg(msg, html=True):
         print("tg err:", e); return False
 
 
-def fmt_swing(s, html=True):
+def live_last(symbols):
+    """audit 2026-10-22 (market-data §2, script-standards #2): the "last" a card shows is re-read at send time through
+    price_guard.fresh (Robinhood first, Yahoo labelled), with its source + data time; never the producer's yfinance
+    daily close. {SYM: "last 377.87 · src Robinhood 15:10 ET"} or "last UNAVAILABLE (<reason>)"."""
+    try:
+        from price_guard import fresh
+        res = fresh(sorted({s.upper() for s in symbols}))
+    except Exception as e:  # noqa: BLE001
+        return {s.upper(): f"last UNAVAILABLE (price guard error {type(e).__name__})" for s in symbols}
+    out = {}
+    for s in symbols:
+        r = res.get(s.upper()) or {}
+        out[s.upper()] = (f"last {float(r['price']):.2f} · {r.get('src')}" if r.get("ok") and r.get("price")
+                          else f"last UNAVAILABLE ({r.get('reason') or 'no quote'})")
+    return out
+
+
+def fmt_swing(s, html=True, last=None):
     arrow = "⬆" if s["dir"] == "LONG" else "⬇"
     glyph = "⭐" if s.get("hiConv") else "▸"
-    facts = (f"{s['dir']} {arrow}", f"score {s['score']}/10", f"last {s['entry']}")
+    facts = (f"{s['dir']} {arrow}", f"score {s['score']}/10",
+             (last or {}).get(s["symbol"].upper()) or "last UNAVAILABLE (not re-read)")
     if html:
         return row(s['symbol'], *facts, glyph=glyph)
     return f"{glyph} **{s['symbol']}** · " + " · ".join(facts)  # Discord markdown
@@ -52,6 +70,7 @@ def _swing_board(swing, auto, html):
     """Shared structure for the Telegram (HTML) and Discord (plain/** markdown) renders —
     same tickers/numbers, glyph-matched Hi-Conviction/Setups grouping either way."""
     top = swing[:6]
+    last = live_last([s["symbol"] for s in top])
     stars = [s for s in top if s.get("hiConv")]
     rest = [s for s in top if not s.get("hiConv")]
     # 2026-10-08 audit F16: header said "10 fired" over 6 rows. Count what is shown.
@@ -62,11 +81,11 @@ def _swing_board(swing, auto, html):
              else f"📡 {b_('WATCHLIST SIGNALS')} · {sub}"]
     if stars:
         lines.append(section("Hi-Conviction") if html else f"\n{b_('HI-CONVICTION')}")
-        lines += [fmt_swing(s, html) for s in stars]
+        lines += [fmt_swing(s, html, last) for s in stars]
     if rest:
         if stars:
             lines.append(section("Setups") if html else f"\n{b_('SETUPS')}")
-        lines += [fmt_swing(s, html) for s in rest]
+        lines += [fmt_swing(s, html, last) for s in rest]
     lines.append(foot("advisory only · recommendation surface · auto-exec "
                        + ("ARMED" if auto else "OFF")))
     return join(*lines) if html else "\n".join(str(x) for x in lines if x)
