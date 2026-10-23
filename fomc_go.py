@@ -26,21 +26,29 @@ from zoneinfo import ZoneInfo
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 from macro_calendar_alert import FOMC_2026, et_today  # reuse embedded Fed calendar
 
-SEC = Path.home() / ".openclaw" / "secrets"
 ET = ZoneInfo("America/New_York")
-KID = (SEC / "alpaca-boba-key-id").read_text().strip()
-SECK = (SEC / "alpaca-boba-secret").read_text().strip()
-DATA = "https://data.alpaca.markets"
-HDR = {"APCA-API-KEY-ID": KID, "APCA-API-SECRET-KEY": SECK}
+YAHOO = "https://query1.finance.yahoo.com/v8/finance/chart/{sym}?range=1d&interval=1m&includePrePost=false"
 
 
 def _get(url: str):
     try:
-        req = urllib.request.Request(url, headers=HDR)
+        req = urllib.request.Request(url, headers={"User-Agent": "Mozilla/5.0 (fomc-go)"})
         with urllib.request.urlopen(req, timeout=12) as r:
             return json.loads(r.read())
     except Exception:
         return None
+
+
+def _bars_1m(sym: str) -> list[tuple[datetime, float]]:
+    """[(bar time UTC, close)] for today's regular session from Yahoo's free chart JSON (1-min). Empty on any failure.
+    Free replacement for the Alpaca IEX 1-min bars (market-data §1: Alpaca is not a price source)."""
+    j = _get(YAHOO.format(sym=sym))
+    try:
+        res = j["chart"]["result"][0]
+        closes = res["indicators"]["quote"][0]["close"]
+        return [(datetime.fromtimestamp(t, tz=timezone.utc), c) for t, c in zip(res.get("timestamp") or [], closes) if c is not None]
+    except Exception:
+        return []
 
 
 _AS_OF: dict[str, str] = {}   # symbol -> newest 1-min bar time used (the as_of of each % move)
@@ -48,28 +56,23 @@ _AS_OF: dict[str, str] = {}   # symbol -> newest 1-min bar time used (the as_of 
 
 def moves_since_2pm() -> dict[str, float]:
     """% move from the 14:00 ET bar close to the latest, per symbol."""
-    syms = "SPY,QQQ,SMH,TLT"
     start = datetime.now(timezone.utc).astimezone(ET).replace(
         hour=13, minute=55, second=0, microsecond=0).astimezone(timezone.utc)
-    url = (f"{DATA}/v2/stocks/bars?symbols={syms}&timeframe=1Min"
-           f"&start={start.strftime('%Y-%m-%dT%H:%M:%SZ')}&limit=2000&feed=iex")
-    j = _get(url)
     out = {}
-    if not j or "bars" not in j:
-        return out
-    for s, bars in j["bars"].items():
+    for s in ("SPY", "QQQ", "SMH", "TLT"):
+        bars = [(t, c) for t, c in _bars_1m(s) if t >= start]
         if not bars:
             continue
         base = None
-        for b in bars:
-            t = datetime.fromisoformat(b["t"].replace("Z", "+00:00")).astimezone(ET)
-            if t.hour == 14 and t.minute == 0:
-                base = b["c"]
+        for t, c in bars:
+            et = t.astimezone(ET)
+            if et.hour == 14 and et.minute == 0:
+                base = c
                 break
-        base = base if base is not None else bars[0]["c"]
-        last = bars[-1]["c"]
+        base = base if base is not None else bars[0][1]
+        last = bars[-1][1]
         out[s] = (last / base - 1) * 100 if base else 0.0
-        _AS_OF[s] = bars[-1]["t"]
+        _AS_OF[s] = bars[-1][0].strftime("%Y-%m-%dT%H:%M:%SZ")
     return out
 
 
@@ -90,12 +93,12 @@ def build(send: bool):
 
     tape = (f"SPY {m.get('SPY',0):+.1f}% · QQQ {m.get('QQQ',0):+.1f}% · "
             f"SMH {m.get('SMH',0):+.1f}% · TLT {m.get('TLT',0):+.1f}% (since 2:00)")
-    # market-data §2: a sent number names its source + data time. These % moves are computed from Alpaca IEX 1-min
-    # bars (no free intraday Robinhood bar history here) — a labelled cross-check, never a price.
+    # market-data §2: a sent number names its source + data time. These % moves are computed from Yahoo 1-min
+    # bars (no free intraday Robinhood bar history here) — labelled "not Robinhood", never a price.
     newest = max(_AS_OF.values()) if _AS_OF else None
     when = (datetime.fromisoformat(newest.replace("Z", "+00:00")).astimezone(ET).strftime("%H:%M ET")
             if newest else "time n/a")
-    tape += f" · src Alpaca IEX 1-min bars, not Robinhood, as of {when}"
+    tape += f" · src Yahoo 1-min bars, not Robinhood, as of {when}"
     L = [f"🏛️ <b>FOMC REACTION — {verdict.upper()}</b>",
          f"FOMC TAPE (local SPY/QQQ/SMH/TLT move since 14:00 heuristic, not the canonical regime): "
          f"{verdict}",
