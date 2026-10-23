@@ -10,8 +10,8 @@ import options_live_quiz as L  # noqa: E402
 
 
 def test_spot_via_price_guard_only():
-    with mock.patch.object(L, "_get", side_effect=AssertionError("Alpaca called")), \
-         mock.patch.object(L.price_guard, "fresh", return_value={"AAPL": {"ok": False, "price": 1.0}}):
+    assert not hasattr(L, "_get")   # c56978c35 removed the Alpaca HTTP helper entirely
+    with mock.patch.object(L.price_guard, "fresh", return_value={"AAPL": {"ok": False, "price": 1.0}}):
         assert L._spot("AAPL") is None
 
 
