@@ -6,7 +6,7 @@ the regular session, 300 s pre/after-hours, today's print only — Mike's decisi
 This module only path-loads it, so the pipeline lib never lands on sys.path. If it
 can't be loaded, every check fails closed — a sender holds the card, it never guesses.
 
-    from price_guard import check, src_label, fresh, option_mid, option_quotes, alpaca_last
+    from price_guard import check, src_label, fresh, option_mid, option_quotes
 """
 from __future__ import annotations
 
@@ -247,28 +247,3 @@ def src_label(source: str, ts) -> str:
     return QC.src_label(source, ts) if QC else f"src {source} time n/a"
 
 
-def _bar_date(bar: dict):
-    try:
-        return datetime.fromisoformat(str(bar.get("t", "")).replace("Z", "+00:00")).astimezone(ET).date()
-    except ValueError:
-        return None
-
-
-def alpaca_session_bars(node: dict | None, now: datetime | None = None) -> tuple:
-    """(prior_bar, today_bar) from an Alpaca snapshot, anchored on bar DATES. Before today's
-    first print, Alpaca's dailyBar is still the LAST session and prevDailyBar is two sessions
-    back (the 10-08 PCRX premarket gap was measured against that bar). today_bar is {} then."""
-    node = node or {}
-    daily, prev = node.get("dailyBar") or {}, node.get("prevDailyBar") or {}
-    today = (now or datetime.now(timezone.utc)).astimezone(ET).date()
-    d = _bar_date(daily) if daily else None
-    if d is not None and d < today:
-        return daily, {}
-    return prev, daily
-
-
-def alpaca_last(node: dict | None, now: datetime | None = None) -> tuple:
-    """(price, check) from an Alpaca stock/crypto snapshot's latestTrade. price is None unless check ok."""
-    t = (node or {}).get("latestTrade") or {}
-    chk = check(t.get("t"), t.get("p"), now=now)
-    return (float(t["p"]) if chk["ok"] else None), chk

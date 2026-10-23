@@ -16,13 +16,6 @@ def test_loaded():
     assert pg.QC is not None
 
 
-def test_alpaca_last_fresh_and_stale():
-    px, chk = pg.alpaca_last({"latestTrade": {"p": 10.5, "t": "2026-10-20T13:59:40Z"}}, RTH)
-    assert px == 10.5 and chk["ok"]
-    px, chk = pg.alpaca_last({"latestTrade": {"p": 10.5, "t": "2026-10-20T13:50:00Z"}}, RTH)
-    assert px is None and "max 60s" in chk["reason"]
-
-
 def test_alpaca_option_leg_is_gone():
     # 2026-10-23: Alpaca is not a price source; option_mid is Robinhood -> Yahoo -> CBOE only.
     assert not hasattr(pg, "alpaca_option_mid")
@@ -36,13 +29,9 @@ def test_missing_lib_fails_closed(monkeypatch):
     assert pg.src_label("X", None) == "src X time n/a"
 
 
-def test_session_bars_reanchor_before_first_print():
-    node = {"dailyBar": {"t": "2026-10-19T04:00:00Z", "c": 24}, "prevDailyBar": {"t": "2026-10-16T04:00:00Z", "c": 22}}
-    prev, today = pg.alpaca_session_bars(node, RTH)
-    assert prev["c"] == 24 and today == {}
-    node["dailyBar"]["t"] = "2026-10-20T04:00:00Z"
-    prev, today = pg.alpaca_session_bars(node, RTH)
-    assert prev["c"] == 22 and today["c"] == 24
+def test_alpaca_helpers_are_gone():
+    # 2026-10-23: stock_monitor archived and setup_scanner moved to get_bars; nothing reads Alpaca snapshots here.
+    assert not hasattr(pg, "alpaca_last") and not hasattr(pg, "alpaca_session_bars")
 
 
 class _FakeRH:
