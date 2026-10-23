@@ -7,11 +7,11 @@ would have sailed straight past every existing guard. Price is ground truth here
 news only ARMS a watch state — price action must confirm before anything fires.
 
 Detectors (full mode = market hours, every 2 min; light mode = off-hours, every 10):
-  * SPY 1-min return z-score (Alpaca data API, IEX feed, boba paper key — data only)
+  * SPY 1-min return z-score (Yahoo chart endpoint, no key; second Yahoo host as the fallback)
   * VIX level tiers (Yahoo chart endpoint, no key): >=25 STRESS / >=30 CRISIS / >=40 PANIC
   * VIX term structure: VIX/VIX3M >= 1.0 (backwardation) escalates STRESS->CRISIS gate
   * BTC 15-min velocity (Yahoo): 24/7 risk proxy, off-hours early warning (alert-only)
-  * Alpaca news REST poll, keyword pre-filter (tariff/fed/war/...) -> arms WATCH only
+  * Headline poll (local /api/market-news), keyword pre-filter (tariff/fed/war/...) -> arms WATCH only
 
 State machine (state file survives runs; debounce stops whipsaw on fake headlines):
   CALM -> WATCH  (headline hit, or one soft trigger)
@@ -23,7 +23,7 @@ Actions on CRISIS (tiered, all wired to EXISTING enforcement):
   L2  write ~/.openclaw/decipher_STRESS json (decipher tightens trail + scales size)
       — STRESS also engages alone at VIX>=25 without CRISIS (silent note)
   L3  list every DTE<=2 option position on boba+jazzy paper; if the flag file
-      ~/.openclaw/shock_autoclose_paper exists, market-close them (PAPER ONLY —
+      (RETIRED 2026-10-20 + this change: the guard reads no account; it only prints advisory text) (was: PAPER ONLY —
       Robinhood positions get the alert text telling Mike exactly what to close)
 Recovery: HALT is NEVER auto-removed. When calm holds 30 min, guard sends a
 stand-down note; Mike replies RESUME to @PipelineSignals_Bot (dm_responder clears).
@@ -60,7 +60,6 @@ STATE = STATE_DIR / "shock_guard_state.json"
 HALT_FILE = OC / "decipher_HALT"
 STRESS_FILE = OC / "decipher_STRESS"
 OFF_FILE = OC / "shock_guard_OFF"
-AUTOCLOSE_FLAG = OC / "shock_autoclose_paper"
 EVENTS = Path.home() / "logs" / "shock_events.jsonl"
 
 # thresholds (practitioner consensus, see TELEGRAM-TRADER-COPILOT-PLAN.md item 41)
@@ -80,20 +79,17 @@ Z_MIN_MOVE_PCT = 0.40
 EXCLUDE_CLOSING_BAR = os.environ.get("SHOCK_EXCLUDE_CLOSING_BAR", "0") == "1"
 BTC_15M_PCT = -3.0
 # News is slow-moving and only ARMS an advisory WATCH (price action drives CRISIS), so it does
-# not need the 2-min price cadence. Polling it every ~5 min cuts a third of shock_guard's Alpaca
-# data calls (the dominant 429 source) with no impact on shock latency.
+# not need the 2-min price cadence. Polling it every ~5 min keeps the local aggregator load down
+# with no impact on shock latency.
 NEWS_POLL_SEC = 300
 NEWS_KEYWORDS = ("tariff", "trump", "truth social", "fed ", "federal reserve",
                  "rate hike", "emergency", "halt", "war ", "strike on", "nuclear",
                  "invasion", "default", "bank failure", "circuit breaker", "china")
 DRY = os.environ.get("DRY") == "1"
 
-# 2026-09-15 — free-first sourcing. Alpaca's SPY bars/news (data.alpaca.markets) have been
-# 504-timing-out under the shared free-tier load, leaving this detector blind while it kept
-# hitting the same dead endpoint every 2 min. Yahoo's chart endpoint (already used below for
-# VIX/BTC, no key, one request) is now PRIMARY for SPY bars; the missionctrl market-news API
-# (same free aggregator NewsPanel reads) is PRIMARY for headlines. Alpaca is fallback only —
-# it's still a fine free market-data feed per doctrine, just not the first call any more.
+# 2026-09-15 free-first sourcing; this change drops the Alpaca fallback entirely (market-data §1). Yahoo's chart endpoint
+# (no key, one request) is the SPY-bar source, with its second host as the only fallback; the missionctrl market-news
+# API (the free aggregator NewsPanel reads) is the only headline source. A double failure raises the BLIND alert.
 LOCAL_NEWS_URL = "http://localhost:3000/api/market-news"
 BLIND_ALERT_KEY = "shock_guard_blind"
 BLIND_ALERT_REPEAT_SEC = 6 * 3600   # alert_gate cooldown for the SHOCK GUARD BLIND ping
@@ -111,7 +107,7 @@ def _get(url: str, headers: dict | None = None, timeout: int = 15,
     # Shared retry wrapper: one backoff retry on transient 429/5xx/timeout, then None.
     # Contract UNCHANGED — a data miss returns None and never triggers a halt (the state
     # machine only escalates on positive VIX/z/BTC signals), it just leaves the guard blind
-    # for this run. 429 is expected noise under the shared Alpaca data limit (~38 spam
+    # for this run. 429 is expected noise under provider rate limits (~38 spam
     # lines/day), so it is NOT logged as an error; genuine failures (DNS/5xx/timeout) still
     # surface. The retry makes the guard LESS blind through transient rate-limit blips.
     res = http_request(url, headers={**UA, **(headers or {})}, timeout=timeout, retries=retries)
@@ -168,11 +164,11 @@ def _is_closing_bar(ts_iso: str) -> bool:
     return dt.hour >= 16 or (dt.hour == 15 and dt.minute >= 59)
 
 
-def _yahoo_spy_bars() -> list[dict]:
+def _yahoo_spy_bars(host: str = "query1") -> list[dict]:
     """SPY 1-min bars from Yahoo's free chart endpoint (no key, one request) — primary
     source. Shaped like Alpaca's bars ({"t": iso_ts, "c": close}) so the z-score/
     closing-bar logic below doesn't care which source fed it."""
-    d = _get("https://query1.finance.yahoo.com/v8/finance/chart/SPY"
+    d = _get(f"https://{host}.finance.yahoo.com/v8/finance/chart/SPY"
              "?interval=1m&range=1d&includePrePost=false")
     try:
         result = d["chart"]["result"][0]
@@ -189,28 +185,15 @@ def _yahoo_spy_bars() -> list[dict]:
     return bars[-40:]
 
 
-def _alpaca_spy_bars() -> list[dict]:
-    """SPY 1-min bars from Alpaca — fallback only, when Yahoo above comes back empty."""
-    key, sec_ = _secret("alpaca-boba-key-id"), _secret("alpaca-boba-secret")
-    if not key or not sec_:
-        return []
-    start = datetime.now(tz=ZoneInfo("UTC")).timestamp() - 40 * 60
-    start_iso = datetime.fromtimestamp(start, tz=ZoneInfo("UTC")).strftime("%Y-%m-%dT%H:%M:%SZ")
-    d = _get("https://data.alpaca.markets/v2/stocks/SPY/bars"
-             f"?timeframe=1Min&limit=40&feed=iex&start={start_iso}",
-             headers={"APCA-API-KEY-ID": key, "APCA-API-SECRET-KEY": sec_})
-    return (d or {}).get("bars") or []
-
-
 def check_spy_z() -> dict:
     """z-score of the latest 1-min SPY return vs the trailing 20 bars. Yahoo (free, no
-    key) is the primary source — one request/tick; Alpaca is only tried when Yahoo comes
-    back empty, so the guard survives Alpaca's 504 windows instead of going blind."""
+    key) is the primary source — one request/tick; the second Yahoo host is tried when the first comes
+    back empty, so a single-host outage does not blind the guard."""
     bars = _yahoo_spy_bars()
     source = "yahoo"
-    if not bars:
-        bars = _alpaca_spy_bars()
-        source = "alpaca"
+    if not bars:   # same free provider, second host (no Alpaca: market-data §1)
+        bars = _yahoo_spy_bars("query2")
+        source = "yahoo-q2"
     blind = not bars   # both sources came back empty this tick — a real outage
     if EXCLUDE_CLOSING_BAR:
         bars = [b for b in bars if not _is_closing_bar(b.get("t"))]
@@ -244,32 +227,12 @@ def _local_news() -> list[dict] | None:
     return d.get("news") or []
 
 
-def _alpaca_news(state: dict) -> list[dict] | None:
-    """Alpaca news — fallback only, when the local feed above is unreachable."""
-    key, sec_ = _secret("alpaca-boba-key-id"), _secret("alpaca-boba-secret")
-    if not key or not sec_:
-        return None
-    params = {"limit": "25", "sort": "desc"}
-    if state.get("news_since_alpaca"):
-        params["start"] = state["news_since_alpaca"]
-    d = _get("https://data.alpaca.markets/v1beta1/news?" + urllib.parse.urlencode(params),
-             headers={"APCA-API-KEY-ID": key, "APCA-API-SECRET-KEY": sec_})
-    if d is None:
-        return None
-    items = d.get("news") or []
-    if items:
-        state["news_since_alpaca"] = items[0].get("created_at") or state.get("news_since_alpaca")
-    return items
-
-
 def check_news(state: dict) -> tuple[list[str], bool]:
     """Keyword-filtered headlines since the last poll. Local `/api/market-news` (free,
-    no key) is primary; Alpaca news is the fallback only. Returns (headlines,
-    blind) — blind means BOTH sources failed to return data this tick (an outage),
+    no key) is the only source. Returns (headlines,
+    blind) — blind means it failed to return data this tick (an outage),
     not just 'nothing new/keyword-matching', which is the normal case almost every run."""
     items = _local_news()
-    if items is None:
-        items = _alpaca_news(state)
     blind = items is None
     items = items or []
 
@@ -333,7 +296,7 @@ def alert_blind(reasons: list[str]) -> None:
         tgf.section("Failed sources"),
         *(tgf.row(r) for r in reasons),
         tgf.footer("CRISIS/HALT detection is degraded until this clears — both the "
-                   "free source and the Alpaca fallback failed on the same tick."))
+                   "free source and its fallback failed on the same tick."))
     if DRY:
         print(f"DRY blind-alert (gate={ok}, {why}):\n{text}\n")
         return
@@ -364,62 +327,12 @@ def log_event(kind: str, detail: dict) -> None:
         f.write(json.dumps(rec) + "\n")
 
 
-def alpaca_trade(path: str, account: str, method: str = "GET", body: dict | None = None):
-    key = _secret(f"alpaca-{account}-key-id")
-    sec_ = _secret(f"alpaca-{account}-secret")
-    if not key or not sec_:
-        return None
-    req = urllib.request.Request(
-        f"https://paper-api.alpaca.markets{path}",
-        data=json.dumps(body).encode() if body else None, method=method,
-        headers={"APCA-API-KEY-ID": key, "APCA-API-SECRET-KEY": sec_,
-                 "Content-Type": "application/json"})
-    try:
-        with urllib.request.urlopen(req, timeout=20) as r:
-            return json.loads(r.read())
-    except Exception as e:  # noqa: BLE001
-        print(f"[guard] alpaca {account} {path}: {e}", file=sys.stderr)
-        return None
-
-
-def short_dte_positions(account: str) -> list[dict]:
-    """Option positions expiring within 2 days on a paper account."""
-    pos = alpaca_trade("/v2/positions", account) or []
-    out = []
-    today = now_et().date()
-    for p in pos:
-        sym = p.get("symbol", "")
-        if p.get("asset_class") != "us_option" and len(sym) < 12:
-            continue
-        digits = "".join(ch for ch in sym if ch.isdigit())
-        try:
-            exp = datetime.strptime(digits[:6], "%y%m%d").date()
-        except ValueError:
-            continue
-        dte = (exp - today).days
-        if dte <= 2:
-            out.append({"symbol": sym, "qty": p.get("qty"), "dte": dte,
-                        "account": account, "side": p.get("side", "long")})
-    return out
-
-
 def crisis_close_l3(reason: str) -> str:
-    """List (and optionally market-close, paper only) all DTE<=2 option positions."""
-    rows = []
-    for acct in ("boba", "jazzy"):
-        for p in short_dte_positions(acct):
-            if AUTOCLOSE_FLAG.exists() and not DRY:
-                # Order path RETIRED (remedial W5 / DECISIONS R4, 2026-10-20): advisory only. The flag was
-                # moved to ~/.openclaw/shock_autoclose_paper.retired-20261020; recreating it must not close.
-                raise RuntimeError("shock auto-close order path retired 2026-10-20 (R4) — advisory only")
-            else:
-                note = "0-2 DTE held"
-            rows.append(tgf.row(p["symbol"], acct, f"x{p['qty']}", f"{p['dte']} DTE", note))
-            log_event("l3_position", {"reason": reason, **p,
-                                      "auto": AUTOCLOSE_FLAG.exists()})
-    if not rows:
-        return "No 0-2 DTE options held on paper accounts."
-    return "\n".join(rows)
+    """Advisory text only. Alpaca paper positions/orders are not part of the architecture (global doctrine, W5 R4
+    2026-10-20): the guard no longer reads any account, so it cannot list holdings. Mike checks his own short-dated
+    options in Robinhood."""
+    log_event("l3_advisory", {"reason": reason})
+    return "Check your own 0-2 DTE option positions in Robinhood (the guard reads no account)."
 
 
 # --------------------------------------------------------------------------- #
@@ -458,16 +371,16 @@ def main() -> int:
     else:
         headlines = st.get("last_headlines", [])
 
-    # Double-failure guard (2026-09-15): if BOTH the primary free source and the Alpaca
-    # fallback came back empty this tick, the detector isn't "quiet" — it's blind. Ping
+    # Double-failure guard (2026-09-15): if BOTH Yahoo hosts (SPY) or the local
+    # news feed came back empty this tick, the detector isn't "quiet" — it's blind. Ping
     # once (gated, 6h cooldown) instead of the old silent-empty-dict behavior, which let
     # the CRISIS/HALT trigger run dark for a full session with nothing in the log Mike
     # would ever see outside a tail of shock_guard.log.
     blind_reasons = []
     if full and spy_d.get("blind"):
-        blind_reasons.append("SPY bars (Yahoo + Alpaca both empty)")
+        blind_reasons.append("SPY bars (Yahoo query1 + query2 both empty)")
     if news_blind:
-        blind_reasons.append("news (localhost market-news + Alpaca both failed)")
+        blind_reasons.append("news (localhost market-news failed)")
     if blind_reasons:
         alert_blind(blind_reasons)
 
