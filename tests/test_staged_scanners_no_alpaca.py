@@ -6,6 +6,9 @@ from pathlib import Path
 from unittest import mock
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
+for _m in [m for m in sys.modules if m == "lib" or m.startswith("lib.")]:   # another test's `lib` (pipeline) can shadow ~/scripts/lib
+    if str(ROOT / "lib") not in [str(x) for x in getattr(sys.modules[_m], "__path__", [str(ROOT / "lib")])]:
+        del sys.modules[_m]
 from lib import daily_bars  # noqa: E402
 import flow_chase as fc  # noqa: E402
 
