@@ -90,6 +90,16 @@ class Routed(unittest.TestCase):
             m.telegram("alert", True)
         self.assertIn("TELEGRAM SEND FAILED", err.getvalue())
 
+    def test_lib_notify_tg_push_dry_run_renders_lane_without_network(self):
+        import lib.notify as n
+        src = (SCRIPTS / "lib" / "notify.py").read_text()
+        self.assertNotIn("api.telegram.org", src)
+        r, out = self.run_capture(n.tg_push, "<b>alert</b> test", "flow_signals", loud=False, chat="123")
+        self.assertEqual(r, "flow_signals")
+        self.assertIn("DRY flow_signals", out)
+        r, out = self.run_capture(n.tg_push, "x " * 3000, "trading_recaps", chat="123")
+        self.assertIn("DRY trading_recaps", out)       # long text -> several parts, all rendered, none sent
+
     def test_no_raw_telegram_urls_left_except_getupdates(self):
         for p in (QE, SCRIPTS / "options_position_scorecard.py", DIGEST / "scoreboard_auditor.py"):
             self.assertNotIn("api.telegram.org", p.read_text(), p.name)

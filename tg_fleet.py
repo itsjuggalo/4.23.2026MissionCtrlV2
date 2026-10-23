@@ -742,11 +742,12 @@ def call(fn, method, **params):
     Returns Telegram's JSON dict ({"ok": False, "description": ...} on failure); never raises. TG_DRY_RUN=1 renders
     the call and returns a fake ok. Receiving (getUpdates) is the caller's business, not a send. (script-standard #6)"""
     fn = route(fn)
+    review_it = params.pop("_review", True)   # False when the caller already ran tg_lint (lib/notify.tg_push)
     if os.environ.get("TG_DRY_RUN") == "1":
         _dry(fn, f"{method} {json.dumps(params, default=str, ensure_ascii=False)[:6000]}")
         return {"ok": True, "result": {"message_id": 0}, "dry": True}
     text = params.get("text") if method == "sendMessage" else None
-    if isinstance(text, str):
+    if isinstance(text, str) and review_it:
         try:   # same pre-send review as send(); fail-open by design
             sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
             from lib.tg_lint import review

@@ -59,17 +59,17 @@ class SendPointsTest(unittest.TestCase):
 
     def test_notify_splits_long_and_recovers_bad_html(self):
         import lib.notify as n
-        old = n.urllib.request.urlopen
-        n.urllib.request.urlopen = self.fake_urlopen
+        import urllib.request as _ur, tg_fleet as _tf
+        old = _ur.urlopen; _ur.urlopen = self.fake_urlopen; _led = _tf._ledger; _tf._ledger = lambda *a, **k: None
         try:
-            self.assertTrue(n._send_message("t", "c", "line\n" * 3000, loud=False, html=True))
+            self.assertTrue(n._send_message("flow_signals", "c", "line\n" * 3000, loud=False, html=True))
             self.assertTrue(all(len(c["text"]) <= 4000 for c in self.calls))
             self.calls.clear()
-            self.assertTrue(n._send_message("t", "c", "<b>broken", loud=False, html=True))
+            self.assertTrue(n._send_message("flow_signals", "c", "<b>broken", loud=False, html=True))
             self.assertEqual(self.calls[-1]["text"], "broken")
             self.assertNotIn("parse_mode", self.calls[-1])
         finally:
-            n.urllib.request.urlopen = old
+            _ur.urlopen = old; _tf._ledger = _led
 
     def test_tg_fleet_send_splits_long(self):
         import tg_fleet as f

@@ -12,7 +12,7 @@ YOUR-NAME tag was watchlist+holdings+real-money-crypto; narrowed to watchlist-on
 tag against).
 
   flow_picks_post.py            # post to #flow-picks
-  flow_picks_post.py --print    # print only, don't post
+  flow_picks_post.py --print    # dry run: render only — no post, no pick log, no score write, no alert send
   flow_picks_post.py --channel flow-picks
 """
 from __future__ import annotations
@@ -21,6 +21,7 @@ import argparse
 import json
 import math
 import os
+import re
 import subprocess
 import sys
 from datetime import datetime, timezone
@@ -33,6 +34,8 @@ from lib.portfolio import get_watchlist  # noqa: E402
 from lib.heartbeat import beat  # noqa: E402
 from lib.notify import tg_brief  # noqa: E402
 from lib import card_mute  # noqa: E402  — operator-muted names get skipped
+import levels_block as LB  # noqa: E402  R32 (Mike 2026-10-21): computed levels.v1 block per swing pick
+from price_guard import check as price_check, fresh, option_quotes, src_label  # noqa: E402  quote.v1, Robinhood first
 from lib.discord_threading import (make_pick_key,  # noqa: E402  — per-pick lifecycle threads
                                    post_to_pick_thread_bot, _load_state as _thread_state)
 
@@ -47,6 +50,11 @@ PICKLOG_DIR = Path.home() / ".openclaw" / "state"
 IV_FORECAST = Path("/AIWorkWSL/labs/quantum/out/iv_forecast.json")
 MC_REPO = Path(os.environ.get("MC_REPO", "/AIWorkWSL/web/missionctrl"))
 MC_PY = os.environ.get("MC_PY", str(Path.home() / ".venv/bin/python"))  # quantum desk IV grader
+TAPE = (("SPY", "SPY"), ("QQQ", "QQQ"), ("^VIX", "VIX"))
+STATE: dict = {}   # build() → render(): the selected picks + their slow enrichment (pick_score, levels)
+PRICED: list = []  # (as_of, price) of every price on the rendered card — re-checked right before the send
+SPOT_SRC: dict = {}  # SYM → the render-time spot's "src … ET" label (pick threads / action cards)
+MISSING: dict = {} # input → [{source, ok, error}] for the loud missing-data alert (market-data rule §3)
 
 
 def _load_iv_map() -> dict:
@@ -93,17 +101,33 @@ def _iv_tag(a: dict, iv_map: dict) -> str:
     return ("\n   📊 " + " · ".join(bits)) if bits else ""
 
 
+_OCC_ROOT = re.compile(r"^[A-Z]{1,6}\d{6}[CP]\d{8}")
+_INDEX_Q = {"VIX": "^VIX", "SPX": "^SPX", "NDX": "^NDX", "RUT": "^RUT", "XSP": "^XSP"}  # index options → quote.v1
+
+
+def _occ(a: dict) -> str | None:
+    """The plain OCC symbol. flow2 rows append a source id ("NTRA270115C00460000_0941…"), which no pricer parses."""
+    m = _OCC_ROOT.match(str(a.get("OptionSymbol") or ""))
+    return m.group(0) if m else None
+
+
+def _qsym(sym) -> str:
+    s = str(sym or "").strip().upper()
+    return _INDEX_Q.get(s, s)
+
+
+def _spot_q(ticker: str) -> dict:
+    """quote.v1 send-time quote (price_guard.fresh: Robinhood first, a fallback is labelled "not Robinhood"; the
+    regular-session price in RTH, the extended print outside it). {ok, price, src, as_of, reason, change_pct}."""
+    sym = _qsym(ticker)
+    return (fresh([sym]).get(sym) or {}) if sym else {}
+
+
 def _spot(ticker: str):
-    """Underlying last price (yfinance) for grading later. None on failure."""
-    try:
-        import yfinance as yf
-        i = yf.Ticker(ticker).history(period="1d", interval="5m")
-        if len(i):
-            return float(i["Close"].iloc[-1])
-        h = yf.Ticker(ticker).history(period="1d")
-        return float(h["Close"].iloc[-1]) if len(h) else None
-    except Exception:
-        return None
+    """Underlying price that passed the send guard, else None (fail closed). Was direct yfinance until
+    2026-10-22 (audit P0): no source, no as_of, never Robinhood."""
+    r = _spot_q(ticker)
+    return r.get("price") if r.get("ok") else None
 
 
 def _log_picks(picks):
@@ -212,43 +236,32 @@ def _fmt(a: dict) -> str:
     return f"{a['Symbol']} ${a['Strike']:g}{typ} {exp}"
 
 
-def _tape() -> str:
-    """'SPY 766 (+0.4%) · QQQ … · VIX … (Yahoo 5m, 09:45 ET)'. Remedial W1 (2026-10-20): the
-    price must be TODAY's intraday bar and the % is vs the last close BEFORE today. It used
-    to fall back to the daily close and to iloc[-2], which before today's daily bar existed
-    was two sessions back — a stale 'TODAY' tape. A symbol without today's bar is dropped."""
+def _tape(q: dict | None = None) -> str:
+    """'SPY 766 (+0.4%, src Robinhood 09:49 ET) · QQQ … · VIX …'. Audit P0 (2026-10-22): quote.v1 via
+    price_guard.fresh (Robinhood first; VIX is Yahoo's delayed index, exempt from the "not Robinhood" label), each
+    value with its own source and data time, % vs the prior regular close. A symbol that fails the send guard shows
+    UNAVAILABLE with the reason — never an older price. `q` = an already-fetched fresh() result."""
     try:
-        import yfinance as yf
-        today = datetime.now(ET).date()
-        out, stamp = [], None
-        for t, lbl in (("SPY", "SPY"), ("QQQ", "QQQ"), ("^VIX", "VIX")):
-            h = yf.Ticker(t).history(period="5d", interval="1d")
-            i = yf.Ticker(t).history(period="1d", interval="5m")
-            if not len(i) or i.index[-1].astimezone(ET).date() != today:
-                continue
-            prior = [float(c) for d, c in zip(h.index, h["Close"]) if d.astimezone(ET).date() < today]
-            if not prior:
-                continue
-            prev, now = prior[-1], float(i["Close"].iloc[-1])
-            stamp = max(stamp or i.index[-1], i.index[-1])
-            chg = (now - prev) / prev * 100
-            out.append(f"{lbl} {now:,.0f} ({chg:+.1f}%)" if lbl != "VIX" else f"VIX {now:.1f} ({chg:+.1f}%)")
-        if not out:
-            return ""
-        return " · ".join(out) + f" (Yahoo 5m bar {stamp.astimezone(ET):%H:%M} ET)"
-    except Exception:
-        return ""
+        q = q if q is not None else fresh([t for t, _ in TAPE])
+    except Exception as e:  # noqa: BLE001
+        return f"Tape UNAVAILABLE ({type(e).__name__})"
+    out = []
+    for t, lbl in TAPE:
+        r = q.get(t) or {}
+        if not r.get("ok"):
+            out.append(f"{lbl} UNAVAILABLE ({r.get('reason') or 'no quote'})")
+            continue
+        px, chg = float(r["price"]), r.get("change_pct")
+        val = f"{px:.1f}" if lbl == "VIX" else f"{px:,.0f}"
+        pct = f"{chg:+.1f}%, " if isinstance(chg, (int, float)) else ""
+        out.append(f"{lbl} {val} ({pct}{r.get('src')})")
+    return " · ".join(out)
 
 
 MAX_MNY = 0.15   # |moneyness| beyond this = hedge/LEAP/stock-replacement, not a swing pick
 DTE_MIN, DTE_MAX = 7, 120   # swing window — excludes 0DTE lotto and long-dated LEAPs
 # Per-trade price caps removed 2026-10-05 (Mike's decision): each pick shows its cost
 # per contract (mid × 100) — no contract counts, no "affordable alternative" swaps.
-
-
-def _mid(row):
-    bid, ask, last = float(row["bid"] or 0), float(row["ask"] or 0), float(row["lastPrice"] or 0)
-    return (bid + ask) / 2 if (bid and ask) else last
 
 
 def _yf_option_chain_df(ticker_sym, exp, is_call, retries=3):
@@ -273,28 +286,68 @@ def _yf_option_chain_df(ticker_sym, exp, is_call, retries=3):
     return None
 
 
-def _cost_line(a, is_call, spot=None):
-    """Cost line for the flagged contract: mid and cost of ONE contract (mid × 100).
-    Price caps were removed 2026-10-05 — no contract count, no cap judgment.
-    `spot` is kept for call-site compatibility."""
+def _yahoo_last(a: dict) -> dict:
+    """Labelled fallback when Robinhood can't price the contract: Yahoo's last trade for the exact strike, with its
+    own trade time (Yahoo's chain carries no quote time, so its bid/ask are never shown). Send-guard checked."""
     try:
         exp = datetime.fromtimestamp(int(a.get("Expiry", 0)), tz=timezone.utc).astimezone(ET).strftime("%Y-%m-%d")
+        is_call = str(a.get("OptionType", "")).upper().startswith("C")
         df = _yf_option_chain_df(a.get("Symbol"), exp, is_call)
         if df is None:
-            return ""
-        strike = float(a.get("Strike", 0) or 0)
-        row = df[df["strike"] == strike]
-        mid = _mid(row.iloc[0]) if len(row) else None
-    except Exception:
-        return ""
-    if not mid:
-        return "   💵 cost per contract UNAVAILABLE (no live quote)"
-    # 2026-10-08 audit F10: round first so the per-contract price and the dollar cost always agree;
-    # label the quote's source + time.
-    mid = round(mid, 2)
-    cost = mid * 100
-    _src = f" [Yahoo mid, {datetime.now(ET).strftime('%-I:%M')} ET]"
-    return f"   💵 ~${mid:.2f}/ct{_src} → ${cost:,.0f} per contract"
+            return {"ok": False, "reason": "no Yahoo chain"}
+        row = df[df["strike"] == float(a.get("Strike", 0) or 0)]
+        if not len(row):
+            return {"ok": False, "reason": "strike not in the Yahoo chain"}
+        px, ts = float(row.iloc[0]["lastPrice"] or 0), row.iloc[0]["lastTradeDate"]
+        ts = ts.isoformat() if hasattr(ts, "isoformat") else str(ts)
+    except Exception as e:  # noqa: BLE001
+        return {"ok": False, "reason": f"Yahoo chain {type(e).__name__}"}
+    chk = price_check(ts, px)
+    if not chk["ok"]:
+        return {"ok": False, "reason": f"Yahoo last trade: {chk['reason']}"}
+    return {"ok": True, "mid": round(px, 2), "as_of": ts, "src": src_label("Yahoo last trade (not Robinhood)", ts)}
+
+
+def _marks(picks) -> dict:
+    """OCC → {ok, mid, as_of, src, reason}: Robinhood marketdata/options first (price_guard.option_quotes, send-guard
+    checked at the quote's own time), else the labelled Yahoo last trade. Both fail → ok False, both reasons named.
+    Audit P0 2026-10-22: the cost line was a Yahoo mid stamped with the render time."""
+    occs = [o for o in (_occ(r[0]) for r in picks) if o]
+    try:
+        rh = option_quotes(occs)
+    except Exception as e:  # noqa: BLE001
+        rh = {o: {"ok": False, "reason": f"Robinhood helper {type(e).__name__}"} for o in occs}
+    out = {}
+    for rec in picks:
+        a = rec[0]
+        occ = _occ(a) or a.get("OptionSymbol")
+        q = rh.get(occ) or {"reason": "not an OCC symbol"}
+        if q.get("ok"):
+            ts = datetime.fromtimestamp(q["as_of"], timezone.utc).isoformat()
+            out[occ] = {"ok": True, "mid": round(q["mid"], 2), "as_of": ts, "src": q["src"]}
+            continue
+        y = _yahoo_last(a)
+        y["rh_reason"] = q.get("reason") or "no Robinhood quote"
+        if not y["ok"]:
+            y["reason"] = f"Robinhood: {y['rh_reason']}; {y['reason']}"
+        out[occ] = y
+    return out
+
+
+def _cost_line(m: dict | None) -> str:
+    """Cost of ONE contract (price × 100) with the price's source + data time; no contract count, no cap
+    (caps removed 2026-10-05, R32). A price that fails the send guard is UNAVAILABLE with the reason."""
+    if not m or not m.get("ok"):
+        return f"   💵 cost per contract UNAVAILABLE — {(m or {}).get('reason') or 'no quote'}"
+    return f"   💵 ~${m['mid']:.2f}/ct [{m['src']}] → ${m['mid'] * 100:,.0f} per contract"
+
+
+def _levels(rec) -> list[str]:
+    """levels.v1 block (DECISIONS R32) for a swing pick: underlying levels with methods + the contract premium
+    levels. The "No size, no cap" footer is printed once per card. A failure is one UNAVAILABLE line."""
+    a, dte = rec[0], rec[3]
+    return LB.lines(str(a.get("Symbol", "")).upper(), LB.side_for(a.get("OptionType")), LB.horizon_for(dte),
+                    occ=_occ(a), footer=False)
 
 
 def _moneyness(a: dict, spot: float):
@@ -307,12 +360,14 @@ def _moneyness(a: dict, spot: float):
     return otm, (otm < 0)
 
 
-def build() -> str | None:
+def build(dry_run: bool = False) -> str | None:
+    """Select the picks (flow facts + a send-guarded spot for the moneyness filter), run the slow enrichment
+    (pick_score, levels.v1), then render() fetches the displayed prices last so they are seconds old at send.
+    dry_run: no pick log, no pick_score write."""
     merged = _load()
     if not merged:
         return None
     names = {s.upper() for s in get_watchlist()}
-    iv_map = _load_iv_map()
     scored = sorted(((_score(a), a) for a in merged.values()), key=lambda x: -x[0][0])
 
     spot_cache: dict[str, float | None] = {}
@@ -349,18 +404,75 @@ def build() -> str | None:
                 bulls.append(rec); used.add(sym)
             elif not a.get("isBullish") and not is_call and len(bears) < 2:
                 bears.append(rec); used.add(sym)
+    unpriced = sorted(t for t, v in spot_cache.items() if v is None)
+    if unpriced:   # a swing candidate dropped only because its underlying had no send-guarded price
+        MISSING["flow_picks underlying spot"] = [
+            {"source": "quote.v1 (Robinhood → Yahoo → Finnhub)", "ok": False,
+             "error": f"no send-guarded price for {', '.join(unpriced[:8])} — those picks were skipped"}]
 
-    _log_picks(bulls + bears)   # record for the EOD scorecard (direction from isBullish)
+    if not dry_run:
+        _log_picks(bulls + bears)   # record for the EOD scorecard (direction from isBullish)
+    picks = bulls + bears
+    STATE.clear()
+    STATE.update(conf=conf, bulls=bulls, bears=bears, hedges=hedges, names=names, scored=scored,
+                 iv_map=_load_iv_map(),
+                 ps=_pick_scores([_occ(r[0]) for r in picks], write=not dry_run),
+                 levels={_occ(r[0]): _levels(r) for r in picks})
+    return render()
+
+
+def render() -> str:
+    """The card from STATE with prices fetched NOW: tape + each pick's spot (quote.v1, Robinhood first) and option
+    price (_marks). Every price carries its source + data time; a failed one is UNAVAILABLE. Records each shown
+    price in PRICED for the send-time re-check and each miss in MISSING for the loud alert."""
+    st = STATE
+    bulls, bears, iv_map, ps, lv = st["bulls"], st["bears"], st["iv_map"], st["ps"], st["levels"]
+    PRICED.clear()
+    for k in [k for k in MISSING if k != "flow_picks underlying spot"]:
+        MISSING.pop(k)
+    syms = list(dict.fromkeys(_qsym(r[0].get("Symbol")) for r in bulls + bears))
+    try:
+        q = fresh([t for t, _ in TAPE] + syms)
+    except Exception as e:  # noqa: BLE001
+        q = {t: {"ok": False, "reason": f"quote.v1 {type(e).__name__}"} for t in [t for t, _ in TAPE] + syms}
+    marks = _marks(bulls + bears)
+    # refresh each pick's spot/moneyness to the render-time quote (selection ran before the slow enrichment)
+    fresh_recs = []
+    for a, fv, voi, dte, tag, sp, otm in bulls + bears:
+        r = q.get(_qsym(a.get("Symbol"))) or {}
+        if r.get("ok"):
+            sp = r["price"]
+            otm, _ = _moneyness(a, sp)
+            PRICED.append((r.get("as_of"), sp))
+        else:
+            sp = otm = None
+        fresh_recs.append((a, fv, voi, dte, tag, sp, otm))
+    bulls, bears = fresh_recs[:len(bulls)], fresh_recs[len(bulls):]
+    for t, _ in TAPE:
+        if (q.get(t) or {}).get("ok"):
+            PRICED.append((q[t].get("as_of"), q[t]["price"]))
+    for m in marks.values():
+        if m.get("ok"):
+            PRICED.append((m["as_of"], m["mid"]))
+    bad_spot = [f"{s}: {(q.get(s) or {}).get('reason') or 'no quote'}" for s in syms if not (q.get(s) or {}).get("ok")]
+    bad_tape = [f"{t}: {(q.get(t) or {}).get('reason') or 'no quote'}" for t, _ in TAPE if not (q.get(t) or {}).get("ok")]
+    bad_mark = [(o, m) for o, m in marks.items() if not m.get("ok")]
+    if bad_spot or bad_tape:
+        MISSING["flow_picks spot/tape"] = [{"source": "quote.v1 (Robinhood → Yahoo → Finnhub)", "ok": False,
+                                            "error": "; ".join(bad_spot + bad_tape)[:400]}]
+    if bad_mark:
+        MISSING["flow_picks option price"] = [
+            {"source": "Robinhood marketdata/options", "ok": False,
+             "error": "; ".join(f"{o}: {m.get('rh_reason')}" for o, m in bad_mark)[:300]},
+            {"source": "Yahoo option chain last trade (not Robinhood)", "ok": False,
+             "error": "; ".join(f"{o}: {m['reason'].split('; ', 1)[-1]}" for o, m in bad_mark)[:300]}]
+
     stamp = datetime.now(ET).strftime("%a %b %-d %-I:%M %p ET")
-    tape = _tape()
     lines = [f"🎯 **FLOW PICKS — live contracts** · {stamp}"]
-    if tape:
-        lines.append(f"_Tape: {tape}_")
-    if conf:
+    lines.append(f"_Tape: {_tape(q)}_")
+    if st["conf"]:
         lines.append("\n**🟢 TAPE CONFIRMATION (0DTE — direction, not swing buys):**")
-        lines += conf
-
-    ps = _pick_scores([r[0].get("OptionSymbol") for r in bulls + bears])
+        lines += st["conf"]
 
     def _pickline(idx, rec):
         a, fv, voi, dte, tag, sp, otm = rec
@@ -368,14 +480,17 @@ def build() -> str | None:
         oi = int(a.get("OI", 0) or 0)
         why = ("fresh opening flow (vol >> OI)" if voi >= 2 else
                "repeat institutional positioning" if voi < 1 else "building position")
-        mny = f" · spot ${sp:,.2f} ({abs(otm)*100:.0f}% {'OTM' if otm >= 0 else 'ITM'})" if sp else ""
-        is_call = str(a.get("OptionType", "")).upper().startswith("C")
-        sizing = _cost_line(a, is_call, sp)
+        sq = q.get(_qsym(a.get("Symbol"))) or {}
+        occ = _occ(a)
+        mny = (f" · spot ${sp:,.2f} ({abs(otm)*100:.0f}% {'OTM' if otm >= 0 else 'ITM'}, {sq.get('src')})" if sp
+               else f" · spot UNAVAILABLE ({sq.get('reason') or 'no quote'})")
         line = f"**{idx}. {_fmt(a)}** ({dte} DTE) · ${fv:,.0f} · V/OI {voi:.1f} ({vol:,}/{oi:,}){mny}{tag}\n   *{why}*"
-        line += ("\n" + sizing if sizing else "")
+        line += "\n" + _cost_line(marks.get(occ or a.get("OptionSymbol")))
         line += _iv_tag(a, iv_map)   # researched-&-verified stamp when the name was graded
-        if ps.get(a.get("OptionSymbol")):
-            line += "\n   _" + ps[a.get("OptionSymbol")] + "_"
+        for lvl in lv.get(occ) or []:
+            line += "\n   📐 " + lvl
+        if ps.get(occ):
+            line += "\n   _" + ps[occ] + "_"
         if _V2_ON and _V2_NOTES.get(a.get("OptionSymbol")):
             line += "\n   _v2 terms: " + "; ".join(_V2_NOTES[a.get("OptionSymbol")]) + "_"
         return line
@@ -388,30 +503,39 @@ def build() -> str | None:
         lines.append("\n**🔴 BEARISH FLOW TO RESPECT (contra flow — evidence only):**")
         for i, rec in enumerate(bears, 1):
             lines.append(_pickline(i, rec))
-    if hedges:
+    if st["hedges"]:
         lines.append("\n**🛡️ Notable big-money positioning (deep OTM — likely hedges, not buys):**")
-        for a, fv, otm, tag in hedges:
+        for a, fv, otm, tag in st["hedges"]:
             lines.append(f"• {_fmt(a)} — ${fv:,.0f} ({abs(otm)*100:.0f}% OTM){tag}")
     # your-name caution: largest flow on a held name that reads bearish
-    for (s, fv, voi, dte), a in scored:
-        if str(a.get("Symbol", "")).upper() in names and not a.get("isBullish") and fv > 2_000_000:
+    for (s, fv, voi, dte), a in st["scored"]:
+        if str(a.get("Symbol", "")).upper() in st["names"] and not a.get("isBullish") and fv > 2_000_000:
             lines.append(f"\n⚠️ **YOUR NAME — {a['Symbol']}:** big flow ({_fmt(a)}, ${fv:,.0f}) reads "
                          f"**bearish** (V/OI {voi:.1f}). Don't mistake size for a green light.")
             break
     lines.append("\n_0DTE = confirmation not entry · cost shown per contract · auto-posted intraday._")
+    if bulls or bears:
+        lines.append(f"_{LB.FOOTER}_")
     global TOP_ACTION_PICK, ACTIONABLE_PICKS
     TOP_ACTION_PICK = bulls[0] if bulls else (bears[0] if bears else None)
     ACTIONABLE_PICKS = list(bulls) + list(bears)
+    for a, *_ in ACTIONABLE_PICKS:   # thread / action-card spot carries its source too
+        SPOT_SRC[str(a.get("Symbol", "")).upper()] = (q.get(_qsym(a.get("Symbol"))) or {}).get("src")
     return "\n".join(lines)
 
 
-def _pick_scores(occs: list[str], timeout: int = 240) -> dict:
+def prices_fresh(now: datetime | None = None) -> bool:
+    """Send-time re-check (market-data rule §1): every price on the card still passes send_price_check."""
+    return all(price_check(ts, px, now=now)["ok"] for ts, px in PRICED)
+
+
+def _pick_scores(occs: list[str], timeout: int = 240, write: bool = True) -> dict:
     """pick_score.v1 factor line per pick (missionctrl pipeline/decision/pick_score, DECISIONS R35) — display-only,
     never re-ranks. Stores the full tables for /api/pick-score. A failure says so on the card."""
     occs = [o for o in occs if o]
     if not occs:
         return {}
-    cmd = [MC_PY, "-m", "pipeline.decision.pick_score.score", "--lines", ",".join(occs), "--write"]
+    cmd = [MC_PY, "-m", "pipeline.decision.pick_score.score", "--lines", ",".join(occs)] + (["--write"] if write else [])
     try:
         r = subprocess.run(cmd, cwd=MC_REPO, capture_output=True, text=True, timeout=timeout)
         if r.returncode == 0:
@@ -440,7 +564,8 @@ def _post_pick_threads(actionable) -> None:
                 continue
             is_call = str(a.get("OptionType", "")).upper().startswith("C")
             msg = (f"🎯 **ENTRY — {_fmt(a)}** ({dte} DTE)\n"
-                   f"${fv:,.0f} flow · V/OI {voi:.1f}" + (f" · spot ${sp:,.2f}" if sp else "")
+                   f"${fv:,.0f} flow · V/OI {voi:.1f}"
+                   + (f" · spot ${sp:,.2f} ({SPOT_SRC.get(sym) or 'src n/a'})" if sp else " · spot UNAVAILABLE")
                    + f"\n{'🟢 bullish call' if is_call else '🔴 bearish put'}{tag}")
             r = post_to_pick_thread_bot(key, msg, f"{_fmt(a)} · {datetime.now(ET):%b %-d}", tok, parent)
             print(f"[flow-picks] thread {sym}: created={r.get('created')} ok={r.get('ok')}", flush=True)
@@ -474,7 +599,8 @@ def _post_action_card(rec) -> None:
             return
         # fallback — render/upload failed: post the compact embed (still button-bearing)
         is_call = str(a.get("OptionType", "")).upper().startswith("C")
-        mny = f"${sp:,.2f} ({abs(otm)*100:.0f}% {'OTM' if otm >= 0 else 'ITM'})" if sp else "—"
+        mny = (f"${sp:,.2f} ({abs(otm)*100:.0f}% {'OTM' if otm >= 0 else 'ITM'}, {SPOT_SRC.get(sym) or 'src n/a'})"
+               if sp else "UNAVAILABLE")
         embed = {
             "title": f"⚡ ACTION · {sym}",
             "color": 0x2ECC71 if is_call else 0xE74C3C,
@@ -498,24 +624,63 @@ def _post_action_cards(picks) -> None:
         _post_action_card(rec)
 
 
+def _chunks(msg: str, limit: int = 3900) -> list[str]:
+    """Split on blank-line section breaks so a Telegram part never cuts a pick (tg_brief truncates past 4000)."""
+    parts, cur = [], ""
+    for block in msg.split("\n\n"):
+        cand = f"{cur}\n\n{block}" if cur else block
+        if len(cand) <= limit:
+            cur = cand
+            continue
+        if cur:
+            parts.append(cur)
+        cur = block[:limit]
+    return parts + ([cur] if cur else [])
+
+
+def _alert_missing(dry_run: bool) -> None:
+    """Loud missing-data alert (market-data rule §3) via MissionCtrl's missing_data (system_health lane via tg_fleet,
+    once per input per ET day; the state file feeds Data Health). Path-loaded so the pipeline lib stays off sys.path."""
+    if not MISSING:
+        return
+    try:
+        import importlib.util
+        spec = importlib.util.spec_from_file_location(
+            "mc_missing_data", MC_REPO / "pipeline/decision/lib/missing_data.py")
+        md = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(md)
+        for name, tried in MISSING.items():
+            md.alert_missing(name, tried, dry_run=dry_run)
+    except Exception as e:  # noqa: BLE001
+        print(f"[flow-picks] missing-data alert failed: {type(e).__name__} — inputs {sorted(MISSING)}", flush=True)
+
+
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--channel", default="flow-picks")
-    ap.add_argument("--print", action="store_true", dest="print_only")
+    ap.add_argument("--print", "--dry-run", action="store_true", dest="print_only")
     a = ap.parse_args()
-    msg = build()
+    msg = build(dry_run=a.print_only)
     if not msg:
         print("[flow-picks] no flow data; skip", flush=True)
         return
+    if not prices_fresh():   # the slow steps ran before render(); a price that aged past the guard is re-fetched
+        print("[flow-picks] a price aged past the send guard before send — re-rendering", flush=True)
+        msg = render()
     if a.print_only:
         print(msg)
+        _alert_missing(dry_run=True)
         return
     post(resolve_channel(a.channel), msg)
     _post_action_cards(ACTIONABLE_PICKS)  # button-bearing cards for the top 3 picks (SynthControl)
     _post_pick_threads(ACTIONABLE_PICKS)  # per-pick lifecycle threads (entry; grade follows at EOD)
     beat("flow_picks")
-    used = tg_brief(msg, chain=("flow_digest", "daily_briefs"))  # 2026-06-24: Flow Picks → flow_digest (fallback SpaceCoast so a vault hiccup never silences a pick)
-    print(f"[flow-picks] posted ({len(msg)} chars) · tg→{used or 'skip'}", flush=True)
+    # 2026-06-24: Flow Picks → flow_digest (fallback daily_briefs so a vault hiccup never silences a pick)
+    used = [tg_brief(part, chain=("flow_digest", "daily_briefs")) for part in _chunks(msg)]
+    print(f"[flow-picks] posted ({len(msg)} chars) · tg→{','.join(u or 'skip' for u in used)}", flush=True)
+    _alert_missing(dry_run=False)
+    if MISSING:   # card went out with those values UNAVAILABLE; the run still reports the miss (script-standards §10)
+        sys.exit(3)
 
 
 if __name__ == "__main__":
