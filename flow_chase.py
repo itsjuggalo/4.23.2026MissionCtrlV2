@@ -32,7 +32,7 @@ sys.path.insert(0, os.path.expanduser("~/scripts"))
 import quantum_tg as Q  # shared read-only formatters (_human, _market_open, etc.)
 from tg_format import esc, b, hdr, row, footer, join
 import levels_block as LB  # R32 (Mike 2026-10-21): computed levels.v1 block on the single-contract card
-from price_guard import alpaca_option_mid, fresh, option_mid, src_label  # remedial W1/W4 send-time guard (Robinhood first)
+from price_guard import fresh, option_mid, src_label  # remedial W1/W4 send-time guard (Robinhood first)
 
 ET = ZoneInfo("America/New_York")
 
@@ -43,28 +43,11 @@ ET = ZoneInfo("America/New_York")
 SECRETS = os.path.expanduser("~/.openclaw/secrets")
 DATA = os.path.expanduser("~/trading/signals/option-scraper/data")
 FLOW2 = os.path.join(DATA, "flow2_alerts_today.json")
-ALPACA = "https://data.alpaca.markets"
 
 SIGNIF_USD = 1_500_000   # only mirror the meaty app pushes (anti-bloat default for the guard)
 
 
-# ── live quotes (Alpaca) ─────────────────────────────────────────────────────
-def _headers():
-    try:
-        return {"APCA-API-KEY-ID": open(f"{SECRETS}/alpaca-boba-key-id").read().strip(),
-                "APCA-API-SECRET-KEY": open(f"{SECRETS}/alpaca-boba-secret").read().strip()}
-    except Exception:
-        return {}
-
-
-def _get(url, timeout=6):
-    try:
-        req = urllib.request.Request(url, headers=_headers())
-        return json.load(urllib.request.urlopen(req, timeout=timeout))
-    except Exception:
-        return None
-
-
+# ── live quotes (Robinhood only; the Alpaca fallback was removed 2026-10-22) ─────
 def _clean_occ(s):
     # flow2 alert keys can carry a "_<time><hash>" suffix on repeat alerts; the real
     # OCC symbol is the head before the first underscore.
@@ -79,18 +62,9 @@ def option_snapshot(occ):
     if src is not None:
         return {"mid": mid, "bid": x.get("bid"), "ask": x.get("ask"), "quote_check": chk, "src": src,
                 "iv": x.get("iv"), "delta": x.get("delta"), "day_high": x.get("high"), "day_low": x.get("low")}
-    d = _get(f"{ALPACA}/v1beta1/options/snapshots?symbols={occ}")
-    node = ((d or {}).get("snapshots") or {}).get(occ, {})
-    lq = node.get("latestQuote") or {}
-    db = node.get("dailyBar") or {}
-    g = node.get("greeks") or {}
-    bp, ap = lq.get("bp"), lq.get("ap")
-    # remedial W1 (2026-10-20): a quote older than the send_guard ceiling is no quote —
-    # the verdict falls to its existing NO LIVE QUOTE / WAIT branch instead of using it.
-    mid, chk = alpaca_option_mid(node)
-    return {"mid": mid, "bid": bp, "ask": ap, "quote_check": chk, "src": src_label("Alpaca (not Robinhood)", lq.get("t")),
-            "iv": node.get("impliedVolatility") or g.get("iv"),
-            "delta": g.get("delta"), "day_high": db.get("h"), "day_low": db.get("l")}
+    # Robinhood has no quote: no fallback. mid None sends the verdict to its existing NO LIVE QUOTE / WAIT branch.
+    return {"mid": None, "bid": None, "ask": None, "quote_check": chk, "src": None,
+            "iv": None, "delta": None, "day_high": None, "day_low": None, "rh_reason": x.get("rh_reason")}
 
 
 def equity_snapshot(tkr):

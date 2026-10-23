@@ -2,7 +2,7 @@
 """breakout_scanner.py — large-cap breakout + rising-volume scanner.
 
 Deterministic (no LLM, free, fast). Scans the S&P 500 (tradeable large-cap proxy
-for "Fortune 500") via Alpaca daily bars and flags names that are:
+for "Fortune 500") via the shared daily-bars loader and flags names that are:
   - breaking out: today's close > prior-20-session high
   - on rising volume: RVOL = today vol / 20-session avg vol >= threshold (1.5)
   - in an uptrend: close > 50-day SMA  (filters dead-cat pops)
@@ -30,7 +30,6 @@ FLOW_DB = Path(os.environ.get("MC_SIGNAL_TRACKER_DB") or Path.home() / "02_DATA/
 FLOW_FEEDS = ("relay:", "scraper:", "uw_feed:")
 MIN_RVOL = float(os.environ.get("BREAKOUT_RVOL", "1.5"))
 TOPN = int(os.environ.get("BREAKOUT_TOPN", "12"))
-DATA_BASE = "https://data.alpaca.markets/v2/stocks/bars"
 
 
 def _secret(*names: str) -> str | None:
@@ -56,54 +55,17 @@ def load_universe() -> list[str]:
     return [s for s in syms if s.replace(".", "").isalnum()]
 
 
-def fetch_bars(symbols: list[str], key: str, sec: str) -> dict[str, list[dict]]:
-    """Batch daily bars for ~1y. Returns {symbol: [bars oldest→newest]}."""
-    hdr = {"APCA-API-KEY-ID": key, "APCA-API-SECRET-KEY": sec}
-    start = (datetime.now(timezone.utc) - timedelta(days=380)).strftime("%Y-%m-%d")
-    out: dict[str, list[dict]] = {}
-
-    def fetch_chunk(chunk: list[str], feed: str) -> bool:
-        """Fetch one symbol batch (paginated). Returns False on HTTP error so the
-        caller can bisect — a single malformed symbol 400s the whole batch."""
-        page_token = None
-        while True:
-            qs = (f"?symbols={','.join(chunk)}&timeframe=1Day&start={start}"
-                  f"&limit=10000&adjustment=all&feed={feed}")
-            if page_token:
-                qs += f"&page_token={page_token}"
-            try:
-                d = _http_json(DATA_BASE + qs, hdr)
-            except Exception as e:
-                if len(chunk) == 1:
-                    print(f"[scanner] drop {chunk[0]} (feed={feed}): {e}", file=sys.stderr)
-                    return True   # give up on this single symbol, don't bisect further
-                return False
-            for sym, blist in (d.get("bars") or {}).items():
-                out.setdefault(sym, []).extend(blist)
-            page_token = d.get("next_page_token")
-            if not page_token:
-                return True
-
-    def fetch_recursive(chunk: list[str], feed: str):
-        if not fetch_chunk(chunk, feed):     # batch failed → bisect to isolate bad symbol
-            mid = len(chunk) // 2
-            fetch_recursive(chunk[:mid], feed)
-            fetch_recursive(chunk[mid:], feed)
-
-    CHUNK = 100
-    feed = "iex"   # free plan; flip to sip via probe below if iex returns nothing
-    # quick feed probe on first symbol
-    probe = symbols[:1]
-    if not fetch_chunk(probe, "iex"):
-        feed = "sip"
-    for i in range(1 if out else 0, len(symbols), CHUNK):
-        fetch_recursive(symbols[i:i+CHUNK], feed)
-        time.sleep(0.15)   # gentle on rate limit
-    FEED_USED[0] = feed
+def fetch_bars(symbols: list[str]) -> dict[str, list[dict]]:
+    """Daily bars for ~1y from the shared loader (lib/daily_bars -> pipeline.decision.lib.bars.get_bars: Robinhood
+    daily, console cache, yfinance). No Alpaca. {symbol: [bars oldest->newest]}; BAR_SOURCES holds each source."""
+    from lib import daily_bars
+    out, srcs = daily_bars.fetch_daily(symbols, 380)
+    BAR_SOURCES.update(srcs)
     return out
 
 
-FEED_USED = ["iex"]
+BAR_SOURCES: dict[str, str] = {}
+FEED_USED = ["shared-loader"]
 FLOW_STATUS: dict = {"source": "signal tracker (vendor flow alerts: UW, FlowGreeks, Firebase relay)", "newest": None, "stale": True}
 
 
@@ -226,24 +188,20 @@ def analyze(sym: str, bars: list[dict], flows, mode: str) -> dict | None:
 
 
 def main():
-    key, sec = _secret("alpaca-boba-key-id"), _secret("alpaca-boba-secret")
-    if not key or not sec:
-        print(json.dumps({"error": "no alpaca data keys", "hits": []}))
-        return
     universe = load_universe()
     if not universe:
         print(json.dumps({"error": "empty universe", "hits": []}))
         return
     flows = flow_tickers()
-    bars = fetch_bars(universe, key, sec)
+    bars = fetch_bars(universe)
     mode = os.environ.get("SCAN_MODE", "breakout")     # breakout | breakdown | both
     modes = ["breakout", "breakdown"] if mode == "both" else [mode]
     # W8 MC-AUD-013: provenance travels with the scan — bar date/session, feed, adjustment, flow-overlay freshness
     lasts = sorted((str(b[-1]["t"]), s) for s, b in bars.items() if b)
     meta = bar_meta(bars[lasts[-1][1]], FEED_USED[0]) if lasts else {"session": "UNAVAILABLE (no bars)"}
     result = {
-        "bars": {**meta, "adjustment": "split+dividend adjusted (adjustment=all)",
-                 "source": f"Alpaca {FEED_USED[0].upper()} daily bars — cross-check only, not Robinhood"},
+        "bars": {**meta, "adjustment": "raw OHLC, split-adjusted by the source; dividends not applied",
+                 "source": "shared bars loader: " + ", ".join(sorted(set(BAR_SOURCES.values())) or ["UNAVAILABLE"])},
         "flow_overlay": dict(FLOW_STATUS),
         "generated_at": datetime.now(timezone.utc).isoformat(timespec="seconds"),
         "universe": UNIVERSE.name, "scanned": len(bars), "min_rvol": MIN_RVOL,

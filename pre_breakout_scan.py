@@ -11,7 +11,7 @@ Filter (all must hold, score ranks):
   • base tight: 20d range / price ≤ 15%
   • accumulation: OBV(last) > OBV(mid) AND up/down volume ratio ≥ 1.3
   • relative strength: 20d return ≥ SPY's
-Universe: sp500.txt + cc_watchlist + held stocks. Bars: Alpaca IEX (free, batched,
+Universe: sp500.txt + cc_watchlist + held stocks. Bars: shared daily-bars loader (RH, console cache, yfinance;
 pattern from ~/scripts/breakout_scanner.py).
 
 HONESTY RAIL: every emitted candidate lands in mike.sqlite scan_history and gets
@@ -43,7 +43,6 @@ WATCH = Path.home() / "portfolio" / "cc_watchlist.txt"
 BOOK = Path.home() / "portfolio" / "unified_book.json"
 DB = Path.home() / "portfolio" / "mike.sqlite"
 OUT_JSON = Path.home() / "portfolio" / "pre_breakout.json"
-DATA_BASE = "https://data.alpaca.markets/v2/stocks/bars"
 TG = Path.home() / "bin" / "tg-send-msg"
 
 # v3 parameters — WON the 2026-07-07 walk-forward sweep: 31.8% of picks hit +30%
@@ -89,43 +88,9 @@ def universe() -> list[str]:
 
 
 def fetch_bars(symbols: list[str], days: int = 380) -> dict[str, list[dict]]:
-    """Batched Alpaca IEX daily bars (breakout_scanner pattern, bisect on bad symbol)."""
-    hdr = {"APCA-API-KEY-ID": _secret("alpaca-key-id"),
-           "APCA-API-SECRET-KEY": _secret("alpaca-secret")}
-    start = (datetime.now(timezone.utc) - timedelta(days=days)).strftime("%Y-%m-%d")
-    out: dict[str, list[dict]] = {}
-
-    def fetch_chunk(chunk: list[str]) -> bool:
-        page = None
-        while True:
-            qs = (f"?symbols={','.join(chunk)}&timeframe=1Day&start={start}"
-                  f"&limit=10000&adjustment=all&feed=iex")
-            if page:
-                qs += f"&page_token={page}"
-            try:
-                d = _http_json(DATA_BASE + qs, hdr)
-            except Exception as e:
-                if len(chunk) == 1:
-                    print(f"drop {chunk[0]}: {e}", file=sys.stderr)
-                    return True
-                return False
-            for sym, bl in (d.get("bars") or {}).items():
-                out.setdefault(sym, []).extend(bl)
-            page = d.get("next_page_token")
-            if not page:
-                return True
-
-    def rec(chunk: list[str]):
-        if not fetch_chunk(chunk):
-            mid = len(chunk) // 2
-            rec(chunk[:mid])
-            rec(chunk[mid:])
-
-    import time
-    CHUNK = 100
-    for i in range(0, len(symbols), CHUNK):
-        rec(symbols[i:i + CHUNK])
-        time.sleep(0.4)          # stay under Alpaca free-tier rate limit (429s)
+    """Daily bars from the shared loader (lib/daily_bars): Robinhood daily, console cache, yfinance. No Alpaca."""
+    from lib import daily_bars
+    out, _src = daily_bars.fetch_daily(symbols, days)
     return out
 
 

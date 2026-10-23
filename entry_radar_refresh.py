@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """entry_radar_refresh.py — compute entry-quality reads for SPY/QQQ + Mike's
-watchlist, from Alpaca daily bars (IEX feed, free).
+watchlist, from completed daily bars (shared loader: Robinhood daily, then cache/yfinance; no Alpaca).
 
 Replaces the Promotion Gate slot on the Command Center with something a trader
 can act on: for each symbol — trend, RSI, a pullback ENTRY ZONE (EMA21 ± 0.4*ATR),
@@ -49,36 +49,31 @@ def watchlist():
     return WATCH_DEFAULT
 
 
-RETRY_WAITS = (5, 15, 40)   # the Alpaca data key is shared with the scanners/decision
-                            # cycles, so a co-scheduled burst can 429 this one request
-
-
-def fetch_bars(syms, key, sec):
-    """Alpaca daily bars. Backs off on 429/5xx; returns {} rather than raising so a
-    rate-limited minute degrades to the Yahoo fallback instead of killing the run."""
-    url = ("https://data.alpaca.markets/v2/stocks/bars?"
-           + urllib.parse.urlencode({
-               "symbols": ",".join(syms), "timeframe": "1Day", "limit": 3000,
-               "adjustment": "split", "feed": "iex",
-               "start": (datetime.utcnow() - timedelta(days=180)).strftime("%Y-%m-%dT00:00:00Z"),
-           }))
-    req = urllib.request.Request(url, headers={"APCA-API-KEY-ID": key, "APCA-API-SECRET-KEY": sec})
-    for wait in RETRY_WAITS + (None,):
+def fetch_bars(syms):
+    """Completed daily bars from the shared loader (pipeline/decision/lib/bars.get_bars: Robinhood daily first, then
+    the console cache, then yfinance; no Alpaca - market-data §1). Returns {sym: [{h,l,c,t}]}; a symbol the loader
+    cannot serve is left out so the caller falls back to Yahoo's chart JSON. Each bar list carries its source in
+    BAR_SOURCE[sym] so a card can say where it came from."""
+    out = {}
+    try:
+        sys.path.insert(0, "/AIWorkWSL/web/missionctrl")
+        from pipeline.decision.lib import bars as shared
+    except Exception as e:  # noqa: BLE001
+        print(f"shared bars loader unavailable: {type(e).__name__} - using the Yahoo fallback")
+        return out
+    for s in syms:
         try:
-            with urllib.request.urlopen(req, timeout=30) as r:
-                return json.load(r).get("bars", {})
-        except urllib.error.HTTPError as e:
-            if e.code not in (429, 500, 502, 503, 504) or wait is None:
-                print(f"alpaca bars failed: HTTP {e.code} — falling back to Yahoo")
-                return {}
-            ra = (e.headers.get("Retry-After") if e.headers else None) or ""
-            delay = max(wait, min(int(ra), 60)) if ra.strip().isdigit() else wait
-            print(f"alpaca bars HTTP {e.code} — retrying in {delay}s")
-            time.sleep(delay)
-        except Exception as e:
-            print(f"alpaca bars error: {e} — falling back to Yahoo")
-            return {}
-    return {}
+            bs = shared.get_bars(s.replace(".", "-"), "1d", lookback_period="1y")
+        except Exception as e:  # noqa: BLE001
+            print(f"bars {s}: {type(e).__name__}: {str(e)[:80]}")
+            continue
+        out[s] = [{"h": float(r["h"]), "l": float(r["l"]), "c": float(r["c"]),
+                   "t": r["t"].astimezone(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")} for r in bs.df.to_dict("records")]
+        BAR_SOURCE[s] = str(bs.source)
+    return out
+
+
+BAR_SOURCE = {}
 
 
 def fetch_yahoo_bars(ysym, rng="1y", interval="1d"):
@@ -179,20 +174,21 @@ if __name__ == "__main__":
     now_et = datetime.now(ZoneInfo("America/New_York"))
     mode = ah.session_state(now_et)
 
-    key, sec = secret("alpaca-key-id"), secret("alpaca-secret")
     syms, seen = [], set()
     for s in CORE + watchlist():
         if s not in seen:
             seen.add(s); syms.append(s)
     syms = syms[:MAX_SYMS]
-    bars = fetch_bars(syms, key, sec)
+    bars = fetch_bars(syms)
     rows = []
     for s in syms:
         row = analyze(s, bars.get(s, []))
-        if not row:                                         # Alpaca 429'd or skipped it
+        if row:
+            row["source"] = BAR_SOURCE.get(s, "shared bars")
+        if not row:                                         # shared loader could not serve it
             row = analyze(s, fetch_yahoo_bars(s.replace(".", "-")))
             if row:
-                row["source"] = "yahoo"
+                row["source"] = "yahoo (not Robinhood)"
         if row:
             rows.append(row)
     for disp, ysym in FUTURES.items():                      # MNQ etc via Yahoo
@@ -219,7 +215,7 @@ if __name__ == "__main__":
             except Exception:
                 live = {}
             now_s = (f"now ${live['price']:g} · {live['src']}" if live.get("ok") else
-                     f"last bar close ${r['price']} ({r.get('source', 'alpaca')} bars, no live price)")
+                     f"last bar close ${r['price']} ({r.get('source', 'daily')} bars, no live price)")
             msg = (f"🎯 {r['sym']} ENTERED the entry zone ${r['entryLo']}–${r['entryHi']} "
                    f"({now_s}, RSI {r['rsi']}, was {prev.get(r['sym'])})\n"
                    f"uptrend pullback to the 21-day line "

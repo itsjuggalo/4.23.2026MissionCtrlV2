@@ -48,7 +48,7 @@ log "=== breakout/breakdown scan start ==="
 if [[ -n "${BREAKOUT_SCAN_JSON_FILE:-}" ]]; then
   SCAN_JSON="$(cat "$BREAKOUT_SCAN_JSON_FILE")"
 else
-  SCAN_JSON="$(SCAN_MODE=both python3 "$HOME/scripts/breakout_scanner.py" 2>>"$LOG")"
+  SCAN_JSON="$(SCAN_MODE=both "$HOME/.venv/bin/python" "$HOME/scripts/breakout_scanner.py" 2>>"$LOG")"
 fi
 [[ -z "$SCAN_JSON" ]] && { log "scanner empty — abort"; exit 1; }
 
