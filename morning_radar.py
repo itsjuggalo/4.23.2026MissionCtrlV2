@@ -116,45 +116,45 @@ def daily_posture(daily) -> dict[str, dict]:
     return out
 
 
-def alpaca_pm_volumes(symbols: list[str]) -> dict[str, dict]:
-    """symbol -> {pm_vol (today 04:00-09:29 ET), pm_base (median of prior premarkets)}
-    via Alpaca free IEX feed — yfinance reports premarket volume as 0, IEX is real
-    (partial SIP, but ratio vs its own history is valid)."""
+RH_TOKEN = HOME / ".openclaw" / "secrets" / "robinhood-brokerage-token.txt"   # keeper's read-only token
+SRC_RH = "Robinhood ext-hours 5m bars"
+SRC_YF = "yfinance prepost 1m (not Robinhood)"
+
+
+def rh_pm_volumes(symbols: list[str], batch: int = 50) -> dict[str, dict]:
+    """symbol -> {pm_vol (today 04:00-09:29 ET), pm_base (median of prior premarkets), pm_last} from Robinhood
+    `marketdata/historicals` 5-minute bars, bounds=extended, span=week (read-only; replaces the Alpaca IEX leg
+    2026-10-23). {} on any failure -> the yfinance prepost frame stands, labelled not Robinhood."""
     import urllib.request
-    from datetime import timedelta
-    sec_dir = HOME / ".openclaw" / "secrets"
-    try:
-        key = (sec_dir / "alpaca-boba-key-id").read_text().strip()
-        sec = (sec_dir / "alpaca-boba-secret").read_text().strip()
-    except Exception:
+    if not RH_TOKEN.exists():
         return {}
-    days = [d for d in (now_et().date() - timedelta(days=i) for i in range(9, -1, -1))
-            if d.weekday() < 5][-6:]
-    vols: dict[str, dict] = {s: {} for s in symbols}
-    for day in days:
-        url = ("https://data.alpaca.markets/v2/stocks/bars?symbols=" + ",".join(symbols)
-               + f"&timeframe=1Min&start={day}T04:00:00-04:00&end={day}T09:29:59-04:00"
-               + "&feed=iex&limit=10000")
-        token = ""
-        try:
-            while True:
-                req = urllib.request.Request(url + (f"&page_token={token}" if token else ""),
-                                             headers={"APCA-API-KEY-ID": key,
-                                                      "APCA-API-SECRET-KEY": sec})
-                d = json.loads(urllib.request.urlopen(req, timeout=30).read())
-                for sym, bars in (d.get("bars") or {}).items():
-                    vols[sym][day] = vols[sym].get(day, 0) + sum(b["v"] for b in bars)
-                token = d.get("next_page_token")
-                if not token:
-                    break
-        except Exception:
-            continue
     today = now_et().date()
     out: dict[str, dict] = {}
-    for sym, by_day in vols.items():
-        prior = sorted(v for d, v in by_day.items() if d != today and v > 0)
-        out[sym] = {"pm_vol": by_day.get(today, 0),
-                    "pm_base": prior[len(prior) // 2] if prior else 0.0}
+    for i in range(0, len(symbols), batch):
+        path = (f"marketdata/historicals/?symbols={','.join(symbols[i:i + batch])}"
+                "&interval=5minute&span=week&bounds=extended")
+        try:
+            req = urllib.request.Request("https://api.robinhood.com/" + path,
+                                         headers={"Authorization": "Bearer " + RH_TOKEN.read_text().strip(),
+                                                  "Accept": "application/json"})
+            results = json.loads(urllib.request.urlopen(req, timeout=20).read()).get("results") or []
+        except Exception:
+            continue
+        for res in results:
+            days: dict = {}
+            last = None
+            for h in (res or {}).get("historicals") or []:
+                if h.get("interpolated"):
+                    continue
+                t = datetime.fromisoformat(h["begins_at"].replace("Z", "+00:00")).astimezone(ET)
+                if dtime(4, 0) <= t.time() < dtime(9, 30):
+                    days[t.date()] = days.get(t.date(), 0.0) + float(h.get("volume") or 0)
+                    if t.date() == today:
+                        last = float(h["close_price"])
+            prior = sorted(v for d, v in days.items() if d != today and v > 0)
+            if res.get("symbol") and days:
+                out[res["symbol"]] = {"pm_vol": days.get(today, 0.0),
+                                      "pm_base": prior[len(prior) // 2] if prior else 0.0, "pm_last": last}
     return out
 
 
@@ -202,14 +202,18 @@ def build_signals() -> tuple[list[dict], int]:
                         progress=False, threads=True, group_by="column", auto_adjust=True)
     posture = daily_posture(daily)
     pm = premarket_stats(intra, syms)
-    apm = alpaca_pm_volumes(syms)
-    for sym, av in apm.items():
-        if sym in pm and av["pm_base"] > 0:
-            pm[sym]["pm_vol"] = av["pm_vol"]
-            pm[sym]["pm_base"] = av["pm_base"]
-            pm[sym]["ratio"] = av["pm_vol"] / av["pm_base"]
-        elif sym in pm and av["pm_vol"] > 0 and pm[sym]["ratio"] == 0:
-            pm[sym]["ratio"] = 1.0  # traded premarket, no baseline — neutral
+    for m in pm.values():
+        m["src"] = SRC_YF
+    for sym, av in rh_pm_volumes(syms).items():   # Robinhood first; yfinance prepost stays as the labelled fallback
+        m = pm.setdefault(sym, {"pm_vol": 0.0, "pm_base": 0.0, "ratio": 0.0, "pm_last": None})
+        m["src"] = SRC_RH
+        m["pm_vol"], m["pm_base"] = av["pm_vol"], av["pm_base"]
+        if av["pm_last"] is not None:
+            m["pm_last"] = av["pm_last"]
+        if av["pm_base"] > 0:
+            m["ratio"] = av["pm_vol"] / av["pm_base"]
+        else:
+            m["ratio"] = 1.0 if av["pm_vol"] > 0 else 0.0  # traded premarket, no baseline — neutral
     rows: list[dict] = []
     for sym in syms:
         p, m = posture.get(sym), pm.get(sym)
@@ -237,7 +241,7 @@ def build_signals() -> tuple[list[dict], int]:
         if p["atr"] and p["yrange"] < 0.6 * p["atr"]:
             score += 2
             why.append("coiled (tight day)")
-        rows.append({"sym": sym, "tag": uni[sym], "score": round(score, 1),
+        rows.append({"sym": sym, "tag": uni[sym], "score": round(score, 1), "src": m.get("src", SRC_YF),
                      "gap": round(gap, 1), "ratio": round(m["ratio"], 1),
                      "why": why, "ema20": p["ema20"], "close": p["close"]})
     rows.sort(key=lambda r: -r["score"])
@@ -256,6 +260,9 @@ def card(rows: list[dict], nsyms: int, top: int) -> str:
         lines.append(f"• *{r['sym']}* [{r['score']}] {tag} — " + " · ".join(r["why"]))
     if hot:
         lines.append("Rules: no chase >+15%/5d. Momentum observation only.")
+    srcs = sorted({r["src"] for r in rows})
+    if srcs:
+        lines.append("PM volume/price: " + " + ".join(srcs) + " · posture: yfinance daily (not Robinhood)")
     return "\n".join(lines)
 
 

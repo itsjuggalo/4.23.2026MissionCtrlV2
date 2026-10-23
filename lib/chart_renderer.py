@@ -457,7 +457,7 @@ def selftest() -> dict:
         "premium": 1_210_000, "voi": 14.2, "sweeps": 8, "blocks": 3, "dte": 66,
         "conviction": 7.2, "iv": 58,
         "what": "Fresh bullish call sweeps — new positioning, not closing. Volume >> open interest.",
-        "play": "1-2% of account · exit 50-100% / cut at -50% · 0DTE = confirmation, not entry.",
+        "play": "exit 50-100% / cut at -50% · 0DTE = confirmation, not entry.",
     })
     import numpy as _np
     out["market"] = market_card({

@@ -73,7 +73,7 @@ RISK_MENU = C([
 ])
 JAZZY_MENU = C([
     ("book", "Open Jazzy positions"),
-    ("pick", "#1 contract (sized vs Jazzy equity)"),
+    ("pick", "#1 contract"),
     ("greeks", "Greeks for a ticker"),
     ("help", "What this desk does (Jazzy paper account)"),
 ])

@@ -7,7 +7,7 @@ Public:
     tier(alert)            'T1'|'T2'|'T3'  (size/aggression)
     conviction(alert)      0-10 float
     what_this_means(alert) plain-English read
-    how_to_play(alert)     sizing + exit doctrine ($800 / equity-fraction)
+    how_to_play(alert)     exit doctrine (no sizing: DECISIONS R32, 2026-10-23)
     contract_label(alert)  'NVDA $205C 8/21'
     card_spec(alert, iv)   dict ready for chart_renderer.pick_card
 """
@@ -108,7 +108,7 @@ def what_this_means(a) -> str:
 def how_to_play(a, iv=None) -> str:
     bull = _is_bullish(a)
     dte = int(_f(a, "DTE", "dte"))
-    bits = ["Size 1-2% of equity (max $800 risk)"]
+    bits = []                                  # R32: no position size or risk cap on any card
     if dte <= 1:
         bits.append("0DTE = confirmation, not an entry")
     bits.append("exit 50-100% / cut at -50%")
