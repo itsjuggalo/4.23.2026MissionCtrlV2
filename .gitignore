@@ -20,3 +20,4 @@ brief_prompts/
 *api_key*
 creds*
 credentials*
+!google_token_keeper.py
