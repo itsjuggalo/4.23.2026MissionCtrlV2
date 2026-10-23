@@ -23,12 +23,11 @@ def test_alpaca_last_fresh_and_stale():
     assert px is None and "max 60s" in chk["reason"]
 
 
-def test_option_mid_needs_fresh_quote():
-    node = {"latestQuote": {"bp": 1.0, "ap": 1.2, "t": "2026-10-20T13:59:50Z"}}
-    assert pg.alpaca_option_mid(node, RTH)[0] == 1.1
-    node["latestQuote"]["t"] = "2026-10-19T19:59:00Z"
-    mid, chk = pg.alpaca_option_mid(node, RTH)
-    assert mid is None and "not today" in chk["reason"]
+def test_alpaca_option_leg_is_gone():
+    # 2026-10-23: Alpaca is not a price source; option_mid is Robinhood -> Yahoo -> CBOE only.
+    assert not hasattr(pg, "alpaca_option_mid")
+    import inspect
+    assert "alpaca_node" not in inspect.signature(pg.option_mid).parameters
 
 
 def test_missing_lib_fails_closed(monkeypatch):
@@ -81,12 +80,11 @@ def test_option_mid_0dte_caller_now_before_fetch_is_not_future(monkeypatch):
 def test_option_mid_names_why_robinhood_missed(monkeypatch):
     occ = "SPY261022P00767000"
     monkeypatch.setattr(pg, "_rh_quote_mod", lambda: _FakeRH({}, {occ: "instrument lookup failed (HTTP 401)"}))
+    monkeypatch.setattr(pg, "_option_fallback_mod", lambda: type("O", (), {"LEGS": ()})())   # no network in tests
+    monkeypatch.setattr(pg, "_alert_missing", lambda *a, **k: None)
     mid, chk, src, ex = pg.option_mid(occ, now=RTH)
     assert mid is None and ex["rh_reason"] == "instrument lookup failed (HTTP 401)"
     assert "instrument lookup failed (HTTP 401)" in chk["reason"]
-    node = {"latestQuote": {"bp": 2.4, "ap": 2.48, "t": "2026-10-20T13:59:55Z"}}
-    mid, chk, src, ex = pg.option_mid(occ, now=RTH, alpaca_node=node)
-    assert "not Robinhood" in src and ex["rh_reason"] == "instrument lookup failed (HTTP 401)"
 
 
 def _rhq(ts_iso, bid=1.0, ask=1.2):

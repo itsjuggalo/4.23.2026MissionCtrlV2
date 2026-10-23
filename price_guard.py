@@ -6,7 +6,7 @@ the regular session, 300 s pre/after-hours, today's print only — Mike's decisi
 This module only path-loads it, so the pipeline lib never lands on sys.path. If it
 can't be loaded, every check fails closed — a sender holds the card, it never guesses.
 
-    from price_guard import check, src_label, fresh, option_mid, option_quotes, alpaca_last, alpaca_option_mid
+    from price_guard import check, src_label, fresh, option_mid, option_quotes, alpaca_last
 """
 from __future__ import annotations
 
@@ -127,9 +127,10 @@ def tried_text(tried: list) -> str:
     return "; ".join(f"{t['source']}: {t.get('error') or 'ok'}" for t in tried)
 
 
-def option_mid(occ: str, now: datetime | None = None, alpaca_node: dict | None = None) -> tuple:
-    """Remedial W4 (Mike 10-09 #1): option mid from Robinhood first (lib/rh_quote, read-only), else the Alpaca
-    Yahoo option chain, then CBOE delayed (each labelled, dated, send-guard age rule), then the Alpaca snapshot node (labelled). -> (mid | None, check, src, extras{iv, delta, high, low, rh_reason}).
+def option_mid(occ: str, now: datetime | None = None) -> tuple:
+    """Remedial W4 (Mike 10-09 #1): option mid from Robinhood first (lib/rh_quote, read-only), else the
+    Yahoo option chain, then CBOE delayed (each labelled, dated, send-guard age rule). No Alpaca leg (removed 2026-10-23).
+    -> (mid | None, check, src, extras{iv, delta, high, low, rh_reason, tried}).
     extras["rh_reason"] names why Robinhood was not used (None when it was), so a fallback is never silent.
     A caller's `now` taken before this fetch (a run that started seconds earlier) is not allowed to make a
     fresh Robinhood quote look like it is "from the future" (2026-10-22: the SPY 0DTE scalp cards fell back
@@ -155,11 +156,6 @@ def option_mid(occ: str, now: datetime | None = None, alpaca_node: dict | None =
         return fq["mid"], fchk, src_label(fq["label"], ts), {"bid": fq["bid"], "ask": fq["ask"], "rh_reason": rh_reason,
                                                              "provider": fq["provider"], "as_of": fq["as_of"],
                                                              "as_of_et": fq["as_of_et"], "tried": tried}
-    if alpaca_node:
-        mid, chk = alpaca_option_mid(alpaca_node, now=now)
-        lq = alpaca_node.get("latestQuote") or {}
-        return mid, chk, src_label("Alpaca (not Robinhood)", lq.get("t")), {"bid": lq.get("bp"), "ask": lq.get("ap"),
-                                                                           "rh_reason": rh_reason}
     if stale is None and OCC_RE.match(occ or "") and not _expired(occ, now):
         _alert_missing(f"option mark {occ}", tried)   # every source failed: loud, once per day
     return None, {"ok": False, "reason": "UNAVAILABLE - " + tried_text(tried), "age_s": None, "hhmm": None,
@@ -276,13 +272,3 @@ def alpaca_last(node: dict | None, now: datetime | None = None) -> tuple:
     t = (node or {}).get("latestTrade") or {}
     chk = check(t.get("t"), t.get("p"), now=now)
     return (float(t["p"]) if chk["ok"] else None), chk
-
-
-def alpaca_option_mid(node: dict | None, now: datetime | None = None) -> tuple:
-    """(mid, check) from an Alpaca option snapshot's latestQuote (bid/ask midpoint, one-sided
-    falls back to the side present). mid is None unless the quote passes the same age rule."""
-    q = (node or {}).get("latestQuote") or {}
-    bp, ap = q.get("bp"), q.get("ap")
-    mid = round((bp + ap) / 2, 2) if (bp and ap) else (ap or bp or None)
-    chk = check(q.get("t"), mid, now=now)
-    return (mid if chk["ok"] else None), chk
