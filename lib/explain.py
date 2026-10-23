@@ -7,7 +7,7 @@ Public:
     tier(alert)            'T1'|'T2'|'T3'  (size/aggression)
     conviction(alert)      0-10 float
     what_this_means(alert) plain-English read
-    how_to_play(alert)     exit doctrine (no sizing: DECISIONS R32, 2026-10-23)
+    how_to_play(alert)     exit levels from levels.v1 (TP1 / SL with method, source, as_of) — no sizing (R32)
     contract_label(alert)  'NVDA $205C 8/21'
     card_spec(alert, iv)   dict ready for chart_renderer.pick_card
 """
@@ -105,13 +105,29 @@ def what_this_means(a) -> str:
     return (f"{size} of {side} {instrument} — {fresh}. {how.capitalize()}. {urgency}.")
 
 
+def _exit_levels(a) -> str | None:
+    try:
+        import sys as _sys
+        from pathlib import Path as _P
+        _sys.path.insert(0, str(_P(__file__).resolve().parents[1]))
+        import levels_block as LB
+        return LB.exit_line(str(a.get("Symbol", a.get("symbol", ""))).upper(),
+                            str(a.get("OptionType", a.get("option_type", ""))), _f(a, "DTE", "dte"))
+    except Exception:  # noqa: BLE001 — no engine = no exit line, never a guessed one
+        return None
+
+
 def how_to_play(a, iv=None) -> str:
     bull = _is_bullish(a)
     dte = int(_f(a, "DTE", "dte"))
     bits = []                                  # R32: no position size or risk cap on any card
     if dte <= 1:
         bits.append("0DTE = confirmation, not an entry")
-    bits.append("exit 50-100% / cut at -50%")
+    # 2026-10-23 (R32): the fixed "exit 50-100% / cut at -50%" rule is gone. The exit is the underlying's computed
+    # levels.v1 TP1 / SL with method + source + as_of; no computed level → no exit line (never an invented one).
+    ex = _exit_levels(a)
+    if ex:
+        bits.append(ex)
     if iv is not None:
         try:
             if float(iv) >= 70:
