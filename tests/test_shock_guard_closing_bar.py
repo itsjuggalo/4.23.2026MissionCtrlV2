@@ -34,12 +34,13 @@ def _bars_with_bell_spike():
 
 def _patch(monkey_env, exclude):
     sg.EXCLUDE_CLOSING_BAR = exclude
-    sg._secret = lambda name: "x"
-    sg._get = lambda *a, **k: {"bars": _bars_with_bell_spike()}
+    # f38f7ded2 (merged a33e8a3e4) removed the Alpaca bars read: SPY bars now come from _yahoo_spy_bars.
+    sg._yahoo_spy_bars = lambda host="query1": _bars_with_bell_spike()
 
 
 def test_bell_spike_dominates_when_flag_off():
     _prev = sg.EXCLUDE_CLOSING_BAR
+    _orig = sg._yahoo_spy_bars
     try:
         _patch(os.environ, exclude=False)
         r = sg.check_spy_z()
@@ -47,10 +48,12 @@ def test_bell_spike_dominates_when_flag_off():
         assert r["last_ret_pct"] < -4.0            # the -5% auction bar is the latest return
     finally:
         sg.EXCLUDE_CLOSING_BAR = _prev
+        sg._yahoo_spy_bars = _orig
 
 
 def test_bell_spike_excluded_when_flag_on():
     _prev = sg.EXCLUDE_CLOSING_BAR
+    _orig = sg._yahoo_spy_bars
     try:
         _patch(os.environ, exclude=True)
         r = sg.check_spy_z()
@@ -58,3 +61,4 @@ def test_bell_spike_excluded_when_flag_on():
         assert abs(r["last_ret_pct"]) < 1.0        # spike removed -> latest return is quiet
     finally:
         sg.EXCLUDE_CLOSING_BAR = _prev
+        sg._yahoo_spy_bars = _orig
