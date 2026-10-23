@@ -118,4 +118,4 @@ def test_option_quotes_rh_down_fails_to_caller(monkeypatch):
         raise OSError("no token")
     monkeypatch.setattr(pg, "_rh_quote_mod", boom)
     q = pg.option_quotes(["A"], now=RTH)
-    assert not q["A"]["ok"] and q["A"]["reason"] == "Robinhood unavailable (OSError)"
+    assert not q["A"]["ok"] and "Robinhood unavailable (OSError)" in q["A"]["reason"]   # chain reason names every source tried (2026-10-23)

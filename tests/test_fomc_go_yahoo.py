@@ -30,6 +30,7 @@ class Tape(unittest.TestCase):
         self.assertNotIn("data.alpaca.markets", src)
         self.assertNotIn("alpaca-boba", src)
         with mock.patch.object(m, "moves_since_2pm", lambda: {"SPY": 0.1}):
+            m._AS_OF.clear()   # module-global: other tests in this file leave newer as_of values behind
             m._AS_OF["SPY"] = "2026-10-22T19:00:00Z"
             msg, _ = m.build(False)
         self.assertIn("src Yahoo 1-min bars, not Robinhood, as of 15:00 ET", msg)

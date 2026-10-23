@@ -12,6 +12,7 @@ from __future__ import annotations
 
 import importlib.util
 import os
+import re
 from datetime import datetime, timezone
 from zoneinfo import ZoneInfo
 
@@ -51,9 +52,84 @@ def fresh(symbols, now: datetime | None = None) -> dict:
     return QC.require_fresh(syms, now=now)
 
 
+_OF = None
+_MD = None
+OCC_RE = re.compile(r"^[A-Z]{1,6}\d{6}[CP]\d{8}$")
+
+
+def _option_fallback_mod():
+    """lib/option_fallback loaded by file path (same reason as rh_quote: the pipeline has its own `lib`)."""
+    global _OF
+    if _OF is None:
+        spec = importlib.util.spec_from_file_location("pg_option_fallback", os.path.join(
+            os.path.dirname(os.path.abspath(__file__)), "lib", "option_fallback.py"))
+        _OF = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(_OF)
+    return _OF
+
+
+def _missing_data_mod():
+    global _MD
+    if _MD is None:
+        spec = importlib.util.spec_from_file_location("pg_missing_data", os.path.join(
+            os.path.dirname(QUOTE_CLIENT), "missing_data.py"))
+        _MD = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(_MD)
+    return _MD
+
+
+def _alert_missing(input_name: str, tried: list) -> None:
+    """Loud missing-data alert (ops lane + Data Health state), once per input per ET day. TG_DRY_RUN=1 renders only."""
+    try:
+        _missing_data_mod().alert_missing(input_name, tried, dry_run=os.environ.get("TG_DRY_RUN") == "1")
+    except Exception as e:  # noqa: BLE001 - an alert failure never breaks a sender; it is printed
+        print(f"[price_guard] missing-data alert failed: {type(e).__name__}")
+
+
+def _expired(occ: str, now: datetime | None = None) -> bool:
+    try:
+        exp = datetime.strptime(occ[-15:-9], "%y%m%d").date()
+    except ValueError:
+        return False
+    return exp < (now or datetime.now(timezone.utc)).astimezone(ET).date()
+
+
+def fallback_mark(occ: str, rh_reason: str, now: datetime | None = None) -> tuple:
+    """Robinhood had no quote: Yahoo option chain, then CBOE delayed (lib/option_fallback), each labelled and dated.
+    -> (quote | None, check | None, tried[{source, error}], stale | None).  quote passed the send-guard age rule for
+    `now`; `stale` is the first leg that answered but was too old (shown by display callers, never used by senders).
+    Nothing answered at all -> quote None and stale None: that is the missing-data case (caller raises the alert)."""
+    tried = [{"source": "Robinhood", "error": rh_reason}]
+    if not re.match(r"^[A-Z]{1,6}\d{6}[CP]\d{8}$", occ or ""):
+        tried.append({"source": "Yahoo/CBOE", "error": "not an OCC symbol"})
+        return None, None, tried, None
+    if _expired(occ, now):
+        tried.append({"source": "Yahoo/CBOE", "error": "contract expired - nothing to price"})
+        return None, None, tried, None
+    of = _option_fallback_mod()
+    stale = None
+    chk = None
+    for name, leg in of.LEGS:
+        q, why = leg(occ)
+        if q is None:
+            tried.append({"source": name, "error": why})
+            continue
+        ts = datetime.fromtimestamp(q["as_of"], timezone.utc).isoformat()
+        chk = check(ts, q["mid"], now=now)
+        if chk["ok"]:
+            return q, chk, tried + [{"source": name, "ok": True}], None
+        tried.append({"source": name, "error": f"too old for a sender: {chk['reason']}"})
+        stale = stale or {**q, "check": chk}
+    return None, chk, tried, stale
+
+
+def tried_text(tried: list) -> str:
+    return "; ".join(f"{t['source']}: {t.get('error') or 'ok'}" for t in tried)
+
+
 def option_mid(occ: str, now: datetime | None = None, alpaca_node: dict | None = None) -> tuple:
     """Remedial W4 (Mike 10-09 #1): option mid from Robinhood first (lib/rh_quote, read-only), else the Alpaca
-    snapshot node (labelled "not Robinhood"). -> (mid | None, check, src, extras{iv, delta, high, low, rh_reason}).
+    Yahoo option chain, then CBOE delayed (each labelled, dated, send-guard age rule), then the Alpaca snapshot node (labelled). -> (mid | None, check, src, extras{iv, delta, high, low, rh_reason}).
     extras["rh_reason"] names why Robinhood was not used (None when it was), so a fallback is never silent.
     A caller's `now` taken before this fetch (a run that started seconds earlier) is not allowed to make a
     fresh Robinhood quote look like it is "from the future" (2026-10-22: the SPY 0DTE scalp cards fell back
@@ -73,13 +149,21 @@ def option_mid(occ: str, now: datetime | None = None, alpaca_node: dict | None =
                   "bid": q["bid"], "ask": q["ask"], "rh_reason": None if chk["ok"] else chk.get("reason")}
         return (q["mid"] if chk["ok"] else None), chk, src_label("Robinhood", ts), extras
     rh_reason = diag.get(occ) or "no Robinhood quote"
+    fq, fchk, tried, stale = fallback_mark(occ, rh_reason, now)
+    if fq:
+        ts = datetime.fromtimestamp(fq["as_of"], timezone.utc).isoformat()
+        return fq["mid"], fchk, src_label(fq["label"], ts), {"bid": fq["bid"], "ask": fq["ask"], "rh_reason": rh_reason,
+                                                             "provider": fq["provider"], "as_of": fq["as_of"],
+                                                             "as_of_et": fq["as_of_et"], "tried": tried}
     if alpaca_node:
         mid, chk = alpaca_option_mid(alpaca_node, now=now)
         lq = alpaca_node.get("latestQuote") or {}
         return mid, chk, src_label("Alpaca (not Robinhood)", lq.get("t")), {"bid": lq.get("bp"), "ask": lq.get("ap"),
                                                                            "rh_reason": rh_reason}
-    return None, {"ok": False, "reason": f"no Robinhood quote: {rh_reason}", "age_s": None, "hhmm": None,
-                  "window": None}, None, {"rh_reason": rh_reason}
+    if stale is None and OCC_RE.match(occ or "") and not _expired(occ, now):
+        _alert_missing(f"option mark {occ}", tried)   # every source failed: loud, once per day
+    return None, {"ok": False, "reason": "UNAVAILABLE - " + tried_text(tried), "age_s": None, "hhmm": None,
+                  "window": None}, None, {"rh_reason": rh_reason, "tried": tried, "stale": stale}
 
 
 _RQ = None
@@ -117,7 +201,8 @@ def option_quotes(occs, now: datetime | None = None, mode: str = "live") -> dict
     mode "live":  check() — today's quote within the send-guard age (gating at decision time).
     mode "close": the quote must be from last_session_day() (a nightly closing mark).
     -> {occ: {ok, mid, bid, ask, as_of (epoch), as_of_et, provider, src, reason}}. mid is None unless ok.
-    A contract Robinhood cannot price gets ok False, provider None — the caller's labelled fallback decides."""
+    A contract Robinhood cannot price falls to Yahoo, then CBOE delayed (labelled, dated). Every source failing gives
+    ok False, provider None and a reason naming all of them (plus one loud missing-data alert)."""
     occs = list(dict.fromkeys(o for o in (occs or []) if o))
     try:
         rq = _rh_quote_mod().rh_quotes(occs)
@@ -127,12 +212,22 @@ def option_quotes(occs, now: datetime | None = None, mode: str = "live") -> dict
         err = "Robinhood could not price it"
     day = last_session_day(now) if mode == "close" else None
     out = {}
+    missing: list = []
     for occ in occs:
         q = rq.get(occ)
+        provider, label = "robinhood", "Robinhood"
+        tried = None
         if not q:
-            out[occ] = {"ok": False, "mid": None, "bid": None, "ask": None, "as_of": None, "as_of_et": None,
-                        "provider": None, "src": None, "reason": err}
-            continue
+            fq, _fchk, tried, stale = fallback_mark(occ, err, now)
+            if fq is None and stale is not None:   # answered but too old for the live gate; a "close" mark may still be dated right
+                fq = stale
+            if fq is None:
+                if mode == "live" and OCC_RE.match(occ or "") and not _expired(occ, now):
+                    missing.append(occ)
+                out[occ] = {"ok": False, "mid": None, "bid": None, "ask": None, "as_of": None, "as_of_et": None,
+                            "provider": None, "src": None, "reason": "UNAVAILABLE - " + tried_text(tried), "tried": tried}
+                continue
+            q, provider, label = fq, fq["provider"], fq["label"]
         ts = datetime.fromtimestamp(q["as_of"], timezone.utc).isoformat()
         if mode == "close":
             qd = datetime.fromtimestamp(q["as_of"], ET).date()
@@ -142,8 +237,13 @@ def option_quotes(occs, now: datetime | None = None, mode: str = "live") -> dict
             chk = check(ts, q["mid"], now=now)
             ok, reason = chk["ok"], chk["reason"]
         out[occ] = {"ok": ok, "mid": q["mid"] if ok else None, "bid": q["bid"], "ask": q["ask"], "as_of": q["as_of"],
-                    "as_of_et": q.get("as_of_et"), "provider": "robinhood", "src": src_label("Robinhood", ts),
-                    "reason": reason}
+                    "as_of_et": q.get("as_of_et"), "provider": provider, "src": src_label(label, ts),
+                    "reason": reason, **({"tried": tried} if tried else {})}
+        if not ok and tried:   # a fallback leg answered but is too old: name every source in the reason
+            out[occ]["reason"] = f"{reason} ({tried_text(tried)})"
+    if missing:   # one loud alert per call (and per ET day) naming each contract + every source tried
+        _alert_missing("option marks (no source answered)", [
+            {"source": f"{o} via {t['source']}", "error": t.get("error")} for o in missing for t in out[o]["tried"]])
     return out
 
 
