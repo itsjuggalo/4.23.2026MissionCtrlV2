@@ -474,7 +474,9 @@ CHARTER = {
         fleet="system_health",
         owns=["DEAD / heal-failed / cron-failure alerts (gated)",
               "MISSING DATA alerts: every free source of a required input failed (market-data §3; "
-              "missionctrl pipeline/decision/lib/missing_data.py, once per input per ET day)"],
+              "missionctrl pipeline/decision/lib/missing_data.py, once per input per ET day)",
+              "nightly check summary, report only (missionctrl pipeline/ops/nightly_check.py, 05:30 ET weekdays; "
+              "Mike 2026-10-22)"],
         never=["routine OK pings"],
         cadence="06:45 ET daily", cadence_min=24 * 60,
         reads=[
