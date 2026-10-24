@@ -663,6 +663,34 @@ def set_token(fn, tok):
         con.close()
 
 
+_LIB_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), "lib")
+_LIB_DEPS = {"tg_digest": ("tg_ledger",)}     # helpers that import another helper as lib.<name> inside a function
+
+
+def _lib(name):
+    """~/scripts/lib/<name>.py by file path (2026-10-23). A process with MissionCtrl pipeline/ or pipeline/decision/ on
+    sys.path resolves `lib` to MissionCtrl's regular package, which hides this namespace dir, so a plain
+    `from lib.<name> import …` missed: the ledger and tg_lint silently skipped and send() raised on tg_split. Registered
+    as `lib.<name>` so the helpers' own `from lib.tg_ledger import …` finds this same module; reused when the normal
+    import already loaded this file. Raises like an import would."""
+    key, path = f"lib.{name}", os.path.join(_LIB_DIR, f"{name}.py")
+    for dep in _LIB_DEPS.get(name, ()):
+        _lib(dep)
+    m = sys.modules.get(key)
+    if m is not None and os.path.realpath(getattr(m, "__file__", "") or "") == os.path.realpath(path):
+        return m
+    import importlib.util
+    spec = importlib.util.spec_from_file_location(key, path)
+    m = importlib.util.module_from_spec(spec)
+    sys.modules[key] = m
+    try:
+        spec.loader.exec_module(m)
+    except BaseException:
+        sys.modules.pop(key, None)
+        raise
+    return m
+
+
 def _strip_html(msg):
     """Plain-text fallback for an HTML-mode message Telegram refused to parse."""
     import html as _html, re as _re
@@ -672,9 +700,7 @@ def _strip_html(msg):
 def _ledger(fn, text, ok, html=False):
     """Passive send record (lib/tg_ledger.py) — never affects the send. (2026-09-28)"""
     try:
-        sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
-        from lib.tg_ledger import record
-        record(fn, text, ok, html=html)
+        _lib("tg_ledger").record(fn, text, ok, html=html)
     except Exception:
         pass
 
@@ -688,16 +714,13 @@ def send(fn, msg, html=False):
     if os.environ.get("TG_DRY_RUN") == "1":   # render only (MC-AUD-084): nothing sent, queued or recorded
         return _dry(fn, msg)
     try:   # FYI pushes fold into the next digest (lib/tg_digest.py) — 2026-09-28
-        sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
-        from lib.tg_digest import intercept
-        if intercept(fn, msg, html):
+        if _lib("tg_digest").intercept(fn, msg, html):
             print("queued for digest (accepted; delivered at the next digest slot)")
             return 0
     except Exception:
         pass
     try:   # pre-send review (lib/tg_lint.py): hold exact repeats + broken renders, strip internal ids.
-        from lib.tg_lint import review   # fail-open by design — 2026-10-08 TG audit
-        reviewed, notes = review(fn, msg)
+        reviewed, notes = _lib("tg_lint").review(fn, msg)   # fail-open by design — 2026-10-08 TG audit
         if reviewed is None:
             print(f"held by pre-send review: {'; '.join(notes)}")
             return 0
@@ -723,8 +746,7 @@ def send(fn, msg, html=False):
                 return {"ok": False, "description": str(e)}
         except Exception as e:
             return {"ok": False, "description": str(e)}
-    sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
-    from lib.tg_split import chunks   # >4096 used to fail outright ("message is too long") — 2026-09-28
+    chunks = _lib("tg_split").chunks   # >4096 used to fail outright ("message is too long") — 2026-09-28
     ok, why = True, ""
     for part in chunks(msg):
         r = _post(part, "HTML" if html else None)
@@ -751,9 +773,7 @@ def call(fn, method, **params):
     text = params.get("text") if method == "sendMessage" else None
     if isinstance(text, str) and review_it:
         try:   # same pre-send review as send(); fail-open by design
-            sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
-            from lib.tg_lint import review
-            reviewed, notes = review(fn, text)
+            reviewed, notes = _lib("tg_lint").review(fn, text)
             if reviewed is None:
                 print(f"held by pre-send review: {'; '.join(notes)}")
                 return {"ok": True, "result": {"message_id": 0}, "held": True}
@@ -854,9 +874,7 @@ def send_upload(fn, path, caption="", as_doc=False, html=False, extra=None, anim
 def _upload_lane(fn, path=""):
     """FYI charts / over-cap sources → the digest bot (lib/tg_digest.upload_lane). Fail-open: the lane is unchanged."""
     try:
-        sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
-        from lib.tg_digest import upload_lane
-        return route(upload_lane(fn, path))
+        return route(_lib("tg_digest").upload_lane(fn, path))
     except Exception:
         return fn
 
