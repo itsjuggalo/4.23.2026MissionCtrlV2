@@ -45,13 +45,16 @@ def log(m):
 
 
 def telegram(msg):
+    """Plain-text status ping as lane trading_command (@oOLaptopClaude_Bot — the token this used) through tg_fleet.call:
+    pinned bot, Mike's chat, ledgered; no tg_lint hold, same text (script-standard #6, 2026-10-23)."""
     try:
-        tok = (SECRETS / "telegram_laptopclaude_bot_token").read_text().strip()
-        cid  = (SECRETS / "telegram-chat-id.txt").read_text().strip()
-        import urllib.request, urllib.parse
-        data = urllib.parse.urlencode({"chat_id": cid, "text": msg}).encode()
-        urllib.request.urlopen(
-            f"https://api.telegram.org/bot{tok}/sendMessage", data=data, timeout=15)
+        cid = (SECRETS / "telegram-chat-id.txt").read_text().strip()
+        import sys as _sys
+        _sys.path.insert(0, str(Path.home() / "scripts"))
+        import tg_fleet
+        r = tg_fleet.call("trading_command", "sendMessage", chat_id=cid, text=msg, _review=False)
+        if not r.get("ok"):
+            log(f"telegram failed: {r.get('description')}")
     except Exception as e:
         log(f"telegram failed: {e}")
 

@@ -9,13 +9,9 @@ Used by life-engine-run.py (brief cards + quick-action buttons) and bodywork_qui
 """
 from __future__ import annotations
 
-import json
-import mimetypes
 import os
 import subprocess
 import sys
-import urllib.request
-import uuid
 from pathlib import Path
 
 SEC = Path.home() / ".openclaw" / "secrets"
@@ -46,24 +42,6 @@ def _chat(chat: str | None = None) -> str | None:
     return None
 
 
-def _multipart(fields: dict, file_field: str, file_path: str) -> tuple[bytes, str]:
-    boundary = "----mc" + uuid.uuid4().hex
-    nl = b"\r\n"
-    buf = []
-    for k, v in fields.items():
-        buf += [b"--" + boundary.encode() + nl,
-                f'Content-Disposition: form-data; name="{k}"'.encode() + nl + nl,
-                str(v).encode() + nl]
-    fn = os.path.basename(file_path)
-    ctype = mimetypes.guess_type(fn)[0] or "application/octet-stream"
-    buf += [b"--" + boundary.encode() + nl,
-            f'Content-Disposition: form-data; name="{file_field}"; filename="{fn}"'.encode() + nl,
-            f"Content-Type: {ctype}".encode() + nl + nl,
-            Path(file_path).read_bytes() + nl,
-            b"--" + boundary.encode() + b"--" + nl]
-    return b"".join(buf), boundary
-
-
 def send_card_with_buttons(media_path: str, caption: str, buttons: list | None = None, *,
                            fn: str = "life_wellness", chat: str | None = None,
                            animation: bool = False, silent: bool = False) -> bool:
@@ -72,20 +50,20 @@ def send_card_with_buttons(media_path: str, caption: str, buttons: list | None =
     chat = _chat(chat)
     if not tok or not chat or not media_path or not os.path.exists(media_path):
         return False
-    method = "sendAnimation" if animation else "sendPhoto"
-    file_field = "animation" if animation else "photo"
-    fields = {"chat_id": chat, "caption": (caption or "")[:1024], "parse_mode": "HTML"}
+    # tg_fleet.send_upload as lane `fn` (pinned bot, ledgered) — script-standard #6, 2026-10-23 (was a raw multipart
+    # POST with the same token). Same caption, HTML mode, buttons, silent flag and chat.
+    extra = {}
+    if chat != _chat(None):
+        extra["chat_id"] = chat
     if silent:
-        fields["disable_notification"] = "true"
+        extra["disable_notification"] = "true"
     if buttons:
-        fields["reply_markup"] = json.dumps({"inline_keyboard": buttons})
-    body, boundary = _multipart(fields, file_field, media_path)
-    req = urllib.request.Request(
-        f"https://api.telegram.org/bot{tok}/{method}", data=body, method="POST",
-        headers={"Content-Type": f"multipart/form-data; boundary={boundary}"})
+        extra["reply_markup"] = {"inline_keyboard": buttons}
     try:
-        with urllib.request.urlopen(req, timeout=60) as r:
-            return json.loads(r.read()).get("ok", False)
+        sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
+        import tg_fleet
+        rc = tg_fleet.send_upload(fn, media_path, (caption or "")[:1024], html=True, extra=extra, animation=animation)
+        return rc == 0 and os.environ.get("TG_DRY_RUN") != "1"
     except Exception as e:
-        print(f"[tg_wellness_card] {method} failed: {e}", file=sys.stderr)
+        print(f"[tg_wellness_card] send failed: {e}", file=sys.stderr)
         return False

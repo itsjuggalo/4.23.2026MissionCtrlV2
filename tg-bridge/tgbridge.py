@@ -110,13 +110,16 @@ def send_to_telegram(text, channel_name="discord"):
         "parse_mode": "HTML",
         "disable_web_page_preview": True,
     }
-    try:
-        r = requests.post(f"{TG_API}/sendMessage", json=payload, timeout=10)
-        if r.status_code == 200:
+    try:   # tg_fleet.call as lane flow_signals (the bot telegram-bot-token.txt is; ledgered, no tg_lint hold) — #6
+        import sys
+        sys.path.insert(0, str(Path.home() / "scripts"))
+        import tg_fleet
+        r = tg_fleet.call("flow_signals", "sendMessage", _review=False, **payload)
+        if r.get("ok"):
             logging.info(f"→TG OK from #{channel_name}: {text[:60]}")
             return True
         else:
-            logging.error(f"→TG FAIL {r.status_code}: {r.text[:200]}")
+            logging.error(f"→TG FAIL: {str(r.get('description'))[:200]}")
             return False
     except Exception as e:
         logging.error(f"→TG exception: {e}")

@@ -12,8 +12,6 @@ from __future__ import annotations
 
 import json
 import sqlite3
-import urllib.parse
-import urllib.request
 from pathlib import Path
 
 DB = Path.home() / "portfolio" / "mike.sqlite"
@@ -70,11 +68,15 @@ def _profile_factors(r: dict) -> list[str]:
 
 
 def _tg_api(method: str, **params):
-    token = (SEC / "telegram-bot-token.txt").read_text().strip()
-    data = urllib.parse.urlencode(params).encode()
-    req = urllib.request.Request(f"https://api.telegram.org/bot{token}/{method}", data=data)
-    with urllib.request.urlopen(req, timeout=20) as r:
-        return json.loads(r.read())
+    """Bot API call as lane flow_signals (the bot telegram-bot-token.txt is) through tg_fleet.call — pinned token,
+    ledgered, no tg_lint hold (script-standard #6, 2026-10-23). Raises on a failed call, as the urllib path did."""
+    import sys
+    sys.path.insert(0, str(Path.home() / "scripts"))
+    import tg_fleet
+    r = tg_fleet.call("flow_signals", method, _review=False, **params)
+    if not r.get("ok"):
+        raise RuntimeError(f"telegram {method}: {r.get('description')}")
+    return r
 
 
 def send_decision_buttons(r: dict, decision_id: int) -> bool:

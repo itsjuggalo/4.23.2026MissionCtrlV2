@@ -63,14 +63,12 @@ def send_message(chat_id, text, reply_to=None):
         payload = {"chat_id": chat_id, "text": chunk}
         if reply_to:
             payload["reply_to_message_id"] = reply_to
-        try:
-            r = requests.post(
-                f"https://api.telegram.org/bot{BOT_TOKEN}/sendMessage",
-                json=payload,
-                timeout=15,
-            )
-            if r.ok:
-                last_id = r.json()["result"]["message_id"]
+        try:   # tg_fleet.call as lane quiz (the bot this token is; ledgered, no tg_lint hold) — script-standard #6
+            sys.path.insert(0, str(Path.home() / "scripts"))
+            import tg_fleet
+            r = tg_fleet.call("quiz", "sendMessage", _review=False, **payload)
+            if r.get("ok"):
+                last_id = r["result"]["message_id"]
         except Exception as e:
             print(f"  [send] error: {e}")
     return last_id
@@ -79,11 +77,9 @@ def send_message(chat_id, text, reply_to=None):
 def edit_message(chat_id, message_id, text):
     """Edit an existing Telegram message in-place (rate-limited by caller)."""
     try:
-        requests.post(
-            f"https://api.telegram.org/bot{BOT_TOKEN}/editMessageText",
-            json={"chat_id": chat_id, "message_id": message_id, "text": text[:4096]},
-            timeout=10,
-        )
+        sys.path.insert(0, str(Path.home() / "scripts"))
+        import tg_fleet
+        tg_fleet.call("quiz", "editMessageText", chat_id=chat_id, message_id=message_id, text=text[:4096])
     except Exception as e:
         print(f"  [edit] error: {e}")
 

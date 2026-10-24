@@ -3,7 +3,7 @@
 Erik Dalton transcription progress monitor.
 Runs every 30 min via cron; pings Telegram with status, detects stalls, auto-syncs KB when done.
 """
-import json, os, subprocess, time, urllib.request, urllib.parse
+import json, os, subprocess, time
 from pathlib import Path
 
 HOME = Path.home()
@@ -19,13 +19,16 @@ TOTAL = DVD_TOTAL + MSG_TOTAL
 
 
 def telegram(msg):
+    """Plain-text status ping as lane trading_command (@oOLaptopClaude_Bot — the token this used) through tg_fleet.call:
+    pinned bot, Mike's chat, ledgered; no tg_lint hold, same text (script-standard #6, 2026-10-23)."""
     try:
-        tok = (SECRETS / "telegram_laptopclaude_bot_token").read_text().strip()
         cid = (SECRETS / "telegram-chat-id.txt").read_text().strip()
-        data = urllib.parse.urlencode({"chat_id": cid, "text": msg}).encode()
-        urllib.request.urlopen(
-            f"https://api.telegram.org/bot{tok}/sendMessage", data=data, timeout=15
-        )
+        import sys as _sys
+        _sys.path.insert(0, str(Path.home() / "scripts"))
+        import tg_fleet
+        r = tg_fleet.call("trading_command", "sendMessage", chat_id=cid, text=msg, _review=False)
+        if not r.get("ok"):
+            print(f"telegram failed: {r.get('description')}")
     except Exception as e:
         print(f"telegram failed: {e}")
 

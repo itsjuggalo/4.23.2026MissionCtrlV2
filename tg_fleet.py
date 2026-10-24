@@ -799,10 +799,11 @@ def _resolve(fn):
     return None, fn
 
 
-def send_upload(fn, path, caption="", as_doc=False, html=False, extra=None):
+def send_upload(fn, path, caption="", as_doc=False, html=False, extra=None, animation=False):
     """html=True → caption parsed as Telegram HTML (tg_format output); falls back to a
     stripped plain caption if Telegram rejects the markup (2026-09-16). `extra` = more form fields
-    (reply_markup as a dict → JSON, disable_notification …) for senders that need them (2026-10-23)."""
+    (reply_markup as a dict → JSON, disable_notification …) for senders that need them; animation=True → sendAnimation
+    (2026-10-23)."""
     if not os.path.exists(path):
         print(f"no such file: {path}"); return 1
     fn = _upload_lane(route(fn), path)
@@ -815,6 +816,8 @@ def send_upload(fn, path, caption="", as_doc=False, html=False, extra=None):
     low = path.lower()
     if as_doc:
         method, field = "sendDocument", "document"
+    elif animation:
+        method, field = "sendAnimation", "animation"
     elif low.endswith((".jpg", ".jpeg", ".png", ".webp", ".gif")):
         method, field = "sendPhoto", "photo"
     elif low.endswith((".mp4", ".mov", ".webm", ".mkv")):

@@ -208,6 +208,78 @@ class Bots(unittest.TestCase):
         self.assertEqual((seen["disable_notification"], seen["reply_markup"], seen["caption"]),
                          ("true", '{"k": [1]}', "cap"))
 
+    def _fn(self, path, name, ns):
+        """Exec one top-level function from a file that cannot be imported in a test (threads/discord at import)."""
+        import ast
+        tree = ast.parse(Path(path).read_text())
+        node = next(n for n in tree.body if isinstance(n, ast.FunctionDef) and n.name == name)
+        exec(compile(ast.Module([node], []), str(path), "exec"), ns)
+        return ns[name]
+
+    def test_transcribe_pings_on_trading_command(self):
+        logs = []
+        for f in ("erikdalton_transcribe.py", "vibecoding_transcribe.py", "ct_transcribe_monitor.py",
+                  "ed_transcribe_monitor.py"):
+            src = (SCRIPTS / f).read_text()
+            self.assertNotIn("api.telegram.org", src, f)
+            ns = {"SECRETS": Path.home() / ".openclaw/secrets", "Path": Path, "log": logs.append, "print": logs.append}
+            tg = self._fn(SCRIPTS / f, "telegram", ns)
+            _, out = self.capture(tg, TEXT)
+            self.check(out, "trading_command")
+
+    def test_grok_and_tgbridge(self):
+        import logging
+        ns = {"sys": sys, "Path": Path, "print": print}
+        send = self._fn(SCRIPTS / "bots/grok_telegram.py", "send_message", ns)
+        edit = self._fn(SCRIPTS / "bots/grok_telegram.py", "edit_message", ns)
+        mid, out = self.capture(send, "123", TEXT, reply_to=7)
+        self.assertEqual((mid, self.check(out, "quiz")["reply_to_message_id"]), (0, 7))
+        _, out = self.capture(edit, "123", 9, TEXT)
+        self.assertEqual(self.check(out, "quiz", method="editMessageText")["message_id"], 9)
+        ns = {"Path": Path, "TG_CHAT_ID": "123", "logging": logging}
+        fwd = self._fn(SCRIPTS / "tg-bridge/tgbridge.py", "send_to_telegram", ns)
+        ok, out = self.capture(fwd, TEXT, "flow")
+        self.assertTrue(ok)
+        self.assertEqual(self.check(out, "flow_signals")["parse_mode"], "HTML")
+
+    def test_real_coach_ledger_and_lane_bots(self):
+        lg = load("real_coach_ledger_t", SCRIPTS / "real_coach/ledger.py")
+        kb = {"inline_keyboard": [[{"text": "FOLLOW", "callback_data": "dec:1:follow"}]]}
+        _, out = self.capture(lg._tg_api, "sendMessage", chat_id="123", text=TEXT, reply_markup=json.dumps(kb))
+        self.assertEqual(json.loads(self.check(out, "flow_signals")["reply_markup"]), kb)
+        with mock.patch.dict(os.environ, {"DRY": ""}):
+            lb = load("lane_bots_t", SCRIPTS / "lane_bots.py")
+            lb.DRY = False
+            bot = lb.Bot("crypto_desk")
+            _, out = self.capture(bot.send, TEXT)
+            self.assertEqual(self.check(out, "crypto_desk")["parse_mode"], "HTML")
+
+    def test_wellness_card_animation_with_buttons(self):
+        sys.path.insert(0, str(SCRIPTS))
+        wc = load("tg_wellness_card_t", SCRIPTS / "lib/tg_wellness_card.py")
+        gif = SCRIPTS / "tests" / "_tg_dry.gif"
+        gif.write_bytes(b"GIF89a")
+        seen = {}
+
+        def fake_post(url, data=None, files=None, timeout=None):
+            seen.update(data, method=url.rsplit("/", 1)[1], field=list(files)[0])
+            return mock.Mock(json=lambda: {"ok": True})
+        try:
+            ok, out = self.capture(wc.send_card_with_buttons, str(gif), TEXT, [[{"text": "Done", "callback_data": "x"}]],
+                                   animation=True)
+            self.assertFalse(ok)                      # dry render is never "sent"
+            self.assertIn("DRY life_wellness", out)
+            with mock.patch.dict(os.environ, {"TG_DRY_RUN": "0"}), mock.patch.object(tg_fleet.requests, "post", fake_post), \
+                    mock.patch.object(tg_fleet, "_ledger", lambda *a, **k: None):
+                ok, _ = self.capture(wc.send_card_with_buttons, str(gif), TEXT, [[{"text": "Done", "callback_data": "x"}]],
+                                     animation=True, silent=True)
+        finally:
+            gif.unlink()
+        self.assertTrue(ok)
+        self.assertEqual((seen["method"], seen["field"], seen["caption"], seen["parse_mode"], seen["disable_notification"]),
+                         ("sendAnimation", "animation", TEXT, "HTML", "true"))
+        self.assertEqual(json.loads(seen["reply_markup"])["inline_keyboard"][0][0]["text"], "Done")
+
 
 if __name__ == "__main__":
     unittest.main()

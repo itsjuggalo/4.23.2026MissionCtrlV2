@@ -49,7 +49,9 @@ class Bot:
         if DRY and method not in ("getUpdates", "getMe", "getWebhookInfo"):
             print(f"DRY {self.fn} {method}: {json.dumps(kw)[:400]}")
             return {"ok": True}
-        try:
+        try:   # sends through tg_fleet.call as this lane (pinned bot, ledgered, no tg_lint hold) — script-standard #6
+            if method not in ("getUpdates", "getMe", "getWebhookInfo", "deleteWebhook", "getFile"):
+                return tg_fleet.call(self.fn, method, _review=False, **kw)
             return requests.post(f"https://api.telegram.org/bot{self.tok}/{method}", json=kw,
                                  timeout=kw.get("timeout", 0) + 20).json()
         except Exception as e:  # noqa: BLE001
@@ -67,11 +69,7 @@ class Bot:
             if not r.get("ok") and html_mode and not DRY:
                 kw.pop("parse_mode"); kw["text"] = re.sub(r"<[^>]+>", "", part)
                 self.api("sendMessage", **kw)
-        try:
-            from lib.tg_ledger import record
-            record(self.fn, text, True, html=html_mode, src="lane_bots.py")
-        except Exception:
-            pass
+        # the send ledger row is written by tg_fleet.call per message (2026-10-23; was one row here, always ok=True)
 
 
 def run(cmd: list[str], env: dict | None = None, cwd: str | None = None, timeout: int = 150) -> str:
