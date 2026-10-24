@@ -196,7 +196,7 @@ def render(today: date, events: list[dict], t1: bool) -> tuple[str, bool]:
         else:
             L += ["", "Calendar feed returned nothing — UNAVAILABLE (embedded FOMC/NFP only). "
                       "Verify CPI/PPI/jobless dates manually."]
-    L += ["", "<i>Heads-up only. Don't over-deploy into a high-impact event; size down spec names before it.</i>"]
+    L += ["", "<i>Heads-up only.</i>"]   # R32 (eval 10-23): the old footer told Mike to size down; no size advice
     return "\n".join(L), high_soon
 
 
