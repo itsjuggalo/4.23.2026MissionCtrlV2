@@ -45,11 +45,28 @@ _SENT = re.compile(r"((?<=[.!?;])\s+|\s+[—–]\s+)")
 _PREFIX = re.compile(r"^(\s*(?:[-*•]\s*)?(?:[A-Z][A-Za-z ]{1,20}:\s*)?)")
 
 
-def _hits(s: str) -> list[str]:
-    return [k for k, rx in (("size", SIZE), ("stop", STOP), ("level", LEVEL)) if rx.search(s)]
+_RULES = (("size", SIZE), ("stop", STOP), ("level", LEVEL))
+# "Half-size SPY puts…" → "SPY puts…": a size word used as an adjective goes, the sentence stays.
+SIZE_ADJ = re.compile(r"\b(?:half|quarter|full|small|smaller|reduced|light|starter|partial)[- ]siz(?:e|ed)\s+(?=\w)", re.I)
 
 
-def scrub(text: str) -> tuple[str, list[dict]]:
+def _hits(s: str, only: tuple[str, ...] = ("size", "stop", "level")) -> list[str]:
+    return [k for k, rx in _RULES if k in only and rx.search(s)]
+
+
+def scrub_size(text: str) -> tuple[str, list[dict]]:
+    """Size advice only (eval 10-23): for senders whose levels are already menu-checked, so a stop/level sentence
+    must stay. A size adjective is cut in place ("Half-size SPY puts" → "SPY puts"); any other sentence that sizes a
+    trade is dropped. -> (clean text, removed) like scrub()."""
+    removed = [{"kind": ["size"], "text": m.group(0).strip()} for m in SIZE_ADJ.finditer(text or "")]
+    clean = SIZE_ADJ.sub(lambda m: "", text or "")
+    clean = re.sub(r"(^|(?<=: )|(?<=\. ))([a-z])", lambda m: m.group(1) + m.group(2).upper(), clean, flags=re.M) \
+        if removed else clean
+    clean, more = scrub(clean, only=("size",))
+    return clean, removed + more
+
+
+def scrub(text: str, only: tuple[str, ...] = ("size", "stop", "level")) -> tuple[str, list[dict]]:
     """Drop each sentence that sizes a trade, advises a stop/target or names an invented price level.
     A line whose every sentence goes keeps its label ("PLAN:") with a removal note, so the reader sees the gap.
     -> (clean text, [{kind: [...], text: removed sentence}])."""
@@ -65,7 +82,7 @@ def scrub(text: str) -> tuple[str, list[dict]]:
         keep: list[tuple[str, str]] = []     # (separator before it, sentence)
         for i in range(0, len(parts), 2):
             sent, sep = parts[i], (parts[i - 1] if i else "")
-            kinds = _hits(sent)
+            kinds = _hits(sent, only)
             if kinds:
                 removed.append({"kind": kinds, "text": sent.strip()})
             elif sent.strip():

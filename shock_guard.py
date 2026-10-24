@@ -307,9 +307,9 @@ def alert_blind(reasons: list[str]) -> None:
     try:
         sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
         from lib.notify import tg_push
-        # trading_command, not system_health: system_health is machine health only (2026-09-28)
-        sent = tg_push(text, "trading_command", loud=True,
-                       fallback_token_file="telegram_laptopclaude_bot_token")
+        # flow_signals, the shock_guard lane in the fleet charter (eval 10-23 §17; was trading_command). Not
+        # system_health: that lane is machine health only (2026-09-28).
+        sent = tg_push(text, "flow_signals", loud=True)
     except Exception as e:  # noqa: BLE001
         print(f"[guard] blind-alert send failed: {e}", file=sys.stderr)
     if sent:

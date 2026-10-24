@@ -6,7 +6,7 @@ Pin-mode (AIME-style @): /agent <name> pins a local Claude agent for the chat �
 all messages then run headless `claude -p "/ainvest ..."` on the laptop
 (offline-first copilot, subscription billing). /exit unpins. /ainvest <q> = one-shot.
 """
-import json, os, subprocess, time, secrets, sys, queue, threading
+import json, os, re, subprocess, time, secrets, sys, queue, threading
 from pathlib import Path
 import requests
 
@@ -71,13 +71,13 @@ def ask_local(question: str, agent: str | None = None) -> str:
              "--output-format", "json", "--allowedTools", CLAUDE_TOOLS],
             capture_output=True, text=True, timeout=300, env=env, cwd=CLAUDE_CWD)
         if r.returncode != 0:
-            return f"[copilot error rc={r.returncode}] {r.stderr.strip()[:300]}"
+            return f"[copilot error rc={r.returncode}] {_mask(r.stderr.strip()[:300])}"
         out = json.loads(r.stdout)
         return (out.get("result") or "").strip() or "[copilot returned empty]"
     except subprocess.TimeoutExpired:
         return "[copilot timeout after 300s]"
     except Exception as e:
-        return f"[copilot error] {e}"
+        return f"[copilot error] {_mask(e)}"
 
 def download_photo(file_id: str) -> str | None:
     """Telegram getFile -> download the largest photo to /tmp. Returns local path or None."""
@@ -95,7 +95,7 @@ def download_photo(file_id: str) -> str | None:
         dest.write_bytes(r.content)
         return str(dest)
     except Exception as e:
-        print(f"download_photo err: {e}", flush=True)
+        print(f"download_photo err: {_mask(e)}", flush=True)
         return None
 
 def ask_local_image(img_path: str, caption: str = "") -> str:
@@ -113,13 +113,13 @@ def ask_local_image(img_path: str, caption: str = "") -> str:
              "--output-format", "json", "--allowedTools", CLAUDE_TOOLS],
             capture_output=True, text=True, timeout=900, env=env, cwd=CLAUDE_CWD)
         if r.returncode != 0:
-            return f"[decipher error rc={r.returncode}] {r.stderr.strip()[:300]}"
+            return f"[decipher error rc={r.returncode}] {_mask(r.stderr.strip()[:300])}"
         out = json.loads(r.stdout)
         return (out.get("result") or "").strip() or "[decipher returned empty]"
     except subprocess.TimeoutExpired:
         return "[decipher timeout after 900s — try a tighter crop of just the chain]"
     except Exception as e:
-        return f"[decipher error] {e}"
+        return f"[decipher error] {_mask(e)}"
 
 # Serial background worker: decipher runs ~5-10 min; queue keeps the poll loop
 # responsive and runs ONE claude subprocess at a time (RAM-safe on this box).
@@ -133,14 +133,23 @@ def _photo_worker():
             send_reply(chat_id, answer)
             print(f"[{chat_id}] A(decipher): {len(answer)} chars", flush=True)
         except Exception as e:
-            tg("sendMessage", chat_id=chat_id, text=f"⚠️ decipher error: {e}")
-            print(f"[{chat_id}] decipher ERR: {e}", flush=True)
+            tg("sendMessage", chat_id=chat_id, text=f"⚠️ decipher error: {_mask(e)}")
+            print(f"[{chat_id}] decipher ERR: {_mask(e)}", flush=True)
         finally:
             try:
                 os.remove(img)
             except OSError:
                 pass
             PHOTO_Q.task_done()
+
+
+_TOKEN_RE = re.compile(r"bot\d+:[\w-]+|\b\d{8,10}:AA[\w-]{30,}")
+
+
+def _mask(x) -> str:
+    """Never let the bot token reach a log line or a chat (requests errors carry the URL /bot<token>/…). 2026-10-23."""
+    return _TOKEN_RE.sub("bot<redacted>", str(x))
+
 
 RECEIVE = ("getUpdates", "deleteWebhook", "getFile", "getMe")   # receiving stays a direct poll; every send goes through tg_fleet
 
@@ -214,7 +223,7 @@ def main():
             data = tg("getUpdates", req_timeout=35, offset=offset, timeout=25,
                       allowed_updates=["message"])
             if not data.get("ok"):
-                print(f"getUpdates not ok: {data}", flush=True)
+                print(f"getUpdates not ok: {_mask(data)}", flush=True)
                 time.sleep(5)
                 continue
 
@@ -320,12 +329,12 @@ def main():
                     send_reply(chat_id, answer)
                     print(f"[{chat_id}] A({via}): {len(answer)} chars", flush=True)
                 except Exception as e:
-                    err = f"⚠️ bot error: {e}"
+                    err = f"⚠️ bot error: {_mask(e)}"
                     tg("sendMessage", chat_id=chat_id, text=err)
-                    print(f"[{chat_id}] ERR: {e}", flush=True)
+                    print(f"[{chat_id}] ERR: {_mask(e)}", flush=True)
 
         except Exception as e:
-            print(f"Poll loop error: {e}", flush=True)
+            print(f"Poll loop error: {_mask(e)}", flush=True)
             time.sleep(5)
 
 if __name__ == "__main__":

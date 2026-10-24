@@ -576,7 +576,10 @@ def _tg_send_html(text: str, chain=("flow_digest", "daily_briefs")) -> str | Non
         try:
             r = subprocess.run([PY, FLEET, "sendhtml", fn, body],
                                capture_output=True, text=True, timeout=30)
-            if r.returncode == 0 and "sent" in (r.stdout or ""):
+            # exit 0 = accepted: "sent", "queued for digest" (folded into the next digest) or "held by pre-send review".
+            # Waiting for the word "sent" made a queued scorecard fall through to the next bot — it arrived twice
+            # (eval 10-23 §15). A real failure exits 1 and still falls back.
+            if r.returncode == 0:
                 return fn
         except Exception:
             continue
