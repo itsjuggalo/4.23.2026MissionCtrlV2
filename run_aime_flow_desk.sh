@@ -18,4 +18,6 @@ flock -n 9 || { echo "[$(date -Is)] skip ${MODE}: still running" >>"$LOG"; exit 
 unset ANTHROPIC_API_KEY
 echo "[$(date -Is)] aime_flow_desk ${MODE} start" >>"$LOG"
 timeout 150 /usr/bin/python3 "$SCRIPT" "$MODE" --post >>"$LOG" 2>&1
-echo "[$(date -Is)] aime_flow_desk ${MODE} exit=$?" >>"$LOG"
+RC=$?
+echo "[$(date -Is)] aime_flow_desk ${MODE} exit=$RC" >>"$LOG"
+exit "$RC"   # fail loud (script-standard #10, 2026-10-23): was always 0 (the echo's status), so hb-run never went red

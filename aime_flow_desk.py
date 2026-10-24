@@ -314,7 +314,7 @@ def main() -> int:
 
     if (a.post and not a.dry) and not ensure_aime_alive():
         print("AIME cookie dead — alerted, skipping post")
-        return 0
+        return 3          # fail loud (script-standard #10, 2026-10-23): the required input is down → hb-run red
 
     if instant:
         flows = t0_flows(d)
@@ -340,8 +340,9 @@ def main() -> int:
         print(msg)
         return 0
     n = post_discord(msg)
-    print(f"posted {n} chunk(s) to flow-alerts")
-    return 0
+    want = (len(msg) + 1899) // 1900
+    print(f"posted {n}/{want} chunk(s) to flow-alerts")
+    return 0 if n == want else 1      # a lost chunk is a failed send, not a success (script-standard #10)
 
 
 if __name__ == "__main__":
