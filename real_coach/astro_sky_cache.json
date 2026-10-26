@@ -1,15 +1,15 @@
 {
  "meta": {
   "schema_version": 2,
-  "generated_at": "2026-10-19T08:30:05-04:00",
+  "generated_at": "2026-10-26T08:30:05-04:00",
   "source": "astro_sky._build_cache (Swiss Ephemeris)",
   "timezone": "America/New_York",
   "code_hash": "fc8f83d18ad4",
-  "valid_until": "2026-10-26T08:30:05-04:00"
+  "valid_until": "2026-11-02T08:30:05-05:00"
  },
- "generated": "2026-10-19",
- "range_start": "2026-10-18",
- "range_end": "2027-11-22",
+ "generated": "2026-10-26",
+ "range_start": "2026-10-25",
+ "range_end": "2027-11-29",
  "lunations": [
   {
    "date_et": "2026-10-26T00:12-04:00",
@@ -351,6 +351,21 @@
      "orb": 0.91
     }
    ]
+  },
+  {
+   "date_et": "2027-11-27T22:24-05:00",
+   "kind": "new",
+   "lon": 245.6533,
+   "sign": "Sagittarius",
+   "deg": 5,
+   "house": 5,
+   "natal_hits": [
+    {
+     "natal": "Mercury",
+     "aspect": "conjunct",
+     "orb": 0.47
+    }
+   ]
   }
  ],
  "eclipses": [
@@ -435,15 +450,6 @@
   }
  ],
  "stations": [
-  {
-   "date_et": "2026-10-24T03:13-04:00",
-   "body": "Mercury",
-   "kind": "retrograde",
-   "lon": 230.979,
-   "sign": "Scorpio",
-   "deg": 20,
-   "house": 4
-  },
   {
    "date_et": "2026-11-13T10:54-05:00",
    "body": "Mercury",
@@ -644,24 +650,6 @@
   }
  ],
  "ingresses": [
-  {
-   "date_et": "2026-10-23T05:38-04:00",
-   "body": "Sun",
-   "retro": false,
-   "lon": 210,
-   "sign": "Scorpio",
-   "deg": 0,
-   "house": 4
-  },
-  {
-   "date_et": "2026-10-25T05:10-04:00",
-   "body": "Venus",
-   "retro": true,
-   "lon": 209.999,
-   "sign": "Libra",
-   "deg": 29,
-   "house": 4
-  },
   {
    "date_et": "2026-11-22T02:23-05:00",
    "body": "Sun",
@@ -1133,6 +1121,33 @@
   {
    "date_et": "2027-11-22T08:16-05:00",
    "body": "Sun",
+   "retro": false,
+   "lon": 240,
+   "sign": "Sagittarius",
+   "deg": 0,
+   "house": 5
+  },
+  {
+   "date_et": "2027-11-25T06:59-05:00",
+   "body": "Venus",
+   "retro": false,
+   "lon": 270,
+   "sign": "Capricorn",
+   "deg": 0,
+   "house": 6
+  },
+  {
+   "date_et": "2027-11-25T13:38-05:00",
+   "body": "Mars",
+   "retro": false,
+   "lon": 270,
+   "sign": "Capricorn",
+   "deg": 0,
+   "house": 6
+  },
+  {
+   "date_et": "2027-11-29T05:24-05:00",
+   "body": "Mercury",
    "retro": false,
    "lon": 240,
    "sign": "Sagittarius",
