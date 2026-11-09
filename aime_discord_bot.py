@@ -746,7 +746,7 @@ HELP_TEXT = (
     "`/flowpicks` ranked flow · `/signals` source liveness\n\n"
     "**🐳 Flow intel (instant, no AI)**\n"
     "`/contracts <ticker|company>` every contract seen across Firebase/flow/UW/scrapers/decipher · "
-    "`/intel <t>` one-screen · `/flow <t>` · `/tide` · `/hot` · `/gex <t>` · `/oi <t>` · `/iv <t>` · "
+    "`/intel <t>` one-screen · `/flow [t] [type: huge/unusual/repeated/weekly/etf/live] [channel] [min/max premium] [days]` · `/tide` · `/hot` · `/gex <t>` · `/oi <t>` · `/iv <t>` · "
     "`/darkpool <t>` · `/uw <t>` · `/sweeps` · `/odte` · `/winners`\n\n"
     "**👁️ Watchlist** (feeds your scheduled intel)\n"
     "`/watch <t>` · `/unwatch <t>` · `/watchlist`\n\n"
@@ -907,10 +907,48 @@ async def contracts_cmd(interaction: discord.Interaction, query: str, type: Opti
     await _intel(interaction, *args)
 
 
-@tree.command(name="flow", description="Session options flow for a ticker: premium, net premium, top prints")
-@app_commands.describe(ticker="ticker or company name")
-async def flow_cmd(interaction: discord.Interaction, ticker: str):
-    await _intel(interaction, "flow", ticker)
+_FLOW_TYPES = [app_commands.Choice(name=n, value=v) for n, v in (
+    ("tape — flow.db prints (default with a ticker)", "tape"), ("all — huge+unusual+repeated+weekly+etf", "all"),
+    ("huge", "huge"), ("unusual", "unusual"), ("repeated", "repeated"), ("weekly", "weekly"), ("etf", "etf"),
+    ("live", "live"), ("firehose — every relay alert", "firehose"))]
+
+
+@tree.command(name="flow", description="Options flow: flow.db tape for a ticker, or your flow channels (huge/unusual/repeated…)")
+@app_commands.describe(ticker="ticker (optional when you pick a type or channel)",
+                       type="which flow to read: the flow.db tape or one of the relay's Discord channels",
+                       channel="read any channel in this server (e.g. another flow or whales channel)",
+                       min_premium="only flow at or above this premium, e.g. 250K, 1M",
+                       max_premium="only flow at or below this premium, e.g. 5M",
+                       days="channel reads: session days back, 1-5 (default 1)")
+@app_commands.choices(type=_FLOW_TYPES)
+async def flow_cmd(interaction: discord.Interaction, ticker: Optional[str] = None,
+                   type: Optional[app_commands.Choice[str]] = None, channel: Optional[discord.TextChannel] = None,
+                   min_premium: Optional[str] = None, max_premium: Optional[str] = None,
+                   days: Optional[app_commands.Range[int, 1, 5]] = None):
+    from lib import discord_flow
+    lo = discord_flow.parse_premium(min_premium) if min_premium else None
+    hi = discord_flow.parse_premium(max_premium) if max_premium else None
+    if (min_premium and lo is None) or (max_premium and hi is None):
+        await interaction.response.send_message("Premium must look like 250K, 1.5M or 500000.", ephemeral=True)
+        return
+    kind = type.value if type else None
+    if kind in (None, "tape") and not channel and ticker:
+        await _intel(interaction, "flow", ticker, *(["--min-prem", f"{lo:.0f}"] if lo is not None else []),
+                     *(["--max-prem", f"{hi:.0f}"] if hi is not None else []))
+        return
+    if kind == "tape":
+        await interaction.response.send_message("The flow.db tape needs a ticker.", ephemeral=True)
+        return
+    types = list(discord_flow.ALL) if kind == "all" or (kind is None and not channel) else [kind] if kind else []
+    sym = (ticker or "").strip().upper().lstrip("$") or None
+    await interaction.response.defer(thinking=True)
+    try:
+        out = await asyncio.to_thread(discord_flow.scan, TOKEN, types=types,
+                                      channel_ids=[str(channel.id)] if channel else None,
+                                      ticker=sym, lo=lo, hi=hi, days=days or 1)
+    except Exception as e:  # noqa: BLE001
+        out = f"⚠️ flow channel read failed: {e.__class__.__name__}: {e}"
+    await _send_lines(interaction, out)
 
 
 @tree.command(name="tide", description="Market tide: net call vs net put premium through the session (proxy)")
