@@ -75,8 +75,18 @@ def _strike(s: str) -> str:
     return f"{float(s):g}"
 
 
+_FCM_CARD = re.compile(r"^(?P<sym>[A-Z][A-Z0-9.]*) (?P<cp>CALL|PUT) \S+ \$(?P<strike>[\d.]+) exp (?P<exp>[\d/]+)")
+_DOT = {"🟢": "green", "🟡": "yellow", "🔴": "red", "⬜": "white"}
+
+
+def _field(e: dict, name: str) -> str:
+    return next((f.get("value") or "" for f in e.get("fields") or [] if f.get("name") == name), "")
+
+
 def parse_message(msg: dict) -> list[dict]:
-    """One Discord message (REST JSON) -> the flow signals on it."""
+    """One Discord message (REST JSON) -> the flow signals on it. `src` names the card shape:
+    relay card (option-relay, one FlowGreeks alert), fcm card (fcm-discord, one FlowGreeks alert),
+    fcm batch (fcm-discord, FlowGreeks LiveFlows trades; its 📈/📉 is CALL/PUT, its dot is the FlowGreeks COLOR)."""
     ts = datetime.fromisoformat(msg["timestamp"]).astimezone(ET)
     out = []
     for e in msg.get("embeds") or []:
@@ -86,20 +96,41 @@ def parse_message(msg: dict) -> list[dict]:
             so, sb = _FIELD["size_oi"].search(desc), _FIELD["sw_bl"].search(desc)
             out.append({"sym": m["sym"], "strike": _strike(m["strike"]), "cp": m["cp"].upper(), "exp": m["exp"],
                         "premium": parse_premium(_FIELD["prem"].search(desc).group(1)),
-                        "dir": "bull" if m["dir"] == "🟢" else "bear", "kind": "", "side": "",
+                        "dir": "bull" if m["dir"] == "🟢" else "bear", "kind": "", "side": "", "color": "",
                         "size": int(so.group(1)) if so else None, "oi": int(so.group(2)) if so else None,
                         "sweeps": int(sb.group(1)) if sb else None, "blocks": int(sb.group(2)) if sb else None,
-                        "ts": ts})
+                        "ts": ts, "src": "relay card", "alert_type": None})
+            continue
+        f = _FCM_CARD.search(title)
+        if f and _field(e, "Total Flow Value"):
+            prem = parse_premium(_field(e, "Total Flow Value"))
+            sb = re.match(r"(\d+) / (\d+)", _field(e, "Sweeps/Blocks"))
+            ov = re.match(r"([\d,]+) / ([\d,]+)", _field(e, "OI / Volume"))
+            at = re.search(r"\*\*([A-Z0-9 ]+)\*\*", desc)
+            if prem:
+                out.append({"sym": f["sym"], "strike": _strike(f["strike"]), "cp": f["cp"][0], "exp": f["exp"],
+                            "premium": prem, "dir": "bull" if "BULL" in desc else "bear", "kind": "", "side": "",
+                            "color": "", "size": int(ov.group(2).replace(",", "")) if ov else None,
+                            "oi": int(ov.group(1).replace(",", "")) if ov else None,
+                            "sweeps": int(sb.group(1)) if sb else None, "blocks": int(sb.group(2)) if sb else None,
+                            "ts": ts, "src": "fcm card",
+                            "alert_type": None if not at or at[1] == "FLOW ALERT" else at[1].lower().replace(" ", "_")})
             continue
         for line in desc.splitlines():
             b = _BATCH.search(line)
             if not b:
                 continue
             out.append({"sym": b["sym"], "strike": _strike(b["strike"]), "cp": b["cp"].upper(), "exp": b["exp"],
-                        "premium": parse_premium(b["prem"]), "dir": "bull" if b["dir"] == "📈" else "bear",
+                        "premium": parse_premium(b["prem"]), "dir": None, "color": _DOT.get(b["flag"], "white"),
                         "kind": (b["kind"] or "").upper(), "side": (b["side"] or "").lower(),
-                        "size": None, "oi": None, "sweeps": None, "blocks": None, "ts": ts})
+                        "size": None, "oi": None, "sweeps": None, "blocks": None, "ts": ts, "src": "fcm batch",
+                        "alert_type": None})
     return out
+
+
+def parse_cards(msg: dict) -> list[dict]:
+    """Only the single-alert cards (FlowGreeks Alerts), with `view` = FlowGreeks' isBullish."""
+    return [{**c, "view": c["dir"]} for c in parse_message(msg) if c["src"] != "fcm batch"]
 
 
 def dedupe(sigs: list[dict]) -> list[dict]:
@@ -154,7 +185,7 @@ def render(sigs: list[dict], *, label: str, since: datetime, ticker: str | None,
            scanned: int, capped: list[str], unparsed: int, top: int = 12, notes: list[tuple] | None = None) -> str:
     band = "" if lo is None and hi is None else f" · premium {money(lo) if lo is not None else '$0'}–{money(hi) if hi is not None else 'any'}"
     head = (f"**{ticker.upper() + ' · ' if ticker else ''}{label} flow** · since {since:%a %m/%d} ET{band} · "
-            f"{len(sigs)} signals from {scanned} messages · Discord #channels (as posted by the option relay)")
+            f"{len(sigs)} signals from {scanned} messages · read from Discord")
     lines = [head]
     if capped:
         lines.append(f"⚠️ stopped at {MAX_PAGES * 100} messages in {', '.join(capped)} — older posts not read; use a shorter window")
@@ -170,8 +201,13 @@ def render(sigs: list[dict], *, label: str, since: datetime, ticker: str | None,
     puts = [s for s in sigs if s["cp"] == "P"]
     bull = sum(s["premium"] or 0 for s in sigs if s["dir"] == "bull")
     bear = sum(s["premium"] or 0 for s in sigs if s["dir"] == "bear")
+    cards = sum(1 for s in sigs if s["dir"])
     lines.append(f"Calls {money(sum(s['premium'] or 0 for s in calls))} ({len(calls)}) · Puts "
-                 f"{money(sum(s['premium'] or 0 for s in puts))} ({len(puts)}) · 📈 {money(bull)} vs 📉 {money(bear)} (relay's tag)")
+                 f"{money(sum(s['premium'] or 0 for s in puts))} ({len(puts)})"
+                 + (f" · FlowGreeks alert view on {cards} cards: 🟢 {money(bull)} vs 🔴 {money(bear)}" if cards else ""))
+    src = Counter(s["src"] for s in sigs)
+    lines.append("Card types: " + " · ".join(f"{k} {n}" for k, n in src.most_common())
+                 + " (relay/fcm card = FlowGreeks Alerts; fcm batch = FlowGreeks LiveFlows trades)")
     by_chan = Counter(s["chan"] for s in sigs)
     lines.append("By channel: " + " · ".join(f"{c} {n}" for c, n in by_chan.most_common()))
     if not ticker:
@@ -192,8 +228,13 @@ def render(sigs: list[dict], *, label: str, since: datetime, ticker: str | None,
             extra.append(f"size {s['size']:,} / OI {s['oi']:,}")
         if s["sweeps"] is not None:
             extra.append(f"{s['sweeps']} sweeps / {s['blocks']} blocks")
-        lines.append(f"• {'📈' if s['dir'] == 'bull' else '📉'} {s['sym']} ${s['strike']}{s['cp']} {s['exp']} · "
-                     f"{money(s['premium'])} · {' · '.join(extra) + ' · ' if extra else ''}#{s['chan']} {s['ts']:%m/%d %H:%M} ET")
+        if s["dir"]:
+            extra.insert(0, f"FG {'🟢 bull' if s['dir'] == 'bull' else '🔴 bear'}")
+        if s["color"] and s["color"] != "white":
+            extra.append(f"FG {s['color']}")
+        res = "FG LiveFlows trade" if s["src"] == "fcm batch" else "FG Alerts " + (s.get("alert_type") or "card")
+        lines.append(f"• {s['sym']} ${s['strike']}{s['cp']} {s['exp']} · {money(s['premium'])} · "
+                     f"{' · '.join(extra) + ' · ' if extra else ''}{s['ts']:%m/%d %H:%M} ET [#{s['chan']} · {res} · {s['src']}]")
     return "\n".join(lines + tail)
 
 

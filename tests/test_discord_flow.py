@@ -12,6 +12,13 @@ REPOST = {"id": "2", "timestamp": "2026-11-09T19:51:14+00:00", "content": "", "e
 SINGLE = {"id": "3", "timestamp": "2026-11-09T19:46:57+00:00", "content": "", "embeds": [{
     "title": "🔴 NVDA $215.0P 01/15/27",
     "description": "Flow Premium **$6.57M** • Size / OI 1646 / 28074 • Sweeps / Blocks 5 / 4 • Alerted Price $40.5\nDTE 67"}]}
+FCM = {"id": "5", "timestamp": "2026-11-09T19:40:00+00:00", "content": "", "embeds": [{
+    "title": "AMD PUT 📉 $200 exp 01/15/27", "description": "**HIGH FLOW** · 🔴 BEAR",
+    "fields": [{"name": "Total Flow Value", "value": "$1.25M"}, {"name": "Sweeps/Blocks", "value": "3 / 1"},
+               {"name": "OI / Volume", "value": "1,500 / 900"}, {"name": "Feed", "value": "FG"}]}]}
+FCM_ZERO = {"id": "6", "timestamp": "2026-11-09T19:41:00+00:00", "content": "", "embeds": [{
+    "title": "AMD PUT 📉 $200 exp 01/15/27", "description": "**HIGH FLOW** · 🔴 BEAR",
+    "fields": [{"name": "Total Flow Value", "value": "$0"}]}]}
 NEWS = {"id": "4", "timestamp": "2026-11-09T19:00:00+00:00",
         "content": "<t:1794250463:t> - **NVDA Stock Price Prediction: holds above trend**", "embeds": []}
 
@@ -32,14 +39,23 @@ def test_parse_premium():
 
 def test_parse_batch_and_single_cards():
     b = D.parse_message(BATCH)
-    assert [(s["sym"], s["strike"], s["cp"], s["exp"], s["premium"], s["kind"], s["side"], s["dir"]) for s in b] == [
-        ("TEM", "95", "C", "Jan21", 635_000, "SWEEP", "ask", "bull"),
-        ("SPXW", "7520", "P", "Nov18", 22_430_000, "BLOCK", "bid", "bear")]
+    # batch 📈/📉 is CALL/PUT, not a direction; the leading dot is the FlowGreeks COLOR
+    assert [(s["sym"], s["strike"], s["cp"], s["exp"], s["premium"], s["kind"], s["side"], s["dir"], s["color"], s["src"])
+            for s in b] == [
+        ("TEM", "95", "C", "Jan21", 635_000, "SWEEP", "ask", None, "white", "fcm batch"),
+        ("SPXW", "7520", "P", "Nov18", 22_430_000, "BLOCK", "bid", None, "yellow", "fcm batch")]
     (s,) = D.parse_message(SINGLE)
     assert (s["sym"], s["strike"], s["cp"], s["premium"], s["size"], s["oi"], s["sweeps"], s["dir"]) == (
         "NVDA", "215", "P", 6_570_000, 1646, 28074, 5, "bear")
     assert s["ts"].tzinfo is not None and s["ts"].hour == 14   # 19:46 UTC = 14:46 ET
+    assert s["src"] == "relay card"
     assert D.parse_message(NEWS) == []
+    (f,) = D.parse_message(FCM)
+    assert (f["sym"], f["strike"], f["cp"], f["exp"], f["premium"], f["dir"], f["alert_type"], f["size"], f["oi"],
+            f["sweeps"], f["blocks"], f["src"]) == ("AMD", "200", "P", "01/15/27", 1_250_000, "bear", "high_flow",
+                                                   900, 1500, 3, 1, "fcm card")
+    assert D.parse_message(FCM_ZERO) == []                    # broken $0 cards are skipped
+    assert [c["view"] for c in D.parse_cards({**BATCH, "embeds": BATCH["embeds"] + FCM["embeds"]})] == ["bear"]
 
 
 def test_dedupe_drops_batch_reposts_only():
