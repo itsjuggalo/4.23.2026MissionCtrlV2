@@ -1,15 +1,15 @@
 {
  "meta": {
   "schema_version": 2,
-  "generated_at": "2026-11-02T08:30:05-05:00",
+  "generated_at": "2026-11-09T08:30:05-05:00",
   "source": "astro_sky._build_cache (Swiss Ephemeris)",
   "timezone": "America/New_York",
   "code_hash": "fc8f83d18ad4",
-  "valid_until": "2026-11-09T08:30:05-05:00"
+  "valid_until": "2026-11-16T08:30:05-05:00"
  },
- "generated": "2026-11-02",
- "range_start": "2026-11-01",
- "range_end": "2027-12-06",
+ "generated": "2026-11-09",
+ "range_start": "2026-11-08",
+ "range_end": "2027-12-13",
  "lunations": [
   {
    "date_et": "2026-11-09T02:02-05:00",
@@ -355,6 +355,21 @@
      "natal": "Mercury",
      "aspect": "conjunct",
      "orb": 0.47
+    }
+   ]
+  },
+  {
+   "date_et": "2027-12-13T11:09-05:00",
+   "kind": "full",
+   "lon": 81.4129,
+   "sign": "Gemini",
+   "deg": 21,
+   "house": 11,
+   "natal_hits": [
+    {
+     "natal": "Venus",
+     "aspect": "opposite",
+     "orb": 2.72
     }
    ]
   }
