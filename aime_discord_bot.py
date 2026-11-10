@@ -750,7 +750,7 @@ HELP_TEXT = (
     "`/darkpool <t>` · `/uw <t>` · `/sweeps` · `/odte` · `/winners`\n\n"
     "**📈 Charts, vol & rotation (instant, no AI unless you pick the AI mode)**\n"
     "`/ta <symbol> [timeframe] [mode] [strike expiry option_type]` chart + computed read for stocks, crypto or an option contract · "
-    "`/optionvol <t>` IV rank, IV vs realized, skew, term structure · `/sectors [slow_money]` sector rotation · "
+    "`/optionvol <t>` IV rank, IV vs realized, skew, term structure · `/sectors [slow_money]` sector rotation · `/etf <etf>` % change of each holding · "
     "`/earnings [days]` · `/patterns <sym>` · `/correlation <a b c>` · `/sentiment`\n\n"
     "**👁️ Watchlist** (feeds your scheduled intel)\n"
     "`/watch <t>` · `/unwatch <t>` · `/watchlist`\n\n"
@@ -1103,6 +1103,27 @@ async def sectors_cmd(interaction: discord.Interaction, slow_money: Optional[boo
         await _send_lines(interaction, r["text"])
     if slow_money:
         await _send_lines(interaction, await asyncio.to_thread(sector_rotation.weekly))
+
+
+@tree.command(name="etf", description="% change of every stock inside an ETF (e.g. SOXL): 1d / 5d / 20d + weight")
+@app_commands.describe(symbol="ETF ticker (SOXL, XLK, SPY, SMH...)", sort="sort the table by (default 1d % change)",
+                       top="how many holdings, largest first, 5-60 (default 30)")
+@app_commands.choices(sort=[app_commands.Choice(name=n, value=v) for n, v in (
+    ("1d % change (default)", "1d"), ("5d % change", "5d"), ("20d % change", "20d"), ("weight in the fund", "weight"))])
+async def etf_cmd(interaction: discord.Interaction, symbol: str, sort: Optional[app_commands.Choice[str]] = None,
+                  top: Optional[app_commands.Range[int, 5, 60]] = 30):
+    import etf_holdings
+    await interaction.response.defer(thinking=True)
+    try:
+        r = await asyncio.to_thread(etf_holdings.build, symbol, sort.value if sort else "1d", top or 30)
+    except Exception as e:  # noqa: BLE001
+        r = {"text": f"⚠️ /etf failed: {e.__class__.__name__}: {e}", "png": None}
+    if r.get("png") and len(r["text"]) <= DISCORD_MAX:
+        await interaction.followup.send(content=r["text"], file=discord.File(r["png"]))
+    else:
+        if r.get("png"):
+            await interaction.followup.send(file=discord.File(r["png"]))
+        await _send_lines(interaction, r["text"])
 
 
 @tree.command(name="earnings", description="Upcoming earnings from the MissionCtrl calendar (flags unverified dates)")

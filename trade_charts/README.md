@@ -40,6 +40,7 @@ Imported by `~/scripts/aime_discord_bot.py`; each also runs from the CLI. Determ
 | `ta_cmd.py` | `/ta` (stocks, crypto, option contract; `mode` adds an optional AI read through `llm-route`, checked by `unsupported_numbers`) | Robinhood daily bars (Yahoo when stale or intraday, labelled), Coinbase candles (Kraken fallback), Robinhood option bars, `levels.v1` |
 | `optionvol.py` | `/optionvol` | CBOE delayed chain (`pipeline/intel/chains.py`), daily closes |
 | `sector_rotation.py` | `/sectors` | see the scheduled row above |
+| `etf_holdings.py` | `/etf` (each holding's 1d/5d/20d % change; live 1d during the session) | Direxion CSV, SPDR XLSX, Yahoo top 10 (labelled); bars via `ta_cmd.stock_bars`; day cache `~/.openclaw/data/etf-holdings/` |
 | `screeners.py` | `/earnings`, `/patterns`, `/correlation`, `/sentiment` | MissionCtrl `/api/calendar`, `/api/chart-patterns`, `/api/fear-greed`, bars, `flow.db` |
 
 Import order matters: these modules run `import lib` first, because MissionCtrl modules put `pipeline/` (which has its own
