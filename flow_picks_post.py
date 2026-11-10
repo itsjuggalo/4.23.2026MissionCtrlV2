@@ -172,6 +172,8 @@ def _load() -> dict:
             d = json.loads(p.read_text())
         except Exception:
             continue
+        if not isinstance(d, dict):     # Firebase returns "" for an empty feed node (FlowGreeks2 since 2026-11-03)
+            continue
         for v in d.values():
             a = v.get("alert", v) if isinstance(v, dict) else v
             if not isinstance(a, dict):

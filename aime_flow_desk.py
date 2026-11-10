@@ -235,7 +235,7 @@ def render(tickers: list[dict], d: dict, instant: bool) -> str:
 
 
 ALERT_WEBHOOK = Path.home() / ".openclaw" / "secrets" / "discord_pipeline_alerts_webhook"
-BENCH_DIR = Path.home() / "04_RESEARCH" / "aime_research" / "benchmark"
+BENCH_DIR = Path.home() / "tools-node" / "ainvest-login"  # holds node_modules (old 04_RESEARCH folder is gone)
 LOGIN_JS = Path.home() / "05_AUTOMATION" / "scripts" / "ainvest_login.js"
 
 

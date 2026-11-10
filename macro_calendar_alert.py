@@ -31,7 +31,7 @@ ET = timezone(timedelta(hours=-4))  # EDT; ET label only, dates are what matter
 # ── Reliable floor: 2026 FOMC decision days (published by the Fed, second meeting day) ──
 FOMC_2026 = [
     "2026-01-28", "2026-03-18", "2026-04-29", "2026-06-17",
-    "2026-07-29", "2026-09-16", "2026-10-28", "2026-12-16",
+    "2026-07-29", "2026-09-16", "2026-10-28", "2026-12-09",  # Dec 8-9 per federalreserve.gov, checked 2026-11-10 (was 12-16)
 ]
 # His current stock names (from the 2026-06-16 eval) — earnings filter seed, unioned
 # with the watchlist + live flow-relay tickers in held_tickers() below.

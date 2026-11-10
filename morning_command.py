@@ -434,6 +434,25 @@ def _rates_line() -> str:
             f"(FRED {t2['as_of']}) · 10y−2y {sp['value']:+.2f}{flag(sp)} (FRED {sp['as_of']})")
 
 
+def _live_countdown(nxt: dict) -> str:
+    """Countdown computed at render time from the event's ISO timestamp. The cached
+    `countdown` string is frozen at the macro-reaction job's run time (07:00 ET), so it
+    read "in 1h 29m" after the 08:30 release had already printed (audit 2026-11-10)."""
+    from datetime import datetime, timezone
+    try:
+        at = datetime.fromisoformat(str(nxt.get("at")))
+        if at.tzinfo is None:
+            raise ValueError("naive timestamp")
+        mins = int((at - datetime.now(timezone.utc)).total_seconds() // 60)
+    except Exception:
+        return "(countdown UNAVAILABLE)"
+    if mins < 0:
+        return "already released"
+    d, rem = divmod(mins, 1440)
+    h, m = divmod(rem, 60)
+    return f"in {d}d {h}h" if d else (f"in {h}h {m:02d}m" if h else f"in {m}m")
+
+
 def _macro_block() -> str:
     """Desk-copy block: next release + countdown + last-3 reaction lines + the data-vs-flows read."""
     data = _load_fresh_json(MACRO_REACTION_JSON, MACRO_MAX_AGE_H)
@@ -444,7 +463,7 @@ def _macro_block() -> str:
     if nxt:
         fc = nxt.get("forecast")
         also = nxt.get("alsoThatDay") or []
-        head = f"• Next: {nxt.get('name')} {nxt.get('countdown')} ({str(nxt.get('at') or '')[:16].replace('T', ' ')} ET)"
+        head = f"• Next: {nxt.get('name')} {_live_countdown(nxt)} ({str(nxt.get('at') or '')[:16].replace('T', ' ')} ET)"
         if fc is not None:
             head += f" · consensus {fc:+g}" if isinstance(fc, (int, float)) else f" · consensus {fc}"
         if also:

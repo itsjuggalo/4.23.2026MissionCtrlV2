@@ -16,7 +16,7 @@
 // (--auto requires `npm i imapflow mailparser` in the benchmark node_modules dir.)
 //
 // Run from the dir that has rebrowser-playwright-core, e.g.:
-//   cd ~/04_RESEARCH/aime_research/benchmark
+//   cd ~/tools-node/ainvest-login
 //   NODE_PATH=$(pwd)/node_modules node ~/05_AUTOMATION/scripts/ainvest_login.js --auto
 const { chromium } = require('rebrowser-playwright-core');
 const fs = require('fs');

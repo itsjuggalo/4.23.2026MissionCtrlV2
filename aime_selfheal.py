@@ -35,7 +35,7 @@ ALERT_COOLDOWN = int(os.environ.get("AIME_ALERT_COOLDOWN", 24 * 3600))
 
 RECAPTURE = ("AIME cookie expired. Recapture: log into ainvest.com, DevTools -> Network -> "
              "copy the Cookie header -> overwrite ~/.openclaw/secrets/ainvest_cookie.txt "
-             "(see ~/04_RESEARCH/aime_research/HOW_TO_CAPTURE_COOKIE.md). Running on visitor "
+             "(cd ~/tools-node/ainvest-login && NODE_PATH=$PWD/node_modules node ~/scripts/ainvest_login.js --send, then --code). Running on visitor "
              "fallback until then.")
 
 

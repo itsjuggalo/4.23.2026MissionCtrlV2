@@ -91,6 +91,8 @@ DRY = os.environ.get("DRY") == "1"
 # (no key, one request) is the SPY-bar source, with its second host as the only fallback; the missionctrl market-news
 # API (the free aggregator NewsPanel reads) is the only headline source. A double failure raises the BLIND alert.
 LOCAL_NEWS_URL = "http://localhost:3000/api/market-news"
+NEWS_STALE_MIN = 30      # route cache is 5 min; older than this = the route is serving a dead snapshot
+_NEWS_WHY = "localhost market-news failed"
 BLIND_ALERT_KEY = "shock_guard_blind"
 BLIND_ALERT_REPEAT_SEC = 6 * 3600   # alert_gate cooldown for the SHOCK GUARD BLIND ping
 
@@ -194,7 +196,11 @@ def check_spy_z() -> dict:
     if not bars:   # same free provider, second host (no Alpaca: market-data §1)
         bars = _yahoo_spy_bars("query2")
         source = "yahoo-q2"
-    blind = not bars   # both sources came back empty this tick — a real outage
+    # 09:30–09:31 ET: the first 1-min bar has not printed yet, so "empty" is normal, not an
+    # outage (it produced a false BLIND at exactly 09:30 on 4 of 5 sessions, audit 2026-11-10).
+    _n = now_et()
+    opening = _n.hour == 9 and _n.minute in (30, 31)
+    blind = not bars and not opening   # both sources came back empty this tick — a real outage
     if EXCLUDE_CLOSING_BAR:
         bars = [b for b in bars if not _is_closing_bar(b.get("t"))]
     closes = [b["c"] for b in bars if b.get("c")]
@@ -221,8 +227,23 @@ def check_btc() -> dict:
 def _local_news() -> list[dict] | None:
     """missionctrl's free news aggregator — primary source. None on fetch failure
     (distinct from an empty-but-successful [] response)."""
-    d = _get(LOCAL_NEWS_URL, timeout=8)
+    # 20 s, not 8: the route answers in ~9 s whenever a feed is slow (its own ROUTE_TIMEOUT_MS
+    # is 9000), so the old 8 s limit turned every cold poll into a false BLIND (audit 2026-11-10).
+    global _NEWS_WHY
+    _NEWS_WHY = "localhost market-news failed"
+    d = _get(LOCAL_NEWS_URL, timeout=20)
     if d is None:
+        return None
+    # A 200 that is only the route's last-good cache is not news: when its fan-out hangs it
+    # keeps serving the old snapshot (stale:true). Older than NEWS_STALE_MIN = blind, said so.
+    try:
+        upd = datetime.fromisoformat(str(d.get("updated")).replace("Z", "+00:00"))
+        age_min = (datetime.now(ZoneInfo("UTC")) - upd).total_seconds() / 60
+    except Exception:
+        age_min = None
+    if age_min is not None and age_min > NEWS_STALE_MIN:
+        _NEWS_WHY = (f"localhost market-news serving a stale snapshot from "
+                     f"{upd.astimezone(ET).strftime('%a %m-%d %H:%M')} ET")
         return None
     return d.get("news") or []
 
@@ -380,7 +401,7 @@ def main() -> int:
     if full and spy_d.get("blind"):
         blind_reasons.append("SPY bars (Yahoo query1 + query2 both empty)")
     if news_blind:
-        blind_reasons.append("news (localhost market-news failed)")
+        blind_reasons.append(f"news ({_NEWS_WHY})")
     if blind_reasons:
         alert_blind(blind_reasons)
 
