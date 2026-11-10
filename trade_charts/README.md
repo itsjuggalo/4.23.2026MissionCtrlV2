@@ -25,10 +25,25 @@ All lines run `cd ~/05_AUTOMATION/scripts/trade_charts && ~/.venv/bin/python <sc
 | `gex_chart.py SPY QQQ IWM` | 10:05 | `gamma-levels` | Yahoo chains; when its own sweep finds no gamma flip, the flip from the `pipeline/gex` owner (`factors/gex.json`, only within its max age) |
 | `breadth.py` | 10:30 | `market-regime` | Yahoo bars for a fixed ~40-name basket |
 | `volume_profile.py --from-flow --top 3` | 11:30 | `ta-charts` | flow stream, Yahoo bars |
+| `sector_rotation.py` | 10:05, 12:05, 14:05, 16:20; `--weekly` Sat 09:00 | `sector-rotation` (Discord only) | daily bars (Robinhood, Yahoo when Robinhood is a session behind), `flow.db`, `pipeline/darkpool` latest.json; weekly: `f13.sqlite`, Signal8 |
 
 "Flow stream" = `/AIWorkWSL/trading/signals/option-scraper/data/flow_alerts_today.json`, read-only (never write it).
 
 Not scheduled: `networth.py`. It is a net-worth / holdings view, and those views were retired 2026-09-12. Do not schedule it.
+
+## On-demand modules (Synth Control slash commands, added 2026-11-10)
+
+Imported by `~/scripts/aime_discord_bot.py`; each also runs from the CLI. Deterministic, no LLM in any number.
+
+| Module | Slash command | Reads |
+|---|---|---|
+| `ta_cmd.py` | `/ta` (stocks, crypto, option contract; `mode` adds an optional AI read through `llm-route`, checked by `unsupported_numbers`) | Robinhood daily bars (Yahoo when stale or intraday, labelled), Coinbase candles (Kraken fallback), Robinhood option bars, `levels.v1` |
+| `optionvol.py` | `/optionvol` | CBOE delayed chain (`pipeline/intel/chains.py`), daily closes |
+| `sector_rotation.py` | `/sectors` | see the scheduled row above |
+| `screeners.py` | `/earnings`, `/patterns`, `/correlation`, `/sentiment` | MissionCtrl `/api/calendar`, `/api/chart-patterns`, `/api/fear-greed`, bars, `flow.db` |
+
+Import order matters: these modules run `import lib` first, because MissionCtrl modules put `pipeline/` (which has its own
+`lib/`) at the front of `sys.path`.
 
 ## Shared modules
 

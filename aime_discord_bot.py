@@ -748,6 +748,10 @@ HELP_TEXT = (
     "`/contracts <ticker|company>` every contract seen across Firebase/flow/UW/scrapers/decipher · "
     "`/intel <t>` one-screen · `/flow [t] [type: all/huge/unusual/repeated/weekly/etf/live/other/fg2/tape] [channel] [min/max premium] [days]` · `/tide` · `/hot` · `/gex <t>` · `/oi <t>` · `/iv <t>` · "
     "`/darkpool <t>` · `/uw <t>` · `/sweeps` · `/odte` · `/winners`\n\n"
+    "**📈 Charts, vol & rotation (instant, no AI unless you pick the AI mode)**\n"
+    "`/ta <symbol> [timeframe] [mode] [strike expiry option_type]` chart + computed read for stocks, crypto or an option contract · "
+    "`/optionvol <t>` IV rank, IV vs realized, skew, term structure · `/sectors [slow_money]` sector rotation · "
+    "`/earnings [days]` · `/patterns <sym>` · `/correlation <a b c>` · `/sentiment`\n\n"
     "**👁️ Watchlist** (feeds your scheduled intel)\n"
     "`/watch <t>` · `/unwatch <t>` · `/watchlist`\n\n"
     "**🐦 Intel & briefs**\n"
@@ -997,6 +1001,139 @@ async def darkpool_cmd(interaction: discord.Interaction, ticker: str):
 @app_commands.describe(ticker="ticker or company name")
 async def uw_cmd(interaction: discord.Interaction, ticker: str):
     await _intel(interaction, "uw", ticker)
+
+
+# ─── TA / VOL / SECTORS / SCREENERS (2026-11-10, Mike) ───────────────────────
+# Deterministic modules in trade_charts/ (no LLM in any number). These replace the dead Jazzy/Orion
+# OpenClaw commands (option_vol_analysis, sector_rotation_detector, sector_overview, earnings_screener,
+# intraday_pattern_scanner, correlation_analysis, market_sentiment); Synth Control is the one command bot.
+sys.path.insert(0, str(Path.home() / "05_AUTOMATION" / "scripts" / "trade_charts"))
+
+_TA_AI_PROMPT = (
+    "You are writing a short technical read for Mike from COMPUTED FACTS. Do not use any tools, do not search, "
+    "do not look anything up. Use ONLY numbers that appear in the facts below, copied exactly; never invent, "
+    "round differently, or derive a new price. No position size, no risk cap, no 'buy'/'sell' order. "
+    "Write at most 6 short bullets in plain English: trend, momentum, the nearest support and resistance, "
+    "what would confirm the read, what would break it, and the opposite (bear or bull) case. "
+    "If a fact says UNAVAILABLE, say it is unavailable.\n\nFACTS:\n")
+
+
+def _ta_ai_read(facts: str) -> str:
+    import ta_cmd
+    out = _run_skill(_TA_AI_PROMPT + facts, "sonnet", 150)
+    if out.startswith("[skill"):
+        return f"🤖 AI read UNAVAILABLE — {out}"
+    bad = ta_cmd.unsupported_numbers(out, facts)
+    note = (f"\n⚠️ The AI read cites numbers that are not in the computed facts ({', '.join(bad[:8])}). "
+            "Trust the computed block above, not those.") if bad else ""
+    return f"🤖 **AI read** (LLM via llm-route, from the computed facts only; every number checked against them)\n{out}{note}"
+
+
+@tree.command(name="ta", description="Technical analysis chart + computed read: stocks, crypto, or an option contract")
+@app_commands.describe(symbol="ticker or coin (NVDA, SPY, BTC, ETH...)",
+                       timeframe="bar size (default 1d)",
+                       mode="chart + computed read (default), add an AI read, or text only",
+                       asset="force the asset type (default: auto-detect)",
+                       strike="option strike — with expiry and call/put charts the contract's own premium",
+                       expiry="option expiry, YYYY-MM-DD",
+                       option_type="call or put")
+@app_commands.choices(
+    timeframe=[app_commands.Choice(name=n, value=n) for n in ("5m", "1h", "1d", "1w")],
+    mode=[app_commands.Choice(name="chart + computed read (default, no AI)", value="chart"),
+          app_commands.Choice(name="chart + computed read + AI read (slower)", value="ai"),
+          app_commands.Choice(name="text only, no image", value="text")],
+    asset=[app_commands.Choice(name=n, value=n) for n in ("auto", "stock", "crypto", "option")],
+    option_type=[app_commands.Choice(name="call", value="call"), app_commands.Choice(name="put", value="put")])
+async def ta_cmd_(interaction: discord.Interaction, symbol: str,
+                  timeframe: Optional[app_commands.Choice[str]] = None,
+                  mode: Optional[app_commands.Choice[str]] = None,
+                  asset: Optional[app_commands.Choice[str]] = None,
+                  strike: Optional[float] = None, expiry: Optional[str] = None,
+                  option_type: Optional[app_commands.Choice[str]] = None):
+    import ta_cmd
+    await interaction.response.defer(thinking=True)
+    m = mode.value if mode else "chart"
+    try:
+        r = await asyncio.to_thread(ta_cmd.analyze, symbol, timeframe.value if timeframe else "1d",
+                                    asset.value if asset else "auto", strike, (expiry or "").strip() or None,
+                                    option_type.value if option_type else None, m != "text")
+    except Exception as e:  # noqa: BLE001
+        r = {"ok": False, "text": f"⚠️ /ta failed: {e.__class__.__name__}: {e}", "png": None, "facts": ""}
+    text = r["text"]
+    if r.get("png") and len(text) <= DISCORD_MAX:
+        await interaction.followup.send(content=text, file=discord.File(r["png"]))
+    elif r.get("png"):
+        await interaction.followup.send(file=discord.File(r["png"]))
+        await _send_lines(interaction, text)
+    else:
+        await _send_lines(interaction, text)
+    if m == "ai" and r.get("ok"):
+        await _send_lines(interaction, await asyncio.to_thread(_ta_ai_read, r["facts"]))
+
+
+async def _det_text(interaction: discord.Interaction, fn, *args) -> None:
+    """Run a deterministic text builder off the event loop and send it on line boundaries."""
+    await interaction.response.defer(thinking=True)
+    try:
+        out = await asyncio.to_thread(fn, *args)
+    except Exception as e:  # noqa: BLE001
+        out = f"⚠️ error: {e.__class__.__name__}: {e}"
+    await _send_lines(interaction, out or "[empty]")
+
+
+@tree.command(name="optionvol", description="Option vol analysis: IV rank, IV vs realized, skew, term structure, expected move")
+@app_commands.describe(ticker="ticker or company name")
+async def optionvol_cmd(interaction: discord.Interaction, ticker: str):
+    import optionvol
+    await _det_text(interaction, optionvol.report, ticker)
+
+
+@tree.command(name="sectors", description="Sector rotation: strength vs SPY, net option premium and dark pool by sector")
+@app_commands.describe(slow_money="also show the weekly slow money (13F institutions + Congress by sector)")
+async def sectors_cmd(interaction: discord.Interaction, slow_money: Optional[bool] = False):
+    import sector_rotation
+    await interaction.response.defer(thinking=True)
+    try:
+        r = await asyncio.to_thread(sector_rotation.build)
+    except Exception as e:  # noqa: BLE001
+        r = {"text": f"⚠️ /sectors failed: {e.__class__.__name__}: {e}", "png": None}
+    if r.get("png"):
+        await interaction.followup.send(content=r["text"][:DISCORD_MAX], file=discord.File(r["png"]))
+    else:
+        await _send_lines(interaction, r["text"])
+    if slow_money:
+        await _send_lines(interaction, await asyncio.to_thread(sector_rotation.weekly))
+
+
+@tree.command(name="earnings", description="Upcoming earnings from the MissionCtrl calendar (flags unverified dates)")
+@app_commands.describe(days="days ahead, 1-30 (default 7)")
+async def earnings_cmd(interaction: discord.Interaction, days: Optional[app_commands.Range[int, 1, 30]] = 7):
+    import screeners
+    await _det_text(interaction, screeners.earnings, days or 7)
+
+
+@tree.command(name="patterns", description="Chart-pattern scan for a ticker or coin (MissionCtrl pattern engine)")
+@app_commands.describe(symbol="ticker or coin", timeframe="bar size (default 1d)")
+@app_commands.choices(timeframe=[app_commands.Choice(name=n, value=n) for n in ("5m", "1h", "1d")])
+async def patterns_cmd(interaction: discord.Interaction, symbol: str,
+                       timeframe: Optional[app_commands.Choice[str]] = None):
+    import screeners
+    await _det_text(interaction, screeners.patterns, symbol, timeframe.value if timeframe else "1d")
+
+
+@tree.command(name="correlation", description="Correlation matrix of daily returns for 2-8 tickers or coins")
+@app_commands.describe(tickers="2 to 8 symbols separated by spaces or commas (e.g. NVDA AMD SPY BTC)",
+                       days="sessions to compare, 20-250 (default 60)")
+async def correlation_cmd(interaction: discord.Interaction, tickers: str,
+                          days: Optional[app_commands.Range[int, 20, 250]] = 60):
+    import screeners
+    await _det_text(interaction, screeners.correlation, re.split(r"[\s,]+", tickers.strip()), days or 60)
+
+
+@tree.command(name="sentiment", description="Market sentiment: Fear & Greed (stocks + crypto), breadth, options tide")
+async def sentiment_cmd(interaction: discord.Interaction):
+    import screeners
+    await _det_text(interaction, screeners.sentiment)
 
 
 # ─── POLISH: ticker autocomplete + right-click context menus (Phase 5) ────────
