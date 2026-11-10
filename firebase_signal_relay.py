@@ -246,6 +246,7 @@ def poll():
     seen = set(state.get("seen_ids", []))
     new_count = 0
     any_fetch_ok = False
+    current, all_ok = set(), True
 
     for source, paths in [
         ("Name", ["ShortTermOptions", "LongTermOptions"]),
@@ -256,10 +257,13 @@ def poll():
             data, ok = fetch_json(f"{source}/{path}.json")
             if ok:
                 any_fetch_ok = True
+            if not ok:
+                all_ok = False
             if not data or not isinstance(data, dict):
                 continue
             for sig_id, sig in data.items():
                 full_id = f"{source}:{sig_id}"
+                current.add(full_id)
                 if full_id not in seen:
                     seen.add(full_id)
                     msg = format_signal(sig, f"{source}/{path}")
@@ -285,8 +289,11 @@ def poll():
                     new_count += 1
                     time.sleep(1)
 
-    # Keep only last 500 IDs
-    state["seen_ids"] = list(seen)[-500:]
+    # Remember every ID still in the feed. The old `list(seen)[-500:]` cut a SET (random order) to 500, so with
+    # more than 500 signals in the nodes random old ones were forgotten and re-posted every poll as "new"
+    # (2026-11: 39,560 posts, 154 unique; an AAPL put that expired 06/15 went out 8,875 times). IDs that left the
+    # feed are dropped only when every node answered, so one failed fetch cannot make its signals look new.
+    state["seen_ids"] = sorted((seen & current) if all_ok and current else seen)
     save_state(state)
     save_for_boba(new_signals_buffer)
     save_high_interest(new_signals_buffer)
