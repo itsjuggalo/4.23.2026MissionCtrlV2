@@ -953,6 +953,11 @@ async def flow_cmd(interaction: discord.Interaction, ticker: Optional[str] = Non
         if channel:
             out = await asyncio.to_thread(discord_flow.scan, TOKEN, channel_ids=[str(channel.id)],
                                           ticker=sym, lo=lo, hi=hi, days=days or 1)
+        elif sym and kind == "all" and (days or 1) == 1:
+            # default path (Mike 2026-11-11): evidence report (deduped prints, bull/bear/unclear checklists, context),
+            # then the FlowGreeks block and the flow.db tape/OI block; after hours it queues the morning OI follow-up
+            from lib import flow_report
+            out = await asyncio.to_thread(flow_report.report, sym, lo=lo, hi=hi, channel_id=interaction.channel_id)
         else:
             out = await asyncio.to_thread(flowgreeks.scan, kind=kind, ticker=sym, lo=lo, hi=hi, days=days or 1,
                                           token=TOKEN)

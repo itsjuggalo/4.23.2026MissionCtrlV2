@@ -100,7 +100,10 @@ def alert_sig(entry: dict, fg2: bool = False) -> dict | None:
             "resource": f"{res} {a.get('AlertType') or 'untyped'}",
             "view": "bull" if a.get("isBullish") else "bear", "side": "", "color": "",
             "size": int(_num(a.get("Volume"))), "oi": int(_num(a.get("OI"))),
-            "sweeps": int(_num(a.get("SWEEPS"))), "blocks": int(_num(a.get("BLOCKS")))}
+            "sweeps": int(_num(a.get("SWEEPS"))), "blocks": int(_num(a.get("BLOCKS"))),
+            # trades the alert totals: 1 = the alert IS one print (its LiveFlows twin is merged by merge_twins);
+            # more = a summary of several prints, never added to print totals. None = not stated.
+            "trades": int(_num(a.get("totalFlowCount") or a.get("trade_count"))) or None}
 
 
 def live_sig(d: dict, fg2: bool = False) -> dict | None:
@@ -214,26 +217,44 @@ def load_liveflows(start: datetime, end: datetime, status: dict) -> list[dict]:
     return rows
 
 
-def bullbears(sym: str) -> list[str]:
+def bullbears(sym: str, stale: list[str] | None = None) -> list[str]:
+    """FG / FG2 BullBears lines for one ticker. A stale node (file not written today, or FG2 'today' empty so only an
+    older day exists) is not a verdict: with `stale` given its line goes there, worded as stale, not into the result."""
     out = []
-    d = _load_json(OS_DATA / "flow_bullbears_today.json")
+    p1 = OS_DATA / "flow_bullbears_today.json"
+    d = _load_json(p1)
     r = d.get(sym) if isinstance(d, dict) else None
-    out.append(f"FG BullBears today ({_as_of(OS_DATA / 'flow_bullbears_today.json')}): " +
-               (f"{'🟢 bullish' if r.get('isBullish') else '🔴 bearish'} · net {_m(_num(r.get('valueDifference')))} · "
-                f"rank {r.get('Rank')} · {r.get('count')} flows" if isinstance(r, dict) else "not listed"))
+    try:
+        old1 = datetime.fromtimestamp(p1.stat().st_mtime, ET).date() < datetime.now(ET).date()
+    except OSError:
+        old1 = False
+    l1 = (f"FG BullBears today ({_as_of(p1)}): " +
+          (f"{'🟢 bullish' if r.get('isBullish') else '🔴 bearish'} · net {_m(_num(r.get('valueDifference')))} · "
+           f"rank {r.get('Rank')} · {r.get('count')} flows" if isinstance(r, dict) else "not listed"))
+    if old1 and stale is not None:
+        stale.append(f"FG BullBears STALE (file last written "
+                     f"{datetime.fromtimestamp(p1.stat().st_mtime, ET):%m/%d %H:%M} ET; its read is not used)")
+    else:
+        out.append(l1)
     d2 = _load_json(OS_DATA / "flow2_bullbears.json")
-    when, r2 = "today", None
+    when, r2, last = "today", None, None
     if isinstance(d2, dict):
         r2 = (d2.get("today") or {}).get(sym) if isinstance(d2.get("today"), dict) else None
         if r2 is None and not d2.get("today"):
             days = sorted((k for k in d2 if k.isdigit()), key=int)
             if days:
-                when = "STALE: node empty today, last day " + datetime.fromtimestamp(int(days[-1]), ET).strftime("%m/%d")
+                last = datetime.fromtimestamp(int(days[-1]), ET).strftime("%m/%d")
+                when = "STALE: node empty today, last day " + last
                 r2 = d2[days[-1]].get(sym) if isinstance(d2[days[-1]], dict) else None
-    out.append(f"FG2 BullBears ({when}): " +
-               (f"{'🟢 bullish' if r2.get('isBullish') else '🔴 bearish'} · bull {_m(_num(r2.get('bullishValue')))} vs "
-                f"bear {_m(_num(r2.get('bearishValue')))} · rank {r2.get('Rank')} · {r2.get('count')} flows"
-                if isinstance(r2, dict) else "not listed"))
+    read2 = (f"{'🟢 bullish' if r2.get('isBullish') else '🔴 bearish'} · bull {_m(_num(r2.get('bullishValue')))} vs "
+             f"bear {_m(_num(r2.get('bearishValue')))} · rank {r2.get('Rank')} · {r2.get('count')} flows"
+             if isinstance(r2, dict) else "not listed")
+    if last and stale is not None:
+        stale.append(f"FG2 BullBears STALE (node empty today; last day {last} " +
+                     (f"said {read2.replace('🟢 ', '').replace('🔴 ', '')}; not used)" if isinstance(r2, dict)
+                      else f"did not list {sym})"))
+    else:
+        out.append(f"FG2 BullBears ({when}): " + read2)
     return out
 
 
@@ -269,12 +290,67 @@ def _m(x: float | None) -> str:
 
 
 def tag(s: dict) -> str:
-    return f"[{s['cat']}{' ETF' if s['etf'] and 'Alerts' in s['resource'] else ''} · {s['resource']} → {s['chan']}]"
+    also = s.get("also") or []
+    if also and all(a["chan"] == s["chan"] for a in also):   # same channel: name it once
+        srcs = " + ".join([s["resource"], *(a["resource"] for a in also)])
+        return f"[{s['cat']} · {srcs} → {s['chan']}]"
+    more = "".join(f" + {a['resource']} → {a['chan']}" for a in also)
+    return f"[{s['cat']}{' ETF' if s['etf'] and 'Alerts' in s['resource'] else ''} · {s['resource']} → {s['chan']}{more}]"
+
+
+def ckey(s: dict) -> tuple:
+    return s["sym"], s["strike"], s["cp"], s["exp"]
+
+
+TWIN_LAG_S = 600   # an alert card is written 10 s to ~9 min after its print (measured 2026-11-11: 11–549 s, n=69)
+
+
+def merge_twins(sigs: list[dict]) -> tuple[list[dict], int]:
+    """One print, one line. A single-trade FG alert (trades == 1) is the same print as a LiveFlows row with the same
+    contract, premium (±0.2%) and size, printed 0–TWIN_LAG_S before the alert: the two merge into the LiveFlows row,
+    which keeps the alert's source tag, channel and FG view. Returns (signals, how many alert twins were merged).
+    Inputs are not modified."""
+    lives: dict[tuple, list[dict]] = {}
+    out = []
+    for s in sigs:
+        if "LiveFlows" in s["resource"]:
+            s = dict(s)
+            lives.setdefault(ckey(s), []).append(s)
+        out.append(s)
+    merged, keep = 0, []
+    for s in out:
+        if "Alerts" in s["resource"] and s.get("trades") == 1:
+            cands = [v for v in lives.get(ckey(s), []) if not v.get("also") and v["size"] == s["size"]
+                     and abs(v["premium"] - s["premium"]) <= max(1.0, 0.002 * s["premium"])
+                     and -5 <= (s["ts"] - v["ts"]).total_seconds() <= TWIN_LAG_S]
+            if cands:
+                v = min(cands, key=lambda v: abs((s["ts"] - v["ts"]).total_seconds()))
+                v["also"] = [{"resource": s["resource"], "chan": s["chan"]}]
+                v["view"] = s["view"]
+                if s["sweeps"] is not None:
+                    v["sweeps"], v["blocks"] = s["sweeps"], s["blocks"]
+                merged += 1
+                continue
+        keep.append(s)
+    return keep, merged
+
+
+def mark_mixed(sigs: list[dict]) -> None:
+    """A contract FG tagged both bull and bear in the window is 'mixed' on every one of its lines."""
+    views: dict[tuple, Counter] = {}
+    for s in sigs:
+        if s.get("view"):
+            views.setdefault(ckey(s), Counter())[s["view"]] += 1
+    for s in sigs:
+        v = views.get(ckey(s))
+        s["mixed"] = (v["bull"], v["bear"]) if v and v["bull"] and v["bear"] else None
 
 
 def line(s: dict) -> str:
     bits = [f"{s['sym']} ${s['strike']}{s['cp']} {s['exp']}", _m(s["premium"])]
-    if s["view"]:
+    if s.get("mixed"):
+        bits.append(f"FG ⚪ mixed {s['mixed'][0]}🟢/{s['mixed'][1]}🔴")
+    elif s["view"]:
         bits.append(f"FG {'🟢 bull' if s['view'] == 'bull' else '🔴 bear'}")
     if s.get("kind") or s["side"]:
         bits.append(f"{s.get('kind', '')} {s['side']}".strip())
@@ -282,18 +358,31 @@ def line(s: dict) -> str:
         bits.append(f"vol {s['size']:,} / OI {s['oi']:,}")
     if s["sweeps"] is not None:
         bits.append(f"{s['sweeps']}sw/{s['blocks']}bl")
+    if is_summary(s) and s.get("trades"):
+        bits.append(f"alert total of {s['trades']} prints")
     bits.append(f"{s['ts']:%m/%d %H:%M} ET")
     if s.get("dup", 1) > 1:
         bits.append(f"×{s['dup']} identical prints, counted once")
     return "• " + " · ".join(bits) + " " + tag(s)
 
 
+def is_summary(s: dict) -> bool:
+    """An FG alert that totals several prints (or does not say how many) — not a print of its own."""
+    return "Alerts" in s["resource"] and s.get("trades") != 1
+
+
 def render(sigs: list[dict], status: dict, *, kind: str, ticker: str | None, lo: float | None, hi: float | None,
-           since: datetime, bb: list[str] | None = None, top: int = 10) -> str:
+           since: datetime, bb: list[str] | None = None, top: int = 10, merged: int = 0,
+           stale: list[str] | None = None, stale_out: list[str] | None = None) -> str:
+    """`stale`: stale-source lines (bullbears). Empty or stale sources are listed on one final 'Stale or empty sources'
+    line, never in the verdict area; with `stale_out` given that line is left to the caller (which prints it last)."""
     band = "" if lo is None and hi is None else f" · premium {_m(lo) if lo is not None else '$0'}–{_m(hi) if hi is not None else 'any'}"
+    live_src = {k: v for k, v in status.items() if v[0]}
+    gone = [f"{k} {n:,} ({why})" for k, (n, why) in status.items() if not n] + list(stale or [])
     out = [f"**{ticker.upper() + ' · ' if ticker else ''}FlowGreeks {kind} flow** · since {since:%a %m/%d} ET{band} · "
-           f"{len(sigs):,} signals",
-           "Sources: " + " · ".join(f"{k} {n:,} ({why})" for k, (n, why) in status.items())]
+           f"{len(sigs):,} signals" + (f" ({merged:,} alert/live twins merged, one line per print)" if merged else ""),
+           "Sources: " + (" · ".join(f"{k} {n:,} ({why})" for k, (n, why) in live_src.items()) or "none with data")]
+    mark_mixed(sigs)
     cats = Counter()
     prem = Counter()
     for s in sigs:
@@ -301,14 +390,27 @@ def render(sigs: list[dict], status: dict, *, kind: str, ticker: str | None, lo:
         prem[s["cat"]] += s["premium"]
     if sigs:
         out.append("By type: " + " · ".join(f"{c} {cats[c]:,} {_m(prem[c])}" for c in CATS if cats[c]))
-        calls = [s for s in sigs if s["cp"] == "C"]
-        puts = [s for s in sigs if s["cp"] == "P"]
+        prints = [s for s in sigs if not is_summary(s)]
+        summ = [s for s in sigs if is_summary(s)]
+        base, what = (prints, "prints only") if prints else (summ, "alert summaries only")
+        calls = [s for s in base if s["cp"] == "C"]
+        puts = [s for s in base if s["cp"] == "P"]
         out.append(f"Calls {_m(sum(s['premium'] for s in calls))} ({len(calls):,}) · Puts "
-                   f"{_m(sum(s['premium'] for s in puts))} ({len(puts):,})")
+                   f"{_m(sum(s['premium'] for s in puts))} ({len(puts):,}) · {what}"
+                   + (f"; {len(summ):,} FG alert summaries ({_m(sum(s['premium'] for s in summ))}) not added, "
+                      "each totals several prints" if prints and summ else ""))
     out += bb or []
+
+    def _done() -> str:
+        if gone and stale_out is not None:
+            stale_out.extend(gone)
+        elif gone:
+            out.extend(["Stale or empty sources:", *(f"• {g}" for g in gone)])
+        return "\n".join(out)
+
     if not sigs:
         out.append("No FlowGreeks signals matched.")
-        return "\n".join(out)
+        return _done()
     if not ticker:
         tk = Counter()
         for s in sigs:
@@ -320,7 +422,7 @@ def render(sigs: list[dict], status: dict, *, kind: str, ticker: str | None, lo:
         out.append("Same contract more than once: " + " · ".join(f"{k[0]} {k[1]}{k[2]} {k[3]} ×{n}" for k, n in multi))
     out.append("Biggest:")
     out += [line(s) for s in sorted(sigs, key=lambda s: -s["premium"])[:top]]
-    return "\n".join(out)
+    return _done()
 
 
 def history_alerts(token: str, start: datetime, today0: datetime, status: dict, kind: str = "all") -> list[dict]:
@@ -383,5 +485,9 @@ def scan(*, kind: str = "all", ticker: str | None = None, lo: float | None = Non
     if kind not in ("repeated", "weekly", "etf", "other"):
         sigs += load_liveflows(since, now + timedelta(minutes=1), status)
     sym = (ticker or "").strip().upper().lstrip("$") or None
+    sigs, _merged = merge_twins(sigs)
     rows = pick(sigs, kind, sym, lo, hi)
-    return render(rows, status, kind=kind, ticker=sym, lo=lo, hi=hi, since=since, bb=bullbears(sym) if sym else None)
+    stale: list[str] = []
+    return render(rows, status, kind=kind, ticker=sym, lo=lo, hi=hi, since=since,
+                  bb=bullbears(sym, stale) if sym else None, stale=stale,
+                  merged=sum(1 for r in rows if r.get("also")))

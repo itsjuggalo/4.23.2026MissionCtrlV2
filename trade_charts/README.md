@@ -26,8 +26,14 @@ All lines run `cd ~/05_AUTOMATION/scripts/trade_charts && ~/.venv/bin/python <sc
 | `breadth.py` | 10:30 | `market-regime` | Yahoo bars for a fixed ~40-name basket |
 | `volume_profile.py --from-flow --top 3` | 11:30 | `ta-charts` | flow stream, Yahoo bars |
 | `sector_rotation.py` | 10:05, 12:05, 14:05, 16:20; `--weekly` Sat 09:00 | `sector-rotation` (Discord only) | daily bars (Robinhood, Yahoo when Robinhood is a session behind), `flow.db`, `pipeline/darkpool` latest.json; weekly: `f13.sqlite`, Signal8 |
+| `flow_oi_followup.py` | 10:45, 16:50 (installed 2026-11-11) | the channel each `/flow` was asked in (Synth Control bot token) + Telegram `tg-send-msg` | queue below; MissionCtrl `pipeline/intel/oi_confirm.evaluate` (CBOE chain / `chains.sqlite`), `flow.db` |
 
 "Flow stream" = `/AIWorkWSL/trading/signals/option-scraper/data/flow_alerts_today.json`, read-only (never write it).
+
+`flow_oi_followup.py` (2026-11-11): `/flow <TICKER>` asked outside regular hours queues the ticker with its channel
+(`lib/flow_report.maybe_queue`). Next session it posts the biggest prints of that session with OI before → after and
+OPENING / PARTIAL / NOT CONFIRMED, then drops the ticker. New OI not dated after the session → "OI not updated yet" in the
+log, ticker stays queued (dropped after 7 days). `--dry` prints and changes nothing.
 
 Not scheduled: `networth.py`. It is a net-worth / holdings view, and those views were retired 2026-09-12. Do not schedule it.
 
@@ -63,6 +69,7 @@ Import order matters: these modules run `import lib` first, because MissionCtrl 
 | `~/.openclaw/flow_ta_cards_state.json` | `flow_ta_cards.py` | last card key per ticker (skips repeats); not written under `--dry` |
 | `~/.openclaw/repeat_flow_state.json` | `repeat_flow.py` | date the legend was last sent; not written under `--dry` |
 | `~/.openclaw/workspace/charts/iv_history.json` | `straddle_cards.py` | daily ATM IV per ticker (last 300), feeds IV rank; **written even under `--dry`** |
+| `~/.openclaw/data/flow-oi-followup/queue.json` | `lib/flow_report.py` (bot `/flow`) adds, `flow_oi_followup.py` removes | `{sym, channel_id, session, queued_at}`; flock on `queue.lock`; not changed under `--dry` |
 
 ## Check and test (WSL bash)
 
