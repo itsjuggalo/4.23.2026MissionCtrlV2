@@ -166,7 +166,9 @@ def fetch_analyst(c: McpClient, tk: str) -> dict | None:
 
 def fetch_congress(c: McpClient, tk: str, size: int = 12) -> list | None:
     d = c.tool("get-ownership-congress", {"ticker": tk, "size": size})
-    if not isinstance(d, dict):
+    # 2026-11-13: an API error (e.g. status_code 5000 "Request info error") is NOT "no trades".
+    # Before this check it came back as [] and wiped the cached congress rows on every run.
+    if not isinstance(d, dict) or d.get("status_code") not in (0, None):
         return None
     rows = (((d.get("data") or {}).get("data")) if isinstance(d.get("data"), dict) else None) or []
     out = []

@@ -61,6 +61,9 @@ Import order matters: these modules run `import lib` first, because MissionCtrl 
 - `spotsrc.py`: the card's spot price through `~/scripts/price_guard.py` (Robinhood first, Yahoo labelled "not Robinhood");
   a stale or missing spot returns `(None, reason)` so the card fails closed. Used by `flow_ta_cards`, `max_pain` and
   `straddle_cards`.
+- `table_card.py` (2026-11-13, not wired to any command yet): `render(title, columns, sections, path, subtitle, split, notes)`
+  draws a dark table card with PIL (striped rows, section headings, in-cell bars, call/put share bar, footer notes).
+  Presentation only: the caller passes every number; nothing is fetched or computed in it.
 
 ## State files
 

@@ -118,9 +118,11 @@ async function fetchCodeFromGmail(email, appPassword, sentAfter) {
       console.log('code requested — check email, then run with --code <NNNNNN>');
     } else { // auto
       const sentAfter = new Date(Date.now() - 60000);
-      await sendCode(page);
-      if (!e.GMAIL_APP_PASSWORD) { console.error('--auto needs GMAIL_APP_PASSWORD in ' + ENV); process.exitCode = 2; }
+      // 2026-11-13: check BEFORE requesting a code. Without the app password --auto can never finish, and the 5-min
+      // flow-desk cron was emailing a fresh code on every run (inbox spam; AInvest then stops sending codes).
+      if (!e.GMAIL_APP_PASSWORD) { console.error('--auto needs GMAIL_APP_PASSWORD in ' + ENV + ' (no code requested)'); process.exitCode = 2; }
       else {
+        await sendCode(page);
         const code = await fetchCodeFromGmail(email, e.GMAIL_APP_PASSWORD, sentAfter);
         if (!code) { console.error('no code found in Gmail within timeout'); process.exitCode = 1; }
         else {
