@@ -90,7 +90,71 @@ async def _answer_skill(prompt: str, timeout: int = 300) -> str:
     return await asyncio.to_thread(_run_skill, prompt, "sonnet", timeout)
 
 
-async def _send_chunks(interaction: discord.Interaction, text: str) -> None:
+# ─── IMAGE CARDS (Mike 2026-11-14) ────────────────────────────────────────────
+# Every slash-command reply is drawn as a dark Unusual-Whales-style PNG card
+# (trade_charts/text_card.py) instead of plain text: same words and numbers, nothing added.
+# Buttons, right-click menus and one-line errors stay text. Any render or upload failure
+# falls back to the old text reply, so a card bug can never eat an answer.
+# Off switches (env, then pm2 restart): SYNTH_CARDS=0 (all) · SYNTH_CARDS_OFF="oi,help" (per command).
+CARDS_ON = os.environ.get("SYNTH_CARDS", "1") != "0"
+CARDS_OFF = {c.strip().lstrip("/").lower() for c in os.environ.get("SYNTH_CARDS_OFF", "").split(",") if c.strip()}
+_CARD_DIR = str(Path.home() / "05_AUTOMATION" / "scripts" / "trade_charts")
+_CARD_LOCK = asyncio.Lock()
+_NO_CARD = ("⚠️", "[skill error", "[skill timed out", "[skill returned empty", "[intel returned nothing",
+            "[empty]", "[no output]")
+
+
+def _card_label(interaction: discord.Interaction) -> Optional[str]:
+    """'/oi NVDA' for a slash command. None for buttons, right-click menus and switched-off commands."""
+    cmd = getattr(interaction, "command", None)
+    if not CARDS_ON or not isinstance(cmd, app_commands.Command) or cmd.name.lower() in CARDS_OFF:
+        return None
+    vals = []
+    try:
+        for _k, v in interaction.namespace:
+            if v is None or isinstance(v, (bool, discord.Attachment)):
+                continue
+            vals.append(str(v) if isinstance(v, (str, int, float)) else "#" + str(getattr(v, "name", v)))
+    except Exception:  # noqa: BLE001
+        pass
+    label = " ".join(["/" + cmd.name, *vals])
+    return label if len(label) <= 56 else label[:55].rstrip() + "…"
+
+
+def _render_cards(label: str, text: str) -> dict:
+    if _CARD_DIR not in sys.path:
+        sys.path.insert(0, _CARD_DIR)
+    import text_card
+    return text_card.render_cards(label, text)
+
+
+async def _send_card(interaction: discord.Interaction, text: str, label: Optional[str] = None) -> bool:
+    """Send `text` as image card(s), one PNG per message in page order. True = all pages sent.
+    False = the caller sends the text reply (not a slash command, switched off, one-line error, or a failure)."""
+    auto = _card_label(interaction)
+    body = (text or "").strip()
+    if not auto or not body:
+        return False
+    if body.startswith(_NO_CARD) and len(body) <= 400 and body.count("\n") <= 2:
+        return False
+    try:
+        async with _CARD_LOCK:
+            r = await asyncio.to_thread(_render_cards, label or auto, body)
+        links = " ".join(f"<{u}>" for u in r.get("links") or [])[:DISCORD_MAX]
+        for i, png in enumerate(r["pngs"]):
+            if i == 0 and links:
+                await interaction.followup.send(content=links, file=discord.File(png))
+            else:
+                await interaction.followup.send(file=discord.File(png))
+        return bool(r["pngs"])
+    except Exception as e:  # noqa: BLE001
+        print(f"[cards] {label or auto}: {e.__class__.__name__}: {e} -> text reply", flush=True)
+        return False
+
+
+async def _send_chunks(interaction: discord.Interaction, text: str, label: Optional[str] = None) -> None:
+    if await _send_card(interaction, text, label):
+        return
     parts = list(_chunks(text))
     await interaction.followup.send(parts[0])
     for p in parts[1:]:
@@ -496,11 +560,7 @@ tree.interaction_check = _mike_only
 @app_commands.describe(question="What do you want to ask AIME?")
 async def aime_cmd(interaction: discord.Interaction, question: str):
     await interaction.response.defer(thinking=True)
-    ans = await _answer(question)
-    parts = list(_chunks(ans))
-    await interaction.followup.send(parts[0])
-    for p in parts[1:]:
-        await interaction.followup.send(p)
+    await _send_chunks(interaction, await _answer(question))
 
 
 # ─── TRADING SLASH COMMANDS (each shells to a Claude skill on the subscription) ──
@@ -731,7 +791,12 @@ async def unwatch_cmd(interaction: discord.Interaction, ticker: str):
 @tree.command(name="watchlist", description="Show your watchlist")
 async def watchlist_cmd(interaction: discord.Interaction):
     wl = await asyncio.to_thread(get_watchlist)
-    await interaction.response.send_message(f"👁️ Watchlist: {', '.join(wl) or '(empty)'}")
+    text = f"👁️ Watchlist: {', '.join(wl) or '(empty)'}"
+    if _card_label(interaction):
+        await interaction.response.defer(thinking=True)
+        await _send_chunks(interaction, text)
+    else:
+        await interaction.response.send_message(text)
 
 
 HELP_TEXT = (
@@ -766,7 +831,11 @@ HELP_TEXT = (
 
 @tree.command(name="help", description="Show the full command deck + what runs automatically")
 async def help_cmd(interaction: discord.Interaction):
-    await interaction.response.send_message(HELP_TEXT)
+    if _card_label(interaction):
+        await interaction.response.defer(thinking=True)
+        await _send_lines(interaction, HELP_TEXT)
+    else:
+        await interaction.response.send_message(HELP_TEXT)
 
 
 @tree.command(name="journal", description="Today's virtual-pick recap (no broker — Alpaca retired as a book)")
@@ -792,7 +861,7 @@ async def scorecard_cmd(interaction: discord.Interaction):
             capture_output=True, text=True, timeout=150)
         return (r.stdout or r.stderr or "[no output]").strip()
 
-    await _send_chunks(interaction, await asyncio.to_thread(_run))
+    await _send_chunks(interaction, _html_to_md(await asyncio.to_thread(_run)))
 
 
 # ─── UW-STYLE INTEL (deterministic, no LLM / subscription spend) ──────────────
@@ -816,8 +885,10 @@ def _run_intel(args: list[str], timeout: int = 90) -> str:
         return f"⚠️ intel error: {e}"
 
 
-async def _send_lines(interaction: discord.Interaction, text: str) -> None:
+async def _send_lines(interaction: discord.Interaction, text: str, label: Optional[str] = None) -> None:
     """Like _send_chunks but splits on line boundaries so bold/links never break mid-line."""
+    if await _send_card(interaction, text, label):
+        return
     parts, cur = [], ""
     for line in (text or "[empty]").splitlines():
         line = line[:DISCORD_MAX]
@@ -1065,15 +1136,16 @@ async def ta_cmd_(interaction: discord.Interaction, symbol: str,
     except Exception as e:  # noqa: BLE001
         r = {"ok": False, "text": f"⚠️ /ta failed: {e.__class__.__name__}: {e}", "png": None, "facts": ""}
     text = r["text"]
-    if r.get("png") and len(text) <= DISCORD_MAX:
+    if r.get("png") and len(text) <= DISCORD_MAX and not _card_label(interaction):
         await interaction.followup.send(content=text, file=discord.File(r["png"]))
-    elif r.get("png"):
+    elif r.get("png"):                       # cards on: the chart first, then the read as a card
         await interaction.followup.send(file=discord.File(r["png"]))
-        await _send_lines(interaction, text)
+        await _send_lines(interaction, text, label=f"/ta {symbol.upper().strip()}"[:56])
     else:
         await _send_lines(interaction, text)
     if m == "ai" and r.get("ok"):
-        await _send_lines(interaction, await asyncio.to_thread(_ta_ai_read, r["facts"]))
+        await _send_lines(interaction, await asyncio.to_thread(_ta_ai_read, r["facts"]),
+                          label=f"/ta {symbol.upper().strip()} AI read"[:56])
 
 
 async def _det_text(interaction: discord.Interaction, fn, *args) -> None:
@@ -1102,12 +1174,15 @@ async def sectors_cmd(interaction: discord.Interaction, slow_money: Optional[boo
         r = await asyncio.to_thread(sector_rotation.build)
     except Exception as e:  # noqa: BLE001
         r = {"text": f"⚠️ /sectors failed: {e.__class__.__name__}: {e}", "png": None}
-    if r.get("png"):
+    if r.get("png") and _card_label(interaction):     # cards on: the chart first, then the table as a card
+        await interaction.followup.send(file=discord.File(r["png"]))
+        await _send_lines(interaction, r["text"], label="/sectors")
+    elif r.get("png"):
         await interaction.followup.send(content=r["text"][:DISCORD_MAX], file=discord.File(r["png"]))
     else:
         await _send_lines(interaction, r["text"])
     if slow_money:
-        await _send_lines(interaction, await asyncio.to_thread(sector_rotation.weekly))
+        await _send_lines(interaction, await asyncio.to_thread(sector_rotation.weekly), label="/sectors weekly")
 
 
 @tree.command(name="etf", description="% change of every stock inside an ETF (e.g. SOXL): 1d / 5d / 20d + weight")
@@ -1123,7 +1198,7 @@ async def etf_cmd(interaction: discord.Interaction, symbol: str, sort: Optional[
         r = await asyncio.to_thread(etf_holdings.build, symbol, sort.value if sort else "1d", top or 30)
     except Exception as e:  # noqa: BLE001
         r = {"text": f"⚠️ /etf failed: {e.__class__.__name__}: {e}", "png": None}
-    if r.get("png") and len(r["text"]) <= DISCORD_MAX:
+    if r.get("png") and len(r["text"]) <= DISCORD_MAX and not _card_label(interaction):
         await interaction.followup.send(content=r["text"], file=discord.File(r["png"]))
     else:
         if r.get("png"):

@@ -61,9 +61,17 @@ Import order matters: these modules run `import lib` first, because MissionCtrl 
 - `spotsrc.py`: the card's spot price through `~/scripts/price_guard.py` (Robinhood first, Yahoo labelled "not Robinhood");
   a stale or missing spot returns `(None, reason)` so the card fails closed. Used by `flow_ta_cards`, `max_pain` and
   `straddle_cards`.
-- `table_card.py` (2026-11-13, not wired to any command yet): `render(title, columns, sections, path, subtitle, split, notes)`
-  draws a dark table card with PIL (striped rows, section headings, in-cell bars, call/put share bar, footer notes).
-  Presentation only: the caller passes every number; nothing is fetched or computed in it.
+- `text_card.py` + `text_card_parse.py` (2026-11-14): image cards for Synth Control slash replies.
+  `text_card.render_cards(label, text)` turns a command's reply text into dark PNG cards (1800 px wide, one file per
+  page, `card_*.png` in `~/.openclaw/workspace/charts/`, deleted after 24 h) and returns `{"pngs", "links"}`.
+  `text_card_parse.parse()` reads the reply's own lines into a title, meta line, tables (striped rows, in-cell bars,
+  green calls / red puts), a call/put premium split bar, key/value rows, bullets and source notes. Presentation only:
+  every word and number comes from the reply text; nothing is fetched, computed or added.
+  Wired in `~/scripts/aime_discord_bot.py` (`_send_card`, called first by `_send_chunks` and `_send_lines`): every slash
+  command replies with cards; `/ta`, `/sectors` and `/etf` send their chart first, then the card. Buttons, right-click
+  menus and one-line errors stay text, and any render or upload failure falls back to the old text reply.
+  Off switches (bot env, then `pm2 restart aime-discord`): `SYNTH_CARDS=0` (all) · `SYNTH_CARDS_OFF="oi,help"`.
+  Test: `~/.venv/bin/python -m pytest ~/scripts/tests/test_text_card.py -q`.
 
 ## State files
 
