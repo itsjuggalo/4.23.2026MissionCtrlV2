@@ -1,25 +1,16 @@
 {
  "meta": {
   "schema_version": 2,
-  "generated_at": "2026-11-09T08:30:05-05:00",
+  "generated_at": "2026-11-16T08:30:05-05:00",
   "source": "astro_sky._build_cache (Swiss Ephemeris)",
   "timezone": "America/New_York",
   "code_hash": "fc8f83d18ad4",
-  "valid_until": "2026-11-16T08:30:05-05:00"
+  "valid_until": "2026-11-23T08:30:05-05:00"
  },
- "generated": "2026-11-09",
- "range_start": "2026-11-08",
- "range_end": "2027-12-13",
+ "generated": "2026-11-16",
+ "range_start": "2026-11-15",
+ "range_end": "2027-12-20",
  "lunations": [
-  {
-   "date_et": "2026-11-09T02:02-05:00",
-   "kind": "new",
-   "lon": 226.8898,
-   "sign": "Scorpio",
-   "deg": 16,
-   "house": 4,
-   "natal_hits": []
-  },
   {
    "date_et": "2026-11-24T09:54-05:00",
    "kind": "full",
@@ -457,24 +448,6 @@
  ],
  "stations": [
   {
-   "date_et": "2026-11-13T10:54-05:00",
-   "body": "Mercury",
-   "kind": "direct",
-   "lon": 215.0335,
-   "sign": "Scorpio",
-   "deg": 5,
-   "house": 4
-  },
-  {
-   "date_et": "2026-11-13T19:27-05:00",
-   "body": "Venus",
-   "kind": "direct",
-   "lon": 202.8637,
-   "sign": "Libra",
-   "deg": 22,
-   "house": 4
-  },
-  {
    "date_et": "2026-12-10T18:31-05:00",
    "body": "Saturn",
    "kind": "direct",
@@ -653,6 +626,15 @@
    "sign": "Libra",
    "deg": 19,
    "house": 4
+  },
+  {
+   "date_et": "2027-12-15T04:06-05:00",
+   "body": "Neptune",
+   "kind": "direct",
+   "lon": 3.8526,
+   "sign": "Aries",
+   "deg": 3,
+   "house": 9
   }
  ],
  "ingresses": [
@@ -1159,23 +1141,27 @@
    "sign": "Sagittarius",
    "deg": 0,
    "house": 5
+  },
+  {
+   "date_et": "2027-12-18T06:58-05:00",
+   "body": "Mercury",
+   "retro": false,
+   "lon": 270,
+   "sign": "Capricorn",
+   "deg": 0,
+   "house": 6
+  },
+  {
+   "date_et": "2027-12-19T13:40-05:00",
+   "body": "Venus",
+   "retro": false,
+   "lon": 300,
+   "sign": "Aquarius",
+   "deg": 0,
+   "house": 7
   }
  ],
  "mercury_rx": [
-  {
-   "body": "Mercury",
-   "pre_shadow": "2026-10-04T05:09-04:00",
-   "rx_start": "2026-10-24T03:13-04:00",
-   "rx_end": "2026-11-13T10:54-05:00",
-   "post_shadow": "2026-11-30T01:16-05:00",
-   "from_deg": 20,
-   "from_sign": "Scorpio",
-   "to_deg": 5,
-   "to_sign": "Scorpio",
-   "houses": [
-    4
-   ]
-  },
   {
    "body": "Mercury",
    "pre_shadow": "2027-01-25T13:58-05:00",
@@ -1220,20 +1206,6 @@
   }
  ],
  "venus_mars_rx": [
-  {
-   "body": "Venus",
-   "pre_shadow": "2026-08-31T10:46-04:00",
-   "rx_start": "2026-10-03T03:16-04:00",
-   "rx_end": "2026-11-13T19:27-05:00",
-   "post_shadow": "2026-12-15T13:44-05:00",
-   "from_deg": 8,
-   "from_sign": "Scorpio",
-   "to_deg": 22,
-   "to_sign": "Libra",
-   "houses": [
-    4
-   ]
-  },
   {
    "body": "Mars",
    "pre_shadow": "2026-11-05T10:34-05:00",
