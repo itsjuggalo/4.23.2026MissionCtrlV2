@@ -1,15 +1,15 @@
 {
  "meta": {
   "schema_version": 2,
-  "generated_at": "2026-11-16T08:30:05-05:00",
+  "generated_at": "2026-11-23T08:30:06-05:00",
   "source": "astro_sky._build_cache (Swiss Ephemeris)",
   "timezone": "America/New_York",
   "code_hash": "fc8f83d18ad4",
-  "valid_until": "2026-11-23T08:30:05-05:00"
+  "valid_until": "2026-11-30T08:30:06-05:00"
  },
- "generated": "2026-11-16",
- "range_start": "2026-11-15",
- "range_end": "2027-12-20",
+ "generated": "2026-11-23",
+ "range_start": "2026-11-22",
+ "range_end": "2027-12-27",
  "lunations": [
   {
    "date_et": "2026-11-24T09:54-05:00",
@@ -635,18 +635,18 @@
    "sign": "Aries",
    "deg": 3,
    "house": 9
+  },
+  {
+   "date_et": "2027-12-23T21:47-05:00",
+   "body": "Saturn",
+   "kind": "direct",
+   "lon": 21.0206,
+   "sign": "Aries",
+   "deg": 21,
+   "house": 10
   }
  ],
  "ingresses": [
-  {
-   "date_et": "2026-11-22T02:23-05:00",
-   "body": "Sun",
-   "retro": false,
-   "lon": 240,
-   "sign": "Sagittarius",
-   "deg": 0,
-   "house": 5
-  },
   {
    "date_et": "2026-11-25T18:37-05:00",
    "body": "Mars",
@@ -1159,6 +1159,15 @@
    "sign": "Aquarius",
    "deg": 0,
    "house": 7
+  },
+  {
+   "date_et": "2027-12-21T21:42-05:00",
+   "body": "Sun",
+   "retro": false,
+   "lon": 270,
+   "sign": "Capricorn",
+   "deg": 0,
+   "house": 6
   }
  ],
  "mercury_rx": [
