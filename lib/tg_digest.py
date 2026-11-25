@@ -46,7 +46,7 @@ RELANE = {
 # digest instead of buzzing. Nothing is dropped. Exits, stops and trade management are exempt.
 FYI_CHARTS = {"market_boards.py", "max_pain.py", "gex_chart.py", "straddle_cards.py"}
 DAILY_CAP = 8                                      # trading_command messages per source per day
-CAP_OVERRIDES: dict[str, int] = {}                 # per-source cap, e.g. {"flow_winners_push.py": 6}
+CAP_OVERRIDES: dict[str, int] = {"opt_watch.py": 22}   # opt_watch (Mike 2026-11-24): 5 scheduled + ≤15 own-capped alerts
 CAP_EXEMPT = {"spy_scalp_monitor.py", "watchlist_exec.py", "vol_trigger.py", "spy_prebell.py", "prebell.py",
               "tg_day_spacer.py", "spy_scalp_pickpush.py"}   # exits / stops / morning card / SPY 0DTE picks (Mike 10-22) always buzz
 MAX_ROWS = 10                                      # per section, per digest
