@@ -42,3 +42,12 @@ def test_telegram_intel_commands_use_the_intel_cli():
                    and any(getattr(x, "id", "") == "TRADING_CMDS" for x in n.targets))
     assert set(cmds) <= trading                     # the astrology lane refuses them
     assert '"pipeline.intel.query"' in tg
+
+
+def test_voloi_command_runs_the_voloi_module_without_llm():
+    """Mike 2026-11-25: /voloi <ticker> = pipeline.intel.voloi (Robinhood + OCC + flow.db), deterministic, in /help."""
+    i = SRC.index('@tree.command(name="voloi"')
+    body = SRC[i:SRC.index("@tree.command", i + 10)]
+    assert '"pipeline.intel.voloi"' in body and "_run_intel" in body and "llm" not in body.lower()
+    assert '"--max-dte", "0"' in body and "`/voloi <t>`" in SRC
+    assert SRC.count('@tree.command(name="voloi"') == 1

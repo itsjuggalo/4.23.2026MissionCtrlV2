@@ -811,7 +811,7 @@ HELP_TEXT = (
     "`/flowpicks` ranked flow · `/signals` source liveness\n\n"
     "**🐳 Flow intel (instant, no AI)**\n"
     "`/contracts <ticker|company>` every contract seen across Firebase/flow/UW/scrapers/decipher · "
-    "`/intel <t>` one-screen · `/flow [t] [type: all/huge/unusual/repeated/weekly/etf/live/other/fg2/tape] [channel] [min/max premium] [days]` · `/tide` · `/hot` · `/gex <t>` · `/oi <t>` · `/iv <t>` · "
+    "`/intel <t>` one-screen · `/flow [t] [type: all/huge/unusual/repeated/weekly/etf/live/other/fg2/tape] [channel] [min/max premium] [days]` · `/tide` · `/hot` · `/gex <t>` · `/oi <t>` · `/voloi <t>` (vol + OI changes: Robinhood, OCC, flow) · `/iv <t>` · "
     "`/darkpool <t>` · `/uw <t>` · `/sweeps` · `/odte` · `/winners`\n\n"
     "**📈 Charts, vol & rotation (instant, no AI unless you pick the AI mode)**\n"
     "`/ta <symbol> [timeframe] [mode] [strike expiry option_type]` chart + computed read for stocks, crypto or an option contract · "
@@ -871,9 +871,9 @@ INTEL_PY = "/home/itsju/.venv/bin/python"
 INTEL_CWD = "/AIWorkWSL/web/missionctrl"
 
 
-def _run_intel(args: list[str], timeout: int = 90) -> str:
+def _run_intel(args: list[str], timeout: int = 90, module: str = "pipeline.intel.query") -> str:
     try:
-        r = subprocess.run([INTEL_PY, "-m", "pipeline.intel.query", *args], capture_output=True, text=True,
+        r = subprocess.run([INTEL_PY, "-m", module, *args], capture_output=True, text=True,
                            timeout=timeout, cwd=INTEL_CWD)
         out = (r.stdout or "").strip()
         if r.returncode != 0:
@@ -1053,6 +1053,16 @@ async def hot_cmd(interaction: discord.Interaction):
 @app_commands.describe(ticker="ticker (SPX/NDX work too)")
 async def gex_cmd(interaction: discord.Interaction, ticker: str):
     await _intel(interaction, "gex", ticker)
+
+
+# Mike 2026-11-25: one command for volume + OI changes on any ticker from every readable source
+# (Robinhood chain live, OCC official OI, flow.db $50K+ prints). Deterministic, no LLM. pipeline/intel/voloi.py.
+@tree.command(name="voloi", description="Volume + OI changes for a ticker: Robinhood chain, OCC official OI, $50K+ flow")
+@app_commands.describe(ticker="ticker symbol, e.g. SOXL", all_expiries="read every expiry (slower); default is 60 days out")
+async def voloi_cmd(interaction: discord.Interaction, ticker: str, all_expiries: bool = False):
+    await interaction.response.defer(thinking=True)
+    args = [ticker] + (["--max-dte", "0"] if all_expiries else [])
+    await _send_lines(interaction, await asyncio.to_thread(_run_intel, args, 150, "pipeline.intel.voloi"))
 
 
 @tree.command(name="oi", description="Unusual volume vs open interest + biggest OI changes")
