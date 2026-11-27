@@ -811,7 +811,7 @@ HELP_TEXT = (
     "`/flowpicks` ranked flow · `/signals` source liveness\n\n"
     "**🐳 Flow intel (instant, no AI)**\n"
     "`/contracts <ticker|company>` every contract seen across Firebase/flow/UW/scrapers/decipher · "
-    "`/intel <t>` one-screen · `/flow [t] [type: all/huge/unusual/repeated/weekly/etf/live/other/fg2/tape] [channel] [min/max premium] [days]` · `/tide` · `/hot` · `/gex <t>` · `/oi <t>` · `/voloi <t>` (vol + OI changes: Robinhood, OCC, flow) · `/iv <t>` · "
+    "`/intel <t>` one-screen · `/flow [t] [type: all/huge/unusual/repeated/weekly/etf/live/other/fg2/tape] [channel] [min/max premium] [days]` · `/tide` · `/hot` · `/gex <t>` · `/oi <t>` · `/voloi <t>` (vol + OI changes: Robinhood, OCC, flow) · `/analyze <t>` (data pack + separate Claude / Codex / Rallies.ai reads) · `/iv <t>` · "
     "`/darkpool <t>` · `/uw <t>` · `/sweeps` · `/odte` · `/winners`\n\n"
     "**📈 Charts, vol & rotation (instant, no AI unless you pick the AI mode)**\n"
     "`/ta <symbol> [timeframe] [mode] [strike expiry option_type]` chart + computed read for stocks, crypto or an option contract · "
@@ -1063,6 +1063,45 @@ async def voloi_cmd(interaction: discord.Interaction, ticker: str, all_expiries:
     await interaction.response.defer(thinking=True)
     args = [ticker] + (["--max-dte", "0"] if all_expiries else [])
     await _send_lines(interaction, await asyncio.to_thread(_run_intel, args, 150, "pipeline.intel.voloi"))
+
+
+# Mike 2026-11-27: /analyze <ticker> = one deterministic data pack (price + extended hours, futures, technicals,
+# put/call, call and put walls, max pain, OCC OI, flow.db / FlowGreeks / UW flow, ETF components, dossier), then ONE
+# MESSAGE PER AI MODEL (Claude, Codex, Rallies.ai), each posted as it finishes, then a tally of their stances.
+# The pack, prompts, lanes and output checks live in MissionCtrl pipeline/intel/analyze.py; a lane that cannot answer
+# says UNAVAILABLE with the reason (never another model under its name). Advisory only, no proven edge.
+ANALYZE_LANES = ("claude", "codex", "rallies")
+
+
+@tree.command(name="analyze", description="Full read on a ticker: data pack, then separate Claude, Codex and Rallies.ai messages")
+@app_commands.describe(ticker="ticker symbol, e.g. SOXL")
+async def analyze_cmd(interaction: discord.Interaction, ticker: str):
+    await interaction.response.defer(thinking=True)
+    mod = "pipeline.intel.analyze"
+    out = await asyncio.to_thread(_run_intel, [ticker, "--pack"], 240, mod)
+    first, _, summary = out.partition("\n")
+    if not first.startswith("PACK_DIR "):
+        await _send_lines(interaction, out)                     # not a ticker, or an intel error: say it and stop
+        return
+    pack_dir = first[len("PACK_DIR "):].strip()
+    sym = ticker.strip().upper().lstrip("$")
+    await _send_lines(interaction, summary, label=f"/analyze {sym}")
+    try:
+        await interaction.followup.send(content="Full data pack every model reads:",
+                                        file=discord.File(os.path.join(pack_dir, "pack.txt"), filename=f"{sym}_data_pack.txt"))
+    except Exception as e:  # noqa: BLE001 — the attachment is a convenience; the reads still go out
+        print(f"[analyze] pack attach failed: {e.__class__.__name__}", flush=True)
+
+    async def lane(name: str) -> str:
+        return await asyncio.to_thread(_run_intel, ["--lane", name, "--dir", pack_dir], 480, mod)
+
+    for fut in asyncio.as_completed([lane(n) for n in ANALYZE_LANES]):
+        text = await fut
+        if "— UNAVAILABLE:" in text.split("\n", 1)[0]:
+            text = "⚠️ " + text                                # one-line reason: plain text, not a card
+        await _send_lines(interaction, text, label=f"/analyze {sym}")
+    tally = await asyncio.to_thread(_run_intel, ["--tally", "--dir", pack_dir], 60, mod)
+    await interaction.followup.send(tally[:DISCORD_MAX])
 
 
 @tree.command(name="oi", description="Unusual volume vs open interest + biggest OI changes")

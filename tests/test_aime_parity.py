@@ -51,3 +51,15 @@ def test_voloi_command_runs_the_voloi_module_without_llm():
     assert '"pipeline.intel.voloi"' in body and "_run_intel" in body and "llm" not in body.lower()
     assert '"--max-dte", "0"' in body and "`/voloi <t>`" in SRC
     assert SRC.count('@tree.command(name="voloi"') == 1
+
+
+def test_analyze_command_posts_pack_then_one_message_per_model_then_tally():
+    """Mike 2026-11-27: /analyze <ticker> = pipeline.intel.analyze pack, one message per AI lane, tally; in /help."""
+    i = SRC.index('@tree.command(name="analyze"')
+    body = SRC[i:SRC.index("@tree.command", i + 10)]
+    assert SRC.count('@tree.command(name="analyze"') == 1 and 'ANALYZE_LANES = ("claude", "codex", "rallies")' in SRC
+    assert '"pipeline.intel.analyze"' in body and '[ticker, "--pack"]' in body and 'startswith("PACK_DIR ")' in body
+    assert '["--lane", name, "--dir", pack_dir]' in body and "asyncio.as_completed" in body      # each lane its own message
+    assert '["--tally", "--dir", pack_dir]' in body and body.index("--lane") < body.index("--tally")
+    assert "_run_skill" not in body and "_answer_skill" not in body       # no model call hidden in the bot: lanes are named
+    assert "`/analyze <t>`" in SRC
